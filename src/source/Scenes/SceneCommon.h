@@ -52,6 +52,55 @@ extern CharacterSelectionState g_characterSelection;
 extern int& SelectedHero;
 
 //=============================================================================
+// Scene Initialization State
+//=============================================================================
+
+class SceneInitializationState {
+private:
+    bool initLogIn = false;
+    bool initLoading = false;
+    bool initCharacterScene = false;
+    bool initMainScene = false;
+    bool enableMainRender = false;
+
+public:
+    // Reset all initialization flags
+    void ResetAll() {
+        initLogIn = false;
+        initLoading = false;
+        initCharacterScene = false;
+        initMainScene = false;
+        enableMainRender = false;
+    }
+
+    // Reset flags when disconnecting from server
+    void ResetForDisconnect() {
+        initLogIn = false;
+        initCharacterScene = false;
+        initMainScene = false;
+        enableMainRender = false;
+        // Note: initLoading is not reset on disconnect
+    }
+
+    // Legacy accessors for backward compatibility
+    bool& GetInitLogIn() { return initLogIn; }
+    bool& GetInitLoading() { return initLoading; }
+    bool& GetInitCharacterScene() { return initCharacterScene; }
+    bool& GetInitMainScene() { return initMainScene; }
+    bool& GetEnableMainRender() { return enableMainRender; }
+};
+
+// Global scene initialization state
+extern SceneInitializationState g_sceneInit;
+
+// Legacy globals (deprecated - use g_sceneInit instead)
+extern bool& InitLogIn;
+extern bool& InitLoading;
+extern bool& InitCharacterScene;
+extern bool& InitMainScene;
+extern bool& EnableMainRender;
+
+//=============================================================================
 // Utility functions
 //=============================================================================
 

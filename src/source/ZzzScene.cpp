@@ -83,7 +83,6 @@ wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 DWORD GenerateCheckSum2(BYTE* pbyBuffer, DWORD dwSize, WORD wKey);
 
 
-bool EnableMainRender = false;
 extern int HeroKey;
 
 int DeleteGuildIndex = -1;
@@ -91,10 +90,6 @@ int DeleteGuildIndex = -1;
 int  ErrorMessage = NULL;
 extern bool g_bEnterPressed;
 
-bool InitLogIn = false;
-bool InitLoading = false;
-bool InitCharacterScene = false;
-bool InitMainScene = false;
 extern wchar_t LogInID[MAX_ID_SIZE + 1];
 extern wchar_t m_ExeVersion[11];
 

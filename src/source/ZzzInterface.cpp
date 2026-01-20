@@ -51,6 +51,8 @@
 
 #include "ZzzInterface.h"
 
+#include "Scenes/SceneCommon.h"
+
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;

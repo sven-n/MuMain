@@ -18,6 +18,20 @@ CharacterSelectionState g_characterSelection;
 int& SelectedHero = g_characterSelection.GetLegacyReference();
 
 //=============================================================================
+// Scene Initialization State Implementation
+//=============================================================================
+
+// Global instance
+SceneInitializationState g_sceneInit;
+
+// Legacy global references (for backward compatibility)
+bool& InitLogIn = g_sceneInit.GetInitLogIn();
+bool& InitLoading = g_sceneInit.GetInitLoading();
+bool& InitCharacterScene = g_sceneInit.GetInitCharacterScene();
+bool& InitMainScene = g_sceneInit.GetInitMainScene();
+bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
+
+//=============================================================================
 // Scene Common Utilities
 //=============================================================================
 #include "../ZzzInterface.h"

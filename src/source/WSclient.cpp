@@ -691,9 +691,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         CurrentProtocolState = REQUEST_CHARACTERS_LIST;
         SocketClient->ToGameServer()->SendRequestCharacterList(g_pMultiLanguage->GetLanguage());
 
-        InitCharacterScene = false;
-        InitMainScene = false;
-        EnableMainRender = false;
+        g_sceneInit.ResetForDisconnect();
         CurrentProtocolState = REQUEST_JOIN_SERVER;
         InitGame();
         break;
@@ -721,10 +719,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         ReleaseCharacterSceneData();
         SceneFlag = LOG_IN_SCENE;
 
-        InitLogIn = false;
-        InitCharacterScene = false;
-        InitMainScene = false;
-        EnableMainRender = false;
+        g_sceneInit.ResetForDisconnect();
         CurrentProtocolState = REQUEST_JOIN_SERVER;
 
         LogIn = 0;

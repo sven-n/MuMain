@@ -31,8 +31,6 @@
 #include "../UIMapName.h"
 
 // External declarations
-extern bool InitMainScene;
-extern bool EnableMainRender;
 extern float CameraAngle[3];
 extern HWND g_hWnd;
 extern CErrorReport g_ErrorReport;

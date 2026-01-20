@@ -30,14 +30,12 @@
 
 // External declarations
 extern int DeleteGuildIndex;
-extern bool InitLogIn;
 extern float CameraAngle[3];
 extern float CameraPosition[3];
 extern float CameraFOV;
 extern EGameScene SceneFlag;
 extern int g_iChatInputType;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
-extern bool EnableMainRender;
 extern float g_fMULogoAlpha;
 extern wchar_t m_ID[MAX_ID_SIZE + 1];
 extern CHARACTER* Hero;

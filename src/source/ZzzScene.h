@@ -14,11 +14,6 @@ extern EGameScene SceneFlag;
 
 extern int  ErrorMessage;
 extern bool InitServerList;
-extern bool InitLogIn;
-extern bool InitLoading;
-extern bool InitCharacterScene;
-extern bool InitMainScene;
-extern bool EnableMainRender;
 extern wchar_t* szServerIpAddress;
 extern unsigned short g_ServerPort;
 extern int g_iLengthAuthorityCode;

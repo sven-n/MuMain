@@ -11,6 +11,7 @@
 #include "ZzzTexture.h"
 #include "ZzzScene.h"
 #include "ZzzInterface.h"
+#include "Scenes/SceneCommon.h"
 
 CLoadingScene::CLoadingScene()
 {
@@ -54,7 +55,6 @@ void CLoadingScene::Render()
 }
 
 // External variables
-extern bool InitLoading;
 extern int LoadingWorld;
 extern bool FogEnable;
 extern EGameScene SceneFlag;
