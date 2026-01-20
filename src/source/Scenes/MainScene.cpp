@@ -86,6 +86,18 @@ static bool ShouldRenderLeaves()
            IsUnitedMarketPlace();
 }
 
+/**
+ * @brief Performs one-time initialization when entering the main game scene.
+ *
+ * This function is called once when transitioning from character selection to the main game.
+ * It performs the following tasks:
+ * - Sends character selection to the game server
+ * - Initializes UI systems (chat, party, guild, etc.)
+ * - Sets up camera and input configuration
+ * - Clears previous scene state and prepares for gameplay
+ *
+ * @note This function should only be called once per main scene entry.
+ */
 static void InitializeMainScene()
 {
     g_pMainFrame->ResetSkillHotKey();
@@ -141,6 +153,16 @@ static void InitializeMainScene()
     g_ConsoleDebug->Write(MCD_NORMAL, L"MainScene Init Success");
 }
 
+/**
+ * @brief Resets per-frame state variables at the start of each frame.
+ *
+ * Initializes frame-dependent state including:
+ * - Earthquake effect damping
+ * - Terrain lighting
+ * - UI interaction flags (inventory, skill checks, mouse window state)
+ *
+ * @note Called every frame during the main scene update loop.
+ */
 static void InitializeSceneFrame()
 {
     EarthQuake *= 0.2f;
@@ -151,6 +173,19 @@ static void InitializeSceneFrame()
     MouseOnWindow = false;
 }
 
+/**
+ * @brief Updates user interface and processes player input.
+ *
+ * Handles all UI-related updates and input processing including:
+ * - Party system updates
+ * - New UI system updates
+ * - Mouse and keyboard input handling
+ * - Window focus management
+ * - Interface movement and tournament interface updates
+ *
+ * @note Only processes input when not in top-view camera mode and loading is complete.
+ * @note Skips processing if CameraTopViewEnable is true or LoadingWorld >= 30.
+ */
 static void UpdateUIAndInput()
 {
     if (CameraTopViewEnable || LoadingWorld >= 30)
@@ -184,6 +219,21 @@ static void UpdateUIAndInput()
         g_pUIManager->UpdateInput();
 }
 
+/**
+ * @brief Updates all game entities and visual effects.
+ *
+ * Performs per-frame updates for all game world entities:
+ * - World objects and items
+ * - Environmental effects (leaves, boids, fish)
+ * - Chat messages and player shops
+ * - Player hero and other characters
+ * - Mounts and pets
+ * - Visual effects (particles, joints, pointers)
+ * - Direction indicators
+ *
+ * @note Some updates are conditional based on camera mode (e.g., items only update when not in top-view).
+ * @note Includes editor object updates when ENABLE_EDIT is defined.
+ */
 static void UpdateGameEntities()
 {
     MoveObjects();
@@ -217,6 +267,19 @@ static void UpdateGameEntities()
 #endif //ENABLE_EDIT
 }
 
+/**
+ * @brief Main update function for the game scene.
+ *
+ * This is the primary per-frame update loop for the main gameplay scene.
+ * It orchestrates initialization, server connection waiting, and frame updates by calling:
+ * 1. InitializeMainScene() - One-time setup (first call only)
+ * 2. Server join synchronization - Waits for server response before enabling rendering
+ * 3. InitializeSceneFrame() - Per-frame state reset
+ * 4. UpdateUIAndInput() - UI and input processing
+ * 5. UpdateGameEntities() - Game world and entity updates
+ *
+ * @note Returns early if EnableMainRender is false (waiting for server join).
+ */
 void MoveMainScene()
 {
     if (!InitMainScene)
