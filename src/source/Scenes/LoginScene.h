@@ -29,4 +29,4 @@ extern int CurrentCameraNumber;
 extern vec3_t CurrentCameraPosition;
 extern vec3_t CurrentCameraAngle;
 extern float CurrentCameraWalkDelta[6];
-extern float CameraWalk[];
+extern float CameraWalk[36];
