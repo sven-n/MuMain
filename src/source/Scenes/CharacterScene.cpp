@@ -58,6 +58,11 @@ BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstrin
 void StartGame()
 {
     {
+        if (SelectedHero < 0 || SelectedHero >= MAX_CHARACTERS_PER_ACCOUNT)
+        {
+            return;
+        }
+
         if (CTLCODE_01BLOCKCHAR & CharactersClient[SelectedHero].CtlCode)
             CUIMng::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
         else
