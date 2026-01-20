@@ -58,7 +58,7 @@ bool MoveMainCamera()
 
             vec3_t p1, p2;
             Vector(0.f, 0.f, 0.f, p1);
-            FLOAT Velocity = sqrtf(TERRAIN_SCALE * TERRAIN_SCALE) * 1.25f * FPS_ANIMATION_FACTOR;
+            FLOAT Velocity = TERRAIN_SCALE * 1.25f * FPS_ANIMATION_FACTOR;
 
             if (HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128)
             {
