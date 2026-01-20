@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <vector>
 #include "SceneManager.h"
 #include "SceneCommon.h"
 #include "WebzenScene.h"
@@ -110,13 +111,11 @@ void UpdateSceneState()
             g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
 
-        auto Buffer = new unsigned char[WindowWidth * WindowHeight * 3];
+        std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
 
-        glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, &Buffer[0]);
+        glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, Buffer.data());
 
-        WriteJpeg(GrabFileName, WindowWidth, WindowHeight, &Buffer[0], 100);
-
-        SAFE_DELETE_ARRAY(Buffer);
+        WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100);
 
         GrabScreen++;
         GrabScreen %= 10000;
