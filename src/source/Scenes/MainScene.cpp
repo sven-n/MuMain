@@ -308,50 +308,30 @@ void MoveMainScene()
     g_ConsoleDebug->UpdateMainScene();
 }
 
-bool RenderMainScene()
+/**
+ * @brief Sets up OpenGL viewport and clear color for main scene.
+ *
+ * @param outWidth Output screen width
+ * @param outHeight Output screen height
+ * @param outByWaterMap Output water map flag (0=normal, 1=hellas water, 2=water terrain)
+ * @param cameraPos Camera position for frustum
+ */
+static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWaterMap, vec3_t cameraPos)
 {
-    if (EnableMainRender == false)
-    {
-        return false;
-    }
-
-    if ((LoadingWorld) > 30)
-    {
-        return false;
-    }
-
-    FogEnable = false;
-
-    vec3_t pos;
-
-    if (MoveMainCamera() == true)
-    {
-        VectorCopy(Hero->Object.StartPosition, pos);
-    }
-    else
-    {
-        g_pCatapultWindow->GetCameraPos(pos);
-
-        if (g_Direction.IsDirection() && g_Direction.m_bDownHero == false)
-        {
-            g_Direction.GetCameraPosition(pos);
-        }
-    }
-
-    int Width, Height;
-
-    BYTE byWaterMap = 0;
+    outByWaterMap = 0;
 
     if (CameraTopViewEnable == false)
     {
-        Height = 480 - 48;
+        outHeight = 480 - 48;
     }
     else
     {
-        Height = 480;
+        outHeight = 480;
     }
 
-    Width = GetScreenWidth();
+    outWidth = GetScreenWidth();
+
+    // Set clear color based on world
     if (gMapManager.WorldActive == WD_0LORENCIA)
     {
         glClearColor(10 / 256.f, 20 / 256.f, 14 / 256.f, 1.f);
@@ -374,7 +354,7 @@ bool RenderMainScene()
     }
     else if (gMapManager.InHellas() == true)
     {
-        byWaterMap = 1;
+        outByWaterMap = 1;
         glClearColor(0.f / 256.f, 0.f / 256.f, 0.f / 256.f, 1.f);
     }
     else
@@ -382,10 +362,10 @@ bool RenderMainScene()
         glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
     }
 
-    BeginOpengl(0, 0, Width, Height);
+    BeginOpengl(0, 0, outWidth, outHeight);
+    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, cameraPos);
 
-    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
-
+    // Setup fog for battle castle
     if (gMapManager.InBattleCastle())
     {
         if (battleCastle::InBattleCastle2(Hero->Object.Position))
@@ -400,7 +380,17 @@ bool RenderMainScene()
     }
 
     CreateScreenVector(MouseX, MouseY, MouseTarget);
+}
 
+/**
+ * @brief Renders all 3D game entities (terrain, objects, characters, effects).
+ *
+ * @param byWaterMap Water map mode flag (passed by reference, may be modified)
+ * @param width Screen width for water terrain rendering
+ * @param height Screen height for water terrain rendering
+ */
+static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
+{
     if (IsWaterTerrain() == false)
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
@@ -472,7 +462,7 @@ bool RenderMainScene()
         byWaterMap = 2;
 
         EndOpengl();
-        BeginOpengl(0, 0, Width, Height);
+        BeginOpengl(0, 0, width, height);
         RenderWaterTerrain();
         RenderJoints(byWaterMap);
         RenderEffects(true);
@@ -490,7 +480,7 @@ bool RenderMainScene()
         EndSprite();
         EndOpengl();
 
-        BeginOpengl(0, 0, Width, Height);
+        BeginOpengl(0, 0, width, height);
     }
 
     if (gMapManager.InBattleCastle())
@@ -500,7 +490,13 @@ bool RenderMainScene()
             battleCastle::EndFog();
         }
     }
+}
 
+/**
+ * @brief Renders UI elements and overlays for the main scene.
+ */
+static void RenderMainSceneUI()
+{
     SelectObjects();
     BeginBitmap();
     RenderObjectDescription();
@@ -516,7 +512,6 @@ bool RenderMainScene()
     g_pNewUISystem->Render();
 
     BeginBitmap();
-
     RenderInfomation();
 
 #ifdef ENABLE_EDIT
@@ -529,6 +524,56 @@ bool RenderMainScene()
     RenderCursor();
 
     EndBitmap();
+}
+
+/**
+ * @brief Main rendering function for the game scene.
+ *
+ * Orchestrates the complete rendering pipeline:
+ * 1. Determines camera position based on camera mode
+ * 2. Sets up viewport and clear color
+ * 3. Renders 3D world (terrain, objects, characters, effects)
+ * 4. Renders UI and overlays
+ *
+ * @return true if rendering succeeded, false if rendering was skipped
+ */
+bool RenderMainScene()
+{
+    if (EnableMainRender == false)
+    {
+        return false;
+    }
+
+    if ((LoadingWorld) > 30)
+    {
+        return false;
+    }
+
+    FogEnable = false;
+
+    vec3_t cameraPos;
+    int width, height;
+    BYTE byWaterMap;
+
+    // Determine camera position
+    if (MoveMainCamera() == true)
+    {
+        VectorCopy(Hero->Object.StartPosition, cameraPos);
+    }
+    else
+    {
+        g_pCatapultWindow->GetCameraPos(cameraPos);
+
+        if (g_Direction.IsDirection() && g_Direction.m_bDownHero == false)
+        {
+            g_Direction.GetCameraPosition(cameraPos);
+        }
+    }
+
+    SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
+    RenderGameWorld(byWaterMap, width, height);
+    RenderMainSceneUI();
+
     EndOpengl();
 
     return true;
