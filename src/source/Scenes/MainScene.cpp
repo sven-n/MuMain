@@ -51,6 +51,31 @@ extern int MouseX;
 extern vec3_t MouseTarget;
 extern int EditFlag;
 
+static bool RequireLeavesEffect()
+{
+    return (gMapManager.WorldActive == WD_0LORENCIA && HeroTile != 4) ||
+           (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10) ||
+           gMapManager.WorldActive == WD_3NORIA ||
+           gMapManager.WorldActive == WD_7ATLANSE ||
+           gMapManager.InDevilSquare() ||
+           gMapManager.WorldActive == WD_10HEAVEN ||
+           gMapManager.InChaosCastle() ||
+           gMapManager.InBattleCastle() ||
+           M31HuntingGround::IsInHuntingGround() ||
+           M33Aida::IsInAida() ||
+           M34CryWolf1st::IsCyrWolf1st() ||
+           gMapManager.WorldActive == WD_42CHANGEUP3RD_2ND ||
+           IsIceCity() ||
+           IsSantaTown() ||
+           gMapManager.IsPKField() ||
+           IsDoppelGanger2() ||
+           gMapManager.IsEmpireGuardian1() ||
+           gMapManager.IsEmpireGuardian2() ||
+           gMapManager.IsEmpireGuardian3() ||
+           gMapManager.IsEmpireGuardian4() ||
+           IsUnitedMarketPlace();
+}
+
 void MoveMainScene()
 {
     if (!InitMainScene)
@@ -159,28 +184,7 @@ void MoveMainScene()
     MoveObjects();
     if (!CameraTopViewEnable)
         MoveItems();
-    if ((gMapManager.WorldActive == WD_0LORENCIA && HeroTile != 4) ||
-        (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
-        || gMapManager.WorldActive == WD_3NORIA
-        || gMapManager.WorldActive == WD_7ATLANSE
-        || gMapManager.InDevilSquare() == true
-        || gMapManager.WorldActive == WD_10HEAVEN
-        || gMapManager.InChaosCastle() == true
-        || gMapManager.InBattleCastle() == true
-        || M31HuntingGround::IsInHuntingGround() == true
-        || M33Aida::IsInAida() == true
-        || M34CryWolf1st::IsCyrWolf1st() == true
-        || gMapManager.WorldActive == WD_42CHANGEUP3RD_2ND
-        || IsIceCity()
-        || IsSantaTown()
-        || gMapManager.IsPKField()
-        || IsDoppelGanger2()
-        || gMapManager.IsEmpireGuardian1()
-        || gMapManager.IsEmpireGuardian2()
-        || gMapManager.IsEmpireGuardian3()
-        || gMapManager.IsEmpireGuardian4()
-        || IsUnitedMarketPlace()
-        )
+    if (RequireLeavesEffect())
     {
         MoveLeaves();
     }
