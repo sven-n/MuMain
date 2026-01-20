@@ -20,6 +20,14 @@ extern CErrorReport g_ErrorReport;
 constexpr int BACKGROUND_SELECTION_PERCENTAGE = 100;
 constexpr int CLASSIC_BACKGROUND_PROBABILITY = 70;
 
+// Bitmap indices for title scene resources
+constexpr int TITLE_BITMAP_BASE = BITMAP_TITLE;
+constexpr int TITLE_BITMAP_BACK_02 = BITMAP_TITLE + 1;
+constexpr int TITLE_BITMAP_LOGO = BITMAP_TITLE + 3;
+constexpr int TITLE_BITMAP_PATTERN = BITMAP_TITLE + 5;
+constexpr int TITLE_BITMAP_DYNAMIC_START = BITMAP_TITLE + 6;
+constexpr int TITLE_BITMAP_DYNAMIC_END = BITMAP_TITLE + 14;
+
 void WebzenScene(HDC hDC)
 {
     CUIMng& rUIMng = CUIMng::Instance();
@@ -67,13 +75,15 @@ void WebzenScene(HDC hDC)
     CUIMng::Instance().RenderTitleSceneUI(hDC, 11, 11);
 
     rUIMng.ReleaseTitleSceneUI();
-    DeleteBitmap(BITMAP_TITLE);
-    DeleteBitmap(BITMAP_TITLE + 1);
-    DeleteBitmap(BITMAP_TITLE + 3);
-    DeleteBitmap(BITMAP_TITLE + 5);
+    DeleteBitmap(TITLE_BITMAP_BASE);
+    DeleteBitmap(TITLE_BITMAP_BACK_02);
+    DeleteBitmap(TITLE_BITMAP_LOGO);
+    DeleteBitmap(TITLE_BITMAP_PATTERN);
 
-    for (int i = 6; i < 14; ++i)
-        DeleteBitmap(BITMAP_TITLE + i);
+    for (int i = TITLE_BITMAP_DYNAMIC_START; i < TITLE_BITMAP_DYNAMIC_END; ++i)
+    {
+        DeleteBitmap(i);
+    }
 
     g_ErrorReport.Write(L"> Loading ok.\r\n");
 
