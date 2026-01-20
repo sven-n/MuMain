@@ -76,6 +76,20 @@ static bool RequireLeavesEffect()
            IsUnitedMarketPlace();
 }
 
+static bool ShouldRenderLeaves()
+{
+    return (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10) ||
+           IsIceCity() ||
+           IsSantaTown() ||
+           gMapManager.IsPKField() ||
+           IsDoppelGanger2() ||
+           gMapManager.IsEmpireGuardian1() ||
+           gMapManager.IsEmpireGuardian2() ||
+           gMapManager.IsEmpireGuardian3() ||
+           gMapManager.IsEmpireGuardian4() ||
+           IsUnitedMarketPlace();
+}
+
 void MoveMainScene()
 {
     if (!InitMainScene)
@@ -354,17 +368,7 @@ bool RenderMainScene()
     CheckSprites();
     BeginSprite();
 
-    if ((gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
-        || IsIceCity()
-        || IsSantaTown()
-        || gMapManager.IsPKField()
-        || IsDoppelGanger2()
-        || gMapManager.IsEmpireGuardian1()
-        || gMapManager.IsEmpireGuardian2()
-        || gMapManager.IsEmpireGuardian3()
-        || gMapManager.IsEmpireGuardian4()
-        || IsUnitedMarketPlace()
-        )
+    if (ShouldRenderLeaves())
     {
         RenderLeaves();
     }
