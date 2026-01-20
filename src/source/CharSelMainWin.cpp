@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <utility>
 
+#include "Scenes/SceneCommon.h"
+
 namespace
 {
     constexpr int kCharacterSlotCount = 5;

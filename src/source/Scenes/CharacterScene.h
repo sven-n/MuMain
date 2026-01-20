@@ -11,6 +11,3 @@ bool NewRenderCharacterScene(HDC hDC);
 
 // Character management
 void StartGame();
-
-// State variables (extern - defined in ZzzScene.cpp)
-extern int SelectedHero;

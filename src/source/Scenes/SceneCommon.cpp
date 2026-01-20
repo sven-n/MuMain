@@ -6,6 +6,20 @@
 #include "stdafx.h"
 #include "SceneCommon.h"
 #include "../ZzzScene.h"
+
+//=============================================================================
+// Character Selection State Implementation
+//=============================================================================
+
+// Global instance
+CharacterSelectionState g_characterSelection;
+
+// Legacy global reference (for backward compatibility)
+int& SelectedHero = g_characterSelection.GetLegacyReference();
+
+//=============================================================================
+// Scene Common Utilities
+//=============================================================================
 #include "../ZzzInterface.h"
 #include "../ZzzInventory.h"
 #include "../ZzzTexture.h"

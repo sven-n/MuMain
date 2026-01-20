@@ -31,7 +31,6 @@
 // External declarations
 extern int DeleteGuildIndex;
 extern bool InitLogIn;
-extern int SelectedHero;
 extern float CameraAngle[3];
 extern float CameraPosition[3];
 extern float CameraFOV;

@@ -31,7 +31,6 @@
 #include "LoginScene.h"
 
 // External declarations
-extern int SelectedHero;
 extern bool InitCharacterScene;
 extern EGameScene SceneFlag;
 extern bool EnableMainRender;

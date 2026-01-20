@@ -104,7 +104,6 @@ extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;
 extern BOOL g_bIMEBlock;
 
-int SelectedHero = -1;
 bool MoveMainCamera();
 
 // Legacy global variables (kept for backward compatibility)

@@ -60,6 +60,7 @@
 
 #include "GambleSystem.h"
 #include "QuestMng.h"
+#include "Scenes/SceneCommon.h"
 #ifdef PBG_ADD_SECRETBUFF
 #include "FatigueTimeSystem.h"
 #endif //PBG_ADD_SECRETBUFF

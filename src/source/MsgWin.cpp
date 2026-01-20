@@ -18,6 +18,7 @@
 
 #include "UIControls.h"
 #include "ZzzOpenglUtil.h"
+#include "Scenes/SceneCommon.h"
 #include "Utilities/Log/ErrorReport.h"
 
 #define	MW_OK		0
