@@ -30,19 +30,8 @@
 
 // External declarations
 extern int DeleteGuildIndex;
-extern bool MenuCancel;
 extern bool InitLogIn;
-extern int MenuY;
-extern int MenuX;
 extern int SelectedHero;
-extern int CameraWalkCut;
-extern int CurrentCameraCount;
-extern int CurrentCameraNumber;
-extern int CurrentCameraWalkType;
-extern float CurrentCameraPosition[3];
-extern float CurrentCameraAngle[3];
-extern float CurrentCameraWalkDelta[6];
-extern float CameraWalk[36];
 extern float CameraAngle[3];
 extern float CameraPosition[3];
 extern float CameraFOV;
@@ -57,6 +46,59 @@ extern double WorldTime;
 extern HFONT g_hFont;
 extern wchar_t m_ExeVersion[11];
 extern HWND g_hWnd;
+
+//=============================================================================
+// LoginScene Camera State (local to this file)
+//=============================================================================
+namespace {
+
+struct LoginCameraState {
+    int walkCut = 0;
+    int currentCount = -1;
+    int currentNumber = 0;
+    int currentWalkType = 0;
+    vec3_t currentPosition = {0, 0, 0};
+    vec3_t currentAngle = {0, 0, 0};
+    float currentWalkDelta[6] = {0, 0, 0, 0, 0, 0};
+
+    // Predefined camera animation paths (6 paths × 6 values each)
+    static constexpr float WALK_PATHS[6][6] = {
+        {0.f, -1000.f, 500.f, -80.f, 0.f, 0.f},
+        {0.f, -1100.f, 500.f, -80.f, 0.f, 0.f},
+        {0.f, -1100.f, 500.f, -80.f, 0.f, 0.f},
+        {0.f, -1100.f, 500.f, -80.f, 0.f, 0.f},
+        {0.f, -1100.f, 500.f, -80.f, 0.f, 0.f},
+        {200.f, -800.f, 250.f, -87.f, 0.f, -10.f}
+    };
+
+    void Reset() {
+        currentCount = -1;
+        walkCut = 0;
+        currentNumber = 0;
+        currentWalkType = 0;
+    }
+};
+
+// File-local camera state instance
+LoginCameraState g_loginCamera;
+
+}  // namespace
+
+//=============================================================================
+// Accessor functions for external use
+//=============================================================================
+
+int GetLoginCameraCount() {
+    return g_loginCamera.currentCount;
+}
+
+int GetLoginCameraWalkCut() {
+    return g_loginCamera.walkCut;
+}
+
+//=============================================================================
+// LoginScene Implementation
+//=============================================================================
 
 void DeleteCharacter()
 {
@@ -104,68 +146,68 @@ void MoveCamera()
         return;
     }
 
-    if (CurrentCameraCount == -1)
+    if (g_loginCamera.currentCount == -1)
     {
         for (int i = 0; i < 3; i++)
         {
-            CurrentCameraPosition[i] = CameraWalk[i];
-            CurrentCameraAngle[i] = CameraWalk[i + 3];
+            g_loginCamera.currentPosition[i] = LoginCameraState::WALK_PATHS[0][i];
+            g_loginCamera.currentAngle[i] = LoginCameraState::WALK_PATHS[0][i + 3];
         }
-        CurrentCameraNumber = 1;
-        CurrentCameraWalkType = 1;
+        g_loginCamera.currentNumber = 1;
+        g_loginCamera.currentWalkType = 1;
 
         for (int i = 0; i < 3; i++)
         {
-            CurrentCameraWalkDelta[i] = (CameraWalk[CurrentCameraNumber * 6 + i] - CurrentCameraPosition[i]) / 128;
-            CurrentCameraWalkDelta[i + 3] = (CameraWalk[CurrentCameraNumber * 6 + i + 3] - CurrentCameraAngle[i]) / 128;
+            g_loginCamera.currentWalkDelta[i] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 128;
+            g_loginCamera.currentWalkDelta[i + 3] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 128;
         }
     }
-    CurrentCameraCount++;
-    if ((CameraWalkCut == 0 && CurrentCameraCount >= 40) || (CameraWalkCut > 0 && CurrentCameraCount >= 128))
+    g_loginCamera.currentCount++;
+    if ((g_loginCamera.walkCut == 0 && g_loginCamera.currentCount >= 40) || (g_loginCamera.walkCut > 0 && g_loginCamera.currentCount >= 128))
     {
-        CurrentCameraCount = 0;
-        if (CameraWalkCut == 0)
+        g_loginCamera.currentCount = 0;
+        if (g_loginCamera.walkCut == 0)
         {
-            CameraWalkCut = 1;
+            g_loginCamera.walkCut = 1;
         }
         else
         {
             if (SceneFlag == LOG_IN_SCENE)
             {
-                CurrentCameraNumber = rand() % 4 + 1;
-                CurrentCameraWalkType = rand() % 2;
+                g_loginCamera.currentNumber = rand() % 4 + 1;
+                g_loginCamera.currentWalkType = rand() % 2;
             }
             else
             {
-                CurrentCameraNumber = 5;
-                CurrentCameraWalkType = 0;
+                g_loginCamera.currentNumber = 5;
+                g_loginCamera.currentWalkType = 0;
             }
         }
         for (int i = 0; i < 3; i++)
         {
-            CurrentCameraWalkDelta[i] = (CameraWalk[CurrentCameraNumber * 6 + i] - CurrentCameraPosition[i]) / 128;
-            CurrentCameraWalkDelta[i + 3] = (CameraWalk[CurrentCameraNumber * 6 + i + 3] - CurrentCameraAngle[i]) / 128;
+            g_loginCamera.currentWalkDelta[i] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 128;
+            g_loginCamera.currentWalkDelta[i + 3] = (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 128;
         }
     }
-    if (CurrentCameraWalkType == 0)
+    if (g_loginCamera.currentWalkType == 0)
     {
         for (int i = 0; i < 3; i++)
         {
-            CurrentCameraPosition[i] += (CameraWalk[CurrentCameraNumber * 6 + i] - CurrentCameraPosition[i]) / 6;
-            CurrentCameraAngle[i] += (CameraWalk[CurrentCameraNumber * 6 + i + 3] - CurrentCameraAngle[i]) / 6;
+            g_loginCamera.currentPosition[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 6;
+            g_loginCamera.currentAngle[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 6;
         }
     }
     else
     {
         for (int i = 0; i < 2; i++)
         {
-            CurrentCameraPosition[i] += CurrentCameraWalkDelta[i];
+            g_loginCamera.currentPosition[i] += g_loginCamera.currentWalkDelta[i];
         }
     }
     CameraFOV = 45.f;
     vec3_t Position;
     Vector(0.f, 0.f, 0.f, Position);
-    MoveCharacterCamera(Position, CurrentCameraPosition, CurrentCameraAngle);
+    MoveCharacterCamera(Position, g_loginCamera.currentPosition, g_loginCamera.currentAngle);
 }
 
 void CreateLogInScene()

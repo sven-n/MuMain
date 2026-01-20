@@ -91,23 +91,6 @@ int DeleteGuildIndex = -1;
 int  ErrorMessage = NULL;
 extern bool g_bEnterPressed;
 
-int    CameraWalkCut;
-int    CurrentCameraCount = -1;
-int    CurrentCameraWalkType = 0;
-int    CurrentCameraNumber = 0;
-vec3_t CurrentCameraPosition;
-vec3_t CurrentCameraAngle;
-float  CurrentCameraWalkDelta[6];
-float  CameraWalk[] =
-{
-     0.f,-1000.f,500.f,-80.f,0.f, 0.f,
-     0.f,-1100.f,500.f,-80.f,0.f, 0.f,
-     0.f,-1100.f,500.f,-80.f,0.f, 0.f,
-     0.f,-1100.f,500.f,-80.f,0.f, 0.f,
-     0.f,-1100.f,500.f,-80.f,0.f, 0.f,
-    200.f,-800.f,250.f,-87.f,0.f, -10.f,
-};
-
 bool InitLogIn = false;
 bool InitLoading = false;
 bool InitCharacterScene = false;

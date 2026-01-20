@@ -3615,8 +3615,9 @@ void RenderObjects_AfterCharacter()
     }
 }
 
-extern int CameraWalkCut;
-extern int CurrentCameraCount;
+// Forward declarations for LoginScene camera accessors
+int GetLoginCameraCount();
+int GetLoginCameraWalkCut();
 
 void MoveObject(OBJECT* o)
 {
@@ -3710,12 +3711,12 @@ void MoveObject(OBJECT* o)
             o->BlendMeshTexCoordV = -((int)WorldTime % 4000 * 0.00025f);
             break;
         case MODEL_MUGAME:
-            if (CameraWalkCut == 0)
-                Luminosity = CurrentCameraCount * 0.02f;
+            if (GetLoginCameraWalkCut() == 0)
+                Luminosity = GetLoginCameraCount() * 0.02f;
             else
             {
                 Luminosity = 1.5f;
-                /*if(CameraWalkCut==1 && CurrentCameraCount==0)
+                /*if(GetLoginCameraWalkCut()==1 && GetLoginCameraCount()==0)
                 {
                 for(int i=0;i<100;i++)
                 {
