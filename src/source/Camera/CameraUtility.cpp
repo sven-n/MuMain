@@ -311,13 +311,14 @@ bool MoveMainCamera()
         {
             switch (g_shCameraLevel)
             {
-            case 0: CameraDistanceTarget = 1000.f; CameraDistance += (CameraDistanceTarget - CameraDistance) / 3; break;
-            case 1: CameraDistanceTarget = 1100.f; CameraDistance += (CameraDistanceTarget - CameraDistance) / 3; break;
-            case 2: CameraDistanceTarget = 1200.f; CameraDistance += (CameraDistanceTarget - CameraDistance) / 3; break;
-            case 3: CameraDistanceTarget = 1300.f; CameraDistance += (CameraDistanceTarget - CameraDistance) / 3; break;
-            case 4: CameraDistanceTarget = 1400.f; CameraDistance += (CameraDistanceTarget - CameraDistance) / 3; break;
-            case 5: CameraDistanceTarget = g_Direction.m_fCameraViewFar; CameraDistance += (CameraDistanceTarget - CameraDistance) / 3; break;
+            case 0: CameraDistanceTarget = 1000.f; break;
+            case 1: CameraDistanceTarget = 1100.f; break;
+            case 2: CameraDistanceTarget = 1200.f; break;
+            case 3: CameraDistanceTarget = 1300.f; break;
+            case 4: CameraDistanceTarget = 1400.f; break;
+            case 5: CameraDistanceTarget = g_Direction.m_fCameraViewFar; break;
             }
+            CameraDistance += (CameraDistanceTarget - CameraDistance) / 3;
         }
     }
 
