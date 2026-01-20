@@ -21,7 +21,6 @@ FrameTimingState g_frameTiming;
 #include "LoginScene.h"
 #include "CharacterScene.h"
 #include "MainScene.h"
-#include "SceneCore.h"
 #include "../LoadingScene.h"
 #include "../DSPlaySound.h"
 #include "../ZzzOpenglUtil.h"
@@ -134,17 +133,27 @@ void UpdateSceneState()
     GrabEnable = false;
 }
 
-void MainScene(HDC hDC)
+/**
+ * @brief Updates UI and input systems for login and character scenes.
+ *
+ * @param dDeltaTick Time delta for frame updates
+ */
+static void UpdateLoginAndCharacterScenes()
 {
-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-    {
-        double dDeltaTick = g_pTimer->GetTimeElapsed();
-        dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
+    double dDeltaTick = g_pTimer->GetTimeElapsed();
+    dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
 
-        CInput::Instance().Update();
-        CUIMng::Instance().Update(dDeltaTick);
-    }
+    CInput::Instance().Update();
+    CUIMng::Instance().Update(dDeltaTick);
+}
 
+/**
+ * @brief Updates water animation texture cycling.
+ *
+ * Advances water texture animation based on elapsed time at reference FPS rate.
+ */
+static void UpdateWaterAnimation()
+{
     constexpr int NumberOfWaterTextures = 32;
     const double timePerFrame = 1000 / REFERENCE_FPS;
     auto time_since_last_render = g_frameTiming.currentTickCount - g_frameTiming.lastWaterChange;
@@ -155,17 +164,25 @@ void MainScene(HDC hDC)
         time_since_last_render -= timePerFrame;
         g_frameTiming.lastWaterChange = g_frameTiming.currentTickCount;
     }
+}
 
-    if (Destroy) {
-        return;
-    }
-
+/**
+ * @brief Updates core game systems (physics, bitmaps, audio positioning).
+ */
+static void UpdateCoreSystems()
+{
     g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
-
     Bitmaps.Manage();
-
     Set3DSoundPosition();
+}
 
+/**
+ * @brief Sets the OpenGL clear color based on the current world/map.
+ *
+ * Different maps have different background colors for visual atmosphere.
+ */
+static void SetWorldClearColor()
+{
     if (gMapManager.WorldActive == WD_10HEAVEN)
     {
         glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
@@ -205,67 +222,94 @@ void MainScene(HDC hDC)
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
 
+/**
+ * @brief Renders the appropriate scene based on current SceneFlag.
+ *
+ * @param hDC Device context for rendering
+ * @return true if rendering succeeded, false otherwise
+ */
+static bool RenderCurrentScene(HDC hDC)
+{
     bool Success = false;
 
-    try
+    if (SceneFlag == LOG_IN_SCENE)
     {
-        if (SceneFlag == LOG_IN_SCENE)
-        {
-            Success = NewRenderLogInScene(hDC);
-        }
-        else if (SceneFlag == CHARACTER_SCENE)
-        {
-            Success = NewRenderCharacterScene(hDC);
-        }
-        else if (SceneFlag == MAIN_SCENE)
-        {
-            Success = RenderMainScene();
-        }
+        Success = NewRenderLogInScene(hDC);
+    }
+    else if (SceneFlag == CHARACTER_SCENE)
+    {
+        Success = NewRenderCharacterScene(hDC);
+    }
+    else if (SceneFlag == MAIN_SCENE)
+    {
+        Success = RenderMainScene();
+    }
 
-        g_PhysicsManager.Render();
+    g_PhysicsManager.Render();
+    return Success;
+}
 
+/**
+ * @brief Renders debug information overlay in development builds.
+ *
+ * Shows FPS, mouse position, and camera info on screen.
+ */
+static void RenderDebugInfo()
+{
 #if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
-        BeginBitmap();
-        wchar_t szDebugText[128];
-        swprintf(szDebugText, L"FPS: %.1f Vsync: %d CPU: %.1f%%", FPS_AVG, IsVSyncEnabled(), CPU_AVG);
-        wchar_t szMousePos[128];
-        swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
-        wchar_t szCamera3D[128];
-        swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->SetBgColor(0, 0, 0, 100);
-        g_pRenderText->SetTextColor(255, 255, 255, 200);
-        g_pRenderText->RenderText(10, 26, szDebugText);
-        g_pRenderText->RenderText(10, 36, szMousePos);
-        g_pRenderText->RenderText(10, 46, szCamera3D);
-        g_pRenderText->SetFont(g_hFont);
-        EndBitmap();
+    BeginBitmap();
+    wchar_t szDebugText[128];
+    swprintf(szDebugText, L"FPS: %.1f Vsync: %d CPU: %.1f%%", FPS_AVG, IsVSyncEnabled(), CPU_AVG);
+    wchar_t szMousePos[128];
+    swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
+    wchar_t szCamera3D[128];
+    swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+    g_pRenderText->RenderText(10, 26, szDebugText);
+    g_pRenderText->RenderText(10, 36, szMousePos);
+    g_pRenderText->RenderText(10, 46, szCamera3D);
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
 #endif // defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
+}
 
-        if (Success)
+/**
+ * @brief Checks and handles server connection loss.
+ */
+static void CheckServerConnection()
+{
+    if (SocketClient == nullptr || !SocketClient->IsConnected())
+    {
+        static BOOL s_bClosed = FALSE;
+        if (!s_bClosed)
         {
-            SwapBuffers(hDC);
+            s_bClosed = TRUE;
+            g_ErrorReport.Write(L"> Connection closed. ");
+            g_ErrorReport.WriteCurrentTime();
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+            CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
         }
+    }
+}
 
-        if (SocketClient == nullptr || !SocketClient->IsConnected())
-        {
-            static BOOL s_bClosed = FALSE;
-            if (!s_bClosed)
-            {
-                s_bClosed = TRUE;
-                g_ErrorReport.Write(L"> Connection closed. ");
-                g_ErrorReport.WriteCurrentTime();
-                g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
-                CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
-            }
-        }
+/**
+ * @brief Manages audio playback for the main game scene based on current world/map.
+ *
+ * Handles both ambient sound effects and background music for all game maps.
+ * This is a large function due to the extensive number of maps requiring unique audio.
+ */
+static void ManageMainSceneAudio()
+{
+    if (SceneFlag != MAIN_SCENE)
+        return;
 
-        if (SceneFlag == MAIN_SCENE)
-        {
-            switch (gMapManager.WorldActive)
-            {
-            case WD_0LORENCIA:
+    switch (gMapManager.WorldActive)
+    {
+    case WD_0LORENCIA:
                 if (HeroTile == 4)
                 {
                     StopBuffer(SOUND_WIND01, true);
@@ -519,19 +563,66 @@ void MainScene(HDC hDC)
                 StopMp3(MUSIC_SWAMP_OF_QUIET);
             }
 
-            g_Raklion.PlayBGM();
-            g_SantaTown.PlayBGM();
-            g_PKField.PlayBGM();
-            g_DoppelGanger1.PlayBGM();
-            g_EmpireGuardian1.PlayBGM();
-            g_EmpireGuardian2.PlayBGM();
-            g_EmpireGuardian3.PlayBGM();
-            g_EmpireGuardian4.PlayBGM();
-            g_UnitedMarketPlace.PlayBGM();
+    g_Raklion.PlayBGM();
+    g_SantaTown.PlayBGM();
+    g_PKField.PlayBGM();
+    g_DoppelGanger1.PlayBGM();
+    g_EmpireGuardian1.PlayBGM();
+    g_EmpireGuardian2.PlayBGM();
+    g_EmpireGuardian3.PlayBGM();
+    g_EmpireGuardian4.PlayBGM();
+    g_UnitedMarketPlace.PlayBGM();
 #ifdef ASG_ADD_MAP_KARUTAN
-            g_Karutan1.PlayBGM();
+    g_Karutan1.PlayBGM();
 #endif	// ASG_ADD_MAP_KARUTAN
+}
+
+/**
+ * @brief Main scene rendering and update function.
+ *
+ * This is the primary entry point for rendering all game scenes (login, character, main game).
+ * Orchestrates:
+ * - Input/UI updates for login and character scenes
+ * - Water animation updates
+ * - Core system updates (physics, bitmaps, audio positioning)
+ * - Scene-specific rendering
+ * - Audio management for the main game scene
+ * - Debug information rendering
+ * - Server connection monitoring
+ *
+ * @param hDC Device context for rendering
+ */
+void MainScene(HDC hDC)
+{
+    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+    {
+        UpdateLoginAndCharacterScenes();
+    }
+
+    UpdateWaterAnimation();
+
+    if (Destroy)
+    {
+        return;
+    }
+
+    UpdateCoreSystems();
+    SetWorldClearColor();
+
+    bool Success = false;
+
+    try
+    {
+        Success = RenderCurrentScene(hDC);
+        RenderDebugInfo();
+
+        if (Success)
+        {
+            SwapBuffers(hDC);
         }
+
+        CheckServerConnection();
+        ManageMainSceneAudio();
     }
     catch (const std::exception& e)
     {
