@@ -297,16 +297,12 @@ static void CheckServerConnection()
 }
 
 /**
- * @brief Manages audio playback for the main game scene based on current world/map.
+ * @brief Plays ambient sound effects for the current world/map.
  *
- * Handles both ambient sound effects and background music for all game maps.
- * This is a large function due to the extensive number of maps requiring unique audio.
+ * Handles world-specific ambient sounds like wind, rain, desert, water, etc.
  */
-static void ManageMainSceneAudio()
+static void PlayWorldAmbientSounds()
 {
-    if (SceneFlag != MAIN_SCENE)
-        return;
-
     switch (gMapManager.WorldActive)
     {
     case WD_0LORENCIA:
@@ -385,183 +381,209 @@ static void ManageMainSceneAudio()
                 }
                 break;
 #endif	// ASG_ADD_MAP_KARUTAN
-            }
-            if (gMapManager.WorldActive != WD_0LORENCIA && gMapManager.WorldActive != WD_2DEVIAS && gMapManager.WorldActive != WD_3NORIA && gMapManager.WorldActive != WD_58ICECITY_BOSS && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE)
-            {
-                StopBuffer(SOUND_WIND01, true);
-            }
-            if (gMapManager.WorldActive != WD_0LORENCIA && gMapManager.InDevilSquare() == false && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE)
-            {
-                StopBuffer(SOUND_RAIN01, true);
-            }
-            if (gMapManager.WorldActive != WD_1DUNGEON)
-            {
-                StopBuffer(SOUND_DUNGEON01, true);
-            }
-            if (gMapManager.WorldActive != WD_3NORIA)
-            {
-                StopBuffer(SOUND_FOREST01, true);
-            }
-            if (gMapManager.WorldActive != WD_4LOSTTOWER)
-            {
-                StopBuffer(SOUND_TOWER01, true);
-            }
-            if (gMapManager.WorldActive != WD_7ATLANSE)
-            {
-                StopBuffer(SOUND_WATER01, true);
-            }
-            if (gMapManager.WorldActive != WD_8TARKAN)
-            {
-                StopBuffer(SOUND_DESERT01, true);
-            }
-            if (gMapManager.WorldActive != WD_10HEAVEN)
-            {
-                StopBuffer(SOUND_HEAVEN01, true);
-            }
-            if (gMapManager.WorldActive != WD_51HOME_6TH_CHAR)
-            {
-                StopBuffer(SOUND_ELBELAND_VILLAGEPROTECTION01, true);
-                StopBuffer(SOUND_ELBELAND_WATERFALLSMALL01, true);
-                StopBuffer(SOUND_ELBELAND_WATERWAY01, true);
-                StopBuffer(SOUND_ELBELAND_ENTERDEVIAS01, true);
-                StopBuffer(SOUND_ELBELAND_WATERSMALL01, true);
-                StopBuffer(SOUND_ELBELAND_RAVINE01, true);
-                StopBuffer(SOUND_ELBELAND_ENTERATLANCE01, true);
-            }
+    }
+}
+
+/**
+ * @brief Stops ambient sounds that don't belong to the current world.
+ *
+ * Ensures only the current world's ambient sounds are playing.
+ */
+static void StopInactiveAmbientSounds()
+{
+    if (gMapManager.WorldActive != WD_0LORENCIA && gMapManager.WorldActive != WD_2DEVIAS && gMapManager.WorldActive != WD_3NORIA && gMapManager.WorldActive != WD_58ICECITY_BOSS && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE)
+    {
+        StopBuffer(SOUND_WIND01, true);
+    }
+    if (gMapManager.WorldActive != WD_0LORENCIA && gMapManager.InDevilSquare() == false && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE)
+    {
+        StopBuffer(SOUND_RAIN01, true);
+    }
+    if (gMapManager.WorldActive != WD_1DUNGEON)
+    {
+        StopBuffer(SOUND_DUNGEON01, true);
+    }
+    if (gMapManager.WorldActive != WD_3NORIA)
+    {
+        StopBuffer(SOUND_FOREST01, true);
+    }
+    if (gMapManager.WorldActive != WD_4LOSTTOWER)
+    {
+        StopBuffer(SOUND_TOWER01, true);
+    }
+    if (gMapManager.WorldActive != WD_7ATLANSE)
+    {
+        StopBuffer(SOUND_WATER01, true);
+    }
+    if (gMapManager.WorldActive != WD_8TARKAN)
+    {
+        StopBuffer(SOUND_DESERT01, true);
+    }
+    if (gMapManager.WorldActive != WD_10HEAVEN)
+    {
+        StopBuffer(SOUND_HEAVEN01, true);
+    }
+    if (gMapManager.WorldActive != WD_51HOME_6TH_CHAR)
+    {
+        StopBuffer(SOUND_ELBELAND_VILLAGEPROTECTION01, true);
+        StopBuffer(SOUND_ELBELAND_WATERFALLSMALL01, true);
+        StopBuffer(SOUND_ELBELAND_WATERWAY01, true);
+        StopBuffer(SOUND_ELBELAND_ENTERDEVIAS01, true);
+        StopBuffer(SOUND_ELBELAND_WATERSMALL01, true);
+        StopBuffer(SOUND_ELBELAND_RAVINE01, true);
+        StopBuffer(SOUND_ELBELAND_ENTERATLANCE01, true);
+    }
 #ifdef ASG_ADD_MAP_KARUTAN
-            if (!IsKarutanMap())
-                StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
-            if (gMapManager.WorldActive != WD_80KARUTAN1)
-                StopBuffer(SOUND_KARUTAN_INSECT_ENV, true);
-            if (gMapManager.WorldActive != WD_81KARUTAN2)
-                StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
+    if (!IsKarutanMap())
+        StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
+    if (gMapManager.WorldActive != WD_80KARUTAN1)
+        StopBuffer(SOUND_KARUTAN_INSECT_ENV, true);
+    if (gMapManager.WorldActive != WD_81KARUTAN2)
+        StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
 #endif	// ASG_ADD_MAP_KARUTAN
+}
 
-            if (gMapManager.WorldActive == WD_0LORENCIA)
+/**
+ * @brief Manages background music playback for the current world/map.
+ *
+ * Plays and stops background music tracks based on world and player location.
+ */
+static void ManageBackgroundMusic()
+{
+    if (gMapManager.WorldActive == WD_0LORENCIA)
+    {
+        if (Hero->SafeZone)
+        {
+            if (HeroTile == 4)
+                PlayMp3(MUSIC_PUB);
+            else
+                PlayMp3(MUSIC_MAIN_THEME);
+        }
+    }
+    else
+    {
+        StopMp3(MUSIC_PUB);
+        StopMp3(MUSIC_MAIN_THEME);
+    }
+
+    if (gMapManager.WorldActive == WD_2DEVIAS)
+    {
+        if (Hero->SafeZone)
+        {
+            if ((Hero->PositionX) >= 205 && (Hero->PositionX) <= 214 &&
+                (Hero->PositionY) >= 13 && (Hero->PositionY) <= 31)
             {
-                if (Hero->SafeZone)
-                {
-                    if (HeroTile == 4)
-                        PlayMp3(MUSIC_PUB);
-                    else
-                        PlayMp3(MUSIC_MAIN_THEME);
-                }
+                PlayMp3(MUSIC_CHURCH);
             }
             else
             {
-                StopMp3(MUSIC_PUB);
-                StopMp3(MUSIC_MAIN_THEME);
+                PlayMp3(MUSIC_DEVIAS);
             }
-            if (gMapManager.WorldActive == WD_2DEVIAS)
-            {
-                if (Hero->SafeZone)
-                {
-                    if ((Hero->PositionX) >= 205 && (Hero->PositionX) <= 214 &&
-                        (Hero->PositionY) >= 13 && (Hero->PositionY) <= 31)
-                    {
-                        PlayMp3(MUSIC_CHURCH);
-                    }
-                    else
-                    {
-                        PlayMp3(MUSIC_DEVIAS);
-                    }
-                }
-            }
-            else
-            {
-                StopMp3(MUSIC_CHURCH);
-                StopMp3(MUSIC_DEVIAS);
-            }
-            if (gMapManager.WorldActive == WD_3NORIA)
-            {
-                if (Hero->SafeZone)
-                    PlayMp3(MUSIC_NORIA);
-            }
-            else
-            {
-                StopMp3(MUSIC_NORIA);
-            }
-            if (gMapManager.WorldActive == WD_1DUNGEON || gMapManager.WorldActive == WD_5UNKNOWN)
-            {
-                PlayMp3(MUSIC_DUNGEON);
-            }
-            else
-            {
-                StopMp3(MUSIC_DUNGEON);
-            }
+        }
+    }
+    else
+    {
+        StopMp3(MUSIC_CHURCH);
+        StopMp3(MUSIC_DEVIAS);
+    }
 
-            if (gMapManager.WorldActive == WD_7ATLANSE) {
-                PlayMp3(MUSIC_ATLANS);
-            }
-            else {
-                StopMp3(MUSIC_ATLANS);
-            }
-            if (gMapManager.WorldActive == WD_10HEAVEN) {
-                PlayMp3(MUSIC_ICARUS);
-            }
-            else {
-                StopMp3(MUSIC_ICARUS);
-            }
-            if (gMapManager.WorldActive == WD_8TARKAN) {
-                PlayMp3(MUSIC_TARKAN);
-            }
-            else {
-                StopMp3(MUSIC_TARKAN);
-            }
-            if (gMapManager.WorldActive == WD_4LOSTTOWER) {
-                PlayMp3(MUSIC_LOSTTOWER_A);
-            }
-            else {
-                StopMp3(MUSIC_LOSTTOWER_A);
-            }
+    if (gMapManager.WorldActive == WD_3NORIA)
+    {
+        if (Hero->SafeZone)
+            PlayMp3(MUSIC_NORIA);
+    }
+    else
+    {
+        StopMp3(MUSIC_NORIA);
+    }
 
-            if (gMapManager.InHellas(gMapManager.WorldActive)) {
-                PlayMp3(MUSIC_KALIMA);
-            }
-            else {
-                StopMp3(MUSIC_KALIMA);
-            }
+    if (gMapManager.WorldActive == WD_1DUNGEON || gMapManager.WorldActive == WD_5UNKNOWN)
+    {
+        PlayMp3(MUSIC_DUNGEON);
+    }
+    else
+    {
+        StopMp3(MUSIC_DUNGEON);
+    }
 
-            if (gMapManager.WorldActive == WD_31HUNTING_GROUND) {
-                PlayMp3(MUSIC_BC_HUNTINGGROUND);
-            }
-            else {
-                StopMp3(MUSIC_BC_HUNTINGGROUND);
-            }
+    if (gMapManager.WorldActive == WD_7ATLANSE) {
+        PlayMp3(MUSIC_ATLANS);
+    }
+    else {
+        StopMp3(MUSIC_ATLANS);
+    }
 
-            if (gMapManager.WorldActive == WD_33AIDA) {
-                PlayMp3(MUSIC_BC_ADIA);
-            }
-            else {
-                StopMp3(MUSIC_BC_ADIA);
-            }
+    if (gMapManager.WorldActive == WD_10HEAVEN) {
+        PlayMp3(MUSIC_ICARUS);
+    }
+    else {
+        StopMp3(MUSIC_ICARUS);
+    }
 
-            M34CryWolf1st::ChangeBackGroundMusic(gMapManager.WorldActive);
-            M39Kanturu3rd::ChangeBackGroundMusic(gMapManager.WorldActive);
+    if (gMapManager.WorldActive == WD_8TARKAN) {
+        PlayMp3(MUSIC_TARKAN);
+    }
+    else {
+        StopMp3(MUSIC_TARKAN);
+    }
 
-            if (gMapManager.WorldActive == WD_37KANTURU_1ST)
-                PlayMp3(MUSIC_KANTURU_1ST);
-            else
-                StopMp3(MUSIC_KANTURU_1ST);
-            M38Kanturu2nd::PlayBGM();
-            SEASON3A::CGM3rdChangeUp::Instance().PlayBGM();
-            if (gMapManager.IsCursedTemple())
-            {
-                g_CursedTemple->PlayBGM();
-            }
-            if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR) {
-                PlayMp3(MUSIC_ELBELAND);
-            }
-            else {
-                StopMp3(MUSIC_ELBELAND);
-            }
+    if (gMapManager.WorldActive == WD_4LOSTTOWER) {
+        PlayMp3(MUSIC_LOSTTOWER_A);
+    }
+    else {
+        StopMp3(MUSIC_LOSTTOWER_A);
+    }
 
-            if (gMapManager.WorldActive == WD_56MAP_SWAMP_OF_QUIET) {
-                PlayMp3(MUSIC_SWAMP_OF_QUIET);
-            }
-            else {
-                StopMp3(MUSIC_SWAMP_OF_QUIET);
-            }
+    if (gMapManager.InHellas(gMapManager.WorldActive)) {
+        PlayMp3(MUSIC_KALIMA);
+    }
+    else {
+        StopMp3(MUSIC_KALIMA);
+    }
+
+    if (gMapManager.WorldActive == WD_31HUNTING_GROUND) {
+        PlayMp3(MUSIC_BC_HUNTINGGROUND);
+    }
+    else {
+        StopMp3(MUSIC_BC_HUNTINGGROUND);
+    }
+
+    if (gMapManager.WorldActive == WD_33AIDA) {
+        PlayMp3(MUSIC_BC_ADIA);
+    }
+    else {
+        StopMp3(MUSIC_BC_ADIA);
+    }
+
+    M34CryWolf1st::ChangeBackGroundMusic(gMapManager.WorldActive);
+    M39Kanturu3rd::ChangeBackGroundMusic(gMapManager.WorldActive);
+
+    if (gMapManager.WorldActive == WD_37KANTURU_1ST)
+        PlayMp3(MUSIC_KANTURU_1ST);
+    else
+        StopMp3(MUSIC_KANTURU_1ST);
+
+    M38Kanturu2nd::PlayBGM();
+    SEASON3A::CGM3rdChangeUp::Instance().PlayBGM();
+
+    if (gMapManager.IsCursedTemple())
+    {
+        g_CursedTemple->PlayBGM();
+    }
+
+    if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR) {
+        PlayMp3(MUSIC_ELBELAND);
+    }
+    else {
+        StopMp3(MUSIC_ELBELAND);
+    }
+
+    if (gMapManager.WorldActive == WD_56MAP_SWAMP_OF_QUIET) {
+        PlayMp3(MUSIC_SWAMP_OF_QUIET);
+    }
+    else {
+        StopMp3(MUSIC_SWAMP_OF_QUIET);
+    }
 
     g_Raklion.PlayBGM();
     g_SantaTown.PlayBGM();
@@ -575,6 +597,26 @@ static void ManageMainSceneAudio()
 #ifdef ASG_ADD_MAP_KARUTAN
     g_Karutan1.PlayBGM();
 #endif	// ASG_ADD_MAP_KARUTAN
+}
+
+/**
+ * @brief Manages all audio (ambient sounds and music) for the main game scene.
+ *
+ * Orchestrates three audio subsystems:
+ * - World-specific ambient sound effects
+ * - Stopping inactive ambient sounds
+ * - Background music management
+ *
+ * @note Only active when SceneFlag == MAIN_SCENE
+ */
+static void ManageMainSceneAudio()
+{
+    if (SceneFlag != MAIN_SCENE)
+        return;
+
+    PlayWorldAmbientSounds();
+    StopInactiveAmbientSounds();
+    ManageBackgroundMusic();
 }
 
 /**
