@@ -232,8 +232,7 @@ bool MoveMainCamera()
         {
             CameraPosition[2] = 255.f;//700
         }
-        else if (CCameraMove::GetInstancePtr()->IsTourMode());
-        else
+        else if (!CCameraMove::GetInstancePtr()->IsTourMode())
         {
             CameraPosition[2] = Hero->Object.Position[2];//700
         }
