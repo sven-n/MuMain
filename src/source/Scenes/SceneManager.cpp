@@ -529,8 +529,12 @@ void MainScene(HDC hDC)
 #endif	// ASG_ADD_MAP_KARUTAN
         }
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
+        // Log exception in MainScene
+        char errorMsg[256];
+        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in MainScene: %s", e.what());
+        OutputDebugStringA(errorMsg);
     }
 }
 
@@ -564,7 +568,11 @@ void RenderScene(HDC hDC)
             KillGLWindow();
         }
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
+        // Log exception in RenderScene
+        char errorMsg[256];
+        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in RenderScene: %s", e.what());
+        OutputDebugStringA(errorMsg);
     }
 }
