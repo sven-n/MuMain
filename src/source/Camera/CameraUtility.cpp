@@ -237,7 +237,7 @@ bool MoveMainCamera()
 
         VectorAdd(Position, TransformPosition, CameraPosition);
 
-        if (gMapManager.InBattleCastle() == true)
+        if (gMapManager.InBattleCastle())
         {
             CameraPosition[2] = 255.f;//700
         }
@@ -245,6 +245,7 @@ bool MoveMainCamera()
         {
             CameraPosition[2] = Hero->Object.Position[2];//700
         }
+        // Note: When in tour mode and not in battle castle, CameraPosition[2] is not set here
 
         if ((TerrainWall[iIndex] & TW_HEIGHT) == TW_HEIGHT)
         {
