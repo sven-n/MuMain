@@ -27,7 +27,7 @@ ItemAddOptioninfo::ItemAddOptioninfo()
     if (!Result)
     {
         wchar_t szMessage[256];
-        ::swprintf(szMessage, L"%ls file not found.\r\n", ITEMADDOPTION_DATA_FILE);
+        ::mu_swprintf(szMessage, L"%ls file not found.\r\n", ITEMADDOPTION_DATA_FILE);
         g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -77,21 +77,21 @@ void ItemAddOptioninfo::GetItemAddOtioninfoText(std::vector<std::wstring>& outte
 
         switch (optiontype)
         {
-        case 1: swprintf(TempText, GlobalText[2184], optionvalue);
+        case 1: mu_swprintf(TempText, GlobalText[2184], optionvalue);
             break;
-        case 2: swprintf(TempText, GlobalText[2185], optionvalue);
+        case 2: mu_swprintf(TempText, GlobalText[2185], optionvalue);
             break;
-        case 3: swprintf(TempText, GlobalText[2186], optionvalue);
+        case 3: mu_swprintf(TempText, GlobalText[2186], optionvalue);
             break;
-        case 4: swprintf(TempText, GlobalText[2187], optionvalue);
+        case 4: mu_swprintf(TempText, GlobalText[2187], optionvalue);
             break;
-        case 5: swprintf(TempText, GlobalText[2188], optionvalue);
+        case 5: mu_swprintf(TempText, GlobalText[2188], optionvalue);
             break;
-        case 6: swprintf(TempText, GlobalText[2189], optionvalue);
+        case 6: mu_swprintf(TempText, GlobalText[2189], optionvalue);
             break;
-        case 7: swprintf(TempText, GlobalText[2190]);
+        case 7: mu_swprintf(TempText, GlobalText[2190]);
             break;
-        case 8: swprintf(TempText, GlobalText[2191], optionvalue);
+        case 8: mu_swprintf(TempText, GlobalText[2191], optionvalue);
             break;
         }
 

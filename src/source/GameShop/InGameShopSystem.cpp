@@ -100,7 +100,7 @@ bool CInGameShopSystem::ScriptDownload()
     ::GetCurrentDirectory(255, m_szScriptLocalPath);
 
     wchar_t szScriptRemotePathforDMZ[MAX_TEXT_LENGTH];
-    swprintf(m_szScriptLocalPath, L"%ls%ls", m_szScriptLocalPath, L"\\data\\InGameShopScript");
+    mu_swprintf(m_szScriptLocalPath, L"%ls%ls", m_szScriptLocalPath, L"\\data\\InGameShopScript");
     wcscpy(m_szScriptIPAddress, L"image.webzen.com");
     wcscpy(m_szScriptRemotePath, L"/Global/Payment/ProductTransfer");
     wcscpy(szScriptRemotePathforDMZ, L"/Global/Payment/DevScriptGB/ProductTransfer");
@@ -140,7 +140,7 @@ bool CInGameShopSystem::ScriptDownload()
         ShopOpenLock();
 
         wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
-        swprintf(szText, GlobalText[3029], m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId, res.GetErrorMessage());
+        mu_swprintf(szText, GlobalText[3029], m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId, res.GetErrorMessage());
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], szText);
@@ -171,7 +171,7 @@ bool CInGameShopSystem::BannerDownload()
     ::GetCurrentDirectory(255, m_szBannerLocalPath);
 
     wchar_t szBannerRemotePathforDMZ[MAX_TEXT_LENGTH];
-    swprintf(m_szBannerLocalPath, L"%ls%ls", m_szBannerLocalPath, L"\\data\\InGameShopBanner");
+    mu_swprintf(m_szBannerLocalPath, L"%ls%ls", m_szBannerLocalPath, L"\\data\\InGameShopBanner");
 
     wcscpy(m_szBannerIPAddress, L"image.webzen.com");
     wcscpy(m_szBannerRemotePath, L"/Global/Payment/BannerTransfer");
@@ -222,7 +222,7 @@ bool CInGameShopSystem::BannerDownload()
 
         // MessageBox
         wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
-        swprintf(szText, GlobalText[3030], m_BannerVerInfo.Zone, m_BannerVerInfo.year, m_BannerVerInfo.yearId, res.GetErrorMessage());
+        mu_swprintf(szText, GlobalText[3030], m_BannerVerInfo.Zone, m_BannerVerInfo.year, m_BannerVerInfo.yearId, res.GetErrorMessage());
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], szText);
@@ -564,7 +564,7 @@ bool CInGameShopSystem::GetPackageInfo(int iPackageSeq, int iPackageAttrType, OU
             wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
             iValue = Package.Price;
             ConvertGold(iValue, szText);
-            swprintf(pszText, L"%ls %ls", szText, Package.PricUnitName);
+            mu_swprintf(pszText, L"%ls %ls", szText, Package.PricUnitName);
             return true;
         }break;
         case IGS_PACKAGE_ATT_TYPE_ITEMCODE:

@@ -350,17 +350,17 @@ namespace giPetManager
             int cmdType = Type - AT_PET_COMMAND_DEFAULT;
 
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true;
-            swprintf(TextList[TextNum], GlobalText[1219 + cmdType]); TextNum++; SkipNum++;
+            mu_swprintf(TextList[TextNum], GlobalText[1219 + cmdType]); TextNum++; SkipNum++;
 
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
-            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
+            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
             switch (cmdType)
             {
-            case PET_CMD_DEFAULT: swprintf(TextList[TextNum], GlobalText[1223]); TextNum++; SkipNum++; break;
-            case PET_CMD_RANDOM: swprintf(TextList[TextNum], GlobalText[1224]); TextNum++; SkipNum++; break;
-            case PET_CMD_OWNER: swprintf(TextList[TextNum], GlobalText[1225]); TextNum++; SkipNum++; break;
-            case PET_CMD_TARGET: swprintf(TextList[TextNum], GlobalText[1226]); TextNum++; SkipNum++; break;
+            case PET_CMD_DEFAULT: mu_swprintf(TextList[TextNum], GlobalText[1223]); TextNum++; SkipNum++; break;
+            case PET_CMD_RANDOM: mu_swprintf(TextList[TextNum], GlobalText[1224]); TextNum++; SkipNum++; break;
+            case PET_CMD_OWNER: mu_swprintf(TextList[TextNum], GlobalText[1225]); TextNum++; SkipNum++; break;
+            case PET_CMD_TARGET: mu_swprintf(TextList[TextNum], GlobalText[1226]); TextNum++; SkipNum++; break;
             }
 
             SIZE TextSize = { 0, 0 };

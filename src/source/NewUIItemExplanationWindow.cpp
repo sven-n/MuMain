@@ -183,7 +183,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     ComputeItemInfo(ItemHelp);
 
     TextNum = 0;
-    swprintf(TextList[TextNum], L"\n");
+    mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
 
     wcscpy(TextList[TextNum], GlobalText[160]);
@@ -191,16 +191,16 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     TextBold[TextNum] = true;
     TextNum++;
 
-    swprintf(TextList[TextNum], L"%ls", p->Name);
+    mu_swprintf(TextList[TextNum], L"%ls", p->Name);
     TextListColor[TextNum] = TEXT_COLOR_WHITE;
     TextBold[TextNum] = true;
     TextNum++;
 
-    swprintf(TextList[TextNum], L"\n");
+    mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
-    swprintf(TextList[TextNum], L" ");
+    mu_swprintf(TextList[TextNum], L" ");
     TextNum++;
-    swprintf(TextList[TextNum], L"\n");
+    mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
 
     float fNumAdd = 1.0f;
@@ -263,7 +263,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
         if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 1 ) )
         {
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], HIBYTE( mixLevel ) );TextNum++;
+            mu_swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], HIBYTE( mixLevel ) );TextNum++;
         }
     }
     if ( LOBYTE( mixLevel)<=3 )
@@ -272,13 +272,13 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
         if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 2 ) )
         {
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], LOBYTE( mixLevel ) );TextNum++;
+            mu_swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], LOBYTE( mixLevel ) );TextNum++;
         }
     }
     */
 
     RequireClass(p);
-    swprintf(TextList[TextNum], L"\n");
+    mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
     RenderTipTextList(1, 1, TextNum, iInfoWidth, RT3_SORT_CENTER);
     EnableAlphaTest();

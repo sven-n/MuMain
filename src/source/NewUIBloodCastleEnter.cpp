@@ -281,14 +281,14 @@ void CNewUIEnterBloodCastle::OpenningProcess()
 
     for (int i = 0; i < MAX_ENTER_GRADE - 1; i++)
     {
-        swprintf(sztext, GlobalText[847], i + 1
+        mu_swprintf(sztext, GlobalText[847], i + 1
             , m_iBloodCastleLimitLevel[(iLimitLVIndex * MAX_ENTER_GRADE) + i][0]
             , m_iBloodCastleLimitLevel[(iLimitLVIndex * MAX_ENTER_GRADE) + i][1]);
         m_BtnEnter[i].SetFont(g_hFontBold);
         m_BtnEnter[i].ChangeText(sztext);
     }
 
-    swprintf(sztext, GlobalText[1779], 8);
+    mu_swprintf(sztext, GlobalText[1779], 8);
 
     m_BtnEnter[MAX_ENTER_GRADE - 1].SetFont(g_hFontBold);
     m_BtnEnter[MAX_ENTER_GRADE - 1].ChangeText(sztext);

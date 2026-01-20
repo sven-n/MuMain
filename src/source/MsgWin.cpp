@@ -204,7 +204,7 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
                 else
                 {
                     wchar_t szMsg[64]{};
-                    swprintf(szMsg, GlobalText[380], m_nGameExit);
+                    mu_swprintf(szMsg, GlobalText[380], m_nGameExit);
                     SetMsg(m_eType, szMsg, L"");
                 }
             }
@@ -302,7 +302,7 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         break;
     case MESSAGE_GAME_END_COUNTDOWN:
         m_nGameExit = 5;
-        swprintf(szTempMsg, GlobalText[380], m_nGameExit);
+        mu_swprintf(szTempMsg, GlobalText[380], m_nGameExit);
         lpszMsg = szTempMsg;
         eType = MWT_NON;
         break;
@@ -385,11 +385,11 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         lpszMsg = GlobalText[1654];
         break;
     case MESSAGE_DELETE_CHARACTER_WARNING:
-        swprintf(szTempMsg, GlobalText[1711], CHAR_DEL_LIMIT_LV);
+        mu_swprintf(szTempMsg, GlobalText[1711], CHAR_DEL_LIMIT_LV);
         lpszMsg = szTempMsg;
         break;
     case MESSAGE_DELETE_CHARACTER_CONFIRM:
-        swprintf(szTempMsg, GlobalText[1712], CharactersClient[SelectedHero].ID);
+        mu_swprintf(szTempMsg, GlobalText[1712], CharactersClient[SelectedHero].ID);
         lpszMsg = szTempMsg;
         eType = MWT_BTN_BOTH;
         break;

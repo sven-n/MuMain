@@ -461,23 +461,23 @@ BOOL ShowCheckBox(int num, int index, int message)
         {
             switch (TargetItem.Level)
             {
-            case 0:swprintf(Name, L"%ls", GlobalText[168]); break;
-            case 1:swprintf(Name, L"%ls", GlobalText[169]); break;
-            case 2:swprintf(Name, L"%ls", GlobalText[167]); break;
-            case 3:swprintf(Name, L"%ls", GlobalText[166]); break;
-            case 4:swprintf(Name, L"%ls", GlobalText[1900]); break;
+            case 0:mu_swprintf(Name, L"%ls", GlobalText[168]); break;
+            case 1:mu_swprintf(Name, L"%ls", GlobalText[169]); break;
+            case 2:mu_swprintf(Name, L"%ls", GlobalText[167]); break;
+            case 3:mu_swprintf(Name, L"%ls", GlobalText[166]); break;
+            case 4:mu_swprintf(Name, L"%ls", GlobalText[1900]); break;
             }
         }
 
         if (message == MESSAGE_USE_STATE2)
-            swprintf(g_lpszMessageBoxCustom[0], L"( %ls%ls )", Name, GlobalText[1901]);
+            mu_swprintf(g_lpszMessageBoxCustom[0], L"( %ls%ls )", Name, GlobalText[1901]);
         else
-            swprintf(g_lpszMessageBoxCustom[0], L"( %ls )", Name);
+            mu_swprintf(g_lpszMessageBoxCustom[0], L"( %ls )", Name);
 
         num++;
         for (int i = 1; i < num; ++i)
         {
-            swprintf(g_lpszMessageBoxCustom[i], GlobalText[index]);
+            mu_swprintf(g_lpszMessageBoxCustom[i], GlobalText[index]);
         }
         g_iNumLineMessageBoxCustom = num;
     }
@@ -485,11 +485,11 @@ BOOL ShowCheckBox(int num, int index, int message)
     {
         wchar_t szGold[256];
         ConvertGold(InputGold, szGold);
-        swprintf(g_lpszMessageBoxCustom[0], GlobalText[index], szGold);
+        mu_swprintf(g_lpszMessageBoxCustom[0], GlobalText[index], szGold);
 
         for (int i = 1; i < num; ++i)
         {
-            swprintf(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
+            mu_swprintf(g_lpszMessageBoxCustom[i], GlobalText[index + i]);
         }
         g_iNumLineMessageBoxCustom = num;
     }
@@ -509,8 +509,8 @@ BOOL ShowCheckBox(int num, int index, int message)
         g_iNumLineMessageBoxCustom = 0;
         if (COMGEM::isComMode())
         {
-            if (COMGEM::m_cGemType == 0) swprintf(tBuf, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
-            else swprintf(tBuf, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+            if (COMGEM::m_cGemType == 0) mu_swprintf(tBuf, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+            else mu_swprintf(tBuf, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
 
             g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
                 tLines[g_iNumLineMessageBoxCustom], 2, 30);
@@ -518,14 +518,14 @@ BOOL ShowCheckBox(int num, int index, int message)
             for (int t = 0; t < 2; ++t)
                 wcscpy(g_lpszMessageBoxCustom[t], tLines[t]);
 
-            swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1810], COMGEM::m_iValue);
+            mu_swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1810], COMGEM::m_iValue);
             ++g_iNumLineMessageBoxCustom;
         }
         else
         {
             int t_GemLevel = COMGEM::GetUnMixGemLevel() + 1;
-            if (COMGEM::m_cGemType == 0) swprintf(tBuf, GlobalText[1813], GlobalText[1806], t_GemLevel);
-            else swprintf(tBuf, GlobalText[1813], GlobalText[1807], t_GemLevel);
+            if (COMGEM::m_cGemType == 0) mu_swprintf(tBuf, GlobalText[1813], GlobalText[1806], t_GemLevel);
+            else mu_swprintf(tBuf, GlobalText[1813], GlobalText[1807], t_GemLevel);
 
             g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
                 tLines[g_iNumLineMessageBoxCustom], 2, 30);
@@ -533,14 +533,14 @@ BOOL ShowCheckBox(int num, int index, int message)
             for (int t = 0; t < 2; ++t)
                 wcscpy(g_lpszMessageBoxCustom[t], tLines[t]);
 
-            swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1814], COMGEM::m_iValue);
+            mu_swprintf(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], GlobalText[1814], COMGEM::m_iValue);
             ++g_iNumLineMessageBoxCustom;
         }
     }
     else if (message == MESSAGE_CANCEL_SKILL)
     {
         wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-        swprintf(tBuf, L"%ls%ls", SkillAttribute[index].Name, GlobalText[2046]);
+        mu_swprintf(tBuf, L"%ls%ls", SkillAttribute[index].Name, GlobalText[2046]);
         g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
         g_iCancelSkillTarget = index;
     }
@@ -1184,7 +1184,7 @@ bool NewRenderLogInScene(HDC hDC)
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335, 480 - Size.cy * 640 / WindowWidth - 1, Text);
 
-    swprintf(Text, GlobalText[456], m_ExeVersion);
+    mu_swprintf(Text, GlobalText[456], m_ExeVersion);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(0, 480 - Size.cy * 640 / WindowWidth - 1, Text);
@@ -2014,10 +2014,10 @@ void UpdateSceneState()
     {
         SYSTEMTIME st;
         GetLocalTime(&st);
-        swprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-        swprintf(screenshotText, GlobalText[459], GrabFileName);
+        mu_swprintf(GrabFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
+        mu_swprintf(screenshotText, GlobalText[459], GrabFileName);
         wchar_t lpszTemp[64];
-        swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+        mu_swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
         wcscat(screenshotText, lpszTemp);
         if (addTimeStampToCapture)
         {
@@ -2138,11 +2138,11 @@ void MainScene(HDC hDC)
 #if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
         BeginBitmap();
         wchar_t szDebugText[128];
-        swprintf(szDebugText, L"FPS: %.1f Vsync: %d CPU: %.1f%%", FPS_AVG, IsVSyncEnabled(), CPU_AVG);
+        mu_swprintf(szDebugText, L"FPS: %.1f Vsync: %d CPU: %.1f%%", FPS_AVG, IsVSyncEnabled(), CPU_AVG);
         wchar_t szMousePos[128];
-        swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
+        mu_swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
         wchar_t szCamera3D[128];
-        swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+        mu_swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
         g_pRenderText->SetFont(g_hFontBold);
         g_pRenderText->SetBgColor(0, 0, 0, 100);
         g_pRenderText->SetTextColor(255, 255, 255, 200);

@@ -103,7 +103,7 @@ bool CNewUIChaosCastleTime::Render()
 
     if (m_iMaxKillMonster != MAX_KILL_MONSTER)
     {
-        swprintf(szText, GlobalText[1161], m_iKilledMonster, m_iMaxKillMonster);
+        mu_swprintf(szText, GlobalText[1161], m_iKilledMonster, m_iMaxKillMonster);
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, szText, CHAOSCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
     }
 
@@ -153,7 +153,7 @@ void CNewUIChaosCastleTime::SetTime(int iTime)
     m_iTime = iTime;
 
     int iMinute = m_iTime / 60;
-    swprintf(m_szTime, L" %.2d:%.2d:%.2d", iMinute, m_iTime % 60, (int)WorldTime % 60);
+    mu_swprintf(m_szTime, L" %.2d:%.2d:%.2d", iMinute, m_iTime % 60, (int)WorldTime % 60);
 
     if (iMinute < 5)
     {

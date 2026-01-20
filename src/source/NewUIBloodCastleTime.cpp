@@ -112,11 +112,11 @@ bool CNewUIBloodCastle::Render()
     {
         if (g_csMatchInfo->GetMatchType() == 5)
         {
-            swprintf(szText, GlobalText[866], m_iKilledMonster, m_iMaxKillMonster);
+            mu_swprintf(szText, GlobalText[866], m_iKilledMonster, m_iMaxKillMonster);
         }
         else
         {
-            swprintf(szText, GlobalText[864], m_iKilledMonster, m_iMaxKillMonster);
+            mu_swprintf(szText, GlobalText[864], m_iKilledMonster, m_iMaxKillMonster);
         }
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, szText, BLOODCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
     }
@@ -167,7 +167,7 @@ void CNewUIBloodCastle::SetTime(int iTime)
     m_iTime = iTime;
 
     int iMinute = m_iTime / 60;
-    swprintf(m_szTime, L" %.2d:%.2d:%.2d", iMinute, m_iTime % 60, (int)WorldTime % 60);
+    mu_swprintf(m_szTime, L" %.2d:%.2d:%.2d", iMinute, m_iTime % 60, (int)WorldTime % 60);
 
     if (iMinute < 5)
     {

@@ -218,7 +218,7 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
     if (!file)
     {
         wchar_t text[256];
-        swprintf_s(text, std::size(text), L"%ls - File not exist.", filename);
+        mu_swprintf_s(text, std::size(text), L"%ls - File not exist.", filename);
         return false;
     }
 
@@ -554,7 +554,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
     {
         wchar_t answerText[64] {};
         CMultiLanguage::ConvertFromUtf8(answerText, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
-        swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", i + 1, answerText);
+        mu_swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)
         {
@@ -567,7 +567,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     if (0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
     {
-        swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", iTextSize + 1, GlobalText[609]);
+        mu_swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", iTextSize + 1, GlobalText[609]);
         wcscpy_s(g_lpszDialogAnswer[0][0], MAX_LENGTH_CMB, lpszAnswer);
         g_iNumAnswer = 1;
     }
@@ -750,13 +750,13 @@ void CSQuest::RenderBloodCastle(void)
 
     g_pRenderText->SetTextColor(223, 191, 103, 255);
     g_pRenderText->SetBgColor(0);
-    swprintf_s(Text, std::size(Text), GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
+    mu_swprintf_s(Text, std::size(Text), GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 80, Text, 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->SetTextColor(255, 230, 210, 255);
     g_pRenderText->RenderText(m_iStartX + 85, m_iStartY + 100, GlobalText[877], 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->RenderText(m_iStartX + 105, m_iStartY + 120, GlobalText[878], 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetFont(g_hFontBig);
-    swprintf_s(Text, std::size(Text), GlobalText[868], m_byEventCount[m_byQuestType]);
+    mu_swprintf_s(Text, std::size(Text), GlobalText[868], m_byEventCount[m_byQuestType]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 65 + 60 * 4, Text, 0, 0, RT3_WRITE_CENTER);
 }

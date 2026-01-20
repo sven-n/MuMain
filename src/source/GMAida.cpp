@@ -981,7 +981,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         for (int i = 0; i < 6; i++)
         {
             wchar_t Bone_Name[256];
-            swprintf(Bone_Name, L"Monster104_Horn%d", i);
+            mu_swprintf(Bone_Name, L"Monster104_Horn%d", i);
             Random_Light = (float)(rand() % 10) / 100.0f + 0.8f;
             Vector(0.4f, Random_Light, 0.5f, Light);
             BoneManager::GetBonePosition(pObject, Bone_Name, Position);

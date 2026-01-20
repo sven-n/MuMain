@@ -104,7 +104,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(wchar_t* path)
 
     if (fp == nullptr)
     {
-        swprintf(Text, L"%ls - File not exist.", path);
+        mu_swprintf(Text, L"%ls - File not exist.", path);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -125,7 +125,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(wchar_t* path)
 
     if (dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
     {
-        swprintf(Text, L"%ls - File corrupted.", path);
+        mu_swprintf(Text, L"%ls - File corrupted.", path);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -160,7 +160,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(wchar_t* path)
     if (fp == nullptr)
     {
         wchar_t Text[256];
-        swprintf(Text, L"%ls - File not exist.", path);
+        mu_swprintf(Text, L"%ls - File not exist.", path);
         g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
@@ -395,7 +395,7 @@ int SEASON3B::CNewUIMasterLevel::SetDivideString(wchar_t* text, int isItemTollTi
             }
         }
 
-        swprintf(TextList[TextNum], cText.c_str());
+        mu_swprintf(TextList[TextNum], cText.c_str());
 
         TextNum++;
     }
@@ -517,7 +517,7 @@ void SEASON3B::CNewUIMasterLevel::RenderText() const
         TextList[0][0] = 0;
         TextBold[0] = 0;
         TextListColor[0] = 0;
-        swprintf(TextList[0], L"%I64d / %I64d", Master_Level_Data.lMasterLevel_Experince, Master_Level_Data.lNext_MasterLevel_Experince);
+        mu_swprintf(TextList[0], L"%I64d / %I64d", Master_Level_Data.lMasterLevel_Experince, Master_Level_Data.lNext_MasterLevel_Experince);
         RenderTipTextList(466, 26, 1, 0, 3, 0, 1);
     }
 
@@ -527,11 +527,11 @@ void SEASON3B::CNewUIMasterLevel::RenderText() const
 
     wchar_t Buffer[256] = {};
 
-    swprintf(Buffer, GlobalText[1746], Master_Level_Data.nMLevel);
+    mu_swprintf(Buffer, GlobalText[1746], Master_Level_Data.nMLevel);
 
     g_pRenderText->RenderText(275, 11, Buffer, 0, 0, 1, 0);
 
-    swprintf(Buffer, GlobalText[1747], Master_Level_Data.nMLevelUpMPoint);
+    mu_swprintf(Buffer, GlobalText[1747], Master_Level_Data.nMLevelUpMPoint);
 
     g_pRenderText->RenderText(372, 11, Buffer, 0, 0, 1, 0);
 
@@ -568,7 +568,7 @@ void SEASON3B::CNewUIMasterLevel::RenderText() const
         // 현재 획득한 경험치
         const double fExp = (double)Master_Level_Data.lMasterLevel_Experince - (double)iBaseExperience;
 
-        swprintf(Buffer, GlobalText[3335], fExp / fNeedExp * 100.0);
+        mu_swprintf(Buffer, GlobalText[3335], fExp / fNeedExp * 100.0);
 
         g_pRenderText->RenderText(466, 11, Buffer, 0, 0, 1, 0);
     }
@@ -577,15 +577,15 @@ void SEASON3B::CNewUIMasterLevel::RenderText() const
 
     g_pRenderText->SetTextColor(255, 155, 0, 0xFFu);
 
-    swprintf(Buffer, GlobalText[this->CategoryTextIndex], this->CategoryPoint[0]);
+    mu_swprintf(Buffer, GlobalText[this->CategoryTextIndex], this->CategoryPoint[0]);
 
     g_pRenderText->RenderText(92, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
 
-    swprintf(Buffer, GlobalText[this->CategoryTextIndex + 1], this->CategoryPoint[1]);
+    mu_swprintf(Buffer, GlobalText[this->CategoryTextIndex + 1], this->CategoryPoint[1]);
 
     g_pRenderText->RenderText(302, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
 
-    swprintf(Buffer, GlobalText[this->CategoryTextIndex + 2], this->CategoryPoint[2]);
+    mu_swprintf(Buffer, GlobalText[this->CategoryTextIndex + 2], this->CategoryPoint[2]);
 
     g_pRenderText->RenderText(513, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
 }
@@ -707,13 +707,13 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
         int lineCount = 0;
 
-        swprintf(TextList[lineCount], L"%ls", p->Name);
+        mu_swprintf(TextList[lineCount], L"%ls", p->Name);
 
         TextBold[lineCount] = true;
 
         lineCount++;
 
-        swprintf(TextList[lineCount], mtit->second.Info1, p->SkillRank, skillLevel, it->second.MaxLevel);
+        mu_swprintf(TextList[lineCount], mtit->second.Info1, p->SkillRank, skillLevel, it->second.MaxLevel);
 
         lineCount++;
 
@@ -721,37 +721,37 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
         if (it->second.DefValue == -1.0f)
         {
-            swprintf(buffer, mtit->second.Info2);
+            mu_swprintf(buffer, mtit->second.Info2);
         }
         else
         {
-            swprintf(buffer, mtit->second.Info2, skillLevel != 0 ? skillValue : it->second.DefValue);
+            mu_swprintf(buffer, mtit->second.Info2, skillLevel != 0 ? skillValue : it->second.DefValue);
         }
 
         lineCount = this->SetDivideString(buffer, 0, lineCount, 0, 0, true);
 
         if (skillLevel != 0 && skillLevel < it->second.MaxLevel)
         {
-            swprintf(buffer, GlobalText[3328]);
+            mu_swprintf(buffer, GlobalText[3328]);
 
             lineCount = this->SetDivideString(buffer, 0, lineCount, 4, 0, true);
 
             TextBold[lineCount] = 1;
 
-            swprintf(buffer, mtit->second.Info2, skillNextValue);
+            mu_swprintf(buffer, mtit->second.Info2, skillNextValue);
 
             lineCount = this->SetDivideString(buffer, 0, lineCount, 0, 0, true);
         }
 
         if (skillLevel < it->second.MaxLevel)
         {
-            swprintf(buffer, GlobalText[3329]);
+            mu_swprintf(buffer, GlobalText[3329]);
 
             lineCount = this->SetDivideString(buffer, 0, lineCount, 1, 0, true);
 
             TextBold[lineCount] = 1;
 
-            swprintf(buffer, mtit->second.Info3, it->second.RequiredPoints);
+            mu_swprintf(buffer, mtit->second.Info3, it->second.RequiredPoints);
 
             if (it->second.RequiredPoints <= Master_Level_Data.nMLevelUpMPoint)
             {
@@ -765,7 +765,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
         int iTextColor = this->CheckBeforeSkill(Skill, skillLevel) == true ? 0 : 2;
 
-        swprintf(buffer, mtit->second.Info4);
+        mu_swprintf(buffer, mtit->second.Info4);
 
         lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
 
@@ -773,7 +773,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
         {
             iTextColor = this->CheckRankPoint(group, p->SkillRank, skillLevel) == true ? 0 : 2;
 
-            swprintf(buffer, mtit->second.Info5);
+            mu_swprintf(buffer, mtit->second.Info5);
 
             lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
 
@@ -785,7 +785,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
                 {
                     auto requiredSkill = CharacterAttribute->MasterSkillInfo[RequireSkill];
                     iTextColor = requiredSkill.GetSkillValue() < 10 ? 2 : 0;
-                    swprintf(buffer, i == 0 ? mtit->second.Info6 : mtit->second.Info7);
+                    mu_swprintf(buffer, i == 0 ? mtit->second.Info6 : mtit->second.Info7);
                     lineCount = this->SetDivideString(buffer, 0, lineCount, iTextColor, 0, true);
                 }
             }
@@ -945,7 +945,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MAS
 
     wchar_t Buffer[358] = {};
 
-    swprintf(Buffer, GlobalText[3326], skillData.RequiredPoints - mLevelUpPoint);
+    mu_swprintf(Buffer, GlobalText[3326], skillData.RequiredPoints - mLevelUpPoint);
 
     SEASON3B::CreateOkMessageBox(Buffer);
 

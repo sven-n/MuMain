@@ -322,7 +322,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
     switch (m_eType)
     {
     case eLuckyItemType_Trade:
-        swprintf(m_szSubject, L"%ls", GlobalText[3288]);
+        mu_swprintf(m_szSubject, L"%ls", GlobalText[3288]);
         AddText(3291, 0xFF0000FF, RT3_SORT_LEFT), AddText(0), AddText(0), AddText(3292), AddText(3293), AddText(3294);
         AddText(0), AddText(0);
         AddText(2223, 0xFF00FFFF);
@@ -331,7 +331,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
         m_BtnMix.ChangeToolTipText(GlobalText[591], true); // 조합
         break;
     case eLuckyItemType_Refinery:
-        swprintf(m_szSubject, L"%ls", GlobalText[3289]);
+        mu_swprintf(m_szSubject, L"%ls", GlobalText[3289]);
         AddText(2346, 0xFF0000FF, RT3_SORT_LEFT), AddText(0), AddText(0);
         AddText(3300), AddText(3301);
         AddText(0), AddText(0), AddText(0);

@@ -140,22 +140,22 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
     DWORD dwWritten = 0;
     wchar_t szLine[256] = { 0, };
     int offset = 0;
-    offset += swprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
+    offset += mu_swprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
     for (int i = 0; i < iSize; i++) {
-        offset += swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
+        offset += mu_swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
         if (i > 0 && i < iSize - 1) {
             if (i % 16 == 15) {	//. new line
-                offset += swprintf(szLine + offset, L"\r\n");
+                offset += mu_swprintf(szLine + offset, L"\r\n");
                 WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
                 offset = 0;
-                offset += swprintf(szLine + offset, L"           : ");
+                offset += mu_swprintf(szLine + offset, L"           : ");
             }
             else if (i % 4 == 3) { //. space
-                offset += swprintf(szLine + offset, L" ");
+                offset += mu_swprintf(szLine + offset, L" ");
             }
         }
     }
-    offset += swprintf(szLine + offset, L"\r\n");
+    offset += mu_swprintf(szLine + offset, L"\r\n");
     WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
 }
 
@@ -297,7 +297,7 @@ void GetOSVersion(ER_SystemInfo* si)
     GetVersionEx(&osiOne);
 
     int iBuildNumberType = 0;
-    swprintf(si->m_lpszOS, L"%ls %d.%d ", lpszUnknown, osiOne.dwMajorVersion, osiOne.dwMinorVersion);
+    mu_swprintf(si->m_lpszOS, L"%ls %d.%d ", lpszUnknown, osiOne.dwMajorVersion, osiOne.dwMinorVersion);
 
     switch (osiOne.dwMajorVersion)
     {
@@ -385,14 +385,14 @@ void GetOSVersion(ER_SystemInfo* si)
     switch (iBuildNumberType)
     {
     case 0:
-        swprintf(lpszTemp, L"Build %d ", osiOne.dwBuildNumber);
+        mu_swprintf(lpszTemp, L"Build %d ", osiOne.dwBuildNumber);
         break;
     case 1:
-        swprintf(lpszTemp, L"Build %d.%d.%d ", HIBYTE(HIWORD(osiOne.dwBuildNumber)), LOBYTE(HIWORD(osiOne.dwBuildNumber)), LOWORD(osiOne.dwBuildNumber));
+        mu_swprintf(lpszTemp, L"Build %d.%d.%d ", HIBYTE(HIWORD(osiOne.dwBuildNumber)), LOBYTE(HIWORD(osiOne.dwBuildNumber)), LOWORD(osiOne.dwBuildNumber));
         break;
     }
     wcscat(si->m_lpszOS, lpszTemp);
-    swprintf(lpszTemp, L"(%ls)", osiOne.szCSDVersion);
+    mu_swprintf(lpszTemp, L"(%ls)", osiOne.szCSDVersion);
     wcscat(si->m_lpszOS, lpszTemp);
 }
 
@@ -688,5 +688,5 @@ void GetSystemInfo(ER_SystemInfo* si)
 
     // DX
     DWORD dwDX = GetDXVersion();
-    swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
+    mu_swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
 }

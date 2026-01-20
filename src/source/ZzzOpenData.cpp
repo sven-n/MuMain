@@ -84,9 +84,9 @@ void OpenModels(int Model, wchar_t* FileName, int i)
 {
     wchar_t Name[64];
     if (i < 10)
-        swprintf(Name, L"%ls0%d.smd", FileName, i);
+        mu_swprintf(Name, L"%ls0%d.smd", FileName, i);
     else
-        swprintf(Name, L"%ls%d.smd", FileName, i);
+        mu_swprintf(Name, L"%ls%d.smd", FileName, i);
     OpenSMDModel(Model, Name);
     OpenSMDAnimation(Model, Name);
 }
@@ -542,19 +542,19 @@ void OpenPlayerTextures()
         gLoadData.OpenTexture(MODEL_MISTERY_GLOVES + i, L"Player\\");
         gLoadData.OpenTexture(MODEL_MISTERY_BOOTS + i, L"Player\\");
 
-        ::swprintf(szFileName, L"Player\\InvenArmorMale%d.tga", 40 + i);
+        ::mu_swprintf(szFileName, L"Player\\InvenArmorMale%d.tga", 40 + i);
         ::LoadBitmap(szFileName, BITMAP_INVEN_ARMOR + i);
-        ::swprintf(szFileName, L"Player\\InvenPantsMale%d.tga", 40 + i);
+        ::mu_swprintf(szFileName, L"Player\\InvenPantsMale%d.tga", 40 + i);
         ::LoadBitmap(szFileName, BITMAP_INVEN_PANTS + i);
     }
 
-    ::swprintf(szFileName, L"Player\\Item312_Armoritem.tga");
+    ::mu_swprintf(szFileName, L"Player\\Item312_Armoritem.tga");
     ::LoadBitmap(szFileName, BITMAP_SKIN_ARMOR_DEVINE);
-    ::swprintf(szFileName, L"Player\\Item312_Pantitem.tga");
+    ::mu_swprintf(szFileName, L"Player\\Item312_Pantitem.tga");
     ::LoadBitmap(szFileName, BITMAP_SKIN_PANTS_DEVINE);
-    ::swprintf(szFileName, L"Player\\SkinClass706_upperitem.tga");
+    ::mu_swprintf(szFileName, L"Player\\SkinClass706_upperitem.tga");
     ::LoadBitmap(szFileName, BITMAP_SKIN_ARMOR_SUCCUBUS);
-    ::swprintf(szFileName, L"Player\\SkinClass706_loweritem.tga");
+    ::mu_swprintf(szFileName, L"Player\\SkinClass706_loweritem.tga");
     ::LoadBitmap(szFileName, BITMAP_SKIN_PANTS_SUCCUBUS);
 
     for (int i = 0; i < MODEL_ITEM_COMMON_NUM; ++i)
@@ -759,7 +759,7 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_POTION + 77, L"Data\\Item\\partCharge2\\", L"elitescroll_mana");
 
     wchar_t	szPC6Path[24];
-    swprintf(szPC6Path, L"Data\\Item\\partCharge6\\");
+    mu_swprintf(szPC6Path, L"Data\\Item\\partCharge6\\");
 
     gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_KNIGHT_1_CHARM, szPC6Path, L"amulet_satan");
     gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_MAGICIAN_1_CHARM, szPC6Path, L"amulet_sky");
@@ -1228,7 +1228,7 @@ void OpenItems()
 
     for (int i = 0; i < 11; i++)
     {
-        swprintf(szLuckySetPathName, L"%ls%d\\", szLuckySetPath, nIndex);
+        mu_swprintf(szLuckySetPathName, L"%ls%d\\", szLuckySetPath, nIndex);
         if (nIndex != 71)	gLoadData.AccessModel(MODEL_HELM + nIndex, szLuckySetPathName, szLuckySetFileName[0], i + 1);
         gLoadData.AccessModel(MODEL_ARMOR + nIndex, szLuckySetPathName, szLuckySetFileName[1], i + 1);
         gLoadData.AccessModel(MODEL_PANTS + nIndex, szLuckySetPathName, szLuckySetFileName[2], i + 1);
@@ -1773,7 +1773,7 @@ void OpenItemTextures()
 
     for (int i = 0; i < 11; i++)
     {
-        swprintf(szLuckySetPathName, L"%ls%d\\", szLuckySetPath, nIndex);
+        mu_swprintf(szLuckySetPathName, L"%ls%d\\", szLuckySetPath, nIndex);
         if (nIndex != 71)	gLoadData.OpenTexture(MODEL_HELM + nIndex, szLuckySetPathName);
         gLoadData.OpenTexture(MODEL_ARMOR + nIndex, szLuckySetPathName);
         gLoadData.OpenTexture(MODEL_PANTS + nIndex, szLuckySetPathName);
@@ -1785,13 +1785,13 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_POTION + 160, L"Item\\LuckyItem\\");
     gLoadData.OpenTexture(MODEL_POTION + 161, L"Item\\LuckyItem\\");
 
-    swprintf(szLuckySetPathName, L"Player\\LuckyItem\\65\\InvenArmorMale40_luck.tga");
+    mu_swprintf(szLuckySetPathName, L"Player\\LuckyItem\\65\\InvenArmorMale40_luck.tga");
     LoadBitmap(szLuckySetPathName, BITMAP_INVEN_ARMOR + 6);
-    swprintf(szLuckySetPathName, L"Player\\LuckyItem\\65\\InvenPantsMale40_luck.tga");
+    mu_swprintf(szLuckySetPathName, L"Player\\LuckyItem\\65\\InvenPantsMale40_luck.tga");
     LoadBitmap(szLuckySetPathName, BITMAP_INVEN_PANTS + 6);
-    swprintf(szLuckySetPathName, L"Player\\LuckyItem\\70\\InvenArmorMale41_luck.tga");
+    mu_swprintf(szLuckySetPathName, L"Player\\LuckyItem\\70\\InvenArmorMale41_luck.tga");
     LoadBitmap(szLuckySetPathName, BITMAP_INVEN_ARMOR + 7);
-    swprintf(szLuckySetPathName, L"Player\\LuckyItem\\70\\InvenPantsMale41_luck.tga");
+    mu_swprintf(szLuckySetPathName, L"Player\\LuckyItem\\70\\InvenPantsMale41_luck.tga");
     LoadBitmap(szLuckySetPathName, BITMAP_INVEN_PANTS + 7);
 
 }
@@ -4451,17 +4451,17 @@ void SaveWorld(int World)
 {
     wchar_t WorldName[32];
     wchar_t FileName[64];
-    swprintf(WorldName, L"World%d", World);
+    mu_swprintf(WorldName, L"World%d", World);
 
-    swprintf(FileName, L"Data2\\%ls\\TerrainLight.jpg", WorldName);
+    mu_swprintf(FileName, L"Data2\\%ls\\TerrainLight.jpg", WorldName);
     SaveTerrainLight(FileName);
-    swprintf(FileName, L"Data2\\%ls\\TerrainHeight.bmp", WorldName);
+    mu_swprintf(FileName, L"Data2\\%ls\\TerrainHeight.bmp", WorldName);
     SaveTerrainHeight(FileName);
-    swprintf(FileName, L"Data\\%ls\\Terrain.map", WorldName);
+    mu_swprintf(FileName, L"Data\\%ls\\Terrain.map", WorldName);
     SaveTerrainMapping(FileName, World);
-    swprintf(FileName, L"Data\\%ls\\Terrain.att", WorldName);
+    mu_swprintf(FileName, L"Data\\%ls\\Terrain.att", WorldName);
     SaveTerrainAttribute(FileName, World);
-    swprintf(FileName, L"Data\\%ls\\Terrain.obj", WorldName);
+    mu_swprintf(FileName, L"Data\\%ls\\Terrain.obj", WorldName);
     SaveObjects(FileName, World);
 }
 
@@ -5363,25 +5363,25 @@ void OpenBasicData(HDC hDC)
 
     g_ServerListManager->LoadServerListScript();
 
-    swprintf(Text, L"Data\\Local\\%ls\\Dialog_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    mu_swprintf(Text, L"Data\\Local\\%ls\\Dialog_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     OpenDialogFile(Text);
 
-    swprintf(Text, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    mu_swprintf(Text, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     OpenItemScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    mu_swprintf(Text, L"Data\\Local\\%ls\\movereq_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%ls\\NpcName_%ls.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    mu_swprintf(Text, L"Data\\Local\\%ls\\NpcName_%ls.txt", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     OpenMonsterScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    mu_swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_csQuest.OpenQuestScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    mu_swprintf(Text, L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     OpenSkillScript(Text);
 
-    swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    mu_swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SocketItemMgr.OpenSocketItemScript(Text);
 
     OpenTextData();		//. Text.bmd, Testtest.bmd
@@ -5427,7 +5427,7 @@ void OpenTextData()
 {
     wchar_t Text[100];
 
-    swprintf(Text, L"Data\\Local\\%ls\\Text_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+    mu_swprintf(Text, L"Data\\Local\\%ls\\Text_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     GlobalText.Load(Text, CGlobalText::LD_USA_CANADA_TEXTS | CGlobalText::LD_FOREIGN_TEXTS);
     OpenMacro(L"Data\\Macro.txt");
 }

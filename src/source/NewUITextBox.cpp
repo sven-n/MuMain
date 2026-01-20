@@ -124,7 +124,7 @@ void CNewUITextBox::AddText(wchar_t* strText)
 void CNewUITextBox::AddText(const wchar_t* strText)
 {
     wchar_t strTempText[iMAX_TEXT_LINE] = { 0, };
-    swprintf(strTempText, strText);
+    mu_swprintf(strTempText, strText);
 
     AddText(strTempText);
 }

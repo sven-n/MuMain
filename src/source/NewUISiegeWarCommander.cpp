@@ -173,7 +173,7 @@ void SEASON3B::CNewUISiegeWarCommander::InitCmdGroupBtn()
         iVal = i * MINIMAP_BTN_GROUP_HEIGHT;
         m_BtnCommandGroup[i].ChangeButtonImgState(true, IMAGE_MINIMAP_BTN_GROUP, true);
         m_BtnCommandGroup[i].ChangeButtonInfo(m_BtnCommandGroupPos.x, m_BtnCommandGroupPos.y + iVal, MINIMAP_BTN_GROUP_WIDTH, MINIMAP_BTN_GROUP_HEIGHT);
-        swprintf(sztext, L"%d", i + 1);
+        mu_swprintf(sztext, L"%d", i + 1);
         m_BtnCommandGroup[i].ChangeText(sztext);
     }
 }
@@ -266,7 +266,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
     case 2: iWidth = COMMAND_WAIT_WIDTH; iHeight = COMMAND_WAIT_HEIGHT; break;
     }
 
-    swprintf(szText, L"%d", m_iCurSelectBtnGroup + 1);
+    mu_swprintf(szText, L"%d", m_iCurSelectBtnGroup + 1);
     g_pRenderText->RenderText(MouseX - 13, MouseY - 6, szText);
     RenderImage(IMAGE_COMMAND_ATTACK + m_iCurSelectBtnCommand, MouseX - 8, MouseY - 8, iWidth, iHeight);
 }
