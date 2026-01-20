@@ -24,6 +24,7 @@
 #include <thread>
 
 #include "Camera/CameraUtility.h"
+#include "Scenes/SceneManager.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
@@ -117,13 +118,6 @@ extern int  GrabScreen;
 
 void MoveCharacter(CHARACTER* c, OBJECT* o);
 
-double target_fps = 60;
-double ms_per_frame = 1000.0 / target_fps;
-
-double last_render_tick_count = 0;
-double current_tick_count = 0;
-double last_water_change = 0;
-
 float g_Luminosity;
 
 extern int g_iNoMouseTime;
@@ -132,8 +126,8 @@ extern GLvoid KillGLWindow(GLvoid);
 void WaitForNextActivity(bool usePreciseSleep)
 {
     // We only sleep when we have enough time to sleep and have some additional rest time.
-    const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
-    const auto current_ms_per_frame = ms_per_frame;
+    const auto current_frame_time_ms = g_frameTiming.GetCurrentFrameTime();
+    const auto current_ms_per_frame = g_frameTiming.GetMsPerFrame();
     if (current_ms_per_frame > 0 && current_frame_time_ms > 0 && current_frame_time_ms < current_ms_per_frame)
     {
         const auto sleep_threshold_ms = usePreciseSleep? 4.0 : 16.0;
@@ -159,13 +153,6 @@ void WaitForNextActivity(bool usePreciseSleep)
 
 bool CheckRenderNextFrame()
 {
-    current_tick_count = g_pTimer->GetTimeElapsed();
-    const auto current_frame_time_ms = current_tick_count - last_render_tick_count;
-
-    if (current_frame_time_ms >= ms_per_frame)
-    {
-        return true;
-    }
-
-    return false;
+    g_frameTiming.UpdateCurrentTime(g_pTimer->GetTimeElapsed());
+    return g_frameTiming.ShouldRenderNextFrame();
 }

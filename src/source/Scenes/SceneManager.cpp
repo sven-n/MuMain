@@ -5,6 +5,17 @@
 #include "stdafx.h"
 #include <vector>
 #include "SceneManager.h"
+
+//=============================================================================
+// Frame Timing State Implementation
+//=============================================================================
+
+// Global instance
+FrameTimingState g_frameTiming;
+
+//=============================================================================
+// Scene Manager Implementation
+//=============================================================================
 #include "SceneCommon.h"
 #include "WebzenScene.h"
 #include "LoginScene.h"
@@ -32,11 +43,6 @@ extern int GrabScreen;
 extern int WaterTextureNumber;
 extern float g_Luminosity;
 extern int g_iNoMouseTime;
-extern double target_fps;
-extern double ms_per_frame;
-extern double last_render_tick_count;
-extern double current_tick_count;
-extern double last_water_change;
 extern CPhysicsManager g_PhysicsManager;
 extern EGameScene SceneFlag;
 extern CTimer* g_pTimer;
@@ -55,13 +61,12 @@ void SetTargetFps(double targetFps)
         targetFps = -1;
     }
 
-    target_fps = targetFps;
-    ms_per_frame = 1000.0 / target_fps;
+    g_frameTiming.SetTargetFps(targetFps);
 }
 
 double GetTargetFps()
 {
-    return target_fps;
+    return g_frameTiming.GetTargetFps();
 }
 
 void UpdateSceneState()
@@ -142,13 +147,13 @@ void MainScene(HDC hDC)
 
     constexpr int NumberOfWaterTextures = 32;
     const double timePerFrame = 1000 / REFERENCE_FPS;
-    auto time_since_last_render = current_tick_count - last_water_change;
+    auto time_since_last_render = g_frameTiming.currentTickCount - g_frameTiming.lastWaterChange;
     while (time_since_last_render > timePerFrame)
     {
         WaterTextureNumber++;
         WaterTextureNumber %= NumberOfWaterTextures;
         time_since_last_render -= timePerFrame;
-        last_water_change = current_tick_count;
+        g_frameTiming.lastWaterChange = g_frameTiming.currentTickCount;
     }
 
     if (Destroy) {
@@ -542,7 +547,7 @@ void RenderScene(HDC hDC)
     CalcFPS();
     UpdateSceneState();
 
-    last_render_tick_count = current_tick_count;
+    g_frameTiming.MarkFrameRendered();
 
     try
     {
