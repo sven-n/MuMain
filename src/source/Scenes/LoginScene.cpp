@@ -273,6 +273,7 @@ bool NewRenderLogInScene(HDC hDC)
     FogEnable = false;
 
     vec3_t pos;
+    VectorCopy(CameraPosition, pos);
     if (CCameraMove::GetInstancePtr()->IsCameraMove())
     {
         VectorCopy(CameraPosition, pos);
