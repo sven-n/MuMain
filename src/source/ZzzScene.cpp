@@ -128,51 +128,6 @@ extern BOOL g_bIMEBlock;
 int SelectedHero = -1;
 bool MoveMainCamera();
 
-void LoadingScene(HDC hDC)
-{
-    g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_Start");
-
-    CUIMng& rUIMng = CUIMng::Instance();
-    if (!InitLoading)
-    {
-        LoadingWorld = 9999999;
-
-        InitLoading = true;
-
-        LoadBitmap(L"Interface\\LSBg01.JPG", BITMAP_TITLE, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg02.JPG", BITMAP_TITLE + 1, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg03.JPG", BITMAP_TITLE + 2, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg04.JPG", BITMAP_TITLE + 3, GL_LINEAR);
-
-        ::StopMp3(MUSIC_LOGIN_THEME);
-
-        rUIMng.m_pLoadingScene = new CLoadingScene;
-        rUIMng.m_pLoadingScene->Create();
-    }
-
-    FogEnable = false;
-    ::BeginOpengl();
-    ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    ::BeginBitmap();
-
-    rUIMng.m_pLoadingScene->Render();
-
-    ::EndBitmap();
-    ::EndOpengl();
-    ::glFlush();
-    ::SwapBuffers(hDC);
-
-    SAFE_DELETE(rUIMng.m_pLoadingScene);
-
-    SceneFlag = MAIN_SCENE;
-    for (int i = 0; i < 4; ++i)
-        ::DeleteBitmap(BITMAP_TITLE + i);
-
-    ::ClearInput();
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_End");
-}
-
 // Legacy global variables (kept for backward compatibility)
 float CameraDistanceTarget = 1000.f;
 float CameraDistance = 1000.f;
