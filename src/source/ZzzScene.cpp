@@ -23,6 +23,8 @@
 #include <chrono>
 #include <thread>
 
+#include "Camera/CameraUtility.h"
+
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
@@ -171,10 +173,14 @@ void LoadingScene(HDC hDC)
     g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_End");
 }
 
+// Legacy global variables (kept for backward compatibility)
 float CameraDistanceTarget = 1000.f;
-float CameraDistance = CameraDistanceTarget;
-float	Camera3DFov = 0.f;
-bool	Camera3DRoll = false;
+float CameraDistance = 1000.f;
+float Camera3DFov = 0.f;
+bool Camera3DRoll = false;
+
+// Camera state structure instance (uses legacy variables via references)
+CameraState g_CameraState;
 
 extern int WaterTextureNumber;
 
