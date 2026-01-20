@@ -61,25 +61,27 @@ bool MoveMainCamera()
             Vector(0.f, 0.f, 0.f, p1);
             FLOAT Velocity = TERRAIN_SCALE * 1.25f * FPS_ANIMATION_FACTOR;
 
-            if (HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128)
+            struct KeyMapping {
+                int vKey;
+                float x;
+                float y;
+            };
+
+            const KeyMapping keyMappings[] = {
+                {VK_LEFT,  -Velocity, -Velocity},
+                {VK_RIGHT,  Velocity,  Velocity},
+                {VK_UP,    -Velocity,  Velocity},
+                {VK_DOWN,   Velocity, -Velocity}
+            };
+
+            for (const auto& mapping : keyMappings)
             {
-                Vector(-Velocity, -Velocity, 0.f, p1);
-                EditMove = true;
-            }
-            if (HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
-            {
-                Vector(Velocity, Velocity, 0.f, p1);
-                EditMove = true;
-            }
-            if (HIBYTE(GetAsyncKeyState(VK_UP)) == 128)
-            {
-                Vector(-Velocity, Velocity, 0.f, p1);
-                EditMove = true;
-            }
-            if (HIBYTE(GetAsyncKeyState(VK_DOWN)) == 128)
-            {
-                Vector(Velocity, -Velocity, 0.f, p1);
-                EditMove = true;
+                if (HIBYTE(GetAsyncKeyState(mapping.vKey)) == 128)
+                {
+                    Vector(mapping.x, mapping.y, 0.f, p1);
+                    EditMove = true;
+                    break;
+                }
             }
 
             glPushMatrix();
