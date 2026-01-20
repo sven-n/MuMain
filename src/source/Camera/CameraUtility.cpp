@@ -54,10 +54,7 @@ bool MoveMainCamera()
             if (HIBYTE(GetAsyncKeyState(VK_HOME)) == 128)
                 CameraAngle[2] = -45;
 
-            if (CameraAngle[2] < -360)
-                CameraAngle[2] += 360;
-            else if (CameraAngle[2] > 0)
-                CameraAngle[2] -= 360;
+            CameraAngle[2] = fmodf(CameraAngle[2] + 360.0f, 360.0f) - 360.0f;
 
 
             vec3_t p1, p2;
