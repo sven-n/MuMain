@@ -9,6 +9,8 @@ extern bool LockInputStatus;
 
 extern bool g_bAutoGetItem;
 
+extern bool g_bRenderGameCursor;
+
 extern bool InputEnable;
 extern bool TabInputEnable;
 extern bool GuildInputEnable;

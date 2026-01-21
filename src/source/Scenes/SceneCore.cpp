@@ -10,6 +10,8 @@
 
 #ifdef _EDITOR
 #include "../MuEditor/MuEditor.h"
+#include "../MuEditor/MuEditorConsole.h"
+#include "imgui.h"
 #endif
 
 #include "PhysicsManager.h"
