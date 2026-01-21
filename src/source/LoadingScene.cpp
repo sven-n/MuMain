@@ -13,6 +13,10 @@
 #include "ZzzInterface.h"
 #include "Scenes/SceneCommon.h"
 
+#ifdef _EDITOR
+#include "../MuEditor/MuEditor.h"
+#endif
+
 CLoadingScene::CLoadingScene()
 {
 }
@@ -91,6 +95,17 @@ void LoadingScene(HDC hDC)
     ::EndBitmap();
     ::EndOpengl();
     ::glFlush();
+#ifdef _EDITOR
+    // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
+    g_MuEditor.Render();
+
+    // Always render default cursor on top of ImGui
+    EnableAlphaTest();
+    glColor3f(1.f, 1.f, 1.f);
+    BeginBitmap();
+    RenderBitmap(BITMAP_CURSOR, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
+    EndBitmap();
+#endif
     ::SwapBuffers(hDC);
 
     SAFE_DELETE(rUIMng.m_pLoadingScene);

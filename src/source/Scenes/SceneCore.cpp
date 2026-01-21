@@ -8,6 +8,9 @@
 #include "ZzzTexture.h"
 #include "SceneCore.h"
 
+#ifdef _EDITOR
+#include "../MuEditor/MuEditor.h"
+#endif
 
 #include "PhysicsManager.h"
 

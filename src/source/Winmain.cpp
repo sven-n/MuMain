@@ -52,6 +52,15 @@
 
 #include "NewUISystem.h"
 
+#ifdef _EDITOR
+#include "../MuEditor/MuEditor.h"
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+
+// Forward declare ImGui WndProc handler
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
+
 CUIMercenaryInputBox* g_pMercenaryInputBox = nullptr;
 CUITextInputBox* g_pSingleTextInputBox = nullptr;
 CUITextInputBox* g_pSinglePasswdInputBox = nullptr;
@@ -451,6 +460,12 @@ extern bool EnableFastInput;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+#ifdef _EDITOR
+    // Always forward messages to ImGui (for "Open Editor" button when closed, or full UI when open)
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+        return true;
+#endif
+
     switch (msg)
     {
     case WM_SYSKEYDOWN:
@@ -859,6 +874,30 @@ MSG MainLoop()
         {
             if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
             {
+#ifdef _EDITOR
+                // F12 key toggle for editor
+                static bool wasF12Pressed = false;
+                if (GetAsyncKeyState(VK_F12) & 0x8000)
+                {
+                    if (!wasF12Pressed)
+                    {
+                        g_MuEditor.ToggleEditor();
+                        std::fwprintf(stderr, L"[Editor] Toggled: %s\n",
+                            g_MuEditor.IsEnabled() ? L"ON" : L"OFF");
+                        std::fflush(stderr);
+                        wasF12Pressed = true;
+                    }
+                }
+                else
+                {
+                    wasF12Pressed = false;
+                }
+
+                // Update editor UI (must be before RenderScene)
+                g_MuEditor.Update();
+#endif
+
+                // Render game scene (ImGui rendering happens inside before SwapBuffers)
                 RenderScene(g_hDC);
             }
         }
@@ -1226,6 +1265,19 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
+
+#ifdef _EDITOR
+    // Initialize MU Editor
+    g_MuEditor.Initialize(g_hWnd, g_hDC);
+
+    // Check for --editor command line flag
+    if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
+    {
+        g_MuEditor.SetEnabled(true);
+        std::fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");
+        std::fflush(stderr);
+    }
+#endif
 
     g_ErrorReport.WriteImeInfo( g_hWnd);
     g_ErrorReport.AddSeparator();
