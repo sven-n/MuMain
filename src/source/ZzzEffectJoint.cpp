@@ -4836,7 +4836,7 @@ void MoveJoint(JOINT* o, int iIndex)
                 }
                 else
                 {
-                    assert(!"디버깅");
+                    assert(!"Debuggen");
                 }
             }
             break;

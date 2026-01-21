@@ -13,7 +13,7 @@
 #include "ZzzOpenglUtil.h"
 #include "DSPlaySound.h"
 #include "ZzzAI.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "UIControls.h"
 
 #include "Local.h"

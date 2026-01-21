@@ -16,7 +16,7 @@
 #include "ZzzInventory.h"
 #include "ZzzOpenData.h"
 #include "ZzzEffect.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "ZzzPath.h"
 #include "DSPlaySound.h"
 
@@ -50,6 +50,8 @@
 #include "MUHelper/MuHelper.h"
 
 #include "ZzzInterface.h"
+
+#include "Scenes/SceneCommon.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern CUITextInputBox* g_pSinglePasswdInputBox;

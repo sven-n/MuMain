@@ -3,15 +3,17 @@
 #include "ZzzInfomation.h"
 #include "SpinLock.h"
 
+// Include refactored scene headers
+#ifdef USE_REFACTORED_SCENES
+#include "Scenes/SceneCommon.h"
+#include "Scenes/SceneManager.h"
+#include "Camera/CameraUtility.h"
+#endif
+
 extern EGameScene SceneFlag;
 
 extern int  ErrorMessage;
 extern bool InitServerList;
-extern bool InitLogIn;
-extern bool InitLoading;
-extern bool InitCharacterScene;
-extern bool InitMainScene;
-extern bool EnableMainRender;
 extern wchar_t* szServerIpAddress;
 extern unsigned short g_ServerPort;
 extern int g_iLengthAuthorityCode;

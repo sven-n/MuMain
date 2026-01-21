@@ -15,7 +15,7 @@
 #include "ZzzEffect.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzOpenData.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 
 #include "DSPlaySound.h"
 
@@ -60,6 +60,7 @@
 
 #include "GambleSystem.h"
 #include "QuestMng.h"
+#include "Scenes/SceneCommon.h"
 #ifdef PBG_ADD_SECRETBUFF
 #include "FatigueTimeSystem.h"
 #endif //PBG_ADD_SECRETBUFF
@@ -690,9 +691,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         CurrentProtocolState = REQUEST_CHARACTERS_LIST;
         SocketClient->ToGameServer()->SendRequestCharacterList(g_pMultiLanguage->GetLanguage());
 
-        InitCharacterScene = false;
-        InitMainScene = false;
-        EnableMainRender = false;
+        g_sceneInit.ResetForDisconnect();
         CurrentProtocolState = REQUEST_JOIN_SERVER;
         InitGame();
         break;
@@ -720,10 +719,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         ReleaseCharacterSceneData();
         SceneFlag = LOG_IN_SCENE;
 
-        InitLogIn = false;
-        InitCharacterScene = false;
-        InitMainScene = false;
-        EnableMainRender = false;
+        g_sceneInit.ResetForDisconnect();
         CurrentProtocolState = REQUEST_JOIN_SERVER;
 
         LogIn = 0;

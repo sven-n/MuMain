@@ -23,7 +23,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
 #include "ZzzEffect.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "DSPlaySound.h"
 #include "ZzzPath.h"
 #include "CharacterManager.h"

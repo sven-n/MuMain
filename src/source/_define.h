@@ -455,6 +455,7 @@ constexpr int ITEM_GROUP_ETC = 15;
 
 #define MAX_CHARACTERS_CLIENT  400
 #define MAX_CHARACTERS_SERVER  10
+#define MAX_CHARACTERS_PER_ACCOUNT 5
 
 #define MAX_PATH_FIND 15
 
@@ -521,7 +522,7 @@ constexpr int ITEM_GROUP_ETC = 15;
 #define MAX_MAGIC					64
 
 //----------------------------------------------------------------------------
-// ÀúÇ×·Â ¹øÈ£
+// ï¿½ï¿½ï¿½×·ï¿½ ï¿½ï¿½È£
 #define RESISTANCE_COLD				0
 #define RESISTANCE_POISON			1
 #define RESISTANCE_THUNDER			2

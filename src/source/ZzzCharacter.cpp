@@ -22,7 +22,7 @@
 #include "ZzzInventory.h"
 #include "ZzzEffect.h"
 #include "ZzzOpenData.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "DSPlaySound.h"
 
 #include "PhysicsManager.h"

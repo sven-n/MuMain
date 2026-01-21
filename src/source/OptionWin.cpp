@@ -11,7 +11,7 @@
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "DSPlaySound.h"
 #include "UIControls.h"
 #include "NewUISystem.h"

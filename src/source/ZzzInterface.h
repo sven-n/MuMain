@@ -43,7 +43,6 @@ extern int  SelectedItem;
 extern int  SelectedNpc;
 extern int  SelectedCharacter;
 extern int  SelectedOperate;
-extern int  SelectedHero;
 extern int  Attacking;
 
 extern int   g_iFollowCharacter;

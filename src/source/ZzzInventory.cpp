@@ -16,7 +16,7 @@
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 
 #include "./Utilities/Debouncer.h"
 #include "CSQuest.h"

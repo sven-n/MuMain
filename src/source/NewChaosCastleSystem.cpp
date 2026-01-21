@@ -11,7 +11,7 @@ using namespace SEASON3B;
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzLodTerrain.h"
-#include "ZzzScene.h"
+#include "Scenes/SceneCore.h"
 #include "NewUICustomMessageBox.h"
 #include "MapManager.h"
 #include "DSPlaySound.h"
