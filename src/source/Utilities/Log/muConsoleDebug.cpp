@@ -15,13 +15,21 @@
 #include "GlobalBitmap.h"
 #include "ZzzTexture.h"
 #include "Scenes/SceneCore.h"
+
+#ifdef _EDITOR
+#include "../MuEditor/MuEditorConsole.h"
+#endif
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 #include "ZzzPath.h"
 #endif // CSK_DEBUG_MAP_PATHFINDING
 
 CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 {
-#ifdef CSK_LH_DEBUG_CONSOLE
+#ifdef _EDITOR
+    // When editor is enabled, don't open the Windows console
+    // All output will go to ImGui console instead
+    m_bInit = true;
+#elif defined(CSK_LH_DEBUG_CONSOLE)
     if (leaf::OpenConsoleWindow(L"Mu Debug Console Window"))
     {
         leaf::ActivateCloseButton(false);
@@ -35,8 +43,10 @@ CmuConsoleDebug::CmuConsoleDebug() : m_bInit(false)
 
 CmuConsoleDebug::~CmuConsoleDebug()
 {
-#ifdef CSK_LH_DEBUG_CONSOLE
-    leaf::CloseConsoleWindow();
+#ifndef _EDITOR
+    #ifdef CSK_LH_DEBUG_CONSOLE
+        leaf::CloseConsoleWindow();
+    #endif
 #endif
 }
 
@@ -229,6 +239,13 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
         va_end(pArguments);
 
         std::wcout << szBuffer << std::endl;
+
+#ifdef _EDITOR
+        // Also log to ImGui console
+        char szUtf8Buffer[512];
+        WideCharToMultiByte(CP_UTF8, 0, szBuffer, -1, szUtf8Buffer, sizeof(szUtf8Buffer), NULL, NULL);
+        g_MuEditorConsole.LogGame(szUtf8Buffer);
+#endif
     }
 #endif
 }

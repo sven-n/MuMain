@@ -151,6 +151,11 @@
 #include "./Utilities/Log/ErrorReport.h"
 #include "./Utilities/Log/WindowsConsole.h"
 
+// Redirect console output to ImGui when editor is enabled
+#ifdef _EDITOR
+#include "../MuEditor/MuEditorConsoleRedirect.h"
+#endif
+
 #include "w_MapHeaders.h"
 
 #include "_crypt.h"
