@@ -43,12 +43,7 @@ void CItemEditorColumns::RenderByteColumn(
         if (intValue >= 0 && intValue <= 255)
         {
             value = (BYTE)intValue;
-            std::string logMsg = i18n::FormatEditor("log_changed_item", {
-                std::to_string(itemIndex),
-                columnName,
-                std::to_string(intValue)
-            });
-            g_MuEditorConsoleUI.LogEditor(logMsg);
+            g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(itemIndex) + " " + columnName + " to " + std::to_string(intValue));
         }
     }
 
@@ -72,12 +67,7 @@ void CItemEditorColumns::RenderWordColumn(
         if (intValue >= 0 && intValue <= 65535)
         {
             value = (WORD)intValue;
-            std::string logMsg = i18n::FormatEditor("log_changed_item", {
-                std::to_string(itemIndex),
-                columnName,
-                std::to_string(intValue)
-            });
-            g_MuEditorConsoleUI.LogEditor(logMsg);
+            g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(itemIndex) + " " + columnName + " to " + std::to_string(intValue));
         }
     }
 
@@ -149,12 +139,7 @@ void CItemEditorColumns::RenderWCharArrayColumn(
     if (ImGui::InputText("##input", editableBuffer, sizeof(editableBuffer)))
     {
         MultiByteToWideChar(CP_UTF8, 0, editableBuffer, -1, value, arraySize);
-        std::string logMsg = i18n::FormatEditor("log_changed_item", {
-            std::to_string(itemIndex),
-            columnName,
-            editableBuffer
-        });
-        g_MuEditorConsoleUI.LogEditor(logMsg);
+        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(itemIndex) + " " + columnName + " to " + std::string(editableBuffer));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -192,12 +177,8 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
             ItemAttribute[itemIndex] = ItemAttribute[newIndex];
             ItemAttribute[newIndex] = temp;
 
-            std::string logMsg = i18n::FormatEditor("log_moved_item", {
-                std::to_string(itemIndex),
-                std::to_string(newIndex)
-            });
-            g_MuEditorConsoleUI.LogEditor(logMsg);
-
+            g_MuEditorConsoleUI.LogEditor("Moved item from index " + std::to_string(itemIndex) + " to " + std::to_string(newIndex));
+            
             s_errorLogged = false;
 
             // Invalidate the filter to rebuild the item list

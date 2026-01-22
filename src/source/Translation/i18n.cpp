@@ -173,6 +173,54 @@ std::string Translator::Format(Domain domain, const char* key, const std::vector
     return ReplacePlaceholders(format, args);
 }
 
+bool Translator::SwitchLanguage(const std::string& locale) {
+    // Try to load all translation files for the new locale
+    std::wstring localeW(locale.begin(), locale.end());
+
+    bool gameLoaded = false;
+#ifdef _EDITOR
+    bool editorLoaded = false;
+    bool metadataLoaded = false;
+#endif
+
+    // Try multiple paths for game translations
+    std::wstring gamePath1 = L"Translations\\" + localeW + L"\\game.json";
+    std::wstring gamePath2 = L"bin\\Translations\\" + localeW + L"\\game.json";
+
+    gameLoaded = LoadTranslations(Domain::Game, gamePath1);
+    if (!gameLoaded) {
+        gameLoaded = LoadTranslations(Domain::Game, gamePath2);
+    }
+
+#ifdef _EDITOR
+    // Try multiple paths for editor translations
+    std::wstring editorPath1 = L"Translations\\" + localeW + L"\\editor.json";
+    std::wstring editorPath2 = L"bin\\Translations\\" + localeW + L"\\editor.json";
+
+    editorLoaded = LoadTranslations(Domain::Editor, editorPath1);
+    if (!editorLoaded) {
+        editorLoaded = LoadTranslations(Domain::Editor, editorPath2);
+    }
+
+    // Try multiple paths for metadata translations
+    std::wstring metadataPath1 = L"Translations\\" + localeW + L"\\metadata.json";
+    std::wstring metadataPath2 = L"bin\\Translations\\" + localeW + L"\\metadata.json";
+
+    metadataLoaded = LoadTranslations(Domain::Metadata, metadataPath1);
+    if (!metadataLoaded) {
+        metadataLoaded = LoadTranslations(Domain::Metadata, metadataPath2);
+    }
+#endif
+
+    // Only change locale if at least game translations loaded successfully
+    if (gameLoaded) {
+        m_currentLocale = locale;
+        return true;
+    }
+
+    return false;
+}
+
 void Translator::Clear() {
 #ifdef _EDITOR
     m_editorTranslations.clear();

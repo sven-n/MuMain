@@ -138,7 +138,7 @@ void CItemEditorActions::RenderSaveButton()
         {
             // Log change details first, then save completion message
             g_MuEditorConsoleUI.LogEditor(changeLog);
-            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("log_save_complete"));
+            g_MuEditorConsoleUI.LogEditor("=== SAVE COMPLETED ===");
             ImGui::OpenPopup("Save Success");
         }
         else
@@ -172,8 +172,7 @@ void CItemEditorActions::RenderExportS6E3Button()
         if (g_ItemDataHandler.SaveLegacy(fileName))
         {
             std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd";
-            std::string logMsg = i18n::FormatEditor("log_exported_s6e3", {filename_str});
-            g_MuEditorConsoleUI.LogEditor(logMsg);
+            g_MuEditorConsoleUI.LogEditor("Exported items as S6E3 legacy format: " + filename_str);
             ImGui::OpenPopup("Export S6E3 Success");
         }
         else
@@ -199,8 +198,7 @@ void CItemEditorActions::RenderExportCSVButton()
         if (g_ItemDataHandler.ExportToCsv(csvFileName))
         {
             std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv";
-            std::string logMsg = i18n::FormatEditor("log_exported_csv", {filename_str});
-            g_MuEditorConsoleUI.LogEditor(logMsg);
+            g_MuEditorConsoleUI.LogEditor("Exported items as CSV: " + filename_str);
             ImGui::OpenPopup("Export CSV Success");
         }
         else

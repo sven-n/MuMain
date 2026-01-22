@@ -41,6 +41,9 @@ public:
     // Format string with arguments
     std::string Format(Domain domain, const char* key, const std::vector<std::string>& args) const;
 
+    // Switch to a different language (reloads all translation files)
+    bool SwitchLanguage(const std::string& locale);
+
     // Clear all translations
     void Clear();
 

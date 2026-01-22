@@ -20,14 +20,5 @@
   "label_columns": "Columns",
   "label_freeze_columns": "Freeze Columns",
   "label_no_columns": "No columns selected. Click 'Columns' to show columns.",
-  "label_index": "Index",
-
-  "log_changed_item": "Changed item {0} {1} to {2}",
-  "log_moved_item": "Moved item from index {0} to {1}",
-  "log_save_complete": "=== SAVE COMPLETED ===",
-  "log_exported_s6e3": "Exported items as S6E3 legacy format: {0}",
-  "log_exported_csv": "Exported items as CSV: {0}",
-  "log_no_changes_detected": "No changes detected.",
-  "log_item_changes_header": "=== Item Changes ({0} items modified) ===",
-  "log_item_change_entry": "[{0}] {1}"
+  "label_index": "Index"
 }
