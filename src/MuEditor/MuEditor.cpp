@@ -5,6 +5,7 @@
 #include "MuEditor.h"
 #include "MuEditorUI.h"
 #include "MuEditorConsole.h"
+#include "../MuEditor/MuEditorCenterPane.h"
 #include "../MuEditor/MuItemEditor/MuItemEditor.h"
 #include "MuInputBlocker.h"
 #include "imgui.h"
@@ -28,6 +29,7 @@ CMuEditor::CMuEditor()
     , m_bFrameStarted(false)
     , m_bShowItemEditor(false)
     , m_bHoveringUI(false)
+    , m_bPreviousFrameHoveringUI(false)
 {
 }
 
@@ -136,7 +138,48 @@ void CMuEditor::Update()
         m_bFrameStarted = true;
     }
 
-    // When editor is closed, check if mouse is over "Open Editor" button area and block input
+    // When editor is closed, check for "Open Editor" button click (after ImGui frame started)
+    if (!m_bEditorMode)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+
+        // Get mouse position
+        POINT mousePos;
+        if (GetCursorPos(&mousePos))
+        {
+            extern HWND g_hWnd;
+            ScreenToClient(g_hWnd, &mousePos);
+
+            // Check if mouse is over button area (top-right corner)
+            RECT rect;
+            GetClientRect(g_hWnd, &rect);
+            float screenWidth = (float)(rect.right - rect.left);
+            float buttonX = screenWidth - EDITOR_BTN_X_OFFSET;
+            float buttonY = EDITOR_BTN_Y;
+            float buttonWidth = EDITOR_BTN_WIDTH;
+            float buttonHeight = EDITOR_BTN_HEIGHT;
+
+            if (mousePos.x >= buttonX && mousePos.x <= (buttonX + buttonWidth) &&
+                mousePos.y >= buttonY && mousePos.y <= (buttonY + buttonHeight))
+            {
+                // Check for click
+                extern bool MouseLButtonPush;
+                if (MouseLButtonPush)
+                {
+                    m_bEditorMode = true;
+
+                    // Clear the click so it doesn't go to game
+                    extern bool MouseLButton, MouseLButtonPop, MouseLButtonDBClick;
+                    MouseLButton = false;
+                    MouseLButtonPop = false;
+                    MouseLButtonPush = false;
+                    MouseLButtonDBClick = false;
+                }
+            }
+        }
+    }
+
+    // When editor is closed, handle "Open Editor" button hover to block game input
     if (!m_bEditorMode)
     {
         ImGuiIO& io = ImGui::GetIO();
@@ -152,7 +195,7 @@ void CMuEditor::Update()
         if (io.MousePos.x >= buttonX && io.MousePos.x <= (buttonX + buttonWidth) &&
             io.MousePos.y >= buttonY && io.MousePos.y <= (buttonY + buttonHeight))
         {
-            // Mouse is over button - block game input
+            // Mouse is over button - block game input for this frame
             extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;
             MouseLButton = false;
             MouseLButtonPop = false;
@@ -160,10 +203,28 @@ void CMuEditor::Update()
             MouseLButtonDBClick = false;
         }
     }
-    // Only block game input when editor is fully open and ImGui is capturing mouse/keyboard
-    else
+    // When editor is open, block input based on UI state
+    else if (m_bEditorMode)
     {
-        g_MuInputBlocker.ProcessInputBlocking();
+        // Block mouse input when hovering UI (from previous frame)
+        if (m_bPreviousFrameHoveringUI)
+        {
+            extern bool MouseLButton, MouseLButtonPop, MouseLButtonPush, MouseLButtonDBClick;
+            extern bool MouseRButton, MouseRButtonPop, MouseRButtonPush;
+            extern bool MouseMButton;
+
+            MouseLButton = false;
+            MouseLButtonPop = false;
+            MouseLButtonPush = false;
+            MouseLButtonDBClick = false;
+            MouseRButton = false;
+            MouseRButtonPop = false;
+            MouseRButtonPush = false;
+            MouseMButton = false;
+        }
+
+        // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in NewUICommon.cpp
+        // It prevents the game from scanning keyboard state when ImGui wants to capture it
     }
 }
 
@@ -184,18 +245,15 @@ void CMuEditor::Render()
 
     if (m_bEditorMode)
     {
-        // Render center viewport
-        g_MuEditorUI.RenderCenterViewport();
+        // Render center pane (handles all editor windows and input blocking)
+        g_MuEditorCenterPane.Render(m_bShowItemEditor);
 
         // Render console
         g_MuEditorConsole.Render();
-
-        // Render editor windows
-        if (m_bShowItemEditor)
-        {
-            g_MuItemEditor.Render(m_bShowItemEditor);
-        }
     }
+
+    // Store current hover state for next frame's input blocking
+    m_bPreviousFrameHoveringUI = m_bHoveringUI;
 
     // Control game cursor rendering via global flag
     // When hovering UI, hide game cursor; otherwise show it

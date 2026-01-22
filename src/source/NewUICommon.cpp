@@ -11,6 +11,11 @@
 #include "ZzzTexture.h"
 #include "ZzzOpenglUtil.h"
 
+#ifdef _EDITOR
+#include "../MuEditor/MuEditor.h"
+#include "imgui.h"
+#endif
+
 extern int MouseX, MouseY;
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
 extern bool g_bWndActive;
@@ -143,6 +148,28 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
     if (!g_bWndActive)
         return;
 #endif	// ASG_FIX_ACTIVATE_APP_INPUT
+
+#ifdef _EDITOR
+    // EDITOR KEYBOARD BLOCKING:
+    // When ImGui wants to capture keyboard (user is typing in text fields),
+    // we prevent scanning keyboard state entirely and clear all existing states.
+    // This ensures keyboard input doesn't leak through to the game when typing.
+    // This is the primary keyboard blocking mechanism - it blocks at the source
+    // by preventing GetAsyncKeyState() from being polled.
+    if (g_MuEditor.IsEnabled())
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard)
+        {
+            // Clear all key states and return early without scanning
+            for (int key = 0; key < 256; key++)
+            {
+                m_pInputInfo[key].byKeyState = KEY_NONE;
+            }
+            return;
+        }
+    }
+#endif // _EDITOR
 
     for (int key = 0; key < 256; key++)
     {
