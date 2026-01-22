@@ -88,10 +88,11 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     i18n::Translator& translator = i18n::Translator::GetInstance();
 
     // Helper lambda to try loading from multiple possible paths
-    auto TryLoadTranslation = [&translator](i18n::Domain domain, const wchar_t* relativePath) -> bool {
+    auto TryLoadTranslation = [&translator, &savedLanguage](i18n::Domain domain, const wchar_t* relativePath) -> bool {
+        std::wstring lang(savedLanguage.begin(), savedLanguage.end());
         std::wstring paths[] = {
-            std::wstring(L"Translations\\en\\") + relativePath,
-            std::wstring(L"bin\\Translations\\en\\") + relativePath
+            std::wstring(L"Translations\\") + lang + L"\\" + relativePath,
+            std::wstring(L"bin\\Translations\\") + lang + L"\\" + relativePath
         };
 
         for (const auto& path : paths) {
