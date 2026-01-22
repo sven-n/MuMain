@@ -20,12 +20,17 @@ public:
     // Set the parent table instance (needed for invalidating filter)
     void SetTable(CItemEditorTable* table) { m_pTable = table; }
 
-    // Metadata-driven rendering - automatically renders any field based on metadata
-    void RenderFieldByMetadata(const ItemFieldMetadata& meta, int& colIdx, int itemIndex,
-                               ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible);
+    // X-macro-driven rendering - automatically renders any field based on descriptor
+    void RenderFieldByDescriptor(const FieldDescriptor& desc, int& colIdx, int itemIndex,
+                                 ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible);
 
     // Render Index column (special - not part of ITEM_ATTRIBUTE fields)
     void RenderIndexColumn(int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible);
+
+    // Friend declaration for template helper in ItemFieldMetadata.h
+    template<typename TColumns>
+    friend void ::RenderFieldByDescriptor(const FieldDescriptor& desc, TColumns* cols, ITEM_ATTRIBUTE& item,
+                                          int& colIdx, int itemIndex, bool& rowInteracted, bool isVisible);
 
 private:
     // Low-level type-specific rendering helpers

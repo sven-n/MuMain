@@ -30,30 +30,30 @@ CMuItemEditorUI::CMuItemEditorUI()
     m_columnVisibility["Index"] = true;  // Special column (not in metadata)
 
     // Get all fields from metadata and set default visibility
-    const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
-    for (const auto& meta : fields)
+    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    for (int i = 0; i < fieldCount; ++i)
     {
         // Default commonly used columns to visible, rest to hidden
         bool defaultVisible = false;
 
         // Check for commonly used fields
-        if (strcmp(meta.fieldName, "Name") == 0 ||
-            strcmp(meta.fieldName, "Level") == 0 ||
-            strcmp(meta.fieldName, "DamageMin") == 0 ||
-            strcmp(meta.fieldName, "DamageMax") == 0 ||
-            strcmp(meta.fieldName, "Defense") == 0 ||
-            strcmp(meta.fieldName, "WeaponSpeed") == 0 ||
-            strcmp(meta.fieldName, "Durability") == 0 ||
-            strcmp(meta.fieldName, "RequireStrength") == 0 ||
-            strcmp(meta.fieldName, "RequireDexterity") == 0 ||
-            strcmp(meta.fieldName, "RequireEnergy") == 0 ||
-            strcmp(meta.fieldName, "RequireVitality") == 0 ||
-            strcmp(meta.fieldName, "RequireCharisma") == 0)
+        if (strcmp(fields[i].name, "Name") == 0 ||
+            strcmp(fields[i].name, "Level") == 0 ||
+            strcmp(fields[i].name, "DamageMin") == 0 ||
+            strcmp(fields[i].name, "DamageMax") == 0 ||
+            strcmp(fields[i].name, "Defense") == 0 ||
+            strcmp(fields[i].name, "WeaponSpeed") == 0 ||
+            strcmp(fields[i].name, "Durability") == 0 ||
+            strcmp(fields[i].name, "RequireStrength") == 0 ||
+            strcmp(fields[i].name, "RequireDexterity") == 0 ||
+            strcmp(fields[i].name, "RequireEnergy") == 0 ||
+            strcmp(fields[i].name, "RequireVitality") == 0 ||
+            strcmp(fields[i].name, "RequireCharisma") == 0)
         {
             defaultVisible = true;
         }
 
-        m_columnVisibility[meta.fieldName] = defaultVisible;
+        m_columnVisibility[fields[i].name] = defaultVisible;
     }
 
     // Load column preferences from file (will override defaults if file exists)
@@ -221,11 +221,11 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
         changed |= ImGui::Checkbox(EDITOR_TEXT("label_index"), &m_columnVisibility["Index"]);
 
         // Get all fields from metadata and render checkboxes
-        const auto& fields = CItemFieldMetadataRegistry::GetAllFields();
-        for (const auto& meta : fields)
+        const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+        for (int i = 0; i < fieldCount; ++i)
         {
-            const char* displayName = meta.GetDisplayName();
-            changed |= ImGui::Checkbox(displayName, &m_columnVisibility[meta.fieldName]);
+            const char* displayName = GetFieldDisplayName(fields[i].name);
+            changed |= ImGui::Checkbox(displayName, &m_columnVisibility[fields[i].name]);
         }
 
         // Save immediately when any checkbox changes
