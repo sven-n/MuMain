@@ -14,7 +14,7 @@ class CItemEditorTable;
 class CItemEditorColumns
 {
 public:
-    CItemEditorColumns() : m_pTable(nullptr) {}
+    CItemEditorColumns() : m_pTable(nullptr), m_lastEditedIndex(-1), m_errorLogged(false) {}
     ~CItemEditorColumns() = default;
 
     // Set the parent table instance (needed for invalidating filter)
@@ -47,6 +47,10 @@ private:
 
     // Parent table reference
     CItemEditorTable* m_pTable;
+
+    // Index column state tracking
+    int m_lastEditedIndex;
+    bool m_errorLogged;
 };
 
 #endif // _EDITOR

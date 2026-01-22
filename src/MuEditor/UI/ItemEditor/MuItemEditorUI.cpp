@@ -14,6 +14,7 @@
 #include <cctype>
 #include <fstream>
 #include <direct.h>
+#include <filesystem>
 
 #include "imgui_internal.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
@@ -245,7 +246,7 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
 void CMuItemEditorUI::SaveColumnPreferences()
 {
     // Create MuEditor directory if it doesn't exist
-    _mkdir("MuEditor");
+    std::filesystem::create_directory("MuEditor");
 
     std::ofstream file(muitemeditor_columns_cfg);
     if (!file.is_open())

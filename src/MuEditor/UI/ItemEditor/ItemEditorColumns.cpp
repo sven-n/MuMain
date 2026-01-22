@@ -2,6 +2,10 @@
 
 #ifdef _EDITOR
 
+#include "ItemEditorColumns.h"
+#include "ItemEditorTable.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "GameData/ItemData/ItemFieldDefs.h"
 #include "Translation/i18n.h"
 #include "_struct.h"
 #include "_define.h"
@@ -156,9 +160,6 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
     ImGui::PushID(itemIndex * 100000 + 999999);
     ImGui::SetNextItemWidth(-FLT_MIN);
 
-    static int s_lastEditedIndex = -1;
-    static bool s_errorLogged = false;
-
     int newIndex = itemIndex;
     ImGui::InputInt("##index", &newIndex, 0, 0);
 
@@ -178,8 +179,8 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
             ItemAttribute[newIndex] = temp;
 
             g_MuEditorConsoleUI.LogEditor("Moved item from index " + std::to_string(itemIndex) + " to " + std::to_string(newIndex));
-            
-            s_errorLogged = false;
+
+            m_errorLogged = false;
 
             // Invalidate the filter to rebuild the item list
             if (m_pTable)
@@ -190,23 +191,23 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
             // Scroll to new index position
             CItemEditorTable::RequestScrollToIndex(newIndex);
         }
-        else if (!s_errorLogged)
+        else if (!m_errorLogged)
         {
             std::string errorMsg = i18n::FormatEditor("error_index_in_use", {
                 std::to_string(newIndex)
             });
             g_MuEditorConsoleUI.LogEditor(errorMsg);
-            s_errorLogged = true;
+            m_errorLogged = true;
         }
     }
 
     // Reset error flag when user starts editing a different field
     if (wasActive)
     {
-        if (s_lastEditedIndex != itemIndex)
+        if (m_lastEditedIndex != itemIndex)
         {
-            s_errorLogged = false;
-            s_lastEditedIndex = itemIndex;
+            m_errorLogged = false;
+            m_lastEditedIndex = itemIndex;
         }
     }
 
