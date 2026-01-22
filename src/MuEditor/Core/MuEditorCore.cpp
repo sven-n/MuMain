@@ -9,6 +9,7 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
 #include "MuInputBlockerCore.h"
+#include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "Translation/i18n.h"
@@ -79,6 +80,10 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     m_bInitialized = true;
     g_MuEditorConsoleUI.LogEditor("MU Editor initialized");
 
+    // Load configuration (includes language preference)
+    g_MuEditorConfig.Load();
+    std::string savedLanguage = g_MuEditorConfig.GetLanguage();
+
     // Load translation files (editor only - game translations loaded by main game code)
     i18n::Translator& translator = i18n::Translator::GetInstance();
 
@@ -93,7 +98,15 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     if (!metadataLoaded) metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
         L"bin\\Translations\\en\\metadata.json");
 
-    translator.SetLocale("en");
+    // Set locale to saved language preference (or default "en")
+    if (!savedLanguage.empty() && translator.SwitchLanguage(savedLanguage))
+    {
+        g_MuEditorConsoleUI.LogEditor("Language restored to: " + savedLanguage);
+    }
+    else
+    {
+        translator.SetLocale("en");
+    }
 
     if (editorLoaded && metadataLoaded)
     {

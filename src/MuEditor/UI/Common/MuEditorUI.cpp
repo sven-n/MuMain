@@ -6,6 +6,7 @@
 
 #include "imgui.h"
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Config/MuEditorConfig.h"
 #include "Translation/i18n.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 
@@ -136,15 +137,15 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor)
         // Language selector
         ImGui::SameLine();
         ImGui::SetNextItemWidth(100.0f);
-
+        
         i18n::Translator& translator = i18n::Translator::GetInstance();
         const std::string& currentLocale = translator.GetLocale();
-
+        
         // Language options
         const char* languages[] = { "English", "Español", "Português" };
         const char* locales[] = { "en", "es", "pt" };
         int currentIndex = 0;
-
+        
         // Find current language index
         for (int i = 0; i < 3; i++)
         {
@@ -154,12 +155,16 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor)
                 break;
             }
         }
-
+        
         if (ImGui::Combo("##Language", &currentIndex, languages, 3))
         {
             // Language changed
             if (translator.SwitchLanguage(locales[currentIndex]))
             {
+                // Save language preference to config
+                g_MuEditorConfig.SetLanguage(locales[currentIndex]);
+                g_MuEditorConfig.Save();
+
                 g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + languages[currentIndex]);
             }
             else

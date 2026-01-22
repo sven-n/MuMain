@@ -7,6 +7,7 @@
 #include "ItemEditorActions.h"
 #include "ItemEditorPopups.h"
 #include "GameData/ItemData/ItemFieldMetadata.h"
+#include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "Translation/i18n.h"
 #include "imgui.h"
@@ -245,43 +246,25 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
 
 void CMuItemEditorUI::SaveColumnPreferences()
 {
-    // Create MuEditor directory if it doesn't exist
-    std::filesystem::create_directory("MuEditor");
-
-    std::ofstream file(muitemeditor_columns_cfg);
-    if (!file.is_open())
-        return;
-
-    for (const auto& col : m_columnVisibility)
-    {
-        file << col.first << "=" << (col.second ? "1" : "0") << "\n";
-    }
-    file.close();
+    // Save to unified config system
+    g_MuEditorConfig.SetAllColumnVisibility(m_columnVisibility);
+    g_MuEditorConfig.Save();
 }
 
 void CMuItemEditorUI::LoadColumnPreferences()
 {
-    std::ifstream file(muitemeditor_columns_cfg);
-    if (!file.is_open())
-        return; // File doesn't exist yet, use defaults
+    // Load from unified config system
+    const auto& savedVisibility = g_MuEditorConfig.GetAllColumnVisibility();
 
-    std::string line;
-    while (std::getline(file, line))
+    // Only update columns that exist in saved config
+    for (const auto& col : savedVisibility)
     {
-        size_t pos = line.find('=');
-        if (pos != std::string::npos)
+        // Only update if the column exists in our default map
+        if (m_columnVisibility.find(col.first) != m_columnVisibility.end())
         {
-            std::string key = line.substr(0, pos);
-            std::string value = line.substr(pos + 1);
-
-            // Only update if the column exists in our map
-            if (m_columnVisibility.find(key) != m_columnVisibility.end())
-            {
-                m_columnVisibility[key] = (value == "1");
-            }
+            m_columnVisibility[col.first] = col.second;
         }
     }
-    file.close();
 }
 
 #endif // _EDITOR
