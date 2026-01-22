@@ -79,7 +79,7 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     m_bInitialized = true;
     g_MuEditorConsoleUI.LogEditor("MU Editor initialized");
 
-    // Load translation files
+    // Load translation files (editor only - game translations loaded by main game code)
     i18n::Translator& translator = i18n::Translator::GetInstance();
 
     // Try multiple possible paths since working directory varies
@@ -87,11 +87,6 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
         L"Translations\\en\\editor.json");
     if (!editorLoaded) editorLoaded = translator.LoadTranslations(i18n::Domain::Editor,
         L"bin\\Translations\\en\\editor.json");
-
-    bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
-        L"Translations\\en\\game.json");
-    if (!gameLoaded) gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
-        L"bin\\Translations\\en\\game.json");
 
     bool metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
         L"Translations\\en\\metadata.json");
@@ -102,11 +97,11 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
 
     if (editorLoaded && metadataLoaded)
     {
-        g_MuEditorConsoleUI.LogEditor("Translations loaded successfully");
+        g_MuEditorConsoleUI.LogEditor("Editor translations loaded successfully");
     }
     else
     {
-        g_MuEditorConsoleUI.LogEditor("WARNING: Some translation files not loaded");
+        g_MuEditorConsoleUI.LogEditor("WARNING: Some editor translation files not loaded");
         if (!editorLoaded) g_MuEditorConsoleUI.LogEditor("  - editor.json missing");
         if (!metadataLoaded) g_MuEditorConsoleUI.LogEditor("  - metadata.json missing");
 
