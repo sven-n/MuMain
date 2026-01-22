@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Sprite.h"
+#include "../Sprite.h"
 
 #define LDS_BACK_MAX	4
 
