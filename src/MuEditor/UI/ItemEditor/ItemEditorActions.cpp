@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include <string>
 #include <sstream>
+#include "../Console/MuEditorConsoleUI.h"
 
 extern std::wstring g_strSelectedML;
 

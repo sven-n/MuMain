@@ -14,6 +14,7 @@
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "imgui.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 #endif
 
 extern int MouseX, MouseY;

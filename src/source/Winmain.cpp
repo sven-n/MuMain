@@ -57,8 +57,8 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
-#include "MuEditor/Config/MuEditorConfig.h"
-
+#include "../MuEditor/Config/MuEditorConfig.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 // Forward declare ImGui WndProc handler
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif

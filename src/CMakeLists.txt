@@ -108,7 +108,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Collect all C++ source files under source/
 file(GLOB_RECURSE MU_MAIN_SOURCES
   CONFIGURE_DEPENDS
-  "source/*.cpp"
+        "source/*.cpp"
+        "MuEditor/*.cpp"
 )
 
 # Add MuEditor sources when editor is enabled

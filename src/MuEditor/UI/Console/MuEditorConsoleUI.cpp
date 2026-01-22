@@ -14,7 +14,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../../Core/MuEditorCore.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 
 // Mutex for thread-safe console access
 static std::mutex g_consoleMutex;
