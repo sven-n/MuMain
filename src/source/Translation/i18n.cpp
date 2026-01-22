@@ -15,7 +15,16 @@ Translator& Translator::GetInstance() {
 }
 
 bool Translator::ParseJsonFile(const std::wstring& filePath, std::map<std::string, std::string>& outMap) {
-    std::ifstream file(filePath);
+    // Convert wstring to UTF-8 for file opening (MinGW compatibility)
+    const int requiredBytes = WideCharToMultiByte(CP_UTF8, 0, filePath.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (requiredBytes <= 0) {
+        return false;
+    }
+
+    std::string narrowPath(requiredBytes - 1, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, filePath.c_str(), -1, &narrowPath[0], requiredBytes, nullptr, nullptr);
+
+    std::ifstream file(narrowPath);
     if (!file.is_open()) {
         return false;
     }

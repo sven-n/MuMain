@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include <Windows.h>
+#include <windows.h>
 #include "GameData/ItemData/ItemFieldMetadata.h"
 #include "_struct.h"
 

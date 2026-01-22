@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ItemDataFileIO.h"
 #include "ZzzInfomation.h"
-#include <Windows.h>
+#include <windows.h>
 
 extern HWND g_hWnd;
 
