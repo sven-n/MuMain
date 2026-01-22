@@ -12,10 +12,12 @@ public:
 
     void Render(bool& showEditor);
     void ClearSearch() { m_szItemSearchBuffer[0] = '\0'; }
+    void SaveColumnPreferences();
+    void LoadColumnPreferences();
 
 private:
     CMuItemEditor();
-    ~CMuItemEditor() = default;
+    ~CMuItemEditor();
 
     void RenderSearchBar();
     void RenderItemTable(const std::string& searchLower);
@@ -26,6 +28,9 @@ private:
 
     // Column visibility state
     std::map<std::string, bool> m_columnVisibility;
+
+    // Config file path
+    const char* muitemeditor_columns_cfg = "MuEditor\\MuItemEditorColumns.cfg";
 
     // Selected row tracking
     int m_selectedRow;

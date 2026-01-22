@@ -7,7 +7,6 @@
 #include "MuEditorConsole.h"
 #include "../MuEditor/MuEditorCenterPane.h"
 #include "../MuEditor/MuItemEditor/MuItemEditor.h"
-#include "MuInputBlocker.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
@@ -86,6 +85,9 @@ void CMuEditor::Shutdown()
 {
     if (!m_bInitialized)
         return;
+
+    // Save item editor preferences before shutting down
+    g_MuItemEditor.SaveColumnPreferences();
 
     ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplWin32_Shutdown();
