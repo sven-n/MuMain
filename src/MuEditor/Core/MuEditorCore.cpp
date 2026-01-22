@@ -8,6 +8,7 @@
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
+#include "MuInputBlockerCore.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "Translation/i18n.h"
@@ -266,6 +267,9 @@ void CMuEditorCore::Update()
             MouseRButtonPush = false;
             MouseMButton = false;
         }
+
+        // Process input blocking for editor UI (keyboard)
+        g_MuInputBlockerCore.ProcessInputBlocking();
 
         // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in NewUICommon.cpp
         // It prevents the game from scanning keyboard state when ImGui wants to capture it
