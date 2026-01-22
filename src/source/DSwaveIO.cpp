@@ -8,6 +8,7 @@
 #include <mmsystem.h>
 
 // Undefine the editor redirect macro so we can use std::fwprintf directly
+// to log to both stderr and the in-game editor console.
 #ifdef _EDITOR
 #undef fwprintf
 extern "C" int editor_fwprintf(FILE* stream, const wchar_t* format, ...);
