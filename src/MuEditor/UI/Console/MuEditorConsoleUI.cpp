@@ -2,7 +2,8 @@
 
 #ifdef _EDITOR
 
-#include "MuEditor\UI\Console\MuEditorConsoleUI.h"
+#include "MuEditorConsoleUI.h"
+
 #include "imgui.h"
 #include <ctime>
 #include <sstream>
@@ -13,8 +14,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "MuEditor/Core/MuEditorCore.h"
-#include "MuEditor/UI/Common/MuEditorUI.h"
+#include "../../Core/MuEditorCore.h"
 
 // Mutex for thread-safe console access
 static std::mutex g_consoleMutex;

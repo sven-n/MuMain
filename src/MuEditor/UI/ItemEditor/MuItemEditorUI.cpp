@@ -7,7 +7,7 @@
 #include "ItemEditorActions.h"
 #include "ItemEditorPopups.h"
 #include "GameData/ItemData/ItemFieldMetadata.h"
-#include "MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 #include "Translation/i18n.h"
 #include "imgui.h"
 #include <algorithm>
@@ -16,7 +16,7 @@
 #include <direct.h>
 
 #include "imgui_internal.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 
 CMuItemEditorUI::CMuItemEditorUI()
     : m_selectedRow(-1)

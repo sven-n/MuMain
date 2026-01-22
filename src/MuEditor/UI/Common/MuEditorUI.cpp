@@ -2,9 +2,10 @@
 
 #ifdef _EDITOR
 
-#include "MuEditor\UI\Common\MuEditorUI.h"
+#include "MuEditorUI.h"
+
 #include "imgui.h"
-#include "MuEditor/Core/MuEditorCore.h"
+#include "../../Core/MuEditorCore.h"
 
 // UI Layout constants
 constexpr float TOOLBAR_HEIGHT = 40.0f;

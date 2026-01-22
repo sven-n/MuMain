@@ -3,7 +3,7 @@
 #ifdef _EDITOR
 
 #include "ItemEditorColumns.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "GameData/ItemData/ItemFieldMetadata.h"
 #include "Translation/i18n.h"
 #include "_struct.h"

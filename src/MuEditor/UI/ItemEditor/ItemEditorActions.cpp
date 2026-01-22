@@ -5,7 +5,7 @@
 #include "ItemEditorActions.h"
 #include "DataHandler/ItemData/ItemDataHandler.h"
 #include "GameData/ItemData/ItemFieldMetadata.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Translation/i18n.h"
 #include "imgui.h"
 #include <string>

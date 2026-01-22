@@ -51,7 +51,7 @@
 
 
 #include "NewUISystem.h"
-#include "MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Core/MuEditorCore.h"
 
 #ifdef _EDITOR
 #include "imgui.h"

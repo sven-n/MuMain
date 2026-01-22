@@ -2,7 +2,8 @@
 
 #ifdef _EDITOR
 
-#include "../MuEditor/MuEditorCenterPane.h"
+#include "MuEditorCenterPaneUI.h"
+
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 
 CMuEditorCenterPaneUI& CMuEditorCenterPaneUI::GetInstance()
