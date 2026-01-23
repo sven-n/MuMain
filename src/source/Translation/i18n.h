@@ -44,6 +44,12 @@ public:
     // Switch to a different language (reloads all translation files)
     bool SwitchLanguage(const std::string& locale);
 
+    // Get list of available locales by scanning translation directories
+    std::vector<std::string> GetAvailableLocales() const;
+
+    // Get display name for a locale from its editor.json file
+    std::string GetLanguageDisplayName(const std::string& locale) const;
+
     // Clear all translations
     void Clear();
 

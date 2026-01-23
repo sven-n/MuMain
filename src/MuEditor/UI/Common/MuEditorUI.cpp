@@ -137,40 +137,57 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor)
         // Language selector
         ImGui::SameLine();
         ImGui::SetNextItemWidth(100.0f);
-        
+
         i18n::Translator& translator = i18n::Translator::GetInstance();
         const std::string& currentLocale = translator.GetLocale();
-        
-        // Language options
-        const char* languages[] = { "English", "Español", "Português" };
-        const char* locales[] = { "en", "es", "pt" };
-        int currentIndex = 0;
-        
+
+        // Get available locales dynamically from translation directories
+        static std::vector<std::string> availableLocales = translator.GetAvailableLocales();
+
         // Find current language index
-        for (int i = 0; i < 3; i++)
+        int currentIndex = 0;
+        for (size_t i = 0; i < availableLocales.size(); i++)
         {
-            if (currentLocale == locales[i])
+            if (currentLocale == availableLocales[i])
             {
-                currentIndex = i;
+                currentIndex = static_cast<int>(i);
                 break;
             }
         }
-        
-        if (ImGui::Combo("##Language", &currentIndex, languages, 3))
-        {
-            // Language changed
-            if (translator.SwitchLanguage(locales[currentIndex]))
-            {
-                // Save language preference to config
-                g_MuEditorConfig.SetLanguage(locales[currentIndex]);
-                g_MuEditorConfig.Save();
 
-                g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + languages[currentIndex]);
-            }
-            else
+        // Get display name for current language from translation file
+        std::string currentLanguageName = translator.GetLanguageDisplayName(currentLocale);
+
+        if (ImGui::BeginCombo("##Language", currentLanguageName.c_str()))
+        {
+            for (size_t i = 0; i < availableLocales.size(); i++)
             {
-                g_MuEditorConsoleUI.LogEditor(std::string("Failed to load translations for: ") + languages[currentIndex]);
+                const bool isSelected = (currentIndex == static_cast<int>(i));
+                std::string displayName = translator.GetLanguageDisplayName(availableLocales[i]);
+
+                if (ImGui::Selectable(displayName.c_str(), isSelected))
+                {
+                    // Language changed
+                    if (translator.SwitchLanguage(availableLocales[i]))
+                    {
+                        // Save language preference to config
+                        g_MuEditorConfig.SetLanguage(availableLocales[i]);
+                        g_MuEditorConfig.Save();
+
+                        g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + displayName);
+                    }
+                    else
+                    {
+                        g_MuEditorConsoleUI.LogEditor(std::string("Failed to load translations for: ") + displayName);
+                    }
+                }
+
+                if (isSelected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
+            ImGui::EndCombo();
         }
 
         // Close button on the far right

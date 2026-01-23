@@ -2,6 +2,7 @@
 #include "i18n.h"
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 
 #include "../../ThirdParty/json.hpp"
 
@@ -200,6 +201,90 @@ bool Translator::SwitchLanguage(const std::string& locale) {
     }
 
     return false;
+}
+
+std::vector<std::string> Translator::GetAvailableLocales() const {
+    std::vector<std::string> locales;
+
+    // Try both possible paths for translation directories
+    std::vector<std::wstring> basePaths = { L"Translations", L"bin\\Translations" };
+
+    for (const auto& basePath : basePaths) {
+        if (std::filesystem::exists(basePath) && std::filesystem::is_directory(basePath)) {
+            for (const auto& entry : std::filesystem::directory_iterator(basePath)) {
+                if (entry.is_directory()) {
+                    std::wstring dirName = entry.path().filename().wstring();
+                    std::string locale(dirName.begin(), dirName.end());
+
+                    // Check if this directory contains game.json to verify it's a valid locale
+                    std::wstring gameJsonPath = entry.path().wstring() + L"\\game.json";
+                    if (std::filesystem::exists(gameJsonPath)) {
+                        // Only add if not already in the list
+                        if (std::find(locales.begin(), locales.end(), locale) == locales.end()) {
+                            locales.push_back(locale);
+                        }
+                    }
+                }
+            }
+
+            // If we found locales in this path, no need to check the other
+            if (!locales.empty()) {
+                break;
+            }
+        }
+    }
+
+    // Sort locales alphabetically
+    std::sort(locales.begin(), locales.end());
+
+    return locales;
+}
+
+std::string Translator::GetLanguageDisplayName(const std::string& locale) const {
+    // Try both possible paths for editor.json
+    std::wstring localeW(locale.begin(), locale.end());
+    std::vector<std::wstring> editorPaths = {
+        L"Translations\\" + localeW + L"\\editor.json",
+        L"bin\\Translations\\" + localeW + L"\\editor.json"
+    };
+
+    for (const auto& editorPath : editorPaths) {
+        // Convert wstring to UTF-8 for file opening
+        const int requiredBytes = WideCharToMultiByte(CP_UTF8, 0, editorPath.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (requiredBytes <= 0) {
+            continue;
+        }
+
+        std::string narrowPath(requiredBytes - 1, '\0');
+        WideCharToMultiByte(CP_UTF8, 0, editorPath.c_str(), -1, &narrowPath[0], requiredBytes, nullptr, nullptr);
+
+        std::ifstream file(narrowPath);
+        if (!file.is_open()) {
+            continue;
+        }
+
+        try {
+            json j;
+            file >> j;
+            file.close();
+
+            // Look for language_name key
+            if (j.is_object() && j.contains("language_name") && j["language_name"].is_string()) {
+                return j["language_name"].get<std::string>();
+            }
+        }
+        catch (const json::exception&) {
+            // JSON parsing failed, continue to next path
+            continue;
+        }
+    }
+
+    // Fallback: capitalize the locale code
+    std::string displayName = locale;
+    if (!displayName.empty()) {
+        displayName[0] = std::toupper(displayName[0]);
+    }
+    return displayName;
 }
 
 void Translator::Clear() {
