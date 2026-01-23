@@ -132,7 +132,7 @@ void CItemEditorActions::RenderSaveButton()
     if (ImGui::Button(EDITOR_TEXT("btn_save")))
     {
         wchar_t fileName[256];
-        swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+        swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
         std::string changeLog;
         if (g_ItemDataHandler.Save(fileName, &changeLog))
@@ -168,7 +168,7 @@ void CItemEditorActions::RenderExportS6E3Button()
     if (ImGui::Button(EDITOR_TEXT("btn_export_s6e3")))
     {
         wchar_t fileName[256];
-        swprintf(fileName, L"Data\\Local\\%ls\\Item_%ls_S6E3.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+        swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_%ls_S6E3.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
         if (g_ItemDataHandler.SaveLegacy(fileName))
         {
@@ -194,7 +194,7 @@ void CItemEditorActions::RenderExportCSVButton()
     if (ImGui::Button(EDITOR_TEXT("btn_export_csv")))
     {
         wchar_t csvFileName[256];
-        swprintf(csvFileName, L"Data\\Local\\%ls\\Item_%ls_export.csv", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+        swprintf_s(csvFileName, _countof(csvFileName), L"Data\\Local\\%ls\\Item_%ls_export.csv", g_strSelectedML.c_str(), g_strSelectedML.c_str());
 
         if (g_ItemDataHandler.ExportToCsv(csvFileName))
         {
