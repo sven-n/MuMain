@@ -9,7 +9,7 @@
 #include "_define.h"
 #include "ZzzInfomation.h"
 #include "MultiLanguage.h"
-#include "MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Utilities/StringUtils.h"
 #include <sstream>
 #include <string>
