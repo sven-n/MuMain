@@ -21,6 +21,9 @@ build-mingw/
 /Win32/
 
 # .NET build outputs
+**/bin/**
+!**/bin/Translations/
+!**/bin/Translations/**
 **/obj/
 *.user
 *.suo
