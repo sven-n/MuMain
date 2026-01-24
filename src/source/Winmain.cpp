@@ -51,6 +51,17 @@
 
 
 #include "NewUISystem.h"
+#include "Translation/i18n.h"
+
+#ifdef _EDITOR
+#include "../MuEditor/Core/MuEditorCore.h"
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "../MuEditor/Config/MuEditorConfig.h"
+#include "../MuEditor/Core/MuEditorCore.h"
+// Forward declare ImGui WndProc handler
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
 
 CUIMercenaryInputBox* g_pMercenaryInputBox = nullptr;
 CUITextInputBox* g_pSingleTextInputBox = nullptr;
@@ -357,6 +368,11 @@ void DestroyWindow()
     regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config");
     regkey.WriteDword(L"VolumeLevel", g_pOption->GetVolumeLevel());
 
+#ifdef _EDITOR
+    // Save editor configuration
+    g_MuEditorConfig.Save();
+#endif
+
     CUIMng::Instance().Release();
 
     //. release font handle
@@ -451,6 +467,16 @@ extern bool EnableFastInput;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+#ifdef _EDITOR
+    // Only forward messages to ImGui when editor is open
+    // When editor is closed, we handle button clicks manually in RenderToolbarOpen
+    if (g_MuEditorCore.IsEnabled())
+    {
+        if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+            return true;
+    }
+#endif
+
     switch (msg)
     {
     case WM_SYSKEYDOWN:
@@ -561,7 +587,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     break;
     case WM_SETCURSOR:
-        ShowCursor(false);
+#ifdef _EDITOR
+        // When hovering UI (including Open Editor button), let Windows show cursor
+        // Otherwise hide Windows cursor for game cursor
+        if (g_MuEditorCore.IsHoveringUI())
+        {
+            // Let Windows cursor show - don't hide it
+            return DefWindowProc(hwnd, msg, wParam, lParam);
+        }
+        else
+#endif
+        {
+            ShowCursor(false);
+        }
         break;
         //-----------------------------
     default:
@@ -859,6 +897,30 @@ MSG MainLoop()
         {
             if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
             {
+#ifdef _EDITOR
+                // F12 key toggle for editor
+                static bool wasF12Pressed = false;
+                if (GetAsyncKeyState(VK_F12) & 0x8000)
+                {
+                    if (!wasF12Pressed)
+                    {
+                        g_MuEditorCore.ToggleEditor();
+                        fwprintf(stderr, L"[Editor] Toggled: %s\n",
+                            g_MuEditorCore.IsEnabled() ? L"ON" : L"OFF");
+                        fflush(stderr);
+                        wasF12Pressed = true;
+                    }
+                }
+                else
+                {
+                    wasF12Pressed = false;
+                }
+
+                // Update editor UI (must be before RenderScene)
+                g_MuEditorCore.Update();
+#endif
+
+                // Render game scene (ImGui rendering happens inside before SwapBuffers)
                 RenderScene(g_hDC);
             }
         }
@@ -1226,6 +1288,38 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
+
+    // Initialize game translations (always available)
+    {
+        i18n::Translator& translator = i18n::Translator::GetInstance();
+        bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
+            L"Translations\\en\\game.json");
+        if (!gameLoaded) gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
+            L"bin\\Translations\\en\\game.json");
+        translator.SetLocale("en");
+
+        if (gameLoaded)
+        {
+            g_ErrorReport.Write(L"> Game translations loaded successfully.\r\n");
+        }
+        else
+        {
+            g_ErrorReport.Write(L"> WARNING: Game translations not found (game.json missing).\r\n");
+        }
+    }
+
+#ifdef _EDITOR
+    // Initialize MU Editor
+    g_MuEditorCore.Initialize(g_hWnd, g_hDC);
+
+    // Check for --editor command line flag
+    if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
+    {
+        g_MuEditorCore.SetEnabled(true);
+        fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");
+        std::fflush(stderr);
+    }
+#endif
 
     g_ErrorReport.WriteImeInfo( g_hWnd);
     g_ErrorReport.AddSeparator();

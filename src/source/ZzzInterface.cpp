@@ -114,6 +114,8 @@ int   g_iFollowCharacter = -1;
 
 bool g_bAutoGetItem = false;
 
+bool g_bRenderGameCursor = true;
+
 float LButtonPopTime = 0.f;
 float LButtonPressTime = 0.f;
 float RButtonPopTime = 0.f;
@@ -8874,6 +8876,9 @@ extern int g_iKeyPadEnable;
 
 void RenderCursor()
 {
+    if (!g_bRenderGameCursor)
+        return;
+
     EnableAlphaTest();
     glColor3f(1.f, 1.f, 1.f);
 

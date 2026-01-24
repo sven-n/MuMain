@@ -48,6 +48,7 @@ What I have done so far:
     * Ancient set labels
   * The code has been refactored. A lot of magic values have been replaced by
     enums and constants.
+  * 🔥 New Translation system (see [TRANSLATION_SYSTEM_INTEGRATION.md](TRANSLATION_SYSTEM_INTEGRATION.md))
 
 What needs to be done for Season 6:
   * Lucky Items
@@ -60,16 +61,34 @@ What needs to be done for Season 6:
 * **Visual Studio 2022+** with C++ and C# workloads, **CLion**, or **Rider** (see IDE-specific instructions below)
 * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
 
-### First-time Setup
+### First Time Setup - Initialize Submodules
 
-After cloning the repository, initialize the git submodules:
+The project uses ImGui as a git submodule for the in-game editor (debug builds only). After cloning the repository, you must initialize the submodules
+if CMake did not do this automatically which it should
 
-In Root dir execute:
 ```bash
-git submodule update --init --recursive
+# From the repository root
+git submodule update --init
 ```
 
-This will download the required **ImGui** library into `src/ThirdParty/imgui`.
+This will download the ImGui library into `src/ThirdParty/imgui`.
+
+**Note:** This is only required for **Debug builds** (`Global Debug` configuration). Release builds do not require ImGui.
+
+### Build Configurations
+
+#### Debug Builds (`Global Debug`)
+- Includes the in-game MU Editor (ImGui-based)
+- Requires ImGui submodule to be initialized (see above)
+- Press **F12** in-game to toggle the editor
+- Start with `--editor` flag to launch with editor enabled
+- Preprocessor define: `_EDITOR`
+
+#### Release Builds (`Global Release`)
+- No editor code included
+- ImGui submodule not required
+- Optimized for production use
+- Zero editor overhead
 
 ### Building with CMake and MinGW-w64 (Linux)
 

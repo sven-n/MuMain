@@ -108,8 +108,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Collect all C++ source files under source/
 file(GLOB_RECURSE MU_MAIN_SOURCES
   CONFIGURE_DEPENDS
-  "source/*.cpp"
+        "source/*.cpp"
 )
+
+# Add MuEditor sources when editor is enabled
+if(ENABLE_EDITOR)
+  file(GLOB_RECURSE MU_EDITOR_SOURCES
+    CONFIGURE_DEPENDS
+    "MuEditor/*.cpp"
+  )
+  list(APPEND MU_MAIN_SOURCES ${MU_EDITOR_SOURCES})
+endif()
 
 # ImGui static library (required when editor is enabled)
 if(ENABLE_EDITOR)
@@ -181,6 +190,7 @@ target_include_directories(Main PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/source"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
+  $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 
 # Basic compile definitions, roughly mirroring the original MSVC project

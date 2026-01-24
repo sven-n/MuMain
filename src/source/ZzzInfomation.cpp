@@ -5,6 +5,7 @@
 #include "ZzzInfomation.h"
 
 #include <codecvt>
+#include <sstream>
 
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
@@ -373,88 +374,6 @@ void OpenDialogFile(wchar_t* FileName)
 ///////////////////////////////////////////////////////////////////////////////
 // item
 ///////////////////////////////////////////////////////////////////////////////
-
-
-void OpenItemScript(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
-    {
-        const int Size = sizeof(ITEM_ATTRIBUTE_FILE);
-        BYTE* Buffer = new BYTE[Size * MAX_ITEM];
-        fread(Buffer, Size * MAX_ITEM, 1, fp);
-        // crc
-        DWORD dwCheckSum;
-        fread(&dwCheckSum, sizeof(DWORD), 1, fp);
-        fclose(fp);
-        if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_ITEM, 0xE2F1))
-        {
-            wchar_t Text[256];
-            mu_swprintf(Text, L"%ls - File corrupted.", FileName);
-            g_ErrorReport.Write(Text);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
-            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-        }
-        else
-        {
-            BYTE* pSeek = Buffer;
-            for (int i = 0; i < MAX_ITEM; i++)
-            {
-                BuxConvert(pSeek, Size);
-
-                ITEM_ATTRIBUTE_FILE source;
-                memcpy(&source, pSeek, Size);
-
-                CMultiLanguage::ConvertFromUtf8(ItemAttribute[i].Name, source.Name, MAX_ITEM_NAME);
-                ItemAttribute[i].TwoHand = source.TwoHand;
-                ItemAttribute[i].Level = source.Level;
-                ItemAttribute[i].m_byItemSlot = source.m_byItemSlot;
-                ItemAttribute[i].m_wSkillIndex = source.m_wSkillIndex;
-                ItemAttribute[i].Width = source.Width;
-                ItemAttribute[i].Height = source.Height;
-                ItemAttribute[i].DamageMin = source.DamageMin;
-                ItemAttribute[i].DamageMax = source.DamageMax;
-                ItemAttribute[i].SuccessfulBlocking = source.SuccessfulBlocking;
-                ItemAttribute[i].Defense =source.Defense;
-                ItemAttribute[i].MagicDefense = source.MagicDefense;
-                ItemAttribute[i].WeaponSpeed = source.WeaponSpeed;
-                ItemAttribute[i].WalkSpeed = source.WalkSpeed;
-                ItemAttribute[i].Durability = source.Durability;
-                ItemAttribute[i].MagicDur = source.MagicDur;
-                ItemAttribute[i].MagicPower = source.MagicPower;
-                ItemAttribute[i].RequireStrength = source.RequireStrength;
-                ItemAttribute[i].RequireDexterity = source.RequireDexterity;
-                ItemAttribute[i].RequireEnergy = source.RequireEnergy;
-                ItemAttribute[i].RequireVitality = source.RequireVitality;
-                ItemAttribute[i].RequireCharisma = source.RequireCharisma;
-                ItemAttribute[i].RequireLevel = source.RequireLevel;
-                ItemAttribute[i].Value = source.Value;
-                ItemAttribute[i].iZen = source.iZen;
-                ItemAttribute[i].AttType = source.AttType;
-                for (int c = 0; c < MAX_CLASS; ++c)
-                {
-                    ItemAttribute[i].RequireClass[c] = source.RequireClass[c];
-                }
-
-                for (int r = 0; r < MAX_RESISTANCE; ++r)
-                {
-                    ItemAttribute[i].Resistance[r] = source.Resistance[r];
-                }
-
-                pSeek += Size;
-            }
-        }
-        delete[] Buffer;
-    }
-    else
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-    }
-}
 
 void PrintItem(wchar_t* FileName)
 {

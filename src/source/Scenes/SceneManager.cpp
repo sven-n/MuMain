@@ -21,7 +21,7 @@ FrameTimingState g_frameTiming;
 #include "LoginScene.h"
 #include "CharacterScene.h"
 #include "MainScene.h"
-#include "../LoadingScene.h"
+#include "LoadingScene.h"
 #include "../DSPlaySound.h"
 #include "../ZzzOpenglUtil.h"
 #include "../PhysicsManager.h"
@@ -36,6 +36,11 @@ FrameTimingState g_frameTiming;
 #include "../GlobalText.h"
 #include "../ZzzAI.h"
 #include "../Winmain.h"
+
+#ifdef _EDITOR
+#include "../MuEditor/Core/MuEditorCore.h"
+#include "imgui.h"
+#endif
 
 // External declarations
 extern int GrabScreen;
@@ -695,6 +700,19 @@ void MainScene(HDC hDC)
 
         if (Success)
         {
+#ifdef _EDITOR
+            // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
+            g_MuEditorCore.Render();
+
+            // Render game cursor on top of ImGui if not hovering UI
+            extern bool g_bRenderGameCursor;
+            if (g_bRenderGameCursor)
+            {
+                BeginBitmap();
+                RenderCursor();
+                EndBitmap();
+            }
+#endif
             SwapBuffers(hDC);
         }
 

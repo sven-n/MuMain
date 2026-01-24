@@ -2,16 +2,22 @@
 // File: LoadingScene.cpp
 //*****************************************************************************
 
-#include "stdafx.h"
+#include "../stdafx.h"
+
 #include "LoadingScene.h"
 
-#include "Input.h"
-#include "UIMng.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
-#include "Scenes/SceneCore.h"
-#include "ZzzInterface.h"
-#include "Scenes/SceneCommon.h"
+#include "../Input.h"
+#include "../UIMng.h"
+#include "../ZzzOpenglUtil.h"
+#include "../ZzzTexture.h"
+#include "SceneCore.h"
+#include "../ZzzInterface.h"
+#include "SceneCommon.h"
+
+
+#ifdef _EDITOR
+#include "Core/MuEditorCore.h"
+#endif
 
 CLoadingScene::CLoadingScene()
 {
@@ -69,7 +75,6 @@ void LoadingScene(HDC hDC)
         LoadingWorld = 9999999;
 
         InitLoading = true;
-
         LoadBitmap(L"Interface\\LSBg01.JPG", BITMAP_TITLE, GL_LINEAR);
         LoadBitmap(L"Interface\\LSBg02.JPG", BITMAP_TITLE + 1, GL_LINEAR);
         LoadBitmap(L"Interface\\LSBg03.JPG", BITMAP_TITLE + 2, GL_LINEAR);
@@ -91,6 +96,19 @@ void LoadingScene(HDC hDC)
     ::EndBitmap();
     ::EndOpengl();
     ::glFlush();
+#ifdef _EDITOR
+    // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
+    g_MuEditorCore.Render();
+
+    // Render game cursor on top of ImGui if not hovering UI
+    extern bool g_bRenderGameCursor;
+    if (g_bRenderGameCursor)
+    {
+        BeginBitmap();
+        RenderCursor();
+        EndBitmap();
+    }
+#endif
     ::SwapBuffers(hDC);
 
     SAFE_DELETE(rUIMng.m_pLoadingScene);

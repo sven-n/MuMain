@@ -17,6 +17,10 @@
 #include "UIControls.h"
 #include "ServerListManager.h"
 
+#ifdef _EDITOR
+#include "../MuEditor/Core/MuEditorCore.h"
+#endif
+
 #define	DOCK_EXTENT		10
 
 //#define	UIM_TS_BG_BLACK		0
@@ -150,6 +154,10 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
     ::EndBitmap();
     ::EndOpengl();
     ::glFlush();
+#ifdef _EDITOR
+    // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
+    g_MuEditorCore.Render();
+#endif
     ::SwapBuffers(hDC);
 }
 
