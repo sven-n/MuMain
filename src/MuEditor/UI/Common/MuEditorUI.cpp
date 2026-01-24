@@ -97,6 +97,10 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
                 MouseLButtonDBClick = false;
             }
         }
+        else
+        {
+            g_MuEditorCore.SetHoveringUI(false);
+        }
 
         ImGui::Unindent(10.0f);
     }
