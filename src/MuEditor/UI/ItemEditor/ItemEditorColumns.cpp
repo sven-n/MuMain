@@ -130,8 +130,6 @@ void CItemEditorColumns::RenderDWordColumn(
     ImGui::SetNextItemWidth(-FLT_MIN);
 
     // DWORD is unsigned, range 0 to 4294967295
-    // Use int64_t for ImGui input to safely handle the full range
-    long long llValue = value;
     if (ImGui::InputScalar("##input", ImGuiDataType_U32, &value, nullptr, nullptr, "%u"))
     {
         LogItemFieldChange(itemIndex, columnName, std::to_string(value));
