@@ -22,14 +22,35 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 
 // ===== X-MACRO-DRIVEN RENDERING =====
 
-void CItemEditorColumns::RenderFieldByDescriptor(const FieldDescriptor& desc, int& colIdx, int itemIndex,
+void CItemEditorColumns::RenderFieldByDescriptor(const ItemFieldDescriptor& desc, int& colIdx, int itemIndex,
                                                   ITEM_ATTRIBUTE& item, bool& rowInteracted, bool isVisible)
 {
-    // Use the template helper function from ItemFieldDefs.h
-    ::RenderFieldByDescriptor(desc, this, item, colIdx, itemIndex, rowInteracted, isVisible);
+    // Use the template helper function from ItemFieldMetadata.h
+    ::RenderFieldByDescriptor(desc, this, item, colIdx, itemIndex, rowInteracted, isVisible, MAX_ITEM_NAME);
 }
 
 // ===== LOW-LEVEL TYPE-SPECIFIC RENDERING =====
+
+static std::string GetItemNameUtf8(int itemIndex)
+{
+    char nameBuf[256]{};
+    if (ItemAttribute && itemIndex >= 0 && itemIndex < MAX_ITEM)
+    {
+        WideCharToMultiByte(CP_UTF8, 0, ItemAttribute[itemIndex].Name, -1, nameBuf, sizeof(nameBuf), NULL, NULL);
+    }
+    if (nameBuf[0] == '\0')
+        return "<unnamed>";
+    return nameBuf;
+}
+
+static void LogItemFieldChange(int itemIndex, const char* columnName, const std::string& newValue)
+{
+    g_MuEditorConsoleUI.LogEditor(
+        "Changed item " + std::to_string(itemIndex) +
+        " (" + GetItemNameUtf8(itemIndex) + ") " +
+        columnName + " to " + newValue
+    );
+}
 
 void CItemEditorColumns::RenderByteColumn(
     const char* columnName, int& colIdx, int itemIndex, int uniqueId,
@@ -47,7 +68,7 @@ void CItemEditorColumns::RenderByteColumn(
         if (intValue >= 0 && intValue <= 255)
         {
             value = (BYTE)intValue;
-            g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(itemIndex) + " " + columnName + " to " + std::to_string(intValue));
+            LogItemFieldChange(itemIndex, columnName, std::to_string(intValue));
         }
     }
 
@@ -71,7 +92,7 @@ void CItemEditorColumns::RenderWordColumn(
         if (intValue >= 0 && intValue <= 65535)
         {
             value = (WORD)intValue;
-            g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(itemIndex) + " " + columnName + " to " + std::to_string(intValue));
+            LogItemFieldChange(itemIndex, columnName, std::to_string(intValue));
         }
     }
 
@@ -91,12 +112,27 @@ void CItemEditorColumns::RenderIntColumn(
 
     if (ImGui::InputInt("##input", &value, 0, 0))
     {
-        std::string logMsg = i18n::FormatEditor("log_changed_item", {
-            std::to_string(itemIndex),
-            columnName,
-            std::to_string(value)
-        });
-        g_MuEditorConsoleUI.LogEditor(logMsg);
+        LogItemFieldChange(itemIndex, columnName, std::to_string(value));
+    }
+
+    if (ImGui::IsItemActivated()) rowInteracted = true;
+    ImGui::PopID();
+}
+
+void CItemEditorColumns::RenderDWordColumn(
+    const char* columnName, int& colIdx, int itemIndex, int uniqueId,
+    DWORD& value, bool& rowInteracted, bool isVisible)
+{
+    if (!isVisible) return;
+
+    ImGui::TableSetColumnIndex(colIdx++);
+    ImGui::PushID(itemIndex * 100000 + uniqueId);
+    ImGui::SetNextItemWidth(-FLT_MIN);
+
+    // DWORD is unsigned, range 0 to 4294967295
+    if (ImGui::InputScalar("##input", ImGuiDataType_U32, &value, nullptr, nullptr, "%u"))
+    {
+        LogItemFieldChange(itemIndex, columnName, std::to_string(value));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -115,12 +151,7 @@ void CItemEditorColumns::RenderBoolColumn(
 
     if (ImGui::Checkbox("##checkbox", &value))
     {
-        std::string logMsg = i18n::FormatEditor("log_changed_item", {
-            std::to_string(itemIndex),
-            columnName,
-            value ? "true" : "false"
-        });
-        g_MuEditorConsoleUI.LogEditor(logMsg);
+        LogItemFieldChange(itemIndex, columnName, value ? "true" : "false");
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -143,7 +174,7 @@ void CItemEditorColumns::RenderWCharArrayColumn(
     if (ImGui::InputText("##input", editableBuffer, sizeof(editableBuffer)))
     {
         MultiByteToWideChar(CP_UTF8, 0, editableBuffer, -1, value, arraySize);
-        g_MuEditorConsoleUI.LogEditor("Changed item " + std::to_string(itemIndex) + " " + columnName + " to " + std::string(editableBuffer));
+        LogItemFieldChange(itemIndex, columnName, std::string(editableBuffer));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;

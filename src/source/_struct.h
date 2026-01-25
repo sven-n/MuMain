@@ -271,59 +271,9 @@ typedef struct
     MONSTER_ATTRIBUTE Attribute;
 } MONSTER;
 
-typedef struct
-{
-    /*+00*/	char Name[MAX_SKILL_NAME];
-    /*+32*/	WORD Level;
-    /*+34*/	WORD Damage;
-    /*+36*/	WORD Mana;
-    /*+38*/	WORD AbilityGuage;
-    /*+40*/	DWORD Distance;
-    /*+44*/	int Delay;
-    /*+48*/	int Energy;
-    /*+52*/	WORD Charisma;
-    /*+54*/	BYTE MasteryType;
-    /*+55*/	BYTE SkillUseType;
-    /*+56*/	DWORD SkillBrand;
-    /*+60*/	BYTE KillCount;
-    /*+61*/	BYTE RequireDutyClass[MAX_DUTY_CLASS];
-    /*+64*/	BYTE RequireClass[MAX_CLASS];
-    /*+71*/	BYTE SkillRank;
-    /*+72*/	WORD Magic_Icon;
-    /*+74*/	BYTE TypeSkill;
-    /*+76*/	int Strength;
-    /*+80*/	int Dexterity;
-    /*+84*/	BYTE ItemSkill;
-    /*+85*/	BYTE IsDamage;
-    /*+86*/	WORD Effect;
-} SKILL_ATTRIBUTE_FILE;
-
-typedef struct
-{
-    wchar_t Name[MAX_SKILL_NAME];
-    WORD Level;
-    WORD Damage;
-    WORD Mana;
-    WORD AbilityGuage;
-    DWORD Distance;
-    int Delay;
-    int Energy;
-    WORD Charisma;
-    BYTE MasteryType;
-    BYTE SkillUseType;
-    DWORD SkillBrand;
-    BYTE KillCount;
-    BYTE RequireDutyClass[MAX_DUTY_CLASS];
-    BYTE RequireClass[MAX_CLASS];
-    BYTE SkillRank;
-    WORD Magic_Icon;
-    BYTE TypeSkill;
-    int Strength;
-    int Dexterity;
-    BYTE ItemSkill;
-    BYTE IsDamage;
-    WORD Effect;
-} SKILL_ATTRIBUTE;
+// SKILL_ATTRIBUTE_FILE and SKILL_ATTRIBUTE definitions moved to GameData/SkillData/SkillStructs.h
+// This is now the single source of truth for ALL builds (editor and release)
+#include "GameData/SkillData/SkillStructs.h"
 /*
 typedef struct
 {

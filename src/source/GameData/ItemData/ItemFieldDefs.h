@@ -56,6 +56,7 @@
 #define FIELD_TYPE_Byte BYTE
 #define FIELD_TYPE_Word WORD
 #define FIELD_TYPE_Int int
+#define FIELD_TYPE_DWord DWORD
 
 // Generate struct field declarations from X-macro
 #define DECLARE_FIELD(name, type, arraySize, width) FIELD_TYPE_##type name;

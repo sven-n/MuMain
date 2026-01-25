@@ -15,6 +15,10 @@
 #include <sstream>
 #include <memory>
 
+#include "DataHandler/CommonDataSaver.h"
+#include "UI/Console/MuEditorConsoleUI.h"
+#include "Utilities/StringUtils.h"
+
 // External references
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
@@ -173,6 +177,9 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
 
         return false; // Return false to indicate no save was needed
     }
+
+    // Create backup
+    CommonDataSaver::CreateBackup(fileName);
 
     // Open file for writing only after we know we need to save
     FILE* fp = _wfopen(fileName, L"wb");

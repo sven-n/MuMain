@@ -1,0 +1,49 @@
+{
+  "_comment": "MuEditor UI Translations - Polish",
+  "language_name": "Polski",
+
+  "btn_save": "Zapisz Przedmioty",
+  "btn_save_skills": "Zapisz Umiejętności",
+  "btn_export_s6e3": "Eksportuj jako S6E3",
+  "btn_export_csv": "Eksportuj jako CSV",
+  "btn_export_csv_skills": "Eksportuj Umiejętności jako CSV",
+  "btn_columns": "Kolumny",
+  "btn_select_all": "Zaznacz Wszystkie",
+  "btn_unselect_all": "Odznacz Wszystkie",
+  "btn_ok": "OK",
+
+  "msg_save_success": "Zapisano pomyślnie!",
+  "msg_save_failed": "Nie udało się zapisać przedmiotów!",
+  "msg_save_skills_success": "Umiejętności zapisane pomyślnie!",
+  "msg_save_skills_failed": "Nie udało się zapisać umiejętności!",
+  "msg_export_s6e3_success": "Eksport S6E3 zakończony pomyślnie!",
+  "msg_export_s6e3_failed": "Nie udało się wyeksportować do formatu S6E3!",
+  "msg_export_csv_success": "Eksport CSV zakończony pomyślnie!",
+  "msg_export_csv_failed": "Nie udało się wyeksportować do CSV!",
+  "msg_export_csv_skills_success": "Umiejętności wyeksportowane jako CSV pomyślnie!",
+  "msg_export_csv_skills_failed": "Nie udało się wyeksportować umiejętności do CSV!",
+
+  "error_file_not_found": "Nie znaleziono pliku: {0}",
+  "error_invalid_index": "Nieprawidłowy indeks: {0}",
+  "error_index_in_use": "Błąd: Indeks {0} jest już używany!",
+
+  "label_search_text": "Szukaj:",
+  "label_freeze_columns": "Zamroź Indeks/Nazwę",
+  "label_no_columns": "Nie wybrano kolumn. Kliknij 'Kolumny', aby pokazać kolumny.",
+  "label_index": "Indeks",
+
+  "popup_toggle_columns": "Przełącz Widoczność Kolumn:",
+  "popup_save_success": "Przedmioty zapisane pomyślnie!",
+  "popup_save_failed": "Nie udało się zapisać przedmiotów!",
+  "popup_save_skills_success": "Umiejętności zapisane pomyślnie!",
+  "popup_save_skills_failed": "Nie udało się zapisać umiejętności!",
+  "popup_export_csv_success": "Przedmioty wyeksportowane jako CSV pomyślnie!",
+  "popup_export_csv_failed": "Nie udało się wyeksportować atrybutów przedmiotów do CSV!",
+  "popup_export_csv_skills_success": "Umiejętności wyeksportowane jako CSV pomyślnie!",
+  "popup_export_csv_skills_failed": "Nie udało się wyeksportować atrybutów umiejętności do CSV!",
+  "popup_export_s6e3_success": "Pomyślnie wyeksportowano jako format starszego typu!",
+  "popup_export_s6e3_failed": "Nie udało się wyeksportować jako format starszego typu!",
+
+  "label_skill_editor_title": "Edytor Umiejętności",
+  "label_search_skills": "Szukaj Umiejętności:"
+}

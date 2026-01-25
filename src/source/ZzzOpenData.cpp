@@ -28,6 +28,7 @@
 #include "QuestMng.h"
 #include "ServerListManager.h"
 #include "MonkSystem.h"
+#include "DataHandler/SkillData/SkillDataHandler.h"
 
 #include "DataHandler/ItemData/ItemDataHandler.h"
 #include "SocketSystem.h"
@@ -5381,7 +5382,7 @@ void OpenBasicData(HDC hDC)
     g_csQuest.OpenQuestScript(Text);
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-    OpenSkillScript(Text);
+    g_SkillDataHandler.Load(Text);
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SocketItemMgr.OpenSocketItemScript(Text);

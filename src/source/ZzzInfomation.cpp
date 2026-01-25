@@ -242,57 +242,6 @@ void OpenNpcScript(wchar_t* FileName)
     fclose(SMDFile);
 }
 
-void OpenSkillScript(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
-    {
-        int Size = sizeof(SKILL_ATTRIBUTE_FILE);
-        // 읽기
-        BYTE* Buffer = new BYTE[Size * MAX_SKILLS];
-        fread(Buffer, Size * MAX_SKILLS, 1, fp);
-        // crc 체크
-        DWORD dwCheckSum;
-        fread(&dwCheckSum, sizeof(DWORD), 1, fp);
-        fclose(fp);
-        if (dwCheckSum != GenerateCheckSum2(Buffer, Size * MAX_SKILLS, 0x5A18))
-        {
-            wchar_t Text[256];
-            mu_swprintf(Text, L"%ls - File corrupted.", FileName);
-            g_ErrorReport.Write(Text);
-            MessageBox(g_hWnd, Text, NULL, MB_OK);
-            SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-        }
-        else
-        {
-            BYTE* pSeek = Buffer;
-            for (int i = 0; i < MAX_SKILLS; i++)
-            {
-                BuxConvert(pSeek, Size);
-                // memcpy(&SkillAttribute[i], pSeek, Size);
-
-                char rawName[MAX_SKILL_NAME]{};
-
-                memcpy(rawName, pSeek, MAX_SKILL_NAME);
-                CMultiLanguage::ConvertFromUtf8(SkillAttribute[i].Name, rawName);
-                pSeek += MAX_SKILL_NAME;
-                memcpy(&(SkillAttribute[i].Level), pSeek, Size - MAX_SKILL_NAME);
-
-                pSeek += Size - MAX_SKILL_NAME;
-            }
-        }
-        delete[] Buffer;
-    }
-    else
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-    }
-}
-
 BOOL IsValidateSkillIdx(INT iSkillIdx)
 {
     if (iSkillIdx >= MAX_SKILLS || iSkillIdx < 0)

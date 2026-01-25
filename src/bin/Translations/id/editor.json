@@ -1,0 +1,49 @@
+{
+  "_comment": "MuEditor UI Translations - Indonesian",
+  "language_name": "Bahasa Indonesia",
+
+  "btn_save": "Simpan Item",
+  "btn_save_skills": "Simpan Skill",
+  "btn_export_s6e3": "Ekspor sebagai S6E3",
+  "btn_export_csv": "Ekspor sebagai CSV",
+  "btn_export_csv_skills": "Ekspor Skill sebagai CSV",
+  "btn_columns": "Kolom",
+  "btn_select_all": "Pilih Semua",
+  "btn_unselect_all": "Batalkan Pilihan",
+  "btn_ok": "OK",
+
+  "msg_save_success": "Berhasil disimpan!",
+  "msg_save_failed": "Gagal menyimpan item!",
+  "msg_save_skills_success": "Skill berhasil disimpan!",
+  "msg_save_skills_failed": "Gagal menyimpan skill!",
+  "msg_export_s6e3_success": "Ekspor S6E3 berhasil diselesaikan!",
+  "msg_export_s6e3_failed": "Gagal mengekspor ke format S6E3!",
+  "msg_export_csv_success": "Ekspor CSV berhasil diselesaikan!",
+  "msg_export_csv_failed": "Gagal mengekspor sebagai CSV!",
+  "msg_export_csv_skills_success": "Skill berhasil diekspor sebagai CSV!",
+  "msg_export_csv_skills_failed": "Gagal mengekspor skill sebagai CSV!",
+
+  "error_file_not_found": "File tidak ditemukan: {0}",
+  "error_invalid_index": "Indeks tidak valid: {0}",
+  "error_index_in_use": "Error: Indeks {0} sudah digunakan!",
+
+  "label_search_text": "Cari:",
+  "label_freeze_columns": "Bekukan Indeks/Nama",
+  "label_no_columns": "Tidak ada kolom yang dipilih. Klik 'Kolom' untuk menampilkan kolom.",
+  "label_index": "Indeks",
+
+  "popup_toggle_columns": "Alihkan Visibilitas Kolom:",
+  "popup_save_success": "Item berhasil disimpan!",
+  "popup_save_failed": "Gagal menyimpan item!",
+  "popup_save_skills_success": "Skill berhasil disimpan!",
+  "popup_save_skills_failed": "Gagal menyimpan skill!",
+  "popup_export_csv_success": "Item berhasil diekspor sebagai CSV!",
+  "popup_export_csv_failed": "Gagal mengekspor atribut item sebagai CSV!",
+  "popup_export_csv_skills_success": "Skill berhasil diekspor sebagai CSV!",
+  "popup_export_csv_skills_failed": "Gagal mengekspor atribut skill sebagai CSV!",
+  "popup_export_s6e3_success": "Berhasil diekspor sebagai format lawas!",
+  "popup_export_s6e3_failed": "Gagal mengekspor sebagai format lawas!",
+
+  "label_skill_editor_title": "Editor Skill",
+  "label_search_skills": "Cari Skill:"
+}

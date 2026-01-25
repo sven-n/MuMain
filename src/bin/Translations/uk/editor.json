@@ -1,0 +1,49 @@
+{
+  "_comment": "MuEditor UI Translations - Ukrainian",
+  "language_name": "Українська",
+
+  "btn_save": "Зберегти Предмети",
+  "btn_save_skills": "Зберегти Навички",
+  "btn_export_s6e3": "Експорт у S6E3",
+  "btn_export_csv": "Експорт у CSV",
+  "btn_export_csv_skills": "Експорт Навичок у CSV",
+  "btn_columns": "Стовпці",
+  "btn_select_all": "Вибрати Все",
+  "btn_unselect_all": "Зняти Вибір",
+  "btn_ok": "ОК",
+
+  "msg_save_success": "Збереження завершено успішно!",
+  "msg_save_failed": "Не вдалося зберегти предмети!",
+  "msg_save_skills_success": "Навички збережено успішно!",
+  "msg_save_skills_failed": "Не вдалося зберегти навички!",
+  "msg_export_s6e3_success": "Експорт S6E3 завершено успішно!",
+  "msg_export_s6e3_failed": "Не вдалося експортувати у формат S6E3!",
+  "msg_export_csv_success": "Експорт CSV завершено успішно!",
+  "msg_export_csv_failed": "Не вдалося експортувати у CSV!",
+  "msg_export_csv_skills_success": "Навички експортовано у CSV успішно!",
+  "msg_export_csv_skills_failed": "Не вдалося експортувати навички у CSV!",
+
+  "error_file_not_found": "Файл не знайдено: {0}",
+  "error_invalid_index": "Недопустимий індекс: {0}",
+  "error_index_in_use": "Помилка: Індекс {0} вже використовується!",
+
+  "label_search_text": "Пошук:",
+  "label_freeze_columns": "Закріпити Індекс/Ім'я",
+  "label_no_columns": "Стовпці не вибрано. Натисніть 'Стовпці', щоб показати стовпці.",
+  "label_index": "Індекс",
+
+  "popup_toggle_columns": "Перемикач Видимості Стовпців:",
+  "popup_save_success": "Предмети збережено успішно!",
+  "popup_save_failed": "Не вдалося зберегти предмети!",
+  "popup_save_skills_success": "Навички збережено успішно!",
+  "popup_save_skills_failed": "Не вдалося зберегти навички!",
+  "popup_export_csv_success": "Предмети експортовано у CSV успішно!",
+  "popup_export_csv_failed": "Не вдалося експортувати атрибути предметів у CSV!",
+  "popup_export_csv_skills_success": "Навички експортовано у CSV успішно!",
+  "popup_export_csv_skills_failed": "Не вдалося експортувати атрибути навичок у CSV!",
+  "popup_export_s6e3_success": "Успішно експортовано у застарілому форматі!",
+  "popup_export_s6e3_failed": "Не вдалося експортувати у застарілому форматі!",
+
+  "label_skill_editor_title": "Редактор Навичок",
+  "label_search_skills": "Пошук Навичок:"
+}

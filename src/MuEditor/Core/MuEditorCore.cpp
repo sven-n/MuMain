@@ -3,8 +3,6 @@
 #ifdef _EDITOR
 
 #include "MuEditorCore.h"
-#include "../MuEditor/UI/Common/MuEditorUI.h"
-#include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
@@ -12,7 +10,11 @@
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
+#include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
+#include "../UI/Common/MuEditorUI.h"
+#include "../UI/Console/MuEditorConsoleUI.h"
 #include "Translation/i18n.h"
+#include "Utilities/StringUtils.h"
 
 // Windows cursor display counter thresholds
 // The cursor is visible when the counter is >= CURSOR_VISIBLE_THRESHOLD
@@ -30,6 +32,7 @@ CMuEditorCore::CMuEditorCore()
     , m_bInitialized(false)
     , m_bFrameStarted(false)
     , m_bShowItemEditor(false)
+    , m_bShowSkillEditor(false)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
 {
@@ -63,6 +66,98 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     io.MouseDrawCursor = false; // Don't let ImGui draw its own cursor, use Windows cursor
 
     fwprintf(stderr, L"[MuEditor] ImGui context created\n");
+    fflush(stderr);
+
+    // Load font with extended Unicode support for multiple languages
+    // This includes Latin, Cyrillic, Greek, and other common character sets
+    ImFontConfig fontConfig;
+    fontConfig.OversampleH = 2;
+    fontConfig.OversampleV = 2;
+    fontConfig.PixelSnapH = true;
+
+    // Build font atlas with multiple Unicode ranges
+    ImFontGlyphRangesBuilder builder;
+    builder.AddRanges(io.Fonts->GetGlyphRangesDefault());        // Basic Latin + Latin Supplement
+    builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());       // Cyrillic (Russian, Ukrainian, etc.)
+    builder.AddRanges(io.Fonts->GetGlyphRangesGreek());          // Greek
+    builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());       // Includes common Asian characters
+
+    // Add additional specific characters if needed
+    static const ImWchar additionalRanges[] = {
+        0x0100, 0x017F, // Latin Extended-A (Polish, etc.)
+        0x0180, 0x024F, // Latin Extended-B
+        0x1E00, 0x1EFF, // Latin Extended Additional (Vietnamese)
+        0,
+    };
+    builder.AddRanges(additionalRanges);
+
+    ImVector<ImWchar> ranges;
+    builder.BuildRanges(&ranges);
+
+    // Load default font with extended ranges
+    // Try platform-specific fonts that support extended Unicode
+    bool fontLoaded = false;
+
+#ifdef _WIN32
+    // Windows: Get fonts directory dynamically
+    wchar_t windowsDir[MAX_PATH];
+    if (GetWindowsDirectoryW(windowsDir, MAX_PATH) > 0)
+    {
+        std::wstring fontPathW = std::wstring(windowsDir) + L"\\Fonts\\segoeui.ttf";
+
+        // Convert to UTF-8 using StringUtils helper
+        std::string fontPath = StringUtils::WideToNarrow(fontPathW.c_str());
+        if (!fontPath.empty())
+        {
+            if (io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, &fontConfig, ranges.Data) != nullptr)
+            {
+                fontLoaded = true;
+            }
+        }
+    }
+#elif __APPLE__
+    // macOS: Try system fonts
+    const char* macFonts[] = {
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
+        "/Library/Fonts/Arial Unicode.ttf"
+    };
+    for (const char* fontPath : macFonts)
+    {
+        if (io.Fonts->AddFontFromFileTTF(fontPath, 16.0f, &fontConfig, ranges.Data) != nullptr)
+        {
+            fontLoaded = true;
+            break;
+        }
+    }
+#else
+    // Linux: Try common fonts with Unicode support
+    const char* linuxFonts[] = {
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+    };
+    for (const char* fontPath : linuxFonts)
+    {
+        if (io.Fonts->AddFontFromFileTTF(fontPath, 16.0f, &fontConfig, ranges.Data) != nullptr)
+        {
+            fontLoaded = true;
+            break;
+        }
+    }
+#endif
+
+    // Fallback to ImGui's default font if no system font loaded
+    // Note: Default font only supports basic ASCII, not extended ranges
+    if (!fontLoaded)
+    {
+        io.Fonts->AddFontDefault(&fontConfig);
+    }
+
+    // Note: Don't call io.Fonts->Build() - the backend will build it automatically
+
+    fwprintf(stderr, L"[MuEditor] Font loaded with Unicode support\n");
     fflush(stderr);
 
     // Dark theme
@@ -147,6 +242,9 @@ void CMuEditorCore::Shutdown()
 
     // Save item editor preferences before shutting down
     g_MuItemEditorUI.SaveColumnPreferences();
+
+    // Save skill editor preferences before shutting down
+    g_MuSkillEditorUI.SaveColumnPreferences();
 
     ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -305,12 +403,12 @@ void CMuEditorCore::Render()
     m_bHoveringUI = false;
 
     // Render toolbar (handles both open and closed states)
-    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor);
+    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor);
 
     if (m_bEditorMode)
     {
         // Render center pane (handles all editor windows and input blocking)
-        g_MuEditorCenterPaneUI.Render(m_bShowItemEditor);
+        g_MuEditorCenterPaneUI.Render(m_bShowItemEditor, m_bShowSkillEditor);
 
         // Render console
         g_MuEditorConsoleUI.Render();

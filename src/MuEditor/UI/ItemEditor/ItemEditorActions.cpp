@@ -21,7 +21,7 @@ void CItemEditorActions::ConvertItemName(char* outBuffer, size_t bufferSize, con
     WideCharToMultiByte(CP_UTF8, 0, name, -1, outBuffer, (int)bufferSize, NULL, NULL);
 }
 
-std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const FieldDescriptor& desc)
+std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const ItemFieldDescriptor& desc)
 {
     std::stringstream ss;
 
@@ -64,7 +64,7 @@ std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item
 std::string CItemEditorActions::GetCSVHeader()
 {
     std::stringstream ss;
-    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << "Index";
     for (int i = 0; i < fieldCount; ++i)
@@ -78,7 +78,7 @@ std::string CItemEditorActions::GetCSVHeader()
 std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBUTE& item)
 {
     std::stringstream ss;
-    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << "Row " << itemIndex << "\n";
     ss << "Index = " << itemIndex;
@@ -95,7 +95,7 @@ std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBU
 std::string CItemEditorActions::ExportItemToCSV(int itemIndex, ITEM_ATTRIBUTE& item)
 {
     std::stringstream ss;
-    const FieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
+    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
 
     ss << itemIndex;
 
@@ -168,9 +168,9 @@ void CItemEditorActions::RenderExportS6E3Button()
     if (ImGui::Button(EDITOR_TEXT("btn_export_s6e3")))
     {
         wchar_t fileName[256];
-        swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_%ls_S6E3.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+        swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_S6E3.bmd", g_strSelectedML.c_str());
 
-        if (g_ItemDataHandler.SaveLegacy(fileName))
+        if (g_ItemDataHandler.ExportAsS6E3(fileName))
         {
             std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd";
             g_MuEditorConsoleUI.LogEditor("Exported items as S6E3 legacy format: " + filename_str);
@@ -194,7 +194,7 @@ void CItemEditorActions::RenderExportCSVButton()
     if (ImGui::Button(EDITOR_TEXT("btn_export_csv")))
     {
         wchar_t csvFileName[256];
-        swprintf_s(csvFileName, _countof(csvFileName), L"Data\\Local\\%ls\\Item_%ls_export.csv", g_strSelectedML.c_str(), g_strSelectedML.c_str());
+        swprintf_s(csvFileName, _countof(csvFileName), L"Data\\Local\\%ls\\Item.csv", g_strSelectedML.c_str());
 
         if (g_ItemDataHandler.ExportToCsv(csvFileName))
         {
