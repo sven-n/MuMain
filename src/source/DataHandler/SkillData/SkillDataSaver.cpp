@@ -14,6 +14,8 @@
 #include <sstream>
 #include <string>
 
+#include "DataHandler/CommonDataSaver.h"
+
 // External references
 extern SKILL_ATTRIBUTE* SkillAttribute;
 
@@ -47,24 +49,6 @@ extern SKILL_ATTRIBUTE* SkillAttribute;
         skillChanges << "  " #nameWithIndex ": " << (int)oldSkill.baseName[index] << " -> " << (int)newSkill.baseName[index] << "\n"; \
         changed = true; \
     }
-
-bool SkillDataSaver::CreateBackup(wchar_t* fileName)
-{
-    wchar_t backupName[512];
-    swprintf(backupName, L"%ls.bak", fileName);
-
-    // Delete old backup if exists
-    DeleteFileW(backupName);
-
-    // Copy current file to backup
-    if (!CopyFileW(fileName, backupName, FALSE))
-    {
-        g_MuEditorConsoleUI.LogEditor("Warning: Could not create backup file");
-        return false;
-    }
-
-    return true;
-}
 
 bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
 {
@@ -123,9 +107,6 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
             delete[] OrigBuffer;
         }
     }
-
-    // Create backup
-    CreateBackup(fileName);
 
     // Prepare new buffer
     BYTE* Buffer = new BYTE[Size * MAX_SKILLS];
@@ -204,6 +185,9 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
 
     // Generate checksum
     DWORD dwCheckSum = GenerateCheckSum2(Buffer, Size * MAX_SKILLS, 0x5A18);
+
+    // Create backup
+    CommonDataSaver::CreateBackup(fileName);
 
     // Open file for writing only after we know we need to save
     FILE* fp = _wfopen(fileName, L"wb");

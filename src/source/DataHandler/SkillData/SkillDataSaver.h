@@ -13,10 +13,6 @@ public:
     // Returns true on success, false on failure
     // outChangeLog: Optional parameter to receive a detailed change log
     static bool Save(wchar_t* fileName, std::string* outChangeLog = nullptr);
-
-private:
-    // Create a backup of the file before saving
-    static bool CreateBackup(wchar_t* fileName);
 };
 
 #endif // _EDITOR
