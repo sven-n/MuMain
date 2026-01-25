@@ -50,7 +50,7 @@ namespace MUHelper
 		PET_ATTACK_TOGETHER = 0x02
 	};
 
-	typedef struct
+	typedef struct _PetAttackConfig
 	{
 		int iHuntingRange = 0;
 
