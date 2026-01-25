@@ -13,6 +13,7 @@
 #include "imgui.h"
 #include <algorithm>
 #include <cctype>
+#include <unordered_set>
 
 #include "imgui_internal.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
@@ -31,25 +32,17 @@ CMuSkillEditorUI::CMuSkillEditorUI()
     // Get all fields from metadata and set default visibility
     const SkillFieldDescriptor* fields = GetSkillFieldDescriptors();
     const int fieldCount = GetSkillFieldCount();
+
+    // Define commonly used fields that should be visible by default
+    static const std::unordered_set<std::string> defaultVisibleFields = {
+        "Name", "Level", "Damage", "Mana", "Distance",
+        "Delay", "Energy", "Strength", "Dexterity"
+    };
+
     for (int i = 0; i < fieldCount; ++i)
     {
-        // Default commonly used columns to visible, rest to hidden
-        bool defaultVisible = false;
-
-        // Check for commonly used fields
-        if (strcmp(fields[i].name, "Name") == 0 ||
-            strcmp(fields[i].name, "Level") == 0 ||
-            strcmp(fields[i].name, "Damage") == 0 ||
-            strcmp(fields[i].name, "Mana") == 0 ||
-            strcmp(fields[i].name, "Distance") == 0 ||
-            strcmp(fields[i].name, "Delay") == 0 ||
-            strcmp(fields[i].name, "Energy") == 0 ||
-            strcmp(fields[i].name, "Strength") == 0 ||
-            strcmp(fields[i].name, "Dexterity") == 0)
-        {
-            defaultVisible = true;
-        }
-
+        // Check if field is in the default visible set
+        bool defaultVisible = defaultVisibleFields.count(fields[i].name) > 0;
         m_columnVisibility[fields[i].name] = defaultVisible;
     }
 
