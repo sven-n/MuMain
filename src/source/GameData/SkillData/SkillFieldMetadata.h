@@ -34,6 +34,7 @@ namespace SkillFieldMetadataInternal
         // All other fields from X-macros
         SKILL_FIELDS_SIMPLE(MAKE_SKILL_FIELD_DESCRIPTOR)
         SKILL_FIELDS_ARRAYS(MAKE_SKILL_ARRAY_DESCRIPTOR)
+        SKILL_FIELDS_AFTER_ARRAYS(MAKE_SKILL_FIELD_DESCRIPTOR)
     };
 }
 
