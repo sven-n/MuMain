@@ -995,7 +995,7 @@ typedef struct {
     BYTE         GuildKeyL;
 } PRECEIVE_GUILD_PLAYER, * LPPRECEIVE_GUILD_PLAYER;
 
-// ±æµå¿ø ¸ñ·Ï
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 typedef struct {
     char         ID[MAX_ID_SIZE];
     BYTE         Number;
@@ -1003,7 +1003,7 @@ typedef struct {
     BYTE		 GuildStatus;
 } PRECEIVE_GUILD_LIST, * LPPRECEIVE_GUILD_LIST;
 
-// ±æµå¿ø ¸ñ·Ï ¸®½ºÆ®
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
 typedef struct {
     PWMSG_HEADER Header;
     BYTE         Result;
@@ -1330,7 +1330,7 @@ typedef struct
     BYTE	m_byItemInfo[PACKET_ITEM_LENGTH_EXTENDED_MAX];
 } NPC_QUESTEXP_REQUEST_INFO, * LPNPC_QUESTEXP_REQUEST_INFO;
 
-// º¸»ó
+// ï¿½ï¿½ï¿½ï¿½
 enum QUEST_REWARD_TYPE : BYTE
 {
     QUEST_REWARD_NONE = 0x0000,
@@ -1911,7 +1911,7 @@ typedef struct
     WORD			m_Time;
 }PMSG_MATCH_TIMEVIEW, * LPPMSG_MATCH_TIMEVIEW;
 
-typedef struct
+typedef struct _PMSG_MATCH_RESULT
 {
     void			Clear()
     {
@@ -1933,7 +1933,7 @@ typedef struct
     WORD			m_Score2;
 }PMSG_MATCH_RESULT, * LPPMSG_MATCH_RESULT;
 
-typedef struct
+typedef struct _MATCH_RESULT
 {
     void			Clear()
     {
@@ -2486,7 +2486,7 @@ typedef struct
 } PMSG_ANS_CRYWOLF_INFO, * LPPMSG_ANS_CRYWOLF_INFO;
 
 //--------------------------------------------------------------------------
-// GC [0xBD][0x02] ¹æ¾î¸·, Á¦´Ü »óÅÂ Á¤º¸
+// GC [0xBD][0x02] ï¿½ï¿½î¸·, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 //--------------------------------------------------------------------------
 typedef struct
 {
@@ -3251,7 +3251,7 @@ typedef struct
 }PMSG_CASHSHOP_BUYITEM_REQ, * LPPMSG_CASHSHOP_BUYITEM_REQ;
 
 //----------------------------------------------------------------------------
-// ¾ÆÀÌÅÛ ±¸¸Å °á°ú (0xD2)(0x03)
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (0xD2)(0x03)
 //----------------------------------------------------------------------------
 typedef struct
 {
