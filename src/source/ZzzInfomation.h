@@ -12,13 +12,13 @@ extern wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
 extern int  AbuseFilterNumber;
 extern int  AbuseNameFilterNumber;
 
-void OpenFilterFile(wchar_t* FileName);
-void OpenNameFilterFile(wchar_t* FileName);
+void OpenFilterFile(const wchar_t* FileName);
+void OpenNameFilterFile(const wchar_t* FileName);
 
 extern GATE_ATTRIBUTE* GateAttribute;
 
-void OpenGateScript(wchar_t* FileName);
-void OpenMonsterSkillScript(wchar_t* FileName);
+void OpenGateScript(const wchar_t* FileName);
+void OpenMonsterSkillScript(const wchar_t* FileName);
 
 extern DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
 
@@ -36,7 +36,7 @@ extern MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
 
 extern void  OpenMonsterScript(wchar_t* FileName);
 extern void  MonsterConvert(MONSTER* m, int Level);
-extern wchar_t* getMonsterName(int type);
+extern const wchar_t* getMonsterName(int type);
 
 extern SKILL_ATTRIBUTE* SkillAttribute;
 

@@ -3547,7 +3547,7 @@ extern int  SoccerTime;
 extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
-BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port);
+BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
 void DeleteSocket();
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
 

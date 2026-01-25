@@ -30,11 +30,11 @@ CListManager::~CListManager() // OK
 }
 
 void			CListManager::SetListManagerInfo(DownloaderType type,
-    wchar_t* ServerIP,
-    wchar_t* UserID,
-    wchar_t* Pwd,
-    wchar_t* RemotePath,
-    wchar_t* LocalPath,
+    const wchar_t* ServerIP,
+    const wchar_t* UserID,
+    const wchar_t* Pwd,
+    const wchar_t* RemotePath,
+    const wchar_t* LocalPath,
     CListVersionInfo Version,
     DWORD dwDownloadMaxTime)
 {
@@ -47,12 +47,12 @@ void			CListManager::SetListManagerInfo(DownloaderType type,
 }
 
 void			CListManager::SetListManagerInfo(DownloaderType type,
-    wchar_t* ServerIP,
+    const wchar_t* ServerIP,
     unsigned short PortNum,
-    wchar_t* UserID,
-    wchar_t* Pwd,
-    wchar_t* RemotePath,
-    wchar_t* LocalPath,
+    const wchar_t* UserID,
+    const wchar_t* Pwd,
+    const wchar_t* RemotePath,
+    const wchar_t* LocalPath,
     FTP_SERVICE_MODE ftpMode,
     CListVersionInfo Version,
     DWORD dwDownloadMaxTime) // OK

@@ -94,7 +94,7 @@ void SEASON3B::CNewUIMasterLevel::SetPos()
     this->height = 428;
 }
 
-void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(wchar_t* path)
+void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 {
     memset(m_stMasterSkillTreeData, 0, sizeof(m_stMasterSkillTreeData));
 
@@ -151,7 +151,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(wchar_t* path)
     delete[] Buffer;
 }
 
-void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(wchar_t* path)
+void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
 {
     memset(m_stMasterSkillTooltip, 0, sizeof(m_stMasterSkillTooltip));
 

@@ -10,7 +10,7 @@
 
 namespace
 {
-    void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
+    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
     {
         g_pRenderText->SetFont(g_hFont);
 

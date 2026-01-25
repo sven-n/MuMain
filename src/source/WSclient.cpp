@@ -153,7 +153,7 @@ void AddDebugText(const unsigned char* Buffer, int Size)
 // Forward declaration
 static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
 
-BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port)
+BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
     g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);

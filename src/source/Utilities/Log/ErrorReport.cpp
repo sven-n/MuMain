@@ -30,7 +30,7 @@ void CErrorReport::Clear(void)
     m_iKey = 0;
 }
 
-void CErrorReport::Create(wchar_t* lpszFileName)
+void CErrorReport::Create(const wchar_t* lpszFileName)
 {
     wcscpy(m_lpszFileName, lpszFileName);
 
@@ -71,9 +71,9 @@ void CErrorReport::CutHead(void)
     }
 }
 
-wchar_t* CErrorReport::CheckHeadToCut(wchar_t* lpszBuffer, DWORD dwNumber)
+wchar_t* CErrorReport::CheckHeadToCut( wchar_t* lpszBuffer, DWORD dwNumber)
 {
-    wchar_t* lpszBegin = L"###### Log Begin ######";
+    const wchar_t* lpszBegin = L"###### Log Begin ######";
     int iLengthOfBegin = wcslen(lpszBegin);
 
     wchar_t* lpFoundList[128];
@@ -289,7 +289,7 @@ void CErrorReport::WriteSoundCardInfo(void)
 
 void GetOSVersion(ER_SystemInfo* si)
 {
-    wchar_t* lpszUnknown = L"Unknown";
+    const wchar_t* lpszUnknown = L"Unknown";
     wchar_t lpszTemp[256];
 
     OSVERSIONINFO osiOne;

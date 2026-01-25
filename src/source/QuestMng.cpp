@@ -257,7 +257,7 @@ int CQuestMng::GetNPCIndex()
     return m_nNPCIndex;
 }
 
-wchar_t* CQuestMng::GetNPCName()
+const wchar_t* CQuestMng::GetNPCName()
 {
     return m_szNPCName;
 }

@@ -9,7 +9,7 @@
 
 namespace
 {
-    void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
+    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
     {
         g_pRenderText->SetFont(g_hFont);
 
@@ -208,7 +208,7 @@ void CNewUIGoldBowmanLena::RenderFrame()
 
 void CNewUIGoldBowmanLena::RenderTexts()
 {
-    wchar_t* name = getMonsterName(236);
+    const wchar_t* name = getMonsterName(236);
     RenderText(name, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     wchar_t Text[100];

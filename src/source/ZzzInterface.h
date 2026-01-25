@@ -68,7 +68,7 @@ int  CreateChat(wchar_t* character_name, const wchar_t* chat_text, OBJECT* Owner
 void AssignChat(wchar_t* ID, const wchar_t* Text, int Flag = 0);
 void MoveChat();
 void ClearNotice(void);
-void CreateNotice(wchar_t* Text, int Color);
+void CreateNotice(const wchar_t* Text, int Color);
 void MoveNotices();
 void RenderNotices();
 void RenderSwichState();

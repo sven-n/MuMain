@@ -50,7 +50,7 @@ public:
     void ShowQuestNpcWindow(int index = -1);
 
     std::uint8_t getCurrQuestState(void);
-    wchar_t* GetNPCName(BYTE byQuestIndex);
+    const wchar_t* GetNPCName(BYTE byQuestIndex);
     wchar_t* getQuestTitle();
     wchar_t* getQuestTitle(BYTE byQuestIndex);
     wchar_t* getQuestTitleWindow();

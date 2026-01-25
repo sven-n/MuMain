@@ -51,7 +51,7 @@ WZResult& WZResult::operator=(const WZResult& a2) // OK
     return *this;
 }
 
-void WZResult::SetResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, TCHAR* szFormat, ...) // OK
+void WZResult::SetResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR* szFormat, ...) // OK
 {
     va_list va;
 
@@ -77,7 +77,7 @@ WZResult WZResult::BuildSuccessResult() // OK
     return result;
 }
 
-WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, TCHAR* szFormat, ...) // OK
+WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR* szFormat, ...) // OK
 {
     WZResult result;
     wchar_t Buffer[MAX_ERROR_MESSAGE];

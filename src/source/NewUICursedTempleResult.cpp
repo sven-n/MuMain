@@ -24,7 +24,7 @@ using namespace SEASON3B;
 
 namespace
 {
-    void DrawText(wchar_t* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
+    void DrawText(const wchar_t* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
     {
         if (isbold)
         {

@@ -14,7 +14,7 @@ extern EGameScene SceneFlag;
 
 extern int  ErrorMessage;
 extern bool InitServerList;
-extern wchar_t* szServerIpAddress;
+extern const wchar_t* szServerIpAddress;
 extern unsigned short g_ServerPort;
 extern int g_iLengthAuthorityCode;
 

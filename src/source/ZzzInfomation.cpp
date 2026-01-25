@@ -62,7 +62,7 @@ wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
 int  AbuseFilterNumber = 0;
 int  AbuseNameFilterNumber = 0;
 
-void OpenFilterFile(wchar_t* FileName)
+void OpenFilterFile(const wchar_t* FileName)
 {
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
@@ -101,7 +101,7 @@ void OpenFilterFile(wchar_t* FileName)
     fclose(fp);
 }
 
-void OpenNameFilterFile(wchar_t* FileName)
+void OpenNameFilterFile(const wchar_t* FileName)
 {
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
@@ -151,7 +151,7 @@ void OpenNameFilterFile(wchar_t* FileName)
 // gate
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGateScript(wchar_t* FileName)
+void OpenGateScript(const wchar_t* FileName)
 {
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp != NULL)
@@ -177,7 +177,7 @@ void OpenGateScript(wchar_t* FileName)
     }
 }
 
-void OpenMonsterSkillScript(wchar_t* FileName)
+void OpenMonsterSkillScript(const wchar_t* FileName)
 {
     memset(MonsterSkill, -1, sizeof(Script_Skill));
 
@@ -2383,7 +2383,7 @@ void OpenMonsterScript(wchar_t* FileName)
     fclose(SMDFile);
 }
 
-wchar_t* getMonsterName(int type)
+const wchar_t* getMonsterName(int type)
 {
     for (int i = 0; i < MAX_MONSTER; ++i)
     {
