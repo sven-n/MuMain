@@ -117,8 +117,18 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     delete[] Buffer;
 
 #ifdef _EDITOR
+    // Count non-empty skills (skills with names)
+    int skillCount = 0;
+    for (int i = 0; i < MAX_SKILLS; i++)
+    {
+        if (SkillAttribute[i].Name[0] != L'\0')
+        {
+            skillCount++;
+        }
+    }
+
     wchar_t successMsg[256];
-    swprintf(successMsg, L"Loaded %d skills from %ls", MAX_SKILLS, fileName);
+    swprintf(successMsg, L"Loaded %d skills from %ls", skillCount, fileName);
     g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
 #endif
 

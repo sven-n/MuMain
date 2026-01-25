@@ -10,6 +10,11 @@
 #include "CSChaosCastle.h"
 #include <sstream>
 
+#ifdef _EDITOR
+#include "UI/Console/MuEditorConsoleUI.h"
+#include "Utilities/StringUtils.h"
+#endif
+
 // External references
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
@@ -37,6 +42,13 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     bool isLegacyFormat = (fileSize == expectedLegacySize);
     bool success = false;
 
+#ifdef _EDITOR
+    if (isLegacyFormat)
+    {
+        g_MuEditorConsoleUI.LogEditor("Detected legacy item format (30-byte names)");
+    }
+#endif
+
     if (isLegacyFormat)
     {
         success = LoadLegacyFormat(fp, fileSize);
@@ -47,6 +59,26 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     }
 
     fclose(fp);
+
+#ifdef _EDITOR
+    if (success)
+    {
+        // Count non-empty items (items with names)
+        int itemCount = 0;
+        for (int i = 0; i < MAX_ITEM; i++)
+        {
+            if (ItemAttribute[i].Name[0] != L'\0')
+            {
+                itemCount++;
+            }
+        }
+
+        wchar_t successMsg[256];
+        swprintf(successMsg, L"Loaded %d items from %ls", itemCount, fileName);
+        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
+    }
+#endif
+
     return success;
 }
 
