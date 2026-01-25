@@ -1140,7 +1140,7 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
 
 int CMixRecipeMgr::GetMixInventoryType()
 {
-    assert(m_iMixType >= MIXTYPE_GOBLIN_NORMAL && m_iMixType < MAX_MIX_TYPES && "정의되지 않은 조합창");
+    assert(m_iMixType >= MIXTYPE_GOBLIN_NORMAL && m_iMixType < MAX_MIX_TYPES && "Undefined combination");
     return m_iMixType;
 }
 
