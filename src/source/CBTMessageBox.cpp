@@ -40,6 +40,9 @@ namespace
     struct ScopedCbtUnhook
     {
         leaf::CCBTMessageBox* owner{nullptr};
+
+        explicit ScopedCbtUnhook(leaf::CCBTMessageBox* p) : owner(p) {}
+
         ScopedCbtUnhook(const ScopedCbtUnhook&) = delete;
         ScopedCbtUnhook& operator=(const ScopedCbtUnhook&) = delete;
         ScopedCbtUnhook(ScopedCbtUnhook&&) = delete;
