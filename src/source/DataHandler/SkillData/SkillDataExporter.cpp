@@ -52,29 +52,26 @@ bool SkillDataExporter::ExportToCsv(wchar_t* fileName)
         // Only export skills with names
         if (SkillAttribute[i].Name[0] != 0)
         {
-            // Convert wide char name to UTF-8
-            char utf8Name[MAX_SKILL_NAME * 3] = {0};
-            WideCharToMultiByte(CP_UTF8, 0, SkillAttribute[i].Name, -1, utf8Name, sizeof(utf8Name), NULL, NULL);
+            // Convert wide char name to UTF-8 using StringUtils
+            std::string utf8Name = StringUtils::WideToNarrow(SkillAttribute[i].Name);
 
             // Escape quotes in name
-            char escapedName[MAX_SKILL_NAME * 6] = {0};
-            int idx = 0;
-            for (int j = 0; utf8Name[j] != 0 && idx < (MAX_SKILL_NAME * 6 - 2); j++)
+            std::string escapedName;
+            escapedName.reserve(utf8Name.length() * 2); // Reserve space for worst case
+            for (char c : utf8Name)
             {
-                if (utf8Name[j] == '"')
+                if (c == '"')
                 {
-                    escapedName[idx++] = '"';
-                    escapedName[idx++] = '"';
+                    escapedName += "\"\"";
                 }
                 else
                 {
-                    escapedName[idx++] = utf8Name[j];
+                    escapedName += c;
                 }
             }
-            escapedName[idx] = '\0';
 
             // Print index and name
-            fprintf(csvFp, "%d,\"%s\"", i, escapedName);
+            fprintf(csvFp, "%d,\"%s\"", i, escapedName.c_str());
 
             // Print all fields using X-macros
             SKILL_ATTRIBUTE& skill = SkillAttribute[i];
