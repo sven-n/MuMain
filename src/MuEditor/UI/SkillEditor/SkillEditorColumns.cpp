@@ -15,6 +15,29 @@
 
 extern SKILL_ATTRIBUTE* SkillAttribute;
 
+// ===== HELPER FUNCTIONS =====
+
+static std::string GetSkillNameUtf8(int skillIndex)
+{
+    char nameBuf[256]{};
+    if (SkillAttribute && skillIndex >= 0 && skillIndex < MAX_SKILLS)
+    {
+        WideCharToMultiByte(CP_UTF8, 0, SkillAttribute[skillIndex].Name, -1, nameBuf, sizeof(nameBuf), NULL, NULL);
+    }
+    if (nameBuf[0] == '\0')
+        return "<unnamed>";
+    return nameBuf;
+}
+
+static void LogSkillFieldChange(int skillIndex, const char* columnName, const std::string& newValue)
+{
+    g_MuEditorConsoleUI.LogEditor(
+        "Changed skill " + std::to_string(skillIndex) +
+        " (" + GetSkillNameUtf8(skillIndex) + ") " +
+        columnName + " to " + newValue
+    );
+}
+
 // ===== X-MACRO-DRIVEN RENDERING =====
 
 void CSkillEditorColumns::RenderFieldByDescriptor(const SkillFieldDescriptor& desc, int& colIdx, int skillIndex,
@@ -42,7 +65,7 @@ void CSkillEditorColumns::RenderByteColumn(
         if (intValue >= 0 && intValue <= 255)
         {
             value = (BYTE)intValue;
-            g_MuEditorConsoleUI.LogEditor("Changed skill " + std::to_string(skillIndex) + " " + columnName + " to " + std::to_string(intValue));
+            LogSkillFieldChange(skillIndex, columnName, std::to_string(intValue));
         }
     }
 
@@ -66,7 +89,7 @@ void CSkillEditorColumns::RenderWordColumn(
         if (intValue >= 0 && intValue <= 65535)
         {
             value = (WORD)intValue;
-            g_MuEditorConsoleUI.LogEditor("Changed skill " + std::to_string(skillIndex) + " " + columnName + " to " + std::to_string(intValue));
+            LogSkillFieldChange(skillIndex, columnName, std::to_string(intValue));
         }
     }
 
@@ -86,7 +109,7 @@ void CSkillEditorColumns::RenderIntColumn(
 
     if (ImGui::InputInt("##input", &value, 0, 0))
     {
-        g_MuEditorConsoleUI.LogEditor("Changed skill " + std::to_string(skillIndex) + " " + columnName + " to " + std::to_string(value));
+        LogSkillFieldChange(skillIndex, columnName, std::to_string(value));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -106,7 +129,7 @@ void CSkillEditorColumns::RenderDWordColumn(
     // DWORD is unsigned, range 0 to 4294967295
     if (ImGui::InputScalar("##input", ImGuiDataType_U32, &value, nullptr, nullptr, "%u"))
     {
-        g_MuEditorConsoleUI.LogEditor("Changed skill " + std::to_string(skillIndex) + " " + columnName + " to " + std::to_string(value));
+        LogSkillFieldChange(skillIndex, columnName, std::to_string(value));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -125,7 +148,7 @@ void CSkillEditorColumns::RenderBoolColumn(
 
     if (ImGui::Checkbox("##checkbox", &value))
     {
-        g_MuEditorConsoleUI.LogEditor("Changed skill " + std::to_string(skillIndex) + " " + columnName + " to " + (value ? "true" : "false"));
+        LogSkillFieldChange(skillIndex, columnName, value ? "true" : "false");
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
@@ -148,7 +171,7 @@ void CSkillEditorColumns::RenderWCharArrayColumn(
     if (ImGui::InputText("##input", editableBuffer, sizeof(editableBuffer)))
     {
         MultiByteToWideChar(CP_UTF8, 0, editableBuffer, -1, value, arraySize);
-        g_MuEditorConsoleUI.LogEditor("Changed skill " + std::to_string(skillIndex) + " " + columnName + " to " + std::string(editableBuffer));
+        LogSkillFieldChange(skillIndex, columnName, std::string(editableBuffer));
     }
 
     if (ImGui::IsItemActivated()) rowInteracted = true;
