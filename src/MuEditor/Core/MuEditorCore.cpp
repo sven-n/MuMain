@@ -14,6 +14,7 @@
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "Translation/i18n.h"
+#include "Utilities/StringUtils.h"
 
 // Windows cursor display counter thresholds
 // The cursor is visible when the counter is >= CURSOR_VISIBLE_THRESHOLD
@@ -104,13 +105,10 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     {
         std::wstring fontPathW = std::wstring(windowsDir) + L"\\Fonts\\segoeui.ttf";
 
-        // Convert to UTF-8
-        int utf8Size = WideCharToMultiByte(CP_UTF8, 0, fontPathW.c_str(), -1, nullptr, 0, nullptr, nullptr);
-        if (utf8Size > 0)
+        // Convert to UTF-8 using StringUtils helper
+        std::string fontPath = StringUtils::WideToNarrow(fontPathW.c_str());
+        if (!fontPath.empty())
         {
-            std::string fontPath(utf8Size, 0);
-            WideCharToMultiByte(CP_UTF8, 0, fontPathW.c_str(), -1, &fontPath[0], utf8Size, nullptr, nullptr);
-
             if (io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, &fontConfig, ranges.Data) != nullptr)
             {
                 fontLoaded = true;
