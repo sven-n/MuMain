@@ -77,6 +77,7 @@ bool SkillDataExporter::ExportToCsv(wchar_t* fileName)
             SKILL_ATTRIBUTE& skill = SkillAttribute[i];
             SKILL_FIELDS_SIMPLE(CSV_PRINT_SIMPLE)
             SKILL_FIELDS_ARRAYS(CSV_PRINT_ARRAY)
+            SKILL_FIELDS_AFTER_ARRAYS(CSV_PRINT_SIMPLE)
 
             fprintf(csvFp, "\n");
             exportedCount++;
