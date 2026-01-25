@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include <Windows.h>
+#include <windows.h>
 #include <string>
 #include "Translation/i18n.h"
 
