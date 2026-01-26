@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.25)
 
 project(MuMain)
 
-# Force C++20 for all targets here (if needed as a fallback)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 # Initialize imgui submodule automatically if missing
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp")
   find_package(Git QUIET)
