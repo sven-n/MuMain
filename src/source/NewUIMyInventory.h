@@ -11,7 +11,7 @@
 #include "NewUIMessageBox.h"
 #include "NewUI3DRenderMng.h"
 #include "NewUIButton.h"
-#include "span.hpp"
+#include <span>
 #include "_enum.h"
 
 namespace SEASON3B

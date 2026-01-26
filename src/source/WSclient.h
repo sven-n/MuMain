@@ -5,7 +5,7 @@
 
 #include "Dotnet/Connection.h"
 #include "CSMapServer.h"
-#include "span.hpp"
+#include <span>
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)
 
