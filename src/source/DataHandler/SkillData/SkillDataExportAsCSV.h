@@ -4,7 +4,7 @@
 
 // Skill Data Export Operations
 // Exports skill data to CSV format for external editing
-class SkillDataExporter
+class SkillDataExportAsCSV
 {
 public:
     // Export all skills to CSV file

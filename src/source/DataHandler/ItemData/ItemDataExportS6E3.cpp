@@ -2,20 +2,21 @@
 
 #ifdef _EDITOR
 
-#include "SkillDataSaverLegacy.h"
+#include "ItemDataExportS6E3.h"
 #include "DataHandler/DataFileIO.h"
-#include "GameData/SkillData/SkillStructs.h"
+#include "GameData/ItemData/ItemStructs.h"
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
+#include "MultiLanguage.h"
 #include <memory>
 
 // External references
-extern SKILL_ATTRIBUTE* SkillAttribute;
+extern ITEM_ATTRIBUTE* ItemAttribute;
 
-bool SkillDataSaverLegacy::SaveLegacy(wchar_t* fileName)
+bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName)
 {
-    const int Size = sizeof(SKILL_ATTRIBUTE_FILE_LEGACY);
+    const int Size = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
 
     FILE* fp = _wfopen(fileName, L"wb");
     if (fp == NULL)
@@ -23,16 +24,16 @@ bool SkillDataSaverLegacy::SaveLegacy(wchar_t* fileName)
         return false;
     }
 
-    auto Buffer = std::make_unique<BYTE[]>(Size * MAX_SKILLS);
+    auto Buffer = std::make_unique<BYTE[]>(Size * MAX_ITEM);
     BYTE* pSeek = Buffer.get();
 
-    // Convert SKILL_ATTRIBUTE to SKILL_ATTRIBUTE_FILE_LEGACY format
-    for (int i = 0; i < MAX_SKILLS; i++)
+    // Convert ItemAttribute to ITEM_ATTRIBUTE_FILE_LEGACY format
+    for (int i = 0; i < MAX_ITEM; i++)
     {
-        SKILL_ATTRIBUTE_FILE_LEGACY dest;
+        ITEM_ATTRIBUTE_FILE_LEGACY dest;
         memset(&dest, 0, Size);
 
-        CopySkillAttributeToDestination(dest, SkillAttribute[i]);
+        CopyItemAttributeToDestination(dest, ItemAttribute[i]);
 
         memcpy(pSeek, &dest, Size);
         pSeek += Size;
@@ -41,8 +42,8 @@ bool SkillDataSaverLegacy::SaveLegacy(wchar_t* fileName)
     // Configure I/O
     DataFileIO::IOConfig config;
     config.itemSize = Size;
-    config.itemCount = MAX_SKILLS;
-    config.checksumKey = 0x5A18;
+    config.itemCount = MAX_ITEM;
+    config.checksumKey = 0xE2F1;
     config.encryptRecord = [](BYTE* data, int size) { BuxConvert(data, size); };
 
     // Encrypt buffer

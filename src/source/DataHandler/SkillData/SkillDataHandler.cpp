@@ -3,14 +3,14 @@
 
 #include "SkillDataLoader.h"
 #include "SkillDataSaver.h"
-#include "SkillDataSaverLegacy.h"
+#include "SkillDataExportS6E3.h"
 #include "GameData/SkillData/SkillStructs.h"
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
 
 #ifdef _EDITOR
-#include "SkillDataExporter.h"
+#include "SkillDataExportAsCSV.h"
 #endif
 
 // External references
@@ -56,11 +56,11 @@ bool CSkillDataHandler::Save(wchar_t* fileName, std::string* outChangeLog)
 
 bool CSkillDataHandler::ExportAsS6E3(wchar_t* fileName)
 {
-    return SkillDataSaverLegacy::SaveLegacy(fileName);
+    return SkillDataExportS6E3::SaveLegacy(fileName);
 }
 
 bool CSkillDataHandler::ExportToCsv(wchar_t* fileName)
 {
-    return SkillDataExporter::ExportToCsv(fileName);
+    return SkillDataExportAsCSV::ExportToCsv(fileName);
 }
 #endif

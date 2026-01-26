@@ -14,6 +14,7 @@
 #include <string>
 #include <memory>
 
+#include "DataHandler/ChangeTracker.h"
 #include "DataHandler/CommonDataSaver.h"
 #include "DataHandler/FieldMetadata.h"
 #include "DataHandler/SkillData/SkillComparisonMetadata.h"

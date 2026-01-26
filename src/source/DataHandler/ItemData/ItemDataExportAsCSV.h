@@ -3,7 +3,7 @@
 #ifdef _EDITOR
 
 // Item Data Export/Import Operations
-class ItemDataExporter
+class ItemDataExportAsCSV
 {
 public:
     static bool ExportToCsv(wchar_t* fileName);

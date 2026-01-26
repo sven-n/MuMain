@@ -13,6 +13,7 @@
 #include <sstream>
 #include <memory>
 
+#include "DataHandler/ChangeTracker.h"
 #include "DataHandler/CommonDataSaver.h"
 #include "DataHandler/FieldMetadata.h"
 #include "DataHandler/ItemData/ItemComparisonMetadata.h"
