@@ -31,11 +31,8 @@ namespace SEASON3B
         };
 
     private:
-        enum
-        {
-            INVENTORY_WIDTH = 190,
-            INVENTORY_HEIGHT = 429,
-        };
+        static constexpr float INVENTORY_WIDTH = 190.0f;
+        static constexpr float INVENTORY_HEIGHT = 429.0f;
 
         CNewUIManager* m_pNewUIMng;
         CNewUIInventoryCtrl* m_pNewInventoryCtrl;

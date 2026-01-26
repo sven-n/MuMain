@@ -23,11 +23,8 @@ namespace SEASON3B
             IMAGE_CURSEDTEMPLERESULT_FAILURE,
         };
 
-        enum UI_SIZE
-        {
-            CURSEDTEMPLE_RESULT_WINDOW_WIDTH = 230,
-            CURSEDTEMPLE_RESULT_WINDOW_HEIGHT = 282,
-        };
+        static constexpr float CURSEDTEMPLE_RESULT_WINDOW_WIDTH = 230.0f;
+        static constexpr float CURSEDTEMPLE_RESULT_WINDOW_HEIGHT = 282.0f;
 
         enum
         {

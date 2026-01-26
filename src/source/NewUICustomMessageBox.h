@@ -24,20 +24,13 @@ namespace SEASON3B
         KEYPAD_TYPE_LOCK_FINAL = 5,
     };
 
-    enum
-    {
-        INPUTBOX_WIDTH = 50,
-        INPUTBOX_HEIGHT = 12,
-
-        INPUTBOX_TEXTLIMIT = 8,
-    };
+    static constexpr float INPUTBOX_WIDTH = 50.0f;
+    static constexpr float INPUTBOX_HEIGHT = 12.0f;
+    static constexpr int INPUTBOX_TEXTLIMIT = 8;
 
     class CNewUITextInputMsgBox : public CNewUIMessageBoxBase
     {
-        enum
-        {
-            INPUTBOX_TOP_BLANK = 10,
-        };
+        static constexpr float INPUTBOX_TOP_BLANK = 10.0f;
 
         typedef struct _MSGBOX_TEXTDATA
         {
@@ -115,13 +108,10 @@ namespace SEASON3B
 
     class CNewUIKeyPadMsgBox : public CNewUIMessageBoxBase
     {
-        enum
-        {
-            MSGBOX_MIDDLE_FRAME_NUM = 9,
-            KEYPAD_INPUT_NUM = 2,
-            KEYPAD_WIDTH = 32,
-            KEYPAD_HEIGHT = 32,
-        };
+        static constexpr int MSGBOX_MIDDLE_FRAME_NUM = 9;
+        static constexpr int KEYPAD_INPUT_NUM = 2;
+        static constexpr float KEYPAD_WIDTH = 32.0f;
+        static constexpr float KEYPAD_HEIGHT = 32.0f;
 
         typedef struct _MSGBOX_TEXTDATA
         {
@@ -196,13 +186,10 @@ namespace SEASON3B
 
     class CUseFruitCheckMsgBox : public CNewUIMessageBoxBase, public INewUI3DRenderObj
     {
-        enum
-        {
-            MSGBOX_TEXT_MAXWIDTH_3DITEM = 120,
-            MSGBOX_TEXT_LEFT_BLANK_3DITEM = 60,
-            MSGBOX_3DITEM_WIDTH = 40,
-            MSGBOX_3DITEM_HEIGHT = 40,
-        };
+        static constexpr float MSGBOX_TEXT_MAXWIDTH_3DITEM = 120.0f;
+        static constexpr float MSGBOX_TEXT_LEFT_BLANK_3DITEM = 60.0f;
+        static constexpr float MSGBOX_3DITEM_WIDTH = 40.0f;
+        static constexpr float MSGBOX_3DITEM_HEIGHT = 40.0f;
     public:
         CUseFruitCheckMsgBox();
         virtual ~CUseFruitCheckMsgBox();
@@ -244,12 +231,9 @@ namespace SEASON3B
 
     class CGemIntegrationMsgBox : public CNewUIMessageBoxBase
     {
-        enum
-        {
-            MIDDLE_COUNT = 5,
-            BTN_TOP_BLANK = 60,
-            BTN_GAP = 40,
-        };
+        static constexpr float MIDDLE_COUNT = 5.0f;
+        static constexpr float BTN_TOP_BLANK = 60.0f;
+        static constexpr float BTN_GAP = 40.0f;
     public:
         CGemIntegrationMsgBox();
         virtual ~CGemIntegrationMsgBox();
@@ -288,12 +272,9 @@ namespace SEASON3B
         {
             STATE_BASIC,
         };
-        enum
-        {
-            MIDDLE_COUNT = 10,
-            BTN_TOP_BLANK = 60,
-            BTN_GAP = 40,
-        };
+        static constexpr float MIDDLE_COUNT = 10.0f;
+        static constexpr float BTN_TOP_BLANK = 60.0f;
+        static constexpr float BTN_GAP = 40.0f;
     public:
         CGemIntegrationUnityMsgBox();
         virtual ~CGemIntegrationUnityMsgBox();
@@ -413,10 +394,7 @@ namespace SEASON3B
 
     class CBloodCastleResultMsgBox : public CNewUIMessageBoxBase
     {
-        enum
-        {
-            MIDDLE_COUNT = 6,
-        };
+        static constexpr float MIDDLE_COUNT = 6.0f;
     public:
         CBloodCastleResultMsgBox();
         virtual ~CBloodCastleResultMsgBox();
@@ -437,11 +415,8 @@ namespace SEASON3B
 
     class CDevilSquareRankMsgBox : public CNewUIMessageBoxBase
     {
-        enum
-        {
-            MIDDLE_COUNT1 = 11,
-            MIDDLE_COUNT2 = 3,
-        };
+        static constexpr float MIDDLE_COUNT1 = 11.0f;
+        static constexpr float MIDDLE_COUNT2 = 3.0f;
     public:
         CDevilSquareRankMsgBox();
         virtual ~CDevilSquareRankMsgBox();
@@ -462,10 +437,7 @@ namespace SEASON3B
 
     class CChaosCastleResultMsgBox : public CNewUIMessageBoxBase
     {
-        enum
-        {
-            MIDDLE_COUNT = 6,
-        };
+        static constexpr float MIDDLE_COUNT = 6.0f;
     public:
         CChaosCastleResultMsgBox();
         virtual ~CChaosCastleResultMsgBox();
@@ -486,10 +458,7 @@ namespace SEASON3B
 
     class CChaosMixMenuMsgBox : public CNewUIMessageBoxBase
     {
-        enum
-        {
-            MIDDLE_COUNT = 13,
-        };
+        static constexpr float MIDDLE_COUNT = 13.0f;
     public:
         CChaosMixMenuMsgBox();
         virtual ~CChaosMixMenuMsgBox();
@@ -798,12 +767,9 @@ namespace SEASON3B
         {
             STATE_BASIC,
         };
-        enum
-        {
-            MIDDLE_COUNT = 10,
-            BTN_TOP_BLANK = 60,
-            BTN_GAP = 40,
-        };
+        static constexpr float MIDDLE_COUNT = 10.0f;
+        static constexpr float BTN_TOP_BLANK = 60.0f;
+        static constexpr float BTN_GAP = 40.0f;
         enum GUILD_STATUS
         {
             G_NONE = (BYTE)-1,
@@ -1090,12 +1056,9 @@ namespace SEASON3B
 
     class CPersonalShopNameMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
     {
-        enum
-        {
-            INPUT_WIDTH = 130,
-            INPUT_HEIGHT = 12,
-            INPUT_TEXTLIMIT = 28,
-        };
+        static constexpr float INPUT_WIDTH = 130.0f;
+        static constexpr float INPUT_HEIGHT = 12.0f;
+        static constexpr int INPUT_TEXTLIMIT = 28;
     public:
         bool SetLayout();
         static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);

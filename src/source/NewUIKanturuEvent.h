@@ -24,11 +24,9 @@ namespace SEASON3B
             IMAGE_KANTURU2ND_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
             IMAGE_KANTURU2ND_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
         };
-        enum
-        {
-            KANTURU2ND_ENTER_WINDOW_WIDTH = 230,
-            KANTURU2ND_ENTER_WINDOW_HEIGHT = 267,
-        };
+
+        static constexpr float KANTURU2ND_ENTER_WINDOW_WIDTH = 230.0f;
+        static constexpr float KANTURU2ND_ENTER_WINDOW_HEIGHT = 267.0f;
 
         enum MSGBOX_TYPE
         {

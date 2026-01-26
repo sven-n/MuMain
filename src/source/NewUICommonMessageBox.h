@@ -24,37 +24,34 @@ namespace SEASON3B
         MSGBOX_FONT_BOLD,
     };
 
-    enum
-    {
-        SCREEN_WIDTH = 640,
-        SCREEN_HEIGHT = 480,
+    static constexpr float SCREEN_WIDTH = 640.0f;
+    static constexpr float SCREEN_HEIGHT = 480.0f;
 
-        MSGBOX_WIDTH = 230,
-        MSGBOX_TOP_HEIGHT = 67,
-        MSGBOX_BOTTOM_HEIGHT = 50,
-        MSGBOX_MIDDLE_HEIGHT = 15,
+    static constexpr float MSGBOX_WIDTH = 230.0f;
+    static constexpr float MSGBOX_TOP_HEIGHT = 67.0f;
+    static constexpr float MSGBOX_BOTTOM_HEIGHT = 50.0f;
+    static constexpr float MSGBOX_MIDDLE_HEIGHT = 15.0f;
 
-        MSGBOX_BACK_BLANK_WIDTH = 8,
-        MSGBOX_BACK_BLANK_HEIGHT = 10,
+    static constexpr float MSGBOX_BACK_BLANK_WIDTH = 8.0f;
+    static constexpr float MSGBOX_BACK_BLANK_HEIGHT = 10.0f;
 
-        MSGBOX_TEXT_TOP_BLANK = 35,
-        MSGBOX_TEXT_MAXWIDTH = 180,
+    static constexpr float MSGBOX_TEXT_TOP_BLANK = 35.0f;
+    static constexpr float MSGBOX_TEXT_MAXWIDTH = 180.0f;
 
-        MSGBOX_LINE_WIDTH = 223,
-        MSGBOX_LINE_HEIGHT = 21,
+    static constexpr float MSGBOX_LINE_WIDTH = 223.0f;
+    static constexpr float MSGBOX_LINE_HEIGHT = 21.0f;
 
-        MSGBOX_SEPARATE_LINE_WIDTH = 205,
-        MSGBOX_SEPARATE_LINE_HEIGHT = 2,
+    static constexpr float MSGBOX_SEPARATE_LINE_WIDTH = 205.0f;
+    static constexpr float MSGBOX_SEPARATE_LINE_HEIGHT = 2.0f;
 
-        MSGBOX_BTN_WIDTH = 54,
-        MSGBOX_BTN_HEIGHT = 30,
-        MSGBOX_BTN_BOTTOM_BLANK = 20,
+    static constexpr float MSGBOX_BTN_WIDTH = 54.0f;
+    static constexpr float MSGBOX_BTN_HEIGHT = 30.0f;
+    static constexpr float MSGBOX_BTN_BOTTOM_BLANK = 20.0f;
 
-        MSGBOX_BTN_EMPTY_SMALL_WIDTH = 64,
-        MSGBOX_BTN_EMPTY_WIDTH = 108,
-        MSGBOX_BTN_EMPTY_BIG_WIDTH = 180,
-        MSGBOX_BTN_EMPTY_HEIGHT = 29,
-    };
+    static constexpr float MSGBOX_BTN_EMPTY_SMALL_WIDTH = 64.0f;
+    static constexpr float MSGBOX_BTN_EMPTY_WIDTH = 108.0f;
+    static constexpr float MSGBOX_BTN_EMPTY_BIG_WIDTH = 180.0f;
+    static constexpr float MSGBOX_BTN_EMPTY_HEIGHT = 29.0f;
 
     typedef struct _MSGBOX_TEXTDATA
     {
@@ -193,13 +190,10 @@ namespace SEASON3B
 
     class CNewUI3DItemCommonMsgBox : public CNewUIMessageBoxBase, public INewUI3DRenderObj
     {
-        enum
-        {
-            MSGBOX_TEXT_MAXWIDTH_3DITEM = 120,
-            MSGBOX_TEXT_LEFT_BLANK_3DITEM = 60,
-            MSGBOX_3DITEM_WIDTH = 40,
-            MSGBOX_3DITEM_HEIGHT = 40,
-        };
+        static constexpr float MSGBOX_TEXT_MAXWIDTH_3DITEM = 120.0f;
+        static constexpr float MSGBOX_TEXT_LEFT_BLANK_3DITEM = 60.0f;
+        static constexpr float MSGBOX_3DITEM_WIDTH = 40.0f;
+        static constexpr float MSGBOX_3DITEM_HEIGHT = 40.0f;
     public:
         CNewUI3DItemCommonMsgBox();
         ~CNewUI3DItemCommonMsgBox();

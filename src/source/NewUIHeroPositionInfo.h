@@ -20,13 +20,10 @@ namespace SEASON3B
             IMAGE_HERO_POSITION_INFO_BASE_WINDOW = BITMAP_HERO_POSITION_INFO_BEGIN,		// newui_position02.tga			(70, 25)
         };
     private:
-        enum HERO_POSITION_INFO_BASE_WINDOW_SIZE
-        {
-            HERO_POSITION_INFO_BASEA_WINDOW_WIDTH = 22,
-            HERO_POSITION_INFO_BASE_WINDOW_HEIGHT = 25,
-            HERO_POSITION_INFO_BASEB_WINDOW_WIDTH = 80,
-            HERO_POSITION_INFO_BASEC_WINDOW_WIDTH = 22,
-        };
+        static constexpr float HERO_POSITION_INFO_BASEA_WINDOW_WIDTH = 22.0f;
+        static constexpr float HERO_POSITION_INFO_BASE_WINDOW_HEIGHT = 25.0f;
+        static constexpr float HERO_POSITION_INFO_BASEB_WINDOW_WIDTH = 80.0f;
+        static constexpr float HERO_POSITION_INFO_BASEC_WINDOW_WIDTH = 22.0f;
 
     private:
         int              WidenX;

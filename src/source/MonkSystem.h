@@ -31,9 +31,7 @@ public:
 class CDummyUnit
 {
 private:
-    enum {
-        MAX_DUMMYDISTANCE = 500,
-    };
+    static constexpr float MAX_DUMMYDISTANCE = 500.0f;
     vec3_t m_vPosition;
     vec3_t m_vStartPosition;
     vec3_t m_vTargetPosition;
