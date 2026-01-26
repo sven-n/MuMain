@@ -182,7 +182,7 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     BITMAP_t* pImage = &Bitmaps[m_dwTexType];
     RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height,
-        (0.5f / (float)pImage->Width), ((m_EventState * m_fButtonHeight + 0.5f) / (float)pImage->Height),
+        (0.5f / (float)pImage->Width), ((static_cast<float>(m_EventState) * m_fButtonHeight + 0.5f) / (float)pImage->Height),
         (m_fButtonWidth - 0.5f) / (float)pImage->Width - (0.5f / (float)pImage->Width),
         (m_fButtonHeight - 0.5f) / (float)pImage->Height - (0.5f / (float)pImage->Height));
 #else //KJH_ADD_INGAMESHOP_UI_SYSTEM
