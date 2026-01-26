@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <sstream>
+#include <span>
 
 /**
  * Field metadata system - replaces X-macros with simple, readable arrays
@@ -25,6 +26,7 @@ struct FieldInfo
     FieldType type;          // Field type
     size_t offset;           // Offset in struct (use offsetof)
     size_t size;             // Size of field (use sizeof)
+    int arrayIndex;          // -1 for simple fields, >= 0 for array elements
 };
 
 /**
@@ -134,5 +136,23 @@ inline void CompareFieldByMetadata(
     {
         changes << fieldChange.str();
         hasChanged = true;
+    }
+}
+
+/**
+ * Compare all fields using metadata array
+ * Simple loop - no macros!
+ */
+template<typename T>
+inline void CompareAllFieldsByMetadata(
+    const T& oldStruct,
+    const T& newStruct,
+    std::span<const FieldInfo> fields,
+    std::stringstream& changes,
+    bool& hasChanged)
+{
+    for (const auto& field : fields)
+    {
+        CompareFieldByMetadata(field, oldStruct, newStruct, changes, hasChanged);
     }
 }
