@@ -3,10 +3,12 @@
 #ifdef _EDITOR
 
 #include "SkillDataSaverLegacy.h"
+#include "DataHandler/DataFileIO.h"
 #include "GameData/SkillData/SkillStructs.h"
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
+#include <memory>
 
 // External references
 extern SKILL_ATTRIBUTE* SkillAttribute;
@@ -21,8 +23,8 @@ bool SkillDataSaverLegacy::SaveLegacy(wchar_t* fileName)
         return false;
     }
 
-    BYTE* Buffer = new BYTE[Size * MAX_SKILLS];
-    BYTE* pSeek = Buffer;
+    auto Buffer = std::make_unique<BYTE[]>(Size * MAX_SKILLS);
+    BYTE* pSeek = Buffer.get();
 
     // Convert SKILL_ATTRIBUTE to SKILL_ATTRIBUTE_FILE_LEGACY format
     for (int i = 0; i < MAX_SKILLS; i++)
@@ -32,22 +34,26 @@ bool SkillDataSaverLegacy::SaveLegacy(wchar_t* fileName)
 
         CopySkillAttributeToDestination(dest, SkillAttribute[i]);
 
-        // Encrypt and write to buffer
-        BuxConvert((BYTE*)&dest, Size);
         memcpy(pSeek, &dest, Size);
         pSeek += Size;
     }
 
-    // Generate checksum
-    DWORD dwCheckSum = GenerateCheckSum2(Buffer, Size * MAX_SKILLS, 0x5A18);
+    // Configure I/O
+    DataFileIO::IOConfig config;
+    config.itemSize = Size;
+    config.itemCount = MAX_SKILLS;
+    config.checksumKey = 0x5A18;
+    config.encryptRecord = [](BYTE* data, int size) { BuxConvert(data, size); };
 
-    fwrite(Buffer, Size * MAX_SKILLS, 1, fp);
-    fwrite(&dwCheckSum, sizeof(DWORD), 1, fp);
+    // Encrypt buffer
+    DataFileIO::EncryptBuffer(Buffer.get(), config);
+
+    // Write buffer and checksum
+    bool success = DataFileIO::WriteBuffer(fp, Buffer.get(), config);
+
     fclose(fp);
 
-    delete[] Buffer;
-
-    return true;
+    return success;
 }
 
 #endif // _EDITOR
