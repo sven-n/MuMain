@@ -848,10 +848,10 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
         || Check_LuckyItem(ip->Type)
         )
     {
-        isExcellent = 0;
+        isExcellent = false;
     }
 
-    if (isExcellent > 0 && ip->RequireLevel > 0 && !IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
+    if (isExcellent && ip->RequireLevel > 0 && !IsWingItem(ip) && ip->Type != ITEM_HORN_OF_FENRIR)
     {
         ip->RequireLevel += 20;
     }
