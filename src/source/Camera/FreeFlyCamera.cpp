@@ -155,6 +155,9 @@ void FreeFlyCamera::ComputeCameraTransform()
     m_State.Angle[1] = 0.0f;
     m_State.Angle[2] = -m_Yaw;
 
+    // Update camera matrix from angles
+    m_State.UpdateMatrix();
+
     // Set other state
     m_State.Distance = 0.0f;  // No target
     m_State.DistanceTarget = 0.0f;
