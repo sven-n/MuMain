@@ -1,0 +1,123 @@
+// CameraManager.cpp - Camera mode management and switching
+
+#include "stdafx.h"
+#include "CameraManager.h"
+#include "DefaultCamera.h"
+#include "OrbitalCamera.h"
+#ifdef _EDITOR
+#include "FreeFlyCamera.h"
+#endif
+
+// External global camera state
+extern CameraState g_Camera;
+
+CameraManager::CameraManager()
+    : m_CurrentMode(CameraMode::Default)
+    , m_pActiveCamera(nullptr)
+{
+}
+
+CameraManager::~CameraManager()
+{
+    Shutdown();
+}
+
+CameraManager& CameraManager::Instance()
+{
+    static CameraManager instance;
+    return instance;
+}
+
+void CameraManager::Initialize()
+{
+    // Create camera instances
+    m_pDefaultCamera = std::make_unique<DefaultCamera>(g_Camera);
+    m_pOrbitalCamera = std::make_unique<OrbitalCamera>(g_Camera);
+#ifdef _EDITOR
+    m_pFreeFlyCamera = std::make_unique<FreeFlyCamera>(g_Camera);
+#endif
+
+    // Start with default camera
+    m_pActiveCamera = m_pDefaultCamera.get();
+    m_CurrentMode = CameraMode::Default;
+    m_pActiveCamera->OnActivate(g_Camera);
+}
+
+void CameraManager::Shutdown()
+{
+    if (m_pActiveCamera)
+    {
+        m_pActiveCamera->OnDeactivate();
+        m_pActiveCamera = nullptr;
+    }
+
+    m_pDefaultCamera.reset();
+    m_pOrbitalCamera.reset();
+#ifdef _EDITOR
+    m_pFreeFlyCamera.reset();
+#endif
+}
+
+bool CameraManager::Update()
+{
+    // Lazy initialization on first use
+    if (!m_pActiveCamera && !m_pDefaultCamera)
+    {
+        Initialize();
+    }
+
+    if (!m_pActiveCamera)
+        return false;
+
+    return m_pActiveCamera->Update();
+}
+
+bool CameraManager::SetCameraMode(CameraMode mode)
+{
+    if (mode == m_CurrentMode)
+        return false;
+
+    ICamera* pNewCamera = nullptr;
+
+    switch (mode)
+    {
+        case CameraMode::Default:
+            pNewCamera = m_pDefaultCamera.get();
+            break;
+        case CameraMode::Orbital:
+            pNewCamera = m_pOrbitalCamera.get();
+            break;
+#ifdef _EDITOR
+        case CameraMode::FreeFly:
+            pNewCamera = m_pFreeFlyCamera.get();
+            break;
+#endif
+        default:
+            return false;
+    }
+
+    if (!pNewCamera)
+        return false;
+
+    TransitionToCamera(pNewCamera);
+    m_CurrentMode = mode;
+    return true;
+}
+
+void CameraManager::CycleToNextMode()
+{
+    CameraMode nextMode = GetNextCameraMode(m_CurrentMode);
+    SetCameraMode(nextMode);
+}
+
+void CameraManager::TransitionToCamera(ICamera* pNewCamera)
+{
+    // Deactivate old camera
+    if (m_pActiveCamera)
+        m_pActiveCamera->OnDeactivate();
+
+    // Activate new camera with current state for smooth transition
+    pNewCamera->OnActivate(g_Camera);
+
+    m_pActiveCamera = pNewCamera;
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ICamera.h"
 #include "CameraState.h"
 
 /**
@@ -12,22 +13,18 @@
  * This remains the DEFAULT camera mode. In Phase 2, we'll add OrbitalCamera
  * and FreeFlyCameraEditor as alternatives.
  */
-class DefaultCamera
+class DefaultCamera : public ICamera
 {
 public:
     DefaultCamera(CameraState& state);
-    ~DefaultCamera() = default;
+    ~DefaultCamera() override = default;
 
-    /**
-     * @brief Main update function - call this every frame
-     * @return true if camera is locked (tour mode, etc.)
-     */
-    bool Update();
-
-    /**
-     * @brief Reset camera to default state
-     */
-    void Reset();
+    // ICamera interface
+    bool Update() override;
+    void Reset() override;
+    void OnActivate(const CameraState& previousState) override;
+    void OnDeactivate() override;
+    const char* GetName() const override { return "Default"; }
 
 private:
     CameraState& m_State;
