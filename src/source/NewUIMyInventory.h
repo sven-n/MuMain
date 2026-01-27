@@ -11,7 +11,7 @@
 #include "NewUIMessageBox.h"
 #include "NewUI3DRenderMng.h"
 #include "NewUIButton.h"
-#include "span.hpp"
+#include <span>
 #include "_enum.h"
 
 namespace SEASON3B
@@ -65,11 +65,8 @@ namespace SEASON3B
             ITEM_SOCKET_SET_OPTION = 2,
         };
 
-        enum
-        {
-            INVENTORY_WIDTH = 190,
-            INVENTORY_HEIGHT = 429,
-        };
+        static constexpr float INVENTORY_WIDTH = 190.0f;
+        static constexpr float INVENTORY_HEIGHT = 429.0f;
         typedef struct tagEQUIPMENT_ITEM
         {
             int x, y;

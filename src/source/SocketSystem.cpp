@@ -242,7 +242,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
         }
         else
         {
-            assert(!"소켓 인덱스 에러");
+            assert(!"Socket index error");
         }
 
         mu_swprintf(TextList[iTextNum], GlobalText[2655], i + 1, szOptionText);

@@ -77,7 +77,7 @@ void wzAudioDestroy();
 //					 numRepeat = n ( play n times) 
 //					 numRepeat = -1 ( play unlimitedly)
 //
-void wzAudioPlay(char* szFilename, int numRepeat);
+void wzAudioPlay(const char* szFilename, int numRepeat);
 
 
 // Function name	: wzAudioPause

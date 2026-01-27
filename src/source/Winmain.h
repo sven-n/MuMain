@@ -80,8 +80,8 @@ extern double CPU_AVG;
 extern void SetMaxMessagePerCycle(int messages);
 extern void CheckHack(void);
 extern DWORD GetCheckSum(WORD wKey);
-extern void StopMp3(char* Name, BOOL bEnforce = false);
-extern void PlayMp3(char* Name, BOOL bEnforce = false);
+extern void StopMp3(const char* Name, BOOL bEnforce = false);
+extern void PlayMp3(const char* Name, BOOL bEnforce = false);
 extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
 

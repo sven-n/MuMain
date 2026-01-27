@@ -252,7 +252,7 @@ void CNewUINPCQuest::RenderText()
 
     g_pRenderText->SetTextColor(150, 255, 240, 255);
     //const auto name = new wchar_t[MAX_MONSTER_NAME];
-    wchar_t* name = nullptr;
+    const wchar_t* name = nullptr;
 
     if ((Hero->Class == CLASS_DARK_LORD || Hero->Class == CLASS_DARK
         || Hero->Class == CLASS_RAGEFIGHTER)

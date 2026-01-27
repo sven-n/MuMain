@@ -27,13 +27,13 @@ public:
     void SetSuccessResult();
     void SetResult(DWORD dwErrorCode,
         DWORD dwWindowErrorCode,
-        TCHAR* szFormat,
+        const TCHAR* szFormat,
         ...);
 
     static WZResult BuildSuccessResult();
     static WZResult BuildResult(DWORD dwErrorCode,
         DWORD dwWindowErrorCode,
-        TCHAR* szFormat,
+        const TCHAR* szFormat,
         ...);
 
 private:

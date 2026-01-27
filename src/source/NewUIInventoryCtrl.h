@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "NewUI3DRenderMng.h"
-#include "span.hpp"
+#include <span>
 #include "ZzzTexture.h"
 
 namespace SEASON3B

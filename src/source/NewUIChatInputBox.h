@@ -71,23 +71,20 @@ namespace SEASON3B
         };
 
     private:
-        enum
-        {
-            INPUT_MESSAGE_TYPE_COUNT = 4,
-            BUTTON_WIDTH = 27,
-            BUTTON_HEIGHT = 26,
+        static constexpr int INPUT_MESSAGE_TYPE_COUNT = 4;
+        static constexpr float BUTTON_WIDTH = 27.0f;
+        static constexpr float BUTTON_HEIGHT = 26.0f;
 
-            GROUP_SEPARATING_WIDTH = 6,
+        static constexpr float GROUP_SEPARATING_WIDTH = 6.0f;
 
-            INPUT_TYPE_START_X = 0,
-            BLOCK_WHISPER_START_X = INPUT_MESSAGE_TYPE_COUNT * BUTTON_WIDTH + GROUP_SEPARATING_WIDTH,
-            SYSTEM_ON_START_X = BLOCK_WHISPER_START_X + BUTTON_WIDTH,
-            CHATLOG_ON_START_X = SYSTEM_ON_START_X + BUTTON_WIDTH,
+        static constexpr float INPUT_TYPE_START_X = 0.0f;
+        static constexpr float BLOCK_WHISPER_START_X = INPUT_MESSAGE_TYPE_COUNT * BUTTON_WIDTH + GROUP_SEPARATING_WIDTH;
+        static constexpr float SYSTEM_ON_START_X = BLOCK_WHISPER_START_X + BUTTON_WIDTH;
+        static constexpr float CHATLOG_ON_START_X = SYSTEM_ON_START_X + BUTTON_WIDTH;
 
-            FRAME_ON_START_X = CHATLOG_ON_START_X + BUTTON_WIDTH + GROUP_SEPARATING_WIDTH,
-            FRAME_RESIZE_START_X = FRAME_ON_START_X + BUTTON_WIDTH,
-            TRANSPARENCY_START_X = FRAME_RESIZE_START_X + BUTTON_WIDTH,
-        };
+        static constexpr float FRAME_ON_START_X = CHATLOG_ON_START_X + BUTTON_WIDTH + GROUP_SEPARATING_WIDTH;
+        static constexpr float FRAME_RESIZE_START_X = FRAME_ON_START_X + BUTTON_WIDTH;
+        static constexpr float TRANSPARENCY_START_X = FRAME_RESIZE_START_X + BUTTON_WIDTH;
 
         enum EVENT_STATE
         {

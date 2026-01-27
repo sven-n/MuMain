@@ -101,10 +101,6 @@ endif()
 # Editor mode option (for admin builds)
 option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 # Collect all C++ source files under source/
 file(GLOB_RECURSE MU_MAIN_SOURCES
   CONFIGURE_DEPENDS
@@ -122,22 +118,28 @@ endif()
 
 # ImGui static library (required when editor is enabled)
 if(ENABLE_EDITOR)
-add_library(imgui STATIC
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_widgets.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_win32.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl2.cpp"
-)
+  add_library(imgui STATIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_widgets.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_win32.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl2.cpp"
+  )
 
-target_include_directories(imgui PUBLIC
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
-)
+  target_include_directories(imgui PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
+  )
+
+  # <-- Force C++20 for ImGui here
+  target_compile_features(imgui PUBLIC cxx_std_20)
 endif()
 
 add_executable(Main ${MU_MAIN_SOURCES})
+
+# <-- Force C++20 for Main here
+target_compile_features(Main PUBLIC cxx_std_20)
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")

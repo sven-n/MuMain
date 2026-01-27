@@ -25,11 +25,8 @@ namespace SEASON3B
         };
 
     private:
-        enum
-        {
-            STORAGE_WIDTH = 190,
-            STORAGE_HEIGHT = 429,
-        };
+        static constexpr float STORAGE_WIDTH = 190.0f;
+        static constexpr float STORAGE_HEIGHT = 429.0f;
 
         CNewUIManager* m_pNewUIMng;
         POINT					m_Pos;

@@ -1224,8 +1224,8 @@ void OpenItems()
     gLoadData.AccessModel(MODEL_POTION + 160, L"Data\\Item\\LuckyItem\\", L"lucky_items01");
     gLoadData.AccessModel(MODEL_POTION + 161, L"Data\\Item\\LuckyItem\\", L"lucky_items02");
 
-    wchar_t	szLuckySetFileName[][50] = { L"new_Helm", L"new_Armor", L"new_Pant", L"new_Glove", L"new_Boot" };
-    wchar_t* szLuckySetPath = { L"Data\\Player\\LuckyItem\\" };
+    const wchar_t	szLuckySetFileName[][50] = { L"new_Helm", L"new_Armor", L"new_Pant", L"new_Glove", L"new_Boot" };
+    const wchar_t* szLuckySetPath = { L"Data\\Player\\LuckyItem\\" };
     wchar_t	szLuckySetPathName[50] = { L"" };
     int		nIndex = 62;
 
@@ -1770,7 +1770,7 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_HELPER + 143, L"Item\\LuckyItem\\");
     gLoadData.OpenTexture(MODEL_HELPER + 144, L"Item\\LuckyItem\\");
 
-    wchar_t* szLuckySetPath = { L"Player\\LuckyItem\\" };
+    const wchar_t* szLuckySetPath = { L"Player\\LuckyItem\\" };
     wchar_t	szLuckySetPathName[50] = { L"" };
     int		nIndex = 62;
 

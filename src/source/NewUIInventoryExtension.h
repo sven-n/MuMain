@@ -28,14 +28,10 @@ namespace SEASON3B
         };
 
     private:
-        enum
-        {
-            WIDTH = 190,
-            HEIGHT = 429,
-
-            HEIGHT_PER_EXT = 87,
-            EXT_BORDER = 3,
-        };
+        static constexpr float WIDTH = 190.0f;
+        static constexpr float HEIGHT = 429.0f;
+        static constexpr float HEIGHT_PER_EXT = 87.0f;
+        static constexpr float EXT_BORDER = 3.0f;
 
         CNewUIManager* m_pNewUIMng;
         CNewUIInventoryCtrl* m_extensions[MAX_INVENTORY_EXT_COUNT];

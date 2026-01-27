@@ -2680,7 +2680,7 @@ private:
 };
 
 
-bool BMD::Open2(wchar_t* DirName, wchar_t* ModelFileName, bool bReAlloc)
+bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAlloc)
 {
     if (m_bCompletedAlloc)
     {

@@ -599,7 +599,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
             }
             else
             {
-                assert(!"���ݵ����� ��?");
+                assert(!"Attack action is missing.");
             }
             pObject->Owner = pNewObject;
         }

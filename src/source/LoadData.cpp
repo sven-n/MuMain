@@ -23,7 +23,7 @@ CLoadData::~CLoadData() // OK
 {
 }
 
-void CLoadData::AccessModel(int Type, wchar_t* Dir, wchar_t* FileName, int i)
+void CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileName, int i)
 {
     wchar_t Name[64];
     if (i == -1)
@@ -48,7 +48,7 @@ void CLoadData::AccessModel(int Type, wchar_t* Dir, wchar_t* FileName, int i)
     }
 }
 
-void CLoadData::OpenTexture(int Model, wchar_t* SubFolder, int Wrap, int Type, bool Check)
+void CLoadData::OpenTexture(int Model, const wchar_t* SubFolder, int Wrap, int Type, bool Check)
 {
     BMD* pModel = &Models[Model];
 

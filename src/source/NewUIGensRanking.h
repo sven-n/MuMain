@@ -43,18 +43,15 @@ namespace SEASON3B
             IMAGE_RANKBACK_TEXTBOX = BITMAP_INTERFACE_NEW_CHAINFO_WINDOW_BEGIN,
         };
 
-        enum IMAGE_SIZE
-        {
-            GENSRANKING_WIDTH = 190,
-            GENSRANKING_HEIGHT = 429,
-            TEAMNAME_LENTH = 10,
-            GENSMARK_WIDTH = 50,
-            GENSMARK_HEIGHT = 69,
-            GENSRANKBACK_WIDTH = 170,
-            GENSRANKBACK_HEIGHT = 88,
-            GENSRANKTEXTBACK_WIDTH = 170,
-            GENSRANKTEXTBACK_HEIGHT = 21,
-        };
+        static constexpr float GENSRANKING_WIDTH = 190.0f;
+        static constexpr float GENSRANKING_HEIGHT = 429.0f;
+        static constexpr int TEAMNAME_LENTH = 10;
+        static constexpr float GENSMARK_WIDTH = 50.0f;
+        static constexpr float GENSMARK_HEIGHT = 69.0f;
+        static constexpr float GENSRANKBACK_WIDTH = 170.0f;
+        static constexpr float GENSRANKBACK_HEIGHT = 88.0f;
+        static constexpr float GENSRANKTEXTBACK_WIDTH = 170.0f;
+        static constexpr float GENSRANKTEXTBACK_HEIGHT = 21.0f;
 
         enum IMAGE_INDEX
         {

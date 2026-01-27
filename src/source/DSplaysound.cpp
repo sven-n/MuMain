@@ -726,7 +726,7 @@ void FreeDirectSound()
     Manager().Shutdown();
 }
 
-void LoadWaveFile(ESound bufferId, wchar_t* filename, int maxChannel, bool enable3D)
+void LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel, bool enable3D)
 {
     Manager().LoadWaveFile(bufferId, filename, maxChannel, enable3D);
 }

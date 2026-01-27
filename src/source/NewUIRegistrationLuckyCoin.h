@@ -26,11 +26,8 @@ namespace SEASON3B
         };
 
     private:
-        enum
-        {
-            LUCKYCOIN_REG_WIDTH = 190,
-            LUCKYCOIN_REG_HEIGHT = 429,
-        };
+        static constexpr float LUCKYCOIN_REG_WIDTH = 190.0f;
+        static constexpr float LUCKYCOIN_REG_HEIGHT = 429.0f;
 
     public:
         CNewUIRegistrationLuckyCoin();

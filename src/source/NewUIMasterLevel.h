@@ -86,8 +86,8 @@ namespace SEASON3B
         bool Create(CNewUIManager* pNewUIMng);
         void Release();
         
-        void OpenMasterSkillTreeData(wchar_t* path);
-        void OpenMasterSkillTooltip(wchar_t* path);
+        void OpenMasterSkillTreeData(const wchar_t* path);
+        void OpenMasterSkillTooltip(const wchar_t* path);
         void InitMasterSkillPoint();
         void SetMasterType(CLASS_TYPE Class);
 

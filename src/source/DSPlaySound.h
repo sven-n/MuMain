@@ -935,7 +935,7 @@ enum ESound
 
     SOUND_EMPIREGUARDIAN_PRIEST_STOP,					// Priest_stay.wav
 
-    SOUND_RAGESKILL_THRUST,								// 레이지 파이터스킬 사운드
+    SOUND_RAGESKILL_THRUST,
     SOUND_RAGESKILL_THRUST_ATTACK,
     SOUND_RAGESKILL_STAMP,
     SOUND_RAGESKILL_STAMP_ATTACK,
@@ -1001,7 +1001,7 @@ HRESULT InitDirectSound(HWND hDlg);
 void    SetEnableSound(bool b);
 void    FreeDirectSound();
 
-void    LoadWaveFile(ESound Buffer, wchar_t* strFileName, int BufferChannel = MAX_CHANNEL, bool Enable3DSound = false);
+void    LoadWaveFile(ESound Buffer, const wchar_t* strFileName, int BufferChannel = MAX_CHANNEL, bool Enable3DSound = false);
 HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = NULL, BOOL bLooped = false);
 void    StopBuffer(ESound Buffer, BOOL bResetPosition);
 void    AllStopSound(void);

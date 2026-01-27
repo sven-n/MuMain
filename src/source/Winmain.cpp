@@ -122,7 +122,7 @@ void StopMusic()
     wzAudioStop();
 }
 
-void StopMp3(char* Name, BOOL bEnforce)
+void StopMp3(const char* Name, BOOL bEnforce)
 {
     if (!m_MusicOnOff && !bEnforce) return;
 
@@ -135,7 +135,7 @@ void StopMp3(char* Name, BOOL bEnforce)
     }
 }
 
-void PlayMp3(char* Name, BOOL bEnforce)
+void PlayMp3(const char* Name, BOOL bEnforce)
 {
     if (Destroy) return;
     if (!m_MusicOnOff && !bEnforce) return;
@@ -1177,7 +1177,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     g_hInst = hInstance;
 
-    wchar_t* windowName = L"MU Online";
+    const wchar_t* windowName = L"MU Online";
     WNDCLASS wndClass;
 
     wndClass.style = CS_HREDRAW | CS_VREDRAW;

@@ -84,23 +84,20 @@ namespace SEASON3B
         };
 
     private:
-        enum
-        {
-            MAX_CHAT_BUFFER_SIZE = 60,
-            MAX_NUMBER_OF_LINES = 200,
-            WND_WIDTH = CNewUIChatInputBox::CHATBOX_WIDTH,
-            FONT_LEADING = 4,
-            WND_TOP_BOTTOM_EDGE = 2,
-            WND_LEFT_RIGHT_EDGE = 4,
-            RESIZING_BTN_WIDTH = WND_WIDTH,
-            RESIZING_BTN_HEIGHT = 10,
-            SCROLL_BAR_WIDTH = 7,
-            SCROLL_TOP_BOTTOM_PART_HEIGHT = 3,
-            SCROLL_MIDDLE_PART_HEIGHT = 15,
-            SCROLL_BTN_WIDTH = 15,
-            SCROLL_BTN_HEIGHT = 30,
-            CLIENT_WIDTH = WND_WIDTH - SCROLL_BAR_WIDTH * 2 - (WND_LEFT_RIGHT_EDGE * 2),
-        };
+        static constexpr int MAX_CHAT_BUFFER_SIZE = 60;
+        static constexpr int MAX_NUMBER_OF_LINES = 200;
+        static constexpr float WND_WIDTH = CNewUIChatInputBox::CHATBOX_WIDTH;
+        static constexpr float FONT_LEADING = 4.0f;
+        static constexpr float WND_TOP_BOTTOM_EDGE = 2.0f;
+        static constexpr float WND_LEFT_RIGHT_EDGE = 4.0f;
+        static constexpr float RESIZING_BTN_WIDTH = WND_WIDTH;
+        static constexpr float RESIZING_BTN_HEIGHT = 10.0f;
+        static constexpr float SCROLL_BAR_WIDTH = 7.0f;
+        static constexpr float SCROLL_TOP_BOTTOM_PART_HEIGHT = 3.0f;
+        static constexpr float SCROLL_MIDDLE_PART_HEIGHT = 15.0f;
+        static constexpr float SCROLL_BTN_WIDTH = 15.0f;
+        static constexpr float SCROLL_BTN_HEIGHT = 30.0f;
+        static constexpr float CLIENT_WIDTH = WND_WIDTH - SCROLL_BAR_WIDTH * 2.0f - (WND_LEFT_RIGHT_EDGE * 2.0f);
         enum EVENT_STATE
         {
             EVENT_NONE = 0,

@@ -26,7 +26,7 @@ protected:
     wchar_t m_lpszFileName[MAX_PATH];
     int m_iKey;
 public:
-    void Create(wchar_t* lpszFileName);
+    void Create(const wchar_t* lpszFileName);
     void Destroy(void);
 protected:
     void CutHead(void);

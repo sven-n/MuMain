@@ -1244,12 +1244,10 @@ typedef struct
 
 class CUIPackCheckBuyingListBox : public CUITextListBox<IGS_SelectBuyItem>
 {
-    enum IMAGE_LISTBOX_SIZE
-    {
-        LISTBOX_WIDTH = 180,
-        LISTBOX_HEIGHT = 100,
-        TEXT_HEIGHTSIZE = 33,
-    };
+    static constexpr float LISTBOX_WIDTH = 180.0f;
+    static constexpr float LISTBOX_HEIGHT = 100.0f;
+    static constexpr float TEXT_HEIGHTSIZE = 33.0f;
+
 public:
     CUIPackCheckBuyingListBox();
     virtual ~CUIPackCheckBuyingListBox();

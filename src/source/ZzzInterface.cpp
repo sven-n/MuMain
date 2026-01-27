@@ -519,7 +519,7 @@ void ClearNotice(void)
     memset(Notice, 0, sizeof(NOTICE) * MAX_NOTICE);
 }
 
-void CreateNotice(wchar_t* Text, int Color)
+void CreateNotice(const wchar_t* Text, int Color)
 {
     SIZE Size;
     g_pRenderText->SetFont(g_hFontBold);

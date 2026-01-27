@@ -234,7 +234,7 @@ void CNewUILuckyItemWnd::LoadImg(void)
     float	fLineX = 21.0f;
     float	fLineY = fSizeY - fTop - fBottom;
 
-    wchar_t* szFileName[] = { L"Interface\\newui_msgbox_back.jpg",
+    const wchar_t* szFileName[] = { L"Interface\\newui_msgbox_back.jpg",
                              L"Interface\\newui_item_back04.tga",
                              L"Interface\\newui_item_back02-L.tga",
                              L"Interface\\newui_item_back02-R.tga",

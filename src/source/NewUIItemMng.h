@@ -9,9 +9,9 @@
 
 #pragma warning(disable : 4786)
 #include <list>
+#include <span>
 
 #include "./Time/Timer.h"
-#include <./span.hpp>
 
 struct ItemCreationParams
 {

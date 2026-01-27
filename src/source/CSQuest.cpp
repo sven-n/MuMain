@@ -166,7 +166,7 @@ std::uint8_t CSQuest::getCurrQuestState(void)
     return CheckQuestState();
 }
 
-wchar_t* CSQuest::GetNPCName(BYTE byQuestIndex)
+const wchar_t* CSQuest::GetNPCName(BYTE byQuestIndex)
 {
     return getMonsterName(int(m_Quest[byQuestIndex].wNpcType));
 }

@@ -5,7 +5,7 @@
 
 #include "Dotnet/Connection.h"
 #include "CSMapServer.h"
-#include "span.hpp"
+#include <span>
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)
 
@@ -995,7 +995,7 @@ typedef struct {
     BYTE         GuildKeyL;
 } PRECEIVE_GUILD_PLAYER, * LPPRECEIVE_GUILD_PLAYER;
 
-// 길드원 목록
+// Guild member list
 typedef struct {
     char         ID[MAX_ID_SIZE];
     BYTE         Number;
@@ -1003,7 +1003,7 @@ typedef struct {
     BYTE		 GuildStatus;
 } PRECEIVE_GUILD_LIST, * LPPRECEIVE_GUILD_LIST;
 
-// 길드원 목록 리스트
+// Guild member list packet
 typedef struct {
     PWMSG_HEADER Header;
     BYTE         Result;
@@ -1330,7 +1330,6 @@ typedef struct
     BYTE	m_byItemInfo[PACKET_ITEM_LENGTH_EXTENDED_MAX];
 } NPC_QUESTEXP_REQUEST_INFO, * LPNPC_QUESTEXP_REQUEST_INFO;
 
-// 보상
 enum QUEST_REWARD_TYPE : BYTE
 {
     QUEST_REWARD_NONE = 0x0000,
@@ -1911,7 +1910,7 @@ typedef struct
     WORD			m_Time;
 }PMSG_MATCH_TIMEVIEW, * LPPMSG_MATCH_TIMEVIEW;
 
-typedef struct
+typedef struct _PMSG_MATCH_RESULT
 {
     void			Clear()
     {
@@ -1933,7 +1932,7 @@ typedef struct
     WORD			m_Score2;
 }PMSG_MATCH_RESULT, * LPPMSG_MATCH_RESULT;
 
-typedef struct
+typedef struct _MATCH_RESULT
 {
     void			Clear()
     {
@@ -2486,7 +2485,7 @@ typedef struct
 } PMSG_ANS_CRYWOLF_INFO, * LPPMSG_ANS_CRYWOLF_INFO;
 
 //--------------------------------------------------------------------------
-// GC [0xBD][0x02] 방어막, 제단 상태 정보
+// GC [0xBD][0x02] containing Crywolf shield and altar status data
 //--------------------------------------------------------------------------
 typedef struct
 {
@@ -3251,7 +3250,7 @@ typedef struct
 }PMSG_CASHSHOP_BUYITEM_REQ, * LPPMSG_CASHSHOP_BUYITEM_REQ;
 
 //----------------------------------------------------------------------------
-// 아이템 구매 결과 (0xD2)(0x03)
+// Cash shop item purchase response (0xD2)(0x03)
 //----------------------------------------------------------------------------
 typedef struct
 {
@@ -3547,7 +3546,7 @@ extern int  SoccerTime;
 extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
-BOOL CreateSocket(wchar_t* IpAddr, unsigned short Port);
+BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
 void DeleteSocket();
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
 

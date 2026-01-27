@@ -17,11 +17,9 @@ namespace SEASON3B
     class CNewUICursedTempleEnter : public CNewUIObj
     {
     public:
-        enum UI_SIZE
-        {
-            CURSEDTEMPLE_ENTER_WINDOW_WIDTH = 230,
-            CURSEDTEMPLE_ENTER_WINDOW_HEIGHT = 252,
-        };
+
+        static constexpr float CURSEDTEMPLE_ENTER_WINDOW_WIDTH = 230.0f;
+        static constexpr float CURSEDTEMPLE_ENTER_WINDOW_HEIGHT = 252.0f;
 
         enum
         {
