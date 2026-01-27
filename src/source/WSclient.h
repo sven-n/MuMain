@@ -1330,7 +1330,6 @@ typedef struct
     BYTE	m_byItemInfo[PACKET_ITEM_LENGTH_EXTENDED_MAX];
 } NPC_QUESTEXP_REQUEST_INFO, * LPNPC_QUESTEXP_REQUEST_INFO;
 
-// ����
 enum QUEST_REWARD_TYPE : BYTE
 {
     QUEST_REWARD_NONE = 0x0000,
@@ -2486,7 +2485,7 @@ typedef struct
 } PMSG_ANS_CRYWOLF_INFO, * LPPMSG_ANS_CRYWOLF_INFO;
 
 //--------------------------------------------------------------------------
-// GC [0xBD][0x02] ��, ���� ���� ����
+// GC [0xBD][0x02] containing Crywolf shield and altar status data
 //--------------------------------------------------------------------------
 typedef struct
 {
@@ -3251,7 +3250,7 @@ typedef struct
 }PMSG_CASHSHOP_BUYITEM_REQ, * LPPMSG_CASHSHOP_BUYITEM_REQ;
 
 //----------------------------------------------------------------------------
-// ������ ���� ��� (0xD2)(0x03)
+// Cash shop item purchase response (0xD2)(0x03)
 //----------------------------------------------------------------------------
 typedef struct
 {
