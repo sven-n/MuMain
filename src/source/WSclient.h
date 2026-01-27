@@ -995,7 +995,7 @@ typedef struct {
     BYTE         GuildKeyL;
 } PRECEIVE_GUILD_PLAYER, * LPPRECEIVE_GUILD_PLAYER;
 
-// ���� ���
+// Guild member list
 typedef struct {
     char         ID[MAX_ID_SIZE];
     BYTE         Number;
@@ -1003,7 +1003,7 @@ typedef struct {
     BYTE		 GuildStatus;
 } PRECEIVE_GUILD_LIST, * LPPRECEIVE_GUILD_LIST;
 
-// ���� ��� ����Ʈ
+// Guild member list packet
 typedef struct {
     PWMSG_HEADER Header;
     BYTE         Result;
