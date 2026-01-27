@@ -499,7 +499,7 @@ static void RenderDebugInfo()
     swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
     g_pRenderText->RenderText(10, y, szLine); y += 10;
 
-    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", g_Camera.FOV, g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
     g_pRenderText->RenderText(10, y, szLine); y += 10;
 
     // Frame time graph below text

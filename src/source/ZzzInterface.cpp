@@ -7919,7 +7919,7 @@ int SelectCharacter(BYTE Kind)
                 if (CollisionDetectLineToOBB(MousePosition, MouseTarget, o->OBB))
                 {
                     vec3_t vSub;
-                    VectorSubtract(o->Position, CameraPosition, vSub);
+                    VectorSubtract(o->Position, g_Camera.Position, vSub);
 
                     float fNewDist = DotProduct(vSub, vSub);
 

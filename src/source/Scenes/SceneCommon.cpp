@@ -282,11 +282,11 @@ void RenderInfomation3D()
         glPushMatrix();
         glLoadIdentity();
         glViewport2(0, 0, WindowWidth, WindowHeight);
-        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), CameraViewNear, CameraViewFar);
+        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
-        GetOpenGLMatrix(CameraMatrix);
+        GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
 

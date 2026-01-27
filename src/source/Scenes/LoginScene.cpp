@@ -29,9 +29,6 @@
 
 // External declarations
 extern int DeleteGuildIndex;
-extern float CameraAngle[3];
-extern float CameraPosition[3];
-extern float CameraFOV;
 extern EGameScene SceneFlag;
 extern int g_iChatInputType;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
@@ -125,14 +122,14 @@ void DeleteCharacter()
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle)
 {
     vec3_t TransformPosition;
-    CameraAngle[0] = 0.f;
-    CameraAngle[1] = 0.f;
-    CameraAngle[2] = Angle[2];
+    g_Camera.Angle[0] = 0.f;
+    g_Camera.Angle[1] = 0.f;
+    g_Camera.Angle[2] = Angle[2];
     float Matrix[3][4];
-    AngleMatrix(CameraAngle, Matrix);
+    AngleMatrix(g_Camera.Angle, Matrix);
     VectorIRotate(Position, Matrix, TransformPosition);
-    VectorAdd(Origin, TransformPosition, CameraPosition);
-    CameraAngle[0] = Angle[0];
+    VectorAdd(Origin, TransformPosition, g_Camera.Position);
+    g_Camera.Angle[0] = Angle[0];
 }
 
 /**
@@ -253,7 +250,7 @@ void MoveCamera()
     UpdateCameraWaypoint();
     InterpolateCameraMovement();
 
-    CameraFOV = 45.f;
+    g_Camera.FOV = 45.f;
     vec3_t Position;
     Vector(0.f, 0.f, 0.f, Position);
     MoveCharacterCamera(Position, g_loginCamera.currentPosition, g_loginCamera.currentAngle);
@@ -364,10 +361,10 @@ bool NewRenderLogInScene(HDC hDC)
     FogEnable = false;
 
     vec3_t pos;
-    VectorCopy(CameraPosition, pos);
+    VectorCopy(g_Camera.Position, pos);
     if (CCameraMove::GetInstancePtr()->IsCameraMove())
     {
-        VectorCopy(CameraPosition, pos);
+        VectorCopy(g_Camera.Position, pos);
     }
 
     MoveMainCamera();
@@ -385,10 +382,10 @@ bool NewRenderLogInScene(HDC hDC)
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
-        CameraViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
+        g_Camera.ViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
 
         RenderTerrain(false);
-        CameraViewFar = 7000.f;
+        g_Camera.ViewFar = 7000.f;
         RenderCharactersClient();
         RenderMount();
         RenderObjects();
