@@ -63,7 +63,7 @@ typedef struct
 template<typename TSource>
 inline void CopySkillAttributeFromSource(SKILL_ATTRIBUTE& dest, const TSource& source)
 {
-    CMultiLanguage::ConvertFromUtf8(dest.Name, source.Name, MAX_SKILL_NAME);
+    CMultiLanguage::ConvertFromUtf8(dest.Name, const_cast<char*>(source.Name), MAX_SKILL_NAME);
     COPY_SKILL_ATTRIBUTE_FIELDS(dest, source);
 }
 
@@ -72,6 +72,6 @@ inline void CopySkillAttributeFromSource(SKILL_ATTRIBUTE& dest, const TSource& s
 template<typename TDest>
 inline void CopySkillAttributeToDestination(TDest& dest, const SKILL_ATTRIBUTE& source)
 {
-    CMultiLanguage::ConvertToUtf8(dest.Name, source.Name, sizeof(dest.Name));
+    CMultiLanguage::ConvertToUtf8(dest.Name, const_cast<wchar_t*>(source.Name), sizeof(dest.Name));
     COPY_SKILL_ATTRIBUTE_FIELDS(dest, source);
 }

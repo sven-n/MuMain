@@ -63,7 +63,7 @@ typedef struct
 template<typename TSource>
 inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, const TSource& source)
 {
-    CMultiLanguage::ConvertFromUtf8(dest.Name, source.Name, MAX_ITEM_NAME);
+    CMultiLanguage::ConvertFromUtf8(dest.Name, const_cast<char*>(source.Name), MAX_ITEM_NAME);
     COPY_ITEM_ATTRIBUTE_FIELDS(dest, source);
 }
 
@@ -72,6 +72,6 @@ inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, const TSource& sou
 template<typename TDest>
 inline void CopyItemAttributeToDestination(TDest& dest, const ITEM_ATTRIBUTE& source)
 {
-    CMultiLanguage::ConvertToUtf8(dest.Name, source.Name, sizeof(dest.Name));
+    CMultiLanguage::ConvertToUtf8(dest.Name, const_cast<wchar_t*>(source.Name), sizeof(dest.Name));
     COPY_ITEM_ATTRIBUTE_FIELDS(dest, source);
 }

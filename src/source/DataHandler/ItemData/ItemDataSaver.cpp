@@ -57,10 +57,10 @@ bool ItemDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
         fileName,
         MAX_ITEM,
         ItemAttribute,
-        [](ITEM_ATTRIBUTE_FILE& dest, ITEM_ATTRIBUTE& src) {
+        [](ITEM_ATTRIBUTE_FILE& dest, const ITEM_ATTRIBUTE& src) {
             CopyItemAttributeToDestination(dest, src);
         },
-        [](ITEM_ATTRIBUTE& dest, ITEM_ATTRIBUTE_FILE& src) {
+        [](ITEM_ATTRIBUTE& dest, const ITEM_ATTRIBUTE_FILE& src) {
             CopyItemAttributeFromSource(dest, src);
         },
         CompareItems,

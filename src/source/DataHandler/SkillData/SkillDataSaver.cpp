@@ -61,10 +61,10 @@ bool SkillDataSaver::Save(wchar_t* fileName, std::string* outChangeLog)
         fileName,
         MAX_SKILLS,
         SkillAttribute,
-        [](SKILL_ATTRIBUTE_FILE& dest, SKILL_ATTRIBUTE& src) {
+        [](SKILL_ATTRIBUTE_FILE& dest, const SKILL_ATTRIBUTE& src) {
             CopySkillAttributeToDestination(dest, src);
         },
-        [](SKILL_ATTRIBUTE& dest, SKILL_ATTRIBUTE_FILE& src) {
+        [](SKILL_ATTRIBUTE& dest, const SKILL_ATTRIBUTE_FILE& src) {
             CopySkillAttributeFromSource(dest, src);
         },
         CompareSkills,
