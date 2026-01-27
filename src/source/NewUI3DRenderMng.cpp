@@ -115,7 +115,7 @@ bool SEASON3B::CNewUI3DCamera::Render()
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    GetOpenGLMatrix(CameraMatrix);
+    GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
     glClear(GL_DEPTH_BUFFER_BIT);

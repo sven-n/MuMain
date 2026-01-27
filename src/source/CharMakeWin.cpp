@@ -481,7 +481,7 @@ void CCharMakeWin::RenderCreateCharacter()
     Vector(1.0f, 1.0f, 1.0f, o->Light);
     Vector(10, -500.f, 48.f, Position);
     Vector(-90.f, 0.f, 0.f, Angle);
-    CameraFOV = 10.f;
+    g_Camera.FOV = 10.f;
     MoveCharacterCamera(CharacterView.Object.Position, Position, Angle);
 
     BeginOpengl(m_winBack.GetXPos() / g_fScreenRate_x, m_winBack.GetYPos() / g_fScreenRate_y, 410 / g_fScreenRate_x, 335 / g_fScreenRate_y);

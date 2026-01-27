@@ -300,7 +300,7 @@ void CPersonalShopTitleImp::UpdatePosition()
 {
     float Width = GetScreenWidth(), Height = 480;
 
-    if (!CameraTopViewEnable)
+    if (!g_Camera.TopViewEnable)
         Height = 480 - 48;
 
     EndBitmap();

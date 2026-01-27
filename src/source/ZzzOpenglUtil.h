@@ -1,7 +1,8 @@
 #pragma once
 
-extern float PerspectiveX;
-extern float PerspectiveY;
+// Include CameraState before compatibility layer
+#include "Camera/CameraState.h"
+
 extern int OpenglWindowWidth;
 extern int OpenglWindowHeight;
 extern unsigned int WindowWidth;
@@ -11,14 +12,6 @@ extern double  FPS;
 extern double  FPS_AVG;
 extern float  FPS_ANIMATION_FACTOR;
 extern double  WorldTime;
-extern bool   CameraTopViewEnable;
-extern float  CameraViewNear;
-extern float  CameraViewFar;
-extern float  CameraFOV;
-extern vec3_t CameraPosition;
-extern vec3_t CameraAngle;
-extern float  CameraMatrix[3][4];
-extern float  g_fCameraCustomDistance;
 extern bool   FogEnable;
 extern bool   TextureEnable;
 extern bool   DepthTestEnable;
@@ -116,3 +109,6 @@ bool CollisionDetectLineToFace(vec3_t Position, vec3_t Target, int Polygon, floa
 bool CollisionDetectLineToOBB(vec3_t p1, vec3_t p2, OBB_t obb);
 void CalcFPS();
 bool rand_fps_check(int reference_frames);
+
+// Camera zoom level (external, not part of CameraState yet)
+extern short g_shCameraLevel;

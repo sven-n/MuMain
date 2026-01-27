@@ -47,7 +47,6 @@ extern double WorldTime;
 extern int MouseX;
 extern int MouseY;
 extern vec3_t MouseTarget;
-extern float CameraViewFar;
 
 // Forward declaration
 BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring& lpszString);

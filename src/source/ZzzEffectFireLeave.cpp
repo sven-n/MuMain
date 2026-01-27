@@ -221,7 +221,7 @@ bool CreateLorenciaLeaf(PARTICLE* o)
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
     o->Velocity[0] = -Random::RangeFloat(64, 127) * 0.1f;
-    if (Position[1] < CameraPosition[1] + 400.f)
+    if (Position[1] < g_Camera.Position[1] + 400.f)
     {
         o->Velocity[0] = -o->Velocity[0] + 3.2f;
     }
@@ -302,7 +302,7 @@ bool CreateAtlanseLeaf(PARTICLE* o)
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
     o->Velocity[0] = -Random::RangeFloat(64, 127) * 0.1f;
-    if (Position[1] < CameraPosition[1] + 400.f) o->Velocity[0] = -o->Velocity[0] + 3.2f;
+    if (Position[1] < g_Camera.Position[1] + 400.f) o->Velocity[0] = -o->Velocity[0] + 3.2f;
     o->Velocity[1] = Random::RangeFloat(-16, 15) * 0.1f;
     o->Velocity[2] = Random::RangeFloat(-16, 15) * 0.1f;
     o->TurningForce[0] = Random::RangeFloat(-8, 7) * 0.1f;

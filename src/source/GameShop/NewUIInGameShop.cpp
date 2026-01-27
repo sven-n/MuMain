@@ -316,7 +316,7 @@ void CNewUIInGameShop::RenderDisplayItems()
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    GetOpenGLMatrix(CameraMatrix);
+    GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
