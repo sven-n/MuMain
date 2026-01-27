@@ -34,6 +34,19 @@ void DefaultCamera::Reset()
     m_State.Reset();
 }
 
+void DefaultCamera::OnActivate(const CameraState& previousState)
+{
+    // Smooth transition: inherit distance and FOV from previous camera
+    m_State.Distance = previousState.Distance;
+    m_State.DistanceTarget = previousState.DistanceTarget;
+    m_State.FOV = previousState.FOV;
+}
+
+void DefaultCamera::OnDeactivate()
+{
+    // Nothing to cleanup
+}
+
 bool DefaultCamera::Update()
 {
     bool bLockCamera = false;
