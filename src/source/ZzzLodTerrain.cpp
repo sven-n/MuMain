@@ -25,6 +25,7 @@
 
 #include "w_MapHeaders.h"
 #include "CameraMove.h"
+#include "Camera/CameraProjection.h"
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -2206,7 +2207,7 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     float FrustrumMaxX = 0.f;
     float FrustrumMaxY = 0.f;
     float Matrix[3][4];
-    GetOpenGLMatrix(Matrix);
+    CameraProjection::GetOpenGLMatrix(Matrix);
     for (int i = 0; i < 5; i++)
     {
         vec3_t t;
@@ -2269,7 +2270,7 @@ void CFrustrum::Make(vec3_t vEye, float fFov, float fAspect, float fDist)
     Vector(-Width, -Height, -fDist, Temp[4]);
 
     float Matrix[3][4];
-    GetOpenGLMatrix(Matrix);
+    CameraProjection::GetOpenGLMatrix(Matrix);
     for (int i = 0; i < 5; i++)
     {
         vec3_t t;
@@ -2690,7 +2691,7 @@ void RenderSun()
     VectorRotate(p, Matrix, Position);
     VectorAdd(g_Camera.Position, Position, Sun.Position);
     Sun.Position[2] = 550.f;
-    Sun.Visible = TestDepthBuffer(Sun.Position);
+    Sun.Visible = CameraProjection::TestDepthBuffer(g_Camera, Sun.Position);
     BeginSprite();
     //RenderSprite(&Sun);
     EndSprite();

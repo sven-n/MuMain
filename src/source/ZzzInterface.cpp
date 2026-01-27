@@ -51,6 +51,7 @@
 
 #include "ZzzInterface.h"
 
+#include "Camera/CameraProjection.h"
 #include "Scenes/SceneCommon.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
@@ -8741,7 +8742,7 @@ void RenderPartyHP()
         int         ScreenX, ScreenY;
 
         Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 100.f, Position);
-        Projection(Position, &ScreenX, &ScreenY);
+        CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
         ScreenX -= (int)(Width / 2);
 
         if ((MouseX >= ScreenX && MouseX < ScreenX + Width && MouseY >= ScreenY - 2 && MouseY < ScreenY + 6))
@@ -8799,11 +8800,11 @@ void RenderBooleans()
                 {
                     Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 20.f, Position);
                 }
-                Projection(Position, &ScreenX, &ScreenY);
+                CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
             }
             else
             {
-                Projection(ci->Position, &ScreenX, &ScreenY);
+                CameraProjection::WorldToScreen(g_Camera, ci->Position, &ScreenX, &ScreenY);
             }
             SetBooleanPosition(ci);
             ci->x = ScreenX - (ci->Width / 2);

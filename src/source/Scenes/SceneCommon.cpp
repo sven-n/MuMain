@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "SceneCommon.h"
 #include "SceneCore.h"
+#include "Camera/CameraProjection.h"
 
 //=============================================================================
 // Character Selection State Implementation
@@ -282,11 +283,11 @@ void RenderInfomation3D()
         glPushMatrix();
         glLoadIdentity();
         glViewport2(0, 0, WindowWidth, WindowHeight);
-        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
+        CameraProjection::SetupPerspective(g_Camera, 1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
-        GetOpenGLMatrix(g_Camera.Matrix);
+        CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
 

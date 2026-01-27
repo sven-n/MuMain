@@ -11,6 +11,7 @@
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
 #include "wglext.h"
+#include "Camera/CameraProjection.h"
 
 int     OpenglWindowX;
 int     OpenglWindowY;
@@ -129,99 +130,6 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
 bool GrabEnable = false;
 wchar_t GrabFileName[MAX_PATH];
 int  GrabScreen = 0;
-
-// Note: PerspectiveX/Y and ScreenCenter variables now in g_Camera (see backward compatibility layer in ZzzOpenglUtil.h)
-
-void GetOpenGLMatrix(float Matrix[3][4])
-{
-    float OpenGLMatrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, OpenGLMatrix);
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            Matrix[i][j] = OpenGLMatrix[j * 4 + i];
-        }
-    }
-}
-
-void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
-{
-    gluPerspective(Fov, Aspect, ZNear, ZFar);
-
-    g_Camera.ScreenCenterX = OpenglWindowX + OpenglWindowWidth / 2;
-    g_Camera.ScreenCenterY = OpenglWindowY + OpenglWindowHeight / 2;
-    g_Camera.ScreenCenterYFlip = WindowWidth - g_Camera.ScreenCenterY;
-
-    float AspectY = (float)(WindowHeight) / (float)(OpenglWindowHeight);
-    g_Camera.PerspectiveX = tanf(Fov * 0.5f * Q_PI / 180.f) / (float)(OpenglWindowWidth / 2) * Aspect;
-    g_Camera.PerspectiveY = tanf(Fov * 0.5f * Q_PI / 180.f) / (float)(OpenglWindowHeight / 2) * AspectY;
-}
-
-void CreateScreenVector(int sx, int sy, vec3_t Target, bool bFixView)
-{
-    sx = sx * WindowWidth / 640;
-    sy = sy * WindowHeight / 480;
-    vec3_t p1, p2;
-    if (bFixView)
-    {
-        p1[0] = (float)(sx - g_Camera.ScreenCenterX) * g_Camera.ViewFar * g_Camera.PerspectiveX;
-        p1[1] = -(float)(sy - g_Camera.ScreenCenterY) * g_Camera.ViewFar * g_Camera.PerspectiveY;
-        p1[2] = -g_Camera.ViewFar;
-    }
-    else
-    {
-        p1[0] = (float)(sx - g_Camera.ScreenCenterX) * RENDER_ITEMVIEW_FAR * g_Camera.PerspectiveX;
-        p1[1] = -(float)(sy - g_Camera.ScreenCenterY) * RENDER_ITEMVIEW_FAR * g_Camera.PerspectiveY;
-        p1[2] = -RENDER_ITEMVIEW_FAR;
-    }
-
-    p2[0] = -g_Camera.Matrix[0][3];
-    p2[1] = -g_Camera.Matrix[1][3];
-    p2[2] = -g_Camera.Matrix[2][3];
-    VectorIRotate(p2, g_Camera.Matrix, MousePosition);
-    VectorIRotate(p1, g_Camera.Matrix, p2);
-    VectorAdd(MousePosition, p2, Target);
-}
-
-void Projection(vec3_t Position, int* sx, int* sy)
-{
-    vec3_t TrasformPosition;
-    VectorTransform(Position, g_Camera.Matrix, TrasformPosition);
-    *sx = -(int)(TrasformPosition[0] / g_Camera.PerspectiveX / TrasformPosition[2]) + g_Camera.ScreenCenterX;
-    *sy = (int)(TrasformPosition[1] / g_Camera.PerspectiveY / TrasformPosition[2]) + g_Camera.ScreenCenterY;
-    *sx = *sx * 640 / (int)WindowWidth;
-    *sy = *sy * 480 / (int)WindowHeight;
-}
-
-void TransformPosition(vec3_t Position, vec3_t WorldPosition, int* x, int* y)
-{
-    vec3_t Temp;
-    VectorSubtract(Position, g_Camera.Position, Temp);
-    VectorRotate(Temp, g_Camera.Matrix, WorldPosition);
-
-    *x = (int)(WorldPosition[0] / g_Camera.PerspectiveX / -WorldPosition[2]) + (g_Camera.ScreenCenterX);
-    *y = (int)(WorldPosition[1] / g_Camera.PerspectiveY / -WorldPosition[2]) + (g_Camera.ScreenCenterYFlip);
-    //*y = (int)(WorldPosition[1]/g_Camera.PerspectiveY/-WorldPosition[2]) + (WindowHeight/2);
-}
-
-bool TestDepthBuffer(vec3_t Position)
-{
-    vec3_t WorldPosition;
-    int x, y;
-    TransformPosition(Position, WorldPosition, &x, &y);
-    if (x < OpenglWindowX ||
-        y < OpenglWindowY ||
-        x >= (int)OpenglWindowX + OpenglWindowWidth ||
-        y >= (int)OpenglWindowY + OpenglWindowHeight) return false;
-
-    GLfloat key[3];
-    glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, key);
-
-    float z = 1.f - g_Camera.ViewNear / -WorldPosition[2] + g_Camera.ViewNear / g_Camera.ViewFar;
-    if (key[0] >= z) return true;
-    return false;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // opengl render util
@@ -555,7 +463,7 @@ void glViewport2(int x, int y, int Width, int Height)
     OpenglWindowY = y;
     OpenglWindowWidth = Width;
     OpenglWindowHeight = Height;
-    glViewport(x, WindowHeight - (y + Height), Width, Height);
+    CameraProjection::SetViewport(x, y, Width, Height);
 }
 
 float ConvertX(float x)
@@ -580,7 +488,7 @@ void BeginOpengl(int x, int y, int Width, int Height)
     glLoadIdentity();
     glViewport2(x, y, Width, Height);
 
-    gluPerspective2(g_Camera.FOV, (float)Width / (float)Height, g_Camera.ViewNear, g_Camera.ViewFar * 1.4f);
+    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, (float)Width / (float)Height, g_Camera.ViewNear, g_Camera.ViewFar * 1.4f);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -615,7 +523,7 @@ void BeginOpengl(int x, int y, int Width, int Height)
         glDisable(GL_FOG);
     }
 
-    GetOpenGLMatrix(g_Camera.Matrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
 }
 
 void EndOpengl()
@@ -632,7 +540,7 @@ void UpdateMousePositionn()
 
     glLoadIdentity();
     glTranslatef(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
-    GetOpenGLMatrix(g_Camera.Matrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
 
     Vector(-g_Camera.Matrix[0][3], -g_Camera.Matrix[1][3], -g_Camera.Matrix[2][3], vPos);
     VectorIRotate(vPos, g_Camera.Matrix, MousePosition);

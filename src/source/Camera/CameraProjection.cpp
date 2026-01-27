@@ -31,20 +31,14 @@ void CameraProjection::SetupPerspective(CameraState& state, float fov, float asp
 
 void CameraProjection::SetViewport(int x, int y, int width, int height)
 {
-    // Convert from 640×480 reference to actual window size
-    int actualX = x * WindowWidth / 640;
-    int actualY = y * WindowHeight / 480;
-    int actualWidth = width * WindowWidth / 640;
-    int actualHeight = height * WindowHeight / 480;
+    // Update cached viewport dimensions
+    OpenglWindowX = x;
+    OpenglWindowY = y;
+    OpenglWindowWidth = width;
+    OpenglWindowHeight = height;
 
     // Set OpenGL viewport (Y coordinate is flipped)
-    glViewport(actualX, WindowHeight - (actualY + actualHeight), actualWidth, actualHeight);
-
-    // Update cached viewport dimensions
-    OpenglWindowX = actualX;
-    OpenglWindowY = actualY;
-    OpenglWindowWidth = actualWidth;
-    OpenglWindowHeight = actualHeight;
+    glViewport(x, WindowHeight - (y + height), width, height);
 }
 
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,
@@ -64,9 +58,13 @@ void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy
     p1[1] = -(float)(sy - state.ScreenCenterY) * farDist * state.PerspectiveY;
     p1[2] = -farDist;
 
-    // Transform by camera matrix to get world-space direction
-    VectorRotate(p1, state.Matrix, p2);
-    VectorAdd(state.Position, p2, outTarget);
+    // Extract camera position from matrix and transform ray
+    p2[0] = -state.Matrix[0][3];
+    p2[1] = -state.Matrix[1][3];
+    p2[2] = -state.Matrix[2][3];
+    VectorIRotate(p2, state.Matrix, MousePosition);
+    VectorIRotate(p1, state.Matrix, p2);
+    VectorAdd(MousePosition, p2, outTarget);
 }
 
 void CameraProjection::WorldToScreen(const CameraState& state, const vec3_t worldPos,

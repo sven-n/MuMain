@@ -28,14 +28,14 @@ public:
                                   float zNear, float zFar);
 
     /**
-     * @brief Sets OpenGL viewport with proper coordinate conversion
+     * @brief Sets OpenGL viewport with Y-axis flip
      *
-     * Replaces glViewport2().
+     * Replaces glViewport2(). Takes pixel coordinates directly (not reference coords).
      *
-     * @param x Viewport X offset (in 640×480 reference coordinates)
-     * @param y Viewport Y offset (in 640×480 reference coordinates)
-     * @param width Viewport width (in 640×480 reference coordinates)
-     * @param height Viewport height (in 640×480 reference coordinates)
+     * @param x Viewport X offset (pixels)
+     * @param y Viewport Y offset (pixels)
+     * @param width Viewport width (pixels)
+     * @param height Viewport height (pixels)
      */
     static void SetViewport(int x, int y, int width, int height);
 
