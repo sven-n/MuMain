@@ -142,8 +142,8 @@ std::unique_ptr<BYTE[]> ConvertToFileFormatAndTrackChanges(
         TFile fileStruct;
         memset(&fileStruct, 0, fileStructSize);
 
-        // Convert runtime to file format (cast away const for legacy Copy functions)
-        config.convertToFile(fileStruct, const_cast<TRuntime&>(config.runtimeData[i]));
+        // Convert runtime to file format
+        config.convertToFile(fileStruct, config.runtimeData[i]);
 
         // Track changes if comparison is enabled
         if (originalData && config.compareItems)
@@ -225,8 +225,8 @@ typename CommonDataSaver::SaveConfig<TRuntime, TFile> CreateStandardSaveConfig(
     const wchar_t* fileName,
     size_t itemCount,
     const TRuntime* runtimeData,
-    std::function<void(TFile&, TRuntime&)> convertToFile,
-    std::function<void(TRuntime&, TFile&)> convertFromFile,
+    std::function<void(TFile&, const TRuntime&)> convertToFile,
+    std::function<void(TRuntime&, const TFile&)> convertFromFile,
     std::function<void(const TRuntime&, const TRuntime&, std::stringstream&, bool&)> compareItems,
     std::function<std::string(int, const TRuntime&)> getItemName,
     DWORD checksumKey,

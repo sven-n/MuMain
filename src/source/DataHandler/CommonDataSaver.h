@@ -25,8 +25,8 @@ public:
         const TRuntime* runtimeData;  // Current in-memory data
 
         // Conversion functions
-        std::function<void(TFile&, TRuntime&)> convertToFile;  // Runtime -> File format
-        std::function<void(TRuntime&, TFile&)> convertFromFile; // File -> Runtime format
+        std::function<void(TFile&, const TRuntime&)> convertToFile;  // Runtime -> File format
+        std::function<void(TRuntime&, const TFile&)> convertFromFile; // File -> Runtime format
 
         // Legacy format support (optional)
         size_t legacyFileStructSize = 0;  // Set to sizeof(legacy struct) if legacy support needed
