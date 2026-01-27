@@ -150,10 +150,11 @@ void FreeFlyCamera::ComputeCameraTransform()
     // Copy position
     VectorCopy(m_Position, m_State.Position);
 
-    // Set angles
+    // For FreeFly camera, we set angles that make the camera look in the direction
+    // specified by yaw and pitch, similar to a first-person camera
     m_State.Angle[0] = m_Pitch;
     m_State.Angle[1] = 0.0f;
-    m_State.Angle[2] = -m_Yaw;
+    m_State.Angle[2] = m_Yaw;
 
     // Update camera matrix from angles
     m_State.UpdateMatrix();

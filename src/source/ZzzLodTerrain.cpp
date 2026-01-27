@@ -1992,151 +1992,77 @@ float FrustrumY[4];
 
 extern int GetScreenWidth();
 
+// Forward declarations for DevEditor (editor only)
+#ifdef _EDITOR
+extern "C" bool DevEditor_IsOverrideEnabled();
+extern "C" void DevEditor_GetFrustumValues(float* outViewFar, float* outViewNear, float* outViewTarget,
+                                            float* outWidthFar, float* outWidthNear);
+#endif
+
 void CreateFrustrum2D(vec3_t Position)
 {
     float Width = 0.0f, CameraViewFar = 0.0f, CameraViewNear = 0.0f, CameraViewTarget = 0.0f;
     float WidthFar = 0.0f, WidthNear = 0.0f;
 
-    if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
+#ifdef _EDITOR
+    // Dev Editor override - allows real-time frustum tweaking
+    if (DevEditor_IsOverrideEnabled())
     {
-        Width = (float)GetScreenWidth() / 480.f;// * 0.1f;
-        if (battleCastle::InBattleCastle2(Hero->Object.Position) && (Hero->Object.Position[0] < 17100.f || Hero->Object.Position[0]>18300.f))
-        {
-            CameraViewFar = 5100.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 2250.f * Width; // 1140.f
-            WidthNear = 540.f * Width; // 540.f
-        }
-        else
-        {
-            CameraViewFar = 3300.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1300.f * Width; // 1140.f
-            WidthNear = 580.f * Width; // 540.f
-        }
+        Width = (float)GetScreenWidth() / 500.f + 0.1f;
+        float baseWidthFar, baseWidthNear;
+        DevEditor_GetFrustumValues(&CameraViewFar, &CameraViewNear, &CameraViewTarget,
+                                    &baseWidthFar, &baseWidthNear);
+        WidthFar = baseWidthFar * Width;
+        WidthNear = baseWidthNear * Width;
     }
-    else if (gMapManager.WorldActive == WD_62SANTA_TOWN)
+    else
+#endif
     {
-        Width = (float)GetScreenWidth() / 450.f * 1.0f;
-        CameraViewFar = 2400.f;
+        // Simplified frustum configuration - only 3 cases
+        if (SceneFlag == LOG_IN_SCENE)
+    {
+        // Login scene - huge frustum for panoramic view
+        Width = (float)GetScreenWidth() / 640.f;
+        CameraViewFar = 265200.f;   // 1200 * 17 * 13 - massive view distance
+        CameraViewNear = 10200.f;    // 1200 * 17 * 0.5
+        CameraViewTarget = 10200.f;  // 1200 * 17 * 0.5
+        WidthFar = 2500.f * Width;
+        WidthNear = 150.f * Width;
+    }
+    else if (SceneFlag == CHARACTER_SCENE)
+    {
+        // Character selection - medium frustum
+        Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
+        CameraViewFar = 7371.f;      // 2000 * 9.1 * 0.404998
         CameraViewNear = CameraViewFar * 0.19f;
         CameraViewTarget = CameraViewFar * 0.47f;
-        CameraViewFar = 2650.f;
-        WidthFar = 1250.f * Width;
-        WidthNear = 540.f * Width;
-    }
-    else if (gMapManager.IsPKField() || IsDoppelGanger2())
-    {
-        Width = (float)GetScreenWidth() / 500.f;
-        CameraViewFar = 1700.0f;
-        CameraViewNear = 55.0f;
-        CameraViewTarget = 830.0f;
-        CameraViewFar = 3300.f;
-        WidthFar = 1900.f * Width;
-        WidthNear = 600.f * Width;
+        WidthFar = 1190.f * Width * sqrtf(g_Camera.FOV / 33.f);
+        WidthNear = 540.f * Width * sqrtf(g_Camera.FOV / 33.f);
     }
     else
     {
-        static  int CameraLevel;
-
-        if ((int)g_Camera.DistanceTarget >= (int)g_Camera.Distance)
-            CameraLevel = g_shCameraLevel;
-
-        switch (CameraLevel)
-        {
-        case 0:
-            if (SceneFlag == LOG_IN_SCENE)
-            {
-            }
-            else if (SceneFlag == CHARACTER_SCENE)
-            {
-                Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
-            }
-            else if (g_Direction.m_CKanturu.IsMayaScene())
-            {
-                Width = (float)GetScreenWidth() / 640.f * 10.0f * 0.115f;
-            }
-            else
-            {
-                Width = (float)GetScreenWidth()/640.f * 1.1f;
-            }
-
-            if (SceneFlag == LOG_IN_SCENE)
-            {
-            }
-            else if (SceneFlag == CHARACTER_SCENE)
-            {
-                CameraViewFar = 2000.f * 9.1f * 0.404998f;
-            }
-            else if (gMapManager.WorldActive == WD_39KANTURU_3RD)
-            {
-                CameraViewFar = 2000.f * 10.0f * 0.115f;
-            }
-            else
-            {
-                CameraViewFar = 2400.f;
-            }
-
-            if (SceneFlag == LOG_IN_SCENE)
-            {
-                Width = (float)GetScreenWidth() / 640.f;
-                CameraViewFar = 2400.f * 17.0f * 13.0f;
-                CameraViewNear = 2400.f * 17.0f * 0.5f;
-                CameraViewTarget = 2400.f * 17.0f * 0.5f;
-                WidthFar = 5000.f * Width;
-                WidthNear = 300.f * Width;
-            }
-            else
-            {
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1190.f * Width * sqrtf(g_Camera.FOV / 33.f); // 1140.f
-                WidthNear = 540.f * Width * sqrtf(g_Camera.FOV / 33.f); // 540.f
-            }
-            break;
-        case 1:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 2700.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1200.f * Width; // 1140.f
-            WidthNear = 540.f * Width; // 540.f
-            break;
-        case 2:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 3000.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1300.f * Width; // 1140.f
-            WidthNear = 540.f * Width; // 540.f
-            break;
-        case 3:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 3300.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1500.f * Width; // 1140.f
-            WidthNear = 580.f * Width; // 540.f
-            break;
-        case 4:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 5100.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 2250.f * Width; // 1140.f
-            WidthNear = 540.f * Width; // 540.f
-            break;
-        case 5:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 3400.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1600.f * Width; // 1140.f
-            WidthNear = 660.f * Width; // 540.f
-            break;
+        // Main scene (gameplay) - best settings for Default/Orbital camera
+        Width = (float)GetScreenWidth() / 500.f + 0.1f;
+        CameraViewFar = 1100.f;
+        CameraViewNear = -530.f;
+        CameraViewTarget = 0.f;
+        WidthFar = 700.f * Width;
+        WidthNear = 330.f * Width;
         }
+    }
+
+    // Scale 2D frustum to match g_Camera.ViewFar
+    // Main scene base is 1100, but OrbitalCamera can set ViewFar higher when zooming out
+    // Scale all dimensions proportionally to maintain frustum shape
+    const float baseFrustumFar = 1100.0f;
+    if (CameraViewFar > 0.0f && g_Camera.ViewFar > baseFrustumFar * 1.2f)
+    {
+        float scale = g_Camera.ViewFar / CameraViewFar;  // Scale relative to actual base
+        CameraViewFar *= scale;
+        CameraViewNear *= scale;
+        CameraViewTarget *= scale;
+        WidthFar *= scale;
+        WidthNear *= scale;
     }
 
     vec3_t p[4];
@@ -2168,6 +2094,63 @@ void CreateFrustrum2D(vec3_t Position)
         FrustrumX[i] = Frustrum[i][0] * 0.01f;
         FrustrumY[i] = Frustrum[i][1] * 0.01f;
     }
+}
+
+void RenderFrustrum2DDebug()
+{
+    // Render red lines showing the 2D frustum trapezoid borders
+    // FrustrumX/Y are in world space * 0.01, so multiply back by 100
+
+    // Save OpenGL state
+    GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean texture2D = glIsEnabled(GL_TEXTURE_2D);
+    GLboolean lighting = glIsEnabled(GL_LIGHTING);
+
+    // Disable depth testing and writing to render on top
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+
+    // Cache vertex positions
+    vec3_t vertices[4];
+    for (int i = 0; i < 4; i++)
+    {
+        vertices[i][0] = FrustrumX[i] * 100.0f;
+        vertices[i][1] = FrustrumY[i] * 100.0f;
+        vertices[i][2] = RequestTerrainHeight(vertices[i][0], vertices[i][1]) + 50.0f;
+    }
+
+    // Draw red trapezoid border
+    glBegin(GL_LINE_LOOP);
+    glColor3f(1.0f, 0.0f, 0.0f);  // Red color
+    glLineWidth(2.0f);
+    for (int i = 0; i < 4; i++)
+    {
+        glVertex3fv(vertices[i]);
+    }
+    glEnd();
+
+    // Draw blue X lines connecting opposite corners
+    glBegin(GL_LINES);
+    glColor3f(0.0f, 0.5f, 1.0f);  // Blue color
+
+    // Line from vertex 0 to vertex 2
+    glVertex3fv(vertices[0]);
+    glVertex3fv(vertices[2]);
+
+    // Line from vertex 1 to vertex 3
+    glVertex3fv(vertices[1]);
+    glVertex3fv(vertices[3]);
+
+    glEnd();
+
+    // Restore OpenGL state
+    glLineWidth(1.0f);
+    glDepthMask(GL_TRUE);
+    if (depthTest) glEnable(GL_DEPTH_TEST);
+    if (texture2D) glEnable(GL_TEXTURE_2D);
+    if (lighting) glEnable(GL_LIGHTING);
 }
 
 bool TestFrustrum2D(float x, float y, float Range)
@@ -2240,8 +2223,9 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     FrustrumFaceD[2] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
     FrustrumFaceD[3] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
     FrustrumFaceD[4] = -DotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
-    
+
     CreateFrustrum2D(position);
+    // Note: RenderFrustrum2DDebug() is now called from MainScene after all rendering
 }
 
 bool TestFrustrum(vec3_t Position, float Range)

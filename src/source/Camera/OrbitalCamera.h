@@ -27,6 +27,11 @@ public:
     void OnDeactivate() override;
     const char* GetName() const override { return "Orbital"; }
 
+    // Public accessors for UI
+    float GetRadius() const { return m_Radius; }
+    float GetTotalYaw() const { return m_BaseYaw + m_DeltaYaw; }
+    float GetTotalPitch() const { return m_BasePitch + m_DeltaPitch; }
+
 private:
     CameraState& m_State;
     std::unique_ptr<DefaultCamera> m_pDefaultCamera;  // Internal default camera for base calculation

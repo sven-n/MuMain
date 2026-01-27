@@ -121,3 +121,35 @@ void CameraManager::TransitionToCamera(ICamera* pNewCamera)
 
     m_pActiveCamera = pNewCamera;
 }
+
+// External C accessor for editor
+extern "C" CameraManager& CameraManager_Instance()
+{
+    return CameraManager::Instance();
+}
+
+extern "C" OrbitalCamera* GetOrbitalCameraInstance()
+{
+    auto& manager = CameraManager::Instance();
+    if (manager.GetCurrentMode() == CameraMode::Orbital)
+    {
+        // Safe cast since we know it's the orbital camera
+        return static_cast<OrbitalCamera*>(manager.GetActiveCamera());
+    }
+    return nullptr;
+}
+
+extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch)
+{
+    auto* orbital = GetOrbitalCameraInstance();
+    if (orbital)
+    {
+        if (outYaw) *outYaw = orbital->GetTotalYaw();
+        if (outPitch) *outPitch = orbital->GetTotalPitch();
+    }
+    else
+    {
+        if (outYaw) *outYaw = 0.0f;
+        if (outPitch) *outPitch = 0.0f;
+    }
+}
