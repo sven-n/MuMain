@@ -19,13 +19,11 @@
 #include "../w_MapHeaders.h"
 #include "../UIManager.h"
 
-// External variable declarations (definitions remain in ZzzScene.cpp)
+// External variable declarations
 extern short g_shCameraLevel;
 extern float g_fSpecialHeight;
-extern float CameraDistanceTarget;
-extern float CameraDistance;
-extern float Camera3DFov;
-extern bool Camera3DRoll;
+
+// Note: Camera variables now in g_Camera (see backward compatibility layer in ZzzOpenglUtil.h)
 
 /**
  * @brief Calculates camera view distance based on scene and world settings.
@@ -58,7 +56,7 @@ static float CalculateCameraViewFar(int sceneFlag)
     case 0:
         if (sceneFlag == LOG_IN_SCENE)
         {
-            return CameraViewFar; // Use existing value
+            return g_Camera.ViewFar; // Use existing value
         }
         else if (sceneFlag == CHARACTER_SCENE)
         {
@@ -117,10 +115,10 @@ static void CalculateCameraPosition(vec3_t outCameraPosition)
     vec3_t Position, TransformPosition;
     float Matrix[3][4];
 
-    CameraViewFar = CalculateCameraViewFar(SceneFlag);
+    g_Camera.ViewFar = CalculateCameraViewFar(SceneFlag);
 
-    Vector(0.f, -CameraDistance, 0.f, Position);
-    AngleMatrix(CameraAngle, Matrix);
+    Vector(0.f, -g_Camera.Distance, 0.f, Position);
+    AngleMatrix(g_Camera.Angle, Matrix);
     VectorIRotate(Position, Matrix, TransformPosition);
 
     if (SceneFlag == MAIN_SCENE)
@@ -131,7 +129,7 @@ static void CalculateCameraPosition(vec3_t outCameraPosition)
     {
         CCameraMove::GetInstancePtr()->UpdateTourWayPoint();
         CCameraMove::GetInstancePtr()->GetCurrentCameraPos(Position);
-        CameraViewFar = 390.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
+        g_Camera.ViewFar = 390.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
     }
 
     if (g_Direction.IsDirection() && !g_Direction.m_bDownHero)
@@ -170,13 +168,13 @@ static void CalculateCameraPosition(vec3_t outCameraPosition)
     {
         outCameraPosition[2] = g_fSpecialHeight = 1200.f + 1;
     }
-    outCameraPosition[2] += CameraDistance - 150.f;
+    outCameraPosition[2] += g_Camera.Distance - 150.f;
 
     // Apply custom camera distance for special terrain
-    if (g_fCameraCustomDistance != 0.f)
+    if (g_Camera.CustomDistance != 0.f)
     {
         vec3_t angle = { 0.f, 0.f, -45.f };
-        Vector(0.f, g_fCameraCustomDistance, 0.f, Position);
+        Vector(0.f, g_Camera.CustomDistance, 0.f, Position);
         AngleMatrix(angle, Matrix);
         VectorIRotate(Position, Matrix, TransformPosition);
         VectorAdd(outCameraPosition, TransformPosition, outCameraPosition);
@@ -191,25 +189,25 @@ static void SetCameraAngle()
     if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
         CCameraMove::GetInstancePtr()->SetAngleFrustum(-112.5f);
-        CameraAngle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
-        CameraAngle[1] = 0.0f;
-        CameraAngle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
+        g_Camera.Angle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
+        g_Camera.Angle[1] = 0.0f;
+        g_Camera.Angle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
     }
     else if (SceneFlag == CHARACTER_SCENE)
     {
-        CameraAngle[0] = -84.5f;
-        CameraAngle[1] = 0.0f;
-        CameraAngle[2] = -75.0f;
-        CameraPosition[0] = 9758.93f;
-        CameraPosition[1] = 18913.11f;
-        CameraPosition[2] = 675.5f;
+        g_Camera.Angle[0] = -84.5f;
+        g_Camera.Angle[1] = 0.0f;
+        g_Camera.Angle[2] = -75.0f;
+        g_Camera.Position[0] = 9758.93f;
+        g_Camera.Position[1] = 18913.11f;
+        g_Camera.Position[2] = 675.5f;
     }
     else
     {
-        CameraAngle[0] = -48.5f;
+        g_Camera.Angle[0] = -48.5f;
     }
 
-    CameraAngle[0] += EarthQuake;
+    g_Camera.Angle[0] += EarthQuake;
 }
 
 /**
@@ -221,16 +219,16 @@ static void UpdateCustomCameraDistance()
 
     if ((TerrainWall[iIndex] & TW_CAMERA_UP) == TW_CAMERA_UP)
     {
-        if (g_fCameraCustomDistance <= CUSTOM_CAMERA_DISTANCE1)
+        if (g_Camera.CustomDistance <= CUSTOM_CAMERA_DISTANCE1)
         {
-            g_fCameraCustomDistance += 10;
+            g_Camera.CustomDistance += 10;
         }
     }
     else
     {
-        if (g_fCameraCustomDistance > 0)
+        if (g_Camera.CustomDistance > 0)
         {
-            g_fCameraCustomDistance -= 10;
+            g_Camera.CustomDistance -= 10;
         }
     }
 }
@@ -242,33 +240,33 @@ static void UpdateCameraDistance()
 {
     if (gMapManager.WorldActive == 5)
     {
-        CameraAngle[0] += sinf(WorldTime * 0.0005f) * 2.f;
-        CameraAngle[1] += sinf(WorldTime * 0.0008f) * 2.5f;
+        g_Camera.Angle[0] += sinf(WorldTime * 0.0005f) * 2.f;
+        g_Camera.Angle[1] += sinf(WorldTime * 0.0008f) * 2.5f;
     }
     else if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
-        CameraDistanceTarget = 1100.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;
-        CameraDistance = CameraDistanceTarget;
+        g_Camera.DistanceTarget = 1100.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;
+        g_Camera.Distance = g_Camera.DistanceTarget;
     }
     else
     {
         if (gMapManager.InBattleCastle())
         {
-            CameraDistanceTarget = 1100.f;
-            CameraDistance = CameraDistanceTarget;
+            g_Camera.DistanceTarget = 1100.f;
+            g_Camera.Distance = g_Camera.DistanceTarget;
         }
         else
         {
             switch (g_shCameraLevel)
             {
-            case 0: CameraDistanceTarget = 1000.f; break;
-            case 1: CameraDistanceTarget = 1100.f; break;
-            case 2: CameraDistanceTarget = 1200.f; break;
-            case 3: CameraDistanceTarget = 1300.f; break;
-            case 4: CameraDistanceTarget = 1400.f; break;
-            case 5: CameraDistanceTarget = g_Direction.m_fCameraViewFar; break;
+            case 0: g_Camera.DistanceTarget = 1000.f; break;
+            case 1: g_Camera.DistanceTarget = 1100.f; break;
+            case 2: g_Camera.DistanceTarget = 1200.f; break;
+            case 3: g_Camera.DistanceTarget = 1300.f; break;
+            case 4: g_Camera.DistanceTarget = 1400.f; break;
+            case 5: g_Camera.DistanceTarget = g_Direction.m_fCameraViewFar; break;
             }
-            CameraDistance += (CameraDistanceTarget - CameraDistance) / 3;
+            g_Camera.Distance += (g_Camera.DistanceTarget - g_Camera.Distance) / 3;
         }
     }
 }
@@ -281,11 +279,11 @@ static void SetCameraFOV()
     if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
         && CCameraMove::GetInstancePtr()->IsTourMode())
     {
-        CameraFOV = 65.0f;
+        g_Camera.FOV = 65.0f;
     }
     else
     {
-        CameraFOV = 30.f;
+        g_Camera.FOV = 30.f;
     }
 }
 
@@ -302,13 +300,13 @@ static bool HandleEditorMode()
     {
         // Handle camera angle rotation
         if (HIBYTE(GetAsyncKeyState(VK_INSERT)) == 128)
-            CameraAngle[2] += 15;
+            g_Camera.Angle[2] += 15;
         if (HIBYTE(GetAsyncKeyState(VK_DELETE)) == 128)
-            CameraAngle[2] -= 15;
+            g_Camera.Angle[2] -= 15;
         if (HIBYTE(GetAsyncKeyState(VK_HOME)) == 128)
-            CameraAngle[2] = -45;
+            g_Camera.Angle[2] = -45;
 
-        CameraAngle[2] = fmodf(CameraAngle[2] + 360.0f, 360.0f) - 360.0f;
+        g_Camera.Angle[2] = fmodf(g_Camera.Angle[2] + 360.0f, 360.0f) - 360.0f;
 
         // Handle movement input
         vec3_t p1, p2;
@@ -341,7 +339,7 @@ static bool HandleEditorMode()
         // Apply rotation and movement
         glPushMatrix();
         glLoadIdentity();
-        glRotatef(-CameraAngle[2], 0.f, 0.f, 1.f);
+        glRotatef(-g_Camera.Angle[2], 0.f, 0.f, 1.f);
         float Matrix[3][4];
         GetOpenGLMatrix(Matrix);
         glPopMatrix();
@@ -381,19 +379,19 @@ bool MoveMainCamera()
     HandleEditorMode();
 #endif
 
-    CameraAngle[0] = 0.f;
-    CameraAngle[1] = 0.f;
+    g_Camera.Angle[0] = 0.f;
+    g_Camera.Angle[1] = 0.f;
 
-    if (CameraTopViewEnable)
+    if (g_Camera.TopViewEnable)
     {
-        CameraViewFar = 3200.f;
-        CameraPosition[0] = Hero->Object.Position[0];
-        CameraPosition[1] = Hero->Object.Position[1];
-        CameraPosition[2] = CameraViewFar;
+        g_Camera.ViewFar = 3200.f;
+        g_Camera.Position[0] = Hero->Object.Position[0];
+        g_Camera.Position[1] = Hero->Object.Position[1];
+        g_Camera.Position[2] = g_Camera.ViewFar;
     }
     else
     {
-        CalculateCameraPosition(CameraPosition);
+        CalculateCameraPosition(g_Camera.Position);
         SetCameraAngle();
         UpdateCustomCameraDistance();
     }
