@@ -3176,7 +3176,7 @@ enum
     PLAYER_SKILL_PHOENIX_SHOT,
     PLAYER_SKILL_ATT_UP_OURFORCES,
     PLAYER_SKILL_HP_UP_OURFORCES,
-    // ������ ������ ���� �ִ�
+    // Rage Fighter related animations
     PLAYER_RAGE_UNI_ATTACK,
     PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT,
     PLAYER_RAGE_UNI_RUN,
