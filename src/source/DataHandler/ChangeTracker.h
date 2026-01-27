@@ -75,12 +75,16 @@ namespace ChangeTracker
     inline void CompareWideString(const char* fieldName, const wchar_t* oldVal, const wchar_t* newVal,
                                  std::stringstream& changes, bool& hasChanged, int maxLen)
     {
-        if (wcscmp(oldVal, newVal) != 0)
+        bool stringsEqual = (maxLen > 0) ? (wcsncmp(oldVal, newVal, maxLen) == 0)
+                                         : (wcscmp(oldVal, newVal) == 0);
+
+        if (!stringsEqual)
         {
             char oldUtf8[256];
             char newUtf8[256];
-            WideCharToMultiByte(CP_UTF8, 0, oldVal, -1, oldUtf8, sizeof(oldUtf8), NULL, NULL);
-            WideCharToMultiByte(CP_UTF8, 0, newVal, -1, newUtf8, sizeof(newUtf8), NULL, NULL);
+            int charCount = (maxLen > 0) ? maxLen : -1;
+            WideCharToMultiByte(CP_UTF8, 0, oldVal, charCount, oldUtf8, sizeof(oldUtf8), NULL, NULL);
+            WideCharToMultiByte(CP_UTF8, 0, newVal, charCount, newUtf8, sizeof(newUtf8), NULL, NULL);
 
             changes << "  " << fieldName << ": \""
                    << oldUtf8 << "\" -> \"" << newUtf8 << "\"\n";
