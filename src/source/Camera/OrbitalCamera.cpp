@@ -39,10 +39,13 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     m_Radius = previousState.Distance;
     m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
 
-    // Try to calculate initial yaw/pitch from previous camera angle
-    m_Yaw = -previousState.Angle[2];  // Convert to yaw
-    m_Pitch = previousState.Angle[0]; // Use pitch as-is
+    // Start from the previous camera's angles
+    m_Pitch = previousState.Angle[0];
+    m_Yaw = previousState.Angle[2];
+
+    // Clamp to valid range
     m_Pitch = std::clamp(m_Pitch, MIN_PITCH, MAX_PITCH);
+    m_Yaw = fmodf(m_Yaw + 360.0f, 360.0f);
 }
 
 void OrbitalCamera::OnDeactivate()
@@ -69,33 +72,39 @@ void OrbitalCamera::HandleInput()
         MouseWheel = 0;
     }
 
-    // Middle mouse drag rotation
+    // Middle mouse drag rotation - only rotate when button is held AND mouse moves
     bool buttonHeld = (MouseMButton || MouseMButtonPush);
     if (buttonHeld)
     {
         if (!m_bRotating)
         {
+            // Button just pressed - record starting position
             m_bRotating = true;
             m_LastMouseX = MouseX;
             m_LastMouseY = MouseY;
         }
         else
         {
+            // Button held - only rotate if mouse actually moved
             int deltaX = MouseX - m_LastMouseX;
             int deltaY = MouseY - m_LastMouseY;
 
-            const float sensitivity = 0.5f;
-            m_Yaw += deltaX * sensitivity;
-            m_Pitch -= deltaY * sensitivity;  // Inverted Y
+            // Only apply rotation if there's actual mouse movement
+            if (deltaX != 0 || deltaY != 0)
+            {
+                const float sensitivity = 0.5f;
+                m_Yaw += deltaX * sensitivity;
+                m_Pitch -= deltaY * sensitivity;  // Inverted Y
 
-            // Normalize yaw to [0, 360)
-            m_Yaw = fmodf(m_Yaw + 360.0f, 360.0f);
+                // Normalize yaw to [0, 360)
+                m_Yaw = fmodf(m_Yaw + 360.0f, 360.0f);
 
-            // Clamp pitch
-            m_Pitch = std::clamp(m_Pitch, MIN_PITCH, MAX_PITCH);
+                // Clamp pitch
+                m_Pitch = std::clamp(m_Pitch, MIN_PITCH, MAX_PITCH);
 
-            m_LastMouseX = MouseX;
-            m_LastMouseY = MouseY;
+                m_LastMouseX = MouseX;
+                m_LastMouseY = MouseY;
+            }
         }
     }
     else
@@ -117,27 +126,37 @@ void OrbitalCamera::UpdateTarget()
 
 void OrbitalCamera::ComputeCameraTransform()
 {
-    // Convert spherical to Cartesian coordinates
-    float yawRad = m_Yaw * (Q_PI / 180.0f);
-    float pitchRad = m_Pitch * (Q_PI / 180.0f);
+    // Use the same approach as DefaultCamera:
+    // 1. Create offset vector pointing backward (0, -Distance, 0)
+    // 2. Rotate by camera angles
+    // 3. Add to target position
 
-    // Calculate position relative to target
-    float horizontalDist = m_Radius * cosf(pitchRad);
-    float x = horizontalDist * sinf(yawRad);
-    float y = -horizontalDist * cosf(yawRad);
-    float z = m_Radius * sinf(pitchRad);
+    vec3_t offset, rotatedOffset;
+    float matrix[3][4];
 
-    // Set camera position
-    m_State.Position[0] = m_Target[0] + x;
-    m_State.Position[1] = m_Target[1] + y;
-    m_State.Position[2] = m_Target[2] + z;
-
-    // Set camera angles to look at target
+    // Set camera angles
     m_State.Angle[0] = m_Pitch;
     m_State.Angle[1] = 0.0f;
-    m_State.Angle[2] = -m_Yaw;
+    m_State.Angle[2] = m_Yaw;
 
-    // Set other state
+    // Create offset vector pointing backward
+    Vector(0.f, -m_Radius, 0.f, offset);
+
+    // Rotate offset by camera angles (same as DefaultCamera)
+    AngleMatrix(m_State.Angle, matrix);
+    VectorIRotate(offset, matrix, rotatedOffset);
+
+    // Camera position = target + rotated offset
+    VectorAdd(m_Target, rotatedOffset, m_State.Position);
+
+    // Set Z position like DefaultCamera does: target Z + distance adjustment
+    // Note: We use target[2] - 80 because UpdateTarget already adds 80
+    m_State.Position[2] = (m_Target[2] - 80.0f) + m_Radius - 150.f;
+
+    // Update transformation matrix
+    m_State.UpdateMatrix();
+
+    // Set other camera properties
     m_State.Distance = m_Radius;
     m_State.DistanceTarget = m_Radius;
     m_State.ViewFar = 3000.0f;
