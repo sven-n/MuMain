@@ -17,10 +17,8 @@
 #include <array>
 #include <atomic>
 #include <chrono>
-#include <cstddef>
 #include <cstdint>
 #include <cwchar>
-#include <cstring>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -29,7 +27,6 @@
 #include <objbase.h>
 #include <dsound.h>
 #include "DSwaveIO.h"
-#include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"
 
@@ -270,7 +267,18 @@ HRESULT DirectSoundManager::LoadWaveFile(ESound bufferId, const wchar_t* filenam
     }
 
     ++loadCount_;
-    SetVolume(bufferId, masterVolume_);
+
+    // Set volume directly without calling SetVolume() to avoid deadlock (we already hold mutex_)
+    const long clamped = std::clamp<long>(masterVolume_, DSBVOLUME_MIN, DSBVOLUME_MAX);
+    for (int channel = 0; channel < entry.maxChannels; ++channel)
+    {
+        IDirectSoundBuffer* buffer = GetBuffer(bufferId, channel);
+        if (buffer != nullptr)
+        {
+            buffer->SetVolume(clamped);
+        }
+    }
+
     return S_OK;
 }
 
