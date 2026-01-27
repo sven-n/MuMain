@@ -21,7 +21,8 @@ namespace ChangeTracker
     inline std::string GetNameUtf8(int index, const TStruct& data, int maxNameLen)
     {
         char nameBuf[256];
-        WideCharToMultiByte(CP_UTF8, 0, data.Name, -1, nameBuf, sizeof(nameBuf), NULL, NULL);
+        int bufSize = (maxNameLen > 0 && maxNameLen < 256) ? maxNameLen : sizeof(nameBuf);
+        WideCharToMultiByte(CP_UTF8, 0, data.Name, -1, nameBuf, bufSize, NULL, NULL);
         return std::string(nameBuf);
     }
 
