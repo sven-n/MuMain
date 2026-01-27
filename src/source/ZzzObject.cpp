@@ -32,6 +32,7 @@
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
 #include "NewUISystem.h"
+#include "Camera/CameraProjection.h"
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
@@ -6406,7 +6407,7 @@ void RenderItems()
                 VectorCopy(o->Position, Position);
                 Position[2] += 30.f;
                 int ScreenX, ScreenY;
-                Projection(Position, &ScreenX, &ScreenY);
+                CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
                 o->ScreenX = ScreenX;
                 o->ScreenY = ScreenY;
             }

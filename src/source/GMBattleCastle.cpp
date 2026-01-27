@@ -23,6 +23,7 @@
 
 #include "Guild/GuildCache.h"
 #include "ZzzInterface.h"
+#include "Camera/CameraProjection.h"
 
 
 extern  int     WaterTextureNumber;
@@ -318,8 +319,7 @@ namespace battleCastle
 
             int ScreenX, ScreenY;
             int Width = 50, Height = 2;
-
-            Projection(bt.m_vPosition, &ScreenX, &ScreenY);
+            CameraProjection::WorldToScreen(g_Camera, bt.m_vPosition, &ScreenX, &ScreenY);
             ScreenX -= (int)(Width / 2);
 
             int Time = bt.m_byBuildTime / 5.f * (int)Width;

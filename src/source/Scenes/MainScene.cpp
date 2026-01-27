@@ -28,6 +28,7 @@
 #include "../PortalMgr.h"
 #include "../Guild/GuildCache.h"
 #include "../UIMapName.h"
+#include "Camera/CameraProjection.h"
 
 // External declarations
 extern HWND g_hWnd;
@@ -377,8 +378,7 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
             glDisable(GL_FOG);
         }
     }
-
-    CreateScreenVector(MouseX, MouseY, MouseTarget);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 }
 
 /**

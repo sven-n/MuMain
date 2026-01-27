@@ -29,6 +29,7 @@
 #include "../Camera/CameraUtility.h"
 #include "../ZzzOpenData.h"
 #include "LoginScene.h"
+#include "Camera/CameraProjection.h"
 
 // External declarations
 extern EGameScene SceneFlag;
@@ -252,7 +253,7 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     BeginOpengl(0, 25, 640, 430);
 
     CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, pos);
-    CreateScreenVector(MouseX, MouseY, MouseTarget);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 
     // Reset character positions and lighting
     for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)

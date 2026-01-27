@@ -40,13 +40,7 @@ extern bool         GrabEnable;
 
 //  etc
 bool CheckID_HistoryDay(wchar_t* Name, WORD day);
-void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar);
 void glViewport2(int x, int y, int Width, int Height);
-void CreateScreenVector(int sx, int sy, vec3_t Target, bool bFixView = true);
-void Projection(vec3_t Position, int* sx, int* sy);
-void GetOpenGLMatrix(float Matrix[3][4]);
-void TransformPosition(vec3_t Position, vec3_t WorldPosition, int* x, int* y);
-bool TestDepthBuffer(vec3_t Position);
 void BeginSprite();
 void EndSprite();
 void EnableDepthTest();

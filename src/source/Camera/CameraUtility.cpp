@@ -3,6 +3,8 @@
 
 #include "stdafx.h"
 #include "CameraUtility.h"
+
+#include "CameraProjection.h"
 #include "../Scenes/SceneCore.h"
 #include "../ZzzInterface.h"
 #include "../ZzzOpenglUtil.h"
@@ -341,7 +343,7 @@ static bool HandleEditorMode()
         glLoadIdentity();
         glRotatef(-g_Camera.Angle[2], 0.f, 0.f, 1.f);
         float Matrix[3][4];
-        GetOpenGLMatrix(Matrix);
+        CameraProjection::GetOpenGLMatrix(Matrix);
         glPopMatrix();
         VectorRotate(p1, Matrix, p2);
         VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);

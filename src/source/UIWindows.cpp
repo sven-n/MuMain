@@ -17,7 +17,7 @@
 #include "CharacterManager.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
-
+#include "Camera/CameraProjection.h"
 
 
 extern int	 g_iChatInputType;
@@ -1769,11 +1769,11 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     glPushMatrix();
     glLoadIdentity();
     glViewport2(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y, m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
-    gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
+    CameraProjection::SetupPerspective(g_Camera, 1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    GetOpenGLMatrix(g_Camera.Matrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 

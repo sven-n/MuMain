@@ -19,6 +19,7 @@
 #include "MapManager.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include "Camera/CameraProjection.h"
 
 extern  int  WaterTextureNumber;
 extern	wchar_t TextList[50][100];
@@ -282,7 +283,7 @@ void RenderObjectDescription()
         int    x, y;
         vec3_t Position;
         Vector(QD.m_vPos[0], QD.m_vPos[1], QD.m_vPos[2] + 370.f, Position);
-        Projection(Position, &x, &y);
+        CameraProjection::WorldToScreen(g_Camera, Position, &x, &y);
 
         if (x >= 0 && y >= 0)
         {

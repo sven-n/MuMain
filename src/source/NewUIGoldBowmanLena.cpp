@@ -6,6 +6,7 @@
 #include "NewUISystem.h"
 
 #include "MixMgr.h"
+#include "Camera/CameraProjection.h"
 
 namespace
 {
@@ -263,11 +264,11 @@ void CNewUIGoldBowmanLena::Render3D()
     glPushMatrix();
     glLoadIdentity();
     glViewport2(0, 0, WindowWidth, WindowHeight);
-    gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
+    CameraProjection::SetupPerspective(g_Camera, 1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    GetOpenGLMatrix(g_Camera.Matrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 

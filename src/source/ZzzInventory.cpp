@@ -48,6 +48,7 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 #include "NewUISystem.h"
+#include "Camera/CameraProjection.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
@@ -10086,7 +10087,7 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
 
 #ifdef PBG_ADD_ITEMRESIZE
     int ScreenPos_X = 0, ScreenPos_Y = 0;
-    Projection(Position, &ScreenPos_X, &ScreenPos_Y);
+    CameraProjection::WorldToScreen(g_Camera, Position, &ScreenPos_X, &ScreenPos_Y);
 #endif //PBG_ADD_ITEMRESIZE
 
     o->Scale = Scale;
@@ -10467,7 +10468,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
     }
 
     vec3_t Position;
-    CreateScreenVector((int)(sx), (int)(sy), Position, false);
+    CameraProjection::ScreenToWorldRay(g_Camera, (int)(sx), (int)(sy), Position, false);
     //RenderObjectScreen(Type+MODEL_ITEM,Level,Option1,Position,Success,PickUp);
     if (Type == ITEM_BOX_OF_LUCK && Level == 1)	// 성탄의별
     {
