@@ -16,16 +16,8 @@ int     OpenglWindowX;
 int     OpenglWindowY;
 int     OpenglWindowWidth;
 int     OpenglWindowHeight;
-bool    CameraTopViewEnable = false;
-float   CameraViewNear = 20.f;
-float   CameraViewFar = 2000.f;
-float   CameraFOV = 55.f;
-vec3_t  CameraPosition;
-vec3_t  CameraAngle;
-float   CameraMatrix[3][4];
 vec3_t  MousePosition;
 vec3_t  MouseTarget;
-float   g_fCameraCustomDistance = 0.f;
 bool    FogEnable = false;
 GLfloat FogDensity = 0.0004f;
 GLfloat FogColor[4] = { 30 / 256.f,20 / 256.f,10 / 256.f, };
@@ -138,11 +130,7 @@ bool GrabEnable = false;
 wchar_t GrabFileName[MAX_PATH];
 int  GrabScreen = 0;
 
-float PerspectiveX;
-float PerspectiveY;
-int   ScreenCenterX;
-int   ScreenCenterY;
-int   ScreenCenterYFlip;
+// Note: PerspectiveX/Y and ScreenCenter variables now in g_Camera (see backward compatibility layer in ZzzOpenglUtil.h)
 
 void GetOpenGLMatrix(float Matrix[3][4])
 {
