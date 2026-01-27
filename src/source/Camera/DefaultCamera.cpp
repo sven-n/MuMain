@@ -36,10 +36,19 @@ void DefaultCamera::Reset()
 
 void DefaultCamera::OnActivate(const CameraState& previousState)
 {
-    // Smooth transition: inherit distance and FOV from previous camera
+    // When returning to DefaultCamera, reset to default state
+    // Only inherit distance for smoother transition
     m_State.Distance = previousState.Distance;
     m_State.DistanceTarget = previousState.DistanceTarget;
-    m_State.FOV = previousState.FOV;
+
+    // Reset ALL angles to default
+    // DefaultCamera uses fixed angle of -45 degrees (isometric view)
+    m_State.Angle[0] = 0.0f;
+    m_State.Angle[1] = 0.0f;
+    m_State.Angle[2] = -45.0f;
+
+    // Note: DefaultCamera maintains Angle[2] = -45 throughout gameplay
+    // The camera positioning is relative to character's facing direction
 }
 
 void DefaultCamera::OnDeactivate()
@@ -59,6 +68,7 @@ bool DefaultCamera::Update()
 
     m_State.Angle[0] = 0.f;
     m_State.Angle[1] = 0.f;
+    m_State.Angle[2] = -45.f;
 
     if (m_State.TopViewEnable)
     {
