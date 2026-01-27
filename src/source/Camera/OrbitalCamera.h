@@ -2,6 +2,8 @@
 
 #include "ICamera.h"
 #include "CameraState.h"
+#include "DefaultCamera.h"
+#include <memory>
 
 /**
  * @brief Orbital camera - spherical coordinates around character
@@ -27,11 +29,16 @@ public:
 
 private:
     CameraState& m_State;
+    std::unique_ptr<DefaultCamera> m_pDefaultCamera;  // Internal default camera for base calculation
 
     // Orbital parameters
+    vec3_t m_InitialCameraOffset;  // Saved offset from character on first frame
+    bool m_bInitialOffsetSet;      // Has initial offset been captured?
     vec3_t m_Target;              // Orbit center (character position)
-    float m_Yaw;                  // Horizontal rotation (degrees, 0-360)
-    float m_Pitch;                // Vertical rotation (degrees, clamped)
+    float m_BaseYaw;              // Initial yaw when activated
+    float m_BasePitch;            // Initial pitch when activated
+    float m_DeltaYaw;             // User rotation delta from base
+    float m_DeltaPitch;           // User pitch delta from base
     float m_Radius;               // Distance from target
 
     // Constraints
@@ -45,6 +52,7 @@ private:
     bool m_bRotating;             // Middle mouse button held?
     int m_LastMouseX;
     int m_LastMouseY;
+    float m_LastEffectivePitch;   // Last effective pitch applied (after constraints)
 
     // Helper methods
     void HandleInput();
