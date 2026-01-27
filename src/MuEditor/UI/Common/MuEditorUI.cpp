@@ -23,11 +23,11 @@ CMuEditorUI& CMuEditorUI::GetInstance()
     return instance;
 }
 
-void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor)
+void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showConsole)
 {
     if (editorEnabled)
     {
-        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor);
+        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showConsole);
     }
     else
     {
@@ -109,7 +109,7 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     ImGui::PopStyleColor(2);
 }
 
-void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor)
+void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showConsole)
 {
     ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, TOOLBAR_HEIGHT), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
@@ -142,6 +142,19 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, b
         if (ImGui::Button("Skill Editor"))
         {
             showSkillEditor = !showSkillEditor;
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Dev Editor"))
+        {
+            showDevEditor = !showDevEditor;
+        }
+
+        // Console toggle
+        ImGui::SameLine();
+        if (ImGui::Checkbox("Console", &showConsole))
+        {
+            // Toggle is handled by reference
         }
 
         // Language selector

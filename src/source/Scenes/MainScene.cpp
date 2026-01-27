@@ -31,6 +31,10 @@
 #include "Camera/CameraProjection.h"
 
 // External declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_IsDebugVisualizationEnabled();
+#endif
+
 extern HWND g_hWnd;
 extern CErrorReport g_ErrorReport;
 extern float EarthQuake;
@@ -572,6 +576,14 @@ bool RenderMainScene()
     SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
     RenderGameWorld(byWaterMap, width, height);
     RenderMainSceneUI();
+
+    // Debug: Draw frustum trapezoid visualization on top of everything (if enabled)
+#ifdef _EDITOR
+    if (DevEditor_IsDebugVisualizationEnabled())
+    {
+        RenderFrustrum2DDebug();
+    }
+#endif
 
     EndOpengl();
 

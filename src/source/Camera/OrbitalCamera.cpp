@@ -161,8 +161,9 @@ void OrbitalCamera::UpdateTarget()
 
 void OrbitalCamera::ComputeCameraTransform()
 {
-    // At this point, DefaultCamera has calculated m_State.Position and m_State.Angle
-    // Now we modify them like CustomCamera3D did
+    // At this point, DefaultCamera has calculated m_State.Position, m_State.Angle, and m_State.ViewFar
+    // Save the ViewFar that DefaultCamera calculated (we'll multiply it later)
+    float defaultCameraViewFar = m_State.ViewFar;
 
     // Calculate camera offset relative to character
     float relativeX = m_State.Position[0] - m_Target[0];
@@ -234,10 +235,10 @@ void OrbitalCamera::ComputeCameraTransform()
         effectivePitchDelta = (finalElevation - currentElevation) * (180.0f / M_PI);
     }
 
-    // Clamp to prevent looking straight down at character (limit to ~80-85 degrees)
+    // Clamp to prevent looking straight down at character (limit to ~80-90 degrees)
     // When camera is directly above, elevation approaches 90 degrees (PI/2)
     // We want to stop before reaching that to keep character visible
-    const float maxElevationRad = 90.0f * (M_PI / 180.0f);  // ~85 degrees maximum
+    const float maxElevationRad = 90.0f * (M_PI / 180.0f);  // ~90 degrees maximum
     if (finalElevation > maxElevationRad)
     {
         finalElevation = maxElevationRad;
@@ -273,7 +274,28 @@ void OrbitalCamera::ComputeCameraTransform()
     m_State.Distance = m_Radius;
     m_State.DistanceTarget = m_Radius;
 
-    // Scale ViewFar for zoom
-    float zoomDistance = m_Radius / DEFAULT_RADIUS * 100.0f;
-    m_State.ViewFar = m_State.ViewFar * (3.0f + zoomDistance / 100.0f * 4.0f) * 2.5f;
+    // Calculate dynamic ViewFar based on zoom distance
+    // When zoomed IN (small radius): see LESS (smaller ViewFar)
+    // When zoomed OUT (large radius): see MORE (larger ViewFar)
+    // Use CustomCamera3D's aggressive scaling for zoom OUT only
+
+    float baseViewFar = defaultCameraViewFar;
+    float zoomRatio = m_Radius / DEFAULT_RADIUS;  // 0.25 (min) to 2.5 (max), 1.0 at default
+
+    float viewMultiplier;
+    if (zoomRatio >= 1.0f)
+    {
+        // Zooming OUT: minimal scaling for natural feel
+        // At max zoom (2.5x radius), ViewFar = base * 1.3x
+        viewMultiplier = 1.0f + (zoomRatio - 1.0f) * 1.0f;  // Range: 1.0x to 1.3x
+    }
+    else
+    {
+        // Zooming IN: reduce ViewFar proportionally
+        // At radius=200 (0.25x): ViewFar = base * 0.5
+        // At radius=800 (1.0x): ViewFar = base * 1.0
+        viewMultiplier = 0.5f + (zoomRatio * 0.5f);  // Range: 0.5x to 1.0x
+    }
+
+    m_State.ViewFar = baseViewFar * viewMultiplier;
 }

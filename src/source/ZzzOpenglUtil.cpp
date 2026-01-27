@@ -12,6 +12,8 @@
 #include "NewUISystem.h"
 #include "wglext.h"
 #include "Camera/CameraProjection.h"
+#include "Camera/CameraManager.h"
+#include "Camera/CameraMode.h"
 
 int     OpenglWindowX;
 int     OpenglWindowY;
@@ -488,7 +490,10 @@ void BeginOpengl(int x, int y, int Width, int Height)
     glLoadIdentity();
     glViewport2(x, y, Width, Height);
 
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, (float)Width / (float)Height, g_Camera.ViewNear, g_Camera.ViewFar * 1.4f);
+    // Orbital camera already scales ViewFar internally, so don't multiply again
+    // Default camera needs the 1.4f multiplier for proper rendering
+    float viewFarMultiplier = (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital) ? 1.0f : 1.4f;
+    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, (float)Width / (float)Height, g_Camera.ViewNear, g_Camera.ViewFar * viewFarMultiplier);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();

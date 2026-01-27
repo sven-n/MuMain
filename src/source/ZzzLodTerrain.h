@@ -73,6 +73,9 @@ float RequestTerrainHeight(float xf, float yf);
 bool TestFrustrum(vec3_t Position, float Range);
 bool TestFrustrum2D(float x, float y, float Range);
 
+// Debug visualization
+void RenderFrustrum2DDebug();
+
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 void RenderTerrain(bool EditFlag);
 

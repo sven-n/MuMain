@@ -11,6 +11,7 @@
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
+#include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "Translation/i18n.h"
@@ -33,6 +34,8 @@ CMuEditorCore::CMuEditorCore()
     , m_bFrameStarted(false)
     , m_bShowItemEditor(false)
     , m_bShowSkillEditor(false)
+    , m_bShowDevEditor(false)
+    , m_bShowConsole(true)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
 {
@@ -403,15 +406,24 @@ void CMuEditorCore::Render()
     m_bHoveringUI = false;
 
     // Render toolbar (handles both open and closed states)
-    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor);
+    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowConsole);
 
     if (m_bEditorMode)
     {
         // Render center pane (handles all editor windows and input blocking)
         g_MuEditorCenterPaneUI.Render(m_bShowItemEditor, m_bShowSkillEditor);
 
-        // Render console
-        g_MuEditorConsoleUI.Render();
+        // Render Dev Editor
+        if (m_bShowDevEditor)
+        {
+            g_DevEditorUI.Render(&m_bShowDevEditor);
+        }
+
+        // Render console (if enabled)
+        if (m_bShowConsole)
+        {
+            g_MuEditorConsoleUI.Render();
+        }
     }
 
     // Store current hover state for next frame's input blocking
