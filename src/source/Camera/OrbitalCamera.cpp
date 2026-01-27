@@ -4,6 +4,11 @@
 #include "OrbitalCamera.h"
 #include "../ZzzOpenglUtil.h"
 #include "../ZzzCharacter.h"
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 // External globals
 extern int MouseWheel;
@@ -15,22 +20,32 @@ extern int MouseY;
 
 OrbitalCamera::OrbitalCamera(CameraState& state)
     : m_State(state)
-    , m_Yaw(0.0f)
-    , m_Pitch(-30.0f)
+    , m_pDefaultCamera(std::make_unique<DefaultCamera>(state))
+    , m_bInitialOffsetSet(false)
+    , m_BaseYaw(0.0f)
+    , m_BasePitch(0.0f)
+    , m_DeltaYaw(0.0f)
+    , m_DeltaPitch(0.0f)
     , m_Radius(DEFAULT_RADIUS)
     , m_bRotating(false)
     , m_LastMouseX(0)
     , m_LastMouseY(0)
+    , m_LastEffectivePitch(0.0f)
 {
     IdentityVector3D(m_Target);
+    IdentityVector3D(m_InitialCameraOffset);
 }
 
 void OrbitalCamera::Reset()
 {
-    m_Yaw = 0.0f;
-    m_Pitch = -30.0f;
+    m_BaseYaw = 0.0f;
+    m_BasePitch = 0.0f;
+    m_DeltaYaw = 0.0f;
+    m_DeltaPitch = 0.0f;
     m_Radius = DEFAULT_RADIUS;
     m_bRotating = false;
+    m_bInitialOffsetSet = false;
+    m_pDefaultCamera->Reset();
 }
 
 void OrbitalCamera::OnActivate(const CameraState& previousState)
@@ -39,13 +54,12 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     m_Radius = previousState.Distance;
     m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
 
-    // Start from the previous camera's angles
-    m_Pitch = previousState.Angle[0];
-    m_Yaw = previousState.Angle[2];
+    // Reset deltas - user hasn't rotated yet
+    m_DeltaYaw = 0.0f;
+    m_DeltaPitch = 0.0f;
 
-    // Clamp to valid range
-    m_Pitch = std::clamp(m_Pitch, MIN_PITCH, MAX_PITCH);
-    m_Yaw = fmodf(m_Yaw + 360.0f, 360.0f);
+    // Reset initial offset - will be captured on first frame
+    m_bInitialOffsetSet = false;
 }
 
 void OrbitalCamera::OnDeactivate()
@@ -57,7 +71,23 @@ bool OrbitalCamera::Update()
 {
     HandleInput();
     UpdateTarget();
+
+    // First, let DefaultCamera calculate the base camera position
+    m_pDefaultCamera->Update();
+
+    // Then modify it with our orbital transformations
     ComputeCameraTransform();
+
+    // Clamp m_DeltaPitch based on what was actually achieved
+    // If we tried to pitch but didn't move much, we're stuck at a constraint
+    // This prevents accumulation when hitting ground/ceiling
+    const float tolerance = 0.1f;
+    if (std::abs(m_DeltaPitch - m_LastEffectivePitch) > tolerance)
+    {
+        // We tried to pitch more but hit a constraint, clamp to effective value
+        m_DeltaPitch = m_LastEffectivePitch;
+    }
+
     return false; // Camera not locked
 }
 
@@ -73,7 +103,9 @@ void OrbitalCamera::HandleInput()
     }
 
     // Middle mouse drag rotation - only rotate when button is held AND mouse moves
-    bool buttonHeld = (MouseMButton || MouseMButtonPush);
+    // Check if button is currently pressed (not just was pressed)
+    bool buttonHeld = MouseMButton;
+
     if (buttonHeld)
     {
         if (!m_bRotating)
@@ -93,15 +125,17 @@ void OrbitalCamera::HandleInput()
             if (deltaX != 0 || deltaY != 0)
             {
                 const float sensitivity = 0.5f;
-                m_Yaw += deltaX * sensitivity;
-                m_Pitch -= deltaY * sensitivity;  // Inverted Y
+                m_DeltaYaw += deltaX * sensitivity;
+                m_DeltaPitch -= deltaY * sensitivity;  // Inverted Y
 
-                // Normalize yaw to [0, 360)
-                m_Yaw = fmodf(m_Yaw + 360.0f, 360.0f);
+                // Clamp pitch delta to prevent extreme angles
+                float totalPitch = m_BasePitch + m_DeltaPitch;
+                if (totalPitch < MIN_PITCH)
+                    m_DeltaPitch = MIN_PITCH - m_BasePitch;
+                else if (totalPitch > MAX_PITCH)
+                    m_DeltaPitch = MAX_PITCH - m_BasePitch;
 
-                // Clamp pitch
-                m_Pitch = std::clamp(m_Pitch, MIN_PITCH, MAX_PITCH);
-
+                // Update last position
                 m_LastMouseX = MouseX;
                 m_LastMouseY = MouseY;
             }
@@ -109,56 +143,137 @@ void OrbitalCamera::HandleInput()
     }
     else
     {
+        // Button released - reset rotation state
         m_bRotating = false;
     }
 }
 
 void OrbitalCamera::UpdateTarget()
 {
-    // Target is character position with height offset
+    // Target is character position (no height offset in XY, only used for Z calculation)
     if (Hero)
     {
         m_Target[0] = Hero->Object.Position[0];
         m_Target[1] = Hero->Object.Position[1];
-        m_Target[2] = Hero->Object.Position[2] + 80.0f; // Height offset
+        m_Target[2] = Hero->Object.Position[2];
     }
 }
 
 void OrbitalCamera::ComputeCameraTransform()
 {
-    // Use the same approach as DefaultCamera:
-    // 1. Create offset vector pointing backward (0, -Distance, 0)
-    // 2. Rotate by camera angles
-    // 3. Add to target position
+    // At this point, DefaultCamera has calculated m_State.Position and m_State.Angle
+    // Now we modify them like CustomCamera3D did
 
-    vec3_t offset, rotatedOffset;
-    float matrix[3][4];
+    // Calculate camera offset relative to character
+    float relativeX = m_State.Position[0] - m_Target[0];
+    float relativeY = m_State.Position[1] - m_Target[1];
+    float relativeZ = m_State.Position[2] - m_Target[2];
 
-    // Set camera angles
-    m_State.Angle[0] = m_Pitch;
+    // Save initial offset on first frame
+    if (!m_bInitialOffsetSet)
+    {
+        m_InitialCameraOffset[0] = relativeX;
+        m_InitialCameraOffset[1] = relativeY;
+        m_InitialCameraOffset[2] = relativeZ;
+        m_bInitialOffsetSet = true;
+    }
+
+    // Calculate zoom scale (100 = 1.0x normal)
+    float zoomScale = m_Radius / DEFAULT_RADIUS;
+
+    // Apply zoom to initial offset
+    float scaledX = m_InitialCameraOffset[0] * zoomScale;
+    float scaledY = m_InitialCameraOffset[1] * zoomScale;
+    float scaledZ = m_InitialCameraOffset[2] * zoomScale;
+
+    // Apply horizontal rotation around Z axis
+    float angleRad = m_DeltaYaw * (M_PI / 180.0f);
+    float rotatedX = scaledX * cosf(angleRad) - scaledY * sinf(angleRad);
+    float rotatedY = scaledX * sinf(angleRad) + scaledY * cosf(angleRad);
+    float rotatedZ = scaledZ;
+
+    // Apply vertical pitch rotation
+    float horizontalDist = sqrtf(rotatedX * rotatedX + rotatedY * rotatedY);
+    float totalDist = sqrtf(rotatedX * rotatedX + rotatedY * rotatedY + rotatedZ * rotatedZ);
+    float currentElevation = atan2f(rotatedZ, horizontalDist);
+
+    // Calculate additional height offset when zooming in close
+    // This makes the camera focus on character's head/upper body instead of feet
+    const float CAMERA_HEIGHT_OFFSET = 80.0f;
+    const float maxHeightOffset = 200.0f;
+
+    float zoomFactor = 0.0f;
+    if (m_Radius < DEFAULT_RADIUS)  // Only add extra offset when zooming in from default
+    {
+        zoomFactor = (DEFAULT_RADIUS - m_Radius) / (DEFAULT_RADIUS - MIN_RADIUS);
+        zoomFactor = std::max(0.0f, std::min(1.0f, zoomFactor));  // Clamp to 0-1
+    }
+
+    // Calculate the target offset for current zoom level
+    float targetHeightOffset = CAMERA_HEIGHT_OFFSET + ((maxHeightOffset - CAMERA_HEIGHT_OFFSET) * zoomFactor);
+    float additionalOffset = targetHeightOffset - CAMERA_HEIGHT_OFFSET;
+
+    // Check if requested pitch would hit ground or ceiling constraints
+    float pitchRad = m_DeltaPitch * (M_PI / 180.0f);
+    float requestedElevation = currentElevation + pitchRad;
+    float requestedVerticalDist = totalDist * sinf(requestedElevation);
+    float requestedZ = m_Target[2] + requestedVerticalDist + additionalOffset;
+
+    const float minCameraHeight = 50.0f;
+    float finalElevation = requestedElevation;
+    float effectivePitchDelta = m_DeltaPitch;
+
+    // Clamp to prevent looking too far down (below minimum height)
+    if (requestedZ < m_Target[2] + minCameraHeight)
+    {
+        // Calculate maximum downward elevation that keeps us above minimum height
+        float maxRelativeZ = minCameraHeight - additionalOffset;
+        finalElevation = asinf(std::clamp(maxRelativeZ / totalDist, -1.0f, 1.0f));
+
+        // Calculate effective pitch delta
+        effectivePitchDelta = (finalElevation - currentElevation) * (180.0f / M_PI);
+    }
+
+    // Clamp to prevent looking straight down at character (limit to ~80-85 degrees)
+    // When camera is directly above, elevation approaches 90 degrees (PI/2)
+    // We want to stop before reaching that to keep character visible
+    const float maxElevationRad = 90.0f * (M_PI / 180.0f);  // ~85 degrees maximum
+    if (finalElevation > maxElevationRad)
+    {
+        finalElevation = maxElevationRad;
+        effectivePitchDelta = (finalElevation - currentElevation) * (180.0f / M_PI);
+    }
+
+    // Apply the final (possibly clamped) elevation
+    float newHorizontalDist = totalDist * cosf(finalElevation);
+    float newVerticalDist = totalDist * sinf(finalElevation);
+
+    float xyScale = (horizontalDist > 0.001f) ? (newHorizontalDist / horizontalDist) : 1.0f;
+    rotatedX *= xyScale;
+    rotatedY *= xyScale;
+    rotatedZ = newVerticalDist;
+
+    // Set final camera position with additional height offset
+    m_State.Position[0] = m_Target[0] + rotatedX;
+    m_State.Position[1] = m_Target[1] + rotatedY;
+    m_State.Position[2] = m_Target[2] + rotatedZ + additionalOffset;
+
+    // Modify camera angles - use effective pitch that accounts for ground collision
+    m_State.Angle[0] = m_State.Angle[0] + effectivePitchDelta;
     m_State.Angle[1] = 0.0f;
-    m_State.Angle[2] = m_Yaw;
+    m_State.Angle[2] = m_State.Angle[2] - m_DeltaYaw;  // Inverted like CustomCamera3D
 
-    // Create offset vector pointing backward
-    Vector(0.f, -m_Radius, 0.f, offset);
-
-    // Rotate offset by camera angles (same as DefaultCamera)
-    AngleMatrix(m_State.Angle, matrix);
-    VectorIRotate(offset, matrix, rotatedOffset);
-
-    // Camera position = target + rotated offset
-    VectorAdd(m_Target, rotatedOffset, m_State.Position);
-
-    // Set Z position like DefaultCamera does: target Z + distance adjustment
-    // Note: We use target[2] - 80 because UpdateTarget already adds 80
-    m_State.Position[2] = (m_Target[2] - 80.0f) + m_Radius - 150.f;
+    // Store the effective pitch for next frame's constraint checking
+    m_LastEffectivePitch = effectivePitchDelta;
 
     // Update transformation matrix
     m_State.UpdateMatrix();
 
-    // Set other camera properties
+    // Update distance properties
     m_State.Distance = m_Radius;
     m_State.DistanceTarget = m_Radius;
-    m_State.ViewFar = 3000.0f;
-    m_State.FOV = 55.0f;
+
+    // Scale ViewFar for zoom
+    float zoomDistance = m_Radius / DEFAULT_RADIUS * 100.0f;
+    m_State.ViewFar = m_State.ViewFar * (3.0f + zoomDistance / 100.0f * 4.0f) * 2.5f;
 }
