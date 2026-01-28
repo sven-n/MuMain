@@ -17,8 +17,11 @@ void CreateShadowAngle();
 
 OBJECT* CollisionDetectObjects(OBJECT* PickObject);
 
+// Forward declaration
+class ICamera;
+
 void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
-void RenderObjects();
+void RenderObjects(ICamera* camera = nullptr);
 void NextGradeObjectRender(CHARACTER* c);
 void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0, float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);

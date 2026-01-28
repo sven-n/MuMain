@@ -50,6 +50,9 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
 
     // Note: DefaultCamera maintains Angle[2] = -45 throughout gameplay
     // The camera positioning is relative to character's facing direction
+
+    // Phase 3 fix: Initialize frustum immediately on activation
+    UpdateFrustum();
 }
 
 void DefaultCamera::OnDeactivate()

@@ -29,6 +29,7 @@
 #include "../Guild/GuildCache.h"
 #include "../UIMapName.h"
 #include "Camera/CameraProjection.h"
+#include "Camera/CameraManager.h"
 
 // External declarations
 #ifdef _EDITOR
@@ -394,26 +395,29 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
  */
 static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 {
+    // Phase 3: Get active camera for direct culling
+    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
+
     if (IsWaterTerrain() == false)
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
-                RenderTerrain(false);
+                RenderTerrain(false, activeCamera);
         }
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
             {
                 if (gMapManager.IsPKField() || IsDoppelGanger2())
                 {
-                    RenderObjects();
+                    RenderObjects(activeCamera);
                 }
-                RenderTerrain(false);
+                RenderTerrain(false, activeCamera);
             }
     }
 
     if (!gMapManager.IsPKField() && !IsDoppelGanger2())
-        RenderObjects();
+        RenderObjects(activeCamera);
 
     RenderEffectShadows();
     RenderBoids();
