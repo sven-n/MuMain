@@ -657,7 +657,7 @@ void DirectSoundManager::SetVolumeInternal(ESound bufferId, long volume)
     auto& entry = entries_[bufferId];
     for (int channel = 0; channel < entry.maxChannels; ++channel)
     {
-        IDirectSoundBuffer* buffer = GetBuffer(bufferId, channel);
+        IDirectSoundBuffer* buffer = entry.buffers[channel].get();
         if (buffer != nullptr)
         {
             buffer->SetVolume(clamped);
