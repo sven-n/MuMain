@@ -50,8 +50,10 @@ enum class Domain {
 
 ## File Structure
 
+The following structure shows paths relative to the project root directory (where `.sln` file is located):
+
 ```
-MuMain/
+MuMain/                              # Project root directory
 ├── src/
 │   ├── Translation/
 │   │   ├── i18n.h              # Translation system header (domain-aware)
@@ -152,6 +154,7 @@ if (i18n::HasTranslation(i18n::Domain::Metadata, key.c_str())) {
 i18n::Translator& translator = i18n::Translator::GetInstance();
 
 // Game translations - always loaded
+// Path is relative to the executable location (src/bin/)
 bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
     L"Translations/en/game.json");
 
@@ -190,7 +193,9 @@ bool metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
 
 ### 1. Add Translation Keys to JSON Files
 
-**src/bin/Translations/en/game.json**:
+Translation files are located in the `src/bin/Translations/` directory (relative to project root).
+
+**src/bin/Translations/en/game.json** (absolute path from project root):
 ```json
 {
   "new_button": "Click Me",
