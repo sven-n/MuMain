@@ -26,6 +26,22 @@ public:
     float GetFarPlane() const { return m_FarPlane; }
     float GetTerrainCullRange() const { return m_TerrainCullRange; }
 
+    // Render toggle accessors
+    bool ShouldRenderTerrain() const { return m_RenderTerrain; }
+    bool ShouldRenderStaticObjects() const { return m_RenderStaticObjects; }
+    bool ShouldRenderEffects() const { return m_RenderEffects; }
+    bool ShouldRenderDroppedItems() const { return m_RenderDroppedItems; }
+    bool ShouldRenderItemLabels() const { return m_RenderItemLabels; }
+    bool ShouldRenderEquippedItems() const { return m_RenderEquippedItems; }
+    bool ShouldRenderWeatherEffects() const { return m_RenderWeatherEffects; }
+    bool ShouldRenderUI() const { return m_RenderUI; }
+    // Not implemented (for future):
+    bool ShouldRenderHero() const { return m_RenderHero; }
+    bool ShouldRenderNPCs() const { return m_RenderNPCs; }
+    bool ShouldRenderMonsters() const { return m_RenderMonsters; }
+    bool ShouldRenderShaders() const { return m_RenderShaders; }
+    bool ShouldRenderSkillEffects() const { return m_RenderSkillEffects; }
+
 private:
     CDevEditorUI() = default;
     ~CDevEditorUI() = default;
@@ -48,6 +64,26 @@ private:
     float m_NearPlane = 10.0f;        // Near clipping plane
     float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
     float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range
+
+    // Render toggle flags
+    // Working toggles
+    bool m_RenderTerrain = true;          // ✓ WORKING - Ground tiles
+    bool m_RenderStaticObjects = true;    // ✓ WORKING - Trees, stones, walls
+    bool m_RenderEffects = true;          // ✓ WORKING - Particles, magic
+    bool m_RenderDroppedItems = true;     // ✓ WORKING - Ground loot
+    bool m_RenderWeatherEffects = true;   // ✓ WORKING - Rain, snow, leaves, mist
+    bool m_RenderItemLabels = true;       // ✓ WORKING - Item text boxes on ground
+
+    // Not working (too complex - tested and failed)
+    bool m_RenderShaders = true;          // ✗ NOT WORKING - Too low level
+    bool m_RenderSkillEffects = true;     // ✗ NOT WORKING - Too complex
+    bool m_RenderEquippedItems = true;    // ✗ NOT WORKING - Equipment on characters (too complex)
+    bool m_RenderUI = true;               // ✗ NOT WORKING - Interface (needs extensive grouping)
+
+    // Not implemented (too complex)
+    bool m_RenderHero = true;             // NOT IMPLEMENTED
+    bool m_RenderNPCs = true;             // NOT IMPLEMENTED
+    bool m_RenderMonsters = true;         // NOT IMPLEMENTED
 };
 
 #define g_DevEditorUI CDevEditorUI::GetInstance()

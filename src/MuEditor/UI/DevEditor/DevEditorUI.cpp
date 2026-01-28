@@ -247,6 +247,123 @@ void CDevEditorUI::RenderCameraTab()
     {
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to adjust FOV, planes, cull range");
     }
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // Render Toggles Section
+    ImGui::Text("Rendering Toggles");
+    ImGui::Separator();
+
+    // Working toggles
+    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "✓ Working Toggles:");
+    ImGui::Columns(2, nullptr, false);
+
+    ImGui::Checkbox("Terrain", &m_RenderTerrain);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Ground tiles)");
+
+    ImGui::Checkbox("Static Objects", &m_RenderStaticObjects);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Trees, stones, walls)");
+
+    ImGui::Checkbox("Effects", &m_RenderEffects);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Particles, magic)");
+
+    ImGui::NextColumn();
+
+    ImGui::Checkbox("Dropped Items", &m_RenderDroppedItems);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Ground loot)");
+
+    ImGui::Checkbox("Weather Effects", &m_RenderWeatherEffects);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Rain, snow, leaves)");
+
+    ImGui::Checkbox("Item Labels", &m_RenderItemLabels);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Item text boxes)");
+
+    ImGui::Columns(1);
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // Not working section
+    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "✗ Not Working (tested - too complex):");
+    ImGui::BeginDisabled();
+    ImGui::Columns(2, nullptr, false);
+
+    ImGui::Checkbox("Shaders", &m_RenderShaders);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Too low level)");
+
+    ImGui::Checkbox("Skill Effects", &m_RenderSkillEffects);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Too complex)");
+
+    ImGui::NextColumn();
+
+    ImGui::Checkbox("Equipped Items", &m_RenderEquippedItems);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Character system)");
+
+    ImGui::Checkbox("UI", &m_RenderUI);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Needs grouping)");
+
+    ImGui::Columns(1);
+    ImGui::EndDisabled();
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // Not implemented section
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "⊘ Not Implemented:");
+    ImGui::BeginDisabled();
+    ImGui::Columns(3, nullptr, false);
+
+    ImGui::Checkbox("Hero", &m_RenderHero);
+    ImGui::NextColumn();
+    ImGui::Checkbox("NPCs", &m_RenderNPCs);
+    ImGui::NextColumn();
+    ImGui::Checkbox("Monsters", &m_RenderMonsters);
+
+    ImGui::Columns(1);
+    ImGui::EndDisabled();
+
+    ImGui::Spacing();
+    ImGui::Text("Quick Actions:");
+    if (ImGui::Button("All ON"))
+    {
+        m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = true;
+        m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("All OFF"))
+    {
+        m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = false;
+        m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Only Static"))
+    {
+        m_RenderTerrain = true;
+        m_RenderStaticObjects = true;
+        m_RenderEffects = m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Only Items"))
+    {
+        m_RenderTerrain = true;
+        m_RenderDroppedItems = true;
+        m_RenderItemLabels = true;
+        m_RenderStaticObjects = m_RenderEffects = m_RenderWeatherEffects = false;
+    }
+
+    ImGui::Separator();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Legend: ✓ Working  ✗ Not Working  ⊘ Not Implemented");
 }
 
 // Accessors for external use
@@ -312,6 +429,74 @@ extern "C"
         if (outNearPlane) *outNearPlane = g_DevEditorUI.GetNearPlane();
         if (outFarPlane) *outFarPlane = g_DevEditorUI.GetFarPlane();
         if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetTerrainCullRange();
+    }
+
+    // Render toggle accessors
+    bool DevEditor_ShouldRenderTerrain()
+    {
+        return g_DevEditorUI.ShouldRenderTerrain();
+    }
+
+    bool DevEditor_ShouldRenderStaticObjects()
+    {
+        return g_DevEditorUI.ShouldRenderStaticObjects();
+    }
+
+    bool DevEditor_ShouldRenderEffects()
+    {
+        return g_DevEditorUI.ShouldRenderEffects();
+    }
+
+    bool DevEditor_ShouldRenderDroppedItems()
+    {
+        return g_DevEditorUI.ShouldRenderDroppedItems();
+    }
+
+    bool DevEditor_ShouldRenderItemLabels()
+    {
+        return g_DevEditorUI.ShouldRenderItemLabels();
+    }
+
+    bool DevEditor_ShouldRenderEquippedItems()
+    {
+        return g_DevEditorUI.ShouldRenderEquippedItems();
+    }
+
+    bool DevEditor_ShouldRenderWeatherEffects()
+    {
+        return g_DevEditorUI.ShouldRenderWeatherEffects();
+    }
+
+    bool DevEditor_ShouldRenderUI()
+    {
+        return g_DevEditorUI.ShouldRenderUI();
+    }
+
+    // Not implemented (always return true)
+    bool DevEditor_ShouldRenderHero()
+    {
+        return g_DevEditorUI.ShouldRenderHero();
+    }
+
+    bool DevEditor_ShouldRenderNPCs()
+    {
+        return g_DevEditorUI.ShouldRenderNPCs();
+    }
+
+    bool DevEditor_ShouldRenderMonsters()
+    {
+        return g_DevEditorUI.ShouldRenderMonsters();
+    }
+
+    // New untested toggles
+    bool DevEditor_ShouldRenderShaders()
+    {
+        return g_DevEditorUI.ShouldRenderShaders();
+    }
+
+    bool DevEditor_ShouldRenderSkillEffects()
+    {
+        return g_DevEditorUI.ShouldRenderSkillEffects();
     }
 }
 
