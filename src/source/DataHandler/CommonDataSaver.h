@@ -33,13 +33,13 @@ public:
         std::function<void(TRuntime&, BYTE*, size_t)> convertFromFileLegacy; // Legacy file -> Runtime
 
         // Encryption/Decryption (optional, can be nullptr for no encryption)
-        std::function<void(BYTE*, size_t)> encryptBuffer;   // Called once on entire buffer
-        std::function<void(BYTE*, size_t)> decryptBuffer;   // Called once on entire buffer
-        std::function<void(BYTE*, size_t)> encryptRecord;   // Called per-record (like BuxConvert)
-        std::function<void(BYTE*, size_t)> decryptRecord;   // Called per-record (like BuxConvert)
+        std::function<void(BYTE*, std::size_t)> encryptBuffer;   // Called once on entire buffer
+        std::function<void(BYTE*, std::size_t)> decryptBuffer;   // Called once on entire buffer
+        std::function<void(BYTE*, std::size_t)> encryptRecord;   // Called per-record (like BuxConvert)
+        std::function<void(BYTE*, std::size_t)> decryptRecord;   // Called per-record (like BuxConvert)
 
         // Checksum (optional)
-        std::function<DWORD(BYTE*, size_t)> generateChecksum;
+        std::function<DWORD(BYTE*, std::size_t)> generateChecksum;
 
         // Change tracking (optional)
         std::function<void(const TRuntime&, const TRuntime&, std::stringstream&, bool&)> compareItems;

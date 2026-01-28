@@ -243,17 +243,17 @@ typename CommonDataSaver::SaveConfig<TRuntime, TFile> CreateStandardSaveConfig(
     config.convertFromFile = convertFromFile;
 
     // Encryption: BuxConvert per-record (standard for all MU data files)
-    config.encryptRecord = [](BYTE* buffer, size_t size) {
+    config.encryptRecord = [](BYTE* buffer, std::size_t size) {
         BuxConvert(buffer, size);
     };
 
-    config.decryptRecord = [](BYTE* buffer, size_t size) {
+    config.decryptRecord = [](BYTE* buffer, std::size_t size) {
         BuxConvert(buffer, size);
     };
 
     // Checksum with data-type-specific key
-    config.generateChecksum = [checksumKey](BYTE* buffer, size_t size) -> DWORD {
-        return GenerateCheckSum2(buffer, size, checksumKey);
+    config.generateChecksum = [checksumKey](BYTE* buffer, std::size_t size) -> DWORD {
+        return GenerateCheckSum2(buffer, static_cast<DWORD>(size), checksumKey);
     };
 
     // Change tracking
