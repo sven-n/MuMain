@@ -20,9 +20,13 @@ namespace ChangeTracker
     template<typename TStruct>
     inline std::string GetNameUtf8(int index, const TStruct& data, int maxNameLen)
     {
-        char nameBuf[256];
+        char nameBuf[256] = {0};
         int bufSize = (maxNameLen > 0 && maxNameLen < 256) ? maxNameLen : sizeof(nameBuf);
-        WideCharToMultiByte(CP_UTF8, 0, data.Name, -1, nameBuf, bufSize, NULL, NULL);
+        int result = WideCharToMultiByte(CP_UTF8, 0, data.Name, -1, nameBuf, bufSize, NULL, NULL);
+        if (result == 0)
+        {
+            return std::string("[UTF-8 conversion failed]");
+        }
         return std::string(nameBuf);
     }
 
@@ -80,14 +84,21 @@ namespace ChangeTracker
 
         if (!stringsEqual)
         {
-            char oldUtf8[256];
-            char newUtf8[256];
+            char oldUtf8[256] = {0};
+            char newUtf8[256] = {0};
             int charCount = (maxLen > 0) ? maxLen : -1;
-            WideCharToMultiByte(CP_UTF8, 0, oldVal, charCount, oldUtf8, sizeof(oldUtf8), NULL, NULL);
-            WideCharToMultiByte(CP_UTF8, 0, newVal, charCount, newUtf8, sizeof(newUtf8), NULL, NULL);
+            int result1 = WideCharToMultiByte(CP_UTF8, 0, oldVal, charCount, oldUtf8, sizeof(oldUtf8), NULL, NULL);
+            int result2 = WideCharToMultiByte(CP_UTF8, 0, newVal, charCount, newUtf8, sizeof(newUtf8), NULL, NULL);
 
-            changes << "  " << fieldName << ": \""
-                   << oldUtf8 << "\" -> \"" << newUtf8 << "\"\n";
+            if (result1 == 0 || result2 == 0)
+            {
+                changes << "  " << fieldName << ": [UTF-8 conversion failed]\n";
+            }
+            else
+            {
+                changes << "  " << fieldName << ": \""
+                       << oldUtf8 << "\" -> \"" << newUtf8 << "\"\n";
+            }
             hasChanged = true;
         }
     }
