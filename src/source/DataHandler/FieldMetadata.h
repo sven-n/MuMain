@@ -54,8 +54,9 @@ inline void CompareFieldByMetadata(
     {
         case FieldType::Bool:
         {
-            bool oldVal = *(const bool*)oldPtr;
-            bool newVal = *(const bool*)newPtr;
+            bool oldVal, newVal;
+            memcpy(&oldVal, oldPtr, sizeof(bool));
+            memcpy(&newVal, newPtr, sizeof(bool));
             if (oldVal != newVal)
             {
                 fieldChanged = true;
@@ -68,8 +69,9 @@ inline void CompareFieldByMetadata(
 
         case FieldType::Byte:
         {
-            BYTE oldVal = *(const BYTE*)oldPtr;
-            BYTE newVal = *(const BYTE*)newPtr;
+            BYTE oldVal, newVal;
+            memcpy(&oldVal, oldPtr, sizeof(BYTE));
+            memcpy(&newVal, newPtr, sizeof(BYTE));
             if (oldVal != newVal)
             {
                 fieldChanged = true;
@@ -81,8 +83,9 @@ inline void CompareFieldByMetadata(
 
         case FieldType::Word:
         {
-            WORD oldVal = *(const WORD*)oldPtr;
-            WORD newVal = *(const WORD*)newPtr;
+            WORD oldVal, newVal;
+            memcpy(&oldVal, oldPtr, sizeof(WORD));
+            memcpy(&newVal, newPtr, sizeof(WORD));
             if (oldVal != newVal)
             {
                 fieldChanged = true;
@@ -94,8 +97,9 @@ inline void CompareFieldByMetadata(
 
         case FieldType::Int:
         {
-            int oldVal = *(const int*)oldPtr;
-            int newVal = *(const int*)newPtr;
+            int oldVal, newVal;
+            memcpy(&oldVal, oldPtr, sizeof(int));
+            memcpy(&newVal, newPtr, sizeof(int));
             if (oldVal != newVal)
             {
                 fieldChanged = true;
@@ -107,8 +111,9 @@ inline void CompareFieldByMetadata(
 
         case FieldType::DWord:
         {
-            DWORD oldVal = *(const DWORD*)oldPtr;
-            DWORD newVal = *(const DWORD*)newPtr;
+            DWORD oldVal, newVal;
+            memcpy(&oldVal, oldPtr, sizeof(DWORD));
+            memcpy(&newVal, newPtr, sizeof(DWORD));
             if (oldVal != newVal)
             {
                 fieldChanged = true;
@@ -120,8 +125,9 @@ inline void CompareFieldByMetadata(
 
         case FieldType::Float:
         {
-            float oldVal = *(const float*)oldPtr;
-            float newVal = *(const float*)newPtr;
+            float oldVal, newVal;
+            memcpy(&oldVal, oldPtr, sizeof(float));
+            memcpy(&newVal, newPtr, sizeof(float));
             if (oldVal != newVal)
             {
                 fieldChanged = true;
