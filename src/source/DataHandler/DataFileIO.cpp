@@ -37,7 +37,7 @@ namespace DataFileIO
     bool VerifyChecksum(const BYTE* buffer, const IOConfig& config, DWORD expectedChecksum)
     {
         int bufferSize = config.itemSize * config.itemCount;
-        DWORD calculatedChecksum = GenerateCheckSum2(const_cast<BYTE*>(buffer), bufferSize, config.checksumKey);
+        DWORD calculatedChecksum = GenerateCheckSum2(buffer, bufferSize, config.checksumKey);
         return (calculatedChecksum == expectedChecksum);
     }
 
