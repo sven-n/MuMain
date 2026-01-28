@@ -26,8 +26,29 @@ public:
     void OnDeactivate() override;
     const char* GetName() const override { return "Default"; }
 
+    // Phase 1: Configuration & Frustum Management
+    const CameraConfig& GetConfig() const override { return m_Config; }
+    void SetConfig(const CameraConfig& config) override;
+    const Frustum& GetFrustum() const override { return m_Frustum; }
+
+    bool ShouldCullObject(const vec3_t position, float radius) const override
+    {
+        return !m_Frustum.TestSphere(position, radius);
+    }
+
+    bool ShouldCullTerrain(int tileX, int tileY) const override
+    {
+        int minX, minY, maxX, maxY;
+        m_Frustum.GetTerrainTileBounds(&minX, &minY, &maxX, &maxY);
+        return tileX < minX || tileX > maxX || tileY < minY || tileY > maxY;
+    }
+
 private:
     CameraState& m_State;
+
+    // Phase 1: Configuration and frustum
+    CameraConfig m_Config;
+    Frustum m_Frustum;
 
     // These are direct copies of the static functions from CameraUtility.cpp
     // We're NOT refactoring them yet - just moving them as-is
@@ -38,6 +59,7 @@ private:
     void UpdateCustomCameraDistance();
     void UpdateCameraDistance();
     void SetCameraFOV();
+    void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
 
 #ifdef ENABLE_EDIT2
     void HandleEditorMode();
