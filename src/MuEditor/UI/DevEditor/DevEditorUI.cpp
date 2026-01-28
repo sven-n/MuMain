@@ -176,6 +176,77 @@ void CDevEditorUI::RenderCameraTab()
     {
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable override to edit values");
     }
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // New CameraConfig controls
+    ImGui::Text("Camera Configuration (CameraConfig)");
+    ImGui::Separator();
+
+    ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(FOV, near/far planes, cull range)");
+
+    if (m_ConfigOverrideEnabled)
+    {
+        ImGui::PushItemWidth(200);
+
+        ImGui::Text("3D Frustum Parameters:");
+        ImGui::SliderFloat("FOV (degrees)", &m_FOV, 10.0f, 90.0f, "%.1f");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(30° = default)");
+
+        ImGui::InputFloat("Near Plane", &m_NearPlane, 1.0f, 10.0f, "%.1f");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(10 = default)");
+
+        ImGui::InputFloat("Far Plane", &m_FarPlane, 100.0f, 500.0f, "%.1f");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(2400 = default)");
+
+        ImGui::Spacing();
+        ImGui::Text("2D Terrain Culling:");
+        ImGui::InputFloat("Terrain Cull Range", &m_TerrainCullRange, 50.0f, 200.0f, "%.1f");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(1100 = default)");
+
+        ImGui::PopItemWidth();
+
+        ImGui::Spacing();
+        ImGui::Text("Presets:");
+        if (ImGui::Button("Gameplay (Default)"))
+        {
+            m_FOV = 30.0f;
+            m_NearPlane = 10.0f;
+            m_FarPlane = 2400.0f;
+            m_TerrainCullRange = 1100.0f;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Wide FOV"))
+        {
+            m_FOV = 60.0f;
+            m_NearPlane = 10.0f;
+            m_FarPlane = 3200.0f;
+            m_TerrainCullRange = 1500.0f;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cinematic"))
+        {
+            m_FOV = 45.0f;
+            m_NearPlane = 5.0f;
+            m_FarPlane = 5000.0f;
+            m_TerrainCullRange = 2000.0f;
+        }
+
+        ImGui::Separator();
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Changes applied in real-time!");
+        ImGui::Text("Note: These override CameraConfig values");
+    }
+    else
+    {
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to adjust FOV, planes, cull range");
+    }
 }
 
 // Accessors for external use
@@ -228,6 +299,20 @@ extern "C"
     }
 
     // Note: GetOrbitalCameraAngles is implemented in CameraManager.cpp
+
+    // New CameraConfig accessors
+    bool DevEditor_IsConfigOverrideEnabled()
+    {
+        return g_DevEditorUI.IsConfigOverrideEnabled();
+    }
+
+    void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange)
+    {
+        if (outFOV) *outFOV = g_DevEditorUI.GetFOV();
+        if (outNearPlane) *outNearPlane = g_DevEditorUI.GetNearPlane();
+        if (outFarPlane) *outFarPlane = g_DevEditorUI.GetFarPlane();
+        if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetTerrainCullRange();
+    }
 }
 
 #endif // _EDITOR

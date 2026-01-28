@@ -18,6 +18,12 @@ extern int MouseX;
 extern int MouseY;
 // Hero is declared in ZzzCharacter.h as CHARACTER*
 
+#ifdef _EDITOR
+// DevEditor config override functions (global scope required for extern "C")
+extern "C" bool DevEditor_IsConfigOverrideEnabled();
+extern "C" void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
+#endif
+
 OrbitalCamera::OrbitalCamera(CameraState& state)
     : m_State(state)
     , m_pDefaultCamera(std::make_unique<DefaultCamera>(state))
@@ -342,6 +348,14 @@ void OrbitalCamera::UpdateConfigForZoom()
 
 void OrbitalCamera::UpdateFrustum()
 {
+#ifdef _EDITOR
+    // Check if DevEditor is overriding config values
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        DevEditor_GetCameraConfig(&m_Config.fov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
+    }
+#endif
+
     // Calculate forward and up vectors from current camera state
     vec3_t forward, up, right;
 
