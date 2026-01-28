@@ -49,6 +49,11 @@ public:
         return tileX < minX || tileX > maxX || tileY < minY || tileY > maxY;
     }
 
+    bool ShouldCullObject2D(float x, float y, float radius) const override
+    {
+        return !m_Frustum.Test2D(x, y, radius);
+    }
+
 private:
     CameraState& m_State;
     std::unique_ptr<DefaultCamera> m_pDefaultCamera;  // Internal default camera for base calculation

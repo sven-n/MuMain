@@ -132,6 +132,18 @@ public:
         if (outMaxY) *outMaxY = m_TerrainTileMaxY;
     }
 
+    /**
+     * @brief Tests if a 2D circle (XY only) is inside the ground projection trapezoid
+     *
+     * This matches TestFrustrum2D behavior - only tests XY position, ignores Z
+     *
+     * @param x World X coordinate
+     * @param y World Y coordinate
+     * @param radius Tolerance/radius for the test
+     * @return true if visible, false if outside trapezoid
+     */
+    bool Test2D(float x, float y, float radius) const;
+
 private:
     // 6 frustum planes: Left, Right, Top, Bottom, Near, Far
     Plane m_Planes[6];

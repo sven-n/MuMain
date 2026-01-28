@@ -89,4 +89,16 @@ public:
      * @return true if tile should be culled, false if visible
      */
     virtual bool ShouldCullTerrain(int tileX, int tileY) const = 0;
+
+    /**
+     * @brief Tests if an object should be culled using 2D (XY only) test
+     *
+     * This matches TestFrustrum2D behavior - only tests XY position against ground trapezoid
+     *
+     * @param x World X coordinate
+     * @param y World Y coordinate
+     * @param radius Object radius/tolerance
+     * @return true if object should be culled, false if visible
+     */
+    virtual bool ShouldCullObject2D(float x, float y, float radius) const = 0;
 };
