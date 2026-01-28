@@ -34,6 +34,15 @@
 // External declarations
 #ifdef _EDITOR
 extern "C" bool DevEditor_IsDebugVisualizationEnabled();
+// DevEditor render toggle functions
+extern "C" bool DevEditor_ShouldRenderTerrain();
+extern "C" bool DevEditor_ShouldRenderStaticObjects();
+extern "C" bool DevEditor_ShouldRenderEffects();
+extern "C" bool DevEditor_ShouldRenderDroppedItems();
+extern "C" bool DevEditor_ShouldRenderItemLabels();
+extern "C" bool DevEditor_ShouldRenderEquippedItems();
+extern "C" bool DevEditor_ShouldRenderWeatherEffects();
+extern "C" bool DevEditor_ShouldRenderUI();
 #endif
 
 extern HWND g_hWnd;
@@ -398,7 +407,22 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     // Phase 3: Get active camera for direct culling
     ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
 
-    if (IsWaterTerrain() == false)
+#ifdef _EDITOR
+    // DevEditor render toggle checks
+    bool renderTerrain = DevEditor_ShouldRenderTerrain();
+    bool renderStatic = DevEditor_ShouldRenderStaticObjects();
+    bool renderEffects = DevEditor_ShouldRenderEffects();
+    bool renderDroppedItems = DevEditor_ShouldRenderDroppedItems();
+    bool renderWeatherEffects = DevEditor_ShouldRenderWeatherEffects();
+#else
+    bool renderTerrain = true;
+    bool renderStatic = true;
+    bool renderEffects = true;
+    bool renderDroppedItems = true;
+    bool renderWeatherEffects = true;
+#endif
+
+    if (IsWaterTerrain() == false && renderTerrain)
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
@@ -408,7 +432,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
             {
-                if (gMapManager.IsPKField() || IsDoppelGanger2())
+                if ((gMapManager.IsPKField() || IsDoppelGanger2()) && renderStatic)
                 {
                     RenderObjects(activeCamera);
                 }
@@ -416,34 +440,46 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
             }
     }
 
-    if (!gMapManager.IsPKField() && !IsDoppelGanger2())
+    if (!gMapManager.IsPKField() && !IsDoppelGanger2() && renderStatic)
         RenderObjects(activeCamera);
 
-    RenderEffectShadows();
-    RenderBoids();
+    if (renderEffects)
+    {
+        RenderEffectShadows();
+        RenderBoids();
+    }
 
     RenderCharactersClient();
 
-    if (EditFlag != EDIT_NONE)
+    if (EditFlag != EDIT_NONE && renderTerrain)
     {
         RenderTerrain(true);
     }
-    if (!g_Camera.TopViewEnable)
+    if (!g_Camera.TopViewEnable && renderDroppedItems)
         RenderItems();
 
     RenderFishs();
     RenderMount();
-    RenderLeaves();
+
+    if (renderWeatherEffects)
+        RenderLeaves();
 
     if (!gMapManager.InChaosCastle())
         ThePetProcess().RenderPets();
 
-    RenderBoids(true);
-    RenderObjects_AfterCharacter(activeCamera);
+    if (renderEffects)
+        RenderBoids(true);
+
+    if (renderStatic)
+        RenderObjects_AfterCharacter(activeCamera);
 
     RenderJoints(byWaterMap);
-    RenderEffects();
-    RenderBlurs();
+
+    if (renderEffects)
+    {
+        RenderEffects();
+        RenderBlurs();
+    }
     CheckSprites();
     BeginSprite();
 

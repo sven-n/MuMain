@@ -24,6 +24,11 @@
 
 #include <cmath>
 
+// DevEditor forward declarations (must be at global scope)
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldRenderWeatherEffects();
+#endif
+
 float RainTarget = 0;
 float RainCurrent = 0.f;
 
@@ -456,11 +461,20 @@ bool MoveLeaves()
     RainPosition += 20 * FPS_ANIMATION_FACTOR;
     RainPosition %= 2000;
 
+    // DevEditor weather effects toggle
+#ifdef _EDITOR
+    bool renderWeather = DevEditor_ShouldRenderWeatherEffects();
+#else
+    bool renderWeather = true;
+#endif
+
     for (int i = 0; i < iMaxLeaves; i++)
     {
         PARTICLE* o = &Leaves[i];
         if (!o->Live)
         {
+            if (!renderWeather) continue;  // Skip creating new weather particles
+
             Vector(1.f, 1.f, 1.f, o->Light);
             o->Live = true;
 
@@ -487,6 +501,8 @@ bool MoveLeaves()
         }
         else
         {
+            if (!renderWeather) { o->Live = false; continue; }  // Kill existing particles
+
             if (MoveDevilSquareRain(o)) continue;
             if (MoveChaosCastleRain(o)) continue;
             if (MoveHeavenRain(o))      continue;
