@@ -19,6 +19,13 @@ public:
     float GetWidthFar() const { return m_WidthFar; }
     float GetWidthNear() const { return m_WidthNear; }
 
+    // New CameraConfig accessors
+    bool IsConfigOverrideEnabled() const { return m_ConfigOverrideEnabled; }
+    float GetFOV() const { return m_FOV; }
+    float GetNearPlane() const { return m_NearPlane; }
+    float GetFarPlane() const { return m_FarPlane; }
+    float GetTerrainCullRange() const { return m_TerrainCullRange; }
+
 private:
     CDevEditorUI() = default;
     ~CDevEditorUI() = default;
@@ -34,6 +41,13 @@ private:
 
     bool m_OverrideEnabled = false;
     bool m_ShowDebugVisualization = true;
+
+    // New CameraConfig values for live editing
+    bool m_ConfigOverrideEnabled = false;
+    float m_FOV = 30.0f;              // Field of view in degrees
+    float m_NearPlane = 10.0f;        // Near clipping plane
+    float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
+    float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range
 };
 
 #define g_DevEditorUI CDevEditorUI::GetInstance()

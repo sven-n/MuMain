@@ -24,6 +24,12 @@
 extern short g_shCameraLevel;
 extern float g_fSpecialHeight;
 
+#ifdef _EDITOR
+// DevEditor config override functions (global scope required for extern "C")
+extern "C" bool DevEditor_IsConfigOverrideEnabled();
+extern "C" void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
+#endif
+
 DefaultCamera::DefaultCamera(CameraState& state)
     : m_State(state)
     , m_Config(CameraConfig::ForGameplay())  // Phase 1: Initialize with gameplay config
@@ -421,6 +427,14 @@ void DefaultCamera::SetConfig(const CameraConfig& config)
 
 void DefaultCamera::UpdateFrustum()
 {
+#ifdef _EDITOR
+    // Check if DevEditor is overriding config values
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        DevEditor_GetCameraConfig(&m_Config.fov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
+    }
+#endif
+
     // Calculate forward and up vectors from current camera state
     vec3_t forward, up;
 
