@@ -61,7 +61,7 @@ typedef struct
 // Helper template to copy from file structure to runtime structure
 // Requires: #include "MultiLanguage.h"
 template<typename TSource>
-inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, TSource& source)
+inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, const TSource& source)
 {
     CMultiLanguage::ConvertFromUtf8(dest.Name, source.Name, MAX_ITEM_NAME);
     COPY_ITEM_ATTRIBUTE_FIELDS(dest, source);
@@ -70,7 +70,7 @@ inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, TSource& source)
 // Helper template to copy from runtime structure to file structure
 // Requires: #include "MultiLanguage.h"
 template<typename TDest>
-inline void CopyItemAttributeToDestination(TDest& dest, ITEM_ATTRIBUTE& source)
+inline void CopyItemAttributeToDestination(TDest& dest, const ITEM_ATTRIBUTE& source)
 {
     CMultiLanguage::ConvertToUtf8(dest.Name, source.Name, sizeof(dest.Name));
     COPY_ITEM_ATTRIBUTE_FIELDS(dest, source);

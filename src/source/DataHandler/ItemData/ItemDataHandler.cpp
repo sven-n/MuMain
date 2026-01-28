@@ -7,8 +7,8 @@
 
 #ifdef _EDITOR
 #include "ItemDataSaver.h"
-#include "ItemDataSaverLegacy.h"
-#include "ItemDataExporter.h"
+#include "ItemDataExportS6E3.h"
+#include "ItemDataExportAsCSV.h"
 #endif
 
 // External references
@@ -54,11 +54,11 @@ bool CItemDataHandler::Save(wchar_t* fileName, std::string* outChangeLog)
 
 bool CItemDataHandler::ExportAsS6E3(wchar_t* fileName)
 {
-    return ItemDataSaverLegacy::SaveLegacy(fileName);
+    return ItemDataExportS6E3::SaveLegacy(fileName);
 }
 
 bool CItemDataHandler::ExportToCsv(wchar_t* fileName)
 {
-    return ItemDataExporter::ExportToCsv(fileName);
+    return ItemDataExportAsCSV::ExportToCsv(fileName);
 }
 #endif

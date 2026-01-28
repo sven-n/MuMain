@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "SkillDataExporter.h"
+#include "SkillDataExportAsCSV.h"
 #include "GameData/SkillData/SkillStructs.h"
 #include "GameData/SkillData/SkillFieldDefs.h"
 #include "_struct.h"
@@ -31,7 +31,7 @@ extern SKILL_ATTRIBUTE* SkillAttribute;
 #define CSV_PRINT_SIMPLE(name, type, arraySize, width) PRINT_FIELD_##type(skill, name);
 #define CSV_PRINT_ARRAY(nameWithIndex, baseName, index, type, width) fprintf(csvFp, ",%d", skill.baseName[index]);
 
-bool SkillDataExporter::ExportToCsv(wchar_t* fileName)
+bool SkillDataExportAsCSV::ExportToCsv(wchar_t* fileName)
 {
     FILE* csvFp = _wfopen(fileName, L"w");
     if (!csvFp)

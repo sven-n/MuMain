@@ -99,7 +99,7 @@ public:
     void getAllAddStateOnlyExValues(int& iAddStrengthExValues, int& iAddDexterityExValues, int& iAddVitalityExValues, int& iAddEnergyExValues, int& iAddCharismaExValues);
 };
 
-inline DWORD GenerateCheckSum2(BYTE* pbyBuffer, DWORD dwSize, WORD wKey)
+inline DWORD GenerateCheckSum2(const BYTE* pbyBuffer, DWORD dwSize, WORD wKey)
 {
     DWORD dwKey = (DWORD)wKey;
     DWORD dwResult = dwKey << 9;

@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "ItemDataExporter.h"
+#include "ItemDataExportAsCSV.h"
 #include "_struct.h"
 #include "_define.h"
 #include "ZzzInfomation.h"
@@ -29,7 +29,7 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 #define CSV_PRINT_SIMPLE(name, type, arraySize, width) PRINT_FIELD_##type(item, name);
 #define CSV_PRINT_ARRAY(nameWithIndex, baseName, index, type, width) fprintf(csvFp, ",%d", item.baseName[index]);
 
-bool ItemDataExporter::ExportToCsv(wchar_t* fileName)
+bool ItemDataExportAsCSV::ExportToCsv(wchar_t* fileName)
 {
     FILE* csvFp = _wfopen(fileName, L"w");
     if (!csvFp)

@@ -4,8 +4,8 @@
 
 #include <stdio.h>
 
-// Skill Data Legacy Format Saving Operations (32-byte name format)
-class SkillDataSaverLegacy
+// Item Data Legacy Format Saving Operations (S6E3 format)
+class ItemDataExportS6E3
 {
 public:
     static bool SaveLegacy(wchar_t* fileName);

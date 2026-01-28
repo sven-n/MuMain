@@ -1,22 +1,22 @@
 #include "stdafx.h"
-#include "ItemDataFileIO.h"
+#include "DataFileIO.h"
 #include "ZzzInfomation.h"
 #include <windows.h>
 
 extern HWND g_hWnd;
 
-namespace ItemDataFileIO
+namespace DataFileIO
 {
-    std::unique_ptr<BYTE[]> ReadAndDecryptBuffer(FILE* fp, int itemSize, int itemCount, DWORD* outChecksum)
+    std::unique_ptr<BYTE[]> ReadBuffer(FILE* fp, const IOConfig& config, DWORD* outChecksum)
     {
-        int bufferSize = itemSize * itemCount;
+        int bufferSize = config.itemSize * config.itemCount;
         auto buffer = std::make_unique<BYTE[]>(bufferSize);
 
         // Read buffer
         size_t bytesRead = fread(buffer.get(), bufferSize, 1, fp);
         if (bytesRead != 1)
         {
-            ShowErrorAndExit(L"Failed to read item data from file");
+            ShowErrorAndExit(L"Failed to read data from file");
             return nullptr;
         }
 
@@ -34,32 +34,40 @@ namespace ItemDataFileIO
         return buffer;
     }
 
-    bool VerifyChecksum(BYTE* buffer, int bufferSize, DWORD expectedChecksum)
+    bool VerifyChecksum(const BYTE* buffer, const IOConfig& config, DWORD expectedChecksum)
     {
-        DWORD calculatedChecksum = GenerateCheckSum2(buffer, bufferSize, 0xE2F1);
+        int bufferSize = config.itemSize * config.itemCount;
+        DWORD calculatedChecksum = GenerateCheckSum2(buffer, bufferSize, config.checksumKey);
         return (calculatedChecksum == expectedChecksum);
     }
 
-    void DecryptBuffer(BYTE* buffer, int itemSize, int itemCount)
+    void DecryptBuffer(BYTE* buffer, const IOConfig& config)
     {
-        BYTE* pSeek = buffer;
-        for (int i = 0; i < itemCount; i++)
+        if (!config.decryptRecord)
         {
-            BuxConvert(pSeek, itemSize);
-            pSeek += itemSize;
+            return; // No decryption needed
+        }
+
+        BYTE* pSeek = buffer;
+        for (int i = 0; i < config.itemCount; i++)
+        {
+            config.decryptRecord(pSeek, config.itemSize);
+            pSeek += config.itemSize;
         }
     }
 
     void ShowErrorAndExit(const wchar_t* message)
     {
         g_ErrorReport.Write(message);
-        MessageBox(g_hWnd, message, L"Item Data Error", MB_OK | MB_ICONERROR);
+        MessageBox(g_hWnd, message, L"Data File Error", MB_OK | MB_ICONERROR);
         // Note: Application continues running - error handling left to caller
     }
 
 #ifdef _EDITOR
-    bool WriteAndEncryptBuffer(FILE* fp, BYTE* buffer, int bufferSize)
+    bool WriteBuffer(FILE* fp, BYTE* buffer, const IOConfig& config)
     {
+        int bufferSize = config.itemSize * config.itemCount;
+
         // Write buffer
         size_t bytesWritten = fwrite(buffer, bufferSize, 1, fp);
         if (bytesWritten != 1)
@@ -68,7 +76,7 @@ namespace ItemDataFileIO
         }
 
         // Write checksum
-        DWORD dwCheckSum = GenerateCheckSum2(buffer, bufferSize, 0xE2F1);
+        DWORD dwCheckSum = GenerateCheckSum2(buffer, bufferSize, config.checksumKey);
         bytesWritten = fwrite(&dwCheckSum, sizeof(DWORD), 1, fp);
         if (bytesWritten != 1)
         {
@@ -78,13 +86,18 @@ namespace ItemDataFileIO
         return true;
     }
 
-    void EncryptBuffer(BYTE* buffer, int itemSize, int itemCount)
+    void EncryptBuffer(BYTE* buffer, const IOConfig& config)
     {
-        BYTE* pSeek = buffer;
-        for (int i = 0; i < itemCount; i++)
+        if (!config.encryptRecord)
         {
-            BuxConvert(pSeek, itemSize);
-            pSeek += itemSize;
+            return; // No encryption needed
+        }
+
+        BYTE* pSeek = buffer;
+        for (int i = 0; i < config.itemCount; i++)
+        {
+            config.encryptRecord(pSeek, config.itemSize);
+            pSeek += config.itemSize;
         }
     }
 #endif

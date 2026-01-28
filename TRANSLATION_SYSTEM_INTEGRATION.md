@@ -50,25 +50,27 @@ enum class Domain {
 
 ## File Structure
 
+The following structure shows paths relative to the project root directory (where `.sln` file is located):
+
 ```
-Source Main 5.2/
-├── source/
+MuMain/                              # Project root directory
+├── src/
 │   ├── Translation/
 │   │   ├── i18n.h              # Translation system header (domain-aware)
 │   │   └── i18n.cpp            # Translation system implementation
 │   ├── GameData/
 │   │   └── ItemData/
 │   │       └── ItemFieldMetadata.h  # Uses metadata translations (#ifdef _EDITOR)
-│   └── MuEditor/
-│       └── Core/
-│           └── MuEditorCore.cpp     # Loads Editor and Metadata translations (#ifdef _EDITOR)
-└── Data/
-    └── Local/
-        ├── en/
-        │   ├── game.json       # Game translations (always loaded)
-        │   ├── editor.json     # Editor translations (debug only)
-        │   └── metadata.json   # Metadata translations (debug only)
-        └── [other locales]/
+│   ├── MuEditor/
+│   │   └── Core/
+│   │       └── MuEditorCore.cpp     # Loads Editor and Metadata translations (#ifdef _EDITOR)
+│   └── bin/
+│       └── Translations/
+│           ├── en/
+│           │   ├── game.json       # Game translations (always loaded)
+│           │   ├── editor.json     # Editor translations (debug only)
+│           │   └── metadata.json   # Metadata translations (debug only)
+│           └── [other locales]/   # de, es, id, pl, pt, ru, tl, uk
 ```
 
 ## Translation File Format
@@ -152,15 +154,16 @@ if (i18n::HasTranslation(i18n::Domain::Metadata, key.c_str())) {
 i18n::Translator& translator = i18n::Translator::GetInstance();
 
 // Game translations - always loaded
+// Path is relative to the executable location (src/bin/)
 bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
-    L"Data/Local/en/game.json");
+    L"Translations/en/game.json");
 
 #ifdef _EDITOR
 // Editor and metadata translations - only in debug builds
 bool editorLoaded = translator.LoadTranslations(i18n::Domain::Editor,
-    L"Data/Local/en/editor.json");
+    L"Translations/en/editor.json");
 bool metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
-    L"Data/Local/en/metadata.json");
+    L"Translations/en/metadata.json");
 #endif
 ```
 
@@ -190,7 +193,9 @@ bool metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
 
 ### 1. Add Translation Keys to JSON Files
 
-**Data/Local/en/game.json**:
+Translation files are located in the `src/bin/Translations/` directory (relative to project root).
+
+**src/bin/Translations/en/game.json** (absolute path from project root):
 ```json
 {
   "new_button": "Click Me",
@@ -198,7 +203,7 @@ bool metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
 }
 ```
 
-**Data/Local/en/editor.json** (Debug only):
+**src/bin/Translations/en/editor.json** (Debug only):
 ```json
 {
   "new_tool": "Advanced Tool",
@@ -206,7 +211,7 @@ bool metadataLoaded = translator.LoadTranslations(i18n::Domain::Metadata,
 }
 ```
 
-**Data/Local/en/metadata.json** (Debug only):
+**src/bin/Translations/en/metadata.json** (Debug only):
 ```json
 {
   "field_NewAttribute": "New Attribute"

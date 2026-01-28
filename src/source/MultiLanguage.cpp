@@ -34,7 +34,7 @@ BYTE CMultiLanguage::GetLanguage()
     return byLanguage;
 }
 
-int32_t CMultiLanguage::ConvertFromUtf8(wchar_t* target, char* source, int maxSourceLength)
+int32_t CMultiLanguage::ConvertFromUtf8(wchar_t* target, const char* source, int maxSourceLength)
 {
     if (target == nullptr || source == nullptr)
     {
@@ -90,7 +90,7 @@ int32_t CMultiLanguage::ConvertFromUtf8(wchar_t* target, char* source, int maxSo
     return written > 0 ? (written - 1) : 0;
 }
 
-int32_t CMultiLanguage::ConvertToUtf8(char* target, wchar_t* source, int maxSourceLength)
+int32_t CMultiLanguage::ConvertToUtf8(char* target, const wchar_t* source, int maxSourceLength)
 {
     if (target == nullptr || source == nullptr)
     {

@@ -2,8 +2,8 @@
 
 #ifdef _EDITOR
 
-#include "ItemDataSaverLegacy.h"
-#include "ItemDataFileIO.h"
+#include "ItemDataExportS6E3.h"
+#include "DataHandler/DataFileIO.h"
 #include "GameData/ItemData/ItemStructs.h"
 #include "_struct.h"
 #include "_define.h"
@@ -14,7 +14,7 @@
 // External references
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
-bool ItemDataSaverLegacy::SaveLegacy(wchar_t* fileName)
+bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName)
 {
     const int Size = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
 
@@ -39,15 +39,22 @@ bool ItemDataSaverLegacy::SaveLegacy(wchar_t* fileName)
         pSeek += Size;
     }
 
+    // Configure I/O
+    DataFileIO::IOConfig config;
+    config.itemSize = Size;
+    config.itemCount = MAX_ITEM;
+    config.checksumKey = 0xE2F1;
+    config.encryptRecord = [](BYTE* data, int size) { BuxConvert(data, size); };
+
     // Encrypt buffer
-    ItemDataFileIO::EncryptBuffer(Buffer.get(), Size, MAX_ITEM);
+    DataFileIO::EncryptBuffer(Buffer.get(), config);
 
     // Write buffer and checksum
-    ItemDataFileIO::WriteAndEncryptBuffer(fp, Buffer.get(), Size * MAX_ITEM);
+    bool success = DataFileIO::WriteBuffer(fp, Buffer.get(), config);
 
     fclose(fp);
 
-    return true;
+    return success;
 }
 
 #endif // _EDITOR

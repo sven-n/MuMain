@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "DataHandler/SkillData/SkillDataLoader.h"
+#include "DataHandler/DataFileIO.h"
 #include "GameData/SkillData/SkillStructs.h"
 #include "_struct.h"
 #include "_define.h"
@@ -24,11 +25,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     {
         wchar_t errorMsg[256];
         swprintf(errorMsg, L"Skill file not found: %ls", fileName);
-#ifdef _EDITOR
-        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(errorMsg));
-#else
-        MessageBox(g_hWnd, errorMsg, NULL, MB_OK);
-#endif
+        DataFileIO::ShowErrorAndExit(errorMsg);
         return false;
     }
 
@@ -43,22 +40,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     const long expectedNewSize = NewSize * MAX_SKILLS + sizeof(DWORD);
 
     bool isLegacyFormat = (fileSize == expectedLegacySize);
-    int readSize = isLegacyFormat ? LegacySize : NewSize;
-
-    // Validate file size
-    if (fileSize != expectedLegacySize && fileSize != expectedNewSize)
-    {
-        fclose(fp);
-        wchar_t errorMsg[256];
-        swprintf(errorMsg, L"Skill file size mismatch. Expected: %ld (new) or %ld (legacy), Got: %ld",
-                 expectedNewSize, expectedLegacySize, fileSize);
-#ifdef _EDITOR
-        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(errorMsg));
-#else
-        MessageBox(g_hWnd, errorMsg, NULL, MB_OK);
-#endif
-        return false;
-    }
+    bool success = false;
 
 #ifdef _EDITOR
     if (isLegacyFormat)
@@ -67,70 +49,95 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     }
 #endif
 
-    // Read file data
-    BYTE* Buffer = new BYTE[readSize * MAX_SKILLS];
-    fread(Buffer, readSize * MAX_SKILLS, 1, fp);
+    if (isLegacyFormat)
+    {
+        success = LoadLegacyFormat(fp, fileSize);
+    }
+    else
+    {
+        success = LoadNewFormat(fp, fileSize);
+    }
 
-    // Read checksum
-    DWORD dwCheckSum;
-    fread(&dwCheckSum, sizeof(DWORD), 1, fp);
     fclose(fp);
 
-    // Verify checksum
-    DWORD calculatedChecksum = GenerateCheckSum2(Buffer, readSize * MAX_SKILLS, 0x5A18);
-    if (dwCheckSum != calculatedChecksum)
-    {
-        delete[] Buffer;
-        wchar_t errorMsg[256];
-        swprintf(errorMsg, L"Skill file corrupted: %ls (checksum mismatch)", fileName);
 #ifdef _EDITOR
-        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(errorMsg));
-#else
-        MessageBox(g_hWnd, errorMsg, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
+    if (success)
+    {
+        // Count non-empty skills (skills with names)
+        int skillCount = 0;
+        for (int i = 0; i < MAX_SKILLS; i++)
+        {
+            if (SkillAttribute[i].Name[0] != L'\0')
+            {
+                skillCount++;
+            }
+        }
+
+        wchar_t successMsg[256];
+        swprintf(successMsg, L"Loaded %d skills from %ls", skillCount, fileName);
+        g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
+    }
 #endif
+
+    return success;
+}
+
+template<typename TFileFormat>
+bool SkillDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
+{
+    const int Size = sizeof(TFileFormat);
+
+    // Configure I/O
+    DataFileIO::IOConfig config;
+    config.itemSize = Size;
+    config.itemCount = MAX_SKILLS;
+    config.checksumKey = 0x5A18;
+    config.decryptRecord = [](BYTE* data, int size) { BuxConvert(data, size); };
+
+    // Read buffer and checksum
+    DWORD dwCheckSum;
+    auto buffer = DataFileIO::ReadBuffer(fp, config, &dwCheckSum);
+    if (!buffer)
+    {
+        std::wstring errorMsg = L"Failed to read skill file (";
+        errorMsg += formatName;
+        errorMsg += L").";
+        DataFileIO::ShowErrorAndExit(errorMsg.c_str());
         return false;
     }
 
-    // Decrypt and parse data
-    BYTE* pSeek = Buffer;
-    for (int i = 0; i < MAX_SKILLS; i++)
+    // Verify checksum
+    if (!DataFileIO::VerifyChecksum(buffer.get(), config, dwCheckSum))
     {
-        BuxConvert(pSeek, readSize);
-
-        if (isLegacyFormat)
-        {
-            SKILL_ATTRIBUTE_FILE_LEGACY source;
-            memcpy(&source, pSeek, LegacySize);
-            CopySkillAttributeFromSource(SkillAttribute[i], source);
-        }
-        else
-        {
-            SKILL_ATTRIBUTE_FILE source;
-            memcpy(&source, pSeek, NewSize);
-            CopySkillAttributeFromSource(SkillAttribute[i], source);
-        }
-
-        pSeek += readSize;
+        std::wstring errorMsg = L"Skill file corrupted (";
+        errorMsg += formatName;
+        errorMsg += L").";
+        DataFileIO::ShowErrorAndExit(errorMsg.c_str());
+        return false;
     }
 
-    delete[] Buffer;
+    // Decrypt buffer
+    DataFileIO::DecryptBuffer(buffer.get(), config);
 
-#ifdef _EDITOR
-    // Count non-empty skills (skills with names)
-    int skillCount = 0;
+    // Copy skills
+    BYTE* pSeek = buffer.get();
     for (int i = 0; i < MAX_SKILLS; i++)
     {
-        if (SkillAttribute[i].Name[0] != L'\0')
-        {
-            skillCount++;
-        }
+        TFileFormat source;
+        memcpy(&source, pSeek, sizeof(source));
+        CopySkillAttributeFromSource(SkillAttribute[i], source);
+        pSeek += Size;
     }
-
-    wchar_t successMsg[256];
-    swprintf(successMsg, L"Loaded %d skills from %ls", skillCount, fileName);
-    g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
-#endif
 
     return true;
+}
+
+bool SkillDataLoader::LoadLegacyFormat(FILE* fp, long fileSize)
+{
+    return LoadFormat<SKILL_ATTRIBUTE_FILE_LEGACY>(fp, L"legacy format");
+}
+
+bool SkillDataLoader::LoadNewFormat(FILE* fp, long fileSize)
+{
+    return LoadFormat<SKILL_ATTRIBUTE_FILE>(fp, L"new format");
 }

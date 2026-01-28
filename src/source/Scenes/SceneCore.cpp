@@ -85,8 +85,6 @@ int g_iCurrentDialogScript = -1;
 int g_iNumAnswer = 0;
 wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH_CMB];
 
-DWORD GenerateCheckSum2(BYTE* pbyBuffer, DWORD dwSize, WORD wKey);
-
 
 extern int HeroKey;
 

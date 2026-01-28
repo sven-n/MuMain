@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "ItemDataLoader.h"
-#include "ItemDataFileIO.h"
+#include "DataHandler/DataFileIO.h"
 #include "GameData/ItemData/ItemStructs.h"
 #include "_struct.h"
 #include "_define.h"
@@ -25,7 +25,7 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     {
         std::wstringstream ss;
         ss << fileName << L" - File not exist.";
-        ItemDataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ShowErrorAndExit(ss.str().c_str());
         return false;
     }
 
@@ -87,28 +87,35 @@ bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
 {
     const int Size = sizeof(TFileFormat);
 
+    // Configure I/O
+    DataFileIO::IOConfig config;
+    config.itemSize = Size;
+    config.itemCount = MAX_ITEM;
+    config.checksumKey = 0xE2F1;
+    config.decryptRecord = [](BYTE* data, int size) { BuxConvert(data, size); };
+
     // Read buffer and checksum
     DWORD dwCheckSum;
-    auto buffer = ItemDataFileIO::ReadAndDecryptBuffer(fp, Size, MAX_ITEM, &dwCheckSum);
+    auto buffer = DataFileIO::ReadBuffer(fp, config, &dwCheckSum);
     if (!buffer)
     {
         std::wstringstream ss;
         ss << L"Failed to read item file (" << formatName << L").";
-        ItemDataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ShowErrorAndExit(ss.str().c_str());
         return false;
     }
 
     // Verify checksum
-    if (!ItemDataFileIO::VerifyChecksum(buffer.get(), Size * MAX_ITEM, dwCheckSum))
+    if (!DataFileIO::VerifyChecksum(buffer.get(), config, dwCheckSum))
     {
         std::wstringstream ss;
         ss << L"Item file corrupted (" << formatName << L").";
-        ItemDataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ShowErrorAndExit(ss.str().c_str());
         return false;
     }
 
     // Decrypt buffer
-    ItemDataFileIO::DecryptBuffer(buffer.get(), Size, MAX_ITEM);
+    DataFileIO::DecryptBuffer(buffer.get(), config);
 
     // Copy items
     BYTE* pSeek = buffer.get();
