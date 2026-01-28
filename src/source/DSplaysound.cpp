@@ -17,10 +17,9 @@
 #include <array>
 #include <atomic>
 #include <chrono>
-#include <cstddef>
 #include <cstdint>
-#include <cwchar>
 #include <cstring>
+#include <cwchar>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -29,7 +28,6 @@
 #include <objbase.h>
 #include <dsound.h>
 #include "DSwaveIO.h"
-#include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"
 
@@ -95,6 +93,7 @@ private:
     HRESULT CreateStaticBuffer(SoundBufferEntry& entry, ESound bufferId, const wchar_t* filename, bool enable3D);
     HRESULT CopyWaveDataToBuffer(SoundBufferEntry& entry, int bufferId, int channel);
     void ResetEntry(SoundBufferEntry& entry);
+    void SetVolumeInternal(ESound bufferId, long volume);
     bool IsValidBufferIndex(int bufferId) const noexcept;
     bool IsValidChannelIndex(int channel) const noexcept;
     IDirectSoundBuffer* GetBuffer(int bufferId, int channel) const noexcept;
@@ -270,7 +269,8 @@ HRESULT DirectSoundManager::LoadWaveFile(ESound bufferId, const wchar_t* filenam
     }
 
     ++loadCount_;
-    SetVolume(bufferId, masterVolume_);
+    SetVolumeInternal(bufferId, masterVolume_);
+
     return S_OK;
 }
 
@@ -438,18 +438,8 @@ void DirectSoundManager::SetVolume(ESound bufferId, long volume)
         return;
     }
 
-    const long clamped = std::clamp<long>(volume, DSBVOLUME_MIN, DSBVOLUME_MAX);
-
     std::lock_guard lock(mutex_);
-    auto& entry = entries_[bufferId];
-    for (int channel = 0; channel < entry.maxChannels; ++channel)
-    {
-        IDirectSoundBuffer* buffer = GetBuffer(bufferId, channel);
-        if (buffer != nullptr)
-        {
-            buffer->SetVolume(clamped);
-        }
-    }
+    SetVolumeInternal(bufferId, volume);
 }
 
 void DirectSoundManager::SetMasterVolume(long volume)
@@ -658,6 +648,21 @@ void DirectSoundManager::ResetEntry(SoundBufferEntry& entry)
     entry.enable3D = false;
     entry.waveData.clear();
     entry.waveDataSize = 0;
+}
+
+void DirectSoundManager::SetVolumeInternal(ESound bufferId, long volume)
+{
+    // NOTE: Assumes caller holds the mutex.
+    const long clamped = std::clamp<long>(volume, DSBVOLUME_MIN, DSBVOLUME_MAX);
+    auto& entry = entries_[bufferId];
+    for (int channel = 0; channel < entry.maxChannels; ++channel)
+    {
+        IDirectSoundBuffer* buffer = entry.buffers[channel].get();
+        if (buffer != nullptr)
+        {
+            buffer->SetVolume(clamped);
+        }
+    }
 }
 
 bool DirectSoundManager::IsValidBufferIndex(int bufferId) const noexcept
