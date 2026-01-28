@@ -294,3 +294,27 @@ void Frustum::CalculateGroundProjection(const vec3_t position, const vec3_t forw
     if (m_TerrainTileMaxY > TERRAIN_SIZE_MASK - tileWidth)
         m_TerrainTileMaxY = TERRAIN_SIZE_MASK - tileWidth;
 }
+
+bool Frustum::Test2D(float x, float y, float radius) const
+{
+    // Test point against the 4 edges of the ground projection trapezoid
+    // This matches the TestFrustrum2D algorithm exactly
+    // The trapezoid vertices are: [0]=far-left, [1]=far-right, [2]=near-right, [3]=near-left
+
+    int j = 3;
+    for (int i = 0; i < 4; j = i, i++)
+    {
+        // Calculate signed distance from point to edge (i,j)
+        // This is the cross product in 2D: (edge_x * point_y - edge_y * point_x)
+        float d = (m_GroundProjection[i][0] - x) * (m_GroundProjection[j][1] - y) -
+                  (m_GroundProjection[j][0] - x) * (m_GroundProjection[i][1] - y);
+
+        // If point is outside this edge (beyond tolerance), it's culled
+        if (d <= radius)
+        {
+            return false;  // Outside trapezoid
+        }
+    }
+
+    return true;  // Inside trapezoid
+}
