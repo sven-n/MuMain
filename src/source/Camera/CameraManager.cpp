@@ -4,9 +4,10 @@
 #include "CameraManager.h"
 #include "DefaultCamera.h"
 #include "OrbitalCamera.h"
-#ifdef _EDITOR
-#include "FreeFlyCamera.h"
-#endif
+// Note: FreeFlyCamera disabled for Phase 1, will be re-implemented later based on new system
+//#ifdef _EDITOR
+//#include "FreeFlyCamera.h"
+//#endif
 
 // External global camera state
 extern CameraState g_Camera;
@@ -33,9 +34,10 @@ void CameraManager::Initialize()
     // Create camera instances
     m_pDefaultCamera = std::make_unique<DefaultCamera>(g_Camera);
     m_pOrbitalCamera = std::make_unique<OrbitalCamera>(g_Camera);
-#ifdef _EDITOR
-    m_pFreeFlyCamera = std::make_unique<FreeFlyCamera>(g_Camera);
-#endif
+    // Note: FreeFlyCamera disabled for Phase 1
+    //#ifdef _EDITOR
+    //    m_pFreeFlyCamera = std::make_unique<FreeFlyCamera>(g_Camera);
+    //#endif
 
     // Start with default camera
     m_pActiveCamera = m_pDefaultCamera.get();
@@ -53,9 +55,10 @@ void CameraManager::Shutdown()
 
     m_pDefaultCamera.reset();
     m_pOrbitalCamera.reset();
-#ifdef _EDITOR
-    m_pFreeFlyCamera.reset();
-#endif
+    // Note: FreeFlyCamera disabled for Phase 1
+    //#ifdef _EDITOR
+    //    m_pFreeFlyCamera.reset();
+    //#endif
 }
 
 bool CameraManager::Update()

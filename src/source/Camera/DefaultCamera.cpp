@@ -26,6 +26,7 @@ extern float g_fSpecialHeight;
 
 DefaultCamera::DefaultCamera(CameraState& state)
     : m_State(state)
+    , m_Config(CameraConfig::ForGameplay())  // Phase 1: Initialize with gameplay config
 {
 }
 
@@ -406,3 +407,44 @@ void DefaultCamera::HandleEditorMode()
     }
 }
 #endif //ENABLE_EDIT2
+
+// ========== Phase 1: Configuration & Frustum Management ==========
+
+void DefaultCamera::SetConfig(const CameraConfig& config)
+{
+    m_Config = config;
+    UpdateFrustum();
+}
+
+void DefaultCamera::UpdateFrustum()
+{
+    // Calculate forward and up vectors from current camera state
+    vec3_t forward, up;
+
+    // Get forward from camera matrix
+    forward[0] = -m_State.Matrix[2][0];
+    forward[1] = -m_State.Matrix[2][1];
+    forward[2] = -m_State.Matrix[2][2];
+    VectorNormalize(forward);
+
+    // Get up from camera matrix
+    up[0] = m_State.Matrix[1][0];
+    up[1] = m_State.Matrix[1][1];
+    up[2] = m_State.Matrix[1][2];
+    VectorNormalize(up);
+
+    // Build frustum from current configuration
+    extern unsigned int WindowWidth;
+    extern unsigned int WindowHeight;
+    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+
+    m_Frustum.BuildFromCamera(
+        m_State.Position,
+        forward,
+        up,
+        m_Config.fov,
+        aspectRatio,
+        m_Config.nearPlane,
+        m_Config.farPlane
+    );
+}

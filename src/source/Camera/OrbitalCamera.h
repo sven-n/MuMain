@@ -32,9 +32,30 @@ public:
     float GetTotalYaw() const { return m_BaseYaw + m_DeltaYaw; }
     float GetTotalPitch() const { return m_BasePitch + m_DeltaPitch; }
 
+    // Phase 1: Configuration & Frustum Management
+    const CameraConfig& GetConfig() const override { return m_Config; }
+    void SetConfig(const CameraConfig& config) override;
+    const Frustum& GetFrustum() const override { return m_Frustum; }
+
+    bool ShouldCullObject(const vec3_t position, float radius) const override
+    {
+        return !m_Frustum.TestSphere(position, radius);
+    }
+
+    bool ShouldCullTerrain(int tileX, int tileY) const override
+    {
+        int minX, minY, maxX, maxY;
+        m_Frustum.GetTerrainTileBounds(&minX, &minY, &maxX, &maxY);
+        return tileX < minX || tileX > maxX || tileY < minY || tileY > maxY;
+    }
+
 private:
     CameraState& m_State;
     std::unique_ptr<DefaultCamera> m_pDefaultCamera;  // Internal default camera for base calculation
+
+    // Phase 1: Configuration and frustum
+    CameraConfig m_Config;
+    Frustum m_Frustum;
 
     // Orbital parameters
     vec3_t m_InitialCameraOffset;  // Saved offset from character on first frame
@@ -63,4 +84,6 @@ private:
     void HandleInput();
     void UpdateTarget();
     void ComputeCameraTransform();
+    void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
+    void UpdateConfigForZoom();  // Phase 1: Adjust config based on zoom level
 };

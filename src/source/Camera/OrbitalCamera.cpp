@@ -21,6 +21,7 @@ extern int MouseY;
 OrbitalCamera::OrbitalCamera(CameraState& state)
     : m_State(state)
     , m_pDefaultCamera(std::make_unique<DefaultCamera>(state))
+    , m_Config(CameraConfig::ForGameplay())  // Phase 1: Initialize with gameplay config
     , m_bInitialOffsetSet(false)
     , m_BaseYaw(0.0f)
     , m_BasePitch(0.0f)
@@ -298,4 +299,73 @@ void OrbitalCamera::ComputeCameraTransform()
     }
 
     m_State.ViewFar = baseViewFar * viewMultiplier;
+
+    // Phase 1: Update frustum after changing ViewFar
+    UpdateFrustum();
+}
+
+// ========== Phase 1: Configuration & Frustum Management ==========
+
+void OrbitalCamera::SetConfig(const CameraConfig& config)
+{
+    m_Config = config;
+    UpdateFrustum();
+}
+
+void OrbitalCamera::UpdateConfigForZoom()
+{
+    float zoomRatio = m_Radius / DEFAULT_RADIUS;  // 0.25 (min) to 2.5 (max)
+
+    // Adjust config based on zoom level
+    // Use gameplay preset as base
+    CameraConfig baseConfig = CameraConfig::ForGameplay();
+
+    if (zoomRatio >= 1.0f)
+    {
+        // Zooming OUT: gentle scaling
+        float scale = 1.0f + (zoomRatio - 1.0f) * 1.0f;  // 1.0x to 2.5x
+        m_Config.farPlane = baseConfig.farPlane * scale;
+        m_Config.terrainCullRange = baseConfig.terrainCullRange * scale;
+    }
+    else
+    {
+        // Zooming IN: reduce proportionally
+        float scale = 0.5f + (zoomRatio * 0.5f);  // 0.5x to 1.0x
+        m_Config.farPlane = baseConfig.farPlane * scale;
+        m_Config.terrainCullRange = baseConfig.terrainCullRange * scale;
+    }
+}
+
+void OrbitalCamera::UpdateFrustum()
+{
+    // Calculate forward and up vectors from current camera state
+    vec3_t forward, up, right;
+
+    // Get forward from camera matrix
+    forward[0] = -m_State.Matrix[2][0];
+    forward[1] = -m_State.Matrix[2][1];
+    forward[2] = -m_State.Matrix[2][2];
+    VectorNormalize(forward);
+
+    // Get up from camera matrix
+    up[0] = m_State.Matrix[1][0];
+    up[1] = m_State.Matrix[1][1];
+    up[2] = m_State.Matrix[1][2];
+    VectorNormalize(up);
+
+    // Build frustum from current configuration
+    // Use screen aspect ratio (assuming 4:3, can be made dynamic later)
+    extern unsigned int WindowWidth;
+    extern unsigned int WindowHeight;
+    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+
+    m_Frustum.BuildFromCamera(
+        m_State.Position,
+        forward,
+        up,
+        m_Config.fov,
+        aspectRatio,
+        m_Config.nearPlane,
+        m_Config.farPlane
+    );
 }
