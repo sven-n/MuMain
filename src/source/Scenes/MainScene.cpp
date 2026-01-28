@@ -439,7 +439,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         ThePetProcess().RenderPets();
 
     RenderBoids(true);
-    RenderObjects_AfterCharacter();
+    RenderObjects_AfterCharacter(activeCamera);
 
     RenderJoints(byWaterMap);
     RenderEffects();

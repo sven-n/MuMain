@@ -441,6 +441,8 @@ void DefaultCamera::UpdateFrustum()
     extern unsigned int WindowHeight;
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
 
+    // Use ViewFar for 3D culling distance (varies 2000-3700 based on map/zoom)
+    // The Frustum will internally use terrainCullRange for 2D ground projection
     m_Frustum.BuildFromCamera(
         m_State.Position,
         forward,
@@ -448,6 +450,6 @@ void DefaultCamera::UpdateFrustum()
         m_Config.fov,
         aspectRatio,
         m_Config.nearPlane,
-        m_Config.farPlane
+        m_State.ViewFar  // Use dynamic ViewFar for proper distance culling
     );
 }

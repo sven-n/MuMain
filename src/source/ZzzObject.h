@@ -27,7 +27,7 @@ void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, 
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0, float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
 void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
-void RenderObjects_AfterCharacter();
+void RenderObjects_AfterCharacter(ICamera* camera = nullptr);
 
 void MoveObjects();
 void DeleteObjectTile(int x, int y);
