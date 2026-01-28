@@ -3473,8 +3473,9 @@ void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate, int Select, int
     }
 }
 
-void RenderObjects_AfterCharacter()
+void RenderObjects_AfterCharacter(ICamera* camera)
 {
+    // Phase 3: Accept optional camera parameter for direct culling
     if (!(gMapManager.WorldActive == WD_37KANTURU_1ST || gMapManager.WorldActive == WD_38KANTURU_2ND || gMapManager.WorldActive == WD_39KANTURU_3RD
         || gMapManager.WorldActive == WD_40AREA_FOR_GM
         || gMapManager.WorldActive == WD_41CHANGEUP3RD_1ST
@@ -3511,7 +3512,21 @@ void RenderObjects_AfterCharacter()
         for (int j = 0; j < 16; j++)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
-            ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
+
+            // Phase 3: Use camera culling if available
+            if (camera)
+            {
+                // Test center of object block (16x16 tiles)
+                vec3_t blockCenter;
+                blockCenter[0] = (float)(i * 16 + 8) * 100.0f;  // Convert tile to world coords
+                blockCenter[1] = (float)(j * 16 + 8) * 100.0f;
+                blockCenter[2] = 0.0f;
+                ob->Visible = !camera->ShouldCullObject(blockCenter, 180.0f);  // 180 unit radius for block
+            }
+            else
+            {
+                ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
+            }
 
             if (g_Direction.m_CKanturu.IsMayaScene())
             {

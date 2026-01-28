@@ -345,16 +345,24 @@ void OrbitalCamera::UpdateFrustum()
     // Calculate forward and up vectors from current camera state
     vec3_t forward, up, right;
 
-    // Get forward from camera matrix
-    forward[0] = -m_State.Matrix[2][0];
-    forward[1] = -m_State.Matrix[2][1];
-    forward[2] = -m_State.Matrix[2][2];
+    // Calculate forward as direction from camera to target (what we're looking at)
+    forward[0] = m_Target[0] - m_State.Position[0];
+    forward[1] = m_Target[1] - m_State.Position[1];
+    forward[2] = m_Target[2] - m_State.Position[2];
     VectorNormalize(forward);
 
-    // Get up from camera matrix
-    up[0] = m_State.Matrix[1][0];
-    up[1] = m_State.Matrix[1][1];
-    up[2] = m_State.Matrix[1][2];
+    // Calculate right vector (perpendicular to forward in XY plane)
+    vec3_t worldUp = { 0.0f, 0.0f, 1.0f };
+    vec3_t forwardTemp, worldUpTemp;
+    VectorCopy(forward, forwardTemp);
+    VectorCopy(worldUp, worldUpTemp);
+    CrossProduct(forwardTemp, worldUpTemp, right);
+    VectorNormalize(right);
+
+    // Calculate actual up vector (perpendicular to both forward and right)
+    VectorCopy(right, forwardTemp);  // reuse temp
+    VectorCopy(forward, worldUpTemp);  // reuse temp
+    CrossProduct(forwardTemp, worldUpTemp, up);
     VectorNormalize(up);
 
     // Build frustum from current configuration
@@ -363,6 +371,8 @@ void OrbitalCamera::UpdateFrustum()
     extern unsigned int WindowHeight;
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
 
+    // Use ViewFar for 3D culling distance (varies 2000-3700 based on map/zoom)
+    // The Frustum will internally use terrainCullRange for 2D ground projection
     m_Frustum.BuildFromCamera(
         m_State.Position,
         forward,
@@ -370,6 +380,6 @@ void OrbitalCamera::UpdateFrustum()
         m_Config.fov,
         aspectRatio,
         m_Config.nearPlane,
-        m_Config.farPlane
+        m_State.ViewFar  // Use dynamic ViewFar for proper distance culling
     );
 }
