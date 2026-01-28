@@ -2544,7 +2544,7 @@ void InitTerrainRay(int HeroX, int HeroY)
     }*/
 }
 
-void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
+void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag, ICamera* camera = nullptr)
 {
     //int x = ((xi/4)&63);
     //int y = ((yi/4)&63);
@@ -2556,7 +2556,21 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || g_Camera.TopViewEnable)
+            // Phase 3: Use camera culling if available, otherwise fall back to TestFrustrum2D
+            bool visible = g_Camera.TopViewEnable;
+            if (!visible)
+            {
+                if (camera)
+                {
+                    visible = !camera->ShouldCullTerrain(xi + j, yi + i);
+                }
+                else
+                {
+                    visible = TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f);
+                }
+            }
+
+            if (visible)
             {
                 RenderTerrainTile(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
             }
@@ -2567,7 +2581,7 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
     }
 }
 
-void RenderTerrainFrustrum(bool EditFlag)
+void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
 {
     int     xi;
     int     yi = FrustrumBoundMinY;
@@ -2580,7 +2594,22 @@ void RenderTerrainFrustrum(bool EditFlag)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || g_Camera.TopViewEnable)
+            // Phase 3: Use camera culling if available
+            bool visible = g_Camera.TopViewEnable;
+            if (!visible)
+            {
+                if (camera)
+                {
+                    // Use camera's terrain culling - check center of 4x4 block
+                    visible = !camera->ShouldCullTerrain(xi + 2, yi + 2);
+                }
+                else
+                {
+                    visible = TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange);
+                }
+            }
+
+            if (visible)
             {
                 if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                 {
@@ -2591,7 +2620,7 @@ void RenderTerrainFrustrum(bool EditFlag)
                     if (fDistance > 5200.f)
                         continue;
                 }
-                RenderTerrainBlock(xf, yf, xi, yi, EditFlag);
+                RenderTerrainBlock(xf, yf, xi, yi, EditFlag, camera);
             }
         }
     }
@@ -2640,7 +2669,7 @@ void RenderTerrainFrustrum_After(bool EditFlag)
 extern int SelectMapping;
 extern void RenderCharactersClient();
 
-void RenderTerrain(bool EditFlag)
+void RenderTerrain(bool EditFlag, ICamera* camera)
 {
     if (!EditFlag)
     {
@@ -2671,7 +2700,7 @@ void RenderTerrain(bool EditFlag)
     }
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
-    RenderTerrainFrustrum(EditFlag);
+    RenderTerrainFrustrum(EditFlag, camera);
     //
     if (EditFlag && SelectFlag)
     {
@@ -2683,7 +2712,7 @@ void RenderTerrain(bool EditFlag)
         if (TerrainGrassEnable && gMapManager.WorldActive != WD_7ATLANSE && !IsDoppelGanger3())
         {
             TerrainFlag = TERRAIN_MAP_GRASS;
-            RenderTerrainFrustrum(EditFlag);
+            RenderTerrainFrustrum(EditFlag, camera);
         }
         DisableDepthTest();
         EnableCullFace();

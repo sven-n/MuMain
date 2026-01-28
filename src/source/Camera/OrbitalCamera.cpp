@@ -61,6 +61,10 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
 
     // Reset initial offset - will be captured on first frame
     m_bInitialOffsetSet = false;
+
+    // Phase 3 fix: Initialize frustum immediately on activation
+    // Without this, first frame(s) have uninitialized frustum and everything gets culled
+    UpdateFrustum();
 }
 
 void OrbitalCamera::OnDeactivate()

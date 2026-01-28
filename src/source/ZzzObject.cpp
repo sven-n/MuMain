@@ -15,6 +15,7 @@
 #include "Scenes/SceneCore.h"
 #include "ZzzOpenData.h"
 #include "DSPlaySound.h"
+#include "Camera/ICamera.h"
 
 #include "SideHair.h"
 #include "PhysicsManager.h"
@@ -3253,8 +3254,12 @@ void RenderObjectVisual(OBJECT* o)
     }
 }
 
-void RenderObjects()
+void RenderObjects(ICamera* camera)
 {
+    // Phase 3: Accept optional camera parameter for direct culling
+    // If camera provided, can use camera->ShouldCullObject() for per-object culling
+    // For now, still uses TestFrustrum() which gets data from camera via Phase 2 bridge
+
     float   range = 0.f;
     if (gMapManager.WorldActive == WD_10HEAVEN)
     {
@@ -3379,7 +3384,15 @@ void RenderObjects()
                     {
                         if (o->Live)
                         {
-                            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
+                            // Phase 3: Use camera culling if available
+                            if (camera)
+                            {
+                                o->Visible = !camera->ShouldCullObject(o->Position, o->CollisionRange + range);
+                            }
+                            else
+                            {
+                                o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
+                            }
                             if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                                 ) &&
                                 ((o->Type >= 5 && o->Type <= 14) || (o->Type >= 87 && o->Type <= 88) || (o->Type == 4 || o->Type == 129)));

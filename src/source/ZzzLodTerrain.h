@@ -77,7 +77,11 @@ bool TestFrustrum2D(float x, float y, float Range);
 void RenderFrustrum2DDebug();
 
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
-void RenderTerrain(bool EditFlag);
+
+// Forward declaration for Phase 3
+class ICamera;
+
+void RenderTerrain(bool EditFlag, ICamera* camera = nullptr);
 
 void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 void RenderTerrain_After(bool EditFlag);
