@@ -251,6 +251,72 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::Separator();
     ImGui::Spacing();
 
+    // Phase 5 Debug: Camera Debug Info & Custom Origin
+    ImGui::Text("Camera Debug Info");
+    ImGui::Separator();
+
+    // Get current camera info
+    extern CameraState g_Camera;
+    ImGui::Text("Current Camera Position:");
+    ImGui::Text("  X: %.2f  Y: %.2f  Z: %.2f", g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2]);
+    ImGui::Text("Tile: (%d, %d)", (int)(g_Camera.Position[0] / 100.0f), (int)(g_Camera.Position[1] / 100.0f));
+
+    // Get orbital camera target (if active)
+    extern OrbitalCamera* GetOrbitalCameraInstance();
+    OrbitalCamera* orbitalCam = GetOrbitalCameraInstance();
+    if (orbitalCam)
+    {
+        vec3_t target = {0, 0, 0};
+        orbitalCam->GetTargetPosition(target);
+        ImGui::Text("Orbital Target:");
+        ImGui::Text("  X: %.2f  Y: %.2f  Z: %.2f", target[0], target[1], target[2]);
+        ImGui::Text("Tile: (%d, %d)", (int)(target[0] / 100.0f), (int)(target[1] / 100.0f));
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // Custom Origin Controls
+    ImGui::Text("Custom Origin (Orbital Camera)");
+    ImGui::Separator();
+
+    ImGui::Checkbox("Enable Custom Origin", &m_CustomOriginEnabled);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Override Hero position)");
+
+    if (m_CustomOriginEnabled)
+    {
+        ImGui::PushItemWidth(150);
+        ImGui::InputFloat("Origin X (tiles)", &m_CustomOriginX, 1.0f, 10.0f, "%.1f");
+        ImGui::InputFloat("Origin Y (tiles)", &m_CustomOriginY, 1.0f, 10.0f, "%.1f");
+        ImGui::InputFloat("Origin Z (height)", &m_CustomOriginZ, 10.0f, 50.0f, "%.1f");
+        ImGui::PopItemWidth();
+
+        ImGui::Text("World Units: (%.0f, %.0f, %.0f)",
+            m_CustomOriginX * 100.0f, m_CustomOriginY * 100.0f, m_CustomOriginZ);
+
+        if (ImGui::Button("Set to Current Camera Position"))
+        {
+            m_CustomOriginX = g_Camera.Position[0] / 100.0f;
+            m_CustomOriginY = g_Camera.Position[1] / 100.0f;
+            m_CustomOriginZ = g_Camera.Position[2];
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Reset to 0,0,100"))
+        {
+            m_CustomOriginX = 0.0f;
+            m_CustomOriginY = 0.0f;
+            m_CustomOriginZ = 100.0f;
+        }
+    }
+    else
+    {
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to set custom orbit center");
+    }
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
     // Render Toggles Section
     ImGui::Text("Rendering Toggles");
     ImGui::Separator();
@@ -429,6 +495,19 @@ extern "C"
         if (outNearPlane) *outNearPlane = g_DevEditorUI.GetNearPlane();
         if (outFarPlane) *outFarPlane = g_DevEditorUI.GetFarPlane();
         if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetTerrainCullRange();
+    }
+
+    // Phase 5: Custom Origin accessors
+    bool DevEditor_IsCustomOriginEnabled()
+    {
+        return g_DevEditorUI.IsCustomOriginEnabled();
+    }
+
+    void DevEditor_GetCustomOrigin(float* outX, float* outY, float* outZ)
+    {
+        if (outX) *outX = g_DevEditorUI.GetCustomOriginX() * 100.0f;  // Convert tiles to world units
+        if (outY) *outY = g_DevEditorUI.GetCustomOriginY() * 100.0f;
+        if (outZ) *outZ = g_DevEditorUI.GetCustomOriginZ();
     }
 
     // Render toggle accessors

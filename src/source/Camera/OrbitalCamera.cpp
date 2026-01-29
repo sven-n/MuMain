@@ -22,6 +22,8 @@ extern int MouseY;
 // DevEditor config override functions (global scope required for extern "C")
 extern "C" bool DevEditor_IsConfigOverrideEnabled();
 extern "C" void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
+extern "C" bool DevEditor_IsCustomOriginEnabled();
+extern "C" void DevEditor_GetCustomOrigin(float* outX, float* outY, float* outZ);
 #endif
 
 OrbitalCamera::OrbitalCamera(CameraState& state)
@@ -182,6 +184,16 @@ bool OrbitalCamera::IsHeroValid() const
 
 void OrbitalCamera::GetTargetPosition(vec3_t outTarget) const
 {
+#ifdef _EDITOR
+    // Phase 5 Debug: Check if custom origin is enabled
+    if (DevEditor_IsCustomOriginEnabled())
+    {
+        // Use custom origin from DevEditor
+        DevEditor_GetCustomOrigin(&outTarget[0], &outTarget[1], &outTarget[2]);
+        return;
+    }
+#endif
+
     extern CHARACTER* Hero;
     if (IsHeroValid())
     {

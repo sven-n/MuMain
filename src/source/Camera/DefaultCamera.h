@@ -55,7 +55,8 @@ private:
     CameraConfig m_Config;
     Frustum m_Frustum;
 
-    // Phase 5: Hero validity check for non-MainScene contexts
+    // Phase 5: Scene transition tracking and Hero validity
+    int m_LastSceneFlag = -1;
     bool IsHeroValid() const;
 
     // These are direct copies of the static functions from CameraUtility.cpp

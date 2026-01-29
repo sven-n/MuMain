@@ -42,6 +42,12 @@ public:
     bool ShouldRenderShaders() const { return m_RenderShaders; }
     bool ShouldRenderSkillEffects() const { return m_RenderSkillEffects; }
 
+    // Phase 5: Custom Origin accessors
+    bool IsCustomOriginEnabled() const { return m_CustomOriginEnabled; }
+    float GetCustomOriginX() const { return m_CustomOriginX; }
+    float GetCustomOriginY() const { return m_CustomOriginY; }
+    float GetCustomOriginZ() const { return m_CustomOriginZ; }
+
 private:
     CDevEditorUI() = default;
     ~CDevEditorUI() = default;
@@ -64,6 +70,12 @@ private:
     float m_NearPlane = 10.0f;        // Near clipping plane
     float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
     float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range
+
+    // Phase 5 Debug: Custom Origin Controls
+    bool m_CustomOriginEnabled = false;
+    float m_CustomOriginX = 0.0f;     // X coordinate (0-255 game tiles, converted to world units)
+    float m_CustomOriginY = 0.0f;     // Y coordinate (0-255 game tiles, converted to world units)
+    float m_CustomOriginZ = 100.0f;   // Z height (world units)
 
     // Render toggle flags
     // Working toggles
