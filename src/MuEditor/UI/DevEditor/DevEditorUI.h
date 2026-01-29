@@ -48,6 +48,10 @@ public:
     float GetCustomOriginY() const { return m_CustomOriginY; }
     float GetCustomOriginZ() const { return m_CustomOriginZ; }
 
+    // Phase 5: Character targeting accessors
+    bool IsTargetCharacterEnabled() const { return m_TargetCharacterEnabled; }
+    int GetTargetCharacterIndex() const { return m_TargetCharacterIndex; }
+
 private:
     CDevEditorUI() = default;
     ~CDevEditorUI() = default;
@@ -76,6 +80,10 @@ private:
     float m_CustomOriginX = 0.0f;     // X coordinate (0-255 game tiles, converted to world units)
     float m_CustomOriginY = 0.0f;     // Y coordinate (0-255 game tiles, converted to world units)
     float m_CustomOriginZ = 100.0f;   // Z height (world units)
+
+    // Phase 5: Character Scene - Target specific character
+    bool m_TargetCharacterEnabled = false;
+    int m_TargetCharacterIndex = 0;   // 0-4 for characters 1-5
 
     // Render toggle flags
     // Working toggles

@@ -40,11 +40,12 @@ inline CameraMode GetNextCameraMode(CameraMode current)
         case CameraMode::Default:
             return CameraMode::Orbital;
         case CameraMode::Orbital:
-#ifdef _EDITOR
-            return CameraMode::FreeFly;
-        case CameraMode::FreeFly:
-#endif
             return CameraMode::Default;
+#ifdef _EDITOR
+        case CameraMode::FreeFly:
+            // FreeFly is UI-only, should not be in F9 cycle
+            return CameraMode::Default;
+#endif
         default:
             return CameraMode::Default;
     }

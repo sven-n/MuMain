@@ -24,6 +24,8 @@ extern "C" bool DevEditor_IsConfigOverrideEnabled();
 extern "C" void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
 extern "C" bool DevEditor_IsCustomOriginEnabled();
 extern "C" void DevEditor_GetCustomOrigin(float* outX, float* outY, float* outZ);
+extern "C" bool DevEditor_IsTargetCharacterEnabled();
+extern "C" int DevEditor_GetTargetCharacterIndex();
 #endif
 
 OrbitalCamera::OrbitalCamera(CameraState& state)
@@ -71,6 +73,9 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     // Reset initial offset - will be captured on first frame
     m_bInitialOffsetSet = false;
 
+    // Phase 5 fix: Update target immediately on activation to get correct scene context
+    UpdateTarget();
+
     // Phase 3 fix: Initialize frustum immediately on activation
     // Without this, first frame(s) have uninitialized frustum and everything gets culled
     UpdateFrustum();
@@ -87,14 +92,22 @@ bool OrbitalCamera::Update()
     extern EGameScene SceneFlag;
     if (m_LastSceneFlag != (int)SceneFlag)
     {
-        // Scene changed - reset target to force recalculation
-        // This fixes the issue where Orbital in LoginScene/CharacterScene
-        // maintains stale target position when entering MainScene
+        // Scene changed - reset ALL orbital state to prevent cross-scene contamination
         m_LastSceneFlag = (int)SceneFlag;
         m_bInitialOffsetSet = false;  // Force recapture of camera offset
 
+        // Reset rotation deltas - don't carry rotation from previous scene
+        m_DeltaYaw = 0.0f;
+        m_DeltaPitch = 0.0f;
+
+        // Reset radius to default for new scene
+        m_Radius = DEFAULT_RADIUS;
+
         // Update target immediately with new scene context
         UpdateTarget();
+
+        // Force DefaultCamera to recalculate as well
+        m_pDefaultCamera->Reset();
     }
 
     HandleInput();
@@ -185,7 +198,22 @@ bool OrbitalCamera::IsHeroValid() const
 void OrbitalCamera::GetTargetPosition(vec3_t outTarget) const
 {
 #ifdef _EDITOR
-    // Phase 5 Debug: Check if custom origin is enabled
+    extern EGameScene SceneFlag;
+
+    // Priority 1: Target specific character (ONLY in CharacterScene)
+    if (SceneFlag == CHARACTER_SCENE && DevEditor_IsTargetCharacterEnabled())
+    {
+        int charIndex = DevEditor_GetTargetCharacterIndex();
+        extern CHARACTER* CharactersClient;
+        if (CharactersClient && CharactersClient[charIndex].Object.Live)
+        {
+            VectorCopy(CharactersClient[charIndex].Object.Position, outTarget);
+            return;
+        }
+        // If character not loaded, fall through to next priority
+    }
+
+    // Priority 2: Custom origin from DevEditor
     if (DevEditor_IsCustomOriginEnabled())
     {
         // Use custom origin from DevEditor
@@ -197,12 +225,12 @@ void OrbitalCamera::GetTargetPosition(vec3_t outTarget) const
     extern CHARACTER* Hero;
     if (IsHeroValid())
     {
-        // Hero exists - use Hero position as target
+        // Priority 3: Hero exists - use Hero position as target
         VectorCopy(Hero->Object.Position, outTarget);
     }
     else
     {
-        // Fallback: Use current camera position as pivot
+        // Priority 4 (Fallback): Use current camera position as pivot
         // This allows orbital camera to work in LoginScene/CharacterScene
         // without crashing when Hero is invalid
         VectorCopy(m_State.Position, outTarget);
