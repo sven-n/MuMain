@@ -60,9 +60,11 @@ public:
      * @param aspectRatio Width / Height ratio
      * @param nearDist Near clipping plane distance
      * @param farDist Far clipping plane distance
+     * @param terrainCullDist Distance for terrain tile culling (defaults to farDist if not specified)
      */
     void BuildFromCamera(const vec3_t position, const vec3_t forward, const vec3_t up,
-                         float fovDegrees, float aspectRatio, float nearDist, float farDist);
+                         float fovDegrees, float aspectRatio, float nearDist, float farDist,
+                         float terrainCullDist = -1.0f);
 
     /**
      * @brief Tests if a sphere is inside or intersecting the frustum
@@ -166,6 +168,6 @@ private:
     // Helper methods
     void CalculateBoundingBox();
     void CalculateGroundProjection(const vec3_t position, const vec3_t forward,
-                                   const vec3_t up, float nearDist, float farDist,
-                                   float nearWidth, float farWidth);
+                                   const vec3_t up, float nearDist, float terrainFarDist,
+                                   float nearWidth, float terrainFarWidth);
 };

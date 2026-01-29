@@ -221,6 +221,15 @@ bool DefaultCamera::Update()
 
 void DefaultCamera::CalculateCameraViewFar()
 {
+#ifdef _EDITOR
+    // Phase 5: If DevEditor is overriding config, use the far plane value directly
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        m_State.ViewFar = m_Config.farPlane;
+        return;
+    }
+#endif
+
     // Phase 5: NULL check for Hero
     if (IsHeroValid() && battleCastle::InBattleCastle2(Hero->Object.Position))
     {
@@ -633,10 +642,12 @@ void DefaultCamera::UpdateFrustum()
     // The Frustum will internally use terrainCullRange for 2D ground projection
     // Phase 5: If DevEditor is overriding, use config.farPlane instead of ViewFar
     float effectiveFarPlane = m_State.ViewFar;
+    float effectiveTerrainCullRange = m_Config.terrainCullRange;
 #ifdef _EDITOR
     if (DevEditor_IsConfigOverrideEnabled())
     {
         effectiveFarPlane = m_Config.farPlane;
+        effectiveTerrainCullRange = m_Config.terrainCullRange;
     }
 #endif
 
@@ -647,7 +658,8 @@ void DefaultCamera::UpdateFrustum()
         m_Config.fov,
         aspectRatio,
         m_Config.nearPlane,
-        effectiveFarPlane  // Use override or dynamic ViewFar
+        effectiveFarPlane,  // Use override or dynamic ViewFar
+        effectiveTerrainCullRange  // Separate terrain culling distance
     );
 
     // Phase 5: Cache current state for next frame's comparison

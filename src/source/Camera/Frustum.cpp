@@ -27,8 +27,12 @@ Frustum::Frustum()
 }
 
 void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const vec3_t up,
-                               float fovDegrees, float aspectRatio, float nearDist, float farDist)
+                               float fovDegrees, float aspectRatio, float nearDist, float farDist,
+                               float terrainCullDist)
 {
+    // If terrainCullDist not specified, use farDist for terrain culling
+    if (terrainCullDist < 0.0f)
+        terrainCullDist = farDist;
     // Calculate right vector (need temp copies - CrossProduct doesn't accept const)
     vec3_t right, forwardTemp, upTemp;
     VectorCopy(forward, forwardTemp);
@@ -143,7 +147,10 @@ void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const
     CalculateBoundingBox();
 
     // Calculate 2D ground projection for terrain culling
-    CalculateGroundProjection(position, forward, actualUp, nearDist, farDist, nearWidth, farWidth);
+    // Use terrainCullDist for terrain (separate from 3D object farDist)
+    float terrainFarHeight = 2.0f * tanHalfFov * terrainCullDist;
+    float terrainFarWidth = terrainFarHeight * aspectRatio;
+    CalculateGroundProjection(position, forward, actualUp, nearDist, terrainCullDist, nearWidth, terrainFarWidth);
 }
 
 bool Frustum::TestSphere(const vec3_t center, float radius) const
@@ -215,8 +222,8 @@ void Frustum::CalculateBoundingBox()
 }
 
 void Frustum::CalculateGroundProjection(const vec3_t position, const vec3_t forward,
-                                        const vec3_t up, float nearDist, float farDist,
-                                        float nearWidth, float farWidth)
+                                        const vec3_t up, float nearDist, float terrainFarDist,
+                                        float nearWidth, float terrainFarWidth)
 {
     // Calculate right vector (need temp copies - CrossProduct doesn't accept const)
     vec3_t right, forwardTemp, upTemp;
@@ -248,16 +255,16 @@ void Frustum::CalculateGroundProjection(const vec3_t position, const vec3_t forw
     // Calculate near and far centers on ground
     vec3_t nearCenter, farCenter;
     VectorMA(groundPosition, nearDist, groundForward, nearCenter);
-    VectorMA(groundPosition, farDist, groundForward, farCenter);
+    VectorMA(groundPosition, terrainFarDist, groundForward, farCenter);
 
     // Calculate the 4 trapezoid vertices
     vec3_t temp;
 
     // Far-left
-    VectorMA(farCenter, -farWidth * 0.5f, groundRight, m_GroundProjection[0]);
+    VectorMA(farCenter, -terrainFarWidth * 0.5f, groundRight, m_GroundProjection[0]);
 
     // Far-right
-    VectorMA(farCenter, farWidth * 0.5f, groundRight, m_GroundProjection[1]);
+    VectorMA(farCenter, terrainFarWidth * 0.5f, groundRight, m_GroundProjection[1]);
 
     // Near-right
     VectorMA(nearCenter, nearWidth * 0.5f, groundRight, m_GroundProjection[2]);
