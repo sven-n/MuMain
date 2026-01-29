@@ -80,6 +80,16 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
         // LoginScene uses tour mode - position managed by CCameraMove
         // Just maintain previous position if no Hero
     }
+    else if (SceneFlag == MAIN_SCENE)
+    {
+        // Phase 5 fix: In MainScene, don't use previous camera state
+        // Position will be calculated in Update() based on Hero
+        // Just initialize to Hero position to prevent one frame of wrong frustum
+        extern CHARACTER* Hero;
+        m_State.Position[0] = Hero->Object.Position[0];
+        m_State.Position[1] = Hero->Object.Position[1];
+        m_State.Position[2] = Hero->Object.Position[2];
+    }
 
     // Phase 3 fix: Initialize frustum immediately on activation
     UpdateFrustum();
@@ -113,15 +123,16 @@ bool DefaultCamera::Update()
 
     bool bLockCamera = false;
 
+    // Initialize default angles (SetCameraAngle will override these for specific scenes)
+    m_State.Angle[0] = 0.f;
+    m_State.Angle[1] = 0.f;
+    m_State.Angle[2] = -45.f;
+
     SetCameraFOV();
 
 #ifdef ENABLE_EDIT2
     HandleEditorMode();
 #endif
-
-    m_State.Angle[0] = 0.f;
-    m_State.Angle[1] = 0.f;
-    m_State.Angle[2] = -45.f;
 
     if (m_State.TopViewEnable)
     {
@@ -143,6 +154,9 @@ bool DefaultCamera::Update()
     }
 
     UpdateCameraDistance();
+
+    // Phase 5 fix: Update frustum after camera position/angle changes
+    UpdateFrustum();
 
     return bLockCamera;
 }

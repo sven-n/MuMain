@@ -314,8 +314,60 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to set custom orbit center");
     }
 
-    ImGui::Separator();
     ImGui::Spacing();
+    ImGui::Separator();
+
+    // Character Scene - Target Specific Character
+    extern EGameScene SceneFlag;
+    if (SceneFlag == CHARACTER_SCENE)
+    {
+        ImGui::Text("Character Scene - Target Character");
+        ImGui::Separator();
+
+        ImGui::Checkbox("Target Specific Character", &m_TargetCharacterEnabled);
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Orbit specific character 1-5)");
+
+        if (m_TargetCharacterEnabled)
+        {
+            // Character selector (1-5)
+            const char* charLabels[] = { "Character 1", "Character 2", "Character 3", "Character 4", "Character 5" };
+            ImGui::PushItemWidth(150);
+            ImGui::Combo("Target Character", &m_TargetCharacterIndex, charLabels, 5);
+            ImGui::PopItemWidth();
+
+            // Display character info if available
+            extern CHARACTER* CharactersClient;
+            if (CharactersClient && CharactersClient[m_TargetCharacterIndex].Object.Live)
+            {
+                CHARACTER* targetChar = &CharactersClient[m_TargetCharacterIndex];
+                ImGui::Text("Character Position:");
+                ImGui::Text("  X: %.2f  Y: %.2f  Z: %.2f",
+                    targetChar->Object.Position[0],
+                    targetChar->Object.Position[1],
+                    targetChar->Object.Position[2]);
+
+                if (ImGui::Button("Set Origin to This Character"))
+                {
+                    m_CustomOriginEnabled = true;
+                    m_CustomOriginX = targetChar->Object.Position[0] / 100.0f;
+                    m_CustomOriginY = targetChar->Object.Position[1] / 100.0f;
+                    m_CustomOriginZ = targetChar->Object.Position[2];
+                }
+            }
+            else
+            {
+                ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "Character %d not loaded", m_TargetCharacterIndex + 1);
+            }
+        }
+        else
+        {
+            ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to target specific character");
+        }
+
+        ImGui::Separator();
+        ImGui::Spacing();
+    }
 
     // Render Toggles Section
     ImGui::Text("Rendering Toggles");
@@ -508,6 +560,17 @@ extern "C"
         if (outX) *outX = g_DevEditorUI.GetCustomOriginX() * 100.0f;  // Convert tiles to world units
         if (outY) *outY = g_DevEditorUI.GetCustomOriginY() * 100.0f;
         if (outZ) *outZ = g_DevEditorUI.GetCustomOriginZ();
+    }
+
+    // Phase 5: Character targeting accessors
+    bool DevEditor_IsTargetCharacterEnabled()
+    {
+        return g_DevEditorUI.IsTargetCharacterEnabled();
+    }
+
+    int DevEditor_GetTargetCharacterIndex()
+    {
+        return g_DevEditorUI.GetTargetCharacterIndex();
     }
 
     // Render toggle accessors
