@@ -70,7 +70,7 @@ private:
 
     // New CameraConfig values for live editing
     bool m_ConfigOverrideEnabled = false;
-    float m_FOV = 30.0f;              // Field of view in degrees
+    float m_FOV = 60.0f;              // Field of view in degrees (Phase 5: changed default to 60)
     float m_NearPlane = 10.0f;        // Near clipping plane
     float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
     float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range

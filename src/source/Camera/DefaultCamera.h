@@ -79,4 +79,10 @@ private:
     mutable vec3_t m_LastFrustumPosition;
     mutable vec3_t m_LastFrustumAngle;
     mutable float m_LastFrustumViewFar;
+
+    // Phase 5: Cache last DevEditor config to detect changes
+    mutable float m_LastEditorFOV;
+    mutable float m_LastEditorFarPlane;
+    mutable float m_LastEditorNearPlane;
+    mutable float m_LastEditorTerrainCullRange;
 };

@@ -62,6 +62,22 @@ void OrbitalCamera::Reset()
 
 void OrbitalCamera::OnActivate(const CameraState& previousState)
 {
+    // Phase 5 fix: Initialize scene flag to current scene to prevent false scene change detection
+    extern EGameScene SceneFlag;
+    m_LastSceneFlag = (int)SceneFlag;
+
+    // Phase 5: Load scene-specific camera config
+    if (SceneFlag == CHARACTER_SCENE)
+    {
+        m_Config = CameraConfig::ForCharacterScene();
+    }
+    else
+    {
+        // Use gameplay config for MainScene and LoginScene
+        // LoginScene uses CCameraMove tour mode which overrides everything anyway
+        m_Config = CameraConfig::ForGameplay();
+    }
+
     // Inherit radius from previous camera distance
     m_Radius = previousState.Distance;
     m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);

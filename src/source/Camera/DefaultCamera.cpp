@@ -38,6 +38,12 @@ DefaultCamera::DefaultCamera(CameraState& state)
     m_LastFrustumPosition[0] = m_LastFrustumPosition[1] = m_LastFrustumPosition[2] = 0.0f;
     m_LastFrustumAngle[0] = m_LastFrustumAngle[1] = m_LastFrustumAngle[2] = 0.0f;
     m_LastFrustumViewFar = 0.0f;
+
+    // Phase 5: Initialize DevEditor config cache to force first update
+    m_LastEditorFOV = 0.0f;
+    m_LastEditorFarPlane = 0.0f;
+    m_LastEditorNearPlane = 0.0f;
+    m_LastEditorTerrainCullRange = 0.0f;
 }
 
 bool DefaultCamera::IsHeroValid() const
@@ -53,6 +59,19 @@ void DefaultCamera::Reset()
 
 void DefaultCamera::OnActivate(const CameraState& previousState)
 {
+    // Phase 5: Load scene-specific camera config
+    extern EGameScene SceneFlag;
+    if (SceneFlag == CHARACTER_SCENE)
+    {
+        m_Config = CameraConfig::ForCharacterScene();
+    }
+    else
+    {
+        // Use gameplay config for MainScene and LoginScene
+        // LoginScene uses CCameraMove tour mode which overrides everything anyway
+        m_Config = CameraConfig::ForGameplay();
+    }
+
     // When returning to DefaultCamera, reset to default state
     // Only inherit distance for smoother transition
     m_State.Distance = previousState.Distance;
@@ -68,7 +87,6 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     // The camera positioning is relative to character's facing direction
 
     // Phase 5: If Hero is invalid (LoginScene/CharacterScene), use scene-specific position
-    extern EGameScene SceneFlag;
     if (!IsHeroValid())
     {
         // CharacterScene has hardcoded position in SetCameraAngle()
@@ -103,11 +121,12 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
                 }
                 else
                 {
-                    // Fallback: Use hardcoded initial position from old LoginScene
-                    m_State.Position[0] = 0.0f;
-                    m_State.Position[1] = -1000.0f;
-                    m_State.Position[2] = 500.0f;
-                    m_State.Angle[0] = -80.0f;
+                    // Fallback: Use reasonable position similar to CharacterScene
+                    // LoginScene world is at WD_73NEW_LOGIN_SCENE, camera should see the scene
+                    m_State.Position[0] = 5000.0f;  // Center-ish of typical MU map
+                    m_State.Position[1] = 5000.0f;
+                    m_State.Position[2] = 1000.0f;  // Higher up for better view
+                    m_State.Angle[0] = -60.0f;  // Looking down
                     m_State.Angle[1] = 0.0f;
                     m_State.Angle[2] = 0.0f;
                 }
@@ -237,7 +256,8 @@ void DefaultCamera::CalculateCameraViewFar()
         }
         else if (SceneFlag == CHARACTER_SCENE)
         {
-            m_State.ViewFar = 3500.f;
+            // Phase 5: Use config's farPlane for CharacterScene (scene-specific)
+            m_State.ViewFar = m_Config.farPlane;
         }
         else if (g_Direction.m_CKanturu.IsMayaScene())
         {
@@ -634,6 +654,17 @@ void DefaultCamera::UpdateFrustum()
     VectorCopy(m_State.Position, m_LastFrustumPosition);
     VectorCopy(m_State.Angle, m_LastFrustumAngle);
     m_LastFrustumViewFar = effectiveFarPlane;  // Cache the actual far plane used
+
+#ifdef _EDITOR
+    // Cache DevEditor config values
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        m_LastEditorFOV = m_Config.fov;
+        m_LastEditorFarPlane = m_Config.farPlane;
+        m_LastEditorNearPlane = m_Config.nearPlane;
+        m_LastEditorTerrainCullRange = m_Config.terrainCullRange;
+    }
+#endif
 }
 
 bool DefaultCamera::NeedsFrustumUpdate() const
@@ -642,10 +673,19 @@ bool DefaultCamera::NeedsFrustumUpdate() const
     const float EPSILON = 0.01f;  // Small threshold to avoid floating point comparison issues
 
 #ifdef _EDITOR
-    // Always rebuild if DevEditor override is enabled (config might have changed)
+    // Check if DevEditor config changed
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        return true;
+        float currentFOV, currentNearPlane, currentFarPlane, currentTerrainCullRange;
+        DevEditor_GetCameraConfig(&currentFOV, &currentNearPlane, &currentFarPlane, &currentTerrainCullRange);
+
+        if (fabs(currentFOV - m_LastEditorFOV) > EPSILON ||
+            fabs(currentFarPlane - m_LastEditorFarPlane) > EPSILON ||
+            fabs(currentNearPlane - m_LastEditorNearPlane) > EPSILON ||
+            fabs(currentTerrainCullRange - m_LastEditorTerrainCullRange) > EPSILON)
+        {
+            return true;  // Config changed, rebuild needed
+        }
     }
 #endif
 

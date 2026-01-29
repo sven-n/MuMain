@@ -156,3 +156,18 @@ extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch)
         if (outPitch) *outPitch = 0.0f;
     }
 }
+
+// Phase 5: Get active camera's config (for DevEditor single source of truth)
+extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange)
+{
+    auto& manager = CameraManager::Instance();
+    ICamera* camera = manager.GetActiveCamera();
+    if (camera)
+    {
+        const CameraConfig& config = camera->GetConfig();
+        if (outFOV) *outFOV = config.fov;
+        if (outNearPlane) *outNearPlane = config.nearPlane;
+        if (outFarPlane) *outFarPlane = config.farPlane;
+        if (outTerrainCullRange) *outTerrainCullRange = config.terrainCullRange;
+    }
+}

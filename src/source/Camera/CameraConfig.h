@@ -124,18 +124,18 @@ struct CameraConfig
      * Medium frustum for character preview.
      * Shows character and surrounding environment.
      *
-     * Values:
-     * - ViewFar: 7371 (2000 * 9.1 * 0.404998)
-     * - WidthFar: 1190, WidthNear: 540 (with FOV scaling)
+     * Values (Phase 5 update):
+     * - FOV: 71 degrees (optimized for character viewing)
+     * - Far plane: 4100 (balanced visibility)
      */
     static CameraConfig ForCharacterScene()
     {
         CameraConfig config;
-        config.fov = 60.0f;
+        config.fov = 71.0f;
         config.nearPlane = 10.0f;
-        config.farPlane = 7371.0f;
-        config.terrainCullRange = 7371.0f;
-        config.objectCullRange = 7371.0f;
+        config.farPlane = 4100.0f;
+        config.terrainCullRange = 4100.0f;
+        config.objectCullRange = 4100.0f;
         config.frustumWidthNear = 540.0f;
         config.frustumWidthFar = 1190.0f;
         return config;

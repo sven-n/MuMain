@@ -18,6 +18,7 @@ extern CameraState g_Camera;
 extern "C" int GetCurrentCameraMode();
 extern "C" float GetOrbitalCameraRadius();
 extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch);
+extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
 
 CDevEditorUI& CDevEditorUI::GetInstance()
 {
@@ -193,9 +194,9 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::PushItemWidth(200);
 
         ImGui::Text("3D Frustum Parameters:");
-        ImGui::SliderFloat("FOV (degrees)", &m_FOV, 10.0f, 90.0f, "%.1f");
+        ImGui::SliderFloat("FOV (degrees)", &m_FOV, 10.0f, 120.0f, "%.1f");
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(30° = default)");
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(60° = default)");
 
         ImGui::InputFloat("Near Plane", &m_NearPlane, 1.0f, 10.0f, "%.1f");
         ImGui::SameLine();
@@ -217,7 +218,15 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::Text("Presets:");
         if (ImGui::Button("Gameplay (Default)"))
         {
-            m_FOV = 30.0f;
+            m_FOV = 60.0f;  // Phase 5: Updated from 30 to 60
+            m_NearPlane = 10.0f;
+            m_FarPlane = 2400.0f;
+            m_TerrainCullRange = 1100.0f;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Narrow FOV"))
+        {
+            m_FOV = 30.0f;  // Old default
             m_NearPlane = 10.0f;
             m_FarPlane = 2400.0f;
             m_TerrainCullRange = 1100.0f;
@@ -225,7 +234,7 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::SameLine();
         if (ImGui::Button("Wide FOV"))
         {
-            m_FOV = 60.0f;
+            m_FOV = 90.0f;  // Very wide
             m_NearPlane = 10.0f;
             m_FarPlane = 3200.0f;
             m_TerrainCullRange = 1500.0f;
@@ -245,7 +254,17 @@ void CDevEditorUI::RenderCameraTab()
     }
     else
     {
-        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to adjust FOV, planes, cull range");
+        // Phase 5: Display current camera config (read-only, single source of truth)
+        float currentFOV, currentNearPlane, currentFarPlane, currentTerrainCullRange;
+        GetActiveCameraConfig(&currentFOV, &currentNearPlane, &currentFarPlane, &currentTerrainCullRange);
+
+        ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Current Camera Config (Scene-Specific):");
+        ImGui::Text("  FOV: %.1f°", currentFOV);
+        ImGui::Text("  Near Plane: %.1f", currentNearPlane);
+        ImGui::Text("  Far Plane: %.1f", currentFarPlane);
+        ImGui::Text("  Terrain Cull Range: %.1f", currentTerrainCullRange);
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable override to customize these values");
     }
 
     ImGui::Separator();
