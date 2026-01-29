@@ -34,6 +34,7 @@ OrbitalCamera::OrbitalCamera(CameraState& state)
     , m_DeltaYaw(0.0f)
     , m_DeltaPitch(0.0f)
     , m_Radius(DEFAULT_RADIUS)
+    , m_LastSceneFlag(-1)  // Phase 5: Initialize to invalid scene
     , m_bRotating(false)
     , m_LastMouseX(0)
     , m_LastMouseY(0)
@@ -80,6 +81,20 @@ void OrbitalCamera::OnDeactivate()
 
 bool OrbitalCamera::Update()
 {
+    // Phase 5: Detect scene transitions and force target recalculation
+    extern EGameScene SceneFlag;
+    if (m_LastSceneFlag != (int)SceneFlag)
+    {
+        // Scene changed - reset target to force recalculation
+        // This fixes the issue where Orbital in LoginScene/CharacterScene
+        // maintains stale target position when entering MainScene
+        m_LastSceneFlag = (int)SceneFlag;
+        m_bInitialOffsetSet = false;  // Force recapture of camera offset
+
+        // Update target immediately with new scene context
+        UpdateTarget();
+    }
+
     HandleInput();
     UpdateTarget();
 
