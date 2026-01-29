@@ -460,6 +460,15 @@ void OrbitalCamera::UpdateFrustum()
 
     // Use ViewFar for 3D culling distance (varies 2000-3700 based on map/zoom)
     // The Frustum will internally use terrainCullRange for 2D ground projection
+    // Phase 5: If DevEditor is overriding, use config.farPlane instead of ViewFar
+    float effectiveFarPlane = m_State.ViewFar;
+#ifdef _EDITOR
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        effectiveFarPlane = m_Config.farPlane;
+    }
+#endif
+
     m_Frustum.BuildFromCamera(
         m_State.Position,
         forward,
@@ -467,6 +476,6 @@ void OrbitalCamera::UpdateFrustum()
         m_Config.fov,
         aspectRatio,
         m_Config.nearPlane,
-        m_State.ViewFar  // Use dynamic ViewFar for proper distance culling
+        effectiveFarPlane  // Use override or dynamic ViewFar
     );
 }

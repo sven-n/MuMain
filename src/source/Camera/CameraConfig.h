@@ -11,7 +11,7 @@ struct CameraConfig
     // ========== View Frustum Parameters ==========
 
     /** Vertical field of view in degrees */
-    float fov = 33.0f;
+    float fov = 60.0f;
 
     /** Near clipping plane distance */
     float nearPlane = 10.0f;
@@ -85,7 +85,7 @@ struct CameraConfig
     static CameraConfig ForGameplay()
     {
         CameraConfig config;
-        config.fov = 33.0f;
+        config.fov = 60.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 2400.0f;
         config.terrainCullRange = 1100.0f;
@@ -108,7 +108,7 @@ struct CameraConfig
     static CameraConfig ForLoginScene()
     {
         CameraConfig config;
-        config.fov = 33.0f;
+        config.fov = 60.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 265200.0f;
         config.terrainCullRange = 265200.0f;
@@ -131,7 +131,7 @@ struct CameraConfig
     static CameraConfig ForCharacterScene()
     {
         CameraConfig config;
-        config.fov = 33.0f;
+        config.fov = 60.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 7371.0f;
         config.terrainCullRange = 7371.0f;
@@ -149,7 +149,7 @@ struct CameraConfig
     static CameraConfig ForWideView()
     {
         CameraConfig config;
-        config.fov = 33.0f;
+        config.fov = 60.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 6000.0f;
         config.terrainCullRange = 6000.0f;
@@ -168,7 +168,7 @@ struct CameraConfig
     static CameraConfig ForOldDefault()
     {
         CameraConfig config;
-        config.fov = 33.0f;
+        config.fov = 60.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 5100.0f;
         config.terrainCullRange = 5100.0f;
