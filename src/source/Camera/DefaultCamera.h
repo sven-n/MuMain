@@ -69,8 +69,14 @@ private:
     void UpdateCameraDistance();
     void SetCameraFOV();
     void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
+    bool NeedsFrustumUpdate() const;  // Phase 5: Check if frustum needs rebuild
 
 #ifdef ENABLE_EDIT2
     void HandleEditorMode();
 #endif
+
+    // Phase 5: Cache last frustum state to avoid unnecessary rebuilds
+    mutable vec3_t m_LastFrustumPosition;
+    mutable vec3_t m_LastFrustumAngle;
+    mutable float m_LastFrustumViewFar;
 };
