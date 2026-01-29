@@ -55,6 +55,9 @@ private:
     CameraConfig m_Config;
     Frustum m_Frustum;
 
+    // Phase 5: Hero validity check for non-MainScene contexts
+    bool IsHeroValid() const;
+
     // These are direct copies of the static functions from CameraUtility.cpp
     // We're NOT refactoring them yet - just moving them as-is
     void CalculateCameraViewFar();

@@ -159,15 +159,33 @@ void OrbitalCamera::HandleInput()
     }
 }
 
+bool OrbitalCamera::IsHeroValid() const
+{
+    extern CHARACTER* Hero;
+    return (Hero != nullptr && Hero->Object.Live);
+}
+
+void OrbitalCamera::GetTargetPosition(vec3_t outTarget) const
+{
+    extern CHARACTER* Hero;
+    if (IsHeroValid())
+    {
+        // Hero exists - use Hero position as target
+        VectorCopy(Hero->Object.Position, outTarget);
+    }
+    else
+    {
+        // Fallback: Use current camera position as pivot
+        // This allows orbital camera to work in LoginScene/CharacterScene
+        // without crashing when Hero is invalid
+        VectorCopy(m_State.Position, outTarget);
+    }
+}
+
 void OrbitalCamera::UpdateTarget()
 {
-    // Target is character position (no height offset in XY, only used for Z calculation)
-    if (Hero)
-    {
-        m_Target[0] = Hero->Object.Position[0];
-        m_Target[1] = Hero->Object.Position[1];
-        m_Target[2] = Hero->Object.Position[2];
-    }
+    // Phase 5: Use safe GetTargetPosition() instead of direct Hero access
+    GetTargetPosition(m_Target);
 }
 
 void OrbitalCamera::ComputeCameraTransform()
