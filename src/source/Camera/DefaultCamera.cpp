@@ -36,6 +36,12 @@ DefaultCamera::DefaultCamera(CameraState& state)
 {
 }
 
+bool DefaultCamera::IsHeroValid() const
+{
+    extern CHARACTER* Hero;
+    return (Hero != nullptr && Hero->Object.Live);
+}
+
 void DefaultCamera::Reset()
 {
     m_State.Reset();
@@ -83,9 +89,14 @@ bool DefaultCamera::Update()
     if (m_State.TopViewEnable)
     {
         m_State.ViewFar = 3200.f;
-        m_State.Position[0] = Hero->Object.Position[0];
-        m_State.Position[1] = Hero->Object.Position[1];
-        m_State.Position[2] = m_State.ViewFar;
+        // Phase 5: NULL check for Hero (may not exist in LoginScene/CharacterScene)
+        if (IsHeroValid())
+        {
+            m_State.Position[0] = Hero->Object.Position[0];
+            m_State.Position[1] = Hero->Object.Position[1];
+            m_State.Position[2] = m_State.ViewFar;
+        }
+        // else: maintain current position (fallback for non-MainScene)
     }
     else
     {
@@ -101,7 +112,8 @@ bool DefaultCamera::Update()
 
 void DefaultCamera::CalculateCameraViewFar()
 {
-    if (battleCastle::InBattleCastle2(Hero->Object.Position))
+    // Phase 5: NULL check for Hero
+    if (IsHeroValid() && battleCastle::InBattleCastle2(Hero->Object.Position))
     {
         m_State.ViewFar = 3000.f;
         return;
@@ -157,6 +169,10 @@ void DefaultCamera::CalculateCameraViewFar()
 
 void DefaultCamera::AdjustHeroHeight()
 {
+    // Phase 5: NULL check - this function only applies when Hero exists
+    if (!IsHeroValid())
+        return;
+
     if (gMapManager.InChaosCastle() == false || !Hero->Object.m_bActionStart)
     {
         // Skip height adjustment for Kanturu 3rd when action has started
@@ -181,6 +197,14 @@ void DefaultCamera::AdjustHeroHeight()
 
 void DefaultCamera::CalculateCameraPosition()
 {
+    // Phase 5: NULL check - if Hero invalid, use fallback positioning
+    if (!IsHeroValid())
+    {
+        // Fallback: Use CharacterScene or LoginScene static positions
+        // (SetCameraAngle() sets hardcoded positions for CHARACTER_SCENE)
+        return;
+    }
+
     int iIndex = TERRAIN_INDEX((Hero->PositionX), (Hero->PositionY));
     vec3_t Position, TransformPosition;
     float Matrix[3][4];
@@ -279,6 +303,10 @@ void DefaultCamera::SetCameraAngle()
 
 void DefaultCamera::UpdateCustomCameraDistance()
 {
+    // Phase 5: NULL check - custom distance only applies when Hero exists
+    if (!IsHeroValid())
+        return;
+
     int iIndex = TERRAIN_INDEX((Hero->PositionX), (Hero->PositionY));
 
     if ((TerrainWall[iIndex] & TW_CAMERA_UP) == TW_CAMERA_UP)

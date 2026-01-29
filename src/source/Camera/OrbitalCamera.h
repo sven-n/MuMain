@@ -91,4 +91,8 @@ private:
     void ComputeCameraTransform();
     void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
     void UpdateConfigForZoom();  // Phase 1: Adjust config based on zoom level
+
+    // Phase 5: Hero validity check and target position getter
+    bool IsHeroValid() const;
+    void GetTargetPosition(vec3_t outTarget) const;
 };
