@@ -32,6 +32,9 @@ public:
     float GetTotalYaw() const { return m_BaseYaw + m_DeltaYaw; }
     float GetTotalPitch() const { return m_BasePitch + m_DeltaPitch; }
 
+    // Phase 5: Public accessor for debug display
+    void GetTargetPosition(vec3_t outTarget) const;
+
     // Phase 1: Configuration & Frustum Management
     const CameraConfig& GetConfig() const override { return m_Config; }
     void SetConfig(const CameraConfig& config) override;
@@ -95,7 +98,6 @@ private:
     void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
     void UpdateConfigForZoom();  // Phase 1: Adjust config based on zoom level
 
-    // Phase 5: Hero validity check and target position getter
+    // Phase 5: Hero validity check (private)
     bool IsHeroValid() const;
-    void GetTargetPosition(vec3_t outTarget) const;
 };

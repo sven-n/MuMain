@@ -92,6 +92,25 @@ void DefaultCamera::OnDeactivate()
 
 bool DefaultCamera::Update()
 {
+    // Phase 5: Detect scene transitions and force position reset
+    extern EGameScene SceneFlag;
+    if (m_LastSceneFlag != (int)SceneFlag)
+    {
+        // Scene changed - force position recalculation for scene-specific cameras
+        m_LastSceneFlag = (int)SceneFlag;
+
+        // For CharacterScene without Hero, immediately set static position
+        if (SceneFlag == CHARACTER_SCENE && !IsHeroValid())
+        {
+            m_State.Angle[0] = -84.5f;
+            m_State.Angle[1] = 0.0f;
+            m_State.Angle[2] = -75.0f;
+            m_State.Position[0] = 9758.93f;
+            m_State.Position[1] = 18913.11f;
+            m_State.Position[2] = 675.5f;
+        }
+    }
+
     bool bLockCamera = false;
 
     SetCameraFOV();
