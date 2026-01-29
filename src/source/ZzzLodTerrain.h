@@ -66,12 +66,14 @@ void RequestTerrainLight(float xf, float yf, vec3_t Light);
 void OpenTerrainLight(wchar_t* FileName);
 void SaveTerrainLight(wchar_t* FileName);
 
-void CreateFrustrum(float xAspect, float yAspect, vec3_t position);
+// Phase 4: Compatibility shims (redirect to camera system)
+bool TestFrustrum(vec3_t Position, float Range);
+bool TestFrustrum2D(float x, float y, float Range);
+// REMOVED: CreateFrustrum() - use camera->UpdateFrustum() instead
+
 void CreateLodBuffer();
 
 float RequestTerrainHeight(float xf, float yf);
-bool TestFrustrum(vec3_t Position, float Range);
-bool TestFrustrum2D(float x, float y, float Range);
 
 // Debug visualization
 void RenderFrustrum2DDebug();

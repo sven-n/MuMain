@@ -377,7 +377,9 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     }
 
     BeginOpengl(0, 0, outWidth, outHeight);
-    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, cameraPos);
+
+    // Note: Frustum is now updated by camera system in RenderGameWorld()
+    // No need to call CreateFrustrum() here anymore
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())

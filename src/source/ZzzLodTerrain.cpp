@@ -1981,14 +1981,17 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
     }
 }
 
-vec3_t  FrustrumVertex[5];
-vec3_t  FrustrumFaceNormal[5];
-float   FrustrumFaceD[5];
+// Phase 4: Legacy frustum globals - most removed, some kept for compatibility
+// REMOVED: FrustrumVertex[5], FrustrumFaceNormal[5], FrustrumFaceD[5] - unused after removing CreateFrustrum()
+
+// Still used by terrain rendering loops - default to full terrain bounds (no culling at terrain level)
+// Camera frustum handles object culling now
 int     FrustrumBoundMinX = 0;
 int     FrustrumBoundMinY = 0;
 int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
+// Still used by RenderFrustrum2DDebug() for debug visualization
 float FrustrumX[4];
 float FrustrumY[4];
 
@@ -2001,102 +2004,8 @@ extern "C" void DevEditor_GetFrustumValues(float* outViewFar, float* outViewNear
                                             float* outWidthFar, float* outWidthNear);
 #endif
 
-void CreateFrustrum2D(vec3_t Position)
-{
-    float Width = 0.0f, CameraViewFar = 0.0f, CameraViewNear = 0.0f, CameraViewTarget = 0.0f;
-    float WidthFar = 0.0f, WidthNear = 0.0f;
-
-#ifdef _EDITOR
-    // Dev Editor override - allows real-time frustum tweaking
-    if (DevEditor_IsOverrideEnabled())
-    {
-        Width = (float)GetScreenWidth() / 500.f + 0.1f;
-        float baseWidthFar, baseWidthNear;
-        DevEditor_GetFrustumValues(&CameraViewFar, &CameraViewNear, &CameraViewTarget,
-                                    &baseWidthFar, &baseWidthNear);
-        WidthFar = baseWidthFar * Width;
-        WidthNear = baseWidthNear * Width;
-    }
-    else
-#endif
-    {
-        // Simplified frustum configuration - only 3 cases
-        if (SceneFlag == LOG_IN_SCENE)
-    {
-        // Login scene - huge frustum for panoramic view
-        Width = (float)GetScreenWidth() / 640.f;
-        CameraViewFar = 265200.f;   // 1200 * 17 * 13 - massive view distance
-        CameraViewNear = 10200.f;    // 1200 * 17 * 0.5
-        CameraViewTarget = 10200.f;  // 1200 * 17 * 0.5
-        WidthFar = 2500.f * Width;
-        WidthNear = 150.f * Width;
-    }
-    else if (SceneFlag == CHARACTER_SCENE)
-    {
-        // Character selection - medium frustum
-        Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
-        CameraViewFar = 7371.f;      // 2000 * 9.1 * 0.404998
-        CameraViewNear = CameraViewFar * 0.19f;
-        CameraViewTarget = CameraViewFar * 0.47f;
-        WidthFar = 1190.f * Width * sqrtf(g_Camera.FOV / 33.f);
-        WidthNear = 540.f * Width * sqrtf(g_Camera.FOV / 33.f);
-    }
-    else
-    {
-        // Main scene (gameplay) - best settings for Default/Orbital camera
-        Width = (float)GetScreenWidth() / 500.f + 0.1f;
-        CameraViewFar = 1100.f;
-        CameraViewNear = -530.f;
-        CameraViewTarget = 0.f;
-        WidthFar = 700.f * Width;
-        WidthNear = 330.f * Width;
-        }
-    }
-
-    // Scale 2D frustum to match g_Camera.ViewFar
-    // Main scene base is 1100, but OrbitalCamera can set ViewFar higher when zooming out
-    // Scale all dimensions proportionally to maintain frustum shape
-    const float baseFrustumFar = 1100.0f;
-    if (CameraViewFar > 0.0f && g_Camera.ViewFar > baseFrustumFar * 1.2f)
-    {
-        float scale = g_Camera.ViewFar / CameraViewFar;  // Scale relative to actual base
-        CameraViewFar *= scale;
-        CameraViewNear *= scale;
-        CameraViewTarget *= scale;
-        WidthFar *= scale;
-        WidthNear *= scale;
-    }
-
-    vec3_t p[4];
-    Vector(-WidthFar, CameraViewFar - CameraViewTarget, 0.f, p[0]);
-    Vector(WidthFar, CameraViewFar - CameraViewTarget, 0.f, p[1]);
-    Vector(WidthNear, CameraViewNear - CameraViewTarget, 0.f, p[2]);
-    Vector(-WidthNear, CameraViewNear - CameraViewTarget, 0.f, p[3]);
-    vec3_t Angle;
-    float Matrix[3][4];
-
-    if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
-    {
-        VectorScale(g_Camera.Angle, -1.0f, Angle);
-        CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
-        vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f };
-        VectorAdd(Angle, _Temp, Angle);
-    }
-    else
-    {
-        Vector(0.f, 0.f, -g_Camera.Angle[2], Angle);
-    }
-
-    AngleMatrix(Angle, Matrix);
-    vec3_t Frustrum[4];
-    for (int i = 0; i < 4; i++)
-    {
-        VectorRotate(p[i], Matrix, Frustrum[i]);
-        VectorAdd(Frustrum[i], Position, Frustrum[i]);
-        FrustrumX[i] = Frustrum[i][0] * 0.01f;
-        FrustrumY[i] = Frustrum[i][1] * 0.01f;
-    }
-}
+// REMOVED: CreateFrustrum2D() - replaced by camera->UpdateFrustum() in Phase 4
+// 2D ground projection frustum is now calculated inside Frustum class
 
 void RenderFrustrum2DDebug()
 {
@@ -2155,138 +2064,37 @@ void RenderFrustrum2DDebug()
     if (lighting) glEnable(GL_LIGHTING);
 }
 
+// Phase 4: Compatibility shims for legacy code
+// These redirect to the new camera system to avoid updating hundreds of call sites
+
 bool TestFrustrum2D(float x, float y, float Range)
 {
-    if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
-        return true;
-
-    int j = 3;
-    for (int i = 0; i < 4; j = i, i++)
-    {
-        float d = (FrustrumX[i] - x) * (FrustrumY[j] - y) -
-            (FrustrumX[j] - x) * (FrustrumY[i] - y);
-        if (d <= Range)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
-{
-    // Phase 2: Bridge to new camera system
-    // This function now populates legacy global frustum variables from the active camera's Frustum
-    // Keeps existing code working while transitioning to camera-driven culling
-
+    // Redirect to camera system
     ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
     if (activeCamera)
     {
-        // Get frustum from camera (already calculated in camera Update())
-        const Frustum& cameraFrustum = activeCamera->GetFrustum();
-        const vec3_t* vertices = cameraFrustum.GetVertices();
-        const Frustum::Plane* planes = cameraFrustum.GetPlanes();
-
-        // Copy frustum vertices to legacy globals (8 vertices -> 5 vertex pyramid)
-        // Old system used apex + 4 far corners, new system has full 8-corner box
-        VectorCopy(g_Camera.Position, FrustrumVertex[0]);  // Apex at camera position
-        VectorCopy(vertices[4], FrustrumVertex[1]);  // Far top-left
-        VectorCopy(vertices[5], FrustrumVertex[2]);  // Far top-right
-        VectorCopy(vertices[6], FrustrumVertex[3]);  // Far bottom-right
-        VectorCopy(vertices[7], FrustrumVertex[4]);  // Far bottom-left
-
-        // Copy plane normals and distances
-        // New Frustum has 6 planes: Left(0), Right(1), Top(2), Bottom(3), Near(4), Far(5)
-        // Old system has 5 planes: Left, Right, Top, Bottom, Far
-        VectorCopy(planes[0].normal, FrustrumFaceNormal[0]);  // Left
-        VectorCopy(planes[1].normal, FrustrumFaceNormal[1]);  // Right
-        VectorCopy(planes[2].normal, FrustrumFaceNormal[2]);  // Top
-        VectorCopy(planes[3].normal, FrustrumFaceNormal[3]);  // Bottom
-        VectorCopy(planes[5].normal, FrustrumFaceNormal[4]);  // Far
-
-        FrustrumFaceD[0] = planes[0].distance;
-        FrustrumFaceD[1] = planes[1].distance;
-        FrustrumFaceD[2] = planes[2].distance;
-        FrustrumFaceD[3] = planes[3].distance;
-        FrustrumFaceD[4] = planes[5].distance;
-
-        // Copy terrain tile bounds from camera frustum
-        cameraFrustum.GetTerrainTileBounds(&FrustrumBoundMinX, &FrustrumBoundMinY,
-                                           &FrustrumBoundMaxX, &FrustrumBoundMaxY);
-    }
-    else
-    {
-        // Fallback: Old calculation if camera system not available (shouldn't happen)
-        const auto fovv = tanf(g_Camera.FOV * Q_PI / 360.f);
-        float Distance = g_Camera.ViewFar;
-        float Width = fovv * Distance * xAspect + 100.f;
-        float Height = fovv * Distance * yAspect + 100.f;
-
-        vec3_t Temp[5];
-        Vector(0.f, 0.f, 0.f, Temp[0]);
-        Vector(-Width, Height, -Distance, Temp[1]);
-        Vector(Width, Height, -Distance, Temp[2]);
-        Vector(Width, -Height, -Distance, Temp[3]);
-        Vector(-Width, -Height, -Distance, Temp[4]);
-
-        float FrustrumMinX = (float)TERRAIN_SIZE * TERRAIN_SCALE;
-        float FrustrumMinY = (float)TERRAIN_SIZE * TERRAIN_SCALE;
-        float FrustrumMaxX = 0.f;
-        float FrustrumMaxY = 0.f;
-        float Matrix[3][4];
-        CameraProjection::GetOpenGLMatrix(Matrix);
-        for (int i = 0; i < 5; i++)
-        {
-            vec3_t t;
-            VectorIRotate(Temp[i], Matrix, t);
-            VectorAdd(t, g_Camera.Position, FrustrumVertex[i]);
-            if (FrustrumMinX > FrustrumVertex[i][0]) FrustrumMinX = FrustrumVertex[i][0];
-            if (FrustrumMinY > FrustrumVertex[i][1]) FrustrumMinY = FrustrumVertex[i][1];
-            if (FrustrumMaxX < FrustrumVertex[i][0]) FrustrumMaxX = FrustrumVertex[i][0];
-            if (FrustrumMaxY < FrustrumVertex[i][1]) FrustrumMaxY = FrustrumVertex[i][1];
-        }
-
-        int tileWidth = 4;
-
-        FrustrumBoundMinX = (int)(FrustrumMinX / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
-        FrustrumBoundMinY = (int)(FrustrumMinY / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
-        FrustrumBoundMaxX = (int)(FrustrumMaxX / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
-        FrustrumBoundMaxY = (int)(FrustrumMaxY / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
-        FrustrumBoundMinX = FrustrumBoundMinX < 0 ? 0 : FrustrumBoundMinX;
-        FrustrumBoundMinY = FrustrumBoundMinY < 0 ? 0 : FrustrumBoundMinY;
-        FrustrumBoundMaxX = FrustrumBoundMaxX > TERRAIN_SIZE_MASK - tileWidth ? TERRAIN_SIZE_MASK - tileWidth : FrustrumBoundMaxX;
-        FrustrumBoundMaxY = FrustrumBoundMaxY > TERRAIN_SIZE_MASK - tileWidth ? TERRAIN_SIZE_MASK - tileWidth : FrustrumBoundMaxY;
-
-        FaceNormalize(FrustrumVertex[0], FrustrumVertex[1], FrustrumVertex[2], FrustrumFaceNormal[0]);
-        FaceNormalize(FrustrumVertex[0], FrustrumVertex[2], FrustrumVertex[3], FrustrumFaceNormal[1]);
-        FaceNormalize(FrustrumVertex[0], FrustrumVertex[3], FrustrumVertex[4], FrustrumFaceNormal[2]);
-        FaceNormalize(FrustrumVertex[0], FrustrumVertex[4], FrustrumVertex[1], FrustrumFaceNormal[3]);
-        FaceNormalize(FrustrumVertex[3], FrustrumVertex[2], FrustrumVertex[1], FrustrumFaceNormal[4]);
-        FrustrumFaceD[0] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[0]);
-        FrustrumFaceD[1] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[1]);
-        FrustrumFaceD[2] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
-        FrustrumFaceD[3] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
-        FrustrumFaceD[4] = -DotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
+        return !activeCamera->ShouldCullObject2D(x * 100.0f, y * 100.0f, -Range);
     }
 
-    CreateFrustrum2D(position);
-    // Note: RenderFrustrum2DDebug() is now called from MainScene after all rendering
+    // Fallback: always visible if no camera
+    return true;
 }
 
 bool TestFrustrum(vec3_t Position, float Range)
 {
-    // Phase 2: Bridge to new camera system
-    // This function uses the legacy global frustum variables that were populated by CreateFrustrum()
-    // In Phase 3/4, this will be replaced by direct camera->ShouldCullObject() calls
-
-    for (int i = 0; i < 5; i++)
+    // Redirect to camera system
+    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
+    if (activeCamera)
     {
-        float Value;
-        Value = FrustrumFaceD[i] + DotProduct(Position, FrustrumFaceNormal[i]);
-        if (Value < -Range) return false;
+        return !activeCamera->ShouldCullObject(Position, Range);
     }
+
+    // Fallback: always visible if no camera
     return true;
 }
+
+// REMOVED: CreateFrustrum() - replaced by camera->UpdateFrustum() in Phase 4
+// All scenes now call camera->UpdateFrustum() directly
 
 #ifdef DYNAMIC_FRUSTRUM
 
