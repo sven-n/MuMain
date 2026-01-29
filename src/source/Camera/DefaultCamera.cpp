@@ -81,18 +81,37 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
             m_State.Position[1] = 18913.11f;
             m_State.Position[2] = 675.5f;
         }
-        else if (SceneFlag == LOG_IN_SCENE && CCameraMove::GetInstancePtr()->IsTourMode())
+        else if (SceneFlag == LOG_IN_SCENE)
         {
-            // Phase 5 fix: Initialize from CCameraMove tour mode position
-            vec3_t tourPos;
-            CCameraMove::GetInstancePtr()->GetCurrentCameraPos(tourPos);
-            m_State.Position[0] = tourPos[0];
-            m_State.Position[1] = tourPos[1];
-            m_State.Position[2] = tourPos[2];
-
-            m_State.Angle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
-            m_State.Angle[1] = 0.0f;
-            m_State.Angle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
+            // Phase 5 fix: Initialize to LoginScene default camera position
+            // Tour mode will update this in Update(), but we need valid initial position
+            // for first frame frustum. These values match old LoginScene WALK_PATHS[0]
+            // after transformation: {0, -1000, 500} with angles {-80, 0, 0}
+            if (CCameraMove::GetInstancePtr()->IsTourMode())
+            {
+                vec3_t tourPos;
+                CCameraMove::GetInstancePtr()->GetCurrentCameraPos(tourPos);
+                // Check if tour position is valid (not at origin)
+                if (tourPos[0] != 0.0f || tourPos[1] != 0.0f || tourPos[2] != 0.0f)
+                {
+                    m_State.Position[0] = tourPos[0];
+                    m_State.Position[1] = tourPos[1];
+                    m_State.Position[2] = tourPos[2];
+                    m_State.Angle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
+                    m_State.Angle[1] = 0.0f;
+                    m_State.Angle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
+                }
+                else
+                {
+                    // Fallback: Use hardcoded initial position from old LoginScene
+                    m_State.Position[0] = 0.0f;
+                    m_State.Position[1] = -1000.0f;
+                    m_State.Position[2] = 500.0f;
+                    m_State.Angle[0] = -80.0f;
+                    m_State.Angle[1] = 0.0f;
+                    m_State.Angle[2] = 0.0f;
+                }
+            }
         }
         // else: maintain previous position if no Hero and not in recognized scene
     }
