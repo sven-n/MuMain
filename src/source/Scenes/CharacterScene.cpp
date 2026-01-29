@@ -27,6 +27,7 @@
 #include "../Winmain.h"
 #include "SceneCommon.h"
 #include "../Camera/CameraUtility.h"
+#include "../Camera/CameraManager.h"
 #include "../ZzzOpenData.h"
 #include "LoginScene.h"
 #include "Camera/CameraProjection.h"
@@ -155,6 +156,11 @@ void NewMoveCharacterScene()
     InitTerrainLight();
     MoveObjects();
     MoveMounts();
+
+    // Update camera BEFORE checking character visibility
+    MoveCamera();
+
+    // Now check character visibility with updated frustum
     MoveCharactersClient();
     MoveCharacterClient(&CharacterView);
 
@@ -164,8 +170,6 @@ void NewMoveCharacterScene()
     MoveBoids();
 
     ThePetProcess().UpdatePets();
-
-    MoveCamera();
 
 #if defined _DEBUG || defined FOR_WORK
     std::wstring lpszTemp = { 0 };
@@ -252,7 +256,9 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     glClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, 640, 430);
 
-    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, pos);
+    // Get active camera for rendering (frustum already updated in camera Update())
+    // Note: Camera is stored for later use in RenderCharacterScene3D()
+
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 
     // Reset character positions and lighting
@@ -309,8 +315,10 @@ static void AdjustCharacterHeights()
  */
 static void RenderCharacterScene3D()
 {
-    RenderTerrain(false);
-    RenderObjects();
+    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
+
+    RenderTerrain(false, activeCamera);
+    RenderObjects(activeCamera);
     RenderCharactersClient();
 
     if (!CUIMng::Instance().IsCursorOnUI())
@@ -322,7 +330,7 @@ static void RenderCharacterScene3D()
     RenderEffects();
     ThePetProcess().RenderPets();
     RenderBoids();
-    RenderObjects_AfterCharacter();
+    RenderObjects_AfterCharacter(activeCamera);
     CheckSprites();
 }
 

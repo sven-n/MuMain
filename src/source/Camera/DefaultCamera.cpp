@@ -436,18 +436,43 @@ void DefaultCamera::UpdateFrustum()
 #endif
 
     // Calculate forward and up vectors from current camera state
-    vec3_t forward, up;
+    vec3_t forward, up, right;
 
-    // Get forward from camera matrix
-    forward[0] = -m_State.Matrix[2][0];
-    forward[1] = -m_State.Matrix[2][1];
-    forward[2] = -m_State.Matrix[2][2];
-    VectorNormalize(forward);
+    // DefaultCamera looks at Hero from behind at 45-degree angle
+    // Calculate forward as direction from camera to Hero (what we're looking at)
+    extern CHARACTER* Hero;
+    if (Hero && Hero->Object.Live)
+    {
+        // Forward points from camera towards Hero
+        forward[0] = Hero->Object.Position[0] - m_State.Position[0];
+        forward[1] = Hero->Object.Position[1] - m_State.Position[1];
+        forward[2] = Hero->Object.Position[2] - m_State.Position[2];
+        VectorNormalize(forward);
+    }
+    else
+    {
+        // Fallback: Use camera angle to calculate forward direction
+        // This handles LoginScene/CharacterScene where Hero doesn't exist
+        float Matrix[3][4];
+        AngleMatrix(m_State.Angle, Matrix);
+        forward[0] = -Matrix[2][0];
+        forward[1] = -Matrix[2][1];
+        forward[2] = -Matrix[2][2];
+        VectorNormalize(forward);
+    }
 
-    // Get up from camera matrix
-    up[0] = m_State.Matrix[1][0];
-    up[1] = m_State.Matrix[1][1];
-    up[2] = m_State.Matrix[1][2];
+    // Calculate right vector (perpendicular to forward in XY plane)
+    vec3_t worldUp = { 0.0f, 0.0f, 1.0f };
+    vec3_t forwardTemp, worldUpTemp;
+    VectorCopy(forward, forwardTemp);
+    VectorCopy(worldUp, worldUpTemp);
+    CrossProduct(forwardTemp, worldUpTemp, right);
+    VectorNormalize(right);
+
+    // Calculate actual up vector (perpendicular to both forward and right)
+    VectorCopy(right, forwardTemp);  // reuse temp
+    VectorCopy(forward, worldUpTemp);  // reuse temp
+    CrossProduct(forwardTemp, worldUpTemp, up);
     VectorNormalize(up);
 
     // Build frustum from current configuration

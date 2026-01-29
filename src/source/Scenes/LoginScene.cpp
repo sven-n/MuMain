@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "LoginScene.h"
 #include "../Camera/CameraUtility.h"
+#include "../Camera/CameraManager.h"
 #include "../CameraMove.h"
 #include "../DSPlaySound.h"
 #include "../ZzzOpenglUtil.h"
@@ -378,23 +379,25 @@ bool NewRenderLogInScene(HDC hDC)
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
     BeginOpengl(0, 25, 640, 430);
-    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
+
+    // Get active camera for rendering (frustum already updated in camera Update())
+    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
         g_Camera.ViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
 
-        RenderTerrain(false);
+        RenderTerrain(false, activeCamera);
         g_Camera.ViewFar = 7000.f;
         RenderCharactersClient();
         RenderMount();
-        RenderObjects();
+        RenderObjects(activeCamera);
         RenderJoints();
         RenderEffects();
         CheckSprites();
         RenderLeaves();
         RenderBoids();
-        RenderObjects_AfterCharacter();
+        RenderObjects_AfterCharacter(activeCamera);
         ThePetProcess().RenderPets();
     }
 
