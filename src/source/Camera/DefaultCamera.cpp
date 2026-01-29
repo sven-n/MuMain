@@ -63,6 +63,24 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     // Note: DefaultCamera maintains Angle[2] = -45 throughout gameplay
     // The camera positioning is relative to character's facing direction
 
+    // Phase 5: If Hero is invalid (LoginScene/CharacterScene), use scene-specific position
+    extern EGameScene SceneFlag;
+    if (!IsHeroValid())
+    {
+        // CharacterScene has hardcoded position in SetCameraAngle()
+        if (SceneFlag == CHARACTER_SCENE)
+        {
+            m_State.Angle[0] = -84.5f;
+            m_State.Angle[1] = 0.0f;
+            m_State.Angle[2] = -75.0f;
+            m_State.Position[0] = 9758.93f;
+            m_State.Position[1] = 18913.11f;
+            m_State.Position[2] = 675.5f;
+        }
+        // LoginScene uses tour mode - position managed by CCameraMove
+        // Just maintain previous position if no Hero
+    }
+
     // Phase 3 fix: Initialize frustum immediately on activation
     UpdateFrustum();
 }
@@ -418,20 +436,24 @@ void DefaultCamera::HandleEditorMode()
             }
         }
 
-        // Apply rotation and movement
-        glPushMatrix();
-        glLoadIdentity();
-        glRotatef(-m_State.Angle[2], 0.f, 0.f, 1.f);
-        float Matrix[3][4];
-        CameraProjection::GetOpenGLMatrix(Matrix);
-        glPopMatrix();
-        VectorRotate(p1, Matrix, p2);
-        VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
+        // Phase 5: Only apply movement if Hero is valid
+        if (IsHeroValid())
+        {
+            // Apply rotation and movement
+            glPushMatrix();
+            glLoadIdentity();
+            glRotatef(-m_State.Angle[2], 0.f, 0.f, 1.f);
+            float Matrix[3][4];
+            CameraProjection::GetOpenGLMatrix(Matrix);
+            glPopMatrix();
+            VectorRotate(p1, Matrix, p2);
+            VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
+        }
     }
 
     AdjustHeroHeight();
 
-    if (EditMove)
+    if (EditMove && IsHeroValid())
     {
         BYTE PathX[1];
         BYTE PathY[1];

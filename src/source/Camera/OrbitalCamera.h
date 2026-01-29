@@ -72,6 +72,9 @@ private:
     float m_DeltaPitch;           // User pitch delta from base
     float m_Radius;               // Distance from target
 
+    // Phase 5: Scene transition tracking
+    int m_LastSceneFlag;          // Track scene changes to reset target
+
     // Constraints
     static constexpr float MIN_PITCH = -80.0f;  // Look down limit
     static constexpr float MAX_PITCH = 80.0f;   // Look up limit
