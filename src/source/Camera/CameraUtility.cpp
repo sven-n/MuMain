@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "CameraUtility.h"
 #include "CameraManager.h"
+#include "CameraMove.h"
 
 // External variable declarations
 extern short g_shCameraLevel;
@@ -40,6 +41,13 @@ static void HandleCameraModeToggle()
  */
 bool MoveMainCamera()
 {
+    // Check if tour mode is active (LoginScene camera animation)
+    // If so, skip camera system updates - tour manages g_Camera directly
+    if (CCameraMove::GetInstancePtr()->IsTourMode())
+    {
+        return false;  // Camera not locked
+    }
+
     // Handle F9 camera mode toggle
     HandleCameraModeToggle();
 

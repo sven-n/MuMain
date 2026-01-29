@@ -314,13 +314,18 @@ void NewMoveLogInScene()
         MoveObjects();
         MoveMounts();
         MoveLeaves();
+
+        // Update camera BEFORE checking character visibility
+        MoveCamera();
+
+        // Now check character visibility with updated frustum
         MoveCharactersClient();
+
         MoveEffects();
         MoveJoints();
         MoveParticles();
         MoveBoids();
         ThePetProcess().UpdatePets();
-        MoveCamera();
     }
 
     if (CInput::Instance().IsKeyDown(VK_ESCAPE))
