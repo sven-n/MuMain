@@ -611,6 +611,15 @@ void DefaultCamera::UpdateFrustum()
 
     // Use ViewFar for 3D culling distance (varies 2000-3700 based on map/zoom)
     // The Frustum will internally use terrainCullRange for 2D ground projection
+    // Phase 5: If DevEditor is overriding, use config.farPlane instead of ViewFar
+    float effectiveFarPlane = m_State.ViewFar;
+#ifdef _EDITOR
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        effectiveFarPlane = m_Config.farPlane;
+    }
+#endif
+
     m_Frustum.BuildFromCamera(
         m_State.Position,
         forward,
@@ -618,19 +627,27 @@ void DefaultCamera::UpdateFrustum()
         m_Config.fov,
         aspectRatio,
         m_Config.nearPlane,
-        m_State.ViewFar  // Use dynamic ViewFar for proper distance culling
+        effectiveFarPlane  // Use override or dynamic ViewFar
     );
 
     // Phase 5: Cache current state for next frame's comparison
     VectorCopy(m_State.Position, m_LastFrustumPosition);
     VectorCopy(m_State.Angle, m_LastFrustumAngle);
-    m_LastFrustumViewFar = m_State.ViewFar;
+    m_LastFrustumViewFar = effectiveFarPlane;  // Cache the actual far plane used
 }
 
 bool DefaultCamera::NeedsFrustumUpdate() const
 {
     // Phase 5: Check if camera state changed since last frustum rebuild
     const float EPSILON = 0.01f;  // Small threshold to avoid floating point comparison issues
+
+#ifdef _EDITOR
+    // Always rebuild if DevEditor override is enabled (config might have changed)
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        return true;
+    }
+#endif
 
     // Check position change
     if (fabs(m_State.Position[0] - m_LastFrustumPosition[0]) > EPSILON ||
