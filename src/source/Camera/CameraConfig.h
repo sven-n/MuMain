@@ -74,21 +74,22 @@ struct CameraConfig
     /**
      * @brief Default gameplay camera configuration
      *
-     * Optimized for standard third-person gameplay.
-     * Based on testing, these values provide the best balance of
+     * Optimized for standard third-person gameplay in MainScene.
+     * Based on user testing, these values provide the best balance of
      * visibility and performance for orbital/default cameras.
      *
-     * Values:
-     * - ViewFar: 1100 (terrain), 2400 (objects)
-     * - WidthFar: 700, WidthNear: 330
+     * Phase 5 Values (user-specified):
+     * - FOV: 71 degrees (improved field of view)
+     * - Far Plane: 2400 minimum (objects and terrain)
+     * - Terrain Cull Range: 2400 minimum (matches far plane)
      */
     static CameraConfig ForGameplay()
     {
         CameraConfig config;
-        config.fov = 60.0f;
+        config.fov = 71.0f;  // Phase 5: User-specified optimal FOV for MainScene
         config.nearPlane = 10.0f;
         config.farPlane = 2400.0f;
-        config.terrainCullRange = 1100.0f;
+        config.terrainCullRange = 2400.0f;  // Phase 5: Match far plane for consistent rendering
         config.objectCullRange = 2400.0f;
         config.frustumWidthNear = 330.0f;
         config.frustumWidthFar = 700.0f;

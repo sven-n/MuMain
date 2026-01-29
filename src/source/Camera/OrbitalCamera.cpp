@@ -104,12 +104,23 @@ void OrbitalCamera::OnDeactivate()
 
 bool OrbitalCamera::Update()
 {
-    // Phase 5: Detect scene transitions and force target recalculation
+    // Phase 5: Detect scene transitions and force target recalculation + config reload
     extern EGameScene SceneFlag;
     if (m_LastSceneFlag != (int)SceneFlag)
     {
         // Scene changed - reset ALL orbital state to prevent cross-scene contamination
         m_LastSceneFlag = (int)SceneFlag;
+
+        // Phase 5: Reload scene-specific camera config (single source of truth)
+        if (SceneFlag == CHARACTER_SCENE)
+        {
+            m_Config = CameraConfig::ForCharacterScene();
+        }
+        else
+        {
+            m_Config = CameraConfig::ForGameplay();
+        }
+
         m_bInitialOffsetSet = false;  // Force recapture of camera offset
 
         // Reset rotation deltas - don't carry rotation from previous scene
@@ -377,10 +388,10 @@ void OrbitalCamera::ComputeCameraTransform()
     // Calculate dynamic ViewFar based on zoom distance
     // When zoomed IN (small radius): see LESS (smaller ViewFar)
     // When zoomed OUT (large radius): see MORE (larger ViewFar)
-    // Use CustomCamera3D's aggressive scaling for zoom OUT only
+    // Phase 5: More aggressive scaling to maintain consistent horizon distance
 
 #ifdef _EDITOR
-    // Phase 5: If DevEditor is overriding config, use the far plane value directly
+    // Phase 5: If DevEditor is overriding config, don't auto-scale ViewFar with zoom
     if (DevEditor_IsConfigOverrideEnabled())
     {
         m_State.ViewFar = m_Config.farPlane;
@@ -394,9 +405,11 @@ void OrbitalCamera::ComputeCameraTransform()
         float viewMultiplier;
         if (zoomRatio >= 1.0f)
         {
-            // Zooming OUT: minimal scaling for natural feel
-            // At max zoom (2.5x radius), ViewFar = base * 1.3x
-            viewMultiplier = 1.0f + (zoomRatio - 1.0f) * 1.0f;  // Range: 1.0x to 1.3x
+            // Zooming OUT: Aggressive scaling to maintain horizon distance
+            // Phase 5: Increased from 1.3x to 2.0x at max zoom for better rendering
+            // At radius=800 (1.0x): ViewFar = base * 1.0
+            // At radius=2000 (2.5x): ViewFar = base * 2.0
+            viewMultiplier = 1.0f + (zoomRatio - 1.0f) * 0.67f;  // Range: 1.0x to 2.0x
         }
         else
         {
@@ -431,8 +444,9 @@ void OrbitalCamera::UpdateConfigForZoom()
 
     if (zoomRatio >= 1.0f)
     {
-        // Zooming OUT: gentle scaling
-        float scale = 1.0f + (zoomRatio - 1.0f) * 1.0f;  // 1.0x to 2.5x
+        // Phase 5: Zooming OUT: Aggressive scaling to match ViewFar behavior
+        // At max zoom (2.5x), farPlane = base * 2.0x
+        float scale = 1.0f + (zoomRatio - 1.0f) * 0.67f;  // 1.0x to 2.0x
         m_Config.farPlane = baseConfig.farPlane * scale;
         m_Config.terrainCullRange = baseConfig.terrainCullRange * scale;
     }

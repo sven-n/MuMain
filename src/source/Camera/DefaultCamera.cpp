@@ -156,12 +156,22 @@ void DefaultCamera::OnDeactivate()
 
 bool DefaultCamera::Update()
 {
-    // Phase 5: Detect scene transitions and force position reset
+    // Phase 5: Detect scene transitions and force position reset + config reload
     extern EGameScene SceneFlag;
     if (m_LastSceneFlag != (int)SceneFlag)
     {
-        // Scene changed - force position recalculation for scene-specific cameras
+        // Scene changed - reload scene-specific config and reset position
         m_LastSceneFlag = (int)SceneFlag;
+
+        // Phase 5: Reload scene-specific camera config (single source of truth)
+        if (SceneFlag == CHARACTER_SCENE)
+        {
+            m_Config = CameraConfig::ForCharacterScene();
+        }
+        else
+        {
+            m_Config = CameraConfig::ForGameplay();
+        }
 
         // For CharacterScene without Hero, immediately set static position
         if (SceneFlag == CHARACTER_SCENE && !IsHeroValid())
@@ -221,68 +231,65 @@ bool DefaultCamera::Update()
 
 void DefaultCamera::CalculateCameraViewFar()
 {
-#ifdef _EDITOR
-    // Phase 5: If DevEditor is overriding config, use the far plane value directly
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        m_State.ViewFar = m_Config.farPlane;
-        return;
-    }
-#endif
+    // Phase 5: Use config's farPlane as single source of truth
+    // Apply multipliers for specific scenes/maps that need different view distances
+    float baseFarPlane = m_Config.farPlane;
 
     // Phase 5: NULL check for Hero
     if (IsHeroValid() && battleCastle::InBattleCastle2(Hero->Object.Position))
     {
-        m_State.ViewFar = 3000.f;
+        m_State.ViewFar = baseFarPlane * 1.25f;  // 25% more for BattleCastle2
         return;
     }
 
     if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
     {
-        m_State.ViewFar = 2500.f;
+        m_State.ViewFar = baseFarPlane * 1.04f;  // Slightly more for BattleCastle
         return;
     }
 
     if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
     {
-        m_State.ViewFar = 2800.f * 1.15f;
+        m_State.ViewFar = baseFarPlane * 1.34f;  // 34% more for 6th character home
         return;
     }
 
     if (gMapManager.IsPKField() || IsDoppelGanger2())
     {
-        m_State.ViewFar = 3700.0f;
+        m_State.ViewFar = baseFarPlane * 1.54f;  // 54% more for PK field
         return;
     }
 
-    // Handle camera level based view distance
+    // Handle camera level based view distance (zoom levels)
     switch (g_shCameraLevel)
     {
     case 0:
         if (SceneFlag == LOG_IN_SCENE)
         {
-            // Use existing value - don't change m_State.ViewFar
+            // LoginScene uses its own config with massive far plane
+            m_State.ViewFar = m_Config.farPlane;
         }
         else if (SceneFlag == CHARACTER_SCENE)
         {
-            // Phase 5: Use config's farPlane for CharacterScene (scene-specific)
+            // CharacterScene uses its own config (FOV 71, Far 4100)
             m_State.ViewFar = m_Config.farPlane;
         }
         else if (g_Direction.m_CKanturu.IsMayaScene())
         {
-            m_State.ViewFar = 2000.f * 10.0f * 0.115f;
+            m_State.ViewFar = baseFarPlane * 0.96f;  // Slightly less for Kanturu Maya
         }
         else
         {
-            m_State.ViewFar = 2000.f;
+            // Default gameplay: use config's farPlane directly
+            m_State.ViewFar = baseFarPlane;
         }
         break;
-    case 1: m_State.ViewFar = 2500.f; break;
-    case 2: m_State.ViewFar = 2600.f; break;
-    case 3: m_State.ViewFar = 2950.f; break;
+    case 1: m_State.ViewFar = baseFarPlane * 1.04f; break;  // Zoom level 1
+    case 2: m_State.ViewFar = baseFarPlane * 1.08f; break;  // Zoom level 2
+    case 3: m_State.ViewFar = baseFarPlane * 1.23f; break;  // Zoom level 3
     case 4:
-    case 5: m_State.ViewFar = 3200.f; break;
-    default: m_State.ViewFar = 2000.f; break;
+    case 5: m_State.ViewFar = baseFarPlane * 1.33f; break;  // Zoom level 4-5
+    default: m_State.ViewFar = baseFarPlane; break;
     }
 }
 
