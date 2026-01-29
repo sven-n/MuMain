@@ -379,25 +379,35 @@ void OrbitalCamera::ComputeCameraTransform()
     // When zoomed OUT (large radius): see MORE (larger ViewFar)
     // Use CustomCamera3D's aggressive scaling for zoom OUT only
 
-    float baseViewFar = defaultCameraViewFar;
-    float zoomRatio = m_Radius / DEFAULT_RADIUS;  // 0.25 (min) to 2.5 (max), 1.0 at default
-
-    float viewMultiplier;
-    if (zoomRatio >= 1.0f)
+#ifdef _EDITOR
+    // Phase 5: If DevEditor is overriding config, use the far plane value directly
+    if (DevEditor_IsConfigOverrideEnabled())
     {
-        // Zooming OUT: minimal scaling for natural feel
-        // At max zoom (2.5x radius), ViewFar = base * 1.3x
-        viewMultiplier = 1.0f + (zoomRatio - 1.0f) * 1.0f;  // Range: 1.0x to 1.3x
+        m_State.ViewFar = m_Config.farPlane;
     }
     else
+#endif
     {
-        // Zooming IN: reduce ViewFar proportionally
-        // At radius=200 (0.25x): ViewFar = base * 0.5
-        // At radius=800 (1.0x): ViewFar = base * 1.0
-        viewMultiplier = 0.5f + (zoomRatio * 0.5f);  // Range: 0.5x to 1.0x
-    }
+        float baseViewFar = defaultCameraViewFar;
+        float zoomRatio = m_Radius / DEFAULT_RADIUS;  // 0.25 (min) to 2.5 (max), 1.0 at default
 
-    m_State.ViewFar = baseViewFar * viewMultiplier;
+        float viewMultiplier;
+        if (zoomRatio >= 1.0f)
+        {
+            // Zooming OUT: minimal scaling for natural feel
+            // At max zoom (2.5x radius), ViewFar = base * 1.3x
+            viewMultiplier = 1.0f + (zoomRatio - 1.0f) * 1.0f;  // Range: 1.0x to 1.3x
+        }
+        else
+        {
+            // Zooming IN: reduce ViewFar proportionally
+            // At radius=200 (0.25x): ViewFar = base * 0.5
+            // At radius=800 (1.0x): ViewFar = base * 1.0
+            viewMultiplier = 0.5f + (zoomRatio * 0.5f);  // Range: 0.5x to 1.0x
+        }
+
+        m_State.ViewFar = baseViewFar * viewMultiplier;
+    }
 
     // Phase 1: Update frustum after changing ViewFar
     UpdateFrustum();
@@ -478,10 +488,12 @@ void OrbitalCamera::UpdateFrustum()
     // The Frustum will internally use terrainCullRange for 2D ground projection
     // Phase 5: If DevEditor is overriding, use config.farPlane instead of ViewFar
     float effectiveFarPlane = m_State.ViewFar;
+    float effectiveTerrainCullRange = m_Config.terrainCullRange;
 #ifdef _EDITOR
     if (DevEditor_IsConfigOverrideEnabled())
     {
         effectiveFarPlane = m_Config.farPlane;
+        effectiveTerrainCullRange = m_Config.terrainCullRange;
     }
 #endif
 
@@ -492,6 +504,7 @@ void OrbitalCamera::UpdateFrustum()
         m_Config.fov,
         aspectRatio,
         m_Config.nearPlane,
-        effectiveFarPlane  // Use override or dynamic ViewFar
+        effectiveFarPlane,  // Use override or dynamic ViewFar
+        effectiveTerrainCullRange  // Separate terrain culling distance
     );
 }
