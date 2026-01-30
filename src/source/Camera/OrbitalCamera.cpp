@@ -57,6 +57,8 @@ void OrbitalCamera::Reset()
     m_Radius = DEFAULT_RADIUS;
     m_bRotating = false;
     m_bInitialOffsetSet = false;
+    // Phase 5: Reset scene tracking to force config reload
+    m_LastSceneFlag = -1;
     m_pDefaultCamera->Reset();
 }
 

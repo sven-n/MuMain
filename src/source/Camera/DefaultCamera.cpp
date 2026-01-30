@@ -55,6 +55,8 @@ bool DefaultCamera::IsHeroValid() const
 void DefaultCamera::Reset()
 {
     m_State.Reset();
+    // Phase 5: Reset scene tracking to force config reload on next Update()
+    m_LastSceneFlag = -1;
 }
 
 void DefaultCamera::OnActivate(const CameraState& previousState)
@@ -502,6 +504,9 @@ void DefaultCamera::SetCameraFOV()
     }
     else
     {
+        // Phase 5: Keep using 30.0f - this is the OpenGL perspective FOV
+        // m_Config.fov (71) is used for frustum plane calculations in BuildFromCamera()
+        // These are two different FOV concepts and should not be conflated
         m_State.FOV = 30.f;
     }
 }
