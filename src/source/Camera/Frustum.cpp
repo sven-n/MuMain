@@ -107,31 +107,37 @@ void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const
     // Need temporary copies for FaceNormalize (doesn't accept const)
     vec3_t v1, v2, v3;
 
-    // Left plane: position, near-bottom-left, far-bottom-left
+    // Phase 5: CRITICAL FIX - Match old CreateFrustrum() plane indices!
+    // Old system had planes in different order due to vertex winding:
+    // Old [0] = TOP, [1] = RIGHT, [2] = BOTTOM, [3] = LEFT (rotated 90° from expected!)
+    // New [0] = LEFT, [1] = RIGHT, [2] = TOP, [3] = BOTTOM (standard order)
+    // Must use old winding to match TestFrustrum() expectations
+
+    // Plane [0]: Old TOP plane - apex → far-left-top → far-right-top
     VectorCopy(position, v1);
-    VectorCopy(m_Vertices[3], v2);
-    VectorCopy(m_Vertices[7], v3);
+    VectorCopy(m_Vertices[4], v2);  // Far top-left
+    VectorCopy(m_Vertices[5], v3);  // Far top-right
     FaceNormalize(v1, v2, v3, m_Planes[0].normal);
     m_Planes[0].distance = -DotProduct(position, m_Planes[0].normal);
 
-    // Right plane: position, far-bottom-right, near-bottom-right
+    // Plane [1]: Old RIGHT plane - apex → far-right-top → far-right-bottom
     VectorCopy(position, v1);
-    VectorCopy(m_Vertices[6], v2);
-    VectorCopy(m_Vertices[2], v3);
+    VectorCopy(m_Vertices[5], v2);  // Far top-right
+    VectorCopy(m_Vertices[6], v3);  // Far bottom-right
     FaceNormalize(v1, v2, v3, m_Planes[1].normal);
     m_Planes[1].distance = -DotProduct(position, m_Planes[1].normal);
 
-    // Top plane: position, near-top-right, far-top-right
+    // Plane [2]: Old BOTTOM plane - apex → far-right-bottom → far-left-bottom
     VectorCopy(position, v1);
-    VectorCopy(m_Vertices[1], v2);
-    VectorCopy(m_Vertices[5], v3);
+    VectorCopy(m_Vertices[6], v2);  // Far bottom-right
+    VectorCopy(m_Vertices[7], v3);  // Far bottom-left
     FaceNormalize(v1, v2, v3, m_Planes[2].normal);
     m_Planes[2].distance = -DotProduct(position, m_Planes[2].normal);
 
-    // Bottom plane: position, far-bottom-right, near-bottom-left
+    // Plane [3]: Old LEFT plane - apex → far-left-bottom → far-left-top
     VectorCopy(position, v1);
-    VectorCopy(m_Vertices[7], v2);
-    VectorCopy(m_Vertices[3], v3);
+    VectorCopy(m_Vertices[7], v2);  // Far bottom-left
+    VectorCopy(m_Vertices[4], v3);  // Far top-left
     FaceNormalize(v1, v2, v3, m_Planes[3].normal);
     m_Planes[3].distance = -DotProduct(position, m_Planes[3].normal);
 

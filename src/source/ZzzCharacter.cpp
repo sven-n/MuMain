@@ -6350,19 +6350,10 @@ void MoveCharacterClient(CHARACTER* cc)
     OBJECT* co = &cc->Object;
     if (co->Live)
     {
-        // Phase 5: Use 3D frustum for character culling, not 2D terrain culling
-        // This prevents characters from disappearing when camera zooms out
-        auto& cameraManager = CameraManager::Instance();
-        ICamera* camera = cameraManager.GetActiveCamera();
-        if (camera)
-        {
-            co->Visible = !camera->ShouldCullObject(co->Position, 100.0f);
-        }
-        else
-        {
-            // Fallback to old 2D culling if camera not available
-            co->Visible = TestFrustrum2D(co->Position[0] * 0.01f, co->Position[1] * 0.01f, -20.f);
-        }
+        // Phase 5: Test 3D frustum culling with inverted plane normals
+        // Characters are tall (~150-200 units), position is at feet
+        // Use large radius to cover full character height
+        co->Visible = TestFrustrum(co->Position, 1000.0f);
 
         MoveMonsterClient(cc, co);
         MoveCharacter(cc, co);
@@ -6379,10 +6370,6 @@ void MoveCharactersClient()
         if ((TerrainWall[i] & TW_CHARACTER) == TW_CHARACTER) TerrainWall[i] -= TW_CHARACTER;
     }
 
-    // Phase 5: Get camera for 3D frustum culling
-    auto& cameraManager = CameraManager::Instance();
-    ICamera* camera = cameraManager.GetActiveCamera();
-
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
     {
         CHARACTER* tc = &CharactersClient[i];
@@ -6393,15 +6380,8 @@ void MoveCharactersClient()
             TerrainWall[Index] |= TW_CHARACTER;
         }
 
-        // Phase 5: Use 3D frustum for character culling
-        if (camera)
-        {
-            to->Visible = !camera->ShouldCullObject(to->Position, 100.0f);
-        }
-        else
-        {
-            to->Visible = TestFrustrum2D(to->Position[0] * 0.01f, to->Position[1] * 0.01f, -20.f);
-        }
+        // Phase 5: Test 3D frustum culling with inverted plane normals
+        to->Visible = TestFrustrum(to->Position, 1000.0f);
     }
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
