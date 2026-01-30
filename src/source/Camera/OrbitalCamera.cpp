@@ -6,6 +6,8 @@
 #include "../ZzzCharacter.h"
 #include <cmath>
 
+#include "UIControls.h"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -57,9 +59,73 @@ void OrbitalCamera::Reset()
     m_Radius = DEFAULT_RADIUS;
     m_bRotating = false;
     m_bInitialOffsetSet = false;
+    m_bFreeCameraMode = false;
     // Phase 5: Reset scene tracking to force config reload
     m_LastSceneFlag = -1;
     m_pDefaultCamera->Reset();
+}
+
+void OrbitalCamera::ResetForScene(EGameScene scene)
+{
+    // Phase 5: Proper scene-specific reset using switch statement
+    switch (scene)
+    {
+        case CHARACTER_SCENE:
+        {
+            // Load CharacterScene config
+            m_Config = CameraConfig::ForCharacterScene();
+
+            // FORCE all CharacterScene values DIRECTLY to state
+            m_State.ViewFar = m_Config.farPlane;      // 4100
+            m_State.FOV = 30.0f;                       // OpenGL perspective FOV
+            m_State.TopViewEnable = false;
+
+            // Reset orbital parameters for new scene
+            m_DeltaYaw = 0.0f;
+            m_DeltaPitch = 0.0f;
+            m_Radius = DEFAULT_RADIUS;
+            m_bInitialOffsetSet = false;
+            break;
+        }
+
+        case MAIN_SCENE:
+        {
+            // Load MainScene config
+            m_Config = CameraConfig::ForGameplay();
+
+            // Set MainScene defaults
+            m_State.ViewFar = m_Config.farPlane;      // 2400
+            m_State.FOV = 30.0f;
+            m_State.TopViewEnable = false;
+
+            // Reset orbital parameters for new scene
+            m_DeltaYaw = 0.0f;
+            m_DeltaPitch = 0.0f;
+            m_Radius = DEFAULT_RADIUS;
+            m_bInitialOffsetSet = false;
+            break;
+        }
+
+        case LOG_IN_SCENE:
+        case SERVER_LIST_SCENE:
+        case WEBZEN_SCENE:
+        case LOADING_SCENE:
+        default:
+        {
+            // Use gameplay config as default
+            m_Config = CameraConfig::ForGameplay();
+            m_State.ViewFar = m_Config.farPlane;
+            m_State.FOV = 30.0f;
+            m_State.TopViewEnable = false;
+            break;
+        }
+    }
+
+    // Update target immediately with new scene context
+    UpdateTarget();
+
+    // Force DefaultCamera to recalculate as well
+    m_pDefaultCamera->ResetForScene(scene);
 }
 
 void OrbitalCamera::OnActivate(const CameraState& previousState)
@@ -106,56 +172,97 @@ void OrbitalCamera::OnDeactivate()
 
 bool OrbitalCamera::Update()
 {
-    // Phase 5: Detect scene transitions and force target recalculation + config reload
+    // Phase 5: Detect scene transitions and properly reset for new scene
     extern EGameScene SceneFlag;
     if (m_LastSceneFlag != (int)SceneFlag)
     {
-        // Scene changed - reset ALL orbital state to prevent cross-scene contamination
+        // Scene changed - use dedicated reset function
         m_LastSceneFlag = (int)SceneFlag;
-
-        // Phase 5: Reload scene-specific camera config (single source of truth)
-        if (SceneFlag == CHARACTER_SCENE)
-        {
-            m_Config = CameraConfig::ForCharacterScene();
-        }
-        else
-        {
-            m_Config = CameraConfig::ForGameplay();
-        }
-
-        m_bInitialOffsetSet = false;  // Force recapture of camera offset
-
-        // Reset rotation deltas - don't carry rotation from previous scene
-        m_DeltaYaw = 0.0f;
-        m_DeltaPitch = 0.0f;
-
-        // Reset radius to default for new scene
-        m_Radius = DEFAULT_RADIUS;
-
-        // Update target immediately with new scene context
-        UpdateTarget();
-
-        // Force DefaultCamera to recalculate as well
-        m_pDefaultCamera->Reset();
+        ResetForScene(SceneFlag);
     }
 
-    HandleInput();
+    // Phase 5: Handle WASD+QE free camera movement (toggle with F8)
+    if (HIBYTE(GetAsyncKeyState(VK_F8)) == 128)
+    {
+        static bool bF8Pressed = false;
+        if (!bF8Pressed)
+        {
+            m_bFreeCameraMode = !m_bFreeCameraMode;
+            bF8Pressed = true;
+        }
+    }
+    else
+    {
+        static bool bF8Pressed = false;
+        bF8Pressed = false;
+    }
+
+    if (m_bFreeCameraMode)
+    {
+        HandleFreeCameraMovement();
+    }
+    else
+    {
+        HandleInput();
+    }
+
     UpdateTarget();
 
     // First, let DefaultCamera calculate the base camera position
     m_pDefaultCamera->Update();
 
-    // Then modify it with our orbital transformations
-    ComputeCameraTransform();
-
-    // Clamp m_DeltaPitch based on what was actually achieved
-    // If we tried to pitch but didn't move much, we're stuck at a constraint
-    // This prevents accumulation when hitting ground/ceiling
-    const float tolerance = 0.1f;
-    if (std::abs(m_DeltaPitch - m_LastEffectivePitch) > tolerance)
+    // Then modify it with our orbital transformations (unless in free camera mode)
+    if (!m_bFreeCameraMode)
     {
-        // We tried to pitch more but hit a constraint, clamp to effective value
-        m_DeltaPitch = m_LastEffectivePitch;
+        ComputeCameraTransform();
+
+        // Clamp m_DeltaPitch based on what was actually achieved
+        // If we tried to pitch but didn't move much, we're stuck at a constraint
+        // This prevents accumulation when hitting ground/ceiling
+        const float tolerance = 0.1f;
+        if (std::abs(m_DeltaPitch - m_LastEffectivePitch) > tolerance)
+        {
+            // We tried to pitch more but hit a constraint, clamp to effective value
+            m_DeltaPitch = m_LastEffectivePitch;
+        }
+    }
+
+    // Phase 5: Debug text rendering to verify camera values
+    {
+        g_pRenderText->SetFont(g_hFixFont);
+        g_pRenderText->SetTextColor(255, 255, 0, 255);  // Yellow text
+        g_pRenderText->SetBgColor(0, 0, 0, 180);        // Semi-transparent black background
+
+        wchar_t debugText[256];
+        int yPos = 10;
+        const int lineHeight = 15;
+
+        // Camera type and scene
+        swprintf(debugText, 256, L"Camera: OrbitalCamera | Scene: %d | FreeMode: %s",
+                 (int)SceneFlag, m_bFreeCameraMode ? L"ON" : L"OFF");
+        g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // State values
+        swprintf(debugText, 256, L"State.ViewFar: %.0f | State.FOV: %.1f", m_State.ViewFar, m_State.FOV);
+        g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // Config values
+        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.fov: %.1f", m_Config.farPlane, m_Config.fov);
+        g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // Near plane and culling
+        swprintf(debugText, 256, L"Config.nearPlane: %.0f | Config.terrainCullRange: %.0f",
+                 m_Config.nearPlane, m_Config.terrainCullRange);
+        g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // Orbital-specific values
+        swprintf(debugText, 256, L"Radius: %.0f | DeltaYaw: %.1f | DeltaPitch: %.1f",
+                 m_Radius, m_DeltaYaw, m_DeltaPitch);
+        g_pRenderText->RenderText(10, yPos, debugText);
     }
 
     return false; // Camera not locked
@@ -459,6 +566,72 @@ void OrbitalCamera::UpdateConfigForZoom()
         m_Config.farPlane = baseConfig.farPlane * scale;
         m_Config.terrainCullRange = baseConfig.terrainCullRange * scale;
     }
+}
+
+void OrbitalCamera::HandleFreeCameraMovement()
+{
+    // Phase 5: WASD+QE free camera movement (same as DefaultCamera)
+    const float moveSpeed = 50.0f;
+    const float rotSpeed = 2.0f;
+
+    // Forward/Backward: W/S
+    if (HIBYTE(GetAsyncKeyState('W')) == 128)
+    {
+        float angle = m_State.Angle[2] * M_PI / 180.0f;
+        m_State.Position[0] += sinf(angle) * moveSpeed;
+        m_State.Position[1] += cosf(angle) * moveSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState('S')) == 128)
+    {
+        float angle = m_State.Angle[2] * M_PI / 180.0f;
+        m_State.Position[0] -= sinf(angle) * moveSpeed;
+        m_State.Position[1] -= cosf(angle) * moveSpeed;
+    }
+
+    // Strafe Left/Right: A/D
+    if (HIBYTE(GetAsyncKeyState('A')) == 128)
+    {
+        float angle = (m_State.Angle[2] + 90.0f) * M_PI / 180.0f;
+        m_State.Position[0] += sinf(angle) * moveSpeed;
+        m_State.Position[1] += cosf(angle) * moveSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState('D')) == 128)
+    {
+        float angle = (m_State.Angle[2] - 90.0f) * M_PI / 180.0f;
+        m_State.Position[0] += sinf(angle) * moveSpeed;
+        m_State.Position[1] += cosf(angle) * moveSpeed;
+    }
+
+    // Up/Down: E/Q
+    if (HIBYTE(GetAsyncKeyState('E')) == 128)
+    {
+        m_State.Position[2] += moveSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState('Q')) == 128)
+    {
+        m_State.Position[2] -= moveSpeed;
+    }
+
+    // Mouse look: Arrow keys for rotation
+    if (HIBYTE(GetAsyncKeyState(VK_UP)) == 128)
+    {
+        m_State.Angle[0] += rotSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState(VK_DOWN)) == 128)
+    {
+        m_State.Angle[0] -= rotSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128)
+    {
+        m_State.Angle[2] += rotSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
+    {
+        m_State.Angle[2] -= rotSpeed;
+    }
+
+    // Force frustum update when in free camera mode
+    UpdateFrustum();
 }
 
 void OrbitalCamera::UpdateFrustum()

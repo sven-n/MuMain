@@ -2,6 +2,10 @@
 // Extracted from CameraUtility.cpp
 
 #include "stdafx.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 #include "DefaultCamera.h"
 #include "CameraProjection.h"
 #include "../Scenes/SceneCore.h"
@@ -57,6 +61,82 @@ void DefaultCamera::Reset()
     m_State.Reset();
     // Phase 5: Reset scene tracking to force config reload on next Update()
     m_LastSceneFlag = -1;
+    m_bFreeCameraMode = false;
+}
+
+void DefaultCamera::ResetForScene(EGameScene scene)
+{
+    // Phase 5: Proper scene-specific reset using switch statement
+    switch (scene)
+    {
+        case CHARACTER_SCENE:
+        {
+            // Load CharacterScene config
+            m_Config = CameraConfig::ForCharacterScene();
+
+            // FORCE all CharacterScene values DIRECTLY to state
+            m_State.ViewFar = m_Config.farPlane;      // 4100
+            m_State.FOV = 30.0f;                       // OpenGL perspective FOV
+            m_State.TopViewEnable = false;
+
+            // Set static CharacterScene position
+            m_State.Angle[0] = -84.5f;
+            m_State.Angle[1] = 0.0f;
+            m_State.Angle[2] = -75.0f;
+            m_State.Position[0] = 9758.93f;
+            m_State.Position[1] = 18913.11f;
+            m_State.Position[2] = 675.5f;
+            break;
+        }
+
+        case MAIN_SCENE:
+        {
+            // Load MainScene config
+            m_Config = CameraConfig::ForGameplay();
+
+            // Set MainScene defaults
+            m_State.ViewFar = m_Config.farPlane;      // 2400
+            m_State.FOV = 30.0f;
+            m_State.TopViewEnable = false;
+
+            // Position will be calculated from Hero in Update()
+            if (IsHeroValid())
+            {
+                extern CHARACTER* Hero;
+                m_State.Position[0] = Hero->Object.Position[0];
+                m_State.Position[1] = Hero->Object.Position[1];
+                m_State.Position[2] = Hero->Object.Position[2];
+            }
+            break;
+        }
+
+        case LOG_IN_SCENE:
+        case SERVER_LIST_SCENE:
+        case WEBZEN_SCENE:
+        case LOADING_SCENE:
+        default:
+        {
+            // Use gameplay config as default
+            m_Config = CameraConfig::ForGameplay();
+            m_State.ViewFar = m_Config.farPlane;
+            m_State.FOV = 30.0f;
+            m_State.TopViewEnable = false;
+            break;
+        }
+    }
+
+    // Force frustum rebuild
+    m_LastFrustumPosition[0] = m_LastFrustumPosition[1] = m_LastFrustumPosition[2] = -999999.0f;
+    m_LastFrustumAngle[0] = m_LastFrustumAngle[1] = m_LastFrustumAngle[2] = -999999.0f;
+    m_LastFrustumViewFar = -999999.0f;
+
+#ifdef _EDITOR
+    // Clear DevEditor cache
+    m_LastEditorFOV = -1.0f;
+    m_LastEditorFarPlane = -1.0f;
+    m_LastEditorNearPlane = -1.0f;
+    m_LastEditorTerrainCullRange = -1.0f;
+#endif
 }
 
 void DefaultCamera::OnActivate(const CameraState& previousState)
@@ -158,33 +238,34 @@ void DefaultCamera::OnDeactivate()
 
 bool DefaultCamera::Update()
 {
-    // Phase 5: Detect scene transitions and force position reset + config reload
+    // Phase 5: Detect scene transitions and properly reset for new scene
     extern EGameScene SceneFlag;
     if (m_LastSceneFlag != (int)SceneFlag)
     {
-        // Scene changed - reload scene-specific config and reset position
+        // Scene changed - use dedicated reset function
         m_LastSceneFlag = (int)SceneFlag;
+        ResetForScene(SceneFlag);
+    }
 
-        // Phase 5: Reload scene-specific camera config (single source of truth)
-        if (SceneFlag == CHARACTER_SCENE)
+    // Phase 5: Handle WASD+QE free camera movement (toggle with F8)
+    if (HIBYTE(GetAsyncKeyState(VK_F8)) == 128)
+    {
+        static bool bF8Pressed = false;
+        if (!bF8Pressed)
         {
-            m_Config = CameraConfig::ForCharacterScene();
+            m_bFreeCameraMode = !m_bFreeCameraMode;
+            bF8Pressed = true;
         }
-        else
-        {
-            m_Config = CameraConfig::ForGameplay();
-        }
+    }
+    else
+    {
+        static bool bF8Pressed = false;
+        bF8Pressed = false;
+    }
 
-        // For CharacterScene without Hero, immediately set static position
-        if (SceneFlag == CHARACTER_SCENE && !IsHeroValid())
-        {
-            m_State.Angle[0] = -84.5f;
-            m_State.Angle[1] = 0.0f;
-            m_State.Angle[2] = -75.0f;
-            m_State.Position[0] = 9758.93f;
-            m_State.Position[1] = 18913.11f;
-            m_State.Position[2] = 675.5f;
-        }
+    if (m_bFreeCameraMode)
+    {
+        HandleFreeCameraMovement();
     }
 
     bool bLockCamera = false;
@@ -228,7 +309,105 @@ bool DefaultCamera::Update()
         UpdateFrustum();
     }
 
+    // Phase 5: Debug text rendering to verify camera values
+    {
+        g_pRenderText->SetFont(g_hFixFont);
+        g_pRenderText->SetTextColor(255, 255, 0, 255);  // Yellow text
+        g_pRenderText->SetBgColor(0, 0, 0, 180);        // Semi-transparent black background
+
+        wchar_t debugText[256];
+        int yPos = 10;
+        const int lineHeight = 15;
+
+        // Camera type and scene
+        swprintf(debugText, 256, L"Camera: DefaultCamera | Scene: %d | FreeMode: %s",
+                 (int)SceneFlag, m_bFreeCameraMode ? L"ON" : L"OFF");
+        g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // State values
+        swprintf(debugText, 256, L"State.ViewFar: %.0f | State.FOV: %.1f", m_State.ViewFar, m_State.FOV);
+        g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // Config values
+        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.fov: %.1f", m_Config.farPlane, m_Config.fov);
+        g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // Near plane and culling
+        swprintf(debugText, 256, L"Config.nearPlane: %.0f | Config.terrainCullRange: %.0f",
+                 m_Config.nearPlane, m_Config.terrainCullRange);
+        g_pRenderText->RenderText(10, yPos, debugText);
+    }
+
     return bLockCamera;
+}
+
+void DefaultCamera::HandleFreeCameraMovement()
+{
+    // Phase 5: WASD+QE free camera movement
+    const float moveSpeed = 50.0f;
+    const float rotSpeed = 2.0f;
+
+    // Forward/Backward: W/S
+    if (HIBYTE(GetAsyncKeyState('W')) == 128)
+    {
+        float angle = m_State.Angle[2] * M_PI / 180.0f;
+        m_State.Position[0] += sinf(angle) * moveSpeed;
+        m_State.Position[1] += cosf(angle) * moveSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState('S')) == 128)
+    {
+        float angle = m_State.Angle[2] * M_PI / 180.0f;
+        m_State.Position[0] -= sinf(angle) * moveSpeed;
+        m_State.Position[1] -= cosf(angle) * moveSpeed;
+    }
+
+    // Strafe Left/Right: A/D
+    if (HIBYTE(GetAsyncKeyState('A')) == 128)
+    {
+        float angle = (m_State.Angle[2] + 90.0f) * M_PI / 180.0f;
+        m_State.Position[0] += sinf(angle) * moveSpeed;
+        m_State.Position[1] += cosf(angle) * moveSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState('D')) == 128)
+    {
+        float angle = (m_State.Angle[2] - 90.0f) * M_PI / 180.0f;
+        m_State.Position[0] += sinf(angle) * moveSpeed;
+        m_State.Position[1] += cosf(angle) * moveSpeed;
+    }
+
+    // Up/Down: E/Q
+    if (HIBYTE(GetAsyncKeyState('E')) == 128)
+    {
+        m_State.Position[2] += moveSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState('Q')) == 128)
+    {
+        m_State.Position[2] -= moveSpeed;
+    }
+
+    // Mouse look: Arrow keys for rotation
+    if (HIBYTE(GetAsyncKeyState(VK_UP)) == 128)
+    {
+        m_State.Angle[0] += rotSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState(VK_DOWN)) == 128)
+    {
+        m_State.Angle[0] -= rotSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128)
+    {
+        m_State.Angle[2] += rotSpeed;
+    }
+    if (HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
+    {
+        m_State.Angle[2] -= rotSpeed;
+    }
+
+    // Force frustum update when in free camera mode
+    UpdateFrustum();
 }
 
 void DefaultCamera::CalculateCameraViewFar()
