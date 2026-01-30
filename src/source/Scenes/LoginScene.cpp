@@ -226,9 +226,15 @@ static void InterpolateCameraMovement()
     else
     {
         // Linear movement using delta
-        for (int i = 0; i < 2; i++)
+        // FIX: Update all 3 position components (X, Y, Z), not just X and Y
+        for (int i = 0; i < 3; i++)
         {
             g_loginCamera.currentPosition[i] += g_loginCamera.currentWalkDelta[i];
+        }
+        // FIX: Also update angles for linear movement
+        for (int i = 0; i < 3; i++)
+        {
+            g_loginCamera.currentAngle[i] += g_loginCamera.currentWalkDelta[i + 3];
         }
     }
 }
@@ -288,8 +294,11 @@ void CreateLogInScene()
     InputNumber = 2;
     InputTextHide[1] = 1;
 
+    // FIX: Enable tour mode with offset correction
+    // Tour mode waypoints work well for movement, but need position offset
+    // Offset is applied in CCameraMove::GetCurrentCameraPos()
     CCameraMove::GetInstancePtr()->PlayCameraWalk(Hero->Object.Position, 1000);
-    CCameraMove::GetInstancePtr()->SetTourMode(TRUE, FALSE, 1);
+    CCameraMove::GetInstancePtr()->SetTourMode(TRUE, FALSE, 0);  // Start from waypoint 0
 
     MoveMainCamera();
 

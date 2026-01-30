@@ -111,6 +111,48 @@ void DefaultCamera::ResetForScene(EGameScene scene)
         }
 
         case LOG_IN_SCENE:
+        {
+            // Use gameplay config as default
+            m_Config = CameraConfig::ForGameplay();
+            m_State.ViewFar = m_Config.farPlane;
+            m_State.FOV = 30.0f;  // Will be overridden to 45.0 by MoveCamera() in LoginScene
+            m_State.TopViewEnable = false;
+
+            // FIX: Initialize to LoginScene WALK_PATHS[0] starting position
+            // Tour mode will update this, but we need valid initial position
+            if (CCameraMove::GetInstancePtr()->IsTourMode())
+            {
+                vec3_t tourPos;
+                CCameraMove::GetInstancePtr()->GetCurrentCameraPos(tourPos);
+                if (tourPos[0] != 0.0f || tourPos[1] != 0.0f || tourPos[2] != 0.0f)
+                {
+                    m_State.Position[0] = tourPos[0];
+                    m_State.Position[1] = tourPos[1];
+                    m_State.Position[2] = tourPos[2];
+                    m_State.Angle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
+                    m_State.Angle[1] = 0.0f;
+                    m_State.Angle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
+                }
+                else
+                {
+                    // Fallback: Use WALK_PATHS[0] with transformation
+                    vec3_t startPos = {0.f, -0.f, 500.f};
+                    vec3_t startAngle = {-80.f, 0.f, 0.f};
+                    vec3_t origin = {0.f, 0.f, 0.f};
+                    float tempAngle[3] = {0.f, 0.f, startAngle[2]};
+                    float Matrix[3][4];
+                    AngleMatrix(tempAngle, Matrix);
+                    vec3_t transformPos;
+                    VectorIRotate(startPos, Matrix, transformPos);
+                    VectorAdd(origin, transformPos, m_State.Position);
+                    m_State.Angle[0] = startAngle[0];
+                    m_State.Angle[1] = startAngle[1];
+                    m_State.Angle[2] = startAngle[2];
+                }
+            }
+            break;
+        }
+
         case SERVER_LIST_SCENE:
         case WEBZEN_SCENE:
         case LOADING_SCENE:
@@ -203,14 +245,25 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
                 }
                 else
                 {
-                    // Fallback: Use reasonable position similar to CharacterScene
-                    // LoginScene world is at WD_73NEW_LOGIN_SCENE, camera should see the scene
-                    m_State.Position[0] = 5000.0f;  // Center-ish of typical MU map
-                    m_State.Position[1] = 5000.0f;
-                    m_State.Position[2] = 1000.0f;  // Higher up for better view
-                    m_State.Angle[0] = -60.0f;  // Looking down
-                    m_State.Angle[1] = 0.0f;
-                    m_State.Angle[2] = 0.0f;
+                    // FIX: Use LoginScene WALK_PATHS[0] starting position
+                    // Old code: {0.f, -1000.f, 500.f, -80.f, 0.f, 0.f}
+                    // MoveCharacterCamera() applies transformation, but for initial position
+                    // we need to calculate the actual camera position after transformation
+                    vec3_t startPos = {0.f, -1000.f, 500.f};
+                    vec3_t startAngle = {-80.f, 0.f, 0.f};
+                    vec3_t origin = {0.f, 0.f, 0.f};
+
+                    // Apply same transformation as MoveCharacterCamera()
+                    float tempAngle[3] = {0.f, 0.f, startAngle[2]};
+                    float Matrix[3][4];
+                    AngleMatrix(tempAngle, Matrix);
+                    vec3_t transformPos;
+                    VectorIRotate(startPos, Matrix, transformPos);
+                    VectorAdd(origin, transformPos, m_State.Position);
+
+                    m_State.Angle[0] = startAngle[0];  // -80 degrees
+                    m_State.Angle[1] = startAngle[1];  // 0
+                    m_State.Angle[2] = startAngle[2];  // 0
                 }
             }
         }
@@ -246,6 +299,21 @@ bool DefaultCamera::Update()
         m_LastSceneFlag = (int)SceneFlag;
         ResetForScene(SceneFlag);
     }
+
+    // FIX: Check if LoginScene is using WALK_PATHS animation (tour mode OFF)
+    // In this case, MoveCamera() in LoginScene updates g_Camera directly
+    // We should only update frustum and skip position/angle calculations
+    if (SceneFlag == LOG_IN_SCENE && !CCameraMove::GetInstancePtr()->IsTourMode())
+    {
+        // LoginScene WALK_PATHS animation is active
+        // g_Camera is updated by LoginScene::MoveCamera() -> MoveCharacterCamera()
+        // Always update frustum since camera is moving every frame
+        UpdateFrustum();
+        return false;  // Camera not locked
+    }
+
+    // Note: Tour mode is handled internally by CalculateCameraPosition() and SetCameraAngle()
+    // No need to return early - let normal flow continue
 
     // Phase 5: Handle WASD+QE free camera movement (toggle with F8)
     if (HIBYTE(GetAsyncKeyState(VK_F8)) == 128)

@@ -41,16 +41,11 @@ static void HandleCameraModeToggle()
  */
 bool MoveMainCamera()
 {
-    // Check if tour mode is active (LoginScene camera animation)
-    // If so, skip camera system updates - tour manages g_Camera directly
-    if (CCameraMove::GetInstancePtr()->IsTourMode())
-    {
-        return false;  // Camera not locked
-    }
-
     // Handle F9 camera mode toggle
     HandleCameraModeToggle();
 
     // Update active camera through manager
+    // Note: Camera's Update() method will check tour mode internally
+    // and skip position calculations, only updating frustum
     return CameraManager::Instance().Update();
 }

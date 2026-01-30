@@ -14,6 +14,10 @@
 #include "CameraMove.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzAI.h"
+#include "MapManager.h"
+
+// Forward declaration for LoginScene offset helper
+static void ApplyLoginSceneOffset(float& x, float& y, float& z);
 
 CCameraMove::CCameraMove()
 {
@@ -118,6 +122,19 @@ namespace
     CameraVector2 BlendVectors(const CameraVector2& a, const CameraVector2& b, float alpha)
     {
         return {(a.x * (1.0f - alpha)) + (b.x * alpha), (a.y * (1.0f - alpha)) + (b.y * alpha)};
+    }
+}
+
+// Helper function to apply LoginScene offset to waypoint coordinates
+// This corrects for outdated waypoint file coordinates
+static void ApplyLoginSceneOffset(float& x, float& y, float& z)
+{
+    extern CMapManager gMapManager;
+    if (gMapManager.WorldActive == 73)  // WD_73NEW_LOGIN_SCENE
+    {
+        x += 0.0f;      // Left/right correction
+        y += 1000.0f;   // Forward/back correction (was too far back)
+        z += 700.0f;    // Up/down correction (was too low)
     }
 }
 
@@ -423,6 +440,9 @@ void CCameraMove::GetCurrentCameraPos(float CameraPos[3])
         CameraPos[0] = m_vTourCameraPos[0];
         CameraPos[1] = m_vTourCameraPos[1];
         CameraPos[2] = m_vTourCameraPos[2];
+
+        // FIX: Apply LoginScene position offset
+        ApplyLoginSceneOffset(CameraPos[0], CameraPos[1], CameraPos[2]);
     }
     else
     {
@@ -626,6 +646,12 @@ BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart, int index)
     m_CameraStartPos[0] = m_CurrentCameraPos[0] = m_vTourCameraPos[0] = startWaypoint->fCameraX;
     m_CameraStartPos[1] = m_CurrentCameraPos[1] = m_vTourCameraPos[1] = startWaypoint->fCameraY;
     m_CameraStartPos[2] = m_CurrentCameraPos[2] = m_vTourCameraPos[2] = startWaypoint->fCameraZ;
+
+    // FIX: Apply position offset for LoginScene waypoints during initialization
+    // Offset is also applied in GetCurrentCameraPos() for ongoing tour movement
+    ApplyLoginSceneOffset(m_CameraStartPos[0], m_CameraStartPos[1], m_CameraStartPos[2]);
+    ApplyLoginSceneOffset(m_CurrentCameraPos[0], m_CurrentCameraPos[1], m_CurrentCameraPos[2]);
+    ApplyLoginSceneOffset(m_vTourCameraPos[0], m_vTourCameraPos[1], m_vTourCameraPos[2]);
 
     CameraVector2 toTarget{targetWaypoint->fCameraX - startWaypoint->fCameraX, targetWaypoint->fCameraY - startWaypoint->fCameraY};
     const CameraVector2 forwardDir = toTarget.Normalized();
