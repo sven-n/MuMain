@@ -26,6 +26,9 @@ public:
     void OnDeactivate() override;
     const char* GetName() const override { return "Default"; }
 
+    // Phase 5: Scene-specific reset
+    void ResetForScene(EGameScene scene);
+
     // Phase 1: Configuration & Frustum Management
     const CameraConfig& GetConfig() const override { return m_Config; }
     void SetConfig(const CameraConfig& config) override;
@@ -70,6 +73,10 @@ private:
     void SetCameraFOV();
     void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
     bool NeedsFrustumUpdate() const;  // Phase 5: Check if frustum needs rebuild
+
+    // Phase 5: WASD+QE free camera movement
+    void HandleFreeCameraMovement();
+    bool m_bFreeCameraMode = false;
 
 #ifdef ENABLE_EDIT2
     void HandleEditorMode();

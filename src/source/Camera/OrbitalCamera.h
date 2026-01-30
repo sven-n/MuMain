@@ -27,6 +27,9 @@ public:
     void OnDeactivate() override;
     const char* GetName() const override { return "Orbital"; }
 
+    // Phase 5: Scene-specific reset
+    void ResetForScene(EGameScene scene);
+
     // Public accessors for UI
     float GetRadius() const { return m_Radius; }
     float GetTotalYaw() const { return m_BaseYaw + m_DeltaYaw; }
@@ -97,6 +100,10 @@ private:
     void ComputeCameraTransform();
     void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
     void UpdateConfigForZoom();  // Phase 1: Adjust config based on zoom level
+
+    // Phase 5: WASD+QE free camera movement
+    void HandleFreeCameraMovement();
+    bool m_bFreeCameraMode = false;
 
     // Phase 5: Hero validity check (private)
     bool IsHeroValid() const;
