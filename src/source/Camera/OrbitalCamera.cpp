@@ -95,12 +95,11 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
 
         case MAIN_SCENE:
         {
-            // Load extended visibility config for OrbitalCamera
-            // OrbitalCamera uses the same extended range as LoginScene/CharacterScene
-            m_Config = CameraConfig::ForGameplay();
+            // FIX Issue #1: Use ForMainScene to match DefaultCamera's config
+            m_Config = CameraConfig::ForMainScene();
 
             // Set MainScene defaults
-            m_State.ViewFar = m_Config.farPlane;      // 4800
+            m_State.ViewFar = m_Config.farPlane;      // 1700
             m_State.FOV = 30.0f;
             m_State.TopViewEnable = false;
 
@@ -160,9 +159,10 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
 #endif
             break;
         case MAIN_SCENE:
-            m_Config = CameraConfig::ForGameplay();
+            // FIX Issue #1: Use ForMainScene to match DefaultCamera's config
+            m_Config = CameraConfig::ForMainScene();
 #ifdef _EDITOR
-            g_MuEditorConsoleUI.LogEditor("[CAM]   Loaded ForGameplay config for MAIN_SCENE");
+            g_MuEditorConsoleUI.LogEditor("[CAM]   Loaded ForMainScene config for MAIN_SCENE");
 #endif
             break;
         default:
@@ -185,40 +185,171 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     m_State.FOV = 30.0f;
     m_State.TopViewEnable = false;
 
-    // Step 3: Inherit position and angles from previous camera for seamless transition
-    VectorCopy(previousState.Position, m_State.Position);
-    VectorCopy(previousState.Angle, m_State.Angle);
+    // Step 3: Update target FIRST to get Hero/Character position
+    UpdateTarget();
+
+    // Step 3.5: FIX - Only inherit position for MAIN_SCENE where camera follows Hero
+    // For CHARACTER_SCENE and LOG_IN_SCENE, DefaultCamera uses static hardcoded positions
+    // that aren't relative to the character, so inheriting them causes the camera to be far away
+    if (SceneFlag == MAIN_SCENE)
+    {
+        // MainScene: Inherit position and angles for seamless transition
+        VectorCopy(previousState.Position, m_State.Position);
+        VectorCopy(previousState.Angle, m_State.Angle);
 
 #ifdef _EDITOR
-    // DEBUG: Log inherited state
-    sprintf_s(debugMsg, "[CAM]   Inherited: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
-              m_State.Position[0], m_State.Position[1], m_State.Position[2],
-              m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
-    g_MuEditorConsoleUI.LogEditor(debugMsg);
+        sprintf_s(debugMsg, "[CAM]   MainScene: Inherited Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
+                  m_State.Position[0], m_State.Position[1], m_State.Position[2],
+                  m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
+        g_MuEditorConsoleUI.LogEditor(debugMsg);
 #endif
+    }
+    else
+    {
+        // CharacterScene/LoginScene: DefaultCamera uses static positions, not character-relative
+        // Calculate the orbit origin by ray-casting from DefaultCamera's static position
 
-    // Step 4: Inherit radius from previous camera distance
-    m_Radius = previousState.Distance;
-    m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
+        // Use DefaultCamera's static position and angles from ResetForScene
+        vec3_t staticCameraPos, staticCameraAngle;
+        if (SceneFlag == CHARACTER_SCENE)
+        {
+            staticCameraPos[0] = 9758.93f;
+            staticCameraPos[1] = 18913.11f;
+            staticCameraPos[2] = 675.5f;
+            staticCameraAngle[0] = -84.5f;
+            staticCameraAngle[1] = 0.0f;
+            staticCameraAngle[2] = -75.0f;
+        }
+        else // LOGIN_SCENE or others - use character position as fallback
+        {
+            VectorCopy(m_Target, staticCameraPos);
+            staticCameraPos[2] += 300.0f; // Offset above
+            staticCameraAngle[0] = -45.0f;
+            staticCameraAngle[1] = 0.0f;
+            staticCameraAngle[2] = 0.0f;
+        }
 
-    // Step 5: Reset deltas - user hasn't rotated yet
+        // Calculate forward vector from static camera angles
+        float Matrix[3][4];
+        AngleMatrix(staticCameraAngle, Matrix);
+        vec3_t forward = { Matrix[1][0], Matrix[1][1], Matrix[1][2] };
+        VectorNormalize(forward);
+
+        // Ray-cast forward from static position to find orbit origin
+        // Project to character's Z height
+        float targetZ = m_Target[2];
+        float t = (targetZ - staticCameraPos[2]) / forward[2];
+
+        vec3_t orbitOrigin;
+        if (t > 0.0f && t < 5000.0f)
+        {
+            orbitOrigin[0] = staticCameraPos[0] + t * forward[0];
+            orbitOrigin[1] = staticCameraPos[1] + t * forward[1];
+            orbitOrigin[2] = targetZ;
+        }
+        else
+        {
+            // Fallback: use character position
+            VectorCopy(m_Target, orbitOrigin);
+        }
+
+        // Now inherit the static camera position but orbit around the calculated origin
+        VectorCopy(previousState.Position, m_State.Position);
+        VectorCopy(previousState.Angle, m_State.Angle);
+
+        // Override the target to be the orbit origin instead of character
+        VectorCopy(orbitOrigin, m_Target);
+
+#ifdef _EDITOR
+        sprintf_s(debugMsg, "[CAM]   CharScene: StaticCam=(%.1f,%.1f,%.1f), CalcOrigin=(%.1f,%.1f,%.1f), InheritedPos=(%.1f,%.1f,%.1f)",
+                  staticCameraPos[0], staticCameraPos[1], staticCameraPos[2],
+                  orbitOrigin[0], orbitOrigin[1], orbitOrigin[2],
+                  m_State.Position[0], m_State.Position[1], m_State.Position[2]);
+        g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
+    }
+
+    // Step 4: Reset deltas - user hasn't rotated yet (m_Radius will be calculated later from actual distance)
     m_DeltaYaw = 0.0f;
     m_DeltaPitch = 0.0f;
 
-    // Step 6: Update target BEFORE setting initial offset
-    UpdateTarget();
+    // Step 6: Already called UpdateTarget above
 
-    // Step 7: Calculate and save initial offset from INHERITED position
+    // Step 6.5: FIX Issue #3 - For MainScene, calculate what point the inherited camera was looking at
+    // For other scenes, use the Target directly since we calculated the position around it
+    vec3_t lookAtPoint;
+
+    if (SceneFlag == MAIN_SCENE)
+    {
+        // MainScene: Calculate forward direction from inherited angles
+        float Matrix[3][4];
+        AngleMatrix(m_State.Angle, Matrix);
+        vec3_t forward = { Matrix[1][0], Matrix[1][1], Matrix[1][2] };
+        VectorNormalize(forward);
+
+        // Project forward from camera position to find look-at point at Hero's Z height
+        // Ray: P = CameraPos + t * forward, where P.z = Hero.z
+        // Solve for t: CameraPos.z + t * forward.z = Hero.z
+        float targetZ = m_Target[2];
+        float t = (targetZ - m_State.Position[2]) / forward[2];
+
+        // If t is positive, we're looking down toward Hero level
+        if (t > 0.0f && t < 2000.0f)  // Sanity check: within reasonable distance
+        {
+            lookAtPoint[0] = m_State.Position[0] + t * forward[0];
+            lookAtPoint[1] = m_State.Position[1] + t * forward[1];
+            lookAtPoint[2] = targetZ;
+        }
+        else
+        {
+            // Fallback: use Hero position if ray doesn't intersect
+            VectorCopy(m_Target, lookAtPoint);
+        }
+    }
+    else
+    {
+        // CharacterScene/LoginScene: Use Target directly since we calculated position around it
+        VectorCopy(m_Target, lookAtPoint);
+    }
+
+    // Step 7: Calculate and save initial offset from look-at point (not Hero position)
     // This ensures seamless transition - the orbital camera will maintain the same visual position
-    m_InitialCameraOffset[0] = m_State.Position[0] - m_Target[0];
-    m_InitialCameraOffset[1] = m_State.Position[1] - m_Target[1];
-    m_InitialCameraOffset[2] = m_State.Position[2] - m_Target[2];
+    m_InitialCameraOffset[0] = m_State.Position[0] - lookAtPoint[0];
+    m_InitialCameraOffset[1] = m_State.Position[1] - lookAtPoint[1];
+    m_InitialCameraOffset[2] = m_State.Position[2] - lookAtPoint[2];
     m_bInitialOffsetSet = true;
 
+    // Step 7.5: FIX Issue #3 - Calculate orbital radius from inherited position
+    // DefaultCamera uses 2D horizontal distance (m_State.Distance is Y-offset ~1000-1400)
+    // Calculate horizontal distance from camera to Hero (not lookAtPoint) to match DefaultCamera
+    float dx = m_State.Position[0] - m_Target[0];
+    float dy = m_State.Position[1] - m_Target[1];
+    float horizontalDistance = sqrtf(dx * dx + dy * dy);
+
+    float fullDistance = sqrtf(
+        m_InitialCameraOffset[0] * m_InitialCameraOffset[0] +
+        m_InitialCameraOffset[1] * m_InitialCameraOffset[1] +
+        m_InitialCameraOffset[2] * m_InitialCameraOffset[2]
+    );
+
+    // Use horizontal distance as radius to maintain similar zoom level as DefaultCamera
+    // This prevents the camera from appearing zoomed out when including vertical offset
+    m_Radius = DEFAULT_RADIUS;
+    m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
+
+    // Use the calculated look-at point as the pivot for orbital rotation
+    VectorCopy(lookAtPoint, m_Target);
+
 #ifdef _EDITOR
-    sprintf_s(debugMsg, "[CAM]   InitialOffset: (%.1f,%.1f,%.1f) from Target (%.1f,%.1f,%.1f)",
-              m_InitialCameraOffset[0], m_InitialCameraOffset[1], m_InitialCameraOffset[2],
+    sprintf_s(debugMsg, "[CAM]   LookAtPoint: (%.1f,%.1f,%.1f), Hero/Target: (%.1f,%.1f,%.1f)",
+              lookAtPoint[0], lookAtPoint[1], lookAtPoint[2],
               m_Target[0], m_Target[1], m_Target[2]);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+    sprintf_s(debugMsg, "[CAM]   InitialOffset (to LookAt): (%.1f,%.1f,%.1f)",
+              m_InitialCameraOffset[0], m_InitialCameraOffset[1], m_InitialCameraOffset[2]);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+    sprintf_s(debugMsg, "[CAM]   Cam->Hero: dx=%.1f, dy=%.1f | HorizontalDist=%.1f, FullDist=%.1f, m_Radius=%.1f, prevDist=%.1f",
+              dx, dy, horizontalDistance, fullDistance, m_Radius, previousState.Distance);
     g_MuEditorConsoleUI.LogEditor(debugMsg);
 #endif
 
@@ -235,7 +366,23 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     VectorCopy(m_State.Position, g_Camera.Position);
     VectorCopy(m_State.Angle, g_Camera.Angle);
     g_Camera.FOV = m_State.FOV;
-    g_Camera.ViewFar = m_Config.farPlane;
+
+    // Apply DevEditor override if enabled
+    float effectiveFarPlane = m_Config.farPlane;
+#ifdef _EDITOR
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        float fov, nearPlane, farPlane, terrainCull;
+        DevEditor_GetCameraConfig(&fov, &nearPlane, &farPlane, &terrainCull);
+        effectiveFarPlane = farPlane;
+    }
+
+    // Debug: Log what we're setting g_Camera.ViewFar to
+    sprintf_s(debugMsg, "[CAM]   OnActivate: Setting g_Camera.ViewFar=%.0f (from m_Config.farPlane=%.0f)",
+              effectiveFarPlane, m_Config.farPlane);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
+    g_Camera.ViewFar = effectiveFarPlane;
 
     // Step 9: Initialize frustum immediately on activation
     UpdateFrustum();
@@ -298,14 +445,6 @@ bool OrbitalCamera::Update()
     if (!m_bJustActivated)
     {
         m_pDefaultCamera->Update();
-#ifdef _EDITOR
-        // Log position AFTER DefaultCamera::Update() to see if it changed
-        char posMsg[256];
-        sprintf_s(posMsg, "[CAM] After DefaultCamera::Update: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
-                  m_State.Position[0], m_State.Position[1], m_State.Position[2],
-                  m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
-        g_MuEditorConsoleUI.LogEditor(posMsg);
-#endif
     }
     else
     {
@@ -325,15 +464,6 @@ bool OrbitalCamera::Update()
     if (!m_bFreeCameraMode && !skipTransformThisFrame)
     {
         ComputeCameraTransform();
-
-#ifdef _EDITOR
-        // Log position AFTER ComputeCameraTransform() to see if it changed
-        char posMsg[256];
-        sprintf_s(posMsg, "[CAM] After ComputeCameraTransform: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
-                  m_State.Position[0], m_State.Position[1], m_State.Position[2],
-                  m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
-        g_MuEditorConsoleUI.LogEditor(posMsg);
-#endif
 
         // Clamp m_DeltaPitch based on what was actually achieved
         // If we tried to pitch but didn't move much, we're stuck at a constraint
@@ -381,6 +511,11 @@ bool OrbitalCamera::Update()
         // Orbital-specific values
         swprintf(debugText, 256, L"Radius: %.0f | DeltaYaw: %.1f | DeltaPitch: %.1f",
                  m_Radius, m_DeltaYaw, m_DeltaPitch);
+        g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // Rendering value (what BeginOpengl actually uses)
+        swprintf(debugText, 256, L"g_Camera.ViewFar (rendering): %.0f", g_Camera.ViewFar);
         g_pRenderText->RenderText(10, yPos, debugText);
     }
 
@@ -624,42 +759,9 @@ void OrbitalCamera::ComputeCameraTransform()
     m_State.Distance = m_Radius;
     m_State.DistanceTarget = m_Radius;
 
-    // Calculate dynamic ViewFar based on zoom distance
-    // When zoomed IN (small radius): see LESS (smaller ViewFar)
-    // When zoomed OUT (large radius): see MORE (larger ViewFar)
-    // Phase 5: More aggressive scaling to maintain consistent horizon distance
-
-#ifdef _EDITOR
-    // Phase 5: If DevEditor is overriding config, don't auto-scale ViewFar with zoom
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        m_State.ViewFar = m_Config.farPlane;
-    }
-    else
-#endif
-    {
-        float baseViewFar = defaultCameraViewFar;
-        float zoomRatio = m_Radius / DEFAULT_RADIUS;  // 0.25 (min) to 2.5 (max), 1.0 at default
-
-        float viewMultiplier;
-        if (zoomRatio >= 1.0f)
-        {
-            // Zooming OUT: Aggressive scaling to maintain horizon distance
-            // Phase 5: Increased from 1.3x to 2.0x at max zoom for better rendering
-            // At radius=800 (1.0x): ViewFar = base * 1.0
-            // At radius=2000 (2.5x): ViewFar = base * 2.0
-            viewMultiplier = 1.0f + (zoomRatio - 1.0f) * 0.67f;  // Range: 1.0x to 2.0x
-        }
-        else
-        {
-            // Zooming IN: reduce ViewFar proportionally
-            // At radius=200 (0.25x): ViewFar = base * 0.5
-            // At radius=800 (1.0x): ViewFar = base * 1.0
-            viewMultiplier = 0.5f + (zoomRatio * 0.5f);  // Range: 0.5x to 1.0x
-        }
-
-        m_State.ViewFar = baseViewFar * viewMultiplier;
-    }
+    // FIX Issue #1/#2: Use m_Config.farPlane directly, don't scale with zoom
+    // The scaling was causing frustum/rendering mismatch and black background
+    m_State.ViewFar = m_Config.farPlane;
 
     // Phase 1: Update frustum after changing ViewFar
     UpdateFrustum();

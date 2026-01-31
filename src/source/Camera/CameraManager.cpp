@@ -81,6 +81,14 @@ bool CameraManager::SetCameraMode(CameraMode mode)
     if (mode == m_CurrentMode)
         return false;
 
+    // FIX: Only allow OrbitalCamera in MainScene
+    extern EGameScene SceneFlag;
+    if (mode == CameraMode::Orbital && SceneFlag != MAIN_SCENE)
+    {
+        // Silently ignore orbital camera request in non-MainScene
+        return false;
+    }
+
     ICamera* pNewCamera = nullptr;
 
     switch (mode)

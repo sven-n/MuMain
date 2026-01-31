@@ -210,24 +210,29 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     g_MuEditorConsoleUI.LogEditor(debugMsg);
 #endif
 
-    // Inherit distance from previous camera for smoother transition
+    // FIX: Inherit position and angles from previous camera for seamless transition
+    VectorCopy(previousState.Position, m_State.Position);
+    VectorCopy(previousState.Angle, m_State.Angle);
     m_State.Distance = previousState.Distance;
     m_State.DistanceTarget = previousState.DistanceTarget;
 
-    // MainScene uses fixed angle of -45 degrees (isometric view) - override ResetForScene
+    // MainScene uses fixed angle of -45 degrees (isometric view) - override inherited angle
     if (SceneFlag == MAIN_SCENE)
     {
         m_State.Angle[0] = 0.0f;
         m_State.Angle[1] = 0.0f;
         m_State.Angle[2] = -45.0f;
     }
-    // For CHARACTER_SCENE and LOG_IN_SCENE, ResetForScene already set correct angles/positions
+    // For CHARACTER_SCENE and LOG_IN_SCENE, use inherited angles from OrbitalCamera
 
     // Phase 3 fix: Initialize frustum immediately on activation
     UpdateFrustum();
 
     // Update scene tracking to prevent redundant reset in Update()
     m_LastSceneFlag = (int)SceneFlag;
+
+    // FIX: Mark as just activated to skip first frame position recalculation
+    m_bJustActivated = true;
 }
 
 void DefaultCamera::OnDeactivate()
@@ -284,34 +289,45 @@ bool DefaultCamera::Update()
 
     bool bLockCamera = false;
 
-    // Initialize default angles (SetCameraAngle will override these for specific scenes)
-    m_State.Angle[0] = 0.f;
-    m_State.Angle[1] = 0.f;
-    m_State.Angle[2] = -45.f;
+    // FIX: Skip position/angle recalculation on first frame to preserve inherited state
+    if (!m_bJustActivated)
+    {
+        // Initialize default angles (SetCameraAngle will override these for specific scenes)
+        m_State.Angle[0] = 0.f;
+        m_State.Angle[1] = 0.f;
+        m_State.Angle[2] = -45.f;
 
-    SetCameraFOV();
+        SetCameraFOV();
 
 #ifdef ENABLE_EDIT2
-    HandleEditorMode();
+        HandleEditorMode();
 #endif
 
-    if (m_State.TopViewEnable)
-    {
-        m_State.ViewFar = 3200.f;
-        // Phase 5: NULL check for Hero (may not exist in LoginScene/CharacterScene)
-        if (IsHeroValid())
+        if (m_State.TopViewEnable)
         {
-            m_State.Position[0] = Hero->Object.Position[0];
-            m_State.Position[1] = Hero->Object.Position[1];
-            m_State.Position[2] = m_State.ViewFar;
+            m_State.ViewFar = 3200.f;
+            // Phase 5: NULL check for Hero (may not exist in LoginScene/CharacterScene)
+            if (IsHeroValid())
+            {
+                m_State.Position[0] = Hero->Object.Position[0];
+                m_State.Position[1] = Hero->Object.Position[1];
+                m_State.Position[2] = m_State.ViewFar;
+            }
+            // else: maintain current position (fallback for non-MainScene)
         }
-        // else: maintain current position (fallback for non-MainScene)
+        else
+        {
+            CalculateCameraPosition();
+            SetCameraAngle();
+            UpdateCustomCameraDistance();
+        }
     }
     else
     {
-        CalculateCameraPosition();
-        SetCameraAngle();
-        UpdateCustomCameraDistance();
+        // First frame after activation - preserve inherited position/angles
+        // Still need to call SetCameraFOV for proper FOV setup
+        SetCameraFOV();
+        m_bJustActivated = false;
     }
 
     UpdateCameraDistance();
@@ -353,6 +369,11 @@ bool DefaultCamera::Update()
         swprintf(debugText, 256, L"Config.nearPlane: %.0f | Config.terrainCullRange: %.0f",
                  m_Config.nearPlane, m_Config.terrainCullRange);
         g_pRenderText->RenderText(10, yPos, debugText);
+        yPos += lineHeight;
+
+        // Rendering value (what BeginOpengl actually uses)
+        swprintf(debugText, 256, L"g_Camera.ViewFar (rendering): %.0f", g_Camera.ViewFar);
+        g_pRenderText->RenderText(10, yPos, debugText);
     }
 
     // Phase 5: Sync camera state to legacy g_Camera global
@@ -360,8 +381,30 @@ bool DefaultCamera::Update()
     VectorCopy(m_State.Position, g_Camera.Position);
     VectorCopy(m_State.Angle, g_Camera.Angle);
     g_Camera.FOV = m_State.FOV;
+
     // FIX Issue #1: Use m_Config.farPlane for rendering, not zoom-adjusted m_State.ViewFar
-    g_Camera.ViewFar = m_Config.farPlane;
+    // Apply DevEditor override if enabled
+    float effectiveFarPlane = m_Config.farPlane;
+#ifdef _EDITOR
+    if (DevEditor_IsConfigOverrideEnabled())
+    {
+        float fov, nearPlane, farPlane, terrainCull;
+        DevEditor_GetCameraConfig(&fov, &nearPlane, &farPlane, &terrainCull);
+        effectiveFarPlane = farPlane;
+    }
+
+    // Debug: Log when g_Camera.ViewFar is set
+    static float lastLoggedValue = -1.0f;
+    if (effectiveFarPlane != lastLoggedValue)
+    {
+        char debugMsg[256];
+        sprintf_s(debugMsg, "[CAM] DefaultCamera: Setting g_Camera.ViewFar=%.0f (from m_Config.farPlane=%.0f)",
+                  effectiveFarPlane, m_Config.farPlane);
+        g_MuEditorConsoleUI.LogEditor(debugMsg);
+        lastLoggedValue = effectiveFarPlane;
+    }
+#endif
+    g_Camera.ViewFar = effectiveFarPlane;
 
     return bLockCamera;
 }

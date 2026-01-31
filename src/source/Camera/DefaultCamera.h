@@ -60,6 +60,7 @@ private:
 
     // Phase 5: Scene transition tracking and Hero validity
     int m_LastSceneFlag = -1;
+    bool m_bJustActivated = false;  // Skip first frame update to preserve inherited position
     bool IsHeroValid() const;
 
     // These are direct copies of the static functions from CameraUtility.cpp
