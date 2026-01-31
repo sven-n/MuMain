@@ -134,30 +134,16 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
 
 void OrbitalCamera::OnActivate(const CameraState& previousState)
 {
-    // Phase 5 fix: Initialize scene flag to current scene to prevent false scene change detection
+    // Phase 5: When activating, ensure camera is configured for current scene
     extern EGameScene SceneFlag;
-    m_LastSceneFlag = (int)SceneFlag;
 
-    // Phase 5: Load scene-specific camera config
-    // IMPORTANT: OrbitalCamera always uses extended visibility (ForGameplay)
-    // even in MainScene, unlike DefaultCamera which uses conservative values
-    if (SceneFlag == MAIN_SCENE)
-    {
-        // OrbitalCamera in MainScene uses extended visibility config
-        m_Config = CameraConfig::ForGameplay();
-        m_State.ViewFar = m_Config.farPlane;  // Ensure ViewFar matches
-    }
-    else if (SceneFlag == CHARACTER_SCENE)
-    {
-        m_Config = CameraConfig::ForCharacterScene();
-        m_State.ViewFar = m_Config.farPlane;
-    }
-    else
-    {
-        // LoginScene and other scenes use gameplay config
-        m_Config = CameraConfig::ForGameplay();
-        m_State.ViewFar = m_Config.farPlane;
-    }
+    // ALWAYS call ResetForScene to ensure config is properly loaded
+    // This guarantees correct config whether camera was never activated or scene changed
+    ResetForScene(SceneFlag);
+
+    // Inherit position and angles from previous camera for seamless transition
+    VectorCopy(previousState.Position, m_State.Position);
+    VectorCopy(previousState.Angle, m_State.Angle);
 
     // Inherit radius from previous camera distance
     m_Radius = previousState.Distance;
@@ -176,6 +162,9 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     // Phase 3 fix: Initialize frustum immediately on activation
     // Without this, first frame(s) have uninitialized frustum and everything gets culled
     UpdateFrustum();
+
+    // Update scene tracking to prevent redundant reset in Update()
+    m_LastSceneFlag = (int)SceneFlag;
 }
 
 void OrbitalCamera::OnDeactivate()
