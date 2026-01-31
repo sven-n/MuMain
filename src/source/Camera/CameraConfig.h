@@ -89,7 +89,9 @@ struct CameraConfig
         config.fov = 72.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 1700.0f;
-        config.terrainCullRange = 1700.0f;
+        // FIX: Increase terrain culling range to match mouse picking ray distance (ViewFar * 2.0)
+        // This allows clicking on distant terrain that's visible due to the 2.0x multiplier
+        config.terrainCullRange = 3400.0f;  // Was 1700.0f
         config.objectCullRange = 1700.0f;
         config.frustumWidthNear = 330.0f;
         config.frustumWidthFar = 700.0f;
