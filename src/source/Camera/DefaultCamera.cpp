@@ -183,105 +183,32 @@ void DefaultCamera::ResetForScene(EGameScene scene)
 
 void DefaultCamera::OnActivate(const CameraState& previousState)
 {
-    // Phase 5: Load scene-specific camera config
+    // Phase 5: When activating, ensure camera is configured for current scene
     extern EGameScene SceneFlag;
-    if (SceneFlag == CHARACTER_SCENE)
-    {
-        m_Config = CameraConfig::ForCharacterScene();
-    }
-    else
-    {
-        // Use gameplay config for MainScene and LoginScene
-        // LoginScene uses CCameraMove tour mode which overrides everything anyway
-        m_Config = CameraConfig::ForGameplay();
-    }
 
-    // When returning to DefaultCamera, reset to default state
-    // Only inherit distance for smoother transition
+    // ALWAYS call ResetForScene to ensure config is properly loaded
+    // This guarantees correct config for each scene (MainScene uses ForMainScene, others use ForGameplay)
+    // ResetForScene also handles position/angle initialization for each scene
+    ResetForScene(SceneFlag);
+
+    // Inherit distance from previous camera for smoother transition
     m_State.Distance = previousState.Distance;
     m_State.DistanceTarget = previousState.DistanceTarget;
 
-    // Reset ALL angles to default
-    // DefaultCamera uses fixed angle of -45 degrees (isometric view)
-    m_State.Angle[0] = 0.0f;
-    m_State.Angle[1] = 0.0f;
-    m_State.Angle[2] = -45.0f;
-
-    // Note: DefaultCamera maintains Angle[2] = -45 throughout gameplay
-    // The camera positioning is relative to character's facing direction
-
-    // Phase 5: If Hero is invalid (LoginScene/CharacterScene), use scene-specific position
-    if (!IsHeroValid())
+    // MainScene uses fixed angle of -45 degrees (isometric view) - override ResetForScene
+    if (SceneFlag == MAIN_SCENE)
     {
-        // CharacterScene has hardcoded position in SetCameraAngle()
-        if (SceneFlag == CHARACTER_SCENE)
-        {
-            m_State.Angle[0] = -84.5f;
-            m_State.Angle[1] = 0.0f;
-            m_State.Angle[2] = -75.0f;
-            m_State.Position[0] = 9758.93f;
-            m_State.Position[1] = 18913.11f;
-            m_State.Position[2] = 675.5f;
-        }
-        else if (SceneFlag == LOG_IN_SCENE)
-        {
-            // Phase 5 fix: Initialize to LoginScene default camera position
-            // Tour mode will update this in Update(), but we need valid initial position
-            // for first frame frustum. These values match old LoginScene WALK_PATHS[0]
-            // after transformation: {0, -1000, 500} with angles {-80, 0, 0}
-            if (CCameraMove::GetInstancePtr()->IsTourMode())
-            {
-                vec3_t tourPos;
-                CCameraMove::GetInstancePtr()->GetCurrentCameraPos(tourPos);
-                // Check if tour position is valid (not at origin)
-                if (tourPos[0] != 0.0f || tourPos[1] != 0.0f || tourPos[2] != 0.0f)
-                {
-                    m_State.Position[0] = tourPos[0];
-                    m_State.Position[1] = tourPos[1];
-                    m_State.Position[2] = tourPos[2];
-                    m_State.Angle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
-                    m_State.Angle[1] = 0.0f;
-                    m_State.Angle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
-                }
-                else
-                {
-                    // FIX: Use LoginScene WALK_PATHS[0] starting position
-                    // Old code: {0.f, -1000.f, 500.f, -80.f, 0.f, 0.f}
-                    // MoveCharacterCamera() applies transformation, but for initial position
-                    // we need to calculate the actual camera position after transformation
-                    vec3_t startPos = {0.f, -1000.f, 500.f};
-                    vec3_t startAngle = {-80.f, 0.f, 0.f};
-                    vec3_t origin = {0.f, 0.f, 0.f};
-
-                    // Apply same transformation as MoveCharacterCamera()
-                    float tempAngle[3] = {0.f, 0.f, startAngle[2]};
-                    float Matrix[3][4];
-                    AngleMatrix(tempAngle, Matrix);
-                    vec3_t transformPos;
-                    VectorIRotate(startPos, Matrix, transformPos);
-                    VectorAdd(origin, transformPos, m_State.Position);
-
-                    m_State.Angle[0] = startAngle[0];  // -80 degrees
-                    m_State.Angle[1] = startAngle[1];  // 0
-                    m_State.Angle[2] = startAngle[2];  // 0
-                }
-            }
-        }
-        // else: maintain previous position if no Hero and not in recognized scene
+        m_State.Angle[0] = 0.0f;
+        m_State.Angle[1] = 0.0f;
+        m_State.Angle[2] = -45.0f;
     }
-    else if (SceneFlag == MAIN_SCENE)
-    {
-        // Phase 5 fix: In MainScene, don't use previous camera state
-        // Position will be calculated in Update() based on Hero
-        // Just initialize to Hero position to prevent one frame of wrong frustum
-        extern CHARACTER* Hero;
-        m_State.Position[0] = Hero->Object.Position[0];
-        m_State.Position[1] = Hero->Object.Position[1];
-        m_State.Position[2] = Hero->Object.Position[2];
-    }
+    // For CHARACTER_SCENE and LOG_IN_SCENE, ResetForScene already set correct angles/positions
 
     // Phase 3 fix: Initialize frustum immediately on activation
     UpdateFrustum();
+
+    // Update scene tracking to prevent redundant reset in Update()
+    m_LastSceneFlag = (int)SceneFlag;
 }
 
 void DefaultCamera::OnDeactivate()
