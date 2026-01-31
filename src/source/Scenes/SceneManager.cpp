@@ -325,42 +325,49 @@ static void UpdateCoreSystems()
  */
 static void SetWorldClearColor()
 {
-    if (gMapManager.WorldActive == WD_10HEAVEN)
+    if (gMapManager.WorldActive == WD_0LORENCIA)
     {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
+        glClearColor(10 / 256.f, 20 / 256.f, 14 / 256.f, 1.f);  // Dark green
+    }
+    else if (gMapManager.WorldActive == WD_2DEVIAS)
+    {
+        glClearColor(0.f / 256.f, 0.f / 256.f, 10.f / 256.f, 1.f);  // Very dark blue (original)
+    }
+    else if (gMapManager.WorldActive == WD_10HEAVEN)
+    {
+        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);  // Blue
     }
     else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
     {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Black
     }
     else if (gMapManager.InHellas(gMapManager.WorldActive))
     {
-        glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);
+        glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);  // Teal
     }
     else if (gMapManager.InChaosCastle() == true)
     {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClearColor(0.f, 0.f, 0.f, 1.f);  // Black
     }
     else if (gMapManager.InBattleCastle() && battleCastle::InBattleCastle2(Hero->Object.Position))
     {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClearColor(0.f, 0.f, 0.f, 1.f);  // Black
     }
     else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
     {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
+        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);  // Dark purple
     }
-    else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-        )
+    else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
     {
-        glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);
+        glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);  // Gray
     }
     else if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
     {
-        glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);
+        glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);  // Light blue
     }
     else
     {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
+        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);  // Black (default)
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
