@@ -193,6 +193,24 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::Text("Camera Configuration (CameraConfig)");
     ImGui::Separator();
 
+    // Check if camera has changed
+    extern CameraManager& CameraManager_Instance();
+    ICamera* currentCamera = CameraManager_Instance().GetActiveCamera();
+    const char* currentCameraName = currentCamera ? currentCamera->GetName() : nullptr;
+
+    // If override is enabled and camera changed, refresh override values
+    if (m_ConfigOverrideEnabled && m_LastActiveCameraName != currentCameraName)
+    {
+        float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
+        GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+
+        m_FOV = defaultFOV;
+        m_NearPlane = defaultNearPlane;
+        m_FarPlane = defaultFarPlane;
+        m_TerrainCullRange = defaultTerrainCullRange;
+        m_LastActiveCameraName = currentCameraName;
+    }
+
     bool previousOverrideState = m_ConfigOverrideEnabled;
     ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
     ImGui::SameLine();
@@ -208,6 +226,13 @@ void CDevEditorUI::RenderCameraTab()
         m_NearPlane = defaultNearPlane;
         m_FarPlane = defaultFarPlane;
         m_TerrainCullRange = defaultTerrainCullRange;
+        m_LastActiveCameraName = currentCameraName;
+    }
+
+    // If override was just disabled, clear tracking
+    if (!m_ConfigOverrideEnabled && previousOverrideState)
+    {
+        m_LastActiveCameraName = nullptr;
     }
 
     if (m_ConfigOverrideEnabled)

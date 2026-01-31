@@ -74,6 +74,7 @@ private:
     float m_NearPlane = 10.0f;        // Near clipping plane
     float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
     float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range
+    const char* m_LastActiveCameraName = nullptr;  // Track which camera we're overriding for
 
     // Phase 5 Debug: Custom Origin Controls
     bool m_CustomOriginEnabled = false;
