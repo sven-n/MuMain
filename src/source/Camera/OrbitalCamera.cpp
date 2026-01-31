@@ -90,11 +90,12 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
 
         case MAIN_SCENE:
         {
-            // Load MainScene config with conservative values
-            m_Config = CameraConfig::ForMainScene();
+            // Load extended visibility config for OrbitalCamera
+            // OrbitalCamera uses the same extended range as LoginScene/CharacterScene
+            m_Config = CameraConfig::ForGameplay();
 
             // Set MainScene defaults
-            m_State.ViewFar = m_Config.farPlane;      // 2400
+            m_State.ViewFar = m_Config.farPlane;      // 4800
             m_State.FOV = 30.0f;
             m_State.TopViewEnable = false;
 
