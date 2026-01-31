@@ -137,33 +137,50 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     // Phase 5: When activating, ensure camera is configured for current scene
     extern EGameScene SceneFlag;
 
-    // ALWAYS call ResetForScene to ensure config is properly loaded
-    // This guarantees correct config whether camera was never activated or scene changed
-    ResetForScene(SceneFlag);
+    // Step 1: Load config (but don't call ResetForScene yet - it calls UpdateTarget with wrong position)
+    switch (SceneFlag)
+    {
+        case CHARACTER_SCENE:
+            m_Config = CameraConfig::ForCharacterScene();
+            break;
+        case MAIN_SCENE:
+            m_Config = CameraConfig::ForGameplay();
+            break;
+        default:
+            m_Config = CameraConfig::ForGameplay();
+            break;
+    }
 
-    // Inherit position and angles from previous camera for seamless transition
+    // Step 2: Apply config to state
+    m_State.ViewFar = m_Config.farPlane;
+    m_State.FOV = 30.0f;
+    m_State.TopViewEnable = false;
+
+    // Step 3: Inherit position and angles from previous camera for seamless transition
     VectorCopy(previousState.Position, m_State.Position);
     VectorCopy(previousState.Angle, m_State.Angle);
 
-    // Inherit radius from previous camera distance
+    // Step 4: Inherit radius from previous camera distance
     m_Radius = previousState.Distance;
     m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
 
-    // Reset deltas - user hasn't rotated yet
+    // Step 5: Reset deltas - user hasn't rotated yet
     m_DeltaYaw = 0.0f;
     m_DeltaPitch = 0.0f;
 
-    // Reset initial offset - will be captured on first frame
+    // Step 6: Reset initial offset - will be captured on first frame
     m_bInitialOffsetSet = false;
 
-    // Phase 5 fix: Update target immediately on activation to get correct scene context
+    // Step 7: Now update target with correct inherited position
     UpdateTarget();
 
-    // Phase 3 fix: Initialize frustum immediately on activation
-    // Without this, first frame(s) have uninitialized frustum and everything gets culled
+    // Step 8: Force DefaultCamera to use the same config/scene
+    m_pDefaultCamera->ResetForScene(SceneFlag);
+
+    // Step 9: Initialize frustum immediately on activation
     UpdateFrustum();
 
-    // Update scene tracking to prevent redundant reset in Update()
+    // Step 10: Update scene tracking to prevent redundant reset in Update()
     m_LastSceneFlag = (int)SceneFlag;
 }
 
