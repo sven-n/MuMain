@@ -8,6 +8,7 @@
 #include "Camera/OrbitalCamera.h"
 #include "CameraMove.h"
 #include "ZzzCharacter.h"
+#include "UI/Console/MuEditorConsoleUI.h"
 
 // External C functions
 extern "C" CameraManager& CameraManager_Instance();
@@ -201,8 +202,18 @@ void CDevEditorUI::RenderCameraTab()
     // If override is enabled and camera changed, refresh override values
     if (m_ConfigOverrideEnabled && m_LastActiveCameraName != currentCameraName)
     {
+        char debugMsg[256];
+        sprintf_s(debugMsg, "[DEVUI] Camera changed from '%s' to '%s' - refreshing override values",
+                  m_LastActiveCameraName ? m_LastActiveCameraName : "null",
+                  currentCameraName ? currentCameraName : "null");
+        g_MuEditorConsoleUI.LogEditor(debugMsg);
+
         float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
         GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+
+        sprintf_s(debugMsg, "[DEVUI] New config values: FOV=%.1f, Far=%.0f, TerrainCull=%.0f",
+                  defaultFOV, defaultFarPlane, defaultTerrainCullRange);
+        g_MuEditorConsoleUI.LogEditor(debugMsg);
 
         m_FOV = defaultFOV;
         m_NearPlane = defaultNearPlane;

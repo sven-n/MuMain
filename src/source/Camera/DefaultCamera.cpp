@@ -23,6 +23,7 @@
 #include "../GMDoppelGanger2.h"
 #include "../w_MapHeaders.h"
 #include "../UIManager.h"
+#include "UI/Console/MuEditorConsoleUI.h"
 
 // External variable declarations
 extern short g_shCameraLevel;
@@ -186,10 +187,28 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     // Phase 5: When activating, ensure camera is configured for current scene
     extern EGameScene SceneFlag;
 
+#ifdef _EDITOR
+    // DEBUG: Log activation to Editor console
+    char debugMsg[512];
+    sprintf_s(debugMsg, "[CAM] DefaultCamera::OnActivate - Scene=%d, PrevPos=(%.1f,%.1f,%.1f), PrevAngle=(%.1f,%.1f,%.1f), PrevDist=%.0f",
+              (int)SceneFlag,
+              previousState.Position[0], previousState.Position[1], previousState.Position[2],
+              previousState.Angle[0], previousState.Angle[1], previousState.Angle[2],
+              previousState.Distance);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
+
     // ALWAYS call ResetForScene to ensure config is properly loaded
     // This guarantees correct config for each scene (MainScene uses ForMainScene, others use ForGameplay)
     // ResetForScene also handles position/angle initialization for each scene
     ResetForScene(SceneFlag);
+
+#ifdef _EDITOR
+    // DEBUG: Log config after ResetForScene
+    sprintf_s(debugMsg, "[CAM]   Config: Far=%.0f, FOV=%.1f, TerrainCull=%.0f",
+              m_Config.farPlane, m_Config.fov, m_Config.terrainCullRange);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
 
     // Inherit distance from previous camera for smoother transition
     m_State.Distance = previousState.Distance;
@@ -341,7 +360,8 @@ bool DefaultCamera::Update()
     VectorCopy(m_State.Position, g_Camera.Position);
     VectorCopy(m_State.Angle, g_Camera.Angle);
     g_Camera.FOV = m_State.FOV;
-    g_Camera.ViewFar = m_State.ViewFar;
+    // FIX Issue #1: Use m_Config.farPlane for rendering, not zoom-adjusted m_State.ViewFar
+    g_Camera.ViewFar = m_Config.farPlane;
 
     return bLockCamera;
 }
@@ -846,13 +866,16 @@ void DefaultCamera::UpdateFrustum()
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
 
     // Use ViewFar for 3D culling distance (varies 2000-3700 based on map/zoom)
-    // The Frustum will internally use terrainCullRange for 2D ground projection
-    // Phase 5: If DevEditor is overriding, use config.farPlane instead of ViewFar
-    float effectiveFarPlane = m_State.ViewFar;
+    // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
+    // m_State.ViewFar is only for OpenGL rendering (BeginOpengl)
+    // Frustum should use the clean config values, not zoom-adjusted ViewFar
+    float effectiveFarPlane = m_Config.farPlane;
     float effectiveTerrainCullRange = m_Config.terrainCullRange;
 #ifdef _EDITOR
+    // DevEditor can still override config values if needed
     if (DevEditor_IsConfigOverrideEnabled())
     {
+        DevEditor_GetCameraConfig(&m_Config.fov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
         effectiveFarPlane = m_Config.farPlane;
         effectiveTerrainCullRange = m_Config.terrainCullRange;
     }
