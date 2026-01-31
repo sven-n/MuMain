@@ -4,6 +4,7 @@
 #include "CameraManager.h"
 #include "DefaultCamera.h"
 #include "OrbitalCamera.h"
+#include "UI/Console/MuEditorConsoleUI.h"
 // Note: FreeFlyCamera disabled for Phase 1, will be re-implemented later based on new system
 //#ifdef _EDITOR
 //#include "FreeFlyCamera.h"
@@ -169,5 +170,13 @@ extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float*
         if (outNearPlane) *outNearPlane = config.nearPlane;
         if (outFarPlane) *outFarPlane = config.farPlane;
         if (outTerrainCullRange) *outTerrainCullRange = config.terrainCullRange;
+
+#ifdef _EDITOR
+        // DEBUG: Log what DevEditor is reading
+        char debugMsg[256];
+        sprintf_s(debugMsg, "[CAM] GetActiveCameraConfig: Camera=%s, FOV=%.1f, Far=%.0f, TerrainCull=%.0f",
+                  camera->GetName(), config.fov, config.farPlane, config.terrainCullRange);
+        g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
     }
 }

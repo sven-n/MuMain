@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "UIControls.h"
+#include "UI/Console/MuEditorConsoleUI.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -41,6 +42,7 @@ OrbitalCamera::OrbitalCamera(CameraState& state)
     , m_DeltaPitch(0.0f)
     , m_Radius(DEFAULT_RADIUS)
     , m_LastSceneFlag(-1)  // Phase 5: Initialize to invalid scene
+    , m_bJustActivated(false)  // Initialize activation flag
     , m_bRotating(false)
     , m_LastMouseX(0)
     , m_LastMouseY(0)
@@ -137,19 +139,46 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     // Phase 5: When activating, ensure camera is configured for current scene
     extern EGameScene SceneFlag;
 
+#ifdef _EDITOR
+    // DEBUG: Log activation to Editor console
+    char debugMsg[512];
+    sprintf_s(debugMsg, "[CAM] OrbitalCamera::OnActivate - Scene=%d, PrevPos=(%.1f,%.1f,%.1f), PrevAngle=(%.1f,%.1f,%.1f), PrevDist=%.0f",
+              (int)SceneFlag,
+              previousState.Position[0], previousState.Position[1], previousState.Position[2],
+              previousState.Angle[0], previousState.Angle[1], previousState.Angle[2],
+              previousState.Distance);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
+
     // Step 1: Load config (but don't call ResetForScene yet - it calls UpdateTarget with wrong position)
     switch (SceneFlag)
     {
         case CHARACTER_SCENE:
             m_Config = CameraConfig::ForCharacterScene();
+#ifdef _EDITOR
+            g_MuEditorConsoleUI.LogEditor("[CAM]   Loaded ForCharacterScene config");
+#endif
             break;
         case MAIN_SCENE:
             m_Config = CameraConfig::ForGameplay();
+#ifdef _EDITOR
+            g_MuEditorConsoleUI.LogEditor("[CAM]   Loaded ForGameplay config for MAIN_SCENE");
+#endif
             break;
         default:
             m_Config = CameraConfig::ForGameplay();
+#ifdef _EDITOR
+            g_MuEditorConsoleUI.LogEditor("[CAM]   Loaded ForGameplay config (default)");
+#endif
             break;
     }
+
+#ifdef _EDITOR
+    // DEBUG: Log loaded config
+    sprintf_s(debugMsg, "[CAM]   Config: Far=%.0f, FOV=%.1f, TerrainCull=%.0f",
+              m_Config.farPlane, m_Config.fov, m_Config.terrainCullRange);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
 
     // Step 2: Apply config to state
     m_State.ViewFar = m_Config.farPlane;
@@ -160,6 +189,14 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     VectorCopy(previousState.Position, m_State.Position);
     VectorCopy(previousState.Angle, m_State.Angle);
 
+#ifdef _EDITOR
+    // DEBUG: Log inherited state
+    sprintf_s(debugMsg, "[CAM]   Inherited: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
+              m_State.Position[0], m_State.Position[1], m_State.Position[2],
+              m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
+
     // Step 4: Inherit radius from previous camera distance
     m_Radius = previousState.Distance;
     m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
@@ -168,20 +205,47 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     m_DeltaYaw = 0.0f;
     m_DeltaPitch = 0.0f;
 
-    // Step 6: Reset initial offset - will be captured on first frame
-    m_bInitialOffsetSet = false;
-
-    // Step 7: Now update target with correct inherited position
+    // Step 6: Update target BEFORE setting initial offset
     UpdateTarget();
 
-    // Step 8: Force DefaultCamera to use the same config/scene
-    m_pDefaultCamera->ResetForScene(SceneFlag);
+    // Step 7: Calculate and save initial offset from INHERITED position
+    // This ensures seamless transition - the orbital camera will maintain the same visual position
+    m_InitialCameraOffset[0] = m_State.Position[0] - m_Target[0];
+    m_InitialCameraOffset[1] = m_State.Position[1] - m_Target[1];
+    m_InitialCameraOffset[2] = m_State.Position[2] - m_Target[2];
+    m_bInitialOffsetSet = true;
+
+#ifdef _EDITOR
+    sprintf_s(debugMsg, "[CAM]   InitialOffset: (%.1f,%.1f,%.1f) from Target (%.1f,%.1f,%.1f)",
+              m_InitialCameraOffset[0], m_InitialCameraOffset[1], m_InitialCameraOffset[2],
+              m_Target[0], m_Target[1], m_Target[2]);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
+
+    // Step 8: DO NOT call m_pDefaultCamera->ResetForScene() here!
+    // It would overwrite the inherited m_State.Position we just set above
+    // DefaultCamera will load its config on first Update() call anyway
+
+    // Step 8.5: FIX Issue #3 - Update matrix from inherited angles to prevent visual jump
+    // This ensures the camera's transformation matrix matches the inherited position/angles
+    m_State.UpdateMatrix();
+
+    // Step 8.6: FIX Issue #3 - Sync inherited state to g_Camera immediately
+    // This ensures rendering uses the correct inherited position on the first frame
+    VectorCopy(m_State.Position, g_Camera.Position);
+    VectorCopy(m_State.Angle, g_Camera.Angle);
+    g_Camera.FOV = m_State.FOV;
+    g_Camera.ViewFar = m_Config.farPlane;
 
     // Step 9: Initialize frustum immediately on activation
     UpdateFrustum();
 
     // Step 10: Update scene tracking to prevent redundant reset in Update()
     m_LastSceneFlag = (int)SceneFlag;
+
+    // Step 11: Mark as just activated to skip DefaultCamera update on first frame
+    // This preserves the inherited position/angles for seamless transition
+    m_bJustActivated = true;
 }
 
 void OrbitalCamera::OnDeactivate()
@@ -228,12 +292,48 @@ bool OrbitalCamera::Update()
     UpdateTarget();
 
     // First, let DefaultCamera calculate the base camera position
-    m_pDefaultCamera->Update();
+    // EXCEPT on the first frame after activation - we want to preserve inherited position
+    bool skipTransformThisFrame = m_bJustActivated;
+
+    if (!m_bJustActivated)
+    {
+        m_pDefaultCamera->Update();
+#ifdef _EDITOR
+        // Log position AFTER DefaultCamera::Update() to see if it changed
+        char posMsg[256];
+        sprintf_s(posMsg, "[CAM] After DefaultCamera::Update: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
+                  m_State.Position[0], m_State.Position[1], m_State.Position[2],
+                  m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
+        g_MuEditorConsoleUI.LogEditor(posMsg);
+#endif
+    }
+    else
+    {
+        // First frame after activation - skip DefaultCamera update to preserve inherited state
+#ifdef _EDITOR
+        char posMsg[256];
+        sprintf_s(posMsg, "[CAM] OrbitalCamera: Skipping DefaultCamera update on first frame. Current Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
+                  m_State.Position[0], m_State.Position[1], m_State.Position[2],
+                  m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
+        g_MuEditorConsoleUI.LogEditor(posMsg);
+#endif
+        m_bJustActivated = false;  // Clear flag for next frame
+    }
 
     // Then modify it with our orbital transformations (unless in free camera mode)
-    if (!m_bFreeCameraMode)
+    // BUT skip ComputeCameraTransform on first frame to preserve inherited position
+    if (!m_bFreeCameraMode && !skipTransformThisFrame)
     {
         ComputeCameraTransform();
+
+#ifdef _EDITOR
+        // Log position AFTER ComputeCameraTransform() to see if it changed
+        char posMsg[256];
+        sprintf_s(posMsg, "[CAM] After ComputeCameraTransform: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
+                  m_State.Position[0], m_State.Position[1], m_State.Position[2],
+                  m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
+        g_MuEditorConsoleUI.LogEditor(posMsg);
+#endif
 
         // Clamp m_DeltaPitch based on what was actually achieved
         // If we tried to pitch but didn't move much, we're stuck at a constraint
@@ -385,9 +485,20 @@ void OrbitalCamera::GetTargetPosition(vec3_t outTarget) const
     }
     else
     {
-        // Priority 4 (Fallback): Use current camera position as pivot
-        // This allows orbital camera to work in LoginScene/CharacterScene
-        // without crashing when Hero is invalid
+        // Priority 4: In CharacterScene, use CharactersClient[0] as target
+        extern EGameScene SceneFlag;
+        if (SceneFlag == CHARACTER_SCENE)
+        {
+            extern CHARACTER* CharactersClient;
+            if (CharactersClient && CharactersClient[0].Object.Live)
+            {
+                VectorCopy(CharactersClient[0].Object.Position, outTarget);
+                return;
+            }
+        }
+
+        // Priority 5 (Fallback): Use current camera position as pivot
+        // This allows orbital camera to work in LoginScene when no character exists
         VectorCopy(m_State.Position, outTarget);
     }
 }
@@ -692,14 +803,16 @@ void OrbitalCamera::UpdateFrustum()
     extern unsigned int WindowHeight;
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
 
-    // Use ViewFar for 3D culling distance (varies 2000-3700 based on map/zoom)
-    // The Frustum will internally use terrainCullRange for 2D ground projection
-    // Phase 5: If DevEditor is overriding, use config.farPlane instead of ViewFar
-    float effectiveFarPlane = m_State.ViewFar;
+    // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
+    // m_State.ViewFar is only for OpenGL rendering (BeginOpengl)
+    // Frustum should use the clean config values, not zoom-adjusted ViewFar
+    float effectiveFarPlane = m_Config.farPlane;
     float effectiveTerrainCullRange = m_Config.terrainCullRange;
 #ifdef _EDITOR
+    // DevEditor can still override config values if needed
     if (DevEditor_IsConfigOverrideEnabled())
     {
+        DevEditor_GetCameraConfig(&m_Config.fov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
         effectiveFarPlane = m_Config.farPlane;
         effectiveTerrainCullRange = m_Config.terrainCullRange;
     }

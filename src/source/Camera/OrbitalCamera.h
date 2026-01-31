@@ -80,6 +80,7 @@ private:
 
     // Phase 5: Scene transition tracking
     int m_LastSceneFlag;          // Track scene changes to reset target
+    bool m_bJustActivated;        // Skip DefaultCamera update on first frame after activation
 
     // Constraints
     static constexpr float MIN_PITCH = -80.0f;  // Look down limit
