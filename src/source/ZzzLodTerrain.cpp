@@ -2627,6 +2627,7 @@ void RenderSky()
         VectorRotate(p, Matrix, Position);
         VectorAdd(g_Camera.Position, Position, Position);
         Position[2] = 400.f;
+        // NOTE: BITMAP_SKY texture doesn't exist in this codebase - sky rendering disabled
         //RenderSpriteUV(BITMAP_SKY,Position,Width/Num,Height,UV,Light);
     }
     EndSprite();
