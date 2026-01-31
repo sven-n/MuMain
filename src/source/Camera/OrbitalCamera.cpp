@@ -33,7 +33,7 @@ extern "C" int DevEditor_GetTargetCharacterIndex();
 OrbitalCamera::OrbitalCamera(CameraState& state)
     : m_State(state)
     , m_pDefaultCamera(std::make_unique<DefaultCamera>(state))
-    , m_Config(CameraConfig::ForGameplay())  // Phase 1: Initialize with gameplay config
+    , m_Config(CameraConfig::ForGameplay())  // OrbitalCamera defaults to extended visibility
     , m_bInitialOffsetSet(false)
     , m_BaseYaw(0.0f)
     , m_BasePitch(0.0f)
@@ -48,6 +48,9 @@ OrbitalCamera::OrbitalCamera(CameraState& state)
 {
     IdentityVector3D(m_Target);
     IdentityVector3D(m_InitialCameraOffset);
+
+    // Ensure ViewFar matches the config
+    m_State.ViewFar = m_Config.farPlane;
 }
 
 void OrbitalCamera::Reset()
@@ -136,15 +139,24 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     m_LastSceneFlag = (int)SceneFlag;
 
     // Phase 5: Load scene-specific camera config
-    if (SceneFlag == CHARACTER_SCENE)
+    // IMPORTANT: OrbitalCamera always uses extended visibility (ForGameplay)
+    // even in MainScene, unlike DefaultCamera which uses conservative values
+    if (SceneFlag == MAIN_SCENE)
+    {
+        // OrbitalCamera in MainScene uses extended visibility config
+        m_Config = CameraConfig::ForGameplay();
+        m_State.ViewFar = m_Config.farPlane;  // Ensure ViewFar matches
+    }
+    else if (SceneFlag == CHARACTER_SCENE)
     {
         m_Config = CameraConfig::ForCharacterScene();
+        m_State.ViewFar = m_Config.farPlane;
     }
     else
     {
-        // Use gameplay config for MainScene and LoginScene
-        // LoginScene uses CCameraMove tour mode which overrides everything anyway
+        // LoginScene and other scenes use gameplay config
         m_Config = CameraConfig::ForGameplay();
+        m_State.ViewFar = m_Config.farPlane;
     }
 
     // Inherit radius from previous camera distance
