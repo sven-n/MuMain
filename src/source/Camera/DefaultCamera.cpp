@@ -91,8 +91,8 @@ void DefaultCamera::ResetForScene(EGameScene scene)
 
         case MAIN_SCENE:
         {
-            // Load MainScene config
-            m_Config = CameraConfig::ForGameplay();
+            // Load MainScene config with conservative values
+            m_Config = CameraConfig::ForMainScene();
 
             // Set MainScene defaults
             m_State.ViewFar = m_Config.farPlane;      // 2400
@@ -112,10 +112,10 @@ void DefaultCamera::ResetForScene(EGameScene scene)
 
         case LOG_IN_SCENE:
         {
-            // Use LoginScene config with massive culling range for tour mode
-            m_Config = CameraConfig::ForLoginScene();
+            // Use extended visibility config for LoginScene
+            m_Config = CameraConfig::ForGameplay();
             m_State.ViewFar = m_Config.farPlane;
-            m_State.FOV = 30.0f;  // Will be overridden to 45.0 by MoveCamera() in LoginScene
+            m_State.FOV = 30.0f;  // Will be overridden by SetCameraFOV()
             m_State.TopViewEnable = false;
 
             // FIX: Initialize to LoginScene WALK_PATHS[0] starting position
@@ -766,12 +766,13 @@ void DefaultCamera::SetCameraFOV()
     if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
         && CCameraMove::GetInstancePtr()->IsTourMode())
     {
-        m_State.FOV = 65.0f;
+        // Use unified config FOV for LoginScene tour mode
+        m_State.FOV = m_Config.fov;  // Will be 72.0f from ForGameplay()
     }
     else
     {
         // Phase 5: Keep using 30.0f - this is the OpenGL perspective FOV
-        // m_Config.fov (71) is used for frustum plane calculations in BuildFromCamera()
+        // m_Config.fov (72) is used for frustum plane calculations in BuildFromCamera()
         // These are two different FOV concepts and should not be conflated
         m_State.FOV = 30.f;
     }
