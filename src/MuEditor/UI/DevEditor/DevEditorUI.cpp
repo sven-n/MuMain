@@ -223,13 +223,19 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::PopItemWidth();
 
         ImGui::Spacing();
-        if (ImGui::Button("Reset to Defaults"))
+        if (ImGui::Button("Reset to Camera Defaults"))
         {
-            m_FOV = 72.0f;
-            m_NearPlane = 10.0f;
-            m_FarPlane = 4800.0f;
-            m_TerrainCullRange = 4200.0f;
+            // Get the actual defaults from the active camera's config
+            float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
+            GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+
+            m_FOV = defaultFOV;
+            m_NearPlane = defaultNearPlane;
+            m_FarPlane = defaultFarPlane;
+            m_TerrainCullRange = defaultTerrainCullRange;
         }
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Resets to active camera's default config)");
 
         ImGui::Separator();
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Changes applied in real-time!");
