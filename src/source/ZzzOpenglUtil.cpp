@@ -14,6 +14,7 @@
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
+#include "Camera/CameraConfig.h"
 
 int     OpenglWindowX;
 int     OpenglWindowY;
@@ -490,10 +491,8 @@ void BeginOpengl(int x, int y, int Width, int Height)
     glLoadIdentity();
     glViewport2(x, y, Width, Height);
 
-    // FIX: Both cameras use 1.4f multiplier for consistent rendering distance
-    // This ensures terrain/sky renders properly at the top of the screen
-    float viewFarMultiplier = 1.4f;
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, (float)Width / (float)Height, g_Camera.ViewNear, g_Camera.ViewFar * viewFarMultiplier);
+    // Apply RENDER_DISTANCE_MULTIPLIER for consistent rendering distance across all systems
+    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, (float)Width / (float)Height, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();

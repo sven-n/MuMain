@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CameraProjection.h"
 #include "CameraState.h"
+#include "CameraConfig.h"
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -51,8 +52,8 @@ void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy
     vec3_t p1, p2;
 
     // Choose far plane based on use case
-    // FIX: Use 1.4x multiplier to match terrain rendering distance (prevents "visible but not clickable" terrain)
-    float farDist = bFixView ? (state.ViewFar * 1.4f) : RENDER_ITEMVIEW_FAR;
+    // Apply RENDER_DISTANCE_MULTIPLIER to match terrain rendering/culling distance
+    float farDist = bFixView ? (state.ViewFar * RENDER_DISTANCE_MULTIPLIER) : RENDER_ITEMVIEW_FAR;
 
     // Calculate ray endpoint at far plane
     p1[0] = (float)(sx - state.ScreenCenterX) * farDist * state.PerspectiveX;
