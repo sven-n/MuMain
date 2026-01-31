@@ -331,7 +331,7 @@ static void SetWorldClearColor()
     }
     else if (gMapManager.WorldActive == WD_2DEVIAS)
     {
-        glClearColor(0.f / 256.f, 0.f / 256.f, 10.f / 256.f, 1.f);  // Very dark blue (original)
+        glClearColor(0.75f, 0.85f, 1.0f, 1.f);  // Light snowy blue
     }
     else if (gMapManager.WorldActive == WD_10HEAVEN)
     {
