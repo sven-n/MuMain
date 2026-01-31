@@ -490,9 +490,9 @@ void BeginOpengl(int x, int y, int Width, int Height)
     glLoadIdentity();
     glViewport2(x, y, Width, Height);
 
-    // Orbital camera already scales ViewFar internally, so don't multiply again
-    // Default camera needs the 1.4f multiplier for proper rendering
-    float viewFarMultiplier = (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital) ? 1.0f : 1.4f;
+    // FIX: Both cameras use 1.4f multiplier for consistent rendering distance
+    // This ensures terrain/sky renders properly at the top of the screen
+    float viewFarMultiplier = 1.4f;
     CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, (float)Width / (float)Height, g_Camera.ViewNear, g_Camera.ViewFar * viewFarMultiplier);
 
     glMatrixMode(GL_MODELVIEW);
