@@ -1,6 +1,22 @@
 #pragma once
 
 /**
+ * @brief Rendering distance multiplier applied to camera far plane
+ *
+ * This multiplier extends the OpenGL projection matrix far plane beyond the camera's
+ * logical ViewFar to prevent pop-in artifacts at screen edges. The multiplier creates
+ * a buffer zone where terrain/objects slightly outside the frustum are still rendered.
+ *
+ * Used by:
+ * - BeginOpengl() for projection matrix setup (ZzzOpenglUtil.cpp)
+ * - ScreenToWorldRay() for mouse picking ray distance (CameraProjection.cpp)
+ * - ForMainScene() for terrain culling range calculation (CameraConfig.h)
+ *
+ * @note Value of 1.4 provides 40% buffer (e.g., 1700 → 2380 units)
+ */
+constexpr float RENDER_DISTANCE_MULTIPLIER = 1.4f;
+
+/**
  * @brief Camera rendering configuration
  *
  * Encapsulates all parameters that define how a camera renders the scene.
@@ -89,9 +105,8 @@ struct CameraConfig
         config.fov = 72.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 1700.0f;
-        // FIX: Increase terrain culling range to match mouse picking ray distance (ViewFar * 2.0)
-        // This allows clicking on distant terrain that's visible due to the 2.0x multiplier
-        config.terrainCullRange = 2380.0f;  // Was 1700.0f
+        // Use RENDER_DISTANCE_MULTIPLIER to ensure terrain culling matches rendering/picking distance
+        config.terrainCullRange = 1700.0f * RENDER_DISTANCE_MULTIPLIER;  // = 2380.0f
         config.objectCullRange = 1700.0f;
         config.frustumWidthNear = 330.0f;
         config.frustumWidthFar = 700.0f;
