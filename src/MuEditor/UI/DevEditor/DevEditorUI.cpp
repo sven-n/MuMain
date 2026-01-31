@@ -193,32 +193,49 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::Text("Camera Configuration (CameraConfig)");
     ImGui::Separator();
 
+    bool previousOverrideState = m_ConfigOverrideEnabled;
     ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(FOV, near/far planes, cull range)");
 
+    // If override was just enabled, initialize with current camera's defaults
+    if (m_ConfigOverrideEnabled && !previousOverrideState)
+    {
+        float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
+        GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+
+        m_FOV = defaultFOV;
+        m_NearPlane = defaultNearPlane;
+        m_FarPlane = defaultFarPlane;
+        m_TerrainCullRange = defaultTerrainCullRange;
+    }
+
     if (m_ConfigOverrideEnabled)
     {
+        // Get current camera's default config for reference
+        float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
+        GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+
         ImGui::PushItemWidth(200);
 
         ImGui::Text("3D Frustum Parameters:");
         ImGui::SliderFloat("FOV (degrees)", &m_FOV, 10.0f, 120.0f, "%.1f");
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(60° = default)");
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f° = camera default)", defaultFOV);
 
         ImGui::InputFloat("Near Plane", &m_NearPlane, 1.0f, 10.0f, "%.1f");
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(10 = default)");
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultNearPlane);
 
         ImGui::InputFloat("Far Plane", &m_FarPlane, 100.0f, 500.0f, "%.1f");
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(2400 = default)");
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultFarPlane);
 
         ImGui::Spacing();
         ImGui::Text("2D Terrain Culling:");
         ImGui::InputFloat("Terrain Cull Range", &m_TerrainCullRange, 50.0f, 200.0f, "%.1f");
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(1100 = default)");
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultTerrainCullRange);
 
         ImGui::PopItemWidth();
 
