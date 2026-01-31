@@ -3310,18 +3310,46 @@ void RenderObjects(ICamera* camera)
                         else
                             if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                             {
-                                float fDistance_x = g_Camera.Position[0] - o->Position[0];
-                                float fDistance_y = g_Camera.Position[1] - o->Position[1];
-                                float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
-                                float fDis = 2000.0f;
-
-                                if (((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127)) &&
-                                    TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis * 2.0f)
+                                // Use 3D camera culling for LoginScene
+                                bool visible = false;
+                                if (camera)
                                 {
-                                    if (o->BlendMeshLight < 1.0f)
-                                        o->BlendMeshLight += 0.03f;
-                                    else
-                                        o->BlendMeshLight = 1.0f;
+                                    // Use proper 3D frustum culling with appropriate radius for object type
+                                    float cullRadius = 500.0f;
+                                    if ((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127))
+                                    {
+                                        cullRadius = 1000.0f;  // Larger objects need bigger radius
+                                    }
+                                    visible = !camera->ShouldCullObject(o->Position, cullRadius);
+                                }
+                                else
+                                {
+                                    // Fallback to legacy 2D culling if no camera
+                                    float fDistance_x = g_Camera.Position[0] - o->Position[0];
+                                    float fDistance_y = g_Camera.Position[1] - o->Position[1];
+                                    float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
+                                    float fDis = 2000.0f;
+
+                                    if ((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127))
+                                    {
+                                        visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis * 2.0f;
+                                    }
+                                    else if (o->Type <= MAX_WORLD_OBJECTS)
+                                    {
+                                        visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis;
+                                    }
+                                }
+
+                                if (visible)
+                                {
+                                    // Fade in effects for certain object types
+                                    if ((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127))
+                                    {
+                                        if (o->BlendMeshLight < 1.0f)
+                                            o->BlendMeshLight += 0.03f;
+                                        else
+                                            o->BlendMeshLight = 1.0f;
+                                    }
 
                                     if (o->AlphaTarget < 1.0f)
                                         o->AlphaTarget += 0.03f;
@@ -3331,18 +3359,9 @@ void RenderObjects(ICamera* camera)
                                     RenderObject(o);
                                     RenderObjectVisual(o);
                                 }
-                                else if (TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis && o->Type <= MAX_WORLD_OBJECTS)
+                                else
                                 {
-                                    if (o->AlphaTarget < 1.0f)
-                                        o->AlphaTarget += 0.03f;
-                                    else
-                                        o->AlphaTarget = 1.0f;
-
-                                    RenderObject(o);
-                                    RenderObjectVisual(o);
-                                }
-                                else if (o->AlphaTarget != 0 && fDistance > fDis)
-                                {
+                                    // Fade out when not visible
                                     o->BlendMeshLight = 0.0f;
                                     o->Alpha = 0.0f;
                                     o->AlphaTarget = 0.0f;

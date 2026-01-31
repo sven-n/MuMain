@@ -6,6 +6,8 @@
 #include "imgui.h"
 #include "Camera/CameraManager.h"
 #include "Camera/OrbitalCamera.h"
+#include "CameraMove.h"
+#include "ZzzCharacter.h"
 
 // External C functions
 extern "C" CameraManager& CameraManager_Instance();
@@ -19,6 +21,12 @@ extern "C" int GetCurrentCameraMode();
 extern "C" float GetOrbitalCameraRadius();
 extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch);
 extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
+
+// CCameraMove wrapper
+extern "C" CCameraMove* CCameraMove__GetInstancePtr();
+
+// CHARACTER external
+extern CHARACTER* Hero;
 
 CDevEditorUI& CDevEditorUI::GetInstance()
 {
@@ -331,6 +339,131 @@ void CDevEditorUI::RenderCameraTab()
     else
     {
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to set custom orbit center");
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    // LoginScene Camera Offset Controls
+    ImGui::Text("LoginScene Camera Offset");
+    ImGui::Separator();
+    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+                      "Adjust tour waypoint positions in real-time");
+
+    extern float g_LoginSceneOffsetX;
+    extern float g_LoginSceneOffsetY;
+    extern float g_LoginSceneOffsetZ;
+
+    ImGui::PushItemWidth(150);
+    ImGui::InputFloat("Offset X (Left/Right)", &g_LoginSceneOffsetX, 50.0f, 200.0f, "%.1f");
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(0 = default)");
+
+    ImGui::InputFloat("Offset Y (Forward/Back)", &g_LoginSceneOffsetY, 50.0f, 200.0f, "%.1f");
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(1000 = default)");
+
+    ImGui::InputFloat("Offset Z (Up/Down)", &g_LoginSceneOffsetZ, 50.0f, 200.0f, "%.1f");
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(700 = default)");
+
+    ImGui::Spacing();
+    ImGui::Text("Angle Offsets");
+
+    extern float g_LoginSceneAnglePitch;
+    extern float g_LoginSceneAngleYaw;
+
+    ImGui::InputFloat("Pitch (Up/Down Tilt)", &g_LoginSceneAnglePitch, 1.0f, 5.0f, "%.1f");
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(0 = default)");
+
+    ImGui::InputFloat("Yaw (Left/Right Rotation)", &g_LoginSceneAngleYaw, 1.0f, 5.0f, "%.1f");
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(0 = default)");
+    ImGui::PopItemWidth();
+
+    if (ImGui::Button("Reset to Defaults"))
+    {
+        g_LoginSceneOffsetX = -300.0f;
+        g_LoginSceneOffsetY = 650.0f;
+        g_LoginSceneOffsetZ = 950.0f;
+        g_LoginSceneAnglePitch = 40.0f;
+        g_LoginSceneAngleYaw = -5.0f;
+    }
+
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Changes apply in real-time!");
+
+    ImGui::Spacing();
+    ImGui::Text("Tour Mode Controls");
+    ImGui::Separator();
+
+    extern CCameraMove* CCameraMove__GetInstancePtr();
+    CCameraMove* cameraMove = CCameraMove__GetInstancePtr();
+
+    if (cameraMove)
+    {
+        BOOL isTourMode = cameraMove->IsTourMode();
+        BOOL isTourPaused = cameraMove->IsTourPaused();
+
+        ImGui::Text("Tour Mode: %s", isTourMode ? "ACTIVE" : "INACTIVE");
+        if (isTourMode)
+        {
+            ImGui::Text("Status: %s", isTourPaused ? "PAUSED" : "RUNNING");
+        }
+
+        ImGui::Spacing();
+
+        // Control buttons
+        if (isTourMode)
+        {
+            // Pause/Resume toggle
+            if (isTourPaused)
+            {
+                if (ImGui::Button("Resume"))
+                {
+                    cameraMove->PauseTour(FALSE);
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Pause"))
+                {
+                    cameraMove->PauseTour(TRUE);
+                }
+            }
+            ImGui::SameLine();
+        }
+
+        // Restart button (always available when tour is active)
+        if (isTourMode)
+        {
+            if (ImGui::Button("Restart"))
+            {
+                if (Hero)
+                {
+                    cameraMove->SetTourMode(FALSE, FALSE, 0);  // Disable first
+                    cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
+                    cameraMove->SetTourMode(TRUE, FALSE, 0);   // Re-enable from waypoint 0
+                }
+            }
+        }
+        else
+        {
+            // Start Tour button (only when not active)
+            if (ImGui::Button("Start Tour"))
+            {
+                if (Hero)
+                {
+                    cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
+                    cameraMove->SetTourMode(TRUE, FALSE, 0);
+                }
+            }
+        }
+    }
+    else
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Camera Move system not available");
     }
 
     ImGui::Spacing();

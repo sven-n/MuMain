@@ -125,6 +125,16 @@ namespace
     }
 }
 
+// Global offset values for LoginScene camera correction
+// Can be adjusted at runtime via DevEditor
+float g_LoginSceneOffsetX = -300.0f;      // Left/right correction
+float g_LoginSceneOffsetY = 650.0f;   // Forward/back correction
+float g_LoginSceneOffsetZ = 950.0f;    // Up/down correction
+
+// Global angle offset values for LoginScene camera
+float g_LoginSceneAnglePitch = 40.0f;   // Pitch offset (up/down tilt)
+float g_LoginSceneAngleYaw = -5.0f;     // Yaw offset (left/right rotation)
+
 // Helper function to apply LoginScene offset to waypoint coordinates
 // This corrects for outdated waypoint file coordinates
 static void ApplyLoginSceneOffset(float& x, float& y, float& z)
@@ -132,9 +142,9 @@ static void ApplyLoginSceneOffset(float& x, float& y, float& z)
     extern CMapManager gMapManager;
     if (gMapManager.WorldActive == 73)  // WD_73NEW_LOGIN_SCENE
     {
-        x += 0.0f;      // Left/right correction
-        y += 1000.0f;   // Forward/back correction (was too far back)
-        z += 700.0f;    // Up/down correction (was too low)
+        x += g_LoginSceneOffsetX;
+        y += g_LoginSceneOffsetY;
+        z += g_LoginSceneOffsetZ;
     }
 }
 
@@ -558,6 +568,12 @@ CCameraMove* CCameraMove::GetInstancePtr()
 {
     static CCameraMove s_CameraWalkInstance;
     return &s_CameraWalkInstance;
+}
+
+// C-style wrapper for DevEditor access
+extern "C" CCameraMove* CCameraMove__GetInstancePtr()
+{
+    return CCameraMove::GetInstancePtr();
 }
 
 CCameraMove::WAYPOINT* CCameraMove::GetWayPointByIndex(std::size_t index)
