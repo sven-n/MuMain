@@ -112,8 +112,8 @@ void DefaultCamera::ResetForScene(EGameScene scene)
 
         case LOG_IN_SCENE:
         {
-            // Use gameplay config as default
-            m_Config = CameraConfig::ForGameplay();
+            // Use LoginScene config with massive culling range for tour mode
+            m_Config = CameraConfig::ForLoginScene();
             m_State.ViewFar = m_Config.farPlane;
             m_State.FOV = 30.0f;  // Will be overridden to 45.0 by MoveCamera() in LoginScene
             m_State.TopViewEnable = false;
@@ -409,6 +409,13 @@ bool DefaultCamera::Update()
         g_pRenderText->RenderText(10, yPos, debugText);
     }
 
+    // Phase 5: Sync camera state to legacy g_Camera global
+    // This is needed because BeginOpengl() still uses g_Camera.FOV for perspective setup
+    VectorCopy(m_State.Position, g_Camera.Position);
+    VectorCopy(m_State.Angle, g_Camera.Angle);
+    g_Camera.FOV = m_State.FOV;
+    g_Camera.ViewFar = m_State.ViewFar;
+
     return bLockCamera;
 }
 
@@ -661,10 +668,22 @@ void DefaultCamera::SetCameraAngle()
 {
     if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
+        // Apply angle offsets for LoginScene camera tuning
+        extern float g_LoginSceneAnglePitch;
+        extern float g_LoginSceneAngleYaw;
+        extern CMapManager gMapManager;
+
         CCameraMove::GetInstancePtr()->SetAngleFrustum(-112.5f);
         m_State.Angle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
         m_State.Angle[1] = 0.0f;
         m_State.Angle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
+
+        // Apply offsets only in LoginScene (WD_73NEW_LOGIN_SCENE)
+        if (gMapManager.WorldActive == 73)
+        {
+            m_State.Angle[0] += g_LoginSceneAnglePitch;
+            m_State.Angle[2] += g_LoginSceneAngleYaw;
+        }
     }
     else if (SceneFlag == CHARACTER_SCENE)
     {
@@ -870,11 +889,12 @@ void DefaultCamera::UpdateFrustum()
     {
         // Fallback: Use camera angle to calculate forward direction
         // This handles LoginScene/CharacterScene where Hero doesn't exist
+        // Game uses Y-forward convention: forward = Matrix[1] (second row)
         float Matrix[3][4];
         AngleMatrix(m_State.Angle, Matrix);
-        forward[0] = -Matrix[2][0];
-        forward[1] = -Matrix[2][1];
-        forward[2] = -Matrix[2][2];
+        forward[0] = Matrix[1][0];
+        forward[1] = Matrix[1][1];
+        forward[2] = Matrix[1][2];
         VectorNormalize(forward);
     }
 
