@@ -424,6 +424,9 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     bool renderWeatherEffects = true;
 #endif
 
+    // NOTE: RenderSky() disabled - BITMAP_SKY texture doesn't exist in codebase
+    // Sky appearance is controlled by glClearColor() set earlier
+
     if (IsWaterTerrain() == false && renderTerrain)
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
