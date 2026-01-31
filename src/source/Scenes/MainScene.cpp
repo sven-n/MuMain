@@ -345,36 +345,8 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
 
     outWidth = GetScreenWidth();
 
-    // Set clear color based on world
-    if (gMapManager.WorldActive == WD_0LORENCIA)
-    {
-        glClearColor(10 / 256.f, 20 / 256.f, 14 / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_2DEVIAS)
-    {
-        glClearColor(0.f / 256.f, 0.f / 256.f, 10.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_10HEAVEN)
-    {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InChaosCastle() == true)
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
-    {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InHellas() == true)
-    {
-        outByWaterMap = 1;
-        glClearColor(0.f / 256.f, 0.f / 256.f, 0.f / 256.f, 1.f);
-    }
-    else
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
+    // NOTE: Clear color is set by SceneManager::SetWorldClearColor() before this function is called
+    // All background colors are now centralized in SceneManager.cpp
 
     BeginOpengl(0, 0, outWidth, outHeight);
 
