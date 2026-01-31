@@ -90,8 +90,8 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
 
         case MAIN_SCENE:
         {
-            // Load MainScene config
-            m_Config = CameraConfig::ForGameplay();
+            // Load MainScene config with conservative values
+            m_Config = CameraConfig::ForMainScene();
 
             // Set MainScene defaults
             m_State.ViewFar = m_Config.farPlane;      // 2400

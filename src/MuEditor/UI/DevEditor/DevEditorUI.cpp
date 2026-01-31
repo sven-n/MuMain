@@ -223,37 +223,12 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::PopItemWidth();
 
         ImGui::Spacing();
-        ImGui::Text("Presets:");
-        if (ImGui::Button("Gameplay (Default)"))
+        if (ImGui::Button("Reset to Defaults"))
         {
-            m_FOV = 60.0f;  // Phase 5: Updated from 30 to 60
+            m_FOV = 72.0f;
             m_NearPlane = 10.0f;
-            m_FarPlane = 2400.0f;
-            m_TerrainCullRange = 1100.0f;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Narrow FOV"))
-        {
-            m_FOV = 30.0f;  // Old default
-            m_NearPlane = 10.0f;
-            m_FarPlane = 2400.0f;
-            m_TerrainCullRange = 1100.0f;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Wide FOV"))
-        {
-            m_FOV = 90.0f;  // Very wide
-            m_NearPlane = 10.0f;
-            m_FarPlane = 3200.0f;
-            m_TerrainCullRange = 1500.0f;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Cinematic"))
-        {
-            m_FOV = 45.0f;
-            m_NearPlane = 5.0f;
-            m_FarPlane = 5000.0f;
-            m_TerrainCullRange = 2000.0f;
+            m_FarPlane = 4800.0f;
+            m_TerrainCullRange = 4200.0f;
         }
 
         ImGui::Separator();

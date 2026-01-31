@@ -72,25 +72,50 @@ struct CameraConfig
     // ========== Preset Configurations ==========
 
     /**
-     * @brief Default gameplay camera configuration
+     * @brief MainScene default camera configuration
      *
-     * Optimized for standard third-person gameplay in MainScene.
-     * Based on user testing, these values provide the best balance of
-     * visibility and performance for orbital/default cameras.
+     * Optimized configuration for MainScene DefaultCamera.
+     * Balanced for performance and visibility.
+     *
+     * Values (user-specified):
+     * - FOV: 72 degrees
+     * - Near Plane: 10
+     * - Far Plane: 1700 (3D object culling)
+     * - Terrain Cull Range: 1700 (2D terrain culling)
+     */
+    static CameraConfig ForMainScene()
+    {
+        CameraConfig config;
+        config.fov = 72.0f;
+        config.nearPlane = 10.0f;
+        config.farPlane = 1700.0f;
+        config.terrainCullRange = 1700.0f;
+        config.objectCullRange = 1700.0f;
+        config.frustumWidthNear = 330.0f;
+        config.frustumWidthFar = 700.0f;
+        return config;
+    }
+
+    /**
+     * @brief LoginScene and CharacterScene camera configuration
+     *
+     * Extended visibility configuration for LoginScene and CharacterScene.
+     * Provides wider view distance for cinematic tour and character preview.
      *
      * Phase 5 Values (user-specified):
-     * - FOV: 71 degrees (improved field of view)
-     * - Far Plane: 2400 minimum (objects and terrain)
-     * - Terrain Cull Range: 2400 minimum (matches far plane)
+     * - FOV: 72 degrees (optimal field of view)
+     * - Near Plane: 10 (close clipping)
+     * - Far Plane: 4800 (3D object culling distance)
+     * - Terrain Cull Range: 4200 (2D terrain culling distance)
      */
     static CameraConfig ForGameplay()
     {
         CameraConfig config;
-        config.fov = 71.0f;  // Phase 5: User-specified optimal FOV for MainScene
+        config.fov = 72.0f;  // User-specified optimal FOV
         config.nearPlane = 10.0f;
-        config.farPlane = 2400.0f;
-        config.terrainCullRange = 2400.0f;  // Phase 5: Match far plane for consistent rendering
-        config.objectCullRange = 2400.0f;
+        config.farPlane = 4800.0f;  // 3D frustum culling
+        config.terrainCullRange = 4200.0f;  // 2D terrain culling
+        config.objectCullRange = 4800.0f;
         config.frustumWidthNear = 330.0f;
         config.frustumWidthFar = 700.0f;
         return config;
