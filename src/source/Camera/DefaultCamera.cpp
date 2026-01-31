@@ -198,6 +198,13 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     g_MuEditorConsoleUI.LogEditor(debugMsg);
 #endif
 
+    // FIX: Save previousState before ResetForScene overwrites m_State
+    vec3_t savedPosition, savedAngle;
+    float savedDistance = previousState.Distance;
+    float savedDistanceTarget = previousState.DistanceTarget;
+    VectorCopy(previousState.Position, savedPosition);
+    VectorCopy(previousState.Angle, savedAngle);
+
     // ALWAYS call ResetForScene to ensure config is properly loaded
     // This guarantees correct config for each scene (MainScene uses ForMainScene, others use ForGameplay)
     // ResetForScene also handles position/angle initialization for each scene
@@ -211,19 +218,21 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
 #endif
 
     // FIX: Inherit position and angles from previous camera for seamless transition
-    VectorCopy(previousState.Position, m_State.Position);
-    VectorCopy(previousState.Angle, m_State.Angle);
-    m_State.Distance = previousState.Distance;
-    m_State.DistanceTarget = previousState.DistanceTarget;
+    VectorCopy(savedPosition, m_State.Position);
+    VectorCopy(savedAngle, m_State.Angle);
+    m_State.Distance = savedDistance;
+    m_State.DistanceTarget = savedDistanceTarget;
 
-    // MainScene uses fixed angle of -45 degrees (isometric view) - override inherited angle
-    if (SceneFlag == MAIN_SCENE)
-    {
-        m_State.Angle[0] = 0.0f;
-        m_State.Angle[1] = 0.0f;
-        m_State.Angle[2] = -45.0f;
-    }
-    // For CHARACTER_SCENE and LOG_IN_SCENE, use inherited angles from OrbitalCamera
+#ifdef _EDITOR
+    sprintf_s(debugMsg, "[CAM]   After inherit: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f), Dist=%.0f",
+              m_State.Position[0], m_State.Position[1], m_State.Position[2],
+              m_State.Angle[0], m_State.Angle[1], m_State.Angle[2],
+              m_State.Distance);
+    g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
+
+    // Don't override angles - preserve inherited angles for seamless transition
+    // The angles will be recalculated naturally on subsequent frames
 
     // Phase 3 fix: Initialize frustum immediately on activation
     UpdateFrustum();
@@ -231,8 +240,9 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     // Update scene tracking to prevent redundant reset in Update()
     m_LastSceneFlag = (int)SceneFlag;
 
-    // FIX: Mark as just activated to skip first frame position recalculation
+    // FIX: Mark as just activated to skip first frame position recalculation and disable smoothing
     m_bJustActivated = true;
+    m_FramesSinceActivation = 0;
 }
 
 void DefaultCamera::OnDeactivate()
@@ -327,10 +337,36 @@ bool DefaultCamera::Update()
         // First frame after activation - preserve inherited position/angles
         // Still need to call SetCameraFOV for proper FOV setup
         SetCameraFOV();
+
+#ifdef _EDITOR
+        char debugMsg[256];
+        sprintf_s(debugMsg, "[CAM] DefaultCamera first frame: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
+                  m_State.Position[0], m_State.Position[1], m_State.Position[2],
+                  m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
+        g_MuEditorConsoleUI.LogEditor(debugMsg);
+#endif
+
         m_bJustActivated = false;
     }
 
+    // Increment frame counter for smoothing control
+    if (m_FramesSinceActivation < 10)  // Cap to prevent overflow
+        m_FramesSinceActivation++;
+
     UpdateCameraDistance();
+
+#ifdef _EDITOR
+    // Log if UpdateCameraDistance changed anything
+    static vec3_t lastPos = {0,0,0};
+    if (VectorCompare(m_State.Position, lastPos) == false)
+    {
+        char debugMsg[256];
+        sprintf_s(debugMsg, "[CAM] After UpdateCameraDistance: Pos=(%.1f,%.1f,%.1f)",
+                  m_State.Position[0], m_State.Position[1], m_State.Position[2]);
+        g_MuEditorConsoleUI.LogEditor(debugMsg);
+        VectorCopy(m_State.Position, lastPos);
+    }
+#endif
 
     // Phase 5 fix: Update frustum only when camera state actually changes
     // This avoids expensive frustum rebuild every frame (20-25% performance gain)
@@ -746,7 +782,17 @@ void DefaultCamera::UpdateCameraDistance()
             case 4: m_State.DistanceTarget = 1400.f; break;
             case 5: m_State.DistanceTarget = g_Direction.m_fCameraViewFar; break;
             }
-            m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3;
+
+            // FIX: Disable distance smoothing for first 2 frames after activation
+            // This prevents camera interpolation when switching from OrbitalCamera
+            if (m_FramesSinceActivation < 2)
+            {
+                m_State.Distance = m_State.DistanceTarget;  // Snap immediately
+            }
+            else
+            {
+                m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3;  // Smooth interpolation
+            }
         }
     }
 }
