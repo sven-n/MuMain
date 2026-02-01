@@ -32,11 +32,11 @@ void CameraProjection::SetupPerspective(CameraState& state, float fov, float asp
 
 void CameraProjection::SetViewport(int x, int y, int width, int height)
 {
-    // Update cached viewport dimensions
+    // Update cached viewport position only
+    // Do NOT update OpenglWindowWidth/Height - those are the full window dimensions
+    // and should only be set at startup or on window resize
     OpenglWindowX = x;
     OpenglWindowY = y;
-    OpenglWindowWidth = width;
-    OpenglWindowHeight = height;
 
     // Set OpenGL viewport (Y coordinate is flipped)
     glViewport(x, WindowHeight - (y + height), width, height);

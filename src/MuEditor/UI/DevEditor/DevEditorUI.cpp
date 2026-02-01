@@ -727,9 +727,73 @@ void CDevEditorUI::RenderGraphicsTab()
     extern unsigned int WindowHeight;
     extern BOOL g_bUseWindowMode;
     extern HWND g_hWnd;
+    extern int OpenglWindowWidth;
+    extern int OpenglWindowHeight;
+    extern float g_fScreenRate_x;
+    extern float g_fScreenRate_y;
 
+    // Display all debug info
     ImGui::Text("Current Resolution: %u x %u", WindowWidth, WindowHeight);
+    ImGui::Text("OpenGL Viewport: %d x %d", OpenglWindowWidth, OpenglWindowHeight);
+    ImGui::Text("Screen Rate: %.2f x %.2f", g_fScreenRate_x, g_fScreenRate_y);
     ImGui::Text("Window Mode: %s", g_bUseWindowMode ? "Windowed" : "Fullscreen");
+
+    int clientWidth = 0, clientHeight = 0;
+    float calculatedScaleX = 0, calculatedScaleY = 0;
+
+    // Show actual window client rect
+    if (g_hWnd)
+    {
+        RECT clientRect;
+        GetClientRect(g_hWnd, &clientRect);
+        clientWidth = clientRect.right - clientRect.left;
+        clientHeight = clientRect.bottom - clientRect.top;
+        ImGui::Text("Actual Window Client: %d x %d", clientWidth, clientHeight);
+
+        // Calculate what the UI *thinks* the scaling should be
+        calculatedScaleX = (float)clientWidth / 640.0f;
+        calculatedScaleY = (float)clientHeight / 480.0f;
+        ImGui::Text("Calculated Scale from Client: %.2f x %.2f", calculatedScaleX, calculatedScaleY);
+    }
+
+    // Show if there's a mismatch
+    if (WindowWidth != OpenglWindowWidth || WindowHeight != OpenglWindowHeight)
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "WARNING: Window size mismatch detected!");
+    }
+
+    // Copy to clipboard button
+    ImGui::Spacing();
+    if (ImGui::Button("Copy Debug Info to Clipboard", ImVec2(250, 0)))
+    {
+        char debugInfo[1024];
+        sprintf_s(debugInfo,
+            "=== Graphics Debug Info ===\n"
+            "Current Resolution: %u x %u\n"
+            "OpenGL Viewport: %d x %d\n"
+            "Screen Rate: %.2f x %.2f\n"
+            "Window Mode: %s\n"
+            "Actual Window Client: %d x %d\n"
+            "Calculated Scale from Client: %.2f x %.2f\n"
+            "Mismatch: %s\n"
+            "UI Reference System: 640 x 480\n"
+            "Expected UI Scale: WindowWidth/640 = %.2f, WindowHeight/480 = %.2f\n"
+            "Aspect Ratio: %.3f\n",
+            WindowWidth, WindowHeight,
+            OpenglWindowWidth, OpenglWindowHeight,
+            g_fScreenRate_x, g_fScreenRate_y,
+            g_bUseWindowMode ? "Windowed" : "Fullscreen",
+            clientWidth, clientHeight,
+            calculatedScaleX, calculatedScaleY,
+            (WindowWidth != OpenglWindowWidth || WindowHeight != OpenglWindowHeight) ? "YES" : "NO",
+            (float)WindowWidth / 640.0f, (float)WindowHeight / 480.0f,
+            (float)WindowWidth / (float)WindowHeight
+        );
+        ImGui::SetClipboardText(debugInfo);
+        g_MuEditorConsoleUI.LogEditor("Debug info copied to clipboard");
+    }
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "(Paste in Discord/notepad)");
 
     ImGui::Separator();
     ImGui::Spacing();
@@ -766,6 +830,12 @@ void CDevEditorUI::RenderGraphicsTab()
             extern float g_fScreenRate_y;
             g_fScreenRate_x = (float)WindowWidth / 640.0f;
             g_fScreenRate_y = (float)WindowHeight / 480.0f;
+
+            // Update OpenGL viewport dimensions
+            extern int OpenglWindowWidth;
+            extern int OpenglWindowHeight;
+            OpenglWindowWidth = WindowWidth;
+            OpenglWindowHeight = WindowHeight;
 
             // Resize window if in windowed mode
             if (g_bUseWindowMode && g_hWnd)
@@ -818,6 +888,12 @@ void CDevEditorUI::RenderGraphicsTab()
         g_fScreenRate_x = (float)WindowWidth / 640.0f;
         g_fScreenRate_y = (float)WindowHeight / 480.0f;
 
+        // Update OpenGL viewport dimensions
+        extern int OpenglWindowWidth;
+        extern int OpenglWindowHeight;
+        OpenglWindowWidth = WindowWidth;
+        OpenglWindowHeight = WindowHeight;
+
         if (g_bUseWindowMode && g_hWnd)
         {
             RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
@@ -845,6 +921,12 @@ void CDevEditorUI::RenderGraphicsTab()
     if (ImGui::Checkbox("Windowed Mode", &isWindowed))
     {
         g_bUseWindowMode = isWindowed ? TRUE : FALSE;
+
+        // Update OpenGL viewport dimensions
+        extern int OpenglWindowWidth;
+        extern int OpenglWindowHeight;
+        OpenglWindowWidth = WindowWidth;
+        OpenglWindowHeight = WindowHeight;
 
         if (g_hWnd)
         {

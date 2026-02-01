@@ -20,10 +20,10 @@
 extern "C" void DevEditor_GetFogConfig(float*, float*);
 #endif
 
-int     OpenglWindowX;
-int     OpenglWindowY;
-int     OpenglWindowWidth;
-int     OpenglWindowHeight;
+int     OpenglWindowX = 0;
+int     OpenglWindowY = 0;
+int     OpenglWindowWidth = 1024;
+int     OpenglWindowHeight = 768;
 vec3_t  MousePosition;
 vec3_t  MouseTarget;
 bool    FogEnable = false;
@@ -468,8 +468,10 @@ void glViewport2(int x, int y, int Width, int Height)
 {
     OpenglWindowX = x;
     OpenglWindowY = y;
-    OpenglWindowWidth = Width;
-    OpenglWindowHeight = Height;
+    // NOTE: Do NOT update OpenglWindowWidth/Height here!
+    // These represent the FULL window dimensions for UI rendering,
+    // while Width/Height here are the game viewport (which may be smaller due to UI bars)
+    // OpenglWindowWidth/Height are set once at startup and updated only on window resize
     CameraProjection::SetViewport(x, y, Width, Height);
 }
 
@@ -1062,8 +1064,11 @@ void BeginBitmap()
     glPushMatrix();
     glLoadIdentity();
 
+    // Use actual window dimensions for viewport and ortho projection
+    // RenderBitmap() calls ConvertX/Y to scale from 640×480 reference to pixels,
+    // so the projection should match the actual pixel dimensions
     glViewport(0, 0, WindowWidth, WindowHeight);
-    gluPerspective(g_Camera.FOV, (WindowWidth) / ((float)WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
+    gluPerspective(g_Camera.FOV, (float)WindowWidth / (float)WindowHeight, g_Camera.ViewNear, g_Camera.ViewFar);
 
     glLoadIdentity();
     gluOrtho2D(0, WindowWidth, 0, WindowHeight);

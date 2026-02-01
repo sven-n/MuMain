@@ -337,13 +337,18 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
 {
     outByWaterMap = 0;
 
+    extern unsigned int WindowHeight;
+
     if (g_Camera.TopViewEnable == false)
     {
-        outHeight = 480 - 48;
+        // Reserve space for bottom UI bar (48 pixels in 640×480 reference)
+        // Scale proportionally to actual screen height
+        int uiBarHeight = (48 * WindowHeight) / 480;
+        outHeight = WindowHeight - uiBarHeight;
     }
     else
     {
-        outHeight = 480;
+        outHeight = WindowHeight;
     }
 
     outWidth = GetScreenWidth();
