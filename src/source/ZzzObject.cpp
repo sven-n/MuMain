@@ -33,7 +33,9 @@
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
 #include "NewUISystem.h"
+#include "Camera/CameraManager.h"
 #include "Camera/CameraProjection.h"
+#include "Camera/OrbitalCamera.h"
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
@@ -6335,6 +6337,18 @@ void MoveItems()
             {
                 o->Position[2] = Height;
                 ItemAngle(o);
+
+                // Rotate items with camera when in orbital mode (after default angle is set)
+                if (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital)
+                {
+                    // Get the orbital camera and use its actual yaw value
+                    OrbitalCamera* orbitalCam = static_cast<OrbitalCamera*>(CameraManager::Instance().GetActiveCamera());
+                    if (orbitalCam)
+                    {
+                        float cameraYaw = orbitalCam->GetTotalYaw();
+                        o->Angle[2] += cameraYaw;  // Add camera yaw to default angle
+                    }
+                }
             }
             else
             {
@@ -6420,6 +6434,7 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
     VectorCopy(tempPosition, o->Position);
 }
 
+// Render dropped items and fall animation and camera rotation for items on the ground
 void RenderItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
