@@ -41,14 +41,26 @@ public:
 
     bool ShouldCullTerrain(int tileX, int tileY) const override
     {
-        int minX, minY, maxX, maxY;
-        m_Frustum.GetTerrainTileBounds(&minX, &minY, &maxX, &maxY);
-        return tileX < minX || tileX > maxX || tileY < minY || tileY > maxY;
+        // Use 3D frustum sphere test instead of 2D ground projection
+        // Terrain tiles are indexed in world space / TERRAIN_SCALE (100)
+        // Convert tile coords to world space center point
+        vec3_t tileCenter;
+        tileCenter[0] = (tileX + 0.5f) * 100.0f;  // TERRAIN_SCALE = 100
+        tileCenter[1] = (tileY + 0.5f) * 100.0f;
+        tileCenter[2] = 0.0f;  // Z will be ignored for terrain height variance
+
+        // Use generous radius to account for terrain height variance
+        return !m_Frustum.TestSphere(tileCenter, 100.0f);
     }
 
     bool ShouldCullObject2D(float x, float y, float radius) const override
     {
-        return !m_Frustum.Test2D(x, y, radius);
+        // Use 3D frustum sphere test instead of 2D ground projection
+        vec3_t position;
+        position[0] = x;
+        position[1] = y;
+        position[2] = 0.0f;  // Objects on ground
+        return !m_Frustum.TestSphere(position, radius);
     }
 
 private:

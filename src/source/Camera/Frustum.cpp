@@ -4,10 +4,6 @@
 #include <cmath>
 
 Frustum::Frustum()
-    : m_TerrainTileMinX(0)
-    , m_TerrainTileMinY(0)
-    , m_TerrainTileMaxX(0)
-    , m_TerrainTileMaxY(0)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -18,11 +14,6 @@ Frustum::Frustum()
     for (int i = 0; i < 8; i++)
     {
         Vector(0.f, 0.f, 0.f, m_Vertices[i]);
-    }
-
-    for (int i = 0; i < 4; i++)
-    {
-        Vector(0.f, 0.f, 0.f, m_GroundProjection[i]);
     }
 }
 
@@ -151,12 +142,6 @@ void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const
 
     // Calculate bounding box
     CalculateBoundingBox();
-
-    // Calculate 2D ground projection for terrain culling
-    // Use terrainCullDist for terrain (separate from 3D object farDist)
-    float terrainFarHeight = 2.0f * tanHalfFov * terrainCullDist;
-    float terrainFarWidth = terrainFarHeight * aspectRatio;
-    CalculateGroundProjection(position, forward, actualUp, nearDist, terrainCullDist, nearWidth, terrainFarWidth);
 }
 
 bool Frustum::TestSphere(const vec3_t center, float radius) const
@@ -227,128 +212,3 @@ void Frustum::CalculateBoundingBox()
     }
 }
 
-void Frustum::CalculateGroundProjection(const vec3_t position, const vec3_t forward,
-                                        const vec3_t up, float nearDist, float terrainFarDist,
-                                        float nearWidth, float terrainFarWidth)
-{
-    // Calculate right vector (need temp copies - CrossProduct doesn't accept const)
-    vec3_t right, forwardTemp, upTemp;
-    VectorCopy(forward, forwardTemp);
-    VectorCopy(up, upTemp);
-    CrossProduct(forwardTemp, upTemp, right);
-    VectorNormalize(right);
-
-    // Project forward onto XY plane (ground)
-    vec3_t groundForward;
-    groundForward[0] = forward[0];
-    groundForward[1] = forward[1];
-    groundForward[2] = 0.0f;
-
-    // FIX: When looking straight down, ground forward becomes (0,0,0)
-    // In this case, use a much larger radius for terrain culling
-    float groundLength = VectorLength(groundForward);
-    bool lookingStraightDown = (groundLength < 0.1f);
-
-    if (lookingStraightDown)
-    {
-        // Looking nearly straight down - use full circular radius
-        // Multiply terrainFarDist by 1.5x to ensure we see enough terrain
-        terrainFarDist *= 1.5f;
-        terrainFarWidth *= 1.5f;
-
-        // Use arbitrary forward direction for trapezoid calculation
-        groundForward[0] = 0.0f;
-        groundForward[1] = 1.0f;
-        groundForward[2] = 0.0f;
-    }
-    else
-    {
-        VectorNormalize(groundForward);
-    }
-
-    // Project right onto XY plane
-    vec3_t groundRight;
-    groundRight[0] = right[0];
-    groundRight[1] = right[1];
-    groundRight[2] = 0.0f;
-    VectorNormalize(groundRight);
-
-    // Calculate ground projection of camera position
-    vec3_t groundPosition;
-    groundPosition[0] = position[0];
-    groundPosition[1] = position[1];
-    groundPosition[2] = 0.0f;
-
-    // Calculate near and far centers on ground
-    vec3_t nearCenter, farCenter;
-    VectorMA(groundPosition, nearDist, groundForward, nearCenter);
-    VectorMA(groundPosition, terrainFarDist, groundForward, farCenter);
-
-    // Calculate the 4 trapezoid vertices
-    vec3_t temp;
-
-    // Far-left
-    VectorMA(farCenter, -terrainFarWidth * 0.5f, groundRight, m_GroundProjection[0]);
-
-    // Far-right
-    VectorMA(farCenter, terrainFarWidth * 0.5f, groundRight, m_GroundProjection[1]);
-
-    // Near-right
-    VectorMA(nearCenter, nearWidth * 0.5f, groundRight, m_GroundProjection[2]);
-
-    // Near-left
-    VectorMA(nearCenter, -nearWidth * 0.5f, groundRight, m_GroundProjection[3]);
-
-    // Calculate terrain tile bounds
-    float minX = TERRAIN_SIZE * TERRAIN_SCALE;
-    float minY = TERRAIN_SIZE * TERRAIN_SCALE;
-    float maxX = 0.0f;
-    float maxY = 0.0f;
-
-    for (int i = 0; i < 4; i++)
-    {
-        if (m_GroundProjection[i][0] < minX) minX = m_GroundProjection[i][0];
-        if (m_GroundProjection[i][1] < minY) minY = m_GroundProjection[i][1];
-        if (m_GroundProjection[i][0] > maxX) maxX = m_GroundProjection[i][0];
-        if (m_GroundProjection[i][1] > maxY) maxY = m_GroundProjection[i][1];
-    }
-
-    // Convert to tile coordinates with padding
-    int tileWidth = 4;
-    m_TerrainTileMinX = (int)(minX / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
-    m_TerrainTileMinY = (int)(minY / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
-    m_TerrainTileMaxX = (int)(maxX / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
-    m_TerrainTileMaxY = (int)(maxY / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
-
-    // Clamp to terrain bounds
-    if (m_TerrainTileMinX < 0) m_TerrainTileMinX = 0;
-    if (m_TerrainTileMinY < 0) m_TerrainTileMinY = 0;
-    if (m_TerrainTileMaxX > TERRAIN_SIZE_MASK - tileWidth)
-        m_TerrainTileMaxX = TERRAIN_SIZE_MASK - tileWidth;
-    if (m_TerrainTileMaxY > TERRAIN_SIZE_MASK - tileWidth)
-        m_TerrainTileMaxY = TERRAIN_SIZE_MASK - tileWidth;
-}
-
-bool Frustum::Test2D(float x, float y, float radius) const
-{
-    // Test point against the 4 edges of the ground projection trapezoid
-    // This matches the TestFrustrum2D algorithm exactly
-    // The trapezoid vertices are: [0]=far-left, [1]=far-right, [2]=near-right, [3]=near-left
-
-    int j = 3;
-    for (int i = 0; i < 4; j = i, i++)
-    {
-        // Calculate signed distance from point to edge (i,j)
-        // This is the cross product in 2D: (edge_x * point_y - edge_y * point_x)
-        float d = (m_GroundProjection[i][0] - x) * (m_GroundProjection[j][1] - y) -
-                  (m_GroundProjection[j][0] - x) * (m_GroundProjection[i][1] - y);
-
-        // If point is outside this edge (beyond tolerance), it's culled
-        if (d <= radius)
-        {
-            return false;  // Outside trapezoid
-        }
-    }
-
-    return true;  // Inside trapezoid
-}
