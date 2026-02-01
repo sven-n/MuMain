@@ -26,6 +26,10 @@ public:
     float GetFarPlane() const { return m_FarPlane; }
     float GetTerrainCullRange() const { return m_TerrainCullRange; }
 
+    // Fog control accessors
+    float GetFogStartPercent() const { return m_FogStartPercent; }
+    float GetFogEndPercent() const { return m_FogEndPercent; }
+
     // Render toggle accessors
     bool ShouldRenderTerrain() const { return m_RenderTerrain; }
     bool ShouldRenderStaticObjects() const { return m_RenderStaticObjects; }
@@ -75,6 +79,10 @@ private:
     float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
     float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range
     const char* m_LastActiveCameraName = nullptr;  // Track which camera we're overriding for
+
+    // Fog control values
+    float m_FogStartPercent = 0.3f;  // Fog starts at 30% between near and far
+    float m_FogEndPercent = 1.0f;    // Fog ends at 100% of render distance (farPlane * RENDER_DISTANCE_MULTIPLIER)
 
     // Phase 5 Debug: Custom Origin Controls
     bool m_CustomOriginEnabled = false;

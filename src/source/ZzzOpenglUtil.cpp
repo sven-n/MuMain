@@ -16,6 +16,10 @@
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
 
+#ifdef _EDITOR
+extern "C" void DevEditor_GetFogConfig(float*, float*);
+#endif
+
 int     OpenglWindowX;
 int     OpenglWindowY;
 int     OpenglWindowWidth;
@@ -521,9 +525,19 @@ void BeginOpengl(int x, int y, int Width, int Height)
         glFogi(GL_FOG_MODE, GL_LINEAR);
 
         // Set fog transition range for GL_LINEAR mode
-        // Start fog at 60% of ViewFar, end at 100% of render distance
-        float fogStart = g_Camera.ViewFar * 0.6f;
-        float fogEnd = g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER;
+        float fogStartPercent = 0.3f;
+        float fogEndPercent = 1.0f;  // 1.0 = at render distance (ViewFar * RENDER_DISTANCE_MULTIPLIER)
+
+#ifdef _EDITOR
+        // Allow DevEditor to override fog distances
+        DevEditor_GetFogConfig(&fogStartPercent, &fogEndPercent);
+#endif
+
+        // Calculate actual render distance
+        float renderDistance = g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER;
+
+        float fogStart = g_Camera.ViewNear + (g_Camera.ViewFar - g_Camera.ViewNear) * fogStartPercent;
+        float fogEnd = renderDistance * fogEndPercent;
         glFogf(GL_FOG_START, fogStart);
         glFogf(GL_FOG_END, fogEnd);
 

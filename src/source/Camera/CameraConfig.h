@@ -103,7 +103,7 @@ struct CameraConfig
     {
         CameraConfig config;
         config.fov = 72.0f;
-        config.nearPlane = 10.0f;
+        config.nearPlane = 1000.0f;
         config.farPlane = 1700.0f;
         // Use RENDER_DISTANCE_MULTIPLIER to ensure terrain culling matches rendering/picking distance
         config.terrainCullRange = 1700.0f * RENDER_DISTANCE_MULTIPLIER;  // = 2380.0f
@@ -129,7 +129,7 @@ struct CameraConfig
     {
         CameraConfig config;
         config.fov = 72.0f;  // User-specified optimal FOV
-        config.nearPlane = 10.0f;
+        config.nearPlane = 1000.0f;
         config.farPlane = 4800.0f;  // 3D frustum culling
         config.terrainCullRange = 4200.0f;  // 2D terrain culling
         config.objectCullRange = 4800.0f;
