@@ -495,8 +495,13 @@ void BeginOpengl(int x, int y, int Width, int Height)
     glLoadIdentity();
     glViewport2(x, y, Width, Height);
 
+    // Calculate aspect ratio dynamically from viewport dimensions
+    // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)
+    // FOV stays constant, aspect ratio scales the horizontal view accordingly
+    float aspectRatio = (float)Width / (float)Height;
+
     // Apply RENDER_DISTANCE_MULTIPLIER for consistent rendering distance across all systems
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, (float)Width / (float)Height, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();

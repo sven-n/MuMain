@@ -61,6 +61,7 @@ private:
     ~CDevEditorUI() = default;
 
     void RenderCameraTab();
+    void RenderGraphicsTab();
 
     // Camera frustum values for live editing (best settings for Default/Orbital camera)
     float m_CameraViewFar = 1100.0f;
