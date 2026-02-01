@@ -519,7 +519,14 @@ void BeginOpengl(int x, int y, int Width, int Height)
     {
         glEnable(GL_FOG);
         glFogi(GL_FOG_MODE, GL_LINEAR);
-        glFogf(GL_FOG_DENSITY, FogDensity);
+
+        // Set fog transition range for GL_LINEAR mode
+        // Start fog at 60% of ViewFar, end at 100% of render distance
+        float fogStart = g_Camera.ViewFar * 0.6f;
+        float fogEnd = g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER;
+        glFogf(GL_FOG_START, fogStart);
+        glFogf(GL_FOG_END, fogEnd);
+
         glFogfv(GL_FOG_COLOR, FogColor);
     }
     else
