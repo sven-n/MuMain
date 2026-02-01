@@ -574,6 +574,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             g_fScreenRate_x = (float)WindowWidth / 640.0f;
             g_fScreenRate_y = (float)WindowHeight / 480.0f;
 
+            // Update OpenGL viewport dimensions
+            OpenglWindowWidth = WindowWidth;
+            OpenglWindowHeight = WindowHeight;
+
             // Note: Projection matrix and frustum will be updated on next BeginOpengl() call
             // No need to rebuild immediately - happens naturally in render loop
         }
@@ -1146,6 +1150,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     }
 
     g_ErrorReport.Write(L"> Start window success.\r\n");
+
+    // Initialize OpenGL viewport dimensions to match window dimensions
+    // This ensures they're correct even if WM_SIZE hasn't fired yet or sent wrong values
+    OpenglWindowWidth = WindowWidth;
+    OpenglWindowHeight = WindowHeight;
 
     PIXELFORMATDESCRIPTOR pfd;
 
