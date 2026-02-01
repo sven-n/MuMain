@@ -110,42 +110,6 @@ public:
      */
     const AABB& GetBoundingBox() const { return m_BoundingBox; }
 
-    // ========== Terrain-Specific 2D Projection ==========
-    // For backward compatibility with terrain tile culling
-
-    /**
-     * @brief Gets the 2D ground projection of the frustum (trapezoid on XY plane)
-     *
-     * Returns 4 vertices in world space, projected onto ground (Z coordinate from terrain height)
-     * Ordered: far-left, far-right, near-right, near-left
-     */
-    const vec3_t* GetGroundProjection() const { return m_GroundProjection; }
-
-    /**
-     * @brief Gets the terrain tile bounding box for efficient culling
-     *
-     * Terrain tiles are indexed in world space divided by TERRAIN_SCALE (100)
-     */
-    void GetTerrainTileBounds(int* outMinX, int* outMinY, int* outMaxX, int* outMaxY) const
-    {
-        if (outMinX) *outMinX = m_TerrainTileMinX;
-        if (outMinY) *outMinY = m_TerrainTileMinY;
-        if (outMaxX) *outMaxX = m_TerrainTileMaxX;
-        if (outMaxY) *outMaxY = m_TerrainTileMaxY;
-    }
-
-    /**
-     * @brief Tests if a 2D circle (XY only) is inside the ground projection trapezoid
-     *
-     * This matches TestFrustrum2D behavior - only tests XY position, ignores Z
-     *
-     * @param x World X coordinate
-     * @param y World Y coordinate
-     * @param radius Tolerance/radius for the test
-     * @return true if visible, false if outside trapezoid
-     */
-    bool Test2D(float x, float y, float radius) const;
-
 private:
     // 6 frustum planes: Left, Right, Top, Bottom, Near, Far
     Plane m_Planes[6];
@@ -156,18 +120,6 @@ private:
     // Axis-aligned bounding box containing the frustum
     AABB m_BoundingBox;
 
-    // 2D ground projection (trapezoid) - for terrain culling compatibility
-    vec3_t m_GroundProjection[4];
-
-    // Terrain tile bounds (in tile coordinates, not world space)
-    int m_TerrainTileMinX;
-    int m_TerrainTileMinY;
-    int m_TerrainTileMaxX;
-    int m_TerrainTileMaxY;
-
     // Helper methods
     void CalculateBoundingBox();
-    void CalculateGroundProjection(const vec3_t position, const vec3_t forward,
-                                   const vec3_t up, float nearDist, float terrainFarDist,
-                                   float nearWidth, float terrainFarWidth);
 };
