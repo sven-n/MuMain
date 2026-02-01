@@ -268,10 +268,28 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultFarPlane);
 
         ImGui::Spacing();
-        ImGui::Text("2D Terrain Culling:");
+        ImGui::Text("Terrain Culling:");
         ImGui::InputFloat("Terrain Cull Range", &m_TerrainCullRange, 50.0f, 200.0f, "%.1f");
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultTerrainCullRange);
+
+        ImGui::Spacing();
+        ImGui::Text("Fog Controls:");
+        ImGui::SliderFloat("Fog Start", &m_FogStartPercent, 0.0f, 1.0f, "%.2f");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(fraction between near/far)");
+
+        ImGui::SliderFloat("Fog End", &m_FogEndPercent, 0.5f, 2.0f, "%.2f");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(fraction of render distance)");
+
+        // Show actual fog distances
+        constexpr float RENDER_DISTANCE_MULTIPLIER = 1.4f;
+        float renderDistance = m_FarPlane * RENDER_DISTANCE_MULTIPLIER;
+        float actualStart = m_NearPlane + (m_FarPlane - m_NearPlane) * m_FogStartPercent;
+        float actualEnd = renderDistance * m_FogEndPercent;
+        ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
+                          "Actual: Start=%.0f, End=%.0f, RenderDist=%.0f", actualStart, actualEnd, renderDistance);
 
         ImGui::PopItemWidth();
 
@@ -733,6 +751,12 @@ extern "C"
         if (outNearPlane) *outNearPlane = g_DevEditorUI.GetNearPlane();
         if (outFarPlane) *outFarPlane = g_DevEditorUI.GetFarPlane();
         if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetTerrainCullRange();
+    }
+
+    void DevEditor_GetFogConfig(float* outStartPercent, float* outEndPercent)
+    {
+        if (outStartPercent) *outStartPercent = g_DevEditorUI.GetFogStartPercent();
+        if (outEndPercent) *outEndPercent = g_DevEditorUI.GetFogEndPercent();
     }
 
     // Phase 5: Custom Origin accessors

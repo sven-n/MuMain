@@ -361,10 +361,7 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
             vec3_t Color = { 0.f, 0.f, 0.f };
             battleCastle::StartFog(Color);
         }
-        else
-        {
-            glDisable(GL_FOG);
-        }
+        // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 }
