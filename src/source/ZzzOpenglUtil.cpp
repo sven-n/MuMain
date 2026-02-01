@@ -1064,11 +1064,11 @@ void BeginBitmap()
     glPushMatrix();
     glLoadIdentity();
 
-    // Use actual window dimensions for viewport and ortho projection
-    // RenderBitmap() calls ConvertX/Y to scale from 640×480 reference to pixels,
-    // so the projection should match the actual pixel dimensions
+    // Always use full window dimensions for UI/bitmap rendering
+    // UI bitmaps use ConvertX/Y to scale from 640×480 reference,
+    // so we need the full window size here (not the game viewport which may be smaller)
     glViewport(0, 0, WindowWidth, WindowHeight);
-    gluPerspective(g_Camera.FOV, (float)WindowWidth / (float)WindowHeight, g_Camera.ViewNear, g_Camera.ViewFar);
+    gluPerspective(g_Camera.FOV, (WindowWidth) / ((float)WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
 
     glLoadIdentity();
     gluOrtho2D(0, WindowWidth, 0, WindowHeight);
