@@ -6321,6 +6321,37 @@ void CreateShiny(OBJECT* o)
     }
 }
 
+// Helper: Handle item falling animation
+static void HandleItemFalling(OBJECT* o)
+{
+    if (o->Type >= MODEL_SHIELD && o->Type < MODEL_SHIELD + MAX_ITEM_INDEX)
+        o->Angle[1] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+    else
+        o->Angle[0] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+}
+
+// Helper: Handle item on ground (set angle and camera rotation)
+static void HandleItemOnGround(OBJECT* o)
+{
+    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+    if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
+        o->Position[2] += 40.f;
+
+    // Set default item angle
+    ItemAngle(o);
+
+    // Rotate items with camera when in orbital mode (after default angle is set)
+    if (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital)
+    {
+        OrbitalCamera* orbitalCam = static_cast<OrbitalCamera*>(CameraManager::Instance().GetActiveCamera());
+        if (orbitalCam)
+        {
+            float cameraYaw = orbitalCam->GetTotalYaw();
+            o->Angle[2] += cameraYaw;  // Add camera yaw to default angle
+        }
+    }
+}
+
 void MoveItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
@@ -6328,36 +6359,26 @@ void MoveItems()
         OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
+            // Apply gravity physics
             o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
             o->Gravity -= 6.f;
-            float Height = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-            if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-                Height += 40.f;
-            if (o->Position[2] <= Height)
-            {
-                o->Position[2] = Height;
-                ItemAngle(o);
 
-                // Rotate items with camera when in orbital mode (after default angle is set)
-                if (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital)
-                {
-                    // Get the orbital camera and use its actual yaw value
-                    OrbitalCamera* orbitalCam = static_cast<OrbitalCamera*>(CameraManager::Instance().GetActiveCamera());
-                    if (orbitalCam)
-                    {
-                        float cameraYaw = orbitalCam->GetTotalYaw();
-                        o->Angle[2] += cameraYaw;  // Add camera yaw to default angle
-                    }
-                }
+            // Calculate ground height
+            float groundHeight = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+            if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
+                groundHeight += 40.f;
+
+            // Check if item is on ground or still falling
+            if (o->Position[2] <= groundHeight)
+            {
+                HandleItemOnGround(o);
             }
             else
             {
-                if (o->Type >= MODEL_SHIELD && o->Type < MODEL_SHIELD + MAX_ITEM_INDEX)
-                    o->Angle[1] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
-                else
-                    o->Angle[0] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+                HandleItemFalling(o);
             }
 
+            // Create shiny particle effect
             if (rand_fps_check(1))
             {
                 CreateShiny(o);
