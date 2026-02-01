@@ -689,8 +689,9 @@ void OrbitalCamera::ComputeCameraTransform()
 
     // Calculate additional height offset when zooming in close
     // This makes the camera focus on character's head/upper body instead of feet
-    const float CAMERA_HEIGHT_OFFSET = 80.0f;
-    const float maxHeightOffset = 200.0f;
+    // Increased from 80 to 150 to center character on screen (was showing feet at center)
+    const float CAMERA_HEIGHT_OFFSET = 150.0f;
+    const float maxHeightOffset = 270.0f;  // Increased proportionally
 
     float zoomFactor = 0.0f;
     if (m_Radius < DEFAULT_RADIUS)  // Only add extra offset when zooming in from default

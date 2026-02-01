@@ -30,8 +30,11 @@
 #include "../UIMapName.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
+#include "UI/Console/MuEditorConsoleUI.h"
 
 // External declarations
+extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch);
+
 #ifdef _EDITOR
 extern "C" bool DevEditor_IsDebugVisualizationEnabled();
 // DevEditor render toggle functions
@@ -566,8 +569,73 @@ bool RenderMainScene()
         return false;
     }
 
-    // Enable fog with colors matching background for atmospheric depth
-    FogEnable = true;
+    // Enable fog based on camera mode and pitch angle
+    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
+
+    if (activeCamera && strcmp(activeCamera->GetName(), "Default") == 0)
+    {
+        // Default Camera: Always disable fog (top-down view, no horizon)
+        FogEnable = false;
+    }
+    else if (activeCamera && strcmp(activeCamera->GetName(), "Orbital") == 0)
+    {
+        // Orbital Camera: Enable fog based on pitch (horizon visibility)
+        float yaw, orbitalPitch;
+        GetOrbitalCameraAngles(&yaw, &orbitalPitch);
+
+        // Orbital pitch ranges (actual measured values):
+        // +48° = looking straight down at character (no horizon)
+        // 0° = neutral/default position
+        // -37° = looking toward horizon (horizon visible)
+
+#ifdef _EDITOR
+        // DEBUG: Log pitch value
+        static float lastLoggedPitch = 0.0f;
+        if (fabs(orbitalPitch - lastLoggedPitch) > 1.0f)  // Log when pitch changes by more than 1 degree
+        {
+            char debugMsg[256];
+            sprintf_s(debugMsg, "[FOG] Orbital pitch: %.2f°, Threshold: -20°", orbitalPitch);
+            g_MuEditorConsoleUI.LogEditor(debugMsg);
+            lastLoggedPitch = orbitalPitch;
+        }
+#endif
+
+        // Enable fog when pitch < -20° (looking toward horizon)
+        // More negative = looking more toward horizon
+        if (orbitalPitch < -20.0f)
+        {
+            FogEnable = true;   // Looking toward horizon, enable fog
+
+#ifdef _EDITOR
+            // DEBUG: Log fog enable
+            static bool lastFogState = false;
+            if (!lastFogState)
+            {
+                g_MuEditorConsoleUI.LogEditor("[FOG] FOG ENABLED (pitch < -20°, horizon visible)");
+                lastFogState = true;
+            }
+#endif
+        }
+        else
+        {
+            FogEnable = false;  // Looking down, no fog
+
+#ifdef _EDITOR
+            // DEBUG: Log fog disable
+            static bool lastFogState = true;
+            if (lastFogState)
+            {
+                g_MuEditorConsoleUI.LogEditor("[FOG] FOG DISABLED (pitch >= -20°, no horizon)");
+                lastFogState = false;
+            }
+#endif
+        }
+    }
+    else
+    {
+        // Other cameras: Enable fog by default
+        FogEnable = true;
+    }
 
     vec3_t cameraPos;
     int width, height;

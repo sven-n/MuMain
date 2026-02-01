@@ -99,7 +99,7 @@ private:
     static constexpr float MAX_PITCH = 80.0f;   // Look up limit
     static constexpr float MIN_RADIUS = 200.0f;
     static constexpr float MAX_RADIUS = 2000.0f;
-    static constexpr float DEFAULT_RADIUS = 800.0f;
+    static constexpr float DEFAULT_RADIUS = 1100.0f;  // +300 to match Default Camera (3 scroll ticks further out)
 
     // Input state
     bool m_bRotating;             // Middle mouse button held?

@@ -123,6 +123,30 @@ void CDevEditorUI::RenderCameraTab()
                           "(200 = closest, 800 = default, 2000 = farthest)");
     }
 
+    // Fog status
+    extern bool FogEnable;
+    ImGui::Spacing();
+
+    // Get actual pitch used for fog calculation
+    float fogPitch = g_Camera.Angle[0];
+    if (cameraMode == 1)  // Orbital camera
+    {
+        float yaw, orbitalPitch;
+        GetOrbitalCameraAngles(&yaw, &orbitalPitch);
+        fogPitch = orbitalPitch;
+    }
+
+    if (FogEnable)
+    {
+        ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Fog: ENABLED");
+    }
+    else
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "Fog: DISABLED");
+    }
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "(pitch %.1f°, threshold -60°)", fogPitch);
+
     ImGui::Unindent();
     ImGui::Separator();
 

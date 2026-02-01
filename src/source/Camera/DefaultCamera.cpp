@@ -106,7 +106,8 @@ void DefaultCamera::ResetForScene(EGameScene scene)
                 extern CHARACTER* Hero;
                 m_State.Position[0] = Hero->Object.Position[0];
                 m_State.Position[1] = Hero->Object.Position[1];
-                m_State.Position[2] = Hero->Object.Position[2];
+                // Add offset to center character on screen (was showing feet at center)
+                m_State.Position[2] = Hero->Object.Position[2] + 150.0f;
             }
             break;
         }
@@ -775,11 +776,11 @@ void DefaultCamera::UpdateCameraDistance()
         {
             switch (g_shCameraLevel)
             {
-            case 0: m_State.DistanceTarget = 1000.f; break;
-            case 1: m_State.DistanceTarget = 1100.f; break;
-            case 2: m_State.DistanceTarget = 1200.f; break;
-            case 3: m_State.DistanceTarget = 1300.f; break;
-            case 4: m_State.DistanceTarget = 1400.f; break;
+            case 0: m_State.DistanceTarget = 1300.f; break;  // +300 (3 scroll ticks)
+            case 1: m_State.DistanceTarget = 1400.f; break;  // +300
+            case 2: m_State.DistanceTarget = 1500.f; break;  // +300
+            case 3: m_State.DistanceTarget = 1600.f; break;  // +300
+            case 4: m_State.DistanceTarget = 1700.f; break;  // +300
             case 5: m_State.DistanceTarget = g_Direction.m_fCameraViewFar; break;
             }
 
