@@ -337,18 +337,15 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
 {
     outByWaterMap = 0;
 
-    extern unsigned int WindowHeight;
-
     if (g_Camera.TopViewEnable == false)
     {
-        // Reserve space for bottom UI bar (48 pixels in 640×480 reference)
-        // Scale proportionally to actual screen height
-        int uiBarHeight = (48 * WindowHeight) / 480;
-        outHeight = WindowHeight - uiBarHeight;
+        // Use hardcoded value from original game (in 640×480 reference coordinates)
+        // This is then scaled by BeginOpengl() to actual window size
+        outHeight = 480 - 48;
     }
     else
     {
-        outHeight = WindowHeight;
+        outHeight = 480;
     }
 
     outWidth = GetScreenWidth();
