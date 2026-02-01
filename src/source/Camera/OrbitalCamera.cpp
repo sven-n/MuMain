@@ -531,6 +531,10 @@ void OrbitalCamera::HandleInput()
         m_Radius -= MouseWheel * zoomSpeed;
         m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
         MouseWheel = 0;
+
+        // FIX: Update terrain culling range based on zoom level
+        UpdateConfigForZoom();
+        UpdateFrustum();
     }
 
     // Middle mouse drag rotation - only rotate when button is held AND mouse moves
@@ -785,9 +789,9 @@ void OrbitalCamera::UpdateConfigForZoom()
 
     if (zoomRatio >= 1.0f)
     {
-        // Phase 5: Zooming OUT: Aggressive scaling to match ViewFar behavior
-        // At max zoom (2.5x), farPlane = base * 2.0x
-        float scale = 1.0f + (zoomRatio - 1.0f) * 0.67f;  // 1.0x to 2.0x
+        // Zooming OUT: Scale up to 1.5x max
+        // At max zoom (2.5x), farPlane = base * 1.5x
+        float scale = 1.0f + (zoomRatio - 1.0f) * 0.33f;  // 1.0x to 1.5x
         m_Config.farPlane = baseConfig.farPlane * scale;
         m_Config.terrainCullRange = baseConfig.terrainCullRange * scale;
     }

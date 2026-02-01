@@ -243,7 +243,28 @@ void Frustum::CalculateGroundProjection(const vec3_t position, const vec3_t forw
     groundForward[0] = forward[0];
     groundForward[1] = forward[1];
     groundForward[2] = 0.0f;
-    VectorNormalize(groundForward);
+
+    // FIX: When looking straight down, ground forward becomes (0,0,0)
+    // In this case, use a much larger radius for terrain culling
+    float groundLength = VectorLength(groundForward);
+    bool lookingStraightDown = (groundLength < 0.1f);
+
+    if (lookingStraightDown)
+    {
+        // Looking nearly straight down - use full circular radius
+        // Multiply terrainFarDist by 1.5x to ensure we see enough terrain
+        terrainFarDist *= 1.5f;
+        terrainFarWidth *= 1.5f;
+
+        // Use arbitrary forward direction for trapezoid calculation
+        groundForward[0] = 0.0f;
+        groundForward[1] = 1.0f;
+        groundForward[2] = 0.0f;
+    }
+    else
+    {
+        VectorNormalize(groundForward);
+    }
 
     // Project right onto XY plane
     vec3_t groundRight;

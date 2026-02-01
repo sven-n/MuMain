@@ -325,49 +325,62 @@ static void UpdateCoreSystems()
  */
 static void SetWorldClearColor()
 {
+    extern GLfloat FogColor[4];
+
     if (gMapManager.WorldActive == WD_0LORENCIA)
     {
         glClearColor(10 / 256.f, 20 / 256.f, 14 / 256.f, 1.f);  // Dark green
+        FogColor[0] = 10 / 256.f; FogColor[1] = 20 / 256.f; FogColor[2] = 14 / 256.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive == WD_2DEVIAS)
     {
         glClearColor(0.75f, 0.85f, 1.0f, 1.f);  // Light snowy blue
+        FogColor[0] = 0.75f; FogColor[1] = 0.85f; FogColor[2] = 1.0f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive == WD_10HEAVEN)
     {
         glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);  // Blue
+        FogColor[0] = 3.f / 256.f; FogColor[1] = 25.f / 256.f; FogColor[2] = 44.f / 256.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
     {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Black
+        FogColor[0] = 0.f; FogColor[1] = 0.f; FogColor[2] = 0.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.InHellas(gMapManager.WorldActive))
     {
         glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);  // Teal
+        FogColor[0] = 30.f / 256.f; FogColor[1] = 40.f / 256.f; FogColor[2] = 40.f / 256.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.InChaosCastle() == true)
     {
         glClearColor(0.f, 0.f, 0.f, 1.f);  // Black
+        FogColor[0] = 0.f; FogColor[1] = 0.f; FogColor[2] = 0.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.InBattleCastle() && battleCastle::InBattleCastle2(Hero->Object.Position))
     {
         glClearColor(0.f, 0.f, 0.f, 1.f);  // Black
+        FogColor[0] = 0.f; FogColor[1] = 0.f; FogColor[2] = 0.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
     {
         glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);  // Dark purple
+        FogColor[0] = 9.f / 256.f; FogColor[1] = 8.f / 256.f; FogColor[2] = 33.f / 256.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
     {
         glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);  // Gray
+        FogColor[0] = 178.f / 256.f; FogColor[1] = 178.f / 256.f; FogColor[2] = 178.f / 256.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
     {
         glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);  // Light blue
+        FogColor[0] = 148.f / 256.f; FogColor[1] = 179.f / 256.f; FogColor[2] = 223.f / 256.f; FogColor[3] = 1.f;
     }
     else
     {
         glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);  // Black (default)
+        FogColor[0] = 0.f; FogColor[1] = 0.f; FogColor[2] = 0.f; FogColor[3] = 1.f;
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

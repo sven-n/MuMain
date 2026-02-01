@@ -569,7 +569,8 @@ bool RenderMainScene()
         return false;
     }
 
-    FogEnable = false;
+    // Enable fog with colors matching background for atmospheric depth
+    FogEnable = true;
 
     vec3_t cameraPos;
     int width, height;
