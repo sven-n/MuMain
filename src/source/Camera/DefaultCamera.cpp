@@ -361,9 +361,9 @@ bool DefaultCamera::Update()
     if (VectorCompare(m_State.Position, lastPos) == false)
     {
         char debugMsg[256];
-        sprintf_s(debugMsg, "[CAM] After UpdateCameraDistance: Pos=(%.1f,%.1f,%.1f)",
-                  m_State.Position[0], m_State.Position[1], m_State.Position[2]);
-        g_MuEditorConsoleUI.LogEditor(debugMsg);
+        // sprintf_s(debugMsg, "[CAM] After UpdateCameraDistance: Pos=(%.1f,%.1f,%.1f)",
+        //           m_State.Position[0], m_State.Position[1], m_State.Position[2]);
+        // g_MuEditorConsoleUI.LogEditor(debugMsg);
         VectorCopy(m_State.Position, lastPos);
     }
 #endif
