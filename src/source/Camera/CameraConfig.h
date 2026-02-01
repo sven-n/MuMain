@@ -35,7 +35,16 @@ struct CameraConfig
     /** Far clipping plane distance */
     float farPlane = 2400.0f;
 
-    /** Aspect ratio (width / height) - usually calculated from screen dimensions */
+    /**
+     * Aspect ratio (width / height) - calculated dynamically from viewport dimensions
+     *
+     * This value is NOT used directly! BeginOpengl() calculates aspect ratio every frame
+     * from the current viewport (Width / Height) and passes it to SetupPerspective().
+     * This field is kept for reference/compatibility but the live aspect comes from window size.
+     *
+     * Window resizing (WM_SIZE) automatically updates WindowWidth/WindowHeight, and the
+     * next BeginOpengl() call will use the new dimensions to calculate the correct aspect ratio.
+     */
     float aspectRatio = 1.33f;
 
     // ========== Culling Parameters ==========

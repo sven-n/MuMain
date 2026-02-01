@@ -563,6 +563,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_ERASEBKGND:
         return TRUE;
         break;
+    case WM_SIZE:
+        if (wParam != SIZE_MINIMIZED)
+        {
+            // Update window dimensions
+            WindowWidth = LOWORD(lParam);
+            WindowHeight = HIWORD(lParam);
+
+            // Update screen rate factors
+            g_fScreenRate_x = (float)WindowWidth / 640.0f;
+            g_fScreenRate_y = (float)WindowHeight / 480.0f;
+
+            // Note: Projection matrix and frustum will be updated on next BeginOpengl() call
+            // No need to rebuild immediately - happens naturally in render loop
+        }
+        break;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;

@@ -56,8 +56,13 @@ void CDevEditorUI::Render(bool* p_open)
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Graphics"))
+        {
+            RenderGraphicsTab();
+            ImGui::EndTabItem();
+        }
+
         // Future tabs can be added here
-        // if (ImGui::BeginTabItem("Graphics")) { ... }
         // if (ImGui::BeginTabItem("Performance")) { ... }
 
         ImGui::EndTabBar();
@@ -710,6 +715,210 @@ void CDevEditorUI::RenderCameraTab()
 
     ImGui::Separator();
     ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Legend: ✓ Working  ✗ Not Working  ⊘ Not Implemented");
+}
+
+void CDevEditorUI::RenderGraphicsTab()
+{
+    ImGui::Text("Graphics Settings");
+    ImGui::Separator();
+
+    // Window dimensions
+    extern unsigned int WindowWidth;
+    extern unsigned int WindowHeight;
+    extern BOOL g_bUseWindowMode;
+    extern HWND g_hWnd;
+
+    ImGui::Text("Current Resolution: %u x %u", WindowWidth, WindowHeight);
+    ImGui::Text("Window Mode: %s", g_bUseWindowMode ? "Windowed" : "Fullscreen");
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // Window size presets
+    ImGui::Text("Window Size Presets:");
+
+    static const struct { int width; int height; const char* label; } resolutions[] = {
+        { 640, 480, "640 x 480 (4:3)" },
+        { 800, 600, "800 x 600 (4:3)" },
+        { 1024, 768, "1024 x 768 (4:3)" },
+        { 1280, 1024, "1280 x 1024 (5:4)" },
+        { 1280, 720, "1280 x 720 (16:9)" },
+        { 1600, 900, "1600 x 900 (16:9)" },
+        { 1600, 1200, "1600 x 1200 (4:3)" },
+        { 1680, 1050, "1680 x 1050 (16:10)" },
+        { 1920, 1080, "1920 x 1080 (16:9)" },
+        { 2560, 1440, "2560 x 1440 (16:9)" },
+    };
+
+    for (int i = 0; i < 10; i++)
+    {
+        if (i > 0 && i % 2 == 0)
+            ImGui::Spacing();
+
+        if (ImGui::Button(resolutions[i].label, ImVec2(200, 0)))
+        {
+            // Update window dimensions
+            WindowWidth = resolutions[i].width;
+            WindowHeight = resolutions[i].height;
+
+            // Update screen rate factors
+            extern float g_fScreenRate_x;
+            extern float g_fScreenRate_y;
+            g_fScreenRate_x = (float)WindowWidth / 640.0f;
+            g_fScreenRate_y = (float)WindowHeight / 480.0f;
+
+            // Resize window if in windowed mode
+            if (g_bUseWindowMode && g_hWnd)
+            {
+                RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
+                AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
+
+                int windowWidth = windowRect.right - windowRect.left;
+                int windowHeight = windowRect.bottom - windowRect.top;
+
+                SetWindowPos(g_hWnd, HWND_TOP, 0, 0, windowWidth, windowHeight,
+                            SWP_NOMOVE | SWP_NOZORDER);
+            }
+
+            char msg[128];
+            sprintf_s(msg, "Window resized to %ux%u", WindowWidth, WindowHeight);
+            g_MuEditorConsoleUI.LogEditor(msg);
+        }
+
+        if (i % 2 == 0)
+            ImGui::SameLine();
+    }
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // Custom resolution
+    ImGui::Text("Custom Resolution:");
+    static int customWidth = 1920;
+    static int customHeight = 1080;
+
+    ImGui::PushItemWidth(150);
+    ImGui::InputInt("Width", &customWidth, 10, 100);
+    ImGui::InputInt("Height", &customHeight, 10, 100);
+    ImGui::PopItemWidth();
+
+    // Clamp values
+    if (customWidth < 640) customWidth = 640;
+    if (customWidth > 3840) customWidth = 3840;
+    if (customHeight < 480) customHeight = 480;
+    if (customHeight > 2160) customHeight = 2160;
+
+    if (ImGui::Button("Apply Custom Size", ImVec2(200, 0)))
+    {
+        WindowWidth = customWidth;
+        WindowHeight = customHeight;
+
+        extern float g_fScreenRate_x;
+        extern float g_fScreenRate_y;
+        g_fScreenRate_x = (float)WindowWidth / 640.0f;
+        g_fScreenRate_y = (float)WindowHeight / 480.0f;
+
+        if (g_bUseWindowMode && g_hWnd)
+        {
+            RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
+            AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
+
+            int windowWidth = windowRect.right - windowRect.left;
+            int windowHeight = windowRect.bottom - windowRect.top;
+
+            SetWindowPos(g_hWnd, HWND_TOP, 0, 0, windowWidth, windowHeight,
+                        SWP_NOMOVE | SWP_NOZORDER);
+        }
+
+        char msg[128];
+        sprintf_s(msg, "Window resized to custom %ux%u", WindowWidth, WindowHeight);
+        g_MuEditorConsoleUI.LogEditor(msg);
+    }
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // Fullscreen toggle
+    ImGui::Text("Display Mode:");
+
+    bool isWindowed = g_bUseWindowMode == TRUE;
+    if (ImGui::Checkbox("Windowed Mode", &isWindowed))
+    {
+        g_bUseWindowMode = isWindowed ? TRUE : FALSE;
+
+        if (g_hWnd)
+        {
+            if (g_bUseWindowMode)
+            {
+                // Switch to windowed
+                ChangeDisplaySettings(nullptr, 0);
+
+                DWORD style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+                SetWindowLongPtr(g_hWnd, GWL_STYLE, style);
+
+                RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
+                AdjustWindowRect(&windowRect, style, FALSE);
+
+                int windowWidth = windowRect.right - windowRect.left;
+                int windowHeight = windowRect.bottom - windowRect.top;
+
+                SetWindowPos(g_hWnd, HWND_NOTOPMOST, 100, 100, windowWidth, windowHeight,
+                            SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+
+                g_MuEditorConsoleUI.LogEditor("Switched to windowed mode");
+            }
+            else
+            {
+                // Switch to fullscreen
+                DEVMODE dmScreenSettings;
+                memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+                dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+                dmScreenSettings.dmPelsWidth = WindowWidth;
+                dmScreenSettings.dmPelsHeight = WindowHeight;
+                dmScreenSettings.dmBitsPerPel = 32;
+                dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
+                if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
+                {
+                    DWORD style = WS_POPUP | WS_VISIBLE;
+                    SetWindowLongPtr(g_hWnd, GWL_STYLE, style);
+                    SetWindowPos(g_hWnd, HWND_TOPMOST, 0, 0, WindowWidth, WindowHeight,
+                                SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+
+                    g_MuEditorConsoleUI.LogEditor("Switched to fullscreen mode");
+                }
+                else
+                {
+                    g_bUseWindowMode = TRUE;  // Revert on failure
+                    g_MuEditorConsoleUI.LogEditor("Failed to switch to fullscreen mode");
+                }
+            }
+        }
+    }
+
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Toggle between windowed and fullscreen)");
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // Info
+    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Camera Auto-Adapts:");
+    ImGui::Text("• FOV stays constant (set in Camera tab)");
+    ImGui::Text("• Aspect ratio adjusts automatically");
+    ImGui::Text("• Wider screens = more horizontal view");
+    ImGui::Text("• Frustum cone updates each frame");
+
+    ImGui::Separator();
+
+    // Aspect ratio info
+    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    ImGui::Text("Current Aspect Ratio: %.3f (%s)", aspectRatio,
+                aspectRatio > 1.7f ? "Ultra-wide" :
+                aspectRatio > 1.6f ? "16:10" :
+                aspectRatio > 1.5f ? "16:9" :
+                aspectRatio > 1.4f ? "3:2" :
+                aspectRatio > 1.2f ? "5:4" : "4:3");
 }
 
 // Accessors for external use
