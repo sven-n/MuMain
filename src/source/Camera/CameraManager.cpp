@@ -181,10 +181,10 @@ extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float*
 
 #ifdef _EDITOR
         // DEBUG: Log what DevEditor is reading
-        char debugMsg[256];
-        sprintf_s(debugMsg, "[CAM] GetActiveCameraConfig: Camera=%s, FOV=%.1f, Far=%.0f, TerrainCull=%.0f",
-                  camera->GetName(), config.fov, config.farPlane, config.terrainCullRange);
-        g_MuEditorConsoleUI.LogEditor(debugMsg);
+        // char debugMsg[256];
+        // sprintf_s(debugMsg, "[CAM] GetActiveCameraConfig: Camera=%s, FOV=%.1f, Far=%.0f, TerrainCull=%.0f",
+        //           camera->GetName(), config.fov, config.farPlane, config.terrainCullRange);
+        // g_MuEditorConsoleUI.LogEditor(debugMsg);
 #endif
     }
 }
