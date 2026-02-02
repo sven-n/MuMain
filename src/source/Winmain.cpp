@@ -960,6 +960,44 @@ MSG MainLoop()
     return msg;
 }
 
+// Reinitialize fonts when window resolution changes
+void ReinitializeFonts()
+{
+    // Save old font handles
+    HFONT hOldFont = g_hFont;
+    HFONT hOldFontBold = g_hFontBold;
+    HFONT hOldFontBig = g_hFontBig;
+    HFONT hOldFixFont = g_hFixFont;
+
+    // Recalculate font sizes based on new WindowHeight
+    FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
+    int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
+    int iFontSize = FontHeight - 1;
+    int nFixFontSize = nFixFontHeight - 1;
+
+    // Create new fonts
+    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+
+    // Reinitialize the text rendering system with new device context and fonts
+    // This recreates the font buffer bitmap with new g_fScreenRate values
+    extern int g_iRenderTextType;
+    g_pRenderText->Release();
+    g_pRenderText->Create(g_iRenderTextType, g_hDC);
+    g_pRenderText->SetFont(g_hFont);
+
+    // Delete old fonts after the rendering system has been updated
+    if (hOldFont) DeleteObject(hOldFont);
+    if (hOldFontBold) DeleteObject(hOldFontBold);
+    if (hOldFontBig) DeleteObject(hOldFontBig);
+    if (hOldFixFont) DeleteObject(hOldFixFont);
+
+    // Also reinitialize CInput dimensions
+    CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
+}
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 {
     wchar_t lpszExeVersion[256] = L"unknown";
