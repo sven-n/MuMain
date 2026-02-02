@@ -269,7 +269,7 @@ void CSDevilSquareMatch::RenderMatchResult(void)
 
         // Render player ID
         std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
-        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(pResult->m_lpID), MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(pResult->m_lpID), MAX_USERNAME_SIZE);
         g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
 
         // Render score
@@ -307,7 +307,7 @@ void CSDevilSquareMatch::RenderMatchResult(void)
 
         // Render my ID
         std::fill(std::begin(lpszStr), std::end(lpszStr), L'\0');
-        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(myResult->m_lpID), MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(lpszStr, reinterpret_cast<char*>(myResult->m_lpID), MAX_USERNAME_SIZE);
         g_pRenderText->RenderText(xPos[2], yPos, lpszStr);
 
         // Render my score

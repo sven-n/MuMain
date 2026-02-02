@@ -1153,7 +1153,7 @@ void CUIGuildListBox::AddText(const wchar_t* pszID, BYTE Number, BYTE Server)
 
     static GUILDLIST_TEXT text;
     text.m_bIsSelected = FALSE;
-    wcsncpy(text.m_szID, pszID, MAX_ID_SIZE + 1);
+    wcsncpy(text.m_szID, pszID, MAX_USERNAME_SIZE + 1);
     //memcpy(text.m_szID, pszID, wcslen(pszID) + 1);
     text.m_Number = Number;
     text.m_Server = Server;
@@ -1336,7 +1336,7 @@ void CUISimpleChatListBox::AddText(const wchar_t* pszID, const wchar_t* pszText,
 
     static WHISPER_TEXT text;
     text.m_bIsSelected = FALSE;
-    wcsncpy(text.m_szID, pszID, MAX_ID_SIZE + 1);
+    wcsncpy(text.m_szID, pszID, MAX_USERNAME_SIZE + 1);
     //memcpy(text.m_szID, pszID, wcslen(pszID) + 1);
     text.m_iType = iType;
     text.m_iColor = iColor;
@@ -1451,7 +1451,7 @@ void CUISimpleChatListBox::AddTextToRenderList(const wchar_t* pszID, const wchar
     if (pszID == nullptr || pszText == nullptr) return;
 
     static WHISPER_TEXT text;
-    wcsncpy(text.m_szID, pszID, MAX_ID_SIZE + 1);
+    wcsncpy(text.m_szID, pszID, MAX_USERNAME_SIZE + 1);
     //memcpy(text.m_szID, pszID, wcslen(pszID) + 1);
     text.m_iType = iType;
     text.m_iColor = iColor;
@@ -1608,8 +1608,8 @@ void CUIChatPalListBox::AddText(const wchar_t* pszID, BYTE Number, BYTE Server)
 
     static GUILDLIST_TEXT text;
     text.m_bIsSelected = FALSE;
-    wcsncpy(text.m_szID, pszID, MAX_ID_SIZE);
-    text.m_szID[MAX_ID_SIZE] = '\0';
+    wcsncpy(text.m_szID, pszID, MAX_USERNAME_SIZE);
+    text.m_szID[MAX_USERNAME_SIZE] = '\0';
     //memcpy(text.m_szID, pszID, wcslen(pszID) + 1);
     text.m_Number = Number;
     text.m_Server = Server;
@@ -1635,7 +1635,7 @@ void CUIChatPalListBox::DeleteText(const wchar_t* pszID)
     if (pszID == nullptr || wcslen(pszID) == 0) return;
     for (m_TextListIter = m_TextList.begin(); m_TextListIter != m_TextList.end(); ++m_TextListIter)
     {
-        if (wcsncmp(m_TextListIter->m_szID, pszID, MAX_ID_SIZE) == 0)
+        if (wcsncmp(m_TextListIter->m_szID, pszID, MAX_USERNAME_SIZE) == 0)
             break;
     }
     if (m_TextListIter == m_TextList.end()) return;
@@ -1668,14 +1668,14 @@ void CUIChatPalListBox::MakeTitleText(wchar_t* pszTitleText)
     std::deque<GUILDLIST_TEXT>::reverse_iterator riter;
     for (riter = m_TextList.rbegin(); riter != m_TextList.rend(); ++riter)
     {
-        if (wcsncmp(riter->m_szID, Hero->ID, MAX_ID_SIZE) != 0)
+        if (wcsncmp(riter->m_szID, Hero->ID, MAX_USERNAME_SIZE) != 0)
         {
             if (iNameNum > 0)
             {
                 wcscat(pszTitleText, L", L");
             }
 
-            wcsncat(pszTitleText, riter->m_szID, MAX_ID_SIZE);
+            wcsncat(pszTitleText, riter->m_szID, MAX_USERNAME_SIZE);
             ++iNameNum;
 
             if (iNameNum >= 3)
@@ -2041,7 +2041,7 @@ void CUILetterListBox::AddText(const wchar_t* pszID, const wchar_t* pszText, con
 {
     static LETTERLIST_TEXT text;
     text.m_bIsSelected = FALSE;
-    wcsncpy(text.m_szID, pszID, MAX_ID_SIZE + 1);
+    wcsncpy(text.m_szID, pszID, MAX_USERNAME_SIZE + 1);
     wcsncpy(text.m_szText, pszText, MAX_TEXT_LENGTH + 1);
     wcsncpy(text.m_szDate, pszDate, 16);
     wcsncpy(text.m_szTime, pszTime, 16);
@@ -4696,7 +4696,7 @@ void CUINewGuildMemberListBox::AddText(const wchar_t* pszID, BYTE Number, BYTE S
 
     static GUILDLIST_TEXT text;
     text.m_bIsSelected = FALSE;
-    wcsncpy(text.m_szID, pszID, MAX_ID_SIZE + 1);
+    wcsncpy(text.m_szID, pszID, MAX_USERNAME_SIZE + 1);
     //memcpy(text.m_szID, pszID, wcslen(pszID) + 1);
     text.m_Number = Number;
     text.m_Server = Server;
@@ -6030,7 +6030,7 @@ void CUIInGameShopListBox::AddText(IGS_StorageItem& _StorageItem)
     wcsncpy(sItem.m_szNum, _StorageItem.m_szNum, MAX_TEXT_LENGTH);
     wcsncpy(sItem.m_szPeriod, _StorageItem.m_szPeriod, MAX_TEXT_LENGTH);
     wcsncpy(&(sItem.m_szType), &(_StorageItem.m_szType), sizeof(wchar_t));
-    wcsncpy(sItem.m_szSendUserName, _StorageItem.m_szSendUserName, MAX_ID_SIZE + 1);
+    wcsncpy(sItem.m_szSendUserName, _StorageItem.m_szSendUserName, MAX_USERNAME_SIZE + 1);
     wcsncpy(sItem.m_szMessage, _StorageItem.m_szMessage, MAX_GIFT_MESSAGE_SIZE);
 
     m_TextList.push_front(sItem);

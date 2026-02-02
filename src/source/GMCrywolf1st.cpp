@@ -50,7 +50,7 @@ int Exp = 0;
 BYTE Ranking[5];
 CLASS_TYPE HeroClass[5];
 int HeroScore[5] = { -1,-1,-1,-1,-1 };
-wchar_t HeroName[5][MAX_ID_SIZE + 1];
+wchar_t HeroName[5][MAX_USERNAME_SIZE + 1];
 
 int BackUpMin = 0;
 bool TimeStart = false;
@@ -2727,6 +2727,6 @@ void M34CryWolf1st::Set_WorldRank(BYTE Rank, CLASS_TYPE Class, int Score, wchar_
 {
     HeroScore[Rank] = Score;
     HeroClass[Rank] = Class;
-    memcpy(HeroName[Rank], szHeroName, MAX_ID_SIZE);
-    HeroName[Rank][MAX_ID_SIZE] = NULL;
+    wcsncpy_s(HeroName[Rank], szHeroName, MAX_USERNAME_SIZE);
+    HeroName[Rank][MAX_USERNAME_SIZE] = L'\0';
 }

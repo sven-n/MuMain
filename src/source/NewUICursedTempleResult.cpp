@@ -365,7 +365,7 @@ void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYT
         auto data2 = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
 
         CursedTempleGameResult TempData{};
-        CMultiLanguage::ConvertFromUtf8(TempData.s_characterId, data2->GameId, MAX_ID_SIZE);
+        CMultiLanguage::ConvertFromUtf8(TempData.s_characterId, data2->GameId, MAX_USERNAME_SIZE);
 
         TempData.s_mapnumber = (short)data2->byMapNumber;
 

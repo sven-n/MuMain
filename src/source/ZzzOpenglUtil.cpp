@@ -65,7 +65,7 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
 {
     typedef struct  __day_history__
     {
-        wchar_t ID[MAX_ID_SIZE + 1];
+        wchar_t ID[MAX_USERNAME_SIZE + 1];
         WORD date;
     }dayHistory;
 
@@ -88,7 +88,7 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
         {
             for (int i = 0; i < num; ++i)
             {
-                fread(days[i].ID, sizeof(char), MAX_ID_SIZE + 1, fp);
+                fread(days[i].ID, sizeof(char), MAX_USERNAME_SIZE + 1, fp);
                 fread(&days[i].date, sizeof(WORD), 1, fp);
 
                 if (!wcscmp(days[i].ID, Name))
@@ -111,7 +111,7 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
     {
         if (!sameName)
         {
-            memcpy(days[num].ID, Name, (MAX_ID_SIZE + 1) * sizeof(char));
+            memcpy(days[num].ID, Name, (MAX_USERNAME_SIZE + 1) * sizeof(char));
             days[num].date = day;
 
             num++;
@@ -122,7 +122,7 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
         fwrite(&num, sizeof(WORD), 1, fp);
         for (int i = 0; i < num; ++i)
         {
-            fwrite(days[i].ID, sizeof(char), MAX_ID_SIZE + 1, fp);
+            fwrite(days[i].ID, sizeof(char), MAX_USERNAME_SIZE + 1, fp);
             fwrite(&days[i].date, sizeof(WORD), 1, fp);
         }
 

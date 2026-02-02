@@ -45,7 +45,7 @@ enum UIOPTIONS
 typedef struct
 {
     BOOL	m_bIsSelected;
-    wchar_t	m_szID[MAX_ID_SIZE + 1];
+    wchar_t	m_szID[MAX_USERNAME_SIZE + 1];
     wchar_t	m_szText[MAX_TEXT_LENGTH + 1];
     int		m_iType;
     int		m_iColor;
@@ -55,7 +55,7 @@ typedef struct
 typedef struct
 {
     BOOL	m_bIsSelected;
-    wchar_t	m_szID[MAX_ID_SIZE + 1];
+    wchar_t	m_szID[MAX_USERNAME_SIZE + 1];
     BYTE	m_Number;
     BYTE	m_Server;
     BYTE	m_GuildStatus;
@@ -79,7 +79,7 @@ typedef struct
 {
     BOOL	m_bIsSelected;
     DWORD	m_dwLetterID;
-    wchar_t	m_szID[MAX_ID_SIZE + 1];
+    wchar_t	m_szID[MAX_USERNAME_SIZE + 1];
     wchar_t	m_szText[MAX_TEXT_LENGTH + 1];
     wchar_t	m_szDate[16];
     wchar_t	m_szTime[16];
@@ -1109,7 +1109,7 @@ typedef struct
     wchar_t m_szName[MAX_TEXT_LENGTH];
     wchar_t m_szNum[MAX_TEXT_LENGTH];
     wchar_t m_szPeriod[MAX_TEXT_LENGTH];
-    wchar_t m_szSendUserName[MAX_ID_SIZE + 1];
+    wchar_t m_szSendUserName[MAX_USERNAME_SIZE + 1];
     wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
     wchar_t m_szType;
 }IGS_StorageItem;

@@ -160,10 +160,10 @@ void CUIPopup::Close()
             g_pSingleTextInputBox->SetState(UISTATE_HIDE);
         }
         else
-            memset(InputText[0], 0, MAX_ID_SIZE);
+            memset(InputText[0], 0, MAX_USERNAME_SIZE);
 
         InputLength[0] = 0;
-        InputTextMax[0] = MAX_ID_SIZE;
+        InputTextMax[0] = MAX_USERNAME_SIZE;
     }
 
     m_dwPopupID = 0;

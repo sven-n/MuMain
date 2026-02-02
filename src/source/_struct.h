@@ -349,7 +349,7 @@ private:
 
 typedef struct
 {
-    wchar_t Name[MAX_ID_SIZE + 1];
+    wchar_t Name[MAX_USERNAME_SIZE + 1];
     CLASS_TYPE Class;
     BYTE Skin;
     BYTE InventoryExtensions;
@@ -542,7 +542,7 @@ typedef struct
 //inventory start
 typedef struct
 {
-    wchar_t Name[MAX_ID_SIZE + 1];
+    wchar_t Name[MAX_USERNAME_SIZE + 1];
     BYTE Number;
     BYTE Server;
     BYTE GuildStatus;
@@ -558,7 +558,7 @@ typedef struct
 
 typedef struct
 {
-    wchar_t    Name[MAX_ID_SIZE + 1];
+    wchar_t    Name[MAX_USERNAME_SIZE + 1];
     BYTE    Number;
     BYTE    Map;
     BYTE    x;
@@ -573,7 +573,7 @@ typedef struct
 //interface start
 typedef struct
 {
-    wchar_t      ID[MAX_ID_SIZE + 1];
+    wchar_t      ID[MAX_USERNAME_SIZE + 1];
     wchar_t      Text[256];
     int       Type;
     int       LifeTime;
@@ -591,7 +591,7 @@ typedef struct
 //matchevent start
 typedef struct
 {
-    wchar_t	m_lpID[MAX_ID_SIZE];
+    wchar_t	m_lpID[MAX_USERNAME_SIZE];
     int		m_iScore;
     DWORD	m_dwExp;
     int		m_iZen;
@@ -679,7 +679,7 @@ typedef struct
 //cseventmatch start
 typedef struct
 {
-    BYTE	m_lpID[MAX_ID_SIZE];
+    BYTE	m_lpID[MAX_USERNAME_SIZE];
     DWORD	m_iScore;
     DWORD	m_dwExp;
     DWORD	m_iZen;

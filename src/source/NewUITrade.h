@@ -2,7 +2,7 @@
 // File: NewUITrade.h
 //
 // Desc: interface for the CNewUITrade class.
-//		 거래창 클래스.
+//       Trade Window class.
 //
 // producer: Ahn Sang-Kyu
 //*****************************************************************************
@@ -55,29 +55,29 @@ namespace SEASON3B
 
         enum TRADE_BUTTON
         {
-            BTN_CLOSE = 0,			// 창 닫기.
-            BTN_ZEN_INPUT,			// 젠 입력.
+            BTN_CLOSE = 0,            // Close window
+            BTN_ZEN_INPUT,            // Zen input
             MAX_BTN
         };
 
-        CNewUIManager* m_pNewUIMng;			// UI 매니저.
-        POINT					m_Pos;					// 창의 위치.
-        CNewUIButton			m_abtn[MAX_BTN];		// 버튼.
-        POINT					m_posMyConfirm;			// 내 확정 버튼 위치.
-        CNewUIInventoryCtrl* m_pYourInvenCtrl;		// 상대방 물품 컨트롤.
-        CNewUIInventoryCtrl* m_pMyInvenCtrl;			// 내 물품 컨트롤.
-        ITEM					m_aYourInvenBackUp[MAX_TRADE_INVEN];// 상대방 물품 백업.
+        CNewUIManager* m_pNewUIMng;            // UI Manager
+        POINT          m_Pos;                  // Window position
+        CNewUIButton   m_abtn[MAX_BTN];        // Buttons
+        POINT          m_posMyConfirm;         // My confirmation button position
+        CNewUIInventoryCtrl* m_pYourInvenCtrl; // Other player's item control
+        CNewUIInventoryCtrl* m_pMyInvenCtrl;   // My item control
+        ITEM           m_aYourInvenBackUp[MAX_TRADE_INVEN]; // Other player's item backup
 
-        wchar_t					m_szYourID[MAX_ID_SIZE + 1];// 거래 사용자의 아이디.
-        int						m_nYourLevel;			// 거래 사용자의 레벨.
-        int						m_nYourGuildType;		// 상대방 길드 타입.
-        int						m_nYourTradeGold;		// 상대방 거래할 돈.
-        int						m_nMyTradeGold;			// 자신의 거래할 돈.
-        int						m_nTempMyTradeGold;		// 자신의 거래할 돈 임시 공간.
-        bool					m_bYourConfirm;			// 상대방 거래 결정 상태.
-        bool					m_bMyConfirm;			// 자신의 거래 결정 상태.
-        int						m_nMyTradeWait;			// 자신의 거래 결정 버튼 못 누르게 하는 대기 시간.
-        bool					m_bTradeAlert;			// 거래시 경고.
+        wchar_t        m_szYourID[MAX_USERNAME_SIZE + 1]; // Other player's ID
+        int            m_nYourLevel;           // Other player's level
+        int            m_nYourGuildType;       // Other player's guild type
+        int            m_nYourTradeGold;       // Other player's trade gold
+        int            m_nMyTradeGold;         // My trade gold
+        int            m_nTempMyTradeGold;     // Temporary buffer for my trade gold
+        bool           m_bYourConfirm;         // Other player's confirmation status
+        bool           m_bMyConfirm;           // My confirmation status
+        int            m_nMyTradeWait;         // Delay to prevent spamming my confirm button
+        bool           m_bTradeAlert;          // Trade warning alert
 
     public:
         CNewUITrade();
@@ -97,12 +97,12 @@ namespace SEASON3B
 
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
-        // (격자 모양의) 상대편 거래 소지품 컨트롤을 얻음.
+        // Returns the other player's (grid-based) trade inventory control.
         CNewUIInventoryCtrl* GetYourInvenCtrl() const
         {
             return m_pYourInvenCtrl;
         }
-        // (격자 모양의) 자신의 거래 소지품 컨트롤을 얻음.
+        // Returns the local player's (grid-based) trade inventory control.
         CNewUIInventoryCtrl* GetMyInvenCtrl() const
         {
             return m_pMyInvenCtrl;

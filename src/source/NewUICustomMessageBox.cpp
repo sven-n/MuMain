@@ -4186,10 +4186,10 @@ CALLBACK_RESULT SEASON3B::CDuelResultMsgBox::OkBtnDown(class CNewUIMessageBoxBas
 
 void CDuelResultMsgBox::SetIDs(wchar_t* pszWinnerID, wchar_t* pszLoserID)
 {
-    wcsncpy(m_szWinnerID, pszWinnerID, MAX_ID_SIZE);
-    m_szWinnerID[MAX_ID_SIZE] = '\0';
-    wcsncpy(m_szLoserID, pszLoserID, MAX_ID_SIZE);
-    m_szLoserID[MAX_ID_SIZE] = '\0';
+    wcsncpy(m_szWinnerID, pszWinnerID, MAX_USERNAME_SIZE);
+    m_szWinnerID[MAX_USERNAME_SIZE] = '\0';
+    wcsncpy(m_szLoserID, pszLoserID, MAX_USERNAME_SIZE);
+    m_szLoserID[MAX_USERNAME_SIZE] = '\0';
 }
 
 CCherryBlossomMsgBox::CCherryBlossomMsgBox()

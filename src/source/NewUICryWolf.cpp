@@ -35,7 +35,7 @@ extern int Exp;
 extern BYTE Ranking[5];
 extern BYTE HeroClass[5];
 extern int HeroScore[5];
-extern wchar_t HeroName[5][MAX_ID_SIZE + 1];
+extern wchar_t HeroName[5][MAX_USERNAME_SIZE + 1];
 
 extern int BackUpMin;
 extern bool TimeStart;
