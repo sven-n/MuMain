@@ -89,6 +89,7 @@ extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();
 extern void DestroySound();
 extern void ReinitializeFonts();
+extern void UpdateResolutionDependentSystems();
 
 //#if defined _DEBUG || defined PBG_LOG_PACKET_WINSOCKERROR
 //	#include "./Utilities/Log/DebugAngel.h"
