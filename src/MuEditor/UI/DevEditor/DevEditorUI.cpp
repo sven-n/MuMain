@@ -9,6 +9,7 @@
 #include "CameraMove.h"
 #include "ZzzCharacter.h"
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "GameConfig.h"
 
 // External C functions
 extern "C" CameraManager& CameraManager_Instance();
@@ -837,9 +838,15 @@ void CDevEditorUI::RenderGraphicsTab()
             OpenglWindowWidth = WindowWidth;
             OpenglWindowHeight = WindowHeight;
 
-            // Reinitialize fonts for new resolution
+            // Save to config file
+            g_GameConfig.SetWindowSize(WindowWidth, WindowHeight);
+            g_GameConfig.Save();
+
+            // Reinitialize fonts and update resolution-dependent systems
             extern void ReinitializeFonts();
+            extern void UpdateResolutionDependentSystems();
             ReinitializeFonts();
+            UpdateResolutionDependentSystems();
 
             // Resize window if in windowed mode
             if (g_bUseWindowMode && g_hWnd)
@@ -898,9 +905,15 @@ void CDevEditorUI::RenderGraphicsTab()
         OpenglWindowWidth = WindowWidth;
         OpenglWindowHeight = WindowHeight;
 
-        // Reinitialize fonts for new resolution
+        // Save to config file
+        g_GameConfig.SetWindowSize(WindowWidth, WindowHeight);
+        g_GameConfig.Save();
+
+        // Reinitialize fonts and update resolution-dependent systems
         extern void ReinitializeFonts();
+        extern void UpdateResolutionDependentSystems();
         ReinitializeFonts();
+        UpdateResolutionDependentSystems();
 
         if (g_bUseWindowMode && g_hWnd)
         {
@@ -936,9 +949,15 @@ void CDevEditorUI::RenderGraphicsTab()
         OpenglWindowWidth = WindowWidth;
         OpenglWindowHeight = WindowHeight;
 
-        // Reinitialize fonts for new resolution
+        // Save window mode to config
+        g_GameConfig.SetWindowMode(g_bUseWindowMode == TRUE);
+        g_GameConfig.Save();
+
+        // Reinitialize fonts and update resolution-dependent systems
         extern void ReinitializeFonts();
+        extern void UpdateResolutionDependentSystems();
         ReinitializeFonts();
+        UpdateResolutionDependentSystems();
 
         if (g_hWnd)
         {
@@ -1013,6 +1032,27 @@ void CDevEditorUI::RenderGraphicsTab()
                 aspectRatio > 1.5f ? "16:9" :
                 aspectRatio > 1.4f ? "3:2" :
                 aspectRatio > 1.2f ? "5:4" : "4:3");
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // Manual save button
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.5f, 1.0f), "Settings Auto-Save:");
+    ImGui::Text("• Settings save automatically when:");
+    ImGui::Text("  - Changing resolution");
+    ImGui::Text("  - Toggling window mode");
+    ImGui::Text("  - Exiting the game");
+    ImGui::Spacing();
+
+    if (ImGui::Button("Save Settings Now", ImVec2(200, 0)))
+    {
+        g_GameConfig.SetWindowSize(WindowWidth, WindowHeight);
+        g_GameConfig.SetWindowMode(g_bUseWindowMode == TRUE);
+        g_GameConfig.Save();
+        g_MuEditorConsoleUI.LogEditor("Settings saved to config.ini");
+    }
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Saves to config.ini)");
 }
 
 // Accessors for external use
