@@ -837,6 +837,10 @@ void CDevEditorUI::RenderGraphicsTab()
             OpenglWindowWidth = WindowWidth;
             OpenglWindowHeight = WindowHeight;
 
+            // Reinitialize fonts for new resolution
+            extern void ReinitializeFonts();
+            ReinitializeFonts();
+
             // Resize window if in windowed mode
             if (g_bUseWindowMode && g_hWnd)
             {
@@ -894,6 +898,10 @@ void CDevEditorUI::RenderGraphicsTab()
         OpenglWindowWidth = WindowWidth;
         OpenglWindowHeight = WindowHeight;
 
+        // Reinitialize fonts for new resolution
+        extern void ReinitializeFonts();
+        ReinitializeFonts();
+
         if (g_bUseWindowMode && g_hWnd)
         {
             RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
@@ -927,6 +935,10 @@ void CDevEditorUI::RenderGraphicsTab()
         extern int OpenglWindowHeight;
         OpenglWindowWidth = WindowWidth;
         OpenglWindowHeight = WindowHeight;
+
+        // Reinitialize fonts for new resolution
+        extern void ReinitializeFonts();
+        ReinitializeFonts();
 
         if (g_hWnd)
         {
