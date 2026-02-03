@@ -41,13 +41,13 @@ extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 CLoginWin::CLoginWin()
 {
     m_pUsernameInputBox = NULL;
-    m_pPassInputBox = NULL;
+    m_pPasswordInputBox = NULL;
 }
 
 CLoginWin::~CLoginWin()
 {
     SAFE_DELETE(m_pUsernameInputBox);
-    SAFE_DELETE(m_pPassInputBox);
+    SAFE_DELETE(m_pPasswordInputBox);
 }
 
 void CLoginWin::Create()
@@ -92,20 +92,20 @@ void CLoginWin::Create()
         m_aBtnRememberMe.SetCheck(true);
     }
 
-    SAFE_DELETE(m_pPassInputBox);
+    SAFE_DELETE(m_pPasswordInputBox);
 
-    m_pPassInputBox = new CUITextInputBox;
-    m_pPassInputBox->Init(g_hWnd, 140, 14, MAX_PASSWORD_SIZE, TRUE);
-    m_pPassInputBox->SetBackColor(0, 0, 0, 25);
-    m_pPassInputBox->SetTextColor(255, 255, 230, 210);
-    m_pPassInputBox->SetFont(g_hFixFont);
-    m_pPassInputBox->SetState(UISTATE_NORMAL);
+    m_pPasswordInputBox = new CUITextInputBox;
+    m_pPasswordInputBox->Init(g_hWnd, 140, 14, MAX_PASSWORD_SIZE, TRUE);
+    m_pPasswordInputBox->SetBackColor(0, 0, 0, 25);
+    m_pPasswordInputBox->SetTextColor(255, 255, 230, 210);
+    m_pPasswordInputBox->SetFont(g_hFixFont);
+    m_pPasswordInputBox->SetState(UISTATE_NORMAL);
 
-    m_pUsernameInputBox->SetTabTarget(m_pPassInputBox);
-    m_pPassInputBox->SetTabTarget(m_pUsernameInputBox);
+    m_pUsernameInputBox->SetTabTarget(m_pPasswordInputBox);
+    m_pPasswordInputBox->SetTabTarget(m_pUsernameInputBox);
 
     if (m_RememberMe) {
-        m_pPassInputBox->SetText(m_Password);
+        m_pPasswordInputBox->SetText(m_Password);
         m_aBtnRememberMe.SetCheck(true);
     }
 
@@ -130,7 +130,7 @@ void CLoginWin::SetPosition(int x, int y)
 	{
 		const int boxX = int((x + 115) / g_fScreenRate_x);
 		m_pUsernameInputBox->SetPosition(boxX, int((y + 112) / g_fScreenRate_y));
-		m_pPassInputBox->SetPosition(boxX, int((y + 137) / g_fScreenRate_y));
+		m_pPasswordInputBox->SetPosition(boxX, int((y + 137) / g_fScreenRate_y));
 	}
 
 	m_aBtn[LIW_OK].SetPosition(x + 150, y + 178);
@@ -191,14 +191,14 @@ void CLoginWin::UpdateWhileActive(double)
 void CLoginWin::UpdateWhileShow(double dDeltaTick)
 {
     m_pUsernameInputBox->DoAction();
-    m_pPassInputBox->DoAction();
+    m_pPasswordInputBox->DoAction();
 }
 
 void CLoginWin::RenderControls()
 {
     if (FirstLoad)
     {
-        (wcslen(m_Username) > 0 ? m_pPassInputBox : m_pUsernameInputBox)->GiveFocus();
+        (wcslen(m_Username) > 0 ? m_pPasswordInputBox : m_pUsernameInputBox)->GiveFocus();
         FirstLoad = 0;
     }
 
@@ -206,7 +206,7 @@ void CLoginWin::RenderControls()
     m_asprInputBox[LIW_ACCOUNT].Render();
     m_asprInputBox[LIW_PASSWORD].Render();
     m_pUsernameInputBox->Render();
-    m_pPassInputBox->Render();
+    m_pPasswordInputBox->Render();
 
     g_pRenderText->SetFont(g_hFixFont);
     g_pRenderText->SetBgColor(0);
@@ -234,7 +234,7 @@ void CLoginWin::RequestLogin()
     CUIMng::Instance().HideWin(this);
 
     m_pUsernameInputBox->GetText(m_Username, _countof(m_Username));
-    m_pPassInputBox->GetText(m_Password, _countof(m_Password));
+    m_pPasswordInputBox->GetText(m_Password, _countof(m_Password));
 
     // Handle credentials saving
     if (m_aBtnRememberMe.IsCheck())

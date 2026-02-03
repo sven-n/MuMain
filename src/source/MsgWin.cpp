@@ -472,13 +472,13 @@ void CMsgWin::ManageOKClick()
     case RECEIVE_LOG_IN_FAIL_INVALID_IP:
     case RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL:
         rUIMng.ShowWin(&rUIMng.m_LoginWin);
-        CUIMng::Instance().m_LoginWin.GetIDInputBox()->GiveFocus(TRUE);
+        CUIMng::Instance().m_LoginWin.GetUsernameInputBox()->GiveFocus(TRUE);
         CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
         break;
     case MESSAGE_INPUT_PASSWORD:
     case RECEIVE_LOG_IN_FAIL_PASSWORD:
         rUIMng.ShowWin(&rUIMng.m_LoginWin);
-        CUIMng::Instance().m_LoginWin.GetPassInputBox()->GiveFocus(TRUE);
+        CUIMng::Instance().m_LoginWin.GetPasswordInputBox()->GiveFocus(TRUE);
         CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
         break;
     case MESSAGE_DELETE_CHARACTER_CONFIRM:
