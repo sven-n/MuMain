@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <windows.h>
@@ -69,7 +70,7 @@ private:
     GameConfig(const GameConfig&) = delete;
     GameConfig& operator=(const GameConfig&) = delete;
 
-    std::wstring m_configPath;
+    std::filesystem::path m_configPath;
 
     int  m_windowWidth;
     int  m_windowHeight;
