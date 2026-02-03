@@ -165,8 +165,8 @@ struct CameraConfig
         config.farPlane = 265200.0f;
         config.terrainCullRange = 265200.0f;
         config.objectCullRange = 265200.0f;
-        config.frustumWidthNear = 150.0f;
-        config.frustumWidthFar = 2500.0f;
+        config.frustumWidthNear = 1000.0f;
+        config.frustumWidthFar = 5000.0f;
         return config;
     }
 

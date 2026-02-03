@@ -32,6 +32,13 @@
 // Phase 5: Camera system includes for 3D frustum culling
 #include "Camera/CameraManager.h"
 #include "Camera/ICamera.h"
+#include "CullingConstants.h"
+
+// DevEditor function declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldShowCharacterCullingSpheres();
+#endif
+
 #include "CSChaosCastle.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
@@ -6353,7 +6360,7 @@ void MoveCharacterClient(CHARACTER* cc)
         // Phase 5: Test 3D frustum culling with inverted plane normals
         // Characters are tall (~150-200 units), position is at feet
         // Use large radius to cover full character height
-        co->Visible = TestFrustrum(co->Position, 1000.0f);
+        co->Visible = TestFrustrum(co->Position, CULL_RADIUS_CHARACTER);
 
         MoveMonsterClient(cc, co);
         MoveCharacter(cc, co);
@@ -6381,7 +6388,7 @@ void MoveCharactersClient()
         }
 
         // Phase 5: Test 3D frustum culling with inverted plane normals
-        to->Visible = TestFrustrum(to->Position, 1000.0f);
+        to->Visible = TestFrustrum(to->Position, CULL_RADIUS_CHARACTER);
     }
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -11270,6 +11277,14 @@ void RenderCharactersClient()
 
                 if (o->Type == MODEL_PLAYER)
                     battleCastle::CreateBattleCastleCharacter_Visual(c, o);
+
+#ifdef _EDITOR
+                // Debug visualization: Render character culling sphere
+                if (DevEditor_ShouldShowCharacterCullingSpheres())
+                {
+                    RenderDebugSphere(o->Position, CULL_RADIUS_CHARACTER, 0.0f, 1.0f, 1.0f);  // Cyan wireframe
+                }
+#endif
             }
         }
     }

@@ -56,6 +56,11 @@ public:
     bool IsTargetCharacterEnabled() const { return m_TargetCharacterEnabled; }
     int GetTargetCharacterIndex() const { return m_TargetCharacterIndex; }
 
+    // Culling sphere visualization accessors
+    bool ShouldShowTerrainCullingSpheres() const { return m_ShowTerrainCullingSpheres; }
+    bool ShouldShowObjectCullingSpheres() const { return m_ShowObjectCullingSpheres; }
+    bool ShouldShowCharacterCullingSpheres() const { return m_ShowCharacterCullingSpheres; }
+
 private:
     CDevEditorUI() = default;
     ~CDevEditorUI() = default;
@@ -114,6 +119,11 @@ private:
     bool m_RenderHero = true;             // NOT IMPLEMENTED
     bool m_RenderNPCs = true;             // NOT IMPLEMENTED
     bool m_RenderMonsters = true;         // NOT IMPLEMENTED
+
+    // Culling sphere visualization flags
+    bool m_ShowTerrainCullingSpheres = false;    // Show terrain tile culling spheres
+    bool m_ShowObjectCullingSpheres = false;     // Show object culling spheres (trees, items, etc.)
+    bool m_ShowCharacterCullingSpheres = false;  // Show character culling spheres
 };
 
 #define g_DevEditorUI CDevEditorUI::GetInstance()

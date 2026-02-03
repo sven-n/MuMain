@@ -36,6 +36,12 @@
 #include "Camera/CameraManager.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/OrbitalCamera.h"
+#include "CullingConstants.h"
+
+// DevEditor function declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldShowObjectCullingSpheres();
+#endif
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
@@ -3312,16 +3318,17 @@ void RenderObjects(ICamera* camera)
                         else
                             if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                             {
+                                // Determine culling radius based on object type (shared between culling and visualization)
+                                float cullRadius = CULL_RADIUS_OBJECT_SMALL;
+                                if ((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127))
+                                {
+                                    cullRadius = CULL_RADIUS_OBJECT_LARGE;  // Larger objects need bigger radius
+                                }
+
                                 // Use 3D camera culling for LoginScene
                                 bool visible = false;
                                 if (camera)
                                 {
-                                    // Use proper 3D frustum culling with appropriate radius for object type
-                                    float cullRadius = 500.0f;
-                                    if ((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127))
-                                    {
-                                        cullRadius = 1000.0f;  // Larger objects need bigger radius
-                                    }
                                     visible = !camera->ShouldCullObject(o->Position, cullRadius);
                                 }
                                 else
@@ -3332,7 +3339,7 @@ void RenderObjects(ICamera* camera)
                                     float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
                                     float fDis = 2000.0f;
 
-                                    if ((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127))
+                                    if (cullRadius == CULL_RADIUS_OBJECT_LARGE)
                                     {
                                         visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis * 2.0f;
                                     }
@@ -3360,6 +3367,14 @@ void RenderObjects(ICamera* camera)
 
                                     RenderObject(o);
                                     RenderObjectVisual(o);
+
+#ifdef _EDITOR
+                                    // Debug visualization: Render static object culling sphere (uses same cullRadius variable)
+                                    if (DevEditor_ShouldShowObjectCullingSpheres())
+                                    {
+                                        RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+                                    }
+#endif
                                 }
                                 else
                                 {
@@ -3459,6 +3474,24 @@ void RenderObjects(ICamera* camera)
                                                 {
                                                     RenderObject(o);
                                                     RenderObjectVisual(o);
+
+#ifdef _EDITOR
+                                                    // Debug visualization: Render world object culling sphere (trees, walls, grass, etc.)
+                                                    if (DevEditor_ShouldShowObjectCullingSpheres())
+                                                    {
+                                                        // Note: CollisionRange is typically negative (tolerance in tile units)
+                                                        // For 2D culling: negative = expanded frustum (more permissive)
+                                                        // For visualization: show absolute value as approximate radius
+                                                        float cullRadius = o->CollisionRange + range;
+                                                        if (cullRadius < 0)
+                                                        {
+                                                            // Negative means expanded frustum tolerance
+                                                            // Show as approximate sphere for visualization purposes
+                                                            cullRadius = fabsf(cullRadius) * 100.0f;  // Convert tile tolerance to world units
+                                                        }
+                                                        RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+                                                    }
+#endif
                                                 }
                                             }
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
@@ -3597,34 +3630,37 @@ void RenderObjects_AfterCharacter(ICamera* camera)
                 {
                     if (o != NULL)
                     {
+                        // Determine culling radius based on object type and map (shared between culling and visualization)
+                        float cullRadius = CULL_RADIUS_ITEM;  // Default 400
+                        if ((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && o->Type == 76)
+                            cullRadius = CULL_RADIUS_OBJECT_MEDIUM;  // 600
+                        else if ((gMapManager.IsPKField() || IsDoppelGanger2()) && (o->Type == 16 || o->Type == 67 || o->Type == 68))
+                            cullRadius = CULL_RADIUS_OBJECT_MEDIUM;  // 600
+
                         // Phase 3: Use camera culling for special objects
                         bool visible = false;
                         if (camera)
                         {
-                            if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && (o->Type == 89))
-                                visible = !camera->ShouldCullObject(o->Position, 400.f);
-                            else if ((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && o->Type == 76)
-                                visible = !camera->ShouldCullObject(o->Position, 600.f);
-                            else if (gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68))
-                                visible = !camera->ShouldCullObject(o->Position, 600.f);
-                            else if (IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68))
-                                visible = !camera->ShouldCullObject(o->Position, 600.f);
+                            visible = !camera->ShouldCullObject(o->Position, cullRadius);
                         }
                         else
                         {
-                            if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && (o->Type == 89))
-                                visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -400.f);
-                            else if ((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && o->Type == 76)
-                                visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f);
-                            else if (gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68))
-                                visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f);
-                            else if (IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68))
-                                visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f);
+                            // Convert to 2D culling tolerance (world units to tile units, negated)
+                            float tolerance = -(cullRadius / 100.0f);
+                            visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, tolerance);
                         }
 
                         if (visible)
                         {
                             RenderObject_AfterCharacter(o);
+
+#ifdef _EDITOR
+                            // Debug visualization: Render static object culling sphere (uses same cullRadius variable)
+                            if (DevEditor_ShouldShowObjectCullingSpheres())
+                            {
+                                RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+                            }
+#endif
                         }
                         if (o->Next == NULL)
                             break;
@@ -3685,6 +3721,24 @@ void RenderObjects_AfterCharacter(ICamera* camera)
                                                 if (Success)
                                                 {
                                                     RenderObject_AfterCharacter(o);
+
+#ifdef _EDITOR
+                                                    // Debug visualization: Render world object culling sphere (trees, walls, etc)
+                                                    if (DevEditor_ShouldShowObjectCullingSpheres())
+                                                    {
+                                                        // Note: CollisionRange is typically negative (tolerance in tile units)
+                                                        // For 2D culling: negative = expanded frustum (more permissive)
+                                                        // For visualization: show absolute value as approximate radius
+                                                        float cullRadius = o->CollisionRange + range;
+                                                        if (cullRadius < 0)
+                                                        {
+                                                            // Negative means expanded frustum tolerance
+                                                            // Show as approximate sphere for visualization purposes
+                                                            cullRadius = fabsf(cullRadius) * 100.0f;  // Convert tile tolerance to world units
+                                                        }
+                                                        RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+                                                    }
+#endif
                                                 }
                                             }
                         }
@@ -6463,7 +6517,16 @@ void RenderItems()
         OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
-            o->Visible = TestFrustrum(o->Position, 400.f);
+            o->Visible = TestFrustrum(o->Position, CULL_RADIUS_ITEM);
+
+#ifdef _EDITOR
+            // Debug visualization: Render object culling sphere
+            extern bool DevEditor_ShouldShowObjectCullingSpheres();
+            if (DevEditor_ShouldShowObjectCullingSpheres())
+            {
+                RenderDebugSphere(o->Position, CULL_RADIUS_ITEM, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+            }
+#endif
 
             if (o->Visible)
             {

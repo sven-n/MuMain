@@ -85,6 +85,22 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Red/Blue lines on ground)");
 
+    // Culling sphere visualization toggles
+    ImGui::Text("Culling Sphere Visualization:");
+    ImGui::Indent();
+    ImGui::Checkbox("Show Terrain Culling Spheres", &m_ShowTerrainCullingSpheres);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Green wireframe)");
+
+    ImGui::Checkbox("Show Object Culling Spheres", &m_ShowObjectCullingSpheres);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Yellow wireframe)");
+
+    ImGui::Checkbox("Show Character Culling Spheres", &m_ShowCharacterCullingSpheres);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Cyan wireframe)");
+    ImGui::Unindent();
+
     ImGui::Separator();
 
     // Current camera info
@@ -1218,3 +1234,33 @@ extern "C"
 }
 
 #endif // _EDITOR
+
+// C linkage wrappers for external C code (always available, return false when _EDITOR not defined)
+extern "C" {
+    bool DevEditor_ShouldShowTerrainCullingSpheres()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.ShouldShowTerrainCullingSpheres();
+#else
+        return false;
+#endif
+    }
+
+    bool DevEditor_ShouldShowObjectCullingSpheres()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.ShouldShowObjectCullingSpheres();
+#else
+        return false;
+#endif
+    }
+
+    bool DevEditor_ShouldShowCharacterCullingSpheres()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.ShouldShowCharacterCullingSpheres();
+#else
+        return false;
+#endif
+    }
+}
