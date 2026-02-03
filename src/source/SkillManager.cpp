@@ -256,13 +256,12 @@ void CSkillManager::RebuildSkillRequirementsCache()
             continue;
         }
 
-        if (isGuardian && (skillType == AT_SKILL_TELEPORT_ALLY || skillType == AT_SKILL_TELEPORT))
+        ActionSkillType baseSkill = MasterSkillToBaseSkillIndex(static_cast<ActionSkillType>(skillType));
+        if (isGuardian && (baseSkill == AT_SKILL_TELEPORT_ALLY || baseSkill == AT_SKILL_TELEPORT))
         {
             m_aSkillRequirementsFulfilled[skillType] = false;
             continue;
         }
-
-        ActionSkillType baseSkill = MasterSkillToBaseSkillIndex(static_cast<ActionSkillType>(skillType));
 
         DemendConditionInfo skillRequirements;
         skillRequirements.SkillLevel = SkillAttribute[baseSkill].Level;
