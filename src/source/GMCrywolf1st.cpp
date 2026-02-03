@@ -2728,5 +2728,4 @@ void M34CryWolf1st::Set_WorldRank(BYTE Rank, CLASS_TYPE Class, int Score, wchar_
     HeroScore[Rank] = Score;
     HeroClass[Rank] = Class;
     wcsncpy_s(HeroName[Rank], szHeroName, MAX_USERNAME_SIZE);
-    HeroName[Rank][MAX_USERNAME_SIZE] = L'\0';
 }
