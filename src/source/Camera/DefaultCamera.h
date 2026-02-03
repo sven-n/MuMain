@@ -2,6 +2,7 @@
 
 #include "ICamera.h"
 #include "CameraState.h"
+#include "CullingConstants.h"
 
 /**
  * @brief Default legacy third-person follow camera
@@ -49,8 +50,10 @@ public:
         tileCenter[1] = (tileY + 0.5f) * 100.0f;
         tileCenter[2] = 0.0f;  // Z will be ignored for terrain height variance
 
-        // Use generous radius to account for terrain height variance
-        return !m_Frustum.TestSphere(tileCenter, 100.0f);
+        // Use generous radius to account for terrain height variance and steep camera angles
+        // Increased from 100 to 300 to prevent culling terrain tiles close to camera
+        // when looking down at steep angles (like in LoginScene)
+        return !m_Frustum.TestSphere(tileCenter, CULL_RADIUS_TERRAIN);
     }
 
     bool ShouldCullObject2D(float x, float y, float radius) const override

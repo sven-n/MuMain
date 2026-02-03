@@ -28,6 +28,12 @@
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/Frustum.h"
+#include "CullingConstants.h"
+
+// DevEditor function declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldShowTerrainCullingSpheres();
+#endif
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -2064,6 +2070,72 @@ void RenderFrustrum2DDebug()
     if (lighting) glEnable(GL_LIGHTING);
 }
 
+/**
+ * @brief Renders a wireframe sphere for debugging culling volumes
+ * @param center Center position of the sphere in world space
+ * @param radius Radius of the sphere
+ * @param r Red color component (0-1)
+ * @param g Green color component (0-1)
+ * @param b Blue color component (0-1)
+ */
+void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b)
+{
+    // Save OpenGL state
+    GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean texture2D = glIsEnabled(GL_TEXTURE_2D);
+    GLboolean lighting = glIsEnabled(GL_LIGHTING);
+
+    // Disable unnecessary features
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);  // Keep depth test for proper 3D rendering
+
+    glColor3f(r, g, b);
+    glLineWidth(1.0f);
+
+    // Draw three circle rings (XY, XZ, YZ planes) to represent the sphere
+    const int segments = 16;  // Number of line segments per circle
+    const float angleStep = (2.0f * Q_PI) / segments;
+
+    // XY plane circle (around Z axis)
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < segments; i++)
+    {
+        float angle = i * angleStep;
+        float x = center[0] + radius * cosf(angle);
+        float y = center[1] + radius * sinf(angle);
+        glVertex3f(x, y, center[2]);
+    }
+    glEnd();
+
+    // XZ plane circle (around Y axis)
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < segments; i++)
+    {
+        float angle = i * angleStep;
+        float x = center[0] + radius * cosf(angle);
+        float z = center[2] + radius * sinf(angle);
+        glVertex3f(x, center[1], z);
+    }
+    glEnd();
+
+    // YZ plane circle (around X axis)
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < segments; i++)
+    {
+        float angle = i * angleStep;
+        float y = center[1] + radius * cosf(angle);
+        float z = center[2] + radius * sinf(angle);
+        glVertex3f(center[0], y, z);
+    }
+    glEnd();
+
+    // Restore OpenGL state
+    if (!depthTest) glDisable(GL_DEPTH_TEST);
+    if (texture2D) glEnable(GL_TEXTURE_2D);
+    if (lighting) glEnable(GL_LIGHTING);
+}
+
 // Phase 4: Compatibility shims for legacy code
 // These redirect to the new camera system to avoid updating hundreds of call sites
 
@@ -2429,6 +2501,19 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
                         continue;
                 }
                 RenderTerrainBlock(xf, yf, xi, yi, EditFlag, camera);
+
+#ifdef _EDITOR
+                // Debug visualization: Render terrain tile culling sphere
+                if (!EditFlag && DevEditor_ShouldShowTerrainCullingSpheres())
+                {
+                    vec3_t tileCenter;
+                    tileCenter[0] = (xi + 2.0f) * 100.0f;  // Center of 4x4 block
+                    tileCenter[1] = (yi + 2.0f) * 100.0f;
+                    // Use actual terrain height instead of Z=0
+                    tileCenter[2] = RequestTerrainHeight(tileCenter[0], tileCenter[1]);
+                    RenderDebugSphere(tileCenter, CULL_RADIUS_TERRAIN, 0.0f, 1.0f, 0.0f);  // Green wireframe
+                }
+#endif
             }
         }
     }

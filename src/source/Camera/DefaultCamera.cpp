@@ -114,8 +114,8 @@ void DefaultCamera::ResetForScene(EGameScene scene)
 
         case LOG_IN_SCENE:
         {
-            // Use extended visibility config for LoginScene
-            m_Config = CameraConfig::ForGameplay();
+            // Use LoginScene-specific config with correct near plane
+            m_Config = CameraConfig::ForLoginScene();
             m_State.ViewFar = m_Config.farPlane;
             m_State.FOV = 30.0f;  // Will be overridden by SetCameraFOV()
             m_State.TopViewEnable = false;
