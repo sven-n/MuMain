@@ -238,6 +238,16 @@ void CSkillManager::RebuildSkillRequirementsCache()
         return;
     }
 
+    const bool isGuardian = gMapManager.IsEmpireGuardian();
+
+    DemendConditionInfo heroCharacterInfo;
+    heroCharacterInfo.SkillLevel = CharacterMachine->Character.Level;
+    heroCharacterInfo.SkillStrength = CharacterMachine->Character.Strength + CharacterMachine->Character.AddStrength;
+    heroCharacterInfo.SkillDexterity = CharacterMachine->Character.Dexterity + CharacterMachine->Character.AddDexterity;
+    heroCharacterInfo.SkillVitality = CharacterMachine->Character.Vitality + CharacterMachine->Character.AddVitality;
+    heroCharacterInfo.SkillEnergy = CharacterMachine->Character.Energy + CharacterMachine->Character.AddEnergy;
+    heroCharacterInfo.SkillCharisma = CharacterMachine->Character.Charisma + CharacterMachine->Character.AddCharisma;
+
     for (int skillType = 0; skillType < MAX_SKILLS; ++skillType)
     {
         if (SkillAttribute[skillType].Energy == 0)
@@ -246,13 +256,13 @@ void CSkillManager::RebuildSkillRequirementsCache()
             continue;
         }
 
-        if ((true == gMapManager.IsEmpireGuardian()) && (skillType == AT_SKILL_TELEPORT_ALLY || skillType == AT_SKILL_TELEPORT))
+        if (isGuardian && (skillType == AT_SKILL_TELEPORT_ALLY || skillType == AT_SKILL_TELEPORT))
         {
             m_aSkillRequirementsFulfilled[skillType] = false;
             continue;
         }
 
-        ActionSkillType baseSkill = MasterSkillToBaseSkillIndex((ActionSkillType)skillType);
+        ActionSkillType baseSkill = MasterSkillToBaseSkillIndex(static_cast<ActionSkillType>(skillType));
 
         DemendConditionInfo skillRequirements;
         skillRequirements.SkillLevel = SkillAttribute[baseSkill].Level;
@@ -261,14 +271,6 @@ void CSkillManager::RebuildSkillRequirementsCache()
         skillRequirements.SkillVitality = 0;
         skillRequirements.SkillEnergy = (20 + (SkillAttribute[baseSkill].Energy * SkillAttribute[baseSkill].Level) * 0.04);
         skillRequirements.SkillCharisma = SkillAttribute[baseSkill].Charisma;
-
-        DemendConditionInfo heroCharacterInfo;
-        heroCharacterInfo.SkillLevel = CharacterMachine->Character.Level;
-        heroCharacterInfo.SkillStrength = CharacterMachine->Character.Strength + CharacterMachine->Character.AddStrength;
-        heroCharacterInfo.SkillDexterity = CharacterMachine->Character.Dexterity + CharacterMachine->Character.AddDexterity;
-        heroCharacterInfo.SkillVitality = CharacterMachine->Character.Vitality + CharacterMachine->Character.AddVitality;
-        heroCharacterInfo.SkillEnergy = CharacterMachine->Character.Energy + CharacterMachine->Character.AddEnergy;
-        heroCharacterInfo.SkillCharisma = CharacterMachine->Character.Charisma + CharacterMachine->Character.AddCharisma;
 
         m_aSkillRequirementsFulfilled[skillType] = (skillRequirements <= heroCharacterInfo);
     }
