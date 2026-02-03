@@ -58,6 +58,7 @@ namespace SEASON3B
 
         bool Create(int iCameraIndex, UINT uiWidth, UINT uiHeight, float fZOrder);
         void Release();
+        void UpdateDimensions(UINT uiWidth, UINT uiHeight);
 
         bool IsEmpty();
 
@@ -93,6 +94,7 @@ namespace SEASON3B
 
         bool Create(CNewUIManager* pNewUIMng);
         void Release();
+        void UpdateAllCameraDimensions(UINT uiWidth, UINT uiHeight);
 
         void Add3DRenderObj(INewUI3DRenderObj* pObj, float fZOrder = INFORMATION_CAMERA_Z_ORDER);
         void Remove3DRenderObj(INewUI3DRenderObj* pObj);
