@@ -40,6 +40,12 @@ void SEASON3B::CNewUI3DCamera::Release()
     m_deque2DEffects.clear();
 }
 
+void SEASON3B::CNewUI3DCamera::UpdateDimensions(UINT uiWidth, UINT uiHeight)
+{
+    m_uiWidth = uiWidth;
+    m_uiHeight = uiHeight;
+}
+
 bool SEASON3B::CNewUI3DCamera::IsEmpty()
 {
     return m_list3DObjs.empty();
@@ -186,6 +192,17 @@ bool SEASON3B::CNewUI3DRenderMng::Create(CNewUIManager* pNewUIMng)
 void SEASON3B::CNewUI3DRenderMng::Release()
 {
     RemoveAll3DRenderObjs();
+}
+
+void SEASON3B::CNewUI3DRenderMng::UpdateAllCameraDimensions(UINT uiWidth, UINT uiHeight)
+{
+    for (auto it = m_listCamera.begin(); it != m_listCamera.end(); ++it)
+    {
+        if (*it)
+        {
+            (*it)->UpdateDimensions(uiWidth, uiHeight);
+        }
+    }
 }
 
 void SEASON3B::CNewUI3DRenderMng::Add3DRenderObj(INewUI3DRenderObj* pObj, float fZOrder/* = INFORMATION_CAMERA_Z_ORDER*/)

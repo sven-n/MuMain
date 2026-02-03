@@ -1021,6 +1021,12 @@ void UpdateResolutionDependentSystems()
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
     CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio,
                                        g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+
+    // Update all 3D UI camera dimensions for proper item rendering
+    if (g_pNewUI3DRenderMng)
+    {
+        g_pNewUI3DRenderMng->UpdateAllCameraDimensions(WindowWidth, WindowHeight);
+    }
 }
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
