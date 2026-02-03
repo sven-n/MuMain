@@ -897,6 +897,9 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_EMPIREGUARDIAN_TIMER);
     }
 
+    // Initialize skill requirements cache on character login
+    gSkillManager.InitializeSkillRequirementsCache();
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
 
     return (TRUE);
@@ -1136,6 +1139,9 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
 
     if (Master_Skill_Bool > -1 && Skill_Bool > -1)
         CharacterAttribute->Skill[Skill_Bool] = AT_SKILL_UNDEFINED;
+
+    // Skills have changed, invalidate skill requirements cache
+    gSkillManager.InvalidateSkillRequirementsCache();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
@@ -6417,6 +6423,9 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
         CharacterAttribute->ManaMax = Data->MaxMana;
         CharacterAttribute->Life = Data->MaxLife;
         CharacterAttribute->Mana = Data->MaxMana;
+
+        // Character level changed, invalidate skill requirements cache
+        gSkillManager.InvalidateSkillRequirementsCache();
         CharacterAttribute->ShieldMax = Data->MaxShield;
         CharacterAttribute->SkillManaMax = Data->SkillManaMax;
         CharacterAttribute->AddPoint = Data->AddPoint;
@@ -6433,6 +6442,9 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
         CharacterAttribute->ManaMax = Data->MaxMana;
         CharacterAttribute->Life = Data->MaxLife;
         CharacterAttribute->Mana = Data->MaxMana;
+
+        // Character level changed, invalidate skill requirements cache
+        gSkillManager.InvalidateSkillRequirementsCache();
         CharacterAttribute->ShieldMax = Data->MaxShield;
         CharacterAttribute->SkillManaMax = Data->SkillManaMax;
         CharacterAttribute->AddPoint = Data->AddPoint;
@@ -6544,6 +6556,9 @@ void ReceiveSetPointsExtended(const BYTE* ReceiveBuffer)
     CharacterAttribute->Charisma = Data->Charisma;
 
     CharacterMachine->CalculateAll();
+
+    // Character stats changed, invalidate skill requirements cache
+    gSkillManager.InvalidateSkillRequirementsCache();
 }
 
 void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
