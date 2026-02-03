@@ -910,8 +910,6 @@ void CDevEditorUI::RenderGraphicsTab()
         g_GameConfig.Save();
 
         // Reinitialize fonts and update resolution-dependent systems
-        extern void ReinitializeFonts();
-        extern void UpdateResolutionDependentSystems();
         ReinitializeFonts();
         UpdateResolutionDependentSystems();
 
