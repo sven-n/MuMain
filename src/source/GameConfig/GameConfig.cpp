@@ -203,13 +203,13 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
     // Decrypt Username
     std::wstring user = DecryptSetting(GetEncryptedUsername());
     if (!user.empty()) {
-        wcscpy_s(outUser, userBufSize, user.c_str());
+        wcsncpy_s(outUser, userBufSize, user.c_str(), _TRUNCATE);
     }
 
     // Decrypt Password
     std::wstring pass = DecryptSetting(GetEncryptedPassword());
     if (!pass.empty()) {
-        wcscpy_s(outPass, passBufSize, pass.c_str());
+        wcsncpy_s(outPass, passBufSize, pass.c_str(), _TRUNCATE);
     }
 }
 
