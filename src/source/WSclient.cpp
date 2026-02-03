@@ -6558,6 +6558,7 @@ void ReceiveSetPointsExtended(const BYTE* ReceiveBuffer)
     CharacterMachine->CalculateAll();
 
     // Character stats changed, invalidate skill requirements cache
+    // it is called in `CalculatedAll` already, but for future changes and understandability also kept here because it does not have a huge impact.
     gSkillManager.InvalidateSkillRequirementsCache();
 }
 
