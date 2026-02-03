@@ -175,30 +175,22 @@ std::vector<BYTE> GameConfig::HexToBinary(const std::wstring& hex)
 
     binary.reserve(hex.length() / 2);
 
+    auto hex_char_to_byte = [](wchar_t c) -> BYTE {
+        if (c >= L'0' && c <= L'9') return (c - L'0');
+        if (c >= L'a' && c <= L'f') return (c - L'a' + 10);
+        return (c - L'A' + 10);
+    };
+
     for (size_t i = 0; i < hex.length(); i += 2)
     {
         wchar_t high = hex[i];
         wchar_t low = hex[i + 1];
 
-        // Validate hex characters
-        bool isValidHigh = (high >= L'0' && high <= L'9') ||
-                          (high >= L'A' && high <= L'F') ||
-                          (high >= L'a' && high <= L'f');
-        bool isValidLow = (low >= L'0' && low <= L'9') ||
-                         (low >= L'A' && low <= L'F') ||
-                         (low >= L'a' && low <= L'f');
-
-        if (!isValidHigh || !isValidLow)
+        if (!iswxdigit(high) || !iswxdigit(low))
         {
             // Invalid hex character detected, return empty vector
-            return std::vector<BYTE>();
+            return {};
         }
-
-        auto hex_char_to_byte = [](wchar_t c) -> BYTE {
-            if (c >= L'0' && c <= L'9') return (c - L'0');
-            if (c >= L'a' && c <= L'f') return (c - L'a' + 10);
-            return (c - L'A' + 10);
-        };
 
         binary.push_back((hex_char_to_byte(high) << 4) | hex_char_to_byte(low));
     }
