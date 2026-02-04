@@ -12,6 +12,8 @@ extern bool CheckAttack();
 
 CSkillManager::CSkillManager() // OK
 {
+    m_bSkillRequirementsCacheDirty = true;
+    memset(m_aSkillRequirementsFulfilled, 0, sizeof(m_aSkillRequirementsFulfilled));
 }
 
 CSkillManager::~CSkillManager() // OK
@@ -209,29 +211,36 @@ bool CSkillManager::AreSkillRequirementsFulfilled(ActionSkillType skillType)
         return false;
     }
 
-    if ((true == gMapManager.IsEmpireGuardian()) && (skillType == AT_SKILL_TELEPORT_ALLY || skillType == AT_SKILL_TELEPORT))
+    // Rebuild cache if dirty (on first call after stat/skill changes)
+    if (m_bSkillRequirementsCacheDirty)
     {
-        return false;
+        RebuildSkillRequirementsCache();
     }
 
-    //if (SkillAttribute[SkillType].Energy == 0)
-    //{
-    //    return true;
-    //}
+    return m_aSkillRequirementsFulfilled[skillType];
+}
 
-    skillType = MasterSkillToBaseSkillIndex(skillType);
+void CSkillManager::InvalidateSkillRequirementsCache()
+{
+    m_bSkillRequirementsCacheDirty = true;
+}
 
-    DemendConditionInfo skillRequirements;
+void CSkillManager::InitializeSkillRequirementsCache()
+{
+    m_bSkillRequirementsCacheDirty = true;
+    RebuildSkillRequirementsCache();
+}
 
-    skillRequirements.SkillLevel = SkillAttribute[skillType].Level;
-    skillRequirements.SkillStrength = SkillAttribute[skillType].Strength;
-    skillRequirements.SkillDexterity = SkillAttribute[skillType].Dexterity;
-    skillRequirements.SkillVitality = 0;
-    skillRequirements.SkillEnergy = (20 + (SkillAttribute[skillType].Energy * SkillAttribute[skillType].Level) * 0.04);
-    skillRequirements.SkillCharisma = SkillAttribute[skillType].Charisma;
+void CSkillManager::RebuildSkillRequirementsCache()
+{
+    if (!m_bSkillRequirementsCacheDirty)
+    {
+        return;
+    }
+
+    const bool isGuardian = gMapManager.IsEmpireGuardian();
 
     DemendConditionInfo heroCharacterInfo;
-
     heroCharacterInfo.SkillLevel = CharacterMachine->Character.Level;
     heroCharacterInfo.SkillStrength = CharacterMachine->Character.Strength + CharacterMachine->Character.AddStrength;
     heroCharacterInfo.SkillDexterity = CharacterMachine->Character.Dexterity + CharacterMachine->Character.AddDexterity;
@@ -239,7 +248,25 @@ bool CSkillManager::AreSkillRequirementsFulfilled(ActionSkillType skillType)
     heroCharacterInfo.SkillEnergy = CharacterMachine->Character.Energy + CharacterMachine->Character.AddEnergy;
     heroCharacterInfo.SkillCharisma = CharacterMachine->Character.Charisma + CharacterMachine->Character.AddCharisma;
 
-    auto result = skillRequirements <= heroCharacterInfo;
+    for (int skillType = 0; skillType < MAX_SKILLS; ++skillType)
+    {
+        ActionSkillType baseSkill = MasterSkillToBaseSkillIndex(static_cast<ActionSkillType>(skillType));
+        if (isGuardian && (baseSkill == AT_SKILL_TELEPORT_ALLY || baseSkill == AT_SKILL_TELEPORT))
+        {
+            m_aSkillRequirementsFulfilled[skillType] = false;
+            continue;
+        }
 
-    return result;
+        DemendConditionInfo skillRequirements;
+        skillRequirements.SkillLevel = SkillAttribute[baseSkill].Level;
+        skillRequirements.SkillStrength = SkillAttribute[baseSkill].Strength;
+        skillRequirements.SkillDexterity = SkillAttribute[baseSkill].Dexterity;
+        skillRequirements.SkillVitality = 0;
+        skillRequirements.SkillEnergy = (20 + (SkillAttribute[baseSkill].Energy * SkillAttribute[baseSkill].Level) * 0.04);
+        skillRequirements.SkillCharisma = SkillAttribute[baseSkill].Charisma;
+
+        m_aSkillRequirementsFulfilled[skillType] = (skillRequirements <= heroCharacterInfo);
+    }
+
+    m_bSkillRequirementsCacheDirty = false;
 }

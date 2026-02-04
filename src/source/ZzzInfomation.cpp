@@ -3618,4 +3618,7 @@ void CHARACTER_MACHINE::CalculateAll()
         FinalSuccessDefense = true;
     else
         FinalSuccessDefense = false;
+
+    // Stats recalculated (equipment/items changed), invalidate skill requirements cache
+    gSkillManager.InvalidateSkillRequirementsCache();
 }

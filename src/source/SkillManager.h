@@ -49,7 +49,16 @@ public:
     ActionSkillType MasterSkillToBaseSkillIndex(ActionSkillType masterSkill);
     bool skillVScharactorCheck(const DemendConditionInfo& basicInfo, const DemendConditionInfo& heroInfo);
     bool AreSkillRequirementsFulfilled(ActionSkillType skilltype);
-public:
+
+    // Cache management
+    void InvalidateSkillRequirementsCache();
+    void InitializeSkillRequirementsCache();
+
+private:
+    void RebuildSkillRequirementsCache();
+
+    bool m_bSkillRequirementsCacheDirty;
+    bool m_aSkillRequirementsFulfilled[MAX_SKILLS];
 };
 
 extern CSkillManager gSkillManager;
