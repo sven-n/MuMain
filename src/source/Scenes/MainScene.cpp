@@ -662,13 +662,6 @@ bool RenderMainScene()
     RenderGameWorld(byWaterMap, width, height);
     RenderMainSceneUI();
 
-    // Debug: Draw frustum trapezoid visualization on top of everything (if enabled)
-#ifdef _EDITOR
-    if (DevEditor_IsDebugVisualizationEnabled())
-    {
-        RenderFrustrum2DDebug();
-    }
-#endif
 
     EndOpengl();
 

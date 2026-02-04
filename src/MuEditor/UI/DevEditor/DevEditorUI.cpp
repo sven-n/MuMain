@@ -77,14 +77,6 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::Text("Camera System Controls");
     ImGui::Separator();
 
-    // Debug visualization toggle
-    if (ImGui::Checkbox("Show Frustum Trapezoid", &m_ShowDebugVisualization))
-    {
-        // Toggle applied immediately
-    }
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Red/Blue lines on ground)");
-
     // Culling sphere visualization toggles
     ImGui::Text("Culling Sphere Visualization:");
     ImGui::Indent();
@@ -99,6 +91,20 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::Checkbox("Show Character Culling Spheres", &m_ShowCharacterCullingSpheres);
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Cyan wireframe)");
+    ImGui::Unindent();
+
+    ImGui::Separator();
+
+    // Culling radius adjustments
+    ImGui::Text("Culling Radii:");
+    ImGui::Indent();
+    ImGui::PushItemWidth(200);
+    ImGui::InputFloat("Terrain Radius", &m_CullRadiusTerrain, 10.0f, 50.0f, "%.1f");
+    ImGui::InputFloat("Character Radius", &m_CullRadiusCharacter, 10.0f, 50.0f, "%.1f");
+    ImGui::InputFloat("Item Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
+    ImGui::InputFloat("Object Radius", &m_CullRadiusObject, 10.0f, 50.0f, "%.1f");
+    ImGui::PopItemWidth();
+    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Adjust culling sphere radii in real-time");
     ImGui::Unindent();
 
     ImGui::Separator();
@@ -186,47 +192,7 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::InputFloat("ViewNear (Near Plane)", &m_CameraViewNear, 10.0f, 100.0f, "%.1f");
         ImGui::InputFloat("ViewTarget (Pivot)", &m_CameraViewTarget, 10.0f, 100.0f, "%.1f");
 
-        ImGui::Separator();
-        ImGui::Text("Width Controls:");
-        ImGui::InputFloat("WidthFar (Top Width)", &m_WidthFar, 50.0f, 100.0f, "%.1f");
-        ImGui::InputFloat("WidthNear (Bottom Width)", &m_WidthNear, 10.0f, 50.0f, "%.1f");
-
         ImGui::PopItemWidth();
-
-        ImGui::Separator();
-
-        // Presets
-        ImGui::Text("Presets:");
-        if (ImGui::Button("Default (Best)"))
-        {
-            m_CameraViewFar = 1100.0f;
-            m_CameraViewNear = -530.0f;
-            m_CameraViewTarget = 0.0f;
-            m_WidthFar = 700.0f;
-            m_WidthNear = 330.0f;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Old Default"))
-        {
-            m_CameraViewFar = 5100.0f;
-            m_CameraViewNear = 969.0f;
-            m_CameraViewTarget = 2397.0f;
-            m_WidthFar = 2250.0f;
-            m_WidthNear = 540.0f;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Wide View"))
-        {
-            m_CameraViewFar = 6000.0f;
-            m_CameraViewNear = 1140.0f;
-            m_CameraViewTarget = 2820.0f;
-            m_WidthFar = 3000.0f;
-            m_WidthNear = 700.0f;
-        }
-
-        ImGui::Separator();
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Values are applied in real-time!");
-        ImGui::Text("Red trapezoid shows frustum on ground");
     }
     else
     {
@@ -265,6 +231,15 @@ void CDevEditorUI::RenderCameraTab()
         m_NearPlane = defaultNearPlane;
         m_FarPlane = defaultFarPlane;
         m_TerrainCullRange = defaultTerrainCullRange;
+
+        // Update fog values from new camera config
+        if (currentCamera)
+        {
+            const CameraConfig& config = currentCamera->GetConfig();
+            m_FogStart = config.fogStart;
+            m_FogEnd = config.fogEnd;
+        }
+
         m_LastActiveCameraName = currentCameraName;
     }
 
@@ -283,6 +258,15 @@ void CDevEditorUI::RenderCameraTab()
         m_NearPlane = defaultNearPlane;
         m_FarPlane = defaultFarPlane;
         m_TerrainCullRange = defaultTerrainCullRange;
+
+        // Initialize fog values from camera config
+        if (currentCamera)
+        {
+            const CameraConfig& config = currentCamera->GetConfig();
+            m_FogStart = config.fogStart;
+            m_FogEnd = config.fogEnd;
+        }
+
         m_LastActiveCameraName = currentCameraName;
     }
 
@@ -321,21 +305,26 @@ void CDevEditorUI::RenderCameraTab()
 
         ImGui::Spacing();
         ImGui::Text("Fog Controls:");
-        ImGui::SliderFloat("Fog Start", &m_FogStartPercent, 0.0f, 1.0f, "%.2f");
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(fraction between near/far)");
 
-        ImGui::SliderFloat("Fog End", &m_FogEndPercent, 0.5f, 2.0f, "%.2f");
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(fraction of render distance)");
-
-        // Show actual fog distances
+        // Calculate max range based on far plane with render distance multiplier
         constexpr float RENDER_DISTANCE_MULTIPLIER = 1.4f;
-        float renderDistance = m_FarPlane * RENDER_DISTANCE_MULTIPLIER;
-        float actualStart = m_NearPlane + (m_FarPlane - m_NearPlane) * m_FogStartPercent;
-        float actualEnd = renderDistance * m_FogEndPercent;
+        float maxFogRange = m_FarPlane * RENDER_DISTANCE_MULTIPLIER;
+
+        ImGui::SliderFloat("Fog Start", &m_FogStart, 0.0f, maxFogRange, "%.0f");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(absolute distance)");
+
+        ImGui::SliderFloat("Fog End", &m_FogEnd, 0.0f, maxFogRange, "%.0f");
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(full fog density)");
+
+        // Show percentages for reference
+        float startPercent = (m_FogStart / m_FarPlane) * 100.0f;
+        float endPercent = (m_FogEnd / m_FarPlane) * 100.0f;
         ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                          "Actual: Start=%.0f, End=%.0f, RenderDist=%.0f", actualStart, actualEnd, renderDistance);
+                          "Percentages: Start=%.0f%%, End=%.0f%% (of farPlane)", startPercent, endPercent);
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+                          "Max range: %.0f (farPlane × %.1f)", maxFogRange, RENDER_DISTANCE_MULTIPLIER);
 
         ImGui::PopItemWidth();
 
@@ -350,6 +339,14 @@ void CDevEditorUI::RenderCameraTab()
             m_NearPlane = defaultNearPlane;
             m_FarPlane = defaultFarPlane;
             m_TerrainCullRange = defaultTerrainCullRange;
+
+            // Reset fog values from camera config
+            if (currentCamera)
+            {
+                const CameraConfig& config = currentCamera->GetConfig();
+                m_FogStart = config.fogStart;
+                m_FogEnd = config.fogEnd;
+            }
         }
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Resets to active camera's default config)");
@@ -1077,16 +1074,6 @@ extern "C"
         return g_DevEditorUI.IsOverrideEnabled();
     }
 
-    bool DevEditor_IsDebugVisualizationEnabled()
-    {
-        return g_DevEditorUI.IsDebugVisualizationEnabled();
-    }
-
-    void DevEditor_SetDebugVisualizationEnabled(bool enabled)
-    {
-        g_DevEditorUI.SetDebugVisualizationEnabled(enabled);
-    }
-
     void DevEditor_GetFrustumValues(float* outViewFar, float* outViewNear, float* outViewTarget,
                                      float* outWidthFar, float* outWidthNear)
     {
@@ -1134,10 +1121,10 @@ extern "C"
         if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetTerrainCullRange();
     }
 
-    void DevEditor_GetFogConfig(float* outStartPercent, float* outEndPercent)
+    void DevEditor_GetFogConfig(float* outStart, float* outEnd)
     {
-        if (outStartPercent) *outStartPercent = g_DevEditorUI.GetFogStartPercent();
-        if (outEndPercent) *outEndPercent = g_DevEditorUI.GetFogEndPercent();
+        if (outStart) *outStart = g_DevEditorUI.GetFogStart();
+        if (outEnd) *outEnd = g_DevEditorUI.GetFogEnd();
     }
 
     // Phase 5: Custom Origin accessors
@@ -1261,6 +1248,42 @@ extern "C" {
         return g_DevEditorUI.ShouldShowCharacterCullingSpheres();
 #else
         return false;
+#endif
+    }
+
+    float DevEditor_GetCullRadiusTerrain()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.GetCullRadiusTerrain();
+#else
+        return 100.0f;
+#endif
+    }
+
+    float DevEditor_GetCullRadiusCharacter()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.GetCullRadiusCharacter();
+#else
+        return 100.0f;
+#endif
+    }
+
+    float DevEditor_GetCullRadiusItem()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.GetCullRadiusItem();
+#else
+        return 100.0f;
+#endif
+    }
+
+    float DevEditor_GetCullRadiusObject()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.GetCullRadiusObject();
+#else
+        return 100.0f;
 #endif
     }
 }

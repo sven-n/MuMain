@@ -76,7 +76,6 @@ void CreateLodBuffer();
 float RequestTerrainHeight(float xf, float yf);
 
 // Debug visualization
-void RenderFrustrum2DDebug();
 void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b);
 
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);

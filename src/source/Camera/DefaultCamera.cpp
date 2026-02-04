@@ -37,7 +37,7 @@ extern "C" void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, fl
 
 DefaultCamera::DefaultCamera(CameraState& state)
     : m_State(state)
-    , m_Config(CameraConfig::ForGameplay())  // Phase 1: Initialize with gameplay config
+    , m_Config(CameraConfig::ForMainSceneOrbitalCamera())  // Phase 1: Initialize with gameplay config
 {
     // Phase 5: Initialize frustum cache to force first update
     m_LastFrustumPosition[0] = m_LastFrustumPosition[1] = m_LastFrustumPosition[2] = 0.0f;
@@ -93,7 +93,7 @@ void DefaultCamera::ResetForScene(EGameScene scene)
         case MAIN_SCENE:
         {
             // Load MainScene config with conservative values
-            m_Config = CameraConfig::ForMainScene();
+            m_Config = CameraConfig::ForMainSceneDefaultCamera();
 
             // Set MainScene defaults
             m_State.ViewFar = m_Config.farPlane;      // 2400
@@ -161,9 +161,7 @@ void DefaultCamera::ResetForScene(EGameScene scene)
         default:
         {
             // Use gameplay config as default
-            m_Config = CameraConfig::ForGameplay();
-            m_State.ViewFar = m_Config.farPlane;
-            m_State.FOV = 30.0f;
+            m_Config = CameraConfig::ForMainSceneOrbitalCamera();
             m_State.TopViewEnable = false;
             break;
         }
@@ -236,7 +234,7 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     // The angles will be recalculated naturally on subsequent frames
 
     // Phase 3 fix: Initialize frustum immediately on activation
-    UpdateFrustum();
+    // UpdateFrustum();
 
     // Update scene tracking to prevent redundant reset in Update()
     m_LastSceneFlag = (int)SceneFlag;

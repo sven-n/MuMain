@@ -37,6 +37,7 @@
 // DevEditor function declarations
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowCharacterCullingSpheres();
+extern "C" float DevEditor_GetCullRadiusCharacter();
 #endif
 
 #include "CSChaosCastle.h"
@@ -6357,10 +6358,12 @@ void MoveCharacterClient(CHARACTER* cc)
     OBJECT* co = &cc->Object;
     if (co->Live)
     {
-        // Phase 5: Test 3D frustum culling with inverted plane normals
-        // Characters are tall (~150-200 units), position is at feet
-        // Use large radius to cover full character height
-        co->Visible = TestFrustrum(co->Position, CULL_RADIUS_CHARACTER);
+#ifdef _EDITOR
+        float cullRadius = DevEditor_GetCullRadiusCharacter();
+#else
+        float cullRadius = DEFAULT_CULL_RADIUS_CHARACTER;
+#endif
+        co->Visible = TestFrustrum(co->Position, cullRadius);
 
         MoveMonsterClient(cc, co);
         MoveCharacter(cc, co);
@@ -6387,8 +6390,12 @@ void MoveCharactersClient()
             TerrainWall[Index] |= TW_CHARACTER;
         }
 
-        // Phase 5: Test 3D frustum culling with inverted plane normals
-        to->Visible = TestFrustrum(to->Position, CULL_RADIUS_CHARACTER);
+#ifdef _EDITOR
+        float cullRadius = DevEditor_GetCullRadiusCharacter();
+#else
+        float cullRadius = DEFAULT_CULL_RADIUS_CHARACTER;
+#endif
+        to->Visible = TestFrustrum(to->Position, cullRadius);
     }
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -11282,7 +11289,8 @@ void RenderCharactersClient()
                 // Debug visualization: Render character culling sphere
                 if (DevEditor_ShouldShowCharacterCullingSpheres())
                 {
-                    RenderDebugSphere(o->Position, CULL_RADIUS_CHARACTER, 0.0f, 1.0f, 1.0f);  // Cyan wireframe
+                    float cullRadius = DevEditor_GetCullRadiusCharacter();
+                    RenderDebugSphere(o->Position, cullRadius, 0.0f, 1.0f, 1.0f);  // Cyan wireframe
                 }
 #endif
             }
