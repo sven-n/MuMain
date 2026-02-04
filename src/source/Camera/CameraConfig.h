@@ -27,7 +27,7 @@ struct CameraConfig
     // ========== View Frustum Parameters ==========
 
     /** Vertical field of view in degrees */
-    float fov = 60.0f;
+    float fov = 72.0f;
 
     /** Near clipping plane distance */
     float nearPlane = 10.0f;
@@ -61,19 +61,19 @@ struct CameraConfig
      */
     float objectCullRange = 2400.0f;
 
-    // ========== Frustum Shape (for 2D terrain projection) ==========
+    // ========== Fog Parameters ==========
 
     /**
-     * Width of frustum trapezoid at near plane (in world units before aspect scaling)
-     * Used for 2D ground projection calculations
+     * Fog start distance (where fog transition begins)
+     * Default: 1680.0f (70% of default 2400 farPlane)
      */
-    float frustumWidthNear = 330.0f;
+    float fogStart = 1680.0f;
 
     /**
-     * Width of frustum trapezoid at far plane (in world units before aspect scaling)
-     * Used for 2D ground projection calculations
+     * Fog end distance (where fog reaches full density)
+     * Default: 1920.0f (80% of default 2400 farPlane)
      */
-    float frustumWidthFar = 700.0f;
+    float fogEnd = 1920.0f;
 
     // ========== Comparison Operator ==========
 
@@ -85,8 +85,8 @@ struct CameraConfig
                aspectRatio == other.aspectRatio &&
                terrainCullRange == other.terrainCullRange &&
                objectCullRange == other.objectCullRange &&
-               frustumWidthNear == other.frustumWidthNear &&
-               frustumWidthFar == other.frustumWidthFar;
+               fogStart == other.fogStart &&
+               fogEnd == other.fogEnd;
     }
 
     bool operator!=(const CameraConfig& other) const
@@ -108,7 +108,7 @@ struct CameraConfig
      * - Far Plane: 1700 (3D object culling)
      * - Terrain Cull Range: 1700 (2D terrain culling)
      */
-    static CameraConfig ForMainScene()
+    static CameraConfig ForMainSceneDefaultCamera()
     {
         CameraConfig config;
         config.fov = 72.0f;
@@ -117,33 +117,36 @@ struct CameraConfig
         // Use RENDER_DISTANCE_MULTIPLIER to ensure terrain culling matches rendering/picking distance
         config.terrainCullRange = 3000.0f * RENDER_DISTANCE_MULTIPLIER;  // = 4200.0f
         config.objectCullRange = 3000.0f;
-        config.frustumWidthNear = 330.0f;
-        config.frustumWidthFar = 700.0f;
+        // Fog: 70% start, 80% end of farPlane
+        config.fogStart = config.farPlane * 0.7f;
+        config.fogEnd = config.farPlane * 0.8f;
         return config;
     }
 
     /**
-     * @brief LoginScene and CharacterScene camera configuration
-     *
-     * Extended visibility configuration for LoginScene and CharacterScene.
-     * Provides wider view distance for cinematic tour and character preview.
-     *
-     * Phase 5 Values (user-specified):
-     * - FOV: 72 degrees (optimal field of view)
-     * - Near Plane: 10 (close clipping)
-     * - Far Plane: 4800 (3D object culling distance)
-     * - Terrain Cull Range: 4200 (2D terrain culling distance)
-     */
-    static CameraConfig ForGameplay()
+ * @brief MainScene default camera configuration
+ *
+ * Optimized configuration for MainScene OrbitalCamera.
+ * Balanced for performance and visibility.
+ *
+ * Values (user-specified):
+ * - FOV: 72 degrees
+ * - Near Plane: 10
+ * - Far Plane: 1700 (3D object culling)
+ * - Terrain Cull Range: 1700 (2D terrain culling)
+ */
+    static CameraConfig ForMainSceneOrbitalCamera()
     {
         CameraConfig config;
-        config.fov = 72.0f;  // User-specified optimal FOV
-        config.nearPlane = 1000.0f;
-        config.farPlane = 4800.0f;  // 3D frustum culling
-        config.terrainCullRange = 4200.0f;  // 2D terrain culling
+        config.fov = 72.0f;
+        config.nearPlane = 500.0f;
+        config.farPlane = 5400.0f * RENDER_DISTANCE_MULTIPLIER;
+        // Use RENDER_DISTANCE_MULTIPLIER to ensure terrain culling matches rendering/picking distance
+        config.terrainCullRange = 4200.0f;
         config.objectCullRange = 4800.0f;
-        config.frustumWidthNear = 330.0f;
-        config.frustumWidthFar = 700.0f;
+        // Fog: 70% start, 80% end of farPlane
+        config.fogStart = config.farPlane * 0.7f;
+        config.fogEnd = config.farPlane * 0.8f;
         return config;
     }
 
@@ -160,13 +163,14 @@ struct CameraConfig
     static CameraConfig ForLoginScene()
     {
         CameraConfig config;
-        config.fov = 60.0f;
+        config.fov = 72.0f;
         config.nearPlane = 10.0f;
-        config.farPlane = 265200.0f;
-        config.terrainCullRange = 265200.0f;
-        config.objectCullRange = 265200.0f;
-        config.frustumWidthNear = 1000.0f;
-        config.frustumWidthFar = 5000.0f;
+        config.farPlane = 5000.0f;
+        config.terrainCullRange = 5000.0f;
+        config.objectCullRange = 5000.0f;
+        // Fog: 70% start, 80% end of farPlane
+        config.fogStart = config.farPlane * 0.7f;  // 3500.0f
+        config.fogEnd = config.farPlane * 0.8f;    // 4000.0f
         return config;
     }
 
@@ -183,50 +187,14 @@ struct CameraConfig
     static CameraConfig ForCharacterScene()
     {
         CameraConfig config;
-        config.fov = 71.0f;
+        config.fov = 72.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 4100.0f;
         config.terrainCullRange = 4100.0f;
         config.objectCullRange = 4100.0f;
-        config.frustumWidthNear = 540.0f;
-        config.frustumWidthFar = 1190.0f;
-        return config;
-    }
-
-    /**
-     * @brief Wide view configuration (for testing/debugging)
-     *
-     * Extended view distance for debugging or special situations.
-     */
-    static CameraConfig ForWideView()
-    {
-        CameraConfig config;
-        config.fov = 60.0f;
-        config.nearPlane = 10.0f;
-        config.farPlane = 6000.0f;
-        config.terrainCullRange = 6000.0f;
-        config.objectCullRange = 6000.0f;
-        config.frustumWidthNear = 700.0f;
-        config.frustumWidthFar = 3000.0f;
-        return config;
-    }
-
-    /**
-     * @brief Old default configuration (for comparison)
-     *
-     * The previous hardcoded values from before refactor.
-     * Kept for testing and comparison purposes.
-     */
-    static CameraConfig ForOldDefault()
-    {
-        CameraConfig config;
-        config.fov = 60.0f;
-        config.nearPlane = 10.0f;
-        config.farPlane = 5100.0f;
-        config.terrainCullRange = 5100.0f;
-        config.objectCullRange = 5100.0f;
-        config.frustumWidthNear = 540.0f;
-        config.frustumWidthFar = 2250.0f;
+        // Fog: 70% start, 80% end of farPlane
+        config.fogStart = config.farPlane * 0.7f;  // 2870.0f
+        config.fogEnd = config.farPlane * 0.8f;    // 3280.0f
         return config;
     }
 };

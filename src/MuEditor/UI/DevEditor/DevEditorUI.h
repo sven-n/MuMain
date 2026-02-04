@@ -11,8 +11,6 @@ public:
 
     // Accessors for external use (called from C code in ZzzLodTerrain.cpp)
     bool IsOverrideEnabled() const { return m_OverrideEnabled; }
-    bool IsDebugVisualizationEnabled() const { return m_ShowDebugVisualization; }
-    void SetDebugVisualizationEnabled(bool enabled) { m_ShowDebugVisualization = enabled; }
     float GetCameraViewFar() const { return m_CameraViewFar; }
     float GetCameraViewNear() const { return m_CameraViewNear; }
     float GetCameraViewTarget() const { return m_CameraViewTarget; }
@@ -27,8 +25,8 @@ public:
     float GetTerrainCullRange() const { return m_TerrainCullRange; }
 
     // Fog control accessors
-    float GetFogStartPercent() const { return m_FogStartPercent; }
-    float GetFogEndPercent() const { return m_FogEndPercent; }
+    float GetFogStart() const { return m_FogStart; }
+    float GetFogEnd() const { return m_FogEnd; }
 
     // Render toggle accessors
     bool ShouldRenderTerrain() const { return m_RenderTerrain; }
@@ -61,6 +59,12 @@ public:
     bool ShouldShowObjectCullingSpheres() const { return m_ShowObjectCullingSpheres; }
     bool ShouldShowCharacterCullingSpheres() const { return m_ShowCharacterCullingSpheres; }
 
+    // Culling radius accessors
+    float GetCullRadiusTerrain() const { return m_CullRadiusTerrain; }
+    float GetCullRadiusCharacter() const { return m_CullRadiusCharacter; }
+    float GetCullRadiusItem() const { return m_CullRadiusItem; }
+    float GetCullRadiusObject() const { return m_CullRadiusObject; }
+
 private:
     CDevEditorUI() = default;
     ~CDevEditorUI() = default;
@@ -76,7 +80,6 @@ private:
     float m_WidthNear = 330.0f;
 
     bool m_OverrideEnabled = false;
-    bool m_ShowDebugVisualization = true;
 
     // New CameraConfig values for live editing
     bool m_ConfigOverrideEnabled = false;
@@ -86,9 +89,9 @@ private:
     float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range
     const char* m_LastActiveCameraName = nullptr;  // Track which camera we're overriding for
 
-    // Fog control values
-    float m_FogStartPercent = 0.3f;  // Fog starts at 30% between near and far
-    float m_FogEndPercent = 1.0f;    // Fog ends at 100% of render distance (farPlane * RENDER_DISTANCE_MULTIPLIER)
+    // Fog control values (absolute distances)
+    float m_FogStart = 2100.0f;  // Fog starts (absolute distance)
+    float m_FogEnd = 2400.0f;    // Fog ends (absolute distance)
 
     // Phase 5 Debug: Custom Origin Controls
     bool m_CustomOriginEnabled = false;
@@ -124,6 +127,12 @@ private:
     bool m_ShowTerrainCullingSpheres = false;    // Show terrain tile culling spheres
     bool m_ShowObjectCullingSpheres = false;     // Show object culling spheres (trees, items, etc.)
     bool m_ShowCharacterCullingSpheres = false;  // Show character culling spheres
+
+    // Runtime adjustable culling radii
+    float m_CullRadiusTerrain = 100.0f;
+    float m_CullRadiusCharacter = 100.0f;
+    float m_CullRadiusItem = 100.0f;
+    float m_CullRadiusObject = 100.0f;
 };
 
 #define g_DevEditorUI CDevEditorUI::GetInstance()

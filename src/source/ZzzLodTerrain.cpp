@@ -33,6 +33,7 @@
 // DevEditor function declarations
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowTerrainCullingSpheres();
+extern "C" float DevEditor_GetCullRadiusTerrain();
 #endif
 
 //-------------------------------------------------------------------------------------------------------------
@@ -1997,78 +1998,9 @@ int     FrustrumBoundMinY = 0;
 int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
-// Still used by RenderFrustrum2DDebug() for debug visualization
-float FrustrumX[4];
-float FrustrumY[4];
-
-extern int GetScreenWidth();
-
-// Forward declarations for DevEditor (editor only)
-#ifdef _EDITOR
-extern "C" bool DevEditor_IsOverrideEnabled();
-extern "C" void DevEditor_GetFrustumValues(float* outViewFar, float* outViewNear, float* outViewTarget,
-                                            float* outWidthFar, float* outWidthNear);
-#endif
-
-// REMOVED: CreateFrustrum2D() - replaced by camera->UpdateFrustum() in Phase 4
-// 2D ground projection frustum is now calculated inside Frustum class
-
-void RenderFrustrum2DDebug()
-{
-    // Render red lines showing the 2D frustum trapezoid borders
-    // FrustrumX/Y are in world space * 0.01, so multiply back by 100
-
-    // Save OpenGL state
-    GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean texture2D = glIsEnabled(GL_TEXTURE_2D);
-    GLboolean lighting = glIsEnabled(GL_LIGHTING);
-
-    // Disable depth testing and writing to render on top
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
-
-    // Cache vertex positions
-    vec3_t vertices[4];
-    for (int i = 0; i < 4; i++)
-    {
-        vertices[i][0] = FrustrumX[i] * 100.0f;
-        vertices[i][1] = FrustrumY[i] * 100.0f;
-        vertices[i][2] = RequestTerrainHeight(vertices[i][0], vertices[i][1]) + 50.0f;
-    }
-
-    // Draw red trapezoid border
-    glBegin(GL_LINE_LOOP);
-    glColor3f(1.0f, 0.0f, 0.0f);  // Red color
-    glLineWidth(2.0f);
-    for (int i = 0; i < 4; i++)
-    {
-        glVertex3fv(vertices[i]);
-    }
-    glEnd();
-
-    // Draw blue X lines connecting opposite corners
-    glBegin(GL_LINES);
-    glColor3f(0.0f, 0.5f, 1.0f);  // Blue color
-
-    // Line from vertex 0 to vertex 2
-    glVertex3fv(vertices[0]);
-    glVertex3fv(vertices[2]);
-
-    // Line from vertex 1 to vertex 3
-    glVertex3fv(vertices[1]);
-    glVertex3fv(vertices[3]);
-
-    glEnd();
-
-    // Restore OpenGL state
-    glLineWidth(1.0f);
-    glDepthMask(GL_TRUE);
-    if (depthTest) glEnable(GL_DEPTH_TEST);
-    if (texture2D) glEnable(GL_TEXTURE_2D);
-    if (lighting) glEnable(GL_LIGHTING);
-}
+// REMOVED: Old 2D frustum arrays (FrustrumX[4], FrustrumY[4]) - no longer needed
+// The 3D camera frustum system handles all culling now via Frustum::TestSphere()
+// REMOVED: RenderFrustrum2DDebug() - replaced by culling sphere visualization
 
 /**
  * @brief Renders a wireframe sphere for debugging culling volumes
@@ -2506,12 +2438,13 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
                 // Debug visualization: Render terrain tile culling sphere
                 if (!EditFlag && DevEditor_ShouldShowTerrainCullingSpheres())
                 {
+                    float cullRadius = DevEditor_GetCullRadiusTerrain();
                     vec3_t tileCenter;
                     tileCenter[0] = (xi + 2.0f) * 100.0f;  // Center of 4x4 block
                     tileCenter[1] = (yi + 2.0f) * 100.0f;
                     // Use actual terrain height instead of Z=0
                     tileCenter[2] = RequestTerrainHeight(tileCenter[0], tileCenter[1]);
-                    RenderDebugSphere(tileCenter, CULL_RADIUS_TERRAIN, 0.0f, 1.0f, 0.0f);  // Green wireframe
+                    RenderDebugSphere(tileCenter, cullRadius, 0.0f, 1.0f, 0.0f);  // Green wireframe
                 }
 #endif
             }

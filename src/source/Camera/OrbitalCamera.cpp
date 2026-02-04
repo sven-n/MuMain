@@ -34,7 +34,7 @@ extern "C" int DevEditor_GetTargetCharacterIndex();
 OrbitalCamera::OrbitalCamera(CameraState& state)
     : m_State(state)
     , m_pDefaultCamera(std::make_unique<DefaultCamera>(state))
-    , m_Config(CameraConfig::ForGameplay())  // OrbitalCamera defaults to extended visibility
+    , m_Config(CameraConfig::ForMainSceneOrbitalCamera())  // OrbitalCamera defaults to extended visibility
     , m_bInitialOffsetSet(false)
     , m_BaseYaw(0.0f)
     , m_BasePitch(0.0f)
@@ -96,7 +96,7 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
         case MAIN_SCENE:
         {
             // FIX Issue #1: Use ForMainScene to match DefaultCamera's config
-            m_Config = CameraConfig::ForMainScene();
+            m_Config = CameraConfig::ForMainSceneDefaultCamera();
 
             // Set MainScene defaults
             m_State.ViewFar = m_Config.farPlane;      // 1700
@@ -118,7 +118,7 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
         default:
         {
             // Use gameplay config as default
-            m_Config = CameraConfig::ForGameplay();
+            m_Config = CameraConfig::ForMainSceneOrbitalCamera();
             m_State.ViewFar = m_Config.farPlane;
             m_State.FOV = 30.0f;
             m_State.TopViewEnable = false;
@@ -160,13 +160,13 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
             break;
         case MAIN_SCENE:
             // FIX Issue #1: Use ForMainScene to match DefaultCamera's config
-            m_Config = CameraConfig::ForMainScene();
+            m_Config = CameraConfig::ForMainSceneDefaultCamera();
 #ifdef _EDITOR
             g_MuEditorConsoleUI.LogEditor("[CAM]   Loaded ForMainScene config for MAIN_SCENE");
 #endif
             break;
         default:
-            m_Config = CameraConfig::ForGameplay();
+            m_Config = CameraConfig::ForMainSceneOrbitalCamera();
 #ifdef _EDITOR
             g_MuEditorConsoleUI.LogEditor("[CAM]   Loaded ForGameplay config (default)");
 #endif
@@ -786,7 +786,7 @@ void OrbitalCamera::UpdateConfigForZoom()
 
     // Adjust config based on zoom level
     // Use gameplay preset as base
-    CameraConfig baseConfig = CameraConfig::ForGameplay();
+    CameraConfig baseConfig = CameraConfig::ForMainSceneOrbitalCamera();
 
     if (zoomRatio >= 1.0f)
     {
