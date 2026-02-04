@@ -36,7 +36,7 @@ extern EGameScene SceneFlag;
 extern int g_iChatInputType;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern float g_fMULogoAlpha;
-extern wchar_t m_ID[MAX_ID_SIZE + 1];
+extern wchar_t m_Username[MAX_USERNAME_SIZE + 1];
 extern CHARACTER* Hero;
 extern double WorldTime;
 extern HFONT g_hFont;
@@ -281,9 +281,9 @@ void CreateLogInScene()
 
     if (g_iChatInputType == 0)
     {
-        wcscpy_s(InputText[0], 256, m_ID);
+        wcscpy_s(InputText[0], 256, m_Username);
         InputLength[0] = wcslen(InputText[0]);
-        InputTextMax[0] = MAX_ID_SIZE;
+        InputTextMax[0] = MAX_USERNAME_SIZE;
         if (InputLength[0] == 0)	InputIndex = 0;
         else InputIndex = 1;
     }

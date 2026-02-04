@@ -66,7 +66,7 @@ void CDuelMgr::SetDuelPlayer(int iPlayerNum, short sIndex, const wchar_t* pszID)
     m_DuelPlayer[iPlayerNum].m_sIndex = sIndex;
     if (pszID != nullptr)
     {
-        wcsncpy_s(m_DuelPlayer[iPlayerNum].m_szID, pszID, MAX_ID_SIZE);
+        wcsncpy_s(m_DuelPlayer[iPlayerNum].m_szID, pszID, MAX_USERNAME_SIZE);
     }
     else
     {
@@ -78,7 +78,7 @@ void CDuelMgr::SetDuelPlayer(int iPlayerNum, short sIndex, const wchar_t* pszID)
 void CDuelMgr::SetHeroAsDuelPlayer(int iPlayerNum)
 {
     m_DuelPlayer[iPlayerNum].m_sIndex = Hero->Key;
-    wcsncpy_s(m_DuelPlayer[iPlayerNum].m_szID, Hero->ID, MAX_ID_SIZE);
+    wcsncpy_s(m_DuelPlayer[iPlayerNum].m_szID, Hero->ID, MAX_USERNAME_SIZE);
 }
 
 void CDuelMgr::SetScore(int iPlayerNum, int iScore)
@@ -118,11 +118,11 @@ float CDuelMgr::GetSD(int iPlayerNum)
 
 BOOL CDuelMgr::IsDuelPlayer(CHARACTER* pCharacter, int iPlayerNum, BOOL bIncludeSummon)
 {
-    if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_sIndex && wcsncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
+    if (pCharacter->Key == m_DuelPlayer[iPlayerNum].m_sIndex && wcsncmp(pCharacter->ID, m_DuelPlayer[iPlayerNum].m_szID, MAX_USERNAME_SIZE) == 0)
     {
         return TRUE;
     }
-    else if (bIncludeSummon == TRUE && gCharacterManager.GetBaseClass(pCharacter->Class) == 0 && wcsncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_ID_SIZE) == 0)
+    else if (bIncludeSummon == TRUE && gCharacterManager.GetBaseClass(pCharacter->Class) == 0 && wcsncmp(pCharacter->OwnerID, m_DuelPlayer[iPlayerNum].m_szID, MAX_USERNAME_SIZE) == 0)
     {
         return TRUE;
     }
@@ -147,7 +147,7 @@ void CDuelMgr::SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, c
     channel.m_bJoinable = bJoinable;
     if (pszID1 != nullptr)
     {
-        wcsncpy_s(channel.m_szID1, pszID1, MAX_ID_SIZE);
+        wcsncpy_s(channel.m_szID1, pszID1, MAX_USERNAME_SIZE);
     }
     else
     {
@@ -155,7 +155,7 @@ void CDuelMgr::SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, c
     }
     if (pszID2 != nullptr)
     {
-        wcsncpy_s(channel.m_szID2, pszID2, MAX_ID_SIZE);
+        wcsncpy_s(channel.m_szID2, pszID2, MAX_USERNAME_SIZE);
     }
     else
     {
@@ -175,7 +175,7 @@ void CDuelMgr::AddDuelWatchUser(const wchar_t* pszUserID)
         return;
     }
 
-    m_DuelWatchUserList.emplace_back(pszUserID, wcsnlen(pszUserID, MAX_ID_SIZE));
+    m_DuelWatchUserList.emplace_back(pszUserID, wcsnlen(pszUserID, MAX_USERNAME_SIZE));
 }
 
 void CDuelMgr::RemoveDuelWatchUser(const wchar_t* pszUserID)
@@ -187,7 +187,7 @@ void CDuelMgr::RemoveDuelWatchUser(const wchar_t* pszUserID)
 
     const auto matcher = [pszUserID](const std::wstring& name)
     {
-        return wcsncmp(name.c_str(), pszUserID, MAX_ID_SIZE) == 0;
+        return wcsncmp(name.c_str(), pszUserID, MAX_USERNAME_SIZE) == 0;
     };
 
     const auto iter = std::remove_if(m_DuelWatchUserList.begin(), m_DuelWatchUserList.end(), matcher);

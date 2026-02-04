@@ -16,7 +16,7 @@
 #include "ZzzOpenData.h"
 
 extern int LogIn;
-extern wchar_t LogInID[MAX_ID_SIZE + 1];
+extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern int HeroKey;
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
@@ -132,12 +132,12 @@ void CSMServer::SendChangeMapServer(void)
         return;
     }
 
-    constexpr std::size_t kCharacterIdLength = MAX_ID_SIZE + 1;
-    constexpr std::size_t kPacketBufferLength = MAX_ID_SIZE + 2;
+    constexpr std::size_t kCharacterIdLength = MAX_USERNAME_SIZE + 1;
+    constexpr std::size_t kPacketBufferLength = MAX_USERNAME_SIZE + 2;
 
     std::array<wchar_t, kCharacterIdLength> characterIdBuffer {};
 
-    const std::size_t heroIdCopyLength = std::min<std::size_t>(m_heroId.size(), MAX_ID_SIZE);
+    const std::size_t heroIdCopyLength = std::min<std::size_t>(m_heroId.size(), MAX_USERNAME_SIZE);
     std::wmemcpy(characterIdBuffer.data(), m_heroId.c_str(), heroIdCopyLength);
     characterIdBuffer[heroIdCopyLength] = L'\0';
 
@@ -153,9 +153,9 @@ void CSMServer::SendChangeMapServer(void)
     BuxConvert(reinterpret_cast<BYTE*>(loginIdBuffer.data()), kPacketBufferLength);
     SocketClient->ToGameServer()->SendServerChangeAuthentication(
         reinterpret_cast<BYTE*>(loginIdBuffer.data()),
-        MAX_ID_SIZE,
+        MAX_USERNAME_SIZE,
         reinterpret_cast<BYTE*>(characterPacketBuffer.data()),
-        MAX_ID_SIZE,
+        MAX_USERNAME_SIZE,
         m_serverInfo.m_iJoinAuthCode1,
         m_serverInfo.m_iJoinAuthCode2,
         m_serverInfo.m_iJoinAuthCode3,

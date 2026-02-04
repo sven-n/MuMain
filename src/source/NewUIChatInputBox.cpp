@@ -508,10 +508,10 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
     {
         m_lastChatTime = currentTickCount;
         wchar_t	szChatText[MAX_CHAT_SIZE + 1] = { '\0' };
-        wchar_t	szWhisperID[MAX_ID_SIZE + 1] = { '\0' };
+        wchar_t	szWhisperID[MAX_USERNAME_SIZE + 1] = { '\0' };
 
         m_pChatInputBox->GetText(szChatText, MAX_CHAT_SIZE);
-        m_pWhsprIDInputBox->GetText(szWhisperID, MAX_ID_SIZE + 1);
+        m_pWhsprIDInputBox->GetText(szWhisperID, MAX_USERNAME_SIZE + 1);
 
         //for (int i = 0; i < MAX_CHAT_SIZE; i++)
         //    szReceivedChat[i] = g_pMultiLanguage->ConvertFulltoHalfWidthChar(szReceivedChat[i]);

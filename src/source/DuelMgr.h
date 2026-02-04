@@ -7,7 +7,7 @@
 struct DUEL_PLAYER_INFO
 {
     short m_sIndex = 0;
-    wchar_t m_szID[MAX_ID_SIZE + 1]{};
+    wchar_t m_szID[MAX_USERNAME_SIZE + 1]{};
     int m_iScore = 0;
     float m_fHPRate = 0.0f;
     float m_fSDRate = 0.0f;
@@ -24,8 +24,8 @@ struct DUEL_CHANNEL_INFO
 {
     BOOL m_bEnable = FALSE;
     BOOL m_bJoinable = FALSE;
-    wchar_t m_szID1[MAX_ID_SIZE + 1]{};
-    wchar_t m_szID2[MAX_ID_SIZE + 1]{};
+    wchar_t m_szID1[MAX_USERNAME_SIZE + 1]{};
+    wchar_t m_szID2[MAX_USERNAME_SIZE + 1]{};
 };
 
 constexpr int MAX_DUEL_CHANNELS = 4;

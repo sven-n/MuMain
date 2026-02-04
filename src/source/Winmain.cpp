@@ -7,6 +7,7 @@
 
 #include <dpapi.h>
 #include <clocale>
+#include "GameConfig/GameConfig.h"
 #include "UIWindows.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
@@ -363,10 +364,9 @@ extern PATH* path;
 
 void DestroyWindow()
 {
-    //. save volume level
-    leaf::CRegKey regkey;
-    regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config");
-    regkey.WriteDword(L"VolumeLevel", g_pOption->GetVolumeLevel());
+    // Save game configuration to config.ini
+    GameConfig::GetInstance().SetVolumeLevel(g_pOption->GetVolumeLevel());
+    GameConfig::GetInstance().Save();
 
 #ifdef _EDITOR
     // Save editor configuration
@@ -671,7 +671,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         g_iNoMouseTime = 0;
         MouseMButtonPush = false;
         if (MouseMButton) MouseMButtonPop = true;
-        MouseRButton = false;
+        MouseMButton = false;
         ReleaseCapture();
         break;
     case WM_MOUSEWHEEL:
@@ -725,9 +725,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-wchar_t m_ID[11];
+wchar_t m_Username[11];
 wchar_t m_Password[21];
-char m_EncryptedPassword[262];
 wchar_t m_Version[11];
 wchar_t m_ExeVersion[11];
 int  m_SoundOnOff;
@@ -978,18 +977,29 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_ErrorReport.WriteSystemInfo(&si);
     g_ErrorReport.AddSeparator();
     
+    g_ErrorReport.Write(L"> To read config.ini.\r\n");
+
+    // Load game settings from INI file first
+    GameConfig::GetInstance().Load();
+
+    // Check for command line server override
     WORD wPortNumber;
     if (GetConnectServerInfo(GetCommandLine(), g_lpszCmdURL, &wPortNumber))
     {
         szServerIpAddress = g_lpszCmdURL;
         g_ServerPort = wPortNumber;
     }
-
-    g_ErrorReport.Write(L"> To read config.ini.\r\n");
+    else
+    {
+        // Use config.ini settings if no command line override
+        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
+        szServerIpAddress = serverIPFromConfig.c_str();
+        g_ServerPort = GameConfig::GetInstance().GetServerPort();
+    }
 
     //#ifdef _DEBUG
 
-    m_ID[0] = '\0';
+    m_Username[0] = '\0';
     m_Password[0] = '\0';
     m_SoundOnOff = 1;
     m_MusicOnOff = 1;
@@ -997,133 +1007,31 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     m_nColorDepth = 0;
     m_RememberMe = 0;
 
-    HKEY hKey;
-    DWORD dwDisp;
-    DWORD dwSize;
-    if (ERROR_SUCCESS == RegCreateKeyEx(HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config", 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &hKey, &dwDisp))
+    g_iChatInputType = 1;
+
+    // Apply window settings from INI
+    WindowWidth = GameConfig::GetInstance().GetWindowWidth();
+    WindowHeight = GameConfig::GetInstance().GetWindowHeight();
+    g_bUseWindowMode = GameConfig::GetInstance().GetWindowMode() ? TRUE : FALSE;
+    g_bUseFullscreenMode = !g_bUseWindowMode;
+
+    // Apply audio settings from INI
+    m_SoundOnOff = GameConfig::GetInstance().GetSoundEnabled();
+    m_MusicOnOff = GameConfig::GetInstance().GetMusicEnabled();
+
+    // Apply graphics settings from INI
+    m_nColorDepth = GameConfig::GetInstance().GetColorDepth();
+    g_iRenderTextType = GameConfig::GetInstance().GetRenderTextType();
+
+    // Apply login settings from INI
+    m_RememberMe = GameConfig::GetInstance().GetRememberMe() ? 1 : 0;
+    std::wstring langSelection = GameConfig::GetInstance().GetLanguageSelection();
+    wcsncpy_s(g_aszMLSelection, langSelection.c_str(), MAX_LANGUAGE_NAME_LENGTH - 1);
+    g_strSelectedML = g_aszMLSelection;
+
+    if (m_RememberMe)
     {
-        dwSize = sizeof(m_ID);
-        if (RegQueryValueEx(hKey, L"ID", nullptr, nullptr, (LPBYTE)m_ID, &dwSize) != ERROR_SUCCESS)
-        {
-        }
-        dwSize = sizeof(m_EncryptedPassword);
-        if (RegQueryValueEx(hKey, L"Password", nullptr, nullptr, (LPBYTE)m_EncryptedPassword, &dwSize) != ERROR_SUCCESS)
-        {
-        }
-        else
-        {
-            DATA_BLOB dataIn;
-            DATA_BLOB dataOut;
-            dataIn.pbData = (BYTE*)m_EncryptedPassword;
-            dataIn.cbData = dwSize;
-
-            if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
-            {
-                wcscpy(m_Password, (wchar_t*)dataOut.pbData);
-                LocalFree(dataOut.pbData);
-            }
-        }
-
-        dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, L"SoundOnOff", nullptr, nullptr, (LPBYTE)&m_SoundOnOff, &dwSize) != ERROR_SUCCESS)
-        {
-            m_SoundOnOff = true;
-        }
-        dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, L"MusicOnOff", nullptr, nullptr, (LPBYTE)&m_MusicOnOff, &dwSize) != ERROR_SUCCESS)
-        {
-            m_MusicOnOff = false;
-        }
-        dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, L"Resolution", nullptr, nullptr, (LPBYTE)&m_Resolution, &dwSize) != ERROR_SUCCESS)
-            m_Resolution = 1;
-
-        if (0 == m_Resolution)
-            m_Resolution = 1;
-
-        dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, L"ColorDepth", nullptr, nullptr, (LPBYTE)&m_nColorDepth, &dwSize) != ERROR_SUCCESS)
-        {
-            m_nColorDepth = 0;
-        }
-        dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, L"RememberMe", nullptr, nullptr, (LPBYTE)&m_RememberMe, &dwSize) != ERROR_SUCCESS)
-        {
-            m_RememberMe = 0;
-        }
-        dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, L"TextOut", nullptr, nullptr, (LPBYTE)&g_iRenderTextType, &dwSize) != ERROR_SUCCESS)
-        {
-            g_iRenderTextType = 0;
-        }
-
-        g_iChatInputType = 1;
-
-        dwSize = sizeof(int);
-        if (RegQueryValueEx(hKey, L"WindowMode", nullptr, nullptr, (LPBYTE)&g_bUseWindowMode, &dwSize) != ERROR_SUCCESS)
-        {
-            g_bUseWindowMode = FALSE;
-        }
-
-        dwSize = MAX_LANGUAGE_NAME_LENGTH;
-        if (RegQueryValueEx(hKey, L"LangSelection", nullptr, nullptr, (LPBYTE)g_aszMLSelection, &dwSize) != ERROR_SUCCESS)
-        {
-            wcscpy(g_aszMLSelection, L"Eng");
-        }
-        g_strSelectedML = g_aszMLSelection;
-    }
-    RegCloseKey(hKey);
-
-    switch (m_Resolution)
-    {
-    case 0:
-        WindowWidth = 640;
-        WindowHeight = 480;
-        break;
-    case 1:
-        WindowWidth = 800;
-        WindowHeight = 600;
-        break;
-    case 2:
-        WindowWidth = 1024;
-        WindowHeight = 768;
-        break;
-    case 3:
-        WindowWidth = 1280;
-        WindowHeight = 1024;
-        break;
-    case 4:
-        WindowWidth = 1600;
-        WindowHeight = 1200;
-        break;
-    case 5:
-        WindowWidth = 1864;
-        WindowHeight = 1400;
-        break;
-    case 6:
-        WindowWidth = 1600;
-        WindowHeight = 900;
-        break;
-    case 7:
-        WindowWidth = 1600;
-        WindowHeight = 1280;
-        break;
-    case 8:
-        WindowWidth = 1680;
-        WindowHeight = 1050;
-        break;
-    case 9:
-        WindowWidth = 1920;
-        WindowHeight = 1080;
-        break;
-    case 10:
-        WindowWidth = 2560;
-        WindowHeight = 1440;
-        break;
-    default:
-        WindowWidth = 640;
-        WindowHeight = 480;
-        break;
+        GameConfig::GetInstance().DecryptCredentials(m_Username, m_Password, _countof(m_Username), _countof(m_Password));
     }
 
     g_fScreenRate_x = (float)WindowWidth / 640;
@@ -1360,18 +1268,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (m_SoundOnOff)
     {
         InitDirectSound(g_hWnd);
-        leaf::CRegKey regkey;
-        regkey.SetKey(leaf::CRegKey::_HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config");
-        DWORD value;
-        if (!regkey.ReadDword(L"VolumeLevel", value))
-        {
-            value = 5;	//. default setting
-            regkey.WriteDword(L"VolumeLevel", value);
-        }
+
+        // Load volume level from config.ini
+        int value = GameConfig::GetInstance().GetVolumeLevel();
         if (value < 0 || value >= 10)
             value = 5;
 
-        g_pOption->SetVolumeLevel(int(value));
+        g_pOption->SetVolumeLevel(value);
         SetEffectVolumeLevel(g_pOption->GetVolumeLevel());
     }
 

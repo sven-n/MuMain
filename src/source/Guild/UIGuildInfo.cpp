@@ -19,7 +19,7 @@
 extern int			DeleteGuildIndex;
 extern DWORD		g_dwActiveUIID;
 
-wchar_t	s_szTargetID[MAX_ID_SIZE + 1];
+wchar_t	s_szTargetID[MAX_USERNAME_SIZE + 1];
 extern int s_nTargetFireMemberIndex = 0;
 
 char Guild_Skill_Button = 0;

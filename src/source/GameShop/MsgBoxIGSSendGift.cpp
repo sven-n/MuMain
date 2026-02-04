@@ -58,12 +58,12 @@ bool CMsgBoxIGSSendGift::Create(float fPriority)
 
 void CMsgBoxIGSSendGift::InitInputBox()
 {
-    m_IDInputBox.Init(g_hWnd, IGS_ID_INPUT_TEXT_WIDTH, IGS_ID_INPUT_TEXT_HEIGHT, MAX_ID_SIZE);
+    m_IDInputBox.Init(g_hWnd, IGS_ID_INPUT_TEXT_WIDTH, IGS_ID_INPUT_TEXT_HEIGHT, MAX_USERNAME_SIZE);
     m_IDInputBox.SetPosition(GetPos().x + IGS_ID_INPUT_TEXT_POS_X, GetPos().y + IGS_ID_INPUT_TEXT_POS_Y);
     m_IDInputBox.SetTextColor(255, 0, 0, 0);
     m_IDInputBox.SetBackColor(255, 255, 255, 255);
     m_IDInputBox.SetFont(g_hFont);
-    m_IDInputBox.SetTextLimit(MAX_ID_SIZE);
+    m_IDInputBox.SetTextLimit(MAX_USERNAME_SIZE);
     m_IDInputBox.SetState(UISTATE_NORMAL);
 
     m_MessageInputBox.SetMultiline(TRUE);
@@ -109,7 +109,7 @@ bool CMsgBoxIGSSendGift::Update()
     m_MessageInputBox.DoAction();
 
     if (m_IDInputBox.HaveFocus() == TRUE)
-        m_IDInputBox.GetText(m_szID, MAX_ID_SIZE + 1);
+        m_IDInputBox.GetText(m_szID, MAX_USERNAME_SIZE + 1);
 
     if (m_MessageInputBox.HaveFocus() == TRUE)
         m_MessageInputBox.GetText(m_szMessage, MAX_GIFT_MESSAGE_SIZE);

@@ -93,7 +93,7 @@ int DeleteGuildIndex = -1;
 int  ErrorMessage = NULL;
 extern bool g_bEnterPressed;
 
-extern wchar_t LogInID[MAX_ID_SIZE + 1];
+extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern wchar_t m_ExeVersion[11];
 
 BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring &lpszString);

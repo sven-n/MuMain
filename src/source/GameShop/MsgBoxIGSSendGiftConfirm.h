@@ -97,7 +97,7 @@ private:
     DWORD	m_wItemCode;
     int		m_iCashType;
 
-    wchar_t m_szID[MAX_ID_SIZE + 1];
+    wchar_t m_szID[MAX_USERNAME_SIZE + 1];
     wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
 
     wchar_t m_szItemName[MAX_TEXT_LENGTH];

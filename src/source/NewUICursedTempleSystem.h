@@ -130,19 +130,19 @@ namespace SEASON3B
         POINT					m_Pos;
         CNewUIButton			m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
         //EventTime
-        DWORD				m_EventMapTime;             // 이벤트 전체 시간
+        DWORD				m_EventMapTime;             // Total event time
         //MiniMap
-        WORD				m_HolyItemPlayerIndex;		// 성물을 가지고 있는 사용자 인덱스
-        WORD				m_HolyItemPlayerPosX;		// 성물 위치 X
-        WORD				m_HolyItemPlayerPosY;		// 성물 위치 Y
-        wchar_t				m_HolyItemPlayerName[MAX_ID_SIZE];
+        WORD				m_HolyItemPlayerIndex;		// Index of the player holding the Holy Item
+        WORD                m_HolyItemPlayerPosX;       // Sacred Item X-coordinate
+        WORD                m_HolyItemPlayerPosY;       // Sacred Item Y-coordinate
+        wchar_t				m_HolyItemPlayerName[MAX_USERNAME_SIZE];
 
         float				m_Scale;
         float				m_Alph;
 
         //HolyItemCount
-        WORD				m_AlliedPoint;				// 연합군측 점수
-        WORD				m_IllusionPoint;			// 환영교단측 점수
+        WORD  m_AlliedPoint;    // Allied Forces score
+        WORD  m_IllusionPoint;  // Illusion Cult score
 
         WORD							m_CursedTempleMyTeamCount;
         PMSG_CURSED_TAMPLE_PARTY_POS	m_CursedTempleMyTeam[MAX_PARTYS];

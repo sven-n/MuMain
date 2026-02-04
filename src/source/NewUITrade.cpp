@@ -62,7 +62,7 @@ bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_abtn[BTN_ZEN_INPUT].ChangeButtonInfo(x + 104, y + 390, 36, 29);
     m_abtn[BTN_ZEN_INPUT].ChangeToolTipText(GlobalText[227], true);
 
-    ::memset(m_szYourID, 0, MAX_ID_SIZE + 1);
+    ::memset(m_szYourID, 0, MAX_USERNAME_SIZE + 1);
     m_bTradeAlert = false;
 
     InitTradeInfo();
@@ -620,15 +620,15 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
         int x = 260 * MouseX / 640;
         SetCursorPos(x * WindowWidth / 640, MouseY * WindowHeight / 480);
 
-        wchar_t szTempID[MAX_ID_SIZE + 1]{ };
-        CMultiLanguage::ConvertFromUtf8(szTempID, pTradeData->ID, MAX_ID_SIZE);
+        wchar_t szTempID[MAX_USERNAME_SIZE + 1]{ };
+        CMultiLanguage::ConvertFromUtf8(szTempID, pTradeData->ID, MAX_USERNAME_SIZE);
 
         if (!m_bTradeAlert && ::wcscmp(m_szYourID, szTempID))
             InitYourInvenBackUp();
 
         m_bTradeAlert = false;
         m_nYourGuildType = pTradeData->GuildKey;
-        wcsncpy(m_szYourID, szTempID, MAX_ID_SIZE);
+        wcsncpy(m_szYourID, szTempID, MAX_USERNAME_SIZE);
         m_nYourLevel = pTradeData->Level;   //  상대방 레벨.
         break;
     }

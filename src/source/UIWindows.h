@@ -540,7 +540,7 @@ protected:
     DWORD m_dwReturnWindowUIID;
     int m_iDialogType;	// 0: Y/N, 1: OK
     wchar_t m_szCaption[2][MAX_TEXT_LENGTH + 1];
-    wchar_t m_szSaveID[MAX_ID_SIZE + 1];
+    wchar_t m_szSaveID[MAX_USERNAME_SIZE + 1];
     CUIButton m_AddButton;
     CUIButton m_CancelButton;
 };

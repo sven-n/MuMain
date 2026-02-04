@@ -67,7 +67,7 @@ void StartGame()
             CharacterAttribute->Level = CharactersClient[SelectedHero].Level;
             CharacterAttribute->Class = CharactersClient[SelectedHero].Class;
             CharacterAttribute->Skin = CharactersClient[SelectedHero].Skin;
-            ::wcscpy_s(CharacterAttribute->Name, MAX_ID_SIZE + 1, CharactersClient[SelectedHero].ID);
+            ::wcscpy_s(CharacterAttribute->Name, MAX_USERNAME_SIZE + 1, CharactersClient[SelectedHero].ID);
 
             ::ReleaseCharacterSceneData();
             InitLoading = false;

@@ -34,7 +34,7 @@ namespace SEASON3B
 
         struct CursedTempleGameResult
         {
-            wchar_t		s_characterId[MAX_ID_SIZE + 1];
+            wchar_t		s_characterId[MAX_USERNAME_SIZE + 1];
             short		s_mapnumber;
             SEASON3A::eCursedTempleTeam		s_team;
             BYTE		s_point;
@@ -43,7 +43,7 @@ namespace SEASON3B
 
             CursedTempleGameResult() : s_mapnumber(-1), s_team(SEASON3A::eTeam_Count), s_point(0xff), s_class(CLASS_UNDEFINED), s_addexp(0xff)
             {
-                memset(&s_characterId, 0, sizeof(char) * (MAX_ID_SIZE + 1));
+                memset(&s_characterId, 0, sizeof(char) * (MAX_USERNAME_SIZE + 1));
             }
         };
 

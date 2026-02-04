@@ -22,19 +22,19 @@ public:
 
     enum IMAGESIZE_IGS_SEND_GIFT
     {
-        IMAGE_IGS_WINDOW_WIDTH = 640,	// 인게임샵 배경 사이즈
+        IMAGE_IGS_WINDOW_WIDTH = 640,	// In-game shop background size
         IMAGE_IGS_WINDOW_HEIGHT = 429,
-        IMAGE_IGS_FRAME_WIDTH = 210,	// 메세지박스 Size
+        IMAGE_IGS_FRAME_WIDTH = 210,	// Message box Size
         IMAGE_IGS_FRAME_HEIGHT = 267,
         IMAGE_IGS_DECO_WIDTH = 17,	// Deco
         IMAGE_IGS_DECO_HEIGHT = 19,
         IMAGE_IGS_ID_INPUT_BOX_WIDTH = 76,	// Input TextBox
         IMAGE_IGS_ID_INPUT_BOX_HEIGHT = 17,
-        IMAGE_IGS_BTN_WIDTH = 52,	// 버튼 Size
+        IMAGE_IGS_BTN_WIDTH = 52,	// Button Size
         IMAGE_IGS_BTN_HEIGHT = 26,
     };
 
-    // 메세지박스상의 상대좌표
+    // Relative coordinates on the message box
     enum IGS_SEND_GIFT_POS
     {
         IMAGE_IGS_DECO_POS_X = 10,	// Deco
@@ -112,7 +112,7 @@ private:
     DWORD	m_wItemCode;
     int		m_iCashType;
 
-    wchar_t m_szID[MAX_ID_SIZE + 1];
+    wchar_t m_szID[MAX_USERNAME_SIZE + 1];
     wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
 
     wchar_t m_szName[MAX_TEXT_LENGTH];

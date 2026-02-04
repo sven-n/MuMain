@@ -66,7 +66,7 @@ extern HFONT     g_hFixFont;
 extern bool      Destroy;
 extern int       RandomTable[];
 
-extern wchar_t m_ID[11];
+extern wchar_t m_Username[11];
 extern wchar_t m_Password[21];
 extern wchar_t m_Version[];
 extern int  m_SoundOnOff;

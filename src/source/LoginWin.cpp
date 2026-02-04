@@ -21,6 +21,9 @@
 #include "ServerListManager.h"
 #include <dpapi.h>
 
+#include "GameConfig/GameConfig.h"
+#include "GameConfig/GameConfigConstants.h"
+
 #define	LIW_ACCOUNT		0
 #define	LIW_PASSWORD	1
 
@@ -31,24 +34,37 @@
 
 extern int g_iChatInputType;
 extern int  LogIn;
-extern wchar_t LogInID[MAX_ID_SIZE + 1];
+extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
 CLoginWin::CLoginWin()
 {
-    m_pIDInputBox = NULL;
-    m_pPassInputBox = NULL;
+    m_pUsernameInputBox = NULL;
+    m_pPasswordInputBox = NULL;
 }
 
 CLoginWin::~CLoginWin()
 {
-    SAFE_DELETE(m_pIDInputBox);
-    SAFE_DELETE(m_pPassInputBox);
+    SAFE_DELETE(m_pUsernameInputBox);
+    SAFE_DELETE(m_pPasswordInputBox);
 }
 
 void CLoginWin::Create()
 {
+    m_RememberMe = GameConfig::GetInstance().GetRememberMe();
+    if (m_RememberMe)
+    {
+        // Use the helper we built to fill m_Username[11] and m_Password[21]
+        GameConfig::GetInstance().DecryptCredentials(m_Username, m_Password, _countof(m_Username), _countof(m_Password));
+    }
+    else
+    {
+        // Ensure they are empty if RememberMe is off
+        m_Username[0] = L'\0';
+        m_Password[0] = L'\0';
+    }
+
     CWin::Create(329, 245, BITMAP_LOG_IN + 7);
 
     m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
@@ -63,30 +79,33 @@ void CLoginWin::Create()
     m_aBtnRememberMe.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
     CWin::RegisterButton(&m_aBtnRememberMe);
 
-    SAFE_DELETE(m_pIDInputBox);
+    SAFE_DELETE(m_pUsernameInputBox);
 
-    m_pIDInputBox = new CUITextInputBox;
-    m_pIDInputBox->Init(g_hWnd, 140, 14, MAX_ID_SIZE);
-    m_pIDInputBox->SetBackColor(0, 0, 0, 25);
-    m_pIDInputBox->SetTextColor(255, 255, 230, 210);
-    m_pIDInputBox->SetFont(g_hFixFont);
-    m_pIDInputBox->SetState(UISTATE_NORMAL);
-    m_pIDInputBox->SetText(m_ID);
+    m_pUsernameInputBox = new CUITextInputBox;
+    m_pUsernameInputBox->Init(g_hWnd, 140, 14, MAX_USERNAME_SIZE);
+    m_pUsernameInputBox->SetBackColor(0, 0, 0, 25);
+    m_pUsernameInputBox->SetTextColor(255, 255, 230, 210);
+    m_pUsernameInputBox->SetFont(g_hFixFont);
+    m_pUsernameInputBox->SetState(UISTATE_NORMAL);
+    if (m_RememberMe) {
+        m_pUsernameInputBox->SetText(m_Username);
+        m_aBtnRememberMe.SetCheck(true);
+    }
 
-    SAFE_DELETE(m_pPassInputBox);
+    SAFE_DELETE(m_pPasswordInputBox);
 
-    m_pPassInputBox = new CUITextInputBox;
-    m_pPassInputBox->Init(g_hWnd, 140, 14, MAX_PASSWORD_SIZE, TRUE);
-    m_pPassInputBox->SetBackColor(0, 0, 0, 25);
-    m_pPassInputBox->SetTextColor(255, 255, 230, 210);
-    m_pPassInputBox->SetFont(g_hFixFont);
-    m_pPassInputBox->SetState(UISTATE_NORMAL);
+    m_pPasswordInputBox = new CUITextInputBox;
+    m_pPasswordInputBox->Init(g_hWnd, 140, 14, MAX_PASSWORD_SIZE, TRUE);
+    m_pPasswordInputBox->SetBackColor(0, 0, 0, 25);
+    m_pPasswordInputBox->SetTextColor(255, 255, 230, 210);
+    m_pPasswordInputBox->SetFont(g_hFixFont);
+    m_pPasswordInputBox->SetState(UISTATE_NORMAL);
 
-    m_pIDInputBox->SetTabTarget(m_pPassInputBox);
-    m_pPassInputBox->SetTabTarget(m_pIDInputBox);
+    m_pUsernameInputBox->SetTabTarget(m_pPasswordInputBox);
+    m_pPasswordInputBox->SetTabTarget(m_pUsernameInputBox);
 
     if (m_RememberMe) {
-        m_pPassInputBox->SetText(m_Password);
+        m_pPasswordInputBox->SetText(m_Password);
         m_aBtnRememberMe.SetCheck(true);
     }
 
@@ -110,8 +129,8 @@ void CLoginWin::SetPosition(int x, int y)
 	if (g_iChatInputType == 1)
 	{
 		const int boxX = int((x + 115) / g_fScreenRate_x);
-		m_pIDInputBox->SetPosition(boxX, int((y + 112) / g_fScreenRate_y));
-		m_pPassInputBox->SetPosition(boxX, int((y + 137) / g_fScreenRate_y));
+		m_pUsernameInputBox->SetPosition(boxX, int((y + 112) / g_fScreenRate_y));
+		m_pPasswordInputBox->SetPosition(boxX, int((y + 137) / g_fScreenRate_y));
 	}
 
 	m_aBtn[LIW_OK].SetPosition(x + 150, y + 178);
@@ -163,28 +182,31 @@ void CLoginWin::UpdateWhileActive(double)
 	}
 
 	if (m_aBtnRememberMe.IsClick())
+	{
 		m_RememberMe = m_aBtnRememberMe.IsCheck();
+		GameConfig::GetInstance().SetRememberMe(m_RememberMe != 0);
+	}
 }
 
 void CLoginWin::UpdateWhileShow(double dDeltaTick)
 {
-    m_pIDInputBox->DoAction();
-    m_pPassInputBox->DoAction();
+    m_pUsernameInputBox->DoAction();
+    m_pPasswordInputBox->DoAction();
 }
 
 void CLoginWin::RenderControls()
 {
     if (FirstLoad)
     {
-        (wcslen(m_ID) > 0 ? m_pPassInputBox : m_pIDInputBox)->GiveFocus();
+        (wcslen(m_Username) > 0 ? m_pPasswordInputBox : m_pUsernameInputBox)->GiveFocus();
         FirstLoad = 0;
     }
 
     CWin::RenderButtons();
     m_asprInputBox[LIW_ACCOUNT].Render();
     m_asprInputBox[LIW_PASSWORD].Render();
-    m_pIDInputBox->Render();
-    m_pPassInputBox->Render();
+    m_pUsernameInputBox->Render();
+    m_pPasswordInputBox->Render();
 
     g_pRenderText->SetFont(g_hFixFont);
     g_pRenderText->SetBgColor(0);
@@ -211,29 +233,23 @@ void CLoginWin::RequestLogin()
 
     CUIMng::Instance().HideWin(this);
 
-    m_pIDInputBox->GetText(m_ID, MAX_ID_SIZE + 1);
-    m_pPassInputBox->GetText(m_Password, MAX_PASSWORD_SIZE + 1);
+    m_pUsernameInputBox->GetText(m_Username, _countof(m_Username));
+    m_pPasswordInputBox->GetText(m_Password, _countof(m_Password));
 
-    // Start save account info to registry
-    HKEY hKey;
-    RegCreateKeyEx(HKEY_CURRENT_USER, L"SOFTWARE\\Webzen\\Mu\\Config", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL);
-    RegSetValueEx(hKey, L"ID", 0, REG_SZ, (BYTE*)m_ID, sizeof(m_ID));
-
-    DATA_BLOB dataIn;
-    DATA_BLOB dataOut;
-    dataIn.cbData = sizeof(m_Password);
-    dataIn.pbData = m_aBtnRememberMe.IsCheck() ? (BYTE*)m_Password : (BYTE*)"";
-
-    if (CryptProtectData(&dataIn, NULL, NULL, NULL, NULL, 0, &dataOut))
+    // Handle credentials saving
+    if (m_aBtnRememberMe.IsCheck())
     {
-        RegSetValueEx(hKey, L"Password", 0, REG_BINARY, dataOut.pbData, dataOut.cbData);
-        LocalFree(dataOut.pbData);
+        GameConfig::GetInstance().EncryptAndSaveCredentials(m_Username, m_Password);
+    }
+    else
+    {
+        // Clear saved credentials if user unchecked "Remember Me"
+        GameConfig::GetInstance().SetEncryptedUsername(L"");
+        GameConfig::GetInstance().SetEncryptedPassword(L"");
+        GameConfig::GetInstance().Save();
     }
 
-    RegSetValueEx(hKey, L"RememberMe", 0, REG_DWORD, (BYTE*)&m_RememberMe, sizeof(m_RememberMe));
-    // End save account info to registry
-
-    if (wcslen(m_ID) <= 0)
+    if (wcslen(m_Username) <= 0)
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_ID);
     else if (wcslen(m_Password) <= 0)
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
@@ -241,16 +257,16 @@ void CLoginWin::RequestLogin()
     {
         if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", m_ID);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", m_Username);
 
             g_ErrorReport.Write(L"> Login Request.\r\n");
-            g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", m_ID);
+            g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", m_Username);
 
             LogIn = 1;
-            wcscpy(LogInID, (m_ID));
+            wcscpy(LogInID, (m_Username));
             CurrentProtocolState = REQUEST_LOG_IN;
 
-            SocketClient->ToGameServer()->SendLogin(m_ID, m_Password, Version, Serial);
+            SocketClient->ToGameServer()->SendLogin(m_Username, m_Password, Version, Serial);
 
             g_pSystemLogBox->AddText(GlobalText[472], SEASON3B::TYPE_SYSTEM_MESSAGE);
             g_pSystemLogBox->AddText(GlobalText[473], SEASON3B::TYPE_SYSTEM_MESSAGE);

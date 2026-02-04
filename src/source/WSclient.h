@@ -313,13 +313,13 @@ typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
     BYTE         Result;
-    char         Password[MAX_ID_SIZE];
+    char         Password[MAX_USERNAME_SIZE];
 } PRECEIVE_CONFIRM_PASSWORD2, * LPPRECEIVE_CONFIRM_PASSWORD2;
 
 typedef struct
 {
     BYTE         Index;
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
     WORD         Level;
     BYTE		 CtlCode;
     SERVER_CLASS_TYPE         Class;
@@ -334,7 +334,7 @@ typedef struct
     PBMSG_HEADER Header;
     BYTE         SubCode;
     BYTE         Result;
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
     BYTE         Index;
     WORD         Level;
     BYTE         Class; // SERVER_CLASS_TYPE, shifted by 3 bits
@@ -445,7 +445,7 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
     WORD         Level;
     DWORD        GuildKey;
 } PTRADE, * LPPTRADE;
@@ -457,7 +457,7 @@ typedef struct {
 //request chat
 typedef struct {
     PBMSG_HEADER Header;
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
     char         ChatText[MAX_CHAT_SIZE];
 } PCHATING, * LPPCHATING;
 
@@ -501,7 +501,7 @@ typedef struct {
     BYTE         RotationAndHeroState;
     WORD         AttackSpeed;
     WORD         MagicSpeed;
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
 
     SERVER_CLASS_TYPE         Class;
     BYTE         Flags;
@@ -518,7 +518,7 @@ typedef struct
     BYTE         PositionY;
     BYTE         TypeH;
     BYTE         TypeL;
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
     BYTE         TargetX;
     BYTE         TargetY;
     BYTE         Path;
@@ -540,7 +540,7 @@ typedef struct {
     BYTE         TargetX;
     BYTE         TargetY;
     BYTE         Path;
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
     BYTE         s_BuffCount;
     BYTE		 s_BuffEffectState[MAX_BUFF_SLOT_INDEX];
 } PCREATE_SUMMON, * LPPCREATE_SUMMON;
@@ -921,7 +921,7 @@ typedef struct {
 
 //receive party list
 typedef struct {
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
     BYTE         Number;
     BYTE         Map;
     BYTE         x;
@@ -997,7 +997,7 @@ typedef struct {
 
 // Guild member list
 typedef struct {
-    char         ID[MAX_ID_SIZE];
+    char         ID[MAX_USERNAME_SIZE];
     BYTE         Number;
     BYTE		 CurrentServer;
     BYTE		 GuildStatus;
@@ -1090,7 +1090,7 @@ typedef struct
     PBMSG_HEADER	Header;
     BYTE			byType;
     BYTE			byResult;
-    char			szTargetName[MAX_ID_SIZE];
+    char			szTargetName[MAX_USERNAME_SIZE];
 } PRECEIVE_GUILD_ASSIGN, * LPPRECEIVE_GUILD_ASSIGN;
 
 typedef struct
@@ -1503,7 +1503,7 @@ typedef struct
     BYTE		nResult;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    char		szID[MAX_ID_SIZE];
+    char		szID[MAX_USERNAME_SIZE];
 } PMSG_ANS_DUEL_INVITE, * LPPMSG_ANS_DUEL_INVITE;
 
 typedef struct _tagPMSG_REQ_DUEL_ANSWER		// SC2
@@ -1512,7 +1512,7 @@ typedef struct _tagPMSG_REQ_DUEL_ANSWER		// SC2
     BYTE         SubCode;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    char		szID[MAX_ID_SIZE];
+    char		szID[MAX_USERNAME_SIZE];
 } PMSG_REQ_DUEL_ANSWER, * LPPMSG_REQ_DUEL_ANSWER;
 
 typedef struct
@@ -1522,7 +1522,7 @@ typedef struct
     BYTE		nResult;
     BYTE		bIndexH;
     BYTE		bIndexL;
-    char		szID[MAX_ID_SIZE];
+    char		szID[MAX_USERNAME_SIZE];
 } PMSG_ANS_DUEL_EXIT, * LPPMSG_ANS_DUEL_EXIT;
 
 typedef struct
@@ -1556,8 +1556,8 @@ typedef struct
     PBMSG_HEADER Header;
     BYTE         SubCode;
     struct {
-        char	szID1[MAX_ID_SIZE];
-        char	szID2[MAX_ID_SIZE];
+        char	szID1[MAX_USERNAME_SIZE];
+        char	szID2[MAX_USERNAME_SIZE];
         BYTE	bStart;
         BYTE	bWatch;
     } channel[4];
@@ -1569,8 +1569,8 @@ typedef struct
     BYTE         SubCode;
     BYTE		nResult;
     BYTE		nChannelId;
-    char		szID1[MAX_ID_SIZE];
-    char		szID2[MAX_ID_SIZE];
+    char		szID1[MAX_USERNAME_SIZE];
+    char		szID2[MAX_USERNAME_SIZE];
     BYTE		bIndexH1;
     BYTE		bIndexL1;
     BYTE		bIndexH2;
@@ -1581,7 +1581,7 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    char		szID[MAX_ID_SIZE];
+    char		szID[MAX_USERNAME_SIZE];
 } PMSG_DUEL_JOINCNANNEL_BROADCAST, * LPPMSG_DUEL_JOINCNANNEL_BROADCAST;
 
 typedef struct
@@ -1595,7 +1595,7 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    char		szID[MAX_ID_SIZE];
+    char		szID[MAX_USERNAME_SIZE];
 } PMSG_DUEL_LEAVECNANNEL_BROADCAST, * LPPMSG_DUEL_LEAVECNANNEL_BROADCAST;
 
 typedef struct
@@ -1604,7 +1604,7 @@ typedef struct
     BYTE         SubCode;
     BYTE		nCount;
     struct {
-        char	szID[MAX_ID_SIZE];
+        char	szID[MAX_USERNAME_SIZE];
     } user[10];
 } PMSG_DUEL_OBSERVERLIST_BROADCAST, * LPPMSG_DUEL_OBSERVERLIST_BROADCAST;
 
@@ -1612,8 +1612,8 @@ typedef struct
 {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    char		szWinner[MAX_ID_SIZE];
-    char		szLoser[MAX_ID_SIZE];
+    char		szWinner[MAX_USERNAME_SIZE];
+    char		szLoser[MAX_USERNAME_SIZE];
 } PMSG_DUEL_RESULT_BROADCAST, * LPPMSG_DUEL_RESULT_BROADCAST;
 
 typedef struct
@@ -1639,7 +1639,7 @@ typedef struct tagPSHOPTITLE_CHANGE {
     BYTE			byIndexH;
     BYTE			byIndexL;
     char			szTitle[MAX_SHOPTITLE];	//. MAX_SHOPTITLE
-    char			szId[MAX_ID_SIZE];
+    char			szId[MAX_USERNAME_SIZE];
 } PSHOPTITLE_CHANGEINFO, * LPPSHOPTITLE_CHANGEINFO;
 
 typedef struct tagPSHOPSETPRICE_RESULT {
@@ -1676,7 +1676,7 @@ typedef struct tagGETPSHOPITEMLIST_HEADER {
     ShopItemListResult			byResult;
     BYTE			byIndexH;
     BYTE			byIndexL;
-    char			szId[MAX_ID_SIZE];
+    char			szId[MAX_USERNAME_SIZE];
     char			szShopTitle[MAX_SHOPTITLE];	//. MAX_SHOPTITLE
     BYTE			ItemCount;
 } GETPSHOPITEMLIST_HEADERINFO, * LPGETPSHOPITEMLIST_HEADERINFO;
@@ -1724,7 +1724,7 @@ typedef struct tagSOLDITEM_RESULT {
     PBMSG_HEADER	Header;
     BYTE			bySubcode;
     BYTE			byPos;
-    char			szId[MAX_ID_SIZE];
+    char			szId[MAX_USERNAME_SIZE];
 } SOLDITEM_RESULTINFO, * LPSOLDITEM_RESULTINFO;
 
 typedef struct tagDISPLAYEFFECT_NOTIFY {
@@ -1742,25 +1742,25 @@ typedef struct {
 } FS_FRIEND_LIST_HEADER, * LPFS_FRIEND_LIST_HEADER;
 
 typedef struct {
-    char			Name[MAX_ID_SIZE];
+    char			Name[MAX_USERNAME_SIZE];
     BYTE			Server;
 } FS_FRIEND_LIST_DATA, * LPFS_FRIEND_LIST_DATA;
 
 typedef struct {
     PBMSG_HEADER    Header;
     BYTE			Result;
-    char			Name[MAX_ID_SIZE];
+    char			Name[MAX_USERNAME_SIZE];
     BYTE			Server;
 } FS_FRIEND_RESULT, * LPFS_FRIEND_RESULT;
 
 typedef struct {
     PBMSG_HEADER    Header;
-    char			Name[MAX_ID_SIZE];
+    char			Name[MAX_USERNAME_SIZE];
 } FS_ACCEPT_ADD_FRIEND_RESULT, * LPFS_ACCEPT_ADD_FRIEND_RESULT;
 
 typedef struct {
     PBMSG_HEADER    Header;
-    char			Name[MAX_ID_SIZE];
+    char			Name[MAX_USERNAME_SIZE];
     BYTE			Server;
 } FS_FRIEND_STATE_CHANGE, * LPFS_FRIEND_STATE_CHANGE;
 
@@ -1773,7 +1773,7 @@ typedef struct {
 typedef struct {
     PBMSG_HEADER    Header;
     WORD			Index;
-    char			Name[MAX_ID_SIZE];
+    char			Name[MAX_USERNAME_SIZE];
     char			Date[MAX_LETTER_DATE_LENGTH];
     char            Separator;
     char			Time[MAX_LETTER_TIME_LENGTH];
@@ -1830,7 +1830,7 @@ typedef struct {
     PBMSG_HEADER    Header;
     BYTE			Type;
     BYTE			Index;
-    char			Name[MAX_ID_SIZE];
+    char			Name[MAX_USERNAME_SIZE];
 } FS_CHAT_CHANGE_STATE, * LPFS_CHAT_CHANGE_STATE;
 
 typedef struct {
@@ -1841,7 +1841,7 @@ typedef struct {
 
 typedef struct {
     BYTE			Index;
-    char			Name[MAX_ID_SIZE];
+    char			Name[MAX_USERNAME_SIZE];
 } FS_CHAT_USERLIST_DATA, * LPFS_CHAT_USERLIST_DATA;
 
 typedef struct {
@@ -1925,10 +1925,10 @@ typedef struct _PMSG_MATCH_RESULT
     BYTE			m_subCode;
     BYTE			m_Type;
 
-    char			m_MatchTeamName1[MAX_ID_SIZE];
+    char			m_MatchTeamName1[MAX_USERNAME_SIZE];
     WORD			m_Score1;
 
-    char			m_MatchTeamName2[MAX_ID_SIZE];
+    char			m_MatchTeamName2[MAX_USERNAME_SIZE];
     WORD			m_Score2;
 }PMSG_MATCH_RESULT, * LPPMSG_MATCH_RESULT;
 
@@ -1947,10 +1947,10 @@ typedef struct _MATCH_RESULT
     BYTE			m_subCode;
     BYTE			m_Type;
 
-    wchar_t			m_MatchTeamName1[MAX_ID_SIZE];
+    wchar_t			m_MatchTeamName1[MAX_USERNAME_SIZE];
     WORD			m_Score1;
 
-    wchar_t			m_MatchTeamName2[MAX_ID_SIZE];
+    wchar_t			m_MatchTeamName2[MAX_USERNAME_SIZE];
     WORD			m_Score2;
 }MATCH_RESULT, * LPP_MATCH_RESULT;
 
@@ -2014,7 +2014,7 @@ typedef struct
     BYTE		btSiegeStartHour;
     BYTE		btSiegeStartMinute;
     char		cOwnerGuild[MAX_GUILDNAME];
-    char		cOwnerGuildMaster[MAX_ID_SIZE];
+    char		cOwnerGuildMaster[MAX_USERNAME_SIZE];
 
     CHAR		btStateLeftSec1;
     CHAR		btStateLeftSec2;
@@ -2327,7 +2327,7 @@ typedef struct
     BYTE				m_JoinSide;
 
     char				m_szGuildName[8];
-    char				m_szUserName[MAX_ID_SIZE + 1];
+    char				m_szUserName[MAX_USERNAME_SIZE + 1];
 }PRECEIVE_CROWN_SWITCH_INFO, * LPRECEIVE_CROWN_SWITCH_INFO;
 
 typedef struct
@@ -2566,7 +2566,7 @@ typedef struct
 typedef struct
 {
     BYTE iRank;
-    char szHeroName[MAX_ID_SIZE];
+    char szHeroName[MAX_USERNAME_SIZE];
     int iHeroScore;
     SERVER_CLASS_TYPE btHeroClass;
 } PMSG_ANS_CRYWOLF_HERO_LIST_INFO, * LPPMSG_ANS_CRYWOLF_HERO_LIST_INFO;
@@ -2751,7 +2751,7 @@ typedef struct
 
 typedef struct
 {
-    char		GameId[MAX_ID_SIZE];
+    char		GameId[MAX_USERNAME_SIZE];
     BYTE		byMapNumber;
     BYTE		btTeam;
     SERVER_CLASS_TYPE		btClass;
@@ -2787,7 +2787,7 @@ typedef struct
 {
     PBMSG_HEADER2 h;
     WORD		wUserIndex;
-    char		Name[MAX_ID_SIZE];
+    char		Name[MAX_USERNAME_SIZE];
 } PMSG_RELICS_GET_USER, * LPPMSG_RELICS_GET_USER;
 
 //----------------------------------------------------------------------------
@@ -3326,7 +3326,7 @@ typedef struct
     double				dCashPoint;
     char				chItemType;
 
-    char				chSendUserName[MAX_ID_SIZE + 1];
+    char				chSendUserName[MAX_USERNAME_SIZE + 1];
     char				chMessage[MAX_GIFT_MESSAGE_SIZE];
 }PMSG_CASHSHOP_GIFTSTORAGELIST, * LPPMSG_CASHSHOP_GIFTSTORAGELIST;
 
@@ -3568,7 +3568,7 @@ typedef struct _CROWN_SWITCH_INFO
     BYTE				m_bySwitchState;
     BYTE				m_JoinSide;
     wchar_t				m_szGuildName[9];
-    wchar_t				m_szUserName[MAX_ID_SIZE + 1];
+    wchar_t				m_szUserName[MAX_USERNAME_SIZE + 1];
 
     _CROWN_SWITCH_INFO()
     {

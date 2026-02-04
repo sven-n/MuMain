@@ -161,7 +161,7 @@ int  InputNumber = 2;
 int  InputTextWidth = 110;
 int  InputIndex = 0;
 int  InputResidentNumber = 6;
-int  InputTextMax[12] = { MAX_ID_SIZE,MAX_ID_SIZE,MAX_ID_SIZE,30,30,10,14,20,40 };
+int  InputTextMax[12] = { MAX_USERNAME_SIZE,MAX_USERNAME_SIZE,MAX_USERNAME_SIZE,30,30,10,14,20,40 };
 wchar_t InputText[12][256];
 wchar_t InputTextIME[12][4];
 char InputTextHide[12];
@@ -627,7 +627,7 @@ void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t maxLeng
 }
 
 int     WhisperID_Num = 0;
-wchar_t WhisperRegistID[MAX_ID_SIZE + 1][10];
+wchar_t WhisperRegistID[MAX_USERNAME_SIZE + 1][10];
 
 bool CheckWhisperLevel(int lvl, wchar_t* text)
 {
@@ -681,7 +681,7 @@ void RegistWhisperID(int lvl, wchar_t* text)
 
 void ClearWhisperID(void)
 {
-    ZeroMemory(WhisperRegistID, sizeof(char) * (MAX_ID_SIZE + 1) * 10);
+    ZeroMemory(WhisperRegistID, sizeof(char) * (MAX_USERNAME_SIZE + 1) * 10);
 }
 
 void RenderWhisperID_List(void)
@@ -4137,7 +4137,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 return false;
             }
             wchar_t szCmd[24];
-            wchar_t szId[MAX_ID_SIZE];
+            wchar_t szId[MAX_USERNAME_SIZE];
             swscanf(Text, L"%ls %ls", szCmd, szId);
 
             if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
@@ -8664,10 +8664,10 @@ void RenderTournamentInterface()
 
     float t_temp = 0.0f;
     mu_swprintf(t_Str, L"%ls", g_wtMatchResult.m_MatchTeamName1);
-    t_temp = (MAX_ID_SIZE - wcslen(t_Str)) * 5;
+    t_temp = (MAX_USERNAME_SIZE - wcslen(t_Str)) * 5;
     g_pRenderText->RenderText(WindowX + 10 + t_temp, WindowY + 50, t_Str);
     mu_swprintf(t_Str, L"%ls", g_wtMatchResult.m_MatchTeamName2);
-    t_temp = (MAX_ID_SIZE - wcslen(t_Str)) * 5;
+    t_temp = (MAX_USERNAME_SIZE - wcslen(t_Str)) * 5;
     g_pRenderText->RenderText(WindowX + Width - 120 + t_temp, WindowY + 50, t_Str);
 
     mu_swprintf(t_Str, L"(%d)", g_wtMatchResult.m_Score1);

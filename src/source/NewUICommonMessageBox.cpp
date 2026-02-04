@@ -42,7 +42,7 @@ extern int Exp;
 extern BYTE Ranking[5];
 extern CLASS_TYPE HeroClass[5];
 extern int HeroScore[5];
-extern wchar_t HeroName[5][MAX_ID_SIZE + 1];
+extern wchar_t HeroName[5][MAX_USERNAME_SIZE + 1];
 extern char	View_Suc_Or_Fail;
 
 extern int BuyCost;
@@ -1332,7 +1332,7 @@ bool SEASON3B::CTradeMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    wchar_t szYourID[MAX_ID_SIZE + 1];
+    wchar_t szYourID[MAX_USERNAME_SIZE + 1];
     g_pTrade->GetYourID(szYourID);
     pMsgBox->AddMsg(szYourID);
     pMsgBox->AddMsg(GlobalText[419]);

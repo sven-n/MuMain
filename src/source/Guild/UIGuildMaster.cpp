@@ -305,9 +305,9 @@ void CUIGuildMaster::DoCreateGuildAction()
             SaveIMEStatus();
             g_pSingleTextInputBox->SetState(UISTATE_HIDE);
         }
-        memset(InputText[0], 0, MAX_ID_SIZE);
+        memset(InputText[0], 0, MAX_USERNAME_SIZE);
         InputLength[0] = 0;
-        InputTextMax[0] = MAX_ID_SIZE;
+        InputTextMax[0] = MAX_USERNAME_SIZE;
         StepPrev();
     }
 }

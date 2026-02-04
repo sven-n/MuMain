@@ -15,7 +15,7 @@ protected:
     CSprite		m_asprInputBox[2];
     CButton		m_aBtn[2];
     CButton     m_aBtnRememberMe;
-    CUITextInputBox* m_pIDInputBox, * m_pPassInputBox;
+    CUITextInputBox* m_pUsernameInputBox, * m_pPasswordInputBox;
 
 public:
     CLoginWin();
@@ -27,8 +27,8 @@ public:
 
     void ConnectConnectionServer();
 
-    CUITextInputBox* GetIDInputBox() const { return m_pIDInputBox; }
-    CUITextInputBox* GetPassInputBox() const { return m_pPassInputBox; }
+    CUITextInputBox* GetUsernameInputBox() const { return m_pUsernameInputBox; }
+    CUITextInputBox* GetPasswordInputBox() const { return m_pPasswordInputBox; }
 
 private:
     int FirstLoad = 0;

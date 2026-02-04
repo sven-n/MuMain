@@ -254,7 +254,7 @@ void CCharMakeWin::Show(bool bShow)
         ClearInput();
         InputEnable = true;
         InputNumber = 1;
-        InputTextMax[0] = MAX_ID_SIZE;
+        InputTextMax[0] = MAX_USERNAME_SIZE;
         if (g_iChatInputType == 1)
         {
             g_pSingleTextInputBox->SetState(UISTATE_NORMAL);
