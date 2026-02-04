@@ -250,12 +250,6 @@ void CSkillManager::RebuildSkillRequirementsCache()
 
     for (int skillType = 0; skillType < MAX_SKILLS; ++skillType)
     {
-        if (SkillAttribute[skillType].Energy == 0)
-        {
-            m_aSkillRequirementsFulfilled[skillType] = true;
-            continue;
-        }
-
         ActionSkillType baseSkill = MasterSkillToBaseSkillIndex(static_cast<ActionSkillType>(skillType));
         if (isGuardian && (baseSkill == AT_SKILL_TELEPORT_ALLY || baseSkill == AT_SKILL_TELEPORT))
         {
