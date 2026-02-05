@@ -267,18 +267,52 @@ if (MSVC)
       $<TARGET_FILE_DIR:Main>
     COMMENT "Copying required DLLs to build directory"
   )
+endif()
+
+# .NET Client Library and tools (platform-agnostic, requires dotnet SDK)
+# Native AOT can only target the OS it runs on, so when cross-compiling from
+# WSL we need the Windows dotnet.exe (available via WSL interop) rather than
+# a Linux dotnet.
+find_program(DOTNET_EXECUTABLE dotnet.exe)
+if (NOT DOTNET_EXECUTABLE)
+  find_program(DOTNET_EXECUTABLE dotnet)
+endif()
+if (DOTNET_EXECUTABLE)
+  message(STATUS "Found .NET SDK: ${DOTNET_EXECUTABLE}")
 
   # 1. Define the output path using a variable CMake can understand early
   set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library.dll")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
-  # Create temp directories for Native AOT build (avoiding paths with umlauts)
+  # Create temp directories for Native AOT build.
   set(DOTNET_TEMP_OUTPUT "${CMAKE_BINARY_DIR}/dotnet_out")
   set(DOTNET_TEMP_DIR "${CMAKE_BINARY_DIR}/.dotnet_temp")
-  set(DOTNET_NUGET_DIR "${CMAKE_SOURCE_DIR}/.nuget")
+
+  # NuGet cache: defaults to <project>/.nuget, override with -DMU_NUGET_CACHE_DIR=...
+  set(MU_NUGET_CACHE_DIR "${CMAKE_SOURCE_DIR}/.nuget" CACHE PATH "NuGet package cache directory")
+  set(DOTNET_NUGET_DIR "${MU_NUGET_CACHE_DIR}")
   file(MAKE_DIRECTORY "${DOTNET_TEMP_OUTPUT}")
   file(MAKE_DIRECTORY "${DOTNET_TEMP_DIR}")
   file(MAKE_DIRECTORY "${DOTNET_NUGET_DIR}")
+
+  # When using Windows dotnet.exe from WSL, paths passed to MSBuild must be
+  # Windows-style.  Linux paths starting with '/' are misinterpreted as
+  # MSBuild switch prefixes.  We use wslpath -w for backslash UNC paths
+  # (\\wsl.localhost\...) which MSBuild handles correctly.
+  if (DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    foreach(_var DOTNET_PROJ DOTNET_TEMP_OUTPUT DOTNET_NUGET_DIR DOTNET_TEMP_DIR)
+      execute_process(
+        COMMAND wslpath -w "${${_var}}"
+        OUTPUT_VARIABLE ${_var}_NATIVE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    endforeach()
+  else()
+    set(DOTNET_PROJ_NATIVE "${DOTNET_PROJ}")
+    set(DOTNET_TEMP_OUTPUT_NATIVE "${DOTNET_TEMP_OUTPUT}")
+    set(DOTNET_NUGET_DIR_NATIVE "${DOTNET_NUGET_DIR}")
+    set(DOTNET_TEMP_DIR_NATIVE "${DOTNET_TEMP_DIR}")
+  endif()
 
   # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
   file(GLOB_RECURSE DOTNET_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
@@ -300,11 +334,11 @@ if (MSVC)
           OUTPUT "${DOTNET_DLL_PATH}"
           COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
           COMMAND ${CMAKE_COMMAND} -E env
-                  "NUGET_PACKAGES=${DOTNET_NUGET_DIR}"
-                  "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR}"
-                  "TEMP=${DOTNET_TEMP_DIR}"
-                  "TMP=${DOTNET_TEMP_DIR}"
-                  dotnet publish "${DOTNET_PROJ}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT}" --nologo
+                  "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+                  "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+                  "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
+                  "TMP=${DOTNET_TEMP_DIR_NATIVE}"
+                  "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
           COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
           DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
           COMMENT "Checking for .NET Client Library updates..."
@@ -329,18 +363,36 @@ if (MSVC)
 
   # ConstantsReplacer build target
   set(CONSTANTS_REPLACER_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/ConstantsReplacer.csproj")
+  if (DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    execute_process(
+      COMMAND wslpath -w "${CONSTANTS_REPLACER_PROJ}"
+      OUTPUT_VARIABLE CONSTANTS_REPLACER_PROJ_NATIVE
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
+      COMMAND wslpath -w "${CMAKE_BINARY_DIR}/ConstantsReplacer"
+      OUTPUT_VARIABLE CONSTANTS_REPLACER_OUTDIR_NATIVE
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  else()
+    set(CONSTANTS_REPLACER_PROJ_NATIVE "${CONSTANTS_REPLACER_PROJ}")
+    set(CONSTANTS_REPLACER_OUTDIR_NATIVE "${CMAKE_BINARY_DIR}/ConstantsReplacer")
+  endif()
   file(GLOB_RECURSE CONSTANTS_REPLACER_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/*.cs")
   set(CONSTANTS_REPLACER_OUTPUT "${CMAKE_BINARY_DIR}/ConstantsReplacer/ConstantsReplacer.exe")
 
   add_custom_command(
     OUTPUT "${CONSTANTS_REPLACER_OUTPUT}"
-    COMMAND dotnet build "${CONSTANTS_REPLACER_PROJ}" -c $<CONFIG> -o "${CMAKE_BINARY_DIR}/ConstantsReplacer" --nologo
+    COMMAND "${DOTNET_EXECUTABLE}" build "${CONSTANTS_REPLACER_PROJ_NATIVE}" -c $<CONFIG> -o "${CONSTANTS_REPLACER_OUTDIR_NATIVE}" --nologo
     DEPENDS "${CONSTANTS_REPLACER_PROJ}" ${CONSTANTS_REPLACER_SOURCES}
     COMMENT "Building ConstantsReplacer tool..."
     VERBATIM
   )
 
   add_custom_target(ConstantsReplacer DEPENDS "${CONSTANTS_REPLACER_OUTPUT}")
+else()
+  message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
+    "The game will run but cannot connect to the server. Install .NET SDK 10.0+ to enable.")
 endif()
 
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
@@ -415,4 +467,7 @@ endif()
 # Link ImGui for all platforms when editor is enabled
 if(ENABLE_EDITOR)
   target_link_libraries(Main PRIVATE imgui)
+  # ImGui backends need opengl32 and dwmapi; with MinGW's order-sensitive
+  # linker these must come after the imgui static library.
+  target_link_libraries(Main PRIVATE opengl32 dwmapi)
 endif()
