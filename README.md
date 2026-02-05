@@ -56,7 +56,7 @@ What needs to be done for Season 6:
 ## How to build & run
 
 ### Requirements
-* **CMake** 3.16 or newer (bundled with Visual Studio and CLion)
+* **CMake** 3.25 or newer (bundled with Visual Studio and CLion)
 * **.NET SDK 10.0** or newer (for building the Client Library)
 * **Visual Studio 2022+** with C++ and C# workloads, **CLion**, or **Rider** (see IDE-specific instructions below)
 * A compatible server: [OpenMU](https://github.com/MUnique/OpenMU)
@@ -162,7 +162,8 @@ The project uses **CMake** as its build system. The `.NET Client Library` is aut
 3. **Configure working directory:**
    - Run → Edit Configurations
    - Select `Main`
-   - Set "Working directory" to: `$ProjectFileDir$/src/bin`
+   - Set "Working directory" to the build output directory (e.g. `cmake-build-debug/src/Debug`)
+   - The post-build step copies all game assets there automatically
 
 4. **Build and Run:**
    - Click the hammer icon to build
