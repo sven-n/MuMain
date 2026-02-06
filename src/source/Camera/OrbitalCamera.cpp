@@ -476,7 +476,8 @@ bool OrbitalCamera::Update()
         }
     }
 
-    // Phase 5: Debug text rendering to verify camera values
+#ifdef _EDITOR
+    // Debug text rendering to verify camera values (editor only)
     {
         g_pRenderText->SetFont(g_hFixFont);
         g_pRenderText->SetTextColor(255, 255, 0, 255);  // Yellow text
@@ -518,6 +519,7 @@ bool OrbitalCamera::Update()
         swprintf(debugText, 256, L"g_Camera.ViewFar (rendering): %.0f", g_Camera.ViewFar);
         g_pRenderText->RenderText(10, yPos, debugText);
     }
+#endif
 
     return false; // Camera not locked
 }
