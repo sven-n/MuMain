@@ -635,8 +635,8 @@ bool RenderMainScene()
     }
     else
     {
-        // Other cameras: Enable fog by default
-        FogEnable = true;
+        // Legacy and other cameras: Disable fog (matches main branch behavior)
+        FogEnable = false;
     }
 
     vec3_t cameraPos;

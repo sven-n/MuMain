@@ -1995,8 +1995,35 @@ int     FrustrumBoundMinY = 0;
 int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
+// Cached per-frame pointers — set once by CacheActiveFrustum(), avoids
+// CameraManager::Instance() singleton lookup + virtual dispatch on every
+// TestFrustrum2D/TestFrustrum call (~tens of thousands per frame).
+static const Frustum* s_pCachedFrustum = nullptr;
+static ICamera*       s_pCachedCamera  = nullptr;
+
 void UpdateFrustrumBounds()
 {
+    // Try to use the frustum's tight AABB (matches original CreateFrustrum behavior)
+    if (s_pCachedFrustum)
+    {
+        const AABB& bb = s_pCachedFrustum->GetBoundingBox();
+        // Only use AABB if it looks valid (non-zero extents)
+        if (bb.max[0] > bb.min[0] && bb.max[1] > bb.min[1])
+        {
+            int tileWidth = 4;
+            FrustrumBoundMinX = static_cast<int>(bb.min[0] / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
+            FrustrumBoundMaxX = static_cast<int>(bb.max[0] / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
+            FrustrumBoundMinY = static_cast<int>(bb.min[1] / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
+            FrustrumBoundMaxY = static_cast<int>(bb.max[1] / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
+            FrustrumBoundMinX = std::max(0, FrustrumBoundMinX);
+            FrustrumBoundMaxX = std::min(static_cast<int>(TERRAIN_SIZE_MASK) - tileWidth, FrustrumBoundMaxX);
+            FrustrumBoundMinY = std::max(0, FrustrumBoundMinY);
+            FrustrumBoundMaxY = std::min(static_cast<int>(TERRAIN_SIZE_MASK) - tileWidth, FrustrumBoundMaxY);
+            return;
+        }
+    }
+
+    // Fallback: circle-based bounds (for LegacyCamera which has no frustum)
     int range = static_cast<int>(g_Camera.ViewFar / TERRAIN_SCALE);
     int centerX = static_cast<int>(g_Camera.Position[0] / TERRAIN_SCALE);
     int centerY = static_cast<int>(g_Camera.Position[1] / TERRAIN_SCALE);
@@ -2075,12 +2102,6 @@ void RenderDebugSphere(const vec3_t center, float radius, float r, float g, floa
 
 // Phase 4: Compatibility shims for legacy code
 // These redirect to the new camera system to avoid updating hundreds of call sites
-
-// Cached per-frame pointers — set once by CacheActiveFrustum(), avoids
-// CameraManager::Instance() singleton lookup + virtual dispatch on every
-// TestFrustrum2D/TestFrustrum call (~tens of thousands per frame).
-static const Frustum* s_pCachedFrustum = nullptr;
-static ICamera*       s_pCachedCamera  = nullptr;
 
 void CacheActiveFrustum()
 {

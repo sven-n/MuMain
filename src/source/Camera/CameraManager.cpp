@@ -5,7 +5,9 @@
 #include "DefaultCamera.h"
 #include "OrbitalCamera.h"
 #include "LegacyCamera.h"
+#ifdef _EDITOR
 #include "UI/Console/MuEditorConsoleUI.h"
+#endif
 // Note: FreeFlyCamera disabled for Phase 1, will be re-implemented later based on new system
 //#ifdef _EDITOR
 //#include "FreeFlyCamera.h"

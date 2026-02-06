@@ -23,7 +23,9 @@
 #include "../GMDoppelGanger2.h"
 #include "../w_MapHeaders.h"
 #include "../UIManager.h"
+#ifdef _EDITOR
 #include "UI/Console/MuEditorConsoleUI.h"
+#endif
 
 // External variable declarations
 extern short g_shCameraLevel;
