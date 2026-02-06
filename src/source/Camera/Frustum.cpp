@@ -4,6 +4,7 @@
 #include <cmath>
 
 Frustum::Frustum()
+    : m_2DCount(0)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -14,6 +15,12 @@ Frustum::Frustum()
     for (int i = 0; i < 8; i++)
     {
         Vector(0.f, 0.f, 0.f, m_Vertices[i]);
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+        m_2DX[i] = 0.f;
+        m_2DY[i] = 0.f;
     }
 }
 
@@ -142,6 +149,9 @@ void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const
 
     // Calculate bounding box
     CalculateBoundingBox();
+
+    // Calculate 2D ground-plane projection for cheap culling
+    Calculate2DProjection();
 }
 
 bool Frustum::TestSphere(const vec3_t center, float radius) const
@@ -210,5 +220,88 @@ void Frustum::CalculateBoundingBox()
                 m_BoundingBox.max[j] = m_Vertices[i][j];
         }
     }
+}
+
+void Frustum::Calculate2DProjection()
+{
+    // Project all 8 frustum vertices to XY ground plane in tile coordinates
+    struct Point2D { float x, y; };
+    Point2D pts[8];
+    for (int i = 0; i < 8; i++)
+    {
+        pts[i].x = m_Vertices[i][0] * 0.01f;
+        pts[i].y = m_Vertices[i][1] * 0.01f;
+    }
+
+    // Sort by X, then Y (simple insertion sort for N=8)
+    for (int i = 1; i < 8; i++)
+    {
+        Point2D key = pts[i];
+        int j = i - 1;
+        while (j >= 0 && (pts[j].x > key.x || (pts[j].x == key.x && pts[j].y > key.y)))
+        {
+            pts[j + 1] = pts[j];
+            j--;
+        }
+        pts[j + 1] = key;
+    }
+
+    // Andrew's monotone chain convex hull (produces CCW ordering)
+    Point2D hull[16];
+    int k = 0;
+
+    // Lower hull
+    for (int i = 0; i < 8; i++)
+    {
+        while (k >= 2)
+        {
+            float cross = (hull[k-1].x - hull[k-2].x) * (pts[i].y - hull[k-2].y)
+                        - (hull[k-1].y - hull[k-2].y) * (pts[i].x - hull[k-2].x);
+            if (cross <= 0.f) k--;
+            else break;
+        }
+        hull[k++] = pts[i];
+    }
+
+    // Upper hull
+    int lowerSize = k + 1;
+    for (int i = 6; i >= 0; i--)
+    {
+        while (k >= lowerSize)
+        {
+            float cross = (hull[k-1].x - hull[k-2].x) * (pts[i].y - hull[k-2].y)
+                        - (hull[k-1].y - hull[k-2].y) * (pts[i].x - hull[k-2].x);
+            if (cross <= 0.f) k--;
+            else break;
+        }
+        hull[k++] = pts[i];
+    }
+    k--; // Remove duplicate last point
+
+    // Reverse to CW order (the original TestFrustrum2D cross-product test expects CW winding)
+    m_2DCount = k;
+    for (int i = 0; i < k; i++)
+    {
+        m_2DX[i] = hull[k - 1 - i].x;
+        m_2DY[i] = hull[k - 1 - i].y;
+    }
+}
+
+bool Frustum::TestPoint2D(float tileX, float tileY, float range) const
+{
+    if (m_2DCount < 3)
+        return true; // No valid 2D projection, treat as visible
+
+    // Same cross-product winding test as original TestFrustrum2D
+    // For CW-ordered polygon: d > range means inside, d <= range means outside
+    int j = m_2DCount - 1;
+    for (int i = 0; i < m_2DCount; j = i, i++)
+    {
+        float d = (m_2DX[i] - tileX) * (m_2DY[j] - tileY) -
+                  (m_2DX[j] - tileX) * (m_2DY[i] - tileY);
+        if (d <= range)
+            return false;
+    }
+    return true;
 }
 

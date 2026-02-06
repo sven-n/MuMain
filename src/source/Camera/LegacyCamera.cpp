@@ -19,11 +19,9 @@
 #include "../w_MapHeaders.h"
 #include "../UIManager.h"
 
-// External variable declarations (same as original CameraUtility.cpp on main)
+// External variable declarations
 extern short g_shCameraLevel;
 extern float g_fSpecialHeight;
-extern float CameraDistanceTarget;
-extern float CameraDistance;
 
 LegacyCamera::LegacyCamera(CameraState& state)
     : m_State(state)
@@ -112,7 +110,7 @@ void LegacyCamera::CalculateCameraPosition()
 
     m_State.ViewFar = CalculateCameraViewFar();
 
-    Vector(0.f, -CameraDistance, 0.f, Position);
+    Vector(0.f, -m_State.Distance, 0.f, Position);
     AngleMatrix(m_State.Angle, Matrix);
     VectorIRotate(Position, Matrix, TransformPosition);
 
@@ -163,7 +161,7 @@ void LegacyCamera::CalculateCameraPosition()
     {
         m_State.Position[2] = g_fSpecialHeight = 1200.f + 1;
     }
-    m_State.Position[2] += CameraDistance - 150.f;
+    m_State.Position[2] += m_State.Distance - 150.f;
 }
 
 void LegacyCamera::SetCameraAngle()
@@ -195,18 +193,17 @@ void LegacyCamera::SetCameraAngle()
 
 void LegacyCamera::UpdateCustomCameraDistance()
 {
-    extern float g_fCameraCustomDistance;
     int iIndex = TERRAIN_INDEX((Hero->PositionX), (Hero->PositionY));
 
     if ((TerrainWall[iIndex] & TW_CAMERA_UP) == TW_CAMERA_UP)
     {
-        if (g_fCameraCustomDistance <= CUSTOM_CAMERA_DISTANCE1)
-            g_fCameraCustomDistance += 10;
+        if (m_State.CustomDistance <= CUSTOM_CAMERA_DISTANCE1)
+            m_State.CustomDistance += 10;
     }
     else
     {
-        if (g_fCameraCustomDistance > 0)
-            g_fCameraCustomDistance -= 10;
+        if (m_State.CustomDistance > 0)
+            m_State.CustomDistance -= 10;
     }
 }
 
@@ -219,28 +216,28 @@ void LegacyCamera::UpdateCameraDistance()
     }
     else if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
-        CameraDistanceTarget = 1100.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;
-        CameraDistance = CameraDistanceTarget;
+        m_State.DistanceTarget = 1100.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;
+        m_State.Distance = m_State.DistanceTarget;
     }
     else
     {
         if (gMapManager.InBattleCastle())
         {
-            CameraDistanceTarget = 1100.f;
-            CameraDistance = CameraDistanceTarget;
+            m_State.DistanceTarget = 1100.f;
+            m_State.Distance = m_State.DistanceTarget;
         }
         else
         {
             switch (g_shCameraLevel)
             {
-            case 0: CameraDistanceTarget = 1000.f; break;
-            case 1: CameraDistanceTarget = 1100.f; break;
-            case 2: CameraDistanceTarget = 1200.f; break;
-            case 3: CameraDistanceTarget = 1300.f; break;
-            case 4: CameraDistanceTarget = 1400.f; break;
-            case 5: CameraDistanceTarget = g_Direction.m_fCameraViewFar; break;
+            case 0: m_State.DistanceTarget = 1000.f; break;
+            case 1: m_State.DistanceTarget = 1100.f; break;
+            case 2: m_State.DistanceTarget = 1200.f; break;
+            case 3: m_State.DistanceTarget = 1300.f; break;
+            case 4: m_State.DistanceTarget = 1400.f; break;
+            case 5: m_State.DistanceTarget = g_Direction.m_fCameraViewFar; break;
             }
-            CameraDistance += (CameraDistanceTarget - CameraDistance) / 3;
+            m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3;
         }
     }
 }
