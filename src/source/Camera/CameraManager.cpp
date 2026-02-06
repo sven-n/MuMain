@@ -4,6 +4,7 @@
 #include "CameraManager.h"
 #include "DefaultCamera.h"
 #include "OrbitalCamera.h"
+#include "LegacyCamera.h"
 #include "UI/Console/MuEditorConsoleUI.h"
 // Note: FreeFlyCamera disabled for Phase 1, will be re-implemented later based on new system
 //#ifdef _EDITOR
@@ -35,6 +36,7 @@ void CameraManager::Initialize()
     // Create camera instances
     m_pDefaultCamera = std::make_unique<DefaultCamera>(g_Camera);
     m_pOrbitalCamera = std::make_unique<OrbitalCamera>(g_Camera);
+    m_pLegacyCamera = std::make_unique<LegacyCamera>(g_Camera);
     // Note: FreeFlyCamera disabled for Phase 1
     //#ifdef _EDITOR
     //    m_pFreeFlyCamera = std::make_unique<FreeFlyCamera>(g_Camera);
@@ -56,6 +58,7 @@ void CameraManager::Shutdown()
 
     m_pDefaultCamera.reset();
     m_pOrbitalCamera.reset();
+    m_pLegacyCamera.reset();
     // Note: FreeFlyCamera disabled for Phase 1
     //#ifdef _EDITOR
     //    m_pFreeFlyCamera.reset();
@@ -83,7 +86,7 @@ bool CameraManager::SetCameraMode(CameraMode mode)
 
     // FIX: Only allow OrbitalCamera in MainScene
     extern EGameScene SceneFlag;
-    if (mode == CameraMode::Orbital && SceneFlag != MAIN_SCENE)
+    if ((mode == CameraMode::Orbital || mode == CameraMode::Legacy) && SceneFlag != MAIN_SCENE)
     {
         // Silently ignore orbital camera request in non-MainScene
         return false;
@@ -98,6 +101,9 @@ bool CameraManager::SetCameraMode(CameraMode mode)
             break;
         case CameraMode::Orbital:
             pNewCamera = m_pOrbitalCamera.get();
+            break;
+        case CameraMode::Legacy:
+            pNewCamera = m_pLegacyCamera.get();
             break;
 #ifdef _EDITOR
         case CameraMode::FreeFly:
