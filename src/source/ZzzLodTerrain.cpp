@@ -2373,18 +2373,12 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag, ICame
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            // Phase 3: Use camera culling if available, otherwise fall back to TestFrustrum2D
-            bool visible = g_Camera.TopViewEnable;
+            // Per-tile culling: block-level test already passed, so skip expensive
+            // 3D sphere test for individual tiles. Only use legacy 2D test (cheap) as fallback.
+            bool visible = g_Camera.TopViewEnable || camera != nullptr;
             if (!visible)
             {
-                if (camera)
-                {
-                    visible = !camera->ShouldCullTerrain(xi + j, yi + i);
-                }
-                else
-                {
-                    visible = TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f);
-                }
+                visible = TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f);
             }
 
             if (visible)
