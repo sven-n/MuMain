@@ -5,6 +5,7 @@
 #include "CameraUtility.h"
 #include "CameraManager.h"
 #include "CameraMove.h"
+#include "../ZzzLodTerrain.h"
 
 // External variable declarations
 extern short g_shCameraLevel;
@@ -45,7 +46,10 @@ bool MoveMainCamera()
     HandleCameraModeToggle();
 
     // Update active camera through manager
-    // Note: Camera's Update() method will check tour mode internally
-    // and skip position calculations, only updating frustum
-    return CameraManager::Instance().Update();
+    bool result = CameraManager::Instance().Update();
+
+    // Recompute terrain iteration bounds from updated camera position
+    UpdateFrustrumBounds();
+
+    return result;
 }
