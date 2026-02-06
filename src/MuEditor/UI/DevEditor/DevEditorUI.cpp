@@ -8,8 +8,8 @@
 #include "Camera/OrbitalCamera.h"
 #include "CameraMove.h"
 #include "ZzzCharacter.h"
+#include "GameConfig/GameConfig.h"
 #include "UI/Console/MuEditorConsoleUI.h"
-#include "GameConfig.h"
 
 // External C functions
 extern "C" CameraManager& CameraManager_Instance();
@@ -852,8 +852,8 @@ void CDevEditorUI::RenderGraphicsTab()
             OpenglWindowHeight = WindowHeight;
 
             // Save to config file
-            g_GameConfig.SetWindowSize(WindowWidth, WindowHeight);
-            g_GameConfig.Save();
+            GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
+             GameConfig::GetInstance().Save();
 
             // Reinitialize fonts and update resolution-dependent systems
             extern void ReinitializeFonts();
@@ -919,8 +919,8 @@ void CDevEditorUI::RenderGraphicsTab()
         OpenglWindowHeight = WindowHeight;
 
         // Save to config file
-        g_GameConfig.SetWindowSize(WindowWidth, WindowHeight);
-        g_GameConfig.Save();
+         GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
+         GameConfig::GetInstance().Save();
 
         // Reinitialize fonts and update resolution-dependent systems
         ReinitializeFonts();
@@ -961,8 +961,8 @@ void CDevEditorUI::RenderGraphicsTab()
         OpenglWindowHeight = WindowHeight;
 
         // Save window mode to config
-        g_GameConfig.SetWindowMode(g_bUseWindowMode == TRUE);
-        g_GameConfig.Save();
+         GameConfig::GetInstance().SetWindowMode(g_bUseWindowMode == TRUE);
+         GameConfig::GetInstance().Save();
 
         // Reinitialize fonts and update resolution-dependent systems
         extern void ReinitializeFonts();
@@ -1057,9 +1057,9 @@ void CDevEditorUI::RenderGraphicsTab()
 
     if (ImGui::Button("Save Settings Now", ImVec2(200, 0)))
     {
-        g_GameConfig.SetWindowSize(WindowWidth, WindowHeight);
-        g_GameConfig.SetWindowMode(g_bUseWindowMode == TRUE);
-        g_GameConfig.Save();
+         GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
+         GameConfig::GetInstance().SetWindowMode(g_bUseWindowMode == TRUE);
+         GameConfig::GetInstance().Save();
         g_MuEditorConsoleUI.LogEditor("Settings saved to config.ini");
     }
     ImGui::SameLine();
