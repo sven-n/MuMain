@@ -2076,33 +2076,38 @@ void RenderDebugSphere(const vec3_t center, float radius, float r, float g, floa
 // Phase 4: Compatibility shims for legacy code
 // These redirect to the new camera system to avoid updating hundreds of call sites
 
+// Cached per-frame pointers — set once by CacheActiveFrustum(), avoids
+// CameraManager::Instance() singleton lookup + virtual dispatch on every
+// TestFrustrum2D/TestFrustrum call (~tens of thousands per frame).
+static const Frustum* s_pCachedFrustum = nullptr;
+static ICamera*       s_pCachedCamera  = nullptr;
+
+void CacheActiveFrustum()
+{
+    ICamera* cam = CameraManager::Instance().GetActiveCamera();
+    s_pCachedCamera  = cam;
+    s_pCachedFrustum = cam ? &cam->GetFrustum() : nullptr;
+}
+
 bool TestFrustrum2D(float x, float y, float Range)
 {
     extern EGameScene SceneFlag;
     if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
         return true;
 
-    // Use cheap 2D ground-plane projection test (same algorithm as original)
-    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
-    if (activeCamera)
-    {
-        return activeCamera->GetFrustum().TestPoint2D(x, y, Range);
-    }
+    // Use cached frustum pointer (no singleton lookup or virtual dispatch)
+    if (s_pCachedFrustum)
+        return s_pCachedFrustum->TestPoint2D(x, y, Range);
 
-    // Fallback: always visible if no camera
     return true;
 }
 
 bool TestFrustrum(vec3_t Position, float Range)
 {
-    // Redirect to camera system
-    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
-    if (activeCamera)
-    {
-        return !activeCamera->ShouldCullObject(Position, Range);
-    }
+    // Use cached camera pointer (no singleton lookup or virtual dispatch)
+    if (s_pCachedCamera)
+        return !s_pCachedCamera->ShouldCullObject(Position, Range);
 
-    // Fallback: always visible if no camera
     return true;
 }
 
