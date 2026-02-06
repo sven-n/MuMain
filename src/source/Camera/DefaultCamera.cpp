@@ -374,7 +374,8 @@ bool DefaultCamera::Update()
         UpdateFrustum();
     }
 
-    // Phase 5: Debug text rendering to verify camera values
+#ifdef _EDITOR
+    // Debug text rendering to verify camera values (editor only)
     {
         g_pRenderText->SetFont(g_hFixFont);
         g_pRenderText->SetTextColor(255, 255, 0, 255);  // Yellow text
@@ -410,6 +411,7 @@ bool DefaultCamera::Update()
         swprintf(debugText, 256, L"g_Camera.ViewFar (rendering): %.0f", g_Camera.ViewFar);
         g_pRenderText->RenderText(10, yPos, debugText);
     }
+#endif
 
     // Phase 5: Sync camera state to legacy g_Camera global
     // This is needed because BeginOpengl() still uses g_Camera.FOV for perspective setup

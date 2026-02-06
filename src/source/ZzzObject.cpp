@@ -3291,7 +3291,7 @@ void RenderObjects(ICamera* camera)
                 blockCenter[0] = (float)(i * 16 + 8) * 100.0f;
                 blockCenter[1] = (float)(j * 16 + 8) * 100.0f;
                 blockCenter[2] = 0.0f;
-                ob->Visible = !camera->ShouldCullObject(blockCenter, 18000.0f);
+                ob->Visible = !camera->ShouldCullObject(blockCenter, 1500.0f);
             }
             else
             {
@@ -3569,7 +3569,7 @@ void RenderObjects_AfterCharacter(ICamera* camera)
                 blockCenter[1] = (float)(j * 16 + 8) * 100.0f;
                 blockCenter[2] = 0.0f;
                 // Radius: 180 tiles * 100 units/tile = 18000 world units (matches old -180.f tolerance)
-                ob->Visible = !camera->ShouldCullObject(blockCenter, 18000.0f);
+                ob->Visible = !camera->ShouldCullObject(blockCenter, 1500.0f);
             }
             else
             {
