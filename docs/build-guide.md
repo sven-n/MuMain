@@ -104,7 +104,7 @@ Windows git flags WSL-owned repos as untrusted. Without this fix, CLion's git in
 
 ```powershell
 git config --global --add safe.directory '%(prefix)///wsl.localhost/Ubuntu/home/<user>/MuMain'
-git config --global --add safe.directory '%(prefix)///wsl.localhost/Ubuntu/home/<user>/MuMain/src/dependencies/imgui'
+git config --global --add safe.directory '%(prefix)///wsl.localhost/Ubuntu/home/<user>/MuMain/src/ThirdParty/imgui'
 ```
 
 Note: You must use the UNC format above (`///wsl.localhost/...`), not `Z:/...` — git internally resolves the Z: drive back to the UNC path.

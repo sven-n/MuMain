@@ -298,9 +298,15 @@ if (DOTNET_EXECUTABLE)
     if (DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
       execute_process(
         COMMAND wslpath -w "${_input}"
-        OUTPUT_VARIABLE ${_output}
+        OUTPUT_VARIABLE _mu_native_result
+        RESULT_VARIABLE _mu_native_rc
         OUTPUT_STRIP_TRAILING_WHITESPACE
       )
+      if (_mu_native_rc EQUAL 0)
+        set(${_output} "${_mu_native_result}")
+      else()
+        message(FATAL_ERROR "wslpath failed for '${_input}'. Ensure wslpath is available.")
+      endif()
     endif()
   endmacro()
 
