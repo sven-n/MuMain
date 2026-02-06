@@ -166,7 +166,7 @@ D:\repos\MuMain\cmake-build-x86debug-mueditor\src\Debug
 
 The post-build step copies all game assets there automatically.
 
-**Note:** Visual Studio 2026 cannot open projects from the Z: drive (WSL filesystem), but works fine with native Windows paths like `D:\repos\MuMain`.
+**Note:** Visual Studio cannot open projects from the Z: drive (WSL filesystem), but works fine with native Windows paths like `D:\repos\MuMain`.
 
 ### Windows — Visual Studio Presets
 
