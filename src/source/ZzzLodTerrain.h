@@ -70,6 +70,7 @@ void SaveTerrainLight(wchar_t* FileName);
 bool TestFrustrum(vec3_t Position, float Range);
 bool TestFrustrum2D(float x, float y, float Range);
 // REMOVED: CreateFrustrum() - use camera->UpdateFrustum() instead
+void UpdateFrustrumBounds();
 
 void CreateLodBuffer();
 

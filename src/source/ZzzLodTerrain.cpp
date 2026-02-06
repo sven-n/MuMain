@@ -1988,19 +1988,24 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
     }
 }
 
-// Phase 4: Legacy frustum globals - most removed, some kept for compatibility
-// REMOVED: FrustrumVertex[5], FrustrumFaceNormal[5], FrustrumFaceD[5] - unused after removing CreateFrustrum()
-
-// Still used by terrain rendering loops - default to full terrain bounds (no culling at terrain level)
-// Camera frustum handles object culling now
+// Terrain iteration bounds — limits which tiles are visited by rendering/lighting loops.
+// Updated each frame by UpdateFrustrumBounds() from camera position + view distance.
 int     FrustrumBoundMinX = 0;
 int     FrustrumBoundMinY = 0;
 int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
-// REMOVED: Old 2D frustum arrays (FrustrumX[4], FrustrumY[4]) - no longer needed
-// The 3D camera frustum system handles all culling now via Frustum::TestSphere()
-// REMOVED: RenderFrustrum2DDebug() - replaced by culling sphere visualization
+void UpdateFrustrumBounds()
+{
+    int range = static_cast<int>(g_Camera.ViewFar / TERRAIN_SCALE);
+    int centerX = static_cast<int>(g_Camera.Position[0] / TERRAIN_SCALE);
+    int centerY = static_cast<int>(g_Camera.Position[1] / TERRAIN_SCALE);
+
+    FrustrumBoundMinX = std::max(0, centerX - range);
+    FrustrumBoundMaxX = std::min(static_cast<int>(TERRAIN_SIZE_MASK), centerX + range);
+    FrustrumBoundMinY = std::max(0, centerY - range);
+    FrustrumBoundMaxY = std::min(static_cast<int>(TERRAIN_SIZE_MASK), centerY + range);
+}
 
 /**
  * @brief Renders a wireframe sphere for debugging culling volumes
