@@ -69,7 +69,7 @@ void SaveTerrainLight(wchar_t* FileName);
 // Phase 4: Compatibility shims (redirect to camera system)
 bool TestFrustrum(vec3_t Position, float Range);
 bool TestFrustrum2D(float x, float y, float Range);
-// REMOVED: CreateFrustrum() - use camera->UpdateFrustum() instead
+void CacheActiveFrustum();   // Call once per frame after camera update
 void UpdateFrustrumBounds();
 
 void CreateLodBuffer();
