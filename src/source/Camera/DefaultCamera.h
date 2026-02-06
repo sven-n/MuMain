@@ -46,20 +46,9 @@ public:
 
     bool ShouldCullTerrain(int tileX, int tileY) const override
     {
-        // Use 3D frustum sphere test instead of 2D ground projection
-        // Terrain tiles are indexed in world space / TERRAIN_SCALE (100)
-        // Convert tile coords to world space center point
-        vec3_t tileCenter;
-        tileCenter[0] = (tileX + 0.5f) * 100.0f;  // TERRAIN_SCALE = 100
-        tileCenter[1] = (tileY + 0.5f) * 100.0f;
-        tileCenter[2] = 0.0f;  // Z will be ignored for terrain height variance
-
-#ifdef _EDITOR
-        float cullRadius = DevEditor_GetCullRadiusTerrain();
-#else
-        float cullRadius = DEFAULT_CULL_RADIUS_TERRAIN;
-#endif
-        return !m_Frustum.TestSphere(tileCenter, cullRadius);
+        // Use cheap 2D ground-plane projection test for terrain
+        // (same algorithm as original TestFrustrum2D, ~4 cross-products vs 6-plane sphere test)
+        return !m_Frustum.TestPoint2D(tileX + 0.5f, tileY + 0.5f, -40.0f);
     }
 
     bool ShouldCullObject2D(float x, float y, float radius) const override

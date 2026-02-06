@@ -2078,11 +2078,15 @@ void RenderDebugSphere(const vec3_t center, float radius, float r, float g, floa
 
 bool TestFrustrum2D(float x, float y, float Range)
 {
-    // Redirect to camera system
+    extern EGameScene SceneFlag;
+    if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
+        return true;
+
+    // Use cheap 2D ground-plane projection test (same algorithm as original)
     ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
     if (activeCamera)
     {
-        return !activeCamera->ShouldCullObject2D(x * 100.0f, y * 100.0f, -Range);
+        return activeCamera->GetFrustum().TestPoint2D(x, y, Range);
     }
 
     // Fallback: always visible if no camera

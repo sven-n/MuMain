@@ -110,6 +110,20 @@ public:
      */
     const AABB& GetBoundingBox() const { return m_BoundingBox; }
 
+    /**
+     * @brief Cheap 2D point-in-frustum test using ground-plane projection
+     *
+     * Tests if a point (in tile coordinates = world/100) is inside the 2D
+     * convex hull of the frustum projected to the XY ground plane.
+     * Uses the same cross-product winding test as the original TestFrustrum2D.
+     *
+     * @param tileX X coordinate in tile space (world / 100)
+     * @param tileY Y coordinate in tile space (world / 100)
+     * @param range Tolerance: negative = stricter culling, 0 = exact boundary
+     * @return true if point is visible (inside frustum projection)
+     */
+    bool TestPoint2D(float tileX, float tileY, float range) const;
+
 private:
     // 6 frustum planes: Left, Right, Top, Bottom, Near, Far
     Plane m_Planes[6];
@@ -120,6 +134,12 @@ private:
     // Axis-aligned bounding box containing the frustum
     AABB m_BoundingBox;
 
+    // 2D ground-plane projection (convex hull of vertices projected to XY, in tile coords)
+    float m_2DX[8];
+    float m_2DY[8];
+    int m_2DCount;
+
     // Helper methods
     void CalculateBoundingBox();
+    void Calculate2DProjection();
 };
