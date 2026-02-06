@@ -293,22 +293,23 @@ if (DOTNET_EXECUTABLE)
 
   # Helper macro: convert a path to Windows-native format when using
   # Windows dotnet.exe from WSL.  On all other platforms this is a no-op.
-  macro(mu_native_path _input _output)
-    set(${_output} "${_input}")
+  function(mu_native_path input_path output_var)
     if (DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
       execute_process(
-        COMMAND wslpath -w "${_input}"
-        OUTPUT_VARIABLE _mu_native_result
-        RESULT_VARIABLE _mu_native_rc
+        COMMAND wslpath -w "${input_path}"
+        OUTPUT_VARIABLE native_path
+        RESULT_VARIABLE rc
         OUTPUT_STRIP_TRAILING_WHITESPACE
       )
-      if (_mu_native_rc EQUAL 0)
-        set(${_output} "${_mu_native_result}")
+      if (rc EQUAL 0)
+        set(${output_var} "${native_path}" PARENT_SCOPE)
       else()
-        message(FATAL_ERROR "wslpath failed for '${_input}'. Ensure wslpath is available.")
+        message(FATAL_ERROR "wslpath failed for '${input_path}'. Ensure wslpath is available.")
       endif()
+    else()
+      set(${output_var} "${input_path}" PARENT_SCOPE)
     endif()
-  endmacro()
+  endfunction()
 
   # 1. Define the output path using a variable CMake can understand early
   set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library.dll")
