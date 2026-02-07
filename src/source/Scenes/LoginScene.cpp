@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "LoginScene.h"
 #include "../Camera/CameraUtility.h"
+#include "../Camera/CameraManager.h"
 #include "../CameraMove.h"
 #include "../DSPlaySound.h"
 #include "../ZzzOpenglUtil.h"
@@ -29,9 +30,6 @@
 
 // External declarations
 extern int DeleteGuildIndex;
-extern float CameraAngle[3];
-extern float CameraPosition[3];
-extern float CameraFOV;
 extern EGameScene SceneFlag;
 extern int g_iChatInputType;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
@@ -125,14 +123,14 @@ void DeleteCharacter()
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle)
 {
     vec3_t TransformPosition;
-    CameraAngle[0] = 0.f;
-    CameraAngle[1] = 0.f;
-    CameraAngle[2] = Angle[2];
+    g_Camera.Angle[0] = 0.f;
+    g_Camera.Angle[1] = 0.f;
+    g_Camera.Angle[2] = Angle[2];
     float Matrix[3][4];
-    AngleMatrix(CameraAngle, Matrix);
+    AngleMatrix(g_Camera.Angle, Matrix);
     VectorIRotate(Position, Matrix, TransformPosition);
-    VectorAdd(Origin, TransformPosition, CameraPosition);
-    CameraAngle[0] = Angle[0];
+    VectorAdd(Origin, TransformPosition, g_Camera.Position);
+    g_Camera.Angle[0] = Angle[0];
 }
 
 /**
@@ -228,9 +226,15 @@ static void InterpolateCameraMovement()
     else
     {
         // Linear movement using delta
-        for (int i = 0; i < 2; i++)
+        // FIX: Update all 3 position components (X, Y, Z), not just X and Y
+        for (int i = 0; i < 3; i++)
         {
             g_loginCamera.currentPosition[i] += g_loginCamera.currentWalkDelta[i];
+        }
+        // FIX: Also update angles for linear movement
+        for (int i = 0; i < 3; i++)
+        {
+            g_loginCamera.currentAngle[i] += g_loginCamera.currentWalkDelta[i + 3];
         }
     }
 }
@@ -253,7 +257,7 @@ void MoveCamera()
     UpdateCameraWaypoint();
     InterpolateCameraMovement();
 
-    CameraFOV = 45.f;
+    g_Camera.FOV = 45.f;
     vec3_t Position;
     Vector(0.f, 0.f, 0.f, Position);
     MoveCharacterCamera(Position, g_loginCamera.currentPosition, g_loginCamera.currentAngle);
@@ -290,8 +294,11 @@ void CreateLogInScene()
     InputNumber = 2;
     InputTextHide[1] = 1;
 
+    // FIX: Enable tour mode with offset correction
+    // Tour mode waypoints work well for movement, but need position offset
+    // Offset is applied in CCameraMove::GetCurrentCameraPos()
     CCameraMove::GetInstancePtr()->PlayCameraWalk(Hero->Object.Position, 1000);
-    CCameraMove::GetInstancePtr()->SetTourMode(TRUE, FALSE, 1);
+    CCameraMove::GetInstancePtr()->SetTourMode(TRUE, FALSE, 0);  // Start from waypoint 0
 
     MoveMainCamera();
 
@@ -316,13 +323,18 @@ void NewMoveLogInScene()
         MoveObjects();
         MoveMounts();
         MoveLeaves();
+
+        // Update camera BEFORE checking character visibility
+        MoveCamera();
+
+        // Now check character visibility with updated frustum
         MoveCharactersClient();
+
         MoveEffects();
         MoveJoints();
         MoveParticles();
         MoveBoids();
         ThePetProcess().UpdatePets();
-        MoveCamera();
     }
 
     if (CInput::Instance().IsKeyDown(VK_ESCAPE))
@@ -364,10 +376,10 @@ bool NewRenderLogInScene(HDC hDC)
     FogEnable = false;
 
     vec3_t pos;
-    VectorCopy(CameraPosition, pos);
+    VectorCopy(g_Camera.Position, pos);
     if (CCameraMove::GetInstancePtr()->IsCameraMove())
     {
-        VectorCopy(CameraPosition, pos);
+        VectorCopy(g_Camera.Position, pos);
     }
 
     MoveMainCamera();
@@ -381,23 +393,25 @@ bool NewRenderLogInScene(HDC hDC)
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
     BeginOpengl(0, 25, 640, 430);
-    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
+
+    // Get active camera for rendering (frustum already updated in camera Update())
+    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
-        CameraViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
+        g_Camera.ViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
 
-        RenderTerrain(false);
-        CameraViewFar = 7000.f;
+        RenderTerrain(false, activeCamera);
+        g_Camera.ViewFar = 7000.f;
         RenderCharactersClient();
         RenderMount();
-        RenderObjects();
+        RenderObjects(activeCamera);
         RenderJoints();
         RenderEffects();
         CheckSprites();
         RenderLeaves();
         RenderBoids();
-        RenderObjects_AfterCharacter();
+        RenderObjects_AfterCharacter(activeCamera);
         ThePetProcess().RenderPets();
     }
 

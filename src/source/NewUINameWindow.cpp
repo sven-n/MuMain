@@ -15,6 +15,11 @@
 #include "MatchEvent.h"
 #include "MapManager.h"
 
+// DevEditor forward declarations (must be at global scope)
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldRenderItemLabels();
+#endif
+
 using namespace SEASON3B;
 
 //////////////////////////////////////////////////////////////////////
@@ -194,20 +199,32 @@ void SEASON3B::CNewUINameWindow::RenderName()
         }
         else if (SelectedItem != -1)
         {
-            RenderItemName(SelectedItem, &Items[SelectedItem].Object, &Items[SelectedItem].Item, false);
+#ifdef _EDITOR
+            if (DevEditor_ShouldRenderItemLabels())
+#endif
+                RenderItemName(SelectedItem, &Items[SelectedItem].Object, &Items[SelectedItem].Item, false);
         }
     }
 
     if (m_bShowItemName || SEASON3B::IsRepeat(VK_MENU))
     {
-        for (int i = 0; i < MAX_ITEMS; i++)
+#ifdef _EDITOR
+        bool renderLabels = DevEditor_ShouldRenderItemLabels();
+#else
+        bool renderLabels = true;
+#endif
+
+        if (renderLabels)
         {
-            OBJECT* o = &Items[i].Object;
-            if (o->Live)
+            for (int i = 0; i < MAX_ITEMS; i++)
             {
-                if (o->Visible && i != SelectedItem)
+                OBJECT* o = &Items[i].Object;
+                if (o->Live)
                 {
-                    RenderItemName(i, o, &Items[i].Item, true);
+                    if (o->Visible && i != SelectedItem)
+                    {
+                        RenderItemName(i, o, &Items[i].Item, true);
+                    }
                 }
             }
         }

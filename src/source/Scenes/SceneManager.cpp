@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include <vector>
+#include <algorithm>
+#include <numeric>
 #include "SceneManager.h"
 
 //=============================================================================
@@ -57,6 +59,106 @@ extern int HeroTile;
 extern bool Destroy;
 extern double WorldTime;
 extern float FPS_ANIMATION_FACTOR;
+
+static bool g_bShowDebugInfo =
+#ifdef _DEBUG
+    true;
+#else
+    false;
+#endif
+
+static bool g_bShowFpsCounter = false;
+
+void SetShowDebugInfo(bool enabled)
+{
+    g_bShowDebugInfo = enabled;
+    if (enabled) g_bShowFpsCounter = false;
+}
+
+void SetShowFpsCounter(bool enabled)
+{
+    g_bShowFpsCounter = enabled;
+    if (enabled) g_bShowDebugInfo = false;
+}
+
+//=============================================================================
+// Frame Statistics Tracker
+//=============================================================================
+
+static constexpr int FRAME_HISTORY_SIZE = 300;      // ~5 seconds at 60fps
+static constexpr float MIN_FRAME_TIME_MS = 0.5f;    // clamp to 2000fps max
+static constexpr double STATS_UPDATE_INTERVAL = 500.0; // ms between percentile recalculations
+static constexpr int MIN_FRAMES_FOR_STATS = 10;
+static constexpr float GRAPH_MAX_MS = 33.3f;        // graph Y-axis scale (30fps)
+static constexpr float THRESHOLD_60FPS_MS = 16.67f;  // 60 FPS threshold
+static constexpr float THRESHOLD_40FPS_MS = 25.0f;   // 40 FPS threshold
+
+static float s_frameTimesMs[FRAME_HISTORY_SIZE] = {};
+static int s_frameIndex = 0;
+static int s_frameCount = 0;
+static double s_lastFrameTime = 0.0;
+static double s_highestFps = 0.0;
+
+// Percentile stats (updated periodically)
+static float s_avgFps = 0.0f;
+static float s_onePercentLow = 0.0f;
+static float s_slowestFrameFps = 0.0f;
+static double s_lastStatsUpdate = 0.0;
+
+void ResetFrameStats()
+{
+    memset(s_frameTimesMs, 0, sizeof(s_frameTimesMs));
+    s_frameIndex = 0;
+    s_frameCount = 0;
+    s_lastFrameTime = 0.0;
+    s_highestFps = 0.0;
+    s_avgFps = 0.0f;
+    s_onePercentLow = 0.0f;
+    s_slowestFrameFps = 0.0f;
+    s_lastStatsUpdate = 0.0;
+}
+
+static void UpdateFrameStats()
+{
+    double now = WorldTime;
+    if (s_lastFrameTime > 0.0)
+    {
+        double dt = now - s_lastFrameTime;
+        if (dt < MIN_FRAME_TIME_MS) dt = MIN_FRAME_TIME_MS;
+        s_frameTimesMs[s_frameIndex] = static_cast<float>(dt);
+        s_frameIndex = (s_frameIndex + 1) % FRAME_HISTORY_SIZE;
+        if (s_frameCount < FRAME_HISTORY_SIZE) s_frameCount++;
+
+        double instantaneousFps = 1000.0 / dt;
+        if (instantaneousFps > s_highestFps) s_highestFps = instantaneousFps;
+    }
+    s_lastFrameTime = now;
+
+    // Update percentile stats periodically
+    if (now - s_lastStatsUpdate > STATS_UPDATE_INTERVAL && s_frameCount > MIN_FRAMES_FOR_STATS)
+    {
+        s_lastStatsUpdate = now;
+
+        // Copy and sort frame times (descending = slowest first)
+        static float sorted[FRAME_HISTORY_SIZE];
+        memcpy(sorted, s_frameTimesMs, sizeof(float) * s_frameCount);
+        std::sort(sorted, sorted + s_frameCount, std::greater<float>());
+
+        // Average
+        float sum = std::accumulate(sorted, sorted + s_frameCount, 0.0f);
+        float avgMs = sum / s_frameCount;
+        s_avgFps = (avgMs > 0.0f) ? 1000.0f / avgMs : 0.0f;
+
+        // 1% low: average of the slowest 1% of frames
+        int onePercCount = std::max(1, s_frameCount / 100);
+        float onePercSum = std::accumulate(sorted, sorted + onePercCount, 0.0f);
+        float onePercAvgMs = onePercSum / onePercCount;
+        s_onePercentLow = (onePercAvgMs > 0.0f) ? 1000.0f / onePercAvgMs : 0.0f;
+
+        // Slowest frame: the single slowest frame in the window
+        s_slowestFrameFps = (sorted[0] > 0.0f) ? 1000.0f / sorted[0] : 0.0f;
+    }
+}
 
 void SetTargetFps(double targetFps)
 {
@@ -223,42 +325,62 @@ static void UpdateCoreSystems()
  */
 static void SetWorldClearColor()
 {
-    if (gMapManager.WorldActive == WD_10HEAVEN)
+    extern GLfloat FogColor[4];
+
+    if (gMapManager.WorldActive == WD_0LORENCIA)
     {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
+        glClearColor(10 / 256.f, 20 / 256.f, 14 / 256.f, 1.f);  // Dark green
+        FogColor[0] = 10 / 256.f; FogColor[1] = 20 / 256.f; FogColor[2] = 14 / 256.f; FogColor[3] = 1.f;
+    }
+    else if (gMapManager.WorldActive == WD_2DEVIAS)
+    {
+        glClearColor(0.75f, 0.85f, 1.0f, 1.f);  // Light snowy blue
+        FogColor[0] = 0.75f; FogColor[1] = 0.85f; FogColor[2] = 1.0f; FogColor[3] = 1.f;
+    }
+    else if (gMapManager.WorldActive == WD_10HEAVEN)
+    {
+        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);  // Blue
+        FogColor[0] = 3.f / 256.f; FogColor[1] = 25.f / 256.f; FogColor[2] = 44.f / 256.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
     {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Black
+        FogColor[0] = 0.f; FogColor[1] = 0.f; FogColor[2] = 0.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.InHellas(gMapManager.WorldActive))
     {
-        glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);
+        glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);  // Teal
+        FogColor[0] = 30.f / 256.f; FogColor[1] = 40.f / 256.f; FogColor[2] = 40.f / 256.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.InChaosCastle() == true)
     {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClearColor(0.f, 0.f, 0.f, 1.f);  // Black
+        FogColor[0] = 0.f; FogColor[1] = 0.f; FogColor[2] = 0.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.InBattleCastle() && battleCastle::InBattleCastle2(Hero->Object.Position))
     {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClearColor(0.f, 0.f, 0.f, 1.f);  // Black
+        FogColor[0] = 0.f; FogColor[1] = 0.f; FogColor[2] = 0.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
     {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
+        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);  // Dark purple
+        FogColor[0] = 9.f / 256.f; FogColor[1] = 8.f / 256.f; FogColor[2] = 33.f / 256.f; FogColor[3] = 1.f;
     }
-    else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-        )
+    else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
     {
-        glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);
+        glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);  // Gray
+        FogColor[0] = 178.f / 256.f; FogColor[1] = 178.f / 256.f; FogColor[2] = 178.f / 256.f; FogColor[3] = 1.f;
     }
     else if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
     {
-        glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);
+        glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);  // Light blue
+        FogColor[0] = 148.f / 256.f; FogColor[1] = 179.f / 256.f; FogColor[2] = 223.f / 256.f; FogColor[3] = 1.f;
     }
     else
     {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
+        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);  // Black (default)
+        FogColor[0] = 0.f; FogColor[1] = 0.f; FogColor[2] = 0.f; FogColor[3] = 1.f;
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -292,29 +414,141 @@ static bool RenderCurrentScene(HDC hDC)
 }
 
 /**
- * @brief Renders debug information overlay in development builds.
+ * @brief Renders a frame time graph using raw OpenGL quads.
  *
- * Shows FPS, mouse position, and camera info on screen.
+ * Draws a bar chart of recent frame times inside BeginBitmap's 2D ortho projection.
+ * Coordinates are in virtual 640x480 space, converted to window pixels.
+ */
+static void RenderFrameGraph(float graphX, float graphY, float graphW, float graphH)
+{
+    if (s_frameCount < 2)
+        return;
+
+    // Convert virtual 640x480 coords to actual window pixels
+    float gx = graphX * (float)WindowWidth / 640.f;
+    float gy = graphY * (float)WindowHeight / 480.f;
+    float gw = graphW * (float)WindowWidth / 640.f;
+    float gh = graphH * (float)WindowHeight / 480.f;
+
+    // Flip Y for OpenGL (origin bottom-left)
+    float glBottom = (float)WindowHeight - gy - gh;
+    float glTop = (float)WindowHeight - gy;
+
+    // Background
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+    glBegin(GL_QUADS);
+    glVertex2f(gx, glBottom);
+    glVertex2f(gx + gw, glBottom);
+    glVertex2f(gx + gw, glTop);
+    glVertex2f(gx, glTop);
+    glEnd();
+
+    // Target line at 16.67ms (60fps)
+    float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
+    float lineY = glBottom + target60 * gh;
+    glColor4f(0.3f, 0.8f, 0.3f, 0.5f);
+    glBegin(GL_LINES);
+    glVertex2f(gx, lineY);
+    glVertex2f(gx + gw, lineY);
+    glEnd();
+
+    // Frame bars
+    float barW = gw / FRAME_HISTORY_SIZE;
+    int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
+
+    for (int i = 0; i < s_frameCount; i++)
+    {
+        int idx = (oldest + i) % FRAME_HISTORY_SIZE;
+        float ms = s_frameTimesMs[idx];
+        float norm = std::min(ms / GRAPH_MAX_MS, 1.0f);
+        float barH = norm * gh;
+
+        // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
+        if (ms < THRESHOLD_60FPS_MS)
+            glColor4f(0.2f, 0.9f, 0.2f, 0.8f);
+        else if (ms < THRESHOLD_40FPS_MS)
+            glColor4f(0.9f, 0.9f, 0.2f, 0.8f);
+        else
+            glColor4f(0.9f, 0.2f, 0.2f, 0.8f);
+
+        float bx = gx + i * barW;
+        glBegin(GL_QUADS);
+        glVertex2f(bx, glBottom);
+        glVertex2f(bx + barW, glBottom);
+        glVertex2f(bx + barW, glBottom + barH);
+        glVertex2f(bx, glBottom + barH);
+        glEnd();
+    }
+
+    glEnable(GL_TEXTURE_2D);
+}
+
+/**
+ * @brief Renders debug information overlay.
+ *
+ * Shows FPS stats, percentile lows, mouse position, camera info, and frame time graph.
  */
 static void RenderDebugInfo()
 {
-#if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
+    if (!g_bShowDebugInfo)
+        return;
+
+    UpdateFrameStats();
+
     BeginBitmap();
-    wchar_t szDebugText[128];
-    swprintf(szDebugText, L"FPS: %.1f Vsync: %d CPU: %.1f%%", FPS_AVG, IsVSyncEnabled(), CPU_AVG);
-    wchar_t szMousePos[128];
-    swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
-    wchar_t szCamera3D[128];
-    swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+
+    wchar_t szLine[128];
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0, 0, 0, 100);
     g_pRenderText->SetTextColor(255, 255, 255, 200);
-    g_pRenderText->RenderText(10, 26, szDebugText);
-    g_pRenderText->RenderText(10, 36, szMousePos);
-    g_pRenderText->RenderText(10, 46, szCamera3D);
+
+    int y = 26;
+    swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%",
+        FPS_AVG, s_avgFps, s_highestFps, IsVSyncEnabled(), CPU_AVG);
+    g_pRenderText->RenderText(10, y, szLine); y += 10;
+
+    swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms",
+        s_onePercentLow, s_slowestFrameFps,
+        (s_avgFps > 0.0f) ? 1000.0f / s_avgFps : 0.0f);
+    g_pRenderText->RenderText(10, y, szLine); y += 10;
+
+    swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
+    g_pRenderText->RenderText(10, y, szLine); y += 10;
+
+    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", g_Camera.FOV, g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
+    g_pRenderText->RenderText(10, y, szLine); y += 10;
+
+    // Frame time graph below text
+    RenderFrameGraph(10.0f, (float)(y + 2), 200.0f, 40.0f);
+
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
-#endif // defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
+}
+
+/**
+ * @brief Renders a simple FPS counter overlay showing only current FPS.
+ */
+static void RenderFpsCounter()
+{
+    if (!g_bShowFpsCounter)
+        return;
+
+    BeginBitmap();
+
+    wchar_t szLine[64];
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+
+    swprintf(szLine, L"FPS: %.1f", FPS_AVG);
+    g_pRenderText->RenderText(10, 26, szLine);
+
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
 }
 
 /**
@@ -697,6 +931,7 @@ void MainScene(HDC hDC)
     {
         Success = RenderCurrentScene(hDC);
         RenderDebugInfo();
+        RenderFpsCounter();
 
         if (Success)
         {

@@ -113,3 +113,8 @@ void MainScene(HDC hDC);
 // FPS management (legacy - use g_frameTiming instead)
 void SetTargetFps(double targetFps);
 double GetTargetFps();
+
+// Debug overlay controls
+void SetShowDebugInfo(bool enabled);
+void SetShowFpsCounter(bool enabled);
+void ResetFrameStats();

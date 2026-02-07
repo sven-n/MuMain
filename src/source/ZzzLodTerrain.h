@@ -66,15 +66,27 @@ void RequestTerrainLight(float xf, float yf, vec3_t Light);
 void OpenTerrainLight(wchar_t* FileName);
 void SaveTerrainLight(wchar_t* FileName);
 
+// Frustum creation and testing (restored original implementations)
 void CreateFrustrum(float xAspect, float yAspect, vec3_t position);
+void CreateFrustrum2D(vec3_t Position);
+bool TestFrustrum(vec3_t Position, float Range);
+bool TestFrustrum2D(float x, float y, float Range);
+void CacheActiveFrustum();   // Call once per frame after camera update
+void UpdateFrustrumBounds();
+
 void CreateLodBuffer();
 
 float RequestTerrainHeight(float xf, float yf);
-bool TestFrustrum(vec3_t Position, float Range);
-bool TestFrustrum2D(float x, float y, float Range);
+
+// Debug visualization
+void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b);
 
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
-void RenderTerrain(bool EditFlag);
+
+// Forward declaration for Phase 3
+class ICamera;
+
+void RenderTerrain(bool EditFlag, ICamera* camera = nullptr);
 
 void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 void RenderTerrain_After(bool EditFlag);

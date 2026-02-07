@@ -25,6 +25,16 @@
 
 #include "w_MapHeaders.h"
 #include "CameraMove.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/CameraManager.h"
+#include "Camera/Frustum.h"
+#include "CullingConstants.h"
+
+// DevEditor function declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldShowTerrainCullingSpheres();
+extern "C" float DevEditor_GetCullRadiusTerrain();
+#endif
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -66,8 +76,6 @@ const float g_fMinHeight = -500.f;
 const float g_fMaxHeight = 1000.f;
 
 extern  short   g_shCameraLevel;
-extern  float CameraDistanceTarget;
-extern  float CameraDistance;
 
 static  float   g_fFrustumRange = -40.f;
 
@@ -1980,69 +1988,78 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
     }
 }
 
-vec3_t  FrustrumVertex[5];
-vec3_t  FrustrumFaceNormal[5];
-float   FrustrumFaceD[5];
+// Terrain iteration bounds — limits which tiles are visited by rendering/lighting loops.
 int     FrustrumBoundMinX = 0;
 int     FrustrumBoundMinY = 0;
 int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
+// 2D frustum trapezoid vertices (in tile coordinates, i.e. world * 0.01)
 float FrustrumX[4];
 float FrustrumY[4];
+
+// 3D frustum data (used by TestFrustrum / 3D culling)
+static vec3_t FrustrumVertex[5];
+static vec3_t FrustrumFaceNormal[5];
+static float  FrustrumFaceD[5];
+
+// Cached per-frame camera pointer for TestFrustrum shim
+static ICamera* s_pCachedCamera = nullptr;
 
 extern int GetScreenWidth();
 
 void CreateFrustrum2D(vec3_t Position)
 {
-    float Width = 0.0f, CameraViewFar = 0.0f, CameraViewNear = 0.0f, CameraViewTarget = 0.0f;
+    float Width = 0.0f, CameraViewFar_local = 0.0f, CameraViewNear_local = 0.0f, CameraViewTarget_local = 0.0f;
     float WidthFar = 0.0f, WidthNear = 0.0f;
+
+    extern EGameScene SceneFlag;
 
     if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
     {
-        Width = (float)GetScreenWidth() / 480.f;// * 0.1f;
+        Width = (float)GetScreenWidth() / 480.f;
         if (battleCastle::InBattleCastle2(Hero->Object.Position) && (Hero->Object.Position[0] < 17100.f || Hero->Object.Position[0]>18300.f))
         {
-            CameraViewFar = 5100.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 2250.f * Width; // 1140.f
-            WidthNear = 540.f * Width; // 540.f
+            CameraViewFar_local = 5100.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 2250.f * Width;
+            WidthNear = 540.f * Width;
         }
         else
         {
-            CameraViewFar = 3300.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1300.f * Width; // 1140.f
-            WidthNear = 580.f * Width; // 540.f
+            CameraViewFar_local = 3300.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1300.f * Width;
+            WidthNear = 580.f * Width;
         }
     }
     else if (gMapManager.WorldActive == WD_62SANTA_TOWN)
     {
         Width = (float)GetScreenWidth() / 450.f * 1.0f;
-        CameraViewFar = 2400.f;
-        CameraViewNear = CameraViewFar * 0.19f;
-        CameraViewTarget = CameraViewFar * 0.47f;
-        CameraViewFar = 2650.f;
+        CameraViewFar_local = 2400.f;
+        CameraViewNear_local = CameraViewFar_local * 0.19f;
+        CameraViewTarget_local = CameraViewFar_local * 0.47f;
+        CameraViewFar_local = 2650.f;
         WidthFar = 1250.f * Width;
         WidthNear = 540.f * Width;
     }
     else if (gMapManager.IsPKField() || IsDoppelGanger2())
     {
         Width = (float)GetScreenWidth() / 500.f;
-        CameraViewFar = 1700.0f;
-        CameraViewNear = 55.0f;
-        CameraViewTarget = 830.0f;
-        CameraViewFar = 3300.f;
+        CameraViewFar_local = 1700.0f;
+        CameraViewNear_local = 55.0f;
+        CameraViewTarget_local = 830.0f;
+        CameraViewFar_local = 3300.f;
         WidthFar = 1900.f * Width;
         WidthNear = 600.f * Width;
     }
     else
     {
-        static  int CameraLevel;
+        static int CameraLevel;
 
-        if ((int)CameraDistanceTarget >= (int)CameraDistance)
+        if ((int)g_Camera.DistanceTarget >= (int)g_Camera.Distance)
             CameraLevel = g_shCameraLevel;
 
         switch (CameraLevel)
@@ -2061,7 +2078,7 @@ void CreateFrustrum2D(vec3_t Position)
             }
             else
             {
-                Width = (float)GetScreenWidth()/640.f * 1.1f;
+                Width = (float)GetScreenWidth() / 640.f * 1.1f;
             }
 
             if (SceneFlag == LOG_IN_SCENE)
@@ -2069,95 +2086,95 @@ void CreateFrustrum2D(vec3_t Position)
             }
             else if (SceneFlag == CHARACTER_SCENE)
             {
-                CameraViewFar = 2000.f * 9.1f * 0.404998f;
+                CameraViewFar_local = 2000.f * 9.1f * 0.404998f;
             }
             else if (gMapManager.WorldActive == WD_39KANTURU_3RD)
             {
-                CameraViewFar = 2000.f * 10.0f * 0.115f;
+                CameraViewFar_local = 2000.f * 10.0f * 0.115f;
             }
             else
             {
-                CameraViewFar = 2400.f;
+                CameraViewFar_local = 2400.f;
             }
 
             if (SceneFlag == LOG_IN_SCENE)
             {
                 Width = (float)GetScreenWidth() / 640.f;
-                CameraViewFar = 2400.f * 17.0f * 13.0f;
-                CameraViewNear = 2400.f * 17.0f * 0.5f;
-                CameraViewTarget = 2400.f * 17.0f * 0.5f;
+                CameraViewFar_local = 2400.f * 17.0f * 13.0f;
+                CameraViewNear_local = 2400.f * 17.0f * 0.5f;
+                CameraViewTarget_local = 2400.f * 17.0f * 0.5f;
                 WidthFar = 5000.f * Width;
                 WidthNear = 300.f * Width;
             }
             else
             {
-                CameraViewNear = CameraViewFar * 0.19f;//0.22
-                CameraViewTarget = CameraViewFar * 0.47f;//0.47
-                WidthFar = 1190.f * Width * sqrtf(CameraFOV / 33.f); // 1140.f
-                WidthNear = 540.f * Width * sqrtf(CameraFOV / 33.f); // 540.f
+                CameraViewNear_local = CameraViewFar_local * 0.19f;
+                CameraViewTarget_local = CameraViewFar_local * 0.47f;
+                WidthFar = 1190.f * Width * sqrtf(g_Camera.FOV / 33.f);
+                WidthNear = 540.f * Width * sqrtf(g_Camera.FOV / 33.f);
             }
             break;
         case 1:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 2700.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1200.f * Width; // 1140.f
-            WidthNear = 540.f * Width; // 540.f
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 2700.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1200.f * Width;
+            WidthNear = 540.f * Width;
             break;
         case 2:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 3000.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1300.f * Width; // 1140.f
-            WidthNear = 540.f * Width; // 540.f
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 3000.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1300.f * Width;
+            WidthNear = 540.f * Width;
             break;
         case 3:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 3300.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1500.f * Width; // 1140.f
-            WidthNear = 580.f * Width; // 540.f
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 3300.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1500.f * Width;
+            WidthNear = 580.f * Width;
             break;
         case 4:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 5100.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 2250.f * Width; // 1140.f
-            WidthNear = 540.f * Width; // 540.f
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 5100.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 2250.f * Width;
+            WidthNear = 540.f * Width;
             break;
         case 5:
-            Width = (float)GetScreenWidth() / 500.f + 0.1f;// * 0.1f;
-            CameraViewFar = 3400.f;// * 0.1f;
-            CameraViewNear = CameraViewFar * 0.19f;//0.22
-            CameraViewTarget = CameraViewFar * 0.47f;//0.47
-            WidthFar = 1600.f * Width; // 1140.f
-            WidthNear = 660.f * Width; // 540.f
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 3400.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1600.f * Width;
+            WidthNear = 660.f * Width;
             break;
         }
     }
 
     vec3_t p[4];
-    Vector(-WidthFar, CameraViewFar - CameraViewTarget, 0.f, p[0]);
-    Vector(WidthFar, CameraViewFar - CameraViewTarget, 0.f, p[1]);
-    Vector(WidthNear, CameraViewNear - CameraViewTarget, 0.f, p[2]);
-    Vector(-WidthNear, CameraViewNear - CameraViewTarget, 0.f, p[3]);
+    Vector(-WidthFar, CameraViewFar_local - CameraViewTarget_local, 0.f, p[0]);
+    Vector(WidthFar, CameraViewFar_local - CameraViewTarget_local, 0.f, p[1]);
+    Vector(WidthNear, CameraViewNear_local - CameraViewTarget_local, 0.f, p[2]);
+    Vector(-WidthNear, CameraViewNear_local - CameraViewTarget_local, 0.f, p[3]);
     vec3_t Angle;
     float Matrix[3][4];
 
     if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
     {
-        VectorScale(CameraAngle, -1.0f, Angle);
+        VectorScale(g_Camera.Angle, -1.0f, Angle);
         CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
         vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f };
         VectorAdd(Angle, _Temp, Angle);
     }
     else
     {
-        Vector(0.f, 0.f, -CameraAngle[2], Angle);
+        Vector(0.f, 0.f, -g_Camera.Angle[2], Angle);
     }
 
     AngleMatrix(Angle, Matrix);
@@ -2171,28 +2188,10 @@ void CreateFrustrum2D(vec3_t Position)
     }
 }
 
-bool TestFrustrum2D(float x, float y, float Range)
-{
-    if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
-        return true;
-
-    int j = 3;
-    for (int i = 0; i < 4; j = i, i++)
-    {
-        float d = (FrustrumX[i] - x) * (FrustrumY[j] - y) -
-            (FrustrumX[j] - x) * (FrustrumY[i] - y);
-        if (d <= Range)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
 void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
 {
-    const auto fovv = tanf(CameraFOV * Q_PI / 360.f);
-    float Distance = CameraViewFar;
+    const auto fovv = tanf(g_Camera.FOV * Q_PI / 360.f);
+    float Distance = g_Camera.ViewFar;
     float Width = fovv * Distance * xAspect + 100.f;
     float Height = fovv * Distance * yAspect + 100.f;
 
@@ -2207,13 +2206,13 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     float FrustrumMinY = (float)TERRAIN_SIZE * TERRAIN_SCALE;
     float FrustrumMaxX = 0.f;
     float FrustrumMaxY = 0.f;
-    float Matrix[3][4];
-    GetOpenGLMatrix(Matrix);
+    float OGLMatrix[3][4];
+    CameraProjection::GetOpenGLMatrix(OGLMatrix);
     for (int i = 0; i < 5; i++)
     {
         vec3_t t;
-        VectorIRotate(Temp[i], Matrix, t);
-        VectorAdd(t, CameraPosition, FrustrumVertex[i]);
+        VectorIRotate(Temp[i], OGLMatrix, t);
+        VectorAdd(t, g_Camera.Position, FrustrumVertex[i]);
         if (FrustrumMinX > FrustrumVertex[i][0]) FrustrumMinX = FrustrumVertex[i][0];
         if (FrustrumMinY > FrustrumVertex[i][1]) FrustrumMinY = FrustrumVertex[i][1];
         if (FrustrumMaxX < FrustrumVertex[i][0]) FrustrumMaxX = FrustrumVertex[i][0];
@@ -2221,7 +2220,6 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     }
 
     int tileWidth = 4;
-
     FrustrumBoundMinX = (int)(FrustrumMinX / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
     FrustrumBoundMinY = (int)(FrustrumMinY / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
     FrustrumBoundMaxX = (int)(FrustrumMaxX / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
@@ -2241,17 +2239,113 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     FrustrumFaceD[2] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
     FrustrumFaceD[3] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
     FrustrumFaceD[4] = -DotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
-    
+
     CreateFrustrum2D(position);
+}
+
+void UpdateFrustrumBounds()
+{
+    // No-op: bounds are now computed by CreateFrustrum() each frame
+}
+
+/**
+ * @brief Renders a wireframe sphere for debugging culling volumes
+ * @param center Center position of the sphere in world space
+ * @param radius Radius of the sphere
+ * @param r Red color component (0-1)
+ * @param g Green color component (0-1)
+ * @param b Blue color component (0-1)
+ */
+void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b)
+{
+    // Save OpenGL state
+    GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean texture2D = glIsEnabled(GL_TEXTURE_2D);
+    GLboolean lighting = glIsEnabled(GL_LIGHTING);
+
+    // Disable unnecessary features
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);  // Keep depth test for proper 3D rendering
+
+    glColor3f(r, g, b);
+    glLineWidth(1.0f);
+
+    // Draw three circle rings (XY, XZ, YZ planes) to represent the sphere
+    const int segments = 16;  // Number of line segments per circle
+    const float angleStep = (2.0f * Q_PI) / segments;
+
+    // XY plane circle (around Z axis)
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < segments; i++)
+    {
+        float angle = i * angleStep;
+        float x = center[0] + radius * cosf(angle);
+        float y = center[1] + radius * sinf(angle);
+        glVertex3f(x, y, center[2]);
+    }
+    glEnd();
+
+    // XZ plane circle (around Y axis)
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < segments; i++)
+    {
+        float angle = i * angleStep;
+        float x = center[0] + radius * cosf(angle);
+        float z = center[2] + radius * sinf(angle);
+        glVertex3f(x, center[1], z);
+    }
+    glEnd();
+
+    // YZ plane circle (around X axis)
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < segments; i++)
+    {
+        float angle = i * angleStep;
+        float y = center[1] + radius * cosf(angle);
+        float z = center[2] + radius * sinf(angle);
+        glVertex3f(center[0], y, z);
+    }
+    glEnd();
+
+    // Restore OpenGL state
+    if (!depthTest) glDisable(GL_DEPTH_TEST);
+    if (texture2D) glEnable(GL_TEXTURE_2D);
+    if (lighting) glEnable(GL_LIGHTING);
+}
+
+void CacheActiveFrustum()
+{
+    s_pCachedCamera = CameraManager::Instance().GetActiveCamera();
+}
+
+bool TestFrustrum2D(float x, float y, float Range)
+{
+    extern EGameScene SceneFlag;
+    if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
+        return true;
+
+    int j = 3;
+    for (int i = 0; i < 4; j = i, i++)
+    {
+        float d = (FrustrumX[i] - x) * (FrustrumY[j] - y) -
+            (FrustrumX[j] - x) * (FrustrumY[i] - y);
+        if (d <= Range)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool TestFrustrum(vec3_t Position, float Range)
 {
     for (int i = 0; i < 5; i++)
     {
-        float Value;
-        Value = FrustrumFaceD[i] + DotProduct(Position, FrustrumFaceNormal[i]);
-        if (Value < -Range) return false;
+        if (DotProduct(Position, FrustrumFaceNormal[i]) + FrustrumFaceD[i] < -Range)
+        {
+            return false;
+        }
     }
     return true;
 }
@@ -2271,7 +2365,7 @@ void CFrustrum::Make(vec3_t vEye, float fFov, float fAspect, float fDist)
     Vector(-Width, -Height, -fDist, Temp[4]);
 
     float Matrix[3][4];
-    GetOpenGLMatrix(Matrix);
+    CameraProjection::GetOpenGLMatrix(Matrix);
     for (int i = 0; i < 5; i++)
     {
         vec3_t t;
@@ -2324,7 +2418,7 @@ void ResetAllFrustrum()
     {
         CFrustrum* pData = iter->second;
         if (!pData) continue;
-        pData->SetEye(CameraPosition);
+        pData->SetEye(g_Camera.Position);
         pData->Reset();
     }
 }
@@ -2512,7 +2606,7 @@ void InitTerrainRay(int HeroX, int HeroY)
     }*/
 }
 
-void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
+void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag, ICamera* camera = nullptr)
 {
     //int x = ((xi/4)&63);
     //int y = ((yi/4)&63);
@@ -2524,7 +2618,15 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || CameraTopViewEnable)
+            // Per-tile culling: block-level test already passed, so skip expensive
+            // 3D sphere test for individual tiles. Only use legacy 2D test (cheap) as fallback.
+            bool visible = g_Camera.TopViewEnable || camera != nullptr;
+            if (!visible)
+            {
+                visible = TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f);
+            }
+
+            if (visible)
             {
                 RenderTerrainTile(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
             }
@@ -2535,7 +2637,7 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
     }
 }
 
-void RenderTerrainFrustrum(bool EditFlag)
+void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
 {
     int     xi;
     int     yi = FrustrumBoundMinY;
@@ -2548,18 +2650,32 @@ void RenderTerrainFrustrum(bool EditFlag)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || CameraTopViewEnable)
+            if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || g_Camera.TopViewEnable)
             {
                 if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                 {
-                    float fDistance_x = CameraPosition[0] - xf / 0.01f;
-                    float fDistance_y = CameraPosition[1] - yf / 0.01f;
+                    float fDistance_x = g_Camera.Position[0] - xf / 0.01f;
+                    float fDistance_y = g_Camera.Position[1] - yf / 0.01f;
                     float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
 
                     if (fDistance > 5200.f)
                         continue;
                 }
-                RenderTerrainBlock(xf, yf, xi, yi, EditFlag);
+                RenderTerrainBlock(xf, yf, xi, yi, EditFlag, camera);
+
+#ifdef _EDITOR
+                // Debug visualization: Render terrain tile culling sphere
+                if (!EditFlag && DevEditor_ShouldShowTerrainCullingSpheres())
+                {
+                    float cullRadius = DevEditor_GetCullRadiusTerrain();
+                    vec3_t tileCenter;
+                    tileCenter[0] = (xi + 2.0f) * 100.0f;  // Center of 4x4 block
+                    tileCenter[1] = (yi + 2.0f) * 100.0f;
+                    // Use actual terrain height instead of Z=0
+                    tileCenter[2] = RequestTerrainHeight(tileCenter[0], tileCenter[1]);
+                    RenderDebugSphere(tileCenter, cullRadius, 0.0f, 1.0f, 0.0f);  // Green wireframe
+                }
+#endif
             }
         }
     }
@@ -2574,7 +2690,7 @@ void RenderTerrainBlock_After(float xf, float yf, int xi, int yi, bool EditFlag)
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || CameraTopViewEnable)
+            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || g_Camera.TopViewEnable)
             {
                 RenderTerrainTile_After(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
             }
@@ -2597,7 +2713,7 @@ void RenderTerrainFrustrum_After(bool EditFlag)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            if (TestFrustrum2D(xf + 2.f, yf + 2.f, -80.f) || CameraTopViewEnable)
+            if (TestFrustrum2D(xf + 2.f, yf + 2.f, -80.f) || g_Camera.TopViewEnable)
             {
                 RenderTerrainBlock_After(xf, yf, xi, yi, EditFlag);
             }
@@ -2608,7 +2724,7 @@ void RenderTerrainFrustrum_After(bool EditFlag)
 extern int SelectMapping;
 extern void RenderCharactersClient();
 
-void RenderTerrain(bool EditFlag)
+void RenderTerrain(bool EditFlag, ICamera* camera)
 {
     if (!EditFlag)
     {
@@ -2639,7 +2755,7 @@ void RenderTerrain(bool EditFlag)
     }
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
-    RenderTerrainFrustrum(EditFlag);
+    RenderTerrainFrustrum(EditFlag, camera);
     //
     if (EditFlag && SelectFlag)
     {
@@ -2651,7 +2767,7 @@ void RenderTerrain(bool EditFlag)
         if (TerrainGrassEnable && gMapManager.WorldActive != WD_7ATLANSE && !IsDoppelGanger3())
         {
             TerrainFlag = TERRAIN_MAP_GRASS;
-            RenderTerrainFrustrum(EditFlag);
+            RenderTerrainFrustrum(EditFlag, camera);
         }
         DisableDepthTest();
         EnableCullFace();
@@ -2685,14 +2801,14 @@ void RenderSun()
     float Matrix[3][4];
     Angle[0] = 0.f;
     Angle[1] = 0.f;
-    Angle[2] = CameraAngle[2];
+    Angle[2] = g_Camera.Angle[2];
     AngleIMatrix(Angle, Matrix);
     vec3_t p, Position;
-    Vector(-900.f, CameraViewFar * 0.9f, 0.f, p);
+    Vector(-900.f, g_Camera.ViewFar * 0.9f, 0.f, p);
     VectorRotate(p, Matrix, Position);
-    VectorAdd(CameraPosition, Position, Sun.Position);
+    VectorAdd(g_Camera.Position, Position, Sun.Position);
     Sun.Position[2] = 550.f;
-    Sun.Visible = TestDepthBuffer(Sun.Position);
+    Sun.Visible = CameraProjection::TestDepthBuffer(g_Camera, Sun.Position);
     BeginSprite();
     //RenderSprite(&Sun);
     EndSprite();
@@ -2705,7 +2821,7 @@ void RenderSky()
     float Matrix[3][4];
     Angle[0] = 0.f;
     Angle[1] = 0.f;
-    Angle[2] = CameraAngle[2];
+    Angle[2] = g_Camera.Angle[2];
     AngleIMatrix(Angle, Matrix);
     float Aspect = (float)(WindowWidth) / (float)(WindowWidth);
     float Width = 1780.f * Aspect;
@@ -2717,9 +2833,9 @@ void RenderSky()
 
     for (int i = 0; i <= Num; i++)
     {
-        Vector(((float)i - Num * 0.5f) * (Width / Num), CameraViewFar * 0.99f, 0.f, p);
+        Vector(((float)i - Num * 0.5f) * (Width / Num), g_Camera.ViewFar * 0.99f, 0.f, p);
         VectorRotate(p, Matrix, Position);
-        VectorAdd(CameraPosition, Position, Position);
+        VectorAdd(g_Camera.Position, Position, Position);
         RequestTerrainLight(Position[0], Position[1], LightTable[i]);
     }
 
@@ -2754,10 +2870,11 @@ void RenderSky()
         Vector(1.f, 1.f, 1.f, Light[2]);
         Vector(1.f, 1.f, 1.f, Light[3]);
 
-        Vector((x - Num * 0.5f + 0.5f) * (Width / Num), CameraViewFar * 0.9f, 0.f, p);
+        Vector((x - Num * 0.5f + 0.5f) * (Width / Num), g_Camera.ViewFar * 0.9f, 0.f, p);
         VectorRotate(p, Matrix, Position);
-        VectorAdd(CameraPosition, Position, Position);
+        VectorAdd(g_Camera.Position, Position, Position);
         Position[2] = 400.f;
+        // NOTE: BITMAP_SKY texture doesn't exist in this codebase - sky rendering disabled
         //RenderSpriteUV(BITMAP_SKY,Position,Width/Num,Height,UV,Light);
     }
     EndSprite();

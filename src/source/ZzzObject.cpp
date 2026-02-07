@@ -15,6 +15,7 @@
 #include "Scenes/SceneCore.h"
 #include "ZzzOpenData.h"
 #include "DSPlaySound.h"
+#include "Camera/ICamera.h"
 
 #include "SideHair.h"
 #include "PhysicsManager.h"
@@ -32,6 +33,17 @@
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
 #include "NewUISystem.h"
+#include "Camera/CameraManager.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/OrbitalCamera.h"
+#include "CullingConstants.h"
+
+// DevEditor function declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldShowObjectCullingSpheres();
+extern "C" float DevEditor_GetCullRadiusItem();
+extern "C" float DevEditor_GetCullRadiusObject();
+#endif
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
@@ -3252,8 +3264,10 @@ void RenderObjectVisual(OBJECT* o)
     }
 }
 
-void RenderObjects()
+void RenderObjects(ICamera* camera)
 {
+    // Phase 3: Accept optional camera parameter for direct culling
+
     float   range = 0.f;
     if (gMapManager.WorldActive == WD_10HEAVEN)
     {
@@ -3269,6 +3283,7 @@ void RenderObjects()
         for (int j = 0; j < 16; j++)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
+
             ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
             if (g_Direction.m_CKanturu.IsMayaScene()
                 || gMapManager.WorldActive == WD_51HOME_6TH_CHAR
@@ -3293,8 +3308,8 @@ void RenderObjects()
                         else
                             if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                             {
-                                float fDistance_x = CameraPosition[0] - o->Position[0];
-                                float fDistance_y = CameraPosition[1] - o->Position[1];
+                                float fDistance_x = g_Camera.Position[0] - o->Position[0];
+                                float fDistance_y = g_Camera.Position[1] - o->Position[1];
                                 float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
                                 float fDis = 2000.0f;
 
@@ -3369,7 +3384,7 @@ void RenderObjects()
                 }
             }
 
-            if (ob->Visible || CameraTopViewEnable)
+            if (ob->Visible || g_Camera.TopViewEnable)
             {
                 OBJECT* o = ob->Head;
                 while (1)
@@ -3391,7 +3406,7 @@ void RenderObjects()
                                         else if ((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type == 129 || o->Type == 98));
 
                                         else
-                                            if (o->Visible || CameraTopViewEnable)
+                                            if (o->Visible || g_Camera.TopViewEnable)
                                             {
                                                 bool Success = false;
                                                 if (gMapManager.WorldActive == WD_2DEVIAS && o->Type == 100)
@@ -3412,6 +3427,13 @@ void RenderObjects()
                                                 {
                                                     RenderObject(o);
                                                     RenderObjectVisual(o);
+
+#ifdef _EDITOR
+                                                    if (DevEditor_ShouldShowObjectCullingSpheres())
+                                                    {
+                                                        RenderDebugSphere(o->Position, o->CollisionRange * 100.0f, 1.0f, 1.0f, 0.0f);
+                                                    }
+#endif
                                                 }
                                             }
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
@@ -3459,8 +3481,9 @@ void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate, int Select, int
     }
 }
 
-void RenderObjects_AfterCharacter()
+void RenderObjects_AfterCharacter(ICamera* camera)
 {
+    // Phase 3: Accept optional camera parameter for direct culling
     if (!(gMapManager.WorldActive == WD_37KANTURU_1ST || gMapManager.WorldActive == WD_38KANTURU_2ND || gMapManager.WorldActive == WD_39KANTURU_3RD
         || gMapManager.WorldActive == WD_40AREA_FOR_GM
         || gMapManager.WorldActive == WD_41CHANGEUP3RD_1ST
@@ -3497,6 +3520,7 @@ void RenderObjects_AfterCharacter()
         for (int j = 0; j < 16; j++)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
+
             ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
 
             if (g_Direction.m_CKanturu.IsMayaScene())
@@ -3562,7 +3586,7 @@ void RenderObjects_AfterCharacter()
                 }
             }
 
-            if (ob->Visible || CameraTopViewEnable)
+            if (ob->Visible || g_Camera.TopViewEnable)
             {
                 OBJECT* o = ob->Head;
                 while (1)
@@ -3581,7 +3605,7 @@ void RenderObjects_AfterCharacter()
                                     else
                                         if (IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68));
                                         else
-                                            if (o->Visible || CameraTopViewEnable)
+                                            if (o->Visible || g_Camera.TopViewEnable)
                                             {
                                                 bool Success = false;
                                                 if (gMapManager.WorldActive == WD_2DEVIAS && o->Type == 100)
@@ -3602,6 +3626,24 @@ void RenderObjects_AfterCharacter()
                                                 if (Success)
                                                 {
                                                     RenderObject_AfterCharacter(o);
+
+#ifdef _EDITOR
+                                                    // Debug visualization: Render world object culling sphere (trees, walls, etc)
+                                                    if (DevEditor_ShouldShowObjectCullingSpheres())
+                                                    {
+                                                        // Note: CollisionRange is typically negative (tolerance in tile units)
+                                                        // For 2D culling: negative = expanded frustum (more permissive)
+                                                        // For visualization: show absolute value as approximate radius
+                                                        float cullRadius = o->CollisionRange + range;
+                                                        if (cullRadius < 0)
+                                                        {
+                                                            // Negative means expanded frustum tolerance
+                                                            // Show as approximate sphere for visualization purposes
+                                                            cullRadius = fabsf(cullRadius) * 100.0f;  // Convert tile tolerance to world units
+                                                        }
+                                                        RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+                                                    }
+#endif
                                                 }
                                             }
                         }
@@ -6238,6 +6280,37 @@ void CreateShiny(OBJECT* o)
     }
 }
 
+// Helper: Handle item falling animation
+static void HandleItemFalling(OBJECT* o)
+{
+    if (o->Type >= MODEL_SHIELD && o->Type < MODEL_SHIELD + MAX_ITEM_INDEX)
+        o->Angle[1] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+    else
+        o->Angle[0] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+}
+
+// Helper: Handle item on ground (set angle and camera rotation)
+static void HandleItemOnGround(OBJECT* o)
+{
+    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+    if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
+        o->Position[2] += 40.f;
+
+    // Set default item angle
+    ItemAngle(o);
+
+    // Rotate items with camera when in orbital mode (after default angle is set)
+    if (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital)
+    {
+        OrbitalCamera* orbitalCam = static_cast<OrbitalCamera*>(CameraManager::Instance().GetActiveCamera());
+        if (orbitalCam)
+        {
+            float cameraYaw = orbitalCam->GetTotalYaw();
+            o->Angle[2] += cameraYaw;  // Add camera yaw to default angle
+        }
+    }
+}
+
 void MoveItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
@@ -6245,24 +6318,26 @@ void MoveItems()
         OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
+            // Apply gravity physics
             o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
             o->Gravity -= 6.f;
-            float Height = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+
+            // Calculate ground height
+            float groundHeight = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
             if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-                Height += 40.f;
-            if (o->Position[2] <= Height)
+                groundHeight += 40.f;
+
+            // Check if item is on ground or still falling
+            if (o->Position[2] <= groundHeight)
             {
-                o->Position[2] = Height;
-                ItemAngle(o);
+                HandleItemOnGround(o);
             }
             else
             {
-                if (o->Type >= MODEL_SHIELD && o->Type < MODEL_SHIELD + MAX_ITEM_INDEX)
-                    o->Angle[1] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
-                else
-                    o->Angle[0] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+                HandleItemFalling(o);
             }
 
+            // Create shiny particle effect
             if (rand_fps_check(1))
             {
                 CreateShiny(o);
@@ -6339,6 +6414,7 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
     VectorCopy(tempPosition, o->Position);
 }
 
+// Render dropped items and fall animation and camera rotation for items on the ground
 void RenderItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
@@ -6346,7 +6422,20 @@ void RenderItems()
         OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
-            o->Visible = TestFrustrum(o->Position, 400.f);
+#ifdef _EDITOR
+            float cullRadius = DevEditor_GetCullRadiusItem();
+#else
+            float cullRadius = DEFAULT_CULL_RADIUS_ITEM;
+#endif
+            o->Visible = TestFrustrum(o->Position, cullRadius);
+
+#ifdef _EDITOR
+            // Debug visualization: Render object culling sphere
+            if (DevEditor_ShouldShowObjectCullingSpheres())
+            {
+                RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+            }
+#endif
 
             if (o->Visible)
             {
@@ -6406,7 +6495,7 @@ void RenderItems()
                 VectorCopy(o->Position, Position);
                 Position[2] += 30.f;
                 int ScreenX, ScreenY;
-                Projection(Position, &ScreenX, &ScreenY);
+                CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
                 o->ScreenX = ScreenX;
                 o->ScreenY = ScreenY;
             }

@@ -20,6 +20,8 @@ public:
 
     bool IsShowingItemEditor() const { return m_bShowItemEditor; }
     bool IsShowingSkillEditor() const { return m_bShowSkillEditor; }
+    bool IsShowingDevEditor() const { return m_bShowDevEditor; }
+    bool IsShowingConsole() const { return m_bShowConsole; }
     bool IsHoveringUI() const { return m_bHoveringUI; }
     void SetHoveringUI(bool hovering) { m_bHoveringUI = hovering; }
 
@@ -32,6 +34,8 @@ private:
     bool m_bFrameStarted;
     bool m_bShowItemEditor;
     bool m_bShowSkillEditor;
+    bool m_bShowDevEditor;
+    bool m_bShowConsole;
     bool m_bHoveringUI;
     bool m_bPreviousFrameHoveringUI;  // Store previous frame's hover state for input blocking
 };

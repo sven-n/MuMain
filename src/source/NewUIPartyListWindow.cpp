@@ -10,6 +10,7 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 #include "ZzzInterface.h"
+#include "Camera/CameraProjection.h"
 
 using namespace SEASON3B;
 
@@ -310,7 +311,7 @@ void SEASON3B::CNewUIPartyListWindow::RenderPartyHPOnHead()
         Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 100.f, Position);
 
         BeginOpengl();
-        Projection(Position, &ScreenX, &ScreenY);
+        CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
         EndOpengl();
 
         ScreenX -= (int)(Width / 2);

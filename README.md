@@ -14,8 +14,9 @@ What I have done so far:
     * The options menu includes a checkbox to reduce effects to achieve higher frame rates.
     * Chat commands:
       * Change FPS-Limit: `$fps <value>`
-      * Enable V-Sync: `$vsync on`
-      * Disable V-Sync: `$vsync off`
+      * V-Sync: `$vsync on` / `$vsync off`
+      * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
+      * Show detailed performance overlay (FPS stats, percentiles, frame graph): `$details on` / `$details off`
   * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
     a better frame rate when many players and objects are visible.
   * 🔥 Added inventory and vault extensions.
