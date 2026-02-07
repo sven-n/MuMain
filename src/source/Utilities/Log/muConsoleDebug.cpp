@@ -79,6 +79,20 @@ void CmuConsoleDebug::UpdateMainScene()
 
 bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
+    if (strCommand.compare(L"$fpscounter on") == 0)
+    {
+        extern void SetShowDebugInfo(bool);
+        SetShowDebugInfo(true);
+        return true;
+    }
+
+    if (strCommand.compare(L"$fpscounter off") == 0)
+    {
+        extern void SetShowDebugInfo(bool);
+        SetShowDebugInfo(false);
+        return true;
+    }
+
     if (strCommand.compare(0, 4, L"$fps") == 0)
     {
         auto fps_str = strCommand.substr(5);
