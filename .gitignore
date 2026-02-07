@@ -9,6 +9,9 @@ src/source/Global Release/
 src/Global Release/
 src/Global Release/Main
 
+# External dependencies (built locally)
+_deps/
+
 # CMake build directories
 build/
 build-mingw/

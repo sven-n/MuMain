@@ -267,18 +267,70 @@ if (MSVC)
       $<TARGET_FILE_DIR:Main>
     COMMENT "Copying required DLLs to build directory"
   )
+endif()
+
+# .NET Client Library and tools (platform-agnostic, requires dotnet SDK)
+# Native AOT can only target the OS it runs on, so when cross-compiling from
+# WSL we need the Windows dotnet.exe (available via WSL interop) rather than
+# a Linux dotnet.
+find_program(DOTNET_EXECUTABLE dotnet.exe)
+if (NOT DOTNET_EXECUTABLE)
+  find_program(DOTNET_EXECUTABLE dotnet)
+endif()
+if (DOTNET_EXECUTABLE)
+  # Native AOT cannot cross-compile across OS boundaries.  A Linux dotnet
+  # targeting win-x86/win-x64 will fail.  Only proceed when we have a Windows
+  # dotnet.exe (native or via WSL interop).
+  if (NOT DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    message(WARNING "Found Linux dotnet but target is Windows. "
+      "Cross-OS Native AOT is not supported. MUnique.Client.Library.dll will NOT be built. "
+      "Install the Windows .NET SDK or use WSL interop (dotnet.exe) to enable.")
+    set(DOTNET_EXECUTABLE "")
+  endif()
+endif()
+if (DOTNET_EXECUTABLE)
+  message(STATUS "Found .NET SDK: ${DOTNET_EXECUTABLE}")
+
+  # Helper macro: convert a path to Windows-native format when using
+  # Windows dotnet.exe from WSL.  On all other platforms this is a no-op.
+  function(mu_native_path input_path output_var)
+    if (DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+      execute_process(
+        COMMAND wslpath -w "${input_path}"
+        OUTPUT_VARIABLE native_path
+        RESULT_VARIABLE rc
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+      if (rc EQUAL 0)
+        set(${output_var} "${native_path}" PARENT_SCOPE)
+      else()
+        message(FATAL_ERROR "wslpath failed for '${input_path}'. Ensure wslpath is available.")
+      endif()
+    else()
+      set(${output_var} "${input_path}" PARENT_SCOPE)
+    endif()
+  endfunction()
 
   # 1. Define the output path using a variable CMake can understand early
   set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library.dll")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
-  # Create temp directories for Native AOT build (avoiding paths with umlauts)
+  # Create temp directories for Native AOT build.
   set(DOTNET_TEMP_OUTPUT "${CMAKE_BINARY_DIR}/dotnet_out")
   set(DOTNET_TEMP_DIR "${CMAKE_BINARY_DIR}/.dotnet_temp")
-  set(DOTNET_NUGET_DIR "${CMAKE_SOURCE_DIR}/.nuget")
+
+  # NuGet cache: defaults to <project>/.nuget, override with -DMU_NUGET_CACHE_DIR=...
+  set(MU_NUGET_CACHE_DIR "${CMAKE_SOURCE_DIR}/.nuget" CACHE PATH "NuGet package cache directory")
+  set(DOTNET_NUGET_DIR "${MU_NUGET_CACHE_DIR}")
   file(MAKE_DIRECTORY "${DOTNET_TEMP_OUTPUT}")
   file(MAKE_DIRECTORY "${DOTNET_TEMP_DIR}")
   file(MAKE_DIRECTORY "${DOTNET_NUGET_DIR}")
+
+  # Convert paths to Windows-native format for MSBuild (no-op outside WSL).
+  mu_native_path("${DOTNET_PROJ}" DOTNET_PROJ_NATIVE)
+  mu_native_path("${DOTNET_TEMP_OUTPUT}" DOTNET_TEMP_OUTPUT_NATIVE)
+  mu_native_path("${DOTNET_NUGET_DIR}" DOTNET_NUGET_DIR_NATIVE)
+  mu_native_path("${DOTNET_TEMP_DIR}" DOTNET_TEMP_DIR_NATIVE)
 
   # 2. Tell CMake to watch ALL .cs files in the ClientLibrary folder
   file(GLOB_RECURSE DOTNET_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/*.cs")
@@ -300,11 +352,11 @@ if (MSVC)
           OUTPUT "${DOTNET_DLL_PATH}"
           COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
           COMMAND ${CMAKE_COMMAND} -E env
-                  "NUGET_PACKAGES=${DOTNET_NUGET_DIR}"
-                  "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR}"
-                  "TEMP=${DOTNET_TEMP_DIR}"
-                  "TMP=${DOTNET_TEMP_DIR}"
-                  dotnet publish "${DOTNET_PROJ}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT}" --nologo
+                  "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+                  "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+                  "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
+                  "TMP=${DOTNET_TEMP_DIR_NATIVE}"
+                  "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
           COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
           DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
           COMMENT "Checking for .NET Client Library updates..."
@@ -329,18 +381,23 @@ if (MSVC)
 
   # ConstantsReplacer build target
   set(CONSTANTS_REPLACER_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/ConstantsReplacer.csproj")
+  mu_native_path("${CONSTANTS_REPLACER_PROJ}" CONSTANTS_REPLACER_PROJ_NATIVE)
+  mu_native_path("${CMAKE_BINARY_DIR}/ConstantsReplacer" CONSTANTS_REPLACER_OUTDIR_NATIVE)
   file(GLOB_RECURSE CONSTANTS_REPLACER_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/*.cs")
   set(CONSTANTS_REPLACER_OUTPUT "${CMAKE_BINARY_DIR}/ConstantsReplacer/ConstantsReplacer.exe")
 
   add_custom_command(
     OUTPUT "${CONSTANTS_REPLACER_OUTPUT}"
-    COMMAND dotnet build "${CONSTANTS_REPLACER_PROJ}" -c $<CONFIG> -o "${CMAKE_BINARY_DIR}/ConstantsReplacer" --nologo
+    COMMAND "${DOTNET_EXECUTABLE}" build "${CONSTANTS_REPLACER_PROJ_NATIVE}" -c $<CONFIG> -o "${CONSTANTS_REPLACER_OUTDIR_NATIVE}" --nologo
     DEPENDS "${CONSTANTS_REPLACER_PROJ}" ${CONSTANTS_REPLACER_SOURCES}
     COMMENT "Building ConstantsReplacer tool..."
     VERBATIM
   )
 
   add_custom_target(ConstantsReplacer DEPENDS "${CONSTANTS_REPLACER_OUTPUT}")
+else()
+  message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
+    "The game will run but cannot connect to the server. Install .NET SDK 10.0+ to enable.")
 endif()
 
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
@@ -415,4 +472,10 @@ endif()
 # Link ImGui for all platforms when editor is enabled
 if(ENABLE_EDITOR)
   target_link_libraries(Main PRIVATE imgui)
+  # MinGW's linker is order-sensitive: opengl32 and dwmapi (needed by ImGui
+  # backends) must appear after the imgui static library.  MSVC already links
+  # these earlier and doesn't care about order.
+  if (NOT MSVC)
+    target_link_libraries(Main PRIVATE opengl32 dwmapi)
+  endif()
 endif()
