@@ -58,6 +58,15 @@ extern bool Destroy;
 extern double WorldTime;
 extern float FPS_ANIMATION_FACTOR;
 
+static bool g_bShowDebugInfo =
+#ifdef _DEBUG
+    true;
+#else
+    false;
+#endif
+
+void SetShowDebugInfo(bool enabled) { g_bShowDebugInfo = enabled; }
+
 void SetTargetFps(double targetFps)
 {
     if (IsVSyncEnabled() && targetFps >= GetFPSLimit())
@@ -298,7 +307,9 @@ static bool RenderCurrentScene(HDC hDC)
  */
 static void RenderDebugInfo()
 {
-#if defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
+    if (!g_bShowDebugInfo)
+        return;
+
     BeginBitmap();
     wchar_t szDebugText[128];
     swprintf(szDebugText, L"FPS: %.1f Vsync: %d CPU: %.1f%%", FPS_AVG, IsVSyncEnabled(), CPU_AVG);
@@ -314,7 +325,6 @@ static void RenderDebugInfo()
     g_pRenderText->RenderText(10, 46, szCamera3D);
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
-#endif // defined(_DEBUG) || defined(LDS_FOR_DEVELOPMENT_TESTMODE) || defined(LDS_UNFIXED_FIXEDFRAME_FORDEBUG)
 }
 
 /**
