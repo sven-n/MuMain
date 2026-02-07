@@ -15,6 +15,7 @@
 #include "GlobalBitmap.h"
 #include "ZzzTexture.h"
 #include "Scenes/SceneCore.h"
+#include "Scenes/SceneManager.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
@@ -81,14 +82,24 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
     if (strCommand.compare(L"$fpscounter on") == 0)
     {
-        extern void SetShowDebugInfo(bool);
-        SetShowDebugInfo(true);
+        SetShowFpsCounter(true);
         return true;
     }
 
     if (strCommand.compare(L"$fpscounter off") == 0)
     {
-        extern void SetShowDebugInfo(bool);
+        SetShowFpsCounter(false);
+        return true;
+    }
+
+    if (strCommand.compare(L"$details on") == 0)
+    {
+        SetShowDebugInfo(true);
+        return true;
+    }
+
+    if (strCommand.compare(L"$details off") == 0)
+    {
         SetShowDebugInfo(false);
         return true;
     }
@@ -105,7 +116,6 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     {
         EnableVSync();
         SetTargetFps(-1); // unlimited
-        extern void ResetFrameStats();
         ResetFrameStats();
         return true;
     }
@@ -113,7 +123,6 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     if (strCommand.compare(L"$vsync off") == 0)
     {
         DisableVSync();
-        extern void ResetFrameStats();
         ResetFrameStats();
         return true;
     }

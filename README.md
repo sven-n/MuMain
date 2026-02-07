@@ -16,6 +16,8 @@ What I have done so far:
       * Change FPS-Limit: `$fps <value>`
       * Enable V-Sync: `$vsync on`
       * Disable V-Sync: `$vsync off`
+      * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
+      * Show detailed performance overlay (FPS stats, percentiles, frame graph): `$details on` / `$details off`
   * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
     a better frame rate when many players and objects are visible.
   * 🔥 Added inventory and vault extensions.

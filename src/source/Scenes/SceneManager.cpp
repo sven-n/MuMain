@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include "SceneManager.h"
 
 //=============================================================================
@@ -66,13 +67,32 @@ static bool g_bShowDebugInfo =
     false;
 #endif
 
-void SetShowDebugInfo(bool enabled) { g_bShowDebugInfo = enabled; }
+static bool g_bShowFpsCounter = false;
+
+void SetShowDebugInfo(bool enabled)
+{
+    g_bShowDebugInfo = enabled;
+    if (enabled) g_bShowFpsCounter = false;
+}
+
+void SetShowFpsCounter(bool enabled)
+{
+    g_bShowFpsCounter = enabled;
+    if (enabled) g_bShowDebugInfo = false;
+}
 
 //=============================================================================
 // Frame Statistics Tracker
 //=============================================================================
 
-static constexpr int FRAME_HISTORY_SIZE = 300; // ~5 seconds at 60fps
+static constexpr int FRAME_HISTORY_SIZE = 300;      // ~5 seconds at 60fps
+static constexpr float MIN_FRAME_TIME_MS = 0.5f;    // clamp to 2000fps max
+static constexpr double STATS_UPDATE_INTERVAL = 500.0; // ms between percentile recalculations
+static constexpr int MIN_FRAMES_FOR_STATS = 10;
+static constexpr float GRAPH_MAX_MS = 33.3f;        // graph Y-axis scale (30fps)
+static constexpr float THRESHOLD_60FPS_MS = 16.67f;  // 60 FPS threshold
+static constexpr float THRESHOLD_40FPS_MS = 25.0f;   // 40 FPS threshold
+
 static float s_frameTimesMs[FRAME_HISTORY_SIZE] = {};
 static int s_frameIndex = 0;
 static int s_frameCount = 0;
@@ -82,7 +102,7 @@ static double s_highestFps = 0.0;
 // Percentile stats (updated periodically)
 static float s_avgFps = 0.0f;
 static float s_onePercentLow = 0.0f;
-static float s_pointOnePercentLow = 0.0f;
+static float s_slowestFrameFps = 0.0f;
 static double s_lastStatsUpdate = 0.0;
 
 void ResetFrameStats()
@@ -94,7 +114,7 @@ void ResetFrameStats()
     s_highestFps = 0.0;
     s_avgFps = 0.0f;
     s_onePercentLow = 0.0f;
-    s_pointOnePercentLow = 0.0f;
+    s_slowestFrameFps = 0.0f;
     s_lastStatsUpdate = 0.0;
 }
 
@@ -104,17 +124,18 @@ static void UpdateFrameStats()
     if (s_lastFrameTime > 0.0)
     {
         double dt = now - s_lastFrameTime;
-        if (dt < 0.5) dt = 0.5; // clamp to 2000fps max
+        if (dt < MIN_FRAME_TIME_MS) dt = MIN_FRAME_TIME_MS;
         s_frameTimesMs[s_frameIndex] = static_cast<float>(dt);
         s_frameIndex = (s_frameIndex + 1) % FRAME_HISTORY_SIZE;
         if (s_frameCount < FRAME_HISTORY_SIZE) s_frameCount++;
+
+        double instantaneousFps = 1000.0 / dt;
+        if (instantaneousFps > s_highestFps) s_highestFps = instantaneousFps;
     }
     s_lastFrameTime = now;
 
-    if (FPS_AVG > s_highestFps) s_highestFps = FPS_AVG;
-
-    // Update percentile stats every 500ms
-    if (now - s_lastStatsUpdate > 500.0 && s_frameCount > 10)
+    // Update percentile stats periodically
+    if (now - s_lastStatsUpdate > STATS_UPDATE_INTERVAL && s_frameCount > MIN_FRAMES_FOR_STATS)
     {
         s_lastStatsUpdate = now;
 
@@ -124,20 +145,18 @@ static void UpdateFrameStats()
         std::sort(sorted, sorted + s_frameCount, std::greater<float>());
 
         // Average
-        float sum = 0.0f;
-        for (int i = 0; i < s_frameCount; i++) sum += sorted[i];
+        float sum = std::accumulate(sorted, sorted + s_frameCount, 0.0f);
         float avgMs = sum / s_frameCount;
         s_avgFps = (avgMs > 0.0f) ? 1000.0f / avgMs : 0.0f;
 
         // 1% low: average of the slowest 1% of frames
         int onePercCount = std::max(1, s_frameCount / 100);
-        float onePercSum = 0.0f;
-        for (int i = 0; i < onePercCount; i++) onePercSum += sorted[i];
+        float onePercSum = std::accumulate(sorted, sorted + onePercCount, 0.0f);
         float onePercAvgMs = onePercSum / onePercCount;
         s_onePercentLow = (onePercAvgMs > 0.0f) ? 1000.0f / onePercAvgMs : 0.0f;
 
-        // 0.1% low: the single slowest frame in the window
-        s_pointOnePercentLow = (sorted[0] > 0.0f) ? 1000.0f / sorted[0] : 0.0f;
+        // Slowest frame: the single slowest frame in the window
+        s_slowestFrameFps = (sorted[0] > 0.0f) ? 1000.0f / sorted[0] : 0.0f;
     }
 }
 
@@ -409,8 +428,7 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
     glEnd();
 
     // Target line at 16.67ms (60fps)
-    float maxMs = 33.3f; // graph scales to 33.3ms (30fps) max
-    float target60 = 16.67f / maxMs;
+    float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
     float lineY = glBottom + target60 * gh;
     glColor4f(0.3f, 0.8f, 0.3f, 0.5f);
     glBegin(GL_LINES);
@@ -426,13 +444,13 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
     {
         int idx = (oldest + i) % FRAME_HISTORY_SIZE;
         float ms = s_frameTimesMs[idx];
-        float norm = std::min(ms / maxMs, 1.0f);
+        float norm = std::min(ms / GRAPH_MAX_MS, 1.0f);
         float barH = norm * gh;
 
-        // Color: green < 16ms, yellow < 25ms, red >= 25ms
-        if (ms < 16.67f)
+        // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
+        if (ms < THRESHOLD_60FPS_MS)
             glColor4f(0.2f, 0.9f, 0.2f, 0.8f);
-        else if (ms < 25.0f)
+        else if (ms < THRESHOLD_40FPS_MS)
             glColor4f(0.9f, 0.9f, 0.2f, 0.8f);
         else
             glColor4f(0.9f, 0.2f, 0.2f, 0.8f);
@@ -473,9 +491,9 @@ static void RenderDebugInfo()
         FPS_AVG, s_avgFps, s_highestFps, IsVSyncEnabled(), CPU_AVG);
     g_pRenderText->RenderText(10, y, szLine); y += 10;
 
-    swprintf(szLine, L"1%% Low: %.1f  0.1%% Low: %.1f  Frame: %.2fms",
-        s_onePercentLow, s_pointOnePercentLow,
-        (FPS_AVG > 0.0) ? 1000.0 / FPS_AVG : 0.0);
+    swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms",
+        s_onePercentLow, s_slowestFrameFps,
+        (s_avgFps > 0.0f) ? 1000.0f / s_avgFps : 0.0f);
     g_pRenderText->RenderText(10, y, szLine); y += 10;
 
     swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
@@ -486,6 +504,28 @@ static void RenderDebugInfo()
 
     // Frame time graph below text
     RenderFrameGraph(10.0f, (float)(y + 2), 200.0f, 40.0f);
+
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
+}
+
+/**
+ * @brief Renders a simple FPS counter overlay showing only current FPS.
+ */
+static void RenderFpsCounter()
+{
+    if (!g_bShowFpsCounter)
+        return;
+
+    BeginBitmap();
+
+    wchar_t szLine[64];
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+
+    swprintf(szLine, L"FPS: %.1f", FPS_AVG);
+    g_pRenderText->RenderText(10, 26, szLine);
 
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
@@ -871,6 +911,7 @@ void MainScene(HDC hDC)
     {
         Success = RenderCurrentScene(hDC);
         RenderDebugInfo();
+        RenderFpsCounter();
 
         if (Success)
         {
