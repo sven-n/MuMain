@@ -85,6 +85,19 @@ static float s_onePercentLow = 0.0f;
 static float s_pointOnePercentLow = 0.0f;
 static double s_lastStatsUpdate = 0.0;
 
+void ResetFrameStats()
+{
+    memset(s_frameTimesMs, 0, sizeof(s_frameTimesMs));
+    s_frameIndex = 0;
+    s_frameCount = 0;
+    s_lastFrameTime = 0.0;
+    s_highestFps = 0.0;
+    s_avgFps = 0.0f;
+    s_onePercentLow = 0.0f;
+    s_pointOnePercentLow = 0.0f;
+    s_lastStatsUpdate = 0.0;
+}
+
 static void UpdateFrameStats()
 {
     double now = WorldTime;
