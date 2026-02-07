@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include <vector>
+#include <algorithm>
 #include "SceneManager.h"
 
 //=============================================================================
@@ -66,6 +67,66 @@ static bool g_bShowDebugInfo =
 #endif
 
 void SetShowDebugInfo(bool enabled) { g_bShowDebugInfo = enabled; }
+
+//=============================================================================
+// Frame Statistics Tracker
+//=============================================================================
+
+static constexpr int FRAME_HISTORY_SIZE = 300; // ~5 seconds at 60fps
+static float s_frameTimesMs[FRAME_HISTORY_SIZE] = {};
+static int s_frameIndex = 0;
+static int s_frameCount = 0;
+static double s_lastFrameTime = 0.0;
+static double s_highestFps = 0.0;
+
+// Percentile stats (updated periodically)
+static float s_avgFps = 0.0f;
+static float s_onePercentLow = 0.0f;
+static float s_pointOnePercentLow = 0.0f;
+static double s_lastStatsUpdate = 0.0;
+
+static void UpdateFrameStats()
+{
+    double now = WorldTime;
+    if (s_lastFrameTime > 0.0)
+    {
+        double dt = now - s_lastFrameTime;
+        if (dt < 0.5) dt = 0.5; // clamp to 2000fps max
+        s_frameTimesMs[s_frameIndex] = static_cast<float>(dt);
+        s_frameIndex = (s_frameIndex + 1) % FRAME_HISTORY_SIZE;
+        if (s_frameCount < FRAME_HISTORY_SIZE) s_frameCount++;
+    }
+    s_lastFrameTime = now;
+
+    if (FPS_AVG > s_highestFps) s_highestFps = FPS_AVG;
+
+    // Update percentile stats every 500ms
+    if (now - s_lastStatsUpdate > 500.0 && s_frameCount > 10)
+    {
+        s_lastStatsUpdate = now;
+
+        // Copy and sort frame times (descending = slowest first)
+        static float sorted[FRAME_HISTORY_SIZE];
+        memcpy(sorted, s_frameTimesMs, sizeof(float) * s_frameCount);
+        std::sort(sorted, sorted + s_frameCount, std::greater<float>());
+
+        // Average
+        float sum = 0.0f;
+        for (int i = 0; i < s_frameCount; i++) sum += sorted[i];
+        float avgMs = sum / s_frameCount;
+        s_avgFps = (avgMs > 0.0f) ? 1000.0f / avgMs : 0.0f;
+
+        // 1% low: average of the slowest 1% of frames
+        int onePercCount = std::max(1, s_frameCount / 100);
+        float onePercSum = 0.0f;
+        for (int i = 0; i < onePercCount; i++) onePercSum += sorted[i];
+        float onePercAvgMs = onePercSum / onePercCount;
+        s_onePercentLow = (onePercAvgMs > 0.0f) ? 1000.0f / onePercAvgMs : 0.0f;
+
+        // 0.1% low: the single slowest frame in the window
+        s_pointOnePercentLow = (sorted[0] > 0.0f) ? 1000.0f / sorted[0] : 0.0f;
+    }
+}
 
 void SetTargetFps(double targetFps)
 {
@@ -301,28 +362,118 @@ static bool RenderCurrentScene(HDC hDC)
 }
 
 /**
- * @brief Renders debug information overlay in development builds.
+ * @brief Renders a frame time graph using raw OpenGL quads.
  *
- * Shows FPS, mouse position, and camera info on screen.
+ * Draws a bar chart of recent frame times inside BeginBitmap's 2D ortho projection.
+ * Coordinates are in virtual 640x480 space, converted to window pixels.
+ */
+static void RenderFrameGraph(float graphX, float graphY, float graphW, float graphH)
+{
+    if (s_frameCount < 2)
+        return;
+
+    // Convert virtual 640x480 coords to actual window pixels
+    float gx = graphX * (float)WindowWidth / 640.f;
+    float gy = graphY * (float)WindowHeight / 480.f;
+    float gw = graphW * (float)WindowWidth / 640.f;
+    float gh = graphH * (float)WindowHeight / 480.f;
+
+    // Flip Y for OpenGL (origin bottom-left)
+    float glBottom = (float)WindowHeight - gy - gh;
+    float glTop = (float)WindowHeight - gy;
+
+    // Background
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+    glBegin(GL_QUADS);
+    glVertex2f(gx, glBottom);
+    glVertex2f(gx + gw, glBottom);
+    glVertex2f(gx + gw, glTop);
+    glVertex2f(gx, glTop);
+    glEnd();
+
+    // Target line at 16.67ms (60fps)
+    float maxMs = 33.3f; // graph scales to 33.3ms (30fps) max
+    float target60 = 16.67f / maxMs;
+    float lineY = glBottom + target60 * gh;
+    glColor4f(0.3f, 0.8f, 0.3f, 0.5f);
+    glBegin(GL_LINES);
+    glVertex2f(gx, lineY);
+    glVertex2f(gx + gw, lineY);
+    glEnd();
+
+    // Frame bars
+    float barW = gw / FRAME_HISTORY_SIZE;
+    int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
+
+    for (int i = 0; i < s_frameCount; i++)
+    {
+        int idx = (oldest + i) % FRAME_HISTORY_SIZE;
+        float ms = s_frameTimesMs[idx];
+        float norm = std::min(ms / maxMs, 1.0f);
+        float barH = norm * gh;
+
+        // Color: green < 16ms, yellow < 25ms, red >= 25ms
+        if (ms < 16.67f)
+            glColor4f(0.2f, 0.9f, 0.2f, 0.8f);
+        else if (ms < 25.0f)
+            glColor4f(0.9f, 0.9f, 0.2f, 0.8f);
+        else
+            glColor4f(0.9f, 0.2f, 0.2f, 0.8f);
+
+        float bx = gx + i * barW;
+        glBegin(GL_QUADS);
+        glVertex2f(bx, glBottom);
+        glVertex2f(bx + barW, glBottom);
+        glVertex2f(bx + barW, glBottom + barH);
+        glVertex2f(bx, glBottom + barH);
+        glEnd();
+    }
+
+    glEnable(GL_TEXTURE_2D);
+}
+
+/**
+ * @brief Renders debug information overlay.
+ *
+ * Shows FPS stats, percentile lows, mouse position, camera info, and frame time graph.
  */
 static void RenderDebugInfo()
 {
     if (!g_bShowDebugInfo)
         return;
 
+    UpdateFrameStats();
+
     BeginBitmap();
-    wchar_t szDebugText[128];
-    swprintf(szDebugText, L"FPS: %.1f Vsync: %d CPU: %.1f%%", FPS_AVG, IsVSyncEnabled(), CPU_AVG);
-    wchar_t szMousePos[128];
-    swprintf(szMousePos, L"MousePos : %d %d %d", MouseX, MouseY, MouseLButtonPush);
-    wchar_t szCamera3D[128];
-    swprintf(szCamera3D, L"Camera3D : %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+
+    wchar_t szLine[128];
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0, 0, 0, 100);
     g_pRenderText->SetTextColor(255, 255, 255, 200);
-    g_pRenderText->RenderText(10, 26, szDebugText);
-    g_pRenderText->RenderText(10, 36, szMousePos);
-    g_pRenderText->RenderText(10, 46, szCamera3D);
+
+    int y = 26;
+    swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%",
+        FPS_AVG, s_avgFps, s_highestFps, IsVSyncEnabled(), CPU_AVG);
+    g_pRenderText->RenderText(10, y, szLine); y += 10;
+
+    swprintf(szLine, L"1%% Low: %.1f  0.1%% Low: %.1f  Frame: %.2fms",
+        s_onePercentLow, s_pointOnePercentLow,
+        (FPS_AVG > 0.0) ? 1000.0 / FPS_AVG : 0.0);
+    g_pRenderText->RenderText(10, y, szLine); y += 10;
+
+    swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
+    g_pRenderText->RenderText(10, y, szLine); y += 10;
+
+    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+    g_pRenderText->RenderText(10, y, szLine); y += 10;
+
+    // Frame time graph below text
+    RenderFrameGraph(10.0f, (float)(y + 2), 200.0f, 40.0f);
+
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
 }
