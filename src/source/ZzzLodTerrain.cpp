@@ -1989,49 +1989,263 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
 }
 
 // Terrain iteration bounds — limits which tiles are visited by rendering/lighting loops.
-// Updated each frame by UpdateFrustrumBounds() from camera position + view distance.
 int     FrustrumBoundMinX = 0;
 int     FrustrumBoundMinY = 0;
 int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
-// Cached per-frame pointers — set once by CacheActiveFrustum(), avoids
-// CameraManager::Instance() singleton lookup + virtual dispatch on every
-// TestFrustrum2D/TestFrustrum call (~tens of thousands per frame).
-static const Frustum* s_pCachedFrustum = nullptr;
-static ICamera*       s_pCachedCamera  = nullptr;
+// 2D frustum trapezoid vertices (in tile coordinates, i.e. world * 0.01)
+float FrustrumX[4];
+float FrustrumY[4];
 
-void UpdateFrustrumBounds()
+// 3D frustum data (used by TestFrustrum / 3D culling)
+static vec3_t FrustrumVertex[5];
+static vec3_t FrustrumFaceNormal[5];
+static float  FrustrumFaceD[5];
+
+// Cached per-frame camera pointer for TestFrustrum shim
+static ICamera* s_pCachedCamera = nullptr;
+
+extern int GetScreenWidth();
+
+void CreateFrustrum2D(vec3_t Position)
 {
-    // Try to use the frustum's tight AABB (matches original CreateFrustrum behavior)
-    if (s_pCachedFrustum)
+    float Width = 0.0f, CameraViewFar_local = 0.0f, CameraViewNear_local = 0.0f, CameraViewTarget_local = 0.0f;
+    float WidthFar = 0.0f, WidthNear = 0.0f;
+
+    extern EGameScene SceneFlag;
+
+    if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
     {
-        const AABB& bb = s_pCachedFrustum->GetBoundingBox();
-        // Only use AABB if it looks valid (non-zero extents)
-        if (bb.max[0] > bb.min[0] && bb.max[1] > bb.min[1])
+        Width = (float)GetScreenWidth() / 480.f;
+        if (battleCastle::InBattleCastle2(Hero->Object.Position) && (Hero->Object.Position[0] < 17100.f || Hero->Object.Position[0]>18300.f))
         {
-            int tileWidth = 4;
-            FrustrumBoundMinX = static_cast<int>(bb.min[0] / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
-            FrustrumBoundMaxX = static_cast<int>(bb.max[0] / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
-            FrustrumBoundMinY = static_cast<int>(bb.min[1] / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
-            FrustrumBoundMaxY = static_cast<int>(bb.max[1] / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
-            FrustrumBoundMinX = std::max(0, FrustrumBoundMinX);
-            FrustrumBoundMaxX = std::min(static_cast<int>(TERRAIN_SIZE_MASK) - tileWidth, FrustrumBoundMaxX);
-            FrustrumBoundMinY = std::max(0, FrustrumBoundMinY);
-            FrustrumBoundMaxY = std::min(static_cast<int>(TERRAIN_SIZE_MASK) - tileWidth, FrustrumBoundMaxY);
-            return;
+            CameraViewFar_local = 5100.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 2250.f * Width;
+            WidthNear = 540.f * Width;
+        }
+        else
+        {
+            CameraViewFar_local = 3300.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1300.f * Width;
+            WidthNear = 580.f * Width;
+        }
+    }
+    else if (gMapManager.WorldActive == WD_62SANTA_TOWN)
+    {
+        Width = (float)GetScreenWidth() / 450.f * 1.0f;
+        CameraViewFar_local = 2400.f;
+        CameraViewNear_local = CameraViewFar_local * 0.19f;
+        CameraViewTarget_local = CameraViewFar_local * 0.47f;
+        CameraViewFar_local = 2650.f;
+        WidthFar = 1250.f * Width;
+        WidthNear = 540.f * Width;
+    }
+    else if (gMapManager.IsPKField() || IsDoppelGanger2())
+    {
+        Width = (float)GetScreenWidth() / 500.f;
+        CameraViewFar_local = 1700.0f;
+        CameraViewNear_local = 55.0f;
+        CameraViewTarget_local = 830.0f;
+        CameraViewFar_local = 3300.f;
+        WidthFar = 1900.f * Width;
+        WidthNear = 600.f * Width;
+    }
+    else
+    {
+        static int CameraLevel;
+
+        if ((int)g_Camera.DistanceTarget >= (int)g_Camera.Distance)
+            CameraLevel = g_shCameraLevel;
+
+        switch (CameraLevel)
+        {
+        case 0:
+            if (SceneFlag == LOG_IN_SCENE)
+            {
+            }
+            else if (SceneFlag == CHARACTER_SCENE)
+            {
+                Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
+            }
+            else if (g_Direction.m_CKanturu.IsMayaScene())
+            {
+                Width = (float)GetScreenWidth() / 640.f * 10.0f * 0.115f;
+            }
+            else
+            {
+                Width = (float)GetScreenWidth() / 640.f * 1.1f;
+            }
+
+            if (SceneFlag == LOG_IN_SCENE)
+            {
+            }
+            else if (SceneFlag == CHARACTER_SCENE)
+            {
+                CameraViewFar_local = 2000.f * 9.1f * 0.404998f;
+            }
+            else if (gMapManager.WorldActive == WD_39KANTURU_3RD)
+            {
+                CameraViewFar_local = 2000.f * 10.0f * 0.115f;
+            }
+            else
+            {
+                CameraViewFar_local = 2400.f;
+            }
+
+            if (SceneFlag == LOG_IN_SCENE)
+            {
+                Width = (float)GetScreenWidth() / 640.f;
+                CameraViewFar_local = 2400.f * 17.0f * 13.0f;
+                CameraViewNear_local = 2400.f * 17.0f * 0.5f;
+                CameraViewTarget_local = 2400.f * 17.0f * 0.5f;
+                WidthFar = 5000.f * Width;
+                WidthNear = 300.f * Width;
+            }
+            else
+            {
+                CameraViewNear_local = CameraViewFar_local * 0.19f;
+                CameraViewTarget_local = CameraViewFar_local * 0.47f;
+                WidthFar = 1190.f * Width * sqrtf(g_Camera.FOV / 33.f);
+                WidthNear = 540.f * Width * sqrtf(g_Camera.FOV / 33.f);
+            }
+            break;
+        case 1:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 2700.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1200.f * Width;
+            WidthNear = 540.f * Width;
+            break;
+        case 2:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 3000.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1300.f * Width;
+            WidthNear = 540.f * Width;
+            break;
+        case 3:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 3300.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1500.f * Width;
+            WidthNear = 580.f * Width;
+            break;
+        case 4:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 5100.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 2250.f * Width;
+            WidthNear = 540.f * Width;
+            break;
+        case 5:
+            Width = (float)GetScreenWidth() / 500.f + 0.1f;
+            CameraViewFar_local = 3400.f;
+            CameraViewNear_local = CameraViewFar_local * 0.19f;
+            CameraViewTarget_local = CameraViewFar_local * 0.47f;
+            WidthFar = 1600.f * Width;
+            WidthNear = 660.f * Width;
+            break;
         }
     }
 
-    // Fallback: circle-based bounds (for LegacyCamera which has no frustum)
-    int range = static_cast<int>(g_Camera.ViewFar / TERRAIN_SCALE);
-    int centerX = static_cast<int>(g_Camera.Position[0] / TERRAIN_SCALE);
-    int centerY = static_cast<int>(g_Camera.Position[1] / TERRAIN_SCALE);
+    vec3_t p[4];
+    Vector(-WidthFar, CameraViewFar_local - CameraViewTarget_local, 0.f, p[0]);
+    Vector(WidthFar, CameraViewFar_local - CameraViewTarget_local, 0.f, p[1]);
+    Vector(WidthNear, CameraViewNear_local - CameraViewTarget_local, 0.f, p[2]);
+    Vector(-WidthNear, CameraViewNear_local - CameraViewTarget_local, 0.f, p[3]);
+    vec3_t Angle;
+    float Matrix[3][4];
 
-    FrustrumBoundMinX = std::max(0, centerX - range);
-    FrustrumBoundMaxX = std::min(static_cast<int>(TERRAIN_SIZE_MASK), centerX + range);
-    FrustrumBoundMinY = std::max(0, centerY - range);
-    FrustrumBoundMaxY = std::min(static_cast<int>(TERRAIN_SIZE_MASK), centerY + range);
+    if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
+    {
+        VectorScale(g_Camera.Angle, -1.0f, Angle);
+        CCameraMove::GetInstancePtr()->SetFrustumAngle(89.5f);
+        vec3_t _Temp = { CCameraMove::GetInstancePtr()->GetFrustumAngle(), 0.0f, 0.0f };
+        VectorAdd(Angle, _Temp, Angle);
+    }
+    else
+    {
+        Vector(0.f, 0.f, -g_Camera.Angle[2], Angle);
+    }
+
+    AngleMatrix(Angle, Matrix);
+    vec3_t Frustrum[4];
+    for (int i = 0; i < 4; i++)
+    {
+        VectorRotate(p[i], Matrix, Frustrum[i]);
+        VectorAdd(Frustrum[i], Position, Frustrum[i]);
+        FrustrumX[i] = Frustrum[i][0] * 0.01f;
+        FrustrumY[i] = Frustrum[i][1] * 0.01f;
+    }
+}
+
+void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
+{
+    const auto fovv = tanf(g_Camera.FOV * Q_PI / 360.f);
+    float Distance = g_Camera.ViewFar;
+    float Width = fovv * Distance * xAspect + 100.f;
+    float Height = fovv * Distance * yAspect + 100.f;
+
+    vec3_t Temp[5];
+    Vector(0.f, 0.f, 0.f, Temp[0]);
+    Vector(-Width, Height, -Distance, Temp[1]);
+    Vector(Width, Height, -Distance, Temp[2]);
+    Vector(Width, -Height, -Distance, Temp[3]);
+    Vector(-Width, -Height, -Distance, Temp[4]);
+
+    float FrustrumMinX = (float)TERRAIN_SIZE * TERRAIN_SCALE;
+    float FrustrumMinY = (float)TERRAIN_SIZE * TERRAIN_SCALE;
+    float FrustrumMaxX = 0.f;
+    float FrustrumMaxY = 0.f;
+    float OGLMatrix[3][4];
+    CameraProjection::GetOpenGLMatrix(OGLMatrix);
+    for (int i = 0; i < 5; i++)
+    {
+        vec3_t t;
+        VectorIRotate(Temp[i], OGLMatrix, t);
+        VectorAdd(t, g_Camera.Position, FrustrumVertex[i]);
+        if (FrustrumMinX > FrustrumVertex[i][0]) FrustrumMinX = FrustrumVertex[i][0];
+        if (FrustrumMinY > FrustrumVertex[i][1]) FrustrumMinY = FrustrumVertex[i][1];
+        if (FrustrumMaxX < FrustrumVertex[i][0]) FrustrumMaxX = FrustrumVertex[i][0];
+        if (FrustrumMaxY < FrustrumVertex[i][1]) FrustrumMaxY = FrustrumVertex[i][1];
+    }
+
+    int tileWidth = 4;
+    FrustrumBoundMinX = (int)(FrustrumMinX / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
+    FrustrumBoundMinY = (int)(FrustrumMinY / TERRAIN_SCALE) / tileWidth * tileWidth - tileWidth;
+    FrustrumBoundMaxX = (int)(FrustrumMaxX / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
+    FrustrumBoundMaxY = (int)(FrustrumMaxY / TERRAIN_SCALE) / tileWidth * tileWidth + tileWidth;
+    FrustrumBoundMinX = FrustrumBoundMinX < 0 ? 0 : FrustrumBoundMinX;
+    FrustrumBoundMinY = FrustrumBoundMinY < 0 ? 0 : FrustrumBoundMinY;
+    FrustrumBoundMaxX = FrustrumBoundMaxX > TERRAIN_SIZE_MASK - tileWidth ? TERRAIN_SIZE_MASK - tileWidth : FrustrumBoundMaxX;
+    FrustrumBoundMaxY = FrustrumBoundMaxY > TERRAIN_SIZE_MASK - tileWidth ? TERRAIN_SIZE_MASK - tileWidth : FrustrumBoundMaxY;
+
+    FaceNormalize(FrustrumVertex[0], FrustrumVertex[1], FrustrumVertex[2], FrustrumFaceNormal[0]);
+    FaceNormalize(FrustrumVertex[0], FrustrumVertex[2], FrustrumVertex[3], FrustrumFaceNormal[1]);
+    FaceNormalize(FrustrumVertex[0], FrustrumVertex[3], FrustrumVertex[4], FrustrumFaceNormal[2]);
+    FaceNormalize(FrustrumVertex[0], FrustrumVertex[4], FrustrumVertex[1], FrustrumFaceNormal[3]);
+    FaceNormalize(FrustrumVertex[3], FrustrumVertex[2], FrustrumVertex[1], FrustrumFaceNormal[4]);
+    FrustrumFaceD[0] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[0]);
+    FrustrumFaceD[1] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[1]);
+    FrustrumFaceD[2] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
+    FrustrumFaceD[3] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
+    FrustrumFaceD[4] = -DotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
+
+    CreateFrustrum2D(position);
+}
+
+void UpdateFrustrumBounds()
+{
+    // No-op: bounds are now computed by CreateFrustrum() each frame
 }
 
 /**
@@ -2100,14 +2314,9 @@ void RenderDebugSphere(const vec3_t center, float radius, float r, float g, floa
     if (lighting) glEnable(GL_LIGHTING);
 }
 
-// Phase 4: Compatibility shims for legacy code
-// These redirect to the new camera system to avoid updating hundreds of call sites
-
 void CacheActiveFrustum()
 {
-    ICamera* cam = CameraManager::Instance().GetActiveCamera();
-    s_pCachedCamera  = cam;
-    s_pCachedFrustum = cam ? &cam->GetFrustum() : nullptr;
+    s_pCachedCamera = CameraManager::Instance().GetActiveCamera();
 }
 
 bool TestFrustrum2D(float x, float y, float Range)
@@ -2116,24 +2325,30 @@ bool TestFrustrum2D(float x, float y, float Range)
     if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
         return true;
 
-    // Use cached frustum pointer (no singleton lookup or virtual dispatch)
-    if (s_pCachedFrustum)
-        return s_pCachedFrustum->TestPoint2D(x, y, Range);
-
+    int j = 3;
+    for (int i = 0; i < 4; j = i, i++)
+    {
+        float d = (FrustrumX[i] - x) * (FrustrumY[j] - y) -
+            (FrustrumX[j] - x) * (FrustrumY[i] - y);
+        if (d <= Range)
+        {
+            return false;
+        }
+    }
     return true;
 }
 
 bool TestFrustrum(vec3_t Position, float Range)
 {
-    // Use cached camera pointer (no singleton lookup or virtual dispatch)
-    if (s_pCachedCamera)
-        return !s_pCachedCamera->ShouldCullObject(Position, Range);
-
+    for (int i = 0; i < 5; i++)
+    {
+        if (DotProduct(Position, FrustrumFaceNormal[i]) + FrustrumFaceD[i] < -Range)
+        {
+            return false;
+        }
+    }
     return true;
 }
-
-// REMOVED: CreateFrustrum() - replaced by camera->UpdateFrustum() in Phase 4
-// All scenes now call camera->UpdateFrustum() directly
 
 #ifdef DYNAMIC_FRUSTRUM
 
@@ -2435,22 +2650,7 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            // Phase 3: Use camera culling if available
-            bool visible = g_Camera.TopViewEnable;
-            if (!visible)
-            {
-                if (camera)
-                {
-                    // Use camera's terrain culling - check center of 4x4 block
-                    visible = !camera->ShouldCullTerrain(xi + 2, yi + 2);
-                }
-                else
-                {
-                    visible = TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange);
-                }
-            }
-
-            if (visible)
+            if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || g_Camera.TopViewEnable)
             {
                 if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                 {

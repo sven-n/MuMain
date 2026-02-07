@@ -48,11 +48,8 @@ bool MoveMainCamera()
     // Update active camera through manager
     bool result = CameraManager::Instance().Update();
 
-    // Cache frustum pointer for this frame (eliminates per-call singleton + virtual dispatch)
+    // Cache active camera pointer for TestFrustrum shim
     CacheActiveFrustum();
-
-    // Recompute terrain iteration bounds from updated camera position
-    UpdateFrustrumBounds();
 
     return result;
 }

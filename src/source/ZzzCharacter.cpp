@@ -6358,12 +6358,7 @@ void MoveCharacterClient(CHARACTER* cc)
     OBJECT* co = &cc->Object;
     if (co->Live)
     {
-#ifdef _EDITOR
-        float cullRadius = DevEditor_GetCullRadiusCharacter();
-#else
-        float cullRadius = DEFAULT_CULL_RADIUS_CHARACTER;
-#endif
-        co->Visible = TestFrustrum(co->Position, cullRadius);
+        co->Visible = TestFrustrum2D(co->Position[0] * 0.01f, co->Position[1] * 0.01f, -20.f);
 
         MoveMonsterClient(cc, co);
         MoveCharacter(cc, co);
@@ -6390,12 +6385,7 @@ void MoveCharactersClient()
             TerrainWall[Index] |= TW_CHARACTER;
         }
 
-#ifdef _EDITOR
-        float cullRadius = DevEditor_GetCullRadiusCharacter();
-#else
-        float cullRadius = DEFAULT_CULL_RADIUS_CHARACTER;
-#endif
-        to->Visible = TestFrustrum(to->Position, cullRadius);
+        to->Visible = TestFrustrum2D(to->Position[0] * 0.01f, to->Position[1] * 0.01f, -20.f);
     }
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
