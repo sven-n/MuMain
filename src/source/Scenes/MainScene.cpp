@@ -30,7 +30,7 @@
 #include "../UIMapName.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
-#include "UI/Console/MuEditorConsoleUI.h"
+#include "Camera/CameraMode.h"
 
 // External declarations
 extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch);
@@ -354,9 +354,7 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     // All background colors are now centralized in SceneManager.cpp
 
     BeginOpengl(0, 0, outWidth, outHeight);
-
-    // Note: Frustum is now updated by camera system in RenderGameWorld()
-    // No need to call CreateFrustrum() here anymore
+    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, cameraPos);
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())
@@ -380,9 +378,6 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
  */
 static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 {
-    // Phase 3: Get active camera for direct culling
-    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
-
 #ifdef _EDITOR
     // DevEditor render toggle checks
     bool renderTerrain = DevEditor_ShouldRenderTerrain();
@@ -398,29 +393,26 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     bool renderWeatherEffects = true;
 #endif
 
-    // NOTE: RenderSky() disabled - BITMAP_SKY texture doesn't exist in codebase
-    // Sky appearance is controlled by glClearColor() set earlier
-
     if (IsWaterTerrain() == false && renderTerrain)
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
-                RenderTerrain(false, activeCamera);
+                RenderTerrain(false);
         }
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
             {
                 if ((gMapManager.IsPKField() || IsDoppelGanger2()) && renderStatic)
                 {
-                    RenderObjects(activeCamera);
+                    RenderObjects();
                 }
-                RenderTerrain(false, activeCamera);
+                RenderTerrain(false);
             }
     }
 
     if (!gMapManager.IsPKField() && !IsDoppelGanger2() && renderStatic)
-        RenderObjects(activeCamera);
+        RenderObjects();
 
     if (renderEffects)
     {
@@ -450,7 +442,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderBoids(true);
 
     if (renderStatic)
-        RenderObjects_AfterCharacter(activeCamera);
+        RenderObjects_AfterCharacter();
 
     RenderJoints(byWaterMap);
 
@@ -572,70 +564,20 @@ bool RenderMainScene()
     }
 
     // Enable fog based on camera mode and pitch angle
-    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
+    CameraMode cameraMode = CameraManager::Instance().GetCurrentMode();
 
-    if (activeCamera && strcmp(activeCamera->GetName(), "Default") == 0)
-    {
-        // Default Camera: Always disable fog (top-down view, no horizon)
-        FogEnable = false;
-    }
-    else if (activeCamera && strcmp(activeCamera->GetName(), "Orbital") == 0)
+    if (cameraMode == CameraMode::Orbital)
     {
         // Orbital Camera: Enable fog based on pitch (horizon visibility)
         float yaw, orbitalPitch;
         GetOrbitalCameraAngles(&yaw, &orbitalPitch);
 
-        // Orbital pitch ranges (actual measured values):
-        // +48° = looking straight down at character (no horizon)
-        // 0° = neutral/default position
-        // -37° = looking toward horizon (horizon visible)
-
-#ifdef _EDITOR
-        // DEBUG: Log pitch value
-        static float lastLoggedPitch = 0.0f;
-        if (fabs(orbitalPitch - lastLoggedPitch) > 1.0f)  // Log when pitch changes by more than 1 degree
-        {
-            char debugMsg[256];
-            sprintf_s(debugMsg, "[FOG] Orbital pitch: %.2f°, Threshold: -20°", orbitalPitch);
-            g_MuEditorConsoleUI.LogEditor(debugMsg);
-            lastLoggedPitch = orbitalPitch;
-        }
-#endif
-
         // Enable fog when pitch < -20° (looking toward horizon)
-        // More negative = looking more toward horizon
-        if (orbitalPitch < -20.0f)
-        {
-            FogEnable = true;   // Looking toward horizon, enable fog
-
-#ifdef _EDITOR
-            // DEBUG: Log fog enable
-            static bool lastFogState = false;
-            if (!lastFogState)
-            {
-                g_MuEditorConsoleUI.LogEditor("[FOG] FOG ENABLED (pitch < -20°, horizon visible)");
-                lastFogState = true;
-            }
-#endif
-        }
-        else
-        {
-            FogEnable = false;  // Looking down, no fog
-
-#ifdef _EDITOR
-            // DEBUG: Log fog disable
-            static bool lastFogState = true;
-            if (lastFogState)
-            {
-                g_MuEditorConsoleUI.LogEditor("[FOG] FOG DISABLED (pitch >= -20°, no horizon)");
-                lastFogState = false;
-            }
-#endif
-        }
+        FogEnable = (orbitalPitch < -20.0f);
     }
     else
     {
-        // Legacy and other cameras: Disable fog (matches main branch behavior)
+        // Default, Legacy, and other cameras: Disable fog (no horizon visible)
         FogEnable = false;
     }
 

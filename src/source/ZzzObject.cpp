@@ -3284,19 +3284,7 @@ void RenderObjects(ICamera* camera)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
 
-            // Phase 3: Use camera culling if available
-            if (camera)
-            {
-                vec3_t blockCenter;
-                blockCenter[0] = (float)(i * 16 + 8) * 100.0f;
-                blockCenter[1] = (float)(j * 16 + 8) * 100.0f;
-                blockCenter[2] = 0.0f;
-                ob->Visible = !camera->ShouldCullObject(blockCenter, 1500.0f);
-            }
-            else
-            {
-                ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
-            }
+            ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
             if (g_Direction.m_CKanturu.IsMayaScene()
                 || gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                 || gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
@@ -3320,34 +3308,18 @@ void RenderObjects(ICamera* camera)
                         else
                             if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                             {
-#ifdef _EDITOR
-                                float cullRadius = DevEditor_GetCullRadiusObject();
-#else
-                                float cullRadius = DEFAULT_CULL_RADIUS_OBJECT;
-#endif
+                                float fDistance_x = g_Camera.Position[0] - o->Position[0];
+                                float fDistance_y = g_Camera.Position[1] - o->Position[1];
+                                float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
+                                float fDis = 2000.0f;
 
-                                // Use 3D camera culling for LoginScene
-                                bool visible = false;
-                                if (camera)
+                                if (((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127)) &&
+                                    TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis * 2.0f)
                                 {
-                                    visible = !camera->ShouldCullObject(o->Position, cullRadius);
-                                }
-                                else
-                                {
-                                    // Fallback to legacy 2D culling if no camera
-                                    visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f);
-                                }
-
-                                if (visible)
-                                {
-                                    // Fade in effects for certain object types
-                                    if ((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127))
-                                    {
-                                        if (o->BlendMeshLight < 1.0f)
-                                            o->BlendMeshLight += 0.03f;
-                                        else
-                                            o->BlendMeshLight = 1.0f;
-                                    }
+                                    if (o->BlendMeshLight < 1.0f)
+                                        o->BlendMeshLight += 0.03f;
+                                    else
+                                        o->BlendMeshLight = 1.0f;
 
                                     if (o->AlphaTarget < 1.0f)
                                         o->AlphaTarget += 0.03f;
@@ -3356,18 +3328,19 @@ void RenderObjects(ICamera* camera)
 
                                     RenderObject(o);
                                     RenderObjectVisual(o);
-
-#ifdef _EDITOR
-                                    // Debug visualization: Render static object culling sphere (uses same cullRadius variable)
-                                    if (DevEditor_ShouldShowObjectCullingSpheres())
-                                    {
-                                        RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
-                                    }
-#endif
                                 }
-                                else
+                                else if (TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis && o->Type <= MAX_WORLD_OBJECTS)
                                 {
-                                    // Fade out when not visible
+                                    if (o->AlphaTarget < 1.0f)
+                                        o->AlphaTarget += 0.03f;
+                                    else
+                                        o->AlphaTarget = 1.0f;
+
+                                    RenderObject(o);
+                                    RenderObjectVisual(o);
+                                }
+                                else if (o->AlphaTarget != 0 && fDistance > fDis)
+                                {
                                     o->BlendMeshLight = 0.0f;
                                     o->Alpha = 0.0f;
                                     o->AlphaTarget = 0.0f;
@@ -3420,18 +3393,7 @@ void RenderObjects(ICamera* camera)
                     {
                         if (o->Live)
                         {
-                            float effectiveCollisionRange = DEFAULT_CULL_RADIUS_OBJECT;
-
-                            // Phase 3: Use camera culling if available
-                            if (camera)
-                            {
-                                // Use 2D culling (XY only) to match TestFrustrum2D behavior
-                                o->Visible = !camera->ShouldCullObject2D(o->Position[0], o->Position[1], effectiveCollisionRange + range);
-                            }
-                            else
-                            {
-                                o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, effectiveCollisionRange + range);
-                            }
+                            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
                             if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                                 ) &&
                                 ((o->Type >= 5 && o->Type <= 14) || (o->Type >= 87 && o->Type <= 88) || (o->Type == 4 || o->Type == 129)));
@@ -3467,10 +3429,9 @@ void RenderObjects(ICamera* camera)
                                                     RenderObjectVisual(o);
 
 #ifdef _EDITOR
-                                                    // Debug visualization: Render world object culling sphere (trees, walls, grass, etc.)
                                                     if (DevEditor_ShouldShowObjectCullingSpheres())
                                                     {
-                                                        RenderDebugSphere(o->Position, effectiveCollisionRange, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+                                                        RenderDebugSphere(o->Position, o->CollisionRange * 100.0f, 1.0f, 1.0f, 0.0f);
                                                     }
 #endif
                                                 }
@@ -3560,21 +3521,7 @@ void RenderObjects_AfterCharacter(ICamera* camera)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
 
-            // Phase 3: Use camera culling if available
-            if (camera)
-            {
-                // Test center of object block (16x16 tiles)
-                vec3_t blockCenter;
-                blockCenter[0] = (float)(i * 16 + 8) * 100.0f;  // Convert tile to world coords
-                blockCenter[1] = (float)(j * 16 + 8) * 100.0f;
-                blockCenter[2] = 0.0f;
-                // Radius: 180 tiles * 100 units/tile = 18000 world units (matches old -180.f tolerance)
-                ob->Visible = !camera->ShouldCullObject(blockCenter, 1500.0f);
-            }
-            else
-            {
-                ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
-            }
+            ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
 
             if (g_Direction.m_CKanturu.IsMayaScene())
             {
@@ -3611,36 +3558,23 @@ void RenderObjects_AfterCharacter(ICamera* camera)
                 {
                     if (o != NULL)
                     {
-#ifdef _EDITOR
-                        float cullRadius = DevEditor_GetCullRadiusObject();
-#else
-                        float cullRadius = DEFAULT_CULL_RADIUS_OBJECT;
-#endif
-
-                        // Phase 3: Use camera culling for special objects
-                        bool visible = false;
-                        if (camera)
-                        {
-                            visible = !camera->ShouldCullObject(o->Position, cullRadius);
-                        }
-                        else
-                        {
-                            // Convert to 2D culling tolerance (world units to tile units, negated)
-                            float tolerance = -(cullRadius / 100.0f);
-                            visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, tolerance);
-                        }
-
-                        if (visible)
+                        if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR &&
+                            (o->Type == 89)
+                            && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -400.f))
                         {
                             RenderObject_AfterCharacter(o);
-
-#ifdef _EDITOR
-                            // Debug visualization: Render static object culling sphere (uses same cullRadius variable)
-                            if (DevEditor_ShouldShowObjectCullingSpheres())
-                            {
-                                RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
-                            }
-#endif
+                        }
+                        else if ((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && o->Type == 76 && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
+                        {
+                            RenderObject_AfterCharacter(o);
+                        }
+                        else if (gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
+                        {
+                            RenderObject_AfterCharacter(o);
+                        }
+                        else if (IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
+                        {
+                            RenderObject_AfterCharacter(o);
                         }
                         if (o->Next == NULL)
                             break;
@@ -3661,16 +3595,7 @@ void RenderObjects_AfterCharacter(ICamera* camera)
                     {
                         if (o->Live && o->m_bRenderAfterCharacter == true)
                         {
-                            // Phase 3: Use camera culling if available
-                            if (camera)
-                            {
-                                // Use 2D culling (XY only) to match TestFrustrum2D behavior
-                                o->Visible = !camera->ShouldCullObject2D(o->Position[0], o->Position[1], o->CollisionRange + range);
-                            }
-                            else
-                            {
-                                o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
-                            }
+                            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
                             if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                                 ) && (o->Type == 89));
                             else
