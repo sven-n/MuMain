@@ -2012,21 +2012,70 @@ extern int GetScreenWidth();
 
 void CreateFrustrum2D(vec3_t Position)
 {
-    // Dynamic path: OrbitalCamera computes a proper 2D frustum projection
-    if (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital)
+    // Dynamic path: cameras with their own Frustum compute a proper 2D frustum projection
+    CameraMode currentMode = CameraManager::Instance().GetCurrentMode();
+    if (currentMode == CameraMode::Orbital
+#ifdef _EDITOR
+        || currentMode == CameraMode::FreeFly
+#endif
+        )
     {
         const ICamera* cam = CameraManager::Instance().GetActiveCamera();
+#ifdef _EDITOR
+        // In FreeFly spectator mode, use spectated camera's frustum for culling
+        if (currentMode == CameraMode::FreeFly)
+        {
+            ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
+            if (spectated)
+                cam = spectated;
+        }
+#endif
         if (cam)
         {
             const Frustum& frustum = cam->GetFrustum();
             FrustrumCount = frustum.Get2DCount();
             const float* srcX = frustum.Get2DX();
             const float* srcY = frustum.Get2DY();
+
+            // Expand 2D hull by 10% from centroid to create buffer zone
+            float cx = 0.0f, cy = 0.0f;
             for (int i = 0; i < FrustrumCount; i++)
             {
-                FrustrumX[i] = srcX[i];
-                FrustrumY[i] = srcY[i];
+                cx += srcX[i];
+                cy += srcY[i];
             }
+            cx /= (float)FrustrumCount;
+            cy /= (float)FrustrumCount;
+
+            for (int i = 0; i < FrustrumCount; i++)
+            {
+                FrustrumX[i] = cx + (srcX[i] - cx) * 1.1f;
+                FrustrumY[i] = cy + (srcY[i] - cy) * 1.1f;
+            }
+#ifdef _EDITOR
+            // In FreeFly spectator mode, compute iteration bounds from expanded hull
+            if (currentMode == CameraMode::FreeFly)
+            {
+                float minX = FrustrumX[0], minY = FrustrumY[0];
+                float maxX = FrustrumX[0], maxY = FrustrumY[0];
+                for (int i = 1; i < FrustrumCount; i++)
+                {
+                    if (FrustrumX[i] < minX) minX = FrustrumX[i];
+                    if (FrustrumY[i] < minY) minY = FrustrumY[i];
+                    if (FrustrumX[i] > maxX) maxX = FrustrumX[i];
+                    if (FrustrumY[i] > maxY) maxY = FrustrumY[i];
+                }
+                int tileWidth = 4;
+                FrustrumBoundMinX = (int)(minX) / tileWidth * tileWidth - tileWidth;
+                FrustrumBoundMinY = (int)(minY) / tileWidth * tileWidth - tileWidth;
+                FrustrumBoundMaxX = (int)(maxX) / tileWidth * tileWidth + tileWidth;
+                FrustrumBoundMaxY = (int)(maxY) / tileWidth * tileWidth + tileWidth;
+                FrustrumBoundMinX = std::max(FrustrumBoundMinX, 0);
+                FrustrumBoundMinY = std::max(FrustrumBoundMinY, 0);
+                FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE_MASK - tileWidth);
+                FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE_MASK - tileWidth);
+            }
+#endif
             return;
         }
     }
@@ -2265,6 +2314,29 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     FrustrumFaceD[4] = -DotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
 
     CreateFrustrum2D(position);
+
+#ifdef _EDITOR
+    // In FreeFly spectator mode, override 3D frustum planes with spectated camera's
+    // so TestFrustrum() (used by items/effects) culls based on spectated camera
+    if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)
+    {
+        ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
+        if (spectated)
+        {
+            const Frustum& frustum = spectated->GetFrustum();
+            const Frustum::Plane* planes = frustum.GetPlanes();
+            // Planes [0-3] = 4 side planes (same order as legacy)
+            for (int i = 0; i < 4; i++)
+            {
+                VectorCopy(planes[i].normal, FrustrumFaceNormal[i]);
+                FrustrumFaceD[i] = planes[i].distance;
+            }
+            // Frustum plane [5] = far plane → legacy plane [4]
+            VectorCopy(planes[5].normal, FrustrumFaceNormal[4]);
+            FrustrumFaceD[4] = planes[5].distance;
+        }
+    }
+#endif
 }
 
 void UpdateFrustrumBounds()

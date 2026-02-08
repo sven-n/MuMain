@@ -913,7 +913,15 @@ void OrbitalCamera::UpdateFrustum()
     VectorNormalize(forward);
 
     // Calculate right vector (perpendicular to forward in XY plane)
+    // When looking straight down/up, forward is parallel to Z — use Y as fallback
     vec3_t worldUp = { 0.0f, 0.0f, 1.0f };
+    float dot = forward[0] * worldUp[0] + forward[1] * worldUp[1] + forward[2] * worldUp[2];
+    if (fabsf(dot) > 0.99f)
+    {
+        worldUp[0] = 0.0f;
+        worldUp[1] = 1.0f;
+        worldUp[2] = 0.0f;
+    }
     vec3_t forwardTemp, worldUpTemp;
     VectorCopy(forward, forwardTemp);
     VectorCopy(worldUp, worldUpTemp);

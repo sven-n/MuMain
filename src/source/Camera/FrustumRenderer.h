@@ -111,7 +111,7 @@ inline void RenderFrustumWireframe(const Frustum& frustum)
 
     glEnd();
 
-    // --- Ground projection on terrain ---
+    // --- Ground projections on terrain ---
     const int hullCount = frustum.Get2DCount();
     if (hullCount >= 3)
     {
@@ -119,46 +119,77 @@ inline void RenderFrustumWireframe(const Frustum& frustum)
         const float* hullY = frustum.Get2DY();
         const float zOffset = 5.0f;
 
-        glLineWidth(3.0f);
-        glColor4f(0.0f, 1.0f, 0.0f, 0.7f);
-        glBegin(GL_LINES);
-
+        // Compute hull centroid for expanding the buffer zone
+        float cx = 0.0f, cy = 0.0f;
         for (int i = 0; i < hullCount; ++i)
         {
-            int next = (i + 1) % hullCount;
-
-            float x0 = hullX[i] * TERRAIN_SCALE;
-            float y0 = hullY[i] * TERRAIN_SCALE;
-            float x1 = hullX[next] * TERRAIN_SCALE;
-            float y1 = hullY[next] * TERRAIN_SCALE;
-
-            // Subdivide edge to follow terrain elevation
-            float dx = x1 - x0;
-            float dy = y1 - y0;
-            float edgeLen = std::sqrt(dx * dx + dy * dy);
-            int segments = (int)(edgeLen / (2.0f * TERRAIN_SCALE)) + 1;
-            if (segments < 1) segments = 1;
-            if (segments > 32) segments = 32;
-
-            for (int s = 0; s < segments; ++s)
-            {
-                float t0 = (float)s / (float)segments;
-                float t1 = (float)(s + 1) / (float)segments;
-
-                float sx0 = x0 + dx * t0;
-                float sy0 = y0 + dy * t0;
-                float sx1 = x0 + dx * t1;
-                float sy1 = y0 + dy * t1;
-
-                float z0 = RequestTerrainHeight(sx0, sy0) + zOffset;
-                float z1 = RequestTerrainHeight(sx1, sy1) + zOffset;
-
-                glVertex3f(sx0, sy0, z0);
-                glVertex3f(sx1, sy1, z1);
-            }
+            cx += hullX[i];
+            cy += hullY[i];
         }
+        cx /= (float)hullCount;
+        cy /= (float)hullCount;
 
-        glEnd();
+        // Draw both projections: yellow buffer (10% expanded) first, then green exact
+        for (int pass = 0; pass < 2; ++pass)
+        {
+            float scale = (pass == 0) ? 1.1f : 1.0f;
+
+            if (pass == 0)
+            {
+                glLineWidth(2.0f);
+                glColor4f(1.0f, 1.0f, 0.0f, 0.5f);  // Yellow for buffer zone
+            }
+            else
+            {
+                glLineWidth(3.0f);
+                glColor4f(0.0f, 1.0f, 0.0f, 0.7f);  // Green for exact frustum
+            }
+
+            glBegin(GL_LINES);
+
+            for (int i = 0; i < hullCount; ++i)
+            {
+                int next = (i + 1) % hullCount;
+
+                // Scale hull vertices outward from centroid
+                float hx0 = cx + (hullX[i] - cx) * scale;
+                float hy0 = cy + (hullY[i] - cy) * scale;
+                float hx1 = cx + (hullX[next] - cx) * scale;
+                float hy1 = cy + (hullY[next] - cy) * scale;
+
+                float x0 = hx0 * TERRAIN_SCALE;
+                float y0 = hy0 * TERRAIN_SCALE;
+                float x1 = hx1 * TERRAIN_SCALE;
+                float y1 = hy1 * TERRAIN_SCALE;
+
+                // Subdivide edge to follow terrain elevation
+                float dx = x1 - x0;
+                float dy = y1 - y0;
+                float edgeLen = std::sqrt(dx * dx + dy * dy);
+                int segments = (int)(edgeLen / (2.0f * TERRAIN_SCALE)) + 1;
+                if (segments < 1) segments = 1;
+                if (segments > 32) segments = 32;
+
+                for (int s = 0; s < segments; ++s)
+                {
+                    float t0 = (float)s / (float)segments;
+                    float t1 = (float)(s + 1) / (float)segments;
+
+                    float sx0 = x0 + dx * t0;
+                    float sy0 = y0 + dy * t0;
+                    float sx1 = x0 + dx * t1;
+                    float sy1 = y0 + dy * t1;
+
+                    float z0 = RequestTerrainHeight(sx0, sy0) + zOffset;
+                    float z1 = RequestTerrainHeight(sx1, sy1) + zOffset;
+
+                    glVertex3f(sx0, sy0, z0);
+                    glVertex3f(sx1, sy1, z1);
+                }
+            }
+
+            glEnd();
+        }
     }
 
     // --- Camera position marker (cyan cross at near plane center) ---
