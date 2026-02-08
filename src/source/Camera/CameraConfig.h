@@ -144,9 +144,9 @@ struct CameraConfig
         // Use RENDER_DISTANCE_MULTIPLIER to ensure terrain culling matches rendering/picking distance
         config.terrainCullRange = 4200.0f;
         config.objectCullRange = 4800.0f;
-        // Fog: 70% start, 80% end of farPlane
-        config.fogStart = config.farPlane * 0.7f;
-        config.fogEnd = config.farPlane * 0.8f;
+        // Fog: 80% start, 90% end of farPlane
+        config.fogStart = config.farPlane * 0.80f;
+        config.fogEnd = config.farPlane * 0.90f;
         return config;
     }
 

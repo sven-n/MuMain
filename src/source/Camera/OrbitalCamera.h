@@ -110,7 +110,7 @@ private:
     void UpdateTarget();
     void ComputeCameraTransform();
     void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
-    void UpdateConfigForZoom();  // Phase 1: Adjust config based on zoom level
+    void UpdateConfigForView();  // Phase 1: Adjust config based on zoom level and pitch
 
     // Phase 5: WASD+QE free camera movement
     void HandleFreeCameraMovement();

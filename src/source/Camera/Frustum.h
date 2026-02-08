@@ -124,6 +124,21 @@ public:
      */
     bool TestPoint2D(float tileX, float tileY, float range) const;
 
+    /**
+     * @brief Gets the number of vertices in the 2D ground-plane convex hull
+     */
+    int Get2DCount() const { return m_2DCount; }
+
+    /**
+     * @brief Gets the X coordinates of the 2D convex hull (tile space)
+     */
+    const float* Get2DX() const { return m_2DX; }
+
+    /**
+     * @brief Gets the Y coordinates of the 2D convex hull (tile space)
+     */
+    const float* Get2DY() const { return m_2DY; }
+
 private:
     // 6 frustum planes: Left, Right, Top, Bottom, Near, Far
     Plane m_Planes[6];

@@ -1994,9 +1994,11 @@ int     FrustrumBoundMinY = 0;
 int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
-// 2D frustum trapezoid vertices (in tile coordinates, i.e. world * 0.01)
-float FrustrumX[4];
-float FrustrumY[4];
+// 2D frustum convex hull vertices (in tile coordinates, i.e. world * 0.01)
+// Up to 8 vertices when using camera's projected frustum, 4 for legacy trapezoid.
+float FrustrumX[8];
+float FrustrumY[8];
+int FrustrumCount = 4;
 
 // 3D frustum data (used by TestFrustrum / 3D culling)
 static vec3_t FrustrumVertex[5];
@@ -2010,6 +2012,28 @@ extern int GetScreenWidth();
 
 void CreateFrustrum2D(vec3_t Position)
 {
+    // Dynamic path: OrbitalCamera computes a proper 2D frustum projection
+    if (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital)
+    {
+        const ICamera* cam = CameraManager::Instance().GetActiveCamera();
+        if (cam)
+        {
+            const Frustum& frustum = cam->GetFrustum();
+            FrustrumCount = frustum.Get2DCount();
+            const float* srcX = frustum.Get2DX();
+            const float* srcY = frustum.Get2DY();
+            for (int i = 0; i < FrustrumCount; i++)
+            {
+                FrustrumX[i] = srcX[i];
+                FrustrumY[i] = srcY[i];
+            }
+            return;
+        }
+    }
+
+    // Legacy path: hardcoded tables for Default/Legacy cameras
+    FrustrumCount = 4;
+
     float Width = 0.0f, CameraViewFar_local = 0.0f, CameraViewNear_local = 0.0f, CameraViewTarget_local = 0.0f;
     float WidthFar = 0.0f, WidthNear = 0.0f;
 
@@ -2325,8 +2349,8 @@ bool TestFrustrum2D(float x, float y, float Range)
     if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
         return true;
 
-    int j = 3;
-    for (int i = 0; i < 4; j = i, i++)
+    int j = FrustrumCount - 1;
+    for (int i = 0; i < FrustrumCount; j = i, i++)
     {
         float d = (FrustrumX[i] - x) * (FrustrumY[j] - y) -
             (FrustrumX[j] - x) * (FrustrumY[i] - y);

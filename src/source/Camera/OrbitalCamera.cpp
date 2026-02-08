@@ -536,8 +536,8 @@ void OrbitalCamera::HandleInput()
         m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
         MouseWheel = 0;
 
-        // FIX: Update terrain culling range based on zoom level
-        UpdateConfigForZoom();
+        // FIX: Update terrain culling range based on zoom level and pitch
+        UpdateConfigForView();
         UpdateFrustum();
     }
 
@@ -784,29 +784,31 @@ void OrbitalCamera::SetConfig(const CameraConfig& config)
     UpdateFrustum();
 }
 
-void OrbitalCamera::UpdateConfigForZoom()
+void OrbitalCamera::UpdateConfigForView()
 {
-    float zoomRatio = m_Radius / DEFAULT_RADIUS;  // 0.25 (min) to 2.5 (max)
-
-    // Adjust config based on zoom level
-    // Use gameplay preset as base
+    float zoomRatio = m_Radius / DEFAULT_RADIUS;
     CameraConfig baseConfig = CameraConfig::ForMainSceneOrbitalCamera();
 
+    float zoomScale;
     if (zoomRatio >= 1.0f)
     {
-        // Zooming OUT: Scale up to 1.5x max
-        // At max zoom (2.5x), farPlane = base * 1.5x
-        float scale = 1.0f + (zoomRatio - 1.0f) * 0.33f;  // 1.0x to 1.5x
-        m_Config.farPlane = baseConfig.farPlane * scale;
-        m_Config.terrainCullRange = baseConfig.terrainCullRange * scale;
+        // Zooming OUT: scale up gently
+        zoomScale = 1.0f + (zoomRatio - 1.0f) * 0.33f;
     }
     else
     {
         // Zooming IN: reduce proportionally
-        float scale = 0.5f + (zoomRatio * 0.5f);  // 0.5x to 1.0x
-        m_Config.farPlane = baseConfig.farPlane * scale;
-        m_Config.terrainCullRange = baseConfig.terrainCullRange * scale;
+        zoomScale = 0.5f + (zoomRatio * 0.5f);
     }
+
+    // Scale far plane and terrain cull range with zoom only (not pitch).
+    // The 2D frustum projection already adapts its shape to the actual camera pitch.
+    m_Config.farPlane = baseConfig.farPlane * zoomScale;
+    m_Config.terrainCullRange = baseConfig.terrainCullRange * zoomScale;
+
+    // Keep fog proportional to the current far plane: 80% start, 90% end
+    m_Config.fogStart = m_Config.farPlane * 0.80f;
+    m_Config.fogEnd = m_Config.farPlane * 0.90f;
 }
 
 void OrbitalCamera::HandleFreeCameraMovement()
