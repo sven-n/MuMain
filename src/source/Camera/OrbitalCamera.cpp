@@ -84,7 +84,11 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
 
             // FORCE all CharacterScene values DIRECTLY to state
             m_State.ViewFar = m_Config.farPlane;      // 4100
-            m_State.FOV = 30.0f;                       // OpenGL perspective FOV
+            {
+                extern unsigned int WindowWidth, WindowHeight;
+                float aspect = (float)WindowWidth / (float)WindowHeight;
+                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
+            }
             m_State.TopViewEnable = false;
 
             // Reset orbital parameters for new scene
@@ -101,8 +105,12 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
             m_Config = CameraConfig::ForMainSceneDefaultCamera();
 
             // Set MainScene defaults
-            m_State.ViewFar = m_Config.farPlane;      // 1700
-            m_State.FOV = 30.0f;
+            m_State.ViewFar = m_Config.farPlane;
+            {
+                extern unsigned int WindowWidth, WindowHeight;
+                float aspect = (float)WindowWidth / (float)WindowHeight;
+                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
+            }
             m_State.TopViewEnable = false;
 
             // Reset orbital parameters for new scene
@@ -122,7 +130,11 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
             // Use gameplay config as default
             m_Config = CameraConfig::ForMainSceneOrbitalCamera();
             m_State.ViewFar = m_Config.farPlane;
-            m_State.FOV = 30.0f;
+            {
+                extern unsigned int WindowWidth, WindowHeight;
+                float aspect = (float)WindowWidth / (float)WindowHeight;
+                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
+            }
             m_State.TopViewEnable = false;
             break;
         }
@@ -177,14 +189,18 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
 
 #ifdef _EDITOR
     // DEBUG: Log loaded config
-    sprintf_s(debugMsg, "[CAM]   Config: Far=%.0f, FOV=%.1f, TerrainCull=%.0f",
-              m_Config.farPlane, m_Config.fov, m_Config.terrainCullRange);
+    sprintf_s(debugMsg, "[CAM]   Config: Far=%.0f, hFOV=%.1f, TerrainCull=%.0f",
+              m_Config.farPlane, m_Config.hFov, m_Config.terrainCullRange);
     g_MuEditorConsoleUI.LogEditor(debugMsg);
 #endif
 
     // Step 2: Apply config to state
     m_State.ViewFar = m_Config.farPlane;
-    m_State.FOV = 30.0f;
+    {
+        extern unsigned int WindowWidth, WindowHeight;
+        float aspect = (float)WindowWidth / (float)WindowHeight;
+        m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
+    }
     m_State.TopViewEnable = false;
 
     // Step 3: Update target FIRST to get Hero/Character position
@@ -501,7 +517,7 @@ bool OrbitalCamera::Update()
         yPos += lineHeight;
 
         // Config values
-        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.fov: %.1f", m_Config.farPlane, m_Config.fov);
+        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.hFov: %.1f", m_Config.farPlane, m_Config.hFov);
         g_pRenderText->RenderText(10, yPos, debugText);
         yPos += lineHeight;
 
@@ -883,7 +899,7 @@ void OrbitalCamera::UpdateFrustum()
     // Check if DevEditor is overriding config values
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        DevEditor_GetCameraConfig(&m_Config.fov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
+        DevEditor_GetCameraConfig(&m_Config.hFov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
     }
 #endif
 
@@ -911,7 +927,6 @@ void OrbitalCamera::UpdateFrustum()
     VectorNormalize(up);
 
     // Build frustum from current configuration
-    // Use screen aspect ratio (assuming 4:3, can be made dynamic later)
     extern unsigned int WindowWidth;
     extern unsigned int WindowHeight;
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
@@ -925,20 +940,23 @@ void OrbitalCamera::UpdateFrustum()
     // DevEditor can still override config values if needed
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        DevEditor_GetCameraConfig(&m_Config.fov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
+        DevEditor_GetCameraConfig(&m_Config.hFov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
         effectiveFarPlane = m_Config.farPlane;
         effectiveTerrainCullRange = m_Config.terrainCullRange;
     }
 #endif
 
+    // Convert horizontal FOV to vertical FOV for frustum building
+    float vFov = HFovToVFov(m_Config.hFov, aspectRatio);
+
     m_Frustum.BuildFromCamera(
         m_State.Position,
         forward,
         up,
-        m_Config.fov,
+        vFov,
         aspectRatio,
         m_Config.nearPlane,
-        effectiveFarPlane,  // Use override or dynamic ViewFar
-        effectiveTerrainCullRange  // Separate terrain culling distance
+        effectiveFarPlane,
+        effectiveTerrainCullRange
     );
 }

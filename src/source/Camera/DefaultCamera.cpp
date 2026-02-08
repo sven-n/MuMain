@@ -79,7 +79,11 @@ void DefaultCamera::ResetForScene(EGameScene scene)
 
             // FORCE all CharacterScene values DIRECTLY to state
             m_State.ViewFar = m_Config.farPlane;      // 4100
-            m_State.FOV = 30.0f;                       // OpenGL perspective FOV
+            {
+                extern unsigned int WindowWidth, WindowHeight;
+                float aspect = (float)WindowWidth / (float)WindowHeight;
+                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
+            }
             m_State.TopViewEnable = false;
 
             // Set static CharacterScene position
@@ -98,8 +102,12 @@ void DefaultCamera::ResetForScene(EGameScene scene)
             m_Config = CameraConfig::ForMainSceneDefaultCamera();
 
             // Set MainScene defaults
-            m_State.ViewFar = m_Config.farPlane;      // 2400
-            m_State.FOV = 30.0f;
+            m_State.ViewFar = m_Config.farPlane;
+            {
+                extern unsigned int WindowWidth, WindowHeight;
+                float aspect = (float)WindowWidth / (float)WindowHeight;
+                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
+            }
             m_State.TopViewEnable = false;
 
             // Position will be calculated from Hero in Update()
@@ -119,7 +127,11 @@ void DefaultCamera::ResetForScene(EGameScene scene)
             // Use LoginScene-specific config with correct near plane
             m_Config = CameraConfig::ForLoginScene();
             m_State.ViewFar = m_Config.farPlane;
-            m_State.FOV = 30.0f;  // Will be overridden by SetCameraFOV()
+            {
+                extern unsigned int WindowWidth, WindowHeight;
+                float aspect = (float)WindowWidth / (float)WindowHeight;
+                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
+            }
             m_State.TopViewEnable = false;
 
             // FIX: Initialize to LoginScene WALK_PATHS[0] starting position
@@ -213,8 +225,8 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
 
 #ifdef _EDITOR
     // DEBUG: Log config after ResetForScene
-    sprintf_s(debugMsg, "[CAM]   Config: Far=%.0f, FOV=%.1f, TerrainCull=%.0f",
-              m_Config.farPlane, m_Config.fov, m_Config.terrainCullRange);
+    sprintf_s(debugMsg, "[CAM]   Config: Far=%.0f, hFOV=%.1f, TerrainCull=%.0f",
+              m_Config.farPlane, m_Config.hFov, m_Config.terrainCullRange);
     g_MuEditorConsoleUI.LogEditor(debugMsg);
 #endif
 
@@ -399,7 +411,7 @@ bool DefaultCamera::Update()
         yPos += lineHeight;
 
         // Config values
-        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.fov: %.1f", m_Config.farPlane, m_Config.fov);
+        swprintf(debugText, 256, L"Config.farPlane: %.0f | Config.hFov: %.1f", m_Config.farPlane, m_Config.hFov);
         g_pRenderText->RenderText(10, yPos, debugText);
         yPos += lineHeight;
 
@@ -802,18 +814,19 @@ void DefaultCamera::UpdateCameraDistance()
 
 void DefaultCamera::SetCameraFOV()
 {
+    extern unsigned int WindowWidth, WindowHeight;
+    float aspect = (float)WindowWidth / (float)WindowHeight;
+
     if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
         && CCameraMove::GetInstancePtr()->IsTourMode())
     {
-        // Use unified config FOV for LoginScene tour mode
-        m_State.FOV = m_Config.fov;  // Will be 72.0f from ForGameplay()
+        // Tour mode uses wider FOV for cinematic feel
+        m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
     }
     else
     {
-        // Phase 5: Keep using 30.0f - this is the OpenGL perspective FOV
-        // m_Config.fov (72) is used for frustum plane calculations in BuildFromCamera()
-        // These are two different FOV concepts and should not be conflated
-        m_State.FOV = 30.f;
+        // Compute vertical FOV from horizontal FOV and current aspect ratio
+        m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
     }
 }
 
@@ -907,7 +920,7 @@ void DefaultCamera::UpdateFrustum()
     // Check if DevEditor is overriding config values
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        DevEditor_GetCameraConfig(&m_Config.fov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
+        DevEditor_GetCameraConfig(&m_Config.hFov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
     }
 #endif
 
@@ -957,31 +970,31 @@ void DefaultCamera::UpdateFrustum()
     extern unsigned int WindowHeight;
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
 
-    // Use ViewFar for 3D culling distance (varies 2000-3700 based on map/zoom)
     // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
-    // m_State.ViewFar is only for OpenGL rendering (BeginOpengl)
-    // Frustum should use the clean config values, not zoom-adjusted ViewFar
     float effectiveFarPlane = m_Config.farPlane;
     float effectiveTerrainCullRange = m_Config.terrainCullRange;
 #ifdef _EDITOR
     // DevEditor can still override config values if needed
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        DevEditor_GetCameraConfig(&m_Config.fov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
+        DevEditor_GetCameraConfig(&m_Config.hFov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
         effectiveFarPlane = m_Config.farPlane;
         effectiveTerrainCullRange = m_Config.terrainCullRange;
     }
 #endif
 
+    // Convert horizontal FOV to vertical FOV for frustum building
+    float vFov = HFovToVFov(m_Config.hFov, aspectRatio);
+
     m_Frustum.BuildFromCamera(
         m_State.Position,
         forward,
         up,
-        m_Config.fov,
+        vFov,
         aspectRatio,
         m_Config.nearPlane,
-        effectiveFarPlane,  // Use override or dynamic ViewFar
-        effectiveTerrainCullRange  // Separate terrain culling distance
+        effectiveFarPlane,
+        effectiveTerrainCullRange
     );
 
     // Phase 5: Cache current state for next frame's comparison
@@ -993,7 +1006,7 @@ void DefaultCamera::UpdateFrustum()
     // Cache DevEditor config values
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        m_LastEditorFOV = m_Config.fov;
+        m_LastEditorFOV = m_Config.hFov;
         m_LastEditorFarPlane = m_Config.farPlane;
         m_LastEditorNearPlane = m_Config.nearPlane;
         m_LastEditorTerrainCullRange = m_Config.terrainCullRange;

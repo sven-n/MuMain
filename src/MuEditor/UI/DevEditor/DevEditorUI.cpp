@@ -5,6 +5,7 @@
 #include "DevEditorUI.h"
 #include "imgui.h"
 #include "Camera/CameraManager.h"
+#include "Camera/CameraConfig.h"
 #include "Camera/OrbitalCamera.h"
 #include "CameraMove.h"
 #include "ZzzCharacter.h"
@@ -223,21 +224,22 @@ void CDevEditorUI::RenderCameraTab()
         float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
         GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
 
-        sprintf_s(debugMsg, "[DEVUI] New config values: FOV=%.1f, Far=%.0f, TerrainCull=%.0f",
+        sprintf_s(debugMsg, "[DEVUI] New config values: hFOV=%.1f, Far=%.0f, TerrainCull=%.0f",
                   defaultFOV, defaultFarPlane, defaultTerrainCullRange);
         g_MuEditorConsoleUI.LogEditor(debugMsg);
 
-        m_FOV = defaultFOV;
+        m_HFOV = defaultFOV;
         m_NearPlane = defaultNearPlane;
         m_FarPlane = defaultFarPlane;
         m_TerrainCullRange = defaultTerrainCullRange;
 
-        // Update fog values from new camera config
+        // Update fog and cull values from new camera config
         if (currentCamera)
         {
             const CameraConfig& config = currentCamera->GetConfig();
             m_FogStart = config.fogStart;
             m_FogEnd = config.fogEnd;
+            m_ObjectCullRange = config.objectCullRange;
         }
 
         m_LastActiveCameraName = currentCameraName;
@@ -246,25 +248,26 @@ void CDevEditorUI::RenderCameraTab()
     bool previousOverrideState = m_ConfigOverrideEnabled;
     ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
     ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(FOV, near/far planes, cull range)");
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(hFOV, near/far planes, cull range)");
 
     // If override was just enabled, initialize with current camera's defaults
     if (m_ConfigOverrideEnabled && !previousOverrideState)
     {
-        float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
-        GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+        float defaultHFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
+        GetActiveCameraConfig(&defaultHFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
 
-        m_FOV = defaultFOV;
+        m_HFOV = defaultHFOV;
         m_NearPlane = defaultNearPlane;
         m_FarPlane = defaultFarPlane;
         m_TerrainCullRange = defaultTerrainCullRange;
 
-        // Initialize fog values from camera config
+        // Initialize fog and cull values from camera config
         if (currentCamera)
         {
             const CameraConfig& config = currentCamera->GetConfig();
             m_FogStart = config.fogStart;
             m_FogEnd = config.fogEnd;
+            m_ObjectCullRange = config.objectCullRange;
         }
 
         m_LastActiveCameraName = currentCameraName;
@@ -279,15 +282,23 @@ void CDevEditorUI::RenderCameraTab()
     if (m_ConfigOverrideEnabled)
     {
         // Get current camera's default config for reference
-        float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
-        GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+        float defaultHFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
+        GetActiveCameraConfig(&defaultHFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+
+        // Compute vertical FOV from current horizontal FOV for display
+        extern unsigned int WindowWidth, WindowHeight;
+        float aspect = (float)WindowWidth / (float)WindowHeight;
+        float computedVFov = HFovToVFov(m_HFOV, aspect);
 
         ImGui::PushItemWidth(200);
 
         ImGui::Text("3D Frustum Parameters:");
-        ImGui::SliderFloat("FOV (degrees)", &m_FOV, 10.0f, 120.0f, "%.1f");
+        ImGui::SliderFloat("Horizontal FOV (degrees)", &m_HFOV, 10.0f, 150.0f, "%.1f");
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f° = camera default)", defaultFOV);
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f° = camera default)", defaultHFOV);
+
+        ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
+                          "Vertical FOV: %.1f° (at %.2f aspect)", computedVFov, aspect);
 
         ImGui::InputFloat("Near Plane", &m_NearPlane, 1.0f, 10.0f, "%.1f");
         ImGui::SameLine();
@@ -298,10 +309,12 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultFarPlane);
 
         ImGui::Spacing();
-        ImGui::Text("Terrain Culling:");
+        ImGui::Text("Culling:");
         ImGui::InputFloat("Terrain Cull Range", &m_TerrainCullRange, 50.0f, 200.0f, "%.1f");
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultTerrainCullRange);
+
+        ImGui::InputFloat("Object Cull Range", &m_ObjectCullRange, 50.0f, 200.0f, "%.1f");
 
         ImGui::Spacing();
         ImGui::Text("Fog Controls:");
@@ -322,9 +335,7 @@ void CDevEditorUI::RenderCameraTab()
         float startPercent = (m_FogStart / m_FarPlane) * 100.0f;
         float endPercent = (m_FogEnd / m_FarPlane) * 100.0f;
         ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                          "Percentages: Start=%.0f%%, End=%.0f%% (of farPlane)", startPercent, endPercent);
-        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
-                          "Max range: %.0f (farPlane × %.1f)", maxFogRange, RENDER_DISTANCE_MULTIPLIER);
+                          "Fog: Start=%.0f%%, End=%.0f%% (of farPlane)", startPercent, endPercent);
 
         ImGui::PopItemWidth();
 
@@ -332,20 +343,21 @@ void CDevEditorUI::RenderCameraTab()
         if (ImGui::Button("Reset to Camera Defaults"))
         {
             // Get the actual defaults from the active camera's config
-            float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
-            GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+            float resetHFOV, resetNearPlane, resetFarPlane, resetTerrainCullRange;
+            GetActiveCameraConfig(&resetHFOV, &resetNearPlane, &resetFarPlane, &resetTerrainCullRange);
 
-            m_FOV = defaultFOV;
-            m_NearPlane = defaultNearPlane;
-            m_FarPlane = defaultFarPlane;
-            m_TerrainCullRange = defaultTerrainCullRange;
+            m_HFOV = resetHFOV;
+            m_NearPlane = resetNearPlane;
+            m_FarPlane = resetFarPlane;
+            m_TerrainCullRange = resetTerrainCullRange;
 
-            // Reset fog values from camera config
+            // Reset fog and object cull from camera config
             if (currentCamera)
             {
                 const CameraConfig& config = currentCamera->GetConfig();
                 m_FogStart = config.fogStart;
                 m_FogEnd = config.fogEnd;
+                m_ObjectCullRange = config.objectCullRange;
             }
         }
         ImGui::SameLine();
@@ -357,15 +369,25 @@ void CDevEditorUI::RenderCameraTab()
     }
     else
     {
-        // Phase 5: Display current camera config (read-only, single source of truth)
-        float currentFOV, currentNearPlane, currentFarPlane, currentTerrainCullRange;
-        GetActiveCameraConfig(&currentFOV, &currentNearPlane, &currentFarPlane, &currentTerrainCullRange);
+        // Display current camera config (read-only, single source of truth)
+        float currentHFOV, currentNearPlane, currentFarPlane, currentTerrainCullRange;
+        GetActiveCameraConfig(&currentHFOV, &currentNearPlane, &currentFarPlane, &currentTerrainCullRange);
+
+        extern unsigned int WindowWidth, WindowHeight;
+        float aspect = (float)WindowWidth / (float)WindowHeight;
+        float computedVFov = HFovToVFov(currentHFOV, aspect);
 
         ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Current Camera Config (Scene-Specific):");
-        ImGui::Text("  FOV: %.1f°", currentFOV);
+        ImGui::Text("  Horizontal FOV: %.1f°", currentHFOV);
+        ImGui::Text("  Vertical FOV: %.1f° (at %.2f aspect)", computedVFov, aspect);
         ImGui::Text("  Near Plane: %.1f", currentNearPlane);
         ImGui::Text("  Far Plane: %.1f", currentFarPlane);
         ImGui::Text("  Terrain Cull Range: %.1f", currentTerrainCullRange);
+        if (currentCamera)
+        {
+            const CameraConfig& config = currentCamera->GetConfig();
+            ImGui::Text("  Object Cull Range: %.1f", config.objectCullRange);
+        }
         ImGui::Spacing();
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable override to customize these values");
     }
@@ -1113,9 +1135,9 @@ extern "C"
         return g_DevEditorUI.IsConfigOverrideEnabled();
     }
 
-    void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange)
+    void DevEditor_GetCameraConfig(float* outHFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange)
     {
-        if (outFOV) *outFOV = g_DevEditorUI.GetFOV();
+        if (outHFOV) *outHFOV = g_DevEditorUI.GetHFOV();
         if (outNearPlane) *outNearPlane = g_DevEditorUI.GetNearPlane();
         if (outFarPlane) *outFarPlane = g_DevEditorUI.GetFarPlane();
         if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetTerrainCullRange();

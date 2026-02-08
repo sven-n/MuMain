@@ -163,7 +163,11 @@ void FreeFlyCamera::ComputeCameraTransform()
     m_State.Distance = 0.0f;  // No target
     m_State.DistanceTarget = 0.0f;
     m_State.ViewFar = 5000.0f;  // Extended view for editor
-    m_State.FOV = 60.0f;
+    {
+        extern unsigned int WindowWidth, WindowHeight;
+        float aspect = (float)WindowWidth / (float)WindowHeight;
+        m_State.FOV = HFovToVFov(90.0f, aspect);  // 90° horizontal FOV for editor
+    }
 }
 
 #endif // _EDITOR

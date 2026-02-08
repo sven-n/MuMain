@@ -244,14 +244,17 @@ void LegacyCamera::UpdateCameraDistance()
 
 void LegacyCamera::SetCameraFOV()
 {
+    extern unsigned int WindowWidth, WindowHeight;
+    float aspect = (float)WindowWidth / (float)WindowHeight;
+
     if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE
         && CCameraMove::GetInstancePtr()->IsTourMode())
     {
-        m_State.FOV = 65.0f;
+        m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
     }
     else
     {
-        m_State.FOV = 30.f;
+        m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
     }
 }
 

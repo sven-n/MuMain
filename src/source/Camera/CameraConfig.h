@@ -1,5 +1,17 @@
 #pragma once
 
+#include <cmath>
+
+/// Convert horizontal FOV (degrees) to vertical FOV (degrees) for gluPerspective.
+/// hFovDeg is the total horizontal field of view; aspectRatio = width / height.
+inline float HFovToVFov(float hFovDeg, float aspectRatio)
+{
+    constexpr float PI = 3.14159265358979323846f;
+    float hHalfRad = hFovDeg * 0.5f * PI / 180.0f;
+    float vHalfRad = atanf(tanf(hHalfRad) / aspectRatio);
+    return vHalfRad * 2.0f * 180.0f / PI;
+}
+
 /**
  * @brief Rendering distance multiplier applied to camera far plane
  *
@@ -26,8 +38,8 @@ struct CameraConfig
 {
     // ========== View Frustum Parameters ==========
 
-    /** Vertical field of view in degrees */
-    float fov = 72.0f;
+    /** Horizontal field of view in degrees. Vertical FOV is derived at runtime via HFovToVFov(hFov, aspect). */
+    float hFov = 90.0f;
 
     /** Near clipping plane distance */
     float nearPlane = 10.0f;
@@ -79,7 +91,7 @@ struct CameraConfig
 
     bool operator==(const CameraConfig& other) const
     {
-        return fov == other.fov &&
+        return hFov == other.hFov &&
                nearPlane == other.nearPlane &&
                farPlane == other.farPlane &&
                aspectRatio == other.aspectRatio &&
@@ -111,7 +123,7 @@ struct CameraConfig
     static CameraConfig ForMainSceneDefaultCamera()
     {
         CameraConfig config;
-        config.fov = 72.0f;
+        config.hFov = 40.0f;  // ~30° vFOV on 4:3, preserves original game look
         config.nearPlane = 500.0f;
         config.farPlane = 3000.0f;
         // Use RENDER_DISTANCE_MULTIPLIER to ensure terrain culling matches rendering/picking distance
@@ -138,12 +150,11 @@ struct CameraConfig
     static CameraConfig ForMainSceneOrbitalCamera()
     {
         CameraConfig config;
-        config.fov = 72.0f;
+        config.hFov = 90.0f;  // Good 3D game default; ~59° vFOV on 16:9
         config.nearPlane = 500.0f;
-        config.farPlane = 5400.0f * RENDER_DISTANCE_MULTIPLIER;
-        // Use RENDER_DISTANCE_MULTIPLIER to ensure terrain culling matches rendering/picking distance
-        config.terrainCullRange = 4200.0f;
-        config.objectCullRange = 4800.0f;
+        config.farPlane = 3800.0f;  // Direct value — RENDER_DISTANCE_MULTIPLIER already applied in BeginOpengl()
+        config.terrainCullRange = 3800.0f;
+        config.objectCullRange = 3800.0f;
         // Fog: 80% start, 90% end of farPlane
         config.fogStart = config.farPlane * 0.80f;
         config.fogEnd = config.farPlane * 0.90f;
@@ -163,7 +174,7 @@ struct CameraConfig
     static CameraConfig ForLoginScene()
     {
         CameraConfig config;
-        config.fov = 72.0f;
+        config.hFov = 90.0f;
         config.nearPlane = 10.0f;
         config.farPlane = 5000.0f;
         config.terrainCullRange = 5000.0f;
@@ -187,7 +198,7 @@ struct CameraConfig
     static CameraConfig ForCharacterScene()
     {
         CameraConfig config;
-        config.fov = 72.0f;
+        config.hFov = 40.0f;  // ~30° vFOV on 4:3, matches original character scene
         config.nearPlane = 10.0f;
         config.farPlane = 4100.0f;
         config.terrainCullRange = 4100.0f;

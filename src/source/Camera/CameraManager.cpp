@@ -182,7 +182,7 @@ extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float*
     if (camera)
     {
         const CameraConfig& config = camera->GetConfig();
-        if (outFOV) *outFOV = config.fov;
+        if (outFOV) *outFOV = config.hFov;
         if (outNearPlane) *outNearPlane = config.nearPlane;
         if (outFarPlane) *outFarPlane = config.farPlane;
         if (outTerrainCullRange) *outTerrainCullRange = config.terrainCullRange;
@@ -191,7 +191,7 @@ extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float*
         // DEBUG: Log what DevEditor is reading
         // char debugMsg[256];
         // sprintf_s(debugMsg, "[CAM] GetActiveCameraConfig: Camera=%s, FOV=%.1f, Far=%.0f, TerrainCull=%.0f",
-        //           camera->GetName(), config.fov, config.farPlane, config.terrainCullRange);
+        //           camera->GetName(), config.hFov, config.farPlane, config.terrainCullRange);
         // g_MuEditorConsoleUI.LogEditor(debugMsg);
 #endif
     }

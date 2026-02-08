@@ -19,10 +19,11 @@ public:
 
     // New CameraConfig accessors
     bool IsConfigOverrideEnabled() const { return m_ConfigOverrideEnabled; }
-    float GetFOV() const { return m_FOV; }
+    float GetHFOV() const { return m_HFOV; }
     float GetNearPlane() const { return m_NearPlane; }
     float GetFarPlane() const { return m_FarPlane; }
     float GetTerrainCullRange() const { return m_TerrainCullRange; }
+    float GetObjectCullRange() const { return m_ObjectCullRange; }
 
     // Fog control accessors
     float GetFogStart() const { return m_FogStart; }
@@ -83,10 +84,11 @@ private:
 
     // New CameraConfig values for live editing
     bool m_ConfigOverrideEnabled = false;
-    float m_FOV = 60.0f;              // Field of view in degrees (Phase 5: changed default to 60)
+    float m_HFOV = 90.0f;             // Horizontal field of view in degrees
     float m_NearPlane = 10.0f;        // Near clipping plane
     float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
     float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range
+    float m_ObjectCullRange = 2400.0f;   // 3D object culling range
     const char* m_LastActiveCameraName = nullptr;  // Track which camera we're overriding for
 
     // Fog control values (absolute distances)
