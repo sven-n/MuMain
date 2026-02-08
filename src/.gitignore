@@ -1,0 +1,37 @@
+*.ilk
+*.exe
+.vs/
+/*.dat
+*.sdf
+.tmp/
+.tmp\
+*.bak
+*.sbr
+*.tlog
+*.idb
+*.pdb
+*.log
+*.pch
+*.recipe
+*.bsc
+*\.pch
+/*.pch
+*.iobj
+.build/
+*.txt
+*.jpg
+*.wav
+*.mp3
+build/bin/x86/Global Debug/Main.exe
+!/CMakeLists.txt
+
+#MuEditor
+bin/MuEditor/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# ImGui settings (user-specific)
+imgui.ini
+bin/imgui.ini

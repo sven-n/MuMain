@@ -1,0 +1,49 @@
+{
+  "_comment": "MuEditor UI Translations - Spanish",
+  "language_name": "Español",
+
+  "btn_save": "Guardar Objetos",
+  "btn_save_skills": "Guardar Habilidades",
+  "btn_export_s6e3": "Exportar como S6E3",
+  "btn_export_csv": "Exportar como CSV",
+  "btn_export_csv_skills": "Exportar Habilidades como CSV",
+  "btn_columns": "Columnas",
+  "btn_select_all": "Seleccionar Todo",
+  "btn_unselect_all": "Deseleccionar Todo",
+  "btn_ok": "Aceptar",
+
+  "msg_save_success": "¡Guardado completado exitosamente!",
+  "msg_save_failed": "¡Error al guardar objetos!",
+  "msg_save_skills_success": "¡Habilidades guardadas exitosamente!",
+  "msg_save_skills_failed": "¡Error al guardar habilidades!",
+  "msg_export_s6e3_success": "¡Exportación S6E3 completada exitosamente!",
+  "msg_export_s6e3_failed": "¡Error al exportar en formato S6E3!",
+  "msg_export_csv_success": "¡Exportación CSV completada exitosamente!",
+  "msg_export_csv_failed": "¡Error al exportar como CSV!",
+  "msg_export_csv_skills_success": "¡Habilidades exportadas como CSV exitosamente!",
+  "msg_export_csv_skills_failed": "¡Error al exportar habilidades como CSV!",
+
+  "error_file_not_found": "Archivo no encontrado: {0}",
+  "error_invalid_index": "Índice no válido: {0}",
+  "error_index_in_use": "¡Error: El índice {0} ya está en uso!",
+
+  "label_search_text": "Buscar:",
+  "label_freeze_columns": "Congelar Índice/Nombre",
+  "label_no_columns": "No hay columnas seleccionadas. Haz clic en 'Columnas' para mostrar columnas.",
+  "label_index": "Índice",
+
+  "popup_toggle_columns": "Alternar Visibilidad de Columnas:",
+  "popup_save_success": "¡Objetos guardados exitosamente!",
+  "popup_save_failed": "¡Error al guardar objetos!",
+  "popup_save_skills_success": "¡Habilidades guardadas exitosamente!",
+  "popup_save_skills_failed": "¡Error al guardar habilidades!",
+  "popup_export_csv_success": "¡Objetos exportados como CSV exitosamente!",
+  "popup_export_csv_failed": "¡Error al exportar atributos de objetos como CSV!",
+  "popup_export_csv_skills_success": "¡Habilidades exportadas como CSV exitosamente!",
+  "popup_export_csv_skills_failed": "¡Error al exportar atributos de habilidades como CSV!",
+  "popup_export_s6e3_success": "¡Exportado como formato heredado exitosamente!",
+  "popup_export_s6e3_failed": "¡Error al exportar como formato heredado!",
+
+  "label_skill_editor_title": "Editor de Habilidades",
+  "label_search_skills": "Buscar Habilidades:"
+}

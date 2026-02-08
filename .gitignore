@@ -1,0 +1,41 @@
+
+.vs/
+.nuget/
+
+src/source/Global Debug/
+src/Global Debug/
+src/Global Debug/Main
+src/source/Global Release/
+src/Global Release/
+src/Global Release/Main
+
+# External dependencies (built locally)
+_deps/
+
+# CMake build directories
+build/
+build-mingw/
+/cmake-build-debug/
+/cmake-build-release/
+/CMakeFiles/
+**/cmake-build-debug/
+**/cmake-build-release/
+**/CMakeFiles/
+/Win32/
+
+# .NET build outputs
+**/bin/**
+!**/bin/Translations/
+!**/bin/Translations/**
+**/obj/
+*.user
+*.suo
+
+# Jetbrains Ides
+/.idea/
+**/.idea/
+
+# ImGui
+**/imgui.ini
+
+**/*.log
