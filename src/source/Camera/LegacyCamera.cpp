@@ -282,9 +282,67 @@ bool LegacyCamera::Update()
     }
 
     UpdateCameraDistance();
-
-    // Sync to g_Camera (same as original — globals were the camera state)
-    // No frustum building — that's the whole point of Legacy mode
+    UpdateFrustum();
 
     return false;
+}
+
+void LegacyCamera::UpdateFrustum()
+{
+    // Calculate forward vector from camera angles
+    // Legacy camera uses angle-based orientation (same as DefaultCamera fallback)
+    vec3_t forward;
+    extern CHARACTER* Hero;
+    if (Hero && Hero->Object.Live)
+    {
+        forward[0] = Hero->Object.Position[0] - m_State.Position[0];
+        forward[1] = Hero->Object.Position[1] - m_State.Position[1];
+        forward[2] = Hero->Object.Position[2] - m_State.Position[2];
+        VectorNormalize(forward);
+    }
+    else
+    {
+        float Matrix[3][4];
+        AngleMatrix(m_State.Angle, Matrix);
+        forward[0] = Matrix[1][0];
+        forward[1] = Matrix[1][1];
+        forward[2] = Matrix[1][2];
+        VectorNormalize(forward);
+    }
+
+    // Handle degenerate case when looking straight down/up
+    vec3_t worldUp = { 0.0f, 0.0f, 1.0f };
+    float dot = forward[0] * worldUp[0] + forward[1] * worldUp[1] + forward[2] * worldUp[2];
+    if (fabsf(dot) > 0.99f)
+    {
+        worldUp[0] = 0.0f;
+        worldUp[1] = 1.0f;
+        worldUp[2] = 0.0f;
+    }
+
+    vec3_t right, up, forwardTemp, upTemp;
+    VectorCopy(forward, forwardTemp);
+    VectorCopy(worldUp, upTemp);
+    CrossProduct(forwardTemp, upTemp, right);
+    VectorNormalize(right);
+
+    VectorCopy(right, forwardTemp);
+    VectorCopy(forward, upTemp);
+    CrossProduct(forwardTemp, upTemp, up);
+    VectorNormalize(up);
+
+    extern unsigned int WindowWidth, WindowHeight;
+    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    float vFov = HFovToVFov(m_Config.hFov, aspectRatio);
+
+    m_Frustum.BuildFromCamera(
+        m_State.Position,
+        forward,
+        up,
+        vFov,
+        aspectRatio,
+        m_Config.nearPlane,
+        m_Config.farPlane,
+        m_Config.terrainCullRange
+    );
 }

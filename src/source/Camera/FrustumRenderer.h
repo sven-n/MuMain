@@ -36,13 +36,50 @@ inline void RenderFrustumWireframe(const Frustum& frustum)
     vec3_t v[8];
     std::memcpy(v, orig, sizeof(vec3_t) * 8);
 
-    // Compute camera position as the intersection point behind the near plane.
-    // The near plane is very close to the camera, so average of near corners
-    // projected back along the side edges gives a good approximation.
+    // Compute actual camera eye position (apex of frustum pyramid).
+    // Use edge v[0]→v[4] and ratio of near/far plane widths to find convergence point.
+    vec3_t nearCenter, farCenter;
+    nearCenter[0] = (v[0][0] + v[1][0] + v[2][0] + v[3][0]) * 0.25f;
+    nearCenter[1] = (v[0][1] + v[1][1] + v[2][1] + v[3][1]) * 0.25f;
+    nearCenter[2] = (v[0][2] + v[1][2] + v[2][2] + v[3][2]) * 0.25f;
+    farCenter[0] = (v[4][0] + v[5][0] + v[6][0] + v[7][0]) * 0.25f;
+    farCenter[1] = (v[4][1] + v[5][1] + v[6][1] + v[7][1]) * 0.25f;
+    farCenter[2] = (v[4][2] + v[5][2] + v[6][2] + v[7][2]) * 0.25f;
+
+    // Near/far half-widths (distance from center to corner)
+    float nearHW = std::sqrt(
+        (v[0][0] - nearCenter[0]) * (v[0][0] - nearCenter[0]) +
+        (v[0][1] - nearCenter[1]) * (v[0][1] - nearCenter[1]) +
+        (v[0][2] - nearCenter[2]) * (v[0][2] - nearCenter[2]));
+    float farHW = std::sqrt(
+        (v[4][0] - farCenter[0]) * (v[4][0] - farCenter[0]) +
+        (v[4][1] - farCenter[1]) * (v[4][1] - farCenter[1]) +
+        (v[4][2] - farCenter[2]) * (v[4][2] - farCenter[2]));
+
+    // Direction from near to far plane center
+    float dx = farCenter[0] - nearCenter[0];
+    float dy = farCenter[1] - nearCenter[1];
+    float dz = farCenter[2] - nearCenter[2];
+    float planeDist = std::sqrt(dx * dx + dy * dy + dz * dz);
+
     vec3_t camPos;
-    camPos[0] = (v[0][0] + v[1][0] + v[2][0] + v[3][0]) * 0.25f;
-    camPos[1] = (v[0][1] + v[1][1] + v[2][1] + v[3][1]) * 0.25f;
-    camPos[2] = (v[0][2] + v[1][2] + v[2][2] + v[3][2]) * 0.25f;
+    float denom = farHW - nearHW;
+    if (planeDist > 0.001f && std::fabs(denom) > 0.001f)
+    {
+        // nearDist = nearHW * planeDist / (farHW - nearHW)
+        float nearDist = nearHW * planeDist / denom;
+        float invPlaneDist = 1.0f / planeDist;
+        camPos[0] = nearCenter[0] - dx * invPlaneDist * nearDist;
+        camPos[1] = nearCenter[1] - dy * invPlaneDist * nearDist;
+        camPos[2] = nearCenter[2] - dz * invPlaneDist * nearDist;
+    }
+    else
+    {
+        // Fallback: use near-plane center (orthographic or degenerate)
+        camPos[0] = nearCenter[0];
+        camPos[1] = nearCenter[1];
+        camPos[2] = nearCenter[2];
+    }
 
     // Scale far-plane vertices outward from camera by RENDER_DISTANCE_MULTIPLIER
     // to match the actual GL projection extent

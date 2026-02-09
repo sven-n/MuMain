@@ -27,7 +27,7 @@ public:
 
     // Configuration & Frustum (minimal — no expensive frustum building)
     const CameraConfig& GetConfig() const override { return m_Config; }
-    void SetConfig(const CameraConfig& config) override { m_Config = config; }
+    void SetConfig(const CameraConfig& config) override { m_Config = config; UpdateFrustum(); }
     const Frustum& GetFrustum() const override { return m_Frustum; }
 
     // Culling — cheap distance-based checks (no 6-plane sphere test)
@@ -63,7 +63,7 @@ public:
 private:
     CameraState& m_State;
     CameraConfig m_Config;
-    Frustum m_Frustum;  // Unused — kept to satisfy interface
+    Frustum m_Frustum;
 
     // Original main branch camera functions (direct ports)
     float CalculateCameraViewFar();
@@ -73,4 +73,5 @@ private:
     void UpdateCustomCameraDistance();
     void UpdateCameraDistance();
     void SetCameraFOV();
+    void UpdateFrustum();
 };
