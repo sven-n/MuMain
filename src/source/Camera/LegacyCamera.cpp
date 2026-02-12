@@ -289,34 +289,25 @@ bool LegacyCamera::Update()
 
 void LegacyCamera::UpdateFrustum()
 {
-    // Derive forward from camera angles (matches GL view matrix set by AngleMatrix)
-    vec3_t forward;
-    float Matrix[3][4];
-    AngleMatrix(m_State.Angle, Matrix);
-    forward[0] = Matrix[1][0];
-    forward[1] = Matrix[1][1];
-    forward[2] = Matrix[1][2];
+    // Derive forward/up from camera angles matching GL rotation convention.
+    // BeginOpengl applies: glRotatef(A1,0,1,0) * glRotatef(A0,1,0,0) * glRotatef(A2,0,0,1)
+    // => R = Ry(A1) * Rx(A0) * Rz(A2).  Forward = R^T*(0,0,-1), Up = R^T*(0,1,0).
+    float a0 = m_State.Angle[0] * (Q_PI / 180.0f);
+    float a1 = m_State.Angle[1] * (Q_PI / 180.0f);
+    float a2 = m_State.Angle[2] * (Q_PI / 180.0f);
+    float s0 = sinf(a0), c0 = cosf(a0);
+    float s1 = sinf(a1), c1 = cosf(a1);
+    float s2 = sinf(a2), c2 = cosf(a2);
+
+    vec3_t forward, up;
+    forward[0] = s1 * c2 - c1 * s0 * s2;
+    forward[1] = -(s1 * s2 + c1 * s0 * c2);
+    forward[2] = -c1 * c0;
     VectorNormalize(forward);
 
-    // Handle degenerate case when looking straight down/up
-    vec3_t worldUp = { 0.0f, 0.0f, 1.0f };
-    float dot = forward[0] * worldUp[0] + forward[1] * worldUp[1] + forward[2] * worldUp[2];
-    if (fabsf(dot) > 0.99f)
-    {
-        worldUp[0] = 0.0f;
-        worldUp[1] = 1.0f;
-        worldUp[2] = 0.0f;
-    }
-
-    vec3_t right, up, forwardTemp, upTemp;
-    VectorCopy(forward, forwardTemp);
-    VectorCopy(worldUp, upTemp);
-    CrossProduct(forwardTemp, upTemp, right);
-    VectorNormalize(right);
-
-    VectorCopy(right, forwardTemp);
-    VectorCopy(forward, upTemp);
-    CrossProduct(forwardTemp, upTemp, up);
+    up[0] = c0 * s2;
+    up[1] = c0 * c2;
+    up[2] = -s0;
     VectorNormalize(up);
 
     extern unsigned int WindowWidth, WindowHeight;

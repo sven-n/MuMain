@@ -73,6 +73,16 @@ private:
 #ifdef _EDITOR
     std::unique_ptr<ICamera> m_pFreeFlyCamera;
     ICamera* m_pSpectatedCamera = nullptr;  // Camera being spectated while in FreeFly mode
+
+    // Saved g_Camera state for the spectated camera, so its Update() sees its own
+    // previous state instead of FreeFly's values (which would corrupt yaw, distance, etc.)
+    vec3_t m_SpectatedPos = {};
+    vec3_t m_SpectatedAngle = {};
+    float m_SpectatedFOV = 0.0f;
+    float m_SpectatedViewFar = 0.0f;
+    float m_SpectatedDistance = 0.0f;
+    float m_SpectatedDistanceTarget = 0.0f;
+    bool m_bHasSpectatedState = false;
 #endif
 
     void TransitionToCamera(ICamera* pNewCamera);
