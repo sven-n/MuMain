@@ -33,6 +33,7 @@
 // DevEditor function declarations
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowTerrainCullingSpheres();
+extern "C" bool DevEditor_ShouldShowTileGrid();
 extern "C" float DevEditor_GetCullRadiusTerrain();
 #endif
 
@@ -1995,9 +1996,10 @@ int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
 // 2D frustum convex hull vertices (in tile coordinates, i.e. world * 0.01)
-// Up to 8 vertices when using camera's projected frustum, 4 for legacy trapezoid.
-float FrustrumX[8];
-float FrustrumY[8];
+// Up to 12 vertices when using camera's projected frustum (8 frustum + 4 terrain cull extension),
+// 4 for legacy trapezoid.
+float FrustrumX[12];
+float FrustrumY[12];
 int FrustrumCount = 4;
 
 // 3D frustum data (used by TestFrustrum / 3D culling)
@@ -2010,9 +2012,172 @@ static ICamera* s_pCachedCamera = nullptr;
 
 extern int GetScreenWidth();
 
+// Helper: build a CW convex hull from points projected to tile-space XY,
+// then store into FrustrumX/Y/Count and compute iteration bounds.
+static void BuildHull2DAndBounds(const float* ptsX, const float* ptsY, int numPts)
+{
+    struct Pt { float x, y; };
+    Pt sorted[12];
+    int n = (numPts > 12) ? 12 : numPts;
+    for (int i = 0; i < n; i++) { sorted[i].x = ptsX[i]; sorted[i].y = ptsY[i]; }
+
+    // Insertion sort by X then Y
+    for (int i = 1; i < n; i++)
+    {
+        Pt key = sorted[i];
+        int j = i - 1;
+        while (j >= 0 && (sorted[j].x > key.x || (sorted[j].x == key.x && sorted[j].y > key.y)))
+        {
+            sorted[j + 1] = sorted[j];
+            j--;
+        }
+        sorted[j + 1] = key;
+    }
+
+    // Andrew's monotone chain (CCW)
+    Pt hull[24];
+    int k = 0;
+    for (int i = 0; i < n; i++)
+    {
+        while (k >= 2)
+        {
+            float cross = (hull[k-1].x - hull[k-2].x) * (sorted[i].y - hull[k-2].y)
+                        - (hull[k-1].y - hull[k-2].y) * (sorted[i].x - hull[k-2].x);
+            if (cross <= 0.f) k--;
+            else break;
+        }
+        hull[k++] = sorted[i];
+    }
+    int lower = k + 1;
+    for (int i = n - 2; i >= 0; i--)
+    {
+        while (k >= lower)
+        {
+            float cross = (hull[k-1].x - hull[k-2].x) * (sorted[i].y - hull[k-2].y)
+                        - (hull[k-1].y - hull[k-2].y) * (sorted[i].x - hull[k-2].x);
+            if (cross <= 0.f) k--;
+            else break;
+        }
+        hull[k++] = sorted[i];
+    }
+    k--;
+    if (k > 12) k = 12;
+
+    // Reverse to CW (TestFrustrum2D expects CW winding)
+    FrustrumCount = k;
+    for (int i = 0; i < k; i++)
+    {
+        FrustrumX[i] = hull[k - 1 - i].x;
+        FrustrumY[i] = hull[k - 1 - i].y;
+    }
+
+    // Compute iteration bounds
+    float minX = FrustrumX[0], minY = FrustrumY[0];
+    float maxX = FrustrumX[0], maxY = FrustrumY[0];
+    for (int i = 1; i < FrustrumCount; i++)
+    {
+        if (FrustrumX[i] < minX) minX = FrustrumX[i];
+        if (FrustrumY[i] < minY) minY = FrustrumY[i];
+        if (FrustrumX[i] > maxX) maxX = FrustrumX[i];
+        if (FrustrumY[i] > maxY) maxY = FrustrumY[i];
+    }
+    int tileWidth = 4;
+    FrustrumBoundMinX = (int)(minX) / tileWidth * tileWidth - tileWidth;
+    FrustrumBoundMinY = (int)(minY) / tileWidth * tileWidth - tileWidth;
+    FrustrumBoundMaxX = (int)(maxX) / tileWidth * tileWidth + tileWidth;
+    FrustrumBoundMaxY = (int)(maxY) / tileWidth * tileWidth + tileWidth;
+    FrustrumBoundMinX = std::max(FrustrumBoundMinX, 0);
+    FrustrumBoundMinY = std::max(FrustrumBoundMinY, 0);
+    FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE_MASK - tileWidth);
+    FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE_MASK - tileWidth);
+}
+
+// Expand CW convex hull outward by `offset` tiles.
+// Compensates for TestFrustrum2D only checking tile centers — tiles at the hull
+// boundary whose centers are just outside would otherwise be culled even though
+// part of the tile is visible. Expanding by ~1 tile ensures full coverage.
+static void ExpandHullOutward(float offset)
+{
+    if (FrustrumCount < 3) return;
+
+    float newX[12], newY[12];
+
+    for (int i = 0; i < FrustrumCount; i++)
+    {
+        int prev = (i + FrustrumCount - 1) % FrustrumCount;
+        int next = (i + 1) % FrustrumCount;
+
+        // Edge directions
+        float e1x = FrustrumX[i] - FrustrumX[prev];
+        float e1y = FrustrumY[i] - FrustrumY[prev];
+        float len1 = sqrtf(e1x * e1x + e1y * e1y);
+
+        float e2x = FrustrumX[next] - FrustrumX[i];
+        float e2y = FrustrumY[next] - FrustrumY[i];
+        float len2 = sqrtf(e2x * e2x + e2y * e2y);
+
+        if (len1 < 0.001f || len2 < 0.001f)
+        {
+            newX[i] = FrustrumX[i];
+            newY[i] = FrustrumY[i];
+            continue;
+        }
+
+        // Outward normals for CW winding: (-ey, ex) / len
+        float n1x = -e1y / len1, n1y = e1x / len1;
+        float n2x = -e2y / len2, n2y = e2x / len2;
+
+        // Bisector direction
+        float bx = n1x + n2x;
+        float by = n1y + n2y;
+        float blen = sqrtf(bx * bx + by * by);
+
+        if (blen > 0.001f)
+        {
+            bx /= blen;
+            by /= blen;
+            // Scale by 1/cos(halfAngle) to maintain perpendicular offset distance
+            float cosHalf = n1x * bx + n1y * by;
+            float scale = (cosHalf > 0.1f) ? (offset / cosHalf) : (offset * 2.0f);
+            newX[i] = FrustrumX[i] + bx * scale;
+            newY[i] = FrustrumY[i] + by * scale;
+        }
+        else
+        {
+            newX[i] = FrustrumX[i] + n1x * offset;
+            newY[i] = FrustrumY[i] + n1y * offset;
+        }
+    }
+
+    for (int i = 0; i < FrustrumCount; i++)
+    {
+        FrustrumX[i] = newX[i];
+        FrustrumY[i] = newY[i];
+    }
+
+    // Recompute iteration bounds from expanded hull
+    float minX = FrustrumX[0], minY = FrustrumY[0];
+    float maxX = FrustrumX[0], maxY = FrustrumY[0];
+    for (int i = 1; i < FrustrumCount; i++)
+    {
+        if (FrustrumX[i] < minX) minX = FrustrumX[i];
+        if (FrustrumY[i] < minY) minY = FrustrumY[i];
+        if (FrustrumX[i] > maxX) maxX = FrustrumX[i];
+        if (FrustrumY[i] > maxY) maxY = FrustrumY[i];
+    }
+    int tileWidth = 4;
+    FrustrumBoundMinX = (int)(minX) / tileWidth * tileWidth - tileWidth;
+    FrustrumBoundMinY = (int)(minY) / tileWidth * tileWidth - tileWidth;
+    FrustrumBoundMaxX = (int)(maxX) / tileWidth * tileWidth + tileWidth;
+    FrustrumBoundMaxY = (int)(maxY) / tileWidth * tileWidth + tileWidth;
+    FrustrumBoundMinX = std::max(FrustrumBoundMinX, 0);
+    FrustrumBoundMinY = std::max(FrustrumBoundMinY, 0);
+    FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE_MASK - tileWidth);
+    FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE_MASK - tileWidth);
+}
+
 void CreateFrustrum2D(vec3_t Position)
 {
-    // Dynamic path: cameras with their own Frustum compute a proper 2D frustum projection
     CameraMode currentMode = CameraManager::Instance().GetCurrentMode();
     if (currentMode == CameraMode::Orbital
 #ifdef _EDITOR
@@ -2020,42 +2185,129 @@ void CreateFrustrum2D(vec3_t Position)
 #endif
         )
     {
-        const ICamera* cam = CameraManager::Instance().GetActiveCamera();
 #ifdef _EDITOR
-        // In FreeFly spectator mode, use spectated camera's frustum for culling
+        // FreeFly spectator: use spectated camera's pre-computed Frustum hull
         if (currentMode == CameraMode::FreeFly)
         {
             ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
-            if (spectated)
-                cam = spectated;
+            const ICamera* cam = spectated ? spectated : CameraManager::Instance().GetActiveCamera();
+            if (cam)
+            {
+                const Frustum& frustum = cam->GetFrustum();
+                FrustrumCount = frustum.Get2DCount();
+                const float* srcX = frustum.Get2DX();
+                const float* srcY = frustum.Get2DY();
+                float px[12], py[12];
+                for (int i = 0; i < FrustrumCount; i++) { px[i] = srcX[i]; py[i] = srcY[i]; }
+                BuildHull2DAndBounds(px, py, FrustrumCount);
+                // No hull expansion needed — tile-level test checks all 4 corners
+                return;
+            }
         }
 #endif
-        if (cam)
+        // Orbital mode: build 2D hull from the ACTUAL GL modelview matrix,
+        // then clip against the far-clip plane at ground level (Z=0).
+        //
+        // The hull extends to fogEnd distance (= terrainCullRange) so terrain is only
+        // rendered where it's at least partially visible through fog. The far-clip ground
+        // line clipping is a safety net for steep camera angles where the ground at the
+        // hull boundary could be deeper than the GL far clip.
         {
-            const Frustum& frustum = cam->GetFrustum();
-            FrustrumCount = frustum.Get2DCount();
-            const float* srcX = frustum.Get2DX();
-            const float* srcY = frustum.Get2DY();
+            // Use fog end distance as terrain cull extent (don't render fully-fogged terrain)
+            const ICamera* cam = CameraManager::Instance().GetActiveCamera();
+            float terrainDist = g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER;  // fallback
+            if (cam)
+                terrainDist = cam->GetConfig().terrainCullRange;
 
-            // Expand 2D hull by 10% from centroid to create buffer zone
-            float cx = 0.0f, cy = 0.0f;
+            // Same vFov and viewport aspect that gluPerspective uses in BeginOpengl
+            float vFovHalfRad = g_Camera.FOV * 0.5f * Q_PI / 180.0f;
+            float tanHalf = tanf(vFovHalfRad);
+
+            // Viewport aspect ratio (matching BeginOpengl's calculation)
+            extern unsigned int WindowWidth, WindowHeight;
+            extern EGameScene SceneFlag;
+            int refWidth = GetScreenWidth();
+            int refHeight = 480;
+            if (SceneFlag == MAIN_SCENE && !g_Camera.TopViewEnable)
+                refHeight = 480 - 48;
+            else if (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
+                refHeight = 430;
+            float vpW = (float)(refWidth * WindowWidth) / 640.0f;
+            float vpH = (float)(refHeight * WindowHeight) / 480.0f;
+            float aspect = vpW / vpH;
+
+            float halfH = tanHalf * terrainDist;
+            float halfW = halfH * aspect;
+
+            // View-space frustum corners: apex (camera) + 4 far corners at terrainDist
+            vec3_t viewPts[5];
+            Vector(0.f, 0.f, 0.f, viewPts[0]);
+            Vector(-halfW,  halfH, -terrainDist, viewPts[1]);
+            Vector( halfW,  halfH, -terrainDist, viewPts[2]);
+            Vector( halfW, -halfH, -terrainDist, viewPts[3]);
+            Vector(-halfW, -halfH, -terrainDist, viewPts[4]);
+
+            // Transform to world space using the actual GL modelview matrix
+            // (g_Camera.Matrix was set by CameraProjection::GetOpenGLMatrix in BeginOpengl)
+            float px[5], py[5];
+            for (int i = 0; i < 5; i++)
+            {
+                vec3_t world;
+                VectorIRotate(viewPts[i], g_Camera.Matrix, world);
+                VectorAdd(world, g_Camera.Position, world);
+                px[i] = world[0] * 0.01f;
+                py[i] = world[1] * 0.01f;
+            }
+
+            BuildHull2DAndBounds(px, py, 5);
+
+            // --- Clip hull against the far-clip plane at ground level (Z=0) ---
+            // The GL modelview matrix maps world→view. For a point at ground (z=0):
+            //   viewZ = Matrix[2][0]*x + Matrix[2][1]*y + Matrix[2][3]
+            // The point is within the far clip if viewZ >= -terrainDist.
+            // In tile coords (world = tile * 100):
+            //   A*xt + B*yt + D >= 0  means "visible"
+            float A = g_Camera.Matrix[2][0] * 100.0f;
+            float B = g_Camera.Matrix[2][1] * 100.0f;
+            float D = g_Camera.Matrix[2][3] + terrainDist;
+
+            // Sutherland-Hodgman: clip polygon against half-plane A*x + B*y + D >= 0
+            float clipX[24], clipY[24];
+            int clipCount = 0;
+
             for (int i = 0; i < FrustrumCount; i++)
             {
-                cx += srcX[i];
-                cy += srcY[i];
-            }
-            cx /= (float)FrustrumCount;
-            cy /= (float)FrustrumCount;
+                int j = (i + 1) % FrustrumCount;
+                float di = A * FrustrumX[i] + B * FrustrumY[i] + D;
+                float dj = A * FrustrumX[j] + B * FrustrumY[j] + D;
 
-            for (int i = 0; i < FrustrumCount; i++)
-            {
-                FrustrumX[i] = cx + (srcX[i] - cx) * 1.1f;
-                FrustrumY[i] = cy + (srcY[i] - cy) * 1.1f;
+                if (di >= 0.f)
+                {
+                    clipX[clipCount] = FrustrumX[i];
+                    clipY[clipCount] = FrustrumY[i];
+                    clipCount++;
+                }
+
+                // If edge crosses the line, add intersection
+                if ((di >= 0.f) != (dj >= 0.f))
+                {
+                    float t = di / (di - dj);
+                    clipX[clipCount] = FrustrumX[i] + t * (FrustrumX[j] - FrustrumX[i]);
+                    clipY[clipCount] = FrustrumY[i] + t * (FrustrumY[j] - FrustrumY[i]);
+                    clipCount++;
+                }
             }
-#ifdef _EDITOR
-            // In FreeFly spectator mode, compute iteration bounds from expanded hull
-            if (currentMode == CameraMode::FreeFly)
+
+            if (clipCount >= 3 && clipCount <= 12)
             {
+                FrustrumCount = clipCount;
+                for (int i = 0; i < clipCount; i++)
+                {
+                    FrustrumX[i] = clipX[i];
+                    FrustrumY[i] = clipY[i];
+                }
+
+                // Recompute bounds from clipped hull
                 float minX = FrustrumX[0], minY = FrustrumY[0];
                 float maxX = FrustrumX[0], maxY = FrustrumY[0];
                 for (int i = 1; i < FrustrumCount; i++)
@@ -2075,7 +2327,9 @@ void CreateFrustrum2D(vec3_t Position)
                 FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE_MASK - tileWidth);
                 FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE_MASK - tileWidth);
             }
-#endif
+            // else: keep the unclipped hull (camera looking up or edge case)
+
+            // No hull expansion needed — tile-level test checks all 4 corners
             return;
         }
     }
@@ -2714,17 +2968,45 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag, ICame
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            // Per-tile culling: block-level test already passed, so skip expensive
-            // 3D sphere test for individual tiles. Only use legacy 2D test (cheap) as fallback.
+            // Per-tile culling: test if any part of the tile overlaps the 2D hull.
+            // Check center first (most tiles pass immediately), then all 4 corners
+            // so tiles at the hull boundary are rendered if they touch the green lines.
             bool visible = g_Camera.TopViewEnable || camera != nullptr;
             if (!visible)
             {
-                visible = TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f);
+                visible = TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f)
+                       || TestFrustrum2D(xf, yf, 0.f)
+                       || TestFrustrum2D(xf + 1.f, yf, 0.f)
+                       || TestFrustrum2D(xf + 1.f, yf + 1.f, 0.f)
+                       || TestFrustrum2D(xf, yf + 1.f, 0.f);
             }
 
             if (visible)
             {
                 RenderTerrainTile(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
+
+#ifdef _EDITOR
+                if (!EditFlag && DevEditor_ShouldShowTileGrid())
+                {
+                    float sx = xf * TERRAIN_SCALE;
+                    float sy = yf * TERRAIN_SCALE;
+                    float z0 = RequestTerrainHeight(sx, sy) + 2.0f;
+                    float z1 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + 2.0f;
+                    float z2 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + 2.0f;
+                    float z3 = RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + 2.0f;
+
+                    glDisable(GL_TEXTURE_2D);
+                    glDisable(GL_LIGHTING);
+                    glColor4f(0.0f, 1.0f, 1.0f, 0.4f);
+                    glBegin(GL_LINE_LOOP);
+                    glVertex3f(sx, sy, z0);
+                    glVertex3f(sx + TERRAIN_SCALE, sy, z1);
+                    glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, z2);
+                    glVertex3f(sx, sy + TERRAIN_SCALE, z3);
+                    glEnd();
+                    glEnable(GL_TEXTURE_2D);
+                }
+#endif
             }
             xf += lodf;
         }
@@ -2746,7 +3028,14 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || g_Camera.TopViewEnable)
+            // Block-level culling: test center + 4 corners of the 4x4 block so
+            // boundary blocks aren't rejected before per-tile corner tests can run.
+            if (g_Camera.TopViewEnable
+                || TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange)
+                || TestFrustrum2D(xf, yf, 0.f)
+                || TestFrustrum2D(xf + 4.f, yf, 0.f)
+                || TestFrustrum2D(xf + 4.f, yf + 4.f, 0.f)
+                || TestFrustrum2D(xf, yf + 4.f, 0.f))
             {
                 if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                 {
@@ -2786,7 +3075,12 @@ void RenderTerrainBlock_After(float xf, float yf, int xi, int yi, bool EditFlag)
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || g_Camera.TopViewEnable)
+            if (g_Camera.TopViewEnable
+                || TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f)
+                || TestFrustrum2D(xf, yf, 0.f)
+                || TestFrustrum2D(xf + 1.f, yf, 0.f)
+                || TestFrustrum2D(xf + 1.f, yf + 1.f, 0.f)
+                || TestFrustrum2D(xf, yf + 1.f, 0.f))
             {
                 RenderTerrainTile_After(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
             }
@@ -2809,7 +3103,12 @@ void RenderTerrainFrustrum_After(bool EditFlag)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            if (TestFrustrum2D(xf + 2.f, yf + 2.f, -80.f) || g_Camera.TopViewEnable)
+            if (g_Camera.TopViewEnable
+                || TestFrustrum2D(xf + 2.f, yf + 2.f, -80.f)
+                || TestFrustrum2D(xf, yf, 0.f)
+                || TestFrustrum2D(xf + 4.f, yf, 0.f)
+                || TestFrustrum2D(xf + 4.f, yf + 4.f, 0.f)
+                || TestFrustrum2D(xf, yf + 4.f, 0.f))
             {
                 RenderTerrainBlock_After(xf, yf, xi, yi, EditFlag);
             }

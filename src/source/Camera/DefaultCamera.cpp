@@ -924,32 +924,15 @@ void DefaultCamera::UpdateFrustum()
     }
 #endif
 
-    // Calculate forward and up vectors from current camera state
+    // Derive forward from camera angles (matches GL view matrix set by AngleMatrix)
+    // Game uses Y-forward convention: forward = Matrix[1] (second row)
     vec3_t forward, up, right;
-
-    // DefaultCamera looks at Hero from behind at 45-degree angle
-    // Calculate forward as direction from camera to Hero (what we're looking at)
-    extern CHARACTER* Hero;
-    if (Hero && Hero->Object.Live)
-    {
-        // Forward points from camera towards Hero
-        forward[0] = Hero->Object.Position[0] - m_State.Position[0];
-        forward[1] = Hero->Object.Position[1] - m_State.Position[1];
-        forward[2] = Hero->Object.Position[2] - m_State.Position[2];
-        VectorNormalize(forward);
-    }
-    else
-    {
-        // Fallback: Use camera angle to calculate forward direction
-        // This handles LoginScene/CharacterScene where Hero doesn't exist
-        // Game uses Y-forward convention: forward = Matrix[1] (second row)
-        float Matrix[3][4];
-        AngleMatrix(m_State.Angle, Matrix);
-        forward[0] = Matrix[1][0];
-        forward[1] = Matrix[1][1];
-        forward[2] = Matrix[1][2];
-        VectorNormalize(forward);
-    }
+    float Matrix[3][4];
+    AngleMatrix(m_State.Angle, Matrix);
+    forward[0] = Matrix[1][0];
+    forward[1] = Matrix[1][1];
+    forward[2] = Matrix[1][2];
+    VectorNormalize(forward);
 
     // Calculate right vector (perpendicular to forward in XY plane)
     // When looking straight down/up, forward is parallel to Z — use Y as fallback

@@ -5,6 +5,7 @@
 #include "DevEditorUI.h"
 #include "imgui.h"
 #include "Camera/CameraManager.h"
+#include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/OrbitalCamera.h"
 #include "CameraMove.h"
@@ -23,7 +24,6 @@ extern CameraState g_Camera;
 extern "C" int GetCurrentCameraMode();
 extern "C" float GetOrbitalCameraRadius();
 extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch);
-extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
 
 // CCameraMove wrapper
 extern "C" CCameraMove* CCameraMove__GetInstancePtr();
@@ -78,6 +78,50 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::Text("Camera System Controls");
     ImGui::Separator();
 
+    // FreeFly / Game Camera Toggle
+    {
+        auto& camMgr = CameraManager::Instance();
+        CameraMode currentMode = camMgr.GetCurrentMode();
+        bool isFreeFly = (currentMode == CameraMode::FreeFly);
+
+        if (isFreeFly)
+        {
+            if (ImGui::Button("Switch to Game Camera", ImVec2(250, 0)))
+            {
+                ICamera* spectated = camMgr.GetSpectatedCamera();
+                if (spectated)
+                {
+                    const char* name = spectated->GetName();
+                    if (strcmp(name, "Orbital") == 0)
+                        camMgr.SetCameraMode(CameraMode::Orbital);
+                    else if (strcmp(name, "Legacy") == 0)
+                        camMgr.SetCameraMode(CameraMode::Legacy);
+                    else
+                        camMgr.SetCameraMode(CameraMode::Default);
+                }
+                else
+                    camMgr.SetCameraMode(CameraMode::Default);
+            }
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "FreeFly");
+
+            ICamera* spectated = camMgr.GetSpectatedCamera();
+            if (spectated)
+                ImGui::Text("Spectating: %s", spectated->GetName());
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast");
+        }
+        else
+        {
+            if (ImGui::Button("Switch to FreeFly", ImVec2(250, 0)))
+            {
+                camMgr.SetCameraMode(CameraMode::FreeFly);
+            }
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s", camMgr.GetActiveCamera()->GetName());
+        }
+    }
+    ImGui::Separator();
+
     // Culling sphere visualization toggles
     ImGui::Text("Culling Sphere Visualization:");
     ImGui::Indent();
@@ -92,6 +136,10 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::Checkbox("Show Character Culling Spheres", &m_ShowCharacterCullingSpheres);
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Cyan wireframe)");
+
+    ImGui::Checkbox("Show Tile Grid", &m_ShowTileGrid);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Cyan tile borders)");
     ImGui::Unindent();
 
     ImGui::Separator();
@@ -103,7 +151,6 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::InputFloat("Terrain Radius", &m_CullRadiusTerrain, 10.0f, 50.0f, "%.1f");
     ImGui::InputFloat("Character Radius", &m_CullRadiusCharacter, 10.0f, 50.0f, "%.1f");
     ImGui::InputFloat("Item Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
-    ImGui::InputFloat("Object Radius", &m_CullRadiusObject, 10.0f, 50.0f, "%.1f");
     ImGui::PopItemWidth();
     ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Adjust culling sphere radii in real-time");
     ImGui::Unindent();
@@ -120,8 +167,9 @@ void CDevEditorUI::RenderCameraTab()
     {
         case 0: modeName = "Default"; break;
         case 1: modeName = "Orbital"; break;
+        case 2: modeName = "Legacy"; break;
 #ifdef _EDITOR
-        case 2: modeName = "FreeFly"; break;
+        case 3: modeName = "FreeFly"; break;
 #endif
         default: modeName = "Unknown"; break;
     }
@@ -179,69 +227,34 @@ void CDevEditorUI::RenderCameraTab()
     ImGui::Unindent();
     ImGui::Separator();
 
-    // Enable/Disable override
-    ImGui::Checkbox("Override Frustum Values", &m_OverrideEnabled);
-    ImGui::Separator();
-
-    if (m_OverrideEnabled)
-    {
-        ImGui::PushItemWidth(200);
-
-        // Main controls
-        ImGui::Text("Distance Controls:");
-        ImGui::InputFloat("ViewFar (Far Plane)", &m_CameraViewFar, 100.0f, 500.0f, "%.1f");
-        ImGui::InputFloat("ViewNear (Near Plane)", &m_CameraViewNear, 10.0f, 100.0f, "%.1f");
-        ImGui::InputFloat("ViewTarget (Pivot)", &m_CameraViewTarget, 10.0f, 100.0f, "%.1f");
-
-        ImGui::PopItemWidth();
-    }
-    else
-    {
-        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable override to edit values");
-    }
-
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    // New CameraConfig controls
+    // CameraConfig controls
     ImGui::Text("Camera Configuration (CameraConfig)");
     ImGui::Separator();
 
-    // Check if camera has changed
+    // Get the camera whose config we're editing — in FreeFly, that's the spectated camera
     extern CameraManager& CameraManager_Instance();
-    ICamera* currentCamera = CameraManager_Instance().GetActiveCamera();
+    auto& camMgrRef = CameraManager_Instance();
+    ICamera* currentCamera = camMgrRef.GetActiveCamera();
+    if (camMgrRef.GetCurrentMode() == CameraMode::FreeFly)
+    {
+        ICamera* spectated = camMgrRef.GetSpectatedCamera();
+        if (spectated)
+            currentCamera = spectated;
+    }
     const char* currentCameraName = currentCamera ? currentCamera->GetName() : nullptr;
 
     // If override is enabled and camera changed, refresh override values
     if (m_ConfigOverrideEnabled && m_LastActiveCameraName != currentCameraName)
     {
-        char debugMsg[256];
-        sprintf_s(debugMsg, "[DEVUI] Camera changed from '%s' to '%s' - refreshing override values",
-                  m_LastActiveCameraName ? m_LastActiveCameraName : "null",
-                  currentCameraName ? currentCameraName : "null");
-        g_MuEditorConsoleUI.LogEditor(debugMsg);
-
-        float defaultFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
-        GetActiveCameraConfig(&defaultFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
-
-        sprintf_s(debugMsg, "[DEVUI] New config values: hFOV=%.1f, Far=%.0f, TerrainCull=%.0f",
-                  defaultFOV, defaultFarPlane, defaultTerrainCullRange);
-        g_MuEditorConsoleUI.LogEditor(debugMsg);
-
-        m_HFOV = defaultFOV;
-        m_NearPlane = defaultNearPlane;
-        m_FarPlane = defaultFarPlane;
-        m_TerrainCullRange = defaultTerrainCullRange;
-
-        // Update fog and cull values from new camera config
         if (currentCamera)
         {
             const CameraConfig& config = currentCamera->GetConfig();
+            m_HFOV = config.hFov;
+            m_NearPlane = config.nearPlane;
+            m_FarPlane = config.farPlane;
             m_FogStart = config.fogStart;
             m_FogEnd = config.fogEnd;
-            m_ObjectCullRange = config.objectCullRange;
         }
-
         m_LastActiveCameraName = currentCameraName;
     }
 
@@ -253,23 +266,15 @@ void CDevEditorUI::RenderCameraTab()
     // If override was just enabled, initialize with current camera's defaults
     if (m_ConfigOverrideEnabled && !previousOverrideState)
     {
-        float defaultHFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
-        GetActiveCameraConfig(&defaultHFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
-
-        m_HFOV = defaultHFOV;
-        m_NearPlane = defaultNearPlane;
-        m_FarPlane = defaultFarPlane;
-        m_TerrainCullRange = defaultTerrainCullRange;
-
-        // Initialize fog and cull values from camera config
         if (currentCamera)
         {
             const CameraConfig& config = currentCamera->GetConfig();
+            m_HFOV = config.hFov;
+            m_NearPlane = config.nearPlane;
+            m_FarPlane = config.farPlane;
             m_FogStart = config.fogStart;
             m_FogEnd = config.fogEnd;
-            m_ObjectCullRange = config.objectCullRange;
         }
-
         m_LastActiveCameraName = currentCameraName;
     }
 
@@ -282,8 +287,14 @@ void CDevEditorUI::RenderCameraTab()
     if (m_ConfigOverrideEnabled)
     {
         // Get current camera's default config for reference
-        float defaultHFOV, defaultNearPlane, defaultFarPlane, defaultTerrainCullRange;
-        GetActiveCameraConfig(&defaultHFOV, &defaultNearPlane, &defaultFarPlane, &defaultTerrainCullRange);
+        float defaultHFOV = 90.0f, defaultNearPlane = 10.0f, defaultFarPlane = 2400.0f;
+        if (currentCamera)
+        {
+            const CameraConfig& cfg = currentCamera->GetConfig();
+            defaultHFOV = cfg.hFov;
+            defaultNearPlane = cfg.nearPlane;
+            defaultFarPlane = cfg.farPlane;
+        }
 
         // Compute vertical FOV from current horizontal FOV for display
         extern unsigned int WindowWidth, WindowHeight;
@@ -307,14 +318,6 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::InputFloat("Far Plane", &m_FarPlane, 100.0f, 500.0f, "%.1f");
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultFarPlane);
-
-        ImGui::Spacing();
-        ImGui::Text("Culling:");
-        ImGui::InputFloat("Terrain Cull Range", &m_TerrainCullRange, 50.0f, 200.0f, "%.1f");
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultTerrainCullRange);
-
-        ImGui::InputFloat("Object Cull Range", &m_ObjectCullRange, 50.0f, 200.0f, "%.1f");
 
         ImGui::Spacing();
         ImGui::Text("Fog Controls:");
@@ -342,22 +345,14 @@ void CDevEditorUI::RenderCameraTab()
         ImGui::Spacing();
         if (ImGui::Button("Reset to Camera Defaults"))
         {
-            // Get the actual defaults from the active camera's config
-            float resetHFOV, resetNearPlane, resetFarPlane, resetTerrainCullRange;
-            GetActiveCameraConfig(&resetHFOV, &resetNearPlane, &resetFarPlane, &resetTerrainCullRange);
-
-            m_HFOV = resetHFOV;
-            m_NearPlane = resetNearPlane;
-            m_FarPlane = resetFarPlane;
-            m_TerrainCullRange = resetTerrainCullRange;
-
-            // Reset fog and object cull from camera config
             if (currentCamera)
             {
                 const CameraConfig& config = currentCamera->GetConfig();
+                m_HFOV = config.hFov;
+                m_NearPlane = config.nearPlane;
+                m_FarPlane = config.farPlane;
                 m_FogStart = config.fogStart;
                 m_FogEnd = config.fogEnd;
-                m_ObjectCullRange = config.objectCullRange;
             }
         }
         ImGui::SameLine();
@@ -369,24 +364,21 @@ void CDevEditorUI::RenderCameraTab()
     }
     else
     {
-        // Display current camera config (read-only, single source of truth)
-        float currentHFOV, currentNearPlane, currentFarPlane, currentTerrainCullRange;
-        GetActiveCameraConfig(&currentHFOV, &currentNearPlane, &currentFarPlane, &currentTerrainCullRange);
-
-        extern unsigned int WindowWidth, WindowHeight;
-        float aspect = (float)WindowWidth / (float)WindowHeight;
-        float computedVFov = HFovToVFov(currentHFOV, aspect);
-
-        ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Current Camera Config (Scene-Specific):");
-        ImGui::Text("  Horizontal FOV: %.1f°", currentHFOV);
-        ImGui::Text("  Vertical FOV: %.1f° (at %.2f aspect)", computedVFov, aspect);
-        ImGui::Text("  Near Plane: %.1f", currentNearPlane);
-        ImGui::Text("  Far Plane: %.1f", currentFarPlane);
-        ImGui::Text("  Terrain Cull Range: %.1f", currentTerrainCullRange);
+        // Display current camera config (read-only)
         if (currentCamera)
         {
             const CameraConfig& config = currentCamera->GetConfig();
-            ImGui::Text("  Object Cull Range: %.1f", config.objectCullRange);
+
+            extern unsigned int WindowWidth, WindowHeight;
+            float aspect = (float)WindowWidth / (float)WindowHeight;
+            float computedVFov = HFovToVFov(config.hFov, aspect);
+
+            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Current Camera Config:");
+            ImGui::Text("  Horizontal FOV: %.1f°", config.hFov);
+            ImGui::Text("  Vertical FOV: %.1f° (at %.2f aspect)", computedVFov, aspect);
+            ImGui::Text("  Near Plane: %.1f", config.nearPlane);
+            ImGui::Text("  Far Plane: %.1f", config.farPlane);
+            ImGui::Text("  Fog: %.0f - %.0f", config.fogStart, config.fogEnd);
         }
         ImGui::Spacing();
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable override to customize these values");
@@ -1091,21 +1083,6 @@ void CDevEditorUI::RenderGraphicsTab()
 // Accessors for external use
 extern "C"
 {
-    bool DevEditor_IsOverrideEnabled()
-    {
-        return g_DevEditorUI.IsOverrideEnabled();
-    }
-
-    void DevEditor_GetFrustumValues(float* outViewFar, float* outViewNear, float* outViewTarget,
-                                     float* outWidthFar, float* outWidthNear)
-    {
-        if (outViewFar) *outViewFar = g_DevEditorUI.GetCameraViewFar();
-        if (outViewNear) *outViewNear = g_DevEditorUI.GetCameraViewNear();
-        if (outViewTarget) *outViewTarget = g_DevEditorUI.GetCameraViewTarget();
-        if (outWidthFar) *outWidthFar = g_DevEditorUI.GetWidthFar();
-        if (outWidthNear) *outWidthNear = g_DevEditorUI.GetWidthNear();
-    }
-
     // Camera info accessors
     int GetCurrentCameraMode()
     {
@@ -1140,7 +1117,9 @@ extern "C"
         if (outHFOV) *outHFOV = g_DevEditorUI.GetHFOV();
         if (outNearPlane) *outNearPlane = g_DevEditorUI.GetNearPlane();
         if (outFarPlane) *outFarPlane = g_DevEditorUI.GetFarPlane();
-        if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetTerrainCullRange();
+        // terrainCullRange has no effect on culling (dead param in BuildFromCamera),
+        // but callers still pass it — just mirror farPlane for consistency
+        if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetFarPlane();
     }
 
     void DevEditor_GetFogConfig(float* outStart, float* outEnd)
@@ -1273,6 +1252,15 @@ extern "C" {
 #endif
     }
 
+    bool DevEditor_ShouldShowTileGrid()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.ShouldShowTileGrid();
+#else
+        return false;
+#endif
+    }
+
     float DevEditor_GetCullRadiusTerrain()
     {
 #ifdef _EDITOR
@@ -1300,12 +1288,4 @@ extern "C" {
 #endif
     }
 
-    float DevEditor_GetCullRadiusObject()
-    {
-#ifdef _EDITOR
-        return g_DevEditorUI.GetCullRadiusObject();
-#else
-        return 100.0f;
-#endif
-    }
 }

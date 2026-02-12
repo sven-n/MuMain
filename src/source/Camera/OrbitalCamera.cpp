@@ -817,14 +817,15 @@ void OrbitalCamera::UpdateConfigForView()
         zoomScale = 0.5f + (zoomRatio * 0.5f);
     }
 
-    // Scale far plane and terrain cull range with zoom only (not pitch).
+    // Scale far plane with zoom only (not pitch).
     // The 2D frustum projection already adapts its shape to the actual camera pitch.
     m_Config.farPlane = baseConfig.farPlane * zoomScale;
-    m_Config.terrainCullRange = baseConfig.terrainCullRange * zoomScale;
 
-    // Keep fog proportional to the current far plane: 80% start, 90% end
+    // Fog: 80% start of farPlane, end at rendering distance (farPlane * RENDER_DISTANCE_MULTIPLIER)
+    // Terrain cull range = fog end: don't render terrain that's 100% fogged
     m_Config.fogStart = m_Config.farPlane * 0.80f;
-    m_Config.fogEnd = m_Config.farPlane * 0.90f;
+    m_Config.fogEnd = m_Config.farPlane * RENDER_DISTANCE_MULTIPLIER;
+    m_Config.terrainCullRange = m_Config.fogEnd;
 }
 
 void OrbitalCamera::HandleFreeCameraMovement()
@@ -903,45 +904,52 @@ void OrbitalCamera::UpdateFrustum()
     }
 #endif
 
-    // Calculate forward and up vectors from current camera state
-    vec3_t forward, up, right;
+    // Derive forward and up vectors from m_State.Angle to match the OpenGL view setup.
+    // BeginOpengl() applies: glRotatef(A1, Y) * glRotatef(A0, X) * glRotatef(A2, Z)
+    // The GL rotation R = Ry(A1) * Rx(A0) * Rz(A2) transforms world→view.
+    // Forward (view -Z) in world space = R^T * (0,0,-1), Up (view +Y) = R^T * (0,1,0).
+    vec3_t forward, up;
 
-    // Calculate forward as direction from camera to target (what we're looking at)
-    forward[0] = m_Target[0] - m_State.Position[0];
-    forward[1] = m_Target[1] - m_State.Position[1];
-    forward[2] = m_Target[2] - m_State.Position[2];
-    VectorNormalize(forward);
+    float a0 = m_State.Angle[0] * (Q_PI / 180.0f);  // X rotation (pitch)
+    float a1 = m_State.Angle[1] * (Q_PI / 180.0f);  // Y rotation (usually 0)
+    float a2 = m_State.Angle[2] * (Q_PI / 180.0f);  // Z rotation (yaw)
+    float sa0 = sinf(a0), ca0 = cosf(a0);
+    float sa1 = sinf(a1), ca1 = cosf(a1);
+    float sa2 = sinf(a2), ca2 = cosf(a2);
 
-    // Calculate right vector (perpendicular to forward in XY plane)
-    // When looking straight down/up, forward is parallel to Z — use Y as fallback
-    vec3_t worldUp = { 0.0f, 0.0f, 1.0f };
-    float dot = forward[0] * worldUp[0] + forward[1] * worldUp[1] + forward[2] * worldUp[2];
-    if (fabsf(dot) > 0.99f)
-    {
-        worldUp[0] = 0.0f;
-        worldUp[1] = 1.0f;
-        worldUp[2] = 0.0f;
-    }
-    vec3_t forwardTemp, worldUpTemp;
-    VectorCopy(forward, forwardTemp);
-    VectorCopy(worldUp, worldUpTemp);
-    CrossProduct(forwardTemp, worldUpTemp, right);
-    VectorNormalize(right);
+    // forward = -(third row of R) = -R[2][*]
+    forward[0] = sa1 * ca2 - ca1 * sa0 * sa2;
+    forward[1] = -(sa1 * sa2 + ca1 * sa0 * ca2);
+    forward[2] = -(ca1 * ca0);
 
-    // Calculate actual up vector (perpendicular to both forward and right)
-    VectorCopy(right, forwardTemp);  // reuse temp
-    VectorCopy(forward, worldUpTemp);  // reuse temp
-    CrossProduct(forwardTemp, worldUpTemp, up);
-    VectorNormalize(up);
+    // up = second row of R = R[1][*]
+    up[0] = ca0 * sa2;
+    up[1] = ca0 * ca2;
+    up[2] = -sa0;
 
-    // Build frustum from current configuration
+    // Build frustum using the same viewport aspect ratio that BeginOpengl() will use.
+    // BeginOpengl() scales reference coords (640×480) to actual window pixels.
+    // MainScene uses height=432 (480-48 for UI bar), CharacterScene uses 430, etc.
     extern unsigned int WindowWidth;
     extern unsigned int WindowHeight;
-    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    extern EGameScene SceneFlag;
+    extern int GetScreenWidth();
 
-    // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
-    // m_State.ViewFar is only for OpenGL rendering (BeginOpengl)
-    // Frustum should use the clean config values, not zoom-adjusted ViewFar
+    int refWidth = 640;
+    int refHeight = 480;
+    if (SceneFlag == MAIN_SCENE)
+    {
+        refWidth = GetScreenWidth();
+        refHeight = g_Camera.TopViewEnable ? 480 : (480 - 48);
+    }
+    else if (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
+    {
+        refHeight = 430;
+    }
+    float viewportWidth = (float)(refWidth * WindowWidth) / 640.0f;
+    float viewportHeight = (float)(refHeight * WindowHeight) / 480.0f;
+    float aspectRatio = viewportWidth / viewportHeight;
+
     float effectiveFarPlane = m_Config.farPlane;
     float effectiveTerrainCullRange = m_Config.terrainCullRange;
 #ifdef _EDITOR
@@ -954,8 +962,9 @@ void OrbitalCamera::UpdateFrustum()
     }
 #endif
 
-    // Convert horizontal FOV to vertical FOV for frustum building
-    float vFov = HFovToVFov(m_Config.hFov, aspectRatio);
+    // Use g_Camera.FOV (= m_State.FOV) directly — same vFov that BeginOpengl passes
+    // to gluPerspective. Combined with viewport aspect, this matches the GL projection exactly.
+    float vFov = m_State.FOV;
 
     m_Frustum.BuildFromCamera(
         m_State.Position,

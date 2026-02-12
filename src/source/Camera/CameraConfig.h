@@ -153,11 +153,12 @@ struct CameraConfig
         config.hFov = 90.0f;  // Good 3D game default; ~59° vFOV on 16:9
         config.nearPlane = 500.0f;
         config.farPlane = 3800.0f;  // Direct value — RENDER_DISTANCE_MULTIPLIER already applied in BeginOpengl()
-        config.terrainCullRange = 3800.0f;
         config.objectCullRange = 3800.0f;
-        // Fog: 80% start, 90% end of farPlane
+        // Fog: 80% start, 100% end of rendering distance
+        // Terrain cull range = fog end: don't render terrain that's 100% fogged
         config.fogStart = config.farPlane * 0.80f;
-        config.fogEnd = config.farPlane * 0.90f;
+        config.fogEnd = config.farPlane * RENDER_DISTANCE_MULTIPLIER;
+        config.terrainCullRange = config.fogEnd;
         return config;
     }
 

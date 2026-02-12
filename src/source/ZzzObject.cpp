@@ -42,7 +42,6 @@
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowObjectCullingSpheres();
 extern "C" float DevEditor_GetCullRadiusItem();
-extern "C" float DevEditor_GetCullRadiusObject();
 #endif
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];

@@ -7,11 +7,8 @@
 #include "LegacyCamera.h"
 #ifdef _EDITOR
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "FreeFlyCamera.h"
 #endif
-// Note: FreeFlyCamera disabled for Phase 1, will be re-implemented later based on new system
-//#ifdef _EDITOR
-//#include "FreeFlyCamera.h"
-//#endif
 
 // External global camera state
 extern CameraState g_Camera;
@@ -39,10 +36,9 @@ void CameraManager::Initialize()
     m_pDefaultCamera = std::make_unique<DefaultCamera>(g_Camera);
     m_pOrbitalCamera = std::make_unique<OrbitalCamera>(g_Camera);
     m_pLegacyCamera = std::make_unique<LegacyCamera>(g_Camera);
-    // Note: FreeFlyCamera disabled for Phase 1
-    //#ifdef _EDITOR
-    //    m_pFreeFlyCamera = std::make_unique<FreeFlyCamera>(g_Camera);
-    //#endif
+#ifdef _EDITOR
+    m_pFreeFlyCamera = std::make_unique<FreeFlyCamera>(g_Camera);
+#endif
 
     // Start with default camera
     m_pActiveCamera = m_pDefaultCamera.get();
@@ -61,10 +57,10 @@ void CameraManager::Shutdown()
     m_pDefaultCamera.reset();
     m_pOrbitalCamera.reset();
     m_pLegacyCamera.reset();
-    // Note: FreeFlyCamera disabled for Phase 1
-    //#ifdef _EDITOR
-    //    m_pFreeFlyCamera.reset();
-    //#endif
+#ifdef _EDITOR
+    m_pFreeFlyCamera.reset();
+    m_pSpectatedCamera = nullptr;
+#endif
 }
 
 bool CameraManager::Update()
@@ -77,6 +73,30 @@ bool CameraManager::Update()
 
     if (!m_pActiveCamera)
         return false;
+
+#ifdef _EDITOR
+    // When in FreeFly mode, also update the spectated camera so it keeps tracking
+    if (m_pSpectatedCamera && m_CurrentMode == CameraMode::FreeFly)
+    {
+        // Save FreeFly's state before spectated camera overwrites g_Camera
+        vec3_t savedPos, savedAngle;
+        VectorCopy(g_Camera.Position, savedPos);
+        VectorCopy(g_Camera.Angle, savedAngle);
+        float savedFOV = g_Camera.FOV;
+        float savedViewFar = g_Camera.ViewFar;
+
+        m_pSpectatedCamera->Update();
+
+        // Force frustum rebuild on spectated camera (bypasses NeedsFrustumUpdate optimization)
+        m_pSpectatedCamera->SetConfig(m_pSpectatedCamera->GetConfig());
+
+        // Restore FreeFly's state so rendering uses FreeFly's viewpoint
+        VectorCopy(savedPos, g_Camera.Position);
+        VectorCopy(savedAngle, g_Camera.Angle);
+        g_Camera.FOV = savedFOV;
+        g_Camera.ViewFar = savedViewFar;
+    }
+#endif
 
     return m_pActiveCamera->Update();
 }
@@ -132,12 +152,35 @@ void CameraManager::CycleToNextMode()
 
 void CameraManager::TransitionToCamera(ICamera* pNewCamera)
 {
+    // When returning FROM FreeFly to the spectated game camera, skip OnActivate
+    // because the spectated camera was already being updated each frame.
+    bool skipActivate = false;
+#ifdef _EDITOR
+    // Check BEFORE clearing m_pSpectatedCamera
+    if (m_pActiveCamera == m_pFreeFlyCamera.get() && pNewCamera == m_pSpectatedCamera && m_pSpectatedCamera != nullptr)
+        skipActivate = true;
+
+    // When transitioning TO FreeFly, save the old camera as spectated
+    // and inherit its FOV so the view matches at the same position
+    if (pNewCamera == m_pFreeFlyCamera.get() && m_pActiveCamera != m_pFreeFlyCamera.get())
+    {
+        m_pSpectatedCamera = m_pActiveCamera;
+        static_cast<FreeFlyCamera*>(pNewCamera)->InheritFOV(m_pActiveCamera->GetConfig().hFov);
+    }
+    // When transitioning FROM FreeFly, clear spectated
+    else if (m_pActiveCamera == m_pFreeFlyCamera.get())
+    {
+        m_pSpectatedCamera = nullptr;
+    }
+#endif
+
     // Deactivate old camera
     if (m_pActiveCamera)
         m_pActiveCamera->OnDeactivate();
 
     // Activate new camera with current state for smooth transition
-    pNewCamera->OnActivate(g_Camera);
+    if (!skipActivate)
+        pNewCamera->OnActivate(g_Camera);
 
     m_pActiveCamera = pNewCamera;
 }
@@ -174,11 +217,20 @@ extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch)
     }
 }
 
-// Phase 5: Get active camera's config (for DevEditor single source of truth)
+// Get active camera's config (for DevEditor single source of truth)
+// In FreeFly spectator mode, returns the spectated camera's config instead
 extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange)
 {
     auto& manager = CameraManager::Instance();
     ICamera* camera = manager.GetActiveCamera();
+#ifdef _EDITOR
+    if (manager.GetCurrentMode() == CameraMode::FreeFly)
+    {
+        ICamera* spectated = manager.GetSpectatedCamera();
+        if (spectated)
+            camera = spectated;
+    }
+#endif
     if (camera)
     {
         const CameraConfig& config = camera->GetConfig();

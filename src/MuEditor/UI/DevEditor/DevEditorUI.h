@@ -9,21 +9,11 @@ public:
 
     void Render(bool* p_open);
 
-    // Accessors for external use (called from C code in ZzzLodTerrain.cpp)
-    bool IsOverrideEnabled() const { return m_OverrideEnabled; }
-    float GetCameraViewFar() const { return m_CameraViewFar; }
-    float GetCameraViewNear() const { return m_CameraViewNear; }
-    float GetCameraViewTarget() const { return m_CameraViewTarget; }
-    float GetWidthFar() const { return m_WidthFar; }
-    float GetWidthNear() const { return m_WidthNear; }
-
-    // New CameraConfig accessors
+    // CameraConfig accessors
     bool IsConfigOverrideEnabled() const { return m_ConfigOverrideEnabled; }
     float GetHFOV() const { return m_HFOV; }
     float GetNearPlane() const { return m_NearPlane; }
     float GetFarPlane() const { return m_FarPlane; }
-    float GetTerrainCullRange() const { return m_TerrainCullRange; }
-    float GetObjectCullRange() const { return m_ObjectCullRange; }
 
     // Fog control accessors
     float GetFogStart() const { return m_FogStart; }
@@ -59,12 +49,12 @@ public:
     bool ShouldShowTerrainCullingSpheres() const { return m_ShowTerrainCullingSpheres; }
     bool ShouldShowObjectCullingSpheres() const { return m_ShowObjectCullingSpheres; }
     bool ShouldShowCharacterCullingSpheres() const { return m_ShowCharacterCullingSpheres; }
+    bool ShouldShowTileGrid() const { return m_ShowTileGrid; }
 
     // Culling radius accessors
     float GetCullRadiusTerrain() const { return m_CullRadiusTerrain; }
     float GetCullRadiusCharacter() const { return m_CullRadiusCharacter; }
     float GetCullRadiusItem() const { return m_CullRadiusItem; }
-    float GetCullRadiusObject() const { return m_CullRadiusObject; }
 
 private:
     CDevEditorUI() = default;
@@ -73,22 +63,11 @@ private:
     void RenderCameraTab();
     void RenderGraphicsTab();
 
-    // Camera frustum values for live editing (best settings for Default/Orbital camera)
-    float m_CameraViewFar = 1100.0f;
-    float m_CameraViewNear = -530.0f;
-    float m_CameraViewTarget = 0.0f;
-    float m_WidthFar = 700.0f;
-    float m_WidthNear = 330.0f;
-
-    bool m_OverrideEnabled = false;
-
-    // New CameraConfig values for live editing
+    // CameraConfig values for live editing
     bool m_ConfigOverrideEnabled = false;
     float m_HFOV = 90.0f;             // Horizontal field of view in degrees
     float m_NearPlane = 10.0f;        // Near clipping plane
     float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
-    float m_TerrainCullRange = 1100.0f;  // 2D terrain culling range
-    float m_ObjectCullRange = 2400.0f;   // 3D object culling range
     const char* m_LastActiveCameraName = nullptr;  // Track which camera we're overriding for
 
     // Fog control values (absolute distances)
@@ -129,12 +108,12 @@ private:
     bool m_ShowTerrainCullingSpheres = false;    // Show terrain tile culling spheres
     bool m_ShowObjectCullingSpheres = false;     // Show object culling spheres (trees, items, etc.)
     bool m_ShowCharacterCullingSpheres = false;  // Show character culling spheres
+    bool m_ShowTileGrid = false;                 // Show terrain tile borders
 
     // Runtime adjustable culling radii
     float m_CullRadiusTerrain = 100.0f;
     float m_CullRadiusCharacter = 100.0f;
     float m_CullRadiusItem = 100.0f;
-    float m_CullRadiusObject = 100.0f;
 };
 
 #define g_DevEditorUI CDevEditorUI::GetInstance()

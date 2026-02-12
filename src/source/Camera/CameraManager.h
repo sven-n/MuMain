@@ -72,7 +72,13 @@ private:
     std::unique_ptr<ICamera> m_pLegacyCamera;
 #ifdef _EDITOR
     std::unique_ptr<ICamera> m_pFreeFlyCamera;
+    ICamera* m_pSpectatedCamera = nullptr;  // Camera being spectated while in FreeFly mode
 #endif
 
     void TransitionToCamera(ICamera* pNewCamera);
+
+public:
+#ifdef _EDITOR
+    ICamera* GetSpectatedCamera() const { return m_pSpectatedCamera; }
+#endif
 };

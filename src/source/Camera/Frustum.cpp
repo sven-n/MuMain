@@ -5,6 +5,7 @@
 
 Frustum::Frustum()
     : m_2DCount(0)
+    , m_bHasTerrainExtension(false)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -17,7 +18,12 @@ Frustum::Frustum()
         Vector(0.f, 0.f, 0.f, m_Vertices[i]);
     }
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 4; i++)
+    {
+        Vector(0.f, 0.f, 0.f, m_TerrainFarVertices[i]);
+    }
+
+    for (int i = 0; i < 12; i++)
     {
         m_2DX[i] = 0.f;
         m_2DY[i] = 0.f;
@@ -100,6 +106,37 @@ void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const
     // Far bottom-left
     VectorMA(farCenter, -farHeight * 0.5f, actualUp, temp1);
     VectorMA(temp1, -farWidth * 0.5f, right, m_Vertices[7]);
+
+    // Compute extended terrain cull far vertices (for 2D hull only)
+    // When terrainCullDist > farDist, the 2D terrain tile culling range extends
+    // beyond the 3D frustum far plane to match the rendering extent
+    m_bHasTerrainExtension = (terrainCullDist > farDist + 1.0f);
+    if (m_bHasTerrainExtension)
+    {
+        float tcFarHeight = 2.0f * tanHalfFov * terrainCullDist;
+        float tcFarWidth = tcFarHeight * aspectRatio;
+
+        vec3_t tcFarCenter;
+        VectorCopy(position, posTemp2);
+        VectorCopy(forward, forwardTemp2);
+        VectorMA(posTemp2, terrainCullDist, forwardTemp2, tcFarCenter);
+
+        // Terrain far top-left
+        VectorMA(tcFarCenter, tcFarHeight * 0.5f, actualUp, temp1);
+        VectorMA(temp1, -tcFarWidth * 0.5f, right, m_TerrainFarVertices[0]);
+
+        // Terrain far top-right
+        VectorMA(tcFarCenter, tcFarHeight * 0.5f, actualUp, temp1);
+        VectorMA(temp1, tcFarWidth * 0.5f, right, m_TerrainFarVertices[1]);
+
+        // Terrain far bottom-right
+        VectorMA(tcFarCenter, -tcFarHeight * 0.5f, actualUp, temp1);
+        VectorMA(temp1, tcFarWidth * 0.5f, right, m_TerrainFarVertices[2]);
+
+        // Terrain far bottom-left
+        VectorMA(tcFarCenter, -tcFarHeight * 0.5f, actualUp, temp1);
+        VectorMA(temp1, -tcFarWidth * 0.5f, right, m_TerrainFarVertices[3]);
+    }
 
     // Calculate the 6 frustum planes
     // Need temporary copies for FaceNormalize (doesn't accept const)
@@ -224,17 +261,30 @@ void Frustum::CalculateBoundingBox()
 
 void Frustum::Calculate2DProjection()
 {
-    // Project all 8 frustum vertices to XY ground plane in tile coordinates
+    // Project frustum vertices to XY ground plane in tile coordinates
+    // Include terrain cull far vertices if present (extends 2D hull beyond 3D far plane)
     struct Point2D { float x, y; };
-    Point2D pts[8];
+
+    int numPts = 8 + (m_bHasTerrainExtension ? 4 : 0);
+    Point2D pts[12];
+
     for (int i = 0; i < 8; i++)
     {
         pts[i].x = m_Vertices[i][0] * 0.01f;
         pts[i].y = m_Vertices[i][1] * 0.01f;
     }
 
-    // Sort by X, then Y (simple insertion sort for N=8)
-    for (int i = 1; i < 8; i++)
+    if (m_bHasTerrainExtension)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            pts[8 + i].x = m_TerrainFarVertices[i][0] * 0.01f;
+            pts[8 + i].y = m_TerrainFarVertices[i][1] * 0.01f;
+        }
+    }
+
+    // Sort by X, then Y (simple insertion sort for N<=12)
+    for (int i = 1; i < numPts; i++)
     {
         Point2D key = pts[i];
         int j = i - 1;
@@ -247,11 +297,11 @@ void Frustum::Calculate2DProjection()
     }
 
     // Andrew's monotone chain convex hull (produces CCW ordering)
-    Point2D hull[16];
+    Point2D hull[24];
     int k = 0;
 
     // Lower hull
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < numPts; i++)
     {
         while (k >= 2)
         {
@@ -265,7 +315,7 @@ void Frustum::Calculate2DProjection()
 
     // Upper hull
     int lowerSize = k + 1;
-    for (int i = 6; i >= 0; i--)
+    for (int i = numPts - 2; i >= 0; i--)
     {
         while (k >= lowerSize)
         {
@@ -277,6 +327,9 @@ void Frustum::Calculate2DProjection()
         hull[k++] = pts[i];
     }
     k--; // Remove duplicate last point
+
+    // Clamp to max array size
+    if (k > 12) k = 12;
 
     // Reverse to CW order (the original TestFrustrum2D cross-product test expects CW winding)
     m_2DCount = k;

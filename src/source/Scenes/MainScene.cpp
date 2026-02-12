@@ -31,6 +31,9 @@
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
+#ifdef _EDITOR
+#include "Camera/FrustumRenderer.h"
+#endif
 
 // External declarations
 extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch);
@@ -602,6 +605,17 @@ bool RenderMainScene()
 
     SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
     RenderGameWorld(byWaterMap, width, height);
+
+#ifdef _EDITOR
+    // Render spectated camera frustum wireframe when in FreeFly mode
+    if (cameraMode == CameraMode::FreeFly)
+    {
+        ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
+        if (spectated)
+            RenderFrustumWireframe(spectated->GetFrustum());
+    }
+#endif
+
     RenderMainSceneUI();
 
 

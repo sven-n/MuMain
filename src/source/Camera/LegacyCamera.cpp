@@ -289,26 +289,14 @@ bool LegacyCamera::Update()
 
 void LegacyCamera::UpdateFrustum()
 {
-    // Calculate forward vector from camera angles
-    // Legacy camera uses angle-based orientation (same as DefaultCamera fallback)
+    // Derive forward from camera angles (matches GL view matrix set by AngleMatrix)
     vec3_t forward;
-    extern CHARACTER* Hero;
-    if (Hero && Hero->Object.Live)
-    {
-        forward[0] = Hero->Object.Position[0] - m_State.Position[0];
-        forward[1] = Hero->Object.Position[1] - m_State.Position[1];
-        forward[2] = Hero->Object.Position[2] - m_State.Position[2];
-        VectorNormalize(forward);
-    }
-    else
-    {
-        float Matrix[3][4];
-        AngleMatrix(m_State.Angle, Matrix);
-        forward[0] = Matrix[1][0];
-        forward[1] = Matrix[1][1];
-        forward[2] = Matrix[1][2];
-        VectorNormalize(forward);
-    }
+    float Matrix[3][4];
+    AngleMatrix(m_State.Angle, Matrix);
+    forward[0] = Matrix[1][0];
+    forward[1] = Matrix[1][1];
+    forward[2] = Matrix[1][2];
+    VectorNormalize(forward);
 
     // Handle degenerate case when looking straight down/up
     vec3_t worldUp = { 0.0f, 0.0f, 1.0f };

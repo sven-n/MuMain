@@ -31,6 +31,10 @@
 #include "../ZzzOpenData.h"
 #include "LoginScene.h"
 #include "Camera/CameraProjection.h"
+#ifdef _EDITOR
+#include "Camera/CameraMode.h"
+#include "Camera/FrustumRenderer.h"
+#endif
 
 // External declarations
 extern EGameScene SceneFlag;
@@ -418,6 +422,16 @@ bool NewRenderCharacterScene(HDC hDC)
     AdjustCharacterHeights();
     RenderCharacterScene3D();
     RenderSelectedCharacterEffects();
+
+#ifdef _EDITOR
+    if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)
+    {
+        ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
+        if (spectated)
+            RenderFrustumWireframe(spectated->GetFrustum());
+    }
+#endif
+
     RenderCharacterSceneUI();
 
     EndOpengl();
