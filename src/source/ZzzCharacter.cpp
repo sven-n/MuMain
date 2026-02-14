@@ -38,6 +38,9 @@
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowCharacterCullingSpheres();
 extern "C" float DevEditor_GetCullRadiusCharacter();
+
+static bool s_bShowCharacterCullingSpheres = false;
+static float s_fCullRadiusCharacter = 0.0f;
 #endif
 
 #include "CSChaosCastle.h"
@@ -11210,6 +11213,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
 void RenderCharactersClient()
 {
+#ifdef _EDITOR
+    s_bShowCharacterCullingSpheres = DevEditor_ShouldShowCharacterCullingSpheres();
+    s_fCullRadiusCharacter = DevEditor_GetCullRadiusCharacter();
+#endif
+
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -11277,10 +11285,9 @@ void RenderCharactersClient()
 
 #ifdef _EDITOR
                 // Debug visualization: Render character culling sphere
-                if (DevEditor_ShouldShowCharacterCullingSpheres())
+                if (s_bShowCharacterCullingSpheres)
                 {
-                    float cullRadius = DevEditor_GetCullRadiusCharacter();
-                    RenderDebugSphere(o->Position, cullRadius, 0.0f, 1.0f, 1.0f);  // Cyan wireframe
+                    RenderDebugSphere(o->Position, s_fCullRadiusCharacter, 0.0f, 1.0f, 1.0f);  // Cyan wireframe
                 }
 #endif
             }

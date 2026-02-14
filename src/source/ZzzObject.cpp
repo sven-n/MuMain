@@ -42,6 +42,10 @@
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowObjectCullingSpheres();
 extern "C" float DevEditor_GetCullRadiusItem();
+
+// Per-frame cached DevEditor state (avoid per-object function calls)
+static bool s_bShowObjectCullingSpheres = false;
+static float s_fCullRadiusItem = 0.0f;
 #endif
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
@@ -3265,7 +3269,10 @@ void RenderObjectVisual(OBJECT* o)
 
 void RenderObjects(ICamera* camera)
 {
-    // Phase 3: Accept optional camera parameter for direct culling
+#ifdef _EDITOR
+    s_bShowObjectCullingSpheres = DevEditor_ShouldShowObjectCullingSpheres();
+    s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
+#endif
 
     float   range = 0.f;
     if (gMapManager.WorldActive == WD_10HEAVEN)
@@ -3428,7 +3435,7 @@ void RenderObjects(ICamera* camera)
                                                     RenderObjectVisual(o);
 
 #ifdef _EDITOR
-                                                    if (DevEditor_ShouldShowObjectCullingSpheres())
+                                                    if (s_bShowObjectCullingSpheres)
                                                     {
                                                         RenderDebugSphere(o->Position, o->CollisionRange * 100.0f, 1.0f, 1.0f, 0.0f);
                                                     }
@@ -3628,7 +3635,7 @@ void RenderObjects_AfterCharacter(ICamera* camera)
 
 #ifdef _EDITOR
                                                     // Debug visualization: Render world object culling sphere (trees, walls, etc)
-                                                    if (DevEditor_ShouldShowObjectCullingSpheres())
+                                                    if (s_bShowObjectCullingSpheres)
                                                     {
                                                         // Note: CollisionRange is typically negative (tolerance in tile units)
                                                         // For 2D culling: negative = expanded frustum (more permissive)
@@ -6422,7 +6429,7 @@ void RenderItems()
         if (o->Live)
         {
 #ifdef _EDITOR
-            float cullRadius = DevEditor_GetCullRadiusItem();
+            float cullRadius = s_fCullRadiusItem;
 #else
             float cullRadius = DEFAULT_CULL_RADIUS_ITEM;
 #endif
@@ -6430,7 +6437,7 @@ void RenderItems()
 
 #ifdef _EDITOR
             // Debug visualization: Render object culling sphere
-            if (DevEditor_ShouldShowObjectCullingSpheres())
+            if (s_bShowObjectCullingSpheres)
             {
                 RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
             }

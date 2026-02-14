@@ -35,6 +35,11 @@
 extern "C" bool DevEditor_ShouldShowTerrainCullingSpheres();
 extern "C" bool DevEditor_ShouldShowTileGrid();
 extern "C" float DevEditor_GetCullRadiusTerrain();
+
+// Per-frame cached DevEditor state (avoid per-tile function calls)
+static bool s_bShowTerrainCullingSpheres = false;
+static bool s_bShowTileGrid = false;
+static float s_fCullRadiusTerrain = 0.0f;
 #endif
 
 //-------------------------------------------------------------------------------------------------------------
@@ -2200,7 +2205,7 @@ void CreateFrustrum2D(vec3_t Position)
                 float px[12], py[12];
                 for (int i = 0; i < FrustrumCount; i++) { px[i] = srcX[i]; py[i] = srcY[i]; }
                 BuildHull2DAndBounds(px, py, FrustrumCount);
-                // No hull expansion needed — tile-level test checks all 4 corners
+                ExpandHullOutward(1.0f);
                 return;
             }
         }
@@ -2329,7 +2334,7 @@ void CreateFrustrum2D(vec3_t Position)
             }
             // else: keep the unclipped hull (camera looking up or edge case)
 
-            // No hull expansion needed — tile-level test checks all 4 corners
+            ExpandHullOutward(1.0f);
             return;
         }
     }
@@ -2667,6 +2672,11 @@ void RenderDebugSphere(const vec3_t center, float radius, float r, float g, floa
 void CacheActiveFrustum()
 {
     s_pCachedCamera = CameraManager::Instance().GetActiveCamera();
+#ifdef _EDITOR
+    s_bShowTerrainCullingSpheres = DevEditor_ShouldShowTerrainCullingSpheres();
+    s_bShowTileGrid = DevEditor_ShouldShowTileGrid();
+    s_fCullRadiusTerrain = DevEditor_GetCullRadiusTerrain();
+#endif
 }
 
 bool TestFrustrum2D(float x, float y, float Range)
@@ -2675,6 +2685,22 @@ bool TestFrustrum2D(float x, float y, float Range)
     if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
         return true;
 
+    // Fast path: unrolled 4-edge test for Legacy/Default cameras
+    if (FrustrumCount == 4)
+    {
+        float d;
+        d = (FrustrumX[0] - x) * (FrustrumY[3] - y) - (FrustrumX[3] - x) * (FrustrumY[0] - y);
+        if (d <= Range) return false;
+        d = (FrustrumX[1] - x) * (FrustrumY[0] - y) - (FrustrumX[0] - x) * (FrustrumY[1] - y);
+        if (d <= Range) return false;
+        d = (FrustrumX[2] - x) * (FrustrumY[1] - y) - (FrustrumX[1] - x) * (FrustrumY[2] - y);
+        if (d <= Range) return false;
+        d = (FrustrumX[3] - x) * (FrustrumY[2] - y) - (FrustrumX[2] - x) * (FrustrumY[3] - y);
+        if (d <= Range) return false;
+        return true;
+    }
+
+    // General path for N-vertex hulls (Orbital camera)
     int j = FrustrumCount - 1;
     for (int i = 0; i < FrustrumCount; j = i, i++)
     {
@@ -2968,25 +2994,12 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag, ICame
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            // Per-tile culling: test if any part of the tile overlaps the 2D hull.
-            // Check center first (most tiles pass immediately), then all 4 corners
-            // so tiles at the hull boundary are rendered if they touch the green lines.
-            bool visible = g_Camera.TopViewEnable || camera != nullptr;
-            if (!visible)
-            {
-                visible = TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f)
-                       || TestFrustrum2D(xf, yf, 0.f)
-                       || TestFrustrum2D(xf + 1.f, yf, 0.f)
-                       || TestFrustrum2D(xf + 1.f, yf + 1.f, 0.f)
-                       || TestFrustrum2D(xf, yf + 1.f, 0.f);
-            }
-
-            if (visible)
+            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || g_Camera.TopViewEnable)
             {
                 RenderTerrainTile(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
 
 #ifdef _EDITOR
-                if (!EditFlag && DevEditor_ShouldShowTileGrid())
+                if (!EditFlag && s_bShowTileGrid)
                 {
                     float sx = xf * TERRAIN_SCALE;
                     float sy = yf * TERRAIN_SCALE;
@@ -3028,14 +3041,7 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            // Block-level culling: test center + 4 corners of the 4x4 block so
-            // boundary blocks aren't rejected before per-tile corner tests can run.
-            if (g_Camera.TopViewEnable
-                || TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange)
-                || TestFrustrum2D(xf, yf, 0.f)
-                || TestFrustrum2D(xf + 4.f, yf, 0.f)
-                || TestFrustrum2D(xf + 4.f, yf + 4.f, 0.f)
-                || TestFrustrum2D(xf, yf + 4.f, 0.f))
+            if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || g_Camera.TopViewEnable)
             {
                 if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                 {
@@ -3050,9 +3056,9 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
 
 #ifdef _EDITOR
                 // Debug visualization: Render terrain tile culling sphere
-                if (!EditFlag && DevEditor_ShouldShowTerrainCullingSpheres())
+                if (!EditFlag && s_bShowTerrainCullingSpheres)
                 {
-                    float cullRadius = DevEditor_GetCullRadiusTerrain();
+                    float cullRadius = s_fCullRadiusTerrain;
                     vec3_t tileCenter;
                     tileCenter[0] = (xi + 2.0f) * 100.0f;  // Center of 4x4 block
                     tileCenter[1] = (yi + 2.0f) * 100.0f;
@@ -3075,12 +3081,7 @@ void RenderTerrainBlock_After(float xf, float yf, int xi, int yi, bool EditFlag)
         float temp = xf;
         for (int j = 0; j < 4; j += lodi)
         {
-            if (g_Camera.TopViewEnable
-                || TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f)
-                || TestFrustrum2D(xf, yf, 0.f)
-                || TestFrustrum2D(xf + 1.f, yf, 0.f)
-                || TestFrustrum2D(xf + 1.f, yf + 1.f, 0.f)
-                || TestFrustrum2D(xf, yf + 1.f, 0.f))
+            if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || g_Camera.TopViewEnable)
             {
                 RenderTerrainTile_After(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
             }
@@ -3103,12 +3104,7 @@ void RenderTerrainFrustrum_After(bool EditFlag)
         xf = (float)xi;
         for (; xi <= FrustrumBoundMaxX; xi += 4, xf += 4.f)
         {
-            if (g_Camera.TopViewEnable
-                || TestFrustrum2D(xf + 2.f, yf + 2.f, -80.f)
-                || TestFrustrum2D(xf, yf, 0.f)
-                || TestFrustrum2D(xf + 4.f, yf, 0.f)
-                || TestFrustrum2D(xf + 4.f, yf + 4.f, 0.f)
-                || TestFrustrum2D(xf, yf + 4.f, 0.f))
+            if (TestFrustrum2D(xf + 2.f, yf + 2.f, -80.f) || g_Camera.TopViewEnable)
             {
                 RenderTerrainBlock_After(xf, yf, xi, yi, EditFlag);
             }
