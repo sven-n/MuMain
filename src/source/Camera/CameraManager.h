@@ -90,5 +90,6 @@ private:
 public:
 #ifdef _EDITOR
     ICamera* GetSpectatedCamera() const { return m_pSpectatedCamera; }
+    bool GetSpectatedCameraState(vec3_t outPos, vec3_t outAngle) const;
 #endif
 };

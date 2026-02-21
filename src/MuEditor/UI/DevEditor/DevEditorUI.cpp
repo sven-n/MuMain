@@ -8,6 +8,7 @@
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/OrbitalCamera.h"
+#include "Camera/FreeFlyCamera.h"
 #include "CameraMove.h"
 #include "ZzzCharacter.h"
 #include "GameConfig/GameConfig.h"
@@ -107,7 +108,19 @@ void CDevEditorUI::RenderCameraTab()
 
             ICamera* spectated = camMgr.GetSpectatedCamera();
             if (spectated)
+            {
                 ImGui::Text("Spectating: %s", spectated->GetName());
+                ImGui::SameLine();
+                vec3_t snapPos, snapAngle;
+                if (camMgr.GetSpectatedCameraState(snapPos, snapAngle))
+                {
+                    if (ImGui::Button("Snap to Spectated"))
+                    {
+                        auto* freeFly = static_cast<FreeFlyCamera*>(camMgr.GetActiveCamera());
+                        freeFly->SnapToPosition(snapPos, snapAngle[2], snapAngle[0]);
+                    }
+                }
+            }
             ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast");
         }
         else

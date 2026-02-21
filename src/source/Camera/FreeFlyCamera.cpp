@@ -5,6 +5,7 @@
 #ifdef _EDITOR
 
 #include "FreeFlyCamera.h"
+#include "CameraManager.h"
 #include "../ZzzOpenglUtil.h"
 
 // External globals
@@ -64,6 +65,13 @@ void FreeFlyCamera::OnActivate(const CameraState& previousState)
 void FreeFlyCamera::InheritFOV(float hFov)
 {
     m_Config.hFov = hFov;
+}
+
+void FreeFlyCamera::SnapToPosition(const vec3_t pos, float yaw, float pitch)
+{
+    VectorCopy(pos, m_Position);
+    m_Yaw = yaw;
+    m_Pitch = std::clamp(pitch, MIN_PITCH, MAX_PITCH);
 }
 
 void FreeFlyCamera::OnDeactivate()

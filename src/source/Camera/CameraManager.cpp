@@ -184,6 +184,17 @@ void CameraManager::CycleToNextMode()
     SetCameraMode(nextMode);
 }
 
+#ifdef _EDITOR
+bool CameraManager::GetSpectatedCameraState(vec3_t outPos, vec3_t outAngle) const
+{
+    if (!m_pSpectatedCamera || !m_bHasSpectatedState)
+        return false;
+    VectorCopy(m_SpectatedPos, outPos);
+    VectorCopy(m_SpectatedAngle, outAngle);
+    return true;
+}
+#endif
+
 void CameraManager::TransitionToCamera(ICamera* pNewCamera)
 {
     // When returning FROM FreeFly to the spectated game camera, skip OnActivate

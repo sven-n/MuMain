@@ -31,6 +31,7 @@ public:
     void OnDeactivate() override;
     const char* GetName() const override { return "FreeFly"; }
     void InheritFOV(float hFov);
+    void SnapToPosition(const vec3_t pos, float yaw, float pitch);
 
     // Configuration & Frustum Management
     const CameraConfig& GetConfig() const override { return m_Config; }
