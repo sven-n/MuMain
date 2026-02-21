@@ -260,8 +260,13 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     glClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, 640, 430);
 
-    // Get active camera for rendering (frustum already updated in camera Update())
-    // Note: Camera is stored for later use in RenderCharacterScene3D()
+    // Build global frustum arrays for TestFrustrum/TestFrustrum2D
+    // Must be called after BeginOpengl (needs GL matrices) in every scene that renders terrain/objects
+    {
+        vec3_t cameraPos;
+        VectorCopy(g_Camera.Position, cameraPos);
+        CreateFrustrum((float)outWidth / 640.f, 430.f / 480.f, cameraPos);
+    }
 
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 

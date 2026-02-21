@@ -73,6 +73,7 @@ bool TestFrustrum(vec3_t Position, float Range);
 bool TestFrustrum2D(float x, float y, float Range);
 void CacheActiveFrustum();   // Call once per frame after camera update
 void UpdateFrustrumBounds();
+void ResetFrustrumBoundsFullTerrain();  // Set bounds to cover entire terrain (for scenes without CreateFrustrum)
 
 void CreateLodBuffer();
 

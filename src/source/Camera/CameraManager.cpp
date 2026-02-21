@@ -74,6 +74,14 @@ bool CameraManager::Update()
     if (!m_pActiveCamera)
         return false;
 
+    // Auto-reset to DefaultCamera when leaving MainScene
+    // Orbital/Legacy cameras are MainScene-only; if the scene changed, switch back
+    extern EGameScene SceneFlag;
+    if (SceneFlag != MAIN_SCENE && m_CurrentMode != CameraMode::Default)
+    {
+        SetCameraMode(CameraMode::Default);
+    }
+
 #ifdef _EDITOR
     // When in FreeFly mode, also update the spectated camera so it keeps tracking.
     // We must isolate g_Camera so the spectated camera sees its OWN previous state

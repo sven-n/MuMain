@@ -394,6 +394,12 @@ bool NewRenderLogInScene(HDC hDC)
 
     BeginOpengl(0, 25, 640, 430);
 
+    // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
+    // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and
+    // we reset iteration bounds to cover the full terrain so stale bounds from other scenes
+    // don't restrict the render loop.
+    ResetFrustrumBoundsFullTerrain();
+
     // Get active camera for rendering (frustum already updated in camera Update())
     ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
 

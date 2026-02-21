@@ -2489,6 +2489,20 @@ void CreateFrustrum2D(vec3_t Position)
         }
     }
 
+    // Scale trapezoid width for actual window aspect ratio vs reference 4:3.
+    // The hardcoded Width/WidthFar/WidthNear values were tuned for 640x480.
+    // When the window is wider (e.g. 1920x1080), GL perspective shows more
+    // horizontally, so the 2D culling trapezoid must grow to match.
+    extern unsigned int WindowWidth, WindowHeight;
+    if (WindowHeight > 0)
+    {
+        float windowAspect = (float)WindowWidth / (float)WindowHeight;
+        float referenceAspect = 640.0f / 480.0f;
+        float aspectCorrection = windowAspect / referenceAspect;
+        WidthFar *= aspectCorrection;
+        WidthNear *= aspectCorrection;
+    }
+
     vec3_t p[4];
     Vector(-WidthFar, CameraViewFar_local - CameraViewTarget_local, 0.f, p[0]);
     Vector(WidthFar, CameraViewFar_local - CameraViewTarget_local, 0.f, p[1]);
@@ -2603,6 +2617,14 @@ void UpdateFrustrumBounds()
     // No-op: bounds are now computed by CreateFrustrum() each frame
 }
 
+void ResetFrustrumBoundsFullTerrain()
+{
+    FrustrumBoundMinX = 0;
+    FrustrumBoundMinY = 0;
+    FrustrumBoundMaxX = TERRAIN_SIZE_MASK - 4;
+    FrustrumBoundMaxY = TERRAIN_SIZE_MASK - 4;
+}
+
 /**
  * @brief Renders a wireframe sphere for debugging culling volumes
  * @param center Center position of the sphere in world space
@@ -2682,7 +2704,8 @@ void CacheActiveFrustum()
 bool TestFrustrum2D(float x, float y, float Range)
 {
     extern EGameScene SceneFlag;
-    if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
+    if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE
+        || SceneFlag == LOG_IN_SCENE)
         return true;
 
     // Fast path: unrolled 4-edge test for Legacy/Default cameras
@@ -2716,6 +2739,10 @@ bool TestFrustrum2D(float x, float y, float Range)
 
 bool TestFrustrum(vec3_t Position, float Range)
 {
+    extern EGameScene SceneFlag;
+    if (SceneFlag == LOG_IN_SCENE)
+        return true;
+
     for (int i = 0; i < 5; i++)
     {
         if (DotProduct(Position, FrustrumFaceNormal[i]) + FrustrumFaceD[i] < -Range)
