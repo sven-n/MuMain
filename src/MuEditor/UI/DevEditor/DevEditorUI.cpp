@@ -213,37 +213,6 @@ void CDevEditorUI::RenderCameraTab()
                           "(200 = closest, 800 = default, 2000 = farthest)");
     }
 
-    // Fog status
-    extern bool FogEnable;
-    ImGui::Spacing();
-
-    // Get actual pitch used for fog calculation
-    float fogPitch = g_Camera.Angle[0];
-    if (cameraMode == 1)  // Orbital camera
-    {
-        float yaw, orbitalPitch;
-        GetOrbitalCameraAngles(&yaw, &orbitalPitch);
-        fogPitch = orbitalPitch;
-    }
-
-    if (FogEnable)
-    {
-        ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Fog: ENABLED");
-    }
-    else
-    {
-        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "Fog: DISABLED");
-    }
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "(pitch %.1f°, threshold -60°)", fogPitch);
-
-    ImGui::Unindent();
-    ImGui::Separator();
-
-    // CameraConfig controls
-    ImGui::Text("Camera Configuration (CameraConfig)");
-    ImGui::Separator();
-
     // Get the camera whose config we're editing — in FreeFly, that's the spectated camera
     extern CameraManager& CameraManager_Instance();
     auto& camMgrRef = CameraManager_Instance();
@@ -256,59 +225,49 @@ void CDevEditorUI::RenderCameraTab()
     }
     const char* currentCameraName = currentCamera ? currentCamera->GetName() : nullptr;
 
-    // If override is enabled and camera changed, refresh override values
+    ImGui::Unindent();
+    ImGui::Separator();
+
+    // CameraConfig controls
+    ImGui::Text("Camera Configuration");
+    ImGui::Separator();
+
+    // Refresh FOV from current camera when override is active and camera changes
     if (m_ConfigOverrideEnabled && m_LastActiveCameraName != currentCameraName)
     {
         if (currentCamera)
-        {
-            const CameraConfig& config = currentCamera->GetConfig();
-            m_HFOV = config.hFov;
-            m_NearPlane = config.nearPlane;
-            m_FarPlane = config.farPlane;
-            m_FogStart = config.fogStart;
-            m_FogEnd = config.fogEnd;
-        }
+            m_HFOV = currentCamera->GetConfig().hFov;
         m_LastActiveCameraName = currentCameraName;
     }
 
     bool previousOverrideState = m_ConfigOverrideEnabled;
     ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(hFOV, near/far planes, cull range)");
 
-    // If override was just enabled, initialize with current camera's defaults
+    // If override was just enabled, initialize FOV from current camera
     if (m_ConfigOverrideEnabled && !previousOverrideState)
     {
         if (currentCamera)
-        {
-            const CameraConfig& config = currentCamera->GetConfig();
-            m_HFOV = config.hFov;
-            m_NearPlane = config.nearPlane;
-            m_FarPlane = config.farPlane;
-            m_FogStart = config.fogStart;
-            m_FogEnd = config.fogEnd;
-        }
+            m_HFOV = currentCamera->GetConfig().hFov;
         m_LastActiveCameraName = currentCameraName;
     }
 
-    // If override was just disabled, clear tracking
+    // If override was just disabled, clear tracking and fog override
     if (!m_ConfigOverrideEnabled && previousOverrideState)
     {
         m_LastActiveCameraName = nullptr;
+        m_FogOverride = false;
+    }
+
+    // Always show live near/far plane from camera (changes with zoom)
+    if (currentCamera)
+    {
+        const CameraConfig& cfg = currentCamera->GetConfig();
+        ImGui::Text("Near: %.0f  Far: %.0f  ViewFar: %.0f",
+                    cfg.nearPlane, cfg.farPlane, g_Camera.ViewFar);
     }
 
     if (m_ConfigOverrideEnabled)
     {
-        // Get current camera's default config for reference
-        float defaultHFOV = 90.0f, defaultNearPlane = 10.0f, defaultFarPlane = 2400.0f;
-        if (currentCamera)
-        {
-            const CameraConfig& cfg = currentCamera->GetConfig();
-            defaultHFOV = cfg.hFov;
-            defaultNearPlane = cfg.nearPlane;
-            defaultFarPlane = cfg.farPlane;
-        }
-
         // Compute vertical FOV from current horizontal FOV for display
         extern unsigned int WindowWidth, WindowHeight;
         float aspect = (float)WindowWidth / (float)WindowHeight;
@@ -316,85 +275,77 @@ void CDevEditorUI::RenderCameraTab()
 
         ImGui::PushItemWidth(200);
 
-        ImGui::Text("3D Frustum Parameters:");
         ImGui::SliderFloat("Horizontal FOV (degrees)", &m_HFOV, 10.0f, 150.0f, "%.1f");
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f° = camera default)", defaultHFOV);
 
         ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
                           "Vertical FOV: %.1f° (at %.2f aspect)", computedVFov, aspect);
 
-        ImGui::InputFloat("Near Plane", &m_NearPlane, 1.0f, 10.0f, "%.1f");
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultNearPlane);
-
-        ImGui::InputFloat("Far Plane", &m_FarPlane, 100.0f, 500.0f, "%.1f");
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(%.0f = camera default)", defaultFarPlane);
-
+        // Fog controls
         ImGui::Spacing();
-        ImGui::Text("Fog Controls:");
+        extern bool FogEnable;
 
-        // Calculate max range based on far plane with render distance multiplier
-        constexpr float RENDER_DISTANCE_MULTIPLIER = 1.4f;
-        float maxFogRange = m_FarPlane * RENDER_DISTANCE_MULTIPLIER;
-
-        ImGui::SliderFloat("Fog Start", &m_FogStart, 0.0f, maxFogRange, "%.0f");
+        ImGui::Checkbox("Override Fog", &m_FogOverride);
+        if (m_FogOverride)
+        {
+            ImGui::SameLine();
+            ImGui::Checkbox("Fog On", &m_FogOverrideValue);
+        }
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(absolute distance)");
+        if (FogEnable)
+            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "ENABLED");
+        else
+            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "DISABLED");
+        if (!m_FogOverride)
+        {
+            float fogPitch = g_Camera.Angle[0];
+            if (cameraMode == 1)
+            {
+                float yaw, orbitalPitch;
+                GetOrbitalCameraAngles(&yaw, &orbitalPitch);
+                fogPitch = orbitalPitch;
+            }
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "(auto: pitch %.1f°)", fogPitch);
+        }
 
-        ImGui::SliderFloat("Fog End", &m_FogEnd, 0.0f, maxFogRange, "%.0f");
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(full fog density)");
+        float startDisplay = m_FogStartPct * 100.0f;
+        float endDisplay = m_FogEndPct * 100.0f;
+        if (ImGui::SliderFloat("Fog Start %", &startDisplay, 0.0f, 200.0f, "%.0f%%"))
+            m_FogStartPct = startDisplay / 100.0f;
+        if (ImGui::SliderFloat("Fog End %", &endDisplay, 0.0f, 200.0f, "%.0f%%"))
+            m_FogEndPct = endDisplay / 100.0f;
 
-        // Show percentages for reference
-        float startPercent = (m_FogStart / m_FarPlane) * 100.0f;
-        float endPercent = (m_FogEnd / m_FarPlane) * 100.0f;
+        float actualStart = g_Camera.ViewFar * m_FogStartPct;
+        float actualEnd = g_Camera.ViewFar * m_FogEndPct;
         ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                          "Fog: Start=%.0f%%, End=%.0f%% (of farPlane)", startPercent, endPercent);
+                          "Fog: %.0f - %.0f (ViewFar=%.0f)", actualStart, actualEnd, g_Camera.ViewFar);
 
         ImGui::PopItemWidth();
 
         ImGui::Spacing();
-        if (ImGui::Button("Reset to Camera Defaults"))
+        if (ImGui::Button("Reset to Defaults"))
         {
             if (currentCamera)
-            {
-                const CameraConfig& config = currentCamera->GetConfig();
-                m_HFOV = config.hFov;
-                m_NearPlane = config.nearPlane;
-                m_FarPlane = config.farPlane;
-                m_FogStart = config.fogStart;
-                m_FogEnd = config.fogEnd;
-            }
+                m_HFOV = currentCamera->GetConfig().hFov;
+            m_FogStartPct = 0.80f;
+            m_FogEndPct = 0.90f;
         }
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Resets to active camera's default config)");
 
         ImGui::Separator();
         ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Changes applied in real-time!");
-        ImGui::Text("Note: These override CameraConfig values");
     }
     else
     {
-        // Display current camera config (read-only)
+        // Display current config (read-only)
         if (currentCamera)
         {
-            const CameraConfig& config = currentCamera->GetConfig();
-
             extern unsigned int WindowWidth, WindowHeight;
             float aspect = (float)WindowWidth / (float)WindowHeight;
-            float computedVFov = HFovToVFov(config.hFov, aspect);
-
-            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Current Camera Config:");
-            ImGui::Text("  Horizontal FOV: %.1f°", config.hFov);
-            ImGui::Text("  Vertical FOV: %.1f° (at %.2f aspect)", computedVFov, aspect);
-            ImGui::Text("  Near Plane: %.1f", config.nearPlane);
-            ImGui::Text("  Far Plane: %.1f", config.farPlane);
-            ImGui::Text("  Fog: %.0f - %.0f", config.fogStart, config.fogEnd);
+            float hFov = currentCamera->GetConfig().hFov;
+            ImGui::Text("  FOV: %.1f° H / %.1f° V", hFov, HFovToVFov(hFov, aspect));
+            ImGui::Text("  Fog: %.0f%% - %.0f%% of ViewFar",
+                        m_FogStartPct * 100.0f, m_FogEndPct * 100.0f);
         }
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable override to customize these values");
     }
 
     ImGui::Separator();
@@ -1127,18 +1078,27 @@ extern "C"
 
     void DevEditor_GetCameraConfig(float* outHFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange)
     {
+        // Only override FOV — near/far plane change dynamically with zoom
+        // and must not be locked by the DevEditor override
         if (outHFOV) *outHFOV = g_DevEditorUI.GetHFOV();
-        if (outNearPlane) *outNearPlane = g_DevEditorUI.GetNearPlane();
-        if (outFarPlane) *outFarPlane = g_DevEditorUI.GetFarPlane();
-        // terrainCullRange has no effect on culling (dead param in BuildFromCamera),
-        // but callers still pass it — just mirror farPlane for consistency
-        if (outTerrainCullRange) *outTerrainCullRange = g_DevEditorUI.GetFarPlane();
     }
 
     void DevEditor_GetFogConfig(float* outStart, float* outEnd)
     {
-        if (outStart) *outStart = g_DevEditorUI.GetFogStart();
-        if (outEnd) *outEnd = g_DevEditorUI.GetFogEnd();
+        // Convert percentages to absolute distances using current view distance
+        extern CameraState g_Camera;
+        if (outStart) *outStart = g_Camera.ViewFar * g_DevEditorUI.GetFogStartPct();
+        if (outEnd) *outEnd = g_Camera.ViewFar * g_DevEditorUI.GetFogEndPct();
+    }
+
+    bool DevEditor_IsFogOverrideEnabled()
+    {
+        return g_DevEditorUI.IsConfigOverrideEnabled() && g_DevEditorUI.IsFogOverrideEnabled();
+    }
+
+    bool DevEditor_GetFogOverrideValue()
+    {
+        return g_DevEditorUI.GetFogOverrideValue();
     }
 
     // Phase 5: Custom Origin accessors

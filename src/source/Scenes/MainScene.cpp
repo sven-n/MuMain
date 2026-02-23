@@ -49,6 +49,8 @@ extern "C" bool DevEditor_ShouldRenderItemLabels();
 extern "C" bool DevEditor_ShouldRenderEquippedItems();
 extern "C" bool DevEditor_ShouldRenderWeatherEffects();
 extern "C" bool DevEditor_ShouldRenderUI();
+extern "C" bool DevEditor_IsFogOverrideEnabled();
+extern "C" bool DevEditor_GetFogOverrideValue();
 #endif
 
 extern HWND g_hWnd;
@@ -583,6 +585,12 @@ bool RenderMainScene()
         // Default, Legacy, and other cameras: Disable fog (no horizon visible)
         FogEnable = false;
     }
+
+#ifdef _EDITOR
+    // DevEditor override: force fog on/off regardless of pitch
+    if (DevEditor_IsFogOverrideEnabled())
+        FogEnable = DevEditor_GetFogOverrideValue();
+#endif
 
     vec3_t cameraPos;
     int width, height;

@@ -534,20 +534,13 @@ void BeginOpengl(int x, int y, int Width, int Height)
         glEnable(GL_FOG);
         glFogi(GL_FOG_MODE, GL_LINEAR);
 
-        // Get fog distances from CameraConfig
-        ICamera* activeCamera = CameraManager_Instance().GetActiveCamera();
-        float fogStart = 2100.0f;  // Default fallback
-        float fogEnd = 2400.0f;    // Default fallback
-
-        if (activeCamera)
-        {
-            const CameraConfig& config = activeCamera->GetConfig();
-            fogStart = config.fogStart;
-            fogEnd = config.fogEnd;
-        }
+        // Fog scales dynamically with view distance (g_Camera.ViewFar) so it
+        // stays at consistent percentages when zooming. Default: 80%/90%.
+        float fogStart = g_Camera.ViewFar * 0.80f;
+        float fogEnd   = g_Camera.ViewFar * 0.90f;
 
 #ifdef _EDITOR
-        // Allow DevEditor to override fog distances (now in absolute units)
+        // Allow DevEditor to override fog percentages
         if (DevEditor_IsConfigOverrideEnabled())
         {
             DevEditor_GetFogConfig(&fogStart, &fogEnd);

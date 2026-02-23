@@ -821,11 +821,13 @@ void OrbitalCamera::UpdateConfigForView()
     // The 2D frustum projection already adapts its shape to the actual camera pitch.
     m_Config.farPlane = baseConfig.farPlane * zoomScale;
 
-    // Fog: 80% start of farPlane, end at rendering distance (farPlane * RENDER_DISTANCE_MULTIPLIER)
-    // Terrain cull range = fog end: don't render terrain that's 100% fogged
-    m_Config.fogStart = m_Config.farPlane * 0.80f;
-    m_Config.fogEnd = m_Config.farPlane * RENDER_DISTANCE_MULTIPLIER;
-    m_Config.terrainCullRange = m_Config.fogEnd;
+    // Sync g_Camera.ViewFar so BeginOpengl uses the updated far plane for
+    // projection and percentage-based fog (fog = ViewFar * 80%/90%).
+    m_State.ViewFar = m_Config.farPlane;
+    g_Camera.ViewFar = m_Config.farPlane;
+
+    // Terrain cull range = rendering distance
+    m_Config.terrainCullRange = m_Config.farPlane * RENDER_DISTANCE_MULTIPLIER;
 }
 
 void OrbitalCamera::HandleFreeCameraMovement()

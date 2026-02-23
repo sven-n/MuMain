@@ -12,12 +12,12 @@ public:
     // CameraConfig accessors
     bool IsConfigOverrideEnabled() const { return m_ConfigOverrideEnabled; }
     float GetHFOV() const { return m_HFOV; }
-    float GetNearPlane() const { return m_NearPlane; }
-    float GetFarPlane() const { return m_FarPlane; }
 
     // Fog control accessors
-    float GetFogStart() const { return m_FogStart; }
-    float GetFogEnd() const { return m_FogEnd; }
+    bool IsFogOverrideEnabled() const { return m_FogOverride; }
+    bool GetFogOverrideValue() const { return m_FogOverrideValue; }
+    float GetFogStartPct() const { return m_FogStartPct; }
+    float GetFogEndPct() const { return m_FogEndPct; }
 
     // Render toggle accessors
     bool ShouldRenderTerrain() const { return m_RenderTerrain; }
@@ -66,13 +66,13 @@ private:
     // CameraConfig values for live editing
     bool m_ConfigOverrideEnabled = false;
     float m_HFOV = 90.0f;             // Horizontal field of view in degrees
-    float m_NearPlane = 10.0f;        // Near clipping plane
-    float m_FarPlane = 2400.0f;       // Far clipping plane (max view distance)
     const char* m_LastActiveCameraName = nullptr;  // Track which camera we're overriding for
 
-    // Fog control values (absolute distances)
-    float m_FogStart = 2100.0f;  // Fog starts (absolute distance)
-    float m_FogEnd = 2400.0f;    // Fog ends (absolute distance)
+    // Fog control values
+    bool m_FogOverride = false;       // Override pitch-based fog enable/disable
+    bool m_FogOverrideValue = true;   // Fog state when override is active
+    float m_FogStartPct = 0.80f;     // Fog start as fraction of ViewFar (80%)
+    float m_FogEndPct = 0.90f;       // Fog end as fraction of ViewFar (90%)
 
     // Phase 5 Debug: Custom Origin Controls
     bool m_CustomOriginEnabled = false;
