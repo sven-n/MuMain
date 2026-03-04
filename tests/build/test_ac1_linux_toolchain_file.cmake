@@ -64,6 +64,12 @@ if(NOT _match_ext)
     message(FATAL_ERROR "AC-1: CMAKE_CXX_EXTENSIONS is not set to OFF")
 endif()
 
+# --- Check 8: CMAKE_CXX_STANDARD_REQUIRED ON ---
+string(REGEX MATCH "set\\(CMAKE_CXX_STANDARD_REQUIRED[ \t]+ON\\)" _match_req "${TOOLCHAIN_CONTENT}")
+if(NOT _match_req)
+    message(FATAL_ERROR "AC-1: CMAKE_CXX_STANDARD_REQUIRED is not set to ON")
+endif()
+
 # --- Check 7: NO cross-compile artifacts (negative validation) ---
 string(FIND "${TOOLCHAIN_CONTENT}" "CMAKE_FIND_ROOT_PATH_MODE" _pos_root_mode)
 if(NOT _pos_root_mode EQUAL -1)
