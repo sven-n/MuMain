@@ -75,6 +75,30 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "ON"
       }
+    },
+    {
+      "name": "linux-base",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-x64",
+      "displayName": "Linux x86_64",
+      "description": "Native Linux x64 build -- configure only until SDL3 migration removes Win32 API dependencies",
+      "inherits": "linux-base",
+      "toolchainFile": "${sourceDir}/cmake/toolchains/linux-x64.cmake",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -124,6 +148,18 @@
       "name": "windows-x64-mueditor-release",
       "displayName": "x64 MuEditor Release",
       "configurePreset": "windows-x64-mueditor",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-x64-debug",
+      "displayName": "Linux x64 Debug",
+      "configurePreset": "linux-x64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "linux-x64-release",
+      "displayName": "Linux x64 Release",
+      "configurePreset": "linux-x64",
       "configuration": "Release"
     }
   ]
