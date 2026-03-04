@@ -14,6 +14,7 @@ _deps/
 
 # CMake build directories
 build/
+build-test/
 !tests/build/
 build-mingw/
 /cmake-build-debug/

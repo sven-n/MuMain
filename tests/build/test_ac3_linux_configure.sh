@@ -38,6 +38,13 @@ if ! command -v g++ &>/dev/null; then
     exit 1
 fi
 
+# Verify GCC version >= 10 (required for C++20 support)
+GCC_VERSION=$(g++ -dumpversion | cut -d. -f1)
+if [[ "${GCC_VERSION}" -lt 10 ]]; then
+    echo "AC-3: FAILED -- g++ version ${GCC_VERSION} is too old (requires GCC 10+ for C++20)"
+    exit 1
+fi
+
 # --- Check: Toolchain file exists ---
 TOOLCHAIN_FILE="${MUMAIN_ROOT}/cmake/toolchains/linux-x64.cmake"
 if [[ ! -f "${TOOLCHAIN_FILE}" ]]; then
@@ -53,13 +60,15 @@ if ! grep -q '"linux-x64"' "${PRESETS_FILE}"; then
 fi
 
 # --- Main test: cmake --preset linux-x64 configure ---
-BUILD_DIR="${MUMAIN_ROOT}/out/build/test-linux-x64-$$"
-trap 'rm -rf "${BUILD_DIR}"' EXIT
+# Use the preset's own binaryDir (${sourceDir}/out/build/linux-x64) to validate
+# the full preset configuration including binaryDir. Clean up after.
+PRESET_BUILD_DIR="${MUMAIN_ROOT}/out/build/linux-x64"
+trap 'rm -rf "${PRESET_BUILD_DIR}"' EXIT
 
 echo "AC-3: Running cmake --preset linux-x64 from ${MUMAIN_ROOT}..."
 cd "${MUMAIN_ROOT}"
 
-if cmake --preset linux-x64 -B "${BUILD_DIR}" 2>&1; then
+if cmake --preset linux-x64 2>&1; then
     echo "AC-3: PASSED -- cmake --preset linux-x64 configure succeeded"
     exit 0
 else

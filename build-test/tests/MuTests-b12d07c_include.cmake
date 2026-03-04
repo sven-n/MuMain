@@ -1,5 +1,0 @@
-if(EXISTS "/Users/joseybv/workspace/mu/MuMain-workspace/MuMain/build-test/tests/MuTests-b12d07c_tests.cmake")
-  include("/Users/joseybv/workspace/mu/MuMain-workspace/MuMain/build-test/tests/MuTests-b12d07c_tests.cmake")
-else()
-  add_test(MuTests_NOT_BUILT-b12d07c MuTests_NOT_BUILT-b12d07c)
-endif()
