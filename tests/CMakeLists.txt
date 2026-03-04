@@ -14,3 +14,6 @@ target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore)
 include(CTest)
 include(Catch)
 catch_discover_tests(MuTests)
+
+# Build system validation tests (CMake script mode, no Catch2)
+add_subdirectory(build)
