@@ -6,3 +6,4 @@
 # testing this directory and lists subdirectories to be tested as well.
 include("/Users/joseybv/workspace/mu/MuMain-workspace/MuMain/build-test/tests/MuTests-b12d07c_include.cmake")
 subdirs("../_deps/catch2-build")
+subdirs("build")
