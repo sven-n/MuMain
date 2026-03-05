@@ -265,15 +265,18 @@ target_precompile_headers(MUThirdParty REUSE_FROM MUCore)
 # ThirdParty code: keep warnings visible but don't fail the build
 target_compile_options(MUThirdParty PRIVATE -Wno-error)
 
-# Platform abstraction (empty now, populated by Phase 0 SDL3 migration)
+# Platform abstraction with platform-conditional backend selection
 file(GLOB MU_PLATFORM_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/Platform/*.cpp")
-if(MU_PLATFORM_SOURCES)
-  add_library(MUPlatform STATIC ${MU_PLATFORM_SOURCES})
-  target_link_libraries(MUPlatform PRIVATE MUCore)
-  target_precompile_headers(MUPlatform REUSE_FROM MUCore)
+if(WIN32)
+  list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/PlatformLibrary.cpp")
 else()
-  # Empty directory — create INTERFACE placeholder until Phase 0 adds files
-  add_library(MUPlatform INTERFACE)
+  list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/posix/PlatformLibrary.cpp")
+endif()
+add_library(MUPlatform STATIC ${MU_PLATFORM_SOURCES})
+target_link_libraries(MUPlatform PRIVATE MUCore)
+target_precompile_headers(MUPlatform REUSE_FROM MUCore)
+if(NOT WIN32)
+  target_link_libraries(MUPlatform PRIVATE dl)
 endif()
 
 # ============================================================
