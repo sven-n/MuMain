@@ -8,6 +8,9 @@ FetchContent_MakeAvailable(Catch2)
 
 add_executable(MuTests
     core/test_timer.cpp
+    platform/test_platform_types.cpp
+    platform/test_platform_compat.cpp
+    platform/test_platform_keys.cpp
 )
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore)
 
@@ -17,3 +20,6 @@ catch_discover_tests(MuTests)
 
 # Build system validation tests (CMake script mode, no Catch2)
 add_subdirectory(build)
+
+# Platform abstraction header tests (Story 1.2.1)
+add_subdirectory(platform)
