@@ -68,7 +68,11 @@ void Unload(LibraryHandle handle)
         return;
     }
 
-    FreeLibrary(static_cast<HMODULE>(handle));
+    if (!FreeLibrary(static_cast<HMODULE>(handle)))
+    {
+        DWORD error = GetLastError();
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Unload() failed -- FreeLibrary error=%lu\r\n", error);
+    }
 }
 
 } // namespace mu::platform
