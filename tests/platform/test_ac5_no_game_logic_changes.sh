@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Story 1.2.1: AC-5 + AC-STD-3 — Verify no #ifdef _WIN32 in game logic files
-# RED PHASE: This test validates that platform conditionals stay contained in Platform/ headers.
+# GREEN PHASE: Platform headers implemented — this test validates no regressions.
 #
 # This test checks that no game logic source files (outside Platform/) contain
 # new #ifdef _WIN32 directives that were not there before.
