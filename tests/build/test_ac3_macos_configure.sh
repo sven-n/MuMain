@@ -67,7 +67,15 @@ trap 'rm -rf "${PRESET_BUILD_DIR}"' EXIT
 echo "AC-3: Running cmake --preset macos-arm64 from ${MUMAIN_ROOT}..."
 cd "${MUMAIN_ROOT}"
 
-if cmake --preset macos-arm64 2>&1; then
+# Timeout after 120 seconds to avoid hanging in CI
+TIMEOUT_CMD=""
+if command -v timeout &>/dev/null; then
+    TIMEOUT_CMD="timeout 120"
+elif command -v gtimeout &>/dev/null; then
+    TIMEOUT_CMD="gtimeout 120"
+fi
+
+if ${TIMEOUT_CMD} cmake --preset macos-arm64 2>&1; then
     echo "AC-3: PASSED -- cmake --preset macos-arm64 configure succeeded"
     exit 0
 else

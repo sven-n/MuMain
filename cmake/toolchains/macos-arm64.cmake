@@ -12,6 +12,9 @@ set(CMAKE_SYSTEM_NAME Darwin)
 set(CMAKE_SYSTEM_PROCESSOR arm64)
 set(CMAKE_OSX_ARCHITECTURES arm64)
 
+# Target macOS 12 Monterey as minimum deployment target
+set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0")
+
 # Clang is the native macOS compiler
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_CXX_COMPILER clang++)

@@ -9,6 +9,7 @@
     {
       "name": "windows-base",
       "hidden": true,
+      "description": "Base configuration for Windows builds (MSVC)",
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
