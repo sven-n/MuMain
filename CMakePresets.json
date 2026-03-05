@@ -100,6 +100,31 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF"
       }
+    },
+    {
+      "name": "macos-base",
+      "hidden": true,
+      "description": "Base configuration for native macOS builds",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macos-arm64",
+      "displayName": "macOS arm64",
+      "description": "Native macOS Apple Silicon build -- configure only until SDL3 migration removes Win32 API dependencies",
+      "inherits": "macos-base",
+      "toolchainFile": "${sourceDir}/cmake/toolchains/macos-arm64.cmake",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -161,6 +186,18 @@
       "name": "linux-x64-release",
       "displayName": "Linux x64 Release",
       "configurePreset": "linux-x64",
+      "configuration": "Release"
+    },
+    {
+      "name": "macos-arm64-debug",
+      "displayName": "macOS arm64 Debug",
+      "configurePreset": "macos-arm64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "macos-arm64-release",
+      "displayName": "macOS arm64 Release",
+      "configurePreset": "macos-arm64",
       "configuration": "Release"
     }
   ]
