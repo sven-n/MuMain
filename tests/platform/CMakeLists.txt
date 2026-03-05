@@ -1,6 +1,5 @@
 # Story 1.2.1: Platform Abstraction Headers — Test Registration
-# Tests are in RED phase until PlatformTypes.h, PlatformKeys.h,
-# and PlatformCompat.h are implemented.
+# GREEN PHASE: All platform headers implemented and tests passing.
 
 set(PLATFORM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../src/source/Platform")
 

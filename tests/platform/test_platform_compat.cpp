@@ -1,5 +1,5 @@
 // Story 1.2.1: Platform Abstraction Headers — PlatformCompat Function Shims
-// RED PHASE: These tests will FAIL until PlatformCompat.h is implemented.
+// GREEN PHASE: PlatformCompat.h implemented — all assertions pass.
 
 #include "PlatformCompat.h"
 #include <catch2/catch_test_macros.hpp>

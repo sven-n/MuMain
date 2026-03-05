@@ -1,5 +1,5 @@
 # Story 1.2.1: AC-3 — Verify platform headers use #pragma once
-# RED PHASE: This test will FAIL until the headers are created.
+# GREEN PHASE: All platform headers created and verified.
 #
 # Usage: cmake -DPLATFORM_DIR=<path-to-Platform-dir> -P test_ac3_pragma_once.cmake
 

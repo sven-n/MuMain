@@ -1,5 +1,5 @@
 // Story 1.2.1: Platform Abstraction Headers — PlatformKeys VK_* Constants
-// RED PHASE: These tests will FAIL until PlatformKeys.h is implemented.
+// GREEN PHASE: PlatformKeys.h implemented — all assertions pass.
 
 #include "PlatformKeys.h"
 #include <catch2/catch_test_macros.hpp>

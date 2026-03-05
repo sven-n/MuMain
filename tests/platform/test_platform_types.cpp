@@ -1,5 +1,5 @@
 // Story 1.2.1: Platform Abstraction Headers — Type Size Assertions
-// RED PHASE: These tests will FAIL until PlatformTypes.h is implemented.
+// GREEN PHASE: PlatformTypes.h implemented — all assertions pass.
 
 #include "PlatformTypes.h"
 #include <catch2/catch_test_macros.hpp>
