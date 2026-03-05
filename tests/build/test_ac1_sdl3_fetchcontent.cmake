@@ -29,7 +29,7 @@ if(_pos_fetch_declare EQUAL -1)
     message(FATAL_ERROR "AC-1: CMakeLists.txt missing FetchContent_Declare")
 endif()
 
-string(REGEX MATCH "FetchContent_Declare[\\(\\s]*SDL3" _match_sdl3_declare "${CMAKE_CONTENT}")
+string(REGEX MATCH "FetchContent_Declare[\\( \t]*SDL3" _match_sdl3_declare "${CMAKE_CONTENT}")
 if(NOT _match_sdl3_declare)
     # Try multiline match with newline
     string(FIND "${CMAKE_CONTENT}" "FetchContent_Declare(" _pos_fc)
@@ -45,19 +45,19 @@ if(NOT _match_sdl3_declare)
 endif()
 
 # --- Check 3: GIT_REPOSITORY points to SDL ---
-string(REGEX MATCH "GIT_REPOSITORY[\\s]+https://github.com/libsdl-org/SDL" _match_repo "${CMAKE_CONTENT}")
+string(REGEX MATCH "GIT_REPOSITORY[ \t]+https://github.com/libsdl-org/SDL" _match_repo "${CMAKE_CONTENT}")
 if(NOT _match_repo)
     message(FATAL_ERROR "AC-1: GIT_REPOSITORY does not point to libsdl-org/SDL")
 endif()
 
 # --- Check 4: GIT_TAG is pinned (release-3.x.y format, NOT main/HEAD) ---
-string(REGEX MATCH "GIT_TAG[\\s]+([a-zA-Z0-9._-]+)" _match_tag "${CMAKE_CONTENT}")
+string(REGEX MATCH "GIT_TAG[ \t]+([a-zA-Z0-9._-]+)" _match_tag "${CMAKE_CONTENT}")
 if(NOT _match_tag)
     message(FATAL_ERROR "AC-1: GIT_TAG not found in FetchContent_Declare")
 endif()
 
 # Extract the tag value
-string(REGEX REPLACE "GIT_TAG[\\s]+" "" _tag_value "${_match_tag}")
+string(REGEX REPLACE "GIT_TAG[ \t]+" "" _tag_value "${_match_tag}")
 
 # Reject floating references
 if(_tag_value STREQUAL "main" OR _tag_value STREQUAL "HEAD" OR _tag_value STREQUAL "master")

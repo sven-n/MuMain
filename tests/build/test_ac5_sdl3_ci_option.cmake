@@ -24,7 +24,7 @@ endif()
 file(READ "${CMAKELISTS_FILE}" CMAKE_CONTENT)
 
 # --- Check 1: MU_ENABLE_SDL3 option exists ---
-string(REGEX MATCH "option[\\(\\s]*MU_ENABLE_SDL3" _match_option "${CMAKE_CONTENT}")
+string(REGEX MATCH "option[\\( \t]*MU_ENABLE_SDL3" _match_option "${CMAKE_CONTENT}")
 if(NOT _match_option)
     message(FATAL_ERROR "AC-5: option(MU_ENABLE_SDL3 ...) not found in CMakeLists.txt")
 endif()
@@ -53,7 +53,7 @@ endif()
 # --- Check 3: SDL3 target_link_libraries are gated ---
 # The link commands for MUPlatform and MURenderFX with SDL3 should be
 # inside an if(MU_ENABLE_SDL3) block
-string(REGEX MATCHALL "if[\\(\\s]*MU_ENABLE_SDL3[\\)\\s]" _all_if_guards "${CMAKE_CONTENT}")
+string(REGEX MATCHALL "if[\\( \t]*MU_ENABLE_SDL3[\\) \t]" _all_if_guards "${CMAKE_CONTENT}")
 list(LENGTH _all_if_guards _guard_count)
 if(_guard_count LESS 1)
     message(FATAL_ERROR "AC-5: Expected at least 1 if(MU_ENABLE_SDL3) guard, found ${_guard_count}")

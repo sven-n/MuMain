@@ -27,37 +27,37 @@ file(READ "${CMAKELISTS_FILE}" CMAKE_CONTENT)
 
 # --- Check 1: MUPlatform links SDL3 PRIVATELY ---
 # Match target_link_libraries(MUPlatform ... SDL3::SDL3...) with PRIVATE
-string(REGEX MATCH "target_link_libraries[\\(\\s]*MUPlatform[\\s]+PRIVATE[^\\)]*SDL3" _match_platform "${CMAKE_CONTENT}")
+string(REGEX MATCH "target_link_libraries[\\( \t]*MUPlatform[ \t]+PRIVATE[^\\)]*SDL3" _match_platform "${CMAKE_CONTENT}")
 if(NOT _match_platform)
     message(FATAL_ERROR "AC-3: MUPlatform does not link SDL3 with PRIVATE visibility")
 endif()
 
 # --- Check 2: MURenderFX links SDL3 PRIVATELY ---
-string(REGEX MATCH "target_link_libraries[\\(\\s]*MURenderFX[\\s]+PRIVATE[^\\)]*SDL3" _match_renderfx "${CMAKE_CONTENT}")
+string(REGEX MATCH "target_link_libraries[\\( \t]*MURenderFX[ \t]+PRIVATE[^\\)]*SDL3" _match_renderfx "${CMAKE_CONTENT}")
 if(NOT _match_renderfx)
     message(FATAL_ERROR "AC-3: MURenderFX does not link SDL3 with PRIVATE visibility")
 endif()
 
 # --- Check 3: MUGame does NOT link SDL3 ---
-string(REGEX MATCH "target_link_libraries[\\(\\s]*MUGame[^\\)]*SDL3" _match_mugame "${CMAKE_CONTENT}")
+string(REGEX MATCH "target_link_libraries[\\( \t]*MUGame[^\\)]*SDL3" _match_mugame "${CMAKE_CONTENT}")
 if(_match_mugame)
     message(FATAL_ERROR "AC-3: MUGame MUST NOT link SDL3 directly -- found: ${_match_mugame}")
 endif()
 
 # --- Check 4: Main does NOT link SDL3 ---
-string(REGEX MATCH "target_link_libraries[\\(\\s]*Main[^\\)]*SDL3" _match_main "${CMAKE_CONTENT}")
+string(REGEX MATCH "target_link_libraries[\\( \t]*Main[^\\)]*SDL3" _match_main "${CMAKE_CONTENT}")
 if(_match_main)
     message(FATAL_ERROR "AC-3: Main target MUST NOT link SDL3 directly -- found: ${_match_main}")
 endif()
 
 # --- Check 5: MUCore does NOT link SDL3 ---
-string(REGEX MATCH "target_link_libraries[\\(\\s]*MUCore[^\\)]*SDL3" _match_mucore "${CMAKE_CONTENT}")
+string(REGEX MATCH "target_link_libraries[\\( \t]*MUCore[^\\)]*SDL3" _match_mucore "${CMAKE_CONTENT}")
 if(_match_mucore)
     message(FATAL_ERROR "AC-3: MUCore MUST NOT link SDL3 directly -- found: ${_match_mucore}")
 endif()
 
 # --- Check 6: MUCommon INTERFACE does NOT propagate SDL3 ---
-string(REGEX MATCH "target_link_libraries[\\(\\s]*MUCommon[^\\)]*SDL3" _match_mucommon "${CMAKE_CONTENT}")
+string(REGEX MATCH "target_link_libraries[\\( \t]*MUCommon[^\\)]*SDL3" _match_mucommon "${CMAKE_CONTENT}")
 if(_match_mucommon)
     message(FATAL_ERROR "AC-3: MUCommon MUST NOT link SDL3 -- it would propagate to all downstream targets")
 endif()

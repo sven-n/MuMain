@@ -224,6 +224,25 @@ else()
 endif()
 
 # ============================================================
+# SDL3 dependency (required by MUPlatform and MURenderFX)
+# ============================================================
+option(MU_ENABLE_SDL3 "Enable SDL3 dependency (disable for MinGW CI if needed)" ON)
+if(MU_ENABLE_SDL3)
+    include(FetchContent)
+    set(SDL_TESTS OFF CACHE BOOL "" FORCE)
+    set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+    set(SDL_STATIC ON CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        SDL3
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+        GIT_TAG        release-3.2.8
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(SDL3)
+endif()
+
+# ============================================================
 # Independent library targets (enforced dependency boundaries)
 # ============================================================
 
@@ -249,6 +268,9 @@ target_precompile_headers(MUData REUSE_FROM MUCore)
 file(GLOB MU_RENDERFX_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/RenderFX/*.cpp")
 add_library(MURenderFX STATIC ${MU_RENDERFX_SOURCES})
 target_link_libraries(MURenderFX PRIVATE MUCore)
+if(MU_ENABLE_SDL3)
+    target_link_libraries(MURenderFX PRIVATE SDL3::SDL3-static)
+endif()
 target_precompile_headers(MURenderFX REUSE_FROM MUCore)
 
 # Sound system — depends on Core only
@@ -274,6 +296,9 @@ else()
 endif()
 add_library(MUPlatform STATIC ${MU_PLATFORM_SOURCES})
 target_link_libraries(MUPlatform PRIVATE MUCore)
+if(MU_ENABLE_SDL3)
+    target_link_libraries(MUPlatform PRIVATE SDL3::SDL3-static)
+endif()
 target_precompile_headers(MUPlatform REUSE_FROM MUCore)
 if(NOT WIN32)
   target_link_libraries(MUPlatform PRIVATE dl)
