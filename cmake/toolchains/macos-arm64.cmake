@@ -21,7 +21,11 @@ execute_process(
     COMMAND xcrun --sdk macosx --show-sdk-path
     OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _xcrun_result
 )
+if(NOT _xcrun_result EQUAL 0)
+    message(WARNING "xcrun failed (exit ${_xcrun_result}). Install Xcode Command Line Tools: xcode-select --install")
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
