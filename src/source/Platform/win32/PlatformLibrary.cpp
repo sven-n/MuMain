@@ -13,7 +13,7 @@ LibraryHandle Load(const char* path)
 {
     if (path == nullptr)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() - path is null\r\n");
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() failed -- path is null\r\n");
         return nullptr;
     }
 
@@ -21,7 +21,7 @@ LibraryHandle Load(const char* path)
     int wideLen = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
     if (wideLen <= 0)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() - failed to convert path to wide string\r\n");
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() failed -- unable to convert path to wide string\r\n");
         return nullptr;
     }
 
@@ -32,8 +32,8 @@ LibraryHandle Load(const char* path)
     if (hModule == nullptr)
     {
         DWORD error = GetLastError();
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() - LoadLibraryW failed for '%hs' (error=%lu)\r\n", path,
-                            error);
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() failed -- LoadLibraryW error=%lu for '%hs'\r\n", error,
+                            path);
         return nullptr;
     }
 
@@ -44,7 +44,7 @@ void* GetSymbol(LibraryHandle handle, const char* name)
 {
     if (handle == nullptr || name == nullptr)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol() - handle or name is null\r\n");
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol() failed -- handle or name is null\r\n");
         return nullptr;
     }
 
@@ -53,8 +53,8 @@ void* GetSymbol(LibraryHandle handle, const char* name)
     if (proc == nullptr)
     {
         DWORD error = GetLastError();
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol() - GetProcAddress failed for '%hs' (error=%lu)\r\n",
-                            name, error);
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol(%hs) failed -- GetProcAddress error=%lu\r\n", name,
+                            error);
         return nullptr;
     }
 

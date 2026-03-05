@@ -2,8 +2,6 @@
 #include "PlatformLibrary.h"
 
 #include <dlfcn.h>
-#include <cstdio>
-#include <cwchar>
 
 #include "ErrorReport.h"
 
@@ -14,16 +12,19 @@ LibraryHandle Load(const char* path)
 {
     if (path == nullptr)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() - path is null\r\n");
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() failed -- path is null\r\n");
         return nullptr;
     }
 
-    void* handle = dlopen(path, RTLD_NOW);
+    void* handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
     if (handle == nullptr)
     {
         const char* error = dlerror();
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() - dlopen failed for '%hs' (%hs)\r\n", path,
-                            error ? error : "unknown error");
+        wchar_t wPath[256] = {};
+        wchar_t wError[256] = {};
+        mbstowcs(wPath, path, sizeof(wPath) / sizeof(wchar_t) - 1);
+        mbstowcs(wError, error ? error : "unknown error", sizeof(wError) / sizeof(wchar_t) - 1);
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() failed -- %ls (%ls)\r\n", wPath, wError);
         return nullptr;
     }
 
@@ -34,7 +35,7 @@ void* GetSymbol(LibraryHandle handle, const char* name)
 {
     if (handle == nullptr || name == nullptr)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol() - handle or name is null\r\n");
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol() failed -- handle or name is null\r\n");
         return nullptr;
     }
 
@@ -48,7 +49,11 @@ void* GetSymbol(LibraryHandle handle, const char* name)
     const char* error = dlerror();
     if (error != nullptr)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol() - dlsym failed for '%hs' (%hs)\r\n", name, error);
+        wchar_t wName[256] = {};
+        wchar_t wError[256] = {};
+        mbstowcs(wName, name, sizeof(wName) / sizeof(wchar_t) - 1);
+        mbstowcs(wError, error, sizeof(wError) / sizeof(wchar_t) - 1);
+        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol(%ls) failed -- %ls\r\n", wName, wError);
         return nullptr;
     }
 
