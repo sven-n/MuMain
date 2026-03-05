@@ -32,3 +32,21 @@ add_test(
     COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_no_game_logic_changes.sh
         "${CMAKE_CURRENT_SOURCE_DIR}/../../src/source"
 )
+
+# ---- Story 1.2.2: Platform Library Backends — RED PHASE ----
+
+# AC-STD-3,AC-1,AC-6: Verify PlatformLibrary.h is platform-neutral
+add_test(
+    NAME "AC-STD-3:platform-library-header-neutral"
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_DIR=${PLATFORM_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_1_2_2_header_neutral.cmake
+)
+
+# AC-4,AC-2,AC-3: Verify CMake backend selection and backend files exist
+add_test(
+    NAME "AC-4:platform-library-cmake-backend"
+    COMMAND ${CMAKE_COMMAND}
+        -DCMAKELISTS_FILE=${CMAKE_CURRENT_SOURCE_DIR}/../../src/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_1_2_2_cmake_backend.cmake
+)
