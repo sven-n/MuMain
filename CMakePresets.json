@@ -79,6 +79,7 @@
     {
       "name": "linux-base",
       "hidden": true,
+      "description": "Base configuration for native Linux builds",
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
