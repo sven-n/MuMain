@@ -72,9 +72,9 @@ TEST_CASE("AC-5: GetSymbol failure returns nullptr for invalid symbol name", "[p
 
 TEST_CASE("AC-5: Unload on nullptr handle is a safe no-op", "[platform][library]")
 {
-    // This must not crash or throw
+    // This must not crash or throw — reaching this line is the assertion
     mu::platform::Unload(nullptr);
-    REQUIRE(true); // If we reach here, the no-op worked
+    SUCCEED("Unload(nullptr) completed without crash");
 }
 
 TEST_CASE("AC-STD-2: Load and resolve symbol round-trip", "[platform][library]")
@@ -92,9 +92,9 @@ TEST_CASE("AC-STD-2: Load and resolve symbol round-trip", "[platform][library]")
 
 TEST_CASE("AC-STD-3: PlatformLibrary.h has no platform conditionals", "[platform][library]")
 {
-    // This is a compile-time verification — the fact that this test file
-    // includes PlatformLibrary.h and compiles on any platform (without
-    // requiring windows.h or dlfcn.h) proves AC-STD-3.
-    // The header must be platform-neutral.
-    REQUIRE(true);
+    // Compile-time verification: this test file includes PlatformLibrary.h
+    // and compiles on any platform without requiring windows.h or dlfcn.h.
+    // The fact that this test case compiles and links proves AC-STD-3 —
+    // no runtime assertion is needed.
+    SUCCEED("PlatformLibrary.h compiled without platform-specific includes");
 }
