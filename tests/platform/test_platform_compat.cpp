@@ -82,4 +82,52 @@ TEST_CASE("AC-1: PlatformCompat file I/O shims", "[platform][compat]")
         REQUIRE(err != 0);
         REQUIRE(f == nullptr);
     }
+
+    SECTION("_wfopen_s successfully opens and writes a temp file")
+    {
+        const wchar_t* tmpPath = L"/tmp/mu_test_wfopen_121.txt";
+        FILE* f = nullptr;
+        errno_t err = _wfopen_s(&f, tmpPath, L"w");
+        REQUIRE(err == 0);
+        REQUIRE(f != nullptr);
+        std::fputs("hello", f);
+        std::fclose(f);
+
+        // Re-open for reading to verify
+        f = nullptr;
+        err = _wfopen_s(&f, tmpPath, L"r");
+        REQUIRE(err == 0);
+        REQUIRE(f != nullptr);
+        char buf[16] = {};
+        REQUIRE(std::fgets(buf, sizeof(buf), f) != nullptr);
+        REQUIRE(std::strcmp(buf, "hello") == 0);
+        std::fclose(f);
+        std::remove("/tmp/mu_test_wfopen_121.txt");
+    }
+
+    SECTION("_wfopen normalizes backslashes to forward slashes")
+    {
+        const wchar_t* backslashPath = L"/tmp\\mu_test_backslash_121.txt";
+        FILE* f = _wfopen(backslashPath, L"w");
+        REQUIRE(f != nullptr);
+        std::fputs("backslash_test", f);
+        std::fclose(f);
+
+        // Verify the file exists at normalized path
+        f = std::fopen("/tmp/mu_test_backslash_121.txt", "r");
+        REQUIRE(f != nullptr);
+        char buf[32] = {};
+        REQUIRE(std::fgets(buf, sizeof(buf), f) != nullptr);
+        REQUIRE(std::strcmp(buf, "backslash_test") == 0);
+        std::fclose(f);
+        std::remove("/tmp/mu_test_backslash_121.txt");
+    }
+
+    SECTION("_wfopen_s returns EINVAL for null parameters")
+    {
+        FILE* f = nullptr;
+        REQUIRE(_wfopen_s(nullptr, L"path", L"r") == EINVAL);
+        REQUIRE(_wfopen_s(&f, nullptr, L"r") == EINVAL);
+        REQUIRE(_wfopen_s(&f, L"path", nullptr) == EINVAL);
+    }
 }

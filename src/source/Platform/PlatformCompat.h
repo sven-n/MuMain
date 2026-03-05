@@ -85,6 +85,11 @@ inline FILE* mu_wfopen(const wchar_t* path, const wchar_t* mode)
         }
         else if (ch < 0x10000)
         {
+            // Skip UTF-16 surrogate codepoints (U+D800-U+DFFF) — invalid in UTF-8
+            if (ch >= 0xD800 && ch <= 0xDFFF)
+            {
+                continue;
+            }
             u8path += static_cast<char>(0xE0 | (ch >> 12));
             u8path += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
             u8path += static_cast<char>(0x80 | (ch & 0x3F));

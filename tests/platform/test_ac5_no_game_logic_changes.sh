@@ -20,9 +20,15 @@ count=$(grep -r '#ifdef _WIN32' "$MUMAIN_SRC" \
     wc -l | tr -d ' ' || true)
 count=${count:-0}
 
-echo "AC-5/AC-STD-3: Found $count game logic files with #ifdef _WIN32 (expected: existing only, no new ones)"
-echo "AC-5/AC-STD-3: This is a baseline count. The dev agent must not increase this count."
+# Baseline: 0 game logic files contain #ifdef _WIN32 (established 2026-03-04)
+BASELINE=0
 
-# NOTE: This is a baseline check. The exact count will be established
-# after the headers are created. The dev story must verify no increase.
+echo "AC-5/AC-STD-3: Found $count game logic files with #ifdef _WIN32 (baseline: $BASELINE)"
+
+if [ "$count" -gt "$BASELINE" ]; then
+    echo "FAIL: New #ifdef _WIN32 leaked into game logic ($count > $BASELINE)"
+    exit 1
+fi
+
+echo "AC-5/AC-STD-3: PASS — no new platform conditionals in game logic"
 exit 0
