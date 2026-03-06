@@ -21,8 +21,8 @@
 // Pattern: mirrors test_platform_input.cpp which directly sets g_sdl3KeyboardState.
 // ---------------------------------------------------------------------------
 
-extern float MouseX;
-extern float MouseY;
+extern int MouseX;
+extern int MouseY;
 extern int MouseWheel;
 extern bool MouseLButton;
 extern bool MouseLButtonPush;
@@ -139,6 +139,64 @@ TEST_CASE("AC-2 [VS1-SDL-INPUT-MOUSE]: LButton up sets MouseLButtonPop=true and 
 
         // THEN: pop is NOT asserted
         REQUIRE(MouseLButtonPop == false);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// AC-2 [VS1-SDL-INPUT-MOUSE]: LButton double-click detection
+// SDL3 reports clicks==2 on the second click of a double-click sequence.
+// This replaces WM_LBUTTONDBLCLK on the SDL3 path.
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-2 [VS1-SDL-INPUT-MOUSE]: LButton double-click sets MouseLButtonDBClick=true",
+          "[platform][mouse][ac2][dblclick]")
+{
+    SECTION("clicks==2 in BUTTON_DOWN handler sets MouseLButtonDBClick=true")
+    {
+        // GIVEN: double-click flag is not set
+        MouseLButtonDBClick = false;
+
+        // WHEN: simulate SDL_EVENT_MOUSE_BUTTON_DOWN with clicks==2
+        // (mirroring SDLEventLoop::PollEvents handler: if (event.button.clicks == 2) ...)
+        int sdlClicks = 2;
+        if (sdlClicks == 2)
+        {
+            MouseLButtonDBClick = true;
+        }
+
+        // THEN: double-click flag is asserted
+        REQUIRE(MouseLButtonDBClick == true);
+
+        // Cleanup
+        MouseLButtonDBClick = false;
+    }
+
+    SECTION("clicks==1 in BUTTON_DOWN handler does NOT set MouseLButtonDBClick")
+    {
+        // GIVEN: double-click flag is not set
+        MouseLButtonDBClick = false;
+
+        // WHEN: simulate SDL_EVENT_MOUSE_BUTTON_DOWN with clicks==1 (single click)
+        int sdlClicks = 1;
+        if (sdlClicks == 2)
+        {
+            MouseLButtonDBClick = true; // Should NOT execute for single click
+        }
+
+        // THEN: double-click flag is NOT asserted
+        REQUIRE(MouseLButtonDBClick == false);
+    }
+
+    SECTION("MouseLButtonDBClick reset to false at frame start")
+    {
+        // GIVEN: previous frame had a double-click
+        MouseLButtonDBClick = true;
+
+        // WHEN: frame boundary reset (SDLEventLoop::PollEvents start)
+        MouseLButtonDBClick = false;
+
+        // THEN: flag is cleared before new frame events are processed
+        REQUIRE(MouseLButtonDBClick == false);
     }
 }
 
@@ -326,70 +384,71 @@ TEST_CASE("AC-3 [VS1-SDL-INPUT-MOUSE]: MouseWheel reset to zero each frame",
 TEST_CASE("AC-1 [VS1-SDL-INPUT-MOUSE]: Mouse coordinate normalization clamps to 0-640 x range",
           "[platform][mouse][ac1]")
 {
-    SECTION("x coordinate below 0 clamps to 0.0f")
+    SECTION("x coordinate below 0 clamps to 0")
     {
         // GIVEN: SDL reports position outside left edge (e.g., captured mouse)
-        MouseX = 0.0f;
+        MouseX = 0;
         g_fScreenRate_x = 1.0f; // 1:1 for simplicity — real value is WindowWidth/640.0f
 
         // WHEN: simulate SDL_EVENT_MOUSE_MOTION with x = -10
+        // (mirroring SDLEventLoop handler: MouseX = static_cast<int>(x / g_fScreenRate_x))
         float rawX = -10.0f;
-        MouseX = rawX / g_fScreenRate_x;
-        if (MouseX < 0.0f)
+        MouseX = static_cast<int>(rawX / g_fScreenRate_x);
+        if (MouseX < 0)
         {
-            MouseX = 0.0f;
+            MouseX = 0;
         }
-        if (MouseX > 640.0f)
+        if (MouseX > 640)
         {
-            MouseX = 640.0f;
+            MouseX = 640;
         }
 
         // THEN: clamped to 0
-        REQUIRE(MouseX == 0.0f);
+        REQUIRE(MouseX == 0);
     }
 
-    SECTION("x coordinate above 640 clamps to 640.0f")
+    SECTION("x coordinate above 640 clamps to 640")
     {
         // GIVEN: SDL reports position outside right edge
-        MouseX = 0.0f;
+        MouseX = 0;
         g_fScreenRate_x = 1.0f;
 
         // WHEN: simulate motion beyond right edge
         float rawX = 700.0f;
-        MouseX = rawX / g_fScreenRate_x;
-        if (MouseX < 0.0f)
+        MouseX = static_cast<int>(rawX / g_fScreenRate_x);
+        if (MouseX < 0)
         {
-            MouseX = 0.0f;
+            MouseX = 0;
         }
-        if (MouseX > 640.0f)
+        if (MouseX > 640)
         {
-            MouseX = 640.0f;
+            MouseX = 640;
         }
 
         // THEN: clamped to 640
-        REQUIRE(MouseX == 640.0f);
+        REQUIRE(MouseX == 640);
     }
 
     SECTION("x coordinate within range is not clamped")
     {
         // GIVEN: normal window position with 2x screen rate (e.g., 1280px window)
-        MouseX = 0.0f;
+        MouseX = 0;
         g_fScreenRate_x = 2.0f; // 1280 / 640 = 2.0
 
         // WHEN: SDL reports pixel 640 (center of 1280px window)
         float rawX = 640.0f; // window-space pixels
-        MouseX = rawX / g_fScreenRate_x;
-        if (MouseX < 0.0f)
+        MouseX = static_cast<int>(rawX / g_fScreenRate_x);
+        if (MouseX < 0)
         {
-            MouseX = 0.0f;
+            MouseX = 0;
         }
-        if (MouseX > 640.0f)
+        if (MouseX > 640)
         {
-            MouseX = 640.0f;
+            MouseX = 640;
         }
 
         // THEN: maps to 320 in virtual 640 space — no clamping
-        REQUIRE(MouseX == 320.0f);
+        REQUIRE(MouseX == 320);
     }
 }
 

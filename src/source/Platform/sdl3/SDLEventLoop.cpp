@@ -24,9 +24,11 @@ void SetTargetFps(double fps);
 // Must match REFERENCE_FPS in ZzzAI.h — duplicated to avoid Platform->Gameplay coupling.
 constexpr double INACTIVE_REFERENCE_FPS = 25.0;
 
-// Mouse state (ZzzOpenglUtil.cpp) — cleared on focus-loss in windowed mode
+// Mouse state (ZzzOpenglUtil.cpp) — cleared on focus-loss in windowed mode,
+// and populated from SDL mouse events in PollEvents(). [VS1-SDL-INPUT-MOUSE]
 extern bool MouseLButton;
 extern bool MouseLButtonPop;
+extern bool MouseLButtonPush;
 extern bool MouseRButton;
 extern bool MouseRButtonPop;
 extern bool MouseRButtonPush;
@@ -35,6 +37,16 @@ extern bool MouseMButton;
 extern bool MouseMButtonPop;
 extern bool MouseMButtonPush;
 extern int MouseWheel;
+
+// Mouse position and screen-rate scaling (ZzzOpenglUtil.cpp / Winmain.cpp / stdafx.h)
+// [VS1-SDL-INPUT-MOUSE]
+extern int MouseX;
+extern int MouseY;
+extern int g_iNoMouseTime;
+extern int g_iMousePopPosition_x;
+extern int g_iMousePopPosition_y;
+extern float g_fScreenRate_x;
+extern float g_fScreenRate_y;
 
 namespace
 {
@@ -78,6 +90,7 @@ void HandleFocusLoss()
     {
         MouseLButton = false;
         MouseLButtonPop = false;
+        MouseLButtonPush = false;
         MouseRButton = false;
         MouseRButtonPop = false;
         MouseRButtonPush = false;
@@ -108,6 +121,21 @@ namespace mu
 
 bool SDLEventLoop::PollEvents()
 {
+    // Reset per-frame mouse state before processing new events. [VS1-SDL-INPUT-MOUSE]
+    // MouseLButtonDBClick: mirrors Winmain.cpp:611 which clears this each frame.
+    // MouseWheel: per-frame accumulated value — cleared each frame like WM_MOUSEWHEEL.
+    MouseLButtonDBClick = false;
+    MouseWheel = 0;
+
+    // Position-drift clearing: mirrors Winmain.cpp:612-613.
+    // If the cursor has moved since the last left-button-up, clear the stale pop flag.
+    // On Win32 this pattern auto-clears MouseLButtonPop when the cursor drifts from
+    // the release position, preventing stale click-detection in fast-click interactions.
+    if (MouseLButtonPop && (g_iMousePopPosition_x != MouseX || g_iMousePopPosition_y != MouseY))
+    {
+        MouseLButtonPop = false;
+    }
+
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -157,6 +185,117 @@ bool SDLEventLoop::PollEvents()
             {
                 g_sdl3KeyboardState[event.key.scancode] = false;
             }
+            break;
+
+        // Story 2.2.2: Mouse input tracking [VS1-SDL-INPUT-MOUSE]
+        // Mirrors WM_MOUSEMOVE / WM_LBUTTONDOWN / WM_RBUTTONDOWN / WM_MOUSEWHEEL handlers
+        // in WndProc (Winmain.cpp). Coordinates normalized to 640x480 virtual space.
+        case SDL_EVENT_MOUSE_MOTION:
+            // SDL3: event.motion.x/y are float (window-relative pixels).
+            // Divide by screen rate to map to 640x480 virtual coordinate space.
+            MouseX = static_cast<int>(event.motion.x / g_fScreenRate_x);
+            MouseY = static_cast<int>(event.motion.y / g_fScreenRate_y);
+            if (MouseX < 0)
+            {
+                MouseX = 0;
+            }
+            if (MouseX > 640)
+            {
+                MouseX = 640;
+            }
+            if (MouseY < 0)
+            {
+                MouseY = 0;
+            }
+            if (MouseY > 480)
+            {
+                MouseY = 480;
+            }
+            break;
+
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            g_iNoMouseTime = 0;
+            switch (event.button.button)
+            {
+            case SDL_BUTTON_LEFT:
+                MouseLButtonPop = false;
+                if (!MouseLButton)
+                {
+                    MouseLButtonPush = true;
+                }
+                MouseLButton = true;
+                if (event.button.clicks == 2)
+                {
+                    MouseLButtonDBClick = true;
+                }
+                // SDL_CaptureMouse replaces SetCapture — ensures events received outside window
+                SDL_CaptureMouse(true);
+                break;
+            case SDL_BUTTON_RIGHT:
+                MouseRButtonPop = false;
+                if (!MouseRButton)
+                {
+                    MouseRButtonPush = true;
+                }
+                MouseRButton = true;
+                SDL_CaptureMouse(true);
+                break;
+            case SDL_BUTTON_MIDDLE:
+                MouseMButtonPop = false;
+                if (!MouseMButton)
+                {
+                    MouseMButtonPush = true;
+                }
+                MouseMButton = true;
+                SDL_CaptureMouse(true);
+                break;
+            default:
+                break;
+            }
+            break;
+
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            g_iNoMouseTime = 0;
+            switch (event.button.button)
+            {
+            case SDL_BUTTON_LEFT:
+                MouseLButtonPush = false;
+                if (MouseLButton)
+                {
+                    MouseLButtonPop = true;
+                }
+                MouseLButton = false;
+                g_iMousePopPosition_x = MouseX;
+                g_iMousePopPosition_y = MouseY;
+                SDL_CaptureMouse(false);
+                break;
+            case SDL_BUTTON_RIGHT:
+                MouseRButtonPush = false;
+                if (MouseRButton)
+                {
+                    MouseRButtonPop = true;
+                }
+                MouseRButton = false;
+                SDL_CaptureMouse(false);
+                break;
+            case SDL_BUTTON_MIDDLE:
+                MouseMButtonPush = false;
+                if (MouseMButton)
+                {
+                    MouseMButtonPop = true;
+                }
+                MouseMButton = false;
+                SDL_CaptureMouse(false);
+                break;
+            default:
+                break;
+            }
+            break;
+
+        case SDL_EVENT_MOUSE_WHEEL:
+            // SDL3: event.wheel.y positive = scroll up (away from user) — same sign as Win32 WHEEL_DELTA.
+            // Truncate to int — sub-integer trackpad deltas are acceptable to truncate.
+            MouseWheel = static_cast<int>(event.wheel.y);
             break;
 
         default:
