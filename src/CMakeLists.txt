@@ -316,6 +316,8 @@ target_link_libraries(MUPlatform PRIVATE MUCore)
 if(MU_ENABLE_SDL3)
     target_link_libraries(MUPlatform PRIVATE SDL3::SDL3-static)
     target_compile_definitions(MUPlatform PRIVATE MU_ENABLE_SDL3)
+    # Story 2.2.1: keyboard state array + unmapped-VK logger [VS1-SDL-INPUT-KEYBOARD]
+    target_sources(MUPlatform PRIVATE "${MU_SOURCE_DIR}/Platform/sdl3/SDLKeyboardState.cpp")
 endif()
 target_precompile_headers(MUPlatform REUSE_FROM MUCore)
 if(NOT WIN32)

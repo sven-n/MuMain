@@ -2,7 +2,9 @@
 
 #include "SDLEventLoop.h"
 #include "../MuPlatform.h"
+#include "../PlatformCompat.h"
 #include <SDL3/SDL.h>
+#include <algorithm>
 
 // External game state — set to true to trigger clean shutdown
 extern bool Destroy;
@@ -89,6 +91,11 @@ void HandleFocusLoss()
 
     mu::MuPlatform::SetMouseGrab(false);
 
+    // Clear all keyboard state on focus loss — prevents stuck keys on Alt-Tab.
+    // Equivalent to Win32 clearing async key state when the window loses focus.
+    // [VS1-SDL-INPUT-KEYBOARD]
+    std::fill(std::begin(g_sdl3KeyboardState), std::end(g_sdl3KeyboardState), false);
+
     g_ConsoleDebug->Write(MCD_NORMAL, L"[VS1-SDL-WINDOW-FOCUS] Focus lost\r\n");
 }
 
@@ -130,6 +137,24 @@ bool SDLEventLoop::PollEvents()
 
         case SDL_EVENT_WINDOW_RESTORED:
             HandleFocusGain();
+            break;
+
+        // Story 2.2.1: Keyboard state tracking [VS1-SDL-INPUT-KEYBOARD]
+        // Maintains g_sdl3KeyboardState[] array for GetAsyncKeyState() shim.
+        // event.key.repeat is intentionally ignored — the shim models Win32
+        // async state (held=true, released=false), not WM_KEYDOWN repeat events.
+        case SDL_EVENT_KEY_DOWN:
+            if (event.key.scancode < 512)
+            {
+                g_sdl3KeyboardState[event.key.scancode] = true;
+            }
+            break;
+
+        case SDL_EVENT_KEY_UP:
+            if (event.key.scancode < 512)
+            {
+                g_sdl3KeyboardState[event.key.scancode] = false;
+            }
             break;
 
         default:

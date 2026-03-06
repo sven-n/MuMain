@@ -24,6 +24,12 @@ target_sources(MuTests PRIVATE platform/test_platform_input.cpp)
 
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
+# Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp
+# #ifdef guards are active when SDL3 is enabled. [VS1-SDL-INPUT-KEYBOARD]
+if(MU_ENABLE_SDL3)
+    target_compile_definitions(MuTests PRIVATE MU_ENABLE_SDL3)
+endif()
+
 include(CTest)
 include(Catch)
 catch_discover_tests(MuTests)

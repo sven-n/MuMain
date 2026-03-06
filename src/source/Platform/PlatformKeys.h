@@ -57,4 +57,34 @@
 #define VK_NUMPAD8 0x68
 #define VK_NUMPAD9 0x69
 
+// Numpad operators
+#define VK_MULTIPLY 0x6A
+#define VK_ADD 0x6B
+#define VK_SEPARATOR 0x6C
+#define VK_SUBTRACT 0x6D
+#define VK_DECIMAL 0x6E
+#define VK_DIVIDE 0x6F
+
+// Modifier — extended left/right variants
+#define VK_LSHIFT 0xA0
+#define VK_RSHIFT 0xA1
+#define VK_LCONTROL 0xA2
+#define VK_RCONTROL 0xA3
+#define VK_LMENU 0xA4
+#define VK_RMENU 0xA5
+
+// Lock and toggle keys
+#define VK_CAPITAL 0x14
+#define VK_PAUSE 0x13
+#define VK_SNAPSHOT 0x2C
+#define VK_NUMLOCK 0x90
+#define VK_SCROLL 0x91
+
+// OEM keys
+#define VK_OEM_1 0xBA
+#define VK_OEM_PLUS 0xBB
+#define VK_OEM_COMMA 0xBC
+#define VK_OEM_MINUS 0xBD
+#define VK_OEM_PERIOD 0xBE
+
 #endif // _WIN32

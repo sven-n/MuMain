@@ -44,6 +44,210 @@ inline uint32_t GetTickCount()
 
 #ifdef MU_ENABLE_SDL3
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_scancode.h>
+#include <algorithm>
+#include <cstdint>
+
+// ---- Keyboard input shim (GetAsyncKeyState) ----
+// g_sdl3KeyboardState[512] is defined in SDLKeyboardState.cpp and populated
+// by SDLEventLoop::PollEvents(). Indexed by SDL_Scancode (0-511).
+extern bool g_sdl3KeyboardState[512];
+
+// Map Win32 Virtual Key code to SDL3 SDL_Scancode.
+// Returns SDL_SCANCODE_UNKNOWN (0) for any VK code with no mapping.
+inline SDL_Scancode MuVkToSdlScancode(int vk)
+{
+    // ASCII letter range: 'A'-'Z' (0x41-0x5A) -> SDL_SCANCODE_A + offset
+    static_assert(SDL_SCANCODE_A == 4, "SDL_SCANCODE_A must be 4 — verify SDL3 release-3.2.8");
+    if (vk >= 'A' && vk <= 'Z')
+    {
+        return static_cast<SDL_Scancode>(SDL_SCANCODE_A + (vk - 'A'));
+    }
+
+    // ASCII digit range: '1'-'9' (0x31-0x39) -> SDL_SCANCODE_1 + offset
+    // '0' (0x30) -> SDL_SCANCODE_0 (not contiguous with 1-9 in SDL3)
+    static_assert(SDL_SCANCODE_1 == 30, "SDL_SCANCODE_1 must be 30 — verify SDL3 release-3.2.8");
+    if (vk >= '1' && vk <= '9')
+    {
+        return static_cast<SDL_Scancode>(SDL_SCANCODE_1 + (vk - '1'));
+    }
+    if (vk == '0')
+    {
+        return SDL_SCANCODE_0;
+    }
+
+    switch (vk)
+    {
+    // Control / navigation
+    case 0x08:
+        return SDL_SCANCODE_BACKSPACE; // VK_BACK
+    case 0x09:
+        return SDL_SCANCODE_TAB; // VK_TAB
+    case 0x0D:
+        return SDL_SCANCODE_RETURN; // VK_RETURN
+    case 0x10:
+        return SDL_SCANCODE_LSHIFT; // VK_SHIFT
+    case 0x11:
+        return SDL_SCANCODE_LCTRL; // VK_CONTROL
+    case 0x12:
+        return SDL_SCANCODE_LALT; // VK_MENU
+    case 0x13:
+        return SDL_SCANCODE_PAUSE; // VK_PAUSE
+    case 0x14:
+        return SDL_SCANCODE_CAPSLOCK; // VK_CAPITAL
+    case 0x1B:
+        return SDL_SCANCODE_ESCAPE; // VK_ESCAPE
+    case 0x20:
+        return SDL_SCANCODE_SPACE; // VK_SPACE
+    case 0x21:
+        return SDL_SCANCODE_PAGEUP; // VK_PRIOR
+    case 0x22:
+        return SDL_SCANCODE_PAGEDOWN; // VK_NEXT
+    case 0x23:
+        return SDL_SCANCODE_END; // VK_END
+    case 0x24:
+        return SDL_SCANCODE_HOME; // VK_HOME
+    case 0x25:
+        return SDL_SCANCODE_LEFT; // VK_LEFT
+    case 0x26:
+        return SDL_SCANCODE_UP; // VK_UP
+    case 0x27:
+        return SDL_SCANCODE_RIGHT; // VK_RIGHT
+    case 0x28:
+        return SDL_SCANCODE_DOWN; // VK_DOWN
+    case 0x2C:
+        return SDL_SCANCODE_PRINTSCREEN; // VK_SNAPSHOT
+    case 0x2D:
+        return SDL_SCANCODE_INSERT; // VK_INSERT
+    case 0x2E:
+        return SDL_SCANCODE_DELETE; // VK_DELETE
+
+    // Numpad digits
+    case 0x60:
+        return SDL_SCANCODE_KP_0; // VK_NUMPAD0
+    case 0x61:
+        return SDL_SCANCODE_KP_1; // VK_NUMPAD1
+    case 0x62:
+        return SDL_SCANCODE_KP_2; // VK_NUMPAD2
+    case 0x63:
+        return SDL_SCANCODE_KP_3; // VK_NUMPAD3
+    case 0x64:
+        return SDL_SCANCODE_KP_4; // VK_NUMPAD4
+    case 0x65:
+        return SDL_SCANCODE_KP_5; // VK_NUMPAD5
+    case 0x66:
+        return SDL_SCANCODE_KP_6; // VK_NUMPAD6
+    case 0x67:
+        return SDL_SCANCODE_KP_7; // VK_NUMPAD7
+    case 0x68:
+        return SDL_SCANCODE_KP_8; // VK_NUMPAD8
+    case 0x69:
+        return SDL_SCANCODE_KP_9; // VK_NUMPAD9
+
+    // Numpad operators
+    case 0x6A:
+        return SDL_SCANCODE_KP_MULTIPLY; // VK_MULTIPLY
+    case 0x6B:
+        return SDL_SCANCODE_KP_PLUS; // VK_ADD
+    case 0x6D:
+        return SDL_SCANCODE_KP_MINUS; // VK_SUBTRACT
+    case 0x6E:
+        return SDL_SCANCODE_KP_DECIMAL; // VK_DECIMAL
+    case 0x6F:
+        return SDL_SCANCODE_KP_DIVIDE; // VK_DIVIDE
+
+    // Function keys
+    case 0x70:
+        return SDL_SCANCODE_F1;
+    case 0x71:
+        return SDL_SCANCODE_F2;
+    case 0x72:
+        return SDL_SCANCODE_F3;
+    case 0x73:
+        return SDL_SCANCODE_F4;
+    case 0x74:
+        return SDL_SCANCODE_F5;
+    case 0x75:
+        return SDL_SCANCODE_F6;
+    case 0x76:
+        return SDL_SCANCODE_F7;
+    case 0x77:
+        return SDL_SCANCODE_F8;
+    case 0x78:
+        return SDL_SCANCODE_F9;
+    case 0x79:
+        return SDL_SCANCODE_F10;
+    case 0x7A:
+        return SDL_SCANCODE_F11;
+    case 0x7B:
+        return SDL_SCANCODE_F12;
+
+    // Lock keys
+    case 0x90:
+        return SDL_SCANCODE_NUMLOCKCLEAR; // VK_NUMLOCK
+    case 0x91:
+        return SDL_SCANCODE_SCROLLLOCK; // VK_SCROLL
+
+    // Left/Right modifier variants
+    case 0xA0:
+        return SDL_SCANCODE_LSHIFT; // VK_LSHIFT
+    case 0xA1:
+        return SDL_SCANCODE_RSHIFT; // VK_RSHIFT
+    case 0xA2:
+        return SDL_SCANCODE_LCTRL; // VK_LCONTROL
+    case 0xA3:
+        return SDL_SCANCODE_RCTRL; // VK_RCONTROL
+    case 0xA4:
+        return SDL_SCANCODE_LALT; // VK_LMENU
+    case 0xA5:
+        return SDL_SCANCODE_RALT; // VK_RMENU
+
+    // OEM keys
+    case 0xBA:
+        return SDL_SCANCODE_SEMICOLON; // VK_OEM_1
+    case 0xBB:
+        return SDL_SCANCODE_EQUALS; // VK_OEM_PLUS
+    case 0xBC:
+        return SDL_SCANCODE_COMMA; // VK_OEM_COMMA
+    case 0xBD:
+        return SDL_SCANCODE_MINUS; // VK_OEM_MINUS
+    case 0xBE:
+        return SDL_SCANCODE_PERIOD; // VK_OEM_PERIOD
+
+    default:
+        return SDL_SCANCODE_UNKNOWN;
+    }
+}
+
+// MuPlatformLogUnmappedVk — implemented in SDLKeyboardState.cpp (compiled with
+// the project PCH that provides CErrorReport / g_ErrorReport). Declared here so
+// the inline shim can call it without pulling ErrorReport.h into every TU that
+// includes PlatformCompat.h. [VS1-SDL-INPUT-KEYBOARD]
+void MuPlatformLogUnmappedVk(int vk);
+
+// GetAsyncKeyState shim for non-Windows platforms.
+// Returns 0x8000 (high bit set) when the key is currently held, 0 otherwise.
+// Callers using HIBYTE(GetAsyncKeyState(vk)) & 0x80 or == 128 behave correctly:
+//   HIBYTE(0x8000) == 0x80 == 128, satisfying both check patterns.
+// Unmapped VK codes return 0 and log MU_ERR_INPUT_UNMAPPED_VK via g_ErrorReport.
+// [VS1-SDL-INPUT-KEYBOARD]
+inline uint16_t GetAsyncKeyState(int vk)
+{
+    SDL_Scancode sc = MuVkToSdlScancode(vk);
+    if (sc == SDL_SCANCODE_UNKNOWN)
+    {
+        MuPlatformLogUnmappedVk(vk);
+        return 0;
+    }
+    return g_sdl3KeyboardState[sc] ? static_cast<uint16_t>(0x8000) : 0;
+}
+
+// ---- HIBYTE macro (non-Windows) ----
+// Extracts the high byte of a 16-bit value.
+// Used by all HIBYTE(GetAsyncKeyState(vk)) call sites (104 sites in codebase).
+#ifndef HIBYTE
+#define HIBYTE(w) (static_cast<uint8_t>((static_cast<uint16_t>(w) >> 8) & 0xFF))
+#endif
 
 inline std::string mu_wchar_to_utf8(const wchar_t* src)
 {
