@@ -45,46 +45,50 @@ inline uint32_t GetTickCount()
 #ifdef MU_ENABLE_SDL3
 #include <SDL3/SDL.h>
 
+inline std::string mu_wchar_to_utf8(const wchar_t* src)
+{
+    std::string result;
+    if (src == nullptr)
+    {
+        return result;
+    }
+    for (const wchar_t* p = src; *p; ++p)
+    {
+        auto ch = static_cast<uint32_t>(*p);
+        if (ch < 0x80)
+        {
+            result += static_cast<char>(ch);
+        }
+        else if (ch < 0x800)
+        {
+            result += static_cast<char>(0xC0 | (ch >> 6));
+            result += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+        else if (ch < 0x10000)
+        {
+            if (ch >= 0xD800 && ch <= 0xDFFF)
+            {
+                continue;
+            }
+            result += static_cast<char>(0xE0 | (ch >> 12));
+            result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
+            result += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+        else if (ch <= 0x10FFFF)
+        {
+            result += static_cast<char>(0xF0 | (ch >> 18));
+            result += static_cast<char>(0x80 | ((ch >> 12) & 0x3F));
+            result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
+            result += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+    }
+    return result;
+}
+
 inline int MessageBoxW(void* /*hwnd*/, const wchar_t* text, const wchar_t* caption, unsigned int type)
 {
-    // Convert wchar_t to UTF-8 for SDL3
-    std::string u8text;
-    for (const wchar_t* p = text; p && *p; ++p)
-    {
-        wchar_t ch = *p;
-        if (ch < 0x80)
-            u8text += static_cast<char>(ch);
-        else if (ch < 0x800)
-        {
-            u8text += static_cast<char>(0xC0 | (ch >> 6));
-            u8text += static_cast<char>(0x80 | (ch & 0x3F));
-        }
-        else
-        {
-            u8text += static_cast<char>(0xE0 | (ch >> 12));
-            u8text += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
-            u8text += static_cast<char>(0x80 | (ch & 0x3F));
-        }
-    }
-
-    std::string u8caption;
-    for (const wchar_t* p = caption; p && *p; ++p)
-    {
-        wchar_t ch = *p;
-        if (ch < 0x80)
-            u8caption += static_cast<char>(ch);
-        else if (ch < 0x800)
-        {
-            u8caption += static_cast<char>(0xC0 | (ch >> 6));
-            u8caption += static_cast<char>(0x80 | (ch & 0x3F));
-        }
-        else
-        {
-            u8caption += static_cast<char>(0xE0 | (ch >> 12));
-            u8caption += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
-            u8caption += static_cast<char>(0x80 | (ch & 0x3F));
-        }
-    }
+    std::string u8text = mu_wchar_to_utf8(text);
+    std::string u8caption = mu_wchar_to_utf8(caption);
 
     // Map MB_ type to SDL message box flags
     SDL_MessageBoxFlags sdlFlags = SDL_MESSAGEBOX_INFORMATION;

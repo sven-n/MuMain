@@ -292,16 +292,24 @@ file(GLOB MU_PLATFORM_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/Platform/*.cpp
 # MuPlatform.cpp is included unconditionally via the GLOB above (platform facade)
 if(WIN32)
   list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/PlatformLibrary.cpp")
-  list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/Win32Window.cpp")
-  list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/Win32EventLoop.cpp")
+  if(MU_ENABLE_SDL3)
+    # SDL3 backend replaces Win32 window/event loop when enabled
+    list(APPEND MU_PLATFORM_SOURCES
+      "${MU_SOURCE_DIR}/Platform/sdl3/SDLWindow.cpp"
+      "${MU_SOURCE_DIR}/Platform/sdl3/SDLEventLoop.cpp"
+    )
+  else()
+    list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/Win32Window.cpp")
+    list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/Win32EventLoop.cpp")
+  endif()
 else()
   list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/posix/PlatformLibrary.cpp")
-endif()
-if(MU_ENABLE_SDL3)
-  list(APPEND MU_PLATFORM_SOURCES
-    "${MU_SOURCE_DIR}/Platform/sdl3/SDLWindow.cpp"
-    "${MU_SOURCE_DIR}/Platform/sdl3/SDLEventLoop.cpp"
-  )
+  if(MU_ENABLE_SDL3)
+    list(APPEND MU_PLATFORM_SOURCES
+      "${MU_SOURCE_DIR}/Platform/sdl3/SDLWindow.cpp"
+      "${MU_SOURCE_DIR}/Platform/sdl3/SDLEventLoop.cpp"
+    )
+  endif()
 endif()
 add_library(MUPlatform STATIC ${MU_PLATFORM_SOURCES})
 target_link_libraries(MUPlatform PRIVATE MUCore)

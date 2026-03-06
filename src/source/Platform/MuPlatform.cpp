@@ -57,6 +57,11 @@ bool MuPlatform::CreateWindow(const char* title, int width, int height, uint32_t
         return false;
     }
 
+    if (title == nullptr || width <= 0 || height <= 0)
+    {
+        return false;
+    }
+
 #ifdef MU_ENABLE_SDL3
     auto window = std::make_unique<SDLWindow>();
     if (!window->Create(title, width, height, flags))
@@ -66,8 +71,7 @@ bool MuPlatform::CreateWindow(const char* title, int width, int height, uint32_t
     }
     s_pWindow = std::move(window);
     s_pEventLoop = std::make_unique<SDLEventLoop>();
-#else
-#ifdef _WIN32
+#elif defined(_WIN32)
     auto window = std::make_unique<Win32Window>();
     if (!window->Create(title, width, height, flags))
     {
@@ -75,7 +79,8 @@ bool MuPlatform::CreateWindow(const char* title, int width, int height, uint32_t
     }
     s_pWindow = std::move(window);
     s_pEventLoop = std::make_unique<Win32EventLoop>();
-#endif
+#else
+    return false;
 #endif
     return true;
 }
