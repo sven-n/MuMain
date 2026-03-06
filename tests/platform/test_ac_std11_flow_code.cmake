@@ -1,5 +1,5 @@
 # Story 2.1.1: AC-STD-11 — Flow code VS1-SDL-WINDOW-CREATE in story artifacts
-# RED PHASE: Implementation not started yet.
+# GREEN PHASE: Flow code and story references verified.
 #
 # Validates that:
 # 1. test_platform_window.cpp contains the flow code reference
@@ -25,10 +25,16 @@ if(tag_pos EQUAL -1)
     message(FATAL_ERROR "AC-STD-11 FAIL: test_platform_window.cpp missing [2-1-1] tag in test names")
 endif()
 
-# Check for VS1-SDL-WINDOW-CREATE flow code or story reference
+# Check for VS1-SDL-WINDOW-CREATE flow code
+string(FIND "${test_content}" "VS1-SDL-WINDOW-CREATE" flow_code_pos)
+if(flow_code_pos EQUAL -1)
+    message(FATAL_ERROR "AC-STD-11 FAIL: test_platform_window.cpp missing VS1-SDL-WINDOW-CREATE flow code")
+endif()
+
+# Check for story reference 2.1.1
 string(FIND "${test_content}" "2.1.1" story_ref_pos)
 if(story_ref_pos EQUAL -1)
     message(FATAL_ERROR "AC-STD-11 FAIL: test_platform_window.cpp missing story 2.1.1 reference")
 endif()
 
-message(STATUS "AC-STD-11 PASS: Flow code and story references present in test file")
+message(STATUS "AC-STD-11 PASS: Flow code VS1-SDL-WINDOW-CREATE and story references present in test file")

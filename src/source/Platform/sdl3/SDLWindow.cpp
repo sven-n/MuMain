@@ -1,6 +1,7 @@
 #ifdef MU_ENABLE_SDL3
 
 #include "SDLWindow.h"
+#include "../IPlatformWindow.h"
 #include <SDL3/SDL.h>
 
 namespace mu
@@ -19,7 +20,7 @@ bool SDLWindow::Create(const char* title, int width, int height, uint32_t flags)
     }
 
     SDL_WindowFlags sdlFlags = SDL_WINDOW_RESIZABLE;
-    if (flags & 0x1) // fullscreen flag
+    if (flags & MU_WINDOW_FULLSCREEN)
     {
         sdlFlags |= SDL_WINDOW_FULLSCREEN;
     }

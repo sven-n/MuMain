@@ -1386,6 +1386,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 // currently initializes SDL3 windowing and runs the event loop skeleton.
 
 #include "Platform/MuPlatform.h"
+#include "Platform/IPlatformWindow.h"
 
 int MuMain(int /*argc*/, char* /*argv*/[])
 {
@@ -1394,7 +1395,8 @@ int MuMain(int /*argc*/, char* /*argv*/[])
         return 1;
     }
 
-    if (!mu::MuPlatform::CreateWindow("MU Online", WindowWidth, WindowHeight, g_bUseFullscreenMode ? 0x1u : 0x0u))
+    if (!mu::MuPlatform::CreateWindow("MU Online", WindowWidth, WindowHeight,
+                                      g_bUseFullscreenMode ? mu::MU_WINDOW_FULLSCREEN : 0x0u))
     {
         mu::MuPlatform::Shutdown();
         return 1;

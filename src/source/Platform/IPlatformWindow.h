@@ -5,6 +5,8 @@
 namespace mu
 {
 
+constexpr uint32_t MU_WINDOW_FULLSCREEN = 0x1;
+
 class IPlatformWindow
 {
 public:

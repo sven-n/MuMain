@@ -27,7 +27,7 @@ bool MuPlatform::Initialize()
 #ifdef MU_ENABLE_SDL3
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
-        // SDL3 returns false on failure
+        g_ErrorReport.Write(L"MU_ERR_SDL_INIT_FAILED: SDL3 initialization failed: %hs\r\n", SDL_GetError());
         return false;
     }
 #endif
@@ -61,6 +61,7 @@ bool MuPlatform::CreateWindow(const char* title, int width, int height, uint32_t
     auto window = std::make_unique<SDLWindow>();
     if (!window->Create(title, width, height, flags))
     {
+        g_ErrorReport.Write(L"MU_ERR_WINDOW_CREATE_FAILED: Window creation failed: %hs\r\n", SDL_GetError());
         return false;
     }
     s_pWindow = std::move(window);
