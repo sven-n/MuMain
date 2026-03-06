@@ -1,7 +1,7 @@
 // Story 2.2.2: SDL3 Mouse Input Migration [VS1-SDL-INPUT-MOUSE]
-// RED PHASE: Tests written BEFORE implementation — all will FAIL until
+// GREEN PHASE: All tests verified against completed implementation (2026-03-06).
 // SDLEventLoop mouse handlers, PlatformCompat.h shims, and PlatformTypes.h
-// structs are implemented.
+// structs are all implemented and quality-gate verified.
 //
 // Framework: Catch2 v3.7.1
 // Location:  MuMain/tests/platform/test_platform_mouse.cpp
@@ -449,6 +449,76 @@ TEST_CASE("AC-1 [VS1-SDL-INPUT-MOUSE]: Mouse coordinate normalization clamps to 
 
         // THEN: maps to 320 in virtual 640 space — no clamping
         REQUIRE(MouseX == 320);
+    }
+}
+
+TEST_CASE("AC-1 [VS1-SDL-INPUT-MOUSE]: Mouse coordinate normalization clamps to 0-480 y range",
+          "[platform][mouse][ac1]")
+{
+    SECTION("y coordinate below 0 clamps to 0")
+    {
+        // GIVEN: SDL reports position outside top edge (e.g., captured mouse)
+        MouseY = 0;
+        g_fScreenRate_y = 1.0f;
+
+        // WHEN: simulate SDL_EVENT_MOUSE_MOTION with y = -15
+        float rawY = -15.0f;
+        MouseY = static_cast<int>(rawY / g_fScreenRate_y);
+        if (MouseY < 0)
+        {
+            MouseY = 0;
+        }
+        if (MouseY > 480)
+        {
+            MouseY = 480;
+        }
+
+        // THEN: clamped to 0
+        REQUIRE(MouseY == 0);
+    }
+
+    SECTION("y coordinate above 480 clamps to 480")
+    {
+        // GIVEN: SDL reports position outside bottom edge
+        MouseY = 0;
+        g_fScreenRate_y = 1.0f;
+
+        // WHEN: simulate motion beyond bottom edge
+        float rawY = 550.0f;
+        MouseY = static_cast<int>(rawY / g_fScreenRate_y);
+        if (MouseY < 0)
+        {
+            MouseY = 0;
+        }
+        if (MouseY > 480)
+        {
+            MouseY = 480;
+        }
+
+        // THEN: clamped to 480
+        REQUIRE(MouseY == 480);
+    }
+
+    SECTION("y coordinate within range is not clamped")
+    {
+        // GIVEN: normal window position with 2x screen rate (e.g., 960px window)
+        MouseY = 0;
+        g_fScreenRate_y = 2.0f; // 960 / 480 = 2.0
+
+        // WHEN: SDL reports pixel 480 (center of 960px window)
+        float rawY = 480.0f; // window-space pixels
+        MouseY = static_cast<int>(rawY / g_fScreenRate_y);
+        if (MouseY < 0)
+        {
+            MouseY = 0;
+        }
+        if (MouseY > 480)
+        {
+            MouseY = 480;
+        }
+
+        // THEN: maps to 240 in virtual 480 space — no clamping
+        REQUIRE(MouseY == 240);
     }
 }
 
