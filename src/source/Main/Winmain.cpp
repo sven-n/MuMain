@@ -1377,3 +1377,47 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     return msg.wParam;
 }
+
+#ifndef _WIN32
+// ---- Non-Windows entry point (SDL3 path) ----
+// This is the MuMain() function extracted per Story 2.1.1.
+// On non-Windows, the game window and event loop use MuPlatform (SDL3 backend).
+// Full game initialization is deferred to later EPIC-2 stories — this entry point
+// currently initializes SDL3 windowing and runs the event loop skeleton.
+
+#include "Platform/MuPlatform.h"
+
+int MuMain(int /*argc*/, char* /*argv*/[])
+{
+    if (!mu::MuPlatform::Initialize())
+    {
+        return 1;
+    }
+
+    if (!mu::MuPlatform::CreateWindow("MU Online", WindowWidth, WindowHeight, g_bUseFullscreenMode ? 0x1u : 0x0u))
+    {
+        mu::MuPlatform::Shutdown();
+        return 1;
+    }
+
+    while (!Destroy)
+    {
+        if (!mu::MuPlatform::PollEvents())
+        {
+            break;
+        }
+
+        // Game loop body will be added as more systems are migrated
+        // (rendering in EPIC-4, input in EPIC-2.2, audio in EPIC-5)
+    }
+
+    mu::MuPlatform::Shutdown();
+    return 0;
+}
+
+int main(int argc, char* argv[])
+{
+    return MuMain(argc, argv);
+}
+
+#endif // !_WIN32

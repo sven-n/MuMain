@@ -26,12 +26,7 @@ inline uint32_t GetTickCount()
     return timeGetTime();
 }
 
-// ---- MessageBoxW stub ----
-// TEMPORARY STUB: Full SDL3 implementation added in story 1.3.1
-// Returns IDOK for all cases until SDL3 is available
-// NOTE: For MB_YESNO dialogs, callers checking IDYES/IDNO will get IDOK (value 1)
-//       instead. Story 1.3.1 (SDL3) resolves this with proper dialog support.
-
+// ---- MessageBoxW shim ----
 // MB_ flag constants
 #define MB_OK 0x00
 #define MB_YESNO 0x04
@@ -47,10 +42,88 @@ inline uint32_t GetTickCount()
 #define IDYES 6
 #define IDNO 7
 
+#ifdef MU_ENABLE_SDL3
+#include <SDL3/SDL.h>
+
+inline int MessageBoxW(void* /*hwnd*/, const wchar_t* text, const wchar_t* caption, unsigned int type)
+{
+    // Convert wchar_t to UTF-8 for SDL3
+    std::string u8text;
+    for (const wchar_t* p = text; p && *p; ++p)
+    {
+        wchar_t ch = *p;
+        if (ch < 0x80)
+            u8text += static_cast<char>(ch);
+        else if (ch < 0x800)
+        {
+            u8text += static_cast<char>(0xC0 | (ch >> 6));
+            u8text += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+        else
+        {
+            u8text += static_cast<char>(0xE0 | (ch >> 12));
+            u8text += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
+            u8text += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+    }
+
+    std::string u8caption;
+    for (const wchar_t* p = caption; p && *p; ++p)
+    {
+        wchar_t ch = *p;
+        if (ch < 0x80)
+            u8caption += static_cast<char>(ch);
+        else if (ch < 0x800)
+        {
+            u8caption += static_cast<char>(0xC0 | (ch >> 6));
+            u8caption += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+        else
+        {
+            u8caption += static_cast<char>(0xE0 | (ch >> 12));
+            u8caption += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
+            u8caption += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+    }
+
+    // Map MB_ type to SDL message box flags
+    SDL_MessageBoxFlags sdlFlags = SDL_MESSAGEBOX_INFORMATION;
+    if ((type & MB_ICONERROR) || (type & MB_ICONSTOP))
+        sdlFlags = SDL_MESSAGEBOX_ERROR;
+    else if (type & MB_ICONWARNING)
+        sdlFlags = SDL_MESSAGEBOX_WARNING;
+
+    if ((type & 0x0F) == MB_YESNO)
+    {
+        // MB_YESNO: Two-button dialog via SDL_ShowMessageBox
+        const SDL_MessageBoxButtonData buttons[] = {
+            {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, IDYES, "Yes"},
+            {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, IDNO, "No"},
+        };
+
+        const SDL_MessageBoxData messageboxdata = {
+            sdlFlags, nullptr, u8caption.c_str(), u8text.c_str(), 2, buttons, nullptr,
+        };
+
+        int buttonid = IDNO;
+        SDL_ShowMessageBox(&messageboxdata, &buttonid);
+        return buttonid;
+    }
+
+    // MB_OK and other types: simple message box
+    SDL_ShowSimpleMessageBox(sdlFlags, u8caption.c_str(), u8text.c_str(), nullptr);
+    return IDOK;
+}
+
+#else // !MU_ENABLE_SDL3
+
+// Fallback stub when SDL3 is not available
 inline int MessageBoxW(void* /*hwnd*/, const wchar_t* /*text*/, const wchar_t* /*caption*/, unsigned int /*type*/)
 {
     return IDOK;
 }
+
+#endif // MU_ENABLE_SDL3
 
 #define MessageBox MessageBoxW
 

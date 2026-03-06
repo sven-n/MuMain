@@ -289,15 +289,25 @@ target_compile_options(MUThirdParty PRIVATE -Wno-error)
 
 # Platform abstraction with platform-conditional backend selection
 file(GLOB MU_PLATFORM_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/Platform/*.cpp")
+# MuPlatform.cpp is included unconditionally via the GLOB above (platform facade)
 if(WIN32)
   list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/PlatformLibrary.cpp")
+  list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/Win32Window.cpp")
+  list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/Win32EventLoop.cpp")
 else()
   list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/posix/PlatformLibrary.cpp")
+endif()
+if(MU_ENABLE_SDL3)
+  list(APPEND MU_PLATFORM_SOURCES
+    "${MU_SOURCE_DIR}/Platform/sdl3/SDLWindow.cpp"
+    "${MU_SOURCE_DIR}/Platform/sdl3/SDLEventLoop.cpp"
+  )
 endif()
 add_library(MUPlatform STATIC ${MU_PLATFORM_SOURCES})
 target_link_libraries(MUPlatform PRIVATE MUCore)
 if(MU_ENABLE_SDL3)
     target_link_libraries(MUPlatform PRIVATE SDL3::SDL3-static)
+    target_compile_definitions(MUPlatform PRIVATE MU_ENABLE_SDL3)
 endif()
 target_precompile_headers(MUPlatform REUSE_FROM MUCore)
 if(NOT WIN32)
