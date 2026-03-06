@@ -48,6 +48,13 @@ inline uint32_t GetTickCount()
 #include <algorithm>
 #include <cstdint>
 
+// ---- HIBYTE macro (non-Windows) ----
+// Extracts the high byte of a 16-bit value.
+// Used by all HIBYTE(GetAsyncKeyState(vk)) call sites (104 sites in codebase).
+#ifndef HIBYTE
+#define HIBYTE(w) (static_cast<uint8_t>((static_cast<uint16_t>(w) >> 8) & 0xFF))
+#endif
+
 // ---- Keyboard input shim (GetAsyncKeyState) ----
 // g_sdl3KeyboardState[512] is defined in SDLKeyboardState.cpp and populated
 // by SDLEventLoop::PollEvents(). Indexed by SDL_Scancode (0-511).
@@ -55,7 +62,7 @@ extern bool g_sdl3KeyboardState[512];
 
 // Map Win32 Virtual Key code to SDL3 SDL_Scancode.
 // Returns SDL_SCANCODE_UNKNOWN (0) for any VK code with no mapping.
-inline SDL_Scancode MuVkToSdlScancode(int vk)
+[[nodiscard]] inline SDL_Scancode MuVkToSdlScancode(int vk)
 {
     // ASCII letter range: 'A'-'Z' (0x41-0x5A) -> SDL_SCANCODE_A + offset
     static_assert(SDL_SCANCODE_A == 4, "SDL_SCANCODE_A must be 4 — verify SDL3 release-3.2.8");
@@ -149,6 +156,8 @@ inline SDL_Scancode MuVkToSdlScancode(int vk)
         return SDL_SCANCODE_KP_MULTIPLY; // VK_MULTIPLY
     case 0x6B:
         return SDL_SCANCODE_KP_PLUS; // VK_ADD
+    // VK_SEPARATOR (0x6C) intentionally omitted: no SDL3 equivalent.
+    // Falls through to default → logs MU_ERR_INPUT_UNMAPPED_VK if called.
     case 0x6D:
         return SDL_SCANCODE_KP_MINUS; // VK_SUBTRACT
     case 0x6E:
@@ -231,7 +240,7 @@ void MuPlatformLogUnmappedVk(int vk);
 //   HIBYTE(0x8000) == 0x80 == 128, satisfying both check patterns.
 // Unmapped VK codes return 0 and log MU_ERR_INPUT_UNMAPPED_VK via g_ErrorReport.
 // [VS1-SDL-INPUT-KEYBOARD]
-inline uint16_t GetAsyncKeyState(int vk)
+[[nodiscard]] inline uint16_t GetAsyncKeyState(int vk)
 {
     SDL_Scancode sc = MuVkToSdlScancode(vk);
     if (sc == SDL_SCANCODE_UNKNOWN)
@@ -241,13 +250,6 @@ inline uint16_t GetAsyncKeyState(int vk)
     }
     return g_sdl3KeyboardState[sc] ? static_cast<uint16_t>(0x8000) : 0;
 }
-
-// ---- HIBYTE macro (non-Windows) ----
-// Extracts the high byte of a 16-bit value.
-// Used by all HIBYTE(GetAsyncKeyState(vk)) call sites (104 sites in codebase).
-#ifndef HIBYTE
-#define HIBYTE(w) (static_cast<uint8_t>((static_cast<uint16_t>(w) >> 8) & 0xFF))
-#endif
 
 inline std::string mu_wchar_to_utf8(const wchar_t* src)
 {

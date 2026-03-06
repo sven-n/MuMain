@@ -9,7 +9,6 @@
 #ifdef MU_ENABLE_SDL3
 
 #include "PlatformCompat.h"
-#include "Core/ErrorReport.h"
 
 // Keyboard state array: true when the key at that SDL_Scancode index is held.
 // Populated by SDLEventLoop::PollEvents() on KEY_DOWN / KEY_UP events.
