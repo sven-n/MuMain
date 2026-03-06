@@ -641,14 +641,12 @@ TEST_CASE("AC-4 [VS1-SDL-INPUT-MOUSE]: ShowCursor shim is callable under MU_ENAB
         // THEN: no crash (compilation test — verifies shim signature matches call sites)
         // Note: SDL_ShowCursor/SDL_HideCursor are safe to call without SDL_Init in test context.
         // If SDL not initialized, these functions are graceful no-ops.
-        ShowCursor(true);
-        REQUIRE(true); // Shim callable — no crash
+        REQUIRE_NOTHROW(ShowCursor(true));
     }
 
     SECTION("ShowCursor(false) compiles and runs without crashing")
     {
-        ShowCursor(false);
-        REQUIRE(true); // Shim callable — no crash
+        REQUIRE_NOTHROW(ShowCursor(false));
 
         // Restore cursor visibility for subsequent test infrastructure
         ShowCursor(true);
