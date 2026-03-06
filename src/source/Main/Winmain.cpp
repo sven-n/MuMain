@@ -1408,7 +1408,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
         int nDisplayH = WindowHeight;
         if (mu::MuPlatform::GetDisplaySize(nDisplayW, nDisplayH))
         {
-            g_ErrorReport.Write(L"[VS1-SDL-WINDOW-FOCUS] Display size: %dx%d\r\n", nDisplayW, nDisplayH);
+            g_ConsoleDebug->Write(MCD_NORMAL, L"[VS1-SDL-WINDOW-FOCUS] Display size: %dx%d\r\n", nDisplayW, nDisplayH);
             if (g_bUseWindowMode == FALSE)
             {
                 WindowWidth = nDisplayW;
