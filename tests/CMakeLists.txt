@@ -14,6 +14,14 @@ add_executable(MuTests
     platform/test_platform_library.cpp
     platform/test_platform_window.cpp
 )
+
+# Story 2.2.1: SDL3 Keyboard Input Migration [VS1-SDL-INPUT-KEYBOARD]
+# test_platform_input.cpp is guarded by #ifdef MU_ENABLE_SDL3 internally,
+# but we add it to MuTests unconditionally so the translation unit is always
+# compiled. The #ifdef inside the file ensures SDL3-specific code is excluded
+# when MU_ENABLE_SDL3 is OFF (CI / MinGW Strategy B).
+target_sources(MuTests PRIVATE platform/test_platform_input.cpp)
+
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
 include(CTest)

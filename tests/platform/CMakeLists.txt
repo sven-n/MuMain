@@ -94,3 +94,24 @@ add_test(
         -DPLATFORM_DIR=${PLATFORM_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_2_1_2.cmake
 )
+
+# ---- Story 2.2.1: SDL3 Keyboard Input Migration — RED PHASE ----
+# [VS1-SDL-INPUT-KEYBOARD]
+# Catch2 unit tests are registered via MuTests in the parent CMakeLists.txt.
+# (test_platform_input.cpp — VK->scancode mapping, GetAsyncKeyState shim, HIBYTE)
+
+# AC-STD-11: Flow code VS1-SDL-INPUT-KEYBOARD in PlatformCompat.h
+add_test(
+    NAME "2.2.1-AC-STD-11:flow-code-keyboard"
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_DIR=${PLATFORM_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_2_2_1.cmake
+)
+
+# AC-STD-3: No raw GetAsyncKeyState calls outside Platform/ and known call sites
+add_test(
+    NAME "2.2.1-AC-STD-3:no-raw-getasynckeystate"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../../src/source
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_getasynckeystate.cmake
+)
