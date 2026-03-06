@@ -12,6 +12,7 @@ add_executable(MuTests
     platform/test_platform_compat.cpp
     platform/test_platform_keys.cpp
     platform/test_platform_library.cpp
+    platform/test_platform_window.cpp
 )
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
