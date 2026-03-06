@@ -22,6 +22,12 @@ add_executable(MuTests
 # when MU_ENABLE_SDL3 is OFF (CI / MinGW Strategy B).
 target_sources(MuTests PRIVATE platform/test_platform_input.cpp)
 
+# Story 2.2.2: SDL3 Mouse Input Migration [VS1-SDL-INPUT-MOUSE]
+# test_platform_mouse.cpp is guarded by #ifdef MU_ENABLE_SDL3 internally.
+# Added unconditionally so the TU is always compiled; code is excluded when
+# MU_ENABLE_SDL3 is OFF (CI / MinGW Strategy B).
+target_sources(MuTests PRIVATE platform/test_platform_mouse.cpp)
+
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp

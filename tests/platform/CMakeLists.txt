@@ -115,3 +115,25 @@ add_test(
         -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../../src/source
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_getasynckeystate.cmake
 )
+
+# ---- Story 2.2.2: SDL3 Mouse Input Migration — RED PHASE ----
+# [VS1-SDL-INPUT-MOUSE]
+# Catch2 unit tests are registered via MuTests in the parent CMakeLists.txt.
+# (test_platform_mouse.cpp — button state transitions, wheel sign, coord normalization,
+#  GetDoubleClickTime shim, VK_LBUTTON/RBUTTON/MBUTTON GetAsyncKeyState shim, POINT struct)
+
+# AC-STD-11: Flow code VS1-SDL-INPUT-MOUSE in SDLEventLoop.cpp
+add_test(
+    NAME "2.2.2-AC-STD-11:flow-code-mouse"
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_DIR=${PLATFORM_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_2_2_2.cmake
+)
+
+# AC-STD-3: No raw Win32 mouse WM_* patterns outside Winmain.cpp and Platform/
+add_test(
+    NAME "2.2.2-AC-STD-3:no-raw-win32-mouse"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../../src/source
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_win32_mouse.cmake
+)
