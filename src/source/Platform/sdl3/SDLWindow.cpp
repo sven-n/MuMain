@@ -64,6 +64,53 @@ void SDLWindow::SetSize(int width, int height)
     }
 }
 
+void SDLWindow::SetFullscreen(bool fullscreen)
+{
+    if (m_pWindow == nullptr)
+    {
+        return;
+    }
+
+    if (!SDL_SetWindowFullscreen(m_pWindow, fullscreen))
+    {
+        g_ErrorReport.Write(L"MU_ERR_FULLSCREEN_FAILED [VS1-SDL-WINDOW-FOCUS]: %hs\r\n", SDL_GetError());
+    }
+}
+
+void SDLWindow::SetMouseGrab(bool grab)
+{
+    if (m_pWindow != nullptr)
+    {
+        SDL_SetWindowMouseGrab(m_pWindow, grab);
+    }
+}
+
+bool SDLWindow::GetDisplaySize(int& outWidth, int& outHeight) const
+{
+    if (m_pWindow == nullptr)
+    {
+        return false;
+    }
+
+    SDL_DisplayID displayId = SDL_GetDisplayForWindow(m_pWindow);
+    if (displayId == 0)
+    {
+        g_ErrorReport.Write(L"MU_ERR_DISPLAY_QUERY_FAILED [VS1-SDL-WINDOW-FOCUS]: %hs\r\n", SDL_GetError());
+        return false;
+    }
+
+    const SDL_DisplayMode* pMode = SDL_GetCurrentDisplayMode(displayId);
+    if (pMode == nullptr)
+    {
+        g_ErrorReport.Write(L"MU_ERR_DISPLAY_QUERY_FAILED [VS1-SDL-WINDOW-FOCUS]: %hs\r\n", SDL_GetError());
+        return false;
+    }
+
+    outWidth = pMode->w;
+    outHeight = pMode->h;
+    return true;
+}
+
 } // namespace mu
 
 #endif // MU_ENABLE_SDL3

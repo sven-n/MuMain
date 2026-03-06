@@ -457,8 +457,8 @@ bool HangulDelete = false;
 int Hangul = 0;
 bool g_bEnterPressed = false;
 
-static double g_TargetFpsBeforeInactive = -1.0;
-static bool g_HasInactiveFpsOverride = false;
+double g_TargetFpsBeforeInactive = -1.0;
+bool g_HasInactiveFpsOverride = false;
 
 int g_iMousePopPosition_x = 0;
 int g_iMousePopPosition_y = 0;
@@ -1401,6 +1401,22 @@ int MuMain(int /*argc*/, char* /*argv*/[])
         mu::MuPlatform::Shutdown();
         return 1;
     }
+
+#ifdef MU_ENABLE_SDL3
+    {
+        int nDisplayW = WindowWidth;
+        int nDisplayH = WindowHeight;
+        if (mu::MuPlatform::GetDisplaySize(nDisplayW, nDisplayH))
+        {
+            g_ErrorReport.Write(L"[VS1-SDL-WINDOW-FOCUS] Display size: %dx%d\r\n", nDisplayW, nDisplayH);
+            if (!g_bUseWindowMode)
+            {
+                WindowWidth = nDisplayW;
+                WindowHeight = nDisplayH;
+            }
+        }
+    }
+#endif
 
     while (!Destroy)
     {

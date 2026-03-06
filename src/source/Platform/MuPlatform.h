@@ -17,6 +17,10 @@ public:
     [[nodiscard]] static IPlatformWindow* GetWindow();
     [[nodiscard]] static bool PollEvents();
 
+    static void SetFullscreen(bool fullscreen);
+    static void SetMouseGrab(bool grab);
+    [[nodiscard]] static bool GetDisplaySize(int& outWidth, int& outHeight);
+
 private:
     MuPlatform() = delete;
 };

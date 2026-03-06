@@ -99,4 +99,29 @@ bool MuPlatform::PollEvents()
     return s_pEventLoop->PollEvents();
 }
 
+void MuPlatform::SetFullscreen(bool fullscreen)
+{
+    if (s_pWindow)
+    {
+        s_pWindow->SetFullscreen(fullscreen);
+    }
+}
+
+void MuPlatform::SetMouseGrab(bool grab)
+{
+    if (s_pWindow)
+    {
+        s_pWindow->SetMouseGrab(grab);
+    }
+}
+
+bool MuPlatform::GetDisplaySize(int& outWidth, int& outHeight)
+{
+    if (!s_pWindow)
+    {
+        return false;
+    }
+    return s_pWindow->GetDisplaySize(outWidth, outHeight);
+}
+
 } // namespace mu

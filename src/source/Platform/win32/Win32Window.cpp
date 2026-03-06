@@ -42,6 +42,25 @@ void Win32Window::SetSize(int width, int height)
     }
 }
 
+void Win32Window::SetFullscreen(bool /*fullscreen*/)
+{
+    // Win32 fullscreen is handled by ChangeDisplaySettings in Winmain.cpp before window creation.
+    // No runtime toggle needed on the Win32 path at this stage.
+}
+
+void Win32Window::SetMouseGrab(bool /*grab*/)
+{
+    // Win32 uses SetCapture/ReleaseCapture in game logic for mouse confinement.
+    // This SDL3-specific interface method is a no-op on Windows.
+}
+
+bool Win32Window::GetDisplaySize(int& outWidth, int& outHeight) const
+{
+    outWidth = GetSystemMetrics(SM_CXSCREEN);
+    outHeight = GetSystemMetrics(SM_CYSCREEN);
+    return (outWidth > 0 && outHeight > 0);
+}
+
 } // namespace mu
 
 #endif // _WIN32

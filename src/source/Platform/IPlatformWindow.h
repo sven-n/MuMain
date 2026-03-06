@@ -17,6 +17,9 @@ public:
     [[nodiscard]] virtual void* GetNativeHandle() const = 0;
     virtual void SetTitle(const char* title) = 0;
     virtual void SetSize(int width, int height) = 0;
+    virtual void SetFullscreen(bool fullscreen) = 0;
+    virtual void SetMouseGrab(bool grab) = 0;
+    [[nodiscard]] virtual bool GetDisplaySize(int& outWidth, int& outHeight) const = 0;
 };
 
 } // namespace mu

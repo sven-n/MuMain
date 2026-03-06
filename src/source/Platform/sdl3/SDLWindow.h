@@ -20,6 +20,9 @@ public:
     [[nodiscard]] void* GetNativeHandle() const override;
     void SetTitle(const char* title) override;
     void SetSize(int width, int height) override;
+    void SetFullscreen(bool fullscreen) override;
+    void SetMouseGrab(bool grab) override;
+    [[nodiscard]] bool GetDisplaySize(int& outWidth, int& outHeight) const override;
 
 private:
     SDL_Window* m_pWindow = nullptr;

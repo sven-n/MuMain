@@ -151,8 +151,12 @@ TEST_CASE("AC-STD-16: Test infrastructure uses Catch2 v3", "[platform][std][2-1-
 // ===========================================================================
 // Story 2.1.2: SDL3 Window Focus & Display Management
 // Flow: VS1-SDL-WINDOW-FOCUS
-// RED PHASE: Tests written before implementation — all MUST fail until
-// the corresponding production code is added.
+// GREEN PHASE: All tests pass — implementation complete.
+//
+// Known limitation: Tests verify null-guard and no-crash behavior only.
+// Behavioral correctness of focus/minimize/restore events (AC-1, AC-5)
+// is verified via code review and manual testing, as injecting SDL events
+// into the event loop is not feasible in unit tests.
 // ===========================================================================
 
 // ---------------------------------------------------------------------------

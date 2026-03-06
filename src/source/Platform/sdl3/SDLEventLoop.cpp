@@ -1,10 +1,98 @@
 #ifdef MU_ENABLE_SDL3
 
 #include "SDLEventLoop.h"
+#include "../MuPlatform.h"
 #include <SDL3/SDL.h>
 
 // External game state — set to true to trigger clean shutdown
 extern bool Destroy;
+
+// Window and display state (Winmain.cpp)
+extern bool g_bWndActive;
+extern BOOL g_bUseWindowMode;
+
+// FPS throttle state (Winmain.cpp — shared with game loop)
+extern double g_TargetFpsBeforeInactive;
+extern bool g_HasInactiveFpsOverride;
+
+// FPS control (SceneManager.cpp)
+double GetTargetFps();
+void SetTargetFps(double fps);
+
+// Throttled FPS when inactive in fullscreen.
+// Must match REFERENCE_FPS in ZzzAI.h — duplicated to avoid Platform->Gameplay coupling.
+constexpr double INACTIVE_REFERENCE_FPS = 25.0;
+
+// Mouse state (ZzzOpenglUtil.cpp) — cleared on focus-loss in windowed mode
+extern bool MouseLButton;
+extern bool MouseLButtonPop;
+extern bool MouseRButton;
+extern bool MouseRButtonPop;
+extern bool MouseRButtonPush;
+extern bool MouseLButtonDBClick;
+extern bool MouseMButton;
+extern bool MouseMButtonPop;
+extern bool MouseMButtonPush;
+extern int MouseWheel;
+
+namespace
+{
+
+void HandleFocusGain()
+{
+    g_bWndActive = true;
+
+    if (g_HasInactiveFpsOverride)
+    {
+        SetTargetFps(g_TargetFpsBeforeInactive);
+        g_HasInactiveFpsOverride = false;
+    }
+
+    if (g_bUseWindowMode == FALSE)
+    {
+        mu::MuPlatform::SetMouseGrab(true);
+    }
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[VS1-SDL-WINDOW-FOCUS] Focus gained\r\n");
+}
+
+void HandleFocusLoss()
+{
+    // Only set inactive in fullscreen mode — matches Win32 ACTIVE_FOCUS_OUT guard
+    // (Winmain.cpp:491-494). In windowed mode g_bWndActive stays true so that
+    // game systems like the slide-help timer continue to work on Alt-Tab.
+    if (g_bUseWindowMode == FALSE)
+    {
+        g_bWndActive = false;
+    }
+
+    if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
+    {
+        g_TargetFpsBeforeInactive = GetTargetFps();
+        SetTargetFps(INACTIVE_REFERENCE_FPS);
+        g_HasInactiveFpsOverride = true;
+    }
+
+    if (g_bUseWindowMode == TRUE)
+    {
+        MouseLButton = false;
+        MouseLButtonPop = false;
+        MouseRButton = false;
+        MouseRButtonPop = false;
+        MouseRButtonPush = false;
+        MouseLButtonDBClick = false;
+        MouseMButton = false;
+        MouseMButtonPop = false;
+        MouseMButtonPush = false;
+        MouseWheel = 0;
+    }
+
+    mu::MuPlatform::SetMouseGrab(false);
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"[VS1-SDL-WINDOW-FOCUS] Focus lost\r\n");
+}
+
+} // anonymous namespace
 
 namespace mu
 {
@@ -25,23 +113,23 @@ bool SDLEventLoop::PollEvents()
             return false;
 
         case SDL_EVENT_WINDOW_RESIZED:
-            // No-op — will be mapped in story 2.1.2
+            // Resize handling deferred to future story (EPIC-4 rendering migration)
             break;
 
         case SDL_EVENT_WINDOW_FOCUS_GAINED:
-            // No-op — will be mapped in story 2.1.2
+            HandleFocusGain();
             break;
 
         case SDL_EVENT_WINDOW_FOCUS_LOST:
-            // No-op — will be mapped in story 2.1.2
+            HandleFocusLoss();
             break;
 
         case SDL_EVENT_WINDOW_MINIMIZED:
-            // No-op — will be mapped in story 2.1.2
+            HandleFocusLoss();
             break;
 
         case SDL_EVENT_WINDOW_RESTORED:
-            // No-op — will be mapped in story 2.1.2
+            HandleFocusGain();
             break;
 
         default:
