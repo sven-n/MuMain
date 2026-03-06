@@ -1,7 +1,6 @@
 # Story 2.1.2: SDL3 Window Focus & Display Management
 # AC-STD-11: Verify flow code VS1-SDL-WINDOW-FOCUS appears in SDLEventLoop.cpp
-# RED PHASE: This test will FAIL until the focus/minimize/restore handlers
-# in SDLEventLoop.cpp include the flow code string in log output.
+# GREEN PHASE: Focus/minimize/restore handlers include flow code in log output.
 
 cmake_minimum_required(VERSION 3.25)
 
