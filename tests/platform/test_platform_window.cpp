@@ -147,3 +147,144 @@ TEST_CASE("AC-STD-16: Test infrastructure uses Catch2 v3", "[platform][std][2-1-
 {
     REQUIRE(CATCH_VERSION_MAJOR == 3);
 }
+
+// ===========================================================================
+// Story 2.1.2: SDL3 Window Focus & Display Management
+// Flow: VS1-SDL-WINDOW-FOCUS
+// RED PHASE: Tests written before implementation — all MUST fail until
+// the corresponding production code is added.
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// AC-3: Fullscreen toggle — SetFullscreen null-guard (AC-STD-2)
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-3: SDLWindow::SetFullscreen does not crash when window is null",
+          "[platform][window][2-1-2][VS1-SDL-WINDOW-FOCUS]")
+{
+    // GIVEN: Platform initialized but no window created
+    bool initOk = mu::MuPlatform::Initialize();
+    REQUIRE(initOk);
+
+    // WHEN: SetFullscreen called with no active window
+    // THEN: No crash — null-guard prevents SDL call on nullptr
+    mu::MuPlatform::SetFullscreen(true);
+    mu::MuPlatform::SetFullscreen(false);
+
+    mu::MuPlatform::Shutdown();
+}
+
+// ---------------------------------------------------------------------------
+// AC-4: Mouse cursor confinement — SetMouseGrab null-guard (AC-STD-2)
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-4: SDLWindow::SetMouseGrab does not crash when window is null",
+          "[platform][window][2-1-2][VS1-SDL-WINDOW-FOCUS]")
+{
+    // GIVEN: Platform initialized but no window created
+    bool initOk = mu::MuPlatform::Initialize();
+    REQUIRE(initOk);
+
+    // WHEN: SetMouseGrab called with no active window
+    // THEN: No crash — null-guard prevents SDL call on nullptr
+    mu::MuPlatform::SetMouseGrab(true);
+    mu::MuPlatform::SetMouseGrab(false);
+
+    mu::MuPlatform::Shutdown();
+}
+
+// ---------------------------------------------------------------------------
+// AC-2: Display mode detection — GetDisplaySize null-guard (AC-STD-2)
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-2: MuPlatform::GetDisplaySize returns false when no window created",
+          "[platform][window][2-1-2][VS1-SDL-WINDOW-FOCUS]")
+{
+    // GIVEN: Platform initialized but no window created
+    bool initOk = mu::MuPlatform::Initialize();
+    REQUIRE(initOk);
+
+    int width = -1;
+    int height = -1;
+
+    // WHEN: GetDisplaySize called with no active window
+    bool result = mu::MuPlatform::GetDisplaySize(width, height);
+
+    // THEN: Returns false, output parameters unchanged
+    REQUIRE_FALSE(result);
+    REQUIRE(width == -1);
+    REQUIRE(height == -1);
+
+    mu::MuPlatform::Shutdown();
+}
+
+// ---------------------------------------------------------------------------
+// AC-2: Display mode detection — positive dimensions when window exists
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-2: MuPlatform::GetDisplaySize returns positive dimensions with window",
+          "[platform][window][2-1-2][VS1-SDL-WINDOW-FOCUS]")
+{
+    // GIVEN: Platform initialized and window created
+    bool initOk = mu::MuPlatform::Initialize();
+    REQUIRE(initOk);
+    bool created = mu::MuPlatform::CreateWindow("DisplaySize Test", 640, 480, 0);
+    REQUIRE(created);
+
+    int width = 0;
+    int height = 0;
+
+    // WHEN: GetDisplaySize called with an active window
+    bool result = mu::MuPlatform::GetDisplaySize(width, height);
+
+    // THEN: Returns true with positive width and height
+    REQUIRE(result);
+    REQUIRE(width > 0);
+    REQUIRE(height > 0);
+
+    mu::MuPlatform::Shutdown();
+}
+
+// ---------------------------------------------------------------------------
+// AC-3: Fullscreen toggle — SetFullscreen on active window does not crash
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-3: MuPlatform::SetFullscreen toggles without crash on active window",
+          "[platform][window][2-1-2][VS1-SDL-WINDOW-FOCUS]")
+{
+    // GIVEN: Platform initialized and window created
+    bool initOk = mu::MuPlatform::Initialize();
+    REQUIRE(initOk);
+    bool created = mu::MuPlatform::CreateWindow("Fullscreen Test", 640, 480, 0);
+    REQUIRE(created);
+
+    // WHEN: SetFullscreen toggled on and off
+    // THEN: No crash or hang
+    mu::MuPlatform::SetFullscreen(true);
+    mu::MuPlatform::SetFullscreen(false);
+
+    mu::MuPlatform::Shutdown();
+}
+
+// ---------------------------------------------------------------------------
+// AC-4: Mouse grab state transitions
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-4: MuPlatform::SetMouseGrab state transitions do not crash",
+          "[platform][window][2-1-2][VS1-SDL-WINDOW-FOCUS]")
+{
+    // GIVEN: Platform initialized and window created
+    bool initOk = mu::MuPlatform::Initialize();
+    REQUIRE(initOk);
+    bool created = mu::MuPlatform::CreateWindow("MouseGrab Test", 640, 480, 0);
+    REQUIRE(created);
+
+    // WHEN: Mouse grab toggled on/off repeatedly
+    // THEN: No crash — state transitions are clean
+    mu::MuPlatform::SetMouseGrab(true);
+    mu::MuPlatform::SetMouseGrab(false);
+    mu::MuPlatform::SetMouseGrab(true);
+    mu::MuPlatform::SetMouseGrab(false);
+
+    mu::MuPlatform::Shutdown();
+}

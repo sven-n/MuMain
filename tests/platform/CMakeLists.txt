@@ -84,3 +84,13 @@ add_test(
         -DTEST_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code.cmake
 )
+
+# ---- Story 2.1.2: SDL3 Window Focus & Display Management — RED PHASE ----
+
+# AC-STD-11: Flow code VS1-SDL-WINDOW-FOCUS in SDLEventLoop.cpp
+add_test(
+    NAME "2.1.2-AC-STD-11:flow-code-focus"
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_DIR=${PLATFORM_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_2_1_2.cmake
+)
