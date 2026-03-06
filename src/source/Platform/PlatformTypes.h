@@ -46,4 +46,35 @@ using DWORD_PTR = uintptr_t;
 // Memory zeroing macro
 #define ZeroMemory(Destination, Length) memset((Destination), 0, (Length))
 
+// ---- Geometric structs ----
+
+struct POINT
+{
+    long x;
+    long y;
+};
+
+struct RECT
+{
+    long left;
+    long top;
+    long right;
+    long bottom;
+};
+
+struct SIZE
+{
+    long cx;
+    long cy;
+};
+
+inline bool PtInRect(const RECT* prc, POINT pt)
+{
+    if (prc == nullptr)
+    {
+        return false;
+    }
+    return pt.x >= prc->left && pt.x < prc->right && pt.y >= prc->top && pt.y < prc->bottom;
+}
+
 #endif // _WIN32

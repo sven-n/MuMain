@@ -25,4 +25,12 @@ void MuPlatformLogUnmappedVk(int vk)
                         static_cast<unsigned>(vk));
 }
 
+// Logs a cursor warp failure via the post-mortem error log.
+// Called by the SetCursorPos() shim in PlatformCompat.h.
+// [VS1-SDL-INPUT-MOUSE]
+void MuPlatformLogMouseWarpFailed(const char* sdlError)
+{
+    g_ErrorReport.Write(L"MU_ERR_MOUSE_WARP_FAILED [VS1-SDL-INPUT-MOUSE]: cursor warp failed: %hs\r\n", sdlError);
+}
+
 #endif // MU_ENABLE_SDL3

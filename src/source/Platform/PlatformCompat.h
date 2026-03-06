@@ -42,11 +42,85 @@ inline uint32_t GetTickCount()
 #define IDYES 6
 #define IDNO 7
 
+// ---- Mouse cursor and position stubs (non-Windows, no SDL3 dependency) ----
+
+inline DWORD GetDoubleClickTime()
+{
+    // 500ms is the standard double-click interval on Windows.
+    // SDL3 does not expose a platform double-click time API.
+    return 500u;
+}
+
+inline void GetCursorPos(POINT* ppt)
+{
+    // On SDL3 path, mouse position is maintained in MouseX/MouseY globals
+    // via SDL_EVENT_MOUSE_MOTION. CInput::Update() calls GetCursorPos()
+    // but the CInput cursor position system is superseded by the global
+    // mouse state populated by SDLEventLoop.
+    if (ppt != nullptr)
+    {
+        ppt->x = 0;
+        ppt->y = 0;
+    }
+}
+
+inline void ScreenToClient(HWND /*hwnd*/, POINT* /*ppt*/)
+{
+    // No-op on SDL3 path: mouse coordinates from SDL_EVENT_MOUSE_MOTION
+    // are already window-relative. CInput::Update() calls ScreenToClient()
+    // but on the SDL3 path cursor position is fed directly via SDL events
+    // into MouseX/MouseY — the CInput position is not used for gameplay.
+}
+
+inline HWND GetActiveWindow()
+{
+    // On SDL3 path, focus state is managed by SDLEventLoop via g_bWndActive.
+    // Return non-null so CInput::Update() does not zero out cursor state.
+    // Use address of static sentinel to avoid integer-to-pointer cast warnings.
+    static int s_activeWindowSentinel = 0;
+    return static_cast<void*>(&s_activeWindowSentinel);
+}
+
 #ifdef MU_ENABLE_SDL3
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_scancode.h>
 #include <algorithm>
 #include <cstdint>
+
+// ---- Mouse cursor visibility shims (SDL3 path) ----
+// SDL3 split SDL2's SDL_ShowCursor(int) into two separate functions.
+// Win32 ShowCursor has a reference-count mechanism; the shim does not replicate
+// the reference count since the codebase uses balanced show/hide calls.
+// [VS1-SDL-INPUT-MOUSE]
+inline void ShowCursor(bool show)
+{
+    if (show)
+    {
+        SDL_ShowCursor();
+    }
+    else
+    {
+        SDL_HideCursor();
+    }
+}
+
+// MuPlatformLogMouseWarpFailed — implemented in SDLKeyboardState.cpp (compiled
+// with the project PCH that provides CErrorReport / g_ErrorReport). Declared here
+// so the inline SetCursorPos shim can call it without pulling ErrorReport.h into
+// every TU that includes PlatformCompat.h. [VS1-SDL-INPUT-MOUSE]
+void MuPlatformLogMouseWarpFailed(const char* sdlError);
+
+// ---- Cursor warp shim (SDL3 path) ----
+// SDL_WarpMouseInWindow with nullptr targets the currently focused window.
+// Call sites pass window-relative coordinates scaled to WindowWidth/Height.
+// [VS1-SDL-INPUT-MOUSE]
+inline void SetCursorPos(int x, int y)
+{
+    if (!SDL_WarpMouseInWindow(nullptr, static_cast<float>(x), static_cast<float>(y)))
+    {
+        MuPlatformLogMouseWarpFailed(SDL_GetError());
+    }
+}
 
 // ---- HIBYTE macro (non-Windows) ----
 // Extracts the high byte of a 16-bit value.
@@ -234,14 +308,34 @@ extern bool g_sdl3KeyboardState[512];
 // includes PlatformCompat.h. [VS1-SDL-INPUT-KEYBOARD]
 void MuPlatformLogUnmappedVk(int vk);
 
+// Mouse button state — populated by SDLEventLoop, used by GetAsyncKeyState shim.
+// [VS1-SDL-INPUT-MOUSE]
+extern bool MouseLButton;
+extern bool MouseRButton;
+extern bool MouseMButton;
+
 // GetAsyncKeyState shim for non-Windows platforms.
 // Returns 0x8000 (high bit set) when the key is currently held, 0 otherwise.
 // Callers using HIBYTE(GetAsyncKeyState(vk)) & 0x80 or == 128 behave correctly:
 //   HIBYTE(0x8000) == 0x80 == 128, satisfying both check patterns.
+// Mouse button VK codes (0x01/0x02/0x04) are backed by global mouse state.
 // Unmapped VK codes return 0 and log MU_ERR_INPUT_UNMAPPED_VK via g_ErrorReport.
-// [VS1-SDL-INPUT-KEYBOARD]
+// [VS1-SDL-INPUT-KEYBOARD] [VS1-SDL-INPUT-MOUSE]
 [[nodiscard]] inline uint16_t GetAsyncKeyState(int vk)
 {
+    // Mouse button VK codes — backed by global mouse state populated by SDLEventLoop
+    switch (vk)
+    {
+    case 0x01:
+        return MouseLButton ? static_cast<uint16_t>(0x8000) : 0; // VK_LBUTTON
+    case 0x02:
+        return MouseRButton ? static_cast<uint16_t>(0x8000) : 0; // VK_RBUTTON
+    case 0x04:
+        return MouseMButton ? static_cast<uint16_t>(0x8000) : 0; // VK_MBUTTON
+    default:
+        break;
+    }
+
     SDL_Scancode sc = MuVkToSdlScancode(vk);
     if (sc == SDL_SCANCODE_UNKNOWN)
     {
