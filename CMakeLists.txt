@@ -7,12 +7,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(MU_ENABLE_DOTNET ".NET AOT library integration (disable for CI/rendering-only builds)" ON)
+
 add_subdirectory("src")
 
 # ============================================================
 # .NET AOT Cross-Platform Library (EPIC-3, Story 3.1.1)
 # ============================================================
-option(MU_ENABLE_DOTNET ".NET AOT library integration (disable for CI/rendering-only builds)" ON)
 if(MU_ENABLE_DOTNET)
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
     include(FindDotnetAOT)
@@ -32,7 +33,7 @@ if(MU_ENABLE_DOTNET)
         endif()
 
         add_custom_target(BuildDotNetAOT
-            COMMAND "${DOTNET_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
+            COMMAND "${DOTNETAOT_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
             COMMENT "Building .NET AOT library for RID: ${MU_DOTNET_RID}"
             VERBATIM
         )
@@ -41,7 +42,7 @@ if(MU_ENABLE_DOTNET)
             TARGET BuildDotNetAOT POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different
                 "${DOTNETAOT_PUBLISH_DIR}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}"
-                "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}"
+                "$<TARGET_FILE_DIR:Main>/MUnique.Client.Library${MU_DOTNET_LIB_EXT}"
             COMMENT "Copying .NET AOT library to output directory"
             VERBATIM
         )

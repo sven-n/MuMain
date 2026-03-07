@@ -534,36 +534,39 @@ if (DOTNET_EXECUTABLE)
     message(STATUS ".NET Client Library will build for x86 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   endif()
 
-  add_custom_command(
-          OUTPUT "${DOTNET_DLL_PATH}"
-          COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
-          COMMAND ${CMAKE_COMMAND} -E env
-                  "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
-                  "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
-                  "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
-                  "TMP=${DOTNET_TEMP_DIR_NATIVE}"
-                  "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
-          DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
-          COMMENT "Checking for .NET Client Library updates..."
-          VERBATIM
-  )
+  # Legacy ClientLibrary build — skipped when MU_ENABLE_DOTNET=ON (FindDotnetAOT handles it)
+  if(NOT MU_ENABLE_DOTNET)
+    add_custom_command(
+            OUTPUT "${DOTNET_DLL_PATH}"
+            COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
+            COMMAND ${CMAKE_COMMAND} -E env
+                    "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+                    "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+                    "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
+                    "TMP=${DOTNET_TEMP_DIR_NATIVE}"
+                    "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
+            DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
+            COMMENT "Checking for .NET Client Library updates..."
+            VERBATIM
+    )
 
-  # 4. Create a target for the DLL and link it to Main
-  add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
-  add_dependencies(Main ClientLibrary)
-  set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    # 4. Create a target for the DLL and link it to Main
+    add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
+    add_dependencies(Main ClientLibrary)
+    set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-  # Copy ClientLibrary DLL to the executable's output directory
-  add_custom_command(TARGET Main POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL from: ${DOTNET_DLL_PATH}"
-    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL to: $<TARGET_FILE_DIR:Main>"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${DOTNET_DLL_PATH}"
-      $<TARGET_FILE_DIR:Main>
-    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: ClientLibrary DLL copy complete"
-    COMMENT "Copying ClientLibrary DLL to build directory"
-  )
+    # Copy ClientLibrary DLL to the executable's output directory
+    add_custom_command(TARGET Main POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL from: ${DOTNET_DLL_PATH}"
+      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL to: $<TARGET_FILE_DIR:Main>"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${DOTNET_DLL_PATH}"
+        $<TARGET_FILE_DIR:Main>
+      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: ClientLibrary DLL copy complete"
+      COMMENT "Copying ClientLibrary DLL to build directory"
+    )
+  endif() # NOT MU_ENABLE_DOTNET
 
   # ConstantsReplacer build target
   set(CONSTANTS_REPLACER_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/ConstantsReplacer.csproj")

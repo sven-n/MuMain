@@ -33,10 +33,10 @@ endif()
 
 file(READ "${MODULE_FILE}" MODULE_CONTENT)
 
-# --- Check 2: find_program(DOTNET_EXECUTABLE ...) is used ---
-string(REGEX MATCH "find_program[\\( \t]*DOTNET_EXECUTABLE" _match_find_prog "${MODULE_CONTENT}")
+# --- Check 2: find_program(DOTNETAOT_EXECUTABLE ...) is used ---
+string(REGEX MATCH "find_program[\\( \t]*DOTNETAOT_EXECUTABLE" _match_find_prog "${MODULE_CONTENT}")
 if(NOT _match_find_prog)
-    message(FATAL_ERROR "AC-6: find_program(DOTNET_EXECUTABLE ...) not found in FindDotnetAOT.cmake")
+    message(FATAL_ERROR "AC-6: find_program(DOTNETAOT_EXECUTABLE ...) not found in FindDotnetAOT.cmake")
 endif()
 
 # --- Check 3: message(WARNING ...) for graceful failure (NOT FATAL_ERROR) ---

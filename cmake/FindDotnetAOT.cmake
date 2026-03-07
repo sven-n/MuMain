@@ -13,7 +13,7 @@
 #   DOTNETAOT_FOUND        - TRUE if dotnet executable was found
 #   MU_DOTNET_RID          - .NET Runtime Identifier for current platform
 #   MU_DOTNET_LIB_EXT      - Library extension (.dll / .dylib / .so)
-#   DOTNET_EXECUTABLE      - Full path to dotnet or dotnet.exe
+#   DOTNETAOT_EXECUTABLE   - Full path to dotnet or dotnet.exe
 #   DOTNETAOT_CSPROJ_PATH  - Path to MUnique.Client.Library.csproj (Windows-format under WSL)
 #   MU_IS_WSL              - TRUE when running inside WSL
 
@@ -73,12 +73,12 @@ if(MU_IS_WSL)
     )
     foreach(_candidate ${_dotnet_wsl_candidates})
         if(EXISTS "${_candidate}")
-            set(DOTNET_EXECUTABLE "${_candidate}" CACHE FILEPATH "Path to dotnet executable")
+            set(DOTNETAOT_EXECUTABLE "${_candidate}" CACHE FILEPATH "Path to dotnet executable")
             break()
         endif()
     endforeach()
 else()
-    find_program(DOTNET_EXECUTABLE dotnet
+    find_program(DOTNETAOT_EXECUTABLE dotnet
         PATHS
             "$ENV{DOTNET_ROOT}"
             "/usr/local/share/dotnet"
@@ -88,7 +88,7 @@ else()
     )
 endif()
 
-if(NOT DOTNET_EXECUTABLE)
+if(NOT DOTNETAOT_EXECUTABLE)
     message(WARNING
         "PLAT: FindDotnetAOT — dotnet not found at searched paths. "
         ".NET AOT library will not be built. "
@@ -99,7 +99,7 @@ if(NOT DOTNET_EXECUTABLE)
 endif()
 
 set(DOTNETAOT_FOUND TRUE)
-message(STATUS "PLAT: FindDotnetAOT — dotnet found at: ${DOTNET_EXECUTABLE}")
+message(STATUS "PLAT: FindDotnetAOT — dotnet found at: ${DOTNETAOT_EXECUTABLE}")
 
 # ============================================================
 # Step 4: Resolve .csproj path (WSL path conversion)
