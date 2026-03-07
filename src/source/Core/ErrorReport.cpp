@@ -46,6 +46,11 @@ static std::string WideToUtf8(const wchar_t* wide)
         }
         else
         {
+            // Skip UTF-16 surrogate codepoints (U+D800-U+DFFF) — invalid in UTF-8
+            if (ch >= 0xD800 && ch <= 0xDFFF)
+            {
+                continue;
+            }
             result += static_cast<char>(0xE0 | (ch >> 12));
             result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
             result += static_cast<char>(0x80 | (ch & 0x3F));
@@ -178,7 +183,7 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
         0,
     };
     int offset = 0;
-    offset += mu_swprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
+    offset += mu_swprintf(szLine, L"0x%00000008X : ", (DWORD)(uintptr_t)pBuffer);
     for (int i = 0; i < iSize; i++)
     {
         offset += mu_swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
