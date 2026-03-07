@@ -54,6 +54,16 @@ target_sources(MuTests PRIVATE platform/test_connection_library_load.cpp)
 # Tests fail until PlatformCompat.h has the mu_wchar_to_char16 / mu_char16_to_wchar utilities.
 target_sources(MuTests PRIVATE platform/test_char16t_encoding.cpp)
 
+# Story 3.3.1: macOS Server Connectivity Validation [VS1-NET-VALIDATE-MACOS]
+# Guarded by #ifdef __APPLE__ internally — compiles on all platforms, runs only on macOS.
+# MU_TEST_LIBRARY_PATH points to MUnique.Client.Library.dylib in the build output.
+if(APPLE AND EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.dylib")
+    target_compile_definitions(MuTests PRIVATE
+        MU_TEST_LIBRARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.dylib"
+    )
+endif()
+target_sources(MuTests PRIVATE platform/test_macos_connectivity.cpp)
+
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp

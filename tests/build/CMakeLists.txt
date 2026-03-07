@@ -156,3 +156,14 @@ add_test(
         -DCONNECTION_MANAGER_CS=${MUMAIN_SOURCE_DIR}/ClientLibrary/ConnectionManager.cs
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_marshal_ptr_3_2_1.cmake
 )
+
+# ==========================================================================
+# Story 3.3.1 - macOS Server Connectivity Validation [VS1-NET-VALIDATE-MACOS]
+# ==========================================================================
+
+# AC-STD-11 / AC-VAL-3: Flow code traceability — VS1-NET-VALIDATE-MACOS in test file header
+add_test(
+    NAME "3.3.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_3_1.cmake
+)
