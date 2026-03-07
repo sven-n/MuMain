@@ -102,6 +102,18 @@ add_test(
 )
 
 # ==========================================================================
+# Story 3.1.2 - Connection.h Cross-Platform Updates [VS1-NET-CONNECTION-XPLAT]
+# ==========================================================================
+
+# AC-STD-11 / AC-4 / AC-STD-3 / AC-VAL-3: Flow code traceability + no platform ifdefs
+add_test(
+    NAME "3.1.2-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DCONNECTION_H=${MUMAIN_SOURCE_DIR}/src/source/Dotnet/Connection.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_1_2.cmake
+)
+
+# ==========================================================================
 # Story 7.1.1 - Cross-Platform Error Reporting [VS0-QUAL-ERRORREPORT-XPLAT]
 # RED PHASE: AC-3 and AC-STD-11 tests fail until ErrorReport.cpp is refactored.
 # ==========================================================================
