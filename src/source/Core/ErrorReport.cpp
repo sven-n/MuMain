@@ -3,14 +3,56 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+
+#ifdef _WIN32
 #include <ddraw.h>
 #include <dinput.h>
 #include <dmusicc.h>
 #include <eh.h>
 #include <imagehlp.h>
+#endif
+
+#include <chrono>
+#include <ctime>
+#include <filesystem>
+#include <fstream>
+#include <string>
+#include <vector>
+
 #include "ErrorReport.h"
 
 void DeleteSocket();
+
+// ---------------------------------------------------------------------------
+// Internal helper: BMP-only wide-to-UTF-8 conversion.
+// Avoids deprecated std::wstring_convert. All MU Online text is BMP (≤ U+FFFF)
+// per development-standards.md §1, so 3-byte UTF-8 maximum is correct.
+// Pattern from Story 1.2.1 (mu_wfopen shim in PlatformCompat.h).
+// ---------------------------------------------------------------------------
+static std::string WideToUtf8(const wchar_t* wide)
+{
+    std::string result;
+    while (wide && *wide)
+    {
+        wchar_t ch = *wide++;
+        if (ch < 0x80)
+        {
+            result += static_cast<char>(ch);
+        }
+        else if (ch < 0x800)
+        {
+            result += static_cast<char>(0xC0 | (ch >> 6));
+            result += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+        else
+        {
+            result += static_cast<char>(0xE0 | (ch >> 12));
+            result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
+            result += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+    }
+    return result;
+}
 
 CErrorReport::CErrorReport()
 {
@@ -25,104 +67,89 @@ CErrorReport::~CErrorReport()
 
 void CErrorReport::Clear(void)
 {
-    m_hFile = INVALID_HANDLE_VALUE;
-    m_lpszFileName[0] = '\0';
+    m_filePath = {};
     m_iKey = 0;
 }
 
 void CErrorReport::Create(const wchar_t* lpszFileName)
 {
-    wcscpy(m_lpszFileName, lpszFileName);
-
-    // DeleteFile( m_lpszFileName);
     m_iKey = 0;
-    m_hFile = CreateFile(m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS,
-                         FILE_ATTRIBUTE_NORMAL, NULL);
+    std::string utf8Name = WideToUtf8(lpszFileName);
+    m_filePath = std::filesystem::path(utf8Name);
 
+    // CutHead reads any existing content and trims old sessions before appending
     CutHead();
-    SetFilePointer(m_hFile, 0, NULL, FILE_END);
+
+    m_fileStream.open(m_filePath, std::ios::out | std::ios::app);
+    if (!m_fileStream.is_open())
+    {
+        fprintf(stderr, "PLAT: ErrorReport — cannot create %s\n", m_filePath.string().c_str());
+    }
 }
 
 void CErrorReport::Destroy(void)
 {
-    CloseHandle(m_hFile);
+    m_fileStream.close();
     Clear();
 }
 
 void CErrorReport::CutHead(void)
 {
-    DWORD dwNumber;
-    wchar_t lpszBuffer[128 * 1024];
-    ReadFile(m_hFile, lpszBuffer, 128 * 1024 - 1, &dwNumber, NULL);
-    // m_iKey = Xor_ConvertBuffer( lpszBuffer, dwNumber);
-    lpszBuffer[dwNumber] = '\0';
-    wchar_t* lpCut = CheckHeadToCut(lpszBuffer, dwNumber);
-    if (dwNumber >= 32 * 1024 - 1)
+    std::ifstream inFile(m_filePath);
+    if (!inFile.is_open())
     {
-        lpCut = &lpszBuffer[32 * 1024 - 1];
+        return; // No existing file — nothing to trim
     }
-    if (lpCut != lpszBuffer)
+    std::string content((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
+    inFile.close();
+
+    // Locate all session begin markers (ASCII, so UTF-8 find() works correctly)
+    const std::string marker = "###### Log Begin ######";
+    std::vector<size_t> positions;
+    size_t pos = 0;
+    while ((pos = content.find(marker, pos)) != std::string::npos)
     {
-        CloseHandle(m_hFile);
-        DeleteFile(m_lpszFileName);
-        m_hFile = CreateFile(m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS,
-                             FILE_ATTRIBUTE_NORMAL, NULL);
-        DWORD dwSize = dwNumber - (lpCut - lpszBuffer);
-        m_iKey = 0;
-        WriteFile(m_hFile, lpCut, dwSize, &dwNumber, NULL);
-    }
-}
-
-wchar_t* CErrorReport::CheckHeadToCut(wchar_t* lpszBuffer, DWORD dwNumber)
-{
-    const wchar_t* lpszBegin = L"###### Log Begin ######";
-    int iLengthOfBegin = wcslen(lpszBegin);
-
-    wchar_t* lpFoundList[128];
-    int iFoundCount = 0;
-
-    for (wchar_t* lpFind = lpszBuffer; lpFind && *lpFind;)
-    {
-        lpFind = wcschr(lpFind, (int)'#');
-        if (lpFind)
-        {
-            if (0 == wcsncmp(lpFind, lpszBegin, iLengthOfBegin))
-            {
-                lpFoundList[iFoundCount++] = lpFind;
-                lpFind += iLengthOfBegin;
-            }
-            else
-            {
-                lpFind++;
-            }
-        }
+        positions.push_back(pos);
+        pos += marker.size();
     }
 
-    if (iFoundCount >= 5)
-    {
-        return (lpFoundList[iFoundCount - 4]);
-    }
-    return (lpszBuffer);
-}
+    std::string trimmed;
+    bool needRewrite = false;
 
-BOOL CErrorReport::WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten,
-                             LPOVERLAPPED lpOverlapped)
-{
-    // m_iKey = Xor_ConvertBuffer( lpBuffer, nNumberOfBytesToWrite, m_iKey);
-    return (::WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped));
+    if (positions.size() >= 5)
+    {
+        // Keep last 4 sessions — trim everything before the (N-4)th marker
+        trimmed = content.substr(positions[positions.size() - 4]);
+        needRewrite = true;
+    }
+    else if (content.size() >= 32 * 1024 - 1)
+    {
+        // Overall 32 KB cap: truncate to second half
+        trimmed = content.substr(content.size() / 2);
+        needRewrite = true;
+    }
+
+    if (needRewrite)
+    {
+        std::filesystem::remove(m_filePath);
+        std::ofstream outFile(m_filePath, std::ios::out);
+        outFile.write(trimmed.c_str(), static_cast<std::streamsize>(trimmed.size()));
+        outFile.close();
+    }
 }
 
 void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
 {
-    if (m_hFile != INVALID_HANDLE_VALUE)
+    if (m_fileStream.is_open())
     {
-        DWORD dwNumber;
-        WriteFile(m_hFile, lpszToWrite, wcslen(lpszToWrite), &dwNumber, NULL);
-
-        if (dwNumber == 0)
+        std::string utf8 = WideToUtf8(lpszToWrite);
+        m_fileStream.write(utf8.c_str(), static_cast<std::streamsize>(utf8.size()));
+        if (m_fileStream.fail())
         {
-            CloseHandle(m_hFile);
-            Create(m_lpszFileName);
+            std::wstring wPath = m_filePath.wstring();
+            m_fileStream.close();
+            m_fileStream.clear();
+            Create(wPath.c_str());
         }
     }
 }
@@ -142,7 +169,6 @@ void CErrorReport::Write(const wchar_t* lpszFormat, ...)
 
 void CErrorReport::HexWrite(void* pBuffer, int iSize)
 {
-    DWORD dwWritten = 0;
     wchar_t szLine[256] = {
         0,
     };
@@ -156,7 +182,7 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
             if (i % 16 == 15)
             { //. new line
                 offset += mu_swprintf(szLine + offset, L"\r\n");
-                WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
+                WriteDebugInfoStr(szLine);
                 offset = 0;
                 offset += mu_swprintf(szLine + offset, L"           : ");
             }
@@ -167,7 +193,7 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
         }
     }
     offset += mu_swprintf(szLine + offset, L"\r\n");
-    WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
+    WriteDebugInfoStr(szLine);
 }
 
 void CErrorReport::AddSeparator(void)
@@ -182,14 +208,25 @@ void CErrorReport::WriteLogBegin(void)
 
 void CErrorReport::WriteCurrentTime(BOOL bLineShift)
 {
-    SYSTEMTIME st;
-    GetLocalTime(&st);
-    g_ErrorReport.Write(L"%4d/%02d/%02d %02d:%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute);
+    auto now = std::chrono::system_clock::now();
+    std::time_t t = std::chrono::system_clock::to_time_t(now);
+    std::tm tm_local{};
+#ifdef _WIN32
+    localtime_s(&tm_local, &t);
+#else
+    localtime_r(&t, &tm_local);
+#endif
+    wchar_t szTime[32];
+    mu_swprintf(szTime, L"%04d/%02d/%02d %02d:%02d", tm_local.tm_year + 1900, tm_local.tm_mon + 1, tm_local.tm_mday,
+                tm_local.tm_hour, tm_local.tm_min);
+    Write(L"%ls", szTime);
     if (bLineShift)
     {
-        g_ErrorReport.Write(L"\r\n");
+        Write(L"\r\n");
     }
 }
+
+#ifdef _WIN32
 
 void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
 {
@@ -710,3 +747,5 @@ void GetSystemInfo(ER_SystemInfo* si)
     DWORD dwDX = GetDXVersion();
     mu_swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
 }
+
+#endif // _WIN32

@@ -24,25 +24,6 @@
 #include <regex>
 #include <string>
 
-// ---------------------------------------------------------------------------
-// Type stubs for pre-refactor ErrorReport.h compatibility on macOS.
-//
-// The CURRENT ErrorReport.h (pre-7.1.1) declares a Win32-specific private
-// method:
-//   BOOL WriteFile(HANDLE, void*, DWORD, LPDWORD, LPOVERLAPPED)
-// which references LPDWORD and LPOVERLAPPED — not defined in PlatformTypes.h.
-//
-// TODO[7-1-1]: Remove these four lines after Task 2.3 removes the Win32
-//              WriteFile wrapper from ErrorReport.h.
-// ---------------------------------------------------------------------------
-#ifndef _WIN32
-using LPDWORD = uint32_t*;
-struct OVERLAPPED
-{
-};
-using LPOVERLAPPED = OVERLAPPED*;
-#endif
-
 #include "PlatformTypes.h"
 #include "ErrorReport.h"
 

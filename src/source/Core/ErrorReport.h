@@ -1,5 +1,8 @@
 #pragma once
 
+#include <filesystem>
+#include <fstream>
+
 #define MAX_LENGTH_CPUNAME (128)
 #define MAX_LENGTH_OSINFO (128)
 #define MAX_DXVERSION (128)
@@ -22,8 +25,8 @@ public:
     void Clear(void);
 
 protected:
-    HANDLE m_hFile;
-    wchar_t m_lpszFileName[MAX_PATH];
+    std::ofstream m_fileStream;
+    std::filesystem::path m_filePath;
     int m_iKey;
 
 public:
@@ -32,11 +35,6 @@ public:
 
 protected:
     void CutHead(void);
-    wchar_t* CheckHeadToCut(wchar_t* lpszBuffer, DWORD dwNumber);
-
-protected:
-    BOOL WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten,
-                   LPOVERLAPPED lpOverlapped);
 
 public:
     void WriteDebugInfoStr(wchar_t* lpszToWrite);
@@ -47,10 +45,12 @@ public:
     void WriteLogBegin(void);
     void WriteCurrentTime(BOOL bLineShift = TRUE);
 
+#ifdef _WIN32
     void WriteSystemInfo(ER_SystemInfo* si);
     void WriteOpenGLInfo(void);
     void WriteImeInfo(HWND hWnd);
     void WriteSoundCardInfo(void);
+#endif
 };
 
 extern CErrorReport g_ErrorReport;
@@ -67,4 +67,6 @@ extern CErrorReport g_ErrorReport;
         func(arg);                                                                                                     \
     } while (0)
 
+#ifdef _WIN32
 void GetSystemInfo(ER_SystemInfo* si);
+#endif
