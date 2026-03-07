@@ -133,3 +133,17 @@ add_test(
         -DTEST_DIR=${MUMAIN_SOURCE_DIR}/tests/core
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_1_1.cmake
 )
+
+# ==========================================================================
+# Story 3.2.1 - char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
+# ==========================================================================
+
+# AC-STD-11 / AC-1 / AC-3 / AC-STD-3 / AC-VAL-3:
+#   Flow code traceability + no wchar_t at interop boundary in Connection.h and Common.xslt
+add_test(
+    NAME "3.2.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DCONNECTION_H=${MUMAIN_SOURCE_DIR}/src/source/Dotnet/Connection.h
+        -DCOMMON_XSLT=${MUMAIN_SOURCE_DIR}/ClientLibrary/Common.xslt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_2_1.cmake
+)

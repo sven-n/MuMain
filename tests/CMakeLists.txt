@@ -48,6 +48,12 @@ target_sources(MuTests PRIVATE core/test_mu_timer.cpp)
 # No actual .NET library required at test time.
 target_sources(MuTests PRIVATE platform/test_connection_library_load.cpp)
 
+# Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
+# RED PHASE: Tests mu_wchar_to_char16 / mu_char16_to_wchar round-trips and byte-level
+# UTF-16LE baseline for Korean, Latin, mixed-script, null, and IP address strings.
+# Tests fail until PlatformCompat.h has the mu_wchar_to_char16 / mu_char16_to_wchar utilities.
+target_sources(MuTests PRIVATE platform/test_char16t_encoding.cpp)
+
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp
