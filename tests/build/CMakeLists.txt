@@ -62,3 +62,41 @@ add_test(
         -DCMAKELISTS_FILE=${MUMAIN_SOURCE_DIR}/src/CMakeLists.txt
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_sdl3_ci_option.cmake
 )
+
+# ==========================================================================
+# Story 3.1.1 - CMake RID Detection & .NET AOT Build Integration
+# ==========================================================================
+
+# AC-1 + AC-5: FindDotnetAOT.cmake RID detection + WSL detection logic
+add_test(
+    NAME "3.1.1-AC-1:dotnet-rid-detection"
+    COMMAND ${CMAKE_COMMAND}
+        -DMODULE_FILE=${MUMAIN_SOURCE_DIR}/cmake/FindDotnetAOT.cmake
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_dotnet_rid_detection.cmake
+)
+
+# AC-2: MU_DOTNET_LIB_EXT set per platform and passed to C++ compiler
+add_test(
+    NAME "3.1.1-AC-2:dotnet-lib-ext"
+    COMMAND ${CMAKE_COMMAND}
+        -DMODULE_FILE=${MUMAIN_SOURCE_DIR}/cmake/FindDotnetAOT.cmake
+        -DCMAKELISTS_FILE=${MUMAIN_SOURCE_DIR}/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_dotnet_lib_ext.cmake
+)
+
+# AC-6: Graceful failure when dotnet not found
+add_test(
+    NAME "3.1.1-AC-6:dotnet-graceful-failure"
+    COMMAND ${CMAKE_COMMAND}
+        -DMODULE_FILE=${MUMAIN_SOURCE_DIR}/cmake/FindDotnetAOT.cmake
+        -DCMAKELISTS_FILE=${MUMAIN_SOURCE_DIR}/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac6_dotnet_graceful_failure.cmake
+)
+
+# AC-STD-11: Flow code VS1-NET-CMAKE-RID traceability
+add_test(
+    NAME "3.1.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DMODULE_FILE=${MUMAIN_SOURCE_DIR}/cmake/FindDotnetAOT.cmake
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_1_1.cmake
+)
