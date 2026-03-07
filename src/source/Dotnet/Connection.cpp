@@ -20,17 +20,7 @@ void ReportDotNetError(const char* detail)
         return;
     }
     g_dotnetErrorDisplayed = true;
-
-    wchar_t buffer[512];
-    std::swprintf(
-        buffer, std::size(buffer),
-        L"Failed to initialize the managed client library (%hs). The game client cannot connect to the server.",
-        detail ? detail : "unknown error");
-#ifdef _WIN32
-    MessageBoxW(nullptr, buffer, L"MuMainClient", MB_ICONERROR | MB_OK);
-#else
-    wprintf(L"%ls\n", buffer);
-#endif
+    g_ErrorReport.Write(L"NET: Connection \u2014 library load failed: %hs\r\n", detail ? detail : "unknown error");
 }
 
 bool IsManagedLibraryAvailable()
@@ -40,7 +30,8 @@ bool IsManagedLibraryAvailable()
         return true;
     }
 
-    ReportDotNetError("MUnique.Client.Library.dll missing");
+    const std::string libName = std::string("MUnique.Client.Library") + MU_DOTNET_LIB_EXT + " missing";
+    ReportDotNetError(libName.c_str());
     return false;
 }
 } // namespace DotNetBridge
@@ -188,6 +179,5 @@ void Connection::OnDisconnected()
 
 void Connection::OnPacketReceived(const BYTE* data, const int32_t size)
 {
-    wprintf(L"Received packet, size %d", size);
     this->_packetHandler(this->_handle, data, size);
 }

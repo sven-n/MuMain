@@ -1,28 +1,26 @@
 #pragma once
 
 #include "stdafx.h"
+// Flow Code: VS1-NET-CONNECTION-XPLAT
+// Story: 3.1.2 - Connection.h Cross-Platform Updates
 
 #include <coreclr_delegates.h>
+#include <filesystem>
 
+#include "PlatformLibrary.h"
 #include "PacketFunctions_ChatServer.h"
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketFunctions_ClientToServer.h"
 
-#include <cwchar>
+namespace
+{
+// MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so"
+inline const std::string g_dotnetLibPath =
+    (std::filesystem::path("MUnique.Client.Library") += MU_DOTNET_LIB_EXT).string();
+} // namespace
 
-#ifdef _WIN32
-#include "windows.h"
-#define symLoad GetProcAddress
-#else
-#include "dlfcn.h"
-#define symLoad dlsym
-#endif
-
-#ifdef _WIN32
-inline const HINSTANCE munique_client_library_handle = LoadLibrary(L"MUnique.Client.Library.dll");
-#else
-inline const void* munique_client_library_handle = dlopen("MUnique.Client.Library.dll", RTLD_LAZY);
-#endif
+inline const mu::platform::LibraryHandle munique_client_library_handle =
+    mu::platform::Load(g_dotnetLibPath.c_str());
 
 namespace DotNetBridge
 {
@@ -36,7 +34,7 @@ template <typename T> T LoadManagedSymbol(const char* name)
         return nullptr;
     }
 
-    const auto symbol = reinterpret_cast<T>(symLoad(munique_client_library_handle, name));
+    const auto symbol = reinterpret_cast<T>(mu::platform::GetSymbol(munique_client_library_handle, name));
     if (!symbol)
     {
         ReportDotNetError(name);
