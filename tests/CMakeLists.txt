@@ -39,6 +39,11 @@ target_sources(MuTests PRIVATE platform/test_platform_text_input.cpp)
 # Tests fail until ErrorReport.cpp is refactored in story 7.1.1.
 target_sources(MuTests PRIVATE core/test_error_report.cpp)
 
+# Story 7.2.1: Frame Time Instrumentation [VS0-QUAL-FRAMETIMER]
+# RED PHASE: test_mu_timer.cpp exercises mu::MuTimer API (FrameStart/FrameEnd/GetFrameTimeMs/GetFPS/GetHitchCount/Reset).
+# Tests fail until MuTimer.h and MuTimer.cpp are created in story 7.2.1.
+target_sources(MuTests PRIVATE core/test_mu_timer.cpp)
+
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp
