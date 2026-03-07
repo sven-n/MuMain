@@ -705,7 +705,7 @@ TEST_CASE("AC-STD-11 [VS1-SDL-INPUT-TEXT]: Flow code appears in test file",
     {
         // GIVEN/WHEN/THEN: This test case compiling successfully IS the assertion.
         // The flow code VS1-SDL-INPUT-TEXT is embedded in all TEST_CASE names in this file.
-        REQUIRE(true);
+        // No runtime assertion needed — compilation reaching this point is the verification.
     }
 }
 
