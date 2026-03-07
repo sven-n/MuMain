@@ -46,6 +46,15 @@ template <typename T> T LoadManagedSymbol(const char* name)
 
 using DotNetBridge::LoadManagedSymbol;
 
+// Compatibility bridge for XSLT-generated PacketBindings_*.h files.
+// The generated files call symLoad(handle, "SymbolName"); update GenerateBindingsHeader.xslt
+// and regenerate PacketBindings_*.h to emit mu::platform::GetSymbol() directly,
+// then remove this function.
+inline void* symLoad(mu::platform::LibraryHandle handle, const char* name)
+{
+    return mu::platform::GetSymbol(handle, name);
+}
+
 class Connection
 {
 private:

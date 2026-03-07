@@ -43,6 +43,11 @@ target_sources(MuTests PRIVATE core/test_error_report.cpp)
 # GREEN PHASE: mu::MuTimer is implemented in MuTimer.h and MuTimer.cpp. All 6 tests pass.
 target_sources(MuTests PRIVATE core/test_mu_timer.cpp)
 
+# Story 3.1.2: Connection.h Cross-Platform Updates [VS1-NET-CONNECTION-XPLAT]
+# Tests mu::platform::Load/GetSymbol graceful failure paths used by Connection.h.
+# No actual .NET library required at test time.
+target_sources(MuTests PRIVATE platform/test_connection_library_load.cpp)
+
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp

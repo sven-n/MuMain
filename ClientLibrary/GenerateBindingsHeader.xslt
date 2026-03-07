@@ -50,7 +50,7 @@
     <xsl:apply-templates select="pd:Name" />
     <xsl:text> = reinterpret_cast&lt;Send</xsl:text>
     <xsl:apply-templates select="pd:Name" />
-    <xsl:text>&gt;(symLoad(munique_client_library_handle, "Send</xsl:text>
+    <xsl:text>&gt;(mu::platform::GetSymbol(munique_client_library_handle, "Send</xsl:text>
     <xsl:apply-templates select="pd:Name" />
     <xsl:text>"));</xsl:text>
     <xsl:value-of select="$newline" />
