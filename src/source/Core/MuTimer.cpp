@@ -101,6 +101,8 @@ void MuTimer::LogStats()
     const double avgFrameMs = (m_frameCount > 0) ? (sessionElapsedS * 1000.0 / static_cast<double>(m_frameCount)) : 0.0;
     const double minMs = (m_minFrameMs == std::numeric_limits<double>::max()) ? 0.0 : m_minFrameMs;
 
+    // avg/elapsed/frames are session-wide totals; min/max reflect the current interval only
+    // (reset per interval in FrameEnd() so each entry captures recent frame variance).
     g_ErrorReport.Write(
         L"PERF: MuTimer -- elapsed=%.0fs frames=%llu avg=%.1fms min=%.1fms max=%.1fms hitches=%llu fps=%.1f\r\n",
         sessionElapsedS, static_cast<unsigned long long>(m_frameCount), avgFrameMs, minMs, m_maxFrameMs,

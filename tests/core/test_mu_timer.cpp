@@ -1,10 +1,7 @@
 // Story 7.2.1: Frame Time Instrumentation — ATDD Acceptance Tests
 // Flow Code: VS0-QUAL-FRAMETIMER
 //
-// RED PHASE:  These tests FAIL before story 7.2.1 is implemented.
-//             MuTimer.h and MuTimer.cpp do not yet exist.
-//
-// GREEN PHASE: All tests PASS after mu::MuTimer is implemented in
+// GREEN PHASE: All tests PASS. mu::MuTimer is implemented in
 //              MuMain/src/source/Core/MuTimer.h and MuTimer.cpp.
 //
 // AC coverage:
