@@ -3225,6 +3225,14 @@ void CUITextInputBox::DoActionSub(BOOL /*bMessageOnly*/)
     // all Win32 edit HWND operations are bypassed. SDL text input is consumed here instead.
     // [VS1-SDL-INPUT-TEXT]
 #ifdef MU_ENABLE_SDL3
+    // Focus guard: only the focused text input box should consume SDL text input or backspace.
+    // CUIControl::DoAction() calls DoActionSub() unconditionally for all active controls —
+    // without this guard, all visible CUITextInputBox instances would consume typed characters.
+    if (!m_bSDLHasFocus)
+    {
+        return;
+    }
+
     if (g_bSDLTextInputReady && g_szSDLTextInput[0] != '\0')
     {
         // Convert UTF-8 SDL text input to wchar_t and append to m_szSDLText.
@@ -3250,7 +3258,7 @@ void CUITextInputBox::DoActionSub(BOOL /*bMessageOnly*/)
             {
                 if (wch >= L'a' && wch <= L'z')
                 {
-                    wch -= 32; // toLower→toUpper
+                    wch -= 32; // convert lowercase to uppercase (matches Win32 WM_CHAR path)
                 }
                 if (!((wch >= L'0' && wch <= L'9') || (wch >= L'A' && wch <= L'Z')))
                 {
@@ -3394,7 +3402,9 @@ void CUITextInputBox::SetTextLimit(int iLimit)
     SendMessageW(m_hEditWnd, EM_SETLIMITTEXT, iLimit, 0);
 #endif
     // Store limit for SDL3 path — used in DoActionSub to cap m_szSDLText. [VS1-SDL-INPUT-TEXT]
-    m_iSDLMaxLength = iLimit;
+    // Clamp to MAX_CHAT_SIZE to ensure SetText() does not write m_szSDLText[m_iSDLMaxLength]
+    // out of bounds (buffer is MAX_CHAT_SIZE + 1 elements, valid null-term index = MAX_CHAT_SIZE).
+    m_iSDLMaxLength = (iLimit <= MAX_CHAT_SIZE) ? iLimit : MAX_CHAT_SIZE;
 }
 
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
@@ -3488,8 +3498,8 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
     m_hEditWnd = CreateWindowW(L"edit", NULL, WS_CHILD | WS_VISIBLE | dwOptionFlag, m_iRealWindowPos_x, m_iRealWindowPos_y, iWidth * g_fScreenRate_x, iHeight * g_fScreenRate_y, m_hParentWnd, (HMENU)ID_UICEDIT, g_hInst, NULL);
 
     // Store SDL3 max length regardless of platform — m_iSDLMaxLength used in DoActionSub.
-    // [VS1-SDL-INPUT-TEXT]
-    m_iSDLMaxLength = iMaxLength;
+    // Clamp to MAX_CHAT_SIZE to guard SetText() against out-of-bounds write. [VS1-SDL-INPUT-TEXT]
+    m_iSDLMaxLength = (iMaxLength <= MAX_CHAT_SIZE) ? iMaxLength : MAX_CHAT_SIZE;
     SetSize(iWidth, iHeight);
     if (m_hEditWnd)
     {
