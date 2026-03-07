@@ -6,7 +6,6 @@
 #include "ErrorReport.h"
 
 #include <algorithm>
-#include <numeric>
 
 namespace mu
 {
