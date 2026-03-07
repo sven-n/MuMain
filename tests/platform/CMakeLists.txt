@@ -137,3 +137,25 @@ add_test(
         -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../../src/source
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_win32_mouse.cmake
 )
+
+# ---- Story 2.2.3: SDL3 Text Input Migration — RED PHASE ----
+# [VS1-SDL-INPUT-TEXT]
+# Catch2 unit tests are registered via MuTests in the parent CMakeLists.txt.
+# (test_platform_text_input.cpp — UTF-8 decoding, text buffer append/truncation,
+#  backspace edge detection, NUMBERONLY filter, MuSdlUtf8NextChar correctness)
+
+# AC-STD-11: Flow code VS1-SDL-INPUT-TEXT in SDLEventLoop.cpp
+add_test(
+    NAME "2.2.3-AC-STD-11:flow-code-text-input"
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_DIR=${PLATFORM_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_2_2_3.cmake
+)
+
+# AC-STD-3: No raw Win32 IME API calls outside Platform/ and ThirdParty/
+add_test(
+    NAME "2.2.3-AC-STD-3:no-raw-imm-apis"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../../src/source
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_imm.cmake
+)
