@@ -74,6 +74,10 @@ void CErrorReport::Clear(void)
 void CErrorReport::Create(const wchar_t* lpszFileName)
 {
     m_iKey = 0;
+    if (m_fileStream.is_open())
+    {
+        m_fileStream.close();
+    }
     std::string utf8Name = WideToUtf8(lpszFileName);
     m_filePath = std::filesystem::path(utf8Name);
 
@@ -144,6 +148,7 @@ void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
     {
         std::string utf8 = WideToUtf8(lpszToWrite);
         m_fileStream.write(utf8.c_str(), static_cast<std::streamsize>(utf8.size()));
+        m_fileStream.flush(); // ensure crash-time diagnostics reach disk (no app-level buffer loss)
         if (m_fileStream.fail())
         {
             std::wstring wPath = m_filePath.wstring();
