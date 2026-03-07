@@ -1018,12 +1018,7 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* src)
     if constexpr (sizeof(wchar_t) == sizeof(char16_t))
     {
         // Windows/MinGW: wchar_t is UTF-16LE identical to char16_t — safe reinterpret
-        std::u16string result(reinterpret_cast<const char16_t*>(src));
-        if (result.empty() && *src != L'\0')
-        {
-            g_ErrorReport.Write(L"NET: char16_t marshaling — encoding mismatch for %hs\r\n", "mu_wchar_to_char16");
-        }
-        return result;
+        return std::u16string(reinterpret_cast<const char16_t*>(src));
     }
     else
     {
@@ -1043,10 +1038,6 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* src)
                 result.push_back(static_cast<char16_t>(0xD800U | (u >> 10)));
                 result.push_back(static_cast<char16_t>(0xDC00U | (u & 0x3FFU)));
             }
-        }
-        if (result.empty() && *src != L'\0')
-        {
-            g_ErrorReport.Write(L"NET: char16_t marshaling — encoding mismatch for %hs\r\n", "mu_wchar_to_char16");
         }
         return result;
     }
