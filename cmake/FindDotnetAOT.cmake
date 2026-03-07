@@ -17,8 +17,6 @@
 #   DOTNETAOT_CSPROJ_PATH  - Path to MUnique.Client.Library.csproj (Windows-format under WSL)
 #   MU_IS_WSL              - TRUE when running inside WSL
 
-cmake_minimum_required(VERSION 3.25)
-
 # ============================================================
 # Step 1: Platform RID and library extension detection
 # ============================================================
