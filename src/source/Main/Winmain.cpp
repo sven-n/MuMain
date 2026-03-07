@@ -42,6 +42,7 @@
 #include <io.h>
 #include "Input.h"
 #include "Core/Timer.h"
+#include "Core/MuTimer.h"
 #include "UIMng.h"
 
 #include "w_MapHeaders.h"
@@ -88,6 +89,7 @@ HFONT g_hFontBig = nullptr;
 HFONT g_hFixFont = nullptr;
 
 CTimer* g_pTimer = new CTimer(); // performance counter.
+mu::MuTimer g_muFrameTimer;      // frame time instrumentation (Story 7.2.1)
 bool Destroy = false;
 bool ActiveIME = false;
 
@@ -96,8 +98,6 @@ ITEM_ATTRIBUTE* ItemAttRibuteMemoryDump;
 CHARACTER* CharacterMemoryDump;
 
 int RandomTable[100];
-
-CErrorReport g_ErrorReport;
 
 BOOL g_bMinimizedEnabled = FALSE;
 int g_iScreenSaverOldValue = 60 * 15;
@@ -904,6 +904,7 @@ MSG MainLoop()
 
         if (CheckRenderNextFrame())
         {
+            g_muFrameTimer.FrameStart();
             if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
             {
 #ifdef _EDITOR
@@ -931,6 +932,7 @@ MSG MainLoop()
                 // Render game scene (ImGui rendering happens inside before SwapBuffers)
                 RenderScene(g_hDC);
             }
+            g_muFrameTimer.FrameEnd();
         }
         else
         {

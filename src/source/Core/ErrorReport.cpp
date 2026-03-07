@@ -21,6 +21,10 @@
 
 #include "ErrorReport.h"
 
+// Global error report instance — defined here so MUCore-linked binaries (e.g. MuTests) can resolve it.
+// Declared as extern in ErrorReport.h; used from Winmain.cpp and MuTimer.cpp.
+CErrorReport g_ErrorReport;
+
 void DeleteSocket();
 
 // ---------------------------------------------------------------------------
