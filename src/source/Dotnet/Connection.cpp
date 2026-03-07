@@ -42,7 +42,7 @@ using DotNetBridge::ReportDotNetError;
 using onPacketReceived = void(int32_t, int32_t, BYTE*);
 using onDisconnected = void(int32_t);
 
-typedef int32_t(CORECLR_DELEGATE_CALLTYPE* Connect)(const wchar_t*, int32_t, BYTE, onPacketReceived, onDisconnected);
+typedef int32_t(CORECLR_DELEGATE_CALLTYPE* Connect)(const char16_t*, int32_t, BYTE, onPacketReceived, onDisconnected);
 typedef void(CORECLR_DELEGATE_CALLTYPE* Disconnect)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* BeginReceive)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* Send)(int32_t, const BYTE*, int32_t);
@@ -83,7 +83,7 @@ void Connection::OnDisconnectedS(const int32_t handle)
     }
 }
 
-Connection::Connection(const wchar_t* host, int32_t port, bool isEncrypted,
+Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
                        void (*packetHandler)(int32_t, const BYTE*, int32_t))
 {
     this->_packetHandler = packetHandler;

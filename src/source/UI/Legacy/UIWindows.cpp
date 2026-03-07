@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Platform/PlatformCompat.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
@@ -1456,7 +1457,8 @@ void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber
 {
     m_dwRoomNumber = dwRoomNumber;
 
-    _connection = new Connection(pszIP, 55980, true, &HandlePacketS);
+    const std::u16string host16 = mu_wchar_to_char16(pszIP);
+    _connection = new Connection(host16.c_str(), 55980, true, &HandlePacketS);
 
     if (!_connection->IsConnected())
     {

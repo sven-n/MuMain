@@ -996,3 +996,83 @@ inline void* mu_SecureZeroMemory(void* ptr, size_t cnt)
 #define RtlSecureZeroMemory mu_SecureZeroMemory
 
 #endif // _WIN32
+
+// ---- wchar_t <-> char16_t conversion utilities (all platforms) ----
+// Flow Code: VS1-NET-CHAR16T-ENCODING
+//
+// On Windows/MinGW: sizeof(wchar_t)==2, same bit layout as char16_t → reinterpret_cast (zero overhead).
+// On Linux/macOS:   sizeof(wchar_t)==4 (UTF-32) → transcode BMP codepoints; surrogate pairs for U+10000+.
+//
+// Used at the C++/.NET interop boundary where Connection() accepts const char16_t* host
+// while callers (WSclient.cpp, UIWindows.cpp) supply wchar_t* host strings.
+
+#include <string>
+
+inline std::u16string mu_wchar_to_char16(const wchar_t* src)
+{
+    if (src == nullptr)
+    {
+        return {};
+    }
+    if constexpr (sizeof(wchar_t) == sizeof(char16_t))
+    {
+        // Windows/MinGW: wchar_t is UTF-16LE identical to char16_t — safe reinterpret
+        return std::u16string(reinterpret_cast<const char16_t*>(src));
+    }
+    else
+    {
+        // Linux/macOS: wchar_t is 4 bytes (UTF-32), transcode BMP codepoints
+        std::u16string result;
+        for (const wchar_t* p = src; *p != L'\0'; ++p)
+        {
+            const char32_t cp = static_cast<char32_t>(*p);
+            if (cp < 0x10000U)
+            {
+                result.push_back(static_cast<char16_t>(cp));
+            }
+            else
+            {
+                // Surrogate pair for non-BMP (U+10000 and above)
+                const char32_t u = cp - 0x10000U;
+                result.push_back(static_cast<char16_t>(0xD800U | (u >> 10)));
+                result.push_back(static_cast<char16_t>(0xDC00U | (u & 0x3FFU)));
+            }
+        }
+        return result;
+    }
+}
+
+inline std::wstring mu_char16_to_wchar(const char16_t* src)
+{
+    if (src == nullptr)
+    {
+        return {};
+    }
+    if constexpr (sizeof(wchar_t) == sizeof(char16_t))
+    {
+        // Windows/MinGW: wchar_t is UTF-16LE identical to char16_t — safe reinterpret
+        return std::wstring(reinterpret_cast<const wchar_t*>(src));
+    }
+    else
+    {
+        // Linux/macOS: transcode UTF-16 → UTF-32
+        std::wstring result;
+        for (const char16_t* p = src; *p != u'\0'; ++p)
+        {
+            const char16_t cu = *p;
+            if (cu >= 0xD800U && cu <= 0xDBFFU && *(p + 1) >= 0xDC00U && *(p + 1) <= 0xDFFFU)
+            {
+                // Surrogate pair → single UTF-32 codepoint
+                const char32_t high = cu - 0xD800U;
+                const char32_t low = *(p + 1) - 0xDC00U;
+                result.push_back(static_cast<wchar_t>(0x10000U + (high << 10) + low));
+                ++p;
+            }
+            else
+            {
+                result.push_back(static_cast<wchar_t>(cu));
+            }
+        }
+        return result;
+    }
+}

@@ -69,6 +69,7 @@
 #include "ServerListManager.h"
 #include "MonkSystem.h"
 
+#include "Platform/PlatformCompat.h"
 #include "Dotnet/Connection.h"
 
 #include "MuHelper.h"
@@ -159,7 +160,8 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 
     // todo: generally, it's a bad idea to assume a specific port number (range).
     const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
-    SocketClient = new Connection(IpAddr, Port, isEncrypted, &HandleIncomingPacket);
+    const std::u16string host16 = mu_wchar_to_char16(IpAddr);
+    SocketClient = new Connection(host16.c_str(), Port, isEncrypted, &HandleIncomingPacket);
     if (!SocketClient->IsConnected())
     {
         bResult = FALSE;

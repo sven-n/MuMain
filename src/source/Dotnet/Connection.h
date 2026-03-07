@@ -3,6 +3,8 @@
 #include "stdafx.h"
 // Flow Code: VS1-NET-CONNECTION-XPLAT
 // Story: 3.1.2 - Connection.h Cross-Platform Updates
+// Flow Code: VS1-NET-CHAR16T-ENCODING
+// Story: 3.2.1 - char16_t Encoding at .NET Interop Boundary
 
 #include <coreclr_delegates.h>
 #include <filesystem>
@@ -72,7 +74,7 @@ private:
     void OnPacketReceived(const BYTE* data, const int32_t length);
 
 public:
-    Connection(const wchar_t* host, int32_t port, bool isEncrypted,
+    Connection(const char16_t* host, int32_t port, bool isEncrypted,
                void (*packetHandler)(int32_t, const BYTE*, int32_t));
     ~Connection();
 
