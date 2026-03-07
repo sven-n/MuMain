@@ -1,7 +1,9 @@
 #pragma once
 
 #ifdef _WIN32
-// On Windows, all functions come from Win32 APIs — this header is a no-op.
+// On Windows, all functions come from Win32 APIs.
+// Include <string> explicitly for std::u16string/std::wstring used by char16_t utilities below.
+#include <string>
 #else
 
 #include "PlatformTypes.h"
@@ -1005,8 +1007,7 @@ inline void* mu_SecureZeroMemory(void* ptr, size_t cnt)
 //
 // Used at the C++/.NET interop boundary where Connection() accepts const char16_t* host
 // while callers (WSclient.cpp, UIWindows.cpp) supply wchar_t* host strings.
-
-#include <string>
+// Note: <string> is included explicitly in both #ifdef _WIN32 and #else sections above.
 
 inline std::u16string mu_wchar_to_char16(const wchar_t* src)
 {
@@ -1017,7 +1018,12 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* src)
     if constexpr (sizeof(wchar_t) == sizeof(char16_t))
     {
         // Windows/MinGW: wchar_t is UTF-16LE identical to char16_t — safe reinterpret
-        return std::u16string(reinterpret_cast<const char16_t*>(src));
+        std::u16string result(reinterpret_cast<const char16_t*>(src));
+        if (result.empty() && *src != L'\0')
+        {
+            g_ErrorReport.Write(L"NET: char16_t marshaling — encoding mismatch for %hs\r\n", "mu_wchar_to_char16");
+        }
+        return result;
     }
     else
     {
@@ -1037,6 +1043,10 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* src)
                 result.push_back(static_cast<char16_t>(0xD800U | (u >> 10)));
                 result.push_back(static_cast<char16_t>(0xDC00U | (u & 0x3FFU)));
             }
+        }
+        if (result.empty() && *src != L'\0')
+        {
+            g_ErrorReport.Write(L"NET: char16_t marshaling — encoding mismatch for %hs\r\n", "mu_wchar_to_char16");
         }
         return result;
     }

@@ -147,3 +147,12 @@ add_test(
         -DCOMMON_XSLT=${MUMAIN_SOURCE_DIR}/ClientLibrary/Common.xslt
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_2_1.cmake
 )
+
+# AC-2: Marshal.PtrToStringUni regression guard — ConnectionManager.cs
+# Verifies PtrToStringUni present and PtrToStringAuto absent (automated guard for inspection-based AC-2 check)
+add_test(
+    NAME "3.2.1-AC-2:marshal-ptr-to-string-uni"
+    COMMAND ${CMAKE_COMMAND}
+        -DCONNECTION_MANAGER_CS=${MUMAIN_SOURCE_DIR}/ClientLibrary/ConnectionManager.cs
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_marshal_ptr_3_2_1.cmake
+)

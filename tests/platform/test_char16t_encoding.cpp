@@ -73,6 +73,9 @@ TEST_CASE("AC-4: mu_wchar_to_char16 -- Korean BMP round-trip", "[char16t][encodi
         // Expected UTF-16LE bytes for 한국어 (little-endian)
         const unsigned char expected_bytes[] = { 0x5C, 0xD5, 0x6D, 0xAD, 0xB4, 0xC5 };
 
+        // Note: This test assumes little-endian byte order for char16_t storage.
+        // All supported CI targets (x86, x64, arm64) are little-endian.
+        // On big-endian: the byte pairs would be reversed (D5,5C instead of 5C,D5).
         // Interpret u16 storage as bytes (char16_t is little-endian on all supported platforms)
         const unsigned char* actual_bytes = reinterpret_cast<const unsigned char*>(u16.data());
 

@@ -1480,6 +1480,7 @@ void CUIChatWindow::DisconnectToChatServer()
             _connection->Close();
         }
 
+        delete _connection;
         _connection = nullptr;
     }
 }
