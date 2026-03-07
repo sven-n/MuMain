@@ -53,7 +53,7 @@ public:
     /// Is sent by the server when: This packet is sent by the server after the client requested the connection information of a server. This happens after the user clicked on a server.
     /// Causes reaction on client side: The client will try to connect to the server with the specified information.
     /// </remarks>
-    void SendConnectionInfo(const wchar_t* ipAddress, uint16_t port);
+    void SendConnectionInfo(const char16_t* ipAddress, uint16_t port);
 
     /// <summary>
     /// Sends a ServerListRequest to this connection.
@@ -112,5 +112,5 @@ public:
     /// Is sent by the server when: This packet is sent by the server after the client (launcher) requested to check the patch version and it requires an update.
     /// Causes reaction on client side: The launcher will download the required patches and then activate the start button.
     /// </remarks>
-    void SendClientNeedsPatch(BYTE patchVersion, const wchar_t* patchAddress);
+    void SendClientNeedsPatch(BYTE patchVersion, const char16_t* patchAddress);
 };

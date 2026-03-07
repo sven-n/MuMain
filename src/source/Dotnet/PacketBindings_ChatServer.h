@@ -20,19 +20,19 @@
 
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticate)(int32_t, uint16_t , const BYTE* , uint32_t);
-inline SendAuthenticate dotnet_SendAuthenticate = reinterpret_cast<SendAuthenticate>(symLoad(munique_client_library_handle, "SendAuthenticate"));
+inline SendAuthenticate dotnet_SendAuthenticate = reinterpret_cast<SendAuthenticate>(mu::platform::GetSymbol(munique_client_library_handle, "SendAuthenticate"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomClientJoined)(int32_t, BYTE , const wchar_t* );
-inline SendChatRoomClientJoined dotnet_SendChatRoomClientJoined = reinterpret_cast<SendChatRoomClientJoined>(symLoad(munique_client_library_handle, "SendChatRoomClientJoined"));
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomClientJoined)(int32_t, BYTE , const char16_t* );
+inline SendChatRoomClientJoined dotnet_SendChatRoomClientJoined = reinterpret_cast<SendChatRoomClientJoined>(mu::platform::GetSymbol(munique_client_library_handle, "SendChatRoomClientJoined"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLeaveChatRoom)(int32_t);
-inline SendLeaveChatRoom dotnet_SendLeaveChatRoom = reinterpret_cast<SendLeaveChatRoom>(symLoad(munique_client_library_handle, "SendLeaveChatRoom"));
+inline SendLeaveChatRoom dotnet_SendLeaveChatRoom = reinterpret_cast<SendLeaveChatRoom>(mu::platform::GetSymbol(munique_client_library_handle, "SendLeaveChatRoom"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomClientLeft)(int32_t, BYTE , const wchar_t* );
-inline SendChatRoomClientLeft dotnet_SendChatRoomClientLeft = reinterpret_cast<SendChatRoomClientLeft>(symLoad(munique_client_library_handle, "SendChatRoomClientLeft"));
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatRoomClientLeft)(int32_t, BYTE , const char16_t* );
+inline SendChatRoomClientLeft dotnet_SendChatRoomClientLeft = reinterpret_cast<SendChatRoomClientLeft>(mu::platform::GetSymbol(munique_client_library_handle, "SendChatRoomClientLeft"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessage)(int32_t, BYTE , BYTE , const BYTE* , uint32_t);
-inline SendChatMessage dotnet_SendChatMessage = reinterpret_cast<SendChatMessage>(symLoad(munique_client_library_handle, "SendChatMessage"));
+inline SendChatMessage dotnet_SendChatMessage = reinterpret_cast<SendChatMessage>(mu::platform::GetSymbol(munique_client_library_handle, "SendChatMessage"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendKeepAlive)(int32_t);
-inline SendKeepAlive dotnet_SendKeepAlive = reinterpret_cast<SendKeepAlive>(symLoad(munique_client_library_handle, "SendKeepAlive"));
+inline SendKeepAlive dotnet_SendKeepAlive = reinterpret_cast<SendKeepAlive>(mu::platform::GetSymbol(munique_client_library_handle, "SendKeepAlive"));

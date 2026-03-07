@@ -213,13 +213,13 @@ else()
     -Wno-unused-function
     # Harmless const qualifiers on primitive return types (17+ instances)
     -Wno-ignored-qualifiers
-    # Legacy memset(ptr, NULL, size) pattern in packet structs
-    -Wno-conversion-null
-    # Manual sizeof(wchar_t)*N in memset — matches actual buffer size
-    -Wno-memset-elt-size
+    # Legacy memset(ptr, NULL, size) pattern in packet structs (GCC only)
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-conversion-null>
+    # Manual sizeof(wchar_t)*N in memset — matches actual buffer size (GCC only)
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-memset-elt-size>
     # GCC -O2/-O3 false positives from inlined wmemcpy/std::wstring (MinGW wchar.h)
     -Wno-array-bounds
-    -Wno-stringop-overread
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-stringop-overread>
   )
 endif()
 
