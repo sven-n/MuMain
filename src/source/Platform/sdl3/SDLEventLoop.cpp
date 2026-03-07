@@ -5,6 +5,11 @@
 #include "../PlatformCompat.h"
 #include <SDL3/SDL.h>
 
+// SDL text input buffer (SDLKeyboardState.cpp) — populated here, read by UIControls.
+// [VS1-SDL-INPUT-TEXT]
+extern char g_szSDLTextInput[32];
+extern bool g_bSDLTextInputReady;
+
 // External game state — set to true to trigger clean shutdown
 extern bool Destroy;
 
@@ -121,6 +126,11 @@ namespace mu
 
 bool SDLEventLoop::PollEvents()
 {
+    // Reset SDL text input state each frame — text is consumed once per frame.
+    // [VS1-SDL-INPUT-TEXT]
+    g_szSDLTextInput[0] = '\0';
+    g_bSDLTextInputReady = false;
+
     // Reset per-frame mouse state before processing new events. [VS1-SDL-INPUT-MOUSE]
     // MouseLButtonDBClick: mirrors Winmain.cpp:611 which clears this each frame.
     // MouseWheel: per-frame accumulated value — cleared each frame like WM_MOUSEWHEEL.
@@ -184,6 +194,25 @@ bool SDLEventLoop::PollEvents()
             if (static_cast<unsigned>(event.key.scancode) < 512u)
             {
                 g_sdl3KeyboardState[event.key.scancode] = false;
+            }
+            break;
+
+        // Story 2.2.3: Text input tracking [VS1-SDL-INPUT-TEXT]
+        // SDL_EVENT_TEXT_INPUT fires once per composed character or character sequence
+        // (after IME commit). event.text.text[] is a null-terminated UTF-8 string (up to 32 bytes).
+        // Multiple TEXT_INPUT events per frame are concatenated (rare but possible with IME).
+        // Per-frame reset of g_szSDLTextInput / g_bSDLTextInputReady is at start of PollEvents().
+        case SDL_EVENT_TEXT_INPUT:
+            // Copy into g_szSDLTextInput for CUITextInputBox::DoActionSub() to consume.
+            // [VS1-SDL-INPUT-TEXT]
+            {
+                size_t existing = strlen(g_szSDLTextInput);
+                size_t incoming = strlen(event.text.text);
+                if (existing + incoming < sizeof(g_szSDLTextInput))
+                {
+                    memcpy(g_szSDLTextInput + existing, event.text.text, incoming + 1);
+                }
+                g_bSDLTextInputReady = true;
             }
             break;
 

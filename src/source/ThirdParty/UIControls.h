@@ -855,7 +855,11 @@ public:
 
     HWND GetHandle() { return m_hEditWnd; }
     HWND GetParentHandle() { return m_hParentWnd; }
-    BOOL HaveFocus() { return (GetHandle() == GetFocus()); }
+    BOOL HaveFocus();
+#ifndef _WIN32
+    // SDL3 path: HaveFocus is tracked via m_bSDLHasFocus (set in GiveFocus/SetState).
+    // The Win32 inline above is replaced by the guarded declaration; implementation in UIControls.cpp.
+#endif
     BOOL UseMultiline() { return m_bUseMultiLine; }
     virtual void SetTabTarget(CUITextInputBox* pTabTarget) { m_pTabTarget = pTabTarget; }
     CUITextInputBox* GetTabTarget() { return m_pTabTarget; }
@@ -889,6 +893,22 @@ protected:
     BYTE* m_pFontBuffer;
     bool m_bSetText = false;
     std::wstring m_sTextToSet;
+
+    // SDL3 text buffer — used on non-Windows path (SDL_EVENT_TEXT_INPUT → CUITextInputBox).
+    // m_szSDLText: the active text buffer (replaces Win32 edit HWND text on SDL3 path).
+    // m_iSDLTextLen: current number of wchar_t characters in m_szSDLText (excluding null).
+    // m_iSDLMaxLength: maximum characters allowed (set from Init iMaxLength parameter).
+    // m_bBackspaceHeld: edge-detection flag — prevents auto-repeat consuming multiple chars.
+    // m_bSDLHasFocus: true after GiveFocus(), false after SetState(UISTATE_HIDE).
+    // [VS1-SDL-INPUT-TEXT]
+    wchar_t m_szSDLText[MAX_CHAT_SIZE + 1] = {};
+    int m_iSDLTextLen = 0;
+    int m_iSDLMaxLength = MAX_CHAT_SIZE;
+    bool m_bBackspaceHeld = false;
+    bool m_bSDLHasFocus = false;
+
+    // Override DoActionSub to handle SDL3 text input consumption each frame.
+    virtual void DoActionSub(BOOL bMessageOnly) override;
 
 
     CUITextInputBox* m_pTabTarget;

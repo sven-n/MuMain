@@ -26,6 +26,382 @@ inline uint32_t GetTickCount()
     return timeGetTime();
 }
 
+// ---- Text measurement stub ----
+// GetTextExtentPoint32 stub — used extensively in UIControls.cpp and NewUIChatInputBox.cpp
+// for text measurement (CutStr, tooltip sizing). On non-Windows the font DC is nullptr;
+// return a fixed estimate so layout code does not crash.
+// Phase 4 (font system migration introduces IPlatformFont::MeasureText) will replace this.
+inline BOOL GetTextExtentPoint32(HDC /*hDC*/, const wchar_t* pszText, int cch, SIZE* lpSize)
+{
+    // Estimate: 8px per character width, 16px height — acceptable fallback until Phase 4.
+    if (lpSize != nullptr)
+    {
+        lpSize->cx = (cch > 0 ? cch : 0) * 8;
+        lpSize->cy = 16;
+    }
+    return TRUE;
+}
+
+// lstrlen shim — alias to wcslen — used in UIControls.cpp GetTextExtentPoint32 call sites
+#ifndef lstrlen
+inline int lstrlen(const wchar_t* s)
+{
+    return s ? static_cast<int>(wcslen(s)) : 0;
+}
+#endif
+
+// ---- Win32 IME stubs (non-Windows only) ----
+// Used in UIControls.cpp: SaveIMEStatus, RestoreIMEStatus, CheckTextInputBoxIME
+// On SDL3 path these are all no-ops — IME handled by SDL3 internally.
+using HIMC = void*;
+#define IME_CMODE_ALPHANUMERIC 0x0000
+#define IME_SMODE_NONE 0x0000
+#define IME_CONVERSIONMODE 1
+#define IME_SENTENCEMODE 2
+#define IMN_SETOPENSTATUS 0x0005
+#define IMN_SETCONVERSIONMODE 0x0006
+#define IMN_SETSENTENCEMODE 0x0007
+inline HIMC ImmGetContext(HWND /*hwnd*/)
+{
+    return nullptr;
+}
+inline BOOL ImmGetConversionStatus(HIMC /*himc*/, DWORD* pdwConv, DWORD* pdwSent)
+{
+    if (pdwConv)
+    {
+        *pdwConv = IME_CMODE_ALPHANUMERIC;
+    }
+    if (pdwSent)
+    {
+        *pdwSent = IME_SMODE_NONE;
+    }
+    return TRUE;
+}
+inline BOOL ImmSetConversionStatus(HIMC /*himc*/, DWORD /*dwConv*/, DWORD /*dwSent*/)
+{
+    return TRUE;
+}
+inline BOOL ImmReleaseContext(HWND /*hwnd*/, HIMC /*himc*/)
+{
+    return TRUE;
+}
+
+// ImmGetCompositionWindow / ImmSetCompositionWindow — used in CUITextInputBox::SetIMEPosition()
+// Forward-declare COMPOSITIONFORM (defined below with window message stubs)
+struct COMPOSITIONFORM;
+inline BOOL ImmGetCompositionWindow(HIMC /*himc*/, COMPOSITIONFORM* /*lpCompForm*/)
+{
+    return FALSE;
+}
+inline BOOL ImmSetCompositionWindow(HIMC /*himc*/, COMPOSITIONFORM* /*lpCompForm*/)
+{
+    return FALSE;
+}
+
+// ---- Win32 window message stubs (non-Windows only) ----
+// Used in UIControls.cpp: CUITextInputBox::SetIMEPosition, GiveFocus, SetState
+using UINT = unsigned int;
+#define WM_IME_CONTROL 0x0283
+#define IMC_SETCOMPOSITIONWINDOW 0x000C
+inline LRESULT SendMessage(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wp*/, LPARAM /*lp*/)
+{
+    return 0;
+}
+inline LRESULT SendMessageW(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wp*/, LPARAM /*lp*/)
+{
+    return 0;
+}
+// NOLINT — PostMessage is intentional no-op for non-Windows builds
+inline LRESULT PostMessage(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wp*/, LPARAM /*lp*/)
+{
+    return 0;
+} // NOLINT
+inline LRESULT PostMessageW(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wp*/, LPARAM /*lp*/)
+{
+    return 0;
+}
+// EM_SETSEL: edit control message — no-op on SDL3 path
+#define EM_SETSEL 0x00B1
+#define EM_LIMITTEXT 0x00C5
+#define EM_SETLIMITTEXT 0x00C5
+#define EM_GETLINECOUNT 0x00BA
+#define EM_SCROLL 0x00B5
+#define EM_LINESCROLL 0x00B6
+#define SB_LINEUP 0
+#define SB_LINEDOWN 1
+#define SB_PAGEUP 2
+#define SB_PAGEDOWN 3
+#define WM_SETFONT 0x0030
+
+// SetFocus / GetFocus stubs — UIControls.cpp uses these in CUITextInputBox::GiveFocus
+// On SDL3 path focus is managed by SDLEventLoop; returning a sentinel avoids null dereferences.
+inline HWND SetFocus(HWND /*hwnd*/)
+{
+    return reinterpret_cast<HWND>(static_cast<uintptr_t>(1));
+}
+inline HWND GetFocus()
+{
+    return reinterpret_cast<HWND>(static_cast<uintptr_t>(1));
+}
+
+// ShowWindow stub — used in CUITextInputBox::SetState (Win32 path shows/hides the edit HWND)
+#define SW_HIDE 0
+#define SW_SHOW 5
+inline BOOL ShowWindow(HWND /*hwnd*/, int /*nCmdShow*/)
+{
+    return TRUE;
+}
+
+// DestroyWindow stub — used in CUITextInputBox destructor and SetSize failure path
+inline BOOL DestroyWindow(HWND /*hwnd*/)
+{
+    return TRUE;
+}
+
+// GetDC / ReleaseDC stubs — used in CUITextInputBox::SetSize for GDI DIBSection creation
+inline HDC GetDC(HWND /*hwnd*/)
+{
+    return nullptr;
+}
+inline int ReleaseDC(HWND /*hwnd*/, HDC /*hdc*/)
+{
+    return 1;
+}
+
+// SetWindowPos stub — used in CUITextInputBox::SetSize to reposition the Win32 edit control
+#define SWP_NOMOVE 0x0002
+#define SWP_NOZORDER 0x0004
+inline BOOL SetWindowPos(HWND /*hwnd*/, HWND /*hwndInsertAfter*/, int /*x*/, int /*y*/, int /*cx*/, int /*cy*/,
+                         UINT /*flags*/)
+{
+    return TRUE;
+}
+
+// GetCaretPos stub — used in CUITextInputBox::WriteText and SetIMEPosition
+inline BOOL GetCaretPos(POINT* lpPoint)
+{
+    if (lpPoint != nullptr)
+    {
+        lpPoint->x = 0;
+        lpPoint->y = 0;
+    }
+    return TRUE;
+}
+
+// GetWindowText / GetWindowTextW stub — used in CUITextInputBox::GetText (Win32 path reads
+// text from the edit HWND). On SDL3 path GetText is guarded by #ifdef _WIN32.
+inline int GetWindowText(HWND /*hwnd*/, wchar_t* lpString, int nMaxCount)
+{
+    if (lpString != nullptr && nMaxCount > 0)
+    {
+        lpString[0] = L'\0';
+    }
+    return 0;
+}
+#define GetWindowTextW GetWindowText
+
+// SetWindowTextW stub — used in CUITextInputBox Render path (SetWindowTextW(m_hEditWnd, ...))
+inline BOOL SetWindowTextW(HWND /*hwnd*/, const wchar_t* /*lpString*/)
+{
+    return TRUE;
+}
+
+// GetWindowRect stub — used in UIControls render/scroll paths
+inline BOOL GetWindowRect(HWND /*hwnd*/, RECT* lpRect)
+{
+    if (lpRect != nullptr)
+    {
+        lpRect->left = 0;
+        lpRect->top = 0;
+        lpRect->right = 0;
+        lpRect->bottom = 0;
+    }
+    return TRUE;
+}
+
+// WNDPROC type alias and SetWindowLongPtrW / GetWindowLongPtrW / CallWindowProcW stubs
+// Used in UIControls.cpp:CUITextInputBox::Init (subclasses the Win32 edit control)
+using WNDPROC = LRESULT (*)(HWND, UINT, WPARAM, LPARAM);
+#define GWLP_WNDPROC (-4)
+#define GWLP_USERDATA (-21)
+using LONG_PTR = intptr_t;
+inline LONG_PTR SetWindowLongPtrW(HWND /*hwnd*/, int /*nIndex*/, LONG_PTR /*dwNewLong*/)
+{
+    return 0;
+}
+inline LONG_PTR GetWindowLongPtrW(HWND /*hwnd*/, int /*nIndex*/)
+{
+    return 0;
+}
+inline LRESULT CallWindowProcW(WNDPROC /*proc*/, HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wp*/, LPARAM /*lp*/)
+{
+    return 0;
+}
+
+// CreateWindowW stub — on SDL3 path CUITextInputBox::Init calls CreateWindowW(L"edit", ...)
+// to create a Win32 edit control. The stub returns nullptr so all if(m_hEditWnd) guards
+// prevent Win32 edit control operations. SDL3 text input path bypasses the edit HWND entirely.
+#define WS_CHILD 0x40000000L
+#define WS_VISIBLE 0x10000000L
+#define WS_VSCROLL 0x00200000L
+#define ES_AUTOHSCROLL 0x0080L
+#define ES_AUTOVSCROLL 0x0040L
+#define ES_MULTILINE 0x0004L
+#define ES_PASSWORD 0x0020L
+using HMENU = void*;
+inline HWND CreateWindowW(const wchar_t* /*cls*/, const wchar_t* /*wndName*/, DWORD /*style*/, int /*x*/, int /*y*/,
+                          int /*w*/, int /*h*/, HWND /*parent*/, HMENU /*menu*/, HINSTANCE /*inst*/, void* /*param*/)
+{
+    return nullptr; // SDL3 path: no Win32 edit control — text handled via SDL_EVENT_TEXT_INPUT
+}
+
+// GDI stubs — used in CUIRenderTextOriginal::Create/Release (GDI font rendering).
+// These are compilation stubs for Phase 4 (font system migration). On non-Windows they
+// are safe no-ops that prevent crashes until rendering is migrated.
+using HBITMAP = void*;
+using HGDIOBJ = void*;
+struct BITMAPINFOHEADER
+{
+    uint32_t biSize;
+    int32_t biWidth;
+    int32_t biHeight;
+    uint16_t biPlanes;
+    uint16_t biBitCount;
+    uint32_t biCompression;
+    uint32_t biSizeImage;
+    int32_t biXPelsPerMeter;
+    int32_t biYPelsPerMeter;
+    uint32_t biClrUsed;
+    uint32_t biClrImportant;
+};
+struct PALETTEENTRY
+{
+    uint8_t peRed, peGreen, peBlue, peFlags;
+};
+struct RGBQUAD
+{
+    uint8_t rgbBlue, rgbGreen, rgbRed, rgbReserved;
+};
+struct BITMAPINFO
+{
+    BITMAPINFOHEADER bmiHeader;
+    RGBQUAD bmiColors[1];
+};
+#define BI_RGB 0
+#define DIB_RGB_COLORS 0
+inline BOOL DeleteDC(HDC /*hdc*/)
+{
+    return TRUE;
+}
+inline BOOL DeleteObject(HGDIOBJ /*obj*/)
+{
+    return TRUE;
+}
+inline HDC CreateCompatibleDC(HDC /*hdc*/)
+{
+    return nullptr;
+}
+inline HBITMAP CreateDIBSection(HDC /*hdc*/, const BITMAPINFO* /*bmi*/, UINT /*usage*/, void** ppvBits,
+                                HANDLE /*hSection*/, DWORD /*offset*/)
+{
+    if (ppvBits != nullptr)
+    {
+        *ppvBits = nullptr;
+    }
+    return nullptr;
+}
+inline HGDIOBJ SelectObject(HDC /*hdc*/, HGDIOBJ /*obj*/)
+{
+    return nullptr;
+}
+// SelectObject overload for HBITMAP (same no-op)
+inline HGDIOBJ SelectObject(HDC /*hdc*/, HBITMAP /*bmp*/)
+{
+    return nullptr;
+}
+
+// HFONT stub — used in UIControls.h CUITextInputBox::SetFont (HFONT hFont parameter)
+// HFONT is already defined in PlatformTypes.h as void* — no re-definition needed.
+
+// Clipboard stubs — used in UIControls.cpp:ClipboardCheck() for numeric paste validation.
+// On SDL3 path, clipboard comes from SDL_GetClipboardText() (see MuClipboardIsNumericOnly).
+// Win32 clipboard functions are stubbed to safe no-ops so ClipboardCheck compiles.
+using HGLOBAL = void*;
+#define CF_TEXT 1
+inline BOOL OpenClipboard(HWND /*hwnd*/)
+{
+    return FALSE;
+} // SDL3 path uses SDL_GetClipboardText
+inline HGLOBAL GetClipboardData(UINT /*uFormat*/)
+{
+    return nullptr;
+}
+inline void* GlobalLock(HGLOBAL /*hMem*/)
+{
+    return nullptr;
+}
+inline BOOL GlobalUnlock(HGLOBAL /*hMem*/)
+{
+    return TRUE;
+}
+inline BOOL CloseClipboard()
+{
+    return TRUE;
+}
+
+// Win32 message constants needed by EditWndProc switch statement in UIControls.cpp.
+// EditWndProc is never called on the SDL3 path (no Win32 edit HWND), but must compile.
+#define WM_CHAR 0x0102
+#define WM_SYSKEYDOWN 0x0104
+#define WM_IME_COMPOSITION 0x010F
+#define WM_IME_STARTCOMPOSITION 0x010D
+#define WM_IME_ENDCOMPOSITION 0x010E
+#define WM_IME_NOTIFY 0x0282
+
+// COMPOSITIONFORM struct — used by ZzzInterface.cpp:263 SendMessage WM_IME_CONTROL call
+// and CUITextInputBox::SetIMEPosition. With SendMessage shimmed to a no-op, the code
+// compiles and does nothing on non-Windows.
+#define CFS_POINT 0x0002
+#define CFS_FORCE_POSITION 0x0020
+struct COMPOSITIONFORM
+{
+    DWORD dwStyle;
+    POINT ptCurrentPos;
+    RECT rcArea;
+};
+
+// VK_ESCAPE and VK_RETURN — used in EditWndProc WM_CHAR handler
+#ifndef VK_ESCAPE
+#define VK_ESCAPE 0x1B
+#endif
+#ifndef VK_RETURN
+#define VK_RETURN 0x0D
+#endif
+#ifndef VK_BACK
+#define VK_BACK 0x08
+#endif
+#ifndef VK_TAB
+#define VK_TAB 0x09
+#endif
+#ifndef VK_UP
+#define VK_UP 0x26
+#endif
+#ifndef VK_DOWN
+#define VK_DOWN 0x28
+#endif
+#ifndef VK_LEFT
+#define VK_LEFT 0x25
+#endif
+#ifndef VK_RIGHT
+#define VK_RIGHT 0x27
+#endif
+#ifndef VK_F5
+#define VK_F5 0x74
+#endif
+
+// LPSTR type alias — used in ClipboardCheck (GlobalLock returns LPSTR)
+using LPSTR = char*;
+
 // ---- MessageBoxW shim ----
 // MB_ flag constants
 #define MB_OK 0x00
@@ -86,6 +462,104 @@ inline HWND GetActiveWindow()
 #include <SDL3/SDL_scancode.h>
 #include <algorithm>
 #include <cstdint>
+
+// ---- SDL text input buffer externals (SDL3 path) ----
+// g_szSDLTextInput: UTF-8 encoded character(s) from keyboard/IME, populated each frame
+//   when SDL_EVENT_TEXT_INPUT fires. Defined in SDLKeyboardState.cpp.
+// g_bSDLTextInputReady: true for one frame when new text is available.
+// [VS1-SDL-INPUT-TEXT]
+extern char g_szSDLTextInput[32];
+extern bool g_bSDLTextInputReady;
+
+// MuStartTextInput / MuStopTextInput — SDL3 text input lifecycle.
+// Implementations in SDLKeyboardState.cpp (compiled with project PCH for g_ErrorReport).
+// Declared here so CUITextInputBox::GiveFocus / SetState can call them without
+// including SDL3 headers directly. [VS1-SDL-INPUT-TEXT]
+void MuStartTextInput();
+void MuStopTextInput();
+
+// ---- UTF-8 to wchar_t decoder (SDL3 path) ----
+// Decode one UTF-8 codepoint from src, advance src past it.
+// Returns the wchar_t (BMP codepoint U+0000-U+FFFF) or L'\0' on error/end-of-string.
+// MU Online text is BMP-only (U+0000-U+FFFF) — wchar_t is safe on all target platforms.
+// [VS1-SDL-INPUT-TEXT]
+inline wchar_t MuSdlUtf8NextChar(const char*& src)
+{
+    auto byte = static_cast<unsigned char>(*src);
+    if (byte == 0)
+    {
+        return L'\0';
+    }
+    uint32_t codepoint = 0;
+    int extraBytes = 0;
+    if (byte < 0x80)
+    {
+        codepoint = byte;
+        extraBytes = 0;
+    }
+    else if (byte < 0xC0)
+    {
+        ++src;
+        return L'\0'; // continuation byte at start — malformed
+    }
+    else if (byte < 0xE0)
+    {
+        codepoint = byte & 0x1F;
+        extraBytes = 1;
+    }
+    else if (byte < 0xF0)
+    {
+        codepoint = byte & 0x0F;
+        extraBytes = 2;
+    }
+    else
+    {
+        codepoint = byte & 0x07;
+        extraBytes = 3;
+    }
+    ++src;
+    for (int i = 0; i < extraBytes; ++i)
+    {
+        byte = static_cast<unsigned char>(*src);
+        if ((byte & 0xC0) != 0x80)
+        {
+            return L'\0'; // malformed — not a continuation byte
+        }
+        codepoint = (codepoint << 6) | (byte & 0x3F);
+        ++src;
+    }
+    // Clamp to BMP (U+FFFF max) — surrogate range excluded
+    if (codepoint > 0xFFFF || (codepoint >= 0xD800 && codepoint <= 0xDFFF))
+    {
+        return L'?';
+    }
+    return static_cast<wchar_t>(codepoint);
+}
+
+// ---- SDL3 clipboard replacement (MU_ENABLE_SDL3 path) ----
+// MuClipboardIsNumericOnly — SDL3-based replacement for ClipboardCheck() in UIControls.cpp.
+// Returns true if clipboard text contains only digit characters ('0'-'9').
+// Used by EditWndProc WM_CHAR handler for UIOPTION_NUMBERONLY fields (Ctrl+V paste check).
+// [VS1-SDL-INPUT-TEXT]
+inline bool MuClipboardIsNumericOnly()
+{
+    char* text = SDL_GetClipboardText();
+    if (text == nullptr)
+    {
+        return false;
+    }
+    bool allDigits = true;
+    for (const char* p = text; *p != '\0'; ++p)
+    {
+        if (*p < '0' || *p > '9')
+        {
+            allDigits = false;
+            break;
+        }
+    }
+    SDL_free(text);
+    return allDigits;
+}
 
 // ---- Mouse cursor visibility shims (SDL3 path) ----
 // SDL3 split SDL2's SDL_ShowCursor(int) into two separate functions.

@@ -3034,6 +3034,13 @@ CUITextInputBox::CUITextInputBox()
     m_fScrollBarHeight = 0;
     m_fScrollBarPos_y = 0;
     m_fScrollBarClickPos_y = 0;
+
+    // SDL3 text buffer initialization — [VS1-SDL-INPUT-TEXT]
+    m_szSDLText[0] = L'\0';
+    m_iSDLTextLen = 0;
+    m_iSDLMaxLength = MAX_CHAT_SIZE;
+    m_bBackspaceHeld = false;
+    m_bSDLHasFocus = false;
 }
 
 CUITextInputBox::~CUITextInputBox()
@@ -3156,7 +3163,11 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             {
                 if (wParam == VK_BACK);
                 else if (wParam == 0x03 || wParam == 0x18);	// Ctrl+C, Ctrl+X
+#ifdef _WIN32
                 else if (Char == 0x16 && ClipboardCheck(hWnd) == TRUE);	// CTRL+V
+#elif defined(MU_ENABLE_SDL3)
+                else if (Char == 0x16 && MuClipboardIsNumericOnly());		// CTRL+V SDL3
+#endif
                 else if (Char < '0' || Char>'9') return 0;
             }
             else if (pTextInputBox->CheckOption(UIOPTION_SERIALNUMBER))
@@ -3207,8 +3218,94 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return CallWindowProcW(pTextInputBox->m_hOldProc, hWnd, msg, wParam, lParam);
 }
 
+void CUITextInputBox::DoActionSub(BOOL /*bMessageOnly*/)
+{
+    // SDL3 text input consumption — executed each frame via CUIControl::DoAction() → DoActionSub().
+    // On the SDL3 path m_hEditWnd is nullptr (CreateWindowW stub returns nullptr), so
+    // all Win32 edit HWND operations are bypassed. SDL text input is consumed here instead.
+    // [VS1-SDL-INPUT-TEXT]
+#ifdef MU_ENABLE_SDL3
+    if (g_bSDLTextInputReady && g_szSDLTextInput[0] != '\0')
+    {
+        // Convert UTF-8 SDL text input to wchar_t and append to m_szSDLText.
+        // SDL delivers pre-composed characters so multi-byte UTF-8 sequences are expected.
+        const char* src = g_szSDLTextInput;
+        while (*src != '\0' && m_iSDLTextLen < m_iSDLMaxLength)
+        {
+            wchar_t wch = MuSdlUtf8NextChar(src); // advances src past the codepoint
+            if (wch == L'\0')
+            {
+                break;
+            }
+
+            // Apply UIOPTION_NUMBERONLY filter (mirrors WM_CHAR handler in EditWndProc)
+            if (CheckOption(UIOPTION_NUMBERONLY))
+            {
+                if (wch < L'0' || wch > L'9')
+                {
+                    continue;
+                }
+            }
+            else if (CheckOption(UIOPTION_SERIALNUMBER))
+            {
+                if (wch >= L'a' && wch <= L'z')
+                {
+                    wch -= 32; // toLower→toUpper
+                }
+                if (!((wch >= L'0' && wch <= L'9') || (wch >= L'A' && wch <= L'Z')))
+                {
+                    continue;
+                }
+            }
+#ifdef LJH_ADD_RESTRICTION_ON_ID
+            else if (CheckOption(UIOPTION_NOLOCALIZEDCHARACTERS))
+            {
+                if (wch < 33 || wch > 126)
+                {
+                    continue;
+                }
+            }
+#endif
+            m_szSDLText[m_iSDLTextLen++] = wch;
+            m_szSDLText[m_iSDLTextLen] = L'\0';
+        }
+        // Reset ready flag so we don't re-consume (g_szSDLTextInput cleared next frame by SDLEventLoop)
+        g_bSDLTextInputReady = false;
+    }
+
+    // Handle backspace via keyboard shim (GetAsyncKeyState + g_sdl3KeyboardState from story 2.2.1).
+    // VK_BACK (0x08) is mapped to SDL_SCANCODE_BACKSPACE in MuVkToSdlScancode().
+    // Use edge-detect (m_bBackspaceHeld) to match WM_CHAR single-char-per-press behavior.
+    if ((HIBYTE(GetAsyncKeyState(VK_BACK)) & 0x80) != 0)
+    {
+        if (!m_bBackspaceHeld && m_iSDLTextLen > 0)
+        {
+            m_szSDLText[--m_iSDLTextLen] = L'\0';
+            m_bBackspaceHeld = true;
+        }
+    }
+    else
+    {
+        m_bBackspaceHeld = false;
+    }
+#endif // MU_ENABLE_SDL3
+}
+
+BOOL CUITextInputBox::HaveFocus()
+{
+#ifdef _WIN32
+    return (GetHandle() == GetFocus());
+#else
+    // SDL3 path: m_bSDLHasFocus set in GiveFocus(), cleared in SetState(UISTATE_HIDE).
+    // GetFocus() stub returns a non-null sentinel — comparing with nullptr m_hEditWnd
+    // would give wrong result, so use the explicit focus member.
+    return m_bSDLHasFocus ? TRUE : FALSE;
+#endif
+}
+
 void CUITextInputBox::SetIMEPosition()
 {
+#ifdef _WIN32
     if (m_bIsReady == FALSE || m_hEditWnd == nullptr) return;
 
     int iSetPos_x = m_iPos_x * g_fScreenRate_x + WindowWidth;
@@ -3240,33 +3337,64 @@ void CUITextInputBox::SetIMEPosition()
 
     ImmSetCompositionWindow(hIMC, &cpf);
     ImmReleaseContext(m_hEditWnd, hIMC);
+#endif // _WIN32
+    // SDL3: IME window positioning handled by SDL3 internally via SDL_SetTextInputArea().
+    // Not implemented in this story (deferred to Session 6.2 of cross-platform plan).
 }
 
 void CUITextInputBox::GetText(wchar_t* pszText, int iGetLength)
 {
     if (pszText == nullptr) return;
+#ifdef _WIN32
     GetWindowText(m_hEditWnd, pszText, iGetLength);
+#else
+    // SDL3 path: read directly from m_szSDLText buffer.
+    if (iGetLength > 0)
+    {
+        wcsncpy(pszText, m_szSDLText, iGetLength - 1);
+        pszText[iGetLength - 1] = L'\0';
+    }
+#endif
 }
 
 void CUITextInputBox::SetText(const wchar_t* pszText)
 {
+#ifdef _WIN32
     std::wstring wstrText = L"";
     if (pszText != nullptr)
     {
         wstrText = std::wstring(pszText);
     }
-    
+
     //g_pMultiLanguage->ConvertCharToWideStr(wstrText, pszText);
 
     if (wstrText.length() > MAX_TEXT_LENGTH) return;
 
     m_sTextToSet = wstrText;
     m_bSetText = true;
+#else
+    // SDL3 path: write directly to m_szSDLText buffer. [VS1-SDL-INPUT-TEXT]
+    if (pszText != nullptr)
+    {
+        wcsncpy(m_szSDLText, pszText, m_iSDLMaxLength);
+        m_szSDLText[m_iSDLMaxLength] = L'\0';
+        m_iSDLTextLen = static_cast<int>(wcslen(m_szSDLText));
+    }
+    else
+    {
+        m_szSDLText[0] = L'\0';
+        m_iSDLTextLen = 0;
+    }
+#endif
 }
 
 void CUITextInputBox::SetTextLimit(int iLimit)
 {
+#ifdef _WIN32
     SendMessageW(m_hEditWnd, EM_SETLIMITTEXT, iLimit, 0);
+#endif
+    // Store limit for SDL3 path — used in DoActionSub to cap m_szSDLText. [VS1-SDL-INPUT-TEXT]
+    m_iSDLMaxLength = iLimit;
 }
 
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
@@ -3359,6 +3487,9 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 
     m_hEditWnd = CreateWindowW(L"edit", NULL, WS_CHILD | WS_VISIBLE | dwOptionFlag, m_iRealWindowPos_x, m_iRealWindowPos_y, iWidth * g_fScreenRate_x, iHeight * g_fScreenRate_y, m_hParentWnd, (HMENU)ID_UICEDIT, g_hInst, NULL);
 
+    // Store SDL3 max length regardless of platform — m_iSDLMaxLength used in DoActionSub.
+    // [VS1-SDL-INPUT-TEXT]
+    m_iSDLMaxLength = iMaxLength;
     SetSize(iWidth, iHeight);
     if (m_hEditWnd)
     {
@@ -3375,18 +3506,34 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 
 void CUITextInputBox::SetState(int iState)
 {
+#ifdef _WIN32
     if (m_hEditWnd == nullptr) return;
     m_iState = iState;
     if (m_iState == UISTATE_HIDE)
+    {
         ShowWindow(m_hEditWnd, SW_HIDE);
+    }
     else
     {
         ShowWindow(m_hEditWnd, SW_SHOW);
     }
+#else
+    // SDL3 path: m_hEditWnd is nullptr (CreateWindowW stub returns nullptr).
+    // Track state directly and manage SDL3 text input lifecycle. [VS1-SDL-INPUT-TEXT]
+    m_iState = iState;
+    if (m_iState == UISTATE_HIDE)
+    {
+        m_bSDLHasFocus = false;
+#ifdef MU_ENABLE_SDL3
+        MuStopTextInput();
+#endif
+    }
+#endif
 }
 
 void CUITextInputBox::GiveFocus(BOOL SelectText)
 {
+#ifdef _WIN32
     if (m_hEditWnd == nullptr) return;
 
     if (g_iChatInputType == 1 && GetFocus() == g_hWnd && !CheckOption(UIOPTION_SERIALNUMBER) && !CheckOption(UIOPTION_NUMBERONLY))
@@ -3395,13 +3542,32 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
         RestoreIMEStatus();
     }
     else
+    {
         SetFocus(m_hEditWnd);
+    }
 
     g_dwKeyFocusUIID = GetUIID();
     if (SelectText == TRUE)
+    {
         PostMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)0, (LPARAM)-1);
+    }
     else
+    {
         PostMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)-2, (LPARAM)-1);
+    }
+#elif defined(MU_ENABLE_SDL3)
+    // SDL3 path: activate SDL3 text input and track focus state. [VS1-SDL-INPUT-TEXT]
+    // No Win32 HWND operations — SDL_EVENT_TEXT_INPUT drives input on SDL3 path.
+    // Exception: #ifdef _WIN32 / #elif MU_ENABLE_SDL3 guards ARE permitted in ThirdParty/
+    // UIControls.cpp (excluded from clang-tidy) — consistent with existing conditional
+    // compilation in this file (#ifdef LJH_ADD_RESTRICTION_ON_ID, etc.).
+    MuStartTextInput();
+    m_bSDLHasFocus = true;
+    g_dwKeyFocusUIID = GetUIID();
+#else
+    // Non-Windows, non-SDL3: no-op (should not occur in practice)
+    g_dwKeyFocusUIID = GetUIID();
+#endif
 }
 
 void CUITextInputBox::UploadText(int sx, int sy, int Width, int Height)
