@@ -125,3 +125,12 @@ bool MuPlatform::GetDisplaySize(int& outWidth, int& outHeight)
 }
 
 } // namespace mu
+
+// AC-STD-5: char16_t marshaling error log — emitted by mu_wchar_to_char16 defensive guard.
+// Implemented here (not inline) to avoid pulling ErrorReport.h into every TU that
+// includes PlatformCompat.h. The PCH provides g_ErrorReport in this TU.
+// [VS1-NET-CHAR16T-ENCODING]
+void MuPlatformLogChar16MarshalingMismatch(const char* context)
+{
+    g_ErrorReport.Write(L"NET: char16_t marshaling \u2014 encoding mismatch for %hs\r\n", context);
+}

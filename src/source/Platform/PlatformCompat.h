@@ -1009,6 +1009,11 @@ inline void* mu_SecureZeroMemory(void* ptr, size_t cnt)
 // while callers (WSclient.cpp, UIWindows.cpp) supply wchar_t* host strings.
 // Note: <string> is included explicitly in both #ifdef _WIN32 and #else sections above.
 
+// MuPlatformLogChar16MarshalingMismatch — implemented in MuPlatform.cpp (compiled with PCH).
+// Emits AC-STD-5 required error log pattern for encoding mismatch diagnostics.
+// Called by mu_wchar_to_char16 as a defensive guard. [VS1-NET-CHAR16T-ENCODING]
+void MuPlatformLogChar16MarshalingMismatch(const char* context);
+
 inline std::u16string mu_wchar_to_char16(const wchar_t* src)
 {
     if (src == nullptr)
@@ -1018,7 +1023,12 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* src)
     if constexpr (sizeof(wchar_t) == sizeof(char16_t))
     {
         // Windows/MinGW: wchar_t is UTF-16LE identical to char16_t — safe reinterpret
-        return std::u16string(reinterpret_cast<const char16_t*>(src));
+        std::u16string result(reinterpret_cast<const char16_t*>(src));
+        if (result.empty() && *src != L'\0')
+        {
+            MuPlatformLogChar16MarshalingMismatch("mu_wchar_to_char16");
+        }
+        return result;
     }
     else
     {
@@ -1038,6 +1048,10 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* src)
                 result.push_back(static_cast<char16_t>(0xD800U | (u >> 10)));
                 result.push_back(static_cast<char16_t>(0xDC00U | (u & 0x3FFU)));
             }
+        }
+        if (result.empty() && *src != L'\0')
+        {
+            MuPlatformLogChar16MarshalingMismatch("mu_wchar_to_char16");
         }
         return result;
     }
