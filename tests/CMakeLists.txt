@@ -34,6 +34,11 @@ target_sources(MuTests PRIVATE platform/test_platform_mouse.cpp)
 # MU_ENABLE_SDL3 is OFF (CI / MinGW Strategy B).
 target_sources(MuTests PRIVATE platform/test_platform_text_input.cpp)
 
+# Story 7.1.1: Cross-Platform Error Reporting [VS0-QUAL-ERRORREPORT-XPLAT]
+# RED PHASE: test_error_report.cpp exercises post-refactor API (std::ofstream/std::filesystem).
+# Tests fail until ErrorReport.cpp is refactored in story 7.1.1.
+target_sources(MuTests PRIVATE core/test_error_report.cpp)
+
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp

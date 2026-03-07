@@ -100,3 +100,24 @@ add_test(
         -DMODULE_FILE=${MUMAIN_SOURCE_DIR}/cmake/FindDotnetAOT.cmake
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_1_1.cmake
 )
+
+# ==========================================================================
+# Story 7.1.1 - Cross-Platform Error Reporting [VS0-QUAL-ERRORREPORT-XPLAT]
+# RED PHASE: AC-3 and AC-STD-11 tests fail until ErrorReport.cpp is refactored.
+# ==========================================================================
+
+# AC-3 / AC-STD-3: No Win32 file I/O in ErrorReport.cpp cross-platform path
+add_test(
+    NAME "7.1.1-AC-3:no-win32-error-report"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Core/ErrorReport.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_no_win32_error_report.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-ERRORREPORT-XPLAT traceability
+add_test(
+    NAME "7.1.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_DIR=${MUMAIN_SOURCE_DIR}/tests/core
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_1_1.cmake
+)
