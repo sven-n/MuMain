@@ -22,11 +22,13 @@ namespace
 // On UNIX, dlopen() with a bare filename does NOT search the executable directory, so an
 // absolute path is required. On Windows, LoadLibrary() searches the executable directory
 // by default, so a bare filename suffices. (Story 3.3.2 Risk R6 mitigation)
+// Note: anonymous namespace already provides internal linkage — 'inline' is not used here
+// to avoid the misleading combination of anonymous-namespace (internal) + inline (external).
 #ifdef MU_DOTNET_LIB_DIR
-inline const std::string g_dotnetLibPath =
+const std::string g_dotnetLibPath =
     (std::filesystem::path(MU_DOTNET_LIB_DIR) / ("MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT))).string();
 #else
-inline const std::string g_dotnetLibPath =
+const std::string g_dotnetLibPath =
     (std::filesystem::path("MUnique.Client.Library") += MU_DOTNET_LIB_EXT).string();
 #endif
 } // namespace

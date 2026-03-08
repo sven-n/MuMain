@@ -54,26 +54,24 @@ target_sources(MuTests PRIVATE platform/test_connection_library_load.cpp)
 # Tests fail until PlatformCompat.h has the mu_wchar_to_char16 / mu_char16_to_wchar utilities.
 target_sources(MuTests PRIVATE platform/test_char16t_encoding.cpp)
 
-# Story 3.3.1: macOS Server Connectivity Validation [VS1-NET-VALIDATE-MACOS]
-# Guarded by #ifdef __APPLE__ internally — compiles on all platforms, runs only on macOS.
-# MU_TEST_LIBRARY_PATH points to MUnique.Client.Library.dylib in the build output.
+# Stories 3.3.1 / 3.3.2: Platform connectivity smoke tests
+# MU_TEST_LIBRARY_PATH is set to the absolute path of the platform's .NET AOT library.
+# Using a single if/elseif block avoids potential duplicate-definition warnings if
+# a future platform satisfies both conditions. (Story 3.3.2 fix L-1)
 if(APPLE AND EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.dylib")
+    # Story 3.3.1: macOS [VS1-NET-VALIDATE-MACOS]
     target_compile_definitions(MuTests PRIVATE
         MU_TEST_LIBRARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.dylib"
     )
-endif()
-target_sources(MuTests PRIVATE platform/test_macos_connectivity.cpp)
-
-# Story 3.3.2: Linux Server Connectivity Validation [VS1-NET-VALIDATE-LINUX]
-# Guarded by #ifdef __linux__ internally — compiles on all platforms, runs only on Linux.
-# MU_TEST_LIBRARY_PATH points to MUnique.Client.Library.so in the build output.
-# Note: On Linux, dlopen() does NOT search the executable directory for bare filenames —
-# MU_TEST_LIBRARY_PATH must be an absolute path (CMAKE_RUNTIME_OUTPUT_DIRECTORY). (Risk R6)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.so")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.so")
+    # Story 3.3.2: Linux — MU_TEST_LIBRARY_PATH must be absolute; Linux dlopen() does NOT
+    # search the executable directory for bare filenames. (Risk R6 mitigation)
     target_compile_definitions(MuTests PRIVATE
         MU_TEST_LIBRARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.so"
     )
 endif()
+# Both test files are always compiled; platform-specific code is guarded by #ifdef internally.
+target_sources(MuTests PRIVATE platform/test_macos_connectivity.cpp)
 target_sources(MuTests PRIVATE platform/test_linux_connectivity.cpp)
 
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)

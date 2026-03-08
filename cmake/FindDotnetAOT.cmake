@@ -37,7 +37,13 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(MU_DOTNET_LIB_EXT ".so")
-    set(MU_DOTNET_RID "linux-x64")
+    # Story 3.3.2 M-2 fix: mirror macOS processor check for ARM64 Linux support
+    # (Raspberry Pi 4, AWS Graviton, Apple Silicon running Linux, etc.)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        set(MU_DOTNET_RID "linux-arm64")
+    else()
+        set(MU_DOTNET_RID "linux-x64")
+    endif()
 else()
     message(WARNING "PLAT: FindDotnetAOT — unrecognized platform: ${CMAKE_SYSTEM_NAME}. Defaulting to linux-x64.")
     set(MU_DOTNET_LIB_EXT ".so")
@@ -66,17 +72,33 @@ endif()
 # ============================================================
 
 if(MU_IS_WSL)
-    # WSL: locate Windows dotnet.exe via interop mount
-    set(_dotnet_wsl_candidates
-        "/mnt/c/Program Files/dotnet/dotnet.exe"
-        "/mnt/c/Program Files (x86)/dotnet/dotnet.exe"
+    # WSL: prefer native Linux dotnet if available (Story 3.3.2 M-1 fix).
+    # Dev Notes state "Linux native dotnet preferred; WSL interop only if Linux dotnet absent."
+    # The original implementation only checked Windows dotnet.exe candidates, silently
+    # ignoring a native Linux dotnet installed via apt or dotnet-install.sh.
+    find_program(DOTNETAOT_EXECUTABLE dotnet
+        PATHS
+            "$ENV{DOTNET_ROOT}"
+            "/usr/local/share/dotnet"
+            "/usr/share/dotnet"
+            "$ENV{HOME}/.dotnet"
+        DOC "Path to dotnet executable"
     )
-    foreach(_candidate ${_dotnet_wsl_candidates})
-        if(EXISTS "${_candidate}")
-            set(DOTNETAOT_EXECUTABLE "${_candidate}" CACHE FILEPATH "Path to dotnet executable")
-            break()
-        endif()
-    endforeach()
+    if(NOT DOTNETAOT_EXECUTABLE)
+        message(STATUS "PLAT: FindDotnetAOT — native Linux dotnet not found; trying WSL interop")
+        set(_dotnet_wsl_candidates
+            "/mnt/c/Program Files/dotnet/dotnet.exe"
+            "/mnt/c/Program Files (x86)/dotnet/dotnet.exe"
+        )
+        foreach(_candidate ${_dotnet_wsl_candidates})
+            if(EXISTS "${_candidate}")
+                set(DOTNETAOT_EXECUTABLE "${_candidate}" CACHE FILEPATH "Path to dotnet executable")
+                break()
+            endif()
+        endforeach()
+    else()
+        message(STATUS "PLAT: FindDotnetAOT — native Linux dotnet found: ${DOTNETAOT_EXECUTABLE}")
+    endif()
 else()
     find_program(DOTNETAOT_EXECUTABLE dotnet
         PATHS
