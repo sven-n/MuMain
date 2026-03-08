@@ -1,10 +1,20 @@
+// Flow Code: VS1-NET-CONFIG-SERVER
+// Story: 3.4.2 - Server Connection Configuration
+//
+// Cross-platform GameConfig implementation.
+// Replaced Win32 APIs (GetModuleFileNameW, GetPrivateProfileIntW,
+// WritePrivateProfileStringW) with portable alternatives:
+//   - Path: mu_get_app_dir() shim (PlatformCompat.h) + std::filesystem
+//   - INI:  Core/IniFile.h portable reader/writer (std::wifstream/wofstream)
+//   - Validation: GameConfigValidation.h (ValidateServerPort, ValidateServerIP)
+
 #include "stdafx.h"
 #include "GameConfig.h"
 
-#include <imagehlp.h>
-
 #include "GameConfigConstants.h"
-#include <windows.h>
+#include "GameConfigValidation.h"
+#include "IniFile.h"
+#include "PlatformCompat.h"
 
 GameConfig& GameConfig::GetInstance()
 {
@@ -14,20 +24,9 @@ GameConfig& GameConfig::GetInstance()
 
 GameConfig::GameConfig()
 {
-    // Get executable directory and construct config path
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-
-    // Find last backslash to get directory
-    wchar_t* lastSlash = wcsrchr(exePath, L'\\');
-    if (lastSlash)
-    {
-        *(lastSlash + 1) = L'\0'; // Keep the trailing backslash
-    }
-
-    m_configPath = exePath;
-    m_configPath += L"config.ini";
-
+    // Cross-platform path: mu_get_app_dir() is defined in PlatformCompat.h
+    // for both Windows (GetModuleFileNameW) and non-Windows (/proc/self/exe etc.)
+    m_configPath = mu_get_app_dir() / L"config.ini";
     Load();
 }
 
@@ -37,25 +36,31 @@ void GameConfig::Load()
     using namespace CfgKeys;
     using namespace CfgDefaults;
 
-    m_windowWidth = ReadInt(CfgSectionWindow, CfgKeyWidth, CfgDefaultWindowWidth);
-    m_windowHeight = ReadInt(CfgSectionWindow, CfgKeyHeight, CfgDefaultWindowHeight);
-    m_windowMode = ReadBool(CfgSectionWindow, CfgKeyWindowed, CfgDefaultWindowed);
+    IniFile ini(m_configPath);
 
-    m_colorDepth = ReadInt(CfgSectionGraphics, CfgKeyColorDepth, CfgDefaultColorDepth);
+    m_windowWidth = ini.ReadInt(CfgSectionWindow, CfgKeyWidth, CfgDefaultWindowWidth);
+    m_windowHeight = ini.ReadInt(CfgSectionWindow, CfgKeyHeight, CfgDefaultWindowHeight);
+    m_windowMode = ini.ReadBool(CfgSectionWindow, CfgKeyWindowed, CfgDefaultWindowed);
 
-    m_soundEnabled = ReadBool(CfgSectionAudio, CfgKeySoundEnabled, CfgDefaultSoundEnabled);
-    m_musicEnabled = ReadBool(CfgSectionAudio, CfgKeyMusicEnabled, CfgDefaultMusicEnabled);
-    m_volumeLevel = ReadInt(CfgSectionAudio, CfgKeyVolumeLevel, CfgDefaultVolumeLevel);
+    m_colorDepth = ini.ReadInt(CfgSectionGraphics, CfgKeyColorDepth, CfgDefaultColorDepth);
 
-    m_renderTextType = ReadInt(CfgSectionGraphics, CfgKeyRenderTextType, CfgDefaultRenderTextType);
+    m_soundEnabled = ini.ReadBool(CfgSectionAudio, CfgKeySoundEnabled, CfgDefaultSoundEnabled);
+    m_musicEnabled = ini.ReadBool(CfgSectionAudio, CfgKeyMusicEnabled, CfgDefaultMusicEnabled);
+    m_volumeLevel = ini.ReadInt(CfgSectionAudio, CfgKeyVolumeLevel, CfgDefaultVolumeLevel);
 
-    m_rememberMe = ReadBool(CfgSectionLogin, CfgKeyRememberMe, CfgDefaultRememberMe);
-    m_languageSelection = ReadString(CfgSectionLogin, CfgKeyLanguage, CfgDefaultLanguage);
-    m_encryptedUsername = ReadString(CfgSectionLogin, CfgKeyEncryptedUsername, CfgDefaultEncryptedUsername);
-    m_encryptedPassword = ReadString(CfgSectionLogin, CfgKeyEncryptedPassword, CfgDefaultEncryptedPassword);
+    m_renderTextType = ini.ReadInt(CfgSectionGraphics, CfgKeyRenderTextType, CfgDefaultRenderTextType);
 
-    m_serverIP = ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP);
-    m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
+    m_rememberMe = ini.ReadBool(CfgSectionLogin, CfgKeyRememberMe, CfgDefaultRememberMe);
+    m_languageSelection = ini.ReadString(CfgSectionLogin, CfgKeyLanguage, CfgDefaultLanguage);
+    m_encryptedUsername = ini.ReadString(CfgSectionLogin, CfgKeyEncryptedUsername, CfgDefaultEncryptedUsername);
+    m_encryptedPassword = ini.ReadString(CfgSectionLogin, CfgKeyEncryptedPassword, CfgDefaultEncryptedPassword);
+
+    std::wstring rawServerIP = ini.ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP);
+    int rawServerPort = ini.ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
+
+    // AC-4/AC-5: Validate and sanitize connection settings
+    m_serverIP = GameConfig::ValidateServerIP(rawServerIP, CfgDefaultServerIP);
+    m_serverPort = GameConfig::ValidateServerPort(rawServerPort, CfgDefaultServerPort);
 }
 
 void GameConfig::Save()
@@ -63,24 +68,28 @@ void GameConfig::Save()
     using namespace CfgSections;
     using namespace CfgKeys;
 
-    WriteInt(CfgSectionWindow, CfgKeyWidth, m_windowWidth);
-    WriteInt(CfgSectionWindow, CfgKeyHeight, m_windowHeight);
-    WriteBool(CfgSectionWindow, CfgKeyWindowed, m_windowMode);
+    IniFile ini(m_configPath);
 
-    WriteInt(CfgSectionGraphics, CfgKeyColorDepth, m_colorDepth);
-    WriteInt(CfgSectionGraphics, CfgKeyRenderTextType, m_renderTextType);
+    ini.WriteInt(CfgSectionWindow, CfgKeyWidth, m_windowWidth);
+    ini.WriteInt(CfgSectionWindow, CfgKeyHeight, m_windowHeight);
+    ini.WriteBool(CfgSectionWindow, CfgKeyWindowed, m_windowMode);
 
-    WriteBool(CfgSectionAudio, CfgKeySoundEnabled, m_soundEnabled);
-    WriteBool(CfgSectionAudio, CfgKeyMusicEnabled, m_musicEnabled);
-    WriteInt(CfgSectionAudio, CfgKeyVolumeLevel, m_volumeLevel);
+    ini.WriteInt(CfgSectionGraphics, CfgKeyColorDepth, m_colorDepth);
+    ini.WriteInt(CfgSectionGraphics, CfgKeyRenderTextType, m_renderTextType);
 
-    WriteBool(CfgSectionLogin, CfgKeyRememberMe, m_rememberMe);
-    WriteString(CfgSectionLogin, CfgKeyLanguage, m_languageSelection);
-    WriteString(CfgSectionLogin, CfgKeyEncryptedUsername, m_encryptedUsername);
-    WriteString(CfgSectionLogin, CfgKeyEncryptedPassword, m_encryptedPassword);
+    ini.WriteBool(CfgSectionAudio, CfgKeySoundEnabled, m_soundEnabled);
+    ini.WriteBool(CfgSectionAudio, CfgKeyMusicEnabled, m_musicEnabled);
+    ini.WriteInt(CfgSectionAudio, CfgKeyVolumeLevel, m_volumeLevel);
 
-    WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
-    WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
+    ini.WriteBool(CfgSectionLogin, CfgKeyRememberMe, m_rememberMe);
+    ini.WriteString(CfgSectionLogin, CfgKeyLanguage, m_languageSelection);
+    ini.WriteString(CfgSectionLogin, CfgKeyEncryptedUsername, m_encryptedUsername);
+    ini.WriteString(CfgSectionLogin, CfgKeyEncryptedPassword, m_encryptedPassword);
+
+    ini.WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
+    ini.WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
+
+    ini.Save();
 }
 
 void GameConfig::SetWindowSize(int width, int height)
@@ -218,50 +227,6 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
     }
 }
 
-// Helper functions using Windows INI API
-int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue)
-{
-    return GetPrivateProfileIntW(section, key, defaultValue, m_configPath.c_str());
-}
-
-void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
-{
-    wchar_t buffer[32];
-    swprintf_s(buffer, L"%d", value);
-
-    WritePrivateProfileStringW(section, key, buffer, m_configPath.c_str());
-}
-
-bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue)
-{
-    return GetPrivateProfileIntW(section, key, defaultValue ? 1 : 0, m_configPath.c_str()) != 0;
-}
-
-void GameConfig::WriteBool(const wchar_t* section, const wchar_t* key, bool value)
-{
-    WritePrivateProfileStringW(section, key, value ? L"1" : L"0", m_configPath.c_str());
-}
-
-std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue)
-{
-    std::vector<wchar_t> buffer(2048);
-    while (true)
-    {
-        DWORD charsRead = GetPrivateProfileStringW(section, key, defaultValue.c_str(), buffer.data(),
-                                                   static_cast<DWORD>(buffer.size()), m_configPath.c_str());
-        if (charsRead < buffer.size() - 1)
-        {
-            return std::wstring(buffer.data());
-        }
-        buffer.resize(buffer.size() * 2);
-    }
-}
-
-void GameConfig::WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value)
-{
-    WritePrivateProfileStringW(section, key, value.c_str(), m_configPath.c_str());
-}
-
 std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
 {
     if (hexInput.empty())
@@ -321,4 +286,45 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
         SetEncryptedPassword(encPass);
         Save(); // Actually write to the .ini file
     }
+}
+
+// Helper INI read/write methods now delegate to IniFile
+// (these private helpers are kept for backward compat with GameConfig.h declaration)
+int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue)
+{
+    IniFile ini(m_configPath);
+    return ini.ReadInt(section, key, defaultValue);
+}
+
+void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
+{
+    IniFile ini(m_configPath);
+    ini.WriteInt(section, key, value);
+    ini.Save();
+}
+
+bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue)
+{
+    IniFile ini(m_configPath);
+    return ini.ReadBool(section, key, defaultValue);
+}
+
+void GameConfig::WriteBool(const wchar_t* section, const wchar_t* key, bool value)
+{
+    IniFile ini(m_configPath);
+    ini.WriteBool(section, key, value);
+    ini.Save();
+}
+
+std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue)
+{
+    IniFile ini(m_configPath);
+    return ini.ReadString(section, key, defaultValue);
+}
+
+void GameConfig::WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value)
+{
+    IniFile ini(m_configPath);
+    ini.WriteString(section, key, value);
+    ini.Save();
 }

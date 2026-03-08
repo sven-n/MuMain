@@ -2,8 +2,22 @@
 
 #ifdef _WIN32
 // On Windows, all functions come from Win32 APIs.
-// Include <string> explicitly for std::u16string/std::wstring used by char16_t utilities below.
+// Include <string> and <filesystem> explicitly for utilities below.
+#include <filesystem>
 #include <string>
+
+// ---- Executable directory utility (Windows) ----
+// mu_get_app_dir() — portable companion to the non-Windows shim in the #else branch.
+// Returns the directory containing the running executable as a std::filesystem::path.
+// GameConfig.cpp calls this instead of GetModuleFileNameW directly, so that GameConfig.cpp
+// has no #ifdef _WIN32 in game logic. [VS1-NET-CONFIG-SERVER]
+inline std::filesystem::path mu_get_app_dir()
+{
+    wchar_t buf[MAX_PATH];
+    GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    return std::filesystem::path(buf).parent_path();
+}
+
 #else
 
 #include "PlatformTypes.h"
@@ -13,6 +27,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <string>
 
 // ---- Timing shims ----
@@ -906,6 +921,46 @@ inline int MessageBoxW(void* /*hwnd*/, const wchar_t* /*text*/, const wchar_t* /
 #endif // MU_ENABLE_SDL3
 
 #define MessageBox MessageBoxW
+
+// ---- Executable directory shim ----
+// mu_get_app_dir() — cross-platform replacement for GetModuleFileNameW + dirname.
+// Returns the directory containing the running executable as a std::filesystem::path.
+// Used by GameConfig.cpp to locate config.ini next to the executable.
+// Phase 5/5.4: GetModuleFileName → portable executable path.
+// [VS1-NET-CONFIG-SERVER]
+#include <climits>
+#ifdef __linux__
+#include <unistd.h>
+inline std::filesystem::path mu_get_app_dir()
+{
+    char buf[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (len <= 0)
+    {
+        return std::filesystem::current_path();
+    }
+    buf[len] = '\0';
+    return std::filesystem::path(buf).parent_path();
+}
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+inline std::filesystem::path mu_get_app_dir()
+{
+    char buf[PATH_MAX];
+    uint32_t size = sizeof(buf);
+    if (_NSGetExecutablePath(buf, &size) != 0)
+    {
+        return std::filesystem::current_path();
+    }
+    return std::filesystem::path(buf).parent_path();
+}
+#else
+// Fallback for other non-Windows platforms
+inline std::filesystem::path mu_get_app_dir()
+{
+    return std::filesystem::current_path();
+}
+#endif
 
 // ---- File I/O shims ----
 // Convert wchar_t path (UTF-32 on Linux/macOS) to UTF-8, normalize backslashes
