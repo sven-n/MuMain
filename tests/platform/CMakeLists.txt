@@ -159,3 +159,9 @@ add_test(
         -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../../src/source
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_imm.cmake
 )
+
+# ---- Story 7.1.2: POSIX Signal Handlers for Crash Diagnostics — RED PHASE ----
+# [VS0-QUAL-SIGNAL-HANDLERS]
+# AC-STD-3: sigaction/signal() calls must appear ONLY in Platform/posix/ files.
+# Catch2 unit tests (install verification) registered via MuTests in parent CMakeLists.txt.
+# (test_posix_signal_handlers.cpp — SA_SIGACTION flag check for SIGSEGV/SIGABRT/SIGBUS)

@@ -98,7 +98,11 @@ bool CConsoleWindow::Open(const std::wstring& title)
     while (!GetWndHandle())
     {
         m_LimitTimer.UpdateTime();
+#ifdef _WIN32
         if (m_LimitTimer.IsTime() || FALSE == ::EnumChildWindows(NULL, EnumChildProc, (LPARAM)this))
+#else
+        if (m_LimitTimer.IsTime())
+#endif
             break;
         ::Sleep(500);
     }

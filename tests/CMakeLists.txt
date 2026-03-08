@@ -60,6 +60,12 @@ target_sources(MuTests PRIVATE network/test_connection_error_messages.cpp)
 # is present with the correct implementations. No config.ini required at test time.
 target_sources(MuTests PRIVATE network/test_server_config_validation.cpp)
 
+# Story 7.1.2: POSIX Signal Handlers for Crash Diagnostics [VS0-QUAL-SIGNAL-HANDLERS]
+# RED PHASE: test_posix_signal_handlers.cpp verifies InstallSignalHandlers() installs
+# SA_SIGACTION handlers for SIGSEGV/SIGABRT/SIGBUS. Guarded by #ifndef _WIN32 internally
+# so the TU compiles on Windows (MinGW CI) — the test body is a no-op stub on Windows.
+target_sources(MuTests PRIVATE platform/test_posix_signal_handlers.cpp)
+
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
 # RED PHASE: Tests mu_wchar_to_char16 / mu_char16_to_wchar round-trips and byte-level
 # UTF-16LE baseline for Korean, Latin, mixed-script, null, and IP address strings.

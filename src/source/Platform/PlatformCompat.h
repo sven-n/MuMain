@@ -167,6 +167,41 @@ inline BOOL DrawMenuBar(HWND /*hWnd*/)
 {
     return TRUE;
 }
+inline BOOL RemoveMenu(void* /*hMenu*/, UINT /*uPosition*/, UINT /*uFlags*/)
+{
+    return TRUE;
+}
+
+struct CHAR_INFO
+{
+    union {
+        WCHAR UnicodeChar;
+        CHAR AsciiChar;
+    } Char;
+    WORD Attributes;
+};
+
+inline BOOL ReadConsoleOutput(HANDLE /*hConsoleOutput*/, CHAR_INFO* /*lpBuffer*/, COORD /*dwBufferSize*/,
+                              COORD /*dwBufferCoord*/, SMALL_RECT* /*lpReadRegion*/)
+{
+    return TRUE;
+}
+inline DWORD GetWindowThreadProcessId(HWND /*hWnd*/, LPDWORD /*lpdwProcessId*/)
+{
+    return 0;
+}
+inline DWORD GetCurrentThreadId()
+{
+    return 0;
+}
+inline DWORD GetCurrentProcessId()
+{
+    return 0;
+}
+inline int GetClassName(HWND /*hWnd*/, LPTSTR /*lpClassName*/, int /*nMaxCount*/)
+{
+    return 0;
+}
 
 #define SC_CLOSE 0xF060
 #define MF_BYCOMMAND 0x00000000L

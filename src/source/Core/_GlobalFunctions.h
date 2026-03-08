@@ -67,6 +67,9 @@ BuffStateValueControl& TheBuffStateValueControl();
 
 #define g_BuffStateValueString(outstr, type) TheBuffStateValueControl().GetBuffValueString(outstr, type)
 
+#ifdef RGBA
+#undef RGBA
+#endif
 inline unsigned long RGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
     return (r) + (g << 8) + (b << 16) + (a << 24);

@@ -5,7 +5,9 @@
 
 #include "muConsoleDebug.h" // self
 
+#ifdef _WIN32
 #include <io.h>
+#endif
 #include <fcntl.h>
 #include <iostream>
 #include "ZzzInterface.h"
