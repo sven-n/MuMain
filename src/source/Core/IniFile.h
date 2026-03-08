@@ -11,10 +11,13 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <locale>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "ErrorReport.h"
 
 class IniFile
 {
@@ -66,8 +69,8 @@ public:
     void WriteString(const std::wstring& section, const std::wstring& key, const std::wstring& value)
     {
         m_sections[section][key] = value;
-        m_sectionOrder = EnsureSection(m_sectionOrder, section);
-        m_keyOrder[section] = EnsureKey(m_keyOrder[section], key);
+        EnsureSection(m_sectionOrder, section);
+        EnsureKey(m_keyOrder[section], key);
     }
 
     void WriteInt(const std::wstring& section, const std::wstring& key, int value)
@@ -85,8 +88,14 @@ public:
         std::wofstream out(m_path, std::ios::out | std::ios::trunc);
         if (!out.is_open())
         {
+            g_ErrorReport.Write(L"IniFile::Save failed to open '%ls' for writing\r\n", m_path.wstring().c_str());
             return;
         }
+        // Use platform default locale (typically UTF-8 on Linux/macOS) for wide
+        // character encoding. Without this, the default "C" locale only handles
+        // ASCII on non-Windows platforms. Config values are ASCII-only today, but
+        // this ensures correct behaviour as the codebase evolves. See HIGH-2 fix.
+        out.imbue(std::locale(""));
 
         for (const auto& sec : m_sectionOrder)
         {
@@ -130,6 +139,11 @@ private:
         {
             return;
         }
+        // Use platform default locale (typically UTF-8 on Linux/macOS) for wide
+        // character encoding. Without this, the default "C" locale only handles
+        // ASCII on non-Windows platforms. Config values are ASCII-only today, but
+        // this ensures correct behaviour as the codebase evolves. See HIGH-2 fix.
+        in.imbue(std::locale(""));
 
         std::wstring currentSection;
         std::wstring line;
@@ -160,7 +174,7 @@ private:
                 if (close != std::wstring::npos)
                 {
                     currentSection = line.substr(1, close - 1);
-                    m_sectionOrder = EnsureSection(m_sectionOrder, currentSection);
+                    EnsureSection(m_sectionOrder, currentSection);
                 }
                 continue;
             }
@@ -190,26 +204,27 @@ private:
                 }
 
                 m_sections[currentSection][key] = value;
-                m_keyOrder[currentSection] = EnsureKey(m_keyOrder[currentSection], key);
+                EnsureKey(m_keyOrder[currentSection], key);
             }
         }
     }
 
-    static std::vector<std::wstring> EnsureSection(std::vector<std::wstring> order, const std::wstring& section)
+    // Append section to order vector if not already present (in-place, O(n) but
+    // config files have at most a handful of sections — negligible cost).
+    static void EnsureSection(std::vector<std::wstring>& order, const std::wstring& section)
     {
         if (std::find(order.begin(), order.end(), section) == order.end())
         {
             order.push_back(section);
         }
-        return order;
     }
 
-    static std::vector<std::wstring> EnsureKey(std::vector<std::wstring> order, const std::wstring& key)
+    // Append key to order vector if not already present (in-place).
+    static void EnsureKey(std::vector<std::wstring>& order, const std::wstring& key)
     {
         if (std::find(order.begin(), order.end(), key) == order.end())
         {
             order.push_back(key);
         }
-        return order;
     }
 };

@@ -11,7 +11,9 @@
 
 #include <string>
 
-namespace GameConfig
+// Namespace is distinct from the GameConfig class to avoid naming collision.
+// See MEDIUM-3 fix (code review 3-4-2).
+namespace GameConfigValidation
 {
 
 // AC-4: Validate a ServerPort value read from config.ini.
@@ -24,4 +26,4 @@ int ValidateServerPort(int value, int defaultValue);
 // otherwise logs a warning via g_ErrorReport.Write() and returns defaultValue.
 std::wstring ValidateServerIP(const std::wstring& value, const std::wstring& defaultValue);
 
-} // namespace GameConfig
+} // namespace GameConfigValidation

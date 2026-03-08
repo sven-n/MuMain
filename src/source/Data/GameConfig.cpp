@@ -23,11 +23,23 @@ GameConfig& GameConfig::GetInstance()
 }
 
 GameConfig::GameConfig()
+    : m_windowWidth(CfgDefaults::CfgDefaultWindowWidth), m_windowHeight(CfgDefaults::CfgDefaultWindowHeight),
+      m_windowMode(CfgDefaults::CfgDefaultWindowed), m_colorDepth(CfgDefaults::CfgDefaultColorDepth),
+      m_soundEnabled(CfgDefaults::CfgDefaultSoundEnabled), m_musicEnabled(CfgDefaults::CfgDefaultMusicEnabled),
+      m_volumeLevel(CfgDefaults::CfgDefaultVolumeLevel), m_renderTextType(CfgDefaults::CfgDefaultRenderTextType),
+      m_rememberMe(CfgDefaults::CfgDefaultRememberMe), m_languageSelection(CfgDefaults::CfgDefaultLanguage),
+      m_encryptedUsername(CfgDefaults::CfgDefaultEncryptedUsername),
+      m_encryptedPassword(CfgDefaults::CfgDefaultEncryptedPassword), m_serverIP(CfgDefaults::CfgDefaultServerIP),
+      m_serverPort(CfgDefaults::CfgDefaultServerPort)
 {
     // Cross-platform path: mu_get_app_dir() is defined in PlatformCompat.h
     // for both Windows (GetModuleFileNameW) and non-Windows (/proc/self/exe etc.)
     m_configPath = mu_get_app_dir() / L"config.ini";
-    Load();
+    // NOTE: Load() is intentionally NOT called here.
+    // Winmain.cpp calls GameConfig::GetInstance().Load() explicitly at startup
+    // (line ~998). Calling Load() from the constructor would cause two sequential
+    // reads from disk (constructor fires on first GetInstance() access, which IS
+    // the Winmain.cpp call site). See AC-STD-NFR-1.
 }
 
 void GameConfig::Load()
@@ -59,8 +71,8 @@ void GameConfig::Load()
     int rawServerPort = ini.ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
 
     // AC-4/AC-5: Validate and sanitize connection settings
-    m_serverIP = GameConfig::ValidateServerIP(rawServerIP, CfgDefaultServerIP);
-    m_serverPort = GameConfig::ValidateServerPort(rawServerPort, CfgDefaultServerPort);
+    m_serverIP = GameConfigValidation::ValidateServerIP(rawServerIP, CfgDefaultServerIP);
+    m_serverPort = GameConfigValidation::ValidateServerPort(rawServerPort, CfgDefaultServerPort);
 }
 
 void GameConfig::Save()
@@ -286,45 +298,4 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
         SetEncryptedPassword(encPass);
         Save(); // Actually write to the .ini file
     }
-}
-
-// Helper INI read/write methods now delegate to IniFile
-// (these private helpers are kept for backward compat with GameConfig.h declaration)
-int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue)
-{
-    IniFile ini(m_configPath);
-    return ini.ReadInt(section, key, defaultValue);
-}
-
-void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
-{
-    IniFile ini(m_configPath);
-    ini.WriteInt(section, key, value);
-    ini.Save();
-}
-
-bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue)
-{
-    IniFile ini(m_configPath);
-    return ini.ReadBool(section, key, defaultValue);
-}
-
-void GameConfig::WriteBool(const wchar_t* section, const wchar_t* key, bool value)
-{
-    IniFile ini(m_configPath);
-    ini.WriteBool(section, key, value);
-    ini.Save();
-}
-
-std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue)
-{
-    IniFile ini(m_configPath);
-    return ini.ReadString(section, key, defaultValue);
-}
-
-void GameConfig::WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value)
-{
-    IniFile ini(m_configPath);
-    ini.WriteString(section, key, value);
-    ini.Save();
 }

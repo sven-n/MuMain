@@ -139,15 +139,6 @@ private:
     std::wstring m_serverIP;
     int m_serverPort;
 
-    int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
-    void WriteInt(const wchar_t* section, const wchar_t* key, int value);
-
-    bool ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue);
-    void WriteBool(const wchar_t* section, const wchar_t* key, bool value);
-
-    std::wstring ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue);
-    void WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value);
-
     std::wstring DecryptSetting(const std::wstring& hexInput);
     std::wstring EncryptSetting(const wchar_t* input);
 };

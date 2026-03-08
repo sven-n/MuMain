@@ -31,7 +31,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         int defaultPort = 44405;
 
         // WHEN: validating the port
-        int result = GameConfig::ValidateServerPort(value, defaultPort);
+        int result = GameConfigValidation::ValidateServerPort(value, defaultPort);
 
         // THEN: default is substituted
         REQUIRE(result == 44405);
@@ -44,7 +44,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         int defaultPort = 44405;
 
         // WHEN: validating the port
-        int result = GameConfig::ValidateServerPort(value, defaultPort);
+        int result = GameConfigValidation::ValidateServerPort(value, defaultPort);
 
         // THEN: default is substituted
         REQUIRE(result == 44405);
@@ -57,7 +57,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         int defaultPort = 44405;
 
         // WHEN: validating the port
-        int result = GameConfig::ValidateServerPort(value, defaultPort);
+        int result = GameConfigValidation::ValidateServerPort(value, defaultPort);
 
         // THEN: the value is preserved
         REQUIRE(result == 65535);
@@ -70,10 +70,23 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         int defaultPort = 44405;
 
         // WHEN: validating the port
-        int result = GameConfig::ValidateServerPort(value, defaultPort);
+        int result = GameConfigValidation::ValidateServerPort(value, defaultPort);
 
         // THEN: the value is preserved
         REQUIRE(result == 44405);
+    }
+
+    SECTION("AC-4: Port 1 is valid (minimum valid port) — returns 1")
+    {
+        // GIVEN: the minimum valid port (immediately above the 0 boundary)
+        int value = 1;
+        int defaultPort = 44405;
+
+        // WHEN: validating the port
+        int result = GameConfigValidation::ValidateServerPort(value, defaultPort);
+
+        // THEN: the value is preserved (1 is valid per AC-4: rejects <= 0 or > 65535)
+        REQUIRE(result == 1);
     }
 
     SECTION("AC-4: Negative port is invalid — returns default")
@@ -83,7 +96,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         int defaultPort = 44405;
 
         // WHEN: validating the port
-        int result = GameConfig::ValidateServerPort(value, defaultPort);
+        int result = GameConfigValidation::ValidateServerPort(value, defaultPort);
 
         // THEN: default is substituted
         REQUIRE(result == 44405);
@@ -103,7 +116,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         std::wstring defaultIP = L"localhost";
 
         // WHEN: validating the IP
-        std::wstring result = GameConfig::ValidateServerIP(value, defaultIP);
+        std::wstring result = GameConfigValidation::ValidateServerIP(value, defaultIP);
 
         // THEN: default is substituted
         REQUIRE(result == L"localhost");
@@ -116,7 +129,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         std::wstring defaultIP = L"localhost";
 
         // WHEN: validating the IP
-        std::wstring result = GameConfig::ValidateServerIP(value, defaultIP);
+        std::wstring result = GameConfigValidation::ValidateServerIP(value, defaultIP);
 
         // THEN: default is substituted (whitespace trimmed → empty)
         REQUIRE(result == L"localhost");
@@ -129,7 +142,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         std::wstring defaultIP = L"localhost";
 
         // WHEN: validating the IP
-        std::wstring result = GameConfig::ValidateServerIP(value, defaultIP);
+        std::wstring result = GameConfigValidation::ValidateServerIP(value, defaultIP);
 
         // THEN: default is substituted
         REQUIRE(result == L"localhost");
@@ -142,7 +155,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         std::wstring defaultIP = L"localhost";
 
         // WHEN: validating the IP
-        std::wstring result = GameConfig::ValidateServerIP(value, defaultIP);
+        std::wstring result = GameConfigValidation::ValidateServerIP(value, defaultIP);
 
         // THEN: the value is preserved
         REQUIRE(result == L"192.168.1.1");
@@ -155,7 +168,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         std::wstring defaultIP = L"localhost";
 
         // WHEN: validating the IP
-        std::wstring result = GameConfig::ValidateServerIP(value, defaultIP);
+        std::wstring result = GameConfigValidation::ValidateServerIP(value, defaultIP);
 
         // THEN: whitespace is trimmed and value is preserved
         REQUIRE(result == L"game.server.example.com");
@@ -168,7 +181,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         std::wstring defaultIP = L"localhost";
 
         // WHEN: validating the IP
-        std::wstring result = GameConfig::ValidateServerIP(value, defaultIP);
+        std::wstring result = GameConfigValidation::ValidateServerIP(value, defaultIP);
 
         // THEN: the value is preserved
         REQUIRE(result == L"localhost");
