@@ -178,3 +178,14 @@ add_test(
     COMMAND ${CMAKE_COMMAND}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_3_2.cmake
 )
+
+# ==========================================================================
+# Story 3.4.1 - Connection Error Messaging & Graceful Degradation [VS1-NET-ERROR-MESSAGING]
+# ==========================================================================
+
+# AC-STD-11 / AC-VAL-4: Flow code traceability — VS1-NET-ERROR-MESSAGING in Connection.cpp header
+add_test(
+    NAME "3.4.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_4_1.cmake
+)

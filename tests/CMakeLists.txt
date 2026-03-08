@@ -48,6 +48,12 @@ target_sources(MuTests PRIVATE core/test_mu_timer.cpp)
 # No actual .NET library required at test time.
 target_sources(MuTests PRIVATE platform/test_connection_library_load.cpp)
 
+# Story 3.4.1: Connection Error Messaging & Graceful Degradation [VS1-NET-ERROR-MESSAGING]
+# RED PHASE: Tests FormatLibraryNotFoundMessage() and FormatSymbolNotFoundMessage() helpers
+# extracted from Connection.cpp. Tests compile but FAIL until Connection.cpp exposes these
+# free functions in the DotNetBridge namespace. No .NET library required at test time.
+target_sources(MuTests PRIVATE network/test_connection_error_messages.cpp)
+
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
 # RED PHASE: Tests mu_wchar_to_char16 / mu_char16_to_wchar round-trips and byte-level
 # UTF-16LE baseline for Korean, Latin, mixed-script, null, and IP address strings.
