@@ -98,22 +98,22 @@ typedef uint64_t GLuint64;
 typedef void GLvoid;
 
 // OpenGL Constants fallback
-#define GL_DEPTH_TEST                     0x0B71
-#define GL_ALPHA_TEST                     0x0BC0
-#define GL_TEXTURE_2D                     0x0DE1
-#define GL_QUADS                          0x0007
-#define GL_TRIANGLES                      0x0004
-#define GL_LINE_STRIP                     0x0003
-#define GL_NEAREST                        0x2600
-#define GL_LINEAR                         0x2601
-#define GL_CLAMP_TO_EDGE                  0x812F
-#define GL_RGBA                           0x1908
-#define GL_RGB                            0x1907
-#define GL_UNSIGNED_BYTE                  0x1401
-#define GL_BLEND                          0x0BE2
-#define GL_SRC_ALPHA                      0x0302
-#define GL_ONE_MINUS_SRC_ALPHA            0x0303
-#define GL_CULL_FACE                      0x0B44
+#define GL_DEPTH_TEST 0x0B71
+#define GL_ALPHA_TEST 0x0BC0
+#define GL_TEXTURE_2D 0x0DE1
+#define GL_QUADS 0x0007
+#define GL_TRIANGLES 0x0004
+#define GL_LINE_STRIP 0x0003
+#define GL_NEAREST 0x2600
+#define GL_LINEAR 0x2601
+#define GL_CLAMP_TO_EDGE 0x812F
+#define GL_RGBA 0x1908
+#define GL_RGB 0x1907
+#define GL_UNSIGNED_BYTE 0x1401
+#define GL_BLEND 0x0BE2
+#define GL_SRC_ALPHA 0x0302
+#define GL_ONE_MINUS_SRC_ALPHA 0x0303
+#define GL_CULL_FACE 0x0B44
 
 // OpenGL Function stubs
 inline void glEnable(GLenum) {}

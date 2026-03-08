@@ -42,21 +42,21 @@ inline BOOL IsBadWritePtr(void* /*lp*/, UINT_PTR /*ucb*/)
     return FALSE;
 }
 
-#define STD_INPUT_HANDLE  ((DWORD)-10)
-#define STD_OUTPUT_HANDLE ((DWORD)-11)
-#define STD_ERROR_HANDLE  ((DWORD)-12)
+#define STD_INPUT_HANDLE ((DWORD) - 10)
+#define STD_OUTPUT_HANDLE ((DWORD) - 11)
+#define STD_ERROR_HANDLE ((DWORD) - 12)
 
 #define ENABLE_PROCESSED_INPUT 0x0001
-#define ENABLE_LINE_INPUT      0x0002
-#define ENABLE_ECHO_INPUT      0x0004
-#define ENABLE_WINDOW_INPUT    0x0008
-#define ENABLE_MOUSE_INPUT     0x0010
-#define ENABLE_INSERT_MODE     0x0020
+#define ENABLE_LINE_INPUT 0x0002
+#define ENABLE_ECHO_INPUT 0x0004
+#define ENABLE_WINDOW_INPUT 0x0008
+#define ENABLE_MOUSE_INPUT 0x0010
+#define ENABLE_INSERT_MODE 0x0020
 #define ENABLE_QUICK_EDIT_MODE 0x0040
-#define ENABLE_EXTENDED_FLAGS  0x0080
+#define ENABLE_EXTENDED_FLAGS 0x0080
 
-#define ENABLE_PROCESSED_OUTPUT    0x0001
-#define ENABLE_WRAP_AT_EOL_OUTPUT  0x0002
+#define ENABLE_PROCESSED_OUTPUT 0x0001
+#define ENABLE_WRAP_AT_EOL_OUTPUT 0x0002
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 
 struct COORD
@@ -118,16 +118,49 @@ inline BOOL EnumChildWindows(HWND /*hWndParent*/, void* /*lpEnumFunc*/, LPARAM /
 }
 
 inline void SetLastError(DWORD /*dwErrCode*/) {}
-inline DWORD GetLastError() { return 0; }
-inline BOOL UpdateWindow(HWND /*hWnd*/) { return TRUE; }
-inline BOOL GetConsoleScreenBufferInfo(HANDLE /*hConsoleOutput*/, CONSOLE_SCREEN_BUFFER_INFO* /*lpConsoleScreenBufferInfo*/) { return TRUE; }
-inline BOOL FillConsoleOutputCharacter(HANDLE /*hConsoleOutput*/, TCHAR /*cCharacter*/, DWORD /*nLength*/, COORD /*dwWriteCoord*/, LPDWORD /*lpNumberOfCharsWritten*/) { return TRUE; }
-inline BOOL FillConsoleOutputAttribute(HANDLE /*hConsoleOutput*/, WORD /*wAttribute*/, DWORD /*nLength*/, COORD /*dwWriteCoord*/, LPDWORD /*lpNumberOfAttrsWritten*/) { return TRUE; }
-inline BOOL SetConsoleCursorPosition(HANDLE /*hConsoleOutput*/, COORD /*dwCursorPosition*/) { return TRUE; }
-inline BOOL SetConsoleTextAttribute(HANDLE /*hConsoleOutput*/, WORD /*wAttributes*/) { return TRUE; }
-inline void* GetSystemMenu(HWND /*hWnd*/, BOOL /*bRevert*/) { return nullptr; }
-inline BOOL DeleteMenu(void* /*hMenu*/, UINT /*uPosition*/, UINT /*uFlags*/) { return TRUE; }
-inline BOOL DrawMenuBar(HWND /*hWnd*/) { return TRUE; }
+inline DWORD GetLastError()
+{
+    return 0;
+}
+inline BOOL UpdateWindow(HWND /*hWnd*/)
+{
+    return TRUE;
+}
+inline BOOL GetConsoleScreenBufferInfo(HANDLE /*hConsoleOutput*/,
+                                       CONSOLE_SCREEN_BUFFER_INFO* /*lpConsoleScreenBufferInfo*/)
+{
+    return TRUE;
+}
+inline BOOL FillConsoleOutputCharacter(HANDLE /*hConsoleOutput*/, TCHAR /*cCharacter*/, DWORD /*nLength*/,
+                                       COORD /*dwWriteCoord*/, LPDWORD /*lpNumberOfCharsWritten*/)
+{
+    return TRUE;
+}
+inline BOOL FillConsoleOutputAttribute(HANDLE /*hConsoleOutput*/, WORD /*wAttribute*/, DWORD /*nLength*/,
+                                       COORD /*dwWriteCoord*/, LPDWORD /*lpNumberOfAttrsWritten*/)
+{
+    return TRUE;
+}
+inline BOOL SetConsoleCursorPosition(HANDLE /*hConsoleOutput*/, COORD /*dwCursorPosition*/)
+{
+    return TRUE;
+}
+inline BOOL SetConsoleTextAttribute(HANDLE /*hConsoleOutput*/, WORD /*wAttributes*/)
+{
+    return TRUE;
+}
+inline void* GetSystemMenu(HWND /*hWnd*/, BOOL /*bRevert*/)
+{
+    return nullptr;
+}
+inline BOOL DeleteMenu(void* /*hMenu*/, UINT /*uPosition*/, UINT /*uFlags*/)
+{
+    return TRUE;
+}
+inline BOOL DrawMenuBar(HWND /*hWnd*/)
+{
+    return TRUE;
+}
 
 #define SC_CLOSE 0xF060
 #define MF_BYCOMMAND 0x00000000L
