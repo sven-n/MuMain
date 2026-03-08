@@ -16,6 +16,17 @@
 #include "PacketBindings_ConnectServer.h"
 #include "PacketBindings_ClientToServer.h"
 
+// MEDIUM-4 fix: g_dotnetLibPath defined here (not in anonymous namespace in header) to prevent
+// per-TU copies if Connection.h is ever included by a second translation unit.
+// Declaration (extern) remains in Connection.h; only Connection.cpp includes Connection.h today.
+#ifdef MU_DOTNET_LIB_DIR
+const std::string g_dotnetLibPath =
+    (std::filesystem::path(MU_DOTNET_LIB_DIR) / ("MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT))).string();
+#else
+const std::string g_dotnetLibPath =
+    (std::filesystem::path("MUnique.Client.Library") += MU_DOTNET_LIB_EXT).string();
+#endif
+
 std::map<int32_t, Connection*> connections;
 
 namespace DotNetBridge

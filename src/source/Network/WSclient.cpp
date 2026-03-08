@@ -168,10 +168,16 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 
         // AC-3: Connection error with address+port for user diagnosis (VS1-NET-ERROR-MESSAGING)
         // MessageBoxW maps to SDL_ShowSimpleMessageBox via PlatformCompat.h shim
+        // AC-STD-NFR-1: Once-per-session guard — mirrors g_dotnetErrorDisplayed pattern in Connection.cpp
+        static bool g_connectErrorDisplayed = false;
         wchar_t szConnectError[256];
-        mu_swprintf(szConnectError, L"Cannot connect to %ls:%d. Server may be offline.", IpAddr, Port);
+        mu_swprintf_s(szConnectError, L"Cannot connect to %ls:%d. Server may be offline.", IpAddr, Port);
         g_ErrorReport.Write(L"NET: %ls\r\n", szConnectError);
-        MessageBoxW(nullptr, szConnectError, L"Connection Error", MB_ICONERROR | MB_OK);
+        if (!g_connectErrorDisplayed)
+        {
+            g_connectErrorDisplayed = true;
+            MessageBoxW(nullptr, szConnectError, L"Connection Error", MB_ICONERROR | MB_OK);
+        }
 
         g_ErrorReport.WriteCurrentTime();
         delete SocketClient;

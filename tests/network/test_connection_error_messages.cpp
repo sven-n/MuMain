@@ -13,22 +13,10 @@
 //
 // Run: ctest --test-dir build -R "3.4.1"
 
-#pragma once
-
 #include <catch2/catch_test_macros.hpp>
 #include <string>
 
-// Forward declarations of testable helpers that will be extracted from Connection.cpp.
-// These functions will be declared in a Connection_internal.h or inline in Connection.cpp
-// and exposed via the DotNetBridge namespace for unit testing.
-//
-// If the formatting cannot be cleanly extracted (circular includes), the fallback
-// strategy is documented in the story Dev Notes §Catch2 Test Strategy.
-namespace DotNetBridge
-{
-std::string FormatLibraryNotFoundMessage(const std::string& path, const char* platform);
-std::string FormatSymbolNotFoundMessage(const char* name);
-} // namespace DotNetBridge
+#include "DotNetMessageFormat.h"
 
 // =============================================================================
 // AC-1: Library-Not-Found Message Format
