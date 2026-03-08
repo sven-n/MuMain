@@ -7,8 +7,8 @@
 #include <cstdint>
 
 #include "Singleton.h"
-#include "_enum.h"
-#include "_struct.h"
+#include "mu_enum.h"
+#include "mu_struct.h"
 
 class CSQuest : public Singleton<CSQuest>
 {

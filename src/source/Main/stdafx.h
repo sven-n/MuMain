@@ -43,101 +43,49 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE
 
-#pragma warning(push, 3)
-
-#include <windows.h>
-
-// MinGW workaround: Allow swprintf usage
-#if defined(__MINGW32__) || defined(__MINGW64__)
-#undef swprintf
-#endif
-
-// windows
-#include <winsock2.h>
-#include <mmsystem.h>
-#include <shellapi.h>
-
-// c runtime
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <memory.h>
-#include <tchar.h>
-#include <assert.h>
-#include <mbstring.h>
-#include <time.h>
-#include <math.h>
-#include <stdarg.h>
-#include <conio.h>
-
+#include <cstdint>
+#include <climits>
+#include <cstring>
 #include <string>
-#include <list>
 #include <map>
-#include <deque>
-#include <algorithm>
 #include <vector>
+#include <list>
+#include <algorithm>
+#include <memory>
+#include <iostream>
+#include <deque>
 #include <queue>
+#include <filesystem>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <cwchar>
+#include <cwctype>
+#include <cmath>
+#include <cstdarg>
+#include <ctime>
+#include <cassert>
 
-#pragma warning(pop)
-
-// Cross-platform swprintf replacement
-// MinGW blocks swprintf, so we provide mu_swprintf as a safe cross-platform alternative
-
-// Undefine MinGW's blocking macro first
-#undef swprintf
-#undef swprintf_instead_use_StringCbPrintfW_or_StringCchPrintfW
-
-// Use inline template functions instead of macros to avoid issues with #ifdef in arguments
-#ifdef _MSC_VER
-// MSVC: swprintf doesn't need buffer size
-template <typename... Args> inline int mu_swprintf(wchar_t* buffer, const wchar_t* format, Args... args)
-{
-    return swprintf(buffer, format, args...);
-}
-// mu_swprintf_s with explicit size
-template <typename... Args> inline int mu_swprintf_s(wchar_t* buffer, size_t size, const wchar_t* format, Args... args)
-{
-    return swprintf_s(buffer, size, format, args...);
-}
-// mu_swprintf_s with array - auto-deduce size (like MSVC's swprintf_s)
-template <size_t N, typename... Args>
-inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
-{
-    return swprintf_s(buffer, N, format, args...);
-}
+#ifdef _WIN32
+#ifdef _WIN32
+#include <windows.h>
 #else
-// GCC/MinGW/Clang: use std::swprintf with explicit buffer size
-template <typename... Args> inline int mu_swprintf(wchar_t* buffer, const wchar_t* format, Args... args)
-{
-    return std::swprintf(buffer, 1024, format, args...);
-}
-// mu_swprintf_s with explicit size
-template <typename... Args> inline int mu_swprintf_s(wchar_t* buffer, size_t size, const wchar_t* format, Args... args)
-{
-    return std::swprintf(buffer, size, format, args...);
-}
-// mu_swprintf_s with array - auto-deduce size (compatible with MSVC swprintf_s)
-template <size_t N, typename... Args>
-inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
-{
-    return std::swprintf(buffer, N, format, args...);
-}
+#include "Platform/PlatformTypes.h"
+#include "Platform/PlatformCompat.h"
+#endif
+#else
+// For non-Windows, platform types come after system headers but before project headers
+#include "Platform/PlatformTypes.h"
+#include "Platform/PlatformCompat.h"
 #endif
 
-// opengl
-#include <gl/glew.h>
-#include <gl/GL.h>
-
-// patch
-// winmain
-#include "Winmain.h"
-#include "Defined_Global.h"
-
-// client
-#include "_define.h"
-#include "_enum.h"
-#include "_types.h"
-#include "_struct.h"
+// client - base definitions
+#include "Core/mu_base_types.h"
+#include "Core/mu_define.h"
+#include "Core/mu_enum.h"
+#include "Core/ZzzMathLib.h"
+#include "Core/mu_types.h"
+#include "Core/mu_struct.h"
 #include "w_WindowMessageHandler.h"
 #include "_GlobalFunctions.h"
 #include "_TextureIndex.h"

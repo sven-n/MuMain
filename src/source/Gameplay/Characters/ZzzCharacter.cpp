@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "_enum.h"
+#include "mu_enum.h"
 #include <eh.h>
 #include "UIManager.h"
 #include "GuildCache.h"

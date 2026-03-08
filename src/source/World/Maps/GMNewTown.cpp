@@ -19,7 +19,7 @@
 #include "GIPetManager.h"
 #include "MapManager.h"
 #include "SkillManager.h"
-#include "_enum.h"
+#include "mu_enum.h"
 
 #include "w_BaseMap.h"
 #include "w_MapHeaders.h"

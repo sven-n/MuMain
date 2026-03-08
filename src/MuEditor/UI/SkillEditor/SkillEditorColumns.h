@@ -4,7 +4,7 @@
 
 #include <windows.h>
 #include "GameData/SkillData/SkillFieldMetadata.h"
-#include "_struct.h"
+#include "mu_struct.h"
 
 // Forward declaration
 class CSkillEditorTable;

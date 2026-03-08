@@ -76,7 +76,7 @@ CErrorReport::~CErrorReport()
 
 void CErrorReport::Clear(void)
 {
-    m_filePath = {};
+    m_filePath.clear();
     m_iKey = 0;
 }
 

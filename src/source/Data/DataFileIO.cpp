@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "DataFileIO.h"
 #include "ZzzInfomation.h"
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "Platform/PlatformTypes.h"
+#include "Platform/PlatformCompat.h"
+#endif
 
 extern HWND g_hWnd;
 

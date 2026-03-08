@@ -3,7 +3,7 @@
 
 #ifdef _EDITOR
 
-#include "_struct.h"
+#include "mu_struct.h"
 #include <string>
 
 // Handles Save/Export action buttons for the Item Editor

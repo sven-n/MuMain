@@ -2,6 +2,9 @@
 .vs/
 .nuget/
 
+# CLion temporary / backup files
+.!*
+
 src/source/Global Debug/
 src/Global Debug/
 src/Global Debug/Main

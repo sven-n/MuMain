@@ -7,8 +7,8 @@
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "GameData/SkillData/SkillFieldDefs.h"
 #include "Translation/i18n.h"
-#include "_struct.h"
-#include "_define.h"
+#include "mu_struct.h"
+#include "mu_define.h"
 #include "imgui.h"
 #include <algorithm>
 #include <sstream>

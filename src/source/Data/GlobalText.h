@@ -158,7 +158,7 @@ public:
 
     bool Load(const std::wstring& strFilePath, std::uint32_t dwLoadDisposition)
     {
-        std::ifstream file(strFilePath.c_str(), std::ios::binary);
+        std::ifstream file(std::filesystem::path(strFilePath), std::ios::binary);
         if (!file)
         {
             return false;
@@ -213,7 +213,7 @@ public:
     }
     bool Save(const std::wstring& strFilePath)
     {
-        std::ofstream file(strFilePath.c_str(), std::ios::binary | std::ios::trunc);
+        std::ofstream file(std::filesystem::path(strFilePath), std::ios::binary | std::ios::trunc);
         if (!file)
         {
             return false;

@@ -4,7 +4,12 @@
 #include <cwchar>
 #include <cstring>
 
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include "Platform/PlatformTypes.h"
+#include "Platform/PlatformCompat.h"
+#endif
 #include <mmsystem.h>
 
 // Undefine the editor redirect macro so we can use std::fwprintf directly

@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "ItemDataHandler.h"
 #include "ItemDataLoader.h"
-#include "_struct.h"
-#include "_define.h"
+#include "mu_struct.h"
+#include "mu_define.h"
 #include "ZzzInfomation.h"
 
 #ifdef _EDITOR

@@ -5,8 +5,8 @@
 #include "SkillDataSaver.h"
 #include "SkillDataExportS6E3.h"
 #include "SkillStructs.h"
-#include "_struct.h"
-#include "_define.h"
+#include "mu_struct.h"
+#include "mu_define.h"
 #include "ZzzInfomation.h"
 
 #ifdef _EDITOR

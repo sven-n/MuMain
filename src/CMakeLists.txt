@@ -217,6 +217,9 @@ else()
     $<$<CXX_COMPILER_ID:GNU>:-Wno-conversion-null>
     # Manual sizeof(wchar_t)*N in memset — matches actual buffer size (GCC only)
     $<$<CXX_COMPILER_ID:GNU>:-Wno-memset-elt-size>
+    # Clang: Suppress high-volume legacy UI 'override' warnings (Story 3.1.2)
+    $<$<CXX_COMPILER_ID:Clang>:-Wno-inconsistent-missing-override>
+    $<$<CXX_COMPILER_ID:AppleClang>:-Wno-inconsistent-missing-override>
     # GCC -O2/-O3 false positives from inlined wmemcpy/std::wstring (MinGW wchar.h)
     -Wno-array-bounds
     $<$<CXX_COMPILER_ID:GNU>:-Wno-stringop-overread>

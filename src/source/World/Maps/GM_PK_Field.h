@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "w_BaseMap.h"
-#include "_struct.h"
+#include "mu_struct.h"
 
 class BMD;
 struct OBJECT;

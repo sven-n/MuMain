@@ -8,7 +8,7 @@
 #pragma once
 
 #include "NewUIBase.h"
-#include "_struct.h"
+#include "mu_struct.h"
 #include "NewUIManager.h"
 #include "NewUISiegeWarBase.h"
 

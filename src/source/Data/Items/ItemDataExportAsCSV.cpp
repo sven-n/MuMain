@@ -3,8 +3,8 @@
 #ifdef _EDITOR
 
 #include "ItemDataExportAsCSV.h"
-#include "_struct.h"
-#include "_define.h"
+#include "mu_struct.h"
+#include "mu_define.h"
 #include "ZzzInfomation.h"
 #include "ItemFieldDefs.h"
 #include "Core/StringUtils.h"
