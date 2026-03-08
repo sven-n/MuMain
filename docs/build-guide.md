@@ -39,13 +39,13 @@ MuMain/
 
 ### Build Capability by Platform
 
-| Platform | Full Compile | CMake Configure | Quality Gate | Server Connectivity | Runnable Binary |
-|----------|-------------|----------------|-------------|-------------------|----------------|
-| **WSL + MinGW** | Yes (cross-compiles Win `.exe`) | Yes | Yes | Yes (via Windows `dotnet.exe` interop) | Yes (`Main.exe` via WSL) |
+| Platform | Full Compile | CMake Configure | Quality Gate | .NET AOT Library | Runnable Binary |
+|----------|-------------|----------------|-------------|-----------------|----------------|
+| **WSL + MinGW** | Yes (cross-compiles Win `.exe`) | Yes | Yes | Yes (native Linux `dotnet` preferred, WSL interop fallback) | Yes (`Main.exe` via WSL) |
 | **Windows + MSVC** | Yes (native) | Yes | Yes | Yes (native `dotnet.exe`) | Yes |
-| **macOS (arm64)** | Partial — fails on Win32 TUs | Yes | Yes | No (.NET AOT needs Windows) | No |
-| **Linux native (x64)** | Partial — fails on Win32 TUs | Yes | Yes | No (.NET AOT needs Windows) | No |
-| **Pure Linux (no WSL)** | Yes (MinGW cross-compile) but no .NET DLL | Yes | Yes | No | Partial (game runs, no server) |
+| **macOS (arm64)** | Partial — fails on Win32 TUs | Yes | Yes | Yes (produces `.dylib` if `dotnet` installed) | No (blocked by Win32 deps) |
+| **Linux native (x64)** | Partial — fails on Win32 TUs | Yes | Yes | Yes (produces `.so` if `dotnet` installed) | No (blocked by Win32 deps) |
+| **Any platform without `dotnet`** | Yes (game client only) | Yes | Yes | No — CMake warns and skips | Game runs but cannot connect to servers |
 
 ### Quality Gates (from MuMain/ directory)
 
@@ -84,13 +84,22 @@ The codebase is mid-migration from Win32/OpenGL to SDL3/SDL_gpu. Here is what bl
 - `MessageBoxW` shimmed to `SDL_ShowSimpleMessageBox`
 - All quality gate tooling (`clang-format`, `cppcheck`, `Catch2` tests)
 
-### .NET Network DLL Constraints
+### .NET Native AOT Library
 
-The `ClientLibrary/` directory contains a .NET 10 Native AOT library that handles server communication. Key constraints:
+The `ClientLibrary/` directory contains a .NET 10 Native AOT library that handles server communication. CMake auto-detects the platform and produces the correct native library:
 
-- **Native AOT cross-OS is not supported**: `dotnet publish` on Linux cannot produce a Windows `.dll`. Only Windows `dotnet.exe` (or WSL interop to Windows `dotnet.exe`) can produce the required DLL.
-- **Without the DLL**: The game compiles and runs but cannot connect to any server.
-- **CMake auto-detection**: CMake looks for `dotnet.exe` first (Windows binary), falls back to `dotnet` (Linux). If neither is found, it prints a warning and skips the .NET build.
+| Platform | RID | Output | Loader |
+|----------|-----|--------|--------|
+| Windows x86 | `win-x86` | `.dll` | `LoadLibrary` |
+| Windows x64 | `win-x64` | `.dll` | `LoadLibrary` |
+| Linux x64 | `linux-x64` | `.so` | `dlopen` |
+| Linux arm64 | `linux-arm64` | `.so` | `dlopen` |
+| macOS arm64 | `osx-arm64` | `.dylib` | `dlopen` |
+| macOS x64 | `osx-x64` | `.dylib` | `dlopen` |
+
+- **Detection**: `cmake/FindDotnetAOT.cmake` auto-detects the platform RID, library extension, and locates `dotnet`. On WSL, it prefers native Linux `dotnet` and falls back to Windows `dotnet.exe` via interop.
+- **Without `dotnet` installed**: CMake prints a warning and skips the .NET build. The game compiles and runs but cannot connect to any server.
+- **Cross-compile note (WSL + MinGW)**: When cross-compiling a Windows `.exe` from WSL, the .NET library must also be a Windows `.dll`. CMake handles this via RID detection — the MinGW toolchain sets `CMAKE_SYSTEM_NAME=Windows`, so the RID resolves to `win-x86`.
 
 ### Formatting Rules
 
@@ -365,7 +374,7 @@ D:\repos\MuMain\                      <-- source (on Windows drive)
       Main.exe                        <-- built, but no DLL
 ```
 
-The Linux `dotnet` SDK cannot produce a Windows `.dll` via Native AOT (cross-OS AOT is not supported). CMake prints a warning and skips the .NET build. The game runs but cannot connect to a server.
+On pure Linux (no WSL), native `dotnet` produces a Linux `.so` — but since the game is cross-compiled as a Windows `.exe` via MinGW, it needs a Windows `.dll`. Without WSL interop to a Windows `dotnet.exe`, CMake skips the .NET build. The game runs but cannot connect to a server.
 
 ---
 
@@ -387,17 +396,21 @@ cmake -DMU_NUGET_CACHE_DIR=D:/my-nuget-cache ...
 
 ## How dotnet Is Found
 
-```cmake
-find_program(DOTNET_EXECUTABLE dotnet.exe)   # prefer Windows binary
-if (NOT DOTNET_EXECUTABLE)
-  find_program(DOTNET_EXECUTABLE dotnet)     # fallback to Linux binary
-endif()
-```
+Detection is handled by `cmake/FindDotnetAOT.cmake`. The search order depends on the environment:
 
-- **WSL:** Finds `dotnet.exe` at `/mnt/c/Program Files/dotnet/dotnet.exe` via WSL interop. Produces correct Windows DLLs with Native AOT.
-- **Native Windows:** Finds `dotnet.exe` directly.
-- **Pure Linux:** Falls back to `dotnet`. Cannot produce Windows DLLs.
-- **No SDK installed:** CMake warns and skips the .NET build.
+**WSL (detected via `/proc/version` containing "Microsoft" or "WSL"):**
+1. Native Linux `dotnet` — searched at `$DOTNET_ROOT`, `/usr/local/share/dotnet`, `/usr/share/dotnet`, `~/.dotnet`
+2. Windows `dotnet.exe` via interop — `/mnt/c/Program Files/dotnet/dotnet.exe`
+
+**All other platforms (Windows, native Linux, macOS):**
+1. `dotnet` — searched at `$DOTNET_ROOT`, `/usr/local/share/dotnet`, `/usr/share/dotnet`, `~/.dotnet`, plus system PATH
+
+The platform RID (`win-x86`, `linux-x64`, `osx-arm64`, etc.) is determined by `CMAKE_SYSTEM_NAME` and `CMAKE_SYSTEM_PROCESSOR`, not by which `dotnet` binary is found. Native AOT produces a library native to the **target** platform:
+- Windows target → `.dll`
+- Linux target → `.so`
+- macOS target → `.dylib`
+
+If no `dotnet` is found, CMake prints a warning and sets `DOTNETAOT_FOUND=FALSE`. The game compiles without server connectivity.
 
 ---
 
