@@ -7,10 +7,6 @@
 // These tests do NOT require config.ini at test time — they call the free
 // functions ValidateServerPort() and ValidateServerIP() directly.
 //
-// RED PHASE: All tests compile but FAIL until the following are created:
-//   - Core/GameConfigValidation.h  — declares ValidateServerPort / ValidateServerIP
-//   - Core/GameConfigValidation.cpp — defines them (auto-discovered by MU_CORE_SOURCES glob)
-//
 // Run: ctest --test-dir build -R "3.4.2"
 
 #include <catch2/catch_test_macros.hpp>

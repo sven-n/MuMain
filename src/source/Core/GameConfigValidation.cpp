@@ -14,7 +14,7 @@ int ValidateServerPort(int value, int defaultValue)
 {
     if (value <= 0 || value > 65535)
     {
-        g_ErrorReport.Write(L"NET: Invalid ServerPort %d in config.ini \xe2\x80\x94 using default %d\r\n", value,
+        g_ErrorReport.Write(L"NET: Invalid ServerPort %d in config.ini \u2014 using default %d\r\n", value,
                             defaultValue);
         return defaultValue;
     }
@@ -34,8 +34,7 @@ std::wstring ValidateServerIP(const std::wstring& value, const std::wstring& def
     }
     if (trimmed.empty())
     {
-        g_ErrorReport.Write(L"NET: Empty ServerIP in config.ini \xe2\x80\x94 using default %ls\r\n",
-                            defaultValue.c_str());
+        g_ErrorReport.Write(L"NET: Empty ServerIP in config.ini \u2014 using default %ls\r\n", defaultValue.c_str());
         return defaultValue;
     }
     return trimmed;

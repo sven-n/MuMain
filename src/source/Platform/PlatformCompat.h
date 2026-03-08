@@ -14,7 +14,13 @@
 inline std::filesystem::path mu_get_app_dir()
 {
     wchar_t buf[MAX_PATH];
-    GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    DWORD len = GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    // len == 0: API failure; len == MAX_PATH: path was truncated (no null terminator guaranteed).
+    // In either case fall back to current working directory, matching the non-Windows shims.
+    if (len == 0 || len == MAX_PATH)
+    {
+        return std::filesystem::current_path();
+    }
     return std::filesystem::path(buf).parent_path();
 }
 

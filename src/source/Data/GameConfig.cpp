@@ -80,7 +80,10 @@ void GameConfig::Save()
     using namespace CfgSections;
     using namespace CfgKeys;
 
-    IniFile ini(m_configPath);
+    // Write-only construction: skip Load() since all keys are written explicitly
+    // from in-memory state. Avoids an unnecessary disk read on every Save() call.
+    // See HIGH-1 fix (code review 3-4-2).
+    IniFile ini(m_configPath, IniFile::WriteOnly());
 
     ini.WriteInt(CfgSectionWindow, CfgKeyWidth, m_windowWidth);
     ini.WriteInt(CfgSectionWindow, CfgKeyHeight, m_windowHeight);

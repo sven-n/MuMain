@@ -21,10 +21,27 @@
 
 class IniFile
 {
+    // Tag type for write-only construction (skips Load()).
+    // Used by GameConfig::Save() which writes all keys from in-memory state
+    // and does not need to read the existing file first. See HIGH-1 fix.
+    struct SkipLoadTag
+    {
+    };
+
 public:
     explicit IniFile(const std::filesystem::path& path) : m_path(path)
     {
         Load();
+    }
+
+    // Write-only constructor: sets path but does NOT read from disk.
+    // Use this when you intend to write all keys explicitly and do not need
+    // to preserve or inspect any existing file content.
+    explicit IniFile(const std::filesystem::path& path, SkipLoadTag) : m_path(path) {}
+
+    static SkipLoadTag WriteOnly()
+    {
+        return SkipLoadTag{};
     }
 
     std::wstring ReadString(const std::wstring& section, const std::wstring& key,
@@ -137,6 +154,8 @@ private:
         std::wifstream in(m_path);
         if (!in.is_open())
         {
+            // Intentional: if config.ini doesn't exist yet, all reads will use
+            // caller-supplied defaults. This is the expected first-launch path.
             return;
         }
         // Use platform default locale (typically UTF-8 on Linux/macOS) for wide

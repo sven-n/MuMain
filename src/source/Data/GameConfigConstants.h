@@ -6,6 +6,7 @@ inline constexpr wchar_t CfgSectionWindow[] = L"Window";
 inline constexpr wchar_t CfgSectionGraphics[] = L"Graphics";
 inline constexpr wchar_t CfgSectionAudio[] = L"Audio";
 inline constexpr wchar_t CfgSectionLogin[] = L"LOGIN";
+// Section name must match config.ini exactly (case-sensitive, space included).
 inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
 } // namespace CfgSections
 

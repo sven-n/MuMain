@@ -19,11 +19,11 @@ namespace GameConfigValidation
 // AC-4: Validate a ServerPort value read from config.ini.
 // Returns value if valid (1..65535); otherwise logs a warning via
 // g_ErrorReport.Write() and returns defaultValue.
-int ValidateServerPort(int value, int defaultValue);
+[[nodiscard]] int ValidateServerPort(int value, int defaultValue);
 
 // AC-5: Validate a ServerIP value read from config.ini.
 // Trims leading/trailing whitespace. Returns trimmed value if non-empty;
 // otherwise logs a warning via g_ErrorReport.Write() and returns defaultValue.
-std::wstring ValidateServerIP(const std::wstring& value, const std::wstring& defaultValue);
+[[nodiscard]] std::wstring ValidateServerIP(const std::wstring& value, const std::wstring& defaultValue);
 
 } // namespace GameConfigValidation
