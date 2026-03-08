@@ -17,8 +17,18 @@
 namespace
 {
 // MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so"
+// MU_DOTNET_LIB_DIR is defined by CMake for UNIX platforms (Linux + macOS) as the absolute
+// binary output directory (CMAKE_RUNTIME_OUTPUT_DIRECTORY / TARGET_FILE_DIR:Main).
+// On UNIX, dlopen() with a bare filename does NOT search the executable directory, so an
+// absolute path is required. On Windows, LoadLibrary() searches the executable directory
+// by default, so a bare filename suffices. (Story 3.3.2 Risk R6 mitigation)
+#ifdef MU_DOTNET_LIB_DIR
+inline const std::string g_dotnetLibPath =
+    (std::filesystem::path(MU_DOTNET_LIB_DIR) / ("MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT))).string();
+#else
 inline const std::string g_dotnetLibPath =
     (std::filesystem::path("MUnique.Client.Library") += MU_DOTNET_LIB_EXT).string();
+#endif
 } // namespace
 
 inline const mu::platform::LibraryHandle munique_client_library_handle =

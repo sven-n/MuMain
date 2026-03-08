@@ -20,6 +20,15 @@ if(MU_ENABLE_DOTNET)
     if(DOTNETAOT_FOUND)
         add_compile_definitions(MU_DOTNET_LIB_EXT="${MU_DOTNET_LIB_EXT}")
 
+        # On UNIX (Linux + macOS), dlopen() with a bare filename does NOT search the
+        # executable directory — Linux requires LD_LIBRARY_PATH or $ORIGIN RPATH, and
+        # macOS @rpath resolution is install-dependent. Provide an absolute path via
+        # MU_DOTNET_LIB_DIR so Connection.h can construct an absolute library path.
+        # Story 3.3.2 (Linux) / 3.3.1 (macOS) — Risk R6 mitigation.
+        if(UNIX)
+            add_compile_definitions(MU_DOTNET_LIB_DIR="$<TARGET_FILE_DIR:Main>")
+        endif()
+
         set(DOTNETAOT_PUBLISH_DIR "${CMAKE_BINARY_DIR}/dotnet-publish")
 
         set(DOTNETAOT_PUBLISH_ARGS
