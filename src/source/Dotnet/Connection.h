@@ -38,7 +38,16 @@ inline const mu::platform::LibraryHandle munique_client_library_handle =
 
 namespace DotNetBridge
 {
-void ReportDotNetError(const char* detail);
+// AC-2: Distinguishes library-not-found from symbol-not-found errors.
+// Used as second parameter to ReportDotNetError() so callers can be explicit
+// about which failure mode occurred (Option A from Dev Notes §Key Design Decisions).
+enum class DotNetErrorKind
+{
+    LibraryNotFound,
+    SymbolNotFound
+};
+
+void ReportDotNetError(const char* detail, DotNetErrorKind kind = DotNetErrorKind::LibraryNotFound);
 bool IsManagedLibraryAvailable();
 
 template <typename T> T LoadManagedSymbol(const char* name)
@@ -51,7 +60,7 @@ template <typename T> T LoadManagedSymbol(const char* name)
     const auto symbol = reinterpret_cast<T>(mu::platform::GetSymbol(munique_client_library_handle, name));
     if (!symbol)
     {
-        ReportDotNetError(name);
+        ReportDotNetError(name, DotNetErrorKind::SymbolNotFound);
     }
 
     return symbol;

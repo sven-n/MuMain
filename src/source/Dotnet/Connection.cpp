@@ -1,7 +1,16 @@
+// Flow Code: VS1-NET-ERROR-MESSAGING
+// Story: 3.4.1 - Connection Error Messaging & Graceful Degradation
+//
+// AC-4 reserved message template (not triggered in this story):
+//   "Server handshake failed. Check OpenMU version compatibility."
+// AC-5 reserved message template (not triggered in this story):
+//   "Login failed. Check credentials."
+
 #include "stdafx.h"
 #include <map>
 
 #include "Connection.h"
+#include "DotNetMessageFormat.h"
 
 #include "PacketBindings_ChatServer.h"
 #include "PacketBindings_ConnectServer.h"
@@ -13,14 +22,50 @@ namespace DotNetBridge
 {
 bool g_dotnetErrorDisplayed = false;
 
-void ReportDotNetError(const char* detail)
+// AC-1 + AC-2 + AC-7: Structured error reporting for DotNet bridge failures.
+// Distinguishes library-not-found vs symbol-not-found via DotNetErrorKind.
+// Writes to BOTH g_ErrorReport (persistent MuError.log) AND MessageBoxW dialog
+// (mapped to SDL_ShowSimpleMessageBox via PlatformCompat.h shim).
+// AC-STD-NFR-1: Dialog shown at most ONCE per session via g_dotnetErrorDisplayed guard.
+// AC-STD-NFR-2: Called from main game thread only (single-threaded game loop).
+void ReportDotNetError(const char* detail, DotNetErrorKind kind)
 {
     if (g_dotnetErrorDisplayed)
     {
         return;
     }
     g_dotnetErrorDisplayed = true;
-    g_ErrorReport.Write(L"NET: Connection \u2014 library load failed: %hs\r\n", detail ? detail : "unknown error");
+
+    // Determine platform name for AC-1 message (compile-time, impl file only — acceptable
+    // per Dev Notes §Key Design Decisions: diagnostic string in implementation file).
+    const char* platformName =
+#if defined(__linux__)
+        "Linux";
+#elif defined(__APPLE__)
+        "macOS";
+#else
+        "Windows";
+#endif
+
+    std::string msg;
+    if (kind == DotNetErrorKind::LibraryNotFound)
+    {
+        // AC-1: Library not found — include resolved path and platform
+        msg = FormatLibraryNotFoundMessage(g_dotnetLibPath, platformName);
+    }
+    else
+    {
+        // AC-2: Symbol not found — include function name
+        msg = FormatSymbolNotFoundMessage(detail);
+    }
+
+    // Write to MuError.log (persistent diagnostic — g_ErrorReport)
+    g_ErrorReport.Write(L"NET: %hs\r\n", msg.c_str());
+
+    // Show user-visible dialog via MessageBoxW shim → SDL_ShowSimpleMessageBox (PlatformCompat.h)
+    // ASCII-safe conversion: diagnostic messages contain only ASCII characters
+    std::wstring wideMsg(msg.begin(), msg.end());
+    MessageBoxW(nullptr, wideMsg.c_str(), L"Network Error", MB_ICONERROR | MB_OK);
 }
 
 bool IsManagedLibraryAvailable()
@@ -30,12 +75,13 @@ bool IsManagedLibraryAvailable()
         return true;
     }
 
-    const std::string libName = std::string("MUnique.Client.Library") + MU_DOTNET_LIB_EXT + " missing";
-    ReportDotNetError(libName.c_str());
+    // AC-1: Pass library path; ReportDotNetError will use g_dotnetLibPath and platform name
+    ReportDotNetError(nullptr, DotNetErrorKind::LibraryNotFound);
     return false;
 }
 } // namespace DotNetBridge
 
+using DotNetBridge::DotNetErrorKind;
 using DotNetBridge::IsManagedLibraryAvailable;
 using DotNetBridge::ReportDotNetError;
 
@@ -89,7 +135,7 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
     this->_packetHandler = packetHandler;
     if (!dotnet_connect)
     {
-        ReportDotNetError("ConnectionManager_Connect");
+        ReportDotNetError("ConnectionManager_Connect", DotNetErrorKind::SymbolNotFound);
         this->_handle = 0;
         return;
     }
@@ -146,7 +192,7 @@ void Connection::Send(const BYTE* data, const int32_t size)
 
     if (!dotnet_send)
     {
-        ReportDotNetError("ConnectionManager_Send");
+        ReportDotNetError("ConnectionManager_Send", DotNetErrorKind::SymbolNotFound);
         return;
     }
 

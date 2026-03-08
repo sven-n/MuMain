@@ -165,7 +165,14 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
     if (!SocketClient->IsConnected())
     {
         bResult = FALSE;
-        g_ErrorReport.Write(L"Failed to connect. ");
+
+        // AC-3: Connection error with address+port for user diagnosis (VS1-NET-ERROR-MESSAGING)
+        // MessageBoxW maps to SDL_ShowSimpleMessageBox via PlatformCompat.h shim
+        wchar_t szConnectError[256];
+        mu_swprintf(szConnectError, L"Cannot connect to %ls:%d. Server may be offline.", IpAddr, Port);
+        g_ErrorReport.Write(L"NET: %ls\r\n", szConnectError);
+        MessageBoxW(nullptr, szConnectError, L"Connection Error", MB_ICONERROR | MB_OK);
+
         g_ErrorReport.WriteCurrentTime();
         delete SocketClient;
         SocketClient = nullptr;
