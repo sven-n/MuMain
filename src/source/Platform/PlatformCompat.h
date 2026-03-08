@@ -32,6 +32,106 @@ inline std::filesystem::path mu_get_app_dir()
 
 // ---- Timing shims ----
 
+inline BOOL IsBadReadPtr(const void* /*lp*/, UINT_PTR /*ucb*/)
+{
+    return FALSE;
+}
+
+inline BOOL IsBadWritePtr(void* /*lp*/, UINT_PTR /*ucb*/)
+{
+    return FALSE;
+}
+
+#define STD_INPUT_HANDLE  ((DWORD)-10)
+#define STD_OUTPUT_HANDLE ((DWORD)-11)
+#define STD_ERROR_HANDLE  ((DWORD)-12)
+
+#define ENABLE_PROCESSED_INPUT 0x0001
+#define ENABLE_LINE_INPUT      0x0002
+#define ENABLE_ECHO_INPUT      0x0004
+#define ENABLE_WINDOW_INPUT    0x0008
+#define ENABLE_MOUSE_INPUT     0x0010
+#define ENABLE_INSERT_MODE     0x0020
+#define ENABLE_QUICK_EDIT_MODE 0x0040
+#define ENABLE_EXTENDED_FLAGS  0x0080
+
+#define ENABLE_PROCESSED_OUTPUT    0x0001
+#define ENABLE_WRAP_AT_EOL_OUTPUT  0x0002
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+
+struct COORD
+{
+    short X;
+    short Y;
+};
+
+struct SMALL_RECT
+{
+    short Left;
+    short Top;
+    short Right;
+    short Bottom;
+};
+
+struct CONSOLE_SCREEN_BUFFER_INFO
+{
+    COORD dwSize;
+    COORD dwCursorPosition;
+    WORD wAttributes;
+    SMALL_RECT srWindow;
+    COORD dwMaximumWindowSize;
+};
+
+inline HANDLE GetStdHandle(DWORD /*nStdHandle*/)
+{
+    return (HANDLE)-1;
+}
+
+inline BOOL SetConsoleMode(HANDLE /*hConsoleHandle*/, DWORD /*dwMode*/)
+{
+    return TRUE;
+}
+
+inline BOOL AllocConsole()
+{
+    return TRUE;
+}
+
+inline BOOL FreeConsole()
+{
+    return TRUE;
+}
+
+inline void Sleep(DWORD /*dwMilliseconds*/)
+{
+    // Implementation can use std::this_thread::sleep_for if needed
+}
+
+inline BOOL IsWindowVisible(HWND /*hWnd*/)
+{
+    return FALSE;
+}
+
+inline BOOL EnumChildWindows(HWND /*hWndParent*/, void* /*lpEnumFunc*/, LPARAM /*lParam*/)
+{
+    return TRUE;
+}
+
+inline void SetLastError(DWORD /*dwErrCode*/) {}
+inline DWORD GetLastError() { return 0; }
+inline BOOL UpdateWindow(HWND /*hWnd*/) { return TRUE; }
+inline BOOL GetConsoleScreenBufferInfo(HANDLE /*hConsoleOutput*/, CONSOLE_SCREEN_BUFFER_INFO* /*lpConsoleScreenBufferInfo*/) { return TRUE; }
+inline BOOL FillConsoleOutputCharacter(HANDLE /*hConsoleOutput*/, TCHAR /*cCharacter*/, DWORD /*nLength*/, COORD /*dwWriteCoord*/, LPDWORD /*lpNumberOfCharsWritten*/) { return TRUE; }
+inline BOOL FillConsoleOutputAttribute(HANDLE /*hConsoleOutput*/, WORD /*wAttribute*/, DWORD /*nLength*/, COORD /*dwWriteCoord*/, LPDWORD /*lpNumberOfAttrsWritten*/) { return TRUE; }
+inline BOOL SetConsoleCursorPosition(HANDLE /*hConsoleOutput*/, COORD /*dwCursorPosition*/) { return TRUE; }
+inline BOOL SetConsoleTextAttribute(HANDLE /*hConsoleOutput*/, WORD /*wAttributes*/) { return TRUE; }
+inline void* GetSystemMenu(HWND /*hWnd*/, BOOL /*bRevert*/) { return nullptr; }
+inline BOOL DeleteMenu(void* /*hMenu*/, UINT /*uPosition*/, UINT /*uFlags*/) { return TRUE; }
+inline BOOL DrawMenuBar(HWND /*hWnd*/) { return TRUE; }
+
+#define SC_CLOSE 0xF060
+#define MF_BYCOMMAND 0x00000000L
+
 inline uint32_t timeGetTime()
 {
     using namespace std::chrono;
@@ -331,11 +431,6 @@ inline HGDIOBJ SelectObject(HDC /*hdc*/, HGDIOBJ /*obj*/)
 {
     return nullptr;
 }
-// SelectObject overload for HBITMAP (same no-op)
-inline HGDIOBJ SelectObject(HDC /*hdc*/, HBITMAP /*bmp*/)
-{
-    return nullptr;
-}
 
 // HFONT stub — used in UIControls.h CUITextInputBox::SetFont (HFONT hFont parameter)
 // HFONT is already defined in PlatformTypes.h as void* — no re-definition needed.
@@ -420,13 +515,7 @@ struct COMPOSITIONFORM
 using LPSTR = char*;
 
 // ---- MessageBoxW shim ----
-// MB_ flag constants
-#define MB_OK 0x00
-#define MB_YESNO 0x04
-#define MB_OKCANCEL 0x01
-#define MB_ICONERROR 0x10
-#define MB_ICONWARNING 0x30
-#define MB_ICONSTOP 0x10
+// MessageBox result constants are in PlatformTypes.h
 #define MB_ICONINFORMATION 0x40
 
 // Return values

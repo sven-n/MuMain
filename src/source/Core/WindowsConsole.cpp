@@ -130,7 +130,11 @@ const std::wstring& CConsoleWindow::GetTitle()
     wchar_t szConsoleTile[1024] = {
         0,
     };
+#ifdef _WIN32
     ::GetConsoleTitle(szConsoleTile, 1024);
+#else
+    wcsncpy(szConsoleTile, leaf::GetConsoleTitle().c_str(), 1024);
+#endif
 
     static std::wstring s_title = szConsoleTile;
     return s_title;

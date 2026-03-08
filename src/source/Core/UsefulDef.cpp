@@ -40,7 +40,7 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
     int nLine = 0;
 
     wchar_t* context = nullptr;
-    wchar_t* pszToken = wcstok_s(&szWorkSrc[0], &szNewlineChar, &context);
+    wchar_t* pszToken = mu_wcstok(&szWorkSrc[0], &szNewlineChar, &context);
 
     while (pszToken != nullptr)
     {
@@ -54,7 +54,7 @@ int DivideStringByPixel(wchar_t* alpszDst, int nDstRow, int nDstColumn, const wc
             nLine += CutText3(pszToken, alpszDst + nLine * nDstColumn, nPixelPerLine, nDstRow, nDstColumn);
         }
 
-        pszToken = wcstok_s(nullptr, &szNewlineChar, &context);
+        pszToken = mu_wcstok(nullptr, &szNewlineChar, &context);
     }
 
     return nLine;
@@ -131,7 +131,7 @@ BOOL CheckErrString(LPTSTR lpszTarget)
         {
             if (i == nLen - 1)
             {
-                lpszTarget[i] = NULL;
+                lpszTarget[i] = L'\0';
                 return FALSE;
             }
             else

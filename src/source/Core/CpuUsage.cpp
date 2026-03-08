@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include "CpuUsage.h"
 
+#ifdef _WIN32
 // Implementation for Windows
 class CpuUsage::Impl
 {
@@ -10,7 +11,7 @@ public:
     Impl()
     {
         SYSTEM_INFO sysInfo;
-        GetSystemInfo(&sysInfo);
+        ::GetSystemInfo(&sysInfo);
         m_numProcessors = sysInfo.dwNumberOfProcessors;
         m_lastCheckTime = std::chrono::steady_clock::now();
         m_lastProcessTime = 0;
@@ -21,7 +22,7 @@ public:
     {
         // Get the current process times
         FILETIME creationTime, exitTime, kernelTime, userTime;
-        if (!GetProcessTimes(GetCurrentProcess(), &creationTime, &exitTime, &kernelTime, &userTime))
+        if (!::GetProcessTimes(::GetCurrentProcess(), &creationTime, &exitTime, &kernelTime, &userTime))
         {
             return 0.0; // Error
         }
@@ -72,6 +73,18 @@ private:
         return (static_cast<ULONGLONG>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
     }
 };
+#else
+// Placeholder implementation for non-Windows
+class CpuUsage::Impl
+{
+public:
+    Impl() {}
+    double GetUsage()
+    {
+        return 0.0;
+    }
+};
+#endif
 
 CpuUsage* CpuUsage::Instance()
 {

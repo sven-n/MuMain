@@ -187,7 +187,11 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
         0,
     };
     int offset = 0;
-    offset += mu_swprintf(szLine, L"0x%00000008X : ", (DWORD)(uintptr_t)pBuffer);
+#ifdef _WIN32
+    offset += swprintf(szLine, L"0x%08X : ", (DWORD)(uintptr_t)pBuffer);
+#else
+    offset += std::swprintf(szLine, 1024, L"0x%08X : ", (DWORD)(uintptr_t)pBuffer);
+#endif
     for (int i = 0; i < iSize; i++)
     {
         offset += mu_swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));

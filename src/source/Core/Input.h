@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include "stdafx.h"
+#include <map>
+
 class CInput
 {
 protected:

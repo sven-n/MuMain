@@ -85,6 +85,7 @@
 
 namespace SEASON3B
 {
+class CNewUIGensRanking;
 class CNewUISystem
 {
     CNewUIManager* m_pNewUIMng;

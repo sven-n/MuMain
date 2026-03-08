@@ -7,6 +7,9 @@
         (a) ^= (b) ^= (a) ^= (b);                                                                                      \
     }
 #define ARGB(a, r, g, b) (((DWORD)(a)) << 24 | (DWORD)(r) | ((DWORD)(g)) << 8 | ((DWORD)(b)) << 16)
+#ifndef RGBA
+#define RGBA(r, g, b, a) (((DWORD)(r)) | ((DWORD)(g)) << 8 | ((DWORD)(b)) << 16 | ((DWORD)(a)) << 24)
+#endif
 
 bool ReduceStringByPixel(LPTSTR lpszDst, int nDstSize, LPCTSTR lpszSrc, int nPixel);
 #if defined KJH_ADD_INGAMESHOP_UI_SYSTEM || defined LJH_MOD_TO_USE_DIVIDESTRINGBYPIXEL_FUNC
