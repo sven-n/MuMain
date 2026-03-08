@@ -54,6 +54,12 @@ target_sources(MuTests PRIVATE platform/test_connection_library_load.cpp)
 # free functions in the DotNetBridge namespace. No .NET library required at test time.
 target_sources(MuTests PRIVATE network/test_connection_error_messages.cpp)
 
+# Story 3.4.2: Server Connection Configuration [VS1-NET-CONFIG-SERVER]
+# RED PHASE: Tests ValidateServerPort() and ValidateServerIP() helpers extracted into
+# Core/GameConfigValidation.h/.cpp. Tests compile but FAIL until GameConfigValidation.cpp
+# is present with the correct implementations. No config.ini required at test time.
+target_sources(MuTests PRIVATE network/test_server_config_validation.cpp)
+
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
 # RED PHASE: Tests mu_wchar_to_char16 / mu_char16_to_wchar round-trips and byte-level
 # UTF-16LE baseline for Korean, Latin, mixed-script, null, and IP address strings.

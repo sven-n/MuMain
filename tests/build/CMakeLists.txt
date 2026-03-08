@@ -189,3 +189,14 @@ add_test(
     COMMAND ${CMAKE_COMMAND}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_4_1.cmake
 )
+
+# ==========================================================================
+# Story 3.4.2 - Server Connection Configuration [VS1-NET-CONFIG-SERVER]
+# ==========================================================================
+
+# AC-STD-11 / AC-VAL-4: Flow code traceability — VS1-NET-CONFIG-SERVER in GameConfig.cpp header
+add_test(
+    NAME "3.4.2-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_4_2.cmake
+)

@@ -1,6 +1,106 @@
 # CMake Build System — Platform Guide
 
-This document explains how the build system works across all supported environments, what directories are created and why, and how to set up each environment correctly.
+This document explains how the build system works across all supported environments, what directories are created and why, and how to set up each environment correctly. All commands assume you are inside the `MuMain/` directory unless stated otherwise.
+
+---
+
+## Project Scope
+
+MuMain is a C++20 MMORPG game client (MU Online Season 5.2→6) that connects to [OpenMU](https://github.com/MUnique/OpenMU) servers. The repository is self-contained — all build instructions work from the `MuMain/` directory without any parent workspace.
+
+### Build Artifacts
+
+| Artifact | Language | Build Tool | Output |
+|----------|----------|------------|--------|
+| **Game Client** (`Main.exe`) | C++20 | CMake + Ninja | 32-bit Windows PE (OpenGL, Win32, DirectSound) |
+| **Network DLL** (`MUnique.Client.Library.dll`) | C# .NET 10 | `dotnet publish` (Native AOT) | Windows DLL loaded at runtime by the game |
+| **Debug Editor** (built into `Main.exe`) | C++20 | CMake (`-DENABLE_EDITOR=ON`) | ImGui overlay, toggled with F12 at runtime |
+| **Packet Bindings** (generated code) | XSLT→C++/C# | Visual Studio PreBuild | `src/source/Dotnet/PacketBindings_*.h`, `PacketFunctions_*.h/.cpp` |
+
+### Source Layout
+
+```
+MuMain/
+├── src/source/           # C++ game client (691 files in 20 module dirs)
+│   ├── Main/             # Entry point: Winmain.cpp → WinMain()
+│   ├── Core/             # Shared utilities, error reporting, timers
+│   ├── Platform/         # Cross-platform abstraction (SDL3 shims, PlatformCompat.h)
+│   ├── Dotnet/           # C++↔.NET interop (Connection.h/cpp + generated packet bindings)
+│   └── ...               # 16 more module directories (UI, Network, Rendering, etc.)
+├── src/MuEditor/         # ImGui debug editor (34 files, compiled with _EDITOR define)
+├── src/bin/              # Game assets (13,169 files) — copied to build dir by post-build step
+├── ClientLibrary/        # .NET 10 Native AOT network library (14 C# files)
+├── tests/                # Catch2 unit tests
+├── cmake/toolchains/     # Cross-compile toolchains (mingw, linux-x64, macos-arm64)
+├── CMakePresets.json      # All platform presets (windows-x86/x64, linux-x64, macos-arm64)
+├── Makefile              # Quality gate targets (format, lint, test) — run from MuMain/
+└── .clang-format         # Formatting rules (Allman braces, 4-space indent, 120 col)
+```
+
+### Build Capability by Platform
+
+| Platform | Full Compile | CMake Configure | Quality Gate | Server Connectivity | Runnable Binary |
+|----------|-------------|----------------|-------------|-------------------|----------------|
+| **WSL + MinGW** | Yes (cross-compiles Win `.exe`) | Yes | Yes | Yes (via Windows `dotnet.exe` interop) | Yes (`Main.exe` via WSL) |
+| **Windows + MSVC** | Yes (native) | Yes | Yes | Yes (native `dotnet.exe`) | Yes |
+| **macOS (arm64)** | Partial — fails on Win32 TUs | Yes | Yes | No (.NET AOT needs Windows) | No |
+| **Linux native (x64)** | Partial — fails on Win32 TUs | Yes | Yes | No (.NET AOT needs Windows) | No |
+| **Pure Linux (no WSL)** | Yes (MinGW cross-compile) but no .NET DLL | Yes | Yes | No | Partial (game runs, no server) |
+
+### Quality Gates (from MuMain/ directory)
+
+Quality gates run on **all** platforms (no Win32 dependency). These mirror what CI enforces on every PR:
+
+```bash
+# Run from MuMain/ directory
+make format-check    # clang-format --dry-run --Werror on all C++ files (excludes ThirdParty/ and Dotnet/)
+make lint            # cppcheck with enforced warnings (error-exitcode=1)
+make format          # auto-fix formatting in-place
+make test            # build + run Catch2 unit tests (cmake -DBUILD_TESTING=ON)
+```
+
+**Tool requirements:** `clang-format`, `cppcheck` (install via `brew install` on macOS, `apt-get install` on Linux).
+
+### Cross-Platform Build Gaps
+
+The codebase is mid-migration from Win32/OpenGL to SDL3/SDL_gpu. Here is what blocks full compilation on non-Windows:
+
+| Blocker | Files Affected | Migration Phase | Status |
+|---------|---------------|----------------|--------|
+| **Win32 windowing** (`CreateWindowEx`, `RegisterClass`, `ShowWindow`) | `Winmain.cpp`, `ZzzOpenglUtil.cpp` | EPIC-2 (SDL3 Window) | Not started |
+| **Win32 input** (`GetAsyncKeyState`, `SetCapture`, `WM_*` messages) | 8 files, 104+ calls | EPIC-2 (SDL3 Input) | Not started |
+| **OpenGL immediate mode** (`glBegin`/`glEnd`/`glVertex*`) | 14 files, 111 call sites | EPIC-2 (SDL_gpu) | Not started |
+| **DirectSound** (`DirectSoundCreate`, `IDirectSound*`) | `Winmain.cpp`, audio files | EPIC-3 (miniaudio) | Not started |
+| **Win32 file I/O** (`GetModuleFileName`, `GetPrivateProfileInt`) | 5–28 files | EPIC-5 (Config) | Partially done |
+| **Win32 timers** (`SetTimer`/`KillTimer`) | 10 files, 20 calls | EPIC-5 | Not started |
+| **Win32 text input** (`CreateWindowW L"edit"`, `WM_CHAR`) | `UIControls.cpp` | EPIC-6 | Done (SDL3 text input implemented) |
+
+**What already works cross-platform:**
+- CMake configure succeeds on all platforms (validates build system + SDL3 FetchContent)
+- Platform abstraction headers exist: `PlatformTypes.h`, `PlatformCompat.h`, `PlatformKeys.h`, `StringConvert.h` (in `src/source/Platform/`)
+- Timing shims: `timeGetTime()` and `GetTickCount()` are shimmed to `std::chrono::steady_clock` on non-Windows
+- File I/O shim: `_wfopen` → `mu_wfopen` with backslash normalization and case-insensitive fallback
+- SDL3 text input: `SDL_StartTextInput()`/`SDL_StopTextInput()` replace Win32 edit controls
+- `MessageBoxW` shimmed to `SDL_ShowSimpleMessageBox`
+- All quality gate tooling (`clang-format`, `cppcheck`, `Catch2` tests)
+
+### .NET Network DLL Constraints
+
+The `ClientLibrary/` directory contains a .NET 10 Native AOT library that handles server communication. Key constraints:
+
+- **Native AOT cross-OS is not supported**: `dotnet publish` on Linux cannot produce a Windows `.dll`. Only Windows `dotnet.exe` (or WSL interop to Windows `dotnet.exe`) can produce the required DLL.
+- **Without the DLL**: The game compiles and runs but cannot connect to any server.
+- **CMake auto-detection**: CMake looks for `dotnet.exe` first (Windows binary), falls back to `dotnet` (Linux). If neither is found, it prints a warning and skips the .NET build.
+
+### Formatting Rules
+
+Defined in `.clang-format` at the repo root:
+- Style: LLVM base with Allman braces
+- Indent: 4 spaces (no tabs)
+- Column limit: 120
+- C++20 standard
+- Pointer alignment: left (`int* p`)
+- Include sorting: disabled (`SortIncludes: Never`)
 
 ---
 
