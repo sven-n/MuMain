@@ -64,6 +64,18 @@ if(APPLE AND EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.dy
 endif()
 target_sources(MuTests PRIVATE platform/test_macos_connectivity.cpp)
 
+# Story 3.3.2: Linux Server Connectivity Validation [VS1-NET-VALIDATE-LINUX]
+# Guarded by #ifdef __linux__ internally — compiles on all platforms, runs only on Linux.
+# MU_TEST_LIBRARY_PATH points to MUnique.Client.Library.so in the build output.
+# Note: On Linux, dlopen() does NOT search the executable directory for bare filenames —
+# MU_TEST_LIBRARY_PATH must be an absolute path (CMAKE_RUNTIME_OUTPUT_DIRECTORY). (Risk R6)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.so")
+    target_compile_definitions(MuTests PRIVATE
+        MU_TEST_LIBRARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.so"
+    )
+endif()
+target_sources(MuTests PRIVATE platform/test_linux_connectivity.cpp)
+
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp

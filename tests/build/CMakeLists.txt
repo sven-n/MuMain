@@ -167,3 +167,14 @@ add_test(
     COMMAND ${CMAKE_COMMAND}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_3_1.cmake
 )
+
+# ==========================================================================
+# Story 3.3.2 - Linux Server Connectivity Validation [VS1-NET-VALIDATE-LINUX]
+# ==========================================================================
+
+# AC-STD-11 / AC-VAL-5: Flow code traceability — VS1-NET-VALIDATE-LINUX in test file header
+add_test(
+    NAME "3.3.2-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_3_2.cmake
+)
