@@ -77,10 +77,6 @@
 #include <gl/glew.h>
 #include <gl/GL.h>
 #else
-#ifdef MU_ENABLE_SDL3
-#include <SDL3/SDL_opengl.h>
-#else
-// Safe OpenGL fallback when SDL3 is not available
 typedef unsigned int GLuint;
 typedef int GLint;
 typedef float GLfloat;
@@ -96,8 +92,17 @@ typedef int GLfixed;
 typedef int64_t GLint64;
 typedef uint64_t GLuint64;
 typedef void GLvoid;
+typedef float GLclampf;
+typedef unsigned int GLbitfield;
+
+#ifdef MU_ENABLE_SDL3
+#include <SDL3/SDL_opengl.h>
+#else
+// Safe OpenGL fallback when SDL3 is not available
 
 // OpenGL Constants fallback
+#define GL_FALSE                          0
+#define GL_TRUE                           1
 #define GL_DEPTH_TEST 0x0B71
 #define GL_ALPHA_TEST 0x0BC0
 #define GL_TEXTURE_2D 0x0DE1
@@ -114,6 +119,60 @@ typedef void GLvoid;
 #define GL_SRC_ALPHA 0x0302
 #define GL_ONE_MINUS_SRC_ALPHA 0x0303
 #define GL_CULL_FACE 0x0B44
+#define GL_FRONT                          0x0404
+#define GL_BACK                           0x0405
+#define GL_LINE                           0x1B01
+#define GL_FILL                           0x1B02
+#define GL_STENCIL_TEST                   0x0B90
+#define GL_ALWAYS                         0x0207
+#define GL_CCW                            0x0901
+#define GL_LEQUAL                         0x0203
+#define GL_KEEP                           0x1E00
+#define GL_TRIANGLE_FAN                   0x0006
+#define GL_LESS                           0x0201
+#define GL_INCR                           0x1E01
+#define GL_CW                             0x0900
+#define GL_DECR                           0x1E03
+#define GL_MODULATE                       0x2100
+#define GL_REPLACE                        0x1E01
+#define GL_BLEND_DST                      0x0BE1
+#define GL_BLEND_SRC                      0x0BE0
+#define GL_ONE                            1
+#define GL_ZERO                           0
+#define GL_COLOR_BUFFER_BIT               0x00004000
+#define GL_DEPTH_BUFFER_BIT               0x00000100
+#define GL_STENCIL_BUFFER_BIT             0x00000400
+#define GL_EQUAL                          0x0202
+#define GL_NOTEQUAL                       0x0205
+#define GL_GREATER                        0x0204
+#define GL_GEQUAL                         0x0206
+#define GL_SCISSOR_TEST                   0x0C11
+#define GL_CULL_FACE_MODE                 0x0B45
+#define GL_VIEWPORT                       0x0BA2
+#define GL_TEXTURE_GEN_S                  0x0C60
+#define GL_TEXTURE_GEN_T                  0x0C61
+#define GL_TEXTURE_GEN_MODE               0x2500
+#define GL_REFLECTION_MAP                 0x8512
+#define GL_NORMAL_ARRAY                   0x8075
+#define GL_COLOR_ARRAY                    0x8076
+#define GL_TEXTURE_COORD_ARRAY            0x8078
+#define GL_VERTEX_ARRAY                   0x8074
+#define GL_FRONT_AND_BACK                 0x0408
+#define GL_AMBIENT                        0x1200
+#define GL_DIFFUSE                        0x1201
+#define GL_SPECULAR                       0x1202
+#define GL_EMISSION                       0x1200
+#define GL_SHININESS                      0x1601
+#define GL_AMBIENT_AND_DIFFUSE            0x1602
+#define GL_SMOOTH                         0x1D01
+#define GL_FLAT                           0x1D00
+#define GL_PERSPECTIVE_CORRECTION_HINT    0x0C50
+#define GL_NICEST                         0x1102
+#define GL_PACK_ALIGNMENT                 0x0D05
+#define GL_UNPACK_ALIGNMENT               0x0CF5
+#define GL_TEXTURE_ENV                    0x2300
+#define GL_TEXTURE_ENV_MODE               0x2200
+#define GL_BACK_LEFT                      0x0402
 
 // OpenGL Function stubs
 inline void glEnable(GLenum) {}
@@ -121,13 +180,66 @@ inline void glDisable(GLenum) {}
 inline void glBegin(GLenum) {}
 inline void glEnd() {}
 inline void glColor4f(GLfloat, GLfloat, GLfloat, GLfloat) {}
+inline void glColor4ub(GLubyte, GLubyte, GLubyte, GLubyte) {}
 inline void glColor3f(GLfloat, GLfloat, GLfloat) {}
+inline void glColor3fv(const GLfloat*) {}
 inline void glVertex3f(GLfloat, GLfloat, GLfloat) {}
+inline void glVertex3fv(const GLfloat*) {}
+inline void glVertex2f(GLfloat, GLfloat) {}
 inline void glTexCoord2f(GLfloat, GLfloat) {}
+inline void glTexCoord2fv(const GLfloat*) {}
 inline void glNormal3f(GLfloat, GLfloat, GLfloat) {}
+inline void glNormal3fv(const GLfloat*) {}
 inline void glFlush() {}
 inline void glBindTexture(GLenum, GLuint) {}
 inline void glGetIntegerv(GLenum, GLint*) {}
+inline void glPolygonMode(GLenum, GLenum) {}
+inline void glDepthMask(GLboolean) {}
+inline void glColorMask(GLboolean, GLboolean, GLboolean, GLboolean) {}
+inline void glStencilFunc(GLenum, GLint, GLuint) {}
+inline void glFrontFace(GLenum) {}
+inline void glStencilOp(GLenum, GLenum, GLenum) {}
+inline void glDepthFunc(GLenum) {}
+inline void glClear(GLbitfield) {}
+inline void glClearColor(GLclampf, GLfloat, GLfloat, GLfloat) {}
+inline void glMatrixMode(GLenum) {}
+inline void glPushMatrix() {}
+inline void glPopMatrix() {}
+inline void glLoadIdentity() {}
+inline void glTranslatef(GLfloat, GLfloat, GLfloat) {}
+inline void glRotatef(GLfloat, GLfloat, GLfloat, GLfloat) {}
+inline void glScalef(GLfloat, GLfloat, GLfloat) {}
+inline void glBlendFunc(GLenum, GLenum) {}
+inline void glTexEnvi(GLenum, GLenum, GLint) {}
+inline void glScissor(GLint, GLint, GLsizei, GLsizei) {}
+inline void glGenTextures(GLsizei, GLuint*) {}
+inline void glDeleteTextures(GLsizei, const GLuint*) {}
+inline void glTexImage2D(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid*) {}
+inline void glTexParameteri(GLenum, GLenum, GLint) {}
+inline void glViewport(GLint, GLint, GLsizei, GLsizei) {}
+inline void glEnableClientState(GLenum) {}
+inline void glDisableClientState(GLenum) {}
+inline void glVertexPointer(GLint, GLenum, GLsizei, const GLvoid*) {}
+inline void glColorPointer(GLint, GLenum, GLsizei, const GLvoid*) {}
+inline void glTexCoordPointer(GLint, GLenum, GLsizei, const GLvoid*) {}
+inline void glNormalPointer(GLenum, GLsizei, const GLvoid*) {}
+inline void glDrawArrays(GLenum, GLint, GLsizei) {}
+inline void glDrawElements(GLenum, GLsizei, GLenum, const GLvoid*) {}
+inline void glMaterialfv(GLenum, GLenum, const GLfloat*) {}
+inline void glMaterialf(GLenum, GLenum, GLfloat) {}
+inline void glPointSize(GLfloat) {}
+inline void glLineWidth(GLfloat) {}
+inline void glAlphaFunc(GLenum, GLclampf) {}
+inline void glTexGeni(GLenum, GLenum, GLint) {}
+inline void glTexGenfv(GLenum, GLenum, const GLfloat*) {}
+inline void glCullFace(GLenum) {}
+inline void glColor4fv(const GLfloat*) {}
+inline void glReadPixels(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLvoid*) {}
+inline void glDrawBuffer(GLenum) {}
+inline void glReadBuffer(GLenum) {}
+inline void glShadeModel(GLenum) {}
+inline void glHint(GLenum, GLenum) {}
+inline void glPixelStorei(GLenum, GLint) {}
 #endif // MU_ENABLE_SDL3
 #endif // _WIN32
 
