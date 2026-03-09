@@ -1328,20 +1328,19 @@ void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
+    // Rotation math preserved: compute rotated positions then build Vertex2D
+    VectorRotate(p[0], Matrix, p2[0]);
+    VectorRotate(p[1], Matrix, p2[1]);
+    VectorRotate(p[2], Matrix, p2[2]);
+    VectorRotate(p[3], Matrix, p2[3]);
 
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        VectorRotate(p[i], Matrix, p2[i]);
-        glVertex2f(p2[i][0] + x, p2[i][1] + y);
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {p2[0][0] + x, p2[0][1] + y, u, v, 0xFFFFFFFFu},
+        {p2[1][0] + x, p2[1][1] + y, u, v + vHeight, 0xFFFFFFFFu},
+        {p2[2][0] + x, p2[2][1] + y, u + uWidth, v + vHeight, 0xFFFFFFFFu},
+        {p2[3][0] + x, p2[3][1] + y, u + uWidth, v, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitRotate(int Texture, float x, float y, float Width, float Height, float Rotate)
