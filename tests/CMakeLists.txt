@@ -44,11 +44,10 @@ target_sources(MuTests PRIVATE core/test_error_report.cpp)
 target_sources(MuTests PRIVATE core/test_mu_timer.cpp)
 
 # Story 4.1.1: Ground Truth Capture Mechanism [VS1-RENDER-GROUNDTRUTH-CAPTURE]
-# RED PHASE: Tests validate mu::GroundTruthCapture::ComputeSSIM() pure logic.
+# GREEN PHASE: GroundTruthCapture.h/cpp implemented. All SSIM tests pass.
 # ComputeSSIM() is always compiled (no ENABLE_GROUND_TRUTH_CAPTURE guard).
 # glReadPixels-dependent code is guarded by #ifdef ENABLE_GROUND_TRUTH_CAPTURE in
 # GroundTruthCapture.cpp; the glReadPixels stub in stdafx.h ensures compilation on all platforms.
-# Tests FAIL until GroundTruthCapture.h/cpp are implemented.
 target_sources(MuTests PRIVATE core/test_ground_truth.cpp)
 
 # Story 3.1.2: Connection.h Cross-Platform Updates [VS1-NET-CONNECTION-XPLAT]

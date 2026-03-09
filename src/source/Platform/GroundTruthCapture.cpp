@@ -344,42 +344,13 @@ double GroundTruthCapture::CompareTo(const char* sceneName, int width, int heigh
         return -1.0;
     }
 
-    // Capture current frame
-    std::size_t buf_size = static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4;
-    std::vector<unsigned char> current(buf_size);
-    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, current.data());
-    FlipVertical(current.data(), width, height, 4);
-
-    // NOTE: Loading the golden PNG back requires stb_image.h which is not included here.
-    // For the MVP, we store the golden buffer in memory during a sweep and compare inline.
-    // Full load-from-disk comparison is deferred to a future story (4.2.x).
-    // For now, log the intent and return early.
-    // PNG load-from-disk comparison requires stb_image.h — deferred to story 4.2.x.
-    g_ErrorReport.Write(L"RENDER: ground truth -- CompareTo('%hs') requires stb_image for PNG loading "
-                        L"(future story 4.2.x)",
+    // Loading golden PNGs from disk requires stb_image.h, which is not yet included.
+    // Full load-from-disk comparison with per-pixel diff output is deferred to story 4.2.x.
+    // Returning -1.0 signals "not yet implemented" to callers (distinct from a valid SSIM score).
+    g_ErrorReport.Write(L"RENDER: ground truth -- CompareTo('%hs') deferred: "
+                        L"disk-based PNG comparison requires stb_image.h (story 4.2.x)",
                         sceneName);
-
-    double score = ComputeSSIM(current.data(), current.data(), width, height, 4);
-
-    if (score < threshold)
-    {
-        g_ErrorReport.Write(L"RENDER: ground truth -- SSIM below threshold: %.4f for %hs", score, sceneName);
-
-        // Write diff image (placeholder — highlights divergent region as solid red)
-        std::string diff_path = std::string("tests/golden/") + sceneName + "_" + std::to_string(width) + "x" +
-                                std::to_string(height) + "-diff.png";
-        std::vector<unsigned char> diff(buf_size, 0);
-        for (std::size_t i = 0; i < buf_size; i += 4)
-        {
-            diff[i + 0] = 255; // R
-            diff[i + 1] = 0;   // G
-            diff[i + 2] = 0;   // B
-            diff[i + 3] = 128; // A (semi-transparent)
-        }
-        stbi_write_png(diff_path.c_str(), width, height, 4, diff.data(), width * 4);
-    }
-
-    return score;
+    return -1.0;
 }
 
 // ---------------------------------------------------------------------------

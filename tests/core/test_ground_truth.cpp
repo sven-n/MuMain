@@ -1,11 +1,10 @@
 // Story 4.1.1: Ground Truth Capture Mechanism [VS1-RENDER-GROUNDTRUTH-CAPTURE]
 //
-// RED PHASE: These tests validate the SSIM comparison logic in GroundTruthCapture.
-// Tests compile but some will FAIL until GroundTruthCapture.h/cpp are implemented.
+// GREEN PHASE: GroundTruthCapture.h/cpp are implemented. All SSIM tests pass.
 //
 // NOTE: Tests are pure-logic only — no OpenGL calls.
-// glReadPixels is NOT called here; the glReadPixels stub in stdafx.h allows
-// GroundTruthCapture.cpp to compile on all platforms.
+// ComputeSSIM() is always compiled (no ENABLE_GROUND_TRUTH_CAPTURE guard).
+// glReadPixels-dependent code is excluded on non-Windows builds.
 //
 // Run with: ctest --test-dir MuMain/build -R ground_truth
 
@@ -15,20 +14,7 @@
 #include <cstring>
 #include <vector>
 
-// Forward-declare the function under test.
-// GroundTruthCapture.h will define it in the mu:: namespace.
-// The SSIM function is always compiled (no ENABLE_GROUND_TRUTH_CAPTURE guard).
-namespace mu
-{
-class GroundTruthCapture
-{
-public:
-    // AC-5: Perceptual SSIM comparison with configurable threshold (default > 0.99)
-    // Returns mean SSIM score in [0.0, 1.0]
-    [[nodiscard]] static double ComputeSSIM(
-        const unsigned char* imgA, const unsigned char* imgB, int width, int height, int channels);
-};
-} // namespace mu
+#include "GroundTruthCapture.h"
 
 using Catch::Matchers::WithinAbs;
 
