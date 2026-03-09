@@ -1288,40 +1288,19 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
 
     BindTexture(Texture);
 
-    float p[4][2];
-
     y = WindowHeight - y;
 
-    p[0][0] = x;
-    p[0][1] = y;
-    p[1][0] = x;
-    p[1][1] = y - Height;
-    p[2][0] = x + Width;
-    p[2][1] = y - Height;
-    p[3][0] = x + Width;
-    p[3][1] = y;
+    // Pack ABGR: opaque white unless Alpha > 0 (per-vertex alpha mode)
+    const std::uint32_t color =
+        (Alpha > 0.0f) ? (static_cast<std::uint32_t>(Alpha * 255.0f) << 24) | 0x00FFFFFFu : 0xFFFFFFFFu;
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        if (Alpha > 0.f)
-        {
-            glColor4f(1.f, 1.f, 1.f, Alpha);
-        }
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex2f(p[i][0], p[i][1]);
-        if (Alpha > 0.f)
-        {
-            glColor4f(1.f, 1.f, 1.f, 1.f);
-        }
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v, color},
+        {x, y - Height, u, v + vHeight, color},
+        {x + Width, y - Height, u + uWidth, v + vHeight, color},
+        {x + Width, y, u + uWidth, v, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v,
