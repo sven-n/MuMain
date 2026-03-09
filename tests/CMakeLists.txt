@@ -74,10 +74,10 @@ target_sources(MuTests PRIVATE network/test_server_config_validation.cpp)
 target_sources(MuTests PRIVATE platform/test_posix_signal_handlers.cpp)
 
 # Story 4.2.1: MuRenderer Core API with OpenGL Backend [VS1-RENDER-ABSTRACT-CORE]
-# RED PHASE: test_murenderer.cpp tests MatrixStack push/pop logic and BlendMode state
-# tracking via an inline IMuRenderer test-double (no OpenGL calls in the test TU).
-# Tests compile but FAIL until MuRenderer.h, MatrixStack.h, and MatrixStack.cpp are
-# implemented in src/source/RenderFX/.
+# GREEN PHASE: MuRenderer.h, MuRenderer.cpp, MatrixStack.h, MatrixStack.cpp implemented.
+# 8 TEST_CASEs covering MatrixStack push/pop, nested translations, IsEmpty(), BlendMode
+# state tracking round-trip, IMuRenderer interface completeness, mu:: namespace, and
+# IMuRenderer no-GL-types compile check. All 8 pass.
 target_sources(MuTests PRIVATE render/test_murenderer.cpp)
 
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]

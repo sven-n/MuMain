@@ -1,7 +1,7 @@
 // Story 4.2.1: MuRenderer Core API with OpenGL Backend [VS1-RENDER-ABSTRACT-CORE]
 //
-// RED PHASE: Tests compile but FAIL until MuRenderer.h, MuRenderer.cpp,
-// MatrixStack.h, and MatrixStack.cpp are implemented in RenderFX/.
+// GREEN PHASE: MuRenderer.h, MuRenderer.cpp, MatrixStack.h, MatrixStack.cpp
+// implemented in RenderFX/. All 8 TEST_CASEs pass.
 //
 // IMPORTANT: No OpenGL calls in this test TU.
 // MatrixStack and BlendModeTracker are pure-logic types — no gl* functions.
