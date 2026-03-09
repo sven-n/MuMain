@@ -1396,9 +1396,8 @@ void RenderBitRotate(int Texture, float x, float y, float Width, float Height, f
 void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width,
                        float Height, float Rotate, float Rotate_Loc, float uWidth, float vHeight, int Num)
 {
-    int i = 0;
     vec3_t p, p2[4], p3, p4[4], Angle;
-    float c[4][2], Matrix[3][4];
+    float Matrix[3][4];
 
     ix = ConvertX(ix);
     iy = ConvertY(iy);
@@ -1428,31 +1427,34 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
     Vector(0.f, 0.f, Rotate_Loc, Angle);
     AngleMatrix(Angle, Matrix);
 
-    TEXCOORD(c[0], 0.f, 0.f);
-    TEXCOORD(c[3], uWidth, 0.f);
-    TEXCOORD(c[2], uWidth, vHeight);
-    TEXCOORD(c[1], 0.f, vHeight);
+    // Compute the 4 transformed positions (VectorTransform uses Matrix[x][3] as translation)
+    Matrix[0][3] = p3[0] + 25;
+    Matrix[1][3] = p3[1];
+    VectorTransform(p2[0], Matrix, p4[0]);
+    VectorTransform(p2[1], Matrix, p4[1]);
+    VectorTransform(p2[2], Matrix, p4[2]);
+    VectorTransform(p2[3], Matrix, p4[3]);
 
-    glBegin(GL_TRIANGLE_FAN);
-    for (i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
+    const float halfW = WindowWidth / 2.f;
+    const float halfH = WindowHeight / 2.f;
 
-        Matrix[0][3] = p3[0] + 25;
-        Matrix[1][3] = p3[1];
-        VectorTransform(p2[i], Matrix, p4[i]);
+    // UV layout: sub-rect [0, uWidth] x [0, vHeight]
+    const mu::Vertex2D vertices[4] = {
+        {p4[0][0] + halfW, p4[0][1] + halfH, 0.0f, 0.0f, 0xFFFFFFFFu},
+        {p4[1][0] + halfW, p4[1][1] + halfH, 0.0f, vHeight, 0xFFFFFFFFu},
+        {p4[2][0] + halfW, p4[2][1] + halfH, uWidth, vHeight, 0xFFFFFFFFu},
+        {p4[3][0] + halfW, p4[3][1] + halfH, uWidth, 0.0f, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 
-        glVertex2f(p4[i][0] + (WindowWidth / 2.f), p4[i][1] + (WindowHeight / 2.f));
-    }
-    glEnd();
-
+    // Retain minimap button side-effect: update button position based on p4[0]
     if (Num > -1)
     {
         float dx, dy;
-        dx = p4[0][0] + (WindowWidth / 2.f);
-        dy = p4[0][1] + (WindowHeight / 2.f);
-        dx = dx * (float)(640.f / WindowWidth);
-        dy = dy * (float)(480.f / WindowHeight);
+        dx = p4[0][0] + halfW;
+        dy = p4[0][1] + halfH;
+        dx = dx * (640.f / WindowWidth);
+        dy = dy * (480.f / WindowHeight);
         if (Num >= 100)
         {
             g_pNewUIMiniMap->SetBtnPos(Num - 100, dx - (iWidth / 2), (480 - dy) - (iHeight / 2), iWidth, iHeight);
