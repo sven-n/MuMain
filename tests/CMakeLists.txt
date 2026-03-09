@@ -80,6 +80,13 @@ target_sources(MuTests PRIVATE platform/test_posix_signal_handlers.cpp)
 # IMuRenderer no-GL-types compile check. All 8 pass.
 target_sources(MuTests PRIVATE render/test_murenderer.cpp)
 
+# Story 4.2.2: Migrate RenderBitmap Variants to RenderQuad2D [VS1-RENDER-MIGRATE-QUAD2D]
+# RED PHASE: Tests document the RenderQuad2D call-through contract and vertex layout
+# expected after migration of the 9 RenderBitmap* variants + RenderColor.
+# Tests compile and run on macOS/Linux — no gl* calls in the test TU.
+# Tests become GREEN once Tasks 2-11 in the story are implemented.
+target_sources(MuTests PRIVATE render/test_renderbitmap_migration.cpp)
+
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
 # RED PHASE: Tests mu_wchar_to_char16 / mu_char16_to_wchar round-trips and byte-level
 # UTF-16LE baseline for Korean, Latin, mixed-script, null, and IP address strings.
