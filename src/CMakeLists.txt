@@ -307,6 +307,8 @@ if(WIN32)
   endif()
 else()
   list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/posix/PlatformLibrary.cpp")
+  # Story 7.1.2: POSIX Signal Handlers for Crash Diagnostics [VS0-QUAL-SIGNAL-HANDLERS]
+  list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/posix/PosixSignalHandlers.cpp")
   if(MU_ENABLE_SDL3)
     list(APPEND MU_PLATFORM_SOURCES
       "${MU_SOURCE_DIR}/Platform/sdl3/SDLWindow.cpp"

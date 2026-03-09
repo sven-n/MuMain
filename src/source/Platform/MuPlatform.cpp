@@ -4,6 +4,10 @@
 
 #include <memory>
 
+#ifndef _WIN32
+#include "posix/PosixSignalHandlers.h"
+#endif
+
 #ifdef MU_ENABLE_SDL3
 #include "sdl3/SDLWindow.h"
 #include "sdl3/SDLEventLoop.h"
@@ -31,6 +35,15 @@ bool MuPlatform::Initialize()
         return false;
     }
 #endif
+
+#ifndef _WIN32
+    // Story 7.1.2: Install POSIX signal handlers for crash diagnostics.
+    // Must be called after SDL_Init (so .NET AOT runtime is initialized first — R8 mitigation)
+    // and after g_ErrorReport is open (constructor runs before main, so this is safe).
+    // [VS0-QUAL-SIGNAL-HANDLERS]
+    mu::platform::InstallSignalHandlers();
+#endif
+
     s_bInitialized = true;
     return true;
 }

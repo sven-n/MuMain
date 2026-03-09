@@ -55,6 +55,14 @@ public:
 
 extern CErrorReport g_ErrorReport;
 
+// Async-signal-safe file descriptor for crash handler writes.
+// Set in CErrorReport::Create() after m_fileStream.open().
+// Used by POSIX signal handlers (PosixSignalHandlers.cpp) to write
+// crash diagnostics directly via write() — the only async-signal-safe
+// way to output to MuError.log from a signal handler.
+// [VS0-QUAL-SIGNAL-HANDLERS]
+extern volatile int g_errorReportFd;
+
 // Stringify helper: LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DRAGON)
 // writes "OpenMonsterModel(MONSTER_MODEL_DRAGON)" to MuError.log,
 // then calls OpenMonsterModel(MONSTER_MODEL_DRAGON).

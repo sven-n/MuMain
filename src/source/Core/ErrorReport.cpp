@@ -19,11 +19,22 @@
 #include <string>
 #include <vector>
 
+#ifndef _WIN32
+#include <fcntl.h>
+#include <unistd.h>
+#endif
+
 #include "ErrorReport.h"
 
 // Global error report instance — defined here so MUCore-linked binaries (e.g. MuTests) can resolve it.
 // Declared as extern in ErrorReport.h; used from Winmain.cpp and MuTimer.cpp.
 CErrorReport g_ErrorReport;
+
+// Async-signal-safe file descriptor for crash handler writes.
+// Initialized to -1 (disabled). Set in CErrorReport::Create() after m_fileStream.open().
+// Used by POSIX signal handlers (PosixSignalHandlers.cpp) via write(g_errorReportFd, ...).
+// [VS0-QUAL-SIGNAL-HANDLERS]
+volatile int g_errorReportFd = -1;
 
 void DeleteSocket();
 
@@ -98,10 +109,37 @@ void CErrorReport::Create(const wchar_t* lpszFileName)
     {
         fprintf(stderr, "PLAT: ErrorReport — cannot create %s\n", m_filePath.string().c_str());
     }
+
+#ifndef _WIN32
+    // Expose a raw file descriptor for async-signal-safe crash handler writes.
+    // open() with O_WRONLY|O_APPEND is the portable POSIX approach — avoids
+    // relying on non-standard rdbuf()->fd() extensions.
+    // [VS0-QUAL-SIGNAL-HANDLERS]
+    if (m_fileStream.is_open())
+    {
+        // Close any previously opened fd (safe to call on -1, guarded)
+        int oldFd = g_errorReportFd;
+        if (oldFd >= 0)
+        {
+            close(oldFd);
+        }
+        g_errorReportFd = open(m_filePath.string().c_str(), O_WRONLY | O_APPEND);
+    }
+#endif
 }
 
 void CErrorReport::Destroy(void)
 {
+#ifndef _WIN32
+    // Close the async-signal-safe fd before closing the stream.
+    // [VS0-QUAL-SIGNAL-HANDLERS]
+    int fd = g_errorReportFd;
+    g_errorReportFd = -1;
+    if (fd >= 0)
+    {
+        close(fd);
+    }
+#endif
     m_fileStream.close();
     Clear();
 }
