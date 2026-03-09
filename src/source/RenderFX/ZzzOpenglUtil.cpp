@@ -1260,40 +1260,16 @@ void RenderColorBitmap(int Texture, float x, float y, float Width, float Height,
 
     BindTexture(Texture);
 
-    float p[4][2];
-
     y = WindowHeight - y;
 
-    p[0][0] = x;
-    p[0][1] = y;
-    p[1][0] = x;
-    p[1][1] = y - Height;
-    p[2][0] = x + Width;
-    p[2][1] = y - Height;
-    p[3][0] = x + Width;
-    p[3][1] = y;
-
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    glBegin(GL_TRIANGLE_FAN);
-
-    for (int i = 0; i < 4; i++)
-    {
-        glColor4ub(static_cast<GLubyte>((color & 0xff)),        // Rad
-                   static_cast<GLubyte>((color >> 8) & 0xff),   // Green
-                   static_cast<GLubyte>((color >> 16) & 0xff),  // Blue
-                   static_cast<GLubyte>((color >> 24) & 0xff)); // Alpha
-
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex2f(p[i][0], p[i][1]);
-
-        glColor4f(1.f, 1.f, 1.f, 1.f);
-    }
-    glEnd();
+    // color parameter is already packed ABGR (caller provides it)
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v, color},
+        {x, y - Height, u, v + vHeight, color},
+        {x + Width, y - Height, u + uWidth, v + vHeight, color},
+        {x + Width, y, u + uWidth, v, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,
