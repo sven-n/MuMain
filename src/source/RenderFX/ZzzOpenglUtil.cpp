@@ -1573,30 +1573,20 @@ void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, fl
     Height = ConvertY(Height);
     BindTexture(Texture);
 
-    float p[4][2];
     y = WindowHeight - y;
-    p[0][0] = x;
-    p[0][1] = y;
-    p[1][0] = x;
-    p[1][1] = y - Height;
-    p[2][0] = x + Width;
-    p[2][1] = y - Height;
-    p[3][0] = x + Width;
-    p[3][1] = y;
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v + vHeight * 0.25f);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight - vHeight * 0.25f);
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex2f(p[i][0], p[i][1]);
-    }
-    glEnd();
+    // Asymmetric UV warp preserved exactly as original TEXCOORD assignments:
+    //   c[0] = (u,                     v + vHeight*0.25f)   -> vertex 0 (TL)
+    //   c[1] = (u,                     v+vHeight-vHeight*0.25f) -> vertex 1 (BL)
+    //   c[2] = (u+uWidth,              v+vHeight)           -> vertex 2 (BR)
+    //   c[3] = (u+uWidth,              v)                   -> vertex 3 (TR)
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v + vHeight * 0.25f, 0xFFFFFFFFu},
+        {x, y - Height, u, v + vHeight - vHeight * 0.25f, 0xFFFFFFFFu},
+        {x + Width, y - Height, u + uWidth, v + vHeight, 0xFFFFFFFFu},
+        {x + Width, y, u + uWidth, v, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
