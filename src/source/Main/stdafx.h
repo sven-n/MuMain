@@ -173,6 +173,17 @@ typedef unsigned int GLbitfield;
 #define GL_TEXTURE_ENV 0x2300
 #define GL_TEXTURE_ENV_MODE 0x2200
 #define GL_BACK_LEFT 0x0402
+#define GL_FOG 0x0B60
+#define GL_FOG_COLOR 0x0B66
+#define GL_FOG_MODE 0x0B65
+#define GL_FOG_DENSITY 0x0B62
+#define GL_FOG_START 0x0B63
+#define GL_FOG_END 0x0B64
+#define GL_EXP 0x0800
+#define GL_EXP2 0x0801
+#define GL_QUAD_STRIP 0x0008
+#define GL_ONE_MINUS_SRC_COLOR 0x0301
+#define GL_ONE_MINUS_DST_COLOR 0x0306
 
 // OpenGL Function stubs
 inline void glEnable(GLenum) {}
@@ -240,6 +251,9 @@ inline void glReadBuffer(GLenum) {}
 inline void glShadeModel(GLenum) {}
 inline void glHint(GLenum, GLenum) {}
 inline void glPixelStorei(GLenum, GLint) {}
+inline void glFogi(GLenum, GLint) {}
+inline void glFogf(GLenum, GLfloat) {}
+inline void glFogfv(GLenum, const GLfloat*) {}
 #endif // MU_ENABLE_SDL3
 #endif // _WIN32
 
