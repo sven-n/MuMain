@@ -76,12 +76,19 @@ target_sources(MuTests PRIVATE platform/test_char16t_encoding.cpp)
 # MU_TEST_LIBRARY_PATH is set to the absolute path of the platform's .NET AOT library.
 # Using a single if/elseif block avoids potential duplicate-definition warnings if
 # a future platform satisfies both conditions. (Story 3.3.2 fix L-1)
-if(APPLE AND EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.dylib")
+#
+# MEDIUM-2 fix (Story 3.3.1 code review): MU_TEST_LIBRARY_PATH is now set unconditionally
+# (without EXISTS check) when DOTNETAOT_FOUND and platform match. The previous EXISTS guard
+# was evaluated at CMake configure time, but `dotnet publish` runs at build time via
+# add_custom_command — so the dylib never exists at configure time on a clean build, causing
+# both smoke tests to always SKIP. The test code already handles absent files gracefully
+# via std::filesystem::exists() + SKIP macro.
+if(APPLE AND DOTNETAOT_FOUND)
     # Story 3.3.1: macOS [VS1-NET-VALIDATE-MACOS]
     target_compile_definitions(MuTests PRIVATE
         MU_TEST_LIBRARY_PATH="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.dylib"
     )
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MUnique.Client.Library.so")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND DOTNETAOT_FOUND)
     # Story 3.3.2: Linux — MU_TEST_LIBRARY_PATH must be absolute; Linux dlopen() does NOT
     # search the executable directory for bare filenames. (Risk R6 mitigation)
     target_compile_definitions(MuTests PRIVATE

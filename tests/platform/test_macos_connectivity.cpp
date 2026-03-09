@@ -68,7 +68,22 @@ TEST_CASE("3.3.1 AC-2: All four ConnectionManager exports resolve", "[network][d
     }
 
     // WHEN: Library is loaded
+    // LOW-1 fix (Story 3.3.1): use a RAII guard so Unload() is always called even if
+    // REQUIRE or CHECK aborts the test via Catch2 exception. Without this, a REQUIRE
+    // failure would skip the Unload() call, leaving the handle open in sanitizer runs.
     mu::platform::LibraryHandle handle = mu::platform::Load(libPath.c_str());
+    struct HandleGuard
+    {
+        mu::platform::LibraryHandle h;
+        ~HandleGuard()
+        {
+            if (h)
+            {
+                mu::platform::Unload(h);
+            }
+        }
+    } guard{handle};
+
     REQUIRE(handle != nullptr);
 
     // THEN: All four ConnectionManager exports are resolvable (non-null)
@@ -77,8 +92,7 @@ TEST_CASE("3.3.1 AC-2: All four ConnectionManager exports resolve", "[network][d
     CHECK(mu::platform::GetSymbol(handle, "ConnectionManager_BeginReceive") != nullptr);
     CHECK(mu::platform::GetSymbol(handle, "ConnectionManager_Send") != nullptr);
 
-    // CLEANUP:
-    mu::platform::Unload(handle);
+    // CLEANUP: handled by HandleGuard RAII destructor above.
 }
 
 #else // non-Apple platforms

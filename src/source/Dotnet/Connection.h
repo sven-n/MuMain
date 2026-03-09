@@ -22,6 +22,15 @@
 // by default, so a bare filename suffices. (Story 3.3.2 Risk R6 mitigation)
 // Defined in Connection.cpp (not anonymous namespace) to prevent per-TU copies if ever
 // included by a second translation unit. (Story 3.4.1 MEDIUM-4 fix)
+//
+// SIOF mitigation (Story 3.3.1 MEDIUM-3): g_dotnetLibPath is declared `extern` (not
+// `inline`) intentionally. An `inline` variable would have a separate definition in each
+// TU that includes this header, with C++ offering no cross-TU initialization order
+// guarantee. By placing the single definition in Connection.cpp, the compiler ensures
+// g_dotnetLibPath is fully initialized before munique_client_library_handle (below),
+// because both are in the same TU and C++ guarantees initialization order within a
+// single translation unit (definition order). This avoids the Static Initialization
+// Order Fiasco (SIOF) where Load() could be called with an empty string.
 extern const std::string g_dotnetLibPath;
 
 inline const mu::platform::LibraryHandle munique_client_library_handle =

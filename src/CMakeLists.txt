@@ -221,7 +221,7 @@ else()
     $<$<CXX_COMPILER_ID:Clang>:-Wno-inconsistent-missing-override>
     $<$<CXX_COMPILER_ID:AppleClang>:-Wno-inconsistent-missing-override>
     # GCC -O2/-O3 false positives from inlined wmemcpy/std::wstring (MinGW wchar.h)
-    -Wno-array-bounds
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-array-bounds>
     $<$<CXX_COMPILER_ID:GNU>:-Wno-stringop-overread>
   )
 endif()
