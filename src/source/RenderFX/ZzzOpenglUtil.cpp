@@ -1511,21 +1511,21 @@ void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Heigh
         for (int x = 0; x < 4; x++)
         {
             float p[4][2];
-            p[0][0] = sx + ((x)*Width) * 0.25f;
-            p[0][1] = sy - ((y)*Height) * 0.25f;
-            p[1][0] = sx + ((x)*Width) * 0.25f;
-            p[1][1] = sy - ((y + 1) * Height) * 0.25f;
-            p[2][0] = sx + ((x + 1) * Width) * 0.25f;
-            p[2][1] = sy - ((y + 1) * Height) * 0.25f;
-            p[3][0] = sx + ((x + 1) * Width) * 0.25f;
-            p[3][1] = sy - ((y)*Height) * 0.25f;
+            p[0][0] = sx + (static_cast<float>(x) * Width) * 0.25f;
+            p[0][1] = sy - (static_cast<float>(y) * Height) * 0.25f;
+            p[1][0] = sx + (static_cast<float>(x) * Width) * 0.25f;
+            p[1][1] = sy - (static_cast<float>(y + 1) * Height) * 0.25f;
+            p[2][0] = sx + (static_cast<float>(x + 1) * Width) * 0.25f;
+            p[2][1] = sy - (static_cast<float>(y + 1) * Height) * 0.25f;
+            p[3][0] = sx + (static_cast<float>(x + 1) * Width) * 0.25f;
+            p[3][1] = sy - (static_cast<float>(y) * Height) * 0.25f;
 
-            float c[4][2];
-            TEXCOORD(c[0], (x) * 0.25f, (y) * 0.25f);
-            TEXCOORD(c[1], (x) * 0.25f, (y + 1) * 0.25f);
-            TEXCOORD(c[2], (x + 1) * 0.25f, (y + 1) * 0.25f);
-            TEXCOORD(c[3], (x + 1) * 0.25f, (y) * 0.25f);
+            const float u0 = static_cast<float>(x) * 0.25f;
+            const float v0 = static_cast<float>(y) * 0.25f;
+            const float u1 = static_cast<float>(x + 1) * 0.25f;
+            const float v1 = static_cast<float>(y + 1) * 0.25f;
 
+            // Per-vertex alpha gradient (edge fade): 1.0 = opaque, 0.0 = transparent
             float Alpha[4] = {1.f, 1.f, 1.f, 1.f};
             if (x == 0)
             {
@@ -1552,14 +1552,14 @@ void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Heigh
             if(x==3&&y==3) Alpha[2] = 0.f;
             if(x==3&&y==0) Alpha[3] = 0.f;*/
 
-            glBegin(GL_TRIANGLE_FAN);
-            for (int i = 0; i < 4; i++)
-            {
-                glColor4f(1.f, 1.f, 1.f, Alpha[i]);
-                glTexCoord2f(c[i][0], c[i][1]);
-                glVertex2f(p[i][0], p[i][1]);
-            }
-            glEnd();
+            // Pack per-vertex alpha into ABGR: A=(alpha*255)<<24 | 0x00FFFFFF
+            const mu::Vertex2D vertices[4] = {
+                {p[0][0], p[0][1], u0, v0, (static_cast<std::uint32_t>(Alpha[0] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[1][0], p[1][1], u0, v1, (static_cast<std::uint32_t>(Alpha[1] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[2][0], p[2][1], u1, v1, (static_cast<std::uint32_t>(Alpha[2] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[3][0], p[3][1], u1, v0, (static_cast<std::uint32_t>(Alpha[3] * 255.0f) << 24) | 0x00FFFFFFu},
+            };
+            mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
         }
     }
 }
