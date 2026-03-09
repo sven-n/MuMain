@@ -1478,6 +1478,7 @@ void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float H
     Width = ConvertX(Width);
     Height = ConvertY(Height);
 
+    // Local pivot rotation math preserved as-is
     vec3_t vCenter, vDir;
     Vector(x, y, 0, vCenter);
     Vector(Width * 0.5f, -Height * 0.5f, 0, vDir);
@@ -1490,19 +1491,13 @@ void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float H
     p[3][0] = vCenter[0] - (vDir[0]) * sinf(Rotate);
     p[3][1] = vCenter[1] + (vDir[1]) * cosf(Rotate);
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex2f(p[i][0], p[i][1]);
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {p[0][0], p[0][1], u, v, 0xFFFFFFFFu},
+        {p[1][0], p[1][1], u, v + vHeight, 0xFFFFFFFFu},
+        {p[2][0], p[2][1], u + uWidth, v + vHeight, 0xFFFFFFFFu},
+        {p[3][0], p[3][1], u + uWidth, v, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Height)
