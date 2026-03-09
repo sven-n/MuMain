@@ -13,12 +13,11 @@
 #include <cstdlib>
 #include <unistd.h>
 
-#ifndef SA_SIGACTION
-#define SA_SIGACTION 0x0040
-#endif
-#ifndef SA_RESETHAND
-#define SA_RESETHAND 0x0004
-#endif
+// FIX M-1: Removed Linux-specific fallback #defines for SA_SIGACTION and SA_RESETHAND.
+// Both macros are defined by <csignal> / <signal.h> on all supported POSIX targets
+// (macOS and Linux glibc). The former fallback values (0x0040 / 0x0004) were Linux-
+// specific and would have silently produced wrong behavior on macOS where SA_RESETHAND
+// is 0x80000000.
 
 #if defined(__APPLE__) || defined(__GLIBC__)
 #include <execinfo.h>
@@ -54,17 +53,10 @@ static void CrashHandler(int signum, siginfo_t* info, void* context)
         oldact = &s_oldSIGBUS;
     }
 
-    // Compute name length at compile-time via sizeof trick; "SIGSEGV" is longest at 7 chars
-    // Use a loop to find length — strlen() is async-signal-safe per POSIX 2008
-    int nameLen = 0;
-    {
-        const char* p = name;
-        while (*p != '\0')
-        {
-            ++nameLen;
-            ++p;
-        }
-    }
+    // FIX L-1: Use compile-time sizeof() trick to compute name length — avoids a runtime
+    // loop in an async-signal context and matches the dev notes recommendation.
+    // "SIGSEGV" = 7, "SIGABRT" = 7, "SIGBUS" = 6
+    int nameLen = (signum == SIGBUS) ? static_cast<int>(sizeof("SIGBUS") - 1) : static_cast<int>(sizeof("SIGSEGV") - 1);
 
     // Fixed prefix string (no allocation)
     static const char prefix[] = "PLAT: signal handler -- caught ";
@@ -86,8 +78,10 @@ static void CrashHandler(int signum, siginfo_t* info, void* context)
     }
 
 #ifdef MU_HAS_BACKTRACE
-    // Dump backtrace symbols to stderr and MuError.log
-    // backtrace() and backtrace_symbols_fd() are async-signal-safe on glibc/macOS
+    // FIX M-3: backtrace()/backtrace_symbols_fd() are not strictly POSIX async-signal-safe,
+    // but are documented as signal-safe by glibc and work in practice on macOS.
+    // Risk: may deadlock on macOS if crash occurs inside dyld lock. Accepted trade-off
+    // for diagnostic value. (Story 7.1.2 Dev Notes §Async-Signal-Safety)
     void* frames[32];
     int count = backtrace(frames, 32);
     if (count > 0)
@@ -119,7 +113,21 @@ static void CrashHandler(int signum, siginfo_t* info, void* context)
 
 void InstallSignalHandlers()
 {
+    // FIX H-1: Guard against double-install. A second call would overwrite s_old* with
+    // the CrashHandler pointer itself (the handler installed by the first call), causing
+    // recursive CrashHandler invocation on signal delivery (stack overflow).
+    // MuPlatform::Initialize() calls this once; the guard makes it safe regardless.
+    static bool s_installed = false;
+    if (s_installed)
+    {
+        return;
+    }
+    s_installed = true;
+
     struct sigaction act = {};
+    // FIX M-2: POSIX specifies sigset_t as an opaque type. All-zeros is not guaranteed
+    // to represent an empty signal set. sigemptyset() is the correct POSIX idiom.
+    sigemptyset(&act.sa_mask);
     act.sa_sigaction = CrashHandler;
     // SA_SIGACTION: use sa_sigaction (not sa_handler) — receives siginfo_t*
     // SA_RESETHAND: reset to SIG_DFL after first invocation (prevents re-entrant crash)
