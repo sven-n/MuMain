@@ -18,6 +18,8 @@
 //   if (score < 0.99) { /* rendering diverged */ }
 #pragma once
 
+#include <cstddef>
+
 namespace mu
 {
 
@@ -83,7 +85,7 @@ private:
 
     /// Compute SHA256 of a buffer and return the hex string (64 chars + NUL).
     /// Used to log a checksum alongside each captured PNG.
-    static void ComputeSHA256Hex(const unsigned char* data, int len, char outHex[65]);
+    static void ComputeSHA256Hex(const unsigned char* data, std::size_t len, char outHex[65]);
 #endif // ENABLE_GROUND_TRUTH_CAPTURE
 };
 

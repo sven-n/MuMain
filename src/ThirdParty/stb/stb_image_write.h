@@ -31,6 +31,12 @@
  *   Public domain (www.unlicense.org)
  */
 
+// Note: This header intentionally uses #ifndef/#define guards instead of #pragma once.
+// The STB single-header pattern requires the outer #ifndef guard to wrap both the
+// declaration section and the #ifdef STB_IMAGE_WRITE_IMPLEMENTATION section. Using
+// #pragma once alone would not correctly prevent double-inclusion of declarations while
+// allowing the implementation to be compiled once. This is a deliberate exception to
+// the project #pragma once standard (AC-STD-1), per Story 4.1.1 code review findings.
 #ifndef INCLUDE_STB_IMAGE_WRITE_H
 #define INCLUDE_STB_IMAGE_WRITE_H
 

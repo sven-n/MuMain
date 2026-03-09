@@ -196,6 +196,27 @@ TEST_CASE("AC-5: SSIM score is bounded in [0.0, 1.0]", "[core][ground_truth][ac-
 }
 
 // ---------------------------------------------------------------------------
+// LOW-2: CompareTo() deferred stub — verify contract: returns < 0 ("not yet implemented")
+// This locks in the temporary contract so story 4.2.x cannot accidentally change it
+// without a test failure signalling the contract shift.
+// Guard matches GroundTruthCapture.cpp — CompareTo is only compiled under the flag.
+// ---------------------------------------------------------------------------
+#ifdef ENABLE_GROUND_TRUTH_CAPTURE
+TEST_CASE("AC-6 (deferred): CompareTo returns negative for deferred stub",
+          "[core][ground_truth][ac-6][deferred]")
+{
+    SECTION("CompareTo returns < 0 indicating not-yet-implemented")
+    {
+        // The implementation always returns -1.0 (deferred to story 4.2.x).
+        // Callers must treat negative values as "not yet implemented", distinct from
+        // a valid SSIM score (which is always in [0.0, 1.0]).
+        double result = mu::GroundTruthCapture::CompareTo("nonexistent_scene", 8, 8);
+        REQUIRE(result < 0.0);
+    }
+}
+#endif // ENABLE_GROUND_TRUTH_CAPTURE
+
+// ---------------------------------------------------------------------------
 // AC-VAL-2: SSIM correctly identifies identical vs known-different
 // (Explicit regression guard that the SSIM function works end-to-end)
 // ---------------------------------------------------------------------------

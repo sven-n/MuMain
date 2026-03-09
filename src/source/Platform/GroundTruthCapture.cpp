@@ -15,6 +15,7 @@
 #include "ErrorReport.h"
 
 #ifdef ENABLE_GROUND_TRUTH_CAPTURE
+#include <cstdio>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -50,8 +51,11 @@ double GroundTruthCapture::ComputeSSIM(const unsigned char* imgA, const unsigned
 
     constexpr int WINDOW = 8; // 8x8 sliding window (uniform weights)
 
-    int windows_x = width / WINDOW;
-    int windows_y = height / WINDOW;
+    // Use ceiling division so that partial right/bottom edge windows are included.
+    // For a 1366×768 image: ceil(1366/8)=171, ceil(768/8)=96 — captures all edge pixels.
+    // The std::min clamp in the inner loop handles the actual boundary correctly.
+    int windows_x = (width + WINDOW - 1) / WINDOW;
+    int windows_y = (height + WINDOW - 1) / WINDOW;
 
     if (windows_x <= 0 || windows_y <= 0)
     {
@@ -179,7 +183,7 @@ void GroundTruthCapture::FlipVertical(unsigned char* buf, int width, int height,
     }
 }
 
-void GroundTruthCapture::ComputeSHA256Hex(const unsigned char* data, int len, char outHex[65])
+void GroundTruthCapture::ComputeSHA256Hex(const unsigned char* data, std::size_t len, char outHex[65])
 {
     // Minimal SHA256 implementation for checksum logging.
     // This is NOT a security primitive — it is diagnostic only.
@@ -198,35 +202,34 @@ void GroundTruthCapture::ComputeSHA256Hex(const unsigned char* data, int len, ch
 
     auto rotr32 = [](unsigned int x, int n) -> unsigned int { return (x >> n) | (x << (32 - n)); };
 
-    // Padding
-    long long bit_len = static_cast<long long>(len) * 8;
-    int padded_len = len + 1;
+    // Padding — use unsigned 64-bit throughout to avoid signed-overflow UB
+    unsigned long long bit_len = static_cast<unsigned long long>(len) * 8ULL;
+    std::size_t padded_len = len + 1;
     while (padded_len % 64 != 56)
     {
         ++padded_len;
     }
     padded_len += 8;
 
-    std::vector<unsigned char> msg(static_cast<std::size_t>(padded_len), 0);
+    std::vector<unsigned char> msg(padded_len, 0);
     std::copy(data, data + len, msg.begin());
-    msg[static_cast<std::size_t>(len)] = 0x80;
+    msg[len] = 0x80;
     for (int i = 0; i < 8; ++i)
     {
-        msg[static_cast<std::size_t>(padded_len - 8 + i)] =
-            static_cast<unsigned char>((bit_len >> (56 - 8 * i)) & 0xFF);
+        msg[padded_len - 8 + static_cast<std::size_t>(i)] =
+            static_cast<unsigned char>((bit_len >> (56 - 8 * i)) & 0xFFULL);
     }
 
     // Process chunks
-    for (int chunk = 0; chunk < padded_len / 64; ++chunk)
+    for (std::size_t chunk = 0; chunk < padded_len / 64; ++chunk)
     {
         unsigned int w_sched[64];
         for (int i = 0; i < 16; ++i)
         {
-            int base = chunk * 64 + i * 4;
-            w_sched[i] = (static_cast<unsigned int>(msg[static_cast<std::size_t>(base)]) << 24) |
-                         (static_cast<unsigned int>(msg[static_cast<std::size_t>(base + 1)]) << 16) |
-                         (static_cast<unsigned int>(msg[static_cast<std::size_t>(base + 2)]) << 8) |
-                         static_cast<unsigned int>(msg[static_cast<std::size_t>(base + 3)]);
+            std::size_t base = chunk * 64 + static_cast<std::size_t>(i) * 4;
+            w_sched[i] = (static_cast<unsigned int>(msg[base]) << 24) |
+                         (static_cast<unsigned int>(msg[base + 1]) << 16) |
+                         (static_cast<unsigned int>(msg[base + 2]) << 8) | static_cast<unsigned int>(msg[base + 3]);
         }
         for (int i = 16; i < 64; ++i)
         {
@@ -318,8 +321,18 @@ bool GroundTruthCapture::CaptureScene(const char* sceneName, int width, int heig
 
     // Log SHA256 checksum alongside the capture
     char sha256hex[65];
-    ComputeSHA256Hex(buffer.data(), static_cast<int>(buf_size), sha256hex);
+    ComputeSHA256Hex(buffer.data(), buf_size, sha256hex);
     g_ErrorReport.Write(L"RENDER: ground truth -- captured %hs [%hs]", sceneName, sha256hex);
+
+    // Write companion .sha256 file for reliable post-mortem checksum verification (LOW-1 fix).
+    // g_ErrorReport may not flush on crash; a companion file persists across sessions.
+    std::string sha256_path = path + ".sha256";
+    if (FILE* fp = std::fopen(sha256_path.c_str(), "w"))
+    {
+        std::fputs(sha256hex, fp);
+        std::fputc('\n', fp);
+        std::fclose(fp);
+    }
 
     return true;
 }

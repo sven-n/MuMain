@@ -970,16 +970,16 @@ void MainScene(HDC hDC)
 
 #ifdef ENABLE_GROUND_TRUTH_CAPTURE
             // Ground Truth Capture — Story 4.1.1 [VS1-RENDER-GROUNDTRUTH-CAPTURE]
-            // Capture current scene after each successful render + swap.
-            // The static flag ensures the sweep runs exactly once per session.
-            static bool s_groundTruthSweeepDone = false;
-            if (!s_groundTruthSweeepDone)
+            // Both the UI sweep and the main-scene capture run exactly once per session
+            // (one-shot guard). Repeating glReadPixels every frame would cause GPU stalls
+            // and overwrite the golden baseline on every render tick.
+            static bool s_groundTruthSweepDone = false;
+            if (!s_groundTruthSweepDone)
             {
-                s_groundTruthSweeepDone = true;
+                s_groundTruthSweepDone = true;
                 mu::GroundTruthCapture::RunUISweep(WindowWidth, WindowHeight);
+                mu::GroundTruthCapture::CaptureScene("scene_main", WindowWidth, WindowHeight);
             }
-            // Per-frame capture of the main scene render for ongoing comparison.
-            mu::GroundTruthCapture::CaptureScene("scene_main", WindowWidth, WindowHeight);
 #endif
         }
 
