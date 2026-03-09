@@ -41,53 +41,38 @@ int32_t CMultiLanguage::ConvertFromUtf8(wchar_t* target, const char* source, int
         return 0;
     }
 
-    // In this codebase, maxSourceLength is effectively used as the destination buffer capacity.
-    const int requiredCharsWithNull = MultiByteToWideChar(CP_UTF8, 0, source, -1, nullptr, 0);
-    if (requiredCharsWithNull <= 0)
-    {
-        target[0] = L'\0';
-        return 0;
-    }
-
-    if (maxSourceLength > 0)
-    {
-        std::wstring tmp;
-        tmp.resize(requiredCharsWithNull);
-        const int writtenWithNull = MultiByteToWideChar(CP_UTF8, 0, source, -1, tmp.data(), requiredCharsWithNull);
-        if (writtenWithNull <= 0)
-        {
-            target[0] = L'\0';
-            return 0;
-        }
-
-        const int available = std::max<int>(0, maxSourceLength - 1);
-        const int srcLen = std::max<int>(0, writtenWithNull - 1);
-        const int copyLen = std::min<int>(srcLen, available);
-
-        if (copyLen > 0)
-        {
-            std::wmemcpy(target, tmp.c_str(), copyLen);
-        }
-        target[copyLen] = L'\0';
-        return copyLen;
-    }
-
-    const int requiredChars = requiredCharsWithNull;
+    // Determine how many UTF-16 characters are needed
+    const int requiredChars = MultiByteToWideChar(CP_UTF8, 0, source, maxSourceLength, nullptr, 0);
     if (requiredChars <= 0)
     {
         target[0] = L'\0';
         return 0;
     }
 
-    const int written = MultiByteToWideChar(CP_UTF8, 0, source, -1, target, requiredChars);
+    // Perform the conversion
+    int written = MultiByteToWideChar(
+        CP_UTF8,
+        0,
+        source,
+        maxSourceLength,    // read at most this many bytes
+        target,
+        requiredChars       // assume destination large enough
+    );
+
     if (written <= 0)
     {
         target[0] = L'\0';
         return 0;
     }
 
-    // When source length is -1, WinAPI includes the null terminator in 'written'.
-    return written > 0 ? (written - 1) : 0;
+    // If the source contained a null terminator within the range,
+    // MultiByteToWideChar copies it as well.
+    if (written < maxSourceLength)
+    {
+        target[written] = L'\0';
+    }
+
+    return written;
 }
 
 int32_t CMultiLanguage::ConvertToUtf8(char* target, const wchar_t* source, int maxSourceLength)
