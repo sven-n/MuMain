@@ -13,7 +13,6 @@
 #ifndef _WIN32
 
 #include <csignal>
-#include <signal.h>
 
 #include "posix/PosixSignalHandlers.h"
 
@@ -141,8 +140,6 @@ TEST_CASE(
 
 // Windows (MinGW CI): stub test body — compiles and trivially passes.
 // This keeps CI green while POSIX-only signal handler code is excluded.
-
-#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE(
     "AC-STD-2,AC-VAL-2: InstallSignalHandlers — POSIX only (Windows stub)",

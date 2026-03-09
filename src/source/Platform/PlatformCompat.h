@@ -174,7 +174,8 @@ inline BOOL RemoveMenu(void* /*hMenu*/, UINT /*uPosition*/, UINT /*uFlags*/)
 
 struct CHAR_INFO
 {
-    union {
+    union
+    {
         WCHAR UnicodeChar;
         CHAR AsciiChar;
     } Char;

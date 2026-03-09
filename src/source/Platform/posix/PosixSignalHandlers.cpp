@@ -38,7 +38,7 @@ static struct sigaction s_oldSIGBUS;  // NOLINT
 // Async-signal-safe crash handler.
 // Only write(), backtrace_symbols_fd(), and _exit() are called here.
 // g_ErrorReport.Write() is NOT safe inside a signal handler — do not call it here.
-static void CrashHandler(int signum, siginfo_t* /*info*/, void* /*context*/)
+static void CrashHandler(int signum, siginfo_t* info, void* context)
 {
     // Determine signal name using compile-time constants (no malloc, no strlen ambiguity)
     const char* name = "SIGSEGV";
@@ -104,7 +104,7 @@ static void CrashHandler(int signum, siginfo_t* /*info*/, void* /*context*/)
     // Only chain if the previous handler is not SIG_DFL or SIG_IGN
     if ((oldact->sa_flags & SA_SIGACTION) != 0 && oldact->sa_sigaction != nullptr)
     {
-        oldact->sa_sigaction(signum, nullptr, nullptr);
+        oldact->sa_sigaction(signum, info, context);
     }
     else if (oldact->sa_handler != SIG_DFL && oldact->sa_handler != SIG_IGN)
     {
