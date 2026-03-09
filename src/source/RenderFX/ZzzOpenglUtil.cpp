@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
+#include "MuRenderer.h"
 #include "ZzzTexture.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
@@ -1203,6 +1204,9 @@ void EndBitmap()
 
 void RenderColor(float x, float y, float Width, float Height, float Alpha, int Flag)
 {
+    // Option A (AC-3): textureId=0 sentinel means untextured quad.
+    // DisableTexture() is called to disable texturing in the GL pipeline;
+    // RenderQuad2D is called with textureId=0 to document the untextured intent.
     DisableTexture();
 
     x = ConvertX(x);
@@ -1210,35 +1214,34 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
     Width = ConvertX(Width);
     Height = ConvertY(Height);
 
-    float p[4][2];
     y = WindowHeight - y;
 
-    p[0][0] = x;
-    p[0][1] = y;
-    p[1][0] = x;
-    p[1][1] = y - Height;
-    p[2][0] = x + Width;
-    p[2][1] = y - Height;
-    p[3][0] = x + Width;
-    p[3][1] = y;
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
+    // Build per-vertex color: packed ABGR
+    // Flag==0: white with alpha; Flag==1: black with alpha; no alpha -> opaque white
+    std::uint32_t color = 0xFFFFFFFFu; // default: opaque white
+    if (Alpha > 0.f)
     {
-        if (Alpha > 0.f)
+        const auto a = static_cast<std::uint32_t>(Alpha * 255.0f);
+        if (Flag == 0)
         {
-            if (Flag == 0)
-                glColor4f(1.f, 1.f, 1.f, Alpha);
-            else if (Flag == 1)
-                glColor4f(0.f, 0.f, 0.f, Alpha);
+            // White with alpha: ABGR = (a<<24) | 0x00FFFFFF
+            color = (a << 24) | 0x00FFFFFFu;
         }
-        glVertex2f(p[i][0], p[i][1]);
-        if (Alpha > 0.f)
+        else if (Flag == 1)
         {
-            glColor4f(1.f, 1.f, 1.f, 1.f);
+            // Black with alpha: ABGR = (a<<24) | 0x00000000
+            color = (a << 24) | 0x00000000u;
         }
     }
-    glEnd();
+
+    const mu::Vertex2D vertices[4] = {
+        {x, y, 0.0f, 0.0f, color},
+        {x, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y, 0.0f, 0.0f, color},
+    };
+    // textureId=0: untextured sentinel (Option A, AC-3)
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
 }
 void EndRenderColor()
 {
