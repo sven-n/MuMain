@@ -37,10 +37,22 @@ public:
             return;
         }
 
-        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(textureId));
+        // NOTE for the OpenGL immediate-mode backend:
+        // Texture binding is managed by the caller (via BindTexture() or DisableTexture()
+        // in ZzzOpenglUtil.cpp) before calling RenderQuad2D. The textureId parameter is
+        // reserved for the future SDL_gpu backend (story 4.3.1) where the backend manages
+        // its own pipeline state. On this backend, textureId is informational only.
+        (void)textureId;
+
         glBegin(GL_QUADS);
         for (const Vertex2D& v : vertices)
         {
+            // Unpack ABGR: A=bits31-24, B=bits23-16, G=bits15-8, R=bits7-0
+            const auto a = static_cast<float>((v.color >> 24) & 0xFFu) / 255.0f;
+            const auto b = static_cast<float>((v.color >> 16) & 0xFFu) / 255.0f;
+            const auto g = static_cast<float>((v.color >> 8) & 0xFFu) / 255.0f;
+            const auto r = static_cast<float>((v.color) & 0xFFu) / 255.0f;
+            glColor4f(r, g, b, a);
             glTexCoord2f(v.u, v.v);
             glVertex3f(v.x, v.y, 0.0f);
         }

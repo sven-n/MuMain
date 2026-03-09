@@ -21,6 +21,7 @@
 //
 // Run with: ctest --test-dir MuMain/build -R renderbitmap_migration
 
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <array>
 #include <cstdint>
