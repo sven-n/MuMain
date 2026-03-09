@@ -44,6 +44,10 @@ FrameTimingState g_frameTiming;
 #include "imgui.h"
 #endif
 
+#ifdef ENABLE_GROUND_TRUTH_CAPTURE
+#include "GroundTruthCapture.h"
+#endif
+
 // External declarations
 extern int GrabScreen;
 extern int WaterTextureNumber;
@@ -963,6 +967,20 @@ void MainScene(HDC hDC)
             }
 #endif
             SwapBuffers(hDC);
+
+#ifdef ENABLE_GROUND_TRUTH_CAPTURE
+            // Ground Truth Capture — Story 4.1.1 [VS1-RENDER-GROUNDTRUTH-CAPTURE]
+            // Capture current scene after each successful render + swap.
+            // The static flag ensures the sweep runs exactly once per session.
+            static bool s_groundTruthSweeepDone = false;
+            if (!s_groundTruthSweeepDone)
+            {
+                s_groundTruthSweeepDone = true;
+                mu::GroundTruthCapture::RunUISweep(WindowWidth, WindowHeight);
+            }
+            // Per-frame capture of the main scene render for ongoing comparison.
+            mu::GroundTruthCapture::CaptureScene("scene_main", WindowWidth, WindowHeight);
+#endif
         }
 
         CheckServerConnection();

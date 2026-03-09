@@ -82,3 +82,17 @@ option(BUILD_TESTING "Build unit tests" OFF)
 if(BUILD_TESTING)
   add_subdirectory("tests")
 endif()
+
+# ============================================================
+# Ground Truth Capture (EPIC-4, Story 4.1.1)
+# Windows-only, for capturing OpenGL baseline screenshots.
+# NOT for release builds or CI. Enable manually on Windows:
+#   cmake -DENABLE_GROUND_TRUTH_CAPTURE=ON ...
+# ============================================================
+option(ENABLE_GROUND_TRUTH_CAPTURE
+    "Enable ground truth screenshot capture (Windows only, not for release)" OFF)
+if(ENABLE_GROUND_TRUTH_CAPTURE)
+    # MUPlatform owns GroundTruthCapture.cpp (Platform/ glob) and propagates the
+    # define to all targets that link it (MUGame, Main, SceneManager instrumentation).
+    target_compile_definitions(MUPlatform PUBLIC ENABLE_GROUND_TRUTH_CAPTURE)
+endif()
