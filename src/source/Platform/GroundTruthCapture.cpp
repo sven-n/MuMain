@@ -354,7 +354,7 @@ double GroundTruthCapture::CompareTo(const char* sceneName, int width, int heigh
     // For the MVP, we store the golden buffer in memory during a sweep and compare inline.
     // Full load-from-disk comparison is deferred to a future story (4.2.x).
     // For now, log the intent and return early.
-    // TODO(4.2.x): Load golden PNG with stb_image and compare.
+    // PNG load-from-disk comparison requires stb_image.h — deferred to story 4.2.x.
     g_ErrorReport.Write(L"RENDER: ground truth -- CompareTo('%hs') requires stb_image for PNG loading "
                         L"(future story 4.2.x)",
                         sceneName);
