@@ -1374,20 +1374,23 @@ void RenderBitRotate(int Texture, float x, float y, float Width, float Height, f
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
 
-    float c[4][2];
-    TEXCOORD(c[0], 0.f, 0.f);
-    TEXCOORD(c[3], 1.f, 0.f);
-    TEXCOORD(c[2], 1.f, 1.f);
-    TEXCOORD(c[1], 0.f, 1.f);
+    // Rotation math preserved: compute rotated positions then build Vertex2D
+    // UV layout: unit (0-1) range across all four corners
+    VectorRotate(p[0], Matrix, p2[0]);
+    VectorRotate(p[1], Matrix, p2[1]);
+    VectorRotate(p[2], Matrix, p2[2]);
+    VectorRotate(p[3], Matrix, p2[3]);
 
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        VectorRotate(p[i], Matrix, p2[i]);
-        glVertex2f(p2[i][0] + (WindowWidth / 2.f), p2[i][1] + (WindowHeight / 2.f));
-    }
-    glEnd();
+    const float halfW = WindowWidth / 2.f;
+    const float halfH = WindowHeight / 2.f;
+
+    const mu::Vertex2D vertices[4] = {
+        {p2[0][0] + halfW, p2[0][1] + halfH, 0.0f, 0.0f, 0xFFFFFFFFu},
+        {p2[1][0] + halfW, p2[1][1] + halfH, 0.0f, 1.0f, 0xFFFFFFFFu},
+        {p2[2][0] + halfW, p2[2][1] + halfH, 1.0f, 1.0f, 0xFFFFFFFFu},
+        {p2[3][0] + halfW, p2[3][1] + halfH, 1.0f, 0.0f, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width,
