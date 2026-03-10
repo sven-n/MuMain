@@ -17,6 +17,18 @@
 #include "CameraMove.h"
 #include "PhysicsManager.h"
 #include "NewUISystem.h"
+#include "MuRenderer.h"
+
+// ---------------------------------------------------------------------------
+// PackABGR: Pack float RGBA channels into a 32-bit ABGR value.
+// A=bits31-24, B=bits23-16, G=bits15-8, R=bits7-0
+// Matches the Vertex3D::color layout in MuRenderer.h (story 4.2.3).
+// ---------------------------------------------------------------------------
+static inline std::uint32_t PackABGR(float r, float g, float b, float a)
+{
+    return (static_cast<std::uint32_t>(a * 255.f) << 24) | (static_cast<std::uint32_t>(b * 255.f) << 16) |
+           (static_cast<std::uint32_t>(g * 255.f) << 8) | static_cast<std::uint32_t>(r * 255.f);
+}
 
 BMD* Models;
 BMD* ModelsDump;
@@ -1304,11 +1316,6 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     bool enableColor = (enableLight && finalRenderFlags == RENDER_TEXTURE) || finalRenderFlags == RENDER_CHROME ||
                        finalRenderFlags == RENDER_CHROME4 || finalRenderFlags == RENDER_OIL;
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    if (enableColor)
-        glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
     auto vertices = RenderArrayVertices;
     auto colors = RenderArrayColors;
     auto texCoords = RenderArrayTexCoords;
@@ -1393,17 +1400,19 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
     }
 
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    if (enableColor)
-        glColorPointer(4, GL_FLOAT, 0, colors);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-
-    glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3);
-
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (enableColor)
-        glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    {
+        const int numVerts = m->NumTriangles * 3;
+        std::vector<mu::Vertex3D> muVerts;
+        muVerts.reserve(numVerts);
+        for (int i = 0; i < numVerts; ++i)
+        {
+            const vec4_t& c = colors[i];
+            const std::uint32_t color = enableColor ? PackABGR(c[0], c[1], c[2], c[3]) : 0xFFFFFFFFu;
+            muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0],
+                               texCoords[i][1], color});
+        }
+        mu::GetRenderer().RenderTriangles(muVerts, static_cast<std::uint32_t>(textureIndex));
+    }
 }
 
 void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha, int BlendMesh,
