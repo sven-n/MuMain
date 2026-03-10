@@ -134,7 +134,7 @@ void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
 
         glEnable(GL_TEXTURE_2D);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glDisable(GL_BLEND);
+        DisableAlphaBlend();
         glEnable(GL_ALPHA_TEST);
     }
 }

@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "UIWindows.h"
 #include "UIManager.h"
 #include "DSPlaySound.h"
@@ -585,12 +586,18 @@ void DeleteTmpCharacter(void)
 
 void StartFog(vec3_t Color)
 {
-    glEnable(GL_FOG);
-
-    glFogfv(GL_FOG_COLOR, Color);
-    glFogf(GL_FOG_MODE, GL_LINEAR);
-    glFogf(GL_FOG_START, 2000.f);
-    glFogf(GL_FOG_END, 2700.f);
+    // Story 4.2.5: Migrated from direct glFog* calls to mu::GetRenderer().SetFog().
+    // MuRendererGL::SetFog() calls glEnable(GL_FOG) internally — preceding glEnable removed.
+    mu::FogParams fogParams{};
+    fogParams.mode = GL_LINEAR;
+    fogParams.start = 2000.f;
+    fogParams.end = 2700.f;
+    fogParams.density = 0.f;
+    fogParams.color[0] = Color[0];
+    fogParams.color[1] = Color[1];
+    fogParams.color[2] = Color[2];
+    fogParams.color[3] = Color[3];
+    mu::GetRenderer().SetFog(fogParams);
 }
 
 void EndFog(void)

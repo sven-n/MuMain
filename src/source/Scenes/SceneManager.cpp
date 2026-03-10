@@ -430,8 +430,7 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
 
     // Background
     glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    EnableAlphaBlend3();
 
     glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
     glBegin(GL_QUADS);
