@@ -87,6 +87,13 @@ target_sources(MuTests PRIVATE render/test_murenderer.cpp)
 # Tests become GREEN once Tasks 2-11 in the story are implemented.
 target_sources(MuTests PRIVATE render/test_renderbitmap_migration.cpp)
 
+# Story 4.2.3: Migrate Skeletal Mesh Rendering to RenderTriangles [VS1-RENDER-MIGRATE-TRIANGLES]
+# GREEN PHASE: Tests verify Vertex3D struct layout contract, RenderTriangles call-through,
+# ABGR color packing conventions, vertex count = NumTriangles * 3, and shadow path
+# textureId=0 + zero UV/normal fields. All tests are pure logic; no gl* calls in this TU.
+# Tests compile and run on macOS/Linux without Win32 or OpenGL.
+target_sources(MuTests PRIVATE render/test_skeletalmesh_migration.cpp)
+
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
 # RED PHASE: Tests mu_wchar_to_char16 / mu_char16_to_wchar round-trips and byte-level
 # UTF-16LE baseline for Korean, Latin, mixed-script, null, and IP address strings.
