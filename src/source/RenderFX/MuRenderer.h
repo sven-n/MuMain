@@ -99,6 +99,11 @@ public:
 
     // Configure hardware fog for the current scene.
     virtual void SetFog(const FogParams& params) = 0;
+
+    // Per-frame lifecycle: acquire command buffer / render pass (SDL_gpu backend).
+    // No-op in the OpenGL backend. Called from Winmain.cpp game loop.
+    virtual void BeginFrame() {}
+    virtual void EndFrame() {}
 };
 
 // ---------------------------------------------------------------------------

@@ -1149,67 +1149,74 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     g_ErrorReport.Write(L"> Start window success.\r\n");
 
-    PIXELFORMATDESCRIPTOR pfd;
-
-    memset(&pfd, 0, sizeof(pfd));
-    pfd.nSize = sizeof(pfd);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 16;
-    pfd.cDepthBits = 16;
-
-    if (!(g_hDC = GetDC(g_hWnd)))
+#ifdef MU_USE_OPENGL_BACKEND
+    // OpenGL pixel format and context setup — only when the OpenGL backend is active.
+    // When MU_USE_OPENGL_BACKEND is OFF (default), SDL_gpu owns the rendering context
+    // and OpenGL context creation is skipped entirely.
     {
-        g_ErrorReport.Write(L"OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
-    }
+        PIXELFORMATDESCRIPTOR pfd;
 
-    GLuint PixelFormat;
+        memset(&pfd, 0, sizeof(pfd));
+        pfd.nSize = sizeof(pfd);
+        pfd.nVersion = 1;
+        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+        pfd.iPixelType = PFD_TYPE_RGBA;
+        pfd.cColorBits = 16;
+        pfd.cDepthBits = 16;
 
-    if (!(PixelFormat = ChoosePixelFormat(g_hDC, &pfd)))
-    {
-        g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
-    }
+        if (!(g_hDC = GetDC(g_hWnd)))
+        {
+            g_ErrorReport.Write(L"OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
+            KillGLWindow();
+            MessageBox(nullptr, GlobalText[4], L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
 
-    if (!SetPixelFormat(g_hDC, PixelFormat, &pfd))
-    {
-        g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
-    }
+        GLuint PixelFormat;
 
-    if (!(g_hRC = wglCreateContext(g_hDC)))
-    {
-        g_ErrorReport.Write(L"OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
-    }
+        if (!(PixelFormat = ChoosePixelFormat(g_hDC, &pfd)))
+        {
+            g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
+            KillGLWindow();
+            MessageBox(nullptr, GlobalText[4], L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
 
-    if (!wglMakeCurrent(g_hDC, g_hRC))
-    {
-        g_ErrorReport.Write(L"OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
+        if (!SetPixelFormat(g_hDC, PixelFormat, &pfd))
+        {
+            g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
+            KillGLWindow();
+            MessageBox(nullptr, GlobalText[4], L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
+
+        if (!(g_hRC = wglCreateContext(g_hDC)))
+        {
+            g_ErrorReport.Write(L"OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
+            KillGLWindow();
+            MessageBox(nullptr, GlobalText[4], L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
+
+        if (!wglMakeCurrent(g_hDC, g_hRC))
+        {
+            g_ErrorReport.Write(L"OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
+            KillGLWindow();
+            MessageBox(nullptr, GlobalText[4], L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
+
+        g_ErrorReport.Write(L"> OpenGL init success.\r\n");
+        g_ErrorReport.AddSeparator();
+        g_ErrorReport.WriteOpenGLInfo();
+        g_ErrorReport.AddSeparator();
+        g_ErrorReport.WriteSoundCardInfo();
     }
+#endif // MU_USE_OPENGL_BACKEND
 
     ShowWindow(g_hWnd, SW_SHOW);
     SetForegroundWindow(g_hWnd);
     SetFocus(g_hWnd);
-
-    g_ErrorReport.Write(L"> OpenGL init success.\r\n");
-    g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteOpenGLInfo();
-    g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteSoundCardInfo();
 
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
