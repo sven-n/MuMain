@@ -95,12 +95,12 @@ target_sources(MuTests PRIVATE render/test_renderbitmap_migration.cpp)
 target_sources(MuTests PRIVATE render/test_skeletalmesh_migration.cpp)
 
 # Story 4.2.4: Migrate Trail Effects to RenderQuadStrip [VS1-RENDER-MIGRATE-QUADSTRIP]
-# RED PHASE: Tests document the RenderQuadStrip call-through contract, UV mapping from
-# Light1/Light2, Luminosity ABGR packing, and per-branch call patterns for all 4 migrated
-# glBegin(GL_QUADS) trail segment blocks in RenderJoints() (BITMAP_JOINT_FORCE SubType==0,
-# GUILD_WAR_EVENT BITMAP_FLARE SubType==22 double-face, RENDER_FACE_ONE, RENDER_FACE_TWO).
-# Tests compile and run on macOS/Linux — no gl* calls in the test TU.
-# Tests become GREEN once Tasks 1–7 in story 4.2.4 are implemented.
+# GREEN PHASE: All 7 TEST_CASEs pass. Tests verify RenderQuadStrip call-through contract,
+# UV mapping from Light1/Light2, Luminosity ABGR packing, and per-branch call patterns for
+# all 4 migrated glBegin(GL_QUADS) trail segment blocks in RenderJoints():
+#   BITMAP_JOINT_FORCE SubType==0, GUILD_WAR_EVENT BITMAP_FLARE SubType==22 double-face,
+#   RENDER_FACE_ONE, RENDER_FACE_TWO. Tests compile and run on macOS/Linux — no gl* calls.
+# Tasks 1–7 in story 4.2.4 fully implemented and quality gate PASSED (705 files, 0 errors).
 target_sources(MuTests PRIVATE render/test_traileffects_migration.cpp)
 
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]

@@ -100,7 +100,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // RenderQuadStrip: Render a triangle strip from world-space vertices.
+    // RenderQuadStrip: Render a quad strip from world-space vertices.
     // Mirrors the GL_QUAD_STRIP trail paths in ZzzEffectJoint.cpp:
     //   glBegin(GL_QUAD_STRIP) → loop → glEnd()
     //

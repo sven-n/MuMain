@@ -1,10 +1,9 @@
 // Story 4.2.4: Migrate Trail Effects to RenderQuadStrip
 // Flow Code: VS1-RENDER-MIGRATE-QUADSTRIP
 //
-// RED PHASE: Tests document the contracts that must hold after migration of all
-// glBegin(GL_QUADS) trail segment blocks in RenderJoints() to
-// mu::GetRenderer().RenderQuadStrip(). Implementation not yet done — tests will
-// become GREEN once Tasks 1–7 in story 4.2.4 are complete.
+// GREEN PHASE: All 7 TEST_CASEs implemented and passing. Tests verify the contracts
+// for all glBegin(GL_QUADS) trail segment blocks in RenderJoints() migrated to
+// mu::GetRenderer().RenderQuadStrip(). Tasks 1–7 complete.
 //
 // IMPORTANT: No OpenGL calls in this test TU.
 // RenderQuadStripCapture is a test-double of IMuRenderer defined inline below.
@@ -29,6 +28,9 @@
 #include <vector>
 
 #include "MuRenderer.h"
+#include "RenderUtils.h"
+
+using mu::PackABGR;
 
 // ---------------------------------------------------------------------------
 // Test-double: RenderQuadStripCapture
@@ -76,26 +78,6 @@ struct RenderQuadStripCapture : public mu::IMuRenderer
     {
     }
 };
-
-// ---------------------------------------------------------------------------
-// Helper: PackABGR
-// Mirrors the static inline PackABGR() in ZzzEffectJoint.cpp (story 4.2.4 adds it).
-// Also mirrors ZzzBMD.cpp::PackABGR (story 4.2.3).
-// Converts float RGBA channels to a packed 32-bit ABGR value.
-// A=bits31-24, B=bits23-16, G=bits15-8, R=bits7-0
-//
-// KEEP IN SYNC WITH: ZzzEffectJoint.cpp::PackABGR, ZzzBMD.cpp::PackABGR
-// Channels are clamped to [0.0, 1.0]: luminosity values can exceed 1.0 for
-// overbright effects; clamping prevents channel truncation.
-// ---------------------------------------------------------------------------
-[[nodiscard]] std::uint32_t PackABGR(float r, float g, float b, float a)
-{
-    auto clamp01 = [](float v) -> float { return v < 0.f ? 0.f : (v > 1.f ? 1.f : v); };
-    return (static_cast<std::uint32_t>(clamp01(a) * 255.f) << 24) |
-           (static_cast<std::uint32_t>(clamp01(b) * 255.f) << 16) |
-           (static_cast<std::uint32_t>(clamp01(g) * 255.f) << 8) |
-            static_cast<std::uint32_t>(clamp01(r) * 255.f);
-}
 
 // ---------------------------------------------------------------------------
 // Helper: build4VertexTrailSegment

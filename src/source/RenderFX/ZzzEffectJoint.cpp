@@ -15,20 +15,9 @@
 #include "WSclient.h"
 #include "CSPetSystem.h"
 #include "MuRenderer.h"
+#include "RenderUtils.h"
 
-// ---------------------------------------------------------------------------
-// PackABGR: Pack float RGBA channels into a 32-bit ABGR value.
-// A=bits31-24, B=bits23-16, G=bits15-8, R=bits7-0
-// Channels are clamped to [0.0, 1.0] to handle overbright luminosity values.
-// Story 4.2.4 — mirrors ZzzBMD.cpp::PackABGR (story 4.2.3)
-// ---------------------------------------------------------------------------
-static inline std::uint32_t PackABGR(float r, float g, float b, float a)
-{
-    auto clamp01 = [](float v) -> float { return v < 0.f ? 0.f : (v > 1.f ? 1.f : v); };
-    return (static_cast<std::uint32_t>(clamp01(a) * 255.f) << 24) |
-           (static_cast<std::uint32_t>(clamp01(b) * 255.f) << 16) |
-           (static_cast<std::uint32_t>(clamp01(g) * 255.f) << 8) | static_cast<std::uint32_t>(clamp01(r) * 255.f);
-}
+using mu::PackABGR;
 
 extern float g_fBoneSave[10][3][4];
 
@@ -7344,8 +7333,8 @@ void RenderJoints(BYTE bRenderOneMore)
                             CreateSprite(BITMAP_SHINY + 1, Position, 1.f, o->Light, NULL, (float)(rand() % 360), 3);
                         }
                     }
-                    else if (o->Type == BITMAP_FLARE_FORCE && (o->SubType >= 0 && o->SubType <= 4) ||
-                             (o->SubType >= 11 && o->SubType <= 13))
+                    else if (o->Type == BITMAP_FLARE_FORCE &&
+                             ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13)))
                     {
                         float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
 
@@ -7382,8 +7371,8 @@ void RenderJoints(BYTE bRenderOneMore)
                             faceColor = PackABGR(0.7f, 0.7f, 0.7f, 1.f);
                         }
                     }
-                    else if (o->Type == BITMAP_FLARE_FORCE && (o->SubType >= 0 && o->SubType <= 4) ||
-                             (o->SubType >= 11 && o->SubType <= 13))
+                    else if (o->Type == BITMAP_FLARE_FORCE &&
+                             ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13)))
                     {
                         float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
                         faceColor =
