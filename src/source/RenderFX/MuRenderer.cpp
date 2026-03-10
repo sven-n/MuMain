@@ -76,6 +76,12 @@ public:
         glBegin(GL_TRIANGLES);
         for (const Vertex3D& v : vertices)
         {
+            // Unpack ABGR: A=bits31-24, B=bits23-16, G=bits15-8, R=bits7-0
+            const auto a = static_cast<float>((v.color >> 24) & 0xFFu) / 255.0f;
+            const auto b = static_cast<float>((v.color >> 16) & 0xFFu) / 255.0f;
+            const auto g = static_cast<float>((v.color >> 8) & 0xFFu) / 255.0f;
+            const auto r = static_cast<float>((v.color) & 0xFFu) / 255.0f;
+            glColor4f(r, g, b, a);
             glTexCoord2f(v.u, v.v);
             glNormal3f(v.nx, v.ny, v.nz);
             glVertex3f(v.x, v.y, v.z);
