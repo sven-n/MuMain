@@ -2350,10 +2350,16 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
         return;
     }
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    {
+        const int numVerts = target_vertex_index + 1;
+        std::vector<mu::Vertex3D> muVerts;
+        muVerts.reserve(static_cast<std::size_t>(numVerts));
+        for (int i = 0; i < numVerts; ++i)
+        {
+            muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, 0xFF000000u});
+        }
+        mu::GetRenderer().RenderTriangles(muVerts, 0u);
+    }
 }
 
 void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
@@ -2395,10 +2401,16 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
         return;
     }
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    {
+        const int numVerts = target_vertex_index + 1;
+        std::vector<mu::Vertex3D> muVerts;
+        muVerts.reserve(static_cast<std::size_t>(numVerts));
+        for (int i = 0; i < numVerts; ++i)
+        {
+            muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, 0xFF000000u});
+        }
+        mu::GetRenderer().RenderTriangles(muVerts, 0u);
+    }
 }
 
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber,
