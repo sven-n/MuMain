@@ -103,6 +103,17 @@ target_sources(MuTests PRIVATE render/test_skeletalmesh_migration.cpp)
 # Tasks 1–7 in story 4.2.4 fully implemented and quality gate PASSED (705 files, 0 errors).
 target_sources(MuTests PRIVATE render/test_traileffects_migration.cpp)
 
+# Story 4.3.1: SDL_gpu Backend Implementation [VS1-RENDER-SDLGPU-BACKEND]
+# RED PHASE: Tests verify TextureRegistry map contract (register/lookup/unregister),
+# BlendMode -> SDL_GPUBlendFactor mapping table (all 8 modes), and FogParams
+# storage round-trip via SetFog(). Tests compile but FAIL until:
+#   Task 3.1/3.2: GetBlendFactors(BlendMode) free function implemented in MuRendererSDLGpu.cpp
+#   Task 5.1/5.2: RegisterTexture / UnregisterTexture / LookupTexture / ClearTextureRegistry
+#     implemented in MuRendererSDLGpu.cpp and exposed for test linkage
+# No actual SDL_GPUDevice required; FogCaptureMock bypasses device init.
+# Tests compile and run on macOS/Linux without Win32, OpenGL, or a real GPU device.
+target_sources(MuTests PRIVATE render/test_sdlgpubackend.cpp)
+
 # Story 4.2.5: Migrate Blend & Pipeline State to MuRenderer [VS1-RENDER-MIGRATE-STATE]
 # RED PHASE: Tests verify SetBlendMode() routing for all 7 blend helper mappings,
 # SetDepthTest() bool routing (enable/disable), SetFog() FogParams population for the
