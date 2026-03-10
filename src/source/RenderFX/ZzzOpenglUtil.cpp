@@ -298,7 +298,7 @@ void EnableDepthTest()
     if (!DepthTestEnable)
     {
         DepthTestEnable = true;
-        glEnable(GL_DEPTH_TEST);
+        mu::GetRenderer().SetDepthTest(true);
     }
 }
 
@@ -307,7 +307,7 @@ void DisableDepthTest()
     if (DepthTestEnable)
     {
         DepthTestEnable = false;
-        glDisable(GL_DEPTH_TEST);
+        mu::GetRenderer().SetDepthTest(false);
     }
 }
 
@@ -378,7 +378,7 @@ void DisableAlphaBlend()
     if (AlphaBlendType != 0)
     {
         AlphaBlendType = 0;
-        glDisable(GL_BLEND);
+        mu::GetRenderer().DisableBlend();
     }
     EnableCullFace();
     EnableDepthMask();
@@ -426,8 +426,7 @@ void EnableAlphaBlend()
     if (AlphaBlendType != 3)
     {
         AlphaBlendType = 3;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Glow);
     }
     DisableCullFace();
     DisableDepthMask();
@@ -450,8 +449,7 @@ void EnableAlphaBlendMinus()
     if (AlphaBlendType != 4)
     {
         AlphaBlendType = 4;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Subtract);
     }
     DisableCullFace();
     DisableDepthMask();
@@ -474,8 +472,7 @@ void EnableAlphaBlend2()
     if (AlphaBlendType != 5)
     {
         AlphaBlendType = 5;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Luminance);
     }
     DisableCullFace();
     DisableDepthMask();
@@ -498,8 +495,7 @@ void EnableAlphaBlend3()
     if (AlphaBlendType != 6)
     {
         AlphaBlendType = 6;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
     }
     DisableCullFace();
     DisableDepthMask();
@@ -522,8 +518,7 @@ void EnableAlphaBlend4()
     if (AlphaBlendType != 7)
     {
         AlphaBlendType = 7;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Mixed);
     }
     DisableCullFace();
     DisableDepthMask();
@@ -546,8 +541,7 @@ void EnableLightMap()
     if (AlphaBlendType != 1)
     {
         AlphaBlendType = 1;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::LightMap);
     }
     EnableCullFace();
     EnableDepthMask();
