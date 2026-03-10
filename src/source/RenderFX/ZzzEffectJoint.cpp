@@ -7175,8 +7175,8 @@ void RenderJoints(BYTE bRenderOneMore)
                     Light1 -= Scroll;
                     Light2 -= Scroll;
                 }
-                if (o->Type == BITMAP_FLARE_FORCE && o->SubType >= 0 && o->SubType <= 4 ||
-                    (o->SubType >= 11 && o->SubType <= 13) //^ 펜릴 스킬 관련
+                if (o->Type == BITMAP_FLARE_FORCE &&
+                    ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13)) //^ 펜릴 스킬 관련
                 )
                 {
                     Light1 = ((int)o->NumTails - (j)) / (float)((o->MaxTails - 1) / 2);
