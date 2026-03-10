@@ -1218,7 +1218,14 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
 
     // Build per-vertex color: packed ABGR
     // Flag==0: white with alpha; Flag==1: black with alpha; no alpha -> opaque white
-    std::uint32_t color = 0xFFFFFFFFu; // default: opaque white
+    //
+    // Behavioral note (4-2-2): The original GL implementation emitted no glColor* call
+    // when Alpha == 0.f, allowing the current OpenGL vertex color state (from the previous
+    // render call) to carry over implicitly. The migration instead always emits opaque white
+    // (0xFFFFFFFF) in this case, which is the more correct deterministic behavior.
+    // EndRenderColor() already resets to glColor4f(1,1,1,1), so the implicit-state
+    // assumption (current color = white) was sound in practice.
+    std::uint32_t color = 0xFFFFFFFFu; // default: opaque white (deterministic, see note above)
     if (Alpha > 0.f)
     {
         const auto a = static_cast<std::uint32_t>(Alpha * 255.0f);
@@ -1479,17 +1486,19 @@ void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float H
     Height = ConvertY(Height);
 
     // Local pivot rotation math preserved as-is
+    const float sinR = sinf(Rotate);
+    const float cosR = cosf(Rotate);
     vec3_t vCenter, vDir;
     Vector(x, y, 0, vCenter);
     Vector(Width * 0.5f, -Height * 0.5f, 0, vDir);
-    p[0][0] = vCenter[0] + (vDir[0]) * cosf(Rotate);
-    p[0][1] = vCenter[1] + (vDir[1]) * sinf(Rotate);
-    p[1][0] = vCenter[0] + (vDir[0]) * sinf(Rotate);
-    p[1][1] = vCenter[1] - (vDir[1]) * cosf(Rotate);
-    p[2][0] = vCenter[0] - (vDir[0]) * cosf(Rotate);
-    p[2][1] = vCenter[1] - (vDir[1]) * sinf(Rotate);
-    p[3][0] = vCenter[0] - (vDir[0]) * sinf(Rotate);
-    p[3][1] = vCenter[1] + (vDir[1]) * cosf(Rotate);
+    p[0][0] = vCenter[0] + (vDir[0]) * cosR;
+    p[0][1] = vCenter[1] + (vDir[1]) * sinR;
+    p[1][0] = vCenter[0] + (vDir[0]) * sinR;
+    p[1][1] = vCenter[1] - (vDir[1]) * cosR;
+    p[2][0] = vCenter[0] - (vDir[0]) * cosR;
+    p[2][1] = vCenter[1] - (vDir[1]) * sinR;
+    p[3][0] = vCenter[0] - (vDir[0]) * sinR;
+    p[3][1] = vCenter[1] + (vDir[1]) * cosR;
 
     const mu::Vertex2D vertices[4] = {
         {p[0][0], p[0][1], u, v, 0xFFFFFFFFu},
@@ -1547,10 +1556,6 @@ void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Heigh
                 Alpha[1] = 0.f;
                 Alpha[2] = 0.f;
             }
-            /*if(x==0&&y==0) Alpha[0] = 0.f;
-            if(x==0&&y==3) Alpha[1] = 0.f;
-            if(x==3&&y==3) Alpha[2] = 0.f;
-            if(x==3&&y==0) Alpha[3] = 0.f;*/
 
             // Pack per-vertex alpha into ABGR: A=(alpha*255)<<24 | 0x00FFFFFF
             const mu::Vertex2D vertices[4] = {

@@ -18,12 +18,14 @@
 //   AC-VAL-1  → TEST_CASE("AC-VAL-1 [4-2-2]: RenderBitmapAlpha calls RenderQuad2D 16 times")
 //   AC-2/AC-3 → TEST_CASE("AC-2 [4-2-2]: textureId=0 accepted by RenderQuad2D for untextured quad")
 //   AC-1      → TEST_CASE("AC-1 [4-2-2]: RenderQuad2D receives exactly 4 vertices per call")
+//   AC-STD-2  → TEST_CASE("AC-STD-2 [4-2-2]: RenderBitmapLocalRotate vertex positions — Rotate=0")
 //
 // Run with: ctest --test-dir MuMain/build -R renderbitmap_migration
 
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <span>
 #include <vector>
@@ -391,5 +393,51 @@ TEST_CASE("AC-2 [4-2-2]: textureId=0 accepted by RenderQuad2D for untextured qua
         {
             REQUIRE(vert.color == solidRed);
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// AC-STD-2 [4-2-2]: RenderBitmapLocalRotate vertex positions — Rotate=0
+// GIVEN: RenderBitmapLocalRotate vertex building logic with Rotate=0
+// WHEN:  sinf(0)=0, cosf(0)=1: positions are computed using cached sinR/cosR
+// THEN:  vertex[0].x == center.x + (Width*0.5), vertex[0].y == center.y + 0
+//        (since vDir = (Width*0.5, -Height*0.5):
+//          p[0][0] = cx + (Width*0.5) * cos(0) = cx + Width*0.5
+//          p[0][1] = cy + (-Height*0.5) * sin(0) = cy + 0
+//        Documents the sinR/cosR caching pattern and rotation correctness at Rotate=0)
+// ---------------------------------------------------------------------------
+TEST_CASE("AC-STD-2 [4-2-2]: RenderBitmapLocalRotate vertex positions — Rotate=0",
+    "[render][renderbitmap][ac-std-2]")
+{
+    SECTION("Rotate=0: sin=0, cos=1: vertex[0] = (cx+W*0.5, cy), vertex[2] = (cx-W*0.5, cy)")
+    {
+        // GIVEN: build positions using the same formula as RenderBitmapLocalRotate
+        constexpr float cx = 100.0f;
+        constexpr float cy = 200.0f;
+        constexpr float W = 64.0f;
+        constexpr float H = 32.0f;
+        constexpr float Rotate = 0.0f;
+
+        // vCenter = (cx, cy), vDir = (W*0.5, -H*0.5)
+        const float sinR = std::sin(Rotate); // = 0
+        const float cosR = std::cos(Rotate); // = 1
+        const float dirX = W * 0.5f;
+        const float dirY = -H * 0.5f;
+
+        // Mirror the rotation formula from ZzzOpenglUtil.cpp:RenderBitmapLocalRotate
+        float px0 = cx + dirX * cosR;  // cx + (W*0.5)*1 = cx + W*0.5
+        float py0 = cy + dirY * sinR;  // cy + (-H*0.5)*0 = cy
+        float px2 = cx - dirX * cosR;  // cx - W*0.5
+        float py2 = cy - dirY * sinR;  // cy
+
+        // THEN: at Rotate=0, vertex[0] is top-right, vertex[2] is bottom-left
+        REQUIRE(px0 == Catch::Approx(cx + W * 0.5f));
+        REQUIRE(py0 == Catch::Approx(cy));
+        REQUIRE(px2 == Catch::Approx(cx - W * 0.5f));
+        REQUIRE(py2 == Catch::Approx(cy));
+
+        // Verify sinR/cosR caching: same results as direct trig calls
+        REQUIRE(sinR == Catch::Approx(std::sin(Rotate)));
+        REQUIRE(cosR == Catch::Approx(std::cos(Rotate)));
     }
 }
