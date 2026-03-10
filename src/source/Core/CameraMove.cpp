@@ -483,7 +483,7 @@ DWORD CCameraMove::GetCameraWalkState() const
 
 void CCameraMove::RenderWayPoint()
 {
-    glDisable(GL_DEPTH_TEST);
+    DisableDepthTest();
     glDisable(GL_ALPHA_TEST);
     glDisable(GL_TEXTURE_2D);
 
@@ -514,7 +514,7 @@ void CCameraMove::RenderWayPoint()
 
     glEnd();
 
-    glEnable(GL_DEPTH_TEST);
+    EnableDepthTest();
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
 }
