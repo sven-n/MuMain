@@ -1228,7 +1228,8 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
     std::uint32_t color = 0xFFFFFFFFu; // default: opaque white (deterministic, see note above)
     if (Alpha > 0.f)
     {
-        const auto a = static_cast<std::uint32_t>(Alpha * 255.0f);
+        const float clampedAlpha = (Alpha > 1.0f) ? 1.0f : Alpha;
+        const auto a = static_cast<std::uint32_t>(clampedAlpha * 255.0f);
         if (Flag == 0)
         {
             // White with alpha: ABGR = (a<<24) | 0x00FFFFFF
@@ -1298,8 +1299,10 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
     y = WindowHeight - y;
 
     // Pack ABGR: opaque white unless Alpha > 0 (per-vertex alpha mode)
+    // Clamp Alpha to [0,1] to prevent 8-bit A channel overflow (e.g. Alpha=1.01f -> a=257 overflows)
+    const float clampedAlpha = (Alpha > 1.0f) ? 1.0f : Alpha;
     const std::uint32_t color =
-        (Alpha > 0.0f) ? (static_cast<std::uint32_t>(Alpha * 255.0f) << 24) | 0x00FFFFFFu : 0xFFFFFFFFu;
+        (clampedAlpha > 0.0f) ? (static_cast<std::uint32_t>(clampedAlpha * 255.0f) << 24) | 0x00FFFFFFu : 0xFFFFFFFFu;
 
     const mu::Vertex2D vertices[4] = {
         {x, y, u, v, color},
@@ -1476,14 +1479,14 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v,
                              float uWidth, float vHeight)
 {
-    BindTexture(Texture);
-
     vec3_t p[4];
     x = ConvertX(x);
     y = ConvertY(y);
     y = WindowHeight - y;
     Width = ConvertX(Width);
     Height = ConvertY(Height);
+
+    BindTexture(Texture);
 
     // Local pivot rotation math preserved as-is
     const float sinR = sinf(Rotate);
