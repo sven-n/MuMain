@@ -165,10 +165,30 @@ public:
         case BlendMode::LightMap:
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
             break;
+        case BlendMode::Glow:
+            // GL_ONE, GL_ONE — bright additive compositing (EnableAlphaBlend in ZzzOpenglUtil).
+            // Story 4.2.5: added to cover the EnableAlphaBlend() helper mapping.
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
+        case BlendMode::Luminance:
+            // GL_ONE_MINUS_SRC_COLOR, GL_ONE — inverse-based luminance blend (EnableAlphaBlend2).
+            // Story 4.2.5: added to cover the EnableAlphaBlend2() helper mapping.
+            glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE);
+            break;
         default:
             g_ErrorReport.Write(L"RENDER: MuRenderer::SetBlendMode -- unknown blend mode %d", static_cast<int>(mode));
             break;
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // DisableBlend: Disable alpha blending entirely (glDisable(GL_BLEND)).
+    // Called by the DisableAlphaBlend() wrapper in ZzzOpenglUtil.cpp (Story 4.2.5).
+    // Distinct from SetBlendMode — "no blending" is a render state, not a mode.
+    // -----------------------------------------------------------------------
+    void DisableBlend() override
+    {
+        glDisable(GL_BLEND);
     }
 
     // -----------------------------------------------------------------------

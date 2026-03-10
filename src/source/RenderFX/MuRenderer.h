@@ -30,6 +30,8 @@ enum class BlendMode : std::uint8_t
     InverseColor, // GL_ONE_MINUS_DST_COLOR, GL_ZERO
     Mixed,        // GL_ONE,                GL_ONE_MINUS_SRC_ALPHA
     LightMap,     // GL_ZERO,               GL_SRC_COLOR
+    Glow,         // GL_ONE,                GL_ONE             (Story 4.2.5 — EnableAlphaBlend)
+    Luminance,    // GL_ONE_MINUS_SRC_COLOR, GL_ONE            (Story 4.2.5 — EnableAlphaBlend2)
 };
 
 // ---------------------------------------------------------------------------
@@ -87,6 +89,10 @@ public:
 
     // Set the active alpha-blending equation.
     virtual void SetBlendMode(BlendMode mode) = 0;
+
+    // Disable alpha blending entirely (glDisable(GL_BLEND) path).
+    // Distinct from SetBlendMode — "no blending" is a render state, not a blend mode.
+    virtual void DisableBlend() = 0;
 
     // Enable or disable depth testing (glDepthFunc defaults to GL_LEQUAL).
     virtual void SetDepthTest(bool enabled) = 0;
