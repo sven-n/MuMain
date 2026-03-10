@@ -27,8 +27,7 @@ static inline std::uint32_t PackABGR(float r, float g, float b, float a)
     auto clamp01 = [](float v) -> float { return v < 0.f ? 0.f : (v > 1.f ? 1.f : v); };
     return (static_cast<std::uint32_t>(clamp01(a) * 255.f) << 24) |
            (static_cast<std::uint32_t>(clamp01(b) * 255.f) << 16) |
-           (static_cast<std::uint32_t>(clamp01(g) * 255.f) << 8) |
-            static_cast<std::uint32_t>(clamp01(r) * 255.f);
+           (static_cast<std::uint32_t>(clamp01(g) * 255.f) << 8) | static_cast<std::uint32_t>(clamp01(r) * 255.f);
 }
 
 extern float g_fBoneSave[10][3][4];
@@ -7215,10 +7214,12 @@ void RenderJoints(BYTE bRenderOneMore)
                     // glColor3f(Luminosity, Luminosity, Luminosity) call.
                     const std::uint32_t forceColor = PackABGR(Luminosity, Luminosity, Luminosity, 1.f);
                     const std::vector<mu::Vertex3D> forceVerts = {
-                        { currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f, forceColor },
-                        { currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f, forceColor },
-                        { nextTail[1][0],    nextTail[1][1],    nextTail[1][2],    0.f, 0.f, 0.f, Light2, 1.f, forceColor },
-                        { nextTail[0][0],    nextTail[0][1],    nextTail[0][2],    0.f, 0.f, 0.f, Light2, 0.f, forceColor },
+                        {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                         forceColor},
+                        {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                         forceColor},
+                        {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, forceColor},
+                        {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, forceColor},
                     };
                     mu::GetRenderer().RenderQuadStrip(forceVerts, 0u);
                 }
@@ -7356,6 +7357,44 @@ void RenderJoints(BYTE bRenderOneMore)
 
                         glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
                     }
+
+                    // Story 4.2.4: Capture current GL color state into packed ABGR for
+                    // per-vertex color in RENDER_FACE_ONE / RENDER_FACE_TWO RenderQuadStrip calls.
+                    // Default: o->Light (set via glColor3fv(o->Light) before the loop).
+                    // Individual type branches above keep their glColor3f calls in place
+                    // (story 4.2.5 will remove GL color state management); color is
+                    // re-captured here for the vertex buffer path.
+                    std::uint32_t faceColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
+                    if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
+                    {
+                        int tail = (int)(o->Light[2]);
+                        if (tail == j)
+                        {
+                            float l = o->Light[2] - j;
+                            faceColor = PackABGR(l, l, l, 1.f);
+                        }
+                        else if (tail < j)
+                        {
+                            faceColor = PackABGR(0.f, 0.f, 0.f, 1.f);
+                        }
+                        else
+                        {
+                            faceColor = PackABGR(0.7f, 0.7f, 0.7f, 1.f);
+                        }
+                    }
+                    else if (o->Type == BITMAP_FLARE_FORCE && (o->SubType >= 0 && o->SubType <= 4) ||
+                             (o->SubType >= 11 && o->SubType <= 13))
+                    {
+                        float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
+                        faceColor =
+                            PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
+                    }
+                    else if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 1)
+                    {
+                        float Luminosity = (1.f - ((int)o->NumTails - j) / (float)(o->NumTails)) * 2.f;
+                        faceColor =
+                            PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
+                    }
 #ifdef GUILD_WAR_EVENT
                     if (o->Type == BITMAP_FLARE && o->SubType == 22)
                     {
@@ -7371,18 +7410,22 @@ void RenderJoints(BYTE bRenderOneMore)
                         // glTranslatef/glPopMatrix) left in place — story 4.2.5 scope.
                         const std::uint32_t guildColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
                         const std::vector<mu::Vertex3D> guildFace1 = {
-                            { currentTail[2][0],    currentTail[2][1],    currentTail[2][2],    0.f, 0.f, 0.f, Light1, 1.f, guildColor },
-                            { currentTail[3][0],    currentTail[3][1],    currentTail[3][2],    0.f, 0.f, 0.f, Light1, 0.f, guildColor },
-                            { nextTail[3][0],        nextTail[3][1],        nextTail[3][2],        0.f, 0.f, 0.f, Light2, 0.f, guildColor },
-                            { nextTail[2][0],        nextTail[2][1],        nextTail[2][2],        0.f, 0.f, 0.f, Light2, 1.f, guildColor },
+                            {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                             guildColor},
+                            {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                             guildColor},
+                            {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
+                            {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
                         };
                         mu::GetRenderer().RenderQuadStrip(guildFace1, 0u);
 
                         const std::vector<mu::Vertex3D> guildFace2 = {
-                            { currentTail[0][0],    currentTail[0][1],    currentTail[0][2],    0.f, 0.f, 0.f, Light1, 0.f, guildColor },
-                            { currentTail[1][0],    currentTail[1][1],    currentTail[1][2],    0.f, 0.f, 0.f, Light1, 1.f, guildColor },
-                            { nextTail[1][0],        nextTail[1][1],        nextTail[1][2],        0.f, 0.f, 0.f, Light2, 1.f, guildColor },
-                            { nextTail[0][0],        nextTail[0][1],        nextTail[0][2],        0.f, 0.f, 0.f, Light2, 0.f, guildColor },
+                            {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                             guildColor},
+                            {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                             guildColor},
+                            {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
+                            {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
                         };
                         mu::GetRenderer().RenderQuadStrip(guildFace2, 0u);
 
@@ -7408,16 +7451,14 @@ void RenderJoints(BYTE bRenderOneMore)
 
                     if ((o->RenderFace & RENDER_FACE_ONE) == RENDER_FACE_ONE)
                     {
-                        glBegin(GL_QUADS);
-                        glTexCoord2f(L1, V2);
-                        glVertex3fv(currentTail[2]);
-                        glTexCoord2f(L1, V1);
-                        glVertex3fv(currentTail[3]);
-                        glTexCoord2f(L2, V1);
-                        glVertex3fv(nextTail[3]);
-                        glTexCoord2f(L2, V2);
-                        glVertex3fv(nextTail[2]);
-                        glEnd();
+                        // Story 4.2.4: Migrate RENDER_FACE_ONE trail segment to RenderQuadStrip.
+                        const std::vector<mu::Vertex3D> faceOneVerts = {
+                            {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
+                            {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
+                            {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
+                            {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
+                        };
+                        mu::GetRenderer().RenderQuadStrip(faceOneVerts, 0u);
                     }
 
                     if ((o->RenderFace & RENDER_FACE_TWO) == RENDER_FACE_TWO)
@@ -7427,16 +7468,15 @@ void RenderJoints(BYTE bRenderOneMore)
                             L1 += Scroll * 2.f;
                             L2 += Scroll * 2.f;
                         }
-                        glBegin(GL_QUADS);
-                        glTexCoord2f(L1, V1);
-                        glVertex3fv(currentTail[0]);
-                        glTexCoord2f(L1, V2);
-                        glVertex3fv(currentTail[1]);
-                        glTexCoord2f(L2, V2);
-                        glVertex3fv(nextTail[1]);
-                        glTexCoord2f(L2, V1);
-                        glVertex3fv(nextTail[0]);
-                        glEnd();
+                        // Story 4.2.4: Migrate RENDER_FACE_TWO trail segment to RenderQuadStrip.
+                        // BITMAP_JOINT_THUNDER UV scroll (L1/L2 adjustment) preserved above.
+                        const std::vector<mu::Vertex3D> faceTwoVerts = {
+                            {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
+                            {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
+                            {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
+                            {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
+                        };
+                        mu::GetRenderer().RenderQuadStrip(faceTwoVerts, 0u);
                     }
                 }
             }
