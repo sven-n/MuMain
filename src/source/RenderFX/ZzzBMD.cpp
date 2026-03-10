@@ -2192,56 +2192,55 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         Render = RENDER_TEXTURE;
     }
 
-    glBegin(GL_TRIANGLES);
-    for (int j = 0; j < m->NumTriangles; j++)
     {
-        vec3_t pos;
-        Triangle_t* tp = &m->Triangles[j];
-        for (int k = 0; k < tp->Polygon; k++)
+        std::vector<mu::Vertex3D> muVerts;
+        muVerts.reserve(static_cast<std::size_t>(m->NumTriangles) * 3);
+        for (int j = 0; j < m->NumTriangles; j++)
         {
-            int vi = tp->VertexIndex[k];
-            switch (Render)
+            Triangle_t* tp = &m->Triangles[j];
+            for (int k = 0; k < tp->Polygon; k++)
             {
-            case RENDER_TEXTURE:
-            {
-                TexCoord_t* texp = &m->TexCoords[tp->TexCoordIndex[k]];
-                if (EnableWave)
-                    glTexCoord2f(texp->TexCoordU + BlendMeshTexCoordU, texp->TexCoordV + BlendMeshTexCoordV);
-                else
-                    glTexCoord2f(texp->TexCoordU, texp->TexCoordV);
-                if (EnableLight)
+                int vi = tp->VertexIndex[k];
+                int ni = tp->NormalIndex[k];
+
+                float u = 0.f;
+                float v = 0.f;
+                std::uint32_t color = 0xFFFFFFFFu;
+
+                switch (Render)
                 {
-                    int ni = tp->NormalIndex[k];
-                    if (Alpha >= 0.99f)
-                    {
-                        glColor3fv(LightTransform[i][ni]);
-                    }
-                    else
+                case RENDER_TEXTURE:
+                {
+                    TexCoord_t* texp = &m->TexCoords[tp->TexCoordIndex[k]];
+                    u = EnableWave ? texp->TexCoordU + BlendMeshTexCoordU : texp->TexCoordU;
+                    v = EnableWave ? texp->TexCoordV + BlendMeshTexCoordV : texp->TexCoordV;
+                    if (EnableLight)
                     {
                         float* Light = LightTransform[i][ni];
-                        glColor4f(Light[0], Light[1], Light[2], Alpha);
+                        color = (Alpha >= 0.99f) ? PackABGR(Light[0], Light[1], Light[2], 1.f)
+                                                 : PackABGR(Light[0], Light[1], Light[2], Alpha);
                     }
+                    break;
                 }
-                break;
-            }
-            case RENDER_CHROME:
-            {
-                if (Alpha >= 0.99f)
-                    glColor3fv(BodyLight);
-                else
-                    glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-                int ni = tp->NormalIndex[k];
-                glTexCoord2f(g_chrome[ni][0], g_chrome[ni][1]);
-                break;
-            }
-            }
-            {
+                case RENDER_CHROME:
+                {
+                    u = g_chrome[ni][0];
+                    v = g_chrome[ni][1];
+                    color = (Alpha >= 0.99f) ? PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], 1.f)
+                                             : PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
+                    break;
+                }
+                }
+
+                vec3_t pos;
                 VectorAdd(VertexTransform[i][vi], BodyOrigin, pos);
-                glVertex3fv(pos);
+
+                float* n = NormalTransform[i][ni];
+                muVerts.push_back({pos[0], pos[1], pos[2], n[0], n[1], n[2], u, v, color});
             }
         }
+        mu::GetRenderer().RenderTriangles(muVerts, static_cast<std::uint32_t>(Texture));
     }
-    glEnd();
 }
 
 void BMD::RenderBodyTranslate(int Flag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU,
