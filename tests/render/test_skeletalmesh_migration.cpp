@@ -1,13 +1,13 @@
 // Story 4.2.3: Migrate Skeletal Mesh Rendering to RenderTriangles
 // Flow Code: VS1-RENDER-MIGRATE-TRIANGLES
 //
-// RED PHASE: Tests fail until:
-//   - MuRendererGL::RenderTriangles emits per-vertex color (glColor4f, Task 7)
-//   - BMD::RenderMesh() delegates to mu::GetRenderer().RenderTriangles() (Task 2)
-//   - BMD::EndRenderCoinHeap() delegates to mu::GetRenderer().RenderTriangles() (Task 3)
-//   - BMD::RenderMeshAlternative() delegates to mu::GetRenderer().RenderTriangles() (Task 4)
-//   - BMD::RenderMeshTranslate() delegates to mu::GetRenderer().RenderTriangles() (Task 5)
-//   - AddMeshShadowTriangles / AddClothesShadowTriangles delegate to RenderTriangles() (Task 6)
+// GREEN PHASE: All migration tasks complete. Tests verify the implementation contracts:
+//   - MuRendererGL::RenderTriangles emits per-vertex color (glColor4f) — Task 7 done
+//   - BMD::RenderMesh() delegates to mu::GetRenderer().RenderTriangles() — Task 2 done
+//   - BMD::EndRenderCoinHeap() delegates to mu::GetRenderer().RenderTriangles() — Task 3 done
+//   - BMD::RenderMeshAlternative() delegates to mu::GetRenderer().RenderTriangles() — Task 4 done
+//   - BMD::RenderMeshTranslate() delegates to mu::GetRenderer().RenderTriangles() — Task 5 done
+//   - AddMeshShadowTriangles / AddClothesShadowTriangles delegate to RenderTriangles() — Task 6 done
 //
 // IMPORTANT: No OpenGL calls in this test TU.
 // RenderTrianglesCapture is a test-double of IMuRenderer defined inline below.
@@ -85,13 +85,19 @@ struct RenderTrianglesCapture : public mu::IMuRenderer
 // Mirrors the static inline PackABGR() function in ZzzBMD.cpp.
 // Converts float RGBA channels to a packed 32-bit ABGR value.
 // A=bits31-24, B=bits23-16, G=bits15-8, R=bits7-0
+//
+// KEEP IN SYNC WITH: ZzzBMD.cpp::PackABGR
+// Channels are clamped to [0.0, 1.0] to match the production implementation
+// (LightTransform can exceed 1.0 for overbright effects — clamping prevents
+// truncated/incorrect color channels).
 // ---------------------------------------------------------------------------
 [[nodiscard]] std::uint32_t PackABGR(float r, float g, float b, float a)
 {
-    return (static_cast<std::uint32_t>(a * 255.f) << 24) |
-           (static_cast<std::uint32_t>(b * 255.f) << 16) |
-           (static_cast<std::uint32_t>(g * 255.f) << 8) |
-           static_cast<std::uint32_t>(r * 255.f);
+    auto clamp01 = [](float v) -> float { return v < 0.f ? 0.f : (v > 1.f ? 1.f : v); };
+    return (static_cast<std::uint32_t>(clamp01(a) * 255.f) << 24) |
+           (static_cast<std::uint32_t>(clamp01(b) * 255.f) << 16) |
+           (static_cast<std::uint32_t>(clamp01(g) * 255.f) << 8) |
+            static_cast<std::uint32_t>(clamp01(r) * 255.f);
 }
 
 } // anonymous namespace

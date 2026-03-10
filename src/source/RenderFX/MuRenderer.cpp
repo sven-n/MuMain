@@ -63,6 +63,14 @@ public:
     // RenderTriangles: Render world-space triangles.
     // Mirrors the glDrawArrays path in ZzzBMD.cpp:
     //   glBegin(GL_TRIANGLES) → loop over vertex span → glEnd()
+    //
+    // NOTE: textureId is NOT used on this backend. Texture state is managed
+    // by the caller via BindTexture() / DisableTexture() in ZzzOpenglUtil.cpp
+    // before calling RenderTriangles. The textureId parameter is reserved for
+    // the future SDL_gpu backend (story 4.3.1) where the backend owns its own
+    // pipeline state. Using textureId here would re-bind the wrong GL object
+    // (BITMAP slot index ≠ GL texture object name) and corrupt chrome/metal
+    // render paths where the caller binds BITMAP_CHROME before calling us.
     // -----------------------------------------------------------------------
     void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
@@ -72,7 +80,9 @@ public:
             return;
         }
 
-        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(textureId));
+        // textureId is informational on this backend — caller manages GL texture state.
+        (void)textureId;
+
         glBegin(GL_TRIANGLES);
         for (const Vertex3D& v : vertices)
         {

@@ -23,11 +23,17 @@
 // PackABGR: Pack float RGBA channels into a 32-bit ABGR value.
 // A=bits31-24, B=bits23-16, G=bits15-8, R=bits7-0
 // Matches the Vertex3D::color layout in MuRenderer.h (story 4.2.3).
+//
+// Channels are clamped to [0.0, 1.0] before conversion. LightTransform
+// values can exceed 1.0 for overbright effects (VectorScale with Luminosity);
+// without clamping, a float > 1.0 would produce a truncated/wrapped byte.
 // ---------------------------------------------------------------------------
 static inline std::uint32_t PackABGR(float r, float g, float b, float a)
 {
-    return (static_cast<std::uint32_t>(a * 255.f) << 24) | (static_cast<std::uint32_t>(b * 255.f) << 16) |
-           (static_cast<std::uint32_t>(g * 255.f) << 8) | static_cast<std::uint32_t>(r * 255.f);
+    auto clamp01 = [](float v) -> float { return v < 0.f ? 0.f : (v > 1.f ? 1.f : v); };
+    return (static_cast<std::uint32_t>(clamp01(a) * 255.f) << 24) |
+           (static_cast<std::uint32_t>(clamp01(b) * 255.f) << 16) |
+           (static_cast<std::uint32_t>(clamp01(g) * 255.f) << 8) | static_cast<std::uint32_t>(clamp01(r) * 255.f);
 }
 
 BMD* Models;
@@ -985,6 +991,8 @@ void BMD::EndRenderCoinHeap(int coinCount)
         muVerts.push_back(
             {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0], texCoords[i][1], color});
     }
+    // textureId=0 on GL backend: caller's BindTexture() manages texture state.
+    // SDL_gpu backend (story 4.3.1) will use this parameter exclusively.
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
