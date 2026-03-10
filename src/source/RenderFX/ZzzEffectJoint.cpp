@@ -7365,24 +7365,26 @@ void RenderJoints(BYTE bRenderOneMore)
                         glPushMatrix();
                         glTranslatef(t_bias[0], t_bias[1], t_bias[2]);
 
-                        glBegin(GL_QUADS);
-                        glTexCoord2f(Light1, 1.f);
-                        glVertex3fv(currentTail[2]);
-                        glTexCoord2f(Light1, 0.f);
-                        glVertex3fv(currentTail[3]);
-                        glTexCoord2f(Light2, 0.f);
-                        glVertex3fv(o->Tails[j + 1][3]);
-                        glTexCoord2f(Light2, 1.f);
-                        glVertex3fv(o->Tails[j + 1][2]);
-                        glTexCoord2f(Light1, 0.f);
-                        glVertex3fv(currentTail[0]);
-                        glTexCoord2f(Light1, 1.f);
-                        glVertex3fv(currentTail[1]);
-                        glTexCoord2f(Light2, 1.f);
-                        glVertex3fv(o->Tails[j + 1][1]);
-                        glTexCoord2f(Light2, 0.f);
-                        glVertex3fv(o->Tails[j + 1][0]);
-                        glEnd();
+                        // Story 4.2.4: Migrate GUILD_WAR_EVENT double-face trail segment
+                        // to two RenderQuadStrip calls. Color from o->Light (set via
+                        // glColor3fv(o->Light) before the loop). Matrix state (glPushMatrix/
+                        // glTranslatef/glPopMatrix) left in place — story 4.2.5 scope.
+                        const std::uint32_t guildColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
+                        const std::vector<mu::Vertex3D> guildFace1 = {
+                            { currentTail[2][0],    currentTail[2][1],    currentTail[2][2],    0.f, 0.f, 0.f, Light1, 1.f, guildColor },
+                            { currentTail[3][0],    currentTail[3][1],    currentTail[3][2],    0.f, 0.f, 0.f, Light1, 0.f, guildColor },
+                            { nextTail[3][0],        nextTail[3][1],        nextTail[3][2],        0.f, 0.f, 0.f, Light2, 0.f, guildColor },
+                            { nextTail[2][0],        nextTail[2][1],        nextTail[2][2],        0.f, 0.f, 0.f, Light2, 1.f, guildColor },
+                        };
+                        mu::GetRenderer().RenderQuadStrip(guildFace1, 0u);
+
+                        const std::vector<mu::Vertex3D> guildFace2 = {
+                            { currentTail[0][0],    currentTail[0][1],    currentTail[0][2],    0.f, 0.f, 0.f, Light1, 0.f, guildColor },
+                            { currentTail[1][0],    currentTail[1][1],    currentTail[1][2],    0.f, 0.f, 0.f, Light1, 1.f, guildColor },
+                            { nextTail[1][0],        nextTail[1][1],        nextTail[1][2],        0.f, 0.f, 0.f, Light2, 1.f, guildColor },
+                            { nextTail[0][0],        nextTail[0][1],        nextTail[0][2],        0.f, 0.f, 0.f, Light2, 0.f, guildColor },
+                        };
+                        mu::GetRenderer().RenderQuadStrip(guildFace2, 0u);
 
                         glPopMatrix();
                         continue;
