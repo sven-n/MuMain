@@ -103,6 +103,18 @@ target_sources(MuTests PRIVATE render/test_skeletalmesh_migration.cpp)
 # Tasks 1–7 in story 4.2.4 fully implemented and quality gate PASSED (705 files, 0 errors).
 target_sources(MuTests PRIVATE render/test_traileffects_migration.cpp)
 
+# Story 4.2.5: Migrate Blend & Pipeline State to MuRenderer [VS1-RENDER-MIGRATE-STATE]
+# RED PHASE: Tests verify SetBlendMode() routing for all 7 blend helper mappings,
+# SetDepthTest() bool routing (enable/disable), SetFog() FogParams population for the
+# GMBattleCastle GL_LINEAR fog migration, and DisableBlend() routing (new IMuRenderer method).
+# Tests compile but FAIL until Tasks 2–5 in story 4.2.5 are implemented:
+#   Task 2: add BlendMode::Glow, BlendMode::Luminance, DisableBlend() to MuRenderer.h/.cpp
+#   Task 3: wrap 7 blend helpers in ZzzOpenglUtil.cpp to delegate to mu::GetRenderer()
+#   Task 4: wrap depth test helpers; fix CameraMove.cpp direct GL calls
+#   Task 5: migrate GMBattleCastle.cpp fog setup to mu::GetRenderer().SetFog()
+# Tests compile and run on macOS/Linux — no gl* calls in this TU.
+target_sources(MuTests PRIVATE render/test_blendpipelinestate_migration.cpp)
+
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
 # RED PHASE: Tests mu_wchar_to_char16 / mu_char16_to_wchar round-trips and byte-level
 # UTF-16LE baseline for Korean, Latin, mixed-script, null, and IP address strings.
