@@ -1386,9 +1386,20 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 // On non-Windows, the game window and event loop use MuPlatform (SDL3 backend).
 // Full game initialization is deferred to later EPIC-2 stories — this entry point
 // currently initializes SDL3 windowing and runs the event loop skeleton.
+//
+// Story 4.3.1: SDL_gpu backend init/shutdown wired here.
+// InitSDLGpuRenderer / ShutdownSDLGpuRenderer are free function wrappers
+// defined in MuRendererSDLGpu.cpp; no separate header required.
 
 #include "Platform/MuPlatform.h"
 #include "Platform/IPlatformWindow.h"
+#include "RenderFX/MuRenderer.h"
+
+namespace mu
+{
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow);
+void ShutdownSDLGpuRenderer();
+} // namespace mu
 
 int MuMain(int /*argc*/, char* /*argv*/[])
 {
@@ -1418,6 +1429,15 @@ int MuMain(int /*argc*/, char* /*argv*/[])
             }
         }
     }
+
+    // Story 4.3.1: Initialize SDL_gpu backend after window is created.
+    mu::IPlatformWindow* pWin = mu::MuPlatform::GetWindow();
+    if (!pWin || !mu::InitSDLGpuRenderer(pWin->GetNativeHandle()))
+    {
+        g_ErrorReport.Write(L"RENDER: SDL_gpu -- backend initialization failed; exiting");
+        mu::MuPlatform::Shutdown();
+        return 1;
+    }
 #endif
 
     while (!Destroy)
@@ -1427,9 +1447,24 @@ int MuMain(int /*argc*/, char* /*argv*/[])
             break;
         }
 
+        // Story 4.3.1: Per-frame SDL_gpu command buffer / render pass lifecycle.
+        // BeginFrame acquires the command buffer, swapchain texture, and render pass.
+        // EndFrame ends the render pass and submits the command buffer.
+#ifdef MU_ENABLE_SDL3
+        mu::GetRenderer().BeginFrame();
+#endif
+
         // Game loop body will be added as more systems are migrated
         // (rendering in EPIC-4, input in EPIC-2.2, audio in EPIC-5)
+
+#ifdef MU_ENABLE_SDL3
+        mu::GetRenderer().EndFrame();
+#endif
     }
+
+#ifdef MU_ENABLE_SDL3
+    mu::ShutdownSDLGpuRenderer();
+#endif
 
     mu::MuPlatform::Shutdown();
     return 0;

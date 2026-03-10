@@ -74,8 +74,10 @@
 #endif
 
 #ifdef _WIN32
+#ifdef MU_USE_OPENGL_BACKEND
 #include <gl/glew.h>
 #include <gl/GL.h>
+#endif // MU_USE_OPENGL_BACKEND
 #else
 typedef unsigned int GLuint;
 typedef int GLint;

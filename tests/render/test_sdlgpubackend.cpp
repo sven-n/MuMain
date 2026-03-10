@@ -46,30 +46,35 @@
 // while still verifying the factor mapping table values.
 //
 // From SDL3/SDL_gpu.h (SDL_GPUBlendFactor enum):
-//   SDL_GPU_BLENDFACTOR_ZERO                  = 0
-//   SDL_GPU_BLENDFACTOR_ONE                   = 1
-//   SDL_GPU_BLENDFACTOR_SRC_COLOR             = 2
-//   SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR   = 3
-//   SDL_GPU_BLENDFACTOR_SRC_ALPHA             = 4
-//   SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA   = 5
-//   SDL_GPU_BLENDFACTOR_DST_COLOR             = 6
-//   SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR   = 7
-//   SDL_GPU_BLENDFACTOR_DST_ALPHA             = 8
-//   SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_ALPHA   = 9
+//   SDL_GPU_BLENDFACTOR_INVALID               = 0
+//   SDL_GPU_BLENDFACTOR_ZERO                  = 1
+//   SDL_GPU_BLENDFACTOR_ONE                   = 2
+//   SDL_GPU_BLENDFACTOR_SRC_COLOR             = 3
+//   SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR   = 4
+//   SDL_GPU_BLENDFACTOR_DST_COLOR             = 5
+//   SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR   = 6
+//   SDL_GPU_BLENDFACTOR_SRC_ALPHA             = 7
+//   SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA   = 8
+//   SDL_GPU_BLENDFACTOR_DST_ALPHA             = 9
+//   SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_ALPHA   = 10
+//   SDL_GPU_BLENDFACTOR_CONSTANT_COLOR        = 11
+//   SDL_GPU_BLENDFACTOR_ONE_MINUS_CONSTANT_COLOR = 12
+//   SDL_GPU_BLENDFACTOR_SRC_ALPHA_SATURATE    = 13
 namespace
 {
 
 // Proxy constants matching SDL_GPUBlendFactor enum values from SDL3/SDL_gpu.h.
 // These allow the test to verify the factor table without including SDL3 headers.
 // Values must match exactly; if SDL3 changes enum values, this test will catch it.
-constexpr int k_BlendFactor_Zero              = 0;
-constexpr int k_BlendFactor_One               = 1;
-constexpr int k_BlendFactor_SrcColor          = 2;
-constexpr int k_BlendFactor_OneMinusSrcColor  = 3;
-constexpr int k_BlendFactor_SrcAlpha          = 4;
-constexpr int k_BlendFactor_OneMinusSrcAlpha  = 5;
-constexpr int k_BlendFactor_DstColor          = 6;
-constexpr int k_BlendFactor_OneMinusDstColor  = 7;
+// Verified against SDL3 release-3.2.8 SDL_gpu.h (SDL_GPUBlendFactor typedef enum).
+constexpr int k_BlendFactor_Zero              = 1;  // SDL_GPU_BLENDFACTOR_ZERO
+constexpr int k_BlendFactor_One               = 2;  // SDL_GPU_BLENDFACTOR_ONE
+constexpr int k_BlendFactor_SrcColor          = 3;  // SDL_GPU_BLENDFACTOR_SRC_COLOR
+constexpr int k_BlendFactor_OneMinusSrcColor  = 4;  // SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR
+constexpr int k_BlendFactor_DstColor          = 5;  // SDL_GPU_BLENDFACTOR_DST_COLOR
+constexpr int k_BlendFactor_OneMinusDstColor  = 6;  // SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR
+constexpr int k_BlendFactor_SrcAlpha          = 7;  // SDL_GPU_BLENDFACTOR_SRC_ALPHA
+constexpr int k_BlendFactor_OneMinusSrcAlpha  = 8;  // SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
 
 } // anonymous namespace
 
@@ -390,11 +395,12 @@ TEST_CASE("AC-STD-2(b) [4-3-1]: BlendMode -- SDL_gpu factor table", "[render][sd
         for (const auto mode : allModes)
         {
             auto [src, dst] = mu::GetBlendFactors(mode);
-            // Valid SDL_GPUBlendFactor values are 0-9 (see SDL3/SDL_gpu.h)
-            REQUIRE(src >= 0);
-            REQUIRE(src <= 9);
-            REQUIRE(dst >= 0);
-            REQUIRE(dst <= 9);
+            // Valid SDL_GPUBlendFactor values are 1-13 (SDL_GPU_BLENDFACTOR_ZERO..SRC_ALPHA_SATURATE)
+            // See SDL3/SDL_gpu.h SDL_GPUBlendFactor enum (release-3.2.8).
+            REQUIRE(src >= 1);
+            REQUIRE(src <= 13);
+            REQUIRE(dst >= 1);
+            REQUIRE(dst <= 13);
         }
     }
 }
@@ -572,12 +578,12 @@ TEST_CASE("AC-VAL-1 [4-3-1]: TextureRegistry contract verified -- register / loo
 
         for (const auto mode : allModes)
         {
-            // Must not crash or return invalid values (valid range: 0-9)
+            // Must not crash or return invalid values (valid range: 1-13 per SDL3/SDL_gpu.h)
             auto [src, dst] = mu::GetBlendFactors(mode);
-            CHECK(src >= 0);
-            CHECK(src <= 9);
-            CHECK(dst >= 0);
-            CHECK(dst <= 9);
+            CHECK(src >= 1);
+            CHECK(src <= 13);
+            CHECK(dst >= 1);
+            CHECK(dst <= 13);
         }
     }
 }

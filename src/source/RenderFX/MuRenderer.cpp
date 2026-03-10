@@ -7,9 +7,16 @@
 // OpenGL calls appear ONLY in this file — never in MuRenderer.h.
 // stdafx.h provides inline no-op stubs for all gl* calls on non-Windows,
 // so this file compiles on macOS/Linux without #ifdef _WIN32 guards.
+//
+// Story 4.3.1: This entire file is guarded under MU_USE_OPENGL_BACKEND.
+// When MU_USE_OPENGL_BACKEND is OFF (the default), MuRendererSDLGpu.cpp
+// provides GetRenderer() instead. The file still compiles as an empty
+// translation unit when the flag is OFF.
 #include "stdafx.h"
 #include "MuRenderer.h"
 #include "ErrorReport.h"
+
+#ifdef MU_USE_OPENGL_BACKEND
 
 namespace mu
 {
@@ -244,3 +251,5 @@ IMuRenderer& GetRenderer()
 }
 
 } // namespace mu
+
+#endif // MU_USE_OPENGL_BACKEND

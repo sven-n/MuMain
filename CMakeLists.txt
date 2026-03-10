@@ -10,6 +10,16 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(MU_ENABLE_DOTNET ".NET AOT library integration (disable for CI/rendering-only builds)" ON)
 
 # ============================================================
+# Story 4.3.1: SDL_gpu backend / OpenGL backend toggle.
+# OFF (default): MuRendererSDLGpu is the active backend; GLEW is not linked.
+# ON: MuRendererGL (legacy OpenGL/GLEW) backend is compiled and linked.
+# ============================================================
+option(MU_USE_OPENGL_BACKEND "Use legacy OpenGL/GLEW rendering backend instead of SDL_gpu" OFF)
+if(MU_USE_OPENGL_BACKEND)
+    add_compile_definitions(MU_USE_OPENGL_BACKEND)
+endif()
+
+# ============================================================
 # .NET AOT Cross-Platform Library (EPIC-3, Story 3.1.1)
 # compile definitions MUST be set BEFORE add_subdirectory("src")
 # so that Main, MUCore, and MUGame targets inherit them.
