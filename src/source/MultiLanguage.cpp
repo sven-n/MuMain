@@ -34,6 +34,27 @@ BYTE CMultiLanguage::GetLanguage()
     return byLanguage;
 }
 
+/**
+ * Converts a UTF-8 byte buffer to UTF-16.
+ *
+ * Reads up to @p maxSourceLength bytes from @p source (which may or may not
+ * be null-terminated) and writes the converted UTF-16 characters to @p target.
+ * The required number of UTF-16 characters is determined first using
+ * MultiByteToWideChar().
+ *
+ * If a null terminator exists within the processed byte range, it is copied
+ * by the conversion. Otherwise, the function appends one when possible.
+ *
+ * @param target Destination buffer for the UTF-16 output.
+ * @param source UTF-8 encoded byte buffer.
+ * @param maxSourceLength Maximum number of bytes to read from @p source.
+ *
+ * @return Number of UTF-16 characters written (excluding the null terminator
+ *         when present). Returns 0 on failure.
+ *
+ * @note The caller must ensure @p target is large enough to hold the converted
+ *       UTF-16 string plus a terminating null character.
+ */
 int32_t CMultiLanguage::ConvertFromUtf8(wchar_t* target, const char* source, int maxSourceLength)
 {
     if (target == nullptr || source == nullptr)
