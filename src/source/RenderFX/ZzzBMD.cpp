@@ -932,10 +932,6 @@ void BMD::BeginRenderCoinHeap()
 
     BindTexture(textureIndex);
     DisableAlphaBlend();
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 int BMD::AddToCoinHeap(int coinIndex, int target_vertex_index)
@@ -976,17 +972,20 @@ void BMD::EndRenderCoinHeap(int coinCount)
     const auto colors = RenderArrayColors;
     const auto texCoords = RenderArrayTexCoords;
 
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glColorPointer(4, GL_FLOAT, 0, colors);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-
     constexpr int meshIndex = 0;
     Mesh_t* m = &Meshs[meshIndex];
-    glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3 * coinCount);
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    const int numVerts = m->NumTriangles * 3 * coinCount;
+    std::vector<mu::Vertex3D> muVerts;
+    muVerts.reserve(numVerts);
+    for (int i = 0; i < numVerts; ++i)
+    {
+        const vec4_t& c = colors[i];
+        const std::uint32_t color = PackABGR(c[0], c[1], c[2], c[3]);
+        muVerts.push_back(
+            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0], texCoords[i][1], color});
+    }
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
 void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshIndex, float blendMeshAlpha,
