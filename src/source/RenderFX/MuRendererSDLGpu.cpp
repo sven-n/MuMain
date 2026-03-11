@@ -1239,8 +1239,12 @@ private:
         }
 
         // basic_colored.vert — non-fatal (colored path degrades gracefully).
-        // Inputs: pos(TEXCOORD0), uv(TEXCOORD1), color(TEXCOORD2)
+        // Inputs: pos(TEXCOORD0), color(TEXCOORD2)  [uv removed per LOW-1 fix]
         // Uniform buffers: b1 (ScreenSize)
+        // NOTE (HIGH-4): Shader handles below are loaded as pipeline hooks for
+        //   future IMuRenderer::RenderColoredGeometry() and RenderShadowVolume()
+        //   methods. No dedicated pipeline sets exist yet — these shaders are not
+        //   assigned to any pipeline in this story. Deferred to a follow-up story.
         s_vertShader2DCol = createShader("basic_colored", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/false);
 
         // basic_colored.frag — non-fatal.
