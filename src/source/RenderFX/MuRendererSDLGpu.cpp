@@ -404,7 +404,7 @@ public:
     // BeginFrame: Acquire command buffer, swapchain texture, and begin render pass.
     // Called once per frame before any draw calls.
     // -----------------------------------------------------------------------
-    void BeginFrame()
+    void BeginFrame() override
     {
 #ifdef MU_ENABLE_SDL3
         if (!s_device || !s_window)
@@ -471,7 +471,7 @@ public:
     // Called once per frame after all draw calls.
     // Replaces SDL_GL_SwapWindow / SwapBuffers in the game loop.
     // -----------------------------------------------------------------------
-    void EndFrame()
+    void EndFrame() override
     {
 #ifdef MU_ENABLE_SDL3
         if (!s_renderPass)
@@ -559,7 +559,15 @@ public:
         SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
 
         const Uint32 numQuads = static_cast<Uint32>(vertices.size() / 4);
-        SDL_DrawGPUIndexedPrimitives(s_renderPass, numQuads * 6, 1, 0, 0, 0);
+        // Code-review fix H-2: guard against reading past the static quad index buffer.
+        if (numQuads > static_cast<Uint32>(k_MaxQuads))
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuad2D -- numQuads %u exceeds k_MaxQuads %d; clamping draw",
+                                numQuads, k_MaxQuads);
+        }
+        const Uint32 drawQuads =
+            (numQuads <= static_cast<Uint32>(k_MaxQuads)) ? numQuads : static_cast<Uint32>(k_MaxQuads);
+        SDL_DrawGPUIndexedPrimitives(s_renderPass, drawQuads * 6, 1, 0, 0, 0);
 #else
         (void)vertices;
         (void)textureId;
@@ -574,6 +582,13 @@ public:
 #ifdef MU_ENABLE_SDL3
         if (vertices.empty() || !s_renderPass)
         {
+            return;
+        }
+
+        if (vertices.size() % 3 != 0)
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderTriangles -- vertex count %zu not divisible by 3",
+                                vertices.size());
             return;
         }
 
@@ -1373,21 +1388,21 @@ private:
 };
 
 // ---------------------------------------------------------------------------
-// GetRenderer: Return the singleton MuRendererSDLGpu instance.
-// Replaces MuRendererGL as the active backend.
-// MuRendererGL code in MuRenderer.cpp compiles only when MU_USE_OPENGL_BACKEND is ON.
+// GetRenderer / InitSDLGpuRenderer / ShutdownSDLGpuRenderer:
+// Only compiled when MU_USE_OPENGL_BACKEND is OFF (the default SDL_gpu path).
+// When MU_USE_OPENGL_BACKEND is ON, MuRenderer.cpp provides GetRenderer()
+// returning MuRendererGL. Both files defining GetRenderer() would be an ODR
+// violation. Code-review fix H-1.
 // ---------------------------------------------------------------------------
+#ifndef MU_USE_OPENGL_BACKEND
+
 [[nodiscard]] IMuRenderer& GetRenderer()
 {
     static MuRendererSDLGpu s_instance;
     return s_instance;
 }
 
-// ---------------------------------------------------------------------------
-// InitSDLGpuRenderer / ShutdownSDLGpuRenderer: C++ linkage entry points for
-// Winmain.cpp to call without requiring a class forward declaration.
-// Called once on startup / shutdown from the non-Windows SDL3 game loop.
-// ---------------------------------------------------------------------------
+// C++ linkage entry points for Winmain.cpp (no class forward declaration needed).
 [[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow)
 {
     return MuRendererSDLGpu::Init(pNativeWindow);
@@ -1397,5 +1412,7 @@ void ShutdownSDLGpuRenderer()
 {
     MuRendererSDLGpu::Shutdown();
 }
+
+#endif // !MU_USE_OPENGL_BACKEND
 
 } // namespace mu
