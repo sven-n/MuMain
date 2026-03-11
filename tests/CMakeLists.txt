@@ -123,6 +123,14 @@ target_sources(MuTests PRIVATE render/test_sdlgpubackend.cpp)
 # in MuRendererSDLGpu.cpp and exposed in the mu:: namespace.
 target_sources(MuTests PRIVATE render/test_shaderprograms.cpp)
 
+# Story 4.4.1 — Texture system migration [VS1-RENDER-TEXTURE-MIGRATE]
+# RED PHASE: Tests verify TextureRegistry roundtrip (GREEN — 4.3.1 impl), GL->SDL
+# filter/wrap mapping (MapGLFilterToSDL/MapGLWrapToSDL), and RGB->RGBA8 pixel padding
+# (PadRGBToRGBA). Format mapping and padding tests fail until Task 2.1 in story 4.4.1
+# implements the anonymous-namespace helpers in GlobalBitmap.cpp.
+# Tests compile and run on macOS/Linux — no GPU device, no Win32, no OpenGL required.
+target_sources(MuTests PRIVATE render/test_texturesystemmigration.cpp)
+
 # Story 4.2.5: Migrate Blend & Pipeline State to MuRenderer [VS1-RENDER-MIGRATE-STATE]
 # RED PHASE: Tests verify SetBlendMode() routing for all 7 blend helper mappings,
 # SetDepthTest() bool routing (enable/disable), SetFog() FogParams population for the
