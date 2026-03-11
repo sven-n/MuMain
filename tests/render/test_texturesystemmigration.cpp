@@ -31,9 +31,9 @@ void ClearTextureRegistry();
 } // namespace mu
 
 // ---------------------------------------------------------------------------
-// Forward declarations of testable static helpers from GlobalBitmap.cpp.
-// These are defined in an anonymous namespace in GlobalBitmap.cpp and
-// forward-declared here via extern linkage for test TU access.
+// Forward declarations of testable helpers from GlobalBitmap.cpp.
+// These are defined at global scope in GlobalBitmap.cpp (not in an anonymous namespace)
+// so that the test TU can forward-declare and link them directly.
 // They will be defined once Tasks 2.1 and 2.2 in story 4.4.1 are implemented.
 //
 // GL filter constants (matching OpenGL header values, used as plain ints here

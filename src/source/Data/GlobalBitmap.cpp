@@ -258,15 +258,28 @@ void UnregisterSampler(std::uint32_t id);
 
     // Map transfer buffer, copy pixel data, unmap.
     void* pMapped = SDL_MapGPUTransferBuffer(device, transferBuf, false);
-    if (pMapped)
+    if (!pMapped)
     {
-        std::memcpy(pMapped, pixelData, dataSize);
-        SDL_UnmapGPUTransferBuffer(device, transferBuf);
+        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_MapGPUTransferBuffer failed for %ls: %hs", filename.c_str(),
+                            SDL_GetError());
+        SDL_ReleaseGPUTransferBuffer(device, transferBuf);
+        SDL_ReleaseGPUTexture(device, gpuTex);
+        return false;
     }
+    std::memcpy(pMapped, pixelData, dataSize);
+    SDL_UnmapGPUTransferBuffer(device, transferBuf);
 
     // Issue copy command: upload from transfer buffer to GPU texture.
     SDL_GPUCommandBuffer* copyCmd = SDL_AcquireGPUCommandBuffer(device);
-    if (copyCmd)
+    if (!copyCmd)
+    {
+        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_AcquireGPUCommandBuffer failed for %ls: %hs",
+                            filename.c_str(), SDL_GetError());
+        SDL_ReleaseGPUTransferBuffer(device, transferBuf);
+        SDL_ReleaseGPUTexture(device, gpuTex);
+        return false;
+    }
+
     {
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(copyCmd);
         if (copyPass)
@@ -726,6 +739,34 @@ void CGlobalBitmap::UnloadAllImages()
     if (!m_mapBitmap.empty())
         g_ErrorReport.Write(L"Unload Images\r\n");
 #endif // _DEBUG
+
+#ifdef MU_ENABLE_SDL3
+    // Release SDL_gpu textures and samplers before clearing the bitmap map.
+    // m_mapBitmap.clear() would destroy BITMAP_t objects without releasing GPU resources,
+    // causing leaks during map transitions and incorrect TextureRegistry entries.
+    {
+        SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+        if (device)
+        {
+            for (auto& pair : m_mapBitmap)
+            {
+                BITMAP_t* pBitmap = pair.second.get();
+                mu::UnregisterTexture(pBitmap->BitmapIndex);
+                mu::UnregisterSampler(pBitmap->BitmapIndex);
+                if (pBitmap->sdlSampler != nullptr)
+                {
+                    SDL_ReleaseGPUSampler(device, pBitmap->sdlSampler);
+                    pBitmap->sdlSampler = nullptr;
+                }
+                if (pBitmap->sdlTexture != nullptr)
+                {
+                    SDL_ReleaseGPUTexture(device, pBitmap->sdlTexture);
+                    pBitmap->sdlTexture = nullptr;
+                }
+            }
+        }
+    }
+#endif
 
     for ([[maybe_unused]] auto& pair : m_mapBitmap)
     {
