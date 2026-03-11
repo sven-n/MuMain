@@ -2,7 +2,7 @@
 // Story 4.3.2: Shader Programs [VS1-RENDER-SHADERS]
 // No texture sampling; passes vertex color to fragment stage.
 cbuffer ScreenSize : register(b1) { float2 screenSize; float2 pad; };
-struct VSInput { float2 pos : TEXCOORD0; float2 uv : TEXCOORD1; float4 color : TEXCOORD2; };
+struct VSInput { float2 pos : TEXCOORD0; float4 color : TEXCOORD2; };
 struct VSOutput { float4 pos : SV_Position; float4 color : TEXCOORD0; };
 VSOutput main(VSInput input)
 {

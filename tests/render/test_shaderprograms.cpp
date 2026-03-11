@@ -4,6 +4,7 @@
 // Tests compile and run on macOS/Linux — no GPU device, no Win32, no OpenGL required.
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -19,7 +20,7 @@ namespace mu
 // driver: "vulkan", "direct3d12", or "metal"
 // stage:  "vert" or "frag"
 // name:   e.g., "basic_textured", "basic_colored", "shadow_volume"
-std::string GetShaderBlobPath(const char* driver, const char* stage, const char* name);
+[[nodiscard]] std::string GetShaderBlobPath(const char* driver, const char* stage, const char* name);
 
 // AC-8: Identifies which pipeline set a draw mode selects.
 enum class PipelineSet
@@ -50,7 +51,7 @@ struct FogUniform
     float pad0;
     float fogStart;
     float fogEnd;
-    float fogColor[4];
+    std::array<float, 4> fogColor;
     float pad1[2];
 };
 

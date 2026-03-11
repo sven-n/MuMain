@@ -102,6 +102,27 @@ if(NOT MU_ENABLE_SHADER_COMPILATION)
     # CI-safe fallback: copy pre-compiled blobs from src/shaders/compiled/ to
     # ${CMAKE_BINARY_DIR}/shaders/ at configure time. No tool dependency.
     file(GLOB MU_PRECOMPILED_BLOBS "${MU_SHADER_COMPILED_DIR}/*")
+    # Story 4.3.2 (HIGH-1 fix): warn if pre-compiled blobs are all empty (0 bytes).
+    # Empty blobs mean LoadShaderBlob() will fail at runtime and Init() will return false.
+    # To fix: run SDL_shadercross to compile the HLSL shaders and replace the placeholder files
+    # in src/shaders/compiled/, or enable MU_ENABLE_SHADER_COMPILATION on a capable machine.
+    set(MU_FOUND_NONEMPTY_BLOB FALSE)
+    foreach(blob IN LISTS MU_PRECOMPILED_BLOBS)
+        if(EXISTS "${blob}")
+            file(SIZE "${blob}" blob_size)
+            if(blob_size GREATER 0)
+                set(MU_FOUND_NONEMPTY_BLOB TRUE)
+                break()
+            endif()
+        endif()
+    endforeach()
+    if(NOT MU_FOUND_NONEMPTY_BLOB)
+        message(WARNING
+            "All pre-compiled shader blobs in src/shaders/compiled/ are empty (0 bytes). "
+            "LoadShaderBlob() will fail at runtime — renderer Init() will return false. "
+            "To fix: compile HLSL shaders via SDL_shadercross and commit the blobs, "
+            "or enable MU_ENABLE_SHADER_COMPILATION=ON on a machine with SDL_shadercross installed.")
+    endif()
     foreach(blob IN LISTS MU_PRECOMPILED_BLOBS)
         get_filename_component(blob_name "${blob}" NAME)
         configure_file("${blob}" "${MU_SHADER_OUTPUT_DIR}/${blob_name}" COPYONLY)

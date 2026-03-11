@@ -29,6 +29,7 @@
 #include "MuRenderer.h"
 #include "ErrorReport.h"
 
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -68,14 +69,14 @@ namespace mu
 // ---------------------------------------------------------------------------
 struct FogUniform
 {
-    uint32_t fogEnabled;          // offset  0
-    uint32_t alphaDiscardEnabled; // offset  4
-    float alphaThreshold;         // offset  8
-    float pad0;                   // offset 12
-    float fogStart;               // offset 16
-    float fogEnd;                 // offset 20
-    float fogColor[4];            // offset 24 (float4, 16 bytes)
-    float pad1[2];                // offset 40 (8 bytes)
+    uint32_t fogEnabled;           // offset  0
+    uint32_t alphaDiscardEnabled;  // offset  4
+    float alphaThreshold;          // offset  8
+    float pad0;                    // offset 12
+    float fogStart;                // offset 16
+    float fogEnd;                  // offset 20
+    std::array<float, 4> fogColor; // offset 24 (float4, 16 bytes)
+    float pad1[2];                 // offset 40 (8 bytes)
 }; // total: 48 bytes
 
 static_assert(offsetof(FogUniform, fogEnabled) == 0, "FogUniform std140 layout");
@@ -84,7 +85,8 @@ static_assert(offsetof(FogUniform, alphaThreshold) == 8, "FogUniform std140 layo
 static_assert(offsetof(FogUniform, pad0) == 12, "FogUniform std140 layout");
 static_assert(offsetof(FogUniform, fogStart) == 16, "FogUniform std140 layout");
 static_assert(offsetof(FogUniform, fogEnd) == 20, "FogUniform std140 layout");
-static_assert(offsetof(FogUniform, fogColor) == 24, "FogUniform std140 float4 alignment");
+static_assert(offsetof(FogUniform, fogColor) == 24,
+              "FogUniform std140 float4 alignment (std::array<float,4> == float[4])");
 static_assert(offsetof(FogUniform, pad1) == 40, "FogUniform std140 layout");
 static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (std140 HLSL cbuffer)");
 
@@ -96,7 +98,7 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (std140 HLS
 // stage:  "vert" | "frag"
 // name:   e.g., "basic_textured", "basic_colored", "shadow_volume"
 // ---------------------------------------------------------------------------
-std::string GetShaderBlobPath(const char* driver, const char* stage, const char* name)
+[[nodiscard]] std::string GetShaderBlobPath(const char* driver, const char* stage, const char* name)
 {
     const char* ext = "spv";
     if (driver && std::string(driver) == "direct3d12")
@@ -163,7 +165,9 @@ PipelineSet GetPipelineSetFor(DrawMode mode)
         return PipelineSet::Pipelines2D;
     case DrawMode::Triangles:
     case DrawMode::QuadStrip:
+        return PipelineSet::Pipelines3D;
     default:
+        g_ErrorReport.Write(L"RENDER: GetPipelineSetFor -- unknown DrawMode %d", static_cast<int>(mode));
         return PipelineSet::Pipelines3D;
     }
 }
