@@ -238,7 +238,12 @@ void UnregisterSampler(std::uint32_t id);
         return false;
     }
 
-    // Determine pixel byte size based on format (RGBA8 = 4 bytes/pixel).
+    // Determine pixel byte size based on format.
+    // Currently all callers supply SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM (4 bytes/pixel).
+    // If a non-RGBA8 format is ever added (e.g., R8G8B8_UNORM = 3 bytes/pixel), this
+    // calculation must be updated — otherwise the transfer buffer will be incorrectly sized.
+    assert(format == SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM &&
+           "UploadTextureSDLGpu: non-RGBA8 format requires updating pixelBytes calculation");
     const Uint32 pixelBytes = 4u; // SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM: 4 bytes/pixel
     const Uint32 dataSize = static_cast<Uint32>(width) * static_cast<Uint32>(height) * pixelBytes;
 
@@ -282,28 +287,36 @@ void UnregisterSampler(std::uint32_t id);
 
     {
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(copyCmd);
-        if (copyPass)
+        if (!copyPass)
         {
-            SDL_GPUTextureTransferInfo srcInfo{};
-            srcInfo.transfer_buffer = transferBuf;
-            srcInfo.offset = 0;
-            srcInfo.pixels_per_row = static_cast<Uint32>(width);
-            srcInfo.rows_per_layer = static_cast<Uint32>(height);
-
-            SDL_GPUTextureRegion dstRegion{};
-            dstRegion.texture = gpuTex;
-            dstRegion.mip_level = 0;
-            dstRegion.layer = 0;
-            dstRegion.x = 0;
-            dstRegion.y = 0;
-            dstRegion.z = 0;
-            dstRegion.w = static_cast<Uint32>(width);
-            dstRegion.h = static_cast<Uint32>(height);
-            dstRegion.d = 1;
-
-            SDL_UploadToGPUTexture(copyPass, &srcInfo, &dstRegion, false);
-            SDL_EndGPUCopyPass(copyPass);
+            g_ErrorReport.Write(L"ASSET: texture upload -- SDL_BeginGPUCopyPass failed for %ls: %hs", filename.c_str(),
+                                SDL_GetError());
+            // Must submit even on failure to release the command buffer back to the device.
+            SDL_SubmitGPUCommandBuffer(copyCmd);
+            SDL_ReleaseGPUTransferBuffer(device, transferBuf);
+            SDL_ReleaseGPUTexture(device, gpuTex);
+            return false;
         }
+
+        SDL_GPUTextureTransferInfo srcInfo{};
+        srcInfo.transfer_buffer = transferBuf;
+        srcInfo.offset = 0;
+        srcInfo.pixels_per_row = static_cast<Uint32>(width);
+        srcInfo.rows_per_layer = static_cast<Uint32>(height);
+
+        SDL_GPUTextureRegion dstRegion{};
+        dstRegion.texture = gpuTex;
+        dstRegion.mip_level = 0;
+        dstRegion.layer = 0;
+        dstRegion.x = 0;
+        dstRegion.y = 0;
+        dstRegion.z = 0;
+        dstRegion.w = static_cast<Uint32>(width);
+        dstRegion.h = static_cast<Uint32>(height);
+        dstRegion.d = 1;
+
+        SDL_UploadToGPUTexture(copyPass, &srcInfo, &dstRegion, false);
+        SDL_EndGPUCopyPass(copyPass);
         SDL_SubmitGPUCommandBuffer(copyCmd);
     }
 
@@ -764,6 +777,16 @@ void CGlobalBitmap::UnloadAllImages()
                     pBitmap->sdlTexture = nullptr;
                 }
             }
+        }
+        else
+        {
+            // GPU device already shut down (shutdown order: device destroyed before bitmap destructor).
+            // Cannot release GPU objects — log the leak and clear registries to prevent
+            // dangling-pointer use-after-free on any subsequent LookupTexture/LookupSampler calls.
+            g_ErrorReport.Write(
+                L"ASSET: UnloadAllImages -- SDL_GPUDevice unavailable; GPU texture/sampler objects leaked");
+            mu::ClearTextureRegistry();
+            mu::ClearSamplerRegistry();
         }
     }
 #endif

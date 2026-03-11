@@ -40,21 +40,24 @@ struct BITMAP_t
     BYTE* Buffer;
     std::vector<std::uint8_t> BufferStorage;
 
-    // Story 4.4.1 — Texture System Migration: SDL_gpu texture and sampler handles.
-    // Only present when MU_ENABLE_SDL3 is defined. Forward-declared above.
-    // sdlTexture: created by SDL_CreateGPUTexture in OpenJpegTurbo/OpenTga; released by UnloadImage.
-    // sdlSampler: per-texture sampler with filter/wrap parameters; released by UnloadImage.
-    // TextureNumber retains its GLuint type for the OpenGL path (set to 0 on SDL_gpu path).
+private:
+    friend class CBitmapCache;
+    std::uint32_t dwCallCount;
+
+public:
+// Story 4.4.1 — Texture System Migration: SDL_gpu texture and sampler handles.
+// These are 8-byte pointer members on 64-bit platforms and MUST NOT reside inside the
+// #pragma pack(1) scope — misaligned pointer access is UB on ARM (macOS Metal, Linux ARM).
+// Restoring default alignment for these members only, within the same struct declaration.
+#pragma pack(pop)
 #ifdef MU_ENABLE_SDL3
     SDL_GPUTexture* sdlTexture = nullptr;
     SDL_GPUSampler* sdlSampler = nullptr;
 #endif
-
-private:
-    friend class CBitmapCache;
-    std::uint32_t dwCallCount;
 };
-#pragma pack(pop)
+// Note: #pragma pack(pop) above restores alignment before the SDL pointer members.
+// The pack(1) scope begun at the struct declaration is terminated there, so sizeof(BITMAP_t)
+// reflects the naturally-aligned SDL pointers appended after the packed legacy members.
 
 class CBitmapCache
 {
