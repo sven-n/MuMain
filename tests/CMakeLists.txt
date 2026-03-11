@@ -168,7 +168,10 @@ endif()
 target_sources(MuTests PRIVATE platform/test_macos_connectivity.cpp)
 target_sources(MuTests PRIVATE platform/test_linux_connectivity.cpp)
 
-target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform)
+# Story 4.3.1/4.3.2: MURenderFX provides MuRendererSDLGpu.cpp symbols
+# (GetBlendFactors, TextureRegistry, GetShaderBlobPath, GetPipelineSetFor, etc.)
+# needed by test_sdlgpubackend.cpp and test_shaderprograms.cpp.
+target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform MURenderFX)
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp
 # #ifdef guards are active when SDL3 is enabled. [VS1-SDL-INPUT-KEYBOARD]

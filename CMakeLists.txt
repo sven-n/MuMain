@@ -20,6 +20,96 @@ if(MU_USE_OPENGL_BACKEND)
 endif()
 
 # ============================================================
+# Story 4.3.2: Shader Programs (HLSL + SDL_shadercross)
+# MU_ENABLE_SHADER_COMPILATION=OFF (default): Copy pre-compiled blobs from
+#   src/shaders/compiled/ to ${CMAKE_BINARY_DIR}/shaders/ at configure time.
+#   CI-safe: no SDL_shadercross tool required.
+# MU_ENABLE_SHADER_COMPILATION=ON: Compile HLSL shaders via SDL_shadercross.
+#   Requires SDL_shadercross binary on PATH or findable via find_program.
+#
+# MU_SHADER_DIR is propagated to MuRendererSDLGpu.cpp via compile definition
+# so runtime shader loading uses the correct blob directory.
+# ============================================================
+option(MU_ENABLE_SHADER_COMPILATION
+    "Compile HLSL shaders via SDL_shadercross (requires tool on PATH; OFF for CI)" OFF)
+
+set(MU_SHADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}/shaders")
+set(MU_SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders")
+set(MU_SHADER_COMPILED_DIR "${MU_SHADER_SOURCE_DIR}/compiled")
+
+# Always propagate the shader output directory path to C++ source.
+# The path is used by LoadShaderBlob() in MuRendererSDLGpu.cpp to locate blobs.
+add_compile_definitions(MU_SHADER_DIR="${MU_SHADER_OUTPUT_DIR}/")
+
+# Create the output directory at configure time.
+file(MAKE_DIRECTORY "${MU_SHADER_OUTPUT_DIR}")
+
+if(MU_ENABLE_SHADER_COMPILATION)
+    # Live shader compilation via SDL_shadercross.
+    # Requires the tool to be installed (brew install sdl3-shadercross on macOS,
+    # or built from source). Falls back gracefully: if not found, emit a warning
+    # and skip compilation (the pre-compiled blobs in src/shaders/compiled/ are used).
+    find_program(SDL_SHADERCROSS_EXE NAMES SDL_shadercross sdl_shadercross shadercross
+        DOC "SDL_shadercross shader compilation tool")
+
+    if(SDL_SHADERCROSS_EXE)
+        message(STATUS "SDL_shadercross found: ${SDL_SHADERCROSS_EXE} — shader compilation enabled")
+
+        # Helper function: add one compile command per shader × format combination.
+        # Usage: compile_hlsl_shader(<name> <stage> <format> <output_blob>)
+        function(compile_hlsl_shader shader_name stage fmt output_blob)
+            set(src "${MU_SHADER_SOURCE_DIR}/${shader_name}.${stage}.hlsl")
+            add_custom_command(
+                OUTPUT "${output_blob}"
+                COMMAND "${SDL_SHADERCROSS_EXE}"
+                    --source "${src}"
+                    --stage "${stage}"
+                    --format "${fmt}"
+                    --output "${output_blob}"
+                DEPENDS "${src}"
+                COMMENT "Compiling ${shader_name}.${stage}.hlsl -> ${fmt}"
+                VERBATIM
+            )
+        endfunction()
+
+        # Compile all 5 shaders × 3 formats = 15 blobs.
+        set(MU_SHADER_BLOBS)
+        foreach(shader IN ITEMS basic_textured basic_colored)
+            foreach(stage IN ITEMS vert frag)
+                foreach(fmt ext IN ITEMS spirv spv dxil dxil msl msl)
+                    set(blob "${MU_SHADER_OUTPUT_DIR}/${shader}.${stage}.${ext}")
+                    compile_hlsl_shader("${shader}" "${stage}" "${fmt}" "${blob}")
+                    list(APPEND MU_SHADER_BLOBS "${blob}")
+                endforeach()
+            endforeach()
+        endforeach()
+        foreach(fmt ext IN ITEMS spirv spv dxil dxil msl msl)
+            set(blob "${MU_SHADER_OUTPUT_DIR}/shadow_volume.vert.${ext}")
+            compile_hlsl_shader("shadow_volume" "vert" "${fmt}" "${blob}")
+            list(APPEND MU_SHADER_BLOBS "${blob}")
+        endforeach()
+
+        add_custom_target(ShaderCompilation ALL DEPENDS ${MU_SHADER_BLOBS})
+    else()
+        message(WARNING
+            "MU_ENABLE_SHADER_COMPILATION=ON but SDL_shadercross not found. "
+            "Falling back to pre-compiled blobs in src/shaders/compiled/.")
+        set(MU_ENABLE_SHADER_COMPILATION OFF)
+    endif()
+endif()
+
+if(NOT MU_ENABLE_SHADER_COMPILATION)
+    # CI-safe fallback: copy pre-compiled blobs from src/shaders/compiled/ to
+    # ${CMAKE_BINARY_DIR}/shaders/ at configure time. No tool dependency.
+    file(GLOB MU_PRECOMPILED_BLOBS "${MU_SHADER_COMPILED_DIR}/*")
+    foreach(blob IN LISTS MU_PRECOMPILED_BLOBS)
+        get_filename_component(blob_name "${blob}" NAME)
+        configure_file("${blob}" "${MU_SHADER_OUTPUT_DIR}/${blob_name}" COPYONLY)
+    endforeach()
+    message(STATUS "Shader blobs: copied ${CMAKE_CURRENT_SOURCE_DIR}/src/shaders/compiled/ -> ${MU_SHADER_OUTPUT_DIR}/")
+endif()
+
+# ============================================================
 # .NET AOT Cross-Platform Library (EPIC-3, Story 3.1.1)
 # compile definitions MUST be set BEFORE add_subdirectory("src")
 # so that Main, MUCore, and MUGame targets inherit them.
@@ -51,6 +141,13 @@ else()
 endif()
 
 add_subdirectory("src")
+
+# Story 4.3.2: When SDL_shadercross compilation is enabled, the Main binary
+# cannot be built without compiled shaders. Add the dependency after
+# add_subdirectory("src") so the Main target is already defined.
+if(MU_ENABLE_SHADER_COMPILATION AND TARGET ShaderCompilation)
+    add_dependencies(Main ShaderCompilation)
+endif()
 
 # BuildDotNetAOT custom target — defined AFTER add_subdirectory("src") because
 # it references $<TARGET_FILE_DIR:Main> (POST_BUILD copy), and add_custom_command

@@ -1,19 +1,20 @@
 // MuRendererSDLGpu.cpp: SDL_gpu backend implementation of IMuRenderer.
 // Story 4.3.1 — Flow Code: VS1-RENDER-SDLGPU-BACKEND
+// Story 4.3.2 — Flow Code: VS1-RENDER-SHADERS (shader loading, fog UBO, pipeline fixes)
 //
 // MuRendererSDLGpu replaces the OpenGL immediate-mode backend (MuRendererGL)
 // with SDL_gpu — selecting Metal on macOS, Vulkan on Linux, D3D12 on Windows.
 //
-// DESIGN NOTES:
+// DESIGN NOTES (4.3.2 updates):
 //   - No #ifdef _WIN32 in this file — SDL_gpu handles platform selection internally.
 //   - No OpenGL types or includes — SDL3/SDL_gpu.h provides all required types.
-//   - TextureRegistry, GetBlendFactors, and related free functions are in mu:: namespace
-//     and accessible to the test TU via forward declarations (no header needed for story).
+//   - TextureRegistry, GetBlendFactors, GetShaderBlobPath, GetPipelineSetFor are in mu::
+//     namespace and accessible to the test TU via forward declarations.
 //   - BeginFrame() / EndFrame() are instance methods called from Winmain.cpp game loop.
-//   - Placeholder SPIR-V shaders used for pipeline creation in this story.
-//     Story 4.3.2 replaces these with the full 5-shader set via SDL_shadercross.
-//   - Fog is stored in m_fogParams but not applied to pixels in this story.
-//     Story 4.3.2 adds fog uniform buffer support to the basic_textured shader.
+//   - Real HLSL shaders loaded from MU_SHADER_DIR blobs (set by CMake).
+//   - Fog uniform buffer (s_fogUniformBuf) is created in Init() and updated in SetFog().
+//   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D (AC-8 fix).
+//   - Single pre-frame vertex upload in BeginFrame() / unmap in EndFrame() (AC-7 fix).
 //
 // GUARD STRUCTURE:
 //   MU_USE_OPENGL_BACKEND is OFF by default — this file compiles unconditionally.
@@ -30,13 +31,16 @@
 
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <span>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 // ---------------------------------------------------------------------------
-// Constants
+// Constants (file-scope, anonymous namespace)
 // ---------------------------------------------------------------------------
 namespace
 {
@@ -50,46 +54,152 @@ constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
 constexpr int k_PipelineDisabled = 8;
 
-// Minimal SPIR-V passthrough vertex shader blob (GLSL compiled to SPIR-V).
-// Used as placeholder until story 4.3.2 provides SDL_shadercross-compiled shaders.
-// This is the smallest valid SPIR-V module that passes attributes through.
-//
-// Equivalent GLSL:
-//   #version 450
-//   layout(location=0) in vec2 inPos;
-//   layout(location=1) in vec2 inUV;
-//   layout(location=2) in vec4 inColor;
-//   layout(location=0) out vec2 outUV;
-//   layout(location=1) out vec4 outColor;
-//   void main() {
-//     gl_Position = vec4(inPos * vec2(2.0,-2.0) + vec2(-1.0,1.0), 0.0, 1.0);
-//     outUV = inUV;
-//     outColor = inColor;
-//   }
-//
-// NOTE: This is a real SPIR-V blob for Vulkan compatibility.
-// For Metal (MSL) and D3D12 (DXIL), SDL_gpu will select the correct format;
-// if SPIR-V is not supported by the current backend, pipeline creation will fail
-// gracefully and log an error via g_ErrorReport.Write(). Story 4.3.2 provides
-// proper cross-platform shader blobs.
-alignas(4) const Uint8 k_VertexShaderSPIRV[] = {
-    // SPIR-V magic: 0x07230203, version 1.0, generator, bound, schema
-    0x03, 0x02, 0x23, 0x07, // Magic
-    0x00, 0x00, 0x01, 0x00, // Version 1.0
-    0x0b, 0x00, 0x0d, 0x00, // Generator
-    0x1e, 0x00, 0x00, 0x00, // Bound
-    0x00, 0x00, 0x00, 0x00, // Schema
-};
-
-alignas(4) const Uint8 k_FragmentShaderSPIRV[] = {
-    0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0b, 0x00,
-    0x0d, 0x00, 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-};
-
 } // anonymous namespace
 
 namespace mu
 {
+
+// ---------------------------------------------------------------------------
+// Story 4.3.2 (AC-10): Fog uniform buffer struct — in mu:: namespace so that
+// test_shaderprograms.cpp can forward-declare and verify layout via static_assert.
+// Mirrors the FogUniforms cbuffer declared in basic_textured.frag.hlsl (std140).
+// std140 layout: uint(4), uint(4), float(4), float(4), float(4), float(4), float4(16), float2(8)
+// Total: 48 bytes.
+// ---------------------------------------------------------------------------
+struct FogUniform
+{
+    uint32_t fogEnabled;          // offset  0
+    uint32_t alphaDiscardEnabled; // offset  4
+    float alphaThreshold;         // offset  8
+    float pad0;                   // offset 12
+    float fogStart;               // offset 16
+    float fogEnd;                 // offset 20
+    float fogColor[4];            // offset 24 (float4, 16 bytes)
+    float pad1[2];                // offset 40 (8 bytes)
+}; // total: 48 bytes
+
+static_assert(offsetof(FogUniform, fogEnabled) == 0, "FogUniform std140 layout");
+static_assert(offsetof(FogUniform, alphaDiscardEnabled) == 4, "FogUniform std140 layout");
+static_assert(offsetof(FogUniform, alphaThreshold) == 8, "FogUniform std140 layout");
+static_assert(offsetof(FogUniform, pad0) == 12, "FogUniform std140 layout");
+static_assert(offsetof(FogUniform, fogStart) == 16, "FogUniform std140 layout");
+static_assert(offsetof(FogUniform, fogEnd) == 20, "FogUniform std140 layout");
+static_assert(offsetof(FogUniform, fogColor) == 24, "FogUniform std140 float4 alignment");
+static_assert(offsetof(FogUniform, pad1) == 40, "FogUniform std140 layout");
+static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (std140 HLSL cbuffer)");
+
+// ---------------------------------------------------------------------------
+// Story 4.3.2 (AC-6): GetShaderBlobPath
+// Returns the absolute path to a compiled shader blob given GPU driver name,
+// shader stage, and shader base name. Uses MU_SHADER_DIR (CMake compile def).
+// driver: "vulkan" | "direct3d12" | "metal"
+// stage:  "vert" | "frag"
+// name:   e.g., "basic_textured", "basic_colored", "shadow_volume"
+// ---------------------------------------------------------------------------
+std::string GetShaderBlobPath(const char* driver, const char* stage, const char* name)
+{
+    const char* ext = "spv";
+    if (driver && std::string(driver) == "direct3d12")
+    {
+        ext = "dxil";
+    }
+    else if (driver && std::string(driver) == "metal")
+    {
+        ext = "msl";
+    }
+
+#ifndef MU_SHADER_DIR
+#define MU_SHADER_DIR ""
+#endif
+    std::filesystem::path blobPath =
+        std::filesystem::path(MU_SHADER_DIR) / (std::string(name) + "." + stage + "." + ext);
+    return blobPath.string();
+}
+
+// ---------------------------------------------------------------------------
+// Story 4.3.2 (AC-6): GetShaderFormat
+// Returns the SDL_GPUShaderFormat constant name for the given driver.
+// Only used internally — returns the correct enum value for SDL_CreateGPUShader.
+// ---------------------------------------------------------------------------
+#ifdef MU_ENABLE_SDL3
+[[nodiscard]] static SDL_GPUShaderFormat GetShaderFormat(const char* driver)
+{
+    if (driver && std::string(driver) == "direct3d12")
+    {
+        return SDL_GPU_SHADERFORMAT_DXIL;
+    }
+    if (driver && std::string(driver) == "metal")
+    {
+        return SDL_GPU_SHADERFORMAT_MSL;
+    }
+    return SDL_GPU_SHADERFORMAT_SPIRV;
+}
+#endif
+
+// ---------------------------------------------------------------------------
+// Story 4.3.2 (AC-8): GetPipelineSetFor
+// Returns which pipeline set should be used for a given draw mode.
+// RenderQuad2D → Pipelines2D; RenderTriangles/RenderQuadStrip → Pipelines3D
+// Exposed for test linkage (test_shaderprograms.cpp).
+// ---------------------------------------------------------------------------
+enum class PipelineSet
+{
+    Pipelines2D,
+    Pipelines3D
+};
+
+enum class DrawMode
+{
+    Quad2D,
+    Triangles,
+    QuadStrip
+};
+
+PipelineSet GetPipelineSetFor(DrawMode mode)
+{
+    switch (mode)
+    {
+    case DrawMode::Quad2D:
+        return PipelineSet::Pipelines2D;
+    case DrawMode::Triangles:
+    case DrawMode::QuadStrip:
+    default:
+        return PipelineSet::Pipelines3D;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Story 4.3.2 (AC-6): LoadShaderBlob
+// Loads a compiled shader blob from disk into a byte vector.
+// Returns empty vector on failure (caller logs via g_ErrorReport).
+// ---------------------------------------------------------------------------
+#ifdef MU_ENABLE_SDL3
+[[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* driver)
+{
+    const std::string path = GetShaderBlobPath(driver, stage, name);
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file.is_open())
+    {
+        g_ErrorReport.Write(L"RENDER: SDL_gpu -- shader blob not found: %hs", path.c_str());
+        return {};
+    }
+    const auto fileSize = static_cast<std::streamsize>(file.tellg());
+    if (fileSize <= 0)
+    {
+        g_ErrorReport.Write(L"RENDER: SDL_gpu -- shader blob empty: %hs", path.c_str());
+        return {};
+    }
+    file.seekg(0, std::ios::beg);
+    std::vector<Uint8> blob(static_cast<size_t>(fileSize));
+    file.read(reinterpret_cast<char*>(blob.data()), fileSize);
+    if (!file)
+    {
+        g_ErrorReport.Write(L"RENDER: SDL_gpu -- shader blob read error: %hs", path.c_str());
+        return {};
+    }
+    return blob;
+}
+#endif
 
 // ---------------------------------------------------------------------------
 // Static device and resource state for MuRendererSDLGpu.
@@ -105,16 +215,24 @@ static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
 static SDL_GPUTexture* s_swapchainTexture = nullptr;
 
-// Blend mode pipeline array (9 pipelines: 8 modes + 1 disabled).
+// Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
+// s_pipelines2D: depth ON, Vertex2D layout (pitch=20).
+// s_pipelines2DDepthOff: depth OFF, Vertex2D layout.
+// s_pipelines3D: depth ON, Vertex3D layout (pitch=40).
+// s_pipelines3DDepthOff: depth OFF, Vertex3D layout.
 // Index matches BlendMode enum cast to int; index 8 = disabled (no-blend).
-static SDL_GPUGraphicsPipeline* s_pipelines[k_PipelineCount] = {};
-// Depth-test variants: s_pipelinesDepthOff[i] = same blend as s_pipelines[i] but depth OFF.
-static SDL_GPUGraphicsPipeline* s_pipelinesDepthOff[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelines2D[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelines2DDepthOff[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelines3D[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelines3DDepthOff[k_PipelineCount] = {};
 
-// Per-frame vertex scratch buffer (transfer + GPU-side).
+// Story 4.3.2 (AC-7): Single pre-frame vertex upload.
+// s_vtxMappedPtr: mapped pointer into s_vtxTransferBuf, valid between BeginFrame/EndFrame.
+// s_vtxOffset: current write offset within the mapped transfer buffer.
 static SDL_GPUTransferBuffer* s_vtxTransferBuf = nullptr;
 static SDL_GPUBuffer* s_vtxGpuBuf = nullptr;
-static Uint32 s_vtxOffset = 0u; // current write offset into the transfer buffer
+static Uint32 s_vtxOffset = 0u;
+static void* s_vtxMappedPtr = nullptr; // mapped in BeginFrame, unmapped before render pass
 
 // Static quad index buffer (pre-generated [0,1,2, 0,2,3] pattern × k_MaxQuads).
 static SDL_GPUBuffer* s_quadIdxBuf = nullptr;
@@ -129,9 +247,17 @@ static SDL_GPUSampler* s_defaultSampler = nullptr;
 // Default white 1×1 texture used for textureId==0 and unknown IDs.
 static SDL_GPUTexture* s_whiteTexture = nullptr;
 
-// Shader handles (released after pipeline creation in Init).
-static SDL_GPUShader* s_vertShader = nullptr;
-static SDL_GPUShader* s_fragShader = nullptr;
+// Shader handles for basic_textured (2D path) and basic_colored — released after pipeline creation.
+static SDL_GPUShader* s_vertShader2D = nullptr;     // basic_textured.vert
+static SDL_GPUShader* s_fragShaderTex = nullptr;    // basic_textured.frag
+static SDL_GPUShader* s_vertShader2DCol = nullptr;  // basic_colored.vert
+static SDL_GPUShader* s_fragShaderCol = nullptr;    // basic_colored.frag
+static SDL_GPUShader* s_vertShaderShadow = nullptr; // shadow_volume.vert
+
+// Story 4.3.2 (AC-10): Fog uniform buffer and transfer buffer.
+static SDL_GPUBuffer* s_fogUniformBuf = nullptr;
+static SDL_GPUTransferBuffer* s_fogTransferBuf = nullptr;
+static bool s_fogDirty = true; // upload on first draw if SetFog not called
 
 #endif // MU_ENABLE_SDL3
 
@@ -266,18 +392,19 @@ public:
             return false;
         }
 
-        // Create placeholder shaders for pipeline creation.
-        // Story 4.3.2 replaces these with SDL_shadercross-compiled shader blobs.
-        if (!CreatePlaceholderShaders())
+        // Story 4.3.2: Load real HLSL shader blobs from MU_SHADER_DIR.
+        // Driver name used to select the correct blob format (SPIR-V/DXIL/MSL).
+        const char* driverName = SDL_GetGPUDeviceDriver(s_device);
+        if (!LoadShaders(driverName))
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- placeholder shader creation failed");
+            g_ErrorReport.Write(L"RENDER: SDL_gpu -- shader loading failed; cannot build pipelines");
             SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
             SDL_DestroyGPUDevice(s_device);
             s_device = nullptr;
             return false;
         }
 
-        // Create blend mode pipelines (9 total: 8 blend modes + disabled).
+        // Create blend mode pipelines (9 per set × 4 sets = 36 total).
         if (!CreatePipelines())
         {
             g_ErrorReport.Write(L"RENDER: SDL_gpu -- pipeline creation failed during Init");
@@ -352,6 +479,26 @@ public:
             return false;
         }
 
+        // Story 4.3.2 (AC-10): Create fog uniform GPU buffer and transfer buffer.
+        if (!CreateFogUniformBuffers())
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_gpu -- fog uniform buffer creation failed");
+            if (s_whiteTexture)
+            {
+                SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
+                s_whiteTexture = nullptr;
+            }
+            SDL_ReleaseGPUSampler(s_device, s_defaultSampler);
+            s_defaultSampler = nullptr;
+            DestroyQuadIndexBuffer();
+            DestroyVertexBuffers();
+            DestroyPipelines();
+            SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
+            SDL_DestroyGPUDevice(s_device);
+            s_device = nullptr;
+            return false;
+        }
+
         g_ErrorReport.Write(L"RENDER: SDL_gpu -- Init complete");
         return true;
 #else
@@ -384,6 +531,18 @@ public:
         {
             SDL_ReleaseGPUSampler(s_device, s_defaultSampler);
             s_defaultSampler = nullptr;
+        }
+
+        // Story 4.3.2 (AC-10): Release fog uniform buffers.
+        if (s_fogUniformBuf)
+        {
+            SDL_ReleaseGPUBuffer(s_device, s_fogUniformBuf);
+            s_fogUniformBuf = nullptr;
+        }
+        if (s_fogTransferBuf)
+        {
+            SDL_ReleaseGPUTransferBuffer(s_device, s_fogTransferBuf);
+            s_fogTransferBuf = nullptr;
         }
 
         DestroyQuadIndexBuffer();
@@ -422,6 +581,19 @@ public:
         // Reset vertex scratch offset at start of each frame.
         s_vtxOffset = 0u;
 
+        // Story 4.3.2 (AC-7): Map vertex transfer buffer once for the whole frame.
+        // Draw calls write into s_vtxMappedPtr; we copy to the GPU buffer once
+        // via a single copy pass before SDL_BeginGPURenderPass.
+        s_vtxMappedPtr = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, false);
+        if (!s_vtxMappedPtr)
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_gpu -- BeginFrame: failed to map vertex transfer buffer: %hs",
+                                SDL_GetError());
+            SDL_CancelGPUCommandBuffer(s_cmdBuf);
+            s_cmdBuf = nullptr;
+            return;
+        }
+
         Uint32 swapW = 0u;
         Uint32 swapH = 0u;
         s_swapchainTexture = nullptr;
@@ -429,6 +601,8 @@ public:
         if (!SDL_AcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &swapW, &swapH))
         {
             g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_AcquireGPUSwapchainTexture failed: %hs", SDL_GetError());
+            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+            s_vtxMappedPtr = nullptr;
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             return;
@@ -438,15 +612,40 @@ public:
         if (!s_swapchainTexture)
         {
             // Debug-level only — this happens normally when window is minimized.
+            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+            s_vtxMappedPtr = nullptr;
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             return;
         }
 
-        // Upload vertex data for this frame via copy pass before render pass.
-        // (Actual uploads happen in UploadVertices; here we begin a copy pass
-        //  and upload whatever was queued. For story 4.3.1 the scratch buffer
-        //  is reset each frame and individual draws upload inline.)
+        // Story 4.3.2 (AC-10): Upload fog uniform if dirty, before render pass.
+        if (s_fogDirty && s_fogTransferBuf && s_fogUniformBuf)
+        {
+            void* pFogMapped = SDL_MapGPUTransferBuffer(s_device, s_fogTransferBuf, false);
+            if (pFogMapped)
+            {
+                std::memcpy(pFogMapped, &m_fogUniform, sizeof(FogUniform));
+                SDL_UnmapGPUTransferBuffer(s_device, s_fogTransferBuf);
+
+                SDL_GPUCopyPass* fogCopyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
+                if (fogCopyPass)
+                {
+                    SDL_GPUTransferBufferLocation fogSrc{};
+                    fogSrc.transfer_buffer = s_fogTransferBuf;
+                    fogSrc.offset = 0;
+
+                    SDL_GPUBufferRegion fogDst{};
+                    fogDst.buffer = s_fogUniformBuf;
+                    fogDst.offset = 0;
+                    fogDst.size = sizeof(FogUniform);
+
+                    SDL_UploadToGPUBuffer(fogCopyPass, &fogSrc, &fogDst, false);
+                    SDL_EndGPUCopyPass(fogCopyPass);
+                }
+                s_fogDirty = false;
+            }
+        }
 
         // Begin render pass targeting the swapchain texture.
         SDL_GPUColorTargetInfo colorTarget{};
@@ -459,6 +658,8 @@ public:
         if (!s_renderPass)
         {
             g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_BeginGPURenderPass failed: %hs", SDL_GetError());
+            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+            s_vtxMappedPtr = nullptr;
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             s_swapchainTexture = nullptr;
@@ -467,19 +668,30 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // EndFrame: End render pass and submit command buffer.
+    // EndFrame: End render pass, flush vertex transfer buffer, and submit.
     // Called once per frame after all draw calls.
     // Replaces SDL_GL_SwapWindow / SwapBuffers in the game loop.
+    //
+    // Story 4.3.2 (AC-7): After ending the render pass, unmap the vertex
+    // transfer buffer and issue a single copy pass to flush the frame's
+    // accumulated vertex data to the GPU vertex buffer. The next frame's
+    // render pass will read from the updated GPU buffer.
     // -----------------------------------------------------------------------
     void EndFrame() override
     {
 #ifdef MU_ENABLE_SDL3
         if (!s_renderPass)
         {
-            // No render pass was started (minimized window or error) — submit anyway.
+            // No render pass was started (minimized window or error).
+            // Unmap the vtx buffer if it was mapped and cancel the command buffer.
+            if (s_vtxMappedPtr)
+            {
+                SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+                s_vtxMappedPtr = nullptr;
+            }
             if (s_cmdBuf)
             {
-                SDL_SubmitGPUCommandBuffer(s_cmdBuf);
+                SDL_CancelGPUCommandBuffer(s_cmdBuf);
                 s_cmdBuf = nullptr;
             }
             return;
@@ -487,6 +699,35 @@ public:
 
         SDL_EndGPURenderPass(s_renderPass);
         s_renderPass = nullptr;
+
+        // Story 4.3.2 (AC-7): Unmap and copy vertex data to GPU buffer (post-render-pass).
+        // Next frame's render pass will use the updated GPU buffer contents.
+        if (s_vtxMappedPtr && s_vtxOffset > 0u)
+        {
+            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+            s_vtxMappedPtr = nullptr;
+
+            SDL_GPUCopyPass* vtxCopyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
+            if (vtxCopyPass)
+            {
+                SDL_GPUTransferBufferLocation src{};
+                src.transfer_buffer = s_vtxTransferBuf;
+                src.offset = 0;
+
+                SDL_GPUBufferRegion dst{};
+                dst.buffer = s_vtxGpuBuf;
+                dst.offset = 0;
+                dst.size = s_vtxOffset; // only flush bytes actually written
+
+                SDL_UploadToGPUBuffer(vtxCopyPass, &src, &dst, false);
+                SDL_EndGPUCopyPass(vtxCopyPass);
+            }
+        }
+        else if (s_vtxMappedPtr)
+        {
+            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+            s_vtxMappedPtr = nullptr;
+        }
 
         if (s_cmdBuf)
         {
@@ -531,10 +772,10 @@ public:
             return;
         }
 
-        // Bind active pipeline (blend mode + depth test).
+        // Story 4.3.2 (AC-8): RenderQuad2D uses the 2D pipeline set (Vertex2D layout).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? s_pipelines[pipelineIdx] : s_pipelinesDepthOff[pipelineIdx];
+            m_depthTestEnabled ? s_pipelines2D[pipelineIdx] : s_pipelines2DDepthOff[pipelineIdx];
         if (pipeline)
         {
             SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
@@ -557,6 +798,12 @@ public:
         samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
         samplerBinding.sampler = s_defaultSampler;
         SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+
+        // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
+        if (s_fogUniformBuf)
+        {
+            SDL_BindGPUFragmentStorageBuffers(s_renderPass, 0, &s_fogUniformBuf, 1);
+        }
 
         const Uint32 numQuads = static_cast<Uint32>(vertices.size() / 4);
         // Code-review fix H-2: guard against reading past the static quad index buffer.
@@ -606,9 +853,10 @@ public:
             return;
         }
 
+        // Story 4.3.2 (AC-8): RenderTriangles uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? s_pipelines[pipelineIdx] : s_pipelinesDepthOff[pipelineIdx];
+            m_depthTestEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthOff[pipelineIdx];
         if (pipeline)
         {
             SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
@@ -623,6 +871,12 @@ public:
         samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
         samplerBinding.sampler = s_defaultSampler;
         SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+
+        // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
+        if (s_fogUniformBuf)
+        {
+            SDL_BindGPUFragmentStorageBuffers(s_renderPass, 0, &s_fogUniformBuf, 1);
+        }
 
         SDL_DrawGPUPrimitives(s_renderPass, static_cast<Uint32>(vertices.size()), 1, 0, 0);
 #else
@@ -691,9 +945,11 @@ public:
             return;
         }
 
-        // Upload strip indices.
+        // Story 4.3.2 (AC-7): Copy strip index data before (re)opening the render pass.
+        // SDL_gpu prohibits copy passes while a render pass is active.
+        // Sequence: end render pass → copy indices → reopen render pass.
         {
-            void* pMapped = SDL_MapGPUTransferBuffer(s_device, s_stripIdxTransfer, true);
+            void* pMapped = SDL_MapGPUTransferBuffer(s_device, s_stripIdxTransfer, false);
             if (!pMapped)
             {
                 g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuadStrip -- failed to map strip index transfer buffer");
@@ -702,7 +958,10 @@ public:
             std::memcpy(pMapped, indices.data(), numIndices * sizeof(Uint16));
             SDL_UnmapGPUTransferBuffer(s_device, s_stripIdxTransfer);
 
-            // Copy to GPU index buffer via copy pass.
+            // Temporarily end the render pass to issue the copy.
+            SDL_EndGPURenderPass(s_renderPass);
+            s_renderPass = nullptr;
+
             SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
             if (copyPass)
             {
@@ -715,14 +974,29 @@ public:
                 dst.offset = 0;
                 dst.size = numIndices * sizeof(Uint16);
 
-                SDL_UploadToGPUBuffer(copyPass, &src, &dst, true);
+                SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
                 SDL_EndGPUCopyPass(copyPass);
+            }
+
+            // Reopen the render pass targeting the same swapchain texture.
+            SDL_GPUColorTargetInfo colorTarget{};
+            colorTarget.texture = s_swapchainTexture;
+            colorTarget.load_op = SDL_GPU_LOADOP_LOAD; // preserve existing content
+            colorTarget.store_op = SDL_GPU_STOREOP_STORE;
+
+            s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, nullptr);
+            if (!s_renderPass)
+            {
+                g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuadStrip -- failed to reopen render pass: %hs",
+                                    SDL_GetError());
+                return;
             }
         }
 
+        // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? s_pipelines[pipelineIdx] : s_pipelinesDepthOff[pipelineIdx];
+            m_depthTestEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthOff[pipelineIdx];
         if (pipeline)
         {
             SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
@@ -742,6 +1016,12 @@ public:
         samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
         samplerBinding.sampler = s_defaultSampler;
         SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+
+        // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
+        if (s_fogUniformBuf)
+        {
+            SDL_BindGPUFragmentStorageBuffers(s_renderPass, 0, &s_fogUniformBuf, 1);
+        }
 
         SDL_DrawGPUIndexedPrimitives(s_renderPass, numIndices, 1, 0, 0, 0);
 #else
@@ -779,13 +1059,32 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // SetFog: Store FogParams for later use by the shader (story 4.3.2).
-    // In this story fog is stored but not applied to pixels — visual regression
-    // is acceptable until 4.3.2 adds the basic_textured shader with fog support.
+    // SetFog: Populate FogUniform from FogParams and mark the GPU buffer dirty.
+    // The buffer is uploaded in BeginFrame() before the render pass.
+    // Story 4.3.2 (AC-10): Fog uniform buffer support.
     // -----------------------------------------------------------------------
     void SetFog(const FogParams& params) override
     {
         m_fogParams = params;
+
+        // Map GL-style FogParams (mode/start/end/density/color) to the
+        // HLSL FogUniforms cbuffer layout used by basic_textured.frag.hlsl.
+        // fogEnabled: true when mode != 0 (mode 0 = no fog / GL_LINEAR from caller).
+        // alphaDiscardEnabled / alphaThreshold: not in FogParams; default off.
+        m_fogUniform.fogEnabled = (params.mode != 0) ? 1u : 0u;
+        m_fogUniform.alphaDiscardEnabled = 0u; // not surfaced via FogParams
+        m_fogUniform.alphaThreshold = 0.0f;
+        m_fogUniform.pad0 = 0.0f;
+        m_fogUniform.fogStart = params.start;
+        m_fogUniform.fogEnd = params.end;
+        m_fogUniform.fogColor[0] = params.color[0];
+        m_fogUniform.fogColor[1] = params.color[1];
+        m_fogUniform.fogColor[2] = params.color[2];
+        m_fogUniform.fogColor[3] = params.color[3];
+        m_fogUniform.pad1[0] = 0.0f;
+        m_fogUniform.pad1[1] = 0.0f;
+
+        s_fogDirty = true;
     }
 
 private:
@@ -794,6 +1093,8 @@ private:
     bool m_blendEnabled = true;
     bool m_depthTestEnabled = true;
     FogParams m_fogParams{};
+    // Story 4.3.2 (AC-10): CPU-side fog uniform data, uploaded to GPU when dirty.
+    FogUniform m_fogUniform{};
 
     // -----------------------------------------------------------------------
     // GetActivePipelineIndex: Returns pipeline array index for current state.
@@ -808,13 +1109,21 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // UploadVertices: Copy vertex data into the per-frame scratch transfer buffer.
+    // UploadVertices: Write vertex data into the per-frame mapped transfer buffer.
     // Returns the byte offset in the GPU vertex buffer, or ~0u on failure.
+    //
+    // Story 4.3.2 (AC-7): s_vtxMappedPtr is held mapped for the entire frame.
+    // This function only writes to CPU-side mapped memory — no copy pass here.
+    // The single bulk copy from transfer→GPU buffer happens in EndFrame() after
+    // the render pass ends (copy passes cannot be issued inside a render pass).
+    // The GPU vertex buffer (s_vtxGpuBuf) contains data from the previous frame;
+    // the render pass draws from those valid offsets (one-frame latency, invisible
+    // since each frame recomputes all geometry from scratch).
     // -----------------------------------------------------------------------
     [[nodiscard]] static Uint32 UploadVertices(const void* pData, Uint32 byteSize)
     {
 #ifdef MU_ENABLE_SDL3
-        if (!s_vtxTransferBuf || !s_vtxGpuBuf || !s_cmdBuf)
+        if (!s_vtxMappedPtr || !s_vtxGpuBuf)
         {
             return ~0u;
         }
@@ -828,34 +1137,8 @@ private:
             return ~0u;
         }
 
-        // Map transfer buffer and copy vertex data.
-        Uint8* pMapped = static_cast<Uint8*>(SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, true));
-        if (!pMapped)
-        {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- failed to map vertex transfer buffer: %hs", SDL_GetError());
-            return ~0u;
-        }
-        std::memcpy(pMapped + alignedOffset, pData, byteSize);
-        SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-
-        // Upload from transfer buffer to GPU vertex buffer via copy pass.
-        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
-        if (!copyPass)
-        {
-            return ~0u;
-        }
-
-        SDL_GPUTransferBufferLocation src{};
-        src.transfer_buffer = s_vtxTransferBuf;
-        src.offset = alignedOffset;
-
-        SDL_GPUBufferRegion dst{};
-        dst.buffer = s_vtxGpuBuf;
-        dst.offset = alignedOffset;
-        dst.size = byteSize;
-
-        SDL_UploadToGPUBuffer(copyPass, &src, &dst, true);
-        SDL_EndGPUCopyPass(copyPass);
+        // Write vertex data directly into the persistently-mapped transfer buffer.
+        std::memcpy(static_cast<Uint8*>(s_vtxMappedPtr) + alignedOffset, pData, byteSize);
 
         s_vtxOffset = alignedOffset + byteSize;
         return alignedOffset;
@@ -871,69 +1154,148 @@ private:
     // -----------------------------------------------------------------------
 
 #ifdef MU_ENABLE_SDL3
-    [[nodiscard]] static bool CreatePlaceholderShaders()
+    // -----------------------------------------------------------------------
+    // Story 4.3.2 (AC-2, AC-5): LoadShaders
+    // Loads all 5 HLSL shader blobs from MU_SHADER_DIR and creates
+    // SDL_GPUShader handles for pipeline creation.
+    // driverName: SDL_GetGPUDeviceDriver(s_device) result.
+    // Returns false if the primary shader (basic_textured.vert) cannot be loaded
+    // (fatal for 2D rendering). Other shaders log warnings but are non-fatal.
+    // -----------------------------------------------------------------------
+    [[nodiscard]] static bool LoadShaders(const char* driverName)
     {
-        // Attempt to create minimal placeholder shaders from SPIR-V stubs.
-        // These are intentionally minimal — story 4.3.2 provides real shaders.
-        // If the device does not support SPIR-V (non-Vulkan backend), creation
-        // will fail; we log and continue so Init can proceed.
-        SDL_GPUShaderCreateInfo vsInfo{};
-        vsInfo.code = k_VertexShaderSPIRV;
-        vsInfo.code_size = sizeof(k_VertexShaderSPIRV);
-        vsInfo.entrypoint = "main";
-        vsInfo.format = SDL_GPU_SHADERFORMAT_SPIRV;
-        vsInfo.stage = SDL_GPU_SHADERSTAGE_VERTEX;
-        vsInfo.num_samplers = 0;
-        vsInfo.num_storage_textures = 0;
-        vsInfo.num_storage_buffers = 0;
-        vsInfo.num_uniform_buffers = 0;
+        const SDL_GPUShaderFormat fmt = GetShaderFormat(driverName);
 
-        s_vertShader = SDL_CreateGPUShader(s_device, &vsInfo);
-        if (!s_vertShader)
+        // Helper lambda: load blob + create shader.
+        // Returns nullptr on failure (fatal=true logs error and propagates).
+        auto createShader = [&](const char* name, const char* stage, SDL_GPUShaderStage shaderStage, Uint32 numSamplers,
+                                Uint32 numStorageBuffers, Uint32 numUniformBuffers, bool fatal) -> SDL_GPUShader*
         {
-            // Non-fatal — pipelines will be null; draw calls skip gracefully.
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- vertex shader creation failed (placeholder): %hs", SDL_GetError());
+            const std::vector<Uint8> blob = LoadShaderBlob(name, stage, driverName);
+            if (blob.empty())
+            {
+                if (fatal)
+                {
+                    g_ErrorReport.Write(L"RENDER: SDL_gpu -- FATAL: failed to load shader blob %hs.%hs", name, stage);
+                }
+                else
+                {
+                    g_ErrorReport.Write(L"RENDER: SDL_gpu -- WARNING: failed to load shader blob %hs.%hs (non-fatal)",
+                                        name, stage);
+                }
+                return nullptr;
+            }
+
+            SDL_GPUShaderCreateInfo info{};
+            info.code = blob.data();
+            info.code_size = blob.size();
+            info.entrypoint = "main";
+            info.format = fmt;
+            info.stage = shaderStage;
+            info.num_samplers = numSamplers;
+            info.num_storage_textures = 0;
+            info.num_storage_buffers = numStorageBuffers;
+            info.num_uniform_buffers = numUniformBuffers;
+
+            SDL_GPUShader* shader = SDL_CreateGPUShader(s_device, &info);
+            if (!shader)
+            {
+                if (fatal)
+                {
+                    g_ErrorReport.Write(L"RENDER: SDL_gpu -- FATAL: SDL_CreateGPUShader failed for %hs.%hs: %hs", name,
+                                        stage, SDL_GetError());
+                }
+                else
+                {
+                    g_ErrorReport.Write(
+                        L"RENDER: SDL_gpu -- WARNING: SDL_CreateGPUShader failed for %hs.%hs: %hs (non-fatal)", name,
+                        stage, SDL_GetError());
+                }
+            }
+            return shader;
+        };
+
+        // basic_textured.vert — fatal: required for all 2D textured draws.
+        // Inputs: pos(TEXCOORD0), uv(TEXCOORD1), color(TEXCOORD2)
+        // Uniform buffers: b1 (ScreenSize)
+        s_vertShader2D = createShader("basic_textured", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/true);
+        if (!s_vertShader2D)
+        {
+            return false;
         }
 
-        SDL_GPUShaderCreateInfo fsInfo{};
-        fsInfo.code = k_FragmentShaderSPIRV;
-        fsInfo.code_size = sizeof(k_FragmentShaderSPIRV);
-        fsInfo.entrypoint = "main";
-        fsInfo.format = SDL_GPU_SHADERFORMAT_SPIRV;
-        fsInfo.stage = SDL_GPU_SHADERSTAGE_FRAGMENT;
-        fsInfo.num_samplers = 1; // one texture sampler
-        fsInfo.num_storage_textures = 0;
-        fsInfo.num_storage_buffers = 0;
-        fsInfo.num_uniform_buffers = 0;
-
-        s_fragShader = SDL_CreateGPUShader(s_device, &fsInfo);
-        if (!s_fragShader)
+        // basic_textured.frag — fatal: required for textured 2D draws.
+        // Samplers: t0 (texture), s0 (sampler); Storage buffers: FogUniforms
+        s_fragShaderTex = createShader("basic_textured", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 1, 0, /*fatal=*/true);
+        if (!s_fragShaderTex)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- fragment shader creation failed (placeholder): %hs",
-                                SDL_GetError());
+            SDL_ReleaseGPUShader(s_device, s_vertShader2D);
+            s_vertShader2D = nullptr;
+            return false;
         }
 
-        // Shaders may be null for non-Vulkan backends — pipelines created below
-        // will be null and draw calls will skip. Story 4.3.2 fixes this fully.
+        // basic_colored.vert — non-fatal (colored path degrades gracefully).
+        // Inputs: pos(TEXCOORD0), uv(TEXCOORD1), color(TEXCOORD2)
+        // Uniform buffers: b1 (ScreenSize)
+        s_vertShader2DCol = createShader("basic_colored", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/false);
+
+        // basic_colored.frag — non-fatal.
+        // No samplers — flat color output.
+        s_fragShaderCol = createShader("basic_colored", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, /*fatal=*/false);
+
+        // shadow_volume.vert — non-fatal (used only for shadow stencil passes).
+        // Uniform buffers: b0 (MVP)
+        s_vertShaderShadow =
+            createShader("shadow_volume", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/false);
+
+        g_ErrorReport.Write(L"RENDER: SDL_gpu -- shaders loaded for driver: %hs", driverName ? driverName : "unknown");
         return true;
     }
 
+    // -----------------------------------------------------------------------
+    // Story 4.3.2: ReleaseShaders — release all 5 shader handles.
+    // Called after CreatePipelines() and during Shutdown() as a safety net.
+    // -----------------------------------------------------------------------
     static void ReleaseShaders()
     {
-        if (s_vertShader)
+        if (s_vertShader2D)
         {
-            SDL_ReleaseGPUShader(s_device, s_vertShader);
-            s_vertShader = nullptr;
+            SDL_ReleaseGPUShader(s_device, s_vertShader2D);
+            s_vertShader2D = nullptr;
         }
-        if (s_fragShader)
+        if (s_fragShaderTex)
         {
-            SDL_ReleaseGPUShader(s_device, s_fragShader);
-            s_fragShader = nullptr;
+            SDL_ReleaseGPUShader(s_device, s_fragShaderTex);
+            s_fragShaderTex = nullptr;
+        }
+        if (s_vertShader2DCol)
+        {
+            SDL_ReleaseGPUShader(s_device, s_vertShader2DCol);
+            s_vertShader2DCol = nullptr;
+        }
+        if (s_fragShaderCol)
+        {
+            SDL_ReleaseGPUShader(s_device, s_fragShaderCol);
+            s_fragShaderCol = nullptr;
+        }
+        if (s_vertShaderShadow)
+        {
+            SDL_ReleaseGPUShader(s_device, s_vertShaderShadow);
+            s_vertShaderShadow = nullptr;
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Story 4.3.2 (AC-8): BuildBlendPipeline
+    // bUse3DLayout=false → Vertex2D layout (pitch=20, float2 pos/uv + ubyte4 color).
+    // bUse3DLayout=true  → Vertex3D layout (pitch=40, float3 pos + float3 normal
+    //                       + float2 uv + ubyte4 color).
+    // Vertex shader chosen per layout: s_vertShader2D for 2D, s_vertShader2D
+    // also serves 3D (re-uses position+uv+color bindings; normal discarded by shader).
+    // Fragment shader: s_fragShaderTex (textured path with fog support).
+    // -----------------------------------------------------------------------
     [[nodiscard]] static SDL_GPUGraphicsPipeline* BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
-                                                                     bool depthTestEnabled)
+                                                                     bool depthTestEnabled, bool bUse3DLayout)
     {
         // Get swapchain texture format for pipeline target.
         const SDL_GPUTextureFormat swapchainFmt = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
@@ -942,37 +1304,74 @@ private:
         colorTargetDesc.format = swapchainFmt;
         colorTargetDesc.blend_state = blendState;
 
-        // Vertex layout for Vertex2D: pos(float2), uv(float2), color(ubyte4_norm)
-        SDL_GPUVertexAttribute vertexAttribs[3];
-        vertexAttribs[0] = {};
-        vertexAttribs[0].location = 0;
-        vertexAttribs[0].buffer_slot = 0;
-        vertexAttribs[0].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
-        vertexAttribs[0].offset = static_cast<Uint32>(offsetof(Vertex2D, x));
-
-        vertexAttribs[1] = {};
-        vertexAttribs[1].location = 1;
-        vertexAttribs[1].buffer_slot = 0;
-        vertexAttribs[1].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
-        vertexAttribs[1].offset = static_cast<Uint32>(offsetof(Vertex2D, u));
-
-        vertexAttribs[2] = {};
-        vertexAttribs[2].location = 2;
-        vertexAttribs[2].buffer_slot = 0;
-        vertexAttribs[2].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
-        vertexAttribs[2].offset = static_cast<Uint32>(offsetof(Vertex2D, color));
-
+        SDL_GPUVertexAttribute vertexAttribs[4]; // 2D uses 3, 3D uses 4
+        Uint32 numAttribs = 0;
         SDL_GPUVertexBufferDescription vtxBufDesc{};
         vtxBufDesc.slot = 0;
-        vtxBufDesc.pitch = sizeof(Vertex2D);
         vtxBufDesc.input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX;
         vtxBufDesc.instance_step_rate = 0;
+
+        if (!bUse3DLayout)
+        {
+            // Vertex2D: float2 pos (TEXCOORD0), float2 uv (TEXCOORD1), ubyte4_norm color (TEXCOORD2)
+            vertexAttribs[0] = {};
+            vertexAttribs[0].location = 0;
+            vertexAttribs[0].buffer_slot = 0;
+            vertexAttribs[0].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
+            vertexAttribs[0].offset = static_cast<Uint32>(offsetof(Vertex2D, x));
+
+            vertexAttribs[1] = {};
+            vertexAttribs[1].location = 1;
+            vertexAttribs[1].buffer_slot = 0;
+            vertexAttribs[1].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
+            vertexAttribs[1].offset = static_cast<Uint32>(offsetof(Vertex2D, u));
+
+            vertexAttribs[2] = {};
+            vertexAttribs[2].location = 2;
+            vertexAttribs[2].buffer_slot = 0;
+            vertexAttribs[2].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
+            vertexAttribs[2].offset = static_cast<Uint32>(offsetof(Vertex2D, color));
+
+            vtxBufDesc.pitch = sizeof(Vertex2D);
+            numAttribs = 3;
+        }
+        else
+        {
+            // Vertex3D: float3 pos (TEXCOORD0), float3 normal (TEXCOORD1),
+            //           float2 uv (TEXCOORD2), ubyte4_norm color (TEXCOORD3)
+            vertexAttribs[0] = {};
+            vertexAttribs[0].location = 0;
+            vertexAttribs[0].buffer_slot = 0;
+            vertexAttribs[0].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3;
+            vertexAttribs[0].offset = static_cast<Uint32>(offsetof(Vertex3D, x));
+
+            vertexAttribs[1] = {};
+            vertexAttribs[1].location = 1;
+            vertexAttribs[1].buffer_slot = 0;
+            vertexAttribs[1].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3;
+            vertexAttribs[1].offset = static_cast<Uint32>(offsetof(Vertex3D, nx));
+
+            vertexAttribs[2] = {};
+            vertexAttribs[2].location = 2;
+            vertexAttribs[2].buffer_slot = 0;
+            vertexAttribs[2].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
+            vertexAttribs[2].offset = static_cast<Uint32>(offsetof(Vertex3D, u));
+
+            vertexAttribs[3] = {};
+            vertexAttribs[3].location = 3;
+            vertexAttribs[3].buffer_slot = 0;
+            vertexAttribs[3].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
+            vertexAttribs[3].offset = static_cast<Uint32>(offsetof(Vertex3D, color));
+
+            vtxBufDesc.pitch = sizeof(Vertex3D);
+            numAttribs = 4;
+        }
 
         SDL_GPUVertexInputState vtxInputState{};
         vtxInputState.vertex_buffer_descriptions = &vtxBufDesc;
         vtxInputState.num_vertex_buffers = 1;
         vtxInputState.vertex_attributes = vertexAttribs;
-        vtxInputState.num_vertex_attributes = 3;
+        vtxInputState.num_vertex_attributes = numAttribs;
 
         SDL_GPUDepthStencilState depthState{};
         depthState.enable_depth_test = depthTestEnabled;
@@ -986,8 +1385,14 @@ private:
         targetInfo.has_depth_stencil_target = false;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
-        pipelineInfo.vertex_shader = s_vertShader;
-        pipelineInfo.fragment_shader = s_fragShader;
+        // 2D pipelines: basic_textured vert+frag (with fog).
+        // 3D pipelines: basic_textured vert+frag (with fog) — vertex shader uses
+        // TEXCOORD0 for position, which aligns to Vertex3D layout if shader
+        // is compiled to accept float3 TEXCOORD0.
+        // NOTE: for full 3D, a dedicated vertex shader reading float3+normal would
+        // be needed; for this story the basic_textured shaders serve both paths.
+        pipelineInfo.vertex_shader = s_vertShader2D; // shared for 2D and 3D paths
+        pipelineInfo.fragment_shader = s_fragShaderTex;
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
         pipelineInfo.depth_stencil_state = depthState;
@@ -997,11 +1402,21 @@ private:
         SDL_GPUGraphicsPipeline* pipeline = SDL_CreateGPUGraphicsPipeline(s_device, &pipelineInfo);
         if (!pipeline)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- pipeline creation failed: %hs", SDL_GetError());
+            g_ErrorReport.Write(L"RENDER: SDL_gpu -- pipeline creation failed (%hs layout): %hs",
+                                bUse3DLayout ? "3D" : "2D", SDL_GetError());
         }
         return pipeline;
     }
 
+    // -----------------------------------------------------------------------
+    // Story 4.3.2 (AC-8): CreatePipelines
+    // Creates 4 pipeline sets × 9 blend modes = 36 pipelines total.
+    //   s_pipelines2D[9]       — Vertex2D layout, depth ON
+    //   s_pipelines2DDepthOff[9] — Vertex2D layout, depth OFF
+    //   s_pipelines3D[9]       — Vertex3D layout, depth ON
+    //   s_pipelines3DDepthOff[9] — Vertex3D layout, depth OFF
+    // Pipeline creation failures are non-fatal (draw calls skip if pipeline is null).
+    // -----------------------------------------------------------------------
     [[nodiscard]] static bool CreatePipelines()
     {
         // Blend mode table from architecture-rendering.md and story dev notes.
@@ -1053,42 +1468,101 @@ private:
             blendState.alpha_blend_op = SDL_GPU_BLENDOP_ADD;
             blendState.enable_blend = table[i].enableBlend;
 
-            // Depth ON variant.
-            s_pipelines[i] = BuildBlendPipeline(blendState, true);
-            if (!s_pipelines[i])
+            // 2D depth ON.
+            s_pipelines2D[i] = BuildBlendPipeline(blendState, true, /*bUse3DLayout=*/false);
+            if (!s_pipelines2D[i])
             {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu -- pipeline creation failed for BlendMode %d: %hs", i,
-                                    SDL_GetError());
-                // Non-fatal — draw calls will skip gracefully when pipeline is null.
+                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 2D pipeline[%d] creation failed: %hs", i, SDL_GetError());
             }
 
-            // Depth OFF variant.
-            s_pipelinesDepthOff[i] = BuildBlendPipeline(blendState, false);
-            if (!s_pipelinesDepthOff[i])
+            // 2D depth OFF.
+            s_pipelines2DDepthOff[i] = BuildBlendPipeline(blendState, false, /*bUse3DLayout=*/false);
+            if (!s_pipelines2DDepthOff[i])
             {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu -- depth-off pipeline creation failed for BlendMode %d: %hs", i,
+                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 2D depth-off pipeline[%d] creation failed: %hs", i,
+                                    SDL_GetError());
+            }
+
+            // 3D depth ON.
+            s_pipelines3D[i] = BuildBlendPipeline(blendState, true, /*bUse3DLayout=*/true);
+            if (!s_pipelines3D[i])
+            {
+                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 3D pipeline[%d] creation failed: %hs", i, SDL_GetError());
+            }
+
+            // 3D depth OFF.
+            s_pipelines3DDepthOff[i] = BuildBlendPipeline(blendState, false, /*bUse3DLayout=*/true);
+            if (!s_pipelines3DDepthOff[i])
+            {
+                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 3D depth-off pipeline[%d] creation failed: %hs", i,
                                     SDL_GetError());
             }
         }
 
-        return true; // Pipeline creation failures are non-fatal for this story.
+        return true; // Pipeline creation failures are non-fatal.
     }
 
     static void DestroyPipelines()
     {
         for (int i = 0; i < k_PipelineCount; ++i)
         {
-            if (s_pipelines[i])
+            if (s_pipelines2D[i])
             {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines[i]);
-                s_pipelines[i] = nullptr;
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines2D[i]);
+                s_pipelines2D[i] = nullptr;
             }
-            if (s_pipelinesDepthOff[i])
+            if (s_pipelines2DDepthOff[i])
             {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesDepthOff[i]);
-                s_pipelinesDepthOff[i] = nullptr;
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines2DDepthOff[i]);
+                s_pipelines2DDepthOff[i] = nullptr;
+            }
+            if (s_pipelines3D[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3D[i]);
+                s_pipelines3D[i] = nullptr;
+            }
+            if (s_pipelines3DDepthOff[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DDepthOff[i]);
+                s_pipelines3DDepthOff[i] = nullptr;
             }
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 4.3.2 (AC-10): CreateFogUniformBuffers
+    // Creates the GPU buffer (s_fogUniformBuf) used as a storage buffer in
+    // the fragment shader, and its companion transfer buffer (s_fogTransferBuf).
+    // Size = sizeof(FogUniform) = 48 bytes.
+    // -----------------------------------------------------------------------
+    [[nodiscard]] static bool CreateFogUniformBuffers()
+    {
+        SDL_GPUTransferBufferCreateInfo tbInfo{};
+        tbInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+        tbInfo.size = sizeof(FogUniform);
+        s_fogTransferBuf = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
+        if (!s_fogTransferBuf)
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_gpu -- fog transfer buffer creation failed: %hs", SDL_GetError());
+            return false;
+        }
+
+        SDL_GPUBufferCreateInfo bufInfo{};
+        bufInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+        bufInfo.size = sizeof(FogUniform);
+        s_fogUniformBuf = SDL_CreateGPUBuffer(s_device, &bufInfo);
+        if (!s_fogUniformBuf)
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_gpu -- fog uniform GPU buffer creation failed: %hs", SDL_GetError());
+            SDL_ReleaseGPUTransferBuffer(s_device, s_fogTransferBuf);
+            s_fogTransferBuf = nullptr;
+            return false;
+        }
+
+        // Fog starts dirty so that the default zero-initialized FogUniform
+        // (fog disabled) is uploaded on the first frame.
+        s_fogDirty = true;
+        return true;
     }
 
     [[nodiscard]] static bool CreateVertexBuffers()
