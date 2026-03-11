@@ -114,6 +114,15 @@ target_sources(MuTests PRIVATE render/test_traileffects_migration.cpp)
 # Tests compile and run on macOS/Linux without Win32, OpenGL, or a real GPU device.
 target_sources(MuTests PRIVATE render/test_sdlgpubackend.cpp)
 
+# Story 4.3.2: Shader Programs (HLSL + SDL_shadercross) [VS1-RENDER-SHADERS]
+# RED PHASE: Tests verify GetShaderBlobPath driver-to-extension mapping (AC-6),
+# FogUniform struct layout static_assert vs HLSL cbuffer std140 alignment (AC-10),
+# and pipeline set selection for 2D vs 3D draw modes (AC-8).
+# Tests compile and run on macOS/Linux — no GPU device, no Win32, no OpenGL required.
+# Tests fail until GetShaderBlobPath, GetPipelineSetFor, and FogUniform are implemented
+# in MuRendererSDLGpu.cpp and exposed in the mu:: namespace.
+target_sources(MuTests PRIVATE render/test_shaderprograms.cpp)
+
 # Story 4.2.5: Migrate Blend & Pipeline State to MuRenderer [VS1-RENDER-MIGRATE-STATE]
 # RED PHASE: Tests verify SetBlendMode() routing for all 7 blend helper mappings,
 # SetDepthTest() bool routing (enable/disable), SetFog() FogParams population for the
