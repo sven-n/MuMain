@@ -307,6 +307,43 @@ void ClearTextureRegistry()
 }
 
 // ---------------------------------------------------------------------------
+// Story 4.4.1 (AC-4, Task 6): SamplerRegistry — parallel to TextureRegistry.
+// Maps caller-provided uint32_t ids to SDL_GPUSampler* (stored as void* for test linkage).
+// RegisterSampler / LookupSampler / UnregisterSampler follow the same pattern as the texture registry.
+// Sampler binding in draw calls uses LookupSampler(textureId) instead of the hardcoded s_defaultSampler.
+// ---------------------------------------------------------------------------
+static std::unordered_map<std::uint32_t, void*> s_samplerMap;
+
+[[nodiscard]] void* LookupSampler(std::uint32_t id)
+{
+    auto it = s_samplerMap.find(id);
+    if (it == s_samplerMap.end())
+    {
+#ifdef MU_ENABLE_SDL3
+        return s_defaultSampler; // fallback to default sampler for unknown IDs
+#else
+        return nullptr;
+#endif
+    }
+    return it->second;
+}
+
+void RegisterSampler(std::uint32_t id, void* pSampler)
+{
+    s_samplerMap[id] = pSampler;
+}
+
+void UnregisterSampler(std::uint32_t id)
+{
+    s_samplerMap.erase(id);
+}
+
+void ClearSamplerRegistry()
+{
+    s_samplerMap.clear();
+}
+
+// ---------------------------------------------------------------------------
 // GetBlendFactors: Returns (src_color_blendfactor, dst_color_blendfactor) as
 // int values matching SDL_GPUBlendFactor enum for the given BlendMode.
 // Used by the test TU to verify the blend factor table without SDL3 headers.
@@ -744,6 +781,23 @@ public:
     }
 
     // -----------------------------------------------------------------------
+    // Story 4.4.1 (AC-2, Task 6.2/6.3): GetDevice override — returns s_device.
+    // Allows GlobalBitmap.cpp to obtain the SDL_GPUDevice* via mu::GetRenderer().GetDevice()
+    // without a direct dependency on MuRendererSDLGpu.cpp internals.
+    // Logs a warning via g_ErrorReport if s_device is nullptr (renderer not initialized).
+    // -----------------------------------------------------------------------
+#ifdef MU_ENABLE_SDL3
+    [[nodiscard]] void* GetDevice() override
+    {
+        if (!s_device)
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_gpu -- GetDevice() called before Init() or after Shutdown()");
+        }
+        return s_device;
+    }
+#endif
+
+    // -----------------------------------------------------------------------
     // RenderQuad2D: Render a screen-space textured quad (4 vertices per quad).
     // Vertex count must be a multiple of 4.
     // -----------------------------------------------------------------------
@@ -797,10 +851,11 @@ public:
         idxBinding.offset = 0;
         SDL_BindGPUIndexBuffer(s_renderPass, &idxBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
-        // Bind texture and sampler.
+        // Story 4.4.1 (AC-4): Bind per-texture sampler via LookupSampler; fallback to s_defaultSampler.
+        void* pSampler = LookupSampler(textureId);
         SDL_GPUTextureSamplerBinding samplerBinding{};
         samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
-        samplerBinding.sampler = s_defaultSampler;
+        samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
         SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
 
         // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
@@ -871,10 +926,14 @@ public:
         vtxBinding.offset = vtxOffset;
         SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBinding, 1);
 
-        SDL_GPUTextureSamplerBinding samplerBinding{};
-        samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
-        samplerBinding.sampler = s_defaultSampler;
-        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+        // Story 4.4.1 (AC-4): Bind per-texture sampler via LookupSampler; fallback to s_defaultSampler.
+        {
+            void* pSampler = LookupSampler(textureId);
+            SDL_GPUTextureSamplerBinding samplerBinding{};
+            samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
+            samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
+            SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+        }
 
         // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
         if (s_fogUniformBuf)
@@ -1016,10 +1075,14 @@ public:
         idxBinding.offset = 0;
         SDL_BindGPUIndexBuffer(s_renderPass, &idxBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
-        SDL_GPUTextureSamplerBinding samplerBinding{};
-        samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
-        samplerBinding.sampler = s_defaultSampler;
-        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+        // Story 4.4.1 (AC-4): Bind per-texture sampler via LookupSampler; fallback to s_defaultSampler.
+        {
+            void* pSampler = LookupSampler(textureId);
+            SDL_GPUTextureSamplerBinding samplerBinding{};
+            samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
+            samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
+            SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+        }
 
         // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
         if (s_fogUniformBuf)

@@ -1,5 +1,6 @@
 // MuRenderer.h: Rendering abstraction interface for the MU Online game client.
 // Story 4.2.1 — Flow Code: VS1-RENDER-ABSTRACT-CORE
+// Story 4.4.1 — Flow Code: VS1-RENDER-TEXTURE-MIGRATE (GetDevice accessor added)
 //
 // IMuRenderer defines the stable rendering API surface that game code calls.
 // MuRendererGL (in MuRenderer.cpp) implements it using OpenGL immediate mode.
@@ -14,6 +15,13 @@
 
 #include <cstdint>
 #include <span>
+
+// Story 4.4.1: Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
+// can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
+// The returned pointer is opaque — callers cast to SDL_GPUDevice* after including SDL3 headers.
+#ifdef MU_ENABLE_SDL3
+struct SDL_GPUDevice;
+#endif
 
 namespace mu
 {
@@ -104,6 +112,19 @@ public:
     // No-op in the OpenGL backend. Called from Winmain.cpp game loop.
     virtual void BeginFrame() {}
     virtual void EndFrame() {}
+
+    // Story 4.4.1 — Texture System Migration: SDL_gpu device accessor.
+    // Returns the SDL_GPUDevice* used by the active backend, or nullptr if not available.
+    // Default implementation returns nullptr (OpenGL backend has no SDL_GPUDevice).
+    // MuRendererSDLGpu overrides to return s_device.
+    // Used by GlobalBitmap.cpp to upload textures via SDL_gpu without a layering violation.
+    // [[nodiscard]]: callers must check for nullptr before using the device.
+#ifdef MU_ENABLE_SDL3
+    [[nodiscard]] virtual void* GetDevice()
+    {
+        return nullptr;
+    }
+#endif
 };
 
 // ---------------------------------------------------------------------------

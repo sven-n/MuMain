@@ -15,6 +15,14 @@
 #include <cstdint>
 #include "Core/Timer.h"
 
+// Story 4.4.1 — Texture System Migration: forward declarations for SDL_gpu types.
+// Using forward declarations avoids pulling SDL3 headers into every TU that includes GlobalBitmap.h.
+// The struct members sdlTexture and sdlSampler are pointer types — forward declarations are sufficient.
+#ifdef MU_ENABLE_SDL3
+struct SDL_GPUTexture;
+struct SDL_GPUSampler;
+#endif
+
 #define MAX_BITMAP_FILE_NAME 256
 
 #pragma pack(push, 1)
@@ -31,6 +39,16 @@ struct BITMAP_t
     bool IsHair;
     BYTE* Buffer;
     std::vector<std::uint8_t> BufferStorage;
+
+    // Story 4.4.1 — Texture System Migration: SDL_gpu texture and sampler handles.
+    // Only present when MU_ENABLE_SDL3 is defined. Forward-declared above.
+    // sdlTexture: created by SDL_CreateGPUTexture in OpenJpegTurbo/OpenTga; released by UnloadImage.
+    // sdlSampler: per-texture sampler with filter/wrap parameters; released by UnloadImage.
+    // TextureNumber retains its GLuint type for the OpenGL path (set to 0 on SDL_gpu path).
+#ifdef MU_ENABLE_SDL3
+    SDL_GPUTexture* sdlTexture = nullptr;
+    SDL_GPUSampler* sdlSampler = nullptr;
+#endif
 
 private:
     friend class CBitmapCache;

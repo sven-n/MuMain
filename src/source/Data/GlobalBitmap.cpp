@@ -6,6 +6,14 @@
 #include "turbojpeg.h"
 #include "GlobalBitmap.h"
 
+// Story 4.4.1 — Texture System Migration: SDL_gpu upload path.
+// MuRenderer.h is included for mu::GetRenderer().GetDevice() (IMuRenderer::GetDevice virtual method).
+// Only included on the SDL_gpu path to keep the OpenGL path build-clean.
+#ifdef MU_ENABLE_SDL3
+#include <SDL3/SDL_gpu.h>
+#include "RenderFX/MuRenderer.h"
+#endif
+
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -83,6 +91,235 @@ std::string NarrowPath(const std::wstring& wide)
     return conv.to_bytes(wide);
 }
 } // namespace
+
+// ---------------------------------------------------------------------------
+// Story 4.4.1 — Texture System Migration: SDL_gpu texture registry accessors.
+// Forward declarations for the free functions implemented in MuRendererSDLGpu.cpp.
+// UnregisterTexture is declared unconditionally because UnloadImage calls it on both paths
+// (the registry is a no-op on the OpenGL path since no textures are registered there).
+// RegisterTexture / RegisterSampler / UnregisterSampler are SDL_gpu-only.
+// ---------------------------------------------------------------------------
+namespace mu
+{
+void UnregisterTexture(std::uint32_t id);
+#ifdef MU_ENABLE_SDL3
+void RegisterTexture(std::uint32_t id, void* pTex);
+void RegisterSampler(std::uint32_t id, void* pSampler);
+void UnregisterSampler(std::uint32_t id);
+#endif
+} // namespace mu
+
+// ---------------------------------------------------------------------------
+// Story 4.4.1 — Texture System Migration: GL→SDL mapping helpers and pixel padding.
+//
+// These functions are defined at file scope (global namespace) so that the test TU
+// (test_texturesystemmigration.cpp) can forward-declare and link them directly.
+// They are implementation details of the texture upload path; the names are
+// sufficiently specific to avoid collision.
+//
+// GL filter constants:
+//   GL_NEAREST        = 0x2600
+//   GL_LINEAR         = 0x2601
+//
+// GL wrap constants:
+//   GL_CLAMP_TO_EDGE  = 0x812F
+//   GL_REPEAT         = 0x2901
+//
+// SDL_GPUFilter enum (from SDL3/SDL_gpu.h release-3.2.8):
+//   SDL_GPU_FILTER_NEAREST = 0
+//   SDL_GPU_FILTER_LINEAR  = 1
+//
+// SDL_GPUSamplerAddressMode enum:
+//   SDL_GPU_SAMPLER_ADDRESS_MODE_REPEAT        = 0
+//   SDL_GPU_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT = 1
+//   SDL_GPU_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2
+// ---------------------------------------------------------------------------
+
+// MapGLFilterToSDL: maps GL_NEAREST/GL_LINEAR to SDL_GPUFilter integer values.
+// Declared with int return type so the test TU can forward-declare without SDL3 headers.
+// On the SDL_gpu path the return value is cast to SDL_GPUFilter at the call site.
+[[nodiscard]] int MapGLFilterToSDL(unsigned int uiFilter)
+{
+    // GL_NEAREST = 0x2600 → SDL_GPU_FILTER_NEAREST = 0
+    // GL_LINEAR  = 0x2601 → SDL_GPU_FILTER_LINEAR  = 1
+    switch (uiFilter)
+    {
+    case 0x2600u: // GL_NEAREST
+        return 0; // SDL_GPU_FILTER_NEAREST
+    case 0x2601u: // GL_LINEAR
+        return 1; // SDL_GPU_FILTER_LINEAR
+    default:
+        return 0; // default: SDL_GPU_FILTER_NEAREST (safe)
+    }
+}
+
+// MapGLWrapToSDL: maps GL_CLAMP_TO_EDGE/GL_REPEAT to SDL_GPUSamplerAddressMode integer values.
+// Declared with int return type so the test TU can forward-declare without SDL3 headers.
+[[nodiscard]] int MapGLWrapToSDL(unsigned int uiWrapMode)
+{
+    // GL_CLAMP_TO_EDGE = 0x812F → SDL_GPU_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2
+    // GL_REPEAT        = 0x2901 → SDL_GPU_SAMPLER_ADDRESS_MODE_REPEAT        = 0
+    switch (uiWrapMode)
+    {
+    case 0x812Fu: // GL_CLAMP_TO_EDGE
+        return 2; // SDL_GPU_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
+    case 0x2901u: // GL_REPEAT
+        return 0; // SDL_GPU_SAMPLER_ADDRESS_MODE_REPEAT
+    default:
+        return 2; // default: SDL_GPU_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE (safe)
+    }
+}
+
+// PadRGBToRGBA: expands a packed RGB pixel buffer to RGBA8 by inserting alpha=255.
+// Input: rgbData points to width*height*3 bytes (R,G,B per pixel, row-major).
+// Output: vector of width*height*4 bytes (R,G,B,255 per pixel).
+// No GPU device required — pure CPU logic.
+[[nodiscard]] std::vector<std::uint8_t> PadRGBToRGBA(const std::uint8_t* rgbData, int width, int height)
+{
+    const std::size_t pixelCount = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+    std::vector<std::uint8_t> rgba(pixelCount * 4u);
+    for (std::size_t i = 0; i < pixelCount; ++i)
+    {
+        rgba[i * 4u + 0u] = rgbData[i * 3u + 0u]; // R
+        rgba[i * 4u + 1u] = rgbData[i * 3u + 1u]; // G
+        rgba[i * 4u + 2u] = rgbData[i * 3u + 2u]; // B
+        rgba[i * 4u + 3u] = 255u;                 // A = fully opaque
+    }
+    return rgba;
+}
+
+// ---------------------------------------------------------------------------
+// Story 4.4.1 — Texture System Migration: UploadTextureSDLGpu
+//
+// Creates an SDL_GPUTexture + SDL_GPUSampler from decoded pixel data.
+// Uses a synchronous copy command buffer (AcquireGPUCommandBuffer → BeginGPUCopyPass
+// → SDL_UploadToGPUTexture → EndGPUCopyPass → SubmitGPUCommandBuffer).
+// On success: stores handles in pBitmap->sdlTexture and pBitmap->sdlSampler.
+// On any failure: logs via g_ErrorReport.Write and returns false.
+//
+// Parameters:
+//   pBitmap    — destination BITMAP_t (must be non-null)
+//   pixelData  — source pixel buffer (width*height*(3 or 4) bytes)
+//   width      — texture width in pixels
+//   height     — texture height in pixels
+//   format     — SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM (JPEG/TGA both upload as RGBA8)
+//   filter     — SDL_GPUFilter value (from MapGLFilterToSDL)
+//   wrapMode   — SDL_GPUSamplerAddressMode value (from MapGLWrapToSDL)
+//   filename   — asset filename for error log context
+// ---------------------------------------------------------------------------
+#ifdef MU_ENABLE_SDL3
+[[nodiscard]] static bool UploadTextureSDLGpu(BITMAP_t* pBitmap, const std::uint8_t* pixelData, int width, int height,
+                                              SDL_GPUTextureFormat format, SDL_GPUFilter filter,
+                                              SDL_GPUSamplerAddressMode wrapMode, const std::wstring& filename)
+{
+    // Obtain device via IMuRenderer::GetDevice() virtual method (Option B per Dev Notes).
+    SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+    if (!device)
+    {
+        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_GPUDevice not available for %ls", filename.c_str());
+        return false;
+    }
+
+    // Create the GPU texture.
+    SDL_GPUTextureCreateInfo texInfo{};
+    texInfo.type = SDL_GPU_TEXTURETYPE_2D;
+    texInfo.format = format;
+    texInfo.width = static_cast<Uint32>(width);
+    texInfo.height = static_cast<Uint32>(height);
+    texInfo.layer_count_or_depth = 1;
+    texInfo.num_levels = 1;
+    texInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+
+    SDL_GPUTexture* gpuTex = SDL_CreateGPUTexture(device, &texInfo);
+    if (!gpuTex)
+    {
+        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_CreateGPUTexture failed for %ls: %hs", filename.c_str(),
+                            SDL_GetError());
+        return false;
+    }
+
+    // Determine pixel byte size based on format (RGBA8 = 4 bytes/pixel).
+    const Uint32 pixelBytes = 4u; // SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM: 4 bytes/pixel
+    const Uint32 dataSize = static_cast<Uint32>(width) * static_cast<Uint32>(height) * pixelBytes;
+
+    // Create a transfer buffer and upload pixel data via a copy pass.
+    SDL_GPUTransferBufferCreateInfo transferInfo{};
+    transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+    transferInfo.size = dataSize;
+
+    SDL_GPUTransferBuffer* transferBuf = SDL_CreateGPUTransferBuffer(device, &transferInfo);
+    if (!transferBuf)
+    {
+        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_CreateGPUTransferBuffer failed for %ls: %hs",
+                            filename.c_str(), SDL_GetError());
+        SDL_ReleaseGPUTexture(device, gpuTex);
+        return false;
+    }
+
+    // Map transfer buffer, copy pixel data, unmap.
+    void* pMapped = SDL_MapGPUTransferBuffer(device, transferBuf, false);
+    if (pMapped)
+    {
+        std::memcpy(pMapped, pixelData, dataSize);
+        SDL_UnmapGPUTransferBuffer(device, transferBuf);
+    }
+
+    // Issue copy command: upload from transfer buffer to GPU texture.
+    SDL_GPUCommandBuffer* copyCmd = SDL_AcquireGPUCommandBuffer(device);
+    if (copyCmd)
+    {
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(copyCmd);
+        if (copyPass)
+        {
+            SDL_GPUTextureTransferInfo srcInfo{};
+            srcInfo.transfer_buffer = transferBuf;
+            srcInfo.offset = 0;
+            srcInfo.pixels_per_row = static_cast<Uint32>(width);
+            srcInfo.rows_per_layer = static_cast<Uint32>(height);
+
+            SDL_GPUTextureRegion dstRegion{};
+            dstRegion.texture = gpuTex;
+            dstRegion.mip_level = 0;
+            dstRegion.layer = 0;
+            dstRegion.x = 0;
+            dstRegion.y = 0;
+            dstRegion.z = 0;
+            dstRegion.w = static_cast<Uint32>(width);
+            dstRegion.h = static_cast<Uint32>(height);
+            dstRegion.d = 1;
+
+            SDL_UploadToGPUTexture(copyPass, &srcInfo, &dstRegion, false);
+            SDL_EndGPUCopyPass(copyPass);
+        }
+        SDL_SubmitGPUCommandBuffer(copyCmd);
+    }
+
+    SDL_ReleaseGPUTransferBuffer(device, transferBuf);
+
+    // Create per-texture sampler with the requested filter/wrap parameters.
+    SDL_GPUSamplerCreateInfo samplerInfo{};
+    samplerInfo.min_filter = filter;
+    samplerInfo.mag_filter = filter;
+    samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
+    samplerInfo.address_mode_u = wrapMode;
+    samplerInfo.address_mode_v = wrapMode;
+    samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+
+    SDL_GPUSampler* gpuSampler = SDL_CreateGPUSampler(device, &samplerInfo);
+    if (!gpuSampler)
+    {
+        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_CreateGPUSampler failed for %ls: %hs", filename.c_str(),
+                            SDL_GetError());
+        SDL_ReleaseGPUTexture(device, gpuTex);
+        return false;
+    }
+
+    // Store handles in the BITMAP_t.
+    pBitmap->sdlTexture = gpuTex;
+    pBitmap->sdlSampler = gpuSampler;
+    return true;
+}
+#endif
 
 bool CBitmapCache::Create()
 {
@@ -441,7 +678,34 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 
         if (--pBitmap->Ref == 0 || bForce)
         {
+            // Subtask 5.1 — Unregister from TextureRegistry before erasing the bitmap entry.
+            mu::UnregisterTexture(uiBitmapIndex);
+#ifdef MU_ENABLE_SDL3
+            mu::UnregisterSampler(uiBitmapIndex);
+#endif
+
+            // Subtask 5.2 — Guard glDeleteTextures under #ifndef MU_ENABLE_SDL3.
+#ifndef MU_ENABLE_SDL3
             glDeleteTextures(1, &(pBitmap->TextureNumber));
+#else
+            // Subtask 5.3 — Release SDL_gpu resources on the SDL_gpu path.
+            {
+                SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+                if (device)
+                {
+                    if (pBitmap->sdlSampler != nullptr)
+                    {
+                        SDL_ReleaseGPUSampler(device, pBitmap->sdlSampler);
+                        pBitmap->sdlSampler = nullptr;
+                    }
+                    if (pBitmap->sdlTexture != nullptr)
+                    {
+                        SDL_ReleaseGPUTexture(device, pBitmap->sdlTexture);
+                        pBitmap->sdlTexture = nullptr;
+                    }
+                }
+            }
+#endif
 
             const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->Width * pBitmap->Height * pBitmap->Components);
             m_dwUsedTextureMemory -= memoryUsed;
@@ -678,6 +942,9 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
                static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
     }
 
+    // Subtask 3.1 — Guard existing OpenGL texture upload under #ifndef MU_ENABLE_SDL3.
+    // Subtask 3.2 — Add SDL_gpu upload path under #ifdef MU_ENABLE_SDL3.
+#ifndef MU_ENABLE_SDL3
     glGenTextures(1, &(pNewBitmap->TextureNumber));
 
     glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
@@ -693,7 +960,30 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
+#else
+    // SDL_gpu path: pad RGB→RGBA8, upload texture, create sampler.
+    // Capture raw sdlTexture pointer BEFORE std::move (move invalidates pNewBitmap).
+    std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, textureWidth, textureHeight);
+    if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData.data(), textureWidth, textureHeight,
+                             SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
+                             static_cast<SDL_GPUFilter>(MapGLFilterToSDL(uiFilter)),
+                             static_cast<SDL_GPUSamplerAddressMode>(MapGLWrapToSDL(uiWrapMode)), filename))
+    {
+        return false;
+    }
 
+    // Capture raw texture pointer before the move so RegisterTexture can be called after insert.
+    SDL_GPUTexture* rawTex = pNewBitmap->sdlTexture;
+    SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
+
+    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
+
+    // Register texture (and sampler) in the TextureRegistry so LookupTexture(uiBitmapIndex) resolves.
+    mu::RegisterTexture(uiBitmapIndex, rawTex);
+    mu::RegisterSampler(uiBitmapIndex, rawSampler);
+#endif
+
+    // Subtask 3.3 — Return true on both paths (existing structure preserved).
     return true;
 }
 
@@ -773,6 +1063,9 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
         }
     }
 
+    // Subtask 4.1 — Guard existing OpenGL texture upload under #ifndef MU_ENABLE_SDL3.
+    // Subtask 4.2 — Add SDL_gpu upload path under #ifdef MU_ENABLE_SDL3.
+#ifndef MU_ENABLE_SDL3
     glGenTextures(1, &(pNewBitmap->TextureNumber));
 
     glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
@@ -790,6 +1083,26 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
+#else
+    // SDL_gpu path: RGBA data already decoded in pNewBitmap->Buffer (4 components from OZT decode loop).
+    // Upload directly as RGBA8 — no padding required.
+    if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, Width, Height, SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM,
+                             static_cast<SDL_GPUFilter>(MapGLFilterToSDL(uiFilter)),
+                             static_cast<SDL_GPUSamplerAddressMode>(MapGLWrapToSDL(uiWrapMode)), filename))
+    {
+        return false;
+    }
+
+    // Capture raw texture pointer before the move so RegisterTexture can be called after insert.
+    SDL_GPUTexture* rawTex = pNewBitmap->sdlTexture;
+    SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
+
+    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
+
+    // Register texture (and sampler) in the TextureRegistry so LookupTexture(uiBitmapIndex) resolves.
+    mu::RegisterTexture(uiBitmapIndex, rawTex);
+    mu::RegisterSampler(uiBitmapIndex, rawSampler);
+#endif
 
     return true;
 }
