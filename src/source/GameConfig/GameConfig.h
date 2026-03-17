@@ -23,7 +23,9 @@ public:
 
     // Graphics
     int GetColorDepth() const { return m_colorDepth; }
+    int GetCameraZoomLevel() const { return m_cameraZoomLevel; }
     void SetColorDepth(int depth);
+    void SetCameraZoomLevel(int level);
 
     // Audio
     bool GetSoundEnabled() const { return m_soundEnabled; }
@@ -77,6 +79,7 @@ private:
     bool m_windowMode;
 
     int m_colorDepth;
+    int m_cameraZoomLevel;
 
     bool m_soundEnabled;
     bool m_musicEnabled;

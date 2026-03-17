@@ -19,6 +19,7 @@ namespace CfgKeys
     // Graphics
     inline constexpr wchar_t CfgKeyColorDepth[]     = L"ColorDepth";
     inline constexpr wchar_t CfgKeyRenderTextType[] = L"RenderTextType";
+    inline constexpr wchar_t CfgKeyCameraZoomLevel[] = L"CameraZoomLevel";
 
     // Audio
     inline constexpr wchar_t CfgKeySoundEnabled[] = L"SoundEnabled";
@@ -43,6 +44,7 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultWindowed     = true;
 
     inline constexpr int  CfgDefaultColorDepth = 0;
+    inline constexpr int  CfgDefaultCameraZoomLevel = 0;
 
     inline constexpr bool CfgDefaultSoundEnabled = true;
     inline constexpr bool CfgDefaultMusicEnabled = false;

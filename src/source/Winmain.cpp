@@ -14,6 +14,7 @@
 #include "ZzzTexture.h"
 #include "ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Camera/CameraUtility.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
@@ -366,6 +367,7 @@ void DestroyWindow()
 {
     // Save game configuration to config.ini
     GameConfig::GetInstance().SetVolumeLevel(g_pOption->GetVolumeLevel());
+    GameConfig::GetInstance().SetCameraZoomLevel(GetUserCameraZoomLevel());
     GameConfig::GetInstance().Save();
 
 #ifdef _EDITOR
@@ -1022,6 +1024,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     // Apply graphics settings from INI
     m_nColorDepth = GameConfig::GetInstance().GetColorDepth();
     g_iRenderTextType = GameConfig::GetInstance().GetRenderTextType();
+    SetUserCameraZoomLevel(static_cast<short>(GameConfig::GetInstance().GetCameraZoomLevel()));
 
     // Apply login settings from INI
     m_RememberMe = GameConfig::GetInstance().GetRememberMe() ? 1 : 0;
