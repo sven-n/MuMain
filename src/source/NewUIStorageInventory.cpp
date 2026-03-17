@@ -24,6 +24,7 @@ CNewUIStorageInventory::CNewUIStorageInventory()
     m_pNewUIMng = nullptr;
     m_pNewInventoryCtrl = nullptr;
     m_Pos.x = m_Pos.y = 0;
+    m_nBackupSourceInvenIndex = -1;
 }
 
 CNewUIStorageInventory::~CNewUIStorageInventory()
@@ -376,7 +377,7 @@ void CNewUIStorageInventory::ProcessStorageItemAutoMove()
     ITEM* pItemObj = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
     if (pItemObj)
     {
-        int nDstIndex = g_pMyInventory->FindEmptySlot(pItemObj);
+        int nDstIndex = g_pMyInventory->FindEmptySlotIncludingExtensions(pItemObj);
         if (-1 != nDstIndex)
         {
             SetItemAutoMove(true);
@@ -391,7 +392,7 @@ void CNewUIStorageInventory::ProcessStorageItemAutoMove()
     }
 }
 
-bool CNewUIStorageInventory::ProcessMyInvenItemAutoMove()
+bool CNewUIStorageInventory::ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl)
 {
     if (g_pPickedItem && g_pPickedItem->GetItem())
     {
@@ -403,8 +404,17 @@ bool CNewUIStorageInventory::ProcessMyInvenItemAutoMove()
         return false;
     }
 
-    const auto pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
-    if (const auto pItemObj = pMyInvenCtrl->FindItemAtPt(MouseX, MouseY))
+    if (sourceCtrl == nullptr)
+    {
+        sourceCtrl = g_pMyInventory->GetInventoryCtrl();
+    }
+
+    if (sourceCtrl == nullptr)
+    {
+        return false;
+    }
+
+    if (const auto pItemObj = sourceCtrl->FindItemAtPt(MouseX, MouseY))
     {
         if (pItemObj->Type == ITEM_WIZARDS_RING)
             return false;
@@ -412,9 +422,13 @@ bool CNewUIStorageInventory::ProcessMyInvenItemAutoMove()
         const int emptySlotIndex = FindEmptySlot(pItemObj);
         if (-1 != emptySlotIndex)
         {
-            SetItemAutoMove(true);
+            const int nSrcIndex = sourceCtrl->GetIndexByItem(pItemObj);
+            if (nSrcIndex < 0)
+            {
+                return false;
+            }
 
-            const int nSrcIndex = pMyInvenCtrl->GetIndexByItem(pItemObj);
+            SetItemAutoMove(true, nSrcIndex);
             SendRequestItemToStorage(pItemObj, nSrcIndex, emptySlotIndex);
             PlayBuffer(SOUND_GET_ITEM01);
             return true;
@@ -508,7 +522,7 @@ bool CNewUIStorageInventory::ProcessBtns()
     return false;
 }
 
-void CNewUIStorageInventory::SetItemAutoMove(bool bItemAutoMove)
+void CNewUIStorageInventory::SetItemAutoMove(bool bItemAutoMove, int nSourceInvenIndex)
 {
     m_bItemAutoMove = bItemAutoMove;
 
@@ -516,9 +530,13 @@ void CNewUIStorageInventory::SetItemAutoMove(bool bItemAutoMove)
     {
         m_nBackupMouseX = MouseX;
         m_nBackupMouseY = MouseY;
+        m_nBackupSourceInvenIndex = nSourceInvenIndex;
     }
     else
+    {
         m_nBackupMouseX = m_nBackupMouseY = 0;
+        m_nBackupSourceInvenIndex = -1;
+    }
 }
 
 void CNewUIStorageInventory::InitBackupItemInfo()
@@ -526,6 +544,7 @@ void CNewUIStorageInventory::InitBackupItemInfo()
     m_bTakeZen = false;
     m_nBackupTakeZen = 0;
     m_nBackupInvenIndex = -1;
+    m_nBackupSourceInvenIndex = -1;
 }
 
 void CNewUIStorageInventory::SetBackupTakeZen(int nZen)
@@ -630,9 +649,20 @@ void CNewUIStorageInventory::ProcessToReceiveStorageItems(int nIndex, std::span<
     {
         if (IsItemAutoMove())
         {
-            CNewUIInventoryCtrl* pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
-            ITEM* pItemObj = pMyInvenCtrl->FindItemAtPt(m_nBackupMouseX, m_nBackupMouseY);
-            g_pMyInventory->GetInventoryCtrl()->RemoveItem(pItemObj);
+            if (m_nBackupSourceInvenIndex >= MAX_EQUIPMENT_INDEX && m_nBackupSourceInvenIndex < MAX_MY_INVENTORY_INDEX)
+            {
+                g_pMyInventory->DeleteItem(m_nBackupSourceInvenIndex);
+            }
+            else if (m_nBackupSourceInvenIndex >= MAX_MY_INVENTORY_INDEX && m_nBackupSourceInvenIndex < MAX_MY_INVENTORY_EX_INDEX)
+            {
+                g_pMyInventoryExt->DeleteItem(m_nBackupSourceInvenIndex);
+            }
+            else
+            {
+                CNewUIInventoryCtrl* pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
+                ITEM* pItemObj = pMyInvenCtrl->FindItemAtPt(m_nBackupMouseX, m_nBackupMouseY);
+                g_pMyInventory->GetInventoryCtrl()->RemoveItem(pItemObj);
+            }
 
             SetItemAutoMove(false);
         }

@@ -136,16 +136,12 @@ bool CNewUIInventoryExtension::InventoryProcess()
         return false;
     }
 
-    int targetExtensionIndex = 0;
-    CNewUIInventoryCtrl* target = nullptr;
     for (auto* extension : m_extensions)
     {
         if (extension->CheckPtInRect(MouseX, MouseY))
         {
             return g_pMyInventory->HandleInventoryActions(extension);
         }
-
-        targetExtensionIndex++;
     }
 
     return false;
@@ -330,6 +326,29 @@ void CNewUIInventoryExtension::DeleteAllItems() const
             extension->RemoveAllItems();
         }
     }
+}
+
+int CNewUIInventoryExtension::FindEmptySlot(int cx, int cy, const CNewUIInventoryCtrl* excluded) const
+{
+    if (CharacterAttribute == nullptr)
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < CharacterAttribute->InventoryExtensions; ++i)
+    {
+        auto* extension = m_extensions[i];
+        if (extension && extension != excluded)
+        {
+            const int emptySlot = extension->FindEmptySlot(cx, cy);
+            if (emptySlot != -1)
+            {
+                return emptySlot;
+            }
+        }
+    }
+
+    return -1;
 }
 
 CNewUIInventoryCtrl* CNewUIInventoryExtension::GetOwnerOf(const CNewUIPickedItem* pPickedItem) const

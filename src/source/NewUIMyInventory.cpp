@@ -513,7 +513,8 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             const int iSourceIndex = pPickedItem->GetSourceLinealPos();
             const int tx = (int)(CollisionPosition[0] / TERRAIN_SCALE);
             const int ty = (int)(CollisionPosition[1] / TERRAIN_SCALE);
-            if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
+            if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl
+                || g_pMyInventoryExt->GetOwnerOf(pPickedItem) != nullptr)
             {
                 if (Hero->Dead == 0)
                 {
@@ -878,6 +879,11 @@ int CNewUIMyInventory::FindEmptySlot(IN int cx, IN int cy) const
 
 int CNewUIMyInventory::FindEmptySlot(ITEM* pItem) const
 {
+    if (pItem == nullptr)
+    {
+        return -1;
+    }
+
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     if (m_pNewInventoryCtrl)
     {
@@ -885,6 +891,33 @@ int CNewUIMyInventory::FindEmptySlot(ITEM* pItem) const
     }
 
     return -1;
+}
+
+int CNewUIMyInventory::FindEmptySlotIncludingExtensions(IN int cx, IN int cy) const
+{
+    const int baseInventorySlot = FindEmptySlot(cx, cy);
+    if (baseInventorySlot != -1)
+    {
+        return baseInventorySlot;
+    }
+
+    if (g_pMyInventoryExt != nullptr)
+    {
+        return g_pMyInventoryExt->FindEmptySlot(cx, cy);
+    }
+
+    return -1;
+}
+
+int CNewUIMyInventory::FindEmptySlotIncludingExtensions(ITEM* pItem) const
+{
+    if (pItem == nullptr)
+    {
+        return -1;
+    }
+
+    const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
+    return FindEmptySlotIncludingExtensions(pItemAttr->Width, pItemAttr->Height);
 }
 
 void CNewUIMyInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
@@ -2033,6 +2066,72 @@ bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM*
     return false;
 }
 
+bool CNewUIMyInventory::TryTransferBetweenInventorySections(CNewUIInventoryCtrl* sourceControl)
+{
+    if (sourceControl == nullptr || g_pMyInventoryExt == nullptr)
+    {
+        return false;
+    }
+
+    ITEM* pItem = sourceControl->FindItemAtPt(MouseX, MouseY);
+    if (pItem == nullptr)
+    {
+        return false;
+    }
+
+    const int sourceIndex = sourceControl->GetIndexByItem(pItem);
+    if (sourceIndex < 0)
+    {
+        return false;
+    }
+
+    const ITEM_ATTRIBUTE* itemAttribute = &ItemAttribute[pItem->Type];
+    int destinationIndex = -1;
+
+    if (sourceControl == g_pMyInventory->GetInventoryCtrl())
+    {
+        destinationIndex = g_pMyInventoryExt->FindEmptySlot(itemAttribute->Width, itemAttribute->Height);
+    }
+    else
+    {
+        destinationIndex = g_pMyInventory->FindEmptySlot(itemAttribute->Width, itemAttribute->Height);
+        if (destinationIndex == -1)
+        {
+            destinationIndex = g_pMyInventoryExt->FindEmptySlot(itemAttribute->Width, itemAttribute->Height, sourceControl);
+        }
+    }
+
+    if (destinationIndex == -1 || destinationIndex == sourceIndex)
+    {
+        return true;
+    }
+
+    if (!CNewUIInventoryCtrl::CreatePickedItem(sourceControl, pItem))
+    {
+        return false;
+    }
+
+    sourceControl->RemoveItem(pItem);
+
+    CNewUIPickedItem* pickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    if (pickedItem == nullptr || pickedItem->GetItem() == nullptr)
+    {
+        CNewUIInventoryCtrl::BackupPickedItem();
+        return false;
+    }
+
+    pickedItem->HidePickedItem();
+
+    if (!SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, sourceIndex,
+        pickedItem->GetItem(), STORAGE_TYPE::INVENTORY, destinationIndex))
+    {
+        CNewUIInventoryCtrl::BackupPickedItem();
+        return false;
+    }
+
+    return true;
+}
+
 // TODO: This whole logic (and possibly others) should be moved into a 'controller' class or similar.
 bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetControl)
 {
@@ -2094,7 +2193,17 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
 
         if (g_pNewUISystem->IsVisible(INTERFACE_STORAGE))
         {
-            return g_pStorageInventory->ProcessMyInvenItemAutoMove();
+            if (g_pStorageInventory->ProcessMyInvenItemAutoMove(targetControl))
+            {
+                return true;
+            }
+
+            if (g_pNewUISystem->IsVisible(INTERFACE_STORAGE_EXT))
+            {
+                return g_pStorageInventoryExt->ProcessMyInvenItemAutoMove(targetControl);
+            }
+
+            return false;
         }
 
         // Right-click to sell items at NPC shop
@@ -2161,6 +2270,13 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
             // Hide the picked item so it's not visually displayed while selling
             pPickedItem->HidePickedItem();
 
+            const int sourceIndex = pPickedItem->GetSourceLinealPos();
+            if (sourceIndex < MAX_EQUIPMENT_INDEX || sourceIndex >= MAX_MY_INVENTORY_EX_INDEX)
+            {
+                CNewUIInventoryCtrl::BackupPickedItem();
+                return false;
+            }
+
             if (IsHighValueItem(pItem))
             {
                 // Show confirmation dialog for expensive items
@@ -2169,7 +2285,7 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
             }
 
             // For regular items, send sell request immediately
-            SocketClient->ToGameServer()->SendSellItemToNpcRequest(iIndex);
+            SocketClient->ToGameServer()->SendSellItemToNpcRequest(sourceIndex);
             g_pNPCShop->SetSellingItem(true);
             return true;
         }
@@ -2182,6 +2298,11 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
             && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
             && !g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY))
         {
+            if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY_EXT))
+            {
+                return TryTransferBetweenInventorySections(targetControl);
+            }
+
             ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
             if (!pItem)
             {

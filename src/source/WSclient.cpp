@@ -1224,7 +1224,7 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
         {
             g_pMyInventory->DeleteItem(itemindex);
         }
-        else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
         {
             g_pMyInventoryExt->DeleteItem(itemindex);
         }
@@ -5707,7 +5707,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                         pickedItem = g_pMyInventory->FindItem(itemIndex);
                     }
                 }
-                else if (itemIndex >= MAX_MY_INVENTORY_INDEX && Data2->Result < MAX_MY_INVENTORY_EX_INDEX)
+                else if (itemIndex >= MAX_MY_INVENTORY_INDEX && itemIndex < MAX_MY_INVENTORY_EX_INDEX)
                 {
                     if (g_pMyInventoryExt->InsertItem(itemIndex, itemData))
                     {
@@ -5920,7 +5920,7 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     {
         g_pMyInventory->InsertItem(itemindex, itemData);
     }
-    else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+    else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
     {
         g_pMyInventoryExt->InsertItem(itemindex, itemData);
     }
@@ -6396,6 +6396,8 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
     {
         SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
     }
+
+    g_pNPCShop->SetSellingItem(false);
 }
 
 void ReceiveRepair(const BYTE* ReceiveBuffer)
@@ -8929,7 +8931,7 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         {
             g_pMyInventory->InsertItem(itemindex, itemData);
         }
-        else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
         {
             g_pMyInventoryExt->InsertItem(itemindex, itemData);
         }
