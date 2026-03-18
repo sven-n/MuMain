@@ -1168,7 +1168,8 @@ void CNewUISystem::Hide(DWORD dwKey)
 
         if (IsVisible(INTERFACE_INVENTORY_EXT))
         {
-            m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY_EXT, false);
+            // Use Hide() to preserve paired side effects (e.g. hero position widget restore).
+            Hide(INTERFACE_INVENTORY_EXT);
         }
 
         if (IsVisible(INTERFACE_MIXINVENTORY))
