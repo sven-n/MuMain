@@ -917,13 +917,34 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     CharacterAttribute->Shield = Data->Shield;
     CharacterAttribute->SkillMana = Data->SkillMana;
 
+    const auto rawRevivalExperience = Data->CurrentExperience;
+    const auto swappedRevivalExperience = ntoh64(Data->CurrentExperience);
+    const auto selectRevivalExperience = [](uint64_t rawExperience, uint64_t swappedExperience, uint64_t nextExperience)
+    {
+        const bool isRawPlausible = rawExperience <= nextExperience;
+        const bool isSwappedPlausible = swappedExperience <= nextExperience;
+        if (isRawPlausible != isSwappedPlausible)
+        {
+            return isRawPlausible ? rawExperience : swappedExperience;
+        }
+
+        // Fallback to legacy interpretation when both variants are plausible or implausible.
+        return rawExperience;
+    };
+
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
-        Master_Level_Data.lMasterLevel_Experince = ntoh64(Data->CurrentExperience);
+        Master_Level_Data.lMasterLevel_Experince = static_cast<__int64>(selectRevivalExperience(
+            rawRevivalExperience,
+            swappedRevivalExperience,
+            static_cast<uint64_t>(Master_Level_Data.lNext_MasterLevel_Experince)));
     }
     else
     {
-        CharacterAttribute->Experience = ntoh64(Data->CurrentExperience);
+        CharacterAttribute->Experience = selectRevivalExperience(
+            rawRevivalExperience,
+            swappedRevivalExperience,
+            CharacterAttribute->NextExperience);
     }
 
     CharacterMachine->Gold = Data->Gold;
