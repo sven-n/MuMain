@@ -536,42 +536,42 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
     {
         x = 0; y = 470; width = 6; height = 4;
 
-        WORD wPriorLevel = wLevel - 1;
-        DWORD dwPriorExperience = 0;
+        __int64 iPriorLevel = wLevel - 1;
+        __int64 iPriorExperience = 0;
 
-        if (wPriorLevel > 0)
+        if (iPriorLevel > 0)
         {
-            dwPriorExperience = (9 + wPriorLevel) * wPriorLevel * wPriorLevel * 10;
+            iPriorExperience = (9 + iPriorLevel) * iPriorLevel * iPriorLevel * 10;
 
-            if (wPriorLevel > 255)
+            if (iPriorLevel > 255)
             {
-                int iLevelOverN = wPriorLevel - 255;
-                dwPriorExperience += (9 + iLevelOverN) * iLevelOverN * iLevelOverN * 1000;
+                const __int64 iLevelOverN = iPriorLevel - 255;
+                iPriorExperience += (9 + iLevelOverN) * iLevelOverN * iLevelOverN * 1000;
             }
         }
 
-        float fNeedExp = dwNexExperience - dwPriorExperience;
-        float fExp = dwExperience - dwPriorExperience;
+        double fNeedExp = (double)dwNexExperience - (double)iPriorExperience;
+        double fExp = (double)dwExperience - (double)iPriorExperience;
 
-        if (dwExperience < dwPriorExperience)
+        if (dwExperience < iPriorExperience)
         {
             fExp = 0.f;
         }
 
-        float fExpBarNum = 0.f;
+        double fExpBarNum = 0.f;
         if (fExp > 0.f && fNeedExp > 0)
         {
             fExpBarNum = (fExp / fNeedExp) * 10.f;
         }
 
-        float fProgress = fExpBarNum;
-        fProgress = fProgress - (int)fProgress;
+        double fProgress = fExpBarNum;
+        fProgress = fProgress - static_cast<long long>(fProgress);
 
         if (m_bExpEffect == true)
         {
-            float fPreProgress = 0.f;
-            fExp = m_dwPreExp - dwPriorExperience;
-            if (m_dwPreExp < dwPriorExperience)
+            double fPreProgress = 0.f;
+            fExp = (double)m_dwPreExp - (double)iPriorExperience;
+            if (m_dwPreExp < iPriorExperience)
             {
                 x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                 RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
@@ -587,7 +587,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                 {
                     fPreProgress = (fExp / fNeedExp) * 10.f;
                     iPreExpBarNum = (int)fPreProgress;
-                    fPreProgress = fPreProgress - (int)fPreProgress;
+                    fPreProgress = fPreProgress - static_cast<long long>(fPreProgress);
                 }
 
                 iExpBarNum = (int)fExpBarNum;
@@ -602,7 +602,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                 }
                 else
                 {
-                    float fGapProgress = 0.f;
+                    double fGapProgress = 0.f;
                     fGapProgress = fProgress - fPreProgress;
                     x = 2.f; y = 473.f; width = fPreProgress * 629.f; height = 4.f;
                     RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
@@ -2598,12 +2598,12 @@ void SEASON3B::CNewUIMainFrameWindow::SetGetExp_Wide(__int64 dwGetExp)
     }
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SetPreExp(DWORD dwPreExp)
+void SEASON3B::CNewUIMainFrameWindow::SetPreExp(__int64 dwPreExp)
 {
     m_dwPreExp = dwPreExp;
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SetGetExp(DWORD dwGetExp)
+void SEASON3B::CNewUIMainFrameWindow::SetGetExp(__int64 dwGetExp)
 {
     m_dwGetExp = dwGetExp;
 

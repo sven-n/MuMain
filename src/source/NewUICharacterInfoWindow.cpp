@@ -293,7 +293,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
     wchar_t strPoint[128];
 
     mu_swprintf(strLevel, GlobalText[200], CharacterAttribute->Level);
-    mu_swprintf(strExp, GlobalText[201], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
+    mu_swprintf(strExp, GlobalText[1748], CharacterAttribute->Experience, CharacterAttribute->NextExperience);
 
     if (CharacterAttribute->Level > 9)
     {

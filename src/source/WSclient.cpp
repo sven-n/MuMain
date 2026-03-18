@@ -919,11 +919,11 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
-        Master_Level_Data.lMasterLevel_Experince = Data->CurrentExperience;
+        Master_Level_Data.lMasterLevel_Experince = ntoh64(Data->CurrentExperience);
     }
     else
     {
-        CharacterAttribute->Experience = Data->CurrentExperience;
+        CharacterAttribute->Experience = ntoh64(Data->CurrentExperience);
     }
 
     CharacterMachine->Gold = Data->Gold;
@@ -5325,7 +5325,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience & 0xFFFFFFFF);
+        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
         g_pMainFrame->SetGetExp(Exp);
         CharacterAttribute->Experience += Exp;
     }
@@ -5413,7 +5413,7 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience & 0xFFFFFFFF);
+        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
         g_pMainFrame->SetGetExp(addedExperience);
         CharacterAttribute->Experience += addedExperience;
     }
@@ -7589,7 +7589,7 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer, int Size)
     //	Master_Level_Data.nTotalMPoint		= Data->nTotalMPoint;
     Master_Level_Data.nMaxPoint = Data->nMaxPoint;
 
-    if (Size >= sizeof(LPPMSG_MASTERLEVEL_UP_EXTENDED))
+    if (Size >= sizeof(PMSG_MASTERLEVEL_UP_EXTENDED))
     {
         auto ExtData = (LPPMSG_MASTERLEVEL_UP_EXTENDED)ReceiveBuffer;
         Master_Level_Data.wMaxLife = ExtData->wMaxLife;
@@ -7667,7 +7667,7 @@ void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer, int Size)
     Master_Level_Data.lNext_MasterLevel_Experince |= Data->btMNextExp8;
     Master_Level_Data.nMLevelUpMPoint = Data->nMLPoint;
 
-    if (Size >= sizeof(LPPMSG_MASTERLEVEL_INFO_EXTENDED))
+    if (Size >= sizeof(PMSG_MASTERLEVEL_INFO_EXTENDED))
     {
         auto ExtData = (LPPMSG_MASTERLEVEL_INFO_EXTENDED)ReceiveBuffer;
         Master_Level_Data.wMaxLife = ExtData->wMaxLife;
