@@ -1089,6 +1089,7 @@ void SEASON3B::CNewUISystemLogWindow::Init()
     m_nShowingLines = 6;
     m_iCurrentRenderEndLine = -1;
     m_fBackAlpha = 0.6f;
+    m_bShowMessages = true;
 }
 
 
