@@ -277,9 +277,50 @@ endif()
 target_precompile_headers(MURenderFX REUSE_FROM MUCore)
 
 # Sound system — depends on Core only
+# Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
+# MiniAudio backend files are in Platform/MiniAudio/ — not covered by the Audio/*.cpp glob.
+# They are added explicitly below via target_sources.
 file(GLOB MU_AUDIO_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/Audio/*.cpp")
 add_library(MUAudio STATIC ${MU_AUDIO_SOURCES})
-target_link_libraries(MUAudio PRIVATE MUCore)
+
+# Add miniaudio backend sources explicitly (outside the Audio/ glob)
+target_sources(MUAudio PRIVATE
+    "${MU_SOURCE_DIR}/Platform/MiniAudio/MiniAudioBackend.cpp"
+    "${MU_SOURCE_DIR}/Platform/MiniAudio/MiniAudioImpl.cpp"
+)
+
+# MiniAudioImpl.cpp defines MINIAUDIO_IMPLEMENTATION — it MUST NOT use the PCH,
+# otherwise the macro expansion conflicts with the precompiled header symbols.
+set_source_files_properties(
+    "${MU_SOURCE_DIR}/Platform/MiniAudio/MiniAudioImpl.cpp"
+    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+)
+
+# Include paths: miniaudio vendored headers + MiniAudio backend directory
+target_include_directories(MUAudio PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/miniaudio"
+    "${MU_SOURCE_DIR}/Platform/MiniAudio"
+)
+
+# Threading: miniaudio uses pthreads on Linux/macOS
+find_package(Threads REQUIRED)
+target_link_libraries(MUAudio PRIVATE MUCore Threads::Threads)
+
+# Linux: miniaudio uses dlopen() internally — link libdl
+if(UNIX AND NOT APPLE)
+    target_link_libraries(MUAudio PRIVATE dl)
+endif()
+
+# macOS: miniaudio uses CoreAudio — link required frameworks
+if(APPLE)
+    target_link_libraries(MUAudio PRIVATE
+        "-framework AudioToolbox"
+        "-framework AudioUnit"
+        "-framework CoreAudio"
+        "-framework CoreFoundation"
+    )
+endif()
+
 target_precompile_headers(MUAudio REUSE_FROM MUCore)
 
 # External code (regkey, xstreambuf, UIControls)

@@ -143,6 +143,25 @@ target_sources(MuTests PRIVATE render/test_texturesystemmigration.cpp)
 # Tests compile and run on macOS/Linux — no gl* calls in this TU.
 target_sources(MuTests PRIVATE render/test_blendpipelinestate_migration.cpp)
 
+# Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
+# GREEN PHASE: Tests verify IPlatformAudio interface purity (std::is_abstract_v),
+# g_platformAudio starts as nullptr, MiniAudioBackend default-constructs cleanly,
+# Initialize() fails gracefully without an audio device (CI headless), Shutdown() is
+# safe to call without prior Initialize(), and mu:: namespace is accessible.
+# Tests compile and run on macOS/Linux — no Win32, no DirectSound, no audio device required.
+target_sources(MuTests PRIVATE audio/test_muaudio_abstraction.cpp)
+
+# Story 5.1.1: MuAudio target provides miniaudio symbols needed by test_muaudio_abstraction.cpp
+# (MiniAudioBackend, g_platformAudio, ma_engine/ma_sound types from miniaudio.h).
+# MuTests must link MUAudio to resolve these symbols.
+target_link_libraries(MuTests PRIVATE MUAudio)
+# Include paths for audio test: miniaudio.h (included by MiniAudioBackend.h)
+# and MiniAudio/ backend directory (not propagated via MUAudio PRIVATE includes).
+target_include_directories(MuTests PRIVATE
+    "${CMAKE_SOURCE_DIR}/src/dependencies/miniaudio"
+    "${CMAKE_SOURCE_DIR}/src/source/Platform/MiniAudio"
+)
+
 # Story 3.2.1: char16_t Encoding at .NET Interop Boundary [VS1-NET-CHAR16T-ENCODING]
 # RED PHASE: Tests mu_wchar_to_char16 / mu_char16_to_wchar round-trips and byte-level
 # UTF-16LE baseline for Korean, Latin, mixed-script, null, and IP address strings.
