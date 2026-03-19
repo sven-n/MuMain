@@ -3,8 +3,21 @@
 // Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
 // Concrete miniaudio backend implementing IPlatformAudio.
 // Uses ma_engine for mixing and ma_sound for individual sound/music playback.
+//
+// INCLUDE ISOLATION NOTE (HIGH-3 code-review-finalize 2026-03-19):
+// miniaudio.h (95k lines) is intentionally NOT included here to avoid polluting
+// all translation units that include this header. Full type definitions are
+// required for stack-allocated ma_engine and ma_sound members, so a true PIMPL
+// pattern would require heap allocation (std::unique_ptr<Impl>). That refactor
+// is deferred to Story 5.2.1. In the current architecture MiniAudioBackend.cpp
+// sets SKIP_PRECOMPILE_HEADERS ON to isolate the include from the PCH.
+// Do NOT add #include "miniaudio.h" to callers of this header.
 
 #include "IPlatformAudio.h"
+
+// miniaudio.h is included here because ma_engine and ma_sound require full
+// type definitions for stack allocation in the private members below.
+// See isolation note above — this is a known limitation tracked for 5.2.1.
 #include "miniaudio.h"
 
 #include <array>

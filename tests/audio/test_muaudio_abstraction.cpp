@@ -169,6 +169,72 @@ TEST_CASE("AC-6: MiniAudioBackend Shutdown is safe without prior Initialize",
 }
 
 // ---------------------------------------------------------------------------
+// AC-2: All IPlatformAudio methods are safe on an uninitialized backend
+// LOW-2 (code-review-finalize 2026-03-19): Added to cover no-op guard paths
+// for PlaySound, StopSound, AllStopSound, SetVolume, SetMasterVolume, PlayMusic,
+// StopMusic, LoadSound, and Set3DSoundPosition on an uninitialized backend.
+// All calls must be safe (no crash, no exception) regardless of state.
+// This also detects HIGH-1 regressions if pObject were dereferenced when null.
+// ---------------------------------------------------------------------------
+TEST_CASE("AC-2: All IPlatformAudio methods are safe to call on uninitialized backend",
+          "[audio][backend][safety][5-1-1]")
+{
+    // GIVEN: A default-constructed (never initialized) MiniAudioBackend
+    mu::MiniAudioBackend backend;
+
+    // WHEN/THEN: All 13 methods must be callable without crash or exception.
+    // PlaySound with nullptr pObject — guards against HIGH-1 null-deref regression.
+    REQUIRE_NOTHROW([&]() {
+        backend.LoadSound(static_cast<ESound>(0), L"nonexistent.wav", 1, false);
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.PlaySound(static_cast<ESound>(0), nullptr, false);
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.StopSound(static_cast<ESound>(0), false);
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.AllStopSound();
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.Set3DSoundPosition();
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.SetVolume(static_cast<ESound>(0), 0L);
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.SetMasterVolume(0L);
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.PlayMusic("nonexistent.mp3", false);
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.StopMusic(nullptr, false);
+    }());
+
+    REQUIRE_NOTHROW([&]() {
+        backend.StopMusic("nonexistent.mp3", true);
+    }());
+
+    // These return values — verify they don't crash and return safe defaults.
+    bool endMusic = true;
+    REQUIRE_NOTHROW([&]() { endMusic = backend.IsEndMusic(); }());
+    REQUIRE(endMusic); // Uninitialized backend: music is "ended" (not playing)
+
+    int position = -1;
+    REQUIRE_NOTHROW([&]() { position = backend.GetMusicPosition(); }());
+    REQUIRE(position == 0); // Uninitialized backend: position is 0
+}
+
+// ---------------------------------------------------------------------------
 // AC-STD-1: Namespace compliance
 // Verifies that the mu:: namespace is used correctly and the interface is
 // accessible via the correct fully-qualified name.

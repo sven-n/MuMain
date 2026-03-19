@@ -36,7 +36,7 @@ MiniAudioBackend::~MiniAudioBackend()
 // Initialize — start the miniaudio engine
 // Returns false (and logs) if ma_engine_init fails (e.g., no audio device on CI)
 // ---------------------------------------------------------------------------
-[[nodiscard]] bool MiniAudioBackend::Initialize()
+bool MiniAudioBackend::Initialize()
 {
     if (m_initialized)
     {
@@ -109,6 +109,12 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
         return;
     }
 
+    // MEDIUM-4 (code-review-finalize 2026-03-19): Reset slot state unconditionally
+    // before the unload block so that a failed load of the same slot (partial channels)
+    // leaves the slot in a consistent clean state rather than holding stale values.
+    m_activeChannel[bufIdx] = 0;
+    m_sound3DEnabled[bufIdx] = false;
+
     // Unload previously loaded sound at this slot
     if (m_soundLoaded[bufIdx])
     {
@@ -159,12 +165,17 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // ---------------------------------------------------------------------------
 // PlaySound — start playback of a sound effect using round-robin channel selection
 // Mirrors DSPlaySound.h PlayBuffer() signature exactly.
+// MEDIUM-2 (code-review-finalize 2026-03-19): Returns S_FALSE (not S_OK) when
+// !m_initialized to signal a no-op to callers, matching !m_soundLoaded behaviour.
+// HIGH-1 (code-review-finalize 2026-03-19): After starting the sound, apply the
+// 3D world position from pObject when the slot is 3D-enabled, so playback begins
+// at the correct spatial position rather than silently at (0,0,0).
 // ---------------------------------------------------------------------------
 HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
 {
     if (!m_initialized)
     {
-        return S_OK;
+        return S_FALSE;
     }
 
     const int bufIdx = static_cast<int>(buffer);
@@ -188,6 +199,14 @@ HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
     ma_sound_seek_to_pcm_frame(pSound, 0);
     ma_sound_set_looping(pSound, looped ? MA_TRUE : MA_FALSE);
     ma_sound_start(pSound);
+
+    // HIGH-1: Apply 3D world position from the attached OBJECT so the sound
+    // starts at the correct location in world space (not silently at origin).
+    // OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
+    if (m_sound3DEnabled[bufIdx] && pObject != nullptr)
+    {
+        ma_sound_set_position(pSound, pObject->Position[0], pObject->Position[1], pObject->Position[2]);
+    }
 
     return S_OK;
 }
@@ -347,8 +366,19 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
 
 // ---------------------------------------------------------------------------
 // StopMusic — stop the current music stream
-// If enforce=true, also uninit the stream and clear the current track name.
-// Mirrors wzAudioStop() + Mp3FileName guard logic from Winmain.cpp.
+// MEDIUM-3 (code-review-finalize 2026-03-19): Documents pause vs stop semantics.
+// LOW-3 (code-review-finalize 2026-03-19): Documents nullptr name behaviour.
+//
+// enforce=true:  Hard stop — calls ma_sound_uninit(), releases file handle and
+//                decoder. Current track name is cleared. Matches wzAudioStop().
+// enforce=false: Soft pause — calls ma_sound_stop() only. Stream/decoder remain
+//                open. Use this only when you intend to resume later. To avoid
+//                resource leaks, always call with enforce=true when done with a track.
+//
+// name semantics:
+//   Non-null name + enforce=false: only stop if the named track is currently playing.
+//   nullptr       + enforce=false: stop the current track regardless of name.
+//   name is ignored when enforce=true (always stops regardless).
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::StopMusic(const char* name, BOOL enforce)
 {
@@ -357,7 +387,8 @@ void MiniAudioBackend::StopMusic(const char* name, BOOL enforce)
         return;
     }
 
-    // If not enforced, only stop if the name matches the current track
+    // If not enforced, only stop if the name matches the current track.
+    // nullptr name means "stop current track regardless of name" (unconditional soft stop).
     if (!enforce && name != nullptr && !m_currentMusicName.empty())
     {
         if (m_currentMusicName != name)
@@ -370,6 +401,7 @@ void MiniAudioBackend::StopMusic(const char* name, BOOL enforce)
 
     if (enforce)
     {
+        // Hard stop: release stream resources to avoid file handle / decoder leaks.
         ma_sound_uninit(&m_musicSound);
         m_musicLoaded = false;
         m_currentMusicName.clear();
@@ -381,7 +413,7 @@ void MiniAudioBackend::StopMusic(const char* name, BOOL enforce)
 // Mirrors wzAudioGetStreamOffsetRange() == 100 semantics from Winmain.cpp.
 // Returns true when not initialized (safe default state for tests and pre-init).
 // ---------------------------------------------------------------------------
-[[nodiscard]] bool MiniAudioBackend::IsEndMusic()
+bool MiniAudioBackend::IsEndMusic()
 {
     if (!m_initialized || !m_musicLoaded)
     {
@@ -395,37 +427,43 @@ void MiniAudioBackend::StopMusic(const char* name, BOOL enforce)
 // GetMusicPosition — returns music playback position as 0..100 percentage
 // Mirrors wzAudioGetStreamOffsetRange() return value from Winmain.cpp.
 // Returns 0 when not initialized or no music loaded.
+//
+// HIGH-2 (code-review-finalize 2026-03-19): Music is loaded with
+// MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_ASYNC. For streaming sounds,
+// ma_sound_get_length_in_pcm_frames() returns MA_RESULT indicating the length
+// is unavailable while the stream is still opening — totalFrames stays 0.
+// Fix: use ma_sound_get_cursor_in_seconds() for the cursor and
+// ma_sound_get_length_in_seconds() for the total length. The seconds API uses
+// the data-source length which streams can report even while decoding.
+// If length is still unavailable (streaming not yet started), fall back to 0.
 // ---------------------------------------------------------------------------
-[[nodiscard]] int MiniAudioBackend::GetMusicPosition()
+int MiniAudioBackend::GetMusicPosition()
 {
     if (!m_initialized || !m_musicLoaded)
     {
         return 0;
     }
 
-    // Get cursor in PCM frames and convert to seconds
-    ma_uint64 cursorFrames = 0;
-    ma_sound_get_cursor_in_pcm_frames(&m_musicSound, &cursorFrames);
+    // Get current playback position in seconds
+    float cursorSeconds = 0.0f;
+    ma_sound_get_cursor_in_seconds(&m_musicSound, &cursorSeconds);
 
-    const ma_uint32 sampleRate = ma_engine_get_sample_rate(&m_engine);
-    if (sampleRate == 0)
+    // Get total track length in seconds — works for streaming sounds unlike
+    // ma_sound_get_length_in_pcm_frames() which returns 0 until fully decoded.
+    float totalSeconds = 0.0f;
+    ma_sound_get_length_in_seconds(&m_musicSound, &totalSeconds);
+
+    if (totalSeconds <= 0.0f)
     {
-        return 0;
-    }
-
-    // Get total length in frames for percentage calculation
-    ma_uint64 totalFrames = 0;
-    ma_sound_get_length_in_pcm_frames(&m_musicSound, &totalFrames);
-
-    if (totalFrames == 0)
-    {
+        // Length not yet available (stream still opening) — return 0.
+        // Callers checking for "IsEndMusic()" should use IsEndMusic() instead.
         return 0;
     }
 
     // Normalise to 0..100 to match wzAudioGetStreamOffsetRange() semantics
-    const int position =
-        static_cast<int>((static_cast<float>(cursorFrames) / static_cast<float>(totalFrames)) * 100.0f);
-    return position;
+    const float ratio = cursorSeconds / totalSeconds;
+    const int position = static_cast<int>(ratio * 100.0f);
+    return (position < 0) ? 0 : (position > 100) ? 100 : position;
 }
 
 // ---------------------------------------------------------------------------
