@@ -158,6 +158,14 @@ target_sources(MuTests PRIVATE audio/test_muaudio_abstraction.cpp)
 # Implementation complete: g_platformAudio wired in Winmain.cpp; BGM delegation done.
 target_sources(MuTests PRIVATE audio/test_miniaudio_bgm.cpp)
 
+# Story 5.4.1: Volume Controls & Audio State Management [VS1-AUDIO-VOLUME-CONTROLS]
+# RED PHASE: Tests verify SetBGMVolume/SetSFXVolume/GetBGMVolume/GetSFXVolume on
+# MiniAudioBackend — default values (1.0f), clamping, get/set round-trip, and
+# safety on an uninitialized backend. No audio device or Win32 required.
+# Tests fail until Tasks 1-2 in story 5.4.1 add m_bgmVolume/m_sfxVolume and the
+# four new methods to IPlatformAudio and MiniAudioBackend.
+target_sources(MuTests PRIVATE audio/test_volume_controls.cpp)
+
 # Story 5.2.2: miniaudio SFX Implementation [VS1-AUDIO-MINIAUDIO-SFX]
 # RED PHASE: Tests verify SFX lifecycle safety — LoadSound non-existent file graceful,
 # PlaySound before Initialize returns S_FALSE, StopSound on unloaded slot is safe,
