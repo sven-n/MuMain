@@ -352,7 +352,7 @@ void MiniAudioBackend::Set3DSoundPosition()
             continue;
         }
 
-        for (int ch = 0; ch < MAX_CHANNEL; ++ch)
+        for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
         {
             if (!ma_sound_is_playing(&m_sounds[buf][ch]))
             {
@@ -391,7 +391,7 @@ void MiniAudioBackend::SetVolume(ESound buffer, long vol)
     }
 
     const float linear = DbToLinear(vol);
-    for (int ch = 0; ch < MAX_CHANNEL; ++ch)
+    for (int ch = 0; ch < m_loadedChannels[bufIdx]; ++ch)
     {
         ma_sound_set_volume(&m_sounds[bufIdx][ch], linear);
     }

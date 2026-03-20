@@ -153,12 +153,12 @@ void GameConfig::SetVolumeLevel(int level)
 
 void GameConfig::SetBGMVolumeLevel(int level)
 {
-    m_bgmVolumeLevel = level;
+    m_bgmVolumeLevel = std::clamp(level, 0, 10);
 }
 
 void GameConfig::SetSFXVolumeLevel(int level)
 {
-    m_sfxVolumeLevel = level;
+    m_sfxVolumeLevel = std::clamp(level, 0, 10);
 }
 
 void GameConfig::SetRenderTextType(int type)

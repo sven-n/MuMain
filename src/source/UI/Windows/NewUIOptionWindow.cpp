@@ -24,7 +24,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_bWhisperSound = false;
     m_bSlideHelp = true;
     m_iVolumeLevel = 0;
-    m_iBGMVolumeLevel = 0;
+    m_iBGMVolumeLevel = 5;
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
 }
@@ -397,6 +397,17 @@ void SEASON3B::CNewUIOptionWindow::SetBGMVolumeLevel(int iVolume)
 int SEASON3B::CNewUIOptionWindow::GetBGMVolumeLevel()
 {
     return m_iBGMVolumeLevel;
+}
+
+// Story 5.4.1: SFX volume accessor — wraps existing m_iVolumeLevel for API symmetry with BGM
+void SEASON3B::CNewUIOptionWindow::SetSFXVolumeLevel(int iVolume)
+{
+    m_iVolumeLevel = iVolume;
+}
+
+int SEASON3B::CNewUIOptionWindow::GetSFXVolumeLevel()
+{
+    return m_iVolumeLevel;
 }
 
 void SEASON3B::CNewUIOptionWindow::SetRenderLevel(int iRender)

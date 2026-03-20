@@ -367,7 +367,7 @@ void DestroyWindow()
     GameConfig::GetInstance().SetVolumeLevel(g_pOption->GetVolumeLevel());
     // Story 5.4.1: Persist separate BGM and SFX volume levels
     GameConfig::GetInstance().SetBGMVolumeLevel(g_pOption->GetBGMVolumeLevel());
-    GameConfig::GetInstance().SetSFXVolumeLevel(g_pOption->GetVolumeLevel());
+    GameConfig::GetInstance().SetSFXVolumeLevel(g_pOption->GetSFXVolumeLevel());
     GameConfig::GetInstance().Save();
 
 #ifdef _EDITOR
@@ -1325,7 +1325,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
             value = 5;
 
         g_pOption->SetVolumeLevel(value);
-        SetEffectVolumeLevel(g_pOption->GetVolumeLevel());
+        // Story 5.4.1: SetEffectVolumeLevel removed — redundant with SetSFXVolume below
     }
 
     // Story 5.4.1: Restore BGM and SFX volume from config and populate g_pOption
@@ -1337,6 +1337,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         if (sfxLevel < 0 || sfxLevel > 10)
             sfxLevel = 5;
         g_pOption->SetBGMVolumeLevel(bgmLevel);
+        g_pOption->SetSFXVolumeLevel(sfxLevel);
         if (g_platformAudio != nullptr)
         {
             g_platformAudio->SetBGMVolume(static_cast<float>(bgmLevel) / 10.0f);

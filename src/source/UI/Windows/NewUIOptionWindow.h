@@ -63,9 +63,11 @@ public:
     bool IsSlideHelp();
     void SetVolumeLevel(int iVolume);
     int GetVolumeLevel();
-    // Story 5.4.1: BGM volume accessor (programmatic — UI slider deferred to future story)
+    // Story 5.4.1: BGM/SFX volume accessors (programmatic — UI slider deferred to future story)
     void SetBGMVolumeLevel(int iVolume);
     int GetBGMVolumeLevel();
+    void SetSFXVolumeLevel(int iVolume);
+    int GetSFXVolumeLevel();
     void SetRenderLevel(int iRender);
     int GetRenderLevel();
     void SetRenderAllEffects(bool bRenderAllEffects);
