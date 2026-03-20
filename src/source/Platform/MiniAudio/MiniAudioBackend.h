@@ -51,6 +51,12 @@ public:
     [[nodiscard]] bool IsEndMusic() override;
     [[nodiscard]] int GetMusicPosition() override;
 
+    // Volume controls (Story 5.4.1)
+    void SetBGMVolume(float level) override;
+    void SetSFXVolume(float level) override;
+    [[nodiscard]] float GetBGMVolume() const override;
+    [[nodiscard]] float GetSFXVolume() const override;
+
 private:
     // Convert DirectSound volume (dB * 100, range -10000..0) to linear 0.0..1.0
     static float DbToLinear(long dsVol);
@@ -76,6 +82,9 @@ private:
     // adding lifetime management here would require an engine-wide refactor.
     // nullptr = no object attached to this slot (safe — Set3DSoundPosition() checks before deref).
     std::array<const OBJECT*, MAX_BUFFER> m_soundObjects{};
+
+    float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
+    float m_sfxVolume = 1.0f; // SFX volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
 
     ma_sound m_musicSound{};
     bool m_musicLoaded = false;

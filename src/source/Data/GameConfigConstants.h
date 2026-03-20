@@ -25,6 +25,9 @@ inline constexpr wchar_t CfgKeyRenderTextType[] = L"RenderTextType";
 inline constexpr wchar_t CfgKeySoundEnabled[] = L"SoundEnabled";
 inline constexpr wchar_t CfgKeyMusicEnabled[] = L"MusicEnabled";
 inline constexpr wchar_t CfgKeyVolumeLevel[] = L"VolumeLevel";
+// Story 5.4.1: Separate BGM and SFX volume persistence
+inline constexpr wchar_t CfgKeyBGMVolumeLevel[] = L"BGMVolumeLevel";
+inline constexpr wchar_t CfgKeySFXVolumeLevel[] = L"SFXVolumeLevel";
 
 // Login
 inline constexpr wchar_t CfgKeyRememberMe[] = L"RememberMe";
@@ -48,6 +51,9 @@ inline constexpr int CfgDefaultColorDepth = 0;
 inline constexpr bool CfgDefaultSoundEnabled = true;
 inline constexpr bool CfgDefaultMusicEnabled = false;
 inline constexpr int CfgDefaultVolumeLevel = 5;
+// Story 5.4.1: Separate BGM and SFX volume defaults (0-10 int scale)
+inline constexpr int CfgDefaultBGMVolumeLevel = 5;
+inline constexpr int CfgDefaultSFXVolumeLevel = 5;
 
 inline constexpr int CfgDefaultRenderTextType = 0;
 

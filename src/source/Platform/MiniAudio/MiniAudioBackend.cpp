@@ -253,6 +253,9 @@ HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
         m_soundObjects[bufIdx] = pObject;
     }
 
+    // Story 5.4.1: Apply stored SFX volume to newly-started effect
+    ma_sound_set_volume(pSound, m_sfxVolume);
+
     ma_sound_start(pSound);
 
     return S_OK;
@@ -464,6 +467,8 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
     }
 
     ma_sound_set_looping(&m_musicSound, MA_TRUE);
+    // Story 5.4.1: Apply stored BGM volume to new track before starting
+    ma_sound_set_volume(&m_musicSound, m_bgmVolume);
     ma_sound_start(&m_musicSound);
 
     m_musicLoaded = true;
@@ -600,6 +605,59 @@ float MiniAudioBackend::DbToLinear(long dsVol)
     // Clamp to valid DirectSound range: DSBVOLUME_MIN (-10000) to 0
     const float clampedVol = (dsVol > 0L) ? 0.0f : static_cast<float>(dsVol);
     return std::pow(10.0f, clampedVol / 2000.0f);
+}
+
+// ---------------------------------------------------------------------------
+// SetBGMVolume — set BGM volume (linear 0.0 to 1.0), clamped. Story 5.4.1.
+// Stores the value unconditionally; applies to the active music sound only
+// when the engine is initialized and music is loaded.
+// ---------------------------------------------------------------------------
+void MiniAudioBackend::SetBGMVolume(float level)
+{
+    m_bgmVolume = std::clamp(level, 0.0f, 1.0f);
+    if (m_initialized && m_musicLoaded)
+    {
+        ma_sound_set_volume(&m_musicSound, m_bgmVolume);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// SetSFXVolume — set SFX volume (linear 0.0 to 1.0), clamped. Story 5.4.1.
+// Applies per-slot ma_sound_set_volume to all loaded SFX channels.
+// Does NOT use ma_engine_set_volume (would also affect BGM).
+// ---------------------------------------------------------------------------
+void MiniAudioBackend::SetSFXVolume(float level)
+{
+    m_sfxVolume = std::clamp(level, 0.0f, 1.0f);
+    if (!m_initialized)
+    {
+        return;
+    }
+    // Update all currently-loaded SFX slots
+    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
+    {
+        if (!m_soundLoaded[buf])
+        {
+            continue;
+        }
+        for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
+        {
+            ma_sound_set_volume(&m_sounds[buf][ch], m_sfxVolume);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// GetBGMVolume / GetSFXVolume — return stored volume level. Story 5.4.1.
+// ---------------------------------------------------------------------------
+float MiniAudioBackend::GetBGMVolume() const
+{
+    return m_bgmVolume;
+}
+
+float MiniAudioBackend::GetSFXVolume() const
+{
+    return m_sfxVolume;
 }
 
 } // namespace mu

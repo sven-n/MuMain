@@ -38,6 +38,12 @@ public:
     virtual void StopMusic(const char* name, BOOL enforce) = 0;
     [[nodiscard]] virtual bool IsEndMusic() = 0;
     [[nodiscard]] virtual int GetMusicPosition() = 0;
+
+    // Volume controls — linear 0.0 (mute) to 1.0 (full). Story 5.4.1.
+    virtual void SetBGMVolume(float level) = 0;
+    virtual void SetSFXVolume(float level) = 0;
+    [[nodiscard]] virtual float GetBGMVolume() const = 0;
+    [[nodiscard]] virtual float GetSFXVolume() const = 0;
 };
 
 } // namespace mu

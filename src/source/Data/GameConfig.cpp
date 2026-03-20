@@ -26,7 +26,8 @@ GameConfig::GameConfig()
     : m_windowWidth(CfgDefaults::CfgDefaultWindowWidth), m_windowHeight(CfgDefaults::CfgDefaultWindowHeight),
       m_windowMode(CfgDefaults::CfgDefaultWindowed), m_colorDepth(CfgDefaults::CfgDefaultColorDepth),
       m_soundEnabled(CfgDefaults::CfgDefaultSoundEnabled), m_musicEnabled(CfgDefaults::CfgDefaultMusicEnabled),
-      m_volumeLevel(CfgDefaults::CfgDefaultVolumeLevel), m_renderTextType(CfgDefaults::CfgDefaultRenderTextType),
+      m_volumeLevel(CfgDefaults::CfgDefaultVolumeLevel), m_bgmVolumeLevel(CfgDefaults::CfgDefaultBGMVolumeLevel),
+      m_sfxVolumeLevel(CfgDefaults::CfgDefaultSFXVolumeLevel), m_renderTextType(CfgDefaults::CfgDefaultRenderTextType),
       m_rememberMe(CfgDefaults::CfgDefaultRememberMe), m_languageSelection(CfgDefaults::CfgDefaultLanguage),
       m_encryptedUsername(CfgDefaults::CfgDefaultEncryptedUsername),
       m_encryptedPassword(CfgDefaults::CfgDefaultEncryptedPassword), m_serverIP(CfgDefaults::CfgDefaultServerIP),
@@ -59,6 +60,15 @@ void GameConfig::Load()
     m_soundEnabled = ini.ReadBool(CfgSectionAudio, CfgKeySoundEnabled, CfgDefaultSoundEnabled);
     m_musicEnabled = ini.ReadBool(CfgSectionAudio, CfgKeyMusicEnabled, CfgDefaultMusicEnabled);
     m_volumeLevel = ini.ReadInt(CfgSectionAudio, CfgKeyVolumeLevel, CfgDefaultVolumeLevel);
+
+    // Story 5.4.1: Read separate BGM/SFX volume levels with migration fallback.
+    // If new keys absent (sentinel -1), fall back to old VolumeLevel for seamless migration.
+    m_bgmVolumeLevel = ini.ReadInt(CfgSectionAudio, CfgKeyBGMVolumeLevel, -1);
+    m_sfxVolumeLevel = ini.ReadInt(CfgSectionAudio, CfgKeySFXVolumeLevel, -1);
+    if (m_bgmVolumeLevel < 0)
+        m_bgmVolumeLevel = m_volumeLevel;
+    if (m_sfxVolumeLevel < 0)
+        m_sfxVolumeLevel = m_volumeLevel;
 
     m_renderTextType = ini.ReadInt(CfgSectionGraphics, CfgKeyRenderTextType, CfgDefaultRenderTextType);
 
@@ -95,6 +105,9 @@ void GameConfig::Save()
     ini.WriteBool(CfgSectionAudio, CfgKeySoundEnabled, m_soundEnabled);
     ini.WriteBool(CfgSectionAudio, CfgKeyMusicEnabled, m_musicEnabled);
     ini.WriteInt(CfgSectionAudio, CfgKeyVolumeLevel, m_volumeLevel);
+    // Story 5.4.1: Persist separate BGM/SFX volume levels
+    ini.WriteInt(CfgSectionAudio, CfgKeyBGMVolumeLevel, m_bgmVolumeLevel);
+    ini.WriteInt(CfgSectionAudio, CfgKeySFXVolumeLevel, m_sfxVolumeLevel);
 
     ini.WriteBool(CfgSectionLogin, CfgKeyRememberMe, m_rememberMe);
     ini.WriteString(CfgSectionLogin, CfgKeyLanguage, m_languageSelection);
@@ -136,6 +149,16 @@ void GameConfig::SetMusicEnabled(bool enabled)
 void GameConfig::SetVolumeLevel(int level)
 {
     m_volumeLevel = level;
+}
+
+void GameConfig::SetBGMVolumeLevel(int level)
+{
+    m_bgmVolumeLevel = level;
+}
+
+void GameConfig::SetSFXVolumeLevel(int level)
+{
+    m_sfxVolumeLevel = level;
 }
 
 void GameConfig::SetRenderTextType(int type)

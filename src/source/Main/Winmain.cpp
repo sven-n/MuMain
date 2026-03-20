@@ -365,6 +365,9 @@ void DestroyWindow()
 {
     // Save game configuration to config.ini
     GameConfig::GetInstance().SetVolumeLevel(g_pOption->GetVolumeLevel());
+    // Story 5.4.1: Persist separate BGM and SFX volume levels
+    GameConfig::GetInstance().SetBGMVolumeLevel(g_pOption->GetBGMVolumeLevel());
+    GameConfig::GetInstance().SetSFXVolumeLevel(g_pOption->GetVolumeLevel());
     GameConfig::GetInstance().Save();
 
 #ifdef _EDITOR
@@ -1315,15 +1318,30 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         // Story 5.2.2: InitDirectSound(g_hWnd) removed — g_platformAudio (MiniAudioBackend)
         // handles all SFX audio. DirectSoundManager is dormant (never initialized).
-        // SetEffectVolumeLevel → SetMasterVolume delegates to g_platformAudio.
 
-        // Load volume level from config.ini
+        // Load SFX volume level from config.ini (legacy path preserved for option window)
         int value = GameConfig::GetInstance().GetVolumeLevel();
         if (value < 0 || value >= 10)
             value = 5;
 
         g_pOption->SetVolumeLevel(value);
         SetEffectVolumeLevel(g_pOption->GetVolumeLevel());
+    }
+
+    // Story 5.4.1: Restore BGM and SFX volume from config and populate g_pOption
+    {
+        int bgmLevel = GameConfig::GetInstance().GetBGMVolumeLevel();
+        int sfxLevel = GameConfig::GetInstance().GetSFXVolumeLevel();
+        if (bgmLevel < 0 || bgmLevel > 10)
+            bgmLevel = 5;
+        if (sfxLevel < 0 || sfxLevel > 10)
+            sfxLevel = 5;
+        g_pOption->SetBGMVolumeLevel(bgmLevel);
+        if (g_platformAudio != nullptr)
+        {
+            g_platformAudio->SetBGMVolume(static_cast<float>(bgmLevel) / 10.0f);
+            g_platformAudio->SetSFXVolume(static_cast<float>(sfxLevel) / 10.0f);
+        }
     }
 
     SetTimer(g_hWnd, HACK_TIMER, 20 * 1000, nullptr);

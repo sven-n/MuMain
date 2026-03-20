@@ -24,6 +24,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_bWhisperSound = false;
     m_bSlideHelp = true;
     m_iVolumeLevel = 0;
+    m_iBGMVolumeLevel = 0;
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
 }
@@ -385,6 +386,17 @@ void SEASON3B::CNewUIOptionWindow::SetVolumeLevel(int iVolume)
 int SEASON3B::CNewUIOptionWindow::GetVolumeLevel()
 {
     return m_iVolumeLevel;
+}
+
+// Story 5.4.1: BGM volume accessor (programmatic — UI slider deferred to future story)
+void SEASON3B::CNewUIOptionWindow::SetBGMVolumeLevel(int iVolume)
+{
+    m_iBGMVolumeLevel = iVolume;
+}
+
+int SEASON3B::CNewUIOptionWindow::GetBGMVolumeLevel()
+{
+    return m_iBGMVolumeLevel;
 }
 
 void SEASON3B::CNewUIOptionWindow::SetRenderLevel(int iRender)

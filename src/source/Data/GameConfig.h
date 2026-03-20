@@ -60,6 +60,18 @@ public:
     void SetMusicEnabled(bool enabled);
     void SetVolumeLevel(int level);
 
+    // Story 5.4.1: Separate BGM and SFX volume levels (0-10 int scale)
+    int GetBGMVolumeLevel() const
+    {
+        return m_bgmVolumeLevel;
+    }
+    int GetSFXVolumeLevel() const
+    {
+        return m_sfxVolumeLevel;
+    }
+    void SetBGMVolumeLevel(int level);
+    void SetSFXVolumeLevel(int level);
+
     // Text rendering
     int GetRenderTextType() const
     {
@@ -128,6 +140,8 @@ private:
     bool m_soundEnabled;
     bool m_musicEnabled;
     int m_volumeLevel;
+    int m_bgmVolumeLevel; // Story 5.4.1: separate BGM volume (0-10)
+    int m_sfxVolumeLevel; // Story 5.4.1: separate SFX volume (0-10)
 
     int m_renderTextType;
 

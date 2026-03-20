@@ -63,6 +63,9 @@ public:
     bool IsSlideHelp();
     void SetVolumeLevel(int iVolume);
     int GetVolumeLevel();
+    // Story 5.4.1: BGM volume accessor (programmatic â€” UI slider deferred to future story)
+    void SetBGMVolumeLevel(int iVolume);
+    int GetBGMVolumeLevel();
     void SetRenderLevel(int iRender);
     int GetRenderLevel();
     void SetRenderAllEffects(bool bRenderAllEffects);
@@ -84,11 +87,12 @@ private:
 
     CNewUIButton m_BtnClose;
 
-    bool m_bAutoAttack;   // ÀÚµ¿ °ø°Ý
-    bool m_bWhisperSound; // ±Ó¸» ¾Ë¸²À½
-    bool m_bSlideHelp;    // ½½¶óÀÌµå µµ¿ò¸»
-    int m_iVolumeLevel;   // º¼·ýÁ¶Àý
-    int m_iRenderLevel;   // È¿°úÁ¦ÇÑ
+    bool m_bAutoAttack;    // ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½
+    bool m_bWhisperSound;  // ï¿½Ó¸ï¿½ ï¿½Ë¸ï¿½ï¿½ï¿½
+    bool m_bSlideHelp;     // ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½
+    int m_iVolumeLevel;    // SFX volume level (0-10)
+    int m_iBGMVolumeLevel; // BGM volume level (0-10) â€” Story 5.4.1
+    int m_iRenderLevel;    // effect render level
     bool m_bRenderAllEffects;
 };
 } // namespace SEASON3B

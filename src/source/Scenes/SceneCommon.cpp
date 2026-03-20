@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "SceneCommon.h"
 #include "SceneCore.h"
+#include "IPlatformAudio.h" // Story 5.4.1: g_platformAudio for SetSFXVolume in SetEffectVolumeLevel
 
 //=============================================================================
 // Character Selection State Implementation
@@ -219,19 +220,17 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
 
 void SetEffectVolumeLevel(int level)
 {
-    if (level > 9)
-        level = 9;
+    // Story 5.4.1: Replace legacy DirectSound dB-scale path with linear 0.0-1.0 API.
+    // Old path: int 0-10 → dB*100 conversion → SetMasterVolume(long) → DbToLinear → ma_engine_set_volume.
+    // New path: int 0-10 → float / 10.0f → g_platformAudio->SetSFXVolume (per-slot linear volume).
+    if (level > 10)
+        level = 10;
     if (level < 0)
         level = 0;
 
-    if (level == 0)
+    if (g_platformAudio != nullptr)
     {
-        SetMasterVolume(-10000);
-    }
-    else
-    {
-        long vol = -2000 * log10(10.f / float(level));
-        SetMasterVolume(vol);
+        g_platformAudio->SetSFXVolume(static_cast<float>(level) / 10.0f);
     }
 }
 
