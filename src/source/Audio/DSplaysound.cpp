@@ -30,6 +30,10 @@
 #include "DSwaveIO.h"
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"
+// Story 5.2.2: IPlatformAudio.h provides g_platformAudio and the mu::IPlatformAudio interface.
+// All SFX free functions delegate to g_platformAudio when non-null (miniaudio path).
+// The legacy DirectSoundManager paths remain as dormant fallbacks (Manager never initialized).
+#include "IPlatformAudio.h"
 
 namespace
 {
@@ -735,6 +739,12 @@ void FreeDirectSound()
 
 void LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel, bool enable3D)
 {
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->LoadSound(bufferId, filename, maxChannel, enable3D);
+        return;
+    }
+    // Fallback: legacy DirectSound path (dormant — InitDirectSound no longer called after 5.2.2)
     Manager().LoadWaveFile(bufferId, filename, maxChannel, enable3D);
 }
 
@@ -750,30 +760,59 @@ HRESULT RestoreBuffers(int bufferId, int channel)
 
 HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
 {
+    if (g_platformAudio != nullptr)
+    {
+        return g_platformAudio->PlaySound(bufferId, object, looped);
+    }
     return Manager().PlayBuffer(bufferId, object, looped != FALSE);
 }
 
 VOID StopBuffer(ESound bufferId, BOOL resetPosition)
 {
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->StopSound(bufferId, resetPosition);
+        return;
+    }
     Manager().StopBuffer(bufferId, resetPosition != FALSE);
 }
 
 void AllStopSound()
 {
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->AllStopSound();
+        return;
+    }
     Manager().StopAll();
 }
 
 void SetVolume(int bufferId, long volume)
 {
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->SetVolume(static_cast<ESound>(bufferId), volume);
+        return;
+    }
     Manager().SetVolume(static_cast<ESound>(bufferId), volume);
 }
 
 void SetMasterVolume(long volume)
 {
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->SetMasterVolume(volume);
+        return;
+    }
     Manager().SetMasterVolume(volume);
 }
 
 void Set3DSoundPosition()
 {
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->Set3DSoundPosition();
+        return;
+    }
     Manager().Update3DPositions();
 }

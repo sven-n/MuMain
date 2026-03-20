@@ -440,10 +440,10 @@ void DestroyWindow()
 }
 void DestroySound()
 {
-    for (int i = 0; i < MAX_BUFFER; i++)
-        ReleaseBuffer(i);
-
-    FreeDirectSound();
+    // Story 5.2.2: InitDirectSound / FreeDirectSound removed — g_platformAudio (MiniAudioBackend)
+    // handles all audio lifecycle. DirectSoundManager is dormant (never initialized).
+    // ReleaseBuffer loop also removed — Manager().ReleaseBuffer() is a no-op on an
+    // uninitialized DirectSoundManager; removing it avoids unnecessary legacy code paths.
 
     // Story 5.2.1: g_platformAudio lifecycle — Shutdown + delete replaces wzAudioDestroy().
     if (g_platformAudio != nullptr)
@@ -1309,7 +1309,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     if (m_SoundOnOff)
     {
-        InitDirectSound(g_hWnd);
+        // Story 5.2.2: InitDirectSound(g_hWnd) removed — g_platformAudio (MiniAudioBackend)
+        // handles all SFX audio. DirectSoundManager is dormant (never initialized).
+        // SetEffectVolumeLevel → SetMasterVolume delegates to g_platformAudio.
 
         // Load volume level from config.ini
         int value = GameConfig::GetInstance().GetVolumeLevel();

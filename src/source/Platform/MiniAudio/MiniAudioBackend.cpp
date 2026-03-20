@@ -78,6 +78,9 @@ void MiniAudioBackend::Shutdown()
             }
             m_soundLoaded[buf] = false;
         }
+        // Story 5.2.2 (Task 1.3): Clear per-slot OBJECT* tracking to prevent dangling
+        // pointers if the backend is restarted. Safe even if slot was never loaded.
+        m_soundObjects[buf] = nullptr;
     }
 
     // Release music stream
@@ -129,6 +132,13 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 
     // Convert wchar_t filename to UTF-8 for miniaudio (which uses narrow char*)
     std::string utf8Path = mu_wchar_to_utf8(filename);
+
+    // Story 5.2.2 (Task 5.1): Normalize path separators for Linux/macOS.
+    // SFX file paths use Windows backslashes (e.g., L"Data\\Sound\\nBlackSmith.wav").
+    // mu_wchar_to_utf8() preserves them; replace before passing to ma_sound_init_from_file().
+    // On Windows, forward slashes work identically to backslashes for file paths.
+    // Mirrors the PlayMusic() normalization pattern from Story 5.2.1.
+    std::replace(utf8Path.begin(), utf8Path.end(), '\\', '/');
 
     // Clamp channels to the array dimension
     const int numChannels = (channels > 0 && channels <= MAX_CHANNEL) ? channels : MAX_CHANNEL;
@@ -226,6 +236,14 @@ HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
         ma_sound_set_position(pSound, pObject->Position[0], pObject->Position[1], pObject->Position[2]);
     }
 
+    // Story 5.2.2 (Task 1.2): Store the object pointer for per-frame position updates
+    // in Set3DSoundPosition(). Only track for 3D-enabled slots — mono/stereo SFX do not
+    // need per-frame position updates. pObject may be nullptr (checked in Set3DSoundPosition).
+    if (m_sound3DEnabled[bufIdx])
+    {
+        m_soundObjects[bufIdx] = pObject;
+    }
+
     ma_sound_start(pSound);
 
     return S_OK;
@@ -289,13 +307,15 @@ void MiniAudioBackend::AllStopSound()
 // Mirrors DSplaysound.cpp Set3DSoundPosition() behaviour.
 // Called each frame from the game loop for sounds that have an attached OBJECT.
 //
-// Story 5.2.1: Expanded stub — iterates 3D-enabled slots to establish the loop
-// structure. True per-frame OBJECT* position tracking is deferred to Story 5.2.2
-// when SFX call sites are wired; BGM is never 3D spatialized.
-// The ma_sound_set_position() call requires storing an OBJECT* per slot (introduced
-// in 5.2.2 when PlaySound() receives OBJECT* from call sites). Until then this
-// loop body is intentionally empty — it is NOT a stub; it is the complete structure
-// with the position-update call gated on per-slot data not yet available.
+// Story 5.2.2 (Tasks 2.1/2.2): Full implementation using per-slot m_soundObjects[].
+// PlaySound() stores the OBJECT* in m_soundObjects[bufIdx] for 3D-enabled slots.
+// This loop reads that pointer each frame and calls ma_sound_set_position() for
+// every actively-playing channel in the slot.
+// Guard order: !m_soundLoaded → skip; !m_sound3DEnabled → skip;
+//              m_soundObjects[buf] == nullptr → skip (safe — no object attached).
+// OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
+// Lifetime assumption: game engine guarantees the OBJECT outlives its attached sound
+// during normal play (same contract as DirectSoundManager::attachedObjects).
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::Set3DSoundPosition()
 {
@@ -304,15 +324,9 @@ void MiniAudioBackend::Set3DSoundPosition()
         return;
     }
 
-    // Iterate all 3D-enabled sound effect slots and update spatial positions.
-    // OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
-    // Per-frame position update requires the OBJECT* that was passed to PlaySound().
-    // Storing that pointer per-slot is introduced in Story 5.2.2 (SFX wiring).
-    // Until then the loop structure is in place but the set_position call
-    // has no source of per-slot OBJECT* — so the body is intentionally empty.
     for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
     {
-        if (!m_soundLoaded[buf] || !m_sound3DEnabled[buf])
+        if (!m_soundLoaded[buf] || !m_sound3DEnabled[buf] || m_soundObjects[buf] == nullptr)
         {
             continue;
         }
@@ -324,11 +338,10 @@ void MiniAudioBackend::Set3DSoundPosition()
                 continue;
             }
 
-            // Story 5.2.2: Add per-slot OBJECT* storage and call:
-            //   ma_sound_set_position(&m_sounds[buf][ch],
-            //       m_soundObjects[buf]->Position[0],
-            //       m_soundObjects[buf]->Position[1],
-            //       m_soundObjects[buf]->Position[2]);
+            // Update 3D position from the stored OBJECT* set in PlaySound().
+            // m_soundObjects[buf] is non-null (checked above); Position is vec3_t float[3].
+            ma_sound_set_position(&m_sounds[buf][ch], m_soundObjects[buf]->Position[0],
+                                  m_soundObjects[buf]->Position[1], m_soundObjects[buf]->Position[2]);
         }
     }
 }
