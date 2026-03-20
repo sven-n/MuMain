@@ -158,6 +158,20 @@ target_sources(MuTests PRIVATE audio/test_muaudio_abstraction.cpp)
 # Implementation complete: g_platformAudio wired in Winmain.cpp; BGM delegation done.
 target_sources(MuTests PRIVATE audio/test_miniaudio_bgm.cpp)
 
+# Story 5.2.2: miniaudio SFX Implementation [VS1-AUDIO-MINIAUDIO-SFX]
+# RED PHASE: Tests verify SFX lifecycle safety — LoadSound non-existent file graceful,
+# PlaySound before Initialize returns S_FALSE, StopSound on unloaded slot is safe,
+# AllStopSound on empty backend is safe, Set3DSoundPosition with no loaded sounds is safe,
+# Set3DSoundPosition skips nullptr m_soundObjects, volume controls before Initialize are safe.
+# All tests run headless (no audio device required — Initialize() may return false on CI).
+# Tests become GREEN once Tasks 1-5 in story 5.2.2 are implemented:
+#   Task 1: Add m_soundObjects array to MiniAudioBackend
+#   Task 2: Upgrade Set3DSoundPosition() stub to full per-frame position update
+#   Task 3: Redirect SFX free functions in DSplaysound.cpp to g_platformAudio
+#   Task 4: Remove InitDirectSound/FreeDirectSound from Winmain.cpp
+#   Task 5: Add backslash→forward-slash path normalization in LoadSound()
+target_sources(MuTests PRIVATE audio/test_miniaudio_sfx.cpp)
+
 # Story 5.1.1: MuAudio target provides miniaudio symbols needed by test_muaudio_abstraction.cpp
 # (MiniAudioBackend, g_platformAudio, ma_engine/ma_sound types from miniaudio.h).
 # MuTests must link MUAudio to resolve these symbols.
