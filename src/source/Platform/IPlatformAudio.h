@@ -5,8 +5,8 @@
 // Mirrors the public API of DSPlaySound.h (LoadWaveFile/PlayBuffer/StopBuffer/etc.)
 // and the wzAudio wrappers in Winmain.cpp (PlayMp3/StopMp3/IsEndMp3/GetMp3PlayPosition).
 // Story 5.2.1 wired BGM via g_platformAudio (Winmain.cpp replaced wzAudio calls).
-// Story 5.2.2 will wire SFX (LoadSound/PlaySound/StopSound/AllStopSound) into g_platformAudio.
-// (LOW-2 fix, code-review-finalize 2026-03-19)
+// Story 5.2.2 wired SFX (LoadSound/PlaySound/StopSound/AllStopSound) into g_platformAudio.
+// (MEDIUM-4 fix, code-review-finalize 2026-03-20)
 
 #include "DSPlaySound.h" // ESound enum, MAX_CHANNEL, MAX_BUFFER, OBJECT forward decl
 

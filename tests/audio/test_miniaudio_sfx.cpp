@@ -2,7 +2,11 @@
 // RED PHASE: Tests verify SFX lifecycle safety — all headless (no audio device required).
 //
 // AC-STD-2: Catch2 SFX lifecycle tests in tests/audio/test_miniaudio_sfx.cpp
-//   AC-1 coverage:  LoadWaveFile delegates to g_platformAudio (inspection — no direct Catch2 test)
+//   AC-1 coverage:  LoadWaveFile delegates to g_platformAudio — inspection only (MEDIUM-1 note):
+//                  A mock-based Catch2 test would require injecting a mock IPlatformAudio* into
+//                  g_platformAudio, which is a global raw pointer (pre-existing from Story 5.1.1).
+//                  The delegation is a single-line if-guard in DSplaysound.cpp:742–748, verified
+//                  by code inspection. Mocking deferred to a future test-infrastructure story.
 //   AC-2 coverage:  PlaySound before Initialize returns S_FALSE
 //   AC-3 coverage:  StopSound on unloaded slot is safe
 //   AC-4 coverage:  AllStopSound on empty backend is safe
@@ -33,9 +37,11 @@ TEST_CASE("AC-STD-2: MiniAudioBackend SFX — LoadSound non-existent file does n
     // GIVEN: A default-constructed MiniAudioBackend (NOT initialized)
     mu::MiniAudioBackend backend;
 
-    // Confirm g_platformAudio is NOT pointing to this test instance.
-    // (It should be nullptr in headless test builds.)
-    REQUIRE(g_platformAudio == nullptr);
+    // MEDIUM-3 fix: original assertion REQUIRE(g_platformAudio == nullptr) relied on
+    // test execution order (no prior test having set g_platformAudio). Catch2 does not
+    // guarantee cross-file test order. The actual intent is: this local `backend`
+    // instance is NOT registered as the global singleton — verify that directly.
+    REQUIRE(&backend != g_platformAudio);
 
     // WHEN:  LoadSound is called with a non-existent filename before Initialize()
     // THEN:  Must not crash — guard: !m_initialized → return early
@@ -138,11 +144,17 @@ TEST_CASE("AC-STD-2: MiniAudioBackend SFX — Set3DSoundPosition with no loaded 
 
 // ---------------------------------------------------------------------------
 // AC-STD-2 (Subtask 6.8): Set3DSoundPosition skips nullptr m_soundObjects
-// Even if a slot were marked loaded with 3D enabled but m_soundObjects[buf] == nullptr,
-// Set3DSoundPosition must not dereference the nullptr.
-// This test exercises the nullptr guard in the upgraded Set3DSoundPosition() loop
-// via a graceful "LoadSound failed → m_soundLoaded remains false" path.
 // Covers AC-8 nullptr guard for per-slot OBJECT* tracking.
+//
+// HIGH-1 note (code-review-finalize 2026-03-20):
+// This test exercises the !m_soundLoaded[buf] guard (LoadSound fails → slot stays
+// unloaded → loop skips), NOT the m_soundObjects[buf] == nullptr guard at line 329
+// of MiniAudioBackend.cpp. The deeper nullptr guard — where a slot IS loaded and 3D-
+// enabled but PlaySound was called with pObject=nullptr — is covered by code
+// inspection only: the guard `m_soundObjects[buf] == nullptr` at Set3DSoundPosition()
+// line 329 is verified by reading the source. A full runtime test would require
+// either a real audio device (not available on CI) or a test-seam to inject a
+// pre-loaded slot state. Accepted as inspection-only per project skip_checks policy.
 // ---------------------------------------------------------------------------
 TEST_CASE("AC-STD-2: MiniAudioBackend SFX — Set3DSoundPosition skips nullptr m_soundObjects",
           "[audio][sfx][lifecycle][5-2-2]")
@@ -153,16 +165,13 @@ TEST_CASE("AC-STD-2: MiniAudioBackend SFX — Set3DSoundPosition skips nullptr m
     // Initialize may return false on CI (no audio device) — acceptable.
     [[maybe_unused]] bool initResult = backend.Initialize();
 
-    // WHEN:  LoadSound is attempted with a non-existent file for slot 0 with 3D enabled
-    //        This will fail gracefully: ma_sound_init_from_file() returns an error,
-    //        g_ErrorReport.Write() is called, and m_soundLoaded[0] remains false.
-    //        m_soundObjects[0] remains nullptr (default-initialized std::array{}).
+    // WHEN:  LoadSound is attempted with a non-existent file for slot 0 with 3D enabled.
+    //        ma_sound_init_from_file() returns an error, g_ErrorReport.Write() is called,
+    //        and m_soundLoaded[0] remains false. m_soundObjects[0] remains nullptr.
     backend.LoadSound(static_cast<ESound>(0), L"nonexistent_3d_sound.wav", 1, true);
 
-    // THEN:  Set3DSoundPosition must not crash — even for 3D-enabled slots,
-    //        the loop guard (!m_soundLoaded[buf]) prevents nullptr dereference.
-    //        In the full implementation (after Task 2), if m_soundLoaded[buf] were true,
-    //        the m_soundObjects[buf] == nullptr check prevents the ma_sound_set_position() call.
+    // THEN:  Set3DSoundPosition must not crash — the !m_soundLoaded[buf] guard skips
+    //        the slot before reaching the m_soundObjects nullptr check.
     backend.Set3DSoundPosition();
 
     // Cleanup

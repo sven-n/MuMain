@@ -446,6 +446,10 @@ void DestroySound()
     // uninitialized DirectSoundManager; removing it avoids unnecessary legacy code paths.
 
     // Story 5.2.1: g_platformAudio lifecycle — Shutdown + delete replaces wzAudioDestroy().
+    // LOW-1 (code-review-finalize 2026-03-20): raw delete is a pre-existing pattern from
+    // Story 5.1.1. Migrating g_platformAudio to std::unique_ptr requires updating the
+    // extern declaration in IPlatformAudio.h and all assignment sites across Winmain.cpp.
+    // Deferred to a dedicated cleanup story — tracked in backlog.
     if (g_platformAudio != nullptr)
     {
         g_platformAudio->Shutdown();

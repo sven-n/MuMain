@@ -63,6 +63,11 @@ private:
     std::array<bool, MAX_BUFFER> m_soundLoaded{};
     std::array<int, MAX_BUFFER> m_activeChannel{};
     std::array<bool, MAX_BUFFER> m_sound3DEnabled{};
+    // CRITICAL-1 fix: tracks how many polyphonic slots were actually initialised by
+    // LoadSound(). PlaySound/StopSound/AllStopSound must iterate only these slots —
+    // iterating all MAX_CHANNEL slots when numChannels < MAX_CHANNEL calls miniaudio
+    // APIs on uninitialized ma_sound handles (UB).
+    std::array<int, MAX_BUFFER> m_loadedChannels{};
 
     // Per-slot OBJECT* for per-frame 3D position updates (Story 5.2.2).
     // Stores the most recent pObject passed to PlaySound() for each 3D-enabled buffer slot.

@@ -72,11 +72,13 @@ void MiniAudioBackend::Shutdown()
     {
         if (m_soundLoaded[buf])
         {
-            for (int ch = 0; ch < MAX_CHANNEL; ++ch)
+            // CRITICAL-1 fix: uninit only the channels actually initialised by LoadSound().
+            for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
             {
                 ma_sound_uninit(&m_sounds[buf][ch]);
             }
             m_soundLoaded[buf] = false;
+            m_loadedChannels[buf] = 0;
         }
         // Story 5.2.2 (Task 1.3): Clear per-slot OBJECT* tracking to prevent dangling
         // pointers if the backend is restarted. Safe even if slot was never loaded.
@@ -123,11 +125,14 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     // Unload previously loaded sound at this slot
     if (m_soundLoaded[bufIdx])
     {
-        for (int ch = 0; ch < MAX_CHANNEL; ++ch)
+        for (int ch = 0; ch < m_loadedChannels[bufIdx]; ++ch)
         {
             ma_sound_uninit(&m_sounds[bufIdx][ch]);
         }
         m_soundLoaded[bufIdx] = false;
+        // HIGH-2 fix: clear stale object pointer on reload so Set3DSoundPosition()
+        // cannot dereference a pointer that belonged to the previous load lifetime.
+        m_soundObjects[bufIdx] = nullptr;
     }
 
     // Convert wchar_t filename to UTF-8 for miniaudio (which uses narrow char*)
@@ -172,6 +177,9 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     m_soundLoaded[bufIdx] = true;
     m_sound3DEnabled[bufIdx] = enable3D;
     m_activeChannel[bufIdx] = 0;
+    // CRITICAL-1 fix: record how many slots were actually initialised so that
+    // PlaySound/StopSound/AllStopSound never touch uninitialized ma_sound handles.
+    m_loadedChannels[bufIdx] = numChannels;
 }
 
 // ---------------------------------------------------------------------------
@@ -209,9 +217,10 @@ HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
         return S_FALSE;
     }
 
-    // Round-robin channel selection
+    // Round-robin channel selection — clamp to loaded channel count (CRITICAL-1 fix).
+    // m_loadedChannels[bufIdx] >= 1 is guaranteed by the m_soundLoaded guard above.
     const int ch = m_activeChannel[bufIdx];
-    m_activeChannel[bufIdx] = (ch + 1) % MAX_CHANNEL;
+    m_activeChannel[bufIdx] = (ch + 1) % m_loadedChannels[bufIdx];
 
     ma_sound* pSound = &m_sounds[bufIdx][ch];
 
@@ -270,7 +279,8 @@ void MiniAudioBackend::StopSound(ESound buffer, BOOL resetPosition)
         return;
     }
 
-    for (int ch = 0; ch < MAX_CHANNEL; ++ch)
+    // CRITICAL-1 / MEDIUM-2 fix: iterate only the channels actually initialised.
+    for (int ch = 0; ch < m_loadedChannels[bufIdx]; ++ch)
     {
         ma_sound_stop(&m_sounds[bufIdx][ch]);
         if (resetPosition)
@@ -278,6 +288,13 @@ void MiniAudioBackend::StopSound(ESound buffer, BOOL resetPosition)
             ma_sound_seek_to_pcm_frame(&m_sounds[bufIdx][ch], 0);
         }
     }
+
+    // LOW-2 fix: clear stale OBJECT* after stopping so Set3DSoundPosition() cannot
+    // dereference a pointer to an object that has since been deleted (e.g. NPC despawn).
+    // The slot remains loaded — m_soundLoaded stays true — so the next PlaySound()
+    // call can reuse the slot without reloading. Per-frame position updates simply
+    // skip this slot (m_soundObjects[bufIdx] == nullptr guard) until PlaySound() fires.
+    m_soundObjects[bufIdx] = nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -294,7 +311,8 @@ void MiniAudioBackend::AllStopSound()
     {
         if (m_soundLoaded[buf])
         {
-            for (int ch = 0; ch < MAX_CHANNEL; ++ch)
+            // CRITICAL-1 fix: iterate only the channels actually initialised.
+            for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
             {
                 ma_sound_stop(&m_sounds[buf][ch]);
             }
