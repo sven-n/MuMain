@@ -2095,10 +2095,6 @@ bool CNewUIMyInventory::TryTransferBetweenInventorySections(CNewUIInventoryCtrl*
     else
     {
         destinationIndex = g_pMyInventory->FindEmptySlot(itemAttribute->Width, itemAttribute->Height);
-        if (destinationIndex == -1)
-        {
-            destinationIndex = g_pMyInventoryExt->FindEmptySlot(itemAttribute->Width, itemAttribute->Height, sourceControl);
-        }
     }
 
     if (destinationIndex == -1 || destinationIndex == sourceIndex)

@@ -769,6 +769,7 @@ void CNewUISystem::Show(DWORD dwKey)
         HideAllGroupA();
         g_pNPCShop->OpenningProcess();
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY);
+        g_pNPCShop->SetPos(640 - 190 * 2, 0);
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
     }
     else if (dwKey == INTERFACE_STORAGE)
@@ -1168,7 +1169,7 @@ void CNewUISystem::Hide(DWORD dwKey)
 
         if (IsVisible(INTERFACE_INVENTORY_EXT))
         {
-            m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY_EXT, false);
+            Hide(INTERFACE_INVENTORY_EXT);
         }
 
         if (IsVisible(INTERFACE_MIXINVENTORY))
@@ -1244,6 +1245,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_NPCSHOP)
     {
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         g_pNPCShop->ClosingProcess();
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
@@ -1268,7 +1273,10 @@ void CNewUISystem::Hide(DWORD dwKey)
         if (!g_pStorageInventory->ProcessClosing())
             return;
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-        m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY_EXT, false);
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
         Show(INTERFACE_HERO_POSITION_INFO);
     }
@@ -1324,6 +1332,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_TRADE)
     {
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         g_pTrade->ProcessClosing();
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
