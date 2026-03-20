@@ -89,8 +89,14 @@ TEST_CASE("AC-STD-2: MiniAudioBackend BGM lifecycle — PlayMusic non-existent f
     //         ma_sound_init_from_file() failure → g_ErrorReport.Write() + return)
     backend.PlayMusic("nonexistent_track.mp3", TRUE);
 
-    // THEN:  IsEndMusic() returns true — no stream was successfully loaded
-    REQUIRE(backend.IsEndMusic());
+    // THEN:  IsEndMusic() returns true — no stream was successfully loaded.
+    // NOTE:  When Initialize() returns false (CI headless), PlayMusic() hits the
+    //        !m_initialized guard and returns before ma_sound_init_from_file() is
+    //        called — the file-not-found error path is only exercised on developer
+    //        workstations with audio hardware. Both branches produce IsEndMusic()==true
+    //        but for different reasons: !m_initialized guard vs. stream-init failure.
+    //        (MEDIUM-NEW-2 fix, code-review-finalize 2026-03-19)
+    CHECK(backend.IsEndMusic());
 
     // Cleanup
     backend.Shutdown();

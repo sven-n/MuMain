@@ -418,6 +418,10 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
     // to return MA_FALSE for several frames after ma_sound_start(), making IsEndMusic()
     // return true spuriously. BGM is triggered on scene load (infrequent), so synchronous
     // stream init cost is acceptable. (HIGH-1 fix, code-review-finalize 2026-03-19)
+    // NOTE: Synchronous init may stall the game loop 10–100ms on HDDs or network shares
+    // (common in server-hosted MU setups) due to file open + ID3 header parse + decoder init
+    // on the calling thread. Acceptable for BGM at scene transitions on SSD; known limitation
+    // for HDD/network installs. Deferred to 5.2.x if a non-blocking init path is needed.
     ma_result result = ma_sound_init_from_file(&m_engine, normalizedName.c_str(), MA_SOUND_FLAG_STREAM, nullptr,
                                                nullptr, &m_musicSound);
 
@@ -450,6 +454,14 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
 //   Non-null name + enforce=false: only stop if the named track is currently playing.
 //   nullptr       + enforce=false: stop the current track regardless of name.
 //   name is ignored when enforce=true (always stops regardless).
+//
+// KNOWN LIMITATION (LOW-NEW-2): After StopMusic(nullptr, FALSE) (soft pause),
+// m_musicLoaded=true and m_currentMusicName is unchanged. The next PlayMusic() call
+// with the same track name hits the same-track guard and returns early — the music
+// stays paused with no way to resume from the current position. IPlatformAudio has
+// no ResumeMusic() method. In practice, all game call sites use enforce=TRUE (hard
+// stop via the StopMusic() free function in Winmain.cpp), so this dead-end path is
+// not reachable from current gameplay. A ResumeMusic() API may be added in 5.2.2.
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::StopMusic(const char* name, BOOL enforce)
 {

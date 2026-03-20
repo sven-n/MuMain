@@ -43,4 +43,8 @@ public:
 } // namespace mu
 
 // Global audio backend pointer — nullptr until game initializes audio (Story 5.2.1)
+// TODO (LOW-NEW-1, deferred to future story): This singleton declaration belongs in
+// Winmain.h alongside the other audio free-function declarations, not in the pure
+// interface header. Moving it here couples every consumer of IPlatformAudio to the
+// singleton pattern. Pre-existing from Story 5.1.1; no regression introduced in 5.2.1.
 extern mu::IPlatformAudio* g_platformAudio;
