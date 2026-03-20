@@ -5733,9 +5733,6 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             else
                 PlayBuffer(SOUND_GET_ITEM01, &Hero->Object);
         }
-#ifdef FOR_WORK
-        Items[ItemKey].Object.Live = false;
-#endif
     }
     SendGetItem = -1;
 
