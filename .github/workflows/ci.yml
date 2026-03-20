@@ -151,9 +151,65 @@ jobs:
           path: build-mingw/src/Main.exe
           if-no-files-found: error
 
+  build-macos:
+    name: macOS Native Build
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: brew install cmake ninja
+
+      - name: Cache SDL3 FetchContent
+        uses: actions/cache@v4
+        with:
+          path: out/build/macos-arm64/_deps
+          key: sdl3-macos-${{ hashFiles('CMakeLists.txt', 'cmake/**') }}
+          restore-keys: sdl3-macos-
+
+      - name: Configure CMake
+        run: cmake --preset macos-arm64
+
+      - name: Build
+        run: cmake --build out/build/macos-arm64 --config Debug
+
+      - name: Run tests
+        run: ctest --test-dir out/build/macos-arm64 --build-config Debug --output-on-failure
+
+  build-linux:
+    name: Linux Native Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build gcc g++ libgl1-mesa-dev
+
+      - name: Cache SDL3 FetchContent
+        uses: actions/cache@v4
+        with:
+          path: out/build/linux-x64/_deps
+          key: sdl3-linux-${{ hashFiles('CMakeLists.txt', 'cmake/**') }}
+          restore-keys: sdl3-linux-
+
+      - name: Configure CMake
+        run: cmake --preset linux-x64
+
+      - name: Build
+        run: cmake --build out/build/linux-x64 --config Debug
+
+      - name: Run tests
+        run: ctest --test-dir out/build/linux-x64 --build-config Debug --output-on-failure
+
   release:
     name: Semantic Release
-    needs: [quality, build]
+    needs: [quality, build, build-macos, build-linux]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
