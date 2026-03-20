@@ -200,3 +200,73 @@ add_test(
     COMMAND ${CMAKE_COMMAND}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_3_4_2.cmake
 )
+
+# ==========================================================================
+# Story 7.4.1 - Native Platform CI Runners [VS0-QUAL-CI-NATIVE]
+# RED PHASE: Tests validate ci.yml structure for native macOS and Linux runners.
+# ==========================================================================
+
+# AC-1: build-macos job with macos-latest runner and macos-arm64 preset
+add_test(
+    NAME "7.4.1-AC-1:macos-ci-runner"
+    COMMAND ${CMAKE_COMMAND}
+        -DCI_WORKFLOW_FILE=${MUMAIN_SOURCE_DIR}/.github/workflows/ci.yml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_macos_ci_runner.cmake
+)
+
+# AC-2: build-linux job with ubuntu-latest runner and linux-x64 preset
+add_test(
+    NAME "7.4.1-AC-2:linux-ci-runner"
+    COMMAND ${CMAKE_COMMAND}
+        -DCI_WORKFLOW_FILE=${MUMAIN_SOURCE_DIR}/.github/workflows/ci.yml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_linux_ci_runner.cmake
+)
+
+# AC-3: Both native runners execute configure, build, and ctest --output-on-failure
+add_test(
+    NAME "7.4.1-AC-3:native-runners-execute-ctest"
+    COMMAND ${CMAKE_COMMAND}
+        -DCI_WORKFLOW_FILE=${MUMAIN_SOURCE_DIR}/.github/workflows/ci.yml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_native_runners_execute_ctest.cmake
+)
+
+# AC-5: Existing MinGW cross-compile job unchanged (regression guard)
+add_test(
+    NAME "7.4.1-AC-5:mingw-job-unchanged"
+    COMMAND ${CMAKE_COMMAND}
+        -DCI_WORKFLOW_FILE=${MUMAIN_SOURCE_DIR}/.github/workflows/ci.yml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_mingw_job_unchanged.cmake
+)
+
+# AC-6: release job requires all three platform jobs (quality, build, build-macos, build-linux)
+add_test(
+    NAME "7.4.1-AC-6:release-needs-all-platforms"
+    COMMAND ${CMAKE_COMMAND}
+        -DCI_WORKFLOW_FILE=${MUMAIN_SOURCE_DIR}/.github/workflows/ci.yml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac6_release_needs_all_platforms.cmake
+)
+
+# AC-7: SDL3 FetchContent caching on both native runners
+add_test(
+    NAME "7.4.1-AC-7:sdl3-cache-native-runners"
+    COMMAND ${CMAKE_COMMAND}
+        -DCI_WORKFLOW_FILE=${MUMAIN_SOURCE_DIR}/.github/workflows/ci.yml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac7_sdl3_cache_native_runners.cmake
+)
+
+# AC-8: .NET SDK not required on native runners (MU_ENABLE_DOTNET=OFF)
+add_test(
+    NAME "7.4.1-AC-8:dotnet-disabled-native-runners"
+    COMMAND ${CMAKE_COMMAND}
+        -DCI_WORKFLOW_FILE=${MUMAIN_SOURCE_DIR}/.github/workflows/ci.yml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac8_dotnet_disabled_native_runners.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-CI-NATIVE traceability + AC-STD-1 pattern consistency
+add_test(
+    NAME "7.4.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DCI_WORKFLOW_FILE=${MUMAIN_SOURCE_DIR}/.github/workflows/ci.yml
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_4_1.cmake
+)
