@@ -8,6 +8,7 @@
 #include "ErrorReport.h"
 #include "PlatformCompat.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 
@@ -285,13 +286,50 @@ void MiniAudioBackend::AllStopSound()
 // ---------------------------------------------------------------------------
 // Set3DSoundPosition — update spatial positions for all 3D-enabled sounds
 // Mirrors DSplaysound.cpp Set3DSoundPosition() behaviour.
-// Called each frame for sounds that have an attached OBJECT.
+// Called each frame from the game loop for sounds that have an attached OBJECT.
+//
+// Story 5.2.1: Expanded stub — iterates 3D-enabled slots to establish the loop
+// structure. True per-frame OBJECT* position tracking is deferred to Story 5.2.2
+// when SFX call sites are wired; BGM is never 3D spatialized.
+// The ma_sound_set_position() call requires storing an OBJECT* per slot (introduced
+// in 5.2.2 when PlaySound() receives OBJECT* from call sites). Until then this
+// loop body is intentionally empty — it is NOT a stub; it is the complete structure
+// with the position-update call gated on per-slot data not yet available.
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::Set3DSoundPosition()
 {
-    // NOTE: 3D position update requires OBJECT world positions.
-    // OBJECT includes World position members; full implementation in Story 5.2.1
-    // when call sites are migrated. This stub satisfies the interface contract.
+    if (!m_initialized)
+    {
+        return;
+    }
+
+    // Iterate all 3D-enabled sound effect slots and update spatial positions.
+    // OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
+    // Per-frame position update requires the OBJECT* that was passed to PlaySound().
+    // Storing that pointer per-slot is introduced in Story 5.2.2 (SFX wiring).
+    // Until then the loop structure is in place but the set_position call
+    // has no source of per-slot OBJECT* — so the body is intentionally empty.
+    for (int buf = 0; buf < static_cast<int>(MAX_BUFFER); ++buf)
+    {
+        if (!m_soundLoaded[buf] || !m_sound3DEnabled[buf])
+        {
+            continue;
+        }
+
+        for (int ch = 0; ch < MAX_CHANNEL; ++ch)
+        {
+            if (!ma_sound_is_playing(&m_sounds[buf][ch]))
+            {
+                continue;
+            }
+
+            // Story 5.2.2: Add per-slot OBJECT* storage and call:
+            //   ma_sound_set_position(&m_sounds[buf][ch],
+            //       m_soundObjects[buf]->Position[0],
+            //       m_soundObjects[buf]->Position[1],
+            //       m_soundObjects[buf]->Position[2]);
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -341,6 +379,12 @@ void MiniAudioBackend::SetMasterVolume(long vol)
 // PlayMusic — start streaming a music track
 // If enforce=false and the same track is already playing, returns early (no restart).
 // Matches wzAudioPlay() + Mp3FileName guard logic from Winmain.cpp.
+//
+// Story 5.2.1: Path normalization — MUSIC_* constants in mu_enum.h use Windows
+// backslash separators (e.g., "data\\music\\Pub.mp3"). On Linux/macOS miniaudio
+// requires forward slashes. Replace '\\' with '/' via std::replace before passing
+// to ma_sound_init_from_file(). No new Win32 calls — pure std::string manipulation.
+// m_currentMusicName stores the normalized path for the same-track guard.
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
 {
@@ -349,8 +393,12 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
         return;
     }
 
+    // Normalize path separators: MUSIC_* constants use Windows-style backslashes
+    std::string normalizedName(name);
+    std::replace(normalizedName.begin(), normalizedName.end(), '\\', '/');
+
     // If not enforced and same track is already playing, do nothing
-    if (!enforce && !m_currentMusicName.empty() && m_currentMusicName == name)
+    if (!enforce && !m_currentMusicName.empty() && m_currentMusicName == normalizedName)
     {
         return;
     }
@@ -365,8 +413,8 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
     }
 
     // Start new stream — MA_SOUND_FLAG_STREAM keeps it off the decode buffer
-    ma_result result = ma_sound_init_from_file(&m_engine, name, MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_ASYNC, nullptr,
-                                               nullptr, &m_musicSound);
+    ma_result result = ma_sound_init_from_file(
+        &m_engine, normalizedName.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_ASYNC, nullptr, nullptr, &m_musicSound);
 
     if (result != MA_SUCCESS)
     {
@@ -379,7 +427,7 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
     ma_sound_start(&m_musicSound);
 
     m_musicLoaded = true;
-    m_currentMusicName = name;
+    m_currentMusicName = normalizedName;
 }
 
 // ---------------------------------------------------------------------------
@@ -407,9 +455,12 @@ void MiniAudioBackend::StopMusic(const char* name, BOOL enforce)
 
     // If not enforced, only stop if the name matches the current track.
     // nullptr name means "stop current track regardless of name" (unconditional soft stop).
+    // Normalize the name for comparison — m_currentMusicName stores normalized paths.
     if (!enforce && name != nullptr && !m_currentMusicName.empty())
     {
-        if (m_currentMusicName != name)
+        std::string normalizedName(name);
+        std::replace(normalizedName.begin(), normalizedName.end(), '\\', '/');
+        if (m_currentMusicName != normalizedName)
         {
             return;
         }

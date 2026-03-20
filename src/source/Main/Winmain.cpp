@@ -45,6 +45,12 @@
 #include "Core/MuTimer.h"
 #include "UIMng.h"
 
+// Story 5.2.1: miniaudio BGM Implementation [VS1-AUDIO-MINIAUDIO-BGM]
+// wzAudio dependency removed — BGM now routed through g_platformAudio (MiniAudioBackend).
+// Mp3FileName global removed — same-track guard is handled by MiniAudioBackend::m_currentMusicName.
+#include "IPlatformAudio.h"
+#include "MiniAudioBackend.h"
+
 #include "w_MapHeaders.h"
 
 #include "w_PetProcess.h"
@@ -105,31 +111,21 @@ int g_iScreenSaverOldValue = 60 * 15;
 BOOL g_bUseWindowMode = TRUE;
 BOOL g_bUseFullscreenMode = FALSE;
 
-char Mp3FileName[256];
-
-#pragma comment(lib, "wzAudio.lib")
-#include <wzAudio.h>
-
 void StopMusic()
 {
-    if (!m_MusicOnOff)
-        return;
-
-    wzAudioStop();
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->StopMusic(nullptr, FALSE);
+    }
 }
 
 void StopMp3(const char* Name, BOOL bEnforce)
 {
     if (!m_MusicOnOff && !bEnforce)
         return;
-
-    if (Mp3FileName[0] != NULL)
+    if (g_platformAudio != nullptr)
     {
-        if (strcmp(Name, Mp3FileName) == 0)
-        {
-            wzAudioStop();
-            Mp3FileName[0] = NULL;
-        }
+        g_platformAudio->StopMusic(Name, bEnforce);
     }
 }
 
@@ -139,26 +135,24 @@ void PlayMp3(const char* Name, BOOL bEnforce)
         return;
     if (!m_MusicOnOff && !bEnforce)
         return;
-
-    if (strcmp(Name, Mp3FileName) == 0)
+    if (g_platformAudio != nullptr)
     {
-        return;
+        g_platformAudio->PlayMusic(Name, bEnforce);
     }
-
-    wzAudioPlay(Name, 1);
-    strcpy(Mp3FileName, Name);
 }
 
 bool IsEndMp3()
 {
-    if (100 == wzAudioGetStreamOffsetRange())
+    if (g_platformAudio == nullptr)
         return true;
-    return false;
+    return g_platformAudio->IsEndMusic();
 }
 
 int GetMp3PlayPosition()
 {
-    return wzAudioGetStreamOffsetRange();
+    if (g_platformAudio == nullptr)
+        return 0;
+    return g_platformAudio->GetMusicPosition();
 }
 
 extern int LogIn;
@@ -446,7 +440,14 @@ void DestroySound()
         ReleaseBuffer(i);
 
     FreeDirectSound();
-    wzAudioDestroy();
+
+    // Story 5.2.1: g_platformAudio lifecycle — Shutdown + delete replaces wzAudioDestroy().
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->Shutdown();
+        delete g_platformAudio;
+        g_platformAudio = nullptr;
+    }
 }
 
 int g_iInactiveTime = 0;
@@ -1286,10 +1287,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     g_pNewUISystem->Create();
 
-    if (m_MusicOnOff)
+    // Story 5.2.1: Wire g_platformAudio (MiniAudioBackend) into game startup.
+    // Initialize is attempted regardless of m_MusicOnOff so the backend exists
+    // for all call sites; mute/enable is handled at the caller level via PlayMusic guards.
+    // Raw pointer is intentional — consistent with legacy singleton pattern in Winmain.cpp.
+    // Ownership transferred to DestroySound() which calls Shutdown() + delete.
+    g_platformAudio = new mu::MiniAudioBackend();
+    if (!g_platformAudio->Initialize())
     {
-        wzAudioCreate(g_hWnd);
-        wzAudioOption(WZAOPT_STOPBEFOREPLAY, 1);
+        g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::Initialize failed — game will run without audio\r\n");
     }
 
     if (m_SoundOnOff)

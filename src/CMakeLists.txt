@@ -405,6 +405,14 @@ add_executable(Main ${MU_MAIN_ENTRY_SOURCES})
 target_link_libraries(Main PRIVATE MUGame)
 target_precompile_headers(Main REUSE_FROM MUCore)
 
+# Story 5.2.1: Winmain.cpp includes MiniAudioBackend.h and miniaudio.h directly.
+# These paths are PRIVATE to MUAudio (not propagated via MUGame/MUAudio link chain),
+# so they must be added to the Main target explicitly for include resolution.
+target_include_directories(Main PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/miniaudio"
+    "${MU_SOURCE_DIR}/Platform/MiniAudio"
+)
+
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
   target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
@@ -473,12 +481,12 @@ if (MSVC)
     wininet
     urlmon
     turbojpeg-static
-    wzAudio
+    # wzAudio removed — Story 5.2.1: BGM replaced by miniaudio via g_platformAudio (MiniAudioBackend)
   )
 
   # Locate required DLLs in bin directory
   set(DLL_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-  set(REQUIRED_DLL_NAMES wzAudio glew32 ogg vorbisfile)
+  set(REQUIRED_DLL_NAMES glew32 ogg vorbisfile)  # wzAudio removed — Story 5.2.1
   set(REQUIRED_DLLS)
 
   foreach(DLL_NAME IN LISTS REQUIRED_DLL_NAMES)
@@ -637,8 +645,9 @@ endif()
 
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
 # system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.
-# For turbojpeg and wzAudio we link against the logically named libraries,
+# For turbojpeg we link against the logically named library,
 # which must be provided as MinGW-compatible .a import libraries.
+# wzAudio removed — Story 5.2.1: BGM replaced by miniaudio via g_platformAudio (MiniAudioBackend)
 if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-mingw32")
   target_link_directories(Main PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib"
@@ -700,7 +709,7 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
     comdlg32
     advapi32
     ${MU_TURBOJPEG_STATIC_LIB}
-    wzAudio
+    # wzAudio removed — Story 5.2.1: BGM replaced by miniaudio via g_platformAudio (MiniAudioBackend)
   )
 endif()
 
