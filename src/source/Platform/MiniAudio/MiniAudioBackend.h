@@ -4,20 +4,20 @@
 // Concrete miniaudio backend implementing IPlatformAudio.
 // Uses ma_engine for mixing and ma_sound for individual sound/music playback.
 //
-// INCLUDE ISOLATION NOTE (HIGH-3 code-review-finalize 2026-03-19):
-// miniaudio.h (95k lines) is intentionally NOT included here to avoid polluting
-// all translation units that include this header. Full type definitions are
-// required for stack-allocated ma_engine and ma_sound members, so a true PIMPL
-// pattern would require heap allocation (std::unique_ptr<Impl>). That refactor
-// is deferred to Story 5.2.1. In the current architecture MiniAudioBackend.cpp
-// sets SKIP_PRECOMPILE_HEADERS ON to isolate the include from the PCH.
-// Do NOT add #include "miniaudio.h" to callers of this header.
+// INCLUDE ISOLATION NOTE (MEDIUM-2 fix, code-review-finalize 2026-03-19):
+// miniaudio.h (95k lines) is included directly in this header because ma_engine
+// and ma_sound require full type definitions for stack-allocated private members.
+// A true PIMPL pattern (std::unique_ptr<Impl>) would isolate the include but
+// requires heap allocation. That refactor is deferred to Story 5.2.x (future).
+// Current workaround: MiniAudioImpl.cpp (Story 5.1.1) isolates MINIAUDIO_IMPLEMENTATION
+// via SKIP_PRECOMPILE_HEADERS ON so the 95k-line implementation block is not
+// included by the PCH. The header include below is intentional and known.
+// Do NOT add #include "miniaudio.h" to callers of MiniAudioBackend.h.
 
 #include "IPlatformAudio.h"
 
-// miniaudio.h is included here because ma_engine and ma_sound require full
-// type definitions for stack allocation in the private members below.
-// See isolation note above — this is a known limitation tracked for 5.2.1.
+// miniaudio.h required for ma_engine and ma_sound full type definitions.
+// See isolation note above — this include is the known limitation tracked for 5.2.x.
 #include "miniaudio.h"
 
 #include <array>

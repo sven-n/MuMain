@@ -115,7 +115,11 @@ void StopMusic()
 {
     if (g_platformAudio != nullptr)
     {
-        g_platformAudio->StopMusic(nullptr, FALSE);
+        // HIGH-2 fix (code-review-finalize 2026-03-19): use hard stop (enforce=TRUE) to
+        // release the decoder and file handle immediately — mirrors wzAudioStop() behaviour.
+        // Soft stop (FALSE) holds the file handle open until PlayMusic() is next called,
+        // which can leak file descriptors across rapid server reconnects (WSclient.cpp:742,762).
+        g_platformAudio->StopMusic(nullptr, TRUE);
     }
 }
 
@@ -1288,14 +1292,19 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_pNewUISystem->Create();
 
     // Story 5.2.1: Wire g_platformAudio (MiniAudioBackend) into game startup.
-    // Initialize is attempted regardless of m_MusicOnOff so the backend exists
-    // for all call sites; mute/enable is handled at the caller level via PlayMusic guards.
+    // MEDIUM-3 fix (code-review-finalize 2026-03-19): guard allocation with
+    // m_MusicOnOff || m_SoundOnOff so we don't open an audio device (threads,
+    // file descriptors) when the user has explicitly disabled all audio.
+    // g_platformAudio == nullptr is handled safely by all PlayMp3/StopMp3 call sites.
     // Raw pointer is intentional — consistent with legacy singleton pattern in Winmain.cpp.
     // Ownership transferred to DestroySound() which calls Shutdown() + delete.
-    g_platformAudio = new mu::MiniAudioBackend();
-    if (!g_platformAudio->Initialize())
+    if (m_MusicOnOff || m_SoundOnOff)
     {
-        g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::Initialize failed — game will run without audio\r\n");
+        g_platformAudio = new mu::MiniAudioBackend();
+        if (!g_platformAudio->Initialize())
+        {
+            g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::Initialize failed — game will run without audio\r\n");
+        }
     }
 
     if (m_SoundOnOff)

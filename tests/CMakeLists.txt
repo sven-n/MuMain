@@ -152,10 +152,10 @@ target_sources(MuTests PRIVATE render/test_blendpipelinestate_migration.cpp)
 target_sources(MuTests PRIVATE audio/test_muaudio_abstraction.cpp)
 
 # Story 5.2.1: miniaudio BGM Implementation [VS1-AUDIO-MINIAUDIO-BGM]
-# RED PHASE: Tests verify BGM lifecycle — IsEndMusic() before play, StopMusic on unloaded
+# GREEN PHASE: Tests verify BGM lifecycle — IsEndMusic() before play, StopMusic on unloaded
 # stream, PlayMusic with non-existent file (no crash), GetMusicPosition before play returns 0.
 # All tests run headless (no audio device needed — Initialize() may return false on CI).
-# Tests fail until Winmain.cpp wires g_platformAudio (Task 1) and BGM delegation (Task 2).
+# Implementation complete: g_platformAudio wired in Winmain.cpp; BGM delegation done.
 target_sources(MuTests PRIVATE audio/test_miniaudio_bgm.cpp)
 
 # Story 5.1.1: MuAudio target provides miniaudio symbols needed by test_muaudio_abstraction.cpp

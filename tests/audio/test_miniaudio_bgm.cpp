@@ -1,5 +1,5 @@
 // Story 5.2.1: miniaudio BGM Implementation [VS1-AUDIO-MINIAUDIO-BGM]
-// RED PHASE: Tests verify BGM lifecycle semantics — construct, initialize, play,
+// GREEN PHASE: Tests verify BGM lifecycle semantics — construct, initialize, play,
 // stop, position query — all headless (no audio device required).
 //
 // AC-STD-2: Catch2 BGM lifecycle test in tests/audio/test_miniaudio_bgm.cpp
@@ -11,6 +11,11 @@
 // All tests run headless — Initialize() may return false on CI (no audio device), which
 // is acceptable. No Win32, DirectSound, or wzAudio APIs called.
 // Designed to compile on macOS/Linux without Win32 headers.
+//
+// MEDIUM-1 fix (code-review-finalize 2026-03-19): REQUIRE_NOTHROW on non-throwing C++
+// code provides zero test value — miniaudio does not use C++ exceptions. Direct calls
+// replace the lambda-wrapped REQUIRE_NOTHROW pattern. Both results from Initialize()
+// (true/false) remain acceptable — CI headless is expected to return false.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -45,24 +50,20 @@ TEST_CASE("AC-STD-2: MiniAudioBackend BGM lifecycle — StopMusic on unloaded st
     // GIVEN: A default-constructed MiniAudioBackend
     mu::MiniAudioBackend backend;
 
-    // Initialize may succeed or fail (CI headless) — both are valid
-    REQUIRE_NOTHROW([&]() {
-        [[maybe_unused]] bool initResult = backend.Initialize();
-        if (initResult)
-        {
-            // If init succeeded, shut down at end of this section
-        }
-    }());
+    // Initialize may succeed or fail (CI headless) — both are valid.
+    // Direct call: miniaudio does not throw C++ exceptions, so REQUIRE_NOTHROW
+    // would provide no test value. (MEDIUM-1 fix, code-review-finalize 2026-03-19)
+    [[maybe_unused]] bool initResult = backend.Initialize();
 
     // WHEN:  StopMusic is called with no track loaded (nullptr name, hard stop)
-    // THEN:  Must not crash, abort, or throw
-    REQUIRE_NOTHROW([&]() { backend.StopMusic(nullptr, TRUE); }());
+    // THEN:  Must not crash or abort — StopMusic guards !m_initialized and !m_musicLoaded
+    backend.StopMusic(nullptr, TRUE);
 
     // THEN:  IsEndMusic() still returns true — no stream was ever loaded
     REQUIRE(backend.IsEndMusic());
 
     // Cleanup: safe to call Shutdown regardless of init result
-    REQUIRE_NOTHROW([&]() { backend.Shutdown(); }());
+    backend.Shutdown();
 }
 
 // ---------------------------------------------------------------------------
@@ -78,21 +79,21 @@ TEST_CASE("AC-STD-2: MiniAudioBackend BGM lifecycle — PlayMusic non-existent f
     // GIVEN: A default-constructed MiniAudioBackend
     mu::MiniAudioBackend backend;
 
-    // Initialize may return false on CI (no audio device) — acceptable
-    [[maybe_unused]] bool initResult = false;
-    REQUIRE_NOTHROW([&]() { initResult = backend.Initialize(); }());
+    // Initialize may return false on CI (no audio device) — acceptable.
+    // Direct call: miniaudio does not throw C++ exceptions. (MEDIUM-1 fix, code-review-finalize 2026-03-19)
+    [[maybe_unused]] bool initResult = backend.Initialize();
 
     // WHEN:  PlayMusic is called with a file that does not exist
     // THEN:  Must not crash — will log error and return early
     //        (MiniAudioBackend::PlayMusic guards: !m_initialized → return;
     //         ma_sound_init_from_file() failure → g_ErrorReport.Write() + return)
-    REQUIRE_NOTHROW([&]() { backend.PlayMusic("nonexistent_track.mp3", TRUE); }());
+    backend.PlayMusic("nonexistent_track.mp3", TRUE);
 
     // THEN:  IsEndMusic() returns true — no stream was successfully loaded
     REQUIRE(backend.IsEndMusic());
 
     // Cleanup
-    REQUIRE_NOTHROW([&]() { backend.Shutdown(); }());
+    backend.Shutdown();
 }
 
 // ---------------------------------------------------------------------------

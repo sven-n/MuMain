@@ -14,8 +14,9 @@
 
 // ---------------------------------------------------------------------------
 // Global backend pointer — nullptr until the game initialises audio.
-// Story 5.2.1 will set g_platformAudio = new mu::MiniAudioBackend() and call
-// Initialize() during game startup. This story only creates the abstraction.
+// Story 5.1.1: defined here (nullptr). Story 5.2.1: set to new mu::MiniAudioBackend()
+// and Initialize() called during game startup (Winmain.cpp). Story 5.2.2 will
+// extend SFX delegation via this pointer.
 // ---------------------------------------------------------------------------
 mu::IPlatformAudio* g_platformAudio = nullptr;
 
@@ -412,9 +413,13 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
         m_currentMusicName.clear();
     }
 
-    // Start new stream — MA_SOUND_FLAG_STREAM keeps it off the decode buffer
-    ma_result result = ma_sound_init_from_file(
-        &m_engine, normalizedName.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_ASYNC, nullptr, nullptr, &m_musicSound);
+    // Start new stream — MA_SOUND_FLAG_STREAM keeps it off the decode buffer.
+    // MA_SOUND_FLAG_ASYNC is intentionally NOT used: async init causes ma_sound_is_playing()
+    // to return MA_FALSE for several frames after ma_sound_start(), making IsEndMusic()
+    // return true spuriously. BGM is triggered on scene load (infrequent), so synchronous
+    // stream init cost is acceptable. (HIGH-1 fix, code-review-finalize 2026-03-19)
+    ma_result result = ma_sound_init_from_file(&m_engine, normalizedName.c_str(), MA_SOUND_FLAG_STREAM, nullptr,
+                                               nullptr, &m_musicSound);
 
     if (result != MA_SUCCESS)
     {
