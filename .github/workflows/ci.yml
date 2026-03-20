@@ -166,7 +166,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: out/build/macos-arm64/_deps
-          key: sdl3-macos-${{ hashFiles('CMakeLists.txt', 'cmake/**') }}
+          key: sdl3-macos-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt') }}
           restore-keys: sdl3-macos-
 
       - name: Configure CMake
@@ -195,7 +195,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: out/build/linux-x64/_deps
-          key: sdl3-linux-${{ hashFiles('CMakeLists.txt', 'cmake/**') }}
+          key: sdl3-linux-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt') }}
           restore-keys: sdl3-linux-
 
       - name: Configure CMake
@@ -205,7 +205,7 @@ jobs:
         run: cmake --build out/build/linux-x64 --config Debug
 
       - name: Run tests
-        run: ctest --test-dir out/build/linux-x64 --build-config Debug --output-on-failure
+        run: ctest --test-dir out/build/linux-x64 --build-config Debug --output-on-failure --no-tests=error
 
   release:
     name: Semantic Release

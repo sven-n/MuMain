@@ -84,7 +84,9 @@
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "MU_ENABLE_DOTNET": "OFF",
+        "BUILD_TESTING": "ON"
       },
       "condition": {
         "type": "equals",
@@ -109,7 +111,9 @@
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "MU_ENABLE_DOTNET": "OFF",
+        "BUILD_TESTING": "ON"
       },
       "condition": {
         "type": "equals",
