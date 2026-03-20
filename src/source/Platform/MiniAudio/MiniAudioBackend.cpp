@@ -167,9 +167,17 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // Mirrors DSPlaySound.h PlayBuffer() signature exactly.
 // MEDIUM-2 (code-review-finalize 2026-03-19): Returns S_FALSE (not S_OK) when
 // !m_initialized to signal a no-op to callers, matching !m_soundLoaded behaviour.
-// HIGH-1 (code-review-finalize 2026-03-19): After starting the sound, apply the
-// 3D world position from pObject when the slot is 3D-enabled, so playback begins
-// at the correct spatial position rather than silently at (0,0,0).
+// HIGH-1 (code-review-finalize 2026-03-19): Apply the 3D world position from
+// pObject BEFORE calling ma_sound_start() so the first mix tick on the audio
+// thread already sees the correct spatial position (not silently at origin).
+// NEW-HIGH-1 (code-review-finalize 2026-03-19): Ordering fix — set_position must
+// come before start() to avoid the audio-thread race where the first mix tick
+// renders at (0,0,0). Correct miniaudio pattern: configure all properties first,
+// then start.
+// NEW-LOW-1 (code-review-finalize 2026-03-19): Call ma_sound_stop() before
+// ma_sound_seek_to_pcm_frame() to prevent seeking a currently-playing channel
+// (round-robin reuse of looping SFX slots). Avoids the pop/click artifact caused
+// by seeking while the audio thread is actively mixing the channel.
 // ---------------------------------------------------------------------------
 HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
 {
@@ -195,18 +203,28 @@ HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
 
     ma_sound* pSound = &m_sounds[bufIdx][ch];
 
-    // Seek to start before playing to handle overlapping sounds cleanly
-    ma_sound_seek_to_pcm_frame(pSound, 0);
-    ma_sound_set_looping(pSound, looped ? MA_TRUE : MA_FALSE);
-    ma_sound_start(pSound);
+    // NEW-LOW-1: Stop the channel before seeking to avoid a seek-during-play race.
+    // When all MAX_CHANNEL slots are busy (e.g. looping SFX), the oldest channel
+    // is reused. Stopping first prevents a pop/click from seeking mid-mix.
+    ma_sound_stop(pSound);
 
-    // HIGH-1: Apply 3D world position from the attached OBJECT so the sound
-    // starts at the correct location in world space (not silently at origin).
+    // Seek to start so reused channels always play from the beginning.
+    ma_sound_seek_to_pcm_frame(pSound, 0);
+
+    // Configure all sound properties BEFORE starting — miniaudio audio thread
+    // begins mixing immediately on ma_sound_start(), so any property set after
+    // start() is subject to a data race on the first mix tick.
+    ma_sound_set_looping(pSound, looped ? MA_TRUE : MA_FALSE);
+
+    // NEW-HIGH-1 / HIGH-1: Set 3D position BEFORE start() so the audio thread
+    // never renders at the default origin (0,0,0) for even one mix tick.
     // OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
     if (m_sound3DEnabled[bufIdx] && pObject != nullptr)
     {
         ma_sound_set_position(pSound, pObject->Position[0], pObject->Position[1], pObject->Position[2]);
     }
+
+    ma_sound_start(pSound);
 
     return S_OK;
 }
@@ -470,10 +488,19 @@ int MiniAudioBackend::GetMusicPosition()
 // DbToLinear — convert DirectSound dB*100 scale to linear 0.0..1.0
 // DirectSound volume: -10000 (DSBVOLUME_MIN, silent) to 0 (full volume)
 // Each unit = 1/100th of a dB, so vol / 2000.0f = dB / 20.0f (standard dB-to-linear)
+//
+// NEW-MEDIUM-1 (code-review-finalize 2026-03-19): Clamp dsVol to <= 0 before
+// conversion. The valid DirectSound range is DSBVOLUME_MIN (-10000) to 0.
+// A positive dsVol would produce gain > 1.0, causing over-amplified distorted
+// audio because miniaudio does not hard-clamp the volume internally.
+// Clamping to 0 ensures full volume (1.0) is the maximum output, matching the
+// DirectSound contract. Callers passing positive values get clamped silently.
 // ---------------------------------------------------------------------------
 float MiniAudioBackend::DbToLinear(long dsVol)
 {
-    return std::pow(10.0f, static_cast<float>(dsVol) / 2000.0f);
+    // Clamp to valid DirectSound range: DSBVOLUME_MIN (-10000) to 0
+    const float clampedVol = (dsVol > 0L) ? 0.0f : static_cast<float>(dsVol);
+    return std::pow(10.0f, clampedVol / 2000.0f);
 }
 
 } // namespace mu
