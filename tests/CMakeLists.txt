@@ -191,6 +191,16 @@ target_sources(MuTests PRIVATE scenes/test_auth_character_validation.cpp)
 target_compile_definitions(MuTests PRIVATE MU_SCENE_TESTS_ENABLED)
 target_include_directories(MuTests PRIVATE "${CMAKE_SOURCE_DIR}/src/source/Scenes")
 
+# Story 6.1.2: World Navigation Validation [VS1-GAME-VALIDATE-NAVIGATION]
+# RED PHASE: Tests verify ENUM_WORLD map IDs for all 6 key maps (AC-5), PATH grid
+# geometry (CheckXYPos/GetIndex/EstimateCostToGoal — AC-1), MovePoint() direction
+# mapping (AC-1), MOVEINFODATA gate index contract (AC-2), and TW_* terrain flags (AC-2).
+# AC-1/AC-2 partial: FindPath A*, CMapManager range queries, CPortalMgr state are gated
+# by MU_WORLD_NAVIGATION_TESTS_ENABLED (requires MUGame linkage — not set by default).
+# MUCommon INTERFACE provides src/source/{Core,World,Data}/ include paths — no extra
+# target_include_directories needed.
+target_sources(MuTests PRIVATE world/test_world_navigation_validation.cpp)
+
 # Story 5.3.1: Audio Format Validation [VS1-AUDIO-FORMAT-VALIDATE]
 # RED PHASE: Tests verify miniaudio correctly decodes WAV, MP3, and OGG Vorbis audio
 # formats used by the game, and that error paths are handled gracefully.
