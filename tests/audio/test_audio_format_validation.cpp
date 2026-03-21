@@ -770,7 +770,7 @@ TEST_CASE("AC-1: WAV mono PCM 16-bit loads via MiniAudioBackend", "[audio][wav][
     // THEN: Must not crash regardless of init state (AC-6: CI headless guard)
     // NOTE: LoadSound takes wchar_t* — use std::wstring for conversion
     const std::wstring wWavPath(wavPath.begin(), wavPath.end());
-    backend.LoadSound(static_cast<ESound>(SOUND_EXPAND_END - 1), wWavPath.c_str(), 1, false);
+    backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 1), wWavPath.c_str(), 1, false);
 
     if (!initOk)
     {
@@ -796,7 +796,7 @@ TEST_CASE("AC-1: WAV stereo PCM 16-bit loads via MiniAudioBackend", "[audio][wav
     const bool initOk = backend.Initialize();
 
     const std::wstring wWavPath(wavPath.begin(), wavPath.end());
-    backend.LoadSound(static_cast<ESound>(SOUND_EXPAND_END - 2), wWavPath.c_str(), 1, false);
+    backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 2), wWavPath.c_str(), 1, false);
 
     if (!initOk)
     {
@@ -885,7 +885,7 @@ TEST_CASE("AC-1: MP3 loads via MiniAudioBackend", "[audio][mp3][format][5-3-1]")
     const bool initOk = backend.Initialize();
 
     const std::wstring wMp3Path(mp3Path.begin(), mp3Path.end());
-    backend.LoadSound(static_cast<ESound>(SOUND_EXPAND_END - 3), wMp3Path.c_str(), 1, false);
+    backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 3), wMp3Path.c_str(), 1, false);
 
     if (!initOk)
     {
@@ -980,7 +980,7 @@ TEST_CASE("AC-1: OGG Vorbis loads via MiniAudioBackend", "[audio][ogg][format][5
     const bool initOk = backend.Initialize();
 
     const std::wstring wOggPath(oggPath.begin(), oggPath.end());
-    backend.LoadSound(static_cast<ESound>(SOUND_EXPAND_END - 4), wOggPath.c_str(), 1, false);
+    backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 4), wOggPath.c_str(), 1, false);
 
     if (!initOk)
     {
@@ -1079,10 +1079,10 @@ TEST_CASE("AC-3: LoadSound with non-existent file handles gracefully", "[audio][
     // WHEN: LoadSound is called with the non-existent path
     // THEN: Must not crash — backend logs error via g_ErrorReport.Write() and returns
     const std::wstring wPath(nonexistentPath.begin(), nonexistentPath.end());
-    backend.LoadSound(static_cast<ESound>(SOUND_EXPAND_END - 5), wPath.c_str(), 1, false);
+    backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 5), wPath.c_str(), 1, false);
 
     // THEN: PlaySound on the unloaded slot must also be a safe no-op
-    backend.PlaySound(static_cast<ESound>(SOUND_EXPAND_END - 5), nullptr, FALSE);
+    backend.PlaySound(static_cast<ESound>(MAX_BUFFER - 5), nullptr, FALSE);
 
     backend.Shutdown();
 }
@@ -1114,7 +1114,7 @@ TEST_CASE("AC-3: LoadSound with corrupt file handles gracefully", "[audio][error
     // WHEN: LoadSound is called with the corrupt file
     // THEN: Must not crash — miniaudio will fail to parse the header
     const std::wstring wPath(corruptPath.begin(), corruptPath.end());
-    backend.LoadSound(static_cast<ESound>(SOUND_EXPAND_END - 6), wPath.c_str(), 1, false);
+    backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 6), wPath.c_str(), 1, false);
 
     backend.Shutdown();
 }
