@@ -261,6 +261,54 @@ TEST_CASE("AC-2 [6-2-1]: DemendConditionInfo operator<= validates all stat thres
         REQUIRE_FALSE(highEnergy <= heroStats);
     }
 
+    SECTION("Requirements not met when one stat (level) exceeds hero's value by 1")
+    {
+        DemendConditionInfo highLevel;
+        highLevel.SkillLevel = 11;  // one point over hero's 10
+        highLevel.SkillStrength = 100;
+        highLevel.SkillDexterity = 80;
+        highLevel.SkillVitality = 50;
+        highLevel.SkillEnergy = 200;
+        highLevel.SkillCharisma = 30;
+        REQUIRE_FALSE(highLevel <= heroStats);
+    }
+
+    SECTION("Requirements not met when one stat (dexterity) exceeds hero's value by 1")
+    {
+        DemendConditionInfo highDex;
+        highDex.SkillLevel = 10;
+        highDex.SkillStrength = 100;
+        highDex.SkillDexterity = 81;  // one point over hero's 80
+        highDex.SkillVitality = 50;
+        highDex.SkillEnergy = 200;
+        highDex.SkillCharisma = 30;
+        REQUIRE_FALSE(highDex <= heroStats);
+    }
+
+    SECTION("Requirements not met when one stat (vitality) exceeds hero's value by 1")
+    {
+        DemendConditionInfo highVit;
+        highVit.SkillLevel = 10;
+        highVit.SkillStrength = 100;
+        highVit.SkillDexterity = 80;
+        highVit.SkillVitality = 51;  // one point over hero's 50
+        highVit.SkillEnergy = 200;
+        highVit.SkillCharisma = 30;
+        REQUIRE_FALSE(highVit <= heroStats);
+    }
+
+    SECTION("Requirements not met when one stat (charisma) exceeds hero's value by 1")
+    {
+        DemendConditionInfo highChar;
+        highChar.SkillLevel = 10;
+        highChar.SkillStrength = 100;
+        highChar.SkillDexterity = 80;
+        highChar.SkillVitality = 50;
+        highChar.SkillEnergy = 200;
+        highChar.SkillCharisma = 31;  // one point over hero's 30
+        REQUIRE_FALSE(highChar <= heroStats);
+    }
+
     SECTION("Zero requirements (default-constructed) are always met by any hero")
     {
         DemendConditionInfo noReqs;
@@ -728,6 +776,16 @@ TEST_CASE("Task-2.5 [6-2-1]: SET_OPTION struct fields are independently addressa
     SECTION("IsFullOption field stores and retrieves correctly")
     {
         REQUIRE(opt.IsFullOption == false);
+    }
+
+    SECTION("IsExtOption field stores and retrieves correctly")
+    {
+        REQUIRE(opt.IsExtOption == true);
+    }
+
+    SECTION("FulfillsClassRequirement field stores and retrieves correctly")
+    {
+        REQUIRE(opt.FulfillsClassRequirement == true);
     }
 
     SECTION("OptionNumber field stores and retrieves correctly")
