@@ -180,6 +180,19 @@ target_sources(MuTests PRIVATE audio/test_volume_controls.cpp)
 #   Task 5: Add backslash→forward-slash path normalization in LoadSound()
 target_sources(MuTests PRIVATE audio/test_miniaudio_sfx.cpp)
 
+# Story 5.3.1: Audio Format Validation [VS1-AUDIO-FORMAT-VALIDATE]
+# RED PHASE: Tests verify miniaudio correctly decodes WAV, MP3, and OGG Vorbis audio
+# formats used by the game, and that error paths are handled gracefully.
+# AC-1: MiniAudioBackend::LoadSound() works for WAV (mono + stereo), MP3, and OGG
+# AC-2: Test assets generated at runtime (WAV in-code, MP3/OGG as embedded hex arrays)
+# AC-3: Non-existent and corrupt files handled gracefully (no crash)
+# AC-4: PlayMusic() streaming path (MA_SOUND_FLAG_STREAM) works for MP3 and OGG Vorbis
+# AC-5: ma_decoder direct pipeline validation (frame count, sample format, channel count)
+# AC-6: All tests run headless on macOS/Linux/Windows CI without audio device
+# AC-7: Tests use standalone MiniAudioBackend instances — do NOT touch g_platformAudio
+# Tests fail until miniaudio correctly decodes all three formats in the build under test.
+target_sources(MuTests PRIVATE audio/test_audio_format_validation.cpp)
+
 # Story 5.1.1: MuAudio target provides miniaudio symbols needed by test_muaudio_abstraction.cpp
 # (MiniAudioBackend, g_platformAudio, ma_engine/ma_sound types from miniaudio.h).
 # MuTests must link MUAudio to resolve these symbols.
