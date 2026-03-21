@@ -201,6 +201,19 @@ target_include_directories(MuTests PRIVATE "${CMAKE_SOURCE_DIR}/src/source/Scene
 # target_include_directories needed.
 target_sources(MuTests PRIVATE world/test_world_navigation_validation.cpp)
 
+# Story 6.2.1: Combat System Validation [VS1-GAME-VALIDATE-COMBAT]
+# RED PHASE: Tests verify ActionSkillType melee skill enum values (AC-1), SKILL_ATTRIBUTE
+# struct constants (MAX_CLASS, MAX_DUTY_CLASS, MAX_SKILL_NAME) and DemendConditionInfo
+# requirement operator (AC-2), MonsterSkillType base enum values (AC-3),
+# AT_SKILL_UNDEFINED sentinel and AT_SKILL_MASTER_END range (AC-4), MAX_SKILLS
+# capacity and SKILL_ATTRIBUTE Mana/Damage fields (AC-5), and ESound combat enum values
+# SOUND_BRANDISH_SWORD01..04, SOUND_ATTACK_MELEE_HIT1..5, SOUND_MONSTER range (AC-6).
+# AC-1/AC-3 script struct, CSkillManager runtime, ZzzCharacter state machine: gated by
+# MU_COMBAT_TESTS_ENABLED (requires MUGame linkage — not set by default).
+# MUCommon INTERFACE provides src/source/{Audio,Gameplay/Skills,Data/Skills,Core}/ include
+# paths — no extra target_include_directories needed for this test file.
+target_sources(MuTests PRIVATE gameplay/test_combat_system_validation.cpp)
+
 # Story 5.3.1: Audio Format Validation [VS1-AUDIO-FORMAT-VALIDATE]
 # RED PHASE: Tests verify miniaudio correctly decodes WAV, MP3, and OGG Vorbis audio
 # formats used by the game, and that error paths are handled gracefully.

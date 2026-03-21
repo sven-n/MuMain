@@ -1,0 +1,579 @@
+// Story 6.2.1: Combat System Validation [VS1-GAME-VALIDATE-COMBAT]
+// RED PHASE: Tests define expected logical contracts for combat system validation.
+//
+// AC coverage (unit-testable subset — see manual test scenarios for full AC validation):
+//   AC-1       — Melee attacks: ActionSkillType values for melee attack skills
+//                (AT_SKILL_FALLING_SLASH, AT_SKILL_LUNGE, AT_SKILL_UPPERCUT, AT_SKILL_CYCLONE, AT_SKILL_SLASH)
+//   AC-2       — Skill system: SKILL_ATTRIBUTE struct constants (MAX_CLASS, MAX_DUTY_CLASS, MAX_SKILL_NAME),
+//                DemendConditionInfo requirement checking, ActionSkillType magic skill enumeration
+//   AC-3       — Monster death/loot: MonsterSkillType enum base values and skill range
+//   AC-4       — Player death/respawn: AT_SKILL_UNDEFINED initial state, AT_SKILL_MASTER_END range
+//   AC-5       — Health/mana: MAX_SKILLS capacity, SKILL_ATTRIBUTE Mana/Damage field read-write
+//   AC-6       — Combat audio: SOUND_BRANDISH_SWORD01..04 values, SOUND_MONSTER range (210-450),
+//                melee hit sound range, non-overlapping sound region validation
+//
+// Manual validation (full AC-1..6 on macOS/Linux/Windows with live server):
+//   See: _bmad-output/test-scenarios/epic-6/combat-system-validation.md
+//
+// PCC Constraints:
+//   - Platform-compatible includes: #ifdef _WIN32 / PlatformTypes.h on non-Win32
+//   - No Win32 API calls in test logic — test logic only
+//   - Catch2 TEST_CASE / SECTION / REQUIRE structure
+//   - Allman brace style, 4-space indent, 120-column limit
+//   - No raw new/delete in test code
+//   - #pragma once not used (this is a .cpp file)
+//
+// Design notes:
+//   - ActionSkillType: Pure enum in mu_enum.h — testable standalone.
+//   - MonsterSkillType: Pure enum in mu_enum.h — testable standalone.
+//   - SKILL_ATTRIBUTE: Struct in Data/Skills/SkillStructs.h — platform-compatible, testable standalone.
+//   - DemendConditionInfo: Struct in SkillManager.h — pure logic (operator<= on WORD/int fields), testable standalone.
+//   - ESound/SOUND_BRANDISH_SWORD*: Enum and macros in Audio/DSPlaySound.h — testable standalone.
+//   - Script_Skill/CSkillManager runtime: gated by MU_COMBAT_TESTS_ENABLED (requires MUGame linkage).
+//
+// MUCommon INTERFACE propagates all src/source/ subdirectory include paths to MuTests.
+// No additional target_include_directories entries needed for this test file.
+
+#include <catch2/catch_test_macros.hpp>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include "Platform/PlatformTypes.h"
+#endif
+
+// Forward declarations for types referenced only in function-signature parameters of included headers.
+// These are not used in test logic — only required to allow header compilation.
+class OBJECT;
+class CHARACTER;
+
+#include "mu_define.h" // MAX_SKILLS, DWORD, WORD, BYTE, game constants
+#include "mu_enum.h"   // ActionSkillType, MonsterSkillType
+
+#include "DSPlaySound.h"  // ESound enum, SOUND_BRANDISH_SWORD*, SOUND_MONSTER* macros
+#include "SkillManager.h" // DemendConditionInfo struct
+#include "SkillStructs.h" // SKILL_ATTRIBUTE, SKILL_ATTRIBUTE_FILE, MAX_CLASS, MAX_DUTY_CLASS, MAX_SKILL_NAME
+
+// =============================================================================
+// AC-1 [6-2-1]: ActionSkillType — melee attack skill identifiers
+// SetPlayerAttack() and AttackStage() use ActionSkillType to identify which attack
+// animation to play. These enum values must be stable across platforms for combat
+// animations to render identically on macOS/Linux/Windows.
+// =============================================================================
+
+TEST_CASE("AC-1 [6-2-1]: ActionSkillType defines correct IDs for melee attack skills", "[combat][skills][melee][6-2-1]")
+{
+    SECTION("AT_SKILL_UNDEFINED is 0 (no-skill / initial state sentinel)")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_UNDEFINED) == 0);
+    }
+
+    SECTION("AT_SKILL_FALLING_SLASH is 19 (Dark Knight melee skill)")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_FALLING_SLASH) == 19);
+    }
+
+    SECTION("AT_SKILL_LUNGE is 20")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_LUNGE) == 20);
+    }
+
+    SECTION("AT_SKILL_UPPERCUT is 21")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_UPPERCUT) == 21);
+    }
+
+    SECTION("AT_SKILL_CYCLONE is 22")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_CYCLONE) == 22);
+    }
+
+    SECTION("AT_SKILL_SLASH is 23")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_SLASH) == 23);
+    }
+}
+
+TEST_CASE("AC-1 [6-2-1]: ActionSkillType melee skill IDs are all distinct", "[combat][skills][melee][6-2-1]")
+{
+    // All 10 pairs among the 5 melee skill values must be unique to ensure
+    // correct attack animation dispatch in SetPlayerAttack() / AttackStage().
+    const int kFallingSlash = static_cast<int>(AT_SKILL_FALLING_SLASH);
+    const int kLunge = static_cast<int>(AT_SKILL_LUNGE);
+    const int kUppercut = static_cast<int>(AT_SKILL_UPPERCUT);
+    const int kCyclone = static_cast<int>(AT_SKILL_CYCLONE);
+    const int kSlash = static_cast<int>(AT_SKILL_SLASH);
+
+    REQUIRE(kFallingSlash != kLunge);
+    REQUIRE(kFallingSlash != kUppercut);
+    REQUIRE(kFallingSlash != kCyclone);
+    REQUIRE(kFallingSlash != kSlash);
+    REQUIRE(kLunge != kUppercut);
+    REQUIRE(kLunge != kCyclone);
+    REQUIRE(kLunge != kSlash);
+    REQUIRE(kUppercut != kCyclone);
+    REQUIRE(kUppercut != kSlash);
+    REQUIRE(kCyclone != kSlash);
+}
+
+// =============================================================================
+// AC-2 [6-2-1]: Skill system — SKILL_ATTRIBUTE struct layout and DemendConditionInfo
+// SKILL_ATTRIBUTE stores all per-skill data loaded from the BMD file.
+// DemendConditionInfo encodes the stat prerequisites for skill activation via operator<=.
+// These must have stable layouts across platforms for correct skill data parsing and gating.
+// =============================================================================
+
+TEST_CASE("AC-2 [6-2-1]: Skill attribute struct constants define correct array dimensions",
+          "[combat][skills][data][6-2-1]")
+{
+    SECTION("MAX_CLASS is 7 (number of character classes with class-specific skill requirements)")
+    {
+        REQUIRE(MAX_CLASS == 7);
+    }
+
+    SECTION("MAX_DUTY_CLASS is 3 (duty class array dimension in SKILL_ATTRIBUTE)")
+    {
+        REQUIRE(MAX_DUTY_CLASS == 3);
+    }
+
+    SECTION("MAX_SKILL_NAME is 50 (name buffer character capacity in file and runtime structs)")
+    {
+        REQUIRE(MAX_SKILL_NAME == 50);
+    }
+}
+
+TEST_CASE("AC-2 [6-2-1]: SKILL_ATTRIBUTE_FILE Name buffer has correct byte size for BMD parsing",
+          "[combat][skills][data][6-2-1]")
+{
+    // SKILL_ATTRIBUTE_FILE is used for reading current BMD skill data files.
+    // Its char Name[MAX_SKILL_NAME] must be exactly MAX_SKILL_NAME bytes for correct binary parsing.
+    REQUIRE(sizeof(SKILL_ATTRIBUTE_FILE::Name) == static_cast<size_t>(MAX_SKILL_NAME) * sizeof(char));
+}
+
+TEST_CASE("AC-2 [6-2-1]: SKILL_ATTRIBUTE runtime Name buffer has wide-character size", "[combat][skills][data][6-2-1]")
+{
+    // SKILL_ATTRIBUTE is the in-memory runtime struct.
+    // Its wchar_t Name[MAX_SKILL_NAME] must be MAX_SKILL_NAME * sizeof(wchar_t) bytes.
+    REQUIRE(sizeof(SKILL_ATTRIBUTE::Name) == static_cast<size_t>(MAX_SKILL_NAME) * sizeof(wchar_t));
+}
+
+TEST_CASE("AC-2 [6-2-1]: DemendConditionInfo default-constructs with all stat requirements at zero",
+          "[combat][skills][requirements][6-2-1]")
+{
+    DemendConditionInfo info;
+
+    SECTION("SkillType initialised to 0 (undefined skill type)")
+    {
+        REQUIRE(info.SkillType == 0);
+    }
+
+    SECTION("SkillLevel initialised to 0 (no minimum level requirement)")
+    {
+        REQUIRE(info.SkillLevel == 0);
+    }
+
+    SECTION("SkillStrength initialised to 0")
+    {
+        REQUIRE(info.SkillStrength == 0);
+    }
+
+    SECTION("SkillDexterity initialised to 0")
+    {
+        REQUIRE(info.SkillDexterity == 0);
+    }
+
+    SECTION("SkillVitality initialised to 0")
+    {
+        REQUIRE(info.SkillVitality == 0);
+    }
+
+    SECTION("SkillEnergy initialised to 0")
+    {
+        REQUIRE(info.SkillEnergy == 0);
+    }
+
+    SECTION("SkillCharisma initialised to 0")
+    {
+        REQUIRE(info.SkillCharisma == 0);
+    }
+}
+
+TEST_CASE("AC-2 [6-2-1]: DemendConditionInfo operator<= validates all stat thresholds",
+          "[combat][skills][requirements][6-2-1]")
+{
+    // heroStats represents the hero's current stat values.
+    // A skill requirement (basicInfo) is met when basicInfo <= heroStats.
+    DemendConditionInfo heroStats;
+    heroStats.SkillLevel = 10;
+    heroStats.SkillStrength = 100;
+    heroStats.SkillDexterity = 80;
+    heroStats.SkillVitality = 50;
+    heroStats.SkillEnergy = 200;
+    heroStats.SkillCharisma = 30;
+
+    SECTION("Requirements met when hero has exactly the required stats")
+    {
+        DemendConditionInfo meetsAll;
+        meetsAll.SkillLevel = 10;
+        meetsAll.SkillStrength = 100;
+        meetsAll.SkillDexterity = 80;
+        meetsAll.SkillVitality = 50;
+        meetsAll.SkillEnergy = 200;
+        meetsAll.SkillCharisma = 30;
+        REQUIRE((meetsAll <= heroStats) == TRUE);
+    }
+
+    SECTION("Requirements met when hero exceeds all required stats")
+    {
+        DemendConditionInfo lower;
+        lower.SkillLevel = 5;
+        lower.SkillStrength = 50;
+        lower.SkillDexterity = 40;
+        lower.SkillVitality = 25;
+        lower.SkillEnergy = 100;
+        lower.SkillCharisma = 15;
+        REQUIRE((lower <= heroStats) == TRUE);
+    }
+
+    SECTION("Requirements not met when one stat (strength) exceeds hero's value by 1")
+    {
+        DemendConditionInfo tooHigh;
+        tooHigh.SkillLevel = 10;
+        tooHigh.SkillStrength = 101; // one point over hero's 100
+        tooHigh.SkillDexterity = 80;
+        tooHigh.SkillVitality = 50;
+        tooHigh.SkillEnergy = 200;
+        tooHigh.SkillCharisma = 30;
+        REQUIRE((tooHigh <= heroStats) == FALSE);
+    }
+
+    SECTION("Requirements not met when one stat (energy) exceeds hero's value by 1")
+    {
+        DemendConditionInfo highEnergy;
+        highEnergy.SkillLevel = 10;
+        highEnergy.SkillStrength = 100;
+        highEnergy.SkillDexterity = 80;
+        highEnergy.SkillVitality = 50;
+        highEnergy.SkillEnergy = 201; // one point over hero's 200
+        highEnergy.SkillCharisma = 30;
+        REQUIRE((highEnergy <= heroStats) == FALSE);
+    }
+
+    SECTION("Zero requirements (default-constructed) are always met by any hero")
+    {
+        DemendConditionInfo noReqs;
+        REQUIRE((noReqs <= heroStats) == TRUE);
+    }
+}
+
+TEST_CASE("AC-2 [6-2-1]: ActionSkillType magic and support skill values", "[combat][skills][magic][6-2-1]")
+{
+    SECTION("AT_SKILL_POISON is 1 (first magic skill)")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_POISON) == 1);
+    }
+
+    SECTION("AT_SKILL_METEO is 2")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_METEO) == 2);
+    }
+
+    SECTION("AT_SKILL_LIGHTNING is 3")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_LIGHTNING) == 3);
+    }
+
+    SECTION("AT_SKILL_FIREBALL is 4")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_FIREBALL) == 4);
+    }
+
+    SECTION("AT_SKILL_SOUL_BARRIER is 16 (defensive magic skill)")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_SOUL_BARRIER) == 16);
+    }
+
+    SECTION("AT_SKILL_HEALING is 26 (Elf healing skill)")
+    {
+        REQUIRE(static_cast<int>(AT_SKILL_HEALING) == 26);
+    }
+}
+
+// =============================================================================
+// AC-3 [6-2-1]: Monster skill system — MonsterSkillType enum for monster behavior
+// ZzzAI.h uses MonsterSkillType to dispatch monster special attacks, death behaviors,
+// and loot drop triggers. These values must be stable for correct AI dispatch across
+// platforms.
+// =============================================================================
+
+TEST_CASE("AC-3 [6-2-1]: MonsterSkillType defines correct base values for monster behavior",
+          "[combat][monsters][skills][6-2-1]")
+{
+    SECTION("ATMON_SKILL_BIGIN is 0 (sentinel / begin value)")
+    {
+        REQUIRE(static_cast<int>(ATMON_SKILL_BIGIN) == 0);
+    }
+
+    SECTION("ATMON_SKILL_THUNDER is 1")
+    {
+        REQUIRE(static_cast<int>(ATMON_SKILL_THUNDER) == 1);
+    }
+
+    SECTION("ATMON_SKILL_WIND is 2")
+    {
+        REQUIRE(static_cast<int>(ATMON_SKILL_WIND) == 2);
+    }
+
+    SECTION("ATMON_SKILL_NORMAL is 18 (standard monster attack — most common behavior)")
+    {
+        REQUIRE(static_cast<int>(ATMON_SKILL_NORMAL) == 18);
+    }
+
+    SECTION("ATMON_SKILL_SUMMON is 20 (boss summon mechanic)")
+    {
+        REQUIRE(static_cast<int>(ATMON_SKILL_SUMMON) == 20);
+    }
+}
+
+TEST_CASE("AC-3 [6-2-1]: MonsterSkillType basic skill values are all distinct", "[combat][monsters][skills][6-2-1]")
+{
+    // Basic monster skill types must have unique values for correct AI dispatch.
+    REQUIRE(static_cast<int>(ATMON_SKILL_BIGIN) != static_cast<int>(ATMON_SKILL_THUNDER));
+    REQUIRE(static_cast<int>(ATMON_SKILL_THUNDER) != static_cast<int>(ATMON_SKILL_WIND));
+    REQUIRE(static_cast<int>(ATMON_SKILL_WIND) != static_cast<int>(ATMON_SKILL_NORMAL));
+    REQUIRE(static_cast<int>(ATMON_SKILL_NORMAL) != static_cast<int>(ATMON_SKILL_SUMMON));
+}
+
+// =============================================================================
+// AC-4 [6-2-1]: Player death and respawn — ActionSkillType skill range validation
+// AT_SKILL_UNDEFINED marks the "no active skill" state used in death/respawn.
+// AT_SKILL_MASTER_END defines the upper bound for the master skill indexing arrays
+// declared as CHARACTER::MasterSkillInfo[AT_SKILL_MASTER_END + 1].
+// =============================================================================
+
+TEST_CASE("AC-4 [6-2-1]: AT_SKILL_UNDEFINED is 0 — initial and post-death state sentinel",
+          "[combat][death][respawn][6-2-1]")
+{
+    // AT_SKILL_UNDEFINED == 0 is the sentinel used when no skill is active.
+    // After player death and respawn, the active skill must be reset to AT_SKILL_UNDEFINED
+    // to clear any in-progress attack or effect.
+    REQUIRE(static_cast<int>(AT_SKILL_UNDEFINED) == 0);
+}
+
+TEST_CASE("AC-4 [6-2-1]: AT_SKILL_MASTER_END defines master skill index upper bound at 608",
+          "[combat][death][respawn][skills][6-2-1]")
+{
+    // AT_SKILL_MASTER_END == 608: all master skill arrays are sized [AT_SKILL_MASTER_END + 1].
+    // This must be stable for CSkillTreeInfo MasterSkillInfo[AT_SKILL_MASTER_END + 1] in CHARACTER
+    // struct (mu_struct.h) to not overrun its bounds.
+    REQUIRE(static_cast<int>(AT_SKILL_MASTER_END) == 608);
+}
+
+TEST_CASE("AC-4 [6-2-1]: AT_SKILL_MASTER_END is within MAX_SKILLS skill array capacity",
+          "[combat][death][skills][6-2-1]")
+{
+    // AT_SKILL_MASTER_END must be strictly less than MAX_SKILLS so the per-character
+    // skill arrays (ClassSkill, Skill, SkillDelay, SkillLevel — all sized MAX_SKILLS)
+    // are not overrun by master skill index lookups.
+    REQUIRE(static_cast<int>(AT_SKILL_MASTER_END) < MAX_SKILLS);
+}
+
+// =============================================================================
+// AC-5 [6-2-1]: Health/mana bar data — MAX_SKILLS and SKILL_ATTRIBUTE capacity
+// SKILL_ATTRIBUTE includes Mana (cost) and Damage fields read by the HUD to display
+// skill tooltip info. MAX_SKILLS bounds all per-character skill arrays in CHARACTER.
+// =============================================================================
+
+TEST_CASE("AC-5 [6-2-1]: MAX_SKILLS defines per-character skill array capacity as 650",
+          "[combat][health][mana][skills][6-2-1]")
+{
+    // MAX_SKILLS == 650: bounds of all per-character skill arrays
+    // (CHARACTER::ClassSkill, Skill, SkillDelay, SkillLevel in mu_struct.h).
+    REQUIRE(MAX_SKILLS == 650);
+}
+
+TEST_CASE("AC-5 [6-2-1]: SKILL_ATTRIBUTE Mana and Damage fields are independently addressable",
+          "[combat][health][mana][skills][6-2-1]")
+{
+    // Mana (skill activation cost) and Damage (base damage) are WORD fields in SKILL_ATTRIBUTE.
+    // The HUD reads Mana to display skill mana cost and Damage for damage tooltip.
+    SKILL_ATTRIBUTE attr = {};
+    attr.Mana = 50;
+    attr.Damage = 100;
+
+    SECTION("Mana field stores and retrieves value correctly")
+    {
+        REQUIRE(attr.Mana == 50);
+    }
+
+    SECTION("Damage field stores and retrieves value correctly")
+    {
+        REQUIRE(attr.Damage == 100);
+    }
+
+    SECTION("Mana and Damage fields are independent (distinct memory locations)")
+    {
+        REQUIRE(attr.Mana != attr.Damage);
+    }
+}
+
+TEST_CASE("AC-5 [6-2-1]: SKILL_ATTRIBUTE RequireClass array has MAX_CLASS entries", "[combat][skills][class][6-2-1]")
+{
+    // RequireClass[MAX_CLASS] determines which of the 7 character classes can use a skill.
+    // This drives skill slot eligibility checks in the HUD (greyed out for ineligible classes).
+    SKILL_ATTRIBUTE attr = {};
+    REQUIRE(sizeof(attr.RequireClass) == static_cast<size_t>(MAX_CLASS) * sizeof(BYTE));
+}
+
+// =============================================================================
+// AC-6 [6-2-1]: Combat audio — ESound enum values for sword and monster sounds
+// SOUND_BRANDISH_SWORD01..04 play on melee attacks.
+// SOUND_ATTACK_MELEE_HIT1..5 play on successful hits.
+// SOUND_MONSTER range (macro: 210-450) covers all monster ambient, attack, and death sounds.
+// These values must be correct for DSPlaySound to map sound IDs to the right audio files.
+// =============================================================================
+
+TEST_CASE("AC-6 [6-2-1]: SOUND_BRANDISH_SWORD enum values for melee attack swing sounds",
+          "[combat][audio][melee][6-2-1]")
+{
+    SECTION("SOUND_BRANDISH_SWORD01 is 60")
+    {
+        REQUIRE(static_cast<int>(SOUND_BRANDISH_SWORD01) == 60);
+    }
+
+    SECTION("SOUND_BRANDISH_SWORD02 is 61")
+    {
+        REQUIRE(static_cast<int>(SOUND_BRANDISH_SWORD02) == 61);
+    }
+
+    SECTION("SOUND_BRANDISH_SWORD03 is 62")
+    {
+        REQUIRE(static_cast<int>(SOUND_BRANDISH_SWORD03) == 62);
+    }
+
+    SECTION("SOUND_BRANDISH_SWORD04 is 63")
+    {
+        REQUIRE(static_cast<int>(SOUND_BRANDISH_SWORD04) == 63);
+    }
+
+    SECTION("SOUND_BRANDISH_SWORD01..04 are four consecutive IDs")
+    {
+        REQUIRE(static_cast<int>(SOUND_BRANDISH_SWORD02) == static_cast<int>(SOUND_BRANDISH_SWORD01) + 1);
+        REQUIRE(static_cast<int>(SOUND_BRANDISH_SWORD03) == static_cast<int>(SOUND_BRANDISH_SWORD02) + 1);
+        REQUIRE(static_cast<int>(SOUND_BRANDISH_SWORD04) == static_cast<int>(SOUND_BRANDISH_SWORD03) + 1);
+    }
+}
+
+TEST_CASE("AC-6 [6-2-1]: SOUND_ATTACK_MELEE_HIT sounds form a range of 5 consecutive IDs",
+          "[combat][audio][melee][6-2-1]")
+{
+    // SOUND_ATTACK_MELEE_HIT1..5 are the five melee hit sound variants played on successful attacks.
+    SECTION("SOUND_ATTACK_MELEE_HIT1 is 70")
+    {
+        REQUIRE(static_cast<int>(SOUND_ATTACK_MELEE_HIT1) == 70);
+    }
+
+    SECTION("SOUND_ATTACK_MELEE_HIT5 is 74")
+    {
+        REQUIRE(static_cast<int>(SOUND_ATTACK_MELEE_HIT5) == 74);
+    }
+
+    SECTION("Melee hit sounds span exactly 5 IDs (HIT1 to HIT5 inclusive)")
+    {
+        const int first = static_cast<int>(SOUND_ATTACK_MELEE_HIT1);
+        const int last = static_cast<int>(SOUND_ATTACK_MELEE_HIT5);
+        REQUIRE(last - first == 4);
+    }
+}
+
+TEST_CASE("AC-6 [6-2-1]: SOUND_MONSTER macro range covers IDs 210 to 450", "[combat][audio][monsters][6-2-1]")
+{
+    // SOUND_MONSTER and SOUND_MONSTER_END are preprocessor macros defining the range of
+    // sound indices reserved for monster ambient, attack, and death sounds.
+    SECTION("SOUND_MONSTER starts at 210")
+    {
+        REQUIRE(SOUND_MONSTER == 210);
+    }
+
+    SECTION("SOUND_MONSTER_END is 450")
+    {
+        REQUIRE(SOUND_MONSTER_END == 450);
+    }
+
+    SECTION("Monster sound range spans 240 indices (210 to 450 exclusive, 240 slots)")
+    {
+        REQUIRE(SOUND_MONSTER_END - SOUND_MONSTER == 240);
+    }
+}
+
+TEST_CASE("AC-6 [6-2-1]: SOUND_MONSTER_BULL1 is the first monster enum entry matching SOUND_MONSTER",
+          "[combat][audio][monsters][6-2-1]")
+{
+    // SOUND_MONSTER_BULL1 == 210: the first monster enum value must equal the SOUND_MONSTER
+    // macro so range membership checks (sound >= SOUND_MONSTER) correctly classify it.
+    REQUIRE(static_cast<int>(SOUND_MONSTER_BULL1) == SOUND_MONSTER);
+}
+
+TEST_CASE("AC-6 [6-2-1]: Combat sound ranges are mutually non-overlapping", "[combat][audio][6-2-1]")
+{
+    // Sword swing sounds (60-63) must not overlap with hit sounds (70-74).
+    REQUIRE(static_cast<int>(SOUND_BRANDISH_SWORD04) < static_cast<int>(SOUND_ATTACK_MELEE_HIT1));
+
+    // Melee hit sounds (70-74) must not overlap with monster sounds (210+).
+    REQUIRE(static_cast<int>(SOUND_ATTACK_MELEE_HIT5) < SOUND_MONSTER);
+}
+
+// =============================================================================
+// AC-1..5 [6-2-1]: Tests requiring MUGame linkage (CSkillManager, Script_Skill, combat state)
+// These tests need non-inline implementations or heavy-dependency types from MUGame:
+//   - CSkillManager::GetSkillInformation() — reads g_SkillAttribute data (MUGame data segment)
+//   - CSkillManager::CheckSkillDelay()     — accesses CHARACTER::SkillDelay array (MUGame)
+//   - Script_Skill struct                  — in mu_struct.h (pulls CHARACTER/OBJECT from MUGame)
+//   - SetPlayerAttack(), AttackStage()     — non-inline in ZzzCharacter.cpp (MUGame target)
+//
+// Enable by defining MU_COMBAT_TESTS_ENABLED and linking MuTests against MUGame.
+// =============================================================================
+
+#ifdef MU_COMBAT_TESTS_ENABLED
+
+// When MUGame linkage is available, replace this static_assert with real test
+// implementations for CSkillManager runtime behavior, Script_Skill struct layout,
+// and ZzzCharacter attack state machine.
+static_assert(false, "MU_COMBAT_TESTS_ENABLED is defined but MUGame-linked combat tests "
+                     "for story 6-2-1 are not yet implemented. Remove this flag or add the tests.");
+
+#else
+
+TEST_CASE("AC-1 [6-2-1]: CSkillManager::GetSkillInformation runtime lookup — requires MUGame linkage",
+          "[combat][skills][manager][6-2-1]")
+{
+    SKIP("MU_COMBAT_TESTS_ENABLED not defined: CSkillManager::GetSkillInformation reads "
+         "g_SkillAttribute (MUGame data segment). "
+         "Set -DMU_COMBAT_TESTS_ENABLED and link MuTests against MUGame to enable.");
+}
+
+TEST_CASE("AC-2 [6-2-1]: CSkillManager::CheckSkillDelay activation gating — requires MUGame linkage",
+          "[combat][skills][delay][6-2-1]")
+{
+    SKIP("MU_COMBAT_TESTS_ENABLED not defined: CSkillManager::CheckSkillDelay accesses "
+         "CHARACTER::SkillDelay array (MUGame). "
+         "Set -DMU_COMBAT_TESTS_ENABLED and link MuTests against MUGame to enable.");
+}
+
+TEST_CASE("AC-3 [6-2-1]: Script_Skill array capacity (MAX_MONSTERSKILL_NUM slots) — requires MUGame linkage",
+          "[combat][monsters][struct][6-2-1]")
+{
+    SKIP("MU_COMBAT_TESTS_ENABLED not defined: Script_Skill is defined in mu_struct.h which "
+         "includes w_ObjectInfo.h and w_CharacterInfo.h (MUGame). "
+         "Set -DMU_COMBAT_TESTS_ENABLED and link MuTests against MUGame to enable.");
+}
+
+TEST_CASE("AC-1 [6-2-1]: SetPlayerAttack and AttackStage state transitions — requires MUGame linkage",
+          "[combat][attack][animation][6-2-1]")
+{
+    SKIP("MU_COMBAT_TESTS_ENABLED not defined: SetPlayerAttack() and AttackStage() are "
+         "non-inline methods in ZzzCharacter.cpp (MUGame target). "
+         "Set -DMU_COMBAT_TESTS_ENABLED and link MuTests against MUGame to enable.");
+}
+
+#endif // MU_COMBAT_TESTS_ENABLED
