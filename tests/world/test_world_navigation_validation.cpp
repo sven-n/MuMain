@@ -215,8 +215,10 @@ TEST_CASE("AC-1 [6-1-2]: PATH GetIndex maps 2D coordinates to flat array index",
 TEST_CASE("AC-1 [6-1-2]: PATH EstimateCostToGoal heuristic properties",
           "[world][navigation][pathfinding][6-1-2]")
 {
-    // EstimateCostToGoal(xGoal, yGoal, xCurrent, yCurrent) — A* heuristic.
-    // Computes Chebyshev-style cost weighted by FACTOR_PATH_DIST / FACTOR_PATH_DIST_DIAG.
+    // EstimateCostToGoal(xStart, yStart, xNew, yNew) — A* heuristic.
+    // Called as EstimateCostToGoal(xEnd, yEnd, xNew, yNew) in FindPath(): first pair is the
+    // goal position, second pair is the candidate node. Computes Chebyshev-style cost
+    // weighted by FACTOR_PATH_DIST / FACTOR_PATH_DIST_DIAG.
     constexpr int kWidth = 20;
     constexpr int kHeight = 20;
     WORD mapData[kWidth * kHeight] = {};
@@ -315,6 +317,22 @@ TEST_CASE("AC-1 [6-1-2]: MovePoint maps all 8 EPathDirection values to correct c
         POINT result = MovePoint(EPathDirection::NORTHWEST, origin);
         REQUIRE(result.x == 9);
         REQUIRE(result.y == 10);
+    }
+
+    SECTION("WEST from origin (0, 0) produces negative coordinates")
+    {
+        const POINT zero = {0, 0};
+        POINT result = MovePoint(EPathDirection::WEST, zero);
+        REQUIRE(result.x == -1);
+        REQUIRE(result.y == -1);
+    }
+
+    SECTION("EAST from large coordinates does not overflow for typical map sizes")
+    {
+        const POINT farCorner = {255, 255};
+        POINT result = MovePoint(EPathDirection::EAST, farCorner);
+        REQUIRE(result.x == 256);
+        REQUIRE(result.y == 256);
     }
 }
 
