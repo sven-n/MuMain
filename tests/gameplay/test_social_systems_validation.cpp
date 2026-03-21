@@ -208,10 +208,8 @@ TEST_CASE("AC-2 [6-3-1]: Party constants define correct capacity and struct layo
         REQUIRE(sizeof(PARTY_t::index) == 4u);
     }
 
-    SECTION("PARTY_t non-HP fields fit within architectural constraint: 9 distinct field types")
+    SECTION("PARTY_t struct is non-empty — carries all AC-specified member fields")
     {
-        // Document that PARTY_t carries exactly the fields the AC specifies.
-        // Static check: sizeof(PARTY_t) > 0 — struct is non-empty.
         static_assert(sizeof(PARTY_t) > 0, "PARTY_t must be a non-empty struct");
         REQUIRE(sizeof(PARTY_t) > 0u);
     }
@@ -244,10 +242,10 @@ TEST_CASE("AC-3 [6-3-1]: GuildConstants define correct guild name and mark dimen
     SECTION("GUILD_MARK_PIXELS is 8 — marks are 8x8 pixel grids")
     {
         REQUIRE(GuildConstants::GUILD_MARK_PIXELS == 8);
-        // Mark pixel area = GUILD_MARK_PIXELS^2 / 2 (nibble packing) = 32, but
-        // stored as GUILD_MARK_SIZE=64 bytes using 4-bit palette entries
-        REQUIRE(GuildConstants::GUILD_MARK_PIXELS * GuildConstants::GUILD_MARK_PIXELS / 2 == 32u);
-        REQUIRE(GuildConstants::GUILD_MARK_SIZE == 64u); // each pixel = 4 bits → 64 nibble bytes
+        // Each pixel stored as 1 byte (8-bit palette index).
+        // 8x8 grid = 64 pixels × 1 byte = GUILD_MARK_SIZE (64 bytes).
+        REQUIRE(GuildConstants::GUILD_MARK_PIXELS * GuildConstants::GUILD_MARK_PIXELS ==
+                GuildConstants::GUILD_MARK_SIZE);
     }
 
     SECTION("Capacity::MAX_CAPACITY is 80 — maximum guild member count")
@@ -510,21 +508,21 @@ TEST_CASE("AC-5 [6-3-1]: Chat encoding constants are consistent across all subsy
 
     SECTION("MAX_CHAT_SIZE is 90 — consistent architecture constraint for all chat buffers")
     {
-        // All chat-related buffers (PCHATING, PCHATING_KEY) must equal MAX_CHAT_SIZE
+        // Intentional AC traceability: also verified in AC-1. AC-5 re-checks cross-system consistency.
         REQUIRE(MAX_CHAT_SIZE == 90);
     }
 
     SECTION("PARTY_t name buffer uses MAX_USERNAME_SIZE — same as chat ID field")
     {
+        // Intentional AC traceability: also verified in AC-2. AC-5 re-checks cross-system consistency.
         const std::size_t party_name_chars = sizeof(PARTY_t::Name) / sizeof(wchar_t);
-        // Name is MAX_USERNAME_SIZE + 1 (null terminator)
         REQUIRE(party_name_chars == static_cast<std::size_t>(MAX_USERNAME_SIZE) + 1);
     }
 
     SECTION("GUILD_LIST_t name buffer uses MAX_USERNAME_SIZE — consistent with chat system")
     {
+        // Intentional AC traceability: also verified in AC-3. AC-5 re-checks cross-system consistency.
         const std::size_t guild_name_chars = sizeof(GUILD_LIST_t::Name) / sizeof(wchar_t);
-        // Name is MAX_USERNAME_SIZE + 1 (null terminator)
         REQUIRE(guild_name_chars == static_cast<std::size_t>(MAX_USERNAME_SIZE) + 1);
     }
 
