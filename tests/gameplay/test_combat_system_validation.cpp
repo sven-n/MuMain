@@ -50,6 +50,7 @@ class CHARACTER;
 #include "mu_define.h" // MAX_SKILLS, DWORD, WORD, BYTE, game constants
 #include "mu_enum.h"   // ActionSkillType, MonsterSkillType
 
+#include "CSItemOption.h"  // ITEM_SET_TYPE, ITEM_SET_OPTION, SET_OPTION, MAX_SET_OPTION, MASTERY_OPTION
 #include "DSPlaySound.h"  // ESound enum, SOUND_BRANDISH_SWORD*, SOUND_MONSTER* macros
 #include "SkillManager.h" // DemendConditionInfo struct
 #include "SkillStructs.h" // SKILL_ATTRIBUTE, SKILL_ATTRIBUTE_FILE, MAX_CLASS, MAX_DUTY_CLASS, MAX_SKILL_NAME
@@ -524,6 +525,209 @@ TEST_CASE("AC-6 [6-2-1]: Combat sound ranges are mutually non-overlapping", "[co
 }
 
 // =============================================================================
+// Task 2.4 [6-2-1]: Buff system data structures — eBuffState, eBuffClass enums
+// w_BuffStateSystem manages buffs/debuffs with value control, time tracking.
+// eBuffState defines all buff/debuff types; eBuffClass categorises them.
+// These enum values must be stable for correct buff application across platforms.
+// =============================================================================
+
+TEST_CASE("Task-2.4 [6-2-1]: eBuffState sentinel and combat-relevant buff values", "[combat][buffs][enum][6-2-1]")
+{
+    SECTION("eBuffNone is 0 (no buff / initial state)")
+    {
+        REQUIRE(static_cast<int>(eBuffNone) == 0);
+    }
+
+    SECTION("eBuff_Attack is 1 (attack power buff)")
+    {
+        REQUIRE(static_cast<int>(eBuff_Attack) == 1);
+    }
+
+    SECTION("eBuff_Defense is 2 (defense buff)")
+    {
+        REQUIRE(static_cast<int>(eBuff_Defense) == 2);
+    }
+
+    SECTION("eBuff_Berserker is 81 (rage mode combat buff)")
+    {
+        REQUIRE(static_cast<int>(eBuff_Berserker) == 81);
+    }
+
+    SECTION("eBuff_Count is 206 (total buff enum count)")
+    {
+        REQUIRE(static_cast<int>(eBuff_Count) == 206);
+    }
+}
+
+TEST_CASE("Task-2.4 [6-2-1]: eBuffState debuff sentinel values for combat effects",
+          "[combat][buffs][debuff][6-2-1]")
+{
+    SECTION("eDeBuff_Poison is the first debuff entry (follows buff entries)")
+    {
+        // eDeBuff_Poison comes after the buff entries in the enum, starting the debuff block.
+        REQUIRE(static_cast<int>(eDeBuff_Poison) > static_cast<int>(eBuff_SecretPotion5));
+    }
+
+    SECTION("eDeBuff_Freeze follows eDeBuff_Poison")
+    {
+        REQUIRE(static_cast<int>(eDeBuff_Freeze) == static_cast<int>(eDeBuff_Poison) + 1);
+    }
+
+    SECTION("eDeBuff_Stun is within the debuff range")
+    {
+        REQUIRE(static_cast<int>(eDeBuff_Stun) > static_cast<int>(eDeBuff_Poison));
+        REQUIRE(static_cast<int>(eDeBuff_Stun) < static_cast<int>(eBuff_Count));
+    }
+
+    SECTION("eDeBuff_Sleep is 72 (crowd control debuff)")
+    {
+        REQUIRE(static_cast<int>(eDeBuff_Sleep) == 72);
+    }
+}
+
+TEST_CASE("Task-2.4 [6-2-1]: eBuffClass categorises buffs and debuffs", "[combat][buffs][class][6-2-1]")
+{
+    SECTION("eBuffClass_Buff is 0 (positive effects)")
+    {
+        REQUIRE(static_cast<int>(eBuffClass_Buff) == 0);
+    }
+
+    SECTION("eBuffClass_DeBuff is 1 (negative effects)")
+    {
+        REQUIRE(static_cast<int>(eBuffClass_DeBuff) == 1);
+    }
+
+    SECTION("eBuffClass_Count is 2 (exactly two categories)")
+    {
+        REQUIRE(static_cast<int>(eBuffClass_Count) == 2);
+    }
+}
+
+// =============================================================================
+// Task 2.5 [6-2-1]: Item combat attributes — CSItemOption constants and structs
+// CSItemOption manages ancient set bonuses that affect combat damage.
+// ITEM_SET_TYPE maps items to their set membership.
+// ITEM_SET_OPTION stores the option bonuses activated by set completion.
+// These constants/structs must be stable for correct set bonus calculation.
+// =============================================================================
+
+TEST_CASE("Task-2.5 [6-2-1]: Item set system constants define correct capacities",
+          "[combat][items][constants][6-2-1]")
+{
+    SECTION("MAX_SET_OPTION is 64 (maximum number of ancient sets)")
+    {
+        REQUIRE(MAX_SET_OPTION == 64);
+    }
+
+    SECTION("MASTERY_OPTION is 24 (mastery option that increases a specific skill)")
+    {
+        REQUIRE(MASTERY_OPTION == 24);
+    }
+
+    SECTION("MAX_EQUIPPED_SETS is 5 (max concurrent equipped sets)")
+    {
+        REQUIRE(MAX_EQUIPPED_SETS == 5);
+    }
+
+    SECTION("MAX_EQUIPMENT_INDEX is 12 (equipment slot count)")
+    {
+        REQUIRE(MAX_EQUIPMENT_INDEX == 12);
+    }
+
+    SECTION("MAX_ITEM is 8192 (MAX_ITEM_TYPE * MAX_ITEM_INDEX)")
+    {
+        REQUIRE(MAX_ITEM == 8192);
+    }
+}
+
+TEST_CASE("Task-2.5 [6-2-1]: ITEM_SET_TYPE struct has correct array dimensions",
+          "[combat][items][struct][6-2-1]")
+{
+    ITEM_SET_TYPE setType = {};
+
+    SECTION("byOption array has MAX_ITEM_SETS_PER_ITEM (2) entries")
+    {
+        REQUIRE(setType.byOption.size() == MAX_ITEM_SETS_PER_ITEM);
+    }
+
+    SECTION("byMixItemLevel array has MAX_ITEM_SETS_PER_ITEM (2) entries")
+    {
+        REQUIRE(setType.byMixItemLevel.size() == MAX_ITEM_SETS_PER_ITEM);
+    }
+
+    SECTION("Default-constructed arrays are zero-initialised")
+    {
+        REQUIRE(setType.byOption[0] == 0);
+        REQUIRE(setType.byOption[1] == 0);
+        REQUIRE(setType.byMixItemLevel[0] == 0);
+        REQUIRE(setType.byMixItemLevel[1] == 0);
+    }
+}
+
+TEST_CASE("Task-2.5 [6-2-1]: ITEM_SET_OPTION struct has correct nested array dimensions",
+          "[combat][items][struct][6-2-1]")
+{
+    ITEM_SET_OPTION setOption = {};
+
+    SECTION("byStandardOption has MAX_ITEM_SET_STANDARD_OPTION_COUNT (6) rows")
+    {
+        REQUIRE(setOption.byStandardOption.size() == MAX_ITEM_SET_STANDARD_OPTION_COUNT);
+    }
+
+    SECTION("Each byStandardOption row has MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT (2) columns")
+    {
+        REQUIRE(setOption.byStandardOption[0].size() == MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT);
+    }
+
+    SECTION("byFullOption has MAX_ITEM_SET_FULL_OPTION_COUNT (5) entries")
+    {
+        REQUIRE(setOption.byFullOption.size() == MAX_ITEM_SET_FULL_OPTION_COUNT);
+    }
+
+    SECTION("byRequireClass has MAX_CLASS (7) entries")
+    {
+        REQUIRE(setOption.byRequireClass.size() == static_cast<size_t>(MAX_CLASS));
+    }
+
+    SECTION("bySetItemCount default-constructs to 0")
+    {
+        REQUIRE(setOption.bySetItemCount == 0);
+    }
+}
+
+TEST_CASE("Task-2.5 [6-2-1]: SET_OPTION struct fields are independently addressable",
+          "[combat][items][struct][6-2-1]")
+{
+    SET_OPTION opt = {};
+    opt.IsActive = true;
+    opt.IsFullOption = false;
+    opt.IsExtOption = true;
+    opt.FulfillsClassRequirement = true;
+    opt.OptionNumber = 42;
+    opt.Value = 150;
+
+    SECTION("IsActive field stores and retrieves correctly")
+    {
+        REQUIRE(opt.IsActive == true);
+    }
+
+    SECTION("IsFullOption field stores and retrieves correctly")
+    {
+        REQUIRE(opt.IsFullOption == false);
+    }
+
+    SECTION("OptionNumber field stores and retrieves correctly")
+    {
+        REQUIRE(opt.OptionNumber == 42);
+    }
+
+    SECTION("Value field stores and retrieves correctly")
+    {
+        REQUIRE(opt.Value == 150);
+    }
+}
+
+// =============================================================================
 // AC-1..5 [6-2-1]: Tests requiring MUGame linkage (CSkillManager, Script_Skill, combat state)
 // These tests need non-inline implementations or heavy-dependency types from MUGame:
 //   - CSkillManager::GetSkillInformation() — reads g_SkillAttribute data (MUGame data segment)
@@ -573,6 +777,22 @@ TEST_CASE("AC-1 [6-2-1]: SetPlayerAttack and AttackStage state transitions — r
 {
     SKIP("MU_COMBAT_TESTS_ENABLED not defined: SetPlayerAttack() and AttackStage() are "
          "non-inline methods in ZzzCharacter.cpp (MUGame target). "
+         "Set -DMU_COMBAT_TESTS_ENABLED and link MuTests against MUGame to enable.");
+}
+
+TEST_CASE("Task-2.4 [6-2-1]: w_BuffStateSystem RegisterBuff/UnRegisterBuff runtime — requires MUGame linkage",
+          "[combat][buffs][runtime][6-2-1]")
+{
+    SKIP("MU_COMBAT_TESTS_ENABLED not defined: w_BuffStateSystem uses WindowMessageHandler "
+         "and SmartPointer (MUGame). BuffScriptLoader loads buff definitions at runtime. "
+         "Set -DMU_COMBAT_TESTS_ENABLED and link MuTests against MUGame to enable.");
+}
+
+TEST_CASE("Task-2.5 [6-2-1]: GetAttackDamage min/max calculation — requires MUGame linkage",
+          "[combat][items][damage][6-2-1]")
+{
+    SKIP("MU_COMBAT_TESTS_ENABLED not defined: GetAttackDamage() in ZzzInventory.h "
+         "reads CHARACTER equipment state and calculates min/max weapon damage (MUGame). "
          "Set -DMU_COMBAT_TESTS_ENABLED and link MuTests against MUGame to enable.");
 }
 
