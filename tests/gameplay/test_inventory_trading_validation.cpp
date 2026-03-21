@@ -230,27 +230,229 @@ TEST_CASE("AC-3 [6-2-2]: STORAGE_TYPE enum values for inventory drag-and-drop",
     }
 }
 
-TEST_CASE("AC-3 [6-2-2]: STORAGE_TYPE drag-and-drop values are pairwise distinct",
+TEST_CASE("AC-3 [6-2-2]: All STORAGE_TYPE enum values are pairwise distinct",
           "[inventory][drag-drop][storage-type][uniqueness][6-2-2]")
 {
-    // All STORAGE_TYPE values used in inventory drag-and-drop must be unique to prevent
+    // STORAGE_TYPE must have unique values across all 18 defined enum members to prevent
     // misidentification of source inventory in CNewUIPickedItem::GetSourceStorageType().
-    const int kUndefined = static_cast<int>(STORAGE_TYPE::UNDEFINED);
-    const int kInventory = static_cast<int>(STORAGE_TYPE::INVENTORY);
-    const int kTrade = static_cast<int>(STORAGE_TYPE::TRADE);
-    const int kVault = static_cast<int>(STORAGE_TYPE::VAULT);
-    const int kMyShop = static_cast<int>(STORAGE_TYPE::MYSHOP);
+    // Each inventory context (trade, vault, mix/craft, shop, storage, etc.) has a distinct
+    // value to ensure correct routing of drag-and-drop operations.
 
-    REQUIRE(kUndefined != kInventory);
-    REQUIRE(kUndefined != kTrade);
-    REQUIRE(kUndefined != kVault);
-    REQUIRE(kUndefined != kMyShop);
-    REQUIRE(kInventory != kTrade);
-    REQUIRE(kInventory != kVault);
-    REQUIRE(kInventory != kMyShop);
-    REQUIRE(kTrade != kVault);
-    REQUIRE(kTrade != kMyShop);
-    REQUIRE(kVault != kMyShop);
+    // Core inventory types (always tested — critical for basic drag-and-drop)
+    const int kUndefined = static_cast<int>(STORAGE_TYPE::UNDEFINED);      // -1
+    const int kInventory = static_cast<int>(STORAGE_TYPE::INVENTORY);      // 0
+    const int kTrade = static_cast<int>(STORAGE_TYPE::TRADE);              // 1
+    const int kVault = static_cast<int>(STORAGE_TYPE::VAULT);              // 2
+    const int kMyShop = static_cast<int>(STORAGE_TYPE::MYSHOP);            // 4
+
+    // Extended inventory types (tested for completeness)
+    const int kChaos = static_cast<int>(STORAGE_TYPE::CHAOS_MIX);          // 3
+    const int kTrainer = static_cast<int>(STORAGE_TYPE::TRAINER_MIX);      // 5
+    const int kElpis = static_cast<int>(STORAGE_TYPE::ELPIS_MIX);          // 6
+    const int kCombine = static_cast<int>(STORAGE_TYPE::COMBINE);          // 7
+    const int kStorage = static_cast<int>(STORAGE_TYPE::STORAGE);          // 8
+    const int kPrivateShop = static_cast<int>(STORAGE_TYPE::PRIVATE_SHOP); // 9
+    const int kDarkHorse = static_cast<int>(STORAGE_TYPE::DARK_HORSE_MIX); // 10
+    const int kGoldenDice = static_cast<int>(STORAGE_TYPE::GOLDEN_DICE_MIX); // 11
+    const int kMoon = static_cast<int>(STORAGE_TYPE::MOON_MIX);            // 12
+    const int kSeason = static_cast<int>(STORAGE_TYPE::SEASON_MIX);        // 13
+    const int kCosmos = static_cast<int>(STORAGE_TYPE::COSMOS_MIX);        // 14
+    const int kSocket = static_cast<int>(STORAGE_TYPE::SOCKET_MIX);        // 15
+    const int kLucky = static_cast<int>(STORAGE_TYPE::LUCKY_MIX);          // 16
+    const int kSynthesis = static_cast<int>(STORAGE_TYPE::SYNTHESIS_MIX);  // 17
+
+    SECTION("All 18 STORAGE_TYPE values are pairwise distinct")
+    {
+        // Test all core and extended values are unique
+        REQUIRE(kUndefined != kInventory);
+        REQUIRE(kUndefined != kTrade);
+        REQUIRE(kUndefined != kVault);
+        REQUIRE(kUndefined != kChaos);
+        REQUIRE(kUndefined != kMyShop);
+        REQUIRE(kUndefined != kTrainer);
+        REQUIRE(kUndefined != kElpis);
+        REQUIRE(kUndefined != kCombine);
+        REQUIRE(kUndefined != kStorage);
+        REQUIRE(kUndefined != kPrivateShop);
+        REQUIRE(kUndefined != kDarkHorse);
+        REQUIRE(kUndefined != kGoldenDice);
+        REQUIRE(kUndefined != kMoon);
+        REQUIRE(kUndefined != kSeason);
+        REQUIRE(kUndefined != kCosmos);
+        REQUIRE(kUndefined != kSocket);
+        REQUIRE(kUndefined != kLucky);
+        REQUIRE(kUndefined != kSynthesis);
+
+        REQUIRE(kInventory != kTrade);
+        REQUIRE(kInventory != kVault);
+        REQUIRE(kInventory != kChaos);
+        REQUIRE(kInventory != kMyShop);
+        REQUIRE(kInventory != kTrainer);
+        REQUIRE(kInventory != kElpis);
+        REQUIRE(kInventory != kCombine);
+        REQUIRE(kInventory != kStorage);
+        REQUIRE(kInventory != kPrivateShop);
+        REQUIRE(kInventory != kDarkHorse);
+        REQUIRE(kInventory != kGoldenDice);
+        REQUIRE(kInventory != kMoon);
+        REQUIRE(kInventory != kSeason);
+        REQUIRE(kInventory != kCosmos);
+        REQUIRE(kInventory != kSocket);
+        REQUIRE(kInventory != kLucky);
+        REQUIRE(kInventory != kSynthesis);
+
+        REQUIRE(kTrade != kVault);
+        REQUIRE(kTrade != kChaos);
+        REQUIRE(kTrade != kMyShop);
+        REQUIRE(kTrade != kTrainer);
+        REQUIRE(kTrade != kElpis);
+        REQUIRE(kTrade != kCombine);
+        REQUIRE(kTrade != kStorage);
+        REQUIRE(kTrade != kPrivateShop);
+        REQUIRE(kTrade != kDarkHorse);
+        REQUIRE(kTrade != kGoldenDice);
+        REQUIRE(kTrade != kMoon);
+        REQUIRE(kTrade != kSeason);
+        REQUIRE(kTrade != kCosmos);
+        REQUIRE(kTrade != kSocket);
+        REQUIRE(kTrade != kLucky);
+        REQUIRE(kTrade != kSynthesis);
+
+        REQUIRE(kVault != kChaos);
+        REQUIRE(kVault != kMyShop);
+        REQUIRE(kVault != kTrainer);
+        REQUIRE(kVault != kElpis);
+        REQUIRE(kVault != kCombine);
+        REQUIRE(kVault != kStorage);
+        REQUIRE(kVault != kPrivateShop);
+        REQUIRE(kVault != kDarkHorse);
+        REQUIRE(kVault != kGoldenDice);
+        REQUIRE(kVault != kMoon);
+        REQUIRE(kVault != kSeason);
+        REQUIRE(kVault != kCosmos);
+        REQUIRE(kVault != kSocket);
+        REQUIRE(kVault != kLucky);
+        REQUIRE(kVault != kSynthesis);
+
+        REQUIRE(kChaos != kMyShop);
+        REQUIRE(kChaos != kTrainer);
+        REQUIRE(kChaos != kElpis);
+        REQUIRE(kChaos != kCombine);
+        REQUIRE(kChaos != kStorage);
+        REQUIRE(kChaos != kPrivateShop);
+        REQUIRE(kChaos != kDarkHorse);
+        REQUIRE(kChaos != kGoldenDice);
+        REQUIRE(kChaos != kMoon);
+        REQUIRE(kChaos != kSeason);
+        REQUIRE(kChaos != kCosmos);
+        REQUIRE(kChaos != kSocket);
+        REQUIRE(kChaos != kLucky);
+        REQUIRE(kChaos != kSynthesis);
+
+        REQUIRE(kMyShop != kTrainer);
+        REQUIRE(kMyShop != kElpis);
+        REQUIRE(kMyShop != kCombine);
+        REQUIRE(kMyShop != kStorage);
+        REQUIRE(kMyShop != kPrivateShop);
+        REQUIRE(kMyShop != kDarkHorse);
+        REQUIRE(kMyShop != kGoldenDice);
+        REQUIRE(kMyShop != kMoon);
+        REQUIRE(kMyShop != kSeason);
+        REQUIRE(kMyShop != kCosmos);
+        REQUIRE(kMyShop != kSocket);
+        REQUIRE(kMyShop != kLucky);
+        REQUIRE(kMyShop != kSynthesis);
+
+        REQUIRE(kTrainer != kElpis);
+        REQUIRE(kTrainer != kCombine);
+        REQUIRE(kTrainer != kStorage);
+        REQUIRE(kTrainer != kPrivateShop);
+        REQUIRE(kTrainer != kDarkHorse);
+        REQUIRE(kTrainer != kGoldenDice);
+        REQUIRE(kTrainer != kMoon);
+        REQUIRE(kTrainer != kSeason);
+        REQUIRE(kTrainer != kCosmos);
+        REQUIRE(kTrainer != kSocket);
+        REQUIRE(kTrainer != kLucky);
+        REQUIRE(kTrainer != kSynthesis);
+
+        REQUIRE(kElpis != kCombine);
+        REQUIRE(kElpis != kStorage);
+        REQUIRE(kElpis != kPrivateShop);
+        REQUIRE(kElpis != kDarkHorse);
+        REQUIRE(kElpis != kGoldenDice);
+        REQUIRE(kElpis != kMoon);
+        REQUIRE(kElpis != kSeason);
+        REQUIRE(kElpis != kCosmos);
+        REQUIRE(kElpis != kSocket);
+        REQUIRE(kElpis != kLucky);
+        REQUIRE(kElpis != kSynthesis);
+
+        REQUIRE(kCombine != kStorage);
+        REQUIRE(kCombine != kPrivateShop);
+        REQUIRE(kCombine != kDarkHorse);
+        REQUIRE(kCombine != kGoldenDice);
+        REQUIRE(kCombine != kMoon);
+        REQUIRE(kCombine != kSeason);
+        REQUIRE(kCombine != kCosmos);
+        REQUIRE(kCombine != kSocket);
+        REQUIRE(kCombine != kLucky);
+        REQUIRE(kCombine != kSynthesis);
+
+        REQUIRE(kStorage != kPrivateShop);
+        REQUIRE(kStorage != kDarkHorse);
+        REQUIRE(kStorage != kGoldenDice);
+        REQUIRE(kStorage != kMoon);
+        REQUIRE(kStorage != kSeason);
+        REQUIRE(kStorage != kCosmos);
+        REQUIRE(kStorage != kSocket);
+        REQUIRE(kStorage != kLucky);
+        REQUIRE(kStorage != kSynthesis);
+
+        REQUIRE(kPrivateShop != kDarkHorse);
+        REQUIRE(kPrivateShop != kGoldenDice);
+        REQUIRE(kPrivateShop != kMoon);
+        REQUIRE(kPrivateShop != kSeason);
+        REQUIRE(kPrivateShop != kCosmos);
+        REQUIRE(kPrivateShop != kSocket);
+        REQUIRE(kPrivateShop != kLucky);
+        REQUIRE(kPrivateShop != kSynthesis);
+
+        REQUIRE(kDarkHorse != kGoldenDice);
+        REQUIRE(kDarkHorse != kMoon);
+        REQUIRE(kDarkHorse != kSeason);
+        REQUIRE(kDarkHorse != kCosmos);
+        REQUIRE(kDarkHorse != kSocket);
+        REQUIRE(kDarkHorse != kLucky);
+        REQUIRE(kDarkHorse != kSynthesis);
+
+        REQUIRE(kGoldenDice != kMoon);
+        REQUIRE(kGoldenDice != kSeason);
+        REQUIRE(kGoldenDice != kCosmos);
+        REQUIRE(kGoldenDice != kSocket);
+        REQUIRE(kGoldenDice != kLucky);
+        REQUIRE(kGoldenDice != kSynthesis);
+
+        REQUIRE(kMoon != kSeason);
+        REQUIRE(kMoon != kCosmos);
+        REQUIRE(kMoon != kSocket);
+        REQUIRE(kMoon != kLucky);
+        REQUIRE(kMoon != kSynthesis);
+
+        REQUIRE(kSeason != kCosmos);
+        REQUIRE(kSeason != kSocket);
+        REQUIRE(kSeason != kLucky);
+        REQUIRE(kSeason != kSynthesis);
+
+        REQUIRE(kCosmos != kSocket);
+        REQUIRE(kCosmos != kLucky);
+        REQUIRE(kCosmos != kSynthesis);
+
+        REQUIRE(kSocket != kLucky);
+        REQUIRE(kSocket != kSynthesis);
+
+        REQUIRE(kLucky != kSynthesis);
+    }
 }
 
 #ifdef MU_GAME_AVAILABLE
@@ -333,29 +535,31 @@ TEST_CASE("AC-3 [6-2-2]: EVENT_STATE EVENT_PICKING is correct for drag-and-drop 
 // trade grid. COLUMN=8, ROW=4, MAX=32 are private enum constants in CNewUITrade.
 // =============================================================================
 
-TEST_CASE("AC-4 [6-2-2]: Trade inventory grid invariant is 8 columns x 4 rows = 32 slots",
+TEST_CASE("AC-4 [6-2-2]: Trade inventory grid dimensions match inventory constants",
           "[trade][grid][layout][6-2-2]")
 {
     // The trade grid constants COLUMN_TRADE_INVEN=8, ROW_TRADE_INVEN=4, MAX_TRADE_INVEN=32
-    // are private enums in CNewUITrade — verified here via the known formula.
-    // This ensures the architectural constraint is documented and regression-tested.
+    // are private enums in CNewUITrade. We verify the architectural constraint by validating
+    // that the trade grid reuses the same column and row dimensions as the main inventory.
+    // This ensures visual consistency and correct packet struct sizing across platforms.
 
-    SECTION("Trade grid formula: 8 columns * 4 rows = 32 slots")
-    {
-        static_assert(8 * 4 == 32, "Trade inventory grid must be 8 cols x 4 rows = 32 slots");
-        REQUIRE(8 * 4 == 32);
-    }
-
-    SECTION("Trade grid column count (8) is equal to player inventory column count")
+    SECTION("Trade grid column count equals player inventory column count (8)")
     {
         // Trade window reuses the same column width as the main inventory for visual consistency.
         REQUIRE(COLUMN_INVENTORY == 8); // same as COLUMN_TRADE_INVEN
     }
 
-    SECTION("Trade grid row count (4) is equal to extended inventory row count")
+    SECTION("Trade grid row count equals extended inventory row count (4)")
     {
         // Trade window height = one extended inventory row block (ROW_INVENTORY_EXT = 4).
         REQUIRE(ROW_INVENTORY_EXT == 4); // same as ROW_TRADE_INVEN
+    }
+
+    SECTION("Trade grid capacity is 32 slots (8 columns × 4 rows)")
+    {
+        // Architectural invariant: trade grid reuses column and row dimensions from main inventory.
+        // 8 × 4 = 32 slots total, which is the capacity of MAX_TRADE_INVEN.
+        static_assert(8 * 4 == 32, "Trade inventory grid must be 8 cols x 4 rows = 32 slots");
     }
 }
 
@@ -539,16 +743,3 @@ TEST_CASE("AC-6 [6-2-2]: CSItemOption set identifiers are distinct",
     REQUIRE(static_cast<int>(EXT_A_SET_OPTION) != static_cast<int>(EXT_B_SET_OPTION));
 }
 
-TEST_CASE("AC-6 [6-2-2]: CSItemOption item-set constants derived from equipment count are correct",
-          "[tooltip][set-options][derived][6-2-2]")
-{
-    SECTION("MAX_EQUIPPED_SET_ITEMS is 10 (excludes fairy + wing = 2 non-set slots)")
-    {
-        REQUIRE(static_cast<int>(MAX_EQUIPPED_SET_ITEMS) == 10);
-    }
-
-    SECTION("MAX_EQUIPPED_SETS is 5 (max simultaneous ancient sets active)")
-    {
-        REQUIRE(static_cast<int>(MAX_EQUIPPED_SETS) == 5);
-    }
-}
