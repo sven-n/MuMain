@@ -9,7 +9,8 @@
 //   AC-3       — Monster death/loot: MonsterSkillType enum base values and skill range
 //   AC-4       — Player death/respawn: AT_SKILL_UNDEFINED initial state, AT_SKILL_MASTER_END range
 //   AC-5       — Health/mana: MAX_SKILLS capacity, SKILL_ATTRIBUTE Mana/Damage field read-write
-//   AC-6       — Combat audio: SOUND_BRANDISH_SWORD01..04 values, SOUND_MONSTER range (210-450),
+//   AC-6       — Combat audio: SOUND_BRANDISH_SWORD01..04 values, SOUND_ATTACK_MELEE_HIT range,
+//                SOUND_MONSTER range (210-450),
 //                melee hit sound range, non-overlapping sound region validation
 //
 // Manual validation (full AC-1..6 on macOS/Linux/Windows with live server):
@@ -221,7 +222,7 @@ TEST_CASE("AC-2 [6-2-1]: DemendConditionInfo operator<= validates all stat thres
         meetsAll.SkillVitality = 50;
         meetsAll.SkillEnergy = 200;
         meetsAll.SkillCharisma = 30;
-        REQUIRE((meetsAll <= heroStats) == TRUE);
+        REQUIRE(meetsAll <= heroStats);
     }
 
     SECTION("Requirements met when hero exceeds all required stats")
@@ -233,7 +234,7 @@ TEST_CASE("AC-2 [6-2-1]: DemendConditionInfo operator<= validates all stat thres
         lower.SkillVitality = 25;
         lower.SkillEnergy = 100;
         lower.SkillCharisma = 15;
-        REQUIRE((lower <= heroStats) == TRUE);
+        REQUIRE(lower <= heroStats);
     }
 
     SECTION("Requirements not met when one stat (strength) exceeds hero's value by 1")
@@ -245,7 +246,7 @@ TEST_CASE("AC-2 [6-2-1]: DemendConditionInfo operator<= validates all stat thres
         tooHigh.SkillVitality = 50;
         tooHigh.SkillEnergy = 200;
         tooHigh.SkillCharisma = 30;
-        REQUIRE((tooHigh <= heroStats) == FALSE);
+        REQUIRE_FALSE(tooHigh <= heroStats);
     }
 
     SECTION("Requirements not met when one stat (energy) exceeds hero's value by 1")
@@ -257,13 +258,13 @@ TEST_CASE("AC-2 [6-2-1]: DemendConditionInfo operator<= validates all stat thres
         highEnergy.SkillVitality = 50;
         highEnergy.SkillEnergy = 201; // one point over hero's 200
         highEnergy.SkillCharisma = 30;
-        REQUIRE((highEnergy <= heroStats) == FALSE);
+        REQUIRE_FALSE(highEnergy <= heroStats);
     }
 
     SECTION("Zero requirements (default-constructed) are always met by any hero")
     {
         DemendConditionInfo noReqs;
-        REQUIRE((noReqs <= heroStats) == TRUE);
+        REQUIRE(noReqs <= heroStats);
     }
 }
 
@@ -339,10 +340,23 @@ TEST_CASE("AC-3 [6-2-1]: MonsterSkillType defines correct base values for monste
 TEST_CASE("AC-3 [6-2-1]: MonsterSkillType basic skill values are all distinct", "[combat][monsters][skills][6-2-1]")
 {
     // Basic monster skill types must have unique values for correct AI dispatch.
-    REQUIRE(static_cast<int>(ATMON_SKILL_BIGIN) != static_cast<int>(ATMON_SKILL_THUNDER));
-    REQUIRE(static_cast<int>(ATMON_SKILL_THUNDER) != static_cast<int>(ATMON_SKILL_WIND));
-    REQUIRE(static_cast<int>(ATMON_SKILL_WIND) != static_cast<int>(ATMON_SKILL_NORMAL));
-    REQUIRE(static_cast<int>(ATMON_SKILL_NORMAL) != static_cast<int>(ATMON_SKILL_SUMMON));
+    // All 10 pairwise combinations among the 5 monster skill types must be unique.
+    const int kBigin = static_cast<int>(ATMON_SKILL_BIGIN);
+    const int kThunder = static_cast<int>(ATMON_SKILL_THUNDER);
+    const int kWind = static_cast<int>(ATMON_SKILL_WIND);
+    const int kNormal = static_cast<int>(ATMON_SKILL_NORMAL);
+    const int kSummon = static_cast<int>(ATMON_SKILL_SUMMON);
+
+    REQUIRE(kBigin != kThunder);
+    REQUIRE(kBigin != kWind);
+    REQUIRE(kBigin != kNormal);
+    REQUIRE(kBigin != kSummon);
+    REQUIRE(kThunder != kWind);
+    REQUIRE(kThunder != kNormal);
+    REQUIRE(kThunder != kSummon);
+    REQUIRE(kWind != kNormal);
+    REQUIRE(kWind != kSummon);
+    REQUIRE(kNormal != kSummon);
 }
 
 // =============================================================================
@@ -414,7 +428,11 @@ TEST_CASE("AC-5 [6-2-1]: SKILL_ATTRIBUTE Mana and Damage fields are independentl
 
     SECTION("Mana and Damage fields are independent (distinct memory locations)")
     {
-        REQUIRE(attr.Mana != attr.Damage);
+        // Prove non-aliasing: write to Mana, verify Damage unchanged
+        attr.Mana = 42;
+        attr.Damage = 42;
+        attr.Mana = 99;
+        REQUIRE(attr.Damage == 42); // Damage must remain unchanged after Mana write
     }
 }
 
@@ -735,13 +753,9 @@ TEST_CASE("Task-2.5 [6-2-1]: SET_OPTION struct fields are independently addressa
 // =============================================================================
 
 #ifdef MU_COMBAT_TESTS_ENABLED
-
-// When MUGame linkage is available, replace this static_assert with real test
-// implementations for CSkillManager runtime behavior, Script_Skill struct layout,
-// and ZzzCharacter attack state machine.
-static_assert(false, "MU_COMBAT_TESTS_ENABLED is defined but MUGame-linked combat tests "
-                     "for story 6-2-1 are not yet implemented. Remove this flag or add the tests.");
-
+#error "MU_COMBAT_TESTS_ENABLED is defined but MUGame-linked combat tests for story 6-2-1 are \
+not yet implemented. Define this flag only when ready to add real test implementations for \
+CSkillManager runtime behavior, Script_Skill struct layout, and ZzzCharacter attack state machine."
 #else
 
 TEST_CASE("AC-1 [6-2-1]: CSkillManager::GetSkillInformation runtime lookup — requires MUGame linkage",
