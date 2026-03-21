@@ -27,6 +27,21 @@ namespace COMGEM
         {
             return (g_pMyInventory != nullptr) ? g_pMyInventory->GetInventoryCtrl() : nullptr;
         }
+
+        const ITEM* FindInventoryItemBySlot(const int slot)
+        {
+            if (slot < MAX_EQUIPMENT_INDEX || slot >= MAX_MY_INVENTORY_EX_INDEX)
+            {
+                return nullptr;
+            }
+
+            if (slot < MAX_MY_INVENTORY_INDEX)
+            {
+                return (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(slot) : nullptr;
+            }
+
+            return (g_pMyInventoryExt != nullptr) ? g_pMyInventoryExt->FindItem(slot) : nullptr;
+        }
     }
 
     //Locals
@@ -77,25 +92,27 @@ void COMGEM::ResetWantedList()
 
 bool COMGEM::FindWantedList()
 {
-    SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
-    if (pNewInventoryCtrl == nullptr)
+    if (GetInventoryCtrl() == nullptr)
     {
         ResetWantedList();
         return false;
     }
 
     bool foundAny = false;
-    const int nInvenMaxIndex = MAX_MY_INVENTORY_INDEX;
     ResetWantedList();
 
-    for (int i = 0; i < nInvenMaxIndex; ++i)
+    for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
     {
-        const ITEM* pItem = pNewInventoryCtrl->GetItem(i);
-        if (!pItem) continue;
+        const ITEM* pItem = FindInventoryItemBySlot(slot);
+        if (!pItem)
+        {
+            continue;
+        }
+
         if (isCompiledGem(pItem))
         {
             INTBYTEPAIR p;
-            p.first = pItem->y * pNewInventoryCtrl->GetNumberOfColumn() + pItem->x + MAX_EQUIPMENT_INDEX;
+            p.first = slot;
             p.second = pItem->Level;
             m_UnmixTarList.AddText(p.first, p.second);
             foundAny = true;
@@ -161,22 +178,23 @@ bool COMGEM::CheckMyInvValid()
     m_cPercent = 0;
     m_cCount = 0;
 
-    const int nInvenMaxIndex = MAX_MY_INVENTORY_INDEX;
-
     if (m_bType == ATTACH)
     {
-        SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
-        if (pNewInventoryCtrl == nullptr)
+        if (GetInventoryCtrl() == nullptr)
         {
             m_cErr = COMERROR_NOTALLOWED;
             m_cPercent = 0;
             return false;
         }
 
-        for (int i = 0; i < nInvenMaxIndex; ++i)
+        for (int slot = MAX_EQUIPMENT_INDEX; slot < MAX_MY_INVENTORY_EX_INDEX; ++slot)
         {
-            const ITEM* pItem = pNewInventoryCtrl->GetItem(i);
-            if (!pItem) continue;
+            const ITEM* pItem = FindInventoryItemBySlot(slot);
+            if (!pItem)
+            {
+                continue;
+            }
+
             if (m_cGemType == Check_Jewel_Unit(pItem->Type))	++m_cCount;
 
             if (m_cCount == m_cComType)
@@ -195,16 +213,14 @@ bool COMGEM::CheckMyInvValid()
     }
     else if (m_bType == DETACH)
     {
-        if (iUnMixIndex == -1 || iUnMixIndex >= MAX_MY_INVENTORY_EX_INDEX)
+        if (iUnMixIndex < MAX_EQUIPMENT_INDEX || iUnMixIndex >= MAX_MY_INVENTORY_EX_INDEX)
         {
             m_cErr = DEERROR_NOTALLOWED;
             m_cPercent = 0;
             return false;
         }
 
-        //SEASON3B::CNewUIInventoryCtrl * pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
-        //ITEM * pItem = pNewInventoryCtrl->GetItem(iUnMixIndex);
-        const ITEM* pItem = (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(iUnMixIndex) : nullptr;
+        const ITEM* pItem = FindInventoryItemBySlot(iUnMixIndex);
         if (pItem != nullptr && isCompiledGem(pItem))
         {
             ++m_cCount;

@@ -5102,6 +5102,21 @@ bool lessfunc(const UNMIX_TEXT& lhs, const UNMIX_TEXT& rhs)
     return (lhs.m_iInvenIdx > rhs.m_iInvenIdx);
 }
 
+static ITEM* FindInventoryItemBySlot(const int slot)
+{
+    if (slot < MAX_EQUIPMENT_INDEX || slot >= MAX_MY_INVENTORY_EX_INDEX)
+    {
+        return nullptr;
+    }
+
+    if (slot < MAX_MY_INVENTORY_INDEX)
+    {
+        return (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(slot) : nullptr;
+    }
+
+    return (g_pMyInventoryExt != nullptr) ? g_pMyInventoryExt->FindItem(slot) : nullptr;
+}
+
 void CUIUnmixgemList::Sort()
 {
     sort(m_TextList.begin(), m_TextList.end(), lessfunc);
@@ -5109,7 +5124,7 @@ void CUIUnmixgemList::Sort()
 
 void CUIUnmixgemList::AddText(int iIndex, BYTE cComType)
 {
-    if (iIndex < 0 || iIndex > MAX_INVENTORY || cComType == COMGEM::NOCOM) return;
+    if (iIndex < MAX_EQUIPMENT_INDEX || iIndex >= MAX_MY_INVENTORY_EX_INDEX || cComType == COMGEM::NOCOM) return;
 
     for (unsigned int i = 0; i < m_TextList.size(); ++i)
     {
@@ -5200,7 +5215,7 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
 
     wchar_t oText[MAX_GLOBAL_TEXT_STRING] = { 0, };
 
-    ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(m_TextListIter->m_iInvenIdx);
+    ITEM* pItem = FindInventoryItemBySlot(m_TextListIter->m_iInvenIdx);
     if (pItem)
     {
         int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
@@ -5229,7 +5244,9 @@ BOOL CUIUnmixgemList::DoLineMouseAction(int iLineNumber)
             SLSetSelectLine(m_iCurrentRenderEndLine + iLineNumber + 1);
             UNMIX_TEXT* pt = GetSelectedText();
 
-            if (pt->m_cLevel != COMGEM::NOCOM && pt->m_iInvenIdx > 0 && pt->m_iInvenIdx < MAX_INVENTORY)
+            if (pt->m_cLevel != COMGEM::NOCOM
+                && pt->m_iInvenIdx >= MAX_EQUIPMENT_INDEX
+                && pt->m_iInvenIdx < MAX_MY_INVENTORY_EX_INDEX)
                 COMGEM::SelectFromList(pt->m_iInvenIdx, pt->m_cLevel);
 
             MouseLButtonDBClick = false;

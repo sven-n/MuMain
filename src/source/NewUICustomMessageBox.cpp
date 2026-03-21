@@ -27,6 +27,24 @@ char AppointType;
 
 using namespace SEASON3B;
 
+namespace
+{
+    ITEM* FindInventoryItemBySlot(const int slot)
+    {
+        if (slot < MAX_EQUIPMENT_INDEX || slot >= MAX_MY_INVENTORY_EX_INDEX)
+        {
+            return nullptr;
+        }
+
+        if (slot < MAX_MY_INVENTORY_INDEX)
+        {
+            return (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(slot) : nullptr;
+        }
+
+        return (g_pMyInventoryExt != nullptr) ? g_pMyInventoryExt->FindItem(slot) : nullptr;
+    }
+}
+
 SEASON3B::CNewUITextInputMsgBox::CNewUITextInputMsgBox()
 {
     m_pInputBox = NULL;
@@ -2068,6 +2086,12 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
     UNMIX_TEXT* pUT = COMGEM::m_UnmixTarList.GetSelectedText();
     if (pUT)
     {
+        ITEM* pItem = FindInventoryItemBySlot(pUT->m_iInvenIdx);
+        if (pItem == nullptr)
+        {
+            return CALLBACK_BREAK;
+        }
+
         COMGEM::SelectFromList(pUT->m_iInvenIdx, pUT->m_cLevel);
 
         SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
@@ -2077,7 +2101,6 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
         {
             wchar_t strText[256] = { 0, };
             int	iGemLevel = COMGEM::GetUnMixGemLevel() + 1;
-            ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(pUT->m_iInvenIdx);
             int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
             COMGEM::SetGem(nIdx);
             mu_swprintf(strText, GlobalText[1813], GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], iGemLevel);
