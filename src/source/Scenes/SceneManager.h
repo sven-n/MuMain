@@ -18,12 +18,11 @@ class FrameTimingState
 private:
     double targetFps = -1.0; // -1 = uncapped, >0 = specific FPS limit
     double msPerFrame = 0.0; // 0 = no frame limiting (uncapped)
-
-public:
     double lastRenderTickCount = 0.0;
     double currentTickCount = 0.0;
     double lastWaterChange = 0.0;
 
+public:
     /**
      * Set target frames per second for frame rate limiting
      * @param fps Target FPS. Use -1 or any negative value for uncapped (unlimited) framerate.
@@ -112,6 +111,42 @@ public:
     double GetCurrentFrameTime() const
     {
         return currentTickCount - lastRenderTickCount;
+    }
+
+    /**
+     * Get the last render tick count
+     * @return Last render tick count in milliseconds
+     */
+    double GetLastRenderTickCount() const
+    {
+        return lastRenderTickCount;
+    }
+
+    /**
+     * Get the current tick count
+     * @return Current tick count in milliseconds
+     */
+    double GetCurrentTickCount() const
+    {
+        return currentTickCount;
+    }
+
+    /**
+     * Get the last water change time
+     * @return Last water change tick count in milliseconds
+     */
+    double GetLastWaterChange() const
+    {
+        return lastWaterChange;
+    }
+
+    /**
+     * Set the last water change time
+     * @param time Time in milliseconds when water was last changed
+     */
+    void SetLastWaterChange(double time)
+    {
+        lastWaterChange = time;
     }
 };
 

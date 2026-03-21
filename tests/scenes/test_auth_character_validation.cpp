@@ -35,7 +35,6 @@
 #include <windows.h>
 #else
 #include "Platform/PlatformTypes.h"
-#include "Platform/PlatformCompat.h"
 #endif
 
 #include "mu_define.h" // MAX_CHARACTERS_PER_ACCOUNT = 5
@@ -48,8 +47,7 @@
 //   Magic Gladiator (CLASS_DARK), Dark Lord (CLASS_DARK_LORD)
 // =============================================================================
 
-TEST_CASE("AC-4 [6-1-1]: 5 base character classes defined in CLASS_TYPE enum",
-          "[scenes][auth][character][6-1-1]")
+TEST_CASE("AC-4 [6-1-1]: 5 base character classes defined in CLASS_TYPE enum", "[scenes][auth][character][6-1-1]")
 {
     SECTION("Dark Wizard is CLASS_WIZARD = 0 (first class)")
     {
@@ -95,8 +93,7 @@ TEST_CASE("AC-4 [6-1-1]: 5 base character classes defined in CLASS_TYPE enum",
 // This constant governs CharacterSelectionState bounds and char list display.
 // =============================================================================
 
-TEST_CASE("AC-3 [6-1-1]: Character account supports exactly 5 character slots",
-          "[scenes][auth][character][6-1-1]")
+TEST_CASE("AC-3 [6-1-1]: Character account supports exactly 5 character slots", "[scenes][auth][character][6-1-1]")
 {
     REQUIRE(MAX_CHARACTERS_PER_ACCOUNT == 5);
 }
@@ -112,7 +109,7 @@ TEST_CASE("AC-3 [6-1-1]: Character account supports exactly 5 character slots",
 
 #ifdef MU_SCENE_TESTS_ENABLED
 
-#include "SceneCommon.h" // CharacterSelectionState, SceneInitializationState
+#include "SceneCommon.h"  // CharacterSelectionState, SceneInitializationState
 #include "SceneManager.h" // FrameTimingState
 
 // ---------------------------------------------------------------------------
@@ -120,8 +117,7 @@ TEST_CASE("AC-3 [6-1-1]: Character account supports exactly 5 character slots",
 // SceneInitializationState must have all flags false on fresh construction.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-1 [6-1-1]: SceneInitializationState starts with all flags false",
-          "[scenes][auth][login][6-1-1]")
+TEST_CASE("AC-1 [6-1-1]: SceneInitializationState starts with all flags false", "[scenes][auth][login][6-1-1]")
 {
     SceneInitializationState state;
 
@@ -155,8 +151,7 @@ TEST_CASE("AC-1 [6-1-1]: SceneInitializationState starts with all flags false",
 // AC-1 [6-1-1]: ResetAll clears all scene initialization flags
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-1 [6-1-1]: SceneInitializationState ResetAll clears all flags",
-          "[scenes][auth][login][6-1-1]")
+TEST_CASE("AC-1 [6-1-1]: SceneInitializationState ResetAll clears all flags", "[scenes][auth][login][6-1-1]")
 {
     SceneInitializationState state;
 
@@ -208,8 +203,7 @@ TEST_CASE("AC-6 [6-1-1]: SceneInitializationState ResetForDisconnect preserves l
 // AC-3 [6-1-1]: CharacterSelectionState starts with no selection
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-3 [6-1-1]: CharacterSelectionState has no selection on construction",
-          "[scenes][auth][character][6-1-1]")
+TEST_CASE("AC-3 [6-1-1]: CharacterSelectionState has no selection on construction", "[scenes][auth][character][6-1-1]")
 {
     CharacterSelectionState state;
 
@@ -222,8 +216,7 @@ TEST_CASE("AC-3 [6-1-1]: CharacterSelectionState has no selection on constructio
 // Valid indices are [0, MAX_CHARACTERS_PER_ACCOUNT).
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-5 [6-1-1]: CharacterSelectionState accepts valid character slots",
-          "[scenes][auth][character][6-1-1]")
+TEST_CASE("AC-5 [6-1-1]: CharacterSelectionState accepts valid character slots", "[scenes][auth][character][6-1-1]")
 {
     CharacterSelectionState state;
 
@@ -243,14 +236,26 @@ TEST_CASE("AC-5 [6-1-1]: CharacterSelectionState accepts valid character slots",
 
     SECTION("Out-of-bounds index is rejected (index < 0)")
     {
+        state.SelectCharacter(2); // establish valid selection first
         state.SelectCharacter(-1);
-        REQUIRE(state.HasSelection() == false);
+        REQUIRE(state.HasSelection() == true);
+        REQUIRE(state.GetSelectedIndex() == 2); // preserved
     }
 
     SECTION("Out-of-bounds index is rejected (index >= MAX_CHARACTERS_PER_ACCOUNT)")
     {
+        state.SelectCharacter(2); // establish valid selection first
         state.SelectCharacter(MAX_CHARACTERS_PER_ACCOUNT);
-        REQUIRE(state.HasSelection() == false);
+        REQUIRE(state.HasSelection() == true);
+        REQUIRE(state.GetSelectedIndex() == 2); // preserved
+    }
+
+    SECTION("Invalid selection does not clear existing valid selection")
+    {
+        state.SelectCharacter(2);
+        state.SelectCharacter(-1);
+        REQUIRE(state.HasSelection() == true);
+        REQUIRE(state.GetSelectedIndex() == 2);
     }
 }
 
@@ -279,8 +284,7 @@ TEST_CASE("AC-6 [6-1-1]: CharacterSelectionState ClearSelection returns to NO_SE
 // builds, the render tick must advance correctly for scene transitions to work.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-5 [6-1-1]: FrameTimingState ShouldRenderNextFrame controls scene loop",
-          "[scenes][auth][timing][6-1-1]")
+TEST_CASE("AC-5 [6-1-1]: FrameTimingState ShouldRenderNextFrame controls scene loop", "[scenes][auth][timing][6-1-1]")
 {
     FrameTimingState timing;
 
@@ -325,8 +329,7 @@ TEST_CASE("AC-5 [6-1-1]: FrameTimingState ShouldRenderNextFrame controls scene l
 // See story 6-1-1 CMakeLists.txt comment for enablement path.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-1 [6-1-1]: SceneInitializationState logic — requires MUGame linkage",
-          "[scenes][auth][login][6-1-1]")
+TEST_CASE("AC-1 [6-1-1]: SceneInitializationState logic — requires MUGame linkage", "[scenes][auth][login][6-1-1]")
 {
     SKIP("MU_SCENE_TESTS_ENABLED not defined: SceneCommon.h needs MUGame. "
          "Set -DMU_SCENE_TESTS_ENABLED and link MuTests against MUGame to enable.");

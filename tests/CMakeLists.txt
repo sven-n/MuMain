@@ -184,9 +184,12 @@ target_sources(MuTests PRIVATE audio/test_miniaudio_sfx.cpp)
 # RED PHASE: Tests verify CLASS_TYPE enum has 5 base classes, MAX_CHARACTERS_PER_ACCOUNT == 5,
 # and CharacterSelectionState / SceneInitializationState contracts.
 # AC-3/AC-4: CLASS_TYPE enum + MAX_CHARACTERS_PER_ACCOUNT tests are always compiled and run.
-# AC-1/AC-5/AC-6: Scene state tests gated by MU_SCENE_TESTS_ENABLED (requires MUGame linkage).
-# Tests compile without MUGame (SKIP macro documents enablement path in that case).
+# AC-1/AC-5/AC-6: Scene state tests gated by MU_SCENE_TESTS_ENABLED (requires SceneCommon.h headers).
+# Story 6-1-1 code review fix: SceneCommon.h now uses mu_define.h instead of ZzzInfomation.h,
+# enabling header-only compilation without full MUGame linkage. All tests now execute.
 target_sources(MuTests PRIVATE scenes/test_auth_character_validation.cpp)
+target_compile_definitions(MuTests PRIVATE MU_SCENE_TESTS_ENABLED)
+target_include_directories(MuTests PRIVATE "${CMAKE_SOURCE_DIR}/src/source/Scenes")
 
 # Story 5.3.1: Audio Format Validation [VS1-AUDIO-FORMAT-VALIDATE]
 # RED PHASE: Tests verify miniaudio correctly decodes WAV, MP3, and OGG Vorbis audio

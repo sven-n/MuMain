@@ -8,7 +8,7 @@
 #include "Platform/PlatformTypes.h"
 #include "Platform/PlatformCompat.h"
 #endif
-#include "ZzzInfomation.h" // For MAX_CHARACTERS_PER_ACCOUNT
+#include "mu_define.h" // For MAX_CHARACTERS_PER_ACCOUNT
 
 //=============================================================================
 // Character Selection State
