@@ -50,7 +50,7 @@ class CHARACTER;
 #include "mu_define.h" // MAX_SKILLS, DWORD, WORD, BYTE, game constants
 #include "mu_enum.h"   // ActionSkillType, MonsterSkillType
 
-#include "CSItemOption.h"  // ITEM_SET_TYPE, ITEM_SET_OPTION, SET_OPTION, MAX_SET_OPTION, MASTERY_OPTION
+#include "CSItemOption.h" // ITEM_SET_TYPE, ITEM_SET_OPTION, SET_OPTION, MAX_SET_OPTION, MASTERY_OPTION
 #include "DSPlaySound.h"  // ESound enum, SOUND_BRANDISH_SWORD*, SOUND_MONSTER* macros
 #include "SkillManager.h" // DemendConditionInfo struct
 #include "SkillStructs.h" // SKILL_ATTRIBUTE, SKILL_ATTRIBUTE_FILE, MAX_CLASS, MAX_DUTY_CLASS, MAX_SKILL_NAME
@@ -559,8 +559,7 @@ TEST_CASE("Task-2.4 [6-2-1]: eBuffState sentinel and combat-relevant buff values
     }
 }
 
-TEST_CASE("Task-2.4 [6-2-1]: eBuffState debuff sentinel values for combat effects",
-          "[combat][buffs][debuff][6-2-1]")
+TEST_CASE("Task-2.4 [6-2-1]: eBuffState debuff sentinel values for combat effects", "[combat][buffs][debuff][6-2-1]")
 {
     SECTION("eDeBuff_Poison is the first debuff entry (follows buff entries)")
     {
@@ -611,8 +610,7 @@ TEST_CASE("Task-2.4 [6-2-1]: eBuffClass categorises buffs and debuffs", "[combat
 // These constants/structs must be stable for correct set bonus calculation.
 // =============================================================================
 
-TEST_CASE("Task-2.5 [6-2-1]: Item set system constants define correct capacities",
-          "[combat][items][constants][6-2-1]")
+TEST_CASE("Task-2.5 [6-2-1]: Item set system constants define correct capacities", "[combat][items][constants][6-2-1]")
 {
     SECTION("MAX_SET_OPTION is 64 (maximum number of ancient sets)")
     {
@@ -640,8 +638,7 @@ TEST_CASE("Task-2.5 [6-2-1]: Item set system constants define correct capacities
     }
 }
 
-TEST_CASE("Task-2.5 [6-2-1]: ITEM_SET_TYPE struct has correct array dimensions",
-          "[combat][items][struct][6-2-1]")
+TEST_CASE("Task-2.5 [6-2-1]: ITEM_SET_TYPE struct has correct array dimensions", "[combat][items][struct][6-2-1]")
 {
     ITEM_SET_TYPE setType = {};
 
@@ -695,8 +692,7 @@ TEST_CASE("Task-2.5 [6-2-1]: ITEM_SET_OPTION struct has correct nested array dim
     }
 }
 
-TEST_CASE("Task-2.5 [6-2-1]: SET_OPTION struct fields are independently addressable",
-          "[combat][items][struct][6-2-1]")
+TEST_CASE("Task-2.5 [6-2-1]: SET_OPTION struct fields are independently addressable", "[combat][items][struct][6-2-1]")
 {
     SET_OPTION opt = {};
     opt.IsActive = true;
