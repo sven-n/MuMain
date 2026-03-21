@@ -21,10 +21,10 @@
 //   - #pragma once not used (this is a .cpp file)
 //
 // Design notes:
-//   - SceneCommon.h transitively includes game-type headers (ZzzInfomation.h), which
-//     prevents direct inclusion without the full PCH chain. Tests validate the LOGICAL
-//     CONTRACT of CharacterSelectionState and SceneInitializationState by testing
-//     their behaviours against their documented interface, compiled as part of MUGame.
+//   - SceneCommon.h includes mu_define.h for MAX_CHARACTERS_PER_ACCOUNT. Tests validate
+//     the LOGICAL CONTRACT of CharacterSelectionState and SceneInitializationState by
+//     testing their behaviours against their documented interface, compiled as part of
+//     MUGame when MU_SCENE_TESTS_ENABLED is defined.
 //   - mu_define.h and mu_enum.h are lightweight headers includable without stdafx.h.
 //   - CLASS_TYPE is a BYTE-based enum: include PlatformTypes.h on non-Win32 first.
 //   - AC-2 (SDL3 text input path) is already covered by test_platform_text_input.cpp.
@@ -155,12 +155,12 @@ TEST_CASE("AC-1 [6-1-1]: SceneInitializationState ResetAll clears all flags", "[
 {
     SceneInitializationState state;
 
-    // Set all flags
-    state.GetInitLogIn() = true;
-    state.GetInitLoading() = true;
-    state.GetInitCharacterScene() = true;
-    state.GetInitMainScene() = true;
-    state.GetEnableMainRender() = true;
+    // Set all flags via setters
+    state.SetInitLogIn(true);
+    state.SetInitLoading(true);
+    state.SetInitCharacterScene(true);
+    state.SetInitMainScene(true);
+    state.SetEnableMainRender(true);
 
     state.ResetAll();
 
@@ -181,11 +181,11 @@ TEST_CASE("AC-6 [6-1-1]: SceneInitializationState ResetForDisconnect preserves l
 {
     SceneInitializationState state;
 
-    state.GetInitLogIn() = true;
-    state.GetInitLoading() = true;
-    state.GetInitCharacterScene() = true;
-    state.GetInitMainScene() = true;
-    state.GetEnableMainRender() = true;
+    state.SetInitLogIn(true);
+    state.SetInitLoading(true);
+    state.SetInitCharacterScene(true);
+    state.SetInitMainScene(true);
+    state.SetEnableMainRender(true);
 
     state.ResetForDisconnect();
 
@@ -284,6 +284,9 @@ TEST_CASE("AC-6 [6-1-1]: CharacterSelectionState ClearSelection returns to NO_SE
 // builds, the render tick must advance correctly for scene transitions to work.
 // ---------------------------------------------------------------------------
 
+// AC-5: Frame timing controls scene transition readiness.
+// ShouldRenderNextFrame() == false during frame limiting (e.g., login -> character select).
+// ShouldRenderNextFrame() == true when frame is due for rendering.
 TEST_CASE("AC-5 [6-1-1]: FrameTimingState ShouldRenderNextFrame controls scene loop", "[scenes][auth][timing][6-1-1]")
 {
     FrameTimingState timing;

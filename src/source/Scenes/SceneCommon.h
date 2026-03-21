@@ -20,6 +20,8 @@ private:
     int selectedIndex = -1;
 
 public:
+    // Sentinel value indicating no character is currently selected.
+    // Valid indices are [0, MAX_CHARACTERS_PER_ACCOUNT), so -1 is safely outside the range.
     static constexpr int NO_SELECTION = -1;
 
     // Check if a character is currently selected
@@ -97,24 +99,68 @@ public:
         // Note: initLoading is not reset on disconnect
     }
 
-    // Legacy accessors for backward compatibility
-    bool& GetInitLogIn()
+    // Const accessors (preferred API)
+    bool GetInitLogIn() const
     {
         return initLogIn;
     }
-    bool& GetInitLoading()
+    bool GetInitLoading() const
     {
         return initLoading;
     }
-    bool& GetInitCharacterScene()
+    bool GetInitCharacterScene() const
     {
         return initCharacterScene;
     }
-    bool& GetInitMainScene()
+    bool GetInitMainScene() const
     {
         return initMainScene;
     }
-    bool& GetEnableMainRender()
+    bool GetEnableMainRender() const
+    {
+        return enableMainRender;
+    }
+
+    // Setters
+    void SetInitLogIn(bool value)
+    {
+        initLogIn = value;
+    }
+    void SetInitLoading(bool value)
+    {
+        initLoading = value;
+    }
+    void SetInitCharacterScene(bool value)
+    {
+        initCharacterScene = value;
+    }
+    void SetInitMainScene(bool value)
+    {
+        initMainScene = value;
+    }
+    void SetEnableMainRender(bool value)
+    {
+        enableMainRender = value;
+    }
+
+    // Legacy mutable accessors (deprecated — for backward-compatible global references only)
+    bool& LegacyRefInitLogIn()
+    {
+        return initLogIn;
+    }
+    bool& LegacyRefInitLoading()
+    {
+        return initLoading;
+    }
+    bool& LegacyRefInitCharacterScene()
+    {
+        return initCharacterScene;
+    }
+    bool& LegacyRefInitMainScene()
+    {
+        return initMainScene;
+    }
+    bool& LegacyRefEnableMainRender()
     {
         return enableMainRender;
     }

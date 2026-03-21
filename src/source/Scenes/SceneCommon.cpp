@@ -25,12 +25,12 @@ int& SelectedHero = g_characterSelection.GetLegacyReference();
 // Global instance
 SceneInitializationState g_sceneInit;
 
-// Legacy global references (for backward compatibility)
-bool& InitLogIn = g_sceneInit.GetInitLogIn();
-bool& InitLoading = g_sceneInit.GetInitLoading();
-bool& InitCharacterScene = g_sceneInit.GetInitCharacterScene();
-bool& InitMainScene = g_sceneInit.GetInitMainScene();
-bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
+// Legacy global references (deprecated — use g_sceneInit setters/getters instead)
+bool& InitLogIn = g_sceneInit.LegacyRefInitLogIn();
+bool& InitLoading = g_sceneInit.LegacyRefInitLoading();
+bool& InitCharacterScene = g_sceneInit.LegacyRefInitCharacterScene();
+bool& InitMainScene = g_sceneInit.LegacyRefInitMainScene();
+bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 
 //=============================================================================
 // Scene Common Utilities
