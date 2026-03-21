@@ -364,14 +364,14 @@ bool WriteMP3File(const std::string& path)
 //           oggenc -q 0 -o minimal.ogg tmp.wav
 // Converted: xxd -i minimal.ogg
 // Encoder: vorbis-tools 1.4.3 / libvorbis (oggenc)
-// Parameters: mono, 44100 Hz, quality 0 (lowest bitrate), ~0.1s silence (3798 bytes)
+// Parameters: mono, 44100 Hz, quality 0 (lowest bitrate), ~0.1s 440 Hz tone (3798 bytes)
 //
 // Returns true on success.
 // ---------------------------------------------------------------------------
 bool WriteOggFile(const std::string& path)
 {
     // Minimal OGG Vorbis: 3 pages (identification, comment, setup) + audio data
-    // Generated: ffmpeg -f lavfi -i "anullsrc=r=44100:cl=mono" -t 0.1 -c:a libvorbis
+    // Generated: ffmpeg -f lavfi -i "sine=frequency=440:sample_rate=44100:duration=0.1" -c:a libvorbis
     // Embedded as constexpr to avoid committing binary files to the repository (AC-2).
     // OGG container magic bytes: 0x4f, 0x67, 0x67, 0x53 ("OggS")
     // Vorbis identification header magic: 0x01, 0x76, 0x6f, 0x72, 0x62, 0x69, 0x73 ("\x01vorbis")
@@ -714,7 +714,8 @@ bool WriteOggFile(const std::string& path)
 class TempAudioDir
 {
 public:
-    TempAudioDir() : m_path(std::filesystem::temp_directory_path() / "mu_audio_test_5_3_1")
+    TempAudioDir()
+        : m_path(std::filesystem::temp_directory_path() / ("mu_audio_test_5_3_1_" + std::to_string(::getpid())))
     {
         std::filesystem::create_directories(m_path);
     }
@@ -768,8 +769,8 @@ TEST_CASE("AC-1: WAV mono PCM 16-bit loads via MiniAudioBackend", "[audio][wav][
 
     // WHEN: LoadSound is called with the mono WAV path (wide string conversion)
     // THEN: Must not crash regardless of init state (AC-6: CI headless guard)
-    // NOTE: LoadSound takes wchar_t* — use std::wstring for conversion
-    const std::wstring wWavPath(wavPath.begin(), wavPath.end());
+    // NOTE: LoadSound takes wchar_t* — convert via std::filesystem::path for UTF-8 correctness
+    const auto wWavPath = std::filesystem::path(wavPath).wstring();
     backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 1), wWavPath.c_str(), 1, false);
 
     if (!initOk)
@@ -795,7 +796,7 @@ TEST_CASE("AC-1: WAV stereo PCM 16-bit loads via MiniAudioBackend", "[audio][wav
     mu::MiniAudioBackend backend;
     const bool initOk = backend.Initialize();
 
-    const std::wstring wWavPath(wavPath.begin(), wavPath.end());
+    const auto wWavPath = std::filesystem::path(wavPath).wstring();
     backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 2), wWavPath.c_str(), 1, false);
 
     if (!initOk)
@@ -884,7 +885,7 @@ TEST_CASE("AC-1: MP3 loads via MiniAudioBackend", "[audio][mp3][format][5-3-1]")
     mu::MiniAudioBackend backend;
     const bool initOk = backend.Initialize();
 
-    const std::wstring wMp3Path(mp3Path.begin(), mp3Path.end());
+    const auto wMp3Path = std::filesystem::path(mp3Path).wstring();
     backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 3), wMp3Path.c_str(), 1, false);
 
     if (!initOk)
@@ -979,7 +980,7 @@ TEST_CASE("AC-1: OGG Vorbis loads via MiniAudioBackend", "[audio][ogg][format][5
     mu::MiniAudioBackend backend;
     const bool initOk = backend.Initialize();
 
-    const std::wstring wOggPath(oggPath.begin(), oggPath.end());
+    const auto wOggPath = std::filesystem::path(oggPath).wstring();
     backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 4), wOggPath.c_str(), 1, false);
 
     if (!initOk)
@@ -1078,12 +1079,13 @@ TEST_CASE("AC-3: LoadSound with non-existent file handles gracefully", "[audio][
 
     // WHEN: LoadSound is called with the non-existent path
     // THEN: Must not crash — backend logs error via g_ErrorReport.Write() and returns
-    const std::wstring wPath(nonexistentPath.begin(), nonexistentPath.end());
+    const auto wPath = std::filesystem::path(nonexistentPath).wstring();
     backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 5), wPath.c_str(), 1, false);
 
     // THEN: PlaySound on the unloaded slot must also be a safe no-op
     backend.PlaySound(static_cast<ESound>(MAX_BUFFER - 5), nullptr, FALSE);
 
+    // Shutdown() is safe even if Initialize() failed (m_initialized guard in MiniAudioBackend)
     backend.Shutdown();
 }
 
@@ -1113,9 +1115,10 @@ TEST_CASE("AC-3: LoadSound with corrupt file handles gracefully", "[audio][error
 
     // WHEN: LoadSound is called with the corrupt file
     // THEN: Must not crash — miniaudio will fail to parse the header
-    const std::wstring wPath(corruptPath.begin(), corruptPath.end());
+    const auto wPath = std::filesystem::path(corruptPath).wstring();
     backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 6), wPath.c_str(), 1, false);
 
+    // Shutdown() is safe even if Initialize() failed (m_initialized guard in MiniAudioBackend)
     backend.Shutdown();
 }
 
@@ -1136,6 +1139,7 @@ TEST_CASE("AC-3: PlayMusic with non-existent file handles gracefully", "[audio][
     // THEN: IsEndMusic() returns true — no stream was successfully loaded
     CHECK(backend.IsEndMusic());
 
+    // Shutdown() is safe even if Initialize() failed (m_initialized guard in MiniAudioBackend)
     backend.Shutdown();
 }
 
@@ -1187,26 +1191,59 @@ TEST_CASE("AC-5: ma_decoder pipeline returns non-zero frame count for valid WAV"
 
 // ---------------------------------------------------------------------------
 // AC-6: All decoder tests run without audio device (ma_decoder does not need ma_engine)
-// This test explicitly verifies that ma_decoder_init_file succeeds on a valid WAV
+// This test explicitly verifies that ma_decoder_init_file succeeds for all formats
 // with NO ma_engine initialization — confirming CI headless compatibility.
 // ---------------------------------------------------------------------------
 TEST_CASE("AC-6: ma_decoder works without audio device (headless CI compatible)", "[audio][headless][ci][5-3-1]")
 {
-    // GIVEN: A valid WAV file (generated in-process — no binary asset committed)
     test_assets::TempAudioDir tempDir;
-    const std::string wavPath = tempDir.FilePath("headless_test.wav");
-    REQUIRE(test_assets::GenerateWavFile(wavPath, 1, 44100, 2205)); // 0.05s mono
 
-    // WHEN: ma_decoder is used WITHOUT any ma_engine initialization
-    // THEN: MA_SUCCESS is returned — decoder does not require an audio device
-    ma_decoder decoder;
-    ma_decoder_config config = ma_decoder_config_init(ma_format_f32, 0, 0);
-    const ma_result result = ma_decoder_init_file(wavPath.c_str(), &config, &decoder);
-    CHECK(result == MA_SUCCESS);
-
-    if (result == MA_SUCCESS)
+    // SECTION: WAV format decoder (headless safe)
     {
-        ma_decoder_uninit(&decoder);
+        const std::string wavPath = tempDir.FilePath("headless_wav.wav");
+        REQUIRE(test_assets::GenerateWavFile(wavPath, 1, 44100, 2205)); // 0.05s mono
+
+        ma_decoder decoder;
+        ma_decoder_config config = ma_decoder_config_init(ma_format_f32, 0, 0);
+        const ma_result result = ma_decoder_init_file(wavPath.c_str(), &config, &decoder);
+        CHECK(result == MA_SUCCESS);
+
+        if (result == MA_SUCCESS)
+        {
+            ma_decoder_uninit(&decoder);
+        }
+    }
+
+    // SECTION: MP3 format decoder (headless safe)
+    {
+        const std::string mp3Path = tempDir.FilePath("headless_mp3.mp3");
+        REQUIRE(test_assets::WriteMP3File(mp3Path));
+
+        ma_decoder decoder;
+        ma_decoder_config config = ma_decoder_config_init(ma_format_f32, 0, 0);
+        const ma_result result = ma_decoder_init_file(mp3Path.c_str(), &config, &decoder);
+        CHECK(result == MA_SUCCESS);
+
+        if (result == MA_SUCCESS)
+        {
+            ma_decoder_uninit(&decoder);
+        }
+    }
+
+    // SECTION: OGG Vorbis format decoder (headless safe)
+    {
+        const std::string oggPath = tempDir.FilePath("headless_ogg.ogg");
+        REQUIRE(test_assets::WriteOggFile(oggPath));
+
+        ma_decoder decoder;
+        ma_decoder_config config = ma_decoder_config_init(ma_format_f32, 0, 0);
+        const ma_result result = ma_decoder_init_file(oggPath.c_str(), &config, &decoder);
+        CHECK(result == MA_SUCCESS);
+
+        if (result == MA_SUCCESS)
+        {
+            ma_decoder_uninit(&decoder);
+        }
     }
 }
 
