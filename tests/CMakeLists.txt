@@ -180,6 +180,14 @@ target_sources(MuTests PRIVATE audio/test_volume_controls.cpp)
 #   Task 5: Add backslash→forward-slash path normalization in LoadSound()
 target_sources(MuTests PRIVATE audio/test_miniaudio_sfx.cpp)
 
+# Story 6.1.1: Auth & Character Management Validation [VS1-GAME-VALIDATE-AUTH]
+# RED PHASE: Tests verify CLASS_TYPE enum has 5 base classes, MAX_CHARACTERS_PER_ACCOUNT == 5,
+# and CharacterSelectionState / SceneInitializationState contracts.
+# AC-3/AC-4: CLASS_TYPE enum + MAX_CHARACTERS_PER_ACCOUNT tests are always compiled and run.
+# AC-1/AC-5/AC-6: Scene state tests gated by MU_SCENE_TESTS_ENABLED (requires MUGame linkage).
+# Tests compile without MUGame (SKIP macro documents enablement path in that case).
+target_sources(MuTests PRIVATE scenes/test_auth_character_validation.cpp)
+
 # Story 5.3.1: Audio Format Validation [VS1-AUDIO-FORMAT-VALIDATE]
 # RED PHASE: Tests verify miniaudio correctly decodes WAV, MP3, and OGG Vorbis audio
 # formats used by the game, and that error paths are handled gracefully.
