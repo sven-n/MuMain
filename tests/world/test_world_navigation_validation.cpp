@@ -225,7 +225,7 @@ TEST_CASE("AC-1 [6-1-2]: PATH EstimateCostToGoal heuristic properties",
 
     SECTION("Cost from current position to itself is 0")
     {
-        // xDist=0, yDist=0 → (0*5 + 0*7 + 1)*3/4 = 0 (integer division of 0.75)
+        // xDist=0, yDist=0 → (0*FACTOR_PATH_DIST + 0*FACTOR_PATH_DIST_DIAG + 1)*3/4 = 0
         REQUIRE(path.EstimateCostToGoal(10, 10, 10, 10) == 0);
     }
 
@@ -351,23 +351,33 @@ TEST_CASE("AC-2 [6-1-2]: MOVEINFODATA index equality operator matches gate by in
     }
 }
 
-TEST_CASE("AC-2 [6-1-2]: MOVEINFODATA _bCanMove flag controls gate passability",
+TEST_CASE("AC-2 [6-1-2]: MOVEINFODATA _bCanMove flag is default-constructible and distinguishes gate states",
           "[world][navigation][portal][warp][6-1-2]")
 {
-    SEASON3B::CMoveCommandData::MOVEINFODATA passable = {};
-    passable._bCanMove = true;
-
-    SEASON3B::CMoveCommandData::MOVEINFODATA blocked = {};
-    blocked._bCanMove = false;
-
-    SECTION("_bCanMove = true means gate requirements are satisfied")
+    SECTION("Default-constructed MOVEINFODATA has _bCanMove == false (gates locked by default)")
     {
-        REQUIRE(passable._bCanMove == true);
+        SEASON3B::CMoveCommandData::MOVEINFODATA data = {};
+        REQUIRE(data._bCanMove == false);
     }
 
-    SECTION("_bCanMove = false means gate is locked (level or zen requirement unmet)")
+    SECTION("Passable and blocked gates are distinguishable via _bCanMove")
     {
-        REQUIRE(blocked._bCanMove == false);
+        SEASON3B::CMoveCommandData::MOVEINFODATA passable = {};
+        passable._bCanMove = true;
+
+        SEASON3B::CMoveCommandData::MOVEINFODATA blocked = {};
+        blocked._bCanMove = false;
+
+        REQUIRE(passable._bCanMove != blocked._bCanMove);
+    }
+
+    SECTION("_bCanMove is independent of gate index")
+    {
+        SEASON3B::CMoveCommandData::MOVEINFODATA data = {};
+        data._ReqInfo.index = 42;
+        data._bCanMove = true;
+        REQUIRE(data._bCanMove == true);
+        REQUIRE((data == 42) == true);
     }
 }
 
@@ -413,11 +423,22 @@ TEST_CASE("AC-2 [6-1-2]: TW_* terrain attribute flags are distinct non-overlappi
 
     SECTION("All TW_* flags used in FindPath() pathfinding are mutually non-overlapping")
     {
-        REQUIRE((TW_SAFEZONE & TW_NOMOVE) == 0);
-        REQUIRE((TW_NOMOVE & TW_ACTION) == 0);
-        REQUIRE((TW_ACTION & TW_HEIGHT) == 0);
-        REQUIRE((TW_HEIGHT & TW_CAMERA_UP) == 0);
+        // All 15 pairs among the 6 TW_* flags
         REQUIRE((TW_SAFEZONE & TW_CHARACTER) == 0);
+        REQUIRE((TW_SAFEZONE & TW_NOMOVE) == 0);
+        REQUIRE((TW_SAFEZONE & TW_ACTION) == 0);
+        REQUIRE((TW_SAFEZONE & TW_HEIGHT) == 0);
+        REQUIRE((TW_SAFEZONE & TW_CAMERA_UP) == 0);
+        REQUIRE((TW_CHARACTER & TW_NOMOVE) == 0);
+        REQUIRE((TW_CHARACTER & TW_ACTION) == 0);
+        REQUIRE((TW_CHARACTER & TW_HEIGHT) == 0);
+        REQUIRE((TW_CHARACTER & TW_CAMERA_UP) == 0);
+        REQUIRE((TW_NOMOVE & TW_ACTION) == 0);
+        REQUIRE((TW_NOMOVE & TW_HEIGHT) == 0);
+        REQUIRE((TW_NOMOVE & TW_CAMERA_UP) == 0);
+        REQUIRE((TW_ACTION & TW_HEIGHT) == 0);
+        REQUIRE((TW_ACTION & TW_CAMERA_UP) == 0);
+        REQUIRE((TW_HEIGHT & TW_CAMERA_UP) == 0);
     }
 }
 
@@ -433,8 +454,12 @@ TEST_CASE("AC-2 [6-1-2]: TW_* terrain attribute flags are distinct non-overlappi
 
 #ifdef MU_WORLD_NAVIGATION_TESTS_ENABLED
 
-// CMapManager range query tests, CPortalMgr state tests, and PATH::FindPath A* tests
-// are implemented here once MUGame linkage is available.
+// MUGame-linked tests for story 6-1-2 are not yet implemented.
+// When MUGame linkage is available, replace this static_assert with real test
+// implementations for CMapManager range queries, CPortalMgr state, and PATH::FindPath.
+static_assert(false,
+              "MU_WORLD_NAVIGATION_TESTS_ENABLED is defined but MUGame-linked tests "
+              "for story 6-1-2 are not yet implemented. Remove this flag or add the tests.");
 
 #else
 

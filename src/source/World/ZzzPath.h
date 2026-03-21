@@ -71,10 +71,12 @@ public:
     bool FindPath(int xStart, int yStart, int xEnd, int yEnd, bool bErrorCheck, int iWall, bool Value,
                   float fDistance = 0.0f);
 
+public:
+    int EstimateCostToGoal(int xStart, int yStart, int xNew, int yNew);
+
 private:
     void SetEndNodes(bool bErrorCheck, int iWall, int xEnd, int yEnd, float fDistance);
     int CalculateCostToStartAddition(int xDir, int yDir);
-    int EstimateCostToGoal(int xStart, int yStart, int xNew, int yNew);
     bool GeneratePath(int xStart, int yStart, int xEnd, int yEnd);
 
 #ifdef SHOW_PATH_INFO
