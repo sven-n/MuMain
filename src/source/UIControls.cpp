@@ -18,6 +18,7 @@
 #include "ReadScript.h"
 #include "CMVP1stDirection.h"
 #include "UIManager.h"
+#include "InventoryUtils.h"
 #include "NewUISystem.h"
 
 extern BYTE m_CrywolfState;
@@ -5102,21 +5103,6 @@ bool lessfunc(const UNMIX_TEXT& lhs, const UNMIX_TEXT& rhs)
     return (lhs.m_iInvenIdx > rhs.m_iInvenIdx);
 }
 
-static ITEM* FindInventoryItemBySlot(const int slot)
-{
-    if (slot < MAX_EQUIPMENT_INDEX || slot >= MAX_MY_INVENTORY_EX_INDEX)
-    {
-        return nullptr;
-    }
-
-    if (slot < MAX_MY_INVENTORY_INDEX)
-    {
-        return (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(slot) : nullptr;
-    }
-
-    return (g_pMyInventoryExt != nullptr) ? g_pMyInventoryExt->FindItem(slot) : nullptr;
-}
-
 void CUIUnmixgemList::Sort()
 {
     sort(m_TextList.begin(), m_TextList.end(), lessfunc);
@@ -5215,7 +5201,7 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
 
     wchar_t oText[MAX_GLOBAL_TEXT_STRING] = { 0, };
 
-    ITEM* pItem = FindInventoryItemBySlot(m_TextListIter->m_iInvenIdx);
+    const ITEM* pItem = FindInventoryItemBySlot(m_TextListIter->m_iInvenIdx);
     if (pItem)
     {
         int	  nIdx = COMGEM::Check_Jewel(pItem->Type);

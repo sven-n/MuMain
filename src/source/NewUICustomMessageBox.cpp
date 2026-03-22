@@ -13,6 +13,7 @@
 #include "npcBreeder.h"
 #include "ZzzOpenData.h"
 #include "DuelMgr.h"
+#include "InventoryUtils.h"
 #include "NewUISystem.h"
 #include "w_CursedTemple.h"
 
@@ -26,24 +27,6 @@ char AppointType;
 #define BATTLEMASTER	32
 
 using namespace SEASON3B;
-
-namespace
-{
-    ITEM* FindInventoryItemBySlot(const int slot)
-    {
-        if (slot < MAX_EQUIPMENT_INDEX || slot >= MAX_MY_INVENTORY_EX_INDEX)
-        {
-            return nullptr;
-        }
-
-        if (slot < MAX_MY_INVENTORY_INDEX)
-        {
-            return (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(slot) : nullptr;
-        }
-
-        return (g_pMyInventoryExt != nullptr) ? g_pMyInventoryExt->FindItem(slot) : nullptr;
-    }
-}
 
 SEASON3B::CNewUITextInputMsgBox::CNewUITextInputMsgBox()
 {
@@ -2086,7 +2069,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
     UNMIX_TEXT* pUT = COMGEM::m_UnmixTarList.GetSelectedText();
     if (pUT)
     {
-        ITEM* pItem = FindInventoryItemBySlot(pUT->m_iInvenIdx);
+        const ITEM* pItem = FindInventoryItemBySlot(pUT->m_iInvenIdx);
         if (pItem == nullptr)
         {
             return CALLBACK_BREAK;

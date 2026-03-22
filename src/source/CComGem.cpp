@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstdint>
 
+#include "InventoryUtils.h"
 #include "ZzzInventory.h"
 #include "NewUIInventoryCtrl.h"
 #include "NewUISystem.h"
@@ -26,21 +27,6 @@ namespace COMGEM
         SEASON3B::CNewUIInventoryCtrl* GetInventoryCtrl()
         {
             return (g_pMyInventory != nullptr) ? g_pMyInventory->GetInventoryCtrl() : nullptr;
-        }
-
-        const ITEM* FindInventoryItemBySlot(const int slot)
-        {
-            if (slot < MAX_EQUIPMENT_INDEX || slot >= MAX_MY_INVENTORY_EX_INDEX)
-            {
-                return nullptr;
-            }
-
-            if (slot < MAX_MY_INVENTORY_INDEX)
-            {
-                return (g_pMyInventory != nullptr) ? g_pMyInventory->FindItem(slot) : nullptr;
-            }
-
-            return (g_pMyInventoryExt != nullptr) ? g_pMyInventoryExt->FindItem(slot) : nullptr;
         }
     }
 
