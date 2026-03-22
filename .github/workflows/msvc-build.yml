@@ -1,4 +1,4 @@
-name: Build Windows Client
+name: MSVC Windows Build
 
 on:
   workflow_dispatch:
