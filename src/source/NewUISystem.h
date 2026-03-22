@@ -133,6 +133,9 @@ namespace SEASON3B
         void HideAllGroupA();
         void HideAllGroupB();
         void HideGroupBeforeOpenInterface();
+        void UpdateHeroPositionInfoVisibilityForLayoutChange(DWORD dwKey);
+        void SyncHeroPositionInfoVisibility();
+        bool ShouldHideHeroPositionInfo();
 
         /* Interface classes */
     private:

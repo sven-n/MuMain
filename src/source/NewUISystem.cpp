@@ -8,6 +8,29 @@
 
 using namespace SEASON3B;
 
+namespace
+{
+    bool IsHeroPositionLayoutInterface(DWORD dwKey)
+    {
+        switch (dwKey)
+        {
+        case INTERFACE_INVENTORY:
+        case INTERFACE_INVENTORY_EXT:
+        case INTERFACE_STORAGE:
+        case INTERFACE_STORAGE_EXT:
+        case INTERFACE_CHARACTER:
+        case INTERFACE_NPCSHOP:
+        case INTERFACE_MIXINVENTORY:
+        case INTERFACE_TRADE:
+        case INTERFACE_MYSHOP_INVENTORY:
+        case INTERFACE_PURCHASESHOP_INVENTORY:
+            return true;
+        default:
+            return false;
+        }
+    }
+}
+
 CNewUISystem::CNewUISystem()
 {
     m_pNewUIMng = nullptr;
@@ -769,6 +792,7 @@ void CNewUISystem::Show(DWORD dwKey)
         HideAllGroupA();
         g_pNPCShop->OpenningProcess();
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY);
+        g_pNPCShop->SetPos(640 - 190 * 2, 0);
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
     }
     else if (dwKey == INTERFACE_STORAGE)
@@ -1094,6 +1118,8 @@ void CNewUISystem::Show(DWORD dwKey)
 
     m_pNewUIMng->ShowInterface(dwKey);
 
+    UpdateHeroPositionInfoVisibilityForLayoutChange(dwKey);
+
     int iScreenWidth = GetScreenWidth();
     m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
     m_pNewBuffWindow->SetPos(iScreenWidth);
@@ -1168,7 +1194,6 @@ void CNewUISystem::Hide(DWORD dwKey)
 
         if (IsVisible(INTERFACE_INVENTORY_EXT))
         {
-            // Use Hide() to preserve paired side effects (e.g. hero position widget restore).
             Hide(INTERFACE_INVENTORY_EXT);
         }
 
@@ -1245,6 +1270,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_NPCSHOP)
     {
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         g_pNPCShop->ClosingProcess();
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
@@ -1269,7 +1298,10 @@ void CNewUISystem::Hide(DWORD dwKey)
         if (!g_pStorageInventory->ProcessClosing())
             return;
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-        m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY_EXT, false);
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
         Show(INTERFACE_HERO_POSITION_INFO);
     }
@@ -1325,6 +1357,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_TRADE)
     {
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         g_pTrade->ProcessClosing();
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
@@ -1510,6 +1546,8 @@ void CNewUISystem::Hide(DWORD dwKey)
 
     m_pNewUIMng->ShowInterface(dwKey, false);
 
+    UpdateHeroPositionInfoVisibilityForLayoutChange(dwKey);
+
     int iScreenWidth = GetScreenWidth();
     m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
     m_pNewBuffWindow->SetPos(iScreenWidth);
@@ -1680,6 +1718,49 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
             m_pNewUIMng->ShowInterface(dwGroupC[i], false);
         }
     }
+}
+
+void CNewUISystem::UpdateHeroPositionInfoVisibilityForLayoutChange(DWORD dwKey)
+{
+    if (IsHeroPositionLayoutInterface(dwKey))
+    {
+        SyncHeroPositionInfoVisibility();
+    }
+}
+
+void CNewUISystem::SyncHeroPositionInfoVisibility()
+{
+    if (!m_pNewUIMng)
+    {
+        return;
+    }
+
+    m_pNewUIMng->ShowInterface(INTERFACE_HERO_POSITION_INFO, !ShouldHideHeroPositionInfo());
+}
+
+bool CNewUISystem::ShouldHideHeroPositionInfo()
+{
+    if (!m_pNewUIMng)
+    {
+        return false;
+    }
+
+    if (IsVisible(INTERFACE_STORAGE_EXT))
+    {
+        return true;
+    }
+
+    if (!IsVisible(INTERFACE_INVENTORY_EXT))
+    {
+        return false;
+    }
+
+    return IsVisible(INTERFACE_CHARACTER)
+        || IsVisible(INTERFACE_STORAGE)
+        || IsVisible(INTERFACE_MYSHOP_INVENTORY)
+        || IsVisible(INTERFACE_NPCSHOP)
+        || IsVisible(INTERFACE_MIXINVENTORY)
+        || IsVisible(INTERFACE_TRADE);
 }
 
 void CNewUISystem::Enable(DWORD dwKey)
