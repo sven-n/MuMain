@@ -224,9 +224,8 @@ namespace MUHelper
             _targetsLock.unlock();
         }
 
-        if (m_config.bUseSelfDefense)
+        if (m_config.bUseSelfDefense && IsMonster(pTarget))
         {
-            pTarget->Object.Kind = KIND_MONSTER;
             m_iCurrentTarget = iTargetId;
         }
     }
@@ -301,6 +300,11 @@ namespace MUHelper
             int iIndex = FindCharacterIndex(iMonsterId);
             CHARACTER* pTarget = &CharactersClient[iIndex];
 
+            if (!IsMonster(pTarget))
+            {
+                continue;
+            }
+
             int iDistance = ComputeDistanceFromTarget(pTarget);
             if (iDistance < iMinDistance)
             {
@@ -328,6 +332,11 @@ namespace MUHelper
         {
             int iIndex = FindCharacterIndex(iMonsterId);
             CHARACTER* pTarget = &CharactersClient[iIndex];
+
+            if (!IsMonster(pTarget))
+            {
+                continue;
+            }
 
             int iDistance = ComputeDistanceFromTarget(pTarget);
             if (iDistance > iMaxDistance)
