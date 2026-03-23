@@ -214,6 +214,29 @@ target_sources(MuTests PRIVATE world/test_world_navigation_validation.cpp)
 # paths — no extra target_include_directories needed for this test file.
 target_sources(MuTests PRIVATE gameplay/test_combat_system_validation.cpp)
 
+# Story 6.2.2: Inventory & Trading Validation [VS1-GAME-VALIDATE-INVENTORY]
+# RED PHASE: Tests verify inventory slot/bag constants, item struct layouts, STORAGE_TYPE
+# pairwise distinctness, and trade system data structures. No server or Win32 required
+# for component-level struct/enum tests; full AC validation gated by MU_GAME_AVAILABLE.
+target_sources(MuTests PRIVATE gameplay/test_inventory_trading_validation.cpp)
+
+# Story 6.3.1: Social Systems Validation [VS1-GAME-VALIDATE-SOCIAL]
+# RED PHASE: Tests verify chat MESSAGE_TYPE enum (10 values + TYPE_UNKNOWN), INPUT_MESSAGE_TYPE
+# channel count, MAX_CHAT_SIZE=90, PARTY_t struct layout, GuildConstants namespace
+# (GUILD_NAME_LENGTH=8, GUILD_MARK_SIZE=64, Capacity::MAX_CAPACITY=80), GuildTab/GuildInfoButton/
+# RelationshipType enums, GUILD_LIST_t/MARK_t struct layouts, GuildConstants::Colors ARGB values.
+# MU_GAME_AVAILABLE gates UI and packet struct tests (NewUIChatLogWindow, WSclient).
+target_sources(MuTests PRIVATE gameplay/test_social_systems_validation.cpp)
+
+# Story 6.3.2: Advanced Game Systems Validation [VS1-GAME-VALIDATE-SYSTEMS]
+# RED PHASE: Tests verify quest constants (MAX_QUESTS=200, CONDITION/REQUEST=16),
+# TYPE_QUEST/QUEST_VIEW enum completeness, QUEST_CLASS_ACT/REQUEST/ATTRIBUTE struct layouts,
+# pet state/PET_TYPE/PET_COMMAND enum integrity, DUEL_PLAYER_INFO/DUEL_CHANNEL_INFO struct
+# layouts, MAX_DUEL_CHANNELS=4, _DUEL_PLAYER_TYPE enum values.
+# MU_GAME_AVAILABLE gates CSQuest state packing constants, PET_INFO struct, PetObject::ActionType,
+# pet rendering constants (PC4_ELF..SKELETON), and CSBaseMatch inheritance static_assert checks.
+target_sources(MuTests PRIVATE gameplay/test_advanced_systems_validation.cpp)
+
 # Story 5.3.1: Audio Format Validation [VS1-AUDIO-FORMAT-VALIDATE]
 # RED PHASE: Tests verify miniaudio correctly decodes WAV, MP3, and OGG Vorbis audio
 # formats used by the game, and that error paths are handled gracefully.
