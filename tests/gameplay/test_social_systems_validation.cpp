@@ -133,6 +133,8 @@ TEST_CASE("AC-1 [6-3-1]: MESSAGE_TYPE enum covers all chat channels with no dupl
         REQUIRE(static_cast<int>(MESSAGE_TYPE::TYPE_CHAT_MESSAGE) == 1);
         REQUIRE(static_cast<int>(MESSAGE_TYPE::TYPE_WHISPER_MESSAGE) == 2);
         REQUIRE(static_cast<int>(MESSAGE_TYPE::TYPE_SYSTEM_MESSAGE) == 3);
+        // TYPE_ERROR_MESSAGE=4 sits between system(3) and party(5)
+        REQUIRE(static_cast<int>(MESSAGE_TYPE::TYPE_ERROR_MESSAGE) == 4);
         REQUIRE(static_cast<int>(MESSAGE_TYPE::TYPE_PARTY_MESSAGE) == 5);
         REQUIRE(static_cast<int>(MESSAGE_TYPE::TYPE_GUILD_MESSAGE) == 6);
         REQUIRE(static_cast<int>(MESSAGE_TYPE::TYPE_UNION_MESSAGE) == 7);
@@ -211,7 +213,6 @@ TEST_CASE("AC-2 [6-3-1]: Party constants define correct capacity and struct layo
     SECTION("PARTY_t struct is non-empty — carries all AC-specified member fields")
     {
         static_assert(sizeof(PARTY_t) > 0, "PARTY_t must be a non-empty struct");
-        REQUIRE(sizeof(PARTY_t) > 0u);
     }
 }
 
@@ -234,7 +235,7 @@ TEST_CASE("AC-3 [6-3-1]: GuildConstants define correct guild name and mark dimen
         REQUIRE(GuildConstants::GUILD_NAME_BUFFER_SIZE == 9);
     }
 
-    SECTION("GUILD_MARK_SIZE is 64 — 8x8 pixel bitmap stored as 64 nibble-packed bytes")
+    SECTION("GUILD_MARK_SIZE is 64 — 8x8 pixel bitmap stored as 64 bytes (byte-per-pixel)")
     {
         REQUIRE(GuildConstants::GUILD_MARK_SIZE == 64);
     }
@@ -297,7 +298,7 @@ TEST_CASE("AC-3 [6-3-1]: GuildInfoButton enum covers all 7 button values includi
         REQUIRE(static_cast<int>(GuildConstants::GuildInfoButton::END) == 6);
     }
 
-    SECTION("All GuildInfoButton values from GUILD_OUT to UNION_OUT are pairwise distinct")
+    SECTION("All 7 GuildInfoButton values (GUILD_OUT through END) are pairwise distinct")
     {
         const int buttons[] = {
             static_cast<int>(GuildConstants::GuildInfoButton::GUILD_OUT),
@@ -306,6 +307,7 @@ TEST_CASE("AC-3 [6-3-1]: GuildInfoButton enum covers all 7 button values includi
             static_cast<int>(GuildConstants::GuildInfoButton::GET_OUT),
             static_cast<int>(GuildConstants::GuildInfoButton::UNION_CREATE),
             static_cast<int>(GuildConstants::GuildInfoButton::UNION_OUT),
+            static_cast<int>(GuildConstants::GuildInfoButton::END),
         };
         constexpr int n = static_cast<int>(sizeof(buttons) / sizeof(buttons[0]));
         for (int i = 0; i < n; ++i)
@@ -371,7 +373,6 @@ TEST_CASE("AC-3 [6-3-1]: GUILD_LIST_t struct has correct field layout", "[guild]
     SECTION("GUILD_LIST_t is a non-empty struct")
     {
         static_assert(sizeof(GUILD_LIST_t) > 0, "GUILD_LIST_t must be non-empty");
-        REQUIRE(sizeof(GUILD_LIST_t) > 0u);
     }
 
     SECTION("GUILD_LIST_t::Name buffer covers MAX_USERNAME_SIZE+1 wide characters")
@@ -393,7 +394,6 @@ TEST_CASE("AC-3 [6-3-1]: MARK_t struct has correct field layout for guild mark s
     SECTION("MARK_t is a non-empty struct")
     {
         static_assert(sizeof(MARK_t) > 0, "MARK_t must be non-empty");
-        REQUIRE(sizeof(MARK_t) > 0u);
     }
 
     SECTION("MARK_t::GuildName buffer is GUILD_NAME_BUFFER_SIZE wide characters")
