@@ -237,6 +237,17 @@ target_sources(MuTests PRIVATE gameplay/test_social_systems_validation.cpp)
 # pet rendering constants (PC4_ELF..SKELETON), and CSBaseMatch inheritance static_assert checks.
 target_sources(MuTests PRIVATE gameplay/test_advanced_systems_validation.cpp)
 
+# Story 6.4.1: UI Windows Comprehensive Validation [VS1-GAME-VALIDATE-UI]
+# RED PHASE: Tests verify INTERFACE_LIST enum completeness and coverage (AC-4),
+# CNewUIObj class hierarchy and Show/Enable state transitions (AC-1, MU_GAME_AVAILABLE),
+# inventory grid and minimap MASTER_DATA dimension constants (AC-2, MU_GAME_AVAILABLE),
+# BUTTON_STATE/RADIOGROUPEVENT_NONE/SQUARE_COLOR_STATE enums (AC-3, MU_GAME_AVAILABLE),
+# and SSIM infrastructure validity for 190x429 inventory and 320x240 minimap buffers (AC-5).
+# AC-1/AC-2/AC-3 class-level tests are gated by MU_GAME_AVAILABLE (require Win32 + MUGame).
+# AC-4 (INTERFACE_LIST from mu_enum.h) and AC-5 (GroundTruthCapture.h ComputeSSIM) are
+# always compiled and run — no Win32 or OpenGL required.
+target_sources(MuTests PRIVATE gameplay/test_ui_windows_validation.cpp)
+
 # Story 5.3.1: Audio Format Validation [VS1-AUDIO-FORMAT-VALIDATE]
 # RED PHASE: Tests verify miniaudio correctly decodes WAV, MP3, and OGG Vorbis audio
 # formats used by the game, and that error paths are handled gracefully.
