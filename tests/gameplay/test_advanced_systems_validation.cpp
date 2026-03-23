@@ -154,21 +154,20 @@ TEST_CASE("AC-1 [6-3-2]: Quest view mode enum covers all display states", "[ques
             QUEST_VIEW_PREVIEW,
             QUEST_VIEW_END,
         };
-        REQUIRE(views[0] != views[1]);
-        REQUIRE(views[0] != views[2]);
-        REQUIRE(views[0] != views[3]);
-        REQUIRE(views[1] != views[2]);
-        REQUIRE(views[1] != views[3]);
-        REQUIRE(views[2] != views[3]);
+        constexpr int n = static_cast<int>(sizeof(views) / sizeof(views[0]));
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = i + 1; j < n; ++j)
+            {
+                REQUIRE(views[i] != views[j]);
+            }
+        }
     }
 }
 
 TEST_CASE("AC-1 [6-3-2]: QUEST_CLASS_ACT struct has correct field layout", "[quest][struct][act][6-3-2]")
 {
-    SECTION("QUEST_CLASS_ACT is a non-empty struct")
-    {
-        static_assert(sizeof(QUEST_CLASS_ACT) > 0, "QUEST_CLASS_ACT must be non-empty");
-    }
+    static_assert(sizeof(QUEST_CLASS_ACT) > 0, "QUEST_CLASS_ACT must be non-empty");
 
     SECTION("QUEST_CLASS_ACT::chLive and byQuestType are single-byte fields (BYTE)")
     {
@@ -190,15 +189,20 @@ TEST_CASE("AC-1 [6-3-2]: QUEST_CLASS_ACT struct has correct field layout", "[que
     {
         REQUIRE(sizeof(QUEST_CLASS_ACT::shQuestStartText) == 4u * sizeof(short));
     }
+
+    SECTION("QUEST_CLASS_ACT::byItemSubType, byItemLevel, byItemNum, byRequestType are single-byte fields")
+    {
+        REQUIRE(sizeof(QUEST_CLASS_ACT::byItemSubType) == 1u);
+        REQUIRE(sizeof(QUEST_CLASS_ACT::byItemLevel) == 1u);
+        REQUIRE(sizeof(QUEST_CLASS_ACT::byItemNum) == 1u);
+        REQUIRE(sizeof(QUEST_CLASS_ACT::byRequestType) == 1u);
+    }
 }
 
 TEST_CASE("AC-1 [6-3-2]: QUEST_CLASS_REQUEST struct has correct field layout",
           "[quest][struct][request][6-3-2]")
 {
-    SECTION("QUEST_CLASS_REQUEST is a non-empty struct")
-    {
-        static_assert(sizeof(QUEST_CLASS_REQUEST) > 0, "QUEST_CLASS_REQUEST must be non-empty");
-    }
+    static_assert(sizeof(QUEST_CLASS_REQUEST) > 0, "QUEST_CLASS_REQUEST must be non-empty");
 
     SECTION("QUEST_CLASS_REQUEST::byLive and byType are single-byte fields (BYTE)")
     {
@@ -218,15 +222,17 @@ TEST_CASE("AC-1 [6-3-2]: QUEST_CLASS_REQUEST struct has correct field layout",
     {
         REQUIRE(sizeof(QUEST_CLASS_REQUEST::dwZen) == 4u);
     }
+
+    SECTION("QUEST_CLASS_REQUEST::shErrorText is a 2-byte field (short)")
+    {
+        REQUIRE(sizeof(QUEST_CLASS_REQUEST::shErrorText) == 2u);
+    }
 }
 
 TEST_CASE("AC-1 [6-3-2]: QUEST_ATTRIBUTE struct uses correct array sizes and name buffer",
           "[quest][struct][attribute][6-3-2]")
 {
-    SECTION("QUEST_ATTRIBUTE is a non-empty struct")
-    {
-        static_assert(sizeof(QUEST_ATTRIBUTE) > 0, "QUEST_ATTRIBUTE must be non-empty");
-    }
+    static_assert(sizeof(QUEST_ATTRIBUTE) > 0, "QUEST_ATTRIBUTE must be non-empty");
 
     SECTION("QUEST_ATTRIBUTE::QuestAct array holds exactly MAX_QUEST_CONDITION=16 entries")
     {
@@ -243,6 +249,13 @@ TEST_CASE("AC-1 [6-3-2]: QUEST_ATTRIBUTE struct uses correct array sizes and nam
     SECTION("QUEST_ATTRIBUTE::strQuestName buffer holds 32 wide characters")
     {
         REQUIRE(sizeof(QUEST_ATTRIBUTE::strQuestName) == 32u * sizeof(wchar_t));
+    }
+
+    SECTION("QUEST_ATTRIBUTE header fields: shQuestConditionNum, shQuestRequestNum, wNpcType")
+    {
+        REQUIRE(sizeof(QUEST_ATTRIBUTE::shQuestConditionNum) == 2u);
+        REQUIRE(sizeof(QUEST_ATTRIBUTE::shQuestRequestNum) == 2u);
+        REQUIRE(sizeof(QUEST_ATTRIBUTE::wNpcType) == 2u);
     }
 }
 
@@ -412,10 +425,7 @@ TEST_CASE("AC-2 [6-3-2]: PET_COMMAND enum covers all AI command modes with no du
 TEST_CASE("AC-2 [6-3-2]: PET_INFO struct has correct field layout for network data",
           "[pet][struct][info][6-3-2]")
 {
-    SECTION("PET_INFO is a non-empty struct")
-    {
-        static_assert(sizeof(PET_INFO) > 0, "PET_INFO must be non-empty");
-    }
+    static_assert(sizeof(PET_INFO) > 0, "PET_INFO must be non-empty");
 
     SECTION("PET_INFO::m_dwPetType, m_dwExp1, m_dwExp2 are 4-byte fields (DWORD)")
     {
@@ -490,7 +500,7 @@ TEST_CASE("AC-2 [6-3-2]: Pet type rendering constants are pairwise distinct",
     SECTION("All pet type rendering constants (PC4_ELF through SKELETON) are pairwise distinct")
     {
         // PANDA (#define PANDA 5) may not be defined if PJH_ADD_PANDA_PET is not set.
-        // Test the four unconditional constants: PC4_ELF, PC4_TEST, PC4_SATAN, XMAS_RUDOLPH, UNICORN, SKELETON.
+        // Test the six unconditional constants: PC4_ELF, PC4_TEST, PC4_SATAN, XMAS_RUDOLPH, UNICORN, SKELETON.
         const int pet_types[] = {
             PC4_ELF,      // 1
             PC4_TEST,     // 2
@@ -556,10 +566,7 @@ TEST_CASE("AC-3 [6-3-2]: _DUEL_PLAYER_TYPE enum identifies hero and enemy duel p
 TEST_CASE("AC-3 [6-3-2]: DUEL_PLAYER_INFO struct has correct field layout for combat tracking",
           "[pvp][struct][player][6-3-2]")
 {
-    SECTION("DUEL_PLAYER_INFO is a non-empty struct")
-    {
-        static_assert(sizeof(DUEL_PLAYER_INFO) > 0, "DUEL_PLAYER_INFO must be non-empty");
-    }
+    static_assert(sizeof(DUEL_PLAYER_INFO) > 0, "DUEL_PLAYER_INFO must be non-empty");
 
     SECTION("DUEL_PLAYER_INFO::m_sIndex is a 2-byte short field")
     {
@@ -587,10 +594,7 @@ TEST_CASE("AC-3 [6-3-2]: DUEL_PLAYER_INFO struct has correct field layout for co
 TEST_CASE("AC-3 [6-3-2]: DUEL_CHANNEL_INFO struct has correct field layout for arena channels",
           "[pvp][struct][channel][6-3-2]")
 {
-    SECTION("DUEL_CHANNEL_INFO is a non-empty struct")
-    {
-        static_assert(sizeof(DUEL_CHANNEL_INFO) > 0, "DUEL_CHANNEL_INFO must be non-empty");
-    }
+    static_assert(sizeof(DUEL_CHANNEL_INFO) > 0, "DUEL_CHANNEL_INFO must be non-empty");
 
     SECTION("DUEL_CHANNEL_INFO::m_bEnable and m_bJoinable are BOOL (4-byte int) fields")
     {
@@ -626,16 +630,22 @@ TEST_CASE("AC-3 [6-3-2]: DUEL_CHANNEL_INFO struct has correct field layout for a
 TEST_CASE("AC-4 [6-3-2]: MAX_DUEL_CHANNELS matches CDuelMgr channel array contract",
           "[duel][constants][consistency][6-3-2]")
 {
-    SECTION("MAX_DUEL_CHANNELS == MAX_DUEL_PLAYERS * 2 — each channel hosts a pair of duellists")
+    SECTION("MAX_DUEL_CHANNELS is 4 — validates independent channel capacity constant")
     {
-        // CDuelMgr allocates MAX_DUEL_CHANNELS channel slots and MAX_DUEL_PLAYERS (2) player slots.
-        // 4 channels × 2 players = 8 total duel participants tracked simultaneously.
-        REQUIRE(MAX_DUEL_CHANNELS == static_cast<int>(MAX_DUEL_PLAYERS) * 2);
+        // CDuelMgr allocates MAX_DUEL_CHANNELS independent channel slots.
+        // Each channel can host a pair of duellists (via MAX_DUEL_PLAYERS player array).
+        REQUIRE(MAX_DUEL_CHANNELS == 4);
     }
 
-    SECTION("DUEL_PLAYER_INFO array sized by MAX_DUEL_PLAYERS fits both hero and enemy slots")
+    SECTION("MAX_DUEL_PLAYERS is 2 — validates player slots per channel contract")
     {
         // CDuelMgr::m_DuelPlayer is std::array<DUEL_PLAYER_INFO, MAX_DUEL_PLAYERS>.
+        // Each duel channel uses exactly 2 player slots (hero + enemy).
+        REQUIRE(static_cast<int>(MAX_DUEL_PLAYERS) == 2);
+    }
+
+    SECTION("DUEL_HERO and DUEL_ENEMY indices fit within MAX_DUEL_PLAYERS bounds")
+    {
         // DUEL_HERO=0 and DUEL_ENEMY=1 must both index within [0, MAX_DUEL_PLAYERS).
         REQUIRE(static_cast<int>(DUEL_HERO) < static_cast<int>(MAX_DUEL_PLAYERS));
         REQUIRE(static_cast<int>(DUEL_ENEMY) < static_cast<int>(MAX_DUEL_PLAYERS));
