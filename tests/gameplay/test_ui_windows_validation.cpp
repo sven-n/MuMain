@@ -82,7 +82,7 @@
 // =============================================================================
 
 TEST_CASE("AC-4 [6-4-1]: INTERFACE_LIST boundary values and count validate 84+ window coverage",
-    "[ui][interface][enum][6-4-1]")
+          "[ui][interface][enum][6-4-1]")
 {
     using namespace SEASON3B;
 
@@ -113,25 +113,16 @@ TEST_CASE("AC-4 [6-4-1]: INTERFACE_LIST boundary values and count validate 84+ w
 }
 
 TEST_CASE("AC-4 [6-4-1]: HUD and core UI window IDs are present and pairwise distinct",
-    "[ui][interface][hud][distinct][6-4-1]")
+          "[ui][interface][hud][distinct][6-4-1]")
 {
     using namespace SEASON3B;
 
     SECTION("Core HUD and gameplay window IDs are pairwise distinct")
     {
         const int coreWindows[] = {
-            INTERFACE_MAINFRAME,
-            INTERFACE_INVENTORY,
-            INTERFACE_CHARACTER,
-            INTERFACE_CHATINPUTBOX,
-            INTERFACE_CHATLOGWINDOW,
-            INTERFACE_MINI_MAP,
-            INTERFACE_SKILL_LIST,
-            INTERFACE_BUFF_WINDOW,
-            INTERFACE_OPTION,
-            INTERFACE_WINDOW_MENU,
-            INTERFACE_HELP,
-            INTERFACE_NAME_WINDOW,
+            INTERFACE_MAINFRAME,     INTERFACE_INVENTORY,   INTERFACE_CHARACTER,  INTERFACE_CHATINPUTBOX,
+            INTERFACE_CHATLOGWINDOW, INTERFACE_MINI_MAP,    INTERFACE_SKILL_LIST, INTERFACE_BUFF_WINDOW,
+            INTERFACE_OPTION,        INTERFACE_WINDOW_MENU, INTERFACE_HELP,       INTERFACE_NAME_WINDOW,
         };
         constexpr int n = static_cast<int>(sizeof(coreWindows) / sizeof(coreWindows[0]));
         for (int i = 0; i < n; ++i)
@@ -145,7 +136,7 @@ TEST_CASE("AC-4 [6-4-1]: HUD and core UI window IDs are present and pairwise dis
 }
 
 TEST_CASE("AC-4 [6-4-1]: Inventory and commerce window IDs are pairwise distinct",
-    "[ui][interface][inventory][commerce][distinct][6-4-1]")
+          "[ui][interface][inventory][commerce][distinct][6-4-1]")
 {
     using namespace SEASON3B;
 
@@ -176,20 +167,15 @@ TEST_CASE("AC-4 [6-4-1]: Inventory and commerce window IDs are pairwise distinct
     }
 }
 
-TEST_CASE("AC-4 [6-4-1]: Social window IDs are pairwise distinct",
-    "[ui][interface][social][distinct][6-4-1]")
+TEST_CASE("AC-4 [6-4-1]: Social window IDs are pairwise distinct", "[ui][interface][social][distinct][6-4-1]")
 {
     using namespace SEASON3B;
 
     SECTION("Social window IDs are pairwise distinct")
     {
         const int socialWindows[] = {
-            INTERFACE_FRIEND,
-            INTERFACE_PARTY,
-            INTERFACE_GUILDINFO,
-            INTERFACE_PARTY_INFO_WINDOW,
-            INTERFACE_GENSRANKING,
-            INTERFACE_NPCGUILDMASTER,
+            INTERFACE_FRIEND,      INTERFACE_PARTY,          INTERFACE_GUILDINFO, INTERFACE_PARTY_INFO_WINDOW,
+            INTERFACE_GENSRANKING, INTERFACE_NPCGUILDMASTER,
         };
         constexpr int n = static_cast<int>(sizeof(socialWindows) / sizeof(socialWindows[0]));
         for (int i = 0; i < n; ++i)
@@ -202,20 +188,15 @@ TEST_CASE("AC-4 [6-4-1]: Social window IDs are pairwise distinct",
     }
 }
 
-TEST_CASE("AC-4 [6-4-1]: Castle window IDs are pairwise distinct",
-    "[ui][interface][castle][distinct][6-4-1]")
+TEST_CASE("AC-4 [6-4-1]: Castle window IDs are pairwise distinct", "[ui][interface][castle][distinct][6-4-1]")
 {
     using namespace SEASON3B;
 
     SECTION("Castle window IDs are pairwise distinct")
     {
         const int castleWindows[] = {
-            INTERFACE_GUARDSMAN,
-            INTERFACE_SENATUS,
-            INTERFACE_GATEKEEPER,
-            INTERFACE_GATESWITCH,
-            INTERFACE_CATAPULT,
-            INTERFACE_SIEGEWARFARE,
+            INTERFACE_GUARDSMAN,  INTERFACE_SENATUS,  INTERFACE_GATEKEEPER,
+            INTERFACE_GATESWITCH, INTERFACE_CATAPULT, INTERFACE_SIEGEWARFARE,
         };
         constexpr int n = static_cast<int>(sizeof(castleWindows) / sizeof(castleWindows[0]));
         for (int i = 0; i < n; ++i)
@@ -228,32 +209,19 @@ TEST_CASE("AC-4 [6-4-1]: Castle window IDs are pairwise distinct",
     }
 }
 
-TEST_CASE("AC-4 [6-4-1]: Event window IDs are pairwise distinct",
-    "[ui][interface][events][distinct][6-4-1]")
+TEST_CASE("AC-4 [6-4-1]: Event window IDs are pairwise distinct", "[ui][interface][events][distinct][6-4-1]")
 {
     using namespace SEASON3B;
 
     SECTION("Event window IDs are pairwise distinct")
     {
         const int eventWindows[] = {
-            INTERFACE_BLOODCASTLE,
-            INTERFACE_BLOODCASTLE_TIME,
-            INTERFACE_DEVILSQUARE,
-            INTERFACE_CHAOSCASTLE_TIME,
-            INTERFACE_CURSEDTEMPLE_NPC,
-            INTERFACE_CURSEDTEMPLE_GAMESYSTEM,
-            INTERFACE_CURSEDTEMPLE_RESULT,
-            INTERFACE_DUEL_WINDOW,
-            INTERFACE_CRYWOLF,
-            INTERFACE_DOPPELGANGER_NPC,
-            INTERFACE_DOPPELGANGER_FRAME,
-            INTERFACE_EMPIREGUARDIAN_NPC,
-            INTERFACE_EMPIREGUARDIAN_TIMER,
-            INTERFACE_BATTLE_SOCCER_SCORE,
-            INTERFACE_DUELWATCH,
-            INTERFACE_DUELWATCH_MAINFRAME,
-            INTERFACE_DUELWATCH_USERLIST,
-            INTERFACE_KANTURU2ND_ENTERNPC,
+            INTERFACE_BLOODCASTLE,          INTERFACE_BLOODCASTLE_TIME,    INTERFACE_DEVILSQUARE,
+            INTERFACE_CHAOSCASTLE_TIME,     INTERFACE_CURSEDTEMPLE_NPC,    INTERFACE_CURSEDTEMPLE_GAMESYSTEM,
+            INTERFACE_CURSEDTEMPLE_RESULT,  INTERFACE_DUEL_WINDOW,         INTERFACE_CRYWOLF,
+            INTERFACE_DOPPELGANGER_NPC,     INTERFACE_DOPPELGANGER_FRAME,  INTERFACE_EMPIREGUARDIAN_NPC,
+            INTERFACE_EMPIREGUARDIAN_TIMER, INTERFACE_BATTLE_SOCCER_SCORE, INTERFACE_DUELWATCH,
+            INTERFACE_DUELWATCH_MAINFRAME,  INTERFACE_DUELWATCH_USERLIST,  INTERFACE_KANTURU2ND_ENTERNPC,
             INTERFACE_KANTURU_INFO,
         };
         constexpr int n = static_cast<int>(sizeof(eventWindows) / sizeof(eventWindows[0]));
@@ -268,7 +236,7 @@ TEST_CASE("AC-4 [6-4-1]: Event window IDs are pairwise distinct",
 }
 
 TEST_CASE("AC-4 [6-4-1]: Quest and MuHelper window IDs are pairwise distinct",
-    "[ui][interface][quest][muhelper][distinct][6-4-1]")
+          "[ui][interface][quest][muhelper][distinct][6-4-1]")
 {
     using namespace SEASON3B;
 
@@ -308,6 +276,48 @@ TEST_CASE("AC-4 [6-4-1]: Quest and MuHelper window IDs are pairwise distinct",
     }
 }
 
+TEST_CASE("AC-4 [6-4-1]: Uncategorized window IDs are present and pairwise distinct",
+          "[ui][interface][misc][distinct][6-4-1]")
+{
+    using namespace SEASON3B;
+
+    SECTION("Remaining INTERFACE_LIST IDs not covered by category tests are pairwise distinct")
+    {
+        const int miscWindows[] = {
+            INTERFACE_MOVEMAP,
+            INTERFACE_COMMAND,
+            INTERFACE_PET,
+            INTERFACE_SERVERDIVISION,
+            INTERFACE_REFINERY,
+            INTERFACE_REFINERYINFO,
+            INTERFACE_ITEM_EXPLANATION,
+            INTERFACE_SETITEM_EXPLANATION,
+            INTERFACE_QUICK_COMMAND,
+            INTERFACE_SLIDEWINDOW,
+            INTERFACE_HERO_POSITION_INFO,
+            INTERFACE_MESSAGEBOX,
+            INTERFACE_ITEM_ENDURANCE_INFO,
+            INTERFACE_MASTER_LEVEL,
+            INTERFACE_GOLD_BOWMAN,
+            INTERFACE_GOLD_BOWMAN_LENA,
+            INTERFACE_INGAMESHOP,
+            INTERFACE_NPC_DIALOGUE,
+            INTERFACE_UNITEDMARKETPLACE_NPC_JULIA,
+            INTERFACE_HOTKEY,
+            INTERFACE_ITEM_TOOLTIP,
+            INTERFACE_SYSTEMLOGWINDOW,
+        };
+        constexpr int n = static_cast<int>(sizeof(miscWindows) / sizeof(miscWindows[0]));
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = i + 1; j < n; ++j)
+            {
+                REQUIRE(miscWindows[i] != miscWindows[j]);
+            }
+        }
+    }
+}
+
 // =============================================================================
 // AC-5 [6-4-1]: SSIM ground truth comparison infrastructure for key UI windows
 // The 5 key windows (inventory, character info, skills, map, chat) are identified by
@@ -317,21 +327,22 @@ TEST_CASE("AC-4 [6-4-1]: Quest and MuHelper window IDs are pairwise distinct",
 // =============================================================================
 
 TEST_CASE("AC-5 [6-4-1]: The 5 key UI window IDs for SSIM comparison are registered and distinct",
-    "[ui][ssim][key-windows][6-4-1]")
+          "[ui][ssim][key-windows][6-4-1]")
 {
     using namespace SEASON3B;
 
+    // Inventory, character info, skills, map, chat — the 5 priority windows per AC-5
+    const int keyWindows[] = {
+        INTERFACE_INVENTORY,    // Inventory window (190x429 px)
+        INTERFACE_CHARACTER,    // Character info window
+        INTERFACE_SKILL_LIST,   // Skills / hotbar skill list
+        INTERFACE_MINI_MAP,     // Map window
+        INTERFACE_CHATINPUTBOX, // Chat input window
+    };
+    constexpr int n = static_cast<int>(sizeof(keyWindows) / sizeof(keyWindows[0]));
+
     SECTION("5 key SSIM ground truth window IDs are pairwise distinct")
     {
-        // Inventory, character info, skills, map, chat — the 5 priority windows per AC-5
-        const int keyWindows[] = {
-            INTERFACE_INVENTORY,    // Inventory window (190x429 px)
-            INTERFACE_CHARACTER,    // Character info window
-            INTERFACE_SKILL_LIST,   // Skills / hotbar skill list
-            INTERFACE_MINI_MAP,     // Map window
-            INTERFACE_CHATINPUTBOX, // Chat input window
-        };
-        constexpr int n = static_cast<int>(sizeof(keyWindows) / sizeof(keyWindows[0]));
         for (int i = 0; i < n; ++i)
         {
             for (int j = i + 1; j < n; ++j)
@@ -343,15 +354,6 @@ TEST_CASE("AC-5 [6-4-1]: The 5 key UI window IDs for SSIM comparison are registe
 
     SECTION("All 5 key window IDs fall within the valid INTERFACE_LIST range")
     {
-        using namespace SEASON3B;
-        const int keyWindows[] = {
-            INTERFACE_INVENTORY,
-            INTERFACE_CHARACTER,
-            INTERFACE_SKILL_LIST,
-            INTERFACE_MINI_MAP,
-            INTERFACE_CHATINPUTBOX,
-        };
-        constexpr int n = static_cast<int>(sizeof(keyWindows) / sizeof(keyWindows[0]));
         for (int i = 0; i < n; ++i)
         {
             REQUIRE(keyWindows[i] > INTERFACE_BEGIN);
@@ -361,7 +363,7 @@ TEST_CASE("AC-5 [6-4-1]: The 5 key UI window IDs for SSIM comparison are registe
 }
 
 TEST_CASE("AC-5 [6-4-1]: SSIM infrastructure validates identical inventory-sized buffers",
-    "[ui][ssim][inventory][6-4-1]")
+          "[ui][ssim][inventory][6-4-1]")
 {
     // Inventory window dimensions: INVENTORY_WIDTH=190.0f, INVENTORY_HEIGHT=429.0f
     // (per CNewUIMyInventory private constexpr in NewUIMyInventory.h)
@@ -375,8 +377,7 @@ TEST_CASE("AC-5 [6-4-1]: SSIM infrastructure validates identical inventory-sized
         std::vector<unsigned char> imgA(size, 64u);
         std::vector<unsigned char> imgB(size, 64u);
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score >= 0.99);
     }
@@ -386,15 +387,36 @@ TEST_CASE("AC-5 [6-4-1]: SSIM infrastructure validates identical inventory-sized
         std::vector<unsigned char> imgA(size, 0u);   // black background
         std::vector<unsigned char> imgB(size, 255u); // white background
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score < 0.5);
     }
+
+    SECTION("Identical patterned 190x429 inventory buffers produce SSIM >= 0.99")
+    {
+        // Horizontal gradient exercises variance-dependent SSIM code paths
+        // (uniform buffers degenerate the formula by zeroing local variance)
+        std::vector<unsigned char> imgA(size);
+        for (int y = 0; y < height; ++y)
+        {
+            for (int x = 0; x < width; ++x)
+            {
+                unsigned char val = static_cast<unsigned char>(x * 255 / (width - 1));
+                std::size_t idx = static_cast<std::size_t>((y * width + x) * channels);
+                imgA[idx + 0] = val;
+                imgA[idx + 1] = val;
+                imgA[idx + 2] = val;
+            }
+        }
+        std::vector<unsigned char> imgB(imgA); // identical copy
+
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
+
+        REQUIRE(score >= 0.99);
+    }
 }
 
-TEST_CASE("AC-5 [6-4-1]: SSIM infrastructure validates identical minimap-sized buffers",
-    "[ui][ssim][minimap][6-4-1]")
+TEST_CASE("AC-5 [6-4-1]: SSIM infrastructure validates identical minimap-sized buffers", "[ui][ssim][minimap][6-4-1]")
 {
     // Minimap uses a typical 320x240 display region for ground truth comparison
     constexpr int width = 320;
@@ -407,8 +429,7 @@ TEST_CASE("AC-5 [6-4-1]: SSIM infrastructure validates identical minimap-sized b
         std::vector<unsigned char> imgA(size, 128u);
         std::vector<unsigned char> imgB(size, 128u);
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score >= 0.99);
     }
@@ -458,8 +479,7 @@ struct TestUIWindow : public SEASON3B::CNewUIObj
 // CNewUIObj implements: IsVisible(), IsEnabled(), Show(), Enable(), GetKeyEventOrder().
 // =============================================================================
 
-TEST_CASE("AC-1 [6-4-1]: INewUIBase is a pure-virtual (abstract) interface",
-    "[ui][hierarchy][abstract][6-4-1]")
+TEST_CASE("AC-1 [6-4-1]: INewUIBase is a pure-virtual (abstract) interface", "[ui][hierarchy][abstract][6-4-1]")
 {
     SECTION("INewUIBase is an abstract type — cannot be instantiated directly")
     {
@@ -468,7 +488,7 @@ TEST_CASE("AC-1 [6-4-1]: INewUIBase is a pure-virtual (abstract) interface",
 }
 
 TEST_CASE("AC-1 [6-4-1]: CNewUIObj is an abstract base class derived from INewUIBase",
-    "[ui][hierarchy][base-class][6-4-1]")
+          "[ui][hierarchy][base-class][6-4-1]")
 {
     SECTION("CNewUIObj derives from INewUIBase (all window classes inherit this base)")
     {
@@ -482,7 +502,7 @@ TEST_CASE("AC-1 [6-4-1]: CNewUIObj is an abstract base class derived from INewUI
 }
 
 TEST_CASE("AC-1 [6-4-1]: CNewUIObj default visibility and enabled state after construction",
-    "[ui][hierarchy][state][6-4-1]")
+          "[ui][hierarchy][state][6-4-1]")
 {
     SECTION("TestUIWindow (concrete CNewUIObj subclass) defaults to visible=true, enabled=true")
     {
@@ -525,7 +545,7 @@ TEST_CASE("AC-1 [6-4-1]: CNewUIObj default visibility and enabled state after co
 // =============================================================================
 
 TEST_CASE("AC-2 [6-4-1]: Inventory grid cell dimensions define valid square cells",
-    "[ui][inventory][grid][constants][6-4-1]")
+          "[ui][inventory][grid][constants][6-4-1]")
 {
     using namespace SEASON3B;
 
@@ -552,13 +572,13 @@ TEST_CASE("AC-2 [6-4-1]: Inventory grid cell dimensions define valid square cell
 }
 
 TEST_CASE("AC-2 [6-4-1]: CNewUIMiniMap MASTER_DATA skill icon geometry constants are valid",
-    "[ui][minimap][master-data][constants][6-4-1]")
+          "[ui][minimap][master-data][constants][6-4-1]")
 {
     using namespace SEASON3B;
 
     SECTION("SKILL_ICON_DATA_WDITH is 4 — data columns per icon entry in the master skill table")
     {
-        REQUIRE(CNewUIMiniMap::SKILL_ICON_DATA_WDITH == 4);
+        REQUIRE(CNewUIMiniMap::SKILL_ICON_DATA_WDITH == 4); // Note: "WDITH" is the upstream spelling in NewUIMiniMap.h
     }
 
     SECTION("SKILL_ICON_DATA_HEIGHT is 8 — data rows per icon entry in the master skill table")
@@ -584,7 +604,7 @@ TEST_CASE("AC-2 [6-4-1]: CNewUIMiniMap MASTER_DATA skill icon geometry constants
 }
 
 TEST_CASE("AC-2 [6-4-1]: TOOLTIP_TYPE enum covers all inventory tooltip display contexts",
-    "[ui][tooltip][enum][constants][6-4-1]")
+          "[ui][tooltip][enum][constants][6-4-1]")
 {
     using namespace SEASON3B;
 
@@ -596,12 +616,8 @@ TEST_CASE("AC-2 [6-4-1]: TOOLTIP_TYPE enum covers all inventory tooltip display 
     SECTION("All 6 TOOLTIP_TYPE values (UNKNOWN through PURCHASE_SHOP) are pairwise distinct")
     {
         const int types[] = {
-            UNKNOWN_TOOLTIP_TYPE,
-            TOOLTIP_TYPE_INVENTORY,
-            TOOLTIP_TYPE_REPAIR,
-            TOOLTIP_TYPE_NPC_SHOP,
-            TOOLTIP_TYPE_MY_SHOP,
-            TOOLTIP_TYPE_PURCHASE_SHOP,
+            UNKNOWN_TOOLTIP_TYPE,  TOOLTIP_TYPE_INVENTORY, TOOLTIP_TYPE_REPAIR,
+            TOOLTIP_TYPE_NPC_SHOP, TOOLTIP_TYPE_MY_SHOP,   TOOLTIP_TYPE_PURCHASE_SHOP,
         };
         constexpr int n = static_cast<int>(sizeof(types) / sizeof(types[0]));
         for (int i = 0; i < n; ++i)
@@ -621,8 +637,7 @@ TEST_CASE("AC-2 [6-4-1]: TOOLTIP_TYPE enum covers all inventory tooltip display 
 // RADIOGROUPEVENT_NONE is the sentinel for no active radio group event.
 // =============================================================================
 
-TEST_CASE("AC-3 [6-4-1]: BUTTON_STATE enum defines the 3 visual button interaction states",
-    "[ui][button][enum][6-4-1]")
+TEST_CASE("AC-3 [6-4-1]: BUTTON_STATE enum defines the 3 visual button interaction states", "[ui][button][enum][6-4-1]")
 {
     using namespace SEASON3B;
 
@@ -655,8 +670,7 @@ TEST_CASE("AC-3 [6-4-1]: BUTTON_STATE enum defines the 3 visual button interacti
     }
 }
 
-TEST_CASE("AC-3 [6-4-1]: RADIOGROUPEVENT_NONE sentinel is -1",
-    "[ui][button][radio-group][6-4-1]")
+TEST_CASE("AC-3 [6-4-1]: RADIOGROUPEVENT_NONE sentinel is -1", "[ui][button][radio-group][6-4-1]")
 {
     using namespace SEASON3B;
 
@@ -667,7 +681,7 @@ TEST_CASE("AC-3 [6-4-1]: RADIOGROUPEVENT_NONE sentinel is -1",
 }
 
 TEST_CASE("AC-3 [6-4-1]: SQUARE_COLOR_STATE enum covers normal and warning inventory slot states",
-    "[ui][inventory][color-state][6-4-1]")
+          "[ui][inventory][color-state][6-4-1]")
 {
     using namespace SEASON3B;
 
