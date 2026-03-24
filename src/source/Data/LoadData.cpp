@@ -4,9 +4,6 @@
 #include "stdafx.h"
 #include "LoadData.h"
 
-#include <codecvt>
-#include <locale>
-
 #include "GlobalBitmap.h"
 
 #include "ZzzBMD.h"

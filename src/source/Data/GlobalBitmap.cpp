@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <codecvt>
 #include <cstring>
 #include <fstream>
 #include <iterator>

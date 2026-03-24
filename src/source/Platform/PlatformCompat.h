@@ -177,10 +177,39 @@ inline int MultiByteToWideChar(UINT /*CodePage*/, DWORD /*dwFlags*/, const char*
         {
             break;
         }
+        // Validate continuation bytes have pattern 10xxxxxx (MEDIUM-1 fix)
+        bool valid = true;
         for (int i = 1; i < seqLen; ++i)
         {
+            if ((src[i] & 0xC0) != 0x80)
+            {
+                valid = false;
+                break;
+            }
             ch = (ch << 6) | (src[i] & 0x3F);
         }
+        if (!valid)
+        {
+            ++src;
+            continue;
+        }
+
+        // Reject overlong sequences (MEDIUM-2 fix)
+        // Each sequence length must produce values in the correct range
+        bool overlong = false;
+        if (seqLen == 2 && ch < 0x80)
+            overlong = true; // 2-byte: must be >= 0x80
+        if (seqLen == 3 && ch < 0x800)
+            overlong = true; // 3-byte: must be >= 0x800
+        if (seqLen == 4 && ch < 0x10000)
+            overlong = true; // 4-byte: must be >= 0x10000
+
+        if (overlong)
+        {
+            ++src;
+            continue;
+        }
+
         src += seqLen;
         if (cchWideChar > 0 && count < cchWideChar)
         {
