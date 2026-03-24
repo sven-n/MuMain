@@ -22,6 +22,9 @@
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #endif
+
+// Forward declaration — avoids pulling in Win32-heavy Winmain.h
+extern void SetMaxMessagePerCycle(int messages);
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 #include "ZzzPath.h"
 #endif // CSK_DEBUG_MAP_PATHFINDING
