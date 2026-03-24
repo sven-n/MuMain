@@ -153,17 +153,6 @@ void AddDebugText(const unsigned char* Buffer, int Size)
 // Forward declaration
 static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
 
-namespace
-{
-    constexpr int MasterExperienceUnlockLevel = 400;
-
-    bool IsMasterExperienceActive()
-    {
-        return gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true
-            && CharacterAttribute->Level >= MasterExperienceUnlockLevel;
-    }
-}
-
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
@@ -943,7 +932,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
         return rawExperience;
     };
 
-    if (IsMasterExperienceActive() == true)
+    if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
         Master_Level_Data.lMasterLevel_Experince = static_cast<__int64>(selectRevivalExperience(
             rawRevivalExperience,
@@ -5349,7 +5338,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     c->Dead = 1;
     c->Movement = false;
 
-    if (IsMasterExperienceActive() == true)
+    if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
         g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
         g_pMainFrame->SetGetExp_Wide(Exp);
@@ -5365,7 +5354,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     if (Exp > 0)
     {
         wchar_t Text[100];
-        if (IsMasterExperienceActive() == true)
+        if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
         {
             mu_swprintf(Text, GlobalText[1750], Exp);
         }

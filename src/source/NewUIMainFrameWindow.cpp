@@ -28,17 +28,6 @@
 #include "GameShop/InGameShopSystem.h"
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
-namespace
-{
-    constexpr int MasterExperienceUnlockLevel = 400;
-
-    bool IsMasterExperienceActive()
-    {
-        return gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == true
-            && CharacterAttribute->Level >= MasterExperienceUnlockLevel;
-    }
-}
-
 SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
 {
     m_bExpEffect = false;
@@ -420,7 +409,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
     __int64 dwExperience;
     double x, y, width, height;
 
-    if (IsMasterExperienceActive() == true)
+    if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
         wLevel = (__int64)Master_Level_Data.nMLevel;
         dwNexExperience = (__int64)Master_Level_Data.lNext_MasterLevel_Experince;
@@ -433,7 +422,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
         dwExperience = CharacterAttribute->Experience;
     }
 
-    if (IsMasterExperienceActive() == true)
+    if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
         x = 0; y = 470; width = 6; height = 4;
 

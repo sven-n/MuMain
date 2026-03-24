@@ -9,6 +9,7 @@ public:
     bool IsSecondClass(const CLASS_TYPE byClass);
     bool IsThirdClass(const CLASS_TYPE byClass);
     bool IsMasterLevel(const CLASS_TYPE byClass);
+    bool IsMasterExperienceActive(const CLASS_TYPE byClass, const int level);
     CLASS_TYPE GetBaseClass(CLASS_TYPE iClass);
     const wchar_t* GetCharacterClassText(const CLASS_TYPE byClass);
     
