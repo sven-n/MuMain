@@ -231,6 +231,12 @@ endif()
 # ============================================================
 option(MU_ENABLE_SDL3 "Enable SDL3 dependency (disable for MinGW CI if needed)" ON)
 if(MU_ENABLE_SDL3)
+    # Story 7.3.0: Propagate MU_ENABLE_SDL3 to ALL targets at project scope.
+    # Previously only MUPlatform received this flag (PRIVATE), leaving MUCore, MUData,
+    # MURenderFX, MUProtocol, and MUAudio without it — causing compilation failures
+    # on macOS/Linux where #ifdef MU_ENABLE_SDL3 guards were not active.
+    # [VS0-QUAL-BUILDCOMPAT-MACOS]
+    add_compile_definitions(MU_ENABLE_SDL3)
     include(FetchContent)
     set(SDL_TESTS OFF CACHE BOOL "" FORCE)
     set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -243,6 +249,11 @@ if(MU_ENABLE_SDL3)
         GIT_SHALLOW    TRUE
     )
     FetchContent_MakeAvailable(SDL3)
+    # Story 7.3.0: Make SDL3 headers available to ALL targets.
+    # PlatformCompat.h (included via PCH) has #ifdef MU_ENABLE_SDL3 sections that
+    # #include <SDL3/SDL.h>. Now that MU_ENABLE_SDL3 is project-scope, every target's
+    # PCH needs the SDL3 include path. [VS0-QUAL-BUILDCOMPAT-MACOS]
+    include_directories(SYSTEM "${sdl3_SOURCE_DIR}/include")
 endif()
 
 # ============================================================

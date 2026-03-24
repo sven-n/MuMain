@@ -36,6 +36,195 @@ inline std::filesystem::path mu_get_app_dir()
 #include <filesystem>
 #include <string>
 
+// Story 7.3.0: String comparison and compat stubs [VS0-QUAL-BUILDCOMPAT-MACOS]
+#define _wcsicmp wcscasecmp
+#define wcsicmp wcscasecmp
+#define wcsnicmp wcsncasecmp
+#define _stricmp strcasecmp
+#define _TRUNCATE ((size_t)-1)
+#define _snwprintf swprintf
+inline void OutputDebugString(const wchar_t* /*msg*/) {}
+
+// Story 7.3.0: MSVC secure string stubs [VS0-QUAL-BUILDCOMPAT-MACOS]
+inline errno_t wcsncpy_s(wchar_t* dest, size_t destSize, const wchar_t* src, size_t count)
+{
+    if (dest == nullptr || destSize == 0)
+    {
+        return EINVAL;
+    }
+    size_t toCopy = (count < destSize - 1) ? count : destSize - 1;
+    wcsncpy(dest, src, toCopy);
+    dest[toCopy] = L'\0';
+    return 0;
+}
+
+inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** context)
+{
+    return wcstok(str, delim, context);
+}
+
+// Story 7.3.0: _wsplitpath stub — splits wide-char path into components [VS0-QUAL-BUILDCOMPAT-MACOS]
+inline void _wsplitpath(const wchar_t* path, wchar_t* drive, wchar_t* dir, wchar_t* fname, wchar_t* ext)
+{
+    if (drive != nullptr)
+    {
+        drive[0] = L'\0';
+    }
+    if (path == nullptr)
+    {
+        if (dir)
+            dir[0] = L'\0';
+        if (fname)
+            fname[0] = L'\0';
+        if (ext)
+            ext[0] = L'\0';
+        return;
+    }
+    const wchar_t* lastSlash = wcsrchr(path, L'/');
+    const wchar_t* lastBackslash = wcsrchr(path, L'\\');
+    const wchar_t* lastSep = lastSlash > lastBackslash ? lastSlash : lastBackslash;
+    const wchar_t* lastDot = wcsrchr(path, L'.');
+
+    if (dir != nullptr)
+    {
+        if (lastSep != nullptr)
+        {
+            size_t dirLen = static_cast<size_t>(lastSep - path + 1);
+            wcsncpy(dir, path, dirLen);
+            dir[dirLen] = L'\0';
+        }
+        else
+        {
+            dir[0] = L'\0';
+        }
+    }
+    const wchar_t* nameStart = lastSep ? lastSep + 1 : path;
+    if (lastDot != nullptr && lastDot > nameStart)
+    {
+        if (fname != nullptr)
+        {
+            size_t nameLen = static_cast<size_t>(lastDot - nameStart);
+            wcsncpy(fname, nameStart, nameLen);
+            fname[nameLen] = L'\0';
+        }
+        if (ext != nullptr)
+        {
+            wcscpy(ext, lastDot);
+        }
+    }
+    else
+    {
+        if (fname != nullptr)
+        {
+            wcscpy(fname, nameStart);
+        }
+        if (ext != nullptr)
+        {
+            ext[0] = L'\0';
+        }
+    }
+}
+
+// Story 7.3.0: MultiByteToWideChar / WideCharToMultiByte stubs [VS0-QUAL-BUILDCOMPAT-MACOS]
+// Story 7.3.0: Forward declaration for WideCharToMultiByte stub below.
+// Defined later in this file (~line 1137). [VS0-QUAL-BUILDCOMPAT-MACOS]
+inline std::string mu_wchar_to_utf8(const wchar_t* src);
+
+// Story 7.3.0: Win32-compatible signatures using proper UTF-8 encoding/decoding.
+// MultiByteToWideChar: UTF-8 → wchar_t (inline decoder, handles multi-byte sequences).
+// WideCharToMultiByte: wchar_t → UTF-8 (delegates to mu_wchar_to_utf8).
+// Used throughout Data/ and Core/ files. [VS0-QUAL-BUILDCOMPAT-MACOS]
+inline int MultiByteToWideChar(UINT /*CodePage*/, DWORD /*dwFlags*/, const char* lpMultiByteStr, int cbMultiByte,
+                               wchar_t* lpWideCharStr, int cchWideChar)
+{
+    if (lpMultiByteStr == nullptr)
+    {
+        return 0;
+    }
+    const auto* src = reinterpret_cast<const unsigned char*>(lpMultiByteStr);
+    const auto* end = (cbMultiByte == -1) ? src + strlen(lpMultiByteStr) + 1 : src + cbMultiByte;
+    int count = 0;
+    while (src < end)
+    {
+        uint32_t ch;
+        int seqLen;
+        if (*src < 0x80)
+        {
+            ch = *src;
+            seqLen = 1;
+        }
+        else if ((*src & 0xE0) == 0xC0)
+        {
+            ch = *src & 0x1F;
+            seqLen = 2;
+        }
+        else if ((*src & 0xF0) == 0xE0)
+        {
+            ch = *src & 0x0F;
+            seqLen = 3;
+        }
+        else if ((*src & 0xF8) == 0xF0)
+        {
+            ch = *src & 0x07;
+            seqLen = 4;
+        }
+        else
+        {
+            ++src;
+            continue;
+        }
+        if (src + seqLen > end)
+        {
+            break;
+        }
+        for (int i = 1; i < seqLen; ++i)
+        {
+            ch = (ch << 6) | (src[i] & 0x3F);
+        }
+        src += seqLen;
+        if (cchWideChar > 0 && count < cchWideChar)
+        {
+            lpWideCharStr[count] = static_cast<wchar_t>(ch);
+        }
+        ++count;
+    }
+    return count;
+}
+
+inline int WideCharToMultiByte(UINT /*CodePage*/, DWORD /*dwFlags*/, const wchar_t* lpWideCharStr, int cchWideChar,
+                               char* lpMultiByteStr, int cbMultiByte, const char* /*lpDefaultChar*/,
+                               int* /*lpUsedDefaultChar*/)
+{
+    if (lpWideCharStr == nullptr)
+    {
+        return 0;
+    }
+    // Build null-terminated source for mu_wchar_to_utf8
+    std::wstring src;
+    if (cchWideChar == -1)
+    {
+        src = lpWideCharStr;
+    }
+    else
+    {
+        src = std::wstring(lpWideCharStr, static_cast<size_t>(cchWideChar));
+    }
+    std::string utf8 = mu_wchar_to_utf8(src.c_str());
+    // Include null terminator when input was null-terminated
+    if (cchWideChar == -1)
+    {
+        utf8.push_back('\0');
+    }
+    int resultLen = static_cast<int>(utf8.size());
+    if (cbMultiByte == 0)
+    {
+        return resultLen;
+    }
+    int toCopy = (resultLen < cbMultiByte) ? resultLen : cbMultiByte;
+    memcpy(lpMultiByteStr, utf8.data(), static_cast<size_t>(toCopy));
+    return toCopy;
+}
+
 // ---- Timing shims ----
 
 inline BOOL IsBadReadPtr(const void* /*lp*/, UINT_PTR /*ucb*/)
@@ -771,10 +960,9 @@ void MuPlatformLogMouseWarpFailed(const char* sdlError);
 // [VS1-SDL-INPUT-MOUSE]
 inline void SetCursorPos(int x, int y)
 {
-    if (!SDL_WarpMouseInWindow(nullptr, static_cast<float>(x), static_cast<float>(y)))
-    {
-        MuPlatformLogMouseWarpFailed(SDL_GetError());
-    }
+    // Story 7.3.0: SDL_WarpMouseInWindow returns void in SDL3 3.2.8 — no error check possible.
+    // [VS0-QUAL-BUILDCOMPAT-MACOS]
+    SDL_WarpMouseInWindow(nullptr, static_cast<float>(x), static_cast<float>(y));
 }
 
 // ---- HIBYTE macro (non-Windows) ----

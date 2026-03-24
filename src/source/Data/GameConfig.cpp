@@ -270,6 +270,7 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
     if (hexInput.empty())
         return L"";
 
+#ifdef _WIN32
     // Convert Hex String back to Binary Blob
     std::vector<BYTE> encryptedData = HexToBinary(hexInput);
     if (encryptedData.empty())
@@ -293,6 +294,12 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
     }
 
     return L"";
+#else
+    // Story 7.3.0: On non-Windows dev builds, credentials are stored unencrypted.
+    // DPAPI is Windows-only. This is acceptable for local dev sessions.
+    // [VS0-QUAL-BUILDCOMPAT-MACOS]
+    return hexInput;
+#endif
 }
 
 std::wstring GameConfig::EncryptSetting(const wchar_t* input)
@@ -300,6 +307,7 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
     if (!input || wcslen(input) == 0)
         return L"";
 
+#ifdef _WIN32
     DATA_BLOB dataIn, dataOut;
     dataIn.cbData = static_cast<DWORD>((wcslen(input) + 1) * sizeof(wchar_t));
     dataIn.pbData = reinterpret_cast<BYTE*>(const_cast<wchar_t*>(input));
@@ -311,6 +319,11 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
         return hexResult;
     }
     return L"";
+#else
+    // Story 7.3.0: On non-Windows dev builds, return input as-is (no encryption).
+    // [VS0-QUAL-BUILDCOMPAT-MACOS]
+    return std::wstring(input);
+#endif
 }
 
 void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* pass)

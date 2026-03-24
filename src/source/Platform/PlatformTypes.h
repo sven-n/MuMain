@@ -52,6 +52,26 @@ using HRESULT = long;
 // Pointer-width unsigned integer (needed for LOWORD/HIWORD macros)
 using DWORD_PTR = uintptr_t;
 
+// Story 7.3.0: CONST qualifier alias — used in KeyGenerater.h CONST parameters
+// [VS0-QUAL-BUILDCOMPAT-MACOS]
+#define CONST const
+
+// Story 7.3.0: CP_UTF8 code page constant — used in encoding call sites
+// [VS0-QUAL-BUILDCOMPAT-MACOS]
+#define CP_UTF8 65001
+
+// Story 7.3.0: MSVC-specific path buffer constants [VS0-QUAL-BUILDCOMPAT-MACOS]
+#define _MAX_DRIVE 3
+#define _MAX_DIR 256
+#define _MAX_FNAME 256
+#define _MAX_EXT 256
+
+// Story 7.3.0: MSVC __forceinline keyword [VS0-QUAL-BUILDCOMPAT-MACOS]
+#define __forceinline inline __attribute__((always_inline))
+
+// Story 7.3.0: Windows message constants used in game logic [VS0-QUAL-BUILDCOMPAT-MACOS]
+#define WM_DESTROY 0x0002
+
 // Constants
 #define MAX_PATH 260
 #define TRUE 1

@@ -6,7 +6,6 @@
 
 #include <codecvt>
 #include <locale>
-#include <shlwapi.h>
 
 #include "GlobalBitmap.h"
 

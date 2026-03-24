@@ -87,8 +87,17 @@ int NextPowerOfTwo(int value, int maxValue)
 
 std::string NarrowPath(const std::wstring& wide)
 {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
-    return conv.to_bytes(wide);
+#ifdef _WIN32
+    int len =
+        WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), static_cast<int>(wide.size()), nullptr, 0, nullptr, nullptr);
+    std::string result(len, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), static_cast<int>(wide.size()), result.data(), len, nullptr, nullptr);
+    return result;
+#else
+    // Story 7.3.0: Use mu_wchar_to_utf8 on non-Windows — avoids deprecated std::wstring_convert
+    // [VS0-QUAL-BUILDCOMPAT-MACOS]
+    return mu_wchar_to_utf8(wide.c_str());
+#endif
 }
 } // namespace
 
@@ -106,6 +115,10 @@ void UnregisterTexture(std::uint32_t id);
 void RegisterTexture(std::uint32_t id, void* pTex);
 void RegisterSampler(std::uint32_t id, void* pSampler);
 void UnregisterSampler(std::uint32_t id);
+// Story 7.3.0: Forward-declare registry clear functions for UnloadAllImages fallback path
+// [VS0-QUAL-BUILDCOMPAT-MACOS]
+void ClearTextureRegistry();
+void ClearSamplerRegistry();
 #endif
 } // namespace mu
 
@@ -121,9 +134,9 @@ void UnregisterSampler(std::uint32_t id);
 //   GL_NEAREST        = 0x2600
 //   GL_LINEAR         = 0x2601
 //
-// GL wrap constants:
-//   GL_CLAMP_TO_EDGE  = 0x812F
-//   GL_REPEAT         = 0x2901
+// GL wrap constants (numeric literals used directly — no GL headers needed):
+//   clamp-to-edge = 0x812F
+//   repeat        = 0x2901
 //
 // SDL_GPUFilter enum (from SDL3/SDL_gpu.h release-3.2.8):
 //   SDL_GPU_FILTER_NEAREST = 0
@@ -153,17 +166,17 @@ void UnregisterSampler(std::uint32_t id);
     }
 }
 
-// MapGLWrapToSDL: maps GL_CLAMP_TO_EDGE/GL_REPEAT to SDL_GPUSamplerAddressMode integer values.
+// MapGLWrapToSDL: maps 0x812F/0x2901 wrap modes to SDL_GPUSamplerAddressMode integer values.
 // Declared with int return type so the test TU can forward-declare without SDL3 headers.
 [[nodiscard]] int MapGLWrapToSDL(unsigned int uiWrapMode)
 {
-    // GL_CLAMP_TO_EDGE = 0x812F → SDL_GPU_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2
-    // GL_REPEAT        = 0x2901 → SDL_GPU_SAMPLER_ADDRESS_MODE_REPEAT        = 0
+    // 0x812F (clamp-to-edge) → SDL_GPU_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2
+    // 0x2901 (repeat)        → SDL_GPU_SAMPLER_ADDRESS_MODE_REPEAT        = 0
     switch (uiWrapMode)
     {
-    case 0x812Fu: // GL_CLAMP_TO_EDGE
+    case 0x812Fu: // clamp-to-edge
         return 2; // SDL_GPU_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE
-    case 0x2901u: // GL_REPEAT
+    case 0x2901u: // repeat
         return 0; // SDL_GPU_SAMPLER_ADDRESS_MODE_REPEAT
     default:
         return 2; // default: SDL_GPU_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE (safe)
@@ -648,8 +661,10 @@ GLuint CGlobalBitmap::LoadImage(const std::wstring& filename, GLuint uiFilter, G
 }
 bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
-    unsigned int UICLAMP = GL_CLAMP_TO_EDGE;
-    unsigned int UIREPEAT = GL_REPEAT;
+    // Story 7.3.0: Use numeric literals instead of GL symbolic constants — avoids requiring
+    // OpenGL headers on the macOS SDL3 build path. [VS0-QUAL-BUILDCOMPAT-MACOS]
+    unsigned int UICLAMP = 0x812Fu;  // clamp-to-edge
+    unsigned int UIREPEAT = 0x2901u; // repeat
 
     if (uiWrapMode != UICLAMP && uiWrapMode != UIREPEAT)
     {
