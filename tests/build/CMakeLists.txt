@@ -270,3 +270,80 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_4_1.cmake
 )
+
+# ==========================================================================
+# Story 7.3.0 - macOS Native Build Compatibility Fixes [VS0-QUAL-BUILDCOMPAT-MACOS]
+# RED PHASE: Tests fail until build compatibility fixes are implemented.
+# ==========================================================================
+
+# AC-2: MU_ENABLE_SDL3 defined at project scope in src/CMakeLists.txt
+add_test(
+    NAME "7.3.0-AC-2:cmake-mu-enable-sdl3-project-scope"
+    COMMAND ${CMAKE_COMMAND}
+        -DCMAKELISTS_FILE=${MUMAIN_SOURCE_DIR}/src/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_cmake_mu_enable_sdl3_7_3_0.cmake
+)
+
+# AC-3: PlatformTypes.h defines CONST and CP_UTF8 in non-Win32 #else block
+add_test(
+    NAME "7.3.0-AC-3:platform-types-const-cp-utf8"
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_TYPES_H=${MUMAIN_SOURCE_DIR}/src/source/Platform/PlatformTypes.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_platform_types_const_cp_utf8.cmake
+)
+
+# AC-4: PlatformCompat.h provides _wcsicmp/wcsicmp, _TRUNCATE, OutputDebugString stubs
+add_test(
+    NAME "7.3.0-AC-4:platform-compat-wcsicmp-stubs"
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_COMPAT_H=${MUMAIN_SOURCE_DIR}/src/source/Platform/PlatformCompat.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_platform_compat_wcsicmp_stubs.cmake
+)
+
+# AC-5: GlobalBitmap.cpp NarrowPath uses mu_wchar_to_utf8, no deprecated wstring_convert
+add_test(
+    NAME "7.3.0-AC-5:globalbitmaps-no-wstring-convert"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/GlobalBitmap.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_globalbitmaps_no_wstring_convert.cmake
+)
+
+# AC-6: GlobalBitmap.cpp uses numeric literals instead of GL_CLAMP_TO_EDGE/GL_REPEAT
+add_test(
+    NAME "7.3.0-AC-6:globalbitmaps-gl-literals"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/GlobalBitmap.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac6_globalbitmaps_gl_literals.cmake
+)
+
+# AC-7: LoadData.cpp has no #include <shlwapi.h>
+add_test(
+    NAME "7.3.0-AC-7:loaddata-no-shlwapi"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/LoadData.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac7_loaddata_no_shlwapi.cmake
+)
+
+# AC-8: GameConfig.cpp DPAPI calls guarded by #ifdef _WIN32
+add_test(
+    NAME "7.3.0-AC-8:gameconfig-dpapi-guarded"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/GameConfig.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac8_gameconfig_dpapi_guarded.cmake
+)
+
+# AC-9: No new unguarded Win32 calls in game logic files (MinGW regression guard)
+add_test(
+    NAME "7.3.0-AC-9:mingw-no-regression"
+    COMMAND ${CMAKE_COMMAND}
+        -DMUMAIN_SOURCE_DIR=${MUMAIN_SOURCE_DIR}/src/source
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac9_mingw_no_regression_7_3_0.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-BUILDCOMPAT-MACOS traceability
+add_test(
+    NAME "7.3.0-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_3_0.cmake
+)
