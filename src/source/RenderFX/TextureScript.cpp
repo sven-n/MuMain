@@ -55,6 +55,8 @@ bool TextureScriptParsing::parsingTScriptA(char* filename)
                     m_bBeScript = true;
                     break;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmultichar"
                 case 'DC':
                     m_byShadowMesh = 1; //  NoneTexture.
                     m_bBeScript = true;
@@ -64,6 +66,7 @@ bool TextureScriptParsing::parsingTScriptA(char* filename)
                     m_byShadowMesh = 2; //  Texture.
                     m_bBeScript = true;
                     break;
+#pragma clang diagnostic pop
 
                 default:
                     m_bBeScript = false;

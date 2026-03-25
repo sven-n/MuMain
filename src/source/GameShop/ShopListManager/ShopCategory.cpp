@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopCategory.h"
 #include "StringToken.h"
@@ -84,4 +85,4 @@ void CShopCategory::ClearPackageSeq()
 {
     this->PackageList.clear();
 }
-#endif
+#endif #endif // _WIN32

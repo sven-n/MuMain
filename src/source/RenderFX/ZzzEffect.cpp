@@ -15,11 +15,14 @@
 #include "UIManager.h"
 #include "CDirection.h"
 #include "MapManager.h"
-#include "SkillEffectMgr.h"]
+#include "SkillEffectMgr.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
 #include <NewUISystem.h>
 #include "ZzzInterface.h"
+#include "Scenes/SceneCore.h"
+#include "Core/_GlobalFunctions.h"
+#include "ZzzInventory.h"
 
 PARTICLE Particles[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT
@@ -374,7 +377,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             o->PKKey = PKKey;
             o->Kind = Skill;
             o->Skill = SkillIndex;
-            o->RenderType = NULL;
+            o->RenderType = 0;
             o->AttackPoint[0] = 0;
             o->CurrentAction = 0;
             o->m_bySkillSerialNum = (BYTE)SkillSerialNum;
@@ -775,7 +778,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             case MODEL_SUMMONER_CASTING_EFFECT222:
             {
                 o->LifeTime = 40;
-                if (o->SubType = 0)
+                if ((o->SubType = 0))
                     o->Scale = 1.0f;
                 o->Alpha = 1.0f;
                 Vector(0.f, 0.f, 0.f, o->Direction);
@@ -3129,12 +3132,11 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 o->Velocity = (float)(rand() % 360);
                 Vector(0.f, 0.f, 0.f, o->Light);
 
-                int rangeX, rangeY, rangeZ;
+                int rangeX, rangeY;
                 if (o->SubType == 1)
                 {
                     rangeX = 300;
                     rangeY = 150;
-                    rangeZ = 700;
                     o->Scale = 0.5f;
                     o->Gravity -= (rand() % 20 + 10) * FPS_ANIMATION_FACTOR;
                 }
@@ -3142,7 +3144,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 {
                     rangeX = 200;
                     rangeY = 100;
-                    rangeZ = 500;
                     o->Scale = 0.f;
                 }
 
@@ -3259,11 +3260,10 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     o->Velocity = (float)(rand() % 360);
                     Vector(0.f, 0.f, 0.f, o->Light);
 
-                    int rangeX, rangeY, rangeZ;
+                    int rangeX, rangeY;
 
                     rangeX = 300;
                     rangeY = 150;
-                    rangeZ = 700;
                     o->Scale = 0.5f;
                     o->Gravity -= (rand() % 30 + 10) * FPS_ANIMATION_FACTOR;
 
@@ -5244,7 +5244,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 {
                     const int TOTAL_LIFETIME = 60;
                     vec3_t v3PosStart, v3PosTarget;
-                    vec3_t arv3PosProcess[3];
+                    vec3_t arv3PosProcess[4];
 
                     o->ExtState = TOTAL_LIFETIME;
                     o->LifeTime = TOTAL_LIFETIME;
@@ -5263,16 +5263,15 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     vec3_t v3DirDistAD;
                     vec3_t v3PosStartModify, v3PosTargetModify;
                     const int iLimitArea1 = 200;
-                    float fDistAD, fDistAB, fDistCD;
+                    float fDistAB;
                     float fHeightTerrainTarget = RequestTerrainHeight(v3PosTarget[0], v3PosTarget[1]);
                     int iOffsetDist = 100;
                     VectorCopy(v3PosStart, v3PosStartModify);
                     VectorCopy(v3PosTarget, v3PosTargetModify);
                     v3PosTargetModify[2] = v3PosStartModify[2];
-                    fDistAD = VectorDistance3D_DirDist(v3PosStartModify, v3PosTargetModify, v3DirDistAD);
+                    VectorDistance3D_DirDist(v3PosStartModify, v3PosTargetModify, v3DirDistAD);
 
                     fDistAB = 900.0f + (rand() % iOffsetDist - (iOffsetDist / 2));
-                    fDistCD;
                     VectorCopy(v3PosStart, arv3PosProcess[0]);
                     arv3PosProcess[1][0] = arv3PosProcess[0][0] + (float)(rand() % iLimitArea1 - (iLimitArea1 / 2));
                     arv3PosProcess[1][1] = arv3PosProcess[0][1] + (float)(rand() % iLimitArea1 - (iLimitArea1 / 2));
@@ -5837,6 +5836,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                             o->Velocity = 0.4f;
 
                             BMD* b = &Models[o->Type];
+                            (void)b;
                             // b->Velocity = 10.f;
 
                             Vector(o->Angle[0], o->Angle[1], o->Angle[2], o->HeadAngle);
@@ -7213,8 +7213,6 @@ void MoveEffect(OBJECT* o, int iIndex)
                     break;
                 }
 
-                if (Ran < 0)
-                    Ran = Ran;
                 for (int i = 0; i < 3; i++)
                 {
                     VectorCopy(o->Position, p);
@@ -8471,7 +8469,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             AngleMatrix(o->Owner->Angle, Matrix);
             VectorRotate(P, Matrix, dp);
             VectorAdd(dp, vFirePosition, Position);
-            CreateSprite(BITMAP_SHINY + 6, Position, 2.0f, o->Light, o, NULL, 1);
+            CreateSprite(BITMAP_SHINY + 6, Position, 2.0f, o->Light, o, 0.0f, 1);
         }
         break;
         }
@@ -10364,12 +10362,16 @@ void MoveEffect(OBJECT* o, int iIndex)
         o->BlendMeshTexCoordU = -(float)(int)o->LifeTime * 0.01f;
 
         if (o->Owner != NULL)
+        {
             if (o->Owner->Type == MODEL_WEREWOLF_HERO)
             {
                 Vector(Luminosity * 0.0f, Luminosity * 0.0f, Luminosity * 1.0f, Light);
             }
             else
+            {
                 Vector(Luminosity * 1.0f, Luminosity * 0.0f, Luminosity * 0.0f, Light);
+            }
+        }
         AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
         break;
     case MODEL_SKILL_FURY_STRIKE + 4:
@@ -12282,6 +12284,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         BMD* pModel = &Models[o->Type];
 
         int iNumCreateFeather = rand() % 2;
+        (void)iNumCreateFeather;
 
         vec3_t vPos;
 
@@ -13257,12 +13260,15 @@ void MoveEffect(OBJECT* o, int iIndex)
         fRateJointStart = fRateJointEnd = 0.0f;
         fRateBlurStart = 0.0f;
         fRateBlurEnd = 0.90f;
+        (void)fRateShadowStart;
+        (void)fRateJointStart;
 
         int iTYPESWORDFORCE = 0;  // 1: FORCE OF SWORD
         int iTYPESWORDSHADOW = 0; // 1: SHADOW SWORD
 
         iTYPESWORDFORCE = 1;
         iTYPESWORDSHADOW = 0;
+        (void)iTYPESWORDSHADOW;
 
         if (iTYPESWORDFORCE == 1)
         {
@@ -16068,7 +16074,9 @@ void MoveEffect(OBJECT* o, int iIndex)
         else if (o->SubType == 1)
         {
             float fEPSILON = 0.000001f;
+            (void)fEPSILON;
             float fRateAlpha_EraseOver = 0.7f;
+            (void)fRateAlpha_EraseOver;
             vec3_t v3RotateAngleRelative;
             o->Visible = true;
 
@@ -16222,6 +16230,7 @@ void MoveEffect(OBJECT* o, int iIndex)
                         iBlurAccessTimeAttk01 = 3;
                         iBlurAccessTimeAttk02 = 20;
                         iBlurAccessTimeAttk03 = 5;
+                        (void)iBlurAccessTimeAttk03;
                         iBlurAccessTimeAttk04 = 6;
 
                         switch (o->Type)
@@ -17950,7 +17959,7 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->LifeTime = 0;
             break;
         }
-        if (o->Owner->AnimationFrame > 2 && o->Owner->AnimationFrame < 8 & rand_fps_check(1))
+        if (o->Owner->AnimationFrame > 2 && o->Owner->AnimationFrame < 8 && rand_fps_check(1))
         {
             BMD* pModel = &Models[o->Owner->Type];
             vec3_t _StartPos, _EndPos;
@@ -18545,15 +18554,15 @@ void RenderEffects(bool bRenderBlendMesh)
                         CreateSprite(BITMAP_SHOCK_WAVE, o->Position, 0.8f, vLight, o, -(o->m_iAnimation * 3.f));
                         // Flare1
                         Vector(0.8f, 0.6f, 0.f, vLight);
-                        CreateSprite(BITMAP_LIGHT, o->Position, 5.0f, vLight, o, NULL);
+                        CreateSprite(BITMAP_LIGHT, o->Position, 5.0f, vLight, o, 0.0f);
                         RenderObject(o);
                     }
                     else if (o->SubType == 1)
                     {
-                        CreateSprite(BITMAP_LIGHT, o->Position, 5.0f, o->Light, o, NULL);
-                        CreateSprite(BITMAP_LIGHT, o->Position, 3.0f, o->Light, o, NULL);
-                        CreateSprite(BITMAP_LIGHT, o->Position, 3.0f, o->Light, o, NULL);
-                        CreateSprite(BITMAP_SHINY + 6, o->Position, 2.0f, o->Light, o, NULL);
+                        CreateSprite(BITMAP_LIGHT, o->Position, 5.0f, o->Light, o, 0.0f);
+                        CreateSprite(BITMAP_LIGHT, o->Position, 3.0f, o->Light, o, 0.0f);
+                        CreateSprite(BITMAP_LIGHT, o->Position, 3.0f, o->Light, o, 0.0f);
+                        CreateSprite(BITMAP_SHINY + 6, o->Position, 2.0f, o->Light, o, 0.0f);
 
                         RenderObject(o);
                     }
@@ -19153,6 +19162,7 @@ void RenderEffects(bool bRenderBlendMesh)
                             vPos_SwordEffectEdge05, vPos_SwordEffectEdge06, vPos_SwordEffectEdge07,
                             vPos_SwordEffectEdge08, vPos_SwordEffectEdge09;
                         float fLumi1, fLumi2;
+                        (void)fLumi2;
                         int arrBoneIdxs_SwordEffectRed01[] = {2, 9, 1, 3, 10};    // SWORD MainEffect01 BoneINDEX.
                         int arrBoneIdxs_SwordEffectRed02[] = {3, 10, 2, 10, 11};  // SWORD MainEffect02 BoneINDEX.
                         int arrBoneIdxs_SwordEffectEdge01[] = {13, 13, 3, 4, 1};  // SWORD EdgeEffect01 BoneINDEX.
@@ -19478,7 +19488,7 @@ void RenderEffectShadows()
             {
                 vec3_t Light;
                 float Luminosity = (float)(rand() % 4 + 8) * 0.1f;
-                float Rotation, Scale;
+                float Rotation, Scale = 1.0f;
                 EnableAlphaBlend();
 
                 switch (o->Type)

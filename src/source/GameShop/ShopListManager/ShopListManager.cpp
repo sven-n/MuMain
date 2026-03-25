@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopListManager.h"
 
@@ -54,4 +55,4 @@ WZResult CShopListManager::LoadScript(bool bDonwLoad) // OK
 
     return this->m_Result;
 }
-#endif
+#endif #endif // _WIN32

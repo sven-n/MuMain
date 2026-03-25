@@ -642,6 +642,7 @@ void RenderFlagFace(OBJECT* o, int x, int y, vec3_t Light, int Tex1, int Tex2)
     TexCoord[3][1] = sv;
 
     float minz = 65536.f; // louis
+    (void)minz;
     physics_face* f = &g_flagFaces[y * (FLAG_WIDTH - 1) + x];
 
     for (int i = 0; i < n; i++)
@@ -701,6 +702,7 @@ void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2)
         {
             physics_vertex* v = &g_flagVertices[y * FLAG_WIDTH + x];
             float num = 0.f;
+            (void)num;
             if (y < FLAG_HEIGHT - 1 && x < FLAG_WIDTH - 1)
             {
                 VectorCopy(g_flagFaces[y * (FLAG_WIDTH - 1) + x].normal, v->normal);

@@ -34,12 +34,14 @@
 #define ERROR_LOAD_SCRIPT 0x07
 #define ERROR_THREAD 0x08
 
+#ifdef _WIN32
 #include <wininet.h>
-#include <vector>
-#include <string>
 #include <tchar.h>
 #include <crtdbg.h>
 #include <strsafe.h>
+#endif
+#include <vector>
+#include <string>
 #include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
 #include "GameShop/ShopListManager/interface/DownloadInfo.h"
 #include "GameShop/ShopListManager/interface/FileDownloader.h"

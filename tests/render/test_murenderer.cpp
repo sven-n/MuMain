@@ -50,6 +50,10 @@ struct BlendModeTracker : public mu::IMuRenderer
         m_blendModeSet = true;
     }
 
+    void DisableBlend() override
+    {
+    }
+
     void SetDepthTest(bool /*enabled*/) override
     {
     }

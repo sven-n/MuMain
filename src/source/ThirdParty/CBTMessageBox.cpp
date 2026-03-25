@@ -1,4 +1,7 @@
 #include "stdafx.h"
+
+#ifdef _WIN32
+
 #include "CBTMessageBox.h"
 
 #include <algorithm>
@@ -154,3 +157,5 @@ LRESULT CALLBACK leaf::CCBTMessageBox::CBTProc(INT nCode, WPARAM wParam, LPARAM 
 
     return 0;
 }
+
+#endif // _WIN32

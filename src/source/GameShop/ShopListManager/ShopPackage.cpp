@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopPackage.h"
 #include "StringToken.h"
@@ -160,4 +161,4 @@ void CShopPackage::SetPriceSeqList(std::wstring strdata) // OK
         this->PriceSeqList.push_back(_wtoi(data.c_str()));
     }
 }
-#endif
+#endif #endif // _WIN32

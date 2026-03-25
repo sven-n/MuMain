@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopList.h"
 
@@ -271,4 +272,4 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
 
     return result;
 }
-#endif
+#endif #endif // _WIN32

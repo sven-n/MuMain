@@ -12,6 +12,12 @@
 #include <cmath>
 #include <cstring>
 
+#ifndef _WIN32
+#define S_OK 0
+#define S_FALSE 1
+#define E_INVALIDARG 0x80070057L
+#endif
+
 // ---------------------------------------------------------------------------
 // Global backend pointer — nullptr until the game initialises audio.
 // Story 5.1.1: defined here (nullptr). Story 5.2.1: set to new mu::MiniAudioBackend()

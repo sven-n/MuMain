@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "BannerListManager.h"
 
@@ -32,4 +33,4 @@ WZResult CBannerListManager::LoadScript(bool bDonwLoad) // OK
     return this->m_BannerInfoList->LoadBanner(path, BANNER_SCRIPT_FILENAME, bDonwLoad);
 }
 
-#endif
+#endif #endif // _WIN32

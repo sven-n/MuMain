@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "WZResult.h"
 #include <crtdbg.h>
@@ -95,4 +96,4 @@ WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const
     return result;
 }
 
-#endif
+#endif #endif // _WIN32

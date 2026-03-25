@@ -19,6 +19,8 @@
 #include "CMVP1stDirection.h"
 #include "UIManager.h"
 #include "NewUISystem.h"
+#include "Winmain.h"
+#include "../Core/_GlobalFunctions.h"
 
 extern BYTE m_CrywolfState;
 
@@ -1112,9 +1114,11 @@ template class CUITextListBox<BCGUILD_TEXT>;
 template class CUITextListBox<MOVECOMMAND_TEXT>;
 template class CUITextListBox<SCurQuestItem>;
 template class CUITextListBox<SQuestContents>;
+#ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 template class CUITextListBox<IGS_StorageItem>;
 template class CUITextListBox<IGS_BuyList>;
 template class CUITextListBox<IGS_SelectBuyItem>;
+#endif // PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 
 CUIGuildListBox::CUIGuildListBox()
 {
@@ -1498,7 +1502,7 @@ BOOL CUISimpleChatListBox::RenderDataLine(int iLineNumber)
 
     SIZE TextSize = { 0, 0 };
     // 이름
-    if (m_TextListIter->m_szID[0] != NULL)
+    if (m_TextListIter->m_szID[0] != L'\0')
     {
         switch (m_TextListIter->m_iType)
         {
@@ -2665,7 +2669,7 @@ bool CUIRenderTextOriginal::Create(HDC hDC)
     DIB_INFO->bmiHeader.biBitCount = 24;
     DIB_INFO->bmiHeader.biCompression = BI_RGB;
 
-    m_hBitmap = CreateDIBSection(hDC, DIB_INFO, DIB_RGB_COLORS, (void**)&m_pFontBuffer, nullptr, NULL);
+    m_hBitmap = CreateDIBSection(hDC, DIB_INFO, DIB_RGB_COLORS, (void**)&m_pFontBuffer, nullptr, 0);
     m_hFontDC = CreateCompatibleDC(hDC);
     SelectObject(m_hFontDC, m_hBitmap);
     SelectObject(m_hFontDC, g_hFont);
@@ -3438,7 +3442,7 @@ void CUITextInputBox::SetSize(int iWidth, int iHeight)
     DIB_INFO->bmiHeader.biBitCount = 24;
     DIB_INFO->bmiHeader.biCompression = BI_RGB;
 
-    m_hBitmap = CreateDIBSection(hDC, DIB_INFO, DIB_RGB_COLORS, (void**)&m_pFontBuffer, nullptr, NULL);
+    m_hBitmap = CreateDIBSection(hDC, DIB_INFO, DIB_RGB_COLORS, (void**)&m_pFontBuffer, nullptr, 0);
     m_hMemDC = CreateCompatibleDC(hDC);
     SelectObject(m_hMemDC, m_hBitmap);
     SetFont(g_hFont);

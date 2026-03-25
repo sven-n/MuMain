@@ -734,6 +734,7 @@ struct RENDER_TEXT_DATA
 class IUIRenderText
 {
 public:
+    virtual ~IUIRenderText() = default;
     virtual bool Create(HDC hDC) = 0;
     virtual void Release() = 0;
 

@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopProductList.h"
 
@@ -97,4 +98,4 @@ bool CShopProductList::GetPriceSeqNext(CShopProduct& product) // OK
 
     return this->GetPriceSeqNext(product);
 }
-#endif
+#endif #endif // _WIN32

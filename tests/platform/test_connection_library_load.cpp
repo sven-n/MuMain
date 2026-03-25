@@ -8,6 +8,7 @@
 // AC-STD-2 and AC-STD-3 tests pass immediately (platform primitives already work).
 
 #include <catch2/catch_test_macros.hpp>
+#include <filesystem>
 #include "PlatformLibrary.h"
 
 // ---------------------------------------------------------------------------

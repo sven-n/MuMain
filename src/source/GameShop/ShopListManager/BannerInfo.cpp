@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "BannerInfo.h"
 #include "StringToken.h"
@@ -72,4 +73,4 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
 
     return 1;
 }
-#endif
+#endif #endif // _WIN32

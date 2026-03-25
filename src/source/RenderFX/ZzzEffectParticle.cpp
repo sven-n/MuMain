@@ -16,6 +16,8 @@
 #include "WSclient.h"
 #include "MapManager.h"
 #include "NewUISystem.h"
+#include "Scenes/SceneCore.h"
+#include "Core/_GlobalFunctions.h"
 
 vec3_t g_vParticleWind = {0.0f, 0.0f, 0.0f};
 vec3_t g_vParticleWindVelo = {0.0f, 0.0f, 0.0f};
@@ -2175,9 +2177,9 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
                     break;
                 case 7:
                     o->Alpha = 1.0f;
+                    o->Position[0] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
                     o->Position[1] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
                     o->Position[2] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
-                    o->Position[3] += (-30.0f + (float)(rand() % 60)) * FPS_ANIMATION_FACTOR;
                     o->LifeTime = 30;
                     o->Gravity = 1.3f;
                     o->Scale = (float)(rand() % 5) / 10.0f + 1.0f;
@@ -3791,7 +3793,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             break;
             case BITMAP_AG_ADDITION_EFFECT:
             {
-                float _Scale;
+                float _Scale = 1.0f;
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 33 + rand() % 5;
@@ -3872,6 +3874,7 @@ void MoveParticles()
     }
 
     int count = 0;
+    (void)count;
 
     for (int i = 0; i < MAX_PARTICLES; i++)
     {
@@ -4175,8 +4178,8 @@ void MoveParticles()
                     break;
 
                 case 2:
-                    o->Position[0]; // += (float)(rand()%30-15)*1.f*o->Scale;
-                    o->Position[1]; // += (float)(rand()%30-15)*1.f*o->Scale;
+                    // o->Position[0] += (float)(rand()%30-15)*1.f*o->Scale;
+                    // o->Position[1] += (float)(rand()%30-15)*1.f*o->Scale;
                     o->Position[2] += (float)(rand() % 20 + 10) * 0.3f * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.005f;
                     break;
@@ -4188,8 +4191,8 @@ void MoveParticles()
                     o->Position[2] += (float)(rand() % 20 + 10) * 2.5f * o->Gravity * FPS_ANIMATION_FACTOR;
                     break;
                 case 4:
-                    o->Position[0]; // += (float)(rand()%30-15)*1.f*o->Scale;
-                    o->Position[1]; // += (float)(rand()%30-15)*1.f*o->Scale;
+                    // o->Position[0] += (float)(rand()%30-15)*1.f*o->Scale;
+                    // o->Position[1] += (float)(rand()%30-15)*1.f*o->Scale;
                     o->Position[2] += (float)(rand() % 20 + 10) * 0.3f * FPS_ANIMATION_FACTOR;
                     o->Scale += FPS_ANIMATION_FACTOR * 0.005f;
                     if (o->Position[2] > 350)
@@ -8257,7 +8260,7 @@ void MoveParticles()
                 }
                 break;
             case BITMAP_POUNDING_BALL:
-                if (o->SubType == 0 && o->SubType == 1)
+                if (o->SubType == 0 || o->SubType == 1)
                 {
                     o->Gravity += (0.004f) * FPS_ANIMATION_FACTOR;
                     o->Scale -= FPS_ANIMATION_FACTOR * 0.02f;
@@ -8948,6 +8951,7 @@ void MoveParticles()
                 if (!o->Live && g_isCharacterBuff(o->Target, eBuff_AG_Addition))
                 {
                     float _Scale = (rand() % 20 + 20.0f) / 50.0f;
+                    (void)_Scale;
                     if (o->SubType == 0)
                         CreateParticleFpsChecked(BITMAP_AG_ADDITION_EFFECT, Temp_Pos, o->Angle, o->Light, 0, 1.0f,
                                                  o->Target);

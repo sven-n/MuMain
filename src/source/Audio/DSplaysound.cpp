@@ -25,8 +25,10 @@
 #include <thread>
 #include <vector>
 
+#ifdef _WIN32
 #include <objbase.h>
 #include <dsound.h>
+#endif
 #include "DSwaveIO.h"
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"

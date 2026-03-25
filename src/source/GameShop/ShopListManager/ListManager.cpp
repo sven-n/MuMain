@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ListManager.h"
 #include <process.h>
@@ -226,4 +227,4 @@ unsigned int __stdcall CListManager::RunFileDownLoadThread(LPVOID pParam) // OK
 
     return 0;
 }
-#endif
+#endif #endif // _WIN32

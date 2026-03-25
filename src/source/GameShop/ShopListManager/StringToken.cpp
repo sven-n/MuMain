@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "StringToken.h"
 
@@ -93,4 +94,4 @@ void CStringToken::IsNullString(std::wstring::size_type pos) // OK
         this->IsNullString(pos + 1);
     }
 }
-#endif
+#endif #endif // _WIN32

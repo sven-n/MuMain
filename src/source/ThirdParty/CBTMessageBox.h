@@ -1,3 +1,7 @@
+#pragma once
+
+#ifdef _WIN32
+
 #include <string>
 
 namespace leaf {
@@ -27,3 +31,5 @@ namespace leaf {
         static LRESULT CALLBACK CBTProc(INT nCode, WPARAM wParam, LPARAM lParam);
     };
 }
+
+#endif // _WIN32

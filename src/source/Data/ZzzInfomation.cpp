@@ -25,6 +25,7 @@
 #include "NewUISystem.h"
 #include "CharacterManager.h"
 #include "SkillManager.h"
+#include "Core/_GlobalFunctions.h"
 
 CLASS_ATTRIBUTE ClassAttribute[MAX_CLASS];
 MONSTER_SCRIPT MonsterScript[MAX_MONSTER];
@@ -88,7 +89,7 @@ void OpenFilterFile(const wchar_t* FileName)
         {
             BuxConvert(pSeek, Size);
             memcpy(AbuseFilter[i], pSeek, Size);
-            if (AbuseFilter[i][0] == NULL)
+            if (AbuseFilter[i][0] == L'\0')
             {
                 AbuseFilterNumber = i;
                 break;
@@ -136,7 +137,7 @@ void OpenNameFilterFile(const wchar_t* FileName)
         {
             BuxConvert(pSeek, Size);
             memcpy(AbuseNameFilter[i], pSeek, Size);
-            if (AbuseNameFilter[i][0] == NULL)
+            if (AbuseNameFilter[i][0] == L'\0')
             {
                 AbuseNameFilterNumber = i;
                 break;
@@ -234,14 +235,10 @@ void OpenNpcScript(wchar_t* FileName)
             break;
         if (Token == NUMBER)
         {
-            int Type, x, y, Dir;
-            Type = (int)TokenNumber;
+            // Advance past Type, x, y, Dir tokens (consumed by parser, values unused)
             Token = (*GetToken)();
-            x = (int)TokenNumber;
             Token = (*GetToken)();
-            y = (int)TokenNumber;
             Token = (*GetToken)();
-            Dir = (int)TokenNumber;
         }
     }
     fclose(SMDFile);
@@ -343,7 +340,7 @@ void PrintItem(wchar_t* FileName)
                          L"----------\n");
         }
         ITEM_ATTRIBUTE* p = &ItemAttribute[i];
-        if (p->Name[0] != NULL)
+        if (p->Name[0] != L'\0')
         {
             int Plus;
             if (i >= 12 * MAX_ITEM_INDEX)
@@ -748,10 +745,8 @@ void CalcRequirements(ITEM* ip, ITEM_ATTRIBUTE* p)
         addValue = 5;
     }
 
-    if (p->RequireLevel &&
-        ((ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING) || (ip->Type == ITEM_HORN_OF_FENRIR) ||
-         (ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR) ||
-         (ip->Type >= ITEM_WING_OF_DIMENSION && ip->Type < ITEM_CAPE_OF_EMPEROR) && (ip->Type != ITEM_CAPE_OF_FIGHTER)))
+    if (p->RequireLevel && ((ip->Type >= ITEM_SWORD && ip->Type < ITEM_WING) || (ip->Type == ITEM_HORN_OF_FENRIR) ||
+                            (ip->Type >= ITEM_ORB_OF_TWISTING_SLASH && ip->Type <= ITEM_CAPE_OF_EMPEROR)))
     {
         ip->RequireLevel = p->RequireLevel;
     }
@@ -1112,7 +1107,7 @@ void CalcExcellentOptions(ITEM* ip)
 void CalcPartType(ITEM* ip)
 {
     // part
-    if (ip->Type >= ITEM_BOW && ip->Type < ITEM_CROSSBOW || ip->Type == ITEM_CELESTIAL_BOW)
+    if ((ip->Type >= ITEM_BOW && ip->Type < ITEM_CROSSBOW) || ip->Type == ITEM_CELESTIAL_BOW)
         ip->Part = EQUIPMENT_WEAPON_LEFT;
     if (ip->Type >= ITEM_BOOK_OF_SAHAMUTT && ip->Type <= ITEM_STAFF + 29)
         ip->Part = EQUIPMENT_WEAPON_LEFT;
@@ -1788,7 +1783,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
         Gold = 10000 * 3;
     }
     else if (ITEM_SUSPICIOUS_SCRAP_OF_PAPER == ip->Type ||
-             ITEM_FIRST_SECROMICON_FRAGMENT <= ip->Type && ip->Type <= ITEM_SIXTH_SECROMICON_FRAGMENT)
+             (ITEM_FIRST_SECROMICON_FRAGMENT <= ip->Type && ip->Type <= ITEM_SIXTH_SECROMICON_FRAGMENT))
     {
         Gold = (long long)((long long)ip->Durability * 10000) * 3;
     }
@@ -2269,7 +2264,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
     {
         PET_INFO* pPetInfo = giPetManager::GetPetInfo(ip);
 
-        if (pPetInfo->m_dwPetType == PET_TYPE_NONE)
+        if (static_cast<int>(pPetInfo->m_dwPetType) == PET_TYPE_NONE)
             return -1;
 
         Gold = giPetManager::GetPetItemValue(pPetInfo);
@@ -3651,7 +3646,6 @@ void CHARACTER_MACHINE::CalulateMasterLevelNextExperience()
 
     int64_t iTotalLevel = (int64_t)CharacterAttribute->Level + (int64_t)Master_Level_Data.nMLevel + 1;
     int64_t iTOverLevel = iTotalLevel - 255;
-    int64_t iBaseExperience = 0;
 
     int64_t iData_Master =
         (((int64_t)9 + (int64_t)iTotalLevel) * (int64_t)iTotalLevel * (int64_t)iTotalLevel * (int64_t)10) +

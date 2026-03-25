@@ -58,7 +58,7 @@ void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, flo
     VectorCopy(Color, Light[3]);
 
     char Text[32];
-    itoa(Num, Text, 10);
+    snprintf(Text, sizeof(Text), "%d", Num);
     p[0] -= strlen(Text) * 5.f;
     unsigned int Length = strlen(Text);
     p[0] -= Length * Scale * 0.125f;

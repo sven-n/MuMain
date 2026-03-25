@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "Path.h"
 
@@ -261,4 +262,4 @@ BOOL Path::CreateDirectorys(TCHAR* szFilePath, BOOL bIsFile)
 
     return 0;
 }
-#endif
+#endif #endif // _WIN32

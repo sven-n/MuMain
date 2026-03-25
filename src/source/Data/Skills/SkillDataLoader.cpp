@@ -24,7 +24,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     if (fp == NULL)
     {
         wchar_t errorMsg[256];
-        swprintf(errorMsg, L"Skill file not found: %ls", fileName);
+        mu_swprintf(errorMsg, L"Skill file not found: %ls", fileName);
         DataFileIO::ShowErrorAndExit(errorMsg);
         return false;
     }
@@ -35,9 +35,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     fseek(fp, 0, SEEK_SET);
 
     const int LegacySize = sizeof(SKILL_ATTRIBUTE_FILE_LEGACY);
-    const int NewSize = sizeof(SKILL_ATTRIBUTE_FILE);
     const long expectedLegacySize = LegacySize * MAX_SKILLS + sizeof(DWORD);
-    const long expectedNewSize = NewSize * MAX_SKILLS + sizeof(DWORD);
 
     bool isLegacyFormat = (fileSize == expectedLegacySize);
     bool success = false;
@@ -74,7 +72,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
         }
 
         wchar_t successMsg[256];
-        swprintf(successMsg, L"Loaded %d skills from %ls", skillCount, fileName);
+        mu_swprintf(successMsg, L"Loaded %d skills from %ls", skillCount, fileName);
         g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
     }
 #endif

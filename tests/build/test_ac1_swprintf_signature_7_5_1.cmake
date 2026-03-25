@@ -25,7 +25,9 @@ file(READ "${SOURCE_FILE}" source_content)
 
 # Check for 2-arg swprintf: pattern where second arg is a format string (starts with L")
 # The problematic pattern: swprintf(buf, L"...") — format string is 2nd arg, no size param
-string(REGEX MATCH "swprintf\\([^,]+,[ \t]*L\"" bad_call "${source_content}")
+# First strip mu_swprintf calls (safe wrapper), then check for bare swprintf
+string(REPLACE "mu_swprintf" "_SAFE_SWPRINTF_" cleaned_content "${source_content}")
+string(REGEX MATCH "swprintf\\([^,]+,[ \t]*L\"" bad_call "${cleaned_content}")
 if(bad_call)
     message(FATAL_ERROR
         "AC-1 FAIL: swprintf uses 2-argument Windows form in SkillDataLoader.cpp.\n"

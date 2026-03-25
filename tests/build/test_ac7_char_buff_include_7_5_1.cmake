@@ -29,13 +29,13 @@ if(usage_pos EQUAL -1)
     message(WARNING "AC-7 NOTE: g_isCharacterBuff not found in ZzzInfomation.cpp — may have been refactored")
 endif()
 
-# Check that _GlobalFunctions.h is included
-string(REGEX MATCH "#include[ \t]+\"_GlobalFunctions\\.h\"" include_found "${source_content}")
+# Check that _GlobalFunctions.h is included (with or without Core/ prefix)
+string(REGEX MATCH "#include[ \t]+\"(Core/)?_GlobalFunctions\\.h\"" include_found "${source_content}")
 if(NOT include_found)
     message(FATAL_ERROR
         "AC-7 FAIL: '#include \"_GlobalFunctions.h\"' not found in ZzzInfomation.cpp.\n"
         "g_isCharacterBuff is declared in Core/_GlobalFunctions.h but the include is missing.\n"
-        "Fix: Add '#include \"_GlobalFunctions.h\"' to ZzzInfomation.cpp.\n"
+        "Fix: Add '#include \"Core/_GlobalFunctions.h\"' to ZzzInfomation.cpp.\n"
         "Follow SortIncludes: Never — place after existing includes, preserving order.")
 endif()
 

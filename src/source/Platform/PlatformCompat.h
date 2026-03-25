@@ -36,6 +36,9 @@ inline std::filesystem::path mu_get_app_dir()
 #include <filesystem>
 #include <string>
 
+// MSVC intrinsic stub — triggers a breakpoint on non-Windows/non-MSVC builds [VS0-QUAL-BUILDCOMPAT-MACOS]
+#define __debugbreak() __builtin_trap()
+
 // Story 7.3.0: String comparison and compat stubs [VS0-QUAL-BUILDCOMPAT-MACOS]
 #define _wcsicmp wcscasecmp
 #define wcsicmp wcscasecmp
@@ -999,6 +1002,19 @@ inline void SetCursorPos(int x, int y)
 // Used by all HIBYTE(GetAsyncKeyState(vk)) call sites (104 sites in codebase).
 #ifndef HIBYTE
 #define HIBYTE(w) (static_cast<uint8_t>((static_cast<uint16_t>(w) >> 8) & 0xFF))
+#endif
+
+// Extracts the low byte of a 16-bit value.
+#ifndef LOBYTE
+#define LOBYTE(w) (static_cast<uint8_t>(static_cast<uint16_t>(w) & 0xFF))
+#endif
+
+// Packs two 16-bit values into a 32-bit LONG (non-Windows equivalent of Win32 MAKELONG).
+#ifndef MAKELONG
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define MAKELONG(a, b)                                                                                                 \
+    ((LONG)(((WORD)(((DWORD_PTR)(a)) & 0xffff)) | ((DWORD)((WORD)(((DWORD_PTR)(b)) & 0xffff))) << 16))
+// NOLINTEND(cppcoreguidelines-macro-usage)
 #endif
 
 // ---- Keyboard input shim (GetAsyncKeyState) ----

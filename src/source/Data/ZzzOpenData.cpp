@@ -13,6 +13,7 @@
 #include "DSPlaySound.h"
 
 #include "SMD.h"
+#include "Main/Winmain.h"
 
 #include "PhysicsManager.h"
 #include "CSQuest.h"
@@ -99,7 +100,13 @@ void OpenPlayers()
 {
     ModelsDump = new BMD[MAX_MODELS + 1024];
     Models = ModelsDump + (rand() % 1024);
+    // NOLINTBEGIN(bugprone-undefined-memory-manipulation)
+    // Legacy zero-init of BMD array — memset is intentional for C-style game structs
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnontrivial-memcall"
     ZeroMemory(Models, MAX_MODELS * sizeof(BMD));
+#pragma clang diagnostic pop
+    // NOLINTEND(bugprone-undefined-memory-manipulation)
 
     gLoadData.AccessModel(MODEL_PLAYER, L"Data\\Player\\", L"Player");
 
@@ -765,16 +772,20 @@ void OpenItems()
     wchar_t szPC6Path[24];
     mu_swprintf(szPC6Path, L"Data\\Item\\partCharge6\\");
 
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_KNIGHT_1_CHARM, szPC6Path, L"amulet_satan");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_MAGICIAN_1_CHARM, szPC6Path, L"amulet_sky");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_ELF_1_CHARM, szPC6Path, L"amulet_elf");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_SUMMONER_1_CHARM, szPC6Path, L"amulet_disaster");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_DARKLORD_1_CHARM, szPC6Path, L"amulet_cloak");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_KNIGHT_2_CHARM, szPC6Path, L"amulet_dragon");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_MAGICIAN_2_CHARM, szPC6Path, L"amulet_soul");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_ELF_2_CHARM, szPC6Path, L"amulet_spirit");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_SUMMONER_2_CHARM, szPC6Path, L"amulet_despair");
-    gLoadData.AccessModel(MODEL_TYPE_CHARM_MIXWING + EWS_DARKKNIGHT_2_CHARM, szPC6Path, L"amulet_dark");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_KNIGHT_1_CHARM, szPC6Path, L"amulet_satan");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_MAGICIAN_1_CHARM, szPC6Path, L"amulet_sky");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_ELF_1_CHARM, szPC6Path, L"amulet_elf");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_SUMMONER_1_CHARM, szPC6Path,
+                          L"amulet_disaster");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_DARKLORD_1_CHARM, szPC6Path,
+                          L"amulet_cloak");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_KNIGHT_2_CHARM, szPC6Path, L"amulet_dragon");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_MAGICIAN_2_CHARM, szPC6Path, L"amulet_soul");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_ELF_2_CHARM, szPC6Path, L"amulet_spirit");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_SUMMONER_2_CHARM, szPC6Path,
+                          L"amulet_despair");
+    gLoadData.AccessModel(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_DARKKNIGHT_2_CHARM, szPC6Path,
+                          L"amulet_dark");
     gLoadData.AccessModel(MODEL_HELPER + 59, L"Data\\Item\\partCharge2\\", L"sealmove");
     gLoadData.AccessModel(MODEL_HELPER + 54, L"Data\\Item\\partCharge2\\", L"resetfruit_power");
     gLoadData.AccessModel(MODEL_HELPER + 55, L"Data\\Item\\partCharge2\\", L"resetfruit_quick");
@@ -1496,17 +1507,17 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_POTION + 75, L"Item\\partCharge2\\");
     gLoadData.OpenTexture(MODEL_POTION + 76, L"Item\\partCharge2\\");
     gLoadData.OpenTexture(MODEL_POTION + 77, L"Item\\partCharge2\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_KNIGHT_1_CHARM, L"Item\\partCharge6\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_MAGICIAN_1_CHARM, L"Item\\partCharge6\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_ELF_1_CHARM, L"Item\\partCharge6\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_SUMMONER_1_CHARM, L"Item\\partCharge6\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_DARKLORD_1_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_KNIGHT_1_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_MAGICIAN_1_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_ELF_1_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_SUMMONER_1_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_DARKLORD_1_CHARM, L"Item\\partCharge6\\");
 
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_KNIGHT_2_CHARM, L"Item\\partCharge6\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_MAGICIAN_2_CHARM, L"Item\\partCharge6\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_ELF_2_CHARM, L"Item\\partCharge6\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_SUMMONER_2_CHARM, L"Item\\partCharge6\\");
-    gLoadData.OpenTexture(MODEL_TYPE_CHARM_MIXWING + EWS_DARKKNIGHT_2_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_KNIGHT_2_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_MAGICIAN_2_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_ELF_2_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_SUMMONER_2_CHARM, L"Item\\partCharge6\\");
+    gLoadData.OpenTexture(static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_DARKKNIGHT_2_CHARM, L"Item\\partCharge6\\");
 
     gLoadData.OpenTexture(MODEL_HELPER + 59, L"Item\\partCharge2\\");
 
@@ -2126,7 +2137,7 @@ void OpenNpc(int Type)
         int _index = 9;
         int _index_end = 14;
 
-        Models[Type].Textures->FileName[_index_end] = NULL;
+        Models[Type].Textures->FileName[_index_end] = '\0';
         for (int i = _index_end - 1; i > _index; i--)
         {
             Models[Type].Textures->FileName[i] = Models[Type].Textures->FileName[i - 1];
@@ -2135,7 +2146,7 @@ void OpenNpc(int Type)
         wchar_t _temp2[10] = {
             0,
         };
-        _itow(_temp, _temp2, 10);
+        mu_swprintf(_temp2, L"%d", _temp);
         Models[Type].Textures->FileName[_index] = _temp2[0];
 
         gLoadData.OpenTexture(MODEL_LITTLESANTA + (Type - MODEL_LITTLESANTA), L"Npc\\");
@@ -2320,7 +2331,7 @@ void DeleteMonsters()
 
 void OpenMonsterModel(EMonsterModelType Type)
 {
-    int Index = MODEL_MONSTER01 + Type;
+    int Index = MODEL_MONSTER01 + static_cast<int>(Type);
 
     BMD* b = &Models[Index];
     if (b->NumActions > 0 || b->NumMeshs > 0)
@@ -2362,6 +2373,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         gLoadData.OpenTexture(MODEL_ICE_GIANT_PART6, L"Monster\\");
     }
     break;
+    default:
+        break;
     }
 
     b->Actions[MONSTER01_STOP1].PlaySpeed = 0.25f;
@@ -3146,6 +3159,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.75f;
         break;
 #endif // ASG_ADD_KARUTAN_MONSTERS
+    default:
+        break;
     }
     switch (Type)
     {
@@ -3154,6 +3169,8 @@ void OpenMonsterModel(EMonsterModelType Type)
     case MONSTER_MODEL_TITAN:
     case MONSTER_MODEL_SOLDIER:
         b->Actions[MONSTER01_STOP2].Loop = true;
+        break;
+    default:
         break;
     }
 
@@ -3164,14 +3181,14 @@ void OpenMonsterModel(EMonsterModelType Type)
     case MONSTER_MODEL_CHAOSCASTLE_KNIGHT:
     case MONSTER_MODEL_CHAOSCASTLE_ELF:
         LoadWaveFile(SOUND_MONSTER_ORCCAPATTACK1, L"Data\\Sound\\mOrcCapAttack1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 161, 161, -1);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, -1, -1, 161, 161, -1);
+        Models[Index].BoneHead = 20;
         break;
 
     case MONSTER_MODEL_CHAOSCASTLE_WIZARD:
         LoadWaveFile(SOUND_MONSTER_ORCARCHERATTACK1, L"Data\\Sound\\mOrcArcherAttack1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 162, 162, -1);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, -1, -1, 162, 162, -1);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_BULL_FIGHTER:
     case MONSTER_MODEL_DEATH_COW:
@@ -3180,8 +3197,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_BULLATTACK1, L"Data\\Sound\\mBullAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BULLATTACK2, L"Data\\Sound\\mBullAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BULLDIE, L"Data\\Sound\\mBullDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 0, 1, 2, 3, 4);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, 0, 1, 2, 3, 4);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_HOUND:
         LoadWaveFile(SOUND_MONSTER_HOUND1, L"Data\\Sound\\mHound1.wav", Channel, Enable);
@@ -3189,19 +3206,19 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_HOUNDATTACK1, L"Data\\Sound\\mHoundAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HOUNDATTACK2, L"Data\\Sound\\mHoundAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HOUNDDIE, L"Data\\Sound\\mHoundDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 5, 6, 7, 8, 9);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 5;
+        SetMonsterSound(Index, 5, 6, 7, 8, 9);
+        Models[Index].BoneHead = 5;
         break;
     case MONSTER_MODEL_BUDGE_DRAGON:
         LoadWaveFile(SOUND_MONSTER_BUDGE1, L"Data\\Sound\\mBudge1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BUDGEATTACK1, L"Data\\Sound\\mBudgeAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BUDGEDIE, L"Data\\Sound\\mBudgeDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 10, 11, 11, 11, 12);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 7;
+        SetMonsterSound(Index, 10, 11, 11, 11, 12);
+        Models[Index].BoneHead = 7;
         break;
     case MONSTER_MODEL_SPIDER:
         LoadWaveFile(SOUND_MONSTER_SPIDER1, L"Data\\Sound\\mSpider1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 13, 13, 13, 13, 13);
+        SetMonsterSound(Index, 13, 13, 13, 13, 13);
         break;
     case MONSTER_MODEL_DARK_KNIGHT:
     case MONSTER_MODEL_DEATH_KNIGHT:
@@ -3211,13 +3228,13 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_DARKKNIGHTATTACK1, L"Data\\Sound\\mDarkKnightAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_DARKKNIGHTATTACK2, L"Data\\Sound\\mDarkKnightAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_DARKKNIGHTDIE, L"Data\\Sound\\mDarkKnightDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 15, 16, 17, 18, 19);
+        SetMonsterSound(Index, 15, 16, 17, 18, 19);
         if (Type == 3)
-            Models[MODEL_MONSTER01 + Type].BoneHead = 16;
+            Models[Index].BoneHead = 16;
         else if (Type == 29)
-            Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+            Models[Index].BoneHead = 20;
         else
-            Models[MODEL_MONSTER01 + Type].BoneHead = 19;
+            Models[Index].BoneHead = 19;
         break;
     case MONSTER_MODEL_LICH:
         LoadWaveFile(SOUND_MONSTER_WIZARD1, L"Data\\Sound\\mWizard1.wav", Channel, Enable);
@@ -3225,8 +3242,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_WIZARDATTACK1, L"Data\\Sound\\mWizardAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_WIZARDATTACK2, L"Data\\Sound\\mWizardAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_WIZARDDIE, L"Data\\Sound\\mWizardDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 20, 21, 22, 23, 24);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, 20, 21, 22, 23, 24);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_GIANT:
         LoadWaveFile(SOUND_MONSTER_GIANT1, L"Data\\Sound\\mGiant1.wav", Channel, Enable);
@@ -3234,20 +3251,20 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_GIANTATTACK1, L"Data\\Sound\\mGiantAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GIANTATTACK2, L"Data\\Sound\\mGiantAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GIANTDIE, L"Data\\Sound\\mGiantDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 25, 26, 27, 28, 29);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, 25, 26, 27, 28, 29);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_LARVA:
         LoadWaveFile(SOUND_MONSTER_LARVA1, L"Data\\Sound\\mLarva1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_LARVA2, L"Data\\Sound\\mLarva2.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 30, 31, 30, 31, 31);
+        SetMonsterSound(Index, 30, 31, 30, 31, 31);
         break;
     case MONSTER_MODEL_HELL_SPIDER:
         LoadWaveFile(SOUND_MONSTER_HELLSPIDER1, L"Data\\Sound\\mHellSpider1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HELLSPIDERATTACK1, L"Data\\Sound\\mHellSpiderAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HELLSPIDERDIE, L"Data\\Sound\\mHellSpiderDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 32, 33, 33, 33, 34);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 16;
+        SetMonsterSound(Index, 32, 33, 33, 33, 34);
+        Models[Index].BoneHead = 16;
         break;
     case MONSTER_MODEL_GHOST:
         LoadWaveFile(SOUND_MONSTER_GHOST1, L"Data\\Sound\\mGhost1.wav", Channel, Enable);
@@ -3255,8 +3272,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_GHOSTATTACK1, L"Data\\Sound\\mGhostAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GHOSTATTACK2, L"Data\\Sound\\mGhostAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GHOSTDIE, L"Data\\Sound\\mGhostDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 35, 36, 37, 38, 39);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, 35, 36, 37, 38, 39);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_CYCLOPS:
         LoadWaveFile(SOUND_MONSTER_OGRE1, L"Data\\Sound\\mOgre1.wav", Channel, Enable);
@@ -3264,8 +3281,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_OGREATTACK1, L"Data\\Sound\\mOgreAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_OGREATTACK2, L"Data\\Sound\\mOgreAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_OGREDIE, L"Data\\Sound\\mOgreDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 40, 41, 42, 43, 44);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, 40, 41, 42, 43, 44);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_GORGON:
         LoadWaveFile(SOUND_MONSTER_GORGON1, L"Data\\Sound\\mGorgon1.wav", Channel, Enable);
@@ -3273,28 +3290,28 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_GORGONATTACK1, L"Data\\Sound\\mGorgonAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GORGONATTACK2, L"Data\\Sound\\mGorgonAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GORGONDIE, L"Data\\Sound\\mGorgonDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 45, 46, 47, 48, 49);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, 45, 46, 47, 48, 49);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_ICE_MONSTER:
         LoadWaveFile(SOUND_MONSTER_ICEMONSTER1, L"Data\\Sound\\mIceMonster1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ICEMONSTER2, L"Data\\Sound\\mIceMonster2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ICEMONSTERDIE, L"Data\\Sound\\mIceMonsterDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 50, 51, 50, 50, 52);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 19;
+        SetMonsterSound(Index, 50, 51, 50, 50, 52);
+        Models[Index].BoneHead = 19;
         break;
     case MONSTER_MODEL_WORM:
         LoadWaveFile(SOUND_MONSTER_WORM1, L"Data\\Sound\\mWorm1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_WORM2, L"Data\\Sound\\mWorm2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_WORMDIE, L"Data\\Sound\\mWormDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 53, 53, 55, 55, 55);
+        SetMonsterSound(Index, 53, 53, 55, 55, 55);
         break;
     case MONSTER_MODEL_HOMMERD:
         LoadWaveFile(SOUND_MONSTER_HOMORD1, L"Data\\Sound\\mHomord1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HOMORD2, L"Data\\Sound\\mHomord2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HOMORDATTACK1, L"Data\\Sound\\mHomordAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HOMORDDIE, L"Data\\Sound\\mHomordDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 56, 57, 58, 58, 59);
+        SetMonsterSound(Index, 56, 57, 58, 58, 59);
         break;
     case MONSTER_MODEL_ICE_QUEEN:
         LoadWaveFile(SOUND_MONSTER_ICEQUEEN1, L"Data\\Sound\\mIceQueen1.wav", Channel, Enable);
@@ -3302,15 +3319,15 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_ICEQUEENATTACK1, L"Data\\Sound\\mIceQueenAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ICEQUEENATTACK2, L"Data\\Sound\\mIceQueenAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ICEQUEENDIE, L"Data\\Sound\\mIceQueenDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 60, 61, 62, 63, 64);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 16;
+        SetMonsterSound(Index, 60, 61, 62, 63, 64);
+        Models[Index].BoneHead = 16;
         break;
     case MONSTER_MODEL_ASSASSIN:
         LoadWaveFile(SOUND_MONSTER_ASSASSINATTACK1, L"Data\\Sound\\mAssassinAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ASSASSINATTACK2, L"Data\\Sound\\mAssassinAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ASSASSINDIE, L"Data\\Sound\\mAssassinDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 65, 66, 67);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, -1, -1, 65, 66, 67);
+        Models[Index].BoneHead = 20;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.35f;
         break;
     case MONSTER_MODEL_YETI:
@@ -3330,8 +3347,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_GOBLINATTACK1, L"Data\\Sound\\mGoblinAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GOBLINATTACK2, L"Data\\Sound\\mGoblinAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GOBLINDIE, L"Data\\Sound\\mGoblinDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 72, 73, 74, 75, 76);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 6;
+        SetMonsterSound(Index, 72, 73, 74, 75, 76);
+        Models[Index].BoneHead = 6;
         break;
     case MONSTER_MODEL_CHAIN_SCORPION:
         LoadWaveFile(SOUND_MONSTER_SCORPION1, L"Data\\Sound\\mScorpion1.wav", Channel, Enable);
@@ -3339,14 +3356,14 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_SCORPIONATTACK1, L"Data\\Sound\\mScorpionAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_SCORPIONATTACK2, L"Data\\Sound\\mScorpionAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_SCORPIONDIE, L"Data\\Sound\\mScorpionDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 77, 78, 79, 80, 81);
+        SetMonsterSound(Index, 77, 78, 79, 80, 81);
         break;
     case MONSTER_MODEL_BEETLE_MONSTER:
         LoadWaveFile(SOUND_MONSTER_BEETLE1, L"Data\\Sound\\mBeetle1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BEETLEATTACK1, L"Data\\Sound\\mBeetleAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BEETLEDIE, L"Data\\Sound\\mBeetleDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 82, 82, 83, 83, 84);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 5;
+        SetMonsterSound(Index, 82, 82, 83, 83, 84);
+        Models[Index].BoneHead = 5;
         break;
     case MONSTER_MODEL_HUNTER:
         LoadWaveFile(SOUND_MONSTER_HUNTER1, L"Data\\Sound\\mHunter1.wav", Channel, Enable);
@@ -3354,8 +3371,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_HUNTERATTACK1, L"Data\\Sound\\mHunterAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HUNTERATTACK2, L"Data\\Sound\\mHunterAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HUNTERDIE, L"Data\\Sound\\mHunterDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 85, 86, 87, 88, 89);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 6;
+        SetMonsterSound(Index, 85, 86, 87, 88, 89);
+        Models[Index].BoneHead = 6;
         break;
     case MONSTER_MODEL_FOREST_MONSTER:
         LoadWaveFile(SOUND_MONSTER_WOODMON1, L"Data\\Sound\\mWoodMon1.wav", Channel, Enable);
@@ -3363,8 +3380,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_WOODMONATTACK1, L"Data\\Sound\\mWoodMonAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_WOODMONATTACK2, L"Data\\Sound\\mWoodMonAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_WOODMONDIE, L"Data\\Sound\\mWoodMonDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 90, 91, 92, 93, 94);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 6;
+        SetMonsterSound(Index, 90, 91, 92, 93, 94);
+        Models[Index].BoneHead = 6;
         break;
     case MONSTER_MODEL_AGON:
         LoadWaveFile(SOUND_MONSTER_ARGON1, L"Data\\Sound\\mArgon1.wav", Channel, Enable);
@@ -3372,8 +3389,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_ARGONATTACK1, L"Data\\Sound\\mArgonAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ARGONATTACK2, L"Data\\Sound\\mArgonAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ARGONDIE, L"Data\\Sound\\mArgonDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 95, 96, 97, 98, 99);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 16;
+        SetMonsterSound(Index, 95, 96, 97, 98, 99);
+        Models[Index].BoneHead = 16;
         break;
     case MONSTER_MODEL_STONE_GOLEM:
         LoadWaveFile(SOUND_MONSTER_GOLEM1, L"Data\\Sound\\mGolem1.wav", Channel, Enable);
@@ -3381,15 +3398,15 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_GOLEMATTACK1, L"Data\\Sound\\mGolemAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GOLEMATTACK2, L"Data\\Sound\\mGolemAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GOLEMDIE, L"Data\\Sound\\mGolemDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 100, 101, 102, 103, 104);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 5;
+        SetMonsterSound(Index, 100, 101, 102, 103, 104);
+        Models[Index].BoneHead = 5;
         break;
     case MONSTER_MODEL_DEVIL:
         LoadWaveFile(SOUND_MONSTER_YETI1, L"Data\\Sound\\mYeti1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_SATANATTACK1, L"Data\\Sound\\mSatanAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_YETIDIE, L"Data\\Sound\\mYetiDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 105, 105, 106, 106, 107);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 6;
+        SetMonsterSound(Index, 105, 105, 106, 106, 107);
+        Models[Index].BoneHead = 6;
         break;
     case MONSTER_MODEL_BALROG:
         LoadWaveFile(SOUND_MONSTER_BALROG1, L"Data\\Sound\\mBalrog1.wav", Channel, Enable);
@@ -3397,9 +3414,9 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_WIZARDATTACK2, L"Data\\Sound\\mWizardAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GORGONATTACK2, L"Data\\Sound\\mGorgonAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BALROGDIE, L"Data\\Sound\\mBalrogDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 108, 109, 110, 111, 112);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 6;
-        Models[MODEL_MONSTER01 + Type].StreamMesh = 1;
+        SetMonsterSound(Index, 108, 109, 110, 111, 112);
+        Models[Index].BoneHead = 6;
+        Models[Index].StreamMesh = 1;
         break;
     case MONSTER_MODEL_SHADOW:
         LoadWaveFile(SOUND_MONSTER_SHADOW1, L"Data\\Sound\\mShadow1.wav", Channel, Enable);
@@ -3407,14 +3424,14 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_SHADOWATTACK1, L"Data\\Sound\\mShadowAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_SHADOWATTACK2, L"Data\\Sound\\mShadowAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_SHADOWDIE, L"Data\\Sound\\mShadowDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 113, 114, 115, 116, 117);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 5;
+        SetMonsterSound(Index, 113, 114, 115, 116, 117);
+        Models[Index].BoneHead = 5;
         break;
     case MONSTER_MODEL_DRAGON:
         LoadWaveFile(SOUND_MONSTER_YETI1, L"Data\\Sound\\mYeti1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BULLATTACK1, L"Data\\Sound\\mBullAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_YETIDIE, L"Data\\Sound\\mYetiDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 123, 123, 124, 124, 125);
+        SetMonsterSound(Index, 123, 123, 124, 124, 125);
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.5f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.7f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.8f;
@@ -3425,7 +3442,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_BALI2, L"Data\\Sound\\mBali2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BALIATTACK1, L"Data\\Sound\\mBaliAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BALIATTACK2, L"Data\\Sound\\mBaliAttack2.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 126, 127, 128, 129, 127);
+        SetMonsterSound(Index, 126, 127, 128, 129, 127);
         b->Actions[MONSTER01_ATTACK3].PlaySpeed = 0.4f;
         b->Actions[MONSTER01_ATTACK4].PlaySpeed = 0.4f;
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.4f;
@@ -3436,13 +3453,13 @@ void OpenMonsterModel(EMonsterModelType Type)
     case MONSTER_MODEL_BAHAMUT:
         LoadWaveFile(SOUND_MONSTER_BAHAMUT1, L"Data\\Sound\\mBahamut1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_YETI1, L"Data\\Sound\\mYeti1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 130, 130, 131, 131, 130);
+        SetMonsterSound(Index, 130, 130, 131, 131, 130);
         break;
     case MONSTER_MODEL_VEPAR:
         LoadWaveFile(SOUND_MONSTER_BEPAR1, L"Data\\Sound\\mBepar1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BEPAR2, L"Data\\Sound\\mBepar2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BALROG1, L"Data\\Sound\\mBalrog1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 132, 133, 104, 104, 133);
+        SetMonsterSound(Index, 132, 133, 104, 104, 133);
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.5f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.5f;
         b->BoneHead = 20; // 인어
@@ -3451,24 +3468,24 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_VALKYRIE1, L"Data\\Sound\\mValkyrie1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BALIATTACK2, L"Data\\Sound\\mBaliAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_VALKYRIEDIE, L"Data\\Sound\\mValkyrieDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 135, 135, 136, 136, 137);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 19;
+        SetMonsterSound(Index, 135, 135, 136, 136, 137);
+        Models[Index].BoneHead = 19;
         break;
     case MONSTER_MODEL_LIZARD:
     case MONSTER_MODEL_SOLDIER:
         LoadWaveFile(SOUND_MONSTER_LIZARDKING1, L"Data\\Sound\\mLizardKing1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_LIZARDKING2, L"Data\\Sound\\mLizardKing2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GORGONDIE, L"Data\\Sound\\mGorgonDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 138, 139, 138, 139, 140);
+        SetMonsterSound(Index, 138, 139, 138, 139, 140);
         if (Type == 36)
-            Models[MODEL_MONSTER01 + Type].BoneHead = 19;
+            Models[Index].BoneHead = 19;
         else
-            Models[MODEL_MONSTER01 + Type].BoneHead = 6;
+            Models[Index].BoneHead = 6;
         break;
     case MONSTER_MODEL_HYDRA:
         LoadWaveFile(SOUND_MONSTER_HYDRA1, L"Data\\Sound\\mHydra1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_HYDRAATTACK1, L"Data\\Sound\\mHydraAttack1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 141, 141, 142, 142, 141);
+        SetMonsterSound(Index, 141, 141, 142, 142, 141);
         b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
@@ -3476,8 +3493,8 @@ void OpenMonsterModel(EMonsterModelType Type)
     case MONSTER_MODEL_GOLDEN_WHEEL:
         LoadWaveFile(SOUND_MONSTER_IRON1, L"Data\\Sound\\iron1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_IRON_ATTACK1, L"Data\\Sound\\iron_attack1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 143, 143, 144, 144, 144);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 3;
+        SetMonsterSound(Index, 143, 143, 144, 144, 144);
+        Models[Index].BoneHead = 3;
         break;
     case MONSTER_MODEL_TANTALLOS:
         LoadWaveFile(SOUND_MONSTER_JAIKAN1, L"Data\\Sound\\jaikan1.wav", Channel, Enable);
@@ -3485,52 +3502,52 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_JAIKAN_ATTACK1, L"Data\\Sound\\jaikan_attack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_JAIKAN_ATTACK2, L"Data\\Sound\\jaikan_attack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_JAIKAN_DIE, L"Data\\Sound\\jaikan_die.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 145, 146, 147, 148, 149);
+        SetMonsterSound(Index, 145, 146, 147, 148, 149);
         LoadBitmap(L"Monster\\bv01_2.jpg", BITMAP_MONSTER_SKIN, GL_LINEAR, GL_REPEAT);
         LoadBitmap(L"Monster\\bv02_2.jpg", BITMAP_MONSTER_SKIN + 1, GL_LINEAR, GL_REPEAT);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_BLOODY_WOLF:
         LoadWaveFile(SOUND_MONSTER_BLOOD1, L"Data\\Sound\\blood1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BLOOD_ATTACK1, L"Data\\Sound\\blood_attack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BLOOD_ATTACK2, L"Data\\Sound\\blood_attack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BLOOD_DIE, L"Data\\Sound\\blood_die.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 150, 150, 151, 152, 153);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 7;
+        SetMonsterSound(Index, 150, 150, 151, 152, 153);
+        Models[Index].BoneHead = 7;
         break;
     case MONSTER_MODEL_BEAM_KNIGHT:
         LoadWaveFile(SOUND_MONSTER_DEATH1, L"Data\\Sound\\death1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_DEATH_ATTACK1, L"Data\\Sound\\death_attack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_DEATH_DIE, L"Data\\Sound\\death_die.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 154, 154, 155, 155, 156);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 6;
+        SetMonsterSound(Index, 154, 154, 155, 155, 156);
+        Models[Index].BoneHead = 6;
         break;
     case MONSTER_MODEL_MUTANT:
         LoadWaveFile(SOUND_MONSTER_UTANT1, L"Data\\Sound\\mutant1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_UTANT2, L"Data\\Sound\\mutant2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_UTANT_ATTACK1, L"Data\\Sound\\mutant_attack1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 157, 158, 159, 159, 159);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 6;
+        SetMonsterSound(Index, 157, 158, 159, 159, 159);
+        Models[Index].BoneHead = 6;
         break;
     case MONSTER_MODEL_ORC_ARCHER:
         LoadWaveFile(SOUND_MONSTER_ORCARCHERATTACK1, L"Data\\Sound\\mOrcArcherAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BULLDIE, L"Data\\Sound\\mBullDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 162, 162, 4);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 7;
+        SetMonsterSound(Index, -1, -1, 162, 162, 4);
+        Models[Index].BoneHead = 7;
         break;
     case MONSTER_MODEL_ORC:
         LoadWaveFile(SOUND_MONSTER_HUNTER2, L"Data\\Sound\\mHunter2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BULLDIE, L"Data\\Sound\\mBullDie.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ORCCAPATTACK1, L"Data\\Sound\\mOrcCapAttack1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 86, 86, 161, 161, 4);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, 86, 86, 161, 161, 4);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_CURSED_KING:
         LoadWaveFile(SOUND_MONSTER_CURSEDKING1, L"Data\\Sound\\mCursedKing1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_CURSEDKING2, L"Data\\Sound\\mCursedKing2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_CURSEDKINGDIE1, L"Data\\Sound\\mCursedKingDie1.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 160, 164, -1, -1, 163);
-        Models[MODEL_MONSTER01 + Type].BoneHead = 20;
+        SetMonsterSound(Index, 160, 164, -1, -1, 163);
+        Models[Index].BoneHead = 20;
         break;
     case MONSTER_MODEL_CRUST:
         LoadBitmap(L"Monster\\iui02.tga", BITMAP_ROBE + 3);
@@ -3539,49 +3556,49 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_MEGACRUST1, L"Data\\Sound\\mMegaCrust1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_MEGACRUSTATTACK1, L"Data\\Sound\\mMegaCrustAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_MEGACRUSTDIE, L"Data\\Sound\\mMegaCrustDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 180, 180, 181, 181, 182);
+        SetMonsterSound(Index, 180, 180, 181, 181, 182);
         break;
     case MONSTER_MODEL_MOLT:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         LoadWaveFile(SOUND_MONSTER_MOLT1, L"Data\\Sound\\mMolt1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_MOLTATTACK1, L"Data\\Sound\\mMoltAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_MOLTDIE, L"Data\\Sound\\mMoltDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 177, 177, 178, 178, 179);
+        SetMonsterSound(Index, 177, 177, 178, 178, 179);
         break;
     case MONSTER_MODEL_ALQUAMOS:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         // LoadWaveFile(SOUND_MONSTER+174,"Data\\Sound\\mAlquamos1.wav"    ,Channel,Enable);
         LoadWaveFile(SOUND_MONSTER_ALQUAMOSATTACK1, L"Data\\Sound\\mAlquamosAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ALQUAMOSDIE, L"Data\\Sound\\mAlquamosDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 175, 175, 175, 175, 176);
+        SetMonsterSound(Index, 175, 175, 175, 175, 176);
         break;
     case MONSTER_MODEL_QUEEN_RAINER:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         LoadWaveFile(SOUND_MONSTER_RAINNER1, L"Data\\Sound\\mRainner1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_RAINNERATTACK1, L"Data\\Sound\\mRainnerAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_RAINNERDIE, L"Data\\Sound\\mRainnerDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 171, -1, 172, 172, 173);
+        SetMonsterSound(Index, 171, -1, 172, 172, 173);
         break;
     case MONSTER_MODEL_PHANTOM_KNIGHT:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         LoadWaveFile(SOUND_MONSTER_PHANTOM1, L"Data\\Sound\\mPhantom1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_PHANTOMATTACK1, L"Data\\Sound\\mPhantomAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_PHANTOMDIE, L"Data\\Sound\\mPhantomDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 168, 168, 169, 169, 170);
+        SetMonsterSound(Index, 168, 168, 169, 169, 170);
         break;
     case MONSTER_MODEL_DRAKAN:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         LoadWaveFile(SOUND_MONSTER_DRAKAN1, L"Data\\Sound\\mDrakan1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_DRAKANATTACK1, L"Data\\Sound\\mDrakanAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_DRAKANDIE, L"Data\\Sound\\mDrakanDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 165, 165, 166, 166, 167);
+        SetMonsterSound(Index, 165, 165, 166, 166, 167);
         break;
     case MONSTER_MODEL_DARK_PHOENIX_SHIELD:
         LoadWaveFile(SOUND_MONSTER_PHOENIX1, L"Data\\Sound\\mPhoenix1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_PHOENIX1, L"Data\\Sound\\mPhoenix1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_PHOENIXATTACK1, L"Data\\Sound\\mPhoenixAttack1.wav", Channel, Enable);
         // LoadWaveFile(SOUND_MONSTER+186,"Data\\Sound\\mDarkPhoenixDie.wav"    ,Channel,Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 183, 184, 185, 185, -1);
+        SetMonsterSound(Index, 183, 184, 185, 185, -1);
     case MONSTER_MODEL_DARK_PHOENIX:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         // b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.01f;
@@ -3590,7 +3607,7 @@ void OpenMonsterModel(EMonsterModelType Type)
     case MONSTER_MODEL_MAGIC_SKELETON:
         LoadWaveFile(SOUND_MONSTER_MAGICSKULL1, L"Data\\Sound\\mMagicSkull.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_MAGICSKULL2, L"Data\\Sound\\mMagicSkull.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 186, -1, -1, -1, 187);
+        SetMonsterSound(Index, 186, -1, -1, -1, 187);
         break;
     case MONSTER_MODEL_CASTLE_GATE:
         break;
@@ -3601,30 +3618,30 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_HUNTER2, L"Data\\Sound\\mHunter2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BLACKSKULLDIE, L"Data\\Sound\\mBlackSkullDie.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BLACKSKULLATTACK, L"Data\\Sound\\mBlackSkullAttack.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 188, -1, 190, -1, 189);
+        SetMonsterSound(Index, 188, -1, 190, -1, 189);
         break;
     case MONSTER_MODEL_GIANT_OGRE:
         LoadWaveFile(SOUND_MONSTER_HUNTER2, L"Data\\Sound\\mHunter2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GHAINTORGERDIE, L"Data\\Sound\\mGhaintOrgerDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 188, -1, 190, -1, 191);
+        SetMonsterSound(Index, 188, -1, 190, -1, 191);
         break;
     case MONSTER_MODEL_RED_SKELETON_KNIGHT:
         LoadWaveFile(SOUND_MONSTER_REDSKULL, L"Data\\Sound\\mRedSkull.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_REDSKULLDIE, L"Data\\Sound\\mRedSkullDie.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_REDSKULLATTACK, L"Data\\Sound\\mRedSkullAttack.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 192, -1, 194, -1, 193);
+        SetMonsterSound(Index, 192, -1, 194, -1, 193);
         break;
     case MONSTER_MODEL_DEATH_ANGEL:
         LoadWaveFile(SOUND_MONSTER_DANGELIDLE, L"Data\\Sound\\mDAngelIdle.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_DANGELATTACK, L"Data\\Sound\\mDAngelAttack.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_DANGELDEATH, L"Data\\Sound\\mDAngelDeath.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 195, 195, 196, 196, 197);
+        SetMonsterSound(Index, 195, 195, 196, 196, 197);
         break;
     case MONSTER_MODEL_ILLUSION_OF_KUNDUN:
         LoadWaveFile(SOUND_MONSTER_OCDOORDIS, L"Data\\Sound\\mKundunIdle.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BOWMERCATTACK, L"Data\\Sound\\mKundunAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BOWMERCDEATH, L"Data\\Sound\\mKundunAttack2.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 232, 232, 233, 234, -1);
+        SetMonsterSound(Index, 232, 232, 233, 234, -1);
         break;
     case MONSTER_MODEL_BLOOD_SOLDIER:
         LoadWaveFile(SOUND_MONSTER_BSOLDIERIDLE1, L"Data\\Sound\\mBSoldierIdle1.wav", Channel, Enable);
@@ -3632,14 +3649,14 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_BSOLDIERATTACK1, L"Data\\Sound\\mBSoldierAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BSOLDIERATTACK2, L"Data\\Sound\\mBSoldierAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BSOLDIERDEATH, L"Data\\Sound\\mBSoldierDeath.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 198, 199, 200, 201, 202);
+        SetMonsterSound(Index, 198, 199, 200, 201, 202);
         break;
     case MONSTER_MODEL_AEGIS:
         LoadWaveFile(SOUND_MONSTER_ESISIDLE, L"Data\\Sound\\mEsisIdle.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ESISATTACK1, L"Data\\Sound\\mEsisAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ESISATTACK2, L"Data\\Sound\\mEsisAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_ESISDEATH, L"Data\\Sound\\mEsisDeath.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 203, 203, 204, 205, 206);
+        SetMonsterSound(Index, 203, 203, 204, 205, 206);
         break;
     case MONSTER_MODEL_DEATH_CENTURION:
         LoadWaveFile(SOUND_MONSTER_DSIDLE1, L"Data\\Sound\\mDsIdle1.wav", Channel, Enable);
@@ -3652,7 +3669,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_LSATTACK1, L"Data\\Sound\\mLsAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_LSATTACK2, L"Data\\Sound\\mLsAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_LSDEATH, L"Data\\Sound\\mLsDeath.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216);
+        SetMonsterSound(Index, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216);
         break;
     case MONSTER_MODEL_NECRON:
         LoadWaveFile(SOUND_MONSTER_NECRONIDLE1, L"Data\\Sound\\mNecronIdle1.wav", Channel, Enable);
@@ -3660,7 +3677,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_NECRONATTACK1, L"Data\\Sound\\mNecronAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_NECRONATTACK2, L"Data\\Sound\\mNecronAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_NECRONDEATH, L"Data\\Sound\\mNecronDeath.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 217, 218, 219, 220, 221);
+        SetMonsterSound(Index, 217, 218, 219, 220, 221);
         break;
     case MONSTER_MODEL_SHRIKER:
         LoadWaveFile(SOUND_MONSTER_SVIDLE1, L"Data\\Sound\\mSvIdle1.wav", Channel, Enable);
@@ -3673,14 +3690,14 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_LVATTACK1, L"Data\\Sound\\mLvAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_LVATTACK2, L"Data\\Sound\\mLvAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_LVDEATH, L"Data\\Sound\\mLvDeath.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231);
+        SetMonsterSound(Index, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231);
         break;
     case MONSTER_MODEL_CASTLE_GATE1:
         LoadWaveFile(SOUND_MONSTER_OCDOORDIS, L"Data\\Sound\\BattleCastle\\oCDoorDis.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, -1, -1, 232);
+        SetMonsterSound(Index, -1, -1, -1, -1, 232);
         break;
     case MONSTER_MODEL_LIFE_STONE:
-        SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, -1, -1, -1);
+        SetMonsterSound(Index, -1, -1, -1, -1, -1);
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.05f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.05f;
         b->Actions[MONSTER01_WALK].PlaySpeed = 0.1f;
@@ -3688,13 +3705,13 @@ void OpenMonsterModel(EMonsterModelType Type)
     case MONSTER_MODEL_BATTLE_GUARD1:
         LoadWaveFile(SOUND_MONSTER_BOWMERCATTACK, L"Data\\Sound\\BattleCastle\\mBowMercAttack.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_BOWMERCDEATH, L"Data\\Sound\\BattleCastle\\mBowMercDeath.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 233, 233, 234);
+        SetMonsterSound(Index, -1, -1, 233, 233, 234);
         break;
     case MONSTER_MODEL_BATTLE_GUARD2:
         LoadWaveFile(SOUND_MONSTER_SPEARMERCATTACK, L"Data\\Sound\\BattleCastle\\mSpearMercAttack.wav", Channel,
                      Enable);
         LoadWaveFile(SOUND_MONSTER_SPEARMERCDEATH, L"Data\\Sound\\BattleCastle\\mSpearMercDeath.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, -1, -1, 235, 235, 236);
+        SetMonsterSound(Index, -1, -1, 235, 235, 236);
         break;
     case MONSTER_MODEL_CANON_TOWER:
         break;
@@ -3830,7 +3847,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_GOBLINATTACK1, L"Data\\Sound\\mGoblinAttack1.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GOBLINATTACK2, L"Data\\Sound\\mGoblinAttack2.wav", Channel, Enable);
         LoadWaveFile(SOUND_MONSTER_GOBLINDIE, L"Data\\Sound\\mGoblinDie.wav", Channel, Enable);
-        SetMonsterSound(MODEL_MONSTER01 + Type, 72, 73, 74, 75, 76);
+        SetMonsterSound(Index, 72, 73, 74, 75, 76);
         break;
     case MONSTER_MODEL_ZOMBIE_FIGHTER:
     {
@@ -3950,6 +3967,8 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_KARUTAN_CONDRA_DEATH, L"Data\\Sound\\Karutan\\Condra_death.wav");
         break;
 #endif // ASG_ADD_KARUTAN_MONSTERS
+    default:
+        break;
     }
 }
 
@@ -4929,7 +4948,7 @@ void OpenCharacterSceneData()
         Models[MODEL_FACE + i].Actions[0].PlaySpeed = 0.3f;
         Models[MODEL_FACE + i].Actions[1].PlaySpeed = 0.3f;
     }
-    Models[MODEL_FACE + CLASS_SUMMONER].Actions[0].PlaySpeed = 0.25f;
+    Models[MODEL_FACE + static_cast<int>(CLASS_SUMMONER)].Actions[0].PlaySpeed = 0.25f;
 }
 
 void ReleaseCharacterSceneData()

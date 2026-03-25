@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopProduct.h"
 #include "StringToken.h"
@@ -51,4 +52,4 @@ bool CShopProduct::SetProduct(std::wstring strdata) // OK
 
     return 1;
 }
-#endif
+#endif #endif // _WIN32

@@ -6,7 +6,9 @@
 
 #pragma once
 
+#ifdef _WIN32
 #include <wininet.h>
+#endif
 #define DL_DEFAULT_BUFFER_SIZE 4096
 
 typedef enum _DownloaderType

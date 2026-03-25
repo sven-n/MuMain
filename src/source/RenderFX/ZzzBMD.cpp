@@ -621,10 +621,7 @@ void BMD::AnimationTransformOnlySelf(vec3_t* arrOutSetfAllBonePositions, const v
 
     vec34_t* arrBonesTMLocal;
     vec3_t v3RootAngle, v3RootPosition;
-    float fRootScale;
     vec3_t Temp;
-
-    fRootScale = const_cast<float&>(fScale);
 
     v3RootAngle[0] = v3Angle[0];
     v3RootAngle[1] = v3Angle[1];
@@ -2824,7 +2821,7 @@ public:
 
 private:
     unsigned char* data;
-    size_t size;
+    [[maybe_unused]] size_t size;
     size_t ptr;
 };
 

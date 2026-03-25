@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "FTPFileDownLoader.h"
 CFTPFileDownLoader::CFTPFileDownLoader() // OK
@@ -93,4 +94,4 @@ BOOL CFTPFileDownLoader::CreateFolder(std::wstring strFilePath) // OK
 
     return 1;
 }
-#endif
+#endif #endif // _WIN32

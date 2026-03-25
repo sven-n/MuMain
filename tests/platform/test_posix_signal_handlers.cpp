@@ -13,6 +13,7 @@
 #ifndef _WIN32
 
 #include <csignal>
+#include <signal.h>
 
 #include "posix/PosixSignalHandlers.h"
 

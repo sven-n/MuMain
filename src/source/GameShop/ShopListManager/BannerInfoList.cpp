@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "BannerInfoList.h"
 #include "BannerInfo.h"
@@ -94,4 +95,4 @@ bool CBannerInfoList::GetNext(CBannerInfo& banner) // OK
     this->m_BannerInfoIter++;
     return 1;
 }
-#endif
+#endif #endif // _WIN32

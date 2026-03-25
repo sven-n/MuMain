@@ -3,12 +3,15 @@
 #ifdef _WIN32
 // On Windows, all types come from <windows.h> — this header is a no-op.
 #else
+#include <cstdint>
+#include <cstring>
 // Fundamental Windows type aliases
 using DWORD = uint32_t;
 using BOOL = int;
 using BYTE = uint8_t;
 using WORD = uint16_t;
 using UINT = unsigned int;
+using LONG = long;
 using ULONG = unsigned long;
 using UCHAR = unsigned char;
 using USHORT = unsigned short;

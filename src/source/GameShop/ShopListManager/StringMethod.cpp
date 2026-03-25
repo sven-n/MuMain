@@ -9,6 +9,7 @@
 //
 
 #include "stdafx.h"
+#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "StringMethod.h"
 
@@ -54,4 +55,4 @@ void CStringMethod::ConvertStringToDateTime(tm& datetime, std::wstring strdata) 
 
     mktime(&datetime);
 }
-#endif
+#endif #endif // _WIN32

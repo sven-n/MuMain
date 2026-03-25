@@ -21,6 +21,7 @@
 #include "w_MapHeaders.h"
 #include "NewUISystem.h"
 #include "Random.h"
+#include "Main/Winmain.h"
 
 #include <cmath>
 
@@ -88,7 +89,7 @@ void CheckSkull(OBJECT* o)
 {
     vec3_t Position;
     VectorCopy(Hero->Object.Position, Position);
-    if (Hero->Object.CurrentAction >= PLAYER_WALK_MALE && Hero->Object.CurrentAction <= PLAYER_RUN_RIDE_WEAPON ||
+    if ((Hero->Object.CurrentAction >= PLAYER_WALK_MALE && Hero->Object.CurrentAction <= PLAYER_RUN_RIDE_WEAPON) ||
         (Hero->Object.CurrentAction == PLAYER_RAGE_UNI_RUN ||
          Hero->Object.CurrentAction == PLAYER_RAGE_UNI_RUN_ONE_RIGHT))
     {

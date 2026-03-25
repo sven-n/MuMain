@@ -260,6 +260,7 @@ inline void glFogfv(GLenum, const GLfloat*) {}
 #endif // _WIN32
 
 // client - base definitions
+#include "Core/Defined_Global.h"
 #define PBG_ADD_INGAMESHOPMSGBOX
 #define ASG_ADD_GENS_MARK
 #define PBG_ADD_GENSRANKING
