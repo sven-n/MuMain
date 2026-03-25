@@ -2428,6 +2428,43 @@ inline int GetDeviceCaps(HDC /*hdc*/, int nIndex)
 
 #endif // _WIN32
 
+// ---- Cross-platform process CPU time measurement ----
+// Story 7.6.4: mu_get_process_cpu_times replaces GetProcessTimes() in CpuUsage.cpp.
+// Returns kernel and user CPU time in nanoseconds. Returns false on failure.
+// [VS0-QUAL-WIN32CLEAN-CPUUSAGE]
+#include <cstdint>
+#ifdef _WIN32
+inline bool mu_get_process_cpu_times(uint64_t* kernelNs, uint64_t* userNs)
+{
+    FILETIME creation, exitTime, kernel, user;
+    if (!::GetProcessTimes(::GetCurrentProcess(), &creation, &exitTime, &kernel, &user))
+    {
+        return false;
+    }
+    // FILETIME is in 100-nanosecond intervals
+    auto toNs = [](const FILETIME& ft) -> uint64_t
+    { return ((static_cast<uint64_t>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime) * 100ULL; };
+    *kernelNs = toNs(kernel);
+    *userNs = toNs(user);
+    return true;
+}
+#else
+#include <sys/resource.h>
+inline bool mu_get_process_cpu_times(uint64_t* kernelNs, uint64_t* userNs)
+{
+    struct rusage ru;
+    if (getrusage(RUSAGE_SELF, &ru) != 0)
+    {
+        return false;
+    }
+    auto timevalToNs = [](const struct timeval& tv) -> uint64_t
+    { return static_cast<uint64_t>(tv.tv_sec) * 1000000000ULL + static_cast<uint64_t>(tv.tv_usec) * 1000ULL; };
+    *kernelNs = timevalToNs(ru.ru_stime);
+    *userNs = timevalToNs(ru.ru_utime);
+    return true;
+}
+#endif
+
 // ---- Cross-platform credential encryption (all platforms) ----
 // Story 7.6.3: mu_encrypt_blob / mu_decrypt_blob replace Windows DPAPI.
 // Implementation moved to Platform/PlatformCrypto.cpp to confine OpenSSL headers to a single TU.

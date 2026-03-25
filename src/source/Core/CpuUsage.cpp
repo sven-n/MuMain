@@ -1,90 +1,80 @@
 #include "stdafx.h"
 #include <chrono>
-#include <stdexcept>
+#include <cstdint>
+#include <thread>
 #include "CpuUsage.h"
+#include "ErrorReport.h"
 
-#ifdef _WIN32
-// Implementation for Windows
+// Story 7.6.4: Cross-platform CpuUsage implementation.
+// Uses mu_get_process_cpu_times() (PlatformCompat.h) for process CPU time
+// and std::thread::hardware_concurrency() for core count.
+// [VS0-QUAL-WIN32CLEAN-CPUUSAGE]
+
 class CpuUsage::Impl
 {
 public:
     Impl()
     {
-        SYSTEM_INFO sysInfo;
-        ::GetSystemInfo(&sysInfo);
-        m_numProcessors = sysInfo.dwNumberOfProcessors;
+        unsigned int hw = std::thread::hardware_concurrency();
+        m_numProcessors = (hw > 0) ? hw : 1;
         m_lastCheckTime = std::chrono::steady_clock::now();
-        m_lastProcessTime = 0;
-        m_lastSystemTime = 0;
+        m_lastProcessTimeNs = 0;
+        m_bInitialized = false;
     }
 
     double GetUsage()
     {
-        // Get the current process times
-        FILETIME creationTime, exitTime, kernelTime, userTime;
-        if (!::GetProcessTimes(::GetCurrentProcess(), &creationTime, &exitTime, &kernelTime, &userTime))
+        uint64_t kernelNs = 0;
+        uint64_t userNs = 0;
+        if (!mu_get_process_cpu_times(&kernelNs, &userNs))
         {
-            return 0.0; // Error
+            g_ErrorReport.Write(L"CpuUsage: mu_get_process_cpu_times failed — returning 0.0\r\n");
+            return 0.0;
         }
 
-        // Convert process times to ULONGLONG
-        ULONGLONG currentKernelTime = FileTimeToULL(kernelTime);
-        ULONGLONG currentUserTime = FileTimeToULL(userTime);
-        ULONGLONG currentProcessTime = currentKernelTime + currentUserTime;
+        uint64_t currentProcessTimeNs = kernelNs + userNs;
 
-        // Get the current wall-clock time using std::chrono
         auto now = std::chrono::steady_clock::now();
-        auto elapsedWallTime = std::chrono::duration_cast<std::chrono::microseconds>(now - m_lastCheckTime).count();
+        auto wallElapsedNs = std::chrono::duration_cast<std::chrono::nanoseconds>(now - m_lastCheckTime).count();
 
-        // First call: Initialize
-        if (m_lastSystemTime == 0 || m_lastProcessTime == 0)
+        if (!m_bInitialized)
         {
-            m_lastSystemTime = elapsedWallTime;
-            m_lastProcessTime = currentProcessTime;
+            m_lastProcessTimeNs = currentProcessTimeNs;
             m_lastCheckTime = now;
-            return 0.0; // Not enough data to calculate usage
+            m_bInitialized = true;
+            return 0.0;
         }
 
-        // Calculate elapsed times
-        ULONGLONG systemTimeElapsed = elapsedWallTime;
-        ULONGLONG processTimeElapsed = currentProcessTime - m_lastProcessTime;
+        uint64_t processTimeElapsedNs = currentProcessTimeNs - m_lastProcessTimeNs;
 
-        // Update last recorded times
-        m_lastSystemTime = elapsedWallTime;
-        m_lastProcessTime = currentProcessTime;
+        m_lastProcessTimeNs = currentProcessTimeNs;
         m_lastCheckTime = now;
 
-        // Avoid division by zero
-        if (systemTimeElapsed == 0 || m_numProcessors == 0)
+        if (wallElapsedNs <= 0 || m_numProcessors == 0)
+        {
             return 0.0;
+        }
 
-        // Calculate CPU usage as a percentage
-        return std::max<double>(0.0, (100.0 * processTimeElapsed) / (systemTimeElapsed * m_numProcessors));
+        double usage =
+            static_cast<double>(processTimeElapsedNs) / (static_cast<double>(wallElapsedNs) * m_numProcessors);
+
+        if (usage < 0.0)
+        {
+            return 0.0;
+        }
+        if (usage > 1.0)
+        {
+            return 1.0;
+        }
+        return usage;
     }
 
 private:
-    ULONGLONG m_lastSystemTime;
-    ULONGLONG m_lastProcessTime;
-    DWORD m_numProcessors;
+    uint64_t m_lastProcessTimeNs;
+    unsigned int m_numProcessors;
+    bool m_bInitialized;
     std::chrono::steady_clock::time_point m_lastCheckTime;
-
-    ULONGLONG FileTimeToULL(const FILETIME& ft)
-    {
-        return (static_cast<ULONGLONG>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
-    }
 };
-#else
-// Placeholder implementation for non-Windows
-class CpuUsage::Impl
-{
-public:
-    Impl() {}
-    double GetUsage()
-    {
-        return 0.0;
-    }
-};
-#endif
 
 CpuUsage* CpuUsage::Instance()
 {
@@ -92,13 +82,10 @@ CpuUsage* CpuUsage::Instance()
     return &instance;
 }
 
-// Constructor
 CpuUsage::CpuUsage() : pImpl(std::make_unique<Impl>()) {}
 
-// Destructor
 CpuUsage::~CpuUsage() = default;
 
-// Public methods
 double CpuUsage::GetUsage()
 {
     return pImpl->GetUsage();
