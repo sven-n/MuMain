@@ -54,6 +54,7 @@ foreach(source_file IN LISTS MODIFIED_FILES)
                 "Story 7.5.1 fixes (mu_swprintf, static_cast) should not require Win32 guards.\n"
                 "If these are new guards added by this story, they violate AC-10.\n"
                 "Use platform-neutral PlatformCompat.h shims instead.")
+            set(found_violations TRUE)
         endif()
     endif()
 
@@ -64,6 +65,7 @@ foreach(source_file IN LISTS MODIFIED_FILES)
             message(WARNING
                 "AC-10 WARN: ZzzInfomation.cpp has ${guard_count} #ifdef _WIN32 guards — expected 0-2 pre-existing.\n"
                 "Story 7.5.1 fixes must be platform-neutral — no new Win32 guards needed.")
+            set(found_violations TRUE)
         endif()
     endif()
 endforeach()

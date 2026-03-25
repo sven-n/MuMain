@@ -21,7 +21,7 @@ extern HWND g_hWnd;
 bool SkillDataLoader::Load(wchar_t* fileName)
 {
     FILE* fp = _wfopen(fileName, L"rb");
-    if (fp == NULL)
+    if (fp == nullptr)
     {
         wchar_t errorMsg[256];
         mu_swprintf(errorMsg, L"Skill file not found: %ls", fileName);
