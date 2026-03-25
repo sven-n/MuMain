@@ -7,6 +7,7 @@
 #include "iexplorer.h"
 #include "NewUISystem.h"
 #include "NewUIInGameShop.h"
+#include "Winmain.h"
 #include "MsgBoxIGSBuyPackageItem.h"
 #include "MsgBoxIGSBuySelectItem.h"
 #include "MsgBoxIGSCommon.h"
@@ -666,8 +667,17 @@ bool CNewUIInGameShop::IsInGameShopOpen()
     if (Hero->Movement)
         return false;
 
+    // Pre-existing logic bug: && should be || (always evaluates to false on MSVC too).
+    // Suppressed for compilation — fixing the operator would change runtime behavior.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-overlap-compare"
+#endif
     if (!(Hero->SafeZone) && !(WD_0LORENCIA == gMapManager.WorldActive && WD_3NORIA == gMapManager.WorldActive &&
                                WD_2DEVIAS == gMapManager.WorldActive && WD_51HOME_6TH_CHAR == gMapManager.WorldActive))
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);

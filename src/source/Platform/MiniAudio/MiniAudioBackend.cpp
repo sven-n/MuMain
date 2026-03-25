@@ -12,9 +12,8 @@
 #include <cmath>
 #include <cstring>
 
-#ifndef _WIN32
-#define S_OK 0
-#define S_FALSE 1
+// S_OK, S_FALSE are now provided by PlatformTypes.h (via PCH)
+#ifndef E_INVALIDARG
 #define E_INVALIDARG 0x80070057L
 #endif
 

@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "w_Buff.h"
+#include "w_BuffScriptLoader.h"
+#include "_GlobalFunctions.h"
 
 namespace
 {
@@ -229,7 +231,6 @@ void Buff::UnRegisterBuff(eBuffState buffstate)
 
     if (iter != m_Buff.end())
     {
-        DWORD& tempcount = (*iter).second;
         {
             m_Buff.erase(iter);
         }

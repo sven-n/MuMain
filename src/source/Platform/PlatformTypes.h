@@ -49,8 +49,17 @@ using LPVOID = void*;
 using LPARAM = intptr_t;
 using WPARAM = uintptr_t;
 using UINT_PTR = uintptr_t;
+using INT_PTR = intptr_t;
 using LRESULT = intptr_t;
 using HRESULT = long;
+
+// COM result codes — used by audio and other legacy Windows APIs
+#ifndef S_OK
+#define S_OK    0L
+#endif
+#ifndef S_FALSE
+#define S_FALSE 1L
+#endif
 
 // Pointer-width unsigned integer (needed for LOWORD/HIWORD macros)
 using DWORD_PTR = uintptr_t;

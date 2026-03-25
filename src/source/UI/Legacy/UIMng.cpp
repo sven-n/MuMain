@@ -604,7 +604,7 @@ void CUIMng::Update(double dDeltaTick)
         m_bBlockCharMove = false;
     }
     int nlist = m_WinList.GetCount();
-    CWin** apTempWin = new (CWin* [nlist]);
+    CWin** apTempWin = new CWin*[nlist];
 
     position = m_WinList.GetHeadPosition();
     for (int i = 0; i < nlist; ++i)

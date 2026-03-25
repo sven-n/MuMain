@@ -171,7 +171,7 @@ void NewMoveCharacterScene()
     std::wstring lpszTemp = {0};
     if (::Util_CheckOption(::GetCommandLine(), L'c', lpszTemp))
     {
-        SelectedHero = ::_wtoi(lpszTemp.c_str());
+        SelectedHero = _wtoi(lpszTemp.c_str());
         ::StartGame();
     }
 #endif

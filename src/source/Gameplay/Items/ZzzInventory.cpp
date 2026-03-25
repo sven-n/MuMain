@@ -48,6 +48,8 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 #include "NewUISystem.h"
+#include "Winmain.h"
+#include "_GlobalFunctions.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
@@ -496,6 +498,7 @@ bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem,
     {
         splitType |= 0x04;
     }
+    (void)splitType;
 
     BYTE spareBits;
     if (g_SocketItemMgr.IsSocketItem(pItem))
@@ -506,6 +509,7 @@ bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem,
     {
         spareBits = (((BYTE)pItem->Jewel_Of_Harmony_Option) << 4) + ((BYTE)pItem->Jewel_Of_Harmony_OptionLevel);
     }
+    (void)spareBits;
 
     SocketClient->ToGameServer()->SendItemMoveRequestExtended((uint32_t)iSrcType, iSrcIndex, (uint32_t)iDstType,
                                                               iDstIndex);
@@ -2228,7 +2232,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     tm* ExpireTime;
     if (ip->bPeriodItem == true && ip->bExpiredPeriod == false)
     {
-        _tzset();
+        tzset();
         if (ip->lExpireTime == 0)
             return;
 
@@ -2242,7 +2246,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     ZeroMemory(TextListColor, 20 * sizeof(int));
     for (int i = 0; i < 30; i++)
     {
-        TextList[i][0] = NULL;
+        TextList[i][0] = L'\0';
     }
 
     if (!Sell && (ip->Type == ITEM_DARK_HORSE_ITEM || ip->Type == ITEM_DARK_RAVEN_ITEM))
@@ -3367,6 +3371,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type == ITEM_POTION + 97)
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
+        (void)Item_data;
 
         mu_swprintf(TextList[TextNum], GlobalText[2580]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -3381,6 +3386,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     else if (ip->Type == ITEM_POTION + 98)
     {
         const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
+        (void)Item_data;
 
         mu_swprintf(TextList[TextNum], GlobalText[2581]);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
@@ -4268,6 +4274,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     if (ip->DamageMin)
     {
         int minindex = 0, maxindex = 0, magicalindex = 0;
+        (void)magicalindex;
 
         if (Level >= ip->Jewel_Of_Harmony_OptionLevel)
         {
@@ -6332,7 +6339,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     SkipNum = 0;
     for (int i = 0; i < 30; i++)
     {
-        TextList[i][0] = NULL;
+        TextList[i][0] = L'\0';
     }
 
     int Level = ip->Level;
@@ -11708,7 +11715,7 @@ void MovePersonalShop()
             {
                 if (g_bEnablePersonalShop)
                 {
-                    SocketClient->ToGameServer()->SendPlayerShopOpen(g_szPersonalShopTitle);
+                    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(g_szPersonalShopTitle));
                     g_pUIManager->Close(INTERFACE_INVENTORY);
                 }
                 else
@@ -11761,7 +11768,7 @@ void ClosePersonalShop()
         }
         if (g_PersonalShopSeller.Key)
         {
-            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
+            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, MU_C16(g_PersonalShopSeller.ID));
         }
     }
 

@@ -120,7 +120,7 @@ private:
     typedef std::map<CHARACTER*, CShopTitleDrawObj*> type_drawobj_map;
     type_drawobj_map m_listShopTitleDrawObj;
 
-    int m_iHighlightFrame;
+    [[maybe_unused]] int m_iHighlightFrame;
     bool m_bShow;
 };
 

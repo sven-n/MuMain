@@ -5,9 +5,12 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSBuyConfirm.h"
+#include "Winmain.h"
 #include "DSPlaySound.h"
 
+#ifdef _WIN32
 #include <strsafe.h>
+#endif
 
 CMsgBoxIGSBuyConfirm::CMsgBoxIGSBuyConfirm()
 {
@@ -262,4 +265,4 @@ bool CMsgBoxIGSBuyConfirmLayout::SetLayout()
     return true;
 }
 
-#endif KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM

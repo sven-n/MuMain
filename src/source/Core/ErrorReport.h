@@ -68,10 +68,14 @@ extern volatile int g_errorReportFd;
 // then calls OpenMonsterModel(MONSTER_MODEL_DRAGON).
 // Falls back to numeric output for computed arguments — use the
 // direct function call with manual logging in those rare cases.
+// Note: L#x does not work on Clang — use a two-step widen macro instead.
+#define MU_WIDEN_IMPL(x) L##x
+#define MU_WIDEN(x) MU_WIDEN_IMPL(x)
+#define MU_STRINGIFY(x) #x
 #define LOG_CALL(func, arg)                                                                                            \
     do                                                                                                                 \
     {                                                                                                                  \
-        g_ErrorReport.Write(L"%ls(%ls)\r\n", L#func, L#arg);                                                           \
+        g_ErrorReport.Write(L"%ls(%ls)\r\n", MU_WIDEN(MU_STRINGIFY(func)), MU_WIDEN(MU_STRINGIFY(arg)));                \
         func(arg);                                                                                                     \
     } while (0)
 

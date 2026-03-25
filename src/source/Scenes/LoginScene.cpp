@@ -115,7 +115,7 @@ void DeleteCharacter()
     }
 
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
-    SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[characterToDelete].ID, InputText[0]);
+    SocketClient->ToGameServer()->SendDeleteCharacter(MU_C16(CharactersClient[characterToDelete].ID), MU_C16(InputText[0]));
 
     PlayBuffer(SOUND_MENU01);
 

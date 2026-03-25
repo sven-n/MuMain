@@ -12,6 +12,7 @@
 
 #include "PlatformCompat.h"
 #include "../MuPlatform.h"
+#include "../IPlatformWindow.h"
 
 // Keyboard state array: true when the key at that SDL_Scancode index is held.
 // Populated by SDLEventLoop::PollEvents() on KEY_DOWN / KEY_UP events.

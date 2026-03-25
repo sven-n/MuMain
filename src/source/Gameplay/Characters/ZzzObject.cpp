@@ -1,6 +1,7 @@
 ﻿///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Winmain.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
@@ -32,6 +33,7 @@
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
 #include "NewUISystem.h"
+#include "_GlobalFunctions.h"
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
@@ -4565,6 +4567,7 @@ void MoveObject(OBJECT* o)
             }
 
             float fTemp1 = sinf(WorldTime * 0.001f) * 0.2 + 0.6f;
+            (void)fTemp1;
             o->BlendMesh = -2;
             break;
         }
@@ -5315,10 +5318,12 @@ int OpenObjects(wchar_t* FileName)
 
     unsigned char* Data = EncData;
     int DataBytes = EncBytes;
+    (void)DataBytes;
 
     int DataPtr = 0;
 
     BYTE Version = *((BYTE*)(Data + DataPtr));
+    (void)Version;
     DataPtr += 1;
 
     int iMapNumber = 0;
@@ -5400,6 +5405,7 @@ bool SaveObjects(wchar_t* FileName, int iMapNumber)
 
     short ObjectCount = 0;
     int CounterPoint = 3;
+    (void)CounterPoint;
     BYTE Version = 0;
     fwrite(&Version, sizeof(BYTE), 1, fp);
     fwrite(&iMapNumber, 1, 1, fp);
@@ -6298,7 +6304,7 @@ void ItemAngle(OBJECT* o)
         //	o->Angle[2] = 0.0f;
         o->Scale = 1.0f;
     }
-    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN && o->Type <= MODEL_TYPE_CHARM_MIXWING + EWS_END)
+    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_BEGIN) && o->Type <= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_END))
     {
         o->Scale = 0.5f;
         o->Angle[2] = 90.f;
@@ -7591,6 +7597,8 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
 
     nIndex = int((o->Type + 1 - MODEL_ITEM) / 512.0f);
     nNum = (o->Type - MODEL_ITEM) % 512;
+    (void)nIndex;
+    (void)nNum;
 
     BOOL bIsNotRendered = FALSE;
 
@@ -7996,7 +8004,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         float sine = float(sinf(WorldTime * 0.00004f) * 0.15f) + 0.5f;
         b->RenderBody(RenderType, 1.f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
                       0);
-        b->RenderBody(RenderType, 1.f, 0.5f, sine, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
+        b->RenderBody(RenderType, 1.f, static_cast<int>(0.5f), sine, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
     }
     else if (o->Type == MODEL_SCROLL_OF_BLOOD)
     {
@@ -8008,9 +8016,11 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (Type == MODEL_POTION + 64)
     {
         float fLumi = (sinf(WorldTime * 0.001f) + 1.5f) * 0.25f;
+        (void)fLumi;
 
         float PlaySpeed = 0.f;
         PlaySpeed = b->Actions[b->CurrentAction].PlaySpeed;
+        (void)PlaySpeed;
 
         b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, 2.f / 7.f, o->Position,
                          o->Angle);
@@ -8388,6 +8398,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (Type == MODEL_POTION + 96)
     {
         float fLumi = (sinf(WorldTime * 0.0015f) + 1.5f) * 0.5f;
+        (void)fLumi;
 
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -8452,6 +8463,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
              Type == MODEL_HURRICANE_BOOTS)
     {
         float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
+        (void)Luminosity;
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
         Vector(Light[0] * 0.3f, Light[1] * 0.8f, Light[1] * 1.f, b->BodyLight);
@@ -8504,6 +8516,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
 
         o->Alpha = 0.5f;
         float Luminosity4 = sinf(WorldTime * 0.0025f) * 0.5f + 0.7f;
+        (void)Luminosity4;
         Vector(0.4f, 0.4f, 0.8f, b->BodyLight);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -2, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordU);
     }
@@ -9481,6 +9494,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         int iAnimationFrame = (int)o->AnimationFrame;
         static int iPriorAnimationFrame = 0;
         iPriorAnimationFrame = iAnimationFrame;
+        (void)iPriorAnimationFrame;
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
     {
@@ -9639,7 +9653,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
     }
-    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN && o->Type <= MODEL_TYPE_CHARM_MIXWING + EWS_END)
+    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_BEGIN) && o->Type <= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_END))
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, o->HiddenMesh);

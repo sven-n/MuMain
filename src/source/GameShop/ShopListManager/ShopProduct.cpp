@@ -52,4 +52,5 @@ bool CShopProduct::SetProduct(std::wstring strdata) // OK
 
     return 1;
 }
-#endif #endif // _WIN32
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // _WIN32

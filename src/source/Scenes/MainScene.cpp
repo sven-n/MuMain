@@ -93,7 +93,7 @@ static void InitializeMainScene()
     g_ConsoleDebug->Write(MCD_SEND, L"SendRequestJoinMapServer");
 
     CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
-    SocketClient->ToGameServer()->SendSelectCharacter(CharactersClient[SelectedHero].ID);
+    SocketClient->ToGameServer()->SendSelectCharacter(MU_C16(CharactersClient[SelectedHero].ID));
 
     CUIMng::Instance().CreateMainScene();
 

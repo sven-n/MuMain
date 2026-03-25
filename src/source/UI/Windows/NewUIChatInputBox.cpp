@@ -547,7 +547,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                     if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && wcslen(szChatText) &&
                         wcslen(szWhisperID) > 0)
                     {
-                        SocketClient->ToGameServer()->SendWhisperMessage(szWhisperID, wstrText.c_str());
+                        SocketClient->ToGameServer()->SendWhisperMessage(MU_C16(szWhisperID), MU_C16(wstrText.c_str()));
                         g_pChatListBox->AddText(Hero->ID, szChatText, SEASON3B::TYPE_WHISPER_MESSAGE);
                         AddWhsprIDHistory(szWhisperID);
                     }
@@ -573,7 +573,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                             CheckChatText(szChatText);
                         }
 
-                        SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, wstrText.c_str());
+                        SocketClient->ToGameServer()->SendPublicChatMessage(MU_C16(Hero->ID), MU_C16(wstrText.c_str()));
                         AddChatHistory(wstrText);
                     }
                 }

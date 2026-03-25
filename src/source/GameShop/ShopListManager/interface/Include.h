@@ -13,7 +13,9 @@
 
 #include <crtdbg.h>
 #include <tchar.h>
+#ifdef _WIN32
 #include <strsafe.h>
+#endif
 
 #include "GameShop\ShopListManager\interface\WZResult/WZResult.h"
 #include "GameShop\ShopListManager\interface\DownloadInfo.h"

@@ -5,6 +5,7 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSBuySelectItem.h"
+#include "Winmain.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
 #include "MsgBoxIGSBuyConfirm.h"
@@ -349,7 +350,14 @@ void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPri
     };
 
     IGS_SelectBuyItem Item;
+#if defined(__has_warning) && __has_warning("-Wnontrivial-memcall")
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnontrivial-memcall"
+#endif
     memset(&Item, 0, sizeof(IGS_SelectBuyItem));
+#if defined(__has_warning) && __has_warning("-Wnontrivial-memcall")
+#pragma clang diagnostic pop
+#endif
 
     Item.m_bIsSelected = FALSE;
     Item.m_iPackageSeq = iPackageSeq;

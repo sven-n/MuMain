@@ -73,4 +73,5 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
 
     return 1;
 }
-#endif #endif // _WIN32
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // _WIN32

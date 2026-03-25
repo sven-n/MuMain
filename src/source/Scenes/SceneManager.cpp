@@ -199,12 +199,12 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
-    swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute,
+    mu_swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute,
              GrabScreen);
-    swprintf(outMessage, GlobalText[459], outFileName);
+    mu_swprintf(outMessage, GlobalText[459], outFileName);
 
     wchar_t lpszTemp[64];
-    swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+    mu_swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
     wcscat(outMessage, lpszTemp);
 }
 
@@ -313,13 +313,13 @@ static void UpdateWaterAnimation()
 {
     constexpr int NumberOfWaterTextures = 32;
     const double timePerFrame = 1000 / REFERENCE_FPS;
-    auto time_since_last_render = g_frameTiming.currentTickCount - g_frameTiming.lastWaterChange;
+    auto time_since_last_render = g_frameTiming.GetCurrentTickCount() - g_frameTiming.GetLastWaterChange();
     while (time_since_last_render > timePerFrame)
     {
         WaterTextureNumber++;
         WaterTextureNumber %= NumberOfWaterTextures;
         time_since_last_render -= timePerFrame;
-        g_frameTiming.lastWaterChange = g_frameTiming.currentTickCount;
+        g_frameTiming.SetLastWaterChange(g_frameTiming.GetCurrentTickCount());
     }
 }
 
@@ -500,21 +500,21 @@ static void RenderDebugInfo()
     g_pRenderText->SetTextColor(255, 255, 255, 200);
 
     int y = DEBUG_TEXT_Y_START;
-    swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%", FPS_AVG, s_avgFps, s_highestFps,
+    mu_swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%", FPS_AVG, s_avgFps, s_highestFps,
              IsVSyncEnabled(), CPU_AVG);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
-    swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms", s_onePercentLow, s_slowestFrameFps,
+    mu_swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms", s_onePercentLow, s_slowestFrameFps,
              (s_avgFps > 0.0f) ? 1000.0f / s_avgFps : 0.0f);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
-    swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
+    mu_swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
-    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+    mu_swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
@@ -540,7 +540,7 @@ static void RenderFpsCounter()
     g_pRenderText->SetBgColor(0, 0, 0, 100);
     g_pRenderText->SetTextColor(255, 255, 255, 200);
 
-    swprintf(szLine, L"FPS: %.1f", FPS_AVG);
+    mu_swprintf(szLine, L"FPS: %.1f", FPS_AVG);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, DEBUG_TEXT_Y_START, szLine);
 
     g_pRenderText->SetFont(g_hFont);

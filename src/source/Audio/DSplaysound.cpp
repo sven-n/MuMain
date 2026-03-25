@@ -39,6 +39,7 @@
 
 namespace
 {
+#ifdef _WIN32
 constexpr std::size_t kBufferNameLength = 64;
 
 template <typename T> struct ComReleaser
@@ -718,25 +719,37 @@ void DirectSoundManager::CoUninitializeIfNeeded()
         CoUninitialize();
     }
 }
+#endif // _WIN32
 } // namespace
 
 HRESULT InitDirectSound(HWND windowHandle)
 {
+#ifdef _WIN32
     return Manager().Initialize(windowHandle);
+#else
+    (void)windowHandle;
+    return S_OK;
+#endif
 }
 
 void SetEnableSound(bool enabled)
 {
+#ifdef _WIN32
     Manager().SetEnabled(enabled);
     if (!enabled)
     {
         Manager().StopAll();
     }
+#else
+    (void)enabled;
+#endif
 }
 
 void FreeDirectSound()
 {
+#ifdef _WIN32
     Manager().Shutdown();
+#endif
 }
 
 void LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel, bool enable3D)
@@ -746,18 +759,31 @@ void LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel, bool
         g_platformAudio->LoadSound(bufferId, filename, maxChannel, enable3D);
         return;
     }
+#ifdef _WIN32
     // Fallback: legacy DirectSound path (dormant — InitDirectSound no longer called after 5.2.2)
     Manager().LoadWaveFile(bufferId, filename, maxChannel, enable3D);
+#endif
 }
 
 HRESULT ReleaseBuffer(int bufferId)
 {
+#ifdef _WIN32
     return Manager().ReleaseBuffer(static_cast<ESound>(bufferId));
+#else
+    (void)bufferId;
+    return S_OK;
+#endif
 }
 
 HRESULT RestoreBuffers(int bufferId, int channel)
 {
+#ifdef _WIN32
     return Manager().RestoreBuffers(bufferId, channel);
+#else
+    (void)bufferId;
+    (void)channel;
+    return S_OK;
+#endif
 }
 
 HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
@@ -766,7 +792,11 @@ HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
     {
         return g_platformAudio->PlaySound(bufferId, object, looped);
     }
+#ifdef _WIN32
     return Manager().PlayBuffer(bufferId, object, looped != FALSE);
+#else
+    return S_OK;
+#endif
 }
 
 VOID StopBuffer(ESound bufferId, BOOL resetPosition)
@@ -776,7 +806,9 @@ VOID StopBuffer(ESound bufferId, BOOL resetPosition)
         g_platformAudio->StopSound(bufferId, resetPosition);
         return;
     }
+#ifdef _WIN32
     Manager().StopBuffer(bufferId, resetPosition != FALSE);
+#endif
 }
 
 void AllStopSound()
@@ -786,7 +818,9 @@ void AllStopSound()
         g_platformAudio->AllStopSound();
         return;
     }
+#ifdef _WIN32
     Manager().StopAll();
+#endif
 }
 
 void SetVolume(int bufferId, long volume)
@@ -796,7 +830,9 @@ void SetVolume(int bufferId, long volume)
         g_platformAudio->SetVolume(static_cast<ESound>(bufferId), volume);
         return;
     }
+#ifdef _WIN32
     Manager().SetVolume(static_cast<ESound>(bufferId), volume);
+#endif
 }
 
 void SetMasterVolume(long volume)
@@ -806,7 +842,9 @@ void SetMasterVolume(long volume)
         g_platformAudio->SetMasterVolume(volume);
         return;
     }
+#ifdef _WIN32
     Manager().SetMasterVolume(volume);
+#endif
 }
 
 void Set3DSoundPosition()
@@ -816,5 +854,7 @@ void Set3DSoundPosition()
         g_platformAudio->Set3DSoundPosition();
         return;
     }
+#ifdef _WIN32
     Manager().Update3DPositions();
+#endif
 }

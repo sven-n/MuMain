@@ -291,6 +291,15 @@ inline void glFogfv(GLenum, const GLfloat*) {}
 
 #include "_crypt.h"
 
+// Story 7.6.1: Game headers that many TUs depend on via transitive includes.
+// On Windows, these are pulled in through include chains that differ on macOS.
+// Adding them to the PCH ensures all symbols are available on all platforms.
+// [VS0-QUAL-BUILDCOMP-MACOS]
+#include "Main/Winmain.h"
+#include "Data/ZzzInfomation.h"
+#include "Scenes/SceneCore.h"
+#include "Core/_GlobalFunctions.h"
+
 #ifdef _MSC_VER
 #define mu_wcstok wcstok_s
 #else

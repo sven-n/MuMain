@@ -7,6 +7,7 @@
 
 #include "MsgBoxIGSBuyPackageItem.h"
 
+#include "Winmain.h"
 #include "UsefulDef.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"

@@ -209,7 +209,7 @@ void ConfigDataSerDe::Deserialize(const PRECEIVE_MUHELPER_DATA& netData, ConfigD
     gameData.bPickExtraItems = (bool)netData.AddExtraItem;
 
     wchar_t wsExtraItemBuffer[15 + 1];
-    for (int i = 0; i < sizeof(netData.ExtraItems) / sizeof(netData.ExtraItems[0]); i++)
+    for (size_t i = 0; i < sizeof(netData.ExtraItems) / sizeof(netData.ExtraItems[0]); i++)
     {
         memset(wsExtraItemBuffer, 0, sizeof(wsExtraItemBuffer));
 

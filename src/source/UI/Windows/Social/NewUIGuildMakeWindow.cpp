@@ -401,7 +401,7 @@ bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
                 Mark[i / 2] += GuildMark[MARK_EDIT].Mark[i];
         }
 
-        SocketClient->ToGameServer()->SendGuildCreateRequest(GuildMark[MARK_EDIT].GuildName, Mark, sizeof Mark);
+        SocketClient->ToGameServer()->SendGuildCreateRequest(MU_C16(GuildMark[MARK_EDIT].GuildName), Mark, sizeof Mark);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
         return true;
     }

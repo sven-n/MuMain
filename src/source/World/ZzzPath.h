@@ -481,6 +481,8 @@ inline POINT MovePoint(EPathDirection direction, POINT position)
     case EPathDirection::NORTHWEST:
         position.x--;
         break;
+    default:
+        break;
     }
     return position;
 }

@@ -6,6 +6,8 @@
 #include "UIManager.h"
 #include "ItemAddOptioninfo.h"
 #include "w_BuffTimeControl.h"
+#include "w_BuffScriptLoader.h"
+#include "_GlobalFunctions.h"
 
 BuffTimeControlPtr BuffTimeControl::Make()
 {
@@ -93,7 +95,7 @@ void BuffTimeControl::RegisterBuffTime(eBuffState bufftype, DWORD curbufftime)
 
     curbufftime = GetBuffMaxTime(bufftype, curbufftime);
 
-    if (bufftimetype == eBuffTime_None || curbufftime == -1)
+    if (bufftimetype == eBuffTime_None || curbufftime == static_cast<DWORD>(-1))
     {
         return;
     }

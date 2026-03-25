@@ -1571,7 +1571,7 @@ CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::OkBtnDown(class CNewU
     wchar_t shopTitle[MAX_SHOPTITLE]{};
     g_pMyShopInventory->GetTitle(shopTitle);
     wcscpy(g_szPersonalShopTitle, shopTitle);
-    SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
+    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
 
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -2961,7 +2961,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
         int sourceIndex = g_pPurchaseShopInventory->GetItemInventoryIndex(pItem);
         if (sourceIndex >= 0)
         {
-            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, MU_C16(pCha->ID), sourceIndex);
         }
     }
 
@@ -3127,7 +3127,7 @@ bool SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
 CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner,
                                                                                const leaf::xstreambuf& xParam)
 {
-    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, GuildList[DeleteIndex].Name, 0x03);
+    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, MU_C16(GuildList[DeleteIndex].Name), 0x03);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3506,7 +3506,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::CancelBtnDown(class CN
 CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner,
                                                                     const leaf::xstreambuf& xParam)
 {
-    SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(DeleteID);
+    SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(MU_C16(DeleteID));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

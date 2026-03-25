@@ -458,6 +458,7 @@ void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
         BYTE TextNum = 0;
         BYTE SkipNum = 0;
         BYTE setIndex = 0;
+        (void)setIndex;
 
         mu_swprintf(TextList[TextNum], L"\n");
         TextListColor[TextNum] = 0;
@@ -474,6 +475,7 @@ void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
         TextBold[TextNum] = false;
         TextNum++;
         SkipNum++;
+        (void)SkipNum;
 
         mu_swprintf(TextList[TextNum], GlobalText[2657]);
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
@@ -483,6 +485,7 @@ void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
         wchar_t szOptionText[64] = {
             0,
         };
+        (void)szOptionText;
         wchar_t szOptionValueText[16] = {
             0,
         };

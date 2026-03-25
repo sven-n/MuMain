@@ -137,55 +137,55 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     if (!m_bInit)
         return false;
 
-    if (strCommand.compare(L"$open") == NULL)
+    if (strCommand.compare(L"$open") == 0)
     {
         leaf::ShowConsole(true);
         return true;
     }
-    else if (strCommand.compare(L"$close") == NULL)
+    else if (strCommand.compare(L"$close") == 0)
     {
         leaf::ShowConsole(false);
         return true;
     }
-    else if (strCommand.compare(L"$clear") == NULL)
+    else if (strCommand.compare(L"$clear") == 0)
     {
         leaf::SetConsoleTextColor();
         leaf::ClearConsoleScreen();
         return true;
     }
 #ifdef CSK_DEBUG_MAP_ATTRIBUTE
-    else if (strCommand.compare(L"$mapatt on") == NULL)
+    else if (strCommand.compare(L"$mapatt on") == 0)
     {
         EditFlag = EDIT_WALL;
         return true;
     }
-    else if (strCommand.compare(L"$mapatt off") == NULL)
+    else if (strCommand.compare(L"$mapatt off") == 0)
     {
         EditFlag = EDIT_NONE;
         return true;
     }
 #endif // CSK_DEBUG_MAP_ATTRIBUTE
 #ifdef CSK_DEBUG_MAP_PATHFINDING
-    else if (strCommand.compare(L"$path on") == NULL)
+    else if (strCommand.compare(L"$path on") == 0)
     {
         g_bShowPath = true;
     }
-    else if (strCommand.compare(L"$path off") == NULL)
+    else if (strCommand.compare(L"$path off") == 0)
     {
         g_bShowPath = false;
     }
 #endif // CSK_DEBUG_MAP_PATHFINDING
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
-    else if (strCommand.compare(L"$bb on") == NULL)
+    else if (strCommand.compare(L"$bb on") == 0)
     {
         g_bRenderBoundingBox = true;
     }
-    else if (strCommand.compare(L"$bb off") == NULL)
+    else if (strCommand.compare(L"$bb off") == 0)
     {
         g_bRenderBoundingBox = false;
     }
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
-    else if (strCommand.compare(L"$type_test") == NULL)
+    else if (strCommand.compare(L"$type_test") == 0)
     {
         Write(MCD_SEND, L"MCD_SEND");
         Write(MCD_RECEIVE, L"MCD_RECEIVE");
@@ -193,13 +193,13 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         Write(MCD_NORMAL, L"MCD_NORMAL");
         return true;
     }
-    else if (strCommand.compare(L"$texture_info") == NULL)
+    else if (strCommand.compare(L"$texture_info") == 0)
     {
         Write(MCD_NORMAL, L"Texture Number : %d", Bitmaps.GetNumberOfTexture());
         Write(MCD_NORMAL, L"Texture Memory : %dKB", Bitmaps.GetUsedTextureMemory() / 1024);
         return true;
     }
-    else if (strCommand.compare(L"$color_test") == NULL)
+    else if (strCommand.compare(L"$color_test") == 0)
     {
         leaf::SetConsoleTextColor(leaf::COLOR_DARKRED);
         std::cout << "color test: dark red" << std::endl;
@@ -260,7 +260,7 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
         va_list pArguments;
 
         va_start(pArguments, pStr);
-        vswprintf(szBuffer, pStr, pArguments);
+        vswprintf(szBuffer, 256, pStr, pArguments);
         va_end(pArguments);
 
         std::wcout << szBuffer << std::endl;

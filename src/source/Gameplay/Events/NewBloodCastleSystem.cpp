@@ -7,6 +7,7 @@
 #include "NewBloodCastleSystem.h"
 #include "NewUICustomMessageBox.h"
 #include "NewUISystem.h"
+#include "Winmain.h"
 #include "DSPlaySound.h"
 #include "CSChaosCastle.h"
 #include "MapManager.h"
@@ -134,7 +135,7 @@ void CNewBloodCastleSystem::RenderMatchResult(void)
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
     wchar_t lpszStr[256] = {
-        NULL,
+        L'\0',
     };
 
     if (m_iNumResult)

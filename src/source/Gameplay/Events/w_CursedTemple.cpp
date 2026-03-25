@@ -18,6 +18,7 @@
 #include "UIControls.h"
 #include "NewUISystem.h"
 #include "NewUIInventoryCtrl.h"
+#include "Winmain.h"
 #include "MapManager.h"
 
 extern int TextNum;
@@ -151,6 +152,8 @@ bool CursedTemple::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
     case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
         return CheckMonsterSkill(c, o);
+    default:
+        break;
     }
 
     return false;
@@ -268,6 +271,8 @@ CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPo
         pCharacter->Object.SubType = MODEL_CURSEDTEMPLE_ILLUSION_PLAYER;
     }
     break;
+    default:
+        break;
     }
 
     return pCharacter;
@@ -307,6 +312,8 @@ bool CursedTemple::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
         }
     }
         return true;
+    default:
+        break;
     }
 
     return false;
@@ -555,6 +562,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             position[2] -= 100.f;
 
             float Rotation = (int)WorldTime % 3600 / (float)10.f;
+            (void)Rotation;
 
             Vector(0.15f, 0.15f, 0.15f, o->Light);
             CreateParticleFpsChecked(BITMAP_EFFECT, position, o->Angle, o->Light);
@@ -1256,6 +1264,7 @@ void CursedTemple::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
             CHARACTER* c = &CharactersClient[holyitemcharacterindex];
             OBJECT* o = &c->Object;
             OBJECT* ho = &Hero->Object;
+            (void)ho;
 
             if (o->Live && !SearchEffect(MODEL_CURSEDTEMPLE_HOLYITEM, o))
             {
@@ -1269,6 +1278,7 @@ void CursedTemple::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
                 float fActionSpeed = b->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
 
                 float fSpeedPerFrame = fActionSpeed / 10.f;
+                (void)fSpeedPerFrame;
 
                 float fAnimationFrame = o->AnimationFrame - fActionSpeed;
 

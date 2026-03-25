@@ -12,6 +12,7 @@
 
 #include "NewUICustomMessageBox.h"
 #include "NewUISystem.h"
+#include "Winmain.h"
 
 #include <algorithm>
 #include <chrono>
@@ -121,6 +122,7 @@ void CSBaseMatch::RenderTime(void)
     EnableAlphaTest(false);
 
     x = 10.0f;
+    (void)x;
     y = 480.0f - 70.0f;
     g_pRenderText->SetTextColor(128, 128, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 128);
@@ -224,7 +226,7 @@ void CSDevilSquareMatch::SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE d
 void CSDevilSquareMatch::RenderMatchResult(void)
 {
     int xPos[6] = {
-        m_PosResult.x,
+        static_cast<int>(m_PosResult.x),
     };
     xPos[1] = xPos[0] + 15;
     xPos[2] = xPos[1] + 15;

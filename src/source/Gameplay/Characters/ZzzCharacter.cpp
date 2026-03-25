@@ -7,7 +7,9 @@
 
 #include "stdafx.h"
 #include "mu_enum.h"
+#ifdef _WIN32
 #include <eh.h>
+#endif
 #include "UIManager.h"
 #include "GuildCache.h"
 #include "ZzzOpenglUtil.h"
@@ -46,6 +48,7 @@
 #include "DuelMgr.h"
 #include "MonkSystem.h"
 #include <NewUISystem.h>
+#include "_GlobalFunctions.h"
 
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
@@ -99,7 +102,7 @@ int GetFenrirType(CHARACTER* c)
 
 void FallingMonster(CHARACTER* c, OBJECT* o)
 {
-    float AngleY;
+    float AngleY = 0.0f;
     o->Gravity += 2.5f;
     o->Angle[0] -= 4.f;
     o->m_bActionStart = true;
@@ -534,6 +537,7 @@ void SetPlayerWalk(CHARACTER* c)
         {
             int Index = TERRAIN_INDEX_REPEAT((int)(c->Object.Position[0] / TERRAIN_SCALE),
                                              (int)(c->Object.Position[1] / TERRAIN_SCALE));
+            (void)Index;
 
             if (!(c->Object.SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER ||
                   c->Object.SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER) &&
@@ -3025,6 +3029,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
                    o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)))
         {
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
+            (void)RightType;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
             if (c->AttackTime >= 1 && LeftType == ITEM_SYLPH_WIND_BOW && o->Type == MODEL_PLAYER && rand_fps_check(1))
@@ -3820,7 +3825,7 @@ void CreateWeaponBlur(CHARACTER* c, OBJECT* o, BMD* b)
                     }
                 }
             }
-            else if (Type == MODEL_TOMAHAWK || Type >= MODEL_BATTLE_AXE && Type < MODEL_MACE + MAX_ITEM_INDEX)
+            else if (Type == MODEL_TOMAHAWK || (Type >= MODEL_BATTLE_AXE && Type < MODEL_MACE + MAX_ITEM_INDEX))
             {
                 if (o->CurrentAction >= PLAYER_ATTACK_SKILL_SWORD1 && o->CurrentAction <= PLAYER_ATTACK_SKILL_SWORD5)
                 {
@@ -4064,6 +4069,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
     vec3_t p, Position;
     vec3_t Light;
     float Luminosity = (float)(rand() % 6 + 2) * 0.1f;
+    (void)Luminosity;
 
     Vector(0.f, 0.f, 0.f, p);
     Vector(1.f, 1.f, 1.f, Light);
@@ -4325,6 +4331,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         {
             vec3_t Angle = {-45.f, 0.f, 45.f};
             vec3_t Light = {1.f, 1.f, 1.f};
+            (void)Light;
             vec3_t Position;
 
             Position[0] = o->Position[0] + sinf(45 * 0.1f) * 80.f;
@@ -4634,6 +4641,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
 
             vec3_t vAngle;
             int iAngle = rand() % 360;
+            (void)iAngle;
 
             if (c->m_iFenrirSkillTarget != -1 && c->m_iFenrirSkillTarget < MAX_CHARACTERS_CLIENT)
             {
@@ -4812,7 +4820,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                   o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW ||
                   o->CurrentAction == PLAYER_FENRIR_ATTACK_BOW || o->CurrentAction == PLAYER_FENRIR_ATTACK_CROSSBOW ||
                   o->CurrentAction == PLAYER_ATTACK_RIDE_BOW || o->CurrentAction == PLAYER_ATTACK_RIDE_CROSSBOW)) ||
-                o->Type != MODEL_PLAYER && o->Kind == KIND_PLAYER)
+                (o->Type != MODEL_PLAYER && o->Kind == KIND_PLAYER))
             {
                 if (AT_SKILL_MULTI_SHOT != (c->Skill))
                     CreateArrows(c, o, NULL, FindHotKey((c->Skill)), Skill, (c->Skill));
@@ -5226,6 +5234,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             int Hand = 0;
             if (o->CurrentAction == PLAYER_ATTACK_SWORD_LEFT1 || o->CurrentAction == PLAYER_ATTACK_SWORD_LEFT2)
                 Hand = 1;
+            (void)Hand;
 
             if (tc == Hero)
             {
@@ -5727,7 +5736,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                 }
             }
             if (o->CurrentAction == PLAYER_SKILL_HELL_BEGIN ||
-                o->CurrentAction == PLAYER_SKILL_HELL_START && rand_fps_check(1))
+                (o->CurrentAction == PLAYER_SKILL_HELL_START && rand_fps_check(1)))
             {
                 if (o->BoneTransform != NULL)
                 {
@@ -5860,7 +5869,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                     b->TransformPosition(o->BoneTransform[vec_list[i]], p, vec[i], true);
                 }
 
-                char start, end;
+                int start, end;
                 float scale = 1.0f;
 
                 for (int i = 0; i < 15; ++i)
@@ -5919,7 +5928,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                     if (rand_fps_check(1))
                     {
                         CreateParticle(BITMAP_FLAME, vec[start], angle, dist, 2, 1.3f);
-                        CreateParticle(BITMAP_FLAME, vec[head], angle, dist, 3, 0.5f);
+                        CreateParticle(BITMAP_FLAME, vec[static_cast<int>(head)], angle, dist, 3, 0.5f);
                     }
                 }
 
@@ -7301,6 +7310,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     {
         float fLight;
         fLight = (float)sinf((WorldTime) * 0.4f) * 0.25f;
+        (void)fLight;
         Vector(0.0f, 0.7f, 0.0f, Light);
         Vector(0.f, 0.f, 0.f, p);
         b->TransformPosition(BoneTransform[10], p, Position, true);
@@ -7913,6 +7923,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         int iRandomTexure1, iRandomTexure2;
         iRandomTexure1 = (Object->m_iAnimation / 10) % 3; // 3개
         iRandomTexure2 = (Object->m_iAnimation) % 3;      // 3개
+        (void)iRandomTexure2;
 
         // Zx01
         fRandomScale = (float)(rand() % 10) / 10.0f + 1.0f; //(1.0~2.0)
@@ -8543,9 +8554,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             DeleteCharacter(c, o);
         }
     }
-    else if (o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
-             o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA ||
-             o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED)
+    else if ((o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL) ||
+             (o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA) ||
+             (o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED))
     {
         if (o->m_iAnimation >= 1)
         {
@@ -8834,7 +8845,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 CreateSprite(BITMAP_LIGHT, Position, 0.8f, Light, o);
 
                 VectorCopy(Position, pos2);
-                if ((i >= 14 && i <= 16 || i == 23) && rand_fps_check(1))
+                if (((i >= 14 && i <= 16) || i == 23) && rand_fps_check(1))
                 {
                     CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 20.f);
                 }
@@ -8859,6 +8870,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, 0, 0.3f);
                 }
             }
+            break;
+        default:
             break;
         }
 
@@ -9297,6 +9310,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             // 			vec3_t vLight;
             vec3_t vPos;
             BMD* b = &Models[o->Type];
+            (void)b;
 
             // Vector(0.5f, 0.5f, 0.5f, vLight);
 
@@ -9445,6 +9459,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         {
             auto* pParts = (CSIPartsMDL*)c->m_pTempParts;
             OBJECT* pObj = pParts->GetObject();
+            (void)pObj;
 
             RenderParts(c);
         }
@@ -9785,14 +9800,14 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     numCloth = 3;
                 }
 
-                if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + SKIN_CLASS_DARK_LORD)
+                if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_DARK_LORD))
                 {
                     pCloth[3].Create(o, 18, 0.0f, 10.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARK_LOAD_SKIRT,
                                      BITMAP_DARK_LOAD_SKIRT,
                                      PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
                     pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
                 }
-                else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + SKIN_CLASS_LORDEMPEROR)
+                else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_LORDEMPEROR))
                 {
                     pCloth[3].Create(o, 18, 0.0f, 10.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARKLOAD_SKIRT_3RD,
                                      BITMAP_DARKLOAD_SKIRT_3RD,
@@ -9902,8 +9917,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
         else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
         {
-            if ((c->BodyPart[BODYPART_ARMOR].Type != MODEL_BODY_ARMOR + SKIN_CLASS_DARK_LORD &&
-                 c->BodyPart[BODYPART_ARMOR].Type != MODEL_BODY_ARMOR + SKIN_CLASS_LORDEMPEROR) &&
+            if ((c->BodyPart[BODYPART_ARMOR].Type != MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_DARK_LORD) &&
+                 c->BodyPart[BODYPART_ARMOR].Type != MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_LORDEMPEROR)) &&
                 o->m_byNumCloth == 4)
             {
                 if (o && o->m_pCloth)
@@ -9914,7 +9929,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     o->m_byNumCloth = 3;
                 }
             }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + CLASS_DARK_LORD && o->m_byNumCloth == 3)
+            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(CLASS_DARK_LORD) && o->m_byNumCloth == 3)
             {
                 if (o && o->m_pCloth)
                 {
@@ -9927,7 +9942,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     o->m_byNumCloth = 4;
                 }
             }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + SKIN_CLASS_LORDEMPEROR &&
+            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_LORDEMPEROR) &&
                      o->m_byNumCloth == 3)
             {
                 if (o && o->m_pCloth)
@@ -9941,7 +9956,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     o->m_byNumCloth = 4;
                 }
             }
-            else if (c->BodyPart[BODYPART_ARMOR].Type != MODEL_BODY_ARMOR + SKIN_CLASS_DARK_LORD &&
+            else if (c->BodyPart[BODYPART_ARMOR].Type != MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_DARK_LORD) &&
                      o->m_byNumCloth == 6)
             {
                 if (o && o->m_pCloth)
@@ -9951,7 +9966,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         pCloth[3].Destroy();
                 }
             }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + SKIN_CLASS_DARK_LORD &&
+            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_DARK_LORD) &&
                      o->m_byNumCloth == 6)
             {
                 if (o && o->m_pCloth)
@@ -9966,7 +9981,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     }
                 }
             }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + SKIN_CLASS_LORDEMPEROR &&
+            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_LORDEMPEROR) &&
                      o->m_byNumCloth == 6)
             {
                 if (o && o->m_pCloth)

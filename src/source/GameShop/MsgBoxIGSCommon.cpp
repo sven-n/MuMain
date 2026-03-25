@@ -5,6 +5,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "MsgBoxIGSCommon.h"
+#include "Winmain.h"
 
 #include "DSPlaySound.h"
 
@@ -120,7 +121,7 @@ void CMsgBoxIGSCommon::SetAddCallbackFunc()
 void CMsgBoxIGSCommon::SetButtonInfo()
 {
     m_BtnOk.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + (IMAGE_IGS_FRAME_WIDTH / 2) - (IMAGE_IGS_BTN_WIDTH / 2),
-                    (GetPos().y + m_iMsgBoxHeight) - (IMAGE_IGS_BTN_HEIGHT + IGS_BTN_POS_Y), IMAGE_IGS_BTN_WIDTH,
+                    (GetPos().y + m_iMsgBoxHeight) - (static_cast<int>(IMAGE_IGS_BTN_HEIGHT) + IGS_BTN_POS_Y), IMAGE_IGS_BTN_WIDTH,
                     IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnOk.MoveTextPos(0, -1);
     m_BtnOk.SetText(GlobalText[228]);
@@ -206,4 +207,4 @@ bool CMsgBoxIGSCommonLayout::SetLayout()
     return true;
 }
 
-#endif KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM

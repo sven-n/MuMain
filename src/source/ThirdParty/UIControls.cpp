@@ -4070,7 +4070,7 @@ const int MAX_HISTORY_LINES = 10;
 
 void CUIChatInputBox::AddHistory(const wchar_t* pszText)
 {
-    if (pszText == nullptr || pszText[0] == NULL) return;
+    if (pszText == nullptr || pszText[0] == L'\0') return;
 
     wchar_t* pszSaveText = new wchar_t[wcslen(pszText) + 1];
     wcsncpy(pszSaveText, pszText, wcslen(pszText) + 1);
@@ -4404,7 +4404,7 @@ int CUISlideHelp::CheckCutSize(const wchar_t* pszSource, int iNeedValue)
 {
     if (pszSource == nullptr || pszSource[0] == L'\0') return 0;
 
-    auto iLength = wcslen(pszSource);
+    int iLength = static_cast<int>(wcslen(pszSource));
     int iMove = 2; // might be 4, too
     int iTextSize = 0;
     for (int i = 0; i < iLength; )
@@ -5086,7 +5086,7 @@ void CUIUnionGuildListBox::AddText(BYTE* pGuildMark, const wchar_t* szGuildName,
     text.m_bIsSelected = FALSE;
     memcpy(text.GuildMark, pGuildMark, sizeof(BYTE) * 64);
     wcsncpy(text.szName, szGuildName, MAX_GUILDNAME);
-    text.szName[MAX_GUILDNAME] = NULL;
+    text.szName[MAX_GUILDNAME] = L'\0';
     text.nMemberCount = nMemberCount;
     m_TextList.push_front(text);
 
@@ -5289,7 +5289,7 @@ void CUIUnmixgemList::Sort()
 
 void CUIUnmixgemList::AddText(int iIndex, BYTE cComType)
 {
-    if (iIndex < 0 || iIndex > MAX_INVENTORY || cComType == COMGEM::NOCOM) return;
+    if (iIndex < 0 || iIndex > MAX_INVENTORY || static_cast<int>(cComType) == COMGEM::NOCOM) return;
 
     for (unsigned int i = 0; i < m_TextList.size(); ++i)
     {
@@ -5458,7 +5458,7 @@ void CUIBCDeclareGuildListBox::AddText(const wchar_t* szGuildName, int nMarkCoun
     static BCDECLAREGUILD_TEXT text;
     text.m_bIsSelected = FALSE;
     wcsncpy(text.szName, szGuildName, MAX_GUILDNAME);
-    text.szName[MAX_GUILDNAME] = NULL;
+    text.szName[MAX_GUILDNAME] = L'\0';
     text.nCount = nMarkCount;
     text.byIsGiveUp = byIsGiveUp;
     text.bySeqNum = bySeqNum;
@@ -5630,7 +5630,7 @@ void CUIBCGuildListBox::AddText(const wchar_t* szGuildName, BYTE byJoinSide, BYT
     static BCGUILD_TEXT text;
     text.m_bIsSelected = FALSE;
     wcsncpy(text.szName, szGuildName, MAX_GUILDNAME);
-    text.szName[MAX_GUILDNAME] = NULL;
+    text.szName[MAX_GUILDNAME] = L'\0';
     text.byJoinSide = byJoinSide;
     text.byGuildInvolved = byGuildInvolved;
     text.iGuildScore = iGuildScore;
@@ -6424,7 +6424,7 @@ BOOL CUIBuyingListBox::RenderDataLine(int iLineNumber)
     int iPos_y = GetRenderLinePos_y(iLineNumber);
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
-    if (m_TextListIter->m_pszItemExplanation != nullptr)
+    if (m_TextListIter->m_pszItemExplanation[0] != L'\0')
     {
         mu_swprintf(Text, L"%ls", m_TextListIter->m_pszItemExplanation);
         g_pRenderText->RenderText(iPos_x, iPos_y, Text);
@@ -6571,7 +6571,7 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
 
     wchar_t Text[MAX_TEXT_LENGTH + 1] = { 0 };
 
-    if (m_TextListIter->m_szItemName != nullptr)
+    if (m_TextListIter->m_szItemName[0] != L'\0')
     {
         if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + nLine + 1)
             m_TextListIter->m_RadioBtn.UpdateActionCheck(true);

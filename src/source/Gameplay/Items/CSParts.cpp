@@ -15,6 +15,7 @@
 #include "GuildCache.h"
 #include "ZzzLodTerrain.h"
 #include "CSParts.h"
+#include "_GlobalFunctions.h"
 
 #include <memory>
 
@@ -164,11 +165,18 @@ void DeleteParts(CHARACTER* c)
 
     if (c->m_pParts != nullptr)
     {
-        SAFE_DELETE(c->m_pParts);
+        auto* pTyped = static_cast<CSIPartsMDL*>(c->m_pParts);
+        delete pTyped;
+        c->m_pParts = nullptr;
         c->EtcPart = 0;
     }
 
-    SAFE_DELETE(c->m_pTempParts);
+    if (c->m_pTempParts != nullptr)
+    {
+        auto* pTyped = static_cast<CSIPartsMDL*>(c->m_pTempParts);
+        delete pTyped;
+        c->m_pTempParts = nullptr;
+    }
 }
 
 CSParts::CSParts(int Type, int BoneNumber, bool bBillBoard, float x, float y, float z, float ax, float ay, float az)

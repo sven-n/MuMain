@@ -7,6 +7,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "MsgBoxIGSDeleteItemConfirm.h"
+#include "Winmain.h"
 
 #include "DSPlaySound.h"
 
@@ -280,4 +281,4 @@ bool CMsgBoxIGSDeleteItemConfirmLayout::SetLayout()
     return true;
 }
 
-#endif KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM

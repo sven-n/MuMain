@@ -16,6 +16,7 @@
 #include "WSclient.h"
 
 #include "MuHelper.h"
+#include "_GlobalFunctions.h"
 
 constexpr int MAX_ACTIONABLE_DISTANCE = 10;
 constexpr int DEFAULT_DURABILITY_THRESHOLD = 50;
@@ -810,7 +811,7 @@ ActionSkillType CMuHelper::SelectAttackSkill()
 
 int CMuHelper::SimulateComboAttack()
 {
-    for (int i = 0; i < m_config.aiSkill.size(); i++)
+    for (size_t i = 0; i < m_config.aiSkill.size(); i++)
     {
         if (m_config.aiSkill[i] == 0)
         {
@@ -951,7 +952,7 @@ int CMuHelper::SimulateMove(POINT posMove)
 
 bool CMuHelper::HasAssignedBuffSkill()
 {
-    for (int i = 0; i < m_config.aiBuff.size(); i++)
+    for (size_t i = 0; i < m_config.aiBuff.size(); i++)
     {
         if (m_config.aiBuff[i] != 0)
         {
@@ -969,7 +970,7 @@ ActionSkillType CMuHelper::GetHealingSkill()
         AT_SKILL_HEALING_STR,
     };
 
-    for (int i = 0; i < aiHealingSkills.size(); i++)
+    for (size_t i = 0; i < aiHealingSkills.size(); i++)
     {
         int iSkillIndex = g_pSkillList->GetSkillIndex(aiHealingSkills[i]);
         if (iSkillIndex != -1)
@@ -985,7 +986,7 @@ ActionSkillType CMuHelper::GetDrainLifeSkill()
 {
     std::vector<ActionSkillType> aiDrainLifeSkills = {AT_SKILL_ALICE_DRAINLIFE, AT_SKILL_ALICE_DRAINLIFE_STR};
 
-    for (int i = 0; i < aiDrainLifeSkills.size(); i++)
+    for (size_t i = 0; i < aiDrainLifeSkills.size(); i++)
     {
         int iSkillIndex = g_pSkillList->GetSkillIndex(aiDrainLifeSkills[i]);
         if (iSkillIndex != -1)
@@ -1010,6 +1011,7 @@ int CMuHelper::ObtainItem()
 
     ITEM_t* pDrop = &Items[m_iCurrentItem];
     ITEM* pItem = &pDrop->Item;
+    (void)pItem;
 
     if (!pDrop->Object.Live)
     {

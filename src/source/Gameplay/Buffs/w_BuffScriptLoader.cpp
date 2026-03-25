@@ -40,7 +40,7 @@ void CutTokenString(wchar_t* pcCuttoken, std::list<std::wstring>& out)
 } // namespace
 
 BuffInfo::BuffInfo()
-    : s_ItemType(255), s_ItemIndex(255), s_BuffIndex(0), s_BuffEffectType(0), s_BuffClassType(0), s_NoticeType(0),
+    : s_BuffIndex(0), s_BuffEffectType(0), s_ItemType(255), s_ItemIndex(255), s_BuffClassType(0), s_NoticeType(0),
       s_ClearType(0)
 {
     memset(&s_BuffName, 0, sizeof(wchar_t) * MAX_BUFF_NAME_LENGTH);

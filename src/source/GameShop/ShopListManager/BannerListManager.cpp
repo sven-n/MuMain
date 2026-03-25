@@ -33,4 +33,5 @@ WZResult CBannerListManager::LoadScript(bool bDonwLoad) // OK
     return this->m_BannerInfoList->LoadBanner(path, BANNER_SCRIPT_FILENAME, bDonwLoad);
 }
 
-#endif #endif // _WIN32
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // _WIN32

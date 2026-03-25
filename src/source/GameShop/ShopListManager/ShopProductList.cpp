@@ -98,4 +98,5 @@ bool CShopProductList::GetPriceSeqNext(CShopProduct& product) // OK
 
     return this->GetPriceSeqNext(product);
 }
-#endif #endif // _WIN32
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // _WIN32

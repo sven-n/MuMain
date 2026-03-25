@@ -272,4 +272,5 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
 
     return result;
 }
-#endif #endif // _WIN32
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // _WIN32

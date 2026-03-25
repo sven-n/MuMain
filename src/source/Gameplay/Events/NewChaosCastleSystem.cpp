@@ -16,6 +16,7 @@ using namespace SEASON3B;
 #include "MapManager.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
+#include "Winmain.h"
 
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
@@ -174,7 +175,7 @@ void CNewChaosCastleSystem::RenderMatchResult(void)
     int x = 640 / 2;
     int yPos = m_PosResult.y + 40;
     wchar_t lpszStr[256] = {
-        NULL,
+        L'\0',
     };
 
     EnableAlphaTest();

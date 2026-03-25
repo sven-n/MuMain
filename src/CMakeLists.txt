@@ -178,6 +178,14 @@ target_include_directories(MUCommon INTERFACE
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 
+# Story 7.6.1: Non-Windows stub headers for Windows CRT/SDK headers (process.h, crtdbg.h, etc.)
+# Placed BEFORE system includes so stubs are found first on macOS/Linux.
+if(NOT WIN32)
+  target_include_directories(MUCommon INTERFACE
+    "${MU_SOURCE_DIR}/Platform/compat-headers"
+  )
+endif()
+
 target_compile_definitions(MUCommon INTERFACE
   _LANGUAGE_FOREIGN
   _LANGUAGE_ENG
@@ -402,11 +410,57 @@ file(GLOB_RECURSE MU_GAME_SOURCES CONFIGURE_DEPENDS
   "${MU_SOURCE_DIR}/GameShop/*.cpp"
   "${MU_SOURCE_DIR}/Translation/*.cpp"
 )
+# Story 7.6.1: GameShop/FileDownloader/ implements WinINet FTP/HTTP downloads —
+# entirely Windows-specific (replaced by IPlatformHTTP in EPIC-5 Phase 5.7).
+# [VS0-QUAL-BUILDCOMP-MACOS]
+if(NOT WIN32)
+    list(FILTER MU_GAME_SOURCES EXCLUDE REGEX ".*/GameShop/FileDownloader/.*")
+    # Story 7.6.1: ZzzLodTerrain.cpp uses GL/glu.h (OpenGL Utility) — replaced by SDL3 GPU.
+    list(REMOVE_ITEM MU_GAME_SOURCES "${MU_SOURCE_DIR}/World/ZzzLodTerrain.cpp")
+endif()
 add_library(MUGame STATIC ${MU_GAME_SOURCES})
 target_link_libraries(MUGame PUBLIC
   MUCore MUProtocol MUData MURenderFX MUAudio MUPlatform MUThirdParty
 )
 target_precompile_headers(MUGame REUSE_FROM MUCore)
+
+# Story 7.6.1: Legacy game code — Clang-specific warnings that MSVC/MinGW tolerate.
+# Keep visible as warnings for gradual cleanup; don't block macOS native build.
+if(NOT MSVC)
+  set(MU_LEGACY_WARNING_RELAXATIONS
+    -Wno-error=deprecated-anon-enum-enum-conversion
+    -Wno-error=deprecated-enum-enum-conversion
+    -Wno-error=deprecated-enum-compare
+    -Wno-error=switch
+    -Wno-error=unused-variable
+    -Wno-error=unused-but-set-variable
+    -Wno-error=unused-private-field
+    -Wno-error=null-conversion
+    -Wno-error=null-arithmetic
+    -Wno-error=logical-op-parentheses
+    -Wno-error=sign-compare
+    -Wno-error=missing-braces
+    -Wno-error=reorder-ctor
+    -Wno-error=pointer-bool-conversion
+    -Wno-error=tautological-constant-out-of-range-compare
+    -Wno-error=tautological-overlap-compare
+    -Wno-error=sizeof-pointer-memaccess
+    -Wno-error=missing-field-initializers
+    -Wno-error=char-subscripts
+    -Wno-error=nontrivial-memcall
+    -Wno-error=delete-non-abstract-non-virtual-dtor
+    -Wno-error=pragma-once-outside-header
+    -Wno-error=int-in-bool-context
+    -Wno-error=bitwise-op-parentheses
+    -Wno-error=sometimes-uninitialized
+    -Wno-error=extern-initializer
+    -Wno-error=tautological-pointer-compare
+    -Wno-error=c++11-narrowing
+    -Wno-error=writable-strings
+    -Wno-error=constant-conversion
+  )
+  target_compile_options(MUGame PRIVATE ${MU_LEGACY_WARNING_RELAXATIONS})
+endif()
 
 # Editor sources compiled as part of MUGame when enabled
 if(ENABLE_EDITOR)
@@ -421,6 +475,9 @@ file(GLOB MU_MAIN_ENTRY_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/Main/*.cpp")
 add_executable(Main ${MU_MAIN_ENTRY_SOURCES})
 target_link_libraries(Main PRIVATE MUGame)
 target_precompile_headers(Main REUSE_FROM MUCore)
+if(NOT MSVC)
+  target_compile_options(Main PRIVATE ${MU_LEGACY_WARNING_RELAXATIONS})
+endif()
 
 # Story 5.2.1: Winmain.cpp includes MiniAudioBackend.h and miniaudio.h directly.
 # These paths are PRIVATE to MUAudio (not propagated via MUGame/MUAudio link chain),

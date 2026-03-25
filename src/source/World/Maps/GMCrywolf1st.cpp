@@ -2751,7 +2751,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
             Deco_Insert -= 1.f;
     }
 
-    if (TimeStart = true)
+    if (TimeStart == true)
     {
         int nPastHour = m_iHour;
         int nPastMinute;

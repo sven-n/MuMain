@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 #include "MonkSystem.h"
+#include "ZzzInfomation.h"
 #include "ZzzEffect.h"
 #include "ZzzAI.h"
 #include "ZzzLodTerrain.h"

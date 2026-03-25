@@ -15,6 +15,7 @@
 #include "NewUISystem.h"
 #include "SkillManager.h"
 #include "CSItemOption.h"
+#include "Winmain.h"
 
 #include <algorithm>
 #include <array>
@@ -210,7 +211,7 @@ bool CSItemOption::IsDisableSkill(ActionSkillType Type, int Energy, int Charisma
         SkillEnergy = 10 + SkillAttribute[Type].Energy * (SkillAttribute[Type].Level) * 4 / 100;
     }
 
-    switch (Type)
+    switch (static_cast<int>(Type))
     {
     case 17:
         SkillEnergy = 0;
@@ -968,6 +969,7 @@ void CSItemOption::CheckItemSetOptions()
         static_cast<std::uint16_t>(CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity);
     const auto AllEnergy = static_cast<std::uint16_t>(CharacterAttribute->Energy + CharacterAttribute->AddEnergy);
     auto AllVitality = static_cast<std::uint16_t>(CharacterAttribute->Vitality + CharacterAttribute->AddVitality);
+    (void)AllVitality;
     const auto AllCharisma = static_cast<std::uint16_t>(CharacterAttribute->Charisma + CharacterAttribute->AddCharisma);
     const auto AllLevel = static_cast<std::uint16_t>(CharacterAttribute->Level);
 
@@ -1072,6 +1074,7 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
         std::uint8_t TextNum = 0;
         std::uint8_t SkipNum = 0;
         std::uint8_t setIndex = 0;
+        (void)setIndex;
 
         mu_swprintf(TextList[TextNum], L"\n");
         TextListColor[TextNum] = 0;
@@ -1088,8 +1091,11 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
         TextBold[TextNum] = false;
         TextNum++;
         SkipNum++;
+        (void)SkipNum;
 
         int iCurSetItemTypeSequence = 0, iCurSetItemType = -1;
+        (void)iCurSetItemTypeSequence;
+        (void)iCurSetItemType;
 
         for (int i = 0; i < m_SetSearchResultCount; i++)
         {

@@ -8,7 +8,7 @@
 
 struct CHARACTER;
 struct OBJECT;
-struct BMD;
+class BMD;
 
 constexpr std::chrono::milliseconds XMAS_EVENT_TIME{60000};
 

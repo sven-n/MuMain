@@ -55,7 +55,7 @@ public:
     bool IsGaugebarEnabled();
 
 private:
-    bool m_IsTalkEnterNpc;
+    [[maybe_unused]] bool m_IsTalkEnterNpc;
     bool m_InterfaceState;
     WORD m_HolyItemPlayerIndex;
     eCursedTempleState m_CursedTempleState;

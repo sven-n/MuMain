@@ -4,6 +4,7 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSUseBuffConfirm.h"
+#include "Winmain.h"
 
 #include "DSPlaySound.h"
 
@@ -249,4 +250,4 @@ bool CMsgBoxIGSUseBuffConfirmLayout::SetLayout()
     return true;
 }
 
-#endif KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM

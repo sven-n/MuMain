@@ -6,6 +6,7 @@
 #include "NewUISystem.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSStorageItemInfo.h"
+#include "Winmain.h"
 
 #include "DSPlaySound.h"
 #include "MsgBoxIGSUseItemConfirm.h"
@@ -253,4 +254,4 @@ bool CMsgBoxIGSStorageItemInfoLayout::SetLayout()
     return true;
 }
 
-#endif KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM

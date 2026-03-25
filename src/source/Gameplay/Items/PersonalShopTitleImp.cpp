@@ -7,6 +7,7 @@
 
 #include "UIManager.h"
 #include "NewUISystem.h"
+#include "Winmain.h"
 
 CPersonalShopTitleImp::CPersonalShopTitleImp() : m_iHighlightFrame(0), m_bShow(true) {}
 CPersonalShopTitleImp::~CPersonalShopTitleImp()
@@ -271,7 +272,7 @@ void CPersonalShopTitleImp::Draw()
         UpdatePosition();
         RevisionPosition();
 
-        auto isHighlightTime = static_cast<INT64>(WorldTime / 265) % 2 == 0;
+        auto isHighlightTime = static_cast<int64_t>(WorldTime / 265) % 2 == 0;
 
         auto mi = m_listShopTitleDrawObj.begin();
         for (; mi != m_listShopTitleDrawObj.end(); ++mi)
@@ -565,10 +566,10 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
     break;
     }
 
-    POINT RenderPos = {m_pos.x / g_fScreenRate_x, m_pos.y / g_fScreenRate_y};
-    SIZE RenderBoxSize = {m_size.cx / g_fScreenRate_x, m_size.cy / g_fScreenRate_y};
-    SIZE RenderIconSize = {m_icon.cx / g_fScreenRate_x, m_icon.cy / g_fScreenRate_y};
-    int iLineHeight = FontHeight / g_fScreenRate_y;
+    POINT RenderPos = {static_cast<long>(m_pos.x / g_fScreenRate_x), static_cast<long>(m_pos.y / g_fScreenRate_y)};
+    SIZE RenderBoxSize = {static_cast<long>(m_size.cx / g_fScreenRate_x), static_cast<long>(m_size.cy / g_fScreenRate_y)};
+    SIZE RenderIconSize = {static_cast<long>(m_icon.cx / g_fScreenRate_x), static_cast<long>(m_icon.cy / g_fScreenRate_y)};
+    int iLineHeight = static_cast<int>(FontHeight / g_fScreenRate_y);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(iIconBkColor);

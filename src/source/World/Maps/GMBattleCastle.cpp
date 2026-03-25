@@ -1294,10 +1294,10 @@ bool RenderBattleCastleObjectMesh(OBJECT* o, BMD* b)
             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                           o->BlendMeshTexCoordV, o->HiddenMesh);
             Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-            b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU,
+            b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, static_cast<int>(0.5f), o->BlendMeshLight, o->BlendMeshTexCoordU,
                           o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
             Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-            b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU,
+            b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, static_cast<int>(0.5f), o->BlendMeshLight, o->BlendMeshTexCoordU,
                           o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
             Vector(1.f, 1.f, 1.f, b->BodyLight);
         }
@@ -2069,10 +2069,10 @@ bool RenderBattleCastleMonsterObjectMesh(OBJECT* o, BMD* b)
                 b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                               o->BlendMeshTexCoordV, o->HiddenMesh);
                 Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, static_cast<int>(0.5f), o->BlendMeshLight, o->BlendMeshTexCoordU,
                               o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
                 Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, static_cast<int>(0.5f), o->BlendMeshLight, o->BlendMeshTexCoordU,
                               o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
             }

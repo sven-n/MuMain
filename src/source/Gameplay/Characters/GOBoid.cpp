@@ -20,6 +20,8 @@
 #include "MapManager.h"
 #include "CameraMove.h"
 #include "NewUISystem.h"
+#include "Scenes/SceneCore.h"
+#include "_GlobalFunctions.h"
 
 int EnableEvent = 0;
 
@@ -533,7 +535,7 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                     o->Position[2] -= 30.f;
             }
             VectorCopy(o->Owner->Angle, o->Angle);
-            if (o->Owner->CurrentAction >= PLAYER_WALK_MALE && o->Owner->CurrentAction <= PLAYER_RUN_RIDE_WEAPON ||
+            if ((o->Owner->CurrentAction >= PLAYER_WALK_MALE && o->Owner->CurrentAction <= PLAYER_RUN_RIDE_WEAPON) ||
                 o->Owner->CurrentAction == PLAYER_FLY_RIDE || o->Owner->CurrentAction == PLAYER_FLY_RIDE_WEAPON ||
                 o->Owner->CurrentAction == PLAYER_RAGE_UNI_RUN ||
                 o->Owner->CurrentAction == PLAYER_RAGE_UNI_RUN_ONE_RIGHT)

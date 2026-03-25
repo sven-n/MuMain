@@ -61,6 +61,13 @@ inline errno_t wcsncpy_s(wchar_t* dest, size_t destSize, const wchar_t* src, siz
     return 0;
 }
 
+// MSVC-compatible 3-arg template overload: deduces array size from dest [VS0-QUAL-BUILDCOMPAT-MACOS]
+template <size_t N>
+inline errno_t wcsncpy_s(wchar_t (&dest)[N], const wchar_t* src, size_t count)
+{
+    return wcsncpy_s(dest, N, src, count);
+}
+
 inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** context)
 {
     return wcstok(str, delim, context);
@@ -510,6 +517,12 @@ inline BOOL ImmSetCompositionWindow(HIMC /*himc*/, COMPOSITIONFORM* /*lpCompForm
 {
     return FALSE;
 }
+// Story 7.6.1: ImmGetCompositionString — returns composition string length or data.
+// No-op on non-Windows (IME is not supported). [VS0-QUAL-BUILDCOMP-MACOS]
+inline LONG ImmGetCompositionString(HIMC /*himc*/, DWORD /*dwIndex*/, void* /*lpBuf*/, DWORD /*dwBufLen*/)
+{
+    return 0;
+}
 
 // ---- Win32 window message stubs (non-Windows only) ----
 // Used in UIControls.cpp: CUITextInputBox::SetIMEPosition, GiveFocus, SetState
@@ -560,9 +573,18 @@ inline HWND GetFocus()
 // ShowWindow stub — used in CUITextInputBox::SetState (Win32 path shows/hides the edit HWND)
 #define SW_HIDE 0
 #define SW_SHOW 5
+#define SW_NORMAL 1
 inline BOOL ShowWindow(HWND /*hwnd*/, int /*nCmdShow*/)
 {
     return TRUE;
+}
+
+// ShellExecute stub — used in iexplorer.h:OpenExplorer to launch URLs in a browser.
+// On non-Windows, returns 0 (failure). A real implementation would use SDL_OpenURL or xdg-open.
+inline HINSTANCE ShellExecute(HWND /*hwnd*/, const wchar_t* /*op*/, const wchar_t* /*file*/,
+                              const wchar_t* /*params*/, const wchar_t* /*dir*/, int /*nShowCmd*/)
+{
+    return nullptr;
 }
 
 // DestroyWindow stub — used in CUITextInputBox destructor and SetSize failure path
@@ -1489,8 +1511,350 @@ inline BOOL  TextOut(HDC /*hdc*/, int /*x*/, int /*y*/, const wchar_t* /*str*/, 
 // IME composition string selector
 #define GCS_COMPSTR 0x0008
 
+// Scrollbar API — no-op on non-Windows [VS0-QUAL-BUILDCOMP-MACOS]
+inline int GetScrollPos(HWND /*hwnd*/, int /*nBar*/) { return 0; }
+inline int SetScrollPos(HWND /*hwnd*/, int /*nBar*/, int /*nPos*/, BOOL /*bRedraw*/) { return 0; }
+
 // Timer API — no-op on non-Windows
 inline UINT SetTimer(HWND /*hwnd*/, UINT /*id*/, UINT /*ms*/, void* /*fn*/) { return 0; }
+inline BOOL KillTimer(HWND /*hwnd*/, UINT /*id*/) { return TRUE; }
+
+// GetCurrentDirectory — returns current working dir. Stub for non-Windows. [VS0-QUAL-BUILDCOMP-MACOS]
+inline DWORD GetCurrentDirectory(DWORD nBufferLength, wchar_t* lpBuffer)
+{
+    (void)nBufferLength;
+    (void)lpBuffer;
+    return 0;
+}
+
+// _wtoi — MSVC-specific wide string to int. [VS0-QUAL-BUILDCOMP-MACOS]
+#ifndef _wtoi
+#define _wtoi(s) static_cast<int>(wcstol((s), nullptr, 10))
+#endif
+
+// ---- Story 7.6.1: Additional Win32 API stubs for macOS native build ----
+// [VS0-QUAL-BUILDCOMP-MACOS]
+
+// MAKEWORD — packs two bytes into a WORD (used in WinSock init, version checks)
+#ifndef MAKEWORD
+#define MAKEWORD(low, high) (static_cast<WORD>(((BYTE)(low)) | (static_cast<WORD>((BYTE)(high))) << 8))
+#endif
+
+// TEXT() macro — maps to wide string literal on UNICODE builds
+#ifndef TEXT
+#define TEXT(s) L##s
+#endif
+
+// GetTickCount64 — 64-bit tick counter (shim to chrono)
+inline unsigned long long GetTickCount64()
+{
+    return static_cast<unsigned long long>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch())
+            .count());
+}
+
+// IntersectRect — rectangle intersection test (GDI)
+inline BOOL IntersectRect(RECT* dest, const RECT* src1, const RECT* src2)
+{
+    if (!dest || !src1 || !src2)
+        return FALSE;
+    dest->left   = (src1->left > src2->left) ? src1->left : src2->left;
+    dest->top    = (src1->top > src2->top) ? src1->top : src2->top;
+    dest->right  = (src1->right < src2->right) ? src1->right : src2->right;
+    dest->bottom = (src1->bottom < src2->bottom) ? src1->bottom : src2->bottom;
+    if (dest->left >= dest->right || dest->top >= dest->bottom)
+    {
+        dest->left = dest->top = dest->right = dest->bottom = 0;
+        return FALSE;
+    }
+    return TRUE;
+}
+
+// OutputDebugStringA — narrow-char variant (wide OutputDebugString already defined above)
+inline void OutputDebugStringA(const char* /*msg*/) {}
+
+// SwapBuffers — WGL buffer swap (dead code on macOS, SDL3 handles presentation)
+inline BOOL SwapBuffers(HDC /*hdc*/) { return FALSE; }
+
+// MSVC-specific safe string functions
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <cwchar>
+
+#define sprintf_s  snprintf
+#define swprintf_s swprintf
+
+inline int wcscpy_s(wchar_t* dest, size_t destsz, const wchar_t* src)
+{
+    if (!dest || !src || destsz == 0)
+        return -1;
+    wcsncpy(dest, src, destsz - 1);
+    dest[destsz - 1] = L'\0';
+    return 0;
+}
+
+// _itow — integer to wide string (MSVC CRT)
+inline wchar_t* mu_itow(int value, wchar_t* buffer, int radix)
+{
+    if (radix == 10)
+        swprintf(buffer, 32, L"%d", value);
+    else if (radix == 16)
+        swprintf(buffer, 32, L"%x", value);
+    else
+        buffer[0] = L'\0';
+    return buffer;
+}
+#define _itow mu_itow
+
+// _mbclen — multibyte character length (MSVC MBCS)
+inline size_t mu_mbclen(const unsigned char* c)
+{
+    if (!c || *c == 0)
+        return 0;
+    return (*c > 0x7f) ? 2 : 1;
+}
+#define _mbclen mu_mbclen
+
+// GDI font creation constants (used in CreateFont calls — dead code on macOS)
+#define CLIP_DEFAULT_PRECIS       0
+#define DEFAULT_CHARSET           1
+#define DEFAULT_PITCH             0
+#define FF_DONTCARE               0
+#define FW_BOLD                   700
+#define FW_NORMAL                 400
+#define NONANTIALIASED_QUALITY    3
+#define OUT_DEFAULT_PRECIS        0
+#define ANSI_CHARSET              0
+#define ANTIALIASED_QUALITY       4
+
+// IME mode constants
+#ifndef IME_CMODE_NATIVE
+#define IME_CMODE_NATIVE 0x0001
+#endif
+
+// IME sentence mode constant — used in ZzzInterface.cpp
+#define IME_SMODE_AUTOMATIC 0x0004
+
+// ImmGetDefaultIMEWnd — returns default IME window handle (no-op on non-Windows)
+inline HWND ImmGetDefaultIMEWnd(HWND /*hwnd*/) { return nullptr; }
+
+// ---- Window message constants ----
+#ifndef WM_USER
+#define WM_USER 0x0400
+#endif
+#ifndef WM_CLOSE
+#define WM_CLOSE 0x0010
+#endif
+#ifndef WM_KEYDOWN
+#define WM_KEYDOWN 0x0100
+#endif
+#ifndef WM_KEYUP
+#define WM_KEYUP 0x0101
+#endif
+#ifndef WM_LBUTTONDOWN
+#define WM_LBUTTONDOWN 0x0201
+#endif
+#ifndef WM_RBUTTONDOWN
+#define WM_RBUTTONDOWN 0x0204
+#endif
+#ifndef WM_MOUSEWHEEL
+#define WM_MOUSEWHEEL 0x020A
+#endif
+
+// ---- SetRect — GDI rectangle initializer ----
+inline BOOL SetRect(RECT* lprc, int left, int top, int right, int bottom)
+{
+    if (!lprc) return FALSE;
+    lprc->left = left;
+    lprc->top = top;
+    lprc->right = right;
+    lprc->bottom = bottom;
+    return TRUE;
+}
+
+// ---- CreateFont — GDI font creation (returns nullptr on non-Windows) ----
+inline HFONT CreateFont(int /*nHeight*/, int /*nWidth*/, int /*nEscapement*/, int /*nOrientation*/,
+                        int /*fnWeight*/, DWORD /*fdwItalic*/, DWORD /*fdwUnderline*/,
+                        DWORD /*fdwStrikeOut*/, DWORD /*fdwCharSet*/, DWORD /*fdwOutputPrecision*/,
+                        DWORD /*fdwClipPrecision*/, DWORD /*fdwQuality*/, DWORD /*fdwPitchAndFamily*/,
+                        const wchar_t* /*lpszFace*/)
+{
+    return nullptr;
+}
+
+// ---- _ASSERT — MSVC debug assertion macro ----
+#ifndef _ASSERT
+#define _ASSERT(expr) assert(expr)
+#endif
+
+// ---- Win32 error codes ----
+#ifndef ERROR_SUCCESS
+#define ERROR_SUCCESS 0L
+#endif
+
+// ---- SYSTEMTIME — Win32 date/time structure ----
+struct SYSTEMTIME
+{
+    WORD wYear;
+    WORD wMonth;
+    WORD wDayOfWeek;
+    WORD wDay;
+    WORD wHour;
+    WORD wMinute;
+    WORD wSecond;
+    WORD wMilliseconds;
+};
+
+inline void GetLocalTime(SYSTEMTIME* lpSystemTime)
+{
+    if (!lpSystemTime) return;
+    auto now = std::chrono::system_clock::now();
+    auto tt = std::chrono::system_clock::to_time_t(now);
+    struct tm local_tm;
+    localtime_r(&tt, &local_tm);
+    lpSystemTime->wYear = static_cast<WORD>(local_tm.tm_year + 1900);
+    lpSystemTime->wMonth = static_cast<WORD>(local_tm.tm_mon + 1);
+    lpSystemTime->wDayOfWeek = static_cast<WORD>(local_tm.tm_wday);
+    lpSystemTime->wDay = static_cast<WORD>(local_tm.tm_mday);
+    lpSystemTime->wHour = static_cast<WORD>(local_tm.tm_hour);
+    lpSystemTime->wMinute = static_cast<WORD>(local_tm.tm_min);
+    lpSystemTime->wSecond = static_cast<WORD>(local_tm.tm_sec);
+    lpSystemTime->wMilliseconds = 0;
+}
+
+// ---- GetCommandLine — Win32 command-line string (stub) ----
+inline wchar_t* GetCommandLineW() { static wchar_t empty[] = L""; return empty; }
+#define GetCommandLine GetCommandLineW
+
+// ---- Registry API stubs (non-Windows) ----
+// regkey.h (ThirdParty) uses these unconditionally. On non-Windows, registry
+// operations are no-ops — configuration uses config.ini via GameConfig.
+struct _HKEY { int unused; };
+using HKEY = _HKEY*;
+#define HKEY_CLASSES_ROOT   (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000000)))
+#define HKEY_CURRENT_USER   (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000001)))
+#define HKEY_LOCAL_MACHINE  (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000002)))
+#define HKEY_USERS          (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000003)))
+#define HKEY_CURRENT_CONFIG (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000005)))
+
+#define REG_DWORD      4
+#define REG_EXPAND_SZ  2
+#define REG_SZ         1
+#define KEY_READ       0x20019
+#define KEY_WRITE      0x20006
+
+inline LONG RegOpenKeyEx(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/, DWORD /*ulOptions*/,
+                         DWORD /*samDesired*/, HKEY* /*phkResult*/)
+{ return 2L; /* ERROR_FILE_NOT_FOUND */ }
+
+inline LONG RegQueryValueEx(HKEY /*hKey*/, const wchar_t* /*lpValueName*/, LPDWORD /*lpReserved*/,
+                            LPDWORD /*lpType*/, BYTE* /*lpData*/, LPDWORD /*lpcbData*/)
+{ return 2L; }
+
+inline LONG RegSetValueEx(HKEY /*hKey*/, const wchar_t* /*lpValueName*/, DWORD /*Reserved*/,
+                          DWORD /*dwType*/, const BYTE* /*lpData*/, DWORD /*cbData*/)
+{ return 2L; }
+
+inline LONG RegCreateKeyEx(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/, DWORD /*Reserved*/,
+                           wchar_t* /*lpClass*/, DWORD /*dwOptions*/, DWORD /*samDesired*/,
+                           void* /*lpSecurityAttributes*/, HKEY* /*phkResult*/, LPDWORD /*lpdwDisposition*/)
+{ return 2L; }
+
+inline LONG RegCloseKey(HKEY /*hKey*/) { return 0L; }
+
+#define RegOpenKeyExW    RegOpenKeyEx
+#define RegQueryValueExW RegQueryValueEx
+#define RegSetValueExW   RegSetValueEx
+#define RegCreateKeyExW  RegCreateKeyEx
+
+// ---- MCI multimedia constants ----
+#define MCI_SEQ_MAPPER 0xFFFF
+
+// ---- GetModuleFileName stub ----
+inline DWORD GetModuleFileName(HINSTANCE /*hModule*/, wchar_t* lpFilename, DWORD nSize)
+{
+    if (lpFilename && nSize > 0) lpFilename[0] = L'\0';
+    return 0;
+}
+#define GetModuleFileNameW GetModuleFileName
+
+// ---- PeekMessage / DispatchMessage stubs ----
+struct MSG { HWND hwnd; UINT message; WPARAM wParam; LPARAM lParam; DWORD time; POINT pt; };
+#define PM_REMOVE 0x0001
+inline BOOL PeekMessage(MSG* /*lpMsg*/, HWND /*hWnd*/, UINT /*wMsgFilterMin*/, UINT /*wMsgFilterMax*/, UINT /*wRemoveMsg*/) { return FALSE; }
+inline BOOL TranslateMessage(const MSG* /*lpMsg*/) { return FALSE; }
+inline LRESULT DispatchMessage(const MSG* /*lpMsg*/) { return 0; }
+#define PeekMessageW PeekMessage
+#define DispatchMessageW DispatchMessage
+
+// ---- _wtoi64 — wide string to 64-bit int ----
+#ifndef _wtoi64
+#define _wtoi64(s) static_cast<long long>(wcstoll((s), nullptr, 10))
+#endif
+
+// ---- u_int64 type alias (used in some legacy code as __int64) ----
+using u_int64 = int64_t;
+
+// ---- Win32 File API stubs (non-Windows) ----
+// InGameShopSystem.cpp uses CreateFile/CloseHandle behind #ifdef FOR_WORK.
+#define GENERIC_READ     0x80000000L
+#define GENERIC_WRITE    0x40000000L
+#define OPEN_EXISTING    3
+#define CREATE_ALWAYS    2
+#define FILE_ATTRIBUTE_NORMAL 0x80
+#define INVALID_HANDLE_VALUE (reinterpret_cast<HANDLE>(static_cast<intptr_t>(-1)))
+
+inline HANDLE CreateFile(const wchar_t* /*lpFileName*/, DWORD /*dwDesiredAccess*/, DWORD /*dwShareMode*/,
+                         void* /*lpSecurityAttributes*/, DWORD /*dwCreationDisposition*/,
+                         DWORD /*dwFlagsAndAttributes*/, HANDLE /*hTemplateFile*/)
+{ return INVALID_HANDLE_VALUE; }
+#define CreateFileW CreateFile
+
+inline BOOL ReadFile(HANDLE /*hFile*/, void* /*lpBuffer*/, DWORD /*nNumberOfBytesToRead*/,
+                     LPDWORD /*lpNumberOfBytesRead*/, void* /*lpOverlapped*/)
+{ return FALSE; }
+
+inline DWORD GetFileSize(HANDLE /*hFile*/, LPDWORD /*lpFileSizeHigh*/) { return 0; }
+
+inline BOOL CloseHandle(HANDLE /*hObject*/) { return TRUE; }
+
+// ---- _countof macro (MSVC CRT) ----
+#ifndef _countof
+#define _countof(arr) (sizeof(arr) / sizeof((arr)[0]))
+#endif
+
+// ---- _wcsupr — in-place wide string uppercase (MSVC CRT) ----
+inline wchar_t* mu_wcsupr(wchar_t* str)
+{
+    if (!str) return nullptr;
+    for (wchar_t* p = str; *p; ++p)
+        *p = towupper(*p);
+    return str;
+}
+#define _wcsupr mu_wcsupr
+
+// ---- Registry additional constants ----
+#ifndef KEY_ALL_ACCESS
+#define KEY_ALL_ACCESS 0xF003F
+#endif
+#ifndef REG_OPTION_NON_VOLATILE
+#define REG_OPTION_NON_VOLATILE 0
+#endif
+
+inline LONG RegDeleteKey(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/) { return 2L; }
+inline LONG RegDeleteValue(HKEY /*hKey*/, const wchar_t* /*lpValueName*/) { return 2L; }
+#define RegDeleteKeyW   RegDeleteKey
+#define RegDeleteValueW RegDeleteValue
+
+// ---- vswprintf MSVC-compatible variant (no size param) ----
+// muConsoleDebug.cpp calls vswprintf(buf, fmt, va) without buffer size.
+// On POSIX, vswprintf requires a size parameter.
+inline int mu_vswprintf(wchar_t* buffer, const wchar_t* format, va_list args)
+{
+    return vswprintf(buffer, 1024, format, args);
+}
 
 #endif // _WIN32
 
@@ -1586,3 +1950,14 @@ inline std::wstring mu_char16_to_wchar(const char16_t* src)
         return result;
     }
 }
+
+// Story 7.6.1: MU_C16 — transparent wchar_t* to const char16_t* conversion macro.
+// On Windows/MinGW (sizeof(wchar_t)==2): zero-cost reinterpret_cast.
+// On macOS/Linux (sizeof(wchar_t)==4): transcode via mu_wchar_to_char16.
+// Safe as function argument: the temporary std::u16string lives for the full expression.
+// [VS0-QUAL-BUILDCOMP-MACOS]
+#if WCHAR_MAX <= 0xFFFF
+#define MU_C16(s) reinterpret_cast<const char16_t*>(s)
+#else
+#define MU_C16(s) mu_wchar_to_char16(s).c_str()
+#endif
