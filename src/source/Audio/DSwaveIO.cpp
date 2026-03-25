@@ -6,11 +6,15 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <mmsystem.h>
 #else
 #include "Platform/PlatformTypes.h"
 #include "Platform/PlatformCompat.h"
 #endif
-#include <mmsystem.h>
+
+// waveIO is a Windows-only class (WinMM/DirectSound). All method implementations
+// are guarded here to match the #ifdef _WIN32 guard in DSwaveIO.h.
+#ifdef _WIN32
 
 // Undefine the editor redirect macro so we can use std::fwprintf directly
 // to log to both stderr and the in-game editor console.
@@ -244,3 +248,5 @@ bool waveIO::WriteWaveHeader(const wchar_t* filename, const PCMWAVEFORMAT& forma
     m_DataLeft = waveDataSize;
     return true;
 }
+
+#endif // _WIN32

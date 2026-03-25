@@ -15,9 +15,16 @@ set(CMAKE_OSX_ARCHITECTURES arm64)
 # Target macOS 12 Monterey as minimum deployment target
 set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0")
 
-# Clang is the native macOS compiler
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_CXX_COMPILER clang++)
+# Prefer Homebrew LLVM for macOS builds — Homebrew Clang supports warnings like
+# -Wnontrivial-memcall that Apple Clang 17 (Xcode CLI tools) does not.
+# Fall back to system clang if Homebrew LLVM is not installed.
+if(EXISTS "/opt/homebrew/opt/llvm/bin/clang")
+    set(CMAKE_C_COMPILER "/opt/homebrew/opt/llvm/bin/clang")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++")
+else()
+    set(CMAKE_C_COMPILER clang)
+    set(CMAKE_CXX_COMPILER clang++)
+endif()
 
 # Detect macOS SDK path at configure time
 execute_process(

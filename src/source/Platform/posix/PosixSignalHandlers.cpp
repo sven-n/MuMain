@@ -13,11 +13,9 @@
 #include <cstdlib>
 #include <unistd.h>
 
-// FIX M-1: Removed Linux-specific fallback #defines for SA_SIGACTION and SA_RESETHAND.
-// Both macros are defined by <csignal> / <signal.h> on all supported POSIX targets
-// (macOS and Linux glibc). The former fallback values (0x0040 / 0x0004) were Linux-
-// specific and would have silently produced wrong behavior on macOS where SA_RESETHAND
-// is 0x80000000.
+// Note: SA_SIGINFO (not SA_SIGINFO) is the correct POSIX flag to enable the 3-arg
+// signal handler form (siginfo_t* parameter). SA_SIGINFO is defined on both macOS and
+// Linux. SA_SIGINFO does not exist on macOS and is not part of the POSIX standard.
 
 #if defined(__APPLE__) || defined(__GLIBC__)
 #include <execinfo.h>
@@ -96,7 +94,7 @@ static void CrashHandler(int signum, siginfo_t* info, void* context)
 
     // Chain to previous handler (AC-STD-NFR-2 — R8 mitigation: preserves .NET AOT handler)
     // Only chain if the previous handler is not SIG_DFL or SIG_IGN
-    if ((oldact->sa_flags & SA_SIGACTION) != 0 && oldact->sa_sigaction != nullptr)
+    if ((oldact->sa_flags & SA_SIGINFO) != 0 && oldact->sa_sigaction != nullptr)
     {
         oldact->sa_sigaction(signum, info, context);
     }
@@ -129,9 +127,9 @@ void InstallSignalHandlers()
     // to represent an empty signal set. sigemptyset() is the correct POSIX idiom.
     sigemptyset(&act.sa_mask);
     act.sa_sigaction = CrashHandler;
-    // SA_SIGACTION: use sa_sigaction (not sa_handler) — receives siginfo_t*
+    // SA_SIGINFO: use sa_sigaction (not sa_handler) — receives siginfo_t*
     // SA_RESETHAND: reset to SIG_DFL after first invocation (prevents re-entrant crash)
-    act.sa_flags = SA_SIGACTION | SA_RESETHAND;
+    act.sa_flags = SA_SIGINFO | SA_RESETHAND;
 
     sigaction(SIGSEGV, &act, &s_oldSIGSEGV);
     sigaction(SIGABRT, &act, &s_oldSIGABRT);

@@ -2,13 +2,12 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#else
-#include "Platform/PlatformTypes.h"
-#include "Platform/PlatformCompat.h"
-#endif
 #include <mmsystem.h>
 #include <cstdint>
 
+// waveIO — legacy DirectSound/WinMM wave file I/O.
+// This class is Windows-only (WinMM API). It is replaced by miniaudio in EPIC-5.
+// Guarded with #ifdef _WIN32 so macOS/Linux builds compile without mmsystem.h types.
 class waveIO
 {
 public:
@@ -52,3 +51,5 @@ private:
     int m_SilentSample;
     Mode m_mode;
 };
+
+#endif // _WIN32

@@ -30,7 +30,7 @@ xstreambuf::xstreambuf(const xstreambuf& xbuf)
 }
 xstreambuf::~xstreambuf()
 {
-    delete[] m_pBuffer;
+    delete[] static_cast<char*>(m_pBuffer);
 }
 
 void xstreambuf::seek(unsigned int n, XBUF_POS pos)
@@ -70,7 +70,7 @@ xstreambuf& xstreambuf::read(void* dest, unsigned int n)
 
 void xstreambuf::clear()
 {
-    delete[] m_pBuffer;
+    delete[] static_cast<char*>(m_pBuffer);
 
     init();
 }
@@ -110,7 +110,7 @@ void xstreambuf::resize(size_t s)
                 cpysize = size();
 
             memcpy(temp, m_pBuffer, cpysize);
-            delete[] m_pBuffer;
+            delete[] static_cast<char*>(m_pBuffer);
         }
         m_pBuffer = temp;
         m_capacity = buf_size;

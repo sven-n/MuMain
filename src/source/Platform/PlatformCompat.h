@@ -1466,6 +1466,32 @@ using HINTERNET = void*;
 #define __stdcall
 #endif
 
+// ---- GDI / Win32 UI stubs (non-Windows only) ----
+// UIControls.cpp is a ThirdParty Windows UI file that calls GDI/Win32 APIs.
+// On macOS/Linux these are dead code paths (replaced by SDL3 GPU rendering).
+// Stubs allow compilation; no functionality is expected from them.
+
+// GDI color macro: COLORREF is DWORD (uint32_t), RGB packs R/G/B into low 24 bits.
+#define RGB(r, g, b) (static_cast<DWORD>((r) | ((g) << 8) | ((b) << 16)))
+
+// GDI DC operations — no-ops on non-Windows
+inline DWORD SetBkColor(HDC /*hdc*/, DWORD /*color*/) { return 0; }
+inline DWORD SetTextColor(HDC /*hdc*/, DWORD /*color*/) { return 0; }
+inline BOOL  TextOut(HDC /*hdc*/, int /*x*/, int /*y*/, const wchar_t* /*str*/, int /*len*/) { return FALSE; }
+
+// Win32 window messages used as constants in UIControls.cpp
+#define WM_PAINT       0x000F
+#define WM_ERASEBKGND  0x0014
+
+// Scroll bar identifier
+#define SB_VERT 1
+
+// IME composition string selector
+#define GCS_COMPSTR 0x0008
+
+// Timer API — no-op on non-Windows
+inline UINT SetTimer(HWND /*hwnd*/, UINT /*id*/, UINT /*ms*/, void* /*fn*/) { return 0; }
+
 #endif // _WIN32
 
 // ---- wchar_t <-> char16_t conversion utilities (all platforms) ----

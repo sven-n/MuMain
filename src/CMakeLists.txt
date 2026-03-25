@@ -280,6 +280,12 @@ target_precompile_headers(MUData REUSE_FROM MUCore)
 
 # Effects, models, textures, OpenGL — depends on Core only
 file(GLOB MU_RENDERFX_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/RenderFX/*.cpp")
+# Story 7.6.1: ZzzOpenglUtil.cpp implements WGL (Windows OpenGL extensions), which does not
+# exist on macOS/Linux. SDL3 GPU replaces WGL — the file will be deleted in a future story.
+# [VS0-QUAL-BUILDCOMP-MACOS]
+if(NOT WIN32)
+    list(REMOVE_ITEM MU_RENDERFX_SOURCES "${MU_SOURCE_DIR}/RenderFX/ZzzOpenglUtil.cpp")
+endif()
 add_library(MURenderFX STATIC ${MU_RENDERFX_SOURCES})
 target_link_libraries(MURenderFX PRIVATE MUCore)
 if(MU_ENABLE_SDL3)
