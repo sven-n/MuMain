@@ -2465,6 +2465,116 @@ inline bool mu_get_process_cpu_times(uint64_t* kernelNs, uint64_t* userNs)
 }
 #endif
 
+// ---- Cross-platform terminal/console abstraction ----
+// Story 7.6.5: Replaces Win32 console APIs (AllocConsole, SetConsoleTextAttribute,
+// FillConsoleOutputCharacter, etc.) with ANSI escape sequences on ALL platforms.
+// Windows 10+ supports ANSI natively once ENABLE_VIRTUAL_TERMINAL_PROCESSING is set.
+// [VS0-QUAL-WIN32CLEAN-CONSOLE]
+#include <cstdio>
+#ifdef _WIN32
+#include <io.h>
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+#else
+#include <unistd.h>
+#include <sys/ioctl.h>
+#endif
+
+// Global TTY state — set by mu_console_init(), read by mu_console_* functions.
+inline bool& mu_console_is_tty_ref()
+{
+    static bool s_isTTY = false;
+    return s_isTTY;
+}
+
+// mu_console_init() — enable ANSI escape sequences on Windows; check isatty on POSIX.
+// Must be called once before any other mu_console_* function.
+#ifdef _WIN32
+inline void mu_console_init()
+{
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE)
+    {
+        DWORD dwMode = 0;
+        GetConsoleMode(hOut, &dwMode);
+        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT;
+        SetConsoleMode(hOut, dwMode);
+    }
+    mu_console_is_tty_ref() = (_isatty(_fileno(stdout)) != 0);
+}
+#else
+inline void mu_console_init()
+{
+    mu_console_is_tty_ref() = (isatty(STDOUT_FILENO) != 0);
+}
+#endif
+
+// mu_set_console_title() — ANSI OSC title escape, same on all platforms.
+inline void mu_set_console_title(const wchar_t* title)
+{
+    std::string utf8 = mu_wchar_to_utf8(title);
+    std::printf("\033]0;%s\007", utf8.c_str());
+    std::fflush(stdout);
+}
+
+// mu_set_console_text_color() — ANSI SGR colour escape, same on all platforms.
+// colorCode is an ANSI SGR parameter (e.g., 31=red, 32=green, 0=reset).
+inline void mu_set_console_text_color(int colorCode)
+{
+    std::printf("\033[%dm", colorCode);
+    std::fflush(stdout);
+}
+
+// mu_get_console_size() — terminal dimensions with 80x24 fallback.
+#ifdef _WIN32
+inline void mu_get_console_size(int* cols, int* rows)
+{
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
+    {
+        *cols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        *rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+        if (*cols > 0 && *rows > 0)
+        {
+            return;
+        }
+    }
+    *cols = 80;
+    *rows = 24;
+}
+#else
+inline void mu_get_console_size(int* cols, int* rows)
+{
+    struct winsize ws;
+    if (isatty(STDOUT_FILENO) && ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0 && ws.ws_row > 0)
+    {
+        *cols = ws.ws_col;
+        *rows = ws.ws_row;
+    }
+    else
+    {
+        *cols = 80;
+        *rows = 24;
+    }
+}
+#endif
+
+// mu_console_clear() — ANSI clear screen + cursor home, same on all platforms.
+inline void mu_console_clear()
+{
+    std::printf("\033[2J\033[H");
+    std::fflush(stdout);
+}
+
+// mu_console_set_cursor_position() — ANSI cursor positioning, same on all platforms.
+// x = column (0-based), y = row (0-based). ANSI sequences are 1-based.
+inline void mu_console_set_cursor_position(int x, int y)
+{
+    std::printf("\033[%d;%dH", y + 1, x + 1);
+    std::fflush(stdout);
+}
+
 // ---- Cross-platform credential encryption (all platforms) ----
 // Story 7.6.3: mu_encrypt_blob / mu_decrypt_blob replace Windows DPAPI.
 // Implementation moved to Platform/PlatformCrypto.cpp to confine OpenSSL headers to a single TU.

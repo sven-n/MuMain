@@ -1,7 +1,5 @@
 // Story 7.6.5: Cross-Platform Terminal / Console [VS0-QUAL-WIN32CLEAN-CONSOLE]
-// RED PHASE — tests compile but FAIL until:
-//   Task 2.1: PlatformCompat.h gains mu_console_init()
-//   Task 2.4: PlatformCompat.h gains mu_get_console_size(int*, int*)
+// GREEN PHASE — mu_console_init() and mu_get_console_size() added to PlatformCompat.h
 //
 // AC-STD-2: Catch2 unit tests — console init does not crash, GetConsoleSize returns positive dimensions.
 // AC-3:     mu_console_init() enables ANSI on Windows; no crash on POSIX.

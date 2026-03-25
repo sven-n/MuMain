@@ -1,8 +1,53 @@
-#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
+// Story 7.6.5: Cross-platform terminal/console using ANSI escape sequences.
+// No Win32 console APIs — all platforms use the same ANSI code path.
+// [VS0-QUAL-WIN32CLEAN-CONSOLE]
 
 #include "stdafx.h"
 
 #include "WindowsConsole.h"
+
+#include "PlatformCompat.h"
+
+// ---- Win32 COLOR_INDEX → ANSI SGR code mapping ----
+// Maps the 4-bit RGBI colour index (0–15) to an ANSI SGR foreground code.
+// Dark colours: 30–37, bright colours: 90–97.
+static int ColorIndexToAnsiFg(int colorIndex)
+{
+    // clang-format off
+    static const int kAnsiTable[16] = {
+        30,  // 0  COLOR_BLACK
+        34,  // 1  COLOR_DARKBLUE
+        32,  // 2  COLOR_DARKGREEN
+        36,  // 3  COLOR_TEAL (dark cyan)
+        31,  // 4  COLOR_DARKRED
+        35,  // 5  COLOR_PURPLE (dark magenta)
+        33,  // 6  COLOR_OLIVE (dark yellow)
+        37,  // 7  COLOR_GRAY (light gray)
+        90,  // 8  COLOR_INTENSITY (dark gray / bright black)
+        94,  // 9  COLOR_BLUE (bright blue)
+        92,  // 10 COLOR_GREEN (bright green)
+        96,  // 11 COLOR_AQUA (bright cyan)
+        91,  // 12 COLOR_RED (bright red)
+        95,  // 13 COLOR_FUCHSIA (bright magenta)
+        93,  // 14 COLOR_YELLOW (bright yellow)
+        97,  // 15 COLOR_WHITE (bright white)
+    };
+    // clang-format on
+    if (colorIndex < 0 || colorIndex > 15)
+    {
+        return 37; // fallback: light gray
+    }
+    return kAnsiTable[colorIndex];
+}
+
+// Maps the 4-bit RGBI colour index (0–15) to an ANSI SGR background code.
+static int ColorIndexToAnsiBg(int colorIndex)
+{
+    // Background codes are foreground + 10
+    return ColorIndexToAnsiFg(colorIndex) + 10;
+}
+
+//. Public functions — delegate to singleton
 
 bool leaf::OpenConsoleWindow(const std::wstring& title)
 {
@@ -22,11 +67,6 @@ const std::wstring& leaf::GetConsoleTitle()
     return CConsoleWindow::GetInstance()->GetTitle();
 }
 
-HWND leaf::GetConsoleWndHandle()
-{
-    return CConsoleWindow::GetInstance()->GetWndHandle();
-}
-
 bool leaf::IsConsoleVisible()
 {
     return CConsoleWindow::GetInstance()->IsVisible();
@@ -41,13 +81,13 @@ void leaf::ClearConsoleScreen()
     CConsoleWindow::GetInstance()->ClearScreen();
 }
 
-WORD leaf::GetConsoleTextColorIndex(WORD* pwBgColorIndex)
+int leaf::GetConsoleTextColorIndex(int* pBgColorIndex)
 {
-    return CConsoleWindow::GetInstance()->GetTextColorIndex(pwBgColorIndex);
+    return CConsoleWindow::GetInstance()->GetTextColorIndex(pBgColorIndex);
 }
-void leaf::SetConsoleTextColor(WORD wTextColorIndex, WORD wBgColorIndex)
+void leaf::SetConsoleTextColor(int textColorIndex, int bgColorIndex)
 {
-    CConsoleWindow::GetInstance()->SetTextColor(wTextColorIndex, wBgColorIndex);
+    CConsoleWindow::GetInstance()->SetTextColor(textColorIndex, bgColorIndex);
 }
 
 void leaf::ActivateCloseButton(bool bActive)
@@ -69,11 +109,13 @@ using namespace leaf;
 
 CConsoleWindow::CConsoleWindow()
 {
-    m_hWnd = NULL;
     m_bActiveCloseButton = false;
+    m_bVisible = false;
     m_started = false;
+    m_currentTextColor = COLOR_WHITE;
+    m_currentBgColor = COLOR_BLACK;
 
-    m_LimitTimer.SetTimer(12000); //. 12��
+    m_LimitTimer.SetTimer(12000);
 }
 CConsoleWindow::~CConsoleWindow() {}
 
@@ -81,196 +123,95 @@ bool CConsoleWindow::Open(const std::wstring& title)
 {
     Close();
     if (m_started)
+    {
         return true;
+    }
     m_started = true;
 
-    if (FALSE == ::AllocConsole())
-        return false;
-
-    (void)freopen("CONIN$", "r", stdin);
-    (void)freopen("CONOUT$", "w", stdout);
-    (void)freopen("CONOUT$", "w", stderr);
-
-    ::SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
-    ::SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
-    ::SetConsoleMode(GetStdHandle(STD_ERROR_HANDLE), ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
-
-    while (!GetWndHandle())
-    {
-        m_LimitTimer.UpdateTime();
-#ifdef _WIN32
-        if (m_LimitTimer.IsTime() || FALSE == ::EnumChildWindows(NULL, EnumChildProc, (LPARAM)this))
-#else
-        if (m_LimitTimer.IsTime())
-#endif
-            break;
-        ::Sleep(500);
-    }
+    mu_console_init();
 
     m_bActiveCloseButton = true;
+    m_bVisible = true;
+    m_title = title;
+    mu_set_console_title(title.c_str());
 
     return true;
 }
+
 void CConsoleWindow::Close()
 {
-    fclose(stdin);
-    fclose(stdout);
-    fclose(stderr);
-
-    FreeConsole();
-
-    m_hWnd = NULL;
+    m_bVisible = false;
     m_started = false;
 }
 
 bool CConsoleWindow::SetTitle(const std::wstring& title)
 {
-    if (FALSE == ::SetConsoleTitle(title.c_str()))
-        return false;
+    m_title = title;
+    mu_set_console_title(title.c_str());
     return true;
 }
+
 const std::wstring& CConsoleWindow::GetTitle()
 {
-    wchar_t szConsoleTile[1024] = {
-        0,
-    };
-#ifdef _WIN32
-    ::GetConsoleTitle(szConsoleTile, 1024);
-#else
-    wcsncpy(szConsoleTile, leaf::GetConsoleTitle().c_str(), 1024);
-#endif
-
-    static std::wstring s_title = szConsoleTile;
-    return s_title;
-}
-
-HWND CConsoleWindow::GetWndHandle()
-{
-    return m_hWnd;
+    return m_title;
 }
 
 bool CConsoleWindow::IsVisible()
 {
-    return GetWndHandle() && ::IsWindowVisible(GetWndHandle()) ? true : false;
+    return m_bVisible;
 }
+
 void CConsoleWindow::Show(bool bShow)
 {
-    if (m_hWnd)
-    {
-        BOOL bResult = FALSE;
-        m_LimitTimer.ResetTimer();
-        while (!bResult)
-        {
-            ::SetLastError(0);
-            ::ShowWindow(m_hWnd, bShow ? SW_SHOW : SW_HIDE);
-            ::UpdateWindow(m_hWnd);
-            bResult = ::GetLastError() ? FALSE : TRUE;
-            Sleep(10);
-        }
-    }
+    m_bVisible = bShow;
 }
 
 void CConsoleWindow::ClearScreen()
 {
-    /***************************************/
-    // This code is from one of Microsoft's
-    // knowledge base articles, you can find it at
-    // http://support.microsoft.com/default.aspx?scid=KB;EN-US;q99261&
-    /***************************************/
-
-    COORD coordScreen = {0, 0};
-
-    DWORD cCharsWritten;
-    CONSOLE_SCREEN_BUFFER_INFO csbi; /* to get buffer info */
-    DWORD dwConSize;
-
-    /* get the number of character cells in the current buffer */
-    ::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-
-    dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
-
-    /* fill the entire screen with blanks */
-    ::FillConsoleOutputCharacter(::GetStdHandle(STD_OUTPUT_HANDLE), (TCHAR)' ', dwConSize, coordScreen, &cCharsWritten);
-
-    /* get the current text attribute */
-    ::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-
-    /* now set the buffer's attributes accordingly */
-    ::FillConsoleOutputAttribute(::GetStdHandle(STD_OUTPUT_HANDLE), csbi.wAttributes, dwConSize, coordScreen,
-                                 &cCharsWritten);
-
-    /* put the cursor at (0, 0) */
-    ::SetConsoleCursorPosition(::GetStdHandle(STD_OUTPUT_HANDLE), coordScreen);
+    mu_console_clear();
 }
 
-WORD CConsoleWindow::GetTextColorIndex(WORD* pwBgColorIndex)
+int CConsoleWindow::GetTextColorIndex(int* pBgColorIndex)
 {
-    CONSOLE_SCREEN_BUFFER_INFO ConScreenBufInfo;
-    if (FALSE == ::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &ConScreenBufInfo))
-        return 0xFFFF;
-
-    WORD wTextColorIndex = ConScreenBufInfo.wAttributes & 0x000F;
-    if (pwBgColorIndex)
+    if (pBgColorIndex != nullptr)
     {
-        *pwBgColorIndex = wTextColorIndex >> 4;
+        *pBgColorIndex = m_currentBgColor;
     }
-    return wTextColorIndex;
+    return m_currentTextColor;
 }
-void CConsoleWindow::SetTextColor(WORD wTextColorIndex, WORD wBgColorIndex)
-{
-    WORD wColorAttr = (wBgColorIndex << 4) & 0xF0;
-    wColorAttr |= wTextColorIndex;
 
-    ::SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), wColorAttr);
+void CConsoleWindow::SetTextColor(int textColorIndex, int bgColorIndex)
+{
+    m_currentTextColor = textColorIndex;
+    m_currentBgColor = bgColorIndex;
+
+    if (bgColorIndex == COLOR_BLACK)
+    {
+        // Foreground only — simpler escape
+        mu_set_console_text_color(ColorIndexToAnsiFg(textColorIndex));
+    }
+    else
+    {
+        // Foreground + background
+        std::printf("\033[%d;%dm", ColorIndexToAnsiFg(textColorIndex), ColorIndexToAnsiBg(bgColorIndex));
+        std::fflush(stdout);
+    }
 }
 
 void CConsoleWindow::ActivateCloseButton(bool bActive)
 {
-    if (bActive && (m_hWnd != NULL))
-    {
-        // enable the [x] button if we found our console
-        ::GetSystemMenu(m_hWnd, TRUE);
-        ::DrawMenuBar(m_hWnd);
-        m_bActiveCloseButton = true;
-    }
-    else if (m_hWnd != NULL)
-    {
-        // disable the [x] button if we found our console
-        HMENU hMenu = ::GetSystemMenu(m_hWnd, FALSE);
-        if (hMenu != NULL)
-        {
-            ::RemoveMenu(hMenu, SC_CLOSE, MF_BYCOMMAND);
-            ::DrawMenuBar(m_hWnd);
-            m_bActiveCloseButton = false;
-        }
-    }
+    m_bActiveCloseButton = bActive;
 }
+
 bool CConsoleWindow::IsActiveCloseButton() const
 {
     return m_bActiveCloseButton;
 }
 
-bool CConsoleWindow::SaveScreenBuffer(const std::wstring& filename)
+bool CConsoleWindow::SaveScreenBuffer(const std::wstring& /*filename*/)
 {
-    CONSOLE_SCREEN_BUFFER_INFO csbi; /* to get buffer info */
-
-    /* get the number of character cells in the current buffer */
-    ::GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-
-    COORD BufferSize;
-    BufferSize.X = csbi.dwSize.X;
-    BufferSize.Y = csbi.dwCursorPosition.Y + 1;
-
-    auto* pbyCharBuffer = new CHAR_INFO[BufferSize.X * BufferSize.Y];
-
-    COORD StartPointToWrite = {0, 0};
-    SMALL_RECT RectToRead = {0, 0, BufferSize.X, BufferSize.Y};
-    if (ReadConsoleOutput(GetStdHandle(STD_OUTPUT_HANDLE), pbyCharBuffer, BufferSize, StartPointToWrite, &RectToRead))
-    {
-    }
-
-    delete[] pbyCharBuffer;
-
+    // Screen buffer capture has no cross-platform ANSI equivalent.
+    // The Win32 ReadConsoleOutput API was removed; this is now a no-op.
     return true;
 }
 
@@ -278,48 +219,4 @@ CConsoleWindow* CConsoleWindow::GetInstance()
 {
     static CConsoleWindow s_ConsoleWindow;
     return &s_ConsoleWindow;
-}
-
-void CConsoleWindow::SetWndHandle(HWND hWnd)
-{
-    m_hWnd = hWnd;
-}
-DWORD CConsoleWindow::Get32ColorFromColorIndex(WORD wColorIndex)
-{
-    DWORD dw32Color = 0;
-    if ((wColorIndex & leaf::COLOR_RED) == leaf::COLOR_RED)
-        dw32Color |= 0x007F0000;
-    if ((wColorIndex & leaf::COLOR_GREEN) == leaf::COLOR_GREEN)
-        dw32Color |= 0x00007F00;
-    if ((wColorIndex & leaf::COLOR_BLUE) == leaf::COLOR_BLUE)
-        dw32Color |= 0x0000007F;
-    if ((wColorIndex & leaf::COLOR_INTENSITY) == leaf::COLOR_INTENSITY)
-    {
-        if ((dw32Color & 0x7F0000) == 0x7F0000)
-            dw32Color |= 0x800000;
-        if ((dw32Color & 0x007F00) == 0x007F00)
-            dw32Color |= 0x008000;
-        if ((dw32Color & 0x00007F) == 0x00007F)
-            dw32Color |= 0x000080;
-    }
-    return dw32Color;
-}
-BOOL CALLBACK CConsoleWindow::EnumChildProc(HWND hWnd, LPARAM lParam)
-{
-    auto* pConsoleWnd = (CConsoleWindow*)(lParam);
-    DWORD dwProcessId = 0;
-    if (GetWindowThreadProcessId(hWnd, &dwProcessId) == GetCurrentThreadId() && dwProcessId == GetCurrentProcessId())
-    {
-        wchar_t szClassName[512] = {
-            0,
-        };
-        GetClassName(hWnd, szClassName, 512);
-        if (0 == wcscmp(szClassName, L"ConsoleWindowClass"))
-        {
-            if (!pConsoleWnd->GetWndHandle())
-                pConsoleWnd->SetWndHandle(hWnd);
-            return FALSE;
-        }
-    }
-    return TRUE;
 }

@@ -247,11 +247,9 @@ target_sources(MuTests PRIVATE gameplay/test_advanced_systems_validation.cpp)
 target_sources(MuTests PRIVATE data/test_gameconfig_crypto.cpp)
 
 # Story 7.6.5: Cross-Platform Terminal / Console [VS0-QUAL-WIN32CLEAN-CONSOLE]
-# RED PHASE: test_console.cpp verifies mu_console_init() does not crash (AC-STD-2, AC-3)
+# GREEN PHASE: mu_console_init() and mu_get_console_size() implemented in PlatformCompat.h.
+# test_console.cpp verifies mu_console_init() does not crash (AC-STD-2, AC-3)
 # and mu_get_console_size() returns positive dimensions (AC-STD-2, AC-6).
-# Tests compile but FAIL until:
-#   Task 2.1: PlatformCompat.h gains mu_console_init()
-#   Task 2.4: PlatformCompat.h gains mu_get_console_size(int*, int*)
 # No Win32 APIs in the test TU — runs on macOS/Linux/Windows (MinGW CI).
 target_sources(MuTests PRIVATE core/test_console.cpp)
 

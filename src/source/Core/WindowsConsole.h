@@ -1,34 +1,33 @@
-#ifndef _WINDOWSCONSOLE_H_
-#define _WINDOWSCONSOLE_H_
-
 #pragma once
+
 #include "Core/Timer.h"
 
-#pragma warning(disable : 4786)
 #include <string>
 
 namespace leaf
 {
+// Console colour indices — self-contained, no Win32 FOREGROUND_* dependency.
+// Numeric values match the original Win32 colour attribute layout (4-bit RGBI).
 enum COLOR_INDEX
 {
     COLOR_BLACK = 0,
 
-    COLOR_DARKBLUE = FOREGROUND_BLUE,
-    COLOR_DARKGREEN = FOREGROUND_GREEN,
-    COLOR_DARKRED = FOREGROUND_RED,
-    COLOR_INTENSITY = FOREGROUND_INTENSITY,
+    COLOR_DARKBLUE = 1,
+    COLOR_DARKGREEN = 2,
+    COLOR_TEAL = 3,
+    COLOR_DARKRED = 4,
+    COLOR_PURPLE = 5,
+    COLOR_OLIVE = 6,
+    COLOR_GRAY = 7,
+    COLOR_INTENSITY = 8,
 
-    COLOR_BLUE = COLOR_DARKBLUE | COLOR_INTENSITY,
-    COLOR_GREEN = COLOR_DARKGREEN | COLOR_INTENSITY,
-    COLOR_RED = COLOR_DARKRED | COLOR_INTENSITY,
-    COLOR_OLIVE = COLOR_DARKRED | COLOR_DARKGREEN,
-    COLOR_TEAL = COLOR_DARKGREEN | COLOR_DARKBLUE,
-    COLOR_PURPLE = COLOR_DARKRED | COLOR_DARKBLUE,
-    COLOR_GRAY = COLOR_DARKRED | COLOR_DARKGREEN | COLOR_DARKBLUE,
-    COLOR_YELLOW = COLOR_OLIVE | COLOR_INTENSITY,
-    COLOR_AQUA = COLOR_TEAL | COLOR_INTENSITY,
-    COLOR_FUCHSIA = COLOR_PURPLE | COLOR_INTENSITY,
-    COLOR_WHITE = COLOR_GRAY | COLOR_INTENSITY,
+    COLOR_BLUE = 9,
+    COLOR_GREEN = 10,
+    COLOR_AQUA = 11,
+    COLOR_RED = 12,
+    COLOR_FUCHSIA = 13,
+    COLOR_YELLOW = 14,
+    COLOR_WHITE = 15,
 
     COLOR_ERROR = 0xFFFF
 };
@@ -41,15 +40,13 @@ void CloseConsoleWindow();
 bool SetConsoleTitle(const std::wstring& title);
 const std::wstring& GetConsoleTitle();
 
-HWND GetConsoleWndHandle();
-
 bool IsConsoleVisible();
 void ShowConsole(bool bShow = true);
 
 void ClearConsoleScreen();
 
-WORD GetConsoleTextColorIndex(WORD* pwBgColorIndex = NULL);
-void SetConsoleTextColor(WORD wTextColorIndex = COLOR_WHITE, WORD wBgColorIndex = COLOR_BLACK);
+int GetConsoleTextColorIndex(int* pBgColorIndex = nullptr);
+void SetConsoleTextColor(int textColorIndex = COLOR_WHITE, int bgColorIndex = COLOR_BLACK);
 
 void ActivateCloseButton(bool bActive = true);
 bool IsActiveCloseButton();
@@ -61,9 +58,12 @@ bool SaveConsoleScreenBuffer(const std::wstring& filename);
 class CConsoleWindow
 {
     CTimer2 m_LimitTimer;
-    HWND m_hWnd;
     bool m_bActiveCloseButton;
+    bool m_bVisible;
     bool m_started;
+    int m_currentTextColor;
+    int m_currentBgColor;
+    std::wstring m_title;
 
 public:
     ~CConsoleWindow();
@@ -74,15 +74,13 @@ public:
     bool SetTitle(const std::wstring& title);
     const std::wstring& GetTitle();
 
-    HWND GetWndHandle();
-
     bool IsVisible();
     void Show(bool bShow = true);
 
     void ClearScreen();
 
-    WORD GetTextColorIndex(WORD* pwBgColorIndex = NULL);
-    void SetTextColor(WORD wTextColorIndex = COLOR_WHITE, WORD wBgColorIndex = COLOR_BLACK);
+    int GetTextColorIndex(int* pBgColorIndex = nullptr);
+    void SetTextColor(int textColorIndex = COLOR_WHITE, int bgColorIndex = COLOR_BLACK);
 
     void ActivateCloseButton(bool bActive = true);
     bool IsActiveCloseButton() const;
@@ -93,11 +91,5 @@ public:
 
 protected:
     CConsoleWindow();
-
-    void SetWndHandle(HWND hWnd);
-    DWORD Get32ColorFromColorIndex(WORD wColorIndex);
-    static BOOL CALLBACK EnumChildProc(HWND hWnd, LPARAM lParam);
 };
 } // namespace leaf
-
-#endif // _WINDOWSCONSOLE_H_
