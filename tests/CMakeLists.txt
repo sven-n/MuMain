@@ -246,6 +246,15 @@ target_sources(MuTests PRIVATE gameplay/test_advanced_systems_validation.cpp)
 # No Win32 APIs or DPAPI — runs on macOS/Linux/Windows (MinGW CI).
 target_sources(MuTests PRIVATE data/test_gameconfig_crypto.cpp)
 
+# Story 7.6.5: Cross-Platform Terminal / Console [VS0-QUAL-WIN32CLEAN-CONSOLE]
+# RED PHASE: test_console.cpp verifies mu_console_init() does not crash (AC-STD-2, AC-3)
+# and mu_get_console_size() returns positive dimensions (AC-STD-2, AC-6).
+# Tests compile but FAIL until:
+#   Task 2.1: PlatformCompat.h gains mu_console_init()
+#   Task 2.4: PlatformCompat.h gains mu_get_console_size(int*, int*)
+# No Win32 APIs in the test TU — runs on macOS/Linux/Windows (MinGW CI).
+target_sources(MuTests PRIVATE core/test_console.cpp)
+
 # Story 7.6.4: Cross-Platform CPU Usage Monitoring [VS0-QUAL-WIN32CLEAN-CPUUSAGE]
 # RED PHASE: Tests verify hardware_concurrency returns positive value (AC-3, AC-STD-2),
 # CPU usage GetUsage() returns a value in [0.0, 1.0] (AC-4, AC-STD-2), and multiple
