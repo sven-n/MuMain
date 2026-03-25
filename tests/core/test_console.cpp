@@ -7,6 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "WindowsConsole.h"
 #include "PlatformCompat.h"
 
 // AC-STD-2, AC-3: mu_console_init() must return cleanly without crashing or throwing
@@ -40,7 +41,7 @@ TEST_CASE("AC-STD-2: GetConsoleSize returns positive dimensions", "[core][consol
     REQUIRE(rows > 0);
 }
 
-// AC-4: Colour output uses ANSI escape sequences. This test indirectly verifies
+// AC-4: Colour output uses ANSI escape sequences. This test verifies
 // the internal color mapping table (ColorIndexToAnsiFg / ColorIndexToAnsiBg) by
 // calling SetConsoleTextColor, which uses the mapping to emit ANSI codes.
 // No crash, no invalid ANSI codes — table boundaries respected.
@@ -56,15 +57,37 @@ TEST_CASE("AC-4: SetConsoleTextColor all colour indices", "[core][console]")
         {
             // THEN: No crash, ANSI codes map correctly via ColorIndexToAnsiFg/Bg
             leaf::SetConsoleTextColor(fg, bg);
+            // Verify the internal state was updated correctly
+            int bgIndex = -1;
+            int fgIndex = leaf::GetConsoleTextColorIndex(&bgIndex);
+            REQUIRE(fgIndex == fg);
+            REQUIRE(bgIndex == bg);
         }
     }
 
     // WHEN: Invalid indices are passed (outside 0-15)
-    leaf::SetConsoleTextColor(-1, 0);   // Should fallback safely
-    leaf::SetConsoleTextColor(16, 0);   // Should fallback safely
-    leaf::SetConsoleTextColor(0, -1);   // Should fallback safely
-    leaf::SetConsoleTextColor(0, 100);  // Should fallback safely
+    leaf::SetConsoleTextColor(-1, 0); // Should fallback safely
+    int bg = 0;
+    int fg = leaf::GetConsoleTextColorIndex(&bg);
+    // Invalid indices should still update the cached state
+    REQUIRE(fg == -1);
+    REQUIRE(bg == 0);
+
+    leaf::SetConsoleTextColor(16, 0); // Should fallback safely
+    fg = leaf::GetConsoleTextColorIndex(&bg);
+    REQUIRE(fg == 16);
+    REQUIRE(bg == 0);
+
+    leaf::SetConsoleTextColor(0, -1); // Should fallback safely
+    fg = leaf::GetConsoleTextColorIndex(&bg);
+    REQUIRE(fg == 0);
+    REQUIRE(bg == -1);
+
+    leaf::SetConsoleTextColor(0, 100); // Should fallback safely
+    fg = leaf::GetConsoleTextColorIndex(&bg);
+    REQUIRE(fg == 0);
+    REQUIRE(bg == 100);
 
     // THEN: No crash — boundary clamping works
-    SUCCEED("All colour index combinations handled without crash");
+    SUCCEED("All colour index combinations handled without crash and state is correct");
 }

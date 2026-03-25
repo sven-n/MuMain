@@ -142,6 +142,9 @@ void CConsoleWindow::Close()
 {
     m_bVisible = false;
     m_started = false;
+    // Reset color state to match terminal default (white on black)
+    m_currentTextColor = COLOR_WHITE;
+    m_currentBgColor = COLOR_BLACK;
 }
 
 bool CConsoleWindow::SetTitle(const std::wstring& title)
@@ -185,16 +188,10 @@ void CConsoleWindow::SetTextColor(int textColorIndex, int bgColorIndex)
     m_currentTextColor = textColorIndex;
     m_currentBgColor = bgColorIndex;
 
-    if (bgColorIndex == COLOR_BLACK)
-    {
-        // Foreground only — simpler escape
-        mu_set_console_text_color(ColorIndexToAnsiFg(textColorIndex));
-    }
-    else
-    {
-        // Foreground + background — routed through platform abstraction
-        mu_set_console_text_color_with_bg(ColorIndexToAnsiFg(textColorIndex), ColorIndexToAnsiBg(bgColorIndex));
-    }
+    // Always emit both fg + bg to prevent background leaking from prior calls.
+    // ANSI foreground-only codes do not reset background attributes, so a previous
+    // background color would persist if we only emitted foreground here.
+    mu_set_console_text_color_with_bg(ColorIndexToAnsiFg(textColorIndex), ColorIndexToAnsiBg(bgColorIndex));
 }
 
 void CConsoleWindow::ActivateCloseButton(bool bActive)

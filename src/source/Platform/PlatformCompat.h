@@ -2490,9 +2490,15 @@ inline bool& mu_console_is_tty_ref()
 
 // mu_console_init() — enable ANSI escape sequences on Windows; check isatty on POSIX.
 // Must be called once before any other mu_console_* function.
+// Idempotent: safe to call multiple times (only initializes once).
 #ifdef _WIN32
 inline void mu_console_init()
 {
+    static bool s_inited = false;
+    if (s_inited)
+        return;
+    s_inited = true;
+
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut != INVALID_HANDLE_VALUE)
     {
@@ -2508,6 +2514,11 @@ inline void mu_console_init()
 #else
 inline void mu_console_init()
 {
+    static bool s_inited = false;
+    if (s_inited)
+        return;
+    s_inited = true;
+
     mu_console_is_tty_ref() = (isatty(STDOUT_FILENO) != 0);
 }
 #endif
@@ -2520,6 +2531,9 @@ inline void mu_set_console_title(const wchar_t* title)
     {
         return;
     }
+    // Guard ANSI output — don't emit escapes to non-TTY (files, pipes)
+    if (!mu_console_is_tty_ref())
+        return;
     std::string utf8 = mu_wchar_to_utf8(title);
     std::printf("\033]0;%s\007", utf8.c_str());
     std::fflush(stdout);
@@ -2529,6 +2543,9 @@ inline void mu_set_console_title(const wchar_t* title)
 // colorCode is an ANSI SGR parameter (e.g., 31=red, 32=green, 0=reset).
 inline void mu_set_console_text_color(int colorCode)
 {
+    // Guard ANSI output — don't emit escapes to non-TTY (files, pipes)
+    if (!mu_console_is_tty_ref())
+        return;
     std::printf("\033[%dm", colorCode);
     std::fflush(stdout);
 }
@@ -2538,6 +2555,9 @@ inline void mu_set_console_text_color(int colorCode)
 // bgCode = background ANSI code (40-47 for dark, 100-107 for bright)
 inline void mu_set_console_text_color_with_bg(int fgCode, int bgCode)
 {
+    // Guard ANSI output — don't emit escapes to non-TTY (files, pipes)
+    if (!mu_console_is_tty_ref())
+        return;
     std::printf("\033[%d;%dm", fgCode, bgCode);
     std::fflush(stdout);
 }
@@ -2579,6 +2599,9 @@ inline void mu_get_console_size(int* cols, int* rows)
 // mu_console_clear() — ANSI clear screen + cursor home, same on all platforms.
 inline void mu_console_clear()
 {
+    // Guard ANSI output — don't emit escapes to non-TTY (files, pipes)
+    if (!mu_console_is_tty_ref())
+        return;
     std::printf("\033[2J\033[H");
     std::fflush(stdout);
 }
@@ -2587,6 +2610,9 @@ inline void mu_console_clear()
 // x = column (0-based), y = row (0-based). ANSI sequences are 1-based.
 inline void mu_console_set_cursor_position(int x, int y)
 {
+    // Guard ANSI output — don't emit escapes to non-TTY (files, pipes)
+    if (!mu_console_is_tty_ref())
+        return;
     std::printf("\033[%d;%dH", y + 1, x + 1);
     std::fflush(stdout);
 }
