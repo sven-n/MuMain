@@ -19,6 +19,47 @@
 
 using namespace SEASON3B;
 
+namespace
+{
+    float GetMasterSkillValue(ActionSkillType skill)
+    {
+        return CharacterAttribute->MasterSkillInfo[skill].GetSkillValue();
+    }
+
+    float GetMasterSkillValue(ActionSkillType firstSkill, ActionSkillType secondSkill)
+    {
+        const auto firstSkillInfo = CharacterAttribute->MasterSkillInfo[firstSkill];
+        const auto secondSkillInfo = CharacterAttribute->MasterSkillInfo[secondSkill];
+
+        if (secondSkillInfo.GetSkillLevel() > firstSkillInfo.GetSkillLevel())
+        {
+            return secondSkillInfo.GetSkillValue();
+        }
+
+        return firstSkillInfo.GetSkillValue();
+    }
+
+    int GetMasterSkillValueAsInt(ActionSkillType skill)
+    {
+        return static_cast<int>(GetMasterSkillValue(skill));
+    }
+
+    int GetMasterSkillValueAsInt(ActionSkillType firstSkill, ActionSkillType secondSkill)
+    {
+        return static_cast<int>(GetMasterSkillValue(firstSkill, secondSkill));
+    }
+
+    float ClampDefenseSuccessRateMultiplier(float multiplier)
+    {
+        if (multiplier < 1.0f)
+        {
+            return 1.0f;
+        }
+
+        return multiplier;
+    }
+}
+
 SEASON3B::CNewUICharacterInfoWindow::CNewUICharacterInfoWindow()
 {
     m_pNewUIMng = NULL;
@@ -454,7 +495,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     int add_attack_success_rate_pvm = 0;
     int add_attack_success_rate_pvp = 0;
-    int add_defense_success_rate_pvm = 0;
+    float add_defense_success_rate_pvm = 0.0f;
     int add_defense_success_rate_pvp = 0;
     int add_attack_dmg_max = 0;
     int add_attack_dmg_min = 0;
@@ -462,75 +503,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     int add_magic_damage_min = 0;
     int add_magic_damage_max = 0;
 
-    for (int i = 0; i < MAX_SKILLS; ++i)
-    {
-        auto currentSkill = CharacterAttribute->Skill[i];
-        if (currentSkill < AT_SKILL_MASTER_BEGIN || currentSkill > AT_SKILL_MASTER_END)
-        {
-            continue;
-        }
-
-        auto skillValue = CharacterAttribute->MasterSkillInfo[currentSkill].GetSkillValue();
-        switch (currentSkill)
-        {
-        case AT_SKILL_AttackSuccRateInc:
-        case AT_SKILL_IncreaseAttackSuccessRate:
-            add_attack_success_rate_pvm = skillValue;
-            break;
-        case AT_SKILL_PvPAttackRate:
-        case AT_SKILL_IncreasePvPAttackRate:
-            add_attack_success_rate_pvp = skillValue;
-            break;
-        case AT_SKILL_DefenseSuccessRateInc:
-        case AT_SKILL_IncreaseDefenseSuccessRate:
-            add_defense_success_rate_pvm = skillValue;
-            break;
-        case AT_SKILL_PvPDefenceRateInc:
-        case AT_SKILL_IncreasePvPDefenseRate:
-            add_defense_success_rate_pvp = skillValue;
-            break;
-        case AT_SKILL_DefenseIncrease:
-        case AT_SKILL_IncreasesDefense:
-            add_defense = skillValue;
-            break;
-        case AT_SKILL_MinimumWizardryInc:
-            add_magic_damage_min = skillValue;
-            break;
-            // to be continued ...
-            // depending on the equipped weapons this may get complex. Maybe we should leave these calculations to the server.
-        }
-            /*
-            else
-            if (CharacterAttribute->Skill[i] >= AT_SKILL_MAX_ATTACKRATE_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_ATTACKRATE_UP + 5)
-            {
-            add_attack_dmg_max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-            }
-            else
-            if (CharacterAttribute->Skill[i] >= AT_SKILL_MAX_ATT_MAGIC_UP && CharacterAttribute->Skill[i] < AT_SKILL_MAX_ATT_MAGIC_UP + 5)
-            {
-            add_mana_max = add_attack_dmg_max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-            }
-            else
-            if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_ATT_MAGIC_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_ATT_MAGIC_UP + 5)
-            {
-            add_magic_damage_min = add_attack_dmg_min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-            }
-            else
-            if (CharacterAttribute->Skill[i] >= at_skill_mana && CharacterAttribute->Skill[i] < AT_SKILL_MAX_MANA_UP + 5)
-            {
-            add_mana_max = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-            }
-            else
-            if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_MANA_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_MANA_UP + 5)
-            {
-            add_magic_damage_min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-            }
-            else
-            if (CharacterAttribute->Skill[i] >= AT_SKILL_MIN_ATTACKRATE_UP && CharacterAttribute->Skill[i] < AT_SKILL_MIN_ATTACKRATE_UP + 5)
-            {
-                add_attack_dmg_min = SkillAttribute[CharacterAttribute->Skill[i]].Damage;
-            }*/
-    }
+    add_attack_success_rate_pvm = GetMasterSkillValueAsInt(AT_SKILL_AttackSuccRateInc, AT_SKILL_IncreaseAttackSuccessRate);
+    add_attack_success_rate_pvp = GetMasterSkillValueAsInt(AT_SKILL_PvPAttackRate, AT_SKILL_IncreasePvPAttackRate);
+    add_defense_success_rate_pvm = GetMasterSkillValue(AT_SKILL_DefenseSuccessRateInc, AT_SKILL_IncreaseDefenseSuccessRate);
+    add_defense_success_rate_pvp = GetMasterSkillValueAsInt(AT_SKILL_PvPDefenceRateInc, AT_SKILL_IncreasePvPDefenseRate);
+    add_defense = GetMasterSkillValueAsInt(AT_SKILL_DefenseIncrease, AT_SKILL_IncreasesDefense);
+    add_magic_damage_min = GetMasterSkillValueAsInt(AT_SKILL_MinimumWizardryInc);
 
     ITEM* pWeaponRight = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
     ITEM* pWeaponLeft = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
@@ -986,6 +964,9 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     wchar_t strBlocking[256];
 
+    const float defenseSuccessRateMultiplier = ClampDefenseSuccessRateMultiplier(add_defense_success_rate_pvm);
+    const int defenseSuccessRate = static_cast<int>(CharacterAttribute->SuccessfulBlocking * defenseSuccessRateMultiplier);
+
     int nAdd_FulBlocking = 0;
     if (g_isCharacterBuff((&Hero->Object), eBuff_Def_up_Ourforces))
     {
@@ -993,24 +974,24 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         if (_AddStat > 100)
             _AddStat = 100;
 
-        _AddStat = CharacterAttribute->SuccessfulBlocking * _AddStat / 100;
+        _AddStat = defenseSuccessRate * _AddStat / 100;
         nAdd_FulBlocking += _AddStat;
     }
 
     if (bDexSuccess)
     {
         // memorylock
-        if (CharacterAttribute->SuccessfulBlocking > 0)
+        if (defenseSuccessRate > 0)
         {
             if (nAdd_FulBlocking)
             {
                 mu_swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
-                    CharacterAttribute->SuccessfulBlocking, (CharacterAttribute->SuccessfulBlocking) / 10 + nAdd_FulBlocking);
+                    defenseSuccessRate, (defenseSuccessRate) / 10 + nAdd_FulBlocking);
             }
             else
             {
                 mu_swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense,
-                    CharacterAttribute->SuccessfulBlocking, (CharacterAttribute->SuccessfulBlocking) / 10);
+                    defenseSuccessRate, (defenseSuccessRate) / 10);
             }
         }
         else
@@ -1020,15 +1001,15 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     }
     else
     {
-        if (CharacterAttribute->SuccessfulBlocking > 0)
+        if (defenseSuccessRate > 0)
         {
             if (nAdd_FulBlocking)
             {
-                mu_swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense, CharacterAttribute->SuccessfulBlocking, nAdd_FulBlocking);
+                mu_swprintf(strBlocking, GlobalText[206], t_adjdef + maxdefense + iChangeRingAddDefense, defenseSuccessRate, nAdd_FulBlocking);
             }
             else
             {
-                mu_swprintf(strBlocking, GlobalText[208], t_adjdef + maxdefense + iChangeRingAddDefense, CharacterAttribute->SuccessfulBlocking);
+                mu_swprintf(strBlocking, GlobalText[208], t_adjdef + maxdefense + iChangeRingAddDefense, defenseSuccessRate);
             }
         }
         else
