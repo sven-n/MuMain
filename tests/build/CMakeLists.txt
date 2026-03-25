@@ -347,3 +347,89 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_3_0.cmake
 )
+
+# ==========================================================================
+# Story 7.5.1 - Fix Remaining macOS Build Failures and Remove Quality Gate Bypass
+#              [VS0-QUAL-BUILDFIXREM-MACOS]
+# RED PHASE: Tests fail until build compatibility fixes are implemented.
+# ==========================================================================
+
+# AC-1: SkillDataLoader.cpp swprintf uses 3-arg POSIX form (not 2-arg Windows form)
+add_test(
+    NAME "7.5.1-AC-1:swprintf-signature"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/Skills/SkillDataLoader.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_swprintf_signature_7_5_1.cmake
+)
+
+# AC-2: ZzzOpenData.cpp MODEL_TYPE_CHARM_MIXWING uses static_cast<int>
+add_test(
+    NAME "7.5.1-AC-2:enum-cast-zzzopen"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/ZzzOpenData.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_enum_cast_zzzopen_7_5_1.cmake
+)
+
+# AC-3: ZzzInfomation.cpp wchar_t null comparisons use L'\0' not NULL
+add_test(
+    NAME "7.5.1-AC-3:wchar-null-compare"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/ZzzInfomation.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_wchar_null_compare_7_5_1.cmake
+)
+
+# AC-4: ZzzInfomation.cpp unused variables at line 237 resolved
+add_test(
+    NAME "7.5.1-AC-4:unused-vars"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/ZzzInfomation.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_unused_vars_7_5_1.cmake
+)
+
+# AC-5: ZzzInfomation.cpp && within || precedence warnings resolved with explicit parens
+add_test(
+    NAME "7.5.1-AC-5:precedence-parens"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/ZzzInfomation.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_precedence_parens_7_5_1.cmake
+)
+
+# AC-6: ZzzInfomation.cpp sign comparison between DWORD and PET_TYPE fixed
+add_test(
+    NAME "7.5.1-AC-6:sign-compare"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/ZzzInfomation.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac6_sign_compare_7_5_1.cmake
+)
+
+# AC-7: ZzzInfomation.cpp includes _GlobalFunctions.h for g_isCharacterBuff
+add_test(
+    NAME "7.5.1-AC-7:char-buff-include"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/ZzzInfomation.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac7_char_buff_include_7_5_1.cmake
+)
+
+# AC-9: .pcc-config.yaml skip_checks bypass removed
+add_test(
+    NAME "7.5.1-AC-9:skip-checks-removed"
+    COMMAND ${CMAKE_COMMAND}
+        -DROOT=${MUMAIN_SOURCE_DIR}/..
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac9_skip_checks_removed_7_5_1.cmake
+)
+
+# AC-10: No new Win32 guards in modified game logic files (MinGW regression guard)
+add_test(
+    NAME "7.5.1-AC-10:mingw-no-regression"
+    COMMAND ${CMAKE_COMMAND}
+        -DMUMAIN_SOURCE_DIR=${MUMAIN_SOURCE_DIR}/src/source
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac10_mingw_no_regression_7_5_1.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-BUILDFIXREM-MACOS traceability
+add_test(
+    NAME "7.5.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_5_1.cmake
+)
