@@ -237,6 +237,15 @@ target_sources(MuTests PRIVATE gameplay/test_social_systems_validation.cpp)
 # pet rendering constants (PC4_ELF..SKELETON), and CSBaseMatch inheritance static_assert checks.
 target_sources(MuTests PRIVATE gameplay/test_advanced_systems_validation.cpp)
 
+# Story 7.6.3: Data Layer Win32 Removal [VS0-QUAL-WIN32CLEAN-DATALAYER]
+# RED PHASE: Tests verify mu_encrypt_blob / mu_decrypt_blob round-trip (AC-3, AC-STD-2).
+# Includes round-trip for ASCII, binary, and wstring payloads; tamper detection (GCM auth tag);
+# and random-IV guarantee. Tests compile but FAIL until:
+#   Task 2.1: PlatformCompat.h gains mu_encrypt_blob / mu_decrypt_blob (AES-256-GCM or no-op)
+#   Task 3.2: CMake links OpenSSL::Crypto to MUCore when MU_HAS_OPENSSL=1
+# No Win32 APIs or DPAPI — runs on macOS/Linux/Windows (MinGW CI).
+target_sources(MuTests PRIVATE data/test_gameconfig_crypto.cpp)
+
 # Story 7.6.2: Win32 String Conversion and Include Guard Cleanup [VS0-QUAL-WIN32CLEAN-STRINCLUDE]
 # RED PHASE: Tests verify that mu_wchar_to_utf8() correctly converts wide strings to UTF-8
 # (replacing WideCharToMultiByte) and that mu_swprintf() formats correctly (replacing
