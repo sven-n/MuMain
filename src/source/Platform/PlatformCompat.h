@@ -1449,6 +1449,23 @@ inline void* mu_SecureZeroMemory(void* ptr, size_t cnt)
 
 #define RtlSecureZeroMemory mu_SecureZeroMemory
 
+// ---- WinINet stubs (non-Windows only) ----
+// ShopListManager headers (DownloadInfo.h, IConnecter.h, FileDownloader.h, BannerInfo.h)
+// use WinINet types unconditionally despite guarding the #include <wininet.h>.
+// These are compilation stubs only — WinINet functionality requires Windows.
+#define INTERNET_MAX_URL_LENGTH       2084
+#define INTERNET_MAX_USER_NAME_LENGTH 256
+#define INTERNET_MAX_PASSWORD_LENGTH  256
+using INTERNET_PORT = unsigned short;
+using HINTERNET = void*;
+
+// __stdcall is a Win32 x86 calling convention attribute. Clang on arm64/x86_64
+// recognises it but emits -Wignored-attributes (promoted to error via -Werror).
+// Define as empty before ShopListManager headers are parsed.
+#ifndef __stdcall
+#define __stdcall
+#endif
+
 #endif // _WIN32
 
 // ---- wchar_t <-> char16_t conversion utilities (all platforms) ----
