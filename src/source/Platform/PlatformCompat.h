@@ -32,6 +32,7 @@ inline std::filesystem::path mu_get_app_dir()
 #include <cerrno>
 #include <chrono>
 #include <cstdio>
+#include <thread>
 #include <cstring>
 #include <filesystem>
 #include <string>
@@ -335,9 +336,9 @@ inline BOOL FreeConsole()
     return TRUE;
 }
 
-inline void Sleep(DWORD /*dwMilliseconds*/)
+inline void Sleep(DWORD dwMilliseconds)
 {
-    // Implementation can use std::this_thread::sleep_for if needed
+    std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds));
 }
 
 inline BOOL IsWindowVisible(HWND /*hWnd*/)
@@ -525,7 +526,7 @@ inline LONG ImmGetCompositionString(HIMC /*himc*/, DWORD /*dwIndex*/, void* /*lp
 
 // ---- Win32 window message stubs (non-Windows only) ----
 // Used in UIControls.cpp: CUITextInputBox::SetIMEPosition, GiveFocus, SetState
-using UINT = unsigned int;
+// UINT already defined in PlatformTypes.h
 #define WM_IME_CONTROL 0x0283
 #define IMC_SETCOMPOSITIONWINDOW 0x000C
 inline LRESULT SendMessage(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wp*/, LPARAM /*lp*/)
@@ -1657,14 +1658,20 @@ template <size_t N> inline int wcscat_s(wchar_t (&dest)[N], const wchar_t* src)
 }
 
 // _itow — integer to wide string (MSVC CRT)
+// Caller must provide a buffer of at least 34 wide chars (32 digits + sign + null).
 inline wchar_t* mu_itow(int value, wchar_t* buffer, int radix)
 {
+    wchar_t tmp[34]; // max 32 digits for base-2 + sign + null
     if (radix == 10)
-        swprintf(buffer, 32, L"%d", value);
+        swprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), L"%d", value);
     else if (radix == 16)
-        swprintf(buffer, 32, L"%x", value);
+        swprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), L"%x", value);
     else
+    {
         buffer[0] = L'\0';
+        return buffer;
+    }
+    wcscpy(buffer, tmp);
     return buffer;
 }
 #define _itow mu_itow

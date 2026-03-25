@@ -57,7 +57,19 @@ def check_file(fpath: str) -> list[tuple[int, str]]:
 
     i = 0
     while i < len(lines):
-        if lines[i].strip() != "#ifdef _WIN32":
+        stripped = lines[i].strip()
+        # Match #ifdef _WIN32, #if defined(_WIN32), #if _WIN32
+        # Exclude #ifndef _WIN32 and #if !defined(_WIN32) (those are non-Windows guards)
+        is_win32_guard = (
+            stripped == "#ifdef _WIN32"
+            or (
+                stripped.startswith("#if ")
+                and "_WIN32" in stripped
+                and "!defined" not in stripped
+                and "!" not in stripped.split("_WIN32")[0]
+            )
+        )
+        if not is_win32_guard:
             i += 1
             continue
 

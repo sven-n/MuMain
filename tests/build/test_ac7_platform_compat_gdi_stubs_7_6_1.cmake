@@ -12,11 +12,22 @@ endif()
 
 file(READ "${PLATFORM_COMPAT}" compat_content)
 
-set(REQUIRED_STUBS "RGB" "SetBkColor" "SetTextColor" "TextOut" "WM_PAINT" "WM_ERASEBKGND" "SB_VERT" "GCS_COMPSTR" "SetTimer")
+# Verify actual definitions/declarations, not just string occurrences
+set(REQUIRED_PATTERNS
+  "#define RGB"
+  "inline.*SetBkColor"
+  "inline.*SetTextColor"
+  "inline.*TextOut"
+  "WM_PAINT"
+  "WM_ERASEBKGND"
+  "SB_VERT"
+  "GCS_COMPSTR"
+  "inline.*SetTimer"
+)
 
-foreach(stub ${REQUIRED_STUBS})
-  if(NOT compat_content MATCHES "${stub}")
-    message(FATAL_ERROR "AC-7 FAILED: Stub ${stub} not found")
+foreach(pattern ${REQUIRED_PATTERNS})
+  if(NOT compat_content MATCHES "${pattern}")
+    message(FATAL_ERROR "AC-7 FAILED: Pattern '${pattern}' not found")
   endif()
 endforeach()
 

@@ -13,9 +13,9 @@
 #include <cstdlib>
 #include <unistd.h>
 
-// Note: SA_SIGINFO (not SA_SIGINFO) is the correct POSIX flag to enable the 3-arg
+// Note: SA_SIGINFO (not SA_SIGACTION) is the correct POSIX flag to enable the 3-arg
 // signal handler form (siginfo_t* parameter). SA_SIGINFO is defined on both macOS and
-// Linux. SA_SIGINFO does not exist on macOS and is not part of the POSIX standard.
+// Linux. SA_SIGACTION does not exist on macOS and is not part of the POSIX standard.
 
 #if defined(__APPLE__) || defined(__GLIBC__)
 #include <execinfo.h>

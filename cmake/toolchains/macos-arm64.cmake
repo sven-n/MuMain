@@ -1,8 +1,8 @@
 # Toolchain for native macOS arm64 builds
 #
 # This is a NATIVE toolchain (macOS host -> macOS target).
-# Configure-only until SDL3 migration removes Win32/DirectX API dependencies.
-# Full compile will be possible after Phase 1-2 of the cross-platform plan.
+# Native macOS arm64 build using Homebrew LLVM (story 7-6-1).
+# Full compilation of game client targets succeeds.
 #
 # Note: Setting CMAKE_SYSTEM_NAME causes CMAKE_CROSSCOMPILING=TRUE even for
 # native builds. This is acceptable — the preset condition restricts to Darwin
