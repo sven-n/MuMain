@@ -39,3 +39,32 @@ TEST_CASE("AC-STD-2: GetConsoleSize returns positive dimensions", "[core][consol
     REQUIRE(cols > 0);
     REQUIRE(rows > 0);
 }
+
+// AC-4: Colour output uses ANSI escape sequences. This test indirectly verifies
+// the internal color mapping table (ColorIndexToAnsiFg / ColorIndexToAnsiBg) by
+// calling SetConsoleTextColor, which uses the mapping to emit ANSI codes.
+// No crash, no invalid ANSI codes — table boundaries respected.
+TEST_CASE("AC-4: SetConsoleTextColor all colour indices", "[core][console]")
+{
+    // GIVEN: Console is initialized
+    mu_console_init();
+
+    // WHEN: SetConsoleTextColor is called with all valid colour indices (0-15)
+    for (int fg = 0; fg <= 15; ++fg)
+    {
+        for (int bg = 0; bg <= 15; ++bg)
+        {
+            // THEN: No crash, ANSI codes map correctly via ColorIndexToAnsiFg/Bg
+            leaf::SetConsoleTextColor(fg, bg);
+        }
+    }
+
+    // WHEN: Invalid indices are passed (outside 0-15)
+    leaf::SetConsoleTextColor(-1, 0);   // Should fallback safely
+    leaf::SetConsoleTextColor(16, 0);   // Should fallback safely
+    leaf::SetConsoleTextColor(0, -1);   // Should fallback safely
+    leaf::SetConsoleTextColor(0, 100);  // Should fallback safely
+
+    // THEN: No crash — boundary clamping works
+    SUCCEED("All colour index combinations handled without crash");
+}

@@ -2497,9 +2497,11 @@ inline void mu_console_init()
     if (hOut != INVALID_HANDLE_VALUE)
     {
         DWORD dwMode = 0;
-        GetConsoleMode(hOut, &dwMode);
-        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT;
-        SetConsoleMode(hOut, dwMode);
+        if (GetConsoleMode(hOut, &dwMode))
+        {
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT;
+            SetConsoleMode(hOut, dwMode);
+        }
     }
     mu_console_is_tty_ref() = (_isatty(_fileno(stdout)) != 0);
 }
@@ -2513,6 +2515,11 @@ inline void mu_console_init()
 // mu_set_console_title() — ANSI OSC title escape, same on all platforms.
 inline void mu_set_console_title(const wchar_t* title)
 {
+    // Ignore null pointer
+    if (!title)
+    {
+        return;
+    }
     std::string utf8 = mu_wchar_to_utf8(title);
     std::printf("\033]0;%s\007", utf8.c_str());
     std::fflush(stdout);
@@ -2523,6 +2530,15 @@ inline void mu_set_console_title(const wchar_t* title)
 inline void mu_set_console_text_color(int colorCode)
 {
     std::printf("\033[%dm", colorCode);
+    std::fflush(stdout);
+}
+
+// mu_set_console_text_color_with_bg() — ANSI SGR colour escape with background, same on all platforms.
+// fgCode = foreground ANSI code (30-37 for dark, 90-97 for bright)
+// bgCode = background ANSI code (40-47 for dark, 100-107 for bright)
+inline void mu_set_console_text_color_with_bg(int fgCode, int bgCode)
+{
+    std::printf("\033[%d;%dm", fgCode, bgCode);
     std::fflush(stdout);
 }
 

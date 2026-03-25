@@ -68,6 +68,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+// Undefine SetConsoleTitle macro to prevent collision with leaf::SetConsoleTitle (Story 7.6.5)
+#undef SetConsoleTitle
 #include "Platform/PlatformCompat.h"
 #else
 #include "Platform/PlatformTypes.h"

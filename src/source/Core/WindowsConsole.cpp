@@ -121,11 +121,11 @@ CConsoleWindow::~CConsoleWindow() {}
 
 bool CConsoleWindow::Open(const std::wstring& title)
 {
-    Close();
     if (m_started)
     {
-        return true;
+        return true; // Already open
     }
+    Close();
     m_started = true;
 
     mu_console_init();
@@ -192,9 +192,8 @@ void CConsoleWindow::SetTextColor(int textColorIndex, int bgColorIndex)
     }
     else
     {
-        // Foreground + background
-        std::printf("\033[%d;%dm", ColorIndexToAnsiFg(textColorIndex), ColorIndexToAnsiBg(bgColorIndex));
-        std::fflush(stdout);
+        // Foreground + background — routed through platform abstraction
+        mu_set_console_text_color_with_bg(ColorIndexToAnsiFg(textColorIndex), ColorIndexToAnsiBg(bgColorIndex));
     }
 }
 
@@ -212,7 +211,8 @@ bool CConsoleWindow::SaveScreenBuffer(const std::wstring& /*filename*/)
 {
     // Screen buffer capture has no cross-platform ANSI equivalent.
     // The Win32 ReadConsoleOutput API was removed; this is now a no-op.
-    return true;
+    // Return false to indicate the operation is unsupported.
+    return false;
 }
 
 CConsoleWindow* CConsoleWindow::GetInstance()
