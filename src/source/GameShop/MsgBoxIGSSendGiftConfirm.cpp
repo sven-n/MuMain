@@ -131,12 +131,10 @@ CALLBACK_RESULT CMsgBoxIGSSendGiftConfirm::LButtonUp(class CNewUIMessageBoxBase*
 CALLBACK_RESULT CMsgBoxIGSSendGiftConfirm::OKButtonDown(class CNewUIMessageBoxBase* pOwner,
                                                         const leaf::xstreambuf& xParam)
 {
-#ifdef _WIN32
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSSendGiftConfirm*>(pOwner);
     SocketClient->ToGameServer()->SendCashShopItemGiftRequest(
         pOwnMsgBox->m_iPackageSeq, pOwnMsgBox->m_iDisplaySeq, pOwnMsgBox->m_iPriceSeq, pOwnMsgBox->m_wItemCode,
-        pOwnMsgBox->m_iCashType, 0, pOwnMsgBox->m_szID, pOwnMsgBox->m_szMessage);
-#endif
+        pOwnMsgBox->m_iCashType, 0, MU_C16(pOwnMsgBox->m_szID), MU_C16(pOwnMsgBox->m_szMessage));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

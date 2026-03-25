@@ -67,7 +67,7 @@ def check_file(fpath: str) -> list[tuple[int, str]]:
         j = i + 1
         depth = 1
 
-        while j < len(lines) and j < i + 100:
+        while j < len(lines) and j < i + 2000:
             s = lines[j].strip()
             if s.startswith("#if"):
                 depth += 1

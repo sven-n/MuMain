@@ -74,4 +74,5 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
     return 1;
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
 #endif // _WIN32

@@ -804,4 +804,5 @@ void GetSystemInfo(ER_SystemInfo* si)
     mu_swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
 }
 
+#else  // !_WIN32 — method stubs are inline in ErrorReport.h
 #endif // _WIN32

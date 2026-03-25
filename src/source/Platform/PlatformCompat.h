@@ -592,6 +592,12 @@ inline BOOL DestroyWindow(HWND /*hwnd*/)
     return TRUE;
 }
 
+// ExitProcess stub — used in ZzzTexture.cpp fatal error path
+inline void ExitProcess(UINT uExitCode)
+{
+    exit(static_cast<int>(uExitCode));
+}
+
 // GetDC / ReleaseDC stubs — used in CUITextInputBox::SetSize for GDI DIBSection creation
 inline HDC GetDC(HWND /*hwnd*/)
 {

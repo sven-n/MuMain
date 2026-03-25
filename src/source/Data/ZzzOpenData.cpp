@@ -104,7 +104,9 @@ void OpenPlayers()
     // Legacy zero-init of BMD array — memset is intentional for C-style game structs
 #ifdef __clang__
 #pragma clang diagnostic push
+#if defined(__has_warning) && __has_warning("-Wnontrivial-memcall")
 #pragma clang diagnostic ignored "-Wnontrivial-memcall"
+#endif
 #endif
     ZeroMemory(Models, MAX_MODELS * sizeof(BMD));
 #ifdef __clang__

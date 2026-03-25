@@ -99,4 +99,5 @@ bool CShopProductList::GetPriceSeqNext(CShopProduct& product) // OK
     return this->GetPriceSeqNext(product);
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
 #endif // _WIN32

@@ -265,4 +265,5 @@ BOOL Path::CreateDirectorys(TCHAR* szFilePath, BOOL bIsFile)
     return 0;
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
 #endif // _WIN32
