@@ -45,12 +45,22 @@ public:
             return 0.0;
         }
 
+        // Detect OS clock issues (backward time, cgroup changes, VM migration)
+        if (currentProcessTimeNs < m_lastProcessTimeNs)
+        {
+            g_ErrorReport.Write(L"CpuUsage: process time went backwards — returning 0.0\r\n");
+            m_lastProcessTimeNs = currentProcessTimeNs;
+            m_lastCheckTime = now;
+            return 0.0;
+        }
+
         uint64_t processTimeElapsedNs = currentProcessTimeNs - m_lastProcessTimeNs;
 
         m_lastProcessTimeNs = currentProcessTimeNs;
         m_lastCheckTime = now;
 
-        if (wallElapsedNs <= 0 || m_numProcessors == 0)
+        // m_numProcessors is guaranteed >= 1 (constructor falls back to 1 if hardware_concurrency() is 0).
+        if (wallElapsedNs <= 0)
         {
             return 0.0;
         }

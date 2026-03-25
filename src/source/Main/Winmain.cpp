@@ -844,7 +844,8 @@ void RecordCpuUsage()
     {
         double currentUsage = CpuUsage::Instance()->GetUsage();
 
-        currentUsage = std::max<double>(0.0, std::min<double>(100.0, currentUsage));
+        // GetUsage() returns [0.0, 1.0] (fractional). Clamp to valid range and convert to percentage for recording.
+        currentUsage = std::max<double>(0.0, std::min<double>(1.0, currentUsage)) * 100.0;
 
         // Subtract the old value to maintain the sum
         sum -= CPU_Recordings[count];

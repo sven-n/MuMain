@@ -1,15 +1,10 @@
 // Story 7.6.4: Cross-Platform CPU Usage Monitoring [VS0-QUAL-WIN32CLEAN-CPUUSAGE]
-// RED PHASE — tests compile and run on macOS/Linux without Win32 APIs.
+// GREEN PHASE — all acceptance criteria verified. Implementation completed.
 //
-// Tests become GREEN once:
-//   Task 3.1: CpuUsage::Impl replaces GetSystemInfo()/SYSTEM_INFO with
-//             std::thread::hardware_concurrency()
-//   Task 3.2: CpuUsage::Impl replaces GetProcessTimes()/FILETIME with
-//             mu_get_process_cpu_times() + std::chrono wall-clock, normalised to [0.0, 1.0]
-//   Task 3.3/3.4: All #ifdef _WIN32 blocks and windows.h removed from CpuUsage.cpp
-//
-// Range test [0.0, 1.0] is RED on Windows until Task 3 normalises the return value
-// from the legacy percentage (0–100+) to a fractional ratio (0.0–1.0).
+// AC-3: hardware_concurrency() returns positive value on any supported host
+// AC-4: GetUsage() returns fractional CPU utilisation in [0.0, 1.0] range (normalised from legacy percentage 0–100+)
+// AC-5: Multiple rapid calls do not break the rolling average
+// AC-STD-2: Tests exist and exercise the core module
 
 #include <catch2/catch_test_macros.hpp>
 #include <chrono>
@@ -28,9 +23,11 @@ TEST_CASE("AC-3: hardware_concurrency returns positive value", "[core][cpu]")
 }
 
 // AC-4, AC-STD-2: GetUsage() must return a fractional CPU utilisation in [0.0, 1.0].
-// RED on Windows: current implementation returns a percentage (0–100+).
-// GREEN after Task 3.2 normalises the formula to:
-//   (delta_user_ns + delta_kernel_ns) / (delta_wall_ns * num_cores)
+// GREEN phase: CpuUsage::Instance() returns a Meyers singleton with persistent state across
+// test SECTIONS and TEST_CASEs. The second SECTION depends on state initialised by the first;
+// the AC-5 test inherits all prior state. This coupling is intentional (tests verify steady-state
+// behavior). For isolation requirements in future tests, consider a private Reset() method gated
+// behind MU_TESTING.
 TEST_CASE("AC-4: CPU usage measurement returns value in [0,1] range", "[core][cpu]")
 {
     CpuUsage* cpu = CpuUsage::Instance();

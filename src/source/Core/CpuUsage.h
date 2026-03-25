@@ -7,6 +7,9 @@ class CpuUsage
 public:
     static CpuUsage* Instance();
 
+    // Returns CPU utilisation as fractional ratio in [0.0, 1.0] where 1.0 = 100% of one core.
+    // NOT thread-safe — must only be called from a single thread.
+    // Safe-by-design: RecordCpuUsage worker thread is the only caller.
     double GetUsage();
 
 private:
