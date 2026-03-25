@@ -142,6 +142,8 @@ namespace SEASON3B
         int FindItemReverseIndex(short sType, int iLevel = -1) const;
         int FindEmptySlot(IN int cx, IN int cy) const;
         int FindEmptySlot(ITEM* pItem) const;
+        int FindEmptySlotIncludingExtensions(IN int cx, IN int cy) const;
+        int FindEmptySlotIncludingExtensions(ITEM* pItem) const;
         bool IsItem(short int siType, bool bcheckPick = false) const;
         int	GetNumItemByKey(DWORD dwItemKey) const;
         int GetNumItemByType(short sItemType) const;
@@ -195,6 +197,7 @@ namespace SEASON3B
         static bool TryStackItems(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex,
             int iTargetIndex);
         static bool TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, const int iIndex);
+        static bool TryTransferBetweenInventorySections(CNewUIInventoryCtrl* sourceControl);
 
         bool InventoryProcess() const;
         bool BtnProcess();
