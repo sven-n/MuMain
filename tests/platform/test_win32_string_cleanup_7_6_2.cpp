@@ -86,13 +86,10 @@ TEST_CASE("AC-4: mu_wchar_to_utf8 replacement produces same output as WideCharTo
 
     SECTION("round-trip: ASCII string is unchanged via wchar_t")
     {
-        const char* original = "GameShop";
-        // Convert to wchar_t
-        wchar_t wide[64];
-        std::mbstowcs(wide, original, 64);
+        const wchar_t* wide = L"GameShop";
         // Convert back via mu_wchar_to_utf8
         std::string result = mu_wchar_to_utf8(wide);
-        REQUIRE(result == original);
+        REQUIRE(result == "GameShop");
     }
 
     SECTION("file path separators are preserved")
@@ -147,9 +144,10 @@ TEST_CASE("AC-5: mu_swprintf_s safe variant", "[platform][win32-cleanup][ac-5]")
     {
         wchar_t buf[8];
         int ret = mu_swprintf_s(buf, 8, L"%ls", L"TooLong!");
-        // May truncate — just verify no crash and buffer is null-terminated
+        // May truncate — verify no crash, buffer is null-terminated, and ret reflects truncation
         buf[7] = L'\0'; // guarantee termination
-        REQUIRE(true); // no crash = pass
+        CHECK(ret < 0 || std::wcslen(buf) < 8);
+        (void)ret;
     }
 
     SECTION("array-deducing overload")
