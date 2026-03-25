@@ -321,10 +321,13 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
     std::wstring encUser = EncryptSetting(user);
     std::wstring encPass = EncryptSetting(pass);
 
-    if (!encUser.empty() && !encPass.empty())
+    if (encUser.empty() || encPass.empty())
     {
-        SetEncryptedUsername(encUser);
-        SetEncryptedPassword(encPass);
-        Save(); // Actually write to the .ini file
+        g_ErrorReport.Write(L"[GameConfig] WARN: Failed to encrypt credentials, not saved\r\n");
+        return;
     }
+
+    SetEncryptedUsername(encUser);
+    SetEncryptedPassword(encPass);
+    Save(); // Actually write to the .ini file
 }
