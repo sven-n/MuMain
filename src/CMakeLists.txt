@@ -271,6 +271,18 @@ add_library(MUCore STATIC ${MU_CORE_SOURCES})
 target_link_libraries(MUCore PUBLIC MUCommon)
 target_precompile_headers(MUCore PRIVATE "${MU_SOURCE_DIR}/Main/stdafx.h")
 
+# Story 7.6.3: OpenSSL for cross-platform credential encryption (mu_encrypt_blob/mu_decrypt_blob)
+# Replaces Windows DPAPI with AES-256-GCM via OpenSSL on ALL platforms.
+# If OpenSSL is not found, PlatformCompat.h falls back to identity no-op with a log warning.
+find_package(OpenSSL QUIET COMPONENTS Crypto)
+if(OpenSSL_FOUND)
+    target_link_libraries(MUCore PRIVATE OpenSSL::Crypto)
+    target_compile_definitions(MUCore PUBLIC MU_HAS_OPENSSL=1)
+    message(STATUS "OpenSSL found: mu_encrypt_blob/mu_decrypt_blob will use AES-256-GCM")
+else()
+    message(STATUS "OpenSSL NOT found: mu_encrypt_blob/mu_decrypt_blob will use identity no-op fallback")
+endif()
+
 # Crypto / packet encoding — depends on Core only
 file(GLOB MU_PROTOCOL_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/Protocol/*.cpp")
 add_library(MUProtocol STATIC ${MU_PROTOCOL_SOURCES})

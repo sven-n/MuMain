@@ -2428,6 +2428,238 @@ inline int GetDeviceCaps(HDC /*hdc*/, int nIndex)
 
 #endif // _WIN32
 
+// ---- Cross-platform credential encryption (all platforms) ----
+// Story 7.6.3: mu_encrypt_blob / mu_decrypt_blob replace Windows DPAPI.
+// AES-256-GCM via OpenSSL when MU_HAS_OPENSSL is defined; identity no-op fallback otherwise.
+// Key derived via PBKDF2(hostname, fixed_salt, 100000, SHA-256) — machine-bound.
+// [VS0-QUAL-WIN32CLEAN-DATALAYER]
+
+#include <cstdint>
+#include <cstring>
+#include <vector>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
+#if defined(MU_HAS_OPENSSL)
+
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+
+// AES-256-GCM constants
+inline constexpr int MU_CRYPTO_KEY_LEN = 32; // 256-bit key
+inline constexpr int MU_CRYPTO_IV_LEN = 12;  // 96-bit IV (GCM recommended)
+inline constexpr int MU_CRYPTO_TAG_LEN = 16; // 128-bit auth tag
+inline constexpr int MU_CRYPTO_SALT_LEN = 16;
+inline constexpr int MU_CRYPTO_PBKDF2_ITERATIONS = 100000;
+
+// Fixed salt for PBKDF2 key derivation (not secret — machine binding comes from hostname)
+inline constexpr uint8_t MU_CRYPTO_FIXED_SALT[MU_CRYPTO_SALT_LEN] = {0x4D, 0x75, 0x4F, 0x6E, 0x6C, 0x69, 0x6E, 0x65,
+                                                                     0x43, 0x6F, 0x6E, 0x66, 0x69, 0x67, 0x53, 0x61};
+
+namespace mu_crypto_detail
+{
+
+inline bool DeriveKey(uint8_t* keyOut)
+{
+    char hostname[256] = {};
+#ifdef _WIN32
+    DWORD size = sizeof(hostname);
+    if (!GetComputerNameA(hostname, &size))
+    {
+        strncpy(hostname, "MuOnlineDefault", sizeof(hostname) - 1);
+    }
+#else
+    if (gethostname(hostname, sizeof(hostname)) != 0)
+    {
+        strncpy(hostname, "MuOnlineDefault", sizeof(hostname) - 1);
+    }
+#endif
+    hostname[sizeof(hostname) - 1] = '\0';
+
+    return PKCS5_PBKDF2_HMAC(hostname, static_cast<int>(strlen(hostname)), MU_CRYPTO_FIXED_SALT, MU_CRYPTO_SALT_LEN,
+                             MU_CRYPTO_PBKDF2_ITERATIONS, EVP_sha256(), MU_CRYPTO_KEY_LEN, keyOut) == 1;
+}
+
+} // namespace mu_crypto_detail
+
+// Encrypt plaintext bytes using AES-256-GCM.
+// Output format: [12-byte IV][ciphertext][16-byte GCM auth tag]
+// Returns true on success.
+inline bool mu_encrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& out)
+{
+    out.clear();
+
+    if (pIn == nullptr || cbIn == 0)
+    {
+        return false;
+    }
+
+    uint8_t key[MU_CRYPTO_KEY_LEN];
+    if (!mu_crypto_detail::DeriveKey(key))
+    {
+        return false;
+    }
+
+    uint8_t iv[MU_CRYPTO_IV_LEN];
+    if (RAND_bytes(iv, MU_CRYPTO_IV_LEN) != 1)
+    {
+        return false;
+    }
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (ctx == nullptr)
+    {
+        return false;
+    }
+
+    bool ok = false;
+    do
+    {
+        if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), nullptr, nullptr, nullptr) != 1)
+            break;
+        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, MU_CRYPTO_IV_LEN, nullptr) != 1)
+            break;
+        if (EVP_EncryptInit_ex(ctx, nullptr, nullptr, key, iv) != 1)
+            break;
+
+        // Reserve: IV + ciphertext (same size as plaintext) + tag
+        out.resize(MU_CRYPTO_IV_LEN + cbIn + MU_CRYPTO_TAG_LEN);
+
+        // Write IV
+        memcpy(out.data(), iv, MU_CRYPTO_IV_LEN);
+
+        int outLen = 0;
+        if (EVP_EncryptUpdate(ctx, out.data() + MU_CRYPTO_IV_LEN, &outLen, static_cast<const uint8_t*>(pIn),
+                              static_cast<int>(cbIn)) != 1)
+            break;
+
+        int finalLen = 0;
+        if (EVP_EncryptFinal_ex(ctx, out.data() + MU_CRYPTO_IV_LEN + outLen, &finalLen) != 1)
+            break;
+
+        outLen += finalLen;
+
+        // Get auth tag
+        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, MU_CRYPTO_TAG_LEN, out.data() + MU_CRYPTO_IV_LEN + outLen) !=
+            1)
+            break;
+
+        out.resize(MU_CRYPTO_IV_LEN + outLen + MU_CRYPTO_TAG_LEN);
+        ok = true;
+    } while (false);
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    if (!ok)
+    {
+        out.clear();
+    }
+
+    return ok;
+}
+
+// Decrypt a blob produced by mu_encrypt_blob.
+// Input format: [12-byte IV][ciphertext][16-byte GCM auth tag]
+// Returns true on success (authentication tag verified).
+inline bool mu_decrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& out)
+{
+    out.clear();
+
+    // Minimum size: IV + tag (no ciphertext = 0-byte plaintext, but we rejected that on encrypt)
+    if (pIn == nullptr || cbIn < static_cast<size_t>(MU_CRYPTO_IV_LEN + MU_CRYPTO_TAG_LEN))
+    {
+        return false;
+    }
+
+    const auto* data = static_cast<const uint8_t*>(pIn);
+
+    uint8_t key[MU_CRYPTO_KEY_LEN];
+    if (!mu_crypto_detail::DeriveKey(key))
+    {
+        return false;
+    }
+
+    const uint8_t* iv = data;
+    const uint8_t* ciphertext = data + MU_CRYPTO_IV_LEN;
+    size_t ciphertextLen = cbIn - MU_CRYPTO_IV_LEN - MU_CRYPTO_TAG_LEN;
+    const uint8_t* tag = data + MU_CRYPTO_IV_LEN + ciphertextLen;
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (ctx == nullptr)
+    {
+        return false;
+    }
+
+    bool ok = false;
+    do
+    {
+        if (EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), nullptr, nullptr, nullptr) != 1)
+            break;
+        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, MU_CRYPTO_IV_LEN, nullptr) != 1)
+            break;
+        if (EVP_DecryptInit_ex(ctx, nullptr, nullptr, key, iv) != 1)
+            break;
+
+        out.resize(ciphertextLen);
+
+        int outLen = 0;
+        if (EVP_DecryptUpdate(ctx, out.data(), &outLen, ciphertext, static_cast<int>(ciphertextLen)) != 1)
+            break;
+
+        // Set expected auth tag before finalize
+        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, MU_CRYPTO_TAG_LEN, const_cast<uint8_t*>(tag)) != 1)
+            break;
+
+        int finalLen = 0;
+        // EVP_DecryptFinal_ex returns 0 if GCM auth tag verification fails
+        if (EVP_DecryptFinal_ex(ctx, out.data() + outLen, &finalLen) != 1)
+            break;
+
+        out.resize(outLen + finalLen);
+        ok = true;
+    } while (false);
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    if (!ok)
+    {
+        out.clear();
+    }
+
+    return ok;
+}
+
+#else // !MU_HAS_OPENSSL
+
+// No-op fallback: passes bytes through unencrypted.
+// Game config encryption is a convenience feature, not a security boundary.
+inline bool mu_encrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& out)
+{
+    out.clear();
+    if (pIn == nullptr || cbIn == 0)
+    {
+        return false;
+    }
+    const auto* bytes = static_cast<const uint8_t*>(pIn);
+    out.assign(bytes, bytes + cbIn);
+    return true;
+}
+
+inline bool mu_decrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& out)
+{
+    out.clear();
+    if (pIn == nullptr || cbIn == 0)
+    {
+        return false;
+    }
+    const auto* bytes = static_cast<const uint8_t*>(pIn);
+    out.assign(bytes, bytes + cbIn);
+    return true;
+}
+
+#endif // MU_HAS_OPENSSL
+
 // ---- wchar_t <-> char16_t conversion utilities (all platforms) ----
 // Flow Code: VS1-NET-CHAR16T-ENCODING
 //

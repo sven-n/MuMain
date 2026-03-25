@@ -270,36 +270,26 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
     if (hexInput.empty())
         return L"";
 
-#ifdef _WIN32
-    // Convert Hex String back to Binary Blob
+    // Story 7.6.3: Cross-platform decryption via mu_decrypt_blob (AES-256-GCM or no-op fallback).
+    // Replaces Windows DPAPI. [VS0-QUAL-WIN32CLEAN-DATALAYER]
     std::vector<BYTE> encryptedData = HexToBinary(hexInput);
     if (encryptedData.empty())
         return L"";
 
-    DATA_BLOB dataIn, dataOut;
-    dataIn.pbData = encryptedData.data();
-    dataIn.cbData = static_cast<DWORD>(encryptedData.size());
+    std::vector<uint8_t> decrypted;
+    if (!mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decrypted))
+        return L"";
 
-    // Decrypt using Windows DPAPI
-    if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
+    if (decrypted.empty())
+        return L"";
+
+    std::wstring result(reinterpret_cast<const wchar_t*>(decrypted.data()), decrypted.size() / sizeof(wchar_t));
+    // The decrypted string might contain the null terminator, let's remove it if it exists.
+    if (!result.empty() && result.back() == L'\0')
     {
-        std::wstring result(reinterpret_cast<wchar_t*>(dataOut.pbData), dataOut.cbData / sizeof(wchar_t));
-        LocalFree(dataOut.pbData); // Safety: Windows allocated this, we free it
-        // The decrypted string might contain the null terminator, let's remove it if it exists.
-        if (!result.empty() && result.back() == L'\0')
-        {
-            result.pop_back();
-        }
-        return result;
+        result.pop_back();
     }
-
-    return L"";
-#else
-    // Story 7.3.0: On non-Windows dev builds, credentials are stored unencrypted.
-    // DPAPI is Windows-only. This is acceptable for local dev sessions.
-    // [VS0-QUAL-BUILDCOMPAT-MACOS]
-    return hexInput;
-#endif
+    return result;
 }
 
 std::wstring GameConfig::EncryptSetting(const wchar_t* input)
@@ -307,23 +297,15 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
     if (!input || wcslen(input) == 0)
         return L"";
 
-#ifdef _WIN32
-    DATA_BLOB dataIn, dataOut;
-    dataIn.cbData = static_cast<DWORD>((wcslen(input) + 1) * sizeof(wchar_t));
-    dataIn.pbData = reinterpret_cast<BYTE*>(const_cast<wchar_t*>(input));
+    // Story 7.6.3: Cross-platform encryption via mu_encrypt_blob (AES-256-GCM or no-op fallback).
+    // Replaces Windows DPAPI. [VS0-QUAL-WIN32CLEAN-DATALAYER]
+    size_t byteLen = (wcslen(input) + 1) * sizeof(wchar_t);
 
-    if (CryptProtectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
-    {
-        std::wstring hexResult = BinaryToHex(dataOut.pbData, dataOut.cbData);
-        LocalFree(dataOut.pbData);
-        return hexResult;
-    }
-    return L"";
-#else
-    // Story 7.3.0: On non-Windows dev builds, return input as-is (no encryption).
-    // [VS0-QUAL-BUILDCOMPAT-MACOS]
-    return std::wstring(input);
-#endif
+    std::vector<uint8_t> encrypted;
+    if (!mu_encrypt_blob(input, byteLen, encrypted))
+        return L"";
+
+    return BinaryToHex(encrypted.data(), static_cast<DWORD>(encrypted.size()));
 }
 
 void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* pass)

@@ -1,14 +1,7 @@
 #include "stdafx.h"
 #include "DataFileIO.h"
 #include "ZzzInfomation.h"
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include "Platform/PlatformTypes.h"
-#include "Platform/PlatformCompat.h"
-#endif
-
-extern HWND g_hWnd;
+#include "PlatformCompat.h"
 
 namespace DataFileIO
 {
@@ -64,8 +57,6 @@ void DecryptBuffer(BYTE* buffer, const IOConfig& config)
 void ShowErrorAndExit(const wchar_t* message)
 {
     g_ErrorReport.Write(message);
-    MessageBox(g_hWnd, message, L"Data File Error", MB_OK | MB_ICONERROR);
-    // Note: Application continues running - error handling left to caller
 }
 
 #ifdef _EDITOR
