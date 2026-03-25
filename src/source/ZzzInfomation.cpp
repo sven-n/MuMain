@@ -3404,13 +3404,15 @@ void CHARACTER_MACHINE::CalculateWalkSpeed()
 
 void CHARACTER_MACHINE::CalculateNextExperince()
 {
+    const uint64_t characterLevel = static_cast<uint64_t>(Character.Level);
+
     Character.Experience = Character.NextExperience;
-    Character.NextExperience = (9 + Character.Level) * (Character.Level) * (Character.Level) * 10;
+    Character.NextExperience = (9ull + characterLevel) * characterLevel * characterLevel * 10ull;
 
     if (Character.Level > 255)
     {
-        int LevelOver_N = Character.Level - 255;
-        Character.NextExperience += (9 + LevelOver_N) * LevelOver_N * LevelOver_N * 1000;
+        const uint64_t levelOverN = static_cast<uint64_t>(Character.Level - 255);
+        Character.NextExperience += (9ull + levelOverN) * levelOverN * levelOverN * 1000ull;
     }
 }
 
