@@ -246,6 +246,15 @@ target_sources(MuTests PRIVATE gameplay/test_advanced_systems_validation.cpp)
 # No Win32 APIs or DPAPI — runs on macOS/Linux/Windows (MinGW CI).
 target_sources(MuTests PRIVATE data/test_gameconfig_crypto.cpp)
 
+# Story 7.6.6: ShopListManager Cross-Platform HTTP Downloader [VS0-QUAL-WIN32CLEAN-SHOPHTTP]
+# RED PHASE: Tests compile on all platforms but use Catch2 SKIP until:
+#   Task 3: TCHAR/INTERNET_PORT/HANDLE replaced with portable types in DownloadInfo.h + headers
+#   Task 4: #ifdef _WIN32 guards removed from all 17 ShopListManager .cpp files
+#   Task 1: libcurl linked via find_package(CURL REQUIRED) in CMakeLists.txt
+# To activate GREEN phase: add target_compile_definitions(MuTests PRIVATE MU_SHOPLIST_CROSS_PLATFORM_READY)
+# after Tasks 3+4 complete. No Win32 APIs in the test TU — compiles on macOS/Linux/Windows (MinGW CI).
+target_sources(MuTests PRIVATE gameshop/test_shoplist_download.cpp)
+
 # Story 7.6.5: Cross-Platform Terminal / Console [VS0-QUAL-WIN32CLEAN-CONSOLE]
 # GREEN PHASE: mu_console_init() and mu_get_console_size() implemented in PlatformCompat.h.
 # test_console.cpp verifies mu_console_init() does not crash (AC-STD-2, AC-3)
