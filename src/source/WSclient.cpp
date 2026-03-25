@@ -28,6 +28,7 @@
 #include "CSMapServer.h"
 #include "npcGateSwitch.h"
 #include "CComGem.h"
+#include "InventoryUtils.h"
 #include "UIMapName.h" // rozy
 #include "UIMng.h"
 #include "CDirection.h"
@@ -1241,15 +1242,15 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
         {
             g_pMyInventory->UnequipItem(itemindex);
         }
-        else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+        else if (IsMainInventorySlot(itemindex))
         {
             g_pMyInventory->DeleteItem(itemindex);
         }
-        else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (IsInventoryExtensionSlot(itemindex))
         {
             g_pMyInventoryExt->DeleteItem(itemindex);
         }
-        else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+        else if (IsMyShopSlot(itemindex))
         {
             g_pMyShopInventory->DeleteItem(itemindex);
         }
@@ -1345,15 +1346,15 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         {
             g_pMyInventory->EquipItem(itemindex, itemData);
         }
-        else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+        else if (IsMainInventorySlot(itemindex))
         {
             g_pMyInventory->InsertItem(itemindex, itemData);
         }
-        else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (IsInventoryExtensionSlot(itemindex))
         {
             g_pMyInventoryExt->InsertItem(itemindex, itemData);
         }
-        else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+        else if (IsMyShopSlot(itemindex))
         {
             g_pMyShopInventory->InsertItem(itemindex, itemData);
         }
@@ -5709,8 +5710,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             auto itemIndex = Data->Value;
             if (itemIndex != GET_ITEM_MULTI)
             {
-                auto Data2 = safe_cast<PRECEIVE_GET_ITEM_EXTENDED>(ReceiveBuffer);
-                if (Data2 == nullptr)
+                if (safe_cast<PRECEIVE_GET_ITEM_EXTENDED>(ReceiveBuffer) == nullptr)
                 {
                     assert(false);
                     return;
@@ -5721,14 +5721,14 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                 int length = CalcItemLength(itemData);
                 itemData = itemData.subspan(0, length);
 
-                if (itemIndex >= MAX_EQUIPMENT_INDEX && itemIndex < MAX_MY_INVENTORY_INDEX)
+                if (IsMainInventorySlot(itemIndex))
                 {
                     if (g_pMyInventory->InsertItem(itemIndex, itemData))
                     {
                         pickedItem = g_pMyInventory->FindItem(itemIndex);
                     }
                 }
-                else if (itemIndex >= MAX_MY_INVENTORY_INDEX && itemIndex < MAX_MY_INVENTORY_EX_INDEX)
+                else if (IsInventoryExtensionSlot(itemIndex))
                 {
                     if (g_pMyInventoryExt->InsertItem(itemIndex, itemData))
                     {
@@ -5837,19 +5837,19 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
             {
                 g_pMyInventory->EquipItem(itemindex, itemData);
             }
-            else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+            else if (IsMainInventorySlot(itemindex))
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
                 g_pMyInventory->InsertItem(itemindex, itemData);
             }
-            else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+            else if (IsInventoryExtensionSlot(itemindex))
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
                 g_pMyInventoryExt->InsertItem(itemindex, itemData);
             }
-            else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+            else if (IsMyShopSlot(itemindex))
             {
                 g_pMyShopInventory->InsertItem(itemindex, itemData);
             }
@@ -5934,11 +5934,11 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
         g_pMyInventory->DeleteItem(itemindex);
     }
 
-    if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+    if (IsMainInventorySlot(itemindex))
     {
         g_pMyInventory->InsertItem(itemindex, itemData);
     }
-    else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+    else if (IsInventoryExtensionSlot(itemindex))
     {
         g_pMyInventoryExt->InsertItem(itemindex, itemData);
     }
@@ -6192,11 +6192,11 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        if (Data->Index >= MAX_EQUIPMENT_INDEX && Data->Index < MAX_MY_INVENTORY_INDEX)
+        if (IsMainInventorySlot(Data->Index))
         {
             g_pMyInventory->InsertItem(Data->Index, itemData);
         }
-        else if (Data->Index >= MAX_MY_INVENTORY_INDEX && Data->Index < MAX_MY_INVENTORY_EX_INDEX)
+        else if (IsInventoryExtensionSlot(Data->Index))
         {
             g_pMyInventoryExt->InsertItem(Data->Index, itemData);
         }
@@ -8945,11 +8945,11 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         auto offset = sizeof(PURCHASEITEM_RESULTINFO);
         auto itemData = ReceiveBuffer.subspan(offset);
 
-        if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+        if (IsMainInventorySlot(itemindex))
         {
             g_pMyInventory->InsertItem(itemindex, itemData);
         }
-        else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (IsInventoryExtensionSlot(itemindex))
         {
             g_pMyInventoryExt->InsertItem(itemindex, itemData);
         }
