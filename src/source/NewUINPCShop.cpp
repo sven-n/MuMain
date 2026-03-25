@@ -360,11 +360,13 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 
         if (pPickedItem->GetSourceStorageType() == STORAGE_TYPE::INVENTORY)
         {
-            int iSourceIndex = pPickedItem->GetSourceLinealPos();
-            SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
-            g_pNPCShop->SetSellingItem(true);
-
-            return true;
+            const int iSourceIndex = pPickedItem->GetSourceLinealPos();
+            if (iSourceIndex >= MAX_EQUIPMENT_INDEX && iSourceIndex < MAX_MY_INVENTORY_EX_INDEX)
+            {
+                SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
+                g_pNPCShop->SetSellingItem(true);
+                return true;
+            }
         }
     }
 

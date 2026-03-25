@@ -3556,7 +3556,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             SendGetItem = ItemKey;
             SocketClient->ToGameServer()->SendPickupItemRequest(ItemKey);
         }
-        else if (g_pMyInventory->FindEmptySlot(&Items[ItemKey].Item) == -1)
+        else if (g_pMyInventory->FindEmptySlotIncludingExtensions(&Items[ItemKey].Item) == -1)
         {
             wchar_t Text[256];
             mu_swprintf(Text, GlobalText[375]);
