@@ -5,6 +5,20 @@
 
 namespace DataFileIO
 {
+void ReportError(const wchar_t* message)
+{
+    // Log error with module prefix and line terminator for proper log formatting
+    // Pattern: [DataFileIO] <message>\r\n
+    std::wstring formatted = L"[DataFileIO] ";
+    formatted += message;
+    // Ensure line terminator if not present
+    if (!formatted.empty() && formatted.back() != L'\n' && formatted.back() != L'\r')
+    {
+        formatted += L"\r\n";
+    }
+    g_ErrorReport.Write(formatted.c_str());
+}
+
 std::unique_ptr<BYTE[]> ReadBuffer(FILE* fp, const IOConfig& config, DWORD* outChecksum)
 {
     int bufferSize = config.itemSize * config.itemCount;
@@ -14,7 +28,7 @@ std::unique_ptr<BYTE[]> ReadBuffer(FILE* fp, const IOConfig& config, DWORD* outC
     size_t bytesRead = fread(buffer.get(), bufferSize, 1, fp);
     if (bytesRead != 1)
     {
-        ShowErrorAndExit(L"Failed to read data from file");
+        ReportError(L"Failed to read data from file");
         return nullptr;
     }
 
@@ -24,7 +38,7 @@ std::unique_ptr<BYTE[]> ReadBuffer(FILE* fp, const IOConfig& config, DWORD* outC
         bytesRead = fread(outChecksum, sizeof(DWORD), 1, fp);
         if (bytesRead != 1)
         {
-            ShowErrorAndExit(L"Failed to read checksum from file");
+            ReportError(L"Failed to read checksum from file");
             return nullptr;
         }
     }
@@ -52,11 +66,6 @@ void DecryptBuffer(BYTE* buffer, const IOConfig& config)
         config.decryptRecord(pSeek, config.itemSize);
         pSeek += config.itemSize;
     }
-}
-
-void ShowErrorAndExit(const wchar_t* message)
-{
-    g_ErrorReport.Write(message);
 }
 
 #ifdef _EDITOR

@@ -85,5 +85,5 @@ void EncryptBuffer(BYTE* buffer, const IOConfig& config);
  *
  * @param message Error message to display
  */
-void ShowErrorAndExit(const wchar_t* message);
+void ReportError(const wchar_t* message);
 } // namespace DataFileIO

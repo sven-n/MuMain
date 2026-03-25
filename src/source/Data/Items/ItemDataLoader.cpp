@@ -25,7 +25,7 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     {
         std::wstringstream ss;
         ss << fileName << L" - File not exist.";
-        DataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ReportError(ss.str().c_str());
         return false;
     }
 
@@ -98,7 +98,7 @@ template <typename TFileFormat> bool ItemDataLoader::LoadFormat(FILE* fp, const 
     {
         std::wstringstream ss;
         ss << L"Failed to read item file (" << formatName << L").";
-        DataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ReportError(ss.str().c_str());
         return false;
     }
 
@@ -107,7 +107,7 @@ template <typename TFileFormat> bool ItemDataLoader::LoadFormat(FILE* fp, const 
     {
         std::wstringstream ss;
         ss << L"Item file corrupted (" << formatName << L").";
-        DataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ReportError(ss.str().c_str());
         return false;
     }
 

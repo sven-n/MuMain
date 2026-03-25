@@ -25,7 +25,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     {
         wchar_t errorMsg[256];
         mu_swprintf(errorMsg, L"Skill file not found: %ls", fileName);
-        DataFileIO::ShowErrorAndExit(errorMsg);
+        DataFileIO::ReportError(errorMsg);
         return false;
     }
 
@@ -99,7 +99,7 @@ template <typename TFileFormat> bool SkillDataLoader::LoadFormat(FILE* fp, const
         std::wstring errorMsg = L"Failed to read skill file (";
         errorMsg += formatName;
         errorMsg += L").";
-        DataFileIO::ShowErrorAndExit(errorMsg.c_str());
+        DataFileIO::ReportError(errorMsg.c_str());
         return false;
     }
 
@@ -109,7 +109,7 @@ template <typename TFileFormat> bool SkillDataLoader::LoadFormat(FILE* fp, const
         std::wstring errorMsg = L"Skill file corrupted (";
         errorMsg += formatName;
         errorMsg += L").";
-        DataFileIO::ShowErrorAndExit(errorMsg.c_str());
+        DataFileIO::ReportError(errorMsg.c_str());
         return false;
     }
 

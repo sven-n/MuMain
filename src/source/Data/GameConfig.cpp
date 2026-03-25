@@ -272,6 +272,10 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
 
     // Story 7.6.3: Cross-platform decryption via mu_decrypt_blob (AES-256-GCM or no-op fallback).
     // Replaces Windows DPAPI. [VS0-QUAL-WIN32CLEAN-DATALAYER]
+    // NOTE: Serialization format is platform-specific (wchar_t byte representation varies).
+    // On Windows: sizeof(wchar_t)==2 (UTF-16LE); on Linux/macOS: sizeof(wchar_t)==4 (UTF-32).
+    // Config files encrypted on one platform cannot be decrypted on another, but since keys are
+    // machine-bound (PBKDF2 with hostname), cross-platform portability is intentionally out of scope.
     std::vector<BYTE> encryptedData = HexToBinary(hexInput);
     if (encryptedData.empty())
         return L"";
@@ -299,6 +303,10 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
 
     // Story 7.6.3: Cross-platform encryption via mu_encrypt_blob (AES-256-GCM or no-op fallback).
     // Replaces Windows DPAPI. [VS0-QUAL-WIN32CLEAN-DATALAYER]
+    // NOTE: Serialization format is platform-specific (wchar_t byte representation varies).
+    // On Windows: sizeof(wchar_t)==2 (UTF-16LE); on Linux/macOS: sizeof(wchar_t)==4 (UTF-32).
+    // Config files encrypted on one platform cannot be decrypted on another, but since keys are
+    // machine-bound (PBKDF2 with hostname), cross-platform portability is intentionally out of scope.
     size_t byteLen = (wcslen(input) + 1) * sizeof(wchar_t);
 
     std::vector<uint8_t> encrypted;

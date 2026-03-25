@@ -2443,6 +2443,7 @@ inline int GetDeviceCaps(HDC /*hdc*/, int nIndex)
 
 #if defined(MU_HAS_OPENSSL)
 
+#include <openssl/crypto.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
@@ -2491,6 +2492,12 @@ inline bool mu_encrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& 
     out.clear();
 
     if (pIn == nullptr || cbIn == 0)
+    {
+        return false;
+    }
+
+    // EVP_EncryptUpdate takes int for length; guard against overflow
+    if (cbIn > static_cast<size_t>(INT_MAX))
     {
         return false;
     }
@@ -2551,6 +2558,9 @@ inline bool mu_encrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& 
 
     EVP_CIPHER_CTX_free(ctx);
 
+    // Securely zero the key material to prevent leaks in memory
+    OPENSSL_cleanse(key, MU_CRYPTO_KEY_LEN);
+
     if (!ok)
     {
         out.clear();
@@ -2568,6 +2578,12 @@ inline bool mu_decrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& 
 
     // Minimum size: IV + tag (no ciphertext = 0-byte plaintext, but we rejected that on encrypt)
     if (pIn == nullptr || cbIn < static_cast<size_t>(MU_CRYPTO_IV_LEN + MU_CRYPTO_TAG_LEN))
+    {
+        return false;
+    }
+
+    // EVP_DecryptUpdate takes int for length; guard against overflow
+    if (cbIn > static_cast<size_t>(INT_MAX))
     {
         return false;
     }
@@ -2608,6 +2624,7 @@ inline bool mu_decrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& 
             break;
 
         // Set expected auth tag before finalize
+        // Note: const_cast is needed because OpenSSL API requires non-const void*, but does not modify the tag
         if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, MU_CRYPTO_TAG_LEN, const_cast<uint8_t*>(tag)) != 1)
             break;
 
@@ -2621,6 +2638,9 @@ inline bool mu_decrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& 
     } while (false);
 
     EVP_CIPHER_CTX_free(ctx);
+
+    // Securely zero the key material to prevent leaks in memory
+    OPENSSL_cleanse(key, MU_CRYPTO_KEY_LEN);
 
     if (!ok)
     {
@@ -2641,6 +2661,17 @@ inline bool mu_encrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& 
     {
         return false;
     }
+
+    // Warn once (not per-call) that encryption is unavailable
+    // Note: Using fprintf(stderr) instead of g_ErrorReport because this header is included
+    // before ErrorReport.h is available. The warning will appear in stderr on first encryption attempt.
+    static bool warned = false;
+    if (!warned)
+    {
+        fprintf(stderr, "[GameConfig] WARN: OpenSSL unavailable, config not encrypted\n");
+        warned = true;
+    }
+
     const auto* bytes = static_cast<const uint8_t*>(pIn);
     out.assign(bytes, bytes + cbIn);
     return true;
