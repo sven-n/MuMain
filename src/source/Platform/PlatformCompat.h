@@ -1453,9 +1453,9 @@ inline void* mu_SecureZeroMemory(void* ptr, size_t cnt)
 // ShopListManager headers (DownloadInfo.h, IConnecter.h, FileDownloader.h, BannerInfo.h)
 // use WinINet types unconditionally despite guarding the #include <wininet.h>.
 // These are compilation stubs only — WinINet functionality requires Windows.
-#define INTERNET_MAX_URL_LENGTH       2084
+#define INTERNET_MAX_URL_LENGTH 2084
 #define INTERNET_MAX_USER_NAME_LENGTH 256
-#define INTERNET_MAX_PASSWORD_LENGTH  256
+#define INTERNET_MAX_PASSWORD_LENGTH 256
 using INTERNET_PORT = unsigned short;
 using HINTERNET = void*;
 
