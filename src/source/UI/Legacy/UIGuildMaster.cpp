@@ -385,7 +385,8 @@ void CUIGuildMaster::DoCreateInfoAction()
 
         if (m_nCurrMode == MODE_CREATE_GUILD)
         {
-            SocketClient->ToGameServer()->SendGuildCreateRequest(MU_C16(GuildMark[MARK_EDIT].GuildName), Mark, sizeof Mark);
+            SocketClient->ToGameServer()->SendGuildCreateRequest(MU_C16(GuildMark[MARK_EDIT].GuildName), Mark,
+                                                                 sizeof Mark);
         }
         //		else if( m_nCurrMode == MODE_EDIT_GUILDMARK )
         //		{

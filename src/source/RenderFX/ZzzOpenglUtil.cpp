@@ -11,7 +11,9 @@
 #include "ZzzCharacter.h"
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
+#ifdef _WIN32
 #include "wglext.h"
+#endif
 
 int OpenglWindowX;
 int OpenglWindowY;
@@ -75,7 +77,6 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
 
     FILE* fp;
     dayHistory days[100];
-    int count = 0;
     WORD num = 0;
     bool sameName = false;
     bool update = true;
@@ -105,7 +106,6 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
                     }
                     days[i].date = day;
                 }
-                count++;
             }
         }
         fclose(fp);

@@ -4,5 +4,8 @@
 #pragma once
 #ifndef _WIN32
 #include <unistd.h>
-inline int _getpid() { return getpid(); }
+inline int _getpid()
+{
+    return getpid();
+}
 #endif

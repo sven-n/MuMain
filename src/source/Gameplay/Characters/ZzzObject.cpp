@@ -6304,7 +6304,8 @@ void ItemAngle(OBJECT* o)
         //	o->Angle[2] = 0.0f;
         o->Scale = 1.0f;
     }
-    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_BEGIN) && o->Type <= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_END))
+    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_BEGIN) &&
+             o->Type <= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_END))
     {
         o->Scale = 0.5f;
         o->Angle[2] = 90.f;
@@ -9653,7 +9654,8 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
     }
-    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_BEGIN) && o->Type <= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_END))
+    else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_BEGIN) &&
+             o->Type <= MODEL_TYPE_CHARM_MIXWING + static_cast<int>(EWS_END))
     {
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, o->HiddenMesh);

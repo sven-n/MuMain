@@ -9807,7 +9807,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                                      PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
                     pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
                 }
-                else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_LORDEMPEROR))
+                else if (c->BodyPart[BODYPART_ARMOR].Type ==
+                         MODEL_BODY_ARMOR + static_cast<int>(SKIN_CLASS_LORDEMPEROR))
                 {
                     pCloth[3].Create(o, 18, 0.0f, 10.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARKLOAD_SKIRT_3RD,
                                      BITMAP_DARKLOAD_SKIRT_3RD,
@@ -9929,7 +9930,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     o->m_byNumCloth = 3;
                 }
             }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(CLASS_DARK_LORD) && o->m_byNumCloth == 3)
+            else if (c->BodyPart[BODYPART_ARMOR].Type == MODEL_BODY_ARMOR + static_cast<int>(CLASS_DARK_LORD) &&
+                     o->m_byNumCloth == 3)
             {
                 if (o && o->m_pCloth)
                 {

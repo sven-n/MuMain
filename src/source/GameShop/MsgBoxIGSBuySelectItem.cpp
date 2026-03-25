@@ -350,12 +350,12 @@ void CMsgBoxIGSBuySelectItem::AddData(int iPackageSeq, int iDisplaySeq, int iPri
     };
 
     IGS_SelectBuyItem Item;
-#if defined(__has_warning) && __has_warning("-Wnontrivial-memcall")
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnontrivial-memcall"
 #endif
     memset(&Item, 0, sizeof(IGS_SelectBuyItem));
-#if defined(__has_warning) && __has_warning("-Wnontrivial-memcall")
+#ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 

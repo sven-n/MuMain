@@ -1147,11 +1147,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         RECT rc = {0, 0, WindowWidth, WindowHeight};
         AdjustWindowRect(&rc, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
                          NULL);
-        g_hWnd = CreateWindow(windowName, windowName,
-                              WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
-                              (GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2,
-                              (GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2, rc.right - rc.left, rc.bottom - rc.top,
-                              nullptr, nullptr, hInstance, nullptr);
+        g_hWnd = CreateWindowEx(0, windowName, windowName,
+                                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
+                                (GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2,
+                                (GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2, rc.right - rc.left, rc.bottom - rc.top,
+                                nullptr, nullptr, hInstance, nullptr);
     }
     else
     {

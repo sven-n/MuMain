@@ -173,18 +173,15 @@ target_include_directories(MUCommon INTERFACE
   "${MU_SOURCE_DIR}/Dotnet"
   "${MU_SOURCE_DIR}/GameShop"
   "${MU_SOURCE_DIR}/Translation"
+  # Story 7.6.1: Non-Windows stub headers for Windows CRT/SDK headers (process.h, crtdbg.h, etc.)
+  # Must come BEFORE dependencies/include so compat-headers/GL/gl.h is found before
+  # the vendored Windows-case gl/GL.h on case-insensitive macOS filesystems.
+  # [VS0-QUAL-BUILDCOMP-MACOS]
+  $<$<NOT:$<BOOL:${WIN32}>>:${MU_SOURCE_DIR}/Platform/compat-headers>
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
-
-# Story 7.6.1: Non-Windows stub headers for Windows CRT/SDK headers (process.h, crtdbg.h, etc.)
-# Placed BEFORE system includes so stubs are found first on macOS/Linux.
-if(NOT WIN32)
-  target_include_directories(MUCommon INTERFACE
-    "${MU_SOURCE_DIR}/Platform/compat-headers"
-  )
-endif()
 
 target_compile_definitions(MUCommon INTERFACE
   _LANGUAGE_FOREIGN
@@ -288,12 +285,10 @@ target_precompile_headers(MUData REUSE_FROM MUCore)
 
 # Effects, models, textures, OpenGL — depends on Core only
 file(GLOB MU_RENDERFX_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/RenderFX/*.cpp")
-# Story 7.6.1: ZzzOpenglUtil.cpp implements WGL (Windows OpenGL extensions), which does not
-# exist on macOS/Linux. SDL3 GPU replaces WGL — the file will be deleted in a future story.
+# Story 7.6.1: ZzzOpenglUtil.cpp uses WGL (Windows OpenGL extensions) for VSync/MSAA.
+# On macOS, WGL stubs in PlatformCompat.h allow compilation; VSync init detects
+# "not available" and no-ops. The file provides essential rendering globals/functions.
 # [VS0-QUAL-BUILDCOMP-MACOS]
-if(NOT WIN32)
-    list(REMOVE_ITEM MU_RENDERFX_SOURCES "${MU_SOURCE_DIR}/RenderFX/ZzzOpenglUtil.cpp")
-endif()
 add_library(MURenderFX STATIC ${MU_RENDERFX_SOURCES})
 target_link_libraries(MURenderFX PRIVATE MUCore)
 if(MU_ENABLE_SDL3)
@@ -318,7 +313,9 @@ target_sources(MUAudio PRIVATE
 # otherwise the macro expansion conflicts with the precompiled header symbols.
 set_source_files_properties(
     "${MU_SOURCE_DIR}/Platform/MiniAudio/MiniAudioImpl.cpp"
-    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+    PROPERTIES
+        SKIP_PRECOMPILE_HEADERS ON
+        COMPILE_OPTIONS "-Wno-error=tautological-compare"
 )
 
 # Include paths: miniaudio vendored headers + MiniAudio backend directory
@@ -414,9 +411,12 @@ file(GLOB_RECURSE MU_GAME_SOURCES CONFIGURE_DEPENDS
 # entirely Windows-specific (replaced by IPlatformHTTP in EPIC-5 Phase 5.7).
 # [VS0-QUAL-BUILDCOMP-MACOS]
 if(NOT WIN32)
+    # Story 7.6.1: GameShop/FileDownloader/ implements WinINet FTP/HTTP downloads —
+    # entirely Windows-specific (replaced by IPlatformHTTP in EPIC-5 Phase 5.7).
+    # [VS0-QUAL-BUILDCOMP-MACOS]
     list(FILTER MU_GAME_SOURCES EXCLUDE REGEX ".*/GameShop/FileDownloader/.*")
-    # Story 7.6.1: ZzzLodTerrain.cpp uses GL/glu.h (OpenGL Utility) — replaced by SDL3 GPU.
-    list(REMOVE_ITEM MU_GAME_SOURCES "${MU_SOURCE_DIR}/World/ZzzLodTerrain.cpp")
+    # Story 7.6.1: ZzzLodTerrain.cpp uses GL/glu.h — compat headers redirect to
+    # macOS OpenGL framework. File provides terrain rendering used throughout game.
 endif()
 add_library(MUGame STATIC ${MU_GAME_SOURCES})
 target_link_libraries(MUGame PUBLIC
@@ -487,7 +487,7 @@ target_include_directories(Main PRIVATE
     "${MU_SOURCE_DIR}/Platform/MiniAudio"
 )
 
-if (NOT MSVC)
+if (NOT MSVC AND NOT APPLE)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
   target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
 endif()
@@ -518,6 +518,31 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     pthread
     dl
     m
+  )
+endif()
+
+# Native macOS/Linux builds: link turbojpeg from system (Homebrew on macOS).
+# MinGW cross-builds handle turbojpeg separately below.
+# [VS0-QUAL-BUILDCOMP-MACOS]
+if (NOT WIN32 AND NOT CMAKE_CXX_COMPILER MATCHES "mingw32" AND NOT CMAKE_CXX_COMPILER MATCHES "w64-mingw32")
+  find_library(MU_NATIVE_TURBOJPEG turbojpeg
+    HINTS /opt/homebrew/lib /usr/local/lib /usr/lib
+  )
+  if (MU_NATIVE_TURBOJPEG)
+    target_link_libraries(Main PRIVATE ${MU_NATIVE_TURBOJPEG})
+  else()
+    message(WARNING "libturbojpeg not found. Install jpeg-turbo (brew install jpeg-turbo) for native builds.")
+  endif()
+endif()
+
+# Native macOS builds: link OpenGL framework (legacy GL used by game engine).
+# [VS0-QUAL-BUILDCOMP-MACOS]
+if (APPLE)
+  target_link_libraries(Main PRIVATE
+    "-framework OpenGL"
+    "-framework Cocoa"
+    "-framework IOKit"
+    "-framework CoreFoundation"
   )
 endif()
 

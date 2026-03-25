@@ -55,7 +55,7 @@ using HRESULT = long;
 
 // COM result codes — used by audio and other legacy Windows APIs
 #ifndef S_OK
-#define S_OK    0L
+#define S_OK 0L
 #endif
 #ifndef S_FALSE
 #define S_FALSE 1L

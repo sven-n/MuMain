@@ -13,3 +13,10 @@
 #include "stb_vorbis.c" // NOLINT — intentional .c include for single-file library
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
+
+// Include stb_vorbis implementation after miniaudio.
+// The header-only include above provides declarations; this provides definitions.
+// Without this, native macOS/Linux builds get unresolved stb_vorbis symbols.
+// [VS0-QUAL-BUILDCOMP-MACOS]
+#undef STB_VORBIS_HEADER_ONLY
+#include "stb_vorbis.c" // NOLINT — intentional .c include for single-file library implementation

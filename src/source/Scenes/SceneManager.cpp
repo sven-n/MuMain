@@ -200,7 +200,7 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
     SYSTEMTIME st;
     GetLocalTime(&st);
     mu_swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute,
-             GrabScreen);
+                GrabScreen);
     mu_swprintf(outMessage, GlobalText[459], outFileName);
 
     wchar_t lpszTemp[64];
@@ -501,12 +501,12 @@ static void RenderDebugInfo()
 
     int y = DEBUG_TEXT_Y_START;
     mu_swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%", FPS_AVG, s_avgFps, s_highestFps,
-             IsVSyncEnabled(), CPU_AVG);
+                IsVSyncEnabled(), CPU_AVG);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
     mu_swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms", s_onePercentLow, s_slowestFrameFps,
-             (s_avgFps > 0.0f) ? 1000.0f / s_avgFps : 0.0f);
+                (s_avgFps > 0.0f) ? 1000.0f / s_avgFps : 0.0f);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 

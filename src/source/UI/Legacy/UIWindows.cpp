@@ -2955,8 +2955,8 @@ BOOL CUILetterWriteWindow::HandleMessage()
                 int iZoom = (m_Photo.GetCurrentZoom() * 100.0f - 80 + 5) / 10;
                 BYTE Data1 = (iZoom << 6) & 0xC0 | iAngle & 0x3F;
                 BYTE Data2 = m_Photo.GetCurrentAction() - AT_ATTACK1;
-                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), MU_C16(szMailto), MU_C16(szTitle), Data1, Data2, len,
-                                                                    MU_C16(szText));
+                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), MU_C16(szMailto), MU_C16(szTitle), Data1,
+                                                                    Data2, len, MU_C16(szText));
             }
             break;
         case 2:

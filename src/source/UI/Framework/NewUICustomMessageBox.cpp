@@ -5470,7 +5470,8 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class C
     {
         if (pMsgBox->GetStoragePassword() != 0)
         {
-            SocketClient->ToGameServer()->SendSetVaultPin(pMsgBox->GetStoragePassword(), MU_C16(pMsgBox->GetInputText()));
+            SocketClient->ToGameServer()->SendSetVaultPin(pMsgBox->GetStoragePassword(),
+                                                          MU_C16(pMsgBox->GetInputText()));
         }
         g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 

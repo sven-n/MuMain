@@ -102,12 +102,12 @@ void OpenPlayers()
     Models = ModelsDump + (rand() % 1024);
     // NOLINTBEGIN(bugprone-undefined-memory-manipulation)
     // Legacy zero-init of BMD array — memset is intentional for C-style game structs
-#if defined(__has_warning) && __has_warning("-Wnontrivial-memcall")
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnontrivial-memcall"
 #endif
     ZeroMemory(Models, MAX_MODELS * sizeof(BMD));
-#if defined(__has_warning) && __has_warning("-Wnontrivial-memcall")
+#ifdef __clang__
 #pragma clang diagnostic pop
 #endif
     // NOLINTEND(bugprone-undefined-memory-manipulation)

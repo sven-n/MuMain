@@ -50,6 +50,11 @@ public:
     void WriteOpenGLInfo(void);
     void WriteImeInfo(HWND hWnd);
     void WriteSoundCardInfo(void);
+#else
+    void WriteSystemInfo(ER_SystemInfo* /*si*/) {}
+    void WriteOpenGLInfo() {}
+    void WriteImeInfo(HWND /*hWnd*/) {}
+    void WriteSoundCardInfo() {}
 #endif
 };
 
@@ -75,10 +80,16 @@ extern volatile int g_errorReportFd;
 #define LOG_CALL(func, arg)                                                                                            \
     do                                                                                                                 \
     {                                                                                                                  \
-        g_ErrorReport.Write(L"%ls(%ls)\r\n", MU_WIDEN(MU_STRINGIFY(func)), MU_WIDEN(MU_STRINGIFY(arg)));                \
+        g_ErrorReport.Write(L"%ls(%ls)\r\n", MU_WIDEN(MU_STRINGIFY(func)), MU_WIDEN(MU_STRINGIFY(arg)));               \
         func(arg);                                                                                                     \
     } while (0)
 
 #ifdef _WIN32
 void GetSystemInfo(ER_SystemInfo* si);
+#else
+inline void GetSystemInfo(ER_SystemInfo* si)
+{
+    if (si)
+        memset(si, 0, sizeof(ER_SystemInfo));
+}
 #endif

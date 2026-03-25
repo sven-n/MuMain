@@ -62,8 +62,7 @@ inline errno_t wcsncpy_s(wchar_t* dest, size_t destSize, const wchar_t* src, siz
 }
 
 // MSVC-compatible 3-arg template overload: deduces array size from dest [VS0-QUAL-BUILDCOMPAT-MACOS]
-template <size_t N>
-inline errno_t wcsncpy_s(wchar_t (&dest)[N], const wchar_t* src, size_t count)
+template <size_t N> inline errno_t wcsncpy_s(wchar_t (&dest)[N], const wchar_t* src, size_t count)
 {
     return wcsncpy_s(dest, N, src, count);
 }
@@ -581,8 +580,8 @@ inline BOOL ShowWindow(HWND /*hwnd*/, int /*nCmdShow*/)
 
 // ShellExecute stub — used in iexplorer.h:OpenExplorer to launch URLs in a browser.
 // On non-Windows, returns 0 (failure). A real implementation would use SDL_OpenURL or xdg-open.
-inline HINSTANCE ShellExecute(HWND /*hwnd*/, const wchar_t* /*op*/, const wchar_t* /*file*/,
-                              const wchar_t* /*params*/, const wchar_t* /*dir*/, int /*nShowCmd*/)
+inline HINSTANCE ShellExecute(HWND /*hwnd*/, const wchar_t* /*op*/, const wchar_t* /*file*/, const wchar_t* /*params*/,
+                              const wchar_t* /*dir*/, int /*nShowCmd*/)
 {
     return nullptr;
 }
@@ -695,6 +694,14 @@ inline HWND CreateWindowW(const wchar_t* /*cls*/, const wchar_t* /*wndName*/, DW
 // are safe no-ops that prevent crashes until rendering is migrated.
 using HBITMAP = void*;
 using HGDIOBJ = void*;
+struct BITMAPFILEHEADER
+{
+    uint16_t bfType;
+    uint32_t bfSize;
+    uint16_t bfReserved1;
+    uint16_t bfReserved2;
+    uint32_t bfOffBits;
+};
 struct BITMAPINFOHEADER
 {
     uint32_t biSize;
@@ -1497,13 +1504,22 @@ using HINTERNET = void*;
 #define RGB(r, g, b) (static_cast<DWORD>((r) | ((g) << 8) | ((b) << 16)))
 
 // GDI DC operations — no-ops on non-Windows
-inline DWORD SetBkColor(HDC /*hdc*/, DWORD /*color*/) { return 0; }
-inline DWORD SetTextColor(HDC /*hdc*/, DWORD /*color*/) { return 0; }
-inline BOOL  TextOut(HDC /*hdc*/, int /*x*/, int /*y*/, const wchar_t* /*str*/, int /*len*/) { return FALSE; }
+inline DWORD SetBkColor(HDC /*hdc*/, DWORD /*color*/)
+{
+    return 0;
+}
+inline DWORD SetTextColor(HDC /*hdc*/, DWORD /*color*/)
+{
+    return 0;
+}
+inline BOOL TextOut(HDC /*hdc*/, int /*x*/, int /*y*/, const wchar_t* /*str*/, int /*len*/)
+{
+    return FALSE;
+}
 
 // Win32 window messages used as constants in UIControls.cpp
-#define WM_PAINT       0x000F
-#define WM_ERASEBKGND  0x0014
+#define WM_PAINT 0x000F
+#define WM_ERASEBKGND 0x0014
 
 // Scroll bar identifier
 #define SB_VERT 1
@@ -1512,12 +1528,27 @@ inline BOOL  TextOut(HDC /*hdc*/, int /*x*/, int /*y*/, const wchar_t* /*str*/, 
 #define GCS_COMPSTR 0x0008
 
 // Scrollbar API — no-op on non-Windows [VS0-QUAL-BUILDCOMP-MACOS]
-inline int GetScrollPos(HWND /*hwnd*/, int /*nBar*/) { return 0; }
-inline int SetScrollPos(HWND /*hwnd*/, int /*nBar*/, int /*nPos*/, BOOL /*bRedraw*/) { return 0; }
+inline int GetScrollPos(HWND /*hwnd*/, int /*nBar*/)
+{
+    return 0;
+}
+inline int SetScrollPos(HWND /*hwnd*/, int /*nBar*/, int /*nPos*/, BOOL /*bRedraw*/)
+{
+    return 0;
+}
+
+// TIMERPROC callback type — used by SetTimer
+using TIMERPROC = void(CALLBACK*)(HWND, UINT, UINT_PTR, DWORD);
 
 // Timer API — no-op on non-Windows
-inline UINT SetTimer(HWND /*hwnd*/, UINT /*id*/, UINT /*ms*/, void* /*fn*/) { return 0; }
-inline BOOL KillTimer(HWND /*hwnd*/, UINT /*id*/) { return TRUE; }
+inline UINT_PTR SetTimer(HWND /*hwnd*/, UINT_PTR /*id*/, UINT /*ms*/, TIMERPROC /*fn*/)
+{
+    return 0;
+}
+inline BOOL KillTimer(HWND /*hwnd*/, UINT /*id*/)
+{
+    return TRUE;
+}
 
 // GetCurrentDirectory — returns current working dir. Stub for non-Windows. [VS0-QUAL-BUILDCOMP-MACOS]
 inline DWORD GetCurrentDirectory(DWORD nBufferLength, wchar_t* lpBuffer)
@@ -1549,8 +1580,7 @@ inline DWORD GetCurrentDirectory(DWORD nBufferLength, wchar_t* lpBuffer)
 inline unsigned long long GetTickCount64()
 {
     return static_cast<unsigned long long>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now().time_since_epoch())
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
             .count());
 }
 
@@ -1559,9 +1589,9 @@ inline BOOL IntersectRect(RECT* dest, const RECT* src1, const RECT* src2)
 {
     if (!dest || !src1 || !src2)
         return FALSE;
-    dest->left   = (src1->left > src2->left) ? src1->left : src2->left;
-    dest->top    = (src1->top > src2->top) ? src1->top : src2->top;
-    dest->right  = (src1->right < src2->right) ? src1->right : src2->right;
+    dest->left = (src1->left > src2->left) ? src1->left : src2->left;
+    dest->top = (src1->top > src2->top) ? src1->top : src2->top;
+    dest->right = (src1->right < src2->right) ? src1->right : src2->right;
     dest->bottom = (src1->bottom < src2->bottom) ? src1->bottom : src2->bottom;
     if (dest->left >= dest->right || dest->top >= dest->bottom)
     {
@@ -1575,7 +1605,10 @@ inline BOOL IntersectRect(RECT* dest, const RECT* src1, const RECT* src2)
 inline void OutputDebugStringA(const char* /*msg*/) {}
 
 // SwapBuffers — WGL buffer swap (dead code on macOS, SDL3 handles presentation)
-inline BOOL SwapBuffers(HDC /*hdc*/) { return FALSE; }
+inline BOOL SwapBuffers(HDC /*hdc*/)
+{
+    return FALSE;
+}
 
 // MSVC-specific safe string functions
 #include <cstdio>
@@ -1583,7 +1616,7 @@ inline BOOL SwapBuffers(HDC /*hdc*/) { return FALSE; }
 #include <cstdlib>
 #include <cwchar>
 
-#define sprintf_s  snprintf
+#define sprintf_s snprintf
 #define swprintf_s swprintf
 
 inline int wcscpy_s(wchar_t* dest, size_t destsz, const wchar_t* src)
@@ -1593,6 +1626,28 @@ inline int wcscpy_s(wchar_t* dest, size_t destsz, const wchar_t* src)
     wcsncpy(dest, src, destsz - 1);
     dest[destsz - 1] = L'\0';
     return 0;
+}
+// MSVC 2-argument template overload: deduces buffer size from static array
+template <size_t N> inline int wcscpy_s(wchar_t (&dest)[N], const wchar_t* src)
+{
+    return wcscpy_s(dest, N, src);
+}
+
+// wcscat_s — safe wide string concatenation (MSVC CRT)
+inline int wcscat_s(wchar_t* dest, size_t destsz, const wchar_t* src)
+{
+    if (!dest || !src || destsz == 0)
+        return -1;
+    size_t dlen = wcslen(dest);
+    if (dlen >= destsz)
+        return -1;
+    wcsncpy(dest + dlen, src, destsz - dlen - 1);
+    dest[destsz - 1] = L'\0';
+    return 0;
+}
+template <size_t N> inline int wcscat_s(wchar_t (&dest)[N], const wchar_t* src)
+{
+    return wcscat_s(dest, N, src);
 }
 
 // _itow — integer to wide string (MSVC CRT)
@@ -1618,16 +1673,17 @@ inline size_t mu_mbclen(const unsigned char* c)
 #define _mbclen mu_mbclen
 
 // GDI font creation constants (used in CreateFont calls — dead code on macOS)
-#define CLIP_DEFAULT_PRECIS       0
-#define DEFAULT_CHARSET           1
-#define DEFAULT_PITCH             0
-#define FF_DONTCARE               0
-#define FW_BOLD                   700
-#define FW_NORMAL                 400
-#define NONANTIALIASED_QUALITY    3
-#define OUT_DEFAULT_PRECIS        0
-#define ANSI_CHARSET              0
-#define ANTIALIASED_QUALITY       4
+#define CLIP_DEFAULT_PRECIS 0
+#define DEFAULT_CHARSET 1
+#define DEFAULT_PITCH 0
+#define FF_DONTCARE 0
+#define FW_BOLD 700
+#define FW_NORMAL 400
+#define NONANTIALIASED_QUALITY 3
+#define CLEARTYPE_NATURAL_QUALITY 6
+#define OUT_DEFAULT_PRECIS 0
+#define ANSI_CHARSET 0
+#define ANTIALIASED_QUALITY 4
 
 // IME mode constants
 #ifndef IME_CMODE_NATIVE
@@ -1638,7 +1694,10 @@ inline size_t mu_mbclen(const unsigned char* c)
 #define IME_SMODE_AUTOMATIC 0x0004
 
 // ImmGetDefaultIMEWnd — returns default IME window handle (no-op on non-Windows)
-inline HWND ImmGetDefaultIMEWnd(HWND /*hwnd*/) { return nullptr; }
+inline HWND ImmGetDefaultIMEWnd(HWND /*hwnd*/)
+{
+    return nullptr;
+}
 
 // ---- Window message constants ----
 #ifndef WM_USER
@@ -1662,11 +1721,319 @@ inline HWND ImmGetDefaultIMEWnd(HWND /*hwnd*/) { return nullptr; }
 #ifndef WM_MOUSEWHEEL
 #define WM_MOUSEWHEEL 0x020A
 #endif
+#ifndef WM_ACTIVATE
+#define WM_ACTIVATE 0x0006
+#endif
+#ifndef WA_INACTIVE
+#define WA_INACTIVE 0
+#endif
+#ifndef WM_CTLCOLOREDIT
+#define WM_CTLCOLOREDIT 0x0133
+#endif
+#ifndef WM_SETCURSOR
+#define WM_SETCURSOR 0x0020
+#endif
+#ifndef WM_MOUSEMOVE
+#define WM_MOUSEMOVE 0x0200
+#endif
+#ifndef WM_LBUTTONUP
+#define WM_LBUTTONUP 0x0202
+#endif
+#ifndef WM_RBUTTONUP
+#define WM_RBUTTONUP 0x0205
+#endif
+#ifndef WM_LBUTTONDBLCLK
+#define WM_LBUTTONDBLCLK 0x0203
+#endif
+#ifndef WM_MBUTTONDOWN
+#define WM_MBUTTONDOWN 0x0207
+#endif
+#ifndef WM_MBUTTONUP
+#define WM_MBUTTONUP 0x0208
+#endif
+#ifndef WM_QUIT
+#define WM_QUIT 0x0012
+#endif
+#ifndef PM_NOREMOVE
+#define PM_NOREMOVE 0x0000
+#endif
+#ifndef WHEEL_DELTA
+#define WHEEL_DELTA 120
+#endif
+
+// ---- Window style constants (Winmain.cpp window creation) ----
+#ifndef CS_HREDRAW
+#define CS_HREDRAW 0x0002
+#endif
+#ifndef CS_VREDRAW
+#define CS_VREDRAW 0x0001
+#endif
+#ifndef WS_OVERLAPPED
+#define WS_OVERLAPPED 0x00000000L
+#endif
+#ifndef WS_CAPTION
+#define WS_CAPTION 0x00C00000L
+#endif
+#ifndef WS_SYSMENU
+#define WS_SYSMENU 0x00080000L
+#endif
+#ifndef WS_MINIMIZEBOX
+#define WS_MINIMIZEBOX 0x00020000L
+#endif
+#ifndef WS_BORDER
+#define WS_BORDER 0x00800000L
+#endif
+#ifndef WS_CLIPCHILDREN
+#define WS_CLIPCHILDREN 0x02000000L
+#endif
+#ifndef WS_POPUP
+#define WS_POPUP 0x80000000L
+#endif
+#ifndef WS_EX_TOPMOST
+#define WS_EX_TOPMOST 0x00000008L
+#endif
+#ifndef WS_EX_APPWINDOW
+#define WS_EX_APPWINDOW 0x00040000L
+#endif
+
+// ---- GDI brush / stock object constants ----
+#ifndef BLACK_BRUSH
+#define BLACK_BRUSH 4
+#endif
+#ifndef WHITE_BRUSH
+#define WHITE_BRUSH 0
+#endif
+
+// ---- File sharing constants ----
+#ifndef FILE_SHARE_READ
+#define FILE_SHARE_READ 0x00000001
+#endif
+
+// ---- System metrics constants ----
+#ifndef SM_CXSCREEN
+#define SM_CXSCREEN 0
+#endif
+#ifndef SM_CYSCREEN
+#define SM_CYSCREEN 1
+#endif
+
+// ---- Font weight constants ----
+#ifndef FW_SEMIBOLD
+#define FW_SEMIBOLD 600
+#endif
+
+// ---- Timer resolution constants ----
+#ifndef TIMERR_NOERROR
+#define TIMERR_NOERROR 0
+#endif
+
+// ---- SystemParametersInfo constants ----
+#ifndef SPI_SCREENSAVERRUNNING
+#define SPI_SCREENSAVERRUNNING 97
+#endif
+#ifndef SPI_GETSCREENSAVETIMEOUT
+#define SPI_GETSCREENSAVETIMEOUT 14
+#endif
+#ifndef SPI_SETSCREENSAVETIMEOUT
+#define SPI_SETSCREENSAVETIMEOUT 15
+#endif
+
+// ---- Type aliases for Win32 handles ----
+using HICON = void*;
+using HCURSOR = void*;
+using HBRUSH = void*;
+using ATOM = WORD;
+using PSTR = char*;
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
+// ---- PAINTSTRUCT — used in WM_PAINT handler ----
+struct PAINTSTRUCT
+{
+    HDC hdc;
+    BOOL fErase;
+    RECT rcPaint;
+    BOOL fRestore;
+    BOOL fIncUpdate;
+    BYTE rgbReserved[32];
+};
+inline HDC BeginPaint(HWND /*hwnd*/, PAINTSTRUCT* ps)
+{
+    if (ps)
+        memset(ps, 0, sizeof(*ps));
+    return nullptr;
+}
+inline BOOL EndPaint(HWND /*hwnd*/, const PAINTSTRUCT* /*ps*/)
+{
+    return TRUE;
+}
+
+// ---- VS_FIXEDFILEINFO — version info struct ----
+struct VS_FIXEDFILEINFO
+{
+    DWORD dwSignature;
+    DWORD dwStrucVersion;
+    DWORD dwFileVersionMS;
+    DWORD dwFileVersionLS;
+    DWORD dwProductVersionMS;
+    DWORD dwProductVersionLS;
+    DWORD dwFileFlagsMask;
+    DWORD dwFileFlags;
+    DWORD dwFileOS;
+    DWORD dwFileType;
+    DWORD dwFileSubtype;
+    DWORD dwFileDateMS;
+    DWORD dwFileDateLS;
+};
+inline DWORD GetFileVersionInfoSize(const wchar_t* /*lptstrFilename*/, DWORD* lpHandle)
+{
+    if (lpHandle)
+        *lpHandle = 0;
+    return 0;
+}
+inline BOOL GetFileVersionInfo(const wchar_t* /*lptstrFilename*/, DWORD /*dwHandle*/, DWORD /*dwLen*/, void* /*lpData*/)
+{
+    return FALSE;
+}
+inline BOOL VerQueryValue(const void* /*pBlock*/, const wchar_t* /*lpSubBlock*/, void** /*lplpBuffer*/, UINT* /*puLen*/)
+{
+    return FALSE;
+}
+
+// ---- DEVMODE — display settings struct (minimal for EnumDisplaySettings) ----
+struct DEVMODE
+{
+    wchar_t dmDeviceName[32];
+    DWORD dmBitsPerPel;
+    DWORD dmPelsWidth;
+    DWORD dmPelsHeight;
+    DWORD dmFields;
+    WORD dmSize;
+    WORD dmDriverExtra;
+};
+inline BOOL EnumDisplaySettings(const wchar_t* /*lpszDeviceName*/, DWORD /*iModeNum*/, DEVMODE* /*lpDevMode*/)
+{
+    return FALSE;
+}
+inline LONG ChangeDisplaySettings(DEVMODE* /*lpDevMode*/, DWORD /*dwFlags*/)
+{
+    return 0;
+}
+
+// ---- WNDCLASS — window class registration struct ----
+struct WNDCLASS
+{
+    UINT style;
+    LRESULT(CALLBACK* lpfnWndProc)(HWND, UINT, WPARAM, LPARAM);
+    int cbClsExtra;
+    int cbWndExtra;
+    HINSTANCE hInstance;
+    HICON hIcon;
+    HCURSOR hCursor;
+    HBRUSH hbrBackground;
+    const wchar_t* lpszMenuName;
+    const wchar_t* lpszClassName;
+};
+inline ATOM RegisterClass(const WNDCLASS* /*lpWndClass*/)
+{
+    return 1;
+}
+
+// ---- _EXCEPTION_POINTERS — structured exception handling stub ----
+struct _EXCEPTION_POINTERS
+{
+    void* ExceptionRecord;
+    void* ContextRecord;
+};
+
+// ---- Window management function stubs (Winmain.cpp) ----
+inline BOOL wglMakeCurrent(HDC /*hdc*/, HGLRC /*hglrc*/)
+{
+    return TRUE;
+}
+inline BOOL wglDeleteContext(HGLRC /*hglrc*/)
+{
+    return TRUE;
+}
+inline HGLRC wglCreateContext(HDC /*hdc*/)
+{
+    return nullptr;
+}
+inline HWND FindWindow(const wchar_t* /*lpClassName*/, const wchar_t* /*lpWindowName*/)
+{
+    return nullptr;
+}
+inline void PostQuitMessage(int /*nExitCode*/) {}
+inline HWND SetCapture(HWND /*hwnd*/)
+{
+    return nullptr;
+}
+inline BOOL ReleaseCapture()
+{
+    return TRUE;
+}
+inline HGDIOBJ GetStockObject(int /*fnObject*/)
+{
+    return nullptr;
+}
+inline BOOL AdjustWindowRect(RECT* /*lpRect*/, DWORD /*dwStyle*/, BOOL /*bMenu*/)
+{
+    return TRUE;
+}
+inline HWND CreateWindowEx(DWORD /*dwExStyle*/, const wchar_t* /*lpClassName*/, const wchar_t* /*lpWindowName*/,
+                           DWORD /*dwStyle*/, int /*x*/, int /*y*/, int /*w*/, int /*h*/, HWND /*hWndParent*/,
+                           HMENU /*hMenu*/, HINSTANCE /*hInstance*/, void* /*lpParam*/)
+{
+    return nullptr;
+}
+inline int GetSystemMetrics(int nIndex)
+{
+    if (nIndex == SM_CXSCREEN)
+        return 1920;
+    if (nIndex == SM_CYSCREEN)
+        return 1080;
+    return 0;
+}
+inline BOOL SetForegroundWindow(HWND /*hwnd*/)
+{
+    return TRUE;
+}
+inline BOOL SystemParametersInfo(UINT /*uiAction*/, UINT /*uiParam*/, void* /*pvParam*/, UINT /*fWinIni*/)
+{
+    return TRUE;
+}
+inline UINT timeBeginPeriod(UINT /*uPeriod*/)
+{
+    return TIMERR_NOERROR;
+}
+inline UINT timeEndPeriod(UINT /*uPeriod*/)
+{
+    return TIMERR_NOERROR;
+}
+inline HICON LoadIcon(HINSTANCE /*hInstance*/, const wchar_t* /*lpIconName*/)
+{
+    return nullptr;
+}
+inline HCURSOR LoadCursor(HINSTANCE /*hInstance*/, const wchar_t* /*lpCursorName*/)
+{
+    return nullptr;
+}
+#ifndef IDC_ARROW
+#define IDC_ARROW ((const wchar_t*)32512)
+#endif
+inline LRESULT DefWindowProc(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+    return 0;
+}
+// Note: CreateWindow macro NOT defined here — conflicts with MuPlatform::CreateWindow().
+// Winmain.cpp uses CreateWindowEx(0, ...) directly instead.
 
 // ---- SetRect — GDI rectangle initializer ----
 inline BOOL SetRect(RECT* lprc, int left, int top, int right, int bottom)
 {
-    if (!lprc) return FALSE;
+    if (!lprc)
+        return FALSE;
     lprc->left = left;
     lprc->top = top;
     lprc->right = right;
@@ -1675,11 +2042,10 @@ inline BOOL SetRect(RECT* lprc, int left, int top, int right, int bottom)
 }
 
 // ---- CreateFont — GDI font creation (returns nullptr on non-Windows) ----
-inline HFONT CreateFont(int /*nHeight*/, int /*nWidth*/, int /*nEscapement*/, int /*nOrientation*/,
-                        int /*fnWeight*/, DWORD /*fdwItalic*/, DWORD /*fdwUnderline*/,
-                        DWORD /*fdwStrikeOut*/, DWORD /*fdwCharSet*/, DWORD /*fdwOutputPrecision*/,
-                        DWORD /*fdwClipPrecision*/, DWORD /*fdwQuality*/, DWORD /*fdwPitchAndFamily*/,
-                        const wchar_t* /*lpszFace*/)
+inline HFONT CreateFont(int /*nHeight*/, int /*nWidth*/, int /*nEscapement*/, int /*nOrientation*/, int /*fnWeight*/,
+                        DWORD /*fdwItalic*/, DWORD /*fdwUnderline*/, DWORD /*fdwStrikeOut*/, DWORD /*fdwCharSet*/,
+                        DWORD /*fdwOutputPrecision*/, DWORD /*fdwClipPrecision*/, DWORD /*fdwQuality*/,
+                        DWORD /*fdwPitchAndFamily*/, const wchar_t* /*lpszFace*/)
 {
     return nullptr;
 }
@@ -1709,7 +2075,8 @@ struct SYSTEMTIME
 
 inline void GetLocalTime(SYSTEMTIME* lpSystemTime)
 {
-    if (!lpSystemTime) return;
+    if (!lpSystemTime)
+        return;
     auto now = std::chrono::system_clock::now();
     auto tt = std::chrono::system_clock::to_time_t(now);
     struct tm local_tm;
@@ -1725,49 +2092,67 @@ inline void GetLocalTime(SYSTEMTIME* lpSystemTime)
 }
 
 // ---- GetCommandLine — Win32 command-line string (stub) ----
-inline wchar_t* GetCommandLineW() { static wchar_t empty[] = L""; return empty; }
+inline wchar_t* GetCommandLineW()
+{
+    static wchar_t empty[] = L"";
+    return empty;
+}
 #define GetCommandLine GetCommandLineW
 
 // ---- Registry API stubs (non-Windows) ----
 // regkey.h (ThirdParty) uses these unconditionally. On non-Windows, registry
 // operations are no-ops — configuration uses config.ini via GameConfig.
-struct _HKEY { int unused; };
+struct _HKEY
+{
+    int unused;
+};
 using HKEY = _HKEY*;
-#define HKEY_CLASSES_ROOT   (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000000)))
-#define HKEY_CURRENT_USER   (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000001)))
-#define HKEY_LOCAL_MACHINE  (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000002)))
-#define HKEY_USERS          (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000003)))
+#define HKEY_CLASSES_ROOT (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000000)))
+#define HKEY_CURRENT_USER (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000001)))
+#define HKEY_LOCAL_MACHINE (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000002)))
+#define HKEY_USERS (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000003)))
 #define HKEY_CURRENT_CONFIG (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000005)))
 
-#define REG_DWORD      4
-#define REG_EXPAND_SZ  2
-#define REG_SZ         1
-#define KEY_READ       0x20019
-#define KEY_WRITE      0x20006
+#define REG_DWORD 4
+#define REG_EXPAND_SZ 2
+#define REG_SZ 1
+#define KEY_READ 0x20019
+#define KEY_WRITE 0x20006
 
-inline LONG RegOpenKeyEx(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/, DWORD /*ulOptions*/,
-                         DWORD /*samDesired*/, HKEY* /*phkResult*/)
-{ return 2L; /* ERROR_FILE_NOT_FOUND */ }
+inline LONG RegOpenKeyEx(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/, DWORD /*ulOptions*/, DWORD /*samDesired*/,
+                         HKEY* /*phkResult*/)
+{
+    return 2L; /* ERROR_FILE_NOT_FOUND */
+}
 
-inline LONG RegQueryValueEx(HKEY /*hKey*/, const wchar_t* /*lpValueName*/, LPDWORD /*lpReserved*/,
-                            LPDWORD /*lpType*/, BYTE* /*lpData*/, LPDWORD /*lpcbData*/)
-{ return 2L; }
+inline LONG RegQueryValueEx(HKEY /*hKey*/, const wchar_t* /*lpValueName*/, LPDWORD /*lpReserved*/, LPDWORD /*lpType*/,
+                            BYTE* /*lpData*/, LPDWORD /*lpcbData*/)
+{
+    return 2L;
+}
 
-inline LONG RegSetValueEx(HKEY /*hKey*/, const wchar_t* /*lpValueName*/, DWORD /*Reserved*/,
-                          DWORD /*dwType*/, const BYTE* /*lpData*/, DWORD /*cbData*/)
-{ return 2L; }
+inline LONG RegSetValueEx(HKEY /*hKey*/, const wchar_t* /*lpValueName*/, DWORD /*Reserved*/, DWORD /*dwType*/,
+                          const BYTE* /*lpData*/, DWORD /*cbData*/)
+{
+    return 2L;
+}
 
-inline LONG RegCreateKeyEx(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/, DWORD /*Reserved*/,
-                           wchar_t* /*lpClass*/, DWORD /*dwOptions*/, DWORD /*samDesired*/,
-                           void* /*lpSecurityAttributes*/, HKEY* /*phkResult*/, LPDWORD /*lpdwDisposition*/)
-{ return 2L; }
+inline LONG RegCreateKeyEx(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/, DWORD /*Reserved*/, wchar_t* /*lpClass*/,
+                           DWORD /*dwOptions*/, DWORD /*samDesired*/, void* /*lpSecurityAttributes*/,
+                           HKEY* /*phkResult*/, LPDWORD /*lpdwDisposition*/)
+{
+    return 2L;
+}
 
-inline LONG RegCloseKey(HKEY /*hKey*/) { return 0L; }
+inline LONG RegCloseKey(HKEY /*hKey*/)
+{
+    return 0L;
+}
 
-#define RegOpenKeyExW    RegOpenKeyEx
+#define RegOpenKeyExW RegOpenKeyEx
 #define RegQueryValueExW RegQueryValueEx
-#define RegSetValueExW   RegSetValueEx
-#define RegCreateKeyExW  RegCreateKeyEx
+#define RegSetValueExW RegSetValueEx
+#define RegCreateKeyExW RegCreateKeyEx
 
 // ---- MCI multimedia constants ----
 #define MCI_SEQ_MAPPER 0xFFFF
@@ -1775,17 +2160,36 @@ inline LONG RegCloseKey(HKEY /*hKey*/) { return 0L; }
 // ---- GetModuleFileName stub ----
 inline DWORD GetModuleFileName(HINSTANCE /*hModule*/, wchar_t* lpFilename, DWORD nSize)
 {
-    if (lpFilename && nSize > 0) lpFilename[0] = L'\0';
+    if (lpFilename && nSize > 0)
+        lpFilename[0] = L'\0';
     return 0;
 }
 #define GetModuleFileNameW GetModuleFileName
 
 // ---- PeekMessage / DispatchMessage stubs ----
-struct MSG { HWND hwnd; UINT message; WPARAM wParam; LPARAM lParam; DWORD time; POINT pt; };
+struct MSG
+{
+    HWND hwnd;
+    UINT message;
+    WPARAM wParam;
+    LPARAM lParam;
+    DWORD time;
+    POINT pt;
+};
 #define PM_REMOVE 0x0001
-inline BOOL PeekMessage(MSG* /*lpMsg*/, HWND /*hWnd*/, UINT /*wMsgFilterMin*/, UINT /*wMsgFilterMax*/, UINT /*wRemoveMsg*/) { return FALSE; }
-inline BOOL TranslateMessage(const MSG* /*lpMsg*/) { return FALSE; }
-inline LRESULT DispatchMessage(const MSG* /*lpMsg*/) { return 0; }
+inline BOOL PeekMessage(MSG* /*lpMsg*/, HWND /*hWnd*/, UINT /*wMsgFilterMin*/, UINT /*wMsgFilterMax*/,
+                        UINT /*wRemoveMsg*/)
+{
+    return FALSE;
+}
+inline BOOL TranslateMessage(const MSG* /*lpMsg*/)
+{
+    return FALSE;
+}
+inline LRESULT DispatchMessage(const MSG* /*lpMsg*/)
+{
+    return 0;
+}
 #define PeekMessageW PeekMessage
 #define DispatchMessageW DispatchMessage
 
@@ -1799,26 +2203,36 @@ using u_int64 = int64_t;
 
 // ---- Win32 File API stubs (non-Windows) ----
 // InGameShopSystem.cpp uses CreateFile/CloseHandle behind #ifdef FOR_WORK.
-#define GENERIC_READ     0x80000000L
-#define GENERIC_WRITE    0x40000000L
-#define OPEN_EXISTING    3
-#define CREATE_ALWAYS    2
+#define GENERIC_READ 0x80000000L
+#define GENERIC_WRITE 0x40000000L
+#define OPEN_EXISTING 3
+#define CREATE_ALWAYS 2
 #define FILE_ATTRIBUTE_NORMAL 0x80
 #define INVALID_HANDLE_VALUE (reinterpret_cast<HANDLE>(static_cast<intptr_t>(-1)))
 
 inline HANDLE CreateFile(const wchar_t* /*lpFileName*/, DWORD /*dwDesiredAccess*/, DWORD /*dwShareMode*/,
                          void* /*lpSecurityAttributes*/, DWORD /*dwCreationDisposition*/,
                          DWORD /*dwFlagsAndAttributes*/, HANDLE /*hTemplateFile*/)
-{ return INVALID_HANDLE_VALUE; }
+{
+    return INVALID_HANDLE_VALUE;
+}
 #define CreateFileW CreateFile
 
 inline BOOL ReadFile(HANDLE /*hFile*/, void* /*lpBuffer*/, DWORD /*nNumberOfBytesToRead*/,
                      LPDWORD /*lpNumberOfBytesRead*/, void* /*lpOverlapped*/)
-{ return FALSE; }
+{
+    return FALSE;
+}
 
-inline DWORD GetFileSize(HANDLE /*hFile*/, LPDWORD /*lpFileSizeHigh*/) { return 0; }
+inline DWORD GetFileSize(HANDLE /*hFile*/, LPDWORD /*lpFileSizeHigh*/)
+{
+    return 0;
+}
 
-inline BOOL CloseHandle(HANDLE /*hObject*/) { return TRUE; }
+inline BOOL CloseHandle(HANDLE /*hObject*/)
+{
+    return TRUE;
+}
 
 // ---- _countof macro (MSVC CRT) ----
 #ifndef _countof
@@ -1828,7 +2242,8 @@ inline BOOL CloseHandle(HANDLE /*hObject*/) { return TRUE; }
 // ---- _wcsupr — in-place wide string uppercase (MSVC CRT) ----
 inline wchar_t* mu_wcsupr(wchar_t* str)
 {
-    if (!str) return nullptr;
+    if (!str)
+        return nullptr;
     for (wchar_t* p = str; *p; ++p)
         *p = towupper(*p);
     return str;
@@ -1843,9 +2258,15 @@ inline wchar_t* mu_wcsupr(wchar_t* str)
 #define REG_OPTION_NON_VOLATILE 0
 #endif
 
-inline LONG RegDeleteKey(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/) { return 2L; }
-inline LONG RegDeleteValue(HKEY /*hKey*/, const wchar_t* /*lpValueName*/) { return 2L; }
-#define RegDeleteKeyW   RegDeleteKey
+inline LONG RegDeleteKey(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/)
+{
+    return 2L;
+}
+inline LONG RegDeleteValue(HKEY /*hKey*/, const wchar_t* /*lpValueName*/)
+{
+    return 2L;
+}
+#define RegDeleteKeyW RegDeleteKey
 #define RegDeleteValueW RegDeleteValue
 
 // ---- vswprintf MSVC-compatible variant (no size param) ----
@@ -1854,6 +2275,122 @@ inline LONG RegDeleteValue(HKEY /*hKey*/, const wchar_t* /*lpValueName*/) { retu
 inline int mu_vswprintf(wchar_t* buffer, const wchar_t* format, va_list args)
 {
     return vswprintf(buffer, 1024, format, args);
+}
+
+// ---- GLU (OpenGL Utility) function stubs ----
+// ZzzOpenglUtil.cpp calls gluPerspective/gluOrtho2D for camera setup.
+// SDL3/SDL_opengl.h provides GL functions but NOT GLU. On macOS these
+// are no-ops since the rendering pipeline uses SDL3 GPU.
+// [VS0-QUAL-BUILDCOMP-MACOS]
+inline void gluPerspective(double /*fovy*/, double /*aspect*/, double /*zNear*/, double /*zFar*/) {}
+inline void gluOrtho2D(double /*left*/, double /*right*/, double /*bottom*/, double /*top*/) {}
+inline void gluLookAt(double, double, double, double, double, double, double, double, double) {}
+
+// ---- WGL (Windows GL Extensions) stubs ----
+// ZzzOpenglUtil.cpp uses WGL function pointers for VSync and MSAA.
+// On macOS, WGL doesn't exist; SDL3 handles presentation. These stubs
+// allow the code to compile — VSync init will detect "not available"
+// and early-return through the existing null-check paths.
+// [VS0-QUAL-BUILDCOMP-MACOS]
+
+// WGL function pointer types (from wglext.h)
+typedef int (*PFNWGLSWAPINTERVALEXTPROC)(int);
+typedef const char* (*PFNWGLGETEXTENSIONSSTRINGEXTPROC)(void);
+typedef BOOL (*PFNWGLCHOOSEPIXELFORMATARBPROC)(HDC, const int*, const float*, UINT, int*, UINT*);
+
+// WGL function stubs — all return failure/nullptr so extension detection
+// correctly reports "not available"
+inline void* wglGetProcAddress(const char* /*name*/)
+{
+    return nullptr;
+}
+inline void* wglGetProcAddress(const wchar_t* /*name*/)
+{
+    return nullptr;
+}
+inline HDC wglGetCurrentDC()
+{
+    return nullptr;
+}
+
+// WGL_ARB_multisample / WGL_ARB_pixel_format constants
+#define WGL_DRAW_TO_WINDOW_ARB 0x2001
+#define WGL_SUPPORT_OPENGL_ARB 0x2010
+#define WGL_ACCELERATION_ARB 0x2003
+#define WGL_FULL_ACCELERATION_ARB 0x2027
+#define WGL_COLOR_BITS_ARB 0x2014
+#define WGL_ALPHA_BITS_ARB 0x201B
+#define WGL_DEPTH_BITS_ARB 0x2022
+#define WGL_STENCIL_BITS_ARB 0x2023
+#define WGL_DOUBLE_BUFFER_ARB 0x2011
+#define WGL_SAMPLE_BUFFERS_ARB 0x2041
+#define WGL_SAMPLES_ARB 0x2042
+#define GL_MULTISAMPLE_ARB 0x809D
+
+// PIXELFORMATDESCRIPTOR — used by InitGLMultisample (Winmain.cpp, ZzzOpenglUtil.cpp)
+struct PIXELFORMATDESCRIPTOR
+{
+    WORD nSize;
+    WORD nVersion;
+    DWORD dwFlags;
+    BYTE iPixelType;
+    BYTE cColorBits;
+    BYTE cRedBits;
+    BYTE cRedShift;
+    BYTE cGreenBits;
+    BYTE cGreenShift;
+    BYTE cBlueBits;
+    BYTE cBlueShift;
+    BYTE cAlphaBits;
+    BYTE cAlphaShift;
+    BYTE cAccumBits;
+    BYTE cAccumRedBits;
+    BYTE cAccumGreenBits;
+    BYTE cAccumBlueBits;
+    BYTE cAccumAlphaBits;
+    BYTE cDepthBits;
+    BYTE cStencilBits;
+    BYTE cAuxBuffers;
+    BYTE iLayerType;
+    BYTE bReserved;
+    DWORD dwLayerMask;
+    DWORD dwVisibleMask;
+    DWORD dwDamageMask;
+};
+#define PFD_DOUBLEBUFFER 0x00000001
+#define PFD_DRAW_TO_WINDOW 0x00000004
+#define PFD_SUPPORT_OPENGL 0x00000020
+#define PFD_TYPE_RGBA 0
+#define PFD_MAIN_PLANE 0
+
+inline int ChoosePixelFormat(HDC /*hdc*/, const PIXELFORMATDESCRIPTOR* /*ppfd*/)
+{
+    return 1;
+}
+inline int DescribePixelFormat(HDC /*hdc*/, int /*iPixelFormat*/, UINT /*nBytes*/, PIXELFORMATDESCRIPTOR* ppfd)
+{
+    if (ppfd)
+        memset(ppfd, 0, sizeof(*ppfd));
+    return 1;
+}
+inline BOOL SetPixelFormat(HDC /*hdc*/, int /*format*/, const PIXELFORMATDESCRIPTOR* /*ppfd*/)
+{
+    return TRUE;
+}
+
+// ---- GetDeviceCaps — display device capabilities stub ----
+#define VREFRESH 116
+#define HORZRES 8
+#define VERTRES 10
+inline int GetDeviceCaps(HDC /*hdc*/, int nIndex)
+{
+    if (nIndex == VREFRESH)
+        return 60;
+    if (nIndex == HORZRES)
+        return 1920;
+    if (nIndex == VERTRES)
+        return 1080;
+    return 0;
 }
 
 #endif // _WIN32

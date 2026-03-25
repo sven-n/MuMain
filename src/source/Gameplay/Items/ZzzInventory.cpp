@@ -11768,7 +11768,8 @@ void ClosePersonalShop()
         }
         if (g_PersonalShopSeller.Key)
         {
-            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, MU_C16(g_PersonalShopSeller.ID));
+            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key,
+                                                                   MU_C16(g_PersonalShopSeller.ID));
         }
     }
 

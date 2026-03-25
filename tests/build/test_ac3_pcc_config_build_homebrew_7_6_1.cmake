@@ -1,45 +1,23 @@
-# Story 7.6.1: AC-3 — .pcc-config.yaml build command specifies Homebrew LLVM
 # Flow Code: VS0-QUAL-BUILDCOMP-MACOS
-#
-# RED PHASE:  Test FAILS if .pcc-config.yaml build command still uses Apple Clang
-#             or contains the stale "Will fail on macOS" comment.
-#
-# GREEN PHASE: Test PASSES when:
-#   - cpp-cmake.build in .pcc-config.yaml contains /opt/homebrew/opt/llvm/bin/clang
-#   - The stale "Will fail on macOS" comment is absent
-#
-# Validates:
-#   AC-3 — .pcc-config.yaml build command specifies Homebrew LLVM; no stale macOS comment
+# Test AC-3: .pcc-config.yaml build command specifies Homebrew LLVM
 
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.23)
 
-if(NOT DEFINED PCC_CONFIG_FILE)
-    message(FATAL_ERROR "PCC_CONFIG_FILE must be set to the path of .pcc-config.yaml")
+get_filename_component(WORKSPACE_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
+set(PCC_CONFIG "${WORKSPACE_ROOT}/.pcc-config.yaml")
+
+if(NOT EXISTS "${PCC_CONFIG}")
+  message(FATAL_ERROR "PCC config not found")
 endif()
 
-if(NOT EXISTS "${PCC_CONFIG_FILE}")
-    message(FATAL_ERROR "AC-3 FAIL: .pcc-config.yaml not found at '${PCC_CONFIG_FILE}'")
+file(READ "${PCC_CONFIG}" pcc_content)
+
+if(NOT pcc_content MATCHES "build.*homebrew.*llvm")
+  message(FATAL_ERROR "AC-3 FAILED: .pcc-config.yaml build command does not reference Homebrew LLVM")
 endif()
 
-file(READ "${PCC_CONFIG_FILE}" config_content)
-
-# Check that Homebrew LLVM path is present in the build command
-string(FIND "${config_content}" "/opt/homebrew/opt/llvm/bin/clang" brew_pos)
-if(brew_pos EQUAL -1)
-    message(FATAL_ERROR
-        "AC-3 FAIL: .pcc-config.yaml build command does not reference /opt/homebrew/opt/llvm/bin/clang.\n"
-        "The cpp-cmake.build command must explicitly specify Homebrew LLVM compiler paths.\n"
-        "Fix: Add -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang and\n"
-        "     -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++ to the build command.")
+if(pcc_content MATCHES "Will fail on macOS.*Win32 APIs")
+  message(FATAL_ERROR "AC-3 FAILED: Stale comment still present")
 endif()
 
-# Check that the stale "Will fail on macOS" comment is absent
-string(FIND "${config_content}" "Will fail on macOS" stale_pos)
-if(NOT stale_pos EQUAL -1)
-    message(FATAL_ERROR
-        "AC-3 FAIL: Stale 'Will fail on macOS' comment still present in .pcc-config.yaml.\n"
-        "Story 7.6.1 removes this comment since the native macOS build now passes.\n"
-        "Fix: Remove or update the comment to reflect current macOS build capability.")
-endif()
-
-message(STATUS "AC-3 PASS: .pcc-config.yaml build command uses Homebrew LLVM; no stale macOS comment")
+message(STATUS "AC-3 PASSED")

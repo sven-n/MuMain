@@ -165,7 +165,8 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
             memcpy(strSerial3, strSerial + 8, sizeof(wchar_t) * 4);
             strSerial3[4] = 0;
 
-            SocketClient->ToGameServer()->SendLuckyNumberRequest(MU_C16(strSerial1), MU_C16(strSerial2), MU_C16(strSerial3));
+            SocketClient->ToGameServer()->SendLuckyNumberRequest(MU_C16(strSerial1), MU_C16(strSerial2),
+                                                                 MU_C16(strSerial3));
         }
     }
 
