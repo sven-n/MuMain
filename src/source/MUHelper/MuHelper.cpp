@@ -1056,8 +1056,12 @@ namespace MUHelper
             }
             else
             {
-                SocketClient->ToGameServer()->SendPickupItemRequest(m_iCurrentItem);
-                DeleteItem(m_iCurrentItem);
+                if (SendGetItem == -1)
+                {
+                    SendGetItem = m_iCurrentItem;
+                    SocketClient->ToGameServer()->SendPickupItemRequest(m_iCurrentItem);
+                    DeleteItem(m_iCurrentItem);
+                }
             }
         }
 
