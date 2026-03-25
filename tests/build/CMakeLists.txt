@@ -433,3 +433,97 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_5_1.cmake
 )
+
+# ==========================================================================
+# Story 7.6.1 - macOS Native Build — Remaining Compilation Gaps
+#              [VS0-QUAL-BUILDCOMP-MACOS]
+# Tests verify cross-platform fixes for MURenderFX, MUAudio, MUThirdParty targets.
+# ==========================================================================
+
+# AC-2: ./ctl build explicitly uses Homebrew LLVM compiler paths
+add_test(
+    NAME "7.6.1-AC-2:ctl-uses-homebrew-llvm"
+    COMMAND ${CMAKE_COMMAND}
+        -DCTL_SCRIPT=${MUMAIN_SOURCE_DIR}/../ctl
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_ctl_homebrew_llvm_7_6_1.cmake
+)
+
+# AC-3: .pcc-config.yaml build command specifies Homebrew LLVM; no stale macOS comment
+add_test(
+    NAME "7.6.1-AC-3:pcc-config-build-homebrew"
+    COMMAND ${CMAKE_COMMAND}
+        -DPCC_CONFIG_FILE=${MUMAIN_SOURCE_DIR}/../.pcc-config.yaml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_pcc_config_build_homebrew_7_6_1.cmake
+)
+
+# AC-4: quality_gate in .pcc-config.yaml includes cmake --build build
+add_test(
+    NAME "7.6.1-AC-4:pcc-config-quality-gate-includes-build"
+    COMMAND ${CMAKE_COMMAND}
+        -DPCC_CONFIG_FILE=${MUMAIN_SOURCE_DIR}/../.pcc-config.yaml
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_pcc_config_quality_gate_build_7_6_1.cmake
+)
+
+# AC-5: ZzzOpenglUtil.cpp excluded from macOS/non-Win32 CMake build
+add_test(
+    NAME "7.6.1-AC-5:wgl-cmake-exclusion"
+    COMMAND ${CMAKE_COMMAND}
+        -DCMAKELISTS_FILE=${MUMAIN_SOURCE_DIR}/src/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_wgl_cmake_exclusion_7_6_1.cmake
+)
+
+# AC-6: DSwaveIO.h includes mmsystem.h only inside #ifdef _WIN32 guard
+add_test(
+    NAME "7.6.1-AC-6:dswaveio-mmsystem-guard"
+    COMMAND ${CMAKE_COMMAND}
+        -DDSWAVEIO_H=${MUMAIN_SOURCE_DIR}/src/source/Audio/DSwaveIO.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac6_dswaveio_mmsystem_guard_7_6_1.cmake
+)
+
+# AC-7: PlatformCompat.h provides all required GDI/Win32 stubs for UIControls.cpp
+add_test(
+    NAME "7.6.1-AC-7:platform-compat-gdi-stubs"
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_COMPAT_H=${MUMAIN_SOURCE_DIR}/src/source/Platform/PlatformCompat.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac7_platform_compat_gdi_stubs_7_6_1.cmake
+)
+
+# AC-8: xstreambuf.cpp delete void* fixed with typed cast
+add_test(
+    NAME "7.6.1-AC-8:xstreambuf-no-delete-void"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/ThirdParty/xstreambuf.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac8_xstreambuf_no_delete_void_7_6_1.cmake
+)
+
+# AC-9: PosixSignalHandlers.cpp uses SA_SIGINFO (not SA_SIGACTION)
+add_test(
+    NAME "7.6.1-AC-9:posix-sa-siginfo"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Platform/posix/PosixSignalHandlers.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac9_posix_sa_siginfo_7_6_1.cmake
+)
+
+# AC-10: ZzzOpenData.cpp Wnontrivial-memcall pragma guarded with __has_warning
+add_test(
+    NAME "7.6.1-AC-10:pragma-has-warning-guard"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MUMAIN_SOURCE_DIR}/src/source/Data/ZzzOpenData.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac10_pragma_has_warning_7_6_1.cmake
+)
+
+# AC-11: No new Win32 guards in modified game logic files (MinGW regression guard)
+add_test(
+    NAME "7.6.1-AC-11:mingw-no-regression"
+    COMMAND ${CMAKE_COMMAND}
+        -DMUMAIN_SOURCE_DIR=${MUMAIN_SOURCE_DIR}/src/source
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac11_mingw_no_regression_7_6_1.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-BUILDCOMP-MACOS traceability
+add_test(
+    NAME "7.6.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_6_1.cmake
+)
