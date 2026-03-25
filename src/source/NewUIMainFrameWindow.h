@@ -219,8 +219,8 @@ namespace SEASON3B
         void SetPreExp_Wide(__int64 dwPreExp);
         void SetGetExp_Wide(__int64 dwGetExp);
 
-        void SetPreExp(DWORD dwPreExp);
-        void SetGetExp(DWORD dwGetExp);
+        void SetPreExp(__int64 dwPreExp);
+        void SetGetExp(__int64 dwGetExp);
 
         // buttons
         void SetBtnState(int iBtnType, bool bStateDown);
@@ -259,8 +259,8 @@ namespace SEASON3B
         bool m_bExpEffect;
         DWORD m_dwExpEffectTime;
 
-        DWORD m_dwPreExp;
-        DWORD m_dwGetExp;
+        __int64 m_dwPreExp;
+        __int64 m_dwGetExp;
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
         CNewUIButton m_BtnCShop;
