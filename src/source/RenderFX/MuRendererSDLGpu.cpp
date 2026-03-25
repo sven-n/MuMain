@@ -21,10 +21,10 @@
 //   MuRenderer.cpp compiles only when MU_USE_OPENGL_BACKEND is ON.
 
 // Include SDL3 GPU header only in this file — not exposed to game logic.
-#ifdef MU_ENABLE_SDL3
+// MU_ENABLE_SDL3 is defined at CMake project scope; the preprocessor guard
+// around these includes was redundant and has been removed (Story 7.6.2, AC-7).
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL.h>
-#endif
 
 #include "MuRenderer.h"
 #include "ErrorReport.h"

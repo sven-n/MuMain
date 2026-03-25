@@ -7,9 +7,6 @@
 
 #include "stdafx.h"
 #include "mu_enum.h"
-#ifdef _WIN32
-#include <eh.h>
-#endif
 #include "UIManager.h"
 #include "GuildCache.h"
 #include "ZzzOpenglUtil.h"

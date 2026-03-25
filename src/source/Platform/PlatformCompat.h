@@ -24,6 +24,26 @@ inline std::filesystem::path mu_get_app_dir()
     return std::filesystem::path(buf).parent_path();
 }
 
+// ---- Cross-platform UTF-8 conversion (Windows) ----
+// mu_wchar_to_utf8() — delegates to WideCharToMultiByte on Windows.
+// Provides the same interface as the non-Windows shim below, so call sites
+// can use mu_wchar_to_utf8() unconditionally without #ifdef _WIN32.
+inline std::string mu_wchar_to_utf8(const wchar_t* src)
+{
+    if (src == nullptr)
+    {
+        return std::string();
+    }
+    int len = WideCharToMultiByte(CP_UTF8, 0, src, -1, nullptr, 0, nullptr, nullptr);
+    if (len <= 0)
+    {
+        return std::string();
+    }
+    std::string result(len - 1, 0); // -1 to exclude null terminator
+    WideCharToMultiByte(CP_UTF8, 0, src, -1, result.data(), len, nullptr, nullptr);
+    return result;
+}
+
 #else
 
 #include "PlatformTypes.h"

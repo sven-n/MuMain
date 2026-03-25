@@ -86,17 +86,7 @@ int NextPowerOfTwo(int value, int maxValue)
 
 std::string NarrowPath(const std::wstring& wide)
 {
-#ifdef _WIN32
-    int len =
-        WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), static_cast<int>(wide.size()), nullptr, 0, nullptr, nullptr);
-    std::string result(len, '\0');
-    WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), static_cast<int>(wide.size()), result.data(), len, nullptr, nullptr);
-    return result;
-#else
-    // Story 7.3.0: Use mu_wchar_to_utf8 on non-Windows — avoids deprecated std::wstring_convert
-    // [VS0-QUAL-BUILDCOMPAT-MACOS]
     return mu_wchar_to_utf8(wide.c_str());
-#endif
 }
 } // namespace
 

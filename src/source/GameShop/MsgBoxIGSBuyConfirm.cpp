@@ -8,10 +8,6 @@
 #include "Winmain.h"
 #include "DSPlaySound.h"
 
-#ifdef _WIN32
-#include <strsafe.h>
-#endif
-
 CMsgBoxIGSBuyConfirm::CMsgBoxIGSBuyConfirm()
 {
     m_iMiddleCount = 7;

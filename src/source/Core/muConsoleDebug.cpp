@@ -5,10 +5,6 @@
 
 #include "muConsoleDebug.h" // self
 
-#ifdef _WIN32
-#include <io.h>
-#endif
-#include <fcntl.h>
 #include <iostream>
 #include "ZzzInterface.h"
 #include "ZzzOpenglUtil.h"
@@ -267,9 +263,8 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
 
 #ifdef _EDITOR
         // Also log to ImGui console
-        char szUtf8Buffer[512];
-        WideCharToMultiByte(CP_UTF8, 0, szBuffer, -1, szUtf8Buffer, sizeof(szUtf8Buffer), NULL, NULL);
-        g_MuEditorConsoleUI.LogGame(szUtf8Buffer);
+        std::string szUtf8Buffer = mu_wchar_to_utf8(szBuffer);
+        g_MuEditorConsoleUI.LogGame(szUtf8Buffer.c_str());
 #endif
     }
 #endif
