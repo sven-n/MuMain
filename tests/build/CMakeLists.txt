@@ -527,3 +527,92 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_6_1.cmake
 )
+
+# ==========================================================================
+# Story 7.6.2 - Win32 String Conversion and Include Guard Cleanup
+#              [VS0-QUAL-WIN32CLEAN-STRINCLUDE]
+# Tests verify that Win32 string conversion guards and bare include guards
+# have been removed from Core, Data, GameShop, Gameplay, RenderFX, and Scenes.
+# ==========================================================================
+
+set(MU_SOURCE_ROOT "${MUMAIN_SOURCE_DIR}/src/source")
+
+# AC-1: check-win32-guards.py exists and all story-scoped source files are present
+add_test(
+    NAME "7.6.2-AC-1:win32-guard-check-script"
+    COMMAND ${CMAKE_COMMAND}
+        -DSCRIPT_PATH=${MUMAIN_SOURCE_DIR}/scripts/check-win32-guards.py
+        -DSOURCE_ROOT=${MU_SOURCE_ROOT}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_win32_guard_check_7_6_2.cmake
+)
+
+# AC-2: Core/muConsoleDebug.cpp uses mu_wchar_to_utf8() and removes <io.h> guard
+add_test(
+    NAME "7.6.2-AC-2:console-debug-migration"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MU_SOURCE_ROOT}/Core/muConsoleDebug.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_console_debug_migration_7_6_2.cmake
+)
+
+# AC-3: Core/StringUtils.h uses mu_wchar_to_utf8()
+add_test(
+    NAME "7.6.2-AC-3:string-utils-migration"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MU_SOURCE_ROOT}/Core/StringUtils.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_string_utils_migration_7_6_2.cmake
+)
+
+# AC-4: Data/GlobalBitmap.cpp uses mu_wchar_to_utf8()
+add_test(
+    NAME "7.6.2-AC-4:global-bitmap-migration"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MU_SOURCE_ROOT}/Data/GlobalBitmap.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_global_bitmap_migration_7_6_2.cmake
+)
+
+# AC-5: GameShop/MsgBoxIGSBuyConfirm.cpp uses mu_swprintf; no StringCbPrintf or <strsafe.h>
+add_test(
+    NAME "7.6.2-AC-5:msgbox-swprintf-migration"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MU_SOURCE_ROOT}/GameShop/MsgBoxIGSBuyConfirm.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_msgbox_swprintf_migration_7_6_2.cmake
+)
+
+# AC-6: Gameplay/Characters/ZzzCharacter.cpp has no <eh.h> include
+add_test(
+    NAME "7.6.2-AC-6:zzz-character-no-eh"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MU_SOURCE_ROOT}/Gameplay/Characters/ZzzCharacter.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac6_zzz_character_no_eh_7_6_2.cmake
+)
+
+# AC-7: RenderFX/MuRendererSDLGpu.cpp has unconditional SDL3 includes
+add_test(
+    NAME "7.6.2-AC-7:sdl-gpu-unconditional-includes"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${MU_SOURCE_ROOT}/RenderFX/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac7_sdl_gpu_unconditional_7_6_2.cmake
+)
+
+# AC-8: Scene headers have complete #else / PlatformCompat.h branch
+add_test(
+    NAME "7.6.2-AC-8:scene-headers-else-branch"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_ROOT=${MU_SOURCE_ROOT}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac8_scene_headers_else_branch_7_6_2.cmake
+)
+
+# AC-9: Data struct headers have complete #else / PlatformCompat.h branch
+add_test(
+    NAME "7.6.2-AC-9:data-headers-else-branch"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_ROOT=${MU_SOURCE_ROOT}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac9_data_headers_else_branch_7_6_2.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-WIN32CLEAN-STRINCLUDE traceability
+add_test(
+    NAME "7.6.2-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_6_2.cmake
+)

@@ -237,6 +237,15 @@ target_sources(MuTests PRIVATE gameplay/test_social_systems_validation.cpp)
 # pet rendering constants (PC4_ELF..SKELETON), and CSBaseMatch inheritance static_assert checks.
 target_sources(MuTests PRIVATE gameplay/test_advanced_systems_validation.cpp)
 
+# Story 7.6.2: Win32 String Conversion and Include Guard Cleanup [VS0-QUAL-WIN32CLEAN-STRINCLUDE]
+# RED PHASE: Tests verify that mu_wchar_to_utf8() correctly converts wide strings to UTF-8
+# (replacing WideCharToMultiByte) and that mu_swprintf() formats correctly (replacing
+# StringCbPrintf/StringCchPrintf). Tests compile and run on macOS/Linux using only
+# PlatformCompat.h shims — no Win32 or game loop required. Tests become the authoritative
+# regression guard after Win32 guards are removed in Tasks 1-8.
+# AC-2 (muConsoleDebug), AC-3 (StringUtils), AC-4 (GlobalBitmap), AC-5 (MsgBoxIGSBuyConfirm).
+target_sources(MuTests PRIVATE platform/test_win32_string_cleanup_7_6_2.cpp)
+
 # Story 6.4.1: UI Windows Comprehensive Validation [VS1-GAME-VALIDATE-UI]
 # RED PHASE: Tests verify INTERFACE_LIST enum completeness and coverage (AC-4),
 # CNewUIObj class hierarchy and Show/Enable state transitions (AC-1, MU_GAME_AVAILABLE),
