@@ -246,6 +246,18 @@ target_sources(MuTests PRIVATE gameplay/test_advanced_systems_validation.cpp)
 # No Win32 APIs or DPAPI — runs on macOS/Linux/Windows (MinGW CI).
 target_sources(MuTests PRIVATE data/test_gameconfig_crypto.cpp)
 
+# Story 7.6.4: Cross-Platform CPU Usage Monitoring [VS0-QUAL-WIN32CLEAN-CPUUSAGE]
+# RED PHASE: Tests verify hardware_concurrency returns positive value (AC-3, AC-STD-2),
+# CPU usage GetUsage() returns a value in [0.0, 1.0] (AC-4, AC-STD-2), and multiple
+# rapid calls never crash and always return non-negative values (AC-5).
+# Tests compile and run on macOS/Linux — no Win32 APIs required in test TU.
+# Range test [0.0, 1.0] is RED on Windows until Task 3 normalises GetUsage() from
+# percentage (0–100+) to fractional ratio (0.0–1.0). Tests become GREEN once:
+#   Task 2.1: PlatformCompat.h gains mu_get_process_cpu_times() abstraction
+#   Task 3.1–3.4: CpuUsage.cpp fully migrated to std::thread::hardware_concurrency()
+#                 and mu_get_process_cpu_times() with all #ifdef _WIN32 blocks removed.
+target_sources(MuTests PRIVATE core/test_cpu_usage.cpp)
+
 # Story 7.6.2: Win32 String Conversion and Include Guard Cleanup [VS0-QUAL-WIN32CLEAN-STRINCLUDE]
 # RED PHASE: Tests verify that mu_wchar_to_utf8() correctly converts wide strings to UTF-8
 # (replacing WideCharToMultiByte) and that mu_swprintf() formats correctly (replacing
