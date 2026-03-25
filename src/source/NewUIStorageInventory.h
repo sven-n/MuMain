@@ -63,6 +63,7 @@ namespace SEASON3B
         bool					m_bTakeZen;
         int						m_nBackupTakeZen;
         int						m_nBackupInvenIndex;
+        int						m_nBackupSourceInvenIndex;
 
     public:
         CNewUIStorageInventory();
@@ -92,7 +93,7 @@ namespace SEASON3B
 
         void SetBackupTakeZen(int nZen);
 
-        bool ProcessMyInvenItemAutoMove();
+        bool ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl = nullptr);
 
         void SendRequestItemToMyInven(ITEM* pItemObj, int nStorageIndex, int nInvenIndex);
 
@@ -103,7 +104,7 @@ namespace SEASON3B
 
         int GetPointedItemIndex();
 
-        void SetItemAutoMove(bool bItemAutoMove);
+        void SetItemAutoMove(bool bItemAutoMove, int nSourceInvenIndex = -1);
         void SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex, int nStorageIndex);
     private:
         void LoadImages();
