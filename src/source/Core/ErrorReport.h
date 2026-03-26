@@ -7,13 +7,15 @@
 #define MAX_LENGTH_OSINFO (128)
 #define MAX_DXVERSION (128)
 
+struct SDL_Window;
+
 typedef struct
 {
     wchar_t m_lpszCPU[MAX_LENGTH_CPUNAME];
     wchar_t m_lpszOS[MAX_LENGTH_OSINFO];
     int m_iMemorySize;
 
-    wchar_t m_lpszDxVersion[MAX_DXVERSION];
+    wchar_t m_lpszGpuBackend[MAX_DXVERSION];
 } ER_SystemInfo;
 
 class CErrorReport
@@ -45,17 +47,10 @@ public:
     void WriteLogBegin(void);
     void WriteCurrentTime(BOOL bLineShift = TRUE);
 
-#ifdef _WIN32
     void WriteSystemInfo(ER_SystemInfo* si);
     void WriteOpenGLInfo(void);
-    void WriteImeInfo(HWND hWnd);
+    void WriteImeInfo(SDL_Window* pWindow);
     void WriteSoundCardInfo(void);
-#else
-    void WriteSystemInfo(ER_SystemInfo* /*si*/) {}
-    void WriteOpenGLInfo() {}
-    void WriteImeInfo(HWND /*hWnd*/) {}
-    void WriteSoundCardInfo() {}
-#endif
 };
 
 extern CErrorReport g_ErrorReport;
@@ -84,12 +79,4 @@ extern volatile int g_errorReportFd;
         func(arg);                                                                                                     \
     } while (0)
 
-#ifdef _WIN32
 void GetSystemInfo(ER_SystemInfo* si);
-#else
-inline void GetSystemInfo(ER_SystemInfo* si)
-{
-    if (si)
-        memset(si, 0, sizeof(ER_SystemInfo));
-}
-#endif

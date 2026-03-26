@@ -125,6 +125,13 @@ public:
         return nullptr;
     }
 #endif
+
+    // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
+    // Returns "unknown" by default; SDL GPU backend overrides with SDL_GetGPUDeviceDriver().
+    [[nodiscard]] virtual const char* GetGPUDriverName()
+    {
+        return "unknown";
+    }
 };
 
 // ---------------------------------------------------------------------------

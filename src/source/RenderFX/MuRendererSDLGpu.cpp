@@ -797,6 +797,12 @@ public:
     }
 #endif
 
+    // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
+    [[nodiscard]] const char* GetGPUDriverName() override
+    {
+        return s_device ? SDL_GetGPUDeviceDriver(s_device) : "unknown";
+    }
+
     // -----------------------------------------------------------------------
     // RenderQuad2D: Render a screen-space textured quad (4 vertices per quad).
     // Vertex count must be a multiple of 4.

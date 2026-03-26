@@ -22,9 +22,14 @@
 
 #include <array>
 #include <string>
+#include <vector>
 
 namespace mu
 {
+
+// [Story 7-6-7: AC-6] Enumerate playback device names via miniaudio.
+// Isolated here to keep miniaudio.h out of ErrorReport.cpp.
+std::vector<std::string> GetAudioDeviceNames();
 
 class MiniAudioBackend : public IPlatformAudio
 {

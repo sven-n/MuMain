@@ -665,4 +665,30 @@ float MiniAudioBackend::GetSFXVolume() const
     return m_sfxVolume;
 }
 
+// ---------------------------------------------------------------------------
+// GetAudioDeviceNames — enumerate playback devices for error reporting.
+// [Story 7-6-7: AC-6] Isolated here to keep miniaudio.h out of ErrorReport.cpp.
+// ---------------------------------------------------------------------------
+std::vector<std::string> GetAudioDeviceNames()
+{
+    ma_context ctx;
+    if (ma_context_init(nullptr, 0, nullptr, &ctx) != MA_SUCCESS)
+    {
+        return {};
+    }
+
+    ma_device_info* pPlayback = nullptr;
+    ma_uint32 playbackCount = 0;
+    ma_context_get_devices(&ctx, &pPlayback, &playbackCount, nullptr, nullptr);
+
+    std::vector<std::string> names;
+    for (ma_uint32 i = 0; i < playbackCount; ++i)
+    {
+        names.emplace_back(pPlayback[i].name);
+    }
+
+    ma_context_uninit(&ctx);
+    return names;
+}
+
 } // namespace mu

@@ -1265,7 +1265,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     }
 #endif
 
-    g_ErrorReport.WriteImeInfo(g_hWnd);
+    g_ErrorReport.WriteImeInfo(nullptr);
     g_ErrorReport.AddSeparator();
 
     InitVSync();
