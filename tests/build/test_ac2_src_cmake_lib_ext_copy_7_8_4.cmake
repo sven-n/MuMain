@@ -44,9 +44,9 @@ if(_pos_dylib EQUAL -1)
     message(FATAL_ERROR "AC-2 FAIL [7.8.4]: '.dylib' extension not found in src/CMakeLists.txt — required for macOS native AOT output")
 endif()
 
-string(FIND "${CMAKE_CONTENT}" ".so" _pos_so)
+string(FIND "${CMAKE_CONTENT}" "set(MU_DOTNET_LIB_EXT \".so\")" _pos_so)
 if(_pos_so EQUAL -1)
-    message(FATAL_ERROR "AC-2 FAIL [7.8.4]: '.so' extension not found in src/CMakeLists.txt — required for Linux native AOT output")
+    message(FATAL_ERROR "AC-2 FAIL [7.8.4]: 'set(MU_DOTNET_LIB_EXT \".so\")' not found in src/CMakeLists.txt — required for Linux native AOT output")
 endif()
 
 # --- Check 4: DOTNET_DLL_PATH uses the extension variable ---

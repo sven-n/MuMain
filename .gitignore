@@ -1,6 +1,7 @@
 
 .vs/
 .nuget/
+**/.DS_Store
 
 # CLion temporary / backup files
 .!*
