@@ -211,6 +211,115 @@ TEST_CASE("AC-NFR-2 [7-1-1]: ErrorReport does not crash on invalid file path",
 }
 
 // ---------------------------------------------------------------------------
+// ===========================================================================
+// Story 7.6.7: ErrorReport Cross-Platform Crash Diagnostics
+// Flow Code: VS0-QUAL-WIN32CLEAN-ERRDIAG
+//
+// RED PHASE:  Tests FAIL (or fail to compile) before 7-6-7 is implemented:
+//   - AC-8 test:  compile error — m_lpszGpuBackend field does not yet exist
+//                 (currently named m_lpszDxVersion)
+//   - AC-3 test:  FAIL — WriteSystemInfo is an empty stub on non-Windows;
+//                 OS/CPU fields remain empty and iMemorySize == 0
+//   - AC-5 test:  compile error on Windows — WriteImeInfo takes HWND, not SDL_Window*
+//   - AC-4 test:  PASS (stub doesn't throw) — behavioral intent documented
+//   - AC-6 test:  PASS (stub doesn't throw) — behavioral intent documented
+//
+// GREEN PHASE: All tests PASS after cross-platform implementation is complete.
+//   - AC-8:  m_lpszGpuBackend field exists in ER_SystemInfo
+//   - AC-3:  WriteSystemInfo uses uname()/sysctlbyname//proc on POSIX
+//   - AC-5:  WriteImeInfo(SDL_Window*) accepted — SDL_TextInputActive used
+//   - AC-4:  WriteOpenGLInfo callable without crash on all platforms
+//   - AC-6:  WriteSoundCardInfo uses mu::GetAudioDeviceNames() (miniaudio)
+// ===========================================================================
+
+#include <SDL3/SDL.h>
+
+// ---------------------------------------------------------------------------
+// AC-8: ER_SystemInfo.m_lpszGpuBackend field exists (renamed from m_lpszDxVersion)
+// Compile error in RED phase: no member 'm_lpszGpuBackend' in ER_SystemInfo.
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-8 [7-6-7]: ER_SystemInfo has m_lpszGpuBackend field",
+          "[core][error_report][7-6-7]")
+{
+    // VS0-QUAL-WIN32CLEAN-ERRDIAG
+    ER_SystemInfo si{};
+    // Accessing m_lpszGpuBackend causes a compile error in RED phase
+    // (field is still named m_lpszDxVersion until AC-8 is implemented).
+    REQUIRE(sizeof(si.m_lpszGpuBackend) == MAX_DXVERSION * sizeof(wchar_t));
+}
+
+// ---------------------------------------------------------------------------
+// AC-3 / AC-STD-2: WriteSystemInfo populates OS name, CPU model, and RAM size.
+// Fails in RED phase: empty stub leaves all fields at zero/empty.
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-3/AC-STD-2 [7-6-7]: WriteSystemInfo populates OS, CPU, and RAM fields",
+          "[core][error_report][7-6-7]")
+{
+    // VS0-QUAL-WIN32CLEAN-ERRDIAG
+    ER_SystemInfo si{};
+
+    g_ErrorReport.WriteSystemInfo(&si);
+
+    // AC-3: OS field must be non-empty — uname() provides sysname + release on POSIX
+    REQUIRE(si.m_lpszOS[0] != L'\0');
+
+    // AC-3: CPU field must be non-empty — sysctlbyname on macOS / /proc/cpuinfo on Linux
+    REQUIRE(si.m_lpszCPU[0] != L'\0');
+
+    // AC-3: RAM must be positive — sysctlbyname hw.memsize macOS / /proc/meminfo Linux
+    REQUIRE(si.m_iMemorySize > 0);
+}
+
+// ---------------------------------------------------------------------------
+// AC-5: WriteImeInfo signature changed to WriteImeInfo(SDL_Window*).
+// On Windows in RED phase: HWND and SDL_Window* are incompatible — compile error.
+// On non-Windows in RED phase: HWND stub may accept nullptr implicitly.
+// In GREEN phase: SDL_Window* overload accepted; nullptr handled gracefully.
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-5 [7-6-7]: WriteImeInfo accepts SDL_Window* and does not crash",
+          "[core][error_report][7-6-7]")
+{
+    // VS0-QUAL-WIN32CLEAN-ERRDIAG
+    // No SDL window in unit test context — implementation must handle nullptr.
+    // static_cast to SDL_Window* enforces the new signature at compile time.
+    REQUIRE_NOTHROW(g_ErrorReport.WriteImeInfo(static_cast<SDL_Window*>(nullptr)));
+}
+
+// ---------------------------------------------------------------------------
+// AC-4: WriteOpenGLInfo callable on all platforms without crash.
+// Without an active GL context glGetString returns nullptr — implementation
+// must handle this gracefully (not dereference nullptr).
+// In RED phase this test passes (empty stub), but documents expected behavior.
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-4 [7-6-7]: WriteOpenGLInfo callable on all platforms without crash",
+          "[core][error_report][7-6-7]")
+{
+    // VS0-QUAL-WIN32CLEAN-ERRDIAG
+    // Primary verification is ./ctl check (no #ifdef _WIN32 guard wrapping the body).
+    // This test documents the no-crash guarantee for headless/unit-test environments.
+    REQUIRE_NOTHROW(g_ErrorReport.WriteOpenGLInfo());
+}
+
+// ---------------------------------------------------------------------------
+// AC-6: WriteSoundCardInfo uses miniaudio (mu::GetAudioDeviceNames) — no
+// DirectSoundEnumerate or Win32 types in the implementation.
+// In RED phase this test passes (empty stub), but documents expected behavior.
+// In GREEN phase ma_context_get_devices may return empty in CI/headless
+// environments but must not crash.
+// ---------------------------------------------------------------------------
+
+TEST_CASE("AC-6 [7-6-7]: WriteSoundCardInfo uses miniaudio and does not crash",
+          "[core][error_report][7-6-7]")
+{
+    // VS0-QUAL-WIN32CLEAN-ERRDIAG
+    REQUIRE_NOTHROW(g_ErrorReport.WriteSoundCardInfo());
+}
+
+// ---------------------------------------------------------------------------
 // AC-NFR-1: Write() overhead < 1ms per call for a 256-char message
 // ---------------------------------------------------------------------------
 
