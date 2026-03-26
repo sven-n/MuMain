@@ -295,6 +295,16 @@ target_sources(MuTests PRIVATE platform/test_win32_string_cleanup_7_6_2.cpp)
 # always compiled and run — no Win32 or OpenGL required.
 target_sources(MuTests PRIVATE gameplay/test_ui_windows_validation.cpp)
 
+# Story 7.8.1: Audio Interface Win32 Type Cleanup [VS0-QUAL-BUILD-AUDIO]
+# RED PHASE: AC-2 primary test: PlaySound return type must be bool (sizeof == 1), not
+# HRESULT (= long, sizeof == 4 or 8). sizeof(result) != sizeof(bool) fails in RED phase.
+# AC-4 call-site tests: nullptr/false args compile with both old (OBJECT*, BOOL) and
+# new (void*, bool) signatures — these are compatibility guards, not type-assertion tests.
+# AC-STD-2: Headers compile on this platform — test file inclusion IS the compilation check.
+# Tests become GREEN once Tasks 2-5 in story 7.8.1 replace Win32 types with portable types.
+# No audio device required. Compiles and runs on macOS/Linux/Windows (MinGW CI).
+target_sources(MuTests PRIVATE audio/test_audio_interface_portable_types_7_8_1.cpp)
+
 # Story 5.3.1: Audio Format Validation [VS1-AUDIO-FORMAT-VALIDATE]
 # RED PHASE: Tests verify miniaudio correctly decodes WAV, MP3, and OGG Vorbis audio
 # formats used by the game, and that error paths are handled gracefully.

@@ -616,3 +616,53 @@ add_test(
     COMMAND ${CMAKE_COMMAND}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_6_2.cmake
 )
+
+# ==========================================================================
+# Story 7.8.1 - Audio Interface Win32 Type Cleanup [VS0-QUAL-BUILD-AUDIO]
+# RED PHASE: Tests verify that Win32 types (HRESULT, BOOL, OBJECT*) are removed
+# from IPlatformAudio.h and MiniAudioBackend.h, and that DirectSound-specific
+# declarations in DSPlaySound.h are guarded by #ifdef _WIN32.
+# ==========================================================================
+
+set(MU_AUDIO_SOURCE_ROOT "${MUMAIN_SOURCE_DIR}/src/source")
+
+# AC-1: DSPlaySound.h HRESULT/HWND/OBJECT* declarations wrapped in #ifdef _WIN32
+add_test(
+    NAME "7.8.1-AC-1:dsplaysound-win32-guard"
+    COMMAND ${CMAKE_COMMAND}
+        -DDSPLAYSOUND_H=${MU_AUDIO_SOURCE_ROOT}/Audio/DSPlaySound.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_dsplaysound_win32_guard_7_8_1.cmake
+)
+
+# AC-2: IPlatformAudio.h uses only portable types (no HRESULT, BOOL, OBJECT*)
+add_test(
+    NAME "7.8.1-AC-2:iplatformaudio-portable-types"
+    COMMAND ${CMAKE_COMMAND}
+        -DIPLATFORMAUDIO_H=${MU_AUDIO_SOURCE_ROOT}/Platform/IPlatformAudio.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_iplatformaudio_portable_types_7_8_1.cmake
+)
+
+# AC-3: MiniAudioBackend.h override declarations have no Win32 types
+add_test(
+    NAME "7.8.1-AC-3:miniaudiobackend-no-win32-types"
+    COMMAND ${CMAKE_COMMAND}
+        -DMINIAUDIO_BACKEND_H=${MU_AUDIO_SOURCE_ROOT}/Platform/MiniAudio/MiniAudioBackend.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_miniaudiobackend_no_win32_types_7_8_1.cmake
+)
+
+# AC-5: check-win32-guards.py script exists; audio headers present; no bare Win32 guards
+add_test(
+    NAME "7.8.1-AC-5:check-win32-guards-audio"
+    COMMAND ${CMAKE_COMMAND}
+        -DSCRIPT_PATH=${MUMAIN_SOURCE_DIR}/scripts/check-win32-guards.py
+        -DSOURCE_ROOT=${MU_AUDIO_SOURCE_ROOT}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_check_win32_guards_audio_7_8_1.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-BUILD-AUDIO traceability
+add_test(
+    NAME "7.8.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_8_1.cmake
+)
