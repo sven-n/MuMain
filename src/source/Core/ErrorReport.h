@@ -5,7 +5,7 @@
 
 #define MAX_LENGTH_CPUNAME (128)
 #define MAX_LENGTH_OSINFO (128)
-#define MAX_DXVERSION (128)
+#define MAX_GPU_BACKEND_LEN (128)
 
 struct SDL_Window;
 
@@ -15,7 +15,7 @@ typedef struct
     wchar_t m_lpszOS[MAX_LENGTH_OSINFO];
     int64_t m_iMemorySize; // int64_t to support all modern RAM sizes (>2GB)
 
-    wchar_t m_lpszGpuBackend[MAX_DXVERSION];
+    wchar_t m_lpszGpuBackend[MAX_GPU_BACKEND_LEN];
 } ER_SystemInfo;
 
 class CErrorReport
@@ -79,4 +79,4 @@ extern volatile int g_errorReportFd;
         func(arg);                                                                                                     \
     } while (0)
 
-void GetSystemInfo(ER_SystemInfo* si);
+void MuGetSystemInfo(ER_SystemInfo* si);

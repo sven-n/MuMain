@@ -1000,7 +1000,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_ErrorReport.WriteCurrentTime();
     ER_SystemInfo si;
     ZeroMemory(&si, sizeof(ER_SystemInfo));
-    GetSystemInfo(&si);
+    MuGetSystemInfo(&si);
     g_ErrorReport.AddSeparator();
     g_ErrorReport.WriteSystemInfo(&si);
     g_ErrorReport.AddSeparator();

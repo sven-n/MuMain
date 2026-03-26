@@ -246,7 +246,7 @@ TEST_CASE("AC-8 [7-6-7]: ER_SystemInfo has m_lpszGpuBackend field",
     ER_SystemInfo si{};
     // Accessing m_lpszGpuBackend causes a compile error in RED phase
     // (field is still named m_lpszDxVersion until AC-8 is implemented).
-    REQUIRE(sizeof(si.m_lpszGpuBackend) == MAX_DXVERSION * sizeof(wchar_t));
+    REQUIRE(sizeof(si.m_lpszGpuBackend) == MAX_GPU_BACKEND_LEN * sizeof(wchar_t));
 }
 
 // ---------------------------------------------------------------------------
@@ -260,8 +260,8 @@ TEST_CASE("AC-3/AC-STD-2 [7-6-7]: WriteSystemInfo populates OS, CPU, and RAM fie
     // VS0-QUAL-WIN32CLEAN-ERRDIAG
     ER_SystemInfo si{};
 
-    // GetSystemInfo populates the struct fields using cross-platform APIs
-    GetSystemInfo(&si);
+    // MuGetSystemInfo populates the struct fields using cross-platform APIs
+    MuGetSystemInfo(&si);
 
     // Then WriteSystemInfo logs those fields to the error report
     g_ErrorReport.WriteSystemInfo(&si);

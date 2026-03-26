@@ -679,7 +679,11 @@ std::vector<std::string> GetAudioDeviceNames()
 
     ma_device_info* pPlayback = nullptr;
     ma_uint32 playbackCount = 0;
-    ma_context_get_devices(&ctx, &pPlayback, &playbackCount, nullptr, nullptr);
+    if (ma_context_get_devices(&ctx, &pPlayback, &playbackCount, nullptr, nullptr) != MA_SUCCESS)
+    {
+        ma_context_uninit(&ctx);
+        return {};
+    }
 
     std::vector<std::string> names;
     for (ma_uint32 i = 0; i < playbackCount; ++i)

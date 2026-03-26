@@ -225,11 +225,7 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
         0,
     };
     int offset = 0;
-#ifdef _WIN32
-    offset += swprintf(szLine, L"0x%08X : ", (DWORD)(uintptr_t)pBuffer);
-#else
-    offset += std::swprintf(szLine, 1024, L"0x%08X : ", (DWORD)(uintptr_t)pBuffer);
-#endif
+    offset += mu_swprintf(szLine + offset, L"0x%08X : ", (DWORD)(uintptr_t)pBuffer);
     for (int i = 0; i < iSize; i++)
     {
         offset += mu_swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
@@ -282,13 +278,8 @@ void CErrorReport::WriteCurrentTime(BOOL bLineShift)
     }
 }
 
-// ---------------------------------------------------------------------------
-// Forward declarations for cross-platform helpers
-// ---------------------------------------------------------------------------
-namespace mu
-{
-std::vector<std::string> GetAudioDeviceNames();
-} // namespace mu
+// Cross-platform audio device enumeration (lightweight header — avoids miniaudio.h)
+#include "Platform/MiniAudio/AudioDeviceNames.h"
 
 // ---------------------------------------------------------------------------
 // WriteSystemInfo — log system information to error report
@@ -373,10 +364,10 @@ void CErrorReport::WriteSoundCardInfo(void)
 }
 
 // ---------------------------------------------------------------------------
-// GetSystemInfo — populate ER_SystemInfo using cross-platform POSIX APIs
+// MuGetSystemInfo — populate ER_SystemInfo using cross-platform POSIX APIs
 // [Story 7-6-7: AC-3]
 // ---------------------------------------------------------------------------
-void GetSystemInfo(ER_SystemInfo* si)
+void MuGetSystemInfo(ER_SystemInfo* si)
 {
     memset(si, 0, sizeof(ER_SystemInfo));
 
@@ -403,7 +394,7 @@ void GetSystemInfo(ER_SystemInfo* si)
     {
         wcscpy(si->m_lpszCPU, L"Unknown CPU");
     }
-#else
+#elif defined(__linux__)
     // Linux: read /proc/cpuinfo
     std::ifstream cpuFile("/proc/cpuinfo");
     std::string cpuLine;
@@ -413,7 +404,7 @@ void GetSystemInfo(ER_SystemInfo* si)
         if (cpuLine.find("model name") != std::string::npos)
         {
             auto pos = cpuLine.find(':');
-            if (pos != std::string::npos)
+            if (pos != std::string::npos && pos + 2 < cpuLine.size())
             {
                 std::string model = cpuLine.substr(pos + 2);
                 swprintf(si->m_lpszCPU, MAX_LENGTH_CPUNAME, L"%hs", model.c_str());
@@ -426,6 +417,9 @@ void GetSystemInfo(ER_SystemInfo* si)
     {
         wcscpy(si->m_lpszCPU, L"Unknown CPU");
     }
+#else
+    // Windows/MinGW: CPU info not available via POSIX APIs
+    wcscpy(si->m_lpszCPU, L"N/A (MinGW)");
 #endif
 
     // RAM
@@ -436,7 +430,7 @@ void GetSystemInfo(ER_SystemInfo* si)
     {
         si->m_iMemorySize = static_cast<int64_t>(memSize);
     }
-#else
+#elif defined(__linux__)
     // Linux: read /proc/meminfo
     std::ifstream memFile("/proc/meminfo");
     std::string memLine;
@@ -454,6 +448,9 @@ void GetSystemInfo(ER_SystemInfo* si)
             break;
         }
     }
+#else
+    // Windows/MinGW: RAM info not available via POSIX APIs
+    si->m_iMemorySize = 0;
 #endif
 
     // GPU Backend — populated by caller from MuRenderer if available
