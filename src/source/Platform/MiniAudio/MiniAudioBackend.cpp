@@ -371,8 +371,7 @@ void MiniAudioBackend::Set3DSoundPosition()
             // m_soundObjects[buf] is non-null (checked above); Position is vec3_t float[3].
             // Story 7.8.1: m_soundObjects is const void* — cast to OBJECT* for position access.
             const auto* pObj = static_cast<const OBJECT*>(m_soundObjects[buf]);
-            ma_sound_set_position(&m_sounds[buf][ch], pObj->Position[0], pObj->Position[1],
-                                  pObj->Position[2]);
+            ma_sound_set_position(&m_sounds[buf][ch], pObj->Position[0], pObj->Position[1], pObj->Position[2]);
         }
     }
 }

@@ -72,7 +72,6 @@ constexpr int k_BlendFactor_Zero              = 1;  // SDL_GPU_BLENDFACTOR_ZERO
 constexpr int k_BlendFactor_One               = 2;  // SDL_GPU_BLENDFACTOR_ONE
 constexpr int k_BlendFactor_SrcColor          = 3;  // SDL_GPU_BLENDFACTOR_SRC_COLOR
 constexpr int k_BlendFactor_OneMinusSrcColor  = 4;  // SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR
-constexpr int k_BlendFactor_DstColor          = 5;  // SDL_GPU_BLENDFACTOR_DST_COLOR
 constexpr int k_BlendFactor_OneMinusDstColor  = 6;  // SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR
 constexpr int k_BlendFactor_SrcAlpha          = 7;  // SDL_GPU_BLENDFACTOR_SRC_ALPHA
 constexpr int k_BlendFactor_OneMinusSrcAlpha  = 8;  // SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
