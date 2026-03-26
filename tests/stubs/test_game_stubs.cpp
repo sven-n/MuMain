@@ -197,6 +197,7 @@ uint32_t WZResult::GetWindowErrorCode() { return m_dwWindowErrorCode; }
 
 WZResult& WZResult::operator=(const WZResult& a2)
 {
+    if (this == &a2) return *this;
     m_dwErrorCode = a2.m_dwErrorCode;
     m_dwWindowErrorCode = a2.m_dwWindowErrorCode;
     wcsncpy(m_szErrorMessage, a2.m_szErrorMessage, MAX_ERROR_MESSAGE - 1);
@@ -238,7 +239,11 @@ WZResult WZResult::BuildResult(uint32_t dwErrorCode, uint32_t dwWindowErrorCode,
     std::memset(Buffer, 0, sizeof(Buffer));
     vswprintf(Buffer, MAX_ERROR_MESSAGE, szFormat, args);
     va_end(args);
-    result.SetResult(dwErrorCode, dwWindowErrorCode, Buffer);
+    // Direct assignment to avoid double-formatting (Buffer is already formatted)
+    result.m_dwErrorCode = dwErrorCode;
+    result.m_dwWindowErrorCode = dwWindowErrorCode;
+    wcsncpy(result.m_szErrorMessage, Buffer, MAX_ERROR_MESSAGE - 1);
+    result.m_szErrorMessage[MAX_ERROR_MESSAGE - 1] = L'\0';
     return result;
 }
 
@@ -379,6 +384,11 @@ extern "C"
 
 [[nodiscard]] std::vector<std::uint8_t> PadRGBToRGBA(const std::uint8_t* rgbData, int width, int height)
 {
+    // Validate input parameters to prevent overflow/out-of-bounds access
+    if (width <= 0 || height <= 0 || rgbData == nullptr)
+    {
+        return {};
+    }
     const std::size_t pixelCount = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
     std::vector<std::uint8_t> rgba(pixelCount * 4u);
     for (std::size_t i = 0; i < pixelCount; ++i)

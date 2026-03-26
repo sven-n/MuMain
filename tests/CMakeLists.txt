@@ -408,6 +408,7 @@ endif()
 # Standalone stability test target — compiles on all platforms without Win32 dependencies.
 # Links same modules as MuTests to resolve MUCore transitive dependencies (SDL3, GL, audio).
 add_executable(MuStabilityTests stability/test_macos_stability_session.cpp)
+target_sources(MuStabilityTests PRIVATE stubs/test_game_stubs.cpp)
 target_link_libraries(MuStabilityTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform MURenderFX MUAudio)
 if(MU_ENABLE_SDL3)
     target_link_libraries(MuStabilityTests PRIVATE SDL3::SDL3-static)
