@@ -211,7 +211,11 @@ void WZResult::SetResult(uint32_t dwErrorCode, uint32_t dwWindowErrorCode, const
     va_start(va, szFormat);
     m_dwErrorCode = dwErrorCode;
     m_dwWindowErrorCode = dwWindowErrorCode;
-    vswprintf(m_szErrorMessage, MAX_ERROR_MESSAGE, szFormat, va);
+    int written = vswprintf(m_szErrorMessage, MAX_ERROR_MESSAGE, szFormat, va);
+    if (written < 0)
+    {
+        m_szErrorMessage[0] = L'\0'; // ensure null-terminated on vswprintf failure
+    }
     va_end(va);
 }
 
