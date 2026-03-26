@@ -143,6 +143,11 @@ jobs:
         run: |
           cmake --build build-mingw -j$(nproc)
 
+      - name: Validate artifacts
+        run: |
+          test -f build-mingw/src/Main.exe || { echo "MISSING: Main.exe"; exit 1; }
+          echo "OK: Main.exe ($(du -sh build-mingw/src/Main.exe | cut -f1))"
+
       - name: Upload artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
@@ -183,6 +188,26 @@ jobs:
       - name: Run tests
         run: ctest --test-dir out/build/macos-arm64 --build-config Debug --output-on-failure
 
+      - name: Validate artifacts
+        run: |
+          EXE_DIR="out/build/macos-arm64/src/Debug"
+          FAIL=0
+          for f in \
+            "$EXE_DIR/Main" \
+            "$EXE_DIR/MUnique.Client.Library.dylib" \
+            "$EXE_DIR/config.ini" \
+            "$EXE_DIR/Translations" \
+            "$EXE_DIR/shaders"
+          do
+            if [ -e "$f" ]; then
+              echo "OK:      $f"
+            else
+              echo "MISSING: $f"
+              FAIL=1
+            fi
+          done
+          exit $FAIL
+
       - name: Upload artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
@@ -192,6 +217,7 @@ jobs:
             out/build/macos-arm64/src/Debug/Main
             out/build/macos-arm64/src/Debug/MUnique.Client.Library.dylib
             out/build/macos-arm64/src/Debug/Translations
+            out/build/macos-arm64/src/Debug/shaders
             out/build/macos-arm64/src/Debug/config.ini
           if-no-files-found: warn
 
@@ -232,6 +258,25 @@ jobs:
       - name: Run tests
         run: ctest --test-dir out/build/linux-x64 --build-config Debug --output-on-failure --no-tests=error
 
+      - name: Validate artifacts
+        run: |
+          EXE_DIR="out/build/linux-x64/src/Debug"
+          FAIL=0
+          for f in \
+            "$EXE_DIR/Main" \
+            "$EXE_DIR/config.ini" \
+            "$EXE_DIR/Translations" \
+            "$EXE_DIR/shaders"
+          do
+            if [ -e "$f" ]; then
+              echo "OK:      $f"
+            else
+              echo "MISSING: $f"
+              FAIL=1
+            fi
+          done
+          exit $FAIL
+
       - name: Upload artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
@@ -240,6 +285,7 @@ jobs:
           path: |
             out/build/linux-x64/src/Debug/Main
             out/build/linux-x64/src/Debug/Translations
+            out/build/linux-x64/src/Debug/shaders
             out/build/linux-x64/src/Debug/config.ini
           if-no-files-found: warn
 

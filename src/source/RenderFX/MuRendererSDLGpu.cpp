@@ -113,9 +113,15 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (std140 HLS
 #ifndef MU_SHADER_DIR
 #define MU_SHADER_DIR ""
 #endif
-    std::filesystem::path blobPath =
-        std::filesystem::path(MU_SHADER_DIR) / (std::string(name) + "." + stage + "." + ext);
-    return blobPath.string();
+    // Primary: cmake build-output path (works for local dev builds).
+    // Fallback: shaders/ next to the executable (works for CI artifacts and installs).
+    std::string filename = std::string(name) + "." + stage + "." + ext;
+    std::filesystem::path cmakePath = std::filesystem::path(MU_SHADER_DIR) / filename;
+    if (!cmakePath.empty() && std::filesystem::exists(cmakePath))
+    {
+        return cmakePath.string();
+    }
+    return (mu_get_app_dir() / "shaders" / filename).string();
 }
 
 // ---------------------------------------------------------------------------

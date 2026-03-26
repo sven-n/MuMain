@@ -523,8 +523,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     COMMENT "Copying game assets to executable directory"
   )
 else()
-  # macOS / Linux: copy Data/, Translations/, and config.ini next to the executable.
+  # macOS / Linux: copy Data/, Translations/, shaders/ and config.ini next to the executable.
   # DLLs in bin/ are Windows-only and are intentionally excluded.
+  # shaders/ is copied from the cmake build output so CI artifacts contain the right blobs.
   add_custom_command(
     TARGET Main
     POST_BUILD
@@ -534,6 +535,9 @@ else()
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_CURRENT_SOURCE_DIR}/bin/Translations"
             "$<TARGET_FILE_DIR:Main>/Translations"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_BINARY_DIR}/shaders"
+            "$<TARGET_FILE_DIR:Main>/shaders"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${CMAKE_CURRENT_SOURCE_DIR}/bin/config.ini"
             "$<TARGET_FILE_DIR:Main>/config.ini"
