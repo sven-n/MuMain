@@ -71,6 +71,10 @@ struct RenderTrianglesCapture : public mu::IMuRenderer
     {
     }
 
+    void DisableBlend() override
+    {
+    }
+
     void SetDepthTest(bool /*enabled*/) override
     {
     }

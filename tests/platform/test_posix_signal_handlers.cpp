@@ -1,11 +1,11 @@
 // Story 7.1.2: POSIX Signal Handlers for Crash Diagnostics — ATDD RED Phase
 // [VS0-QUAL-SIGNAL-HANDLERS]
 //
-// AC-STD-2: Catch2 test verifying InstallSignalHandlers() installs SA_SIGACTION
+// AC-STD-2: Catch2 test verifying InstallSignalHandlers() installs SA_SIGINFO
 // handlers for SIGSEGV, SIGABRT, SIGBUS. Compile-time guarded with #ifndef _WIN32
 // so this is a no-op on MinGW/Windows cross-compile (CI remains green).
 //
-// AC-VAL-2: sigaction() query after InstallSignalHandlers() confirms SA_SIGACTION flag
+// AC-VAL-2: sigaction() query after InstallSignalHandlers() confirms SA_SIGINFO flag
 // set for all three signals — this test validates that assertion.
 
 #include <catch2/catch_test_macros.hpp>
@@ -30,12 +30,12 @@ static void* QuerySigHandler(int signum)
 {
     struct sigaction act = {};
     sigaction(signum, nullptr, &act);
-    // On platforms where SA_SIGACTION is set, the handler is in sa_sigaction
+    // On platforms where SA_SIGINFO is set, the handler is in sa_sigaction
     return reinterpret_cast<void*>(act.sa_sigaction);
 }
 
 TEST_CASE(
-    "AC-STD-2,AC-VAL-2: InstallSignalHandlers installs SA_SIGACTION for SIGSEGV/SIGABRT/SIGBUS",
+    "AC-STD-2,AC-VAL-2: InstallSignalHandlers installs SA_SIGINFO for SIGSEGV/SIGABRT/SIGBUS",
     "[platform][posix][signal]")
 {
     // Save old handlers before install so we can restore them after the test
@@ -49,22 +49,22 @@ TEST_CASE(
     // AC-1: Install signal handlers (function under test)
     mu::platform::InstallSignalHandlers();
 
-    SECTION("AC-STD-2: SIGSEGV handler has SA_SIGACTION flag set")
+    SECTION("AC-STD-2: SIGSEGV handler has SA_SIGINFO flag set")
     {
         int flags = QuerySigFlags(SIGSEGV);
-        REQUIRE((flags & SA_SIGACTION) != 0);
+        REQUIRE((flags & SA_SIGINFO) != 0);
     }
 
-    SECTION("AC-STD-2: SIGABRT handler has SA_SIGACTION flag set")
+    SECTION("AC-STD-2: SIGABRT handler has SA_SIGINFO flag set")
     {
         int flags = QuerySigFlags(SIGABRT);
-        REQUIRE((flags & SA_SIGACTION) != 0);
+        REQUIRE((flags & SA_SIGINFO) != 0);
     }
 
-    SECTION("AC-STD-2: SIGBUS handler has SA_SIGACTION flag set")
+    SECTION("AC-STD-2: SIGBUS handler has SA_SIGINFO flag set")
     {
         int flags = QuerySigFlags(SIGBUS);
-        REQUIRE((flags & SA_SIGACTION) != 0);
+        REQUIRE((flags & SA_SIGINFO) != 0);
     }
 
     SECTION("AC-STD-2: SIGSEGV sa_sigaction handler pointer is non-null")

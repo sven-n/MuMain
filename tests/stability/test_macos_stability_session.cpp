@@ -53,6 +53,11 @@
 //   static const char*      SESSION_LOG_PATH           = "progress.md#session-log";
 //   static const char*      SESSION_MUERROR_PATH       = "MuError.log";
 
+// RED PHASE: These are 0/0.0 placeholders. Populate with real values after the session.
+// Suppress unused warnings — constants are referenced only in SKIP'd tests (GREEN phase).
+// NOLINTBEGIN(misc-unused-parameters)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-const-variable"
 static constexpr double SESSION_DURATION_MINUTES = 0.0;
 static constexpr double SESSION_MIN_FPS = 0.0;
 static constexpr double SESSION_AVG_FPS = 0.0;
@@ -60,6 +65,7 @@ static constexpr int SESSION_HITCH_COUNT = 0;
 static constexpr double SESSION_MEMORY_GROWTH_PCT = 0.0;
 static constexpr int SESSION_DISCONNECT_COUNT = 0;
 static constexpr int SESSION_ERROR_LOG_ENTRIES = 0;
+#pragma clang diagnostic pop
 
 // =============================================================================
 // Stability session FPS / hitch thresholds (from story requirements)

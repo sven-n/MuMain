@@ -21,6 +21,7 @@
 // RED PHASE: Tests will fail to compile until MuRendererSDLGpu.cpp is created
 // with the required classes, free functions, and testable API surface exposed.
 
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <cstdint>
 #include <optional>

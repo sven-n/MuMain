@@ -359,8 +359,10 @@ target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform M
 
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp
 # #ifdef guards are active when SDL3 is enabled. [VS1-SDL-INPUT-KEYBOARD]
+# Story 7-3-1: SDL3 include paths needed by test TUs that include PlatformCompat.h
 if(MU_ENABLE_SDL3)
     target_compile_definitions(MuTests PRIVATE MU_ENABLE_SDL3)
+    target_link_libraries(MuTests PRIVATE SDL3::SDL3-static)
 endif()
 
 # Story 7.3.1: macOS 60-Minute Stability Session [VS0-QUAL-STABILITY-MACOS]
@@ -372,9 +374,26 @@ endif()
 # GREEN PHASE: Populate SESSION_* constants, remove SKIP markers, all tests pass.
 target_sources(MuTests PRIVATE stability/test_macos_stability_session.cpp)
 
+# Standalone stability test target — compiles on all platforms without Win32 dependencies.
+# Links same modules as MuTests to resolve MUCore transitive dependencies (SDL3, GL, audio).
+add_executable(MuStabilityTests stability/test_macos_stability_session.cpp)
+target_link_libraries(MuStabilityTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform MURenderFX MUAudio)
+if(MU_ENABLE_SDL3)
+    target_link_libraries(MuStabilityTests PRIVATE SDL3::SDL3-static)
+endif()
+if(APPLE)
+    target_link_libraries(MuStabilityTests PRIVATE "-framework OpenGL")
+endif()
+target_include_directories(MuStabilityTests PRIVATE
+    "${CMAKE_SOURCE_DIR}/src/source/Core"
+    "${CMAKE_SOURCE_DIR}/src/dependencies/miniaudio"
+    "${CMAKE_SOURCE_DIR}/src/source/Platform/MiniAudio"
+)
+
 include(CTest)
 include(Catch)
 catch_discover_tests(MuTests)
+catch_discover_tests(MuStabilityTests)
 
 # Build system validation tests (CMake script mode, no Catch2)
 add_subdirectory(build)
