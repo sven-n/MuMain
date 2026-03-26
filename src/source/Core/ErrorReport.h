@@ -13,7 +13,7 @@ typedef struct
 {
     wchar_t m_lpszCPU[MAX_LENGTH_CPUNAME];
     wchar_t m_lpszOS[MAX_LENGTH_OSINFO];
-    int m_iMemorySize;
+    int64_t m_iMemorySize; // int64_t to support all modern RAM sizes (>2GB)
 
     wchar_t m_lpszGpuBackend[MAX_DXVERSION];
 } ER_SystemInfo;

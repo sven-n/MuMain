@@ -260,6 +260,10 @@ TEST_CASE("AC-3/AC-STD-2 [7-6-7]: WriteSystemInfo populates OS, CPU, and RAM fie
     // VS0-QUAL-WIN32CLEAN-ERRDIAG
     ER_SystemInfo si{};
 
+    // GetSystemInfo populates the struct fields using cross-platform APIs
+    GetSystemInfo(&si);
+
+    // Then WriteSystemInfo logs those fields to the error report
     g_ErrorReport.WriteSystemInfo(&si);
 
     // AC-3: OS field must be non-empty — uname() provides sysname + release on POSIX

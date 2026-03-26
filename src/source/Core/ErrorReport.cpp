@@ -299,7 +299,7 @@ void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
     Write(L"<System information>\r\n");
     Write(L"OS \t\t\t: %ls\r\n", si->m_lpszOS);
     Write(L"CPU \t\t\t: %ls\r\n", si->m_lpszCPU);
-    Write(L"RAM \t\t\t: %dMB\r\n", 1 + (si->m_iMemorySize / 1024 / 1024));
+    Write(L"RAM \t\t\t: %lldMB\r\n", 1 + (si->m_iMemorySize / 1024 / 1024));
     AddSeparator();
     Write(L"GPU Backend \t\t: %ls\r\n", si->m_lpszGpuBackend);
 }
@@ -434,7 +434,7 @@ void GetSystemInfo(ER_SystemInfo* si)
     size_t memLen = sizeof(memSize);
     if (sysctlbyname("hw.memsize", &memSize, &memLen, nullptr, 0) == 0)
     {
-        si->m_iMemorySize = static_cast<int>(memSize);
+        si->m_iMemorySize = static_cast<int64_t>(memSize);
     }
 #else
     // Linux: read /proc/meminfo
@@ -449,7 +449,7 @@ void GetSystemInfo(ER_SystemInfo* si)
             if (pos != std::string::npos)
             {
                 long long memKb = std::strtoll(memLine.c_str() + pos + 1, nullptr, 10);
-                si->m_iMemorySize = static_cast<int>(memKb * 1024);
+                si->m_iMemorySize = static_cast<int64_t>(memKb * 1024);
             }
             break;
         }
