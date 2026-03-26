@@ -7,7 +7,7 @@
 //                  g_platformAudio, which is a global raw pointer (pre-existing from Story 5.1.1).
 //                  The delegation is a single-line if-guard in DSplaysound.cpp:742–748, verified
 //                  by code inspection. Mocking deferred to a future test-infrastructure story.
-//   AC-2 coverage:  PlaySound before Initialize returns S_FALSE
+//   AC-2 coverage:  PlaySound before Initialize returns false (Story 7.8.1: bool return)
 //   AC-3 coverage:  StopSound on unloaded slot is safe
 //   AC-4 coverage:  AllStopSound on empty backend is safe
 //   AC-5/AC-6 coverage: SetMasterVolume / SetVolume on uninitialized backend do not crash
@@ -53,24 +53,25 @@ TEST_CASE("AC-STD-2: MiniAudioBackend SFX — LoadSound non-existent file does n
 }
 
 // ---------------------------------------------------------------------------
-// AC-STD-2 (Subtask 6.4): PlaySound before Initialize returns S_FALSE
+// AC-STD-2 (Subtask 6.4): PlaySound before Initialize returns false
 // PlaySound must not crash when called before Initialize() and must return
-// S_FALSE to indicate no sound was played.
+// false to indicate no sound was played.
 // Covers AC-2 delegation guard.
+// Story 7.8.1: PlaySound now returns bool (was HRESULT).
 // ---------------------------------------------------------------------------
-TEST_CASE("AC-STD-2: MiniAudioBackend SFX — PlaySound before Initialize returns S_FALSE",
+TEST_CASE("AC-STD-2: MiniAudioBackend SFX — PlaySound before Initialize returns false",
           "[audio][sfx][lifecycle][5-2-2]")
 {
     // GIVEN: A default-constructed MiniAudioBackend (NOT initialized)
     mu::MiniAudioBackend backend;
 
     // WHEN:  PlaySound is called with no object and not looped, before Initialize()
-    // THEN:  Must return S_FALSE (existing guard from 5.2.1: !m_initialized → return S_FALSE)
+    // THEN:  Must return false (guard from 5.2.1: !m_initialized → return false)
     //        Must not crash or abort.
     // Direct call: miniaudio does not throw C++ exceptions, so REQUIRE_NOTHROW provides no value.
-    HRESULT result = backend.PlaySound(static_cast<ESound>(0), nullptr, FALSE);
+    bool result = backend.PlaySound(static_cast<ESound>(0), nullptr, false);
 
-    REQUIRE(result == S_FALSE);
+    REQUIRE(result == false);
 }
 
 // ---------------------------------------------------------------------------
@@ -90,7 +91,7 @@ TEST_CASE("AC-STD-2: MiniAudioBackend SFX — StopSound on unloaded slot is safe
 
     // WHEN:  StopSound is called on a slot that was never loaded
     // THEN:  Must not crash — guard: !m_soundLoaded[bufIdx] → return
-    backend.StopSound(static_cast<ESound>(0), FALSE);
+    backend.StopSound(static_cast<ESound>(0), false);
 
     // Cleanup
     backend.Shutdown();

@@ -189,7 +189,8 @@ TEST_CASE("AC-2: All IPlatformAudio methods are safe to call on uninitialized ba
     }());
 
     REQUIRE_NOTHROW([&]() {
-        backend.PlaySound(static_cast<ESound>(0), nullptr, false);
+        // Story 7.8.1: PlaySound now returns [[nodiscard]] bool — must capture result
+        [[maybe_unused]] bool result = backend.PlaySound(static_cast<ESound>(0), nullptr, false);
     }());
 
     REQUIRE_NOTHROW([&]() {

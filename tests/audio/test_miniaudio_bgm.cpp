@@ -57,7 +57,7 @@ TEST_CASE("AC-STD-2: MiniAudioBackend BGM lifecycle — StopMusic on unloaded st
 
     // WHEN:  StopMusic is called with no track loaded (nullptr name, hard stop)
     // THEN:  Must not crash or abort — StopMusic guards !m_initialized and !m_musicLoaded
-    backend.StopMusic(nullptr, TRUE);
+    backend.StopMusic(nullptr, true);
 
     // THEN:  IsEndMusic() still returns true — no stream was ever loaded
     REQUIRE(backend.IsEndMusic());
@@ -87,7 +87,7 @@ TEST_CASE("AC-STD-2: MiniAudioBackend BGM lifecycle — PlayMusic non-existent f
     // THEN:  Must not crash — will log error and return early
     //        (MiniAudioBackend::PlayMusic guards: !m_initialized → return;
     //         ma_sound_init_from_file() failure → g_ErrorReport.Write() + return)
-    backend.PlayMusic("nonexistent_track.mp3", TRUE);
+    backend.PlayMusic("nonexistent_track.mp3", true);
 
     // THEN:  IsEndMusic() returns true — no stream was successfully loaded.
     // NOTE:  When Initialize() returns false (CI headless), PlayMusic() hits the

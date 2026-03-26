@@ -1,6 +1,11 @@
 #ifndef __DSPLAYSOUND_H__
 #define __DSPLAYSOUND_H__
 
+// Story 7.8.1: Include PlatformTypes.h so HRESULT/BOOL/HWND are available on all platforms.
+// Forward-declare OBJECT for function parameters that use OBJECT* pointers.
+#include "Platform/PlatformTypes.h"
+struct OBJECT;
+
 #define MAX_CHANNEL 4
 
 // npc
@@ -995,7 +1000,11 @@ enum ESound
     MAX_BUFFER
 };
 
+// Story 7.8.1: DirectSound-only functions guarded for Windows.
+// On non-Windows platforms, use g_platformAudio (IPlatformAudio interface) instead.
+#ifdef _WIN32
 HRESULT InitDirectSound(HWND hDlg);
+#endif
 void SetEnableSound(bool b);
 void FreeDirectSound();
 

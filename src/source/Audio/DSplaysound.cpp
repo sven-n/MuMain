@@ -790,7 +790,8 @@ HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
 {
     if (g_platformAudio != nullptr)
     {
-        return g_platformAudio->PlaySound(bufferId, object, looped);
+        // Story 7.8.1: PlaySound now returns bool; convert to HRESULT for legacy callers
+        return g_platformAudio->PlaySound(bufferId, object, looped != FALSE) ? S_OK : S_FALSE;
     }
 #ifdef _WIN32
     return Manager().PlayBuffer(bufferId, object, looped != FALSE);
@@ -803,7 +804,7 @@ VOID StopBuffer(ESound bufferId, BOOL resetPosition)
 {
     if (g_platformAudio != nullptr)
     {
-        g_platformAudio->StopSound(bufferId, resetPosition);
+        g_platformAudio->StopSound(bufferId, resetPosition != FALSE);
         return;
     }
 #ifdef _WIN32

@@ -34,6 +34,7 @@ ALLOWED_PATHS = [
     "/ThirdParty/",
     "Audio/DSwaveIO",
     "Audio/DSplaysound",
+    "Audio/DSPlaySound",
 ]
 
 

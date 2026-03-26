@@ -43,16 +43,16 @@ public:
 
     // Sound effects
     void LoadSound(ESound buffer, const wchar_t* filename, int channels = MAX_CHANNEL, bool enable3D = false) override;
-    HRESULT PlaySound(ESound buffer, OBJECT* pObject = nullptr, BOOL looped = false) override;
-    void StopSound(ESound buffer, BOOL resetPosition) override;
+    [[nodiscard]] bool PlaySound(ESound buffer, void* pObject = nullptr, bool looped = false) override;
+    void StopSound(ESound buffer, bool resetPosition) override;
     void AllStopSound() override;
     void Set3DSoundPosition() override;
     void SetVolume(ESound buffer, long vol) override;
     void SetMasterVolume(long vol) override;
 
     // Music
-    void PlayMusic(const char* name, BOOL enforce) override;
-    void StopMusic(const char* name, BOOL enforce) override;
+    void PlayMusic(const char* name, bool enforce) override;
+    void StopMusic(const char* name, bool enforce) override;
     [[nodiscard]] bool IsEndMusic() override;
     [[nodiscard]] int GetMusicPosition() override;
 
@@ -80,13 +80,15 @@ private:
     // APIs on uninitialized ma_sound handles (UB).
     std::array<int, MAX_BUFFER> m_loadedChannels{};
 
-    // Per-slot OBJECT* for per-frame 3D position updates (Story 5.2.2).
+    // Per-slot object pointer for per-frame 3D position updates (Story 5.2.2).
     // Stores the most recent pObject passed to PlaySound() for each 3D-enabled buffer slot.
     // Lifetime: game engine guarantees object outlives the attached sound (same assumption
     // as DirectSoundManager::attachedObjects in DSplaysound.cpp). Raw pointer is intentional —
     // adding lifetime management here would require an engine-wide refactor.
     // nullptr = no object attached to this slot (safe — Set3DSoundPosition() checks before deref).
-    std::array<const OBJECT*, MAX_BUFFER> m_soundObjects{};
+    // Story 7.8.1: Changed from const OBJECT* to const void* for cross-platform portability.
+    // Cast back to const OBJECT* in Set3DSoundPosition() when accessing position data.
+    std::array<const void*, MAX_BUFFER> m_soundObjects{};
 
     float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
     float m_sfxVolume = 1.0f; // SFX volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1

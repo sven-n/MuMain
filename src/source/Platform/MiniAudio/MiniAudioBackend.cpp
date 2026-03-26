@@ -7,6 +7,7 @@
 #include "MiniAudioBackend.h"
 #include "ErrorReport.h"
 #include "PlatformCompat.h"
+#include "mu_struct.h" // OBJECT forward decl — needed for void* → OBJECT* casts (Story 7.8.1)
 
 #include <algorithm>
 #include <cmath>
@@ -204,22 +205,22 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // (round-robin reuse of looping SFX slots). Avoids the pop/click artifact caused
 // by seeking while the audio thread is actively mixing the channel.
 // ---------------------------------------------------------------------------
-HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
+bool MiniAudioBackend::PlaySound(ESound buffer, void* pObject, bool looped)
 {
     if (!m_initialized)
     {
-        return S_FALSE;
+        return false;
     }
 
     const int bufIdx = static_cast<int>(buffer);
     if (bufIdx < 0 || bufIdx >= static_cast<int>(MAX_BUFFER))
     {
-        return E_INVALIDARG;
+        return false;
     }
 
     if (!m_soundLoaded[bufIdx])
     {
-        return S_FALSE;
+        return false;
     }
 
     // Round-robin channel selection — clamp to loaded channel count (CRITICAL-1 fix).
@@ -245,9 +246,11 @@ HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
     // NEW-HIGH-1 / HIGH-1: Set 3D position BEFORE start() so the audio thread
     // never renders at the default origin (0,0,0) for even one mix tick.
     // OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
+    // Story 7.8.1: pObject is void* — cast to OBJECT* for position access.
     if (m_sound3DEnabled[bufIdx] && pObject != nullptr)
     {
-        ma_sound_set_position(pSound, pObject->Position[0], pObject->Position[1], pObject->Position[2]);
+        const auto* pObj = static_cast<const OBJECT*>(pObject);
+        ma_sound_set_position(pSound, pObj->Position[0], pObj->Position[1], pObj->Position[2]);
     }
 
     // Story 5.2.2 (Task 1.2): Store the object pointer for per-frame position updates
@@ -263,13 +266,13 @@ HRESULT MiniAudioBackend::PlaySound(ESound buffer, OBJECT* pObject, BOOL looped)
 
     ma_sound_start(pSound);
 
-    return S_OK;
+    return true;
 }
 
 // ---------------------------------------------------------------------------
 // StopSound — stop all channels for the given sound slot
 // ---------------------------------------------------------------------------
-void MiniAudioBackend::StopSound(ESound buffer, BOOL resetPosition)
+void MiniAudioBackend::StopSound(ESound buffer, bool resetPosition)
 {
     if (!m_initialized)
     {
@@ -297,7 +300,7 @@ void MiniAudioBackend::StopSound(ESound buffer, BOOL resetPosition)
         }
     }
 
-    // LOW-2 fix: clear stale OBJECT* after stopping so Set3DSoundPosition() cannot
+    // LOW-2 fix: clear stale object pointer after stopping so Set3DSoundPosition() cannot
     // dereference a pointer to an object that has since been deleted (e.g. NPC despawn).
     // The slot remains loaded — m_soundLoaded stays true — so the next PlaySound()
     // call can reuse the slot without reloading. Per-frame position updates simply
@@ -331,7 +334,7 @@ void MiniAudioBackend::AllStopSound()
 // ---------------------------------------------------------------------------
 // Set3DSoundPosition — update spatial positions for all 3D-enabled sounds
 // Mirrors DSplaysound.cpp Set3DSoundPosition() behaviour.
-// Called each frame from the game loop for sounds that have an attached OBJECT.
+// Called each frame from the game loop for sounds that have an attached game object.
 //
 // Story 5.2.2 (Tasks 2.1/2.2): Full implementation using per-slot m_soundObjects[].
 // PlaySound() stores the OBJECT* in m_soundObjects[bufIdx] for 3D-enabled slots.
@@ -364,10 +367,12 @@ void MiniAudioBackend::Set3DSoundPosition()
                 continue;
             }
 
-            // Update 3D position from the stored OBJECT* set in PlaySound().
+            // Update 3D position from the stored object pointer set in PlaySound().
             // m_soundObjects[buf] is non-null (checked above); Position is vec3_t float[3].
-            ma_sound_set_position(&m_sounds[buf][ch], m_soundObjects[buf]->Position[0],
-                                  m_soundObjects[buf]->Position[1], m_soundObjects[buf]->Position[2]);
+            // Story 7.8.1: m_soundObjects is const void* — cast to OBJECT* for position access.
+            const auto* pObj = static_cast<const OBJECT*>(m_soundObjects[buf]);
+            ma_sound_set_position(&m_sounds[buf][ch], pObj->Position[0], pObj->Position[1],
+                                  pObj->Position[2]);
         }
     }
 }
@@ -426,7 +431,7 @@ void MiniAudioBackend::SetMasterVolume(long vol)
 // to ma_sound_init_from_file(). No new Win32 calls — pure std::string manipulation.
 // m_currentMusicName stores the normalized path for the same-track guard.
 // ---------------------------------------------------------------------------
-void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
+void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 {
     if (!m_initialized || name == nullptr)
     {
@@ -504,7 +509,7 @@ void MiniAudioBackend::PlayMusic(const char* name, BOOL enforce)
 // stop via the StopMusic() free function in Winmain.cpp), so this dead-end path is
 // not reachable from current gameplay. A ResumeMusic() API may be added in 5.2.2.
 // ---------------------------------------------------------------------------
-void MiniAudioBackend::StopMusic(const char* name, BOOL enforce)
+void MiniAudioBackend::StopMusic(const char* name, bool enforce)
 {
     if (!m_initialized || !m_musicLoaded)
     {
