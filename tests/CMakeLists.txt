@@ -363,6 +363,15 @@ if(MU_ENABLE_SDL3)
     target_compile_definitions(MuTests PRIVATE MU_ENABLE_SDL3)
 endif()
 
+# Story 7.3.1: macOS 60-Minute Stability Session [VS0-QUAL-STABILITY-MACOS]
+# RED PHASE: Infrastructure tests verify MuTimer hitch/FPS APIs (AC-4) and
+# log-scan utility for ERROR entry counting (AC-5). Manual session ACs (AC-1,
+# AC-2, AC-3, AC-6, AC-VAL-1, AC-VAL-2, AC-VAL-3) use Catch2 SKIP until the
+# stability session is conducted and SESSION_* constants are populated.
+# Tests compile and run on macOS/Linux/Windows (MinGW CI) — no Win32 or GUI required.
+# GREEN PHASE: Populate SESSION_* constants, remove SKIP markers, all tests pass.
+target_sources(MuTests PRIVATE stability/test_macos_stability_session.cpp)
+
 include(CTest)
 include(Catch)
 catch_discover_tests(MuTests)
