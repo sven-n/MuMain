@@ -27,7 +27,7 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type, std::wstring str
                                            std::wstring strlocalpath, bool bPassiveMode, CListVersionInfo Version,
                                            std::vector<std::wstring> vScriptFiles)
 {
-    static WZResult result;
+    WZResult result;
 
     result.BuildSuccessResult();
 

@@ -39,7 +39,8 @@ WZResult FTPConnecter::ConfigureCurl(CURL* curl)
     // FTP-specific options
     if (this->m_pServerInfo->IsPassive())
     {
-        // EPRT/EPSV disabled = passive mode
+        // Enable extended passive mode (EPSV) for IPv6 and better firewall compatibility
+        curl_easy_setopt(curl, CURLOPT_FTP_USE_EPSV, 1L);
     }
     else
     {

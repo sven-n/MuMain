@@ -240,20 +240,19 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
 
     if (encode == FE_UTF8)
     {
-        // UTF-8 to wide char conversion
-        int cchWideChar = MultiByteToWideChar(CP_UTF8, 0, buffer, -1, 0, 0);
-        auto lpWideCharStr = new wchar_t[cchWideChar + 1];
-        MultiByteToWideChar(CP_UTF8, 0, buffer, -1, lpWideCharStr, cchWideChar);
+        // UTF-8 to wide char conversion using portable std::mbsrtowcs
+        std::mbstate_t state = {};
+        const char* src = buffer;
+        size_t len = std::mbsrtowcs(nullptr, &src, 0, &state);
 
-        int cbMultiByte = WideCharToMultiByte(0, 0, lpWideCharStr, -1, 0, 0, 0, 0);
-        char* buff = new char[cbMultiByte + 1];
-        WideCharToMultiByte(0, 0, lpWideCharStr, -1, buff, cbMultiByte, 0, 0);
-
-        // cppcheck-suppress dangerousTypeCast
-        result = (wchar_t*)buff;
-
-        delete[] lpWideCharStr;
-        delete[] buff;
+        if (len > 0 && len != static_cast<size_t>(-1))
+        {
+            auto wideStr = std::make_unique<wchar_t[]>(len + 1);
+            state = {};
+            src = buffer;
+            std::mbsrtowcs(wideStr.get(), &src, len + 1, &state);
+            result = wideStr.get();
+        }
     }
     else
     {
@@ -261,10 +260,16 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
         {
             result = L"\0";
         }
-        else
+        else if (encode == FE_ANSI)
         {
-            // cppcheck-suppress dangerousTypeCast
-            result = (wchar_t*)(buffer);
+            // ANSI (single-byte) to wide char conversion using portable mbstowcs
+            size_t wideLen = mbstowcs(nullptr, buffer, 0);
+            if (wideLen > 0 && wideLen != static_cast<size_t>(-1))
+            {
+                auto lpWideCharStr = std::make_unique<wchar_t[]>(wideLen + 1);
+                mbstowcs(lpWideCharStr.get(), buffer, wideLen + 1);
+                result = lpWideCharStr.get();
+            }
         }
     }
 

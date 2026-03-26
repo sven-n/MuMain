@@ -202,22 +202,24 @@ bool Path::ReadFileLastLine(wchar_t* szFile, wchar_t* szLastLine)
 
     if (ifs.is_open())
     {
-        std::size_t len = 0;
-
         while (!ifs.eof())
         {
             ifs.getline(buff, sizeof(buff));
-            len = strlen(buff);
-            (void)len;
         }
 
         ifs.close();
 
-        len = wcslen(szLastLine);
-
-        if (len > 1)
+        // Convert the last line read from char to wchar_t using portable mbstowcs
+        size_t wideLen = mbstowcs(nullptr, buff, 0);
+        if (wideLen > 0 && wideLen != static_cast<size_t>(-1))
         {
-            return true;
+            mbstowcs(szLastLine, buff, wideLen + 1);
+            std::size_t len = wcslen(szLastLine);
+
+            if (len > 0)
+            {
+                return true;
+            }
         }
     }
 

@@ -63,12 +63,12 @@ void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* Server
     if (!std::filesystem::exists(std::filesystem::path(LocalPath), ec))
         std::filesystem::create_directory(std::filesystem::path(LocalPath), ec);
 
-    if (this->m_ListManagerInfo.m_strLocalPath.substr(this->m_ListManagerInfo.m_strLocalPath.size(), 1) != L"/")
+    if (!this->m_ListManagerInfo.m_strLocalPath.empty() && this->m_ListManagerInfo.m_strLocalPath.back() != L'/')
     {
         this->m_ListManagerInfo.m_strLocalPath += L"/";
     }
 
-    if (this->m_ListManagerInfo.m_strRemotePath.substr(this->m_ListManagerInfo.m_strRemotePath.size(), 1) != L"/")
+    if (!this->m_ListManagerInfo.m_strRemotePath.empty() && this->m_ListManagerInfo.m_strRemotePath.back() != L'/')
     {
         this->m_ListManagerInfo.m_strRemotePath += L"/";
     }

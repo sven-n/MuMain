@@ -94,8 +94,12 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
                     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
                     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
                     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
-                    curl_easy_perform(curl);
+                    CURLcode res = curl_easy_perform(curl);
                     outFile.close();
+                    if (res != CURLE_OK)
+                    {
+                        std::filesystem::remove(std::filesystem::path(narrowPath));
+                    }
                 }
                 curl_easy_cleanup(curl);
             }
