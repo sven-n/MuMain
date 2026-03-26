@@ -522,6 +522,23 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
             "$<TARGET_FILE_DIR:Main>"
     COMMENT "Copying game assets to executable directory"
   )
+else()
+  # macOS / Linux: copy Data/, Translations/, and config.ini next to the executable.
+  # DLLs in bin/ are Windows-only and are intentionally excluded.
+  add_custom_command(
+    TARGET Main
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/bin/Data"
+            "$<TARGET_FILE_DIR:Main>/Data"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/bin/Translations"
+            "$<TARGET_FILE_DIR:Main>/Translations"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/bin/config.ini"
+            "$<TARGET_FILE_DIR:Main>/config.ini"
+    COMMENT "Copying game assets to executable directory"
+  )
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -637,6 +654,13 @@ if (DOTNET_EXECUTABLE)
       "Install the Windows .NET SDK or use WSL interop (dotnet.exe) to enable.")
     set(DOTNET_EXECUTABLE "")
   endif()
+  # Symmetric guard: Windows dotnet.exe cannot target macOS/Linux via Native AOT.
+  if (DOTNET_EXECUTABLE MATCHES "\\.exe$" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    message(WARNING "Found Windows dotnet.exe but target is ${CMAKE_SYSTEM_NAME}. "
+      "Cross-OS Native AOT is not supported. MUnique.Client.Library will NOT be built. "
+      "Install the native .NET SDK for ${CMAKE_SYSTEM_NAME} to enable.")
+    set(DOTNET_EXECUTABLE "")
+  endif()
 endif()
 if (DOTNET_EXECUTABLE)
   message(STATUS "Found .NET SDK: ${DOTNET_EXECUTABLE}")
@@ -690,10 +714,8 @@ if (DOTNET_EXECUTABLE)
       set(DOTNET_PLATFORM "x64")
     endif()
   else()
-    message(WARNING "Unrecognized platform: ${CMAKE_SYSTEM_NAME}. Defaulting to linux-x64.")
-    set(MU_DOTNET_LIB_EXT ".so")
-    set(DOTNET_RID "linux-x64")
-    set(DOTNET_PLATFORM "x64")
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}. "
+      ".NET Native AOT supports Windows, macOS (Darwin), and Linux only.")
   endif()
   message(STATUS ".NET Client Library: RID=${DOTNET_RID}, Platform=${DOTNET_PLATFORM}, LIB_EXT=${MU_DOTNET_LIB_EXT}")
 
