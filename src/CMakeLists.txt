@@ -661,8 +661,44 @@ if (DOTNET_EXECUTABLE)
     endif()
   endfunction()
 
-  # 1. Define the output path using a variable CMake can understand early
-  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library.dll")
+  # 1. Determine runtime identifier and platform target based on host OS
+  if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(MU_DOTNET_LIB_EXT ".dll")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(DOTNET_RID "win-x64")
+      set(DOTNET_PLATFORM "x64")
+    else()
+      set(DOTNET_RID "win-x86")
+      set(DOTNET_PLATFORM "x86")
+    endif()
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(MU_DOTNET_LIB_EXT ".dylib")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+      set(DOTNET_RID "osx-arm64")
+      set(DOTNET_PLATFORM "arm64")
+    else()
+      set(DOTNET_RID "osx-x64")
+      set(DOTNET_PLATFORM "x64")
+    endif()
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(MU_DOTNET_LIB_EXT ".so")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+      set(DOTNET_RID "linux-arm64")
+      set(DOTNET_PLATFORM "arm64")
+    else()
+      set(DOTNET_RID "linux-x64")
+      set(DOTNET_PLATFORM "x64")
+    endif()
+  else()
+    message(WARNING "Unrecognized platform: ${CMAKE_SYSTEM_NAME}. Defaulting to linux-x64.")
+    set(MU_DOTNET_LIB_EXT ".so")
+    set(DOTNET_RID "linux-x64")
+    set(DOTNET_PLATFORM "x64")
+  endif()
+  message(STATUS ".NET Client Library: RID=${DOTNET_RID}, Platform=${DOTNET_PLATFORM}, LIB_EXT=${MU_DOTNET_LIB_EXT}")
+
+  # 2. Define the output path using the platform-correct extension
+  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
   # Create temp directories for Native AOT build.
@@ -687,17 +723,6 @@ if (DOTNET_EXECUTABLE)
 
   # 3. Build to temp directory with Native AOT, then copy to build and bin directories
   # Override environment variables to avoid issues with umlauts in Windows username
-  # Determine runtime identifier and platform target based on architecture
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(DOTNET_RID "win-x64")
-    set(DOTNET_PLATFORM "x64")
-    message(STATUS ".NET Client Library will build for x64 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
-  else()
-    set(DOTNET_RID "win-x86")
-    set(DOTNET_PLATFORM "x86")
-    message(STATUS ".NET Client Library will build for x86 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
-  endif()
-
   # Legacy ClientLibrary build — skipped when MU_ENABLE_DOTNET=ON (FindDotnetAOT handles it)
   if(NOT MU_ENABLE_DOTNET)
     add_custom_command(
@@ -709,7 +734,7 @@ if (DOTNET_EXECUTABLE)
                     "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
                     "TMP=${DOTNET_TEMP_DIR_NATIVE}"
                     "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}" "${DOTNET_DLL_PATH}"
             DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
             COMMENT "Checking for .NET Client Library updates..."
             VERBATIM

@@ -24,7 +24,9 @@
 #include "ZzzLodTerrain.h"
 #include "DSPlaySound.h"
 
+#ifdef _WIN32
 #include "resource.h"
+#endif
 #include <imm.h>
 #include "ZzzPath.h"
 #include "Local.h"
