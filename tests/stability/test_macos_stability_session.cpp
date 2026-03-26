@@ -55,7 +55,6 @@
 
 // RED PHASE: These are 0/0.0 placeholders. Populate with real values after the session.
 // Suppress unused warnings — constants are referenced only in SKIP'd tests (GREEN phase).
-// NOLINTBEGIN(misc-unused-parameters)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-const-variable"
 static constexpr double SESSION_DURATION_MINUTES = 0.0;
@@ -70,11 +69,11 @@ static constexpr int SESSION_ERROR_LOG_ENTRIES = 0;
 // =============================================================================
 // Stability session FPS / hitch thresholds (from story requirements)
 // =============================================================================
-static constexpr double FPS_MINIMUM_SUSTAINED = 30.0;        // AC-4: must sustain ≥30 FPS
+static constexpr double FPS_MINIMUM_SUSTAINED = 30.0;                       // AC-4: must sustain ≥30 FPS
 static constexpr double FRAME_TIME_MAX_MS = 1000.0 / FPS_MINIMUM_SUSTAINED; // ≈33.3 ms
-static constexpr double HITCH_THRESHOLD_MS = 50.0;           // AC-4: >50ms = hitch
-static constexpr double MEMORY_GROWTH_MAX_PCT = 20.0;        // AC-6: <20% growth = stable
-static constexpr double SESSION_DURATION_MIN_MINUTES = 60.0; // AC-1: ≥60 minutes
+static constexpr double HITCH_THRESHOLD_MS = 50.0;                          // AC-4: >50ms = hitch
+static constexpr double MEMORY_GROWTH_MAX_PCT = 20.0;                       // AC-6: <20% growth = stable
+static constexpr double SESSION_DURATION_MIN_MINUTES = 60.0;                // AC-1: ≥60 minutes
 
 // =============================================================================
 // Helper: unique temp file path for test log isolation
@@ -84,8 +83,7 @@ namespace
 
 std::filesystem::path TempLogPath(const char* suffix)
 {
-    return std::filesystem::temp_directory_path()
-           / (std::string("mu_test_7_3_1_") + suffix + ".log");
+    return std::filesystem::temp_directory_path() / (std::string("mu_test_7_3_1_") + suffix + ".log");
 }
 
 void RemoveQuiet(const std::filesystem::path& path)
@@ -102,8 +100,7 @@ void RemoveQuiet(const std::filesystem::path& path)
 // Verifies the mathematical relationship between the 30 FPS target and the 50ms
 // hitch threshold. This is a compile-time / arithmetic test — no real frames needed.
 
-TEST_CASE("AC-4 [7-3-1]: FPS and hitch threshold constants are consistent",
-          "[stability][infrastructure][7-3-1]")
+TEST_CASE("AC-4 [7-3-1]: FPS and hitch threshold constants are consistent", "[stability][infrastructure][7-3-1]")
 {
     // GIVEN: Project-defined thresholds for the stability session (AC-4)
 
@@ -127,8 +124,7 @@ TEST_CASE("AC-4 [7-3-1]: FPS and hitch threshold constants are consistent",
 // to validate AC-4 during the session. Does not duplicate test_mu_timer.cpp —
 // this test verifies the *session monitoring* usage pattern specifically.
 
-TEST_CASE("AC-4 [7-3-1]: MuTimer provides hitch detection for session monitoring",
-          "[stability][infrastructure][7-3-1]")
+TEST_CASE("AC-4 [7-3-1]: MuTimer provides hitch detection for session monitoring", "[stability][infrastructure][7-3-1]")
 {
     // GIVEN: A fresh MuTimer instance (as used at session start)
     mu::MuTimer timer;
@@ -150,8 +146,7 @@ TEST_CASE("AC-4 [7-3-1]: MuTimer provides hitch detection for session monitoring
     REQUIRE(timer.GetHitchCount() == 1);
 }
 
-TEST_CASE("AC-4 [7-3-1]: MuTimer FPS reflects frame rate for session monitoring",
-          "[stability][infrastructure][7-3-1]")
+TEST_CASE("AC-4 [7-3-1]: MuTimer FPS reflects frame rate for session monitoring", "[stability][infrastructure][7-3-1]")
 {
     // GIVEN: A MuTimer with multiple fast frames (~60 FPS = 16ms each)
     mu::MuTimer timer;
@@ -180,7 +175,9 @@ TEST_CASE("AC-4 [7-3-1]: MuTimer FPS reflects frame rate for session monitoring"
 namespace
 {
 
-/// Count lines containing "ERROR" in a log file. Returns -1 if file not found.
+/// Count lines containing "[ERROR]" in a log file. Returns -1 if file not found.
+/// Matches the [ERROR] format used by CErrorReport::Write(), avoiding false positives
+/// from substrings like "NO_ERROR", "ERRORLEVEL", etc.
 int CountErrorLogEntries(const std::filesystem::path& logPath)
 {
     std::ifstream f(logPath);
@@ -192,7 +189,7 @@ int CountErrorLogEntries(const std::filesystem::path& logPath)
     std::string line;
     while (std::getline(f, line))
     {
-        if (line.find("ERROR") != std::string::npos)
+        if (line.find("[ERROR]") != std::string::npos)
         {
             ++count;
         }
@@ -202,8 +199,7 @@ int CountErrorLogEntries(const std::filesystem::path& logPath)
 
 } // namespace
 
-TEST_CASE("AC-5 [7-3-1]: Log scan finds zero ERROR entries in clean session log",
-          "[stability][infrastructure][7-3-1]")
+TEST_CASE("AC-5 [7-3-1]: Log scan finds zero ERROR entries in clean session log", "[stability][infrastructure][7-3-1]")
 {
     // GIVEN: A temp log file with only INFO-level entries (simulating a clean session)
     auto logPath = TempLogPath("clean_session");
@@ -225,8 +221,7 @@ TEST_CASE("AC-5 [7-3-1]: Log scan finds zero ERROR entries in clean session log"
     RemoveQuiet(logPath);
 }
 
-TEST_CASE("AC-5 [7-3-1]: Log scan correctly identifies ERROR entries",
-          "[stability][infrastructure][7-3-1]")
+TEST_CASE("AC-5 [7-3-1]: Log scan correctly identifies ERROR entries", "[stability][infrastructure][7-3-1]")
 {
     // GIVEN: A temp log file that includes an ERROR entry
     auto logPath = TempLogPath("error_session");
@@ -248,8 +243,7 @@ TEST_CASE("AC-5 [7-3-1]: Log scan correctly identifies ERROR entries",
     RemoveQuiet(logPath);
 }
 
-TEST_CASE("AC-5 [7-3-1]: Log scan returns -1 when log file does not exist",
-          "[stability][infrastructure][7-3-1]")
+TEST_CASE("AC-5 [7-3-1]: Log scan returns -1 when log file does not exist", "[stability][infrastructure][7-3-1]")
 {
     // GIVEN: A path that does not exist
     auto logPath = TempLogPath("nonexistent_7_3_1");
@@ -268,8 +262,7 @@ TEST_CASE("AC-5 [7-3-1]: Log scan returns -1 when log file does not exist",
 // SKIP until session is conducted. In GREEN phase: populate SESSION_DURATION_MINUTES
 // and verify it meets the 60-minute minimum requirement.
 
-TEST_CASE("AC-1 [7-3-1]: 60+ minute gameplay session completed without crashes",
-          "[stability][session][manual][7-3-1]")
+TEST_CASE("AC-1 [7-3-1]: 60+ minute gameplay session completed without crashes", "[stability][session][manual][7-3-1]")
 {
     SKIP("RED PHASE — requires completed macOS arm64 stability session. "
          "Populate SESSION_DURATION_MINUTES with measured value and remove SKIP.");
@@ -284,8 +277,7 @@ TEST_CASE("AC-1 [7-3-1]: 60+ minute gameplay session completed without crashes",
 // SKIP until session is conducted. In GREEN phase: this test becomes a documentation
 // assertion confirming activities were performed (see progress.md session log).
 
-TEST_CASE("AC-2 [7-3-1]: Session includes all required gameplay activities",
-          "[stability][session][manual][7-3-1]")
+TEST_CASE("AC-2 [7-3-1]: Session includes all required gameplay activities", "[stability][session][manual][7-3-1]")
 {
     SKIP("RED PHASE — requires completed macOS arm64 stability session. "
          "Document activities in progress.md#session-log and remove SKIP.");
@@ -297,8 +289,7 @@ TEST_CASE("AC-2 [7-3-1]: Session includes all required gameplay activities",
 // AC-3 [MANUAL]: No server disconnects during session
 // =============================================================================
 
-TEST_CASE("AC-3 [7-3-1]: No server disconnects during session",
-          "[stability][session][manual][7-3-1]")
+TEST_CASE("AC-3 [7-3-1]: No server disconnects during session", "[stability][session][manual][7-3-1]")
 {
     SKIP("RED PHASE — requires completed macOS arm64 stability session. "
          "Populate SESSION_DISCONNECT_COUNT and remove SKIP.");
@@ -309,8 +300,7 @@ TEST_CASE("AC-3 [7-3-1]: No server disconnects during session",
 // AC-4 [MANUAL]: Session frame time log validates 30+ FPS sustained, 0 hitches
 // =============================================================================
 
-TEST_CASE("AC-4 [7-3-1]: Session sustained 30+ FPS with no hitches",
-          "[stability][session][manual][7-3-1]")
+TEST_CASE("AC-4 [7-3-1]: Session sustained 30+ FPS with no hitches", "[stability][session][manual][7-3-1]")
 {
     SKIP("RED PHASE — requires completed macOS arm64 stability session. "
          "Populate SESSION_MIN_FPS and SESSION_HITCH_COUNT, then remove SKIP.");
@@ -322,8 +312,7 @@ TEST_CASE("AC-4 [7-3-1]: Session sustained 30+ FPS with no hitches",
 // AC-5 [MANUAL]: MuError.log shows no ERROR entries during session
 // =============================================================================
 
-TEST_CASE("AC-5 [7-3-1]: MuError.log shows no ERROR entries during session",
-          "[stability][session][manual][7-3-1]")
+TEST_CASE("AC-5 [7-3-1]: MuError.log shows no ERROR entries during session", "[stability][session][manual][7-3-1]")
 {
     SKIP("RED PHASE — requires completed macOS arm64 stability session. "
          "Populate SESSION_ERROR_LOG_ENTRIES and remove SKIP.");
@@ -334,8 +323,7 @@ TEST_CASE("AC-5 [7-3-1]: MuError.log shows no ERROR entries during session",
 // AC-6 [MANUAL]: Memory usage stable (<20% growth over 60 minutes)
 // =============================================================================
 
-TEST_CASE("AC-6 [7-3-1]: Memory usage stable over 60-minute session",
-          "[stability][session][manual][7-3-1]")
+TEST_CASE("AC-6 [7-3-1]: Memory usage stable over 60-minute session", "[stability][session][manual][7-3-1]")
 {
     SKIP("RED PHASE — requires completed macOS arm64 stability session. "
          "Populate SESSION_MEMORY_GROWTH_PCT and remove SKIP.");
@@ -346,8 +334,7 @@ TEST_CASE("AC-6 [7-3-1]: Memory usage stable over 60-minute session",
 // AC-VAL-1 [MANUAL]: Session log exists and covers required activities
 // =============================================================================
 
-TEST_CASE("AC-VAL-1 [7-3-1]: Session log artifact exists in story progress",
-          "[stability][validation][manual][7-3-1]")
+TEST_CASE("AC-VAL-1 [7-3-1]: Session log artifact exists in story progress", "[stability][validation][manual][7-3-1]")
 {
     SKIP("RED PHASE — requires completed macOS arm64 stability session. "
          "Attach session log to progress.md and remove SKIP.");
