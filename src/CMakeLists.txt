@@ -697,6 +697,17 @@ if (DOTNET_EXECUTABLE)
   endif()
   message(STATUS ".NET Client Library: RID=${DOTNET_RID}, Platform=${DOTNET_PLATFORM}, LIB_EXT=${MU_DOTNET_LIB_EXT}")
 
+  # Portable OpenSSL library path for .NET Native AOT linker.
+  # LIBRARY_PATH is honoured by clang/ld at link time on macOS and Linux.
+  # Reuses the find_package(OpenSSL) result from above so no extra probe is needed.
+  # Not set on Windows — MSVC link.exe does not use LIBRARY_PATH.
+  set(_DOTNET_ENV_EXTRA)
+  if(OPENSSL_FOUND AND OPENSSL_CRYPTO_LIBRARY AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    get_filename_component(_OPENSSL_LIB_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
+    list(APPEND _DOTNET_ENV_EXTRA "LIBRARY_PATH=${_OPENSSL_LIB_DIR}")
+    message(STATUS ".NET Client Library: OpenSSL lib dir for linker: ${_OPENSSL_LIB_DIR}")
+  endif()
+
   # 2. Define the output path using the platform-correct extension
   set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
@@ -733,6 +744,7 @@ if (DOTNET_EXECUTABLE)
                     "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
                     "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
                     "TMP=${DOTNET_TEMP_DIR_NATIVE}"
+                    ${_DOTNET_ENV_EXTRA}
                     "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}" "${DOTNET_DLL_PATH}"
             DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
