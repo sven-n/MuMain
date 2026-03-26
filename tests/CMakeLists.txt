@@ -295,6 +295,17 @@ target_sources(MuTests PRIVATE platform/test_win32_string_cleanup_7_6_2.cpp)
 # always compiled and run — no Win32 or OpenGL required.
 target_sources(MuTests PRIVATE gameplay/test_ui_windows_validation.cpp)
 
+# Story 7.8.2: Gameplay Header Cross-Platform Fixes [VS0-QUAL-BUILD-HEADERS]
+# RED PHASE: test_gameplay_header_crossplatform_7_8_2.cpp includes mu_enum.h from a
+# third translation unit (alongside test_combat_system_validation.cpp and
+# test_ui_windows_validation.cpp, which also include mu_enum.h). On macOS/Linux,
+# building MuTests fails at link time with a duplicate-symbol error for SKILL_REPLACEMENTS
+# until 'inline' is added to its declaration in mu_enum.h (AC-1). The compilation
+# success of this TU IS the RED phase failure; linker error resolves in GREEN phase.
+# AC-2/AC-3/AC-4 (ZzzPath.h, SkillStructs.h, CSItemOption.h) are verified by CMake
+# script tests in tests/build/ — those headers have Win32 deps, not included here.
+target_sources(MuTests PRIVATE gameplay/test_gameplay_header_crossplatform_7_8_2.cpp)
+
 # Story 7.8.1: Audio Interface Win32 Type Cleanup [VS0-QUAL-BUILD-AUDIO]
 # RED PHASE: AC-2 primary test: PlaySound return type must be bool (sizeof == 1), not
 # HRESULT (= long, sizeof == 4 or 8). sizeof(result) != sizeof(bool) fails in RED phase.

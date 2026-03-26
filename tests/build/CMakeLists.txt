@@ -666,3 +666,54 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_8_1.cmake
 )
+
+# ==========================================================================
+# Story 7.8.2 - Gameplay Header Cross-Platform Fixes [VS0-QUAL-BUILD-HEADERS]
+# RED PHASE: Tests verify that gameplay headers are self-contained and ODR-safe:
+#   AC-1: mu_enum.h SKILL_REPLACEMENTS is declared inline (ODR-safe)
+#   AC-2: ZzzPath.h explicitly includes ErrorReport.h (no transitive dep on g_ErrorReport)
+#   AC-3: SkillStructs.h includes MultiLanguage.h (CMultiLanguage dependency explicit)
+#   AC-4: CSItemOption.h includes mu_enum.h and ITEM header (ActionSkillType, ITEM types)
+# ==========================================================================
+
+set(MU_GAMEPLAY_SOURCE_ROOT "${MUMAIN_SOURCE_DIR}/src/source")
+
+# AC-1: Core/mu_enum.h SKILL_REPLACEMENTS declared with 'inline' keyword (ODR-safe)
+add_test(
+    NAME "7.8.2-AC-1:mu-enum-inline-skill-replacements"
+    COMMAND ${CMAKE_COMMAND}
+        -DMU_ENUM_H=${MU_GAMEPLAY_SOURCE_ROOT}/Core/mu_enum.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_mu_enum_inline_7_8_2.cmake
+)
+
+# AC-2: World/ZzzPath.h explicitly includes ErrorReport.h
+add_test(
+    NAME "7.8.2-AC-2:zzzpath-errorreport-include"
+    COMMAND ${CMAKE_COMMAND}
+        -DZZZ_PATH_H=${MU_GAMEPLAY_SOURCE_ROOT}/World/ZzzPath.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_zzzpath_errorreport_include_7_8_2.cmake
+)
+
+# AC-3: Data/Skills/SkillStructs.h includes MultiLanguage.h (CMultiLanguage defined)
+add_test(
+    NAME "7.8.2-AC-3:skillstructs-multilanguage-include"
+    COMMAND ${CMAKE_COMMAND}
+        -DSKILL_STRUCTS_H=${MU_GAMEPLAY_SOURCE_ROOT}/Data/Skills/SkillStructs.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_skillstructs_multilanguage_7_8_2.cmake
+)
+
+# AC-4: Gameplay/Items/CSItemOption.h includes types for ActionSkillType and ITEM
+add_test(
+    NAME "7.8.2-AC-4:csitemoption-type-includes"
+    COMMAND ${CMAKE_COMMAND}
+        -DCS_ITEM_OPTION_H=${MU_GAMEPLAY_SOURCE_ROOT}/Gameplay/Items/CSItemOption.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_csitemoption_type_includes_7_8_2.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-BUILD-HEADERS traceability
+add_test(
+    NAME "7.8.2-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_8_2.cmake
+)
