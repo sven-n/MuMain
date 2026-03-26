@@ -157,8 +157,16 @@ if(MU_ENABLE_DOTNET)
         add_compile_definitions(MU_DOTNET_LIB_EXT="${MU_DOTNET_LIB_EXT}")
     endif()
 else()
-    # Default to .dll when dotnet is disabled (CI MinGW cross-compile builds)
-    add_compile_definitions(MU_DOTNET_LIB_EXT=".dll")
+    # MU_ENABLE_DOTNET is OFF: legacy build path in src/CMakeLists.txt handles dotnet publish.
+    # Detect extension from host OS so C++ code loads the correct filename at runtime.
+    # MinGW cross-compile (CI) targets Windows and defaults to .dll.
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        add_compile_definitions(MU_DOTNET_LIB_EXT=".dylib")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_compile_definitions(MU_DOTNET_LIB_EXT=".so")
+    else()
+        add_compile_definitions(MU_DOTNET_LIB_EXT=".dll")
+    endif()
 endif()
 
 add_subdirectory("src")
