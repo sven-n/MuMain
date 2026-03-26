@@ -29,11 +29,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#ifdef _WIN32
 #include "PlatformTypes.h"
-#else
-#include "PlatformTypes.h"
-#endif
 
 #include "mu_enum.h"
 

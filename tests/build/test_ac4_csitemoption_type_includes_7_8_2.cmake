@@ -50,16 +50,22 @@ endif()
 # ---------------------------------------------------------------------------
 string(FIND "${content}" "#include \"mu_struct.h\"" pos_mu_struct)
 string(FIND "${content}" "#include \"Item.h\"" pos_item_h)
-string(FIND "${content}" "struct ITEM" pos_fwd_item)
+# ITEM is defined as 'typedef struct tagITEM { ... } ITEM;' in mu_struct.h.
+# A plain 'struct ITEM;' forward declaration is INCORRECT (introduces a different
+# type tag that conflicts with the typedef). The correct forward declaration is:
+#   struct tagITEM; typedef struct tagITEM ITEM;
+string(FIND "${content}" "typedef struct tagITEM ITEM" pos_typedef_fwd)
+string(FIND "${content}" "struct tagITEM" pos_tag_fwd)
 
-if(pos_mu_struct EQUAL -1 AND pos_item_h EQUAL -1 AND pos_fwd_item EQUAL -1)
+if(pos_mu_struct EQUAL -1 AND pos_item_h EQUAL -1 AND pos_typedef_fwd EQUAL -1)
     message(FATAL_ERROR
         "AC-4 FAILED: CSItemOption.h uses ITEM* but does not include the header\n"
-        "that defines struct ITEM and has no forward declaration for ITEM.\n"
-        "Fix: Add '#include \"mu_struct.h\"' (or forward-declare 'struct ITEM;') to CSItemOption.h\n"
-        "Why: GetDefaultOptionValue(), GetDefaultOptionText(), RenderDefaultOptionText()\n"
-        "     and similar methods take ITEM* parameters. Without the definition in scope,\n"
-        "     the compiler cannot resolve ITEM.")
+        "that defines ITEM and has no correct forward declaration.\n"
+        "ITEM is defined as 'typedef struct tagITEM { ... } ITEM;' in mu_struct.h.\n"
+        "Fix: Add '#include \"mu_struct.h\"' or forward-declare correctly:\n"
+        "  struct tagITEM;\n"
+        "  typedef struct tagITEM ITEM;\n"
+        "Note: A plain 'struct ITEM;' is INCORRECT — it introduces a conflicting tag name.")
 endif()
 
 # ---------------------------------------------------------------------------
