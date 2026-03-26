@@ -20,18 +20,20 @@ if(MU_USE_OPENGL_BACKEND)
 endif()
 
 # ============================================================
-# Story 4.3.2: Shader Programs (HLSL + SDL_shadercross)
-# MU_ENABLE_SHADER_COMPILATION=OFF (default): Copy pre-compiled blobs from
-#   src/shaders/compiled/ to ${CMAKE_BINARY_DIR}/shaders/ at configure time.
-#   CI-safe: no SDL_shadercross tool required.
-# MU_ENABLE_SHADER_COMPILATION=ON: Compile HLSL shaders via SDL_shadercross.
-#   Requires SDL_shadercross binary on PATH or findable via find_program.
+# Shader Programs: HLSL → SPIR-V (glslang) + SPIR-V → MSL (spirv-cross)
+# MU_ENABLE_SHADER_COMPILATION=ON (default): Compile HLSL shaders at build time.
+#   glslangValidator + spirv-cross are used if found on PATH; otherwise they are
+#   fetched and built from source via FetchContent.
+#   Install manually:  brew install glslang spirv-cross            (macOS)
+#                      apt-get install glslang-tools spirv-cross   (Linux)
+# MU_ENABLE_SHADER_COMPILATION=OFF: Copy pre-compiled blobs from
+#   src/shaders/compiled/ at configure time (offline / MinGW builds).
 #
 # MU_SHADER_DIR is propagated to MuRendererSDLGpu.cpp via compile definition
 # so runtime shader loading uses the correct blob directory.
 # ============================================================
 option(MU_ENABLE_SHADER_COMPILATION
-    "Compile HLSL shaders via SDL_shadercross (requires tool on PATH; OFF for CI)" OFF)
+    "Compile HLSL shaders via glslang+spirv-cross (ON by default; OFF for offline/MinGW builds)" ON)
 
 set(MU_SHADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}/shaders")
 set(MU_SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders")
@@ -45,67 +47,98 @@ add_compile_definitions(MU_SHADER_DIR="${MU_SHADER_OUTPUT_DIR}/")
 file(MAKE_DIRECTORY "${MU_SHADER_OUTPUT_DIR}")
 
 if(MU_ENABLE_SHADER_COMPILATION)
-    # Live shader compilation via SDL_shadercross.
-    # Requires the tool to be installed (brew install sdl3-shadercross on macOS,
-    # or built from source). Falls back gracefully: if not found, emit a warning
-    # and skip compilation (the pre-compiled blobs in src/shaders/compiled/ are used).
-    find_program(SDL_SHADERCROSS_EXE NAMES SDL_shadercross sdl_shadercross shadercross
-        DOC "SDL_shadercross shader compilation tool")
+    include(FetchContent)
 
-    if(SDL_SHADERCROSS_EXE)
-        message(STATUS "SDL_shadercross found: ${SDL_SHADERCROSS_EXE} — shader compilation enabled")
-
-        # Helper function: add one compile command per shader × format combination.
-        # Usage: compile_hlsl_shader(<name> <stage> <format> <output_blob>)
-        function(compile_hlsl_shader shader_name stage fmt output_blob)
-            set(src "${MU_SHADER_SOURCE_DIR}/${shader_name}.${stage}.hlsl")
-            add_custom_command(
-                OUTPUT "${output_blob}"
-                COMMAND "${SDL_SHADERCROSS_EXE}"
-                    --source "${src}"
-                    --stage "${stage}"
-                    --format "${fmt}"
-                    --output "${output_blob}"
-                DEPENDS "${src}"
-                COMMENT "Compiling ${shader_name}.${stage}.hlsl -> ${fmt}"
-                VERBATIM
-            )
-        endfunction()
-
-        # Compile all 5 shaders × 3 formats = 15 blobs.
-        set(MU_SHADER_BLOBS)
-        foreach(shader IN ITEMS basic_textured basic_colored)
-            foreach(stage IN ITEMS vert frag)
-                foreach(fmt ext IN ITEMS spirv spv dxil dxil msl msl)
-                    set(blob "${MU_SHADER_OUTPUT_DIR}/${shader}.${stage}.${ext}")
-                    compile_hlsl_shader("${shader}" "${stage}" "${fmt}" "${blob}")
-                    list(APPEND MU_SHADER_BLOBS "${blob}")
-                endforeach()
-            endforeach()
-        endforeach()
-        foreach(fmt ext IN ITEMS spirv spv dxil dxil msl msl)
-            set(blob "${MU_SHADER_OUTPUT_DIR}/shadow_volume.vert.${ext}")
-            compile_hlsl_shader("shadow_volume" "vert" "${fmt}" "${blob}")
-            list(APPEND MU_SHADER_BLOBS "${blob}")
-        endforeach()
-
-        add_custom_target(ShaderCompilation ALL DEPENDS ${MU_SHADER_BLOBS})
+    # -- glslangValidator: HLSL → SPIR-V --
+    find_program(GLSLANG_EXE NAMES glslangValidator glslang
+        DOC "glslang HLSL/GLSL to SPIR-V compiler")
+    set(_MU_GLSLANG_EXTRA_DEP "")
+    if(NOT GLSLANG_EXE)
+        set(GLSLANG_FETCH_TAG "14.3.0" CACHE STRING "glslang git tag for FetchContent fallback")
+        message(STATUS "glslangValidator not on PATH — fetching glslang ${GLSLANG_FETCH_TAG} via FetchContent")
+        FetchContent_Declare(glslang
+            GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
+            GIT_TAG        "${GLSLANG_FETCH_TAG}"
+            GIT_SHALLOW    TRUE
+        )
+        set(ENABLE_GLSLANG_BINARIES ON  CACHE BOOL "" FORCE)
+        set(ENABLE_HLSL             ON  CACHE BOOL "" FORCE)
+        set(ENABLE_OPT              OFF CACHE BOOL "" FORCE)
+        set(BUILD_EXTERNAL          OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(glslang)
+        set(GLSLANG_EXE "$<TARGET_FILE:glslangValidator>")
+        set(_MU_GLSLANG_EXTRA_DEP "glslangValidator")
     else()
-        message(WARNING
-            "MU_ENABLE_SHADER_COMPILATION=ON but SDL_shadercross not found. "
-            "Falling back to pre-compiled blobs in src/shaders/compiled/.")
-        set(MU_ENABLE_SHADER_COMPILATION OFF)
+        message(STATUS "glslangValidator: ${GLSLANG_EXE}")
     endif()
+
+    # -- spirv-cross: SPIR-V → MSL --
+    find_program(SPIRV_CROSS_EXE NAMES spirv-cross
+        DOC "SPIR-V cross-compiler (SPIR-V → MSL)")
+    set(_MU_SPIRVCROSS_EXTRA_DEP "")
+    if(NOT SPIRV_CROSS_EXE)
+        set(SPIRVCROSS_FETCH_TAG "vulkan-sdk-1.3.290.0" CACHE STRING "SPIRV-Cross git tag for FetchContent fallback")
+        message(STATUS "spirv-cross not on PATH — fetching SPIRV-Cross ${SPIRVCROSS_FETCH_TAG} via FetchContent")
+        FetchContent_Declare(spirvcross
+            GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Cross.git
+            GIT_TAG        "${SPIRVCROSS_FETCH_TAG}"
+            GIT_SHALLOW    TRUE
+        )
+        set(SPIRV_CROSS_CLI          ON  CACHE BOOL "" FORCE)
+        set(SPIRV_CROSS_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(spirvcross)
+        set(SPIRV_CROSS_EXE "$<TARGET_FILE:spirv-cross>")
+        set(_MU_SPIRVCROSS_EXTRA_DEP "spirv-cross")
+    else()
+        message(STATUS "spirv-cross: ${SPIRV_CROSS_EXE}")
+    endif()
+
+    # Helper: compile one HLSL stage → SPIR-V + MSL + DXIL stub.
+    # Appends output paths to MU_SHADER_BLOBS in the parent scope.
+    function(mu_add_shader shader_name stage)
+        set(src  "${MU_SHADER_SOURCE_DIR}/${shader_name}.${stage}.hlsl")
+        set(spv  "${MU_SHADER_OUTPUT_DIR}/${shader_name}.${stage}.spv")
+        set(msl  "${MU_SHADER_OUTPUT_DIR}/${shader_name}.${stage}.msl")
+        set(dxil "${MU_SHADER_OUTPUT_DIR}/${shader_name}.${stage}.dxil")
+
+        add_custom_command(
+            OUTPUT  "${spv}"
+            COMMAND "${GLSLANG_EXE}" -V -D -S "${stage}" -e main -o "${spv}" "${src}"
+            DEPENDS "${src}" ${_MU_GLSLANG_EXTRA_DEP}
+            COMMENT "HLSL→SPIR-V: ${shader_name}.${stage}.hlsl"
+            VERBATIM
+        )
+        add_custom_command(
+            OUTPUT  "${msl}"
+            COMMAND "${SPIRV_CROSS_EXE}" --msl "${spv}" --output "${msl}"
+            DEPENDS "${spv}" ${_MU_SPIRVCROSS_EXTRA_DEP}
+            COMMENT "SPIR-V→MSL: ${shader_name}.${stage}.spv"
+            VERBATIM
+        )
+        # DXIL stub — empty file (DX12 not yet implemented; MinGW target uses OpenGL)
+        add_custom_command(
+            OUTPUT  "${dxil}"
+            COMMAND "${CMAKE_COMMAND}" -E touch "${dxil}"
+            COMMENT "DXIL stub: ${shader_name}.${stage}.dxil"
+            VERBATIM
+        )
+        set(MU_SHADER_BLOBS "${MU_SHADER_BLOBS}" "${spv}" "${msl}" "${dxil}" PARENT_SCOPE)
+    endfunction()
+
+    set(MU_SHADER_BLOBS)
+    foreach(shader IN ITEMS basic_textured basic_colored)
+        foreach(stage IN ITEMS vert frag)
+            mu_add_shader("${shader}" "${stage}")
+        endforeach()
+    endforeach()
+    mu_add_shader("shadow_volume" "vert")
+
+    add_custom_target(ShaderCompilation ALL DEPENDS ${MU_SHADER_BLOBS})
 endif()
 
 if(NOT MU_ENABLE_SHADER_COMPILATION)
-    # CI-safe fallback: copy pre-compiled blobs from src/shaders/compiled/ to
-    # ${CMAKE_BINARY_DIR}/shaders/ at configure time. No tool dependency.
+    # Offline fallback: copy pre-compiled blobs from src/shaders/compiled/ at configure time.
     file(GLOB MU_PRECOMPILED_BLOBS "${MU_SHADER_COMPILED_DIR}/*")
-    # Story 4.3.2 (HIGH-1 fix): warn if pre-compiled blobs are all empty (0 bytes).
-    # Empty blobs mean LoadShaderBlob() will fail at runtime and Init() will return false.
-    # To fix: run SDL_shadercross to compile the HLSL shaders and replace the placeholder files
-    # in src/shaders/compiled/, or enable MU_ENABLE_SHADER_COMPILATION on a capable machine.
     set(MU_FOUND_NONEMPTY_BLOB FALSE)
     foreach(blob IN LISTS MU_PRECOMPILED_BLOBS)
         if(EXISTS "${blob}")
@@ -118,10 +151,12 @@ if(NOT MU_ENABLE_SHADER_COMPILATION)
     endforeach()
     if(NOT MU_FOUND_NONEMPTY_BLOB)
         message(WARNING
-            "All pre-compiled shader blobs in src/shaders/compiled/ are empty (0 bytes). "
-            "LoadShaderBlob() will fail at runtime — renderer Init() will return false. "
-            "To fix: compile HLSL shaders via SDL_shadercross and commit the blobs, "
-            "or enable MU_ENABLE_SHADER_COMPILATION=ON on a machine with SDL_shadercross installed.")
+            "MU_ENABLE_SHADER_COMPILATION=OFF and all pre-compiled blobs in "
+            "src/shaders/compiled/ are empty (0 bytes). "
+            "The renderer will fail to initialize at runtime. "
+            "To fix: enable MU_ENABLE_SHADER_COMPILATION=ON (the default) and install "
+            "glslang + spirv-cross (brew install glslang spirv-cross / "
+            "apt-get install glslang-tools spirv-cross).")
     endif()
     foreach(blob IN LISTS MU_PRECOMPILED_BLOBS)
         get_filename_component(blob_name "${blob}" NAME)

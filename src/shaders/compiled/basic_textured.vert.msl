@@ -1,0 +1,36 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct ScreenSize
+{
+    float2 screenSize;
+    float2 pad;
+};
+
+struct main0_out
+{
+    float2 _entryPointOutput_uv [[user(locn0)]];
+    float4 _entryPointOutput_color [[user(locn1)]];
+    float _entryPointOutput_fogFactor [[user(locn2)]];
+    float4 gl_Position [[position]];
+};
+
+struct main0_in
+{
+    float2 input_pos [[attribute(0)]];
+    float2 input_uv [[attribute(1)]];
+    float4 input_color [[attribute(2)]];
+};
+
+vertex main0_out main0(main0_in in [[stage_in]], constant ScreenSize& _25 [[buffer(0)]])
+{
+    main0_out out = {};
+    out.gl_Position = float4(((in.input_pos / _25.screenSize) * float2(2.0, -2.0)) + float2(-1.0, 1.0), 0.0, 1.0);
+    out._entryPointOutput_uv = in.input_uv;
+    out._entryPointOutput_color = in.input_color;
+    out._entryPointOutput_fogFactor = 0.0;
+    return out;
+}
+

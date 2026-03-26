@@ -137,7 +137,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a" \
             -DMU_ENABLE_SDL3=OFF \
-            -DMU_ENABLE_DOTNET=OFF
+            -DMU_ENABLE_DOTNET=OFF \
+            -DMU_ENABLE_SHADER_COMPILATION=OFF
 
       - name: Build
         run: |
@@ -170,7 +171,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3
+        run: brew install cmake ninja openssl@3 glslang spirv-cross
 
       - name: Cache SDL3 FetchContent
         uses: actions/cache@v4
@@ -240,6 +241,7 @@ jobs:
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libasound2-dev libpulse-dev \
             libssl-dev \
+            glslang-tools spirv-cross \
             pkg-config
 
       - name: Cache SDL3 FetchContent

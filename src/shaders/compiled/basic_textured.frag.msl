@@ -1,0 +1,55 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct FogUniforms
+{
+    uint fogEnabled;
+    uint alphaDiscardEnabled;
+    float alphaThreshold;
+    float pad0;
+    float fogStart;
+    float fogEnd;
+    float4 fogColor;
+};
+
+struct main0_out
+{
+    float4 _entryPointOutput [[color(0)]];
+};
+
+struct main0_in
+{
+    float2 input_uv [[user(locn0)]];
+    float4 input_color [[user(locn1)]];
+    float input_fogFactor [[user(locn2)]];
+};
+
+fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _40 [[buffer(0)]], texture2d<float> tex [[texture(0)]], sampler s [[sampler(0)]])
+{
+    main0_out out = {};
+    float4 _118 = tex.sample(s, in.input_uv);
+    float4 _121 = _118 * in.input_color;
+    if ((_40.alphaDiscardEnabled != 0u) && (_121.w <= _40.alphaThreshold))
+    {
+        discard_fragment();
+    }
+    float4 _178;
+    if (_40.fogEnabled != 0u)
+    {
+        float3 _145 = mix(_121.xyz, _40.fogColor.xyz, float3(in.input_fogFactor));
+        float4 _173 = _121;
+        _173.x = _145.x;
+        _173.y = _145.y;
+        _173.z = _145.z;
+        _178 = _173;
+    }
+    else
+    {
+        _178 = _121;
+    }
+    out._entryPointOutput = _178;
+    return out;
+}
+

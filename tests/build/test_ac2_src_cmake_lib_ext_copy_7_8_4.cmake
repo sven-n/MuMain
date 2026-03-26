@@ -39,9 +39,9 @@ if(_pos_ext_var EQUAL -1)
 endif()
 
 # --- Check 3: .dylib and .so are referenced (platform extensions set) ---
-string(FIND "${CMAKE_CONTENT}" ".dylib" _pos_dylib)
+string(FIND "${CMAKE_CONTENT}" "set(MU_DOTNET_LIB_EXT \".dylib\")" _pos_dylib)
 if(_pos_dylib EQUAL -1)
-    message(FATAL_ERROR "AC-2 FAIL [7.8.4]: '.dylib' extension not found in src/CMakeLists.txt — required for macOS native AOT output")
+    message(FATAL_ERROR "AC-2 FAIL [7.8.4]: 'set(MU_DOTNET_LIB_EXT \".dylib\")' not found in src/CMakeLists.txt — required for macOS native AOT output")
 endif()
 
 string(FIND "${CMAKE_CONTENT}" "set(MU_DOTNET_LIB_EXT \".so\")" _pos_so)

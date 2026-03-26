@@ -730,12 +730,17 @@ if (DOTNET_EXECUTABLE)
   set(_DOTNET_ENV_EXTRA)
   if(OPENSSL_FOUND AND OPENSSL_CRYPTO_LIBRARY AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     get_filename_component(_OPENSSL_LIB_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
-    list(APPEND _DOTNET_ENV_EXTRA "LIBRARY_PATH=${_OPENSSL_LIB_DIR}")
+    # Preserve existing LIBRARY_PATH by appending, don't overwrite
+    set(_LIBRARY_PATH_VALUE "${_OPENSSL_LIB_DIR}")
+    if(DEFINED ENV{LIBRARY_PATH})
+      set(_LIBRARY_PATH_VALUE "${_OPENSSL_LIB_DIR}:$ENV{LIBRARY_PATH}")
+    endif()
+    list(APPEND _DOTNET_ENV_EXTRA "LIBRARY_PATH=${_LIBRARY_PATH_VALUE}")
     message(STATUS ".NET Client Library: OpenSSL lib dir for linker: ${_OPENSSL_LIB_DIR}")
   endif()
 
   # 2. Define the output path using the platform-correct extension
-  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}")
+  set(DOTNET_LIB_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
   # Create temp directories for Native AOT build.
@@ -763,7 +768,7 @@ if (DOTNET_EXECUTABLE)
   # Legacy ClientLibrary build — skipped when MU_ENABLE_DOTNET=ON (FindDotnetAOT handles it)
   if(NOT MU_ENABLE_DOTNET)
     add_custom_command(
-            OUTPUT "${DOTNET_DLL_PATH}"
+            OUTPUT "${DOTNET_LIB_PATH}"
             COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
             COMMAND ${CMAKE_COMMAND} -E env
                     "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
@@ -772,26 +777,23 @@ if (DOTNET_EXECUTABLE)
                     "TMP=${DOTNET_TEMP_DIR_NATIVE}"
                     ${_DOTNET_ENV_EXTRA}
                     "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}" "${DOTNET_DLL_PATH}"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library${MU_DOTNET_LIB_EXT}" "${DOTNET_LIB_PATH}"
             DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
             COMMENT "Checking for .NET Client Library updates..."
             VERBATIM
     )
 
     # 4. Create a target for the DLL and link it to Main
-    add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
+    add_custom_target(ClientLibrary DEPENDS "${DOTNET_LIB_PATH}")
     add_dependencies(Main ClientLibrary)
     set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-    # Copy ClientLibrary DLL to the executable's output directory
+    # Copy ClientLibrary native library to the executable's output directory
     add_custom_command(TARGET Main POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL from: ${DOTNET_DLL_PATH}"
-      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL to: $<TARGET_FILE_DIR:Main>"
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${DOTNET_DLL_PATH}"
+        "${DOTNET_LIB_PATH}"
         $<TARGET_FILE_DIR:Main>
-      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: ClientLibrary DLL copy complete"
-      COMMENT "Copying ClientLibrary DLL to build directory"
+      COMMENT "Copying ClientLibrary native library to build directory"
     )
   endif() # NOT MU_ENABLE_DOTNET
 
