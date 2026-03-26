@@ -791,7 +791,7 @@ HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
     if (g_platformAudio != nullptr)
     {
         // Story 7.8.1: PlaySound now returns bool; convert to HRESULT for legacy callers
-        return g_platformAudio->PlaySound(bufferId, object, looped != FALSE) ? S_OK : S_FALSE;
+        return g_platformAudio->PlaySound(bufferId, static_cast<void*>(object), looped != FALSE) ? S_OK : E_FAIL;
     }
 #ifdef _WIN32
     return Manager().PlayBuffer(bufferId, object, looped != FALSE);

@@ -60,6 +60,9 @@ using HRESULT = long;
 #ifndef S_FALSE
 #define S_FALSE 1L
 #endif
+#ifndef E_FAIL
+#define E_FAIL ((HRESULT)0x80004005L)
+#endif
 
 // Pointer-width unsigned integer (needed for LOWORD/HIWORD macros)
 using DWORD_PTR = uintptr_t;

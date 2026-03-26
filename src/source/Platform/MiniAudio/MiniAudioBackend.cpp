@@ -205,7 +205,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // (round-robin reuse of looping SFX slots). Avoids the pop/click artifact caused
 // by seeking while the audio thread is actively mixing the channel.
 // ---------------------------------------------------------------------------
-bool MiniAudioBackend::PlaySound(ESound buffer, void* pObject, bool looped)
+bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped)
 {
     if (!m_initialized)
     {

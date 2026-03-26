@@ -26,7 +26,7 @@ public:
     // (zero call-site changes when Stories 5.2.1/5.2.2 delegate to g_platformAudio)
     virtual void LoadSound(ESound buffer, const wchar_t* filename, int channels = MAX_CHANNEL,
                            bool enable3D = false) = 0;
-    [[nodiscard]] virtual bool PlaySound(ESound buffer, void* pObject = nullptr, bool looped = false) = 0;
+    [[nodiscard]] virtual bool PlaySound(ESound buffer, const void* pObject = nullptr, bool looped = false) = 0;
     virtual void StopSound(ESound buffer, bool resetPosition) = 0;
     virtual void AllStopSound() = 0;
     virtual void Set3DSoundPosition() = 0;

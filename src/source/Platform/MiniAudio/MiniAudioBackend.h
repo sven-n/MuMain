@@ -43,7 +43,7 @@ public:
 
     // Sound effects
     void LoadSound(ESound buffer, const wchar_t* filename, int channels = MAX_CHANNEL, bool enable3D = false) override;
-    [[nodiscard]] bool PlaySound(ESound buffer, void* pObject = nullptr, bool looped = false) override;
+    [[nodiscard]] bool PlaySound(ESound buffer, const void* pObject = nullptr, bool looped = false) override;
     void StopSound(ESound buffer, bool resetPosition) override;
     void AllStopSound() override;
     void Set3DSoundPosition() override;

@@ -33,8 +33,8 @@ ALLOWED_PATHS = [
     "/Platform/",
     "/ThirdParty/",
     "Audio/DSwaveIO",
-    "Audio/DSplaysound",
-    "Audio/DSPlaySound",
+    "Audio/DSplaysound",   # DSplaysound.cpp (lowercase 's' in source)
+    "Audio/DSPlaySound",   # DSPlaySound.h (uppercase 'PS' in source)
 ]
 
 
