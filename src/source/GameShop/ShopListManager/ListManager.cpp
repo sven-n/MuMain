@@ -1,23 +1,22 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: ListManager.cpp
-//
+// Migrated to std::thread + std::filesystem (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ListManager.h"
-#include <process.h>
+
+#include <thread>
+#include <future>
+#include <filesystem>
+#include <cwchar>
 
 // cppcheck-suppress uninitMemberVar
-CListManager::CListManager() // OK
+CListManager::CListManager()
 {
-    this->m_pFTPDownLoader = NULL;
+    this->m_pFTPDownLoader = nullptr;
     this->m_ListManagerInfo.m_strServerIP.clear();
     this->m_ListManagerInfo.m_strUserID.clear();
     this->m_ListManagerInfo.m_strPWD.clear();
@@ -26,14 +25,14 @@ CListManager::CListManager() // OK
     this->m_vScriptFiles.clear();
 }
 
-CListManager::~CListManager() // OK
+CListManager::~CListManager()
 {
     SAFE_DELETE(m_pFTPDownLoader);
 }
 
 void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* ServerIP, const wchar_t* UserID,
                                       const wchar_t* Pwd, const wchar_t* RemotePath, const wchar_t* LocalPath,
-                                      CListVersionInfo Version, DWORD dwDownloadMaxTime)
+                                      CListVersionInfo Version, uint32_t dwDownloadMaxTime)
 {
     unsigned short port = 80;
 
@@ -47,7 +46,7 @@ void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* Server
 void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* ServerIP, unsigned short PortNum,
                                       const wchar_t* UserID, const wchar_t* Pwd, const wchar_t* RemotePath,
                                       const wchar_t* LocalPath, FTP_SERVICE_MODE ftpMode, CListVersionInfo Version,
-                                      DWORD dwDownloadMaxTime) // OK
+                                      uint32_t dwDownloadMaxTime)
 {
     this->m_ListManagerInfo.m_DownloaderType = type;
     this->m_ListManagerInfo.m_nPortNum = PortNum;
@@ -60,12 +59,13 @@ void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* Server
     this->m_ListManagerInfo.m_Version = Version;
     this->m_ListManagerInfo.m_dwDownloadMaxTime = dwDownloadMaxTime;
 
-    if (GetFileAttributes(LocalPath) == INVALID_FILE_ATTRIBUTES)
-        CreateDirectory(LocalPath, 0);
+    std::error_code ec;
+    if (!std::filesystem::exists(std::filesystem::path(LocalPath), ec))
+        std::filesystem::create_directory(std::filesystem::path(LocalPath), ec);
 
-    if (this->m_ListManagerInfo.m_strLocalPath.substr(this->m_ListManagerInfo.m_strLocalPath.size(), 1) != L"\\")
+    if (this->m_ListManagerInfo.m_strLocalPath.substr(this->m_ListManagerInfo.m_strLocalPath.size(), 1) != L"/")
     {
-        this->m_ListManagerInfo.m_strLocalPath += L"\\";
+        this->m_ListManagerInfo.m_strLocalPath += L"/";
     }
 
     if (this->m_ListManagerInfo.m_strRemotePath.substr(this->m_ListManagerInfo.m_strRemotePath.size(), 1) != L"/")
@@ -74,7 +74,7 @@ void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* Server
     }
 }
 
-WZResult CListManager::LoadScriptList(bool bDonwLoad) // OK
+WZResult CListManager::LoadScriptList(bool bDonwLoad)
 {
     this->m_Result.BuildSuccessResult();
 
@@ -109,7 +109,7 @@ WZResult CListManager::LoadScriptList(bool bDonwLoad) // OK
     return this->m_Result;
 }
 
-bool CListManager::IsScriptFileExist() // OK
+bool CListManager::IsScriptFileExist()
 {
     std::wstring path = this->GetScriptPath();
 
@@ -117,30 +117,31 @@ bool CListManager::IsScriptFileExist() // OK
     {
         std::wstring file_path = path + *(it);
 
-        if (GetFileAttributes(file_path.c_str()) == INVALID_FILE_ATTRIBUTES)
+        std::error_code ec;
+        if (!std::filesystem::exists(std::filesystem::path(file_path), ec))
         {
-            return 0;
+            return false;
         }
     }
 
-    return 1;
+    return true;
 }
 
-std::wstring CListManager::GetScriptPath() // OK
+std::wstring CListManager::GetScriptPath()
 {
-    TCHAR buff[MAX_PATH] = {0};
+    wchar_t buff[MAX_PATH] = {0};
 
-    StringCchPrintf(buff, sizeof(buff), L"%03d.%04d.%03d", m_ListManagerInfo.m_Version.Zone,
-                    m_ListManagerInfo.m_Version.year, m_ListManagerInfo.m_Version.yearId);
+    swprintf(buff, MAX_PATH, L"%03d.%04d.%03d", m_ListManagerInfo.m_Version.Zone, m_ListManagerInfo.m_Version.year,
+             m_ListManagerInfo.m_Version.yearId);
 
     std::wstring path = this->m_ListManagerInfo.m_strLocalPath;
     path += buff;
-    path += L"\\";
+    path += L"/";
 
     return path;
 }
 
-void CListManager::DeleteScriptFiles() // OK
+void CListManager::DeleteScriptFiles()
 {
     std::wstring path = this->GetScriptPath();
 
@@ -148,42 +149,37 @@ void CListManager::DeleteScriptFiles() // OK
     {
         std::wstring file_path = path + (*it);
 
-        DeleteFile(file_path.c_str());
+        std::error_code ec;
+        std::filesystem::remove(std::filesystem::path(file_path), ec);
     }
 }
 
-WZResult CListManager::FileDownLoad() // OK
+WZResult CListManager::FileDownLoad()
 {
     if (this->m_ListManagerInfo.m_dwDownloadMaxTime > 0)
     {
-        unsigned int ThreadID = 0;
+        auto future = std::async(std::launch::async, [this]() { return this->FileDownLoadImpl(); });
 
-        auto hHandle = (HANDLE)_beginthreadex(0, 0, CListManager::RunFileDownLoadThread, this, 0, &ThreadID);
-
-        if (hHandle == INVALID_HANDLE_VALUE)
+        auto status = future.wait_for(std::chrono::milliseconds(this->m_ListManagerInfo.m_dwDownloadMaxTime));
+        if (status == std::future_status::timeout)
         {
-            this->m_Result.BuildResult(8, GetLastError(), L"Fail : _beginthreadex");
-        }
-        else if (WaitForSingleObject(hHandle, this->m_ListManagerInfo.m_dwDownloadMaxTime) == WAIT_TIMEOUT)
-        {
-            if (this->m_pFTPDownLoader != NULL)
+            if (this->m_pFTPDownLoader != nullptr)
                 this->m_pFTPDownLoader->Break();
 
-            WaitForSingleObject(hHandle, INFINITE);
+            // Wait for the thread to finish after breaking
+            this->m_Result = future.get();
 
-            if (m_pFTPDownLoader != NULL)
-                if (m_pFTPDownLoader->GetFileDownloader() != NULL)
+            if (m_pFTPDownLoader != nullptr)
+                if (m_pFTPDownLoader->GetFileDownloader() != nullptr)
                     m_pFTPDownLoader->GetFileDownloader()->Break();
 
             SAFE_DELETE(m_pFTPDownLoader);
-
-            CloseHandle(hHandle);
 
             this->m_Result.BuildResult(1, 0, L"Time Out!");
         }
         else
         {
-            CloseHandle(hHandle);
+            this->m_Result = future.get();
         }
     }
     else
@@ -194,19 +190,19 @@ WZResult CListManager::FileDownLoad() // OK
     return this->m_Result;
 }
 
-WZResult CListManager::FileDownLoadImpl() // OK
+WZResult CListManager::FileDownLoadImpl()
 {
-    if (m_pFTPDownLoader != NULL)
+    if (m_pFTPDownLoader != nullptr)
     {
         m_pFTPDownLoader->Break();
 
-        if (m_pFTPDownLoader->GetFileDownloader() != NULL)
+        if (m_pFTPDownLoader->GetFileDownloader() != nullptr)
         {
             m_pFTPDownLoader->GetFileDownloader()->Break();
         }
     }
 
-    SAFE_DELETE(m_pFTPDownLoader); // FIX THIS
+    SAFE_DELETE(m_pFTPDownLoader);
 
     this->m_pFTPDownLoader = new CFTPFileDownLoader;
 
@@ -218,15 +214,4 @@ WZResult CListManager::FileDownLoadImpl() // OK
 
     return this->m_Result;
 }
-
-unsigned int __stdcall CListManager::RunFileDownLoadThread(LPVOID pParam) // OK
-{
-    auto* p = reinterpret_cast<CListManager*>(pParam);
-
-    p->m_Result = p->FileDownLoadImpl();
-
-    return 0;
-}
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

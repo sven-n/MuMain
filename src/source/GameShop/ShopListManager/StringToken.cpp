@@ -1,32 +1,24 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: StringToken.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "StringToken.h"
 
 // cppcheck-suppress uninitMemberVar
-CStringToken::CStringToken() // OK
+CStringToken::CStringToken()
 {
     this->data.clear();
     this->delimiter.clear();
     this->tokens.clear();
-    // this->index = this->tokens.begin();
 }
 
-CStringToken::~CStringToken() // OK
-{
-}
+CStringToken::~CStringToken() {}
 
-CStringToken::CStringToken(const std::wstring& dataLine, const std::wstring& delim) // OK
+CStringToken::CStringToken(const std::wstring& dataLine, const std::wstring& delim)
 {
     this->data = dataLine;
     this->delimiter = delim;
@@ -35,7 +27,7 @@ CStringToken::CStringToken(const std::wstring& dataLine, const std::wstring& del
     this->split();
 }
 
-size_t CStringToken::countTokens() // OK
+size_t CStringToken::countTokens()
 {
     return this->tokens.size();
 }
@@ -45,7 +37,7 @@ bool CStringToken::hasMoreTokens()
     return this->index != this->tokens.end();
 }
 
-std::wstring CStringToken::nextToken() // OK
+std::wstring CStringToken::nextToken()
 {
     std::wstring result;
 
@@ -63,7 +55,7 @@ std::wstring CStringToken::nextToken() // OK
     return result;
 }
 
-void CStringToken::split() // OK
+void CStringToken::split()
 {
     std::size_t first_not = this->data.find_first_not_of(this->delimiter, 0);
     std::size_t first = this->data.find_first_of(this->delimiter, first_not);
@@ -83,7 +75,7 @@ void CStringToken::split() // OK
     this->index = this->tokens.begin();
 }
 
-void CStringToken::IsNullString(std::wstring::size_type pos) // OK
+void CStringToken::IsNullString(std::wstring::size_type pos)
 {
     std::wstring search = this->data.substr(pos + 1, this->delimiter.length());
 
@@ -94,6 +86,4 @@ void CStringToken::IsNullString(std::wstring::size_type pos) // OK
         this->IsNullString(pos + 1);
     }
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

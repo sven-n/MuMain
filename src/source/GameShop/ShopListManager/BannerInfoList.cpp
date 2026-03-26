@@ -1,29 +1,22 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: BannerInfoList.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "BannerInfoList.h"
 #include "BannerInfo.h"
 #include <fstream>
 
 // cppcheck-suppress uninitMemberVar
-CBannerInfoList::CBannerInfoList() // OK
+CBannerInfoList::CBannerInfoList()
 {
     this->Clear();
 }
 
-CBannerInfoList::~CBannerInfoList() // OK
-{
-}
+CBannerInfoList::~CBannerInfoList() {}
 
 WZResult CBannerInfoList::LoadBanner(std::wstring strDirPath, std::wstring strScriptFileName, bool bDonwLoad)
 {
@@ -60,41 +53,39 @@ WZResult CBannerInfoList::LoadBanner(std::wstring strDirPath, std::wstring strSc
     }
     else
     {
-        result.SetResult(6, GetLastError(), L"Banner file open fail");
+        result.SetResult(6, 0, L"Banner file open fail");
     }
 
     return result;
 }
 
-void CBannerInfoList::Clear() // OK
+void CBannerInfoList::Clear()
 {
     this->m_BannerInfos.clear();
 }
 
-int CBannerInfoList::GetSize() // OK
+int CBannerInfoList::GetSize()
 {
     return this->m_BannerInfos.size();
 }
 
-void CBannerInfoList::Append(CBannerInfo banner) // OK
+void CBannerInfoList::Append(CBannerInfo banner)
 {
     this->m_BannerInfos.insert(std::make_pair(banner.BannerSeq, banner));
 }
 
-void CBannerInfoList::SetFirst() // OK
+void CBannerInfoList::SetFirst()
 {
     this->m_BannerInfoIter = this->m_BannerInfos.begin();
 }
-bool CBannerInfoList::GetNext(CBannerInfo& banner) // OK
+bool CBannerInfoList::GetNext(CBannerInfo& banner)
 {
     if (this->m_BannerInfoIter == this->m_BannerInfos.end())
-        return 0;
+        return false;
 
     banner = this->m_BannerInfoIter->second;
 
     this->m_BannerInfoIter++;
-    return 1;
+    return true;
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

@@ -1,42 +1,39 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: ShopProduct.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopProduct.h"
 #include "StringToken.h"
 
-// cppcheck-suppress uninitMemberVar
-CShopProduct::CShopProduct() // OK
-{
-}
-CShopProduct::~CShopProduct() // OK
-{
-}
+#include <cwchar>
 
-bool CShopProduct::SetProduct(std::wstring strdata) // OK
+// cppcheck-suppress uninitMemberVar
+CShopProduct::CShopProduct() {}
+CShopProduct::~CShopProduct() {}
+
+bool CShopProduct::SetProduct(std::wstring strdata)
 {
     if (strdata.empty())
-        return 0;
+        return false;
 
     CStringToken token(strdata, L"@");
 
     if (token.hasMoreTokens() == 0)
-        return 0;
+        return false;
 
     this->ProductSeq = _wtoi(token.nextToken().c_str());
-    StringCchCopy(this->ProductName, sizeof(this->ProductName), token.nextToken().c_str());
-    StringCchCopy(this->PropertyName, sizeof(this->PropertyName), token.nextToken().c_str());
-    StringCchCopy(this->Value, sizeof(this->Value), token.nextToken().c_str());
-    StringCchCopy(this->UnitName, sizeof(this->UnitName), token.nextToken().c_str());
+    wcsncpy(this->ProductName, token.nextToken().c_str(), SHOPLIST_LENGTH_PRODUCTNAME - 1);
+    this->ProductName[SHOPLIST_LENGTH_PRODUCTNAME - 1] = L'\0';
+    wcsncpy(this->PropertyName, token.nextToken().c_str(), SHOPLIST_LENGTH_PRODUCTPROPERTYNAME - 1);
+    this->PropertyName[SHOPLIST_LENGTH_PRODUCTPROPERTYNAME - 1] = L'\0';
+    wcsncpy(this->Value, token.nextToken().c_str(), SHOPLIST_LENGTH_PRODUCTVALUE - 1);
+    this->Value[SHOPLIST_LENGTH_PRODUCTVALUE - 1] = L'\0';
+    wcsncpy(this->UnitName, token.nextToken().c_str(), SHOPLIST_LENGTH_PRODUCTUNITNAME - 1);
+    this->UnitName[SHOPLIST_LENGTH_PRODUCTUNITNAME - 1] = L'\0';
     this->Price = _wtoi(token.nextToken().c_str());
     this->PriceSeq = _wtoi(token.nextToken().c_str());
     this->PropertyType = _wtoi(token.nextToken().c_str());
@@ -45,13 +42,12 @@ bool CShopProduct::SetProduct(std::wstring strdata) // OK
     this->DeleteFlag = _wtoi(token.nextToken().c_str());
     this->StorageGroup = _wtoi(token.nextToken().c_str());
     this->ShareFlag = _wtoi(token.nextToken().c_str());
-    StringCchCopy(this->InGamePackageID, sizeof(this->InGamePackageID), token.nextToken().c_str());
+    wcsncpy(this->InGamePackageID, token.nextToken().c_str(), SHOPLIST_LENGTH_INGAMEPACKAGEID - 1);
+    this->InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID - 1] = L'\0';
     this->PropertySeq = _wtoi(token.nextToken().c_str());
     this->ProductType = _wtoi(token.nextToken().c_str());
     this->UnitType = _wtoi(token.nextToken().c_str());
 
-    return 1;
+    return true;
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

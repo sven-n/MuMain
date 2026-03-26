@@ -1,7 +1,6 @@
 /*******************************************************************************
- *	�� �� �� : ������
- *	�� �� �� : 2009.07.07
- *	��    �� : FTP Connecter
+ *	FTP Connecter — libcurl-based
+ *	Migrated from WinINet (Story 7.6.6)
  *******************************************************************************/
 
 #pragma once
@@ -11,19 +10,9 @@
 class FTPConnecter : public IConnecter
 {
 public:
-    // Constructor, Destructor
-
     FTPConnecter(DownloadServerInfo* pServerInfo, DownloadFileInfo* pFileInfo);
     ~FTPConnecter();
 
-    // abstract Function
-
-    //						����
-    virtual WZResult CreateSession(HINTERNET& hSession);
-    //						Ŀ��Ʈ
-    virtual WZResult CreateConnection(HINTERNET& hSession, HINTERNET& hConnection);
-    //						�ٿ�ε� ���� ���� & ������ ��������
-    virtual WZResult OpenRemoteFile(HINTERNET& hConnection, HINTERNET& hRemoteFile, ULONGLONG& nFileLength);
-    //						����Ʈ ���� �б�
-    virtual WZResult ReadRemoteFile(HINTERNET& hRemoteFile, BYTE* byReadBuffer, DWORD* dwBytesRead);
+    std::string BuildURL() override;
+    WZResult ConfigureCurl(CURL* curl) override;
 };

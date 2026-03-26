@@ -1,21 +1,17 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: ShopList.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopList.h"
 
 #include <fstream>
+#include <cstring>
 
-CShopList::CShopList() // OK
+CShopList::CShopList()
 {
     // cppcheck-suppress [noCopyConstructor, noOperatorEq]
     this->m_CategoryListPtr = new CShopCategoryList;
@@ -23,14 +19,14 @@ CShopList::CShopList() // OK
     this->m_ProductListPtr = new CShopProductList;
 }
 
-CShopList::~CShopList() // OK
+CShopList::~CShopList()
 {
     SAFE_DELETE(m_CategoryListPtr);
     SAFE_DELETE(m_PackageListPtr);
     SAFE_DELETE(m_ProductListPtr);
 }
 
-WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
+WZResult CShopList::LoadCategroy(const wchar_t* szFilePath)
 {
     WZResult result;
 
@@ -38,15 +34,15 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(szFilePath, std::ifstream::in);
+    char narrowPath[MAX_PATH * 4] = {0};
+    wcstombs(narrowPath, szFilePath, sizeof(narrowPath) - 1);
 
-    DWORD LastError = GetLastError();
+    ifs.open(narrowPath, std::ifstream::in);
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
-        Sleep(0x64);
-        ifs.open(szFilePath, std::ifstream::in);
-        LastError = GetLastError();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        ifs.open(narrowPath, std::ifstream::in);
     }
 
     char buff[1024] = {0};
@@ -76,13 +72,13 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
     }
     else
     {
-        result.SetResult(PT_LOADLIBRARY, LastError, L"package file open fail");
+        result.SetResult(PT_LOADLIBRARY, 0, L"package file open fail");
     }
 
     return result;
 }
 
-WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
+WZResult CShopList::LoadPackage(const wchar_t* szFilePath)
 {
     WZResult result;
 
@@ -90,15 +86,15 @@ WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(szFilePath, std::ifstream::in);
+    char narrowPath[MAX_PATH * 4] = {0};
+    wcstombs(narrowPath, szFilePath, sizeof(narrowPath) - 1);
 
-    DWORD LastError = GetLastError();
+    ifs.open(narrowPath, std::ifstream::in);
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
-        Sleep(0x64);
-        ifs.open(szFilePath, std::ifstream::in);
-        LastError = GetLastError();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        ifs.open(narrowPath, std::ifstream::in);
     }
 
     char buff[1024] = {0};
@@ -125,13 +121,13 @@ WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
     }
     else
     {
-        result.SetResult(4, LastError, L"package file open fail");
+        result.SetResult(4, 0, L"package file open fail");
     }
 
     return result;
 }
 
-WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
+WZResult CShopList::LoadProduct(const wchar_t* szFilePath)
 {
     static WZResult result;
 
@@ -141,15 +137,15 @@ WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(szFilePath, std::ifstream::in);
+    char narrowPath[MAX_PATH * 4] = {0};
+    wcstombs(narrowPath, szFilePath, sizeof(narrowPath) - 1);
 
-    DWORD LastError = GetLastError();
+    ifs.open(narrowPath, std::ifstream::in);
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
-        Sleep(0x64);
-        ifs.open(szFilePath, std::ifstream::in);
-        LastError = GetLastError();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        ifs.open(narrowPath, std::ifstream::in);
     }
 
     char buff[1024] = {0};
@@ -179,32 +175,35 @@ WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
     }
     else
     {
-        result.SetResult(4, LastError, L"package file open fail");
+        result.SetResult(4, 0, L"package file open fail");
     }
 
     return result;
 }
 
-void CShopList::SetCategoryListPtr(CShopCategoryList* CategoryListPtr) // OK
+void CShopList::SetCategoryListPtr(CShopCategoryList* CategoryListPtr)
 {
     m_CategoryListPtr = CategoryListPtr;
 }
 
-void CShopList::SetPackageListPtr(CShopPackageList* PackagePtr) // OK
+void CShopList::SetPackageListPtr(CShopPackageList* PackagePtr)
 {
     m_PackageListPtr = PackagePtr;
 }
 
-void CShopList::SetProductListPtr(CShopProductList* ProductListPtr) // OK
+void CShopList::SetProductListPtr(CShopProductList* ProductListPtr)
 {
     m_ProductListPtr = ProductListPtr;
 }
 
-FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
+FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath)
 {
+    char narrowPath[MAX_PATH * 4] = {0};
+    wcstombs(narrowPath, szFilePath, sizeof(narrowPath) - 1);
+
     std::ifstream ifs;
 
-    ifs.open(szFilePath, std::ifstream::in);
+    ifs.open(narrowPath, std::ifstream::in);
 
     if (!ifs.is_open())
     {
@@ -222,12 +221,12 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
         return FE_ANSI;
     }
 
-    if (buff[0] == 0xEF && buff[1] == 0xBB && buff[2] == 0xBF)
+    if (buff[0] == (char)0xEF && buff[1] == (char)0xBB && buff[2] == (char)0xBF)
     {
         return FE_UTF8;
     }
 
-    if (buff[0] == 0xFF && buff[1] == 0xFE)
+    if (buff[0] == (char)0xFF && buff[1] == (char)0xFE)
     {
         return FE_UNICODE;
     }
@@ -235,21 +234,21 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
     return FE_ANSI;
 }
 
-std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode) // OK
+std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
 {
     std::wstring result;
 
     if (encode == FE_UTF8)
     {
+        // UTF-8 to wide char conversion
         int cchWideChar = MultiByteToWideChar(CP_UTF8, 0, buffer, -1, 0, 0);
-        auto lpWideCharStr = new WCHAR[cchWideChar + 1];
+        auto lpWideCharStr = new wchar_t[cchWideChar + 1];
         MultiByteToWideChar(CP_UTF8, 0, buffer, -1, lpWideCharStr, cchWideChar);
 
-        cchWideChar = WideCharToMultiByte(0, 0, lpWideCharStr, -1, 0, 0, 0, 0);
-        char* buff = new char[cchWideChar + 1];
-        WideCharToMultiByte(0, 0, lpWideCharStr, -1, buff, cchWideChar, 0, 0);
+        int cbMultiByte = WideCharToMultiByte(0, 0, lpWideCharStr, -1, 0, 0, 0, 0);
+        char* buff = new char[cbMultiByte + 1];
+        WideCharToMultiByte(0, 0, lpWideCharStr, -1, buff, cbMultiByte, 0, 0);
 
-        // todo: check if that's correct
         // cppcheck-suppress dangerousTypeCast
         result = (wchar_t*)buff;
 
@@ -264,7 +263,6 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
         }
         else
         {
-            // todo: check if that's correct
             // cppcheck-suppress dangerousTypeCast
             result = (wchar_t*)(buffer);
         }
@@ -272,6 +270,4 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
 
     return result;
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

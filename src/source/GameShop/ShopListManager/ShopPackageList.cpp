@@ -1,91 +1,82 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: ShopPackageList.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopPackageList.h"
 
 // cppcheck-suppress uninitMemberVar
-CShopPackageList::CShopPackageList() // OK
+CShopPackageList::CShopPackageList()
 {
     this->m_Packages.clear();
 }
 
-CShopPackageList::~CShopPackageList() // OK
-{
-}
+CShopPackageList::~CShopPackageList() {}
 
-int CShopPackageList::GetSize() // OK
+int CShopPackageList::GetSize()
 {
     return static_cast<int>(this->m_Packages.size());
 }
 
-void CShopPackageList::Clear() // OK
+void CShopPackageList::Clear()
 {
     this->m_Packages.clear();
 }
 
-void CShopPackageList::Append(CShopPackage package) // OK
+void CShopPackageList::Append(CShopPackage package)
 {
     this->m_Packages.insert(std::make_pair(package.PackageProductSeq, package));
 }
 
-void CShopPackageList::SetFirst() // OK
+void CShopPackageList::SetFirst()
 {
     this->m_iter = this->m_Packages.begin();
 }
 
-bool CShopPackageList::GetNext(CShopPackage& package) // OK
+bool CShopPackageList::GetNext(CShopPackage& package)
 {
     if (this->m_iter == this->m_Packages.end())
-        return 0;
+        return false;
 
     package = this->m_iter->second;
     this->m_iter++;
-    return 1;
+    return true;
 }
 
-bool CShopPackageList::GetValueByKey(int nKey, CShopPackage& package) // OK
+bool CShopPackageList::GetValueByKey(int nKey, CShopPackage& package)
 {
     auto it = this->m_Packages.find(nKey);
 
     if (it == this->m_Packages.end())
-        return 0;
+        return false;
 
     package = it->second;
 
-    return 1;
+    return true;
 }
 
-bool CShopPackageList::GetValueByIndex(int nIndex, CShopPackage& package) // OK
+bool CShopPackageList::GetValueByIndex(int nIndex, CShopPackage& package)
 {
     if (nIndex < 0 || nIndex >= static_cast<int>(this->m_PackageIndex.size()))
     {
-        return 0;
+        return false;
     }
 
     return this->GetValueByKey(this->m_PackageIndex[nIndex], package);
 }
 
-bool CShopPackageList::SetPacketLeftCount(int PackageSeq, int nCount) // OK
+bool CShopPackageList::SetPacketLeftCount(int PackageSeq, int nCount)
 {
     auto it = this->m_Packages.find(PackageSeq);
 
     if (it == this->m_Packages.end())
-        return 0;
+        return false;
 
     it->second.LeftCount = nCount;
 
-    return 1;
+    return true;
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

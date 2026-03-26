@@ -1,131 +1,120 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: Path.cpp
-//
+// Migrated to std::filesystem + portable types (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "Path.h"
 
 #include <fstream>
-#ifdef _WIN32
-#include <crtdbg.h>
-#include <strsafe.h>
-#endif
+#include <cstring>
+#include <cwchar>
+#include <filesystem>
 
-TCHAR* Path::GetCurrentFullPath(TCHAR* szPath)
+wchar_t* Path::GetCurrentFullPath(wchar_t* szPath)
 {
     if (!szPath)
-        return 0;
+        return nullptr;
 
-    GetModuleFileName(0, szPath, MAX_PATH);
+    std::error_code ec;
+    auto exePath = std::filesystem::current_path(ec);
+    if (!ec)
+    {
+        std::wstring ws = exePath.wstring();
+        wcsncpy(szPath, ws.c_str(), MAX_PATH - 1);
+        szPath[MAX_PATH - 1] = L'\0';
+    }
+    else
+    {
+        szPath[0] = L'\0';
+    }
 
     return szPath;
 }
 
-TCHAR* Path::GetCurrentDirectory(TCHAR* szPath)
+wchar_t* Path::GetCurrentDirectory(wchar_t* szPath)
 {
     if (!szPath)
-        return 0;
+        return nullptr;
 
-    GetModuleFileName(0, szPath, MAX_PATH);
-
-    wchar_t* chr = wcsrchr(szPath, '\\');
-
-    if (!chr)
-        return 0;
-
-    (*chr) = 0;
+    std::error_code ec;
+    auto curDir = std::filesystem::current_path(ec);
+    if (!ec)
+    {
+        std::wstring ws = curDir.wstring();
+        wcsncpy(szPath, ws.c_str(), MAX_PATH - 1);
+        szPath[MAX_PATH - 1] = L'\0';
+    }
+    else
+    {
+        szPath[0] = L'\0';
+    }
 
     return szPath;
 }
 
-TCHAR* Path::GetCurrentFileName(TCHAR* szPath)
+wchar_t* Path::GetCurrentFileName(wchar_t* szPath)
 {
     if (!szPath)
-        return 0;
+        return nullptr;
 
-    GetModuleFileName(0, szPath, MAX_PATH);
-
+    Path::GetCurrentFullPath(szPath);
     return Path::GetFileName(szPath);
 }
 
-TCHAR* Path::SetDirString(TCHAR* szPath)
+wchar_t* Path::SetDirString(wchar_t* szPath)
 {
     if (!szPath)
-        return 0;
+        return nullptr;
 
     if ((*szPath))
     {
-        std::size_t len = 0;
-        StringCchLength(szPath, MAX_PATH, &len);
+        std::size_t len = wcslen(szPath);
 
-        if (szPath[len - 1] != '\\')
+        if (szPath[len - 1] != L'/' && szPath[len - 1] != L'\\')
         {
-            szPath[len] = '\\';
-            szPath[len + 1] = 0;
+            szPath[len] = L'/';
+            szPath[len + 1] = L'\0';
         }
     }
     else
     {
-        szPath[0] = '\\';
-        szPath[1] = 0;
+        szPath[0] = L'/';
+        szPath[1] = L'\0';
     }
 
     return szPath;
 }
 
-TCHAR* Path::ClearDirString(TCHAR* szPath)
+wchar_t* Path::ClearDirString(wchar_t* szPath)
 {
     if (!szPath || !(*szPath))
         return szPath;
 
-    std::size_t len = 0;
-    StringCchLength(szPath, MAX_PATH, &len);
+    std::size_t len = wcslen(szPath);
 
-    if (len > 0 && (szPath[len - 1] == '\\' || szPath[len - 1] == '/' || szPath[len - 1] == '"'))
+    if (len > 0 && (szPath[len - 1] == L'\\' || szPath[len - 1] == L'/' || szPath[len - 1] == L'"'))
     {
-        szPath[len - 1] = 0;
+        szPath[len - 1] = L'\0';
     }
 
-    if (len >= 2 && (szPath[len - 2] == '\\' || szPath[len - 2] == '/' || szPath[len - 2] == '"'))
+    if (len >= 2 && (szPath[len - 2] == L'\\' || szPath[len - 2] == L'/' || szPath[len - 2] == L'"'))
     {
-        szPath[len - 2] = 0;
+        szPath[len - 2] = L'\0';
     }
 
-    if (szPath[0] == '"')
+    if (szPath[0] == L'"')
     {
-        StringCchCopy(szPath, MAX_PATH, szPath + 1);
+        std::size_t newLen = wcslen(szPath + 1);
+        wmemmove(szPath, szPath + 1, newLen + 1);
     }
 
     return szPath;
 }
 
-TCHAR* Path::GetDirectory(TCHAR* szPath)
-{
-    if (!szPath || !(*szPath))
-        return szPath;
-
-    wchar_t* chr = wcsrchr(szPath, '\\');
-
-    if (!chr)
-        chr = wcsrchr(szPath, L'/');
-
-    if (chr)
-        (*chr) = 0;
-    else
-        StringCchCopy(szPath, MAX_PATH, L".");
-
-    return szPath;
-}
-
-TCHAR* Path::GetFileName(TCHAR* szPath)
+wchar_t* Path::GetDirectory(wchar_t* szPath)
 {
     if (!szPath || !(*szPath))
         return szPath;
@@ -136,87 +125,114 @@ TCHAR* Path::GetFileName(TCHAR* szPath)
         chr = wcsrchr(szPath, L'/');
 
     if (chr)
-        StringCchCopy(szPath, MAX_PATH, szPath + 1);
-
-    return szPath;
-}
-
-TCHAR* Path::ChangeSlashToBackSlash(TCHAR* szPath)
-{
-    if (!szPath || !(*szPath))
-        return szPath;
-
-    std::size_t len = 0;
-    StringCchLength(szPath, MAX_PATH, &len);
-
-    for (std::size_t n = 0; n < len; n++)
+        (*chr) = L'\0';
+    else
     {
-        if (szPath[n] == '\\')
-            szPath[n] = '/';
+        szPath[0] = L'.';
+        szPath[1] = L'\0';
     }
 
     return szPath;
 }
 
-TCHAR* Path::ChangeBackSlashToSlash(TCHAR* szPath)
+wchar_t* Path::GetFileName(wchar_t* szPath)
 {
     if (!szPath || !(*szPath))
         return szPath;
 
-    std::size_t len = 0;
-    StringCchLength(szPath, MAX_PATH, &len);
+    wchar_t* chr = wcsrchr(szPath, L'\\');
 
-    for (std::size_t n = 0; n < len; n++)
+    if (!chr)
+        chr = wcsrchr(szPath, L'/');
+
+    if (chr)
     {
-        if (szPath[n] == '/')
-            szPath[n] = '\\';
+        std::size_t len = wcslen(chr + 1);
+        wmemmove(szPath, chr + 1, len + 1);
     }
 
     return szPath;
 }
 
-BOOL Path::ReadFileLastLine(TCHAR* szFile, TCHAR* szLastLine)
+wchar_t* Path::ChangeSlashToBackSlash(wchar_t* szPath)
 {
-    std::ifstream ifs(szFile, std::ifstream::in | std::ifstream::binary);
+    if (!szPath || !(*szPath))
+        return szPath;
+
+    std::size_t len = wcslen(szPath);
+
+    for (std::size_t n = 0; n < len; n++)
+    {
+        if (szPath[n] == L'\\')
+            szPath[n] = L'/';
+    }
+
+    return szPath;
+}
+
+wchar_t* Path::ChangeBackSlashToSlash(wchar_t* szPath)
+{
+    if (!szPath || !(*szPath))
+        return szPath;
+
+    std::size_t len = wcslen(szPath);
+
+    for (std::size_t n = 0; n < len; n++)
+    {
+        if (szPath[n] == L'/')
+            szPath[n] = L'\\';
+    }
+
+    return szPath;
+}
+
+bool Path::ReadFileLastLine(wchar_t* szFile, wchar_t* szLastLine)
+{
+    if (!szFile || !szLastLine || !*szFile)
+    {
+        return false;
+    }
+
+    char narrowPath[MAX_PATH * 4] = {0};
+    wcstombs(narrowPath, szFile, sizeof(narrowPath) - 1);
+
+    std::ifstream ifs(narrowPath, std::ifstream::in | std::ifstream::binary);
 
     char buff[1024] = {0};
 
-    if (szFile && szLastLine && *szFile && ifs.is_open())
+    if (ifs.is_open())
     {
         std::size_t len = 0;
 
         while (!ifs.eof())
         {
             ifs.getline(buff, sizeof(buff));
-
-            len = 0;
-            StringCchLengthA(buff, sizeof(buff), &len);
-
-            // TODO convert buff to utf8
-            // if (len > 1)
-            //    StringCchCopy(szLastLine, sizeof(buff), buff);
+            len = strlen(buff);
+            (void)len;
         }
 
         ifs.close();
 
-        len = 0;
-        StringCchLength(szLastLine, 1024, &len);
+        len = wcslen(szLastLine);
 
         if (len > 1)
         {
-            return 1;
+            return true;
         }
     }
 
-    return 0;
+    return false;
 }
 
-BOOL Path::WriteNewFile(TCHAR* szFile, TCHAR* szText, INT nTextSize)
+bool Path::WriteNewFile(wchar_t* szFile, wchar_t* szText, int nTextSize)
 {
     if (!szFile || !szText)
-        return 0;
+        return false;
 
-    std::wfstream ofs(szFile, std::wfstream::out | std::wfstream::trunc | std::wfstream::binary);
+    char narrowPath[MAX_PATH * 4] = {0};
+    wcstombs(narrowPath, szFile, sizeof(narrowPath) - 1);
+
+    std::wfstream ofs(narrowPath, std::wfstream::out | std::wfstream::trunc | std::wfstream::binary);
 
     if (ofs.is_open())
     {
@@ -224,46 +240,28 @@ BOOL Path::WriteNewFile(TCHAR* szFile, TCHAR* szText, INT nTextSize)
         ofs.write(szText, nTextSize);
         ofs.close();
 
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
-BOOL Path::CreateDirectorys(TCHAR* szFilePath, BOOL bIsFile)
-
+bool Path::CreateDirectorys(wchar_t* szFilePath, bool bIsFile)
 {
     if (!szFilePath || !(*szFilePath))
-        return 0;
+        return false;
 
-    wchar_t PathName[MAX_PATH] = {0};
-    wchar_t buff2[MAX_PATH] = {0};
-
-    StringCchCopy(PathName, sizeof(PathName), szFilePath);
+    std::filesystem::path fsPath(szFilePath);
 
     if (bIsFile)
-        Path::GetDirectory(PathName);
+        fsPath = fsPath.parent_path();
 
-    if (CreateDirectory(PathName, 0) == 0)
-    {
-        StringCchCopy(buff2, sizeof(buff2), PathName);
+    if (fsPath.empty())
+        return false;
 
-        wchar_t* chr1 = wcsrchr(buff2, L'\\');
-        wchar_t* chr2 = wcschr(buff2, L'\\');
+    std::error_code ec;
+    std::filesystem::create_directories(fsPath, ec);
 
-        if (!chr1 || !chr2 || chr1 == chr2)
-            return 0;
-
-        (*chr1) = 0;
-
-        if (!Path::CreateDirectorys(buff2, 0))
-            return 0;
-
-        return CreateDirectory(PathName, 0);
-    }
-
-    return 0;
+    return !ec;
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

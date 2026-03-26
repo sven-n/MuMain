@@ -1,82 +1,78 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: ShopCategory.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopCategory.h"
 #include "StringToken.h"
 
+#include <cwchar>
+
 // cppcheck-suppress uninitMemberVar
-CShopCategory::CShopCategory() // OK
+CShopCategory::CShopCategory()
 {
     this->CategoryList.clear();
     this->PackageList.clear();
 }
 
-CShopCategory::~CShopCategory() // OK
-{
-}
+CShopCategory::~CShopCategory() {}
 
-bool CShopCategory::SetCategory(std::wstring strdata) // OK
+bool CShopCategory::SetCategory(std::wstring strdata)
 {
     if (strdata.empty())
-        return 0;
+        return false;
 
     CStringToken token(strdata, L"@");
 
     if (token.hasMoreTokens() == 0)
-        return 0;
+        return false;
 
     this->ProductDisplaySeq = _wtoi(token.nextToken().c_str());
-    StringCchCopy(this->CategroyName, sizeof(this->CategroyName), token.nextToken().c_str());
+    wcsncpy(this->CategroyName, token.nextToken().c_str(), SHOPLIST_LENGTH_CATEGORYNAME - 1);
+    this->CategroyName[SHOPLIST_LENGTH_CATEGORYNAME - 1] = L'\0';
     this->EventFlag = _wtoi(token.nextToken().c_str());
     this->OpenFlag = _wtoi(token.nextToken().c_str());
     this->ParentProductDisplaySeq = _wtoi(token.nextToken().c_str());
     this->DisplayOrder = _wtoi(token.nextToken().c_str());
     this->Root = _wtoi(token.nextToken().c_str());
 
-    return 1;
+    return true;
 }
 
-void CShopCategory::SetCategoryFirst() // OK
+void CShopCategory::SetCategoryFirst()
 {
     this->Categoryiter = this->CategoryList.begin();
 }
 
-bool CShopCategory::GetCategoryNext(int& CategorySeq) // OK
+bool CShopCategory::GetCategoryNext(int& CategorySeq)
 {
     if (this->Categoryiter == this->CategoryList.end())
-        return 0;
+        return false;
 
     CategorySeq = (*this->Categoryiter);
     this->Categoryiter++;
-    return 1;
+    return true;
 }
 
-void CShopCategory::SetPackagSeqFirst() // OK
+void CShopCategory::SetPackagSeqFirst()
 {
     this->Packageiter = this->PackageList.begin();
 }
 
-bool CShopCategory::GetPackagSeqNext(int& PackagSeq) // OK
+bool CShopCategory::GetPackagSeqNext(int& PackagSeq)
 {
     if (this->Packageiter == this->PackageList.end())
-        return 0;
+        return false;
 
     PackagSeq = (*this->Packageiter);
     this->Packageiter++;
-    return 1;
+    return true;
 }
 
-void CShopCategory::AddPackageSeq(int PackageSeq) // OK
+void CShopCategory::AddPackageSeq(int PackageSeq)
 {
     this->PackageList.push_back(PackageSeq);
 }
@@ -85,6 +81,4 @@ void CShopCategory::ClearPackageSeq()
 {
     this->PackageList.clear();
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

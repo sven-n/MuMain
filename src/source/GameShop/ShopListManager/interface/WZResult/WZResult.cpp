@@ -1,78 +1,73 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: WZResult.cpp
-//
+// Migrated to portable types (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "WZResult.h"
-#ifdef _WIN32
-#include <crtdbg.h>
-#include <strsafe.h>
-#endif
 
-WZResult::WZResult() // OK
+#include <cstdarg>
+#include <cstring>
+#include <cwchar>
+
+WZResult::WZResult()
 {
     this->SetSuccessResult();
 }
 
-WZResult::~WZResult() // OK
-{
-}
+WZResult::~WZResult() {}
 
-BOOL WZResult::IsSuccess() // OK
+bool WZResult::IsSuccess()
 {
     return !this->m_dwErrorCode && !this->m_dwWindowErrorCode;
 }
 
-DWORD WZResult::GetErrorCode() // OK
+uint32_t WZResult::GetErrorCode()
 {
     return this->m_dwErrorCode;
 }
 
-wchar_t* WZResult::GetErrorMessage() // OK
+wchar_t* WZResult::GetErrorMessage()
 {
     return this->m_szErrorMessage;
 }
 
-DWORD WZResult::GetWindowErrorCode() // OK
+uint32_t WZResult::GetWindowErrorCode()
 {
     return this->m_dwWindowErrorCode;
 }
 
-WZResult& WZResult::operator=(const WZResult& a2) // OK
+WZResult& WZResult::operator=(const WZResult& a2)
 {
     this->m_dwErrorCode = a2.m_dwErrorCode;
     this->m_dwWindowErrorCode = a2.m_dwWindowErrorCode;
-    StringCchCopy(this->m_szErrorMessage, sizeof(this->m_szErrorMessage), a2.m_szErrorMessage);
+    wcsncpy(this->m_szErrorMessage, a2.m_szErrorMessage, MAX_ERROR_MESSAGE - 1);
+    this->m_szErrorMessage[MAX_ERROR_MESSAGE - 1] = L'\0';
     return *this;
 }
 
-void WZResult::SetResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR* szFormat, ...) // OK
+void WZResult::SetResult(uint32_t dwErrorCode, uint32_t dwWindowErrorCode, const wchar_t* szFormat, ...)
 {
     va_list va;
 
     va_start(va, szFormat);
     this->m_dwErrorCode = dwErrorCode;
     this->m_dwWindowErrorCode = dwWindowErrorCode;
-    StringCchVPrintf(this->m_szErrorMessage, sizeof(this->m_szErrorMessage), szFormat, va);
+    vswprintf(this->m_szErrorMessage, MAX_ERROR_MESSAGE, szFormat, va);
     va_end(va);
 }
 
-void WZResult::SetSuccessResult() // OK
+void WZResult::SetSuccessResult()
 {
     this->m_dwErrorCode = WZ_SUCCESS;
-    this->m_dwWindowErrorCode = ERROR_SUCCESS;
-    StringCchCopy(this->m_szErrorMessage, sizeof(this->m_szErrorMessage), L"Success");
+    this->m_dwWindowErrorCode = 0;
+    wcsncpy(this->m_szErrorMessage, L"Success", MAX_ERROR_MESSAGE - 1);
+    this->m_szErrorMessage[MAX_ERROR_MESSAGE - 1] = L'\0';
 }
 
-WZResult WZResult::BuildSuccessResult() // OK
+WZResult WZResult::BuildSuccessResult()
 {
     WZResult result;
 
@@ -81,7 +76,7 @@ WZResult WZResult::BuildSuccessResult() // OK
     return result;
 }
 
-WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR* szFormat, ...) // OK
+WZResult WZResult::BuildResult(uint32_t dwErrorCode, uint32_t dwWindowErrorCode, const wchar_t* szFormat, ...)
 {
     WZResult result;
     wchar_t Buffer[MAX_ERROR_MESSAGE];
@@ -90,7 +85,7 @@ WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const
     va_start(args, szFormat);
 
     memset(Buffer, 0, sizeof(Buffer));
-    StringCchVPrintf(Buffer, sizeof(Buffer), szFormat, args);
+    vswprintf(Buffer, MAX_ERROR_MESSAGE, szFormat, args);
 
     va_end(args);
     result.SetResult(dwErrorCode, dwWindowErrorCode, Buffer);
@@ -98,6 +93,4 @@ WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const
     return result;
 }
 
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

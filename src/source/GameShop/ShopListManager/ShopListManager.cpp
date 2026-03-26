@@ -1,19 +1,14 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: ShopListManager.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopListManager.h"
 
-CShopListManager::CShopListManager() // OK
+CShopListManager::CShopListManager()
 {
     // cppcheck-suppress [noCopyConstructor, noOperatorEq]
     this->m_ShopList = new CShopList;
@@ -21,16 +16,14 @@ CShopListManager::CShopListManager() // OK
     this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_CATEGORY);
     this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_PACKAGE);
     this->m_vScriptFiles.push_back(SHOPLIST_SCRIPT_PRODUCT);
-
-    // setlocale(0,"Koraen");
 }
 
-CShopListManager::~CShopListManager() // OK
+CShopListManager::~CShopListManager()
 {
     SAFE_DELETE(m_ShopList);
 }
 
-WZResult CShopListManager::LoadScript(bool bDonwLoad) // OK
+WZResult CShopListManager::LoadScript(bool bDonwLoad)
 {
     if (this->m_ShopList)
     {
@@ -55,6 +48,4 @@ WZResult CShopListManager::LoadScript(bool bDonwLoad) // OK
 
     return this->m_Result;
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

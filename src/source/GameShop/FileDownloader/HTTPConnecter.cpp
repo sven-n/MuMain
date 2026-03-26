@@ -1,17 +1,12 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: HTTPConnecter.cpp
-//
+// Migrated from WinINet to libcurl (Story 7.6.6)
 //
 
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "HTTPConnecter.h"
-#include "GameShop/ShopListManager/interface/PathMethod/Path.h"
 
 HTTPConnecter::HTTPConnecter(DownloadServerInfo* pServerInfo, DownloadFileInfo* pFileInfo)
     : IConnecter(pServerInfo, pFileInfo)
@@ -20,125 +15,43 @@ HTTPConnecter::HTTPConnecter(DownloadServerInfo* pServerInfo, DownloadFileInfo* 
 
 HTTPConnecter::~HTTPConnecter() {}
 
-WZResult HTTPConnecter::CreateSession(HINTERNET& hSession)
+std::string HTTPConnecter::BuildURL()
 {
-    wchar_t path[MAX_PATH] = {0};
+    char serverURL[DL_MAX_URL_LENGTH] = {0};
+    char remotePath[DL_MAX_URL_LENGTH] = {0};
 
-    Path::GetCurrentFileName(path);
+    wcstombs(serverURL, this->m_pServerInfo->GetServerURL(), sizeof(serverURL) - 1);
+    wcstombs(remotePath, this->m_pFileInfo->GetRemoteFilePath(), sizeof(remotePath) - 1);
 
-    if ((hSession = InternetOpen(path, 0, 0, 0, 0)))
-    {
-        this->m_Result.SetSuccessResult();
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_CREATE_SESSION, GetLastError(),
-                                 L"[HTTPConnecter::CreateSession] Fail : InternetOpen, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
+    std::string url = "http://";
+    url += serverURL;
+    url += ":";
+    url += std::to_string(this->m_pServerInfo->GetPort());
+    url += "/";
+    url += remotePath;
 
-    return this->m_Result;
+    return url;
 }
 
-WZResult HTTPConnecter::CreateConnection(HINTERNET& hSession, HINTERNET& hConnection)
+WZResult HTTPConnecter::ConfigureCurl(CURL* curl)
 {
-    this->m_pServerInfo->GetPassword();
+    // HTTP-specific: follow redirects
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    if ((hConnection = InternetConnect(hSession, this->m_pServerInfo->GetServerURL(), this->m_pServerInfo->GetPort(),
-                                       this->m_pServerInfo->GetUserID(), this->m_pServerInfo->GetPassword(), 3, 0,
-                                       (DWORD_PTR)this)))
+    // HTTP credentials if provided
+    char userID[DL_MAX_USER_NAME_LENGTH] = {0};
+    wcstombs(userID, this->m_pServerInfo->GetUserID(), sizeof(userID) - 1);
+
+    if (userID[0] != '\0')
     {
-        this->m_Result.SetSuccessResult();
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_CREATE_CONNECTION, GetLastError(),
-                                 L"[HTTPConnecter::CreateConnection] Fail : InternetConnect, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
+        char password[DL_MAX_PASSWORD_LENGTH] = {0};
+        wcstombs(password, this->m_pServerInfo->GetPassword(), sizeof(password) - 1);
 
-    return this->m_Result;
-}
-
-WZResult HTTPConnecter::OpenRemoteFile(HINTERNET& hConnection, HINTERNET& hRemoteFile, ULONGLONG& nFileLength)
-{
-    hRemoteFile =
-        HttpOpenRequest(hConnection, L"GET", this->m_pFileInfo->GetRemoteFilePath(), L"HTTP/1.0", 0, 0, 0x80000000, 0);
-
-    if (hRemoteFile)
-    {
-        HttpSendRequest(hRemoteFile, 0, 0, 0, 0);
-
-        wchar_t buffer[32];
-
-        memset(buffer, 0, sizeof(buffer));
-
-        DWORD dwBufferLength = 32;
-
-        if (HttpQueryInfo(hRemoteFile, HTTP_QUERY_STATUS_CODE, buffer, &dwBufferLength, 0))
-        {
-            if (_wtoi64(buffer) == HTTP_STATUS_OK)
-            {
-                memset(buffer, 0, sizeof(buffer));
-                dwBufferLength = 32;
-
-                if (HttpQueryInfo(hRemoteFile, HTTP_QUERY_CONTENT_LENGTH, buffer, &dwBufferLength, 0))
-                {
-                    nFileLength = _wtoi64(buffer);
-                    this->m_Result.SetSuccessResult();
-                }
-                else
-                {
-                    this->m_Result.SetResult(DL_GET_FILE_LENGTH, GetLastError(),
-                                             L"[HTTPConnecter::OpenRemoteFile] Fail : HttpQueryInfo - "
-                                             L"HTTP_QUERY_CONTENT_LENGTH, FileName = %ls",
-                                             this->m_pFileInfo->GetRemoteFilePath());
-                }
-            }
-            else
-            {
-                this->m_Result.SetResult(DL_HTTP_STATUS_NOT_OK, 0,
-                                         L"[HTTPConnecter::OpenRemoteFile] Fail : Not HTTP_STATUS_OK, FileName = %ls",
-                                         this->m_pFileInfo->GetRemoteFilePath());
-            }
-        }
-        else
-        {
-            this->m_Result.SetResult(
-                DL_HTTP_QUERY_INFO, GetLastError(),
-                L"[HTTPConnecter::OpenRemoteFile] Fail : HttpQueryInfo - HTTP_QUERY_STATUS_CODE, FileName = %ls",
-                this->m_pFileInfo->GetRemoteFilePath());
-        }
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_OPEN_REMOTEFILE, GetLastError(),
-                                 L"[HTTPConnecter::OpenRemoteFile] Fail : HttpOpenRequest, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
+        std::string userpwd = std::string(userID) + ":" + std::string(password);
+        curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd.c_str());
     }
 
-    return this->m_Result;
-}
-
-WZResult HTTPConnecter::ReadRemoteFile(HINTERNET& hRemoteFile, BYTE* byReadBuffer, DWORD* dwBytesRead)
-{
-    DWORD dwNumberOfBytesAvailable = 0;
-
-    InternetQueryDataAvailable(hRemoteFile, &dwNumberOfBytesAvailable, 0, 0);
-
-    DWORD Size = this->m_pServerInfo->GetReadBufferSize();
-
-    if (InternetReadFile(hRemoteFile, byReadBuffer, Size, dwBytesRead))
-    {
-        this->m_Result.SetSuccessResult();
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_READ_REMOTEFILE, GetLastError(),
-                                 L"[HTTPConnecter::ReadRemoteFile] Fail : InternetReadFile, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
-
+    this->m_Result.SetSuccessResult();
     return this->m_Result;
 }
 #endif

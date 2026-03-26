@@ -1,38 +1,35 @@
 /*******************************************************************************
- *	작 성 자 : 진혜진
- *	작 성 일 : 2009.06.10
- *	내    용 : WZResult - 처리 결과 객체
+ *	WZResult - Processing result object
+ *	Portable types (Story 7.6.6)
  *******************************************************************************/
 
 #pragma once
 
 #include "GameShop/ShopListManager/interface/WZResult/ErrorCodeDefine.h"
+#include <cstdint>
+
 #define MAX_ERROR_MESSAGE 1024
 
 class WZResult
 {
 public:
-    // Constructor, Destructor
     WZResult();
     ~WZResult();
 
-    // public Function
-
     WZResult& operator=(const WZResult& result);
-    BOOL IsSuccess();
-    TCHAR* GetErrorMessage();
-    DWORD GetErrorCode();
-    DWORD GetWindowErrorCode();
+    bool IsSuccess();
+    wchar_t* GetErrorMessage();
+    uint32_t GetErrorCode();
+    uint32_t GetWindowErrorCode();
 
     void SetSuccessResult();
-    void SetResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR* szFormat, ...);
+    void SetResult(uint32_t dwErrorCode, uint32_t dwWindowErrorCode, const wchar_t* szFormat, ...);
 
     static WZResult BuildSuccessResult();
-    static WZResult BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR* szFormat, ...);
+    static WZResult BuildResult(uint32_t dwErrorCode, uint32_t dwWindowErrorCode, const wchar_t* szFormat, ...);
 
 private:
-    // Member Object
-    DWORD m_dwErrorCode;
-    DWORD m_dwWindowErrorCode;
-    TCHAR m_szErrorMessage[MAX_ERROR_MESSAGE];
+    uint32_t m_dwErrorCode;
+    uint32_t m_dwWindowErrorCode;
+    wchar_t m_szErrorMessage[MAX_ERROR_MESSAGE];
 };

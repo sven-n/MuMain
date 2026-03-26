@@ -1,166 +1,171 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: DownloadInfo.cpp
-//
+// Migrated to portable types (Story 7.6.6)
 //
 
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "Include.h"
 
-DownloadFileInfo::DownloadFileInfo() // OK
+DownloadFileInfo::DownloadFileInfo()
 {
     this->m_uFileLength = 0;
-    RtlSecureZeroMemory(this->m_szFileName, sizeof(this->m_szFileName));
-    RtlSecureZeroMemory(this->m_szLocalFilePath, sizeof(this->m_szLocalFilePath));
-    RtlSecureZeroMemory(this->m_szRemoteFilePath, sizeof(this->m_szRemoteFilePath));
-    RtlSecureZeroMemory(this->m_szTargerDirPath, sizeof(this->m_szTargerDirPath));
+    memset(this->m_szFileName, 0, sizeof(this->m_szFileName));
+    memset(this->m_szLocalFilePath, 0, sizeof(this->m_szLocalFilePath));
+    memset(this->m_szRemoteFilePath, 0, sizeof(this->m_szRemoteFilePath));
+    memset(this->m_szTargerDirPath, 0, sizeof(this->m_szTargerDirPath));
 }
 
-DownloadFileInfo::~DownloadFileInfo() // OK
-{
-}
+DownloadFileInfo::~DownloadFileInfo() {}
 
-TCHAR* DownloadFileInfo::GetFileName() // OK
+wchar_t* DownloadFileInfo::GetFileName()
 {
     return m_szFileName;
 }
 
-TCHAR* DownloadFileInfo::GetLocalFilePath() // OK
+wchar_t* DownloadFileInfo::GetLocalFilePath()
 {
     return m_szLocalFilePath;
 }
 
-TCHAR* DownloadFileInfo::GetRemoteFilePath() // OK
+wchar_t* DownloadFileInfo::GetRemoteFilePath()
 {
     return m_szRemoteFilePath;
 }
 
-TCHAR* DownloadFileInfo::GetTargetDirPath() // OK
+wchar_t* DownloadFileInfo::GetTargetDirPath()
 {
     return m_szTargerDirPath;
 }
 
-ULONGLONG DownloadFileInfo::GetFileLength() // OK
+uint64_t DownloadFileInfo::GetFileLength()
 {
     return this->m_uFileLength;
 }
 
-void DownloadFileInfo::SetFilePath(TCHAR* szFileName, TCHAR* szLocalFilePath, TCHAR* szRemoteFilePath,
-                                   TCHAR* szTargerDirPath) // OK
+void DownloadFileInfo::SetFilePath(wchar_t* szFileName, wchar_t* szLocalFilePath, wchar_t* szRemoteFilePath,
+                                   wchar_t* szTargerDirPath)
 {
-    StringCchCopy(this->m_szFileName, sizeof(this->m_szFileName), szFileName);
-    StringCchCopy(this->m_szLocalFilePath, sizeof(this->m_szLocalFilePath), szLocalFilePath);
-    StringCchCopy(this->m_szRemoteFilePath, sizeof(this->m_szRemoteFilePath), szRemoteFilePath);
+    wcsncpy(this->m_szFileName, szFileName, MAX_PATH - 1);
+    this->m_szFileName[MAX_PATH - 1] = L'\0';
+    wcsncpy(this->m_szLocalFilePath, szLocalFilePath, MAX_PATH - 1);
+    this->m_szLocalFilePath[MAX_PATH - 1] = L'\0';
+    wcsncpy(this->m_szRemoteFilePath, szRemoteFilePath, DL_MAX_URL_LENGTH - 1);
+    this->m_szRemoteFilePath[DL_MAX_URL_LENGTH - 1] = L'\0';
     if (szTargerDirPath)
-        StringCchCopy(this->m_szTargerDirPath, sizeof(this->m_szTargerDirPath), szTargerDirPath);
+    {
+        wcsncpy(this->m_szTargerDirPath, szTargerDirPath, MAX_PATH - 1);
+        this->m_szTargerDirPath[MAX_PATH - 1] = L'\0';
+    }
 }
 
-void DownloadFileInfo::SetFileLength(ULONGLONG uFileLength) // OK
+void DownloadFileInfo::SetFileLength(uint64_t uFileLength)
 {
     this->m_uFileLength = uFileLength;
 }
 
-DownloadServerInfo::DownloadServerInfo() // OK
+DownloadServerInfo::DownloadServerInfo()
 {
     this->m_nPort = 21;
     this->m_DownloaderType = FTP;
     this->m_dwReadBufferSize = DL_DEFAULT_BUFFER_SIZE;
-    this->m_bOverWrite = 1;
-    this->m_bPassive = 0;
+    this->m_bOverWrite = true;
+    this->m_bPassive = false;
     this->m_dwConnectTimeout = 0;
-    RtlSecureZeroMemory(this->m_szServerURL, sizeof(this->m_szServerURL));
-    RtlSecureZeroMemory(this->m_szUserID, sizeof(this->m_szUserID));
-    RtlSecureZeroMemory(this->m_szPassword, sizeof(this->m_szPassword));
+    memset(this->m_szServerURL, 0, sizeof(this->m_szServerURL));
+    memset(this->m_szUserID, 0, sizeof(this->m_szUserID));
+    memset(this->m_szPassword, 0, sizeof(this->m_szPassword));
 }
 
-DownloadServerInfo::~DownloadServerInfo() // OK
-{
-}
+DownloadServerInfo::~DownloadServerInfo() {}
 
-DWORD DownloadServerInfo::GetConnectTimeout() // OK
+uint32_t DownloadServerInfo::GetConnectTimeout()
 {
     return this->m_dwConnectTimeout;
 }
 
-DownloaderType DownloadServerInfo::GetDownloaderType() // OK
+DownloaderType DownloadServerInfo::GetDownloaderType()
 {
     return this->m_DownloaderType;
 }
 
-TCHAR* DownloadServerInfo::GetPassword() // OK
+wchar_t* DownloadServerInfo::GetPassword()
 {
     return this->m_szPassword;
 }
 
-INTERNET_PORT DownloadServerInfo::GetPort() // OK
+unsigned short DownloadServerInfo::GetPort()
 {
     return this->m_nPort;
 }
 
-DWORD DownloadServerInfo::GetReadBufferSize() // OK
+uint32_t DownloadServerInfo::GetReadBufferSize()
 {
     return this->m_dwReadBufferSize;
 }
 
-TCHAR* DownloadServerInfo::GetServerURL() // OK
+wchar_t* DownloadServerInfo::GetServerURL()
 {
     return this->m_szServerURL;
 }
 
-TCHAR* DownloadServerInfo::GetUserID() // OK
+wchar_t* DownloadServerInfo::GetUserID()
 {
     return this->m_szUserID;
 }
 
-BOOL DownloadServerInfo::IsOverWrite() // OK
+bool DownloadServerInfo::IsOverWrite()
 {
     return this->m_bOverWrite;
 }
 
-BOOL DownloadServerInfo::IsPassive() // OK
+bool DownloadServerInfo::IsPassive()
 {
     return this->m_bPassive;
 }
 
-void DownloadServerInfo::SetServerInfo(TCHAR* szServerURL, INTERNET_PORT nPort, TCHAR* szUserID,
-                                       TCHAR* szPassword) // OK
+void DownloadServerInfo::SetServerInfo(wchar_t* szServerURL, unsigned short nPort, wchar_t* szUserID,
+                                       wchar_t* szPassword)
 {
-    auto* search = wcschr(szServerURL, ':');
-    if (search && search[1] == '/' && search[2] == '/')
-        StringCchCopy(this->m_szServerURL, sizeof(this->m_szServerURL), search + 3);
+    auto* search = wcschr(szServerURL, L':');
+    if (search && search[1] == L'/' && search[2] == L'/')
+    {
+        wcsncpy(this->m_szServerURL, search + 3, DL_MAX_URL_LENGTH - 1);
+    }
     else
-        StringCchCopy(this->m_szServerURL, sizeof(this->m_szServerURL), szServerURL);
+    {
+        wcsncpy(this->m_szServerURL, szServerURL, DL_MAX_URL_LENGTH - 1);
+    }
+    this->m_szServerURL[DL_MAX_URL_LENGTH - 1] = L'\0';
     this->m_nPort = nPort;
-    StringCchCopy(this->m_szUserID, sizeof(this->m_szUserID), szUserID);
-    StringCchCopy(this->m_szPassword, sizeof(this->m_szPassword), szPassword);
+    wcsncpy(this->m_szUserID, szUserID, DL_MAX_USER_NAME_LENGTH - 1);
+    this->m_szUserID[DL_MAX_USER_NAME_LENGTH - 1] = L'\0';
+    wcsncpy(this->m_szPassword, szPassword, DL_MAX_PASSWORD_LENGTH - 1);
+    this->m_szPassword[DL_MAX_PASSWORD_LENGTH - 1] = L'\0';
 }
 
-void DownloadServerInfo::SetDownloaderType(DownloaderType dwDownloaderType) // OK
+void DownloadServerInfo::SetDownloaderType(DownloaderType dwDownloaderType)
 {
     this->m_DownloaderType = dwDownloaderType;
 }
 
-void DownloadServerInfo::SetReadBufferSize(DWORD dwReadBufferSize) // OK
+void DownloadServerInfo::SetReadBufferSize(uint32_t dwReadBufferSize)
 {
     this->m_dwReadBufferSize = dwReadBufferSize;
 }
 
-void DownloadServerInfo::SetOverWrite(BOOL bOverWrite) // OK
+void DownloadServerInfo::SetOverWrite(bool bOverWrite)
 {
     this->m_bOverWrite = bOverWrite;
 }
 
-void DownloadServerInfo::SetPassiveMode(BOOL bPassive) // OK
+void DownloadServerInfo::SetPassiveMode(bool bPassive)
 {
     this->m_bPassive = bPassive;
 }
 
-void DownloadServerInfo::SetConnectTimeout(DWORD dwConnectTimeout) // OK
+void DownloadServerInfo::SetConnectTimeout(uint32_t dwConnectTimeout)
 {
     this->m_dwConnectTimeout = dwConnectTimeout;
 }

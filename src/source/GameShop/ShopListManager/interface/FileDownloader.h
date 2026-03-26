@@ -1,86 +1,47 @@
 /*******************************************************************************
- *	�� �� �� : ������
- *	�� �� �� : 2009.06.10
- *	��    �� : FileDownloader
- *				File ���� �ٿ�ε� ��� ����
+ *	FileDownloader — libcurl-based file download engine
+ *	Migrated from WinINet (Story 7.6.6)
  *******************************************************************************/
 
 #pragma once
 
+#include <cstdint>
+#include <fstream>
+#include <curl/curl.h>
 #include "GameShop/ShopListManager/interface/IConnecter.h"
 #include "GameShop/ShopListManager/interface/IDownloaderStateEvent.h"
 
 class FileDownloader
 {
 public:
-    // Constructor, Destructor
-
     FileDownloader(IDownloaderStateEvent* pStateEvent, DownloadServerInfo* pServerInfo, DownloadFileInfo* pFileInfo);
     ~FileDownloader();
 
-    // public Function
-
-    //					�ٿ�ε� ����
     void Break();
-    //					������ ���� �ٿ�ε� ���� : ����, Ŀ��Ʈ, ���� ���� ��� ó��
     WZResult DownloadFile();
 
 private:
-    // private Function
-
-    //					���� ����
-    BOOL CanBeContinue();
-    //					������
+    bool CanBeContinue();
     void Release();
 
-    //					Ŀ���� ����
     IConnecter* CreateConnecter();
-    //					���� ó��
-    WZResult CreateConnection();
-    static unsigned int __stdcall RunConnectThread(LPVOID pParam);
-    WZResult Connection();
 
-    //					���� ó��
-    WZResult TransferRemoteFile();
+    static size_t CurlWriteCallback(void* ptr, size_t size, size_t nmemb, void* userdata);
+    static int CurlProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
+                                    curl_off_t ulnow);
 
-    //					���� ���� ����
-    WZResult CreateLocalFile();
-    //					�ٿ�ε� ���� �б�
-    WZResult ReadRemoteFile(BYTE* byReadBuffer, DWORD* dwBytesRead);
-    //					���� ���� ����
-    WZResult WriteLocalFile(BYTE* byReadBuffer, DWORD dwBytesRead);
-
-    //					�ٿ�ε� ���� �̺�Ʈ ������
-    void SendStartedDownloadFileEvent(ULONGLONG nFileLength);
-    //					�ٿ�ε� �Ϸ� �̺�Ʈ ������
+    void SendStartedDownloadFileEvent(uint64_t nFileLength);
     void SendCompletedDownloadFileEvent(WZResult wzResult);
-    //					�ٿ�ε� ���� ��Ȳ �̺�Ʈ ������ : ��Ŷ ����
-    void SendProgressDownloadFileEvent(ULONGLONG nTotalBytesRead);
+    void SendProgressDownloadFileEvent(uint64_t nTotalBytesRead);
 
-    // Member Object
-
-    //							�ٿ�ε� ���� �÷���
-    volatile BOOL m_bBreak;
-    //							���..
+    volatile bool m_bBreak;
     WZResult m_Result;
 
-    //							�ٿ�ε� ���� �̺�Ʈ ���� ��ü
     IDownloaderStateEvent* m_pStateEvent;
-    //							�ٿ�ε� ���� ���� ��ü
     DownloadServerInfo* m_pServerInfo;
-    //							�ٿ�ε� ���� ���� ��ü
     DownloadFileInfo* m_pFileInfo;
-    //							Ŀ����
     IConnecter* m_pConnecter;
 
-    //							WinINet ���� �ڵ�
-    HINTERNET m_hSession;
-    //							WinINet Ŀ���� �ڵ�
-    HINTERNET m_hConnection;
-    //							���� ���� �ڵ�
-    HINTERNET m_hRemoteFile;
-    //							���� ���� �ڵ�
-    HANDLE m_hLocalFile;
-    //							���� ������
-    ULONGLONG m_nFileLength;
+    std::ofstream m_LocalFile;
+    uint64_t m_nFileLength;
 };

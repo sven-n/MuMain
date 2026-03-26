@@ -1,11 +1,7 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: FileDownloader.cpp
-//
+// Migrated from WinINet to libcurl (Story 7.6.6)
 //
 
 #include "stdafx.h"
@@ -15,96 +11,236 @@
 #include "FTPConnecter.h"
 #include <GameShop/ShopListManager/interface/PathMethod/Path.h>
 
-#include <process.h>
+#include <thread>
+#include <future>
+#include <filesystem>
 
 FileDownloader::FileDownloader(IDownloaderStateEvent* pStateEvent, DownloadServerInfo* pServerInfo,
-                               DownloadFileInfo* pFileInfo) // OK
+                               DownloadFileInfo* pFileInfo)
 {
-    this->m_bBreak = 0;
+    this->m_bBreak = false;
     this->m_pStateEvent = pStateEvent;
     this->m_pServerInfo = pServerInfo;
     this->m_pFileInfo = pFileInfo;
-    this->m_pConnecter = 0;
-    this->m_hLocalFile = INVALID_HANDLE_VALUE;
+    this->m_pConnecter = nullptr;
     this->m_nFileLength = 0;
 }
 
-FileDownloader::~FileDownloader() // OK
+FileDownloader::~FileDownloader()
 {
     this->Release();
 }
 
 void FileDownloader::Break()
 {
-    this->m_bBreak = 1;
+    this->m_bBreak = true;
 }
 
-WZResult FileDownloader::DownloadFile() // OK
+size_t FileDownloader::CurlWriteCallback(void* ptr, size_t size, size_t nmemb, void* userdata)
 {
-    this->m_bBreak = 0;
+    auto* stream = static_cast<std::ofstream*>(userdata);
+    size_t bytes = size * nmemb;
+    stream->write(static_cast<const char*>(ptr), static_cast<std::streamsize>(bytes));
+    return stream->good() ? bytes : 0;
+}
+
+int FileDownloader::CurlProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t /*ultotal*/,
+                                         curl_off_t /*ulnow*/)
+{
+    auto* downloader = static_cast<FileDownloader*>(clientp);
+
+    if (downloader->m_bBreak)
+        return 1; // Abort transfer
+
+    if (dlnow > 0)
+        downloader->SendProgressDownloadFileEvent(static_cast<uint64_t>(dlnow));
+
+    return 0;
+}
+
+WZResult FileDownloader::DownloadFile()
+{
+    this->m_bBreak = false;
     this->m_nFileLength = 0;
     this->Release();
+
     this->m_pConnecter = this->CreateConnecter();
-    this->m_Result = this->m_pConnecter->CreateSession(this->m_hSession);
 
-    if (!this->CanBeContinue())
-        goto JUMP_END;
+    // Build URL from connecter
+    std::string url = this->m_pConnecter->BuildURL();
 
-    this->m_Result = this->CreateConnection();
-    if (!this->CanBeContinue())
-        goto JUMP_END;
+    // Create local directory structure
+    wchar_t* localPath = this->m_pFileInfo->GetLocalFilePath();
 
-    this->m_Result = this->m_pConnecter->OpenRemoteFile(m_hConnection, m_hRemoteFile, m_nFileLength);
+    if (!this->m_pServerInfo->IsOverWrite())
+    {
+        // Check if file already exists
+        std::error_code ec;
+        if (std::filesystem::exists(std::filesystem::path(localPath), ec))
+        {
+            this->m_Result.SetResult(DL_LOCALFILE_EXISTS, 0,
+                                     L"[FileDownloader::DownloadFile] Fail : Local File Exists, FileName = %ls",
+                                     this->m_pFileInfo->GetRemoteFilePath());
+            return this->m_Result;
+        }
+    }
 
-    if (!this->CanBeContinue())
-        goto JUMP_END;
+    // Create parent directories
+    Path::CreateDirectorys(localPath, true);
 
-    this->m_Result = this->CreateLocalFile();
+    // Remove read-only attribute if needed
+    std::error_code ec;
+    auto perms = std::filesystem::status(std::filesystem::path(localPath), ec).permissions();
+    if (!ec && (perms & std::filesystem::perms::owner_write) == std::filesystem::perms::none)
+    {
+        std::filesystem::permissions(std::filesystem::path(localPath), std::filesystem::perms::owner_write,
+                                     std::filesystem::perm_options::add, ec);
+    }
 
-    if (!this->CanBeContinue())
-        goto JUMP_END;
+    // Convert local path to narrow string for ofstream
+    char narrowLocalPath[MAX_PATH * 4] = {0};
+    wcstombs(narrowLocalPath, localPath, sizeof(narrowLocalPath) - 1);
 
+    // Open local file for writing
+    this->m_LocalFile.open(narrowLocalPath, std::ios::binary | std::ios::trunc);
+    if (!this->m_LocalFile.is_open())
+    {
+        this->m_Result.SetResult(DL_CREATE_LOCALFILE, 0,
+                                 L"[FileDownloader::DownloadFile] Fail : CreateFile, FileName = %ls",
+                                 this->m_pFileInfo->GetRemoteFilePath());
+        return this->m_Result;
+    }
+
+    // Initialize curl
+    CURL* curl = curl_easy_init();
+    if (!curl)
+    {
+        this->m_LocalFile.close();
+        this->m_Result.SetResult(DL_CREATE_SESSION, 0, L"[FileDownloader::DownloadFile] Fail : curl_easy_init");
+        return this->m_Result;
+    }
+
+    // Set URL
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+    // Set write callback
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, FileDownloader::CurlWriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &this->m_LocalFile);
+
+    // Set progress callback for break support
+    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, FileDownloader::CurlProgressCallback);
+    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+
+    // Timeouts (AC-STD-12: no hangs on network stalls)
+    uint32_t connectTimeout = this->m_pServerInfo->GetConnectTimeout();
+    if (connectTimeout > 0)
+    {
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, static_cast<long>(connectTimeout));
+    }
+    else
+    {
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30L);
+    }
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 300L); // 5 minute overall timeout
+
+    // Apply protocol-specific configuration
+    this->m_pConnecter->ConfigureCurl(curl);
+
+    // Notify start
+    this->SendStartedDownloadFileEvent(0);
+
+    // Perform download (optionally with timeout thread)
+    CURLcode res;
+    if (connectTimeout > 0)
+    {
+        // Use async for timeout support
+        auto future = std::async(std::launch::async, [curl]() { return curl_easy_perform(curl); });
+
+        auto status = future.wait_for(std::chrono::milliseconds(connectTimeout + 60000));
+        if (status == std::future_status::timeout)
+        {
+            this->m_bBreak = true;
+            res = future.get(); // Wait for curl to abort via progress callback
+        }
+        else
+        {
+            res = future.get();
+        }
+    }
+    else
+    {
+        res = curl_easy_perform(curl);
+    }
+
+    // Get file size info
+    curl_off_t downloadSize = 0;
+    curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &downloadSize);
+    this->m_nFileLength = static_cast<uint64_t>(downloadSize);
     this->m_pFileInfo->SetFileLength(this->m_nFileLength);
-    this->m_Result = this->TransferRemoteFile();
 
-JUMP_END:
+    // Check result
+    if (res == CURLE_OK)
+    {
+        long httpCode = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+        if (httpCode >= 400)
+        {
+            this->m_Result.SetResult(DL_HTTP_STATUS_NOT_OK, static_cast<uint32_t>(httpCode),
+                                     L"[FileDownloader::DownloadFile] Fail : HTTP status %ld", httpCode);
+        }
+        else
+        {
+            this->m_Result.SetSuccessResult();
+        }
+    }
+    else if (res == CURLE_ABORTED_BY_CALLBACK)
+    {
+        this->m_Result.SetResult(WZ_USER_BREAK, 0, L"[FileDownloader] User Break");
+    }
+    else if (res == CURLE_OPERATION_TIMEDOUT)
+    {
+        this->m_Result.SetResult(DL_CONNECTION_TIMEOUT, 0,
+                                 L"[FileDownloader::DownloadFile] Fail : TIMEOUT, FileName = %ls",
+                                 this->m_pFileInfo->GetRemoteFilePath());
+    }
+    else
+    {
+        this->m_Result.SetResult(DL_CREATE_CONNECTION, static_cast<uint32_t>(res),
+                                 L"[FileDownloader::DownloadFile] Fail : curl error %d", static_cast<int>(res));
+    }
+
+    curl_easy_cleanup(curl);
+    this->m_LocalFile.close();
+
+    // Remove file on failure
+    if (!this->m_Result.IsSuccess())
+    {
+        std::filesystem::remove(std::filesystem::path(localPath), ec);
+    }
+
+    this->SendCompletedDownloadFileEvent(this->m_Result);
+
     return this->m_Result;
 }
 
-BOOL FileDownloader::CanBeContinue() // OK
+bool FileDownloader::CanBeContinue()
 {
     if (this->m_bBreak)
         this->m_Result.SetResult(WZ_USER_BREAK, WZ_SUCCESS, L"[FileDownloader] User Break");
     return this->m_Result.IsSuccess();
 }
 
-void FileDownloader::Release() // OK
+void FileDownloader::Release()
 {
-    if (this->m_hLocalFile != INVALID_HANDLE_VALUE)
-    {
-        CloseHandle(this->m_hLocalFile);
-        this->m_hLocalFile = INVALID_HANDLE_VALUE;
-    }
-    if (this->m_hRemoteFile)
-    {
-        InternetCloseHandle(this->m_hRemoteFile);
-        this->m_hRemoteFile = 0;
-    }
-    if (this->m_hConnection)
-    {
-        InternetCloseHandle(this->m_hConnection);
-        this->m_hConnection = 0;
-    }
-    if (this->m_hSession)
-    {
-        InternetCloseHandle(this->m_hSession);
-        this->m_hSession = 0;
-    }
+    if (this->m_LocalFile.is_open())
+        this->m_LocalFile.close();
 
     SAFE_DELETE(m_pConnecter);
 }
 
-IConnecter* FileDownloader::CreateConnecter() // OK
+IConnecter* FileDownloader::CreateConnecter()
 {
     if (m_pServerInfo->GetDownloaderType() == HTTP)
     {
@@ -116,204 +252,9 @@ IConnecter* FileDownloader::CreateConnecter() // OK
     }
 }
 
-WZResult FileDownloader::CreateConnection()
+void FileDownloader::SendStartedDownloadFileEvent(uint64_t nFileLength)
 {
-    DWORD dwMilliseconds = this->m_pServerInfo->GetConnectTimeout();
-
-    if (dwMilliseconds > 0)
-    {
-        unsigned int ThreadID = 0;
-
-        auto hHandle = (HANDLE)_beginthreadex(0, 0, FileDownloader::RunConnectThread, this, 0, &ThreadID);
-
-        if (hHandle == INVALID_HANDLE_VALUE)
-        {
-            this->m_Result.SetResult(DL_BEGIN_THREAD_CONNECTION, GetLastError(),
-                                     L"[FileDownloader::CreateConnection] Fail : _beginthreadex, FileName = %ls",
-                                     this->m_pFileInfo->GetRemoteFilePath());
-        }
-        else
-        {
-            if (WaitForSingleObject(hHandle, dwMilliseconds) == WAIT_TIMEOUT)
-            {
-                InternetCloseHandle(this->m_hSession);
-                this->m_hSession = 0;
-
-                WaitForSingleObject(hHandle, INFINITE);
-
-                CloseHandle(hHandle);
-
-                this->m_Result.SetResult(DL_CONNECTION_TIMEOUT, 0,
-                                         L"[FileDownloader::CreateConnection] Fail : WAIT_TIMEOUT, FileName = %ls",
-                                         this->m_pFileInfo->GetRemoteFilePath());
-            }
-            else
-            {
-                CloseHandle(hHandle);
-            }
-        }
-    }
-    else
-    {
-        this->m_Result = this->Connection();
-    }
-
-    return this->m_Result;
-}
-
-unsigned int WINAPI FileDownloader::RunConnectThread(LPVOID pParam)
-{
-    auto* p = reinterpret_cast<FileDownloader*>(pParam);
-
-    if (p)
-    {
-        p->m_Result = p->Connection();
-    }
-
-    return 0;
-}
-
-WZResult FileDownloader::Connection()
-{
-    this->m_Result = this->m_pConnecter->CreateConnection(this->m_hSession, this->m_hConnection);
-
-    return this->m_Result;
-}
-
-WZResult FileDownloader::TransferRemoteFile()
-{
-    DWORD CbSize = this->m_pServerInfo->GetReadBufferSize();
-
-    BYTE* buffer = new BYTE[CbSize];
-
-    DWORD TotalSize = 0;
-    DWORD ReadSize = 0;
-
-    this->SendStartedDownloadFileEvent(this->m_nFileLength);
-
-    ReadSize = 0;
-    this->m_Result = this->m_pConnecter->ReadRemoteFile(this->m_hRemoteFile, buffer, &ReadSize);
-
-    if (this->CanBeContinue())
-    {
-        while (true)
-        {
-            if (ReadSize > 0)
-            {
-                this->m_Result = this->WriteLocalFile(buffer, ReadSize);
-
-                if (!this->CanBeContinue())
-                    break;
-
-                TotalSize += ReadSize;
-                this->SendProgressDownloadFileEvent(TotalSize);
-            }
-
-            if (ReadSize == 0 || this->m_bBreak)
-            {
-                if (this->CanBeContinue())
-                {
-                    if (TotalSize >= this->m_nFileLength)
-                    {
-                        this->m_Result.SetSuccessResult();
-                    }
-                    else
-                    {
-                        this->m_Result.SetResult(
-                            DL_DIFFERENT_FILE_LENGTH, 0,
-                            L"[FileDownloader::TransferRemoteFile] Fail : Different Down File Size, FileName = %ls",
-                            this->m_pFileInfo->GetRemoteFilePath());
-                    }
-                }
-
-                break;
-            }
-        }
-    }
-
-    this->SendCompletedDownloadFileEvent(this->m_Result);
-
-    delete[] buffer;
-
-    return this->m_Result;
-}
-
-WZResult FileDownloader::CreateLocalFile()
-{
-    TCHAR* path = this->m_pFileInfo->GetLocalFilePath();
-
-    if (GetFileAttributes(path) == INVALID_FILE_ATTRIBUTES || this->m_pServerInfo->IsOverWrite())
-    {
-        Path::CreateDirectorys(path, 1);
-
-        path = this->m_pFileInfo->GetLocalFilePath();
-
-        DWORD attr = GetFileAttributes(path);
-        if ((attr & 1) != 0)
-        {
-            SetFileAttributes(path, attr & 0xFFFFFFFE);
-        }
-        this->m_hLocalFile = CreateFile(path, 0x40000000, 0, 0, CREATE_ALWAYS, 0x80, 0);
-
-        if (this->m_hLocalFile == INVALID_HANDLE_VALUE)
-        {
-            this->m_Result.SetResult(DL_CREATE_LOCALFILE, GetLastError(),
-                                     L"[FileDownloader::CreateLocalFile] Fail : CreateFile, FileName = %ls",
-                                     this->m_pFileInfo->GetRemoteFilePath());
-        }
-        else
-        {
-            this->m_Result.SetSuccessResult();
-        }
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_LOCALFILE_EXISTS, 0,
-                                 L"[FileDownloader::CreateLocalFile] Fail : Local File Exists, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
-
-    return this->m_Result;
-}
-
-WZResult FileDownloader::ReadRemoteFile(BYTE* byReadBuffer, DWORD* dwBytesRead)
-{
-    if (this->m_hRemoteFile)
-    {
-        this->m_Result = this->m_pConnecter->ReadRemoteFile(this->m_hRemoteFile, byReadBuffer, dwBytesRead);
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_READ_REMOTEFILE, 0,
-                                 L"[FileDownloader::ReadRemoteFile] Fail : ReadRemoteFile, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
-
-    return this->m_Result;
-}
-
-WZResult FileDownloader::WriteLocalFile(BYTE* byReadBuffer, DWORD dwBytesRead)
-{
-    DWORD NumberOfBytesWritten = 0;
-
-    if (WriteFile(this->m_hLocalFile, byReadBuffer, dwBytesRead, &NumberOfBytesWritten, 0) &&
-        dwBytesRead == NumberOfBytesWritten)
-    {
-        this->m_Result.SetSuccessResult();
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_WRITE_LOCALFILE, GetLastError(),
-                                 L"[FileDownloader::WriteLocalFile] Fail : WriteFile, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
-
-    return this->m_Result;
-}
-
-void FileDownloader::SendStartedDownloadFileEvent(ULONGLONG nFileLength)
-{
-    if (this->m_pStateEvent != NULL)
+    if (this->m_pStateEvent != nullptr)
     {
         this->m_pStateEvent->OnStartedDownloadFile(this->m_pFileInfo->GetFileName(), nFileLength);
     }
@@ -321,15 +262,15 @@ void FileDownloader::SendStartedDownloadFileEvent(ULONGLONG nFileLength)
 
 void FileDownloader::SendCompletedDownloadFileEvent(WZResult wzResult)
 {
-    if (this->m_pStateEvent != NULL)
+    if (this->m_pStateEvent != nullptr)
     {
         this->m_pStateEvent->OnCompletedDownloadFile(this->m_pFileInfo->GetFileName(), wzResult);
     }
 }
 
-void FileDownloader::SendProgressDownloadFileEvent(ULONGLONG nTotalBytesRead)
+void FileDownloader::SendProgressDownloadFileEvent(uint64_t nTotalBytesRead)
 {
-    if (this->m_pStateEvent != NULL)
+    if (this->m_pStateEvent != nullptr)
     {
         this->m_pStateEvent->OnProgressDownloadFile(this->m_pFileInfo->GetFileName(), nTotalBytesRead);
     }

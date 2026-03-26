@@ -1,7 +1,7 @@
 /**************************************************************************************************
 
-�ۼ���: 2009.10.06
-�ۼ���: ������
+ListManager — download orchestration
+Portable types (Story 7.6.6)
 
 **************************************************************************************************/
 
@@ -9,20 +9,22 @@
 #include "Include.h"
 #include "FTPFileDownLoader.h"
 
+#include <thread>
+#include <future>
+
 class CListManager
 {
 public:
     CListManager();
     virtual ~CListManager();
 
-    //				�� ����Ʈ �ٿ�ε� & ���� �� ���� ������ �����Ѵ�.
     void SetListManagerInfo(DownloaderType type, const wchar_t* ServerIP, const wchar_t* UserID, const wchar_t* Pwd,
                             const wchar_t* RemotePath, const wchar_t* LocalPath, CListVersionInfo Version,
-                            DWORD dwDownloadMaxTime = 0);
+                            uint32_t dwDownloadMaxTime = 0);
 
     void SetListManagerInfo(DownloaderType type, const wchar_t* ServerIP, unsigned short PortNum, const wchar_t* UserID,
                             const wchar_t* Pwd, const wchar_t* RemotePath, const wchar_t* LocalPath,
-                            FTP_SERVICE_MODE ftpMode, CListVersionInfo Version, DWORD dwDownloadMaxTime = 0);
+                            FTP_SERVICE_MODE ftpMode, CListVersionInfo Version, uint32_t dwDownloadMaxTime = 0);
 
     WZResult LoadScriptList(bool bDonwLoad);
 
@@ -33,7 +35,6 @@ protected:
 
     WZResult FileDownLoad();
     WZResult FileDownLoadImpl();
-    static unsigned int __stdcall RunFileDownLoadThread(LPVOID pParam);
 
     virtual WZResult LoadScript(bool bDonwLoad) = 0;
 

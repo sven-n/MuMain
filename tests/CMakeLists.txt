@@ -254,6 +254,7 @@ target_sources(MuTests PRIVATE data/test_gameconfig_crypto.cpp)
 # To activate GREEN phase: add target_compile_definitions(MuTests PRIVATE MU_SHOPLIST_CROSS_PLATFORM_READY)
 # after Tasks 3+4 complete. No Win32 APIs in the test TU — compiles on macOS/Linux/Windows (MinGW CI).
 target_sources(MuTests PRIVATE gameshop/test_shoplist_download.cpp)
+target_compile_definitions(MuTests PRIVATE MU_SHOPLIST_CROSS_PLATFORM_READY)
 
 # Story 7.6.5: Cross-Platform Terminal / Console [VS0-QUAL-WIN32CLEAN-CONSOLE]
 # GREEN PHASE: mu_console_init() and mu_get_console_size() implemented in PlatformCompat.h.

@@ -1,27 +1,18 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: StringMethod.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "StringMethod.h"
 
-CStringMethod::CStringMethod() // OK
-{
-}
+CStringMethod::CStringMethod() {}
 
-CStringMethod::~CStringMethod() // OK
-{
-}
+CStringMethod::~CStringMethod() {}
 
-void CStringMethod::ConvertStringToDateTime(tm& datetime, std::wstring strdata) // OK
+void CStringMethod::ConvertStringToDateTime(tm& datetime, std::wstring strdata)
 {
     if (strdata.length() >= 4)
     {
@@ -55,6 +46,4 @@ void CStringMethod::ConvertStringToDateTime(tm& datetime, std::wstring strdata) 
 
     mktime(&datetime);
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

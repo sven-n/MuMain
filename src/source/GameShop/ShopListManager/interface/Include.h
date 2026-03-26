@@ -1,24 +1,16 @@
 /*******************************************************************************
- *	�� �� �� : ������
- *	�� �� �� : 2009.06.10
- *	��    �� : Include Header
+ *	Include Header — FileDownloader interface layer
+ *	Migrated from WinINet to libcurl (Story 7.6.6)
  *******************************************************************************/
 
 #pragma once
 
-#pragma warning(disable : 4995)
-
 #include <iostream>
-#include <wininet.h>
+#include <cstdint>
+#include <cstring>
+#include <string>
+#include <curl/curl.h>
 
-#include <crtdbg.h>
-#include <tchar.h>
-#ifdef _WIN32
-#include <strsafe.h>
-#endif
-
-#include "GameShop\ShopListManager\interface\WZResult/WZResult.h"
-#include "GameShop\ShopListManager\interface\DownloadInfo.h"
-#include "GameShop\ShopListManager\interface\IDownloaderStateEvent.h"
-
-#pragma comment(lib, L"Wininet.lib")
+#include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
+#include "GameShop/ShopListManager/interface/DownloadInfo.h"
+#include "GameShop/ShopListManager/interface/IDownloaderStateEvent.h"

@@ -1,15 +1,22 @@
 /*******************************************************************************
- *	�� �� �� : ������
- *	�� �� �� : 2009.06.10
- *	��    �� : Download�� �ʿ��� ���� ����
+ *	Download info classes — portable types
+ *	Migrated from WinINet types (Story 7.6.6)
  *******************************************************************************/
 
 #pragma once
 
-#ifdef _WIN32
-#include <wininet.h>
-#endif
+#include <cstdint>
+#include <cwchar>
+
 #define DL_DEFAULT_BUFFER_SIZE 4096
+
+#ifndef MAX_PATH
+#define MAX_PATH 260
+#endif
+
+#define DL_MAX_URL_LENGTH 2084
+#define DL_MAX_USER_NAME_LENGTH 256
+#define DL_MAX_PASSWORD_LENGTH 256
 
 typedef enum _DownloaderType
 {
@@ -20,101 +27,58 @@ typedef enum _DownloaderType
 class DownloadFileInfo
 {
 public:
-    // Constructor, Destructor
-
     DownloadFileInfo();
     ~DownloadFileInfo();
 
-    // Get Function
-    //			���� ��� ��������
-    TCHAR* GetFileName();
-    TCHAR* GetLocalFilePath();
-    TCHAR* GetRemoteFilePath();
-    TCHAR* GetTargetDirPath();
-    ULONGLONG GetFileLength();
-    // Set Function
-    //		���� ��� ����
-    void SetFilePath(TCHAR* szFileName, TCHAR* szLocalFilePath, TCHAR* szRemoteFilePath, TCHAR* szTargerDirPath);
-    void SetFileLength(ULONGLONG uFileLength);
+    wchar_t* GetFileName();
+    wchar_t* GetLocalFilePath();
+    wchar_t* GetRemoteFilePath();
+    wchar_t* GetTargetDirPath();
+    uint64_t GetFileLength();
+
+    void SetFilePath(wchar_t* szFileName, wchar_t* szLocalFilePath, wchar_t* szRemoteFilePath,
+                     wchar_t* szTargerDirPath);
+    void SetFileLength(uint64_t uFileLength);
 
 private:
-    // Member Object
-
-    //			���� �̸�
-    TCHAR m_szFileName[MAX_PATH];
-    //			���� ��ü ���
-    TCHAR m_szLocalFilePath[MAX_PATH];
-    //			����Ʈ ��ü ���
-    TCHAR m_szRemoteFilePath[INTERNET_MAX_URL_LENGTH];
-    //			��ġ Ǯ� ���� ���
-    TCHAR m_szTargerDirPath[MAX_PATH];
-    //			���� ������
-    ULONGLONG m_uFileLength;
+    wchar_t m_szFileName[MAX_PATH];
+    wchar_t m_szLocalFilePath[MAX_PATH];
+    wchar_t m_szRemoteFilePath[DL_MAX_URL_LENGTH];
+    wchar_t m_szTargerDirPath[MAX_PATH];
+    uint64_t m_uFileLength;
 };
 
 class DownloadServerInfo
 {
 public:
-    // Constructor, Destructor
-
     DownloadServerInfo();
     ~DownloadServerInfo();
 
-    // Get Function
-
-    //				���� �ּ� ��������
-    TCHAR* GetServerURL();
-    //				���� ���� ���� ��������
-    TCHAR* GetUserID();
-    //				���� ���� ���� ��� ��������
-    TCHAR* GetPassword();
-    //				��Ʈ ��ȣ ��������
-    INTERNET_PORT GetPort();
-    //				Ÿ��ε� Ÿ�� ��������
+    wchar_t* GetServerURL();
+    wchar_t* GetUserID();
+    wchar_t* GetPassword();
+    unsigned short GetPort();
     DownloaderType GetDownloaderType();
-    //				���� ������ ��������
-    DWORD GetReadBufferSize();
-    //				Ŀ��Ʈ Ÿ�Ӿƿ� ��������
-    DWORD GetConnectTimeout();
-    //				����� ����
-    BOOL IsOverWrite();
-    //				�нú� ��� ����
-    BOOL IsPassive();
+    uint32_t GetReadBufferSize();
+    uint32_t GetConnectTimeout();
+    bool IsOverWrite();
+    bool IsPassive();
 
-    // Set Function
-
-    //				���� ���� ����
-    void SetServerInfo(TCHAR* szServerURL, INTERNET_PORT nPort, TCHAR* szUserID, TCHAR* szPassword);
-    //				�ٿ�ε� Ÿ�� ����
+    void SetServerInfo(wchar_t* szServerURL, unsigned short nPort, wchar_t* szUserID, wchar_t* szPassword);
     void SetDownloaderType(DownloaderType dwDownloaderType);
-    //				���� ������ ����
-    void SetReadBufferSize(DWORD dwReadBufferSize);
-    //				���� ���� ���� �� ����� ����
-    void SetOverWrite(BOOL bOverWrite);
-    //				�нú� ��� ����
-    void SetPassiveMode(BOOL bPassive);
-    //				Ŀ��Ʈ Ÿ�Ӿƿ� ����
-    void SetConnectTimeout(DWORD dwConnectTimeout);
+    void SetReadBufferSize(uint32_t dwReadBufferSize);
+    void SetOverWrite(bool bOverWrite);
+    void SetPassiveMode(bool bPassive);
+    void SetConnectTimeout(uint32_t dwConnectTimeout);
 
 private:
-    // Member Object
-
-    // 							Server �ּ�
-    TCHAR m_szServerURL[INTERNET_MAX_URL_LENGTH];
-    // 							���� ���� ��
-    TCHAR m_szUserID[INTERNET_MAX_USER_NAME_LENGTH];
-    // 							���� ���� Password
-    TCHAR m_szPassword[INTERNET_MAX_PASSWORD_LENGTH];
-    // 							���� ��Ʈ default = INTERNET_DEFAULT_FTP_PORT (21)
-    INTERNET_PORT m_nPort;
-    //							�ٿ�δ� Ÿ�� - ��������
+    wchar_t m_szServerURL[DL_MAX_URL_LENGTH];
+    wchar_t m_szUserID[DL_MAX_USER_NAME_LENGTH];
+    wchar_t m_szPassword[DL_MAX_PASSWORD_LENGTH];
+    unsigned short m_nPort;
     DownloaderType m_DownloaderType;
-    // 							�ٿ�ε� ��Ŷ ������ ���� default = 4096
-    DWORD m_dwReadBufferSize;
-    //							Local File ������ ��� ����� ���� default = TRUE
-    BOOL m_bOverWrite;
-    //							Passive ���� default = FALSE
-    BOOL m_bPassive;
-    //							Ŀ��Ʈ Ÿ�Ӿƿ�
-    DWORD m_dwConnectTimeout;
+    uint32_t m_dwReadBufferSize;
+    bool m_bOverWrite;
+    bool m_bPassive;
+    uint32_t m_dwConnectTimeout;
 };

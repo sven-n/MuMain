@@ -338,6 +338,9 @@ target_include_directories(MUAudio PRIVATE
 
 # Threading: miniaudio uses pthreads on Linux/macOS
 find_package(Threads REQUIRED)
+
+# Story 7.6.6: libcurl for cross-platform HTTP/FTP downloads (ShopListManager)
+find_package(CURL REQUIRED)
 target_link_libraries(MUAudio PRIVATE MUCore Threads::Threads)
 
 # Linux: miniaudio uses dlopen() internally — link libdl
@@ -423,20 +426,12 @@ file(GLOB_RECURSE MU_GAME_SOURCES CONFIGURE_DEPENDS
   "${MU_SOURCE_DIR}/GameShop/*.cpp"
   "${MU_SOURCE_DIR}/Translation/*.cpp"
 )
-# Story 7.6.1: GameShop/FileDownloader/ implements WinINet FTP/HTTP downloads —
-# entirely Windows-specific (replaced by IPlatformHTTP in EPIC-5 Phase 5.7).
-# [VS0-QUAL-BUILDCOMP-MACOS]
-if(NOT WIN32)
-    # Story 7.6.1: GameShop/FileDownloader/ implements WinINet FTP/HTTP downloads —
-    # entirely Windows-specific (replaced by IPlatformHTTP in EPIC-5 Phase 5.7).
-    # [VS0-QUAL-BUILDCOMP-MACOS]
-    list(FILTER MU_GAME_SOURCES EXCLUDE REGEX ".*/GameShop/FileDownloader/.*")
-    # Story 7.6.1: ZzzLodTerrain.cpp uses GL/glu.h — compat headers redirect to
-    # macOS OpenGL framework. File provides terrain rendering used throughout game.
-endif()
+# Story 7.6.1: ZzzLodTerrain.cpp uses GL/glu.h — compat headers redirect to
+# macOS OpenGL framework. File provides terrain rendering used throughout game.
 add_library(MUGame STATIC ${MU_GAME_SOURCES})
 target_link_libraries(MUGame PUBLIC
   MUCore MUProtocol MUData MURenderFX MUAudio MUPlatform MUThirdParty
+  CURL::libcurl
 )
 target_precompile_headers(MUGame REUSE_FROM MUCore)
 

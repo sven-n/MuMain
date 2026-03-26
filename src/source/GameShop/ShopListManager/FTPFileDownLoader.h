@@ -22,7 +22,7 @@ public:
     }
 
 private:
-    BOOL CreateFolder(std::wstring strFilePath);
-    BOOL m_Break;
+    bool CreateFolder(std::wstring strFilePath);
+    bool m_Break;
     FileDownloader* m_pFileDownloader;
 };

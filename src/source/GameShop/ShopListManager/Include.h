@@ -34,27 +34,17 @@
 #define ERROR_LOAD_SCRIPT 0x07
 #define ERROR_THREAD 0x08
 
-#ifdef _WIN32
-#include <wininet.h>
-#include <tchar.h>
-#include <crtdbg.h>
-#include <strsafe.h>
-#endif
+#include <cstdint>
 #include <vector>
 #include <string>
+#include <filesystem>
 #include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
 #include "GameShop/ShopListManager/interface/DownloadInfo.h"
 #include "GameShop/ShopListManager/interface/FileDownloader.h"
 
 #if !defined(INVALID_FILE_ATTRIBUTES)
-#define INVALID_FILE_ATTRIBUTES ((DWORD) - 1)
+#define INVALID_FILE_ATTRIBUTES ((uint32_t)-1)
 #endif
-
-// #ifdef _DEBUG
-//	#pragma  comment(lib, L"FileDownloader.lib")
-// #else
-//	#pragma  comment(lib, L"FileDownloader.lib")
-// #endif
 
 enum FTP_SERVICE_MODE
 {
@@ -87,7 +77,7 @@ public:
     std::wstring m_strRemotePath;
     FTP_SERVICE_MODE m_ftpMode;
     std::wstring m_strLocalPath;
-    DWORD m_dwDownloadMaxTime;
+    uint32_t m_dwDownloadMaxTime;
 
     CListVersionInfo m_Version;
 };

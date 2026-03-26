@@ -1,24 +1,23 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: FTPFileDownLoader.cpp
-//
+// Migrated to portable types + std::filesystem (Story 7.6.6)
 //
 
 #include "stdafx.h"
-#ifdef _WIN32
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "FTPFileDownLoader.h"
-CFTPFileDownLoader::CFTPFileDownLoader() // OK
+
+#include <filesystem>
+#include <cwchar>
+
+CFTPFileDownLoader::CFTPFileDownLoader()
 {
-    this->m_Break = 0;
-    this->m_pFileDownloader = NULL;
+    this->m_Break = false;
+    this->m_pFileDownloader = nullptr;
 }
 
-CFTPFileDownLoader::~CFTPFileDownLoader() // OK
+CFTPFileDownLoader::~CFTPFileDownLoader()
 {
     SAFE_DELETE(this->m_pFileDownloader);
 }
@@ -26,7 +25,7 @@ CFTPFileDownLoader::~CFTPFileDownLoader() // OK
 WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type, std::wstring strServerIP, unsigned short PortNum,
                                            std::wstring strUserName, std::wstring strPWD, std::wstring strRemotepath,
                                            std::wstring strlocalpath, bool bPassiveMode, CListVersionInfo Version,
-                                           std::vector<std::wstring> vScriptFiles) // OK
+                                           std::vector<std::wstring> vScriptFiles)
 {
     static WZResult result;
 
@@ -36,34 +35,35 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type, std::wstring str
     DownloadFileInfo FileInfo;
 
     ServerInfo.SetPassiveMode(bPassiveMode);
-    ServerInfo.SetOverWrite(1);
+    ServerInfo.SetOverWrite(true);
     ServerInfo.SetDownloaderType(FTP);
     ServerInfo.SetConnectTimeout(3000);
-    ServerInfo.SetServerInfo((TCHAR*)strServerIP.c_str(), PortNum, (TCHAR*)strUserName.c_str(), (TCHAR*)strPWD.c_str());
+    ServerInfo.SetServerInfo((wchar_t*)strServerIP.c_str(), PortNum, (wchar_t*)strUserName.c_str(),
+                             (wchar_t*)strPWD.c_str());
 
     wchar_t Buffer[MAX_PATH] = {0};
 
-    StringCchPrintf(Buffer, sizeof(Buffer), L"%03d.%04d.%03d", Version.Zone, Version.year, Version.yearId);
+    swprintf(Buffer, MAX_PATH, L"%03d.%04d.%03d", Version.Zone, Version.year, Version.yearId);
 
     strRemotepath += Buffer;
     strRemotepath += L"/";
     strlocalpath += Buffer;
-    strlocalpath += L"\\";
+    strlocalpath += L"/";
 
     for (std::vector<std::wstring>::iterator it = vScriptFiles.begin(); it != vScriptFiles.end(); it++)
     {
         std::wstring lPath = strlocalpath + (*it);
         std::wstring rPath = strRemotepath + (*it);
 
-        FileInfo.SetFilePath((TCHAR*)it->c_str(), (TCHAR*)lPath.c_str(), (TCHAR*)rPath.c_str(), NULL);
+        FileInfo.SetFilePath((wchar_t*)it->c_str(), (wchar_t*)lPath.c_str(), (wchar_t*)rPath.c_str(), nullptr);
 
-        this->m_pFileDownloader = new FileDownloader(NULL, &ServerInfo, &FileInfo);
+        this->m_pFileDownloader = new FileDownloader(nullptr, &ServerInfo, &FileInfo);
 
         result = this->m_pFileDownloader->DownloadFile();
 
         SAFE_DELETE(this->m_pFileDownloader);
 
-        if (this->m_Break != 0)
+        if (this->m_Break)
         {
             result.SetResult(1, 0, L"Time Out Break");
             break;
@@ -78,22 +78,21 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type, std::wstring str
     return result;
 }
 
-void CFTPFileDownLoader::Break() // OK
+void CFTPFileDownLoader::Break()
 {
-    this->m_Break = 1;
-    if (this->m_pFileDownloader != NULL)
+    this->m_Break = true;
+    if (this->m_pFileDownloader != nullptr)
         m_pFileDownloader->Break();
 }
 
-BOOL CFTPFileDownLoader::CreateFolder(std::wstring strFilePath) // OK
+bool CFTPFileDownLoader::CreateFolder(std::wstring strFilePath)
 {
-    if (GetFileAttributes(strFilePath.c_str()) == INVALID_FILE_ATTRIBUTES)
+    std::error_code ec;
+    if (!std::filesystem::exists(std::filesystem::path(strFilePath), ec))
     {
-        return CreateDirectory(strFilePath.c_str(), 0);
+        return std::filesystem::create_directory(std::filesystem::path(strFilePath), ec);
     }
 
-    return 1;
+    return true;
 }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-#else  // !_WIN32 — stub implementations in ShopListManagerStubs.cpp
-#endif // _WIN32
+#endif

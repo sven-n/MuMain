@@ -1,17 +1,12 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: FTPConnecter.cpp
-//
+// Migrated from WinINet to libcurl (Story 7.6.6)
 //
 
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "FTPConnecter.h"
-#include "GameShop/ShopListManager/interface/PathMethod/Path.h"
 
 FTPConnecter::FTPConnecter(DownloadServerInfo* pServerInfo, DownloadFileInfo* pFileInfo)
     : IConnecter(pServerInfo, pFileInfo)
@@ -20,97 +15,48 @@ FTPConnecter::FTPConnecter(DownloadServerInfo* pServerInfo, DownloadFileInfo* pF
 
 FTPConnecter::~FTPConnecter() {}
 
-WZResult FTPConnecter::CreateSession(HINTERNET& hSession)
+std::string FTPConnecter::BuildURL()
 {
-    wchar_t path[MAX_PATH] = {0};
+    // Convert wide strings to narrow for curl URL
+    char serverURL[DL_MAX_URL_LENGTH] = {0};
+    char remotePath[DL_MAX_URL_LENGTH] = {0};
 
-    Path::GetCurrentFileName(path);
+    wcstombs(serverURL, this->m_pServerInfo->GetServerURL(), sizeof(serverURL) - 1);
+    wcstombs(remotePath, this->m_pFileInfo->GetRemoteFilePath(), sizeof(remotePath) - 1);
 
-    if ((hSession = InternetOpen(path, 0, 0, 0, 0)))
-    {
-        this->m_Result.SetSuccessResult();
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_CREATE_SESSION, GetLastError(),
-                                 L"[FTPConnecter::CreateSession] Fail : InternetOpen, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
+    std::string url = "ftp://";
+    url += serverURL;
+    url += ":";
+    url += std::to_string(this->m_pServerInfo->GetPort());
+    url += "/";
+    url += remotePath;
 
-    return this->m_Result;
+    return url;
 }
 
-WZResult FTPConnecter::CreateConnection(HINTERNET& hSession, HINTERNET& hConnection)
+WZResult FTPConnecter::ConfigureCurl(CURL* curl)
 {
-    if ((hConnection = InternetConnect(hSession, this->m_pServerInfo->GetServerURL(), this->m_pServerInfo->GetPort(),
-                                       this->m_pServerInfo->GetUserID(), this->m_pServerInfo->GetPassword(), 1,
-                                       this->m_pServerInfo->IsPassive() != 0 ? 0x8000000 : 0, (DWORD_PTR)this)))
+    // FTP-specific options
+    if (this->m_pServerInfo->IsPassive())
     {
-        this->m_Result.SetSuccessResult();
+        // EPRT/EPSV disabled = passive mode
     }
     else
     {
-        this->m_Result.SetResult(DL_CREATE_CONNECTION, GetLastError(),
-                                 L"[FTPConnecter::CreateConnection] Fail : InternetConnect, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
+        curl_easy_setopt(curl, CURLOPT_FTPPORT, "-"); // Active mode: use default interface
     }
 
-    return this->m_Result;
-}
+    // FTP credentials
+    char userID[DL_MAX_USER_NAME_LENGTH] = {0};
+    char password[DL_MAX_PASSWORD_LENGTH] = {0};
 
-WZResult FTPConnecter::OpenRemoteFile(HINTERNET& hConnection, HINTERNET& hRemoteFile, ULONGLONG& nFileLength)
-{
-    struct _WIN32_FIND_DATAW FindFileData = {0};
+    wcstombs(userID, this->m_pServerInfo->GetUserID(), sizeof(userID) - 1);
+    wcstombs(password, this->m_pServerInfo->GetPassword(), sizeof(password) - 1);
 
-    HINTERNET hInternet = FtpFindFirstFile(hConnection, this->m_pFileInfo->GetRemoteFilePath(), &FindFileData,
-                                           0x84000000, (DWORD_PTR)this);
+    std::string userpwd = std::string(userID) + ":" + std::string(password);
+    curl_easy_setopt(curl, CURLOPT_USERPWD, userpwd.c_str());
 
-    if (hInternet)
-    {
-        nFileLength = (ULONGLONG)((ULONGLONG)FindFileData.nFileSizeHigh << (ULONGLONG)32) |
-                      (ULONGLONG)(FindFileData.nFileSizeLow);
-
-        InternetCloseHandle(hInternet);
-
-        hRemoteFile =
-            FtpOpenFile(hConnection, this->m_pFileInfo->GetRemoteFilePath(), 0x80000000, 0x84000002, (DWORD_PTR)this);
-
-        if (hRemoteFile)
-        {
-            this->m_Result.SetSuccessResult();
-        }
-        else
-        {
-            this->m_Result.SetResult(DL_OPEN_REMOTEFILE, GetLastError(),
-                                     L"[FTPConnecter::OpenRemoteFile] Fail : FtpOpenFile, FileName = %ls",
-                                     this->m_pFileInfo->GetRemoteFilePath());
-        }
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_GET_FILE_LENGTH, 0,
-                                 L"[FTPConnecter::OpenRemoteFile] Fail : FtpFindFirstFile, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
-
-    return this->m_Result;
-}
-
-WZResult FTPConnecter::ReadRemoteFile(HINTERNET& hRemoteFile, BYTE* byReadBuffer, DWORD* dwBytesRead)
-{
-    DWORD Size = this->m_pServerInfo->GetReadBufferSize();
-
-    if (InternetReadFile(hRemoteFile, byReadBuffer, Size, dwBytesRead))
-    {
-        this->m_Result.SetSuccessResult();
-    }
-    else
-    {
-        this->m_Result.SetResult(DL_READ_REMOTEFILE, GetLastError(),
-                                 L"[FTPConnecter::ReadRemoteFile] Fail : InternetReadFile, FileName = %ls",
-                                 this->m_pFileInfo->GetRemoteFilePath());
-    }
-
+    this->m_Result.SetSuccessResult();
     return this->m_Result;
 }
 #endif
