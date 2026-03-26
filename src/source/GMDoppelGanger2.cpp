@@ -644,7 +644,7 @@ bool CGMDoppelGanger2::CreateFireSpark(PARTICLE* o)
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
     o->Velocity[0] = -(float)(rand() % 64 + 64) * 0.1f;
-    if (Position[1] < CameraPosition[1] + 400.f)
+    if (Position[1] < g_Camera.Position[1] + 400.f)
     {
         o->Velocity[0] = -o->Velocity[0] + 2.2f;
     }

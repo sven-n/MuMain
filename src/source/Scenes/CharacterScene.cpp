@@ -27,8 +27,14 @@
 #include "../Winmain.h"
 #include "SceneCommon.h"
 #include "../Camera/CameraUtility.h"
+#include "../Camera/CameraManager.h"
 #include "../ZzzOpenData.h"
 #include "LoginScene.h"
+#include "Camera/CameraProjection.h"
+#ifdef _EDITOR
+#include "Camera/CameraMode.h"
+#include "Camera/FrustumRenderer.h"
+#endif
 
 // External declarations
 extern EGameScene SceneFlag;
@@ -47,7 +53,6 @@ extern double WorldTime;
 extern int MouseX;
 extern int MouseY;
 extern vec3_t MouseTarget;
-extern float CameraViewFar;
 
 // Forward declaration
 BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring& lpszString);
@@ -155,6 +160,11 @@ void NewMoveCharacterScene()
     InitTerrainLight();
     MoveObjects();
     MoveMounts();
+
+    // Update camera BEFORE checking character visibility
+    MoveCamera();
+
+    // Now check character visibility with updated frustum
     MoveCharactersClient();
     MoveCharacterClient(&CharacterView);
 
@@ -164,8 +174,6 @@ void NewMoveCharacterScene()
     MoveBoids();
 
     ThePetProcess().UpdatePets();
-
-    MoveCamera();
 
 #if defined _DEBUG || defined FOR_WORK
     std::wstring lpszTemp = { 0 };
@@ -252,8 +260,15 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     glClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, 640, 430);
 
-    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, pos);
-    CreateScreenVector(MouseX, MouseY, MouseTarget);
+    // Build global frustum arrays for TestFrustrum/TestFrustrum2D
+    // Must be called after BeginOpengl (needs GL matrices) in every scene that renders terrain/objects
+    {
+        vec3_t cameraPos;
+        VectorCopy(g_Camera.Position, cameraPos);
+        CreateFrustrum((float)outWidth / 640.f, 430.f / 480.f, cameraPos);
+    }
+
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 
     // Reset character positions and lighting
     for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)
@@ -309,8 +324,10 @@ static void AdjustCharacterHeights()
  */
 static void RenderCharacterScene3D()
 {
-    RenderTerrain(false);
-    RenderObjects();
+    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
+
+    RenderTerrain(false, activeCamera);
+    RenderObjects(activeCamera);
     RenderCharactersClient();
 
     if (!CUIMng::Instance().IsCursorOnUI())
@@ -322,7 +339,7 @@ static void RenderCharacterScene3D()
     RenderEffects();
     ThePetProcess().RenderPets();
     RenderBoids();
-    RenderObjects_AfterCharacter();
+    RenderObjects_AfterCharacter(activeCamera);
     CheckSprites();
 }
 
@@ -410,6 +427,16 @@ bool NewRenderCharacterScene(HDC hDC)
     AdjustCharacterHeights();
     RenderCharacterScene3D();
     RenderSelectedCharacterEffects();
+
+#ifdef _EDITOR
+    if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)
+    {
+        ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
+        if (spectated)
+            RenderFrustumWireframe(spectated->GetFrustum());
+    }
+#endif
+
     RenderCharacterSceneUI();
 
     EndOpengl();

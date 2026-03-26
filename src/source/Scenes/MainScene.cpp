@@ -28,9 +28,31 @@
 #include "../PortalMgr.h"
 #include "../Guild/GuildCache.h"
 #include "../UIMapName.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/CameraManager.h"
+#include "Camera/CameraMode.h"
+#ifdef _EDITOR
+#include "Camera/FrustumRenderer.h"
+#endif
 
 // External declarations
-extern float CameraAngle[3];
+extern "C" void GetOrbitalCameraAngles(float* outYaw, float* outPitch);
+
+#ifdef _EDITOR
+extern "C" bool DevEditor_IsDebugVisualizationEnabled();
+// DevEditor render toggle functions
+extern "C" bool DevEditor_ShouldRenderTerrain();
+extern "C" bool DevEditor_ShouldRenderStaticObjects();
+extern "C" bool DevEditor_ShouldRenderEffects();
+extern "C" bool DevEditor_ShouldRenderDroppedItems();
+extern "C" bool DevEditor_ShouldRenderItemLabels();
+extern "C" bool DevEditor_ShouldRenderEquippedItems();
+extern "C" bool DevEditor_ShouldRenderWeatherEffects();
+extern "C" bool DevEditor_ShouldRenderUI();
+extern "C" bool DevEditor_IsFogOverrideEnabled();
+extern "C" bool DevEditor_GetFogOverrideValue();
+#endif
+
 extern HWND g_hWnd;
 extern CErrorReport g_ErrorReport;
 extern float EarthQuake;
@@ -114,7 +136,7 @@ static void InitializeMainScene()
 
     CUIMng::Instance().CreateMainScene();
 
-    CameraAngle[2] = -45.f;
+    g_Camera.Angle[2] = -45.f;
 
     ClearInput();
     InputEnable = false;
@@ -184,11 +206,11 @@ static void InitializeSceneFrame()
  * - Interface movement and tournament interface updates
  *
  * @note Only processes input when not in top-view camera mode and loading is complete.
- * @note Skips processing if CameraTopViewEnable is true or LoadingWorld >= 30.
+ * @note Skips processing if g_Camera.TopViewEnable is true or LoadingWorld >= 30.
  */
 static void UpdateUIAndInput()
 {
-    if (CameraTopViewEnable || LoadingWorld >= 30)
+    if (g_Camera.TopViewEnable || LoadingWorld >= 30)
         return;
 
     if (MouseY >= (int)(480 - 48))
@@ -238,7 +260,7 @@ static void UpdateGameEntities()
 {
     MoveObjects();
 
-    if (!CameraTopViewEnable)
+    if (!g_Camera.TopViewEnable)
         MoveItems();
 
     if (RequireLeavesEffect())
@@ -320,8 +342,10 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
 {
     outByWaterMap = 0;
 
-    if (CameraTopViewEnable == false)
+    if (g_Camera.TopViewEnable == false)
     {
+        // Use hardcoded value from original game (in 640×480 reference coordinates)
+        // This is then scaled by BeginOpengl() to actual window size
         outHeight = 480 - 48;
     }
     else
@@ -331,36 +355,8 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
 
     outWidth = GetScreenWidth();
 
-    // Set clear color based on world
-    if (gMapManager.WorldActive == WD_0LORENCIA)
-    {
-        glClearColor(10 / 256.f, 20 / 256.f, 14 / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_2DEVIAS)
-    {
-        glClearColor(0.f / 256.f, 0.f / 256.f, 10.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_10HEAVEN)
-    {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InChaosCastle() == true)
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
-    {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InHellas() == true)
-    {
-        outByWaterMap = 1;
-        glClearColor(0.f / 256.f, 0.f / 256.f, 0.f / 256.f, 1.f);
-    }
-    else
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
+    // NOTE: Clear color is set by SceneManager::SetWorldClearColor() before this function is called
+    // All background colors are now centralized in SceneManager.cpp
 
     BeginOpengl(0, 0, outWidth, outHeight);
     CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, cameraPos);
@@ -373,13 +369,9 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
             vec3_t Color = { 0.f, 0.f, 0.f };
             battleCastle::StartFog(Color);
         }
-        else
-        {
-            glDisable(GL_FOG);
-        }
+        // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
-
-    CreateScreenVector(MouseX, MouseY, MouseTarget);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 }
 
 /**
@@ -391,7 +383,22 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
  */
 static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 {
-    if (IsWaterTerrain() == false)
+#ifdef _EDITOR
+    // DevEditor render toggle checks
+    bool renderTerrain = DevEditor_ShouldRenderTerrain();
+    bool renderStatic = DevEditor_ShouldRenderStaticObjects();
+    bool renderEffects = DevEditor_ShouldRenderEffects();
+    bool renderDroppedItems = DevEditor_ShouldRenderDroppedItems();
+    bool renderWeatherEffects = DevEditor_ShouldRenderWeatherEffects();
+#else
+    bool renderTerrain = true;
+    bool renderStatic = true;
+    bool renderEffects = true;
+    bool renderDroppedItems = true;
+    bool renderWeatherEffects = true;
+#endif
+
+    if (IsWaterTerrain() == false && renderTerrain)
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
@@ -401,7 +408,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
             {
-                if (gMapManager.IsPKField() || IsDoppelGanger2())
+                if ((gMapManager.IsPKField() || IsDoppelGanger2()) && renderStatic)
                 {
                     RenderObjects();
                 }
@@ -409,34 +416,46 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
             }
     }
 
-    if (!gMapManager.IsPKField() && !IsDoppelGanger2())
+    if (!gMapManager.IsPKField() && !IsDoppelGanger2() && renderStatic)
         RenderObjects();
 
-    RenderEffectShadows();
-    RenderBoids();
+    if (renderEffects)
+    {
+        RenderEffectShadows();
+        RenderBoids();
+    }
 
     RenderCharactersClient();
 
-    if (EditFlag != EDIT_NONE)
+    if (EditFlag != EDIT_NONE && renderTerrain)
     {
         RenderTerrain(true);
     }
-    if (!CameraTopViewEnable)
+    if (!g_Camera.TopViewEnable && renderDroppedItems)
         RenderItems();
 
     RenderFishs();
     RenderMount();
-    RenderLeaves();
+
+    if (renderWeatherEffects)
+        RenderLeaves();
 
     if (!gMapManager.InChaosCastle())
         ThePetProcess().RenderPets();
 
-    RenderBoids(true);
-    RenderObjects_AfterCharacter();
+    if (renderEffects)
+        RenderBoids(true);
+
+    if (renderStatic)
+        RenderObjects_AfterCharacter();
 
     RenderJoints(byWaterMap);
-    RenderEffects();
-    RenderBlurs();
+
+    if (renderEffects)
+    {
+        RenderEffects();
+        RenderBlurs();
+    }
     CheckSprites();
     BeginSprite();
 
@@ -501,7 +520,7 @@ static void RenderMainSceneUI()
     BeginBitmap();
     RenderObjectDescription();
 
-    if (CameraTopViewEnable == false)
+    if (g_Camera.TopViewEnable == false)
     {
         RenderInterface(true);
     }
@@ -549,7 +568,29 @@ bool RenderMainScene()
         return false;
     }
 
-    FogEnable = false;
+    // Enable fog based on camera mode and pitch angle
+    CameraMode cameraMode = CameraManager::Instance().GetCurrentMode();
+
+    if (cameraMode == CameraMode::Orbital)
+    {
+        // Orbital Camera: Enable fog based on pitch (horizon visibility)
+        float yaw, orbitalPitch;
+        GetOrbitalCameraAngles(&yaw, &orbitalPitch);
+
+        // Enable fog when pitch < -20° (looking toward horizon)
+        FogEnable = (orbitalPitch < -20.0f);
+    }
+    else
+    {
+        // Default, Legacy, and other cameras: Disable fog (no horizon visible)
+        FogEnable = false;
+    }
+
+#ifdef _EDITOR
+    // DevEditor override: force fog on/off regardless of pitch
+    if (DevEditor_IsFogOverrideEnabled())
+        FogEnable = DevEditor_GetFogOverrideValue();
+#endif
 
     vec3_t cameraPos;
     int width, height;
@@ -572,7 +613,19 @@ bool RenderMainScene()
 
     SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
     RenderGameWorld(byWaterMap, width, height);
+
+#ifdef _EDITOR
+    // Render spectated camera frustum wireframe when in FreeFly mode
+    if (cameraMode == CameraMode::FreeFly)
+    {
+        ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
+        if (spectated)
+            RenderFrustumWireframe(spectated->GetFrustum());
+    }
+#endif
+
     RenderMainSceneUI();
+
 
     EndOpengl();
 

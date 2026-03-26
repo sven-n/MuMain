@@ -7,6 +7,7 @@
 
 #include "UIManager.h"
 #include "NewUISystem.h"
+#include "Camera/CameraProjection.h"
 
 CPersonalShopTitleImp::CPersonalShopTitleImp() : m_iHighlightFrame(0), m_bShow(true)
 {}
@@ -300,7 +301,7 @@ void CPersonalShopTitleImp::UpdatePosition()
 {
     float Width = GetScreenWidth(), Height = 480;
 
-    if (!CameraTopViewEnable)
+    if (!g_Camera.TopViewEnable)
         Height = 480 - 48;
 
     EndBitmap();
@@ -400,7 +401,7 @@ void CPersonalShopTitleImp::CalculateBooleanPos(IN CHARACTER* pPlayer, IN const 
     Vector(pObject->Position[0], pObject->Position[1], pObject->Position[2] + pObject->BoundingBoxMax[2] + 60.f, posTemp);
 
     POINT ptFloating;
-    Projection(posTemp, (int*)&ptFloating.x, (int*)&ptFloating.y);		//. logical position
+    CameraProjection::WorldToScreen(g_Camera, posTemp, (int*)&ptFloating.x, (int*)&ptFloating.y);
 
     //. pos : real position
     pos.x = (ptFloating.x * (int)WindowWidth / 640) - size.cx / 2;

@@ -461,7 +461,7 @@ void DirectSoundManager::Update3DPositions()
     std::lock_guard lock(mutex_);
     vec3_t angle {};
     float rotation[3][4];
-    Vector(0.f, 0.f, CameraAngle[2], angle);
+    Vector(0.f, 0.f, g_Camera.Angle[2], angle);
     AngleMatrix(angle, rotation);
 
     for (int bufferIndex = 0; bufferIndex < MAX_BUFFER; ++bufferIndex)

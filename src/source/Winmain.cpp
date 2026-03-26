@@ -52,6 +52,8 @@
 
 
 #include "NewUISystem.h"
+#include "Camera/CameraConfig.h"
+#include "Camera/CameraProjection.h"
 #include "Translation/i18n.h"
 
 #ifdef _EDITOR
@@ -563,6 +565,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_ERASEBKGND:
         return TRUE;
         break;
+    case WM_SIZE:
+        if (wParam != SIZE_MINIMIZED)
+        {
+            // Update window dimensions
+            WindowWidth = LOWORD(lParam);
+            WindowHeight = HIWORD(lParam);
+
+            // Update screen rate factors
+            g_fScreenRate_x = (float)WindowWidth / 640.0f;
+            g_fScreenRate_y = (float)WindowHeight / 480.0f;
+
+            // Update OpenGL viewport dimensions
+            OpenglWindowWidth = WindowWidth;
+            OpenglWindowHeight = WindowHeight;
+
+            // Note: Projection matrix and frustum will be updated on next BeginOpengl() call
+            // No need to rebuild immediately - happens naturally in render loop
+        }
+        break;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
@@ -941,6 +962,73 @@ MSG MainLoop()
     return msg;
 }
 
+// Reinitialize fonts when window resolution changes
+void ReinitializeFonts()
+{
+    // Save old font handles
+    HFONT hOldFont = g_hFont;
+    HFONT hOldFontBold = g_hFontBold;
+    HFONT hOldFontBig = g_hFontBig;
+    HFONT hOldFixFont = g_hFixFont;
+
+    // Recalculate font sizes based on new WindowHeight
+    FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
+    int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
+    int iFontSize = FontHeight - 1;
+    int nFixFontSize = nFixFontHeight - 1;
+
+    // Create new fonts
+    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+
+    // Reinitialize the text rendering system with new device context and fonts
+    // This recreates the font buffer bitmap with new g_fScreenRate values
+    extern int g_iRenderTextType;
+    g_pRenderText->Release();
+    g_pRenderText->Create(g_iRenderTextType, g_hDC);
+    g_pRenderText->SetFont(g_hFont);
+
+    // Delete old fonts after the rendering system has been updated
+    if (hOldFont) DeleteObject(hOldFont);
+    if (hOldFontBold) DeleteObject(hOldFontBold);
+    if (hOldFontBig) DeleteObject(hOldFontBig);
+    if (hOldFixFont) DeleteObject(hOldFixFont);
+
+    // Reinitialize CInput dimensions
+    CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
+
+    // Refresh inventory equipment slot positions for 3D item rendering
+    // MUST be called here immediately after text rendering system is reinitialized
+    // because inventory position calculations depend on the text buffer size
+    if (g_pNewUISystem)
+    {
+        auto* pInventory = g_pNewUISystem->GetUI_NewMyInventory();
+        if (pInventory)
+        {
+            pInventory->SetEquipmentSlotInfo();
+        }
+    }
+}
+
+// Update camera state when window resolution changes
+void UpdateResolutionDependentSystems()
+{
+    // Force camera state update with new viewport dimensions
+    // This updates ScreenCenterX/Y and PerspectiveX/Y used for 3D item positioning
+    extern CameraState g_Camera;
+    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio,
+                                       g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+
+    // Update all 3D UI camera dimensions for proper item rendering
+    if (g_pNewUI3DRenderMng)
+    {
+        g_pNewUI3DRenderMng->UpdateAllCameraDimensions(WindowWidth, WindowHeight);
+    }
+}
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 {
     wchar_t lpszExeVersion[256] = L"unknown";
@@ -1131,6 +1219,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     }
 
     g_ErrorReport.Write(L"> Start window success.\r\n");
+
+    // Initialize OpenGL viewport dimensions to match window dimensions
+    // This ensures they're correct even if WM_SIZE hasn't fired yet or sent wrong values
+    OpenglWindowWidth = WindowWidth;
+    OpenglWindowHeight = WindowHeight;
 
     PIXELFORMATDESCRIPTOR pfd;
 
