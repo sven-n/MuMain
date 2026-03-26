@@ -717,3 +717,52 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_8_2.cmake
 )
+
+# ==========================================================================
+# Story 7.8.4 - .NET Client Library Native Build [VS0-QUAL-BUILD-DOTNET]
+# RED PHASE: Tests verify cmake RID detection and .NET build enable on
+#   macOS/Linux. Tests fail until src/CMakeLists.txt and CMakePresets.json
+#   are updated and Winmain.cpp has the resource.h guard.
+# ==========================================================================
+
+set(MU_DOTNET_SOURCE_ROOT "${MUMAIN_SOURCE_DIR}/src/source")
+
+# AC-1: src/CMakeLists.txt uses CMAKE_SYSTEM_NAME for cross-platform DOTNET_RID detection
+add_test(
+    NAME "7.8.4-AC-1:src-cmake-rid-detection"
+    COMMAND ${CMAKE_COMMAND}
+        -DCMAKELISTS_FILE=${MUMAIN_SOURCE_DIR}/src/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_src_cmake_rid_detection_7_8_4.cmake
+)
+
+# AC-2: src/CMakeLists.txt copy command uses MU_DOTNET_LIB_EXT (no hardcoded .dll)
+add_test(
+    NAME "7.8.4-AC-2:src-cmake-lib-ext-copy"
+    COMMAND ${CMAKE_COMMAND}
+        -DCMAKELISTS_FILE=${MUMAIN_SOURCE_DIR}/src/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_src_cmake_lib_ext_copy_7_8_4.cmake
+)
+
+# AC-3: CMakePresets.json macos-base and linux-base no longer disable MU_ENABLE_DOTNET
+add_test(
+    NAME "7.8.4-AC-3:presets-dotnet-enabled"
+    COMMAND ${CMAKE_COMMAND}
+        -DPRESETS_FILE=${MUMAIN_SOURCE_DIR}/CMakePresets.json
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_presets_dotnet_enabled_7_8_4.cmake
+)
+
+# AC-4: Winmain.cpp wraps #include "resource.h" in #ifdef _WIN32 guard
+add_test(
+    NAME "7.8.4-AC-4:resource-h-win32-guard"
+    COMMAND ${CMAKE_COMMAND}
+        -DWINMAIN_CPP=${MU_DOTNET_SOURCE_ROOT}/Main/Winmain.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_resource_h_guard_7_8_4.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-BUILD-DOTNET traceability
+add_test(
+    NAME "7.8.4-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_8_4.cmake
+)
