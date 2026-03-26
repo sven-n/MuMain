@@ -21,6 +21,7 @@
 
 // Include X-macro field definitions
 #include "SkillFieldDefs.h"
+#include "MultiLanguage.h"
 
 // Legacy file format structure (32-byte name)
 // Used for backward compatibility with old BMD files

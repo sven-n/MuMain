@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 namespace SEASON3A
 {
 enum eCursedTempleState
@@ -630,7 +632,7 @@ enum ActionSkillType
     AT_SKILL_MASTER_END = 608,
 };
 
-const std::map<ActionSkillType, ActionSkillType> SKILL_REPLACEMENTS = {
+inline const std::map<ActionSkillType, ActionSkillType> SKILL_REPLACEMENTS = {
     {AT_SKILL_POISON_STR, AT_SKILL_POISON},
     {AT_SKILL_LIGHTNING_STR, AT_SKILL_LIGHTNING},
     {AT_SKILL_LIGHTNING_STR_MG, AT_SKILL_LIGHTNING},

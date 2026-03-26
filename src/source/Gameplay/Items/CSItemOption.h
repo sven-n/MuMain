@@ -1,9 +1,12 @@
 #pragma once
 #include "Singleton.h"
+#include "mu_enum.h"
 
 #include <array>
 #include <cstdint>
 #include <map>
+
+struct ITEM;
 
 constexpr std::uint8_t MAX_SET_OPTION = 64; // Maximum number of possible ancient sets
 constexpr std::uint8_t MASTERY_OPTION = 24; // A mastery option increases a specific skill
