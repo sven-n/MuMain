@@ -183,6 +183,18 @@ jobs:
       - name: Run tests
         run: ctest --test-dir out/build/macos-arm64 --build-config Debug --output-on-failure
 
+      - name: Upload artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-macos-arm64-${{ github.ref_name }}
+          path: |
+            out/build/macos-arm64/src/Debug/Main
+            out/build/macos-arm64/src/Debug/MUnique.Client.Library.dylib
+            out/build/macos-arm64/src/Debug/Translations
+            out/build/macos-arm64/src/Debug/config.ini
+          if-no-files-found: warn
+
   build-linux:
     name: Linux Native Build
     runs-on: ubuntu-latest
@@ -219,6 +231,17 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir out/build/linux-x64 --build-config Debug --output-on-failure --no-tests=error
+
+      - name: Upload artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-linux-x64-${{ github.ref_name }}
+          path: |
+            out/build/linux-x64/src/Debug/Main
+            out/build/linux-x64/src/Debug/Translations
+            out/build/linux-x64/src/Debug/config.ini
+          if-no-files-found: warn
 
   release:
     name: Semantic Release
