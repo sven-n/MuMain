@@ -1,5 +1,6 @@
 #pragma once
 #include "Singleton.h"
+#include "mu_define.h"
 #include "mu_enum.h"
 
 #include <array>

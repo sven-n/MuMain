@@ -57,6 +57,13 @@ string(FIND "${content}" "#include \"Item.h\"" pos_item_h)
 string(FIND "${content}" "typedef struct tagITEM ITEM" pos_typedef_fwd)
 string(FIND "${content}" "struct tagITEM" pos_tag_fwd)
 
+# If using typedef forward declaration, verify both the tag declaration and typedef are present
+if(NOT pos_typedef_fwd EQUAL -1 AND pos_tag_fwd EQUAL -1)
+    message(FATAL_ERROR
+        "AC-4 FAILED: CSItemOption.h has 'typedef struct tagITEM ITEM' but missing 'struct tagITEM' declaration.\n"
+        "Both the struct tag and the typedef must be present for correct forward declaration.")
+endif()
+
 if(pos_mu_struct EQUAL -1 AND pos_item_h EQUAL -1 AND pos_typedef_fwd EQUAL -1)
     message(FATAL_ERROR
         "AC-4 FAILED: CSItemOption.h uses ITEM* but does not include the header\n"
