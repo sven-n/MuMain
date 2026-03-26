@@ -2055,6 +2055,9 @@ inline HCURSOR LoadCursor(HINSTANCE /*hInstance*/, const wchar_t* /*lpCursorName
 #ifndef IDC_ARROW
 #define IDC_ARROW ((const wchar_t*)32512)
 #endif
+#ifndef IDI_ICON1
+#define IDI_ICON1 101
+#endif
 inline LRESULT DefWindowProc(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
     return 0;
