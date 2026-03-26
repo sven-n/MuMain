@@ -2310,6 +2310,28 @@ inline int mu_vswprintf(wchar_t* buffer, const wchar_t* format, va_list args)
     return vswprintf(buffer, 1024, format, args);
 }
 
+// ---- mu_swprintf / mu_swprintf_s: variadic wrappers matching stdafx.h signatures ----
+// GCC/Clang: use std::swprintf with explicit buffer size.
+// These mirror the templates in stdafx.h for use by test files that include
+// PlatformCompat.h instead of the PCH. Guard prevents redefinition when
+// stdafx.h is also included (e.g., via PCH).
+#ifndef MU_SWPRINTF_DEFINED
+#define MU_SWPRINTF_DEFINED
+template <typename... Args> inline int mu_swprintf(wchar_t* buffer, const wchar_t* format, Args... args)
+{
+    return std::swprintf(buffer, 1024, format, args...);
+}
+template <typename... Args> inline int mu_swprintf_s(wchar_t* buffer, size_t size, const wchar_t* format, Args... args)
+{
+    return std::swprintf(buffer, size, format, args...);
+}
+template <size_t N, typename... Args>
+inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... args)
+{
+    return std::swprintf(buffer, N, format, args...);
+}
+#endif // MU_SWPRINTF_DEFINED
+
 // ---- GLU (OpenGL Utility) function stubs ----
 // ZzzOpenglUtil.cpp calls gluPerspective/gluOrtho2D for camera setup.
 // SDL3/SDL_opengl.h provides GL functions but NOT GLU. On macOS these

@@ -707,4 +707,4 @@ struct DirectionMonster
 };
 // cdirection end
 
-#endif ___STRUCT_H__
+#endif // ___STRUCT_H__

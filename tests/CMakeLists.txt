@@ -378,12 +378,22 @@ target_sources(MuTests PRIVATE platform/test_linux_connectivity.cpp)
 # needed by test_sdlgpubackend.cpp and test_shaderprograms.cpp.
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform MURenderFX)
 
+# Story 7-8-3: Stub definitions for game globals referenced by MUCore/MUPlatform/MURenderFX
+# that are defined in game source files (Winmain.cpp, ZzzInterface.cpp, etc.) not linked
+# into MuTests. Required for test binary to link on all platforms.
+target_sources(MuTests PRIVATE stubs/test_game_stubs.cpp)
+
 # Story 2.2.1: Propagate MU_ENABLE_SDL3 to MuTests so test_platform_input.cpp
 # #ifdef guards are active when SDL3 is enabled. [VS1-SDL-INPUT-KEYBOARD]
 # Story 7-3-1: SDL3 include paths needed by test TUs that include PlatformCompat.h
 if(MU_ENABLE_SDL3)
     target_compile_definitions(MuTests PRIVATE MU_ENABLE_SDL3)
     target_link_libraries(MuTests PRIVATE SDL3::SDL3-static)
+endif()
+# Story 7-8-3: MURenderFX references OpenGL symbols (glAlphaFunc, glBegin, etc.)
+# On macOS, these come from the OpenGL framework.
+if(APPLE)
+    target_link_libraries(MuTests PRIVATE "-framework OpenGL")
 endif()
 
 # Story 7.3.1: macOS 60-Minute Stability Session [VS0-QUAL-STABILITY-MACOS]

@@ -146,7 +146,7 @@ TEST_CASE("AC-5: mu_swprintf_s safe variant", "[platform][win32-cleanup][ac-5]")
         int ret = mu_swprintf_s(buf, 8, L"%ls", L"TooLong!");
         // May truncate — verify no crash, buffer is null-terminated, and ret reflects truncation
         buf[7] = L'\0'; // guarantee termination
-        CHECK(ret < 0 || std::wcslen(buf) < 8);
+        CHECK((ret < 0 || std::wcslen(buf) < 8));
         (void)ret;
     }
 

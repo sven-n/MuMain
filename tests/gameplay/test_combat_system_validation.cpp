@@ -45,7 +45,7 @@
 
 // Forward declarations for types referenced only in function-signature parameters of included headers.
 // These are not used in test logic — only required to allow header compilation.
-class OBJECT;
+struct OBJECT; // must match DSPlaySound.h forward declaration (struct, not class)
 class CHARACTER;
 
 #include "mu_define.h" // MAX_SKILLS, DWORD, WORD, BYTE, game constants

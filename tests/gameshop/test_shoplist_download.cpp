@@ -25,8 +25,8 @@
 // Until then, MU_SHOPLIST_CROSS_PLATFORM_READY is NOT defined and the real test bodies
 // fall through to SKIP().
 #ifdef MU_SHOPLIST_CROSS_PLATFORM_READY
-#include "ShopListManager.h"
-#include "Include.h"
+#include "ShopListManager/ShopListManager.h"
+#include "ShopListManager/Include.h"
 #endif
 
 namespace

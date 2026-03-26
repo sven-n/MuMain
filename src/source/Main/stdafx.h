@@ -328,6 +328,9 @@ inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... ar
 }
 #else
 // GCC/MinGW/Clang: use std::swprintf with explicit buffer size
+// Guard prevents redefinition when PlatformCompat.h already defined these
+#ifndef MU_SWPRINTF_DEFINED
+#define MU_SWPRINTF_DEFINED
 template <typename... Args> inline int mu_swprintf(wchar_t* buffer, const wchar_t* format, Args... args)
 {
     return std::swprintf(buffer, 1024, format, args...);
@@ -343,6 +346,7 @@ inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... ar
 {
     return std::swprintf(buffer, N, format, args...);
 }
+#endif // MU_SWPRINTF_DEFINED
 #endif
 
 #ifndef _WIN32

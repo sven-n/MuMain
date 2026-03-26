@@ -37,6 +37,11 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#ifdef _WIN32
+#include <process.h> // getpid()
+#else
+#include <unistd.h> // getpid()
+#endif
 
 #include "MiniAudioBackend.h"
 #include "miniaudio.h"
@@ -1083,7 +1088,7 @@ TEST_CASE("AC-3: LoadSound with non-existent file handles gracefully", "[audio][
     backend.LoadSound(static_cast<ESound>(MAX_BUFFER - 5), wPath.c_str(), 1, false);
 
     // THEN: PlaySound on the unloaded slot must also be a safe no-op
-    backend.PlaySound(static_cast<ESound>(MAX_BUFFER - 5), nullptr, FALSE);
+    (void)backend.PlaySound(static_cast<ESound>(MAX_BUFFER - 5), nullptr, FALSE);
 
     // Shutdown() is safe even if Initialize() failed (m_initialized guard in MiniAudioBackend)
     backend.Shutdown();

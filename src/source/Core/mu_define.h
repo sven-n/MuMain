@@ -169,6 +169,10 @@ enum EPathDirection
 
 #define MAX_PARTYS 5
 
+#ifndef MAX_CHAT_SIZE
+#define MAX_CHAT_SIZE 90
+#endif
+
 #define TRADE_BUY 0
 #define TRADE_SELL 1
 #define TRADE_REPAIR 2

@@ -2,6 +2,7 @@
 #define __MATHLIB__
 
 #include <math.h>
+#include "mu_base_types.h" // vec3_t, vec4_t
 
 #ifdef __cplusplus
 extern "C"

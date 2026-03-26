@@ -1,5 +1,10 @@
 #pragma once
 
+#include <map>
+#include <string>
+#include "mu_enum.h"                // eBuffState
+#include "Platform/PlatformTypes.h" // DWORD (no-op on Windows)
+
 typedef char* PCHAR;
 typedef char CHAR;
 typedef std::string STRING;

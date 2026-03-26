@@ -1,5 +1,8 @@
 #pragma once
 
+#include <list>
+#include "mu_types.h" // BuffStateMap, eBuffState, DWORD
+
 SmartPointer(Buff);
 
 class Buff
