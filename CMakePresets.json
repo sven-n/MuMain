@@ -97,7 +97,7 @@
     {
       "name": "linux-x64",
       "displayName": "Linux x86_64",
-      "description": "Native Linux x64 build -- configure only until SDL3 migration removes Win32 API dependencies",
+      "description": "Native Linux x64 build — full build target, must compile and pass tests",
       "inherits": "linux-base",
       "toolchainFile": "${sourceDir}/cmake/toolchains/linux-x64.cmake",
       "cacheVariables": {
@@ -124,7 +124,7 @@
     {
       "name": "macos-arm64",
       "displayName": "macOS arm64",
-      "description": "Native macOS Apple Silicon build -- configure only until SDL3 migration removes Win32 API dependencies",
+      "description": "Native macOS Apple Silicon build — full build target, must compile and pass tests",
       "inherits": "macos-base",
       "toolchainFile": "${sourceDir}/cmake/toolchains/macos-arm64.cmake",
       "cacheVariables": {
