@@ -230,8 +230,27 @@ if(MU_ENABLE_DOTNET AND DOTNETAOT_FOUND)
         list(APPEND DOTNETAOT_PUBLISH_ARGS /p:Platform=x86 /p:PlatformTarget=x86)
     endif()
 
+    # Inject OpenSSL LIBRARY_PATH so the AOT linker finds libssl/libcrypto on macOS/Linux.
+    # OPENSSL_CRYPTO_LIBRARY is a CACHE variable set by find_package(OpenSSL) in src/CMakeLists.txt
+    # and is accessible here (root scope) after add_subdirectory("src").
+    if(OPENSSL_CRYPTO_LIBRARY AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        get_filename_component(_DOTNETAOT_OPENSSL_LIB_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
+        set(_DOTNETAOT_LIBRARY_PATH "${_DOTNETAOT_OPENSSL_LIB_DIR}")
+        if(DEFINED ENV{LIBRARY_PATH})
+            set(_DOTNETAOT_LIBRARY_PATH "${_DOTNETAOT_OPENSSL_LIB_DIR}:$ENV{LIBRARY_PATH}")
+        endif()
+        set(_DOTNETAOT_PUBLISH_COMMAND
+            "${CMAKE_COMMAND}" -E env "LIBRARY_PATH=${_DOTNETAOT_LIBRARY_PATH}"
+            "${DOTNETAOT_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
+        )
+    else()
+        set(_DOTNETAOT_PUBLISH_COMMAND
+            "${DOTNETAOT_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
+        )
+    endif()
+
     add_custom_target(BuildDotNetAOT
-        COMMAND "${DOTNETAOT_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
+        COMMAND ${_DOTNETAOT_PUBLISH_COMMAND}
         COMMENT "Building .NET AOT library for RID: ${MU_DOTNET_RID}"
         VERBATIM
     )
@@ -244,6 +263,9 @@ if(MU_ENABLE_DOTNET AND DOTNETAOT_FOUND)
         COMMENT "Copying .NET AOT library to output directory"
         VERBATIM
     )
+
+    # Build the .NET library whenever Main is built so the dylib is always present at runtime.
+    add_dependencies(Main BuildDotNetAOT)
 endif()
 
 # ============================================================

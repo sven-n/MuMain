@@ -1453,6 +1453,15 @@ void ShutdownSDLGpuRenderer();
 
 int MuMain(int /*argc*/, char* /*argv*/[])
 {
+    // Set working directory to the executable's own directory so that all relative
+    // data paths (Data/, Translations/, shaders/) resolve correctly regardless of
+    // which directory the process was launched from. No-op on Windows when the
+    // launcher already sets CWD correctly; safe to call on all platforms.
+    {
+        std::error_code ec;
+        std::filesystem::current_path(mu_get_app_dir(), ec);
+    }
+
     if (!mu::MuPlatform::Initialize())
     {
         return 1;
