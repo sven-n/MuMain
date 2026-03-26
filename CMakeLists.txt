@@ -230,19 +230,51 @@ if(MU_ENABLE_DOTNET AND DOTNETAOT_FOUND)
         list(APPEND DOTNETAOT_PUBLISH_ARGS /p:Platform=x86 /p:PlatformTarget=x86)
     endif()
 
-    # Inject OpenSSL LIBRARY_PATH so the AOT linker finds libssl/libcrypto on macOS/Linux.
-    # OPENSSL_CRYPTO_LIBRARY is a CACHE variable set by find_package(OpenSSL) in src/CMakeLists.txt
-    # and is accessible here (root scope) after add_subdirectory("src").
-    if(OPENSSL_CRYPTO_LIBRARY AND NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        get_filename_component(_DOTNETAOT_OPENSSL_LIB_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
-        set(_DOTNETAOT_LIBRARY_PATH "${_DOTNETAOT_OPENSSL_LIB_DIR}")
-        if(DEFINED ENV{LIBRARY_PATH})
-            set(_DOTNETAOT_LIBRARY_PATH "${_DOTNETAOT_OPENSSL_LIB_DIR}:$ENV{LIBRARY_PATH}")
+    # Inject LIBRARY_PATH so the AOT linker finds native libraries on macOS/Linux.
+    # On macOS (Homebrew): include the Homebrew lib dir (brotli, etc.) and the keg-only
+    # OpenSSL dir. On Linux: include the OpenSSL lib dir if outside the default search path.
+    # OPENSSL_CRYPTO_LIBRARY is a CACHE variable set by find_package(OpenSSL) in src/CMakeLists.txt.
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(_DOTNETAOT_LIB_DIRS "")
+
+        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+            # Homebrew main lib dir covers brotli, icu4c, and other native deps.
+            find_program(_BREW_EXE brew DOC "Homebrew package manager")
+            if(_BREW_EXE)
+                execute_process(
+                    COMMAND "${_BREW_EXE}" --prefix
+                    OUTPUT_VARIABLE _HOMEBREW_PREFIX
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_QUIET
+                )
+                if(_HOMEBREW_PREFIX)
+                    list(APPEND _DOTNETAOT_LIB_DIRS "${_HOMEBREW_PREFIX}/lib")
+                endif()
+            endif()
         endif()
-        set(_DOTNETAOT_PUBLISH_COMMAND
-            "${CMAKE_COMMAND}" -E env "LIBRARY_PATH=${_DOTNETAOT_LIBRARY_PATH}"
-            "${DOTNETAOT_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
-        )
+
+        # OpenSSL may be keg-only (not in the Homebrew main lib dir) on macOS,
+        # or outside the default search path on Linux.
+        if(OPENSSL_CRYPTO_LIBRARY)
+            get_filename_component(_DOTNETAOT_OPENSSL_LIB_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
+            list(APPEND _DOTNETAOT_LIB_DIRS "${_DOTNETAOT_OPENSSL_LIB_DIR}")
+        endif()
+
+        if(_DOTNETAOT_LIB_DIRS)
+            list(REMOVE_DUPLICATES _DOTNETAOT_LIB_DIRS)
+            list(JOIN _DOTNETAOT_LIB_DIRS ":" _DOTNETAOT_LIBRARY_PATH_VAL)
+            if(DEFINED ENV{LIBRARY_PATH})
+                string(APPEND _DOTNETAOT_LIBRARY_PATH_VAL ":$ENV{LIBRARY_PATH}")
+            endif()
+            set(_DOTNETAOT_PUBLISH_COMMAND
+                "${CMAKE_COMMAND}" -E env "LIBRARY_PATH=${_DOTNETAOT_LIBRARY_PATH_VAL}"
+                "${DOTNETAOT_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
+            )
+        else()
+            set(_DOTNETAOT_PUBLISH_COMMAND
+                "${DOTNETAOT_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
+            )
+        endif()
     else()
         set(_DOTNETAOT_PUBLISH_COMMAND
             "${DOTNETAOT_EXECUTABLE}" publish ${DOTNETAOT_PUBLISH_ARGS}
