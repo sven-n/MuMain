@@ -159,8 +159,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - name: Install build tools
-        run: brew install cmake ninja
+        run: brew install cmake ninja openssl@3
 
       - name: Cache SDL3 FetchContent
         uses: actions/cache@v4
@@ -170,7 +175,7 @@ jobs:
           restore-keys: sdl3-macos-
 
       - name: Configure CMake
-        run: cmake --preset macos-arm64
+        run: cmake --preset macos-arm64 -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
 
       - name: Build
         run: cmake --build out/build/macos-arm64 --config Debug
@@ -189,7 +194,15 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build gcc g++ libgl1-mesa-dev
+          sudo apt-get install -y \
+            cmake ninja-build gcc g++ \
+            libgl1-mesa-dev \
+            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libxss-dev libxxf86vm-dev \
+            libwayland-dev libxkbcommon-dev wayland-protocols \
+            libasound2-dev libpulse-dev \
+            libssl-dev \
+            pkg-config
 
       - name: Cache SDL3 FetchContent
         uses: actions/cache@v4
