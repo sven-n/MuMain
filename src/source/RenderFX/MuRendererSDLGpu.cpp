@@ -225,6 +225,12 @@ static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
 static SDL_GPUTexture* s_swapchainTexture = nullptr;
 
+// Diagnostics: per-frame counters, reset in BeginFrame, logged every 300 frames.
+static Uint32 s_dbgFrameCount = 0u;
+static Uint32 s_dbgDrawCallsThisFrame = 0u;
+static Uint32 s_dbgVtxBytesThisFrame = 0u;
+static bool s_dbgNullPipelineWarned = false;
+
 // Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
 // s_pipelines2D: depth ON, Vertex2D layout (pitch=20).
 // s_pipelines2DDepthOff: depth OFF, Vertex2D layout.
@@ -625,8 +631,11 @@ public:
             return;
         }
 
-        // Reset vertex scratch offset at start of each frame.
+        // Reset vertex scratch offset and per-frame diagnostics at start of each frame.
         s_vtxOffset = 0u;
+        s_dbgDrawCallsThisFrame = 0u;
+        s_dbgVtxBytesThisFrame = 0u;
+        ++s_dbgFrameCount;
 
         // Story 4.3.2 (AC-7): Map vertex transfer buffer once for the whole frame.
         // Draw calls write into s_vtxMappedPtr; we copy to the GPU buffer once
@@ -783,6 +792,19 @@ public:
         }
 
         s_swapchainTexture = nullptr;
+
+        // Emit per-frame diagnostic stats every 300 frames (~5s at 60fps).
+        if (s_dbgFrameCount % 300 == 0)
+        {
+            SDL_Log("[RENDER diag] frame=%u  draw_calls=%u  vtx_bytes=%u",
+                    s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgVtxBytesThisFrame);
+        }
+        // Warn once if frames are rendering but producing no draw calls.
+        if (s_dbgFrameCount == 10 && s_dbgDrawCallsThisFrame == 0)
+        {
+            SDL_Log("[RENDER diag] WARNING: 10 frames elapsed with zero draw calls — "
+                    "game may not be calling RenderQuad2D/RenderTriangles");
+        }
 #endif
     }
 
@@ -846,10 +868,18 @@ public:
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled ? s_pipelines2D[pipelineIdx] : s_pipelines2DDepthOff[pipelineIdx];
-        if (pipeline)
+        if (!pipeline)
         {
-            SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
+            if (!s_dbgNullPipelineWarned)
+            {
+                SDL_Log("[RENDER diag] WARNING: RenderQuad2D pipeline is null (idx=%d depth=%d) — "
+                        "pipeline creation failed during Init",
+                        pipelineIdx, m_depthTestEnabled ? 1 : 0);
+                s_dbgNullPipelineWarned = true;
+            }
+            return;
         }
+        SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
 
         // Bind vertex buffer.
         SDL_GPUBufferBinding vtxBinding{};
@@ -886,6 +916,8 @@ public:
         const Uint32 drawQuads =
             (numQuads <= static_cast<Uint32>(k_MaxQuads)) ? numQuads : static_cast<Uint32>(k_MaxQuads);
         SDL_DrawGPUIndexedPrimitives(s_renderPass, drawQuads * 6, 1, 0, 0, 0);
+        ++s_dbgDrawCallsThisFrame;
+        s_dbgVtxBytesThisFrame += byteSize;
 #else
         (void)vertices;
         (void)textureId;
@@ -928,10 +960,17 @@ public:
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthOff[pipelineIdx];
-        if (pipeline)
+        if (!pipeline)
         {
-            SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
+            if (!s_dbgNullPipelineWarned)
+            {
+                SDL_Log("[RENDER diag] WARNING: RenderTriangles pipeline is null (idx=%d depth=%d)",
+                        pipelineIdx, m_depthTestEnabled ? 1 : 0);
+                s_dbgNullPipelineWarned = true;
+            }
+            return;
         }
+        SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
 
         SDL_GPUBufferBinding vtxBinding{};
         vtxBinding.buffer = s_vtxGpuBuf;
@@ -954,6 +993,8 @@ public:
         }
 
         SDL_DrawGPUPrimitives(s_renderPass, static_cast<Uint32>(vertices.size()), 1, 0, 0);
+        ++s_dbgDrawCallsThisFrame;
+        s_dbgVtxBytesThisFrame += byteSize;
 #else
         (void)vertices;
         (void)textureId;
@@ -1103,6 +1144,8 @@ public:
         }
 
         SDL_DrawGPUIndexedPrimitives(s_renderPass, numIndices, 1, 0, 0, 0);
+        ++s_dbgDrawCallsThisFrame;
+        s_dbgVtxBytesThisFrame += static_cast<Uint32>(vertices.size() * sizeof(Vertex3D));
 #else
         (void)vertices;
         (void)textureId;
