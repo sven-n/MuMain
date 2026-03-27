@@ -1472,6 +1472,23 @@ int MuMain(int /*argc*/, char* /*argv*/[])
         std::filesystem::current_path(mu_get_app_dir(), ec);
     }
 
+    // Load game configuration from config.ini now that the CWD is resolved.
+    // Must happen before window creation (WindowWidth/Height) and before any
+    // locale-specific file loading (g_strSelectedML used by OpenBasicData).
+    GameConfig::GetInstance().Load();
+    WindowWidth = GameConfig::GetInstance().GetWindowWidth();
+    WindowHeight = GameConfig::GetInstance().GetWindowHeight();
+    g_bUseWindowMode = GameConfig::GetInstance().GetWindowMode() ? TRUE : FALSE;
+    g_bUseFullscreenMode = !g_bUseWindowMode;
+    m_SoundOnOff = GameConfig::GetInstance().GetSoundEnabled();
+    m_MusicOnOff = GameConfig::GetInstance().GetMusicEnabled();
+    m_RememberMe = GameConfig::GetInstance().GetRememberMe() ? 1 : 0;
+    {
+        std::wstring langSelection = GameConfig::GetInstance().GetLanguageSelection();
+        wcsncpy_s(g_aszMLSelection, langSelection.c_str(), MAX_LANGUAGE_NAME_LENGTH - 1);
+        g_strSelectedML = g_aszMLSelection;
+    }
+
     if (!mu::MuPlatform::Initialize())
     {
         return 1;
@@ -1556,6 +1573,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     // UI managers
     g_pUIManager = new CUIManager;
     g_pUIMapName = new CUIMapName;
+    pMultiLanguage = new CMultiLanguage(g_strSelectedML);
 
     g_BuffSystem = BuffStateSystem::Make();
     g_MapProcess = MapProcess::Make();
