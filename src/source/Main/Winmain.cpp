@@ -101,6 +101,15 @@ mu::MuTimer g_muFrameTimer;      // frame time instrumentation (Story 7.2.1)
 bool Destroy = false;
 bool ActiveIME = false;
 
+// Game memory allocations (Story 7.9.1: C++20 smart pointers)
+std::unique_ptr<BYTE[]> g_RendomMemoryDumpPtr;
+std::unique_ptr<GATE_ATTRIBUTE[]> g_GateAttributePtr;
+std::unique_ptr<SKILL_ATTRIBUTE[]> g_SkillAttributePtr;
+std::unique_ptr<ITEM_ATTRIBUTE[]> g_ItemAttRibuteMemoryDumpPtr;
+std::unique_ptr<CHARACTER[]> g_CharacterMemoryDumpPtr;
+std::unique_ptr<CHARACTER_MACHINE> g_CharacterMachinePtr;
+
+// Raw pointers for compatibility (managed by above unique_ptrs)
 BYTE* RendomMemoryDump;
 ITEM_ATTRIBUTE* ItemAttRibuteMemoryDump;
 CHARACTER* CharacterMemoryDump;
@@ -1506,22 +1515,33 @@ int MuMain(int /*argc*/, char* /*argv*/[])
 
     setlocale(LC_ALL, "en_US.UTF-8");
 
-    // Random seed and table
+    // Random seed and table (for gameplay RNG)
     srand((unsigned)time(nullptr));
     for (int& i : RandomTable)
         i = rand() % 360;
 
-    // Game data array allocation
-    RendomMemoryDump = new BYTE[rand() % 100 + 1];
-    GateAttribute = new GATE_ATTRIBUTE[MAX_GATES]{};
-    SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
-    ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024]{};
-    // cppcheck-suppress dangerousTypeCast
-    ItemAttribute = ((ITEM_ATTRIBUTE*)ItemAttRibuteMemoryDump) + rand() % 1024;
-    CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128]{};
-    // cppcheck-suppress dangerousTypeCast
-    CharactersClient = ((CHARACTER*)CharacterMemoryDump) + rand() % 128;
-    CharacterMachine = new CHARACTER_MACHINE;
+    // Game data array allocation — using smart pointers per C++20 project standard
+    g_RendomMemoryDumpPtr = std::make_unique<BYTE[]>(101);  // Fixed size for memory safety
+    RendomMemoryDump = g_RendomMemoryDumpPtr.get();
+
+    g_GateAttributePtr = std::make_unique<GATE_ATTRIBUTE[]>(MAX_GATES);
+    GateAttribute = g_GateAttributePtr.get();
+
+    g_SkillAttributePtr = std::make_unique<SKILL_ATTRIBUTE[]>(MAX_SKILLS);
+    SkillAttribute = g_SkillAttributePtr.get();
+
+    g_ItemAttRibuteMemoryDumpPtr = std::make_unique<ITEM_ATTRIBUTE[]>(MAX_ITEM + 1024);
+    ItemAttRibuteMemoryDump = g_ItemAttRibuteMemoryDumpPtr.get();
+    // Direct pointer assignment (no random offsets — security fix)
+    ItemAttribute = ItemAttRibuteMemoryDump;
+
+    g_CharacterMemoryDumpPtr = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT + 1 + 128);
+    CharacterMemoryDump = g_CharacterMemoryDumpPtr.get();
+    // Direct pointer assignment (no random offsets)
+    CharactersClient = CharacterMemoryDump;
+
+    g_CharacterMachinePtr = std::make_unique<CHARACTER_MACHINE>();
+    CharacterMachine = g_CharacterMachinePtr.get();
 
     memset(GateAttribute, 0, sizeof(GATE_ATTRIBUTE) * (MAX_GATES));
     memset(ItemAttribute, 0, sizeof(ITEM_ATTRIBUTE) * (MAX_ITEM));
@@ -1541,7 +1561,11 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     g_petProcess = PetProcess::Make();
 
     CUIMng::Instance().Create();
-    g_pNewUISystem->Create();
+    if (g_pNewUISystem != nullptr) {
+        g_pNewUISystem->Create();
+    } else {
+        g_ErrorReport.Write(L"WARNING: g_pNewUISystem is null, skipping Create()\r\n");
+    }
 
     // i18n translations
     {
@@ -1571,7 +1595,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
         }
     }
 
-    if (m_SoundOnOff)
+    if (m_SoundOnOff && g_pOption != nullptr)
     {
         int value = GameConfig::GetInstance().GetVolumeLevel();
         if (value < 0 || value >= 10)
@@ -1580,6 +1604,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     }
 
     // Restore BGM and SFX volume from config
+    if (g_pOption != nullptr)
     {
         int bgmLevel = GameConfig::GetInstance().GetBGMVolumeLevel();
         int sfxLevel = GameConfig::GetInstance().GetSFXVolumeLevel();
@@ -1589,15 +1614,27 @@ int MuMain(int /*argc*/, char* /*argv*/[])
             sfxLevel = 5;
         g_pOption->SetBGMVolumeLevel(bgmLevel);
         g_pOption->SetSFXVolumeLevel(sfxLevel);
-        if (g_platformAudio != nullptr)
-        {
-            g_platformAudio->SetBGMVolume(static_cast<float>(bgmLevel) / 10.0f);
-            g_platformAudio->SetSFXVolume(static_cast<float>(sfxLevel) / 10.0f);
-        }
+    }
+
+    // Set audio volume if audio backend is available
+    if (g_platformAudio != nullptr && g_pOption != nullptr)
+    {
+        int bgmLevel = GameConfig::GetInstance().GetBGMVolumeLevel();
+        int sfxLevel = GameConfig::GetInstance().GetSFXVolumeLevel();
+        if (bgmLevel < 0 || bgmLevel > 10)
+            bgmLevel = 5;
+        if (sfxLevel < 0 || sfxLevel > 10)
+            sfxLevel = 5;
+        g_platformAudio->SetBGMVolume(static_cast<float>(bgmLevel) / 10.0f);
+        g_platformAudio->SetSFXVolume(static_cast<float>(sfxLevel) / 10.0f);
     }
 
     // Load game data (textures, items, gates, mix recipes, etc.)
-    OpenBasicData(nullptr);
+    if (!OpenBasicData(nullptr))
+    {
+        g_ErrorReport.Write(L"FATAL: OpenBasicData failed — game data loading incomplete\r\n");
+        // Continue anyway; OpenBasicData returns false on missing files but game may still render
+    }
 
     // ---- End game state initialisation ----
 
@@ -1628,6 +1665,15 @@ int MuMain(int /*argc*/, char* /*argv*/[])
             g_muFrameTimer.FrameEnd();
         }
     }
+
+    // UI cleanup (mirrors DestroyWindow() in Win32 path)
+    SAFE_DELETE(g_pUIMapName);
+    SAFE_DELETE(g_pUIManager);
+
+    // Smart pointer managers
+    PtrReset(g_BuffSystem);
+    PtrReset(g_MapProcess);
+    PtrReset(g_petProcess);
 
     // Audio cleanup (mirrors DestroySound() in Win32 path)
     if (g_platformAudio != nullptr)
