@@ -96,6 +96,7 @@ namespace MUHelper
         m_iComboState = 0;
         m_iCurrentBuffIndex = 0;
         m_iCurrentBuffPartyIndex = 0;
+        m_iCurrentHealPartyIndex = 0;
         m_iCurrentTarget = -1;
         m_iCurrentSkill = (ActionSkillType)m_config.aiSkill[0];
         m_iCurrentItem = MAX_ITEMS;
@@ -593,21 +594,25 @@ namespace MUHelper
         {
             PARTY_t* pMember = &Party[m_iCurrentHealPartyIndex];
             CHARACTER* pChar = g_pPartyManager->GetPartyMemberChar(pMember);
+            int iHealResult = 1;
 
             if (pChar != NULL)
             {
                 if (pChar == Hero)
                 {
-                    return HealSelf(iHealingSkill);
+                    iHealResult = HealSelf(iHealingSkill);
                 }
                 else if (pMember->Map == gMapManager.WorldActive
                     && pMember->stepHP * 10 <= m_config.iHealPartyThreshold
                     && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
                 {
-                    return SimulateSkill(iHealingSkill, true, pChar->Key);
+                    iHealResult = SimulateSkill(iHealingSkill, true, pChar->Key);
                 }
             }
+
             m_iCurrentHealPartyIndex = (m_iCurrentHealPartyIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
+
+            return iHealResult;
         }
         else
         {
