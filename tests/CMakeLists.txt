@@ -284,6 +284,19 @@ target_sources(MuTests PRIVATE core/test_cpu_usage.cpp)
 # AC-2 (muConsoleDebug), AC-3 (StringUtils), AC-4 (GlobalBitmap), AC-5 (MsgBoxIGSBuyConfirm).
 target_sources(MuTests PRIVATE platform/test_win32_string_cleanup_7_6_2.cpp)
 
+# Story 7.9.3: Unify Entry Point [VS0-QUAL-RENDER-UNIFYENTRY]
+# RED PHASE: Tests verify that WinMain() is deleted (AC-2), MuMain() is the universal
+# entry point (AC-3), and zero #ifdef _WIN32 guards remain in game code outside Platform/
+# and Audio/ directories (AC-5).
+# AC-1 tests (screen rate calculation) are pure math — always GREEN, serve as regression guards.
+# File-scan tests (AC-2, AC-3, AC-5) are guarded by #ifndef _WIN32 internally so MinGW CI
+# compiles cleanly. MU_SOURCE_DIR is injected so the scanner can locate source files.
+# No Win32 APIs in the test TU — compiles and runs on macOS/Linux/Windows (MinGW CI).
+target_sources(MuTests PRIVATE platform/test_entry_point_unification_7_9_3.cpp)
+target_compile_definitions(MuTests PRIVATE
+    MU_SOURCE_DIR="${CMAKE_SOURCE_DIR}/src/source"
+)
+
 # Story 6.4.1: UI Windows Comprehensive Validation [VS1-GAME-VALIDATE-UI]
 # RED PHASE: Tests verify INTERFACE_LIST enum completeness and coverage (AC-4),
 # CNewUIObj class hierarchy and Show/Enable state transitions (AC-1, MU_GAME_AVAILABLE),
