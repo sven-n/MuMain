@@ -31,3 +31,7 @@ extern CameraState g_CameraState;
 // Main camera controller
 // Returns true if camera is locked
 bool MoveMainCamera();
+
+// User-configurable gameplay zoom level (0..4)
+short GetUserCameraZoomLevel();
+void SetUserCameraZoomLevel(short level);

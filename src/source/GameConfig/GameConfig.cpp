@@ -42,6 +42,7 @@ void GameConfig::Load()
     m_windowMode   = ReadBool(CfgSectionWindow, CfgKeyWindowed, CfgDefaultWindowed);
 
     m_colorDepth = ReadInt(CfgSectionGraphics, CfgKeyColorDepth, CfgDefaultColorDepth);
+    SetCameraZoomLevel(ReadInt(CfgSectionGraphics, CfgKeyCameraZoomLevel, CfgDefaultCameraZoomLevel));
 
     m_soundEnabled = ReadBool(CfgSectionAudio, CfgKeySoundEnabled, CfgDefaultSoundEnabled);
     m_musicEnabled = ReadBool(CfgSectionAudio, CfgKeyMusicEnabled, CfgDefaultMusicEnabled);
@@ -69,6 +70,7 @@ void GameConfig::Save()
 
     WriteInt(CfgSectionGraphics, CfgKeyColorDepth, m_colorDepth);
     WriteInt(CfgSectionGraphics, CfgKeyRenderTextType, m_renderTextType);
+    WriteInt(CfgSectionGraphics, CfgKeyCameraZoomLevel, m_cameraZoomLevel);
 
     WriteBool(CfgSectionAudio, CfgKeySoundEnabled, m_soundEnabled);
     WriteBool(CfgSectionAudio, CfgKeyMusicEnabled, m_musicEnabled);
@@ -97,6 +99,20 @@ void GameConfig::SetWindowMode(bool windowed)
 void GameConfig::SetColorDepth(int depth)
 {
     m_colorDepth = depth;
+}
+
+void GameConfig::SetCameraZoomLevel(int level)
+{
+    if (level < 0)
+    {
+        level = 0;
+    }
+    else if (level > 4)
+    {
+        level = 4;
+    }
+
+    m_cameraZoomLevel = level;
 }
 
 void GameConfig::SetSoundEnabled(bool enabled)

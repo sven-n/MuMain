@@ -18,6 +18,7 @@
 #include "../GMDoppelGanger2.h"
 #include "../w_MapHeaders.h"
 #include "../UIManager.h"
+#include "../NewUICommon.h"
 
 // External variable declarations (definitions remain in ZzzScene.cpp)
 extern short g_shCameraLevel;
@@ -26,6 +27,59 @@ extern float CameraDistanceTarget;
 extern float CameraDistance;
 extern float Camera3DFov;
 extern bool Camera3DRoll;
+
+namespace
+{
+    constexpr short MinUserCameraLevel = 0;
+    constexpr short MaxUserCameraLevel = 4;
+    short g_shUserCameraLevel = 0;
+}
+
+short GetUserCameraZoomLevel()
+{
+    return g_shUserCameraLevel;
+}
+
+void SetUserCameraZoomLevel(short level)
+{
+    if (level < MinUserCameraLevel)
+    {
+        level = MinUserCameraLevel;
+    }
+    else if (level > MaxUserCameraLevel)
+    {
+        level = MaxUserCameraLevel;
+    }
+
+    g_shUserCameraLevel = level;
+}
+
+/**
+ * @brief Handles user camera zoom hotkeys in main scene.
+ */
+static void UpdateUserZoomHotkeys()
+{
+    if (SceneFlag != MAIN_SCENE || CameraTopViewEnable)
+    {
+        return;
+    }
+
+    // Avoid stealing page navigation keys while UI text/input widgets are active.
+    if (g_pUIManager && g_pUIManager->IsInputEnable())
+    {
+        return;
+    }
+
+    if (SEASON3B::IsPress(VK_PRIOR)) // PageUp: zoom out
+    {
+        g_shUserCameraLevel = std::min<short>(g_shUserCameraLevel + 1, MaxUserCameraLevel);
+    }
+
+    if (SEASON3B::IsPress(VK_NEXT)) // PageDown: zoom in
+    {
+        g_shUserCameraLevel = std::max<short>(g_shUserCameraLevel - 1, MinUserCameraLevel);
+    }
+}
 
 /**
  * @brief Calculates camera view distance based on scene and world settings.
@@ -117,24 +171,16 @@ static void CalculateCameraPosition(vec3_t outCameraPosition)
     vec3_t Position, TransformPosition;
     float Matrix[3][4];
 
-    CameraViewFar = CalculateCameraViewFar(SceneFlag);
-
     Vector(0.f, -CameraDistance, 0.f, Position);
     AngleMatrix(CameraAngle, Matrix);
     VectorIRotate(Position, Matrix, TransformPosition);
 
-    if (SceneFlag == MAIN_SCENE)
+    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
     {
-        g_pCatapultWindow->GetCameraPos(Position);
+        // Keep menu/character scenes at the classic fixed zoom to avoid broken framing.
+        g_shCameraLevel = 0;
     }
-    else if (CCameraMove::GetInstancePtr()->IsTourMode())
-    {
-        CCameraMove::GetInstancePtr()->UpdateTourWayPoint();
-        CCameraMove::GetInstancePtr()->GetCurrentCameraPos(Position);
-        CameraViewFar = 390.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
-    }
-
-    if (g_Direction.IsDirection() && !g_Direction.m_bDownHero)
+    else if (g_Direction.IsDirection() && !g_Direction.m_bDownHero)
     {
         Hero->Object.Position[2] = 300.0f;
         g_shCameraLevel = g_Direction.GetCameraPosition(Position);
@@ -147,7 +193,23 @@ static void CalculateCameraPosition(vec3_t outCameraPosition)
     {
         g_shCameraLevel = 5;
     }
-    else g_shCameraLevel = 0;
+    else
+    {
+        g_shCameraLevel = g_shUserCameraLevel;
+    }
+
+    CameraViewFar = CalculateCameraViewFar(SceneFlag);
+
+    if (SceneFlag == MAIN_SCENE)
+    {
+        g_pCatapultWindow->GetCameraPos(Position);
+    }
+    else if (CCameraMove::GetInstancePtr()->IsTourMode())
+    {
+        CCameraMove::GetInstancePtr()->UpdateTourWayPoint();
+        CCameraMove::GetInstancePtr()->GetCurrentCameraPos(Position);
+        CameraViewFar = 390.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
+    }
 
     if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
@@ -376,6 +438,7 @@ bool MoveMainCamera()
     bool bLockCamera = false;
 
     SetCameraFOV();
+    UpdateUserZoomHotkeys();
 
 #ifdef ENABLE_EDIT2
     HandleEditorMode();
