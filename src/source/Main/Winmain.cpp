@@ -1579,6 +1579,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     g_MapProcess = MapProcess::Make();
     g_petProcess = PetProcess::Make();
 
+    CInput::Instance().SetScreenSize(WindowWidth, WindowHeight);
     CUIMng::Instance().Create();
     if (g_pNewUISystem != nullptr)
     {

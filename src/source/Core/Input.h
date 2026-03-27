@@ -147,6 +147,11 @@ public:
     {
         return m_lScreenHeight;
     }
+    void SetScreenSize(long w, long h)
+    {
+        m_lScreenWidth = w;
+        m_lScreenHeight = h;
+    }
     void SetLeftHandMode(bool bLeftHand)
     {
         m_bLeftHand = bLeftHand;
