@@ -796,8 +796,8 @@ public:
         // Emit per-frame diagnostic stats every 300 frames (~5s at 60fps).
         if (s_dbgFrameCount % 300 == 0)
         {
-            SDL_Log("[RENDER diag] frame=%u  draw_calls=%u  vtx_bytes=%u",
-                    s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgVtxBytesThisFrame);
+            SDL_Log("[RENDER diag] frame=%u  draw_calls=%u  vtx_bytes=%u", s_dbgFrameCount, s_dbgDrawCallsThisFrame,
+                    s_dbgVtxBytesThisFrame);
         }
         // Warn once if frames are rendering but producing no draw calls.
         if (s_dbgFrameCount == 10 && s_dbgDrawCallsThisFrame == 0)
@@ -809,6 +809,141 @@ public:
     }
 
     // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-1): BeginScene — 3D viewport and projection setup.
+    // SDL_gpu backend: sets viewport on the render pass. Projection/camera
+    // transforms are handled via uniform buffers (not immediate-mode matrices).
+    // -----------------------------------------------------------------------
+    void BeginScene(int x, int y, int w, int h) override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (!s_renderPass || !s_window)
+        {
+            return;
+        }
+
+        // Get actual window size from SDL (avoids dependency on ZzzOpenglUtil globals).
+        int winW = 0;
+        int winH = 0;
+        SDL_GetWindowSize(s_window, &winW, &winH);
+
+        // Scale from 640×480 design space to actual window size.
+        const float scaleX = static_cast<float>(winW) / 640.0f;
+        const float scaleY = static_cast<float>(winH) / 480.0f;
+
+        SDL_GPUViewport viewport{};
+        viewport.x = static_cast<float>(x) * scaleX;
+        viewport.y = static_cast<float>(y) * scaleY;
+        viewport.w = static_cast<float>(w) * scaleX;
+        viewport.h = static_cast<float>(h) * scaleY;
+        viewport.min_depth = 0.0f;
+        viewport.max_depth = 1.0f;
+
+        SDL_SetGPUViewport(s_renderPass, &viewport);
+#else
+        (void)x;
+        (void)y;
+        (void)w;
+        (void)h;
+#endif
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-1): EndScene — restore state after 3D pass.
+    // SDL_gpu backend: reset viewport to full window.
+    // -----------------------------------------------------------------------
+    void EndScene() override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (!s_renderPass)
+        {
+            return;
+        }
+
+        // Reset viewport to full window.
+        int winW = 0;
+        int winH = 0;
+        SDL_GetWindowSize(s_window, &winW, &winH);
+
+        SDL_GPUViewport fullVP{};
+        fullVP.x = 0.0f;
+        fullVP.y = 0.0f;
+        fullVP.w = static_cast<float>(winW);
+        fullVP.h = static_cast<float>(winH);
+        fullVP.min_depth = 0.0f;
+        fullVP.max_depth = 1.0f;
+
+        SDL_SetGPUViewport(s_renderPass, &fullVP);
+#endif
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-2): Begin2DPass — mark 2D mode for pipeline selection.
+    // SDL_gpu uses separate 2D pipelines (Vertex2D layout, depth OFF).
+    // -----------------------------------------------------------------------
+    void Begin2DPass() override
+    {
+        // 2D pipeline selection is already handled by RenderQuad2D based on
+        // depth test state. No additional state change needed.
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-2): End2DPass — restore 3D mode.
+    // -----------------------------------------------------------------------
+    void End2DPass() override
+    {
+        // No-op: pipeline selection returns to 3D automatically via
+        // RenderTriangles/RenderQuadStrip calls.
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-7): ClearScreen — no-op on SDL_gpu.
+    // SDL_gpu clears the swapchain texture at BeginFrame (LOADOP_CLEAR).
+    // -----------------------------------------------------------------------
+    void ClearScreen() override
+    {
+        // No-op: SDL_gpu clears in BeginFrame via SDL_GPU_LOADOP_CLEAR.
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-5): RenderLines — line primitive rendering.
+    // SDL_gpu backend: emit line primitives using existing 3D pipeline.
+    // For now, renders as thin triangles (SDL_gpu line support varies).
+    // -----------------------------------------------------------------------
+    void RenderLines(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (vertices.empty() || !s_renderPass)
+        {
+            return;
+        }
+
+        // Render lines as pairs of vertices using the 3D pipeline.
+        // SDL_gpu supports line list primitives via the pipeline topology,
+        // but our pipelines use triangle topology. For debug visualization,
+        // render each line as a degenerate triangle (3 vertices: A, B, A).
+        // This produces visible lines with the existing triangle pipeline.
+        const auto lineCount = vertices.size() / 2;
+        for (std::size_t i = 0; i < lineCount; ++i)
+        {
+            const Vertex3D triVerts[3] = {vertices[i * 2], vertices[i * 2 + 1], vertices[i * 2]};
+            RenderTriangles(std::span<const Vertex3D>(triVerts, 3), textureId);
+        }
+#else
+        (void)vertices;
+        (void)textureId;
+#endif
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-6): IsFrameActive — frame lifecycle query.
+    // Returns true when a render pass is open (between BeginFrame/EndFrame).
+    // -----------------------------------------------------------------------
+    [[nodiscard]] bool IsFrameActive() const override
+    {
+        return s_renderPass != nullptr;
+    }
+
     // Story 4.4.1 (AC-2, Task 6.2/6.3): GetDevice override — returns s_device.
     // Allows GlobalBitmap.cpp to obtain the SDL_GPUDevice* via mu::GetRenderer().GetDevice()
     // without a direct dependency on MuRendererSDLGpu.cpp internals.
@@ -964,8 +1099,8 @@ public:
         {
             if (!s_dbgNullPipelineWarned)
             {
-                SDL_Log("[RENDER diag] WARNING: RenderTriangles pipeline is null (idx=%d depth=%d)",
-                        pipelineIdx, m_depthTestEnabled ? 1 : 0);
+                SDL_Log("[RENDER diag] WARNING: RenderTriangles pipeline is null (idx=%d depth=%d)", pipelineIdx,
+                        m_depthTestEnabled ? 1 : 0);
                 s_dbgNullPipelineWarned = true;
             }
             return;

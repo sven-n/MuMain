@@ -33,6 +33,7 @@
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
 #include "NewUISystem.h"
+#include "MuRenderer.h"
 #include "_GlobalFunctions.h"
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
@@ -12236,68 +12237,46 @@ void RenderBoundingBox(OBJECT* pObj)
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    // glBegin(GL_QUADS);
-    glBegin(GL_LINES);
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[5]);
+    // Story 7-9-2 (AC-5): Port GL_LINES collision debug box to MuRenderer.
+    // Original was GL_LINES with 24 vertices = 12 line segments.
+    // Each glColor set 4 vertices (2 line segments) with the same color.
+    auto MakeVtx = [&](const vec3_t& pos, std::uint32_t c) -> mu::Vertex3D
+    { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, 0.f, 0.f, c}; };
 
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[1]);
+    constexpr std::uint32_t cDark = 0xFF333333u;  // 0.2, 0.2, 0.2
+    constexpr std::uint32_t cMid = 0xFF999999u;   // 0.6, 0.6, 0.6
+    constexpr std::uint32_t cLight = 0xFF666666u; // 0.4, 0.4, 0.4
 
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[6]);
-
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[4]);
-
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[3]);
-
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[2]);
-    glEnd();
+    std::vector<mu::Vertex3D> lineVerts = {
+        // Dark lines: 7-6, 4-5, 0-2, 3-1
+        MakeVtx(TransformVertices[7], cDark),
+        MakeVtx(TransformVertices[6], cDark),
+        MakeVtx(TransformVertices[4], cDark),
+        MakeVtx(TransformVertices[5], cDark),
+        MakeVtx(TransformVertices[0], cDark),
+        MakeVtx(TransformVertices[2], cDark),
+        MakeVtx(TransformVertices[3], cDark),
+        MakeVtx(TransformVertices[1], cDark),
+        // Mid lines: 7-3, 2-6, 0-1, 5-4
+        MakeVtx(TransformVertices[7], cMid),
+        MakeVtx(TransformVertices[3], cMid),
+        MakeVtx(TransformVertices[2], cMid),
+        MakeVtx(TransformVertices[6], cMid),
+        MakeVtx(TransformVertices[0], cMid),
+        MakeVtx(TransformVertices[1], cMid),
+        MakeVtx(TransformVertices[5], cMid),
+        MakeVtx(TransformVertices[4], cMid),
+        // Light lines: 7-5, 1-3, 0-4, 6-2
+        MakeVtx(TransformVertices[7], cLight),
+        MakeVtx(TransformVertices[5], cLight),
+        MakeVtx(TransformVertices[1], cLight),
+        MakeVtx(TransformVertices[3], cLight),
+        MakeVtx(TransformVertices[0], cLight),
+        MakeVtx(TransformVertices[4], cLight),
+        MakeVtx(TransformVertices[6], cLight),
+        MakeVtx(TransformVertices[2], cLight),
+    };
+    mu::GetRenderer().RenderLines(lineVerts, 0);
 
     glPopMatrix();
 }

@@ -14,10 +14,12 @@
 #include "DSPlaySound.h"
 #include "WSclient.h"
 #include "Random.h"
+#include "MuRenderer.h"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <vector>
 
 namespace
 {
@@ -213,30 +215,41 @@ void RenderBlurs()
             BindTexture(nTexture);
             for (int j = 0; j < blur.Number - 1; j++)
             {
-                glBegin(GL_TRIANGLE_FAN);
-                float Light;
-                float TexU;
+                float Light1;
+                float TexU1;
                 if (blur.Owner->Level == 0)
-                    Light = (blur.Number - j) / static_cast<float>(blur.Number);
+                    Light1 = (blur.Number - j) / static_cast<float>(blur.Number);
                 else
-                    Light = 1.f;
-                glColor3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j) / static_cast<float>(blur.Number);
-                glTexCoord2f(TexU, 1.f);
-                glVertex3fv(blur.P1[j]);
-                glTexCoord2f(TexU, 0.f);
-                glVertex3fv(blur.P2[j]);
+                    Light1 = 1.f;
+                auto r1 = static_cast<uint8_t>(blur.Light[0] * Light1 * 255.f);
+                auto g1 = static_cast<uint8_t>(blur.Light[1] * Light1 * 255.f);
+                auto b1 = static_cast<uint8_t>(blur.Light[2] * Light1 * 255.f);
+                uint32_t color1 = (0xFFu << 24) | (b1 << 16) | (g1 << 8) | r1;
+                TexU1 = (j) / static_cast<float>(blur.Number);
+
+                float Light2;
                 if (blur.Owner->Level == 0)
-                    Light = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
+                    Light2 = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
                 else
-                    Light = 1.f;
-                glColor3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j + 1) / static_cast<float>(blur.Number);
-                glTexCoord2f(TexU, 0.f);
-                glVertex3fv(blur.P2[j + 1]);
-                glTexCoord2f(TexU, 1.f);
-                glVertex3fv(blur.P1[j + 1]);
-                glEnd();
+                    Light2 = 1.f;
+                auto r2 = static_cast<uint8_t>(blur.Light[0] * Light2 * 255.f);
+                auto g2 = static_cast<uint8_t>(blur.Light[1] * Light2 * 255.f);
+                auto b2 = static_cast<uint8_t>(blur.Light[2] * Light2 * 255.f);
+                uint32_t color2 = (0xFFu << 24) | (b2 << 16) | (g2 << 8) | r2;
+                float TexU2 = (j + 1) / static_cast<float>(blur.Number);
+
+                // Fan vertices: v0=P1[j], v1=P2[j], v2=P2[j+1], v3=P1[j+1]
+                // Triangles: [v0,v1,v2] and [v0,v2,v3]
+                mu::Vertex3D fanVerts[4] = {
+                    {blur.P1[j][0], blur.P1[j][1], blur.P1[j][2], 0.f, 0.f, 1.f, TexU1, 1.f, color1},
+                    {blur.P2[j][0], blur.P2[j][1], blur.P2[j][2], 0.f, 0.f, 1.f, TexU1, 0.f, color1},
+                    {blur.P2[j + 1][0], blur.P2[j + 1][1], blur.P2[j + 1][2], 0.f, 0.f, 1.f, TexU2, 0.f, color2},
+                    {blur.P1[j + 1][0], blur.P1[j + 1][1], blur.P1[j + 1][2], 0.f, 0.f, 1.f, TexU2, 1.f, color2},
+                };
+                mu::Vertex3D triVerts[6] = {
+                    fanVerts[0], fanVerts[1], fanVerts[2], fanVerts[0], fanVerts[2], fanVerts[3],
+                };
+                mu::GetRenderer().RenderTriangles(triVerts, 0);
             }
         }
     }
@@ -388,22 +401,32 @@ void RenderObjectBlurs()
                     }
                 }
 
-                glBegin(GL_TRIANGLE_FAN);
-                float Light = (blur.Number - j) / static_cast<float>(blur.Number);
-                float TexU = (j) / static_cast<float>(blur.Number);
-                glColor3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                glTexCoord2f(TexU, 1.f);
-                glVertex3fv(blur.P1[j]);
-                glTexCoord2f(TexU, 0.f);
-                glVertex3fv(blur.P2[j]);
-                Light = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
-                glColor3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j + 1) / static_cast<float>(blur.Number);
-                glTexCoord2f(TexU, 0.f);
-                glVertex3fv(blur.P2[j + 1]);
-                glTexCoord2f(TexU, 1.f);
-                glVertex3fv(blur.P1[j + 1]);
-                glEnd();
+                float Light1 = (blur.Number - j) / static_cast<float>(blur.Number);
+                float TexU1 = (j) / static_cast<float>(blur.Number);
+                auto r1 = static_cast<uint8_t>(blur.Light[0] * Light1 * 255.f);
+                auto g1 = static_cast<uint8_t>(blur.Light[1] * Light1 * 255.f);
+                auto b1 = static_cast<uint8_t>(blur.Light[2] * Light1 * 255.f);
+                uint32_t color1 = (0xFFu << 24) | (b1 << 16) | (g1 << 8) | r1;
+
+                float Light2 = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
+                auto r2 = static_cast<uint8_t>(blur.Light[0] * Light2 * 255.f);
+                auto g2 = static_cast<uint8_t>(blur.Light[1] * Light2 * 255.f);
+                auto b2 = static_cast<uint8_t>(blur.Light[2] * Light2 * 255.f);
+                uint32_t color2 = (0xFFu << 24) | (b2 << 16) | (g2 << 8) | r2;
+                float TexU2 = (j + 1) / static_cast<float>(blur.Number);
+
+                // Fan vertices: v0=P1[j], v1=P2[j], v2=P2[j+1], v3=P1[j+1]
+                // Triangles: [v0,v1,v2] and [v0,v2,v3]
+                mu::Vertex3D fanVerts[4] = {
+                    {blur.P1[j][0], blur.P1[j][1], blur.P1[j][2], 0.f, 0.f, 1.f, TexU1, 1.f, color1},
+                    {blur.P2[j][0], blur.P2[j][1], blur.P2[j][2], 0.f, 0.f, 1.f, TexU1, 0.f, color1},
+                    {blur.P2[j + 1][0], blur.P2[j + 1][1], blur.P2[j + 1][2], 0.f, 0.f, 1.f, TexU2, 0.f, color2},
+                    {blur.P1[j + 1][0], blur.P1[j + 1][1], blur.P1[j + 1][2], 0.f, 0.f, 1.f, TexU2, 1.f, color2},
+                };
+                mu::Vertex3D triVerts[6] = {
+                    fanVerts[0], fanVerts[1], fanVerts[2], fanVerts[0], fanVerts[2], fanVerts[3],
+                };
+                mu::GetRenderer().RenderTriangles(triVerts, 0);
             }
         }
     }
@@ -652,37 +675,55 @@ void RenderFlagFace(OBJECT* o, int x, int y, vec3_t Light, int Tex1, int Tex2)
         v->light = (-v->normal[0] + v->normal[1]) * 0.5f + 0.5f;
     }
 
+    // Build quad vertices for front face (Tex2)
     BindTexture(Tex2);
-    glBegin(GL_QUADS);
-
-    for (int i = 0; i < n; i++)
     {
-        int vlist = f->vlist[i];
-        physics_vertex* v = &g_flagVertices[vlist];
-        glTexCoord2f(TexCoord[i][0], TexCoord[i][1]);
-        glColor3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
-        vec3_t p, Position;
-        Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
-        Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
-        glVertex3f(Position[0], Position[1], Position[2]);
+        mu::Vertex3D quadVerts[4];
+        for (int i = 0; i < n; i++)
+        {
+            int vlist = f->vlist[i];
+            physics_vertex* v = &g_flagVertices[vlist];
+            auto r = static_cast<uint8_t>(Light[0] * v->light * 255.f);
+            auto g = static_cast<uint8_t>(Light[1] * v->light * 255.f);
+            auto b = static_cast<uint8_t>(Light[2] * v->light * 255.f);
+            uint32_t color = (0xFFu << 24) | (b << 16) | (g << 8) | r;
+            vec3_t p, Position;
+            Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
+            Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
+            quadVerts[i] = {Position[0], Position[1],    Position[2],    0.f,  0.f,
+                            1.f,         TexCoord[i][0], TexCoord[i][1], color};
+        }
+        mu::Vertex3D triVerts[6] = {
+            quadVerts[0], quadVerts[1], quadVerts[2], quadVerts[0], quadVerts[2], quadVerts[3],
+        };
+        mu::GetRenderer().RenderTriangles(triVerts, 0);
     }
-    glEnd();
 
+    // Build quad vertices for back face (Tex1) — reverse winding
     BindTexture(Tex1);
-    glBegin(GL_QUADS);
-
-    for (int i = n - 1; i >= 0; i--)
     {
-        int vlist = f->vlist[i];
-        physics_vertex* v = &g_flagVertices[vlist];
-        glTexCoord2f(TexCoord[i][0], TexCoord[i][1]);
-        glColor3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
-        vec3_t p, Position;
-        Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
-        Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
-        glVertex3f(Position[0], Position[1], Position[2]);
+        mu::Vertex3D quadVerts[4];
+        int idx = 0;
+        for (int i = n - 1; i >= 0; i--)
+        {
+            int vlist = f->vlist[i];
+            physics_vertex* v = &g_flagVertices[vlist];
+            auto r = static_cast<uint8_t>(Light[0] * v->light * 255.f);
+            auto g = static_cast<uint8_t>(Light[1] * v->light * 255.f);
+            auto b = static_cast<uint8_t>(Light[2] * v->light * 255.f);
+            uint32_t color = (0xFFu << 24) | (b << 16) | (g << 8) | r;
+            vec3_t p, Position;
+            Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
+            Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
+            quadVerts[idx] = {Position[0], Position[1],    Position[2],    0.f,  0.f,
+                              1.f,         TexCoord[i][0], TexCoord[i][1], color};
+            idx++;
+        }
+        mu::Vertex3D triVerts[6] = {
+            quadVerts[0], quadVerts[1], quadVerts[2], quadVerts[0], quadVerts[2], quadVerts[3],
+        };
+        mu::GetRenderer().RenderTriangles(triVerts, 0);
     }
-    glEnd();
 }
 
 void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2)

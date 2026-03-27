@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "CameraMove.h"
+#include "MuRenderer.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzAI.h"
 
@@ -487,32 +488,72 @@ void CCameraMove::RenderWayPoint()
     glDisable(GL_ALPHA_TEST);
     glDisable(GL_TEXTURE_2D);
 
-    glBegin(GL_QUADS);
-    glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
-    for (const auto& waypoint : m_listWayPoint)
+    // Story 7-9-2 (AC-5): Port waypoint gizmo quads + line strip to MuRenderer.
+    // Red quads: ABGR color = alpha=0xCC (0.8*255), B=0, G=0, R=0xFF
+    constexpr std::uint32_t redColor = 0xCC0000FFu;
     {
-        glNormal3f(0.0f, 0.0f, 1.0f);
-        const float minX = waypoint->fCameraX + kWaypointRenderOffset - kWaypointRenderHalfSize;
-        const float maxX = waypoint->fCameraX + kWaypointRenderOffset + kWaypointRenderHalfSize;
-        const float minY = waypoint->fCameraY + kWaypointRenderOffset - kWaypointRenderHalfSize;
-        const float maxY = waypoint->fCameraY + kWaypointRenderOffset + kWaypointRenderHalfSize;
+        std::vector<mu::Vertex3D> quadVerts;
+        quadVerts.reserve(m_listWayPoint.size() * 6);
+        for (const auto& waypoint : m_listWayPoint)
+        {
+            const float minX = waypoint->fCameraX + kWaypointRenderOffset - kWaypointRenderHalfSize;
+            const float maxX = waypoint->fCameraX + kWaypointRenderOffset + kWaypointRenderHalfSize;
+            const float minY = waypoint->fCameraY + kWaypointRenderOffset - kWaypointRenderHalfSize;
+            const float maxY = waypoint->fCameraY + kWaypointRenderOffset + kWaypointRenderHalfSize;
+            const float z = waypoint->fCameraZ;
 
-        glVertex3f(minX, minY, waypoint->fCameraZ);
-        glVertex3f(maxX, minY, waypoint->fCameraZ);
-        glVertex3f(maxX, maxY, waypoint->fCameraZ);
-        glVertex3f(minX, maxY, waypoint->fCameraZ);
+            // Quad (minX,minY) (maxX,minY) (maxX,maxY) (minX,maxY) -> 2 triangles
+            mu::Vertex3D v0 = {minX, minY, z, 0.f, 0.f, 1.f, 0.f, 0.f, redColor};
+            mu::Vertex3D v1 = {maxX, minY, z, 0.f, 0.f, 1.f, 0.f, 0.f, redColor};
+            mu::Vertex3D v2 = {maxX, maxY, z, 0.f, 0.f, 1.f, 0.f, 0.f, redColor};
+            mu::Vertex3D v3 = {minX, maxY, z, 0.f, 0.f, 1.f, 0.f, 0.f, redColor};
+            quadVerts.push_back(v0);
+            quadVerts.push_back(v1);
+            quadVerts.push_back(v2);
+            quadVerts.push_back(v0);
+            quadVerts.push_back(v2);
+            quadVerts.push_back(v3);
+        }
+        if (!quadVerts.empty())
+        {
+            mu::GetRenderer().RenderTriangles(quadVerts, 0);
+        }
     }
-    glEnd();
 
-    glBegin(GL_LINE_STRIP);
-
-    glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-    for (const auto& waypoint : m_listWayPoint)
+    // White line strip: ABGR color = alpha=0x80 (0.5*255~128), B=0xFF, G=0xFF, R=0xFF
+    constexpr std::uint32_t whiteColor = 0x80FFFFFFu;
     {
-        glVertex3f(waypoint->fCameraX + 50.0f, waypoint->fCameraY + 50.0f, waypoint->fCameraZ);
+        std::vector<mu::Vertex3D> lineVerts;
+        if (m_listWayPoint.size() >= 2)
+        {
+            lineVerts.reserve((m_listWayPoint.size() - 1) * 2);
+        }
+        mu::Vertex3D prev{};
+        bool hasPrev = false;
+        for (const auto& waypoint : m_listWayPoint)
+        {
+            mu::Vertex3D cur = {waypoint->fCameraX + 50.0f,
+                                waypoint->fCameraY + 50.0f,
+                                waypoint->fCameraZ,
+                                0.f,
+                                0.f,
+                                1.f,
+                                0.f,
+                                0.f,
+                                whiteColor};
+            if (hasPrev)
+            {
+                lineVerts.push_back(prev);
+                lineVerts.push_back(cur);
+            }
+            prev = cur;
+            hasPrev = true;
+        }
+        if (!lineVerts.empty())
+        {
+            mu::GetRenderer().RenderLines(lineVerts, 0);
+        }
     }
-
-    glEnd();
 
     EnableDepthTest();
     glEnable(GL_ALPHA_TEST);

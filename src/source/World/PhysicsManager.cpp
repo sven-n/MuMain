@@ -8,6 +8,9 @@
 #include "ZzzCharacter.h"
 #include "ZzzEffect.h"
 #include "MapManager.h"
+#include "MuRenderer.h"
+
+#include <vector>
 
 #define RENDER_CLOTH
 #define ADD_COLLISION
@@ -782,8 +785,13 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
         break;
     }
 
+    // Track vertex color for cloth rendering (replaces glColor state)
+    float colorR = 1.f, colorG = 1.f, colorB = 1.f;
     if (pvColor)
     {
+        colorR = (*pvColor)[0];
+        colorG = (*pvColor)[1];
+        colorB = (*pvColor)[2];
         glColor3fv(*pvColor);
     }
     else
@@ -810,15 +818,21 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
                 iOffset++;
             }
         }
-        glColor3f(Lum, Lum, Lum);
         EnableAlphaBlend();
+        colorR = Lum;
+        colorG = Lum;
+        colorB = Lum;
     }
 #ifdef RENDER_CLOTH
     {
-        RenderFace(TRUE, m_iTexFront, pvRenderPos);
+        auto rByte = static_cast<uint8_t>(colorR * 255.f);
+        auto gByte = static_cast<uint8_t>(colorG * 255.f);
+        auto bByte = static_cast<uint8_t>(colorB * 255.f);
+        uint32_t clothColor = (0xFFu << 24) | (bByte << 16) | (gByte << 8) | rByte;
+        RenderFace(TRUE, m_iTexFront, pvRenderPos, clothColor);
         if ((PCT_MASK_DRAW & m_dwType) != PCT_MASK_BLEND || !(PCT_MASK_LIGHT & m_dwType))
         {
-            RenderFace(FALSE, m_iTexBack, pvRenderPos);
+            RenderFace(FALSE, m_iTexBack, pvRenderPos, clothColor);
         }
     }
 #endif
@@ -826,11 +840,23 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
     delete[] pvRenderPos;
 }
 
-void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos)
+void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, uint32_t vertexColor)
 {
     BindTexture(iTexture); // BITMAP_ROBE
 
-    glBegin(GL_QUADS);
+    // Helper lambda to build a Vertex3D from grid coordinates
+    auto makeVert = [&](int xVertex, int yVertex) -> mu::Vertex3D
+    {
+        int iVertex = m_iNumHor * yVertex + xVertex;
+        vec3_t* pvPos = &pvRenderPos[iVertex];
+        float u = (float)xVertex / (float)(m_iNumHor - 1);
+        float v = std::min<float>(0.99f, (float)yVertex / (float)(m_iNumVer - 1));
+        return {(*pvPos)[0], (*pvPos)[1], (*pvPos)[2], 0.f, 0.f, 1.f, u, v, vertexColor};
+    };
+
+    int numQuads = (m_iNumHor - 1) * (m_iNumVer - 1);
+    std::vector<mu::Vertex3D> triVerts;
+    triVerts.reserve(numQuads * 6);
 
     if (bFront)
     {
@@ -838,10 +864,16 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos)
         {
             for (int i = 0; i < m_iNumHor - 1; ++i)
             {
-                RenderVertex(pvRenderPos, i, j);
-                RenderVertex(pvRenderPos, i + 1, j);
-                RenderVertex(pvRenderPos, i + 1, j + 1);
-                RenderVertex(pvRenderPos, i, j + 1);
+                mu::Vertex3D v0 = makeVert(i, j);
+                mu::Vertex3D v1 = makeVert(i + 1, j);
+                mu::Vertex3D v2 = makeVert(i + 1, j + 1);
+                mu::Vertex3D v3 = makeVert(i, j + 1);
+                triVerts.push_back(v0);
+                triVerts.push_back(v1);
+                triVerts.push_back(v2);
+                triVerts.push_back(v0);
+                triVerts.push_back(v2);
+                triVerts.push_back(v3);
             }
         }
     }
@@ -851,24 +883,21 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos)
         {
             for (int i = 0; i < m_iNumHor - 1; ++i)
             {
-                RenderVertex(pvRenderPos, i, j);
-                RenderVertex(pvRenderPos, i, j + 1);
-                RenderVertex(pvRenderPos, i + 1, j + 1);
-                RenderVertex(pvRenderPos, i + 1, j);
+                mu::Vertex3D v0 = makeVert(i, j);
+                mu::Vertex3D v1 = makeVert(i, j + 1);
+                mu::Vertex3D v2 = makeVert(i + 1, j + 1);
+                mu::Vertex3D v3 = makeVert(i + 1, j);
+                triVerts.push_back(v0);
+                triVerts.push_back(v1);
+                triVerts.push_back(v2);
+                triVerts.push_back(v0);
+                triVerts.push_back(v2);
+                triVerts.push_back(v3);
             }
         }
     }
 
-    glEnd();
-}
-
-void CPhysicsCloth::RenderVertex(vec3_t* pvRenderPos, int xVertex, int yVertex)
-{
-    int iVertex = m_iNumHor * yVertex + xVertex;
-    vec3_t* pvPos = &pvRenderPos[iVertex];
-    glTexCoord2f((float)xVertex / (float)(m_iNumHor - 1),
-                 std::min<float>(0.99f, (float)yVertex / (float)(m_iNumVer - 1)));
-    glVertex3f((*pvPos)[0], (*pvPos)[1], (*pvPos)[2]);
+    mu::GetRenderer().RenderTriangles(triVerts, 0);
 }
 
 void CPhysicsCloth::RenderCollisions(void)

@@ -1539,7 +1539,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
         i = rand() % 360;
 
     // Game data array allocation — using smart pointers per C++20 project standard
-    g_RendomMemoryDumpPtr = std::make_unique<BYTE[]>(101);  // Fixed size for memory safety
+    g_RendomMemoryDumpPtr = std::make_unique<BYTE[]>(101); // Fixed size for memory safety
     RendomMemoryDump = g_RendomMemoryDumpPtr.get();
 
     g_GateAttributePtr = std::make_unique<GATE_ATTRIBUTE[]>(MAX_GATES);
@@ -1580,9 +1580,12 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     g_petProcess = PetProcess::Make();
 
     CUIMng::Instance().Create();
-    if (g_pNewUISystem != nullptr) {
+    if (g_pNewUISystem != nullptr)
+    {
         g_pNewUISystem->Create();
-    } else {
+    }
+    else
+    {
         g_ErrorReport.Write(L"WARNING: g_pNewUISystem is null, skipping Create()\r\n");
     }
 

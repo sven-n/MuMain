@@ -29,7 +29,7 @@ private:
 
     void CreateTerrain(int x, int y);
     void RenderWaterBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha,
-                               float Height = 0.f);
+                               float Height = 0.f, std::uint32_t fallbackColor = 0xFFFFFFFFu);
 
     void SpawnAmbientWave(double currentTimeMs);
 

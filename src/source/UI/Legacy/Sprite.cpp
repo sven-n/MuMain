@@ -8,6 +8,7 @@
 #include "Input.h"
 
 #include "ZzzOpenglUtil.h"
+#include "MuRenderer.h"
 
 #include <crtdbg.h>
 
@@ -280,29 +281,37 @@ void CSprite::Update(double dDeltaTick)
 void CSprite::Render()
 {
     if (!m_bShow)
+    {
         return;
+    }
 
-    if (-1 < m_nTexID)
+    // Story 7-9-2 (AC-3): Port CSprite::Render to RenderQuad2D.
+    // Build Vertex2D[4] from sprite screen/texture coordinates.
+    // Color packed as ABGR: (alpha << 24) | (blue << 16) | (green << 8) | red.
+    const std::uint32_t color = (static_cast<std::uint32_t>(m_byAlpha) << 24) |
+                                (static_cast<std::uint32_t>(m_byBlue) << 16) |
+                                (static_cast<std::uint32_t>(m_byGreen) << 8) | static_cast<std::uint32_t>(m_byRed);
+
+    mu::Vertex2D vertices[POS_MAX];
+    for (int i = LT; i < POS_MAX; ++i)
+    {
+        vertices[i].x = m_aScrCoord[i].fX * m_fScaleX;
+        vertices[i].y = m_aScrCoord[i].fY * m_fScaleY;
+        vertices[i].u = (m_nTexID >= 0) ? m_aTexCoord[i].fTU : 0.0f;
+        vertices[i].v = (m_nTexID >= 0) ? m_aTexCoord[i].fTV : 0.0f;
+        vertices[i].color = color;
+    }
+
+    // textureId=0 sentinel for untextured sprites (m_nTexID == -1).
+    // Caller manages texture binding via BindTexture() before RenderQuad2D.
+    if (m_nTexID >= 0)
     {
         if (!TextureEnable)
         {
             TextureEnable = true;
             ::glEnable(GL_TEXTURE_2D);
         }
-
         BindTexture(m_nTexID);
-
-        ::glBegin(GL_TRIANGLE_FAN);
-
-        ::glColor4ub(m_byRed, m_byGreen, m_byBlue, m_byAlpha);
-
-        for (int i = LT; i < POS_MAX; ++i)
-        {
-            ::glTexCoord2f(m_aTexCoord[i].fTU, m_aTexCoord[i].fTV);
-            ::glVertex2f(m_aScrCoord[i].fX * m_fScaleX, m_aScrCoord[i].fY * m_fScaleY);
-        }
-
-        ::glEnd();
     }
     else
     {
@@ -311,13 +320,8 @@ void CSprite::Render()
             TextureEnable = false;
             ::glDisable(GL_TEXTURE_2D);
         }
-
-        ::glBegin(GL_TRIANGLE_FAN);
-
-        ::glColor4ub(m_byRed, m_byGreen, m_byBlue, m_byAlpha);
-        for (int i = LT; i < POS_MAX; ++i)
-            ::glVertex2f(m_aScrCoord[i].fX * m_fScaleX, m_aScrCoord[i].fY * m_fScaleY);
-
-        ::glEnd();
     }
+
+    const std::uint32_t textureId = (m_nTexID >= 0) ? static_cast<std::uint32_t>(m_nTexID) : 0u;
+    mu::GetRenderer().RenderQuad2D(std::span<const mu::Vertex2D>(vertices, POS_MAX), textureId);
 }

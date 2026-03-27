@@ -108,6 +108,42 @@ public:
     // Configure hardware fog for the current scene.
     virtual void SetFog(const FogParams& params) = 0;
 
+    // Story 7-9-2 (AC-1): 3D scene projection setup — replaces BeginOpengl()/EndOpengl().
+    // BeginScene sets viewport and projection (perspective + modelview).
+    // EndScene restores matrix state.
+    virtual void BeginScene(int x, int y, int w, int h) = 0;
+    virtual void EndScene() = 0;
+
+    // Story 7-9-2 (AC-2): 2D orthographic pass — replaces BeginBitmap()/EndBitmap().
+    // Begin2DPass sets up orthographic projection for screen-space rendering.
+    // End2DPass restores the previous projection state.
+    virtual void Begin2DPass() = 0;
+    virtual void End2DPass() = 0;
+
+    // Story 7-9-2 (AC-7): Clear the color and depth buffers.
+    // OpenGL backend: glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT).
+    // SDL_gpu backend: no-op (SDL_gpu clears in BeginFrame).
+    virtual void ClearScreen() = 0;
+
+    // Story 7-9-2 (AC-7): Clear depth buffer only (mid-frame depth reset).
+    // Used by UI 3D render panels to clear depth before rendering 3D items on top.
+    // OpenGL backend: glClear(GL_DEPTH_BUFFER_BIT).
+    // SDL_gpu backend: no-op (depth handled by render pass management).
+    virtual void ClearDepthBuffer() {}
+
+    // Story 7-9-2 (AC-5): Render line primitives (GL_LINES replacement).
+    // Used by debug visualizations (collision, skeleton, waypoint gizmos).
+    virtual void RenderLines(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
+
+    // Story 7-9-2 (AC-6): Query whether a frame is currently active.
+    // OpenGL backend: always false (immediate mode, no frame lifecycle).
+    // SDL_gpu backend: true when s_renderPass != nullptr.
+    // Used by RenderTitleSceneUI() to self-manage BeginFrame/EndFrame.
+    [[nodiscard]] virtual bool IsFrameActive() const
+    {
+        return false;
+    }
+
     // Per-frame lifecycle: acquire command buffer / render pass (SDL_gpu backend).
     // No-op in the OpenGL backend. Called from Winmain.cpp game loop.
     virtual void BeginFrame() {}

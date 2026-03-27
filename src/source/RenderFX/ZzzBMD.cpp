@@ -2477,67 +2477,43 @@ void BMD::RenderObjectBoundingBox()
                 VectorTransform(b->BoundingVertices[j], BoneTransform[i], BoundingVertices[j]);
             }
 
-            glBegin(GL_QUADS);
-            glColor3f(0.2f, 0.2f, 0.2f);
-            glTexCoord2f(1.0F, 1.0F);
-            glVertex3fv(BoundingVertices[7]);
-            glTexCoord2f(1.0F, 0.0F);
-            glVertex3fv(BoundingVertices[6]);
-            glTexCoord2f(0.0F, 0.0F);
-            glVertex3fv(BoundingVertices[4]);
-            glTexCoord2f(0.0F, 1.0F);
-            glVertex3fv(BoundingVertices[5]);
+            // Story 7-9-2 (AC-5): Port GL_QUADS bounding box to MuRenderer triangle list.
+            auto MakeVtx = [&](const vec3_t& pos, float tu, float tv, std::uint32_t c) -> mu::Vertex3D
+            { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tu, tv, c}; };
 
-            glColor3f(0.2f, 0.2f, 0.2f);
-            glTexCoord2f(0.0F, 1.0F);
-            glVertex3fv(BoundingVertices[0]);
-            glTexCoord2f(1.0F, 1.0F);
-            glVertex3fv(BoundingVertices[2]);
-            glTexCoord2f(1.0F, 0.0F);
-            glVertex3fv(BoundingVertices[3]);
-            glTexCoord2f(0.0F, 0.0F);
-            glVertex3fv(BoundingVertices[1]);
+            constexpr std::uint32_t cDark = 0xFF333333u;
+            constexpr std::uint32_t cMid = 0xFF999999u;
+            constexpr std::uint32_t cLight = 0xFF666666u;
 
-            glColor3f(0.6f, 0.6f, 0.6f);
-            glTexCoord2f(1.0F, 1.0F);
-            glVertex3fv(BoundingVertices[7]);
-            glTexCoord2f(1.0F, 0.0F);
-            glVertex3fv(BoundingVertices[3]);
-            glTexCoord2f(0.0F, 0.0F);
-            glVertex3fv(BoundingVertices[2]);
-            glTexCoord2f(0.0F, 1.0F);
-            glVertex3fv(BoundingVertices[6]);
+            std::vector<mu::Vertex3D> verts;
+            verts.reserve(36);
 
-            glColor3f(0.6f, 0.6f, 0.6f);
-            glTexCoord2f(0.0F, 1.0F);
-            glVertex3fv(BoundingVertices[0]);
-            glTexCoord2f(1.0F, 1.0F);
-            glVertex3fv(BoundingVertices[1]);
-            glTexCoord2f(1.0F, 0.0F);
-            glVertex3fv(BoundingVertices[5]);
-            glTexCoord2f(0.0F, 0.0F);
-            glVertex3fv(BoundingVertices[4]);
+            auto EmitQuad = [&](const vec3_t& q0, float u0, float v0t, const vec3_t& q1, float u1, float v1t,
+                                const vec3_t& q2, float u2, float v2t, const vec3_t& q3, float u3, float v3t,
+                                std::uint32_t col)
+            {
+                verts.push_back(MakeVtx(q0, u0, v0t, col));
+                verts.push_back(MakeVtx(q1, u1, v1t, col));
+                verts.push_back(MakeVtx(q2, u2, v2t, col));
+                verts.push_back(MakeVtx(q0, u0, v0t, col));
+                verts.push_back(MakeVtx(q2, u2, v2t, col));
+                verts.push_back(MakeVtx(q3, u3, v3t, col));
+            };
 
-            glColor3f(0.4f, 0.4f, 0.4f);
-            glTexCoord2f(1.0F, 1.0F);
-            glVertex3fv(BoundingVertices[7]);
-            glTexCoord2f(1.0F, 0.0F);
-            glVertex3fv(BoundingVertices[5]);
-            glTexCoord2f(0.0F, 0.0F);
-            glVertex3fv(BoundingVertices[1]);
-            glTexCoord2f(0.0F, 1.0F);
-            glVertex3fv(BoundingVertices[3]);
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[6], 1.f, 0.f, BoundingVertices[4], 0.f, 0.f,
+                     BoundingVertices[5], 0.f, 1.f, cDark);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[2], 1.f, 1.f, BoundingVertices[3], 1.f, 0.f,
+                     BoundingVertices[1], 0.f, 0.f, cDark);
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[3], 1.f, 0.f, BoundingVertices[2], 0.f, 0.f,
+                     BoundingVertices[6], 0.f, 1.f, cMid);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[1], 1.f, 1.f, BoundingVertices[5], 1.f, 0.f,
+                     BoundingVertices[4], 0.f, 0.f, cMid);
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[5], 1.f, 0.f, BoundingVertices[1], 0.f, 0.f,
+                     BoundingVertices[3], 0.f, 1.f, cLight);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[4], 1.f, 1.f, BoundingVertices[6], 1.f, 0.f,
+                     BoundingVertices[2], 0.f, 0.f, cLight);
 
-            glColor3f(0.4f, 0.4f, 0.4f);
-            glTexCoord2f(0.0F, 1.0F);
-            glVertex3fv(BoundingVertices[0]);
-            glTexCoord2f(1.0F, 1.0F);
-            glVertex3fv(BoundingVertices[4]);
-            glTexCoord2f(1.0F, 0.0F);
-            glVertex3fv(BoundingVertices[6]);
-            glTexCoord2f(0.0F, 0.0F);
-            glVertex3fv(BoundingVertices[2]);
-            glEnd();
+            mu::GetRenderer().RenderTriangles(verts, 0);
         }
     }
     glPopMatrix();
@@ -2548,7 +2524,14 @@ void BMD::RenderBone(float (*BoneMatrix)[3][4])
 {
     DisableTexture();
     glDepthFunc(GL_ALWAYS);
-    glColor3f(0.8f, 0.8f, 0.2f);
+
+    // Story 7-9-2 (AC-5): Port GL_LINES skeleton debug to MuRenderer.
+    // Yellow color: R=0xCC, G=0xCC, B=0x33, A=0xFF -> ABGR = 0xFF33CCCC
+    constexpr std::uint32_t boneColor = 0xFF33CCCCu;
+
+    std::vector<mu::Vertex3D> allLines;
+    allLines.reserve(static_cast<std::size_t>(NumBones) * 6);
+
     for (int i = 0; i < NumBones; i++)
     {
         Bone_t* b = &Bones[i];
@@ -2575,17 +2558,24 @@ void BMD::RenderBone(float (*BoneMatrix)[3][4])
                 {
                     VectorMA(BodyOrigin, BodyScale, BoneVertice, BoneVertice);
                 }
-                glBegin(GL_LINES);
-                glVertex3fv(BoneVertices[0]);
-                glVertex3fv(BoneVertices[1]);
-                glVertex3fv(BoneVertices[1]);
-                glVertex3fv(BoneVertices[2]);
-                glVertex3fv(BoneVertices[2]);
-                glVertex3fv(BoneVertices[0]);
-                glEnd();
+                auto MakeVtx = [&](const vec3_t& pos) -> mu::Vertex3D
+                { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, 0.f, 0.f, boneColor}; };
+                // 3 line segments: 0-1, 1-2, 2-0
+                allLines.push_back(MakeVtx(BoneVertices[0]));
+                allLines.push_back(MakeVtx(BoneVertices[1]));
+                allLines.push_back(MakeVtx(BoneVertices[1]));
+                allLines.push_back(MakeVtx(BoneVertices[2]));
+                allLines.push_back(MakeVtx(BoneVertices[2]));
+                allLines.push_back(MakeVtx(BoneVertices[0]));
             }
         }
     }
+
+    if (!allLines.empty())
+    {
+        mu::GetRenderer().RenderLines(allLines, 0);
+    }
+
     glDepthFunc(GL_LEQUAL);
 }
 

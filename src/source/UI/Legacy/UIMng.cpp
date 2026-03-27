@@ -7,6 +7,7 @@
 #include "Input.h"
 #include "Sprite.h"
 #include "GaugeBar.h"
+#include "MuRenderer.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
@@ -135,8 +136,15 @@ void CUIMng::ReleaseTitleSceneUI()
 
 void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 {
+    // Story 7-9-2 (AC-6): Self-manage frame lifecycle during OpenBasicData() loading.
+    // RenderTitleSceneUI is called outside the main game loop, so it must bracket
+    // its own BeginFrame/EndFrame when no frame is already active.
+    const bool needsFrame = !mu::GetRenderer().IsFrameActive();
+    if (needsFrame)
+        mu::GetRenderer().BeginFrame();
+
     ::BeginOpengl();
-    ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearScreen();
     ::BeginBitmap();
 
     for (int i = 0; i < UIM_TS_MAX; ++i)
@@ -151,12 +159,13 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 
     ::EndBitmap();
     ::EndOpengl();
-    ::glFlush();
 #ifdef _EDITOR
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
     g_MuEditorCore.Render();
 #endif
-    ::SwapBuffers(hDC);
+
+    if (needsFrame)
+        mu::GetRenderer().EndFrame();
 }
 
 void CUIMng::Create()

@@ -580,60 +580,22 @@ float ConvertY(float y)
 
 void BeginOpengl(int x, int y, int Width, int Height)
 {
-    x = x * WindowWidth / 640;
-    y = y * WindowHeight / 480;
-    Width = Width * WindowWidth / 640;
-    Height = Height * WindowHeight / 480;
+    // Story 7-9-2 (AC-1): Delegate projection/viewport/camera setup to the renderer.
+    mu::GetRenderer().BeginScene(x, y, Width, Height);
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glViewport2(x, y, Width, Height);
-
-    gluPerspective2(CameraFOV, (float)Width / (float)Height, CameraViewNear, CameraViewFar * 1.4f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glRotatef(CameraAngle[1], 0.f, 1.f, 0.f);
-    if (CameraTopViewEnable == false)
-        glRotatef(CameraAngle[0], 1.f, 0.f, 0.f);
-    glRotatef(CameraAngle[2], 0.f, 0.f, 1.f);
-    glTranslatef(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
-
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glDepthMask(true);
+    // State tracking flags remain here — they are ZzzOpenglUtil-internal
+    // render state caches that game code queries directly.
     AlphaTestEnable = false;
     TextureEnable = true;
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
-    glDepthFunc(GL_LEQUAL);
-    glAlphaFunc(GL_GREATER, 0.25f);
-    if (FogEnable)
-    {
-        glEnable(GL_FOG);
-        glFogi(GL_FOG_MODE, GL_LINEAR);
-        glFogf(GL_FOG_DENSITY, FogDensity);
-        glFogfv(GL_FOG_COLOR, FogColor);
-    }
-    else
-    {
-        glDisable(GL_FOG);
-    }
-
-    GetOpenGLMatrix(CameraMatrix);
 }
 
 void EndOpengl()
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    // Story 7-9-2 (AC-1): Delegate matrix restore to the renderer.
+    mu::GetRenderer().EndScene();
 }
 
 void UpdateMousePositionn()
@@ -912,68 +874,51 @@ void RenderBox(float Matrix[3][4])
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    glBegin(GL_QUADS);
-    // glBegin(GL_LINES);
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[5]);
+    // Story 7-9-2 (AC-5): Port GL_QUADS box to MuRenderer triangle list.
+    // 6 faces * 2 triangles * 3 vertices = 36 vertices.
+    auto MakeVtx = [&](const vec3_t& pos, float tu, float tv, std::uint32_t c) -> mu::Vertex3D
+    { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tu, tv, c}; };
 
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[1]);
+    // Pack ABGR colors (opaque)
+    constexpr std::uint32_t cDark = 0xFF333333u;  // 0.2, 0.2, 0.2
+    constexpr std::uint32_t cMid = 0xFF999999u;   // 0.6, 0.6, 0.6
+    constexpr std::uint32_t cLight = 0xFF666666u; // 0.4, 0.4, 0.4
 
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[6]);
+    // Helper: emit 2 triangles from a quad (v0,v1,v2,v3) -> (v0,v1,v2) + (v0,v2,v3)
+    std::vector<mu::Vertex3D> verts;
+    verts.reserve(36);
 
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[4]);
+    auto EmitQuad = [&](const vec3_t& v0, float u0, float v0t, const vec3_t& v1, float u1, float v1t, const vec3_t& v2,
+                        float u2, float v2t, const vec3_t& v3, float u3, float v3t, std::uint32_t col)
+    {
+        verts.push_back(MakeVtx(v0, u0, v0t, col));
+        verts.push_back(MakeVtx(v1, u1, v1t, col));
+        verts.push_back(MakeVtx(v2, u2, v2t, col));
+        verts.push_back(MakeVtx(v0, u0, v0t, col));
+        verts.push_back(MakeVtx(v2, u2, v2t, col));
+        verts.push_back(MakeVtx(v3, u3, v3t, col));
+    };
 
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[3]);
+    // Face 1 (dark): 7,6,4,5
+    EmitQuad(TransformVertices[7], 1.f, 1.f, TransformVertices[6], 1.f, 0.f, TransformVertices[4], 0.f, 0.f,
+             TransformVertices[5], 0.f, 1.f, cDark);
+    // Face 2 (dark): 0,2,3,1
+    EmitQuad(TransformVertices[0], 0.f, 1.f, TransformVertices[2], 1.f, 1.f, TransformVertices[3], 1.f, 0.f,
+             TransformVertices[1], 0.f, 0.f, cDark);
+    // Face 3 (mid): 7,3,2,6
+    EmitQuad(TransformVertices[7], 1.f, 1.f, TransformVertices[3], 1.f, 0.f, TransformVertices[2], 0.f, 0.f,
+             TransformVertices[6], 0.f, 1.f, cMid);
+    // Face 4 (mid): 0,1,5,4
+    EmitQuad(TransformVertices[0], 0.f, 1.f, TransformVertices[1], 1.f, 1.f, TransformVertices[5], 1.f, 0.f,
+             TransformVertices[4], 0.f, 0.f, cMid);
+    // Face 5 (light): 7,5,1,3
+    EmitQuad(TransformVertices[7], 1.f, 1.f, TransformVertices[5], 1.f, 0.f, TransformVertices[1], 0.f, 0.f,
+             TransformVertices[3], 0.f, 1.f, cLight);
+    // Face 6 (light): 0,4,6,2
+    EmitQuad(TransformVertices[0], 0.f, 1.f, TransformVertices[4], 1.f, 1.f, TransformVertices[6], 1.f, 0.f,
+             TransformVertices[2], 0.f, 0.f, cLight);
 
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(0.0F, 1.0F);
-    glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F);
-    glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(1.0F, 0.0F);
-    glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F);
-    glVertex3fv(TransformVertices[2]);
-    glEnd();
+    mu::GetRenderer().RenderTriangles(verts, 0);
 }
 
 void RenderPlane3D(float Width, float Height, float Matrix[3][4])
@@ -990,16 +935,16 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4])
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.f, 1.f);
-    glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.f, 1.f);
-    glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(1.f, 0.f);
-    glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(0.f, 0.f);
-    glVertex3fv(TransformVertices[3]);
-    glEnd();
+    // Story 7-9-2 (AC-5): Port GL_QUADS plane to MuRenderer triangle list.
+    constexpr std::uint32_t white = 0xFFFFFFFFu;
+    auto MakeVtx = [&](const vec3_t& pos, float tu, float tv) -> mu::Vertex3D
+    { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tu, tv, white}; };
+    std::vector<mu::Vertex3D> verts = {
+        MakeVtx(TransformVertices[0], 0.f, 1.f), MakeVtx(TransformVertices[1], 1.f, 1.f),
+        MakeVtx(TransformVertices[2], 1.f, 0.f), MakeVtx(TransformVertices[0], 0.f, 1.f),
+        MakeVtx(TransformVertices[2], 1.f, 0.f), MakeVtx(TransformVertices[3], 0.f, 0.f),
+    };
+    mu::GetRenderer().RenderTriangles(verts, 0);
 }
 
 void BeginSprite()
@@ -1061,22 +1006,33 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     TEXCOORD(c[1], u + uWidth, v + vHeight);
     TEXCOORD(c[0], u, v + vHeight);
 
-    glBegin(GL_QUADS);
-    if (Bitmaps[Texture].Components == 3)
-        glColor3fv(Light);
-    else
+    // Story 7-9-2 (AC-5): Port GL_QUADS sprite to MuRenderer triangle list.
+    std::uint32_t spriteColor;
     {
-        if (Texture == BITMAP_BLOOD + 1 || Texture == BITMAP_FONT_HIT)
-            glColor4f(Light[0], Light[1], Light[2], 1.f);
-        else
-            glColor4f(Light[0], Light[1], Light[2], Light[0]);
+        auto ToByte = [](float f) -> std::uint8_t
+        { return static_cast<std::uint8_t>(std::min(std::max(f, 0.f), 1.f) * 255.f + 0.5f); };
+        std::uint8_t r = ToByte(Light[0]);
+        std::uint8_t g = ToByte(Light[1]);
+        std::uint8_t b = ToByte(Light[2]);
+        std::uint8_t a = 255;
+        if (Bitmaps[Texture].Components != 3)
+        {
+            if (Texture == BITMAP_BLOOD + 1 || Texture == BITMAP_FONT_HIT)
+                a = 255;
+            else
+                a = r; // alpha = Light[0]
+        }
+        spriteColor = (static_cast<std::uint32_t>(a) << 24) | (static_cast<std::uint32_t>(b) << 16) |
+                      (static_cast<std::uint32_t>(g) << 8) | r;
     }
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex3fv(p[i]);
-    }
-    glEnd();
+    auto MakeVtx = [&](const vec3_t& pos, float tu, float tv) -> mu::Vertex3D
+    { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tu, tv, spriteColor}; };
+    // Quad (p[0],p[1],p[2],p[3]) -> 2 triangles
+    std::vector<mu::Vertex3D> verts = {
+        MakeVtx(p[0], c[0][0], c[0][1]), MakeVtx(p[1], c[1][0], c[1][1]), MakeVtx(p[2], c[2][0], c[2][1]),
+        MakeVtx(p[0], c[0][0], c[0][1]), MakeVtx(p[2], c[2][0], c[2][1]), MakeVtx(p[3], c[3][0], c[3][1]),
+    };
+    mu::GetRenderer().RenderTriangles(verts, 0);
 }
 
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float (*UV)[2], vec3_t Light[4],
@@ -1098,14 +1054,24 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     Vector(x + Width, y + Height, z, p[2]);
     Vector(x - Width, y + Height, z, p[3]);
 
-    glBegin(GL_QUADS);
-    for (int i = 0; i < 4; i++)
+    // Story 7-9-2 (AC-5): Port GL_QUADS spriteUV to MuRenderer triangle list.
+    auto ToByte = [](float f) -> std::uint8_t
+    { return static_cast<std::uint8_t>(std::min(std::max(f, 0.f), 1.f) * 255.f + 0.5f); };
+    auto MakeVtx = [&](int idx) -> mu::Vertex3D
     {
-        glColor4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
-        glTexCoord2f(UV[i][0], UV[i][1]);
-        glVertex3fv(p[i]);
-    }
-    glEnd();
+        std::uint8_t r = ToByte(Light[idx][0]);
+        std::uint8_t g = ToByte(Light[idx][1]);
+        std::uint8_t b = ToByte(Light[idx][2]);
+        std::uint8_t a = ToByte(Alpha);
+        std::uint32_t col = (static_cast<std::uint32_t>(a) << 24) | (static_cast<std::uint32_t>(b) << 16) |
+                            (static_cast<std::uint32_t>(g) << 8) | r;
+        return {p[idx][0], p[idx][1], p[idx][2], 0.f, 0.f, 1.f, UV[idx][0], UV[idx][1], col};
+    };
+    // Quad (0,1,2,3) -> 2 triangles
+    std::vector<mu::Vertex3D> verts = {
+        MakeVtx(0), MakeVtx(1), MakeVtx(2), MakeVtx(0), MakeVtx(2), MakeVtx(3),
+    };
+    mu::GetRenderer().RenderTriangles(verts, 0);
 }
 
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
@@ -1171,29 +1137,14 @@ float RenderNumber2D(float x, float y, int Num, float Width, float Height)
 
 void BeginBitmap()
 {
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-
-    glViewport(0, 0, WindowWidth, WindowHeight);
-    gluPerspective(CameraFOV, (WindowWidth) / ((float)WindowHeight), CameraViewNear, CameraViewFar);
-
-    glLoadIdentity();
-    gluOrtho2D(0, WindowWidth, 0, WindowHeight);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
-    glLoadIdentity();
-    DisableDepthTest();
+    // Story 7-9-2 (AC-2): Delegate orthographic setup to the renderer.
+    mu::GetRenderer().Begin2DPass();
 }
 
 void EndBitmap()
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    // Story 7-9-2 (AC-2): Delegate matrix restore to the renderer.
+    mu::GetRenderer().End2DPass();
 }
 
 void RenderColor(float x, float y, float Width, float Height, float Alpha, int Flag)

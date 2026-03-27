@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "NewUI3DRenderMng.h"
 #include "NewUIManager.h"
 
@@ -118,7 +119,7 @@ bool SEASON3B::CNewUI3DCamera::Render()
     GetOpenGLMatrix(CameraMatrix);
     EnableDepthTest();
     EnableDepthMask();
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearDepthBuffer();
 
     auto li = m_list3DObjs.begin();
     for (; li != m_list3DObjs.end(); li++)

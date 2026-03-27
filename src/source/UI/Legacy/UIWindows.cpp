@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Platform/PlatformCompat.h"
 #include "UIWindows.h"
+#include "MuRenderer.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "ZzzBMD.h"
@@ -1889,7 +1890,7 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     glDepthFunc(GL_LEQUAL);
     glAlphaFunc(GL_GREATER, 0.25f);
     glDisable(GL_FOG);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearDepthBuffer();
     o->Scale = 0.7f * m_fCurrentZoom;
     m_PhotoHelper.Scale = m_fPhotoHelperScale * m_fCurrentZoom;
     Vector(1, 1, 1, o->Light);

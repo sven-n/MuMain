@@ -20,6 +20,8 @@ extern vec3_t CameraAngle;
 extern float CameraMatrix[3][4];
 extern float g_fCameraCustomDistance;
 extern bool FogEnable;
+extern float FogDensity;
+extern float FogColor[4];
 extern bool TextureEnable;
 extern bool DepthTestEnable;
 extern bool CullFaceEnable;

@@ -91,6 +91,13 @@ struct MockBlendPipelineRenderer : public mu::IMuRenderer
         m_lastFogParams = params;
         ++m_setFogCallCount;
     }
+
+    void BeginScene(int /*x*/, int /*y*/, int /*w*/, int /*h*/) override {}
+    void EndScene() override {}
+    void Begin2DPass() override {}
+    void End2DPass() override {}
+    void ClearScreen() override {}
+    void RenderLines(std::span<const mu::Vertex3D> /*vertices*/, std::uint32_t /*textureId*/) override {}
 };
 
 } // anonymous namespace

@@ -82,6 +82,13 @@ struct RenderTrianglesCapture : public mu::IMuRenderer
     void SetFog(const mu::FogParams& /*params*/) override
     {
     }
+
+    void BeginScene(int /*x*/, int /*y*/, int /*w*/, int /*h*/) override {}
+    void EndScene() override {}
+    void Begin2DPass() override {}
+    void End2DPass() override {}
+    void ClearScreen() override {}
+    void RenderLines(std::span<const mu::Vertex3D> /*vertices*/, std::uint32_t /*textureId*/) override {}
 };
 
 // ---------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
+#include "MuRenderer.h"
 #include "iexplorer.h"
 #include "NewUISystem.h"
 #include "NewUIInGameShop.h"
@@ -356,7 +357,7 @@ void CNewUIInGameShop::RenderDisplayItems()
     EnableDepthTest();
     EnableDepthMask();
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearDepthBuffer();
 
     for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
     {

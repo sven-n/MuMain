@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "NewUIRegistrationLuckyCoin.h"
 #include "NewUISystem.h"
 
@@ -121,7 +122,7 @@ void CNewUIRegistrationLuckyCoin::RenderLuckyCoin()
     EnableDepthTest();
     EnableDepthMask();
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearDepthBuffer();
 
     SetItemRotation(true);
     RenderItem3D(x, y, width, height, m_CoinItem->Type, m_CoinItem->Level, 0, 0, true);

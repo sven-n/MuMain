@@ -12,6 +12,7 @@
 #include "ZzzTexture.h"
 #include "BaseCls.h"
 #include "ZzzCharacter.h"
+#include "MuRenderer.h"
 
 CQueue<CShadowVolume*> m_qSV;
 
@@ -93,13 +94,19 @@ void RenderShadowToScreen(void)
     p[3][0] = 0.f + Width;
     p[3][1] = 0.f;
     // BeginBitmap();
-    glBegin(GL_TRIANGLE_FAN);
-    glColor3fv(vLight);
-    for (int i = 0; i < 4; i++)
     {
-        glVertex2f(p[i][0], p[i][1]);
+        auto r = static_cast<std::uint32_t>(vLight[0] * 255.f);
+        auto g = static_cast<std::uint32_t>(vLight[1] * 255.f);
+        auto b = static_cast<std::uint32_t>(vLight[2] * 255.f);
+        std::uint32_t color = (255u << 24) | (b << 16) | (g << 8) | r;
+        mu::Vertex2D vertices[4] = {
+            {p[0][0], p[0][1], 0.f, 0.f, color},
+            {p[1][0], p[1][1], 0.f, 0.f, color},
+            {p[2][0], p[2][1], 0.f, 0.f, color},
+            {p[3][0], p[3][1], 0.f, 0.f, color},
+        };
+        mu::GetRenderer().RenderQuad2D(std::span<const mu::Vertex2D>(vertices, 4), 0);
     }
-    glEnd();
     glDepthFunc(GL_LESS);
     glDisable(GL_STENCIL_TEST);
     EnableDepthMask();
@@ -311,14 +318,12 @@ void CShadowVolume::RenderAsFrame(void)
 
 void CShadowVolume::RenderShadowVolume(void)
 {
-    glBegin(GL_TRIANGLES);
-
+    std::vector<mu::Vertex3D> verts(m_nNumVertices);
     for (int i = 0; i < m_nNumVertices; ++i)
     {
-        glVertex3fv(m_pVertices[i]);
+        verts[i] = {m_pVertices[i][0], m_pVertices[i][1], m_pVertices[i][2], 0.f, 0.f, 1.f, 0.f, 0.f, 0xFFFFFFFF};
     }
-
-    glEnd();
+    mu::GetRenderer().RenderTriangles(verts, 0);
 }
 
 void CShadowVolume::Shade(void)

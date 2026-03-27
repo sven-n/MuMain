@@ -17,6 +17,7 @@
 #include "Random.h"
 
 #include <cmath>
+#include "MuRenderer.h"
 
 void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation,
                   float LightTop, float TextureV)
@@ -62,14 +63,20 @@ void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float Scal
         VectorRotate(p, Matrix1, Position[3]);
         VectorAdd(ObjectPosition, Position[3], Position[3]);
 
-        glBegin(GL_QUADS);
+        mu::Vertex3D quadVerts[4];
         for (int i = 0; i < 4; i++)
         {
-            glTexCoord2f(UV[i][0], UV[i][1] + TextureV);
-            glColor3fv(Light[i]);
-            glVertex3fv(Position[i]);
+            auto r = static_cast<uint8_t>(Light[i][0] * 255.f);
+            auto g = static_cast<uint8_t>(Light[i][1] * 255.f);
+            auto b = static_cast<uint8_t>(Light[i][2] * 255.f);
+            uint32_t color = (0xFFu << 24) | (b << 16) | (g << 8) | r;
+            quadVerts[i] = {Position[i][0], Position[i][1],      Position[i][2], 0.f, 0.f, 1.f,
+                            UV[i][0],       UV[i][1] + TextureV, color};
         }
-        glEnd();
+        mu::Vertex3D triVerts[6] = {
+            quadVerts[0], quadVerts[1], quadVerts[2], quadVerts[0], quadVerts[2], quadVerts[3],
+        };
+        mu::GetRenderer().RenderTriangles(triVerts, 0);
     }
 }
 
@@ -121,15 +128,17 @@ void RenderCircle2D(int Type, vec3_t ScreenPosition, float ScaleBottom, float Sc
         Vector(0.f, ScaleTop, Height, p);
         VectorRotate(p, Matrix1, Position[3]);
 
-        glBegin(GL_QUADS);
+        mu::Vertex2D quadVerts[4];
         for (int i = 0; i < 4; i++)
         {
-            glTexCoord2f(UV[i][0], UV[i][1] + TextureV);
-            glColor3fv(Light[i]);
             VectorAdd(ObjectPosition, Position[i], Position[i]);
-            glVertex2f(Position[i][0], Position[i][1]);
+            auto cr = static_cast<std::uint32_t>(Light[i][0] * 255.f);
+            auto cg = static_cast<std::uint32_t>(Light[i][1] * 255.f);
+            auto cb = static_cast<std::uint32_t>(Light[i][2] * 255.f);
+            quadVerts[i] = {Position[i][0], Position[i][1], UV[i][0], UV[i][1] + TextureV,
+                            (255u << 24) | (cb << 16) | (cg << 8) | cr};
         }
-        glEnd();
+        mu::GetRenderer().RenderQuad2D(std::span<const mu::Vertex2D>(quadVerts, 4), 0);
     }
 }
 

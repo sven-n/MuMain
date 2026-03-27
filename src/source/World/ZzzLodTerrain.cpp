@@ -25,6 +25,8 @@
 
 #include "w_MapHeaders.h"
 #include "CameraMove.h"
+#include "MuRenderer.h"
+#include "RenderUtils.h"
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -1257,173 +1259,6 @@ inline void Interpolation(int mx, int my)
     }
 }
 
-inline void Vertex0()
-{
-    glTexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-    glColor3fv(PrimaryTerrainLight[TerrainIndex1]);
-    glVertex3fv(TerrainVertex[0]);
-}
-
-inline void Vertex1()
-{
-    glTexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-    glColor3fv(PrimaryTerrainLight[TerrainIndex2]);
-    glVertex3fv(TerrainVertex[1]);
-}
-
-inline void Vertex2()
-{
-    glTexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-    glColor3fv(PrimaryTerrainLight[TerrainIndex3]);
-    glVertex3fv(TerrainVertex[2]);
-}
-
-inline void Vertex3()
-{
-    glTexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-    glColor3fv(PrimaryTerrainLight[TerrainIndex4]);
-    glVertex3fv(TerrainVertex[3]);
-}
-
-inline void Vertex01()
-{
-    glTexCoord2f(TerrainTextureCoord01[0], TerrainTextureCoord01[1]);
-    glColor3fv(PrimaryTerrainLight[Index01]);
-    glVertex3fv(TerrainVertex01);
-}
-
-inline void Vertex12()
-{
-    glTexCoord2f(TerrainTextureCoord12[0], TerrainTextureCoord12[1]);
-    glColor3fv(PrimaryTerrainLight[Index12]);
-    glVertex3fv(TerrainVertex12);
-}
-
-inline void Vertex23()
-{
-    glTexCoord2f(TerrainTextureCoord23[0], TerrainTextureCoord23[1]);
-    glColor3fv(PrimaryTerrainLight[Index23]);
-    glVertex3fv(TerrainVertex23);
-}
-
-inline void Vertex30()
-{
-    glTexCoord2f(TerrainTextureCoord30[0], TerrainTextureCoord30[1]);
-    glColor3fv(PrimaryTerrainLight[Index30]);
-    glVertex3fv(TerrainVertex30);
-}
-
-inline void Vertex02()
-{
-    glTexCoord2f(TerrainTextureCoord02[0], TerrainTextureCoord02[1]);
-    glColor3fv(PrimaryTerrainLight[Index02]);
-    glVertex3fv(TerrainVertex02);
-}
-
-inline void VertexAlpha0()
-{
-    glTexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-    float* Light = &PrimaryTerrainLight[TerrainIndex1][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha[TerrainIndex1]);
-    glVertex3fv(TerrainVertex[0]);
-}
-
-inline void VertexAlpha1()
-{
-    glTexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-    float* Light = &PrimaryTerrainLight[TerrainIndex2][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha[TerrainIndex2]);
-    glVertex3fv(TerrainVertex[1]);
-}
-
-inline void VertexAlpha2()
-{
-    glTexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-    float* Light = &PrimaryTerrainLight[TerrainIndex3][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha[TerrainIndex3]);
-    glVertex3fv(TerrainVertex[2]);
-}
-
-inline void VertexAlpha3()
-{
-    glTexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-    float* Light = &PrimaryTerrainLight[TerrainIndex4][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha[TerrainIndex4]);
-    glVertex3fv(TerrainVertex[3]);
-}
-
-inline void VertexAlpha01()
-{
-    glTexCoord2f(TerrainTextureCoord01[0], TerrainTextureCoord01[1]);
-    float* Light = &PrimaryTerrainLight[Index01][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha01);
-    glVertex3fv(TerrainVertex01);
-}
-
-inline void VertexAlpha12()
-{
-    glTexCoord2f(TerrainTextureCoord12[0], TerrainTextureCoord12[1]);
-    float* Light = &PrimaryTerrainLight[Index12][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha12);
-    glVertex3fv(TerrainVertex12);
-}
-
-inline void VertexAlpha23()
-{
-    glTexCoord2f(TerrainTextureCoord23[0], TerrainTextureCoord23[1]);
-    float* Light = &PrimaryTerrainLight[Index23][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha23);
-    glVertex3fv(TerrainVertex23);
-}
-
-inline void VertexAlpha30()
-{
-    glTexCoord2f(TerrainTextureCoord30[0], TerrainTextureCoord30[1]);
-    float* Light = &PrimaryTerrainLight[Index30][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha30);
-    glVertex3fv(TerrainVertex30);
-}
-
-inline void VertexAlpha02()
-{
-    glTexCoord2f(TerrainTextureCoord02[0], TerrainTextureCoord02[1]);
-    float* Light = &PrimaryTerrainLight[Index02][0];
-    glColor4f(Light[0], Light[1], Light[2], TerrainMappingAlpha02);
-    glVertex3fv(TerrainVertex02);
-}
-
-inline void VertexBlend0()
-{
-    glTexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-    float Light = TerrainMappingAlpha[TerrainIndex1];
-    glColor3f(Light, Light, Light);
-    glVertex3fv(TerrainVertex[0]);
-}
-
-inline void VertexBlend1()
-{
-    glTexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-    float Light = TerrainMappingAlpha[TerrainIndex2];
-    glColor3f(Light, Light, Light);
-    glVertex3fv(TerrainVertex[1]);
-}
-
-inline void VertexBlend2()
-{
-    glTexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-    float Light = TerrainMappingAlpha[TerrainIndex3];
-    glColor3f(Light, Light, Light);
-    glVertex3fv(TerrainVertex[2]);
-}
-
-inline void VertexBlend3()
-{
-    glTexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-    float Light = TerrainMappingAlpha[TerrainIndex4];
-    glColor3f(Light, Light, Light);
-    glVertex3fv(TerrainVertex[3]);
-}
-
 void RenderFace(int Texture, int mx, int my)
 {
     if (gMapManager.WorldActive == WD_39KANTURU_3RD)
@@ -1483,12 +1318,19 @@ void RenderFace(int Texture, int mx, int my)
         DisableAlphaBlend();
     BindTexture(BITMAP_MAPTILE + Texture);
 
-    glBegin(GL_TRIANGLE_FAN);
-    Vertex0();
-    Vertex1();
-    Vertex2();
-    Vertex3();
-    glEnd();
+    {
+        auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
+        {
+            return {
+                pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1], mu::PackABGR(light[0], light[1], light[2], 1.f)};
+        };
+        const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], PrimaryTerrainLight[TerrainIndex1]);
+        const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2]);
+        const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
+        const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
+        const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
+        mu::GetRenderer().RenderTriangles(tris, 0u);
+    }
 }
 
 void RenderFace_After(int Texture, int mx, int my)
@@ -1502,36 +1344,58 @@ void RenderFace_After(int Texture, int mx, int my)
 
     BindTexture(BITMAP_MAPTILE + Texture);
 
-    glBegin(GL_TRIANGLE_FAN);
-    Vertex0();
-    Vertex1();
-    Vertex2();
-    Vertex3();
-    glEnd();
+    {
+        auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
+        {
+            return {
+                pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1], mu::PackABGR(light[0], light[1], light[2], 1.f)};
+        };
+        const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], PrimaryTerrainLight[TerrainIndex1]);
+        const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2]);
+        const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
+        const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
+        const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
+        mu::GetRenderer().RenderTriangles(tris, 0u);
+    }
 }
 
 void RenderFaceAlpha(int Texture, int mx, int my)
 {
     EnableAlphaTest();
     BindTexture(BITMAP_MAPTILE + Texture);
-    glBegin(GL_TRIANGLE_FAN);
-    VertexAlpha0();
-    VertexAlpha1();
-    VertexAlpha2();
-    VertexAlpha3();
-    glEnd();
+    {
+        auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
+        {
+            return {
+                pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1], mu::PackABGR(light[0], light[1], light[2], alpha)};
+        };
+        const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], PrimaryTerrainLight[TerrainIndex1],
+                                         TerrainMappingAlpha[TerrainIndex1]);
+        const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2],
+                                         TerrainMappingAlpha[TerrainIndex2]);
+        const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3],
+                                         TerrainMappingAlpha[TerrainIndex3]);
+        const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4],
+                                         TerrainMappingAlpha[TerrainIndex4]);
+        const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
+        mu::GetRenderer().RenderTriangles(tris, 0u);
+    }
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)
 {
     EnableAlphaBlend();
     BindTexture(BITMAP_MAPTILE + Texture);
-    glBegin(GL_TRIANGLE_FAN);
-    VertexBlend0();
-    VertexBlend1();
-    VertexBlend2();
-    VertexBlend3();
-    glEnd();
+    {
+        auto MakeVert = [](const float* pos, const float* tc, float light) -> mu::Vertex3D
+        { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, tc[0], tc[1], mu::PackABGR(light, light, light, 1.f)}; };
+        const mu::Vertex3D v0 = MakeVert(TerrainVertex[0], TerrainTextureCoord[0], TerrainMappingAlpha[TerrainIndex1]);
+        const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], TerrainMappingAlpha[TerrainIndex2]);
+        const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], TerrainMappingAlpha[TerrainIndex3]);
+        const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], TerrainMappingAlpha[TerrainIndex4]);
+        const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
+        mu::GetRenderer().RenderTriangles(tris, 0u);
+    }
 }
 
 void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
@@ -1700,20 +1564,24 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 #ifdef ASG_ADD_MAP_KARUTAN
                 }
 #endif // ASG_ADD_MAP_KARUTAN
-                glBegin(GL_QUADS);
-                glTexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-                glColor3fv(PrimaryTerrainLight[TerrainIndex1]);
-                glVertex3fv(TerrainVertex[0]);
-                glTexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-                glColor3fv(PrimaryTerrainLight[TerrainIndex2]);
-                glVertex3fv(TerrainVertex[1]);
-                glTexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-                glColor3fv(PrimaryTerrainLight[TerrainIndex3]);
-                glVertex3fv(TerrainVertex[2]);
-                glTexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-                glColor3fv(PrimaryTerrainLight[TerrainIndex4]);
-                glVertex3fv(TerrainVertex[3]);
-                glEnd();
+                {
+                    auto MakeVert = [](const float* pos, const float* tc, const float* light) -> mu::Vertex3D
+                    {
+                        return {pos[0], pos[1], pos[2],
+                                0.f,    0.f,    1.f,
+                                tc[0],  tc[1],  mu::PackABGR(light[0], light[1], light[2], 1.f)};
+                    };
+                    const mu::Vertex3D v0 =
+                        MakeVert(TerrainVertex[0], TerrainTextureCoord[0], PrimaryTerrainLight[TerrainIndex1]);
+                    const mu::Vertex3D v1 =
+                        MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2]);
+                    const mu::Vertex3D v2 =
+                        MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
+                    const mu::Vertex3D v3 =
+                        MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
+                    const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
+                    mu::GetRenderer().RenderTriangles(tris, 0u);
+                }
 
                 if (gMapManager.IsPKField() || IsDoppelGanger2())
                     DisableAlphaBlend();
@@ -1788,20 +1656,26 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
             {
                 EnableAlphaTest();
                 DisableTexture();
-                glBegin(GL_TRIANGLE_FAN);
-                if (4 <= path->GetClosedStatus(TerrainIndex1))
                 {
-                    glColor4f(0.3f, 0.3f, 1.0f, 0.5f);
+                    const std::uint32_t pathColor = (4 <= path->GetClosedStatus(TerrainIndex1))
+                                                        ? mu::PackABGR(0.3f, 0.3f, 1.0f, 0.5f)
+                                                        : mu::PackABGR(1.0f, 1.0f, 1.0f, 0.3f);
+                    mu::Vertex3D verts[4];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        verts[i] = {TerrainVertex[i][0],
+                                    TerrainVertex[i][1],
+                                    TerrainVertex[i][2],
+                                    0.f,
+                                    0.f,
+                                    1.f,
+                                    0.f,
+                                    0.f,
+                                    pathColor};
+                    }
+                    const mu::Vertex3D tris[6] = {verts[0], verts[1], verts[2], verts[0], verts[2], verts[3]};
+                    mu::GetRenderer().RenderTriangles(tris, 0u);
                 }
-                else
-                {
-                    glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
-                }
-                for (int i = 0; i < 4; i++)
-                {
-                    glVertex3fv(TerrainVertex[i]);
-                }
-                glEnd();
                 DisableAlphaBlend();
             }
         }
@@ -1813,13 +1687,25 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
         if (EditFlag != EDIT_LIGHT)
         {
             DisableTexture();
-            glColor3f(0.5f, 0.5f, 0.5f);
-            glBegin(GL_LINE_STRIP);
-            for (int i = 0; i < 4; i++)
             {
-                glVertex3fv(TerrainVertex[i]);
+                const std::uint32_t lineColor = mu::PackABGR(0.5f, 0.5f, 0.5f, 1.f);
+                mu::Vertex3D verts[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    verts[i] = {TerrainVertex[i][0],
+                                TerrainVertex[i][1],
+                                TerrainVertex[i][2],
+                                0.f,
+                                0.f,
+                                1.f,
+                                0.f,
+                                0.f,
+                                lineColor};
+                }
+                // LINE_STRIP [0,1,2,3] -> line segments: [0,1], [1,2], [2,3]
+                const mu::Vertex3D lines[6] = {verts[0], verts[1], verts[1], verts[2], verts[2], verts[3]};
+                mu::GetRenderer().RenderLines(lines, 0u);
             }
-            glEnd();
             DisableAlphaBlend();
         }
 #endif // _DEBUG
@@ -1858,13 +1744,17 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
             EnableAlphaTest();
             DisableTexture();
 
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4f(1.f, 0.5f, 0.5f, 0.3f);
-            for (int i = 0; i < 4; i++)
             {
-                glVertex3fv(TerrainVertex[i]);
+                const std::uint32_t debugColor = mu::PackABGR(1.f, 0.5f, 0.5f, 0.3f);
+                mu::Vertex3D verts[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    verts[i] = {TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2], 0.f, 0.f, 1.f, 0.f, 0.f,
+                                debugColor};
+                }
+                const mu::Vertex3D tris[6] = {verts[0], verts[1], verts[2], verts[0], verts[2], verts[3]};
+                mu::GetRenderer().RenderTriangles(tris, 0u);
             }
-            glEnd();
 
             DisableAlphaBlend();
         }
@@ -1907,7 +1797,7 @@ void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int
 }
 
 void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha,
-                             float Height = 0.f)
+                             float Height = 0.f, std::uint32_t fallbackColor = 0xFFFFFFFFu)
 {
     int xi = (int)xf;
     int yi = (int)yf;
@@ -1934,26 +1824,32 @@ void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[
         VectorCopy(PrimaryTerrainLight[TerrainIndex4], Light[3]);
     }
 
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
     {
-        if (LightEnable)
+        mu::Vertex3D verts[4];
+        for (int i = 0; i < 4; i++)
         {
-            if (Alpha == 1.f)
-                glColor3fv(Light[i]);
-            else
-                glColor4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
+            std::uint32_t vertColor = fallbackColor;
+            if (LightEnable)
+            {
+                vertColor = mu::PackABGR(Light[i][0], Light[i][1], Light[i][2], Alpha);
+            }
+            verts[i] = {TerrainVertex[i][0],
+                        TerrainVertex[i][1],
+                        TerrainVertex[i][2],
+                        0.f,
+                        0.f,
+                        1.f,
+                        c[i][0],
+                        c[i][1],
+                        vertColor};
         }
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex3fv(TerrainVertex[i]);
+        const mu::Vertex3D tris[6] = {verts[0], verts[1], verts[2], verts[0], verts[2], verts[3]};
+        mu::GetRenderer().RenderTriangles(tris, 0u);
     }
-    glEnd();
 }
 
 void RenderTerrainBitmap(int Texture, int mxi, int myi, float Rotation)
 {
-    glColor3f(1.f, 1.f, 1.f);
-
     vec3_t Angle;
     Vector(0.f, 0.f, Rotation, Angle);
     float Matrix[3][4];
@@ -1988,10 +1884,7 @@ void RenderTerrainBitmap(int Texture, int mxi, int myi, float Rotation)
 void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, float SizeY, vec3_t Light, float Rotation,
                               float Alpha, float Height)
 {
-    if (Alpha == 1.f)
-        glColor3fv(Light);
-    else
-        glColor4f(Light[0], Light[1], Light[2], Alpha);
+    const std::uint32_t terrainBitmapColor = mu::PackABGR(Light[0], Light[1], Light[2], Alpha);
 
     vec3_t Angle;
     Vector(0.f, 0.f, Rotation, Angle);
@@ -2034,7 +1927,8 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
                 p2[i][1] += 0.5f;
                 // if((p2[i][0]>=0.f && p2[i][0]<=1.f) || (p2[i][1]>=0.f && p2[i][1]<=1.f)) Clip = true;
             }
-            RenderTerrainBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height);
+            RenderTerrainBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height,
+                                    terrainBitmapColor);
         }
     }
 }

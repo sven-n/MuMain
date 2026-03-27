@@ -27,6 +27,7 @@ FrameTimingState g_frameTiming;
 #include "DSPlaySound.h"
 #include "ZzzOpenglUtil.h"
 #include "PhysicsManager.h"
+#include "MuRenderer.h"
 #include "Core/Timer.h"
 #include "Input.h"
 #include "UIMng.h"
@@ -377,7 +378,7 @@ static void SetWorldClearColor()
         glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearScreen();
 }
 
 /**
@@ -429,53 +430,65 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
     float glTop = (float)WindowHeight - gy;
 
     // Background
-    glDisable(GL_TEXTURE_2D);
+    DisableTexture();
     EnableAlphaBlend3();
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-    glBegin(GL_QUADS);
-    glVertex2f(gx, glBottom);
-    glVertex2f(gx + gw, glBottom);
-    glVertex2f(gx + gw, glTop);
-    glVertex2f(gx, glTop);
-    glEnd();
+    {
+        std::uint32_t bgColor = (127u << 24) | (0u << 16) | (0u << 8) | 0u; // ABGR: a=0.5, r=0, g=0, b=0
+        mu::Vertex2D bgVerts[4] = {
+            {gx, glBottom, 0.f, 0.f, bgColor},
+            {gx + gw, glBottom, 0.f, 0.f, bgColor},
+            {gx + gw, glTop, 0.f, 0.f, bgColor},
+            {gx, glTop, 0.f, 0.f, bgColor},
+        };
+        mu::GetRenderer().RenderQuad2D(std::span<const mu::Vertex2D>(bgVerts, 4), 0);
+    }
 
-    // Target line at 16.67ms (60fps)
-    float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
-    float lineY = glBottom + target60 * gh;
-    glColor4f(0.3f, 0.8f, 0.3f, 0.5f);
-    glBegin(GL_LINES);
-    glVertex2f(gx, lineY);
-    glVertex2f(gx + gw, lineY);
-    glEnd();
+    // Target line at 16.67ms (60fps) — rendered as a thin 1-pixel quad
+    {
+        float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
+        float lineY = glBottom + target60 * gh;
+        std::uint32_t lineColor = (127u << 24) | (76u << 16) | (204u << 8) | 76u; // ABGR: a=0.5, r=0.3, g=0.8, b=0.3
+        mu::Vertex2D lineVerts[4] = {
+            {gx, lineY, 0.f, 0.f, lineColor},
+            {gx + gw, lineY, 0.f, 0.f, lineColor},
+            {gx + gw, lineY + 1.f, 0.f, 0.f, lineColor},
+            {gx, lineY + 1.f, 0.f, 0.f, lineColor},
+        };
+        mu::GetRenderer().RenderQuad2D(std::span<const mu::Vertex2D>(lineVerts, 4), 0);
+    }
 
     // Frame bars
-    float barW = gw / FRAME_HISTORY_SIZE;
-    int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
-
-    glBegin(GL_QUADS);
-    for (int i = 0; i < s_frameCount; i++)
     {
-        int idx = (oldest + i) % FRAME_HISTORY_SIZE;
-        float ms = s_frameTimesMs[idx];
-        float norm = std::min(ms / GRAPH_MAX_MS, 1.0f);
-        float barH = norm * gh;
+        float barW = gw / FRAME_HISTORY_SIZE;
+        int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
 
-        // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
-        if (ms < THRESHOLD_60FPS_MS)
-            glColor4f(0.2f, 0.9f, 0.2f, 0.8f);
-        else if (ms < THRESHOLD_40FPS_MS)
-            glColor4f(0.9f, 0.9f, 0.2f, 0.8f);
-        else
-            glColor4f(0.9f, 0.2f, 0.2f, 0.8f);
+        for (int i = 0; i < s_frameCount; i++)
+        {
+            int idx = (oldest + i) % FRAME_HISTORY_SIZE;
+            float ms = s_frameTimesMs[idx];
+            float norm = std::min(ms / GRAPH_MAX_MS, 1.0f);
+            float barH = norm * gh;
 
-        float bx = gx + i * barW;
-        glVertex2f(bx, glBottom);
-        glVertex2f(bx + barW, glBottom);
-        glVertex2f(bx + barW, glBottom + barH);
-        glVertex2f(bx, glBottom + barH);
+            // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
+            std::uint32_t barColor;
+            if (ms < THRESHOLD_60FPS_MS)
+                barColor = (204u << 24) | (51u << 16) | (229u << 8) | 51u; // ABGR: a=0.8, r=0.2, g=0.9, b=0.2
+            else if (ms < THRESHOLD_40FPS_MS)
+                barColor = (204u << 24) | (51u << 16) | (229u << 8) | 229u; // ABGR: a=0.8, r=0.9, g=0.9, b=0.2
+            else
+                barColor = (204u << 24) | (51u << 16) | (51u << 8) | 229u; // ABGR: a=0.8, r=0.9, g=0.2, b=0.2
+
+            float bx = gx + i * barW;
+            mu::Vertex2D barVerts[4] = {
+                {bx, glBottom, 0.f, 0.f, barColor},
+                {bx + barW, glBottom, 0.f, 0.f, barColor},
+                {bx + barW, glBottom + barH, 0.f, 0.f, barColor},
+                {bx, glBottom + barH, 0.f, 0.f, barColor},
+            };
+            mu::GetRenderer().RenderQuad2D(std::span<const mu::Vertex2D>(barVerts, 4), 0);
+        }
     }
-    glEnd();
 
     glEnable(GL_TEXTURE_2D);
 }

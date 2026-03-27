@@ -169,6 +169,13 @@ struct FogCaptureMock : public mu::IMuRenderer
         ++m_setFogCallCount;
     }
 
+    void BeginScene(int /*x*/, int /*y*/, int /*w*/, int /*h*/) override {}
+    void EndScene() override {}
+    void Begin2DPass() override {}
+    void End2DPass() override {}
+    void ClearScreen() override {}
+    void RenderLines(std::span<const mu::Vertex3D> /*vertices*/, std::uint32_t /*textureId*/) override {}
+
     [[nodiscard]] const std::optional<mu::FogParams>& GetLastFogParams() const
     {
         return m_lastFogParams;

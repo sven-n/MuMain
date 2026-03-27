@@ -18,6 +18,8 @@
 
 #ifdef MU_USE_OPENGL_BACKEND
 
+#include "ZzzOpenglUtil.h"
+
 namespace mu
 {
 
@@ -139,6 +141,147 @@ public:
             glColor4f(r, g, b, a);
             glTexCoord2f(v.u, v.v);
             glNormal3f(v.nx, v.ny, v.nz);
+            glVertex3f(v.x, v.y, v.z);
+        }
+        glEnd();
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-1): BeginScene — 3D projection setup.
+    // Mirrors the current BeginOpengl() body in ZzzOpenglUtil.cpp.
+    // Sets viewport, perspective projection, modelview from camera state.
+    // -----------------------------------------------------------------------
+    void BeginScene(int x, int y, int w, int h) override
+    {
+        x = x * WindowWidth / 640;
+        y = y * WindowHeight / 480;
+        w = w * WindowWidth / 640;
+        h = h * WindowHeight / 480;
+
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        glViewport2(x, y, w, h);
+
+        gluPerspective2(CameraFOV, static_cast<float>(w) / static_cast<float>(h), CameraViewNear, CameraViewFar * 1.4f);
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+        glRotatef(CameraAngle[1], 0.f, 1.f, 0.f);
+        if (!CameraTopViewEnable)
+        {
+            glRotatef(CameraAngle[0], 1.f, 0.f, 0.f);
+        }
+        glRotatef(CameraAngle[2], 0.f, 0.f, 1.f);
+        glTranslatef(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+
+        glDisable(GL_ALPHA_TEST);
+        glEnable(GL_TEXTURE_2D);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glDepthMask(true);
+        glDepthFunc(GL_LEQUAL);
+        glAlphaFunc(GL_GREATER, 0.25f);
+        if (FogEnable)
+        {
+            glEnable(GL_FOG);
+            glFogi(GL_FOG_MODE, GL_LINEAR);
+            glFogf(GL_FOG_DENSITY, FogDensity);
+            glFogfv(GL_FOG_COLOR, FogColor);
+        }
+        else
+        {
+            glDisable(GL_FOG);
+        }
+
+        GetOpenGLMatrix(CameraMatrix);
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-1): EndScene — restore matrix state after 3D pass.
+    // Mirrors the current EndOpengl() body in ZzzOpenglUtil.cpp.
+    // -----------------------------------------------------------------------
+    void EndScene() override
+    {
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-2): Begin2DPass — orthographic projection setup.
+    // Mirrors the current BeginBitmap() body in ZzzOpenglUtil.cpp.
+    // -----------------------------------------------------------------------
+    void Begin2DPass() override
+    {
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+
+        glViewport(0, 0, WindowWidth, WindowHeight);
+        gluPerspective(CameraFOV, static_cast<float>(WindowWidth) / static_cast<float>(WindowHeight), CameraViewNear,
+                       CameraViewFar);
+
+        glLoadIdentity();
+        gluOrtho2D(0, WindowWidth, 0, WindowHeight);
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+
+        glLoadIdentity();
+        DisableDepthTest();
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-2): End2DPass — restore matrix state after 2D pass.
+    // Mirrors the current EndBitmap() body in ZzzOpenglUtil.cpp.
+    // -----------------------------------------------------------------------
+    void End2DPass() override
+    {
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-7): ClearScreen — clear color and depth buffers.
+    // -----------------------------------------------------------------------
+    void ClearScreen() override
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    // Story 7-9-2 (AC-7): ClearDepthBuffer — depth-only clear for UI 3D panels.
+    void ClearDepthBuffer() override
+    {
+        glClear(GL_DEPTH_BUFFER_BIT);
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7-9-2 (AC-5): RenderLines — line primitive rendering.
+    // Replaces GL_LINES blocks in debug visualization code.
+    // -----------------------------------------------------------------------
+    void RenderLines(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
+    {
+        if (vertices.empty())
+        {
+            return;
+        }
+
+        (void)textureId;
+
+        glBegin(GL_LINES);
+        for (const Vertex3D& v : vertices)
+        {
+            const auto a = static_cast<float>((v.color >> 24) & 0xFFu) / 255.0f;
+            const auto b = static_cast<float>((v.color >> 16) & 0xFFu) / 255.0f;
+            const auto g = static_cast<float>((v.color >> 8) & 0xFFu) / 255.0f;
+            const auto r = static_cast<float>((v.color) & 0xFFu) / 255.0f;
+            glColor4f(r, g, b, a);
+            glTexCoord2f(v.u, v.v);
             glVertex3f(v.x, v.y, v.z);
         }
         glEnd();
