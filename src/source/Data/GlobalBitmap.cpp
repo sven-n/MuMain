@@ -86,7 +86,9 @@ int NextPowerOfTwo(int value, int maxValue)
 
 std::string NarrowPath(const std::wstring& wide)
 {
-    return mu_wchar_to_utf8(wide.c_str());
+    std::string path = mu_wchar_to_utf8(wide.c_str());
+    std::replace(path.begin(), path.end(), '\\', '/');
+    return path;
 }
 } // namespace
 
