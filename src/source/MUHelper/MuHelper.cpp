@@ -857,54 +857,58 @@ namespace MUHelper
 
         if (bTargetRequired)
         {
-            if (iTarget == -1 && !bSelfPositionSkill)
-            {
-                return 0;
-            }
-
-            const int iCharIndex = FindCharacterIndex(iTarget);
-            if (iCharIndex == MAX_CHARACTERS_CLIENT && !bSelfPositionSkill)
-            {
-                DeleteTarget(iTarget);
-                return 0;
-            }
-
-            SelectedCharacter = iCharIndex;
-
-            CHARACTER* pTarget = bSelfPositionSkill ? nullptr : &CharactersClient[iCharIndex];
-            if (pTarget && pTarget->Dead > 0)
-            {
-                DeleteTarget(iTarget);
-                return 0;
-            }
-
-            g_MovementSkill.m_iTarget = bSelfPositionSkill ? -1 : iCharIndex;
-
             if (bSelfPositionSkill)
             {
                 TargetX = Hero->PositionX;
                 TargetY = Hero->PositionY;
 
+                g_MovementSkill.m_iTarget = -1;
+
                 // Check if current target is still valid (exists and alive)
                 if (iTarget != -1)
                 {
-                    int iTargetIndex = FindCharacterIndex(iTarget);
-                    if (iTargetIndex != MAX_CHARACTERS_CLIENT)
+                    const int iCharIndex = FindCharacterIndex(iTarget);
+                    if (iCharIndex != MAX_CHARACTERS_CLIENT)
                     {
-                        CHARACTER* pCurrentTarget = &CharactersClient[iTargetIndex];
+                        CHARACTER* pCurrentTarget = &CharactersClient[iCharIndex];
                         if (pCurrentTarget->Dead > 0 || !IsMonster(pCurrentTarget))
                         {
+                            DeleteTarget(iTarget);
                             return 0;
                         }
                     }
                     else
                     {
+                        DeleteTarget(iTarget);
                         return 0;
                     }
                 }
             }
             else
             {
+                if (iTarget == -1)
+                {
+                    return 0;
+                }
+
+                const int iCharIndex = FindCharacterIndex(iTarget);
+                if (iCharIndex == MAX_CHARACTERS_CLIENT)
+                {
+                    DeleteTarget(iTarget);
+                    return 0;
+                }
+
+                SelectedCharacter = iCharIndex;
+
+                CHARACTER* pTarget = &CharactersClient[iCharIndex];
+                if (pTarget->Dead > 0)
+                {
+                    DeleteTarget(iTarget);
+                    return 0;
+                }
+
+                g_MovementSkill.m_iTarget = iCharIndex;
+
                 TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
 
