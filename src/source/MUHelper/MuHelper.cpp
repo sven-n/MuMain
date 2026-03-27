@@ -614,7 +614,6 @@ namespace MUHelper
 
             return iHealResult;
         }
-        }
         else
         {
             return HealSelf(iHealingSkill);
