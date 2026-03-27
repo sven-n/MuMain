@@ -57,15 +57,44 @@ lint:
 		--suppress=returnByReference \
 		--inline-suppr
 
-# Run clang-tidy (requires a build directory with compile_commands.json)
+# Auto-detect build directory containing compile_commands.json.
+# Prefers the native build (out/build/*) over the cross-compile (build-mingw).
+BUILD_DIR := $(firstword $(wildcard out/build/*/compile_commands.json))
+BUILD_DIR := $(if $(BUILD_DIR),$(dir $(BUILD_DIR)),$(if $(wildcard build-mingw/compile_commands.json),build-mingw/,))
+
+# Run clang-tidy with full .clang-tidy config (manual use — noisy on legacy code)
 tidy:
-	@if [ ! -f build-mingw/compile_commands.json ]; then \
-		echo "Error: build-mingw/compile_commands.json not found."; \
-		echo "Run cmake configure first to generate it."; \
+	@if [ -z "$(BUILD_DIR)" ]; then \
+		echo "Error: compile_commands.json not found. Run cmake configure first."; \
 		exit 1; \
 	fi
-	@echo "Running clang-tidy..."
-	@echo $(SOURCES) | xargs clang-tidy -p build-mingw
+	@echo "Running clang-tidy (full config) against $(BUILD_DIR)..."
+	@echo $(SOURCES) | xargs clang-tidy -p $(BUILD_DIR)
+
+# Focused clang-tidy gate: only high-value portability/correctness checks.
+# These catch real bugs (e.g. sizeof(pointer) on 64-bit) without legacy noise.
+# Pre-existing compilation errors (missing include guards etc.) are ignored —
+# the build step already validates compilation. Only bugprone-* findings fail.
+TIDY_CHECKS := -*,bugprone-sizeof-expression,bugprone-suspicious-memset-usage,bugprone-misplaced-pointer-arithmetic-in-alloc,-clang-diagnostic-*
+tidy-gate:
+	@if [ -z "$(BUILD_DIR)" ]; then \
+		echo "Error: compile_commands.json not found. Run cmake configure first."; \
+		exit 1; \
+	fi
+	@echo "Running clang-tidy portability gate against $(BUILD_DIR)..."
+	@FINDINGS=$$(echo $(SOURCES) | xargs clang-tidy -p $(BUILD_DIR) \
+		--checks='$(TIDY_CHECKS)' \
+		--extra-arg=-Wno-everything 2>&1 \
+		| grep -c '\[bugprone-' || true); \
+	if [ "$$FINDINGS" -gt 0 ]; then \
+		echo $(SOURCES) | xargs clang-tidy -p $(BUILD_DIR) \
+			--checks='$(TIDY_CHECKS)' \
+			--extra-arg=-Wno-everything 2>&1 \
+			| grep -E '\[bugprone-'; \
+		echo "$$FINDINGS bugprone finding(s) — fix before committing."; \
+		exit 1; \
+	fi
+	@echo "0 bugprone findings."
 
 # Install git hooks
 hooks:
