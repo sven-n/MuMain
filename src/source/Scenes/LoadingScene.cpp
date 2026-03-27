@@ -104,7 +104,6 @@ void LoadingScene(HDC hDC)
         EndBitmap();
     }
 #endif
-    ::SwapBuffers(hDC);
 
     SAFE_DELETE(rUIMng.m_pLoadingScene);
 

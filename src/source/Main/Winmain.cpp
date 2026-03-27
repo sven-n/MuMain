@@ -1499,6 +1499,108 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     }
 #endif
 
+    // ---- Story 7.9.1: Game state initialisation (ported from WinMain) ----
+    // This reproduces the cross-platform subset of WinMain() init that runs
+    // before MainLoop(). Win32-only init (CreateFont, SetTimer, CInput with
+    // HWND, IME, screensaver suppression) is intentionally skipped.
+
+    setlocale(LC_ALL, "english");
+
+    // Random seed and table
+    srand((unsigned)time(nullptr));
+    for (int& i : RandomTable)
+        i = rand() % 360;
+
+    // Game data array allocation
+    RendomMemoryDump = new BYTE[rand() % 100 + 1];
+    GateAttribute = new GATE_ATTRIBUTE[MAX_GATES]{};
+    SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
+    ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024]{};
+    // cppcheck-suppress dangerousTypeCast
+    ItemAttribute = ((ITEM_ATTRIBUTE*)ItemAttRibuteMemoryDump) + rand() % 1024;
+    CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128]{};
+    // cppcheck-suppress dangerousTypeCast
+    CharactersClient = ((CHARACTER*)CharacterMemoryDump) + rand() % 128;
+    CharacterMachine = new CHARACTER_MACHINE;
+
+    memset(GateAttribute, 0, sizeof(GATE_ATTRIBUTE) * (MAX_GATES));
+    memset(ItemAttribute, 0, sizeof(ITEM_ATTRIBUTE) * (MAX_ITEM));
+    memset(SkillAttribute, 0, sizeof(SKILL_ATTRIBUTE) * (MAX_SKILLS));
+    memset(CharacterMachine, 0, sizeof(CHARACTER_MACHINE));
+
+    CharacterAttribute = &CharacterMachine->Character;
+    CharacterMachine->Init();
+    Hero = &CharactersClient[0];
+
+    // UI managers
+    g_pUIManager = new CUIManager;
+    g_pUIMapName = new CUIMapName;
+
+    g_BuffSystem = BuffStateSystem::Make();
+    g_MapProcess = MapProcess::Make();
+    g_petProcess = PetProcess::Make();
+
+    CUIMng::Instance().Create();
+    g_pNewUISystem->Create();
+
+    // i18n translations
+    {
+        i18n::Translator& translator = i18n::Translator::GetInstance();
+        bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game, L"Translations/en/game.json");
+        if (!gameLoaded)
+            gameLoaded = translator.LoadTranslations(i18n::Domain::Game, L"bin/Translations/en/game.json");
+        translator.SetLocale("en");
+
+        if (gameLoaded)
+        {
+            g_ErrorReport.Write(L"> Game translations loaded successfully.\r\n");
+        }
+        else
+        {
+            g_ErrorReport.Write(L"> WARNING: Game translations not found (game.json missing).\r\n");
+        }
+    }
+
+    // Audio backend
+    if (m_MusicOnOff || m_SoundOnOff)
+    {
+        g_platformAudio = new mu::MiniAudioBackend();
+        if (!g_platformAudio->Initialize())
+        {
+            g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::Initialize failed — game will run without audio\r\n");
+        }
+    }
+
+    if (m_SoundOnOff)
+    {
+        int value = GameConfig::GetInstance().GetVolumeLevel();
+        if (value < 0 || value >= 10)
+            value = 5;
+        g_pOption->SetVolumeLevel(value);
+    }
+
+    // Restore BGM and SFX volume from config
+    {
+        int bgmLevel = GameConfig::GetInstance().GetBGMVolumeLevel();
+        int sfxLevel = GameConfig::GetInstance().GetSFXVolumeLevel();
+        if (bgmLevel < 0 || bgmLevel > 10)
+            bgmLevel = 5;
+        if (sfxLevel < 0 || sfxLevel > 10)
+            sfxLevel = 5;
+        g_pOption->SetBGMVolumeLevel(bgmLevel);
+        g_pOption->SetSFXVolumeLevel(sfxLevel);
+        if (g_platformAudio != nullptr)
+        {
+            g_platformAudio->SetBGMVolume(static_cast<float>(bgmLevel) / 10.0f);
+            g_platformAudio->SetSFXVolume(static_cast<float>(sfxLevel) / 10.0f);
+        }
+    }
+
+    // Load game data (textures, items, gates, mix recipes, etc.)
+    OpenBasicData(nullptr);
+
+    // ---- End game state initialisation ----
+
     while (!Destroy)
     {
         if (!mu::MuPlatform::PollEvents())
@@ -1513,8 +1615,11 @@ int MuMain(int /*argc*/, char* /*argv*/[])
         mu::GetRenderer().BeginFrame();
 #endif
 
-        // Game loop body will be added as more systems are migrated
-        // (rendering in EPIC-4, input in EPIC-2.2, audio in EPIC-5)
+        // Story 7.9.1: Full render path — RenderScene dispatches to
+        // WebzenScene / LoadingScene / MainScene based on SceneFlag.
+        // hDC is nullptr on SDL3 — all HDC dereferences are behind
+        // #ifdef MU_USE_OPENGL_BACKEND or have been removed (AC-1).
+        RenderScene(nullptr);
 
 #ifdef MU_ENABLE_SDL3
         mu::GetRenderer().EndFrame();

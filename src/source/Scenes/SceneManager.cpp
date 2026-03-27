@@ -965,8 +965,6 @@ void MainScene(HDC hDC)
                 EndBitmap();
             }
 #endif
-            SwapBuffers(hDC);
-
 #ifdef ENABLE_GROUND_TRUTH_CAPTURE
             // Ground Truth Capture — Story 4.1.1 [VS1-RENDER-GROUNDTRUTH-CAPTURE]
             // Both the UI sweep and the main-scene capture run exactly once per session
@@ -987,10 +985,7 @@ void MainScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        // Log exception in MainScene
-        char errorMsg[256];
-        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in MainScene: %s", e.what());
-        OutputDebugStringA(errorMsg);
+        g_ErrorReport.Write(L"Exception in MainScene: %S\r\n", e.what());
     }
 }
 
@@ -1021,14 +1016,11 @@ void RenderScene(HDC hDC)
 
         if (g_iNoMouseTime > 31)
         {
-            KillGLWindow();
+            Destroy = true;
         }
     }
     catch (const std::exception& e)
     {
-        // Log exception in RenderScene
-        char errorMsg[256];
-        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in RenderScene: %s", e.what());
-        OutputDebugStringA(errorMsg);
+        g_ErrorReport.Write(L"Exception in RenderScene: %S\r\n", e.what());
     }
 }
