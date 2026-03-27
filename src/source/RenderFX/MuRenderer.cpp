@@ -18,7 +18,9 @@
 
 #ifdef MU_USE_OPENGL_BACKEND
 
-#include "ZzzOpenglUtil.h"
+// ZzzOpenglUtil.h include removed (story 7-9-2 review Finding 2):
+// the OpenGL backend uses direct GL calls, avoiding a circular dependency
+// where ZzzOpenglUtil wraps IMuRenderer but the backend called back into it.
 
 namespace mu
 {
@@ -231,7 +233,7 @@ public:
         glPushMatrix();
 
         glLoadIdentity();
-        DisableDepthTest();
+        glDisable(GL_DEPTH_TEST);
     }
 
     // -----------------------------------------------------------------------

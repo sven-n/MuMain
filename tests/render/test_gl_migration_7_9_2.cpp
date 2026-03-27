@@ -518,8 +518,13 @@ TEST_CASE("AC-STD-2 [7-9-2]: IMuRenderer extended interface — all new methods 
         mu::FogParams fog{};
         mock.SetFog(fog);
 
-        // All pre-existing calls succeeded — interface is backward compatible
-        REQUIRE(true);
+        // Verify pre-existing calls didn't accidentally trigger 7-9-2 counters
+        REQUIRE(mock.m_beginSceneCallCount == 0);
+        REQUIRE(mock.m_endSceneCallCount == 0);
+        REQUIRE(mock.m_begin2DCallCount == 0);
+        REQUIRE(mock.m_end2DCallCount == 0);
+        REQUIRE(mock.m_renderLinesCallCount == 0);
+        REQUIRE(mock.m_clearScreenCallCount == 0);
     }
 
     SECTION("IMuRenderer has no OpenGL types in extended interface (cross-platform compile check)")
@@ -530,8 +535,8 @@ TEST_CASE("AC-STD-2 [7-9-2]: IMuRenderer extended interface — all new methods 
         MigrationCaptureMock mock;
         mock.SetBlendMode(mu::BlendMode::Additive);
 
-        // Compile-time verification only
-        REQUIRE(true);
+        // Compilation is the real assertion; verify no side effects on 7-9-2 counters
+        REQUIRE(mock.m_beginSceneCallCount == 0);
     }
 }
 

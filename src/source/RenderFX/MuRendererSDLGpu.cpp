@@ -30,6 +30,7 @@
 #include "ErrorReport.h"
 
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -918,16 +919,84 @@ public:
             return;
         }
 
-        // Render lines as pairs of vertices using the 3D pipeline.
-        // SDL_gpu supports line list primitives via the pipeline topology,
-        // but our pipelines use triangle topology. For debug visualization,
-        // render each line as a degenerate triangle (3 vertices: A, B, A).
-        // This produces visible lines with the existing triangle pipeline.
+        // Render lines as thin quads (2 triangles per line segment).
+        // Degenerate triangles (A, B, A) have zero area and are culled by GPUs,
+        // so we extrude each line into a thin quad with a perpendicular offset.
+        constexpr float kHalfWidth = 0.5f;
         const auto lineCount = vertices.size() / 2;
         for (std::size_t i = 0; i < lineCount; ++i)
         {
-            const Vertex3D triVerts[3] = {vertices[i * 2], vertices[i * 2 + 1], vertices[i * 2]};
-            RenderTriangles(std::span<const Vertex3D>(triVerts, 3), textureId);
+            const auto& a = vertices[i * 2];
+            const auto& b = vertices[i * 2 + 1];
+
+            const float dx = b.x - a.x;
+            const float dy = b.y - a.y;
+            const float dz = b.z - a.z;
+            const float len = std::sqrt(dx * dx + dy * dy + dz * dz);
+            if (len < 1e-6f)
+            {
+                continue;
+            }
+
+            const float invLen = 1.0f / len;
+            const float dirX = dx * invLen;
+            const float dirY = dy * invLen;
+            const float dirZ = dz * invLen;
+
+            // Perpendicular via cross product with an axis not parallel to line
+            float perpX, perpY, perpZ;
+            if (std::abs(dirY) < 0.9f)
+            {
+                perpX = dirZ;
+                perpY = 0.0f;
+                perpZ = -dirX;
+            }
+            else
+            {
+                perpX = 0.0f;
+                perpY = -dirZ;
+                perpZ = dirY;
+            }
+
+            const float perpLen = std::sqrt(perpX * perpX + perpY * perpY + perpZ * perpZ);
+            if (perpLen < 1e-6f)
+            {
+                continue;
+            }
+            const float scale = kHalfWidth / perpLen;
+            perpX *= scale;
+            perpY *= scale;
+            perpZ *= scale;
+
+            // Two triangles forming a thin quad: (A+p, A-p, B-p) and (A+p, B-p, B+p)
+            Vertex3D verts[6];
+            verts[0] = a;
+            verts[0].x += perpX;
+            verts[0].y += perpY;
+            verts[0].z += perpZ;
+            verts[1] = a;
+            verts[1].x -= perpX;
+            verts[1].y -= perpY;
+            verts[1].z -= perpZ;
+            verts[2] = b;
+            verts[2].x -= perpX;
+            verts[2].y -= perpY;
+            verts[2].z -= perpZ;
+
+            verts[3] = a;
+            verts[3].x += perpX;
+            verts[3].y += perpY;
+            verts[3].z += perpZ;
+            verts[4] = b;
+            verts[4].x -= perpX;
+            verts[4].y -= perpY;
+            verts[4].z -= perpZ;
+            verts[5] = b;
+            verts[5].x += perpX;
+            verts[5].y += perpY;
+            verts[5].z += perpZ;
+
+            RenderTriangles(std::span<const Vertex3D>(verts, 6), textureId);
         }
 #else
         (void)vertices;
