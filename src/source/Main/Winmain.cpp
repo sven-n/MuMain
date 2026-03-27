@@ -1453,6 +1453,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 #include "Platform/MuPlatform.h"
 #include "Platform/IPlatformWindow.h"
 #include "RenderFX/MuRenderer.h"
+#include <SDL3/SDL_timer.h>
 
 namespace mu
 {
@@ -1513,7 +1514,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     // before MainLoop(). Win32-only init (CreateFont, SetTimer, CInput with
     // HWND, IME, screensaver suppression) is intentionally skipped.
 
-    setlocale(LC_ALL, "en_US.UTF-8");
+    setlocale(LC_ALL, "");
 
     // Random seed and table (for gameplay RNG)
     srand((unsigned)time(nullptr));
@@ -1630,11 +1631,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     }
 
     // Load game data (textures, items, gates, mix recipes, etc.)
-    if (!OpenBasicData(nullptr))
-    {
-        g_ErrorReport.Write(L"FATAL: OpenBasicData failed — game data loading incomplete\r\n");
-        // Continue anyway; OpenBasicData returns false on missing files but game may still render
-    }
+    OpenBasicData(nullptr);
 
     // ---- End game state initialisation ----
 
@@ -1663,6 +1660,10 @@ int MuMain(int /*argc*/, char* /*argv*/[])
 #endif
 
             g_muFrameTimer.FrameEnd();
+        }
+        else
+        {
+            SDL_Delay(1); // Yield CPU when not rendering to avoid spinlock
         }
     }
 

@@ -986,7 +986,8 @@ void MainScene(HDC hDC)
     catch (const std::exception& e)
     {
         wchar_t wMsg[256] = {};
-        mbstowcs(wMsg, e.what(), 255);
+        const char* msg = e.what() ? e.what() : "unknown";
+        mbstowcs(wMsg, msg, 255);
         g_ErrorReport.Write(L"Exception in MainScene: %ls\r\n", wMsg);
     }
 }
@@ -1024,7 +1025,8 @@ void RenderScene(HDC hDC)
     catch (const std::exception& e)
     {
         wchar_t wMsg[256] = {};
-        mbstowcs(wMsg, e.what(), 255);
+        const char* msg = e.what() ? e.what() : "unknown";
+        mbstowcs(wMsg, msg, 255);
         g_ErrorReport.Write(L"Exception in RenderScene: %ls\r\n", wMsg);
     }
 }
