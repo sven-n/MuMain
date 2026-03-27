@@ -82,6 +82,16 @@ if(bf_pos EQUAL -1 OR ef_pos EQUAL -1)
     set(found_violations TRUE)
 endif()
 
+# AC-5e: Verify ordering — RenderScene must appear between BeginFrame and EndFrame
+if(NOT rs_pos EQUAL -1 AND NOT bf_pos EQUAL -1 AND NOT ef_pos EQUAL -1)
+    if(rs_pos LESS bf_pos OR rs_pos GREATER ef_pos)
+        message(WARNING
+            "AC-5 FAIL: RenderScene(nullptr) must appear between BeginFrame() and EndFrame().\n"
+            "Current positions: BeginFrame=${bf_pos}, RenderScene=${rs_pos}, EndFrame=${ef_pos}")
+        set(found_violations TRUE)
+    endif()
+endif()
+
 if(found_violations)
     message(FATAL_ERROR
         "AC-5 FAIL: RenderScene() not yet wired into SDL3 game loop in MuMain().\n"

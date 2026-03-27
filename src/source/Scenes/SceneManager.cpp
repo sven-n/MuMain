@@ -985,7 +985,9 @@ void MainScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        g_ErrorReport.Write(L"Exception in MainScene: %S\r\n", e.what());
+        wchar_t wMsg[256] = {};
+        mbstowcs(wMsg, e.what(), 255);
+        g_ErrorReport.Write(L"Exception in MainScene: %ls\r\n", wMsg);
     }
 }
 
@@ -1021,6 +1023,8 @@ void RenderScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        g_ErrorReport.Write(L"Exception in RenderScene: %S\r\n", e.what());
+        wchar_t wMsg[256] = {};
+        mbstowcs(wMsg, e.what(), 255);
+        g_ErrorReport.Write(L"Exception in RenderScene: %ls\r\n", wMsg);
     }
 }

@@ -53,12 +53,19 @@ if(NOT ods_pos EQUAL -1)
     set(found_violations TRUE)
 endif()
 
-# Also verify g_ErrorReport.Write is now present in SceneManager.cpp (confirms migration done)
-string(FIND "${scene_manager_content}" "g_ErrorReport.Write" ger_pos)
-if(ger_pos EQUAL -1)
+# Verify exception-specific g_ErrorReport.Write calls are present (not just pre-existing ones)
+string(FIND "${cross_platform_section}" "Exception in MainScene" main_exc_pos)
+string(FIND "${cross_platform_section}" "Exception in RenderScene" render_exc_pos)
+if(main_exc_pos EQUAL -1)
     message(WARNING
-        "AC-2 FAIL: 'g_ErrorReport.Write' not found in SceneManager.cpp.\n"
-        "Add g_ErrorReport.Write() calls in the MainScene and RenderScene catch blocks.")
+        "AC-2 FAIL: 'Exception in MainScene' not found in SceneManager.cpp cross-platform section.\n"
+        "Add g_ErrorReport.Write() call in the MainScene catch block.")
+    set(found_violations TRUE)
+endif()
+if(render_exc_pos EQUAL -1)
+    message(WARNING
+        "AC-2 FAIL: 'Exception in RenderScene' not found in SceneManager.cpp cross-platform section.\n"
+        "Add g_ErrorReport.Write() call in the RenderScene catch block.")
     set(found_violations TRUE)
 endif()
 

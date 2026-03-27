@@ -1504,7 +1504,7 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     // before MainLoop(). Win32-only init (CreateFont, SetTimer, CInput with
     // HWND, IME, screensaver suppression) is intentionally skipped.
 
-    setlocale(LC_ALL, "english");
+    setlocale(LC_ALL, "en_US.UTF-8");
 
     // Random seed and table
     srand((unsigned)time(nullptr));
@@ -1608,22 +1608,33 @@ int MuMain(int /*argc*/, char* /*argv*/[])
             break;
         }
 
-        // Story 4.3.1: Per-frame SDL_gpu command buffer / render pass lifecycle.
-        // BeginFrame acquires the command buffer, swapchain texture, and render pass.
-        // EndFrame ends the render pass and submits the command buffer.
-#ifdef MU_ENABLE_SDL3
-        mu::GetRenderer().BeginFrame();
-#endif
-
-        // Story 7.9.1: Full render path — RenderScene dispatches to
-        // WebzenScene / LoadingScene / MainScene based on SceneFlag.
-        // hDC is nullptr on SDL3 — all HDC dereferences are behind
-        // #ifdef MU_USE_OPENGL_BACKEND or have been removed (AC-1).
-        RenderScene(nullptr);
+        if (CheckRenderNextFrame())
+        {
+            g_muFrameTimer.FrameStart();
 
 #ifdef MU_ENABLE_SDL3
-        mu::GetRenderer().EndFrame();
+            // Story 4.3.1: Per-frame SDL_gpu command buffer / render pass lifecycle.
+            mu::GetRenderer().BeginFrame();
+
+            // Story 7.9.1: Full render path — RenderScene dispatches to
+            // WebzenScene / LoadingScene / MainScene based on SceneFlag.
+            // hDC is nullptr on SDL3 — all HDC dereferences are behind
+            // #ifdef MU_USE_OPENGL_BACKEND or have been removed (AC-1).
+            RenderScene(nullptr);
+
+            mu::GetRenderer().EndFrame();
 #endif
+
+            g_muFrameTimer.FrameEnd();
+        }
+    }
+
+    // Audio cleanup (mirrors DestroySound() in Win32 path)
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->Shutdown();
+        delete g_platformAudio;
+        g_platformAudio = nullptr;
     }
 
 #ifdef MU_ENABLE_SDL3
