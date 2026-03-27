@@ -333,6 +333,11 @@ public:
     {
         m_iMixSubType = 0;
         m_btPlusChaosRate = 0;
+    }
+    // Called from OpenBasicData() after the CWD is set to the executable directory.
+    // Do NOT call during static initialization (e.g., from a global constructor).
+    void LoadData()
+    {
         OpenRecipeFile(L"Data\\Local\\Mix.bmd");
     }
     virtual ~CMixRecipeMgr() {}

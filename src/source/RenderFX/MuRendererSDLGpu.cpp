@@ -1268,7 +1268,8 @@ private:
             SDL_GPUShaderCreateInfo info{};
             info.code = blob.data();
             info.code_size = blob.size();
-            info.entrypoint = "main";
+            // spirv-cross renames "main" to "main0" in MSL because Metal reserves "main".
+            info.entrypoint = (fmt == SDL_GPU_SHADERFORMAT_MSL) ? "main0" : "main";
             info.format = fmt;
             info.stage = shaderStage;
             info.num_samplers = numSamplers;

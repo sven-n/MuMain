@@ -33,6 +33,7 @@
 
 #include "ItemDataHandler.h"
 #include "SocketSystem.h"
+#include "MixMgr.h"
 
 ///////////////////////////////////////////
 extern BOOL g_bUseChatListBox;
@@ -5464,6 +5465,8 @@ void OpenBasicData(HDC hDC)
     g_QuestMng.LoadQuestScript();
 
     OpenGateScript(L"Data\\Gate.bmd");
+
+    g_MixRecipeMgr.LoadData();
 
     OpenFilterFile(L"Data\\Local\\Filter.bmd");
 

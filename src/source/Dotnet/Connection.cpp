@@ -12,6 +12,13 @@
 #include "Connection.h"
 #include "DotNetMessageFormat.h"
 
+// Full definitions required: Connection.cpp allocates these types (new PacketFunctions_*()).
+// Connection.h uses only forward declarations to avoid include-order failures in TUs
+// that pull it in transitively through WSclient.h.
+#include "PacketFunctions_ChatServer.h"
+#include "PacketFunctions_ConnectServer.h"
+#include "PacketFunctions_ClientToServer.h"
+
 #include "PacketBindings_ChatServer.h"
 #include "PacketBindings_ConnectServer.h"
 #include "PacketBindings_ClientToServer.h"
@@ -26,6 +33,11 @@ const std::string g_dotnetLibPath =
 const std::string g_dotnetLibPath =
     (std::filesystem::path("MUnique.Client.Library") += MU_DOTNET_LIB_EXT).string();
 #endif
+
+// Defined after g_dotnetLibPath so C++ TU initialization order guarantees the path is
+// fully constructed before Load() is called. (SIOF fix — was inline in Connection.h)
+const mu::platform::LibraryHandle munique_client_library_handle =
+    mu::platform::Load(g_dotnetLibPath.c_str());
 
 std::map<int32_t, Connection*> connections;
 

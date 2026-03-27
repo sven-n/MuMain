@@ -171,7 +171,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 glslang spirv-cross
+        run: brew install cmake ninja openssl@3 brotli glslang spirv-cross
 
       - name: Cache SDL3 FetchContent
         uses: actions/cache@v4

@@ -4,6 +4,12 @@
 #pragma once
 
 #include "Dotnet/Connection.h"
+// Full PacketFunctions definitions for game code that calls Send* methods via
+// ToGameServer()/ToChatServer()/ToConnectServer(). Connection.h uses forward
+// declarations only to avoid include-order failures.
+#include "Dotnet/PacketFunctions_ChatServer.h"
+#include "Dotnet/PacketFunctions_ConnectServer.h"
+#include "Dotnet/PacketFunctions_ClientToServer.h"
 #include "CSMapServer.h"
 #include <span>
 
