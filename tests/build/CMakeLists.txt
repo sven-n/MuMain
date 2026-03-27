@@ -766,3 +766,64 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_8_4.cmake
 )
+
+# ==========================================================================
+# Story 7.9.1 - macOS Game Loop & Render Path Migration [VS0-QUAL-RENDER-GAMELOOP]
+# RED PHASE: Tests verify that the three banned Win32 APIs are removed from the
+#   render path, the game init sequence is ported to MuMain(), and RenderScene()
+#   is wired into the SDL3 game loop.
+# Tests FAIL until Tasks 1-5 in story 7.9.1 are implemented.
+# ==========================================================================
+
+set(MU_SCENES_SOURCE "${MUMAIN_SOURCE_DIR}/src/source/Scenes")
+set(MU_MAIN_SOURCE "${MUMAIN_SOURCE_DIR}/src/source/Main")
+
+# AC-1: SwapBuffers(hDC) removed from SceneManager.cpp and ::SwapBuffers(hDC) from LoadingScene.cpp
+add_test(
+    NAME "7.9.1-AC-1:swapbuffers-removed"
+    COMMAND ${CMAKE_COMMAND}
+        -DSCENE_MANAGER_CPP=${MU_SCENES_SOURCE}/SceneManager.cpp
+        -DLOADING_SCENE_CPP=${MU_SCENES_SOURCE}/LoadingScene.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_swapbuffers_removed_7_9_1.cmake
+)
+
+# AC-2: OutputDebugStringA replaced with g_ErrorReport.Write() in SceneManager.cpp
+add_test(
+    NAME "7.9.1-AC-2:outputdebugstringa-removed"
+    COMMAND ${CMAKE_COMMAND}
+        -DSCENE_MANAGER_CPP=${MU_SCENES_SOURCE}/SceneManager.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_outputdebugstringa_removed_7_9_1.cmake
+)
+
+# AC-3: KillGLWindow() replaced with 'Destroy = true' in SceneManager.cpp (RenderScene path)
+add_test(
+    NAME "7.9.1-AC-3:killglwindow-removed"
+    COMMAND ${CMAKE_COMMAND}
+        -DSCENE_MANAGER_CPP=${MU_SCENES_SOURCE}/SceneManager.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_killglwindow_removed_7_9_1.cmake
+)
+
+# AC-4: Game init sequence (OpenBasicData, CharacterMachine, g_pUIManager, i18n, g_platformAudio)
+#        ported to MuMain() in Winmain.cpp
+add_test(
+    NAME "7.9.1-AC-4:muminit-sequence"
+    COMMAND ${CMAKE_COMMAND}
+        -DWINMAIN_CPP=${MU_MAIN_SOURCE}/Winmain.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_muminit_sequence_7_9_1.cmake
+)
+
+# AC-5: RenderScene(nullptr) wired into SDL3 game loop between BeginFrame/EndFrame in MuMain()
+add_test(
+    NAME "7.9.1-AC-5:renderscene-wired"
+    COMMAND ${CMAKE_COMMAND}
+        -DWINMAIN_CPP=${MU_MAIN_SOURCE}/Winmain.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_renderscene_wired_7_9_1.cmake
+)
+
+# AC-STD-11: Flow code VS0-QUAL-RENDER-GAMELOOP traceability
+add_test(
+    NAME "7.9.1-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_9_1.cmake
+)
