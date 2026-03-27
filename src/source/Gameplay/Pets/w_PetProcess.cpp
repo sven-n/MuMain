@@ -223,8 +223,8 @@ bool PetProcess::LoadData()
             _scale = 0.0f;
             _blendMesh = -1;
             _count = 0;
-            ZeroMemory(_action, sizeof(_action));
-            ZeroMemory(_speed, sizeof(_speed));
+            ZeroMemory(_action, sizeof(int) * _array);
+            ZeroMemory(_speed, sizeof(float) * _array);
 
             BuxConvert(pSeek, Size);
 
@@ -243,8 +243,8 @@ bool PetProcess::LoadData()
             memcpy(_action, pSeek, sizeof(int) * _array);
             pSeek += sizeof(int) * _array;
 
-            memcpy(_speed, pSeek, sizeof(_speed) * _array);
-            pSeek += sizeof(_speed) * _array;
+            memcpy(_speed, pSeek, sizeof(float) * _array);
+            pSeek += sizeof(float) * _array;
 
             PetInfoPtr petInfo = PetInfo::Make();
             petInfo->SetBlendMesh(_blendMesh);
