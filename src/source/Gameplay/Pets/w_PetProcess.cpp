@@ -45,7 +45,7 @@ void PetInfo::SetActions(int count, int* actions, float* speeds)
     memcpy(m_actions, actions, sizeof(int) * m_count);
 
     m_speeds = new float[count];
-    memcpy(m_speeds, speeds, sizeof(int) * m_count);
+    memcpy(m_speeds, speeds, sizeof(float) * m_count);
 }
 
 PetProcessPtr g_petProcess;
