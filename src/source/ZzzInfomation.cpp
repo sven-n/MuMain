@@ -477,6 +477,7 @@ bool IsWing(ITEM* ip)
         || ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL
         || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL
         || ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL
+        || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
         || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL
         || ip->Type == ITEM_CAPE_OF_LORD
         || (ITEM_WING + 130 <= ip->Type && ip->Type <= ITEM_WING + 134)

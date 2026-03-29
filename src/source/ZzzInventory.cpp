@@ -1608,7 +1608,8 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     }
     else if (ip->ExcellentFlags > 0 &&
         (ip->Type<ITEM_WINGS_OF_SPIRITS || ip->Type>ITEM_WINGS_OF_DARKNESS) &&
-        (ip->Type != ITEM_DIVINE_SWORD_OF_ARCHANGEL && ip->Type != ITEM_DIVINE_CB_OF_ARCHANGEL && ip->Type != ITEM_DIVINE_STAFF_OF_ARCHANGEL)
+        (ip->Type != ITEM_DIVINE_SWORD_OF_ARCHANGEL && ip->Type != ITEM_DIVINE_CB_OF_ARCHANGEL
+            && ip->Type != ITEM_DIVINE_STAFF_OF_ARCHANGEL && ip->Type != ITEM_DIVINE_STICK_OF_ARCHANGEL)
         && ip->Type != ITEM_CAPE_OF_LORD
         && (ip->Type<ITEM_WING_OF_STORM || ip->Type>ITEM_CAPE_OF_EMPEROR)
         && (ip->Type<ITEM_WINGS_OF_DESPAIR || ip->Type>ITEM_WING_OF_DIMENSION)
@@ -1824,7 +1825,9 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         else
             mu_swprintf(Text, L"%ls +%d", p->Name, iLevel);
     }
-    else if (iType == ITEM_DIVINE_SWORD_OF_ARCHANGEL || iType == ITEM_DIVINE_CB_OF_ARCHANGEL || iType == ITEM_DIVINE_STAFF_OF_ARCHANGEL || iType == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
+    else if (iType == ITEM_DIVINE_SWORD_OF_ARCHANGEL || iType == ITEM_DIVINE_CB_OF_ARCHANGEL
+        || iType == ITEM_DIVINE_STAFF_OF_ARCHANGEL || iType == ITEM_DIVINE_STICK_OF_ARCHANGEL
+        || iType == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
     {
         if (iLevel == 0)
             mu_swprintf(Text, L"%ls", p->Name);
@@ -2157,7 +2160,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         Color = TEXT_COLOR_YELLOW;
     }
-    else if (ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
+    else if (ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
+        || ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL
+        || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
     {
         Color = TEXT_COLOR_PURPLE;
     }
@@ -2583,7 +2588,9 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             mu_swprintf(TextList[TextNum], L"%ls", p->Name);
         }
     }
-    else if (ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
+    else if (ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL
+        || ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
+        || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
     {
         if (Level == 0)
             mu_swprintf(TextList[TextNum], L"%ls", p->Name);
@@ -5769,7 +5776,9 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     {
         Color = TEXT_COLOR_YELLOW;
     }
-    else if (ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
+    else if (ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
+        || ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL
+        || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
     {
         Color = TEXT_COLOR_PURPLE;
     }
@@ -7024,7 +7033,9 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else
     {
-        if (o->Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL || o->Type == MODEL_DIVINE_CB_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
+        if (o->Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL || o->Type == MODEL_DIVINE_STICK_OF_ARCHANGEL
+            || o->Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL || o->Type == MODEL_DIVINE_CB_OF_ARCHANGEL
+            || o->Type == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
         {
             SetTextColor(1.f, 0.1f, 1.f);
         }
@@ -7455,6 +7466,7 @@ bool IsHighValueItem(ITEM* pItem)
         pItem->AncientDiscriminator > 0 ||
         pItem->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL ||
         pItem->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL ||
+        pItem->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL ||
         pItem->Type == ITEM_DIVINE_CB_OF_ARCHANGEL ||
         pItem->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL ||
         pItem->Type == ITEM_LOCHS_FEATHER ||
