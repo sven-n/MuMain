@@ -2,12 +2,6 @@
 
 // CharacterScene.h - Character selection scene
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include "Platform/PlatformCompat.h"
-#endif
-
 // Character scene lifecycle
 void CreateCharacterScene();
 void NewMoveCharacterScene();

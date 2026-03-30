@@ -1,10 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
-#include <windows.h>
-#else
 #include "Platform/PlatformCompat.h"
-#endif
 
 // Forward declarations for constants
 #ifndef MAX_CLASS

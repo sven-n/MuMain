@@ -295,8 +295,12 @@ void CSprite::Render()
     mu::Vertex2D vertices[POS_MAX];
     for (int i = LT; i < POS_MAX; ++i)
     {
-        vertices[i].x = m_aScrCoord[i].fX * m_fScaleX;
-        vertices[i].y = m_aScrCoord[i].fY * m_fScaleY;
+        // Story 7-9-2 (AC-3): Apply full coordinate conversion.
+        // OpenGL bottom-up 640×480 → screen pixels:
+        // x = (screen_x) * (WindowWidth / 640)
+        // y = WindowHeight - (screen_y) * (WindowHeight / 480)
+        vertices[i].x = m_aScrCoord[i].fX * m_fScaleX * (::WindowWidth / 640.0f);
+        vertices[i].y = ::WindowHeight - (m_aScrCoord[i].fY * m_fScaleY * (::WindowHeight / 480.0f));
         vertices[i].u = (m_nTexID >= 0) ? m_aTexCoord[i].fTU : 0.0f;
         vertices[i].v = (m_nTexID >= 0) ? m_aTexCoord[i].fTV : 0.0f;
         vertices[i].color = color;
@@ -304,6 +308,10 @@ void CSprite::Render()
 
     // textureId=0 sentinel for untextured sprites (m_nTexID == -1).
     // Caller manages texture binding via BindTexture() before RenderQuad2D.
+    // TECH DEBT (Story 7-9-2 review Finding #3): Raw glEnable/glDisable(GL_TEXTURE_2D)
+    // calls below are GL state management explicitly out-of-scope per AC-8. On non-GL
+    // backends these resolve to no-op stubs (stdafx.h). Future texture-state abstraction
+    // should route these through IMuRenderer.
     if (m_nTexID >= 0)
     {
         if (!TextureEnable)

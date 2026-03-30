@@ -58,10 +58,12 @@ struct FogParams
 
 // ---------------------------------------------------------------------------
 // Vertex2D: Screen-space quad vertex (texture-mapped 2D).
+// (x, y) are final screen pixels (post-conversion). Callers convert from
+// their source coordinate space (e.g., 640x480 logical) before constructing.
 // ---------------------------------------------------------------------------
 struct Vertex2D
 {
-    float x, y;          // screen position
+    float x, y;          // screen position (final pixels)
     float u, v;          // texture coordinates
     std::uint32_t color; // packed ABGR (matches GL vertex colour layout)
 };
@@ -92,7 +94,7 @@ public:
     // Render world-space triangles (vertex count must be divisible by 3).
     virtual void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
-    // Render a triangle strip from a sequence of world-space vertices.
+    // Render a quad strip from world-space vertices (requires >= 4 vertices, even count ideal).
     virtual void RenderQuadStrip(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
     // Set the active alpha-blending equation.
@@ -117,6 +119,8 @@ public:
     // Story 7-9-2 (AC-2): 2D orthographic pass — replaces BeginBitmap()/EndBitmap().
     // Begin2DPass sets up orthographic projection for screen-space rendering.
     // End2DPass restores the previous projection state.
+    // NOTE: OpenGL backend disables depth test in Begin2DPass and re-enables in End2DPass
+    // as a side effect. SDL_gpu backend handles depth per-pipeline; these are no-ops there.
     virtual void Begin2DPass() = 0;
     virtual void End2DPass() = 0;
 
@@ -133,6 +137,7 @@ public:
 
     // Story 7-9-2 (AC-5): Render line primitives (GL_LINES replacement).
     // Used by debug visualizations (collision, skeleton, waypoint gizmos).
+    // Vertex count should be even (pairs); odd count logs a warning, last vertex ignored.
     virtual void RenderLines(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
     // Story 7-9-2 (AC-6): Query whether a frame is currently active.

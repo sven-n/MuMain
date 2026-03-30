@@ -1,6 +1,9 @@
 #pragma once
 
 #ifdef _WIN32
+#include <windows.h>
+// Undefine SetConsoleTitle macro to prevent collision with leaf::SetConsoleTitle (Story 7.6.5)
+#undef SetConsoleTitle
 // On Windows, all functions come from Win32 APIs.
 // Include <string> and <filesystem> explicitly for utilities below.
 #include <filesystem>

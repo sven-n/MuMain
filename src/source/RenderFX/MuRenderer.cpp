@@ -42,9 +42,9 @@ public:
     // -----------------------------------------------------------------------
     void RenderQuad2D(std::span<const Vertex2D> vertices, std::uint32_t textureId) override
     {
-        if (vertices.empty())
+        if (vertices.size() != 4)
         {
-            g_ErrorReport.Write(L"RENDER: MuRenderer::RenderQuad2D -- vertex buffer empty");
+            g_ErrorReport.Write(L"RENDER: MuRenderer::RenderQuad2D -- requires 4 vertices, got %zu", vertices.size());
             return;
         }
 
@@ -85,9 +85,10 @@ public:
     // -----------------------------------------------------------------------
     void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
-        if (vertices.empty())
+        if (vertices.empty() || vertices.size() % 3 != 0)
         {
-            g_ErrorReport.Write(L"RENDER: MuRenderer::RenderTriangles -- vertex buffer empty");
+            g_ErrorReport.Write(L"RENDER: MuRenderer::RenderTriangles -- requires multiple of 3 vertices, got %zu",
+                                vertices.size());
             return;
         }
 
@@ -123,9 +124,10 @@ public:
     // -----------------------------------------------------------------------
     void RenderQuadStrip(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
-        if (vertices.empty())
+        if (vertices.size() < 4)
         {
-            g_ErrorReport.Write(L"RENDER: MuRenderer::RenderQuadStrip -- vertex buffer empty");
+            g_ErrorReport.Write(L"RENDER: MuRenderer::RenderQuadStrip -- requires >= 4 vertices, got %zu",
+                                vertices.size());
             return;
         }
 
@@ -155,6 +157,8 @@ public:
     // -----------------------------------------------------------------------
     void BeginScene(int x, int y, int w, int h) override
     {
+        // Integer arithmetic matches original BeginOpengl() in ZzzOpenglUtil.cpp.
+        // SDL_gpu backend uses float; rounding may differ by ±1 pixel for odd values.
         x = x * WindowWidth / 640;
         y = y * WindowHeight / 480;
         w = w * WindowWidth / 640;
@@ -239,6 +243,7 @@ public:
     // -----------------------------------------------------------------------
     // Story 7-9-2 (AC-2): End2DPass — restore matrix state after 2D pass.
     // Mirrors the current EndBitmap() body in ZzzOpenglUtil.cpp.
+    // Story 7-9-2 (Code Review Fix): Restore depth test disabled in Begin2DPass.
     // -----------------------------------------------------------------------
     void End2DPass() override
     {
@@ -246,6 +251,7 @@ public:
         glPopMatrix();
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
+        glEnable(GL_DEPTH_TEST); // Restore depth test (disabled in Begin2DPass)
     }
 
     // -----------------------------------------------------------------------
@@ -271,6 +277,11 @@ public:
         if (vertices.empty())
         {
             return;
+        }
+        if (vertices.size() % 2 != 0)
+        {
+            g_ErrorReport.Write(L"RENDER: MuRenderer::RenderLines -- odd vertex count %zu, last vertex ignored",
+                                vertices.size());
         }
 
         (void)textureId;

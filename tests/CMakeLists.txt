@@ -143,6 +143,14 @@ target_sources(MuTests PRIVATE render/test_texturesystemmigration.cpp)
 # Tests compile and run on macOS/Linux — no gl* calls in this TU.
 target_sources(MuTests PRIVATE render/test_blendpipelinestate_migration.cpp)
 
+# Story 7.9.2: OpenGL Immediate-Mode → MuRenderer Abstraction Migration [VS0-QUAL-RENDER-GLMIGRATE]
+# GREEN PHASE: Tests verify new IMuRenderer methods (BeginScene/EndScene, Begin2DPass/End2DPass,
+# RenderLines, ClearScreen, IsFrameActive), CSprite coordinate conversion formula
+# (640×480 → screen pixels with Y-axis inversion), and ABGR color packing.
+# All tests use MigrationCaptureMock — no gl* calls in this TU.
+# Tests compile and run on macOS/Linux without Win32, OpenGL, or a GPU device.
+target_sources(MuTests PRIVATE render/test_gl_migration_7_9_2.cpp)
+
 # Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
 # GREEN PHASE: Tests verify IPlatformAudio interface purity (std::is_abstract_v),
 # g_platformAudio starts as nullptr, MiniAudioBackend default-constructs cleanly,
@@ -435,10 +443,34 @@ target_include_directories(MuStabilityTests PRIVATE
     "${CMAKE_SOURCE_DIR}/src/source/Platform/MiniAudio"
 )
 
+# Story 7.3.2: Linux 60-Minute Stability Session [VS0-QUAL-STABILITY-LINUX]
+# RED PHASE: Infrastructure tests verify MuTimer hitch/FPS APIs (AC-4) and
+# log-scan utility for ERROR entry counting (AC-5). Manual session ACs (AC-1,
+# AC-2, AC-3, AC-6, AC-VAL-1, AC-VAL-2, AC-VAL-3) use Catch2 SKIP until the
+# stability session is conducted and SESSION_* constants are populated.
+# Tests compile and run on macOS/Linux/Windows (MinGW CI) — no Win32 or GUI required.
+# GREEN PHASE: Populate SESSION_* constants, remove SKIP markers, all tests pass.
+# Standalone target mirrors MuStabilityTests pattern from story 7.3.1.
+add_executable(MuLinuxStabilityTests stability/test_linux_stability_session.cpp)
+target_sources(MuLinuxStabilityTests PRIVATE stubs/test_game_stubs.cpp)
+target_link_libraries(MuLinuxStabilityTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform MURenderFX MUAudio)
+if(MU_ENABLE_SDL3)
+    target_link_libraries(MuLinuxStabilityTests PRIVATE SDL3::SDL3-static)
+endif()
+if(APPLE)
+    target_link_libraries(MuLinuxStabilityTests PRIVATE "-framework OpenGL")
+endif()
+target_include_directories(MuLinuxStabilityTests PRIVATE
+    "${CMAKE_SOURCE_DIR}/src/source/Core"
+    "${CMAKE_SOURCE_DIR}/src/dependencies/miniaudio"
+    "${CMAKE_SOURCE_DIR}/src/source/Platform/MiniAudio"
+)
+
 include(CTest)
 include(Catch)
 catch_discover_tests(MuTests)
 catch_discover_tests(MuStabilityTests)
+catch_discover_tests(MuLinuxStabilityTests)
 
 # Build system validation tests (CMake script mode, no Catch2)
 add_subdirectory(build)

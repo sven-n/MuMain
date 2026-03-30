@@ -2,11 +2,7 @@
 
 #ifdef _EDITOR
 
-#ifdef _WIN32
-#include <windows.h>
-#else
 #include "Platform/PlatformCompat.h"
-#endif
 #include <string>
 #include "ItemStructs.h"
 #include "ItemFieldDefs.h"

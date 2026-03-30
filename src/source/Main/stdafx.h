@@ -66,21 +66,11 @@
 #include <ctime>
 #include <cassert>
 
-#ifdef _WIN32
-#include <windows.h>
-// Undefine SetConsoleTitle macro to prevent collision with leaf::SetConsoleTitle (Story 7.6.5)
-#undef SetConsoleTitle
 #include "Platform/PlatformCompat.h"
-#else
-#include "Platform/PlatformTypes.h"
-#include "Platform/PlatformCompat.h"
-#endif
 
-#ifdef _WIN32
 #ifdef MU_USE_OPENGL_BACKEND
 #include <gl/glew.h>
 #include <gl/GL.h>
-#endif // MU_USE_OPENGL_BACKEND
 #else
 typedef unsigned int GLuint;
 typedef int GLint;
@@ -260,7 +250,7 @@ inline void glFogi(GLenum, GLint) {}
 inline void glFogf(GLenum, GLfloat) {}
 inline void glFogfv(GLenum, const GLfloat*) {}
 #endif // MU_ENABLE_SDL3
-#endif // _WIN32
+#endif // MU_USE_OPENGL_BACKEND
 
 // client - base definitions
 #include "Core/Defined_Global.h"
@@ -347,10 +337,6 @@ inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... ar
     return std::swprintf(buffer, N, format, args...);
 }
 #endif // MU_SWPRINTF_DEFINED
-#endif
-
-#ifndef _WIN32
-extern HWND g_hWnd;
 #endif
 
 inline std::wstring g_strSelectedML = L"";

@@ -17,7 +17,7 @@
 #include <sys/sysctl.h>
 #endif
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #include <fcntl.h>
 #include <unistd.h>
 #endif
@@ -110,7 +110,7 @@ void CErrorReport::Create(const wchar_t* lpszFileName)
         fprintf(stderr, "PLAT: ErrorReport — cannot create %s\n", m_filePath.string().c_str());
     }
 
-#ifndef _WIN32
+#ifndef _MSC_VER
     // Expose a raw file descriptor for async-signal-safe crash handler writes.
     // open() with O_WRONLY|O_APPEND is the portable POSIX approach — avoids
     // relying on non-standard rdbuf()->fd() extensions.
@@ -130,7 +130,7 @@ void CErrorReport::Create(const wchar_t* lpszFileName)
 
 void CErrorReport::Destroy(void)
 {
-#ifndef _WIN32
+#ifndef _MSC_VER
     // Close the async-signal-safe fd before closing the stream.
     // [VS0-QUAL-SIGNAL-HANDLERS]
     int fd = g_errorReportFd;
@@ -263,7 +263,7 @@ void CErrorReport::WriteCurrentTime(BOOL bLineShift)
     auto now = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(now);
     std::tm tm_local{};
-#ifdef _WIN32
+#ifdef _MSC_VER
     localtime_s(&tm_local, &t);
 #else
     localtime_r(&t, &tm_local);

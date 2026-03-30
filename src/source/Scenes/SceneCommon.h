@@ -2,11 +2,6 @@
 
 // SceneCommon.h - Shared utilities used by multiple scenes
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include "Platform/PlatformCompat.h"
-#endif
 #include "mu_define.h" // For MAX_CHARACTERS_PER_ACCOUNT
 
 //=============================================================================

@@ -2,10 +2,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 
-#define WIN32_LEAN_AND_MEAN
-#define WIN32_EXTRA_LEAN
-
-#include <dpapi.h>
 #include <clocale>
 #include "Data/GameConfig.h"
 #include "UIWindows.h"
@@ -24,10 +20,6 @@
 #include "ZzzLodTerrain.h"
 #include "DSPlaySound.h"
 
-#ifdef _WIN32
-#include "resource.h"
-#endif
-#include <imm.h>
 #include "ZzzPath.h"
 #include "Local.h"
 #include "PersonalShopTitleImp.h"
@@ -41,7 +33,6 @@
 #include "ThirdParty/regkey.h"
 
 #include "CSChaosCastle.h"
-#include <io.h>
 #include "Input.h"
 #include "Core/Timer.h"
 #include "Core/MuTimer.h"
@@ -100,6 +91,26 @@ CTimer* g_pTimer = new CTimer(); // performance counter.
 mu::MuTimer g_muFrameTimer;      // frame time instrumentation (Story 7.2.1)
 bool Destroy = false;
 bool ActiveIME = false;
+
+// Story 7.9.3: Global variables previously in WinMain/Win32 init block.
+// Definitions moved here after Win32 entry point deletion; externs remain in
+// Winmain.h, SDLEventLoop.cpp, and various game-code files.
+wchar_t m_Username[11] = {};
+wchar_t m_Password[21] = {};
+wchar_t m_ExeVersion[11] = {};
+int m_SoundOnOff = 0;
+int m_MusicOnOff = 0;
+int m_RememberMe = 0;
+int g_iRenderTextType = 0;
+int g_iNoMouseTime = 0;
+int g_iMousePopPosition_x = 0;
+int g_iMousePopPosition_y = 0;
+bool g_bWndActive = false;
+bool g_bEnterPressed = false;
+double g_TargetFpsBeforeInactive = -1.0;
+bool g_HasInactiveFpsOverride = false;
+double CPU_AVG = 0.0;
+int g_MaxMessagePerCycle = 1;
 
 // Game memory allocations (Story 7.9.1: C++20 smart pointers)
 std::unique_ptr<BYTE[]> g_RendomMemoryDumpPtr;
@@ -204,266 +215,36 @@ void CheckHack()
     }
 }
 
+// Story 7.9.3: Functions previously defined in the Win32 code block of Winmain.cpp.
+// Restored as cross-platform stubs or full implementations after WinMain deletion.
+
+void SetMaxMessagePerCycle(int messages)
+{
+    constexpr int custom_min = 3;
+    g_MaxMessagePerCycle = (messages > 0) ? std::max<int>(messages, custom_min) : messages;
+}
+
 GLvoid KillGLWindow(GLvoid)
 {
+    // Legacy OpenGL context teardown. On SDL3/SDL_gpu path this is a no-op;
+    // MuRenderer::Shutdown() handles GPU resource cleanup.
+#ifndef MU_ENABLE_SDL3
     if (g_hRC)
     {
         wglMakeCurrent(nullptr, nullptr);
-        if (!wglDeleteContext(g_hRC))
-        {
-            g_ErrorReport.Write(L"GL - Release Rendering Context Failed\r\n");
-            MessageBox(nullptr, L"Release Rendering Context Failed.", L"Error", MB_OK | MB_ICONINFORMATION);
-        }
-
+        wglDeleteContext(g_hRC);
         g_hRC = nullptr;
     }
-
-    if (g_hDC && !ReleaseDC(g_hWnd, g_hDC))
+    if (g_hDC)
     {
-        g_ErrorReport.Write(L"GL - OpenGL Release Error\r\n");
-        MessageBox(nullptr, L"OpenGL Release Error.", L"Error", MB_OK | MB_ICONINFORMATION);
+        ReleaseDC(g_hWnd, g_hDC);
         g_hDC = nullptr;
     }
-
-    if (g_bUseWindowMode == FALSE && g_bUseFullscreenMode == TRUE)
-    {
-        ChangeDisplaySettings(nullptr, 0);
-        ShowCursor(TRUE);
-    }
-}
-
-BOOL GetFileNameOfFilePath(wchar_t* lpszFile, wchar_t* lpszPath)
-{
-    auto iFind = (int)'\\';
-    wchar_t* lpFound = lpszPath;
-    wchar_t* lpOld = lpFound;
-    while (lpFound)
-    {
-        lpOld = lpFound;
-        lpFound = wcschr(lpFound + 1, iFind);
-    }
-
-    if (wcschr(lpszPath, iFind))
-    {
-        wcscpy(lpszFile, lpOld + 1);
-    }
-    else
-    {
-        wcscpy(lpszFile, lpOld);
-    }
-
-    BOOL bCheck = TRUE;
-    for (wchar_t* lpTemp = lpszFile; bCheck; ++lpTemp)
-    {
-        switch (*lpTemp)
-        {
-        case '\"':
-        case '\\':
-        case '/':
-        case ' ':
-            *lpTemp = '\0';
-        case '\0':
-            bCheck = FALSE;
-            break;
-        }
-    }
-
-    return (TRUE);
-}
-
-WORD DecryptCheckSumKey(WORD wSource)
-{
-    WORD wAcc = wSource ^ 0xB479;
-    return ((wAcc >> 10) << 4) | (wAcc & 0xF);
-}
-
-DWORD GenerateCheckSum(BYTE* pbyBuffer, DWORD dwSize, WORD wKey)
-{
-    auto dwKey = (DWORD)wKey;
-    DWORD dwResult = dwKey << 9;
-    for (DWORD dwChecked = 0; dwChecked <= dwSize - 4; dwChecked += 4)
-    {
-        DWORD dwTemp;
-        memcpy(&dwTemp, pbyBuffer + dwChecked, sizeof(DWORD));
-
-        switch ((dwChecked / 4 + wKey) % 3)
-        {
-        case 0:
-            dwResult ^= dwTemp;
-            break;
-        case 1:
-            dwResult += dwTemp;
-            break;
-        case 2:
-            dwResult <<= (dwTemp % 11);
-            dwResult ^= dwTemp;
-            break;
-        }
-
-        if (0 == (dwChecked % 4))
-        {
-            dwResult ^= ((dwKey + dwResult) >> ((dwChecked / 4) % 16 + 3));
-        }
-    }
-
-    return (dwResult);
-}
-
-DWORD GetCheckSum(WORD wKey)
-{
-    wKey = DecryptCheckSumKey(wKey);
-
-    wchar_t lpszFile[MAX_PATH];
-
-    wcscpy(lpszFile, L"data\\local\\Gameguard.csr");
-
-    HANDLE hFile =
-        CreateFile(lpszFile, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-    if (INVALID_HANDLE_VALUE == hFile)
-    {
-        return (0);
-    }
-
-    DWORD dwSize = GetFileSize(hFile, nullptr);
-    auto* pbyBuffer = new BYTE[dwSize];
-    DWORD dwNumber;
-    ReadFile(hFile, pbyBuffer, dwSize, &dwNumber, nullptr);
-    CloseHandle(hFile);
-
-    DWORD dwCheckSum = GenerateCheckSum(pbyBuffer, dwSize, wKey);
-    delete[] pbyBuffer;
-
-    return (dwCheckSum);
-}
-
-BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion)
-{
-    DWORD dwHandle;
-    DWORD dwLen = GetFileVersionInfoSize(lpszFileName, &dwHandle);
-    if (dwLen <= 0)
-    {
-        return (FALSE);
-    }
-
-    auto* pbyData = new BYTE[dwLen];
-    if (!GetFileVersionInfo(lpszFileName, dwHandle, dwLen, pbyData))
-    {
-        delete[] pbyData;
-        return (FALSE);
-    }
-
-    VS_FIXEDFILEINFO* pffi;
-    UINT uLen;
-    // cppcheck-suppress dangerousTypeCast
-    if (!VerQueryValue(pbyData, L"\\", (LPVOID*)&pffi, &uLen))
-    {
-        delete[] pbyData;
-        return (FALSE);
-    }
-
-    pwVersion[0] = HIWORD(pffi->dwFileVersionMS);
-    pwVersion[1] = LOWORD(pffi->dwFileVersionMS);
-    pwVersion[2] = HIWORD(pffi->dwFileVersionLS);
-    pwVersion[3] = LOWORD(pffi->dwFileVersionLS);
-
-    delete[] pbyData;
-    return (TRUE);
-}
-
-extern PATH* path;
-
-void DestroyWindow()
-{
-    // Save game configuration to config.ini
-    GameConfig::GetInstance().SetVolumeLevel(g_pOption->GetVolumeLevel());
-    // Story 5.4.1: Persist separate BGM and SFX volume levels
-    GameConfig::GetInstance().SetBGMVolumeLevel(g_pOption->GetBGMVolumeLevel());
-    GameConfig::GetInstance().SetSFXVolumeLevel(g_pOption->GetSFXVolumeLevel());
-    GameConfig::GetInstance().Save();
-
-#ifdef _EDITOR
-    // Save editor configuration
-    g_MuEditorConfig.Save();
 #endif
-
-    CUIMng::Instance().Release();
-
-    //. release font handle
-    if (g_hFont)
-        DeleteObject((HGDIOBJ)g_hFont);
-
-    if (g_hFontBold)
-        DeleteObject((HGDIOBJ)g_hFontBold);
-
-    if (g_hFontBig)
-        DeleteObject((HGDIOBJ)g_hFontBig);
-
-    if (g_hFixFont)
-        ::DeleteObject((HGDIOBJ)g_hFixFont);
-
-    ReleaseCharacters();
-
-    SAFE_DELETE(GateAttribute);
-
-    SAFE_DELETE(SkillAttribute);
-
-    SAFE_DELETE(CharacterMachine);
-
-    DeleteWaterTerrain();
-
-    {
-        gMapManager.DeleteObjects();
-
-        // Object.
-        for (int i = MODEL_LOGO; i < MAX_MODELS; i++)
-        {
-            Models[i].Release();
-        }
-
-        // Bitmap
-        Bitmaps.UnloadAllImages();
-    }
-
-    SAFE_DELETE_ARRAY(CharacterMemoryDump);
-    SAFE_DELETE_ARRAY(ItemAttRibuteMemoryDump);
-    SAFE_DELETE_ARRAY(RendomMemoryDump);
-    SAFE_DELETE_ARRAY(ModelsDump);
-
-#ifdef DYNAMIC_FRUSTRUM
-    DeleteAllFrustrum();
-#endif // DYNAMIC_FRUSTRUM
-
-    SAFE_DELETE(g_pMercenaryInputBox);
-    SAFE_DELETE(g_pSingleTextInputBox);
-    SAFE_DELETE(g_pSinglePasswdInputBox);
-
-    SAFE_DELETE(g_pUIMapName); // rozy
-    SAFE_DELETE(g_pTimer);
-    SAFE_DELETE(g_pUIManager);
-
-    SAFE_DELETE(pMultiLanguage);
-    PtrReset(g_BuffSystem);
-    PtrReset(g_MapProcess);
-    PtrReset(g_petProcess);
-
-    g_ErrorReport.Write(L"Destroy");
-
-    HWND shWnd = FindWindow(nullptr, L"MuPlayer");
-    if (shWnd)
-        SendMessage(shWnd, WM_DESTROY, 0, 0);
 }
+
 void DestroySound()
 {
-    // Story 5.2.2: InitDirectSound / FreeDirectSound removed — g_platformAudio (MiniAudioBackend)
-    // handles all audio lifecycle. DirectSoundManager is dormant (never initialized).
-    // ReleaseBuffer loop also removed — Manager().ReleaseBuffer() is a no-op on an
-    // uninitialized DirectSoundManager; removing it avoids unnecessary legacy code paths.
-
-    // Story 5.2.1: g_platformAudio lifecycle — Shutdown + delete replaces wzAudioDestroy().
-    // LOW-1 (code-review-finalize 2026-03-20): raw delete is a pre-existing pattern from
-    // Story 5.1.1. Migrating g_platformAudio to std::unique_ptr requires updating the
-    // extern declaration in IPlatformAudio.h and all assignment sites across Winmain.cpp.
-    // Deferred to a dedicated cleanup story — tracked in backlog.
     if (g_platformAudio != nullptr)
     {
         g_platformAudio->Shutdown();
@@ -472,302 +253,13 @@ void DestroySound()
     }
 }
 
-int g_iInactiveTime = 0;
-int g_iNoMouseTime = 0;
-int g_iInactiveWarning = 0;
-bool g_bWndActive = false;
-bool HangulDelete = false;
-int Hangul = 0;
-bool g_bEnterPressed = false;
-
-double g_TargetFpsBeforeInactive = -1.0;
-bool g_HasInactiveFpsOverride = false;
-
-int g_iMousePopPosition_x = 0;
-int g_iMousePopPosition_y = 0;
-
-extern int TimeRemain;
-extern bool EnableFastInput;
-
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+DWORD GetCheckSum(WORD wKey)
 {
-#ifdef _EDITOR
-    // Only forward messages to ImGui when editor is open
-    // When editor is closed, we handle button clicks manually in RenderToolbarOpen
-    if (g_MuEditorCore.IsEnabled())
-    {
-        if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
-            return true;
-    }
-#endif
-
-    switch (msg)
-    {
-    case WM_SYSKEYDOWN:
-    {
-        return 0;
-    }
-    break;
-    case WM_ACTIVATE:
-        if (LOWORD(wParam) == WA_INACTIVE)
-        {
-#ifdef ACTIVE_FOCUS_OUT
-            if (g_bUseWindowMode == FALSE)
-#endif // ACTIVE_FOCUS_OUT
-                g_bWndActive = false;
-
-            if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
-            {
-                g_TargetFpsBeforeInactive = GetTargetFps();
-                SetTargetFps(REFERENCE_FPS);
-                g_HasInactiveFpsOverride = true;
-            }
-            if (g_bUseWindowMode == TRUE)
-            {
-                MouseLButton = false;
-                MouseLButtonPop = false;
-                // MouseLButtonPush = false;
-                MouseRButton = false;
-                MouseRButtonPop = false;
-                MouseRButtonPush = false;
-                MouseLButtonDBClick = false;
-                MouseMButton = false;
-                MouseMButtonPop = false;
-                MouseMButtonPush = false;
-                MouseWheel = 0;
-            }
-        }
-        else
-        {
-            g_bWndActive = true;
-
-            if (g_HasInactiveFpsOverride)
-            {
-                SetTargetFps(g_TargetFpsBeforeInactive);
-                g_HasInactiveFpsOverride = false;
-            }
-        }
-        break;
-    case WM_TIMER:
-        switch (wParam)
-        {
-        case HACK_TIMER:
-            CheckHack();
-            break;
-        case WINDOWMINIMIZED_TIMER:
-            PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-            break;
-        case CHATCONNECT_TIMER:
-            g_pFriendMenu->SendChatRoomConnectCheck();
-            break;
-        case SLIDEHELP_TIMER:
-            if (g_bWndActive)
-            {
-                if (g_pSlideHelpMgr)
-                    g_pSlideHelpMgr->CreateSlideText();
-            }
-            break;
-        }
-        break;
-    case WM_RECEIVE_BUFFER:
-    {
-        auto Packet = std::unique_ptr<PacketInfo>(reinterpret_cast<PacketInfo*>(wParam));
-        ProcessPacketCallback(Packet.release());
-        break;
-    }
-    case WM_NPROTECT_EXIT_TWO:
-        SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
-        SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, nullptr);
-        MessageBox(nullptr, GlobalText[16], L"Error", MB_OK);
-        break;
-    case WM_CTLCOLOREDIT:
-        SetBkColor((HDC)wParam, RGB(0, 0, 0));
-        SetTextColor((HDC)wParam, RGB(255, 255, 255));
-        return (LRESULT)GetStockObject(BLACK_BRUSH);
-        break;
-    case WM_ERASEBKGND:
-        return TRUE;
-        break;
-    case WM_PAINT:
-    {
-        PAINTSTRUCT ps;
-        HDC hDC = BeginPaint(hwnd, &ps);
-        EndPaint(hwnd, &ps);
-    }
-        return 0;
-        break;
-    case WM_DESTROY:
-    {
-        Destroy = true;
-        if (SocketClient != nullptr)
-        {
-            SocketClient->Close();
-            g_bGameServerConnected = false;
-        }
-
-        DestroySound();
-        // DestroyWindow();
-        KillGLWindow();
-        PostQuitMessage(0);
-    }
-    break;
-    case WM_SETCURSOR:
-#ifdef _EDITOR
-        // When hovering UI (including Open Editor button), let Windows show cursor
-        // Otherwise hide Windows cursor for game cursor
-        if (g_MuEditorCore.IsHoveringUI())
-        {
-            // Let Windows cursor show - don't hide it
-            return DefWindowProc(hwnd, msg, wParam, lParam);
-        }
-        else
-#endif
-        {
-            ShowCursor(false);
-        }
-        break;
-        //-----------------------------
-    default:
-        break;
-    }
-
-    MouseLButtonDBClick = false;
-    if (MouseLButtonPop == true && (g_iMousePopPosition_x != MouseX || g_iMousePopPosition_y != MouseY))
-        MouseLButtonPop = false;
-    switch (msg)
-    {
-    case WM_MOUSEMOVE:
-    {
-        MouseX = (float)LOWORD(lParam) / g_fScreenRate_x;
-        MouseY = (float)HIWORD(lParam) / g_fScreenRate_y;
-        if (MouseX < 0)
-            MouseX = 0;
-        if (MouseX > 640)
-            MouseX = 640;
-        if (MouseY < 0)
-            MouseY = 0;
-        if (MouseY > 480)
-            MouseY = 480;
-    }
-    break;
-    case WM_LBUTTONDOWN:
-        g_iNoMouseTime = 0;
-        MouseLButtonPop = false;
-        if (!MouseLButton)
-            MouseLButtonPush = true;
-        MouseLButton = true;
-        SetCapture(g_hWnd);
-        break;
-    case WM_LBUTTONUP:
-        g_iNoMouseTime = 0;
-        MouseLButtonPush = false;
-        if (MouseLButton)
-            MouseLButtonPop = true;
-        MouseLButton = false;
-        g_iMousePopPosition_x = MouseX;
-        g_iMousePopPosition_y = MouseY;
-        ReleaseCapture();
-        break;
-    case WM_RBUTTONDOWN:
-        g_iNoMouseTime = 0;
-        MouseRButtonPop = false;
-        if (!MouseRButton)
-            MouseRButtonPush = true;
-        MouseRButton = true;
-        SetCapture(g_hWnd);
-        break;
-    case WM_RBUTTONUP:
-        g_iNoMouseTime = 0;
-        MouseRButtonPush = false;
-        if (MouseRButton)
-            MouseRButtonPop = true;
-        MouseRButton = false;
-        ReleaseCapture();
-        break;
-    case WM_LBUTTONDBLCLK:
-        g_iNoMouseTime = 0;
-        MouseLButtonDBClick = true;
-        break;
-    case WM_MBUTTONDOWN:
-        g_iNoMouseTime = 0;
-        MouseMButtonPop = false;
-        if (!MouseMButton)
-            MouseMButtonPush = true;
-        MouseMButton = true;
-        SetCapture(g_hWnd);
-        break;
-    case WM_MBUTTONUP:
-        g_iNoMouseTime = 0;
-        MouseMButtonPush = false;
-        if (MouseMButton)
-            MouseMButtonPop = true;
-        MouseMButton = false;
-        ReleaseCapture();
-        break;
-    case WM_MOUSEWHEEL:
-    {
-        MouseWheel = (short)HIWORD(wParam) / WHEEL_DELTA;
-    }
-    break;
-    case WM_IME_NOTIFY:
-    {
-        if (g_iChatInputType == 1)
-        {
-            switch (wParam)
-            {
-            case IMN_SETCONVERSIONMODE:
-                if (GetFocus() == g_hWnd)
-                {
-                    CheckTextInputBoxIME(IME_CONVERSIONMODE);
-                }
-                break;
-            case IMN_SETSENTENCEMODE:
-                if (GetFocus() == g_hWnd)
-                {
-                    CheckTextInputBoxIME(IME_SENTENCEMODE);
-                }
-                break;
-            default:
-                break;
-            }
-        }
-    }
-    break;
-    case WM_CHAR:
-    {
-        switch (wParam)
-        {
-        case VK_RETURN:
-        {
-            SetEnterPressed(true);
-        }
-        break;
-        }
-    }
-    break;
-    }
-
-    if (g_BuffSystem)
-    {
-        LRESULT result;
-        TheBuffStateSystem().HandleWindowMessage(msg, wParam, lParam, result);
-    }
-
-    return DefWindowProc(hwnd, msg, wParam, lParam);
+    // Checksum validation stub. The original implementation used Win32 CreateFile/ReadFile
+    // on a GameGuard file. On cross-platform builds, return 0 (no GameGuard).
+    (void)wKey;
+    return 0;
 }
-
-wchar_t m_Username[11];
-wchar_t m_Password[21];
-wchar_t m_Version[11];
-wchar_t m_ExeVersion[11];
-int m_SoundOnOff;
-int m_MusicOnOff;
-int m_Resolution;
-int m_nColorDepth;
-int m_RememberMe;
-int g_iRenderTextType = 0;
-
-wchar_t g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = {'\0'};
 
 BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring& lpszString)
 {
@@ -776,7 +268,6 @@ BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstrin
         return FALSE;
     }
 
-    // Create both lowercase and uppercase variants of the option character
     std::wstring cOptionLower = L"/";
     cOptionLower += static_cast<wchar_t>(towlower(static_cast<wint_t>(cOption)));
     auto foundIndex = lpszCommandLine.find(cOptionLower);
@@ -802,658 +293,11 @@ BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstrin
     return TRUE;
 }
 
-#include <tlhelp32.h>
-
-wchar_t g_lpszCmdURL[50];
-BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
-{
-    std::wstring lpszTemp = {
-        0,
-    };
-
-    if (!Util_CheckOption(szCmdLine, L'u', lpszTemp))
-    {
-        return FALSE;
-    }
-
-    wcscpy(lpszURL, lpszTemp.c_str());
-    if (!Util_CheckOption(szCmdLine, L'p', lpszTemp))
-    {
-        return FALSE;
-    }
-
-    *pwPort = static_cast<WORD>(std::stoi(lpszTemp));
-
-    return TRUE;
-}
-
-extern int TimeRemain;
-BOOL g_bInactiveTimeChecked = FALSE;
-void MoveObject(OBJECT* o);
-
-bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
-{
-    if (g_bUseWindowMode == FALSE && g_bUseFullscreenMode == TRUE)
-    {
-        ChangeDisplaySettings(nullptr, 0);
-    }
-    return true;
-}
-
-double CPU_AVG = 0.0;
-void RecordCpuUsage()
-{
-    constexpr int max_recordings = 60;
-    double CPU_Recordings[max_recordings] = {0.0};
-    double currentAvg = 0.0;
-    double sum = 0.0;
-    int count = 0;
-    int numFilled = 0;
-    auto lastUpdateTime = std::chrono::steady_clock::now();
-
-    while (!Destroy)
-    {
-        double currentUsage = CpuUsage::Instance()->GetUsage();
-
-        // GetUsage() returns [0.0, 1.0] (fractional). Clamp to valid range and convert to percentage for recording.
-        currentUsage = std::max<double>(0.0, std::min<double>(1.0, currentUsage)) * 100.0;
-
-        // Subtract the old value to maintain the sum
-        sum -= CPU_Recordings[count];
-
-        sum += currentUsage;
-
-        CPU_Recordings[count] = currentUsage;
-
-        // Update the count (wrap around when full - FIFO behavior)
-        count = (count + 1) % max_recordings;
-
-        if (numFilled < max_recordings)
-        {
-            numFilled++;
-        }
-
-        // Calculate the current average
-        currentAvg = sum / numFilled;
-
-        // Update the CPU_AVG every 250 ms
-        auto currentTime = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdateTime).count() >= 250)
-        {
-            CPU_AVG = currentAvg;
-            lastUpdateTime = currentTime;
-        }
-
-        // Sleep to match a 60Hz frame rate as the basis
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
-    }
-}
-
-// unlimited as default (same behavior as original)
-int g_MaxMessagePerCycle = -1;
-
-void SetMaxMessagePerCycle(int messages)
-{
-    constexpr int custom_min = 3;
-    g_MaxMessagePerCycle = (messages > 0) ? std::max<int>(messages, custom_min) : messages;
-}
-
-MSG MainLoop()
-{
-    MSG msg;
-
-    constexpr auto target_resolution = 1;
-    auto precise = timeBeginPeriod(target_resolution);
-
-    while (true)
-    {
-        int messageProcessed = 0;
-
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-        {
-            if (msg.message == WM_QUIT)
-            {
-                return msg;
-            }
-
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-            ++messageProcessed;
-
-            if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
-            {
-                break;
-            }
-        }
-
-        if (CheckRenderNextFrame())
-        {
-            g_muFrameTimer.FrameStart();
-            if (g_bUseWindowMode || g_bWndActive || g_HasInactiveFpsOverride)
-            {
-#ifdef _EDITOR
-                // F12 key toggle for editor
-                static bool wasF12Pressed = false;
-                if (GetAsyncKeyState(VK_F12) & 0x8000)
-                {
-                    if (!wasF12Pressed)
-                    {
-                        g_MuEditorCore.ToggleEditor();
-                        fwprintf(stderr, L"[Editor] Toggled: %s\n", g_MuEditorCore.IsEnabled() ? L"ON" : L"OFF");
-                        fflush(stderr);
-                        wasF12Pressed = true;
-                    }
-                }
-                else
-                {
-                    wasF12Pressed = false;
-                }
-
-                // Update editor UI (must be before RenderScene)
-                g_MuEditorCore.Update();
-#endif
-
-                // Render game scene (ImGui rendering happens inside before SwapBuffers)
-                RenderScene(g_hDC);
-            }
-            g_muFrameTimer.FrameEnd();
-        }
-        else
-        {
-            if (!PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE))
-            {
-                WaitForNextActivity(precise == TIMERR_NOERROR);
-            }
-        }
-
-    } // while( 1 )
-
-    if (precise == TIMERR_NOERROR)
-    {
-        timeEndPeriod(target_resolution);
-    }
-
-    return msg;
-}
-
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
-{
-    wchar_t lpszExeVersion[256] = L"unknown";
-
-    wchar_t* lpszCommandLine = GetCommandLine();
-    wchar_t lpszFile[MAX_PATH];
-    WORD wVersion[4] = {
-        0,
-    };
-    if (GetFileNameOfFilePath(lpszFile, lpszCommandLine))
-    {
-        if (GetFileVersion(lpszFile, wVersion))
-        {
-            mu_swprintf(lpszExeVersion, L"%d.%02d", wVersion[0], wVersion[1]);
-            if (wVersion[2] > 0)
-            {
-                wchar_t lpszMinorVersion[2] = L"a";
-                lpszMinorVersion[0] += (wVersion[2] - 1);
-                wcscat(lpszExeVersion, lpszMinorVersion);
-            }
-        }
-    }
-
-    g_ErrorReport.Write(L"\r\n");
-    g_ErrorReport.WriteLogBegin();
-    g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0],
-                        wVersion[1], wVersion[2], wVersion[3]);
-
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2],
-                          wVersion[3]);
-
-    g_ErrorReport.WriteCurrentTime();
-    ER_SystemInfo si;
-    ZeroMemory(&si, sizeof(ER_SystemInfo));
-    MuGetSystemInfo(&si);
-    g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteSystemInfo(&si);
-    g_ErrorReport.AddSeparator();
-
-    g_ErrorReport.Write(L"> To read config.ini.\r\n");
-
-    // Load game settings from INI file first
-    GameConfig::GetInstance().Load();
-
-    // Check for command line server override
-    WORD wPortNumber;
-    if (GetConnectServerInfo(GetCommandLine(), g_lpszCmdURL, &wPortNumber))
-    {
-        szServerIpAddress = g_lpszCmdURL;
-        g_ServerPort = wPortNumber;
-    }
-    else
-    {
-        // Use config.ini settings if no command line override
-        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
-        szServerIpAddress = serverIPFromConfig.c_str();
-        g_ServerPort = GameConfig::GetInstance().GetServerPort();
-    }
-
-    // #ifdef _DEBUG
-
-    m_Username[0] = '\0';
-    m_Password[0] = '\0';
-    m_SoundOnOff = 1;
-    m_MusicOnOff = 1;
-    m_Resolution = 0;
-    m_nColorDepth = 0;
-    m_RememberMe = 0;
-
-    g_iChatInputType = 1;
-
-    // Apply window settings from INI
-    WindowWidth = GameConfig::GetInstance().GetWindowWidth();
-    WindowHeight = GameConfig::GetInstance().GetWindowHeight();
-    g_bUseWindowMode = GameConfig::GetInstance().GetWindowMode() ? TRUE : FALSE;
-    g_bUseFullscreenMode = !g_bUseWindowMode;
-
-    // Apply audio settings from INI
-    m_SoundOnOff = GameConfig::GetInstance().GetSoundEnabled();
-    m_MusicOnOff = GameConfig::GetInstance().GetMusicEnabled();
-
-    // Apply graphics settings from INI
-    m_nColorDepth = GameConfig::GetInstance().GetColorDepth();
-    g_iRenderTextType = GameConfig::GetInstance().GetRenderTextType();
-
-    // Apply login settings from INI
-    m_RememberMe = GameConfig::GetInstance().GetRememberMe() ? 1 : 0;
-    std::wstring langSelection = GameConfig::GetInstance().GetLanguageSelection();
-    wcsncpy_s(g_aszMLSelection, langSelection.c_str(), MAX_LANGUAGE_NAME_LENGTH - 1);
-    g_strSelectedML = g_aszMLSelection;
-
-    if (m_RememberMe)
-    {
-        GameConfig::GetInstance().DecryptCredentials(m_Username, m_Password, _countof(m_Username),
-                                                     _countof(m_Password));
-    }
-
-    g_fScreenRate_x = (float)WindowWidth / 640;
-    g_fScreenRate_y = (float)WindowHeight / 480;
-
-    pMultiLanguage = new CMultiLanguage(g_strSelectedML);
-
-    if (g_iChatInputType == 1)
-        ShowCursor(FALSE);
-
-    g_ErrorReport.Write(L"> Enum display settings.\r\n");
-    DEVMODE DevMode;
-    DEVMODE* pDevmodes;
-    int nModes = 0;
-    while (EnumDisplaySettings(nullptr, nModes, &DevMode))
-        nModes++;
-    pDevmodes = new DEVMODE[nModes + 1];
-    nModes = 0;
-    while (EnumDisplaySettings(nullptr, nModes, &pDevmodes[nModes]))
-        nModes++;
-
-    DWORD dwBitsPerPel = 16;
-    for (int n1 = 0; n1 < nModes; n1++)
-    {
-        if (pDevmodes[n1].dmBitsPerPel == 16 && m_nColorDepth == 0)
-        {
-            dwBitsPerPel = 16;
-            break;
-        }
-        if (pDevmodes[n1].dmBitsPerPel == 24 && m_nColorDepth == 1)
-        {
-            dwBitsPerPel = 24;
-            break;
-        }
-        if (pDevmodes[n1].dmBitsPerPel == 32 && m_nColorDepth == 1)
-        {
-            dwBitsPerPel = 32;
-            break;
-        }
-    }
-
-    if (g_bUseWindowMode == FALSE && g_bUseFullscreenMode == TRUE)
-    {
-        for (int n2 = 0; n2 < nModes; n2++)
-        {
-            if (pDevmodes[n2].dmPelsWidth == WindowWidth && pDevmodes[n2].dmPelsHeight == WindowHeight &&
-                pDevmodes[n2].dmBitsPerPel == dwBitsPerPel)
-            {
-                g_ErrorReport.Write(L"> Change display setting %dx%d.\r\n", pDevmodes[n2].dmPelsWidth,
-                                    pDevmodes[n2].dmPelsHeight);
-                ChangeDisplaySettings(&pDevmodes[n2], 0);
-                break;
-            }
-        }
-    }
-
-    delete[] pDevmodes;
-
-    g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
-
-    g_hInst = hInstance;
-
-    const wchar_t* windowName = L"MU Online";
-    WNDCLASS wndClass;
-
-    wndClass.style = CS_HREDRAW | CS_VREDRAW;
-    wndClass.lpfnWndProc = WndProc;
-    wndClass.cbClsExtra = 0;
-    wndClass.cbWndExtra = 0;
-    wndClass.hInstance = hInstance;
-    wndClass.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_ICON1);
-    wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-    wndClass.lpszMenuName = nullptr;
-    wndClass.lpszClassName = windowName;
-
-    if (!RegisterClass(&wndClass))
-    {
-        MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
-        return 0;
-    }
-
-    if (g_bUseWindowMode == TRUE)
-    {
-        RECT rc = {0, 0, WindowWidth, WindowHeight};
-        AdjustWindowRect(&rc, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
-                         NULL);
-        g_hWnd = CreateWindowEx(0, windowName, windowName,
-                                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
-                                (GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2,
-                                (GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2, rc.right - rc.left, rc.bottom - rc.top,
-                                nullptr, nullptr, hInstance, nullptr);
-    }
-    else
-    {
-        g_hWnd = CreateWindowEx(WS_EX_TOPMOST | WS_EX_APPWINDOW, windowName, windowName, WS_POPUP, 0, 0, WindowWidth,
-                                WindowHeight, nullptr, nullptr, hInstance, nullptr);
-    }
-
-    g_ErrorReport.Write(L"> Start window success.\r\n");
-
-#ifdef MU_USE_OPENGL_BACKEND
-    // OpenGL pixel format and context setup — only when the OpenGL backend is active.
-    // When MU_USE_OPENGL_BACKEND is OFF (default), SDL_gpu owns the rendering context
-    // and OpenGL context creation is skipped entirely.
-    {
-        PIXELFORMATDESCRIPTOR pfd;
-
-        memset(&pfd, 0, sizeof(pfd));
-        pfd.nSize = sizeof(pfd);
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = 16;
-        pfd.cDepthBits = 16;
-
-        if (!(g_hDC = GetDC(g_hWnd)))
-        {
-            g_ErrorReport.Write(L"OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
-            KillGLWindow();
-            MessageBox(nullptr, GlobalText[4], L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
-            return FALSE;
-        }
-
-        GLuint PixelFormat;
-
-        if (!(PixelFormat = ChoosePixelFormat(g_hDC, &pfd)))
-        {
-            g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-            KillGLWindow();
-            MessageBox(nullptr, GlobalText[4], L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
-            return FALSE;
-        }
-
-        if (!SetPixelFormat(g_hDC, PixelFormat, &pfd))
-        {
-            g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-            KillGLWindow();
-            MessageBox(nullptr, GlobalText[4], L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
-            return FALSE;
-        }
-
-        if (!(g_hRC = wglCreateContext(g_hDC)))
-        {
-            g_ErrorReport.Write(L"OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
-            KillGLWindow();
-            MessageBox(nullptr, GlobalText[4], L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
-            return FALSE;
-        }
-
-        if (!wglMakeCurrent(g_hDC, g_hRC))
-        {
-            g_ErrorReport.Write(L"OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
-            KillGLWindow();
-            MessageBox(nullptr, GlobalText[4], L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
-            return FALSE;
-        }
-
-        g_ErrorReport.Write(L"> OpenGL init success.\r\n");
-        g_ErrorReport.AddSeparator();
-        g_ErrorReport.WriteOpenGLInfo();
-        g_ErrorReport.AddSeparator();
-        g_ErrorReport.WriteSoundCardInfo();
-    }
-#endif // MU_USE_OPENGL_BACKEND
-
-    ShowWindow(g_hWnd, SW_SHOW);
-    SetForegroundWindow(g_hWnd);
-    SetFocus(g_hWnd);
-
-    ShowWindow(g_hWnd, nCmdShow);
-    UpdateWindow(g_hWnd);
-
-    // Initialize game translations (always available)
-    {
-        i18n::Translator& translator = i18n::Translator::GetInstance();
-        bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game, L"Translations\\en\\game.json");
-        if (!gameLoaded)
-            gameLoaded = translator.LoadTranslations(i18n::Domain::Game, L"bin\\Translations\\en\\game.json");
-        translator.SetLocale("en");
-
-        if (gameLoaded)
-        {
-            g_ErrorReport.Write(L"> Game translations loaded successfully.\r\n");
-        }
-        else
-        {
-            g_ErrorReport.Write(L"> WARNING: Game translations not found (game.json missing).\r\n");
-        }
-    }
-
-#ifdef _EDITOR
-    // Initialize MU Editor
-    g_MuEditorCore.Initialize(g_hWnd, g_hDC);
-
-    // Check for --editor command line flag
-    if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
-    {
-        g_MuEditorCore.SetEnabled(true);
-        fwprintf(stderr, L"[Editor] Starting in editor mode (--editor flag detected)\n");
-        std::fflush(stderr);
-    }
-#endif
-
-    g_ErrorReport.WriteImeInfo(nullptr);
-    g_ErrorReport.AddSeparator();
-
-    InitVSync();
-    if (IsVSyncAvailable())
-    {
-        EnableVSync();
-        SetTargetFps(-1); // unlimited
-    }
-
-    FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
-
-    int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
-    int nFixFontSize;
-    int iFontSize;
-
-    iFontSize = FontHeight - 1;
-    nFixFontSize = nFixFontHeight - 1;
-
-    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                         CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                             CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                            CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                            CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-
-    setlocale(LC_ALL, "english");
-
-    CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
-
-    g_pNewUISystem->Create();
-
-    // Story 5.2.1: Wire g_platformAudio (MiniAudioBackend) into game startup.
-    // MEDIUM-3 fix (code-review-finalize 2026-03-19): guard allocation with
-    // m_MusicOnOff || m_SoundOnOff so we don't open an audio device (threads,
-    // file descriptors) when the user has explicitly disabled all audio.
-    // g_platformAudio == nullptr is handled safely by all PlayMp3/StopMp3 call sites.
-    // Raw pointer is intentional — consistent with legacy singleton pattern in Winmain.cpp.
-    // Ownership transferred to DestroySound() which calls Shutdown() + delete.
-    if (m_MusicOnOff || m_SoundOnOff)
-    {
-        g_platformAudio = new mu::MiniAudioBackend();
-        if (!g_platformAudio->Initialize())
-        {
-            g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::Initialize failed — game will run without audio\r\n");
-        }
-    }
-
-    if (m_SoundOnOff)
-    {
-        // Story 5.2.2: InitDirectSound(g_hWnd) removed — g_platformAudio (MiniAudioBackend)
-        // handles all SFX audio. DirectSoundManager is dormant (never initialized).
-
-        // Load SFX volume level from config.ini (legacy path preserved for option window)
-        int value = GameConfig::GetInstance().GetVolumeLevel();
-        if (value < 0 || value >= 10)
-            value = 5;
-
-        g_pOption->SetVolumeLevel(value);
-        // Story 5.4.1: SetEffectVolumeLevel removed — redundant with SetSFXVolume below
-    }
-
-    // Story 5.4.1: Restore BGM and SFX volume from config and populate g_pOption
-    {
-        int bgmLevel = GameConfig::GetInstance().GetBGMVolumeLevel();
-        int sfxLevel = GameConfig::GetInstance().GetSFXVolumeLevel();
-        if (bgmLevel < 0 || bgmLevel > 10)
-            bgmLevel = 5;
-        if (sfxLevel < 0 || sfxLevel > 10)
-            sfxLevel = 5;
-        g_pOption->SetBGMVolumeLevel(bgmLevel);
-        g_pOption->SetSFXVolumeLevel(sfxLevel);
-        if (g_platformAudio != nullptr)
-        {
-            g_platformAudio->SetBGMVolume(static_cast<float>(bgmLevel) / 10.0f);
-            g_platformAudio->SetSFXVolume(static_cast<float>(sfxLevel) / 10.0f);
-        }
-    }
-
-    SetTimer(g_hWnd, HACK_TIMER, 20 * 1000, nullptr);
-    SetTimer(g_hWnd, MUHELPER_TIMER, 250 /* ms */, MUHelper::CMuHelper::TimerProc);
-
-    srand((unsigned)time(nullptr));
-
-    for (int& i : RandomTable)
-        i = rand() % 360;
-
-    RendomMemoryDump = new BYTE[rand() % 100 + 1];
-    GateAttribute = new GATE_ATTRIBUTE[MAX_GATES]{};
-    SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
-    ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024]{};
-    // cppcheck-suppress dangerousTypeCast
-    ItemAttribute = ((ITEM_ATTRIBUTE*)ItemAttRibuteMemoryDump) + rand() % 1024;
-    CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128]{};
-    // cppcheck-suppress dangerousTypeCast
-    CharactersClient = ((CHARACTER*)CharacterMemoryDump) + rand() % 128;
-    CharacterMachine = new CHARACTER_MACHINE;
-
-    memset(GateAttribute, 0, sizeof(GATE_ATTRIBUTE) * (MAX_GATES));
-    memset(ItemAttribute, 0, sizeof(ITEM_ATTRIBUTE) * (MAX_ITEM));
-    memset(SkillAttribute, 0, sizeof(SKILL_ATTRIBUTE) * (MAX_SKILLS));
-    memset(CharacterMachine, 0, sizeof(CHARACTER_MACHINE));
-
-    CharacterAttribute = &CharacterMachine->Character;
-    CharacterMachine->Init();
-    Hero = &CharactersClient[0];
-
-    if (g_iChatInputType == 1)
-    {
-        g_pMercenaryInputBox = new CUIMercenaryInputBox;
-        g_pSingleTextInputBox = new CUITextInputBox;
-        g_pSinglePasswdInputBox = new CUITextInputBox;
-    }
-
-    g_pUIManager = new CUIManager;
-    g_pUIMapName = new CUIMapName; // rozy
-
-    g_BuffSystem = BuffStateSystem::Make();
-
-    g_MapProcess = MapProcess::Make();
-
-    g_petProcess = PetProcess::Make();
-
-    CUIMng::Instance().Create();
-
-    if (g_iChatInputType == 1)
-    {
-        g_pMercenaryInputBox->Init(g_hWnd);
-        g_pSingleTextInputBox->Init(g_hWnd, 200, 20);
-        g_pSinglePasswdInputBox->Init(g_hWnd, 200, 20, 9, TRUE);
-        g_pSingleTextInputBox->SetState(UISTATE_HIDE);
-        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
-
-        g_pMercenaryInputBox->SetFont(g_hFont);
-        g_pSingleTextInputBox->SetFont(g_hFont);
-        g_pSinglePasswdInputBox->SetFont(g_hFont);
-
-        g_bIMEBlock = FALSE;
-        HIMC hIMC = ImmGetContext(g_hWnd);
-        ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
-        ImmReleaseContext(g_hWnd, hIMC);
-        SaveIMEStatus();
-        g_bIMEBlock = TRUE;
-    }
-
-    if (g_bUseWindowMode == FALSE)
-    {
-        int nOldVal;
-        SystemParametersInfo(SPI_SCREENSAVERRUNNING, 1, &nOldVal, 0);
-        SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);
-        SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300 * 60, nullptr, 0);
-    }
-
-    std::thread cpuUsageRecorder(RecordCpuUsage);
-    const MSG msg = MainLoop();
-
-    DestroyWindow();
-
-    return msg.wParam;
-}
-
-#ifndef _WIN32
-// ---- Non-Windows entry point (SDL3 path) ----
-// This is the MuMain() function extracted per Story 2.1.1.
-// On non-Windows, the game window and event loop use MuPlatform (SDL3 backend).
-// Full game initialization is deferred to later EPIC-2 stories — this entry point
-// currently initializes SDL3 windowing and runs the event loop skeleton.
-//
-// Story 4.3.1: SDL_gpu backend init/shutdown wired here.
-// InitSDLGpuRenderer / ShutdownSDLGpuRenderer are free function wrappers
-// defined in MuRendererSDLGpu.cpp; no separate header required.
-
 #include "Platform/MuPlatform.h"
 #include "Platform/IPlatformWindow.h"
 #include "RenderFX/MuRenderer.h"
 #include <SDL3/SDL_timer.h>
+#include <SDL3/SDL_main.h> // Story 7.9.3: Windows WinMain → main() remapping
 
 namespace mu
 {
@@ -1461,7 +305,7 @@ namespace mu
 void ShutdownSDLGpuRenderer();
 } // namespace mu
 
-int MuMain(int /*argc*/, char* /*argv*/[])
+int MuMain(int argc, char* argv[])
 {
     // Set working directory to the executable's own directory so that all relative
     // data paths (Data/, Translations/, shaders/) resolve correctly regardless of
@@ -1471,6 +315,25 @@ int MuMain(int /*argc*/, char* /*argv*/[])
         std::error_code ec;
         std::filesystem::current_path(mu_get_app_dir(), ec);
     }
+
+    // Task 1.1 (Story 7.9.3): Error report log header — ported from Win32 init path.
+    // Writes version separator and system info to MuError.log on startup.
+    g_ErrorReport.Write(L"\r\n");
+    g_ErrorReport.WriteLogBegin();
+    g_ErrorReport.AddSeparator();
+    g_ErrorReport.Write(L"Mu online SDL3 (Eng) executed.\r\n");
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online SDL3");
+    g_ErrorReport.WriteCurrentTime();
+    {
+        ER_SystemInfo si;
+        memset(&si, 0, sizeof(ER_SystemInfo));
+        MuGetSystemInfo(&si);
+        g_ErrorReport.AddSeparator();
+        g_ErrorReport.WriteSystemInfo(&si);
+        g_ErrorReport.AddSeparator();
+    }
+
+    g_ErrorReport.Write(L"> To read config.ini.\r\n");
 
     // Load game configuration from config.ini now that the CWD is resolved.
     // Must happen before window creation (WindowWidth/Height) and before any
@@ -1483,11 +346,46 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     m_SoundOnOff = GameConfig::GetInstance().GetSoundEnabled();
     m_MusicOnOff = GameConfig::GetInstance().GetMusicEnabled();
     m_RememberMe = GameConfig::GetInstance().GetRememberMe() ? 1 : 0;
+    g_strSelectedML = GameConfig::GetInstance().GetLanguageSelection();
+
+    // Task 1.2 (Story 7.9.3): Command line server override — ported from Win32 init path.
+    // Checks argv for -u <IP> and -p <PORT> to override config.ini server settings.
     {
-        std::wstring langSelection = GameConfig::GetInstance().GetLanguageSelection();
-        wcsncpy_s(g_aszMLSelection, langSelection.c_str(), MAX_LANGUAGE_NAME_LENGTH - 1);
-        g_strSelectedML = g_aszMLSelection;
+        const char* cmdUrl = nullptr;
+        const char* cmdPort = nullptr;
+        for (int i = 1; i < argc - 1; ++i)
+        {
+            if (argv[i][0] == '-' || argv[i][0] == '/')
+            {
+                if (argv[i][1] == 'u' || argv[i][1] == 'U')
+                    cmdUrl = argv[i + 1];
+                else if (argv[i][1] == 'p' || argv[i][1] == 'P')
+                    cmdPort = argv[i + 1];
+            }
+        }
+        if (cmdUrl && cmdPort)
+        {
+            // Convert UTF-8 argv to wchar_t for szServerIpAddress
+            static wchar_t s_CmdUrlW[64];
+            mbstowcs(s_CmdUrlW, cmdUrl, 63);
+            s_CmdUrlW[63] = L'\0';
+            szServerIpAddress = s_CmdUrlW;
+            g_ServerPort = static_cast<WORD>(std::atoi(cmdPort));
+            g_ErrorReport.Write(L"> Command line server override: %ls:%d\r\n", s_CmdUrlW, (int)g_ServerPort);
+        }
+        else
+        {
+            static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
+            szServerIpAddress = serverIPFromConfig.c_str();
+            g_ServerPort = GameConfig::GetInstance().GetServerPort();
+        }
     }
+
+    // Task 1.3 (Story 7.9.3): Screen rate calculation — ported from Win32 init path.
+    // Used throughout game for UI scaling relative to 640x480 reference resolution.
+    g_fScreenRate_x = (float)WindowWidth / 640;
+    g_fScreenRate_y = (float)WindowHeight / 480;
+    g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
     if (!mu::MuPlatform::Initialize())
     {
@@ -1526,9 +424,9 @@ int MuMain(int /*argc*/, char* /*argv*/[])
     }
 #endif
 
-    // ---- Story 7.9.1: Game state initialisation (ported from WinMain) ----
-    // This reproduces the cross-platform subset of WinMain() init that runs
-    // before MainLoop(). Win32-only init (CreateFont, SetTimer, CInput with
+    // ---- Story 7.9.1: Game state initialisation (cross-platform init sequence) ----
+    // Reproduces the cross-platform subset of the Win32 init path that ran
+    // before the Win32 game loop. Win32-only init (CreateFont, SetTimer, CInput with
     // HWND, IME, screensaver suppression) is intentionally skipped.
 
     setlocale(LC_ALL, "");
@@ -1718,5 +616,3 @@ int main(int argc, char* argv[])
 {
     return MuMain(argc, argv);
 }
-
-#endif // !_WIN32

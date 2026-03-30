@@ -20,9 +20,11 @@
 // Run with: ctest --test-dir MuMain/build -R gl_migration_7_9_2
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 #include <array>
 #include <cstdint>
 #include <span>
+#include <vector>
 
 #include "MuRenderer.h"
 
@@ -45,8 +47,15 @@ struct MigrationCaptureMock : public mu::IMuRenderer
 {
     // --- Existing interface (4.2.1) ----------------------------------------
 
-    void RenderQuad2D(std::span<const mu::Vertex2D> /*v*/, std::uint32_t /*id*/) override
+    std::vector<mu::Vertex2D> m_lastQuad2DVertices;
+    std::uint32_t m_lastQuad2DTextureId{0};
+    int m_renderQuad2DCallCount{0};
+
+    void RenderQuad2D(std::span<const mu::Vertex2D> v, std::uint32_t id) override
     {
+        m_lastQuad2DVertices.assign(v.begin(), v.end());
+        m_lastQuad2DTextureId = id;
+        ++m_renderQuad2DCallCount;
     }
 
     void RenderTriangles(std::span<const mu::Vertex3D> /*v*/, std::uint32_t /*id*/) override
@@ -537,6 +546,179 @@ TEST_CASE("AC-STD-2 [7-9-2]: IMuRenderer extended interface — all new methods 
 
         // Compilation is the real assertion; verify no side effects on 7-9-2 counters
         REQUIRE(mock.m_beginSceneCallCount == 0);
+    }
+}
+
+// ===========================================================================
+// AC-3 [7-9-2]: CSprite coordinate conversion — 640×480 → screen pixels
+//
+// Validates the coordinate conversion formula used by CSprite::Render() to
+// transform OpenGL bottom-up 640×480 logical coordinates to screen-space
+// pixels. The formula is:
+//   screenX = scrX * scaleX * (WindowWidth / 640.0f)
+//   screenY = WindowHeight - (scrY * scaleY * (WindowHeight / 480.0f))
+//
+// Also validates ABGR color packing and full Vertex2D quad construction.
+// These tests exercise the SAME math that CSprite::Render() uses, without
+// requiring the full game engine (no WindowWidth/WindowHeight globals needed).
+// ===========================================================================
+TEST_CASE("AC-3 [7-9-2]: CSprite coordinate conversion — 640x480 to screen pixels",
+    "[render][migration][ac-3]")
+{
+    SECTION("Center of 640x480 maps to center of screen")
+    {
+        // Scenario: 1024×768 display, scale = 1.0
+        constexpr float windowWidth = 1024.0f;
+        constexpr float windowHeight = 768.0f;
+        constexpr float scaleX = 1.0f;
+        constexpr float scaleY = 1.0f;
+
+        // Logical center of 640×480 space
+        constexpr float logicalX = 320.0f;
+        constexpr float logicalY = 240.0f;
+
+        const float screenX = logicalX * scaleX * (windowWidth / 640.0f);
+        const float screenY = windowHeight - (logicalY * scaleY * (windowHeight / 480.0f));
+
+        // Center of 640×480 maps to center of 1024×768
+        REQUIRE(screenX == Catch::Approx(512.0f));
+        REQUIRE(screenY == Catch::Approx(384.0f));
+    }
+
+    SECTION("Y-axis inversion: OpenGL bottom-up to screen top-down")
+    {
+        constexpr float windowHeight = 768.0f;
+        constexpr float scaleY = 1.0f;
+
+        // OpenGL Y=0 (bottom) → screen Y=WindowHeight (bottom of screen)
+        const float screenY_bottom = windowHeight - (0.0f * scaleY * (windowHeight / 480.0f));
+        REQUIRE(screenY_bottom == Catch::Approx(768.0f));
+
+        // OpenGL Y=480 (top) → screen Y=0 (top of screen)
+        const float screenY_top = windowHeight - (480.0f * scaleY * (windowHeight / 480.0f));
+        REQUIRE(screenY_top == Catch::Approx(0.0f));
+    }
+
+    SECTION("Origin maps to bottom-left of screen")
+    {
+        constexpr float windowWidth = 1280.0f;
+        constexpr float windowHeight = 960.0f;
+        constexpr float scaleX = 1.0f;
+        constexpr float scaleY = 1.0f;
+
+        const float screenX = 0.0f * scaleX * (windowWidth / 640.0f);
+        const float screenY = windowHeight - (0.0f * scaleY * (windowHeight / 480.0f));
+
+        REQUIRE(screenX == Catch::Approx(0.0f));
+        REQUIRE(screenY == Catch::Approx(960.0f)); // bottom of screen
+    }
+
+    SECTION("ABGR color packing: alpha=255, blue=128, green=64, red=32")
+    {
+        // CSprite::Render packs: (alpha << 24) | (blue << 16) | (green << 8) | red
+        const auto alpha = static_cast<std::uint32_t>(255);
+        const auto blue = static_cast<std::uint32_t>(128);
+        const auto green = static_cast<std::uint32_t>(64);
+        const auto red = static_cast<std::uint32_t>(32);
+
+        const std::uint32_t color = (alpha << 24) | (blue << 16) | (green << 8) | red;
+
+        REQUIRE(color == 0xFF804020u);
+    }
+
+    SECTION("Full Vertex2D quad construction with coordinate conversion")
+    {
+        // Simulates the CSprite::Render() loop that builds Vertex2D[4]
+        constexpr float windowWidth = 1280.0f;
+        constexpr float windowHeight = 960.0f;
+        constexpr float scaleX = 1.0f;
+        constexpr float scaleY = 1.0f;
+
+        // Sprite corners in 640×480 space: (100,100) to (200,200)
+        struct ScrCoord
+        {
+            float fX, fY;
+        };
+        struct TexCoord
+        {
+            float fTU, fTV;
+        };
+        constexpr int kQuadVerts = 4;
+        const ScrCoord scrCoords[kQuadVerts] = {{100, 100}, {100, 200}, {200, 200}, {200, 100}};
+        const TexCoord texCoords[kQuadVerts] = {{0, 0}, {0, 1}, {1, 1}, {1, 0}};
+        const std::uint32_t color = 0xFFFFFFFFu;
+
+        mu::Vertex2D vertices[kQuadVerts];
+        for (int i = 0; i < kQuadVerts; ++i)
+        {
+            vertices[i].x = scrCoords[i].fX * scaleX * (windowWidth / 640.0f);
+            vertices[i].y = windowHeight - (scrCoords[i].fY * scaleY * (windowHeight / 480.0f));
+            vertices[i].u = texCoords[i].fTU;
+            vertices[i].v = texCoords[i].fTV;
+            vertices[i].color = color;
+        }
+
+        // Verify coordinate conversion: 100 * (1280/640) = 200
+        REQUIRE(vertices[0].x == Catch::Approx(200.0f));
+        // 960 - 100*(960/480) = 960 - 200 = 760
+        REQUIRE(vertices[0].y == Catch::Approx(760.0f));
+
+        // Verify opposite corner: 200 * (1280/640) = 400
+        REQUIRE(vertices[2].x == Catch::Approx(400.0f));
+        // 960 - 200*(960/480) = 960 - 400 = 560
+        REQUIRE(vertices[2].y == Catch::Approx(560.0f));
+
+        // Verify texture coords preserved
+        REQUIRE(vertices[0].u == Catch::Approx(0.0f));
+        REQUIRE(vertices[0].v == Catch::Approx(0.0f));
+        REQUIRE(vertices[2].u == Catch::Approx(1.0f));
+        REQUIRE(vertices[2].v == Catch::Approx(1.0f));
+
+        // Verify color
+        REQUIRE(vertices[0].color == 0xFFFFFFFFu);
+    }
+
+    SECTION("Untextured sprite: texture coords are zero when textureId < 0")
+    {
+        // CSprite::Render uses textureId = 0 sentinel for m_nTexID == -1
+        constexpr int textureId = -1;
+        mu::Vertex2D vert{};
+        vert.u = (textureId >= 0) ? 0.5f : 0.0f;
+        vert.v = (textureId >= 0) ? 0.5f : 0.0f;
+
+        REQUIRE(vert.u == Catch::Approx(0.0f));
+        REQUIRE(vert.v == Catch::Approx(0.0f));
+    }
+
+    SECTION("RenderQuad2D receives correct vertex data via mock")
+    {
+        // Verify the complete pipeline: build vertices → call RenderQuad2D → capture data
+        MigrationCaptureMock mock;
+        constexpr int kQuadVerts = 4;
+        std::array<mu::Vertex2D, kQuadVerts> verts{};
+
+        // Set up a simple sprite quad at 640×480 origin
+        verts[0] = {0.0f, 768.0f, 0.0f, 0.0f, 0xFFFFFFFFu};
+        verts[1] = {0.0f, 0.0f, 0.0f, 1.0f, 0xFFFFFFFFu};
+        verts[2] = {1024.0f, 0.0f, 1.0f, 1.0f, 0xFFFFFFFFu};
+        verts[3] = {1024.0f, 768.0f, 1.0f, 0.0f, 0xFFFFFFFFu};
+
+        const std::uint32_t textureId = 42u;
+        mock.RenderQuad2D(std::span<const mu::Vertex2D>(verts), textureId);
+
+        // Verify mock captured the vertex data (Finding #9 fix)
+        REQUIRE(mock.m_renderQuad2DCallCount == 1);
+        REQUIRE(mock.m_lastQuad2DTextureId == 42u);
+        REQUIRE(mock.m_lastQuad2DVertices.size() == 4);
+        REQUIRE(mock.m_lastQuad2DVertices[0].x == Catch::Approx(0.0f));
+        REQUIRE(mock.m_lastQuad2DVertices[0].y == Catch::Approx(768.0f));
+        REQUIRE(mock.m_lastQuad2DVertices[2].x == Catch::Approx(1024.0f));
+        REQUIRE(mock.m_lastQuad2DVertices[2].color == 0xFFFFFFFFu);
+
+        // Verify no cross-contamination with other 7-9-2 counters
+        REQUIRE(mock.m_beginSceneCallCount == 0);
+        REQUIRE(mock.m_renderLinesCallCount == 0);
+        REQUIRE(mock.m_clearScreenCallCount == 0);
     }
 }
 

@@ -2526,6 +2526,7 @@ void BMD::RenderBone(float (*BoneMatrix)[3][4])
     glDepthFunc(GL_ALWAYS);
 
     // Story 7-9-2 (AC-5): Port GL_LINES skeleton debug to MuRenderer.
+    // TECH DEBT (review Finding #7): Per-frame heap alloc in debug path — acceptable.
     // Yellow color: R=0xCC, G=0xCC, B=0x33, A=0xFF -> ABGR = 0xFF33CCCC
     constexpr std::uint32_t boneColor = 0xFF33CCCCu;
 

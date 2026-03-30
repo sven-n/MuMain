@@ -11,7 +11,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
-#ifdef _WIN32
+#ifdef MU_USE_OPENGL_BACKEND
 #include "wglext.h"
 #endif
 
@@ -1271,6 +1271,11 @@ void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height
 
     vec3_t p[4], p2[4];
 
+    // Coordinate conversion contract (640×480 → screen space):
+    // ConvertX/ConvertY above scale from 640×480 logical to screen pixels.
+    // Y-axis inversion here flips from OpenGL bottom-up to screen top-down
+    // (required because the original coordinate system has Y=0 at bottom).
+    // This same conversion is applied in CSprite::Render() (Story 7-9-2, AC-3).
     y = WindowHeight - y;
 
     Vector(-Width * 0.5f, Height * 0.5f, 0.f, p[0]);

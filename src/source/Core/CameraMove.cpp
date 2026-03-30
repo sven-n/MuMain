@@ -489,6 +489,8 @@ void CCameraMove::RenderWayPoint()
     glDisable(GL_TEXTURE_2D);
 
     // Story 7-9-2 (AC-5): Port waypoint gizmo quads + line strip to MuRenderer.
+    // TECH DEBT (review Finding #7): Per-frame std::vector heap allocs in debug path.
+    // Acceptable for debug-only rendering; optimize with persistent buffers if needed.
     // Red quads: ABGR color = alpha=0xCC (0.8*255), B=0, G=0, R=0xFF
     constexpr std::uint32_t redColor = 0xCC0000FFu;
     {

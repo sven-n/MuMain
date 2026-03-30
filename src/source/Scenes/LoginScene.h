@@ -2,11 +2,6 @@
 
 // LoginScene.h - Login scene management
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include "Platform/PlatformCompat.h"
-#endif
 #include "ZzzOpenglUtil.h" // For vec3_t
 
 // Login scene lifecycle

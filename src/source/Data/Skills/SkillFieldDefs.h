@@ -1,10 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
-#include <windows.h>
-#else
 #include "Platform/PlatformCompat.h"
-#endif
 
 // X-Macro definition for all SKILL_ATTRIBUTE fields (except Name which is special)
 // Format: X(FieldName, TypeEnum, ArraySize, DefaultColumnWidth)

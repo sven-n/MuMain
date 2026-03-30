@@ -2,12 +2,6 @@
 
 // SceneManager.h - Top-level scene orchestration
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include "Platform/PlatformCompat.h"
-#endif
-
 //=============================================================================
 // Frame Timing State
 //=============================================================================
