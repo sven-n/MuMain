@@ -22,7 +22,7 @@ MuMain is a C++20 MMORPG game client (MU Online Season 5.2→6) that connects to
 ```
 MuMain/
 ├── src/source/           # C++ game client (691 files in 20 module dirs)
-│   ├── Main/             # Entry point: Winmain.cpp → WinMain()
+│   ├── Main/             # Entry point: MuMain.cpp → WinMain()
 │   ├── Core/             # Shared utilities, error reporting, timers
 │   ├── Platform/         # Cross-platform abstraction (SDL3 shims, PlatformCompat.h)
 │   ├── Dotnet/           # C++↔.NET interop (Connection.h/cpp + generated packet bindings)
@@ -67,10 +67,10 @@ The codebase is mid-migration from Win32/OpenGL to SDL3/SDL_gpu. Here is what bl
 
 | Blocker | Files Affected | Migration Phase | Status |
 |---------|---------------|----------------|--------|
-| **Win32 windowing** (`CreateWindowEx`, `RegisterClass`, `ShowWindow`) | `Winmain.cpp`, `ZzzOpenglUtil.cpp` | EPIC-2 (SDL3 Window) | Not started |
+| **Win32 windowing** (`CreateWindowEx`, `RegisterClass`, `ShowWindow`) | `MuMain.cpp`, `ZzzOpenglUtil.cpp` | EPIC-2 (SDL3 Window) | Not started |
 | **Win32 input** (`GetAsyncKeyState`, `SetCapture`, `WM_*` messages) | 8 files, 104+ calls | EPIC-2 (SDL3 Input) | Not started |
 | **OpenGL immediate mode** (`glBegin`/`glEnd`/`glVertex*`) | 14 files, 111 call sites | EPIC-2 (SDL_gpu) | Not started |
-| **DirectSound** (`DirectSoundCreate`, `IDirectSound*`) | `Winmain.cpp`, audio files | EPIC-3 (miniaudio) | Not started |
+| **DirectSound** (`DirectSoundCreate`, `IDirectSound*`) | `MuMain.cpp`, audio files | EPIC-3 (miniaudio) | Not started |
 | **Win32 file I/O** (`GetModuleFileName`, `GetPrivateProfileInt`) | 5–28 files | EPIC-5 (Config) | Partially done |
 | **Win32 timers** (`SetTimer`/`KillTimer`) | 10 files, 20 calls | EPIC-5 | Not started |
 | **Win32 text input** (`CreateWindowW L"edit"`, `WM_CHAR`) | `UIControls.cpp` | EPIC-6 | Done (SDL3 text input implemented) |

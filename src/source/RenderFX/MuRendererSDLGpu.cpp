@@ -10,7 +10,7 @@
 //   - No OpenGL types or includes — SDL3/SDL_gpu.h provides all required types.
 //   - TextureRegistry, GetBlendFactors, GetShaderBlobPath, GetPipelineSetFor are in mu::
 //     namespace and accessible to the test TU via forward declarations.
-//   - BeginFrame() / EndFrame() are instance methods called from Winmain.cpp game loop.
+//   - BeginFrame() / EndFrame() are instance methods called from MuMain.cpp game loop.
 //   - Real HLSL shaders loaded from MU_SHADER_DIR blobs (set by CMake).
 //   - Fog uniform buffer (s_fogUniformBuf) is created in Init() and updated in SetFog().
 //   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D (AC-8 fix).
@@ -2202,7 +2202,7 @@ private:
     return s_instance;
 }
 
-// C++ linkage entry points for Winmain.cpp (no class forward declaration needed).
+// C++ linkage entry points for MuMain.cpp (no class forward declaration needed).
 [[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow)
 {
     return MuRendererSDLGpu::Init(pNativeWindow);

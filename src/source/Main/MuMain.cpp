@@ -93,7 +93,7 @@ bool ActiveIME = false;
 
 // Story 7.9.3: Global variables previously in WinMain/Win32 init block.
 // Definitions moved here after Win32 entry point deletion; externs remain in
-// Winmain.h, SDLEventLoop.cpp, and various game-code files.
+// MuMain.h, SDLEventLoop.cpp, and various game-code files.
 wchar_t m_Username[11] = {};
 wchar_t m_Password[21] = {};
 wchar_t m_ExeVersion[11] = {};
@@ -214,7 +214,7 @@ void CheckHack()
     }
 }
 
-// Story 7.9.3: Functions previously defined in the Win32 code block of Winmain.cpp.
+// Story 7.9.3: Functions previously defined in the Win32 code block of MuMain.cpp.
 // Restored as cross-platform stubs or full implementations after WinMain deletion.
 
 void SetMaxMessagePerCycle(int messages)

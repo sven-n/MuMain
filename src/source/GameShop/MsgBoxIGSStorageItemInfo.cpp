@@ -6,7 +6,7 @@
 #include "NewUISystem.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSStorageItemInfo.h"
-#include "Winmain.h"
+#include "MuMain.h"
 
 #include "DSPlaySound.h"
 #include "MsgBoxIGSUseItemConfirm.h"

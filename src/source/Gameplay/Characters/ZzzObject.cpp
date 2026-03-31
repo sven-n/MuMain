@@ -1,7 +1,7 @@
 ﻿///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "Winmain.h"
+#include "MuMain.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"

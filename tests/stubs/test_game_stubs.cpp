@@ -3,8 +3,8 @@
 // These provide minimal definitions to satisfy the linker.
 //
 // Categories:
-//   1. Global variable stubs (Winmain, ZzzInterface, WSclient, zzzpath)
-//   2. Free function stubs (SceneManager, Winmain, UIControls, ZzzInterface)
+//   1. Global variable stubs (MuMain, ZzzInterface, WSclient, zzzpath)
+//   2. Free function stubs (SceneManager, MuMain, UIControls, ZzzInterface)
 //   3. Class method stubs (CGlobalBitmap, Connection, CUIRenderText, SEASON3B UI)
 //   4. ShopListManager stubs (WZResult, DownloadFileInfo, CListManager, CShopListManager)
 //   5. TurboJPEG C-linkage stubs
@@ -30,7 +30,7 @@
 // 1. Global variable stubs
 // ===========================================================================
 
-// From Winmain.cpp
+// From MuMain.cpp
 bool Destroy = false;
 BOOL g_bUseWindowMode = TRUE;
 bool g_bWndActive = false;
@@ -58,7 +58,7 @@ bool g_bShowPath = false;
 // 2. Free function stubs
 // ===========================================================================
 
-// From Winmain.cpp — called by ZzzTexture.cpp (MURenderFX)
+// From MuMain.cpp — called by ZzzTexture.cpp (MURenderFX)
 void DestroySound() {}
 void KillGLWindow() {}
 void SetMaxMessagePerCycle(int /*messages*/) {}

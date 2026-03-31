@@ -32,7 +32,7 @@ set(KNOWN_CALL_SITES
     "SceneManager.cpp"
     "UIGuildInfo.cpp"
     "CameraUtility.cpp"
-    "Winmain.cpp"
+    "MuMain.cpp"
     "UIControls.cpp"
 )
 

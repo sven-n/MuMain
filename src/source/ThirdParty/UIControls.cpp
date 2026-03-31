@@ -19,7 +19,7 @@
 #include "CMVP1stDirection.h"
 #include "UIManager.h"
 #include "NewUISystem.h"
-#include "Winmain.h"
+#include "MuMain.h"
 #include "../Core/_GlobalFunctions.h"
 
 extern BYTE m_CrywolfState;

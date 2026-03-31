@@ -15,7 +15,7 @@
 #include "NewUISystem.h"
 #include "SkillManager.h"
 #include "CSItemOption.h"
-#include "Winmain.h"
+#include "MuMain.h"
 
 #include <algorithm>
 #include <array>

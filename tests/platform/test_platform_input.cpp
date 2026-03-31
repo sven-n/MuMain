@@ -399,12 +399,12 @@ TEST_CASE("AC-4 [VS1-SDL-INPUT-KEYBOARD]: HIBYTE of 0x8000 equals 128 (0x80)",
     }
 }
 
-TEST_CASE("AC-4 [VS1-SDL-INPUT-KEYBOARD]: GetAsyncKeyState direct 0x8000 check (Winmain.cpp pattern)",
+TEST_CASE("AC-4 [VS1-SDL-INPUT-KEYBOARD]: GetAsyncKeyState direct 0x8000 check (MuMain.cpp pattern)",
           "[platform][input][ac4]")
 {
-    SECTION("GetAsyncKeyState(VK_F12) & 0x8000 is true when key held (Winmain.cpp:912 pattern)")
+    SECTION("GetAsyncKeyState(VK_F12) & 0x8000 is true when key held (MuMain.cpp:912 pattern)")
     {
-        // Winmain.cpp uses: GetAsyncKeyState(VK_F12) & 0x8000 (no HIBYTE)
+        // MuMain.cpp uses: GetAsyncKeyState(VK_F12) & 0x8000 (no HIBYTE)
         SDL_Scancode sc = MuVkToSdlScancode(VK_F12);
         REQUIRE(sc != SDL_SCANCODE_UNKNOWN);
         g_sdl3KeyboardState[sc] = true;

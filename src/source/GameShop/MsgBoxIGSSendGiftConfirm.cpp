@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSSendGiftConfirm.h"
-#include "Winmain.h"
+#include "MuMain.h"
 #include "DSPlaySound.h"
 
 // cppcheck-suppress uninitMemberVar

@@ -13,7 +13,7 @@
 #include "DSPlaySound.h"
 
 #include "SMD.h"
-#include "Main/Winmain.h"
+#include "Main/MuMain.h"
 
 #include "PhysicsManager.h"
 #include "CSQuest.h"

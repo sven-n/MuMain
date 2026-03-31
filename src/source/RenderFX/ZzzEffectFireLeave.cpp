@@ -21,7 +21,7 @@
 #include "w_MapHeaders.h"
 #include "NewUISystem.h"
 #include "Random.h"
-#include "Main/Winmain.h"
+#include "Main/MuMain.h"
 
 #include <cmath>
 

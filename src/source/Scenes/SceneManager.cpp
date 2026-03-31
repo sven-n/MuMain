@@ -38,7 +38,7 @@ FrameTimingState g_frameTiming;
 #include "ZzzInterface.h"
 #include "GlobalText.h"
 #include "ZzzAI.h"
-#include "Winmain.h"
+#include "MuMain.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"

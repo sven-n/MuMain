@@ -714,7 +714,7 @@ add_test(
 # Story 7.8.4 - .NET Client Library Native Build [VS0-QUAL-BUILD-DOTNET]
 # RED PHASE: Tests verify cmake RID detection and .NET build enable on
 #   macOS/Linux. Tests fail until src/CMakeLists.txt and CMakePresets.json
-#   are updated and Winmain.cpp has the resource.h guard.
+#   are updated and MuMain.cpp has the resource.h guard.
 # ==========================================================================
 
 set(MU_DOTNET_SOURCE_ROOT "${MUMAIN_SOURCE_DIR}/src/source")
@@ -743,11 +743,11 @@ add_test(
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_presets_dotnet_enabled_7_8_4.cmake
 )
 
-# AC-4: Winmain.cpp wraps #include "resource.h" in #ifdef _WIN32 guard
+# AC-4: MuMain.cpp wraps #include "resource.h" in #ifdef _WIN32 guard
 add_test(
     NAME "7.8.4-AC-4:resource-h-win32-guard"
     COMMAND ${CMAKE_COMMAND}
-        -DWINMAIN_CPP=${MU_DOTNET_SOURCE_ROOT}/Main/Winmain.cpp
+        -DWINMAIN_CPP=${MU_DOTNET_SOURCE_ROOT}/Main/MuMain.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_resource_h_guard_7_8_4.cmake
 )
 
@@ -796,11 +796,11 @@ add_test(
 )
 
 # AC-4: Game init sequence (OpenBasicData, CharacterMachine, g_pUIManager, i18n, g_platformAudio)
-#        ported to MuMain() in Winmain.cpp
+#        ported to MuMain() in MuMain.cpp
 add_test(
     NAME "7.9.1-AC-4:muminit-sequence"
     COMMAND ${CMAKE_COMMAND}
-        -DWINMAIN_CPP=${MU_MAIN_SOURCE}/Winmain.cpp
+        -DWINMAIN_CPP=${MU_MAIN_SOURCE}/MuMain.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_muminit_sequence_7_9_1.cmake
 )
 
@@ -808,7 +808,7 @@ add_test(
 add_test(
     NAME "7.9.1-AC-5:renderscene-wired"
     COMMAND ${CMAKE_COMMAND}
-        -DWINMAIN_CPP=${MU_MAIN_SOURCE}/Winmain.cpp
+        -DWINMAIN_CPP=${MU_MAIN_SOURCE}/MuMain.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_renderscene_wired_7_9_1.cmake
 )
 

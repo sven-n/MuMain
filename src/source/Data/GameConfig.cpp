@@ -37,10 +37,10 @@ GameConfig::GameConfig()
     // for both Windows (GetModuleFileNameW) and non-Windows (/proc/self/exe etc.)
     m_configPath = mu_get_app_dir() / L"config.ini";
     // NOTE: Load() is intentionally NOT called here.
-    // Winmain.cpp calls GameConfig::GetInstance().Load() explicitly at startup
+    // MuMain.cpp calls GameConfig::GetInstance().Load() explicitly at startup
     // (line ~998). Calling Load() from the constructor would cause two sequential
     // reads from disk (constructor fires on first GetInstance() access, which IS
-    // the Winmain.cpp call site). See AC-STD-NFR-1.
+    // the MuMain.cpp call site). See AC-STD-NFR-1.
 }
 
 void GameConfig::Load()

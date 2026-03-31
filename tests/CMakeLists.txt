@@ -163,7 +163,7 @@ target_sources(MuTests PRIVATE audio/test_muaudio_abstraction.cpp)
 # GREEN PHASE: Tests verify BGM lifecycle — IsEndMusic() before play, StopMusic on unloaded
 # stream, PlayMusic with non-existent file (no crash), GetMusicPosition before play returns 0.
 # All tests run headless (no audio device needed — Initialize() may return false on CI).
-# Implementation complete: g_platformAudio wired in Winmain.cpp; BGM delegation done.
+# Implementation complete: g_platformAudio wired in MuMain.cpp; BGM delegation done.
 target_sources(MuTests PRIVATE audio/test_miniaudio_bgm.cpp)
 
 # Story 5.4.1: Volume Controls & Audio State Management [VS1-AUDIO-VOLUME-CONTROLS]
@@ -184,7 +184,7 @@ target_sources(MuTests PRIVATE audio/test_volume_controls.cpp)
 #   Task 1: Add m_soundObjects array to MiniAudioBackend
 #   Task 2: Upgrade Set3DSoundPosition() stub to full per-frame position update
 #   Task 3: Redirect SFX free functions in DSplaysound.cpp to g_platformAudio
-#   Task 4: Remove InitDirectSound/FreeDirectSound from Winmain.cpp
+#   Task 4: Remove InitDirectSound/FreeDirectSound from MuMain.cpp
 #   Task 5: Add backslash→forward-slash path normalization in LoadSound()
 target_sources(MuTests PRIVATE audio/test_miniaudio_sfx.cpp)
 
@@ -411,7 +411,7 @@ target_sources(MuTests PRIVATE platform/test_linux_connectivity.cpp)
 target_link_libraries(MuTests PRIVATE Catch2::Catch2WithMain MUCore MUPlatform MURenderFX)
 
 # Story 7-8-3: Stub definitions for game globals referenced by MUCore/MUPlatform/MURenderFX
-# that are defined in game source files (Winmain.cpp, ZzzInterface.cpp, etc.) not linked
+# that are defined in game source files (MuMain.cpp, ZzzInterface.cpp, etc.) not linked
 # into MuTests. Required for test binary to link on all platforms.
 target_sources(MuTests PRIVATE stubs/test_game_stubs.cpp)
 

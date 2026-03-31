@@ -150,7 +150,7 @@ public:
     }
 
     // Per-frame lifecycle: acquire command buffer / render pass (SDL_gpu backend).
-    // No-op in the OpenGL backend. Called from Winmain.cpp game loop.
+    // No-op in the OpenGL backend. Called from MuMain.cpp game loop.
     virtual void BeginFrame() {}
     virtual void EndFrame() {}
 

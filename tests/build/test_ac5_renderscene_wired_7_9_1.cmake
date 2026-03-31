@@ -2,7 +2,7 @@
 # Flow Code: VS0-QUAL-RENDER-GAMELOOP
 #
 # RED PHASE:  Test FAILS before story 7.9.1 is implemented.
-#             MuMain() at Winmain.cpp:1516 contains only a comment:
+#             MuMain() at MuMain.cpp:1516 contains only a comment:
 #               // Game loop body will be added as more systems are migrated
 #             RenderScene() is NOT called inside the #ifdef MU_ENABLE_SDL3 BeginFrame/EndFrame block.
 #
@@ -19,11 +19,11 @@
 cmake_minimum_required(VERSION 3.25)
 
 if(NOT DEFINED WINMAIN_CPP)
-    message(FATAL_ERROR "WINMAIN_CPP must be set to the path of Winmain.cpp")
+    message(FATAL_ERROR "WINMAIN_CPP must be set to the path of MuMain.cpp")
 endif()
 
 if(NOT EXISTS "${WINMAIN_CPP}")
-    message(FATAL_ERROR "AC-5 FAIL: Winmain.cpp not found at '${WINMAIN_CPP}'")
+    message(FATAL_ERROR "AC-5 FAIL: MuMain.cpp not found at '${WINMAIN_CPP}'")
 endif()
 
 file(READ "${WINMAIN_CPP}" winmain_content)
@@ -33,7 +33,7 @@ file(READ "${WINMAIN_CPP}" winmain_content)
 # ---------------------------------------------------------------------------
 string(FIND "${winmain_content}" "int MuMain(" muminit_pos)
 if(muminit_pos EQUAL -1)
-    message(FATAL_ERROR "AC-5 FAIL: 'int MuMain(' not found in Winmain.cpp.")
+    message(FATAL_ERROR "AC-5 FAIL: 'int MuMain(' not found in MuMain.cpp.")
 endif()
 
 string(LENGTH "${winmain_content}" total_len)
@@ -50,7 +50,7 @@ string(FIND "${muminit_section}" "RenderScene(nullptr)" rs_pos)
 if(rs_pos EQUAL -1)
     message(WARNING
         "AC-5 FAIL: 'RenderScene(nullptr)' not found in MuMain() body.\n"
-        "Task 5.1: replace the '// Game loop body will be added...' comment at Winmain.cpp:1516\n"
+        "Task 5.1: replace the '// Game loop body will be added...' comment at MuMain.cpp:1516\n"
         "with 'RenderScene(nullptr);' between BeginFrame() and EndFrame().")
     set(found_violations TRUE)
 endif()

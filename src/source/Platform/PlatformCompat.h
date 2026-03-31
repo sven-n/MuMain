@@ -765,21 +765,36 @@ inline BOOL DeleteDC(HDC /*hdc*/)
 {
     return TRUE;
 }
-inline BOOL DeleteObject(HGDIOBJ /*obj*/)
+inline BOOL DeleteObject(HGDIOBJ obj)
 {
+    free(obj); // matches calloc in CreateDIBSection; free(nullptr) is a no-op
     return TRUE;
 }
 inline HDC CreateCompatibleDC(HDC /*hdc*/)
 {
-    return nullptr;
+    // Non-null sentinel so callers that null-check succeed.
+    // DeleteDC is a no-op, so a static address is safe.
+    static char s_stubDC;
+    return (HDC)&s_stubDC;
 }
-inline HBITMAP CreateDIBSection(HDC /*hdc*/, const BITMAPINFO* /*bmi*/, UINT /*usage*/, void** ppvBits,
+inline HBITMAP CreateDIBSection(HDC /*hdc*/, const BITMAPINFO* bmi, UINT /*usage*/, void** ppvBits,
                                 HANDLE /*hSection*/, DWORD /*offset*/)
 {
-    if (ppvBits != nullptr)
+    // Allocate a real pixel buffer so CUIRenderTextOriginal::Create succeeds.
+    // The HBITMAP handle IS the buffer pointer; DeleteObject(handle) frees it.
+    if (bmi != nullptr && ppvBits != nullptr)
     {
-        *ppvBits = nullptr;
+        int w = bmi->bmiHeader.biWidth;
+        int h = bmi->bmiHeader.biHeight < 0 ? -bmi->bmiHeader.biHeight : bmi->bmiHeader.biHeight;
+        int bpp = bmi->bmiHeader.biBitCount / 8;
+        if (w > 0 && h > 0 && bpp > 0)
+        {
+            *ppvBits = calloc(1, (size_t)w * h * bpp);
+            return (HBITMAP)*ppvBits;
+        }
     }
+    if (ppvBits != nullptr)
+        *ppvBits = nullptr;
     return nullptr;
 }
 inline HGDIOBJ SelectObject(HDC /*hdc*/, HGDIOBJ /*obj*/)
@@ -1797,7 +1812,7 @@ inline HWND ImmGetDefaultIMEWnd(HWND /*hwnd*/)
 #define WHEEL_DELTA 120
 #endif
 
-// ---- Window style constants (Winmain.cpp window creation) ----
+// ---- Window style constants (MuMain.cpp window creation) ----
 #ifndef CS_HREDRAW
 #define CS_HREDRAW 0x0002
 #endif
@@ -1983,7 +1998,7 @@ struct _EXCEPTION_POINTERS
     void* ContextRecord;
 };
 
-// ---- Window management function stubs (Winmain.cpp) ----
+// ---- Window management function stubs (MuMain.cpp) ----
 inline BOOL wglMakeCurrent(HDC /*hdc*/, HGLRC /*hglrc*/)
 {
     return TRUE;
@@ -2066,7 +2081,7 @@ inline LRESULT DefWindowProc(HWND /*hwnd*/, UINT /*msg*/, WPARAM /*wParam*/, LPA
     return 0;
 }
 // Note: CreateWindow macro NOT defined here — conflicts with MuPlatform::CreateWindow().
-// Winmain.cpp uses CreateWindowEx(0, ...) directly instead.
+// MuMain.cpp uses CreateWindowEx(0, ...) directly instead.
 
 // ---- SetRect — GDI rectangle initializer ----
 inline BOOL SetRect(RECT* lprc, int left, int top, int right, int bottom)
@@ -2388,7 +2403,7 @@ inline HDC wglGetCurrentDC()
 #define WGL_SAMPLES_ARB 0x2042
 #define GL_MULTISAMPLE_ARB 0x809D
 
-// PIXELFORMATDESCRIPTOR — used by InitGLMultisample (Winmain.cpp, ZzzOpenglUtil.cpp)
+// PIXELFORMATDESCRIPTOR — used by InitGLMultisample (MuMain.cpp, ZzzOpenglUtil.cpp)
 struct PIXELFORMATDESCRIPTOR
 {
     WORD nSize;

@@ -48,7 +48,7 @@
 #include "CharacterManager.h"
 #include "SkillManager.h"
 #include "NewUISystem.h"
-#include "Winmain.h"
+#include "MuMain.h"
 #include "_GlobalFunctions.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;

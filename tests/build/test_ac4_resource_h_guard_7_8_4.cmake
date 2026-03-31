@@ -1,8 +1,8 @@
 # Flow Code: VS0-QUAL-BUILD-DOTNET
 # Story 7.8.4: .NET Client Library Native Build
-# AC-4: Winmain.cpp wraps #include "resource.h" in #ifdef _WIN32 / #endif
+# AC-4: MuMain.cpp wraps #include "resource.h" in #ifdef _WIN32 / #endif
 #
-# RED PHASE: Test FAILS until Winmain.cpp line 27 is changed from:
+# RED PHASE: Test FAILS until MuMain.cpp line 27 is changed from:
 #     #include "resource.h"
 # to:
 #     #ifdef _WIN32
@@ -16,11 +16,11 @@
 cmake_minimum_required(VERSION 3.25)
 
 if(NOT DEFINED WINMAIN_CPP)
-    set(WINMAIN_CPP "${CMAKE_CURRENT_LIST_DIR}/../../src/source/Main/Winmain.cpp")
+    set(WINMAIN_CPP "${CMAKE_CURRENT_LIST_DIR}/../../src/source/Main/MuMain.cpp")
 endif()
 
 if(NOT EXISTS "${WINMAIN_CPP}")
-    message(FATAL_ERROR "AC-4 [7.8.4]: Winmain.cpp does not exist: ${WINMAIN_CPP}")
+    message(FATAL_ERROR "AC-4 [7.8.4]: MuMain.cpp does not exist: ${WINMAIN_CPP}")
 endif()
 
 file(READ "${WINMAIN_CPP}" WINMAIN_CONTENT)
@@ -28,7 +28,7 @@ file(READ "${WINMAIN_CPP}" WINMAIN_CONTENT)
 # --- Check 1: resource.h is still included (not accidentally deleted) ---
 string(FIND "${WINMAIN_CONTENT}" "resource.h" _pos_resource)
 if(_pos_resource EQUAL -1)
-    message(FATAL_ERROR "AC-4 FAIL [7.8.4]: 'resource.h' include not found in Winmain.cpp — it should exist but be guarded by #ifdef _WIN32")
+    message(FATAL_ERROR "AC-4 FAIL [7.8.4]: 'resource.h' include not found in MuMain.cpp — it should exist but be guarded by #ifdef _WIN32")
 endif()
 
 # --- Check 2: resource.h include is inside a #ifdef _WIN32 block ---
@@ -39,7 +39,7 @@ if(NOT _match_guarded)
     # Try the multi-line pattern: #ifdef _WIN32 on its own line, then resource.h on next line
     string(REGEX MATCH "#ifdef _WIN32\r?\n#include \"resource\\.h\"" _match_guarded2 "${WINMAIN_CONTENT}")
     if(NOT _match_guarded2)
-        message(FATAL_ERROR "AC-4 FAIL [7.8.4]: '#include \"resource.h\"' is NOT guarded by #ifdef _WIN32 in Winmain.cpp — causes 'file not found' on macOS/Linux builds")
+        message(FATAL_ERROR "AC-4 FAIL [7.8.4]: '#include \"resource.h\"' is NOT guarded by #ifdef _WIN32 in MuMain.cpp — causes 'file not found' on macOS/Linux builds")
     endif()
 endif()
 
@@ -56,7 +56,7 @@ if(NOT _match_full_guard)
         endif()
         message(STATUS "AC-4: #ifdef _WIN32 guard present with #endif — OK (allow comment between include and endif)")
     else()
-        message(FATAL_ERROR "AC-4 FAIL [7.8.4]: '#include \"resource.h\"' is NOT inside a #ifdef _WIN32 / #endif block in Winmain.cpp")
+        message(FATAL_ERROR "AC-4 FAIL [7.8.4]: '#include \"resource.h\"' is NOT inside a #ifdef _WIN32 / #endif block in MuMain.cpp")
     endif()
 endif()
 
@@ -69,7 +69,7 @@ if(_pos_first_resource LESS _pos_first_guard)
 endif()
 
 # --- Check 5: IDI_ICON1 fallback definition exists in PlatformCompat.h ---
-# AC-4 implies that symbols like IDI_ICON1 (used in Winmain.cpp) must have cross-platform fallback definitions
+# AC-4 implies that symbols like IDI_ICON1 (used in MuMain.cpp) must have cross-platform fallback definitions
 set(PLATFORM_COMPAT_H "${CMAKE_CURRENT_LIST_DIR}/../../src/source/Platform/PlatformCompat.h")
 if(EXISTS "${PLATFORM_COMPAT_H}")
     file(READ "${PLATFORM_COMPAT_H}" COMPAT_CONTENT)
@@ -83,4 +83,4 @@ else()
     message(WARNING "AC-4: PlatformCompat.h not found at ${PLATFORM_COMPAT_H} — skipping IDI_ICON1 check (non-critical)")
 endif()
 
-message(STATUS "AC-4 PASS [7.8.4]: Winmain.cpp '#include \"resource.h\"' is wrapped in #ifdef _WIN32 / #endif guard — cross-platform builds safe")
+message(STATUS "AC-4 PASS [7.8.4]: MuMain.cpp '#include \"resource.h\"' is wrapped in #ifdef _WIN32 / #endif guard — cross-platform builds safe")

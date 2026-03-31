@@ -9,7 +9,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "MsgBoxIGSUseItemConfirm.h"
-#include "Winmain.h"
+#include "MuMain.h"
 
 #include "DSPlaySound.h"
 #include "MsgBoxIGSUseBuffConfirm.h"

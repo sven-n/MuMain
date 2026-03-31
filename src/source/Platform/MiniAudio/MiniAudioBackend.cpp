@@ -21,7 +21,7 @@
 // ---------------------------------------------------------------------------
 // Global backend pointer — nullptr until the game initialises audio.
 // Story 5.1.1: defined here (nullptr). Story 5.2.1: set to new mu::MiniAudioBackend()
-// and Initialize() called during game startup (Winmain.cpp). Story 5.2.2 will
+// and Initialize() called during game startup (MuMain.cpp). Story 5.2.2 will
 // extend SFX delegation via this pointer.
 // ---------------------------------------------------------------------------
 mu::IPlatformAudio* g_platformAudio = nullptr;
@@ -452,7 +452,7 @@ void MiniAudioBackend::SetMasterVolume(long vol)
 // ---------------------------------------------------------------------------
 // PlayMusic — start streaming a music track
 // If enforce=false and the same track is already playing, returns early (no restart).
-// Matches wzAudioPlay() + Mp3FileName guard logic from Winmain.cpp.
+// Matches wzAudioPlay() + Mp3FileName guard logic from MuMain.cpp.
 //
 // Story 5.2.1: Path normalization — MUSIC_* constants in mu_enum.h use Windows
 // backslash separators (e.g., "data\\music\\Pub.mp3"). On Linux/macOS miniaudio
@@ -535,7 +535,7 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 // with the same track name hits the same-track guard and returns early — the music
 // stays paused with no way to resume from the current position. IPlatformAudio has
 // no ResumeMusic() method. In practice, all game call sites use enforce=TRUE (hard
-// stop via the StopMusic() free function in Winmain.cpp), so this dead-end path is
+// stop via the StopMusic() free function in MuMain.cpp), so this dead-end path is
 // not reachable from current gameplay. A ResumeMusic() API may be added in 5.2.2.
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::StopMusic(const char* name, bool enforce)
@@ -571,7 +571,7 @@ void MiniAudioBackend::StopMusic(const char* name, bool enforce)
 
 // ---------------------------------------------------------------------------
 // IsEndMusic — returns true when no music is playing
-// Mirrors wzAudioGetStreamOffsetRange() == 100 semantics from Winmain.cpp.
+// Mirrors wzAudioGetStreamOffsetRange() == 100 semantics from MuMain.cpp.
 // Returns true when not initialized (safe default state for tests and pre-init).
 // ---------------------------------------------------------------------------
 bool MiniAudioBackend::IsEndMusic()
@@ -586,7 +586,7 @@ bool MiniAudioBackend::IsEndMusic()
 
 // ---------------------------------------------------------------------------
 // GetMusicPosition — returns music playback position as 0..100 percentage
-// Mirrors wzAudioGetStreamOffsetRange() return value from Winmain.cpp.
+// Mirrors wzAudioGetStreamOffsetRange() return value from MuMain.cpp.
 // Returns 0 when not initialized or no music loaded.
 //
 // HIGH-2 (code-review-finalize 2026-03-19): Music is loaded with

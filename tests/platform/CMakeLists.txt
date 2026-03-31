@@ -130,7 +130,7 @@ add_test(
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_2_2_2.cmake
 )
 
-# AC-STD-3: No raw Win32 mouse WM_* patterns outside Winmain.cpp and Platform/
+# AC-STD-3: No raw Win32 mouse WM_* patterns outside MuMain.cpp and Platform/
 add_test(
     NAME "2.2.2-AC-STD-3:no-raw-win32-mouse"
     COMMAND ${CMAKE_COMMAND}

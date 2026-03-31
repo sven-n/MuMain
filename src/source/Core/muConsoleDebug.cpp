@@ -19,7 +19,7 @@
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #endif
 
-// Forward declaration — avoids pulling in Win32-heavy Winmain.h
+// Forward declaration — avoids pulling in Win32-heavy MuMain.h
 extern void SetMaxMessagePerCycle(int messages);
 #ifdef CSK_DEBUG_MAP_PATHFINDING
 #include "ZzzPath.h"

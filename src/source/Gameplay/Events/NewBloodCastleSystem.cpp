@@ -7,7 +7,7 @@
 #include "NewBloodCastleSystem.h"
 #include "NewUICustomMessageBox.h"
 #include "NewUISystem.h"
-#include "Winmain.h"
+#include "MuMain.h"
 #include "DSPlaySound.h"
 #include "CSChaosCastle.h"
 #include "MapManager.h"

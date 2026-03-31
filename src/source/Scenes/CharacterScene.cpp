@@ -24,7 +24,7 @@
 #include "ZzzInterface.h"
 #include "NewUISystem.h"
 #include "DSPlaySound.h"
-#include "Winmain.h"
+#include "MuMain.h"
 #include "SceneCommon.h"
 #include "Core/CameraUtility.h"
 #include "ZzzOpenData.h"

@@ -3,8 +3,8 @@
 // Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
 // Pure virtual interface for the platform audio backend.
 // Mirrors the public API of DSPlaySound.h (LoadWaveFile/PlayBuffer/StopBuffer/etc.)
-// and the wzAudio wrappers in Winmain.cpp (PlayMp3/StopMp3/IsEndMp3/GetMp3PlayPosition).
-// Story 5.2.1 wired BGM via g_platformAudio (Winmain.cpp replaced wzAudio calls).
+// and the wzAudio wrappers in MuMain.cpp (PlayMp3/StopMp3/IsEndMp3/GetMp3PlayPosition).
+// Story 5.2.1 wired BGM via g_platformAudio (MuMain.cpp replaced wzAudio calls).
 // Story 5.2.2 wired SFX (LoadSound/PlaySound/StopSound/AllStopSound) into g_platformAudio.
 // (MEDIUM-4 fix, code-review-finalize 2026-03-20)
 
@@ -34,7 +34,7 @@ public:
     virtual void SetVolume(ESound buffer, long vol) = 0;
     virtual void SetMasterVolume(long vol) = 0;
 
-    // Music — mirrors Winmain.cpp wzAudio wrapper signatures exactly
+    // Music — mirrors MuMain.cpp wzAudio wrapper signatures exactly
     virtual void PlayMusic(const char* name, bool enforce) = 0;
     virtual void StopMusic(const char* name, bool enforce) = 0;
     [[nodiscard]] virtual bool IsEndMusic() = 0;
@@ -51,7 +51,7 @@ public:
 
 // Global audio backend pointer — nullptr until game initializes audio (Story 5.2.1)
 // TODO (LOW-NEW-1, deferred to future story): This singleton declaration belongs in
-// Winmain.h alongside the other audio free-function declarations, not in the pure
+// MuMain.h alongside the other audio free-function declarations, not in the pure
 // interface header. Moving it here couples every consumer of IPlatformAudio to the
 // singleton pattern. Pre-existing from Story 5.1.1; no regression introduced in 5.2.1.
 extern mu::IPlatformAudio* g_platformAudio;

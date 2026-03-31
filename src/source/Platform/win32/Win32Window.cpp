@@ -2,7 +2,7 @@
 
 #include "Win32Window.h"
 
-// Existing global window handle from Winmain.cpp
+// Existing global window handle from MuMain.cpp
 extern HWND g_hWnd;
 
 namespace mu
@@ -12,7 +12,7 @@ bool Win32Window::Create(const char* /*title*/, int /*width*/, int /*height*/, u
 {
     // Win32 window creation is still handled by WinMain() directly.
     // This stub exists so MuPlatform can provide the existing HWND via GetNativeHandle().
-    // The actual CreateWindowEx call remains in Winmain.cpp on Windows.
+    // The actual CreateWindowEx call remains in MuMain.cpp on Windows.
     return (g_hWnd != nullptr);
 }
 
@@ -44,7 +44,7 @@ void Win32Window::SetSize(int width, int height)
 
 void Win32Window::SetFullscreen(bool /*fullscreen*/)
 {
-    // Win32 fullscreen is handled by ChangeDisplaySettings in Winmain.cpp before window creation.
+    // Win32 fullscreen is handled by ChangeDisplaySettings in MuMain.cpp before window creation.
     // No runtime toggle needed on the Win32 path at this stage.
 }
 

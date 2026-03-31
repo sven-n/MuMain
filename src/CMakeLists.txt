@@ -490,7 +490,7 @@ if(NOT MSVC)
   target_compile_options(Main PRIVATE ${MU_LEGACY_WARNING_RELAXATIONS})
 endif()
 
-# Story 5.2.1: Winmain.cpp includes MiniAudioBackend.h and miniaudio.h directly.
+# Story 5.2.1: MuMain.cpp includes MiniAudioBackend.h and miniaudio.h directly.
 # These paths are PRIVATE to MUAudio (not propagated via MUGame/MUAudio link chain),
 # so they must be added to the Main target explicitly for include resolution.
 target_include_directories(Main PRIVATE

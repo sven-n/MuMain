@@ -18,7 +18,7 @@
 #include "UIControls.h"
 #include "NewUISystem.h"
 #include "NewUIInventoryCtrl.h"
-#include "Winmain.h"
+#include "MuMain.h"
 #include "MapManager.h"
 
 extern int TextNum;

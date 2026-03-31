@@ -2,7 +2,7 @@
 # Flow Code: VS0-QUAL-RENDER-GAMELOOP
 #
 # RED PHASE:  Test FAILS before story 7.9.1 is implemented.
-#             MuMain() in Winmain.cpp is a skeleton that initialises SDL3 windowing and
+#             MuMain() in MuMain.cpp is a skeleton that initialises SDL3 windowing and
 #             enters the event loop, but lacks the game state initialisation that WinMain()
 #             runs before MainLoop(). Key missing items verified by this test:
 #               - OpenBasicData (texture/item/gate/recipe loading)
@@ -25,11 +25,11 @@
 cmake_minimum_required(VERSION 3.25)
 
 if(NOT DEFINED WINMAIN_CPP)
-    message(FATAL_ERROR "WINMAIN_CPP must be set to the path of Winmain.cpp")
+    message(FATAL_ERROR "WINMAIN_CPP must be set to the path of MuMain.cpp")
 endif()
 
 if(NOT EXISTS "${WINMAIN_CPP}")
-    message(FATAL_ERROR "AC-4 FAIL: Winmain.cpp not found at '${WINMAIN_CPP}'")
+    message(FATAL_ERROR "AC-4 FAIL: MuMain.cpp not found at '${WINMAIN_CPP}'")
 endif()
 
 file(READ "${WINMAIN_CPP}" winmain_content)
@@ -40,7 +40,7 @@ file(READ "${WINMAIN_CPP}" winmain_content)
 # ---------------------------------------------------------------------------
 string(FIND "${winmain_content}" "int MuMain(" muminit_pos)
 if(muminit_pos EQUAL -1)
-    message(FATAL_ERROR "AC-4 FAIL: 'int MuMain(' not found in Winmain.cpp — cannot verify init sequence.")
+    message(FATAL_ERROR "AC-4 FAIL: 'int MuMain(' not found in MuMain.cpp — cannot verify init sequence.")
 endif()
 
 string(LENGTH "${winmain_content}" total_len)

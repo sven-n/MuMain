@@ -14,7 +14,7 @@ namespace mu
 
 bool Win32EventLoop::PollEvents()
 {
-    // Win32 message pumping is still handled by MainLoop() in Winmain.cpp.
+    // Win32 message pumping is still handled by MainLoop() in MuMain.cpp.
     // This stub exists so MuPlatform::PollEvents() has a valid backend on Windows.
     // The actual GetMessage/PeekMessage/DispatchMessage loop remains unchanged.
     MSG msg;

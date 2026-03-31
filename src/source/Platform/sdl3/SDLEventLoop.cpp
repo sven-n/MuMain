@@ -13,11 +13,11 @@ extern bool g_bSDLTextInputReady;
 // External game state — set to true to trigger clean shutdown
 extern bool Destroy;
 
-// Window and display state (Winmain.cpp)
+// Window and display state (MuMain.cpp)
 extern bool g_bWndActive;
 extern BOOL g_bUseWindowMode;
 
-// FPS throttle state (Winmain.cpp — shared with game loop)
+// FPS throttle state (MuMain.cpp — shared with game loop)
 extern double g_TargetFpsBeforeInactive;
 extern bool g_HasInactiveFpsOverride;
 
@@ -43,7 +43,7 @@ extern bool MouseMButtonPop;
 extern bool MouseMButtonPush;
 extern int MouseWheel;
 
-// Mouse position and screen-rate scaling (ZzzOpenglUtil.cpp / Winmain.cpp / stdafx.h)
+// Mouse position and screen-rate scaling (ZzzOpenglUtil.cpp / MuMain.cpp / stdafx.h)
 // [VS1-SDL-INPUT-MOUSE]
 extern int MouseX;
 extern int MouseY;
@@ -77,7 +77,7 @@ void HandleFocusGain()
 void HandleFocusLoss()
 {
     // Only set inactive in fullscreen mode — matches Win32 ACTIVE_FOCUS_OUT guard
-    // (Winmain.cpp:491-494). In windowed mode g_bWndActive stays true so that
+    // (MuMain.cpp:491-494). In windowed mode g_bWndActive stays true so that
     // game systems like the slide-help timer continue to work on Alt-Tab.
     if (g_bUseWindowMode == FALSE)
     {
@@ -132,12 +132,12 @@ bool SDLEventLoop::PollEvents()
     g_bSDLTextInputReady = false;
 
     // Reset per-frame mouse state before processing new events. [VS1-SDL-INPUT-MOUSE]
-    // MouseLButtonDBClick: mirrors Winmain.cpp:611 which clears this each frame.
+    // MouseLButtonDBClick: mirrors MuMain.cpp:611 which clears this each frame.
     // MouseWheel: per-frame accumulated value — cleared each frame like WM_MOUSEWHEEL.
     MouseLButtonDBClick = false;
     MouseWheel = 0;
 
-    // Position-drift clearing: mirrors Winmain.cpp:612-613.
+    // Position-drift clearing: mirrors MuMain.cpp:612-613.
     // If the cursor has moved since the last left-button-up, clear the stale pop flag.
     // On Win32 this pattern auto-clears MouseLButtonPop when the cursor drifts from
     // the release position, preventing stale click-detection in fast-click interactions.
@@ -218,7 +218,7 @@ bool SDLEventLoop::PollEvents()
 
         // Story 2.2.2: Mouse input tracking [VS1-SDL-INPUT-MOUSE]
         // Mirrors WM_MOUSEMOVE / WM_LBUTTONDOWN / WM_RBUTTONDOWN / WM_MOUSEWHEEL handlers
-        // in WndProc (Winmain.cpp). Coordinates normalized to 640x480 virtual space.
+        // in WndProc (MuMain.cpp). Coordinates normalized to 640x480 virtual space.
         case SDL_EVENT_MOUSE_MOTION:
             // SDL3: event.motion.x/y are float (window-relative pixels).
             // Divide by screen rate to map to 640x480 virtual coordinate space.

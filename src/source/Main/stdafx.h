@@ -285,7 +285,7 @@ inline void glFogfv(GLenum, const GLfloat*) {}
 // On Windows, these are pulled in through include chains that differ on macOS.
 // Adding them to the PCH ensures all symbols are available on all platforms.
 // [VS0-QUAL-BUILDCOMP-MACOS]
-#include "Main/Winmain.h"
+#include "Main/MuMain.h"
 #include "Data/ZzzInfomation.h"
 #include "Scenes/SceneCore.h"
 #include "Core/_GlobalFunctions.h"

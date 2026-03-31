@@ -1,5 +1,4 @@
-#ifndef __WINMAIN_H__
-#define __WINMAIN_H__
+#pragma once
 
 #define FOR_WORK
 /*--------------------------------------------------------------------------------------*/
@@ -81,5 +80,3 @@ extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
 
 extern void DestroySound();
-
-#endif

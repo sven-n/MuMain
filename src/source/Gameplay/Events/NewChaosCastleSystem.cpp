@@ -16,7 +16,7 @@ using namespace SEASON3B;
 #include "MapManager.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "Winmain.h"
+#include "MuMain.h"
 
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];

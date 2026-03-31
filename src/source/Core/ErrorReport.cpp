@@ -27,7 +27,7 @@
 #include "ErrorReport.h"
 
 // Global error report instance — defined here so MUCore-linked binaries (e.g. MuTests) can resolve it.
-// Declared as extern in ErrorReport.h; used from Winmain.cpp and MuTimer.cpp.
+// Declared as extern in ErrorReport.h; used from MuMain.cpp and MuTimer.cpp.
 CErrorReport g_ErrorReport;
 
 // Async-signal-safe file descriptor for crash handler writes.

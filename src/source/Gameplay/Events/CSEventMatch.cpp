@@ -12,7 +12,7 @@
 
 #include "NewUICustomMessageBox.h"
 #include "NewUISystem.h"
-#include "Winmain.h"
+#include "MuMain.h"
 
 #include <algorithm>
 #include <chrono>

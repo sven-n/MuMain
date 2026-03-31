@@ -7,7 +7,7 @@
 
 #include "UIManager.h"
 #include "NewUISystem.h"
-#include "Winmain.h"
+#include "MuMain.h"
 
 CPersonalShopTitleImp::CPersonalShopTitleImp() : m_iHighlightFrame(0), m_bShow(true) {}
 CPersonalShopTitleImp::~CPersonalShopTitleImp()

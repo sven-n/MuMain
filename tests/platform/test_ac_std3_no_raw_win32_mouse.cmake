@@ -5,19 +5,19 @@
 #  1. WM_MOUSEMOVE, WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN,
 #     WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, WM_MOUSEWHEEL,
 #     WM_LBUTTONDBLCLK, SetCapture, ReleaseCapture
-#     only appear in ALLOWED locations (Winmain.cpp WndProc, Platform/ layer).
+#     only appear in ALLOWED locations (MuMain.cpp WndProc, Platform/ layer).
 #  2. No new files outside the known-call-site list introduce these patterns.
 #
 # Architecture: On SDL3 path, all mouse state is fed from SDLEventLoop::PollEvents()
-#               via SDL events. Win32 WM_* handlers remain ONLY in Winmain.cpp WndProc
+#               via SDL events. Win32 WM_* handlers remain ONLY in MuMain.cpp WndProc
 #               for the Win32 path (zero regression).
 #
 # ALLOWED locations:
-#   - MuMain/src/source/Main/Winmain.cpp          (legacy WndProc — Win32 path)
+#   - MuMain/src/source/Main/MuMain.cpp          (legacy WndProc — Win32 path)
 #   - MuMain/src/source/Platform/**               (platform abstraction layer)
 #
 # FORBIDDEN: Any new WM_MOUSEMOVE / SetCapture / ReleaseCapture in game logic files
-#            outside Winmain.cpp and Platform/.
+#            outside MuMain.cpp and Platform/.
 
 cmake_minimum_required(VERSION 3.25)
 
@@ -41,9 +41,9 @@ set(FORBIDDEN_PATTERNS
 )
 
 # Known files ALLOWED to contain Win32 mouse WM_* patterns
-# (Winmain.cpp WndProc — Win32 path, retained for backward compatibility)
+# (MuMain.cpp WndProc — Win32 path, retained for backward compatibility)
 set(KNOWN_CALL_SITES
-    "Winmain.cpp"
+    "MuMain.cpp"
 )
 
 # Directories ALLOWED to contain any platform patterns
@@ -126,7 +126,7 @@ list(LENGTH UNEXPECTED_FILES UNEXPECTED_COUNT)
 if(UNEXPECTED_COUNT GREATER 0)
     message(FATAL_ERROR
         "AC-STD-3 [VS1-SDL-INPUT-MOUSE] FAILED: Found ${UNEXPECTED_COUNT} unexpected Win32 mouse "
-        "WM_* pattern(s) outside Winmain.cpp and Platform/. "
+        "WM_* pattern(s) outside MuMain.cpp and Platform/. "
         "All mouse state on SDL3 path must be fed from SDLEventLoop::PollEvents() via SDL events. "
         "No new WM_MOUSEMOVE / SetCapture / ReleaseCapture permitted in game logic files.\n"
         "Unexpected files:\n${UNEXPECTED_FILES}"
@@ -134,6 +134,6 @@ if(UNEXPECTED_COUNT GREATER 0)
 endif()
 
 message(STATUS
-    "AC-STD-3 PASSED: No unexpected Win32 mouse WM_* patterns outside Winmain.cpp and Platform/. "
+    "AC-STD-3 PASSED: No unexpected Win32 mouse WM_* patterns outside MuMain.cpp and Platform/. "
     "[VS1-SDL-INPUT-MOUSE]"
 )
