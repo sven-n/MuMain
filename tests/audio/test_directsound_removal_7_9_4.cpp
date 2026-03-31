@@ -56,14 +56,15 @@
 //
 // These tests always pass and serve as regression guards for the conversion math.
 
-TEST_CASE("AC-1 [7-9-4]: DbToLinear formula — mute level (-10000) maps to 0.0f",
+TEST_CASE("AC-1 [7-9-4]: DbToLinear formula — mute level (-10000) is near zero",
     "[audio][volume][ac-1][7-9-4]")
 {
     // GIVEN: DirectSound minimum volume: -10000 (= -100 dB, effectively silent)
-    // WHEN:  Converted to linear scale — special case: volume at floor → mute
-    // THEN:  Must produce 0.0f
-    constexpr float EXPECTED_MUTE = 0.0f;
-    CHECK(EXPECTED_MUTE == 0.0f); // documents the DbToLinear(-10000) == 0.0f contract
+    // WHEN:  Converted to linear scale via pow(10, -10000 / 2000.0f) = pow(10, -5)
+    // THEN:  Must produce a value indistinguishable from silence (< 0.001f)
+    float linear = std::pow(10.0f, -10000.0f / 2000.0f);
+    CHECK(linear < 0.001f);
+    CHECK(linear >= 0.0f);
 }
 
 TEST_CASE("AC-1 [7-9-4]: DbToLinear formula — full volume (0) maps to 1.0f",

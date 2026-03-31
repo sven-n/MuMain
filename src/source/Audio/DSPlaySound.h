@@ -1,5 +1,4 @@
-#ifndef __DSPLAYSOUND_H__
-#define __DSPLAYSOUND_H__
+#pragma once
 
 // Story 7.8.1: Include PlatformTypes.h so HRESULT/BOOL/HWND are available on all platforms.
 // Forward-declare OBJECT for function parameters that use OBJECT* pointers.
@@ -1000,20 +999,12 @@ enum ESound
     MAX_BUFFER
 };
 
-// Story 7-9-4: InitDirectSound is now a no-op — all audio uses g_platformAudio (miniaudio).
-HRESULT InitDirectSound(HWND hDlg);
-void SetEnableSound(bool b);
-void FreeDirectSound();
-
 void LoadWaveFile(ESound Buffer, const wchar_t* strFileName, int BufferChannel = MAX_CHANNEL,
                   bool Enable3DSound = false);
-HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = NULL, BOOL bLooped = false);
+HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = nullptr, BOOL bLooped = false);
 void StopBuffer(ESound Buffer, BOOL bResetPosition);
 void AllStopSound(void);
 void Set3DSoundPosition();
 HRESULT ReleaseBuffer(int Buffer);
-HRESULT RestoreBuffers(int Buffer, int Channel);
 void SetVolume(int Buffer, long vol);
 void SetMasterVolume(long vol);
-
-#endif //__DSPLAYSOUND_H__

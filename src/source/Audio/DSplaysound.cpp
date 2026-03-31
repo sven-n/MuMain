@@ -16,19 +16,6 @@
 #include "DSPlaySound.h"
 #include "IPlatformAudio.h"
 
-HRESULT InitDirectSound(HWND windowHandle)
-{
-    (void)windowHandle;
-    return S_OK;
-}
-
-void SetEnableSound(bool enabled)
-{
-    (void)enabled;
-}
-
-void FreeDirectSound() {}
-
 void LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel, bool enable3D)
 {
     if (g_platformAudio != nullptr)
@@ -46,18 +33,11 @@ HRESULT ReleaseBuffer(int bufferId)
     return S_OK;
 }
 
-HRESULT RestoreBuffers(int bufferId, int channel)
-{
-    (void)bufferId;
-    (void)channel;
-    return S_OK;
-}
-
 HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
 {
     if (g_platformAudio != nullptr)
     {
-        return g_platformAudio->PlaySound(bufferId, static_cast<void*>(object), looped != FALSE) ? S_OK : E_FAIL;
+        return g_platformAudio->PlaySound(bufferId, object, looped != FALSE) ? S_OK : E_FAIL;
     }
     return E_FAIL;
 }
