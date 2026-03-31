@@ -136,12 +136,14 @@ void CUIMng::ReleaseTitleSceneUI()
 
 void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 {
-    // Story 7-9-2 (AC-6): Self-manage frame lifecycle during OpenBasicData() loading.
-    // RenderTitleSceneUI is called outside the main game loop, so it must bracket
-    // its own BeginFrame/EndFrame when no frame is already active.
-    const bool needsFrame = !mu::GetRenderer().IsFrameActive();
-    if (needsFrame)
-        mu::GetRenderer().BeginFrame();
+    // Each loading update gets its own frame so the progress bar is visible.
+    // When called inside the game loop (frame already active), end the
+    // caller's frame first, present this update, then reopen for the caller.
+    const bool wasFrameActive = mu::GetRenderer().IsFrameActive();
+    if (wasFrameActive)
+        mu::GetRenderer().EndFrame();
+
+    mu::GetRenderer().BeginFrame();
 
     ::BeginOpengl();
     mu::GetRenderer().ClearScreen();
@@ -164,8 +166,10 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
     g_MuEditorCore.Render();
 #endif
 
-    if (needsFrame)
-        mu::GetRenderer().EndFrame();
+    mu::GetRenderer().EndFrame();
+
+    if (wasFrameActive)
+        mu::GetRenderer().BeginFrame();
 }
 
 void CUIMng::Create()

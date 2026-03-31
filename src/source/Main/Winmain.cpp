@@ -8,7 +8,6 @@
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
-#include "ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
@@ -539,10 +538,11 @@ int MuMain(int argc, char* argv[])
         g_platformAudio->SetSFXVolume(static_cast<float>(sfxLevel) / 10.0f);
     }
 
-    // Load game data (textures, items, gates, mix recipes, etc.)
-    OpenBasicData(nullptr);
-
     // ---- End game state initialisation ----
+    // Game data loading (OpenBasicData) happens on the first frame via
+    // RenderScene → WebzenScene (SceneFlag == WEBZEN_SCENE).
+    // WebzenScene handles fonts, title bitmaps, loading screen, and
+    // transitions SceneFlag to LOG_IN_SCENE when done.
 
     while (!Destroy)
     {
