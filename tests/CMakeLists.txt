@@ -316,6 +316,22 @@ target_compile_definitions(MuTests PRIVATE
 # No Win32 or DirectSound APIs in the test TU — compiles on macOS/Linux/Windows (MinGW CI).
 target_sources(MuTests PRIVATE audio/test_directsound_removal_7_9_4.cpp)
 
+# Story 7.9.5: Eliminate All Cross-Platform Stubs [VS0-PLAT-COMPAT-KILLSTUBS]
+# RED PHASE: Tests verify GDI text rendering pipeline (AC-1, AC-2, AC-3, AC-4),
+# clipboard operations via SDL3 (AC-5), and dead stub removal from PlatformCompat.h (AC-7).
+# AC-6 (WebzenScene visual) uses Catch2 SKIP — requires manual game binary verification.
+# GDI/clipboard tests FAIL until CrossPlatformGDI.cpp provides real implementations:
+#   AC-1: CreateCompatibleDC/CreateDIBSection return non-null; SelectObject/DeleteDC safe
+#   AC-2: CreateFont() returns a real non-null HFONT descriptor
+#   AC-3: GetTextExtentPoint32() returns non-zero SIZE, multi-char > single-char width
+#   AC-4: TextOut() returns TRUE after rasterizing glyphs into DC+bitmap pipeline
+#   AC-5: OpenClipboard returns TRUE (SDL3 path); GlobalLock returns real data pointer
+#   AC-7: wglCreateContext, gluPerspective, RegOpenKeyEx, CreateFile stubs absent (file-scan)
+# File-scan tests (AC-7) are guarded by #ifndef _WIN32 so MinGW CI compiles cleanly.
+# MU_SOURCE_DIR already injected by Story 7.9.3 CMake entry above.
+# No Win32 APIs in test TU — compiles on macOS/Linux/Windows (MinGW CI).
+target_sources(MuTests PRIVATE platform/test_platformcompat_no_stubs_7_9_5.cpp)
+
 # Story 6.4.1: UI Windows Comprehensive Validation [VS1-GAME-VALIDATE-UI]
 # RED PHASE: Tests verify INTERFACE_LIST enum completeness and coverage (AC-4),
 # CNewUIObj class hierarchy and Show/Enable state transitions (AC-1, MU_GAME_AVAILABLE),
