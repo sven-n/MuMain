@@ -151,6 +151,19 @@ target_sources(MuTests PRIVATE render/test_blendpipelinestate_migration.cpp)
 # Tests compile and run on macOS/Linux without Win32, OpenGL, or a GPU device.
 target_sources(MuTests PRIVATE render/test_gl_migration_7_9_2.cpp)
 
+# Story 7.9.6: Migrate All Raw OpenGL Calls to MuRenderer [VS0-RENDER-GL-MIGRATE]
+# RED PHASE: Tests verify ALL new IMuRenderer methods required to eliminate 250+ raw
+# OpenGL calls (state management, clear color, matrix stack, depth/stencil, viewport,
+# scissor, screenshot) from 35 files. Interface tests use GLMigration796Mock — no gl*
+# calls in this TU. File-scan tests (AC-1, AC-2, AC-9) are guarded by #ifndef _WIN32
+# so MinGW CI compiles cleanly. MU_SOURCE_DIR already injected by Story 7.9.3 entry.
+# Tests compile on macOS/Linux without Win32, OpenGL, or a GPU device.
+# Tests FAIL TO COMPILE until IMuRenderer gains: SetClearColor, PushMatrix, PopMatrix,
+# LoadIdentity, Translate, Rotate, Scale, MultMatrix, LoadMatrix, GetMatrix,
+# SetMatrixMode, SetDepthFunc, SetAlphaFunc, SetStencilFunc, SetStencilOp,
+# SetColorMask, SetViewport, SetScissor, SetScissorEnabled, ReadPixels.
+target_sources(MuTests PRIVATE render/test_gl_migration_7_9_6.cpp)
+
 # Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
 # GREEN PHASE: Tests verify IPlatformAudio interface purity (std::is_abstract_v),
 # g_platformAudio starts as nullptr, MiniAudioBackend default-constructs cleanly,
