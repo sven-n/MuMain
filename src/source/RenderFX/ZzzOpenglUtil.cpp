@@ -11,9 +11,6 @@
 #include "ZzzCharacter.h"
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
-#ifdef MU_USE_OPENGL_BACKEND
-#include "wglext.h"
-#endif
 
 int OpenglWindowX;
 int OpenglWindowY;

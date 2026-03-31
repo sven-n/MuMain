@@ -311,7 +311,6 @@ void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
         SocketClient->Close();
     }
 
-    KillGLWindow();
     DestroySound();
     DestroyWindow(g_hWnd);
     ExitProcess(0);

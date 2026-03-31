@@ -224,24 +224,8 @@ void SetMaxMessagePerCycle(int messages)
     g_MaxMessagePerCycle = (messages > 0) ? std::max<int>(messages, custom_min) : messages;
 }
 
-GLvoid KillGLWindow(GLvoid)
-{
-    // Legacy OpenGL context teardown. On SDL3/SDL_gpu path this is a no-op;
-    // MuRenderer::Shutdown() handles GPU resource cleanup.
-#ifndef MU_ENABLE_SDL3
-    if (g_hRC)
-    {
-        wglMakeCurrent(nullptr, nullptr);
-        wglDeleteContext(g_hRC);
-        g_hRC = nullptr;
-    }
-    if (g_hDC)
-    {
-        ReleaseDC(g_hWnd, g_hDC);
-        g_hDC = nullptr;
-    }
-#endif
-}
+// Story 7.9.3: KillGLWindow() deleted — OpenGL context teardown was a no-op on SDL3.
+// MuRenderer::Shutdown() handles GPU resource cleanup on the SDL_gpu path.
 
 void DestroySound()
 {
@@ -572,8 +556,7 @@ int MuMain(int argc, char* argv[])
 
             // Story 7.9.1: Full render path — RenderScene dispatches to
             // WebzenScene / LoadingScene / MainScene based on SceneFlag.
-            // hDC is nullptr on SDL3 — all HDC dereferences are behind
-            // #ifdef MU_USE_OPENGL_BACKEND or have been removed (AC-1).
+            // hDC is nullptr on SDL3 — HDC dereferences removed (story 7-9-2).
             RenderScene(nullptr);
 
             mu::GetRenderer().EndFrame();

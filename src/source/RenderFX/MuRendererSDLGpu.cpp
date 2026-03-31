@@ -17,8 +17,7 @@
 //   - Single pre-frame vertex upload in BeginFrame() / unmap in EndFrame() (AC-7 fix).
 //
 // GUARD STRUCTURE:
-//   MU_USE_OPENGL_BACKEND is OFF by default — this file compiles unconditionally.
-//   MuRenderer.cpp compiles only when MU_USE_OPENGL_BACKEND is ON.
+//   Story 7.9.3: SDL_gpu is the only renderer backend (MuRenderer.cpp deleted).
 
 // Include SDL3 GPU header only in this file — not exposed to game logic.
 // MU_ENABLE_SDL3 is defined at CMake project scope; the preprocessor guard
@@ -2194,12 +2193,8 @@ private:
 
 // ---------------------------------------------------------------------------
 // GetRenderer / InitSDLGpuRenderer / ShutdownSDLGpuRenderer:
-// Only compiled when MU_USE_OPENGL_BACKEND is OFF (the default SDL_gpu path).
-// When MU_USE_OPENGL_BACKEND is ON, MuRenderer.cpp provides GetRenderer()
-// returning MuRendererGL. Both files defining GetRenderer() would be an ODR
-// violation. Code-review fix H-1.
+// Story 7.9.3: MU_USE_OPENGL_BACKEND removed — SDL_gpu is the only backend.
 // ---------------------------------------------------------------------------
-#ifndef MU_USE_OPENGL_BACKEND
 
 [[nodiscard]] IMuRenderer& GetRenderer()
 {
@@ -2217,7 +2212,5 @@ void ShutdownSDLGpuRenderer()
 {
     MuRendererSDLGpu::Shutdown();
 }
-
-#endif // !MU_USE_OPENGL_BACKEND
 
 } // namespace mu

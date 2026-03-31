@@ -122,7 +122,6 @@ void MoveCharacter(CHARACTER* c, OBJECT* o);
 float g_Luminosity;
 
 extern int g_iNoMouseTime;
-extern GLvoid KillGLWindow(GLvoid);
 
 void WaitForNextActivity(bool usePreciseSleep)
 {

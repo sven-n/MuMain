@@ -68,10 +68,8 @@
 
 #include "Platform/PlatformCompat.h"
 
-#ifdef MU_USE_OPENGL_BACKEND
-#include <gl/glew.h>
-#include <gl/GL.h>
-#else
+// GL type definitions — unconditional (SDL_gpu is the only backend).
+// Story 7.9.3: MU_USE_OPENGL_BACKEND flag and GLEW includes removed.
 typedef unsigned int GLuint;
 typedef int GLint;
 typedef float GLfloat;
@@ -250,7 +248,6 @@ inline void glFogi(GLenum, GLint) {}
 inline void glFogf(GLenum, GLfloat) {}
 inline void glFogfv(GLenum, const GLfloat*) {}
 #endif // MU_ENABLE_SDL3
-#endif // MU_USE_OPENGL_BACKEND
 
 // client - base definitions
 #include "Core/Defined_Global.h"
