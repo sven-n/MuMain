@@ -79,8 +79,8 @@ TEST_CASE("AC-1: SelectObject, DeleteDC, DeleteObject do not crash", "[platform]
         REQUIRE(bmp != nullptr);
 
         // SelectObject should not crash and should return a previous object or null
-        HGDIOBJ prev = SelectObject(dc, reinterpret_cast<HGDIOBJ>(bmp));
-        // prev is allowed to be null (no prior selection) — just must not crash
+        SelectObject(dc, reinterpret_cast<HGDIOBJ>(bmp));
+        // Return value (previous selection) is ignored — just must not crash
 
         DeleteObject(reinterpret_cast<HGDIOBJ>(bmp));
         DeleteDC(dc);

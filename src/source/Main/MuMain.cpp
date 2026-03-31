@@ -29,7 +29,9 @@
 #include "MuHelper.h"
 
 #include "CBTMessageBox.h"
+#ifdef _WIN32
 #include "ThirdParty/regkey.h"
+#endif
 
 #include "CSChaosCastle.h"
 #include "Input.h"

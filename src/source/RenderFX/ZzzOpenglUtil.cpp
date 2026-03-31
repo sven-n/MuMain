@@ -12,6 +12,11 @@
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
 
+// GLU functions — no-op on non-Windows (SDL3 GPU replaces the OpenGL pipeline)
+#ifndef _WIN32
+static void gluPerspective(double /*fovy*/, double /*aspect*/, double /*zNear*/, double /*zFar*/) {}
+#endif
+
 int OpenglWindowX;
 int OpenglWindowY;
 int OpenglWindowWidth;

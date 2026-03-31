@@ -50,6 +50,7 @@ inline std::string mu_wchar_to_utf8(const wchar_t* src)
 #else
 
 #include "PlatformTypes.h"
+#include "CrossPlatformGDI.h"
 
 #include <cassert>
 #include <cerrno>
@@ -469,21 +470,9 @@ inline uint32_t GetTickCount()
     return timeGetTime();
 }
 
-// ---- Text measurement stub ----
-// GetTextExtentPoint32 stub — used extensively in UIControls.cpp and NewUIChatInputBox.cpp
-// for text measurement (CutStr, tooltip sizing). On non-Windows the font DC is nullptr;
-// return a fixed estimate so layout code does not crash.
-// Phase 4 (font system migration introduces IPlatformFont::MeasureText) will replace this.
-inline BOOL GetTextExtentPoint32(HDC /*hDC*/, const wchar_t* pszText, int cch, SIZE* lpSize)
-{
-    // Estimate: 8px per character width, 16px height — acceptable fallback until Phase 4.
-    if (lpSize != nullptr)
-    {
-        lpSize->cx = (cch > 0 ? cch : 0) * 8;
-        lpSize->cy = 16;
-    }
-    return TRUE;
-}
+// ---- Text measurement — real implementation in CrossPlatformGDI.cpp ----
+// Story 7-9-5: Uses embedded bitmap font metrics for accurate glyph measurement.
+BOOL GetTextExtentPoint32(HDC hDC, const wchar_t* lpString, int cchString, SIZE* lpSize);
 
 // lstrlen shim — alias to wcslen — used in UIControls.cpp GetTextExtentPoint32 call sites
 #ifndef lstrlen
@@ -761,75 +750,23 @@ struct BITMAPINFO
 };
 #define BI_RGB 0
 #define DIB_RGB_COLORS 0
-inline BOOL DeleteDC(HDC /*hdc*/)
-{
-    return TRUE;
-}
-inline BOOL DeleteObject(HGDIOBJ obj)
-{
-    free(obj); // matches calloc in CreateDIBSection; free(nullptr) is a no-op
-    return TRUE;
-}
-inline HDC CreateCompatibleDC(HDC /*hdc*/)
-{
-    // Non-null sentinel so callers that null-check succeed.
-    // DeleteDC is a no-op, so a static address is safe.
-    static char s_stubDC;
-    return (HDC)&s_stubDC;
-}
-inline HBITMAP CreateDIBSection(HDC /*hdc*/, const BITMAPINFO* bmi, UINT /*usage*/, void** ppvBits,
-                                HANDLE /*hSection*/, DWORD /*offset*/)
-{
-    // Allocate a real pixel buffer so CUIRenderTextOriginal::Create succeeds.
-    // The HBITMAP handle IS the buffer pointer; DeleteObject(handle) frees it.
-    if (bmi != nullptr && ppvBits != nullptr)
-    {
-        int w = bmi->bmiHeader.biWidth;
-        int h = bmi->bmiHeader.biHeight < 0 ? -bmi->bmiHeader.biHeight : bmi->bmiHeader.biHeight;
-        int bpp = bmi->bmiHeader.biBitCount / 8;
-        if (w > 0 && h > 0 && bpp > 0)
-        {
-            *ppvBits = calloc(1, (size_t)w * h * bpp);
-            return (HBITMAP)*ppvBits;
-        }
-    }
-    if (ppvBits != nullptr)
-        *ppvBits = nullptr;
-    return nullptr;
-}
-inline HGDIOBJ SelectObject(HDC /*hdc*/, HGDIOBJ /*obj*/)
-{
-    return nullptr;
-}
+// ---- GDI functions — real implementations in CrossPlatformGDI.cpp (Story 7-9-5) ----
+BOOL DeleteDC(HDC hdc);
+BOOL DeleteObject(HGDIOBJ obj);
+HDC CreateCompatibleDC(HDC hdc);
+HBITMAP CreateDIBSection(HDC hdc, const BITMAPINFO* pbmi, UINT iUsage, void** ppvBits, HANDLE hSection, DWORD dwOffset);
+HGDIOBJ SelectObject(HDC hdc, HGDIOBJ hObj);
 
-// HFONT stub — used in UIControls.h CUITextInputBox::SetFont (HFONT hFont parameter)
 // HFONT is already defined in PlatformTypes.h as void* — no re-definition needed.
 
-// Clipboard stubs — used in UIControls.cpp:ClipboardCheck() for numeric paste validation.
-// On SDL3 path, clipboard comes from SDL_GetClipboardText() (see MuClipboardIsNumericOnly).
-// Win32 clipboard functions are stubbed to safe no-ops so ClipboardCheck compiles.
+// ---- Clipboard — real SDL3 implementations (Story 7-9-5) ----
 using HGLOBAL = void*;
 #define CF_TEXT 1
-inline BOOL OpenClipboard(HWND /*hwnd*/)
-{
-    return FALSE;
-} // SDL3 path uses SDL_GetClipboardText
-inline HGLOBAL GetClipboardData(UINT /*uFormat*/)
-{
-    return nullptr;
-}
-inline void* GlobalLock(HGLOBAL /*hMem*/)
-{
-    return nullptr;
-}
-inline BOOL GlobalUnlock(HGLOBAL /*hMem*/)
-{
-    return TRUE;
-}
-inline BOOL CloseClipboard()
-{
-    return TRUE;
-}
+BOOL OpenClipboard(HWND hwnd);
+HGLOBAL GetClipboardData(UINT uFormat);
+void* GlobalLock(HGLOBAL hMem);
+BOOL GlobalUnlock(HGLOBAL hMem);
+BOOL CloseClipboard();
 
 // Win32 message constants needed by EditWndProc switch statement in UIControls.cpp.
 // EditWndProc is never called on the SDL3 path (no Win32 edit HWND), but must compile.
@@ -1545,22 +1482,15 @@ using HINTERNET = void*;
 // On macOS/Linux these are dead code paths (replaced by SDL3 GPU rendering).
 // Stubs allow compilation; no functionality is expected from them.
 
-// GDI color macro: COLORREF is DWORD (uint32_t), RGB packs R/G/B into low 24 bits.
+// GDI color types and macros
+using COLORREF = DWORD;
 #define RGB(r, g, b) (static_cast<DWORD>((r) | ((g) << 8) | ((b) << 16)))
 
-// GDI DC operations — no-ops on non-Windows
-inline DWORD SetBkColor(HDC /*hdc*/, DWORD /*color*/)
-{
-    return 0;
-}
-inline DWORD SetTextColor(HDC /*hdc*/, DWORD /*color*/)
-{
-    return 0;
-}
-inline BOOL TextOut(HDC /*hdc*/, int /*x*/, int /*y*/, const wchar_t* /*str*/, int /*len*/)
-{
-    return FALSE;
-}
+// GDI DC operations — real implementations in CrossPlatformGDI.cpp (Story 7-9-5)
+COLORREF SetBkColor(HDC hdc, COLORREF color);
+COLORREF SetTextColor(HDC hdc, COLORREF color);
+int SetBkMode(HDC hdc, int mode);
+BOOL TextOut(HDC hdc, int x, int y, const wchar_t* str, int len);
 
 // Win32 window messages used as constants in UIControls.cpp
 #define WM_PAINT 0x000F
@@ -1648,12 +1578,6 @@ inline BOOL IntersectRect(RECT* dest, const RECT* src1, const RECT* src2)
 
 // OutputDebugStringA — narrow-char variant (wide OutputDebugString already defined above)
 inline void OutputDebugStringA(const char* /*msg*/) {}
-
-// SwapBuffers — WGL buffer swap (dead code on macOS, SDL3 handles presentation)
-inline BOOL SwapBuffers(HDC /*hdc*/)
-{
-    return FALSE;
-}
 
 // MSVC-specific safe string functions
 #include <cstdio>
@@ -1937,21 +1861,6 @@ struct VS_FIXEDFILEINFO
     DWORD dwFileDateMS;
     DWORD dwFileDateLS;
 };
-inline DWORD GetFileVersionInfoSize(const wchar_t* /*lptstrFilename*/, DWORD* lpHandle)
-{
-    if (lpHandle)
-        *lpHandle = 0;
-    return 0;
-}
-inline BOOL GetFileVersionInfo(const wchar_t* /*lptstrFilename*/, DWORD /*dwHandle*/, DWORD /*dwLen*/, void* /*lpData*/)
-{
-    return FALSE;
-}
-inline BOOL VerQueryValue(const void* /*pBlock*/, const wchar_t* /*lpSubBlock*/, void** /*lplpBuffer*/, UINT* /*puLen*/)
-{
-    return FALSE;
-}
-
 // ---- DEVMODE — display settings struct (minimal for EnumDisplaySettings) ----
 struct DEVMODE
 {
@@ -1999,18 +1908,6 @@ struct _EXCEPTION_POINTERS
 };
 
 // ---- Window management function stubs (MuMain.cpp) ----
-inline BOOL wglMakeCurrent(HDC /*hdc*/, HGLRC /*hglrc*/)
-{
-    return TRUE;
-}
-inline BOOL wglDeleteContext(HGLRC /*hglrc*/)
-{
-    return TRUE;
-}
-inline HGLRC wglCreateContext(HDC /*hdc*/)
-{
-    return nullptr;
-}
 inline HWND FindWindow(const wchar_t* /*lpClassName*/, const wchar_t* /*lpWindowName*/)
 {
     return nullptr;
@@ -2095,14 +1992,10 @@ inline BOOL SetRect(RECT* lprc, int left, int top, int right, int bottom)
     return TRUE;
 }
 
-// ---- CreateFont — GDI font creation (returns nullptr on non-Windows) ----
-inline HFONT CreateFont(int /*nHeight*/, int /*nWidth*/, int /*nEscapement*/, int /*nOrientation*/, int /*fnWeight*/,
-                        DWORD /*fdwItalic*/, DWORD /*fdwUnderline*/, DWORD /*fdwStrikeOut*/, DWORD /*fdwCharSet*/,
-                        DWORD /*fdwOutputPrecision*/, DWORD /*fdwClipPrecision*/, DWORD /*fdwQuality*/,
-                        DWORD /*fdwPitchAndFamily*/, const wchar_t* /*lpszFace*/)
-{
-    return nullptr;
-}
+// ---- CreateFont — real implementation in CrossPlatformGDI.cpp (Story 7-9-5) ----
+HFONT CreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, DWORD fdwItalic,
+                 DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet, DWORD fdwOutputPrecision,
+                 DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily, const wchar_t* lpszFace);
 
 // ---- _ASSERT — MSVC debug assertion macro ----
 #ifndef _ASSERT
@@ -2153,61 +2046,6 @@ inline wchar_t* GetCommandLineW()
 }
 #define GetCommandLine GetCommandLineW
 
-// ---- Registry API stubs (non-Windows) ----
-// regkey.h (ThirdParty) uses these unconditionally. On non-Windows, registry
-// operations are no-ops — configuration uses config.ini via GameConfig.
-struct _HKEY
-{
-    int unused;
-};
-using HKEY = _HKEY*;
-#define HKEY_CLASSES_ROOT (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000000)))
-#define HKEY_CURRENT_USER (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000001)))
-#define HKEY_LOCAL_MACHINE (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000002)))
-#define HKEY_USERS (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000003)))
-#define HKEY_CURRENT_CONFIG (reinterpret_cast<HKEY>(static_cast<uintptr_t>(0x80000005)))
-
-#define REG_DWORD 4
-#define REG_EXPAND_SZ 2
-#define REG_SZ 1
-#define KEY_READ 0x20019
-#define KEY_WRITE 0x20006
-
-inline LONG RegOpenKeyEx(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/, DWORD /*ulOptions*/, DWORD /*samDesired*/,
-                         HKEY* /*phkResult*/)
-{
-    return 2L; /* ERROR_FILE_NOT_FOUND */
-}
-
-inline LONG RegQueryValueEx(HKEY /*hKey*/, const wchar_t* /*lpValueName*/, LPDWORD /*lpReserved*/, LPDWORD /*lpType*/,
-                            BYTE* /*lpData*/, LPDWORD /*lpcbData*/)
-{
-    return 2L;
-}
-
-inline LONG RegSetValueEx(HKEY /*hKey*/, const wchar_t* /*lpValueName*/, DWORD /*Reserved*/, DWORD /*dwType*/,
-                          const BYTE* /*lpData*/, DWORD /*cbData*/)
-{
-    return 2L;
-}
-
-inline LONG RegCreateKeyEx(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/, DWORD /*Reserved*/, wchar_t* /*lpClass*/,
-                           DWORD /*dwOptions*/, DWORD /*samDesired*/, void* /*lpSecurityAttributes*/,
-                           HKEY* /*phkResult*/, LPDWORD /*lpdwDisposition*/)
-{
-    return 2L;
-}
-
-inline LONG RegCloseKey(HKEY /*hKey*/)
-{
-    return 0L;
-}
-
-#define RegOpenKeyExW RegOpenKeyEx
-#define RegQueryValueExW RegQueryValueEx
-#define RegSetValueExW RegSetValueEx
-#define RegCreateKeyExW RegCreateKeyEx
-
 // ---- MCI multimedia constants ----
 #define MCI_SEQ_MAPPER 0xFFFF
 
@@ -2255,39 +2093,6 @@ inline LRESULT DispatchMessage(const MSG* /*lpMsg*/)
 // ---- u_int64 type alias (used in some legacy code as __int64) ----
 using u_int64 = int64_t;
 
-// ---- Win32 File API stubs (non-Windows) ----
-// InGameShopSystem.cpp uses CreateFile/CloseHandle behind #ifdef FOR_WORK.
-#define GENERIC_READ 0x80000000L
-#define GENERIC_WRITE 0x40000000L
-#define OPEN_EXISTING 3
-#define CREATE_ALWAYS 2
-#define FILE_ATTRIBUTE_NORMAL 0x80
-#define INVALID_HANDLE_VALUE (reinterpret_cast<HANDLE>(static_cast<intptr_t>(-1)))
-
-inline HANDLE CreateFile(const wchar_t* /*lpFileName*/, DWORD /*dwDesiredAccess*/, DWORD /*dwShareMode*/,
-                         void* /*lpSecurityAttributes*/, DWORD /*dwCreationDisposition*/,
-                         DWORD /*dwFlagsAndAttributes*/, HANDLE /*hTemplateFile*/)
-{
-    return INVALID_HANDLE_VALUE;
-}
-#define CreateFileW CreateFile
-
-inline BOOL ReadFile(HANDLE /*hFile*/, void* /*lpBuffer*/, DWORD /*nNumberOfBytesToRead*/,
-                     LPDWORD /*lpNumberOfBytesRead*/, void* /*lpOverlapped*/)
-{
-    return FALSE;
-}
-
-inline DWORD GetFileSize(HANDLE /*hFile*/, LPDWORD /*lpFileSizeHigh*/)
-{
-    return 0;
-}
-
-inline BOOL CloseHandle(HANDLE /*hObject*/)
-{
-    return TRUE;
-}
-
 // ---- _countof macro (MSVC CRT) ----
 #ifndef _countof
 #define _countof(arr) (sizeof(arr) / sizeof((arr)[0]))
@@ -2303,25 +2108,6 @@ inline wchar_t* mu_wcsupr(wchar_t* str)
     return str;
 }
 #define _wcsupr mu_wcsupr
-
-// ---- Registry additional constants ----
-#ifndef KEY_ALL_ACCESS
-#define KEY_ALL_ACCESS 0xF003F
-#endif
-#ifndef REG_OPTION_NON_VOLATILE
-#define REG_OPTION_NON_VOLATILE 0
-#endif
-
-inline LONG RegDeleteKey(HKEY /*hKey*/, const wchar_t* /*lpSubKey*/)
-{
-    return 2L;
-}
-inline LONG RegDeleteValue(HKEY /*hKey*/, const wchar_t* /*lpValueName*/)
-{
-    return 2L;
-}
-#define RegDeleteKeyW RegDeleteKey
-#define RegDeleteValueW RegDeleteValue
 
 // ---- vswprintf MSVC-compatible variant (no size param) ----
 // muConsoleDebug.cpp calls vswprintf(buf, fmt, va) without buffer size.
@@ -2352,15 +2138,6 @@ inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... ar
     return std::swprintf(buffer, N, format, args...);
 }
 #endif // MU_SWPRINTF_DEFINED
-
-// ---- GLU (OpenGL Utility) function stubs ----
-// ZzzOpenglUtil.cpp calls gluPerspective/gluOrtho2D for camera setup.
-// SDL3/SDL_opengl.h provides GL functions but NOT GLU. On macOS these
-// are no-ops since the rendering pipeline uses SDL3 GPU.
-// [VS0-QUAL-BUILDCOMP-MACOS]
-inline void gluPerspective(double /*fovy*/, double /*aspect*/, double /*zNear*/, double /*zFar*/) {}
-inline void gluOrtho2D(double /*left*/, double /*right*/, double /*bottom*/, double /*top*/) {}
-inline void gluLookAt(double, double, double, double, double, double, double, double, double) {}
 
 // ---- WGL (Windows GL Extensions) stubs ----
 // ZzzOpenglUtil.cpp uses WGL function pointers for VSync and MSAA.

@@ -107,20 +107,10 @@ bool CInGameShopSystem::ScriptDownload()
     wcscpy(szScriptRemotePathforDMZ, L"/Global/Payment/DevScriptGB/ProductTransfer");
 
 #ifdef FOR_WORK
-    HANDLE hFile;
-    hFile = CreateFile(L"dmz.ini",            // file to create
-                       GENERIC_READ,          // open for reading
-                       0,                     // do not share
-                       NULL,                  // default security
-                       OPEN_EXISTING,         // existing file only
-                       FILE_ATTRIBUTE_NORMAL, // normal file
-                       NULL);                 // no template
-
-    if (hFile != INVALID_HANDLE_VALUE)
+    if (std::filesystem::exists("dmz.ini"))
     {
         wcscpy(m_szScriptRemotePath, szScriptRemotePathforDMZ);
     }
-    CloseHandle(hFile);
 #endif // FOR_WORK
     m_ShopManager.SetListManagerInfo(HTTP, m_szScriptIPAddress, L"", L"", m_szScriptRemotePath, m_szScriptLocalPath,
                                      m_ScriptVerInfo, 10000);
@@ -178,20 +168,10 @@ bool CInGameShopSystem::BannerDownload()
     wcscpy(szBannerRemotePathforDMZ, L"/Global/Payment/DevScriptGB/BannerTransfer");
 
 #ifdef FOR_WORK
-    HANDLE hFile;
-    hFile = CreateFile(L"dmz.ini",            // file to create
-                       GENERIC_READ,          // open for reading
-                       0,                     // do not share
-                       NULL,                  // default security
-                       OPEN_EXISTING,         // existing file only
-                       FILE_ATTRIBUTE_NORMAL, // normal file
-                       NULL);                 // no template
-
-    if (hFile != INVALID_HANDLE_VALUE)
+    if (std::filesystem::exists("dmz.ini"))
     {
         wcscpy(m_szBannerRemotePath, szBannerRemotePathforDMZ);
     }
-    CloseHandle(hFile);
 #endif // FOR_WORK
 
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
