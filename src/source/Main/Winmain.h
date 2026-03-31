@@ -49,7 +49,6 @@
 // #define CAMERA_TEST
 
 #define WM_RECEIVE_BUFFER (WM_USER + 2)
-#define WM_NPROTECT_EXIT_TWO (WM_USER + 10001)
 
 extern bool ashies;
 extern int weather;
@@ -67,11 +66,8 @@ extern int RandomTable[];
 
 extern wchar_t m_Username[11];
 extern wchar_t m_Password[21];
-extern wchar_t m_Version[];
 extern int m_SoundOnOff;
 extern int m_MusicOnOff;
-extern int m_Resolution;
-extern int m_nColorDepth;
 extern int m_RememberMe;
 extern int g_MaxMessagePerCycle;
 extern double CPU_AVG;
@@ -84,21 +80,6 @@ extern void PlayMp3(const char* Name, BOOL bEnforce = false);
 extern bool IsEndMp3();
 extern int GetMp3PlayPosition();
 
-extern void DestroyWindow();
 extern void DestroySound();
-
-// #if defined _DEBUG || defined PBG_LOG_PACKET_WINSOCKERROR
-//	#include "Core/DebugAngel.h"
-// #define ExecutionLog	DebugAngel_Write
-// #else
-// #define ExecutionLog	{}
-// #endif //_DEBUG
-
-#define FAKE_CODE(pos)                                                                                                 \
-    _asm { jmp pos }                                                                                                     \
-    ;                                                                                                                  \
-    _asm { __emit 0xFF }                                                                                                 \
-    ;                                                                                                                  \
-    _asm { __emit 0x15 }
 
 #endif

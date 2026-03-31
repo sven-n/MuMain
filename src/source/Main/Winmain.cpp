@@ -332,6 +332,9 @@ int MuMain(int argc, char* argv[])
     m_RememberMe = GameConfig::GetInstance().GetRememberMe() ? 1 : 0;
     g_strSelectedML = GameConfig::GetInstance().GetLanguageSelection();
 
+    // Set locale before any multibyte/wide conversions (e.g., mbstowcs in server override below).
+    setlocale(LC_ALL, "");
+
     // Task 1.2 (Story 7.9.3): Command line server override — ported from Win32 init path.
     // Checks argv for -u <IP> and -p <PORT> to override config.ini server settings.
     {
@@ -354,7 +357,11 @@ int MuMain(int argc, char* argv[])
             mbstowcs(s_CmdUrlW, cmdUrl, 63);
             s_CmdUrlW[63] = L'\0';
             szServerIpAddress = s_CmdUrlW;
-            g_ServerPort = static_cast<WORD>(std::atoi(cmdPort));
+            long port = std::strtol(cmdPort, nullptr, 10);
+            if (port > 0 && port <= 65535)
+                g_ServerPort = static_cast<WORD>(port);
+            else
+                g_ErrorReport.Write(L"> WARNING: Invalid port '%hs', using default %d\r\n", cmdPort, (int)g_ServerPort);
             g_ErrorReport.Write(L"> Command line server override: %ls:%d\r\n", s_CmdUrlW, (int)g_ServerPort);
         }
         else
@@ -412,8 +419,6 @@ int MuMain(int argc, char* argv[])
     // Reproduces the cross-platform subset of the Win32 init path that ran
     // before the Win32 game loop. Win32-only init (CreateFont, SetTimer, CInput with
     // HWND, IME, screensaver suppression) is intentionally skipped.
-
-    setlocale(LC_ALL, "");
 
     // Random seed and table (for gameplay RNG)
     srand((unsigned)time(nullptr));
