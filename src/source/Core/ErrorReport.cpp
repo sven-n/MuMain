@@ -77,7 +77,8 @@ static std::string WideToUtf8(const wchar_t* wide)
 CErrorReport::CErrorReport()
 {
     Clear();
-    Create(L"MuError.log");
+    // File creation deferred — MuMain() calls Create() after setting CWD
+    // so the log lands in the exe directory, not the shell's CWD.
 }
 
 CErrorReport::~CErrorReport()

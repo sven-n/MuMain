@@ -1388,6 +1388,13 @@ public:
     // The buffer is uploaded in BeginFrame() before the render pass.
     // Story 4.3.2 (AC-10): Fog uniform buffer support.
     // -----------------------------------------------------------------------
+    void SetDepthMask(bool enabled) override { m_depthMaskEnabled = enabled; }
+    void SetCullFace(bool enabled) override { m_cullFaceEnabled = enabled; }
+    void SetAlphaTest(bool enabled) override { m_alphaTestEnabled = enabled; }
+    void SetTexture2D(bool enabled) override { m_texture2DEnabled = enabled; }
+    void SetFogEnabled(bool enabled) override { m_fogEnabled = enabled; }
+    void BindTexture(int texId) override { m_boundTextureId = texId; }
+
     void SetFog(const FogParams& params) override
     {
         m_fogParams = params;
@@ -1413,10 +1420,16 @@ public:
     }
 
 private:
-    // Per-instance render state (blend mode, depth test, fog).
+    // Per-instance render state.
     BlendMode m_activeBlendMode = BlendMode::Alpha;
     bool m_blendEnabled = true;
     bool m_depthTestEnabled = true;
+    bool m_depthMaskEnabled = true;
+    bool m_cullFaceEnabled = true;
+    bool m_alphaTestEnabled = false;
+    bool m_texture2DEnabled = true;
+    bool m_fogEnabled = false;
+    int m_boundTextureId = -1;
     FogParams m_fogParams{};
     // Story 4.3.2 (AC-10): CPU-side fog uniform data, uploaded to GPU when dirty.
     FogUniform m_fogUniform{};

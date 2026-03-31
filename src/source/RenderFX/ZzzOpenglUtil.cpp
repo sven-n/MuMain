@@ -258,15 +258,7 @@ void BindTexture(int tex)
     if (CachTexture != tex)
     {
         CachTexture = tex;
-        if (tex >= 0)
-        {
-            BITMAP_t* b = &Bitmaps[tex];
-            glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-        }
-        else
-        {
-            glBindTexture(GL_TEXTURE_2D, -1 * tex);
-        }
+        mu::GetRenderer().BindTexture(tex);
     }
 }
 
@@ -318,7 +310,7 @@ void EnableDepthMask()
     if (!DepthMaskEnable)
     {
         DepthMaskEnable = true;
-        glDepthMask(true);
+        mu::GetRenderer().SetDepthMask(true);
     }
 }
 
@@ -327,7 +319,7 @@ void DisableDepthMask()
     if (DepthMaskEnable)
     {
         DepthMaskEnable = false;
-        glDepthMask(false);
+        mu::GetRenderer().SetDepthMask(false);
     }
 }
 
@@ -336,7 +328,7 @@ void EnableCullFace()
     if (!CullFaceEnable)
     {
         CullFaceEnable = true;
-        glEnable(GL_CULL_FACE);
+        mu::GetRenderer().SetCullFace(true);
     }
 }
 
@@ -345,7 +337,7 @@ void DisableCullFace()
     if (CullFaceEnable)
     {
         CullFaceEnable = false;
-        glDisable(GL_CULL_FACE);
+        mu::GetRenderer().SetCullFace(false);
     }
 }
 
@@ -357,7 +349,7 @@ void DisableTexture(bool AlphaTest)
         if (!AlphaTestEnable)
         {
             AlphaTestEnable = true;
-            glEnable(GL_ALPHA_TEST);
+            mu::GetRenderer().SetAlphaTest(true);
         }
     }
     else
@@ -365,13 +357,13 @@ void DisableTexture(bool AlphaTest)
         if (AlphaTestEnable)
         {
             AlphaTestEnable = false;
-            glDisable(GL_ALPHA_TEST);
+            mu::GetRenderer().SetAlphaTest(false);
         }
     }
     if (TextureEnable)
     {
         TextureEnable = false;
-        glDisable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(false);
     }
 }
 
@@ -387,15 +379,15 @@ void DisableAlphaBlend()
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaTest(bool DepthMask)
@@ -403,8 +395,7 @@ void EnableAlphaTest(bool DepthMask)
     if (AlphaBlendType != 2)
     {
         AlphaBlendType = 2;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
     }
     DisableCullFace();
     if (DepthMask)
@@ -412,15 +403,15 @@ void EnableAlphaTest(bool DepthMask)
     if (!AlphaTestEnable)
     {
         AlphaTestEnable = true;
-        glEnable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(true);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend()
@@ -435,15 +426,15 @@ void EnableAlphaBlend()
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glDisable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(false);
 }
 
 void EnableAlphaBlendMinus()
@@ -458,15 +449,15 @@ void EnableAlphaBlendMinus()
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend2()
@@ -481,15 +472,15 @@ void EnableAlphaBlend2()
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend3()
@@ -504,15 +495,15 @@ void EnableAlphaBlend3()
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend4()
@@ -527,15 +518,15 @@ void EnableAlphaBlend4()
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableLightMap()
@@ -550,15 +541,15 @@ void EnableLightMap()
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void glViewport2(int x, int y, int Width, int Height)
@@ -1201,7 +1192,7 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
 void EndRenderColor()
 {
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
 }
 
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,

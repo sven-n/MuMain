@@ -306,18 +306,13 @@ void CSprite::Render()
         vertices[i].color = color;
     }
 
-    // textureId=0 sentinel for untextured sprites (m_nTexID == -1).
-    // Caller manages texture binding via BindTexture() before RenderQuad2D.
-    // TECH DEBT (Story 7-9-2 review Finding #3): Raw glEnable/glDisable(GL_TEXTURE_2D)
-    // calls below are GL state management explicitly out-of-scope per AC-8. On non-GL
-    // backends these resolve to no-op stubs (stdafx.h). Future texture-state abstraction
-    // should route these through IMuRenderer.
+    // Texture state and binding routed through MuRenderer.
     if (m_nTexID >= 0)
     {
         if (!TextureEnable)
         {
             TextureEnable = true;
-            ::glEnable(GL_TEXTURE_2D);
+            mu::GetRenderer().SetTexture2D(true);
         }
         BindTexture(m_nTexID);
     }
@@ -326,7 +321,7 @@ void CSprite::Render()
         if (TextureEnable)
         {
             TextureEnable = false;
-            ::glDisable(GL_TEXTURE_2D);
+            mu::GetRenderer().SetTexture2D(false);
         }
     }
 

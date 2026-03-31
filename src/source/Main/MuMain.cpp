@@ -301,6 +301,10 @@ int MuMain(int argc, char* argv[])
         std::filesystem::current_path(mu_get_app_dir(), ec);
     }
 
+    // Open the error log now that CWD points to the exe directory.
+    // CErrorReport constructor defers file creation to avoid writing to the shell's CWD.
+    g_ErrorReport.Create(L"MuError.log");
+
     // Task 1.1 (Story 7.9.3): Error report log header — ported from Win32 init path.
     // Writes version separator and system info to MuError.log on startup.
     g_ErrorReport.Write(L"\r\n");

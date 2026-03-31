@@ -107,6 +107,18 @@ public:
     // Enable or disable depth testing (glDepthFunc defaults to GL_LEQUAL).
     virtual void SetDepthTest(bool enabled) = 0;
 
+    // GL state forwarding — SDL_gpu pipeline handles these per-draw.
+    // Default implementations are no-ops; OpenGL backend overrides them.
+    virtual void SetDepthMask(bool /*enabled*/) {}
+    virtual void SetCullFace(bool /*enabled*/) {}
+    virtual void SetAlphaTest(bool /*enabled*/) {}
+    virtual void SetTexture2D(bool /*enabled*/) {}
+    virtual void SetFogEnabled(bool /*enabled*/) {}
+
+    // Bind texture by game bitmap index. SDL_gpu resolves this to SDL_GPUTexture*
+    // via the texture registry; OpenGL calls glBindTexture directly.
+    virtual void BindTexture(int /*texId*/) {}
+
     // Configure hardware fog for the current scene.
     virtual void SetFog(const FogParams& params) = 0;
 

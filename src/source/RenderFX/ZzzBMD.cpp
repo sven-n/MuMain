@@ -2866,9 +2866,10 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     if (Version == 0xC)
     {
         //// wprintf(L"[Open2] Version: %d\n", Version);
-        // cppcheck-suppress arithOperationsOnVoidPointer
-        long encSize = *(long*)(fileData.get() + ptr);
-        ptr += sizeof(long);
+        // File format stores a 4-byte little-endian size (Win32 long = 4 bytes).
+        // Use int32_t — long is 8 bytes on macOS arm64, reading garbage.
+        int32_t encSize = *(int32_t*)(fileData.get() + ptr);
+        ptr += sizeof(int32_t);
         // cppcheck-suppress arithOperationsOnVoidPointer
         unsigned char* encData = fileData.get() + ptr;
         //// wprintf(L"[Open2] Encrypted Size: %ld\n", encSize);
@@ -3166,11 +3167,11 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
             }
         }
     }
-    auto lSize = (long)(pbyCur - pbyBuffer);
-    long lEncSize = MapFileEncrypt(nullptr, pbyBuffer, lSize);
+    auto lSize = static_cast<int32_t>(pbyCur - pbyBuffer);
+    int32_t lEncSize = MapFileEncrypt(nullptr, pbyBuffer, lSize);
     auto* pbyEnc = new BYTE[lEncSize];
     MapFileEncrypt(pbyEnc, pbyBuffer, lSize);
-    fwrite(&lEncSize, sizeof(long), 1, fp);
+    fwrite(&lEncSize, sizeof(int32_t), 1, fp);
     fwrite(pbyEnc, lEncSize, 1, fp);
     fclose(fp);
     delete[] pbyBuffer;

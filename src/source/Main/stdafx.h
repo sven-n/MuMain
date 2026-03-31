@@ -88,12 +88,12 @@ typedef void GLvoid;
 typedef float GLclampf;
 typedef unsigned int GLbitfield;
 
-#ifdef MU_ENABLE_SDL3
-#include <SDL3/SDL_opengl.h>
-#else
-// Safe OpenGL fallback when SDL3 is not available
+// OpenGL constants and no-op stubs for SDL3 GPU backend.
+// SDL3 uses SDL_gpu (Metal/Vulkan/D3D12), not OpenGL.
+// Real GL calls are replaced by MuRenderer; remaining call sites
+// resolve to these stubs harmlessly until fully migrated.
 
-// OpenGL Constants fallback
+// OpenGL Constants
 #define GL_FALSE 0
 #define GL_TRUE 1
 #define GL_DEPTH_TEST 0x0B71
@@ -177,6 +177,60 @@ typedef unsigned int GLbitfield;
 #define GL_QUAD_STRIP 0x0008
 #define GL_ONE_MINUS_SRC_COLOR 0x0301
 #define GL_ONE_MINUS_DST_COLOR 0x0306
+#define GL_VENDOR 0x1F00
+#define GL_RENDERER 0x1F01
+#define GL_VERSION 0x1F02
+#define GL_EXTENSIONS 0x1F03
+#define GL_MAX_TEXTURE_SIZE 0x0D33
+#define GL_MAX_VIEWPORT_DIMS 0x0D3A
+#define GL_REPEAT 0x2901
+#define GL_TEXTURE_MAG_FILTER 0x2800
+#define GL_TEXTURE_MIN_FILTER 0x2801
+#define GL_TEXTURE_WRAP_S 0x2802
+#define GL_TEXTURE_WRAP_T 0x2803
+#define GL_LINES 0x0001
+#define GL_LIGHTING 0x0B50
+#define GL_LIGHT0 0x4000
+#define GL_LIGHT1 0x4001
+#define GL_POSITION 0x1203
+#define GL_LIGHT_MODEL_AMBIENT 0x0B53
+#define GL_POLYGON 0x0009
+#define GL_NORMALIZE 0x0BA1
+#define GL_COLOR_MATERIAL 0x0B57
+#define GL_COMPILE 0x1300
+#define GL_MODELVIEW 0x1700
+#define GL_PROJECTION 0x1701
+#define GL_TEXTURE 0x1702
+#define GL_MODELVIEW_MATRIX 0x0BA6
+#define GL_PROJECTION_MATRIX 0x0BA7
+#define GL_DEPTH_COMPONENT 0x1902
+#define GL_FLOAT 0x1406
+#define GL_ADD 0x0104
+#define GL_DECAL 0x2101
+#define GL_COMBINE 0x8570
+#define GL_COMBINE_RGB 0x8571
+#define GL_COMBINE_ALPHA 0x8572
+#define GL_SOURCE0_RGB 0x8580
+#define GL_SOURCE1_RGB 0x8581
+#define GL_OPERAND0_RGB 0x8590
+#define GL_OPERAND1_RGB 0x8591
+#define GL_SRC_COLOR 0x0300
+#define GL_PREVIOUS 0x8578
+#define GL_INTERPOLATE 0x8575
+#define GL_SOURCE0_ALPHA 0x8588
+#define GL_SOURCE1_ALPHA 0x8589
+#define GL_OPERAND0_ALPHA 0x8598
+#define GL_OPERAND1_ALPHA 0x8599
+#define GL_SRC_ALPHA_SATURATE 0x0308
+#define GL_CONSTANT 0x8576
+#define GL_TEXTURE_ENV_COLOR 0x2201
+#define GL_LIGHT_MODEL_TWO_SIDE 0x0B52
+#define GL_COLOR_MATERIAL_FACE 0x0B55
+#define GL_INT 0x1404
+#define GL_DOUBLE 0x140A
+#define GL_BYTE 0x1400
+#define GL_UNSIGNED_INT 0x1405
+#define GL_CLAMP 0x2900
 
 // OpenGL Function stubs
 inline void glEnable(GLenum) {}
@@ -186,6 +240,7 @@ inline void glEnd() {}
 inline void glColor4f(GLfloat, GLfloat, GLfloat, GLfloat) {}
 inline void glColor4ub(GLubyte, GLubyte, GLubyte, GLubyte) {}
 inline void glColor3f(GLfloat, GLfloat, GLfloat) {}
+inline void glColor3ub(GLubyte, GLubyte, GLubyte) {}
 inline void glColor3fv(const GLfloat*) {}
 inline void glVertex3f(GLfloat, GLfloat, GLfloat) {}
 inline void glVertex3fv(const GLfloat*) {}
@@ -247,7 +302,19 @@ inline void glPixelStorei(GLenum, GLint) {}
 inline void glFogi(GLenum, GLint) {}
 inline void glFogf(GLenum, GLfloat) {}
 inline void glFogfv(GLenum, const GLfloat*) {}
-#endif // MU_ENABLE_SDL3
+inline void glTexEnvf(GLenum, GLenum, GLfloat) {}
+inline void glMultMatrixf(const GLfloat*) {}
+inline void glLoadMatrixf(const GLfloat*) {}
+inline void glGetFloatv(GLenum, GLfloat*) {}
+inline const GLubyte* glGetString(GLenum) { return (const GLubyte*)""; }
+inline void glLightfv(GLenum, GLenum, const GLfloat*) {}
+inline void glLightModelfv(GLenum, const GLfloat*) {}
+inline void glNewList(GLuint, GLenum) {}
+inline void glEndList() {}
+inline void glCallList(GLuint) {}
+inline void glDeleteLists(GLuint, GLsizei) {}
+inline GLuint glGenLists(GLsizei) { return 0; }
+inline GLboolean glIsList(GLuint) { return GL_FALSE; }
 
 // client - base definitions
 #include "Core/Defined_Global.h"
