@@ -46,6 +46,7 @@ public:
     [[nodiscard]] bool PlaySound(ESound buffer, const void* pObject = nullptr, bool looped = false) override;
     void StopSound(ESound buffer, bool resetPosition) override;
     void AllStopSound() override;
+    void ReleaseSound(ESound buffer) override;
     void Set3DSoundPosition() override;
     void SetVolume(ESound buffer, long vol) override;
     void SetMasterVolume(long vol) override;

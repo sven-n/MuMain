@@ -1000,11 +1000,8 @@ enum ESound
     MAX_BUFFER
 };
 
-// Story 7.8.1: DirectSound-only functions guarded for Windows.
-// On non-Windows platforms, use g_platformAudio (IPlatformAudio interface) instead.
-#ifdef _WIN32
+// Story 7-9-4: InitDirectSound is now a no-op — all audio uses g_platformAudio (miniaudio).
 HRESULT InitDirectSound(HWND hDlg);
-#endif
 void SetEnableSound(bool b);
 void FreeDirectSound();
 

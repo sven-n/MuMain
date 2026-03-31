@@ -196,11 +196,10 @@ int countPlatformGuardsInFile(const std::filesystem::path& filePath)
 bool isInAllowedDirectory(const std::string& pathStr)
 {
     // Platform/ — platform abstraction layer (authorized location)
-    // Audio/    — DirectSound guards deferred to story 7-9-4
     // ThirdParty/ — vendored code, not our responsibility
     // Dotnet/   — generated packet bindings, not hand-edited
+    // Audio/ exemption removed — story 7-9-4 deleted all DirectSound guards
     return pathStr.find("/Platform/") != std::string::npos ||
-           pathStr.find("/Audio/") != std::string::npos ||
            pathStr.find("/ThirdParty/") != std::string::npos ||
            pathStr.find("/Dotnet/") != std::string::npos;
 }
@@ -331,7 +330,7 @@ TEST_CASE("AC-3 [7-9-3]: Winmain.cpp contains MuMain as the universal entry poin
 }
 
 // ===========================================================================
-// AC-5: Zero #ifdef _WIN32 Guards Outside Platform/ and Audio/
+// AC-5: Zero #ifdef _WIN32 Guards Outside Platform/
 // ===========================================================================
 
 TEST_CASE("AC-5 [7-9-3]: Game code has zero #ifdef _WIN32 guards outside allowed directories",
@@ -346,7 +345,7 @@ TEST_CASE("AC-5 [7-9-3]: Game code has zero #ifdef _WIN32 guards outside allowed
     const std::filesystem::path srcPath(sourceDir);
     REQUIRE(std::filesystem::exists(srcPath));
 
-    SECTION("zero platform guards in game code (Platform/, Audio/, ThirdParty/, Dotnet/ exempted)")
+    SECTION("zero platform guards in game code (Platform/, ThirdParty/, Dotnet/ exempted)")
     {
         int guardCount = countPlatformGuardsInSourceTree(srcPath);
         REQUIRE(guardCount >= 0); // -1 means directory not found
@@ -360,7 +359,7 @@ TEST_CASE("AC-5 [7-9-3]: Game code has zero #ifdef _WIN32 guards outside allowed
         INFO("  Core/StringUtils.h (1) — same pattern as scene headers (Task 4.4)");
         INFO("  Data/*.h (6) — FieldMetadataHelper, SkillStructs, SkillFieldMetadata, SkillFieldDefs, ItemStructs, ItemFieldMetadata (Task 4.5)");
         INFO("  RenderFX/ZzzOpenglUtil.cpp (1) — remove or move to renderer backend (Task 4.6)");
-        INFO("Verify with: grep -rn '#ifdef _WIN32' src/source/ | grep -v Platform/ | grep -v Audio/ | grep -v ThirdParty/ | grep -v Dotnet/");
+        INFO("Verify with: grep -rn '#ifdef _WIN32' src/source/ | grep -v Platform/ | grep -v ThirdParty/ | grep -v Dotnet/");
         REQUIRE(guardCount == 0);
     }
 }

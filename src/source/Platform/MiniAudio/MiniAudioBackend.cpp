@@ -332,6 +332,36 @@ void MiniAudioBackend::AllStopSound()
 }
 
 // ---------------------------------------------------------------------------
+// ReleaseSound — unload a previously loaded sound from all its polyphonic slots.
+// Called by game code (e.g., ZzzOpenData.cpp) when switching maps to free NPC/monster sounds.
+// Story 7-9-4: Added to IPlatformAudio to replace legacy DirectSoundManager::ReleaseBuffer().
+// ---------------------------------------------------------------------------
+void MiniAudioBackend::ReleaseSound(ESound buffer)
+{
+    const int buf = static_cast<int>(buffer);
+    if (buf < 0 || buf >= static_cast<int>(MAX_BUFFER) || !m_initialized)
+    {
+        return;
+    }
+
+    if (!m_soundLoaded[buf])
+    {
+        return;
+    }
+
+    for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
+    {
+        ma_sound_uninit(&m_sounds[buf][ch]);
+    }
+
+    m_soundLoaded[buf] = false;
+    m_activeChannel[buf] = 0;
+    m_sound3DEnabled[buf] = false;
+    m_loadedChannels[buf] = 0;
+    m_soundObjects[buf] = nullptr;
+}
+
+// ---------------------------------------------------------------------------
 // Set3DSoundPosition — update spatial positions for all 3D-enabled sounds
 // Mirrors DSplaysound.cpp Set3DSoundPosition() behaviour.
 // Called each frame from the game loop for sounds that have an attached game object.

@@ -600,7 +600,6 @@ if (MSVC)
   target_link_libraries(Main PRIVATE
     imm32
     vfw32
-    dsound
     dxguid
     opengl32
     glu32
@@ -612,6 +611,7 @@ if (MSVC)
     wininet
     urlmon
     turbojpeg-static
+    # dsound removed — Story 7-9-4: DirectSound deleted, all audio via miniaudio
     # wzAudio removed — Story 5.2.1: BGM replaced by miniaudio via g_platformAudio (MiniAudioBackend)
   )
 
@@ -865,7 +865,6 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
   target_link_libraries(Main PRIVATE
     imm32
     vfw32
-    dsound
     dxguid
     opengl32
     glu32

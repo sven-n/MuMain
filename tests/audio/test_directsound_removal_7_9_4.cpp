@@ -26,7 +26,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <cmath>
+#include <memory>
 #include <type_traits>
+
+// CRITICAL: Include Defined_Global.h BEFORE audio headers. DSPlaySound.h's ESound enum
+// has #ifdef-guarded entries (ASG_ADD_KARUTAN_MONSTERS, ASG_ADD_MAP_KARUTAN) that change
+// MAX_BUFFER. MUAudio is compiled with these defines via stdafx.h PCH, so the test must
+// see the same defines to avoid an ODR violation (different sizeof(MiniAudioBackend)).
+#include "Defined_Global.h"
 
 #include "IPlatformAudio.h"
 #include "MiniAudioBackend.h"
@@ -147,29 +154,13 @@ TEST_CASE("AC-4 [7-9-4]: IPlatformAudio remains abstract after DirectSound remov
     }
 }
 
-TEST_CASE("AC-4 [7-9-4]: MiniAudioBackend default-constructs cleanly without DirectSound",
+TEST_CASE("AC-4 [7-9-4]: MiniAudioBackend default-constructs and routes through IPlatformAudio",
     "[audio][interface][ac-4][7-9-4]")
 {
-    // GIVEN: A default-constructed MiniAudioBackend after DirectSound code is removed
-    // WHEN:  It is created and immediately destroyed (no Initialize())
-    // THEN:  No crash — miniaudio backend does not call DirectSound at construction time
-    REQUIRE_NOTHROW([]() {
-        mu::MiniAudioBackend backend;
-        (void)backend;
-        // Destructor runs here — must be safe without prior Initialize()
-    }());
-}
-
-TEST_CASE("AC-4 [7-9-4]: IPlatformAudio pointer to MiniAudioBackend resolves via virtual dispatch",
-    "[audio][interface][ac-4][7-9-4]")
-{
-    // GIVEN: A MiniAudioBackend instance accessed through the base-class interface pointer
-    // WHEN:  We call GetBGMVolume() via the IPlatformAudio pointer
-    // THEN:  Virtual dispatch works — no abstract-class instantiation error, no crash
-    mu::MiniAudioBackend backend;
-    mu::IPlatformAudio* audio = &backend;
-    REQUIRE(audio != nullptr);
-    // GetBGMVolume() is const and safe to call without Initialize()
+    // Heap-allocated because MiniAudioBackend is ~3.7MB (m_sounds array).
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    REQUIRE(backend != nullptr);
+    mu::IPlatformAudio* audio = backend.get();
     float vol = audio->GetBGMVolume();
     CHECK(vol >= 0.0f);
     CHECK(vol <= 1.0f);
