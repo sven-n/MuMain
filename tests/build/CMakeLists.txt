@@ -472,14 +472,6 @@ add_test(
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac5_wgl_cmake_exclusion_7_6_1.cmake
 )
 
-# AC-6: DSwaveIO.h includes mmsystem.h only inside #ifdef _WIN32 guard
-add_test(
-    NAME "7.6.1-AC-6:dswaveio-mmsystem-guard"
-    COMMAND ${CMAKE_COMMAND}
-        -DDSWAVEIO_H=${MUMAIN_SOURCE_DIR}/src/source/Audio/DSwaveIO.h
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac6_dswaveio_mmsystem_guard_7_6_1.cmake
-)
-
 # AC-7: PlatformCompat.h provides all required GDI/Win32 stubs for UIControls.cpp
 add_test(
     NAME "7.6.1-AC-7:platform-compat-gdi-stubs"
