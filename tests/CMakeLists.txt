@@ -305,6 +305,17 @@ target_compile_definitions(MuTests PRIVATE
     MU_SOURCE_DIR="${CMAKE_SOURCE_DIR}/src/source"
 )
 
+# Story 7.9.4: Kill DirectSound — Miniaudio-Only Audio Layer [VS0-QUAL-AUDIO-KILLDSOUND]
+# RED PHASE: Tests verify all DirectSound code is removed from Audio/ (AC-1, AC-2, AC-3)
+# and all audio paths route through IPlatformAudio/MiniAudioBackend (AC-4).
+# AC-1a tests (DbToLinear conversion math) are pure arithmetic — always GREEN, serve as
+# regression guards for the dB→linear volume scale formula.
+# File-scan tests (AC-1 DS types, AC-2 wave I/O types, AC-3 guard count) are guarded by
+# #ifndef _WIN32 internally so MinGW CI compiles cleanly. MU_SOURCE_DIR already injected.
+# AC-4 tests (interface conformance, default construction) are compile-time checks — always GREEN.
+# No Win32 or DirectSound APIs in the test TU — compiles on macOS/Linux/Windows (MinGW CI).
+target_sources(MuTests PRIVATE audio/test_directsound_removal_7_9_4.cpp)
+
 # Story 6.4.1: UI Windows Comprehensive Validation [VS1-GAME-VALIDATE-UI]
 # RED PHASE: Tests verify INTERFACE_LIST enum completeness and coverage (AC-4),
 # CNewUIObj class hierarchy and Show/Enable state transitions (AC-1, MU_GAME_AVAILABLE),
