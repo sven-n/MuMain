@@ -11,6 +11,7 @@
 #include "NewUIMessageBox.h"
 #include "NewUI3DRenderMng.h"
 #include "NewUIButton.h"
+#include "NewUIInventoryActionController.h"
 #include <span>
 #include "_enum.h"
 
@@ -77,6 +78,7 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         CNewUI3DRenderMng* m_pNewUI3DRenderMng;
         CNewUIInventoryCtrl* m_pNewInventoryCtrl;
+        CNewUIInventoryActionController m_ActionController;
         POINT m_Pos;
 
         EQUIPMENT_ITEM m_EquipmentSlots[MAX_EQUIPMENT_INDEX];
@@ -208,6 +210,8 @@ namespace SEASON3B
 
         void ResetMouseLButton();
         void ResetMouseRButton();
+
+        friend class CNewUIInventoryActionController;
     };
 }
 

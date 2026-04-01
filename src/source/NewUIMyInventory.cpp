@@ -73,6 +73,8 @@ bool CNewUIMyInventory::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNew
         return false;
     }
 
+    m_ActionController.SetOwner(this);
+
     SetPos(x, y);
     LoadImages();
     SetEquipmentSlotInfo();
@@ -121,7 +123,6 @@ bool CNewUIMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacke
     ITEM* pTempItem = g_pNewItemMng->CreateItem(pbyItemPacket);
 
     if (nullptr == pTempItem)
-    //if(NULL == pTempItem || false == IsEquipable(iIndex, pTempItem))
     {
         return false;
     }
@@ -143,9 +144,10 @@ bool CNewUIMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacke
     g_pNewItemMng->DeleteItem(pTempItem);
 
     CreateEquippingEffect(pTargetItemSlot);
-    
+
     return true;
 }
+
 void CNewUIMyInventory::UnequipItem(int iIndex)
 {
     if (iIndex >= 0 && iIndex < MAX_EQUIPMENT_INDEX && g_pNewItemMng && CharacterMachine)
@@ -185,6 +187,7 @@ void CNewUIMyInventory::UnequipItem(int iIndex)
         }
     }
 }
+
 void CNewUIMyInventory::UnequipAllItems()
 {
     if (CharacterMachine)
@@ -248,7 +251,6 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
     {
-        //ITEM *r = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
         const ITEM* l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
         if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOLT
             && (l->Type >= ITEM_BOW && l->Type < ITEM_BOW + MAX_ITEM_INDEX))
@@ -373,6 +375,7 @@ bool CNewUIMyInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPack
 
     return false;
 }
+
 void CNewUIMyInventory::DeleteItem(int iIndex) const
 {
     if (m_pNewInventoryCtrl)
@@ -398,6 +401,7 @@ void CNewUIMyInventory::DeleteItem(int iIndex) const
         }
     }
 }
+
 void CNewUIMyInventory::DeleteAllItems() const
 {
     if (m_pNewInventoryCtrl)
@@ -1282,7 +1286,6 @@ void CNewUIMyInventory::RenderEquippedItem()
             const int iLevel = pEquipmentItemSlot->Level;
             const int iMaxDurability = CalcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
 
-            // 용사/전사의반지 예외처리
             if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
             {
                 if (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && iLevel == 1
@@ -2128,281 +2131,6 @@ bool CNewUIMyInventory::TryTransferBetweenInventorySections(CNewUIInventoryCtrl*
     return true;
 }
 
-// TODO: This whole logic (and possibly others) should be moved into a 'controller' class or similar.
-bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetControl)
-{
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-    if (pPickedItem && IsRelease(VK_LBUTTON))
-    {
-        ITEM* pPickItem = pPickedItem->GetItem();
-        if (pPickItem == nullptr)
-        {
-            return true;
-        }
-
-        const int iSourceIndex = pPickedItem->GetSourceLinealPos();
-        const int iTargetIndex = pPickedItem->GetTargetLinealPos(targetControl);
-
-        if (pPickedItem->GetOwnerInventory() == targetControl
-            || g_pMyInventoryExt->GetOwnerOf(pPickedItem)) // Movement between Inventory (and within extensions)
-        {
-            // Apply Jewels:
-            if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS
-                || pPickItem->Type == ITEM_JEWEL_OF_SOUL
-                || pPickItem->Type == ITEM_JEWEL_OF_LIFE
-                || pPickItem->Type == ITEM_JEWEL_OF_HARMONY
-                || pPickItem->Type == ITEM_LOWER_REFINE_STONE
-                || pPickItem->Type == ITEM_HIGHER_REFINE_STONE
-                || pPickItem->Type == ITEM_POTION + 160
-                || pPickItem->Type == ITEM_POTION + 161
-                ) && ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex))
-            {
-                return true;
-            }
-
-            if (iTargetIndex != -1 && TryStackItems(targetControl, pPickItem, iSourceIndex, iTargetIndex))
-            {
-                return true;
-            }
-        }
-
-        // If nothing of above applied, we try to move the item.
-        if (iTargetIndex >= 0 && targetControl->CanMove(iTargetIndex, pPickItem))
-        {
-            const auto sourceStorageType = pPickedItem->GetSourceStorageType();
-            const auto targetStorageType = targetControl->GetStorageType();
-            if (iTargetIndex != iSourceIndex)
-            {
-                return SendRequestEquipmentItem(sourceStorageType, iSourceIndex,
-                    pPickItem, targetStorageType, iTargetIndex);
-            }
-            else
-            {
-                CNewUIInventoryCtrl::BackupPickedItem();
-            }
-        }
-    }
-    else if (g_pMyInventory->GetRepairMode() == REPAIR_MODE_OFF && IsPress(VK_RBUTTON))
-    {
-        // handle right click (item usage etc.)
-        g_pMyInventory->ResetMouseRButton();
-
-        if (g_pNewUISystem->IsVisible(INTERFACE_STORAGE))
-        {
-            if (g_pStorageInventory->ProcessMyInvenItemAutoMove(targetControl))
-            {
-                return true;
-            }
-
-            if (g_pNewUISystem->IsVisible(INTERFACE_STORAGE_EXT))
-            {
-                return g_pStorageInventoryExt->ProcessMyInvenItemAutoMove(targetControl);
-            }
-
-            return false;
-        }
-
-        // Right-click to sell items at NPC shop
-        if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) && g_pNewUISystem->IsVisible(INTERFACE_INVENTORY))
-        {
-            // Don't process right-click if there's already a picked item (being dragged)
-            CNewUIPickedItem* pExistingPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-            if (pExistingPickedItem)
-            {
-                return false;
-            }
-
-            // Only process if mouse is over the inventory control area
-            if (!targetControl->CheckPtInRect(MouseX, MouseY))
-            {
-                return false;
-            }
-
-            // Only process for inventory storage type
-            if (targetControl->GetStorageType() != STORAGE_TYPE::INVENTORY)
-            {
-                return false;
-            }
-
-            ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
-            if (!pItem)
-            {
-                return false;
-            }
-
-            if (g_pNPCShop->IsSellingItem())
-            {
-                return false;
-            }
-
-            if (IsSellingBan(pItem))
-            {
-                g_pSystemLogBox->AddText(GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
-                return true;
-            }
-
-            const int iIndex = targetControl->GetIndexByItem(pItem);
-            if (iIndex < 0)
-            {
-                return false;
-            }
-
-            // Create a picked item (same as drag-and-drop)
-            if (!CNewUIInventoryCtrl::CreatePickedItem(targetControl, pItem))
-            {
-                return false;
-            }
-
-            // Verify the picked item was created successfully before removing from inventory
-            CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-            if (!pPickedItem)
-            {
-                return false;
-            }
-
-            // Now it's safe to remove item from inventory display (will be restored if sell fails)
-            targetControl->RemoveItem(pItem);
-
-            // Hide the picked item so it's not visually displayed while selling
-            pPickedItem->HidePickedItem();
-
-            const int sourceIndex = pPickedItem->GetSourceLinealPos();
-            if (sourceIndex < MAX_EQUIPMENT_INDEX || sourceIndex >= MAX_MY_INVENTORY_EX_INDEX)
-            {
-                CNewUIInventoryCtrl::BackupPickedItem();
-                return false;
-            }
-
-            if (IsHighValueItem(pItem))
-            {
-                // Show confirmation dialog for expensive items
-                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHighValueItemCheckMsgBoxLayout));
-                return true;
-            }
-
-            // For regular items, send sell request immediately
-            SocketClient->ToGameServer()->SendSellItemToNpcRequest(sourceIndex);
-            g_pNPCShop->SetSellingItem(true);
-            return true;
-        }
-
-        if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY)
-            && !g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
-            && !g_pNewUISystem->IsVisible(INTERFACE_TRADE)
-            && !g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE)
-            && !g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE)
-            && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-            && !g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY))
-        {
-            if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY_EXT))
-            {
-                return TryTransferBetweenInventorySections(targetControl);
-            }
-
-            ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
-            if (!pItem)
-            {
-                return false;
-            }
-
-            const int iIndex = targetControl->GetIndexByItem(pItem);
-            if (iIndex >= 0 && TryConsumeItem(targetControl, pItem, iIndex))
-            {
-                return true;
-            }
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-            else if (g_pMyInventory->IsInvenItem(pItem->Type))
-            {
-#ifdef LJH_FIX_APP_SHUTDOWN_WEQUIPPING_INVENITEM_WITH_CLICKING_MOUSELBTN
-                if (MouseLButton || MouseLButtonPop || MouseLButtonPush)
-                    return false;
-#endif //LJH_FIX_APP_SHUTDOWN_WEQUIPPING_INVENITEM_WITH_CLICKING_MOUSELBTN
-                if (pItem->Durability == 0)
-                    return false;
-
-                int iChangeInvenItemStatus = 0;
-                (pItem->Durability == 255) ? iChangeInvenItemStatus = 254 : iChangeInvenItemStatus = 255;
-
-                SendRequestEquippingInventoryItem(iIndex, iChangeInvenItemStatus);
-            }
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-            //-- Equip item
-            if (!EquipmentItem)
-            {
-                const int iSrcIndex = iIndex;
-
-                const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-
-                int nDstIndex = pItemAttr->m_byItemSlot;
-
-                if (nDstIndex >= 0 && nDstIndex < MAX_EQUIPMENT_INDEX)
-                {
-                    const ITEM* pEquipment = &CharacterMachine->Equipment[nDstIndex];
-
-                    if (pEquipment && pEquipment->Type != -1)
-                    {
-                        if (nDstIndex == EQUIPMENT_WEAPON_RIGHT)
-                        {
-                            if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK
-                                || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
-                            {
-                                if (!pItemAttr->TwoHand)
-                                {
-                                    nDstIndex = EQUIPMENT_WEAPON_LEFT;
-                                    pEquipment = &CharacterMachine->Equipment[nDstIndex];
-
-                                    if (!(pEquipment && pEquipment->Type != -1))
-                                    {
-                                        goto LABEL_32;
-                                    }
-                                }
-                            }
-                        }
-                        else if (nDstIndex == EQUIPMENT_RING_RIGHT)
-                        {
-                            nDstIndex = EQUIPMENT_RING_LEFT;
-                            pEquipment = &CharacterMachine->Equipment[nDstIndex];
-
-                            if (!(pEquipment && pEquipment->Type != -1))
-                            {
-                                goto LABEL_32;
-                            }
-                        }
-
-                        return true;
-                    }
-                LABEL_32: // wtf...
-                    if (g_pMyInventory->IsEquipable(nDstIndex, pItem))
-                    {
-                        if (CNewUIInventoryCtrl::CreatePickedItem(nullptr, pItem))
-                        {
-                            targetControl->RemoveItem(pItem);
-
-                            const auto pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-                            pPickedItem->HidePickedItem();
-                        }
-
-                        SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSrcIndex, pItem, STORAGE_TYPE::INVENTORY, nDstIndex);
-                    }
-                }
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    if (g_pMyInventory->GetRepairMode() == REPAIR_MODE_ON && IsPress(VK_LBUTTON))
-    {
-        // Repair stuff
-
-        return RepairItemAtMousePoint(targetControl);
-    }
-
-    return false;
-}
-
 bool CNewUIMyInventory::InventoryProcess() const
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
@@ -2415,7 +2143,8 @@ bool CNewUIMyInventory::InventoryProcess() const
         return false;
     }
 
-    return HandleInventoryActions(m_pNewInventoryCtrl);
+    return const_cast<CNewUIInventoryActionController&>(m_ActionController)
+        .HandleInventoryActions(m_pNewInventoryCtrl);
 }
 
 bool CNewUIMyInventory::BtnProcess()
@@ -2547,6 +2276,15 @@ bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
     return false;
 }
 
+bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetControl)
+{
+    if (g_pMyInventory)
+    {
+        return g_pMyInventory->m_ActionController.HandleInventoryActions(targetControl);
+    }
+    return false;
+}
+
 bool CNewUIMyInventory::CanOpenMyShopInterface()
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
@@ -2597,7 +2335,6 @@ void CNewUIMyInventory::LockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(100, 100, 100, 255));
     m_BtnMyShop.Lock();
-    // 1125 "개인상점열기(S)"
     m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
@@ -2606,13 +2343,11 @@ void CNewUIMyInventory::UnlockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(255, 255, 255, 255));
     m_BtnMyShop.UnLock();
-    // 1125 "개인상점열기(S)"
     m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
 void CNewUIMyInventory::ToggleRepairMode()
 {
-    //. 토글 수리모드
     if (m_RepairMode == REPAIR_MODE_OFF)
     {
         SetRepairMode(true);
