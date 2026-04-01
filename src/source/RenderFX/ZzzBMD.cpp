@@ -872,13 +872,13 @@ void BMD::BindLightMaps()
             SmoothBitmap(lmp->Width, lmp->Height, lmp->Buffer);
             SmoothBitmap(lmp->Width, lmp->Height, lmp->Buffer);
 
-            glBindTexture(GL_TEXTURE_2D, i + IndexLightMap);
-            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, lmp->Width, lmp->Height, 0, GL_RGB, GL_UNSIGNED_BYTE, lmp->Buffer);
+            mu::GetRenderer().BindTexture(i + IndexLightMap);
+            mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, (int)GL_MODULATE);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            // Texture upload handled by SDL GPU backend (story 7-9-6).
         }
     }
     LightMapEnable = true;
@@ -902,12 +902,12 @@ void BMD::ReleaseLightMaps()
 
 void BMD::BeginRender(float Alpha)
 {
-    glPushMatrix();
+    mu::GetRenderer().PushMatrix();
 }
 
 void BMD::EndRender()
 {
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
 }
 
 extern double WorldTime;
@@ -1037,7 +1037,6 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     bool enableLight = LightEnable;
     if (meshIndex == StreamMesh)
     {
-        glColor3fv(BodyLight);
         enableLight = false;
     }
     else if (enableLight)
@@ -1073,12 +1072,10 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         DisableTexture();
         if (alpha >= 0.99f)
         {
-            glColor3fv(BodyLight);
         }
         else
         {
             EnableAlphaTest();
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], alpha);
         }
     }
     else if ((renderFlags & RENDER_CHROME) == RENDER_CHROME || (renderFlags & RENDER_CHROME2) == RENDER_CHROME2 ||
@@ -1243,7 +1240,6 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             DisableDepthTest();
         }
 
-        glColor3f(BodyLight[0] * blendMeshAlpha, BodyLight[1] * blendMeshAlpha, BodyLight[2] * blendMeshAlpha);
         // glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
         enableLight = false;
     }
@@ -1442,7 +1438,6 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
     {
         // vec3_t Light;
         // Vector(1.f,1.f,1.f,Light);
-        glColor3fv(BodyLight);
         EnableLight = false;
     }
     else if (EnableLight)
@@ -1472,12 +1467,10 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         DisableTexture();
         if (Alpha >= 0.99f)
         {
-            glColor3fv(BodyLight);
         }
         else
         {
             EnableAlphaTest();
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
         }
     }
     else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME || (RenderFlag & RENDER_CHROME2) == RENDER_CHROME2 ||
@@ -1626,7 +1619,6 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             DisableDepthTest();
         }
 
-        glColor3f(BodyLight[0] * BlendMeshLight, BodyLight[1] * BlendMeshLight, BodyLight[2] * BlendMeshLight);
         // glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
         EnableLight = false;
     }
@@ -1916,13 +1908,7 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
 
     int iBlendMesh = BlendMesh;
     BeginRender(Alpha);
-    if (!LightEnable)
-    {
-        if (Alpha >= 0.99f)
-            glColor3fv(BodyLight);
-        else
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-    }
+    (void)LightEnable;
     for (int i = 0; i < NumMeshs; i++)
     {
         iBlendMesh = BlendMesh;
@@ -1942,26 +1928,16 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
                 if (shadowType == SHADOW_RENDER_COLOR)
                 {
                     DisableAlphaBlend();
-                    if (Alpha >= 0.99f)
-                        glColor3f(0.f, 0.f, 0.f);
-                    else
-                        glColor4f(0.f, 0.f, 0.f, Alpha);
 
                     RenderMesh(i, RENDER_COLOR | RENDER_SHADOWMAP, Alpha, iBlendMesh, BlendMeshLight,
                                BlendMeshTexCoordU, BlendMeshTexCoordV);
-                    glColor3f(1.f, 1.f, 1.f);
                 }
                 else if (shadowType == SHADOW_RENDER_TEXTURE)
                 {
                     DisableAlphaBlend();
-                    if (Alpha >= 0.99f)
-                        glColor3f(0.f, 0.f, 0.f);
-                    else
-                        glColor4f(0.f, 0.f, 0.f, Alpha);
 
                     RenderMesh(i, RENDER_TEXTURE | RENDER_SHADOWMAP, Alpha, iBlendMesh, BlendMeshLight,
                                BlendMeshTexCoordU, BlendMeshTexCoordV);
-                    glColor3f(1.f, 1.f, 1.f);
                 }
             }
         }
@@ -1983,13 +1959,7 @@ void BMD::RenderBodyAlternative(int iRndExtFlag, int iParam, int Flag, float Alp
         return;
 
     BeginRender(Alpha);
-    if (!LightEnable)
-    {
-        if (Alpha >= 0.99f)
-            glColor3fv(BodyLight);
-        else
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-    }
+    (void)LightEnable;
     for (int i = 0; i < NumMeshs; i++)
     {
         if (i != HiddenMesh)
@@ -2047,7 +2017,6 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
     {
         // vec3_t Light;
         // Vector(1.f,1.f,1.f,Light);
-        glColor3fv(BodyLight);
         EnableLight = false;
     }
     else if (EnableLight)
@@ -2069,7 +2038,6 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         else
             DisableAlphaBlend();
         DisableTexture();
-        glColor3fv(BodyLight);
     }
     else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME || (RenderFlag & RENDER_METAL) == RENDER_METAL ||
              (RenderFlag & RENDER_CHROME2) == RENDER_CHROME2 || (RenderFlag & RENDER_CHROME6) == RENDER_CHROME6)
@@ -2142,7 +2110,6 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
             EnableAlphaBlendMinus();
         else
             EnableAlphaBlend();
-        glColor3f(BodyLight[0] * BlendMeshLight, BodyLight[1] * BlendMeshLight, BodyLight[2] * BlendMeshLight);
         // glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
         EnableLight = false;
     }
@@ -2241,13 +2208,7 @@ void BMD::RenderBodyTranslate(int Flag, float Alpha, int BlendMesh, float BlendM
         return;
 
     BeginRender(Alpha);
-    if (!LightEnable)
-    {
-        if (Alpha >= 0.99f)
-            glColor3fv(BodyLight);
-        else
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-    }
+    (void)LightEnable;
     for (int i = 0; i < NumMeshs; i++)
     {
         if (i != HiddenMesh)
@@ -2419,15 +2380,13 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
     EnableAlphaTest(false);
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.5f); // 50% opacity for shadows
-
     DisableTexture();
     DisableDepthMask();
     BeginRender(1.f);
 
     // enable stencil and continue draw
-    glEnable(GL_STENCIL_TEST);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    mu::GetRenderer().SetStencilTest(true);
+    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
     int startMesh = 0;
     int endMesh = NumMeshs;
@@ -2457,15 +2416,15 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
     EndRender();
     EnableDepthMask();
 
-    glDisable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetStencilTest(false);
 }
 
 void BMD::RenderObjectBoundingBox()
 {
     DisableTexture();
-    glPushMatrix();
-    glTranslatef(BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]);
-    glScalef(BodyScale, BodyScale, BodyScale);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().Translate(BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]);
+    mu::GetRenderer().Scale(BodyScale, BodyScale, BodyScale);
     for (int i = 0; i < NumBones; i++)
     {
         Bone_t* b = &Bones[i];
@@ -2516,14 +2475,14 @@ void BMD::RenderObjectBoundingBox()
             mu::GetRenderer().RenderTriangles(verts, 0);
         }
     }
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
     DisableAlphaBlend();
 }
 
 void BMD::RenderBone(float (*BoneMatrix)[3][4])
 {
     DisableTexture();
-    glDepthFunc(GL_ALWAYS);
+    mu::GetRenderer().SetDepthFunc(GL_ALWAYS);
 
     // Story 7-9-2 (AC-5): Port GL_LINES skeleton debug to MuRenderer.
     // TECH DEBT (review Finding #7): Per-frame heap alloc in debug path — acceptable.
@@ -2577,7 +2536,7 @@ void BMD::RenderBone(float (*BoneMatrix)[3][4])
         mu::GetRenderer().RenderLines(allLines, 0);
     }
 
-    glDepthFunc(GL_LEQUAL);
+    mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
 }
 
 void BMD::Release()

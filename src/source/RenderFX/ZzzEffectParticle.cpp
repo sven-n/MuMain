@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "BoneManager.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzInfomation.h"
@@ -9155,10 +9156,10 @@ void RenderParticles(BYTE byRenderOneMore)
             case BITMAP_ADV_SMOKE + 1:
                 if (o->SubType == 2)
                 {
-                    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
+                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, (int)GL_ADD);
                     EnableAlphaBlend3();
                     RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, (int)GL_MODULATE);
                 }
                 else
                 {

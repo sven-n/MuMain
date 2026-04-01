@@ -100,7 +100,6 @@ bool SEASON3B::CNewUISiegeWarBase::Render()
     };
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -112,7 +111,6 @@ bool SEASON3B::CNewUISiegeWarBase::Render()
                 MINIMAP_FRAME_HEIGHT);
     RenderImage(IMAGE_TIME_FRAME, m_TimeUIPos.x, m_TimeUIPos.y, TIME_FRAME_WIDTH, TIME_FRAME_HEIGHT);
 
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
     if (battleCastle::IsBattleCastleStart())
     {
         g_pRenderText->SetFont(g_hFontBig);
@@ -150,13 +148,11 @@ bool SEASON3B::CNewUISiegeWarBase::Render()
 
     OnRender();
 
-    glColor4f(1.f, 1.f, 0.f, m_fMiniMapAlpha);
     RenderColor((float)(m_HeroPosInMiniMap.x), (float)(m_HeroPosInMiniMap.y), 3, 3);
 
     DisableAlphaBlend();
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     if (m_bRenderSkillUI == true)
     {
@@ -448,13 +444,10 @@ void SEASON3B::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
 
             if (m_CmdBuffer[i].byLifeTime > 0)
             {
-                glColor4f(1.f, 1.f + sinf(m_CmdBuffer[i].byLifeTime * 0.2f),
-                          1.f + sinf(m_CmdBuffer[i].byLifeTime * 0.2f), m_fMiniMapAlpha);
                 m_CmdBuffer[i].byLifeTime--;
             }
             else
             {
-                glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
             }
             mu_swprintf(szText, L"%d", m_CmdBuffer[i].byTeam + 1);
             g_pRenderText->RenderText(Pos.x - 12, Pos.y - 5, szText);
@@ -481,7 +474,6 @@ void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
 
     if (Hero->GuildMasterKillCount < iUseSkillDestKill)
     {
-        glColor4f(1.f, 0.5f, 0.5f, m_fMiniMapAlpha);
     }
 
     int src_x, src_y;
@@ -490,8 +482,6 @@ void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
 
     RenderImage(IMAGE_SKILL_ICON, m_SkillIconPos.x + 1, m_SkillIconPos.y, (float)SKILL_ICON_WIDTH,
                 (float)SKILL_ICON_HEIGHT, src_x, src_y);
-
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     g_pRenderText->SetFont(g_hFontBig);
     mu_swprintf(szText, L"%d", iUseSkillDestKill);

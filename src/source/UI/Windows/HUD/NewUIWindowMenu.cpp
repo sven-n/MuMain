@@ -172,8 +172,6 @@ bool SEASON3B::CNewUIWindowMenu::Render()
 {
     EnableAlphaTest();
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderFrame();
     RenderTexts();
     RenderArrow();

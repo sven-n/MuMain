@@ -2,6 +2,7 @@
 // File: GM_kanturu_1st.cpp
 //*****************************************************************************
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "ZzzLodTerrain.h"
@@ -206,10 +207,10 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
     break;
     case 96:
         pModel->StreamMesh = 0;
-        glAlphaFunc(GL_GREATER, 0.0f);
+        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.0f);
         pModel->RenderMesh(0, RENDER_TEXTURE, 1.0f, pObject->BlendMesh, pObject->BlendMeshLight,
                            pObject->BlendMeshTexCoordU, -(int)WorldTime % 20000 * 0.00005f);
-        glAlphaFunc(GL_GREATER, 0.25f);
+        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
         pModel->StreamMesh = -1;
         break;
     case 98:

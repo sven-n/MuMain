@@ -412,7 +412,6 @@ int SEASON3B::CNewUIMasterLevel::SetDivideString(wchar_t* text, int isItemTollTi
 bool SEASON3B::CNewUIMasterLevel::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0, 1.0, 1.0, 1.0);
     RenderImage(IMAGE_MASTER_INTERFACE, this->PosX, this->PosY, Bitmaps[IMAGE_MASTER_INTERFACE].Width,
                 Bitmaps[IMAGE_MASTER_INTERFACE].Height);
     RenderImage(IMAGE_MASTER_INTERFACE + 1, this->PosX + Bitmaps[IMAGE_MASTER_INTERFACE].Width, this->PosY,

@@ -84,7 +84,6 @@ void CNewUIInGameShop::SetPos(int x, int y)
 bool CNewUIInGameShop::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderButtons();
     RenderTexts();
@@ -345,14 +344,14 @@ void CNewUIInGameShop::RenderDisplayItems()
 {
     EndBitmap();
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     glViewport2(0, 0, WindowWidth, WindowHeight);
     gluPerspective2(2.0f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     GetOpenGLMatrix(CameraMatrix);
     EnableDepthTest();
     EnableDepthMask();
@@ -369,10 +368,10 @@ void CNewUIInGameShop::RenderDisplayItems()
 
     UpdateMousePositionn();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
 
     BeginBitmap();
 }

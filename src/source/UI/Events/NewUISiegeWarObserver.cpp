@@ -29,7 +29,6 @@ bool SEASON3B::CNewUISiegeWarObserver::OnUpdate()
 bool SEASON3B::CNewUISiegeWarObserver::OnRender()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -43,8 +42,6 @@ void SEASON3B::CNewUISiegeWarObserver::OnSetPos(int x, int y) {}
 void SEASON3B::CNewUISiegeWarObserver::RenderCharPosInMiniMap()
 {
     float fPosX, fPosY;
-
-    glColor4f(0.8f, 0.8f, 0.8f, m_fMiniMapAlpha);
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {

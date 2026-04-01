@@ -241,7 +241,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Update()
 bool SEASON3B::CNewUIItemEnduranceInfo::Render()
 {
     EnableAlphaTest();
-    glColor3f(1.f, 1.f, 1.f);
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -334,11 +333,9 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszN
     // HPUI_FRAME
     if (bWarning == false)
     {
-        glColor4f(0.f, 0.f, 0.f, 0.7f);
     }
     else
     {
-        glColor4f(0.2f, 0.f, 0.f, 0.7f);
     }
 
     RenderColor(iX + 2, iY + 2, PETHP_FRAME_WIDTH - 4, PETHP_FRAME_HEIGHT - 10);
@@ -352,15 +349,12 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszN
         giPetManager::GetPetInfo(PetInfo, 421 - PET_TYPE_DARK_SPIRIT);
         int RequireCharisma = (185 + (PetInfo.m_wLevel * 15));
         if (RequireCharisma > iCharisma)
-            glColor4f(1.f, 0.5f, 0.5f, 1.f);
-        else
-            glColor4f(1.f, 1.f, 1.f, 1.f);
+            else
     }
     else
 #endif // #ifdef PJH_FIX_SPRIT
 
-        glColor4f(1.f, 1.f, 1.f, 1.f);
-    RenderImage(IMAGE_PETHP_FRAME, iX, iY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT);
+        RenderImage(IMAGE_PETHP_FRAME, iX, iY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT);
 
     // HPUI_Bar
     float fLife = ((float)iLife / (float)iMaxLife) * (float)PETHP_BAR_WIDTH;
@@ -569,8 +563,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
         return false;
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-
     auto ItemDurPos = POINT(m_ItemDurUIStartPos);
     int icntItemDurIcon = 0;
     int iTempImageIndex;
@@ -636,7 +628,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
         }
 
         EnableAlphaTest();
-        glColor4f(1.f, 1.f, 1.f, 1.f);
 
         if (i != EQUIPMENT_RING_LEFT || bRenderRingWarning != true)
         {
@@ -650,19 +641,15 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 
         if (pItem->Durability == 0)
         {
-            glColor4f(1.f, 0.0f, 0.f, 0.5f);
         }
         else if (pItem->Durability <= iMaxDurability * 0.2f)
         {
-            glColor4f(1.f, 0.2f, 0.0f, 0.5f);
         }
         else if (pItem->Durability <= iMaxDurability * 0.3f)
         {
-            glColor4f(1.0f, 0.5f, 0.f, 0.5f);
         }
         else if (pItem->Durability <= iMaxDurability * 0.5f)
         {
-            glColor4f(1.f, 1.f, 0.f, 0.5f);
         }
 
         if (i == EQUIPMENT_RING_RIGHT)

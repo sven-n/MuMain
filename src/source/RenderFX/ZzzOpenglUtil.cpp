@@ -153,7 +153,7 @@ int ScreenCenterYFlip;
 void GetOpenGLMatrix(float Matrix[3][4])
 {
     float OpenGLMatrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, OpenGLMatrix);
+    mu::GetRenderer().GetMatrix(GL_MODELVIEW_MATRIX, OpenGLMatrix);
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 4; j++)
@@ -233,7 +233,7 @@ bool TestDepthBuffer(vec3_t Position)
         return false;
 
     GLfloat key[3];
-    glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, key);
+    mu::GetRenderer().ReadPixels(x, y, 1, 1, key);
 
     float z = 1.f - CameraViewNear / -WorldPosition[2] + CameraViewNear / CameraViewFar;
     if (key[0] >= z)
@@ -270,20 +270,14 @@ void BindTextureStream(int tex)
     if (CachTexture != tex)
     {
         CachTexture = tex;
-        if (TextureStream)
-            glEnd();
         BITMAP_t* b = &Bitmaps[tex];
-        glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-
-        glBegin(GL_TRIANGLES);
+        mu::GetRenderer().BindTexture(b->TextureNumber);
         TextureStream = true;
     }
 }
 
 void EndTextureStream()
 {
-    if (TextureStream)
-        glEnd();
     TextureStream = false;
 }
 
@@ -558,7 +552,7 @@ void glViewport2(int x, int y, int Width, int Height)
     OpenglWindowY = y;
     OpenglWindowWidth = Width;
     OpenglWindowHeight = Height;
-    glViewport(x, WindowHeight - (y + Height), Width, Height);
+    mu::GetRenderer().SetViewport(x, WindowHeight - (y + Height), Width, Height);
 }
 
 float ConvertX(float x)
@@ -595,8 +589,8 @@ void UpdateMousePositionn()
 {
     vec3_t vPos;
 
-    glLoadIdentity();
-    glTranslatef(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+    mu::GetRenderer().LoadIdentity();
+    mu::GetRenderer().Translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
     GetOpenGLMatrix(CameraMatrix);
 
     Vector(-CameraMatrix[0][3], -CameraMatrix[1][3], -CameraMatrix[2][3], vPos);
@@ -605,70 +599,15 @@ void UpdateMousePositionn()
 
 BOOL IsGLExtensionSupported(const wchar_t* extension)
 {
-    const size_t extlen = wcslen(extension);
-    const wchar_t* supported = NULL;
-
-    // Try To Use wglGetExtensionStringARB On Current DC, If Possible
-    auto wglGetExtString = wglGetProcAddress("wglGetExtensionsStringARB");
-
-    if (wglGetExtString)
-        supported = ((wchar_t * (__stdcall*)(HDC)) wglGetExtString)(wglGetCurrentDC());
-
-    // If That Failed, Try Standard Opengl Extensions String
-    if (supported == NULL)
-        supported = (wchar_t*)glGetString(GL_EXTENSIONS);
-
-    // If That Failed Too, Must Be No Extensions Supported
-    if (supported == NULL)
-        return FALSE;
-
-    // Begin Examination At Start Of String, Increment By 1 On False Match
-    for (const wchar_t* p = supported;; p++)
-    {
-        // Advance p Up To The Next Possible Match
-        p = wcsstr(p, extension);
-
-        if (p == NULL)
-            return FALSE; // No Match
-
-        if ((p == supported || p[-1] == ' ') && (p[extlen] == '\0' || p[extlen] == ' '))
-            return TRUE; // Match
-    }
+    return FALSE;
 }
 
 bool WGLExtensionSupported(const char* extension_name)
 {
-    // this is pointer to function which returns pointer to string with list of all wgl extensions
-    PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglGetExtensionsStringEXT =
-        reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(wglGetProcAddress("wglGetExtensionsStringEXT"));
-
-    if (strstr(_wglGetExtensionsStringEXT(), extension_name) == nullptr)
-    {
-        // string was not found
-        return false;
-    }
-
-    // extension is supported
-    return true;
+    return false;
 }
 
-void InitVSync()
-{
-    _isVSyncAvailable = WGLExtensionSupported("WGL_EXT_swap_control");
-    if (_isVSyncAvailable)
-    {
-        // Extension is supported, init pointers.
-        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-
-        // this is another function from WGL_EXT_swap_control extension
-        // wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
-    }
-
-    if (wglSwapIntervalEXT == nullptr)
-    {
-        _isVSyncAvailable = false;
-    }
-}
+void InitVSync() {}
 
 bool IsVSyncAvailable()
 {
@@ -680,162 +619,36 @@ bool IsVSyncEnabled()
     return _isVSyncEnabled;
 }
 
-void EnableVSync()
-{
-    if (!_isVSyncAvailable)
-    {
-        return;
-    }
+void EnableVSync() {}
 
-    wglSwapIntervalEXT(1);
-    _isVSyncEnabled = true;
-}
-
-void DisableVSync()
-{
-    if (!_isVSyncAvailable)
-    {
-        return;
-    }
-
-    wglSwapIntervalEXT(0);
-    _isVSyncEnabled = false;
-}
+void DisableVSync() {}
 
 int GetFPSLimit()
 {
-    return GetDeviceCaps(g_hDC, VREFRESH);
+    return 60;
 }
 
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd, int iRequestMSAAValue,
                        int& OutiPixelFormat)
 {
-    BOOL bIsGLMultisampleSupported = FALSE;
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // See If The String Exists In WGL!
-    if (!IsGLExtensionSupported(L"WGL_ARB_multisample"))
-    {
-        bIsGLMultisampleSupported = FALSE;
-        return FALSE;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-    // Get Our Pixel Format
-    PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB =
-        (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress(L"wglChoosePixelFormatARB");
-    if (!wglChoosePixelFormatARB)
-    {
-        bIsGLMultisampleSupported = FALSE;
-        return FALSE;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Get Our Current Device Context
-    HDC hDC = GetDC(hWnd);
-
-    int valid;
-    UINT numFormats;
-    float fAttributes[] = {0, 0};
-
-    // These Attributes Are The Bits We Want To Test For In Our Sample
-    // Everything Is Pretty Standard, The Only One We Want To
-    // Really Focus On Is The SAMPLE BUFFERS ARB And WGL SAMPLES
-    // These Two Are Going To Do The Main Testing For Whether Or Not
-    // We Support Multisampling On This Hardware.
-    int iAttributes[] = {WGL_DRAW_TO_WINDOW_ARB,
-                         GL_TRUE,
-                         WGL_SUPPORT_OPENGL_ARB,
-                         GL_TRUE,
-                         WGL_ACCELERATION_ARB,
-                         WGL_FULL_ACCELERATION_ARB,
-                         WGL_COLOR_BITS_ARB,
-                         24,
-                         WGL_ALPHA_BITS_ARB,
-                         8,
-                         WGL_DEPTH_BITS_ARB,
-                         16,
-                         WGL_STENCIL_BITS_ARB,
-                         0,
-                         WGL_DOUBLE_BUFFER_ARB,
-                         GL_TRUE,
-                         WGL_SAMPLE_BUFFERS_ARB,
-                         GL_TRUE,
-                         WGL_SAMPLES_ARB,
-                         iRequestMSAAValue, // xN MultiSampling (N=4,2,1)
-                         0,
-                         0};
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // First We Check To See If We Can Get A Pixel Format For 4 Samples
-    valid = wglChoosePixelFormatARB(hDC, iAttributes, fAttributes, 1, &OutiPixelFormat, &numFormats);
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // If We Returned True, And Our Format Count Is Greater Than 1
-    if (valid && numFormats >= 1)
-    {
-        bIsGLMultisampleSupported = TRUE;
-        return bIsGLMultisampleSupported;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Our Pixel Format With 4 Samples Failed, Test For 2 Samples
-    iAttributes[19] = 2;
-    valid = wglChoosePixelFormatARB(hDC, iAttributes, fAttributes, 1, &OutiPixelFormat, &numFormats);
-    if (valid && numFormats >= 1)
-    {
-        bIsGLMultisampleSupported = TRUE;
-        return bIsGLMultisampleSupported;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Return The Valid Format
-    return bIsGLMultisampleSupported;
+    return FALSE;
 }
 
 void SetEnableMultisample()
 {
     if (TRUE == g_bSupportedMSAA)
     {
-        glEnable(GL_MULTISAMPLE_ARB); // Enable Multisampling
+        mu::GetRenderer().SetMultisample(true);
     }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
 }
 
 void SetDisableMultisample()
 {
     if (TRUE == g_bSupportedMSAA)
     {
-        glDisable(GL_MULTISAMPLE_ARB); // Enable Multisampling
+        mu::GetRenderer().SetMultisample(false);
     }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
 }
 
 #endif // LDS_ADD_MULTISAMPLEANTIALIASING
@@ -942,13 +755,13 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4])
 
 void BeginSprite()
 {
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
 }
 
 void EndSprite()
 {
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
 }
 
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Rotation, float u,
@@ -1191,7 +1004,6 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
 }
 void EndRenderColor()
 {
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     mu::GetRenderer().SetTexture2D(true);
 }
 

@@ -135,7 +135,6 @@ bool CNewUIDuelWatchWindow::Update()
 bool CNewUIDuelWatchWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

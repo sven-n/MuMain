@@ -136,7 +136,6 @@ bool CMsgBoxIGSBuyPackageItem::Update()
 bool CMsgBoxIGSBuyPackageItem::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderMsgBackColor(true);
     RenderFrame();
     RenderTexts();

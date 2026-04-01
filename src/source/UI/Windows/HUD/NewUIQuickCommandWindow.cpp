@@ -196,7 +196,6 @@ bool SEASON3B::CNewUIQuickCommandWindow::Update()
 bool SEASON3B::CNewUIQuickCommandWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     if (m_iSelectedCharacterIndex < 0)
     {

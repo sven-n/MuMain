@@ -4,6 +4,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "SceneCommon.h"
 #include "SceneCore.h"
 #include "IPlatformAudio.h" // Story 5.4.1: g_platformAudio for SetSFXVolume in SetEffectVolumeLevel
@@ -277,14 +278,14 @@ void RenderInfomation3D()
 
     if (Success)
     {
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
         glViewport2(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), CameraViewNear, CameraViewFar);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
         GetOpenGLMatrix(CameraMatrix);
         EnableDepthTest();
         EnableDepthMask();
@@ -321,10 +322,10 @@ void RenderInfomation3D()
             break;
         }
 
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PopMatrix();
         UpdateMousePositionn();
     }
 }

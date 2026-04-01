@@ -261,7 +261,6 @@ bool SEASON3B::CNewUICatapultWindow::Update()
 bool SEASON3B::CNewUICatapultWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderOutlineUpper(m_Pos.x + 0, m_Pos.y + 120, 162, 100);
     RenderOutlineLower(m_Pos.x + 0, m_Pos.y + 120, 162, 100);

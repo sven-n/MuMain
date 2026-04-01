@@ -538,7 +538,6 @@ void CUIGuildMaster::RenderGuildMasterMain()
     m_EditGuildMarkButton.SetPosition(ptOrigin.x, ptOrigin.y);
     m_EditGuildMarkButton.Render();
 
-    glColor3f(1.f, 1.f, 1.f);
     float Width = 24.f;
     float Height = 24.f;
     float x = (float)GetPosition_x() + 25;
@@ -639,7 +638,6 @@ BOOL CUIGuildMaster::DoMouseAction()
 
 void CUIGuildMaster::Render()
 {
-    glColor3f(1.f, 1.f, 1.f);
 
     POINT ptOrigin = {GetPosition_x(), GetPosition_y()};
 

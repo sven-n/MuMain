@@ -86,7 +86,6 @@ bool SEASON3B::CNewUISetItemExplanation::Update()
 bool SEASON3B::CNewUISetItemExplanation::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     g_csItemOption.RenderOptionHelper();
 

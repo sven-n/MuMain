@@ -115,7 +115,6 @@ bool CNewUIEmpireGuardianNPC::IsVisible() const
 bool CNewUIEmpireGuardianNPC::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     RenderFrame();
 
     POINT Position = {m_Pos.x + (NPC_WINDOW_WIDTH / 2), m_Pos.y};

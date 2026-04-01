@@ -792,11 +792,9 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
         colorR = (*pvColor)[0];
         colorG = (*pvColor)[1];
         colorB = (*pvColor)[2];
-        glColor3fv(*pvColor);
     }
     else
     {
-        glColor3f(1.f, 1.f, 1.f);
     }
 
     if (PCT_MASK_LIGHT & m_dwType)
@@ -903,7 +901,6 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, u
 void CPhysicsCloth::RenderCollisions(void)
 {
 #ifdef RENDER_COLLISION
-    glColor3f(1.0f, 1.0f, 0.6f);
     BindTexture(BITMAP_CLOUD);
     CNode<CPhysicsCollision*>* pHead = m_lstCollision.FindHead();
     for (; pHead; pHead = m_lstCollision.GetNext(pHead))
@@ -919,12 +916,12 @@ void CPhysicsCloth::RenderCollisions(void)
             {
                 pQuad = gluNewQuadric();
             }
-            glPushMatrix();
+            mu::GetRenderer().PushMatrix();
             vec3_t vCenter;
             pColSph->GetCenter(vCenter);
-            glTranslatef(vCenter[0], vCenter[1], vCenter[2]);
+            mu::GetRenderer().Translate(vCenter[0], vCenter[1], vCenter[2]);
             gluSphere(pQuad, pColSph->GetRadius() - 2.0f, 20, 20);
-            glPopMatrix();
+            mu::GetRenderer().PopMatrix();
         }
     }
 #endif

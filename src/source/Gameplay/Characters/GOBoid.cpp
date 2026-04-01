@@ -1622,16 +1622,6 @@ void RenderBoids(bool bAfterCharacter)
                 if (gMapManager.WorldActive != WD_10HEAVEN)
                 {
                     EnableAlphaTest();
-                    if (o->Type == MODEL_EAGLE)
-                    {
-                        if (o->ShadowScale == 0)
-                            glColor4f(0.f, 0.f, 0.f, 0.0f);
-                        else
-                            glColor4f(0.f, 0.f, 0.f, 1.0f);
-                    }
-                    else
-                        glColor4f(0.f, 0.f, 0.f, 0.2f);
-
                     if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR && o->Type == MODEL_MAP_TORNADO)
                         ;
                     else
@@ -1678,7 +1668,6 @@ void RenderFishs()
                     if (gMapManager.WorldActive != WD_10HEAVEN)
                     {
                         EnableAlphaTest();
-                        glColor4f(0.f, 0.f, 0.f, 0.2f);
                         BMD* b = &Models[o->Type];
                         vec3_t Position;
                         VectorCopy(o->Position, Position);

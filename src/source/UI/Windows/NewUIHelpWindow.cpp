@@ -93,7 +93,6 @@ bool SEASON3B::CNewUIHelpWindow::Update()
 bool SEASON3B::CNewUIHelpWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     extern wchar_t TextList[50][100];
     extern int TextListColor[50];

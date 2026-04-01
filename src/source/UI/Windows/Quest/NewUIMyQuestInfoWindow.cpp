@@ -175,7 +175,6 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::Update()
 bool SEASON3B::CNewUIMyQuestInfoWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTabBtn();
     RenderSubjectTexts();

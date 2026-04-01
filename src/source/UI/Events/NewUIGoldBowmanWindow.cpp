@@ -306,7 +306,6 @@ void CNewUIGoldBowmanWindow::RendeerButton()
 bool CNewUIGoldBowmanWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     RenderFrame();
     RenderTexts();
     RendeerButton();

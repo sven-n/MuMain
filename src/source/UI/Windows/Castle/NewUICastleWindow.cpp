@@ -175,7 +175,6 @@ bool CNewUICastleWindow::Update()
 bool CNewUICastleWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -534,7 +533,6 @@ void CNewUICastleWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fW
     RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT, ptOrigin.x + 12, ptOrigin.y - 4, 14, 14);
     RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT, ptOrigin.x + fBoxWidth + 4, ptOrigin.y - 4, 14, 14);
     RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL, ptOrigin.x + 25, ptOrigin.y - 4, fBoxWidth - 21, 14);
-    glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
     RenderColor(ptOrigin.x + 15, ptOrigin.y - 3, fBoxWidth - 2, 15);
     EndRenderColor();
 }
@@ -786,7 +784,6 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     ptOrigin.y += 6;
 
     EnableAlphaTest();
-    glColor4f(0.4f, 0.4f, 0.4f, 0.5f);
     RenderColor(ptOrigin.x + 15, ptOrigin.y + 14, 150, 24);
     RenderColor(ptOrigin.x + 15, ptOrigin.y + 42, 150, 24);
     EndRenderColor();
@@ -883,7 +880,6 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
 
     if (g_SenatusInfo.IsGate(pInfo)) // ����
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         if (pInfo->btNpcLive)
         {
@@ -895,14 +891,11 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
 
             RenderColor(nPosX, nPosY - 10, nHPBlockSize * (nHP + 1), 3);
             RenderColor(nPosX, nPosY - 5, 24, 3);
-            glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
             RenderColor(nPosX, nPosY - 10, (nHPBlockSize * (nHP + 1)) * fHPRate, 3);
-            glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
             RenderColor(nPosX, nPosY - 10, 24, 1);
             RenderColor(nPosX, nPosY - 7, 24, 1);
             RenderColor(nPosX, nPosY - 10, 1, 3);
             RenderColor(nPosX + 24, nPosY - 10, 1, 3);
-            glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
             RenderColor(nPosX, nPosY - 5, nDefenseBlockSize * (nDefense + 1), 3);
             EndRenderColor();
         }
@@ -914,7 +907,6 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
     }
     if (g_SenatusInfo.IsStatue(pInfo))
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         if (pInfo->btNpcLive)
         {
@@ -928,11 +920,8 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
             RenderColor(nPosX, nPosY - 15, nHPBlockSize * (nHP + 1), 3);
             RenderColor(nPosX, nPosY - 10, 24, 3);
             RenderColor(nPosX, nPosY - 5, 24, 3);
-            glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
             RenderColor(nPosX, nPosY - 15, (nHPBlockSize * (nHP + 1)) * fHPRate, 3);
-            glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
             RenderColor(nPosX, nPosY - 10, nDefenseBlockSize * (nDefense + 1), 3);
-            glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
             RenderColor(nPosX, nPosY - 5, nRecoverBlockSize * (nRecover + 1), 3);
             EndRenderColor();
         }

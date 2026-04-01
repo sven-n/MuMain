@@ -716,8 +716,6 @@ void CSPetDarkSpirit::RenderCmdType(void)
 
     RenderBar(x, y + 12, Width, Height, (float)Life);
 
-    glColor3f(1.f, 1.f, 1.f);
-
     Width = 20.f;
     Height = 28.f;
     x = GetScreenWidth() - Width - PartyWidth - 65.f;

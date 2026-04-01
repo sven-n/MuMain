@@ -191,8 +191,6 @@ void SEASON3B::CNewUICursedTempleResult::RenderResultPanel()
     if (m_WinState == 0)
         return;
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, m_ResultEffectAlph);
-
     if (m_WinState == 1)
     {
         RenderImage(IMAGE_CURSEDTEMPLERESULT_SUCCESS, (640 - 360) / 2, m_Pos.y - 110, 351.f, 115.f);
@@ -201,8 +199,6 @@ void SEASON3B::CNewUICursedTempleResult::RenderResultPanel()
     {
         RenderImage(IMAGE_CURSEDTEMPLERESULT_FAILURE, (640 - 360) / 2, m_Pos.y - 110, 351.f, 115.f);
     }
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 }
 
 void SEASON3B::CNewUICursedTempleResult::RenderFrame()
@@ -337,7 +333,6 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
 bool SEASON3B::CNewUICursedTempleResult::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderResultPanel();

@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "mu_enum.h"
 #include "UIManager.h"
 #include "GuildCache.h"
@@ -6537,9 +6538,8 @@ void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
 {
     EnableAlphaTest();
     EnableCullFace();
-    glColor3f(1.f, 1.f, 1.f);
     BindTexture(BITMAP_GUILD);
-    glPushMatrix();
+    mu::GetRenderer().PushMatrix();
 
     float Matrix[3][4];
     vec3_t Angle;
@@ -6567,10 +6567,10 @@ void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
     }
 
     R_ConcatTransforms(o->BoneTransform[26], Matrix, ParentMatrix);
-    glTranslatef(o->Position[0], o->Position[1], o->Position[2]);
+    mu::GetRenderer().Translate(o->Position[0], o->Position[1], o->Position[2]);
     RenderPlane3D(5.f, 7.f, ParentMatrix);
 
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
     DisableCullFace();
 }
 

@@ -1029,7 +1029,7 @@ public:
 #endif
 
     // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
-    [[nodiscard]] const char* GetGPUDriverName() override
+    [[nodiscard]] const char* GetGPUDriverName() const override
     {
         return s_device ? SDL_GetGPUDeviceDriver(s_device) : "unknown";
     }
@@ -1388,12 +1388,30 @@ public:
     // The buffer is uploaded in BeginFrame() before the render pass.
     // Story 4.3.2 (AC-10): Fog uniform buffer support.
     // -----------------------------------------------------------------------
-    void SetDepthMask(bool enabled) override { m_depthMaskEnabled = enabled; }
-    void SetCullFace(bool enabled) override { m_cullFaceEnabled = enabled; }
-    void SetAlphaTest(bool enabled) override { m_alphaTestEnabled = enabled; }
-    void SetTexture2D(bool enabled) override { m_texture2DEnabled = enabled; }
-    void SetFogEnabled(bool enabled) override { m_fogEnabled = enabled; }
-    void BindTexture(int texId) override { m_boundTextureId = texId; }
+    void SetDepthMask(bool enabled) override
+    {
+        m_depthMaskEnabled = enabled;
+    }
+    void SetCullFace(bool enabled) override
+    {
+        m_cullFaceEnabled = enabled;
+    }
+    void SetAlphaTest(bool enabled) override
+    {
+        m_alphaTestEnabled = enabled;
+    }
+    void SetTexture2D(bool enabled) override
+    {
+        m_texture2DEnabled = enabled;
+    }
+    void SetFogEnabled(bool enabled) override
+    {
+        m_fogEnabled = enabled;
+    }
+    void BindTexture(int texId) override
+    {
+        m_boundTextureId = texId;
+    }
 
     void SetFog(const FogParams& params) override
     {

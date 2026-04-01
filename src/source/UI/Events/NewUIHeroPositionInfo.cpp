@@ -147,7 +147,6 @@ bool CNewUIHeroPositionInfo::Render()
     };
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);

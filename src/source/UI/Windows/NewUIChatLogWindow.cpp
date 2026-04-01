@@ -69,9 +69,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderBackground()
         float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy;
 
         EnableAlphaTest();
-        glColor4f(0.0f, 0.0f, 0.0f, GetBackAlpha());
         RenderColor(fRenderPosX, fRenderPosY, (float)m_WndSize.cx, (float)m_WndSize.cy);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         DisableAlphaBlend();
     }
     return true;
@@ -202,17 +200,13 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
         EnableAlphaTest();
         if (m_EventState == EVENT_RESIZING_BTN_DOWN)
         {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
         }
         else
         {
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
         RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY - (float)RESIZING_BTN_HEIGHT, RESIZING_BTN_WIDTH,
                     RESIZING_BTN_HEIGHT);
         DisableAlphaBlend();
-
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         RenderImage(IMAGE_SCROLL_TOP, fRenderPosX + m_WndSize.cx - SCROLL_BAR_WIDTH - WND_LEFT_RIGHT_EDGE,
                     fRenderPosY + WND_TOP_BOTTOM_EDGE, SCROLL_BAR_WIDTH, WND_TOP_BOTTOM_EDGE);
@@ -232,11 +226,9 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
         EnableAlphaTest();
         if (m_EventState == EVENT_SCROLL_BTN_DOWN)
         {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
         }
         else
         {
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
         RenderImage(IMAGE_SCROLLBAR_ON, m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH, SCROLL_BTN_HEIGHT);
         DisableAlphaBlend();

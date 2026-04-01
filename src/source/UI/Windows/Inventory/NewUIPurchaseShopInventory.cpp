@@ -283,7 +283,6 @@ void SEASON3B::CNewUIPurchaseShopInventory::RenderTextInfo()
 bool SEASON3B::CNewUIPurchaseShopInventory::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

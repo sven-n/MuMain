@@ -44,7 +44,6 @@ bool SEASON3B::CNewUISiegeWarCommander::OnUpdate()
 bool SEASON3B::CNewUISiegeWarCommander::OnRender()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -52,7 +51,6 @@ bool SEASON3B::CNewUISiegeWarCommander::OnRender()
     RenderGuildMemberPosInMiniMap();
     DisableAlphaBlend();
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     if (m_iCurSelectBtnGroup != -1 && m_iCurSelectBtnCommand != -1 && m_bMouseInMiniMap == true)
     {
@@ -208,11 +206,9 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
             {
                 if (o->Kind == KIND_NPC || o->Kind == KIND_MONSTER && o->Type == MODEL_LIFE_STONE)
                 {
-                    glColor4f(1.f, 0.f, 1.f, m_fMiniMapAlpha);
                 }
                 else
                 {
-                    glColor4f(0.8f, 0.f, 0.f, m_fMiniMapAlpha);
                 }
             }
 
@@ -235,15 +231,12 @@ void SEASON3B::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
         switch (UnitIterator->bIndex)
         {
         case 0:
-            glColor4f(0.f, 1.f, 0.f, m_fMiniMapAlpha);
             break;
 
         case 1:
-            glColor4f(0.f, 1.f, 1.f, m_fMiniMapAlpha);
             break;
 
         case 2:
-            glColor4f(1.f, 1.f, 0.f, m_fMiniMapAlpha);
             break;
         }
         Pos.x = (UnitIterator->x) / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x;

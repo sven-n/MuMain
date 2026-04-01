@@ -487,8 +487,8 @@ DWORD CCameraMove::GetCameraWalkState() const
 void CCameraMove::RenderWayPoint()
 {
     DisableDepthTest();
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(false);
 
     // Story 7-9-2 (AC-5): Port waypoint gizmo quads + line strip to MuRenderer.
     // TECH DEBT (review Finding #7): Per-frame std::vector heap allocs in debug path.
@@ -560,8 +560,8 @@ void CCameraMove::RenderWayPoint()
     }
 
     EnableDepthTest();
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetAlphaTest(true);
+    mu::GetRenderer().SetTexture2D(true);
 }
 void CCameraMove::SetSelectedTile(int iTileIndex)
 {

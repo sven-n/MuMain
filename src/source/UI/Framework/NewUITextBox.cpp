@@ -86,7 +86,6 @@ bool CNewUITextBox::Update()
 
 bool CNewUITextBox::Render()
 {
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     for (int iIndex = 0; iIndex < m_iLimitLine; iIndex++)
     {

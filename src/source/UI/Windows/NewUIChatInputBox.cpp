@@ -689,7 +689,6 @@ bool SEASON3B::CNewUIChatInputBox::Update()
 bool SEASON3B::CNewUIChatInputBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderButtons();
@@ -706,7 +705,6 @@ bool SEASON3B::CNewUIChatInputBox::Render()
                                   szWhisperID);
 
         EnableAlphaTest();
-        glColor4f(0.5f, 0.2f, 0.2f, 0.2f);
         RenderColor(m_WndPos.x + 2, m_WndPos.y + 28, 61, 17);
         EndRenderColor();
     }

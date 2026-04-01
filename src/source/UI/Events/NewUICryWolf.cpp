@@ -135,7 +135,6 @@ bool SEASON3B::CNewUICryWolf::Render()
         return true;
 
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     wchar_t Text[300];
 
@@ -312,7 +311,6 @@ bool SEASON3B::CNewUICryWolf::Render()
 
     g_pCryWolfInterface->Render(538, 392, 104, 37, 0.f, 0.f, 104.f / 128.f, 36.f / 64.f, 12);
 
-    glColor3f(1.f, 0.6f, 0.3f);
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 148, 21, 255);
     g_pRenderText->SetBgColor(0);
@@ -353,11 +351,9 @@ bool SEASON3B::CNewUICryWolf::Render()
 
         if (View_Bal == false)
         {
-            glColor3f(1.f, 1.0f, 1.0f);
         }
         else
         {
-            glColor3f(1.f, 0.3f, 0.3f);
         }
 
         if (m_iMinute < 10)
@@ -517,7 +513,6 @@ float SEASON3B::CNewUICryWolf::ConvertY(float y)
 bool SEASON3B::CNewUICryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv,
                                      int Index, bool Scale, bool StartScale, float Alpha)
 {
-    glColor4f(1.f, 1.f, 1.f, Alpha);
 
     RenderImage(IMAGE_MVP_INTERFACE + Index, Posx, Posy, nPosx, nPosy, u, v, su, sv);
 

@@ -218,8 +218,6 @@ bool CNewUIQuestProgressByEtc::Render()
 {
     ::EnableAlphaTest();
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderBackImage();
     RenderSelTextBlock();
 
@@ -268,7 +266,6 @@ void CNewUIQuestProgressByEtc::RenderSelTextBlock()
     for (i = 0; i < m_nSelAnswer - 1; ++i)
         nBlockPosY += QPE_TEXT_GAP * m_anAnswerLine[i];
 
-    ::glColor4f(0.5f, 0.7f, 0.3f, 0.5f);
     ::RenderColor(m_Pos.x + 11, nBlockPosY, 168.f, QPE_TEXT_GAP * m_anAnswerLine[m_nSelAnswer - 1]);
     ::EndRenderColor();
 }

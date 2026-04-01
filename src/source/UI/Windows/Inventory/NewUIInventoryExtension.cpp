@@ -181,7 +181,6 @@ bool CNewUIInventoryExtension::Update()
 bool CNewUIInventoryExtension::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
 

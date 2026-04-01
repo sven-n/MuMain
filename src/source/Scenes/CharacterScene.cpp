@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "CharacterScene.h"
 #include "SceneCore.h"
 #include "CharacterManager.h"
@@ -244,11 +245,10 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
 
     MoveMainCamera();
 
-    glColor3f(1.f, 1.f, 1.f);
     outHeight = 480;
     outWidth = GetScreenWidth();
 
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, 640, 430);
 
     CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, pos);

@@ -36,7 +36,6 @@ void GMSwampOfQuiet::RenderBaseSmoke()
         return;
 
     EnableAlphaTest();
-    glColor3f(0.4f, 0.4f, 0.45f);
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
     RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, 640.f, 480.f - 45.f, WindX2, 0.f, 3.f, 2.f);
     EnableAlphaBlend();

@@ -88,10 +88,10 @@ typedef void GLvoid;
 typedef float GLclampf;
 typedef unsigned int GLbitfield;
 
-// OpenGL constants and no-op stubs for SDL3 GPU backend.
+// OpenGL constants for SDL3 GPU backend.
 // SDL3 uses SDL_gpu (Metal/Vulkan/D3D12), not OpenGL.
-// Real GL calls are replaced by MuRenderer; remaining call sites
-// resolve to these stubs harmlessly until fully migrated.
+// All GL function calls are routed through MuRenderer (story 7-9-6).
+// Constants are retained for MuRenderer API parameters.
 
 // OpenGL Constants
 #define GL_FALSE 0
@@ -231,90 +231,6 @@ typedef unsigned int GLbitfield;
 #define GL_BYTE 0x1400
 #define GL_UNSIGNED_INT 0x1405
 #define GL_CLAMP 0x2900
-
-// OpenGL Function stubs
-inline void glEnable(GLenum) {}
-inline void glDisable(GLenum) {}
-inline void glBegin(GLenum) {}
-inline void glEnd() {}
-inline void glColor4f(GLfloat, GLfloat, GLfloat, GLfloat) {}
-inline void glColor4ub(GLubyte, GLubyte, GLubyte, GLubyte) {}
-inline void glColor3f(GLfloat, GLfloat, GLfloat) {}
-inline void glColor3ub(GLubyte, GLubyte, GLubyte) {}
-inline void glColor3fv(const GLfloat*) {}
-inline void glVertex3f(GLfloat, GLfloat, GLfloat) {}
-inline void glVertex3fv(const GLfloat*) {}
-inline void glVertex2f(GLfloat, GLfloat) {}
-inline void glTexCoord2f(GLfloat, GLfloat) {}
-inline void glTexCoord2fv(const GLfloat*) {}
-inline void glNormal3f(GLfloat, GLfloat, GLfloat) {}
-inline void glNormal3fv(const GLfloat*) {}
-inline void glFlush() {}
-inline void glBindTexture(GLenum, GLuint) {}
-inline void glGetIntegerv(GLenum, GLint*) {}
-inline void glPolygonMode(GLenum, GLenum) {}
-inline void glDepthMask(GLboolean) {}
-inline void glColorMask(GLboolean, GLboolean, GLboolean, GLboolean) {}
-inline void glStencilFunc(GLenum, GLint, GLuint) {}
-inline void glFrontFace(GLenum) {}
-inline void glStencilOp(GLenum, GLenum, GLenum) {}
-inline void glDepthFunc(GLenum) {}
-inline void glClear(GLbitfield) {}
-inline void glClearColor(GLclampf, GLfloat, GLfloat, GLfloat) {}
-inline void glMatrixMode(GLenum) {}
-inline void glPushMatrix() {}
-inline void glPopMatrix() {}
-inline void glLoadIdentity() {}
-inline void glTranslatef(GLfloat, GLfloat, GLfloat) {}
-inline void glRotatef(GLfloat, GLfloat, GLfloat, GLfloat) {}
-inline void glScalef(GLfloat, GLfloat, GLfloat) {}
-inline void glBlendFunc(GLenum, GLenum) {}
-inline void glTexEnvi(GLenum, GLenum, GLint) {}
-inline void glScissor(GLint, GLint, GLsizei, GLsizei) {}
-inline void glGenTextures(GLsizei, GLuint*) {}
-inline void glDeleteTextures(GLsizei, const GLuint*) {}
-inline void glTexImage2D(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid*) {}
-inline void glTexParameteri(GLenum, GLenum, GLint) {}
-inline void glViewport(GLint, GLint, GLsizei, GLsizei) {}
-inline void glEnableClientState(GLenum) {}
-inline void glDisableClientState(GLenum) {}
-inline void glVertexPointer(GLint, GLenum, GLsizei, const GLvoid*) {}
-inline void glColorPointer(GLint, GLenum, GLsizei, const GLvoid*) {}
-inline void glTexCoordPointer(GLint, GLenum, GLsizei, const GLvoid*) {}
-inline void glNormalPointer(GLenum, GLsizei, const GLvoid*) {}
-inline void glDrawArrays(GLenum, GLint, GLsizei) {}
-inline void glDrawElements(GLenum, GLsizei, GLenum, const GLvoid*) {}
-inline void glMaterialfv(GLenum, GLenum, const GLfloat*) {}
-inline void glMaterialf(GLenum, GLenum, GLfloat) {}
-inline void glPointSize(GLfloat) {}
-inline void glLineWidth(GLfloat) {}
-inline void glAlphaFunc(GLenum, GLclampf) {}
-inline void glTexGeni(GLenum, GLenum, GLint) {}
-inline void glTexGenfv(GLenum, GLenum, const GLfloat*) {}
-inline void glCullFace(GLenum) {}
-inline void glColor4fv(const GLfloat*) {}
-inline void glReadPixels(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLvoid*) {}
-inline void glDrawBuffer(GLenum) {}
-inline void glReadBuffer(GLenum) {}
-inline void glShadeModel(GLenum) {}
-inline void glHint(GLenum, GLenum) {}
-inline void glPixelStorei(GLenum, GLint) {}
-inline void glFogi(GLenum, GLint) {}
-inline void glFogf(GLenum, GLfloat) {}
-inline void glFogfv(GLenum, const GLfloat*) {}
-inline void glTexEnvf(GLenum, GLenum, GLfloat) {}
-inline void glMultMatrixf(const GLfloat*) {}
-inline void glLoadMatrixf(const GLfloat*) {}
-inline void glGetFloatv(GLenum, GLfloat*) {}
-inline const GLubyte* glGetString(GLenum) { return (const GLubyte*)""; }
-inline void glLightfv(GLenum, GLenum, const GLfloat*) {}
-inline void glLightModelfv(GLenum, const GLfloat*) {}
-inline void glNewList(GLuint, GLenum) {}
-inline void glEndList() {}
-inline void glCallList(GLuint) {}
-inline void glDeleteLists(GLuint, GLsizei) {}
-inline GLuint glGenLists(GLsizei) { return 0; }
-inline GLboolean glIsList(GLuint) { return GL_FALSE; }
 
 // client - base definitions
 #include "Core/Defined_Global.h"

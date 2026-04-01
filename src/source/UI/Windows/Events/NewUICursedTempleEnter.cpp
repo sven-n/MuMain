@@ -343,7 +343,6 @@ void SEASON3B::CNewUICursedTempleEnter::RenderFrame()
 bool SEASON3B::CNewUICursedTempleEnter::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderText();

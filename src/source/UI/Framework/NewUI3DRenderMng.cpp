@@ -108,14 +108,14 @@ bool SEASON3B::CNewUI3DCamera::Render()
         return true;
 
     EndBitmap();
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     glViewport2(0, 0, m_uiWidth, m_uiHeight);
     gluPerspective2(1.f, (float)(m_uiWidth) / (float)(m_uiHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     GetOpenGLMatrix(CameraMatrix);
     EnableDepthTest();
     EnableDepthMask();
@@ -131,10 +131,10 @@ bool SEASON3B::CNewUI3DCamera::Render()
     }
     UpdateMousePositionn();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
     BeginBitmap();
 
     while (!m_deque2DEffects.empty())

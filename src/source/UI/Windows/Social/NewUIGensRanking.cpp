@@ -97,7 +97,6 @@ void CNewUIGensRanking::SetPos(int x, int y)
 bool CNewUIGensRanking::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -133,7 +132,6 @@ void CNewUIGensRanking::RenderInfoFrame(int iPosX, int iPosY, int iWidth, int iH
                                         int iTitleHeight)
 {
     EnableAlphaTest();
-    glColor4f(0.f, 0.f, 0.f, 0.6f);
     RenderColor(float(iPosX + 3), float(iPosY + 2), float(iTitleWidth - 8), float(iTitleHeight));
     RenderColor(float(iPosX + 3), float(iPosY + 2 + iTitleHeight), float(iWidth - 7),
                 float(iHeight - iTitleHeight - 7));

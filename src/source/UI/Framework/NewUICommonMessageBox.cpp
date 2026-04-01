@@ -175,11 +175,9 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 {
     if (m_bEnable == false)
     {
-        glColor4f(0.8f, 0.8f, 0.8f, 0.9f);
     }
     else
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -228,7 +226,6 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 
     if (m_bEnable == false)
     {
-        glColor4f(0.6f, 0.6f, 0.6f, 0.6f);
     }
 
     if (m_dwSizeType == MSGBOX_BTN_SIZE_OK || m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY_SMALL)
@@ -578,7 +575,6 @@ bool SEASON3B::CNewUICommonMessageBox::Update()
 bool SEASON3B::CNewUICommonMessageBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -1050,7 +1046,6 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::AddButtonBlank(int iAddLine)
 bool SEASON3B::CNewUI3DItemCommonMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();

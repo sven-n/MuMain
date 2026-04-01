@@ -716,9 +716,8 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
             mu::UnregisterSampler(uiBitmapIndex);
 #endif
 
-            // Subtask 5.2 — Guard glDeleteTextures under #ifndef MU_ENABLE_SDL3.
 #ifndef MU_ENABLE_SDL3
-            glDeleteTextures(1, &(pBitmap->TextureNumber));
+            // Non-SDL3: no GPU resources to release (stubs removed in story 7-9-6).
 #else
             // Subtask 5.3 — Release SDL_gpu resources on the SDL_gpu path.
             {
@@ -1012,24 +1011,9 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
                static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
     }
 
-    // Subtask 3.1 — Guard existing OpenGL texture upload under #ifndef MU_ENABLE_SDL3.
-    // Subtask 3.2 — Add SDL_gpu upload path under #ifdef MU_ENABLE_SDL3.
 #ifndef MU_ENABLE_SDL3
-    glGenTextures(1, &(pNewBitmap->TextureNumber));
-
-    glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
-
+    // Non-SDL3: register bitmap without GPU upload (stubs removed in story 7-9-6).
     m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
 #else
     // SDL_gpu path: pad RGB→RGBA8, upload texture, create sampler.
     // Capture raw sdlTexture pointer BEFORE std::move (move invalidates pNewBitmap).
@@ -1133,26 +1117,9 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
         }
     }
 
-    // Subtask 4.1 — Guard existing OpenGL texture upload under #ifndef MU_ENABLE_SDL3.
-    // Subtask 4.2 — Add SDL_gpu upload path under #ifdef MU_ENABLE_SDL3.
 #ifndef MU_ENABLE_SDL3
-    glGenTextures(1, &(pNewBitmap->TextureNumber));
-
-    glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
-
+    // Non-SDL3: register bitmap without GPU upload (stubs removed in story 7-9-6).
     m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
-
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
 #else
     // SDL_gpu path: RGBA data already decoded in pNewBitmap->Buffer (4 components from OZT decode loop).
     // Upload directly as RGBA8 — no padding required.

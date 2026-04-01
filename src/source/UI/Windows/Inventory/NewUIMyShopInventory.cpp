@@ -555,7 +555,6 @@ void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
 bool SEASON3B::CNewUIMyShopInventory::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

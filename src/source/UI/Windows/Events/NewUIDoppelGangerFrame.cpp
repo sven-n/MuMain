@@ -84,7 +84,6 @@ bool CNewUIDoppelGangerFrame::Update()
 bool CNewUIDoppelGangerFrame::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderImage(IMAGE_DOPPELGANGER_FRAME_WINDOW, m_Pos.x, m_Pos.y, float(DOPPELGANGER_FRAME_WINDOW_WIDTH),
                 float(DOPPELGANGER_FRAME_WINDOW_HEIGHT));

@@ -128,7 +128,6 @@ bool CNewUIDoppelGangerWindow::IsVisible() const
 bool CNewUIDoppelGangerWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

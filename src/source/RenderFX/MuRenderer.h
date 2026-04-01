@@ -179,9 +179,57 @@ public:
     }
 #endif
 
+    // -----------------------------------------------------------------------
+    // Story 7-9-6: GL state migration — replaces raw OpenGL calls.
+    // Default implementations are no-ops; SDL_gpu backend overrides them.
+    // -----------------------------------------------------------------------
+
+    // AC-3: Clear color — replaces glClearColor.
+    // SDL_gpu backend stores RGBA and applies in BeginFrame render pass.
+    virtual void SetClearColor(float /*r*/, float /*g*/, float /*b*/, float /*a*/) {}
+
+    // AC-4: Matrix stack — replaces glMatrixMode/glPushMatrix/glPopMatrix/etc.
+    // SDL_gpu backend maintains internal MatrixStack and uploads to GPU uniform buffer.
+    virtual void SetMatrixMode(int /*mode*/) {}
+    virtual void PushMatrix() {}
+    virtual void PopMatrix() {}
+    virtual void LoadIdentity() {}
+    virtual void Translate(float /*x*/, float /*y*/, float /*z*/) {}
+    virtual void Rotate(float /*angle*/, float /*x*/, float /*y*/, float /*z*/) {}
+    virtual void Scale(float /*x*/, float /*y*/, float /*z*/) {}
+    virtual void MultMatrix(const float* /*m*/) {}
+    virtual void LoadMatrix(const float* /*m*/) {}
+    virtual void GetMatrix(int /*mode*/, float* /*m*/) {}
+
+    // AC-6: Depth/stencil/state — replaces glDepthFunc/glAlphaFunc/glStencilFunc/etc.
+    virtual void SetStencilTest(bool /*enabled*/) {}
+    virtual void SetDepthFunc(int /*func*/) {}
+    virtual void SetAlphaFunc(int /*func*/, float /*ref*/) {}
+    virtual void SetStencilFunc(int /*func*/, int /*ref*/, unsigned int /*mask*/) {}
+    virtual void SetStencilOp(int /*sfail*/, int /*dpfail*/, int /*dppass*/) {}
+    virtual void SetColorMask(bool /*r*/, bool /*g*/, bool /*b*/, bool /*a*/) {}
+
+    // Additional state — replaces glPolygonMode/glFrontFace.
+    virtual void SetPolygonMode(int /*face*/, int /*mode*/) {}
+    virtual void SetFrontFace(int /*mode*/) {}
+    virtual void SetMultisample(bool /*enabled*/) {}
+
+    // Texture environment — replaces glTexEnvi/glTexEnvf (fixed-function, no-op in SDL GPU).
+    virtual void SetTexEnv(int /*target*/, int /*pname*/, int /*param*/) {}
+    virtual void SetTexParameter(int /*target*/, int /*pname*/, int /*param*/) {}
+
+    // AC-6: Viewport/scissor — replaces glViewport/glScissor.
+    virtual void SetViewport(int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
+    virtual void SetScissor(int /*x*/, int /*y*/, int /*w*/, int /*h*/) {}
+    virtual void SetScissorEnabled(bool /*enabled*/) {}
+
+    // AC-7: Screenshot — replaces glReadPixels.
+    // SDL_gpu backend: SDL_GPUDownloadFromGPUTexture or SDL_RenderReadPixels.
+    virtual void ReadPixels(int /*x*/, int /*y*/, int /*w*/, int /*h*/, void* /*data*/) {}
+
     // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
     // Returns "unknown" by default; SDL GPU backend overrides with SDL_GetGPUDeviceDriver().
-    [[nodiscard]] virtual const char* GetGPUDriverName()
+    [[nodiscard]] virtual const char* GetGPUDriverName() const
     {
         return "unknown";
     }

@@ -201,7 +201,6 @@ bool SEASON3B::CNewUIBuffWindow::Update()
 bool SEASON3B::CNewUIBuffWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderBuffStatus(BUFF_RENDER_ICON);
 

@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "CreditWin.h"
 #include "Input.h"
 #include "UIMng.h"
@@ -206,7 +207,7 @@ void CCreditWin::UpdateWhileActive(double deltaMilliseconds)
 
 void CCreditWin::RenderControls()
 {
-    ::glDisable(GL_ALPHA_TEST);
+    mu::GetRenderer().SetAlphaTest(false);
 
     for (int i = 0; i <= CRW_SPR_LOGO; ++i)
         m_aSpr[i].Render();
@@ -260,7 +261,7 @@ void CCreditWin::RenderControls()
     for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
         m_aSpr[i].Render();
 
-    glEnable(GL_ALPHA_TEST);
+    mu::GetRenderer().SetAlphaTest(true);
 
     CWin::RenderButtons();
 }

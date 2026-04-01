@@ -745,7 +745,6 @@ bool SEASON3B::CNewUICursedTempleSystem::Update()
 void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_Alph);
 
     float Width, Height, fU, fV, x, y;
     int iSkillIndex;
@@ -771,10 +770,8 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
     fV = 0;
     RenderBitmap(iSkillIndex, x, y, Width, Height, fU, fV, Width / 256.f, Height / 256.f);
 
-    glColor4f(0.9f, 0.4f, 0.1f, m_Alph);
     RenderNumber(x + 55.f, y + 8.f, MaxKillCount, 1.f);
 
-    glColor4f(1.f, 1.f, 1.f, m_Alph);
     RenderNumber(x + 77.f, y + 8.f, m_SkillPoint, 1.f);
 
     x = 512.f + 50;
@@ -862,7 +859,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
         RenderTipTextList(x, y - 20, TextNum, 0);
     }
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     DisableAlphaBlend();
 }
 
@@ -871,7 +867,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderGameTime()
     float x, y, Width, Height;
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_Alph);
 
     x = 506.f;
     y = 393.f;
@@ -883,25 +878,21 @@ void SEASON3B::CNewUICursedTempleSystem::RenderGameTime()
     y = 407.5f;
     Width = 3.f;
     Height = 9.0f;
-    glColor4f(1.f, 0.6f, 0.3f, m_Alph);
     RenderBitmap(BITMAP_INTERFACE_EX + 44, x, y, Width, Height, 0.f, 0.f, Width / 4.f, Height / 16.f);
 
     int minute = m_EventMapTime / 60;
     int second = m_EventMapTime % 60;
 
-    glColor4f(0.f, 0.f, 0.f, m_Alph);
     x = 507.5f + (134.f / 2);
     y = 404.5f;
     RenderNumber(x - 15.f, y, minute, 1.1f);
     RenderNumber(x + 20.f, y, second, 1.1f);
 
-    glColor4f(1.f, 0.6f, 0.3f, m_Alph);
     x = 507.5f + (134.f / 2);
     y = 404.5f;
     RenderNumber(x - 15.f, y, minute, 1.1f);
     RenderNumber(x + 20.f, y, second, 1.1f);
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     DisableAlphaBlend();
 }
 
@@ -912,8 +903,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
     m_Scale = 1.56f;
 
     EnableAlphaTest();
-
-    glColor4f(1.f, 1.f, 1.f, m_Alph);
 
     x = 512.f;
     y = 232.f - 53.f;
@@ -990,8 +979,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
     m_Button[CURSEDTEMPLERESULT_ALPH].ChangeAlpha(m_Alph);
     m_Button[CURSEDTEMPLERESULT_ALPH].Render();
 
-    glColor4f(1.f, 1.f, 1.f, m_Alph);
-
     // 히어로
     x = (Hero->PositionX);
     y = (Hero->PositionY);
@@ -1006,8 +993,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
     RenderNumber2D(517.f + 66.f, 246.f, m_AlliedPoint, 8, 8);
     RenderNumber2D(517.f + 110.f, 246.f, m_IllusionPoint, 8, 8);
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-
     DisableAlphaBlend();
 
 #ifdef _DEBUG
@@ -1015,10 +1000,8 @@ void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
 /*
     for ( int j = 0; j < 7; ++j )
     {
-        glColor3f ( 1.f, 0.f, 0.f );
         RenderColor( MiniMapPos( posX[j], posY[j], m_Scale, AXIS_X ),
                      MiniMapPos( posX[j], posY[j], m_Scale, AXIS_Y ), 3, 3 );
-        glColor3f ( 1.f, 1.f, 1.f );
     }
     DisableAlphaBlend();
 */
@@ -1031,7 +1014,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderScore()
         return;
 
     ::EnableAlphaTest();
-    ::glColor4f(1.0f, 1.0f, 1.0f, m_ScoreEffectAlph);
 
     // 뮤연합군 점수
     if (m_AlliedPoint / 10 != 0)
@@ -1076,7 +1058,6 @@ void SEASON3B::CNewUICursedTempleSystem::RenderScore()
     RenderBitmap(IMAGE_CURSEDTEMPLESYSTEM_SCORE_RIGHT, 445.f, 115.f, 67.0f, 125.0f, 0.f, 0.f, 67.f / 128.f,
                  125.f / 128.f);
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     ::DisableAlphaBlend();
 }
 

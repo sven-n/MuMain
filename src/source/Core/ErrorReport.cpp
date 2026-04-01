@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 
 #include <chrono>
 #include <ctime>
@@ -304,19 +305,18 @@ void CErrorReport::WriteOpenGLInfo(void)
 {
     Write(L"<OpenGL information>\r\n");
 
-    const char* vendor = (const char*)glGetString(GL_VENDOR);
-    const char* renderer = (const char*)glGetString(GL_RENDERER);
-    const char* version = (const char*)glGetString(GL_VERSION);
+    const char* driverName = mu::GetRenderer().GetGPUDriverName();
 
-    Write(L"Vendor\t\t: %hs\r\n", vendor ? vendor : "N/A");
-    Write(L"Render\t\t: %hs\r\n", renderer ? renderer : "N/A");
-    Write(L"OpenGL version\t: %hs\r\n", version ? version : "N/A");
+    Write(L"Vendor\t\t: %hs\r\n", driverName ? driverName : "N/A");
+    Write(L"Render\t\t: %hs\r\n", driverName ? driverName : "N/A");
+    Write(L"OpenGL version\t: %hs\r\n", driverName ? driverName : "N/A");
 
-    GLint iResult[2] = {0, 0};
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, iResult);
-    Write(L"Max Texture size\t: %d x %d\r\n", iResult[0], iResult[0]);
-    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iResult);
-    Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
+    // TODO: query SDL GPU device properties
+    int iMaxTextureSize = 16384;
+    int iMaxViewportW = 16384;
+    int iMaxViewportH = 16384;
+    Write(L"Max Texture size\t: %d x %d\r\n", iMaxTextureSize, iMaxTextureSize);
+    Write(L"Max Viewport size\t: %d x %d\r\n", iMaxViewportW, iMaxViewportH);
 }
 
 // ---------------------------------------------------------------------------

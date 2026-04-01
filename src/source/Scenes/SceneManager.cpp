@@ -215,7 +215,7 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
 static void CaptureScreenshot()
 {
     std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
-    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, Buffer.data());
+    mu::GetRenderer().ReadPixels(0, 0, WindowWidth, WindowHeight, Buffer.data());
     WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100);
 
     GrabScreen++;
@@ -343,39 +343,39 @@ static void SetWorldClearColor()
 {
     if (gMapManager.WorldActive == WD_10HEAVEN)
     {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
+        mu::GetRenderer().SetClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
     }
     else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
     {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        mu::GetRenderer().SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     }
     else if (gMapManager.InHellas(gMapManager.WorldActive))
     {
-        glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);
+        mu::GetRenderer().SetClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);
     }
     else if (gMapManager.InChaosCastle() == true)
     {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
+        mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
     }
     else if (gMapManager.InBattleCastle() && battleCastle::InBattleCastle2(Hero->Object.Position))
     {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
+        mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
     }
     else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
     {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
+        mu::GetRenderer().SetClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
     }
     else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
     {
-        glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);
+        mu::GetRenderer().SetClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);
     }
     else if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
     {
-        glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);
+        mu::GetRenderer().SetClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);
     }
     else
     {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
+        mu::GetRenderer().SetClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
     }
 
     mu::GetRenderer().ClearScreen();
@@ -490,7 +490,7 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
         }
     }
 
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
 }
 
 /**

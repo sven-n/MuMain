@@ -7082,7 +7082,6 @@ void RenderJoints(BYTE bRenderOneMore)
 
             if (o->Type == MODEL_SPEARSKILL)
             {
-                float fAlpha;
                 switch (o->SubType)
                 {
                 case 0:
@@ -7091,8 +7090,6 @@ void RenderJoints(BYTE bRenderOneMore)
                 case 4:
                 case 9:
                 case 10:
-                    fAlpha = (float)std::min<int>(o->LifeTime, 20) * 0.05f;
-                    glColor3f(fAlpha * o->Light[0], fAlpha * o->Light[1], fAlpha * o->Light[2]);
                     break;
                 case 3:
                 case 5:
@@ -7102,10 +7099,8 @@ void RenderJoints(BYTE bRenderOneMore)
                 case 16:
                 case 14:
                 case 17:
-                    glColor3f(o->Light[0], o->Light[1], o->Light[2]);
                     break;
                 case 15:
-                    glColor3f(o->Light[0], o->Light[1], o->Light[2]);
                     EnableAlphaBlendMinus();
                     break;
                 }
@@ -7113,12 +7108,9 @@ void RenderJoints(BYTE bRenderOneMore)
             else if (o->Type == BITMAP_FLARE_BLUE && o->SubType == 20)
             {
                 EnableAlphaBlend2();
-                glColor3fv(o->Light);
             }
             else if (o->Type == BITMAP_SMOKE && o->SubType == 0)
             {
-                float fAlpha = (float)std::min<int>(o->LifeTime, 20) * 0.1f;
-                glColor3f(fAlpha * o->Light[0], fAlpha * o->Light[1], fAlpha * o->Light[2]);
             }
             else if (o->Type == BITMAP_JOINT_SPARK)
             {
@@ -7127,7 +7119,6 @@ void RenderJoints(BYTE bRenderOneMore)
             }
             else
             {
-                glColor3fv(o->Light);
             }
 
             BindTexture(o->TexType);
@@ -7194,7 +7185,6 @@ void RenderJoints(BYTE bRenderOneMore)
                 {
                     float Luminosity = ((float)((o->MaxTails - j) / (float)(o->MaxTails)) * 2);
                     Luminosity *= powf(o->Light[0], FPS_ANIMATION_FACTOR);
-                    glColor3f(Luminosity, Luminosity, Luminosity);
 
                     // Story 4.2.4: Migrate BITMAP_JOINT_FORCE SubType==0 trail segment
                     // to MuRenderer::RenderQuadStrip. Color captured from preceding
@@ -7229,17 +7219,14 @@ void RenderJoints(BYTE bRenderOneMore)
                             {
                                 Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight,
                                        o->Light[2] - fJointHeight, Light);
-                                glColor3fv(Light);
                             }
                             else
                             {
                                 VectorCopy(o->Light, Light);
-                                glColor3fv(o->Light); // 1.f,1.f,1.f);
                             }
                         }
                         else
                         {
-                            glColor3f(1.f, 1.f, 1.f);
                         }
 
                         if (j == ((int)o->NumTails / 2))
@@ -7266,7 +7253,6 @@ void RenderJoints(BYTE bRenderOneMore)
                             VectorScale(o->Light, powf(0.9978f, FPS_ANIMATION_FACTOR), o->Light);
                             Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight,
                                    Light);
-                            glColor3fv(Light);
 
                             vec3_t Position;
 
@@ -7284,20 +7270,6 @@ void RenderJoints(BYTE bRenderOneMore)
                     }
                     else if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
                     {
-                        int tail = (int)(o->Light[2]);
-                        if (tail == j)
-                        {
-                            float l = o->Light[2] - j;
-                            glColor3f(l, l, l);
-                        }
-                        else if (tail < j)
-                        {
-                            glColor3f(0.f, 0.f, 0.f);
-                        }
-                        else
-                        {
-                            glColor3f(0.7f, 0.7f, 0.7f);
-                        }
                     }
                     else if (o->Type == BITMAP_FLARE + 1 && o->SubType == 6)
                     {
@@ -7334,15 +7306,9 @@ void RenderJoints(BYTE bRenderOneMore)
                     else if (o->Type == BITMAP_FLARE_FORCE &&
                              ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13)))
                     {
-                        float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
-
-                        glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
                     }
                     else if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 1)
                     {
-                        float Luminosity = (1.f - ((int)o->NumTails - j) / (float)(o->NumTails)) * 2.f;
-
-                        glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
                     }
 
                     // Story 4.2.4: Capture current GL color state into packed ABGR for
@@ -7387,9 +7353,9 @@ void RenderJoints(BYTE bRenderOneMore)
                     {
                         vec3_t t_bias;
                         VectorSubtract(o->Target->Position, o->StartPosition, t_bias);
-                        glMatrixMode(GL_MODELVIEW);
-                        glPushMatrix();
-                        glTranslatef(t_bias[0], t_bias[1], t_bias[2]);
+                        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+                        mu::GetRenderer().PushMatrix();
+                        mu::GetRenderer().Translate(t_bias[0], t_bias[1], t_bias[2]);
 
                         // Story 4.2.4: Migrate GUILD_WAR_EVENT double-face trail segment
                         // to two RenderQuadStrip calls. Color from o->Light (set via
@@ -7416,7 +7382,7 @@ void RenderJoints(BYTE bRenderOneMore)
                         };
                         mu::GetRenderer().RenderQuadStrip(guildFace2, 0u);
 
-                        glPopMatrix();
+                        mu::GetRenderer().PopMatrix();
                         continue;
                     }
 #endif // GUILD_WAR_EVENT

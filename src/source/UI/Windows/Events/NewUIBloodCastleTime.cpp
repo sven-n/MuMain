@@ -98,7 +98,6 @@ bool CNewUIBloodCastle::Render()
     }
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     wchar_t szText[256] = {
         NULL,

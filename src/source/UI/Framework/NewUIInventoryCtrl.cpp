@@ -894,32 +894,25 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
 
                     if (pItem->byColorState == ITEM_COLOR_NORMAL)
                     {
-                        glColor4f(0.3f, 0.5f, 0.5f, 0.6f);
                     }
                     else if (pItem->byColorState == ITEM_COLOR_DURABILITY_50)
                     {
-                        glColor4f(1.0f, 1.0f, 0.f, 0.4f);
                     }
                     else if (pItem->byColorState == ITEM_COLOR_DURABILITY_70)
                     {
-                        glColor4f(1.0f, 0.66f, 0.f, 0.4f);
                     }
                     else if (pItem->byColorState == ITEM_COLOR_DURABILITY_80)
                     {
-                        glColor4f(1.0f, 0.33f, 0.f, 0.4f);
                     }
                     else if (pItem->byColorState == ITEM_COLOR_DURABILITY_100)
                     {
-                        glColor4f(1.0f, 0.f, 0.f, 0.4f);
                     }
                     else if (pItem->byColorState == ITEM_COLOR_TRADE_WARNING)
                     {
-                        glColor4f(1.0f, 0.2f, 0.1f, 0.4f);
                     }
                 }
                 else
                 {
-                    glColor4f(0.3f, 0.5f, 0.5f, 0.6f);
                 }
 
                 RenderColor(m_Pos.x + (x * INVENTORY_SQUARE_WIDTH), m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT),
@@ -1021,7 +1014,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                 if (bWarning)
                 {
                     EnableAlphaTest();
-                    glColor4f(1.f, 0.2f, 0.2f, 0.4f);
                     RenderColor(iDestPosX, iDestPosY, iDestWidth, iDestHeight);
                     EndRenderColor();
                 }
@@ -1110,14 +1102,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                     {
                                         SetSquareColorWarning(1.f, 0.2f, 0.2f);
                                     }
-
-                                    glColor4f(m_afColorStateWarning[0], m_afColorStateWarning[1],
-                                              m_afColorStateWarning[2], 0.4f);
-                                }
-                                else
-                                {
-                                    glColor4f(m_afColorStateNormal[0], m_afColorStateNormal[1], m_afColorStateNormal[2],
-                                              0.4f);
                                 }
                                 RenderColor(m_Pos.x + (iSquarePosX * INVENTORY_SQUARE_WIDTH),
                                             m_Pos.y + (iSquarePosY * INVENTORY_SQUARE_HEIGHT), INVENTORY_SQUARE_WIDTH,
@@ -1367,7 +1351,6 @@ bool SEASON3B::CNewUIInventoryCtrl::IsRepairMode()
 void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
 {
     EnableAlphaTest();
-    glColor3f(1.f, 1.f, 1.f);
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li)
     {
@@ -1380,55 +1363,45 @@ void SEASON3B::CNewUIInventoryCtrl::RenderNumberOfItem()
 
         if (pItem->Type >= ITEM_POTION && pItem->Type <= ITEM_ANTIDOTE && pItem->Durability > 1)
         {
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
         else if (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK &&
                  pItem->Durability > 1)
         {
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
         else if (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION &&
                  pItem->Durability > 1)
         {
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
         else if (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71 && pItem->Durability > 1)
         {
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
         else if (pItem->Type == ITEM_POTION + 94 && pItem->Durability > 1)
         {
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
         else if (pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82 && pItem->Durability > 1)
         {
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
         else if (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_GOLDEN_CHERRY_BLOSSOM_BRANCH &&
                  pItem->Durability > 1)
         {
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
         else if (pItem->Type == ITEM_POTION + 133 && pItem->Durability > 1)
         {
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, pItem->Durability);
         }
         else if (COMGEM::isCompiledGem(pItem))
         {
             const int Level = pItem->Level;
-            glColor3f(1.f, 0.9f, 0.7f);
             SEASON3B::RenderNumber(x + width - 6, y + 1, (Level + 1) * COMGEM::FIRST);
         }
     }
-    glColor3f(1.f, 1.f, 1.f);
     DisableAlphaBlend();
 }
 
@@ -1557,7 +1530,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render3D()
         const float y = m_Pos.y + (pItem->y * INVENTORY_SQUARE_HEIGHT);
         const float width = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
         const float height = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
-        glColor4f(1.f, 1.f, 1.f, 1.f);
 
         RenderItem3D(x, y, width, height, pItem->Type, pItem->Level, pItem->ExcellentFlags, pItem->AncientDiscriminator,
                      false);

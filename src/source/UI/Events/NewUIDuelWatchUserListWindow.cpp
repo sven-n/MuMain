@@ -80,7 +80,6 @@ bool CNewUIDuelWatchUserListWindow::Update()
 bool CNewUIDuelWatchUserListWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -128,7 +127,6 @@ void CNewUIDuelWatchUserListWindow::RenderFrame()
     POINT ptSize = {57, 17};
 
     int i;
-    glColor4f(0.f, 0.f, 0.f, 0.8f);
     for (i = 0; i < g_DuelMgr.GetDuelWatchUserCount(); ++i)
     {
         RenderColor(m_Pos.x, m_Pos.y - (ptSize.y + 1) * (i + 1), ptSize.x, ptSize.y);

@@ -2,6 +2,7 @@
 // Extracted from ZzzScene.cpp as part of scene refactoring
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "CameraUtility.h"
 #include "../Scenes/SceneCore.h"
 #include "ZzzInterface.h"
@@ -355,12 +356,12 @@ static bool HandleEditorMode()
         }
 
         // Apply rotation and movement
-        glPushMatrix();
-        glLoadIdentity();
-        glRotatef(-CameraAngle[2], 0.f, 0.f, 1.f);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
+        mu::GetRenderer().Rotate(-CameraAngle[2], 0.f, 0.f, 1.f);
         float Matrix[3][4];
         GetOpenGLMatrix(Matrix);
-        glPopMatrix();
+        mu::GetRenderer().PopMatrix();
         VectorRotate(p1, Matrix, p2);
         VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
     }

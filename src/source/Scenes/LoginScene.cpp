@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "LoginScene.h"
 #include "Core/CameraUtility.h"
 #include "CameraMove.h"
@@ -382,11 +383,9 @@ bool NewRenderLogInScene(HDC hDC)
 
     int Width, Height;
 
-    glColor3f(1.f, 1.f, 1.f);
-
     Height = 480;
     Width = GetScreenWidth();
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
 
     BeginOpengl(0, 25, 640, 430);
     CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
@@ -422,10 +421,8 @@ bool NewRenderLogInScene(HDC hDC)
             g_fMULogoAlpha = 10.0f;
 
         EnableAlphaBlend();
-        glColor4f(g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f);
         RenderBitmap(BITMAP_LOG_IN + 17, 320.0f - 128.0f * 0.8f, 25.0f, 256.0f * 0.8f, 128.0f * 0.8f);
         EnableAlphaTest();
-        glColor4f(g_fMULogoAlpha, g_fMULogoAlpha, g_fMULogoAlpha, g_fMULogoAlpha);
         RenderBitmap(BITMAP_LOG_IN + 16, 320.0f - 128.0f * 0.8f, 25.0f, 256.0f * 0.8f, 128.0f * 0.8f);
     }
 
@@ -435,7 +432,6 @@ bool NewRenderLogInScene(HDC hDC)
     g_pRenderText->SetFont(g_hFont);
 
     InputTextWidth = 256;
-    glColor3f(0.8f, 0.7f, 0.6f);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 

@@ -117,7 +117,6 @@ bool CNewUIPetInfoWindow::Update()
 bool CNewUIPetInfoWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(0xFFFFFFFF);
@@ -288,9 +287,7 @@ void CNewUIPetInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int i
 {
     EnableAlphaTest();
 
-    glColor4f(0.f, 0.f, 0.f, 0.9f);
     RenderColor(float(iPosX + 3), float(iPosY + 2), float(iTitleWidth - 8), float(iTitleHeight));
-    glColor4f(0.f, 0.f, 0.f, 0.6f);
     RenderColor(float(iPosX + 3), float(iPosY + 2 + iTitleHeight), float(iWidth - 7),
                 float(iHeight - iTitleHeight - 7));
 

@@ -689,7 +689,6 @@ bool CNewUIMyInventory::Update()
 bool CNewUIMyInventory::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderInventoryDetails();
     RenderSetOption();
@@ -771,7 +770,6 @@ void CNewUIMyInventory::Render3D()
                 y = m_EquipmentSlots[i].y;
             }
 
-            glColor4f(1.f, 1.f, 1.f, 1.f);
             RenderItem3D(m_EquipmentSlots[i].x + 1, y, m_EquipmentSlots[i].width - 4, m_EquipmentSlots[i].height - 4,
                          pEquippedItem->Type, pEquippedItem->Level, pEquippedItem->ExcellentFlags,
                          pEquippedItem->AncientDiscriminator, false);
@@ -1263,20 +1261,8 @@ void CNewUIMyInventory::RenderEquippedItem()
             if ((pEquipmentItemSlot->bPeriodItem == true) && (pEquipmentItemSlot->bExpiredPeriod == false))
                 continue;
 
-            if (pEquipmentItemSlot->Durability <= 0)
-                glColor4f(1.f, 0.f, 0.f, 0.25f);
-            else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.2f))
-                glColor4f(1.f, 0.15f, 0.f, 0.25f);
-            else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.3f))
-                glColor4f(1.f, 0.5f, 0.f, 0.25f);
-            else if (pEquipmentItemSlot->Durability <= (iMaxDurability * 0.5f))
-                glColor4f(1.f, 1.f, 0.f, 0.25f);
-            else if (IsEquipable(i, pEquipmentItemSlot) == false)
-                glColor4f(1.f, 0.f, 0.f, 0.25f);
-            else
-            {
+            if (pEquipmentItemSlot->Durability > (iMaxDurability * 0.5f) && IsEquipable(i, pEquipmentItemSlot))
                 continue;
-            }
 
             EnableAlphaTest();
             RenderColor(m_EquipmentSlots[i].x + 1, m_EquipmentSlots[i].y, m_EquipmentSlots[i].width - 4,
@@ -1293,7 +1279,6 @@ void CNewUIMyInventory::RenderEquippedItem()
             !((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) &&
               (m_iPointedSlot == EQUIPMENT_GLOVES)))
         {
-            glColor4f(0.9f, 0.1f, 0.1f, 0.4f);
             EnableAlphaTest();
             RenderColor(m_EquipmentSlots[m_iPointedSlot].x + 1, m_EquipmentSlots[m_iPointedSlot].y,
                         m_EquipmentSlots[m_iPointedSlot].width - 4, m_EquipmentSlots[m_iPointedSlot].height - 4);

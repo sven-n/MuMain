@@ -5,6 +5,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
@@ -539,7 +540,6 @@ void RenderLeaves()
         EnableAlphaTest();
     }
 
-    glColor3f(1.f, 1.f, 1.f);
 #ifdef DEVIAS_XMAS_EVENT
     int iMaxLeaves;
     if (World == WD_2DEVIAS)
@@ -562,8 +562,8 @@ void RenderLeaves()
             }
             else
             {
-                glPushMatrix();
-                glTranslatef(o->Position[0], o->Position[1], o->Position[2]);
+                mu::GetRenderer().PushMatrix();
+                mu::GetRenderer().Translate(o->Position[0], o->Position[1], o->Position[2]);
                 float Matrix[3][4];
                 AngleMatrix(o->Angle, Matrix);
 
@@ -588,7 +588,7 @@ void RenderLeaves()
                         RenderPlane3D(3.f, 3.f, Matrix);
                     }
                 }
-                glPopMatrix();
+                mu::GetRenderer().PopMatrix();
             }
         }
     }

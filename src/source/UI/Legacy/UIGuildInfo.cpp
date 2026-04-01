@@ -649,7 +649,6 @@ BOOL CUIGuildInfo::DoMouseAction()
 
 void CUIGuildInfo::Render()
 {
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     POINT ptOrigin = {GetPosition_x(), GetPosition_y()};
 
@@ -691,7 +690,6 @@ void CUIGuildInfo::Render()
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[187]);
     }
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     ptOrigin.x = GetPosition_x() + 25;
     ptOrigin.y = GetPosition_y() + 395;
     RenderBitmap(BITMAP_INVENTORY_BUTTON, ptOrigin.x, ptOrigin.y, 24, 24, 0.f, 0.f, 24.f / 32.f, 24.f / 32.f);
@@ -708,7 +706,6 @@ void CUIGuildInfo::Render()
 
     ptOrigin.x = GetPosition_x() + 15;
     ptOrigin.y = GetPosition_y() + 91;
-    glColor4ub(146, 144, 141, 255);
     if (m_nCurrentTab != 0)
         RenderColor(ptOrigin.x, ptOrigin.y, 54, 1);
     ptOrigin.x += 54;
@@ -725,36 +722,22 @@ void CUIGuildInfo::Render()
 
     ptOrigin.x = GetPosition_x() + 15;
     ptOrigin.y = GetPosition_y() + 75;
-    if (m_nCurrentTab == 0)
-        glColor4f(1.f, 1.f, 1.f, 1.f);
-    else
-        glColor4f(0.6f, 0.6f, 0.6f, 1.f);
     RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 0 ? 2 : 0), (float)52,
                  (float)16 + (m_nCurrentTab == 0 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 0 ? 1 : 0), GlobalText[946], 52, 0,
                               RT3_SORT_CENTER);
 
     ptOrigin.x += 54;
-    if (m_nCurrentTab == 1)
-        glColor4f(1.f, 1.f, 1.f, 1.f);
-    else
-        glColor4f(0.6f, 0.6f, 0.6f, 1.f);
     RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 1 ? 2 : 0), (float)52,
                  (float)16 + (m_nCurrentTab == 1 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 1 ? 1 : 0), GlobalText[1330], 52, 0,
                               RT3_SORT_CENTER);
 
     ptOrigin.x += 54;
-    if (m_nCurrentTab == 2)
-        glColor4f(1.f, 1.f, 1.f, 1.f);
-    else
-        glColor4f(0.6f, 0.6f, 0.6f, 1.f);
     RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 2 ? 2 : 0), (float)52,
                  (float)16 + (m_nCurrentTab == 2 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 2 ? 1 : 0), GlobalText[1352], 52, 0,
                               RT3_SORT_CENTER);
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     switch (m_nCurrentTab)
     {

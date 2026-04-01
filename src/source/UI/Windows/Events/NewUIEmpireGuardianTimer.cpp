@@ -79,7 +79,6 @@ bool CNewUIEmpireGuardianTimer::Update()
 bool CNewUIEmpireGuardianTimer::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderImage(IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, m_Pos.x, m_Pos.y, float(TIMER_WINDOW_WIDTH),
                 float(TIMER_WINDOW_HEIGHT));

@@ -77,8 +77,6 @@ bool SEASON3B::CNewUIBattleSoccerScore::Render()
 {
     ::EnableAlphaTest();
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderBackImage();
     RenderContents();
 

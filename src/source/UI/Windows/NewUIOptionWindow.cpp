@@ -181,7 +181,6 @@ bool SEASON3B::CNewUIOptionWindow::Update()
 bool SEASON3B::CNewUIOptionWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderContents();
     RenderButtons();

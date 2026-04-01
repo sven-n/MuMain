@@ -42,7 +42,6 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnUpdate()
 bool SEASON3B::CNewUISiegeWarSoldier::OnRender()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -54,7 +53,6 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnRender()
     DisableAlphaBlend();
 
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, m_fMiniMapAlpha);
 
     // 지도상의 명령 Icon
     RenderCmdIconInMiniMap();
@@ -86,19 +84,15 @@ void SEASON3B::CNewUISiegeWarSoldier::RenderCharPosInMiniMap()
 
             if (g_isCharacterBuff(o, static_cast<eBuffState>(m_dwBuffState)))
             {
-                glColor4f(0.f, 1.f, 0.f, m_fMiniMapAlpha);
             }
             else
             {
-                glColor4f(0.8f, 0.f, 0.f, m_fMiniMapAlpha);
             }
             if (o->Kind == KIND_NPC)
             {
-                glColor4f(1.f, 0.f, 1.f, m_fMiniMapAlpha);
             }
             else if (o->Kind == KIND_MONSTER && o->Type == MODEL_LIFE_STONE)
             {
-                glColor4f(1.f, 0.f, 1.f, m_fMiniMapAlpha);
             }
 
             fPosX = ((c->PositionX)) / m_iMiniMapScale - m_MiniMapScaleOffset.x + m_MiniMapPos.x;

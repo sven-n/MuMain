@@ -206,7 +206,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
     RenderImage(IMAGE_CHAINFO_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
     RenderImage(IMAGE_CHAINFO_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
     RenderColor(m_Pos.x + 12, m_Pos.y + 48, 160, 66);
     EndRenderColor();
     RenderImage(IMAGE_CHAINFO_TABLE_TOP_LEFT, m_Pos.x + 12, m_Pos.y + 48, 14, 14);
@@ -244,7 +243,6 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
 bool SEASON3B::CNewUICharacterInfoWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();

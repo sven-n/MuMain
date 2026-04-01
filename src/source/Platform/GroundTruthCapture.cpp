@@ -19,6 +19,9 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#ifdef MU_ENABLE_SDL3
+#include "RenderFX/MuRenderer.h"
+#endif
 
 // stb_image_write: define the implementation exactly once in this translation unit.
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -307,7 +310,7 @@ bool GroundTruthCapture::CaptureScene(const char* sceneName, int width, int heig
     std::vector<unsigned char> buffer(buf_size);
 
     // Read framebuffer — bottom-row-first (OpenGL convention)
-    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data());
+    mu::GetRenderer().ReadPixels(0, 0, width, height, buffer.data());
 
     // Flip to top-row-first (PNG convention)
     FlipVertical(buffer.data(), width, height, 4);

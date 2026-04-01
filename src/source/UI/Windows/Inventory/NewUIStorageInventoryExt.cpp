@@ -138,8 +138,6 @@ bool CNewUIStorageInventoryExt::Render()
 {
     EnableAlphaTest();
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderBackImage();
     RenderText();
 

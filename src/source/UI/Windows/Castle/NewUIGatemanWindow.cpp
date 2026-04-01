@@ -136,7 +136,6 @@ bool CNewUIGatemanWindow::Update()
 bool CNewUIGatemanWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -312,9 +311,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     mu_swprintf(szText, GlobalText[1602], szGold);
     g_pRenderText->RenderText(ptOrigin.x + 35, ptOrigin.y, szText);
 
-    glColor4f(0.f, 0.f, 0.f, 0.3f);
     RenderColor(ptOrigin.x + 20, ptOrigin.y + 52, 90.f, 30.f);
-    glColor3f(1.f, 1.f, 1.f);
 
     EnableAlphaTest();
     ptOrigin.y += 30;

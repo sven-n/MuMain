@@ -1197,7 +1197,6 @@ bool SEASON3B::CNewUICheckBox::GetBoxState()
 void SEASON3B::CNewUICheckBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderImage(s_ImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, 0.0, (State) ? 0.0 : m_Size.y);
 

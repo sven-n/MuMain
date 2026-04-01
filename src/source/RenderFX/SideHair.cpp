@@ -98,7 +98,6 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
 {
     vec3_t p1, p2, d;
 
-    glColor3f(1.f, 1.f, 1.f);
     VectorSubtract(v2, v1, d);
     const float fLength = VectorLength(d);
     float fTextureMove = 0.0f;
@@ -112,7 +111,6 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
     VectorAdd(p2, d, p2);
 
     float fTextureV = (float)(rand() % 100) * 0.01f;
-    glColor3f(1.f, 1.f, 1.f);
     BindTexture(BITMAP_ROBE + 4);
     EnableAlphaBlendMinus();
     vec3_t vOrtho;

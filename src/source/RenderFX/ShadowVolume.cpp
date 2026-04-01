@@ -23,13 +23,10 @@ void InsertShadowVolume(CShadowVolume* psv)
 
 void RenderShadowVolumesAsFrame(void)
 {
-    glPolygonMode(GL_FRONT, GL_LINE);
-    glDepthMask(true);
+    mu::GetRenderer().SetPolygonMode(GL_FRONT, GL_LINE);
+    mu::GetRenderer().SetDepthMask(true);
     DisableAlphaBlend();
     DisableTexture();
-    vec3_t vLight = {0.4f, 0.f, 0.f};
-    glColor3fv(vLight);
-
     while (m_qSV.GetCount() > 0)
     {
         CShadowVolume* psv = m_qSV.Remove();
@@ -38,7 +35,7 @@ void RenderShadowVolumesAsFrame(void)
         delete psv;
     }
 
-    glPolygonMode(GL_FRONT, GL_FILL);
+    mu::GetRenderer().SetPolygonMode(GL_FRONT, GL_FILL);
 }
 
 void ShadeWithShadowVolumes(void)
@@ -46,10 +43,10 @@ void ShadeWithShadowVolumes(void)
     DisableAlphaBlend();
 
     DisableDepthMask();
-    glEnable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetStencilTest(true);
 
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
+    mu::GetRenderer().SetColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    mu::GetRenderer().SetStencilFunc(GL_ALWAYS, 0xFFFFFFFF, 0xFFFFFFFF);
 
     while (m_qSV.GetCount() > 0)
     {
@@ -59,9 +56,9 @@ void ShadeWithShadowVolumes(void)
         delete psv;
     }
 
-    glFrontFace(GL_CCW);
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glDisable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetFrontFace(GL_CCW);
+    mu::GetRenderer().SetColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    mu::GetRenderer().SetStencilTest(false);
     EnableDepthMask();
 }
 
@@ -69,12 +66,12 @@ void RenderShadowToScreen(void)
 {
     DisableDepthTest();
     DisableDepthMask();
-    glEnable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetStencilTest(true);
 
-    glStencilFunc(GL_LEQUAL, 0x1, 0xFFFFFFFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    mu::GetRenderer().SetStencilFunc(GL_LEQUAL, 0x1, 0xFFFFFFFF);
+    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-    glDepthFunc(GL_ALWAYS);
+    mu::GetRenderer().SetDepthFunc(GL_ALWAYS);
 
     EnableAlphaBlendMinus();
     DisableTexture();
@@ -107,8 +104,8 @@ void RenderShadowToScreen(void)
         };
         mu::GetRenderer().RenderQuad2D(std::span<const mu::Vertex2D>(vertices, 4), 0);
     }
-    glDepthFunc(GL_LESS);
-    glDisable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetDepthFunc(GL_LESS);
+    mu::GetRenderer().SetStencilTest(false);
     EnableDepthMask();
 }
 
@@ -328,11 +325,11 @@ void CShadowVolume::RenderShadowVolume(void)
 
 void CShadowVolume::Shade(void)
 {
-    glFrontFace(GL_CCW);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    mu::GetRenderer().SetFrontFace(GL_CCW);
+    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     RenderShadowVolume();
 
-    glFrontFace(GL_CW);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
+    mu::GetRenderer().SetFrontFace(GL_CW);
+    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
     RenderShadowVolume();
 }

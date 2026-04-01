@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
@@ -221,28 +222,20 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
         case TEXT_COLOR_DARKRED:
         case TEXT_COLOR_DARKBLUE:
         case TEXT_COLOR_DARKYELLOW:
-            glColor3f(1.f, 1.f, 1.f);
             break;
         case TEXT_COLOR_BLUE:
-            glColor3f(0.5f, 0.7f, 1.f);
             break;
         case TEXT_COLOR_GRAY:
-            glColor3f(0.4f, 0.4f, 0.4f);
             break;
         case TEXT_COLOR_GREEN_BLUE:
-            glColor3f(1.f, 1.f, 1.f);
             break;
         case TEXT_COLOR_RED:
-            glColor3f(1.f, 0.2f, 0.1f);
             break;
         case TEXT_COLOR_YELLOW:
-            glColor3f(1.f, 0.8f, 0.1f);
             break;
         case TEXT_COLOR_GREEN:
-            glColor3f(0.1f, 1.f, 0.5f);
             break;
         case TEXT_COLOR_PURPLE:
-            glColor3f(1.f, 0.1f, 1.f);
             break;
         }
         if (TEXT_COLOR_DARKRED == TextListColor[i])
@@ -355,15 +348,13 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 
     if (bUseBG == TRUE && TextNum > 0)
     {
-        glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
         RenderColor((float)iPos_x - 1, fsy - 1, (float)fWidth + 1, (float)1);
         RenderColor((float)iPos_x - 1, fsy - 1, (float)1, (float)fHeight + 1);
         RenderColor((float)iPos_x - 1 + fWidth + 1, (float)fsy - 1, (float)1, (float)fHeight + 1);
         RenderColor((float)iPos_x - 1, fsy - 1 + fHeight + 1, (float)fWidth + 2, (float)1);
 
-        glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
         RenderColor((float)iPos_x, fsy, (float)fWidth, (float)fHeight);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
 
     for (int i = 0; i < TextNum; i++)
@@ -392,37 +383,26 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
             case TEXT_COLOR_DARKRED:
             case TEXT_COLOR_DARKBLUE:
             case TEXT_COLOR_DARKYELLOW:
-                glColor3f(1.f, 1.f, 1.f);
                 break;
             case TEXT_COLOR_BLUE:
-                glColor3f(0.5f, 0.7f, 1.f);
                 break;
             case TEXT_COLOR_GRAY:
-                glColor3f(0.4f, 0.4f, 0.4f);
                 break;
             case TEXT_COLOR_GREEN_BLUE:
-                glColor3f(1.f, 1.f, 1.f);
                 break;
             case TEXT_COLOR_RED:
-                glColor3f(1.f, 0.2f, 0.1f);
                 break;
             case TEXT_COLOR_YELLOW:
-                glColor3f(1.f, 0.8f, 0.1f);
                 break;
             case TEXT_COLOR_GREEN:
-                glColor3f(0.1f, 1.f, 0.5f);
                 break;
             case TEXT_COLOR_PURPLE:
-                glColor3f(1.f, 0.1f, 1.f);
                 break;
             case TEXT_COLOR_REDPURPLE:
-                glColor3f(0.8f, 0.5f, 0.8f);
                 break;
             case TEXT_COLOR_VIOLET:
-                glColor3f(0.7f, 0.4f, 1.0f);
                 break;
             case TEXT_COLOR_ORANGE:
-                glColor3f(0.9f, 0.42f, 0.04f);
                 break;
             }
             if (TEXT_COLOR_DARKRED == TextListColor[i])
@@ -453,7 +433,6 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         fsy += fHeight * 1.1f;
     }
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     DisableAlphaBlend();
 }
 
@@ -7144,7 +7123,6 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
 
 void SetTextColor(float r, float g, float b)
 {
-    glColor3f(r, g, b);
     g_pRenderText->SetTextColor(r * 255, g * 255, b * 255, 255);
 }
 
@@ -11295,34 +11273,24 @@ void InventoryColor(ITEM* p)
     switch (p->Color)
     {
     case 0:
-        glColor3f(1.f, 1.f, 1.f);
         break;
     case 1:
-        glColor3f(0.8f, 0.8f, 0.8f);
         break;
     case 2:
-        glColor3f(0.6f, 0.7f, 1.f);
         break;
     case 3:
-        glColor3f(1.f, 0.2f, 0.1f);
         break;
     case 4:
-        glColor3f(0.5f, 1.f, 0.6f);
         break;
     case 5:
-        glColor4f(0.8f, 0.7f, 0.f, 1.f);
         break;
     case 6:
-        glColor4f(0.8f, 0.5f, 0.f, 1.f);
         break;
     case 7:
-        glColor4f(0.8f, 0.3f, 0.3f, 1.f);
         break;
     case 8:
-        glColor4f(1.0f, 0.f, 0.f, 1.f);
         break;
     case 99:
-        glColor3f(1.f, 0.2f, 0.1f);
         break;
     }
 }
@@ -12004,9 +11972,9 @@ void CreateGuildMark(int nMarkIndex, bool blend)
         }
     }
 
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
+    mu::GetRenderer().BindTexture(b->TextureNumber);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, b->Components, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+    // Texture upload handled by SDL GPU backend (story 7-9-6).
 }
 
 void CreateCastleMark(int Type, BYTE* buffer, bool blend)
@@ -12122,9 +12090,9 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
             offset += 4;
         }
     }
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
+    mu::GetRenderer().BindTexture(b->TextureNumber);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+    // Texture upload handled by SDL GPU backend (story 7-9-6).
 }
 
 void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
@@ -12181,9 +12149,9 @@ void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
         }
     }
 
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
+    mu::GetRenderer().BindTexture(b->TextureNumber);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, b->Components, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+    // Texture upload handled by SDL GPU backend (story 7-9-6).
     RenderBitmap(BITMAP_GUILD, x, y, (float)SizeX, (float)SizeY);
 }
 
@@ -12191,8 +12159,6 @@ void RenderGuildList(int StartX, int StartY)
 {
     GuildListStartX = StartX;
     GuildListStartY = StartY;
-
-    glColor3f(1.f, 1.f, 1.f);
 
     DisableAlphaBlend();
     float x, y, Width, Height;
@@ -12253,7 +12219,6 @@ void RenderServerDivision()
 
     float Width, Height, x, y;
 
-    glColor3f(1.f, 1.f, 1.f);
     EnableAlphaTest();
 
     InventoryStartX = 640 - 190;
@@ -12306,14 +12271,8 @@ void RenderServerDivision()
     Height = 24;
     x = (float)InventoryStartX + 35;
     y = 320; //(Width/2.f); y = 231;
-    if (g_bServerDivisionAccept)
-        glColor3f(1.f, 1.f, 1.f);
-    else
-        glColor3f(0.5f, 0.5f, 0.5f);
     RenderBitmap(BITMAP_INTERFACE + 10, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, 213.f / 256.f);
     g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), GlobalText[228], 0, 0, RT3_WRITE_CENTER);
-
-    glColor3f(1.f, 1.f, 1.f);
 }
 
 BYTE CaculateFreeTicketLevel(int iType)

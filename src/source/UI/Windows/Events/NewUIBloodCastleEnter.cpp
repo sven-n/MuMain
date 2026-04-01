@@ -207,7 +207,6 @@ bool CNewUIEnterBloodCastle::Update()
 bool CNewUIEnterBloodCastle::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     // Base Window
     RenderImage(IMAGE_ENTERBC_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(ENTERBC_BASE_WINDOW_WIDTH),

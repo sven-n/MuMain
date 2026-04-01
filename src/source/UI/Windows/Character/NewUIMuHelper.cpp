@@ -1181,7 +1181,6 @@ void CNewUIMuHelper::Show(bool bShow)
 bool CNewUIMuHelper::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     DWORD TextColor = g_pRenderText->GetTextColor();
 
@@ -1270,7 +1269,6 @@ bool CNewUIMuHelper::Render()
 void CNewUIMuHelper::RenderBack(int x, int y, int width, int height)
 {
     EnableAlphaTest();
-    glColor4f(0.0, 0.0, 0.0, 0.4f);
     RenderColor(x + 3.f, y + 2.f, width - 7.f, height - 7, 0.0, 0);
     EndRenderColor();
 
@@ -2496,7 +2494,6 @@ void CNewUIMuHelperExt::InitCheckBox() {}
 bool CNewUIMuHelperExt::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     DWORD TextColor = g_pRenderText->GetTextColor();
 
@@ -2612,7 +2609,6 @@ void CNewUIMuHelperExt::RenderBackPane(int x, int y, int width, int height, cons
     int headerWidth = 65;
 
     EnableAlphaTest();
-    glColor4f(0.0, 0.0, 0.0, 0.4f);
     RenderColor(x + 3.f, y + 2.f, headerWidth - 7.f, 18.f, 0.0, 0);          // shade for top box
     RenderColor(x + 3.f, y + 2.f + 18.f, width - 7.f, height - 7.f, 0.0, 0); // shade for bottom box
     EndRenderColor();

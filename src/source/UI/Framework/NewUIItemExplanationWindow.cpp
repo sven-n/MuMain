@@ -86,7 +86,6 @@ bool SEASON3B::CNewUIItemExplanationWindow::Update()
 bool SEASON3B::CNewUIItemExplanationWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     extern int ItemHelp;
     extern wchar_t TextList[50][100];

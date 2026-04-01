@@ -115,7 +115,6 @@ void RenderGoldRect(float x, float y, float sx, float sy, int fill = 0)
     switch (fill)
     {
     case 1:
-        glColor4ub(146, 144, 141, 200);
         RenderColor(x, y, sx, sy);
         EndRenderColor();
         break;
@@ -543,7 +542,6 @@ bool CNewUIGuildMakeWindow::UpdateMouseEvent()
 bool CNewUIGuildMakeWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

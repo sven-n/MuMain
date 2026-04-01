@@ -163,7 +163,6 @@ bool CNewUIGuardWindow::Update()
 bool CNewUIGuardWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -704,15 +703,5 @@ void CNewUIGuardWindow::RenderScrollBarFrame(int iPos_x, int iPos_y, int iHeight
 
 void CNewUIGuardWindow::RenderScrollBar(int iPos_x, int iPos_y, BOOL bIsClicked)
 {
-    if (bIsClicked)
-    {
-        glColor3ub(200, 200, 200);
-        RenderImage(IMAGE_GUARDWINDOW_SCROLLBAR_ON, iPos_x, iPos_y, 15, 30);
-    }
-    else
-    {
-        glColor3ub(255, 255, 255);
-        RenderImage(IMAGE_GUARDWINDOW_SCROLLBAR_ON, iPos_x, iPos_y, 15, 30);
-    }
-    glColor3ub(255, 255, 255);
+    RenderImage(IMAGE_GUARDWINDOW_SCROLLBAR_ON, iPos_x, iPos_y, 15, 30);
 }

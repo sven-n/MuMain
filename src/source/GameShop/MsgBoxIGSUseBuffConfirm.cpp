@@ -82,7 +82,6 @@ bool CMsgBoxIGSUseBuffConfirm::Update()
 bool CMsgBoxIGSUseBuffConfirm::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderMsgBackColor(true);
     RenderFrame();
     RenderTexts();

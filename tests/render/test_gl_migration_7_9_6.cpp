@@ -422,12 +422,10 @@ TEST_CASE("AC-1 [7-9-6]: Zero raw gl* calls outside stdafx.h and MuRendererSDLGp
 
         const std::regex glCallPattern{R"(\bgl[A-Z][A-Za-z]+\s*\()"};
         std::string line;
-        int lineNumber{0};
         int rawGlCallCount{0};
 
         while (std::getline(f, line))
         {
-            ++lineNumber;
             // Skip comments
             const auto commentPos = line.find("//");
             const auto checkLine = (commentPos != std::string::npos) ? line.substr(0, commentPos) : line;

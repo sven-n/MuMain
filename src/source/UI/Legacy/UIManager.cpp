@@ -87,7 +87,6 @@ POINT CUIManager::RenderWindowBase(int nHeight, int nOriginY)
     int nWidth = 213;
 
     EnableAlphaBlend3();
-    glColor4f(1.0f, 1.0f, 1.0f, 0.8f);
 
     float fPosX = 320 - nWidth / 2;
     float fPosY;
@@ -122,7 +121,6 @@ POINT CUIManager::RenderWindowBase(int nHeight, int nOriginY)
 
     RenderBitmap(BITMAP_INTERFACE + 22, fPosX, fPosY, nWidth, 5, 0.f, 0.f, nWidth / 256.f, 5.f / 8.f);
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     DisableAlphaBlend();
 
     return ptPos;

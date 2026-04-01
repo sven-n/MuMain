@@ -602,7 +602,7 @@ void StartFog(vec3_t Color)
 
 void EndFog(void)
 {
-    glDisable(GL_FOG);
+    mu::GetRenderer().SetFogEnabled(false);
 }
 
 void RenderBaseSmoke(void)
@@ -614,7 +614,6 @@ void RenderBaseSmoke(void)
 
     EnableAlphaTest();
 
-    glColor3f(0.3f, 0.3f, 0.25f);
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
     RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, 640.f, 480.f - 45.f, WindX2, 0.f, 3.f, 2.f);
     EnableAlphaBlend();
@@ -1267,7 +1266,6 @@ bool RenderBattleCastleObjectMesh(OBJECT* o, BMD* b)
         if (IsBattleCastleStart() == false)
         {
             DisableAlphaBlend();
-            glColor3f(0.f, 0.f, 0.f);
             b->RenderBodyShadow(o->BlendMesh, o->HiddenMesh);
         }
         return true;
@@ -1277,7 +1275,6 @@ bool RenderBattleCastleObjectMesh(OBJECT* o, BMD* b)
         if (IsBattleCastleStart())
         {
             b->BeginRender(o->Alpha);
-            glColor3fv(b->BodyLight);
             b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                           o->BlendMeshTexCoordV);
             Vector(0.3f, 0.3f, 0.3f, b->BodyLight);

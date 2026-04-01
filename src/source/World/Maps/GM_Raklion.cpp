@@ -2277,7 +2277,6 @@ bool CGM_Raklion::CreateSnow(PARTICLE* o)
 void CGM_Raklion::RenderBaseSmoke()
 {
     EnableAlphaBlend();
-    glColor3f(0.4f, 0.4f, 0.45f);
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0006f;
     float WindY2 = -(float)((int)WorldTime % 100000) * 0.0006f;
     RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, 640.f, 480.f - 45.f, WindX2, WindY2, 3.0f, 2.0f);

@@ -170,8 +170,6 @@ bool CNewUINPCQuest::Render()
 {
     ::EnableAlphaTest();
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderBackImage();
 
     BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();

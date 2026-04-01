@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuRenderer.h"
 #include "NewUIMessageBox.h" // self
 #include "NewUIManager.h"
 #include "UIControls.h"
@@ -128,14 +129,12 @@ void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
     float fPosX = 0.0f, fPosY = 0.0f;
     if (_bRender)
     {
-        glEnable(GL_ALPHA_TEST);
-        glColor4f(m_vColor[0], m_vColor[1], m_vColor[2], m_fOpacityAlpha);
+        mu::GetRenderer().SetAlphaTest(true);
         RenderColor(fPosX, fPosY, fWidth, fHeight - 50.0f);
 
-        glEnable(GL_TEXTURE_2D);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        mu::GetRenderer().SetTexture2D(true);
         DisableAlphaBlend();
-        glEnable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(true);
     }
 }
 

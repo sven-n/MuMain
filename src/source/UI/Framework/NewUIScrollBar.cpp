@@ -159,7 +159,6 @@ bool CNewUIScrollBar::Update()
 bool CNewUIScrollBar::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderImage(IMAGE_SCROLL_TOP, m_ptPos.x, m_ptPos.y, SCROLLBAR_TOP_WIDTH, SCROLLBAR_TOP_HEIGHT);
 
     for (int i = 0; i < m_iScrollBarMiddleNum; i++)
@@ -182,7 +181,6 @@ bool CNewUIScrollBar::Render()
     {
         if (m_iScrollBtnMouseEvent == SCROLLBAR_MOUSEBTN_CLICKED)
         {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
         }
         RenderImage(IMAGE_SCROLLBAR_ON, m_ptScrollBtnPos.x, m_ptScrollBtnPos.y, SCROLLBTN_WIDTH, SCROLLBTN_HEIGHT);
     }

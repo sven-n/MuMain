@@ -205,7 +205,6 @@ void CCharSelMainWin::RenderControls()
         sprite.Render();
 
     ::EnableAlphaTest();
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     g_pRenderText->SetFont(g_hFixFont);
     g_pRenderText->SetTextColor(CLRDW_WHITE);

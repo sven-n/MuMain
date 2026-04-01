@@ -419,7 +419,6 @@ bool SEASON3B::CNewUIGuildInfoWindow::Update()
 bool SEASON3B::CNewUIGuildInfoWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -511,38 +510,30 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     mu_swprintf(Text, L"%ls ( Score:%d )", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, Text, 120, 0, RT3_SORT_CENTER);
 
-    glColor4f(0.6f, 0.6f, 0.6f, 1.f);
-
     if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::INFO))
     {
-        glColor4f(1.f, 1.f, 1.f, 1.f);
     }
     mu_swprintf(Text, GlobalText[180]);
     RenderText(Text,
                m_Pos.x + 13 + (static_cast<int>(GuildConstants::GuildTab::INFO) * GuildConstants::UILayout::TAB_WIDTH),
                m_Pos.y + 76, GuildConstants::UILayout::TAB_WIDTH, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-    glColor4f(0.6f, 0.6f, 0.6f, 1.f);
 
     if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::MEMBERS))
     {
-        glColor4f(1.f, 1.f, 1.f, 1.f);
     }
     mu_swprintf(Text, GlobalText[1330]);
     RenderText(Text,
                m_Pos.x + 13 +
                    (static_cast<int>(GuildConstants::GuildTab::MEMBERS) * GuildConstants::UILayout::TAB_WIDTH),
                m_Pos.y + 76, GuildConstants::UILayout::TAB_WIDTH, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-    glColor4f(0.6f, 0.6f, 0.6f, 1.f);
 
     if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::UNION))
     {
-        glColor4f(1.f, 1.f, 1.f, 1.f);
     }
     mu_swprintf(Text, GlobalText[1352]);
     RenderText(Text,
                m_Pos.x + 13 + (static_cast<int>(GuildConstants::GuildTab::UNION) * GuildConstants::UILayout::TAB_WIDTH),
                m_Pos.y + 76, GuildConstants::UILayout::TAB_WIDTH, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
-    glColor4f(0.6f, 0.6f, 0.6f, 1.f);
 
     if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::INFO))
     {
@@ -600,7 +591,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     }
     else if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::MEMBERS))
     {
-        glColor4f(1.f, 1.f, 1.f, 1.f);
         RenderText((wchar_t*)GlobalText[1389], m_Pos.x + 24, m_Pos.y + 112, 40, 0, 0xFFFFFFFF, 0x00000000,
                    RT3_SORT_LEFT);
         RenderText((wchar_t*)GlobalText[1307], m_Pos.x + 89, m_Pos.y + 112, 40, 0, 0xFFFFFFFF, 0x00000000,
@@ -615,7 +605,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     else if (m_nCurrentTab == static_cast<int>(GuildConstants::GuildTab::UNION))
     {
         // BUTTON_UNION_CREATE
-        glColor4f(1.f, 1.f, 1.f, 1.f);
         m_Button[BUTTON_UNION_CREATE].SetPos(m_Pos.x + 30, m_Pos.y + 230);
         m_Button[BUTTON_UNION_OUT].SetPos(m_Pos.x + 100, m_Pos.y + 230);
         m_Button[BUTTON_UNION_CREATE].ChangeText(GlobalText[1422]);
@@ -668,7 +657,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
     RenderImage(IMAGE_GUILDINFO_BOTTOM_LEFT, m_Pos.x + 10, m_Pos.y + 215, 14, 14);
     RenderImage(IMAGE_GUILDINFO_BOTTOM_RIGHT, m_Pos.x + 167, m_Pos.y + 215, 14, 14);
 
-    glColor4ub(0, 0, 0, 255);
     RenderColor(m_Pos.x + 11, m_Pos.y + 260, 165, 84);
     EndRenderColor();
 
@@ -688,8 +676,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
     RenderImage(IMAGE_GUILDINFO_BOTTOM_LEFT, m_Pos.x + 10, m_Pos.y + 334, 14, 14);
     RenderImage(IMAGE_GUILDINFO_BOTTOM_RIGHT, m_Pos.x + 167, m_Pos.y + 334, 14, 14);
     RenderImage(IMAGE_GUILDINFO_TAB_HEAD, m_Pos.x + 11, m_Pos.y + 237, 63.f, 25.f);
-
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderImage(IMAGE_GUILDINFO_SCROLL_TOP, m_Pos.x + 167, 262, 7, 3);
 
@@ -718,11 +704,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
         }
     }
 
-    if (m_EventState == EVENT_SCROLL_BTN_DOWN)
-        glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-    else
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderImage(IMAGE_GUILDINFO_SCROLLBAR_ON, m_Pos.x + 163, 262 + m_Loc, 15, 30);
 
     m_GuildNotice.Scrolling(Line);
@@ -732,7 +713,6 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
 
 void SEASON3B::CNewUIGuildInfoWindow::RenderScrollBar()
 {
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderImage(IMAGE_GUILDINFO_SCROLL_TOP, m_Pos.x + 170, 125, 7, 3);
 
@@ -760,10 +740,6 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderScrollBar()
         }
     }
 
-    if (m_EventState == EVENT_SCROLL_BTN_DOWN)
-        glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-    else
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderImage(IMAGE_GUILDINFO_SCROLLBAR_ON, m_Pos.x + 166, 125 + m_Loc, 15, 30);
 
     m_GuildMember.Scrolling(Line);
@@ -807,10 +783,8 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Info()
     }
     else
     {
-        glColor4ub(21, 21, 21, 150);
         RenderColor(m_Pos.x + 12, m_Pos.y + 12 + 113, 165, 85);
 
-        glColor4ub(59, 59, 59, 150);
         RenderColor(m_Pos.x + 12, m_Pos.y + 12 + 98, 165, 15);
         EndRenderColor();
 
@@ -845,9 +819,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Info()
 
 void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Enum()
 {
-    glColor4ub(21, 21, 21, 150);
     RenderColor(m_Pos.x + 12, m_Pos.y + 12 + 113, 165, 232);
-    glColor4ub(59, 59, 59, 150);
     RenderColor(m_Pos.x + 12, m_Pos.y + 12 + 93, 165, 20);
     EndRenderColor();
 
