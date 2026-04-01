@@ -18,6 +18,7 @@ float4 main(FSInput input) : SV_Target
 {
     float4 color = tex.Sample(s, input.uv) * input.color;
     if (alphaDiscardEnabled && color.a <= alphaThreshold) discard;
-    if (fogEnabled) color.rgb = lerp(color.rgb, fogColor.rgb, input.fogFactor);
+    // Story 7.9.7: fogFactor=1.0 → no fog (close), fogFactor=0.0 → full fog (far).
+    if (fogEnabled) color.rgb = lerp(fogColor.rgb, color.rgb, input.fogFactor);
     return color;
 }

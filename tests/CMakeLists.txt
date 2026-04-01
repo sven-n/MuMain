@@ -174,6 +174,8 @@ target_sources(MuTests PRIVATE render/test_gl_migration_7_9_6.cpp)
 # Matrix stack interface tests use MatrixMath797Mock implementing IMuRenderer.
 # Tests compile and run on macOS/Linux without Win32, OpenGL, or a GPU device.
 target_sources(MuTests PRIVATE render/test_matrix_math_7_9_7.cpp)
+# GLM is PRIVATE in MURenderFX — must also link to MuTests for test_matrix_math_7_9_7.
+target_link_libraries(MuTests PRIVATE glm::glm)
 
 # Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
 # GREEN PHASE: Tests verify IPlatformAudio interface purity (std::is_abstract_v),

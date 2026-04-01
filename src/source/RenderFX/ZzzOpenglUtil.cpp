@@ -23,9 +23,8 @@
 
 static void gluPerspective(double fovy, double aspect, double zNear, double zFar)
 {
-    const glm::mat4 persp = glm::perspective(
-        glm::radians(static_cast<float>(fovy)), static_cast<float>(aspect),
-        static_cast<float>(zNear), static_cast<float>(zFar));
+    const glm::mat4 persp = glm::perspective(glm::radians(static_cast<float>(fovy)), static_cast<float>(aspect),
+                                             static_cast<float>(zNear), static_cast<float>(zFar));
     mu::GetRenderer().MultMatrix(glm::value_ptr(persp));
 }
 

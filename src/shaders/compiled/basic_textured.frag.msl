@@ -38,7 +38,7 @@ fragment main0_out main0(main0_in in [[stage_in]], constant FogUniforms& _40 [[b
     float4 _178;
     if (_40.fogEnabled != 0u)
     {
-        float3 _145 = mix(_121.xyz, _40.fogColor.xyz, float3(in.input_fogFactor));
+        float3 _145 = mix(_40.fogColor.xyz, _121.xyz, float3(in.input_fogFactor));
         float4 _173 = _121;
         _173.x = _145.x;
         _173.y = _145.y;

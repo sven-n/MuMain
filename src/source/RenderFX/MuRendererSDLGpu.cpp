@@ -63,6 +63,17 @@ constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
 constexpr int k_PipelineDisabled = 8;
 
+// Story 7.9.7 (AC-7): Vertex uniform layout matching cbuffer Transform in HLSL.
+// Contains MVP matrix + fog params, pushed per-draw via SDL_PushGPUVertexUniformData.
+struct VertexUniforms
+{
+    glm::mat4 mvp;
+    float fogStart;
+    float fogEnd;
+    float fogPad[2]; // 16-byte alignment padding
+};
+static_assert(sizeof(VertexUniforms) == 80, "VertexUniforms must be 80 bytes");
+
 } // anonymous namespace
 
 namespace mu
@@ -282,6 +293,12 @@ static SDL_GPUShader* s_fragShaderTex = nullptr;    // basic_textured.frag
 static SDL_GPUShader* s_vertShader2DCol = nullptr;  // basic_colored.vert
 static SDL_GPUShader* s_fragShaderCol = nullptr;    // basic_colored.frag
 static SDL_GPUShader* s_vertShaderShadow = nullptr; // shadow_volume.vert
+
+// Story 7.9.7 (AC-3): Depth buffer texture for correct 3D depth testing.
+// Created in Init() at swapchain dimensions, recreated on window resize.
+static SDL_GPUTexture* s_depthTexture = nullptr;
+static Uint32 s_depthW = 0u;
+static Uint32 s_depthH = 0u;
 
 // Story 4.3.2 (AC-10): Fog uniform buffer and transfer buffer.
 static SDL_GPUBuffer* s_fogUniformBuf = nullptr;
@@ -565,6 +582,18 @@ public:
             return false;
         }
 
+        // Story 7.9.7 (AC-3): Create initial depth texture at window size.
+        // BeginFrame() will recreate it if the swapchain dimensions differ.
+        {
+            int winW = 0;
+            int winH = 0;
+            SDL_GetWindowSizeInPixels(s_window, &winW, &winH);
+            if (winW > 0 && winH > 0)
+            {
+                CreateOrResizeDepthTexture(static_cast<Uint32>(winW), static_cast<Uint32>(winH));
+            }
+        }
+
         g_ErrorReport.Write(L"RENDER: SDL_gpu -- Init complete");
         return true;
 #else
@@ -597,6 +626,15 @@ public:
         {
             SDL_ReleaseGPUSampler(s_device, s_defaultSampler);
             s_defaultSampler = nullptr;
+        }
+
+        // Story 7.9.7 (AC-3): Release depth texture.
+        if (s_depthTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_depthTexture);
+            s_depthTexture = nullptr;
+            s_depthW = 0u;
+            s_depthH = 0u;
         }
 
         // Story 4.3.2 (AC-10): Release fog uniform buffers.
@@ -716,14 +754,28 @@ public:
             }
         }
 
-        // Begin render pass targeting the swapchain texture.
+        // Story 7.9.7 (AC-3): Ensure depth texture matches swapchain dimensions.
+        // Recreates on first frame or when window is resized.
+        CreateOrResizeDepthTexture(s_swapW, s_swapH);
+
+        // Begin render pass targeting the swapchain texture + depth buffer.
         SDL_GPUColorTargetInfo colorTarget{};
         colorTarget.texture = s_swapchainTexture;
         colorTarget.clear_color = {0.0f, 0.0f, 0.0f, 1.0f};
         colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
         colorTarget.store_op = SDL_GPU_STOREOP_STORE;
 
-        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, nullptr);
+        // Story 7.9.7 (AC-3): Depth target — clear to 1.0 (far plane) each frame.
+        SDL_GPUDepthStencilTargetInfo depthTarget{};
+        depthTarget.texture = s_depthTexture;
+        depthTarget.clear_depth = 1.0f;
+        depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+        depthTarget.store_op = SDL_GPU_STOREOP_DONT_CARE;
+        depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+        depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+        depthTarget.cycle = true;
+
+        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
         if (!s_renderPass)
         {
             g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_BeginGPURenderPass failed: %hs", SDL_GetError());
@@ -1093,10 +1145,12 @@ public:
         {
             // 2D ortho MVP: maps [0,W]×[0,H] to NDC, replicating gluOrtho2D.
             // GLM_FORCE_DEPTH_ZERO_TO_ONE → correct Z [0,1] for Metal/Vulkan.
+            // Story 7.9.7: fogStart=fogEnd=0 → range=0 → vertex shader sets fogFactor=1.0 (no fog for 2D).
             int winW = 0, winH = 0;
             SDL_GetWindowSize(s_window, &winW, &winH);
-            const glm::mat4 ortho = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, glm::value_ptr(ortho), sizeof(ortho));
+            VertexUniforms vu{};
+            vu.mvp = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &vu, sizeof(vu));
         }
 
         // Bind vertex buffer.
@@ -1192,7 +1246,12 @@ public:
 
         {
             // 3D MVP from the matrix stack (set by game code via SetMatrixMode/Rotate/Translate).
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, glm::value_ptr(m_mvpMatrix), sizeof(glm::mat4));
+            // Story 7.9.7: Include fog params for vertex-based linear fog computation.
+            VertexUniforms vu{};
+            vu.mvp = m_mvpMatrix;
+            vu.fogStart = m_fogUniform.fogStart;
+            vu.fogEnd = m_fogUniform.fogEnd;
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &vu, sizeof(vu));
         }
 
         SDL_GPUBufferBinding vtxBinding{};
@@ -1317,13 +1376,22 @@ public:
                 SDL_EndGPUCopyPass(copyPass);
             }
 
-            // Reopen the render pass targeting the same swapchain texture.
+            // Reopen the render pass targeting the same swapchain texture + depth buffer.
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = s_swapchainTexture;
             colorTarget.load_op = SDL_GPU_LOADOP_LOAD; // preserve existing content
             colorTarget.store_op = SDL_GPU_STOREOP_STORE;
 
-            s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, nullptr);
+            // Story 7.9.7 (AC-3): Reattach depth buffer (LOAD to preserve depth data).
+            SDL_GPUDepthStencilTargetInfo depthTarget{};
+            depthTarget.texture = s_depthTexture;
+            depthTarget.load_op = SDL_GPU_LOADOP_LOAD;
+            depthTarget.store_op = SDL_GPU_STOREOP_DONT_CARE;
+            depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+            depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+            depthTarget.cycle = false;
+
+            s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
             if (!s_renderPass)
             {
                 g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuadStrip -- failed to reopen render pass: %hs",
@@ -1340,8 +1408,12 @@ public:
         {
             SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
 
-            // 3D MVP from the matrix stack.
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, glm::value_ptr(m_mvpMatrix), sizeof(glm::mat4));
+            // 3D MVP from the matrix stack + fog params.
+            VertexUniforms vu{};
+            vu.mvp = m_mvpMatrix;
+            vu.fogStart = m_fogUniform.fogStart;
+            vu.fogEnd = m_fogUniform.fogEnd;
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &vu, sizeof(vu));
         }
 
         SDL_GPUBufferBinding vtxBinding{};
@@ -1422,6 +1494,20 @@ public:
     void SetAlphaTest(bool enabled) override
     {
         m_alphaTestEnabled = enabled;
+        // Story 7.9.7 (AC-5): Propagate alpha test state to the fog uniform
+        // so the fragment shader's `if (alphaDiscardEnabled && color.a <= alphaThreshold) discard;`
+        // actually fires for particle sprites.
+        m_fogUniform.alphaDiscardEnabled = enabled ? 1u : 0u;
+        s_fogDirty = true;
+    }
+
+    // Story 7.9.7 (AC-7): Override SetAlphaFunc to propagate alpha threshold
+    // to the fog uniform. Game code calls SetAlphaFunc(GL_GREATER, 0.25f)
+    // via EnableAlphaTest() in ZzzOpenglUtil.cpp.
+    void SetAlphaFunc(int /*func*/, float ref) override
+    {
+        m_fogUniform.alphaThreshold = ref;
+        s_fogDirty = true;
     }
     void SetTexture2D(bool enabled) override
     {
@@ -1445,8 +1531,8 @@ public:
         // fogEnabled: true when mode != 0 (mode 0 = no fog / GL_LINEAR from caller).
         // alphaDiscardEnabled / alphaThreshold: not in FogParams; default off.
         m_fogUniform.fogEnabled = (params.mode != 0) ? 1u : 0u;
-        m_fogUniform.alphaDiscardEnabled = 0u; // not surfaced via FogParams
-        m_fogUniform.alphaThreshold = 0.0f;
+        // Story 7.9.7: Preserve alpha discard state — SetFog must NOT reset
+        // alphaDiscardEnabled/alphaThreshold set by SetAlphaTest/SetAlphaFunc.
         m_fogUniform.pad0 = 0.0f;
         m_fogUniform.fogStart = params.start;
         m_fogUniform.fogEnd = params.end;
@@ -1466,9 +1552,16 @@ public:
     // up the projection and modelview. We store them and compute MVP when
     // pushing the uniform in draw calls.
     // -----------------------------------------------------------------------
-    void SetMatrixMode(int mode) override { m_matrixMode = mode; }
+    void SetMatrixMode(int mode) override
+    {
+        m_matrixMode = mode;
+    }
 
-    void LoadIdentity() override { ActiveMatrix() = glm::mat4(1.0f); UpdateMVP(); }
+    void LoadIdentity() override
+    {
+        ActiveMatrix() = glm::mat4(1.0f);
+        UpdateMVP();
+    }
 
     void PushMatrix() override
     {
@@ -1537,7 +1630,8 @@ public:
 
     void GetMatrix(int mode, float* m) override
     {
-        if (!m) return;
+        if (!m)
+            return;
         if (mode == 0x0BA6) // GL_MODELVIEW_MATRIX
             std::memcpy(m, glm::value_ptr(m_modelViewMatrix), 64);
         else if (mode == 0x0BA7) // GL_PROJECTION_MATRIX
@@ -1550,7 +1644,10 @@ private:
         return (m_matrixMode == 0x1700) ? m_modelViewMatrix : m_projMatrix;
     }
 
-    void UpdateMVP() { m_mvpMatrix = m_projMatrix * m_modelViewMatrix; }
+    void UpdateMVP()
+    {
+        m_mvpMatrix = m_projMatrix * m_modelViewMatrix;
+    }
     // Per-instance render state.
     BlendMode m_activeBlendMode = BlendMode::Alpha;
     bool m_blendEnabled = true;
@@ -1864,7 +1961,10 @@ private:
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
         targetInfo.color_target_descriptions = &colorTargetDesc;
         targetInfo.num_color_targets = 1;
-        targetInfo.has_depth_stencil_target = false;
+        // Story 7.9.7 (AC-3): Enable depth-stencil target so pipelines match
+        // the render pass that now includes a depth buffer.
+        targetInfo.has_depth_stencil_target = true;
+        targetInfo.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D24_UNORM;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
         // 2D pipelines: basic_textured vert+frag (with fog).
@@ -2009,6 +2109,56 @@ private:
                 s_pipelines3DDepthOff[i] = nullptr;
             }
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // Story 7.9.7 (AC-3): CreateOrResizeDepthTexture
+    // Creates (or recreates on resize) an SDL_GPUTexture with depth format
+    // matching the current swapchain dimensions. Called from Init() and
+    // BeginFrame() when swapchain size changes.
+    // -----------------------------------------------------------------------
+    static bool CreateOrResizeDepthTexture(Uint32 width, Uint32 height)
+    {
+        if (width == 0 || height == 0)
+        {
+            return false;
+        }
+
+        // Skip if the existing depth texture already matches the requested size.
+        if (s_depthTexture && s_depthW == width && s_depthH == height)
+        {
+            return true;
+        }
+
+        // Release old depth texture if resizing.
+        if (s_depthTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_depthTexture);
+            s_depthTexture = nullptr;
+        }
+
+        SDL_GPUTextureCreateInfo depthInfo{};
+        depthInfo.type = SDL_GPU_TEXTURETYPE_2D;
+        depthInfo.format = SDL_GPU_TEXTUREFORMAT_D24_UNORM;
+        depthInfo.width = width;
+        depthInfo.height = height;
+        depthInfo.layer_count_or_depth = 1;
+        depthInfo.num_levels = 1;
+        depthInfo.usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
+
+        s_depthTexture = SDL_CreateGPUTexture(s_device, &depthInfo);
+        if (!s_depthTexture)
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_gpu -- depth texture creation failed (%ux%u): %hs", width, height,
+                                SDL_GetError());
+            s_depthW = 0u;
+            s_depthH = 0u;
+            return false;
+        }
+
+        s_depthW = width;
+        s_depthH = height;
+        return true;
     }
 
     // -----------------------------------------------------------------------

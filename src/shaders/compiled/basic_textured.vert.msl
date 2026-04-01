@@ -3,10 +3,12 @@
 
 using namespace metal;
 
-struct ScreenSize
+struct Transform
 {
-    float2 screenSize;
-    float2 pad;
+    float4x4 mvp;
+    float fogStart;
+    float fogEnd;
+    float2 fogPad;
 };
 
 struct main0_out
@@ -19,18 +21,20 @@ struct main0_out
 
 struct main0_in
 {
-    float2 input_pos [[attribute(0)]];
+    float3 input_pos [[attribute(0)]];
     float2 input_uv [[attribute(1)]];
     float4 input_color [[attribute(2)]];
 };
 
-vertex main0_out main0(main0_in in [[stage_in]], constant ScreenSize& _25 [[buffer(0)]])
+vertex main0_out main0(main0_in in [[stage_in]], constant Transform& _32 [[buffer(0)]])
 {
     main0_out out = {};
-    out.gl_Position = float4(((in.input_pos / _25.screenSize) * float2(2.0, -2.0)) + float2(-1.0, 1.0), 0.0, 1.0);
+    float4 _125 = _32.mvp * float4(in.input_pos, 1.0);
+    float _140 = _32.fogEnd - _32.fogStart;
+    out.gl_Position = _125;
     out._entryPointOutput_uv = in.input_uv;
     out._entryPointOutput_color = in.input_color;
-    out._entryPointOutput_fogFactor = 0.0;
+    out._entryPointOutput_fogFactor = (_140 > 0.001000000047497451305389404296875) ? fast::clamp((_32.fogEnd - abs(_125.w)) / _140, 0.0, 1.0) : 1.0;
     return out;
 }
 
