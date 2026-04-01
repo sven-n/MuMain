@@ -306,6 +306,10 @@ target_link_libraries(MURenderFX PRIVATE MUCore)
 if(MU_ENABLE_SDL3)
     target_link_libraries(MURenderFX PRIVATE SDL3::SDL3-static)
 endif()
+# Story 7.9.7: GLM for matrix math (header-only — propagates include path)
+if(TARGET glm::glm)
+    target_link_libraries(MURenderFX PRIVATE glm::glm)
+endif()
 target_precompile_headers(MURenderFX REUSE_FROM MUCore)
 
 # Sound system — depends on Core only

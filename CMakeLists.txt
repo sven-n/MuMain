@@ -194,6 +194,21 @@ else()
     endif()
 endif()
 
+# ============================================================
+# GLM (OpenGL Mathematics) — header-only matrix math library
+# Replaces hand-rolled mat4:: utilities for projection, view,
+# and model transforms on SDL_GPU (Metal/Vulkan/D3D12).
+# Story 7.9.7: Adopt GLM and Harden Renderer Matrix Pipeline
+# ============================================================
+include(FetchContent)
+FetchContent_Declare(glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG        1.0.1
+    GIT_SHALLOW    TRUE
+)
+set(GLM_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(glm)
+
 add_subdirectory("src")
 
 # Story 4.3.2: When SDL_shadercross compilation is enabled, the Main binary
