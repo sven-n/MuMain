@@ -42,9 +42,8 @@
 
 // GLM — matrix math for projection, view, and model transforms.
 // GLM_FORCE_DEPTH_ZERO_TO_ONE: Metal/Vulkan depth range [0,1] (not OpenGL [-1,1]).
-// GLM_FORCE_LEFT_HANDED: SDL_GPU normalizes to left-handed clip space.
+// Right-handed (GLM default): matches original OpenGL game code coordinate convention.
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_LEFT_HANDED
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -1093,7 +1092,7 @@ public:
         // to convert from 640x480 design-space pixels to NDC.
         {
             // 2D ortho MVP: maps [0,W]×[0,H] to NDC, replicating gluOrtho2D.
-            // GLM_FORCE_DEPTH_ZERO_TO_ONE + GLM_FORCE_LEFT_HANDED → correct Z [0,1] for SDL_GPU.
+            // GLM_FORCE_DEPTH_ZERO_TO_ONE → correct Z [0,1] for Metal/Vulkan.
             int winW = 0, winH = 0;
             SDL_GetWindowSize(s_window, &winW, &winH);
             const glm::mat4 ortho = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);

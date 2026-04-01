@@ -17,7 +17,6 @@
 // in MuRendererSDLGpu.cpp; here we build the matrix using the same convention and pass
 // it via MultMatrix (which does ActiveMatrix = ActiveMatrix * m).
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_LEFT_HANDED
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
