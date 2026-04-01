@@ -295,12 +295,12 @@ void CSprite::Render()
     mu::Vertex2D vertices[POS_MAX];
     for (int i = LT; i < POS_MAX; ++i)
     {
-        // Story 7-9-2 (AC-3): Apply full coordinate conversion.
-        // OpenGL bottom-up 640×480 → screen pixels:
-        // x = (screen_x) * (WindowWidth / 640)
-        // y = WindowHeight - (screen_y) * (WindowHeight / 480)
-        vertices[i].x = m_aScrCoord[i].fX * m_fScaleX * (::WindowWidth / 640.0f);
-        vertices[i].y = ::WindowHeight - (m_aScrCoord[i].fY * m_fScaleY * (::WindowHeight / 480.0f));
+        // Sprite coordinates are already in OpenGL Y-up window space
+        // (fY=0 bottom, fY=m_fScrHeight top). Multiply by scale only —
+        // matches the original glVertex2f(fX*scaleX, fY*scaleY) call.
+        // The vertex shader's gluOrtho2D-equivalent mapping handles NDC conversion.
+        vertices[i].x = m_aScrCoord[i].fX * m_fScaleX;
+        vertices[i].y = m_aScrCoord[i].fY * m_fScaleY;
         vertices[i].u = (m_nTexID >= 0) ? m_aTexCoord[i].fTU : 0.0f;
         vertices[i].v = (m_nTexID >= 0) ? m_aTexCoord[i].fTV : 0.0f;
         vertices[i].color = color;

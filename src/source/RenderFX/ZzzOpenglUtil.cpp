@@ -12,10 +12,20 @@
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
 
-// GLU functions — no-op on non-Windows (SDL3 GPU replaces the OpenGL pipeline)
-#ifndef _WIN32
-static void gluPerspective(double /*fovy*/, double /*aspect*/, double /*zNear*/, double /*zFar*/) {}
-#endif
+// GLU perspective — routes through the renderer's matrix stack on all platforms.
+static void gluPerspective(double fovy, double aspect, double zNear, double zFar)
+{
+    // Build a perspective matrix and multiply it into the current projection matrix.
+    float persp[16];
+    const float f = 1.0f / std::tan(static_cast<float>(fovy) * 0.5f * 3.14159265358979f / 180.0f);
+    std::memset(persp, 0, sizeof(persp));
+    persp[0] = f / static_cast<float>(aspect);
+    persp[5] = f;
+    persp[10] = static_cast<float>((zFar + zNear) / (zNear - zFar));
+    persp[11] = -1.0f;
+    persp[14] = static_cast<float>((2.0 * zFar * zNear) / (zNear - zFar));
+    mu::GetRenderer().MultMatrix(persp);
+}
 
 int OpenglWindowX;
 int OpenglWindowY;
@@ -567,21 +577,48 @@ float ConvertY(float y)
 
 void BeginOpengl(int x, int y, int Width, int Height)
 {
-    // Story 7-9-2 (AC-1): Delegate projection/viewport/camera setup to the renderer.
+    // BeginScene scales from 640×480 design space to physical pixels internally.
+    // Pass raw design-space values — do NOT pre-scale here (that would double-scale).
     mu::GetRenderer().BeginScene(x, y, Width, Height);
 
-    // State tracking flags remain here — they are ZzzOpenglUtil-internal
-    // render state caches that game code queries directly.
+    // Scale to window pixels for aspect ratio and perspective calculations only.
+    const int scaledW = Width * WindowWidth / 640;
+    const int scaledH = Height * WindowHeight / 480;
+
+    // Projection matrix — perspective
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    gluPerspective2(CameraFOV, (float)scaledW / (float)scaledH, CameraViewNear, CameraViewFar * 1.4f);
+
+    // Modelview matrix — camera transform
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    mu::GetRenderer().Rotate(CameraAngle[1], 0.f, 1.f, 0.f);
+    if (!CameraTopViewEnable)
+        mu::GetRenderer().Rotate(CameraAngle[0], 1.f, 0.f, 0.f);
+    mu::GetRenderer().Rotate(CameraAngle[2], 0.f, 0.f, 1.f);
+    mu::GetRenderer().Translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+
+    // State tracking flags
     AlphaTestEnable = false;
     TextureEnable = true;
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
+
+    mu::GetRenderer().SetDepthTest(true);
+
+    GetOpenGLMatrix(CameraMatrix);
 }
 
 void EndOpengl()
 {
-    // Story 7-9-2 (AC-1): Delegate matrix restore to the renderer.
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
     mu::GetRenderer().EndScene();
 }
 
