@@ -84,12 +84,6 @@ int NextPowerOfTwo(int value, int maxValue)
     return std::min<int>(result, maxValue);
 }
 
-std::string NarrowPath(const std::wstring& wide)
-{
-    std::string path = mu_wchar_to_utf8(wide.c_str());
-    std::replace(path.begin(), path.end(), '\\', '/');
-    return path;
-}
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -920,7 +914,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     std::wstring filename_ozj;
     ExchangeExt(filename, L"OZJ", filename_ozj);
 
-    std::ifstream compressedFile(NarrowPath(filename_ozj), std::ios::binary);
+    std::ifstream compressedFile(mu_narrow_path(filename_ozj), std::ios::binary);
     if (!compressedFile)
     {
         g_ErrorReport.Write(L"OpenJpegTurbo: file not found %ls\r\n", filename_ozj.c_str());
@@ -1046,7 +1040,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::wstring filename_ozt;
     ExchangeExt(filename, L"OZT", filename_ozt);
 
-    std::ifstream input(NarrowPath(filename_ozt), std::ios::binary);
+    std::ifstream input(mu_narrow_path(filename_ozt), std::ios::binary);
     if (!input)
     {
         g_ErrorReport.Write(L"OpenTga: file not found %ls\r\n", filename_ozt.c_str());
@@ -1231,8 +1225,8 @@ bool CGlobalBitmap::Convert_Format(const std::wstring& filename)
 
 bool CGlobalBitmap::Save_Image(const std::wstring& src, const std::wstring& dest, int cDumpHeader)
 {
-    const auto srcPath = NarrowPath(src);
-    const auto destPath = NarrowPath(dest);
+    const auto srcPath = mu_narrow_path(src);
+    const auto destPath = mu_narrow_path(dest);
 
     std::ifstream input(srcPath, std::ios::binary);
     if (!input)

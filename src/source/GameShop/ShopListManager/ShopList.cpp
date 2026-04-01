@@ -34,15 +34,14 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath)
 
     std::ifstream ifs;
 
-    char narrowPath[MAX_PATH * 4] = {0};
-    wcstombs(narrowPath, szFilePath, sizeof(narrowPath) - 1);
+    const auto narrowPath = mu_narrow_path(szFilePath);
 
-    ifs.open(narrowPath, std::ifstream::in);
+    ifs.open(narrowPath.c_str(), std::ifstream::in);
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        ifs.open(narrowPath, std::ifstream::in);
+        ifs.open(narrowPath.c_str(), std::ifstream::in);
     }
 
     char buff[1024] = {0};
@@ -86,15 +85,14 @@ WZResult CShopList::LoadPackage(const wchar_t* szFilePath)
 
     std::ifstream ifs;
 
-    char narrowPath[MAX_PATH * 4] = {0};
-    wcstombs(narrowPath, szFilePath, sizeof(narrowPath) - 1);
+    const auto narrowPath = mu_narrow_path(szFilePath);
 
-    ifs.open(narrowPath, std::ifstream::in);
+    ifs.open(narrowPath.c_str(), std::ifstream::in);
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        ifs.open(narrowPath, std::ifstream::in);
+        ifs.open(narrowPath.c_str(), std::ifstream::in);
     }
 
     char buff[1024] = {0};
@@ -137,15 +135,14 @@ WZResult CShopList::LoadProduct(const wchar_t* szFilePath)
 
     std::ifstream ifs;
 
-    char narrowPath[MAX_PATH * 4] = {0};
-    wcstombs(narrowPath, szFilePath, sizeof(narrowPath) - 1);
+    const auto narrowPath = mu_narrow_path(szFilePath);
 
-    ifs.open(narrowPath, std::ifstream::in);
+    ifs.open(narrowPath.c_str(), std::ifstream::in);
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        ifs.open(narrowPath, std::ifstream::in);
+        ifs.open(narrowPath.c_str(), std::ifstream::in);
     }
 
     char buff[1024] = {0};
@@ -198,12 +195,11 @@ void CShopList::SetProductListPtr(CShopProductList* ProductListPtr)
 
 FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath)
 {
-    char narrowPath[MAX_PATH * 4] = {0};
-    wcstombs(narrowPath, szFilePath, sizeof(narrowPath) - 1);
+    const auto narrowPath = mu_narrow_path(szFilePath);
 
     std::ifstream ifs;
 
-    ifs.open(narrowPath, std::ifstream::in);
+    ifs.open(narrowPath.c_str(), std::ifstream::in);
 
     if (!ifs.is_open())
     {

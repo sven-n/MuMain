@@ -356,7 +356,8 @@ void CCreditWin::AnimationIllust(DurationMs deltaTime)
 
 void CCreditWin::LoadText()
 {
-    std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(kCreditDataPath.data(), "rb"), &std::fclose);
+    const auto normalizedPath = mu_narrow_path(kCreditDataPath.data());
+    std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(normalizedPath.c_str(), "rb"), &std::fclose);
     if (!file)
     {
         wchar_t szMessage[256];

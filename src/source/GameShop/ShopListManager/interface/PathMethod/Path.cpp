@@ -193,10 +193,9 @@ bool Path::ReadFileLastLine(wchar_t* szFile, wchar_t* szLastLine)
         return false;
     }
 
-    char narrowPath[MAX_PATH * 4] = {0};
-    wcstombs(narrowPath, szFile, sizeof(narrowPath) - 1);
+    const auto narrowPath = mu_narrow_path(szFile);
 
-    std::ifstream ifs(narrowPath, std::ifstream::in | std::ifstream::binary);
+    std::ifstream ifs(narrowPath.c_str(), std::ifstream::in | std::ifstream::binary);
 
     char buff[1024] = {0};
 
@@ -231,10 +230,9 @@ bool Path::WriteNewFile(wchar_t* szFile, wchar_t* szText, int nTextSize)
     if (!szFile || !szText)
         return false;
 
-    char narrowPath[MAX_PATH * 4] = {0};
-    wcstombs(narrowPath, szFile, sizeof(narrowPath) - 1);
+    const auto narrowPath = mu_narrow_path(szFile);
 
-    std::wfstream ofs(narrowPath, std::wfstream::out | std::wfstream::trunc | std::wfstream::binary);
+    std::wfstream ofs(narrowPath.c_str(), std::wfstream::out | std::wfstream::trunc | std::wfstream::binary);
 
     if (ofs.is_open())
     {

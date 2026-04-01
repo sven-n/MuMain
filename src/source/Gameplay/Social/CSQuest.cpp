@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <cwchar>
 #include <cstring>
-#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <vector>
@@ -211,8 +210,8 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
         return false;
     }
 
-    const std::filesystem::path filePath(filename);
-    std::ifstream file(filePath, std::ios::binary);
+    const auto narrowPath = mu_narrow_path(filename);
+    std::ifstream file(narrowPath, std::ios::binary);
     if (!file)
     {
         wchar_t text[256];

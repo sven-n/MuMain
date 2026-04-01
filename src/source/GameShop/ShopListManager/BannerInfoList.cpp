@@ -27,8 +27,9 @@ WZResult CBannerInfoList::LoadBanner(std::wstring strDirPath, std::wstring strSc
     std::wifstream ifs;
 
     std::wstring path = strDirPath + strScriptFileName;
+    const auto narrowPath = mu_narrow_path(path.c_str());
 
-    ifs.open(path.c_str(), std::ifstream::in);
+    ifs.open(narrowPath.c_str(), std::ifstream::in);
 
     if (ifs.is_open())
     {

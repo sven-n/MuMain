@@ -1284,6 +1284,29 @@ inline std::string mu_wchar_to_utf8(const wchar_t* src)
     return result;
 }
 
+// Convert a wide path to a narrow UTF-8 path with normalized separators.
+// Backslashes → forward slashes so POSIX fopen/ifstream can resolve the path.
+// Safe on Windows too (forward slashes are valid in Win32 file APIs).
+inline std::string mu_narrow_path(const wchar_t* src)
+{
+    std::string path = mu_wchar_to_utf8(src);
+    std::replace(path.begin(), path.end(), '\\', '/');
+    return path;
+}
+
+inline std::string mu_narrow_path(const std::wstring& src)
+{
+    return mu_narrow_path(src.c_str());
+}
+
+// Overload for narrow string paths (e.g., string literals, wcstombs output).
+inline std::string mu_narrow_path(const char* src)
+{
+    std::string path(src);
+    std::replace(path.begin(), path.end(), '\\', '/');
+    return path;
+}
+
 inline int MessageBoxW(void* /*hwnd*/, const wchar_t* text, const wchar_t* caption, unsigned int type)
 {
     std::string u8text = mu_wchar_to_utf8(text);
