@@ -20,25 +20,25 @@ public:
     ~CNewUIInventoryActionController() = default;
 
     void SetOwner(CNewUIMyInventory* pOwner);
-    bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl);
+    bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl) const;
 
 private:
-    bool HandlePickedItemPlacement(CNewUIInventoryCtrl* targetControl);
+    bool HandlePickedItemPlacement(CNewUIInventoryCtrl* targetControl) const;
     bool TryApplyJewel(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem,
-                       ITEM* pPickItem, int iSourceIndex, int iTargetIndex);
+                       ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
     bool TryStackItem(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem,
-                      int iSourceIndex, int iTargetIndex);
+                      int iSourceIndex, int iTargetIndex) const;
     bool TryMoveItem(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem,
-                     ITEM* pPickItem, int iSourceIndex, int iTargetIndex);
+                     ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
 
-    bool HandleRepairClick(CNewUIInventoryCtrl* targetControl);
+    bool HandleRepairClick(CNewUIInventoryCtrl* targetControl) const;
 
-    bool HandleRightClick(CNewUIInventoryCtrl* targetControl);
-    bool HandleStorageAutoMove(CNewUIInventoryCtrl* targetControl);
-    bool HandleSellToNPC(CNewUIInventoryCtrl* targetControl);
-    bool HandleInventoryRightClickActions(CNewUIInventoryCtrl* targetControl);
-    bool TryEquipItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex);
-    bool TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem);
+    bool HandleRightClick(CNewUIInventoryCtrl* targetControl) const;
+    bool HandleStorageAutoMove(CNewUIInventoryCtrl* targetControl) const;
+    bool HandleSellToNPC(CNewUIInventoryCtrl* targetControl) const;
+    bool HandleInventoryRightClickActions(CNewUIInventoryCtrl* targetControl) const;
+    bool TryEquipItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const;
+    bool TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem) const;
 
     int FindAlternateEquipSlot(int nOriginalSlot, ITEM* pItem) const;
     bool IsSlotOccupied(int nSlot) const;

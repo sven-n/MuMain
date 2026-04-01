@@ -2143,8 +2143,7 @@ bool CNewUIMyInventory::InventoryProcess() const
         return false;
     }
 
-    return const_cast<CNewUIInventoryActionController&>(m_ActionController)
-        .HandleInventoryActions(m_pNewInventoryCtrl);
+    return m_ActionController.HandleInventoryActions(m_pNewInventoryCtrl);
 }
 
 bool CNewUIMyInventory::BtnProcess()

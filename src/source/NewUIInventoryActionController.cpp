@@ -18,7 +18,8 @@
 #include "ZzzInterface.h"
 #include "UIManager.h"
 
-using namespace SEASON3B;
+namespace SEASON3B
+{
 
 CNewUIInventoryActionController::CNewUIInventoryActionController()
     : m_pOwner(nullptr)
@@ -30,7 +31,7 @@ void CNewUIInventoryActionController::SetOwner(CNewUIMyInventory* pOwner)
     m_pOwner = pOwner;
 }
 
-bool CNewUIInventoryActionController::HandleInventoryActions(CNewUIInventoryCtrl* targetControl)
+bool CNewUIInventoryActionController::HandleInventoryActions(CNewUIInventoryCtrl* targetControl) const
 {
     if (m_pOwner == nullptr || targetControl == nullptr)
     {
@@ -55,7 +56,7 @@ bool CNewUIInventoryActionController::HandleInventoryActions(CNewUIInventoryCtrl
     return false;
 }
 
-bool CNewUIInventoryActionController::HandlePickedItemPlacement(CNewUIInventoryCtrl* targetControl)
+bool CNewUIInventoryActionController::HandlePickedItemPlacement(CNewUIInventoryCtrl* targetControl) const
 {
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
     if (pPickedItem == nullptr)
@@ -98,7 +99,7 @@ bool CNewUIInventoryActionController::HandlePickedItemPlacement(CNewUIInventoryC
 }
 
 bool CNewUIInventoryActionController::TryApplyJewel(CNewUIInventoryCtrl* targetControl,
-    CNewUIPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex, int iTargetIndex)
+    CNewUIPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
     const bool bIsJewelType =
         pPickItem->Type == ITEM_JEWEL_OF_BLESS
@@ -115,17 +116,17 @@ bool CNewUIInventoryActionController::TryApplyJewel(CNewUIInventoryCtrl* targetC
         return false;
     }
 
-    return m_pOwner->ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex);
+    return CNewUIMyInventory::ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex);
 }
 
 bool CNewUIInventoryActionController::TryStackItem(CNewUIInventoryCtrl* targetControl,
-    ITEM* pPickItem, int iSourceIndex, int iTargetIndex)
+    ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
-    return m_pOwner->TryStackItems(targetControl, pPickItem, iSourceIndex, iTargetIndex);
+    return CNewUIMyInventory::TryStackItems(targetControl, pPickItem, iSourceIndex, iTargetIndex);
 }
 
 bool CNewUIInventoryActionController::TryMoveItem(CNewUIInventoryCtrl* targetControl,
-    CNewUIPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex, int iTargetIndex)
+    CNewUIPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
     if (iTargetIndex < 0 || !targetControl->CanMove(iTargetIndex, pPickItem))
     {
@@ -145,12 +146,12 @@ bool CNewUIInventoryActionController::TryMoveItem(CNewUIInventoryCtrl* targetCon
     return false;
 }
 
-bool CNewUIInventoryActionController::HandleRepairClick(CNewUIInventoryCtrl* targetControl)
+bool CNewUIInventoryActionController::HandleRepairClick(CNewUIInventoryCtrl* targetControl) const
 {
-    return m_pOwner->RepairItemAtMousePoint(targetControl);
+    return CNewUIMyInventory::RepairItemAtMousePoint(targetControl);
 }
 
-bool CNewUIInventoryActionController::HandleRightClick(CNewUIInventoryCtrl* targetControl)
+bool CNewUIInventoryActionController::HandleRightClick(CNewUIInventoryCtrl* targetControl) const
 {
     m_pOwner->ResetMouseRButton();
 
@@ -169,7 +170,7 @@ bool CNewUIInventoryActionController::HandleRightClick(CNewUIInventoryCtrl* targ
         && !g_pNewUISystem->IsVisible(INTERFACE_TRADE)
         && !g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE)
         && !g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE)
-        && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+        && !g_pNewUISystem->IsVisible(INTERFACE_LUCKYITEMWND)
         && !g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY)
         && !g_pNewUISystem->IsVisible(INTERFACE_MYSHOP_INVENTORY))
     {
@@ -179,7 +180,7 @@ bool CNewUIInventoryActionController::HandleRightClick(CNewUIInventoryCtrl* targ
     return false;
 }
 
-bool CNewUIInventoryActionController::HandleStorageAutoMove(CNewUIInventoryCtrl* targetControl)
+bool CNewUIInventoryActionController::HandleStorageAutoMove(CNewUIInventoryCtrl* targetControl) const
 {
     if (g_pStorageInventory->ProcessMyInvenItemAutoMove(targetControl))
     {
@@ -194,7 +195,7 @@ bool CNewUIInventoryActionController::HandleStorageAutoMove(CNewUIInventoryCtrl*
     return false;
 }
 
-bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targetControl)
+bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targetControl) const
 {
     CNewUIPickedItem* pExistingPickedItem = CNewUIInventoryCtrl::GetPickedItem();
     if (pExistingPickedItem)
@@ -225,7 +226,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
 
     if (IsSellingBan(pItem))
     {
-        g_pSystemLogBox->AddText(GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(GlobalText[668], TYPE_ERROR_MESSAGE);
         return true;
     }
 
@@ -258,7 +259,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
 
     if (IsHighValueItem(pItem))
     {
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHighValueItemCheckMsgBoxLayout));
+        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CHighValueItemCheckMsgBoxLayout));
         return true;
     }
 
@@ -267,11 +268,11 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
     return true;
 }
 
-bool CNewUIInventoryActionController::HandleInventoryRightClickActions(CNewUIInventoryCtrl* targetControl)
+bool CNewUIInventoryActionController::HandleInventoryRightClickActions(CNewUIInventoryCtrl* targetControl) const
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY_EXT))
     {
-        return m_pOwner->TryTransferBetweenInventorySections(targetControl);
+        return CNewUIMyInventory::TryTransferBetweenInventorySections(targetControl);
     }
 
     ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
@@ -282,13 +283,13 @@ bool CNewUIInventoryActionController::HandleInventoryRightClickActions(CNewUIInv
 
     const int iIndex = targetControl->GetIndexByItem(pItem);
 
-    if (iIndex >= 0 && m_pOwner->TryConsumeItem(targetControl, pItem, iIndex))
+    if (iIndex >= 0 && CNewUIMyInventory::TryConsumeItem(targetControl, pItem, iIndex))
     {
         return true;
     }
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-    if (m_pOwner->IsInvenItem(pItem->Type))
+    if (g_pMyInventory->IsInvenItem(pItem->Type))
     {
 #ifdef LJH_FIX_APP_SHUTDOWN_WEQUIPPING_INVENITEM_WITH_CLICKING_MOUSELBTN
         if (MouseLButton || MouseLButtonPop || MouseLButtonPush)
@@ -354,10 +355,10 @@ bool CNewUIInventoryActionController::IsSlotOccupied(int nSlot) const
     }
 
     const ITEM* pEquipment = &CharacterMachine->Equipment[nSlot];
-    return (pEquipment != nullptr && pEquipment->Type != -1);
+    return (pEquipment->Type != -1);
 }
 
-bool CNewUIInventoryActionController::TryEquipItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex)
+bool CNewUIInventoryActionController::TryEquipItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const
 {
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     int nDstIndex = pItemAttr->m_byItemSlot;
@@ -391,22 +392,25 @@ bool CNewUIInventoryActionController::TryEquipItem(CNewUIInventoryCtrl* targetCo
         return true;
     }
 
-    if (CNewUIInventoryCtrl::CreatePickedItem(nullptr, pItem))
+    if (!CNewUIInventoryCtrl::CreatePickedItem(nullptr, pItem))
     {
-        targetControl->RemoveItem(pItem);
-
-        CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-        if (pPickedItem != nullptr)
-        {
-            pPickedItem->HidePickedItem();
-        }
+        return false;
     }
+
+    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    if (pPickedItem == nullptr)
+    {
+        return false;
+    }
+
+    targetControl->RemoveItem(pItem);
+    pPickedItem->HidePickedItem();
 
     SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSrcIndex, pItem, STORAGE_TYPE::INVENTORY, nDstIndex);
     return true;
 }
 
-bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem)
+bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem) const
 {
     if (Hero->Dead != 0)
     {
@@ -430,14 +434,13 @@ bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetCon
         return false;
     }
 
-    targetControl->RemoveItem(pItem);
-
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
     if (pPickedItem == nullptr)
     {
         return false;
     }
 
+    targetControl->RemoveItem(pItem);
     pPickedItem->HidePickedItem();
 
     const int tx = Hero->PositionX;
@@ -449,3 +452,5 @@ bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetCon
 
     return true;
 }
+
+} // namespace SEASON3B
