@@ -12,19 +12,22 @@
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
 
-// GLU perspective — routes through the renderer's matrix stack on all platforms.
+// GLU perspective — builds perspective matrix via GLM and multiplies into the renderer's
+// projection matrix stack. GLM_FORCE_DEPTH_ZERO_TO_ONE + GLM_FORCE_LEFT_HANDED are set
+// in MuRendererSDLGpu.cpp; here we build the matrix using the same convention and pass
+// it via MultMatrix (which does ActiveMatrix = ActiveMatrix * m).
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_LEFT_HANDED
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 static void gluPerspective(double fovy, double aspect, double zNear, double zFar)
 {
-    // Build a perspective matrix and multiply it into the current projection matrix.
-    float persp[16];
-    const float f = 1.0f / std::tan(static_cast<float>(fovy) * 0.5f * 3.14159265358979f / 180.0f);
-    std::memset(persp, 0, sizeof(persp));
-    persp[0] = f / static_cast<float>(aspect);
-    persp[5] = f;
-    persp[10] = static_cast<float>((zFar + zNear) / (zNear - zFar));
-    persp[11] = -1.0f;
-    persp[14] = static_cast<float>((2.0 * zFar * zNear) / (zNear - zFar));
-    mu::GetRenderer().MultMatrix(persp);
+    const glm::mat4 persp = glm::perspective(
+        glm::radians(static_cast<float>(fovy)), static_cast<float>(aspect),
+        static_cast<float>(zNear), static_cast<float>(zFar));
+    mu::GetRenderer().MultMatrix(glm::value_ptr(persp));
 }
 
 int OpenglWindowX;

@@ -40,153 +40,14 @@
 #include <utility>
 #include <vector>
 
-// ---------------------------------------------------------------------------
-// Matrix math utilities (column-major float[16], OpenGL convention)
-// ---------------------------------------------------------------------------
-namespace mat4
-{
-
-inline void Identity(float m[16])
-{
-    std::memset(m, 0, 16 * sizeof(float));
-    m[0] = m[5] = m[10] = m[15] = 1.0f;
-}
-
-inline void Multiply(float out[16], const float a[16], const float b[16])
-{
-    float tmp[16];
-    for (int c = 0; c < 4; ++c)
-    {
-        for (int r = 0; r < 4; ++r)
-        {
-            tmp[c * 4 + r] = a[0 * 4 + r] * b[c * 4 + 0] + a[1 * 4 + r] * b[c * 4 + 1] +
-                              a[2 * 4 + r] * b[c * 4 + 2] + a[3 * 4 + r] * b[c * 4 + 3];
-        }
-    }
-    std::memcpy(out, tmp, 16 * sizeof(float));
-}
-
-inline void Ortho(float m[16], float left, float right, float bottom, float top, float zNear, float zFar)
-{
-    Identity(m);
-    m[0] = 2.0f / (right - left);
-    m[5] = 2.0f / (top - bottom);
-    m[10] = -1.0f / (zFar - zNear);
-    m[12] = -(right + left) / (right - left);
-    m[13] = -(top + bottom) / (top - bottom);
-    m[14] = -zNear / (zFar - zNear);
-}
-
-inline void Perspective(float m[16], float fovDeg, float aspect, float zNear, float zFar)
-{
-    Identity(m);
-    const float f = 1.0f / std::tan(fovDeg * 0.5f * 3.14159265358979f / 180.0f);
-    m[0] = f / aspect;
-    m[5] = f;
-    m[10] = zFar / (zNear - zFar);
-    m[11] = -1.0f;
-    m[14] = (zNear * zFar) / (zNear - zFar);
-    m[15] = 0.0f;
-}
-
-inline void Translate(float m[16], float tx, float ty, float tz)
-{
-    float t[16];
-    Identity(t);
-    t[12] = tx;
-    t[13] = ty;
-    t[14] = tz;
-    Multiply(m, m, t);
-}
-
-inline void RotateX(float m[16], float deg)
-{
-    const float rad = deg * 3.14159265358979f / 180.0f;
-    const float c = std::cos(rad), s = std::sin(rad);
-    float r[16];
-    Identity(r);
-    r[5] = c;
-    r[6] = s;
-    r[9] = -s;
-    r[10] = c;
-    Multiply(m, m, r);
-}
-
-inline void RotateY(float m[16], float deg)
-{
-    const float rad = deg * 3.14159265358979f / 180.0f;
-    const float c = std::cos(rad), s = std::sin(rad);
-    float r[16];
-    Identity(r);
-    r[0] = c;
-    r[2] = -s;
-    r[8] = s;
-    r[10] = c;
-    Multiply(m, m, r);
-}
-
-inline void RotateZ(float m[16], float deg)
-{
-    const float rad = deg * 3.14159265358979f / 180.0f;
-    const float c = std::cos(rad), s = std::sin(rad);
-    float r[16];
-    Identity(r);
-    r[0] = c;
-    r[1] = s;
-    r[4] = -s;
-    r[5] = c;
-    Multiply(m, m, r);
-}
-
-inline void RotateAxis(float m[16], float deg, float ax, float ay, float az)
-{
-    // Delegate to single-axis rotations when aligned
-    const float eps = 1e-6f;
-    if (std::fabs(ay) < eps && std::fabs(az) < eps)
-    {
-        RotateX(m, deg * (ax > 0 ? 1.0f : -1.0f));
-    }
-    else if (std::fabs(ax) < eps && std::fabs(az) < eps)
-    {
-        RotateY(m, deg * (ay > 0 ? 1.0f : -1.0f));
-    }
-    else if (std::fabs(ax) < eps && std::fabs(ay) < eps)
-    {
-        RotateZ(m, deg * (az > 0 ? 1.0f : -1.0f));
-    }
-    else
-    {
-        // General axis-angle rotation (Rodrigues)
-        const float rad = deg * 3.14159265358979f / 180.0f;
-        const float len = std::sqrt(ax * ax + ay * ay + az * az);
-        const float x = ax / len, y = ay / len, z = az / len;
-        const float c = std::cos(rad), s = std::sin(rad), t = 1.0f - c;
-        float r[16];
-        Identity(r);
-        r[0] = t * x * x + c;
-        r[1] = t * x * y + s * z;
-        r[2] = t * x * z - s * y;
-        r[4] = t * x * y - s * z;
-        r[5] = t * y * y + c;
-        r[6] = t * y * z + s * x;
-        r[8] = t * x * z + s * y;
-        r[9] = t * y * z - s * x;
-        r[10] = t * z * z + c;
-        Multiply(m, m, r);
-    }
-}
-
-inline void ScaleMatrix(float m[16], float sx, float sy, float sz)
-{
-    float s[16];
-    Identity(s);
-    s[0] = sx;
-    s[5] = sy;
-    s[10] = sz;
-    Multiply(m, m, s);
-}
-
-} // namespace mat4
+// GLM — matrix math for projection, view, and model transforms.
+// GLM_FORCE_DEPTH_ZERO_TO_ONE: Metal/Vulkan depth range [0,1] (not OpenGL [-1,1]).
+// GLM_FORCE_LEFT_HANDED: SDL_GPU normalizes to left-handed clip space.
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_LEFT_HANDED
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // ---------------------------------------------------------------------------
 // Constants (file-scope, anonymous namespace)
@@ -558,12 +419,7 @@ std::pair<int, int> GetBlendFactors(BlendMode mode)
 class MuRendererSDLGpu : public IMuRenderer
 {
 public:
-    MuRendererSDLGpu()
-    {
-        mat4::Identity(m_projMatrix);
-        mat4::Identity(m_modelViewMatrix);
-        mat4::Identity(m_mvpMatrix);
-    }
+    MuRendererSDLGpu() = default;
     ~MuRendererSDLGpu() override = default;
 
     // -----------------------------------------------------------------------
@@ -1237,11 +1093,11 @@ public:
         // to convert from 640x480 design-space pixels to NDC.
         {
             // 2D ortho MVP: maps [0,W]×[0,H] to NDC, replicating gluOrtho2D.
+            // GLM_FORCE_DEPTH_ZERO_TO_ONE + GLM_FORCE_LEFT_HANDED → correct Z [0,1] for SDL_GPU.
             int winW = 0, winH = 0;
             SDL_GetWindowSize(s_window, &winW, &winH);
-            float ortho[16];
-            mat4::Ortho(ortho, 0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, ortho, sizeof(ortho));
+            const glm::mat4 ortho = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, glm::value_ptr(ortho), sizeof(ortho));
         }
 
         // Bind vertex buffer.
@@ -1337,7 +1193,7 @@ public:
 
         {
             // 3D MVP from the matrix stack (set by game code via SetMatrixMode/Rotate/Translate).
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, m_mvpMatrix, sizeof(m_mvpMatrix));
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, glm::value_ptr(m_mvpMatrix), sizeof(glm::mat4));
         }
 
         SDL_GPUBufferBinding vtxBinding{};
@@ -1486,7 +1342,7 @@ public:
             SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
 
             // 3D MVP from the matrix stack.
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, m_mvpMatrix, sizeof(m_mvpMatrix));
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, glm::value_ptr(m_mvpMatrix), sizeof(glm::mat4));
         }
 
         SDL_GPUBufferBinding vtxBinding{};
@@ -1613,23 +1469,19 @@ public:
     // -----------------------------------------------------------------------
     void SetMatrixMode(int mode) override { m_matrixMode = mode; }
 
-    void LoadIdentity() override { mat4::Identity(ActiveMatrix()); UpdateMVP(); }
+    void LoadIdentity() override { ActiveMatrix() = glm::mat4(1.0f); UpdateMVP(); }
 
     void PushMatrix() override
     {
         if (m_matrixMode == 0x1700) // GL_MODELVIEW
         {
             if (m_mvStackTop < k_MatrixStackDepth)
-            {
-                std::memcpy(m_mvStack[m_mvStackTop++], m_modelViewMatrix, 64);
-            }
+                m_mvStack[m_mvStackTop++] = m_modelViewMatrix;
         }
         else
         {
             if (m_projStackTop < k_MatrixStackDepth)
-            {
-                std::memcpy(m_projStack[m_projStackTop++], m_projMatrix, 64);
-            }
+                m_projStack[m_projStackTop++] = m_projMatrix;
         }
     }
 
@@ -1638,35 +1490,31 @@ public:
         if (m_matrixMode == 0x1700) // GL_MODELVIEW
         {
             if (m_mvStackTop > 0)
-            {
-                std::memcpy(m_modelViewMatrix, m_mvStack[--m_mvStackTop], 64);
-            }
+                m_modelViewMatrix = m_mvStack[--m_mvStackTop];
         }
         else
         {
             if (m_projStackTop > 0)
-            {
-                std::memcpy(m_projMatrix, m_projStack[--m_projStackTop], 64);
-            }
+                m_projMatrix = m_projStack[--m_projStackTop];
         }
         UpdateMVP();
     }
 
     void Translate(float x, float y, float z) override
     {
-        mat4::Translate(ActiveMatrix(), x, y, z);
+        ActiveMatrix() = glm::translate(ActiveMatrix(), glm::vec3(x, y, z));
         UpdateMVP();
     }
 
     void Rotate(float angle, float x, float y, float z) override
     {
-        mat4::RotateAxis(ActiveMatrix(), angle, x, y, z);
+        ActiveMatrix() = glm::rotate(ActiveMatrix(), glm::radians(angle), glm::vec3(x, y, z));
         UpdateMVP();
     }
 
     void Scale(float x, float y, float z) override
     {
-        mat4::ScaleMatrix(ActiveMatrix(), x, y, z);
+        ActiveMatrix() = glm::scale(ActiveMatrix(), glm::vec3(x, y, z));
         UpdateMVP();
     }
 
@@ -1674,7 +1522,7 @@ public:
     {
         if (m)
         {
-            mat4::Multiply(ActiveMatrix(), ActiveMatrix(), m);
+            ActiveMatrix() = ActiveMatrix() * glm::make_mat4(m);
             UpdateMVP();
         }
     }
@@ -1683,7 +1531,7 @@ public:
     {
         if (m)
         {
-            std::memcpy(ActiveMatrix(), m, 64);
+            ActiveMatrix() = glm::make_mat4(m);
             UpdateMVP();
         }
     }
@@ -1692,18 +1540,18 @@ public:
     {
         if (!m) return;
         if (mode == 0x0BA6) // GL_MODELVIEW_MATRIX
-            std::memcpy(m, m_modelViewMatrix, 64);
+            std::memcpy(m, glm::value_ptr(m_modelViewMatrix), 64);
         else if (mode == 0x0BA7) // GL_PROJECTION_MATRIX
-            std::memcpy(m, m_projMatrix, 64);
+            std::memcpy(m, glm::value_ptr(m_projMatrix), 64);
     }
 
 private:
-    float* ActiveMatrix()
+    glm::mat4& ActiveMatrix()
     {
         return (m_matrixMode == 0x1700) ? m_modelViewMatrix : m_projMatrix;
     }
 
-    void UpdateMVP() { mat4::Multiply(m_mvpMatrix, m_projMatrix, m_modelViewMatrix); }
+    void UpdateMVP() { m_mvpMatrix = m_projMatrix * m_modelViewMatrix; }
     // Per-instance render state.
     BlendMode m_activeBlendMode = BlendMode::Alpha;
     bool m_blendEnabled = true;
@@ -1721,14 +1569,13 @@ private:
     // Matrix stack for 3D rendering (replaces OpenGL fixed-function matrix stack).
     static constexpr int k_MatrixStackDepth = 16;
     int m_matrixMode = 0x1700; // GL_MODELVIEW
-    float m_projMatrix[16]{};
-    float m_modelViewMatrix[16]{};
-    float m_projStack[k_MatrixStackDepth][16]{};
-    float m_mvStack[k_MatrixStackDepth][16]{};
+    glm::mat4 m_projMatrix{1.0f};
+    glm::mat4 m_modelViewMatrix{1.0f};
+    glm::mat4 m_projStack[k_MatrixStackDepth]{};
+    glm::mat4 m_mvStack[k_MatrixStackDepth]{};
     int m_projStackTop = 0;
     int m_mvStackTop = 0;
-    // Precomputed MVP pushed to the vertex shader.
-    float m_mvpMatrix[16]{};
+    glm::mat4 m_mvpMatrix{1.0f};
 
     // -----------------------------------------------------------------------
     // GetActivePipelineIndex: Returns pipeline array index for current state.
