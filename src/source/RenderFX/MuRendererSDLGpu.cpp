@@ -225,6 +225,11 @@ static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
 static SDL_GPUTexture* s_swapchainTexture = nullptr;
 
+// Swapchain dimensions in physical pixels (from SDL_AcquireGPUSwapchainTexture).
+// Used for viewport calculations — distinct from logical window size on HiDPI/Retina.
+static Uint32 s_swapW = 0u;
+static Uint32 s_swapH = 0u;
+
 // Diagnostics: per-frame counters, reset in BeginFrame, logged every 300 frames.
 static Uint32 s_dbgFrameCount = 0u;
 static Uint32 s_dbgDrawCallsThisFrame = 0u;
@@ -650,11 +655,11 @@ public:
             return;
         }
 
-        Uint32 swapW = 0u;
-        Uint32 swapH = 0u;
+        s_swapW = 0u;
+        s_swapH = 0u;
         s_swapchainTexture = nullptr;
 
-        if (!SDL_AcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &swapW, &swapH))
+        if (!SDL_AcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
         {
             g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_AcquireGPUSwapchainTexture failed: %hs", SDL_GetError());
             SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
@@ -822,14 +827,9 @@ public:
             return;
         }
 
-        // Get actual window size from SDL (avoids dependency on ZzzOpenglUtil globals).
-        int winW = 0;
-        int winH = 0;
-        SDL_GetWindowSize(s_window, &winW, &winH);
-
-        // Scale from 640×480 design space to actual window size.
-        const float scaleX = static_cast<float>(winW) / 640.0f;
-        const float scaleY = static_cast<float>(winH) / 480.0f;
+        // Use swapchain physical pixels for viewport (correct on HiDPI/Retina).
+        const float scaleX = static_cast<float>(s_swapW) / 640.0f;
+        const float scaleY = static_cast<float>(s_swapH) / 480.0f;
 
         SDL_GPUViewport viewport{};
         viewport.x = static_cast<float>(x) * scaleX;
@@ -860,16 +860,12 @@ public:
             return;
         }
 
-        // Reset viewport to full window.
-        int winW = 0;
-        int winH = 0;
-        SDL_GetWindowSize(s_window, &winW, &winH);
-
+        // Reset viewport to full swapchain (physical pixels).
         SDL_GPUViewport fullVP{};
         fullVP.x = 0.0f;
         fullVP.y = 0.0f;
-        fullVP.w = static_cast<float>(winW);
-        fullVP.h = static_cast<float>(winH);
+        fullVP.w = static_cast<float>(s_swapW);
+        fullVP.h = static_cast<float>(s_swapH);
         fullVP.min_depth = 0.0f;
         fullVP.max_depth = 1.0f;
 
@@ -1084,6 +1080,18 @@ public:
         }
         SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
 
+        // Push ScreenSize uniform (slot 0) — vertex shader divides pos by this
+        // to convert from 640x480 design-space pixels to NDC.
+        {
+            // ScreenSize must match the vertex coordinate space (logical window pixels).
+            // The shader converts pos/screenSize to NDC, and the viewport maps NDC to
+            // the full swapchain (physical pixels). Both sides are self-consistent.
+            int winW = 0, winH = 0;
+            SDL_GetWindowSize(s_window, &winW, &winH);
+            const float screenSizeData[4] = {static_cast<float>(winW), static_cast<float>(winH), 0.0f, 0.0f};
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, screenSizeData, sizeof(screenSizeData));
+        }
+
         // Bind vertex buffer.
         SDL_GPUBufferBinding vtxBinding{};
         vtxBinding.buffer = s_vtxGpuBuf;
@@ -1174,6 +1182,16 @@ public:
             return;
         }
         SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
+
+        {
+            // ScreenSize must match the vertex coordinate space (logical window pixels).
+            // The shader converts pos/screenSize to NDC, and the viewport maps NDC to
+            // the full swapchain (physical pixels). Both sides are self-consistent.
+            int winW = 0, winH = 0;
+            SDL_GetWindowSize(s_window, &winW, &winH);
+            const float screenSizeData[4] = {static_cast<float>(winW), static_cast<float>(winH), 0.0f, 0.0f};
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, screenSizeData, sizeof(screenSizeData));
+        }
 
         SDL_GPUBufferBinding vtxBinding{};
         vtxBinding.buffer = s_vtxGpuBuf;
@@ -1319,6 +1337,9 @@ public:
         if (pipeline)
         {
             SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
+
+            const float screenSizeData[4] = {640.0f, 480.0f, 0.0f, 0.0f};
+            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, screenSizeData, sizeof(screenSizeData));
         }
 
         SDL_GPUBufferBinding vtxBinding{};
