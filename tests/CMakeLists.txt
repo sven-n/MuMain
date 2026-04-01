@@ -164,6 +164,17 @@ target_sources(MuTests PRIVATE render/test_gl_migration_7_9_2.cpp)
 # SetColorMask, SetViewport, SetScissor, SetScissorEnabled, ReadPixels.
 target_sources(MuTests PRIVATE render/test_gl_migration_7_9_6.cpp)
 
+# Story 7.9.7: Adopt GLM and Harden Renderer Matrix Pipeline [VS0-RENDER-GLM-MATRIX]
+# RED PHASE: Tests verify GLM matrix math correctness (AC-STD-2, Task 9).
+#   Task 9.2: Perspective Z range [0,1] — glm::perspective with GLM_FORCE_DEPTH_ZERO_TO_ONE
+#             maps eye-space near to NDC z=0 and far to NDC z=1 (Metal/Vulkan convention).
+#   Task 9.3: Ortho projection — glm::ortho maps 0..W/0..H corners to NDC [-1,1].
+#   Task 9.4: Matrix stack push/pop — PushMatrix/PopMatrix call counts via MatrixMath797Mock.
+# All tests use GLM directly (no gl* calls, no GPU device, no Win32).
+# Matrix stack interface tests use MatrixMath797Mock implementing IMuRenderer.
+# Tests compile and run on macOS/Linux without Win32, OpenGL, or a GPU device.
+target_sources(MuTests PRIVATE render/test_matrix_math_7_9_7.cpp)
+
 # Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
 # GREEN PHASE: Tests verify IPlatformAudio interface purity (std::is_abstract_v),
 # g_platformAudio starts as nullptr, MiniAudioBackend default-constructs cleanly,

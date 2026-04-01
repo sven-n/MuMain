@@ -819,3 +819,77 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_9_1.cmake
 )
+
+# ==========================================================================
+# Story 7.9.7 - Adopt GLM and Harden Renderer Matrix Pipeline [VS0-RENDER-GLM-MATRIX]
+# GREEN PHASE (AC-1, AC-2, AC-3 GLM convention, AC-4 ortho): Tasks 1+2 complete.
+# RED PHASE (AC-3 depth buffer, AC-4/5 alpha discard, AC-7 alpha func override):
+#   Tests FAIL until Tasks 3-4 are implemented in MuRendererSDLGpu.cpp.
+# ==========================================================================
+
+set(MU_RENDERFX_SOURCE "${MUMAIN_SOURCE_DIR}/src/source/RenderFX")
+
+# AC-1: GLM integrated via CMake FetchContent (header-only, no binary dependency)
+add_test(
+    NAME "7.9.7-AC-1:glm-fetchcontent"
+    COMMAND ${CMAKE_COMMAND}
+        -DCMAKE_LISTS_TXT=${MUMAIN_SOURCE_DIR}/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_glm_fetchcontent_7_9_7.cmake
+)
+
+# AC-2: mat4:: namespace fully replaced with glm:: equivalents in MuRendererSDLGpu.cpp
+add_test(
+    NAME "7.9.7-AC-2:mat4-namespace-deleted"
+    COMMAND ${CMAKE_COMMAND}
+        -DRENDERER_CPP=${MU_RENDERFX_SOURCE}/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac2_mat4_namespace_deleted_7_9_7.cmake
+)
+
+# AC-3 (GLM depth convention): GLM_FORCE_DEPTH_ZERO_TO_ONE + glm::perspective (right-handed)
+add_test(
+    NAME "7.9.7-AC-3:glm-depth-convention"
+    COMMAND ${CMAKE_COMMAND}
+        -DOPENGLUTIL_CPP=${MU_RENDERFX_SOURCE}/ZzzOpenglUtil.cpp
+        -DRENDERER_CPP=${MU_RENDERFX_SOURCE}/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_glm_depth_convention_7_9_7.cmake
+)
+
+# AC-3 (depth buffer): Depth texture created, pipeline has_depth_stencil_target=true
+add_test(
+    NAME "7.9.7-AC-3:depth-buffer-created"
+    COMMAND ${CMAKE_COMMAND}
+        -DRENDERER_CPP=${MU_RENDERFX_SOURCE}/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac3_depth_buffer_created_7_9_7.cmake
+)
+
+# AC-4: Orthographic projection uses glm::ortho for 2D rendering path
+add_test(
+    NAME "7.9.7-AC-4:glm-ortho-2d"
+    COMMAND ${CMAKE_COMMAND}
+        -DRENDERER_CPP=${MU_RENDERFX_SOURCE}/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_glm_ortho_2d_7_9_7.cmake
+)
+
+# AC-4/5 (alpha discard): SetAlphaTest() propagates to m_fogUniform.alphaDiscardEnabled
+add_test(
+    NAME "7.9.7-AC-4:alpha-discard-propagated"
+    COMMAND ${CMAKE_COMMAND}
+        -DRENDERER_CPP=${MU_RENDERFX_SOURCE}/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac4_alpha_discard_propagated_7_9_7.cmake
+)
+
+# AC-7: SetAlphaFunc override updates m_fogUniform.alphaThreshold + s_fogDirty
+add_test(
+    NAME "7.9.7-AC-7:alpha-func-override"
+    COMMAND ${CMAKE_COMMAND}
+        -DRENDERER_CPP=${MU_RENDERFX_SOURCE}/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac7_alpha_func_override_7_9_7.cmake
+)
+
+# AC-STD-11: Flow code VS0-RENDER-GLM-MATRIX traceability
+add_test(
+    NAME "7.9.7-AC-STD-11:flow-code-traceability"
+    COMMAND ${CMAKE_COMMAND}
+        -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_9_7.cmake
+)
