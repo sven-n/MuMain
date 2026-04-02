@@ -348,8 +348,10 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszN
         PET_INFO PetInfo;
         giPetManager::GetPetInfo(PetInfo, 421 - PET_TYPE_DARK_SPIRIT);
         int RequireCharisma = (185 + (PetInfo.m_wLevel * 15));
-        if (RequireCharisma > iCharisma)
-            else
+        if (RequireCharisma <= iCharisma)
+        {
+            RenderImage(IMAGE_PETHP_FRAME, iX, iY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT);
+        }
     }
     else
 #endif // #ifdef PJH_FIX_SPRIT
