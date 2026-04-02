@@ -322,13 +322,21 @@ static std::unordered_map<std::uint32_t, void*> s_textureMap;
 // without requiring SDL3 headers. The actual stored type is SDL_GPUTexture*.
 // ---------------------------------------------------------------------------
 
+// Track which IDs already logged a fallback warning (avoid per-frame spam).
+static std::unordered_map<std::uint32_t, bool> s_dbgFallbackWarned;
+
 [[nodiscard]] void* LookupTexture(std::uint32_t id)
 {
     auto it = s_textureMap.find(id);
     if (it == s_textureMap.end())
     {
 #ifdef MU_ENABLE_SDL3
-        return s_whiteTexture; // fallback to white texture for unknown IDs
+        if (!s_dbgFallbackWarned[id])
+        {
+            SDL_Log("[ASSET diag] LookupTexture fallback to WHITE for id=%u (not in registry)", id);
+            s_dbgFallbackWarned[id] = true;
+        }
+        return s_whiteTexture;
 #else
         return nullptr;
 #endif
@@ -1190,7 +1198,11 @@ public:
             return;
         }
 
-        void* pTex = LookupTexture(textureId);
+        // Story 7.9.7: When textureId is 0 (sentinel from migrated GL code that relied on
+        // BindTexture global state), fall back to m_boundTextureId set by BindTexture().
+        const std::uint32_t resolvedTexId =
+            (textureId != 0u) ? textureId : static_cast<std::uint32_t>(m_boundTextureId);
+        void* pTex = LookupTexture(resolvedTexId);
         if (!pTex)
         {
             g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderTriangles -- unknown textureId %u, skipping", textureId);
@@ -1239,7 +1251,7 @@ public:
 
         // Story 4.4.1 (AC-4): Bind per-texture sampler via LookupSampler; fallback to s_defaultSampler.
         {
-            void* pSampler = LookupSampler(textureId);
+            void* pSampler = LookupSampler(resolvedTexId);
             SDL_GPUTextureSamplerBinding samplerBinding{};
             samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
             samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
@@ -1272,7 +1284,9 @@ public:
             return;
         }
 
-        void* pTex = LookupTexture(textureId);
+        const std::uint32_t resolvedTexId =
+            (textureId != 0u) ? textureId : static_cast<std::uint32_t>(m_boundTextureId);
+        void* pTex = LookupTexture(resolvedTexId);
         if (!pTex)
         {
             g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuadStrip -- unknown textureId %u, skipping", textureId);
@@ -1406,7 +1420,7 @@ public:
 
         // Story 4.4.1 (AC-4): Bind per-texture sampler via LookupSampler; fallback to s_defaultSampler.
         {
-            void* pSampler = LookupSampler(textureId);
+            void* pSampler = LookupSampler(resolvedTexId);
             SDL_GPUTextureSamplerBinding samplerBinding{};
             samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
             samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
