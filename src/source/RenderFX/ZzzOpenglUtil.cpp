@@ -877,7 +877,7 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
         MakeVtx(p[0], c[0][0], c[0][1]), MakeVtx(p[1], c[1][0], c[1][1]), MakeVtx(p[2], c[2][0], c[2][1]),
         MakeVtx(p[0], c[0][0], c[0][1]), MakeVtx(p[2], c[2][0], c[2][1]), MakeVtx(p[3], c[3][0], c[3][1]),
     };
-    mu::GetRenderer().RenderTriangles(verts, 0);
+    mu::GetRenderer().RenderTriangles(verts, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float (*UV)[2], vec3_t Light[4],
@@ -916,7 +916,7 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     std::vector<mu::Vertex3D> verts = {
         MakeVtx(0), MakeVtx(1), MakeVtx(2), MakeVtx(0), MakeVtx(2), MakeVtx(3),
     };
-    mu::GetRenderer().RenderTriangles(verts, 0);
+    mu::GetRenderer().RenderTriangles(verts, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
