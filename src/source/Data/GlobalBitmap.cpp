@@ -1017,6 +1017,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
                              static_cast<SDL_GPUFilter>(MapGLFilterToSDL(uiFilter)),
                              static_cast<SDL_GPUSamplerAddressMode>(MapGLWrapToSDL(uiWrapMode)), filename))
     {
+        g_ErrorReport.Write(L"ASSET: OZJ upload FAILED for idx=%u %ls (%dx%d)", uiBitmapIndex, filename.c_str(),
+                            textureWidth, textureHeight);
         return false;
     }
 
@@ -1121,6 +1123,8 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
                              static_cast<SDL_GPUFilter>(MapGLFilterToSDL(uiFilter)),
                              static_cast<SDL_GPUSamplerAddressMode>(MapGLWrapToSDL(uiWrapMode)), filename))
     {
+        g_ErrorReport.Write(L"ASSET: OZT upload FAILED for idx=%u %ls (%dx%d)", uiBitmapIndex, filename.c_str(), Width,
+                            Height);
         return false;
     }
 

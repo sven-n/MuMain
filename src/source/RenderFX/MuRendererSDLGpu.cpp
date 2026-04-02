@@ -322,21 +322,13 @@ static std::unordered_map<std::uint32_t, void*> s_textureMap;
 // without requiring SDL3 headers. The actual stored type is SDL_GPUTexture*.
 // ---------------------------------------------------------------------------
 
-// Track which IDs already logged a fallback warning (avoid per-frame spam).
-static std::unordered_map<std::uint32_t, bool> s_dbgFallbackWarned;
-
 [[nodiscard]] void* LookupTexture(std::uint32_t id)
 {
     auto it = s_textureMap.find(id);
     if (it == s_textureMap.end())
     {
 #ifdef MU_ENABLE_SDL3
-        if (!s_dbgFallbackWarned[id])
-        {
-            SDL_Log("[ASSET diag] LookupTexture fallback to WHITE for id=%u (not in registry)", id);
-            s_dbgFallbackWarned[id] = true;
-        }
-        return s_whiteTexture;
+        return s_whiteTexture; // fallback to white texture for unknown IDs
 #else
         return nullptr;
 #endif
