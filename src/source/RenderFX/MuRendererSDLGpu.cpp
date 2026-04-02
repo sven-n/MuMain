@@ -256,15 +256,18 @@ static Uint32 s_dbgVtxBytesThisFrame = 0u;
 static bool s_dbgNullPipelineWarned = false;
 
 // Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
-// s_pipelines2D: depth ON, Vertex2D layout (pitch=20).
+// Story 7.9.7: Added DepthReadOnly variants (depth test ON, depth write OFF) for particles.
+// s_pipelines2D: depth ON (test+write), Vertex2D layout (pitch=20).
 // s_pipelines2DDepthOff: depth OFF, Vertex2D layout.
-// s_pipelines3D: depth ON, Vertex3D layout (pitch=40).
+// s_pipelines3D: depth ON (test+write), Vertex3D layout (pitch=40).
 // s_pipelines3DDepthOff: depth OFF, Vertex3D layout.
+// s_pipelines3DDepthReadOnly: depth test ON, write OFF — for transparent/additive particles.
 // Index matches BlendMode enum cast to int; index 8 = disabled (no-blend).
 static SDL_GPUGraphicsPipeline* s_pipelines2D[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines2DDepthOff[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3D[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3DDepthOff[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelines3DDepthReadOnly[k_PipelineCount] = {};
 
 // Story 4.3.2 (AC-7): Single pre-frame vertex upload.
 // s_vtxMappedPtr: mapped pointer into s_vtxTransferBuf, valid between BeginFrame/EndFrame.
@@ -1204,7 +1207,9 @@ public:
         // Story 4.3.2 (AC-8): RenderTriangles uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthOff[pipelineIdx];
+            m_depthTestEnabled ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx]
+                                                      : s_pipelines3DDepthReadOnly[pipelineIdx])
+                               : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
             if (!s_dbgNullPipelineWarned)
@@ -1374,7 +1379,9 @@ public:
         // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthOff[pipelineIdx];
+            m_depthTestEnabled ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx]
+                                                      : s_pipelines3DDepthReadOnly[pipelineIdx])
+                               : s_pipelines3DDepthOff[pipelineIdx];
         if (pipeline)
         {
             SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
@@ -1856,7 +1863,8 @@ private:
     // Fragment shader: s_fragShaderTex (textured path with fog support).
     // -----------------------------------------------------------------------
     [[nodiscard]] static SDL_GPUGraphicsPipeline* BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
-                                                                     bool depthTestEnabled, bool bUse3DLayout)
+                                                                     bool depthTestEnabled, bool depthWriteEnabled,
+                                                                     bool bUse3DLayout)
     {
         // Get swapchain texture format for pipeline target.
         const SDL_GPUTextureFormat swapchainFmt = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
@@ -1933,7 +1941,7 @@ private:
 
         SDL_GPUDepthStencilState depthState{};
         depthState.enable_depth_test = depthTestEnabled;
-        depthState.enable_depth_write = depthTestEnabled;
+        depthState.enable_depth_write = depthWriteEnabled;
         depthState.enable_stencil_test = false;
         depthState.compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
 
@@ -2029,33 +2037,43 @@ private:
             blendState.alpha_blend_op = SDL_GPU_BLENDOP_ADD;
             blendState.enable_blend = table[i].enableBlend;
 
-            // 2D depth ON.
-            s_pipelines2D[i] = BuildBlendPipeline(blendState, true, /*bUse3DLayout=*/false);
+            // 2D depth ON (test+write).
+            s_pipelines2D[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/false);
             if (!s_pipelines2D[i])
             {
                 g_ErrorReport.Write(L"RENDER: SDL_gpu -- 2D pipeline[%d] creation failed: %hs", i, SDL_GetError());
             }
 
             // 2D depth OFF.
-            s_pipelines2DDepthOff[i] = BuildBlendPipeline(blendState, false, /*bUse3DLayout=*/false);
+            s_pipelines2DDepthOff[i] = BuildBlendPipeline(blendState, false, false, /*bUse3DLayout=*/false);
             if (!s_pipelines2DDepthOff[i])
             {
                 g_ErrorReport.Write(L"RENDER: SDL_gpu -- 2D depth-off pipeline[%d] creation failed: %hs", i,
                                     SDL_GetError());
             }
 
-            // 3D depth ON.
-            s_pipelines3D[i] = BuildBlendPipeline(blendState, true, /*bUse3DLayout=*/true);
+            // 3D depth ON (test+write) — opaque geometry.
+            s_pipelines3D[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true);
             if (!s_pipelines3D[i])
             {
                 g_ErrorReport.Write(L"RENDER: SDL_gpu -- 3D pipeline[%d] creation failed: %hs", i, SDL_GetError());
             }
 
             // 3D depth OFF.
-            s_pipelines3DDepthOff[i] = BuildBlendPipeline(blendState, false, /*bUse3DLayout=*/true);
+            s_pipelines3DDepthOff[i] = BuildBlendPipeline(blendState, false, false, /*bUse3DLayout=*/true);
             if (!s_pipelines3DDepthOff[i])
             {
                 g_ErrorReport.Write(L"RENDER: SDL_gpu -- 3D depth-off pipeline[%d] creation failed: %hs", i,
+                                    SDL_GetError());
+            }
+
+            // Story 7.9.7: 3D depth read-only (test ON, write OFF) — for transparent/additive particles.
+            // Particles need depth test (to go behind walls) but must NOT write to depth buffer
+            // (which would occlude geometry behind them, causing solid rectangle artifacts).
+            s_pipelines3DDepthReadOnly[i] = BuildBlendPipeline(blendState, true, false, /*bUse3DLayout=*/true);
+            if (!s_pipelines3DDepthReadOnly[i])
+            {
+                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 3D depth-readonly pipeline[%d] creation failed: %hs", i,
                                     SDL_GetError());
             }
         }
