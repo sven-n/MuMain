@@ -1796,8 +1796,8 @@ void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int
     }
 }
 
-void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha,
-                             float Height = 0.f, std::uint32_t fallbackColor = 0xFFFFFFFFu)
+void RenderTerrainBitmapTile(int Texture, float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable,
+                             float Alpha, float Height = 0.f, std::uint32_t fallbackColor = 0xFFFFFFFFu)
 {
     int xi = (int)xf;
     int yi = (int)yf;
@@ -1844,7 +1844,7 @@ void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[
                         vertColor};
         }
         const mu::Vertex3D tris[6] = {verts[0], verts[1], verts[2], verts[0], verts[2], verts[3]};
-        mu::GetRenderer().RenderTriangles(tris, 0u);
+        mu::GetRenderer().RenderTriangles(tris, static_cast<std::uint32_t>(Texture));
     }
 }
 
@@ -1876,7 +1876,7 @@ void RenderTerrainBitmap(int Texture, int mxi, int myi, float Rotation)
                 p2[i][0] += 0.5f;
                 p2[i][1] += 0.5f;
             }
-            RenderTerrainBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, true, 1.f);
+            RenderTerrainBitmapTile(Texture, (float)mxi + x, (float)myi + y, 1.f, 1, p2, true, 1.f);
         }
     }
 }
@@ -1927,7 +1927,7 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
                 p2[i][1] += 0.5f;
                 // if((p2[i][0]>=0.f && p2[i][0]<=1.f) || (p2[i][1]>=0.f && p2[i][1]<=1.f)) Clip = true;
             }
-            RenderTerrainBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height,
+            RenderTerrainBitmapTile(Texture, (float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height,
                                     terrainBitmapColor);
         }
     }
