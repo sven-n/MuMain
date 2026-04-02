@@ -1075,7 +1075,7 @@ public:
     void RenderQuad2D(std::span<const Vertex2D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.empty() || !s_renderPass || !m_colorWriteEnabled)
+        if (vertices.empty() || !s_renderPass || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
         }
@@ -1178,7 +1178,7 @@ public:
     void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.empty() || !s_renderPass || !m_colorWriteEnabled)
+        if (vertices.empty() || !s_renderPass || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
         }
@@ -1267,7 +1267,7 @@ public:
     void RenderQuadStrip(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.size() < 2 || !s_renderPass || !m_colorWriteEnabled)
+        if (vertices.size() < 2 || !s_renderPass || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
         }
@@ -1474,6 +1474,14 @@ public:
     {
         m_colorWriteEnabled = (r || g || b || a);
     }
+    // Story 7.9.7: SetStencilTest — track stencil state.
+    // All stencil-dependent rendering (shadow volumes, shadow darkening) is skipped
+    // since we have no stencil buffer. Without this, RenderShadowToScreen() draws
+    // a full-screen darkening quad that covers the entire scene.
+    void SetStencilTest(bool enabled) override
+    {
+        m_stencilTestEnabled = enabled;
+    }
     void SetAlphaTest(bool enabled) override
     {
         m_alphaTestEnabled = enabled;
@@ -1649,6 +1657,7 @@ private:
     bool m_texture2DEnabled = true;
     bool m_fogEnabled = false;
     bool m_colorWriteEnabled = true;
+    bool m_stencilTestEnabled = false;
     int m_boundTextureId = -1;
     FogParams m_fogParams{};
     // Story 4.3.2 (AC-10): CPU-side fog uniform data, uploaded to GPU when dirty.
