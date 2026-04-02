@@ -1198,10 +1198,7 @@ public:
             return;
         }
 
-        // Story 7.9.7: When textureId is 0 (sentinel from migrated GL code that relied on
-        // BindTexture global state), fall back to m_boundTextureId set by BindTexture().
-        const std::uint32_t resolvedTexId =
-            (textureId != 0u) ? textureId : static_cast<std::uint32_t>(m_boundTextureId);
+        const std::uint32_t resolvedTexId = ResolveTextureId(textureId);
         void* pTex = LookupTexture(resolvedTexId);
         if (!pTex)
         {
@@ -1661,6 +1658,14 @@ private:
     {
         m_mvpMatrix = m_projMatrix * m_modelViewMatrix;
     }
+
+    // Resolve texture ID: migrated GL code passes 0 (relied on BindTexture global state).
+    // Fall back to m_boundTextureId when the explicit parameter is the 0 sentinel.
+    [[nodiscard]] std::uint32_t ResolveTextureId(std::uint32_t textureId) const
+    {
+        return (textureId != 0u) ? textureId : static_cast<std::uint32_t>(m_boundTextureId);
+    }
+
     // Per-instance render state.
     BlendMode m_activeBlendMode = BlendMode::Alpha;
     bool m_blendEnabled = true;
