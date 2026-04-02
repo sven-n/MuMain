@@ -1075,7 +1075,7 @@ public:
     void RenderQuad2D(std::span<const Vertex2D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.empty() || !s_renderPass)
+        if (vertices.empty() || !s_renderPass || !m_colorWriteEnabled)
         {
             return;
         }
@@ -1178,7 +1178,7 @@ public:
     void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.empty() || !s_renderPass)
+        if (vertices.empty() || !s_renderPass || !m_colorWriteEnabled)
         {
             return;
         }
@@ -1267,7 +1267,7 @@ public:
     void RenderQuadStrip(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.size() < 2 || !s_renderPass)
+        if (vertices.size() < 2 || !s_renderPass || !m_colorWriteEnabled)
         {
             return;
         }
@@ -1467,6 +1467,13 @@ public:
     {
         m_cullFaceEnabled = enabled;
     }
+    // Story 7.9.7: SetColorMask — track color write state.
+    // When all channels are disabled (shadow volume stencil passes), draw calls
+    // are skipped entirely since we have no stencil buffer support yet.
+    void SetColorMask(bool r, bool g, bool b, bool a) override
+    {
+        m_colorWriteEnabled = (r || g || b || a);
+    }
     void SetAlphaTest(bool enabled) override
     {
         m_alphaTestEnabled = enabled;
@@ -1641,6 +1648,7 @@ private:
     bool m_alphaTestEnabled = false;
     bool m_texture2DEnabled = true;
     bool m_fogEnabled = false;
+    bool m_colorWriteEnabled = true;
     int m_boundTextureId = -1;
     FogParams m_fogParams{};
     // Story 4.3.2 (AC-10): CPU-side fog uniform data, uploaded to GPU when dirty.
