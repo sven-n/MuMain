@@ -1206,10 +1206,13 @@ public:
         }
 
         // Story 4.3.2 (AC-8): RenderTriangles uses the 3D pipeline set (Vertex3D layout).
+        // Force depth-read-only for additive/subtract blends — these produce transparent output
+        // and must not write to the depth buffer (would occlude geometry behind them).
         const int pipelineIdx = GetActivePipelineIndex();
+        const bool wantsDepthWrite = m_depthMaskEnabled && m_activeBlendMode == BlendMode::Alpha;
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx]
-                                                      : s_pipelines3DDepthReadOnly[pipelineIdx])
+            m_depthTestEnabled ? (wantsDepthWrite ? s_pipelines3D[pipelineIdx]
+                                                  : s_pipelines3DDepthReadOnly[pipelineIdx])
                                : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
@@ -1273,8 +1276,7 @@ public:
             return;
         }
 
-        const std::uint32_t resolvedTexId =
-            (textureId != 0u) ? textureId : static_cast<std::uint32_t>(m_boundTextureId);
+        const std::uint32_t resolvedTexId = ResolveTextureId(textureId);
         void* pTex = LookupTexture(resolvedTexId);
         if (!pTex)
         {
@@ -1381,9 +1383,10 @@ public:
 
         // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
+        const bool wantsDepthWrite = m_depthMaskEnabled && m_activeBlendMode == BlendMode::Alpha;
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx]
-                                                      : s_pipelines3DDepthReadOnly[pipelineIdx])
+            m_depthTestEnabled ? (wantsDepthWrite ? s_pipelines3D[pipelineIdx]
+                                                  : s_pipelines3DDepthReadOnly[pipelineIdx])
                                : s_pipelines3DDepthOff[pipelineIdx];
         if (pipeline)
         {
