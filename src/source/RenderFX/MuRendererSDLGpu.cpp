@@ -1651,11 +1651,17 @@ private:
         m_mvpMatrix = m_projMatrix * m_modelViewMatrix;
     }
 
-    // Resolve texture ID: migrated GL code passes 0 (relied on BindTexture global state).
-    // Fall back to m_boundTextureId when the explicit parameter is the 0 sentinel.
+    // Resolve texture ID for draw calls.
+    // - textureId > 0: use it directly (explicit texture from caller)
+    // - textureId == 0 AND texture disabled: use 0 → white texture (intentional: vertex color only)
+    // - textureId == 0 AND texture enabled: use m_boundTextureId (migration compat: BindTexture state)
     [[nodiscard]] std::uint32_t ResolveTextureId(std::uint32_t textureId) const
     {
-        return (textureId != 0u) ? textureId : static_cast<std::uint32_t>(m_boundTextureId);
+        if (textureId != 0u)
+            return textureId;
+        if (!m_texture2DEnabled)
+            return 0u; // DisableTexture() was called — use white texture (registered at ID 0)
+        return static_cast<std::uint32_t>(m_boundTextureId);
     }
 
     // Per-instance render state.
