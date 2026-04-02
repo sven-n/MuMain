@@ -309,6 +309,7 @@ endif()
 # Story 7.9.7: GLM for matrix math (header-only — propagates include path)
 if(TARGET glm::glm)
     target_link_libraries(MURenderFX PRIVATE glm::glm)
+    target_compile_definitions(MURenderFX PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 endif()
 target_precompile_headers(MURenderFX REUSE_FROM MUCore)
 

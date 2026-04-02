@@ -726,33 +726,8 @@ public:
             return;
         }
 
-        // Story 4.3.2 (AC-10): Upload fog uniform if dirty, before render pass.
-        if (s_fogDirty && s_fogTransferBuf && s_fogUniformBuf)
-        {
-            void* pFogMapped = SDL_MapGPUTransferBuffer(s_device, s_fogTransferBuf, false);
-            if (pFogMapped)
-            {
-                std::memcpy(pFogMapped, &m_fogUniform, sizeof(FogUniform));
-                SDL_UnmapGPUTransferBuffer(s_device, s_fogTransferBuf);
-
-                SDL_GPUCopyPass* fogCopyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
-                if (fogCopyPass)
-                {
-                    SDL_GPUTransferBufferLocation fogSrc{};
-                    fogSrc.transfer_buffer = s_fogTransferBuf;
-                    fogSrc.offset = 0;
-
-                    SDL_GPUBufferRegion fogDst{};
-                    fogDst.buffer = s_fogUniformBuf;
-                    fogDst.offset = 0;
-                    fogDst.size = sizeof(FogUniform);
-
-                    SDL_UploadToGPUBuffer(fogCopyPass, &fogSrc, &fogDst, false);
-                    SDL_EndGPUCopyPass(fogCopyPass);
-                }
-                s_fogDirty = false;
-            }
-        }
+        // Story 7.9.7: Fog/alpha uniform is now pushed per-draw-call via
+        // SDL_PushGPUFragmentUniformData — no copy pass needed here.
 
         // Story 7.9.7 (AC-3): Ensure depth texture matches swapchain dimensions.
         // Recreates on first frame or when window is resized.
@@ -1172,11 +1147,9 @@ public:
         samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
         SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
 
-        // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
-        if (s_fogUniformBuf)
-        {
-            SDL_BindGPUFragmentStorageBuffers(s_renderPass, 0, &s_fogUniformBuf, 1);
-        }
+        // Story 7.9.7: Push fog/alpha uniform per-draw (replaces GPU storage buffer).
+        // This allows alphaDiscardEnabled to change per-draw-call during the render pass.
+        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &m_fogUniform, sizeof(FogUniform));
 
         const Uint32 numQuads = static_cast<Uint32>(vertices.size() / 4);
         // Code-review fix H-2: guard against reading past the static quad index buffer.
@@ -1268,11 +1241,9 @@ public:
             SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
         }
 
-        // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
-        if (s_fogUniformBuf)
-        {
-            SDL_BindGPUFragmentStorageBuffers(s_renderPass, 0, &s_fogUniformBuf, 1);
-        }
+        // Story 7.9.7: Push fog/alpha uniform per-draw (replaces GPU storage buffer).
+        // This allows alphaDiscardEnabled to change per-draw-call during the render pass.
+        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &m_fogUniform, sizeof(FogUniform));
 
         SDL_DrawGPUPrimitives(s_renderPass, static_cast<Uint32>(vertices.size()), 1, 0, 0);
         ++s_dbgDrawCallsThisFrame;
@@ -1435,11 +1406,9 @@ public:
             SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
         }
 
-        // Story 4.3.2 (AC-10): Bind fog uniform buffer at fragment storage slot 0.
-        if (s_fogUniformBuf)
-        {
-            SDL_BindGPUFragmentStorageBuffers(s_renderPass, 0, &s_fogUniformBuf, 1);
-        }
+        // Story 7.9.7: Push fog/alpha uniform per-draw (replaces GPU storage buffer).
+        // This allows alphaDiscardEnabled to change per-draw-call during the render pass.
+        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &m_fogUniform, sizeof(FogUniform));
 
         SDL_DrawGPUIndexedPrimitives(s_renderPass, numIndices, 1, 0, 0, 0);
         ++s_dbgDrawCallsThisFrame;
@@ -1569,11 +1538,15 @@ public:
         {
             if (m_mvStackTop < k_MatrixStackDepth)
                 m_mvStack[m_mvStackTop++] = m_modelViewMatrix;
+            else
+                g_ErrorReport.Write(L"RENDER: modelview matrix stack overflow (depth %d)", k_MatrixStackDepth);
         }
         else
         {
             if (m_projStackTop < k_MatrixStackDepth)
                 m_projStack[m_projStackTop++] = m_projMatrix;
+            else
+                g_ErrorReport.Write(L"RENDER: projection matrix stack overflow (depth %d)", k_MatrixStackDepth);
         }
     }
 
@@ -1583,11 +1556,15 @@ public:
         {
             if (m_mvStackTop > 0)
                 m_modelViewMatrix = m_mvStack[--m_mvStackTop];
+            else
+                g_ErrorReport.Write(L"RENDER: modelview matrix stack underflow");
         }
         else
         {
             if (m_projStackTop > 0)
                 m_projMatrix = m_projStack[--m_projStackTop];
+            else
+                g_ErrorReport.Write(L"RENDER: projection matrix stack underflow");
         }
         UpdateMVP();
     }
@@ -1803,8 +1780,10 @@ private:
         }
 
         // basic_textured.frag — fatal: required for textured 2D draws.
-        // Samplers: t0 (texture), s0 (sampler); Storage buffers: FogUniforms
-        s_fragShaderTex = createShader("basic_textured", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 1, 0, /*fatal=*/true);
+        // Samplers: t0 (texture), s0 (sampler); Uniform buffers: FogUniforms (pushed per-draw)
+        // Story 7.9.7: Changed from numStorageBuffers=1 to numUniformBuffers=1 so fog/alpha
+        // data can be pushed per-draw-call via SDL_PushGPUFragmentUniformData (not a GPU buffer).
+        s_fragShaderTex = createShader("basic_textured", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/true);
         if (!s_fragShaderTex)
         {
             SDL_ReleaseGPUShader(s_device, s_vertShader2D);

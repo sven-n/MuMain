@@ -20,8 +20,8 @@
 // Tests compile and run on macOS/Linux without Win32, OpenGL, or a GPU device.
 //
 // Run with: ctest --test-dir MuMain/build -R matrix_math_7_9_7
+// Note: GLM_FORCE_DEPTH_ZERO_TO_ONE is defined via target_compile_definitions in CMakeLists.txt
 
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -173,11 +173,12 @@ TEST_CASE("AC-STD-2 [7-9-7]: glm::ortho Z is flat [0,1] range at z=0",
 }
 
 // ---------------------------------------------------------------------------
-// AC-STD-2 [Task 9.4]: Matrix stack push/pop preserves and restores state
+// AC-STD-2 [Task 9.4]: Matrix stack push/pop invocation counts
 // The IMuRenderer interface provides PushMatrix/PopMatrix/SetMatrixMode.
-// We verify that the interface contract counts pushes and pops correctly.
+// We verify that the interface contract correctly tracks push and pop calls,
+// including nested sequences.
 // ---------------------------------------------------------------------------
-TEST_CASE("AC-STD-2 [7-9-7]: matrix stack push preserves and pop restores state",
+TEST_CASE("AC-STD-2 [7-9-7]: matrix stack push/pop invocation counts",
           "[render][matrix-stack][7-9-7]")
 {
     MatrixMath797Mock mock;

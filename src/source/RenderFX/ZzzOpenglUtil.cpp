@@ -13,10 +13,11 @@
 #include "NewUISystem.h"
 
 // GLU perspective — builds perspective matrix via GLM and multiplies into the renderer's
-// projection matrix stack. GLM_FORCE_DEPTH_ZERO_TO_ONE + GLM_FORCE_LEFT_HANDED are set
-// in MuRendererSDLGpu.cpp; here we build the matrix using the same convention and pass
-// it via MultMatrix (which does ActiveMatrix = ActiveMatrix * m).
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+// projection matrix stack. GLM_FORCE_DEPTH_ZERO_TO_ONE is set (Metal/Vulkan Z [0,1]).
+// Right-handed convention (GLM default) — matches original OpenGL game code.
+// Here we build the matrix using the same convention and pass it via MultMatrix
+// (which does ActiveMatrix = ActiveMatrix * m).
+// Note: GLM_FORCE_DEPTH_ZERO_TO_ONE is defined via target_compile_definitions in CMakeLists.txt
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
