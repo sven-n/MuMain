@@ -43,7 +43,7 @@
 // GLM — matrix math for projection, view, and model transforms.
 // GLM_FORCE_DEPTH_ZERO_TO_ONE: Metal/Vulkan depth range [0,1] (not OpenGL [-1,1]).
 // Right-handed (GLM default): matches original OpenGL game code coordinate convention.
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+// Note: GLM_FORCE_DEPTH_ZERO_TO_ONE is defined via target_compile_definitions in CMakeLists.txt
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -770,7 +770,7 @@ public:
         depthTarget.texture = s_depthTexture;
         depthTarget.clear_depth = 1.0f;
         depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
-        depthTarget.store_op = SDL_GPU_STOREOP_DONT_CARE;
+        depthTarget.store_op = SDL_GPU_STOREOP_STORE;
         depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
         depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
         depthTarget.cycle = true;
@@ -1382,11 +1382,11 @@ public:
             colorTarget.load_op = SDL_GPU_LOADOP_LOAD; // preserve existing content
             colorTarget.store_op = SDL_GPU_STOREOP_STORE;
 
-            // Story 7.9.7 (AC-3): Reattach depth buffer (LOAD to preserve depth data).
+            // Story 7.9.7 (AC-3): Reattach depth buffer (LOAD to preserve depth data, STORE to maintain it).
             SDL_GPUDepthStencilTargetInfo depthTarget{};
             depthTarget.texture = s_depthTexture;
             depthTarget.load_op = SDL_GPU_LOADOP_LOAD;
-            depthTarget.store_op = SDL_GPU_STOREOP_DONT_CARE;
+            depthTarget.store_op = SDL_GPU_STOREOP_STORE;
             depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
             depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
             depthTarget.cycle = false;
@@ -1964,7 +1964,7 @@ private:
         // Story 7.9.7 (AC-3): Enable depth-stencil target so pipelines match
         // the render pass that now includes a depth buffer.
         targetInfo.has_depth_stencil_target = true;
-        targetInfo.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D24_UNORM;
+        targetInfo.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
         // 2D pipelines: basic_textured vert+frag (with fog).
@@ -2139,7 +2139,7 @@ private:
 
         SDL_GPUTextureCreateInfo depthInfo{};
         depthInfo.type = SDL_GPU_TEXTURETYPE_2D;
-        depthInfo.format = SDL_GPU_TEXTUREFORMAT_D24_UNORM;
+        depthInfo.format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
         depthInfo.width = width;
         depthInfo.height = height;
         depthInfo.layer_count_or_depth = 1;
