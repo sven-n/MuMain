@@ -12810,6 +12810,120 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
 
 extern int HeroIndex;
 
+namespace
+{
+    bool IsForcedNpcMonsterType(EMonsterType type)
+    {
+        const int rawType = static_cast<int>(type);
+        switch (rawType)
+        {
+        case 367:
+        case 371:
+        case 375:
+        case 376:
+        case 377:
+        case 379:
+        case 380:
+        case 381:
+        case 382:
+        case 383:
+        case 384:
+        case 385:
+        case 406:
+        case 407:
+        case 408:
+        case 414:
+        case 415:
+        case 416:
+        case 417:
+        case 450:
+        case 452:
+        case 453:
+        case 464:
+        case 465:
+        case 467:
+        case 468:
+        case 469:
+        case 470:
+        case 471:
+        case 472:
+        case 473:
+        case 474:
+        case 475:
+        case 478:
+        case 479:
+        case 492:
+        case 522:
+        case 540:
+        case 541:
+        case 542:
+        case 543:
+        case 544:
+        case 545:
+        case 546:
+        case 547:
+        case 577:
+        case 578:
+        case 579:
+        case static_cast<int>(MONSTER_WANDERING_MERCHANT_ZYRO):
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    int DetermineMonsterObjectKind(EMonsterType type)
+    {
+        const int rawType = static_cast<int>(type);
+
+        // Special hard overrides first.
+        if (rawType == 451)
+        {
+            return KIND_TMP;
+        }
+
+        // Exception range that must stay monster even though values are > 200.
+        if (rawType >= 480 && rawType <= 491)
+        {
+            return KIND_MONSTER;
+        }
+
+        // Explicit NPC overrides.
+        if (rawType == 368 || rawType == 369 || rawType == 370 || IsForcedNpcMonsterType(type))
+        {
+            return KIND_NPC;
+        }
+
+        // Legacy fallback classifier.
+        if (rawType == 200)
+        {
+            return KIND_MONSTER;
+        }
+        if (rawType >= 260)
+        {
+            return KIND_MONSTER;
+        }
+        if (rawType > 200)
+        {
+            return KIND_NPC;
+        }
+        if (rawType >= 150)
+        {
+            return KIND_MONSTER;
+        }
+        if (rawType > 110)
+        {
+            return KIND_MONSTER;
+        }
+        if (rawType >= 100)
+        {
+            return KIND_TRAP;
+        }
+
+        return KIND_MONSTER;
+    }
+}
+
 void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int PositionY)
 {
     OBJECT* o;
@@ -12839,69 +12953,7 @@ void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int Positio
         c->MonsterIndex = Type;
         c->Object.ExtState = 0;
         c->TargetCharacter = HeroIndex;
-        if (Type == 200)
-            o->Kind = KIND_MONSTER;
-        else if (Type >= 260)
-            o->Kind = KIND_MONSTER;
-        else if (Type > 200)
-            o->Kind = KIND_NPC;
-        else if (Type >= 150)
-            o->Kind = KIND_MONSTER;
-        else if (Type > 110)
-            o->Kind = KIND_MONSTER;
-        else if (Type >= 100)
-            o->Kind = KIND_TRAP;
-        else
-            o->Kind = KIND_MONSTER;
-        //c->Object.Kind = KIND_EDIT;
-        //mu_swprintf(c->ID,"%x",Key);
-        if (Type == 368 || Type == 369 || Type == 370)
-            o->Kind = KIND_NPC;
-        if (Type == 367
-            || Type == 371
-            || Type == 375
-            || Type == 376 || Type == 377
-            || Type == 379
-            || Type == 380 || Type == 381 || Type == 382
-            || Type == 383 || Type == 384 || Type == 385
-            || Type == 406
-            || Type == 407
-            || Type == 408
-            || Type == 414
-            || Type == 415 || Type == 416 || Type == 417
-            || Type == 450
-            || Type == 452 || Type == 453
-            || Type == 464
-            || Type == 465
-            || Type == 467
-            || Type == 468 || Type == 469 || Type == 470	//NPC 1~8
-            || Type == 471 || Type == 472 || Type == 473
-            || Type == 474 || Type == 475
-            || Type == 478
-            || Type == 479
-            || Type == 492
-            || Type == 540
-            || Type == 541
-            || Type == 542
-            || Type == 522
-            || Type == 543 || Type == 544
-            || Type == 545
-            || Type == 546
-            || Type == 547
-            || Type == 577 || Type == 578
-            || Type == 579
-            )
-        {
-            o->Kind = KIND_NPC;
-        }
-        if (Type >= 480 && Type <= 491)
-        {
-            o->Kind = KIND_MONSTER;
-        }
-        if (Type == 451)
-        {
-            o->Kind = KIND_TMP;
-        }
+        o->Kind = DetermineMonsterObjectKind(Type);
     }
 }
 
@@ -14228,6 +14280,18 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->BodyPart[BODYPART_ARMOR].Type = MODEL_MERCHANT_MAN_UPPER;
         c->BodyPart[BODYPART_GLOVES].Type = MODEL_MERCHANT_MAN_GLOVES;
         c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_MAN_BOOTS;
+        break;
+    case MONSTER_WANDERING_MERCHANT_ZYRO:
+        OpenNpc(MODEL_GAMBLE_NPC_MOSS);
+        c = CreateCharacter(Key, MODEL_GAMBLE_NPC_MOSS, PositionX, PositionY);
+        wcscpy(c->ID, L"떠돌이 상인");
+        c->Object.LifeTime = 100;
+        c->Object.Scale = 0.8f;
+        c->Object.m_fEdgeScale = 1.1f;
+        for (int i = 0; i < 6; i++)
+        {
+            Models[MODEL_GAMBLE_NPC_MOSS].Actions[i].PlaySpeed = 0.33f;
+        }
         break;
     case MONSTER_HANZO_THE_BLACKSMITH:
         OpenNpc(MODEL_SMITH);
