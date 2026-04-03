@@ -139,6 +139,24 @@ static  int iStateNum = 4;
 
 	// ※
 
+static bool IsDivineArchangelWeaponItem(int itemType)
+{
+    return itemType == ITEM_DIVINE_SWORD_OF_ARCHANGEL
+        || itemType == ITEM_DIVINE_CB_OF_ARCHANGEL
+        || itemType == ITEM_DIVINE_STAFF_OF_ARCHANGEL
+        || itemType == ITEM_DIVINE_STICK_OF_ARCHANGEL
+        || itemType == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL;
+}
+
+static bool IsDivineArchangelWeaponModel(int modelType)
+{
+    return modelType == MODEL_DIVINE_STAFF_OF_ARCHANGEL
+        || modelType == MODEL_DIVINE_STICK_OF_ARCHANGEL
+        || modelType == MODEL_DIVINE_SWORD_OF_ARCHANGEL
+        || modelType == MODEL_DIVINE_CB_OF_ARCHANGEL
+        || modelType == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL;
+}
+
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
@@ -1608,12 +1626,10 @@ WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level)
     }
     else if (ip->ExcellentFlags > 0 &&
         (ip->Type<ITEM_WINGS_OF_SPIRITS || ip->Type>ITEM_WINGS_OF_DARKNESS) &&
-        (ip->Type != ITEM_DIVINE_SWORD_OF_ARCHANGEL && ip->Type != ITEM_DIVINE_CB_OF_ARCHANGEL
-            && ip->Type != ITEM_DIVINE_STAFF_OF_ARCHANGEL && ip->Type != ITEM_DIVINE_STICK_OF_ARCHANGEL)
+        !IsDivineArchangelWeaponItem(ip->Type)
         && ip->Type != ITEM_CAPE_OF_LORD
         && (ip->Type<ITEM_WING_OF_STORM || ip->Type>ITEM_CAPE_OF_EMPEROR)
         && (ip->Type<ITEM_WINGS_OF_DESPAIR || ip->Type>ITEM_WING_OF_DIMENSION)
-        && ip->Type != ITEM_DIVINE_SCEPTER_OF_ARCHANGEL
         && !(ip->Type >= ITEM_CAPE_OF_FIGHTER && ip->Type <= ITEM_CAPE_OF_OVERRULE))
     {
         maxDurability += 15;
@@ -1825,9 +1841,7 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         else
             mu_swprintf(Text, L"%ls +%d", p->Name, iLevel);
     }
-    else if (iType == ITEM_DIVINE_SWORD_OF_ARCHANGEL || iType == ITEM_DIVINE_CB_OF_ARCHANGEL
-        || iType == ITEM_DIVINE_STAFF_OF_ARCHANGEL || iType == ITEM_DIVINE_STICK_OF_ARCHANGEL
-        || iType == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
+    else if (IsDivineArchangelWeaponItem(iType))
     {
         if (iLevel == 0)
             mu_swprintf(Text, L"%ls", p->Name);
@@ -2160,9 +2174,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         Color = TEXT_COLOR_YELLOW;
     }
-    else if (ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
+    else if (IsDivineArchangelWeaponItem(ip->Type))
     {
         Color = TEXT_COLOR_PURPLE;
     }
@@ -2588,9 +2600,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             mu_swprintf(TextList[TextNum], L"%ls", p->Name);
         }
     }
-    else if (ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
+    else if (IsDivineArchangelWeaponItem(ip->Type))
     {
         if (Level == 0)
             mu_swprintf(TextList[TextNum], L"%ls", p->Name);
@@ -5776,9 +5786,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
     {
         Color = TEXT_COLOR_YELLOW;
     }
-    else if (ip->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL || ip->Type == ITEM_DIVINE_CB_OF_ARCHANGEL
-        || ip->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL)
+    else if (IsDivineArchangelWeaponItem(ip->Type))
     {
         Color = TEXT_COLOR_PURPLE;
     }
@@ -7033,9 +7041,7 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else
     {
-        if (o->Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL || o->Type == MODEL_DIVINE_STICK_OF_ARCHANGEL
-            || o->Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL || o->Type == MODEL_DIVINE_CB_OF_ARCHANGEL
-            || o->Type == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
+        if (IsDivineArchangelWeaponModel(o->Type))
         {
             SetTextColor(1.f, 0.1f, 1.f);
         }
@@ -7464,11 +7470,7 @@ bool IsHighValueItem(ITEM* pItem)
         pItem->Type == ITEM_CAPE_OF_LORD ||
         (pItem->Type >= ITEM_WING_OF_STORM && pItem->Type <= ITEM_WING_OF_DIMENSION) ||
         pItem->AncientDiscriminator > 0 ||
-        pItem->Type == ITEM_DIVINE_SWORD_OF_ARCHANGEL ||
-        pItem->Type == ITEM_DIVINE_STAFF_OF_ARCHANGEL ||
-        pItem->Type == ITEM_DIVINE_STICK_OF_ARCHANGEL ||
-        pItem->Type == ITEM_DIVINE_CB_OF_ARCHANGEL ||
-        pItem->Type == ITEM_DIVINE_SCEPTER_OF_ARCHANGEL ||
+        IsDivineArchangelWeaponItem(pItem->Type) ||
         pItem->Type == ITEM_LOCHS_FEATHER ||
         pItem->Type == ITEM_FRUITS ||
         pItem->Type == ITEM_WEAPON_OF_ARCHANGEL ||
