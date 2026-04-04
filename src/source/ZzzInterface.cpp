@@ -7357,6 +7357,11 @@ void MoveHero()
     if (c->Object.Live == 0)
         return;
 
+    if (c->JumpTime > 0)
+    {
+        return;
+    }
+
     if (LoadingWorld > 0)
     {
         LoadingWorld--;
