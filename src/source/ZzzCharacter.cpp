@@ -3065,8 +3065,8 @@ void  PushingCharacter(CHARACTER* c, OBJECT* o)
         }
         else
         {
-            o->Position[0] += (((float)c->TargetX + 0.5f) * TERRAIN_SCALE - o->Position[0]) * Speed + FPS_ANIMATION_FACTOR;
-            o->Position[1] += (((float)c->TargetY + 0.5f) * TERRAIN_SCALE - o->Position[1]) * Speed + FPS_ANIMATION_FACTOR;
+            o->Position[0] += (((float)c->TargetX + 0.5f) * TERRAIN_SCALE - o->Position[0]) * Speed * FPS_ANIMATION_FACTOR;
+            o->Position[1] += (((float)c->TargetY + 0.5f) * TERRAIN_SCALE - o->Position[1]) * Speed * FPS_ANIMATION_FACTOR;
             if (o->Type != MODEL_BALL)
                 o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
             c->JumpTime += FPS_ANIMATION_FACTOR;
