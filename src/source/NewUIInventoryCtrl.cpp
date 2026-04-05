@@ -534,6 +534,71 @@ void SEASON3B::CNewUIInventoryCtrl::RemoveItem(ITEM* pItem)
     }
 }
 
+bool SEASON3B::CNewUIInventoryCtrl::RemoveItemAt(int iLinealPos)
+{
+    iLinealPos -= m_nIndexOffset;
+    ITEM* pItem = this->FindItemFromSlotIndex(iLinealPos, true);
+    if (pItem == nullptr)
+    {
+        return false;
+    }
+
+    this->RemoveItem(pItem);
+    return true;
+}
+
+ITEM* SEASON3B::CNewUIInventoryCtrl::FindItemFromSlotIndex(const int slotIndex, const bool recoverIfMissing)
+{
+    if (slotIndex < 0 || slotIndex >= m_nColumn * m_nRow)
+    {
+        return nullptr;
+    }
+
+    const DWORD key = m_pdwItemCheckBox[slotIndex];
+    if (key == 0)
+    {
+        return nullptr;
+    }
+
+    ITEM* pItem = this->FindItemByKey(key);
+    if (pItem != nullptr)
+    {
+        return pItem;
+    }
+
+    if (recoverIfMissing)
+    {
+        this->ClearSlotKey(key);
+        this->RequestInventoryRefresh();
+    }
+
+    return nullptr;
+}
+
+void SEASON3B::CNewUIInventoryCtrl::ClearSlotKey(const DWORD key)
+{
+    if (key == 0)
+    {
+        return;
+    }
+
+    for (int i = 0; i < m_nColumn * m_nRow; ++i)
+    {
+        if (m_pdwItemCheckBox[i] == key)
+        {
+            m_pdwItemCheckBox[i] = 0;
+        }
+    }
+}
+
+void SEASON3B::CNewUIInventoryCtrl::RequestInventoryRefresh() const
+{
+    if (SocketClient != nullptr && SocketClient->ToGameServer() != nullptr)
+    {
+        SocketClient->ToGameServer()->SendInventoryRequest();
+    }
+}
+
 void SEASON3B::CNewUIInventoryCtrl::RemoveAllItems()
 {
     memset(m_pdwItemCheckBox, 0, sizeof(DWORD) * m_nColumn * m_nRow);
@@ -583,12 +648,7 @@ void SEASON3B::CNewUIInventoryCtrl::GetSquareColorWarning(float* pfParams) const
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItem(int iLinealPos)
 {
     iLinealPos -= m_nIndexOffset;
-    if (iLinealPos >= 0 && iLinealPos < m_nColumn * m_nRow)
-    {
-        const DWORD dwKey = m_pdwItemCheckBox[iLinealPos];
-        return FindItemByKey(dwKey);
-    }
-    return nullptr;
+    return this->FindItemFromSlotIndex(iLinealPos, true);
 }
 
 ITEM* SEASON3B::CNewUIInventoryCtrl::FindItem(int iColumnX, int iRowY)
@@ -819,7 +879,7 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
         )
     {
         m_EventState = EVENT_PICKING;
-        ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset]);
+        ITEM* pItem = this->FindItem(m_iPointedSquareIndex);
         if (pItem)
         {
             if (CreatePickedItem(this, pItem))
@@ -835,8 +895,8 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
         && nullptr == GetPickedItem()
         && (m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset] > 1) && g_pNewUIMng)
     {
-        ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset]);
-        if (pItem != m_pToolTipItem)
+        ITEM* pItem = this->FindItem(m_iPointedSquareIndex);
+        if (pItem != nullptr && pItem != m_pToolTipItem)
         {
             CreateItemToolTip(pItem);
 
@@ -871,8 +931,13 @@ void SEASON3B::CNewUIInventoryCtrl::UpdateProcess()
         m_iPointedSquareIndex = iCurSquareIndex;
     }
 
-    if (m_iPointedSquareIndex == -1
-        || (m_iPointedSquareIndex != -1 && m_pdwItemCheckBox[m_iPointedSquareIndex - m_nIndexOffset] == 0))
+    bool hasValidPointedItem = false;
+    if (m_iPointedSquareIndex != -1)
+    {
+        hasValidPointedItem = this->FindItem(m_iPointedSquareIndex) != nullptr;
+    }
+
+    if (m_iPointedSquareIndex == -1 || !hasValidPointedItem)
     {
         m_EventState = EVENT_NONE;
         DeleteItemToolTip();
@@ -888,11 +953,12 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
         {
             const int iCurSquareIndex = y * m_nColumn + x;
 
-            if (m_pdwItemCheckBox[iCurSquareIndex] > 1)
+            const DWORD slotKey = m_pdwItemCheckBox[iCurSquareIndex];
+            if (slotKey > 1)
             {
                 EnableAlphaTest();
 
-                ITEM* pItem = FindItemByKey(m_pdwItemCheckBox[iCurSquareIndex]);
+                ITEM* pItem = FindItemByKey(slotKey);
 
                 if (pItem)
                 {
@@ -928,7 +994,9 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                 }
                 else
                 {
-                    glColor4f(0.3f, 0.5f, 0.5f, 0.6f);
+                    this->ClearSlotKey(slotKey);
+                    this->RequestInventoryRefresh();
+                    glColor4f(0.f, 0.f, 0.f, 0.f);
                 }
 
                 RenderColor(m_Pos.x + (x * INVENTORY_SQUARE_WIDTH), m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT), INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
@@ -1247,9 +1315,16 @@ bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int startIndex, int width, int hei
                 return false;
             }
 
-            if (m_pdwItemCheckBox[iIndex] != 0)
+            const DWORD slotKey = m_pdwItemCheckBox[iIndex];
+            if (slotKey != 0)
             {
-                return false;
+                if (this->FindItemByKey(slotKey) != nullptr)
+                {
+                    return false;
+                }
+
+                this->ClearSlotKey(slotKey);
+                this->RequestInventoryRefresh();
             }
         }
     }
@@ -1507,9 +1582,14 @@ void SEASON3B::CNewUIInventoryCtrl::BackupPickedItem()
         ITEM* pItemObj = ms_pPickedItem->GetItem();
         if (pOwner)
         {
-            pOwner->AddItem(pItemObj->x, pItemObj->y, pItemObj);
-
-            DeletePickedItem();
+            if (pOwner->AddItem(pItemObj->x, pItemObj->y, pItemObj))
+            {
+                DeletePickedItem();
+            }
+            else
+            {
+                pOwner->RequestInventoryRefresh();
+            }
         }
         else if (pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
         {

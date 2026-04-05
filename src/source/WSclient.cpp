@@ -5646,6 +5646,125 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
 static  const   BYTE    NOT_GET_ITEM = 0xff;
 static  const   BYTE    GET_ITEM_ZEN = 0xfe;
 static  const   BYTE    GET_ITEM_MULTI = 0xfd; // received when item was added in a stack
+
+namespace
+{
+    enum class GetItemPacketKind : int
+    {
+        Fail = 0,
+        Stacked = 1,
+        ZenUpdate = 2,
+        ItemAdded = 3,
+        ItemAddedLegacy = 4,
+    };
+
+    struct ParsedGetItemPacket
+    {
+        GetItemPacketKind Kind = GetItemPacketKind::Fail;
+        BYTE RawValue = 0;
+        int ItemIndex = -1;
+        size_t ItemDataOffset = 0;
+    };
+
+    bool TryExtractItemData(const std::span<const BYTE> receiveBuffer, const size_t itemDataOffset, std::span<const BYTE>& outItemData)
+    {
+        if (receiveBuffer.size() <= itemDataOffset)
+        {
+            return false;
+        }
+
+        const auto itemData = receiveBuffer.subspan(itemDataOffset);
+        const int itemLength = CalcItemLength(itemData);
+        if (itemLength <= 0 || static_cast<size_t>(itemLength) > itemData.size())
+        {
+            return false;
+        }
+
+        outItemData = itemData.subspan(0, static_cast<size_t>(itemLength));
+        return true;
+    }
+
+    ParsedGetItemPacket ParseGetItemPacket(const std::span<const BYTE> receiveBuffer)
+    {
+        ParsedGetItemPacket parsedPacket;
+        if (receiveBuffer.size() < sizeof(PBMSG_HEADER) + 1)
+        {
+            return parsedPacket;
+        }
+
+        parsedPacket.RawValue = receiveBuffer[sizeof(PBMSG_HEADER)];
+        const BYTE value = parsedPacket.RawValue;
+
+        if (value == NOT_GET_ITEM)
+        {
+            parsedPacket.Kind = GetItemPacketKind::Fail;
+            return parsedPacket;
+        }
+
+        if (value == GET_ITEM_MULTI)
+        {
+            parsedPacket.Kind = GetItemPacketKind::Stacked;
+            return parsedPacket;
+        }
+
+        if (value == GET_ITEM_ZEN)
+        {
+            // Modern layout: C3 0x22 with subcode 0xFE and 4-byte money payload.
+            const auto inventoryMoneyPacket = safe_cast<PRECEIVE_INVENTORY_MONEY>(receiveBuffer);
+            if (inventoryMoneyPacket != nullptr && receiveBuffer.size() == sizeof(PRECEIVE_INVENTORY_MONEY))
+            {
+                parsedPacket.Kind = GetItemPacketKind::ZenUpdate;
+                return parsedPacket;
+            }
+
+            // Legacy/alternative layout fallback:
+            // C1/C3 0x22 with value 0xFE and then [inventory slot][item data...].
+            constexpr size_t legacySlotOffset = sizeof(PBMSG_HEADER) + 1;
+            if (receiveBuffer.size() > legacySlotOffset)
+            {
+                const BYTE legacyItemSlot = receiveBuffer[legacySlotOffset];
+                std::span<const BYTE> legacyItemData;
+                if ((IsMainInventorySlot(legacyItemSlot) || IsInventoryExtensionSlot(legacyItemSlot))
+                    && TryExtractItemData(receiveBuffer, legacySlotOffset + 1, legacyItemData))
+                {
+                    parsedPacket.Kind = GetItemPacketKind::ItemAddedLegacy;
+                    parsedPacket.ItemIndex = legacyItemSlot;
+                    parsedPacket.ItemDataOffset = legacySlotOffset + 1;
+                    return parsedPacket;
+                }
+            }
+
+            if (inventoryMoneyPacket != nullptr)
+            {
+                parsedPacket.Kind = GetItemPacketKind::ZenUpdate;
+                return parsedPacket;
+            }
+
+            parsedPacket.Kind = GetItemPacketKind::Fail;
+            return parsedPacket;
+        }
+
+        if (IsMainInventorySlot(value) || IsInventoryExtensionSlot(value))
+        {
+            parsedPacket.Kind = GetItemPacketKind::ItemAdded;
+            parsedPacket.ItemIndex = value;
+            parsedPacket.ItemDataOffset = sizeof(PBMSG_HEADER) + 1;
+            return parsedPacket;
+        }
+
+        parsedPacket.Kind = GetItemPacketKind::Fail;
+        return parsedPacket;
+    }
+
+    void RequestInventorySync()
+    {
+        if (SocketClient != nullptr && SocketClient->ToGameServer() != nullptr)
+        {
+            SocketClient->ToGameServer()->SendInventoryRequest();
+        }
+    }
+}
+
 extern int ItemKey;
 void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 {
@@ -5661,7 +5780,9 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        if (Data->Value == GET_ITEM_ZEN)
+        auto pickedItem = &Items[ItemKey].Item;
+        bool shouldResyncInventory = false;
+        if (parsedPacket.Kind == GetItemPacketKind::ItemAdded || parsedPacket.Kind == GetItemPacketKind::ItemAddedLegacy)
         {
             auto Data2 = safe_cast<PRECEIVE_INVENTORY_MONEY>(ReceiveBuffer);
             if (Data2 == nullptr)
@@ -5678,10 +5799,47 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 
             if (getGold > 0)
             {
-                mu_swprintf(szMessage, L"%d %ls %ls", getGold, GlobalText[224], GlobalText[918]);
-                g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                if (g_pMyInventory->InsertItem(itemIndex, itemData))
+                {
+                    pickedItem = g_pMyInventory->FindItem(itemIndex);
+                }
+                else
+                {
+                    shouldResyncInventory = true;
+                }
+            }
+            else if (IsInventoryExtensionSlot(itemIndex))
+            {
+                if (g_pMyInventoryExt->InsertItem(itemIndex, itemData))
+                {
+                    pickedItem = g_pMyInventoryExt->FindItem(itemIndex);
+                }
+                else
+                {
+                    shouldResyncInventory = true;
+                }
             }
         }
+
+        if (shouldResyncInventory)
+        {
+            RequestInventorySync();
+        }
+
+        wchar_t szItem[64] = { 0, };
+        int level = pickedItem->Level;
+        GetItemName(pickedItem->Type, level, szItem);
+
+        wchar_t szMessage[128];
+        mu_swprintf(szMessage, L"%ls %ls", szItem, GlobalText[918]);
+        g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
+
+        int Type = pickedItem->Type;
+        if (Type == ITEM_JEWEL_OF_BLESS || Type == ITEM_JEWEL_OF_SOUL || Type == ITEM_JEWEL_OF_LIFE || Type == ITEM_JEWEL_OF_CHAOS || Type == ITEM_JEWEL_OF_CREATION
+            || Type == INDEX_COMPILED_CELE || Type == INDEX_COMPILED_SOUL || Type == ITEM_JEWEL_OF_GUARDIAN)
+            PlayBuffer(SOUND_JEWEL01, &Hero->Object);
+        else if (Type == ITEM_GEMSTONE)
+            PlayBuffer(SOUND_JEWEL02, &Hero->Object);
         else
         {
             auto pickedItem = &Items[ItemKey].Item;
@@ -5814,6 +5972,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
             SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 
             int itemindex = Data->Index;
+            bool shouldResyncInventory = false;
 
             if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
             {
@@ -5823,17 +5982,22 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                g_pMyInventory->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyInventory->InsertItem(itemindex, itemData);
             }
             else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                g_pMyInventoryExt->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyInventoryExt->InsertItem(itemindex, itemData);
             }
             else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
             {
-                g_pMyShopInventory->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyShopInventory->InsertItem(itemindex, itemData);
+            }
+
+            if (shouldResyncInventory)
+            {
+                RequestInventorySync();
             }
         }
         else if (storageType == STORAGE_TYPE::TRADE)
@@ -5911,18 +6075,28 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     }
 
     int itemindex = Data->Index;
-    if (g_pMyInventory->FindItem(itemindex))
+    if (IsMainInventorySlot(itemindex) && g_pMyInventory->FindItem(itemindex))
     {
         g_pMyInventory->DeleteItem(itemindex);
     }
-
-    if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+    else if (IsInventoryExtensionSlot(itemindex) && g_pMyInventoryExt->FindItem(itemindex))
     {
-        g_pMyInventory->InsertItem(itemindex, itemData);
+        g_pMyInventoryExt->DeleteItem(itemindex);
+    }
+
+    bool shouldResyncInventory = false;
+    if (IsMainInventorySlot(itemindex))
+    {
+        shouldResyncInventory = !g_pMyInventory->InsertItem(itemindex, itemData);
     }
     else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
     {
-        g_pMyInventoryExt->InsertItem(itemindex, itemData);
+        shouldResyncInventory = !g_pMyInventoryExt->InsertItem(itemindex, itemData);
+    }
+
+    if (shouldResyncInventory)
+    {
+        RequestInventorySync();
     }
 
     int iType = Items[itemindex].Item.Type;

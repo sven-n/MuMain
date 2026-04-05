@@ -377,22 +377,19 @@ void CNewUIMyInventory::DeleteItem(int iIndex) const
 {
     if (m_pNewInventoryCtrl)
     {
-        ITEM* pItem = m_pNewInventoryCtrl->FindItem(iIndex);
-        if (pItem != nullptr)
+        if (m_pNewInventoryCtrl->RemoveItemAt(iIndex))
         {
-            m_pNewInventoryCtrl->RemoveItem(pItem);
+            return;
         }
-        else
+
+        CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+        if (pPickedItem)
         {
-            CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-            if (pPickedItem)
+            if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
             {
-                if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
+                if (pPickedItem->GetSourceLinealPos() == iIndex)
                 {
-                    if (pPickedItem->GetSourceLinealPos() == iIndex)
-                    {
-                        CNewUIInventoryCtrl::DeletePickedItem();
-                    }
+                    CNewUIInventoryCtrl::DeletePickedItem();
                 }
             }
         }
