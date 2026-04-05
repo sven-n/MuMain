@@ -6849,6 +6849,10 @@ void ReceiveDurability(const BYTE* ReceiveBuffer)
     else
     {
         ITEM* pItem = g_pMyInventory->FindItem(Data->Value);
+        if (pItem == nullptr && IsInventoryExtensionSlot(Data->Value))
+        {
+            pItem = g_pMyInventoryExt->FindItem(Data->Value);
+        }
 
         if (pItem)
         {
