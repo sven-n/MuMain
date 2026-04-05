@@ -3949,21 +3949,24 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[40 + 2], DamageMin, DamageMax);
         }
-        else if (ip->Type != ITEM_SCROLL_OF_TELEPORT && ip->Type != ITEM_SCROLL_OF_TELEPORT_ALLY && ip->Type != ITEM_SCROLL_OF_SOUL_BARRIER)
-        {
-            if (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC + MAX_ITEM_INDEX)
+            else if (ip->Type != ITEM_SCROLL_OF_TELEPORT && ip->Type != ITEM_SCROLL_OF_TELEPORT_ALLY && ip->Type != ITEM_SCROLL_OF_SOUL_BARRIER)
             {
-                auto SkillIndex = GetSkillByBook(ip->Type);
+                if (ip->Type >= ITEM_ETC && ip->Type < ITEM_ETC + MAX_ITEM_INDEX)
+                {
+                    const ActionSkillType skillIndex = GetSkillByBook(ip->Type);
+                    if (SkillAttribute != nullptr
+                        && skillIndex != AT_SKILL_UNDEFINED
+                        && IsValidateSkillIdx(static_cast<INT>(skillIndex)))
+                    {
+                        const SKILL_ATTRIBUTE& skillAtt = SkillAttribute[skillIndex];
+                        DamageMin = skillAtt.Damage;
+                        DamageMax = skillAtt.Damage + skillAtt.Damage / 2;
+                    }
 
-                SKILL_ATTRIBUTE* skillAtt = &SkillAttribute[SkillIndex];
-
-                DamageMin = skillAtt->Damage;
-                DamageMax = skillAtt->Damage + skillAtt->Damage / 2;
-
-                mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
-            }
-            else
-            {
+                    mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
+                }
+                else
+                {
                 if (DamageMin + minindex >= DamageMax + maxindex)
                     mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[40 + p->TwoHand], DamageMax + maxindex, DamageMax + maxindex);
                 else

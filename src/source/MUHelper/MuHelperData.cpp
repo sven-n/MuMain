@@ -119,7 +119,7 @@ namespace MUHelper
 		netData.Zen = gameData.bPickZen ? 1 : 0;
 		netData.JewelOrGem = gameData.bPickJewel ? 1 : 0;
 		netData.ExcellentItem = gameData.bPickExcellent ? 1 : 0;
-		netData.SetItem = gameData.bPickAllItems ? 1 : 0;
+		netData.SetItem = gameData.bPickAncient ? 1 : 0;
 		netData.AddExtraItem = gameData.bPickExtraItems ? 1 : 0;
 
 		memset(netData.ExtraItems, 0, sizeof(netData.ExtraItems));

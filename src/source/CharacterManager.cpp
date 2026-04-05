@@ -33,6 +33,7 @@ namespace
     constexpr int kSpecialWingType = ITEM_WING + 135;
 
     constexpr int kDefaultClassTextIndex = 2305;
+    constexpr int kMasterExperienceUnlockLevel = 400;
 
     constexpr std::array<ClassTextEntry, 18> kClassTextEntries{{
         { CLASS_WIZARD, 20 },
@@ -222,6 +223,11 @@ bool CCharacterManager::IsThirdClass(const CLASS_TYPE byClass)
 bool CCharacterManager::IsMasterLevel(const CLASS_TYPE byClass)
 {
     return this->IsThirdClass(byClass);
+}
+
+bool CCharacterManager::IsMasterExperienceActive(const CLASS_TYPE byClass, const int level)
+{
+    return this->IsMasterLevel(byClass) && level >= kMasterExperienceUnlockLevel;
 }
 
 const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byCharacterClass)
