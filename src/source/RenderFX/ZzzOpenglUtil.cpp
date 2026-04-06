@@ -808,18 +808,15 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
 {
     BindTexture(Texture);
 
-    vec3_t p2;
-    VectorTransform(Position, CameraMatrix, p2);
-    float x = p2[0];
-    float y = p2[1];
-    float z = p2[2];
-
-    // Clip sprites behind or too close to camera — prevents degenerate triangles
-    // that stretch across the screen when perspective division produces w≈0.
-    // CameraViewNear is 20.f; use a small margin to catch near-plane sprites.
-    if (z >= -1.0f)
+    // Build billboard in WORLD space (not camera space) so the 1-frame vertex
+    // delay doesn't produce near-plane artifacts when the camera rotates.
+    // Extract camera right/up vectors from CameraMatrix for billboard orientation.
+    vec3_t camRight, camUp;
     {
-        return;
+        vec3_t r = {1.f, 0.f, 0.f};
+        vec3_t u = {0.f, 1.f, 0.f};
+        VectorIRotate(r, CameraMatrix, camRight);
+        VectorIRotate(u, CameraMatrix, camUp);
     }
 
     Width *= 0.5f;
@@ -828,27 +825,31 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     vec3_t p[4];
     if (Rotation == 0)
     {
-        Vector(x - Width, y - Height, z, p[0]);
-        Vector(x + Width, y - Height, z, p[1]);
-        Vector(x + Width, y + Height, z, p[2]);
-        Vector(x - Width, y + Height, z, p[3]);
+        for (int i = 0; i < 3; i++)
+        {
+            p[0][i] = Position[i] + (-Width) * camRight[i] + (-Height) * camUp[i];
+            p[1][i] = Position[i] + (Width)*camRight[i] + (-Height) * camUp[i];
+            p[2][i] = Position[i] + (Width)*camRight[i] + (Height)*camUp[i];
+            p[3][i] = Position[i] + (-Width) * camRight[i] + (Height)*camUp[i];
+        }
     }
     else
     {
-        vec3_t p2[4];
-        Vector(-Width, -Height, z, p2[0]);
-        Vector(Width, -Height, z, p2[1]);
-        Vector(Width, Height, z, p2[2]);
-        Vector(-Width, Height, z, p2[3]);
-        vec3_t Angle;
-        Vector(0.f, 0.f, Rotation, Angle);
-        float Matrix[3][4];
-        AngleMatrix(Angle, Matrix);
-        for (int i = 0; i < 4; i++)
+        // Rotate billboard around its center (camera forward axis)
+        float rad = Rotation * 3.14159265358979f / 180.0f;
+        float cosR = cosf(rad), sinR = sinf(rad);
+        vec3_t rotRight, rotUp;
+        for (int i = 0; i < 3; i++)
         {
-            VectorRotate(p2[i], Matrix, p[i]);
-            p[i][0] += x;
-            p[i][1] += y;
+            rotRight[i] = cosR * camRight[i] + sinR * camUp[i];
+            rotUp[i] = -sinR * camRight[i] + cosR * camUp[i];
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            p[0][i] = Position[i] + (-Width) * rotRight[i] + (-Height) * rotUp[i];
+            p[1][i] = Position[i] + (Width)*rotRight[i] + (-Height) * rotUp[i];
+            p[2][i] = Position[i] + (Width)*rotRight[i] + (Height)*rotUp[i];
+            p[3][i] = Position[i] + (-Width) * rotRight[i] + (Height)*rotUp[i];
         }
     }
 
@@ -892,24 +893,25 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
 {
     BindTexture(Texture);
 
-    vec3_t p2;
-    VectorTransform(Position, CameraMatrix, p2);
-    float x = p2[0];
-    float y = p2[1];
-    float z = p2[2];
-
-    if (z >= -1.0f)
+    // World-space billboard (same approach as RenderSprite).
+    vec3_t camRight, camUp;
     {
-        return;
+        vec3_t r = {1.f, 0.f, 0.f};
+        vec3_t u = {0.f, 1.f, 0.f};
+        VectorIRotate(r, CameraMatrix, camRight);
+        VectorIRotate(u, CameraMatrix, camUp);
     }
 
     Width *= 0.5f;
     Height *= 0.5f;
     vec3_t p[4];
-    Vector(x - Width, y - Height, z, p[0]);
-    Vector(x + Width, y - Height, z, p[1]);
-    Vector(x + Width, y + Height, z, p[2]);
-    Vector(x - Width, y + Height, z, p[3]);
+    for (int i = 0; i < 3; i++)
+    {
+        p[0][i] = Position[i] + (-Width) * camRight[i] + (-Height) * camUp[i];
+        p[1][i] = Position[i] + (Width)*camRight[i] + (-Height) * camUp[i];
+        p[2][i] = Position[i] + (Width)*camRight[i] + (Height)*camUp[i];
+        p[3][i] = Position[i] + (-Width) * camRight[i] + (Height)*camUp[i];
+    }
 
     // Story 7-9-2 (AC-5): Port GL_QUADS spriteUV to MuRenderer triangle list.
     auto ToByte = [](float f) -> std::uint8_t
