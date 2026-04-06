@@ -3671,6 +3671,12 @@ struct PacketInfo
 };
 void ProcessPacketCallback(const PacketInfo* Packet);
 
+#ifdef MU_ENABLE_SDL3
+// Drain the thread-safe packet queue — called once per frame from the game loop.
+// On Win32, packets flow through PostMessage/WM_RECEIVE_BUFFER instead.
+void DrainPacketQueue();
+#endif
+
 void InitGame();
 void InitGuildWar();
 

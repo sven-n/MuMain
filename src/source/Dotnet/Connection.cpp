@@ -165,12 +165,16 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
 
     this->_handle = dotnet_connect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS);
 
+    g_ErrorReport.Write(L"NET: dotnet_connect returned handle=%d (encrypted=%d)\r\n",
+                        this->_handle, isEncrypted ? 1 : 0);
+
     if (IsConnected())
     {
         connections[this->_handle] = this;
         if (dotnet_beginreceive)
         {
             dotnet_beginreceive(this->_handle);
+            g_ErrorReport.Write(L"NET: BeginReceive started for handle=%d\r\n", this->_handle);
         }
 
         // cppcheck-suppress [noCopyConstructor, noOperatorEq]
@@ -239,14 +243,24 @@ void Connection::OnDisconnected()
 {
     if (!IsConnected())
     {
+        g_ErrorReport.Write(L"NET: OnDisconnected called but already disconnected\r\n");
         return;
     }
 
+    g_ErrorReport.Write(L"NET: OnDisconnected — handle=%d, erasing from connection map\r\n", this->_handle);
     connections.erase(this->_handle);
     this->_handle = 0;
 }
 
 void Connection::OnPacketReceived(const BYTE* data, const int32_t size)
 {
+    // Diagnostic: log first packet to confirm .NET→C++ callback path is working.
+    static bool s_firstPacketLogged = false;
+    if (!s_firstPacketLogged)
+    {
+        g_ErrorReport.Write(L"NET: First packet received — handle=%d size=%d (callback path working)\r\n",
+                            this->_handle, size);
+        s_firstPacketLogged = true;
+    }
     this->_packetHandler(this->_handle, data, size);
 }

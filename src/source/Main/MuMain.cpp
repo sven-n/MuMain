@@ -562,6 +562,11 @@ int MuMain(int argc, char* argv[])
             g_muFrameTimer.FrameStart();
 
 #ifdef MU_ENABLE_SDL3
+            // Drain packets queued by the .NET I/O thread before processing the frame.
+            // On Win32 this happens via PostMessage/WM_RECEIVE_BUFFER in the message pump;
+            // on SDL3 we poll the thread-safe queue directly.
+            DrainPacketQueue();
+
             // Story 4.3.1: Per-frame SDL_gpu command buffer / render pass lifecycle.
             mu::GetRenderer().BeginFrame();
 

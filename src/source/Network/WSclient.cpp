@@ -1,5 +1,7 @@
 ﻿#include "stdafx.h"
 #include <memory>
+#include <mutex>
+#include <queue>
 #include "UIManager.h"
 #include "GuildCache.h"
 #include "ZzzBMD.h"
@@ -152,6 +154,17 @@ void AddDebugText(const unsigned char* Buffer, int Size)
 
 // Forward declaration
 static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
+
+#ifdef MU_ENABLE_SDL3
+// Thread-safe packet queue for SDL3 builds.
+// On Windows, HandleIncomingPacket posts to the Win32 message queue (WM_RECEIVE_BUFFER).
+// On SDL3, PostMessage is a no-op — packets must be queued here and drained each frame.
+// The .NET bridge invokes HandleIncomingPacket on an I/O thread, so mutex protection is required.
+static std::mutex s_packetQueueMutex;
+static std::queue<std::unique_ptr<PacketInfo>> s_packetQueue;
+static uint32_t s_dbgPacketsReceived = 0u;
+static uint32_t s_dbgPacketsProcessed = 0u;
+#endif
 
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
@@ -14530,6 +14543,43 @@ void ProcessPacketCallback(const PacketInfo* Packet)
     }
 }
 
+#ifdef MU_ENABLE_SDL3
+void DrainPacketQueue()
+{
+    // Move all queued packets to a local vector under the lock, then process without the lock.
+    // This minimizes lock contention with the .NET I/O thread.
+    std::vector<std::unique_ptr<PacketInfo>> batch;
+    {
+        std::lock_guard<std::mutex> lock(s_packetQueueMutex);
+        while (!s_packetQueue.empty())
+        {
+            batch.push_back(std::move(s_packetQueue.front()));
+            s_packetQueue.pop();
+        }
+    }
+
+    for (const auto& pkt : batch)
+    {
+        ProcessPacketCallback(pkt.get());
+        ++s_dbgPacketsProcessed;
+    }
+
+    // Periodic diagnostic: log packet throughput every 300 frames (~5 sec at 60fps).
+    static uint32_t s_frameCount = 0u;
+    if (++s_frameCount >= 300u)
+    {
+        if (s_dbgPacketsReceived > 0u || s_dbgPacketsProcessed > 0u)
+        {
+            g_ConsoleDebug->Write(MCD_NORMAL, L"[NET diag] packets received=%u processed=%u queued=%zu",
+                                  s_dbgPacketsReceived, s_dbgPacketsProcessed, batch.size());
+        }
+        s_dbgPacketsReceived = 0u;
+        s_dbgPacketsProcessed = 0u;
+        s_frameCount = 0u;
+    }
+}
+#endif
+
 static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size)
 {
     auto Packet = std::make_unique<PacketInfo>();
@@ -14537,7 +14587,17 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     std::copy(ReceiveBuffer, ReceiveBuffer + Size, Packet->ReceiveBuffer.get());
     Packet->Size = Size;
 
+#ifdef MU_ENABLE_SDL3
+    // SDL3: queue packet for main-thread processing — PostMessage is a no-op on non-Windows.
+    // Called from .NET I/O thread, so mutex is required.
+    {
+        std::lock_guard<std::mutex> lock(s_packetQueueMutex);
+        s_packetQueue.push(std::move(Packet));
+        ++s_dbgPacketsReceived;
+    }
+#else
     PostMessage(g_hWnd, WM_RECEIVE_BUFFER, reinterpret_cast<WPARAM>(Packet.release()), 0);
+#endif
 }
 
 bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
