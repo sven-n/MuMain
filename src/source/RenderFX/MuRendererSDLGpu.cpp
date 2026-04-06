@@ -14,7 +14,8 @@
 //   - Real HLSL shaders loaded from MU_SHADER_DIR blobs (set by CMake).
 //   - Fog uniform buffer (s_fogUniformBuf) is created in Init() and updated in SetFog().
 //   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D (AC-8 fix).
-//   - Single pre-frame vertex upload in BeginFrame() / unmap in EndFrame() (AC-7 fix).
+//   - Deferred draw command recording: vertices collected during frame, copied to GPU
+//     in EndFrame() BEFORE the render pass, then draw commands replayed (AC-7 fix).
 //
 // GUARD STRUCTURE:
 //   Story 7.9.3: SDL_gpu is the only renderer backend (MuRenderer.cpp deleted).
@@ -286,6 +287,43 @@ static Uint32 s_stripIdxCapacity = 0u; // in indices (Uint16)
 
 // Sampler (single LINEAR sampler for all textures).
 static SDL_GPUSampler* s_defaultSampler = nullptr;
+
+// ---------------------------------------------------------------------------
+// Deferred draw command recording.
+// Draw calls record RenderCmds during the frame; EndFrame replays them after
+// copying vertex data to the GPU buffer. This eliminates the 1-frame vertex
+// data delay that caused streak artifacts when vertex counts varied per frame.
+// ---------------------------------------------------------------------------
+enum class RenderCmdType : uint8_t
+{
+    SetViewport,
+    DrawTriangles,       // non-indexed 3D (Vertex3D)
+    DrawIndexedQuads2D,  // indexed 2D with static quad index buffer (Vertex2D)
+    DrawIndexedStrip,    // indexed 3D with per-frame strip indices (Vertex3D)
+};
+
+struct RenderCmd
+{
+    RenderCmdType type;
+    SDL_GPUGraphicsPipeline* pipeline;
+    SDL_GPUTexture* texture;
+    SDL_GPUSampler* sampler;
+    Uint32 vtxOffset;
+    Uint32 vtxCount;         // for DrawTriangles
+    Uint32 idxCount;         // for DrawIndexed*
+    Uint32 stripIdxOffset;   // byte offset into strip index scratch buffer
+    VertexUniforms vu;
+    FogUniform fogUniform;
+    SDL_GPUViewport viewport; // for SetViewport only
+};
+
+static std::vector<RenderCmd> s_renderCmds;
+// True between BeginFrame/EndFrame — replaces s_renderPass as the "frame active" guard
+// during the collection phase (render pass is only opened in EndFrame now).
+static bool s_frameActive = false;
+// CPU-side scratch buffer for quad strip indices accumulated during the frame.
+// Copied to GPU in one shot in EndFrame before the render pass.
+static std::vector<Uint16> s_stripIdxScratch;
 
 // Default white 1×1 texture used for textureId==0 and unknown IDs.
 static SDL_GPUTexture* s_whiteTexture = nullptr;
@@ -687,8 +725,10 @@ public:
             return;
         }
 
-        // Reset vertex scratch offset and per-frame diagnostics at start of each frame.
+        // Reset vertex scratch offset, deferred command list, and per-frame diagnostics.
         s_vtxOffset = 0u;
+        s_renderCmds.clear();
+        s_stripIdxScratch.clear();
         s_dbgDrawCallsThisFrame = 0u;
         s_dbgVtxBytesThisFrame = 0u;
         ++s_dbgFrameCount;
@@ -738,33 +778,10 @@ public:
         // Recreates on first frame or when window is resized.
         CreateOrResizeDepthTexture(s_swapW, s_swapH);
 
-        // Begin render pass targeting the swapchain texture + depth buffer.
-        SDL_GPUColorTargetInfo colorTarget{};
-        colorTarget.texture = s_swapchainTexture;
-        colorTarget.clear_color = {0.0f, 0.0f, 0.0f, 1.0f};
-        colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
-        colorTarget.store_op = SDL_GPU_STOREOP_STORE;
-
-        // Story 7.9.7 (AC-3): Depth target — clear to 1.0 (far plane) each frame.
-        SDL_GPUDepthStencilTargetInfo depthTarget{};
-        depthTarget.texture = s_depthTexture;
-        depthTarget.clear_depth = 1.0f;
-        depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
-        depthTarget.store_op = SDL_GPU_STOREOP_STORE;
-        depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
-        depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
-        depthTarget.cycle = true;
-
-        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
-        if (!s_renderPass)
-        {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_BeginGPURenderPass failed: %hs", SDL_GetError());
-            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-            s_vtxMappedPtr = nullptr;
-            SDL_CancelGPUCommandBuffer(s_cmdBuf);
-            s_cmdBuf = nullptr;
-            s_swapchainTexture = nullptr;
-        }
+        // Deferred rendering: do NOT begin the render pass here.
+        // Draw calls record RenderCmds into s_renderCmds during the frame.
+        // EndFrame will: copy vertex data → begin render pass → replay → end → submit.
+        s_frameActive = true;
 #endif
     }
 
@@ -781,10 +798,9 @@ public:
     void EndFrame() override
     {
 #ifdef MU_ENABLE_SDL3
-        if (!s_renderPass)
+        if (!s_frameActive)
         {
-            // No render pass was started (minimized window or error).
-            // Unmap the vtx buffer if it was mapped and cancel the command buffer.
+            // Frame was not started (minimized window or error).
             if (s_vtxMappedPtr)
             {
                 SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
@@ -797,37 +813,198 @@ public:
             }
             return;
         }
+        s_frameActive = false;
 
-        SDL_EndGPURenderPass(s_renderPass);
-        s_renderPass = nullptr;
-
-        // Story 4.3.2 (AC-7): Unmap and copy vertex data to GPU buffer (post-render-pass).
-        // Next frame's render pass will use the updated GPU buffer contents.
-        if (s_vtxMappedPtr && s_vtxOffset > 0u)
+        // ---------------------------------------------------------------
+        // Phase 1: Unmap the vertex transfer buffer (done writing vertices).
+        // ---------------------------------------------------------------
+        if (s_vtxMappedPtr)
         {
             SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
             s_vtxMappedPtr = nullptr;
+        }
 
-            SDL_GPUCopyPass* vtxCopyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
-            if (vtxCopyPass)
+        // ---------------------------------------------------------------
+        // Phase 2: Copy pass — upload vertex + strip index data to GPU.
+        // This happens BEFORE the render pass so the GPU reads current-
+        // frame data, eliminating the 1-frame vertex delay that caused
+        // streak artifacts when vertex counts varied between frames.
+        // ---------------------------------------------------------------
+        bool stripIdxReady = false;
+        if (!s_stripIdxScratch.empty())
+        {
+            // Ensure GPU-side strip index buffer is large enough BEFORE the copy pass
+            // (EnsureStripIndexBuffer may release/create GPU resources).
+            if (EnsureStripIndexBuffer(static_cast<Uint32>(s_stripIdxScratch.size())))
             {
-                SDL_GPUTransferBufferLocation src{};
-                src.transfer_buffer = s_vtxTransferBuf;
-                src.offset = 0;
-
-                SDL_GPUBufferRegion dst{};
-                dst.buffer = s_vtxGpuBuf;
-                dst.offset = 0;
-                dst.size = s_vtxOffset; // only flush bytes actually written
-
-                SDL_UploadToGPUBuffer(vtxCopyPass, &src, &dst, false);
-                SDL_EndGPUCopyPass(vtxCopyPass);
+                void* pIdxMapped = SDL_MapGPUTransferBuffer(s_device, s_stripIdxTransfer, false);
+                if (pIdxMapped)
+                {
+                    const Uint32 totalIdxBytes =
+                        static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
+                    std::memcpy(pIdxMapped, s_stripIdxScratch.data(), totalIdxBytes);
+                    SDL_UnmapGPUTransferBuffer(s_device, s_stripIdxTransfer);
+                    stripIdxReady = true;
+                }
             }
         }
-        else if (s_vtxMappedPtr)
+
+        if (s_vtxOffset > 0u || stripIdxReady)
         {
-            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-            s_vtxMappedPtr = nullptr;
+            SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
+            if (copyPass)
+            {
+                // Copy vertex data.
+                if (s_vtxOffset > 0u)
+                {
+                    SDL_GPUTransferBufferLocation vtxSrc{};
+                    vtxSrc.transfer_buffer = s_vtxTransferBuf;
+                    vtxSrc.offset = 0;
+
+                    SDL_GPUBufferRegion vtxDst{};
+                    vtxDst.buffer = s_vtxGpuBuf;
+                    vtxDst.offset = 0;
+                    vtxDst.size = s_vtxOffset;
+
+                    SDL_UploadToGPUBuffer(copyPass, &vtxSrc, &vtxDst, false);
+                }
+
+                // Copy accumulated strip index data (all strips for this frame).
+                if (stripIdxReady)
+                {
+                    const Uint32 totalIdxBytes =
+                        static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
+
+                    SDL_GPUTransferBufferLocation idxSrc{};
+                    idxSrc.transfer_buffer = s_stripIdxTransfer;
+                    idxSrc.offset = 0;
+
+                    SDL_GPUBufferRegion idxDst{};
+                    idxDst.buffer = s_stripIdxBuf;
+                    idxDst.offset = 0;
+                    idxDst.size = totalIdxBytes;
+
+                    SDL_UploadToGPUBuffer(copyPass, &idxSrc, &idxDst, false);
+                }
+
+                SDL_EndGPUCopyPass(copyPass);
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Phase 3: Render pass — replay all recorded draw commands.
+        // The GPU vertex/index buffers now contain current-frame data.
+        // ---------------------------------------------------------------
+        {
+            SDL_GPUColorTargetInfo colorTarget{};
+            colorTarget.texture = s_swapchainTexture;
+            colorTarget.clear_color = {0.0f, 0.0f, 0.0f, 1.0f};
+            colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+            colorTarget.store_op = SDL_GPU_STOREOP_STORE;
+
+            SDL_GPUDepthStencilTargetInfo depthTarget{};
+            depthTarget.texture = s_depthTexture;
+            depthTarget.clear_depth = 1.0f;
+            depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+            depthTarget.store_op = SDL_GPU_STOREOP_STORE;
+            depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+            depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+            depthTarget.cycle = true;
+
+            s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1,
+                                                  s_depthTexture ? &depthTarget : nullptr);
+        }
+
+        if (s_renderPass)
+        {
+            // Replay all recorded draw commands in submission order.
+            for (const auto& cmd : s_renderCmds)
+            {
+                switch (cmd.type)
+                {
+                case RenderCmdType::SetViewport:
+                {
+                    // const_cast: SDL_SetGPUViewport takes a non-const pointer but
+                    // does not modify the viewport struct.
+                    auto vp = cmd.viewport;
+                    SDL_SetGPUViewport(s_renderPass, &vp);
+                    break;
+                }
+
+                case RenderCmdType::DrawTriangles:
+                {
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                    break;
+                }
+
+                case RenderCmdType::DrawIndexedQuads2D:
+                {
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                    SDL_GPUBufferBinding idxBind{};
+                    idxBind.buffer = s_quadIdxBuf;
+                    idxBind.offset = 0;
+                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
+                    break;
+                }
+
+                case RenderCmdType::DrawIndexedStrip:
+                {
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                    SDL_GPUBufferBinding idxBind{};
+                    idxBind.buffer = s_stripIdxBuf;
+                    idxBind.offset = cmd.stripIdxOffset;
+                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
+                    break;
+                }
+                } // switch
+            } // for
+
+            SDL_EndGPURenderPass(s_renderPass);
+            s_renderPass = nullptr;
         }
 
         if (s_cmdBuf)
@@ -862,7 +1039,7 @@ public:
     void BeginScene(int x, int y, int w, int h) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (!s_renderPass || !s_window)
+        if (!s_frameActive || !s_window)
         {
             return;
         }
@@ -871,15 +1048,15 @@ public:
         const float scaleX = static_cast<float>(s_swapW) / 640.0f;
         const float scaleY = static_cast<float>(s_swapH) / 480.0f;
 
-        SDL_GPUViewport viewport{};
-        viewport.x = static_cast<float>(x) * scaleX;
-        viewport.y = static_cast<float>(y) * scaleY;
-        viewport.w = static_cast<float>(w) * scaleX;
-        viewport.h = static_cast<float>(h) * scaleY;
-        viewport.min_depth = 0.0f;
-        viewport.max_depth = 1.0f;
-
-        SDL_SetGPUViewport(s_renderPass, &viewport);
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::SetViewport;
+        cmd.viewport.x = static_cast<float>(x) * scaleX;
+        cmd.viewport.y = static_cast<float>(y) * scaleY;
+        cmd.viewport.w = static_cast<float>(w) * scaleX;
+        cmd.viewport.h = static_cast<float>(h) * scaleY;
+        cmd.viewport.min_depth = 0.0f;
+        cmd.viewport.max_depth = 1.0f;
+        s_renderCmds.push_back(cmd);
 #else
         (void)x;
         (void)y;
@@ -895,21 +1072,21 @@ public:
     void EndScene() override
     {
 #ifdef MU_ENABLE_SDL3
-        if (!s_renderPass)
+        if (!s_frameActive)
         {
             return;
         }
 
         // Reset viewport to full swapchain (physical pixels).
-        SDL_GPUViewport fullVP{};
-        fullVP.x = 0.0f;
-        fullVP.y = 0.0f;
-        fullVP.w = static_cast<float>(s_swapW);
-        fullVP.h = static_cast<float>(s_swapH);
-        fullVP.min_depth = 0.0f;
-        fullVP.max_depth = 1.0f;
-
-        SDL_SetGPUViewport(s_renderPass, &fullVP);
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::SetViewport;
+        cmd.viewport.x = 0.0f;
+        cmd.viewport.y = 0.0f;
+        cmd.viewport.w = static_cast<float>(s_swapW);
+        cmd.viewport.h = static_cast<float>(s_swapH);
+        cmd.viewport.min_depth = 0.0f;
+        cmd.viewport.max_depth = 1.0f;
+        s_renderCmds.push_back(cmd);
 #endif
     }
 
@@ -949,7 +1126,7 @@ public:
     void RenderLines(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.empty() || !s_renderPass)
+        if (vertices.empty() || !s_frameActive)
         {
             return;
         }
@@ -1045,7 +1222,7 @@ public:
     // -----------------------------------------------------------------------
     [[nodiscard]] bool IsFrameActive() const override
     {
-        return s_renderPass != nullptr;
+        return s_frameActive;
     }
 
     // Story 4.4.1 (AC-2, Task 6.2/6.3): GetDevice override — returns s_device.
@@ -1077,7 +1254,7 @@ public:
     void RenderQuad2D(std::span<const Vertex2D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.empty() || !s_renderPass || !m_colorWriteEnabled || m_stencilTestEnabled)
+        if (vertices.empty() || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
         }
@@ -1118,46 +1295,8 @@ public:
             }
             return;
         }
-        SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
-
-        // Push ScreenSize uniform (slot 0) — vertex shader divides pos by this
-        // to convert from 640x480 design-space pixels to NDC.
-        {
-            // 2D ortho MVP: maps [0,W]×[0,H] to NDC, replicating gluOrtho2D.
-            // GLM_FORCE_DEPTH_ZERO_TO_ONE → correct Z [0,1] for Metal/Vulkan.
-            // Story 7.9.7: fogStart=fogEnd=0 → range=0 → vertex shader sets fogFactor=1.0 (no fog for 2D).
-            int winW = 0, winH = 0;
-            SDL_GetWindowSize(s_window, &winW, &winH);
-            VertexUniforms vu{};
-            vu.mvp = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &vu, sizeof(vu));
-        }
-
-        // Bind vertex buffer.
-        SDL_GPUBufferBinding vtxBinding{};
-        vtxBinding.buffer = s_vtxGpuBuf;
-        vtxBinding.offset = vtxOffset;
-        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBinding, 1);
-
-        // Bind index buffer (static quad index buffer).
-        SDL_GPUBufferBinding idxBinding{};
-        idxBinding.buffer = s_quadIdxBuf;
-        idxBinding.offset = 0;
-        SDL_BindGPUIndexBuffer(s_renderPass, &idxBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-        // Story 4.4.1 (AC-4): Bind per-texture sampler via LookupSampler; fallback to s_defaultSampler.
-        void* pSampler = LookupSampler(textureId);
-        SDL_GPUTextureSamplerBinding samplerBinding{};
-        samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
-        samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
-        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
-
-        // Story 7.9.7: Push fog/alpha uniform per-draw (replaces GPU storage buffer).
-        // This allows alphaDiscardEnabled to change per-draw-call during the render pass.
-        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &m_fogUniform, sizeof(FogUniform));
 
         const Uint32 numQuads = static_cast<Uint32>(vertices.size() / 4);
-        // Code-review fix H-2: guard against reading past the static quad index buffer.
         if (numQuads > static_cast<Uint32>(k_MaxQuads))
         {
             g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuad2D -- numQuads %u exceeds k_MaxQuads %d; clamping draw",
@@ -1165,7 +1304,26 @@ public:
         }
         const Uint32 drawQuads =
             (numQuads <= static_cast<Uint32>(k_MaxQuads)) ? numQuads : static_cast<Uint32>(k_MaxQuads);
-        SDL_DrawGPUIndexedPrimitives(s_renderPass, drawQuads * 6, 1, 0, 0, 0);
+
+        void* pSampler = LookupSampler(textureId);
+
+        // Record deferred draw command — replayed in EndFrame after vertex data is on the GPU.
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::DrawIndexedQuads2D;
+        cmd.pipeline = pipeline;
+        cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
+        cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
+        cmd.vtxOffset = vtxOffset;
+        cmd.idxCount = drawQuads * 6;
+        cmd.fogUniform = m_fogUniform;
+        // 2D ortho MVP: maps [0,W]×[0,H] to NDC, replicating gluOrtho2D.
+        // GLM_FORCE_DEPTH_ZERO_TO_ONE → correct Z [0,1] for Metal/Vulkan.
+        // fogStart=fogEnd=0 → range=0 → vertex shader sets fogFactor=1.0 (no fog for 2D).
+        int winW = 0, winH = 0;
+        SDL_GetWindowSize(s_window, &winW, &winH);
+        cmd.vu.mvp = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
+        s_renderCmds.push_back(cmd);
+
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
 #else
@@ -1180,7 +1338,7 @@ public:
     void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.empty() || !s_renderPass || !m_colorWriteEnabled || m_stencilTestEnabled)
+        if (vertices.empty() || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
         }
@@ -1225,37 +1383,23 @@ public:
             }
             return;
         }
-        SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
 
-        {
-            // 3D MVP from the matrix stack (set by game code via SetMatrixMode/Rotate/Translate).
-            // Story 7.9.7: Include fog params for vertex-based linear fog computation.
-            VertexUniforms vu{};
-            vu.mvp = m_mvpMatrix;
-            vu.fogStart = m_fogUniform.fogStart;
-            vu.fogEnd = m_fogUniform.fogEnd;
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &vu, sizeof(vu));
-        }
+        void* pSampler = LookupSampler(resolvedTexId);
 
-        SDL_GPUBufferBinding vtxBinding{};
-        vtxBinding.buffer = s_vtxGpuBuf;
-        vtxBinding.offset = vtxOffset;
-        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBinding, 1);
+        // Record deferred draw command — replayed in EndFrame after vertex data is on the GPU.
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::DrawTriangles;
+        cmd.pipeline = pipeline;
+        cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
+        cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
+        cmd.vtxOffset = vtxOffset;
+        cmd.vtxCount = static_cast<Uint32>(vertices.size());
+        cmd.vu.mvp = m_mvpMatrix;
+        cmd.vu.fogStart = m_fogUniform.fogStart;
+        cmd.vu.fogEnd = m_fogUniform.fogEnd;
+        cmd.fogUniform = m_fogUniform;
+        s_renderCmds.push_back(cmd);
 
-        // Story 4.4.1 (AC-4): Bind per-texture sampler via LookupSampler; fallback to s_defaultSampler.
-        {
-            void* pSampler = LookupSampler(resolvedTexId);
-            SDL_GPUTextureSamplerBinding samplerBinding{};
-            samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
-            samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
-            SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
-        }
-
-        // Story 7.9.7: Push fog/alpha uniform per-draw (replaces GPU storage buffer).
-        // This allows alphaDiscardEnabled to change per-draw-call during the render pass.
-        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &m_fogUniform, sizeof(FogUniform));
-
-        SDL_DrawGPUPrimitives(s_renderPass, static_cast<Uint32>(vertices.size()), 1, 0, 0);
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
 #else
@@ -1272,7 +1416,7 @@ public:
     void RenderQuadStrip(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (vertices.size() < 2 || !s_renderPass || !m_colorWriteEnabled || m_stencilTestEnabled)
+        if (vertices.size() < 2 || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
         }
@@ -1300,87 +1444,6 @@ public:
         }
 
         const Uint32 numIndices = numQuads * 6;
-        std::vector<Uint16> indices;
-        indices.reserve(numIndices);
-
-        // Strip pattern: quad i uses vertices (2i, 2i+1, 2i+2, 2i+3).
-        // Two triangles: (2i, 2i+1, 2i+2) and (2i+1, 2i+3, 2i+2).
-        for (Uint32 i = 0; i < numQuads; ++i)
-        {
-            const auto v0 = static_cast<Uint16>(i * 2 + 0);
-            const auto v1 = static_cast<Uint16>(i * 2 + 1);
-            const auto v2 = static_cast<Uint16>(i * 2 + 2);
-            const auto v3 = static_cast<Uint16>(i * 2 + 3);
-            indices.push_back(v0);
-            indices.push_back(v1);
-            indices.push_back(v2);
-            indices.push_back(v1);
-            indices.push_back(v3);
-            indices.push_back(v2);
-        }
-
-        // Ensure strip index buffer capacity.
-        if (!EnsureStripIndexBuffer(numIndices))
-        {
-            return;
-        }
-
-        // Story 4.3.2 (AC-7): Copy strip index data before (re)opening the render pass.
-        // SDL_gpu prohibits copy passes while a render pass is active.
-        // Sequence: end render pass → copy indices → reopen render pass.
-        {
-            void* pMapped = SDL_MapGPUTransferBuffer(s_device, s_stripIdxTransfer, false);
-            if (!pMapped)
-            {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuadStrip -- failed to map strip index transfer buffer");
-                return;
-            }
-            std::memcpy(pMapped, indices.data(), numIndices * sizeof(Uint16));
-            SDL_UnmapGPUTransferBuffer(s_device, s_stripIdxTransfer);
-
-            // Temporarily end the render pass to issue the copy.
-            SDL_EndGPURenderPass(s_renderPass);
-            s_renderPass = nullptr;
-
-            SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
-            if (copyPass)
-            {
-                SDL_GPUTransferBufferLocation src{};
-                src.transfer_buffer = s_stripIdxTransfer;
-                src.offset = 0;
-
-                SDL_GPUBufferRegion dst{};
-                dst.buffer = s_stripIdxBuf;
-                dst.offset = 0;
-                dst.size = numIndices * sizeof(Uint16);
-
-                SDL_UploadToGPUBuffer(copyPass, &src, &dst, false);
-                SDL_EndGPUCopyPass(copyPass);
-            }
-
-            // Reopen the render pass targeting the same swapchain texture + depth buffer.
-            SDL_GPUColorTargetInfo colorTarget{};
-            colorTarget.texture = s_swapchainTexture;
-            colorTarget.load_op = SDL_GPU_LOADOP_LOAD; // preserve existing content
-            colorTarget.store_op = SDL_GPU_STOREOP_STORE;
-
-            // Story 7.9.7 (AC-3): Reattach depth buffer (LOAD to preserve depth data, STORE to maintain it).
-            SDL_GPUDepthStencilTargetInfo depthTarget{};
-            depthTarget.texture = s_depthTexture;
-            depthTarget.load_op = SDL_GPU_LOADOP_LOAD;
-            depthTarget.store_op = SDL_GPU_STOREOP_STORE;
-            depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
-            depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
-            depthTarget.cycle = false;
-
-            s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
-            if (!s_renderPass)
-            {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuadStrip -- failed to reopen render pass: %hs",
-                                    SDL_GetError());
-                return;
-            }
-        }
 
         // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
@@ -1388,44 +1451,51 @@ public:
             m_depthTestEnabled ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx]
                                                      : s_pipelines3DDepthReadOnly[pipelineIdx])
                                : s_pipelines3DDepthOff[pipelineIdx];
-        if (pipeline)
+        if (!pipeline)
         {
-            SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
-
-            // 3D MVP from the matrix stack + fog params.
-            VertexUniforms vu{};
-            vu.mvp = m_mvpMatrix;
-            vu.fogStart = m_fogUniform.fogStart;
-            vu.fogEnd = m_fogUniform.fogEnd;
-            SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &vu, sizeof(vu));
+            return;
         }
 
-        SDL_GPUBufferBinding vtxBinding{};
-        vtxBinding.buffer = s_vtxGpuBuf;
-        vtxBinding.offset = vtxOffset;
-        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBinding, 1);
+        void* pSampler = LookupSampler(resolvedTexId);
 
-        SDL_GPUBufferBinding idxBinding{};
-        idxBinding.buffer = s_stripIdxBuf;
-        idxBinding.offset = 0;
-        SDL_BindGPUIndexBuffer(s_renderPass, &idxBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+        // Accumulate strip indices into the per-frame scratch buffer.
+        // Record the byte offset so the replay knows where this strip's indices start.
+        const Uint32 stripIdxByteOffset = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
 
-        // Story 4.4.1 (AC-4): Bind per-texture sampler via LookupSampler; fallback to s_defaultSampler.
+        // Strip pattern: quad i uses vertices (2i, 2i+1, 2i+2, 2i+3).
+        // Two triangles: (2i, 2i+1, 2i+2) and (2i+1, 2i+3, 2i+2).
+        s_stripIdxScratch.reserve(s_stripIdxScratch.size() + numIndices);
+        for (Uint32 i = 0; i < numQuads; ++i)
         {
-            void* pSampler = LookupSampler(resolvedTexId);
-            SDL_GPUTextureSamplerBinding samplerBinding{};
-            samplerBinding.texture = static_cast<SDL_GPUTexture*>(pTex);
-            samplerBinding.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
-            SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+            const auto v0 = static_cast<Uint16>(i * 2 + 0);
+            const auto v1 = static_cast<Uint16>(i * 2 + 1);
+            const auto v2 = static_cast<Uint16>(i * 2 + 2);
+            const auto v3 = static_cast<Uint16>(i * 2 + 3);
+            s_stripIdxScratch.push_back(v0);
+            s_stripIdxScratch.push_back(v1);
+            s_stripIdxScratch.push_back(v2);
+            s_stripIdxScratch.push_back(v1);
+            s_stripIdxScratch.push_back(v3);
+            s_stripIdxScratch.push_back(v2);
         }
 
-        // Story 7.9.7: Push fog/alpha uniform per-draw (replaces GPU storage buffer).
-        // This allows alphaDiscardEnabled to change per-draw-call during the render pass.
-        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &m_fogUniform, sizeof(FogUniform));
+        // Record deferred draw command — replayed in EndFrame after data is on the GPU.
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::DrawIndexedStrip;
+        cmd.pipeline = pipeline;
+        cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
+        cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
+        cmd.vtxOffset = vtxOffset;
+        cmd.idxCount = numIndices;
+        cmd.stripIdxOffset = stripIdxByteOffset;
+        cmd.vu.mvp = m_mvpMatrix;
+        cmd.vu.fogStart = m_fogUniform.fogStart;
+        cmd.vu.fogEnd = m_fogUniform.fogEnd;
+        cmd.fogUniform = m_fogUniform;
+        s_renderCmds.push_back(cmd);
 
-        SDL_DrawGPUIndexedPrimitives(s_renderPass, numIndices, 1, 0, 0, 0);
         ++s_dbgDrawCallsThisFrame;
-        s_dbgVtxBytesThisFrame += static_cast<Uint32>(vertices.size() * sizeof(Vertex3D));
+        s_dbgVtxBytesThisFrame += byteSize;
 #else
         (void)vertices;
         (void)textureId;
@@ -1712,11 +1782,9 @@ private:
     //
     // Story 4.3.2 (AC-7): s_vtxMappedPtr is held mapped for the entire frame.
     // This function only writes to CPU-side mapped memory — no copy pass here.
-    // The single bulk copy from transfer→GPU buffer happens in EndFrame() after
-    // the render pass ends (copy passes cannot be issued inside a render pass).
-    // The GPU vertex buffer (s_vtxGpuBuf) contains data from the previous frame;
-    // the render pass draws from those valid offsets (one-frame latency, invisible
-    // since each frame recomputes all geometry from scratch).
+    // EndFrame() copies all accumulated vertex data to the GPU buffer in a
+    // single copy pass BEFORE beginning the render pass, so draw commands
+    // always read current-frame vertex data (no 1-frame latency).
     // -----------------------------------------------------------------------
     [[nodiscard]] static Uint32 UploadVertices(const void* pData, Uint32 byteSize)
     {
