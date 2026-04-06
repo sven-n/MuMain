@@ -5,6 +5,7 @@
 namespace MUnique.Client.Library;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Sockets;
@@ -26,7 +27,7 @@ public unsafe partial class ConnectionManager
     /// <summary>
     /// The currently active connections, with their handle as key.
     /// </summary>
-    private static readonly Dictionary<int, ConnectionWrapper> Connections = new();
+    private static readonly ConcurrentDictionary<int, ConnectionWrapper> Connections = new();
 
     /// <summary>
     /// The currently used maximum handle number.
@@ -59,7 +60,7 @@ public unsafe partial class ConnectionManager
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error establishing connection: {ex}");
+            Console.Error.WriteLine($"[NET] Error establishing connection: {ex}");
             return -1;
         }
     }
@@ -80,16 +81,15 @@ public unsafe partial class ConnectionManager
                 var bytes = new Span<byte>(data, count);
                 bytes.SetPacketSize();
                 connection.Send(bytes);
-                Debug.WriteLine("Sent {0} bytes with handle {1}", count, handle);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error sending {0} bytes with handle {1}: {2}", count, handle, ex);
+                Console.Error.WriteLine($"[NET] Error sending {count} bytes with handle {handle}: {ex}");
             }
         }
         else
         {
-            Debug.WriteLine("Connection with handle {0} not found.", handle);
+            Console.Error.WriteLine($"[NET] Send: connection with handle {handle} not found.");
         }
     }
 
@@ -121,6 +121,7 @@ public unsafe partial class ConnectionManager
 
     private static int ConnectInner(string host, int port, bool isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
     {
+        Console.Error.WriteLine($"[NET] ConnectInner: {host}:{port} encrypted={isEncrypted}");
         var tcpClient = new TcpClient(host, port);
 
         var socketConnection = SocketConnection.Create(tcpClient.Client);
@@ -131,14 +132,15 @@ public unsafe partial class ConnectionManager
 
         var handle = Interlocked.Increment(ref _maxHandle);
         var wrapper = new ConnectionWrapper(handle, connection, onPacketReceived, onDisconnected);
-        Connections.Add(handle, wrapper);
+        Connections.TryAdd(handle, wrapper);
 
         connection.Disconnected += () =>
         {
-            Connections.Remove(handle);
+            Connections.TryRemove(handle, out _);
             return ValueTask.CompletedTask;
         };
 
+        Console.Error.WriteLine($"[NET] ConnectInner: connected, handle={handle}");
         return handle;
     }
 }

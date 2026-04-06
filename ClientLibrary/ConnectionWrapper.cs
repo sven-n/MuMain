@@ -33,6 +33,8 @@ public sealed class ConnectionWrapper : IDisposable
     /// </summary>
     private readonly unsafe delegate* unmanaged<int, void> _onDisconnected;
 
+    private volatile bool _isDisposed;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ConnectionWrapper"/> class.
     /// </summary>
@@ -74,6 +76,12 @@ public sealed class ConnectionWrapper : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
+        if (this._isDisposed)
+        {
+            return;
+        }
+
+        this._isDisposed = true;
         this._connection.Dispose();
     }
 
@@ -102,6 +110,12 @@ public sealed class ConnectionWrapper : IDisposable
     /// <param name="bytes">The bytes.</param>
     public void Send(Span<byte> bytes)
     {
+        if (this._isDisposed)
+        {
+            Console.Error.WriteLine($"[NET] Send called on disposed connection handle={this._handle}");
+            return;
+        }
+
         using var l = this._connection.OutputLock.Lock();
         var targetSpan = this._connection.Output.GetSpan(bytes.Length);
 
@@ -116,14 +130,41 @@ public sealed class ConnectionWrapper : IDisposable
     /// <param name="packetFactory">The factory which creates the packet and returns the length of it.</param>
     public void CreateAndSend(Func<PipeWriter, int> packetFactory)
     {
+        if (this._isDisposed)
+        {
+            Console.Error.WriteLine($"[NET] CreateAndSend called on disposed connection handle={this._handle}");
+            return;
+        }
+
+        // Diagnostic: null checks for properties that could cause SIGSEGV in Native AOT.
+        if (this._connection.OutputLock is null)
+        {
+            Console.Error.WriteLine($"[NET] CreateAndSend: OutputLock is null, handle={this._handle}");
+            return;
+        }
+
+        if (this._connection.Output is null)
+        {
+            Console.Error.WriteLine($"[NET] CreateAndSend: Output (PipeWriter) is null, handle={this._handle}");
+            return;
+        }
+
+        Console.Error.WriteLine($"[NET] CreateAndSend: about to lock+send, handle={this._handle}");
         using var l = this._connection.OutputLock.Lock();
         var length = packetFactory(this._connection.Output);
         this._connection.Output.Advance(length);
         this._connection.Output.FlushAsync().AsTask().WaitAndUnwrapException();
+        Console.Error.WriteLine($"[NET] CreateAndSend: sent {length} bytes, handle={this._handle}");
     }
 
     private unsafe ValueTask OnPacketReceivedAsync(ReadOnlySequence<byte> args)
     {
+        if (this._isDisposed)
+        {
+            Trace.WriteLine($"[NET] OnPacketReceivedAsync called on disposed connection handle={this._handle}");
+            return ValueTask.CompletedTask;
+        }
+
         using var memoryOwner = MemoryPool<byte>.Shared.Rent((int)args.Length);
         var packet = memoryOwner.Memory.Slice(0, (int)args.Length);
         args.CopyTo(packet.Span);
@@ -136,7 +177,7 @@ public sealed class ConnectionWrapper : IDisposable
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                Trace.WriteLine($"[NET] Error in OnPacketReceivedAsync handle={this._handle}: {ex}");
             }
         }
 
@@ -147,12 +188,13 @@ public sealed class ConnectionWrapper : IDisposable
     {
         try
         {
+            Trace.WriteLine($"[NET] Connection disconnected, handle={this._handle}");
             this._onDisconnected(this._handle);
             this.Dispose();
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex);
+            Trace.WriteLine($"[NET] Error in OnDisconnectedAsync handle={this._handle}: {ex}");
         }
 
         return ValueTask.CompletedTask;
