@@ -14,9 +14,18 @@ VSOutput main(VSInput input)
     o.pos = mul(mvp, float4(input.pos, 1.0));
     o.uv = input.uv;
     o.color = input.color;
+
+    // Clip vertices behind or very near the camera.
+    // When w is near zero, perspective division produces extreme x/y values that
+    // stretch triangles across the entire screen (visible as light streaks).
+    // OpenGL's fixed-function pipeline clipped these; SDL_GPU does not.
+    // Push the vertex behind the near clip plane so the GPU discards it.
+    if (o.pos.w < 0.1)
+    {
+        o.pos = float4(0.0, 0.0, -1.0, 1.0);
+    }
+
     // Story 7.9.7 (AC-7): Linear fog using eye-space distance.
-    // For perspective projection, clip-space w equals negated eye-space z.
-    // For ortho, fogEnd-fogStart=0 → fogFactor=1.0 (no fog).
     float dist = abs(o.pos.w);
     float range = fogEnd - fogStart;
     o.fogFactor = (range > 0.001) ? saturate((fogEnd - dist) / range) : 1.0;
