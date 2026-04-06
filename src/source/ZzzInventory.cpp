@@ -7711,15 +7711,23 @@ bool Check_ItemAction(ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType)
     std::vector<sItemAct>::iterator li;
     int		i = 0;
 
-    for (i = 0; i < 12; i++)	sItem.push_back(Set_ItemActOption(ITEM_HELPER + 135 + i, 0));
-    for (i = 0; i < 2; i++)	sItem.push_back(Set_ItemActOption(ITEM_POTION + 160 + i, 0));
-    for (i = 0; i < 11; i++)
+    // Restricted ITEM_HELPER special items starting at local index 135.
+    for (i = 0; i < RESTRICTED_SPECIAL_MISC_COUNT; i++)
     {
-        sItem.push_back(Set_ItemActOption(ITEM_ARMOR + 62 + i, 1));
-        sItem.push_back(Set_ItemActOption(ITEM_HELM + 62 + i, 1));
-        sItem.push_back(Set_ItemActOption(ITEM_BOOTS + 62 + i, 1));
-        sItem.push_back(Set_ItemActOption(ITEM_GLOVES + 62 + i, 1));
-        sItem.push_back(Set_ItemActOption(ITEM_PANTS + 62 + i, 1));
+        sItem.push_back(Set_ItemActOption(ITEM_HELPER + RESTRICTED_SPECIAL_MISC_START_INDEX + i, ITEM_ACTION_BLOCK_STORAGE_TRADE));
+    }
+    // Restricted ITEM_POTION special jewels starting at local index 160.
+    for (i = 0; i < RESTRICTED_SPECIAL_JEWEL_COUNT; i++)
+    {
+        sItem.push_back(Set_ItemActOption(ITEM_POTION + RESTRICTED_SPECIAL_JEWEL_START_INDEX + i, ITEM_ACTION_BLOCK_STORAGE_TRADE));
+    }
+    for (i = 0; i < LUCKY_SET_ARMOR_COUNT; i++)
+    {
+        sItem.push_back(Set_ItemActOption(ITEM_ARMOR + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
+        sItem.push_back(Set_ItemActOption(ITEM_HELM + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
+        sItem.push_back(Set_ItemActOption(ITEM_BOOTS + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
+        sItem.push_back(Set_ItemActOption(ITEM_GLOVES + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
+        sItem.push_back(Set_ItemActOption(ITEM_PANTS + LUCKY_SET_ARMOR_START_INDEX + i, ITEM_ACTION_BLOCK_SELL_ONLY));
     }
 
     for (li = sItem.begin(); li != sItem.end(); li++)
@@ -7737,10 +7745,12 @@ bool Check_ItemAction(ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType)
 
 bool Check_LuckyItem(int _nIndex, int _nType)
 {
-    int		nItemTabIndex = (_nIndex + _nType) % 512;
+    int		nItemTabIndex = (_nIndex + _nType) % MAX_ITEM_INDEX;
 
     if (_nIndex < ITEM_HELM || _nIndex > ITEM_WING)	return false;
-    if (nItemTabIndex >= 62 && nItemTabIndex <= 72)		return true;
+    if (nItemTabIndex >= LUCKY_SET_ARMOR_START_INDEX
+        && nItemTabIndex < LUCKY_SET_ARMOR_START_INDEX + LUCKY_SET_ARMOR_COUNT)
+        return true;
 
     return false;
 }
@@ -7754,7 +7764,8 @@ bool IsLuckySetItem(int iType)
 #else // LEM_FIX_SELL_LUCKYITEM_BOOTS_POPUP
     if ((iType >= ITEM_HELM && iType <= ITEM_BOOTS)
 #endif // LEM_FIX_SELL_LUCKYITEM_BOOTS_POPUP
-        && (iItemIndex >= 62 && iItemIndex <= 72))
+        && (iItemIndex >= LUCKY_SET_ARMOR_START_INDEX
+            && iItemIndex < LUCKY_SET_ARMOR_START_INDEX + LUCKY_SET_ARMOR_COUNT))
     {
         return true;
     }
