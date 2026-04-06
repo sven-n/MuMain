@@ -1980,7 +1980,9 @@ private:
         depthState.enable_depth_test = depthTestEnabled;
         depthState.enable_depth_write = depthWriteEnabled;
         depthState.enable_stencil_test = false;
-        depthState.compare_op = SDL_GPU_COMPAREOP_LESS;
+        // LESS for 3D: rejects same-depth glow fragments from overlaying their own opaque pass.
+        // LESS_OR_EQUAL for 2D: allows overlapping UI elements at the same Z to draw correctly.
+        depthState.compare_op = bUse3DLayout ? SDL_GPU_COMPAREOP_LESS : SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
 
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
         targetInfo.color_target_descriptions = &colorTargetDesc;
