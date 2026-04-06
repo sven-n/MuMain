@@ -7713,7 +7713,7 @@ bool Check_ItemAction(ITEM* _pItem, ITEMSETOPTION _eAction, bool _bType)
 
     for (i = 0; i < 12; i++)	sItem.push_back(Set_ItemActOption(ITEM_HELPER + 135 + i, 0));
     for (i = 0; i < 2; i++)	sItem.push_back(Set_ItemActOption(ITEM_POTION + 160 + i, 0));
-    for (i = 0; i < 12; i++)
+    for (i = 0; i < 11; i++)
     {
         sItem.push_back(Set_ItemActOption(ITEM_ARMOR + 62 + i, 1));
         sItem.push_back(Set_ItemActOption(ITEM_HELM + 62 + i, 1));
