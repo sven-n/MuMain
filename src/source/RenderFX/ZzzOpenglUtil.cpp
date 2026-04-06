@@ -810,10 +810,17 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
 
     vec3_t p2;
     VectorTransform(Position, CameraMatrix, p2);
-    // VectorCopy(Position,p2);
     float x = p2[0];
     float y = p2[1];
     float z = p2[2];
+
+    // Clip sprites behind or too close to camera — prevents degenerate triangles
+    // that stretch across the screen when perspective division produces w≈0.
+    // CameraViewNear is 20.f; use a small margin to catch near-plane sprites.
+    if (z >= -1.0f)
+    {
+        return;
+    }
 
     Width *= 0.5f;
     Height *= 0.5f;
@@ -890,6 +897,11 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     float x = p2[0];
     float y = p2[1];
     float z = p2[2];
+
+    if (z >= -1.0f)
+    {
+        return;
+    }
 
     Width *= 0.5f;
     Height *= 0.5f;
