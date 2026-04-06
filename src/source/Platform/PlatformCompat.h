@@ -840,16 +840,25 @@ inline DWORD GetDoubleClickTime()
     return 500u;
 }
 
+// Mouse position globals populated by SDLEventLoop (defined in ZzzOpenglUtil.cpp).
+// Declared here to avoid including ZzzOpenglUtil.h from the platform layer.
+extern int MouseX;
+extern int MouseY;
+// Window dimensions (defined in ZzzOpenglUtil.cpp, set during init).
+extern unsigned int WindowWidth;
+extern unsigned int WindowHeight;
+
 inline void GetCursorPos(POINT* ppt)
 {
-    // On SDL3 path, mouse position is maintained in MouseX/MouseY globals
-    // via SDL_EVENT_MOUSE_MOTION. CInput::Update() calls GetCursorPos()
-    // but the CInput cursor position system is superseded by the global
-    // mouse state populated by SDLEventLoop.
+    // On SDL3, mouse position is maintained in MouseX/MouseY globals via
+    // SDL_EVENT_MOUSE_MOTION in SDLEventLoop. These are in 640x480 virtual
+    // space (divided by screen rate). CInput::Update() calls GetCursorPos()
+    // for UI hit-testing which expects WINDOW PIXEL coordinates (matching
+    // Win32 GetCursorPos + ScreenToClient). Scale back to window pixels.
     if (ppt != nullptr)
     {
-        ppt->x = 0;
-        ppt->y = 0;
+        ppt->x = static_cast<long>(MouseX * static_cast<float>(WindowWidth) / 640.0f);
+        ppt->y = static_cast<long>(MouseY * static_cast<float>(WindowHeight) / 480.0f);
     }
 }
 
