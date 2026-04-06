@@ -1990,17 +1990,20 @@ private:
         targetInfo.has_depth_stencil_target = true;
         targetInfo.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
 
+        // Back-face culling: enable for opaque 3D geometry (depth write ON).
+        // Disable for transparent/glow passes (depth write OFF) and all 2D.
+        SDL_GPURasterizerState rasterState{};
+        rasterState.fill_mode = SDL_GPU_FILLMODE_FILL;
+        rasterState.cull_mode =
+            (bUse3DLayout && depthWriteEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
+        rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
+
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
-        // 2D pipelines: basic_textured vert+frag (with fog).
-        // 3D pipelines: basic_textured vert+frag (with fog) — vertex shader uses
-        // TEXCOORD0 for position, which aligns to Vertex3D layout if shader
-        // is compiled to accept float3 TEXCOORD0.
-        // NOTE: for full 3D, a dedicated vertex shader reading float3+normal would
-        // be needed; for this story the basic_textured shaders serve both paths.
-        pipelineInfo.vertex_shader = s_vertShader2D; // shared for 2D and 3D paths
+        pipelineInfo.vertex_shader = s_vertShader2D;
         pipelineInfo.fragment_shader = s_fragShaderTex;
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+        pipelineInfo.rasterizer_state = rasterState;
         pipelineInfo.depth_stencil_state = depthState;
         pipelineInfo.target_info = targetInfo;
         pipelineInfo.props = 0;
