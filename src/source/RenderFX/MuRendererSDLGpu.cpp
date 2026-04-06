@@ -1980,7 +1980,7 @@ private:
         depthState.enable_depth_test = depthTestEnabled;
         depthState.enable_depth_write = depthWriteEnabled;
         depthState.enable_stencil_test = false;
-        depthState.compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
+        depthState.compare_op = SDL_GPU_COMPAREOP_LESS;
 
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
         targetInfo.color_target_descriptions = &colorTargetDesc;
