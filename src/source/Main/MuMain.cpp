@@ -322,6 +322,11 @@ int MuMain(int argc, char* argv[])
         g_ErrorReport.AddSeparator();
     }
 
+    // Re-resolve .NET packet bindings that may be NULL due to SIOF (Static Initialization
+    // Order Fiasco). The inline variables in PacketBindings_*.h call GetSymbol() at static
+    // init time, but the library handle may not be initialized yet depending on linker order.
+    ResolvePacketBindings();
+
     g_ErrorReport.Write(L"> To read config.ini.\r\n");
 
     // Load game configuration from config.ini now that the CWD is resolved.

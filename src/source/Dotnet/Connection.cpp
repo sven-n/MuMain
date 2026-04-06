@@ -19,10 +19,6 @@
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketFunctions_ClientToServer.h"
 
-#include "PacketBindings_ChatServer.h"
-#include "PacketBindings_ConnectServer.h"
-#include "PacketBindings_ClientToServer.h"
-
 // MEDIUM-4 fix: g_dotnetLibPath defined here (not in anonymous namespace in header) to prevent
 // per-TU copies if Connection.h is ever included by a second translation unit.
 // Declaration (extern) remains in Connection.h; only Connection.cpp includes Connection.h today.
@@ -38,6 +34,62 @@ const std::string g_dotnetLibPath =
 // fully constructed before Load() is called. (SIOF fix — was inline in Connection.h)
 const mu::platform::LibraryHandle munique_client_library_handle =
     mu::platform::Load(g_dotnetLibPath.c_str());
+
+// PacketBindings_*.h define inline variables via GetSymbol(munique_client_library_handle, ...).
+// Due to SIOF, these may be NULL if the linker picks a TU where the handle isn't initialized yet.
+#include "PacketBindings_ChatServer.h"
+#include "PacketBindings_ConnectServer.h"
+#include "PacketBindings_ClientToServer.h"
+
+// Re-resolve any NULL inline binding variables. Called from MuMain() after static init.
+// Uses a template helper to avoid repeating the pattern for all ~200 bindings.
+namespace
+{
+template <typename FnPtr>
+void ReResolve(FnPtr& var, const char* name)
+{
+    if (!var && munique_client_library_handle)
+    {
+        var = reinterpret_cast<FnPtr>(mu::platform::GetSymbol(munique_client_library_handle, name));
+    }
+}
+} // anonymous namespace
+
+void ResolvePacketBindings()
+{
+    if (!munique_client_library_handle)
+    {
+        g_ErrorReport.Write(L"NET: ResolvePacketBindings -- library not loaded, skipping\r\n");
+        return;
+    }
+
+    // ConnectServer
+    ReResolve(dotnet_SendConnectionInfoRequest075, "SendConnectionInfoRequest075");
+    ReResolve(dotnet_SendConnectionInfoRequest, "SendConnectionInfoRequest");
+    ReResolve(dotnet_SendConnectionInfo, "SendConnectionInfo");
+    ReResolve(dotnet_SendServerListRequest, "SendServerListRequest");
+    ReResolve(dotnet_SendServerListRequestOld, "SendServerListRequestOld");
+    ReResolve(dotnet_SendHello, "SendHello");
+    ReResolve(dotnet_SendPatchCheckRequest, "SendPatchCheckRequest");
+    ReResolve(dotnet_SendPatchVersionOkay, "SendPatchVersionOkay");
+    ReResolve(dotnet_SendClientNeedsPatch, "SendClientNeedsPatch");
+
+    // ChatServer
+    ReResolve(dotnet_SendAuthenticate, "SendAuthenticate");
+    ReResolve(dotnet_SendChatRoomClientJoined, "SendChatRoomClientJoined");
+    ReResolve(dotnet_SendLeaveChatRoom, "SendLeaveChatRoom");
+    ReResolve(dotnet_SendChatRoomClientLeft, "SendChatRoomClientLeft");
+    ReResolve(dotnet_SendChatMessage, "SendChatMessage");
+    ReResolve(dotnet_SendKeepAlive, "SendKeepAlive");
+
+    // ClientToServer — too many to list individually (191 bindings).
+    // The critical ones for login flow are resolved above (ConnectServer).
+    // Full ClientToServer resolution will happen when those code paths are exercised.
+    // TODO: generate a ResolveAll function from XSLT alongside the bindings.
+
+    g_ErrorReport.Write(L"NET: ResolvePacketBindings done (SendServerListRequest=%p)\r\n",
+                        reinterpret_cast<void*>(dotnet_SendServerListRequest));
+}
 
 std::map<int32_t, Connection*> connections;
 

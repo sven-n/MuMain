@@ -1,4 +1,4 @@
-﻿// <copyright file="PacketFunctions.cpp" company="MUnique">
+// <copyright file="PacketFunctions.cpp" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
