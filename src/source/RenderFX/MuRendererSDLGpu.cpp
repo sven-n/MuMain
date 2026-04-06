@@ -398,39 +398,39 @@ std::pair<int, int> GetBlendFactors(BlendMode mode)
     // SDL_GPUBlendFactor enum values (from SDL3/SDL_gpu.h release-3.2.8):
     //   INVALID=0, ZERO=1, ONE=2, SRC_COLOR=3, ONE_MINUS_SRC_COLOR=4,
     // SDL_GPU_BLENDFACTOR enum (from SDL_gpu.h):
-    //   ZERO=0, ONE=1, SRC_COLOR=2, ONE_MINUS_SRC_COLOR=3,
-    //   DST_COLOR=4, ONE_MINUS_DST_COLOR=5, SRC_ALPHA=6, ONE_MINUS_SRC_ALPHA=7,
-    //   DST_ALPHA=8, ONE_MINUS_DST_ALPHA=9, CONSTANT_COLOR=10,
-    //   ONE_MINUS_CONSTANT_COLOR=11, SRC_ALPHA_SATURATE=12
+    //   INVALID=0, ZERO=1, ONE=2, SRC_COLOR=3, ONE_MINUS_SRC_COLOR=4,
+    //   DST_COLOR=5, ONE_MINUS_DST_COLOR=6, SRC_ALPHA=7, ONE_MINUS_SRC_ALPHA=8,
+    //   DST_ALPHA=9, ONE_MINUS_DST_ALPHA=10, CONSTANT_COLOR=11,
+    //   ONE_MINUS_CONSTANT_COLOR=12, SRC_ALPHA_SATURATE=13
     switch (mode)
     {
     case BlendMode::Alpha:
         // GL: GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA
-        return {6, 7}; // SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
+        return {7, 8}; // SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
     case BlendMode::Additive:
         // GL: GL_SRC_ALPHA, GL_ONE
-        return {6, 1}; // SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE
+        return {7, 2}; // SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE
     case BlendMode::Subtract:
         // GL: GL_ZERO, GL_ONE_MINUS_SRC_COLOR
-        return {0, 3}; // SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR
+        return {1, 4}; // SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR
     case BlendMode::InverseColor:
         // GL: GL_ONE_MINUS_DST_COLOR, GL_ZERO
-        return {5, 0}; // SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR, SDL_GPU_BLENDFACTOR_ZERO
+        return {6, 1}; // SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR, SDL_GPU_BLENDFACTOR_ZERO
     case BlendMode::Mixed:
         // GL: GL_ONE, GL_ONE_MINUS_SRC_ALPHA
-        return {1, 7}; // SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
+        return {2, 8}; // SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA
     case BlendMode::LightMap:
         // GL: GL_ZERO, GL_SRC_COLOR
-        return {0, 2}; // SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_SRC_COLOR
+        return {1, 3}; // SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_SRC_COLOR
     case BlendMode::Glow:
         // GL: GL_ONE, GL_ONE (EnableAlphaBlend in ZzzOpenglUtil.cpp)
-        return {1, 1}; // SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE
+        return {2, 2}; // SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE
     case BlendMode::Luminance:
         // GL: GL_ONE_MINUS_SRC_COLOR, GL_ONE (EnableAlphaBlend2 in ZzzOpenglUtil.cpp)
-        return {3, 1}; // SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR, SDL_GPU_BLENDFACTOR_ONE
+        return {4, 2}; // SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR, SDL_GPU_BLENDFACTOR_ONE
     default:
         g_ErrorReport.Write(L"RENDER: SDL_gpu::GetBlendFactors -- unknown BlendMode %d", static_cast<int>(mode));
-        return {6, 7}; // default to alpha blend
+        return {7, 8}; // default to alpha blend
     }
 }
 
