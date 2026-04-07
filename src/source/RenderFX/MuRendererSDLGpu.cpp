@@ -383,7 +383,8 @@ static int s_cachedWinH = 0;
     {
         for (const auto& entry : std::filesystem::directory_iterator(gameFontDir))
         {
-            if (entry.is_regular_file() && entry.path().extension() == ".ttf")
+            auto ext = entry.path().extension();
+            if (entry.is_regular_file() && (ext == ".ttf" || ext == ".otf" || ext == ".ttc"))
             {
                 return entry.path().string();
             }
@@ -744,8 +745,9 @@ public:
 
                         // F-1 fix: Pre-load font variants for bold, big, and fixed-width text.
                         // All variants use the same .ttf file at different sizes.
-                        // SDL_ttf 3.x doesn't support weight selection from a single .ttf;
-                        // we vary size to differentiate big text and use the same font for bold.
+                        // Known limitation (F-4): SDL_ttf 3.x doesn't support weight selection
+                        // from a single .ttf, so bold appears identical to normal. To fix,
+                        // bundle a separate bold .ttf (e.g., NotoSans-Bold.ttf) in a follow-up.
                         s_ttfFontBold = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
                         s_ttfFontBig = TTF_OpenFont(fontPath.c_str(), k_BigFontPtSize);
                         s_ttfFontFixed = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
@@ -763,11 +765,17 @@ public:
                         static constexpr const char* k_WarmupGlyphs =
                             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
                             "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
-                        TTF_Text* warmup = TTF_CreateText(s_textEngine, s_ttfFont, k_WarmupGlyphs, 0);
-                        if (warmup)
+                        TTF_Font* fontsToWarm[] = {s_ttfFont, s_ttfFontBold, s_ttfFontBig, s_ttfFontFixed};
+                        for (TTF_Font* f : fontsToWarm)
                         {
-                            TTF_GetGPUTextDrawData(warmup); // populate atlas; discard draw data
-                            TTF_DestroyText(warmup);
+                            if (!f)
+                                continue;
+                            TTF_Text* warmup = TTF_CreateText(s_textEngine, f, k_WarmupGlyphs, 0);
+                            if (warmup)
+                            {
+                                TTF_GetGPUTextDrawData(warmup); // populate atlas; discard draw data
+                                TTF_DestroyText(warmup);
+                            }
                         }
                     }
                 }
@@ -1492,10 +1500,11 @@ public:
         cmd.vtxOffset = vtxOffset;
         cmd.vtxCount = static_cast<Uint32>(vertices.size());
         cmd.fogUniform = m_fogUniform;
-        // 2D ortho projection — same as RenderQuad2D.
-        int winW = 0, winH = 0;
-        SDL_GetWindowSize(s_window, &winW, &winH);
-        cmd.vu.mvp = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
+        // 2D ortho projection — same as RenderQuad2D. Use cached dimensions
+        // to avoid per-draw SDL_GetWindowSize calls and ensure consistency
+        // with text position calculations that also use cached height.
+        cmd.vu.mvp =
+            glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
         s_renderCmds.push_back(cmd);
 
         ++s_dbgDrawCallsThisFrame;

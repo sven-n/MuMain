@@ -2943,11 +2943,13 @@ bool CUIRenderTextSDLTtf::Create(HDC /*hDC*/)
         return false;
     }
     m_pActiveFont = renderer.GetTtfFont(); // default font
-    // F-3 fix: Pre-create a reusable TTF_Text to avoid per-frame allocations.
-    if (m_pActiveFont)
+    if (!m_pActiveFont)
     {
-        m_pTtfText = TTF_CreateText(engine, m_pActiveFont, "", 0);
+        g_ErrorReport.Write(L"RENDER: CUIRenderTextSDLTtf::Create -- no TTF font available");
+        return false;
     }
+    // F-3 fix: Pre-create a reusable TTF_Text to avoid per-frame allocations.
+    m_pTtfText = TTF_CreateText(engine, m_pActiveFont, "", 0);
     return true;
 }
 
@@ -3148,7 +3150,13 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
     const float drawY = static_cast<float>(winH) - screenY;
 
     // F-4 fix: Reuse a thread_local scratch buffer to avoid per-call heap allocation.
+    // F-6 fix: Cap capacity to prevent unbounded growth from occasional large text draws.
     static thread_local std::vector<mu::Vertex2D> s_scratchVerts;
+    constexpr size_t k_MaxScratchCapacity = 4096; // ~4K verts ≈ ~112 KB — more than enough
+    if (s_scratchVerts.capacity() > k_MaxScratchCapacity)
+    {
+        s_scratchVerts.shrink_to_fit();
+    }
 
     for (const TTF_GPUAtlasDrawSequence* seq = drawData; seq != nullptr; seq = seq->next)
     {
