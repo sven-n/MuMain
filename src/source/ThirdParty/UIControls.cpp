@@ -3950,6 +3950,24 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 void CUITextInputBox::Render()
 {
     m_bIsReady = TRUE;
+
+#ifdef MU_ENABLE_SDL3
+    // On SDL3, there is no Win32 edit control (m_hEditWnd is nullptr).
+    // Render using the memory DC + TextOut with the SDL text buffer directly.
+    if (!m_hMemDC || !m_pFontBuffer)
+    {
+        return;
+    }
+
+    if (m_bSetText)
+    {
+        // Apply deferred SetText to SDL buffer.
+        wcsncpy(m_szSDLText, m_sTextToSet.c_str(), MAX_CHAT_SIZE);
+        m_szSDLText[MAX_CHAT_SIZE] = L'\0';
+        m_iSDLTextLen = static_cast<int>(wcslen(m_szSDLText));
+        m_bSetText = false;
+    }
+#else
     if (m_hEditWnd == nullptr || !IsWindowVisible(m_hEditWnd))
     {
         return;
@@ -3960,6 +3978,7 @@ void CUITextInputBox::Render()
         SetWindowTextW(m_hEditWnd, m_sTextToSet.c_str());
         m_bSetText = false;
     }
+#endif
 
     POINT RealWndPos = { (int)(m_iPos_x * g_fScreenRate_x), (int)(m_iPos_y * g_fScreenRate_y) };
     SIZE RealWndSize = { (int)(m_iWidth * g_fScreenRate_x), (int)(m_iHeight * g_fScreenRate_y) };
@@ -3980,8 +3999,33 @@ void CUITextInputBox::Render()
         EndRenderColor();
     }
 
+#ifdef MU_ENABLE_SDL3
+    // SDL3 path: render text to the memory DC using TextOut (CrossPlatformGDI bitmap font).
+    // Clear the bitmap buffer first (the Win32 edit control would do this via WM_ERASEBKGND).
+    {
+        const int bufW = static_cast<int>(m_iWidth * g_fScreenRate_x);
+        const int bufH = static_cast<int>(m_iHeight * g_fScreenRate_y);
+        const int pitch = ((bufW * 24 + 31) & ~31) >> 3;
+        std::memset(m_pFontBuffer, 0, pitch * bufH);
+    }
+    ::SetBkColor(m_hMemDC, RGB(0, 0, 0));
+    ::SetTextColor(m_hMemDC, RGB(255, 255, 255));
+    if (IsPassword())
+    {
+        // Mask password with asterisks.
+        wchar_t mask[MAX_CHAT_SIZE + 1] = {};
+        for (int i = 0; i < m_iSDLTextLen && i < MAX_CHAT_SIZE; ++i)
+            mask[i] = L'*';
+        TextOut(m_hMemDC, 0, 0, mask, m_iSDLTextLen);
+    }
+    else
+    {
+        TextOut(m_hMemDC, 0, 0, m_szSDLText, m_iSDLTextLen);
+    }
+#else
     CallWindowProcW(m_hOldProc, m_hEditWnd, WM_ERASEBKGND, (WPARAM)m_hMemDC, 0);
     CallWindowProcW(m_hOldProc, m_hEditWnd, WM_PAINT, (WPARAM)m_hMemDC, 0);
+#endif
 
     const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
     SIZE RealTextLine = { 0, 0 };
