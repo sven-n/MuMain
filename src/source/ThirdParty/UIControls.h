@@ -791,6 +791,44 @@ protected:
     void UploadText(int sx, int sy, int Width, int Height);
 };
 
+// Story 7.9.8: Render text type constants for CUIRenderText::Create().
+constexpr int RENDER_TEXT_ORIGINAL = 0;
+constexpr int RENDER_TEXT_SDL_TTF = 2;
+
+// Story 7.9.8 (AC-3, AC-4): SDL_ttf-based text renderer for SDL3 builds.
+// Uses TTF_CreateGPUTextEngine from the renderer to produce atlas draw data.
+// Replaces the GDI DIB → glTexSubImage2D pipeline that is broken on SDL3.
+#ifdef MU_ENABLE_SDL3
+class CUIRenderTextSDLTtf : public IUIRenderText
+{
+    DWORD m_dwTextColor;
+    DWORD m_dwBackColor;
+
+public:
+    CUIRenderTextSDLTtf();
+    ~CUIRenderTextSDLTtf() override;
+
+    bool Create(HDC hDC) override;
+    void Release() override;
+
+    HDC GetFontDC() const override;
+    BYTE* GetFontBuffer() const override;
+
+    DWORD GetTextColor() const override;
+    DWORD GetBgColor() const override;
+
+    void SetTextColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha) override;
+    void SetTextColor(DWORD dwColor) override;
+    void SetBgColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha) override;
+    void SetBgColor(DWORD dwColor) override;
+
+    void SetFont(HFONT hFont) override;
+
+    void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
+        int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL) override;
+};
+#endif
+
 class CUIRenderText
 {
     CUIRenderText();

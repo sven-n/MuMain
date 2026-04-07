@@ -25,6 +25,7 @@
 // around these includes was redundant and has been removed (Story 7.6.2, AC-7).
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "MuRenderer.h"
 #include "ErrorReport.h"
@@ -297,9 +298,10 @@ static SDL_GPUSampler* s_defaultSampler = nullptr;
 enum class RenderCmdType : uint8_t
 {
     SetViewport,
-    DrawTriangles,       // non-indexed 3D (Vertex3D)
-    DrawIndexedQuads2D,  // indexed 2D with static quad index buffer (Vertex2D)
-    DrawIndexedStrip,    // indexed 3D with per-frame strip indices (Vertex3D)
+    DrawTriangles,      // non-indexed 3D (Vertex3D)
+    DrawIndexedQuads2D, // indexed 2D with static quad index buffer (Vertex2D)
+    DrawIndexedStrip,   // indexed 3D with per-frame strip indices (Vertex3D)
+    DrawTriangles2D,    // Story 7.9.8: non-indexed 2D triangles (Vertex2D) for text atlas
 };
 
 struct RenderCmd
@@ -309,9 +311,9 @@ struct RenderCmd
     SDL_GPUTexture* texture;
     SDL_GPUSampler* sampler;
     Uint32 vtxOffset;
-    Uint32 vtxCount;         // for DrawTriangles
-    Uint32 idxCount;         // for DrawIndexed*
-    Uint32 stripIdxOffset;   // byte offset into strip index scratch buffer
+    Uint32 vtxCount;       // for DrawTriangles
+    Uint32 idxCount;       // for DrawIndexed*
+    Uint32 stripIdxOffset; // byte offset into strip index scratch buffer
     VertexUniforms vu;
     FogUniform fogUniform;
     SDL_GPUViewport viewport; // for SetViewport only
@@ -345,6 +347,57 @@ static Uint32 s_depthH = 0u;
 static SDL_GPUBuffer* s_fogUniformBuf = nullptr;
 static SDL_GPUTransferBuffer* s_fogTransferBuf = nullptr;
 static bool s_fogDirty = true; // upload on first draw if SetFog not called
+
+// Story 7.9.8 (AC-2): SDL_ttf GPU text engine and default font.
+// s_textEngine: atlas-based text engine created after SDL_GPUDevice.
+// s_ttfFont: loaded .ttf font for UI text rendering.
+static TTF_TextEngine* s_textEngine = nullptr;
+static TTF_Font* s_ttfFont = nullptr;
+static constexpr float k_DefaultFontPtSize = 14.0f;
+
+// Story 7.9.8 (AC-2): Discover a usable .ttf font file.
+// Searches game directory first, then system font paths per platform.
+[[nodiscard]] static std::string FindFontPath()
+{
+    // 1. Game-bundled font (preferred).
+    const std::filesystem::path gameFontDir = "Data/Font";
+    if (std::filesystem::exists(gameFontDir))
+    {
+        for (const auto& entry : std::filesystem::directory_iterator(gameFontDir))
+        {
+            if (entry.is_regular_file() && entry.path().extension() == ".ttf")
+            {
+                return entry.path().string();
+            }
+        }
+    }
+
+    // 2. System font fallback (platform-specific).
+    static const char* const k_SystemFontPaths[] = {
+#ifdef __APPLE__
+        "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
+        "/Library/Fonts/Arial Unicode.ttf",
+#elif defined(__linux__)
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+#else // Windows
+        "C:\\Windows\\Fonts\\arial.ttf",
+        "C:\\Windows\\Fonts\\segoeui.ttf",
+#endif
+    };
+
+    for (const char* path : k_SystemFontPaths)
+    {
+        if (std::filesystem::exists(path))
+        {
+            return path;
+        }
+    }
+
+    return {};
+}
 
 #endif // MU_ENABLE_SDL3
 
@@ -637,6 +690,57 @@ public:
             }
         }
 
+        // Story 7.9.8 (AC-2): Initialize SDL_ttf GPU text engine.
+        if (!TTF_Init())
+        {
+            g_ErrorReport.Write(L"RENDER: SDL_ttf -- TTF_Init failed: %hs", SDL_GetError());
+            // Non-fatal: renderer works, text won't render via SDL_ttf.
+        }
+        else
+        {
+            s_textEngine = TTF_CreateGPUTextEngine(s_device);
+            if (!s_textEngine)
+            {
+                g_ErrorReport.Write(L"RENDER: SDL_ttf -- TTF_CreateGPUTextEngine failed: %hs", SDL_GetError());
+                TTF_Quit();
+            }
+            else
+            {
+                const std::string fontPath = FindFontPath();
+                if (fontPath.empty())
+                {
+                    g_ErrorReport.Write(L"RENDER: SDL_ttf -- no .ttf font found (checked Data/Font/ and system paths)");
+                }
+                else
+                {
+                    s_ttfFont = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
+                    if (!s_ttfFont)
+                    {
+                        g_ErrorReport.Write(L"RENDER: SDL_ttf -- TTF_OpenFont(\"%hs\") failed: %hs", fontPath.c_str(),
+                                            SDL_GetError());
+                    }
+                    else
+                    {
+                        g_ErrorReport.Write(L"RENDER: SDL_ttf -- loaded font \"%hs\" at %.0f pt", fontPath.c_str(),
+                                            k_DefaultFontPtSize);
+
+                        // Story 7.9.8 (AC-STD-NFR-1): Warm up glyph atlas with common glyphs.
+                        // Forces FreeType rasterization + GPU atlas upload at init rather than
+                        // incurring a latency spike on the first frame that renders text.
+                        static constexpr const char* k_WarmupGlyphs =
+                            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+                            "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
+                        TTF_Text* warmup = TTF_CreateText(s_textEngine, s_ttfFont, k_WarmupGlyphs, 0);
+                        if (warmup)
+                        {
+                            TTF_GetGPUTextDrawData(warmup); // populate atlas; discard draw data
+                            TTF_DestroyText(warmup);
+                        }
+                    }
+                }
+            }
+        }
+
         g_ErrorReport.Write(L"RENDER: SDL_gpu -- Init complete");
         return true;
 #else
@@ -656,6 +760,19 @@ public:
         if (!s_device)
         {
             return;
+        }
+
+        // Story 7.9.8 (AC-2): Destroy SDL_ttf resources before the GPU device.
+        if (s_ttfFont)
+        {
+            TTF_CloseFont(s_ttfFont);
+            s_ttfFont = nullptr;
+        }
+        if (s_textEngine)
+        {
+            TTF_DestroyGPUTextEngine(s_textEngine);
+            s_textEngine = nullptr;
+            TTF_Quit();
         }
 
         // Release white texture from registry if present.
@@ -840,8 +957,7 @@ public:
                 void* pIdxMapped = SDL_MapGPUTransferBuffer(s_device, s_stripIdxTransfer, false);
                 if (pIdxMapped)
                 {
-                    const Uint32 totalIdxBytes =
-                        static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
+                    const Uint32 totalIdxBytes = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
                     std::memcpy(pIdxMapped, s_stripIdxScratch.data(), totalIdxBytes);
                     SDL_UnmapGPUTransferBuffer(s_device, s_stripIdxTransfer);
                     stripIdxReady = true;
@@ -872,8 +988,7 @@ public:
                 // Copy accumulated strip index data (all strips for this frame).
                 if (stripIdxReady)
                 {
-                    const Uint32 totalIdxBytes =
-                        static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
+                    const Uint32 totalIdxBytes = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
 
                     SDL_GPUTransferBufferLocation idxSrc{};
                     idxSrc.transfer_buffer = s_stripIdxTransfer;
@@ -911,8 +1026,7 @@ public:
             depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
             depthTarget.cycle = true;
 
-            s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1,
-                                                  s_depthTexture ? &depthTarget : nullptr);
+            s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
         }
 
         if (s_renderPass)
@@ -998,6 +1112,28 @@ public:
 
                     SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
                     SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
+                    break;
+                }
+
+                case RenderCmdType::DrawTriangles2D:
+                {
+                    // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
+                    // Uses the same Vertex2D layout as DrawIndexedQuads2D but draws non-indexed.
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
                     break;
                 }
                 } // switch
@@ -1241,6 +1377,59 @@ public:
     }
 #endif
 
+    // Story 7.9.8 (AC-2): SDL_ttf text engine accessor.
+    [[nodiscard]] TTF_TextEngine* GetTextEngine() override
+    {
+        return s_textEngine;
+    }
+
+    // Story 7.9.8 (AC-2): Default TTF font accessor.
+    [[nodiscard]] TTF_Font* GetTtfFont() override
+    {
+        return s_ttfFont;
+    }
+
+    // Story 7.9.8 (AC-6): Submit text atlas triangles as deferred draw commands.
+    void SubmitTextTriangles(std::span<const Vertex2D> vertices, void* atlasTexture, void* sampler = nullptr) override
+    {
+        if (vertices.empty() || !s_frameActive || !atlasTexture)
+        {
+            return;
+        }
+
+        const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(Vertex2D));
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        if (vtxOffset == ~0u)
+        {
+            return;
+        }
+
+        // Text always renders with alpha blending, depth off.
+        const int pipelineIdx = static_cast<int>(BlendMode::Alpha);
+        SDL_GPUGraphicsPipeline* pipeline = s_pipelines2DDepthOff[pipelineIdx];
+        if (!pipeline)
+        {
+            return;
+        }
+
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::DrawTriangles2D;
+        cmd.pipeline = pipeline;
+        cmd.texture = static_cast<SDL_GPUTexture*>(atlasTexture);
+        cmd.sampler = sampler ? static_cast<SDL_GPUSampler*>(sampler) : s_defaultSampler;
+        cmd.vtxOffset = vtxOffset;
+        cmd.vtxCount = static_cast<Uint32>(vertices.size());
+        cmd.fogUniform = m_fogUniform;
+        // 2D ortho projection — same as RenderQuad2D.
+        int winW = 0, winH = 0;
+        SDL_GetWindowSize(s_window, &winW, &winH);
+        cmd.vu.mvp = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
+        s_renderCmds.push_back(cmd);
+
+        ++s_dbgDrawCallsThisFrame;
+        s_dbgVtxBytesThisFrame += byteSize;
+    }
+
     // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
     [[nodiscard]] const char* GetGPUDriverName() const override
     {
@@ -1370,9 +1559,9 @@ public:
         // and must not write to the depth buffer (would occlude geometry behind them).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx]
-                                                     : s_pipelines3DDepthReadOnly[pipelineIdx])
-                               : s_pipelines3DDepthOff[pipelineIdx];
+            m_depthTestEnabled
+                ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthReadOnly[pipelineIdx])
+                : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
             if (!s_dbgNullPipelineWarned)
@@ -1448,9 +1637,9 @@ public:
         // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx]
-                                                     : s_pipelines3DDepthReadOnly[pipelineIdx])
-                               : s_pipelines3DDepthOff[pipelineIdx];
+            m_depthTestEnabled
+                ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthReadOnly[pipelineIdx])
+                : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
             return;
@@ -2064,8 +2253,7 @@ private:
         // Disable for transparent/glow passes (depth write OFF) and all 2D.
         SDL_GPURasterizerState rasterState{};
         rasterState.fill_mode = SDL_GPU_FILLMODE_FILL;
-        rasterState.cull_mode =
-            (bUse3DLayout && depthWriteEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
+        rasterState.cull_mode = (bUse3DLayout && depthWriteEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};

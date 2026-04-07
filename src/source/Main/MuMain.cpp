@@ -102,7 +102,12 @@ wchar_t m_ExeVersion[11] = {};
 int m_SoundOnOff = 0;
 int m_MusicOnOff = 0;
 int m_RememberMe = 0;
-int g_iRenderTextType = 0;
+// Story 7.9.8: Select SDL_ttf text renderer on SDL3 builds.
+#ifdef MU_ENABLE_SDL3
+int g_iRenderTextType = 2; // RENDER_TEXT_SDL_TTF
+#else
+int g_iRenderTextType = 0; // RENDER_TEXT_ORIGINAL
+#endif
 int g_iNoMouseTime = 0;
 int g_iMousePopPosition_x = 0;
 int g_iMousePopPosition_y = 0;

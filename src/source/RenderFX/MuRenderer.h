@@ -19,8 +19,11 @@
 // Story 4.4.1: Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
 // can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
 // The returned pointer is opaque — callers cast to SDL_GPUDevice* after including SDL3 headers.
+// Story 7.9.8: Forward declarations for SDL_ttf text engine and font handles.
 #ifdef MU_ENABLE_SDL3
 struct SDL_GPUDevice;
+struct TTF_TextEngine;
+struct TTF_Font;
 #endif
 
 namespace mu
@@ -176,6 +179,30 @@ public:
     [[nodiscard]] virtual void* GetDevice()
     {
         return nullptr;
+    }
+
+    // Story 7.9.8 (AC-2): SDL_ttf GPU text engine accessor.
+    // Returns the TTF_TextEngine* for creating TTF_Text objects, or nullptr if unavailable.
+    [[nodiscard]] virtual TTF_TextEngine* GetTextEngine()
+    {
+        return nullptr;
+    }
+
+    // Story 7.9.8 (AC-2): Default TTF font accessor.
+    // Returns the TTF_Font* loaded at init, or nullptr if no font was found.
+    [[nodiscard]] virtual TTF_Font* GetTtfFont()
+    {
+        return nullptr;
+    }
+
+    // Story 7.9.8 (AC-6): Submit text triangles for deferred rendering.
+    // Vertices are Vertex2D format, atlasTexture is the glyph atlas from TTF draw data.
+    // sampler may be null (uses default). Non-indexed triangle list.
+    virtual void SubmitTextTriangles(std::span<const Vertex2D> vertices, void* atlasTexture, void* sampler = nullptr)
+    {
+        (void)vertices;
+        (void)atlasTexture;
+        (void)sampler;
     }
 #endif
 

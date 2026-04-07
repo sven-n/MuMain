@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include "CComGem.h"
 #include "MuRenderer.h"
+#ifdef MU_ENABLE_SDL3
+#include <SDL3_ttf/SDL_ttf.h>
+#endif
 #include "UIControls.h"
 #include "UIWindows.h"
 #include "ZzzOpenglUtil.h"
@@ -2529,7 +2532,7 @@ bool CUIRenderText::Create(int iRenderTextType, HDC hDC)
 
     switch (iRenderTextType)
     {
-    case 0:
+    case RENDER_TEXT_ORIGINAL:
         m_pRenderText = new CUIRenderTextOriginal;
         if (!m_pRenderText->Create(hDC))
         {
@@ -2538,9 +2541,17 @@ bool CUIRenderText::Create(int iRenderTextType, HDC hDC)
             return false;
         }
         break;
-    case 1:
-        //m_pRenderText = new CUIRenderTextAdvance;
-        return false;
+#ifdef MU_ENABLE_SDL3
+    case RENDER_TEXT_SDL_TTF:
+        m_pRenderText = new CUIRenderTextSDLTtf;
+        if (!m_pRenderText->Create(hDC))
+        {
+            delete m_pRenderText;
+            m_pRenderText = nullptr;
+            return false;
+        }
+        break;
+#endif
     default:
         return false;
     }
@@ -2901,6 +2912,208 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* ps
         lpTextSize->cy = RealRenderingSize.cy / g_fScreenRate_y;
     }
 }
+
+// =============================================================================
+// Story 7.9.8 (AC-3, AC-4): CUIRenderTextSDLTtf — SDL_ttf GPU text renderer.
+// =============================================================================
+#ifdef MU_ENABLE_SDL3
+
+CUIRenderTextSDLTtf::CUIRenderTextSDLTtf()
+    : m_dwTextColor(0xFFFFFFFF)
+    , m_dwBackColor(0)
+{
+}
+
+CUIRenderTextSDLTtf::~CUIRenderTextSDLTtf()
+{
+    Release();
+}
+
+bool CUIRenderTextSDLTtf::Create(HDC /*hDC*/)
+{
+    // SDL_ttf text engine is owned by the renderer — nothing to create here.
+    // Verify that the renderer has a text engine available.
+    auto* engine = mu::GetRenderer().GetTextEngine();
+    if (!engine)
+    {
+        g_ErrorReport.Write(L"RENDER: CUIRenderTextSDLTtf::Create -- no TTF text engine available");
+        return false;
+    }
+    return true;
+}
+
+void CUIRenderTextSDLTtf::Release()
+{
+    // No owned resources — text engine and font are owned by the renderer.
+}
+
+HDC CUIRenderTextSDLTtf::GetFontDC() const { return nullptr; }
+BYTE* CUIRenderTextSDLTtf::GetFontBuffer() const { return nullptr; }
+DWORD CUIRenderTextSDLTtf::GetTextColor() const { return m_dwTextColor; }
+DWORD CUIRenderTextSDLTtf::GetBgColor() const { return m_dwBackColor; }
+
+void CUIRenderTextSDLTtf::SetTextColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha)
+{
+    m_dwTextColor = mu::sdlttf::PackColorDWORD(byRed, byGreen, byBlue, byAlpha);
+}
+
+void CUIRenderTextSDLTtf::SetTextColor(DWORD dwColor)
+{
+    m_dwTextColor = dwColor;
+}
+
+void CUIRenderTextSDLTtf::SetBgColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha)
+{
+    m_dwBackColor = mu::sdlttf::PackColorDWORD(byRed, byGreen, byBlue, byAlpha);
+}
+
+void CUIRenderTextSDLTtf::SetBgColor(DWORD dwColor)
+{
+    m_dwBackColor = dwColor;
+}
+
+void CUIRenderTextSDLTtf::SetFont(HFONT /*hFont*/)
+{
+    // SDL_ttf uses TTF_Font, not HFONT. Font is managed by the renderer.
+}
+
+void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszText,
+                                      int iBoxWidth, int iBoxHeight,
+                                      int iSort, OUT SIZE* lpTextSize)
+{
+    if (pszText == nullptr || pszText[0] == L'\0')
+    {
+        return;
+    }
+
+    auto& renderer = mu::GetRenderer();
+    TTF_TextEngine* engine = renderer.GetTextEngine();
+    TTF_Font* font = renderer.GetTtfFont();
+    if (!engine || !font)
+    {
+        return;
+    }
+
+    // Convert wchar_t to UTF-8 for SDL_ttf.
+    const std::string utf8Text = mu_wchar_to_utf8(pszText);
+    if (utf8Text.empty())
+    {
+        return;
+    }
+
+    // Measure text size.
+    int textW = 0, textH = 0;
+    TTF_GetStringSize(font, utf8Text.c_str(), utf8Text.size(), &textW, &textH);
+
+    // Apply screen scaling.
+    const float screenX = static_cast<float>(iPos_x) * g_fScreenRate_x;
+    const float screenY = static_cast<float>(iPos_y) * g_fScreenRate_y;
+    float boxW = static_cast<float>(iBoxWidth) * g_fScreenRate_x;
+    float boxH = static_cast<float>(iBoxHeight) * g_fScreenRate_y;
+
+    if (boxW == 0.0f)
+    {
+        boxW = static_cast<float>(textW);
+    }
+    if (boxH == 0.0f)
+    {
+        boxH = static_cast<float>(textH);
+    }
+
+    // Compute alignment offset (same logic as CUIRenderTextOriginal).
+    float tabX = 0.0f;
+    float renderX = screenX;
+
+    if (iSort == RT3_SORT_CENTER)
+    {
+        if (textW < static_cast<int>(boxW))
+        {
+            tabX = (boxW - static_cast<float>(textW)) / 2.0f;
+        }
+    }
+    else if (iSort == RT3_SORT_RIGHT || iSort == RT3_WRITE_RIGHT_TO_LEFT)
+    {
+        if (textW < static_cast<int>(boxW))
+        {
+            tabX = boxW - static_cast<float>(textW);
+        }
+        if (iSort == RT3_WRITE_RIGHT_TO_LEFT)
+        {
+            renderX -= boxW;
+        }
+    }
+    else if (iSort == RT3_WRITE_CENTER)
+    {
+        if (textW < static_cast<int>(boxW))
+        {
+            tabX = (boxW - static_cast<float>(textW)) / 2.0f;
+        }
+        renderX -= boxW / 2.0f;
+    }
+
+    // Return measured size if requested.
+    if (lpTextSize)
+    {
+        lpTextSize->cx = static_cast<LONG>(static_cast<float>(textW) / g_fScreenRate_x);
+        lpTextSize->cy = static_cast<LONG>(static_cast<float>(textH) / g_fScreenRate_y);
+    }
+
+    // Create TTF_Text, get draw data, submit to renderer.
+    TTF_Text* ttfText = TTF_CreateText(engine, font, utf8Text.c_str(), utf8Text.size());
+    if (!ttfText)
+    {
+        return;
+    }
+
+    // Set text color (extract RGBA from ABGR packed DWORD).
+    const Uint8 r = static_cast<Uint8>(m_dwTextColor & 0xFF);
+    const Uint8 g = static_cast<Uint8>((m_dwTextColor >> 8) & 0xFF);
+    const Uint8 b = static_cast<Uint8>((m_dwTextColor >> 16) & 0xFF);
+    const Uint8 a = static_cast<Uint8>((m_dwTextColor >> 24) & 0xFF);
+    TTF_SetTextColor(ttfText, r, g, b, a);
+
+    TTF_GPUAtlasDrawSequence* drawData = TTF_GetGPUTextDrawData(ttfText);
+
+    // SDL_ttf coordinate system: +Y down. SDL_GPU 2D ortho: +Y up (0 at bottom).
+    // We need to get the window height and flip Y.
+    int winW = 0, winH = 0;
+    SDL_GetWindowSize(static_cast<SDL_Window*>(g_hWnd), &winW, &winH);
+
+    // Convert atlas draw sequences to Vertex2D triangles and submit.
+    const float drawX = renderX + tabX;
+    // Flip Y: SDL_ttf Y increases downward, our ortho projection has Y=0 at bottom.
+    const float drawY = static_cast<float>(winH) - screenY;
+
+    for (const TTF_GPUAtlasDrawSequence* seq = drawData; seq != nullptr; seq = seq->next)
+    {
+        if (seq->num_indices <= 0 || seq->atlas_texture == nullptr)
+        {
+            continue;
+        }
+
+        // Expand indexed triangles to non-indexed Vertex2D list.
+        std::vector<mu::Vertex2D> verts;
+        verts.reserve(static_cast<size_t>(seq->num_indices));
+
+        for (int i = 0; i < seq->num_indices; ++i)
+        {
+            const int idx = seq->indices[i];
+            mu::Vertex2D v{};
+            v.x = seq->xy[idx].x + drawX;
+            v.y = drawY - seq->xy[idx].y; // flip Y
+            v.u = seq->uv[idx].x;
+            v.v = seq->uv[idx].y;
+            v.color = m_dwTextColor;
+            verts.push_back(v);
+        }
+
+        renderer.SubmitTextTriangles(verts, seq->atlas_texture, nullptr);
+    }
+
+    TTF_DestroyText(ttfText);
+}
+
+#endif // MU_ENABLE_SDL3
 
 DWORD g_dwBKConv = IME_CMODE_ALPHANUMERIC;
 DWORD g_dwBKSent = IME_SMODE_NONE;
