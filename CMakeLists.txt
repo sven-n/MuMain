@@ -209,6 +209,23 @@ FetchContent_Declare(glm
 set(GLM_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glm)
 
+# ============================================================
+# SDL_ttf 3.x — GPU-accelerated TrueType font rendering
+# Provides TTF_CreateGPUTextEngine() for SDL_GPU text atlas rendering.
+# Replaces the GDI TextOut→DIB→glTexSubImage2D pipeline with a native
+# SDL_GPU text engine that manages glyph atlas textures internally.
+# Story 7.9.8: Adopt SDL_ttf for Cross-Platform Font Rendering
+# ============================================================
+set(SDLTTF_SAMPLES OFF CACHE BOOL "" FORCE)
+set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
+FetchContent_Declare(SDL3_ttf
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+    GIT_TAG        release-3.2.2
+    GIT_SHALLOW    TRUE
+)
+# FetchContent_MakeAvailable(SDL3_ttf) is called in src/CMakeLists.txt after SDL3
+# is available, because SDL_ttf requires find_package(SDL3) at configure time.
+
 add_subdirectory("src")
 
 # Story 4.3.2: When SDL_shadercross compilation is enabled, the Main binary

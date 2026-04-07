@@ -252,8 +252,17 @@ if(MU_ENABLE_SDL3)
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
         GIT_TAG        release-3.2.8
         GIT_SHALLOW    TRUE
+        OVERRIDE_FIND_PACKAGE    # Story 7.9.8: lets SDL_ttf's find_package(SDL3) find FetchContent'd SDL3
     )
     FetchContent_MakeAvailable(SDL3)
+    # Story 7.9.8: SDL_ttf requires SDL3 at configure time — MakeAvailable here after SDL3.
+    # FetchContent_Declare is in the root CMakeLists.txt; MakeAvailable is deferred here.
+    # OVERRIDE_FIND_PACKAGE on SDL3 redirects SDL_ttf's find_package(SDL3) automatically.
+    # SDL_ttf uses BUILD_SHARED_LIBS (standard CMake) — force static to match SDL3.
+    set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+    set(BUILD_SHARED_LIBS OFF)
+    FetchContent_MakeAvailable(SDL3_ttf)
+    set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
     # Story 7.3.0: Make SDL3 headers available to ALL targets.
     # PlatformCompat.h (included via PCH) has #ifdef MU_ENABLE_SDL3 sections that
     # #include <SDL3/SDL.h>. Now that MU_ENABLE_SDL3 is project-scope, every target's
@@ -305,6 +314,10 @@ add_library(MURenderFX STATIC ${MU_RENDERFX_SOURCES})
 target_link_libraries(MURenderFX PRIVATE MUCore)
 if(MU_ENABLE_SDL3)
     target_link_libraries(MURenderFX PRIVATE SDL3::SDL3-static)
+    # Story 7.9.8: SDL_ttf for GPU text rendering (replaces GDI TextOut pipeline)
+    if(TARGET SDL3_ttf::SDL3_ttf)
+        target_link_libraries(MURenderFX PRIVATE SDL3_ttf::SDL3_ttf)
+    endif()
 endif()
 # Story 7.9.7: GLM for matrix math (header-only — propagates include path)
 if(TARGET glm::glm)
@@ -369,6 +382,10 @@ target_precompile_headers(MUAudio REUSE_FROM MUCore)
 file(GLOB MU_THIRDPARTY_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/ThirdParty/*.cpp")
 add_library(MUThirdParty STATIC ${MU_THIRDPARTY_SOURCES})
 target_link_libraries(MUThirdParty PRIVATE MUCommon)
+# Story 7.9.8: CUIRenderTextSDLTtf in UIControls.cpp needs SDL_ttf headers
+if(MU_ENABLE_SDL3 AND TARGET SDL3_ttf::SDL3_ttf)
+    target_link_libraries(MUThirdParty PRIVATE SDL3_ttf::SDL3_ttf SDL3::SDL3-static)
+endif()
 target_precompile_headers(MUThirdParty REUSE_FROM MUCore)
 # ThirdParty code: keep warnings visible but don't fail the build
 target_compile_options(MUThirdParty PRIVATE -Wno-error)

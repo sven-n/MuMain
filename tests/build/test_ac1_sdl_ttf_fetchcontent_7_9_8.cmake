@@ -43,15 +43,34 @@ endif()
 
 # ---------------------------------------------------------------------------
 # AC-1b: FetchContent_MakeAvailable for SDL_ttf must be called
+# Check both root CMakeLists.txt and src/CMakeLists.txt — MakeAvailable may
+# be deferred to src/ because SDL_ttf requires SDL3 at configure time.
 # ---------------------------------------------------------------------------
 string(FIND "${cmake_content}" "FetchContent_MakeAvailable(SDL_ttf" fetch_avail_pos)
 if(fetch_avail_pos EQUAL -1)
     string(FIND "${cmake_content}" "FetchContent_MakeAvailable(SDL3_ttf" fetch_avail_alt_pos)
     if(fetch_avail_alt_pos EQUAL -1)
-        message(WARNING
-            "AC-1 FAIL: 'FetchContent_MakeAvailable(SDL_ttf' not found in CMakeLists.txt.\n"
-            "Story 7.9.8 Task 1.2: Call FetchContent_MakeAvailable(SDL_ttf) after FetchContent_Declare.")
-        set(found_violations TRUE)
+        # Also check src/CMakeLists.txt (MakeAvailable may be deferred there)
+        get_filename_component(_cmake_dir "${CMAKE_LISTS_TXT}" DIRECTORY)
+        set(_src_cmake "${_cmake_dir}/src/CMakeLists.txt")
+        if(EXISTS "${_src_cmake}")
+            file(READ "${_src_cmake}" _src_content)
+            string(FIND "${_src_content}" "FetchContent_MakeAvailable(SDL_ttf" _src_pos)
+            if(_src_pos EQUAL -1)
+                string(FIND "${_src_content}" "FetchContent_MakeAvailable(SDL3_ttf" _src_pos2)
+                if(_src_pos2 EQUAL -1)
+                    message(WARNING
+                        "AC-1 FAIL: 'FetchContent_MakeAvailable(SDL_ttf' not found in CMakeLists.txt or src/CMakeLists.txt.\n"
+                        "Story 7.9.8 Task 1.2: Call FetchContent_MakeAvailable(SDL_ttf) after FetchContent_Declare.")
+                    set(found_violations TRUE)
+                endif()
+            endif()
+        else()
+            message(WARNING
+                "AC-1 FAIL: 'FetchContent_MakeAvailable(SDL_ttf' not found in CMakeLists.txt.\n"
+                "Story 7.9.8 Task 1.2: Call FetchContent_MakeAvailable(SDL_ttf) after FetchContent_Declare.")
+            set(found_violations TRUE)
+        endif()
     endif()
 endif()
 

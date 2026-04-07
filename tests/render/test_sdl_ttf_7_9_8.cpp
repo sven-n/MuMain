@@ -33,33 +33,8 @@
 
 #include <cstdint>
 
-// ---------------------------------------------------------------------------
-// Forward declaration: mu::sdlttf::PackColorDWORD
-//
-// Packs individual RGBA channels into the ABGR DWORD format used internally
-// by CUIRenderTextSDLTtf for SetTextColor/SetBgColor storage.
-//
-// Byte layout (lowest address first):
-//   bits [7:0]   = Red   (r)
-//   bits [15:8]  = Green (g)
-//   bits [23:16] = Blue  (b)
-//   bits [31:24] = Alpha (a)
-//
-// This follows the same ABGR convention used by the renderer for vertex colors,
-// so the color DWORD can be passed directly to SDL_GPU without byte-swapping.
-//
-// RED PHASE: Implemented in UIControls.cpp once CUIRenderTextSDLTtf is written.
-//            Tests fail to link until PackColorDWORD is defined there.
-// ---------------------------------------------------------------------------
-namespace mu
-{
-namespace sdlttf
-{
-
-[[nodiscard]] std::uint32_t PackColorDWORD(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
-
-} // namespace sdlttf
-} // namespace mu
+// GREEN PHASE: Include the constexpr header directly (replaces RED-phase forward declaration).
+#include "../../src/source/ThirdParty/SDLTtfColorPack.h"
 
 // ---------------------------------------------------------------------------
 // AC-3: Color packing — SetTextColor / SetBgColor storage contract

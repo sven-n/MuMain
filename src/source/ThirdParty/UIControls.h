@@ -827,6 +827,9 @@ public:
 #define g_pRenderText CUIRenderText::GetInstance()
 #define g_pMultiLanguage CMultiLanguage::GetSingletonPtr()
 
+// Story 7.9.8: ABGR color packing for SDL_ttf text rendering.
+#include "SDLTtfColorPack.h"
+
 void SaveIMEStatus();
 void RestoreIMEStatus();
 void CheckTextInputBoxIME(int iMode);
