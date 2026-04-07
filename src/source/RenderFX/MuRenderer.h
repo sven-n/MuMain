@@ -227,6 +227,19 @@ public:
     }
 #endif
 
+    // Queue a CPU→GPU texture update for the current frame's copy pass.
+    // Used by GDI text rendering (CUIRenderTextOriginal, CUITextInputBox) to upload
+    // modified BITMAP_t.Buffer to the GPU texture after WriteText modifies the CPU buffer.
+    // pixels must remain valid until EndFrame.
+    virtual void QueueTextureUpdate(std::uint32_t textureId, const void* pixels,
+                                    std::uint32_t width, std::uint32_t height)
+    {
+        (void)textureId;
+        (void)pixels;
+        (void)width;
+        (void)height;
+    }
+
     // -----------------------------------------------------------------------
     // Story 7-9-6: GL state migration — replaces raw OpenGL calls.
     // Default implementations are no-ops; SDL_gpu backend overrides them.

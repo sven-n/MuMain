@@ -2776,8 +2776,13 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
     }
     if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
     {
+        // Upload the modified CPU buffer to the GPU texture before rendering.
+        // WriteText() modified Bitmaps[BITMAP_FONT].Buffer — queue the update for
+        // the EndFrame copy pass so the GPU texture has current-frame text data.
+        mu::GetRenderer().QueueTextureUpdate(
+            static_cast<std::uint32_t>(b->TextureNumber), b->Buffer,
+            static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
         mu::GetRenderer().BindTexture(b->TextureNumber);
-        // Texture upload handled by SDL GPU backend (story 7-9-6).
 
         float TextureUWidth = (Width + 0.01f) / b->Width;
         float TextureVHeight = (Height + 0.01f) / b->Height;
@@ -3866,8 +3871,13 @@ void CUITextInputBox::UploadText(int sx, int sy, int Width, int Height)
     }
     if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
     {
+        // Upload the modified CPU buffer to the GPU texture before rendering.
+        // WriteText() modified Bitmaps[BITMAP_FONT].Buffer — queue the update for
+        // the EndFrame copy pass so the GPU texture has current-frame text data.
+        mu::GetRenderer().QueueTextureUpdate(
+            static_cast<std::uint32_t>(b->TextureNumber), b->Buffer,
+            static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
         mu::GetRenderer().BindTexture(b->TextureNumber);
-        // Texture upload handled by SDL GPU backend (story 7-9-6).
 
         float TextureUWidth = (Width + 0.01f) / b->Width;
         float TextureVHeight = (Height + 0.01f) / b->Height;

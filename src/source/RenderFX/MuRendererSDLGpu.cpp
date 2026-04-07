@@ -327,6 +327,23 @@ static bool s_frameActive = false;
 // Copied to GPU in one shot in EndFrame before the render pass.
 static std::vector<Uint16> s_stripIdxScratch;
 
+// ---------------------------------------------------------------------------
+// Deferred texture updates.
+// Queued during the frame when CPU-side BITMAP_t.Buffer changes (e.g., GDI
+// text rendering to BITMAP_FONT). Processed in EndFrame's copy pass before
+// the render pass, so draw commands see the updated texture data.
+// ---------------------------------------------------------------------------
+struct TextureUpdateCmd
+{
+    SDL_GPUTexture* gpuTexture;
+    const void* pixels;        // pointer to CPU-side pixel data (valid until EndFrame)
+    Uint32 width;
+    Uint32 height;
+    Uint32 bytesPerRow;        // row pitch in bytes
+};
+
+static std::vector<TextureUpdateCmd> s_textureUpdates;
+
 // Default white 1×1 texture used for textureId==0 and unknown IDs.
 static SDL_GPUTexture* s_whiteTexture = nullptr;
 
@@ -906,6 +923,7 @@ public:
         s_vtxOffset = 0u;
         s_renderCmds.clear();
         s_stripIdxScratch.clear();
+        s_textureUpdates.clear();
         s_dbgDrawCallsThisFrame = 0u;
         s_dbgVtxBytesThisFrame = 0u;
         ++s_dbgFrameCount;
@@ -1025,7 +1043,43 @@ public:
             }
         }
 
-        if (s_vtxOffset > 0u || stripIdxReady)
+        // Prepare texture update transfer buffers BEFORE the copy pass.
+        // Each queued texture update gets a temporary transfer buffer.
+        struct PreparedTexUpload
+        {
+            SDL_GPUTransferBuffer* transfer;
+            SDL_GPUTexture* gpuTexture;
+            Uint32 width;
+            Uint32 height;
+            Uint32 bytesPerRow;
+        };
+        std::vector<PreparedTexUpload> preparedTexUploads;
+
+        for (const auto& tu : s_textureUpdates)
+        {
+            const Uint32 dataSize = tu.bytesPerRow * tu.height;
+            SDL_GPUTransferBufferCreateInfo tbInfo{};
+            tbInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+            tbInfo.size = dataSize;
+            SDL_GPUTransferBuffer* tb = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
+            if (!tb)
+            {
+                continue;
+            }
+            void* mapped = SDL_MapGPUTransferBuffer(s_device, tb, false);
+            if (mapped)
+            {
+                std::memcpy(mapped, tu.pixels, dataSize);
+                SDL_UnmapGPUTransferBuffer(s_device, tb);
+                preparedTexUploads.push_back({tb, tu.gpuTexture, tu.width, tu.height, tu.bytesPerRow});
+            }
+            else
+            {
+                SDL_ReleaseGPUTransferBuffer(s_device, tb);
+            }
+        }
+
+        if (s_vtxOffset > 0u || stripIdxReady || !preparedTexUploads.empty())
         {
             SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
             if (copyPass)
@@ -1062,7 +1116,31 @@ public:
                     SDL_UploadToGPUBuffer(copyPass, &idxSrc, &idxDst, false);
                 }
 
+                // Upload queued texture updates (GDI text bitmap → GPU texture).
+                for (const auto& pu : preparedTexUploads)
+                {
+                    SDL_GPUTextureTransferInfo texSrc{};
+                    texSrc.transfer_buffer = pu.transfer;
+                    texSrc.offset = 0;
+                    texSrc.pixels_per_row = pu.width;
+                    texSrc.rows_per_layer = pu.height;
+
+                    SDL_GPUTextureRegion texDst{};
+                    texDst.texture = pu.gpuTexture;
+                    texDst.w = pu.width;
+                    texDst.h = pu.height;
+                    texDst.d = 1;
+
+                    SDL_UploadToGPUTexture(copyPass, &texSrc, &texDst, false);
+                }
+
                 SDL_EndGPUCopyPass(copyPass);
+            }
+
+            // Release temporary transfer buffers.
+            for (const auto& pu : preparedTexUploads)
+            {
+                SDL_ReleaseGPUTransferBuffer(s_device, pu.transfer);
             }
         }
 
@@ -1511,6 +1589,36 @@ public:
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
+    }
+
+    // -----------------------------------------------------------------------
+    // QueueTextureUpdate: Queue a CPU→GPU texture upload for the next EndFrame copy pass.
+    // Used by CUIRenderTextOriginal::UploadText and CUITextInputBox::Render to update
+    // the BITMAP_FONT GPU texture after GDI text rasterization modifies the CPU buffer.
+    // -----------------------------------------------------------------------
+    void QueueTextureUpdate(std::uint32_t textureId, const void* pixels,
+                            std::uint32_t width, std::uint32_t height) override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (!s_frameActive || !pixels || width == 0 || height == 0)
+        {
+            return;
+        }
+
+        void* pTex = LookupTexture(textureId);
+        if (!pTex)
+        {
+            return;
+        }
+
+        TextureUpdateCmd cmd{};
+        cmd.gpuTexture = static_cast<SDL_GPUTexture*>(pTex);
+        cmd.pixels = pixels;
+        cmd.width = width;
+        cmd.height = height;
+        cmd.bytesPerRow = width * 4; // RGBA8
+        s_textureUpdates.push_back(cmd);
+#endif
     }
 
     // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
