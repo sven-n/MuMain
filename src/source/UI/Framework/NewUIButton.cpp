@@ -68,19 +68,19 @@ bool CNewUIBaseButton::RadioProcess()
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
     if (isMousein)
     {
+        // Ensure hover state transitions before click check — on SDL3, mouse motion
+        // and click can arrive in the same frame, so UP→OVER must happen first.
+        if (m_EventState == BUTTON_STATE_UP)
+        {
+            m_EventState = BUTTON_STATE_OVER;
+        }
+
         if (SEASON3B::IsPress(VK_LBUTTON))
         {
             if (m_EventState == BUTTON_STATE_OVER)
             {
                 m_EventState = BUTTON_STATE_DOWN;
                 return true;
-            }
-        }
-        else
-        {
-            if (m_EventState == BUTTON_STATE_UP)
-            {
-                m_EventState = BUTTON_STATE_OVER;
             }
         }
     }
