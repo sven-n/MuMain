@@ -893,3 +893,16 @@ add_test(
         -DTEST_BUILD_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std11_flow_code_7_9_7.cmake
 )
+
+# ===========================================================================
+# Story 7.9.8: Adopt SDL_ttf for Cross-Platform Font Rendering
+# Flow Code: VS1-RENDER-FONT-SDLTTF
+# ===========================================================================
+
+# AC-1: SDL_ttf 3.2.2+ integrated via CMake FetchContent
+add_test(
+    NAME "7.9.8-AC-1:sdl-ttf-fetchcontent"
+    COMMAND ${CMAKE_COMMAND}
+        -DCMAKE_LISTS_TXT=${MUMAIN_SOURCE_DIR}/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_sdl_ttf_fetchcontent_7_9_8.cmake
+)

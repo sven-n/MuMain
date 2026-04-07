@@ -178,6 +178,16 @@ target_sources(MuTests PRIVATE render/test_matrix_math_7_9_7.cpp)
 target_link_libraries(MuTests PRIVATE glm::glm)
 target_compile_definitions(MuTests PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 
+# Story 7.9.8: Adopt SDL_ttf for Cross-Platform Font Rendering [VS1-RENDER-FONT-SDLTTF]
+# RED PHASE: Tests verify:
+#   AC-3: PackColorDWORD — ABGR DWORD color packing for CUIRenderTextSDLTtf (6 test cases)
+#   AC-2, AC-4, AC-5, AC-6, AC-STD-NFR-1: GPU-dependent or Win32-dependent — SKIP markers
+# AC-1 (SDL_ttf FetchContent) verified by CMake script test: 7.9.8-AC-1:sdl-ttf-fetchcontent
+# Tests compile and run on macOS/Linux — no Win32, no OpenGL, no SDL3 GPU device required.
+# PackColorDWORD tests FAIL TO LINK until mu::sdlttf::PackColorDWORD is implemented
+# in UIControls.cpp as part of CUIRenderTextSDLTtf.
+target_sources(MuTests PRIVATE render/test_sdl_ttf_7_9_8.cpp)
+
 # Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
 # GREEN PHASE: Tests verify IPlatformAudio interface purity (std::is_abstract_v),
 # g_platformAudio starts as nullptr, MiniAudioBackend default-constructs cleanly,
