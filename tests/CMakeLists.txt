@@ -474,6 +474,10 @@ target_sources(MuTests PRIVATE stubs/test_game_stubs.cpp)
 if(MU_ENABLE_SDL3)
     target_compile_definitions(MuTests PRIVATE MU_ENABLE_SDL3)
     target_link_libraries(MuTests PRIVATE SDL3::SDL3-static)
+    # Story 7-9-8: SDL_ttf needed by test_sdl_ttf_7_9_8.cpp GPU text engine tests
+    if(TARGET SDL3_ttf::SDL3_ttf)
+        target_link_libraries(MuTests PRIVATE SDL3_ttf::SDL3_ttf)
+    endif()
 endif()
 # Story 7-8-3: MURenderFX references OpenGL symbols (glAlphaFunc, glBegin, etc.)
 # On macOS, these come from the OpenGL framework.
