@@ -1500,9 +1500,11 @@ public:
         cmd.vtxOffset = vtxOffset;
         cmd.vtxCount = static_cast<Uint32>(vertices.size());
         cmd.fogUniform = m_fogUniform;
-        // 2D ortho projection — same as RenderQuad2D. Use cached dimensions
-        // to avoid per-draw SDL_GetWindowSize calls and ensure consistency
-        // with text position calculations that also use cached height.
+        // 2D ortho projection for text — Y-up to match SDL_ttf GPU convention.
+        // SDL_ttf negates Y in the vertex data (see SDL_gpu_textengine.c: "In the GPU API
+        // positive y-axis is upwards so the signs of the y-coords is reversed").
+        // Vertex positions are in Y-up space with the text origin at (0,0).
+        // drawX/drawY offset the text to the correct screen position.
         cmd.vu.mvp =
             glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
         s_renderCmds.push_back(cmd);

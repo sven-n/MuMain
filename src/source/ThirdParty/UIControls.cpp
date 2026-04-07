@@ -3103,15 +3103,16 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
     }
 
     // F-2 fix: Render background color quad before text (same pattern as CUIRenderTextOriginal).
+    // Note: bg quad uses standard Y-up ortho (RenderQuad2D), not the text's Y-down ortho.
     if ((m_dwBackColor >> 24) != 0)
     {
         const float bgX = renderX;
-        const float bgY = static_cast<float>(winH) - screenY;
+        const float bgYOrtho = static_cast<float>(winH) - screenY;
         const mu::Vertex2D bgVerts[4] = {
-            {bgX, bgY, 0.0f, 0.0f, m_dwBackColor},
-            {bgX, bgY - boxH, 0.0f, 0.0f, m_dwBackColor},
-            {bgX + boxW, bgY - boxH, 0.0f, 0.0f, m_dwBackColor},
-            {bgX + boxW, bgY, 0.0f, 0.0f, m_dwBackColor},
+            {bgX, bgYOrtho, 0.0f, 0.0f, m_dwBackColor},
+            {bgX, bgYOrtho - boxH, 0.0f, 0.0f, m_dwBackColor},
+            {bgX + boxW, bgYOrtho - boxH, 0.0f, 0.0f, m_dwBackColor},
+            {bgX + boxW, bgYOrtho, 0.0f, 0.0f, m_dwBackColor},
         };
         renderer.RenderQuad2D(bgVerts, 0u);
     }
@@ -3146,7 +3147,8 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
 
     // Convert atlas draw sequences to Vertex2D triangles and submit.
     const float drawX = renderX + tabX;
-    // Flip Y: SDL_ttf Y increases downward, our ortho projection has Y=0 at bottom.
+    // SDL_ttf negates Y in vertex data (Y-up convention). Convert screen-space Y to Y-up
+    // ortho space: drawY = winH - screenY (same as regular 2D rendering).
     const float drawY = static_cast<float>(winH) - screenY;
 
     // F-4 fix: Reuse a thread_local scratch buffer to avoid per-call heap allocation.
@@ -3174,7 +3176,7 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
             const int idx = seq->indices[i];
             mu::Vertex2D v{};
             v.x = seq->xy[idx].x + drawX;
-            v.y = drawY - seq->xy[idx].y; // flip Y
+            v.y = drawY + seq->xy[idx].y; // Y-up ortho: SDL_ttf already negated Y in vertex data
             v.u = seq->uv[idx].x;
             v.v = seq->uv[idx].y;
             v.color = m_dwTextColor;
