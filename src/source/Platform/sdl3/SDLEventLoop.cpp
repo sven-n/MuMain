@@ -126,10 +126,11 @@ namespace mu
 
 bool SDLEventLoop::PollEvents()
 {
-    // Reset SDL text input state each frame — text is consumed once per frame.
+    // Text input state: do NOT clear here — PollEvents may run multiple times
+    // per render frame (frame rate throttling). Clearing here would discard
+    // TEXT_INPUT events before DoActionSub() gets a chance to consume them.
+    // Text is cleared after consumption in DoActionSub (UIControls.cpp).
     // [VS1-SDL-INPUT-TEXT]
-    g_szSDLTextInput[0] = '\0';
-    g_bSDLTextInputReady = false;
 
     // Reset per-frame mouse state before processing new events. [VS1-SDL-INPUT-MOUSE]
     // MouseLButtonDBClick: mirrors MuMain.cpp:611 which clears this each frame.

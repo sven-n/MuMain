@@ -3542,7 +3542,9 @@ void CUITextInputBox::DoActionSub(BOOL /*bMessageOnly*/)
             m_szSDLText[m_iSDLTextLen++] = wch;
             m_szSDLText[m_iSDLTextLen] = L'\0';
         }
-        // Reset ready flag so we don't re-consume (g_szSDLTextInput cleared next frame by SDLEventLoop)
+        // Consume: clear text buffer and ready flag so other input boxes don't re-consume,
+        // and PollEvents TEXT_INPUT events can accumulate fresh input for the next frame.
+        g_szSDLTextInput[0] = '\0';
         g_bSDLTextInputReady = false;
     }
 
@@ -3832,10 +3834,6 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
     }
 #elif defined(MU_ENABLE_SDL3)
     // SDL3 path: activate SDL3 text input and track focus state. [VS1-SDL-INPUT-TEXT]
-    // No Win32 HWND operations — SDL_EVENT_TEXT_INPUT drives input on SDL3 path.
-    // Exception: #ifdef _WIN32 / #elif MU_ENABLE_SDL3 guards ARE permitted in ThirdParty/
-    // UIControls.cpp (excluded from clang-tidy) — consistent with existing conditional
-    // compilation in this file (#ifdef LJH_ADD_RESTRICTION_ON_ID, etc.).
     MuStartTextInput();
     m_bSDLHasFocus = true;
     g_dwKeyFocusUIID = GetUIID();
