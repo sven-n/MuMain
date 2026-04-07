@@ -195,6 +195,27 @@ public:
         return nullptr;
     }
 
+    // F-1 fix: Font variant accessors for bold, big, and fixed-width text.
+    // Returns the default font as fallback if the variant wasn't loaded.
+    [[nodiscard]] virtual TTF_Font* GetTtfFontBold()
+    {
+        return nullptr;
+    }
+    [[nodiscard]] virtual TTF_Font* GetTtfFontBig()
+    {
+        return nullptr;
+    }
+    [[nodiscard]] virtual TTF_Font* GetTtfFontFixed()
+    {
+        return nullptr;
+    }
+
+    // F-7 fix: Cached window height (updated per-frame in BeginFrame).
+    [[nodiscard]] virtual int GetCachedWindowHeight()
+    {
+        return 0;
+    }
+
     // Story 7.9.8 (AC-6): Submit text triangles for deferred rendering.
     // Vertices are Vertex2D format, atlasTexture is the glyph atlas from TTF draw data.
     // sampler may be null (uses default). Non-indexed triangle list.

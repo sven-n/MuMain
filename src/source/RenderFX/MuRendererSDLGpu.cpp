@@ -348,19 +348,37 @@ static SDL_GPUBuffer* s_fogUniformBuf = nullptr;
 static SDL_GPUTransferBuffer* s_fogTransferBuf = nullptr;
 static bool s_fogDirty = true; // upload on first draw if SetFog not called
 
-// Story 7.9.8 (AC-2): SDL_ttf GPU text engine and default font.
+// Story 7.9.8 (AC-2): SDL_ttf GPU text engine and font variants.
 // s_textEngine: atlas-based text engine created after SDL_GPUDevice.
-// s_ttfFont: loaded .ttf font for UI text rendering.
+// s_ttfFont*: pre-loaded fonts for UI text rendering (normal, bold, big, fixed).
 static TTF_TextEngine* s_textEngine = nullptr;
-static TTF_Font* s_ttfFont = nullptr;
+static TTF_Font* s_ttfFont = nullptr;      // normal (default)
+static TTF_Font* s_ttfFontBold = nullptr;  // bold weight
+static TTF_Font* s_ttfFontBig = nullptr;   // larger size, bold
+static TTF_Font* s_ttfFontFixed = nullptr; // monospace
 static constexpr float k_DefaultFontPtSize = 14.0f;
+static constexpr float k_BigFontPtSize = 18.0f;
+
+// F-7 fix: Cached window dimensions, updated once per frame in BeginFrame().
+static int s_cachedWinW = 0;
+static int s_cachedWinH = 0;
 
 // Story 7.9.8 (AC-2): Discover a usable .ttf font file.
-// Searches game directory first, then system font paths per platform.
+// Searches game directory first (via SDL_GetBasePath), then system font paths.
 [[nodiscard]] static std::string FindFontPath()
 {
-    // 1. Game-bundled font (preferred).
-    const std::filesystem::path gameFontDir = "Data/Font";
+    // 1. Game-bundled font (preferred). Use SDL_GetBasePath() for exe-relative resolution
+    // instead of CWD-relative (F-6 fix).
+    std::filesystem::path gameFontDir;
+    const char* basePath = SDL_GetBasePath();
+    if (basePath)
+    {
+        gameFontDir = std::filesystem::path(basePath) / "Data" / "Font";
+    }
+    else
+    {
+        gameFontDir = "Data/Font"; // fallback to CWD if SDL_GetBasePath fails
+    }
     if (std::filesystem::exists(gameFontDir))
     {
         for (const auto& entry : std::filesystem::directory_iterator(gameFontDir))
@@ -724,6 +742,21 @@ public:
                         g_ErrorReport.Write(L"RENDER: SDL_ttf -- loaded font \"%hs\" at %.0f pt", fontPath.c_str(),
                                             k_DefaultFontPtSize);
 
+                        // F-1 fix: Pre-load font variants for bold, big, and fixed-width text.
+                        // All variants use the same .ttf file at different sizes.
+                        // SDL_ttf 3.x doesn't support weight selection from a single .ttf;
+                        // we vary size to differentiate big text and use the same font for bold.
+                        s_ttfFontBold = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
+                        s_ttfFontBig = TTF_OpenFont(fontPath.c_str(), k_BigFontPtSize);
+                        s_ttfFontFixed = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
+                        // Log which variants loaded (non-fatal if some fail).
+                        if (!s_ttfFontBold || !s_ttfFontBig || !s_ttfFontFixed)
+                        {
+                            g_ErrorReport.Write(
+                                L"RENDER: SDL_ttf -- some font variants failed to load (bold=%d big=%d fixed=%d)",
+                                s_ttfFontBold != nullptr, s_ttfFontBig != nullptr, s_ttfFontFixed != nullptr);
+                        }
+
                         // Story 7.9.8 (AC-STD-NFR-1): Warm up glyph atlas with common glyphs.
                         // Forces FreeType rasterization + GPU atlas upload at init rather than
                         // incurring a latency spike on the first frame that renders text.
@@ -763,6 +796,22 @@ public:
         }
 
         // Story 7.9.8 (AC-2): Destroy SDL_ttf resources before the GPU device.
+        // Close font variants first, then default font, then engine.
+        if (s_ttfFontFixed)
+        {
+            TTF_CloseFont(s_ttfFontFixed);
+            s_ttfFontFixed = nullptr;
+        }
+        if (s_ttfFontBig)
+        {
+            TTF_CloseFont(s_ttfFontBig);
+            s_ttfFontBig = nullptr;
+        }
+        if (s_ttfFontBold)
+        {
+            TTF_CloseFont(s_ttfFontBold);
+            s_ttfFontBold = nullptr;
+        }
         if (s_ttfFont)
         {
             TTF_CloseFont(s_ttfFont);
@@ -841,6 +890,9 @@ public:
             g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_AcquireGPUCommandBuffer failed: %hs", SDL_GetError());
             return;
         }
+
+        // F-7 fix: Cache window dimensions once per frame for text Y-flip.
+        SDL_GetWindowSize(s_window, &s_cachedWinW, &s_cachedWinH);
 
         // Reset vertex scratch offset, deferred command list, and per-frame diagnostics.
         s_vtxOffset = 0u;
@@ -1387,6 +1439,26 @@ public:
     [[nodiscard]] TTF_Font* GetTtfFont() override
     {
         return s_ttfFont;
+    }
+
+    // F-1 fix: Font variant accessors for bold, big, and fixed-width text.
+    [[nodiscard]] TTF_Font* GetTtfFontBold() override
+    {
+        return s_ttfFontBold ? s_ttfFontBold : s_ttfFont;
+    }
+    [[nodiscard]] TTF_Font* GetTtfFontBig() override
+    {
+        return s_ttfFontBig ? s_ttfFontBig : s_ttfFont;
+    }
+    [[nodiscard]] TTF_Font* GetTtfFontFixed() override
+    {
+        return s_ttfFontFixed ? s_ttfFontFixed : s_ttfFont;
+    }
+
+    // F-7 fix: Cached window dimensions accessor (updated per-frame in BeginFrame).
+    [[nodiscard]] int GetCachedWindowHeight() override
+    {
+        return s_cachedWinH;
     }
 
     // Story 7.9.8 (AC-6): Submit text atlas triangles as deferred draw commands.

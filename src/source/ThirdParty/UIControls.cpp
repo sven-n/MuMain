@@ -2921,6 +2921,8 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* ps
 CUIRenderTextSDLTtf::CUIRenderTextSDLTtf()
     : m_dwTextColor(0xFFFFFFFF)
     , m_dwBackColor(0)
+    , m_pActiveFont(nullptr)
+    , m_pTtfText(nullptr)
 {
 }
 
@@ -2933,18 +2935,31 @@ bool CUIRenderTextSDLTtf::Create(HDC /*hDC*/)
 {
     // SDL_ttf text engine is owned by the renderer — nothing to create here.
     // Verify that the renderer has a text engine available.
-    auto* engine = mu::GetRenderer().GetTextEngine();
+    auto& renderer = mu::GetRenderer();
+    auto* engine = renderer.GetTextEngine();
     if (!engine)
     {
         g_ErrorReport.Write(L"RENDER: CUIRenderTextSDLTtf::Create -- no TTF text engine available");
         return false;
+    }
+    m_pActiveFont = renderer.GetTtfFont(); // default font
+    // F-3 fix: Pre-create a reusable TTF_Text to avoid per-frame allocations.
+    if (m_pActiveFont)
+    {
+        m_pTtfText = TTF_CreateText(engine, m_pActiveFont, "", 0);
     }
     return true;
 }
 
 void CUIRenderTextSDLTtf::Release()
 {
-    // No owned resources — text engine and font are owned by the renderer.
+    // F-3 fix: Destroy the reusable TTF_Text.
+    if (m_pTtfText)
+    {
+        TTF_DestroyText(m_pTtfText);
+        m_pTtfText = nullptr;
+    }
+    m_pActiveFont = nullptr;
 }
 
 HDC CUIRenderTextSDLTtf::GetFontDC() const { return nullptr; }
@@ -2972,9 +2987,28 @@ void CUIRenderTextSDLTtf::SetBgColor(DWORD dwColor)
     m_dwBackColor = dwColor;
 }
 
-void CUIRenderTextSDLTtf::SetFont(HFONT /*hFont*/)
+void CUIRenderTextSDLTtf::SetFont(HFONT hFont)
 {
-    // SDL_ttf uses TTF_Font, not HFONT. Font is managed by the renderer.
+    // F-1 fix: Map HFONT handles to pre-loaded TTF_Font* variants.
+    // On SDL3, g_hFont* are created via CrossPlatformGDI's CreateFont() and
+    // are distinct pointers we can compare against.
+    auto& renderer = mu::GetRenderer();
+    if (hFont == g_hFontBold)
+    {
+        m_pActiveFont = renderer.GetTtfFontBold();
+    }
+    else if (hFont == g_hFontBig)
+    {
+        m_pActiveFont = renderer.GetTtfFontBig();
+    }
+    else if (hFont == g_hFixFont)
+    {
+        m_pActiveFont = renderer.GetTtfFontFixed();
+    }
+    else
+    {
+        m_pActiveFont = renderer.GetTtfFont(); // g_hFont or unknown → default
+    }
 }
 
 void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszText,
@@ -2988,7 +3022,8 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
 
     auto& renderer = mu::GetRenderer();
     TTF_TextEngine* engine = renderer.GetTextEngine();
-    TTF_Font* font = renderer.GetTtfFont();
+    // F-1 fix: Use the active font (set by SetFont), not just the default.
+    TTF_Font* font = m_pActiveFont ? m_pActiveFont : renderer.GetTtfFont();
     if (!engine || !font)
     {
         return;
@@ -3058,8 +3093,41 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
         lpTextSize->cy = static_cast<LONG>(static_cast<float>(textH) / g_fScreenRate_y);
     }
 
-    // Create TTF_Text, get draw data, submit to renderer.
-    TTF_Text* ttfText = TTF_CreateText(engine, font, utf8Text.c_str(), utf8Text.size());
+    // F-7 fix: Use cached window height instead of per-call SDL_GetWindowSize.
+    const int winH = renderer.GetCachedWindowHeight();
+    if (winH <= 0)
+    {
+        return; // No window yet — skip rendering.
+    }
+
+    // F-2 fix: Render background color quad before text (same pattern as CUIRenderTextOriginal).
+    if ((m_dwBackColor >> 24) != 0)
+    {
+        const float bgX = renderX;
+        const float bgY = static_cast<float>(winH) - screenY;
+        const mu::Vertex2D bgVerts[4] = {
+            {bgX, bgY, 0.0f, 0.0f, m_dwBackColor},
+            {bgX, bgY - boxH, 0.0f, 0.0f, m_dwBackColor},
+            {bgX + boxW, bgY - boxH, 0.0f, 0.0f, m_dwBackColor},
+            {bgX + boxW, bgY, 0.0f, 0.0f, m_dwBackColor},
+        };
+        renderer.RenderQuad2D(bgVerts, 0u);
+    }
+
+    // F-3 fix: Reuse the member TTF_Text instead of creating/destroying per call.
+    // TTF_SetTextString + TTF_SetTextFont update the existing object in-place.
+    TTF_Text* ttfText = m_pTtfText;
+    if (!ttfText)
+    {
+        // Lazy init if Create() was called before the engine was ready.
+        ttfText = TTF_CreateText(engine, font, utf8Text.c_str(), utf8Text.size());
+        m_pTtfText = ttfText;
+    }
+    else
+    {
+        TTF_SetTextFont(ttfText, font);
+        TTF_SetTextString(ttfText, utf8Text.c_str(), utf8Text.size());
+    }
     if (!ttfText)
     {
         return;
@@ -3074,15 +3142,13 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
 
     TTF_GPUAtlasDrawSequence* drawData = TTF_GetGPUTextDrawData(ttfText);
 
-    // SDL_ttf coordinate system: +Y down. SDL_GPU 2D ortho: +Y up (0 at bottom).
-    // We need to get the window height and flip Y.
-    int winW = 0, winH = 0;
-    SDL_GetWindowSize(static_cast<SDL_Window*>(g_hWnd), &winW, &winH);
-
     // Convert atlas draw sequences to Vertex2D triangles and submit.
     const float drawX = renderX + tabX;
     // Flip Y: SDL_ttf Y increases downward, our ortho projection has Y=0 at bottom.
     const float drawY = static_cast<float>(winH) - screenY;
+
+    // F-4 fix: Reuse a thread_local scratch buffer to avoid per-call heap allocation.
+    static thread_local std::vector<mu::Vertex2D> s_scratchVerts;
 
     for (const TTF_GPUAtlasDrawSequence* seq = drawData; seq != nullptr; seq = seq->next)
     {
@@ -3092,8 +3158,8 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
         }
 
         // Expand indexed triangles to non-indexed Vertex2D list.
-        std::vector<mu::Vertex2D> verts;
-        verts.reserve(static_cast<size_t>(seq->num_indices));
+        s_scratchVerts.clear();
+        s_scratchVerts.reserve(static_cast<size_t>(seq->num_indices));
 
         for (int i = 0; i < seq->num_indices; ++i)
         {
@@ -3104,13 +3170,11 @@ void CUIRenderTextSDLTtf::RenderText(int iPos_x, int iPos_y, const wchar_t* pszT
             v.u = seq->uv[idx].x;
             v.v = seq->uv[idx].y;
             v.color = m_dwTextColor;
-            verts.push_back(v);
+            s_scratchVerts.push_back(v);
         }
 
-        renderer.SubmitTextTriangles(verts, seq->atlas_texture, nullptr);
+        renderer.SubmitTextTriangles(s_scratchVerts, seq->atlas_texture, nullptr);
     }
-
-    TTF_DestroyText(ttfText);
 }
 
 #endif // MU_ENABLE_SDL3

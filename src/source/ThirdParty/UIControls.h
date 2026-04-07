@@ -799,10 +799,14 @@ constexpr int RENDER_TEXT_SDL_TTF = 2;
 // Uses TTF_CreateGPUTextEngine from the renderer to produce atlas draw data.
 // Replaces the GDI DIB → glTexSubImage2D pipeline that is broken on SDL3.
 #ifdef MU_ENABLE_SDL3
+struct TTF_Font;
+struct TTF_Text;
 class CUIRenderTextSDLTtf : public IUIRenderText
 {
     DWORD m_dwTextColor;
     DWORD m_dwBackColor;
+    TTF_Font* m_pActiveFont;  // F-1 fix: active font variant (set by SetFont)
+    TTF_Text* m_pTtfText;    // F-3 fix: reusable TTF_Text to avoid per-call allocation
 
 public:
     CUIRenderTextSDLTtf();

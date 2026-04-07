@@ -4,6 +4,7 @@
 
 #include <clocale>
 #include "Data/GameConfig.h"
+#include "UIControls.h"
 #include "UIWindows.h"
 #include "UIManager.h"
 #include "ZzzOpenglUtil.h"
@@ -103,10 +104,11 @@ int m_SoundOnOff = 0;
 int m_MusicOnOff = 0;
 int m_RememberMe = 0;
 // Story 7.9.8: Select SDL_ttf text renderer on SDL3 builds.
+// F-5 fix: Use named constants instead of magic numbers.
 #ifdef MU_ENABLE_SDL3
-int g_iRenderTextType = 2; // RENDER_TEXT_SDL_TTF
+int g_iRenderTextType = RENDER_TEXT_SDL_TTF;
 #else
-int g_iRenderTextType = 0; // RENDER_TEXT_ORIGINAL
+int g_iRenderTextType = RENDER_TEXT_ORIGINAL;
 #endif
 int g_iNoMouseTime = 0;
 int g_iMousePopPosition_x = 0;
@@ -432,8 +434,23 @@ int MuMain(int argc, char* argv[])
 
     // ---- Story 7.9.1: Game state initialisation (cross-platform init sequence) ----
     // Reproduces the cross-platform subset of the Win32 init path that ran
-    // before the Win32 game loop. Win32-only init (CreateFont, SetTimer, CInput with
+    // before the Win32 game loop. Win32-only init (SetTimer, CInput with
     // HWND, IME, screensaver suppression) is intentionally skipped.
+
+    // F-1 fix: Create the 4 font handles on SDL3 builds. The original Win32 WinMain
+    // created these via GDI CreateFont(); the SDL3 path uses CrossPlatformGDI's shim
+    // which stores height/weight in a MuGdiFont struct. SetFont() compares these
+    // pointers to select the matching pre-loaded TTF_Font* variant.
+#ifdef MU_ENABLE_SDL3
+    g_hFont = CreateFont(-12, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 0,
+                         DEFAULT_PITCH, L"Arial");
+    g_hFontBold = CreateFont(-12, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                             0, DEFAULT_PITCH, L"Arial");
+    g_hFontBig = CreateFont(-16, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 0,
+                            DEFAULT_PITCH, L"Arial");
+    g_hFixFont = CreateFont(-12, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                            0, DEFAULT_PITCH, L"Courier New");
+#endif
 
     // Random seed and table (for gameplay RNG)
     srand((unsigned)time(nullptr));
