@@ -572,8 +572,7 @@ static void CheckServerConnection()
         {
             s_bClosed = TRUE;
             g_ErrorReport.Write(L"> Connection closed (SocketClient=%p, connected=%d). ",
-                                static_cast<void*>(SocketClient),
-                                SocketClient ? SocketClient->IsConnected() : -1);
+                                static_cast<void*>(SocketClient), SocketClient ? SocketClient->IsConnected() : -1);
             g_ErrorReport.WriteCurrentTime();
             g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
             CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);

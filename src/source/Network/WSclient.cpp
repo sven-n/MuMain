@@ -1508,8 +1508,7 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
 {
     if (SceneFlag == LOG_IN_SCENE)
     {
-        g_ErrorReport.Write(L"Send Request Server List (handle=%d).\r\n",
-                            SocketClient->ToConnectServer()->GetHandle());
+        g_ErrorReport.Write(L"Send Request Server List (handle=%d).\r\n", SocketClient->ToConnectServer()->GetHandle());
         SocketClient->ToConnectServer()->SendServerListRequest();
     }
     else

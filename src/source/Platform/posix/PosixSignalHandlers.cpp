@@ -44,9 +44,9 @@ static void CrashHandler(int signum, siginfo_t* info, void* context)
     if (s_inHandler)
     {
         // Re-entrant call — chain to previous handler without diagnostics.
-        const struct sigaction* old = (signum == SIGABRT) ? &s_oldSIGABRT
-                                   : (signum == SIGBUS) ? &s_oldSIGBUS
-                                                        : &s_oldSIGSEGV;
+        const struct sigaction* old = (signum == SIGABRT)  ? &s_oldSIGABRT
+                                      : (signum == SIGBUS) ? &s_oldSIGBUS
+                                                           : &s_oldSIGSEGV;
         if ((old->sa_flags & SA_SIGINFO) != 0 && old->sa_sigaction != nullptr)
         {
             old->sa_sigaction(signum, info, context);
