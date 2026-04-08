@@ -117,8 +117,11 @@ bool CNewUIBaseButton::Process()
     {
         m_EventState = BUTTON_STATE_OVER;
     }
-    else if (SEASON3B::IsRepeat(VK_LBUTTON) && isMousein)
+    else if ((SEASON3B::IsRepeat(VK_LBUTTON) || SEASON3B::IsPress(VK_LBUTTON)) && isMousein)
     {
+        // IsPress added for SDL3: quick clicks transition KEY_NONE→KEY_PRESS→KEY_RELEASE
+        // in 2 frames. Without IsPress, the DOWN state is only set on KEY_REPEAT which
+        // requires 3+ frames of holding.
         m_EventState = BUTTON_STATE_DOWN;
     }
     else if (SEASON3B::IsRelease(VK_LBUTTON) && isMousein)

@@ -352,6 +352,9 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 {
     auto Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
 
+    g_ErrorReport.Write(L"NET: ReceiveJoinServer — Result=0x%02X LogIn=%d\r\n",
+                        Data2->Result, LogIn);
+
     if (LogIn != 0)
     {
         HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
@@ -364,6 +367,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
         switch (Data2->Result)
         {
         case 0x01:
+            g_ErrorReport.Write(L"NET: ReceiveJoinServer — showing login window\r\n");
             rUIMng.ShowWin(&rUIMng.m_LoginWin);
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
@@ -13045,6 +13049,16 @@ void ReceiveDarkside(const BYTE* ReceiveBuffer)
 
 static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 {
+    // Diagnostic: log first 10 packets from each connection to trace protocol flow.
+    static int s_pktCount = 0;
+    if (++s_pktCount <= 20)
+    {
+        fprintf(stderr, "[PKT #%d] size=%d header=0x%02X", s_pktCount, Size, ReceiveBuffer[0]);
+        if (Size >= 3) fprintf(stderr, " byte2=0x%02X", ReceiveBuffer[2]);
+        if (Size >= 4) fprintf(stderr, " byte3=0x%02X", ReceiveBuffer[3]);
+        fprintf(stderr, "\n");
+    }
+
     auto received_span = std::span<const BYTE>(ReceiveBuffer, Size);
     BYTE HeadCode = 0;
     BOOL bEncrypted = ReceiveBuffer[0] >= 0xC3;
