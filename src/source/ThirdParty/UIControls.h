@@ -946,12 +946,14 @@ protected:
     // m_iSDLMaxLength: maximum characters allowed (set from Init iMaxLength parameter).
     // m_bBackspaceHeld: edge-detection flag — prevents auto-repeat consuming multiple chars.
     // m_bSDLHasFocus: true after GiveFocus(), false after SetState(UISTATE_HIDE).
-    // [VS1-SDL-INPUT-TEXT]
+    // m_hConfiguredFont: font set via SetFont() — used in SDL3 Render path instead of g_hFont.
+    // [VS1-SDL-INPUT-TEXT] [Story 7-9-9, AC-2]
     wchar_t m_szSDLText[MAX_CHAT_SIZE + 1] = {};
     int m_iSDLTextLen = 0;
     int m_iSDLMaxLength = MAX_CHAT_SIZE;
     bool m_bBackspaceHeld = false;
     bool m_bSDLHasFocus = false;
+    HFONT m_hConfiguredFont = nullptr;
 
     // Override DoActionSub to handle SDL3 text input consumption each frame.
     virtual void DoActionSub(BOOL bMessageOnly) override;

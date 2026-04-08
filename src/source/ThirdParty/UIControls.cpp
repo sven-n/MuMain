@@ -3833,12 +3833,23 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
         PostMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)-2, (LPARAM)-1);
     }
 #elif defined(MU_ENABLE_SDL3)
-    // SDL3 path: activate SDL3 text input and track focus state. [VS1-SDL-INPUT-TEXT]
+    // SDL3 path: idempotent focus — only one box at a time. [Story 7-9-9, AC-1]
+    if (m_bSDLHasFocus)
+    {
+        return; // Already focused — skip redundant MuStartTextInput calls
+    }
+
+    // Clear focus on the previously focused box (mutual exclusion)
+    static CUITextInputBox* s_pFocusedInputBox = nullptr;
+    if (s_pFocusedInputBox != nullptr && s_pFocusedInputBox != this)
+    {
+        s_pFocusedInputBox->m_bSDLHasFocus = false;
+    }
+    s_pFocusedInputBox = this;
+
     MuStartTextInput();
     m_bSDLHasFocus = true;
     g_dwKeyFocusUIID = GetUIID();
-    fprintf(stderr, "[FOCUS] GiveFocus called: this=%p m_bSDLHasFocus=%d UIID=%u\n",
-            static_cast<void*>(this), m_bSDLHasFocus ? 1 : 0, GetUIID());
 #else
     // Non-Windows, non-SDL3: no-op (should not occur in practice)
     g_dwKeyFocusUIID = GetUIID();
@@ -4022,11 +4033,12 @@ void CUITextInputBox::Render()
     }
     ::SetBkColor(m_hMemDC, RGB(0, 0, 0));
     ::SetTextColor(m_hMemDC, RGB(255, 255, 255));
-    // Ensure the font is selected into the memory DC — SetFont() may have changed it,
-    // but on SDL3 the Win32 WM_SETFONT message path doesn't work.
-    if (g_hFont)
+    // Ensure the configured font is selected — use m_hConfiguredFont (from SetFont),
+    // falling back to g_hFont only if SetFont was never called. [Story 7-9-9, AC-2]
+    HFONT hRenderFont = m_hConfiguredFont ? m_hConfiguredFont : g_hFont;
+    if (hRenderFont)
     {
-        ::SelectObject(m_hMemDC, g_hFont);
+        ::SelectObject(m_hMemDC, hRenderFont);
     }
     if (IsPassword())
     {
@@ -4175,6 +4187,8 @@ void CUITextInputBox::SetFont(HFONT hFont)
 {
     if (hFont == nullptr)
         return;
+
+    m_hConfiguredFont = hFont; // Store for SDL3 Render path [Story 7-9-9, AC-2]
 
 #ifdef _WIN32
     if (m_hEditWnd != nullptr)

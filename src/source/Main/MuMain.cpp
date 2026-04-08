@@ -509,6 +509,20 @@ int MuMain(int argc, char* argv[])
         g_ErrorReport.Write(L"WARNING: g_pNewUISystem is null, skipping Create()\r\n");
     }
 
+    // Initialize global text input boxes for popups/password dialogs [Story 7-9-9, AC-4]
+    g_pSingleTextInputBox = new CUITextInputBox;
+    g_pSingleTextInputBox->Init(g_hWnd, 200, 14, 50);
+    g_pSingleTextInputBox->SetFont(g_hFixFont);
+    g_pSingleTextInputBox->SetState(UISTATE_HIDE);
+
+    g_pSinglePasswdInputBox = new CUITextInputBox;
+    g_pSinglePasswdInputBox->Init(g_hWnd, 200, 14, 20, TRUE);
+    g_pSinglePasswdInputBox->SetFont(g_hFixFont);
+    g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
+
+    assert(g_pSingleTextInputBox != nullptr);
+    assert(g_pSinglePasswdInputBox != nullptr);
+
     // i18n translations
     {
         i18n::Translator& translator = i18n::Translator::GetInstance();
@@ -614,6 +628,8 @@ int MuMain(int argc, char* argv[])
     }
 
     // UI cleanup (mirrors DestroyWindow() in Win32 path)
+    SAFE_DELETE(g_pSinglePasswdInputBox);
+    SAFE_DELETE(g_pSingleTextInputBox);
     SAFE_DELETE(g_pUIMapName);
     SAFE_DELETE(g_pUIManager);
 

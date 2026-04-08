@@ -184,7 +184,6 @@ TEST_CASE("AC-3 [7-9-9]: DoActionSub consumes SDL text input when box has stable
         // GIVEN: box has stable focus and SDL delivered text input
         bool m_bSDLHasFocus = true;
         char g_szSDLTextInput_local[32] = "hello";
-        bool g_bSDLTextInputReady_local = true;
         int m_iSDLTextLen = 0;
 
         // WHEN: simulate DoActionSub text consumption (mirrors UIControls.cpp logic)
@@ -193,7 +192,6 @@ TEST_CASE("AC-3 [7-9-9]: DoActionSub consumes SDL text input when box has stable
             // Simplified: count consumed characters (real code appends to wchar buffer)
             m_iSDLTextLen = static_cast<int>(strlen(g_szSDLTextInput_local));
             g_szSDLTextInput_local[0] = '\0'; // consumed
-            g_bSDLTextInputReady_local = false;
         }
 
         // THEN: text was consumed

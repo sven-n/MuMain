@@ -1222,6 +1222,10 @@ extern bool MouseLButton;
 extern bool MouseRButton;
 extern bool MouseMButton;
 
+// Press-edge flag — survives same-frame DOWN+UP so fast clicks aren't missed.
+// Set on BUTTON_DOWN, cleared by ScanAsyncKeyState after consumption. [Story 7-9-9, AC-5]
+extern bool g_bMouseLButtonPressEdge;
+
 // GetAsyncKeyState shim for non-Windows platforms.
 // Returns 0x8000 (high bit set) when the key is currently held, 0 otherwise.
 // Callers using HIBYTE(GetAsyncKeyState(vk)) & 0x80 or == 128 behave correctly:
@@ -1235,7 +1239,7 @@ extern bool MouseMButton;
     switch (vk)
     {
     case 0x01:
-        return MouseLButton ? static_cast<uint16_t>(0x8000) : 0; // VK_LBUTTON
+        return (MouseLButton || g_bMouseLButtonPressEdge) ? static_cast<uint16_t>(0x8000) : 0; // VK_LBUTTON [AC-5]
     case 0x02:
         return MouseRButton ? static_cast<uint16_t>(0x8000) : 0; // VK_RBUTTON
     case 0x04:

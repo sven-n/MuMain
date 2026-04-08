@@ -201,6 +201,12 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
         }
     }
 
+    // Consume mouse press-edge flag after polling — fast clicks register for one cycle.
+    // [Story 7-9-9, AC-5]
+#ifdef MU_ENABLE_SDL3
+    g_bMouseLButtonPressEdge = false;
+#endif
+
     if (IsPress(VK_RETURN) && IsEnterPressed() == false)
     {
         m_pInputInfo[VK_RETURN].byKeyState = KEY_NONE;
