@@ -42,6 +42,13 @@ int g_iMousePopPosition_y = 0;
 int g_iNoMouseTime = 0;
 double g_TargetFpsBeforeInactive = -1.0;
 
+// Story 7-9-9: Global input box pointers (MuMain.cpp:67-68).
+// Forward-declared as incomplete type — tests only check pointer symbol linkage.
+// Real initialization happens in MuMain.cpp ~line 479 (AC-4 fix target).
+class CUITextInputBox; // NOLINT(cppcoreguidelines-special-member-functions)
+CUITextInputBox* g_pSingleTextInputBox = nullptr;
+CUITextInputBox* g_pSinglePasswdInputBox = nullptr;
+
 // From ZzzInterface.cpp
 int EditFlag = 0;
 

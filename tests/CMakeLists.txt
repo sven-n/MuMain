@@ -188,6 +188,15 @@ target_compile_definitions(MuTests PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 # in UIControls.cpp as part of CUIRenderTextSDLTtf.
 target_sources(MuTests PRIVATE render/test_sdl_ttf_7_9_8.cpp)
 
+# Story 7-9-9: SDL3 Text Input Forms [VS1-INPUT-TEXTFORMS-SDL3]
+# RED PHASE: Tests verify GiveFocus idempotency guard (AC-1), DoActionSub stable focus
+# logic (AC-3 partial), and same-frame press+release edge detection (AC-5).
+# AC-2 (SetFont/Win32 GDI) and AC-4 (global init) require game init — marked SKIP, compile clean.
+# AC-6 (chat/popup) covered by AC-3 code path — also SKIP.
+# Adds CUITextInputBox forward-declare stubs to test_game_stubs.cpp for linker resolution.
+# Tests compile and run on macOS/Linux — no Win32, no GDI, no SDL3 device required.
+target_sources(MuTests PRIVATE platform/test_text_input_forms_7_9_9.cpp)
+
 # Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
 # GREEN PHASE: Tests verify IPlatformAudio interface purity (std::is_abstract_v),
 # g_platformAudio starts as nullptr, MiniAudioBackend default-constructs cleanly,
