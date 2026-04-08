@@ -289,7 +289,7 @@ bool CNewUIInventoryActionController::HandleInventoryRightClickActions(CNewUIInv
         int iChangeInvenItemStatus = 0;
         (pItem->Durability == 255) ? iChangeInvenItemStatus = 254 : iChangeInvenItemStatus = 255;
         SendRequestEquippingInventoryItem(iIndex, iChangeInvenItemStatus);
-        return false;
+        return true;
     }
 #endif
 
@@ -678,7 +678,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         point[3] = CharacterAttribute->Energy    + CharacterAttribute->AddEnergy;
         point[4] = CharacterAttribute->Charisma  + CharacterAttribute->AddCharisma;
 
-        wchar_t nStat[MAX_CLASS][5] =
+        const unsigned char nStat[MAX_CLASS][5] =
         {
             18, 18, 15, 30,  0,
             28, 20, 25, 10,  0,
