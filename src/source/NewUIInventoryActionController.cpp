@@ -354,7 +354,7 @@ bool CNewUIInventoryActionController::TryEquipItem(CNewUIInventoryCtrl* targetCo
 
     if (!m_pContext->IsEquipable(nDstIndex, pItem))
     {
-        return false;
+        return true;
     }
 
     if (IsSlotOccupied(nDstIndex))
