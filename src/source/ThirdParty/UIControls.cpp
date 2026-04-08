@@ -3837,6 +3837,8 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
     MuStartTextInput();
     m_bSDLHasFocus = true;
     g_dwKeyFocusUIID = GetUIID();
+    fprintf(stderr, "[FOCUS] GiveFocus called: this=%p m_bSDLHasFocus=%d UIID=%u\n",
+            static_cast<void*>(this), m_bSDLHasFocus ? 1 : 0, GetUIID());
 #else
     // Non-Windows, non-SDL3: no-op (should not occur in practice)
     g_dwKeyFocusUIID = GetUIID();
@@ -3904,6 +3906,7 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
     const auto caretColor = _ARGB(255, 200, 200, 200);
 
     BITMAP_t* pBitmapFont = &Bitmaps[BITMAP_FONT];
+    int dbgWhite = 0, dbgBlack = 0;
     for (int y = 0; y < iHeight; ++y)
     {
         int SrcIndex = y * iPitch + iOffset;
@@ -3921,6 +3924,7 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 
             if (*(m_pFontBuffer + SrcIndex) == 255)
             {
+                ++dbgWhite;
                 if (showCaret && PtInRect(&rcCaret, ptProcessing))
                     *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
                 else
@@ -3928,6 +3932,7 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
             }
             else if (*(m_pFontBuffer + SrcIndex) == 0)
             {
+                ++dbgBlack;
                 if (showCaret && PtInRect(&rcCaret, ptProcessing))
                     *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = caretColor;
                 else
@@ -3942,6 +3947,15 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
             }
             SrcIndex += 3;
             DstIndex += 4;
+        }
+    }
+    {
+        static int s_wtDbg = 0;
+        if (++s_wtDbg <= 5)
+        {
+            fprintf(stderr, "[WRITETEXT] white=%d black=%d size=%dx%d offset=%d iPitch=%d caret=%d textColor=0x%08X backColor=0x%08X\n",
+                    dbgWhite, dbgBlack, iWidth, iHeight, iOffset, iPitch, showCaret ? 1 : 0,
+                    m_dwTextColor, m_dwBackColor);
         }
     }
 }
@@ -4027,16 +4041,15 @@ void CUITextInputBox::Render()
         TextOut(m_hMemDC, 0, 0, m_szSDLText, m_iSDLTextLen);
     }
 
-    // Diagnostic: log once per input box to trace the full pipeline state.
+    // Diagnostic: log focused input box state periodically.
+    if (m_bSDLHasFocus)
     {
-        static int s_renderCount = 0;
-        if (++s_renderCount == 300) // log after ~5 seconds of rendering
+        static int s_focusedRenderCount = 0;
+        if (++s_focusedRenderCount % 300 == 1) // every ~5 sec, only for focused box
         {
-            fprintf(stderr, "[INPUT STATE] sdlLen=%d focus=%d ready=%d buf='%.8s' hMemDC=%p pFont=%p\n",
-                    m_iSDLTextLen, m_bSDLHasFocus ? 1 : 0,
-                    g_bSDLTextInputReady ? 1 : 0, g_szSDLTextInput,
-                    static_cast<void*>(m_hMemDC),
-                    m_hMemDC ? static_cast<void*>(static_cast<MuGdiDC*>(m_hMemDC)->pFont) : nullptr);
+            fprintf(stderr, "[INPUT FOCUSED] this=%p sdlLen=%d ready=%d buf='%.8s'\n",
+                    static_cast<void*>(this), m_iSDLTextLen,
+                    g_bSDLTextInputReady ? 1 : 0, g_szSDLTextInput);
         }
     }
 #else
@@ -4160,11 +4173,19 @@ void CUITextInputBox::RenderScrollbar()
 
 void CUITextInputBox::SetFont(HFONT hFont)
 {
-    if (m_hEditWnd == nullptr || hFont == nullptr)
+    if (hFont == nullptr)
         return;
 
-    SendMessageW(m_hEditWnd, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), FALSE);
-    SelectObject(m_hMemDC, hFont);
+#ifdef _WIN32
+    if (m_hEditWnd != nullptr)
+    {
+        SendMessageW(m_hEditWnd, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), FALSE);
+    }
+#endif
+    if (m_hMemDC != nullptr)
+    {
+        SelectObject(m_hMemDC, hFont);
+    }
 }
 
 BOOL CUITextInputBox::DoMouseAction()
