@@ -520,9 +520,6 @@ int MuMain(int argc, char* argv[])
     g_pSinglePasswdInputBox->SetFont(g_hFixFont);
     g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
 
-    assert(g_pSingleTextInputBox != nullptr);
-    assert(g_pSinglePasswdInputBox != nullptr);
-
     // i18n translations
     {
         i18n::Translator& translator = i18n::Translator::GetInstance();

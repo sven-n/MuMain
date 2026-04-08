@@ -955,6 +955,10 @@ protected:
     bool m_bSDLHasFocus = false;
     HFONT m_hConfiguredFont = nullptr;
 
+    // Class-level focus tracker — cleared in destructor and SetState(UISTATE_HIDE)
+    // to prevent dangling pointer after box destruction. [Story 7-9-9, Finding 1]
+    static CUITextInputBox* s_pFocusedInputBox;
+
     // Override DoActionSub to handle SDL3 text input consumption each frame.
     virtual void DoActionSub(BOOL bMessageOnly) override;
 

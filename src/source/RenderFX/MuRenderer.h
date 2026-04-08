@@ -231,8 +231,8 @@ public:
     // Used by GDI text rendering (CUIRenderTextOriginal, CUITextInputBox) to upload
     // modified BITMAP_t.Buffer to the GPU texture after WriteText modifies the CPU buffer.
     // pixels must remain valid until EndFrame.
-    virtual void QueueTextureUpdate(std::uint32_t textureId, const void* pixels,
-                                    std::uint32_t width, std::uint32_t height)
+    virtual void QueueTextureUpdate(std::uint32_t textureId, const void* pixels, std::uint32_t width,
+                                    std::uint32_t height)
     {
         (void)textureId;
         (void)pixels;

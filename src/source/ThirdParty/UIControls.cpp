@@ -3308,8 +3308,16 @@ CUITextInputBox::CUITextInputBox()
     m_bSDLHasFocus = false;
 }
 
+CUITextInputBox* CUITextInputBox::s_pFocusedInputBox = nullptr;
+
 CUITextInputBox::~CUITextInputBox()
 {
+    // Clear static focus tracker if we're the focused box [Story 7-9-9, Finding 1]
+    if (s_pFocusedInputBox == this)
+    {
+        s_pFocusedInputBox = nullptr;
+    }
+
     if (m_hEditWnd != nullptr && m_hOldProc != nullptr)
     {
         SetWindowLongPtrW(m_hEditWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(m_hOldProc));
@@ -3801,6 +3809,10 @@ void CUITextInputBox::SetState(int iState)
     if (m_iState == UISTATE_HIDE)
     {
         m_bSDLHasFocus = false;
+        if (s_pFocusedInputBox == this)
+        {
+            s_pFocusedInputBox = nullptr;
+        }
 #ifdef MU_ENABLE_SDL3
         MuStopTextInput();
 #endif
@@ -3840,7 +3852,6 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
     }
 
     // Clear focus on the previously focused box (mutual exclusion)
-    static CUITextInputBox* s_pFocusedInputBox = nullptr;
     if (s_pFocusedInputBox != nullptr && s_pFocusedInputBox != this)
     {
         s_pFocusedInputBox->m_bSDLHasFocus = false;
@@ -4053,17 +4064,6 @@ void CUITextInputBox::Render()
         TextOut(m_hMemDC, 0, 0, m_szSDLText, m_iSDLTextLen);
     }
 
-    // Diagnostic: log focused input box state periodically.
-    if (m_bSDLHasFocus)
-    {
-        static int s_focusedRenderCount = 0;
-        if (++s_focusedRenderCount % 300 == 1) // every ~5 sec, only for focused box
-        {
-            fprintf(stderr, "[INPUT FOCUSED] this=%p sdlLen=%d ready=%d buf='%.8s'\n",
-                    static_cast<void*>(this), m_iSDLTextLen,
-                    g_bSDLTextInputReady ? 1 : 0, g_szSDLTextInput);
-        }
-    }
 #else
     CallWindowProcW(m_hOldProc, m_hEditWnd, WM_ERASEBKGND, (WPARAM)m_hMemDC, 0);
     CallWindowProcW(m_hOldProc, m_hEditWnd, WM_PAINT, (WPARAM)m_hMemDC, 0);

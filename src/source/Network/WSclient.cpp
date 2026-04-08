@@ -352,8 +352,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 {
     auto Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
 
-    g_ErrorReport.Write(L"NET: ReceiveJoinServer — Result=0x%02X LogIn=%d\r\n",
-                        Data2->Result, LogIn);
+    g_ErrorReport.Write(L"NET: ReceiveJoinServer — Result=0x%02X LogIn=%d\r\n", Data2->Result, LogIn);
 
     if (LogIn != 0)
     {
@@ -13055,8 +13054,10 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
     if (++s_pktCount <= 20)
     {
         fprintf(stderr, "[PKT #%d] size=%d header=0x%02X", s_pktCount, Size, ReceiveBuffer[0]);
-        if (Size >= 3) fprintf(stderr, " byte2=0x%02X", ReceiveBuffer[2]);
-        if (Size >= 4) fprintf(stderr, " byte3=0x%02X", ReceiveBuffer[3]);
+        if (Size >= 3)
+            fprintf(stderr, " byte2=0x%02X", ReceiveBuffer[2]);
+        if (Size >= 4)
+            fprintf(stderr, " byte3=0x%02X", ReceiveBuffer[3]);
         fprintf(stderr, "\n");
     }
 

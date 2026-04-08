@@ -336,10 +336,10 @@ static std::vector<Uint16> s_stripIdxScratch;
 struct TextureUpdateCmd
 {
     SDL_GPUTexture* gpuTexture;
-    const void* pixels;        // pointer to CPU-side pixel data (valid until EndFrame)
+    const void* pixels; // pointer to CPU-side pixel data (valid until EndFrame)
     Uint32 width;
     Uint32 height;
-    Uint32 bytesPerRow;        // row pitch in bytes
+    Uint32 bytesPerRow; // row pitch in bytes
 };
 
 static std::vector<TextureUpdateCmd> s_textureUpdates;
@@ -1596,8 +1596,8 @@ public:
     // Used by CUIRenderTextOriginal::UploadText and CUITextInputBox::Render to update
     // the BITMAP_FONT GPU texture after GDI text rasterization modifies the CPU buffer.
     // -----------------------------------------------------------------------
-    void QueueTextureUpdate(std::uint32_t textureId, const void* pixels,
-                            std::uint32_t width, std::uint32_t height) override
+    void QueueTextureUpdate(std::uint32_t textureId, const void* pixels, std::uint32_t width,
+                            std::uint32_t height) override
     {
 #ifdef MU_ENABLE_SDL3
         if (!s_frameActive || !pixels || width == 0 || height == 0)
