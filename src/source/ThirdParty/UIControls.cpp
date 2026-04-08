@@ -4008,6 +4008,12 @@ void CUITextInputBox::Render()
     }
     ::SetBkColor(m_hMemDC, RGB(0, 0, 0));
     ::SetTextColor(m_hMemDC, RGB(255, 255, 255));
+    // Ensure the font is selected into the memory DC — SetFont() may have changed it,
+    // but on SDL3 the Win32 WM_SETFONT message path doesn't work.
+    if (g_hFont)
+    {
+        ::SelectObject(m_hMemDC, g_hFont);
+    }
     if (IsPassword())
     {
         // Mask password with asterisks.
@@ -4019,6 +4025,19 @@ void CUITextInputBox::Render()
     else
     {
         TextOut(m_hMemDC, 0, 0, m_szSDLText, m_iSDLTextLen);
+    }
+
+    // Diagnostic: log once per input box to trace the full pipeline state.
+    {
+        static int s_renderCount = 0;
+        if (++s_renderCount == 300) // log after ~5 seconds of rendering
+        {
+            fprintf(stderr, "[INPUT STATE] sdlLen=%d focus=%d ready=%d buf='%.8s' hMemDC=%p pFont=%p\n",
+                    m_iSDLTextLen, m_bSDLHasFocus ? 1 : 0,
+                    g_bSDLTextInputReady ? 1 : 0, g_szSDLTextInput,
+                    static_cast<void*>(m_hMemDC),
+                    m_hMemDC ? static_cast<void*>(static_cast<MuGdiDC*>(m_hMemDC)->pFont) : nullptr);
+        }
     }
 #else
     CallWindowProcW(m_hOldProc, m_hEditWnd, WM_ERASEBKGND, (WPARAM)m_hMemDC, 0);

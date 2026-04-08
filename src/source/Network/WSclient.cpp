@@ -369,6 +369,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
         case 0x01:
             g_ErrorReport.Write(L"NET: ReceiveJoinServer — showing login window\r\n");
             rUIMng.ShowWin(&rUIMng.m_LoginWin);
+            rUIMng.m_LoginWin.GetUsernameInputBox()->GiveFocus();
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
             break;
