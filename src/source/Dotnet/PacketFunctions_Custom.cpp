@@ -15,15 +15,16 @@
 #include "PacketFunctions_ClientToServer.h"
 #include "PacketBindings_ClientToServer.h"
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogin)(int32_t, const wchar_t*, const wchar_t*, uint32_t, const BYTE*,
-                                                   const BYTE*);
-inline SendLogin dotnet_SendLogin =
-    reinterpret_cast<SendLogin>(symLoad(munique_client_library_handle, "ConnectionManager_SendLogin"));
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLoginFn)(int32_t, const char16_t*, const char16_t*, uint32_t, const BYTE*,
+                                                     const BYTE*);
+inline SendLoginFn dotnet_SendLogin =
+    reinterpret_cast<SendLoginFn>(symLoad(munique_client_library_handle, "ConnectionManager_SendLogin"));
 
 void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, const wchar_t* password,
                                                       const BYTE* clientVersion, const BYTE* clientSerial)
 {
-    dotnet_SendLogin(this->GetHandle(), username, password, GetTickCount(), clientVersion, clientSerial);
+    // .NET expects UTF-16 (char16_t). On macOS, wchar_t is 4 bytes (UTF-32) — MU_C16 converts.
+    dotnet_SendLogin(this->GetHandle(), MU_C16(username), MU_C16(password), GetTickCount(), clientVersion, clientSerial);
 }
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExt)(int32_t, uint16_t, uint32_t);
@@ -35,11 +36,11 @@ void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uin
     dotnet_SendAuthenticateExt(this->GetHandle(), roomId, token);
 }
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessageExt)(int32_t, BYTE, const wchar_t*);
-inline SendChatMessageExt dotnet_SendChatMessageExt = reinterpret_cast<SendChatMessageExt>(
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessageExtFn)(int32_t, BYTE, const char16_t*);
+inline SendChatMessageExtFn dotnet_SendChatMessageExt = reinterpret_cast<SendChatMessageExtFn>(
     symLoad(munique_client_library_handle, "ConnectionManager_SendChatMessageExt"));
 
 void PacketFunctions_ChatServer_Custom::SendChatMessageExt(BYTE senderIndex, const wchar_t* message)
 {
-    dotnet_SendChatMessageExt(this->GetHandle(), senderIndex, message);
+    dotnet_SendChatMessageExt(this->GetHandle(), senderIndex, MU_C16(message));
 }

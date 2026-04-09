@@ -41,8 +41,8 @@ public unsafe partial class ConnectionManager
 
         try
         {
-            var usernameStr = Marshal.PtrToStringAuto(@username);
-            var passwordStr = Marshal.PtrToStringAuto(@password);
+            var usernameStr = Marshal.PtrToStringUni(@username);
+            var passwordStr = Marshal.PtrToStringUni(@password);
 
             // todo: check if username or password is too long
             connection.CreateAndSend(pipeWriter =>

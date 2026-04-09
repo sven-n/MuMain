@@ -6,6 +6,15 @@
 #include "MuRenderer.h"
 #ifdef MU_ENABLE_SDL3
 #include <SDL3_ttf/SDL_ttf.h>
+#include <unordered_map>
+// Forward declarations for texture registry (implemented in MuRendererSDLGpu.cpp).
+namespace mu
+{
+void RegisterTexture(std::uint32_t id, void* pTex);
+void UnregisterTexture(std::uint32_t id);
+void RegisterSampler(std::uint32_t id, void* pSampler);
+void UnregisterSampler(std::uint32_t id);
+} // namespace mu
 #endif
 #include "UIControls.h"
 #include "UIWindows.h"
@@ -2779,10 +2788,13 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
         // Upload the modified CPU buffer to the GPU texture before rendering.
         // WriteText() modified Bitmaps[BITMAP_FONT].Buffer — queue the update for
         // the EndFrame copy pass so the GPU texture has current-frame text data.
+        // Use BitmapIndex (not TextureNumber) — on SDL3 TextureNumber is never set,
+        // but RegisterTexture uses BitmapIndex. LookupTexture(TextureNumber=0) would
+        // resolve to the 1×1 white fallback instead of the actual GPU texture.
         mu::GetRenderer().QueueTextureUpdate(
-            static_cast<std::uint32_t>(b->TextureNumber), b->Buffer,
+            static_cast<std::uint32_t>(b->BitmapIndex), b->Buffer,
             static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
-        mu::GetRenderer().BindTexture(b->TextureNumber);
+        mu::GetRenderer().BindTexture(static_cast<int>(b->BitmapIndex));
 
         float TextureUWidth = (Width + 0.01f) / b->Width;
         float TextureVHeight = (Height + 0.01f) / b->Height;
@@ -3310,8 +3322,95 @@ CUITextInputBox::CUITextInputBox()
 
 CUITextInputBox* CUITextInputBox::s_pFocusedInputBox = nullptr;
 
+#ifdef MU_ENABLE_SDL3
+// Per-instance RGBA buffer + GPU texture for text rendering.
+// Avoids the shared BITMAP_FONT.Buffer overwrite problem where two input boxes
+// both write to the same buffer and the last writer's content appears in both quads.
+struct InputBoxTexture
+{
+    std::vector<std::uint8_t> rgba;           // RGBA pixel buffer (LIMIT_WIDTH * height * 4)
+    std::uint32_t texId = 0;                  // Registered texture ID for LookupTexture
+    int width = 0;
+    int height = 0;
+};
+static std::unordered_map<const CUITextInputBox*, InputBoxTexture> s_inputBoxTexMap;
+static std::uint32_t s_nextInputBoxTexId = 60000; // High range to avoid Bitmaps[] conflicts
+
+static InputBoxTexture& EnsureInputBoxTexture(const CUITextInputBox* box, int w, int h)
+{
+    auto& tex = s_inputBoxTexMap[box];
+    if (tex.texId == 0 || tex.width != w || tex.height != h)
+    {
+        // Allocate/resize RGBA buffer.
+        tex.width = w;
+        tex.height = h;
+        tex.rgba.resize(static_cast<size_t>(w) * h * 4, 0);
+
+        // Create GPU texture if needed.
+        if (tex.texId == 0)
+        {
+            tex.texId = s_nextInputBoxTexId++;
+        }
+
+        SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+        if (device)
+        {
+            // Unregister old texture if resizing.
+            mu::UnregisterTexture(tex.texId);
+
+            SDL_GPUTextureCreateInfo texInfo{};
+            texInfo.type = SDL_GPU_TEXTURETYPE_2D;
+            texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+            texInfo.width = static_cast<Uint32>(w);
+            texInfo.height = static_cast<Uint32>(h);
+            texInfo.layer_count_or_depth = 1;
+            texInfo.num_levels = 1;
+            texInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+
+            SDL_GPUTexture* gpuTex = SDL_CreateGPUTexture(device, &texInfo);
+            if (gpuTex)
+            {
+                mu::RegisterTexture(tex.texId, gpuTex);
+
+                // Create a sampler for this texture.
+                SDL_GPUSamplerCreateInfo sampInfo{};
+                sampInfo.min_filter = SDL_GPU_FILTER_LINEAR;
+                sampInfo.mag_filter = SDL_GPU_FILTER_LINEAR;
+                sampInfo.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+                sampInfo.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+                sampInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+                SDL_GPUSampler* sampler = SDL_CreateGPUSampler(device, &sampInfo);
+                if (sampler)
+                {
+                    mu::RegisterSampler(tex.texId, sampler);
+                }
+            }
+        }
+    }
+    return tex;
+}
+
+static void CleanupInputBoxTexture(const CUITextInputBox* box)
+{
+    auto it = s_inputBoxTexMap.find(box);
+    if (it != s_inputBoxTexMap.end())
+    {
+        SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+        if (device && it->second.texId != 0)
+        {
+            mu::UnregisterTexture(it->second.texId);
+            mu::UnregisterSampler(it->second.texId);
+        }
+        s_inputBoxTexMap.erase(it);
+    }
+}
+#endif
+
 CUITextInputBox::~CUITextInputBox()
 {
+#ifdef MU_ENABLE_SDL3
+    CleanupInputBoxTexture(this);
+#endif
     // Clear static focus tracker if we're the focused box [Story 7-9-9, Finding 1]
     if (s_pFocusedInputBox == this)
     {
@@ -3869,11 +3968,27 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
 
 void CUITextInputBox::UploadText(int sx, int sy, int Width, int Height)
 {
-    BITMAP_t* b = &Bitmaps[BITMAP_FONT];
+    const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
     float TextureU = 0.f, TextureV = 0.f;
+
+#ifdef MU_ENABLE_SDL3
+    // Use per-instance texture to avoid shared BITMAP_FONT overwrite.
+    auto& inputTex = EnsureInputBoxTexture(this, LIMIT_WIDTH, LIMIT_HEIGHT);
+    const float texW = static_cast<float>(inputTex.width);
+    const float texH = static_cast<float>(inputTex.height);
+    const std::uint32_t texId = inputTex.texId;
+    unsigned char* texBuffer = inputTex.rgba.data();
+#else
+    BITMAP_t* b = &Bitmaps[BITMAP_FONT];
+    const float texW = b->Width;
+    const float texH = b->Height;
+    const std::uint32_t texId = static_cast<std::uint32_t>(b->BitmapIndex);
+    unsigned char* texBuffer = b->Buffer;
+#endif
+
     if (sx < 0)
     {
-        TextureU = (-sx + 0.01f) / b->Width;
+        TextureU = (-sx + 0.01f) / texW;
         Width += sx;
         sx = 0.f;
     }
@@ -3883,7 +3998,7 @@ void CUITextInputBox::UploadText(int sx, int sy, int Width, int Height)
     }
     if (sy < 0)
     {
-        TextureV = (-sy + 0.01f) / b->Height;
+        TextureV = (-sy + 0.01f) / texH;
         Height += sy;
         sy = 0.f;
     }
@@ -3893,18 +4008,22 @@ void CUITextInputBox::UploadText(int sx, int sy, int Width, int Height)
     }
     if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
     {
-        // Upload the modified CPU buffer to the GPU texture before rendering.
-        // WriteText() modified Bitmaps[BITMAP_FONT].Buffer — queue the update for
-        // the EndFrame copy pass so the GPU texture has current-frame text data.
         mu::GetRenderer().QueueTextureUpdate(
-            static_cast<std::uint32_t>(b->TextureNumber), b->Buffer,
-            static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
-        mu::GetRenderer().BindTexture(b->TextureNumber);
+            texId, texBuffer,
+            static_cast<std::uint32_t>(texW), static_cast<std::uint32_t>(texH));
+        mu::GetRenderer().BindTexture(static_cast<int>(texId));
 
-        float TextureUWidth = (Width + 0.01f) / b->Width;
-        float TextureVHeight = (Height + 0.01f) / b->Height;
+        float TextureUWidth = (Width + 0.01f) / texW;
+        float TextureVHeight = (Height + 0.01f) / texH;
+
+#ifdef MU_ENABLE_SDL3
+        // Use per-instance texture ID for RenderBitmap (bypasses Bitmaps[BITMAP_FONT]).
+        RenderBitmap(static_cast<int>(texId), (float)sx, (float)sy, (float)Width, (float)Height,
+            TextureU, TextureV, TextureUWidth, TextureVHeight, false, false);
+#else
         RenderBitmap(BITMAP_FONT, (float)sx, (float)sy, (float)Width, (float)Height,
             TextureU, TextureV, TextureUWidth, TextureVHeight, false, false);
+#endif
     }
 }
 
@@ -3927,8 +4046,15 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
     RECT rcCaret = { pt.x - LIMIT_WIDTH * iSectionX, pt.y - LIMIT_HEIGHT * iSectionY,(int)(pt.x - LIMIT_WIDTH * iSectionX + m_fCaretWidth), (int)(pt.y - LIMIT_HEIGHT * iSectionY + m_fCaretHeight) };
     const auto caretColor = _ARGB(255, 200, 200, 200);
 
+#ifdef MU_ENABLE_SDL3
+    // Use per-instance RGBA buffer to avoid shared BITMAP_FONT overwrite.
+    auto& inputTex = EnsureInputBoxTexture(this, LIMIT_WIDTH, LIMIT_HEIGHT);
+    unsigned char* pDstBuffer = inputTex.rgba.data();
+#else
     BITMAP_t* pBitmapFont = &Bitmaps[BITMAP_FONT];
-    int dbgWhite = 0, dbgBlack = 0;
+    unsigned char* pDstBuffer = pBitmapFont->Buffer;
+#endif
+    (void)showCaret; // Caret rendering uses GetFocus which returns sentinel on SDL3 — disabled for now
     for (int y = 0; y < iHeight; ++y)
     {
         int SrcIndex = y * iPitch + iOffset;
@@ -3946,41 +4072,33 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 
             if (*(m_pFontBuffer + SrcIndex) == 255)
             {
-                ++dbgWhite;
+                // white pixel (glyph)
                 if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
+                    *((unsigned int*)(pDstBuffer + DstIndex)) = m_dwBackColor;
                 else
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwTextColor;
+                    *((unsigned int*)(pDstBuffer + DstIndex)) = m_dwTextColor;
             }
             else if (*(m_pFontBuffer + SrcIndex) == 0)
             {
-                ++dbgBlack;
+                // black pixel (background)
                 if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = caretColor;
+                    *((unsigned int*)(pDstBuffer + DstIndex)) = caretColor;
                 else
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
+                    *((unsigned int*)(pDstBuffer + DstIndex)) = m_dwBackColor;
             }
             else
             {
                 if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = caretColor;
+                    *((unsigned int*)(pDstBuffer + DstIndex)) = caretColor;
                 else
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwSelectBackColor;
+                    *((unsigned int*)(pDstBuffer + DstIndex)) = m_dwSelectBackColor;
             }
             SrcIndex += 3;
             DstIndex += 4;
         }
     }
-    {
-        static int s_wtDbg = 0;
-        if (++s_wtDbg <= 5)
-        {
-            fprintf(stderr, "[WRITETEXT] white=%d black=%d size=%dx%d offset=%d iPitch=%d caret=%d textColor=0x%08X backColor=0x%08X\n",
-                    dbgWhite, dbgBlack, iWidth, iHeight, iOffset, iPitch, showCaret ? 1 : 0,
-                    m_dwTextColor, m_dwBackColor);
-        }
-    }
 }
+
 void CUITextInputBox::Render()
 {
     m_bIsReady = TRUE;
@@ -4019,12 +4137,17 @@ void CUITextInputBox::Render()
 
     //. Caret Setting
     m_fCaretWidth = 2.f;
+#ifdef MU_ENABLE_SDL3
+    // Use scaled buffer height for caret — matches the scaled font in the SDL3 Render path.
+    m_fCaretHeight = static_cast<float>(RealWndSize.cy);
+#else
     if (m_fCaretHeight == 0)
     {
         SIZE TextSize;
         GetTextExtentPoint32(m_hMemDC, L"Q", 1, &TextSize);
         m_fCaretHeight = TextSize.cy;
     }
+#endif
 
     if (CheckOption(UIOPTION_PAINTBACK))
     {
@@ -4050,6 +4173,20 @@ void CUITextInputBox::Render()
     if (hRenderFont)
     {
         ::SelectObject(m_hMemDC, hRenderFont);
+    }
+    // Scale font height to match the physical-pixel buffer dimensions.
+    // On Win32, the edit control rendered text at OS DPI. On SDL3, the embedded
+    // bitmap font renders at the literal nHeight — we must scale it to fill the buffer.
+    // Scale font to match the physical-pixel buffer. Use the font's original nHeight
+    // scaled by screen rate (preserves proportions), clamped to the buffer height.
+    auto* dc = static_cast<MuGdiDC*>(m_hMemDC);
+    int savedFontHeight = 0;
+    if (dc && dc->pFont)
+    {
+        savedFontHeight = dc->pFont->nHeight;
+        int scaledH = static_cast<int>(savedFontHeight * g_fScreenRate_y);
+        int bufH = static_cast<int>(m_iHeight * g_fScreenRate_y);
+        dc->pFont->nHeight = (scaledH < bufH) ? scaledH : bufH;
     }
     if (IsPassword())
     {
@@ -4091,6 +4228,13 @@ void CUITextInputBox::Render()
             GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheckUTF16), &TextSize);
             g_pRenderText->SetFont(g_hFont);
         }
+#ifdef MU_ENABLE_SDL3
+        // Restore font height after text measurement. [Story 7-9-9]
+        if (dc && dc->pFont && savedFontHeight > 0)
+        {
+            dc->pFont->nHeight = savedFontHeight;
+        }
+#endif
         RealTextLine.cx = TextSize.cx + m_fCaretWidth;
         RealTextLine.cy = (TextSize.cy > m_fCaretHeight) ? TextSize.cy : m_fCaretHeight;
         if (RealTextLine.cx > RealWndSize.cx)
@@ -4303,14 +4447,25 @@ BOOL CUITextInputBox::DoMouseAction()
         MouseOnWindow = true;
         bResult = TRUE;
 
+        // Edge-trigger: only call GiveFocus on the first frame of the mouse press.
+        // On SDL3, MouseLButtonPush stays true from DOWN until UP (not edge-triggered
+        // per frame like Win32). Without this guard, overlapping hit regions (m_iHeight+8)
+        // cause two boxes to alternate focus every frame. Static is intentional — shared
+        // across all instances so only ONE box acquires focus per click.
+        static bool s_mouseClickHandled = false;
         if (MouseLButtonPush)
         {
-            GiveFocus(TRUE);
+            if (!s_mouseClickHandled)
+            {
+                GiveFocus(TRUE);
+                s_mouseClickHandled = true;
+            }
             MouseUpdateTime = 0;
             MouseUpdateTimeMax = 6;
-            //PlayBuffer(SOUND_CLICK01);
-
-//			return TRUE;
+        }
+        else
+        {
+            s_mouseClickHandled = false;
         }
     }
 

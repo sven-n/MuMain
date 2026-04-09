@@ -336,7 +336,7 @@ static std::vector<Uint16> s_stripIdxScratch;
 struct TextureUpdateCmd
 {
     SDL_GPUTexture* gpuTexture;
-    const void* pixels; // pointer to CPU-side pixel data (valid until EndFrame)
+    std::vector<std::uint8_t> pixelsCopy; // snapshot of CPU-side pixel data at queue time
     Uint32 width;
     Uint32 height;
     Uint32 bytesPerRow; // row pitch in bytes
@@ -1069,7 +1069,7 @@ public:
             void* mapped = SDL_MapGPUTransferBuffer(s_device, tb, false);
             if (mapped)
             {
-                std::memcpy(mapped, tu.pixels, dataSize);
+                std::memcpy(mapped, tu.pixelsCopy.data(), dataSize);
                 SDL_UnmapGPUTransferBuffer(s_device, tb);
                 preparedTexUploads.push_back({tb, tu.gpuTexture, tu.width, tu.height, tu.bytesPerRow});
             }
@@ -1611,13 +1611,15 @@ public:
             return;
         }
 
+        const Uint32 dataSize = width * height * 4u; // RGBA8
         TextureUpdateCmd cmd{};
         cmd.gpuTexture = static_cast<SDL_GPUTexture*>(pTex);
-        cmd.pixels = pixels;
+        cmd.pixelsCopy.resize(dataSize);
+        std::memcpy(cmd.pixelsCopy.data(), pixels, dataSize);
         cmd.width = width;
         cmd.height = height;
         cmd.bytesPerRow = width * 4; // RGBA8
-        s_textureUpdates.push_back(cmd);
+        s_textureUpdates.push_back(std::move(cmd));
 #endif
     }
 
