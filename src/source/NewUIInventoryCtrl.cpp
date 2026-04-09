@@ -555,7 +555,7 @@ ITEM* SEASON3B::CNewUIInventoryCtrl::FindItemFromSlotIndex(const int slotIndex, 
     }
 
     const DWORD key = m_pdwItemCheckBox[slotIndex];
-    if (key == 0)
+    if (key <= 1)
     {
         return nullptr;
     }
@@ -593,6 +593,15 @@ void SEASON3B::CNewUIInventoryCtrl::ClearSlotKey(const DWORD key)
 
 void SEASON3B::CNewUIInventoryCtrl::RequestInventoryRefresh() const
 {
+    static DWORD lastRefreshRequestTick = 0;
+    const DWORD currentTick = GetTickCount();
+    if (currentTick - lastRefreshRequestTick < 1000)
+    {
+        return;
+    }
+
+    lastRefreshRequestTick = currentTick;
+
     if (SocketClient != nullptr && SocketClient->ToGameServer() != nullptr)
     {
         SocketClient->ToGameServer()->SendInventoryRequest();
@@ -1318,7 +1327,7 @@ bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int startIndex, int width, int hei
             const DWORD slotKey = m_pdwItemCheckBox[iIndex];
             if (slotKey != 0)
             {
-                if (this->FindItemByKey(slotKey) != nullptr)
+                if (slotKey == 1 || this->FindItemByKey(slotKey) != nullptr)
                 {
                     return false;
                 }
