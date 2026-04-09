@@ -6820,15 +6820,9 @@ void CopyGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* value)
 template <size_t BufferSize, typename... Args>
 void AppendGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* format, Args... args)
 {
-    size_t currentLength = 0;
-    while (currentLength < BufferSize && buffer[currentLength] != L'\0')
-    {
-        ++currentLength;
-    }
-
+    const size_t currentLength = wcslen(buffer);
     if (currentLength >= BufferSize - 1)
     {
-        buffer[BufferSize - 1] = L'\0';
         return;
     }
 
