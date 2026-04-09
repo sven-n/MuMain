@@ -66,7 +66,7 @@
 #include "FatigueTimeSystem.h"
 #endif //PBG_ADD_SECRETBUFF
 #include <codecvt>
-#include <climits>
+#include <limits>
 
 #include "ServerListManager.h"
 #include "MonkSystem.h"
@@ -155,6 +155,9 @@ void AddDebugText(const unsigned char* Buffer, int Size)
 // Forward declaration
 static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int32_t Size);
 
+static constexpr int64_t kInt64Max = std::numeric_limits<int64_t>::max();
+static constexpr int64_t kInt64Min = std::numeric_limits<int64_t>::min();
+
 static uint64_t GetNormalLowerBound(const WORD level)
 {
     if (level <= 1)
@@ -178,23 +181,23 @@ static int64_t GetMasterLowerBound(const short masterLevel)
 {
     const auto saturatingAdd = [](const int64_t left, const int64_t right)
     {
-        if (right > 0 && left > LLONG_MAX - right)
+        if (right > 0 && left > kInt64Max - right)
         {
-            return LLONG_MAX;
+            return kInt64Max;
         }
 
-        if (right < 0 && left < LLONG_MIN - right)
+        if (right < 0 && left < kInt64Min - right)
         {
-            return LLONG_MIN;
+            return kInt64Min;
         }
 
         return left + right;
     };
     const auto saturatingSub = [&](const int64_t left, const int64_t right)
     {
-        if (right == LLONG_MIN)
+        if (right == kInt64Min)
         {
-            return static_cast<int64_t>(LLONG_MAX);
+            return kInt64Max;
         }
 
         return saturatingAdd(left, -right);
@@ -206,49 +209,31 @@ static int64_t GetMasterLowerBound(const short masterLevel)
             return static_cast<int64_t>(0);
         }
 
-        if (left == -1 && right == LLONG_MIN)
+        const auto magnitude = [](const int64_t value)
         {
-            return LLONG_MAX;
-        }
+            if (value >= 0)
+            {
+                return static_cast<uint64_t>(value);
+            }
 
-        if (right == -1 && left == LLONG_MIN)
-        {
-            return LLONG_MAX;
-        }
+            if (value == kInt64Min)
+            {
+                return uint64_t{1} << 63;
+            }
 
-        if (left > 0)
+            return static_cast<uint64_t>(-value);
+        };
+
+        const bool isNegativeResult = (left < 0) != (right < 0);
+        const uint64_t resultLimit = isNegativeResult
+            ? (uint64_t{1} << 63)
+            : static_cast<uint64_t>(kInt64Max);
+        const uint64_t leftMagnitude = magnitude(left);
+        const uint64_t rightMagnitude = magnitude(right);
+
+        if (leftMagnitude > resultLimit / rightMagnitude)
         {
-            if (right > 0)
-            {
-                if (left > LLONG_MAX / right)
-                {
-                    return LLONG_MAX;
-                }
-            }
-            else
-            {
-                if (right < LLONG_MIN / left)
-                {
-                    return LLONG_MIN;
-                }
-            }
-        }
-        else
-        {
-            if (right > 0)
-            {
-                if (left < LLONG_MIN / right)
-                {
-                    return LLONG_MIN;
-                }
-            }
-            else
-            {
-                if (left < LLONG_MAX / right)
-                {
-                    return LLONG_MAX;
-                }
-            }
+            return isNegativeResult ? kInt64Min : kInt64Max;
         }
 
         return left * right;
@@ -257,12 +242,12 @@ static int64_t GetMasterLowerBound(const short masterLevel)
     {
         if (denominator == 0)
         {
-            return numerator >= 0 ? LLONG_MAX : LLONG_MIN;
+            return numerator >= 0 ? kInt64Max : kInt64Min;
         }
 
-        if (numerator == LLONG_MIN && denominator == -1)
+        if (numerator == kInt64Min && denominator == -1)
         {
-            return LLONG_MAX;
+            return kInt64Max;
         }
 
         return numerator / denominator;
@@ -1131,8 +1116,8 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
         const auto rawRevivalExperience = Data->CurrentExperience;
         const auto swappedRevivalExperience = ntoh64(Data->CurrentExperience);
 
-        const bool rawConvertible = rawRevivalExperience <= static_cast<uint64_t>(LLONG_MAX);
-        const bool swappedConvertible = swappedRevivalExperience <= static_cast<uint64_t>(LLONG_MAX);
+        const bool rawConvertible = rawRevivalExperience <= static_cast<uint64_t>(kInt64Max);
+        const bool swappedConvertible = swappedRevivalExperience <= static_cast<uint64_t>(kInt64Max);
         const auto rawCandidate = rawConvertible ? static_cast<int64_t>(rawRevivalExperience) : currentExperience;
         const auto swappedCandidate = swappedConvertible ? static_cast<int64_t>(swappedRevivalExperience) : currentExperience;
 
