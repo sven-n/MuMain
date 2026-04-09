@@ -158,7 +158,7 @@ public:
 
     bool Load(const std::wstring& strFilePath, std::uint32_t dwLoadDisposition)
     {
-        std::ifstream file(std::filesystem::path(strFilePath), std::ios::binary);
+        std::ifstream file(mu_narrow_path(strFilePath), std::ios::binary);
         if (!file)
         {
             return false;
