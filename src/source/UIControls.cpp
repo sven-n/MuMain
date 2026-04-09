@@ -2812,20 +2812,19 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
             }
             else
             {
-                static std::vector<BYTE> tightUploadBuffer;
                 const size_t tightRowSize = static_cast<size_t>(uploadWidth) * 4;
                 const size_t sourceRowSize = static_cast<size_t>(b->Width) * 4;
-                tightUploadBuffer.resize(tightRowSize * uploadHeight);
+                m_tightUploadBuffer.resize(tightRowSize * uploadHeight);
 
                 for (int row = 0; row < uploadHeight; ++row)
                 {
                     memcpy(
-                        tightUploadBuffer.data() + tightRowSize * row,
+                        m_tightUploadBuffer.data() + tightRowSize * row,
                         b->Buffer + sourceRowSize * row,
                         tightRowSize);
                 }
 
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, uploadWidth, uploadHeight, GL_RGBA, GL_UNSIGNED_BYTE, tightUploadBuffer.data());
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, uploadWidth, uploadHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_tightUploadBuffer.data());
             }
         }
 
