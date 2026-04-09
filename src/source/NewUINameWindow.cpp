@@ -200,6 +200,8 @@ void SEASON3B::CNewUINameWindow::RenderName()
 
     if (m_bShowItemName || SEASON3B::IsRepeat(VK_MENU))
     {
+        SetGroundItemLabelBuildBudget(32);
+
         for (int i = 0; i < MAX_ITEMS; i++)
         {
             OBJECT* o = &Items[i].Object;

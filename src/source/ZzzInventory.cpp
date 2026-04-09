@@ -42,7 +42,9 @@
 #include "NewUISystem.h"
 #include "ServerListManager.h"
 #include <time.h>
+#include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "MapManager.h"
 #include "CharacterManager.h"
@@ -6714,122 +6716,287 @@ std::unordered_set<int> orangeTextItems = {
     MODEL_WING + 135,
 };
 
-void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
+namespace
+{
+constexpr size_t GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES = 1500;
+constexpr DWORD GROUND_ITEM_LABEL_CACHE_MAX_IDLE_MS = 10 * 1000;
+
+int g_groundItemLabelBuildBudgetRemaining = 0;
+
+struct GroundItemLabelDescriptor
 {
     wchar_t Name[80]{};
+    HFONT Font = g_hFont;
+    DWORD TextColor = 0xFFFFFFFF;
+    DWORD BgColor = 0xFF000000;
+};
+
+struct GroundItemLabelCacheKey
+{
+    int Type = -1;
+    int Level = 0;
+    BYTE ExcellentFlags = 0;
+    BYTE AncientDiscriminator = 0;
+    BYTE FeatureFlags = 0;
+
+    bool operator==(const GroundItemLabelCacheKey& other) const
+    {
+        return this->Type == other.Type
+            && this->Level == other.Level
+            && this->ExcellentFlags == other.ExcellentFlags
+            && this->AncientDiscriminator == other.AncientDiscriminator
+            && this->FeatureFlags == other.FeatureFlags;
+    }
+};
+
+struct GroundItemLabelCacheKeyHasher
+{
+    size_t operator()(const GroundItemLabelCacheKey& key) const
+    {
+        size_t seed = std::hash<int>{}(key.Type);
+        seed ^= std::hash<int>{}(key.Level) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.ExcellentFlags)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.AncientDiscriminator)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.FeatureFlags)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed;
+    }
+};
+
+struct GroundItemLabelCacheEntry
+{
+    GLuint TextureId = 0;
+    int TextWidth = 0;
+    int TextHeight = 0;
+    int TextureWidth = 0;
+    int TextureHeight = 0;
+    DWORD BgColor = 0;
+    DWORD LastUsedTick = 0;
+};
+
+std::unordered_map<GroundItemLabelCacheKey, GroundItemLabelCacheEntry, GroundItemLabelCacheKeyHasher> g_groundItemLabelCache;
+
+DWORD MakeRgba(BYTE red, BYTE green, BYTE blue, BYTE alpha = 255)
+{
+    return red + (green << 8) + (blue << 16) + (alpha << 24);
+}
+
+void SetDescriptorTextColor(GroundItemLabelDescriptor& descriptor, float red, float green, float blue)
+{
+    descriptor.TextColor = MakeRgba(
+        static_cast<BYTE>(red * 255.f),
+        static_cast<BYTE>(green * 255.f),
+        static_cast<BYTE>(blue * 255.f),
+        255);
+}
+
+void SetDescriptorYellowTextColor(GroundItemLabelDescriptor& descriptor)
+{
+    SetDescriptorTextColor(descriptor, 1.f, 0.8f, 0.1f);
+}
+
+void SetDescriptorGrayTextColor(GroundItemLabelDescriptor& descriptor)
+{
+    SetDescriptorTextColor(descriptor, 0.7f, 0.7f, 0.7f);
+}
+
+void SetDescriptorOrangeTextColor(GroundItemLabelDescriptor& descriptor)
+{
+    SetDescriptorTextColor(descriptor, 0.9f, 0.53f, 0.13f);
+}
+
+GroundItemLabelCacheKey BuildGroundItemLabelCacheKey(OBJECT* o, ITEM* ip)
+{
+    GroundItemLabelCacheKey key;
+    key.Type = o->Type;
+    key.Level = ip->Level;
+    key.ExcellentFlags = static_cast<BYTE>(ip->ExcellentFlags);
+    key.AncientDiscriminator = static_cast<BYTE>(ip->AncientDiscriminator);
+    key.FeatureFlags = 0;
+    if (ip->HasSkill)
+    {
+        key.FeatureFlags |= 1;
+    }
+    if (ip->HasLuck)
+    {
+        key.FeatureFlags |= 2;
+    }
+    if (ip->OptionLevel > 0)
+    {
+        key.FeatureFlags |= 4;
+    }
+    return key;
+}
+
+int GetNextPowerOfTwo(int value)
+{
+    int result = 1;
+    while (result < value)
+    {
+        result <<= 1;
+    }
+
+    return result;
+}
+
+void DeleteGroundItemLabelTexture(GLuint textureId)
+{
+    if (textureId != 0)
+    {
+        glDeleteTextures(1, &textureId);
+    }
+}
+
+void PruneGroundItemLabelCache(DWORD currentTick)
+{
+    for (auto cacheEntryIterator = g_groundItemLabelCache.begin(); cacheEntryIterator != g_groundItemLabelCache.end();)
+    {
+        if (currentTick - cacheEntryIterator->second.LastUsedTick > GROUND_ITEM_LABEL_CACHE_MAX_IDLE_MS)
+        {
+            DeleteGroundItemLabelTexture(cacheEntryIterator->second.TextureId);
+            cacheEntryIterator = g_groundItemLabelCache.erase(cacheEntryIterator);
+        }
+        else
+        {
+            ++cacheEntryIterator;
+        }
+    }
+
+    while (g_groundItemLabelCache.size() > GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES)
+    {
+        auto oldestIterator = g_groundItemLabelCache.end();
+        for (auto cacheEntryIterator = g_groundItemLabelCache.begin(); cacheEntryIterator != g_groundItemLabelCache.end(); ++cacheEntryIterator)
+        {
+            if (oldestIterator == g_groundItemLabelCache.end()
+                || cacheEntryIterator->second.LastUsedTick < oldestIterator->second.LastUsedTick)
+            {
+                oldestIterator = cacheEntryIterator;
+            }
+        }
+
+        if (oldestIterator == g_groundItemLabelCache.end())
+        {
+            break;
+        }
+
+        DeleteGroundItemLabelTexture(oldestIterator->second.TextureId);
+        g_groundItemLabelCache.erase(oldestIterator);
+    }
+}
+
+void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescriptor& descriptor)
+{
     auto ItemLevel = ip->Level;
     auto ItemOption = ip->ExcellentFlags;
-    GLfloat textColor[] = {1, 1, 1, 1};
 
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 255);
+    descriptor.Font = g_hFont;
+    descriptor.TextColor = MakeRgba(255, 255, 255, 255);
+    descriptor.BgColor = MakeRgba(0, 0, 0, 255);
 
     // Use the item name by default
     if (o->Type == MODEL_ZEN) // Zen
     {
-        mu_swprintf(Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        mu_swprintf(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
     else if (ItemLevel == 0)
     {
-        mu_swprintf(Name, L"%ls", ItemAttribute[o->Type - MODEL_ITEM].Name);
+        mu_swprintf(descriptor.Name, L"%ls", ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else
     {
-        mu_swprintf(Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        mu_swprintf(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
 
     if (boldTextItems.count(o->Type) > 0)
     {
-        g_pRenderText->SetFont(g_hFontBold);
+        descriptor.Font = g_hFontBold;
     }
 
     if (whiteTextItems.count(o->Type) > 0)
     {
-        SetTextColor(1.f, 1.f, 1.f);
+        SetDescriptorTextColor(descriptor, 1.f, 1.f, 1.f);
     }
     else if (yellowTextItems.count(o->Type) > 0)
     {
-        SetYellowTextColor();
+        SetDescriptorYellowTextColor(descriptor);
     }
     else if (orangeTextItems.count(o->Type) > 0)
     {
-        SetOrangeTextColor();
+        SetDescriptorOrangeTextColor(descriptor);
     }
     else if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
-        SetGrayTextColor();
-        mu_swprintf(Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
+        SetDescriptorGrayTextColor(descriptor);
+        mu_swprintf(descriptor.Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
     }
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
     {
         int iJewelItemIndex = COMGEM::GetJewelIndex(COMGEM::Check_Jewel_Com(o->Type, true), COMGEM::eGEM_NAME);
-        g_pRenderText->SetFont(g_hFontBold);
-        SetYellowTextColor();
-        mu_swprintf(Name, L"%ls", GlobalText[iJewelItemIndex]);
+        descriptor.Font = g_hFontBold;
+        SetDescriptorYellowTextColor(descriptor);
+        mu_swprintf(descriptor.Name, L"%ls", GlobalText[iJewelItemIndex]);
     }
     else if (o->Type == MODEL_COMPILED_CELE)
     {
-        mu_swprintf(Name, L"%ls", ItemAttribute[MODEL_JEWEL_OF_BLESS - MODEL_ITEM].Name);
+        mu_swprintf(descriptor.Name, L"%ls", ItemAttribute[MODEL_JEWEL_OF_BLESS - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_COMPILED_SOUL)
     {
-        mu_swprintf(Name, L"%ls", ItemAttribute[MODEL_JEWEL_OF_SOUL - MODEL_ITEM].Name);
+        mu_swprintf(descriptor.Name, L"%ls", ItemAttribute[MODEL_JEWEL_OF_SOUL - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7)
     {
-        mu_swprintf(Name, GlobalText[111]);
+        mu_swprintf(descriptor.Name, GlobalText[111]);
     }
     else if (o->Type == MODEL_POTION + 12)
     {
         switch (ItemLevel)
         {
-        case 0:mu_swprintf(Name, GlobalText[100]); break;
-        case 1:mu_swprintf(Name, GlobalText[101]); break;
-        case 2:mu_swprintf(Name, GlobalText[104]); break;
+        case 0:mu_swprintf(descriptor.Name, GlobalText[100]); break;
+        case 1:mu_swprintf(descriptor.Name, GlobalText[101]); break;
+        case 2:mu_swprintf(descriptor.Name, GlobalText[104]); break;
         }
     }
     else if (o->Type == MODEL_FRUITS)
     {
         switch (ItemLevel)
         {
-        case 0:mu_swprintf(Name, L"%ls %ls", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 1:mu_swprintf(Name, L"%ls %ls", GlobalText[169], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 2:mu_swprintf(Name, L"%ls %ls", GlobalText[167], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 3:mu_swprintf(Name, L"%ls %ls", GlobalText[166], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 4:mu_swprintf(Name, L"%ls %ls", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 0:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 1:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[169], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 2:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[167], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 3:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[166], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 4:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
         }
     }
     else if (o->Type == MODEL_SPIRIT)
     {
         switch (ItemLevel)
         {
-        case 0:mu_swprintf(Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
-        case 1:mu_swprintf(Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1214]); break;
+        case 0:mu_swprintf(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
+        case 1:mu_swprintf(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1214]); break;
         }
     }
     else if (o->Type == MODEL_EVENT + 16)
     {
-        mu_swprintf(Name, GlobalText[1235]);
+        mu_swprintf(descriptor.Name, GlobalText[1235]);
     }
     else if (o->Type == MODEL_EVENT + 4)
     {
-        mu_swprintf(Name, GlobalText[105]);
+        mu_swprintf(descriptor.Name, GlobalText[105]);
     }
     else if (o->Type == MODEL_EVENT + 5)
     {
         switch (ItemLevel)
         {
         case 14:
-            mu_swprintf(Name, GlobalText[1650]);
+            mu_swprintf(descriptor.Name, GlobalText[1650]);
             break;
 
         case 15:
-            mu_swprintf(Name, GlobalText[1651]);
+            mu_swprintf(descriptor.Name, GlobalText[1651]);
             break;
 
         default:
-            mu_swprintf(Name, GlobalText[106]);
+            mu_swprintf(descriptor.Name, GlobalText[106]);
             break;
         }
     }
@@ -6837,133 +7004,123 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     {
         if (ItemLevel == 13)
         {
-            SetYellowTextColor();
-            mu_swprintf(Name, L"%ls", GlobalText[117]);
+            SetDescriptorYellowTextColor(descriptor);
+            mu_swprintf(descriptor.Name, L"%ls", GlobalText[117]);
         }
         else
         {
-            mu_swprintf(Name, GlobalText[107]);
+            mu_swprintf(descriptor.Name, GlobalText[107]);
         }
     }
     else if (o->Type == MODEL_EVENT + 7)
     {
-        mu_swprintf(Name, GlobalText[108]);
+        mu_swprintf(descriptor.Name, GlobalText[108]);
     }
     else if (o->Type == MODEL_EVENT + 8)
     {
-        mu_swprintf(Name, GlobalText[109]);
+        mu_swprintf(descriptor.Name, GlobalText[109]);
     }
     else if (o->Type == MODEL_EVENT + 9)
     {
-        mu_swprintf(Name, GlobalText[110]);
+        mu_swprintf(descriptor.Name, GlobalText[110]);
     }
     else if (o->Type == MODEL_EVENT + 10)
     {
-        mu_swprintf(Name, L"%ls +%d", GlobalText[115], ItemLevel - 7);
+        mu_swprintf(descriptor.Name, L"%ls +%d", GlobalText[115], ItemLevel - 7);
     }
     else if (o->Type == MODEL_RED_RIBBON_BOX)
     {
-        SetTextColor(1.f, 0.3f, 0.3f); // Color: Red
-
+        SetDescriptorTextColor(descriptor, 1.f, 0.3f, 0.3f);
     }
     else if (o->Type == MODEL_GREEN_RIBBON_BOX)
     {
-        SetTextColor(0.3f, 1.0f, 0.3f); // Color: Green
+        SetDescriptorTextColor(descriptor, 0.3f, 1.0f, 0.3f);
     }
     else if (o->Type == MODEL_BLUE_RIBBON_BOX)
     {
-        SetTextColor(0.3f, 0.3f, 1.f); // Color: Blue
+        SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
     }
     else if (o->Type == MODEL_PINK_CHOCOLATE_BOX)
     {
-        int i = MODEL_PINK_CHOCOLATE_BOX;
-        int k = ITEM_PINK_CHOCOLATE_BOX;
         if (ItemLevel == 0)
         {
-            SetTextColor(1.f, 0.3f, 1.f);
+            SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
         }
-        else
-            if (ItemLevel == 1)
-            {
-                SetTextColor(1.f, 0.3f, 1.f);
-                mu_swprintf(Name, GlobalText[2012]);
-            }
+        else if (ItemLevel == 1)
+        {
+            SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
+            mu_swprintf(descriptor.Name, GlobalText[2012]);
+        }
     }
     else if (o->Type == MODEL_RED_CHOCOLATE_BOX)
     {
         if (ItemLevel == 0)
         {
-            SetTextColor(1.0f, 0.3f, 0.3f);
+            SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
         }
-        else
-            if (ItemLevel == 1)
-            {
-                SetTextColor(1.0f, 0.3f, 0.3f);
-                mu_swprintf(Name, GlobalText[2013]);
-            }
+        else if (ItemLevel == 1)
+        {
+            SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
+            mu_swprintf(descriptor.Name, GlobalText[2013]);
+        }
     }
     else if (o->Type == MODEL_BLUE_CHOCOLATE_BOX)
     {
         if (ItemLevel == 0)
         {
-            SetTextColor(0.3f, 0.3f, 1.f);
+            SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
         }
-        else
-            if (ItemLevel == 1)
-            {
-                SetTextColor(0.3f, 0.3f, 1.f);
-                mu_swprintf(Name, GlobalText[2014]);
-            }
+        else if (ItemLevel == 1)
+        {
+            SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
+            mu_swprintf(descriptor.Name, GlobalText[2014]);
+        }
     }
     else if (o->Type == MODEL_EVENT + 21)
     {
-        SetTextColor(1.f, 0.3f, 1.f); // Color: Pink
-        mu_swprintf(Name, GlobalText[2012]);
+        SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
+        mu_swprintf(descriptor.Name, GlobalText[2012]);
     }
     else if (o->Type == MODEL_EVENT + 22)
     {
-        SetTextColor(1.0f, 0.3f, 0.3f); // Color: Red
-        mu_swprintf(Name, GlobalText[2013]);
+        SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
+        mu_swprintf(descriptor.Name, GlobalText[2013]);
     }
     else if (o->Type == MODEL_EVENT + 23)
     {
-        SetTextColor(0.3f, 0.3f, 1.f); // Color: Blue
-        mu_swprintf(Name, GlobalText[2014]);
+        SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
+        mu_swprintf(descriptor.Name, GlobalText[2014]);
     }
     else if (o->Type == MODEL_EVENT + 11)
     {
-        mu_swprintf(Name, GlobalText[810]);
+        mu_swprintf(descriptor.Name, GlobalText[810]);
     }
     else if (o->Type == MODEL_EVENT + 12)
     {
-        mu_swprintf(Name, GlobalText[906]);
+        mu_swprintf(descriptor.Name, GlobalText[906]);
     }
     else if (o->Type == MODEL_EVENT + 13)
     {
-        mu_swprintf(Name, GlobalText[907]);
+        mu_swprintf(descriptor.Name, GlobalText[907]);
     }
     else if (o->Type == MODEL_EVENT + 14)
     {
         switch (ItemLevel)
         {
         case 2:
-            mu_swprintf(Name, GlobalText[928]);
+            mu_swprintf(descriptor.Name, GlobalText[928]);
             break;
         case 3:
-            mu_swprintf(Name, GlobalText[929]);
+            mu_swprintf(descriptor.Name, GlobalText[929]);
             break;
         default:
-            mu_swprintf(Name, GlobalText[922]);
+            mu_swprintf(descriptor.Name, GlobalText[922]);
             break;
         }
     }
     else if (o->Type == MODEL_EVENT + 15)
     {
-        mu_swprintf(Name, GlobalText[925]);
-    }
-    else if (o->Type == MODEL_ORB_OF_SUMMONING)
-    {
-        mu_swprintf(Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
+        mu_swprintf(descriptor.Name, GlobalText[925]);
     }
     else if (o->Type == MODEL_TRANSFORMATION_RING)
     {
@@ -6971,139 +7128,343 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         {
             if (SommonTable[ItemLevel] == MonsterScript[i].Type)
             {
-                mu_swprintf(Name, L"%ls %ls", MonsterScript[i].Name, GlobalText[103]);
+                mu_swprintf(descriptor.Name, L"%ls %ls", MonsterScript[i].Name, GlobalText[103]);
                 break;
             }
         }
     }
     else if (o->Type == MODEL_POTION + 21 && ItemLevel == 3)
     {
-        SetYellowTextColor();
-        mu_swprintf(Name, GlobalText[1290]);
+        SetDescriptorYellowTextColor(descriptor);
+        mu_swprintf(descriptor.Name, GlobalText[1290]);
     }
     else if (o->Type == MODEL_SIEGE_POTION)
     {
         switch (ItemLevel)
         {
-        case 0: mu_swprintf(Name, GlobalText[1413]); break;
-        case 1: mu_swprintf(Name, GlobalText[1414]); break;
+        case 0: mu_swprintf(descriptor.Name, GlobalText[1413]); break;
+        case 1: mu_swprintf(descriptor.Name, GlobalText[1414]); break;
         }
     }
     else if (o->Type == MODEL_HELPER + 7)
     {
         switch (ItemLevel)
         {
-        case 0: mu_swprintf(Name, GlobalText[1460]); break;
-        case 1: mu_swprintf(Name, GlobalText[1461]); break;
+        case 0: mu_swprintf(descriptor.Name, GlobalText[1460]); break;
+        case 1: mu_swprintf(descriptor.Name, GlobalText[1461]); break;
         }
     }
     else if (o->Type == MODEL_LIFE_STONE_ITEM)
     {
         switch (ItemLevel)
         {
-        case 0: mu_swprintf(Name, GlobalText[1416]); break;
-        case 1: mu_swprintf(Name, GlobalText[1462]); break;
+        case 0: mu_swprintf(descriptor.Name, GlobalText[1416]); break;
+        case 1: mu_swprintf(descriptor.Name, GlobalText[1462]); break;
         }
     }
     else if (o->Type == MODEL_EVENT + 18)
     {
-        mu_swprintf(Name, GlobalText[1462]);
+        mu_swprintf(descriptor.Name, GlobalText[1462]);
     }
     else if ((o->Type >= MODEL_SEED_FIRE && o->Type <= MODEL_SEED_EARTH)
-            || (o->Type >= MODEL_SPHERE_MONO && o->Type <= MODEL_SPHERE_5)
-            || (o->Type >= MODEL_SEED_SPHERE_FIRE_1 && o->Type <= MODEL_SEED_SPHERE_EARTH_5))
+        || (o->Type >= MODEL_SPHERE_MONO && o->Type <= MODEL_SPHERE_5)
+        || (o->Type >= MODEL_SEED_SPHERE_FIRE_1 && o->Type <= MODEL_SEED_SPHERE_EARTH_5))
     {
-        SetTextColor(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
-        wcscpy(Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
+        wcscpy(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_HELPER + 66)
     {
-        SetTextColor(0.6f, 0.4f, 1.0f);
+        SetDescriptorTextColor(descriptor, 0.6f, 0.4f, 1.0f);
     }
     else if (o->Type >= MODEL_TYPE_CHARM_MIXWING + EWS_BEGIN
         && o->Type <= MODEL_TYPE_CHARM_MIXWING + EWS_END)
     {
-        SetOrangeTextColor();
+        SetDescriptorOrangeTextColor(descriptor);
     }
     else
     {
         if (o->Type == MODEL_DIVINE_STAFF_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SWORD_OF_ARCHANGEL || o->Type == MODEL_DIVINE_CB_OF_ARCHANGEL || o->Type == MODEL_DIVINE_SCEPTER_OF_ARCHANGEL)
         {
-            SetTextColor(1.f, 0.1f, 1.f);
+            SetDescriptorTextColor(descriptor, 1.f, 0.1f, 1.f);
         }
         else if (g_SocketItemMgr.IsSocketItem(o))
         {
-            SetTextColor(0.7f, 0.4f, 1.0f);	// TEXT_COLOR_VIOLET
+            SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
         }
-        else if ((ItemOption & 63) > 0 && (o->Type<MODEL_WINGS_OF_SPIRITS || o->Type>MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
-            && (o->Type<MODEL_WING_OF_STORM || o->Type>MODEL_CAPE_OF_EMPEROR)
-            && (o->Type<MODEL_WINGS_OF_DESPAIR || o->Type>MODEL_WING_OF_DIMENSION)
+        else if ((ItemOption & 63) > 0 && (o->Type < MODEL_WINGS_OF_SPIRITS || o->Type > MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
+            && (o->Type < MODEL_WING_OF_STORM || o->Type > MODEL_CAPE_OF_EMPEROR)
+            && (o->Type < MODEL_WINGS_OF_DESPAIR || o->Type > MODEL_WING_OF_DIMENSION)
             && !(o->Type >= MODEL_CAPE_OF_FIGHTER && o->Type <= MODEL_CAPE_OF_OVERRULE))
         {
-            SetTextColor(0.1f, 1.f, 0.5f);
+            SetDescriptorTextColor(descriptor, 0.1f, 1.f, 0.5f);
         }
         else if (ItemLevel >= 7)
         {
-            SetYellowTextColor();
+            SetDescriptorYellowTextColor(descriptor);
         }
         else if (ip->HasSkill || ip->HasLuck || ip->OptionLevel > 0)
         {
-            SetTextColor(0.4f, 0.7f, 1.f);
+            SetDescriptorTextColor(descriptor, 0.4f, 0.7f, 1.f);
         }
         else if (ItemLevel == 0)
         {
-            SetGrayTextColor();
+            SetDescriptorGrayTextColor(descriptor);
         }
         else if (ItemLevel < 3)
         {
-            SetTextColor(0.9f, 0.9f, 0.9f);
+            SetDescriptorTextColor(descriptor, 0.9f, 0.9f, 0.9f);
         }
         else if (ItemLevel < 5)
         {
-            SetTextColor(1.f, 0.5f, 0.2f);
+            SetDescriptorTextColor(descriptor, 1.f, 0.5f, 0.2f);
         }
         else if (ItemLevel < 7)
         {
-            SetTextColor(0.4f, 0.7f, 1.f);
+            SetDescriptorTextColor(descriptor, 0.4f, 0.7f, 1.f);
         }
 
         wchar_t SetName[64]{};
         if (g_csItemOption.GetSetItemName(SetName, o->Type - MODEL_ITEM, ip->AncientDiscriminator))
         {
-            SetTextColor(0.f, 1.f, 0.f);
-            g_pRenderText->SetFont(g_hFontBold);
-            g_pRenderText->SetTextColor(0, 255, 0, 255);
-            g_pRenderText->SetBgColor(60, 60, 200, 255);
+            SetDescriptorTextColor(descriptor, 0.f, 1.f, 0.f);
+            descriptor.Font = g_hFontBold;
+            descriptor.TextColor = MakeRgba(0, 255, 0, 255);
+            descriptor.BgColor = MakeRgba(60, 60, 200, 255);
 
-            wcscat(SetName, Name);
-            wcscpy(Name, SetName);
+            wchar_t formattedName[_countof(descriptor.Name)]{};
+            _snwprintf_s(formattedName, _countof(formattedName), _TRUNCATE, L"%ls%ls", SetName, descriptor.Name);
+            wcscpy_s(descriptor.Name, _countof(descriptor.Name), formattedName);
         }
 
         if (ip->HasSkill)
         {
             if (o->Type != MODEL_HORN_OF_DINORANT)
             {
-                wcscat(Name, GlobalText[176]);
+                wcscat(descriptor.Name, GlobalText[176]);
             }
             else
             {
-                wcscat(Name, L" +");
-                wcscat(Name, GlobalText[179]);
+                wcscat(descriptor.Name, L" +");
+                wcscat(descriptor.Name, GlobalText[179]);
             }
         }
         if (ip->OptionLevel > 0)
-            wcscat(Name, GlobalText[177]);
+        {
+            wcscat(descriptor.Name, GlobalText[177]);
+        }
         if (ip->HasLuck)
-            wcscat(Name, GlobalText[178]);
+        {
+            wcscat(descriptor.Name, GlobalText[178]);
+        }
     }
+}
+
+void ApplyGroundItemLabelDescriptor(const GroundItemLabelDescriptor& descriptor)
+{
+    g_pRenderText->SetFont(descriptor.Font);
+    g_pRenderText->SetTextColor(descriptor.TextColor);
+    g_pRenderText->SetBgColor(descriptor.BgColor);
+}
+
+bool CreateGroundItemLabelTexture(const GroundItemLabelDescriptor& descriptor, GroundItemLabelCacheEntry& cacheEntry)
+{
+    HDC fontDc = g_pRenderText->GetFontDC();
+    BYTE* fontBuffer = g_pRenderText->GetFontBuffer();
+    if (fontDc == nullptr || fontBuffer == nullptr || descriptor.Name[0] == L'\0')
+    {
+        return false;
+    }
+
+    g_pRenderText->SetFont(descriptor.Font);
+
+    SIZE textSize{};
+    GetTextExtentPoint32(fontDc, descriptor.Name, lstrlen(descriptor.Name), &textSize);
+    if (textSize.cx <= 0 || textSize.cy <= 0)
+    {
+        return false;
+    }
+
+    RECT clearRect = {0, 0, textSize.cx, textSize.cy};
+    FillRect(fontDc, &clearRect, reinterpret_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
+
+    ::SetBkColor(fontDc, RGB(0, 0, 0));
+    ::SetTextColor(fontDc, RGB(255, 255, 255));
+    TextOut(fontDc, 0, 0, descriptor.Name, lstrlen(descriptor.Name));
+
+    SIZE fontDcSize = { static_cast<int>(640 * g_fScreenRate_x), static_cast<int>(480 * g_fScreenRate_y) };
+    int sourcePitch = ((fontDcSize.cx * 24 + 31) & ~31) >> 3;
+    int sourceBufferLength = sourcePitch * fontDcSize.cy;
+
+    int textureWidth = GetNextPowerOfTwo(textSize.cx);
+    int textureHeight = GetNextPowerOfTwo(textSize.cy);
+
+    std::vector<DWORD> textureBuffer(static_cast<size_t>(textureWidth) * textureHeight, 0);
+    for (int y = 0; y < textSize.cy; ++y)
+    {
+        int sourceIndex = y * sourcePitch;
+        int destinationIndex = y * textureWidth;
+        for (int x = 0; x < textSize.cx; ++x)
+        {
+            if (sourceIndex + 2 >= sourceBufferLength)
+            {
+                return false;
+            }
+
+            DWORD pixelColor = 0;
+            if (*(fontBuffer + sourceIndex) == 255)
+            {
+                pixelColor = descriptor.TextColor;
+            }
+            else if (*(fontBuffer + sourceIndex) != 0)
+            {
+                DWORD alpha = *(fontBuffer + sourceIndex);
+                alpha += *(fontBuffer + sourceIndex + 1);
+                alpha += *(fontBuffer + sourceIndex + 2);
+                alpha /= 3;
+                alpha <<= 24;
+                alpha |= 0x00FFFFFF;
+                pixelColor = descriptor.TextColor & alpha;
+            }
+
+            textureBuffer[destinationIndex] = pixelColor;
+            sourceIndex += 3;
+            destinationIndex += 1;
+        }
+    }
+
+    GLuint textureId = 0;
+    glGenTextures(1, &textureId);
+    if (textureId == 0)
+    {
+        return false;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer.data());
+
+    cacheEntry.TextureId = textureId;
+    cacheEntry.TextWidth = textSize.cx;
+    cacheEntry.TextHeight = textSize.cy;
+    cacheEntry.TextureWidth = textureWidth;
+    cacheEntry.TextureHeight = textureHeight;
+    cacheEntry.BgColor = descriptor.BgColor;
+    return true;
+}
+
+void RenderGroundItemLabelTexture(OBJECT* o, const GroundItemLabelCacheEntry& cacheEntry)
+{
+    if (cacheEntry.TextureId == 0)
+    {
+        return;
+    }
+
+    // Match RenderText center behavior: subtract integer half-width to avoid half-pixel blur on odd widths.
+    float renderX = static_cast<float>(o->ScreenX) * g_fScreenRate_x - static_cast<float>(cacheEntry.TextWidth / 2);
+    float renderY = static_cast<float>(o->ScreenY - 15) * g_fScreenRate_y;
+
+    if (cacheEntry.BgColor != 0)
+    {
+        EnableAlphaTest();
+        glColor4ub(GetRed(cacheEntry.BgColor), GetGreen(cacheEntry.BgColor), GetBlue(cacheEntry.BgColor), GetAlpha(cacheEntry.BgColor));
+        RenderColor(renderX / g_fScreenRate_x, renderY / g_fScreenRate_y,
+            static_cast<float>(cacheEntry.TextWidth) / g_fScreenRate_x, static_cast<float>(cacheEntry.TextHeight) / g_fScreenRate_y);
+        EndRenderColor();
+    }
+
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+    float textureUWidth = (cacheEntry.TextWidth + 0.01f) / static_cast<float>(cacheEntry.TextureWidth);
+    float textureVHeight = (cacheEntry.TextHeight + 0.01f) / static_cast<float>(cacheEntry.TextureHeight);
+    RenderBitmap(-static_cast<int>(cacheEntry.TextureId), renderX, renderY, static_cast<float>(cacheEntry.TextWidth),
+        static_cast<float>(cacheEntry.TextHeight), 0.f, 0.f, textureUWidth, textureVHeight, false, false);
+}
+
+bool RenderGroundItemLabelCached(OBJECT* o, ITEM* ip)
+{
+    GroundItemLabelCacheKey cacheKey = BuildGroundItemLabelCacheKey(o, ip);
+    DWORD currentTick = timeGetTime();
+
+    auto cacheIterator = g_groundItemLabelCache.find(cacheKey);
+    if (cacheIterator != g_groundItemLabelCache.end())
+    {
+        cacheIterator->second.LastUsedTick = currentTick;
+        RenderGroundItemLabelTexture(o, cacheIterator->second);
+        return true;
+    }
+
+    if (g_groundItemLabelBuildBudgetRemaining <= 0)
+    {
+        return false;
+    }
+
+    --g_groundItemLabelBuildBudgetRemaining;
+
+    GroundItemLabelDescriptor descriptor;
+    BuildGroundItemLabelDescriptor(o, ip, descriptor);
+
+    GroundItemLabelCacheEntry cacheEntry;
+    if (!CreateGroundItemLabelTexture(descriptor, cacheEntry))
+    {
+        return false;
+    }
+
+    cacheEntry.LastUsedTick = currentTick;
+
+    auto insertResult = g_groundItemLabelCache.emplace(cacheKey, cacheEntry);
+    if (!insertResult.second)
+    {
+        DeleteGroundItemLabelTexture(cacheEntry.TextureId);
+    }
+
+    PruneGroundItemLabelCache(currentTick);
+
+    auto insertedIterator = g_groundItemLabelCache.find(cacheKey);
+    if (insertedIterator != g_groundItemLabelCache.end())
+    {
+        RenderGroundItemLabelTexture(o, insertedIterator->second);
+        return true;
+    }
+
+    return false;
+}
+}
+
+void SetGroundItemLabelBuildBudget(int buildBudget)
+{
+    g_groundItemLabelBuildBudgetRemaining = buildBudget > 0 ? buildBudget : 0;
+
+    constexpr DWORD pruneIntervalMs = 250;
+    static DWORD lastPruneTick = 0;
+    DWORD currentTick = timeGetTime();
+
+    if (!g_groundItemLabelCache.empty()
+        && (g_groundItemLabelCache.size() > GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES
+            || lastPruneTick == 0
+            || currentTick - lastPruneTick >= pruneIntervalMs))
+    {
+        PruneGroundItemLabelCache(currentTick);
+        lastPruneTick = currentTick;
+    }
+}
+
+void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
+{
+    (void)i;
 
     if (!Sort)
     {
-        g_pRenderText->RenderText(MouseX, MouseY - 15, Name, 0, 0, RT3_WRITE_CENTER);
+        GroundItemLabelDescriptor descriptor;
+        BuildGroundItemLabelDescriptor(o, ip, descriptor);
+        ApplyGroundItemLabelDescriptor(descriptor);
+        g_pRenderText->RenderText(MouseX, MouseY - 15, descriptor.Name, 0, 0, RT3_WRITE_CENTER);
     }
     else
     {
-        g_pRenderText->RenderText(o->ScreenX, o->ScreenY - 15, Name, 0, 0, RT3_WRITE_CENTER);
+        RenderGroundItemLabelCached(o, ip);
     }
 
     g_pRenderText->SetTextColor(255, 230, 200, 255);
