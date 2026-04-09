@@ -41,6 +41,7 @@
 #include "PortalMgr.h"
 #include "NewUISystem.h"
 #include "ServerListManager.h"
+#include <algorithm>
 #include <time.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -6804,6 +6805,36 @@ void SetDescriptorOrangeTextColor(GroundItemLabelDescriptor& descriptor)
     SetDescriptorTextColor(descriptor, 0.9f, 0.53f, 0.13f);
 }
 
+template <size_t BufferSize, typename... Args>
+void FormatGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* format, Args... args)
+{
+    _snwprintf_s(buffer, BufferSize, _TRUNCATE, format, args...);
+}
+
+template <size_t BufferSize>
+void CopyGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* value)
+{
+    FormatGroundItemLabelText(buffer, L"%ls", value != nullptr ? value : L"");
+}
+
+template <size_t BufferSize, typename... Args>
+void AppendGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* format, Args... args)
+{
+    size_t currentLength = 0;
+    while (currentLength < BufferSize && buffer[currentLength] != L'\0')
+    {
+        ++currentLength;
+    }
+
+    if (currentLength >= BufferSize - 1)
+    {
+        buffer[BufferSize - 1] = L'\0';
+        return;
+    }
+
+    _snwprintf_s(buffer + currentLength, BufferSize - currentLength, _TRUNCATE, format, args...);
+}
+
 GroundItemLabelCacheKey BuildGroundItemLabelCacheKey(OBJECT* o, ITEM* ip)
 {
     GroundItemLabelCacheKey key;
@@ -6861,25 +6892,31 @@ void PruneGroundItemLabelCache(DWORD currentTick)
         }
     }
 
-    while (g_groundItemLabelCache.size() > GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES)
+    if (g_groundItemLabelCache.size() > GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES)
     {
-        auto oldestIterator = g_groundItemLabelCache.end();
+        const size_t entryCountToEvict = g_groundItemLabelCache.size() - GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES;
+        std::vector<decltype(g_groundItemLabelCache.begin())> cacheEntryIterators;
+        cacheEntryIterators.reserve(g_groundItemLabelCache.size());
+
         for (auto cacheEntryIterator = g_groundItemLabelCache.begin(); cacheEntryIterator != g_groundItemLabelCache.end(); ++cacheEntryIterator)
         {
-            if (oldestIterator == g_groundItemLabelCache.end()
-                || cacheEntryIterator->second.LastUsedTick < oldestIterator->second.LastUsedTick)
+            cacheEntryIterators.push_back(cacheEntryIterator);
+        }
+
+        std::nth_element(
+            cacheEntryIterators.begin(),
+            cacheEntryIterators.begin() + entryCountToEvict,
+            cacheEntryIterators.end(),
+            [](const auto& left, const auto& right)
             {
-                oldestIterator = cacheEntryIterator;
-            }
-        }
+                return left->second.LastUsedTick < right->second.LastUsedTick;
+            });
 
-        if (oldestIterator == g_groundItemLabelCache.end())
+        for (size_t i = 0; i < entryCountToEvict; ++i)
         {
-            break;
+            DeleteGroundItemLabelTexture(cacheEntryIterators[i]->second.TextureId);
+            g_groundItemLabelCache.erase(cacheEntryIterators[i]);
         }
-
-        DeleteGroundItemLabelTexture(oldestIterator->second.TextureId);
-        g_groundItemLabelCache.erase(oldestIterator);
     }
 }
 
@@ -6895,15 +6932,15 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     // Use the item name by default
     if (o->Type == MODEL_ZEN) // Zen
     {
-        mu_swprintf(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
     else if (ItemLevel == 0)
     {
-        mu_swprintf(descriptor.Name, L"%ls", ItemAttribute[o->Type - MODEL_ITEM].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else
     {
-        mu_swprintf(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
     }
 
     if (boldTextItems.count(o->Type) > 0)
@@ -6926,77 +6963,77 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     else if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
         SetDescriptorGrayTextColor(descriptor);
-        mu_swprintf(descriptor.Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
+        FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, GlobalText[102]);
     }
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
     {
         int iJewelItemIndex = COMGEM::GetJewelIndex(COMGEM::Check_Jewel_Com(o->Type, true), COMGEM::eGEM_NAME);
         descriptor.Font = g_hFontBold;
         SetDescriptorYellowTextColor(descriptor);
-        mu_swprintf(descriptor.Name, L"%ls", GlobalText[iJewelItemIndex]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[iJewelItemIndex]);
     }
     else if (o->Type == MODEL_COMPILED_CELE)
     {
-        mu_swprintf(descriptor.Name, L"%ls", ItemAttribute[MODEL_JEWEL_OF_BLESS - MODEL_ITEM].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[MODEL_JEWEL_OF_BLESS - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_COMPILED_SOUL)
     {
-        mu_swprintf(descriptor.Name, L"%ls", ItemAttribute[MODEL_JEWEL_OF_SOUL - MODEL_ITEM].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[MODEL_JEWEL_OF_SOUL - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7)
     {
-        mu_swprintf(descriptor.Name, GlobalText[111]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[111]);
     }
     else if (o->Type == MODEL_POTION + 12)
     {
         switch (ItemLevel)
         {
-        case 0:mu_swprintf(descriptor.Name, GlobalText[100]); break;
-        case 1:mu_swprintf(descriptor.Name, GlobalText[101]); break;
-        case 2:mu_swprintf(descriptor.Name, GlobalText[104]); break;
+        case 0: CopyGroundItemLabelText(descriptor.Name, GlobalText[100]); break;
+        case 1: CopyGroundItemLabelText(descriptor.Name, GlobalText[101]); break;
+        case 2: CopyGroundItemLabelText(descriptor.Name, GlobalText[104]); break;
         }
     }
     else if (o->Type == MODEL_FRUITS)
     {
         switch (ItemLevel)
         {
-        case 0:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 1:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[169], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 2:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[167], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 3:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[166], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
-        case 4:mu_swprintf(descriptor.Name, L"%ls %ls", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 0: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", GlobalText[168], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 1: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", GlobalText[169], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 2: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", GlobalText[167], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 3: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", GlobalText[166], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
+        case 4: FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", GlobalText[1900], ItemAttribute[o->Type - MODEL_ITEM].Name); break;
         }
     }
     else if (o->Type == MODEL_SPIRIT)
     {
         switch (ItemLevel)
         {
-        case 0:mu_swprintf(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
-        case 1:mu_swprintf(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1214]); break;
+        case 0: FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1187]); break;
+        case 1: FormatGroundItemLabelText(descriptor.Name, L"%ls of %ls", ItemAttribute[o->Type - MODEL_ITEM].Name, GlobalText[1214]); break;
         }
     }
     else if (o->Type == MODEL_EVENT + 16)
     {
-        mu_swprintf(descriptor.Name, GlobalText[1235]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[1235]);
     }
     else if (o->Type == MODEL_EVENT + 4)
     {
-        mu_swprintf(descriptor.Name, GlobalText[105]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[105]);
     }
     else if (o->Type == MODEL_EVENT + 5)
     {
         switch (ItemLevel)
         {
         case 14:
-            mu_swprintf(descriptor.Name, GlobalText[1650]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[1650]);
             break;
 
         case 15:
-            mu_swprintf(descriptor.Name, GlobalText[1651]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[1651]);
             break;
 
         default:
-            mu_swprintf(descriptor.Name, GlobalText[106]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[106]);
             break;
         }
     }
@@ -7005,28 +7042,28 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         if (ItemLevel == 13)
         {
             SetDescriptorYellowTextColor(descriptor);
-            mu_swprintf(descriptor.Name, L"%ls", GlobalText[117]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[117]);
         }
         else
         {
-            mu_swprintf(descriptor.Name, GlobalText[107]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[107]);
         }
     }
     else if (o->Type == MODEL_EVENT + 7)
     {
-        mu_swprintf(descriptor.Name, GlobalText[108]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[108]);
     }
     else if (o->Type == MODEL_EVENT + 8)
     {
-        mu_swprintf(descriptor.Name, GlobalText[109]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[109]);
     }
     else if (o->Type == MODEL_EVENT + 9)
     {
-        mu_swprintf(descriptor.Name, GlobalText[110]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[110]);
     }
     else if (o->Type == MODEL_EVENT + 10)
     {
-        mu_swprintf(descriptor.Name, L"%ls +%d", GlobalText[115], ItemLevel - 7);
+        FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", GlobalText[115], ItemLevel - 7);
     }
     else if (o->Type == MODEL_RED_RIBBON_BOX)
     {
@@ -7049,7 +7086,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         else if (ItemLevel == 1)
         {
             SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
-            mu_swprintf(descriptor.Name, GlobalText[2012]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[2012]);
         }
     }
     else if (o->Type == MODEL_RED_CHOCOLATE_BOX)
@@ -7061,7 +7098,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         else if (ItemLevel == 1)
         {
             SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
-            mu_swprintf(descriptor.Name, GlobalText[2013]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[2013]);
         }
     }
     else if (o->Type == MODEL_BLUE_CHOCOLATE_BOX)
@@ -7073,54 +7110,54 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         else if (ItemLevel == 1)
         {
             SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
-            mu_swprintf(descriptor.Name, GlobalText[2014]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[2014]);
         }
     }
     else if (o->Type == MODEL_EVENT + 21)
     {
         SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
-        mu_swprintf(descriptor.Name, GlobalText[2012]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[2012]);
     }
     else if (o->Type == MODEL_EVENT + 22)
     {
         SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
-        mu_swprintf(descriptor.Name, GlobalText[2013]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[2013]);
     }
     else if (o->Type == MODEL_EVENT + 23)
     {
         SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
-        mu_swprintf(descriptor.Name, GlobalText[2014]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[2014]);
     }
     else if (o->Type == MODEL_EVENT + 11)
     {
-        mu_swprintf(descriptor.Name, GlobalText[810]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[810]);
     }
     else if (o->Type == MODEL_EVENT + 12)
     {
-        mu_swprintf(descriptor.Name, GlobalText[906]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[906]);
     }
     else if (o->Type == MODEL_EVENT + 13)
     {
-        mu_swprintf(descriptor.Name, GlobalText[907]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[907]);
     }
     else if (o->Type == MODEL_EVENT + 14)
     {
         switch (ItemLevel)
         {
         case 2:
-            mu_swprintf(descriptor.Name, GlobalText[928]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[928]);
             break;
         case 3:
-            mu_swprintf(descriptor.Name, GlobalText[929]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[929]);
             break;
         default:
-            mu_swprintf(descriptor.Name, GlobalText[922]);
+            CopyGroundItemLabelText(descriptor.Name, GlobalText[922]);
             break;
         }
     }
     else if (o->Type == MODEL_EVENT + 15)
     {
-        mu_swprintf(descriptor.Name, GlobalText[925]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[925]);
     }
     else if (o->Type == MODEL_TRANSFORMATION_RING)
     {
@@ -7128,7 +7165,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         {
             if (SommonTable[ItemLevel] == MonsterScript[i].Type)
             {
-                mu_swprintf(descriptor.Name, L"%ls %ls", MonsterScript[i].Name, GlobalText[103]);
+                FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", MonsterScript[i].Name, GlobalText[103]);
                 break;
             }
         }
@@ -7136,42 +7173,42 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     else if (o->Type == MODEL_POTION + 21 && ItemLevel == 3)
     {
         SetDescriptorYellowTextColor(descriptor);
-        mu_swprintf(descriptor.Name, GlobalText[1290]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[1290]);
     }
     else if (o->Type == MODEL_SIEGE_POTION)
     {
         switch (ItemLevel)
         {
-        case 0: mu_swprintf(descriptor.Name, GlobalText[1413]); break;
-        case 1: mu_swprintf(descriptor.Name, GlobalText[1414]); break;
+        case 0: CopyGroundItemLabelText(descriptor.Name, GlobalText[1413]); break;
+        case 1: CopyGroundItemLabelText(descriptor.Name, GlobalText[1414]); break;
         }
     }
     else if (o->Type == MODEL_HELPER + 7)
     {
         switch (ItemLevel)
         {
-        case 0: mu_swprintf(descriptor.Name, GlobalText[1460]); break;
-        case 1: mu_swprintf(descriptor.Name, GlobalText[1461]); break;
+        case 0: CopyGroundItemLabelText(descriptor.Name, GlobalText[1460]); break;
+        case 1: CopyGroundItemLabelText(descriptor.Name, GlobalText[1461]); break;
         }
     }
     else if (o->Type == MODEL_LIFE_STONE_ITEM)
     {
         switch (ItemLevel)
         {
-        case 0: mu_swprintf(descriptor.Name, GlobalText[1416]); break;
-        case 1: mu_swprintf(descriptor.Name, GlobalText[1462]); break;
+        case 0: CopyGroundItemLabelText(descriptor.Name, GlobalText[1416]); break;
+        case 1: CopyGroundItemLabelText(descriptor.Name, GlobalText[1462]); break;
         }
     }
     else if (o->Type == MODEL_EVENT + 18)
     {
-        mu_swprintf(descriptor.Name, GlobalText[1462]);
+        CopyGroundItemLabelText(descriptor.Name, GlobalText[1462]);
     }
     else if ((o->Type >= MODEL_SEED_FIRE && o->Type <= MODEL_SEED_EARTH)
         || (o->Type >= MODEL_SPHERE_MONO && o->Type <= MODEL_SPHERE_5)
         || (o->Type >= MODEL_SEED_SPHERE_FIRE_1 && o->Type <= MODEL_SEED_SPHERE_EARTH_5))
     {
         SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
-        wcscpy(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
     }
     else if (o->Type == MODEL_HELPER + 66)
     {
@@ -7233,29 +7270,29 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
             descriptor.BgColor = MakeRgba(60, 60, 200, 255);
 
             wchar_t formattedName[_countof(descriptor.Name)]{};
-            _snwprintf_s(formattedName, _countof(formattedName), _TRUNCATE, L"%ls%ls", SetName, descriptor.Name);
-            wcscpy_s(descriptor.Name, _countof(descriptor.Name), formattedName);
+            FormatGroundItemLabelText(formattedName, L"%ls%ls", SetName, descriptor.Name);
+            CopyGroundItemLabelText(descriptor.Name, formattedName);
         }
 
         if (ip->HasSkill)
         {
             if (o->Type != MODEL_HORN_OF_DINORANT)
             {
-                wcscat(descriptor.Name, GlobalText[176]);
+                AppendGroundItemLabelText(descriptor.Name, L"%ls", GlobalText[176]);
             }
             else
             {
-                wcscat(descriptor.Name, L" +");
-                wcscat(descriptor.Name, GlobalText[179]);
+                AppendGroundItemLabelText(descriptor.Name, L"%ls", L" +");
+                AppendGroundItemLabelText(descriptor.Name, L"%ls", GlobalText[179]);
             }
         }
         if (ip->OptionLevel > 0)
         {
-            wcscat(descriptor.Name, GlobalText[177]);
+            AppendGroundItemLabelText(descriptor.Name, L"%ls", GlobalText[177]);
         }
         if (ip->HasLuck)
         {
-            wcscat(descriptor.Name, GlobalText[178]);
+            AppendGroundItemLabelText(descriptor.Name, L"%ls", GlobalText[178]);
         }
     }
 }
