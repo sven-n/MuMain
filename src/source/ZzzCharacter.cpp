@@ -10771,7 +10771,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     c->ExtendStateTime = 0;
                 }
-                c->ExtendStateTime += std::min<int>(1, FPS_ANIMATION_FACTOR);
+                c->ExtendStateTime++;
             }
 
             if (fullset && g_pOption->GetRenderLevel() >= 2)
