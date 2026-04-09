@@ -82,15 +82,16 @@ void ResolvePacketBindings()
     ReResolve(dotnet_SendChatMessage, "SendChatMessage");
     ReResolve(dotnet_SendKeepAlive, "SendKeepAlive");
 
-    // GameServer — critical bindings for post-login flow
+    // GameServer — critical bindings for post-login and character selection flow
     ReResolve(dotnet_SendPing, "SendPing");
     ReResolve(dotnet_SendChecksumResponse, "SendChecksumResponse");
     ReResolve(dotnet_SendLoginLongPassword, "SendLoginLongPassword");
     ReResolve(dotnet_SendLoginShortPassword, "SendLoginShortPassword");
     ReResolve(dotnet_SendLogin075, "SendLogin075");
     ReResolve(dotnet_SendPingResponse, "SendPingResponse");
+    ReResolve(dotnet_SendRequestCharacterList, "SendRequestCharacterList");
 
-    // ClientToServer — remaining bindings (185+) not yet resolved here.
+    // ClientToServer — remaining bindings (184+) not yet resolved here.
     // TODO: generate a ResolveAll function from XSLT alongside the bindings.
 
     g_ErrorReport.Write(L"NET: ResolvePacketBindings done (SendServerListRequest=%p)\r\n",
