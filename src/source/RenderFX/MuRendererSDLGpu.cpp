@@ -58,8 +58,10 @@ namespace
 
 // Maximum number of quads supported by the static quad index buffer.
 constexpr int k_MaxQuads = 4096;
-// Scratch vertex transfer buffer size (4 MB).
-constexpr Uint32 k_VertexBufferSize = 4u * 1024u * 1024u;
+// Scratch vertex transfer buffer size (16 MB).
+// Character selection scene with 4 detailed characters + wings + weapons + castle
+// exceeds 4 MB, causing 2D UI draw commands to be silently dropped.
+constexpr Uint32 k_VertexBufferSize = 16u * 1024u * 1024u;
 // Number of blend pipelines: 8 blend modes + 1 disabled.
 constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
@@ -1663,9 +1665,11 @@ public:
         }
 
         // Story 4.3.2 (AC-8): RenderQuad2D uses the 2D pipeline set (Vertex2D layout).
+        // Always disable depth test for 2D sprites — they must render on top of 3D
+        // geometry regardless of depth buffer state. The 3D pass fills the depth buffer
+        // with near values (characters close to camera) that would occlude 2D UI.
         const int pipelineIdx = GetActivePipelineIndex();
-        SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled ? s_pipelines2D[pipelineIdx] : s_pipelines2DDepthOff[pipelineIdx];
+        SDL_GPUGraphicsPipeline* pipeline = s_pipelines2DDepthOff[pipelineIdx];
         if (!pipeline)
         {
             if (!s_dbgNullPipelineWarned)
