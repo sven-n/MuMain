@@ -126,7 +126,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ConnectionInfoRef.Length;
                 var packet = new ConnectionInfoRef(pipeWriter.GetSpan(length)[..length]);
-                packet.IpAddress = Marshal.PtrToStringAuto(@ipAddress);
+                packet.IpAddress = Marshal.PtrToStringUni(@ipAddress);
                 packet.Port = @port;
 
                 return length;
@@ -325,7 +325,7 @@ public unsafe partial class ConnectionManager
                 var length = ClientNeedsPatchRef.Length;
                 var packet = new ClientNeedsPatchRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PatchVersion = @patchVersion;
-                packet.PatchAddress = Marshal.PtrToStringAuto(@patchAddress);
+                packet.PatchAddress = Marshal.PtrToStringUni(@patchAddress);
 
                 return length;
             });

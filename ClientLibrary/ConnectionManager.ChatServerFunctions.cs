@@ -96,7 +96,7 @@ public unsafe partial class ConnectionManager
                 var length = ChatRoomClientJoinedRef.Length;
                 var packet = new ChatRoomClientJoinedRef(pipeWriter.GetSpan(length)[..length]);
                 packet.ClientIndex = @clientIndex;
-                packet.Name = Marshal.PtrToStringAuto(@name);
+                packet.Name = Marshal.PtrToStringUni(@name);
 
                 return length;
             });
@@ -163,7 +163,7 @@ public unsafe partial class ConnectionManager
                 var length = ChatRoomClientLeftRef.Length;
                 var packet = new ChatRoomClientLeftRef(pipeWriter.GetSpan(length)[..length]);
                 packet.ClientIndex = @clientIndex;
-                packet.Name = Marshal.PtrToStringAuto(@name);
+                packet.Name = Marshal.PtrToStringUni(@name);
 
                 return length;
             });

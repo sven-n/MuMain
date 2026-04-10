@@ -126,10 +126,10 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = PublicChatMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@message)!));
+                var length = PublicChatMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringUni(@message)!));
                 var packet = new PublicChatMessageRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Character = Marshal.PtrToStringAuto(@character);
-                packet.Message = Marshal.PtrToStringAuto(@message);
+                packet.Character = Marshal.PtrToStringUni(@character);
+                packet.Message = Marshal.PtrToStringUni(@message);
 
                 return length;
             });
@@ -162,10 +162,10 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = WhisperMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@message)!));
+                var length = WhisperMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringUni(@message)!));
                 var packet = new WhisperMessageRef(pipeWriter.GetSpan(length)[..length]);
-                packet.ReceiverName = Marshal.PtrToStringAuto(@receiverName);
-                packet.Message = Marshal.PtrToStringAuto(@message);
+                packet.ReceiverName = Marshal.PtrToStringUni(@receiverName);
+                packet.Message = Marshal.PtrToStringUni(@message);
 
                 return length;
             });
@@ -474,7 +474,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = PlayerShopOpenRef.Length;
                 var packet = new PlayerShopOpenRef(pipeWriter.GetSpan(length)[..length]);
-                packet.StoreName = Marshal.PtrToStringAuto(@storeName);
+                packet.StoreName = Marshal.PtrToStringUni(@storeName);
 
                 return length;
             });
@@ -541,7 +541,7 @@ public unsafe partial class ConnectionManager
                 var length = PlayerShopItemListRequestRef.Length;
                 var packet = new PlayerShopItemListRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
+                packet.PlayerName = Marshal.PtrToStringUni(@playerName);
 
                 return length;
             });
@@ -578,7 +578,7 @@ public unsafe partial class ConnectionManager
                 var length = PlayerShopItemBuyRequestRef.Length;
                 var packet = new PlayerShopItemBuyRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
+                packet.PlayerName = Marshal.PtrToStringUni(@playerName);
                 packet.ItemSlot = @itemSlot;
 
                 return length;
@@ -615,7 +615,7 @@ public unsafe partial class ConnectionManager
                 var length = PlayerShopCloseOtherRef.Length;
                 var packet = new PlayerShopCloseOtherRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
+                packet.PlayerName = Marshal.PtrToStringUni(@playerName);
 
                 return length;
             });
@@ -2525,8 +2525,8 @@ public unsafe partial class ConnectionManager
                 packet.ItemIndex = @itemIndex;
                 packet.CoinIndex = @coinIndex;
                 packet.MileageFlag = @mileageFlag;
-                packet.GiftReceiverName = Marshal.PtrToStringAuto(@giftReceiverName);
-                packet.GiftText = Marshal.PtrToStringAuto(@giftText);
+                packet.GiftReceiverName = Marshal.PtrToStringUni(@giftReceiverName);
+                packet.GiftText = Marshal.PtrToStringUni(@giftText);
 
                 return length;
             });
@@ -2744,7 +2744,7 @@ public unsafe partial class ConnectionManager
                 var length = SetVaultPinRef.Length;
                 var packet = new SetVaultPinRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Pin = @pin;
-                packet.Password = Marshal.PtrToStringAuto(@password);
+                packet.Password = Marshal.PtrToStringUni(@password);
 
                 return length;
             });
@@ -2778,7 +2778,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = RemoveVaultPinRef.Length;
                 var packet = new RemoveVaultPinRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Password = Marshal.PtrToStringAuto(@password);
+                packet.Password = Marshal.PtrToStringUni(@password);
 
                 return length;
             });
@@ -3247,7 +3247,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = CreateCharacterRef.Length;
                 var packet = new CreateCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = Marshal.PtrToStringAuto(@name);
+                packet.Name = Marshal.PtrToStringUni(@name);
                 packet.Class = @class_;
 
                 return length;
@@ -3283,8 +3283,8 @@ public unsafe partial class ConnectionManager
             {
                 var length = DeleteCharacterRef.Length;
                 var packet = new DeleteCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = Marshal.PtrToStringAuto(@name);
-                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode);
+                packet.Name = Marshal.PtrToStringUni(@name);
+                packet.SecurityCode = Marshal.PtrToStringUni(@securityCode);
 
                 return length;
             });
@@ -3318,7 +3318,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = SelectCharacterRef.Length;
                 var packet = new SelectCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = Marshal.PtrToStringAuto(@name);
+                packet.Name = Marshal.PtrToStringUni(@name);
 
                 return length;
             });
@@ -3352,7 +3352,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = FocusCharacterRef.Length;
                 var packet = new FocusCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = Marshal.PtrToStringAuto(@name);
+                packet.Name = Marshal.PtrToStringUni(@name);
 
                 return length;
             });
@@ -4165,15 +4165,15 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = LetterSendRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@message)!));
+                var length = LetterSendRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringUni(@message)!));
                 var packet = new LetterSendRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.LetterId = @letterId;
-                packet.Receiver = Marshal.PtrToStringAuto(@receiver);
-                packet.Title = Marshal.PtrToStringAuto(@title);
+                packet.Receiver = Marshal.PtrToStringUni(@receiver);
+                packet.Title = Marshal.PtrToStringUni(@title);
                 packet.Rotation = @rotation;
                 packet.Animation = @animation;
                 packet.MessageLength = @messageLength;
-                packet.Message = Marshal.PtrToStringAuto(@message);
+                packet.Message = Marshal.PtrToStringUni(@message);
 
                 return length;
             });
@@ -4240,10 +4240,10 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = GuildKickPlayerRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@securityCode)!));
+                var length = GuildKickPlayerRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringUni(@securityCode)!));
                 var packet = new GuildKickPlayerRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
-                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode);
+                packet.PlayerName = Marshal.PtrToStringUni(@playerName);
+                packet.SecurityCode = Marshal.PtrToStringUni(@securityCode);
 
                 return length;
             });
@@ -4380,7 +4380,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = GuildCreateRequestRef.Length;
                 var packet = new GuildCreateRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.GuildName = Marshal.PtrToStringAuto(@guildName);
+                packet.GuildName = Marshal.PtrToStringUni(@guildName);
                 new Span<byte>(@guildEmblem, (int)guildEmblemByteLength).CopyTo(packet.GuildEmblem);
 
                 return length;
@@ -4417,7 +4417,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = GuildCreateRequest075Ref.Length;
                 var packet = new GuildCreateRequest075Ref(pipeWriter.GetSpan(length)[..length]);
-                packet.GuildName = Marshal.PtrToStringAuto(@guildName);
+                packet.GuildName = Marshal.PtrToStringUni(@guildName);
                 new Span<byte>(@guildEmblem, (int)guildEmblemByteLength).CopyTo(packet.GuildEmblem);
 
                 return length;
@@ -4589,7 +4589,7 @@ public unsafe partial class ConnectionManager
                 var packet = new GuildRoleAssignRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Type = @type;
                 packet.Role = @role;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
+                packet.PlayerName = Marshal.PtrToStringUni(@playerName);
 
                 return length;
             });
@@ -4766,7 +4766,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = RemoveAllianceGuildRequestRef.Length;
                 var packet = new RemoveAllianceGuildRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.GuildName = Marshal.PtrToStringAuto(@guildName);
+                packet.GuildName = Marshal.PtrToStringUni(@guildName);
 
                 return length;
             });
@@ -4963,7 +4963,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = FriendAddRequestRef.Length;
                 var packet = new FriendAddRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = Marshal.PtrToStringAuto(@friendName);
+                packet.FriendName = Marshal.PtrToStringUni(@friendName);
 
                 return length;
             });
@@ -4997,7 +4997,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = FriendDeleteRef.Length;
                 var packet = new FriendDeleteRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = Marshal.PtrToStringAuto(@friendName);
+                packet.FriendName = Marshal.PtrToStringUni(@friendName);
 
                 return length;
             });
@@ -5031,7 +5031,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ChatRoomCreateRequestRef.Length;
                 var packet = new ChatRoomCreateRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = Marshal.PtrToStringAuto(@friendName);
+                packet.FriendName = Marshal.PtrToStringUni(@friendName);
 
                 return length;
             });
@@ -5067,7 +5067,7 @@ public unsafe partial class ConnectionManager
                 var length = FriendAddResponseRef.Length;
                 var packet = new FriendAddResponseRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Accepted = @accepted == 1;
-                packet.FriendRequesterName = Marshal.PtrToStringAuto(@friendRequesterName);
+                packet.FriendRequesterName = Marshal.PtrToStringUni(@friendRequesterName);
 
                 return length;
             });
@@ -5137,7 +5137,7 @@ public unsafe partial class ConnectionManager
             {
                 var length = ChatRoomInvitationRequestRef.Length;
                 var packet = new ChatRoomInvitationRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = Marshal.PtrToStringAuto(@friendName);
+                packet.FriendName = Marshal.PtrToStringUni(@friendName);
                 packet.RoomId = @roomId;
                 packet.RequestId = @requestId;
 
@@ -6361,9 +6361,9 @@ public unsafe partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var length = ServerImmigrationRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@securityCode)!));
+                var length = ServerImmigrationRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(Marshal.PtrToStringUni(@securityCode)!));
                 var packet = new ServerImmigrationRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.SecurityCode = Marshal.PtrToStringAuto(@securityCode);
+                packet.SecurityCode = Marshal.PtrToStringUni(@securityCode);
 
                 return length;
             });
@@ -6399,9 +6399,9 @@ public unsafe partial class ConnectionManager
             {
                 var length = LuckyNumberRequestRef.Length;
                 var packet = new LuckyNumberRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Serial1 = Marshal.PtrToStringAuto(@serial1);
-                packet.Serial2 = Marshal.PtrToStringAuto(@serial2);
-                packet.Serial3 = Marshal.PtrToStringAuto(@serial3);
+                packet.Serial1 = Marshal.PtrToStringUni(@serial1);
+                packet.Serial2 = Marshal.PtrToStringUni(@serial2);
+                packet.Serial3 = Marshal.PtrToStringUni(@serial3);
 
                 return length;
             });
@@ -6579,7 +6579,7 @@ public unsafe partial class ConnectionManager
                 var length = DuelStartRequestRef.Length;
                 var packet = new DuelStartRequestRef(pipeWriter.GetSpan(length)[..length]);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
+                packet.PlayerName = Marshal.PtrToStringUni(@playerName);
 
                 return length;
             });
@@ -6617,7 +6617,7 @@ public unsafe partial class ConnectionManager
                 var packet = new DuelStartResponseRef(pipeWriter.GetSpan(length)[..length]);
                 packet.Response = @response == 1;
                 packet.PlayerId = @playerId;
-                packet.PlayerName = Marshal.PtrToStringAuto(@playerName);
+                packet.PlayerName = Marshal.PtrToStringUni(@playerName);
 
                 return length;
             });

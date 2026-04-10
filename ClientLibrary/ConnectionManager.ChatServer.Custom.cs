@@ -83,7 +83,7 @@ public partial class ConnectionManager
         {
             connection.CreateAndSend(pipeWriter =>
             {
-                var messageString = Marshal.PtrToStringAuto(@message);
+                var messageString = Marshal.PtrToStringUni(@message);
                 var messageLength = Encoding.UTF8.GetByteCount(messageString!);
 
                 var length = ChatMessageRef.GetRequiredSize(messageLength);

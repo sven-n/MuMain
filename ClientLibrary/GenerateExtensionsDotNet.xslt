@@ -128,7 +128,7 @@ public unsafe partial class ConnectionManager
   </xsl:template>
 
 	<xsl:template match="pd:Field[(pd:Type = 'String')]" mode="length">
-		<xsl:text>Encoding.UTF8.GetByteCount(Marshal.PtrToStringAuto(@</xsl:text>
+		<xsl:text>Encoding.UTF8.GetByteCount(Marshal.PtrToStringUni(@</xsl:text>
 		<xsl:call-template name="LowerCaseName" />
 		<xsl:text>)!)</xsl:text>
 	</xsl:template>
@@ -222,7 +222,7 @@ public unsafe partial class ConnectionManager
       <xsl:when test="pd:Type='String'">
         <xsl:text>                packet.</xsl:text>
         <xsl:value-of select="pd:Name"/>
-        <xsl:text> = Marshal.PtrToStringAuto(@</xsl:text>
+        <xsl:text> = Marshal.PtrToStringUni(@</xsl:text>
         <xsl:call-template name="LowerCaseName" />
         <xsl:text>);</xsl:text>
       </xsl:when>
