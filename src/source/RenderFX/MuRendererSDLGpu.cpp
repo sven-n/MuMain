@@ -473,6 +473,10 @@ void RegisterTexture(std::uint32_t id, void* pTex)
 void UnregisterTexture(std::uint32_t id)
 {
     s_textureMap.erase(id);
+    // Scene transitions unload textures mid-frame. Deferred render commands may hold
+    // dangling pointers to the freed GPU resources. Clear all pending commands to prevent
+    // Metal/Vulkan from accessing freed memory during EndFrame replay.
+    s_renderCmds.clear();
 }
 
 void ClearTextureRegistry()
