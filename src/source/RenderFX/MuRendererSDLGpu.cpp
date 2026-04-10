@@ -1220,6 +1220,12 @@ public:
                     idxBind.offset = 0;
                     SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
+                    // Guard against dangling sampler/texture — scene transitions may
+                    // unload assets mid-frame before EndFrame replays deferred commands.
+                    if (!cmd.texture || !cmd.sampler)
+                    {
+                        break;
+                    }
                     SDL_GPUTextureSamplerBinding sampBind{};
                     sampBind.texture = cmd.texture;
                     sampBind.sampler = cmd.sampler;
@@ -1245,6 +1251,12 @@ public:
                     idxBind.offset = cmd.stripIdxOffset;
                     SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
+                    // Guard against dangling sampler/texture — scene transitions may
+                    // unload assets mid-frame before EndFrame replays deferred commands.
+                    if (!cmd.texture || !cmd.sampler)
+                    {
+                        break;
+                    }
                     SDL_GPUTextureSamplerBinding sampBind{};
                     sampBind.texture = cmd.texture;
                     sampBind.sampler = cmd.sampler;
@@ -1257,8 +1269,11 @@ public:
 
                 case RenderCmdType::DrawTriangles2D:
                 {
+                    if (!cmd.texture || !cmd.sampler)
+                    {
+                        break;
+                    }
                     // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
-                    // Uses the same Vertex2D layout as DrawIndexedQuads2D but draws non-indexed.
                     SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
                     SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
 
