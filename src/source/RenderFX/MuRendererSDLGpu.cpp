@@ -470,13 +470,15 @@ void RegisterTexture(std::uint32_t id, void* pTex)
     s_textureMap[id] = pTex;
 }
 
+// Flag: set when textures are unregistered mid-frame. EndFrame skips render replay
+// to avoid dangling GPU resource pointers. Reset at BeginFrame.
+static bool s_texturesInvalidated = false;
+
 void UnregisterTexture(std::uint32_t id)
 {
     s_textureMap.erase(id);
-    // Scene transitions unload textures mid-frame. Deferred render commands may hold
-    // dangling pointers to the freed GPU resources. Clear all pending commands to prevent
-    // Metal/Vulkan from accessing freed memory during EndFrame replay.
-    s_renderCmds.clear();
+    // Mark that GPU resources were freed — deferred commands may hold dangling pointers.
+    s_texturesInvalidated = true;
 }
 
 void ClearTextureRegistry()
@@ -930,6 +932,7 @@ public:
         s_renderCmds.clear();
         s_stripIdxScratch.clear();
         s_textureUpdates.clear();
+        s_texturesInvalidated = false; // Reset per-frame texture invalidation flag
         s_dbgDrawCallsThisFrame = 0u;
         s_dbgVtxBytesThisFrame = 0u;
         ++s_dbgFrameCount;
@@ -1176,6 +1179,9 @@ public:
         if (s_renderPass)
         {
             // Replay all recorded draw commands in submission order.
+            // Skip replay if textures were unloaded mid-frame — deferred commands
+            // may hold dangling GPU pointers. The frame renders as a blank clear.
+            if (!s_texturesInvalidated)
             for (const auto& cmd : s_renderCmds)
             {
                 switch (cmd.type)
