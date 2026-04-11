@@ -543,6 +543,20 @@ target_include_directories(MuLinuxStabilityTests PRIVATE
     "${CMAKE_SOURCE_DIR}/src/source/Platform/MiniAudio"
 )
 
+# Story 7.10.1: spdlog Logging Infrastructure Migration [VS0-CORE-MIGRATE-LOGGING]
+# RED PHASE:
+#   test_mu_logger.cpp       — Tests SKIP until MuLogger.h is created (__has_include guard).
+#                              AC-2 (mu::log::Get, MU_LOG_* macros), AC-3 (file sink),
+#                              AC-11 (logger creation, level filtering, multi-logger isolation).
+#   test_logging_migration   — AC-9 header-deletion tests FAIL while ErrorReport.h /
+#                              muConsoleDebug.h still exist (__has_include → FAIL).
+#                              AC-1 spdlog version test SKIPS until FetchContent adds spdlog.
+# GREEN PHASE: All 10 test cases pass after spdlog integrated, MuLogger.h created, and
+#              ErrorReport.h + muConsoleDebug.h deleted.
+# Note: spdlog include paths propagate automatically from MUCore PUBLIC linkage (Task 1.2).
+target_sources(MuTests PRIVATE core/test_mu_logger.cpp)
+target_sources(MuTests PRIVATE core/test_logging_migration_7_10_1.cpp)
+
 include(CTest)
 include(Catch)
 catch_discover_tests(MuTests)
