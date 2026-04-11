@@ -65,6 +65,7 @@ void Init(const std::filesystem::path& logDir)
     // which is the only async-signal-safe way to write to the log file.
     // [VS0-QUAL-SIGNAL-HANDLERS]
     int oldFd = g_errorReportFd;
+    g_errorReportFd = -1; // Disable crash-handler writes during fd transition
     if (oldFd >= 0)
     {
         close(oldFd);
@@ -94,7 +95,10 @@ std::shared_ptr<spdlog::logger> Get(const std::string& name)
         return logger;
     }
     // Fall back to the default logger if the name is not registered.
-    return spdlog::default_logger();
+    // Log a one-time warning so typos are discoverable in the output.
+    auto def = spdlog::default_logger();
+    SPDLOG_LOGGER_WARN(def, "Logger '{}' not registered — using default", name);
+    return def;
 }
 
 bool SetLevel(const std::string& loggerName, spdlog::level::level_enum level)
@@ -116,7 +120,8 @@ std::vector<std::pair<std::string, std::string>> ListLoggers()
         auto logger = spdlog::get(name);
         if (logger)
         {
-            result.emplace_back(name, spdlog::level::to_string_view(logger->level()).data());
+            auto sv = spdlog::level::to_string_view(logger->level());
+            result.emplace_back(name, std::string(sv.data(), sv.size()));
         }
     }
     return result;

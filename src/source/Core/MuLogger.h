@@ -14,6 +14,11 @@
 // Generic fmt formatter for all enum types — cast to underlying integer.
 // fmt 11.x (bundled with spdlog 1.15.x) removed implicit enum-to-int conversion.
 // This avoids requiring static_cast<int>() at every enum log call site.
+//
+// WARNING: This catch-all formatter applies to ALL enums. To provide a custom
+// formatter for a specific enum, use a format_as() free function (ADL-based,
+// lower priority than this specialization) instead of an explicit
+// fmt::formatter<EnumType> specialization, which would conflict.
 template <typename T>
     requires std::is_enum_v<T>
 struct fmt::formatter<T> : fmt::formatter<std::underlying_type_t<T>>

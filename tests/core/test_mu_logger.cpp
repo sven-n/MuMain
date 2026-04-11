@@ -182,7 +182,10 @@ TEST_CASE("AC-11 [7-10-1]: Level filtering suppresses messages below logger thre
     auto tmpDir = MakeTempDir("filter");
     mu::log::Init(tmpDir);
 
-    auto logger = mu::log::Get("test_filter");
+    // Use a real registered logger name to test level filtering on an actual
+    // named logger (not the default fallback). "audio" is a registered subsystem
+    // logger unlikely to conflict with other tests.
+    auto logger = mu::log::Get("audio");
     REQUIRE(logger != nullptr);
 
     // GIVEN: Logger threshold set to info (trace/debug are suppressed)

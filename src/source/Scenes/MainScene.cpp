@@ -132,8 +132,6 @@ static void InitializeMainScene()
     SetFocus(g_hWnd);
 
     mu::log::Get("scenes")->info("Main Scene init success.");
-
-    mu::log::Get("scenes")->info("MainScene Init Success");
 }
 
 /**

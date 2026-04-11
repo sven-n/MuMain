@@ -8,6 +8,8 @@
 
 #include "MuLogger.h"
 
+#include <charconv>
+
 #include "RenderFX/ZzzOpenglUtil.h"
 #include "Scenes/SceneManager.h"
 
@@ -94,7 +96,14 @@ bool CheckCommand(const std::wstring& command)
     if (command.compare(0, 4, L"$fps") == 0 && command.size() > 5)
     {
         auto fps_str = command.substr(5);
-        auto target_fps = std::stof(fps_str);
+        std::string narrow(fps_str.begin(), fps_str.end());
+        char* end = nullptr;
+        float target_fps = std::strtof(narrow.c_str(), &end);
+        if (end == narrow.c_str())
+        {
+            mu::log::Get("core")->warn("Invalid FPS value: {}", narrow);
+            return true;
+        }
         SetTargetFps(target_fps);
         return true;
     }
@@ -114,8 +123,15 @@ bool CheckCommand(const std::wstring& command)
     if (command.compare(0, 7, L"$winmsg") == 0 && command.size() > 8)
     {
         auto str_limit = command.substr(8);
-        auto message_limit = std::stof(str_limit);
-        SetMaxMessagePerCycle(static_cast<int>(message_limit));
+        std::string narrow(str_limit.begin(), str_limit.end());
+        int message_limit = 0;
+        auto [ptr, ec] = std::from_chars(narrow.data(), narrow.data() + narrow.size(), message_limit);
+        if (ec != std::errc{})
+        {
+            mu::log::Get("core")->warn("Invalid message limit: {}", narrow);
+            return true;
+        }
+        SetMaxMessagePerCycle(message_limit);
         return true;
     }
 
