@@ -1397,8 +1397,19 @@ public:
     // -----------------------------------------------------------------------
     void Begin2DPass() override
     {
-        // 2D pipeline selection is already handled by RenderQuad2D based on
-        // depth test state. No additional state change needed.
+        // Reset viewport to full swapchain dimensions for 2D UI rendering.
+        // The original OpenGL BeginBitmap() called glViewport(0, 0, WindowWidth, WindowHeight)
+        // before setting up the orthographic projection. Without this, 2D UI elements
+        // (inventory, skill bar, chat) render inside the shrunken 3D viewport.
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::SetViewport;
+        cmd.viewport.x = 0.0f;
+        cmd.viewport.y = 0.0f;
+        cmd.viewport.w = static_cast<float>(s_swapW);
+        cmd.viewport.h = static_cast<float>(s_swapH);
+        cmd.viewport.min_depth = 0.0f;
+        cmd.viewport.max_depth = 1.0f;
+        s_renderCmds.push_back(cmd);
     }
 
     // -----------------------------------------------------------------------
