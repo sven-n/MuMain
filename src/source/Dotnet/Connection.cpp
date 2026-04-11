@@ -18,6 +18,8 @@
 #include "PacketFunctions_ChatServer.h"
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketFunctions_ClientToServer.h"
+#include "PacketBindings_ConnectServer.h"
+#include "PacketBindings_ChatServer.h"
 
 // MEDIUM-4 fix: g_dotnetLibPath defined here (not in anonymous namespace in header) to prevent
 // per-TU copies if Connection.h is ever included by a second translation unit.

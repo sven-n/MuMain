@@ -587,6 +587,14 @@ void BeginOpengl(int x, int y, int Width, int Height)
     const int scaledW = Width * WindowWidth / 640;
     const int scaledH = Height * WindowHeight / 480;
 
+    // Update viewport globals used by gluPerspective2 for ScreenCenterX/Y and
+    // PerspectiveX/Y. BeginScene queues the GPU viewport command but does not
+    // update these CPU-side globals needed for screen-to-world ray computation.
+    OpenglWindowX = x * (int)WindowWidth / 640;
+    OpenglWindowY = y * (int)WindowHeight / 480;
+    OpenglWindowWidth = scaledW;
+    OpenglWindowHeight = scaledH;
+
     // Projection matrix — perspective
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
