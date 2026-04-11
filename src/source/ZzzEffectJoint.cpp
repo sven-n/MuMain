@@ -1021,10 +1021,9 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 break;
             case BITMAP_JOINT_LASER + 1:
                 o->bTileMapping = true;
-                break;
             case BITMAP_BLUR + 1:
                 o->Scale = 60.f;
-                o->Velocity = 40.f;
+                o->Velocity = 40.f / FPS_ANIMATION_FACTOR;
                 o->MaxTails = 50;
                 o->LifeTime = 2;
                 if (o->SubType == 0)
