@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-#include "ErrorReport.h"
+#include "MuLogger.h"
 
 class IniFile
 {
@@ -105,7 +105,7 @@ public:
         std::wofstream out(m_path, std::ios::out | std::ios::trunc);
         if (!out.is_open())
         {
-            g_ErrorReport.Write(L"IniFile::Save failed to open '%ls' for writing\r\n", m_path.wstring().c_str());
+            mu::log::Get("core")->error("IniFile::Save failed to open '{}' for writing", m_path.string());
             return;
         }
         // Use platform default locale (typically UTF-8 on Linux/macOS) for wide

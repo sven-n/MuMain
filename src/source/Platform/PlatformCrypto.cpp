@@ -4,6 +4,7 @@
 // [VS0-QUAL-WIN32CLEAN-DATALAYER]
 
 #include "stdafx.h"
+#include "MuLogger.h"
 
 #include "Platform/PlatformCrypto.h"
 
@@ -279,7 +280,7 @@ bool mu_encrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& out)
     static std::atomic<bool> warned{false};
     if (!warned.exchange(true))
     {
-        fprintf(stderr, "[GameConfig] WARN: OpenSSL unavailable, config not encrypted\n");
+        mu::log::Get("core")->warn("[GameConfig] OpenSSL unavailable, config not encrypted");
     }
 
     const auto* bytes = static_cast<const uint8_t*>(pIn);
@@ -309,7 +310,7 @@ bool mu_decrypt_blob(const void* pIn, size_t cbIn, std::vector<uint8_t>& out)
     if (bytes[0] == MU_CRYPTO_VERSION_AES256GCM)
     {
         // OpenSSL-encrypted data but we don't have OpenSSL — cannot decrypt
-        fprintf(stderr, "[GameConfig] WARN: Cannot decrypt AES-256-GCM data without OpenSSL\n");
+        mu::log::Get("core")->warn("[GameConfig] Cannot decrypt AES-256-GCM data without OpenSSL");
         return false;
     }
 

@@ -39,7 +39,7 @@ public:
     /// @param width      Framebuffer width in pixels.
     /// @param height     Framebuffer height in pixels.
     /// @returns true on success, false if glReadPixels or PNG write fails.
-    ///          Failure is also logged via g_ErrorReport.
+    ///          Failure is also logged via spdlog ("platform" logger).
     [[nodiscard]] static bool CaptureScene(const char* sceneName, int width, int height);
 
     /// Compare a previously captured scene against a new frame.

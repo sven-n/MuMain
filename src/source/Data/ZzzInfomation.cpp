@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuLogger.h"
 #include "ZzzInfomation.h"
 
 #include <codecvt>
@@ -70,7 +71,7 @@ void OpenFilterFile(const wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("data")->error("{} - File not exist.", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -109,7 +110,7 @@ void OpenNameFilterFile(const wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("data")->error("{} - File not exist.", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -126,7 +127,7 @@ void OpenNameFilterFile(const wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File corrupted.", FileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("data")->error("{} - File corrupted.", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
@@ -172,7 +173,7 @@ void OpenGateScript(const wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("data")->error("{} - File not exist.", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
@@ -208,7 +209,7 @@ void OpenMonsterSkillScript(const wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("data")->error("{} - File not exist.", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
@@ -220,7 +221,7 @@ void OpenNpcScript(wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("data")->error("{} - File not exist.", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -305,7 +306,7 @@ void OpenDialogFile(wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("data")->error("{} - File not exist.", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -2569,7 +2570,7 @@ void OpenMonsterScript(wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("data")->error("{} - File not exist.", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         return;
     }

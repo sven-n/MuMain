@@ -7,8 +7,22 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <type_traits>
 
 #include <spdlog/spdlog.h>
+
+// Generic fmt formatter for all enum types — cast to underlying integer.
+// fmt 11.x (bundled with spdlog 1.15.x) removed implicit enum-to-int conversion.
+// This avoids requiring static_cast<int>() at every enum log call site.
+template <typename T>
+    requires std::is_enum_v<T>
+struct fmt::formatter<T> : fmt::formatter<std::underlying_type_t<T>>
+{
+    auto format(T value, fmt::format_context& ctx) const
+    {
+        return fmt::formatter<std::underlying_type_t<T>>::format(static_cast<std::underlying_type_t<T>>(value), ctx);
+    }
+};
 
 namespace mu::log
 {

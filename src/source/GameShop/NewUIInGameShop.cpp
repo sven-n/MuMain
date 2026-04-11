@@ -16,6 +16,7 @@
 #include "MsgBoxIGSGiftStorageItemInfo.h"
 #include "MapManager.h"
 #include "DSPlaySound.h"
+#include "MuLogger.h"
 
 using namespace SEASON3B;
 
@@ -663,7 +664,7 @@ bool CNewUIInGameShop::UpdateKeyEvent()
 
 bool CNewUIInGameShop::IsInGameShopOpen()
 {
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUIInGameShop::IsInGameShopOpen()");
+    mu::log::Get("gameshop")->info("InGameShopStatue.Txt CallStack - CNewUIInGameShop::IsInGameShopOpen()");
     if (Hero->Movement)
         return false;
 
@@ -682,7 +683,7 @@ bool CNewUIInGameShop::IsInGameShopOpen()
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], GlobalText[3051]);
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", GlobalText[3051]);
+        mu::log::Get("gameshop")->info("InGameShopStatue.Txt Return - false <{}>", mu_wchar_to_utf8(GlobalText[3051]));
         return false;
     }
 
@@ -691,10 +692,10 @@ bool CNewUIInGameShop::IsInGameShopOpen()
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
         pMsgBox->Initialize(GlobalText[3028], GlobalText[3035]);
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", GlobalText[3035]);
+        mu::log::Get("gameshop")->info("InGameShopStatue.Txt Return - false <{}>", mu_wchar_to_utf8(GlobalText[3035]));
         return false;
     }
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - true");
+    mu::log::Get("gameshop")->info("InGameShopStatue.Txt Return - true");
     return true;
 }
 
@@ -764,7 +765,7 @@ void CNewUIInGameShop::ReleaseBanner()
 
 void CNewUIInGameShop::OpeningProcess()
 {
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUIInGameShop::OpeningProcess()");
+    mu::log::Get("gameshop")->info("InGameShopStatue.Txt CallStack - CNewUIInGameShop::OpeningProcess()");
     PlayBuffer(SOUND_CLICK01);
     g_InGameShopSystem->Initalize();
     g_InGameShopSystem->SelectZone(0);

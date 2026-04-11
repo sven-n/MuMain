@@ -10,6 +10,7 @@
 #include "ZzzInventory.h"
 
 #include "GambleSystem.h"
+#include "Core/MuLogger.h"
 
 using namespace SEASON3B;
 
@@ -127,7 +128,7 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
                 {
                     SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(iIndex);
                     BuyCost = ItemValue(pItem, 0);
-                    g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", iIndex);
+                    mu::log::Get("ui")->debug("0x32 [SendRequestBuy({})]", iIndex);
                 }
 
                 return false;

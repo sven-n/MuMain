@@ -920,13 +920,13 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
     switch (iType)
     {
     case MONSTER_SILVIA:
-        LOG_CALL(OpenNpc, MODEL_ELBELAND_SILVIA);
+        OpenNpc(MODEL_ELBELAND_SILVIA);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_SILVIA, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_RHEA:
-        LOG_CALL(OpenNpc, MODEL_ELBELAND_RHEA);
+        OpenNpc(MODEL_ELBELAND_RHEA);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_RHEA, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.m_fEdgeScale = 1.1f;
@@ -934,48 +934,48 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         Models[MODEL_ELBELAND_RHEA].Actions[1].PlaySpeed = 0.4f;
         break;
     case MONSTER_MARCE:
-        LOG_CALL(OpenNpc, MODEL_ELBELAND_MARCE);
+        OpenNpc(MODEL_ELBELAND_MARCE);
         pCharacter = CreateCharacter(Key, MODEL_ELBELAND_MARCE, PosX, PosY);
         pCharacter->Object.Scale = 1.05f;
         pCharacter->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_STRANGE_RABBIT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_RABBIT);
+        OpenMonsterModel(MONSTER_MODEL_RABBIT);
         pCharacter = CreateCharacter(Key, MODEL_RABBIT, PosX, PosY);
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_POLLUTED_BUTTERFLY:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BUTTERFLY);
+        OpenMonsterModel(MONSTER_MODEL_BUTTERFLY);
         pCharacter = CreateCharacter(Key, MODEL_BUTTERFLY, PosX, PosY);
         pCharacter->Object.Scale = 0.8f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_HIDEOUS_RABBIT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_HIDEOUS_RABBIT);
+        OpenMonsterModel(MONSTER_MODEL_HIDEOUS_RABBIT);
         pCharacter = CreateCharacter(Key, MODEL_HIDEOUS_RABBIT, PosX, PosY);
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_WEREWOLF2:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_WEREWOLF2);
+        OpenMonsterModel(MONSTER_MODEL_WEREWOLF2);
         pCharacter = CreateCharacter(Key, MODEL_WEREWOLF2, PosX, PosY);
         pCharacter->Object.Scale = 0.8f * 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_CURSED_LICH:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CURSED_LICH);
+        OpenMonsterModel(MONSTER_MODEL_CURSED_LICH);
         pCharacter = CreateCharacter(Key, MODEL_CURSED_LICH, PosX, PosY);
         pCharacter->Object.Scale = 1.0f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_TOTEM_GOLEM:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_TOTEM_GOLEM);
+        OpenMonsterModel(MONSTER_MODEL_TOTEM_GOLEM);
         pCharacter = CreateCharacter(Key, MODEL_TOTEM_GOLEM, PosX, PosY);
         pCharacter->Object.Scale = 0.17f * 0.95f;
         pCharacter->Object.ShadowScale = 0.01f;
@@ -985,14 +985,14 @@ CHARACTER* GMNewTown::CreateNewTownMonster(int iType, int PosX, int PosY, int Ke
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_GRIZZLY:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GRIZZLY);
+        OpenMonsterModel(MONSTER_MODEL_GRIZZLY);
         pCharacter = CreateCharacter(Key, MODEL_GRIZZLY, PosX, PosY);
         pCharacter->Object.Scale = 1.2f * 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_CAPTAIN_GRIZZLY:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CAPTAIN_GRIZZLY);
+        OpenMonsterModel(MONSTER_MODEL_CAPTAIN_GRIZZLY);
         pCharacter = CreateCharacter(Key, MODEL_CAPTAIN_GRIZZLY, PosX, PosY);
         pCharacter->Object.Scale = 1.3f * 0.95f;
         pCharacter->Weapon[0].Type = -1;

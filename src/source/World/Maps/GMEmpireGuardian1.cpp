@@ -70,7 +70,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     {
     case MONSTER_RAYMOND:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_RAYMOND);
+        OpenMonsterModel(MONSTER_MODEL_RAYMOND);
         pCharacter = CreateCharacter(Key, MODEL_RAYMOND, PosX, PosY);
 
         pCharacter->Object.Scale = 1.45f;
@@ -80,7 +80,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case MONSTER_LUCAS:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_LUCAS);
+        OpenMonsterModel(MONSTER_MODEL_LUCAS);
         pCharacter = CreateCharacter(Key, MODEL_LUCAS, PosX, PosY);
 
         pCharacter->Object.Scale = 1.25f;
@@ -90,7 +90,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case MONSTER_FRED:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_FRED);
+        OpenMonsterModel(MONSTER_MODEL_FRED);
         pCharacter = CreateCharacter(Key, MODEL_FRED, PosX, PosY);
         pCharacter->Object.Scale = 1.55f;
 
@@ -121,7 +121,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case MONSTER_DEVIL_LORD:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DEVIL_LORD);
+        OpenMonsterModel(MONSTER_MODEL_DEVIL_LORD);
         pCharacter = CreateCharacter(Key, MODEL_DEVIL_LORD, PosX, PosY);
         pCharacter->Object.Scale = 1.35f;
 
@@ -130,21 +130,21 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case MONSTER_QUARTER_MASTER:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_QUARTER_MASTER);
+        OpenMonsterModel(MONSTER_MODEL_QUARTER_MASTER);
         pCharacter = CreateCharacter(Key, MODEL_QUARTER_MASTER, PosX, PosY);
         pCharacter->Object.Scale = 1.27f;
     }
     break;
     case MONSTER_COMBAT_INSTRUCTOR:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_COMBAT_INSTRUCTOR);
+        OpenMonsterModel(MONSTER_MODEL_COMBAT_INSTRUCTOR);
         pCharacter = CreateCharacter(Key, MODEL_COMBAT_INSTRUCTOR, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
     }
     break;
     case MONSTER_DEFENDER:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DEFENDER);
+        OpenMonsterModel(MONSTER_MODEL_DEFENDER);
         pCharacter = CreateCharacter(Key, MODEL_DEFENDER, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
 
@@ -154,28 +154,28 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case MONSTER_FORSAKER:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_FORSAKER);
+        OpenMonsterModel(MONSTER_MODEL_FORSAKER);
         pCharacter = CreateCharacter(Key, MODEL_FORSAKER, PosX, PosY);
         pCharacter->Object.Scale = 0.9f;
     }
     break;
     case MONSTER_OCELOT_THE_LORD:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_OCELOT);
+        OpenMonsterModel(MONSTER_MODEL_OCELOT);
         pCharacter = CreateCharacter(Key, MODEL_OCELOT, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
     }
     break;
     case MONSTER_ERIC_THE_GUARD:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ERIC);
+        OpenMonsterModel(MONSTER_MODEL_ERIC);
         pCharacter = CreateCharacter(Key, MODEL_ERIC, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
     }
     break;
     case MONSTER_EVIL_GATE:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_EVIL_GATE);
+        OpenMonsterModel(MONSTER_MODEL_EVIL_GATE);
         pCharacter = CreateCharacter(Key, MODEL_EVIL_GATE, PosX, PosY);
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.Scale = 1.25f;
@@ -183,7 +183,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case MONSTER_LION_GATE:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_LION_GATE);
+        OpenMonsterModel(MONSTER_MODEL_LION_GATE);
         pCharacter = CreateCharacter(Key, MODEL_LION_GATE, PosX, PosY);
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.LifeTime = 100;
@@ -192,7 +192,7 @@ CHARACTER* GMEmpireGuardian1::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case MONSTER_STATUE:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_STATUE);
+        OpenMonsterModel(MONSTER_MODEL_STATUE);
         pCharacter = CreateCharacter(Key, MODEL_STATUE, PosX, PosY);
         pCharacter->Object.m_bRenderShadow = false;
         pCharacter->Object.Scale = 0.6f;

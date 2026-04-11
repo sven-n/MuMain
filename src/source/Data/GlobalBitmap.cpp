@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuLogger.h"
 #include "turbojpeg.h"
 #include "GlobalBitmap.h"
 
@@ -71,7 +72,7 @@ void ReportTurboError(const wchar_t* context)
     {
         message = "Unknown TurboJPEG error";
     }
-    g_ErrorReport.Write(L"[TurboJPEG] %ls: %hs", context, message);
+    mu::log::Get("data")->error("[TurboJPEG] {}: {}", mu_wchar_to_utf8(context), message);
 }
 
 int NextPowerOfTwo(int value, int maxValue)
@@ -193,7 +194,7 @@ void ClearSamplerRegistry();
 // Uses a synchronous copy command buffer (AcquireGPUCommandBuffer → BeginGPUCopyPass
 // → SDL_UploadToGPUTexture → EndGPUCopyPass → SubmitGPUCommandBuffer).
 // On success: stores handles in pBitmap->sdlTexture and pBitmap->sdlSampler.
-// On any failure: logs via g_ErrorReport.Write and returns false.
+// On any failure: logs via mu::log::Get("data") and returns false.
 //
 // Parameters:
 //   pBitmap    — destination BITMAP_t (must be non-null)
@@ -214,7 +215,8 @@ void ClearSamplerRegistry();
     SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
     if (!device)
     {
-        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_GPUDevice not available for %ls", filename.c_str());
+        mu::log::Get("data")->error("ASSET: texture upload -- SDL_GPUDevice not available for {}",
+                                    mu_wchar_to_utf8(filename.c_str()));
         return false;
     }
 
@@ -231,8 +233,8 @@ void ClearSamplerRegistry();
     SDL_GPUTexture* gpuTex = SDL_CreateGPUTexture(device, &texInfo);
     if (!gpuTex)
     {
-        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_CreateGPUTexture failed for %ls: %hs", filename.c_str(),
-                            SDL_GetError());
+        mu::log::Get("data")->error("ASSET: texture upload -- SDL_CreateGPUTexture failed for {}: {}",
+                                    mu_wchar_to_utf8(filename.c_str()), SDL_GetError());
         return false;
     }
 
@@ -253,8 +255,8 @@ void ClearSamplerRegistry();
     SDL_GPUTransferBuffer* transferBuf = SDL_CreateGPUTransferBuffer(device, &transferInfo);
     if (!transferBuf)
     {
-        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_CreateGPUTransferBuffer failed for %ls: %hs",
-                            filename.c_str(), SDL_GetError());
+        mu::log::Get("data")->error("ASSET: texture upload -- SDL_CreateGPUTransferBuffer failed for {}: {}",
+                                    mu_wchar_to_utf8(filename.c_str()), SDL_GetError());
         SDL_ReleaseGPUTexture(device, gpuTex);
         return false;
     }
@@ -263,8 +265,8 @@ void ClearSamplerRegistry();
     void* pMapped = SDL_MapGPUTransferBuffer(device, transferBuf, false);
     if (!pMapped)
     {
-        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_MapGPUTransferBuffer failed for %ls: %hs", filename.c_str(),
-                            SDL_GetError());
+        mu::log::Get("data")->error("ASSET: texture upload -- SDL_MapGPUTransferBuffer failed for {}: {}",
+                                    mu_wchar_to_utf8(filename.c_str()), SDL_GetError());
         SDL_ReleaseGPUTransferBuffer(device, transferBuf);
         SDL_ReleaseGPUTexture(device, gpuTex);
         return false;
@@ -276,8 +278,8 @@ void ClearSamplerRegistry();
     SDL_GPUCommandBuffer* copyCmd = SDL_AcquireGPUCommandBuffer(device);
     if (!copyCmd)
     {
-        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_AcquireGPUCommandBuffer failed for %ls: %hs",
-                            filename.c_str(), SDL_GetError());
+        mu::log::Get("data")->error("ASSET: texture upload -- SDL_AcquireGPUCommandBuffer failed for {}: {}",
+                                    mu_wchar_to_utf8(filename.c_str()), SDL_GetError());
         SDL_ReleaseGPUTransferBuffer(device, transferBuf);
         SDL_ReleaseGPUTexture(device, gpuTex);
         return false;
@@ -287,8 +289,8 @@ void ClearSamplerRegistry();
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(copyCmd);
         if (!copyPass)
         {
-            g_ErrorReport.Write(L"ASSET: texture upload -- SDL_BeginGPUCopyPass failed for %ls: %hs", filename.c_str(),
-                                SDL_GetError());
+            mu::log::Get("data")->error("ASSET: texture upload -- SDL_BeginGPUCopyPass failed for {}: {}",
+                                        mu_wchar_to_utf8(filename.c_str()), SDL_GetError());
             // Must submit even on failure to release the command buffer back to the device.
             SDL_SubmitGPUCommandBuffer(copyCmd);
             SDL_ReleaseGPUTransferBuffer(device, transferBuf);
@@ -332,8 +334,8 @@ void ClearSamplerRegistry();
     SDL_GPUSampler* gpuSampler = SDL_CreateGPUSampler(device, &samplerInfo);
     if (!gpuSampler)
     {
-        g_ErrorReport.Write(L"ASSET: texture upload -- SDL_CreateGPUSampler failed for %ls: %hs", filename.c_str(),
-                            SDL_GetError());
+        mu::log::Get("data")->error("ASSET: texture upload -- SDL_CreateGPUSampler failed for {}: {}",
+                                    mu_wchar_to_utf8(filename.c_str()), SDL_GetError());
         SDL_ReleaseGPUTexture(device, gpuTex);
         return false;
     }
@@ -531,8 +533,8 @@ void CBitmapCache::Update()
         }
 
 #ifdef DEBUG_BITMAP_CACHE
-        g_ConsoleDebug->Write(MCD_NORMAL, L"M,P,I,E : (%d, %d, %d, %d)", m_mapCacheMain.size(), m_mapCachePlayer.size(),
-                              m_mapCacheInterface.size(), m_mapCacheEffect.size());
+        mu::log::Get("data")->info("M,P,I,E : ({}, {}, {}, {})", m_mapCacheMain.size(), m_mapCachePlayer.size(),
+                                   m_mapCacheInterface.size(), m_mapCacheEffect.size());
 #endif // DEBUG_BITMAP_CACHE
     }
 }
@@ -678,8 +680,8 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
             }
             else
             {
-                g_ErrorReport.Write(L"File not found %ls (%d)->%ls\r\n", pBitmap->FileName, uiBitmapIndex,
-                                    filename.c_str());
+                mu::log::Get("data")->warn("File not found {} ({})->{}", mu_wchar_to_utf8(pBitmap->FileName),
+                                           uiBitmapIndex, mu_wchar_to_utf8(filename.c_str()));
                 UnloadImage(uiBitmapIndex, true);
             }
         }
@@ -749,7 +751,7 @@ void CGlobalBitmap::UnloadAllImages()
 {
 #ifdef _DEBUG
     if (!m_mapBitmap.empty())
-        g_ErrorReport.Write(L"Unload Images\r\n");
+        mu::log::Get("data")->info("Unload Images");
 #endif // _DEBUG
 
 #ifdef MU_ENABLE_SDL3
@@ -782,8 +784,8 @@ void CGlobalBitmap::UnloadAllImages()
             // GPU device already shut down (shutdown order: device destroyed before bitmap destructor).
             // Cannot release GPU objects — log the leak and clear registries to prevent
             // dangling-pointer use-after-free on any subsequent LookupTexture/LookupSampler calls.
-            g_ErrorReport.Write(
-                L"ASSET: UnloadAllImages -- SDL_GPUDevice unavailable; GPU texture/sampler objects leaked");
+            mu::log::Get("data")->warn(
+                "ASSET: UnloadAllImages -- SDL_GPUDevice unavailable; GPU texture/sampler objects leaked");
             mu::ClearTextureRegistry();
             mu::ClearSamplerRegistry();
         }
@@ -796,7 +798,7 @@ void CGlobalBitmap::UnloadAllImages()
         BITMAP_t* pBitmap = pair.second.get();
         if (pBitmap->Ref > 1)
         {
-            g_ErrorReport.Write(L"Bitmap %ls(RefCount= %d)\r\n", pBitmap->FileName, pBitmap->Ref);
+            mu::log::Get("data")->info("Bitmap {}(RefCount= {})", mu_wchar_to_utf8(pBitmap->FileName), pBitmap->Ref);
         }
 #endif // _DEBUG
     }
@@ -879,8 +881,8 @@ void CGlobalBitmap::Manage()
     m_DebugOutputTimer.UpdateTime();
     if (m_DebugOutputTimer.IsTime())
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"CacheSize=%d(NumberOfTexture=%d)", m_BitmapCache.GetCacheSize(),
-                              GetNumberOfTexture());
+        mu::log::Get("data")->info("CacheSize={}(NumberOfTexture={})", m_BitmapCache.GetCacheSize(),
+                                   GetNumberOfTexture());
     }
 #endif // DEBUG_BITMAP_CACHE
     m_BitmapCache.Update();
@@ -917,7 +919,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     std::ifstream compressedFile(mu_narrow_path(filename_ozj), std::ios::binary);
     if (!compressedFile)
     {
-        g_ErrorReport.Write(L"OpenJpegTurbo: file not found %ls\r\n", filename_ozj.c_str());
+        mu::log::Get("data")->warn("OpenJpegTurbo: file not found {}", mu_wchar_to_utf8(filename_ozj.c_str()));
         return false;
     }
 
@@ -927,7 +929,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
 
     if (jpegBuf.size() <= 24)
     {
-        g_ErrorReport.Write(L"OpenJpegTurbo: file too small %ls (%zu bytes)\r\n", filename_ozj.c_str(), jpegBuf.size());
+        mu::log::Get("data")->warn("OpenJpegTurbo: file too small {} ({} bytes)",
+                                   mu_wchar_to_utf8(filename_ozj.c_str()), jpegBuf.size());
         return false;
     }
 
@@ -1017,8 +1020,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
                              static_cast<SDL_GPUFilter>(MapGLFilterToSDL(uiFilter)),
                              static_cast<SDL_GPUSamplerAddressMode>(MapGLWrapToSDL(uiWrapMode)), filename))
     {
-        g_ErrorReport.Write(L"ASSET: OZJ upload FAILED for idx=%u %ls (%dx%d)", uiBitmapIndex, filename.c_str(),
-                            textureWidth, textureHeight);
+        mu::log::Get("data")->error("ASSET: OZJ upload FAILED for idx={} {} ({}x{})", uiBitmapIndex,
+                                    mu_wchar_to_utf8(filename.c_str()), textureWidth, textureHeight);
         return false;
     }
 
@@ -1045,7 +1048,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::ifstream input(mu_narrow_path(filename_ozt), std::ios::binary);
     if (!input)
     {
-        g_ErrorReport.Write(L"OpenTga: file not found %ls\r\n", filename_ozt.c_str());
+        mu::log::Get("data")->warn("OpenTga: file not found {}", mu_wchar_to_utf8(filename_ozt.c_str()));
         return false;
     }
 
@@ -1054,7 +1057,8 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
     if (pakBuffer.size() < 21) // minimal TGA header length check for OZT payload (needs bytes 0..20)
     {
-        g_ErrorReport.Write(L"OpenTga: file too small %ls (%zu bytes)\r\n", filename_ozt.c_str(), pakBuffer.size());
+        mu::log::Get("data")->warn("OpenTga: file too small {} ({} bytes)", mu_wchar_to_utf8(filename_ozt.c_str()),
+                                   pakBuffer.size());
         return false;
     }
 
@@ -1071,7 +1075,8 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
     if (bit != 32 || nx <= 0 || ny <= 0 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
     {
-        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d)\r\n", filename_ozt.c_str(), bit, nx, ny);
+        mu::log::Get("data")->error("OpenTga: invalid format {} (bit={}, {}x{})",
+                                    mu_wchar_to_utf8(filename_ozt.c_str()), bit, nx, ny);
         return false;
     }
 
@@ -1123,8 +1128,8 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
                              static_cast<SDL_GPUFilter>(MapGLFilterToSDL(uiFilter)),
                              static_cast<SDL_GPUSamplerAddressMode>(MapGLWrapToSDL(uiWrapMode)), filename))
     {
-        g_ErrorReport.Write(L"ASSET: OZT upload FAILED for idx=%u %ls (%dx%d)", uiBitmapIndex, filename.c_str(), Width,
-                            Height);
+        mu::log::Get("data")->error("ASSET: OZT upload FAILED for idx={} {} ({}x{})", uiBitmapIndex,
+                                    mu_wchar_to_utf8(filename.c_str()), Width, Height);
         return false;
     }
 

@@ -39,6 +39,7 @@
 #include "Core/Timer.h"
 #include "Core/MuTimer.h"
 #include "Core/MuLogger.h"
+#include "Core/MuSystemInfo.h"
 #include "UIMng.h"
 
 // Story 5.2.1: miniaudio BGM Implementation [VS1-AUDIO-MINIAUDIO-BGM]
@@ -203,7 +204,7 @@ void CheckHack()
         return;
     }
 
-    g_ConsoleDebug->Write(MCD_SEND, L"SendCheck");
+    mu::log::Get("core")->debug("SendCheck");
 
     auto attackSpeed = CharacterAttribute->AttackSpeed;
     auto magicSpeed = CharacterAttribute->MagicSpeed;
@@ -315,25 +316,19 @@ int MuMain(int argc, char* argv[])
     // [VS0-CORE-MIGRATE-LOGGING]
     mu::log::Init(std::filesystem::current_path());
 
-    // Open the error log now that CWD points to the exe directory.
-    // CErrorReport constructor defers file creation to avoid writing to the shell's CWD.
-    g_ErrorReport.Create(L"MuError.log");
-
-    // Task 1.1 (Story 7.9.3): Error report log header — ported from Win32 init path.
-    // Writes version separator and system info to MuError.log on startup.
-    g_ErrorReport.Write(L"\r\n");
-    g_ErrorReport.WriteLogBegin();
-    g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"Mu online SDL3 (Eng) executed.\r\n");
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online SDL3");
-    g_ErrorReport.WriteCurrentTime();
+    // Task 1.1 (Story 7.9.3): Log session header with system info.
+    // [VS0-CORE-MIGRATE-LOGGING]
     {
-        ER_SystemInfo si;
-        memset(&si, 0, sizeof(ER_SystemInfo));
+        auto core = mu::log::Get("core");
+        core->info("====== Session Start ======");
+        core->info("Mu online SDL3 (Eng) executed");
+        core->info("Mu Online SDL3");
+        MuSystemInfo si{};
         MuGetSystemInfo(&si);
-        g_ErrorReport.AddSeparator();
-        g_ErrorReport.WriteSystemInfo(&si);
-        g_ErrorReport.AddSeparator();
+        core->info("OS: {}", mu_wchar_to_utf8(si.m_lpszOS));
+        core->info("CPU: {}", mu_wchar_to_utf8(si.m_lpszCPU));
+        core->info("RAM: {}MB", si.m_iMemorySize / (1024 * 1024));
+        core->info("GPU Backend: {}", mu_wchar_to_utf8(si.m_lpszGpuBackend));
     }
 
     // Re-resolve .NET packet bindings that may be NULL due to SIOF (Static Initialization
@@ -341,7 +336,7 @@ int MuMain(int argc, char* argv[])
     // init time, but the library handle may not be initialized yet depending on linker order.
     ResolvePacketBindings();
 
-    g_ErrorReport.Write(L"> To read config.ini.\r\n");
+    mu::log::Get("core")->info("To read config.ini");
 
     // Load game configuration from config.ini now that the CWD is resolved.
     // Must happen before window creation (WindowWidth/Height) and before any
@@ -385,8 +380,10 @@ int MuMain(int argc, char* argv[])
             if (port > 0 && port <= 65535)
                 g_ServerPort = static_cast<WORD>(port);
             else
-                g_ErrorReport.Write(L"> WARNING: Invalid port '%hs', using default %d\r\n", cmdPort, (int)g_ServerPort);
-            g_ErrorReport.Write(L"> Command line server override: %ls:%d\r\n", s_CmdUrlW, (int)g_ServerPort);
+                mu::log::Get("core")->warn("Invalid port '{}', using default {}", cmdPort,
+                                           static_cast<int>(g_ServerPort));
+            mu::log::Get("core")->info("Command line server override: {}:{}", mu_wchar_to_utf8(s_CmdUrlW),
+                                       static_cast<int>(g_ServerPort));
         }
         else
         {
@@ -400,7 +397,7 @@ int MuMain(int argc, char* argv[])
     // Used throughout game for UI scaling relative to 640x480 reference resolution.
     g_fScreenRate_x = (float)WindowWidth / 640;
     g_fScreenRate_y = (float)WindowHeight / 480;
-    g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
+    mu::log::Get("core")->info("Screen size = {} x {}", WindowWidth, WindowHeight);
 
     if (!mu::MuPlatform::Initialize())
     {
@@ -420,7 +417,7 @@ int MuMain(int argc, char* argv[])
         int nDisplayH = WindowHeight;
         if (mu::MuPlatform::GetDisplaySize(nDisplayW, nDisplayH))
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"[VS1-SDL-WINDOW-FOCUS] Display size: %dx%d\r\n", nDisplayW, nDisplayH);
+            mu::log::Get("core")->info("[VS1-SDL-WINDOW-FOCUS] Display size: {}x{}", nDisplayW, nDisplayH);
             if (g_bUseWindowMode == FALSE)
             {
                 WindowWidth = nDisplayW;
@@ -433,7 +430,7 @@ int MuMain(int argc, char* argv[])
     mu::IPlatformWindow* pWin = mu::MuPlatform::GetWindow();
     if (!pWin || !mu::InitSDLGpuRenderer(pWin->GetNativeHandle()))
     {
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- backend initialization failed; exiting");
+        mu::log::Get("render")->critical("SDL_gpu -- backend initialization failed; exiting");
         mu::MuPlatform::Shutdown();
         return 1;
     }
@@ -513,7 +510,7 @@ int MuMain(int argc, char* argv[])
     }
     else
     {
-        g_ErrorReport.Write(L"WARNING: g_pNewUISystem is null, skipping Create()\r\n");
+        mu::log::Get("ui")->warn("g_pNewUISystem is null, skipping Create()");
     }
 
     // Initialize global text input boxes for popups/password dialogs [Story 7-9-9, AC-4]
@@ -537,11 +534,11 @@ int MuMain(int argc, char* argv[])
 
         if (gameLoaded)
         {
-            g_ErrorReport.Write(L"> Game translations loaded successfully.\r\n");
+            mu::log::Get("core")->info("Game translations loaded successfully");
         }
         else
         {
-            g_ErrorReport.Write(L"> WARNING: Game translations not found (game.json missing).\r\n");
+            mu::log::Get("core")->warn("Game translations not found (game.json missing)");
         }
     }
 
@@ -551,7 +548,7 @@ int MuMain(int argc, char* argv[])
         g_platformAudio = new mu::MiniAudioBackend();
         if (!g_platformAudio->Initialize())
         {
-            g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::Initialize failed — game will run without audio\r\n");
+            mu::log::Get("audio")->error("MiniAudioBackend::Initialize failed — game will run without audio");
         }
     }
 

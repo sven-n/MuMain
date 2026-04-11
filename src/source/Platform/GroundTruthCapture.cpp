@@ -12,7 +12,7 @@
 // MU_ENABLE_SDL3 is defined. On production macOS/Linux builds the flag is OFF.
 
 #include "GroundTruthCapture.h"
-#include "ErrorReport.h"
+#include "MuLogger.h"
 
 #ifdef ENABLE_GROUND_TRUTH_CAPTURE
 #include <cstdio>
@@ -318,17 +318,17 @@ bool GroundTruthCapture::CaptureScene(const char* sceneName, int width, int heig
     // Write PNG
     if (!stbi_write_png(path.c_str(), width, height, 4, buffer.data(), width * 4))
     {
-        g_ErrorReport.Write(L"RENDER: ground truth -- capture failed for %hs", sceneName);
+        mu::log::Get("platform")->error("RENDER: ground truth -- capture failed for {}", sceneName);
         return false;
     }
 
     // Log SHA256 checksum alongside the capture
     char sha256hex[65];
     ComputeSHA256Hex(buffer.data(), buf_size, sha256hex);
-    g_ErrorReport.Write(L"RENDER: ground truth -- captured %hs [%hs]", sceneName, sha256hex);
+    mu::log::Get("platform")->info("RENDER: ground truth -- captured {} [{}]", sceneName, sha256hex);
 
     // Write companion .sha256 file for reliable post-mortem checksum verification (LOW-1 fix).
-    // g_ErrorReport may not flush on crash; a companion file persists across sessions.
+    // Log file may not flush on crash; a companion file persists across sessions.
     std::string sha256_path = path + ".sha256";
     if (FILE* fp = std::fopen(sha256_path.c_str(), "w"))
     {
@@ -356,16 +356,17 @@ double GroundTruthCapture::CompareTo(const char* sceneName, int width, int heigh
 
     if (!std::filesystem::exists(golden_path))
     {
-        g_ErrorReport.Write(L"RENDER: ground truth -- golden file missing: %hs", golden_path.c_str());
+        mu::log::Get("platform")->warn("RENDER: ground truth -- golden file missing: {}", golden_path);
         return -1.0;
     }
 
     // Loading golden PNGs from disk requires stb_image.h, which is not yet included.
     // Full load-from-disk comparison with per-pixel diff output is deferred to story 4.2.x.
     // Returning -1.0 signals "not yet implemented" to callers (distinct from a valid SSIM score).
-    g_ErrorReport.Write(L"RENDER: ground truth -- CompareTo('%hs') deferred: "
-                        L"disk-based PNG comparison requires stb_image.h (story 4.2.x)",
-                        sceneName);
+    mu::log::Get("platform")
+        ->info("RENDER: ground truth -- CompareTo('{}') deferred: "
+               "disk-based PNG comparison requires stb_image.h (story 4.2.x)",
+               sceneName);
     return -1.0;
 }
 
@@ -387,7 +388,7 @@ void GroundTruthCapture::RunUISweep(int width, int height)
 
     for (int i = 0; k_SceneNames[i] != nullptr; ++i)
     {
-        // Capture; failure is logged inside CaptureScene via g_ErrorReport.
+        // Capture; failure is logged inside CaptureScene via spdlog.
         static_cast<void>(CaptureScene(k_SceneNames[i], width, height));
     }
 }

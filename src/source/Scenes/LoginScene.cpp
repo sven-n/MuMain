@@ -20,13 +20,13 @@
 #include "UIMng.h"
 #include "Input.h"
 #include "WSclient.h"
-#include "Core/muConsoleDebug.h"
 #include "ZzzInterface.h"
 #include "GlobalText.h"
 #include "ZzzCharacter.h"
 #include "UIControls.h"
 #include "SceneCommon.h"
 #include "ZzzOpenData.h"
+#include "Core/MuLogger.h"
 
 // External declarations
 extern int DeleteGuildIndex;
@@ -310,7 +310,7 @@ void CreateLogInScene()
 
     ::PlayMp3(MUSIC_LOGIN_THEME);
 
-    g_ErrorReport.Write(L"> Login Scene init success.\r\n");
+    mu::log::Get("scenes")->info("Login Scene init success.");
 }
 
 void NewMoveLogInScene()
@@ -349,7 +349,7 @@ void NewMoveLogInScene()
     }
     if (RECEIVE_LOG_IN_SUCCESS == CurrentProtocolState)
     {
-        g_ErrorReport.Write(L"> Request Character list\r\n");
+        mu::log::Get("scenes")->info("Request Character list");
 
         CCameraMove::GetInstancePtr()->SetTourMode(FALSE);
 
@@ -361,8 +361,6 @@ void NewMoveLogInScene()
 
         ClearCharacters();
     }
-
-    g_ConsoleDebug->UpdateMainScene();
 }
 
 bool NewRenderLogInScene(HDC hDC)

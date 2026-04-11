@@ -22,7 +22,10 @@
 #define MU_HAS_BACKTRACE 1
 #endif
 
-#include "ErrorReport.h"
+#include "MuLogger.h"
+
+// CrashHandler uses write(fd, ...) which is async-signal-safe.
+// mu::log::g_errorReportFd is the raw fd opened by MuLogger::Init().
 
 namespace mu::platform
 {
@@ -34,7 +37,7 @@ static struct sigaction s_oldSIGBUS;  // NOLINT
 
 // Async-signal-safe crash handler.
 // Only write(), backtrace_symbols_fd(), and _exit() are called here.
-// g_ErrorReport.Write() is NOT safe inside a signal handler — do not call it here.
+// spdlog is NOT safe inside a signal handler — do not call it here.
 static void CrashHandler(int signum, siginfo_t* info, void* context)
 {
     // Re-entry guard: .NET runtime uses SIGSEGV internally — if the previous handler
@@ -86,7 +89,7 @@ static void CrashHandler(int signum, siginfo_t* info, void* context)
     write(STDERR_FILENO, newline, 1);
 
     // Write to MuError.log fd if available (async-signal-safe: write() on raw fd)
-    int fd = g_errorReportFd;
+    int fd = mu::log::g_errorReportFd;
     if (fd >= 0)
     {
         write(fd, prefix, prefixLen);
@@ -173,9 +176,9 @@ void InstallSignalHandlers()
     // Log install confirmation at install time (safe — not inside the handler)
     // AC-STD-5: PLAT: prefix for platform diagnostic messages
 #ifdef MU_ENABLE_SDL3
-    g_ErrorReport.Write(L"PLAT: signal handler -- installed for SIGABRT, SIGBUS (SIGSEGV left to .NET AOT)\r\n");
+    mu::log::Get("platform")->info("PLAT: signal handler -- installed for SIGABRT, SIGBUS (SIGSEGV left to .NET AOT)");
 #else
-    g_ErrorReport.Write(L"PLAT: signal handler -- installed for SIGSEGV, SIGABRT, SIGBUS\r\n");
+    mu::log::Get("platform")->info("PLAT: signal handler -- installed for SIGSEGV, SIGABRT, SIGBUS");
 #endif
 }
 

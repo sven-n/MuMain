@@ -13,6 +13,7 @@
 #include "MapManager.h"
 #include "CharacterManager.h"
 #include "DSPlaySound.h"
+#include "Core/MuLogger.h"
 
 using namespace SEASON3B;
 
@@ -638,17 +639,17 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
             // m_iAcumMoveMouseScrollPixel = 0;
             RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, false);
 
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
+            mu::log::Get("ui")->info("m_ScrollBtnPos.y : ({})", m_ScrollBtnPos.y);
 
             m_ScrollBtnPos.y += iMovePixel;
             m_iAcumMoveMouseScrollPixel -= iMovePixel;
 
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"iMoveValue : (%d)", -iMoveValue);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
+            mu::log::Get("ui")->info("m_ScrollBtnPos.y : ({})", m_ScrollBtnPos.y);
+            mu::log::Get("ui")->info("iMoveValue : ({})", -iMoveValue);
+            mu::log::Get("ui")->info("m_iRemainMoveScrBtnPixel : ({})", m_iRemainMoveScrBtnPixel);
+            mu::log::Get("ui")->info("m_icurMoveScrBtnPixelperStep : ({})", m_icurMoveScrBtnPixelperStep);
+            mu::log::Get("ui")->info("m_iRemainMoveScrBtnperStep : ({})", m_iRemainMoveScrBtnperStep);
+            mu::log::Get("ui")->info("m_iAcumMoveMouseScrollPixel : ({})", m_iAcumMoveMouseScrollPixel);
         }
     }
 }
@@ -667,17 +668,17 @@ void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
         {
             RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, true);
 
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
+            mu::log::Get("ui")->info("m_ScrollBtnPos.y : ({})", m_ScrollBtnPos.y);
 
             m_iAcumMoveMouseScrollPixel -= iMovePixel;
             m_ScrollBtnPos.y += iMovePixel;
 
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"iMoveValue : (%d)", iMoveValue);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
+            mu::log::Get("ui")->info("m_ScrollBtnPos.y : ({})", m_ScrollBtnPos.y);
+            mu::log::Get("ui")->info("iMoveValue : ({})", iMoveValue);
+            mu::log::Get("ui")->info("m_iRemainMoveScrBtnPixel : ({})", m_iRemainMoveScrBtnPixel);
+            mu::log::Get("ui")->info("m_icurMoveScrBtnPixelperStep : ({})", m_icurMoveScrBtnPixelperStep);
+            mu::log::Get("ui")->info("m_iRemainMoveScrBtnperStep : ({})", m_iRemainMoveScrBtnperStep);
+            mu::log::Get("ui")->info("m_iAcumMoveMouseScrollPixel : ({})", m_iAcumMoveMouseScrollPixel);
         }
     }
 }

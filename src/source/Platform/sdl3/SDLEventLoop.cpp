@@ -3,6 +3,7 @@
 #include "SDLEventLoop.h"
 #include "../MuPlatform.h"
 #include "../PlatformCompat.h"
+#include "Core/MuLogger.h"
 #include <SDL3/SDL.h>
 
 // SDL text input buffer (SDLKeyboardState.cpp) — populated here, read by UIControls.
@@ -75,7 +76,7 @@ void HandleFocusGain()
         mu::MuPlatform::SetMouseGrab(true);
     }
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[VS1-SDL-WINDOW-FOCUS] Focus gained\r\n");
+    mu::log::Get("platform")->info("[VS1-SDL-WINDOW-FOCUS] Focus gained");
 }
 
 void HandleFocusLoss()
@@ -120,7 +121,7 @@ void HandleFocusLoss()
     // [VS1-SDL-INPUT-KEYBOARD]
     std::fill(std::begin(g_sdl3KeyboardState), std::end(g_sdl3KeyboardState), false);
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[VS1-SDL-WINDOW-FOCUS] Focus lost\r\n");
+    mu::log::Get("platform")->info("[VS1-SDL-WINDOW-FOCUS] Focus lost");
 }
 
 } // anonymous namespace

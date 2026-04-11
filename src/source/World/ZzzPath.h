@@ -5,7 +5,7 @@ extern bool g_bShowPath;
 
 #include <math.h>
 #include "BaseCls.h"
-#include "ErrorReport.h"
+#include "MuLogger.h"
 
 class PATH
 {
@@ -356,7 +356,7 @@ inline void PATH::SetEndNodes(bool bErrorCheck, int iWall, int xEnd, int yEnd, f
             }
             else
             {
-                g_ErrorReport.Write(L"Error Path : %d \r\n", iEndIndex);
+                mu::log::Get("gameplay")->error("Error Path : {}", iEndIndex);
             }
             iEndIndex = GetIndex(xEnd - i, yEnd + j);
 
@@ -370,7 +370,7 @@ inline void PATH::SetEndNodes(bool bErrorCheck, int iWall, int xEnd, int yEnd, f
             }
             else
             {
-                g_ErrorReport.Write(L"Error Path : %d \r\n", iEndIndex);
+                mu::log::Get("gameplay")->error("Error Path : {}", iEndIndex);
             }
         }
 
@@ -389,7 +389,7 @@ inline void PATH::SetEndNodes(bool bErrorCheck, int iWall, int xEnd, int yEnd, f
                 }
                 else
                 {
-                    g_ErrorReport.Write(L"Error Path : %d \r\n", iEndIndex);
+                    mu::log::Get("gameplay")->error("Error Path : {}", iEndIndex);
                 }
 
                 iEndIndex = GetIndex(xEnd - i, yEnd + j);
@@ -403,7 +403,7 @@ inline void PATH::SetEndNodes(bool bErrorCheck, int iWall, int xEnd, int yEnd, f
                 }
                 else
                 {
-                    g_ErrorReport.Write(L"Error Path : %d \r\n", iEndIndex);
+                    mu::log::Get("gameplay")->error("Error Path : {}", iEndIndex);
                 }
             }
         }

@@ -21,7 +21,6 @@
 #include "Input.h"
 #include "WSclient.h"
 #include "CSMapServer.h"
-#include "Core/muConsoleDebug.h"
 #include "ZzzInterface.h"
 #include "NewUISystem.h"
 #include "DSPlaySound.h"
@@ -30,6 +29,7 @@
 #include "Core/CameraUtility.h"
 #include "ZzzOpenData.h"
 #include "LoginScene.h"
+#include "Core/MuLogger.h"
 
 // External declarations
 extern EGameScene SceneFlag;
@@ -43,7 +43,6 @@ extern BOOL g_bIMEBlock;
 extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;
 extern HWND g_hWnd;
-extern CErrorReport g_ErrorReport;
 extern double WorldTime;
 extern int MouseX;
 extern int MouseY;
@@ -138,7 +137,7 @@ void CreateCharacterScene()
     ImmReleaseContext(g_hWnd, hIMC);
     g_bIMEBlock = TRUE;
 
-    g_ErrorReport.Write(L"> Character scene init success.\r\n");
+    mu::log::Get("scenes")->info("Character scene init success.");
 }
 
 void NewMoveCharacterScene()
@@ -228,8 +227,6 @@ void NewMoveCharacterScene()
             SelectedHero = SelectedCharacter;
         rUIMng.m_CharSelMainWin.UpdateDisplay();
     }
-
-    g_ConsoleDebug->UpdateMainScene();
 }
 
 /**

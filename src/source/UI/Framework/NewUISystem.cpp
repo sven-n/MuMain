@@ -4,6 +4,7 @@
 
 #include "PersonalShopTitleImp.h"
 #include "MapManager.h"
+#include "Core/MuLogger.h"
 
 using namespace SEASON3B;
 
@@ -1021,7 +1022,7 @@ void CNewUISystem::Show(DWORD dwKey)
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     else if (dwKey == INTERFACE_INGAMESHOP)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUISystem.Show()\r\n");
+        mu::log::Get("ui")->info("InGameShopStatue.Txt CallStack - CNewUISystem.Show()");
         HideAll();
         g_pInGameShop->OpeningProcess();
 #ifndef KJH_MOD_SHOP_SCRIPT_DOWNLOAD

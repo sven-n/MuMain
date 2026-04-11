@@ -22,6 +22,7 @@
 
 #include "Data/GameConfig.h"
 #include "Data/GameConfigConstants.h"
+#include "Core/MuLogger.h"
 
 #define LIW_ACCOUNT 0
 #define LIW_PASSWORD 1
@@ -261,10 +262,10 @@ void CLoginWin::RequestLogin()
     {
         if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", m_Username);
+            mu::log::Get("ui")->info("Login with the following account: {}", mu_wchar_to_utf8(m_Username));
 
-            g_ErrorReport.Write(L"> Login Request.\r\n");
-            g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", m_Username);
+            mu::log::Get("ui")->info("Login Request.");
+            mu::log::Get("ui")->info("Try to Login \"{}\"", mu_wchar_to_utf8(m_Username));
 
             LogIn = 1;
             wcscpy(LogInID, (m_Username));

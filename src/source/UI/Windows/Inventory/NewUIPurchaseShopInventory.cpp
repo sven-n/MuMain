@@ -5,6 +5,7 @@
 #include "NewUIPurchaseShopInventory.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
+#include "Core/MuLogger.h"
 
 #include "PersonalShopTitleImp.h"
 
@@ -305,8 +306,8 @@ void SEASON3B::CNewUIPurchaseShopInventory::ClosingProcess()
     if (m_pNewInventoryCtrl)
     {
         m_pNewInventoryCtrl->RemoveAllItems();
-        g_ErrorReport.Write(
-            L"@ [Notice] CNewUIPurchaseShopInventory::ClosingProcess():m_pNewInventoryCtrl->RemoveAllItems(); )\n");
+        mu::log::Get("ui")->debug(
+            "CNewUIPurchaseShopInventory::ClosingProcess(): m_pNewInventoryCtrl->RemoveAllItems()");
     }
 
     m_ShopCharacterIndex = -1;

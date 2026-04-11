@@ -7,6 +7,7 @@
 #include "UIManager.h"
 #include "ItemAddOptioninfo.h"
 #include "w_BuffScriptLoader.h"
+#include "MuLogger.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -87,9 +88,9 @@ bool BuffScriptLoader::Load(const std::wstring& pchFileName)
         fclose(fp);
         if (dwCheckSum != GenerateCheckSum2(Buffer, structsize * listsize, 0xE2F1))
         {
+            mu::log::Get("gameplay")->warn("{} - File corrupted.", mu_wchar_to_utf8(pchFileName.c_str()));
             wchar_t Text[256];
             mu_swprintf(Text, L"%ls - File corrupted.", pchFileName.c_str());
-            g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         }
@@ -128,9 +129,9 @@ bool BuffScriptLoader::Load(const std::wstring& pchFileName)
     }
     else
     {
+        mu::log::Get("gameplay")->warn("{} - File not exist.", mu_wchar_to_utf8(pchFileName.c_str()));
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", pchFileName.c_str());
-        g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }

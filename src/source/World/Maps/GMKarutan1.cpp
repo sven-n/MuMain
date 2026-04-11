@@ -361,43 +361,43 @@ CHARACTER* CGMKarutan1::CreateMonster(int iType, int PosX, int PosY, int Key)
     switch (iType)
     {
     case MONSTER_VENOMOUS_CHAIN_SCORPION:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION);
+        OpenMonsterModel(MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION);
         pCharacter = CreateCharacter(Key, MODEL_VENOMOUS_CHAIN_SCORPION, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         break;
     case MONSTER_BONE_SCORPION:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BONE_SCORPION);
+        OpenMonsterModel(MONSTER_MODEL_BONE_SCORPION);
         pCharacter = CreateCharacter(Key, MODEL_BONE_SCORPION, PosX, PosY);
         pCharacter->Object.Scale = 0.58f;
         break;
     case MONSTER_ORCUS:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ORCUS);
+        OpenMonsterModel(MONSTER_MODEL_ORCUS);
         pCharacter = CreateCharacter(Key, MODEL_ORCUS, PosX, PosY);
         pCharacter->Object.Scale = 0.64f;
         break;
     case MONSTER_GOLLOCK:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOLLOCK);
+        OpenMonsterModel(MONSTER_MODEL_GOLLOCK);
         pCharacter = CreateCharacter(Key, MODEL_GOLLOCK, PosX, PosY);
         pCharacter->Object.Scale = 1.5f;
         break;
     case MONSTER_CRYPTA:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CRYPTA);
+        OpenMonsterModel(MONSTER_MODEL_CRYPTA);
         pCharacter = CreateCharacter(Key, MODEL_CRYPTA, PosX, PosY);
         pCharacter->Object.Scale = 1.5f;
         break;
     case MONSTER_CRYPOS:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CRYPOS);
+        OpenMonsterModel(MONSTER_MODEL_CRYPOS);
         pCharacter = CreateCharacter(Key, MODEL_CRYPOS, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         break;
     case MONSTER_CONDRA:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CONDRA);
+        OpenMonsterModel(MONSTER_MODEL_CONDRA);
         pCharacter = CreateCharacter(Key, MODEL_CONDRA, PosX, PosY);
         pCharacter->Object.Scale = 1.45f;
         pCharacter->Object.LifeTime = 100;
         break;
     case MONSTER_NARCONDRA:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_NACONDRA);
+        OpenMonsterModel(MONSTER_MODEL_NACONDRA);
         pCharacter = CreateCharacter(Key, MODEL_NACONDRA, PosX, PosY);
         pCharacter->Object.Scale = 1.55f;
         pCharacter->Object.LifeTime = 100;

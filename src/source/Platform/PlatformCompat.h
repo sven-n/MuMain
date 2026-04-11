@@ -894,7 +894,7 @@ extern char g_szSDLTextInput[32];
 extern bool g_bSDLTextInputReady;
 
 // MuStartTextInput / MuStopTextInput — SDL3 text input lifecycle.
-// Implementations in SDLKeyboardState.cpp (compiled with project PCH for g_ErrorReport).
+// Implementations in SDLKeyboardState.cpp (compiled with project PCH + MuLogger.h).
 // Declared here so CUITextInputBox::GiveFocus / SetState can call them without
 // including SDL3 headers directly. [VS1-SDL-INPUT-TEXT]
 void MuStartTextInput();
@@ -1001,9 +1001,9 @@ inline void ShowCursor(bool show)
 }
 
 // MuPlatformLogMouseWarpFailed — implemented in SDLKeyboardState.cpp (compiled
-// with the project PCH that provides CErrorReport / g_ErrorReport). Declared here
-// so the inline SetCursorPos shim can call it without pulling ErrorReport.h into
-// every TU that includes PlatformCompat.h. [VS1-SDL-INPUT-MOUSE]
+// with the project PCH + MuLogger.h). Declared here so the inline SetCursorPos
+// shim can call it without pulling MuLogger.h into every TU that includes
+// PlatformCompat.h. [VS1-SDL-INPUT-MOUSE]
 void MuPlatformLogMouseWarpFailed(const char* sdlError);
 
 // ---- Cursor warp shim (SDL3 path) ----

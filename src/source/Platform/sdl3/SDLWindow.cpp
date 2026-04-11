@@ -2,6 +2,7 @@
 
 #include "SDLWindow.h"
 #include "../IPlatformWindow.h"
+#include "MuLogger.h"
 #include <SDL3/SDL.h>
 
 namespace mu
@@ -73,7 +74,7 @@ void SDLWindow::SetFullscreen(bool fullscreen)
 
     if (!SDL_SetWindowFullscreen(m_pWindow, fullscreen))
     {
-        g_ErrorReport.Write(L"MU_ERR_FULLSCREEN_FAILED [VS1-SDL-WINDOW-FOCUS]: %hs\r\n", SDL_GetError());
+        mu::log::Get("platform")->error("MU_ERR_FULLSCREEN_FAILED [VS1-SDL-WINDOW-FOCUS]: {}", SDL_GetError());
     }
 }
 
@@ -95,14 +96,14 @@ bool SDLWindow::GetDisplaySize(int& outWidth, int& outHeight) const
     SDL_DisplayID displayId = SDL_GetDisplayForWindow(m_pWindow);
     if (displayId == 0)
     {
-        g_ErrorReport.Write(L"MU_ERR_DISPLAY_QUERY_FAILED [VS1-SDL-WINDOW-FOCUS]: %hs\r\n", SDL_GetError());
+        mu::log::Get("platform")->error("MU_ERR_DISPLAY_QUERY_FAILED [VS1-SDL-WINDOW-FOCUS]: {}", SDL_GetError());
         return false;
     }
 
     const SDL_DisplayMode* pMode = SDL_GetCurrentDisplayMode(displayId);
     if (pMode == nullptr)
     {
-        g_ErrorReport.Write(L"MU_ERR_DISPLAY_QUERY_FAILED [VS1-SDL-WINDOW-FOCUS]: %hs\r\n", SDL_GetError());
+        mu::log::Get("platform")->error("MU_ERR_DISPLAY_QUERY_FAILED [VS1-SDL-WINDOW-FOCUS]: {}", SDL_GetError());
         return false;
     }
 

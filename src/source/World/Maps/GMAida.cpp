@@ -342,7 +342,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     {
     case MONSTER_WITCH_QUEEN:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_WITCH_QUEEN);
+        OpenMonsterModel(MONSTER_MODEL_WITCH_QUEEN);
         pCharacter = CreateCharacter(Key, MODEL_WITCH_QUEEN, PosX, PosY);
         pCharacter->Object.Scale = 1.4f;
         pCharacter->Weapon[0].Type = -1;
@@ -361,7 +361,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_BLUE_GOLEM:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOLDEN_STONE_GOLEM);
+        OpenMonsterModel(MONSTER_MODEL_GOLDEN_STONE_GOLEM);
         pCharacter = CreateCharacter(Key, MODEL_GOLDEN_STONE_GOLEM, PosX, PosY);
         pCharacter->Object.Scale = 1.35f;
         pCharacter->Weapon[0].Type = -1;
@@ -374,7 +374,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_DEATH_RIDER:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DEATH_RIDER);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_RIDER);
         pCharacter = CreateCharacter(Key, MODEL_DEATH_RIDER, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
@@ -386,7 +386,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_FOREST_ORC:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_FOREST_ORC);
+        OpenMonsterModel(MONSTER_MODEL_FOREST_ORC);
         pCharacter = CreateCharacter(Key, MODEL_FOREST_ORC, PosX, PosY);
         pCharacter->Object.Scale = 1.15f;
         pCharacter->Weapon[0].Type = -1;
@@ -395,7 +395,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_DEATH_TREE:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DEATH_TREE);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_TREE);
         pCharacter = CreateCharacter(Key, MODEL_DEATH_TREE, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -412,7 +412,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_HELL_MAINE:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_HELL_MAINE);
+        OpenMonsterModel(MONSTER_MODEL_HELL_MAINE);
         pCharacter = CreateCharacter(Key, MODEL_HELL_MAINE, PosX, PosY);
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
@@ -430,7 +430,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_BLOODY_ORC:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BLOODY_ORC);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_ORC);
         pCharacter = CreateCharacter(Key, MODEL_BLOODY_ORC, PosX, PosY);
         // pCharacter->Object.Scale = 1.15f;
         pCharacter->Object.Scale = 1.35f;
@@ -440,7 +440,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_BLOODY_DEATH_RIDER:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BLOODY_DEATH_RIDER);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_DEATH_RIDER);
         pCharacter = CreateCharacter(Key, MODEL_BLOODY_DEATH_RIDER, PosX, PosY);
         // pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.Scale = 1.2f;
@@ -453,7 +453,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_BLOODY_GOLEM:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BLOODY_GOLEM);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_GOLEM);
         pCharacter = CreateCharacter(Key, MODEL_BLOODY_GOLEM, PosX, PosY);
         // pCharacter->Object.Scale = 1.35f;
         pCharacter->Object.Scale = 1.40f;
@@ -467,7 +467,7 @@ CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
     break;
     case MONSTER_BLOODY_WITCH_QUEEN:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BLOODY_WITCH_QUEEN);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_WITCH_QUEEN);
         pCharacter = CreateCharacter(Key, MODEL_BLOODY_WITCH_QUEEN, PosX, PosY);
         // pCharacter->Object.Scale = 1.4f;
         pCharacter->Object.Scale = 1.75f;

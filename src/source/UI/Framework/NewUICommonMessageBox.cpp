@@ -23,6 +23,7 @@
 #include "NewUISystem.h"
 #include "SkillManager.h"
 #include "ZzzInterface.h"
+#include "Core/MuLogger.h"
 
 using namespace SEASON3B;
 
@@ -3773,7 +3774,7 @@ CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageB
         const auto& itemInfo = gambleSys.GetBuyItemInfoConst();
         SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(itemInfo.ItemIndex);
         BuyCost = itemInfo.ItemCost;
-        g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", itemInfo.ItemIndex);
+        mu::log::Get("ui")->debug("0x32 [SendRequestBuy({})]", itemInfo.ItemIndex);
     }
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

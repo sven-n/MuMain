@@ -13,8 +13,7 @@
 #include "DSPlaySound.h"
 
 #include "WSclient.h"
-#include "Core/ErrorReport.h"
-#include "Core/muConsoleDebug.h"
+#include "Core/MuLogger.h"
 
 #define SMW_BTN_GAP 4
 
@@ -112,11 +111,10 @@ void CSysMenuWin::UpdateWhileActive(double dDeltaTick)
     }
     else if (m_aBtn[SMW_BTN_SERVER_SEL].IsClick())
     {
-        g_ErrorReport.Write(L"> Menu - Join another server.");
-        g_ErrorReport.WriteCurrentTime();
+        mu::log::Get("ui")->info("Menu - Join another server.");
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(2);
-        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
+        mu::log::Get("ui")->debug("0xF1 [SendRequestLogOut] 2");
 
         CUIMng& rUIMng = CUIMng::Instance();
         rUIMng.HideWin(this);

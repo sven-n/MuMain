@@ -11,6 +11,7 @@
 
 #include "Connection.h"
 #include "DotNetMessageFormat.h"
+#include "MuLogger.h"
 
 // Full definitions required: Connection.cpp allocates these types (new PacketFunctions_*()).
 // Connection.h uses only forward declarations to avoid include-order failures in TUs
@@ -61,7 +62,7 @@ void ResolvePacketBindings()
 {
     if (!munique_client_library_handle)
     {
-        g_ErrorReport.Write(L"NET: ResolvePacketBindings -- library not loaded, skipping\r\n");
+        mu::log::Get("dotnet")->error("NET: ResolvePacketBindings -- library not loaded, skipping");
         return;
     }
 
@@ -278,8 +279,8 @@ void ResolvePacketBindings()
     ReResolve(dotnet_SendDuelChannelJoinRequest, "SendDuelChannelJoinRequest");
     ReResolve(dotnet_SendDuelChannelQuitRequest, "SendDuelChannelQuitRequest");
 
-    g_ErrorReport.Write(L"NET: ResolvePacketBindings done (SendServerListRequest=%p)\r\n",
-                        reinterpret_cast<void*>(dotnet_SendServerListRequest));
+    mu::log::Get("dotnet")->info("NET: ResolvePacketBindings done (SendServerListRequest={})",
+                                dotnet_SendServerListRequest ? "resolved" : "NULL");
 }
 
 std::map<int32_t, Connection*> connections;
@@ -290,7 +291,7 @@ bool g_dotnetErrorDisplayed = false;
 
 // AC-1 + AC-2 + AC-7: Structured error reporting for DotNet bridge failures.
 // Distinguishes library-not-found vs symbol-not-found via DotNetErrorKind.
-// Writes to BOTH g_ErrorReport (persistent MuError.log) AND MessageBoxW dialog
+// Writes to BOTH spdlog (persistent MuError.log) AND MessageBoxW dialog
 // (mapped to SDL_ShowSimpleMessageBox via PlatformCompat.h shim).
 // AC-STD-NFR-1: Dialog shown at most ONCE per session via g_dotnetErrorDisplayed guard.
 // AC-STD-NFR-2: Called from main game thread only (single-threaded game loop).
@@ -325,8 +326,8 @@ void ReportDotNetError(const char* detail, DotNetErrorKind kind)
         msg = FormatSymbolNotFoundMessage(detail);
     }
 
-    // Write to MuError.log (persistent diagnostic — g_ErrorReport)
-    g_ErrorReport.Write(L"NET: %hs\r\n", msg.c_str());
+    // Write to MuError.log (persistent diagnostic — spdlog)
+    mu::log::Get("dotnet")->error("NET: {}", msg);
 
     // Show user-visible dialog via MessageBoxW shim → SDL_ShowSimpleMessageBox (PlatformCompat.h)
     // ASCII-safe conversion: diagnostic messages contain only ASCII characters
@@ -408,8 +409,8 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
 
     this->_handle = dotnet_connect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS);
 
-    g_ErrorReport.Write(L"NET: dotnet_connect returned handle=%d (encrypted=%d)\r\n",
-                        this->_handle, isEncrypted ? 1 : 0);
+    mu::log::Get("dotnet")->info("NET: dotnet_connect returned handle={} (encrypted={})",
+                                this->_handle, isEncrypted ? 1 : 0);
 
     if (IsConnected())
     {
@@ -417,7 +418,7 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
         if (dotnet_beginreceive)
         {
             dotnet_beginreceive(this->_handle);
-            g_ErrorReport.Write(L"NET: BeginReceive started for handle=%d\r\n", this->_handle);
+            mu::log::Get("dotnet")->info("NET: BeginReceive started for handle={}", this->_handle);
         }
 
         // cppcheck-suppress [noCopyConstructor, noOperatorEq]
@@ -486,11 +487,11 @@ void Connection::OnDisconnected()
 {
     if (!IsConnected())
     {
-        g_ErrorReport.Write(L"NET: OnDisconnected called but already disconnected\r\n");
+        mu::log::Get("dotnet")->info("NET: OnDisconnected called but already disconnected");
         return;
     }
 
-    g_ErrorReport.Write(L"NET: OnDisconnected — handle=%d, erasing from connection map\r\n", this->_handle);
+    mu::log::Get("dotnet")->info("NET: OnDisconnected -- handle={}, erasing from connection map", this->_handle);
     connections.erase(this->_handle);
     this->_handle = 0;
 }
@@ -501,8 +502,8 @@ void Connection::OnPacketReceived(const BYTE* data, const int32_t size)
     static bool s_firstPacketLogged = false;
     if (!s_firstPacketLogged)
     {
-        g_ErrorReport.Write(L"NET: First packet received — handle=%d size=%d (callback path working)\r\n",
-                            this->_handle, size);
+        mu::log::Get("dotnet")->info("NET: First packet received -- handle={} size={} (callback path working)",
+                                    this->_handle, size);
         s_firstPacketLogged = true;
     }
     this->_packetHandler(this->_handle, data, size);

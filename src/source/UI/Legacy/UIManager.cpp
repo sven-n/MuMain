@@ -15,6 +15,7 @@
 #include "DSPlaySound.h"
 #include "NewUICustomMessageBox.h"
 #include "NewUINPCShop.h"
+#include "Core/MuLogger.h"
 
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;
@@ -261,7 +262,7 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
 
             if (g_iPShopWndType != PSHOPWNDTYPE_NONE)
             {
-                g_ErrorReport.Write(L"@ OpenPersonalShop : SendRequestInventory\n");
+                mu::log::Get("ui")->debug("OpenPersonalShop: SendRequestInventory");
                 SocketClient->ToGameServer()->SendInventoryRequest();
             }
 
@@ -281,7 +282,7 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
 
             if (g_iPShopWndType != PSHOPWNDTYPE_NONE)
             {
-                g_ErrorReport.Write(L"@ OpenPersonalShop : SendRequestInventory\n");
+                mu::log::Get("ui")->debug("OpenPersonalShop: SendRequestInventory");
                 SocketClient->ToGameServer()->SendInventoryRequest();
             }
             CreatePersonalItemTable();

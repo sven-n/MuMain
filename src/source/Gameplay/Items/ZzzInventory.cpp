@@ -50,6 +50,7 @@
 #include "SkillManager.h"
 #include "NewUISystem.h"
 #include "MuMain.h"
+#include "MuLogger.h"
 #include "_GlobalFunctions.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
@@ -452,7 +453,7 @@ void SendRequestUse(int Index, int Target)
 
     EnableUse = 10;
     SocketClient->ToGameServer()->SendConsumeItemRequest(Index, Target, g_byItemUseType);
-    g_ConsoleDebug->Write(MCD_SEND, L"0x26 [SendRequestUse(%d)]", Index);
+    mu::log::Get("gameplay")->debug("0x26 [SendRequestUse({})]", Index);
 }
 
 bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex)
@@ -495,8 +496,9 @@ bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem,
     SocketClient->ToGameServer()->SendItemMoveRequestExtended((uint32_t)iSrcType, iSrcIndex, (uint32_t)iDstType,
                                                               iDstIndex);
 
-    g_ConsoleDebug->Write(MCD_SEND, L"0x24 [SendRequestEquipmentItem(%d %d %d %d %d %d %d)]", iSrcIndex, iDstIndex,
-                          iSrcType, iDstType, (pItem->Type & 0x1FFF), (BYTE)(pItem->Level), (BYTE)(pItem->Durability));
+    mu::log::Get("gameplay")
+        ->debug("0x24 [SendRequestEquipmentItem({} {} {} {} {} {} {})]", iSrcIndex, iDstIndex, iSrcType, iDstType,
+                (pItem->Type & 0x1FFF), (BYTE)(pItem->Level), (BYTE)(pItem->Durability));
 
     return true;
 }

@@ -16,7 +16,7 @@ namespace mu::platform
 // chain to the previous handler (R8 mitigation — preserves .NET AOT handler),
 // then call _exit(1).
 //
-// Must be called after g_ErrorReport is open (i.e., after CErrorReport::Create()).
+// Must be called after mu::log::Init() (i.e., after logging subsystem is initialized).
 // Safe to call multiple times — handlers are simply re-installed.
 void InstallSignalHandlers();
 

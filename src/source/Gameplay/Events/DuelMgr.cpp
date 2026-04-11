@@ -9,6 +9,7 @@
 
 #include "CharacterManager.h"
 #include "WSclient.h"
+#include "MuLogger.h"
 
 #include <algorithm>
 #include <cwchar>
@@ -72,7 +73,7 @@ void CDuelMgr::SetDuelPlayer(int iPlayerNum, short sIndex, const wchar_t* pszID)
     {
         m_DuelPlayer[iPlayerNum].m_szID[0] = L'\0';
     }
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[SetDuelPlayer] %d, %ls", sIndex, pszID ? pszID : L"(null)");
+    mu::log::Get("gameplay")->info("[SetDuelPlayer] {}, {}", sIndex, mu_wchar_to_utf8(pszID ? pszID : L"(null)"));
 }
 
 void CDuelMgr::SetHeroAsDuelPlayer(int iPlayerNum)

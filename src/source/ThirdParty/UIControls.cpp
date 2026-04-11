@@ -34,6 +34,7 @@ void UnregisterSampler(std::uint32_t id);
 #include "NewUISystem.h"
 #include "MuMain.h"
 #include "../Core/_GlobalFunctions.h"
+#include "MuLogger.h"
 
 extern BYTE m_CrywolfState;
 
@@ -2956,13 +2957,13 @@ bool CUIRenderTextSDLTtf::Create(HDC /*hDC*/)
     auto* engine = renderer.GetTextEngine();
     if (!engine)
     {
-        g_ErrorReport.Write(L"RENDER: CUIRenderTextSDLTtf::Create -- no TTF text engine available");
+        mu::log::Get("render")->error("CUIRenderTextSDLTtf::Create -- no TTF text engine available");
         return false;
     }
     m_pActiveFont = renderer.GetTtfFont(); // default font
     if (!m_pActiveFont)
     {
-        g_ErrorReport.Write(L"RENDER: CUIRenderTextSDLTtf::Create -- no TTF font available");
+        mu::log::Get("render")->error("CUIRenderTextSDLTtf::Create -- no TTF font available");
         return false;
     }
     // F-3 fix: Pre-create a reusable TTF_Text to avoid per-frame allocations.
@@ -5104,7 +5105,7 @@ void CSlideHelpMgr::OpenSlideTextFile(const wchar_t* szFileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", szFileName);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("ui")->error("{}", mu_wchar_to_utf8(Text));
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;

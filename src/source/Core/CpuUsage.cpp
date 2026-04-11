@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <thread>
 #include "CpuUsage.h"
-#include "ErrorReport.h"
+#include "MuLogger.h"
 
 // Story 7.6.4: Cross-platform CpuUsage implementation.
 // Uses mu_get_process_cpu_times() (PlatformCompat.h) for process CPU time
@@ -28,7 +28,7 @@ public:
         uint64_t userNs = 0;
         if (!mu_get_process_cpu_times(&kernelNs, &userNs))
         {
-            g_ErrorReport.Write(L"CpuUsage: mu_get_process_cpu_times failed — returning 0.0\r\n");
+            mu::log::Get("core")->warn("CpuUsage: mu_get_process_cpu_times failed -- returning 0.0");
             return 0.0;
         }
 
@@ -48,7 +48,7 @@ public:
         // Detect OS clock issues (backward time, cgroup changes, VM migration)
         if (currentProcessTimeNs < m_lastProcessTimeNs)
         {
-            g_ErrorReport.Write(L"CpuUsage: process time went backwards — returning 0.0\r\n");
+            mu::log::Get("core")->warn("CpuUsage: process time went backwards -- returning 0.0");
             m_lastProcessTimeNs = currentProcessTimeNs;
             m_lastCheckTime = now;
             return 0.0;

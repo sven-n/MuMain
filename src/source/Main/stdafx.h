@@ -251,8 +251,7 @@ typedef unsigned int GLbitfield;
 
 #include "MultiLanguage.h"
 
-#include "Core/muConsoleDebug.h"
-#include "Core/ErrorReport.h"
+#include "Core/MuLogger.h"
 #include "Core/WindowsConsole.h"
 
 // Redirect console output to ImGui when editor is enabled

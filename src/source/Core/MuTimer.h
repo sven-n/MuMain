@@ -2,7 +2,7 @@
 // Story 7.2.1 — Flow Code: VS0-QUAL-FRAMETIMER
 //
 // Provides per-frame timing, rolling FPS average, hitch detection (>50ms),
-// and periodic logging to g_ErrorReport every 60 seconds.
+// and periodic logging via spdlog ("core" logger) every 60 seconds.
 // Uses std::chrono::steady_clock exclusively — no Win32 timing APIs.
 #pragma once
 

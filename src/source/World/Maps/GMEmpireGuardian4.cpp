@@ -76,7 +76,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     {
     case MONSTER_GAYION_THE_GLADIATOR:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GAYION);
+        OpenMonsterModel(MONSTER_MODEL_GAYION);
         pCharacter = CreateCharacter(Key, MODEL_GAYION, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Gayion The Gladiator").copy(pCharacter->ID, 19);
@@ -106,7 +106,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     case MONSTER_JERRY:
     case MONSTER_ADVISER_JERINTEU:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_JERRY);
+        OpenMonsterModel(MONSTER_MODEL_JERRY);
         pCharacter = CreateCharacter(Key, MODEL_JERRY, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Jerry The Adviseru").copy(pCharacter->ID, 19);
@@ -117,7 +117,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
     break;
     case MONSTER_STAR_GATE:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_STAR_GATE);
+        OpenMonsterModel(MONSTER_MODEL_STAR_GATE);
         pCharacter = CreateCharacter(Key, MODEL_STAR_GATE, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Star Gate").copy(pCharacter->ID, 10);
@@ -128,7 +128,7 @@ CHARACTER* GMEmpireGuardian4::CreateMonster(int iType, int PosX, int PosY, int K
 
     case MONSTER_RUSH_GATE:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_RUSH_GATE);
+        OpenMonsterModel(MONSTER_MODEL_RUSH_GATE);
         pCharacter = CreateCharacter(Key, MODEL_RUSH_GATE, PosX, PosY);
         memset(pCharacter->ID, 0, sizeof(pCharacter->ID));
         std::wstring(L"Rush Gate").copy(pCharacter->ID, 10);

@@ -9,6 +9,7 @@
 #include <optional>
 
 #include "stdafx.h"
+#include "MuLogger.h"
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -100,7 +101,7 @@ CHARACTER* CGM_PK_Field::CreateMonster(int type, int positionX, int positionY, i
         return nullptr;
     }
 
-    g_ErrorReport.Write(L"OpenMonsterModel(%d)\r\n", definition->monsterModelId);
+    mu::log::Get("gameplay")->info("OpenMonsterModel({})", definition->monsterModelId);
     OpenMonsterModel(definition->monsterModelId);
 
     CHARACTER* character = CreateCharacter(key, definition->objectModelId, positionX, positionY);

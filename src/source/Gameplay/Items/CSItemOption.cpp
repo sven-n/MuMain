@@ -16,6 +16,7 @@
 #include "SkillManager.h"
 #include "CSItemOption.h"
 #include "MuMain.h"
+#include "MuLogger.h"
 
 #include <algorithm>
 #include <array>
@@ -45,9 +46,9 @@ FilePtr OpenBinaryFile(const wchar_t* filename)
 
 void ReportFileIssue(const wchar_t* filename, const wchar_t* issue)
 {
+    mu::log::Get("gameplay")->warn("{} - {}.", mu_wchar_to_utf8(filename), mu_wchar_to_utf8(issue));
     wchar_t text[256]{};
     std::swprintf(text, std::size(text), L"%ls - %ls.", filename, issue);
-    g_ErrorReport.Write(text);
     MessageBox(g_hWnd, text, nullptr, MB_OK);
     SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 }

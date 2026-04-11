@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "MapManager.h"
+#include "MuLogger.h"
 #include "CameraMove.h"
 #include "CDirection.h"
 #include "DSPlaySound.h"
@@ -1247,8 +1248,7 @@ void CMapManager::LoadWorld(int Map)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->error("{} file corrupted", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -1310,8 +1310,7 @@ void CMapManager::LoadWorld(int Map)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->error("{} file corrupted", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -1324,8 +1323,7 @@ void CMapManager::LoadWorld(int Map)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file corrupted.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->error("{} file corrupted", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;

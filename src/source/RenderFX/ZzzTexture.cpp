@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuLogger.h"
 #include <setjmp.h>
 #include <array>
 #include <cstdio>
@@ -181,8 +182,7 @@ bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", fileName.c_str());
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("render")->error("{} - File not exist.", mu_wchar_to_utf8(fileName.c_str()));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;

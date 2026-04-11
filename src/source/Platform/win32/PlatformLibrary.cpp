@@ -9,7 +9,7 @@
 #include "Platform/PlatformCompat.h"
 #endif
 
-#include "ErrorReport.h"
+#include "MuLogger.h"
 
 namespace mu::platform
 {
@@ -18,7 +18,7 @@ LibraryHandle Load(const char* path)
 {
     if (path == nullptr)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() failed -- path is null\r\n");
+        mu::log::Get("platform")->error("PLAT: PlatformLibrary::Load() failed -- path is null");
         return nullptr;
     }
 
@@ -26,7 +26,8 @@ LibraryHandle Load(const char* path)
     int wideLen = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
     if (wideLen <= 0)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() failed -- unable to convert path to wide string\r\n");
+        mu::log::Get("platform")
+            ->error("PLAT: PlatformLibrary::Load() failed -- unable to convert path to wide string");
         return nullptr;
     }
 
@@ -37,8 +38,8 @@ LibraryHandle Load(const char* path)
     if (hModule == nullptr)
     {
         DWORD error = GetLastError();
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Load() failed -- LoadLibraryW error=%lu for '%hs'\r\n", error,
-                            path);
+        mu::log::Get("platform")
+            ->error("PLAT: PlatformLibrary::Load() failed -- LoadLibraryW error={} for '{}'", error, path);
         return nullptr;
     }
 
@@ -49,7 +50,7 @@ void* GetSymbol(LibraryHandle handle, const char* name)
 {
     if (handle == nullptr || name == nullptr)
     {
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol() failed -- handle or name is null\r\n");
+        mu::log::Get("platform")->error("PLAT: PlatformLibrary::GetSymbol() failed -- handle or name is null");
         return nullptr;
     }
 
@@ -58,8 +59,8 @@ void* GetSymbol(LibraryHandle handle, const char* name)
     if (proc == nullptr)
     {
         DWORD error = GetLastError();
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::GetSymbol(%hs) failed -- GetProcAddress error=%lu\r\n", name,
-                            error);
+        mu::log::Get("platform")
+            ->error("PLAT: PlatformLibrary::GetSymbol({}) failed -- GetProcAddress error={}", name, error);
         return nullptr;
     }
 
@@ -76,7 +77,7 @@ void Unload(LibraryHandle handle)
     if (!FreeLibrary(static_cast<HMODULE>(handle)))
     {
         DWORD error = GetLastError();
-        g_ErrorReport.Write(L"PLAT: PlatformLibrary::Unload() failed -- FreeLibrary error=%lu\r\n", error);
+        mu::log::Get("platform")->error("PLAT: PlatformLibrary::Unload() failed -- FreeLibrary error={}", error);
     }
 }
 

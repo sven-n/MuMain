@@ -8,6 +8,7 @@
 #include "UIManager.h"
 #include "NewUISystem.h"
 #include "MuMain.h"
+#include "MuLogger.h"
 
 CPersonalShopTitleImp::CPersonalShopTitleImp() : m_iHighlightFrame(0), m_bShow(true) {}
 CPersonalShopTitleImp::~CPersonalShopTitleImp()
@@ -21,7 +22,8 @@ bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std:
         return false;
     if (pPlayer->Object.Kind != KIND_PLAYER)
     {
-        g_ErrorReport.Write(L"@ AddShopTitle - there is NOT player object(id : %ls) \n", pPlayer->ID);
+        mu::log::Get("gameplay")
+            ->warn("@ AddShopTitle - there is NOT player object(id : {})", mu_wchar_to_utf8(pPlayer->ID));
         return false;
     }
 
@@ -39,7 +41,8 @@ bool CPersonalShopTitleImp::AddShopTitle(int key, CHARACTER* pPlayer, const std:
         }
         else
         {
-            g_ErrorReport.Write(L"@ AddShopTitle - player key-value dismatch(id : %ls) \n", pPlayer->ID);
+            mu::log::Get("gameplay")
+                ->warn("@ AddShopTitle - player key-value dismatch(id : {})", mu_wchar_to_utf8(pPlayer->ID));
         }
     }
     else
@@ -397,17 +400,18 @@ void CPersonalShopTitleImp::CheckKeyIntegrity()
         {
             delete pDrawObj;
             mi = m_listShopTitleDrawObj.erase(mi);
-            g_ErrorReport.Write(L"@ CheckKeyIntegrity - player key-value dismatch(id : %ls, server's key : %d, client "
-                                L"array's key : %d) \n",
-                                pPlayer->ID, pDrawObj->GetKey(), pPlayer->Key);
+            mu::log::Get("gameplay")
+                ->warn("@ CheckKeyIntegrity - player key-value dismatch(id : {}, server's key : {}, client array's key "
+                       ": {})",
+                       mu_wchar_to_utf8(pPlayer->ID), pDrawObj->GetKey(), pPlayer->Key);
         }
         else if (pPlayer->Object.Kind != KIND_PLAYER)
         {
             delete pDrawObj;
             mi = m_listShopTitleDrawObj.erase(mi);
-            g_ErrorReport.Write(
-                L"@ CheckKeyIntegrity - player type invalid(id : %ls, server's key : %d, client array's key : %d) \n",
-                pPlayer->ID, pDrawObj->GetKey(), pPlayer->Key);
+            mu::log::Get("gameplay")
+                ->warn("@ CheckKeyIntegrity - player type invalid(id : {}, server's key : {}, client array's key : {})",
+                       mu_wchar_to_utf8(pPlayer->ID), pDrawObj->GetKey(), pPlayer->Key);
         }
         else
         {

@@ -9,6 +9,7 @@
 //   - Validation: GameConfigValidation.h (ValidateServerPort, ValidateServerIP)
 
 #include "stdafx.h"
+#include "MuLogger.h"
 #include "GameConfig.h"
 
 #include "GameConfigConstants.h"
@@ -323,7 +324,7 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
 
     if (encUser.empty() || encPass.empty())
     {
-        g_ErrorReport.Write(L"[GameConfig] WARN: Failed to encrypt credentials, not saved\r\n");
+        mu::log::Get("data")->warn("[GameConfig] Failed to encrypt credentials, not saved");
         return;
     }
 

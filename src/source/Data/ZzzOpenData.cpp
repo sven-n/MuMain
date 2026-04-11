@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "MuLogger.h"
 #include "UIControls.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
@@ -119,7 +120,7 @@ void OpenPlayers()
 
     if (Models[MODEL_PLAYER].NumMeshs > 0)
     {
-        g_ErrorReport.Write(L"Player.bmd file error.\r\n");
+        mu::log::Get("data")->error("Player.bmd file error.");
         MessageBox(g_hWnd, L"Player.bmd file error!!!", NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
@@ -5409,7 +5410,7 @@ void OpenBasicData(HDC hDC)
 
     ::LoadBitmap(L"NPC\\voloE.jpg", BITMAP_VOLO_SKIN_EFFECT, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-    g_ErrorReport.Write(L"> First Load Files OK.\r\n");
+    mu::log::Get("data")->info("> First Load Files OK.");
 
     OpenPlayers();
 

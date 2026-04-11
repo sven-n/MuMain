@@ -1,6 +1,7 @@
 #include "MuPlatform.h"
 #include "IPlatformWindow.h"
 #include "IPlatformEventLoop.h"
+#include "MuLogger.h"
 
 #include <memory>
 
@@ -31,7 +32,7 @@ bool MuPlatform::Initialize()
 #ifdef MU_ENABLE_SDL3
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
-        g_ErrorReport.Write(L"MU_ERR_SDL_INIT_FAILED: SDL3 initialization failed: %hs\r\n", SDL_GetError());
+        mu::log::Get("platform")->error("MU_ERR_SDL_INIT_FAILED: SDL3 initialization failed: {}", SDL_GetError());
         return false;
     }
 #endif
@@ -39,7 +40,7 @@ bool MuPlatform::Initialize()
 #ifndef _WIN32
     // Story 7.1.2: Install POSIX signal handlers for crash diagnostics.
     // Must be called after SDL_Init (so .NET AOT runtime is initialized first — R8 mitigation)
-    // and after g_ErrorReport is open (constructor runs before main, so this is safe).
+    // and after mu::log::Init() (logging is initialized before MuPlatform::Initialize).
     // [VS0-QUAL-SIGNAL-HANDLERS]
     mu::platform::InstallSignalHandlers();
 #endif
@@ -79,7 +80,7 @@ bool MuPlatform::CreateWindow(const char* title, int width, int height, uint32_t
     auto window = std::make_unique<SDLWindow>();
     if (!window->Create(title, width, height, flags))
     {
-        g_ErrorReport.Write(L"MU_ERR_WINDOW_CREATE_FAILED: Window creation failed: %hs\r\n", SDL_GetError());
+        mu::log::Get("platform")->error("MU_ERR_WINDOW_CREATE_FAILED: Window creation failed: {}", SDL_GetError());
         return false;
     }
     s_pWindow = std::move(window);
@@ -140,10 +141,10 @@ bool MuPlatform::GetDisplaySize(int& outWidth, int& outHeight)
 } // namespace mu
 
 // AC-STD-5: char16_t marshaling error log — emitted by mu_wchar_to_char16 defensive guard.
-// Implemented here (not inline) to avoid pulling ErrorReport.h into every TU that
-// includes PlatformCompat.h. The PCH provides g_ErrorReport in this TU.
+// Implemented here (not inline) to keep MuLogger.h out of every TU that
+// includes PlatformCompat.h.
 // [VS1-NET-CHAR16T-ENCODING]
 void MuPlatformLogChar16MarshalingMismatch(const char* context)
 {
-    g_ErrorReport.Write(L"NET: char16_t marshaling \u2014 encoding mismatch for %hs\r\n", context);
+    mu::log::Get("platform")->error("NET: char16_t marshaling -- encoding mismatch for {}", context);
 }

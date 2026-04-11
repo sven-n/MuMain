@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 #include "NewUIMiniMap.h"
+#include "Core/MuLogger.h"
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
@@ -255,7 +256,7 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
         {
             wchar_t Text[256];
             mu_swprintf(Text, L"%ls - File corrupted.", Fname);
-            g_ErrorReport.Write(Text);
+            mu::log::Get("ui")->error("{} - File corrupted.", mu_wchar_to_utf8(Fname));
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         }

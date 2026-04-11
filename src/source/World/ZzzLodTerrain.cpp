@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuLogger.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <math.h>
@@ -100,8 +101,7 @@ int OpenTerrainAttribute(wchar_t* FileName)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->warn("{} file not found", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return (-1);
@@ -212,8 +212,7 @@ bool SaveTerrainAttribute(wchar_t* FileName, int iMap)
     {
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"%ls file not found.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->warn("{} file not found", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -650,8 +649,7 @@ bool OpenTerrainHeight(wchar_t* filename)
     {
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"%ls file not found.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->warn("{} file not found", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -662,8 +660,7 @@ bool OpenTerrainHeight(wchar_t* filename)
         fclose(fp);
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"Failed to seek in %ls.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->error("Failed to seek in {}", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -677,8 +674,8 @@ bool OpenTerrainHeight(wchar_t* filename)
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"%ls is too small (%ld bytes, needs %ld).", FileName, fileSize,
                       RequiredSize);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")
+            ->error("{} is too small ({} bytes, needs {})", mu_wchar_to_utf8(FileName), fileSize, RequiredSize);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -689,8 +686,7 @@ bool OpenTerrainHeight(wchar_t* filename)
         fclose(fp);
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"Failed to rewind %ls.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->error("Failed to rewind {}", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -706,8 +702,8 @@ bool OpenTerrainHeight(wchar_t* filename)
         wchar_t Text[256];
         mu_swprintf_s(Text, std::size(Text), L"Failed to read %ls (expected %d bytes, got %zu).", FileName, Size,
                       readBytes);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")
+            ->error("Failed to read {} (expected {} bytes, got {})", mu_wchar_to_utf8(FileName), Size, readBytes);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;
@@ -785,8 +781,7 @@ bool OpenTerrainHeightNew(const wchar_t* strFilename)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls file not found.", FileName);
-        g_ErrorReport.Write(Text);
-        g_ErrorReport.Write(L"\r\n");
+        mu::log::Get("gameplay")->warn("{} file not found", mu_wchar_to_utf8(FileName));
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return false;

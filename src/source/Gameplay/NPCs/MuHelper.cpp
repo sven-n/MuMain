@@ -9,7 +9,7 @@
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "NewUISystem.h"
-#include "Core/muConsoleDebug.h"
+#include "Core/MuLogger.h"
 #include "SkillManager.h"
 #include "PartyManager.h"
 #include "MapManager.h"
@@ -115,13 +115,13 @@ void CMuHelper::Start()
     m_iLoopCounter = 0;
 
     m_bActive = true;
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Started");
+    mu::log::Get("gameplay")->info("[MU Helper] Started");
 }
 
 void CMuHelper::Stop()
 {
     m_bActive = false;
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Stopped");
+    mu::log::Get("gameplay")->info("[MU Helper] Stopped");
 }
 
 void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
@@ -133,7 +133,7 @@ void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 
     if (Hero->SafeZone)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Entered safezone. Stopping.");
+        mu::log::Get("gameplay")->info("[MU Helper] Entered safezone. Stopping.");
         TriggerStop();
         return;
     }
@@ -192,7 +192,7 @@ void CMuHelper::Work()
     }
     catch (...)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Exception occurred. Ignoring...");
+        mu::log::Get("gameplay")->info("[MU Helper] Exception occurred. Ignoring...");
     }
 }
 

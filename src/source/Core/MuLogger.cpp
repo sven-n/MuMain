@@ -28,17 +28,7 @@ volatile int g_errorReportFd = -1;
 
 // All named loggers created during Init(). Order matches game subsystems.
 static constexpr std::array kLoggerNames = {
-    "core",
-    "network",
-    "render",
-    "data",
-    "gameplay",
-    "ui",
-    "audio",
-    "platform",
-    "dotnet",
-    "gameshop",
-    "scenes",
+    "core", "network", "render", "data", "gameplay", "ui", "audio", "platform", "dotnet", "gameshop", "scenes",
 };
 
 void Init(const std::filesystem::path& logDir)
@@ -47,8 +37,7 @@ void Init(const std::filesystem::path& logDir)
     auto logPath = logDir / "MuError.log";
 
     // Rotating file sink: 512 KB per file, 3 rotated backups.
-    auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        logPath.string(), 512 * 1024, 3);
+    auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logPath.string(), 512 * 1024, 3);
     fileSink->set_level(spdlog::level::trace);
 
     // Colored stderr sink: warn+ messages for developer visibility.

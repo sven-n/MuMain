@@ -56,29 +56,29 @@ CHARACTER* CGMDoppelGanger1::CreateMonster(int iType, int PosX, int PosY, int Ke
     switch (iType)
     {
     case MONSTER_TERRIBLE_BUTCHER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_TERRIBLE_BUTCHER);
+        OpenMonsterModel(MONSTER_MODEL_TERRIBLE_BUTCHER);
         pCharacter = CreateCharacter(Key, MODEL_TERRIBLE_BUTCHER, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         break;
     case MONSTER_MAD_BUTCHER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_MAD_BUTCHER);
+        OpenMonsterModel(MONSTER_MODEL_MAD_BUTCHER);
         pCharacter = CreateCharacter(Key, MODEL_MAD_BUTCHER, PosX, PosY);
         pCharacter->Object.Scale = 0.8f;
         break;
     case MONSTER_ICE_WALKER2:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ICE_WALKER);
+        OpenMonsterModel(MONSTER_MODEL_ICE_WALKER);
         pCharacter = CreateCharacter(Key, MODEL_ICE_WALKER, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_LARVA2:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_LARVA);
+        OpenMonsterModel(MONSTER_MODEL_LARVA);
         pCharacter = CreateCharacter(Key, MODEL_LARVA, PosX, PosY);
         pCharacter->Object.Scale = 0.6f;
         break;
     case MONSTER_DOPPELGANGER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DOPPELGANGER);
+        OpenMonsterModel(MONSTER_MODEL_DOPPELGANGER);
         pCharacter = CreateCharacter(Key, MODEL_DOPPELGANGER, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Object.m_bRenderShadow = false;

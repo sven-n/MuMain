@@ -19,7 +19,6 @@
 #include "PartyManager.h"
 #include "CDirection.h"
 #include "w_PetProcess.h"
-#include "Core/muConsoleDebug.h"
 #include "ZzzInterface.h"
 #include "WSclient.h"
 #include "GOBoid.h"
@@ -29,11 +28,11 @@
 #include "PortalMgr.h"
 #include "GuildCache.h"
 #include "UIMapName.h"
+#include "Core/MuLogger.h"
 
 // External declarations
 extern float CameraAngle[3];
 extern HWND g_hWnd;
-extern CErrorReport g_ErrorReport;
 extern float EarthQuake;
 extern int CheckSkill;
 extern int MouseY;
@@ -85,13 +84,14 @@ static void InitializeMainScene()
 {
     g_pMainFrame->ResetSkillHotKey();
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Join the game with the following character: %ls",
-                          CharactersClient[SelectedHero].ID);
-    g_ErrorReport.Write(L"> Character selected <%d> \"%ls\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
+    mu::log::Get("scenes")->info("Join the game with the following character: {}",
+                                 mu_wchar_to_utf8(CharactersClient[SelectedHero].ID));
+    mu::log::Get("scenes")->info("Character selected <{}> \"{}\"", SelectedHero + 1,
+                                 mu_wchar_to_utf8(CharactersClient[SelectedHero].ID));
 
     InitMainScene = true;
 
-    g_ConsoleDebug->Write(MCD_SEND, L"SendRequestJoinMapServer");
+    mu::log::Get("scenes")->debug("SendRequestJoinMapServer");
 
     CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
     SocketClient->ToGameServer()->SendSelectCharacter(MU_C16(CharactersClient[SelectedHero].ID));
@@ -131,10 +131,9 @@ static void InitializeMainScene()
 
     SetFocus(g_hWnd);
 
-    g_ErrorReport.Write(L"> Main Scene init success. ");
-    g_ErrorReport.WriteCurrentTime();
+    mu::log::Get("scenes")->info("Main Scene init success.");
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"MainScene Init Success");
+    mu::log::Get("scenes")->info("MainScene Init Success");
 }
 
 /**
@@ -286,8 +285,6 @@ void MoveMainScene()
         MouseOnWindow = true;
 
     UpdateGameEntities();
-
-    g_ConsoleDebug->UpdateMainScene();
 }
 
 /**

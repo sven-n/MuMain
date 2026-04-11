@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "MuLogger.h"
 #include "DataFileIO.h"
 #include "ZzzInfomation.h"
 #include "PlatformCompat.h"
@@ -7,16 +8,7 @@ namespace DataFileIO
 {
 void ReportError(const wchar_t* message)
 {
-    // Log error with module prefix and line terminator for proper log formatting
-    // Pattern: [DataFileIO] <message>\r\n
-    std::wstring formatted = L"[DataFileIO] ";
-    formatted += message;
-    // Ensure line terminator if not present
-    if (!formatted.empty() && formatted.back() != L'\n' && formatted.back() != L'\r')
-    {
-        formatted += L"\r\n";
-    }
-    g_ErrorReport.Write(formatted.c_str());
+    mu::log::Get("data")->error("[DataFileIO] {}", mu_wchar_to_utf8(message));
 }
 
 std::unique_ptr<BYTE[]> ReadBuffer(FILE* fp, const IOConfig& config, DWORD* outChecksum)

@@ -287,7 +287,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
     switch (iType)
     {
     case MONSTER_SAPIUNUS:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SAPIUNUS);
+        OpenMonsterModel(MONSTER_MODEL_SAPIUNUS);
         pCharacter = CreateCharacter(Key, MODEL_SAPIUNUS, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
@@ -304,7 +304,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         // 		}
         break;
     case MONSTER_SAPIDUO:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SAPIDUO);
+        OpenMonsterModel(MONSTER_MODEL_SAPIDUO);
         pCharacter = CreateCharacter(Key, MODEL_SAPIDUO, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
@@ -321,7 +321,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         // 		}
         break;
     case MONSTER_SAPITRES:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SAPITRES);
+        OpenMonsterModel(MONSTER_MODEL_SAPITRES);
         pCharacter = CreateCharacter(Key, MODEL_SAPITRES, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
@@ -338,7 +338,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         // 		}
         break;
     case MONSTER_SHADOW_PAWN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SHADOW_PAWN);
+        OpenMonsterModel(MONSTER_MODEL_SHADOW_PAWN);
         pCharacter = CreateCharacter(Key, MODEL_SHADOW_PAWN, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
@@ -346,7 +346,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         pCharacter->Object.LifeTime = 100;
         break;
     case MONSTER_SHADOW_KNIGHT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SHADOW_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_SHADOW_KNIGHT);
         pCharacter = CreateCharacter(Key, MODEL_SHADOW_KNIGHT, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
@@ -354,7 +354,7 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         pCharacter->Object.LifeTime = 100;
         break;
     case MONSTER_SHADOW_LOOK:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SHADOW_LOOK);
+        OpenMonsterModel(MONSTER_MODEL_SHADOW_LOOK);
         pCharacter = CreateCharacter(Key, MODEL_SHADOW_LOOK, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
@@ -362,49 +362,49 @@ CHARACTER* GMSwampOfQuiet::CreateSwampOfQuietMonster(int iType, int PosX, int Po
         pCharacter->Object.LifeTime = 100;
         break;
     case MONSTER_THUNDER_NAPIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_NAPIN);
+        OpenMonsterModel(MONSTER_MODEL_NAPIN);
         pCharacter = CreateCharacter(Key, MODEL_NAPIN, PosX, PosY);
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_GHOST_NAPIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GHOST_NAPIN);
+        OpenMonsterModel(MONSTER_MODEL_GHOST_NAPIN);
         pCharacter = CreateCharacter(Key, MODEL_GHOST_NAPIN, PosX, PosY);
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_BLAZE_NAPIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BLAZE_NAPIN);
+        OpenMonsterModel(MONSTER_MODEL_BLAZE_NAPIN);
         pCharacter = CreateCharacter(Key, MODEL_BLAZE_NAPIN, PosX, PosY);
         pCharacter->Object.Scale = 0.95f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_MEDUSA:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_MEDUSA);
+        OpenMonsterModel(MONSTER_MODEL_MEDUSA);
         pCharacter = CreateCharacter(Key, MODEL_MEDUSA, PosX, PosY);
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.LifeTime = 100;
         break;
     case MONSTER_SAPI_QUEEN:
     case MONSTER_SAPI_QUEEN2:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SAPI_QUEEN);
+        OpenMonsterModel(MONSTER_MODEL_SAPI_QUEEN);
         pCharacter = CreateCharacter(Key, MODEL_SAPI_QUEEN, PosX, PosY);
         pCharacter->Object.Scale = 1.5f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_ICE_NAPIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ICE_NAPIN);
+        OpenMonsterModel(MONSTER_MODEL_ICE_NAPIN);
         pCharacter = CreateCharacter(Key, MODEL_ICE_NAPIN, PosX, PosY);
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
         break;
     case MONSTER_SHADOW_MASTER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SHADOW_MASTER);
+        OpenMonsterModel(MONSTER_MODEL_SHADOW_MASTER);
         pCharacter = CreateCharacter(Key, MODEL_SHADOW_MASTER, PosX, PosY);
         pCharacter->Object.Scale = 1.56f;
         pCharacter->Weapon[0].Type = -1;

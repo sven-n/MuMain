@@ -35,6 +35,8 @@
 #include "Event.h"
 
 #include "NewUISystem.h"
+#include "Core/MuLogger.h"
+#include "Core/MuConsoleCommands.h"
 #include "w_CursedTemple.h"
 #include "UIControls.h"
 #include "PartyManager.h"
@@ -192,13 +194,11 @@ void PrintPKLog(CHARACTER* pCha)
 
     if (pCha->PK >= PVP_MURDERER2 && pCha->Object.Type == KIND_PLAYER)
     {
-        g_ErrorReport.Write(L"!!!!!!!!!!!!!!!!! PK !!!!!!!!!!!!!!!\n");
-        g_ErrorReport.WriteCurrentTime();
-        g_ErrorReport.Write(L" ID(%ls) PK(%d) GuildName(%ls)\n", pCha->ID, pCha->PK,
-                            GuildMark[pCha->GuildMarkIndex].GuildName);
+        mu::log::Get("ui")->info("PK detected - ID({}) PK({}) GuildName({})", mu_wchar_to_utf8(pCha->ID), pCha->PK,
+                                 mu_wchar_to_utf8(GuildMark[pCha->GuildMarkIndex].GuildName));
 #ifdef CONSOLE_DEBUG
-        g_ConsoleDebug->Write(MCD_ERROR, L"[!!! PK !!! : ID(%ls) PK(%d) GuildName(%ls)\n]", pCha->ID, pCha->PK,
-                              GuildMark[pCha->GuildMarkIndex].GuildName);
+        mu::log::Get("ui")->error("[!!! PK !!! : ID({}) PK({}) GuildName({})]", mu_wchar_to_utf8(pCha->ID), pCha->PK,
+                                  mu_wchar_to_utf8(GuildMark[pCha->GuildMarkIndex].GuildName));
 #endif // CONSOLE_DEBUG
 
         sKey = pCha->Key;
@@ -2079,7 +2079,7 @@ void SendRequestMagic(int Type, int Key)
     {
         g_dwLatestMagicTick = GetTickCount();
         SocketClient->ToGameServer()->SendTargetedSkill(Type, Key);
-        g_ConsoleDebug->Write(MCD_SEND, L"0x19 [SendRequestMagic(%d %d)]", Type, Key);
+        mu::log::Get("ui")->debug("0x19 [SendRequestMagic({} {})]", Type, Key);
     }
 }
 
@@ -2105,7 +2105,7 @@ void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE
 
     SocketClient->ToGameServer()->SendAreaSkill(Type, x, y, Angle, TKey, MakeSkillSerialNumber(pSkillSerial));
 
-    g_ConsoleDebug->Write(MCD_SEND, L"0x1E [SendRequestMagicContinue]");
+    mu::log::Get("ui")->debug("0x1E [SendRequestMagicContinue]");
 }
 
 bool SkillWarrior(CHARACTER* c, ITEM* p)
@@ -2993,9 +2993,8 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
     int iMana, iSkillMana;
     gSkillManager.GetSkillInformation(nSkill, 1, NULL, &iMana, NULL, &iSkillMana);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"AttackRagefighter ID : %d, Dis : %.2f | %d %d / %d | %d", nSkill, fDistance,
-                          iMana, iSkillMana, CharacterAttribute->Mana,
-                          gSkillManager.CheckSkillDelay(Hero->CurrentSkill));
+    mu::log::Get("ui")->debug("AttackRagefighter ID : {}, Dis : {:.2f} | {} {} / {} | {}", nSkill, fDistance, iMana,
+                              iSkillMana, CharacterAttribute->Mana, gSkillManager.CheckSkillDelay(Hero->CurrentSkill));
 
     if (CharacterAttribute->Mana < iMana)
     {
@@ -3011,7 +3010,7 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
         return;
 
     /*if (!gSkillManager.CheckSkillDelay(Hero->CurrentSkill)) {
-        g_ConsoleDebug->Write(MCD_RECEIVE, L"CheckSkillDelay %d", Hero->CurrentSkill);
+        mu::log::Get("ui")->debug("CheckSkillDelay {}", Hero->CurrentSkill);
         return;
     }*/
 
@@ -3025,8 +3024,8 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
     else
         g_MovementSkill.m_iTarget = -1;
 
-    g_ConsoleDebug->Write(MCD_SEND, L"AttackRagefighter ID : %d, Success : %d, SelectedCharacter: %d %d | 5d", nSkill,
-                          bSuccess, SelectedCharacter, CharactersClient[SelectedCharacter].Dead, bCheckAttack);
+    mu::log::Get("ui")->debug("AttackRagefighter ID : {}, Success : {}, SelectedCharacter: {} {} | 5d", nSkill,
+                              bSuccess, SelectedCharacter, CharactersClient[SelectedCharacter].Dead, bCheckAttack);
 
     if (bSuccess)
     {
@@ -3060,7 +3059,7 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance)
                     if (CheckTile(pCha, pObj, fDistance) && pCha->SafeZone == false)
                     {
                         bool bNoneWall = CheckWall((pCha->PositionX), (pCha->PositionY), TargetX, TargetY);
-                        g_ConsoleDebug->Write(MCD_SEND, L"check wall %d", bNoneWall);
+                        mu::log::Get("ui")->debug("check wall {}", bNoneWall);
                         if (bNoneWall)
                             UseSkillRagefighter(pCha, pObj);
                     }
@@ -3609,9 +3608,9 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         case AT_SKILL_OCCUPY:
         case AT_SKILL_PHOENIX_SHOT:
         {
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"Action ID : %d, %d | %d %d | %d %d", iSkill, Distance,
-                                  CharactersClient[g_MovementSkill.m_iTarget].Dead, g_MovementSkill.m_iTarget,
-                                  CheckTile(c, o, Distance * 1.2f), !c->SafeZone);
+            mu::log::Get("ui")->debug("Action ID : {}, {} | {} {} | {} {}", iSkill, Distance,
+                                      CharactersClient[g_MovementSkill.m_iTarget].Dead, g_MovementSkill.m_iTarget,
+                                      CheckTile(c, o, Distance * 1.2f), !c->SafeZone);
             if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT &&
                 CharactersClient[g_MovementSkill.m_iTarget].Dead == 0)
             {
@@ -3620,7 +3619,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
                 if (CheckTile(c, o, Distance * 1.2f) && !c->SafeZone)
                 {
                     UseSkillRagefighter(c, o);
-                    g_ConsoleDebug->Write(MCD_RECEIVE, L"Success attack ID : %d, %d", iSkill, Distance);
+                    mu::log::Get("ui")->debug("Success attack ID : {}, {}", iSkill, Distance);
                 }
                 else
                 {
@@ -4125,7 +4124,7 @@ bool CheckMacroLimit(wchar_t* Text)
 
 bool CheckCommand(wchar_t* Text, bool bMacroText)
 {
-    if (g_ConsoleDebug->CheckCommand(Text) == true)
+    if (mu::console::CheckCommand(Text) == true)
     {
         return true;
     }

@@ -75,6 +75,7 @@
 #include "Dotnet/Connection.h"
 
 #include "MuHelper.h"
+#include "MuLogger.h"
 
 #define MAX_DEBUG_MAX 10
 
@@ -169,7 +170,7 @@ static uint32_t s_dbgPacketsProcessed = 0u;
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
+    mu::log::Get("network")->info("[Connect to Server] ip address = {}, port = {}", mu_wchar_to_utf8(IpAddr), Port);
 
     // todo: generally, it's a bad idea to assume a specific port number (range).
     const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
@@ -185,14 +186,13 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
         static bool g_connectErrorDisplayed = false;
         wchar_t szConnectError[256];
         mu_swprintf_s(szConnectError, L"Cannot connect to %ls:%d. Server may be offline.", IpAddr, Port);
-        g_ErrorReport.Write(L"NET: %ls\r\n", szConnectError);
+        mu::log::Get("network")->error("NET: {}", mu_wchar_to_utf8(szConnectError));
         if (!g_connectErrorDisplayed)
         {
             g_connectErrorDisplayed = true;
             MessageBoxW(nullptr, szConnectError, L"Connection Error", MB_ICONERROR | MB_OK);
         }
 
-        g_ErrorReport.WriteCurrentTime();
         delete SocketClient;
         SocketClient = nullptr;
         CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
@@ -303,7 +303,7 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
 
         g_ServerListManager->InsertServerGroup(Data2->Index, Data2->Percent);
 
-        g_ConsoleDebug->Write(MCD_RECEIVE, L"0xF4 [ReceiveServerList(%d %d %d)]", i, Data2->Index, Data2->Percent);
+        mu::log::Get("network")->debug("0xF4 [ReceiveServerList({} {} {})]", i, Data2->Index, Data2->Percent);
 
         Offset += sizeof(PRECEIVE_SERVER_LIST);
     }
@@ -316,9 +316,9 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
         rUIMng.ShowWin(&rUIMng.m_LoginMainWin);
     }
 
-    g_ErrorReport.Write(L"Success Receive Server List.\r\n");
+    mu::log::Get("network")->info("Success Receive Server List");
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0xF4 [ReceiveServerList]");
+    mu::log::Get("network")->debug("0xF4 [ReceiveServerList]");
 }
 void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 {
@@ -326,7 +326,7 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
     wchar_t IP[16];
     CMultiLanguage::ConvertFromUtf8(IP, Data->IP);
 
-    g_ErrorReport.Write(L"[ReceiveServerConnect]");
+    mu::log::Get("network")->info("ReceiveServerConnect");
     if (SocketClient != nullptr)
     {
         SocketClient->Close();
@@ -352,7 +352,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 {
     auto Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
 
-    g_ErrorReport.Write(L"NET: ReceiveJoinServer — Result=0x%02X LogIn=%d\r\n", Data2->Result, LogIn);
+    mu::log::Get("network")->info("NET: ReceiveJoinServer -- Result=0x{:02X} LogIn={}", Data2->Result, LogIn);
 
     if (LogIn != 0)
     {
@@ -366,7 +366,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
         switch (Data2->Result)
         {
         case 0x01:
-            g_ErrorReport.Write(L"NET: ReceiveJoinServer — showing login window\r\n");
+            mu::log::Get("network")->info("NET: ReceiveJoinServer -- showing login window");
             rUIMng.ShowWin(&rUIMng.m_LoginWin);
             rUIMng.m_LoginWin.GetUsernameInputBox()->GiveFocus();
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
@@ -374,8 +374,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             break;
 
         default:
-            g_ErrorReport.Write(L"Connecting error. ");
-            g_ErrorReport.WriteCurrentTime();
+            mu::log::Get("network")->error("Connecting error");
             rUIMng.PopUpMsgWin(MESSAGE_SERVER_LOST);
             break;
         }
@@ -394,23 +393,11 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
         {
             rUIMng.HideWin(&rUIMng.m_LoginWin);
             rUIMng.PopUpMsgWin(MESSAGE_VERSION);
-            g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
+            mu::log::Get("network")->error("Version mismatch - Join server");
         }
     }
 
     g_GuildCache.Reset();
-
-    // #if defined _DEBUG || defined FOR_WORK
-    //     if (Data2->Result == 0x01)
-    //     {
-    //         wchar_t lpszTemp[256];
-    //         if (Util_CheckOption(GetCommandLineW(), L'i', lpszTemp))
-    //         {
-    //             g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", m_ID);
-    //             SendRequestLogIn(m_ID, lpszTemp);
-    //         }
-    //     }
-    // #endif
 }
 
 void ReceiveConfirmPassword(const BYTE* ReceiveBuffer)
@@ -485,11 +472,8 @@ void ReceiveCharacterListExtended(const BYTE* ReceiveBuffer)
 
     int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
 
-#ifdef _DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
-#else
-    g_ErrorReport.Write(L"[ReceiveList Count %d Max class %d]", Data->CharacterCount, Data->MaxClass);
-#endif
+    mu::log::Get("network")->debug("ReceiveList Count {} Max class {}", Data->CharacterCount, Data->MaxClass);
+    mu::log::Get("network")->debug("[ReceiveList Count {} Max class {}]", Data->CharacterCount, Data->MaxClass);
 
     CharacterAttribute->IsVaultExtended = Data->IsVaultExtended;
     for (int i = 0; i < Data->CharacterCount; i++)
@@ -566,9 +550,9 @@ void ReceiveCharacterCard_New(const BYTE* ReceiveBuffer)
     if ((Data->CharacterCard & CLASS_SUMMONER_CARD) == CLASS_SUMMONER_CARD)
         g_CharCardEnable.bCharacterEnable[2] = true;
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"[BOTH MESSAGE] CharacterCard Recv %d = %d %d %d", Data->CharacterCard,
-                          g_CharCardEnable.bCharacterEnable[0], g_CharCardEnable.bCharacterEnable[1],
-                          g_CharCardEnable.bCharacterEnable[2]);
+    mu::log::Get("network")->info("[BOTH MESSAGE] CharacterCard Recv {} = {} {} {}", Data->CharacterCard,
+                                  g_CharCardEnable.bCharacterEnable[0], g_CharCardEnable.bCharacterEnable[1],
+                                  g_CharCardEnable.bCharacterEnable[2]);
 }
 
 void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
@@ -631,7 +615,7 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
     else if (Data->Result == 2)
         CUIMng::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL2);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x01 [ReceiveCreateCharacter]");
+    mu::log::Get("network")->debug("0x01 [ReceiveCreateCharacter]");
 }
 
 void ReceiveDeleteCharacter(const BYTE* ReceiveBuffer)
@@ -786,7 +770,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
         memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
         SelectMarkColor = 0;
-        g_ErrorReport.Write(L"[ReceiveLogOut]");
+        mu::log::Get("network")->info("ReceiveLogOut");
         if (SocketClient != nullptr)
         {
             SocketClient->Close();
@@ -809,7 +793,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     g_pFriendList->ClearFriendList();
     g_pLetterList->ClearLetterList();
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x02 [ReceiveServerList(%d)]", Data->Value);
+    mu::log::Get("network")->debug("0x02 [ReceiveServerList({})]", Data->Value);
 
     return (TRUE);
 }
@@ -873,8 +857,8 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CreateCharacterPointer(c, MODEL_PLAYER, Data->PositionX, Data->PositionY, ((float)Data->Angle - 1.f) * 45.f);
     c->Key = HeroKey;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer] Key: %d Map: %d X: %d Y:%d", c->Key,
-                          gMapManager.WorldActive, Data->PositionX, Data->PositionY);
+    mu::log::Get("network")->debug("0x03 [ReceiveJoinMapServer] Key: {} Map: {} X: {} Y:{}", c->Key,
+                                   gMapManager.WorldActive, Data->PositionX, Data->PositionY);
     OBJECT* o = &c->Object;
     c->Class = CharacterAttribute->Class;
     c->SkinIndex = gCharacterManager.GetSkinModelIndex(c->Class);
@@ -977,7 +961,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     // Initialize skill requirements cache on character login
     gSkillManager.InitializeSkillRequirementsCache();
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
+    mu::log::Get("network")->debug("0x03 [ReceiveJoinMapServer]");
 
     return (TRUE);
 }
@@ -1110,7 +1094,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
 
     g_pNewUISystem->HideAll();
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x04 [ReceiveRevival]");
+    mu::log::Get("network")->debug("0x04 [ReceiveRevival]");
 }
 
 void ReceiveMagicList(const BYTE* ReceiveBuffer)
@@ -1219,7 +1203,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     // Skills have changed, invalidate skill requirements cache
     gSkillManager.InvalidateSkillRequirementsCache();
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
+    mu::log::Get("network")->debug("0x11 [ReceiveMagicList]");
 }
 
 void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
@@ -1238,7 +1222,7 @@ void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
         interface->SetMasterSkillTreeInfo(lpInfo->SkillIndex, lpInfo->SkillLevel, lpInfo->MainValue, lpInfo->NextValue);
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x53 [Receive_Master_SetSkillList]");
+    mu::log::Get("network")->debug("0x53 [Receive_Master_SetSkillList]");
 }
 
 void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
@@ -1254,7 +1238,7 @@ void ReceiveMuHelperConfigurationData(std::span<const BYTE> ReceiveBuffer)
     MUHelper::ConfigDataSerDe::Deserialize(*pMuHelperData, config);
     g_pNewUIMuHelper->LoadSavedConfig(config);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0xAE [ReceiveMuHelperConfigurationData]");
+    mu::log::Get("network")->debug("0xAE [ReceiveMuHelperConfigurationData]");
 }
 
 void ReceiveMuHelperStatusUpdate(std::span<const BYTE> ReceiveBuffer)
@@ -1285,7 +1269,7 @@ void ReceiveMuHelperStatusUpdate(std::span<const BYTE> ReceiveBuffer)
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x51 [ReceiveMuHelperStatusUpdate]");
+    mu::log::Get("network")->debug("0x51 [ReceiveMuHelperStatusUpdate]");
 }
 
 void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
@@ -1317,7 +1301,7 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
         EnableUse = 0;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x28 [ReceiveDeleteInventory(%d %d)]", Data->SubCode, Data->Value);
+    mu::log::Get("network")->debug("0x28 [ReceiveDeleteInventory({} {})]", Data->SubCode, Data->Value);
 }
 
 int CalcItemLength(std::span<const BYTE> ReceiveBuffer)
@@ -1418,7 +1402,7 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         Offset += length;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x10 [ReceiveInventory]");
+    mu::log::Get("network")->debug("0x10 [ReceiveInventory]");
 
     return (TRUE);
 }
@@ -1505,14 +1489,15 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         Offset += length;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x31 [ReceiveTradeInventoryExtended]");
+    mu::log::Get("network")->debug("0x31 [ReceiveTradeInventoryExtended]");
 }
 
 void ReceiveChat(const BYTE* ReceiveBuffer)
 {
     if (SceneFlag == LOG_IN_SCENE)
     {
-        g_ErrorReport.Write(L"Send Request Server List (handle=%d).\r\n", SocketClient->ToConnectServer()->GetHandle());
+        mu::log::Get("network")->info("Send Request Server List (handle={})",
+                                      SocketClient->ToConnectServer()->GetHandle());
         SocketClient->ToConnectServer()->SendServerListRequest();
     }
     else
@@ -1721,7 +1706,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x0D [ReceiveNotice(%ls)]", Text);
+    mu::log::Get("network")->debug("0x0D [ReceiveNotice({})]", mu_wchar_to_utf8(Text));
 }
 
 void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
@@ -1767,8 +1752,8 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
     c->TargetY = Data->TargetY;
     c->TargetAngle = Data->PathMetadata >> 4;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %ls | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX,
-                          c->PositionY, c->TargetX, c->TargetY);
+    mu::log::Get("network")->debug("ID : {} | sX : {} | sY : {} | tX : {} | tY : {}", mu_wchar_to_utf8(c->ID),
+                                   c->PositionX, c->PositionY, c->TargetX, c->TargetY);
 
     if (Key == HeroKey)
     {
@@ -2023,7 +2008,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         Hero->EtcPart = iEtcPart;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1C [ReceiveTeleport(%d)]", Data->Flag);
+    mu::log::Get("network")->debug("0x1C [ReceiveTeleport({})]", Data->Flag);
 
     return (TRUE);
 }
@@ -2060,10 +2045,9 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
     // BYTE Option = Data->Item[3] & 63;
     // BYTE ExtOption = Data->Item[4];
 
-    g_ConsoleDebug->Write(
-        MCD_RECEIVE,
-        L"0x25 ReceiveChangePlayer Key(0x%04X) Item Slot(0x%02X) Group(0x%02X) Number(0x%04X) Level(0x%02X)", Data->Key,
-        Data->ItemSlot, Data->ItemGroup, Data->ItemNumber, Data->ItemLevel);
+    mu::log::Get("network")->debug(
+        "0x25 ReceiveChangePlayer Key(0x{:04X}) Item Slot(0x{:02X}) Group(0x{:02X}) Number(0x{:04X}) Level(0x{:02X})",
+        Data->Key, Data->ItemSlot, Data->ItemGroup, Data->ItemNumber, Data->ItemLevel);
 
     int maxClass = MAX_CLASS;
 
@@ -2353,8 +2337,8 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
         break;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"(RCPV)ID : %ls | sX : %d | sY : %d | tX : %d | tY : %d", c->ID, c->PositionX,
-                          c->PositionY, c->TargetX, c->TargetY);
+    mu::log::Get("network")->debug("(RCPV)ID : {} | sX : {} | sY : {} | tX : {} | tY : {}", mu_wchar_to_utf8(c->ID),
+                                   c->PositionX, c->PositionY, c->TargetX, c->TargetY);
 
     if (CreateFlag)
     {
@@ -2401,7 +2385,7 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
             auto buff = static_cast<eBuffState>(buffs[j]);
             RegisterBuff(buff, o);
             battleCastle::SettingBattleFormation(c, buff);
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %ls, Buff : %d", c->ID, static_cast<int>(buff));
+            mu::log::Get("network")->debug("ID : {}, Buff : {}", mu_wchar_to_utf8(c->ID), static_cast<int>(buff));
         }
 
         if (gMapManager.InBattleCastle() && battleCastle::IsBattleCastleStart())
@@ -2410,7 +2394,7 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x12 [ReceiveCreatePlayerViewportExtended]");
+    mu::log::Get("network")->debug("0x12 [ReceiveCreatePlayerViewportExtended]");
 }
 
 void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
@@ -2507,8 +2491,8 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
                 RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
                 battleCastle::SettingBattleFormation(c, static_cast<eBuffState>(Data2->s_BuffEffectState[j]));
 
-                g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %ls, Buff : %d", c->ID,
-                                      static_cast<int>(Data2->s_BuffEffectState[j]));
+                mu::log::Get("network")->debug("ID : {}, Buff : {}", mu_wchar_to_utf8(c->ID),
+                                               static_cast<int>(Data2->s_BuffEffectState[j]));
             }
 
             c->PositionX = Data2->PositionX;
@@ -2538,7 +2522,7 @@ void ReceiveCreateTransformViewport(std::span<const BYTE> ReceiveBuffer)
         Offset += (sizeof(PCREATE_TRANSFORM_EXTENDED) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x45 [ReceiveCreateTransformViewport(%d)]", Data->Value);
+    mu::log::Get("network")->debug("0x45 [ReceiveCreateTransformViewport({})]", Data->Value);
 }
 
 void AppearMonster(CHARACTER* c)
@@ -2650,7 +2634,7 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         Key &= 0x7FFF;
         CHARACTER* c = CreateMonster(Type, Data2->PositionX, Data2->PositionY, Key);
 
-        g_ConsoleDebug->Write(MCD_RECEIVE, L"0x13 [ReceiveCreateMonsterViewport(Type : %d | Key : %d)]", Type, Key);
+        mu::log::Get("network")->debug("0x13 [ReceiveCreateMonsterViewport(Type : {} | Key : {})]", Type, Key);
 
         if (c == nullptr)
             break;
@@ -2665,8 +2649,8 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
         {
             RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"ID : %ls, Buff : %d", c->ID,
-                                  static_cast<int>(Data2->s_BuffEffectState[j]));
+            mu::log::Get("network")->debug("ID : {}, Buff : {}", mu_wchar_to_utf8(c->ID),
+                                           static_cast<int>(Data2->s_BuffEffectState[j]));
         }
 
         float fAngle = 45.0f;
@@ -2837,7 +2821,7 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
         Offset += (sizeof(PCREATE_SUMMON) - (sizeof(BYTE) * (MAX_BUFF_SLOT_INDEX - Data2->s_BuffCount)));
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1F [ReceiveCreateSummonViewport(%d)]", Data->Value);
+    mu::log::Get("network")->debug("0x1F [ReceiveCreateSummonViewport({})]", Data->Value);
 }
 
 void ReceiveDeleteCharacterViewport(const BYTE* ReceiveBuffer)
@@ -3196,7 +3180,7 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
     }
     c->Hit = damage;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamage(%d %d)]", AttackPlayer, damage);
+    mu::log::Get("network")->debug("0x15 [ReceiveAttackDamage({} {})]", AttackPlayer, damage);
 }
 
 void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
@@ -3220,7 +3204,7 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     bool bComboEnable = (Data->DamageType >> 7) & 0x01;
     auto ShieldDamage = Data->ShieldDamage;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
+    mu::log::Get("network")->debug("0x15 [ReceiveAttackDamageExtended({} {})]", AttackPlayer, Damage);
     if (IsMonster(c) || IsPlayer(c))
     {
         MUHelper::g_MuHelper.AddTarget(Key, true);
@@ -3503,7 +3487,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         break;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x18 [ReceiveAction(%d)]", Data->Angle);
+    mu::log::Get("network")->debug("0x18 [ReceiveAction({})]", Data->Angle);
 }
 
 void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
@@ -3553,7 +3537,8 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
                 c->EtcPart = PARTS_WEBZEN;
             }
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"RegisterBuff ID : %ls, Buff : %d", c->ID, static_cast<int>(bufftype));
+            mu::log::Get("network")->debug("RegisterBuff ID : {}, Buff : {}", mu_wchar_to_utf8(c->ID),
+                                           static_cast<int>(bufftype));
         }
     }
     else // clear
@@ -3569,8 +3554,8 @@ void ReceiveSkillStatus(const BYTE* ReceiveBuffer)
         {
             battleCastle::DeleteBattleFormation(c, bufftype);
 
-            g_ConsoleDebug->Write(MCD_RECEIVE, L"UnRegisterBuff ID : %ls, Buff : %d", c->ID,
-                                  static_cast<int>(bufftype));
+            mu::log::Get("network")->debug("UnRegisterBuff ID : {}, Buff : {}", mu_wchar_to_utf8(c->ID),
+                                           static_cast<int>(bufftype));
         }
         else if (bufftype == eBuff_GMEffect)
         {
@@ -3822,8 +3807,8 @@ BOOL ReceiveMonsterSkill(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         sc->AttackTime = 1;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x69 [ReceiveMonsterSkill(Skill : %d | SKey : %d |TKey : %d)]", SkillNumber,
-                          SourceKey, TargetKey);
+    mu::log::Get("network")->debug("0x69 [ReceiveMonsterSkill(Skill : {} | SKey : {} |TKey : {})]", SkillNumber,
+                                   SourceKey, TargetKey);
 
     return (TRUE);
 }
@@ -4847,9 +4832,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     break;
     }
 
-#ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x19 [ReceiveMagic(%d)]", MagicNumber);
-#endif // CONSOLE_DEBUG
+    mu::log::Get("network")->debug("0x19 [ReceiveMagic({})]", MagicNumber);
 
     return (TRUE);
 }
@@ -5263,7 +5246,7 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     sc->SkillX = Data->PositionX;
     sc->SkillY = Data->PositionY;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x1E [ReceiveMagicContinue(%d)]", MagicNumber);
+    mu::log::Get("network")->debug("0x1E [ReceiveMagicContinue({})]", MagicNumber);
 
     return (TRUE);
 }
@@ -5437,9 +5420,7 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
-#ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x16 [ReceiveDieExp : %d]", Exp);
-#endif // CONSOLE_DEBUG
+    mu::log::Get("network")->debug("0x16 [ReceiveDieExp : {}]", Exp);
 
     return (TRUE);
 }
@@ -5647,7 +5628,7 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
         MUHelper::g_MuHelper.TriggerStop();
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x17 [ReceiveDie(%d)]", Key);
+    mu::log::Get("network")->debug("0x17 [ReceiveDie({})]", Key);
 }
 
 void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
@@ -5672,7 +5653,7 @@ void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
     CreateMoneyDrop(&Items[Data->Id], Data->Amount, Position, Data->IsFreshDrop);
     MUHelper::g_MuHelper.AddItem(Data->Id, {Data->PositionX, Data->PositionY});
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateMoney]");
+    mu::log::Get("network")->debug("0x20 [ReceiveCreateMoney]");
 }
 
 void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
@@ -5718,7 +5699,7 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
         Offset += length;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateItemViewport]");
+    mu::log::Get("network")->debug("0x20 [ReceiveCreateItemViewport]");
 }
 
 void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
@@ -5838,7 +5819,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
     }
     SendGetItem = -1;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x22 [ReceiveGetItem(%d)]", Data->Value);
+    mu::log::Get("network")->debug("0x22 [ReceiveGetItem({})]", Data->Value);
 }
 
 void ReceiveDropItem(const BYTE* ReceiveBuffer)
@@ -5984,7 +5965,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
         g_bPacketAfter_EquipmentItem = FALSE;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x24 [ReceiveEquipmentItem(%d %d)]", Data->SubCode, Data->Index);
+    mu::log::Get("network")->debug("0x24 [ReceiveEquipmentItem({} {})]", Data->SubCode, Data->Index);
 
     return (TRUE);
 }
@@ -6238,7 +6219,7 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
     }
     BuyCost = 0;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x32 [ReceiveBuy(%d)]", Data->Index);
+    mu::log::Get("network")->debug("0x32 [ReceiveBuy({})]", Data->Index);
 }*/
 
 void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
@@ -6286,7 +6267,7 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
 
     BuyCost = 0;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x32 [ReceiveBuy(%d)]", Data->Index);
+    mu::log::Get("network")->debug("0x32 [ReceiveBuy({})]", Data->Index);
 }
 
 void ReceiveTradeYourInventoryExtended(std::span<const BYTE> ReceiveBuffer)
@@ -6463,7 +6444,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
         break;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x86 [ReceiveMix(%d)]", Data->Index);
+    mu::log::Get("network")->debug("0x86 [ReceiveMix({})]", Data->Index);
 }
 
 void ReceiveSell(const BYTE* ReceiveBuffer)
@@ -6511,7 +6492,7 @@ void ReceiveRepair(const BYTE* ReceiveBuffer)
         PlayBuffer(SOUND_REPAIR);
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x34 [ReceiveRepair(%d)]", Data->Gold);
+    mu::log::Get("network")->debug("0x34 [ReceiveRepair({})]", Data->Gold);
 }
 
 void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
@@ -6577,7 +6558,7 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
     }
     PlayBuffer(SOUND_LEVEL_UP);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x05 [ReceiveLevelUp]");
+    mu::log::Get("network")->debug("0x05 [ReceiveLevelUp]");
 }
 
 void ReceiveAddPoint(const BYTE* ReceiveBuffer)
@@ -6791,7 +6772,7 @@ void ReceiveDurability(const BYTE* ReceiveBuffer)
         EnableUse = 0;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x2A [ReceiveDurability(%d %d)]", Data->Value, Data->KeyL);
+    mu::log::Get("network")->debug("0x2A [ReceiveDurability({} {})]", Data->Value, Data->KeyL);
 }
 
 BOOL ReceiveHelperItem(const BYTE* ReceiveBuffer, BOOL bEncrypted)
@@ -6929,13 +6910,12 @@ void ReceiveStorageGold(const BYTE* ReceiveBuffer)
         CharacterMachine->Gold = Data->Gold;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x81 [ReceiveStorageGold(%d %d %d)]", Data->Result, Data->StorageGold,
-                          Data->Gold);
+    mu::log::Get("network")->debug("0x81 [ReceiveStorageGold({} {} {})]", Data->Result, Data->StorageGold, Data->Gold);
 }
 
 void ReceiveStorageExit(const BYTE* ReceiveBuffer)
 {
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x82 [ReceiveStorageExit]");
+    mu::log::Get("network")->debug("0x82 [ReceiveStorageExit]");
 }
 
 void ReceiveStorageStatus(const BYTE* ReceiveBuffer)
@@ -7008,7 +6988,7 @@ void ReceivePartyList(const BYTE* ReceiveBuffer)
         Offset += sizeof(PRECEIVE_PARTY_LIST);
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
+    mu::log::Get("network")->debug("0x42 [ReceivePartyList(partynum : {})]", Data->Count);
 }
 
 void ReceivePartyInfo(const BYTE* ReceiveBuffer)
@@ -7390,7 +7370,7 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
 
     g_pNewUISystem->Show(SEASON3B::INTERFACE_BATTLE_SOCCER_SCORE);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x62 [ReceiveGuildBeginWar(%d)]", Data->Team);
+    mu::log::Get("network")->debug("0x62 [ReceiveGuildBeginWar({})]", Data->Team);
 }
 
 void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
@@ -7850,7 +7830,7 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer, int Size)
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x51 [Receive_Master_LevelUp]");
+    mu::log::Get("network")->debug("0x51 [Receive_Master_LevelUp]");
 }
 
 void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer, int Size)
@@ -7907,7 +7887,7 @@ void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer, int Size)
         Master_Level_Data.wMaxBP = Data->wMaxSkillMana;
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x50 [Receive_Master_Level_Exp]");
+    mu::log::Get("network")->debug("0x50 [Receive_Master_Level_Exp]");
 }
 
 void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
@@ -7962,7 +7942,7 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
     }
     Master_Level_Data.nMLevelUpMPoint = Data->MasterLevelUpPoints;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x52 [Receive_Master_LevelGetSkill]");
+    mu::log::Get("network")->debug("0x52 [Receive_Master_LevelGetSkill]");
 }
 
 void ReceiveServerCommand(const BYTE* ReceiveBuffer)
@@ -8156,7 +8136,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
 
 void ReceiveMixExit(const BYTE* ReceiveBuffer)
 {
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x87 [ReceiveMixExit]");
+    mu::log::Get("network")->debug("0x87 [ReceiveMixExit]");
 }
 
 void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
@@ -8557,7 +8537,7 @@ void ReceiveSetAttribute(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SET_MAPATTRIBUTE)ReceiveBuffer;
 
-    g_ErrorReport.Write(L"Type:%d \r\n", Data->m_byType);
+    mu::log::Get("network")->debug("Type:{}", Data->m_byType);
 
     switch (Data->m_byType)
     {
@@ -8573,7 +8553,7 @@ void ReceiveSetAttribute(const BYTE* ReceiveBuffer)
             int dx = Data->m_vAttribute[(k * 2) + 1].m_byX - Data->m_vAttribute[(k * 2)].m_byX + 1;
             int dy = Data->m_vAttribute[(k * 2) + 1].m_byY - Data->m_vAttribute[(k * 2)].m_byY + 1;
 
-            g_ErrorReport.Write(L"count:%d, x:%d, y:%d \r\n", Data->m_byCount, dx, dy);
+            mu::log::Get("network")->debug("count:{}, x:{}, y:{}", Data->m_byCount, dx, dy);
 
             AddTerrainAttributeRange(Data->m_vAttribute[(k * 2)].m_byX, Data->m_vAttribute[(k * 2)].m_byY, dx, dy,
                                      Data->m_byMapAttr, 1 - Data->m_byMapSetType);
@@ -8586,14 +8566,14 @@ void ReceiveSetAttribute(const BYTE* ReceiveBuffer)
         {
             if (Data->m_byMapSetType)
             {
-                g_ErrorReport.Write(L"SubTerrainAttribute - count:%d, x:%d, y:%d \r\n", Data->m_byCount,
-                                    Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
+                mu::log::Get("network")->debug("SubTerrainAttribute - count:{}, x:{}, y:{}", Data->m_byCount,
+                                               Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
                 SubTerrainAttribute(Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY, Data->m_byMapAttr);
             }
             else
             {
-                g_ErrorReport.Write(L"AddTerrainAttribute - count:%d, x:%d, y:%d \r\n", Data->m_byCount,
-                                    Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
+                mu::log::Get("network")->debug("AddTerrainAttribute - count:{}, x:{}, y:{}", Data->m_byCount,
+                                               Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY);
                 AddTerrainAttribute(Data->m_vAttribute[i].m_byX, Data->m_vAttribute[i].m_byY, Data->m_byMapAttr);
             }
         }
@@ -8923,7 +8903,7 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
 
         SocketClient->ToGameServer()->SendInventoryRequest();
 
-        g_ErrorReport.Write(L"@ [Fault] ReceiveSetPriceResult (result : %d)\n", Header->byResult);
+        mu::log::Get("network")->error("ReceiveSetPriceResult (result : {})", Header->byResult);
     }
 }
 
@@ -8938,7 +8918,7 @@ void ReceiveCreatePersonalShop(const BYTE* ReceiveBuffer)
     else
     {
         // Header->btResult == 0x03
-        g_ErrorReport.Write(L"@ [Fault] ReceiveCreatePersonalShop (result : %d)\n", Header->byResult);
+        mu::log::Get("network")->error("ReceiveCreatePersonalShop (result : {})", Header->byResult);
     }
 }
 void ReceiveDestroyPersonalShop(const BYTE* ReceiveBuffer)
@@ -8960,7 +8940,7 @@ void ReceiveDestroyPersonalShop(const BYTE* ReceiveBuffer)
     }
     else
     {
-        g_ErrorReport.Write(L"@ [Fault] ReceiveDestroyPersonalShop (result : %d)\n", Header->byResult);
+        mu::log::Get("network")->error("ReceiveDestroyPersonalShop (result : {})", Header->byResult);
     }
 }
 
@@ -9021,12 +9001,12 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
             }
             else
             {
-                g_ConsoleDebug->Write(MCD_ERROR,
-                                      L"[ReceivePersonalShopItemList]Item Count : %d, Item Index : %d, Item Price : %d",
-                                      Header->ItemCount, i, pShopItem->MoneyPrice);
+                mu::log::Get("network")->error(
+                    "[ReceivePersonalShopItemList]Item Count : {}, Item Index : {}, Item Price : {}", Header->ItemCount,
+                    i, pShopItem->MoneyPrice);
 
-                g_ErrorReport.Write(L"@ ReceivePersonalShopItemList - item price less than zero(%d)\n",
-                                    pShopItem->MoneyPrice);
+                mu::log::Get("network")->error("ReceivePersonalShopItemList - item price less than zero({})",
+                                               pShopItem->MoneyPrice);
 
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
@@ -9054,11 +9034,11 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
         break;
         case Fail2:
         default:
-            g_ErrorReport.Write(L"@ [Fault] ReceivePersonalShopItemList (result : %d)\n", Header->byResult);
+            mu::log::Get("network")->error("ReceivePersonalShopItemList (result : {})", Header->byResult);
         }
     }
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x05 [ReceivePersonalShopItemList]");
+    mu::log::Get("network")->debug("0x05 [ReceivePersonalShopItemList]");
 }
 
 void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
@@ -9134,11 +9114,11 @@ void ReceiveRefreshItemList(std::span<const BYTE> ReceiveBuffer)
             auto pCurrentInvenCtrl = g_pPurchaseShopInventory->GetInventoryCtrl();
 
             size_t uiCntInvenCtrl = pCurrentInvenCtrl->GetNumberOfItems();
-            g_ErrorReport.Write(L"@ [Notice] ReceiveRefreshItemList (InventoryCtrl Count Items(%d))\n", uiCntInvenCtrl);
+            mu::log::Get("network")->info("ReceiveRefreshItemList (InventoryCtrl Count Items({}))", uiCntInvenCtrl);
         }
         else
         {
-            g_ErrorReport.Write(L"@ [Fault] ReceiveRefreshItemList (result : %d)\n", Header->byResult);
+            mu::log::Get("network")->error("ReceiveRefreshItemList (result : {})", Header->byResult);
         }
     }
 }
@@ -9199,7 +9179,7 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         break;
         case PURCHASEITEM_RESULTINFO::ItemBlock:
         default:
-            g_ErrorReport.Write(L"@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->Result);
+            mu::log::Get("network")->error("ReceivePurchaseItem (result : {})", Header->Result);
         }
         SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
     }
@@ -10604,7 +10584,7 @@ void ReceiveChangeMapServerResult(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0xB1 [ReceiveChangeMapServerResult]");
+    mu::log::Get("network")->debug("0xB1 [ReceiveChangeMapServerResult]");
 }
 
 void ReceiveBCStatus(const BYTE* ReceiveBuffer)
@@ -11980,7 +11960,7 @@ void ReceiveCheckSumRequest(const BYTE* ReceiveBuffer)
     DWORD dwCheckSum = GetCheckSum(Data->Value);
     SocketClient->ToGameServer()->SendChecksumResponse(dwCheckSum);
 
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveCheckSumRequest]");
+    mu::log::Get("network")->debug("0x03 [ReceiveCheckSumRequest]");
 }
 
 extern int TimeRemain;
@@ -12932,9 +12912,7 @@ bool ReceiveEquippingInventoryItem(const BYTE* pReceiveBuffer)
     ITEM* pItem = g_pMyInventory->FindItem(iItemPos);
     pItem->Durability = iResult;
 
-#ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_RECEIVE, L"[0xBF][0x20]  [ReceiveEquippingInventoryItem]");
-#endif // CONSOLE_DEBUG
+    mu::log::Get("network")->debug("[0xBF][0x20]  [ReceiveEquippingInventoryItem]");
 
     return true;
 }
@@ -13049,16 +13027,19 @@ void ReceiveDarkside(const BYTE* ReceiveBuffer)
 
 static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 {
-    // Diagnostic: log first 10 packets from each connection to trace protocol flow.
+    // Diagnostic: log first 20 packets from each connection to trace protocol flow.
     static int s_pktCount = 0;
     if (++s_pktCount <= 20)
     {
-        fprintf(stderr, "[PKT #%d] size=%d header=0x%02X", s_pktCount, Size, ReceiveBuffer[0]);
-        if (Size >= 3)
-            fprintf(stderr, " byte2=0x%02X", ReceiveBuffer[2]);
+        auto net = mu::log::Get("network");
         if (Size >= 4)
-            fprintf(stderr, " byte3=0x%02X", ReceiveBuffer[3]);
-        fprintf(stderr, "\n");
+            net->debug("[PKT #{}] size={} header=0x{:02X} byte2=0x{:02X} byte3=0x{:02X}", s_pktCount, Size,
+                       ReceiveBuffer[0], ReceiveBuffer[2], ReceiveBuffer[3]);
+        else if (Size >= 3)
+            net->debug("[PKT #{}] size={} header=0x{:02X} byte2=0x{:02X}", s_pktCount, Size, ReceiveBuffer[0],
+                       ReceiveBuffer[2]);
+        else
+            net->debug("[PKT #{}] size={} header=0x{:02X}", s_pktCount, Size, ReceiveBuffer[0]);
     }
 
     auto received_span = std::span<const BYTE>(ReceiveBuffer, Size);
@@ -13114,7 +13095,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
                 break;
             case 0x06:
                 CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_VERSION);
-                g_ErrorReport.Write(L"Version dismatch. - Login\r\n");
+                mu::log::Get("network")->error("Version mismatch - Login");
                 break;
             case 0x07:
             default:
@@ -13206,7 +13187,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             subcode = Data->SubCode;
         }
 
-        g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF3][0x%02x]", subcode);
+        mu::log::Get("network")->debug("Recv [0xF3][0x{:02x}]", subcode);
 
         switch (subcode)
         {
@@ -14586,8 +14567,8 @@ void DrainPacketQueue()
     {
         if (s_dbgPacketsReceived > 0u || s_dbgPacketsProcessed > 0u)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"[NET diag] packets received=%u processed=%u queued=%zu",
-                                  s_dbgPacketsReceived, s_dbgPacketsProcessed, batch.size());
+            mu::log::Get("network")->info("[NET diag] packets received={} processed={} queued={}", s_dbgPacketsReceived,
+                                          s_dbgPacketsProcessed, batch.size());
         }
         s_dbgPacketsReceived = 0u;
         s_dbgPacketsProcessed = 0u;

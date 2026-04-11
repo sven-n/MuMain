@@ -5,7 +5,7 @@
 // See IPlatformAudio.h for the interface contract.
 
 #include "MiniAudioBackend.h"
-#include "ErrorReport.h"
+#include "MuLogger.h"
 #include "PlatformCompat.h"
 #include "mu_struct.h" // OBJECT forward decl — needed for void* → OBJECT* casts (Story 7.8.1)
 
@@ -54,8 +54,8 @@ bool MiniAudioBackend::Initialize()
     ma_result result = ma_engine_init(nullptr, &m_engine);
     if (result != MA_SUCCESS)
     {
-        g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::Initialize -- ma_engine_init failed (%d)\r\n",
-                            static_cast<int>(result));
+        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::Initialize -- ma_engine_init failed ({})",
+                                     static_cast<int>(result));
         return false;
     }
 
@@ -163,9 +163,10 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 
         if (result != MA_SUCCESS)
         {
-            g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::LoadSound -- ma_sound_init_from_file failed for '%ls' "
-                                L"channel %d (%d)\r\n",
-                                filename, ch, static_cast<int>(result));
+            mu::log::Get("audio")->error(
+                "AUDIO: MiniAudioBackend::LoadSound -- ma_sound_init_from_file failed for '{}' "
+                "channel {} ({})",
+                mu_wchar_to_utf8(filename), ch, static_cast<int>(result));
             // Uninit any channels already loaded for this slot
             for (int prev = 0; prev < ch; ++prev)
             {
@@ -500,8 +501,8 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 
     if (result != MA_SUCCESS)
     {
-        g_ErrorReport.Write(L"AUDIO: MiniAudioBackend::PlayMusic -- failed to init stream '%hs' (%d)\r\n", name,
-                            static_cast<int>(result));
+        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- failed to init stream '{}' ({})", name,
+                                     static_cast<int>(result));
         return;
     }
 

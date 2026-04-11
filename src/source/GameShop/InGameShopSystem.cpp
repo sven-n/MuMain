@@ -6,10 +6,7 @@
 #include "InGameShopSystem.h"
 #include "ZzzInventory.h"
 #include "MsgBoxIGSCommon.h"
-
-#ifdef CONSOLE_DEBUG
-
-#endif // CONSOLE_DEBUG
+#include "MuLogger.h"
 
 // cppcheck-suppress uninitMemberVar
 CInGameShopSystem::CInGameShopSystem()
@@ -138,11 +135,12 @@ bool CInGameShopSystem::ScriptDownload()
 
     m_CurrentScriptVerInfo = m_ScriptVerInfo;
 
-#ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt <IngameShop Script Download Success!!!>");
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Ver %d.%d.%d", m_ScriptVerInfo.Zone,
-                          m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
-#endif
+    {
+        auto logger = mu::log::Get("gameshop");
+        logger->info("InGameShopStatue.Txt <IngameShop Script Download Success!!!>");
+        logger->info("InGameShopStatue.Txt - Ver {}.{}.{}", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year,
+                     m_ScriptVerInfo.yearId);
+    }
     ShopOpenUnLock();
 
     CShopList* pShopList = m_ShopManager.GetListPtr();
@@ -218,26 +216,23 @@ bool CInGameShopSystem::BannerDownload()
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 bool CInGameShopSystem::IsScriptDownload()
 {
-#ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CInGameShopSystem::IsScriptDownload()");
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Script Ver %d.%d.%d", m_ScriptVerInfo.Zone,
-                          m_ScriptVerInfo.year, m_ScriptVerInfo.yearId);
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt - Current Ver %d.%d.%d", m_CurrentScriptVerInfo.Zone,
-                          m_CurrentScriptVerInfo.year, m_CurrentScriptVerInfo.yearId);
-#endif
+    {
+        auto logger = mu::log::Get("gameshop");
+        logger->info("InGameShopStatue.Txt CallStack - CInGameShopSystem::IsScriptDownload()");
+        logger->info("InGameShopStatue.Txt - Script Ver {}.{}.{}", m_ScriptVerInfo.Zone, m_ScriptVerInfo.year,
+                     m_ScriptVerInfo.yearId);
+        logger->info("InGameShopStatue.Txt - Current Ver {}.{}.{}", m_CurrentScriptVerInfo.Zone,
+                     m_CurrentScriptVerInfo.year, m_CurrentScriptVerInfo.yearId);
+    }
     if (((m_ScriptVerInfo.year == m_CurrentScriptVerInfo.year) &&
          (m_ScriptVerInfo.yearId == m_CurrentScriptVerInfo.yearId) &&
          (m_ScriptVerInfo.Zone == m_CurrentScriptVerInfo.Zone)) &&
         (m_bFirstScriptDownloaded == true))
     {
-#ifdef CONSOLE_DEBUG
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false");
-#endif
+        mu::log::Get("gameshop")->info("InGameShopStatue.Txt Return - false");
         return false;
     }
-#ifdef CONSOLE_DEBUG
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - true");
-#endif
+    mu::log::Get("gameshop")->info("InGameShopStatue.Txt Return - true");
     return true;
 }
 

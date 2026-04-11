@@ -18,8 +18,8 @@
 
 #include "UIControls.h"
 #include "ZzzOpenglUtil.h"
+#include "Core/MuLogger.h"
 #include "Scenes/SceneCommon.h"
-#include "Core/ErrorReport.h"
 
 #define MW_OK 0
 #define MW_CANCEL 1
@@ -192,8 +192,7 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
                 m_dDeltaTickSum = 0.0;
                 if (--m_nGameExit == 0)
                 {
-                    g_ErrorReport.Write(L"> Menu - Exit game.");
-                    g_ErrorReport.WriteCurrentTime();
+                    mu::log::Get("ui")->info("Menu - Exit game.");
                     ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
                 }
                 else

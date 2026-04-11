@@ -10,6 +10,7 @@
 #include "w_PetActionUnicorn.h"
 #include "w_PetProcess.h"
 #include "ReadScript.h"
+#include "MuLogger.h"
 
 PetInfoPtr PetInfo::Make()
 {
@@ -174,9 +175,9 @@ bool PetProcess::LoadData()
     FILE* fp = _wfopen(FileName, L"rb");
     if (fp == NULL)
     {
+        mu::log::Get("gameplay")->warn("{} - File not exist.", mu_wchar_to_utf8(FileName));
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 
@@ -206,9 +207,9 @@ bool PetProcess::LoadData()
 
     if (dwCheckSum != GenerateCheckSum2(Buffer, Size * _listSize, 0x7F1D))
     {
+        mu::log::Get("gameplay")->warn("{} - File corrupted.", mu_wchar_to_utf8(FileName));
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File corrupted.", FileName);
-        g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 

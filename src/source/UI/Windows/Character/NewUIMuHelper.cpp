@@ -9,6 +9,7 @@
 #include "NewUIMuHelper.h"
 #include "CharacterManager.h"
 #include "MuHelper.h"
+#include "Core/MuLogger.h"
 
 using namespace MUHelper;
 
@@ -519,7 +520,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
     int iButtonId = UpdateMouseBtnList();
     if (iButtonId != -1)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Clicked button [%d]", iButtonId);
+        mu::log::Get("ui")->info("[MU Helper] Clicked button [{}]", iButtonId);
 
         if (iButtonId == BUTTON_ID_HUNT_RANGE_ADD)
         {
@@ -603,7 +604,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
     {
         auto element = m_CheckBoxList[iCheckboxId];
         auto state = element.box->GetBoxState();
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Clicked checkbox [%d] state[%d]", iCheckboxId, state);
+        mu::log::Get("ui")->info("[MU Helper] Clicked checkbox [{}] state[{}]", iCheckboxId, state);
 
         if (iCheckboxId == CHECKBOX_ID_SKILL2_DELAY)
         {
@@ -678,7 +679,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
 
         if (iIconIndex != -1 && iIconIndex < MAX_SKILLS_SLOT)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Clicked skill slot [%d]", iIconIndex);
+            mu::log::Get("ui")->info("[MU Helper] Clicked skill slot [{}]", iIconIndex);
             m_iSelectedSkillSlot = iIconIndex;
 
             bool bPrevVisible = g_pNewUISystem->IsVisible(INTERFACE_MUHELPER_SKILL_LIST);
@@ -735,7 +736,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         int iSlotIndex = UpdateMouseIconList();
         if (iSlotIndex != -1)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Clicked slot slot [%d]", iSlotIndex);
+            mu::log::Get("ui")->info("[MU Helper] Clicked slot slot [{}]", iSlotIndex);
             m_aiSelectedSkills[iSlotIndex] = -1;
 
             auto cboxCombo = m_CheckBoxList[CHECKBOX_ID_COMBO];
@@ -973,7 +974,7 @@ void CNewUIMuHelper::SaveExtraItem()
     int iItemIndex = 0;
     for (const auto& item : _TempConfig.aExtraItems)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"%ls", item.c_str());
+        mu::log::Get("ui")->info("{}", mu_wchar_to_utf8(item.c_str()));
     }
 
     m_ItemInput.SetText(L"");
@@ -1629,8 +1630,7 @@ void CNewUIMuHelper::AssignSkill(int iSkill)
             m_aiSelectedSkills[m_iSelectedSkillSlot] = iSkill;
             ApplyConfigFromSkillSlot(m_iSelectedSkillSlot, iSkill);
 
-            g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Assign m_aiSelectedSkills[%d] = %d", m_iSelectedSkillSlot,
-                                  iSkill);
+            mu::log::Get("ui")->info("[MU Helper] Assign m_aiSelectedSkills[{}] = {}", m_iSelectedSkillSlot, iSkill);
         }
         else
         {
@@ -1928,7 +1928,7 @@ bool CNewUIMuHelperSkillList::UpdateMouseEvent()
         int skillId = UpdateMouseSkillList();
         if (skillId != -1)
         {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Clicked skill [%d]", skillId);
+            mu::log::Get("ui")->info("[MU Helper] Clicked skill [{}]", skillId);
             g_pNewUIMuHelper->AssignSkill(skillId);
             Show(false);
             return false;

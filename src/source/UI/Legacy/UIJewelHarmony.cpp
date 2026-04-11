@@ -5,6 +5,7 @@
 #include "ZzzTexture.h"
 #include "UIManager.h"
 #include "UIJewelHarmony.h"
+#include "Core/MuLogger.h"
 
 #define HARMONYJEWELOPTION_DATA_FILE                                                                                   \
     std::wstring(L"Data\\Local\\" + g_strSelectedML + L"\\JewelOfHarmonyOption_" + g_strSelectedML + L".bmd").c_str()
@@ -71,9 +72,9 @@ JewelHarmonyInfo::JewelHarmonyInfo()
 
     if (!Result)
     {
+        mu::log::Get("ui")->error("JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd file not found.");
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", L"JewelOfHarmonyOption.bmd && JewelOfHarmonySmelt.bmd");
-        g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
     }

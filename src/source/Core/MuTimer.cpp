@@ -3,7 +3,7 @@
 #include "stdafx.h"
 
 #include "MuTimer.h"
-#include "ErrorReport.h"
+#include "MuLogger.h"
 
 #include <algorithm>
 
@@ -102,10 +102,9 @@ void MuTimer::LogStats()
 
     // avg/elapsed/frames are session-wide totals; min/max reflect the current interval only
     // (reset per interval in FrameEnd() so each entry captures recent frame variance).
-    g_ErrorReport.Write(
-        L"PERF: MuTimer -- elapsed=%.0fs frames=%llu avg=%.1fms min=%.1fms max=%.1fms hitches=%llu fps=%.1f\r\n",
-        sessionElapsedS, static_cast<unsigned long long>(m_frameCount), avgFrameMs, minMs, m_maxFrameMs,
-        static_cast<unsigned long long>(m_hitchCount), GetFPS());
+    mu::log::Get("core")->info(
+        "PERF: MuTimer -- elapsed={:.0f}s frames={} avg={:.1f}ms min={:.1f}ms max={:.1f}ms hitches={} fps={:.1f}",
+        sessionElapsedS, m_frameCount, avgFrameMs, minMs, m_maxFrameMs, m_hitchCount, GetFPS());
 }
 
 } // namespace mu

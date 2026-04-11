@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "NewUICustomMessageBox.h"
+#include "Core/MuLogger.h"
 #include "DSPlaySound.h"
 #include "UIControls.h"
 #include "ZzzBMD.h"
@@ -2500,8 +2501,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBas
 CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessageBoxBase* pOwner,
                                                              const leaf::xstreambuf& xParam)
 {
-    g_ErrorReport.Write(L"> Menu - Exit game. ");
-    g_ErrorReport.WriteCurrentTime();
+    mu::log::Get("ui")->info("Menu - Exit game.");
 
     SaveOptions();
     SaveMacro(L"Data\\Macro.txt");
@@ -2515,7 +2515,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
         MUHelper::g_MuHelper.TriggerStop();
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(0);
-        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 0");
+        mu::log::Get("ui")->debug("0xF1 [SendRequestLogOut] 0");
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2531,8 +2531,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
     Suc_Or_Fail = -1;
     M34CryWolf1st::CryWolfMVPInit();
 
-    g_ErrorReport.Write(L"> Menu - Join another server. ");
-    g_ErrorReport.WriteCurrentTime();
+    mu::log::Get("ui")->info("Menu - Join another server.");
 
     SaveOptions();
     SaveMacro(L"Data\\Macro.txt");
@@ -2547,7 +2546,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
         g_pNewUIMng->ResetActiveUIObj();
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(2);
-        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
+        mu::log::Get("ui")->debug("0xF1 [SendRequestLogOut] 2");
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2563,8 +2562,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
     Suc_Or_Fail = -1;
     M34CryWolf1st::CryWolfMVPInit();
 
-    g_ErrorReport.Write(L"> Menu - Join with another character. ");
-    g_ErrorReport.WriteCurrentTime();
+    mu::log::Get("ui")->info("Menu - Join with another character.");
 
     //  게임내에서 설정한 데이터 저장.
     SaveOptions();
@@ -2580,7 +2578,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
         g_pNewUIMng->ResetActiveUIObj();
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(1);
-        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 1");
+        mu::log::Get("ui")->debug("0xF1 [SendRequestLogOut] 1");
     }
 
     PlayBuffer(SOUND_CLICK01);

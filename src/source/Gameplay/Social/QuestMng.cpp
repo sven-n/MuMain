@@ -9,6 +9,7 @@
 
 #include "NewUISystem.h"
 #include "UsefulDef.h"
+#include "MuLogger.h"
 
 #define QM_NPCDIALOGUE_FILE L"Data\\Local\\NPCDialogue.bmd"
 #define QM_QUESTPROGRESS_FILE L"Data\\Local\\QuestProgress.bmd"
@@ -38,9 +39,9 @@ void CQuestMng::LoadNPCDialogueScript()
     FILE* fp = ::_wfopen(QM_NPCDIALOGUE_FILE, L"rb");
     if (fp == NULL)
     {
+        mu::log::Get("gameplay")->error("{} file not found.", mu_wchar_to_utf8(QM_NPCDIALOGUE_FILE));
         wchar_t szMessage[256];
         mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_NPCDIALOGUE_FILE);
-        g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -69,9 +70,9 @@ void CQuestMng::LoadQuestProgressScript()
     FILE* fp = ::_wfopen(QM_QUESTPROGRESS_FILE, L"rb");
     if (fp == NULL)
     {
+        mu::log::Get("gameplay")->error("{} file not found.", mu_wchar_to_utf8(QM_QUESTPROGRESS_FILE));
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_QUESTPROGRESS_FILE);
-        g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -100,9 +101,9 @@ void CQuestMng::LoadQuestWordsScript()
     FILE* fp = ::_wfopen(QM_QUESTWORDS_FILE, L"rb");
     if (fp == NULL)
     {
+        mu::log::Get("gameplay")->error("{} file not found.", mu_wchar_to_utf8(QM_QUESTWORDS_FILE));
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", QM_QUESTWORDS_FILE);
-        g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;

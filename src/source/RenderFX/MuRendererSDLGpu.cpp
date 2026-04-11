@@ -28,7 +28,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "MuRenderer.h"
-#include "ErrorReport.h"
+#include "MuLogger.h"
 
 #include <array>
 #include <cmath>
@@ -196,7 +196,7 @@ PipelineSet GetPipelineSetFor(DrawMode mode)
     case DrawMode::QuadStrip:
         return PipelineSet::Pipelines3D;
     default:
-        g_ErrorReport.Write(L"RENDER: GetPipelineSetFor -- unknown DrawMode %d", static_cast<int>(mode));
+        mu::log::Get("render")->warn("GetPipelineSetFor -- unknown DrawMode {}", static_cast<int>(mode));
         return PipelineSet::Pipelines3D;
     }
 }
@@ -204,7 +204,7 @@ PipelineSet GetPipelineSetFor(DrawMode mode)
 // ---------------------------------------------------------------------------
 // Story 4.3.2 (AC-6): LoadShaderBlob
 // Loads a compiled shader blob from disk into a byte vector.
-// Returns empty vector on failure (caller logs via g_ErrorReport).
+// Returns empty vector on failure (caller logs via mu::log).
 // ---------------------------------------------------------------------------
 #ifdef MU_ENABLE_SDL3
 [[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* driver)
@@ -213,13 +213,13 @@ PipelineSet GetPipelineSetFor(DrawMode mode)
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open())
     {
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- shader blob not found: %hs", path.c_str());
+        mu::log::Get("render")->error("SDL_gpu -- shader blob not found: {}", path);
         return {};
     }
     const auto fileSize = static_cast<std::streamsize>(file.tellg());
     if (fileSize <= 0)
     {
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- shader blob empty: %hs", path.c_str());
+        mu::log::Get("render")->error("SDL_gpu -- shader blob empty: {}", path);
         return {};
     }
     file.seekg(0, std::ios::beg);
@@ -227,7 +227,7 @@ PipelineSet GetPipelineSetFor(DrawMode mode)
     file.read(reinterpret_cast<char*>(blob.data()), fileSize);
     if (!file)
     {
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- shader blob read error: %hs", path.c_str());
+        mu::log::Get("render")->error("SDL_gpu -- shader blob read error: {}", path);
         return {};
     }
     return blob;
@@ -564,7 +564,7 @@ std::pair<int, int> GetBlendFactors(BlendMode mode)
         // GL: GL_ONE_MINUS_SRC_COLOR, GL_ONE (EnableAlphaBlend2 in ZzzOpenglUtil.cpp)
         return {4, 2}; // SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR, SDL_GPU_BLENDFACTOR_ONE
     default:
-        g_ErrorReport.Write(L"RENDER: SDL_gpu::GetBlendFactors -- unknown BlendMode %d", static_cast<int>(mode));
+        mu::log::Get("render")->warn("SDL_gpu::GetBlendFactors -- unknown BlendMode {}", static_cast<int>(mode));
         return {7, 8}; // default to alpha blend
     }
 }
@@ -588,7 +588,7 @@ public:
         s_window = static_cast<SDL_Window*>(pNativeWindow);
         if (!s_window)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- Init called with null window pointer");
+            mu::log::Get("render")->error("SDL_gpu -- Init called with null window pointer");
             return false;
         }
 
@@ -600,16 +600,16 @@ public:
 
         if (!s_device)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- device creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- device creation failed: {}", SDL_GetError());
             return false;
         }
 
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- device driver: %hs", SDL_GetGPUDeviceDriver(s_device));
+        mu::log::Get("render")->info("SDL_gpu -- device driver: {}", SDL_GetGPUDeviceDriver(s_device));
 
         // Claim the window for the GPU device.
         if (!SDL_ClaimWindowForGPUDevice(s_device, s_window))
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_ClaimWindowForGPUDevice failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- SDL_ClaimWindowForGPUDevice failed: {}", SDL_GetError());
             SDL_DestroyGPUDevice(s_device);
             s_device = nullptr;
             return false;
@@ -620,7 +620,7 @@ public:
         const char* driverName = SDL_GetGPUDeviceDriver(s_device);
         if (!LoadShaders(driverName))
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- shader loading failed; cannot build pipelines");
+            mu::log::Get("render")->error("SDL_gpu -- shader loading failed; cannot build pipelines");
             SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
             SDL_DestroyGPUDevice(s_device);
             s_device = nullptr;
@@ -630,7 +630,7 @@ public:
         // Create blend mode pipelines (9 per set × 4 sets = 36 total).
         if (!CreatePipelines())
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- pipeline creation failed during Init");
+            mu::log::Get("render")->error("SDL_gpu -- pipeline creation failed during Init");
             ReleaseShaders();
             SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
             SDL_DestroyGPUDevice(s_device);
@@ -644,7 +644,7 @@ public:
         // Allocate per-frame vertex scratch buffers.
         if (!CreateVertexBuffers())
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- vertex buffer creation failed");
+            mu::log::Get("render")->error("SDL_gpu -- vertex buffer creation failed");
             DestroyPipelines();
             SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
             SDL_DestroyGPUDevice(s_device);
@@ -655,7 +655,7 @@ public:
         // Create static quad index buffer.
         if (!CreateQuadIndexBuffer())
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- quad index buffer creation failed");
+            mu::log::Get("render")->error("SDL_gpu -- quad index buffer creation failed");
             DestroyVertexBuffers();
             DestroyPipelines();
             SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
@@ -676,7 +676,7 @@ public:
             s_defaultSampler = SDL_CreateGPUSampler(s_device, &samplerInfo);
             if (!s_defaultSampler)
             {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu -- sampler creation failed: %hs", SDL_GetError());
+                mu::log::Get("render")->error("SDL_gpu -- sampler creation failed: {}", SDL_GetError());
                 DestroyQuadIndexBuffer();
                 DestroyVertexBuffers();
                 DestroyPipelines();
@@ -690,7 +690,7 @@ public:
         // Create default white 1×1 texture (fallback for textureId==0 and unknowns).
         if (!CreateWhiteTexture())
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- white texture creation failed");
+            mu::log::Get("render")->error("SDL_gpu -- white texture creation failed");
             SDL_ReleaseGPUSampler(s_device, s_defaultSampler);
             s_defaultSampler = nullptr;
             DestroyQuadIndexBuffer();
@@ -705,7 +705,7 @@ public:
         // Story 4.3.2 (AC-10): Create fog uniform GPU buffer and transfer buffer.
         if (!CreateFogUniformBuffers())
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- fog uniform buffer creation failed");
+            mu::log::Get("render")->error("SDL_gpu -- fog uniform buffer creation failed");
             if (s_whiteTexture)
             {
                 SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
@@ -737,7 +737,7 @@ public:
         // Story 7.9.8 (AC-2): Initialize SDL_ttf GPU text engine.
         if (!TTF_Init())
         {
-            g_ErrorReport.Write(L"RENDER: SDL_ttf -- TTF_Init failed: %hs", SDL_GetError());
+            mu::log::Get("render")->warn("SDL_ttf -- TTF_Init failed: {}", SDL_GetError());
             // Non-fatal: renderer works, text won't render via SDL_ttf.
         }
         else
@@ -745,7 +745,7 @@ public:
             s_textEngine = TTF_CreateGPUTextEngine(s_device);
             if (!s_textEngine)
             {
-                g_ErrorReport.Write(L"RENDER: SDL_ttf -- TTF_CreateGPUTextEngine failed: %hs", SDL_GetError());
+                mu::log::Get("render")->warn("SDL_ttf -- TTF_CreateGPUTextEngine failed: {}", SDL_GetError());
                 TTF_Quit();
             }
             else
@@ -753,20 +753,20 @@ public:
                 const std::string fontPath = FindFontPath();
                 if (fontPath.empty())
                 {
-                    g_ErrorReport.Write(L"RENDER: SDL_ttf -- no .ttf font found (checked Data/Font/ and system paths)");
+                    mu::log::Get("render")->warn("SDL_ttf -- no .ttf font found (checked Data/Font/ and system paths)");
                 }
                 else
                 {
                     s_ttfFont = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
                     if (!s_ttfFont)
                     {
-                        g_ErrorReport.Write(L"RENDER: SDL_ttf -- TTF_OpenFont(\"%hs\") failed: %hs", fontPath.c_str(),
-                                            SDL_GetError());
+                        mu::log::Get("render")->warn("SDL_ttf -- TTF_OpenFont(\"{}\") failed: {}", fontPath,
+                                                     SDL_GetError());
                     }
                     else
                     {
-                        g_ErrorReport.Write(L"RENDER: SDL_ttf -- loaded font \"%hs\" at %.0f pt", fontPath.c_str(),
-                                            k_DefaultFontPtSize);
+                        mu::log::Get("render")->info("SDL_ttf -- loaded font \"{}\" at {:.0f} pt", fontPath,
+                                                     k_DefaultFontPtSize);
 
                         // F-1 fix: Pre-load font variants for bold, big, and fixed-width text.
                         // All variants use the same .ttf file at different sizes.
@@ -779,8 +779,8 @@ public:
                         // Log which variants loaded (non-fatal if some fail).
                         if (!s_ttfFontBold || !s_ttfFontBig || !s_ttfFontFixed)
                         {
-                            g_ErrorReport.Write(
-                                L"RENDER: SDL_ttf -- some font variants failed to load (bold=%d big=%d fixed=%d)",
+                            mu::log::Get("render")->warn(
+                                "SDL_ttf -- some font variants failed to load (bold={} big={} fixed={})",
                                 s_ttfFontBold != nullptr, s_ttfFontBig != nullptr, s_ttfFontFixed != nullptr);
                         }
 
@@ -807,11 +807,11 @@ public:
             }
         }
 
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- Init complete");
+        mu::log::Get("render")->info("SDL_gpu -- Init complete");
         return true;
 #else
         (void)pNativeWindow;
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- Init called but MU_ENABLE_SDL3 is not defined");
+        mu::log::Get("render")->error("SDL_gpu -- Init called but MU_ENABLE_SDL3 is not defined");
         return false;
 #endif
     }
@@ -901,7 +901,7 @@ public:
         s_device = nullptr;
         s_window = nullptr;
 
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- Shutdown complete");
+        mu::log::Get("render")->info("SDL_gpu -- Shutdown complete");
 #endif
     }
 
@@ -920,7 +920,7 @@ public:
         s_cmdBuf = SDL_AcquireGPUCommandBuffer(s_device);
         if (!s_cmdBuf)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_AcquireGPUCommandBuffer failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- SDL_AcquireGPUCommandBuffer failed: {}", SDL_GetError());
             return;
         }
 
@@ -943,8 +943,8 @@ public:
         s_vtxMappedPtr = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, false);
         if (!s_vtxMappedPtr)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- BeginFrame: failed to map vertex transfer buffer: %hs",
-                                SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- BeginFrame: failed to map vertex transfer buffer: {}",
+                                          SDL_GetError());
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             return;
@@ -956,7 +956,7 @@ public:
 
         if (!SDL_AcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- SDL_AcquireGPUSwapchainTexture failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- SDL_AcquireGPUSwapchainTexture failed: {}", SDL_GetError());
             SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
             s_vtxMappedPtr = nullptr;
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
@@ -1182,127 +1182,127 @@ public:
             // Skip replay if textures were unloaded mid-frame — deferred commands
             // may hold dangling GPU pointers. The frame renders as a blank clear.
             if (!s_texturesInvalidated)
-            for (const auto& cmd : s_renderCmds)
-            {
-                switch (cmd.type)
+                for (const auto& cmd : s_renderCmds)
                 {
-                case RenderCmdType::SetViewport:
-                {
-                    // const_cast: SDL_SetGPUViewport takes a non-const pointer but
-                    // does not modify the viewport struct.
-                    auto vp = cmd.viewport;
-                    SDL_SetGPUViewport(s_renderPass, &vp);
-                    break;
-                }
-
-                case RenderCmdType::DrawTriangles:
-                {
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                    break;
-                }
-
-                case RenderCmdType::DrawIndexedQuads2D:
-                {
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUBufferBinding idxBind{};
-                    idxBind.buffer = s_quadIdxBuf;
-                    idxBind.offset = 0;
-                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-                    // Guard against dangling sampler/texture — scene transitions may
-                    // unload assets mid-frame before EndFrame replays deferred commands.
-                    if (!cmd.texture || !cmd.sampler)
+                    switch (cmd.type)
                     {
+                    case RenderCmdType::SetViewport:
+                    {
+                        // const_cast: SDL_SetGPUViewport takes a non-const pointer but
+                        // does not modify the viewport struct.
+                        auto vp = cmd.viewport;
+                        SDL_SetGPUViewport(s_renderPass, &vp);
                         break;
                     }
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
 
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
-                    break;
-                }
-
-                case RenderCmdType::DrawIndexedStrip:
-                {
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUBufferBinding idxBind{};
-                    idxBind.buffer = s_stripIdxBuf;
-                    idxBind.offset = cmd.stripIdxOffset;
-                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-                    // Guard against dangling sampler/texture — scene transitions may
-                    // unload assets mid-frame before EndFrame replays deferred commands.
-                    if (!cmd.texture || !cmd.sampler)
+                    case RenderCmdType::DrawTriangles:
                     {
+                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                        SDL_GPUBufferBinding vtxBind{};
+                        vtxBind.buffer = s_vtxGpuBuf;
+                        vtxBind.offset = cmd.vtxOffset;
+                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                        SDL_GPUTextureSamplerBinding sampBind{};
+                        sampBind.texture = cmd.texture;
+                        sampBind.sampler = cmd.sampler;
+                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                        SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
                         break;
                     }
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
 
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
-                    break;
-                }
-
-                case RenderCmdType::DrawTriangles2D:
-                {
-                    if (!cmd.texture || !cmd.sampler)
+                    case RenderCmdType::DrawIndexedQuads2D:
                     {
+                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                        SDL_GPUBufferBinding vtxBind{};
+                        vtxBind.buffer = s_vtxGpuBuf;
+                        vtxBind.offset = cmd.vtxOffset;
+                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                        SDL_GPUBufferBinding idxBind{};
+                        idxBind.buffer = s_quadIdxBuf;
+                        idxBind.offset = 0;
+                        SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
+                        // Guard against dangling sampler/texture — scene transitions may
+                        // unload assets mid-frame before EndFrame replays deferred commands.
+                        if (!cmd.texture || !cmd.sampler)
+                        {
+                            break;
+                        }
+                        SDL_GPUTextureSamplerBinding sampBind{};
+                        sampBind.texture = cmd.texture;
+                        sampBind.sampler = cmd.sampler;
+                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                        SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
                         break;
                     }
-                    // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
 
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+                    case RenderCmdType::DrawIndexedStrip:
+                    {
+                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
 
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+                        SDL_GPUBufferBinding vtxBind{};
+                        vtxBind.buffer = s_vtxGpuBuf;
+                        vtxBind.offset = cmd.vtxOffset;
+                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
 
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                    break;
-                }
-                } // switch
-            } // for
+                        SDL_GPUBufferBinding idxBind{};
+                        idxBind.buffer = s_stripIdxBuf;
+                        idxBind.offset = cmd.stripIdxOffset;
+                        SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
+                        // Guard against dangling sampler/texture — scene transitions may
+                        // unload assets mid-frame before EndFrame replays deferred commands.
+                        if (!cmd.texture || !cmd.sampler)
+                        {
+                            break;
+                        }
+                        SDL_GPUTextureSamplerBinding sampBind{};
+                        sampBind.texture = cmd.texture;
+                        sampBind.sampler = cmd.sampler;
+                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                        SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
+                        break;
+                    }
+
+                    case RenderCmdType::DrawTriangles2D:
+                    {
+                        if (!cmd.texture || !cmd.sampler)
+                        {
+                            break;
+                        }
+                        // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
+                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                        SDL_GPUBufferBinding vtxBind{};
+                        vtxBind.buffer = s_vtxGpuBuf;
+                        vtxBind.offset = cmd.vtxOffset;
+                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                        SDL_GPUTextureSamplerBinding sampBind{};
+                        sampBind.texture = cmd.texture;
+                        sampBind.sampler = cmd.sampler;
+                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                        SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                        break;
+                    }
+                    } // switch
+                } // for
 
             SDL_EndGPURenderPass(s_renderPass);
             s_renderPass = nullptr;
@@ -1540,14 +1540,14 @@ public:
     // Story 4.4.1 (AC-2, Task 6.2/6.3): GetDevice override — returns s_device.
     // Allows GlobalBitmap.cpp to obtain the SDL_GPUDevice* via mu::GetRenderer().GetDevice()
     // without a direct dependency on MuRendererSDLGpu.cpp internals.
-    // Logs a warning via g_ErrorReport if s_device is nullptr (renderer not initialized).
+    // Logs a warning via mu::log if s_device is nullptr (renderer not initialized).
     // -----------------------------------------------------------------------
 #ifdef MU_ENABLE_SDL3
     [[nodiscard]] void* GetDevice() override
     {
         if (!s_device)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- GetDevice() called before Init() or after Shutdown()");
+            mu::log::Get("render")->warn("SDL_gpu -- GetDevice() called before Init() or after Shutdown()");
         }
         return s_device;
     }
@@ -1681,15 +1681,15 @@ public:
 
         if (vertices.size() % 4 != 0)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuad2D -- vertex count %zu not divisible by 4",
-                                vertices.size());
+            mu::log::Get("render")->warn("SDL_gpu::RenderQuad2D -- vertex count {} not divisible by 4",
+                                         vertices.size());
             return;
         }
 
         void* pTex = LookupTexture(textureId);
         if (!pTex)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuad2D -- unknown textureId %u, skipping", textureId);
+            mu::log::Get("render")->warn("SDL_gpu::RenderQuad2D -- unknown textureId {}, skipping", textureId);
             return;
         }
 
@@ -1721,8 +1721,8 @@ public:
         const Uint32 numQuads = static_cast<Uint32>(vertices.size() / 4);
         if (numQuads > static_cast<Uint32>(k_MaxQuads))
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuad2D -- numQuads %u exceeds k_MaxQuads %d; clamping draw",
-                                numQuads, k_MaxQuads);
+            mu::log::Get("render")->warn("SDL_gpu::RenderQuad2D -- numQuads {} exceeds k_MaxQuads {}; clamping draw",
+                                         numQuads, k_MaxQuads);
         }
         const Uint32 drawQuads =
             (numQuads <= static_cast<Uint32>(k_MaxQuads)) ? numQuads : static_cast<Uint32>(k_MaxQuads);
@@ -1767,8 +1767,8 @@ public:
 
         if (vertices.size() % 3 != 0)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderTriangles -- vertex count %zu not divisible by 3",
-                                vertices.size());
+            mu::log::Get("render")->warn("SDL_gpu::RenderTriangles -- vertex count {} not divisible by 3",
+                                         vertices.size());
             return;
         }
 
@@ -1776,7 +1776,7 @@ public:
         void* pTex = LookupTexture(resolvedTexId);
         if (!pTex)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderTriangles -- unknown textureId %u, skipping", textureId);
+            mu::log::Get("render")->warn("SDL_gpu::RenderTriangles -- unknown textureId {}, skipping", textureId);
             return;
         }
 
@@ -1847,7 +1847,7 @@ public:
         void* pTex = LookupTexture(resolvedTexId);
         if (!pTex)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu::RenderQuadStrip -- unknown textureId %u, skipping", textureId);
+            mu::log::Get("render")->warn("SDL_gpu::RenderQuadStrip -- unknown textureId {}, skipping", textureId);
             return;
         }
 
@@ -2059,14 +2059,14 @@ public:
             if (m_mvStackTop < k_MatrixStackDepth)
                 m_mvStack[m_mvStackTop++] = m_modelViewMatrix;
             else
-                g_ErrorReport.Write(L"RENDER: modelview matrix stack overflow (depth %d)", k_MatrixStackDepth);
+                mu::log::Get("render")->warn("modelview matrix stack overflow (depth {})", k_MatrixStackDepth);
         }
         else
         {
             if (m_projStackTop < k_MatrixStackDepth)
                 m_projStack[m_projStackTop++] = m_projMatrix;
             else
-                g_ErrorReport.Write(L"RENDER: projection matrix stack overflow (depth %d)", k_MatrixStackDepth);
+                mu::log::Get("render")->warn("projection matrix stack overflow (depth {})", k_MatrixStackDepth);
         }
     }
 
@@ -2077,14 +2077,14 @@ public:
             if (m_mvStackTop > 0)
                 m_modelViewMatrix = m_mvStack[--m_mvStackTop];
             else
-                g_ErrorReport.Write(L"RENDER: modelview matrix stack underflow");
+                mu::log::Get("render")->warn("modelview matrix stack underflow");
         }
         else
         {
             if (m_projStackTop > 0)
                 m_projMatrix = m_projStack[--m_projStackTop];
             else
-                g_ErrorReport.Write(L"RENDER: projection matrix stack underflow");
+                mu::log::Get("render")->warn("projection matrix stack underflow");
         }
         UpdateMVP();
     }
@@ -2219,8 +2219,8 @@ private:
         const Uint32 alignedOffset = (s_vtxOffset + 3u) & ~3u; // 4-byte alignment
         if (alignedOffset + byteSize > k_VertexBufferSize)
         {
-            g_ErrorReport.Write(
-                L"RENDER: SDL_gpu -- vertex scratch buffer overflow (offset %u + size %u > capacity %u)", alignedOffset,
+            mu::log::Get("render")->error(
+                "SDL_gpu -- vertex scratch buffer overflow (offset {} + size {} > capacity {})", alignedOffset,
                 byteSize, k_VertexBufferSize);
             return ~0u;
         }
@@ -2264,12 +2264,12 @@ private:
             {
                 if (fatal)
                 {
-                    g_ErrorReport.Write(L"RENDER: SDL_gpu -- FATAL: failed to load shader blob %hs.%hs", name, stage);
+                    mu::log::Get("render")->error("SDL_gpu -- FATAL: failed to load shader blob {}.{}", name, stage);
                 }
                 else
                 {
-                    g_ErrorReport.Write(L"RENDER: SDL_gpu -- WARNING: failed to load shader blob %hs.%hs (non-fatal)",
-                                        name, stage);
+                    mu::log::Get("render")->warn("SDL_gpu -- failed to load shader blob {}.{} (non-fatal)", name,
+                                                 stage);
                 }
                 return nullptr;
             }
@@ -2291,14 +2291,13 @@ private:
             {
                 if (fatal)
                 {
-                    g_ErrorReport.Write(L"RENDER: SDL_gpu -- FATAL: SDL_CreateGPUShader failed for %hs.%hs: %hs", name,
-                                        stage, SDL_GetError());
+                    mu::log::Get("render")->error("SDL_gpu -- FATAL: SDL_CreateGPUShader failed for {}.{}: {}", name,
+                                                  stage, SDL_GetError());
                 }
                 else
                 {
-                    g_ErrorReport.Write(
-                        L"RENDER: SDL_gpu -- WARNING: SDL_CreateGPUShader failed for %hs.%hs: %hs (non-fatal)", name,
-                        stage, SDL_GetError());
+                    mu::log::Get("render")->warn("SDL_gpu -- SDL_CreateGPUShader failed for {}.{}: {} (non-fatal)",
+                                                 name, stage, SDL_GetError());
                 }
             }
             return shader;
@@ -2343,7 +2342,7 @@ private:
         s_vertShaderShadow =
             createShader("shadow_volume", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/false);
 
-        g_ErrorReport.Write(L"RENDER: SDL_gpu -- shaders loaded for driver: %hs", driverName ? driverName : "unknown");
+        mu::log::Get("render")->info("SDL_gpu -- shaders loaded for driver: {}", driverName ? driverName : "unknown");
         return true;
     }
 
@@ -2502,8 +2501,8 @@ private:
         SDL_GPUGraphicsPipeline* pipeline = SDL_CreateGPUGraphicsPipeline(s_device, &pipelineInfo);
         if (!pipeline)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- pipeline creation failed (%hs layout): %hs",
-                                bUse3DLayout ? "3D" : "2D", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- pipeline creation failed ({} layout): {}",
+                                          bUse3DLayout ? "3D" : "2D", SDL_GetError());
         }
         return pipeline;
     }
@@ -2572,30 +2571,30 @@ private:
             s_pipelines2D[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/false);
             if (!s_pipelines2D[i])
             {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 2D pipeline[%d] creation failed: %hs", i, SDL_GetError());
+                mu::log::Get("render")->error("SDL_gpu -- 2D pipeline[{}] creation failed: {}", i, SDL_GetError());
             }
 
             // 2D depth OFF.
             s_pipelines2DDepthOff[i] = BuildBlendPipeline(blendState, false, false, /*bUse3DLayout=*/false);
             if (!s_pipelines2DDepthOff[i])
             {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 2D depth-off pipeline[%d] creation failed: %hs", i,
-                                    SDL_GetError());
+                mu::log::Get("render")->error("SDL_gpu -- 2D depth-off pipeline[{}] creation failed: {}", i,
+                                              SDL_GetError());
             }
 
             // 3D depth ON (test+write) — opaque geometry.
             s_pipelines3D[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true);
             if (!s_pipelines3D[i])
             {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 3D pipeline[%d] creation failed: %hs", i, SDL_GetError());
+                mu::log::Get("render")->error("SDL_gpu -- 3D pipeline[{}] creation failed: {}", i, SDL_GetError());
             }
 
             // 3D depth OFF.
             s_pipelines3DDepthOff[i] = BuildBlendPipeline(blendState, false, false, /*bUse3DLayout=*/true);
             if (!s_pipelines3DDepthOff[i])
             {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 3D depth-off pipeline[%d] creation failed: %hs", i,
-                                    SDL_GetError());
+                mu::log::Get("render")->error("SDL_gpu -- 3D depth-off pipeline[{}] creation failed: {}", i,
+                                              SDL_GetError());
             }
 
             // Story 7.9.7: 3D depth read-only (test ON, write OFF) — for transparent/additive particles.
@@ -2604,8 +2603,8 @@ private:
             s_pipelines3DDepthReadOnly[i] = BuildBlendPipeline(blendState, true, false, /*bUse3DLayout=*/true);
             if (!s_pipelines3DDepthReadOnly[i])
             {
-                g_ErrorReport.Write(L"RENDER: SDL_gpu -- 3D depth-readonly pipeline[%d] creation failed: %hs", i,
-                                    SDL_GetError());
+                mu::log::Get("render")->error("SDL_gpu -- 3D depth-readonly pipeline[{}] creation failed: {}", i,
+                                              SDL_GetError());
             }
         }
 
@@ -2677,8 +2676,8 @@ private:
         s_depthTexture = SDL_CreateGPUTexture(s_device, &depthInfo);
         if (!s_depthTexture)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- depth texture creation failed (%ux%u): %hs", width, height,
-                                SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- depth texture creation failed ({}x{}): {}", width, height,
+                                          SDL_GetError());
             s_depthW = 0u;
             s_depthH = 0u;
             return false;
@@ -2703,7 +2702,7 @@ private:
         s_fogTransferBuf = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
         if (!s_fogTransferBuf)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- fog transfer buffer creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- fog transfer buffer creation failed: {}", SDL_GetError());
             return false;
         }
 
@@ -2713,7 +2712,7 @@ private:
         s_fogUniformBuf = SDL_CreateGPUBuffer(s_device, &bufInfo);
         if (!s_fogUniformBuf)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- fog uniform GPU buffer creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- fog uniform GPU buffer creation failed: {}", SDL_GetError());
             SDL_ReleaseGPUTransferBuffer(s_device, s_fogTransferBuf);
             s_fogTransferBuf = nullptr;
             return false;
@@ -2733,7 +2732,7 @@ private:
         s_vtxTransferBuf = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
         if (!s_vtxTransferBuf)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- vertex transfer buffer creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- vertex transfer buffer creation failed: {}", SDL_GetError());
             return false;
         }
 
@@ -2743,7 +2742,7 @@ private:
         s_vtxGpuBuf = SDL_CreateGPUBuffer(s_device, &bufInfo);
         if (!s_vtxGpuBuf)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- vertex GPU buffer creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- vertex GPU buffer creation failed: {}", SDL_GetError());
             SDL_ReleaseGPUTransferBuffer(s_device, s_vtxTransferBuf);
             s_vtxTransferBuf = nullptr;
             return false;
@@ -2801,7 +2800,7 @@ private:
         SDL_GPUCommandBuffer* uploadCmd = SDL_AcquireGPUCommandBuffer(s_device);
         if (!uploadCmd)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- failed to acquire command buffer for index upload");
+            mu::log::Get("render")->error("SDL_gpu -- failed to acquire command buffer for index upload");
             return false;
         }
 
@@ -2811,7 +2810,7 @@ private:
         SDL_GPUTransferBuffer* idxTransfer = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
         if (!idxTransfer)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- quad index transfer buffer creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- quad index transfer buffer creation failed: {}", SDL_GetError());
             SDL_CancelGPUCommandBuffer(uploadCmd);
             return false;
         }
@@ -2819,7 +2818,7 @@ private:
         void* pMapped = SDL_MapGPUTransferBuffer(s_device, idxTransfer, false);
         if (!pMapped)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- failed to map quad index transfer buffer");
+            mu::log::Get("render")->error("SDL_gpu -- failed to map quad index transfer buffer");
             SDL_ReleaseGPUTransferBuffer(s_device, idxTransfer);
             SDL_CancelGPUCommandBuffer(uploadCmd);
             return false;
@@ -2833,7 +2832,7 @@ private:
         s_quadIdxBuf = SDL_CreateGPUBuffer(s_device, &bufInfo);
         if (!s_quadIdxBuf)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- quad index GPU buffer creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- quad index GPU buffer creation failed: {}", SDL_GetError());
             SDL_ReleaseGPUTransferBuffer(s_device, idxTransfer);
             SDL_CancelGPUCommandBuffer(uploadCmd);
             return false;
@@ -2842,7 +2841,7 @@ private:
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmd);
         if (!copyPass)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- failed to begin copy pass for index upload");
+            mu::log::Get("render")->error("SDL_gpu -- failed to begin copy pass for index upload");
             SDL_ReleaseGPUBuffer(s_device, s_quadIdxBuf);
             s_quadIdxBuf = nullptr;
             SDL_ReleaseGPUTransferBuffer(s_device, idxTransfer);
@@ -2903,7 +2902,7 @@ private:
         s_stripIdxTransfer = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
         if (!s_stripIdxTransfer)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- strip index transfer buffer creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- strip index transfer buffer creation failed: {}", SDL_GetError());
             return false;
         }
 
@@ -2913,7 +2912,7 @@ private:
         s_stripIdxBuf = SDL_CreateGPUBuffer(s_device, &bufInfo);
         if (!s_stripIdxBuf)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- strip index GPU buffer creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- strip index GPU buffer creation failed: {}", SDL_GetError());
             SDL_ReleaseGPUTransferBuffer(s_device, s_stripIdxTransfer);
             s_stripIdxTransfer = nullptr;
             return false;
@@ -2939,7 +2938,7 @@ private:
         s_whiteTexture = SDL_CreateGPUTexture(s_device, &texInfo);
         if (!s_whiteTexture)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- white texture creation failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- white texture creation failed: {}", SDL_GetError());
             return false;
         }
 
@@ -2953,7 +2952,7 @@ private:
         SDL_GPUTransferBuffer* pixelTransfer = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
         if (!pixelTransfer)
         {
-            g_ErrorReport.Write(L"RENDER: SDL_gpu -- white texture transfer buffer failed: %hs", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- white texture transfer buffer failed: {}", SDL_GetError());
             SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
             s_whiteTexture = nullptr;
             return false;

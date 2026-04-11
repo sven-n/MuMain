@@ -136,7 +136,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     {
     case MONSTER_WEREWOLFHERO:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_WEREWOLF_HERO);
+        OpenMonsterModel(MONSTER_MODEL_WEREWOLF_HERO);
         pCharacter = CreateCharacter(Key, MODEL_WEREWOLF_HERO, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;
@@ -147,7 +147,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case MONSTER_VALAM:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_VALAM);
+        OpenMonsterModel(MONSTER_MODEL_VALAM);
         pCharacter = CreateCharacter(Key, MODEL_VALAM, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -160,7 +160,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case MONSTER_SOLAM:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SOLAM);
+        OpenMonsterModel(MONSTER_MODEL_SOLAM);
         pCharacter = CreateCharacter(Key, MODEL_SOLAM, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -169,7 +169,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case MONSTER_SCOUT:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SCOUT);
+        OpenMonsterModel(MONSTER_MODEL_SCOUT);
         pCharacter = CreateCharacter(Key, MODEL_SCOUT, PosX, PosY);
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
@@ -178,7 +178,7 @@ CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int
     break;
     case MONSTER_HAMMER_SCOUT:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BALRAM);
+        OpenMonsterModel(MONSTER_MODEL_BALRAM);
         pCharacter = CreateCharacter(Key, MODEL_BALRAM, PosX, PosY);
         pCharacter->Object.Scale = 1.25f;
         pCharacter->Weapon[0].Type = -1;

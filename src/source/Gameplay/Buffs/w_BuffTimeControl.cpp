@@ -8,6 +8,7 @@
 #include "w_BuffTimeControl.h"
 #include "w_BuffScriptLoader.h"
 #include "_GlobalFunctions.h"
+#include "MuLogger.h"
 
 BuffTimeControlPtr BuffTimeControl::Make()
 {
@@ -122,7 +123,7 @@ bool BuffTimeControl::UnRegisterBuffTime(eBuffState bufftype)
     if (iter != m_BuffTimeList.end())
     {
         ::KillTimer(g_hWnd, bufftimetype);
-        g_ConsoleDebug->Write(MCD_NORMAL, L"[Buff End] No. %d\r\n", bufftimetype);
+        mu::log::Get("gameplay")->info("[Buff End] No. {}", bufftimetype);
 
         m_BuffTimeList.erase(iter);
         return true;

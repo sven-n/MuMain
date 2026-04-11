@@ -14,6 +14,7 @@
 #include "SceneCore.h"
 #include "ZzzInterface.h"
 #include "SceneCommon.h"
+#include "Core/MuLogger.h"
 
 #ifdef _EDITOR
 #include "Core/MuEditorCore.h"
@@ -63,7 +64,7 @@ extern EGameScene SceneFlag;
 
 void LoadingScene(HDC hDC)
 {
-    g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_Start");
+    mu::log::Get("scenes")->info("LoadingScene_Start");
 
     CUIMng& rUIMng = CUIMng::Instance();
     if (!InitLoading)
@@ -114,5 +115,5 @@ void LoadingScene(HDC hDC)
 
     ::ClearInput();
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_End");
+    mu::log::Get("scenes")->info("LoadingScene_End");
 }

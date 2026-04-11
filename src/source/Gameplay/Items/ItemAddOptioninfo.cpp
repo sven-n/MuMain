@@ -8,6 +8,7 @@
 #include "UIManager.h"
 
 #include "ItemAddOptioninfo.h"
+#include "MuLogger.h"
 
 #define ITEMADDOPTION_DATA_FILE L"Data\\Local\\ItemAddOption.bmd"
 
@@ -25,9 +26,9 @@ ItemAddOptioninfo::ItemAddOptioninfo()
 
     if (!Result)
     {
+        mu::log::Get("gameplay")->warn("{} file not found.", mu_wchar_to_utf8(ITEMADDOPTION_DATA_FILE));
         wchar_t szMessage[256];
         ::mu_swprintf(szMessage, L"%ls file not found.\r\n", ITEMADDOPTION_DATA_FILE);
-        g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
     }

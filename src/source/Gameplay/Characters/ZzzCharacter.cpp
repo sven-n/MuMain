@@ -47,6 +47,7 @@
 #include "MonkSystem.h"
 #include <NewUISystem.h>
 #include "_GlobalFunctions.h"
+#include "MuLogger.h"
 
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
@@ -13385,7 +13386,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     switch (Type)
     {
     case MONSTER_GUARDSMAN:
-        LOG_CALL(OpenNpc, MODEL_NPC_CLERK); //
+        OpenNpc(MODEL_NPC_CLERK); //
         c = CreateCharacter(Key, MODEL_NPC_CLERK, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         c->Object.Scale = 1.f;
@@ -13396,7 +13397,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
 #ifdef ADD_ELF_SUMMON
     case 276:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOLDEN_TITAN);
+        OpenMonsterModel(MONSTER_MODEL_GOLDEN_TITAN);
         c = CreateCharacter(Key, MODEL_GOLDEN_TITAN, PositionX, PositionY);
         c->Object.Scale = 1.45f;
         c->Weapon[0].Type = MODEL_DARK_BREAKER; // MODEL_SWORD+15;
@@ -13430,7 +13431,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_CHAOS_CASTLE_11:
     case MONSTER_CHAOS_CASTLE_13:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CHAOSCASTLE_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_CHAOSCASTLE_KNIGHT);
         c = CreateCharacter(Key, MODEL_CHAOS_CASTLE_KNIGHT, PositionX, PositionY);
         c->Object.Scale = 0.9f;
         o = &c->Object;
@@ -13456,7 +13457,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
 
         {
             auto modelType = randType == 0 ? MONSTER_MODEL_CHAOSCASTLE_ELF : MONSTER_MODEL_CHAOSCASTLE_WIZARD;
-            g_ErrorReport.Write(L"OpenMonsterModel(%d)\r\n", modelType);
+            mu::log::Get("gameplay")->info("OpenMonsterModel({})", modelType);
             OpenMonsterModel(modelType);
         }
         c = CreateCharacter(Key, MODEL_CHAOS_CASTLE_ELF + randType, PositionX, PositionY);
@@ -13488,7 +13489,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_MAGIC_SKELETON_6:
     case MONSTER_MAGIC_SKELETON_7:
     case MONSTER_MAGIC_SKELETON_8:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_MAGIC_SKELETON);
+        OpenMonsterModel(MONSTER_MODEL_MAGIC_SKELETON);
         c = CreateCharacter(Key, MODEL_MAGIC_SKELETON, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_STAFF;
         c->Weapon[0].Level = 11;
@@ -13496,7 +13497,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"마법해골");
         break;
     case MONSTER_CASTLE_GATE: // ???
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CASTLE_GATE);
+        OpenMonsterModel(MONSTER_MODEL_CASTLE_GATE);
         c = CreateCharacter(Key, MODEL_CASTLE_GATE, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         c->Object.Scale = 0.8f;
@@ -13504,7 +13505,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"성문");
         break;
     case MONSTER_STATUE_OF_SAINT_1:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_STATUE_OF_SAINT);
+        OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT);
         c = CreateCharacter(Key, MODEL_STATUE_OF_SAINT, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         c->Object.Scale = 0.8f;
@@ -13512,7 +13513,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"성자의석관");
         break;
     case MONSTER_STATUE_OF_SAINT_2:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_STATUE_OF_SAINT);
+        OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT);
         c = CreateCharacter(Key, MODEL_STATUE_OF_SAINT, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         c->Object.Scale = 0.8f;
@@ -13520,7 +13521,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"성자의석관");
         break;
     case MONSTER_STATUE_OF_SAINT_3:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_STATUE_OF_SAINT);
+        OpenMonsterModel(MONSTER_MODEL_STATUE_OF_SAINT);
         c = CreateCharacter(Key, MODEL_STATUE_OF_SAINT, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         c->Object.Scale = 0.8f;
@@ -13535,7 +13536,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_CHIEF_SKELETON_WARRIOR_6:
     case MONSTER_CHIEF_SKELETON_WARRIOR_7:
     case MONSTER_CHIEF_SKELETON_WARRIOR_8:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ORC);
+        OpenMonsterModel(MONSTER_MODEL_ORC);
         c = CreateCharacter(Key, MODEL_ORC, PositionX, PositionY);
         c->Object.Scale = 1.1f;
         o = &c->Object;
@@ -13548,7 +13549,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_CHIEF_SKELETON_ARCHER_6:
     case MONSTER_CHIEF_SKELETON_ARCHER_7:
     case MONSTER_CHIEF_SKELETON_ARCHER_8:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ORC_ARCHER);
+        OpenMonsterModel(MONSTER_MODEL_ORC_ARCHER);
         c = CreateCharacter(Key, MODEL_ORC_ARCHER, PositionX, PositionY);
         c->Object.Scale = 1.1f;
         c->Weapon[1].Type = MODEL_BATTLE_BOW;
@@ -13563,7 +13564,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_DARK_SKULL_SOLDIER_6:
     case MONSTER_DARK_SKULL_SOLDIER_7:
     case MONSTER_DARK_SKULL_SOLDIER_8:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DARK_SKULL_SOLDIER);
+        OpenMonsterModel(MONSTER_MODEL_DARK_SKULL_SOLDIER);
         c = CreateCharacter(Key, MODEL_DARK_SKULL_SOLDIER, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_CRESCENT_AXE;
         c->Weapon[0].Level = 0;
@@ -13580,7 +13581,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_GIANT_OGRE_6:
     case MONSTER_GIANT_OGRE_7:
     case MONSTER_GIANT_OGRE_8:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GIANT_OGRE);
+        OpenMonsterModel(MONSTER_MODEL_GIANT_OGRE);
         c = CreateCharacter(Key, MODEL_GIANT_OGRE, PositionX, PositionY);
         c->Object.Scale = 0.8f;
         wcscpy(c->ID, L"자이언트오우거");
@@ -13593,7 +13594,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_RED_SKELETON_KNIGHT_6:
     case MONSTER_RED_SKELETON_KNIGHT_7:
     case MONSTER_RED_SKELETON_KNIGHT_8:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_RED_SKELETON_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_RED_SKELETON_KNIGHT);
         c = CreateCharacter(Key, MODEL_RED_SKELETON_KNIGHT, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_CHAOS_DRAGON_AXE;
 
@@ -13606,7 +13607,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"붉은해골기사");
         break;
     case MONSTER_GOLDEN_GOBLIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOBLIN);
+        OpenMonsterModel(MONSTER_MODEL_GOBLIN);
         c = CreateCharacter(Key, MODEL_GOBLIN, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_AXE;
         c->Weapon[0].Level = 9;
@@ -13614,25 +13615,25 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"고블린");
         break;
     case MONSTER_GOLDEN_DERKON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DRAGON);
+        OpenMonsterModel(MONSTER_MODEL_DRAGON);
         c = CreateCharacter(Key, MODEL_DRAGON_, PositionX, PositionY);
         wcscpy(c->ID, L"드래곤");
         c->Object.Scale = 0.9f;
         break;
     case MONSTER_GOLDEN_LIZARD_KING:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_LIZARD);
+        OpenMonsterModel(MONSTER_MODEL_LIZARD);
         c = CreateCharacter(Key, MODEL_LIZARD, PositionX, PositionY);
         c->Object.Scale = 1.4f;
         c->Weapon[0].Type = MODEL_CHAOS_LIGHTNING_STAFF;
         c->Weapon[0].ExcellentFlags = 63;
         break;
     case MONSTER_GOLDEN_VEPAR:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_VEPAR);
+        OpenMonsterModel(MONSTER_MODEL_VEPAR);
         c = CreateCharacter(Key, MODEL_VEPAR, PositionX, PositionY);
         c->Object.Scale = 1.f;
         break;
     case MONSTER_GOLDEN_TANTALLOS: //??
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_TANTALLOS);
+        OpenMonsterModel(MONSTER_MODEL_TANTALLOS);
         c = CreateCharacter(Key, MODEL_TANTALLOS, PositionX, PositionY);
         c->Object.BlendMesh = 2;
         c->Object.BlendMeshLight = 1.f;
@@ -13644,7 +13645,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
         break;
     case MONSTER_GOLDEN_WHEEL:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOLDEN_WHEEL);
+        OpenMonsterModel(MONSTER_MODEL_GOLDEN_WHEEL);
         c = CreateCharacter(Key, MODEL_GOLDEN_WHEEL, PositionX, PositionY);
         c->Object.Scale = 1.4f;
         c->Weapon[0].Type = MODEL_AQUAGOLD_CROSSBOW;
@@ -13655,19 +13656,19 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
         break;
     case MONSTER_MOLT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_MOLT);
+        OpenMonsterModel(MONSTER_MODEL_MOLT);
         c = CreateCharacter(Key, MODEL_MOLT, PositionX, PositionY);
         c->Object.Scale = 1.4f;
         break;
 
     case MONSTER_ALQUAMOS:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ALQUAMOS);
+        OpenMonsterModel(MONSTER_MODEL_ALQUAMOS);
         c = CreateCharacter(Key, MODEL_ALQUAMOS, PositionX, PositionY);
         c->Object.Scale = 1.f;
         c->Object.BlendMesh = 0;
         break;
     case MONSTER_QUEEN_RAINER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_QUEEN_RAINER);
+        OpenMonsterModel(MONSTER_MODEL_QUEEN_RAINER);
         c = CreateCharacter(Key, MODEL_QUEEN_RAINER, PositionX, PositionY);
         c->Object.Scale = 1.3f;
         c->Object.BlendMesh = -2;
@@ -13677,7 +13678,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_OMEGA_WING:
     case MONSTER_MEGA_CRUST:
     case MONSTER_ALPHA_CRUST:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CRUST);
+        OpenMonsterModel(MONSTER_MODEL_CRUST);
         c = CreateCharacter(Key, MODEL_CRUST, PositionX, PositionY);
         if (MONSTER_MEGA_CRUST == Type)
         {
@@ -13701,7 +13702,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
 
     case MONSTER_PHANTOM_KNIGHT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_PHANTOM_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_PHANTOM_KNIGHT);
         c = CreateCharacter(Key, MODEL_PHANTOM_KNIGHT, PositionX, PositionY);
         c->Object.Scale = 1.45f;
         c->Weapon[0].Type = MODEL_DARK_BREAKER; // MODEL_SWORD+15;
@@ -13710,7 +13711,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
 
     case MONSTER_DRAKAN:
     case MONSTER_GREAT_DRAKAN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DRAKAN);
+        OpenMonsterModel(MONSTER_MODEL_DRAKAN);
         c = CreateCharacter(Key, MODEL_DRAKAN, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         if (Type == MONSTER_GREAT_DRAKAN)
@@ -13729,8 +13730,8 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_DARK_PHOENIX:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DARK_PHOENIX_SHIELD);
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DARK_PHOENIX);
+        OpenMonsterModel(MONSTER_MODEL_DARK_PHOENIX_SHIELD);
+        OpenMonsterModel(MONSTER_MODEL_DARK_PHOENIX);
         c = CreateCharacter(Key, MODEL_DARK_PHEONIX_SHIELD, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         c->Object.Scale = 1.0f;
@@ -13738,7 +13739,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     }
     break;
     case MONSTER_ORC_ARCHER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ORC_ARCHER);
+        OpenMonsterModel(MONSTER_MODEL_ORC_ARCHER);
         c = CreateCharacter(Key, MODEL_ORC_ARCHER, PositionX, PositionY);
         c->Object.Scale = 1.2f;
         c->Weapon[1].Type = MODEL_BATTLE_BOW;
@@ -13747,7 +13748,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         o->HiddenMesh = 1;
         break;
     case MONSTER_ORC_ARCHER_OF_DOOM:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ORC_ARCHER);
+        OpenMonsterModel(MONSTER_MODEL_ORC_ARCHER);
         c = CreateCharacter(Key, MODEL_ORC_ARCHER, PositionX, PositionY);
         c->Object.Scale = 1.2f;
         c->Weapon[1].Type = MODEL_BATTLE_BOW;
@@ -13756,14 +13757,14 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         o->HiddenMesh = 1;
         break;
     case MONSTER_ELITE_ORC:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ORC);
+        OpenMonsterModel(MONSTER_MODEL_ORC);
         c = CreateCharacter(Key, MODEL_ORC, PositionX, PositionY);
         c->Object.Scale = 1.3f;
         o = &c->Object;
         o->HiddenMesh = 2;
         break;
     case MONSTER_ORC_SOLDIER_OF_DOOM:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ORC);
+        OpenMonsterModel(MONSTER_MODEL_ORC);
         c = CreateCharacter(Key, MODEL_ORC, PositionX, PositionY);
         c->Object.Scale = 1.3f;
         o = &c->Object;
@@ -13771,20 +13772,20 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_CURSED_KING:
     case MONSTER_WHITE_WIZARD:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CURSED_KING);
+        OpenMonsterModel(MONSTER_MODEL_CURSED_KING);
         c = CreateCharacter(Key, MODEL_CURSED_KING, PositionX, PositionY);
         c->Object.Scale = 1.7f;
         o = &c->Object;
         break;
     case MONSTER_EVIL_GOBLIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_EVIL_GOBLIN);
+        OpenMonsterModel(MONSTER_MODEL_EVIL_GOBLIN);
         c = CreateCharacter(Key, MODEL_EVIL_GOBLIN, PositionX, PositionY);
         c->Object.Scale = 0.9f;
         wcscpy(c->ID, L"저주받은 고블린");
         o = &c->Object;
         break;
     case MONSTER_CURSED_SANTA:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CURSED_SANTA);
+        OpenMonsterModel(MONSTER_MODEL_CURSED_SANTA);
         c = CreateCharacter(Key, MODEL_CURSED_SANTA, PositionX, PositionY);
         c->Object.Scale = 1.7f;
         wcscpy(c->ID, L"저주받은 산타");
@@ -13792,7 +13793,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_MUTANT_HERO:
     case MONSTER_MUTANT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_MUTANT);
+        OpenMonsterModel(MONSTER_MODEL_MUTANT);
         c = CreateCharacter(Key, MODEL_MUTANT, PositionX, PositionY);
         c->Object.Scale = 1.5f;
         o = &c->Object;
@@ -13801,7 +13802,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_DEATH_BEAM_KNIGHT:
     case MONSTER_BEAM_KNIGHT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BEAM_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_BEAM_KNIGHT);
         c = CreateCharacter(Key, MODEL_BEAM_KNIGHT, PositionX, PositionY);
         if (Type == MONSTER_DEATH_BEAM_KNIGHT)
         {
@@ -13818,7 +13819,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
         break;
     case MONSTER_BLOODY_WOLF:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BLOODY_WOLF);
+        OpenMonsterModel(MONSTER_MODEL_BLOODY_WOLF);
         c = CreateCharacter(Key, MODEL_BLOODY_WOLF, PositionX, PositionY);
         c->Object.Scale = 2.2f;
         o = &c->Object;
@@ -13827,7 +13828,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_TANTALLOS:
     case MONSTER_ZAIKAN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_TANTALLOS);
+        OpenMonsterModel(MONSTER_MODEL_TANTALLOS);
         c = CreateCharacter(Key, MODEL_TANTALLOS, PositionX, PositionY);
         c->Object.BlendMesh = 2;
         c->Object.BlendMeshLight = 1.f;
@@ -13847,7 +13848,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
         break;
     case MONSTER_IRON_WHEEL:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOLDEN_WHEEL);
+        OpenMonsterModel(MONSTER_MODEL_GOLDEN_WHEEL);
         c = CreateCharacter(Key, MODEL_GOLDEN_WHEEL, PositionX, PositionY);
         c->Object.Scale = 1.4f;
         c->Weapon[0].Type = MODEL_AQUAGOLD_CROSSBOW;
@@ -13857,37 +13858,37 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         CreateJoint(BITMAP_JOINT_ENERGY, o->Position, o->Position, o->Angle, 3, o, 30.f);
         break;
     case MONSTER_SILVER_VALKYRIE:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_VALKYRIE);
+        OpenMonsterModel(MONSTER_MODEL_VALKYRIE);
         c = CreateCharacter(Key, MODEL_VALKYRIE, PositionX, PositionY);
         c->Object.Scale = 1.4f;
         c->Weapon[0].Type = MODEL_BLUEWING_CROSSBOW;
         break;
     case MONSTER_GREAT_BAHAMUT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BAHAMUT);
+        OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
         c = CreateCharacter(Key, MODEL_BAHAMUT, PositionX, PositionY);
         c->Object.Scale = 1.f;
         c->Level = 1;
         break;
     case MONSTER_SEA_WORM:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SEA_WORM);
+        OpenMonsterModel(MONSTER_MODEL_SEA_WORM);
         c = CreateCharacter(Key, MODEL_SEA_WORM, PositionX, PositionY);
         c->Object.Scale = 1.8f;
         break;
     case MONSTER_HYDRA:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_HYDRA);
+        OpenMonsterModel(MONSTER_MODEL_HYDRA);
         c = CreateCharacter(Key, MODEL_HYDRA, PositionX, PositionY);
         c->Object.Scale = 1.f;
         c->Object.BlendMesh = 5;
         c->Object.BlendMeshLight = 0.f;
         break;
     case MONSTER_LIZARD_KING:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_LIZARD);
+        OpenMonsterModel(MONSTER_MODEL_LIZARD);
         c = CreateCharacter(Key, MODEL_LIZARD, PositionX, PositionY);
         c->Object.Scale = 1.4f;
         c->Weapon[0].Type = MODEL_STAFF_OF_RESURRECTION;
         break;
     case MONSTER_VALKYRIE:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_VALKYRIE);
+        OpenMonsterModel(MONSTER_MODEL_VALKYRIE);
         c = CreateCharacter(Key, MODEL_VALKYRIE, PositionX, PositionY);
         c->Object.Scale = 1.1f;
         c->Weapon[0].Type = MODEL_BLUEWING_CROSSBOW;
@@ -13895,42 +13896,42 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.BlendMeshLight = 1.f;
         break;
     case MONSTER_VEPAR:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_VEPAR);
+        OpenMonsterModel(MONSTER_MODEL_VEPAR);
         c = CreateCharacter(Key, MODEL_VEPAR, PositionX, PositionY);
         c->Object.Scale = 1.f;
         break;
     case MONSTER_BAHAMUT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BAHAMUT);
+        OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
         c = CreateCharacter(Key, MODEL_BAHAMUT, PositionX, PositionY);
         c->Object.Scale = 0.6f;
         break;
     case MONSTER_BALI:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BALI);
+        OpenMonsterModel(MONSTER_MODEL_BALI);
         c = CreateCharacter(Key, MODEL_BALI, PositionX, PositionY);
         wcscpy(c->ID, L"발리");
         c->Object.Scale = 0.12f;
         break;
     case MONSTER_GOLDEN_DRAGON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DRAGON);
+        OpenMonsterModel(MONSTER_MODEL_DRAGON);
         c = CreateCharacter(Key, MODEL_DRAGON_, PositionX, PositionY);
         wcscpy(c->ID, L"드래곤");
         c->Object.Scale = 0.9f;
         break;
     case MONSTER_GOLDEN_BUDGE_DRAGON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BUDGE_DRAGON);
+        OpenMonsterModel(MONSTER_MODEL_BUDGE_DRAGON);
         c = CreateCharacter(Key, MODEL_BUDGE_DRAGON, PositionX, PositionY);
         wcscpy(c->ID, L"황금버지드래곤");
         c->Object.Scale = 0.7f;
         break;
     case MONSTER_RED_DRAGON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DRAGON);
+        OpenMonsterModel(MONSTER_MODEL_DRAGON);
         c = CreateCharacter(Key, MODEL_DRAGON_, PositionX, PositionY);
         wcscpy(c->ID, L"쿤둔");
         c->Object.Scale = 1.3f;
         Vector(200.f, 150.f, 280.f, c->Object.BoundingBoxMax);
         break;
     case MONSTER_DEATH_COW:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DEATH_COW);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_COW);
         c = CreateCharacter(Key, MODEL_DEATH_COW, PositionX, PositionY);
         wcscpy(c->ID, L"데쓰 카우");
         c->Weapon[0].Type = MODEL_GREAT_HAMMER;
@@ -13939,7 +13940,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         // c->Level = 1;
         break;
     case MONSTER_DEATH_KNIGHT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DEATH_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_DEATH_KNIGHT);
         c = CreateCharacter(Key, MODEL_DEATH_KNIGHT, PositionX, PositionY);
         wcscpy(c->ID, L"데쓰 나이트");
         c->Weapon[0].Type = MODEL_GIANT_SWORD;
@@ -13949,7 +13950,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         // c->Level = 1;
         break;
     case MONSTER_POISON_SHADOW:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SHADOW);
+        OpenMonsterModel(MONSTER_MODEL_SHADOW);
         c = CreateCharacter(Key, MODEL_SHADOW, PositionX, PositionY);
         wcscpy(c->ID, L"포이즌 쉐도우");
         c->Object.Scale = 1.2f;
@@ -13957,7 +13958,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_BALROG:
     case MONSTER_METAL_BALROG: // 발록2
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BALROG);
+        OpenMonsterModel(MONSTER_MODEL_BALROG);
         c = CreateCharacter(Key, MODEL_BALROG, PositionX, PositionY);
         wcscpy(c->ID, L"발록");
         c->Weapon[0].Type = MODEL_BILL_OF_BALROG;
@@ -13965,18 +13966,18 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.Scale = 1.6f;
         break;
     case MONSTER_DEVIL:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DEVIL);
+        OpenMonsterModel(MONSTER_MODEL_DEVIL);
         c = CreateCharacter(Key, MODEL_DEVIL, PositionX, PositionY);
         wcscpy(c->ID, L"데빌");
         c->Object.Scale = 1.1f;
         break;
     case MONSTER_SHADOW:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SHADOW);
+        OpenMonsterModel(MONSTER_MODEL_SHADOW);
         c = CreateCharacter(Key, MODEL_SHADOW, PositionX, PositionY);
         wcscpy(c->ID, L"쉐도우");
         c->Object.Scale = 1.2f;
         break;
-        /*LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GIANT);
+        /*OpenMonsterModel(MONSTER_MODEL_GIANT);
         c = CreateCharacter(Key,MODEL_MONSTER01+7,PositionX,PositionY);
         wcscpy(c->ID,"블러드 고스트");
         c->Object.AlphaTarget = 0.4f;
@@ -13985,7 +13986,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.Scale = 1.1f;
         c->Level = 2;*/
     case MONSTER_DEATH_GORGON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GORGON);
+        OpenMonsterModel(MONSTER_MODEL_GORGON);
         c = CreateCharacter(Key, MODEL_GORGON, PositionX, PositionY);
         wcscpy(c->ID, L"데쓰 고르곤");
         c->Object.Scale = 1.3f;
@@ -14020,7 +14021,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
             c->Object.Scale = 1.0f;
         }
         break;
-        /*LOG_CALL(OpenMonsterModel, MONSTER_MODEL_HELL_HOUND);
+        /*OpenMonsterModel(MONSTER_MODEL_HELL_HOUND);
         c = CreateCharacter(Key,MODEL_MONSTER01+5,PositionX,PositionY);
         wcscpy(c->ID,"자이언트");
         c->Weapon[0].Type = MODEL_AXE+2;
@@ -14029,7 +14030,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         Vector(50.f,50.f,80.f,c->Object.BoundingBoxMax);
         break;*/
     case MONSTER_ELITE_GOBLIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOBLIN);
+        OpenMonsterModel(MONSTER_MODEL_GOBLIN);
         c = CreateCharacter(Key, MODEL_GOBLIN, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_MORNING_STAR;
         c->Weapon[1].Type = MODEL_HORN_SHIELD;
@@ -14038,12 +14039,12 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"고블린 대장");
         break;
     case MONSTER_STONE_GOLEM:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_STONE_GOLEM);
+        OpenMonsterModel(MONSTER_MODEL_STONE_GOLEM);
         c = CreateCharacter(Key, MODEL_STONE_GOLEM, PositionX, PositionY);
         wcscpy(c->ID, L"돌괴물");
         break;
     case MONSTER_AGON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_AGON);
+        OpenMonsterModel(MONSTER_MODEL_AGON);
         c = CreateCharacter(Key, MODEL_AGON, PositionX, PositionY);
         wcscpy(c->ID, L"아곤");
         c->Object.Scale = 1.3f;
@@ -14051,20 +14052,20 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Weapon[1].Type = MODEL_SERPENT_SWORD;
         break;
     case MONSTER_FOREST_MONSTER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_FOREST_MONSTER);
+        OpenMonsterModel(MONSTER_MODEL_FOREST_MONSTER);
         c = CreateCharacter(Key, MODEL_FOREST_MONSTER, PositionX, PositionY);
         wcscpy(c->ID, L"숲의괴물");
         c->Object.Scale = 0.75f;
         break;
     case MONSTER_HUNTER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_HUNTER);
+        OpenMonsterModel(MONSTER_MODEL_HUNTER);
         c = CreateCharacter(Key, MODEL_HUNTER, PositionX, PositionY);
         wcscpy(c->ID, L"헌터");
         c->Weapon[0].Type = MODEL_ARQUEBUS;
         c->Object.Scale = 0.95f;
         break;
     case MONSTER_BEETLE_MONSTER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BEETLE_MONSTER);
+        OpenMonsterModel(MONSTER_MODEL_BEETLE_MONSTER);
         c = CreateCharacter(Key, MODEL_BEETLE_MONSTER, PositionX, PositionY);
         c->Weapon[0].Type = MODEL__SPEAR;
         c->Object.Scale = 0.8f;
@@ -14072,20 +14073,20 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.BlendMesh = 1;
         break;
     case MONSTER_CHAIN_SCORPION:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CHAIN_SCORPION);
+        OpenMonsterModel(MONSTER_MODEL_CHAIN_SCORPION);
         c = CreateCharacter(Key, MODEL_CHAIN_SCORPION, PositionX, PositionY);
         c->Object.Scale = 1.1f;
         wcscpy(c->ID, L"고리전갈");
         break;
     case MONSTER_GOBLIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOBLIN);
+        OpenMonsterModel(MONSTER_MODEL_GOBLIN);
         c = CreateCharacter(Key, MODEL_GOBLIN, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_AXE;
         c->Object.Scale = 0.8f;
         wcscpy(c->ID, L"고블린");
         break;
     case MONSTER_ICE_QUEEN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ICE_QUEEN);
+        OpenMonsterModel(MONSTER_MODEL_ICE_QUEEN);
         c = CreateCharacter(Key, MODEL_ICE_QUEEN, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_ANGELIC_STAFF;
         c->Object.BlendMesh = 2;
@@ -14096,12 +14097,12 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"아이스퀸");
         break;
     case MONSTER_WORM:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_WORM);
+        OpenMonsterModel(MONSTER_MODEL_WORM);
         c = CreateCharacter(Key, MODEL_WORM, PositionX, PositionY);
         wcscpy(c->ID, L"웜");
         break;
     case MONSTER_HOMMERD:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_HOMMERD);
+        OpenMonsterModel(MONSTER_MODEL_HOMMERD);
         c = CreateCharacter(Key, MODEL_HOMMERD, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_LARKAN_AXE;
         c->Weapon[1].Type = MODEL_BIG_ROUND_SHIELD;
@@ -14109,32 +14110,32 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"호머드");
         break;
     case MONSTER_ICE_MONSTER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ICE_MONSTER);
+        OpenMonsterModel(MONSTER_MODEL_ICE_MONSTER);
         c = CreateCharacter(Key, MODEL_ICE_MONSTER, PositionX, PositionY);
         c->Object.BlendMesh = 0;
         c->Object.BlendMeshLight = 1.f;
         wcscpy(c->ID, L"얼음괴물");
         break;
     case MONSTER_ASSASSIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ASSASSIN);
+        OpenMonsterModel(MONSTER_MODEL_ASSASSIN);
         c = CreateCharacter(Key, MODEL_ASSASSIN, PositionX, PositionY);
         c->Object.Scale = 0.95f;
         wcscpy(c->ID, L"암살자");
         break;
     case MONSTER_ELITE_YETI:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_ELITE_YETI);
+        OpenMonsterModel(MONSTER_MODEL_ELITE_YETI);
         c = CreateCharacter(Key, MODEL_ELITE_YETI, PositionX, PositionY);
         wcscpy(c->ID, L"설인 대장");
         c->Object.Scale = 1.4f;
         break;
     case MONSTER_YETI:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_YETI);
+        OpenMonsterModel(MONSTER_MODEL_YETI);
         c = CreateCharacter(Key, MODEL_YETI, PositionX, PositionY);
         wcscpy(c->ID, L"설인");
         c->Object.Scale = 1.1f;
         break;
     case MONSTER_GORGON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GORGON);
+        OpenMonsterModel(MONSTER_MODEL_GORGON);
         c = CreateCharacter(Key, MODEL_GORGON, PositionX, PositionY);
         wcscpy(c->ID, L"고르곤");
         c->Object.Scale = 1.5f;
@@ -14143,13 +14144,13 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.BlendMeshLight = 1.f;
         break;
     case MONSTER_SPIDER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SPIDER);
+        OpenMonsterModel(MONSTER_MODEL_SPIDER);
         c = CreateCharacter(Key, MODEL_SPIDER, PositionX, PositionY);
         wcscpy(c->ID, L"거미");
         c->Object.Scale = 0.4f;
         break;
     case MONSTER_CYCLOPS:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CYCLOPS);
+        OpenMonsterModel(MONSTER_MODEL_CYCLOPS);
         c = CreateCharacter(Key, MODEL_CYCLOPS, PositionX, PositionY);
         wcscpy(c->ID, L"싸이크롭스");
         c->Weapon[0].Type = MODEL_CRESCENT_AXE;
@@ -14160,7 +14161,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     case MONSTER_ELITE_BULL_FIGHTER:
     case MONSTER_POISON_BULL:
     default:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BULL_FIGHTER);
+        OpenMonsterModel(MONSTER_MODEL_BULL_FIGHTER);
         c = CreateCharacter(Key, MODEL_BULL_FIGHTER, PositionX, PositionY);
         if (Type == MONSTER_BULL_FIGHTER)
         {
@@ -14187,7 +14188,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         }
         break;
     case MONSTER_GHOST:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GHOST);
+        OpenMonsterModel(MONSTER_MODEL_GHOST);
         c = CreateCharacter(Key, MODEL_GHOST_MONSTER, PositionX, PositionY);
         wcscpy(c->ID, L"고스트");
         c->Object.AlphaTarget = 0.4f;
@@ -14195,13 +14196,13 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Blood = true;
         break;
     case MONSTER_LARVA:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_LARVA);
+        OpenMonsterModel(MONSTER_MODEL_LARVA);
         c = CreateCharacter(Key, MODEL_LARVA, PositionX, PositionY);
         wcscpy(c->ID, L"유충");
         c->Object.Scale = 0.6f;
         break;
     case MONSTER_HELL_SPIDER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_HELL_SPIDER);
+        OpenMonsterModel(MONSTER_MODEL_HELL_SPIDER);
         c = CreateCharacter(Key, MODEL_HELL_SPIDER, PositionX, PositionY);
         wcscpy(c->ID, L"헬스파이더");
         c->Weapon[0].Type = MODEL_SERPENT_STAFF;
@@ -14209,7 +14210,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_HOUND:
     case MONSTER_HELL_HOUND:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_HOUND);
+        OpenMonsterModel(MONSTER_MODEL_HOUND);
         c = CreateCharacter(Key, MODEL_HOUND, PositionX, PositionY);
         if (Type == MONSTER_HOUND)
         {
@@ -14230,14 +14231,14 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
 
     case MONSTER_BUDGE_DRAGON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_BUDGE_DRAGON);
+        OpenMonsterModel(MONSTER_MODEL_BUDGE_DRAGON);
         c = CreateCharacter(Key, MODEL_BUDGE_DRAGON, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown2");
         c->Object.Scale = 0.5f;
         break;
 
     case MONSTER_DARK_KNIGHT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DARK_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_DARK_KNIGHT);
         c = CreateCharacter(Key, MODEL_DARK_KNIGHT, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown10");
         c->Object.Scale = 0.8f;
@@ -14246,7 +14247,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_LICH:
     case MONSTER_THUNDER_LICH:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_LICH);
+        OpenMonsterModel(MONSTER_MODEL_LICH);
         c = CreateCharacter(Key, MODEL_LICH, PositionX, PositionY);
         if (Type == MONSTER_LICH)
         {
@@ -14263,7 +14264,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         }
         break;
     case MONSTER_GIANT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GIANT);
+        OpenMonsterModel(MONSTER_MODEL_GIANT);
         c = CreateCharacter(Key, MODEL_GIANT, PositionX, PositionY);
         wcscpy(c->ID, L"자이언트");
         c->Weapon[0].Type = MODEL_DOUBLE_AXE;
@@ -14340,7 +14341,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.SubType = MODEL_GM_CHARACTER;
         break;
     case MONSTER_GOLDEN_TITAN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_TITAN);
+        OpenMonsterModel(MONSTER_MODEL_TITAN);
         c = CreateCharacter(Key, MODEL_TITAN, PositionX, PositionY);
         wcscpy(c->ID, L"타이탄");
         c->Object.Scale = 1.8f;
@@ -14352,7 +14353,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_GOLDEN_SOLDIER:
     case MONSTER_SOLDIER:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SOLDIER);
+        OpenMonsterModel(MONSTER_MODEL_SOLDIER);
         c = CreateCharacter(Key, MODEL_SOLDIER, PositionX, PositionY);
         wcscpy(c->ID, L"솔져");
         c->Weapon[1].Type = MODEL_AQUAGOLD_CROSSBOW;
@@ -14384,20 +14385,20 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Level = 1;
         break;
     case MONSTER_PET_TRAINER:
-        LOG_CALL(OpenNpc, MODEL_NPC_BREEDER);
+        OpenNpc(MODEL_NPC_BREEDER);
         c = CreateCharacter(Key, MODEL_NPC_BREEDER, PositionX, PositionY);
         wcscpy(c->ID, L"조련사 NPC");
         break;
 
 #ifdef _PVP_MURDERER_HERO_ITEM
     case 227:
-        LOG_CALL(OpenNpc, MODEL_MASTER);
+        OpenNpc(MODEL_MASTER);
         c = CreateCharacter(Key, MODEL_MASTER, PositionX, PositionY);
         wcscpy(c->ID, L"살인마상점");
         break;
 
     case 228:
-        LOG_CALL(OpenNpc, MODEL_HERO_SHOP);
+        OpenNpc(MODEL_HERO_SHOP);
         c = CreateCharacter(Key, MODEL_HERO_SHOP, PositionX, PositionY);
         wcscpy(c->ID, L"영웅상점");
         break;
@@ -14423,7 +14424,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.m_bpcroom = false;
         break;
     case MONSTER_ALEX:
-        LOG_CALL(OpenNpc, MODEL_MERCHANT_MAN);
+        OpenNpc(MODEL_MERCHANT_MAN);
         c = CreateCharacter(Key, MODEL_MERCHANT_MAN, PositionX, PositionY);
         wcscpy(c->ID, L"로랜추가상인");
         c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_MAN_HEAD;
@@ -14432,20 +14433,20 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_MAN_BOOTS;
         break;
     case MONSTER_THOMPSON_THE_MERCHANT:
-        LOG_CALL(OpenNpc, MODEL_DEVIAS_TRADER);
+        OpenNpc(MODEL_DEVIAS_TRADER);
         c = CreateCharacter(Key, MODEL_DEVIAS_TRADER, PositionX, PositionY);
         wcscpy(c->ID, L"데비추가상인");
         break;
 
     case MONSTER_ARCHANGEL:
-        LOG_CALL(OpenNpc, MODEL_NPC_ARCHANGEL);
+        OpenNpc(MODEL_NPC_ARCHANGEL);
         c = CreateCharacter(Key, MODEL_NPC_ARCHANGEL, PositionX, PositionY);
         o = &c->Object;
         o->Scale = 1.f;
         o->Kind = KIND_NPC;
         break;
     case MONSTER_MESSENGER_OF_ARCH:
-        LOG_CALL(OpenNpc, MODEL_NPC_ARCHANGEL_MESSENGER);
+        OpenNpc(MODEL_NPC_ARCHANGEL_MESSENGER);
         c = CreateCharacter(Key, MODEL_NPC_ARCHANGEL_MESSENGER, PositionX, PositionY);
         o = &c->Object;
         o->Scale = 1.f;
@@ -14453,7 +14454,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
 
     case MONSTER_GOBLIN_GATE:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOBLIN);
+        OpenMonsterModel(MONSTER_MODEL_GOBLIN);
         c = CreateCharacter(Key, MODEL_GOBLIN, PositionX, PositionY);
         c->Weapon[0].Type = MODEL_STAFF;
         c->Weapon[0].Level = 4;
@@ -14463,7 +14464,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
 
     case MONSTER_SEVINA_THE_PRIESTESS:
-        LOG_CALL(OpenNpc, MODEL_NPC_SEVINA);
+        OpenNpc(MODEL_NPC_SEVINA);
         c = CreateCharacter(Key, MODEL_NPC_SEVINA, PositionX, PositionY);
         o = &c->Object;
         o->Scale = 1.f;
@@ -14471,7 +14472,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
 
     case MONSTER_GOLDEN_ARCHER:
-        LOG_CALL(OpenNpc, MODEL_PLAYER);
+        OpenNpc(MODEL_PLAYER);
         c = CreateCharacter(Key, MODEL_PLAYER, PositionX, PositionY);
         o = &c->Object;
         o->SubType = MODEL_SKELETON2;
@@ -14480,40 +14481,40 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Level = 8;
         break;
     case MONSTER_CHARON:
-        LOG_CALL(OpenNpc, MODEL_NPC_DEVILSQUARE);
+        OpenNpc(MODEL_NPC_DEVILSQUARE);
         c = CreateCharacter(Key, MODEL_NPC_DEVILSQUARE, PositionX, PositionY);
         break;
     case MONSTER_OSBOURNE:
-        LOG_CALL(OpenNpc, MODEL_REFINERY_NPC);
+        OpenNpc(MODEL_REFINERY_NPC);
         c = CreateCharacter(Key, MODEL_REFINERY_NPC, PositionX, PositionY);
         o = &c->Object;
         break;
     case MONSTER_JERRIDON: // 환원
-        LOG_CALL(OpenNpc, MODEL_RECOVERY_NPC);
+        OpenNpc(MODEL_RECOVERY_NPC);
         c = CreateCharacter(Key, MODEL_RECOVERY_NPC, PositionX, PositionY);
         o = &c->Object;
         break;
     case MONSTER_CHAOS_GOBLIN:
-        LOG_CALL(OpenNpc, MODEL_MIX_NPC);
+        OpenNpc(MODEL_MIX_NPC);
         c = CreateCharacter(Key, MODEL_MIX_NPC, PositionX, PositionY);
         o = &c->Object;
         o->BlendMesh = 1;
         break;
     case MONSTER_ARENA_GUARD:
-        LOG_CALL(OpenNpc, MODEL_TOURNAMENT);
+        OpenNpc(MODEL_TOURNAMENT);
         c = CreateCharacter(Key, MODEL_TOURNAMENT, PositionX, PositionY);
         break;
     case MONSTER_BAZ_THE_VAULT_KEEPER:
-        LOG_CALL(OpenNpc, MODEL_STORAGE);
+        OpenNpc(MODEL_STORAGE);
         c = CreateCharacter(Key, MODEL_STORAGE, PositionX, PositionY);
         break;
     case MONSTER_GUILD_MASTER:
-        LOG_CALL(OpenNpc, MODEL_MASTER);
+        OpenNpc(MODEL_MASTER);
         c = CreateCharacter(Key, MODEL_MASTER, PositionX, PositionY);
         wcscpy(c->ID, L"마스터");
         break;
     case MONSTER_LAHAP:
-        LOG_CALL(OpenNpc, MODEL_NPC_SERBIS);
+        OpenNpc(MODEL_NPC_SERBIS);
         c = CreateCharacter(Key, MODEL_NPC_SERBIS, PositionX, PositionY);
         wcscpy(c->ID, L"세르비스");
         break;
@@ -14525,7 +14526,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 42, o, 15.f);
         break;
     case MONSTER_ELF_LALA:
-        LOG_CALL(OpenNpc, MODEL_ELF_WIZARD);
+        OpenNpc(MODEL_ELF_WIZARD);
         c = CreateCharacter(Key, MODEL_ELF_WIZARD, PositionX, PositionY);
         wcscpy(c->ID, L"라라 요정");
         o = &c->Object;
@@ -14533,22 +14534,22 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 140.f;
         break;
     case MONSTER_EO_THE_CRAFTSMAN:
-        LOG_CALL(OpenNpc, MODEL_ELF_MERCHANT);
+        OpenNpc(MODEL_ELF_MERCHANT);
         c = CreateCharacter(Key, MODEL_ELF_MERCHANT, PositionX, PositionY);
         wcscpy(c->ID, L"장인");
         break;
     case MONSTER_CAREN_THE_BARMAID:
-        LOG_CALL(OpenNpc, MODEL_SNOW_MERCHANT);
+        OpenNpc(MODEL_SNOW_MERCHANT);
         c = CreateCharacter(Key, MODEL_SNOW_MERCHANT, PositionX, PositionY);
         wcscpy(c->ID, L"술집마담");
         break;
     case MONSTER_IZABEL_THE_WIZARD:
-        LOG_CALL(OpenNpc, MODEL_SNOW_WIZARD);
+        OpenNpc(MODEL_SNOW_WIZARD);
         c = CreateCharacter(Key, MODEL_SNOW_WIZARD, PositionX, PositionY);
         wcscpy(c->ID, L"마법사");
         break;
     case MONSTER_ZIENNA_THE_WEAPONS_MERCHANT:
-        LOG_CALL(OpenNpc, MODEL_SNOW_SMITH);
+        OpenNpc(MODEL_SNOW_SMITH);
         c = CreateCharacter(Key, MODEL_SNOW_SMITH, PositionX, PositionY);
         wcscpy(c->ID, L"무기상인");
         break;
@@ -14565,7 +14566,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         SetCharacterScale(c);
         break;
     case MONSTER_WANDERING_MERCHANT_MARTIN:
-        LOG_CALL(OpenNpc, MODEL_MERCHANT_MAN);
+        OpenNpc(MODEL_MERCHANT_MAN);
         c = CreateCharacter(Key, MODEL_MERCHANT_MAN, PositionX, PositionY);
         wcscpy(c->ID, L"떠돌이 상인");
         c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_MAN_HEAD + 1;
@@ -14585,7 +14586,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         SetCharacterScale(c);
         break;
     case MONSTER_WANDERING_MERCHANT_HAROLD:
-        LOG_CALL(OpenNpc, MODEL_MERCHANT_MAN);
+        OpenNpc(MODEL_MERCHANT_MAN);
         c = CreateCharacter(Key, MODEL_MERCHANT_MAN, PositionX, PositionY);
         wcscpy(c->ID, L"떠돌이 상인");
         c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_MAN_HEAD;
@@ -14594,13 +14595,13 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_MAN_BOOTS;
         break;
     case MONSTER_HANZO_THE_BLACKSMITH:
-        LOG_CALL(OpenNpc, MODEL_SMITH);
+        OpenNpc(MODEL_SMITH);
         c = CreateCharacter(Key, MODEL_SMITH, PositionX, PositionY);
         wcscpy(c->ID, L"대장장이 한스");
         c->Object.Scale = 0.95f;
         break;
     case MONSTER_POTION_GIRL_AMY:
-        LOG_CALL(OpenNpc, MODEL_MERCHANT_GIRL);
+        OpenNpc(MODEL_MERCHANT_GIRL);
         c = CreateCharacter(Key, MODEL_MERCHANT_GIRL, PositionX, PositionY);
         wcscpy(c->ID, L"물약파는 소녀");
         c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_GIRL_HEAD;
@@ -14608,12 +14609,12 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->BodyPart[BODYPART_PANTS].Type = MODEL_MERCHANT_GIRL_LOWER;
         break;
     case MONSTER_PASI_THE_MAGE:
-        LOG_CALL(OpenNpc, MODEL_SCIENTIST);
+        OpenNpc(MODEL_SCIENTIST);
         c = CreateCharacter(Key, MODEL_SCIENTIST, PositionX, PositionY);
         wcscpy(c->ID, L"마법사 파시");
         break;
     case MONSTER_LUMEN_THE_BARMAID:
-        LOG_CALL(OpenNpc, MODEL_MERCHANT_FEMALE);
+        OpenNpc(MODEL_MERCHANT_FEMALE);
         c = CreateCharacter(Key, MODEL_MERCHANT_FEMALE, PositionX, PositionY);
         wcscpy(c->ID, L"술집마담 리아먼");
         c->BodyPart[BODYPART_HELM].Type = MODEL_MERCHANT_FEMALE_HEAD + 1;
@@ -14622,13 +14623,13 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->BodyPart[BODYPART_BOOTS].Type = MODEL_MERCHANT_FEMALE_BOOTS + 1;
         break;
     case MONSTER_WOLF_STATUS:
-        LOG_CALL(OpenNpc, MODEL_CRYWOLF_STATUE);
+        OpenNpc(MODEL_CRYWOLF_STATUE);
         c = CreateCharacter(Key, MODEL_CRYWOLF_STATUE, PositionX, PositionY);
         wcscpy(c->ID, L"석상");
         c->Object.Live = false;
         break;
     case MONSTER_WOLF_ALTAR1:
-        LOG_CALL(OpenNpc, MODEL_CRYWOLF_ALTAR1);
+        OpenNpc(MODEL_CRYWOLF_ALTAR1);
         c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR1, PositionX, PositionY);
         wcscpy(c->ID, L"제단1");
         c->Object.Position[2] -= 10.0f;
@@ -14637,7 +14638,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.EnableShadow = false;
         break;
     case MONSTER_WOLF_ALTAR2:
-        LOG_CALL(OpenNpc, MODEL_CRYWOLF_ALTAR2);
+        OpenNpc(MODEL_CRYWOLF_ALTAR2);
         c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR2, PositionX, PositionY);
         wcscpy(c->ID, L"제단2");
         c->Object.HiddenMesh = -2;
@@ -14646,7 +14647,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.EnableShadow = false;
         break;
     case MONSTER_WOLF_ALTAR3:
-        LOG_CALL(OpenNpc, MODEL_CRYWOLF_ALTAR3);
+        OpenNpc(MODEL_CRYWOLF_ALTAR3);
         c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR3, PositionX, PositionY);
         wcscpy(c->ID, L"제단3");
         c->Object.HiddenMesh = -2;
@@ -14655,7 +14656,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.EnableShadow = false;
         break;
     case MONSTER_WOLF_ALTAR4:
-        LOG_CALL(OpenNpc, MODEL_CRYWOLF_ALTAR4);
+        OpenNpc(MODEL_CRYWOLF_ALTAR4);
         c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR4, PositionX, PositionY);
         wcscpy(c->ID, L"제단4");
         c->Object.HiddenMesh = -2;
@@ -14664,7 +14665,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.EnableShadow = false;
         break;
     case MONSTER_WOLF_ALTAR5:
-        LOG_CALL(OpenNpc, MODEL_CRYWOLF_ALTAR5);
+        OpenNpc(MODEL_CRYWOLF_ALTAR5);
         c = CreateCharacter(Key, MODEL_CRYWOLF_ALTAR5, PositionX, PositionY);
         wcscpy(c->ID, L"제단5");
         c->Object.HiddenMesh = -2;
@@ -14673,7 +14674,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.EnableShadow = false;
         break;
     case MONSTER_ELPHIS:
-        LOG_CALL(OpenNpc, MODEL_SMELTING_NPC);
+        OpenNpc(MODEL_SMELTING_NPC);
         c = CreateCharacter(Key, MODEL_SMELTING_NPC, PositionX + 1, PositionY - 1);
         wcscpy(c->ID, L"제련의탑NPC");
         c->Object.Scale = 2.5f;
@@ -14681,7 +14682,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.m_bRenderShadow = false;
         break;
     case MONSTER_FIREWORKS_GIRL:
-        LOG_CALL(OpenNpc, MODEL_WEDDING_NPC);
+        OpenNpc(MODEL_WEDDING_NPC);
         c = CreateCharacter(Key, MODEL_WEDDING_NPC, PositionX, PositionY);
         wcscpy(c->ID, L"WeddingNPC");
         c->Object.Scale = 1.1f;
@@ -14703,7 +14704,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.m_bpcroom = true;
         break;
     case MONSTER_ORACLE_LAYLA:
-        LOG_CALL(OpenNpc, MODEL_KALIMA_SHOP);
+        OpenNpc(MODEL_KALIMA_SHOP);
         c = CreateCharacter(Key, MODEL_KALIMA_SHOP, PositionX, PositionY);
         c->Object.Position[2] += 140.0f;
         wcscpy(c->ID, L"KalimaShop");
@@ -14731,7 +14732,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     break;
     case MONSTER_PAMELA_THE_SUPPLIER:
     {
-        LOG_CALL(OpenNpc, MODEL_BC_NPC1);
+        OpenNpc(MODEL_BC_NPC1);
         c = CreateCharacter(Key, MODEL_BC_NPC1, PositionX, PositionY);
         wcscpy(c->ID, L"공성 NPC");
         c->Object.Scale = 1.0f;
@@ -14741,7 +14742,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     break;
     case MONSTER_ANGELA_THE_SUPPLIER:
     {
-        LOG_CALL(OpenNpc, MODEL_BC_NPC2);
+        OpenNpc(MODEL_BC_NPC2);
         c = CreateCharacter(Key, MODEL_BC_NPC2, PositionX, PositionY);
         wcscpy(c->ID, L"공성 NPC");
         c->Object.Scale = 1.0f;
@@ -14750,18 +14751,18 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     }
     break;
     case MONSTER_PRIEST_DEVIN:
-        LOG_CALL(OpenNpc, MODEL_NPC_DEVIN);
+        OpenNpc(MODEL_NPC_DEVIN);
         c = CreateCharacter(Key, MODEL_NPC_DEVIN, PositionX, PositionY);
         wcscpy(c->ID, L"사제데빈");
         break;
     case MONSTER_WEREWOLF_QUARREL:
-        LOG_CALL(OpenNpc, MODEL_NPC_QUARREL);
+        OpenNpc(MODEL_NPC_QUARREL);
         c = CreateCharacter(Key, MODEL_NPC_QUARREL, PositionX, PositionY);
         wcscpy(c->ID, L"웨어울프쿼렐");
         c->Object.Scale = 1.9f;
         break;
     case MONSTER_GATEKEEPER:
-        LOG_CALL(OpenNpc, MODEL_NPC_CASTEL_GATE);
+        OpenNpc(MODEL_NPC_CASTEL_GATE);
         c = CreateCharacter(Key, MODEL_NPC_CASTEL_GATE, PositionX, PositionY, 90.f);
         wcscpy(c->ID, L"성문");
         o = &c->Object;
@@ -14773,7 +14774,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_LUNAR_RABBIT:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_LUNAR_RABBIT);
+        OpenMonsterModel(MONSTER_MODEL_LUNAR_RABBIT);
         c = CreateCharacter(Key, MODEL_LUNAR_RABBIT, PositionX, PositionY);
         wcscpy(c->ID, L"달토끼");
         c->Object.Scale = 0.8f;
@@ -14791,7 +14792,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     break;
     case MONSTER_CHERRY_BLOSSOM_SPIRIT:
     {
-        LOG_CALL(OpenNpc, MODEL_NPC_CHERRYBLOSSOM);
+        OpenNpc(MODEL_NPC_CHERRYBLOSSOM);
         c = CreateCharacter(Key, MODEL_NPC_CHERRYBLOSSOM, PositionX, PositionY);
         c->Object.Scale = 0.65f;
         c->Object.m_fEdgeScale = 1.08f;
@@ -14802,7 +14803,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     break;
     case MONSTER_CHERRY_BLOSSOM_TREE:
     {
-        LOG_CALL(OpenNpc, MODEL_NPC_CHERRYBLOSSOMTREE);
+        OpenNpc(MODEL_NPC_CHERRYBLOSSOMTREE);
         c = CreateCharacter(Key, MODEL_NPC_CHERRYBLOSSOMTREE, PositionX, PositionY);
         c->Object.Scale = 1.0f;
         c->Object.m_fEdgeScale = 0.0f;
@@ -14812,7 +14813,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     break;
 
     case MONSTER_DAVID:
-        LOG_CALL(OpenNpc, MODEL_LUCKYITEM_NPC);
+        OpenNpc(MODEL_LUCKYITEM_NPC);
         c = CreateCharacter(Key, MODEL_LUCKYITEM_NPC, PositionX, PositionY);
         wcscpy(c->ID, L"Lucky Item NPC");
         c->Object.Scale = 0.95f;
@@ -14824,14 +14825,14 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         //	Models[MODEL_LUCKYITEM_NPC].Actions[1].PlaySpeed = 50.0f;
         break;
     case MONSTER_SEED_MASTER:
-        LOG_CALL(OpenNpc, MODEL_SEED_MASTER);
+        OpenNpc(MODEL_SEED_MASTER);
         c = CreateCharacter(Key, MODEL_SEED_MASTER, PositionX, PositionY);
         wcscpy(c->ID, L"시드마스터");
         c->Object.Scale = 1.1f;
         c->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_SEED_RESEARCHER:
-        LOG_CALL(OpenNpc, MODEL_SEED_INVESTIGATOR);
+        OpenNpc(MODEL_SEED_INVESTIGATOR);
         c = CreateCharacter(Key, MODEL_SEED_INVESTIGATOR, PositionX, PositionY);
         wcscpy(c->ID, L"시드연구가");
         c->Object.Scale = 0.9f;
@@ -14858,7 +14859,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     }
     break;
     case MONSTER_TRANSFORMED_SNOWMAN:
-        LOG_CALL(OpenNpc, MODEL_XMAS2008_SNOWMAN);
+        OpenNpc(MODEL_XMAS2008_SNOWMAN);
         c = CreateCharacter(Key, MODEL_XMAS2008_SNOWMAN, PositionX, PositionY);
         ::wcscpy(c->ID, L"Unknown");
         c->Object.LifeTime = 100;
@@ -14887,7 +14888,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     {
         int _Model_NpcIndex = MODEL_LITTLESANTA + (Type - 468);
 
-        g_ErrorReport.Write(L"OpenNpc(%d)\r\n", _Model_NpcIndex);
+        mu::log::Get("gameplay")->info("OpenNpc({})", _Model_NpcIndex);
         OpenNpc(_Model_NpcIndex);
         c = CreateCharacter(Key, _Model_NpcIndex, PositionX, PositionY);
 
@@ -14911,13 +14912,13 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     break;
     case MONSTER_DELGADO:
         // 델가도
-        LOG_CALL(OpenNpc, MODEL_NPC_SERBIS);
+        OpenNpc(MODEL_NPC_SERBIS);
         c = CreateCharacter(Key, MODEL_NPC_SERBIS, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         break;
     case MONSTER_GATEKEEPER_TITUS:
         // 결투장 문지기 NPC 타이투스
-        LOG_CALL(OpenNpc, MODEL_DUEL_NPC_TITUS);
+        OpenNpc(MODEL_DUEL_NPC_TITUS);
         c = CreateCharacter(Key, MODEL_DUEL_NPC_TITUS, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.1f;
@@ -14925,7 +14926,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
     case MONSTER_MOSS_THE_MERCHANT:
     {
-        LOG_CALL(OpenNpc, MODEL_GAMBLE_NPC_MOSS);
+        OpenNpc(MODEL_GAMBLE_NPC_MOSS);
         c = CreateCharacter(Key, MODEL_GAMBLE_NPC_MOSS, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.LifeTime = 100;
@@ -14939,7 +14940,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
     }
     break;
     case MONSTER_GOLDEN_RABBIT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_RABBIT);
+        OpenMonsterModel(MONSTER_MODEL_RABBIT);
         c = CreateCharacter(Key, MODEL_RABBIT, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.0f * 0.95f;
@@ -14947,7 +14948,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Weapon[1].Type = -1;
         break;
     case MONSTER_GOLDEN_DARK_KNIGHT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DARK_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_DARK_KNIGHT);
         c = CreateCharacter(Key, MODEL_DARK_KNIGHT, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 0.8f;
@@ -14956,13 +14957,13 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
         break;
     case MONSTER_GOLDEN_DEVIL:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DEVIL);
+        OpenMonsterModel(MONSTER_MODEL_DEVIL);
         c = CreateCharacter(Key, MODEL_DEVIL, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.1f;
         break;
     case MONSTER_GOLDEN_STONE_GOLEM:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_GOLDEN_STONE_GOLEM);
+        OpenMonsterModel(MONSTER_MODEL_GOLDEN_STONE_GOLEM);
         c = CreateCharacter(Key, MODEL_GOLDEN_STONE_GOLEM, PositionX, PositionY);
         c->Object.Scale = 1.35f;
         c->Weapon[0].Type = -1;
@@ -14972,7 +14973,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         BoneManager::RegisterBone(c, L"Monster101_Head", 6);
         break;
     case MONSTER_GOLDEN_CRUST:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_CRUST);
+        OpenMonsterModel(MONSTER_MODEL_CRUST);
         c = CreateCharacter(Key, MODEL_CRUST, PositionX, PositionY);
         c->Object.Scale = 1.1f;
         c->Weapon[0].Type = MODEL_THUNDER_BLADE;
@@ -14983,7 +14984,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.BlendMeshLight = 1.f;
         break;
     case MONSTER_GOLDEN_SATYROS:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_SATYROS);
+        OpenMonsterModel(MONSTER_MODEL_SATYROS);
         c = CreateCharacter(Key, MODEL_SATYROS, PositionX, PositionY);
         c->Object.Scale = 1.3f;
         c->Weapon[0].Type = -1;
@@ -14991,7 +14992,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"Unknown");
         break;
     case MONSTER_GOLDEN_TWIN_TAIL:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_TWIN_TAIL);
+        OpenMonsterModel(MONSTER_MODEL_TWIN_TAIL);
         c = CreateCharacter(Key, MODEL_TWIN_TAIL, PositionX, PositionY);
         c->Object.Scale = 1.3f;
         c->Object.Angle[0] = 0.0f;
@@ -15003,7 +15004,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         BoneManager::RegisterBone(c, L"Twintail_Hair32", 24);
         break;
     case MONSTER_GOLDEN_IRON_KNIGHT:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_IRON_KNIGHT);
+        OpenMonsterModel(MONSTER_MODEL_IRON_KNIGHT);
         c = CreateCharacter(Key, MODEL_IRON_KNIGHT, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.5f;
@@ -15011,7 +15012,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Weapon[1].Type = -1;
         break;
     case MONSTER_GOLDEN_NAPIN:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_NAPIN);
+        OpenMonsterModel(MONSTER_MODEL_NAPIN);
         c = CreateCharacter(Key, MODEL_NAPIN, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 0.95f;
@@ -15019,7 +15020,7 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Weapon[1].Type = -1;
         break;
     case MONSTER_GOLDEN_GREAT_DRAGON:
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DRAGON);
+        OpenMonsterModel(MONSTER_MODEL_DRAGON);
         c = CreateCharacter(Key, MODEL_DRAGON_, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 0.88f;
@@ -15027,54 +15028,54 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Weapon[1].Type = -1;
         break;
     case MONSTER_LUGARD:
-        LOG_CALL(OpenNpc, MODEL_DOPPELGANGER_NPC_LUGARD);
+        OpenNpc(MODEL_DOPPELGANGER_NPC_LUGARD);
         c = CreateCharacter(Key, MODEL_DOPPELGANGER_NPC_LUGARD, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.1f;
         c->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_COMPENSATION_BOX:
-        LOG_CALL(OpenNpc, MODEL_DOPPELGANGER_NPC_BOX);
+        OpenNpc(MODEL_DOPPELGANGER_NPC_BOX);
         c = CreateCharacter(Key, MODEL_DOPPELGANGER_NPC_BOX, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 2.3f;
         c->Object.m_fEdgeScale = 1.1f;
         break;
     case MONSTER_GOLDEN_COMPENSATION_BOX:
-        LOG_CALL(OpenNpc, MODEL_DOPPELGANGER_NPC_GOLDENBOX);
+        OpenNpc(MODEL_DOPPELGANGER_NPC_GOLDENBOX);
         c = CreateCharacter(Key, MODEL_DOPPELGANGER_NPC_GOLDENBOX, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 3.3f;
         c->Object.m_fEdgeScale = 1.1f;
         break;
     case MONSTER_GENS_DUPRIAN:
-        LOG_CALL(OpenNpc, MODAL_GENS_NPC_DUPRIAN);
+        OpenNpc(MODAL_GENS_NPC_DUPRIAN);
         c = CreateCharacter(Key, MODAL_GENS_NPC_DUPRIAN, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.0f;
         break;
     case MONSTER_GENS_VANERT:
-        LOG_CALL(OpenNpc, MODAL_GENS_NPC_BARNERT);
+        OpenNpc(MODAL_GENS_NPC_BARNERT);
         c = CreateCharacter(Key, MODAL_GENS_NPC_BARNERT, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.0f;
         break;
     case MONSTER_CHRISTINE_THE_GENERAL_GOODS_MERCHANT:
-        LOG_CALL(OpenNpc, MODEL_UNITEDMARKETPLACE_CHRISTIN);
+        OpenNpc(MODEL_UNITEDMARKETPLACE_CHRISTIN);
         c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_CHRISTIN, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.1f;
         c->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_JEWELER_RAUL:
-        LOG_CALL(OpenNpc, MODEL_UNITEDMARKETPLACE_RAUL);
+        OpenNpc(MODEL_UNITEDMARKETPLACE_RAUL);
         c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_RAUL, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.0f;
         c->Object.m_fEdgeScale = 1.15f;
         break;
     case MONSTER_MARKET_UNION_MEMBER_JULIA:
-        LOG_CALL(OpenNpc, MODEL_UNITEDMARKETPLACE_JULIA);
+        OpenNpc(MODEL_UNITEDMARKETPLACE_JULIA);
         c = CreateCharacter(Key, MODEL_UNITEDMARKETPLACE_JULIA, PositionX, PositionY);
         wcscpy(c->ID, L"Unknown");
         c->Object.Scale = 1.0f;
@@ -15082,26 +15083,26 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         break;
 
     case MONSTER_MERCENARY_GUILD_FELICIA:
-        LOG_CALL(OpenNpc, MODEL_TERSIA);
+        OpenNpc(MODEL_TERSIA);
         c = CreateCharacter(Key, MODEL_TERSIA, PositionX, PositionY);
         wcscpy(c->ID, L"길드관리인 테르시아");
         c->Object.Scale = 0.93f;
         break;
     case MONSTER_PRIESTESS_VEINA:
-        LOG_CALL(OpenNpc, MODEL_BENA);
+        OpenNpc(MODEL_BENA);
         c = CreateCharacter(Key, MODEL_BENA, PositionX, PositionY);
         wcscpy(c->ID, L"신녀 베이나");
         c->Object.Position[2] += 145.0f;
         break;
     case MONSTER_LEINA_THE_GENERAL_GOODS_MERCHANT:
-        LOG_CALL(OpenNpc, MODEL_KARUTAN_NPC_REINA);
+        OpenNpc(MODEL_KARUTAN_NPC_REINA);
         c = CreateCharacter(Key, MODEL_KARUTAN_NPC_REINA, PositionX, PositionY);
         wcscpy(c->ID, L"잡화상인 레이나");
         c->Object.Scale = 1.1f;
         c->Object.m_fEdgeScale = 1.2f;
         break;
     case MONSTER_WEAPONS_MERCHANT_BOLO:
-        LOG_CALL(OpenNpc, MODEL_KARUTAN_NPC_VOLVO);
+        OpenNpc(MODEL_KARUTAN_NPC_VOLVO);
         c = CreateCharacter(Key, MODEL_KARUTAN_NPC_VOLVO, PositionX, PositionY);
         wcscpy(c->ID, L"무기상인 볼로");
         c->Object.Scale = 0.9f;

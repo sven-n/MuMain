@@ -7,6 +7,7 @@
 #include "UIJewelHarmony.h"
 #include "SocketSystem.h"
 #include "SkillManager.h"
+#include "MuLogger.h"
 
 using namespace SEASON3A;
 
@@ -1240,9 +1241,9 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
     FILE* fp = _wfopen(szFileName, L"rb");
     if (fp == NULL)
     {
+        mu::log::Get("gameplay")->warn("{} - File not exist.", mu_wchar_to_utf8(szFileName));
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", szFileName);
-        g_ErrorReport.Write(Text);
         MessageBox(g_hWnd, Text, NULL, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         exit(0);
@@ -1259,9 +1260,9 @@ void CMixRecipeMgr::OpenRecipeFile(const wchar_t* szFileName)
     {
         if (feof(fp) || iNumMixRecipes[j] > 1000)
         {
+            mu::log::Get("gameplay")->warn("{} - Version not matched.", mu_wchar_to_utf8(szFileName));
             wchar_t Text[256];
             mu_swprintf(Text, L"%ls - Version not matched.", szFileName);
-            g_ErrorReport.Write(Text);
             MessageBox(g_hWnd, Text, NULL, MB_OK);
             SendMessage(g_hWnd, WM_DESTROY, 0, 0);
             fclose(fp);

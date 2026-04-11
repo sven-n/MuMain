@@ -14,6 +14,7 @@
 #include "UIMng.h"
 #include "MapManager.h"
 #include "CharacterManager.h"
+#include "Core/MuLogger.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "GameShop/InGameShopSystem.h"
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -284,7 +285,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     else if (SEASON3B::IsPress('X') == true)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUIHotKey.UpdateKeyEvent()");
+        mu::log::Get("ui")->info("InGameShopStatue.Txt CallStack - CNewUIHotKey.UpdateKeyEvent()");
         if (g_pInGameShop->IsInGameShopOpen() == false)
             return false;
 

@@ -56,7 +56,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     case MONSTER_PERSONA_DS7:
     case MONSTER_PERSONA:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_PERSONA);
+        OpenMonsterModel(MONSTER_MODEL_PERSONA);
         pCharacter = CreateCharacter(Key, MODEL_PERSONA, PosX, PosY);
         pCharacter->Object.Scale = 1.0f;
         pCharacter->Weapon[0].Type = -1;
@@ -69,7 +69,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     break;
     case MONSTER_TWIN_TALE:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_TWIN_TAIL);
+        OpenMonsterModel(MONSTER_MODEL_TWIN_TAIL);
         pCharacter = CreateCharacter(Key, MODEL_TWIN_TAIL, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Angle[0] = 0.0f;
@@ -85,7 +85,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     case MONSTER_DREADFEAR2:
     case MONSTER_DREADFEAR:
     {
-        LOG_CALL(OpenMonsterModel, MONSTER_MODEL_DREADFEAR);
+        OpenMonsterModel(MONSTER_MODEL_DREADFEAR);
         pCharacter = CreateCharacter(Key, MODEL_DREADFEAR, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Angle[0] = 0.0f;
@@ -104,7 +104,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     break;
     case MONSTER_GATEWAY_MACHINE:
     {
-        LOG_CALL(OpenNpc, MODEL_KANTURU2ND_ENTER_NPC);
+        OpenNpc(MODEL_KANTURU2ND_ENTER_NPC);
         pCharacter = CreateCharacter(Key, MODEL_KANTURU2ND_ENTER_NPC, PosX, PosY);
         pCharacter->Object.Scale = 4.76f;
         pCharacter->Object.Position[0] -= 20.0f;

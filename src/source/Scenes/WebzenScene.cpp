@@ -11,10 +11,10 @@
 #include "ZzzOpenData.h"
 #include "UIMng.h"
 #include "NewUISystem.h"
+#include "Core/MuLogger.h"
 
 // External declarations
 extern EGameScene SceneFlag;
-extern CErrorReport g_ErrorReport;
 
 // Constants for background image selection
 constexpr int BACKGROUND_SELECTION_PERCENTAGE = 100;
@@ -131,7 +131,7 @@ void WebzenScene(HDC hDC)
     rUIMng.ReleaseTitleSceneUI();
     UnloadTitleBitmaps();
 
-    g_ErrorReport.Write(L"> Loading ok.\r\n");
+    mu::log::Get("scenes")->info("Loading ok.");
 
     SceneFlag = LOG_IN_SCENE;
 }

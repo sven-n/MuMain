@@ -5,7 +5,7 @@
 // Auto-discovered by file(GLOB MU_CORE_SOURCES Core/*.cpp) in CMakeLists.txt.
 
 #include "GameConfigValidation.h"
-#include "ErrorReport.h"
+#include "MuLogger.h"
 
 namespace GameConfigValidation
 {
@@ -14,8 +14,7 @@ int ValidateServerPort(int value, int defaultValue)
 {
     if (value <= 0 || value > 65535)
     {
-        g_ErrorReport.Write(L"NET: Invalid ServerPort %d in config.ini \u2014 using default %d\r\n", value,
-                            defaultValue);
+        mu::log::Get("core")->warn("NET: Invalid ServerPort {} in config.ini -- using default {}", value, defaultValue);
         return defaultValue;
     }
     return value;
@@ -34,7 +33,8 @@ std::wstring ValidateServerIP(const std::wstring& value, const std::wstring& def
     }
     if (trimmed.empty())
     {
-        g_ErrorReport.Write(L"NET: Empty ServerIP in config.ini \u2014 using default %ls\r\n", defaultValue.c_str());
+        mu::log::Get("core")->warn("NET: Empty ServerIP in config.ini -- using default {}",
+                                   mu_wchar_to_utf8(defaultValue.c_str()));
         return defaultValue;
     }
     return trimmed;

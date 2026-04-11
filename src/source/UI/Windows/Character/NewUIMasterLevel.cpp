@@ -9,6 +9,7 @@
 #include "DSPlaySound.h"
 #include "NewUICommonMessageBox.h"
 #include "SkillManager.h"
+#include "Core/MuLogger.h"
 
 namespace
 {
@@ -105,7 +106,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
     if (fp == nullptr)
     {
         mu_swprintf(Text, L"%ls - File not exist.", path);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("ui")->error("{} - File not exist.", mu_wchar_to_utf8(path));
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -126,7 +127,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
     if (dwCheckSum != GenerateCheckSum2(Buffer, 12288, 0x2BC1))
     {
         mu_swprintf(Text, L"%ls - File corrupted.", path);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("ui")->error("{} - File corrupted.", mu_wchar_to_utf8(path));
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -161,7 +162,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
     {
         wchar_t Text[256];
         mu_swprintf(Text, L"%ls - File not exist.", path);
-        g_ErrorReport.Write(Text);
+        mu::log::Get("ui")->error("{} - File not exist.", mu_wchar_to_utf8(path));
         MessageBox(g_hWnd, Text, nullptr, MB_OK);
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "MuLogger.h"
 #include <ctype.h>
 #include "ZzzBMD.h"
 #include "SMD.h"
@@ -217,7 +218,7 @@ bool OpenSMDFile(wchar_t* FileName, int Type, bool Flip)
         return false;
     if ((SMDFile = _wfopen(FileName, L"rb")) == NULL)
     {
-        g_ErrorReport.Write(L"OpenSMDFile failed: %ls\r\n", FileName);
+        mu::log::Get("data")->warn("OpenSMDFile failed: {}", mu_wchar_to_utf8(FileName));
 #ifdef _DEBUG
         extern HWND g_hWnd;
         wchar_t Text[1024];

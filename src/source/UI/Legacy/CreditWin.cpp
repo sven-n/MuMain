@@ -16,6 +16,7 @@
 #include "Local.h"
 
 #include "UIControls.h"
+#include "Core/MuLogger.h"
 
 #include <algorithm>
 #include <chrono>
@@ -360,9 +361,9 @@ void CCreditWin::LoadText()
     std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(normalizedPath.c_str(), "rb"), &std::fclose);
     if (!file)
     {
+        mu::log::Get("ui")->error("{} file not found.", kCreditDataPath);
         wchar_t szMessage[256];
         std::swprintf(szMessage, std::size(szMessage), L"%hs file not found.\r\n", kCreditDataPath.data());
-        g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;
@@ -371,10 +372,10 @@ void CCreditWin::LoadText()
     const std::size_t nSize = sizeof(SCreditItem) * CRW_ITEM_MAX;
     if (std::fread(m_aCredit, nSize, 1, file.get()) != 1)
     {
+        mu::log::Get("ui")->error("Failed to read {} file or file is corrupt.", kCreditDataPath);
         wchar_t szMessage[256];
         std::swprintf(szMessage, std::size(szMessage), L"Failed to read %hs file or file is corrupt.\r\n",
                       kCreditDataPath.data());
-        g_ErrorReport.Write(szMessage);
         ::MessageBox(g_hWnd, szMessage, NULL, MB_OK);
         ::PostMessage(g_hWnd, WM_DESTROY, 0, 0);
         return;

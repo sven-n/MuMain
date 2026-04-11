@@ -39,6 +39,7 @@ FrameTimingState g_frameTiming;
 #include "GlobalText.h"
 #include "ZzzAI.h"
 #include "MuMain.h"
+#include "Core/MuLogger.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -571,10 +572,9 @@ static void CheckServerConnection()
         if (!s_bClosed)
         {
             s_bClosed = TRUE;
-            g_ErrorReport.Write(L"> Connection closed (SocketClient=%p, connected=%d). ",
-                                static_cast<void*>(SocketClient), SocketClient ? SocketClient->IsConnected() : -1);
-            g_ErrorReport.WriteCurrentTime();
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+            mu::log::Get("scenes")->info("Connection closed (SocketClient={}, connected={}).", fmt::ptr(SocketClient),
+                                         SocketClient ? SocketClient->IsConnected() : -1);
+            mu::log::Get("scenes")->info("Connection closed");
             CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
         }
     }
@@ -999,10 +999,7 @@ void MainScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        wchar_t wMsg[256] = {};
-        const char* msg = e.what() ? e.what() : "unknown";
-        mbstowcs(wMsg, msg, 255);
-        g_ErrorReport.Write(L"Exception in MainScene: %ls\r\n", wMsg);
+        mu::log::Get("scenes")->error("Exception in MainScene: {}", e.what() ? e.what() : "unknown");
     }
 }
 
@@ -1038,9 +1035,6 @@ void RenderScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        wchar_t wMsg[256] = {};
-        const char* msg = e.what() ? e.what() : "unknown";
-        mbstowcs(wMsg, msg, 255);
-        g_ErrorReport.Write(L"Exception in RenderScene: %ls\r\n", wMsg);
+        mu::log::Get("scenes")->error("Exception in RenderScene: {}", e.what() ? e.what() : "unknown");
     }
 }

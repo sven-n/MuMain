@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "MuLogger.h"
 #include "LoadData.h"
 
 #include "GlobalBitmap.h"
@@ -37,7 +38,8 @@ void CLoadData::AccessModel(int Type, const wchar_t* Dir, const wchar_t* FileNam
 
     if (Success == false)
     {
-        g_ErrorReport.Write(L"AccessModel failed: %ls%ls (Type=%d)\r\n", Dir, Name, Type);
+        mu::log::Get("data")->warn("AccessModel failed: {}{} (Type={})", mu_wchar_to_utf8(Dir), mu_wchar_to_utf8(Name),
+                                   Type);
 
         if (wcscmp(FileName, L"Monster") == 0 || wcscmp(FileName, L"Player") == 0 ||
             wcscmp(FileName, L"PlayerTest") == 0 || wcscmp(FileName, L"Angel") == 0)
@@ -117,7 +119,8 @@ void CLoadData::OpenTexture(int Model, const wchar_t* SubFolder, int Wrap, int T
                     0,
                 };
                 mu_swprintf(szErrorMsg, L"OpenTexture Failed: %ls of %hs", szFullPath, pModel->Name);
-                g_ErrorReport.Write(L"%ls (Model=%d)\r\n", szErrorMsg, Model);
+                mu::log::Get("data")->warn("OpenTexture Failed: {} of {} (Model={})", mu_wchar_to_utf8(szFullPath),
+                                           pModel->Name, Model);
 #ifdef FOR_WORK
                 PopUpErrorCheckMsgBox(szErrorMsg);
 #else  // FOR_WORK

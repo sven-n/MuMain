@@ -4,8 +4,8 @@
 // the g_szSDLTextInput / g_bSDLTextInputReady
 // globals, and MuStartTextInput() / MuStopTextInput() lifecycle functions.
 //
-// Separated from PlatformCompat.h to avoid pulling CErrorReport/g_ErrorReport
-// into every translation unit that includes PlatformCompat.h.
+// Separated from PlatformCompat.h to keep logging implementation details
+// out of every translation unit that includes PlatformCompat.h.
 // Compiled with the project PCH (stdafx.h) via MUPlatform REUSE_FROM MUCore.
 
 #ifdef MU_ENABLE_SDL3
@@ -13,6 +13,7 @@
 #include "PlatformCompat.h"
 #include "../MuPlatform.h"
 #include "../IPlatformWindow.h"
+#include "MuLogger.h"
 
 // Keyboard state array: true when the key at that SDL_Scancode index is held.
 // Populated by SDLEventLoop::PollEvents() on KEY_DOWN / KEY_UP events.
@@ -25,7 +26,7 @@ bool g_sdl3KeyboardState[512] = {};
 // [VS1-SDL-INPUT-MOUSE]
 void MuPlatformLogMouseWarpFailed(const char* sdlError)
 {
-    g_ErrorReport.Write(L"MU_ERR_MOUSE_WARP_FAILED [VS1-SDL-INPUT-MOUSE]: cursor warp failed: %hs\r\n", sdlError);
+    mu::log::Get("platform")->error("MU_ERR_MOUSE_WARP_FAILED [VS1-SDL-INPUT-MOUSE]: cursor warp failed: {}", sdlError);
 }
 
 // SDL text input buffer — populated by SDL_EVENT_TEXT_INPUT in SDLEventLoop::PollEvents().
@@ -46,11 +47,11 @@ void MuStartTextInput()
     if (pWnd != nullptr)
     {
         SDL_StartTextInput(pWnd);
-        g_ErrorReport.Write(L"[VS1-SDL-INPUT-TEXT] SDL_StartTextInput activated\r\n");
+        mu::log::Get("platform")->debug("[VS1-SDL-INPUT-TEXT] SDL_StartTextInput activated");
     }
     else
     {
-        g_ErrorReport.Write(L"MU_ERR_TEXT_START_FAILED [VS1-SDL-INPUT-TEXT]: no SDL window available\r\n");
+        mu::log::Get("platform")->error("MU_ERR_TEXT_START_FAILED [VS1-SDL-INPUT-TEXT]: no SDL window available");
     }
 }
 
