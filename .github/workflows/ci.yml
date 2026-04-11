@@ -99,11 +99,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake ninja-build
 
-      - name: Cache libjpeg-turbo (MinGW i686)
+      - name: Cache MinGW i686 dependencies
         uses: actions/cache@v4
         with:
           path: _deps/mingw-i686
-          key: libjpeg-turbo-mingw-i686-3.1.3-v1
+          key: mingw-i686-deps-v2-turbo3.1.3-curl8.11.1
 
       - name: Build libjpeg-turbo (MinGW i686 static)
         run: |
@@ -129,11 +129,41 @@ jobs:
 
           test -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a"
 
+      - name: Build libcurl (MinGW i686 static)
+        run: |
+          if [ -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libcurl.a" ]; then
+            echo "Using cached libcurl.a"
+          else
+            rm -rf _deps/curl-src _deps/build-curl
+            git clone --depth 1 --branch curl-8_11_1 https://github.com/curl/curl.git _deps/curl-src
+            cmake -S _deps/curl-src -B _deps/build-curl \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_SYSTEM_PROCESSOR=i686 \
+              -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc \
+              -DCMAKE_CXX_COMPILER=i686-w64-mingw32-g++ \
+              -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DBUILD_CURL_EXE=OFF \
+              -DBUILD_TESTING=OFF \
+              -DCURL_USE_OPENSSL=OFF \
+              -DCURL_USE_SCHANNEL=OFF \
+              -DCURL_DISABLE_LDAP=ON \
+              -DCURL_DISABLE_LDAPS=ON \
+              -DUSE_LIBIDN2=OFF \
+              -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/_deps/mingw-i686"
+            cmake --build _deps/build-curl -j$(nproc)
+            cmake --install _deps/build-curl
+          fi
+
+          test -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libcurl.a"
+
       - name: Configure CMake
         run: |
           cmake -S . -B build-mingw \
             -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-i686.cmake" \
+            -DCMAKE_FIND_ROOT_PATH="/usr/i686-w64-mingw32;${GITHUB_WORKSPACE}/_deps/mingw-i686" \
             -DCMAKE_BUILD_TYPE=Release \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a" \
             -DMU_ENABLE_SDL3=OFF \
@@ -171,7 +201,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 brotli glslang spirv-cross
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross
 
       - name: Cache SDL3 FetchContent
         uses: actions/cache@v4
@@ -240,7 +270,7 @@ jobs:
             libxcursor-dev libxi-dev libxss-dev libxxf86vm-dev \
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libasound2-dev libpulse-dev \
-            libssl-dev \
+            libssl-dev libcurl4-openssl-dev \
             glslang-tools spirv-cross \
             pkg-config
 

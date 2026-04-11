@@ -480,7 +480,6 @@ if(NOT MSVC)
     -Wno-error=sizeof-pointer-memaccess
     -Wno-error=missing-field-initializers
     -Wno-error=char-subscripts
-    -Wno-error=nontrivial-memcall
     -Wno-error=delete-non-abstract-non-virtual-dtor
     -Wno-error=pragma-once-outside-header
     -Wno-error=int-in-bool-context
@@ -492,6 +491,13 @@ if(NOT MSVC)
     -Wno-error=writable-strings
     -Wno-error=constant-conversion
   )
+  # -Wnontrivial-memcall is supported by Homebrew LLVM but not Apple Clang.
+  # Probe at configure time so the flag doesn't cause -Werror=unknown-warning-option.
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-Wnontrivial-memcall HAS_W_NONTRIVIAL_MEMCALL)
+  if(HAS_W_NONTRIVIAL_MEMCALL)
+    list(APPEND MU_LEGACY_WARNING_RELAXATIONS -Wno-error=nontrivial-memcall)
+  endif()
   target_compile_options(MUGame PRIVATE ${MU_LEGACY_WARNING_RELAXATIONS})
 endif()
 
