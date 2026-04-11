@@ -38,6 +38,7 @@
 #include "Input.h"
 #include "Core/Timer.h"
 #include "Core/MuTimer.h"
+#include "Core/MuLogger.h"
 #include "UIMng.h"
 
 // Story 5.2.1: miniaudio BGM Implementation [VS1-AUDIO-MINIAUDIO-BGM]
@@ -307,6 +308,12 @@ int MuMain(int argc, char* argv[])
         std::error_code ec;
         std::filesystem::current_path(mu_get_app_dir(), ec);
     }
+
+    // Story 7.10.1: Initialize spdlog logging subsystem before any logging calls.
+    // Creates rotating file sink (MuError.log, 512KB x 3) and colored stderr sink (warn+).
+    // Preserves g_errorReportFd for async-signal-safe crash handler writes.
+    // [VS0-CORE-MIGRATE-LOGGING]
+    mu::log::Init(std::filesystem::current_path());
 
     // Open the error log now that CWD points to the exe directory.
     // CErrorReport constructor defers file creation to avoid writing to the shell's CWD.
@@ -648,6 +655,10 @@ int MuMain(int argc, char* argv[])
 #endif
 
     mu::MuPlatform::Shutdown();
+
+    // Story 7.10.1: Flush and shut down spdlog after all game systems are torn down.
+    // [VS0-CORE-MIGRATE-LOGGING]
+    mu::log::Shutdown();
     return 0;
 }
 

@@ -263,6 +263,17 @@ if(MU_ENABLE_SDL3)
     set(BUILD_SHARED_LIBS OFF)
     FetchContent_MakeAvailable(SDL3_ttf)
     set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
+    # Story 7.10.1: spdlog for unified leveled logging (replaces CErrorReport, CmuConsoleDebug,
+    # LOG_CALL, fprintf(stderr)). Header-only mode OFF — static library for faster builds.
+    # [VS0-CORE-MIGRATE-LOGGING]
+    set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG        v1.15.3
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(spdlog)
     # Story 7.3.0: Make SDL3 headers available to ALL targets.
     # PlatformCompat.h (included via PCH) has #ifdef MU_ENABLE_SDL3 sections that
     # #include <SDL3/SDL.h>. Now that MU_ENABLE_SDL3 is project-scope, every target's
@@ -277,7 +288,7 @@ endif()
 # Foundation — no game dependencies
 file(GLOB MU_CORE_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/Core/*.cpp")
 add_library(MUCore STATIC ${MU_CORE_SOURCES})
-target_link_libraries(MUCore PUBLIC MUCommon)
+target_link_libraries(MUCore PUBLIC MUCommon spdlog::spdlog)
 target_precompile_headers(MUCore PRIVATE "${MU_SOURCE_DIR}/Main/stdafx.h")
 
 # Story 7.6.3: OpenSSL for cross-platform credential encryption (mu_encrypt_blob/mu_decrypt_blob)
