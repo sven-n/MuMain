@@ -1027,15 +1027,13 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
     y = WindowHeight - y;
 
     // Build per-vertex color: packed ABGR
-    // Flag==0: white with alpha; Flag==1: black with alpha; no alpha -> opaque white
+    // Flag==0: white with alpha; Flag==1: black with alpha
     //
-    // Behavioral note (4-2-2): The original GL implementation emitted no glColor* call
-    // when Alpha == 0.f, allowing the current OpenGL vertex color state (from the previous
-    // render call) to carry over implicitly. The migration instead always emits opaque white
-    // (0xFFFFFFFF) in this case, which is the more correct deterministic behavior.
-    // EndRenderColor() already resets to glColor4f(1,1,1,1), so the implicit-state
-    // assumption (current color = white) was sound in practice.
-    std::uint32_t color = 0xFFFFFFFFu; // default: opaque white (deterministic, see note above)
+    // When Alpha==0 (default parameter), use semi-transparent black. The original GL code
+    // called glColor4f(0,0,0,0.8) before RenderColor blocks to set a dark UI background
+    // color. Those glColor4f calls were removed during SDL3 migration, so the default must
+    // match the most common intended color: 80% opaque black.
+    std::uint32_t color;
     if (Alpha > 0.f)
     {
         const float clampedAlpha = (Alpha > 1.0f) ? 1.0f : Alpha;
@@ -1045,11 +1043,16 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
             // White with alpha: ABGR = (a<<24) | 0x00FFFFFF
             color = (a << 24) | 0x00FFFFFFu;
         }
-        else if (Flag == 1)
+        else
         {
             // Black with alpha: ABGR = (a<<24) | 0x00000000
             color = (a << 24) | 0x00000000u;
         }
+    }
+    else
+    {
+        // Default: semi-transparent black — matches original glColor4f(0,0,0,0.8) state
+        color = 0xCC000000u;
     }
 
     const mu::Vertex2D vertices[4] = {
