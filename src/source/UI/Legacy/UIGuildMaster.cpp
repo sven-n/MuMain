@@ -354,6 +354,7 @@ void CUIGuildMaster::RenderCreateGuild()
         g_pSingleTextInputBox->SetSize(70, 14);
         g_pSingleTextInputBox->SetPosition(ptOrigin.x + 38, ptOrigin.y);
         g_pSingleTextInputBox->GiveFocus();
+        g_pSingleTextInputBox->DoAction();
         g_pSingleTextInputBox->Render();
     }
     else if (g_iChatInputType == 0)

@@ -428,7 +428,10 @@ void CCharMakeWin::RenderControls()
     g_pRenderText->SetFont(g_hFont);
 
     if (g_iChatInputType == 1)
+    {
+        g_pSingleTextInputBox->DoAction();
         g_pSingleTextInputBox->Render();
+    }
     else if (g_iChatInputType == 0)
         ::RenderInputText(int((m_asprBack[CMW_SPR_INPUT].GetXPos() + 78) / g_fScreenRate_x),
                           int((m_asprBack[CMW_SPR_INPUT].GetYPos() + 21) / g_fScreenRate_y), 0);

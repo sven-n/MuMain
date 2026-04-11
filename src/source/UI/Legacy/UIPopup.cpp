@@ -512,6 +512,7 @@ void CUIPopup::Render()
                 g_pSingleTextInputBox->SetSize(m_nInputSize, 14);
                 g_pSingleTextInputBox->SetPosition(320 - m_nInputSize / 2 + 5, fPosY - 2);
                 g_pSingleTextInputBox->GiveFocus();
+                g_pSingleTextInputBox->DoAction();
                 g_pSingleTextInputBox->Render();
             }
             else if (g_iChatInputType == 0)
