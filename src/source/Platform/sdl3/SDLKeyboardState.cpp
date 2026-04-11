@@ -1,7 +1,7 @@
 // Story 2.2.1: SDL3 Keyboard Input Migration [VS1-SDL-INPUT-KEYBOARD]
 // Story 2.2.3: SDL3 Text Input Migration [VS1-SDL-INPUT-TEXT]
 // Defines the g_sdl3KeyboardState array (indexed by SDL_Scancode, size 512),
-// the MuPlatformLogUnmappedVk() helper, the g_szSDLTextInput / g_bSDLTextInputReady
+// the g_szSDLTextInput / g_bSDLTextInputReady
 // globals, and MuStartTextInput() / MuStopTextInput() lifecycle functions.
 //
 // Separated from PlatformCompat.h to avoid pulling CErrorReport/g_ErrorReport
@@ -19,15 +19,6 @@
 // Cleared in HandleFocusLoss() to prevent stuck keys on Alt-Tab.
 // Size matches SDL_NUM_SCANCODES (512 in SDL3 release-3.2.8).
 bool g_sdl3KeyboardState[512] = {};
-
-// Logs an unmapped VK code warning via the post-mortem error log.
-// Called by the GetAsyncKeyState() shim in PlatformCompat.h.
-// [VS1-SDL-INPUT-KEYBOARD]
-void MuPlatformLogUnmappedVk(int vk)
-{
-    g_ErrorReport.Write(L"MU_ERR_INPUT_UNMAPPED_VK [VS1-SDL-INPUT-KEYBOARD]: unmapped VK code 0x%02X\r\n",
-                        static_cast<unsigned>(vk));
-}
 
 // Logs a cursor warp failure via the post-mortem error log.
 // Called by the SetCursorPos() shim in PlatformCompat.h.

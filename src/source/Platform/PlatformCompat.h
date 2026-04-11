@@ -1210,12 +1210,6 @@ extern bool g_sdl3KeyboardState[512];
     }
 }
 
-// MuPlatformLogUnmappedVk — implemented in SDLKeyboardState.cpp (compiled with
-// the project PCH that provides CErrorReport / g_ErrorReport). Declared here so
-// the inline shim can call it without pulling ErrorReport.h into every TU that
-// includes PlatformCompat.h. [VS1-SDL-INPUT-KEYBOARD]
-void MuPlatformLogUnmappedVk(int vk);
-
 // Mouse button state — populated by SDLEventLoop, used by GetAsyncKeyState shim.
 // [VS1-SDL-INPUT-MOUSE]
 extern bool MouseLButton;
@@ -1231,7 +1225,7 @@ extern bool g_bMouseLButtonPressEdge;
 // Callers using HIBYTE(GetAsyncKeyState(vk)) & 0x80 or == 128 behave correctly:
 //   HIBYTE(0x8000) == 0x80 == 128, satisfying both check patterns.
 // Mouse button VK codes (0x01/0x02/0x04) are backed by global mouse state.
-// Unmapped VK codes return 0 and log MU_ERR_INPUT_UNMAPPED_VK via g_ErrorReport.
+// Unmapped VK codes silently return 0 (matches Windows behavior).
 // [VS1-SDL-INPUT-KEYBOARD] [VS1-SDL-INPUT-MOUSE]
 [[nodiscard]] inline uint16_t GetAsyncKeyState(int vk)
 {
@@ -1251,7 +1245,8 @@ extern bool g_bMouseLButtonPressEdge;
     SDL_Scancode sc = MuVkToSdlScancode(vk);
     if (sc == SDL_SCANCODE_UNKNOWN)
     {
-        MuPlatformLogUnmappedVk(vk);
+        // Silently return 0 for unmapped VK codes — matches Windows GetAsyncKeyState behavior.
+        // ScanAsyncKeyState() polls all 256 VK codes per frame; logging unmapped ones floods MuError.log.
         return 0;
     }
     return g_sdl3KeyboardState[sc] ? static_cast<uint16_t>(0x8000) : 0;
