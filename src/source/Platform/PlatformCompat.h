@@ -73,6 +73,11 @@ inline std::string mu_wchar_to_utf8(const wchar_t* src)
 #define _snwprintf swprintf
 inline void OutputDebugString(const wchar_t* /*msg*/) {}
 
+// errno_t is available on macOS (<errno.h>) and MSVC, but not Linux GCC.
+#if defined(__linux__) && !defined(errno_t)
+typedef int errno_t;
+#endif
+
 // Story 7.3.0: MSVC secure string stubs [VS0-QUAL-BUILDCOMPAT-MACOS]
 inline errno_t wcsncpy_s(wchar_t* dest, size_t destSize, const wchar_t* src, size_t count)
 {

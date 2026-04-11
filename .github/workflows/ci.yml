@@ -163,9 +163,10 @@ jobs:
           cmake -S . -B build-mingw \
             -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-i686.cmake" \
-            -DCMAKE_FIND_ROOT_PATH="/usr/i686-w64-mingw32;${GITHUB_WORKSPACE}/_deps/mingw-i686" \
             -DCMAKE_BUILD_TYPE=Release \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a" \
+            -DCURL_INCLUDE_DIR="${GITHUB_WORKSPACE}/_deps/mingw-i686/include" \
+            -DCURL_LIBRARY="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libcurl.a" \
             -DMU_ENABLE_SDL3=OFF \
             -DMU_ENABLE_DOTNET=OFF \
             -DMU_ENABLE_SHADER_COMPILATION=OFF
