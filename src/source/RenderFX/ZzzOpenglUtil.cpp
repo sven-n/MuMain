@@ -267,11 +267,13 @@ int AlphaBlendType;
 
 void BindTexture(int tex)
 {
-    if (CachTexture != tex)
-    {
-        CachTexture = tex;
-        mu::GetRenderer().BindTexture(tex);
-    }
+    // Always forward to the renderer — no caching. The original OpenGL optimization
+    // (skip glBindTexture if same texture) saved an expensive GPU state change.
+    // In the SDL3 deferred renderer, BindTexture just stores an int (virtually free).
+    // The CachTexture optimization causes bugs: direct mu::GetRenderer().BindTexture()
+    // calls (in UIControls, ZzzInventory) desync CachTexture from m_boundTextureId,
+    // causing subsequent BindTexture calls to skip, leaving the wrong texture bound.
+    mu::GetRenderer().BindTexture(tex);
 }
 
 bool TextureStream = false;
@@ -279,13 +281,8 @@ bool TextureStream = false;
 extern int test;
 void BindTextureStream(int tex)
 {
-    if (CachTexture != tex)
-    {
-        CachTexture = tex;
-        BITMAP_t* b = &Bitmaps[tex];
-        mu::GetRenderer().BindTexture(b->TextureNumber);
-        TextureStream = true;
-    }
+    mu::GetRenderer().BindTexture(tex);
+    TextureStream = true;
 }
 
 void EndTextureStream()
@@ -611,14 +608,22 @@ void BeginOpengl(int x, int y, int Width, int Height)
     mu::GetRenderer().Rotate(CameraAngle[2], 0.f, 0.f, 1.f);
     mu::GetRenderer().Translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
 
-    // State tracking flags
+    // State tracking flags — AND synchronize actual renderer state.
+    // Previous frame's UI rendering may have left m_texture2DEnabled, m_alphaTestEnabled,
+    // etc. in a dirty state. BeginFrame does not reset these. Without explicit sync here,
+    // the tracking variables (used by DisableAlphaBlend/EnableAlphaTest to skip redundant
+    // calls) diverge from the renderer, causing textures to flash on/off.
     AlphaTestEnable = false;
     TextureEnable = true;
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
 
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(true);
     mu::GetRenderer().SetDepthTest(true);
+    mu::GetRenderer().SetDepthMask(true);
+    mu::GetRenderer().SetCullFace(true);
 
     GetOpenGLMatrix(CameraMatrix);
 }
