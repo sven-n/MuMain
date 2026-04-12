@@ -91,34 +91,32 @@ This will download the ImGui library into `src/ThirdParty/imgui`.
 - Optimized for production use
 - Zero editor overhead
 
-### Building with CMake and MinGW-w64 (Linux)
+### Building with CMake — Cross-Platform (Windows, macOS, Linux)
 
-The repository also contains a CMake setup to cross-compile the Windows client
-from Linux using a MinGW-w64 toolchain.
+The project builds natively on all three platforms using CMake presets and SDL3.
 
-**Prerequisites**
+**Windows (MSVC)**
 
-  * A working MinGW-w64 toolchain (for example `i686-w64-mingw32-g++`).
-  * A MinGW-w64 build of libjpeg-turbo which provides a `libturbojpeg` library
-    (static or import library) on the library search path of your toolchain.
-  * Standard Windows / OpenGL libraries shipped with MinGW-w64 (e.g. `opengl32`,
-    `glu32`, `winmm`, `imm32`, `ws2_32`, etc.).
-
-**Example build commands on Linux**
-
-From the repository root:
-
-```sh
-cmake -S . -B build-mingw \
-  -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-i686.cmake \
-  -DCMAKE_BUILD_TYPE=Release
-cmake --build build-mingw -j$(nproc)
+```powershell
+cmake --preset windows-x64
+cmake --build out/build/windows-x64 --config Debug
 ```
 
-If the linker reports `cannot find -lturbojpeg`, install a MinGW-w64 build of
-libjpeg-turbo (providing `libturbojpeg.a` / `libturbojpeg.dll.a`) or adjust the
-`target_link_libraries` entry in `src/CMakeLists.txt` to match the
-name of the library available on your system.
+**macOS (arm64)**
+
+```bash
+cmake --preset macos-arm64
+cmake --build out/build/macos-arm64 --config Debug
+```
+
+**Linux (x64)**
+
+```bash
+cmake --preset linux-x64
+cmake --build out/build/linux-x64 --config Debug
+```
+
+SDL3, spdlog, and shader tools are fetched automatically via FetchContent on first configure.
 
 ---
 

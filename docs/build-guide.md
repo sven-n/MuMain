@@ -31,7 +31,7 @@ MuMain/
 ├── src/bin/              # Game assets (13,169 files) — copied to build dir by post-build step
 ├── ClientLibrary/        # .NET 10 Native AOT network library (14 C# files)
 ├── tests/                # Catch2 unit tests
-├── cmake/toolchains/     # Cross-compile toolchains (mingw, linux-x64, macos-arm64)
+├── cmake/toolchains/     # Platform toolchains (windows-x64, linux-x64, macos-arm64)
 ├── CMakePresets.json      # All platform presets (windows-x86/x64, linux-x64, macos-arm64)
 ├── Makefile              # Quality gate targets (format, lint, test) — run from MuMain/
 └── .clang-format         # Formatting rules (Allman braces, 4-space indent, 120 col)
@@ -41,10 +41,9 @@ MuMain/
 
 | Platform | Full Compile | CMake Configure | Quality Gate | .NET AOT Library | Runnable Binary |
 |----------|-------------|----------------|-------------|-----------------|----------------|
-| **WSL + MinGW** | Yes (cross-compiles Win `.exe`) | Yes | Yes | Yes (native Linux `dotnet` preferred, WSL interop fallback) | Yes (`Main.exe` via WSL) |
 | **Windows + MSVC** | Yes (native) | Yes | Yes | Yes (native `dotnet.exe`) | Yes |
-| **macOS (arm64)** | Partial — fails on Win32 TUs | Yes | Yes | Yes (produces `.dylib` if `dotnet` installed) | No (blocked by Win32 deps) |
-| **Linux native (x64)** | Partial — fails on Win32 TUs | Yes | Yes | Yes (produces `.so` if `dotnet` installed) | No (blocked by Win32 deps) |
+| **macOS (arm64)** | Yes (native via SDL3) | Yes | Yes | Yes (produces `.dylib`) | Yes |
+| **Linux native (x64)** | Yes (native via SDL3) | Yes | Yes | Yes (produces `.so`) | Yes |
 | **Any platform without `dotnet`** | Yes (game client only) | Yes | Yes | No — CMake warns and skips | Game runs but cannot connect to servers |
 
 ### Quality Gates (from MuMain/ directory)
@@ -97,9 +96,8 @@ The `ClientLibrary/` directory contains a .NET 10 Native AOT library that handle
 | macOS arm64 | `osx-arm64` | `.dylib` | `dlopen` |
 | macOS x64 | `osx-x64` | `.dylib` | `dlopen` |
 
-- **Detection**: `cmake/FindDotnetAOT.cmake` auto-detects the platform RID, library extension, and locates `dotnet`. On WSL, it prefers native Linux `dotnet` and falls back to Windows `dotnet.exe` via interop.
+- **Detection**: `cmake/FindDotnetAOT.cmake` auto-detects the platform RID, library extension, and locates `dotnet`.
 - **Without `dotnet` installed**: CMake prints a warning and skips the .NET build. The game compiles and runs but cannot connect to any server.
-- **Cross-compile note (WSL + MinGW)**: When cross-compiling a Windows `.exe` from WSL, the .NET library must also be a Windows `.dll`. CMake handles this via RID detection — the MinGW toolchain sets `CMAKE_SYSTEM_NAME=Windows`, so the RID resolves to `win-x86`.
 
 ### Formatting Rules
 
@@ -117,12 +115,11 @@ Defined in `.clang-format` at the repo root:
 
 | Environment | Best for | Build speed | Setup effort |
 |-------------|----------|-------------|--------------|
-| WSL terminal + MinGW | Daily development, Claude Code | Fast | Medium (one-time) |
-| CLion via Z: drive + MSVC | Quick MSVC testing (no file copy) | Slow (cross-filesystem I/O) | Easy |
-| CLion with native Windows path + MSVC | Debugging, full-speed MSVC builds | Fast | Easy (manual file sync) |
-| Windows native + MSVC (VS presets) | Full-speed MSVC builds | Fast | Easy (manual file sync) |
+| Windows native + MSVC (VS presets) | Full-speed Windows builds | Fast | Easy |
+| macOS native (arm64) | macOS development, Claude Code | Fast | Easy (brew) |
+| Linux native (x64) | Linux development, Claude Code | Fast | Easy (apt) |
 
-**Recommended workflow:** Use WSL + MinGW for daily development and Claude Code. Use CLion/MSVC only when you need the debugger or MSVC-specific testing.
+**Recommended workflow:** Build natively on your platform using CMake presets. All three platforms are first-class.
 
 ---
 
@@ -130,45 +127,35 @@ Defined in `.clang-format` at the repo root:
 
 | Scenario | Compiler | CMake runs on | dotnet used | Status |
 |----------|----------|---------------|-------------|--------|
-| Windows (VS presets) | MSVC x86 | Windows | `dotnet.exe` (Windows) | Supported |
-| CLion via Z: drive | MSVC x86 | Windows | `dotnet.exe` (Windows) | Supported (slow I/O) |
-| CLion with native Windows path | MSVC x86 | Windows | `dotnet.exe` (Windows) | Supported (fast) |
-| WSL terminal (MinGW) | MinGW i686 | Linux (WSL) | `dotnet.exe` (Windows, via WSL interop) | Supported |
-| Pure Linux (no WSL) | MinGW i686 | Linux | `dotnet` (Linux) | Partial — no DLL |
-| CLion on Linux | MinGW i686 | Linux | `dotnet` (Linux) | Untested — no DLL |
+| Windows (VS presets) | MSVC x64 | Windows | `dotnet.exe` (Windows) | Supported |
+| macOS (arm64 preset) | Clang | macOS | `dotnet` (macOS) | Supported |
+| Linux (x64 preset) | GCC 12+ | Linux | `dotnet` (Linux) | Supported |
 
 ---
 
 ## Setup Guide
 
-### WSL Terminal — MinGW (Recommended for Development)
+### Windows — MSVC (Native)
 
-**Where to keep the repo:** On the WSL filesystem (`/home/<user>/MuMain`). This is the fast path — all file I/O stays on native Linux ext4.
-
-**Do NOT** put the repo on `/mnt/c/...` (Windows filesystem from WSL). That path goes through a slow translation layer and is significantly slower than native WSL filesystem.
-
-**Prerequisites (one-time):**
-
-```bash
-sudo apt-get update && sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake ninja-build
+```powershell
+cmake --preset windows-x64
+cmake --build out/build/windows-x64 --config Debug
 ```
 
-**Configure and build:**
+### macOS — Clang (Native)
 
 ```bash
-cmake -S . -B build-mingw -G Ninja \
-  -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-i686.cmake \
-  -DCMAKE_BUILD_TYPE=Debug \
-  -DENABLE_EDITOR=ON \
-  -DMU_TURBOJPEG_STATIC_LIB=_deps/mingw-i686/lib/libturbojpeg.a
-
-cmake --build build-mingw -j$(nproc)
+brew install cmake ninja openssl@3 glslang spirv-cross
+cmake --preset macos-arm64 -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+cmake --build out/build/macos-arm64 --config Debug
 ```
 
-**Running the game:** The post-build step copies all assets from `src/bin/` into `build-mingw/src/`. Run from the build output directory:
+### Linux — GCC (Native)
 
 ```bash
-cd build-mingw/src && ./Main.exe
+sudo apt-get install -y cmake ninja-build gcc g++ libgl1-mesa-dev libssl-dev libcurl4-openssl-dev glslang-tools spirv-cross
+cmake --preset linux-x64
+cmake --build out/build/linux-x64 --config Debug
 ```
 
 ### CLion on Windows — Which Approach?
@@ -352,29 +339,17 @@ D:\repos\MuMain\                      <-- source (on Windows drive)
     .dotnet_temp/
 ```
 
-### 4. WSL Terminal — MinGW Cross-Compile
-
-```
-/home/<user>/MuMain/                  <-- source + build (all on WSL filesystem)
-  .nuget/                             <-- NuGet cache (in project root)
-  build-mingw/                        <-- build output (CMAKE_BINARY_DIR)
-    src/
-      Main.exe                        <-- PE32 Windows executable + copied assets
-      MUnique.Client.Library.dll
-    dotnet_out/
-    .dotnet_temp/
-```
-
-### 5. Pure Linux (No WSL, No Windows dotnet)
+### 4. Linux Native Build
 
 ```
 /home/<user>/MuMain/
-  build-mingw/
+  out/build/linux-x64/                <-- build output (CMAKE_BINARY_DIR)
     src/
-      Main.exe                        <-- built, but no DLL
+      Debug/
+        Main                          <-- native Linux executable + copied assets
+        MUnique.Client.Library.so
+    _deps/                            <-- FetchContent (SDL3, spdlog, etc.)
 ```
-
-On pure Linux (no WSL), native `dotnet` produces a Linux `.so` — but since the game is cross-compiled as a Windows `.exe` via MinGW, it needs a Windows `.dll`. Without WSL interop to a Windows `dotnet.exe`, CMake skips the .NET build. The game runs but cannot connect to a server.
 
 ---
 
@@ -421,7 +396,7 @@ When CMake detects it's running on Linux (`CMAKE_HOST_SYSTEM_NAME == "Linux"`) a
 | Linux path | Converted Windows path |
 |------------|----------------------|
 | `/home/<user>/MuMain/ClientLibrary/...csproj` | `\\wsl.localhost\Ubuntu\home\<user>\MuMain\ClientLibrary\...csproj` |
-| `/home/<user>/MuMain/build-mingw/dotnet_out` | `\\wsl.localhost\Ubuntu\home\<user>\MuMain\build-mingw\dotnet_out` |
+| `/home/<user>/MuMain/out/build/linux-x64/dotnet_out` | `\\wsl.localhost\Ubuntu\home\<user>\MuMain\out\build\linux-x64\dotnet_out` |
 
 Paths used by CMake-native commands (`copy_if_different`, `DEPENDS`) stay as Linux paths.
 
