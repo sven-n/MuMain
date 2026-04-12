@@ -201,11 +201,11 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
         }
     }
 
-    // Consume mouse press-edge flag after polling — fast clicks register for one cycle.
+    // Mouse press-edge flag: cleared per-frame in PollEvents(), NOT here.
+    // ScanAsyncKeyState runs BEFORE CInput::Update() in the frame — if we clear
+    // the edge flag here, CInput::Update() misses fast clicks where DOWN+UP
+    // arrive in the same PollEvents batch (MouseLButton=false, edge=false → lost).
     // [Story 7-9-9, AC-5]
-#ifdef MU_ENABLE_SDL3
-    g_bMouseLButtonPressEdge = false;
-#endif
 
     if (IsPress(VK_RETURN) && IsEnterPressed() == false)
     {

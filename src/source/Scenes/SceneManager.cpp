@@ -41,6 +41,12 @@ FrameTimingState g_frameTiming;
 #include "MuMain.h"
 #include "Core/MuLogger.h"
 
+// Mouse push/edge flags — cleared per render-frame after game logic consumes them.
+extern bool MouseLButtonPush;
+extern bool MouseRButtonPush;
+extern bool MouseMButtonPush;
+extern bool g_bMouseLButtonPressEdge;
+
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "imgui.h"
@@ -1027,6 +1033,14 @@ void RenderScene(HDC hDC)
             MainScene(hDC);
             break;
         }
+
+        // Clear one-shot mouse push/edge flags after all scene logic has consumed them.
+        // These flags accumulate across PollEvents calls (which may run multiple times per
+        // render frame during throttling) and persist until game logic processes them here.
+        MouseLButtonPush = false;
+        MouseRButtonPush = false;
+        MouseMButtonPush = false;
+        g_bMouseLButtonPressEdge = false;
 
         if (g_iNoMouseTime > 31)
         {

@@ -138,8 +138,10 @@ bool SDLEventLoop::PollEvents()
     // [VS1-SDL-INPUT-TEXT]
 
     // Reset per-frame mouse state before processing new events. [VS1-SDL-INPUT-MOUSE]
-    // MouseLButtonDBClick: mirrors MuMain.cpp:611 which clears this each frame.
-    // MouseWheel: per-frame accumulated value — cleared each frame like WM_MOUSEWHEEL.
+    // NOTE: Push/edge flags are NOT cleared here — PollEvents may run multiple times per
+    // render frame (frame throttling). Clearing here would lose clicks accumulated during
+    // throttled iterations. Push/edge flags are cleared in UpdateSceneState() which runs
+    // exactly once per render frame, right before game logic reads them.
     MouseLButtonDBClick = false;
     MouseWheel = 0;
 
@@ -295,7 +297,9 @@ bool SDLEventLoop::PollEvents()
             switch (event.button.button)
             {
             case SDL_BUTTON_LEFT:
-                MouseLButtonPush = false;
+                // Do NOT clear MouseLButtonPush here — let game logic consume it.
+                // On Win32, WM_LBUTTONUP never cleared the Push flag; it only set Pop.
+                // Clearing here loses clicks when DOWN+UP arrive in the same PollEvents batch.
                 if (MouseLButton)
                 {
                     MouseLButtonPop = true;
@@ -306,7 +310,7 @@ bool SDLEventLoop::PollEvents()
                 SDL_CaptureMouse(false);
                 break;
             case SDL_BUTTON_RIGHT:
-                MouseRButtonPush = false;
+                // Same: don't clear MouseRButtonPush here.
                 if (MouseRButton)
                 {
                     MouseRButtonPop = true;
@@ -315,7 +319,6 @@ bool SDLEventLoop::PollEvents()
                 SDL_CaptureMouse(false);
                 break;
             case SDL_BUTTON_MIDDLE:
-                MouseMButtonPush = false;
                 if (MouseMButton)
                 {
                     MouseMButtonPop = true;
