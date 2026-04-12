@@ -232,54 +232,49 @@ else()
 endif()
 
 # ============================================================
-# SDL3 dependency (required by MUPlatform and MURenderFX)
+# SDL3 dependency (required by all platform targets)
 # ============================================================
-option(MU_ENABLE_SDL3 "Enable SDL3 dependency (disable for MinGW CI if needed)" ON)
-if(MU_ENABLE_SDL3)
-    # Story 7.3.0: Propagate MU_ENABLE_SDL3 to ALL targets at project scope.
-    # Previously only MUPlatform received this flag (PRIVATE), leaving MUCore, MUData,
-    # MURenderFX, MUProtocol, and MUAudio without it — causing compilation failures
-    # on macOS/Linux where #ifdef MU_ENABLE_SDL3 guards were not active.
-    # [VS0-QUAL-BUILDCOMPAT-MACOS]
-    add_compile_definitions(MU_ENABLE_SDL3)
-    include(FetchContent)
-    set(SDL_TESTS OFF CACHE BOOL "" FORCE)
-    set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-    set(SDL_STATIC ON CACHE BOOL "" FORCE)
-    FetchContent_Declare(
-        SDL3
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG        release-3.2.8
-        GIT_SHALLOW    TRUE
-        OVERRIDE_FIND_PACKAGE    # Story 7.9.8: lets SDL_ttf's find_package(SDL3) find FetchContent'd SDL3
-    )
-    FetchContent_MakeAvailable(SDL3)
-    # Story 7.9.8: SDL_ttf requires SDL3 at configure time — MakeAvailable here after SDL3.
-    # FetchContent_Declare is in the root CMakeLists.txt; MakeAvailable is deferred here.
-    # OVERRIDE_FIND_PACKAGE on SDL3 redirects SDL_ttf's find_package(SDL3) automatically.
-    # SDL_ttf uses BUILD_SHARED_LIBS (standard CMake) — force static to match SDL3.
-    set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
-    set(BUILD_SHARED_LIBS OFF)
-    FetchContent_MakeAvailable(SDL3_ttf)
-    set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
-    # Story 7.10.1: spdlog for unified leveled logging (replaces CErrorReport, CmuConsoleDebug,
-    # LOG_CALL, fprintf(stderr)). Header-only mode OFF — static library for faster builds.
-    # [VS0-CORE-MIGRATE-LOGGING]
-    set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
-    FetchContent_Declare(
-        spdlog
-        GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG        v1.15.3
-        GIT_SHALLOW    TRUE
-    )
-    FetchContent_MakeAvailable(spdlog)
-    # Story 7.3.0: Make SDL3 headers available to ALL targets.
-    # PlatformCompat.h (included via PCH) has #ifdef MU_ENABLE_SDL3 sections that
-    # #include <SDL3/SDL.h>. Now that MU_ENABLE_SDL3 is project-scope, every target's
-    # PCH needs the SDL3 include path. [VS0-QUAL-BUILDCOMPAT-MACOS]
-    include_directories(SYSTEM "${sdl3_SOURCE_DIR}/include")
-endif()
+# Story 7.3.0: Propagate MU_ENABLE_SDL3 to ALL targets at project scope.
+# C++ source uses #ifdef MU_ENABLE_SDL3 guards — this define keeps them active.
+# [VS0-QUAL-BUILDCOMPAT-MACOS]
+add_compile_definitions(MU_ENABLE_SDL3)
+include(FetchContent)
+set(SDL_TESTS OFF CACHE BOOL "" FORCE)
+set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+set(SDL_STATIC ON CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG        release-3.2.8
+    GIT_SHALLOW    TRUE
+    OVERRIDE_FIND_PACKAGE    # Story 7.9.8: lets SDL_ttf's find_package(SDL3) find FetchContent'd SDL3
+)
+FetchContent_MakeAvailable(SDL3)
+# Story 7.9.8: SDL_ttf requires SDL3 at configure time — MakeAvailable here after SDL3.
+# FetchContent_Declare is in the root CMakeLists.txt; MakeAvailable is deferred here.
+# OVERRIDE_FIND_PACKAGE on SDL3 redirects SDL_ttf's find_package(SDL3) automatically.
+# SDL_ttf uses BUILD_SHARED_LIBS (standard CMake) — force static to match SDL3.
+set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+set(BUILD_SHARED_LIBS OFF)
+FetchContent_MakeAvailable(SDL3_ttf)
+set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
+# Story 7.10.1: spdlog for unified leveled logging (replaces CErrorReport, CmuConsoleDebug,
+# LOG_CALL, fprintf(stderr)). Header-only mode OFF — static library for faster builds.
+# [VS0-CORE-MIGRATE-LOGGING]
+set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG        v1.15.3
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(spdlog)
+# Story 7.3.0: Make SDL3 headers available to ALL targets.
+# PlatformCompat.h (included via PCH) has #ifdef MU_ENABLE_SDL3 sections that
+# #include <SDL3/SDL.h>. Now that MU_ENABLE_SDL3 is project-scope, every target's
+# PCH needs the SDL3 include path. [VS0-QUAL-BUILDCOMPAT-MACOS]
+include_directories(SYSTEM "${sdl3_SOURCE_DIR}/include")
 
 # ============================================================
 # Independent library targets (enforced dependency boundaries)
@@ -322,13 +317,10 @@ file(GLOB MU_RENDERFX_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/RenderFX/*.cpp
 # "not available" and no-ops. The file provides essential rendering globals/functions.
 # [VS0-QUAL-BUILDCOMP-MACOS]
 add_library(MURenderFX STATIC ${MU_RENDERFX_SOURCES})
-target_link_libraries(MURenderFX PRIVATE MUCore)
-if(MU_ENABLE_SDL3)
-    target_link_libraries(MURenderFX PRIVATE SDL3::SDL3-static)
-    # Story 7.9.8: SDL_ttf for GPU text rendering (replaces GDI TextOut pipeline)
-    if(TARGET SDL3_ttf::SDL3_ttf)
-        target_link_libraries(MURenderFX PRIVATE SDL3_ttf::SDL3_ttf)
-    endif()
+target_link_libraries(MURenderFX PRIVATE MUCore SDL3::SDL3-static)
+# Story 7.9.8: SDL_ttf for GPU text rendering (replaces GDI TextOut pipeline)
+if(TARGET SDL3_ttf::SDL3_ttf)
+    target_link_libraries(MURenderFX PRIVATE SDL3_ttf::SDL3_ttf)
 endif()
 # Story 7.9.7: GLM for matrix math (header-only — propagates include path)
 if(TARGET glm::glm)
@@ -394,7 +386,7 @@ file(GLOB MU_THIRDPARTY_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/ThirdParty/*
 add_library(MUThirdParty STATIC ${MU_THIRDPARTY_SOURCES})
 target_link_libraries(MUThirdParty PRIVATE MUCommon)
 # Story 7.9.8: CUIRenderTextSDLTtf in UIControls.cpp needs SDL_ttf headers
-if(MU_ENABLE_SDL3 AND TARGET SDL3_ttf::SDL3_ttf)
+if(TARGET SDL3_ttf::SDL3_ttf)
     target_link_libraries(MUThirdParty PRIVATE SDL3_ttf::SDL3_ttf SDL3::SDL3-static)
 endif()
 target_precompile_headers(MUThirdParty REUSE_FROM MUCore)
@@ -406,39 +398,25 @@ file(GLOB MU_PLATFORM_SOURCES CONFIGURE_DEPENDS "${MU_SOURCE_DIR}/Platform/*.cpp
 # MuPlatform.cpp is included unconditionally via the GLOB above (platform facade)
 if(WIN32)
   list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/PlatformLibrary.cpp")
-  if(MU_ENABLE_SDL3)
-    # SDL3 backend replaces Win32 window/event loop when enabled
-    list(APPEND MU_PLATFORM_SOURCES
-      "${MU_SOURCE_DIR}/Platform/sdl3/SDLWindow.cpp"
-      "${MU_SOURCE_DIR}/Platform/sdl3/SDLEventLoop.cpp"
-    )
-  else()
-    list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/Win32Window.cpp")
-    list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/win32/Win32EventLoop.cpp")
-  endif()
 else()
   list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/posix/PlatformLibrary.cpp")
   # Story 7.1.2: POSIX Signal Handlers for Crash Diagnostics [VS0-QUAL-SIGNAL-HANDLERS]
   list(APPEND MU_PLATFORM_SOURCES "${MU_SOURCE_DIR}/Platform/posix/PosixSignalHandlers.cpp")
-  if(MU_ENABLE_SDL3)
-    list(APPEND MU_PLATFORM_SOURCES
-      "${MU_SOURCE_DIR}/Platform/sdl3/SDLWindow.cpp"
-      "${MU_SOURCE_DIR}/Platform/sdl3/SDLEventLoop.cpp"
-    )
-  endif()
 endif()
+# SDL3 backend — always enabled for all platforms
+list(APPEND MU_PLATFORM_SOURCES
+  "${MU_SOURCE_DIR}/Platform/sdl3/SDLWindow.cpp"
+  "${MU_SOURCE_DIR}/Platform/sdl3/SDLEventLoop.cpp"
+)
 add_library(MUPlatform STATIC ${MU_PLATFORM_SOURCES})
 target_link_libraries(MUPlatform PRIVATE MUCore)
 # Story 7.6.3: PlatformCrypto.cpp needs OpenSSL headers and link symbols
 if(OpenSSL_FOUND)
     target_link_libraries(MUPlatform PRIVATE OpenSSL::Crypto)
 endif()
-if(MU_ENABLE_SDL3)
-    target_link_libraries(MUPlatform PRIVATE SDL3::SDL3-static)
-    target_compile_definitions(MUPlatform PRIVATE MU_ENABLE_SDL3)
-    # Story 2.2.1: keyboard state array + unmapped-VK logger [VS1-SDL-INPUT-KEYBOARD]
-    target_sources(MUPlatform PRIVATE "${MU_SOURCE_DIR}/Platform/sdl3/SDLKeyboardState.cpp")
-endif()
+target_link_libraries(MUPlatform PRIVATE SDL3::SDL3-static)
+# Story 2.2.1: keyboard state array + unmapped-VK logger [VS1-SDL-INPUT-KEYBOARD]
+target_sources(MUPlatform PRIVATE "${MU_SOURCE_DIR}/Platform/sdl3/SDLKeyboardState.cpp")
 target_precompile_headers(MUPlatform REUSE_FROM MUCore)
 if(NOT WIN32)
   target_link_libraries(MUPlatform PRIVATE dl)

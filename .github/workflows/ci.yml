@@ -86,107 +86,68 @@ jobs:
             --suppress=returnByReference \
             --inline-suppr
 
-  build:
-    name: MinGW Build
-    runs-on: ubuntu-latest
+  build-windows:
+    name: Windows Native Build
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install MinGW-w64 toolchain
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake ninja-build
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
 
-      - name: Cache MinGW i686 dependencies
+      - name: Cache FetchContent dependencies
         uses: actions/cache@v4
         with:
-          path: _deps/mingw-i686
-          key: mingw-i686-deps-v2-turbo3.1.3-curl8.11.1
-
-      - name: Build libjpeg-turbo (MinGW i686 static)
-        run: |
-          if [ -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a" ]; then
-            echo "Using cached libturbojpeg.a"
-          else
-            rm -rf _deps/libjpeg-turbo _deps/build-turbo
-            git clone --depth 1 --branch 3.1.3 https://github.com/libjpeg-turbo/libjpeg-turbo.git _deps/libjpeg-turbo
-            cmake -S _deps/libjpeg-turbo -B _deps/build-turbo \
-              -DCMAKE_SYSTEM_NAME=Windows \
-              -DCMAKE_SYSTEM_PROCESSOR=i686 \
-              -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc \
-              -DCMAKE_CXX_COMPILER=i686-w64-mingw32-g++ \
-              -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DENABLE_SHARED=OFF \
-              -DENABLE_STATIC=ON \
-              -DWITH_SIMD=OFF \
-              -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/_deps/mingw-i686"
-            cmake --build _deps/build-turbo -j$(nproc)
-            cmake --install _deps/build-turbo
-          fi
-
-          test -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a"
-
-      - name: Build libcurl (MinGW i686 static)
-        run: |
-          if [ -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libcurl.a" ]; then
-            echo "Using cached libcurl.a"
-          else
-            rm -rf _deps/curl-src _deps/build-curl
-            git clone --depth 1 --branch curl-8_11_1 https://github.com/curl/curl.git _deps/curl-src
-            cmake -S _deps/curl-src -B _deps/build-curl \
-              -DCMAKE_SYSTEM_NAME=Windows \
-              -DCMAKE_SYSTEM_PROCESSOR=i686 \
-              -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc \
-              -DCMAKE_CXX_COMPILER=i686-w64-mingw32-g++ \
-              -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DBUILD_SHARED_LIBS=OFF \
-              -DBUILD_CURL_EXE=OFF \
-              -DBUILD_TESTING=OFF \
-              -DCURL_USE_OPENSSL=OFF \
-              -DCURL_USE_SCHANNEL=OFF \
-              -DCURL_DISABLE_LDAP=ON \
-              -DCURL_DISABLE_LDAPS=ON \
-              -DUSE_LIBIDN2=OFF \
-              -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/_deps/mingw-i686"
-            cmake --build _deps/build-curl -j$(nproc)
-            cmake --install _deps/build-curl
-          fi
-
-          test -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libcurl.a"
+          path: out/build/windows-x64/_deps
+          key: fetchcontent-windows-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt') }}
+          restore-keys: fetchcontent-windows-
 
       - name: Configure CMake
-        run: |
-          cmake -S . -B build-mingw \
-            -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-i686.cmake" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a" \
-            -DCURL_INCLUDE_DIR="${GITHUB_WORKSPACE}/_deps/mingw-i686/include" \
-            -DCURL_LIBRARY="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libcurl.a" \
-            -DMU_ENABLE_SDL3=OFF \
-            -DMU_ENABLE_DOTNET=OFF \
-            -DMU_ENABLE_SHADER_COMPILATION=OFF
+        run: cmake --preset windows-x64
 
       - name: Build
-        run: |
-          cmake --build build-mingw -j$(nproc)
+        run: cmake --build out/build/windows-x64 --config Debug
+
+      - name: Run tests
+        run: ctest --test-dir out/build/windows-x64 --build-config Debug --output-on-failure
 
       - name: Validate artifacts
+        shell: pwsh
         run: |
-          test -f build-mingw/src/Main.exe || { echo "MISSING: Main.exe"; exit 1; }
-          echo "OK: Main.exe ($(du -sh build-mingw/src/Main.exe | cut -f1))"
+          $ExeDir = "out/build/windows-x64/src/Debug"
+          $fail = 0
+          foreach ($f in @(
+            "$ExeDir/Main.exe",
+            "$ExeDir/MUnique.Client.Library.dll",
+            "$ExeDir/config.ini",
+            "$ExeDir/Translations",
+            "$ExeDir/shaders"
+          )) {
+            if (Test-Path $f) {
+              Write-Host "OK:      $f"
+            } else {
+              Write-Host "MISSING: $f"
+              $fail = 1
+            }
+          }
+          exit $fail
 
       - name: Upload artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: main-exe-mingw-${{ github.ref_name }}
-          path: build-mingw/src/Main.exe
-          if-no-files-found: error
+          name: main-windows-x64-${{ github.ref_name }}
+          path: |
+            out/build/windows-x64/src/Debug/Main.exe
+            out/build/windows-x64/src/Debug/MUnique.Client.Library.dll
+            out/build/windows-x64/src/Debug/Translations
+            out/build/windows-x64/src/Debug/shaders
+            out/build/windows-x64/src/Debug/config.ini
+          if-no-files-found: warn
 
   build-macos:
     name: macOS Native Build
@@ -324,7 +285,7 @@ jobs:
 
   release:
     name: Semantic Release
-    needs: [quality, build, build-macos, build-linux]
+    needs: [quality, build-windows, build-macos, build-linux]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
@@ -343,7 +304,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: main-exe-mingw-main
+          name: main-windows-x64-main
           path: artifacts
 
       - name: Semantic Release

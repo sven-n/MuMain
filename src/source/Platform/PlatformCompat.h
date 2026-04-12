@@ -1411,6 +1411,7 @@ inline std::filesystem::path mu_get_app_dir()
 
 // Guard against platforms that already define errno_t
 #ifndef MU_ERRNO_T_DEFINED
+// cppcheck-suppress syntaxError
 using errno_t = int;
 #define MU_ERRNO_T_DEFINED
 #endif

@@ -27,6 +27,14 @@ CCameraMove::~CCameraMove()
 
 namespace
 {
+struct FileCloser
+{
+    void operator()(FILE* f) const
+    {
+        if (f)
+            fclose(f);
+    }
+};
 constexpr float kDefaultStartDistance = 10.0f;
 constexpr float kMinMoveAccel = 0.1f;
 constexpr float kMaxMoveAccel = 40.0f;
@@ -148,7 +156,7 @@ bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
 {
     UnLoadCameraWalkScript();
 
-    std::unique_ptr<FILE, decltype(&fclose)> fileHandle(_wfopen(filename.c_str(), L"rb"), &fclose);
+    std::unique_ptr<FILE, FileCloser> fileHandle(_wfopen(filename.c_str(), L"rb"));
     if (!fileHandle)
     {
         return false;
@@ -194,7 +202,7 @@ bool CCameraMove::SaveCameraWalkScript(const std::wstring& filename)
         return false;
     }
 
-    std::unique_ptr<FILE, decltype(&fclose)> fileHandle(_wfopen(filename.c_str(), L"wb"), &fclose);
+    std::unique_ptr<FILE, FileCloser> fileHandle(_wfopen(filename.c_str(), L"wb"));
     if (!fileHandle)
     {
         return false;
