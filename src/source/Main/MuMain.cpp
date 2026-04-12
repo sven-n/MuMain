@@ -412,6 +412,11 @@ int MuMain(int argc, char* argv[])
     }
 
 #ifdef MU_ENABLE_SDL3
+    // Set g_hWnd to the sentinel value that GetFocus()/GetActiveWindow() return.
+    // CNewUIManager::UpdateKeyEvent() checks GetFocus() == g_hWnd to gate hotkeys.
+    // Without this, g_hWnd stays nullptr and no keyboard hotkeys work.
+    g_hWnd = reinterpret_cast<HWND>(static_cast<uintptr_t>(1));
+
     {
         int nDisplayW = WindowWidth;
         int nDisplayH = WindowHeight;
