@@ -175,7 +175,15 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
     m_MapNameUISize.x += 10;
 
     m_listMoveInfoData = CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
-    m_iRealFontHeight = FontHeight * 640 / WindowWidth + 2;
+
+    // Compute row height in virtual (640x480) units.
+    // FontHeight (Win32 GetTextMetrics global) is populated on Windows but stays 0 on SDL3.
+    // Fall back to 16px (GDI-compatible default) when it has not been initialized.
+    constexpr int kFallbackFontHeight = 16;
+    const int effectiveFontHeight = (FontHeight > 0) ? FontHeight : kFallbackFontHeight;
+    m_iRealFontHeight = (g_fScreenRate_y > 0.0f)
+        ? static_cast<int>(effectiveFontHeight / g_fScreenRate_y) + 2
+        : 14;
 
     m_MapNameUISize.y = 60 + (m_iRealFontHeight * MOVECOMMAND_MAX_RENDER_TEXTLINE);
 

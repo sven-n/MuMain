@@ -165,9 +165,46 @@ inline void _wsplitpath(const wchar_t* path, wchar_t* drive, wchar_t* dir, wchar
 }
 
 // Story 7.3.0: MultiByteToWideChar / WideCharToMultiByte stubs [VS0-QUAL-BUILDCOMPAT-MACOS]
-// Story 7.3.0: Forward declaration for WideCharToMultiByte stub below.
-// Defined later in this file (~line 1137). [VS0-QUAL-BUILDCOMPAT-MACOS]
-inline std::string mu_wchar_to_utf8(const wchar_t* src);
+// Story 7.3.0: wchar_t → UTF-8 conversion. Used by WideCharToMultiByte stub below. [VS0-QUAL-BUILDCOMPAT-MACOS]
+inline std::string mu_wchar_to_utf8(const wchar_t* src)
+{
+    std::string result;
+    if (src == nullptr)
+    {
+        return result;
+    }
+    for (const wchar_t* p = src; *p; ++p)
+    {
+        auto ch = static_cast<uint32_t>(*p);
+        if (ch < 0x80)
+        {
+            result += static_cast<char>(ch);
+        }
+        else if (ch < 0x800)
+        {
+            result += static_cast<char>(0xC0 | (ch >> 6));
+            result += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+        else if (ch < 0x10000)
+        {
+            if (ch >= 0xD800 && ch <= 0xDFFF)
+            {
+                continue;
+            }
+            result += static_cast<char>(0xE0 | (ch >> 12));
+            result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
+            result += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+        else if (ch <= 0x10FFFF)
+        {
+            result += static_cast<char>(0xF0 | (ch >> 18));
+            result += static_cast<char>(0x80 | ((ch >> 12) & 0x3F));
+            result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
+            result += static_cast<char>(0x80 | (ch & 0x3F));
+        }
+    }
+    return result;
+}
 
 // Story 7.3.0: Win32-compatible signatures using proper UTF-8 encoding/decoding.
 // MultiByteToWideChar: UTF-8 → wchar_t (inline decoder, handles multi-byte sequences).
@@ -1255,46 +1292,6 @@ extern bool g_bMouseLButtonPressEdge;
         return 0;
     }
     return g_sdl3KeyboardState[sc] ? static_cast<uint16_t>(0x8000) : 0;
-}
-
-inline std::string mu_wchar_to_utf8(const wchar_t* src)
-{
-    std::string result;
-    if (src == nullptr)
-    {
-        return result;
-    }
-    for (const wchar_t* p = src; *p; ++p)
-    {
-        auto ch = static_cast<uint32_t>(*p);
-        if (ch < 0x80)
-        {
-            result += static_cast<char>(ch);
-        }
-        else if (ch < 0x800)
-        {
-            result += static_cast<char>(0xC0 | (ch >> 6));
-            result += static_cast<char>(0x80 | (ch & 0x3F));
-        }
-        else if (ch < 0x10000)
-        {
-            if (ch >= 0xD800 && ch <= 0xDFFF)
-            {
-                continue;
-            }
-            result += static_cast<char>(0xE0 | (ch >> 12));
-            result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
-            result += static_cast<char>(0x80 | (ch & 0x3F));
-        }
-        else if (ch <= 0x10FFFF)
-        {
-            result += static_cast<char>(0xF0 | (ch >> 18));
-            result += static_cast<char>(0x80 | ((ch >> 12) & 0x3F));
-            result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
-            result += static_cast<char>(0x80 | (ch & 0x3F));
-        }
-    }
-    return result;
 }
 
 // Convert a wide path to a narrow UTF-8 path with normalized separators.
