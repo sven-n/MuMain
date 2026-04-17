@@ -3412,10 +3412,17 @@ CUITextInputBox::~CUITextInputBox()
 #ifdef MU_ENABLE_SDL3
     CleanupInputBoxTexture(this);
 #endif
-    // Clear static focus tracker if we're the focused box [Story 7-9-9, Finding 1]
+    // Clear static focus tracker if we're the focused box [Story 7-9-9, Finding 1].
+    // Also stop SDL3 text input — otherwise a window destroyed without first calling
+    // SetState(UISTATE_HIDE) leaves SDL_StartTextInput active and no box to consume
+    // events, and IsAnyInputBoxFocused() callers can briefly think a dead box still
+    // holds focus.
     if (s_pFocusedInputBox == this)
     {
         s_pFocusedInputBox = nullptr;
+#ifdef MU_ENABLE_SDL3
+        MuStopTextInput();
+#endif
     }
 
     if (m_hEditWnd != nullptr && m_hOldProc != nullptr)
@@ -3952,13 +3959,11 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
         PostMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)-2, (LPARAM)-1);
     }
 #elif defined(MU_ENABLE_SDL3)
-    // SDL3 path: idempotent focus — only one box at a time. [Story 7-9-9, AC-1]
-    if (m_bSDLHasFocus)
-    {
-        return; // Already focused — skip redundant MuStartTextInput calls
-    }
-
-    // Clear focus on the previously focused box (mutual exclusion)
+    // SDL3 path: ensure this box is the focused one and that SDL text input is active.
+    // We do NOT early-return when m_bSDLHasFocus is already true: a prior SetState/Show
+    // cycle can leave that flag set while the OS-level SDL text-input session is stopped
+    // (e.g., focus loss), and skipping MuStartTextInput here would leave typing dead.
+    // MuStartTextInput is cheap and idempotent at the SDL3 layer — always call it.
     if (s_pFocusedInputBox != nullptr && s_pFocusedInputBox != this)
     {
         s_pFocusedInputBox->m_bSDLHasFocus = false;

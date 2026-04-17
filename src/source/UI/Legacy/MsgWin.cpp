@@ -149,6 +149,16 @@ bool CMsgWin::CursorInWin(int nArea)
 
 void CMsgWin::UpdateWhileActive(double dDeltaTick)
 {
+    // Drive the shared password-input singleton each frame while the delete-character
+    // prompt is visible. Without this, SDL3 text events never reach the box's
+    // DoActionSub — typed characters stay in the global SDL buffer and leak into the
+    // next input box to run DoAction (e.g. the Add Friend dialog).
+    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
+        g_pSinglePasswdInputBox != nullptr && g_pSinglePasswdInputBox->GetState() == UISTATE_NORMAL)
+    {
+        g_pSinglePasswdInputBox->DoAction();
+    }
+
     CInput& rInput = CInput::Instance();
 
     if (rInput.IsKeyDown(VK_RETURN))
@@ -485,6 +495,16 @@ void CMsgWin::ManageOKClick()
 
 void CMsgWin::ManageCancelClick()
 {
+    // If the delete-character password prompt is being cancelled, hide the shared
+    // password input so it releases SDL3 focus (otherwise hotkeys remain suppressed
+    // because IsAnyInputBoxFocused() keeps reporting the singleton as focused).
+    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
+        g_pSinglePasswdInputBox != nullptr)
+    {
+        g_pSinglePasswdInputBox->SetText(NULL);
+        g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
+    }
+
     CUIMng& rUIMng = CUIMng::Instance();
     m_nMsgCode = -1;
     rUIMng.HideWin(this);
@@ -504,6 +524,10 @@ void CMsgWin::InitResidentNumInput()
         g_pSinglePasswdInputBox->SetOption(UIOPTION_NULL);
         g_pSinglePasswdInputBox->SetBackColor(0, 0, 0, 0);
         g_pSinglePasswdInputBox->SetTextLimit(20);
+        // g_pSinglePasswdInputBox is a reused singleton — clear any leftover text from a
+        // prior activation before taking focus, otherwise the previous session's string
+        // would render in the field.
+        g_pSinglePasswdInputBox->SetText(NULL);
         g_pSinglePasswdInputBox->GiveFocus();
     }
 }

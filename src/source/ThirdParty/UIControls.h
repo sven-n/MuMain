@@ -902,6 +902,11 @@ public:
     HWND GetHandle() { return m_hEditWnd; }
     HWND GetParentHandle() { return m_hParentWnd; }
     BOOL HaveFocus();
+
+    // Returns true when any CUITextInputBox is currently SDL3-focused. Used by the
+    // hotkey dispatcher to suppress global keyboard shortcuts while the user is
+    // typing into any input field.
+    static bool IsAnyInputBoxFocused() { return s_pFocusedInputBox != nullptr; }
 #ifndef _WIN32
     // SDL3 path: HaveFocus is tracked via m_bSDLHasFocus (set in GiveFocus/SetState).
     // The Win32 inline above is replaced by the guarded declaration; implementation in UIControls.cpp.

@@ -4,6 +4,7 @@
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUICustomMessageBox.h"
+#include "UIControls.h"
 #include "DSPlaySound.h"
 #include "CSChaosCastle.h"
 #include "w_CursedTemple.h"
@@ -369,6 +370,13 @@ bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
 
 bool SEASON3B::CNewUIHotKey::CanUpdateKeyEvent()
 {
+    // Suppress global hotkeys while the user is typing into any text input.
+    // Otherwise letters like 'F' both append to the field AND toggle the friend window.
+    if (CUITextInputBox::IsAnyInputBoxFocused())
+    {
+        return false;
+    }
+
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC) ||
         g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT) ||
         g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST) ||
