@@ -1673,9 +1673,11 @@ inline wchar_t* mu_itow(int value, wchar_t* buffer, int radix)
 #define _itow mu_itow
 
 // _mbclen — multibyte character length (MSVC MBCS)
+// Returns at least 1 for non-null pointers: callers use the result as a loop
+// step and a 0 return causes an infinite loop when iterating wchar_t data.
 inline size_t mu_mbclen(const unsigned char* c)
 {
-    if (!c || *c == 0)
+    if (!c)
         return 0;
     return (*c > 0x7f) ? 2 : 1;
 }
