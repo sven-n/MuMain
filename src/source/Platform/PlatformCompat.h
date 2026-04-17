@@ -2512,9 +2512,13 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* src)
     }
     else
     {
-        // Linux/macOS: wchar_t is 4 bytes (UTF-32), transcode BMP codepoints
+        // Linux/macOS: wchar_t is 4 bytes (UTF-32), transcode BMP codepoints.
+        // Cap at MAX_TEXT_LENGTH to keep a missing null-terminator from running off the
+        // end of an allocated buffer into unmapped memory (SIGSEGV).
         std::u16string result;
-        for (const wchar_t* p = src; *p != L'\0'; ++p)
+        constexpr size_t kMaxIter = 4096;
+        size_t i = 0;
+        for (const wchar_t* p = src; *p != L'\0' && i < kMaxIter; ++p, ++i)
         {
             const char32_t cp = static_cast<char32_t>(*p);
             if (cp < 0x10000U)

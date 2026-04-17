@@ -3602,7 +3602,18 @@ BOOL CUIFriendListTabWindow::HandleMessage()
     case UI_MESSAGE_TXTRETURN:
         if (m_WorkMessage.m_iParam2 != 0)
         {
-            wchar_t* pText = (wchar_t*)m_WorkMessage.m_iParam2;
+            auto* pText = reinterpret_cast<wchar_t*>(m_WorkMessage.m_iParam2);
+            // m_iParam2 carries a heap-allocated wchar_t* from CUITextInputWindow::ReturnText.
+            // If the dispatched value is a small integer or otherwise outside the plausible
+            // heap range, treat it as garbage and skip — preserves robustness against stale
+            // or misrouted messages that would otherwise SIGSEGV on the first dereference.
+            const uintptr_t addr = reinterpret_cast<uintptr_t>(pText);
+            if (addr < 0x100000ULL || addr >= 0x800000000000ULL)
+            {
+                mu::log::Get("ui")->warn("[FriendListTab] TXTRETURN iParam2={:#x} out of heap range — skipping",
+                                         addr);
+                break;
+            }
             SocketClient->ToGameServer()->SendFriendAddRequest(MU_C16(pText));
             delete[] pText;
         }
@@ -5126,10 +5137,14 @@ void CUITextInputWindow::RenderSub()
 void CUITextInputWindow::ReturnText()
 {
     wchar_t* pszReturnText = new wchar_t[MAX_TEXT_LENGTH + 1];
-    m_TextInputBox.GetText(pszReturnText);
+    pszReturnText[0] = L'\0';
+    m_TextInputBox.GetText(pszReturnText, MAX_TEXT_LENGTH + 1);
     m_TextInputBox.SetText(NULL);
-    if (pszReturnText[0] == '\0')
+    if (pszReturnText[0] == L'\0')
+    {
+        delete[] pszReturnText;
         return;
+    }
 
     g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(),
                                         reinterpret_cast<LONG_PTR>(pszReturnText));
