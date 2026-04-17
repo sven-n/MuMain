@@ -3732,10 +3732,17 @@ void CUITextInputBox::GetText(wchar_t* pszText, int iGetLength)
     GetWindowText(m_hEditWnd, pszText, iGetLength);
 #else
     // SDL3 path: read directly from m_szSDLText buffer.
+    // Copy only up to the source string's null terminator — wcsncpy would pad
+    // the remainder of pszText with nulls up to iGetLength-1, overflowing small
+    // destination buffers when callers rely on the default iGetLength=255.
     if (iGetLength > 0)
     {
-        wcsncpy(pszText, m_szSDLText, iGetLength - 1);
-        pszText[iGetLength - 1] = L'\0';
+        const size_t srcLen = wcslen(m_szSDLText);
+        const size_t copyLen = (srcLen < static_cast<size_t>(iGetLength - 1))
+                                   ? srcLen
+                                   : static_cast<size_t>(iGetLength - 1);
+        wmemcpy(pszText, m_szSDLText, copyLen);
+        pszText[copyLen] = L'\0';
     }
 #endif
 }

@@ -11903,6 +11903,11 @@ void CreateGuildMark(int nMarkIndex, bool blend)
     Width = (int)b->Width;
     Height = (int)b->Height;
     BYTE* Buffer = b->Buffer;
+    if (!Buffer || Width == 0 || Height == 0)
+    {
+        mu::log::Get("gameplay")->error("[CreateGuildMark] BITMAP_GUILD not loaded (BitmapIndex={})", b->BitmapIndex);
+        return;
+    }
     int alpha = 128;
     if (blend)
     {
@@ -11976,9 +11981,8 @@ void CreateGuildMark(int nMarkIndex, bool blend)
         }
     }
 
-    mu::GetRenderer().BindTexture(b->TextureNumber);
-
-    // Texture upload handled by SDL GPU backend (story 7-9-6).
+    mu::GetRenderer().QueueTextureUpdate(b->BitmapIndex, b->Buffer, (std::uint32_t)b->Width, (std::uint32_t)b->Height);
+    mu::GetRenderer().BindTexture(b->BitmapIndex);
 }
 
 void CreateCastleMark(int Type, BYTE* buffer, bool blend)
@@ -12104,59 +12108,27 @@ void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
     RenderBitmap(BITMAP_INVENTORY + 18, x - 1, y - 1, (float)SizeX + 2, (float)SizeY + 2, 0.f, 0.f, SizeX / 32.f,
                  SizeY / 30.f);
 
-    BITMAP_t* b = &Bitmaps[BITMAP_GUILD];
-
-    int Width, Height;
-
-    Width = (int)b->Width;
-    Height = (int)b->Height;
-    BYTE* Buffer = b->Buffer;
-    unsigned int Color = MarkColor[Index];
-
+    // SDL3 deferred-render fix: render solid colored quads directly instead of mutating
+    // the shared BITMAP_GUILD texture. The original path queued 81 texture uploads per frame
+    // against a single texture, causing all quads to sample the last-uploaded color and
+    // exhausting GPU transfer-buffer resources after ~600 frames.
     if (Index == 0)
     {
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                // cppcheck-suppress dangerousTypeCast
-                *((unsigned int*)(Buffer)) = 255 << 24;
-                Buffer += 4;
-            }
-        }
-        Color = (255u << 24) + (128 << 16) + (128 << 8) + (128);
-        Buffer = b->Buffer;
-        for (int i = 0; i < 8; i++)
-        {
-            // cppcheck-suppress dangerousTypeCast
-            *((unsigned int*)(Buffer)) = Color;
-            Buffer += 8 * 4 + 4;
-        }
-        Buffer = b->Buffer + 7 * 4;
-        for (int i = 0; i < 8; i++)
-        {
-            // cppcheck-suppress dangerousTypeCast
-            *((unsigned int*)(Buffer)) = Color;
-            Buffer += 8 * 4 - 4;
-        }
+        // Empty/erase cell: opaque black base with a gray X overlay.
+        const unsigned int black = (255u << 24);
+        const unsigned int gray = (255u << 24) | (128u << 16) | (128u << 8) | 128u;
+        const float fx = x;
+        const float fy = y;
+        const float fw = (float)SizeX;
+        const float fh = (float)SizeY;
+        RenderColorQuadARGB(fx, fy, fw, fh, black);
+        RenderColorLineARGB(fx, fy, fx + fw, fy + fh, 2.0f, gray);
+        RenderColorLineARGB(fx + fw, fy, fx, fy + fh, 2.0f, gray);
     }
     else
     {
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                // cppcheck-suppress dangerousTypeCast
-                *((unsigned int*)(Buffer)) = Color;
-                Buffer += 4;
-            }
-        }
+        RenderColorQuadARGB(x, y, (float)SizeX, (float)SizeY, MarkColor[Index]);
     }
-
-    mu::GetRenderer().BindTexture(b->TextureNumber);
-
-    // Texture upload handled by SDL GPU backend (story 7-9-6).
-    RenderBitmap(BITMAP_GUILD, x, y, (float)SizeX, (float)SizeY);
 }
 
 void RenderGuildList(int StartX, int StartY)

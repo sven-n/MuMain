@@ -11,6 +11,7 @@
 #include "ZzzInventory.h"
 #include "Local.h"
 #include "NewUISystem.h"
+#include "MuLogger.h"
 
 extern MARK_t GuildMark[MAX_MARKS];
 extern int SelectMarkColor;
@@ -156,6 +157,8 @@ CNewUIGuildMakeWindow::~CNewUIGuildMakeWindow()
 
 bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
+    mu::log::Get("ui")->info("[GuildMakeWindow] Create() - enter");
+    mu::log::Get("ui")->flush();
     if (NULL == pNewUIMng)
         return false;
 
@@ -164,6 +167,9 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NPCGUILDMASTER, this);
     SetPos(x, y);
 
+    mu::log::Get("ui")->info("[GuildMakeWindow] Create() - creating EditBox (g_hWnd={})",
+                             reinterpret_cast<uintptr_t>(g_hWnd));
+    mu::log::Get("ui")->flush();
     m_EditBox = new CUITextInputBox;
     m_EditBox->Init(g_hWnd, 200, 14, MAXGUILDNAME);
     m_EditBox->SetPosition(m_Pos.x + 50, m_Pos.y + 66);
@@ -172,6 +178,8 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_EditBox->SetFont(g_hFont);
     m_EditBox->SetState(UISTATE_NORMAL);
     m_EditBox->SetOption(UIOPTION_NOLOCALIZEDCHARACTERS);
+    mu::log::Get("ui")->info("[GuildMakeWindow] Create() - EditBox initialized, creating buttons");
+    mu::log::Get("ui")->flush();
     m_Button = new CNewUIButton[GUILDMAKEBUTTON_COUNT];
 
     for (int i = 0; i < GUILDMAKEBUTTON_COUNT; ++i)
@@ -195,6 +203,8 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     Show(false);
 
+    mu::log::Get("ui")->info("[GuildMakeWindow] Create() - done");
+    mu::log::Get("ui")->flush();
     return true;
 }
 
@@ -250,7 +260,7 @@ void CNewUIGuildMakeWindow::ClosingProcess()
     {
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
-        m_EditBox->GetText(tempText);
+        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
         if (tempText[0] != L'\0')
         {
             wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
@@ -331,7 +341,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
         // Save the current text before going back
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
-        m_EditBox->GetText(tempText);
+        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
         if (tempText[0] != L'\0')
         {
             wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
@@ -347,7 +357,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
 
-        m_EditBox->GetText(tempText);
+        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
 
         if (CheckSpecialText(tempText) == true)
         {
@@ -366,7 +376,6 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
             wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
             ChangeWindowState(GUILDMAKE_RESULTINFO);
             ChangeEditBox(UISTATE_HIDE);
-
             return true;
         }
     }
@@ -423,7 +432,6 @@ void CNewUIGuildMakeWindow::RenderGMInfo()
 
 void CNewUIGuildMakeWindow::RenderGMMark()
 {
-    // edit box
     wchar_t Text[100];
     memset(&Text, 0, sizeof(wchar_t) * 100);
     mu_swprintf(Text, GlobalText[182]);
@@ -431,7 +439,6 @@ void CNewUIGuildMakeWindow::RenderGMMark()
 
     RenderImage(IMAGE_GUILDMAKE_EDITBOX, m_Pos.x + 45, m_Pos.y + 60, 108.f, 23.f);
     m_EditBox->Render();
-
     RenderGoldRect(m_Pos.x + 45, m_Pos.y + 95, 130.f, 130.f);
     CreateGuildMark(MARK_EDIT);
     RenderEditGuildMark(m_Pos.x, m_Pos.y);

@@ -1074,6 +1074,66 @@ void EndRenderColor()
     mu::GetRenderer().SetTexture2D(true);
 }
 
+static inline std::uint32_t ArgbToAbgr(unsigned int argb)
+{
+    const std::uint32_t a = (argb >> 24) & 0xffu;
+    const std::uint32_t r = (argb >> 16) & 0xffu;
+    const std::uint32_t g = (argb >> 8) & 0xffu;
+    const std::uint32_t b = argb & 0xffu;
+    return (a << 24) | (b << 16) | (g << 8) | r;
+}
+
+void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor)
+{
+    DisableTexture();
+
+    x = ConvertX(x);
+    y = ConvertY(y);
+    Width = ConvertX(Width);
+    Height = ConvertY(Height);
+    y = WindowHeight - y;
+
+    const std::uint32_t color = ArgbToAbgr(argbColor);
+    const mu::Vertex2D vertices[4] = {
+        {x, y, 0.0f, 0.0f, color},
+        {x, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y, 0.0f, 0.0f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
+}
+
+void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness, unsigned int argbColor)
+{
+    DisableTexture();
+
+    x1 = ConvertX(x1);
+    y1 = ConvertY(y1);
+    x2 = ConvertX(x2);
+    y2 = ConvertY(y2);
+    y1 = WindowHeight - y1;
+    y2 = WindowHeight - y2;
+
+    const float dx = x2 - x1;
+    const float dy = y2 - y1;
+    const float len = sqrtf(dx * dx + dy * dy);
+    if (len < 1e-6f)
+        return;
+
+    const float halfT = thickness * 0.5f;
+    const float ox = -dy / len * halfT;
+    const float oy = dx / len * halfT;
+
+    const std::uint32_t color = ArgbToAbgr(argbColor);
+    const mu::Vertex2D vertices[4] = {
+        {x1 + ox, y1 + oy, 0.0f, 0.0f, color},
+        {x1 - ox, y1 - oy, 0.0f, 0.0f, color},
+        {x2 - ox, y2 - oy, 0.0f, 0.0f, color},
+        {x2 + ox, y2 + oy, 0.0f, 0.0f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
+}
+
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,
                        float vHeight, unsigned int color)
 {
