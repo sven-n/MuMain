@@ -558,6 +558,8 @@ void ReceiveCharacterCard_New(const BYTE* ReceiveBuffer)
 void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_CREATE_CHARACTER)ReceiveBuffer;
+    mu::log::Get("network")->info("[CreateCharacter] response result={} index={} classRaw={} level={}", Data->Result,
+                                  Data->Index, static_cast<int>(Data->Class), Data->Level);
     if (Data->Result == 1)
     {
         float fPos[2] = {0.0f, 0.0f}, fAngle = 0.0f;
@@ -599,6 +601,8 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         CharactersClient[Data->Index].Level = Data->Level;
         auto serverClass = (SERVER_CLASS_TYPE)(Data->Class >> 3);
         auto iClass = gCharacterManager.ChangeServerClassTypeToClientClassType(serverClass);
+        mu::log::Get("network")->info("[CreateCharacter] success serverClass={} clientClass={}",
+                                      static_cast<int>(serverClass), static_cast<int>(iClass));
 
         CharactersClient[Data->Index].Class = iClass;
         CharactersClient[Data->Index].SkinIndex = gCharacterManager.GetSkinModelIndex(iClass);
