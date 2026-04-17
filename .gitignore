@@ -44,6 +44,9 @@ build-mingw/
 # ImGui
 **/imgui.ini
 
+graphify-out/
+
+
 **/*.log
 
 # Semantic release (transient)
