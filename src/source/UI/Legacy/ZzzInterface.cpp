@@ -4692,9 +4692,7 @@ bool FindText(const wchar_t* Text, const wchar_t* Token, bool First)
     if (Length < 0)
         return false;
 
-    // cppcheck-suppress dangerousTypeCast
-    auto* lpszCheck = (unsigned char*)Text;
-    for (int i = 0; i <= Length; i += _mbclen(lpszCheck + i))
+    for (int i = 0; i <= Length; i++)
     {
         bool Success = true;
         for (int j = 0; j < LengthToken; j++)
@@ -4720,9 +4718,7 @@ bool FindTextABS(const wchar_t* Text, const wchar_t* Token, bool First)
     if (Length < 0)
         return false;
 
-    // cppcheck-suppress dangerousTypeCast
-    auto* lpszCheck = (unsigned char*)Text;
-    for (int i = 0; i <= Length; i += _mbclen(lpszCheck + i))
+    for (int i = 0; i <= Length; i++)
     {
         bool Success = true;
         for (int j = 0; j < LengthToken; j++)
