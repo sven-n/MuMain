@@ -100,7 +100,6 @@ void OpenFilterFile(const wchar_t* FileName)
     }
 
     delete[] Buffer;
-    fclose(fp);
 }
 
 void OpenNameFilterFile(const wchar_t* FileName)
