@@ -147,6 +147,8 @@ void NewMoveCharacterScene()
         return;
     }
 
+    MouseOnWindow = false;
+
     if (!InitCharacterScene)
     {
         InitCharacterScene = true;

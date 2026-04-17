@@ -18,6 +18,7 @@
 
 #include "Local.h"
 #include "CharacterManager.h"
+#include "MuLogger.h"
 
 #include <algorithm>
 #include <array>
@@ -355,19 +356,23 @@ void CCharMakeWin::RequestCreateCharacter()
 
     const std::wstring characterName = InputText[0];
 
-    // todo: check with regex from server
     if (characterName.length() < kMinCharacterNameLength)
+    {
         rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
+    }
     else if (::CheckName())
+    {
         rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
+    }
     else if (CheckSpecialText(InputText[0]))
+    {
         rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
+    }
     else
     {
         const std::uint8_t classByte = static_cast<std::uint8_t>((CharacterView.Class << 2) + CharacterView.Skin);
         CurrentProtocolState = REQUEST_CREATE_CHARACTER;
         SocketClient->ToGameServer()->SendCreateCharacter(MU_C16(InputText[0]), classByte);
-        // SendRequestCreateCharacter(InputText[0], CharacterView.Class, CharacterView.Skin);
         rUIMng.HideWin(this);
         rUIMng.PopUpMsgWin(MESSAGE_WAIT);
     }
