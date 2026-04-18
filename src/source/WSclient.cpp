@@ -1731,7 +1731,8 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    if (c->Movement)
+    // If already walking and receiving another walk command, don't interrupt with SetPlayerStop
+    if (c->Movement && pathNum == 0)
     {
         c->Movement = false;
         SetPlayerStop(c);
