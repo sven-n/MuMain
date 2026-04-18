@@ -323,12 +323,24 @@ int OpenTerrainMapping(wchar_t* FileName)
     memcpy(TerrainMappingLayer2, Data + DataPtr, 256 * 256);
     DataPtr += 256 * 256;
 
+    int alphaZero = 0;
+    int alphaFull = 0;
+    int alphaFractional = 0;
     for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; i++)
     {
         BYTE Alpha = *(Data + DataPtr);
         DataPtr += 1;
         TerrainMappingAlpha[i] = static_cast<float>(Alpha) / 255.f;
+        if (Alpha == 0)
+            alphaZero++;
+        else if (Alpha == 255)
+            alphaFull++;
+        else
+            alphaFractional++;
     }
+    mu::log::Get("gameplay")
+        ->info("TerrainMappingAlpha histogram for {}: zero={} full={} fractional={}", mu_wchar_to_utf8(FileName),
+               alphaZero, alphaFull, alphaFractional);
 
     delete[] Data;
 
@@ -1356,7 +1368,14 @@ void RenderFace_After(int Texture, int mx, int my)
 
 void RenderFaceAlpha(int Texture, int mx, int my)
 {
-    EnableAlphaTest();
+    // Terrain overlay uses per-vertex alpha (TerrainMappingAlpha) to feather Layer2 over
+    // Layer1. Two constraints: (1) fractional alpha must reach the blend stage, so use
+    // alpha blend, not alpha test; (2) overlay is coplanar with the base layer, and the
+    // 3D pipeline's depth compare is GL_LESS — with depth test on, every overlay fragment
+    // fails z<z and gets rejected before blending. Disable depth test for this pass so
+    // the interpolated alpha actually renders.
+    DisableDepthTest();
+    EnableAlphaBlend3();
     BindTexture(BITMAP_MAPTILE + Texture);
     {
         auto MakeVert = [](const float* pos, const float* tc, const float* light, float alpha) -> mu::Vertex3D
@@ -1375,6 +1394,10 @@ void RenderFaceAlpha(int Texture, int mx, int my)
         const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
         mu::GetRenderer().RenderTriangles(tris, 0u);
     }
+    // Restore depth test so subsequent draws (next tile's base layer, objects,
+    // shadows, monsters) are correctly z-occluded. Render*State here is sticky
+    // global state; leaving depth off leaks into every draw for the rest of the frame.
+    EnableDepthTest();
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)
