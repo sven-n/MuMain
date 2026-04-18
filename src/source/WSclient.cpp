@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include <memory>
 #include "UIManager.h"
 #include "Guild/GuildCache.h"
@@ -1800,6 +1800,11 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer)
     c->TargetX = Data->PositionX;
     c->TargetY = Data->PositionY;
     c->JumpTime = 1;
+    c->Movement = false;
+    c->Path.PathNum = 0;
+    c->Path.CurrentPath = 0;
+    c->Path.CurrentPathFloat = 0;
+    SetPlayerStop(c);
 }
 
 extern int EnableEvent;
