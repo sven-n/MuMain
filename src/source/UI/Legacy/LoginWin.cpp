@@ -149,6 +149,15 @@ void CLoginWin::Show(bool bShow)
         m_aBtn[i].Show(bShow);
     }
     m_aBtnRememberMe.Show(bShow);
+
+    // Drive the text-input box lifecycle alongside the window visibility so that
+    // CUITextInputBox::s_pFocusedInputBox is cleared when the login window is
+    // hidden. Without this, the password box keeps SDL3 focus after a successful
+    // login and IsAnyInputBoxFocused() suppresses all global hotkeys in-game.
+    if (m_pUsernameInputBox != nullptr)
+        m_pUsernameInputBox->SetState(bShow ? UISTATE_NORMAL : UISTATE_HIDE);
+    if (m_pPasswordInputBox != nullptr)
+        m_pPasswordInputBox->SetState(bShow ? UISTATE_NORMAL : UISTATE_HIDE);
 }
 
 bool CLoginWin::CursorInWin(int nArea)

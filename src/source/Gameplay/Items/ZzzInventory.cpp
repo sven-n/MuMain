@@ -4284,12 +4284,21 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             {
                 auto SkillIndex = GetSkillByBook(ip->Type);
 
-                SKILL_ATTRIBUTE* skillAtt = &SkillAttribute[SkillIndex];
+                if (static_cast<int>(SkillIndex) >= 0 && static_cast<int>(SkillIndex) < MAX_SKILLS)
+                {
+                    SKILL_ATTRIBUTE* skillAtt = &SkillAttribute[SkillIndex];
 
-                DamageMin = skillAtt->Damage;
-                DamageMax = skillAtt->Damage + skillAtt->Damage / 2;
+                    DamageMin = skillAtt->Damage;
+                    DamageMax = skillAtt->Damage + skillAtt->Damage / 2;
 
-                mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
+                    mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
+                }
+                else
+                {
+                    DamageMin = 0;
+                    DamageMax = 0;
+                    mu_swprintf(TextList[TextNum], L"%ls: %d ~ %d", GlobalText[42], DamageMin, DamageMax);
+                }
             }
             else
             {

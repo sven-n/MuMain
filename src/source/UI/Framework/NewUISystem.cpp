@@ -1514,6 +1514,20 @@ void CNewUISystem::Hide(DWORD dwKey)
     m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
     m_pNewBuffWindow->SetPos(iScreenWidth);
     m_pNewPartyListWindow->SetPos(iScreenWidth);
+
+    // Consume any in-flight left-click state. A window typically hides via a [X]
+    // close button pressed on the DOWN edge; the window then disappears before the
+    // matching UP edge arrives. On the next frame no NewUI window captures the
+    // mouse anymore, yet MouseLButton/MouseLButtonPush are still set from the
+    // original click, so MoveHero() treats it as a world click-to-move at the
+    // close-button screen position. Clearing the globals here ends the click
+    // session cleanly and keeps the character in place.
+    if (MouseLButton || MouseLButtonPush || MouseLButtonPop)
+    {
+        MouseLButton = false;
+        MouseLButtonPush = false;
+        MouseLButtonPop = false;
+    }
 }
 
 void CNewUISystem::Toggle(DWORD dwKey)

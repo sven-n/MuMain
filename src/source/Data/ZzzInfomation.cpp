@@ -451,6 +451,12 @@ void PrintItem(wchar_t* FileName)
 
 ActionSkillType GetSkillByBook(int Type)
 {
+    // ITEM_SCROLL_OF_POISON == ITEM_ETC + 0 sits one slot before ITEM_SCROLL_OF_METEORITE
+    // in the ETC range, so the subtraction below would yield -1 for it and the caller
+    // would dereference SkillAttribute[-1]. Remap explicitly.
+    if (Type == ITEM_SCROLL_OF_POISON)
+        return AT_SKILL_POISON;
+
     auto SkillIndex = Type - ITEM_SCROLL_OF_METEORITE;
     switch (SkillIndex)
     {
