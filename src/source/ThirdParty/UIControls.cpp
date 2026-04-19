@@ -4075,11 +4075,8 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
         for (int x = 0; x < iWidth; ++x)
         {
             POINT ptProcessing = { x, y };
-            if ((SrcIndex > iPitch * RealBoxSize.cy) || (DstIndex > LIMIT_WIDTH * 4 * LIMIT_HEIGHT))
+            if ((SrcIndex >= iPitch * RealBoxSize.cy) || (DstIndex >= LIMIT_WIDTH * 4 * LIMIT_HEIGHT))
             {
-#ifdef _DEBUG
-                __debugbreak();
-#endif // _DEBUG
                 return;
             }
 
@@ -4262,6 +4259,8 @@ void CUITextInputBox::Render()
             if (i == iNumberOfSections - 1)
             {
                 RealSectionLine.cx = RealTextLine.cx % LIMIT_WIDTH + m_fCaretWidth * 2;
+                if (RealSectionLine.cx > RealWndSize.cx)
+                    RealSectionLine.cx = RealWndSize.cx;
             }
 
             WriteText(LIMIT_WIDTH * i * 3, RealSectionLine.cx, RealSectionLine.cy);
