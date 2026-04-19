@@ -6326,7 +6326,6 @@ void MoveMonsterClient(CHARACTER* c, OBJECT* o)
             {
                 c->Movement = false;
                 SetPlayerStop(c);
-                c->Object.Angle[2] = ((float)(c->TargetAngle) - 1.f) * 45.f;
             }
 
             MoveCharacterPosition(c);
