@@ -561,7 +561,20 @@ void glViewport2(int x, int y, int Width, int Height)
     OpenglWindowY = y;
     OpenglWindowWidth = Width;
     OpenglWindowHeight = Height;
-    mu::GetRenderer().SetViewport(x, WindowHeight - (y + Height), Width, Height);
+    // SDL_GPU viewports use a top-left origin (matching the rest of the engine's
+    // top-left UI coordinate convention). The OpenGL-era Y flip here placed
+    // partial viewports at the wrong Y — UI-embedded 3D previews like the
+    // Write-letter character photo landed at the bottom-right of the window
+    // instead of the photo slot in the top-right of the compose pane.
+    // MuRendererGL was removed in Story 7.9.3; SDL_GPU is the only backend.
+    mu::GetRenderer().SetViewport(x, y, Width, Height);
+
+    // In Vulkan/Metal/D3D12 the viewport only maps coordinates — it does not
+    // clip fragments outside the rect. Classic OpenGL drivers clipped at the
+    // viewport edge, which game code (CUIPhotoViewer, CharMakeWin, etc.)
+    // implicitly relied on to contain the 3D preview inside its UI slot.
+    // Apply a matching scissor so the preview geometry is hard-clipped.
+    mu::GetRenderer().SetScissor(x, y, Width, Height);
 }
 
 float ConvertX(float x)

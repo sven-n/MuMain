@@ -300,6 +300,7 @@ static SDL_GPUSampler* s_defaultSampler = nullptr;
 enum class RenderCmdType : uint8_t
 {
     SetViewport,
+    SetScissor,         // pixel-level rect clip — Vulkan/Metal/D3D12 viewport alone doesn't clip
     DrawTriangles,      // non-indexed 3D (Vertex3D)
     DrawIndexedQuads2D, // indexed 2D with static quad index buffer (Vertex2D)
     DrawIndexedStrip,   // indexed 3D with per-frame strip indices (Vertex3D)
@@ -319,6 +320,7 @@ struct RenderCmd
     VertexUniforms vu;
     FogUniform fogUniform;
     SDL_GPUViewport viewport; // for SetViewport only
+    SDL_Rect scissor;         // for SetScissor only
 };
 
 static std::vector<RenderCmd> s_renderCmds;
@@ -1178,6 +1180,15 @@ public:
 
         if (s_renderPass)
         {
+            // Sticky scissor. Some GPU backends (notably Metal via SDL_GPU) appear to
+            // drop scissor state when a new pipeline binds, so the photo preview's
+            // 119×141 scissor was respected for the first draw and ignored for later
+            // ones — the character rasterized past its UI slot. We track the most
+            // recently requested scissor and re-apply it before every draw command.
+            // When no scissor has been set yet we default to the full swapchain
+            // (same as SDL_GPU's implicit initial state).
+            SDL_Rect s_currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
+
             // Replay all recorded draw commands in submission order.
             // Skip replay if textures were unloaded mid-frame — deferred commands
             // may hold dangling GPU pointers. The frame renders as a blank clear.
@@ -1195,9 +1206,18 @@ public:
                         break;
                     }
 
+                    case RenderCmdType::SetScissor:
+                    {
+                        s_currentScissor = cmd.scissor;
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                        break;
+                    }
+
                     case RenderCmdType::DrawTriangles:
                     {
                         SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        // Sticky scissor: re-apply after pipeline bind (see note above).
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                         SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
 
                         SDL_GPUBufferBinding vtxBind{};
@@ -1218,6 +1238,7 @@ public:
                     case RenderCmdType::DrawIndexedQuads2D:
                     {
                         SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                         SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
 
                         SDL_GPUBufferBinding vtxBind{};
@@ -1249,6 +1270,7 @@ public:
                     case RenderCmdType::DrawIndexedStrip:
                     {
                         SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                         SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
 
                         SDL_GPUBufferBinding vtxBind{};
@@ -1285,6 +1307,7 @@ public:
                         }
                         // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
                         SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                         SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
 
                         SDL_GPUBufferBinding vtxBind{};
@@ -1388,6 +1411,90 @@ public:
         cmd.viewport.min_depth = 0.0f;
         cmd.viewport.max_depth = 1.0f;
         s_renderCmds.push_back(cmd);
+#endif
+    }
+
+    // -----------------------------------------------------------------------
+    // UI-embedded 3D previews (CUIPhotoViewer, CharMakeWin, NewUIInGameShop,
+    // NewUIGoldBowmanLena, NewUIRegistrationLuckyCoin, NewUI3DRenderMng) call
+    // glViewport2(...) → mu::GetRenderer().SetViewport(...) to shrink the GPU
+    // viewport around the preview region, then set a narrow-FOV projection.
+    // The classic OpenGL backend honored this via glViewport; without a real
+    // override here the base-class no-op leaves the 2D-pass full-swapchain
+    // viewport in effect, so a 1-degree FOV applied to the whole window
+    // produced a screen-filling character (see CUIPhotoViewer::RenderPhotoCharacter).
+    //
+    // Input coordinates are in OS-window pixels — callers multiply design-space
+    // values by g_fScreenRate_x/y before arrival. Scale to swapchain physical
+    // pixels so HiDPI/Retina displays target the correct region.
+    // -----------------------------------------------------------------------
+    void SetViewport(int x, int y, int w, int h) override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (!s_frameActive)
+        {
+            return;
+        }
+
+        const float xScale = (s_cachedWinW > 0) ? static_cast<float>(s_swapW) / static_cast<float>(s_cachedWinW) : 1.0f;
+        const float yScale = (s_cachedWinH > 0) ? static_cast<float>(s_swapH) / static_cast<float>(s_cachedWinH) : 1.0f;
+
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::SetViewport;
+        cmd.viewport.x = static_cast<float>(x) * xScale;
+        cmd.viewport.y = static_cast<float>(y) * yScale;
+        cmd.viewport.w = static_cast<float>(w) * xScale;
+        cmd.viewport.h = static_cast<float>(h) * yScale;
+        cmd.viewport.min_depth = 0.0f;
+        cmd.viewport.max_depth = 1.0f;
+        s_renderCmds.push_back(cmd);
+#else
+        (void)x;
+        (void)y;
+        (void)w;
+        (void)h;
+#endif
+    }
+
+    // -----------------------------------------------------------------------
+    // Pixel-level clip rect paired with SetViewport. In Vulkan/Metal/D3D12 the
+    // viewport is only a coordinate-mapping transform — it does NOT clip
+    // fragments outside the rect. The classic OpenGL driver clipped to the
+    // viewport implicitly, so game code (CUIPhotoViewer, CharMakeWin, etc.)
+    // relied on "small viewport = small drawable region" behavior that we
+    // recover here by applying a matching scissor.
+    //
+    // The replay loop tracks the most recently set scissor in s_currentScissor
+    // and re-applies it before each draw command — some GPU backends reset
+    // scissor state on pipeline binds, so sticky-scissor re-application keeps
+    // the clip deterministic regardless of backend quirks.
+    //
+    // Input is in OS-window pixels (same convention as SetViewport). Scale to
+    // swapchain physical pixels for HiDPI correctness.
+    // -----------------------------------------------------------------------
+    void SetScissor(int x, int y, int w, int h) override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (!s_frameActive)
+        {
+            return;
+        }
+
+        const float xScale = (s_cachedWinW > 0) ? static_cast<float>(s_swapW) / static_cast<float>(s_cachedWinW) : 1.0f;
+        const float yScale = (s_cachedWinH > 0) ? static_cast<float>(s_swapH) / static_cast<float>(s_cachedWinH) : 1.0f;
+
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::SetScissor;
+        cmd.scissor.x = static_cast<int>(static_cast<float>(x) * xScale);
+        cmd.scissor.y = static_cast<int>(static_cast<float>(y) * yScale);
+        cmd.scissor.w = static_cast<int>(static_cast<float>(w) * xScale);
+        cmd.scissor.h = static_cast<int>(static_cast<float>(h) * yScale);
+        s_renderCmds.push_back(cmd);
+#else
+        (void)x;
+        (void)y;
+        (void)w;
+        (void)h;
 #endif
     }
 
