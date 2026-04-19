@@ -38,7 +38,6 @@ extern CHARACTER CharacterView;
 extern int SelectedCharacter;
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern BOOL g_bIMEBlock;
 extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;

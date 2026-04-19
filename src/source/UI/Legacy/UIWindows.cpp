@@ -23,7 +23,6 @@
 extern int g_iChatInputType;
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
 extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached);

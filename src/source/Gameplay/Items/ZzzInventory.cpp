@@ -53,7 +53,6 @@
 #include "MuLogger.h"
 #include "_GlobalFunctions.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
 extern CUIGuildListBox* g_pGuildListBox;
 

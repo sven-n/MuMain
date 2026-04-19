@@ -25,7 +25,6 @@
 #define MW_CANCEL 1
 
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 
 // cppcheck-suppress uninitMemberVar
 CMsgWin::CMsgWin() {}

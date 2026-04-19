@@ -899,6 +899,14 @@ public:
     virtual void SetText(const wchar_t* pszText);
     virtual void GetText(wchar_t* pszText, int iGetLength = MAX_TEXT_LENGTH);
 
+    // Restore the box to a known-clean baseline between consumers of a shared
+    // singleton (g_pSingleTextInputBox / g_pSinglePasswdInputBox). Clears text,
+    // option flags, colors, text limit, and releases SDL3 focus + hides the box.
+    // Each caller that reuses the singleton should Reset() before applying its
+    // own configuration — otherwise leftover text, options, or focus from the
+    // prior consumer leak into the next prompt.
+    virtual void Reset();
+
     HWND GetHandle() { return m_hEditWnd; }
     HWND GetParentHandle() { return m_hParentWnd; }
     BOOL HaveFocus();
@@ -1007,6 +1015,14 @@ protected:
     bool m_bUseScrollbarRender;
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 };
+
+// Process-wide shared input boxes used by modal prompts (login password, delete-
+// character confirm, MU helper fields, guild master, in-game shop note, ...).
+// Both are allocated/initialized in MuMain.cpp startup and freed at shutdown.
+// Callers must Reset() between consumers — see CUITextInputBox::Reset. These
+// externs are the single point of declaration; do not re-declare per-TU.
+extern CUITextInputBox* g_pSingleTextInputBox;
+extern CUITextInputBox* g_pSinglePasswdInputBox;
 
 class CUIChatInputBox
 {

@@ -16,7 +16,6 @@
 #include "NewUISystem.h"
 #include "ZzzInterface.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
 
 static eCurrentMode m_nCurrMode;

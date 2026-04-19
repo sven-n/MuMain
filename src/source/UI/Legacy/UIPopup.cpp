@@ -9,7 +9,6 @@
 #include "UIPopup.h"
 #include "NewUISystem.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
 
 // cppcheck-suppress uninitMemberVar

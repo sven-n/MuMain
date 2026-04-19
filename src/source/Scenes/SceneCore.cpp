@@ -30,8 +30,6 @@
 #include "Core/CameraUtility.h"
 #include "Scenes/SceneManager.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;

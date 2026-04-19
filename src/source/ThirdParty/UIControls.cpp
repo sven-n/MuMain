@@ -3796,6 +3796,22 @@ void CUITextInputBox::SetTextLimit(int iLimit)
     m_iSDLMaxLength = (iLimit <= MAX_CHAT_SIZE) ? iLimit : MAX_CHAT_SIZE;
 }
 
+void CUITextInputBox::Reset()
+{
+    // Order matters: SetState(UISTATE_HIDE) also releases SDL3 focus and clears
+    // s_pFocusedInputBox if this box was holding it, so hotkeys become live again
+    // immediately. Clearing text after hiding avoids a one-frame render of empty
+    // text in a visible box.
+    SetState(UISTATE_HIDE);
+    SetText(nullptr);
+    SetOption(UIOPTION_NULL);
+    SetTextColor(255, 0, 0, 0);
+    SetBackColor(0, 0, 0, 0);
+    SetSelectBackColor(255, 255, 255, 255);
+    SetTextLimit(MAX_TEXT_LENGTH);
+    m_bLock = FALSE;
+}
+
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
 {
     if (iWidth == 0 || iHeight == 0) return;

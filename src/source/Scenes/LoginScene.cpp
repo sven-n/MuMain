@@ -35,7 +35,6 @@ extern float CameraPosition[3];
 extern float CameraFOV;
 extern EGameScene SceneFlag;
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern float g_fMULogoAlpha;
 extern wchar_t m_Username[MAX_USERNAME_SIZE + 1];
 extern CHARACTER* Hero;

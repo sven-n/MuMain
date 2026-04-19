@@ -127,7 +127,6 @@ constexpr int ResolveDescriptionTextId(CLASS_TYPE selectedClass)
 #define CMW_CANCEL 1
 
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSingleTextInputBox;
 
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle);
 

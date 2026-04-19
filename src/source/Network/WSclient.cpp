@@ -84,7 +84,6 @@ extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 
 extern BOOL g_bUseWindowMode;
-extern CUITextInputBox* g_pSingleTextInputBox;
 
 #ifdef _PVP_ADD_MOVE_SCROLL
 extern CMurdererMove g_MurdererMove;
