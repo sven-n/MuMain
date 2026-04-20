@@ -63,7 +63,7 @@ namespace SEASON3B
 
         wchar_t	m_aszPlayerWords[QPE_PLAYER_LINE_MAX][QPE_WORDS_ROW_MAX];
         int		m_anAnswerLine[QM_MAX_ANSWER];
-        int		m_nSelAnswer;
+        QuestProceedAction m_nSelAnswer;
 
         CUIQuestContentsListBox	m_RequestRewardListBox;
         bool	m_bRequestComplete;

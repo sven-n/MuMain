@@ -23,6 +23,8 @@
 //------------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text>_Enums.h"
 #include "PacketFunctions_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text>.h"
 #include "PacketBindings_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text>.h"
 

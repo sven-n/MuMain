@@ -442,7 +442,7 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
                 }
                 else
                 {
-                    SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x01, 0x02, Hero->Key);
+                    SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Alliance, GuildRequestType::Leave, Hero->Key);
                 }
             }
 

@@ -17,7 +17,8 @@
 #include "Connection.h"
 #include <coreclr_delegates.h>
 
-
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_ClientToServer_Enums.h"
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPing)(int32_t, uint32_t , uint16_t );
 inline SendPing dotnet_SendPing = reinterpret_cast<SendPing>(symLoad(munique_client_library_handle, "SendPing"));
@@ -40,7 +41,7 @@ inline SendLoginShortPassword dotnet_SendLoginShortPassword = reinterpret_cast<S
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogin075)(int32_t, const BYTE* , uint32_t, const BYTE* , uint32_t, uint32_t , const BYTE* , uint32_t, const BYTE* , uint32_t);
 inline SendLogin075 dotnet_SendLogin075 = reinterpret_cast<SendLogin075>(symLoad(munique_client_library_handle, "SendLogin075"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogOut)(int32_t, uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogOut)(int32_t, LogOutType );
 inline SendLogOut dotnet_SendLogOut = reinterpret_cast<SendLogOut>(symLoad(munique_client_library_handle, "SendLogOut"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLogOutByCheatDetection)(int32_t, BYTE , BYTE );
@@ -76,13 +77,13 @@ inline SendPickupItemRequest075 dotnet_SendPickupItemRequest075 = reinterpret_ca
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendDropItemRequest)(int32_t, BYTE , BYTE , BYTE );
 inline SendDropItemRequest dotnet_SendDropItemRequest = reinterpret_cast<SendDropItemRequest>(symLoad(munique_client_library_handle, "SendDropItemRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemMoveRequest)(int32_t, uint32_t , BYTE , const BYTE* , uint32_t, uint32_t , BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemMoveRequest)(int32_t, ItemStorageKind , BYTE , const BYTE* , uint32_t, ItemStorageKind , BYTE );
 inline SendItemMoveRequest dotnet_SendItemMoveRequest = reinterpret_cast<SendItemMoveRequest>(symLoad(munique_client_library_handle, "SendItemMoveRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemMoveRequestExtended)(int32_t, uint32_t , BYTE , uint32_t , BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemMoveRequestExtended)(int32_t, ItemStorageKind , BYTE , ItemStorageKind , BYTE );
 inline SendItemMoveRequestExtended dotnet_SendItemMoveRequestExtended = reinterpret_cast<SendItemMoveRequestExtended>(symLoad(munique_client_library_handle, "SendItemMoveRequestExtended"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendConsumeItemRequest)(int32_t, BYTE , BYTE , uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendConsumeItemRequest)(int32_t, BYTE , BYTE , FruitUsage );
 inline SendConsumeItemRequest dotnet_SendConsumeItemRequest = reinterpret_cast<SendConsumeItemRequest>(symLoad(munique_client_library_handle, "SendConsumeItemRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendConsumeItemRequest075)(int32_t, BYTE , BYTE );
@@ -256,10 +257,10 @@ inline SendRemoveVaultPin dotnet_SendRemoveVaultPin = reinterpret_cast<SendRemov
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendVaultClosed)(int32_t);
 inline SendVaultClosed dotnet_SendVaultClosed = reinterpret_cast<SendVaultClosed>(symLoad(munique_client_library_handle, "SendVaultClosed"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendVaultMoveMoneyRequest)(int32_t, uint32_t , uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendVaultMoveMoneyRequest)(int32_t, VaultMoneyMoveDirection , uint32_t );
 inline SendVaultMoveMoneyRequest dotnet_SendVaultMoveMoneyRequest = reinterpret_cast<SendVaultMoveMoneyRequest>(symLoad(munique_client_library_handle, "SendVaultMoveMoneyRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLahapJewelMixRequest)(int32_t, uint32_t , uint32_t , uint32_t , BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLahapJewelMixRequest)(int32_t, MixType , ItemType , StackSize , BYTE );
 inline SendLahapJewelMixRequest dotnet_SendLahapJewelMixRequest = reinterpret_cast<SendLahapJewelMixRequest>(symLoad(munique_client_library_handle, "SendLahapJewelMixRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendPartyListRequest)(int32_t);
@@ -289,7 +290,7 @@ inline SendAnimationRequest dotnet_SendAnimationRequest = reinterpret_cast<SendA
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendRequestCharacterList)(int32_t, BYTE );
 inline SendRequestCharacterList dotnet_SendRequestCharacterList = reinterpret_cast<SendRequestCharacterList>(symLoad(munique_client_library_handle, "SendRequestCharacterList"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendCreateCharacter)(int32_t, const wchar_t* , uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendCreateCharacter)(int32_t, const wchar_t* , CharacterClassNumber );
 inline SendCreateCharacter dotnet_SendCreateCharacter = reinterpret_cast<SendCreateCharacter>(symLoad(munique_client_library_handle, "SendCreateCharacter"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendDeleteCharacter)(int32_t, const wchar_t* , const wchar_t* );
@@ -301,7 +302,7 @@ inline SendSelectCharacter dotnet_SendSelectCharacter = reinterpret_cast<SendSel
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendFocusCharacter)(int32_t, const wchar_t* );
 inline SendFocusCharacter dotnet_SendFocusCharacter = reinterpret_cast<SendFocusCharacter>(symLoad(munique_client_library_handle, "SendFocusCharacter"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendIncreaseCharacterStatPoint)(int32_t, uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendIncreaseCharacterStatPoint)(int32_t, CharacterStatAttribute );
 inline SendIncreaseCharacterStatPoint dotnet_SendIncreaseCharacterStatPoint = reinterpret_cast<SendIncreaseCharacterStatPoint>(symLoad(munique_client_library_handle, "SendIncreaseCharacterStatPoint"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendInventoryRequest)(int32_t);
@@ -349,7 +350,7 @@ inline SendRageAttackRangeRequest dotnet_SendRageAttackRangeRequest = reinterpre
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendTradeCancel)(int32_t);
 inline SendTradeCancel dotnet_SendTradeCancel = reinterpret_cast<SendTradeCancel>(symLoad(munique_client_library_handle, "SendTradeCancel"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendTradeButtonStateChange)(int32_t, uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendTradeButtonStateChange)(int32_t, TradeButtonState );
 inline SendTradeButtonStateChange dotnet_SendTradeButtonStateChange = reinterpret_cast<SendTradeButtonStateChange>(symLoad(munique_client_library_handle, "SendTradeButtonStateChange"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendTradeRequest)(int32_t, uint16_t );
@@ -409,10 +410,10 @@ inline SendGuildRoleAssignRequest dotnet_SendGuildRoleAssignRequest = reinterpre
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildTypeChangeRequest)(int32_t, BYTE );
 inline SendGuildTypeChangeRequest dotnet_SendGuildTypeChangeRequest = reinterpret_cast<SendGuildTypeChangeRequest>(symLoad(munique_client_library_handle, "SendGuildTypeChangeRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildRelationshipChangeRequest)(int32_t, uint32_t , uint32_t , uint16_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildRelationshipChangeRequest)(int32_t, GuildRelationshipType , GuildRequestType , uint16_t );
 inline SendGuildRelationshipChangeRequest dotnet_SendGuildRelationshipChangeRequest = reinterpret_cast<SendGuildRelationshipChangeRequest>(symLoad(munique_client_library_handle, "SendGuildRelationshipChangeRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildRelationshipChangeResponse)(int32_t, uint32_t , uint32_t , BYTE , uint16_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendGuildRelationshipChangeResponse)(int32_t, GuildRelationshipType , GuildRequestType , BYTE , uint16_t );
 inline SendGuildRelationshipChangeResponse dotnet_SendGuildRelationshipChangeResponse = reinterpret_cast<SendGuildRelationshipChangeResponse>(symLoad(munique_client_library_handle, "SendGuildRelationshipChangeResponse"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendRequestAllianceList)(int32_t);
@@ -427,7 +428,7 @@ inline SendPingResponse dotnet_SendPingResponse = reinterpret_cast<SendPingRespo
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendItemRepair)(int32_t, BYTE );
 inline SendItemRepair dotnet_SendItemRepair = reinterpret_cast<SendItemRepair>(symLoad(munique_client_library_handle, "SendItemRepair"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendChaosMachineMixRequest)(int32_t, uint32_t , BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChaosMachineMixRequest)(int32_t, ChaosMachineMixType , BYTE );
 inline SendChaosMachineMixRequest dotnet_SendChaosMachineMixRequest = reinterpret_cast<SendChaosMachineMixRequest>(symLoad(munique_client_library_handle, "SendChaosMachineMixRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendCraftingDialogCloseRequest)(int32_t);
@@ -457,13 +458,13 @@ inline SendChatRoomInvitationRequest dotnet_SendChatRoomInvitationRequest = rein
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLegacyQuestStateRequest)(int32_t);
 inline SendLegacyQuestStateRequest dotnet_SendLegacyQuestStateRequest = reinterpret_cast<SendLegacyQuestStateRequest>(symLoad(munique_client_library_handle, "SendLegacyQuestStateRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendLegacyQuestStateSetRequest)(int32_t, BYTE , uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendLegacyQuestStateSetRequest)(int32_t, BYTE , LegacyQuestState );
 inline SendLegacyQuestStateSetRequest dotnet_SendLegacyQuestStateSetRequest = reinterpret_cast<SendLegacyQuestStateSetRequest>(symLoad(munique_client_library_handle, "SendLegacyQuestStateSetRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendPetCommandRequest)(int32_t, uint32_t , uint32_t , uint16_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendPetCommandRequest)(int32_t, PetType , PetCommandMode , uint16_t );
 inline SendPetCommandRequest dotnet_SendPetCommandRequest = reinterpret_cast<SendPetCommandRequest>(symLoad(munique_client_library_handle, "SendPetCommandRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendPetInfoRequest)(int32_t, uint32_t , uint32_t , BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendPetInfoRequest)(int32_t, PetType , StorageType , BYTE );
 inline SendPetInfoRequest dotnet_SendPetInfoRequest = reinterpret_cast<SendPetInfoRequest>(symLoad(munique_client_library_handle, "SendPetInfoRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendIllusionTempleEnterRequest)(int32_t, BYTE , BYTE );
@@ -499,7 +500,7 @@ inline SendMuHelperSaveDataRequest dotnet_SendMuHelperSaveDataRequest = reinterp
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendQuestSelectRequest)(int32_t, uint16_t , uint16_t , BYTE );
 inline SendQuestSelectRequest dotnet_SendQuestSelectRequest = reinterpret_cast<SendQuestSelectRequest>(symLoad(munique_client_library_handle, "SendQuestSelectRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendQuestProceedRequest)(int32_t, uint16_t , uint16_t , uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendQuestProceedRequest)(int32_t, uint16_t , uint16_t , QuestProceedAction );
 inline SendQuestProceedRequest dotnet_SendQuestProceedRequest = reinterpret_cast<SendQuestProceedRequest>(symLoad(munique_client_library_handle, "SendQuestProceedRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendQuestCompletionRequest)(int32_t, uint16_t , uint16_t );
@@ -529,13 +530,13 @@ inline SendNpcBuffRequest dotnet_SendNpcBuffRequest = reinterpret_cast<SendNpcBu
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendEnterEmpireGuardianEvent)(int32_t, BYTE );
 inline SendEnterEmpireGuardianEvent dotnet_SendEnterEmpireGuardianEvent = reinterpret_cast<SendEnterEmpireGuardianEvent>(symLoad(munique_client_library_handle, "SendEnterEmpireGuardianEvent"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendGensJoinRequest)(int32_t, uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendGensJoinRequest)(int32_t, GensType );
 inline SendGensJoinRequest dotnet_SendGensJoinRequest = reinterpret_cast<SendGensJoinRequest>(symLoad(munique_client_library_handle, "SendGensJoinRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendGensLeaveRequest)(int32_t);
 inline SendGensLeaveRequest dotnet_SendGensLeaveRequest = reinterpret_cast<SendGensLeaveRequest>(symLoad(munique_client_library_handle, "SendGensLeaveRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendGensRewardRequest)(int32_t, uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendGensRewardRequest)(int32_t, GensType );
 inline SendGensRewardRequest dotnet_SendGensRewardRequest = reinterpret_cast<SendGensRewardRequest>(symLoad(munique_client_library_handle, "SendGensRewardRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendGensRankingRequest)(int32_t);
@@ -544,7 +545,7 @@ inline SendGensRankingRequest dotnet_SendGensRankingRequest = reinterpret_cast<S
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendDevilSquareEnterRequest)(int32_t, BYTE , BYTE );
 inline SendDevilSquareEnterRequest dotnet_SendDevilSquareEnterRequest = reinterpret_cast<SendDevilSquareEnterRequest>(symLoad(munique_client_library_handle, "SendDevilSquareEnterRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendMiniGameOpeningStateRequest)(int32_t, uint32_t , BYTE );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendMiniGameOpeningStateRequest)(int32_t, MiniGameType , BYTE );
 inline SendMiniGameOpeningStateRequest dotnet_SendMiniGameOpeningStateRequest = reinterpret_cast<SendMiniGameOpeningStateRequest>(symLoad(munique_client_library_handle, "SendMiniGameOpeningStateRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendEventChipRegistrationRequest)(int32_t, BYTE , BYTE );
@@ -568,7 +569,7 @@ inline SendLuckyNumberRequest dotnet_SendLuckyNumberRequest = reinterpret_cast<S
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendBloodCastleEnterRequest)(int32_t, BYTE , BYTE );
 inline SendBloodCastleEnterRequest dotnet_SendBloodCastleEnterRequest = reinterpret_cast<SendBloodCastleEnterRequest>(symLoad(munique_client_library_handle, "SendBloodCastleEnterRequest"));
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendMiniGameEventCountRequest)(int32_t, uint32_t );
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendMiniGameEventCountRequest)(int32_t, MiniGameType );
 inline SendMiniGameEventCountRequest dotnet_SendMiniGameEventCountRequest = reinterpret_cast<SendMiniGameEventCountRequest>(symLoad(munique_client_library_handle, "SendMiniGameEventCountRequest"));
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChaosCastleEnterRequest)(int32_t, BYTE , BYTE );

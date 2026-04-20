@@ -601,7 +601,7 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
         {
             if (m_bTakeZen)
             {
-                SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(1, GetBackupTakeZen());
+                SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(VaultMoneyMoveDirection::VaultToInventory, GetBackupTakeZen());
                 InitBackupItemInfo();
             }
             else

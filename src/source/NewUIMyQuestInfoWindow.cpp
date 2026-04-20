@@ -127,8 +127,8 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::BtnProcess()
 
     if (eTabBtnIndex == TAB_CASTLE_TEMPLE)
     {
-        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(2);
-        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(3);
+        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(MiniGameType::BloodCastle);
+        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(MiniGameType::CursedTemple);
         return true;
     }
 

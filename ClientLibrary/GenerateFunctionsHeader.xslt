@@ -28,6 +28,9 @@
 #include "PacketFunctions_Custom.h"
 #include &lt;coreclr_delegates.h&gt;
 
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_</xsl:text><xsl:value-of select="$subNamespace"/><xsl:text>_Enums.h"
+
 /// &lt;summary&gt;
 /// Extension methods to start writing messages of this namespace on a &lt;see cref="Connection"/&gt;.
 /// &lt;/summary&gt;

@@ -132,7 +132,6 @@ extern ITEM* CheckInvenParent;
 extern BYTE BuyItem[4];
 extern int  EnableUse;
 extern bool EquipmentItem;
-extern BYTE g_byItemUseType;
 extern wchar_t	g_lpszKeyPadInput[2][MAX_KEYPADINPUT + 1];
 
 #ifdef ASG_ADD_GENS_SYSTEM
@@ -156,7 +155,7 @@ void RepairAllGold(void);
 WORD CalcMaxDurability(const ITEM* ip, ITEM_ATTRIBUTE* p, int Level);
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort = RT3_SORT_CENTER, int iRenderPoint = STRP_NONE, BOOL bUseBG = TRUE);
 
-void SendRequestUse(int Index, int Target);
+void SendRequestUse(int Index, int Target, bool addPoints = true);
 bool SendRequestEquipmentItem(STORAGE_TYPE iSrcType, int iSrcIndex, ITEM* pItem, STORAGE_TYPE iDstType, int iDstIndex);
 bool IsCanUseItem();
 bool IsCanTrade();

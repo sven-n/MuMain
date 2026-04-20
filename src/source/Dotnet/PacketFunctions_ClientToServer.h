@@ -17,6 +17,9 @@
 #include "PacketFunctions_Custom.h"
 #include <coreclr_delegates.h>
 
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_ClientToServer_Enums.h"
+
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
 /// </summary>
@@ -129,7 +132,7 @@ public:
     /// Is sent by the client when: When the client wants to leave the game in various ways.
     /// Causes reaction on server side: Depending on the LogOutType, the game server does several checks and sends a response back to the client. If the request was successful, the game client either closes the game, goes back to server or character selection.
     /// </remarks>
-    void SendLogOut(uint32_t type);
+    void SendLogOut(LogOutType type);
 
     /// <summary>
     /// Sends a LogOutByCheatDetection to this connection.
@@ -260,7 +263,7 @@ public:
     /// Is sent by the client when: A player requests to move an item within or between his available item storage, such as inventory, vault, trade or chaos machine.
     /// Causes reaction on server side: 
     /// </remarks>
-    void SendItemMoveRequest(uint32_t fromStorage, BYTE fromSlot, const BYTE* itemData, uint32_t itemDataByteLength, uint32_t toStorage, BYTE toSlot);
+    void SendItemMoveRequest(ItemStorageKind fromStorage, BYTE fromSlot, const BYTE* itemData, uint32_t itemDataByteLength, ItemStorageKind toStorage, BYTE toSlot);
 
     /// <summary>
     /// Sends a ItemMoveRequestExtended to this connection.
@@ -273,7 +276,7 @@ public:
     /// Is sent by the client when: A player requests to move an item within or between his available item storage, such as inventory, vault, trade or chaos machine.
     /// Causes reaction on server side: 
     /// </remarks>
-    void SendItemMoveRequestExtended(uint32_t fromStorage, BYTE fromSlot, uint32_t toStorage, BYTE toSlot);
+    void SendItemMoveRequestExtended(ItemStorageKind fromStorage, BYTE fromSlot, ItemStorageKind toStorage, BYTE toSlot);
 
     /// <summary>
     /// Sends a ConsumeItemRequest to this connection.
@@ -285,7 +288,7 @@ public:
     /// Is sent by the client when: A player requests to 'consume' an item. This can be a potion which recovers some kind of attribute, or a jewel to upgrade a target item.
     /// Causes reaction on server side: The server tries to 'consume' the specified item and responses accordingly.
     /// </remarks>
-    void SendConsumeItemRequest(BYTE itemSlot, BYTE targetSlot, uint32_t fruitConsumption);
+    void SendConsumeItemRequest(BYTE itemSlot, BYTE targetSlot, FruitUsage fruitConsumption);
 
     /// <summary>
     /// Sends a ConsumeItemRequest075 to this connection.
@@ -894,7 +897,7 @@ public:
     /// Is sent by the client when: The player wants to move money from or to the vault storage.
     /// Causes reaction on server side: The money is moved, if possible.
     /// </remarks>
-    void SendVaultMoveMoneyRequest(uint32_t direction, uint32_t amount);
+    void SendVaultMoveMoneyRequest(VaultMoneyMoveDirection direction, uint32_t amount);
 
     /// <summary>
     /// Sends a LahapJewelMixRequest to this connection.
@@ -907,7 +910,7 @@ public:
     /// Is sent by the client when: When a player has the Lahap npc dialog open and wants to combine or disband jewel stacks.
     /// Causes reaction on server side: If successful, the inventory is updated and the game client gets corresponding responses.
     /// </remarks>
-    void SendLahapJewelMixRequest(uint32_t operation, uint32_t item, uint32_t mixingStackSize, BYTE unmixingSourceSlot);
+    void SendLahapJewelMixRequest(MixType operation, ItemType item, StackSize mixingStackSize, BYTE unmixingSourceSlot);
 
     /// <summary>
     /// Sends a PartyListRequest to this connection.
@@ -1020,7 +1023,7 @@ public:
     /// Is sent by the client when: The game client is at the character selection screen and the player requests to add a new character.
     /// Causes reaction on server side: The server checks if the player is allowed to create the character and sends a response back.
     /// </remarks>
-    void SendCreateCharacter(const wchar_t* name, uint32_t class_);
+    void SendCreateCharacter(const wchar_t* name, CharacterClassNumber class_);
 
     /// <summary>
     /// Sends a DeleteCharacter to this connection.
@@ -1061,7 +1064,7 @@ public:
     /// Is sent by the client when: The player decides to add a stat point to a specific stat type, by pressing a plus-button in the character info menu.
     /// Causes reaction on server side: The server checks if a level-up-point is available. If yes, it adds the point to the specified stat type. It sends a response back to the client.
     /// </remarks>
-    void SendIncreaseCharacterStatPoint(uint32_t statType);
+    void SendIncreaseCharacterStatPoint(CharacterStatAttribute statType);
 
     /// <summary>
     /// Sends a InventoryRequest to this connection.
@@ -1238,7 +1241,7 @@ public:
     /// Is sent by the client when: The player presses the trade button.
     /// Causes reaction on server side: The state change is forwarded to the trade partner. If both players press the trade button at the same time, the server will try to complete the trade by exchanging the items and money.
     /// </remarks>
-    void SendTradeButtonStateChange(uint32_t newState);
+    void SendTradeButtonStateChange(TradeButtonState newState);
 
     /// <summary>
     /// Sends a TradeRequest to this connection.
@@ -1451,7 +1454,7 @@ public:
     /// Is sent by the client when: A guild master sends a request to another guild master about changing the relationship between their guilds.
     /// Causes reaction on server side: The server sends a response with the result.
     /// </remarks>
-    void SendGuildRelationshipChangeRequest(uint32_t relationshipType, uint32_t requestType, uint16_t targetPlayerId);
+    void SendGuildRelationshipChangeRequest(GuildRelationshipType relationshipType, GuildRequestType requestType, uint16_t targetPlayerId);
 
     /// <summary>
     /// Sends a GuildRelationshipChangeResponse to this connection.
@@ -1464,7 +1467,7 @@ public:
     /// Is sent by the client when: A guild master answered the request to another guild master about changing the relationship between their guilds.
     /// Causes reaction on server side: The server sends a response back to the requester. If the guild master agreed, it takes the necessary actions.
     /// </remarks>
-    void SendGuildRelationshipChangeResponse(uint32_t relationshipType, uint32_t requestType, BYTE response, uint16_t targetPlayerId);
+    void SendGuildRelationshipChangeResponse(GuildRelationshipType relationshipType, GuildRequestType requestType, BYTE response, uint16_t targetPlayerId);
 
     /// <summary>
     /// Sends a RequestAllianceList to this connection.
@@ -1513,7 +1516,7 @@ public:
     /// Is sent by the client when: The player has the dialog of the chaos machine open and decided to mix (craft) the items which he put into the chaos machine dialog.
     /// Causes reaction on server side: Based on the type of mix and it's corresponding success rate, the mix succeeds or fails. The client gets a corresponding response with the created, changed or lost items.
     /// </remarks>
-    void SendChaosMachineMixRequest(uint32_t mixType, BYTE socketSlot);
+    void SendChaosMachineMixRequest(ChaosMachineMixType mixType, BYTE socketSlot);
 
     /// <summary>
     /// Sends a CraftingDialogCloseRequest to this connection.
@@ -1614,7 +1617,7 @@ public:
     /// Is sent by the client when: The player wants to change the state of a quest, e.g. to start or to finish a quest.
     /// Causes reaction on server side: Depending on the requested new state, a response is sent back.
     /// </remarks>
-    void SendLegacyQuestStateSetRequest(BYTE questNumber, uint32_t newState);
+    void SendLegacyQuestStateSetRequest(BYTE questNumber, LegacyQuestState newState);
 
     /// <summary>
     /// Sends a PetCommandRequest to this connection.
@@ -1626,7 +1629,7 @@ public:
     /// Is sent by the client when: The player wants to command its equipped pet (raven).
     /// Causes reaction on server side: 
     /// </remarks>
-    void SendPetCommandRequest(uint32_t petType, uint32_t commandMode, uint16_t targetId);
+    void SendPetCommandRequest(PetType petType, PetCommandMode commandMode, uint16_t targetId);
 
     /// <summary>
     /// Sends a PetInfoRequest to this connection.
@@ -1638,7 +1641,7 @@ public:
     /// Is sent by the client when: The player hovers over a pet. The client sends this request to retrieve information (level, experience) of the pet (dark raven, horse).
     /// Causes reaction on server side: The server sends a PetInfoResponse.
     /// </remarks>
-    void SendPetInfoRequest(uint32_t pet, uint32_t storage, BYTE itemSlot);
+    void SendPetInfoRequest(PetType pet, StorageType storage, BYTE itemSlot);
 
     /// <summary>
     /// Sends a IllusionTempleEnterRequest to this connection.
@@ -1762,7 +1765,7 @@ public:
     /// Is sent by the client when: After the server started a quest (and sent a F60B message) the game client requests to proceed with the quest.
     /// Causes reaction on server side: The quest state is set accordingly on the server. The next response seems to depend on the quest configuration. Depending on the action of the next quest state, the server will send either a quest progress message (F60C) or again a quest start message (F60B).
     /// </remarks>
-    void SendQuestProceedRequest(uint16_t questNumber, uint16_t questGroup, uint32_t proceedAction);
+    void SendQuestProceedRequest(uint16_t questNumber, uint16_t questGroup, QuestProceedAction proceedAction);
 
     /// <summary>
     /// Sends a QuestCompletionRequest to this connection.
@@ -1862,7 +1865,7 @@ public:
     /// Is sent by the client when: The player has opened one of the gens NPCs and requests to join it.
     /// Causes reaction on server side: The server checks if the player is not in a gens already and joins the player to the selected gens.
     /// </remarks>
-    void SendGensJoinRequest(uint32_t gensType);
+    void SendGensJoinRequest(GensType gensType);
 
     /// <summary>
     /// Sends a GensLeaveRequest to this connection.
@@ -1881,7 +1884,7 @@ public:
     /// Is sent by the client when: The game client requests to get a reward from the gens npc.
     /// Causes reaction on server side: The server checks if the player has enough points to get the reward, and sends a response.
     /// </remarks>
-    void SendGensRewardRequest(uint32_t gensType);
+    void SendGensRewardRequest(GensType gensType);
 
     /// <summary>
     /// Sends a GensRankingRequest to this connection.
@@ -1912,7 +1915,7 @@ public:
     /// Is sent by the client when: The player requests to get the remaining time of the currently entered event.
     /// Causes reaction on server side: The remaining time is sent back to the client.
     /// </remarks>
-    void SendMiniGameOpeningStateRequest(uint32_t eventType, BYTE eventLevel);
+    void SendMiniGameOpeningStateRequest(MiniGameType eventType, BYTE eventLevel);
 
     /// <summary>
     /// Sends a EventChipRegistrationRequest to this connection.
@@ -1994,7 +1997,7 @@ public:
     /// Is sent by the client when: The player requests to get the entering count of the specified mini game.
     /// Causes reaction on server side: The remaining time is sent back to the client. However, it's not really handled on the known server sources.
     /// </remarks>
-    void SendMiniGameEventCountRequest(uint32_t miniGame);
+    void SendMiniGameEventCountRequest(MiniGameType miniGame);
 
     /// <summary>
     /// Sends a ChaosCastleEnterRequest to this connection.

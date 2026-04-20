@@ -707,7 +707,7 @@ bool CSQuest::ProcessNextProgress()
     }
     else
     {
-        SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(m_byCurrQuestIndex, 1);
+        SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(m_byCurrQuestIndex, LegacyQuestState::Active);
         return false;
     }
 }

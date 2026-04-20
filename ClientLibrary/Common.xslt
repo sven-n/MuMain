@@ -93,7 +93,13 @@
   <xsl:template match="pd:Type[. = 'Double']" mode="nativetype">float64_t</xsl:template>
   <xsl:template match="pd:Type[. = 'String']" mode="nativetype">const wchar_t*</xsl:template>
   <xsl:template match="pd:Type[. = 'Binary']" mode="nativetype">const BYTE*</xsl:template>
-  <xsl:template match="pd:Type[. = 'Enum']" mode="nativetype">uint32_t</xsl:template><!-- TODO: create enums on c++ side -->
+  <xsl:template match="pd:Type[. = 'Enum']" mode="nativetype">
+    <xsl:variable name="typeName" select="./../pd:TypeName"/>
+    <xsl:choose>
+      <xsl:when test="contains($typeName, '.')">uint32_t</xsl:when>
+      <xsl:otherwise><xsl:value-of select="$typeName"/></xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
 
   <xsl:template match="text()" mode="nativetype"></xsl:template>
 

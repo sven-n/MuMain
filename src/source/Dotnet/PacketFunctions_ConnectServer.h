@@ -17,6 +17,9 @@
 #include "PacketFunctions_Custom.h"
 #include <coreclr_delegates.h>
 
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_ConnectServer_Enums.h"
+
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
 /// </summary>

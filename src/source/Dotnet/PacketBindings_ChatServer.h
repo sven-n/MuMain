@@ -17,7 +17,8 @@
 #include "Connection.h"
 #include <coreclr_delegates.h>
 
-
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_ChatServer_Enums.h"
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticate)(int32_t, uint16_t , const BYTE* , uint32_t);
 inline SendAuthenticate dotnet_SendAuthenticate = reinterpret_cast<SendAuthenticate>(symLoad(munique_client_library_handle, "SendAuthenticate"));
