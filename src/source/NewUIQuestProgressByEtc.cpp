@@ -163,7 +163,7 @@ bool CNewUIQuestProgressByEtc::UpdateSelTextMouseEvent()
     if (PLAYER_WORDS_MODE != m_eLowerView || !m_bCanClick)
         return false;
 
-    auto m_nSelAnswer = QuestProceedAction::Undefined;
+    m_nSelAnswer = QuestProceedAction::Undefined;
     if (MouseX < m_Pos.x + 11 || MouseX > m_Pos.x + 179)
         return false;
 
