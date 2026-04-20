@@ -946,9 +946,6 @@ protected:
     virtual BOOL DoMouseAction();
     void RenderScrollbar();
 
-    void WriteText(int iOffset, int iWidth, int iHeight);
-    void UploadText(int sx, int sy, int Width, int Height);
-
 public:
     WNDPROC m_hOldProc;
     CTimer m_caretTimer = { };

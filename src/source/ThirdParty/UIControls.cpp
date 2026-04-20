@@ -3323,95 +3323,8 @@ CUITextInputBox::CUITextInputBox()
 
 CUITextInputBox* CUITextInputBox::s_pFocusedInputBox = nullptr;
 
-#ifdef MU_ENABLE_SDL3
-// Per-instance RGBA buffer + GPU texture for text rendering.
-// Avoids the shared BITMAP_FONT.Buffer overwrite problem where two input boxes
-// both write to the same buffer and the last writer's content appears in both quads.
-struct InputBoxTexture
-{
-    std::vector<std::uint8_t> rgba;           // RGBA pixel buffer (LIMIT_WIDTH * height * 4)
-    std::uint32_t texId = 0;                  // Registered texture ID for LookupTexture
-    int width = 0;
-    int height = 0;
-};
-static std::unordered_map<const CUITextInputBox*, InputBoxTexture> s_inputBoxTexMap;
-static std::uint32_t s_nextInputBoxTexId = 60000; // High range to avoid Bitmaps[] conflicts
-
-static InputBoxTexture& EnsureInputBoxTexture(const CUITextInputBox* box, int w, int h)
-{
-    auto& tex = s_inputBoxTexMap[box];
-    if (tex.texId == 0 || tex.width != w || tex.height != h)
-    {
-        // Allocate/resize RGBA buffer.
-        tex.width = w;
-        tex.height = h;
-        tex.rgba.resize(static_cast<size_t>(w) * h * 4, 0);
-
-        // Create GPU texture if needed.
-        if (tex.texId == 0)
-        {
-            tex.texId = s_nextInputBoxTexId++;
-        }
-
-        SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
-        if (device)
-        {
-            // Unregister old texture if resizing.
-            mu::UnregisterTexture(tex.texId);
-
-            SDL_GPUTextureCreateInfo texInfo{};
-            texInfo.type = SDL_GPU_TEXTURETYPE_2D;
-            texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-            texInfo.width = static_cast<Uint32>(w);
-            texInfo.height = static_cast<Uint32>(h);
-            texInfo.layer_count_or_depth = 1;
-            texInfo.num_levels = 1;
-            texInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
-
-            SDL_GPUTexture* gpuTex = SDL_CreateGPUTexture(device, &texInfo);
-            if (gpuTex)
-            {
-                mu::RegisterTexture(tex.texId, gpuTex);
-
-                // Create a sampler for this texture.
-                SDL_GPUSamplerCreateInfo sampInfo{};
-                sampInfo.min_filter = SDL_GPU_FILTER_LINEAR;
-                sampInfo.mag_filter = SDL_GPU_FILTER_LINEAR;
-                sampInfo.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-                sampInfo.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-                sampInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-                SDL_GPUSampler* sampler = SDL_CreateGPUSampler(device, &sampInfo);
-                if (sampler)
-                {
-                    mu::RegisterSampler(tex.texId, sampler);
-                }
-            }
-        }
-    }
-    return tex;
-}
-
-static void CleanupInputBoxTexture(const CUITextInputBox* box)
-{
-    auto it = s_inputBoxTexMap.find(box);
-    if (it != s_inputBoxTexMap.end())
-    {
-        SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
-        if (device && it->second.texId != 0)
-        {
-            mu::UnregisterTexture(it->second.texId);
-            mu::UnregisterSampler(it->second.texId);
-        }
-        s_inputBoxTexMap.erase(it);
-    }
-}
-#endif
-
 CUITextInputBox::~CUITextInputBox()
 {
-#ifdef MU_ENABLE_SDL3
-    CleanupInputBoxTexture(this);
-#endif
     // Clear static focus tracker if we're the focused box [Story 7-9-9, Finding 1].
     // Also stop SDL3 text input — otherwise a window destroyed without first calling
     // SetState(UISTATE_HIDE) leaves SDL_StartTextInput active and no box to consume
@@ -3995,185 +3908,25 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
 #endif
 }
 
-void CUITextInputBox::UploadText(int sx, int sy, int Width, int Height)
-{
-    const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
-    float TextureU = 0.f, TextureV = 0.f;
-
-#ifdef MU_ENABLE_SDL3
-    // Use per-instance texture to avoid shared BITMAP_FONT overwrite.
-    auto& inputTex = EnsureInputBoxTexture(this, LIMIT_WIDTH, LIMIT_HEIGHT);
-    const float texW = static_cast<float>(inputTex.width);
-    const float texH = static_cast<float>(inputTex.height);
-    const std::uint32_t texId = inputTex.texId;
-    unsigned char* texBuffer = inputTex.rgba.data();
-#else
-    BITMAP_t* b = &Bitmaps[BITMAP_FONT];
-    const float texW = b->Width;
-    const float texH = b->Height;
-    const std::uint32_t texId = static_cast<std::uint32_t>(b->BitmapIndex);
-    unsigned char* texBuffer = b->Buffer;
-#endif
-
-    if (sx < 0)
-    {
-        TextureU = (-sx + 0.01f) / texW;
-        Width += sx;
-        sx = 0.f;
-    }
-    else if (sx + Width > (int)WindowWidth)
-    {
-        Width = WindowWidth - sx;
-    }
-    if (sy < 0)
-    {
-        TextureV = (-sy + 0.01f) / texH;
-        Height += sy;
-        sy = 0.f;
-    }
-    else if (sy + Height > (int)WindowHeight)
-    {
-        Height = WindowHeight - sy;
-    }
-    if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
-    {
-        mu::GetRenderer().QueueTextureUpdate(
-            texId, texBuffer,
-            static_cast<std::uint32_t>(texW), static_cast<std::uint32_t>(texH));
-        mu::GetRenderer().BindTexture(static_cast<int>(texId));
-
-        float TextureUWidth = (Width + 0.01f) / texW;
-        float TextureVHeight = (Height + 0.01f) / texH;
-
-#ifdef MU_ENABLE_SDL3
-        // Use per-instance texture ID for RenderBitmap (bypasses Bitmaps[BITMAP_FONT]).
-        RenderBitmap(static_cast<int>(texId), (float)sx, (float)sy, (float)Width, (float)Height,
-            TextureU, TextureV, TextureUWidth, TextureVHeight, false, false);
-#else
-        RenderBitmap(BITMAP_FONT, (float)sx, (float)sy, (float)Width, (float)Height,
-            TextureU, TextureV, TextureUWidth, TextureVHeight, false, false);
-#endif
-    }
-}
-
-void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
-{
-    bool isFocused = GetFocus() == m_hEditWnd;
-    bool isCaretTime = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / 530) % 2 == 0;
-    bool showCaret = isFocused && isCaretTime;
-
-    POINT pt;
-    GetCaretPos(&pt);
-
-    SIZE RealBoxSize = { (long)(m_iWidth * g_fScreenRate_x), (long)(m_iHeight * g_fScreenRate_y) };
-    const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
-    int iPitch = ((RealBoxSize.cx * 24 + 31) & ~31) >> 3;
-
-    int iSectionX = (iOffset % iPitch) / (LIMIT_WIDTH * 3);
-    int iSectionY = iOffset / (iPitch * LIMIT_HEIGHT);
-
-    RECT rcCaret = { pt.x - LIMIT_WIDTH * iSectionX, pt.y - LIMIT_HEIGHT * iSectionY,(int)(pt.x - LIMIT_WIDTH * iSectionX + m_fCaretWidth), (int)(pt.y - LIMIT_HEIGHT * iSectionY + m_fCaretHeight) };
-    const auto caretColor = _ARGB(255, 200, 200, 200);
-
-#ifdef MU_ENABLE_SDL3
-    // Use per-instance RGBA buffer to avoid shared BITMAP_FONT overwrite.
-    auto& inputTex = EnsureInputBoxTexture(this, LIMIT_WIDTH, LIMIT_HEIGHT);
-    unsigned char* pDstBuffer = inputTex.rgba.data();
-#else
-    BITMAP_t* pBitmapFont = &Bitmaps[BITMAP_FONT];
-    unsigned char* pDstBuffer = pBitmapFont->Buffer;
-#endif
-    (void)showCaret; // Caret rendering uses GetFocus which returns sentinel on SDL3 — disabled for now
-    for (int y = 0; y < iHeight; ++y)
-    {
-        int SrcIndex = y * iPitch + iOffset;
-        int DstIndex = y * LIMIT_WIDTH * 4;
-        for (int x = 0; x < iWidth; ++x)
-        {
-            POINT ptProcessing = { x, y };
-            if ((SrcIndex >= iPitch * RealBoxSize.cy) || (DstIndex >= LIMIT_WIDTH * 4 * LIMIT_HEIGHT))
-            {
-                return;
-            }
-
-            if (*(m_pFontBuffer + SrcIndex) == 255)
-            {
-                // white pixel (glyph)
-                if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pDstBuffer + DstIndex)) = m_dwBackColor;
-                else
-                    *((unsigned int*)(pDstBuffer + DstIndex)) = m_dwTextColor;
-            }
-            else if (*(m_pFontBuffer + SrcIndex) == 0)
-            {
-                // black pixel (background)
-                if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pDstBuffer + DstIndex)) = caretColor;
-                else
-                    *((unsigned int*)(pDstBuffer + DstIndex)) = m_dwBackColor;
-            }
-            else
-            {
-                if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pDstBuffer + DstIndex)) = caretColor;
-                else
-                    *((unsigned int*)(pDstBuffer + DstIndex)) = m_dwSelectBackColor;
-            }
-            SrcIndex += 3;
-            DstIndex += 4;
-        }
-    }
-}
-
 void CUITextInputBox::Render()
 {
     m_bIsReady = TRUE;
 
-#ifdef MU_ENABLE_SDL3
-    // On SDL3, there is no Win32 edit control (m_hEditWnd is nullptr).
-    // Render using the memory DC + TextOut with the SDL text buffer directly.
-    if (!m_hMemDC || !m_pFontBuffer)
+    if (m_iState == UISTATE_HIDE)
     {
         return;
     }
 
     if (m_bSetText)
     {
-        // Apply deferred SetText to SDL buffer.
         wcsncpy(m_szSDLText, m_sTextToSet.c_str(), MAX_CHAT_SIZE);
         m_szSDLText[MAX_CHAT_SIZE] = L'\0';
         m_iSDLTextLen = static_cast<int>(wcslen(m_szSDLText));
         m_bSetText = false;
     }
-#else
-    if (m_hEditWnd == nullptr || !IsWindowVisible(m_hEditWnd))
-    {
-        return;
-    }
 
-    if (m_bSetText)
-    {
-        SetWindowTextW(m_hEditWnd, m_sTextToSet.c_str());
-        m_bSetText = false;
-    }
-#endif
-
-    POINT RealWndPos = { (int)(m_iPos_x * g_fScreenRate_x), (int)(m_iPos_y * g_fScreenRate_y) };
-    SIZE RealWndSize = { (int)(m_iWidth * g_fScreenRate_x), (int)(m_iHeight * g_fScreenRate_y) };
-
-    //. Caret Setting
     m_fCaretWidth = 2.f;
-#ifdef MU_ENABLE_SDL3
-    // Use scaled buffer height for caret — matches the scaled font in the SDL3 Render path.
-    m_fCaretHeight = static_cast<float>(RealWndSize.cy);
-#else
-    if (m_fCaretHeight == 0)
-    {
-        SIZE TextSize;
-        GetTextExtentPoint32(m_hMemDC, L"Q", 1, &TextSize);
-        m_fCaretHeight = TextSize.cy;
-    }
-#endif
+    m_fCaretHeight = static_cast<float>(m_iHeight);
 
     if (CheckOption(UIOPTION_PAINTBACK))
     {
@@ -4182,132 +3935,44 @@ void CUITextInputBox::Render()
         EndRenderColor();
     }
 
-#ifdef MU_ENABLE_SDL3
-    // SDL3 path: render text to the memory DC using TextOut (CrossPlatformGDI bitmap font).
-    // Clear the bitmap buffer first (the Win32 edit control would do this via WM_ERASEBKGND).
+    const wchar_t* displayText = m_szSDLText;
+    wchar_t maskBuf[MAX_CHAT_SIZE + 1] = {};
+    if (IsPassword() && m_iSDLTextLen > 0)
     {
-        const int bufW = static_cast<int>(m_iWidth * g_fScreenRate_x);
-        const int bufH = static_cast<int>(m_iHeight * g_fScreenRate_y);
-        const int pitch = ((bufW * 24 + 31) & ~31) >> 3;
-        std::memset(m_pFontBuffer, 0, pitch * bufH);
-    }
-    ::SetBkColor(m_hMemDC, RGB(0, 0, 0));
-    ::SetTextColor(m_hMemDC, RGB(255, 255, 255));
-    // Ensure the configured font is selected — use m_hConfiguredFont (from SetFont),
-    // falling back to g_hFont only if SetFont was never called. [Story 7-9-9, AC-2]
-    HFONT hRenderFont = m_hConfiguredFont ? m_hConfiguredFont : g_hFont;
-    if (hRenderFont)
-    {
-        ::SelectObject(m_hMemDC, hRenderFont);
-    }
-    // Scale font height to match the physical-pixel buffer dimensions.
-    // On Win32, the edit control rendered text at OS DPI. On SDL3, the embedded
-    // bitmap font renders at the literal nHeight — we must scale it to fill the buffer.
-    // Scale font to match the physical-pixel buffer. Use the font's original nHeight
-    // scaled by screen rate (preserves proportions), clamped to the buffer height.
-    auto* dc = static_cast<MuGdiDC*>(m_hMemDC);
-    int savedFontHeight = 0;
-    if (dc && dc->pFont)
-    {
-        savedFontHeight = dc->pFont->nHeight;
-        int scaledH = static_cast<int>(savedFontHeight * g_fScreenRate_y);
-        int bufH = static_cast<int>(m_iHeight * g_fScreenRate_y);
-        dc->pFont->nHeight = (scaledH < bufH) ? scaledH : bufH;
-    }
-    if (IsPassword())
-    {
-        // Mask password with asterisks.
-        wchar_t mask[MAX_CHAT_SIZE + 1] = {};
         for (int i = 0; i < m_iSDLTextLen && i < MAX_CHAT_SIZE; ++i)
-            mask[i] = L'*';
-        TextOut(m_hMemDC, 0, 0, mask, m_iSDLTextLen);
-    }
-    else
-    {
-        TextOut(m_hMemDC, 0, 0, m_szSDLText, m_iSDLTextLen);
+            maskBuf[i] = L'*';
+        displayText = maskBuf;
     }
 
-#else
-    CallWindowProcW(m_hOldProc, m_hEditWnd, WM_ERASEBKGND, (WPARAM)m_hMemDC, 0);
-    CallWindowProcW(m_hOldProc, m_hEditWnd, WM_PAINT, (WPARAM)m_hMemDC, 0);
-#endif
+    g_pRenderText->SetFont(m_hConfiguredFont ? m_hConfiguredFont : g_hFont);
+    g_pRenderText->SetTextColor(m_dwTextColor);
 
-    const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
-    SIZE RealTextLine = { 0, 0 };
-
-    if (!m_bUseMultiLine)
+    SIZE textSize = { 0, 0 };
+    const int textPadX = 2;
+    const int textPadY = 1;
+    if (m_iSDLTextLen > 0)
     {
-        wchar_t TextCheckUTF16[MAX_TEXT_LENGTH + 1] = { };
-        GetText(TextCheckUTF16);
-        SIZE TextSize;
+        g_pRenderText->RenderText(m_iPos_x + textPadX, m_iPos_y + textPadY, displayText,
+                                  m_iWidth - textPadX * 2, m_iHeight - textPadY * 2,
+                                  RT3_SORT_LEFT, &textSize);
+    }
 
-        if (!IsPassword())
+    if (m_bSDLHasFocus && m_iState != UISTATE_HIDE)
+    {
+        constexpr int kCaretPeriodMs = 530;
+        const bool showCaret = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / kCaretPeriodMs) % 2 == 0;
+        if (showCaret)
         {
-            GetTextExtentPoint32(m_hMemDC, TextCheckUTF16, wcslen(TextCheckUTF16), &TextSize);
-        }
-        else
-        {
-            wchar_t szPasswd[MAX_TEXT_LENGTH + 1] = { };
-            memset(szPasswd, '*', MAX_TEXT_LENGTH);
-            g_pRenderText->SetFont(g_hFontBold);
-
-            GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheckUTF16), &TextSize);
-            g_pRenderText->SetFont(g_hFont);
-        }
-#ifdef MU_ENABLE_SDL3
-        // Restore font height after text measurement. [Story 7-9-9]
-        if (dc && dc->pFont && savedFontHeight > 0)
-        {
-            dc->pFont->nHeight = savedFontHeight;
-        }
-#endif
-        RealTextLine.cx = TextSize.cx + m_fCaretWidth;
-        RealTextLine.cy = (TextSize.cy > m_fCaretHeight) ? TextSize.cy : m_fCaretHeight;
-        if (RealTextLine.cx > RealWndSize.cx)
-            RealTextLine.cx = RealWndSize.cx;
-        if (RealTextLine.cy > RealWndSize.cy)
-            RealTextLine.cy = RealWndSize.cy;
-
-        int iNumberOfSections = (RealTextLine.cx / LIMIT_WIDTH) + ((RealTextLine.cx % LIMIT_WIDTH >= 0) ? 1 : 0);
-        for (int i = 0; i < iNumberOfSections; i++)
-        {
-            SIZE RealSectionLine = { LIMIT_WIDTH, RealTextLine.cy };
-            if (i == iNumberOfSections - 1)
-            {
-                RealSectionLine.cx = RealTextLine.cx % LIMIT_WIDTH + m_fCaretWidth * 2;
-                if (RealSectionLine.cx > RealWndSize.cx)
-                    RealSectionLine.cx = RealWndSize.cx;
-            }
-
-            WriteText(LIMIT_WIDTH * i * 3, RealSectionLine.cx, RealSectionLine.cy);
-            UploadText(RealWndPos.x + LIMIT_WIDTH * i, RealWndPos.y, RealSectionLine.cx, RealSectionLine.cy);
+            const float caretX = static_cast<float>(m_iPos_x + textPadX) + textSize.cx / g_fScreenRate_x;
+            const float caretY = static_cast<float>(m_iPos_y + textPadY);
+            EnableAlphaTest();
+            RenderColor(caretX, caretY, m_fCaretWidth, static_cast<float>(m_iHeight - textPadY * 2));
+            EndRenderColor();
         }
     }
-    else
+
+    if (m_bUseMultiLine)
     {
-        m_iNumLines = RealWndSize.cy / m_fCaretHeight;
-        RealTextLine.cx = RealWndSize.cx;
-        RealTextLine.cy = RealWndSize.cy;
-
-        int iNumberOfXSections = (RealTextLine.cx / LIMIT_WIDTH) + ((RealTextLine.cx % LIMIT_WIDTH > 0) ? 1 : 0);
-        int iNumberOfYSections = (RealTextLine.cy / LIMIT_HEIGHT) + ((RealTextLine.cy % LIMIT_HEIGHT > 0) ? 1 : 0);
-        int iPitch = ((RealWndSize.cx * 24 + 31) & ~31) >> 3;
-
-        for (int y = 0; y < iNumberOfYSections; y++)
-        {
-            SIZE RealSectionLine = { LIMIT_WIDTH, LIMIT_HEIGHT };
-            if (y == iNumberOfYSections - 1)
-                RealSectionLine.cy = RealTextLine.cy % LIMIT_HEIGHT;
-
-            for (int x = 0; x < iNumberOfXSections; x++)
-            {
-                if (x == iNumberOfXSections - 1)
-                    RealSectionLine.cx = RealTextLine.cx % LIMIT_WIDTH;
-
-                WriteText(iPitch * LIMIT_HEIGHT * y + LIMIT_WIDTH * x * 3, RealSectionLine.cx, RealSectionLine.cy);
-                UploadText(RealWndPos.x + LIMIT_WIDTH * x, RealWndPos.y + LIMIT_HEIGHT * y, RealSectionLine.cx, RealSectionLine.cy);
-            }
-        }
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
         if (GetUseScrollbar())
 #endif //PBG_ADD_INGAMESHOPMSGBOX
