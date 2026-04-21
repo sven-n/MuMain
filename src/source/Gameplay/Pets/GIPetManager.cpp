@@ -164,6 +164,7 @@ void ClearRightMouseInputState()
 
 namespace giPetManager
 {
+PET_INFO gs_PetInfo{};
 static std::uint8_t g_tabBar = 0;
 static std::uint32_t g_renderItemIndexBackup = 0;
 static ITEM g_renderItemInfoBackup{};

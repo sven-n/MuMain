@@ -55,18 +55,23 @@ bool TextureScriptParsing::parsingTScriptA(char* filename)
                     m_bBeScript = true;
                     break;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmultichar"
-                case 'DC':
-                    m_byShadowMesh = 1; //  NoneTexture.
-                    m_bBeScript = true;
-                    break;
-
-                case 'DT':
-                    m_byShadowMesh = 2; //  Texture.
-                    m_bBeScript = true;
-                    break;
-#pragma clang diagnostic pop
+                case 'D':
+                    if ((i + 1) < length && strTokenFile[i + 1] == 'C')
+                    {
+                        m_byShadowMesh = 1; //  NoneTexture.
+                        m_bBeScript = true;
+                        ++i;
+                        break;
+                    }
+                    if ((i + 1) < length && strTokenFile[i + 1] == 'T')
+                    {
+                        m_byShadowMesh = 2; //  Texture.
+                        m_bBeScript = true;
+                        ++i;
+                        break;
+                    }
+                    m_bBeScript = false;
+                    return m_bBeScript;
 
                 default:
                     m_bBeScript = false;
@@ -129,15 +134,22 @@ bool TextureScriptParsing::parsingTScript(wchar_t* filename)
                     break;
 
                 case L'D':
-                    if (strTokenFile[i + 1] == L'C')
+                    if ((i + 1) < length && strTokenFile[i + 1] == L'C')
                     {
                         m_byShadowMesh = 1; //  NoneTexture.
                         m_bBeScript = true;
+                        ++i;
                     }
-                    else if (strTokenFile[i + 1] == L'T')
+                    else if ((i + 1) < length && strTokenFile[i + 1] == L'T')
                     {
                         m_byShadowMesh = 2; //  Texture.
                         m_bBeScript = true;
+                        ++i;
+                    }
+                    else
+                    {
+                        m_bBeScript = false;
+                        return m_bBeScript;
                     }
                     break;
 

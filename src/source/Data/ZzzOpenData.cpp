@@ -2244,6 +2244,7 @@ void OpenNpc(int Type)
     case MODEL_TERSIA:
         gLoadData.AccessModel(MODEL_TERSIA, L"Data\\Npc\\", L"tersia");
         gLoadData.OpenTexture(MODEL_TERSIA, L"Npc\\");
+        break;
     case MODEL_BENA:
         gLoadData.AccessModel(MODEL_BENA, L"Data\\Npc\\", L"bena");
         gLoadData.OpenTexture(MODEL_BENA, L"Npc\\");
@@ -2280,6 +2281,7 @@ void OpenNpc(int Type)
         Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.3f;
         Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 1.2f;
         Models[Type].Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
+        break;
     case MODEL_UNITEDMARKETPLACE_RAUL:
         Models[Type].Actions[MONSTER01_STOP1].PlaySpeed = 0.5f;
         Models[Type].Actions[MONSTER01_STOP2].PlaySpeed = 0.5f;
@@ -2507,7 +2509,13 @@ void OpenMonsterModel(EMonsterModelType Type)
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
         break;
     case MONSTER_MODEL_GOLDEN_STONE_GOLEM:
+        b->Actions[MONSTER01_STOP1].PlaySpeed = 0.15f;
+        b->Actions[MONSTER01_STOP2].PlaySpeed = 0.15f;
+        b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.23f;
+        b->Actions[MONSTER01_ATTACK2].PlaySpeed = 0.23f;
+        b->Actions[MONSTER01_WALK].PlaySpeed = 0.3f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.2f;
+        break;
     case MONSTER_MODEL_DEATH_RIDER:
         b->Actions[MONSTER01_STOP1].PlaySpeed = 0.15f;
         b->Actions[MONSTER01_STOP2].PlaySpeed = 0.15f;
@@ -2619,9 +2627,11 @@ void OpenMonsterModel(EMonsterModelType Type)
     case MONSTER_MODEL_MAYA_HAND_LEFT:
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.12f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.12f;
+        [[fallthrough]];
     case MONSTER_MODEL_MAYA_HAND_RIGHT:
         b->Actions[MONSTER01_APEAR].PlaySpeed = 0.12f;
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.12f;
+        break;
     case MONSTER_MODEL_MAYA:
         break;
     case MONSTER_MODEL_POUCH_OF_BLESSING:
@@ -3607,6 +3617,7 @@ void OpenMonsterModel(EMonsterModelType Type)
         LoadWaveFile(SOUND_MONSTER_PHOENIXATTACK1, L"Data\\Sound\\mPhoenixAttack1.wav", Channel, Enable);
         // LoadWaveFile(SOUND_MONSTER+186,"Data\\Sound\\mDarkPhoenixDie.wav"    ,Channel,Enable);
         SetMonsterSound(Index, 183, 184, 185, 185, -1);
+        [[fallthrough]];
     case MONSTER_MODEL_DARK_PHOENIX:
         b->Actions[MONSTER01_DIE].PlaySpeed = 0.22f;
         // b->Actions[MONSTER01_ATTACK1].PlaySpeed = 0.01f;

@@ -3335,11 +3335,12 @@ void CHARACTER_MACHINE::CalculateAttackRating()
     if (gCharacterManager.GetBaseClass(Character.Class) == CLASS_DARK_LORD)
     {
         Character.AttackRating = static_cast<WORD>(
-            ((Character.Level * 5) + (Dexterity * 5) / 2) + (Strength / 6) + (Charisma / 10) & 0xFFFF);
+            (((Character.Level * 5) + (Dexterity * 5) / 2) + (Strength / 6) + (Charisma / 10)) & 0xFFFF);
     }
     else if (gCharacterManager.GetBaseClass(Character.Class) == CLASS_RAGEFIGHTER)
     {
-        Character.AttackRating = ((Character.Level * 3) + (Dexterity * 5) / 4) + (Strength / 6) & 0xFFFF;
+        Character.AttackRating =
+            static_cast<WORD>((((Character.Level * 3) + (Dexterity * 5) / 4) + (Strength / 6)) & 0xFFFF);
     }
     else
     {
@@ -3814,27 +3815,30 @@ void CHARACTER_MACHINE::CalculateAll()
     CalculateAttackRatingPK();
 
     MONSTER_ATTRIBUTE* c = &Enemy.Attribute;
-    FinalAttackDamageRight = AttackDamageRight - c->Defense;
-    FinalAttackDamageLeft = AttackDamageLeft - c->Defense;
+    const int finalAttackDamageRight = static_cast<int>(AttackDamageRight) - c->Defense;
+    const int finalAttackDamageLeft = static_cast<int>(AttackDamageLeft) - c->Defense;
     int EnemyAttackDamage = c->AttackDamageMin + rand() % (c->AttackDamageMax - c->AttackDamageMin + 1);
-    FinalHitPoint = EnemyAttackDamage - Character.Defense;
-    FinalAttackRating = Character.AttackRating - c->SuccessfulBlocking;
-    FinalDefenseRating = Character.SuccessfulBlocking - c->AttackRating;
+    const int finalHitPoint = EnemyAttackDamage - Character.Defense;
+    const int finalAttackRating = static_cast<int>(Character.AttackRating) - c->SuccessfulBlocking;
+    const int finalDefenseRating = static_cast<int>(Character.SuccessfulBlocking) - c->AttackRating;
 
-    if (FinalAttackDamageRight < 0)
-        FinalAttackDamageRight = 0;
-    if (FinalAttackDamageLeft < 0)
-        FinalAttackDamageLeft = 0;
-    if (FinalHitPoint < 0)
-        FinalHitPoint = 0;
-    if (FinalAttackRating < 0)
+    FinalAttackDamageRight = static_cast<WORD>(finalAttackDamageRight > 0 ? finalAttackDamageRight : 0);
+    FinalAttackDamageLeft = static_cast<WORD>(finalAttackDamageLeft > 0 ? finalAttackDamageLeft : 0);
+    FinalHitPoint = static_cast<WORD>(finalHitPoint > 0 ? finalHitPoint : 0);
+
+    if (finalAttackRating < 0)
         FinalAttackRating = 0;
-    else if (FinalAttackRating > 100)
+    else if (finalAttackRating > 100)
         FinalAttackRating = 100;
-    if (FinalDefenseRating < 0)
+    else
+        FinalAttackRating = static_cast<WORD>(finalAttackRating);
+
+    if (finalDefenseRating < 0)
         FinalDefenseRating = 0;
-    else if (FinalDefenseRating > 100)
+    else if (finalDefenseRating > 100)
         FinalDefenseRating = 100;
+    else
+        FinalDefenseRating = static_cast<WORD>(finalDefenseRating);
     if (rand() % 100 < FinalAttackRating)
         FinalSuccessAttack = true;
     else

@@ -12,7 +12,7 @@
 
 namespace giPetManager
 {
-static PET_INFO gs_PetInfo;
+extern PET_INFO gs_PetInfo;
 void InitPetManager(void);
 void CreatePetDarkSpirit(CHARACTER* c);
 void CreatePetDarkSpirit_Now(CHARACTER* c);

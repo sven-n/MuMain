@@ -99,6 +99,17 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Setup MinGW dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-curl
+            mingw-w64-x86_64-pkgconf
+
       - name: Cache FetchContent dependencies
         uses: actions/cache@v4
         with:
@@ -107,7 +118,7 @@ jobs:
           restore-keys: fetchcontent-windows-
 
       - name: Configure CMake
-        run: cmake --preset windows-x64
+        run: cmake --preset windows-x64 -DCMAKE_PREFIX_PATH=C:/msys64/mingw64
 
       - name: Build
         run: cmake --build out/build/windows-x64 --config Debug
