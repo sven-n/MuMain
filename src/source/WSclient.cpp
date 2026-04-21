@@ -5669,6 +5669,18 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
 static  const   BYTE    NOT_GET_ITEM = 0xff;
 static  const   BYTE    GET_ITEM_ZEN = 0xfe;
 static  const   BYTE    GET_ITEM_MULTI = 0xfd; // received when item was added in a stack
+
+namespace
+{
+    void RequestInventorySync()
+    {
+        if (SocketClient != nullptr && SocketClient->ToGameServer() != nullptr)
+        {
+            SocketClient->ToGameServer()->SendInventoryRequest();
+        }
+    }
+}
+
 extern int ItemKey;
 void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 {
@@ -5708,6 +5720,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
         else
         {
             auto pickedItem = &Items[ItemKey].Item;
+            bool shouldResyncInventory = false;
             auto itemIndex = Data->Value;
             if (itemIndex != GET_ITEM_MULTI)
             {
@@ -5728,6 +5741,10 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                     {
                         pickedItem = g_pMyInventory->FindItem(itemIndex);
                     }
+                    else
+                    {
+                        shouldResyncInventory = true;
+                    }
                 }
                 else if (IsInventoryExtensionSlot(itemIndex))
                 {
@@ -5735,7 +5752,16 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                     {
                         pickedItem = g_pMyInventoryExt->FindItem(itemIndex);
                     }
+                    else
+                    {
+                        shouldResyncInventory = true;
+                    }
                 }
+            }
+
+            if (shouldResyncInventory)
+            {
+                RequestInventorySync();
             }
 
             wchar_t szItem[64] = { 0, };
@@ -5833,6 +5859,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
             SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 
             int itemindex = Data->Index;
+            bool shouldResyncInventory = false;
 
             if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
             {
@@ -5842,17 +5869,22 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                g_pMyInventory->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyInventory->InsertItem(itemindex, itemData);
             }
             else if (IsInventoryExtensionSlot(itemindex))
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                g_pMyInventoryExt->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyInventoryExt->InsertItem(itemindex, itemData);
             }
             else if (IsMyShopSlot(itemindex))
             {
-                g_pMyShopInventory->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyShopInventory->InsertItem(itemindex, itemData);
+            }
+
+            if (shouldResyncInventory)
+            {
+                RequestInventorySync();
             }
         }
         else if (storageType == STORAGE_TYPE::TRADE)
@@ -5930,18 +5962,28 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     }
 
     int itemindex = Data->Index;
-    if (g_pMyInventory->FindItem(itemindex))
+    if (IsMainInventorySlot(itemindex) && g_pMyInventory->FindItem(itemindex))
     {
         g_pMyInventory->DeleteItem(itemindex);
     }
+    else if (IsInventoryExtensionSlot(itemindex) && g_pMyInventoryExt->FindItem(itemindex))
+    {
+        g_pMyInventoryExt->DeleteItem(itemindex);
+    }
 
+    bool shouldResyncInventory = false;
     if (IsMainInventorySlot(itemindex))
     {
-        g_pMyInventory->InsertItem(itemindex, itemData);
+        shouldResyncInventory = !g_pMyInventory->InsertItem(itemindex, itemData);
     }
     else if (IsInventoryExtensionSlot(itemindex))
     {
-        g_pMyInventoryExt->InsertItem(itemindex, itemData);
+        shouldResyncInventory = !g_pMyInventoryExt->InsertItem(itemindex, itemData);
+    }
+
+    if (shouldResyncInventory)
+    {
+        RequestInventorySync();
     }
 
     int iType = Items[itemindex].Item.Type;
@@ -6696,6 +6738,10 @@ void ReceiveDurability(const BYTE* ReceiveBuffer)
     else
     {
         ITEM* pItem = g_pMyInventory->FindItem(Data->Value);
+        if (pItem == nullptr && IsInventoryExtensionSlot(Data->Value))
+        {
+            pItem = g_pMyInventoryExt->FindItem(Data->Value);
+        }
 
         if (pItem)
         {

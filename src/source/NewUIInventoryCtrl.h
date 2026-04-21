@@ -159,6 +159,10 @@ namespace SEASON3B
 
         void UpdateProcess();
 
+        ITEM* FindItemFromSlotIndex(int slotIndex, bool recoverIfMissing);
+        void ClearSlotKey(DWORD key);
+        void RequestInventoryRefresh() const;
+
         bool CheckSlot(int startIndex, int width, int height);
         bool CheckSlot(int iColumnX, int iRowY, int width, int height);
     public:
@@ -174,6 +178,7 @@ namespace SEASON3B
         bool AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel = 0, BYTE byDurability = 255,
             BYTE byOption1 = 0, BYTE byOptionEx = 0, BYTE byOption380 = 0, BYTE byOptionHarmony = 0);
         void RemoveItem(ITEM* pItem);
+        bool RemoveItemAt(int iLinealPos);
         void RemoveAllItems();
 
         size_t GetNumberOfItems();
