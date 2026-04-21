@@ -70,6 +70,7 @@ namespace MUHelper
 		ActionSkillType GetHealingSkill();
 		ActionSkillType GetDrainLifeSkill();
 		bool HasAssignedBuffSkill();
+		bool IsSelfPositionSkill(ActionSkillType iSkill);
 
 	private:
 		ConfigData m_config;
