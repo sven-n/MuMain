@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <algorithm>
 
 #include "NewUIMainFrameWindow.h"	// self
 #include "NewUIOptionWindow.h"
@@ -408,6 +409,21 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
     __int64 dwNexExperience;
     __int64 dwExperience;
     double x, y, width, height;
+    const auto buildExpSegment = [](const double ratio, int& digit, double& fraction)
+    {
+        const double clampedRatio = std::clamp(ratio, 0.0, 1.0);
+        if (clampedRatio >= 1.0)
+        {
+            digit = 9;
+            fraction = 1.0;
+            return;
+        }
+
+        const double scaled = clampedRatio * 10.0;
+        digit = std::clamp(static_cast<int>(scaled), 0, 9);
+        fraction = scaled - static_cast<double>(static_cast<long long>(scaled));
+        fraction = std::clamp(fraction, 0.0, 1.0);
+    };
 
     if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
@@ -450,27 +466,24 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                 );
         iBaseExperience = (iData_Master - (__int64)3892250000) / (__int64)2;	// B
 
-        double fNeedExp = (double)dwNexExperience - (double)iBaseExperience;
-        double fExp = (double)dwExperience - (double)iBaseExperience;
-
-        if (dwExperience < iBaseExperience)
+        const __int64 lowerBound = iBaseExperience;
+        __int64 upperBound = dwNexExperience;
+        if (upperBound < lowerBound)
         {
-            fExp = 0.f;
+            upperBound = lowerBound;
         }
 
-        double fExpBarNum = 0.f;
-        if (fExp > 0.f && fNeedExp > 0)
-        {
-            fExpBarNum = ((double)fExp / (double)fNeedExp) * (double)10.f;
-        }
-
-        double fProgress = fExpBarNum - static_cast<long long>(fExpBarNum);
+        const double fNeedExp = static_cast<double>(upperBound - lowerBound);
+        const double fClampedExp = std::clamp(static_cast<double>(dwExperience), static_cast<double>(lowerBound), static_cast<double>(upperBound));
+        const double fRatio = (fNeedExp > 0.0) ? std::clamp((fClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0) : 0.0;
+        int iExp = 0;
+        double fProgress = 0.0;
+        buildExpSegment(fRatio, iExp, fProgress);
 
         if (m_bExpEffect == true)
         {
             double fPreProgress = 0.f;
-            double fPreExp = (double)m_loPreExp - (double)iBaseExperience;
-            if (m_loPreExp < iBaseExperience)
+            if (m_loPreExp < lowerBound)
             {
                 x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                 RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
@@ -481,16 +494,14 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
             else
             {
                 int iPreExpBarNum = 0;
-                int iExpBarNum = 0;
-                if (fPreExp > 0.f && fNeedExp > 0.f)
+                if (fNeedExp > 0.f)
                 {
-                    fPreProgress = ((double)fPreExp / (double)fNeedExp) * (double)10.f;
-                    iPreExpBarNum = (int)fPreProgress;
-                    fPreProgress = static_cast<double>(fPreProgress) - static_cast<long long>(fPreProgress);
+                    const double fPreClampedExp = std::clamp(static_cast<double>(m_loPreExp), static_cast<double>(lowerBound), static_cast<double>(upperBound));
+                    const double fPreRatio = std::clamp((fPreClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0);
+                    buildExpSegment(fPreRatio, iPreExpBarNum, fPreProgress);
                 }
-                iExpBarNum = (int)fExpBarNum;
 
-                if (iExpBarNum > iPreExpBarNum)
+                if (iExp > iPreExpBarNum)
                 {
                     x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                     RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
@@ -500,8 +511,8 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                 }
                 else
                 {
-                    double fGapProgress = 0.f;
-                    fGapProgress = (double)fProgress - (double)fPreProgress;
+                    double fGapProgress = fProgress - fPreProgress;
+                    fGapProgress = std::clamp(fGapProgress, 0.0, 1.0);
                     x = 2.f; y = 473.f; width = (double)fPreProgress * (double)629.f; height = 4.f;
                     RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
 
@@ -519,7 +530,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
             RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
         }
 
-        int iExp = (int)fExpBarNum;
         x = 635.f; y = 469.f;
         SEASON3B::RenderNumber(x, y, iExp);
 
@@ -550,28 +560,24 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
             }
         }
 
-        double fNeedExp = (double)dwNexExperience - (double)iPriorExperience;
-        double fExp = (double)dwExperience - (double)iPriorExperience;
-
-        if (dwExperience < iPriorExperience)
+        const __int64 lowerBound = iPriorExperience;
+        __int64 upperBound = dwNexExperience;
+        if (upperBound < lowerBound)
         {
-            fExp = 0.f;
+            upperBound = lowerBound;
         }
 
-        double fExpBarNum = 0.f;
-        if (fExp > 0.f && fNeedExp > 0)
-        {
-            fExpBarNum = (fExp / fNeedExp) * 10.f;
-        }
-
-        double fProgress = fExpBarNum;
-        fProgress = fProgress - static_cast<long long>(fProgress);
+        const double fNeedExp = static_cast<double>(upperBound - lowerBound);
+        const double fClampedExp = std::clamp(static_cast<double>(dwExperience), static_cast<double>(lowerBound), static_cast<double>(upperBound));
+        const double fRatio = (fNeedExp > 0.0) ? std::clamp((fClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0) : 0.0;
+        int iExp = 0;
+        double fProgress = 0.0;
+        buildExpSegment(fRatio, iExp, fProgress);
 
         if (m_bExpEffect == true)
         {
             double fPreProgress = 0.f;
-            fExp = (double)m_dwPreExp - (double)iPriorExperience;
-            if (m_dwPreExp < iPriorExperience)
+            if (m_dwPreExp < lowerBound)
             {
                 x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                 RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
@@ -582,17 +588,14 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
             else
             {
                 int iPreExpBarNum = 0;
-                int iExpBarNum = 0;
-                if (fExp > 0.f && fNeedExp > 0.f)
+                if (fNeedExp > 0.f)
                 {
-                    fPreProgress = (fExp / fNeedExp) * 10.f;
-                    iPreExpBarNum = (int)fPreProgress;
-                    fPreProgress = fPreProgress - static_cast<long long>(fPreProgress);
+                    const double fPreClampedExp = std::clamp(static_cast<double>(m_dwPreExp), static_cast<double>(lowerBound), static_cast<double>(upperBound));
+                    const double fPreRatio = std::clamp((fPreClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0);
+                    buildExpSegment(fPreRatio, iPreExpBarNum, fPreProgress);
                 }
 
-                iExpBarNum = (int)fExpBarNum;
-
-                if (iExpBarNum > iPreExpBarNum)
+                if (iExp > iPreExpBarNum)
                 {
                     x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                     RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
@@ -602,8 +605,8 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                 }
                 else
                 {
-                    double fGapProgress = 0.f;
-                    fGapProgress = fProgress - fPreProgress;
+                    double fGapProgress = fProgress - fPreProgress;
+                    fGapProgress = std::clamp(fGapProgress, 0.0, 1.0);
                     x = 2.f; y = 473.f; width = fPreProgress * 629.f; height = 4.f;
                     RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
                     x += width; width = fGapProgress * 629.f;
@@ -620,7 +623,6 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
             RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
         }
 
-        int iExp = (int)fExpBarNum;
         x = 635.f; y = 469.f;
         SEASON3B::RenderNumber(x, y, iExp);
 
