@@ -8954,7 +8954,7 @@ void RenderCursor()
         }
     }
     else if (((g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT))
-        && g_pMyInventory->GetRepairMode() == SEASON3B::CNewUIMyInventory::REPAIR_MODE_ON)
+        && g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON)
         || (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
             && g_pNPCShop->GetShopState() == SEASON3B::CNewUINPCShop::SHOP_STATE_REPAIR)
         )
