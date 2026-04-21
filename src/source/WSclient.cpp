@@ -2423,6 +2423,9 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         break;
     }
 
+    // Ancient full-set glow state (purple aura) is sent explicitly per equipment change.
+    c->ExtendState = Data->IsAncientSetComplete > 0;
+
     ChangeChaosCastleUnit(c);
 
     SetCharacterScale(c);
