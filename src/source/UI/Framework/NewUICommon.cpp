@@ -207,11 +207,19 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
     // arrive in the same PollEvents batch (MouseLButton=false, edge=false → lost).
     // [Story 7-9-9, AC-5]
 
+#ifdef _EDITOR
+    // Editor input-blocker gate: MuInputBlockerCore sets g_bEnterPressed=true when
+    // it wants to allow Enter through the editor (otherwise it clears VK_RETURN
+    // itself). Without the editor, no code ever sets g_bEnterPressed=true, so this
+    // block would unconditionally clear every Enter press before chat-open logic
+    // could observe it — the bug that prevented Enter from opening the chat window
+    // on non-editor SDL3 builds. Keep the gate inside the editor guard.
     if (IsPress(VK_RETURN) && IsEnterPressed() == false)
     {
         m_pInputInfo[VK_RETURN].byKeyState = KEY_NONE;
     }
     SetEnterPressed(false);
+#endif
 }
 
 bool SEASON3B::CNewKeyInput::IsNone(int iVirtKey)
