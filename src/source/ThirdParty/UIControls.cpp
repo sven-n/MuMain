@@ -3961,6 +3961,12 @@ void CUITextInputBox::Render()
                                   m_iWidth - textPadX * 2, m_iHeight - textPadY * 2,
                                   RT3_SORT_LEFT, &textSize);
     }
+    else
+    {
+        // Measure font line metrics via an off-screen probe so the caret has a sensible
+        // height even when the input is empty. Offscreen coords avoid any visible output.
+        g_pRenderText->RenderText(-10000, -10000, L"|", 0, 0, RT3_SORT_LEFT, &textSize);
+    }
 
     if (m_bSDLHasFocus && m_iState != UISTATE_HIDE)
     {
@@ -3968,10 +3974,20 @@ void CUITextInputBox::Render()
         const bool showCaret = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / kCaretPeriodMs) % 2 == 0;
         if (showCaret)
         {
-            const float caretX = static_cast<float>(m_iPos_x + textPadX) + textSize.cx / g_fScreenRate_x;
+            // textSize is returned in DESIGN UNITS by CUIRenderTextSDLTtf::RenderText
+            // (lpTextSize divides by g_fScreenRate at UIControls.cpp:3112-3113). Do not
+            // divide again here. RenderColor also accepts design-unit coords.
+            //
+            // Caret height = measured text bbox height, not box height — earlier revisions
+            // used (m_iHeight - textPadY * 2) which is the input-box height; for typical
+            // fonts the text bbox is shorter than the box so the caret overhung the text
+            // bottom by 1-2 pixels, reported as "caret blinks slightly lower than the text."
+            const float caretX = static_cast<float>(m_iPos_x + textPadX + textSize.cx);
             const float caretY = static_cast<float>(m_iPos_y + textPadY);
+            const float caretHeight = (textSize.cy > 0) ? static_cast<float>(textSize.cy)
+                                                        : static_cast<float>(m_iHeight - textPadY * 2);
             EnableAlphaTest();
-            RenderColor(caretX, caretY, m_fCaretWidth, static_cast<float>(m_iHeight - textPadY * 2));
+            RenderColor(caretX, caretY, m_fCaretWidth, caretHeight);
             EndRenderColor();
         }
     }
