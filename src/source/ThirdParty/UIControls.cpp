@@ -3946,6 +3946,11 @@ void CUITextInputBox::Render()
 
     g_pRenderText->SetFont(m_hConfiguredFont ? m_hConfiguredFont : g_hFont);
     g_pRenderText->SetTextColor(m_dwTextColor);
+    // Clear any bg color left on g_pRenderText by a prior RenderText caller — otherwise
+    // CUIRenderTextSDLTtf draws a box-sized background quad behind our text, producing a
+    // visible shadow under every input box. We paint our own background via UIOPTION_PAINTBACK
+    // when callers want one; text render must be transparent-bg by default.
+    g_pRenderText->SetBgColor(0, 0, 0, 0);
 
     SIZE textSize = { 0, 0 };
     const int textPadX = 2;
