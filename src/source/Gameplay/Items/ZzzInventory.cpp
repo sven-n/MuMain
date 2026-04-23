@@ -399,6 +399,12 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         }
         else
         {
+            // Per-tier tooltip text colors. Restored from glColor3f() calls that
+            // were removed in 95b86aae (Story 7-9-6 raw-GL → MuRenderer migration)
+            // but never replaced. Without these, every special item — excellent,
+            // ancient, +7 forge, set, socket, etc. — rendered plain white.
+            // DARKRED/DARKBLUE/DARKYELLOW/GREEN_BLUE keep white text; their colored
+            // backgrounds are painted by the SetBgColor block below.
             g_pRenderText->SetTextColor(0xffffffff);
             switch (TextListColor[i])
             {
@@ -406,26 +412,34 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
             case TEXT_COLOR_DARKRED:
             case TEXT_COLOR_DARKBLUE:
             case TEXT_COLOR_DARKYELLOW:
-                break;
-            case TEXT_COLOR_BLUE:
-                break;
-            case TEXT_COLOR_GRAY:
-                break;
             case TEXT_COLOR_GREEN_BLUE:
                 break;
+            case TEXT_COLOR_BLUE:
+                g_pRenderText->SetTextColor(128, 179, 255, 255);
+                break;
+            case TEXT_COLOR_GRAY:
+                g_pRenderText->SetTextColor(102, 102, 102, 255);
+                break;
             case TEXT_COLOR_RED:
+                g_pRenderText->SetTextColor(255, 51, 26, 255);
                 break;
             case TEXT_COLOR_YELLOW:
+                g_pRenderText->SetTextColor(255, 204, 26, 255);
                 break;
             case TEXT_COLOR_GREEN:
+                g_pRenderText->SetTextColor(26, 255, 128, 255);
                 break;
             case TEXT_COLOR_PURPLE:
+                g_pRenderText->SetTextColor(255, 26, 255, 255);
                 break;
             case TEXT_COLOR_REDPURPLE:
+                g_pRenderText->SetTextColor(204, 128, 204, 255);
                 break;
             case TEXT_COLOR_VIOLET:
+                g_pRenderText->SetTextColor(179, 102, 255, 255);
                 break;
             case TEXT_COLOR_ORANGE:
+                g_pRenderText->SetTextColor(230, 107, 10, 255);
                 break;
             }
             if (TEXT_COLOR_DARKRED == TextListColor[i])
