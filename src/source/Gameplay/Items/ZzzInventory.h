@@ -53,7 +53,7 @@ enum SKILL_TOOLTIP_RENDER_POINT
     STRP_BOOTOMRIGHT
 };
 
-// ¼¼À²Á¤º¸
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 extern int g_nTaxRate;
 extern int g_nChaosTaxRate;
@@ -77,7 +77,7 @@ extern int GuildTotalScore;
 extern int AllRepairGold;
 
 //////////////////////////////////////////////////////////////////////////
-// text °ü·Ã
+// text ï¿½ï¿½ï¿½ï¿½
 //////////////////////////////////////////////////////////////////////////
 extern wchar_t TextList[50][100];
 extern int TextListColor[50];
@@ -207,6 +207,7 @@ void ComputeItemInfo(int iHelpItem);
 void RenderHelpCategory(int iColumnType, int Pos_x, int Pos_y);
 void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, const wchar_t* pGapText = NULL,
                     int Pos_y = 0, int iType = 0);
+void SetGroundItemLabelBuildBudget(int buildBudget);
 void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);

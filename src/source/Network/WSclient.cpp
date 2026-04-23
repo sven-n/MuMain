@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -30,6 +30,7 @@
 #include "CSMapServer.h"
 #include "npcGateSwitch.h"
 #include "CComGem.h"
+#include "InventoryUtils.h"
 #include "UIMapName.h" // rozy
 #include "UIMng.h"
 #include "CDirection.h"
@@ -67,6 +68,7 @@
 #include "FatigueTimeSystem.h"
 #endif // PBG_ADD_SECRETBUFF
 #include <codecvt>
+#include <limits>
 
 #include "ServerListManager.h"
 #include "MonkSystem.h"
@@ -165,6 +167,195 @@ static std::queue<std::unique_ptr<PacketInfo>> s_packetQueue;
 static uint32_t s_dbgPacketsReceived = 0u;
 static uint32_t s_dbgPacketsProcessed = 0u;
 #endif
+
+static constexpr int64_t kInt64Max = std::numeric_limits<int64_t>::max();
+static constexpr int64_t kInt64Min = std::numeric_limits<int64_t>::min();
+
+static uint64_t GetNormalLowerBound(const WORD level)
+{
+    if (level <= 1)
+    {
+        return 0;
+    }
+
+    const uint64_t priorLevel = static_cast<uint64_t>(level - 1);
+    uint64_t priorExperience = (9ull + priorLevel) * priorLevel * priorLevel * 10ull;
+
+    if (priorLevel > 255ull)
+    {
+        const uint64_t levelOverN = priorLevel - 255ull;
+        priorExperience += (9ull + levelOverN) * levelOverN * levelOverN * 1000ull;
+    }
+
+    return priorExperience;
+}
+
+static int64_t GetMasterLowerBound(const short masterLevel)
+{
+    const auto saturatingAdd = [](const int64_t left, const int64_t right)
+    {
+        if (right > 0 && left > kInt64Max - right)
+        {
+            return kInt64Max;
+        }
+
+        if (right < 0 && left < kInt64Min - right)
+        {
+            return kInt64Min;
+        }
+
+        return left + right;
+    };
+    const auto saturatingSub = [&](const int64_t left, const int64_t right)
+    {
+        if (right == kInt64Min)
+        {
+            return kInt64Max;
+        }
+
+        return saturatingAdd(left, -right);
+    };
+    const auto saturatingMul = [](const int64_t left, const int64_t right)
+    {
+        if (left == 0 || right == 0)
+        {
+            return static_cast<int64_t>(0);
+        }
+
+        const auto magnitude = [](const int64_t value)
+        {
+            if (value >= 0)
+            {
+                return static_cast<uint64_t>(value);
+            }
+
+            if (value == kInt64Min)
+            {
+                return uint64_t{1} << 63;
+            }
+
+            return static_cast<uint64_t>(-value);
+        };
+
+        const bool isNegativeResult = (left < 0) != (right < 0);
+        const uint64_t resultLimit = isNegativeResult
+            ? (uint64_t{1} << 63)
+            : static_cast<uint64_t>(kInt64Max);
+        const uint64_t leftMagnitude = magnitude(left);
+        const uint64_t rightMagnitude = magnitude(right);
+
+        if (leftMagnitude > resultLimit / rightMagnitude)
+        {
+            return isNegativeResult ? kInt64Min : kInt64Max;
+        }
+
+        return left * right;
+    };
+    const auto saturatingDiv = [](const int64_t numerator, const int64_t denominator)
+    {
+        if (denominator == 0)
+        {
+            return numerator >= 0 ? kInt64Max : kInt64Min;
+        }
+
+        if (numerator == kInt64Min && denominator == -1)
+        {
+            return kInt64Max;
+        }
+
+        return numerator / denominator;
+    };
+
+    const int64_t totalLevel = saturatingAdd(static_cast<int64_t>(masterLevel), static_cast<int64_t>(400));
+    const int64_t overLevel = saturatingSub(totalLevel, static_cast<int64_t>(255));
+
+    const int64_t leftTerm = saturatingMul(
+        saturatingMul(
+            saturatingMul(saturatingAdd(static_cast<int64_t>(9), totalLevel), totalLevel),
+            totalLevel),
+        static_cast<int64_t>(10));
+    const int64_t rightTerm = saturatingMul(
+        saturatingMul(
+            saturatingMul(saturatingAdd(static_cast<int64_t>(9), overLevel), overLevel),
+            overLevel),
+        static_cast<int64_t>(1000));
+    const int64_t dataMaster = saturatingAdd(leftTerm, rightTerm);
+    const int64_t numerator = saturatingSub(dataMaster, static_cast<int64_t>(3892250000ll));
+
+    return saturatingDiv(numerator, static_cast<int64_t>(2));
+}
+
+static uint64_t ClampToInterval(const uint64_t value, const uint64_t lower, uint64_t upper)
+{
+    if (upper < lower)
+    {
+        upper = lower;
+    }
+
+    if (value < lower)
+    {
+        return lower;
+    }
+
+    if (value > upper)
+    {
+        return upper;
+    }
+
+    return value;
+}
+
+static int64_t ClampToInterval(const int64_t value, const int64_t lower, int64_t upper)
+{
+    if (upper < lower)
+    {
+        upper = lower;
+    }
+
+    if (value < lower)
+    {
+        return lower;
+    }
+
+    if (value > upper)
+    {
+        return upper;
+    }
+
+    return value;
+}
+
+static uint64_t SaturatingAddToUpper(const uint64_t current, const uint64_t add, uint64_t upper)
+{
+    if (upper < current)
+    {
+        upper = current;
+    }
+
+    const uint64_t remaining = upper - current;
+    if (add >= remaining)
+    {
+        return upper;
+    }
+
+    return current + add;
+}
+
+static int64_t SaturatingAddToUpper(const int64_t current, const int64_t add, int64_t upper)
+{
+    if (upper < current)
+    {
+        upper = current;
+    }
+
+    const int64_t remaining = upper - current;
+    if (add >= remaining)
+    {
+        return upper;
+    }
+
+    return current + add;
+}
 
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
@@ -981,13 +1172,56 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
     CharacterAttribute->Shield = Data->Shield;
     CharacterAttribute->SkillMana = Data->SkillMana;
 
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+    if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
-        Master_Level_Data.lMasterLevel_Experince = Data->CurrentExperience;
+        const auto lowerBound = GetMasterLowerBound(Master_Level_Data.nMLevel);
+        const auto upperBound = Master_Level_Data.lNext_MasterLevel_Experince;
+        const auto currentExperience = Master_Level_Data.lMasterLevel_Experince;
+        const auto rawRevivalExperience = Data->CurrentExperience;
+        const auto swappedRevivalExperience = ntoh64(Data->CurrentExperience);
+
+        const bool rawConvertible = rawRevivalExperience <= static_cast<uint64_t>(kInt64Max);
+        const bool swappedConvertible = swappedRevivalExperience <= static_cast<uint64_t>(kInt64Max);
+        const auto rawCandidate = rawConvertible ? static_cast<int64_t>(rawRevivalExperience) : currentExperience;
+        const auto swappedCandidate = swappedConvertible ? static_cast<int64_t>(swappedRevivalExperience) : currentExperience;
+
+        const bool isRawPlausible = rawConvertible && (rawCandidate >= lowerBound && rawCandidate <= upperBound);
+        const bool isSwappedPlausible = swappedConvertible && (swappedCandidate >= lowerBound && swappedCandidate <= upperBound);
+
+        int64_t selectedExperience = currentExperience;
+        if (isRawPlausible != isSwappedPlausible)
+        {
+            selectedExperience = isRawPlausible ? rawCandidate : swappedCandidate;
+        }
+        else if (isRawPlausible && isSwappedPlausible)
+        {
+            selectedExperience = rawCandidate;
+        }
+
+        Master_Level_Data.lMasterLevel_Experince = ClampToInterval(selectedExperience, lowerBound, upperBound);
     }
     else
     {
-        CharacterAttribute->Experience = Data->CurrentExperience;
+        const auto lowerBound = GetNormalLowerBound(CharacterAttribute->Level);
+        const auto upperBound = CharacterAttribute->NextExperience;
+        const auto currentExperience = CharacterAttribute->Experience;
+        const auto rawRevivalExperience = Data->CurrentExperience;
+        const auto swappedRevivalExperience = ntoh64(Data->CurrentExperience);
+
+        const bool isRawPlausible = rawRevivalExperience >= lowerBound && rawRevivalExperience <= upperBound;
+        const bool isSwappedPlausible = swappedRevivalExperience >= lowerBound && swappedRevivalExperience <= upperBound;
+
+        uint64_t selectedExperience = currentExperience;
+        if (isRawPlausible != isSwappedPlausible)
+        {
+            selectedExperience = isRawPlausible ? rawRevivalExperience : swappedRevivalExperience;
+        }
+        else if (isRawPlausible && isSwappedPlausible)
+        {
+            selectedExperience = rawRevivalExperience;
+        }
+
+        CharacterAttribute->Experience = ClampToInterval(selectedExperience, lowerBound, upperBound);
     }
 
     CharacterMachine->Gold = Data->Gold;
@@ -1285,15 +1519,15 @@ void ReceiveDeleteInventory(const BYTE* ReceiveBuffer)
         {
             g_pMyInventory->UnequipItem(itemindex);
         }
-        else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+        else if (IsMainInventorySlot(itemindex))
         {
             g_pMyInventory->DeleteItem(itemindex);
         }
-        else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (IsInventoryExtensionSlot(itemindex))
         {
             g_pMyInventoryExt->DeleteItem(itemindex);
         }
-        else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+        else if (IsMyShopSlot(itemindex))
         {
             g_pMyShopInventory->DeleteItem(itemindex);
         }
@@ -1389,15 +1623,15 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         {
             g_pMyInventory->EquipItem(itemindex, itemData);
         }
-        else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+        else if (IsMainInventorySlot(itemindex))
         {
             g_pMyInventory->InsertItem(itemindex, itemData);
         }
-        else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (IsInventoryExtensionSlot(itemindex))
         {
             g_pMyInventoryExt->InsertItem(itemindex, itemData);
         }
-        else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+        else if (IsMyShopSlot(itemindex))
         {
             g_pMyShopInventory->InsertItem(itemindex, itemData);
         }
@@ -1779,7 +2013,8 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    if (c->Movement)
+    // If already walking and receiving another walk command, don't interrupt with SetPlayerStop
+    if (c->Movement && pathNum == 0)
     {
         c->Movement = false;
         SetPlayerStop(c);
@@ -1848,6 +2083,11 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer)
     c->TargetX = Data->PositionX;
     c->TargetY = Data->PositionY;
     c->JumpTime = 1;
+    c->Movement = false;
+    c->Path.PathNum = 0;
+    c->Path.CurrentPath = 0;
+    c->Path.CurrentPathFloat = 0;
+    SetPlayerStop(c);
 }
 
 extern int EnableEvent;
@@ -2258,6 +2498,9 @@ void ReceiveChangePlayer(std::span<const BYTE> ReceiveBuffer)
         }
         break;
     }
+
+    // Ancient full-set glow state (purple aura) is sent explicitly per equipment change.
+    c->ExtendState = Data->IsAncientSetComplete > 0;
 
     ChangeChaosCastleUnit(c);
 
@@ -3208,7 +3451,7 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     auto ShieldDamage = Data->ShieldDamage;
 
     mu::log::Get("network")->debug("0x15 [ReceiveAttackDamageExtended({} {})]", AttackPlayer, Damage);
-    if (IsMonster(c) || IsPlayer(c))
+    if (IsMonster(c))
     {
         MUHelper::g_MuHelper.AddTarget(Key, true);
     }
@@ -3291,7 +3534,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         c->Object.AnimationFrame = 0;
 
         c->TargetCharacter = HeroIndex;
-        if (IsMonster(c) || IsPlayer(c))
+        if (IsMonster(c))
         {
             MUHelper::g_MuHelper.AddTarget(Key, true);
         }
@@ -5398,23 +5641,39 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     c->Dead = 1;
     c->Movement = false;
 
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+    if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
         g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
         g_pMainFrame->SetGetExp_Wide(Exp);
-        Master_Level_Data.lMasterLevel_Experince += Exp;
+
+        const auto lowerBound = GetMasterLowerBound(Master_Level_Data.nMLevel);
+        const auto upperBound = Master_Level_Data.lNext_MasterLevel_Experince;
+        const auto currentExperience = ClampToInterval(Master_Level_Data.lMasterLevel_Experince, lowerBound, upperBound);
+        const auto addedExperience = static_cast<int64_t>(Exp);
+        Master_Level_Data.lMasterLevel_Experince = ClampToInterval(
+            SaturatingAddToUpper(currentExperience, addedExperience, upperBound),
+            lowerBound,
+            upperBound);
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience & 0xFFFFFFFF);
+        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
         g_pMainFrame->SetGetExp(Exp);
-        CharacterAttribute->Experience += Exp;
+
+        const auto lowerBound = GetNormalLowerBound(CharacterAttribute->Level);
+        const auto upperBound = CharacterAttribute->NextExperience;
+        const auto currentExperience = ClampToInterval(CharacterAttribute->Experience, lowerBound, upperBound);
+        const auto addedExperience = static_cast<uint64_t>(Exp);
+        CharacterAttribute->Experience = ClampToInterval(
+            SaturatingAddToUpper(currentExperience, addedExperience, upperBound),
+            lowerBound,
+            upperBound);
     }
 
     if (Exp > 0)
     {
         wchar_t Text[100];
-        if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+        if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
         {
             mu_swprintf(Text, GlobalText[1750], Exp);
         }
@@ -5488,13 +5747,27 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     {
         g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
         g_pMainFrame->SetGetExp_Wide(addedExperience);
-        Master_Level_Data.lMasterLevel_Experince += addedExperience;
+
+        const auto lowerBound = GetMasterLowerBound(Master_Level_Data.nMLevel);
+        const auto upperBound = Master_Level_Data.lNext_MasterLevel_Experince;
+        const auto currentExperience = ClampToInterval(Master_Level_Data.lMasterLevel_Experince, lowerBound, upperBound);
+        Master_Level_Data.lMasterLevel_Experince = ClampToInterval(
+            SaturatingAddToUpper(currentExperience, static_cast<int64_t>(addedExperience), upperBound),
+            lowerBound,
+            upperBound);
     }
     else
     {
-        g_pMainFrame->SetPreExp(CharacterAttribute->Experience & 0xFFFFFFFF);
+        g_pMainFrame->SetPreExp(CharacterAttribute->Experience);
         g_pMainFrame->SetGetExp(addedExperience);
-        CharacterAttribute->Experience += addedExperience;
+
+        const auto lowerBound = GetNormalLowerBound(CharacterAttribute->Level);
+        const auto upperBound = CharacterAttribute->NextExperience;
+        const auto currentExperience = ClampToInterval(CharacterAttribute->Experience, lowerBound, upperBound);
+        CharacterAttribute->Experience = ClampToInterval(
+            SaturatingAddToUpper(currentExperience, static_cast<uint64_t>(addedExperience), upperBound),
+            lowerBound,
+            upperBound);
     }
 
     if (addedExperience > 0)
@@ -5725,6 +5998,18 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
 static const BYTE NOT_GET_ITEM = 0xff;
 static const BYTE GET_ITEM_ZEN = 0xfe;
 static const BYTE GET_ITEM_MULTI = 0xfd; // received when item was added in a stack
+
+namespace
+{
+    void RequestInventorySync()
+    {
+        if (SocketClient != nullptr && SocketClient->ToGameServer() != nullptr)
+        {
+            SocketClient->ToGameServer()->SendInventoryRequest();
+        }
+    }
+}
+
 extern int ItemKey;
 void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 {
@@ -5765,11 +6050,11 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
         else
         {
             auto pickedItem = &Items[ItemKey].Item;
+            bool shouldResyncInventory = false;
             auto itemIndex = Data->Value;
             if (itemIndex != GET_ITEM_MULTI)
             {
-                auto Data2 = safe_cast<PRECEIVE_GET_ITEM_EXTENDED>(ReceiveBuffer);
-                if (Data2 == nullptr)
+                if (safe_cast<PRECEIVE_GET_ITEM_EXTENDED>(ReceiveBuffer) == nullptr)
                 {
                     assert(false);
                     return;
@@ -5780,20 +6065,33 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
                 int length = CalcItemLength(itemData);
                 itemData = itemData.subspan(0, length);
 
-                if (itemIndex >= MAX_EQUIPMENT_INDEX && itemIndex < MAX_MY_INVENTORY_INDEX)
+                if (IsMainInventorySlot(itemIndex))
                 {
                     if (g_pMyInventory->InsertItem(itemIndex, itemData))
                     {
                         pickedItem = g_pMyInventory->FindItem(itemIndex);
                     }
+                    else
+                    {
+                        shouldResyncInventory = true;
+                    }
                 }
-                else if (itemIndex >= MAX_MY_INVENTORY_INDEX && Data2->Result < MAX_MY_INVENTORY_EX_INDEX)
+                else if (IsInventoryExtensionSlot(itemIndex))
                 {
                     if (g_pMyInventoryExt->InsertItem(itemIndex, itemData))
                     {
                         pickedItem = g_pMyInventoryExt->FindItem(itemIndex);
                     }
+                    else
+                    {
+                        shouldResyncInventory = true;
+                    }
                 }
+            }
+
+            if (shouldResyncInventory)
+            {
+                RequestInventorySync();
             }
 
             wchar_t szItem[64] = {
@@ -5816,9 +6114,6 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             else
                 PlayBuffer(SOUND_GET_ITEM01, &Hero->Object);
         }
-#ifdef FOR_WORK
-        Items[ItemKey].Object.Live = false;
-#endif
     }
     SendGetItem = -1;
 
@@ -5897,26 +6192,32 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
             SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
 
             int itemindex = Data->Index;
+            bool shouldResyncInventory = false;
 
             if (itemindex >= 0 && itemindex < MAX_EQUIPMENT_INDEX)
             {
                 g_pMyInventory->EquipItem(itemindex, itemData);
             }
-            else if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+            else if (IsMainInventorySlot(itemindex))
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                g_pMyInventory->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyInventory->InsertItem(itemindex, itemData);
             }
-            else if (itemindex >= MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+            else if (IsInventoryExtensionSlot(itemindex))
             {
                 g_pStorageInventory->ProcessStorageItemAutoMoveSuccess();
                 g_pStorageInventoryExt->ProcessStorageItemAutoMoveSuccess();
-                g_pMyInventoryExt->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyInventoryExt->InsertItem(itemindex, itemData);
             }
-            else if (itemindex >= MAX_MY_INVENTORY_EX_INDEX && itemindex < MAX_MY_SHOP_INVENTORY_INDEX)
+            else if (IsMyShopSlot(itemindex))
             {
-                g_pMyShopInventory->InsertItem(itemindex, itemData);
+                shouldResyncInventory = !g_pMyShopInventory->InsertItem(itemindex, itemData);
+            }
+
+            if (shouldResyncInventory)
+            {
+                RequestInventorySync();
             }
         }
         else if (storageType == STORAGE_TYPE::TRADE)
@@ -5993,18 +6294,28 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     }
 
     int itemindex = Data->Index;
-    if (g_pMyInventory->FindItem(itemindex))
+    if (IsMainInventorySlot(itemindex) && g_pMyInventory->FindItem(itemindex))
     {
         g_pMyInventory->DeleteItem(itemindex);
     }
-
-    if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+    else if (IsInventoryExtensionSlot(itemindex) && g_pMyInventoryExt->FindItem(itemindex))
     {
-        g_pMyInventory->InsertItem(itemindex, itemData);
+        g_pMyInventoryExt->DeleteItem(itemindex);
     }
-    else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+
+    bool shouldResyncInventory = false;
+    if (IsMainInventorySlot(itemindex))
     {
-        g_pMyInventoryExt->InsertItem(itemindex, itemData);
+        shouldResyncInventory = !g_pMyInventory->InsertItem(itemindex, itemData);
+    }
+    else if (IsInventoryExtensionSlot(itemindex))
+    {
+        shouldResyncInventory = !g_pMyInventoryExt->InsertItem(itemindex, itemData);
+    }
+
+    if (shouldResyncInventory)
+    {
+        RequestInventorySync();
     }
 
     int iType = Items[itemindex].Item.Type;
@@ -6256,11 +6567,11 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        if (Data->Index >= MAX_EQUIPMENT_INDEX && Data->Index < MAX_MY_INVENTORY_INDEX)
+        if (IsMainInventorySlot(Data->Index))
         {
             g_pMyInventory->InsertItem(Data->Index, itemData);
         }
-        else if (Data->Index >= MAX_MY_INVENTORY_INDEX && Data->Index < MAX_MY_INVENTORY_EX_INDEX)
+        else if (IsInventoryExtensionSlot(Data->Index))
         {
             g_pMyInventoryExt->InsertItem(Data->Index, itemData);
         }
@@ -6482,6 +6793,8 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
     {
         SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
     }
+
+    g_pNPCShop->SetSellingItem(false);
 }
 
 void ReceiveRepair(const BYTE* ReceiveBuffer)
@@ -6763,6 +7076,10 @@ void ReceiveDurability(const BYTE* ReceiveBuffer)
     else
     {
         ITEM* pItem = g_pMyInventory->FindItem(Data->Value);
+        if (pItem == nullptr && IsInventoryExtensionSlot(Data->Value))
+        {
+            pItem = g_pMyInventoryExt->FindItem(Data->Value);
+        }
 
         if (pItem)
         {
@@ -7794,7 +8111,7 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer, int Size)
     //	Master_Level_Data.nTotalMPoint		= Data->nTotalMPoint;
     Master_Level_Data.nMaxPoint = Data->nMaxPoint;
 
-    if (Size >= sizeof(LPPMSG_MASTERLEVEL_UP_EXTENDED))
+    if (Size >= sizeof(PMSG_MASTERLEVEL_UP_EXTENDED))
     {
         auto ExtData = (LPPMSG_MASTERLEVEL_UP_EXTENDED)ReceiveBuffer;
         Master_Level_Data.wMaxLife = ExtData->wMaxLife;
@@ -7874,7 +8191,7 @@ void Receive_Master_Level_Exp(const BYTE* ReceiveBuffer, int Size)
     Master_Level_Data.lNext_MasterLevel_Experince |= Data->btMNextExp8;
     Master_Level_Data.nMLevelUpMPoint = Data->nMLPoint;
 
-    if (Size >= sizeof(LPPMSG_MASTERLEVEL_INFO_EXTENDED))
+    if (Size >= sizeof(PMSG_MASTERLEVEL_INFO_EXTENDED))
     {
         auto ExtData = (LPPMSG_MASTERLEVEL_INFO_EXTENDED)ReceiveBuffer;
         Master_Level_Data.wMaxLife = ExtData->wMaxLife;
@@ -9151,11 +9468,11 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         auto offset = sizeof(PURCHASEITEM_RESULTINFO);
         auto itemData = ReceiveBuffer.subspan(offset);
 
-        if (itemindex >= MAX_EQUIPMENT_INDEX && itemindex < MAX_MY_INVENTORY_INDEX)
+        if (IsMainInventorySlot(itemindex))
         {
             g_pMyInventory->InsertItem(itemindex, itemData);
         }
-        else if (itemindex > MAX_MY_INVENTORY_INDEX && itemindex < MAX_MY_INVENTORY_EX_INDEX)
+        else if (IsInventoryExtensionSlot(itemindex))
         {
             g_pMyInventoryExt->InsertItem(itemindex, itemData);
         }

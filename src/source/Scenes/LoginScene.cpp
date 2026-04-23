@@ -352,13 +352,13 @@ void NewMoveLogInScene()
 
         CCameraMove::GetInstancePtr()->SetTourMode(FALSE);
 
+        // Tear down the login scene data before asking the server for the
+        // account characters, otherwise a fast reply can be cleared again.
+        ReleaseLogoSceneData();
+
         SceneFlag = CHARACTER_SCENE;
         CurrentProtocolState = REQUEST_CHARACTERS_LIST;
         SocketClient->ToGameServer()->SendRequestCharacterList(g_pMultiLanguage->GetLanguage());
-
-        ReleaseLogoSceneData();
-
-        ClearCharacters();
     }
 }
 

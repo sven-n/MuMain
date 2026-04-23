@@ -61,6 +61,7 @@ public:
     bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const;
     void DeleteItem(int iIndex) const;
     void DeleteAllItems() const;
+    int FindEmptySlot(int cx, int cy, const CNewUIInventoryCtrl* excluded = nullptr) const;
     CNewUIInventoryCtrl* GetOwnerOf(const CNewUIPickedItem* pPickedItem) const;
 
 private:

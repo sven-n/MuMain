@@ -14,6 +14,7 @@
 #include "npcBreeder.h"
 #include "ZzzOpenData.h"
 #include "DuelMgr.h"
+#include "InventoryUtils.h"
 #include "NewUISystem.h"
 #include "w_CursedTemple.h"
 
@@ -2155,6 +2156,12 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
     UNMIX_TEXT* pUT = COMGEM::m_UnmixTarList.GetSelectedText();
     if (pUT)
     {
+        const ITEM* pItem = FindInventoryItemBySlot(pUT->m_iInvenIdx);
+        if (pItem == nullptr)
+        {
+            return CALLBACK_BREAK;
+        }
+
         COMGEM::SelectFromList(pUT->m_iInvenIdx, pUT->m_cLevel);
 
         SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
@@ -2166,7 +2173,6 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
                 0,
             };
             int iGemLevel = COMGEM::GetUnMixGemLevel() + 1;
-            ITEM* pItem = g_pMyInventory->GetInventoryCtrl()->FindItem(pUT->m_iInvenIdx);
             int nIdx = COMGEM::Check_Jewel(pItem->Type);
             COMGEM::SetGem(nIdx);
             mu_swprintf(strText, GlobalText[1813], GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)],

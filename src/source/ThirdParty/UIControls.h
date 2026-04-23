@@ -6,6 +6,7 @@
 #include "WSclient.h"
 #include "QuestMng.h"
 #include "Core/Timer.h"
+#include <vector>
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #define UIMAX_TEXT_LINE			150
@@ -763,6 +764,7 @@ class CUIRenderTextOriginal : public IUIRenderText
     HBITMAP m_hBitmap;
     BYTE* m_pFontBuffer;
     DWORD m_dwTextColor, m_dwBackColor;
+    std::vector<BYTE> m_tightUploadBuffer;
 public:
     CUIRenderTextOriginal();
     virtual ~CUIRenderTextOriginal();

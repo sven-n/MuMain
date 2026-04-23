@@ -2645,7 +2645,7 @@ CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::OkBtnDown(class CNewU
         }
     }
 
-    if (iSourceIndex != -1)
+    if (iSourceIndex >= MAX_EQUIPMENT_INDEX && iSourceIndex < MAX_MY_INVENTORY_EX_INDEX)
     {
         SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
         g_pNPCShop->SetSellingItem(true);

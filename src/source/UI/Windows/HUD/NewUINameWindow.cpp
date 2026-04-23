@@ -17,6 +17,11 @@
 
 using namespace SEASON3B;
 
+namespace
+{
+constexpr int GROUND_ITEM_LABEL_BUILD_BUDGET_PER_FRAME = 32;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -191,6 +196,8 @@ void SEASON3B::CNewUINameWindow::RenderName()
 
     if (m_bShowItemName || SEASON3B::IsRepeat(VK_MENU))
     {
+        SetGroundItemLabelBuildBudget(GROUND_ITEM_LABEL_BUILD_BUDGET_PER_FRAME);
+
         for (int i = 0; i < MAX_ITEMS; i++)
         {
             OBJECT* o = &Items[i].Object;

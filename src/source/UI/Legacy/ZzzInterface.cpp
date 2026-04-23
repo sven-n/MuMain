@@ -3645,7 +3645,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             SendGetItem = ItemKey;
             SocketClient->ToGameServer()->SendPickupItemRequest(ItemKey);
         }
-        else if (g_pMyInventory->FindEmptySlot(&Items[ItemKey].Item) == -1)
+        else if (g_pMyInventory->FindEmptySlotIncludingExtensions(&Items[ItemKey].Item) == -1)
         {
             wchar_t Text[256];
             mu_swprintf(Text, GlobalText[375]);
@@ -7478,6 +7478,11 @@ void MoveHero()
     if (c->Object.Live == 0)
         return;
 
+    if (c->JumpTime > 0)
+    {
+        return;
+    }
+
     if (LoadingWorld > 0)
     {
         LoadingWorld--;
@@ -9086,7 +9091,7 @@ void RenderCursor()
     }
     else if (((g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY) ||
                g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)) &&
-              g_pMyInventory->GetRepairMode() == SEASON3B::CNewUIMyInventory::REPAIR_MODE_ON) ||
+              g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON) ||
              (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) &&
               g_pNPCShop->GetShopState() == SEASON3B::CNewUINPCShop::SHOP_STATE_REPAIR))
     {

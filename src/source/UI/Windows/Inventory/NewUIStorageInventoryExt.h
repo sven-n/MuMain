@@ -37,6 +37,7 @@ private:
     bool m_bItemAutoMove;
     int m_nBackupMouseX;
     int m_nBackupMouseY;
+    int m_nBackupSourceInvenIndex;
 
 public:
     CNewUIStorageInventoryExt();
@@ -59,6 +60,7 @@ public:
     bool ProcessClosing() const;
     bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const;
     int FindEmptySlot(const ITEM* pItemObj) const;
+    bool ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl = nullptr);
 
     bool IsItemAutoMove() const
     {
@@ -71,7 +73,7 @@ public:
 
     int GetPointedItemIndex() const;
 
-    void SetItemAutoMove(bool bItemAutoMove);
+    void SetItemAutoMove(bool bItemAutoMove, int nSourceInvenIndex = -1);
 
 private:
     void LoadImages() const;

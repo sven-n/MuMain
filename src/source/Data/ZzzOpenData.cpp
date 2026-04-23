@@ -691,6 +691,7 @@ void OpenItems()
 
     gLoadData.AccessModel(MODEL_DRAGON_SOUL_STAFF, L"Data\\Item\\", L"Staff", 10);
     gLoadData.AccessModel(MODEL_DIVINE_STAFF_OF_ARCHANGEL, L"Data\\Item\\", L"Staff", 11);
+    gLoadData.AccessModel(MODEL_DIVINE_STICK_OF_ARCHANGEL, L"Data\\Item\\", L"Archangelus");
     gLoadData.AccessModel(MODEL_STAFF_OF_KUNDUN, L"Data\\Item\\", L"Staff", 12);
 
     for (int i = 14; i <= 20; ++i)
@@ -1350,6 +1351,7 @@ void OpenItemTextures()
     gLoadData.OpenTexture(MODEL_ARMOR_OF_GUARDSMAN, L"Npc\\");
     gLoadData.OpenTexture(MODEL_DIVINE_SWORD_OF_ARCHANGEL, L"Item\\");
     gLoadData.OpenTexture(MODEL_DIVINE_STAFF_OF_ARCHANGEL, L"Item\\");
+    gLoadData.OpenTexture(MODEL_DIVINE_STICK_OF_ARCHANGEL, L"Item\\");
     gLoadData.OpenTexture(MODEL_DIVINE_CB_OF_ARCHANGEL, L"Item\\");
     gLoadData.OpenTexture(MODEL_GREAT_REIGN_CROSSBOW, L"Item\\");
 

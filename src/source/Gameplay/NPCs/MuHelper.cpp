@@ -98,6 +98,7 @@ void CMuHelper::Start()
     m_iComboState = 0;
     m_iCurrentBuffIndex = 0;
     m_iCurrentBuffPartyIndex = 0;
+    m_iCurrentHealPartyIndex = 0;
     m_iCurrentTarget = -1;
     m_iCurrentSkill = (ActionSkillType)m_config.aiSkill[0];
     m_iCurrentItem = MAX_ITEMS;
@@ -225,9 +226,8 @@ void CMuHelper::AddTarget(int iTargetId, bool bIsAttacking)
         _targetsLock.unlock();
     }
 
-    if (m_config.bUseSelfDefense)
+    if (m_config.bUseSelfDefense && IsMonster(pTarget))
     {
-        pTarget->Object.Kind = KIND_MONSTER;
         m_iCurrentTarget = iTargetId;
     }
 }
@@ -264,17 +264,15 @@ int CMuHelper::ComputeDistanceByRange(int iRange)
 
 int CMuHelper::ComputeDistanceFromTarget(CHARACTER* pTarget)
 {
-    POINT posA, posB;
+    const POINT posHero = {Hero->PositionX, Hero->PositionY};
 
-    posA = {Hero->PositionX, Hero->PositionY};
-    posB = {pTarget->PositionX, pTarget->PositionY};
-    int iPrevDistance = ComputeDistanceBetween(posA, posB);
+    const POINT posCurrent = {pTarget->PositionX, pTarget->PositionY};
+    const POINT posNext    = {pTarget->TargetX,   pTarget->TargetY};
 
-    posA = {Hero->PositionX, Hero->PositionY};
-    posB = {pTarget->TargetX, pTarget->TargetX};
-    int iNextDistance = ComputeDistanceBetween(posA, posB);
-
-    return std::min<int>(iPrevDistance, iNextDistance);
+    return std::min(
+        ComputeDistanceBetween(posHero, posCurrent),
+        ComputeDistanceBetween(posHero, posNext)
+    );
 }
 
 int CMuHelper::ComputeDistanceBetween(POINT posA, POINT posB)
@@ -301,6 +299,11 @@ int CMuHelper::GetNearestTarget()
     {
         int iIndex = FindCharacterIndex(iMonsterId);
         CHARACTER* pTarget = &CharactersClient[iIndex];
+
+        if (!IsMonster(pTarget))
+        {
+            continue;
+        }
 
         int iDistance = ComputeDistanceFromTarget(pTarget);
         if (iDistance < iMinDistance)
@@ -329,6 +332,11 @@ int CMuHelper::GetFarthestAttackingTarget()
     {
         int iIndex = FindCharacterIndex(iMonsterId);
         CHARACTER* pTarget = &CharactersClient[iIndex];
+
+        if (!IsMonster(pTarget))
+        {
+            continue;
+        }
 
         int iDistance = ComputeDistanceFromTarget(pTarget);
         if (iDistance > iMaxDistance)
@@ -579,20 +587,24 @@ int CMuHelper::Heal()
     {
         PARTY_t* pMember = &Party[m_iCurrentHealPartyIndex];
         CHARACTER* pChar = g_pPartyManager->GetPartyMemberChar(pMember);
+        int iHealResult = 1;
 
         if (pChar != NULL)
         {
             if (pChar == Hero)
             {
-                return HealSelf(iHealingSkill);
+                iHealResult = HealSelf(iHealingSkill);
             }
             else if (pMember->Map == gMapManager.WorldActive && pMember->stepHP * 10 <= m_config.iHealPartyThreshold &&
                      ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
             {
-                return SimulateSkill(iHealingSkill, true, pChar->Key);
+                iHealResult = SimulateSkill(iHealingSkill, true, pChar->Key);
             }
         }
+
         m_iCurrentHealPartyIndex = (m_iCurrentHealPartyIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
+
+        return iHealResult;
     }
     else
     {
@@ -716,7 +728,7 @@ int CMuHelper::Attack()
     m_iCurrentSkill = SelectAttackSkill();
     if (m_iCurrentSkill > AT_SKILL_UNDEFINED)
     {
-        SimulateAttack(m_iCurrentSkill);
+        return SimulateAttack(m_iCurrentSkill);
     }
 
     return 1;
@@ -837,67 +849,101 @@ int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int i
     g_MovementSkill.m_iSkill = iSkill;
     g_MovementSkill.m_bMagic = true;
 
-    float fSkillDistance = gSkillManager.GetSkillDistance(iSkill, Hero);
+    const float fSkillDistance = gSkillManager.GetSkillDistance(iSkill, Hero);
+    const bool bSelfPositionSkill = IsSelfPositionSkill(iSkill);
 
     if (bTargetRequired)
     {
-        if (iTarget == -1)
+        if (bSelfPositionSkill)
         {
-            return 0;
-        }
+            TargetX = Hero->PositionX;
+            TargetY = Hero->PositionY;
 
-        SelectedCharacter = FindCharacterIndex(iTarget);
-        if (SelectedCharacter == MAX_CHARACTERS_CLIENT)
-        {
-            DeleteTarget(iTarget);
-            return 0;
-        }
+            g_MovementSkill.m_iTarget = -1;
 
-        CHARACTER* pTarget = &CharactersClient[SelectedCharacter];
-        if (pTarget->Dead > 0)
-        {
-            DeleteTarget(iTarget);
-            return 0;
-        }
-
-        g_MovementSkill.m_iTarget = SelectedCharacter;
-
-        TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
-        TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
-
-        PATH_t tempPath;
-        bool bHasPath = PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &tempPath,
-                                     m_iHuntingDistance + fSkillDistance);
-        bool bTargetNear = CheckTile(Hero, &Hero->Object, fSkillDistance);
-        bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
-
-        // target not reachable, ignore it
-        if (!bHasPath)
-        {
-            DeleteTarget(iTarget);
-            return 0;
-        }
-
-        // target is not near or the path is obstructed by a wall, move closer
-        if (!bTargetNear || !bNoWall)
-        {
-            Hero->Path.Lock.lock();
-
-            // Limit movement to 2 steps at a time
-            int pathNum = std::min<int>(tempPath.PathNum, 2);
-            for (int i = 0; i < pathNum; i++)
+            // Check if current target is still valid (exists and alive)
+            if (iTarget != -1)
             {
-                Hero->Path.PathX[i] = tempPath.PathX[i];
-                Hero->Path.PathY[i] = tempPath.PathY[i];
+                const int iCharIndex = FindCharacterIndex(iTarget);
+                if (iCharIndex != MAX_CHARACTERS_CLIENT)
+                {
+                    CHARACTER* pCurrentTarget = &CharactersClient[iCharIndex];
+                    if (pCurrentTarget->Dead > 0 || !IsMonster(pCurrentTarget))
+                    {
+                        DeleteTarget(iTarget);
+                        return 0;
+                    }
+                }
+                else
+                {
+                    DeleteTarget(iTarget);
+                    return 0;
+                }
             }
-            Hero->Path.PathNum = pathNum;
-            Hero->Path.CurrentPath = 0;
-            Hero->Path.CurrentPathFloat = 0;
+        }
+        else
+        {
+            if (iTarget == -1)
+            {
+                return 0;
+            }
 
-            Hero->Path.Lock.unlock();
+            const int iCharIndex = FindCharacterIndex(iTarget);
+            if (iCharIndex == MAX_CHARACTERS_CLIENT)
+            {
+                DeleteTarget(iTarget);
+                return 0;
+            }
 
-            SendMove(Hero, &Hero->Object);
-            return 0;
+            SelectedCharacter = iCharIndex;
+
+            CHARACTER* pTarget = &CharactersClient[iCharIndex];
+            if (pTarget->Dead > 0)
+            {
+                DeleteTarget(iTarget);
+                return 0;
+            }
+
+            g_MovementSkill.m_iTarget = iCharIndex;
+
+            TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
+            TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
+
+            PATH_t tempPath;
+            bool bHasPath = PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &tempPath,
+                                         m_iHuntingDistance + fSkillDistance);
+
+            // Target not reachable, ignore it
+            if (!bHasPath)
+            {
+                DeleteTarget(iTarget);
+                return 0;
+            }
+
+            bool bTargetNear = CheckTile(Hero, &Hero->Object, fSkillDistance);
+            bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
+
+            // Target is not near or the path is obstructed by a wall, move closer
+            if (!bTargetNear || !bNoWall)
+            {
+                Hero->Path.Lock.lock();
+
+                // Limit movement to 2 steps at a time
+                int pathNum = std::min<int>(tempPath.PathNum, 2);
+                for (int i = 0; i < pathNum; i++)
+                {
+                    Hero->Path.PathX[i] = tempPath.PathX[i];
+                    Hero->Path.PathY[i] = tempPath.PathY[i];
+                }
+                Hero->Path.PathNum = pathNum;
+                Hero->Path.CurrentPath = 0;
+                Hero->Path.CurrentPathFloat = 0;
+
+                Hero->Path.Lock.unlock();
+
+                SendMove(Hero, &Hero->Object);
+                return 0;
+            }
         }
     }
     else
@@ -907,7 +953,7 @@ int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int i
     }
 
     int iSkillResult = ExecuteSkill(Hero, iSkill, fSkillDistance);
-    if (iSkillResult == -1)
+    if (iSkillResult == -1 && iTarget != -1)
     {
         DeleteTarget(iTarget);
     }
@@ -982,6 +1028,20 @@ ActionSkillType CMuHelper::GetHealingSkill()
     return AT_SKILL_UNDEFINED;
 }
 
+// Matches AttackWizard() behavior in ZzzInterface.cpp for these skill IDs.
+bool CMuHelper::IsSelfPositionSkill(ActionSkillType iSkill)
+{
+    return (
+        iSkill == AT_SKILL_NOVA_BEGIN ||
+        iSkill == AT_SKILL_NOVA ||
+        iSkill == AT_SKILL_HELL_FIRE ||
+        iSkill == AT_SKILL_HELL_FIRE_STR ||
+        iSkill == AT_SKILL_INFERNO ||
+        iSkill == AT_SKILL_INFERNO_STR ||
+        iSkill == AT_SKILL_INFERNO_STR_MG
+    );
+}
+
 ActionSkillType CMuHelper::GetDrainLifeSkill()
 {
     std::vector<ActionSkillType> aiDrainLifeSkills = {AT_SKILL_ALICE_DRAINLIFE, AT_SKILL_ALICE_DRAINLIFE_STR};
@@ -1036,8 +1096,12 @@ int CMuHelper::ObtainItem()
         }
         else
         {
-            SocketClient->ToGameServer()->SendPickupItemRequest(m_iCurrentItem);
-            DeleteItem(m_iCurrentItem);
+            if (SendGetItem == -1)
+            {
+                SendGetItem = m_iCurrentItem;
+                SocketClient->ToGameServer()->SendPickupItemRequest(m_iCurrentItem);
+                DeleteItem(m_iCurrentItem);
+            }
         }
     }
 

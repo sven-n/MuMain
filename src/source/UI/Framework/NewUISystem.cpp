@@ -8,6 +8,37 @@
 
 using namespace SEASON3B;
 
+namespace
+{
+    constexpr int kLayoutBaseX = 640;
+    constexpr int kLayoutPanelWidth = 190;
+
+    constexpr int PanelColumnX(int columns)
+    {
+        return kLayoutBaseX - (kLayoutPanelWidth * columns);
+    }
+
+    bool IsHeroPositionLayoutInterface(DWORD dwKey)
+    {
+        switch (dwKey)
+        {
+        case INTERFACE_INVENTORY:
+        case INTERFACE_INVENTORY_EXT:
+        case INTERFACE_STORAGE:
+        case INTERFACE_STORAGE_EXT:
+        case INTERFACE_CHARACTER:
+        case INTERFACE_NPCSHOP:
+        case INTERFACE_MIXINVENTORY:
+        case INTERFACE_TRADE:
+        case INTERFACE_MYSHOP_INVENTORY:
+        case INTERFACE_PURCHASESHOP_INVENTORY:
+            return true;
+        default:
+            return false;
+        }
+    }
+}
+
 // cppcheck-suppress uninitMemberVar
 CNewUISystem::CNewUISystem()
 {
@@ -179,11 +210,11 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewMyInventory = new CNewUIMyInventory;
-    if (false == m_pNewMyInventory->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640 - 190, 0))
+    if (false == m_pNewMyInventory->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0))
         return false;
 
     m_pNewMyInventoryExt = new CNewUIInventoryExtension;
-    if (false == m_pNewMyInventoryExt->Create(m_pNewUIMng, 640 - 190 * 2, 0))
+    if (false == m_pNewMyInventoryExt->Create(m_pNewUIMng, PanelColumnX(2), 0))
         return false;
 
     m_pNewNPCShop = new CNewUINPCShop;
@@ -191,7 +222,7 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewPetInfoWindow = new CNewUIPetInfoWindow;
-    if (false == m_pNewPetInfoWindow->Create(m_pNewUIMng, 640 - (190 * 2), 0))
+    if (false == m_pNewPetInfoWindow->Create(m_pNewUIMng, PanelColumnX(2), 0))
         return false;
 
     m_pNewMixInventory = new CNewUIMixInventory;
@@ -199,19 +230,19 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewCastleWindow = new CNewUICastleWindow;
-    if (m_pNewCastleWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewCastleWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewGuardWindow = new CNewUIGuardWindow;
-    if (m_pNewGuardWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewGuardWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewGatemanWindow = new CNewUIGatemanWindow;
-    if (m_pNewGatemanWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewGatemanWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewGateSwitchWindow = new CNewUIGateSwitchWindow;
-    if (m_pNewGateSwitchWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewGateSwitchWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewStorageInventory = new CNewUIStorageInventory;
@@ -223,33 +254,33 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewGuildInfoWindow = new CNewUIGuildInfoWindow;
-    if (m_pNewGuildInfoWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewGuildInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewGuildMakeWindow = new CNewUIGuildMakeWindow;
-    if (m_pNewGuildMakeWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewGuildMakeWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     CreatePersonalItemTable();
 
     m_pNewMyShopInventory = new CNewUIMyShopInventory;
-    if (m_pNewMyShopInventory->Create(m_pNewUIMng, 640 - 190 * 2, 0) == false)
+    if (m_pNewMyShopInventory->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
     m_pNewPurchaseShopInventory = new CNewUIPurchaseShopInventory;
-    if (m_pNewPurchaseShopInventory->Create(m_pNewUIMng, 640 - 190 * 2, 0) == false)
+    if (m_pNewPurchaseShopInventory->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
     m_pNewCharacterInfoWindow = new CNewUICharacterInfoWindow;
-    if (m_pNewCharacterInfoWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewCharacterInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewMyQuestInfoWindow = new CNewUIMyQuestInfoWindow;
-    if (m_pNewMyQuestInfoWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewMyQuestInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewPartyInfoWindow = new CNewUIPartyInfoWindow;
-    if (m_pNewPartyInfoWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewPartyInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewPartyListWindow = new CNewUIPartyListWindow;
@@ -257,15 +288,15 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewNPCQuest = new CNewUINPCQuest;
-    if (m_pNewNPCQuest->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640 - 190, 0) == false)
+    if (m_pNewNPCQuest->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewEnterBloodCastle = new CNewUIEnterBloodCastle;
-    if (m_pNewEnterBloodCastle->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewEnterBloodCastle->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewEnterDevilSquare = new CNewUIEnterDevilSquare;
-    if (m_pNewEnterDevilSquare->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewEnterDevilSquare->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewBloodCastle = new CNewUIBloodCastle;
@@ -297,11 +328,11 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewCommandWindow = new CNewUICommandWindow;
-    if (m_pNewCommandWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewCommandWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewCatapultWindow = new CNewUICatapultWindow;
-    if (m_pNewCatapultWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewCatapultWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
     {
         return false;
     }
@@ -404,23 +435,23 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewGoldBowman = new CNewUIGoldBowmanWindow;
-    if (m_pNewGoldBowman->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewGoldBowman->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewGoldBowmanLena = new CNewUIGoldBowmanLena;
-    if (m_pNewGoldBowmanLena->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewGoldBowmanLena->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewLuckyCoinRegistration = new CNewUIRegistrationLuckyCoin;
-    if (m_pNewLuckyCoinRegistration->Create(m_pNewUIMng, 640 - (190 * 2), 0) == false)
+    if (m_pNewLuckyCoinRegistration->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
     m_pNewExchangeLuckyCoinWindow = new CNewUIExchangeLuckyCoin;
-    if (m_pNewExchangeLuckyCoinWindow->Create(m_pNewUIMng, 640 - (190 * 2), 0) == false)
+    if (m_pNewExchangeLuckyCoinWindow->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
     m_pNewDuelWatchWindow = new CNewUIDuelWatchWindow;
-    if (m_pNewDuelWatchWindow->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewDuelWatchWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewDuelWatchMainFrameWindow = new CNewUIDuelWatchMainFrameWindow;
@@ -438,7 +469,7 @@ bool CNewUISystem::LoadMainSceneInterface()
 #endif // PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
     m_pNewDoppelGangerWindow = new CNewUIDoppelGangerWindow;
-    if (m_pNewDoppelGangerWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640 - 190, 0) == false)
+    if (m_pNewDoppelGangerWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewDoppelGangerFrame = new CNewUIDoppelGangerFrame;
@@ -446,15 +477,15 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewNPCDialogue = new CNewUINPCDialogue;
-    if (m_pNewNPCDialogue->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewNPCDialogue->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewQuestProgress = new CNewUIQuestProgress;
-    if (m_pNewQuestProgress->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewQuestProgress->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewQuestProgressByEtc = new CNewUIQuestProgressByEtc;
-    if (m_pNewQuestProgressByEtc->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewQuestProgressByEtc->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewEmpireGuardianNPC = new CNewUIEmpireGuardianNPC;
@@ -476,7 +507,7 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewUnitedMarketPlaceWindow = new CNewUIUnitedMarketPlaceWindow;
-    if (m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 640 - 190, 0) == false)
+    if (m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewUILuckyItemWnd = new CNewUILuckyItemWnd;
@@ -484,11 +515,11 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 
     m_pNewUIMuHelper = new CNewUIMuHelper;
-    if (m_pNewUIMuHelper->Create(m_pNewUIMng, 640 - 190, 0) == false)
+    if (m_pNewUIMuHelper->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     m_pNewUIMuHelperExt = new CNewUIMuHelperExt;
-    if (m_pNewUIMuHelperExt->Create(m_pNewUIMng, 640 - 380, 0) == false)
+    if (m_pNewUIMuHelperExt->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
     m_pNewUIMuHelperSkillList = new CNewUIMuHelperSkillList;
@@ -644,7 +675,7 @@ void CNewUISystem::Show(DWORD dwKey)
 
         if (IsVisible(INTERFACE_CHARACTER))
         {
-            g_pMyInventory->SetPos(640 - 190 * 2, 0);
+            g_pMyInventory->SetPos(PanelColumnX(2), 0);
         }
         if (IsVisible(INTERFACE_MYQUEST))
         {
@@ -661,13 +692,13 @@ void CNewUISystem::Show(DWORD dwKey)
 
         if (IsVisible(INTERFACE_STORAGE))
         {
-            g_pStorageInventory->SetPos(640 - 190 * 3, 0);
+            g_pStorageInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
         }
 
         if (IsVisible(INTERFACE_MYSHOP_INVENTORY))
         {
-            g_pMyShopInventory->SetPos(640 - 190 * 3, 0);
+            g_pMyShopInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
             if (IsVisible(INTERFACE_MYQUEST))
             {
@@ -689,17 +720,17 @@ void CNewUISystem::Show(DWORD dwKey)
         }
         if (IsVisible(INTERFACE_NPCSHOP))
         {
-            g_pNPCShop->SetPos(640 - 190 * 3, 0);
+            g_pNPCShop->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
         }
         if (IsVisible(INTERFACE_MIXINVENTORY))
         {
-            g_pMixInventory->SetPos(640 - 190 * 3, 0);
+            g_pMixInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
         }
         if (IsVisible(INTERFACE_TRADE))
         {
-            g_pTrade->SetPos(640 - 190 * 3, 0);
+            g_pTrade->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
         }
     }
@@ -711,16 +742,16 @@ void CNewUISystem::Show(DWORD dwKey)
 
         if (IsVisible(INTERFACE_INVENTORY))
         {
-            g_pMyInventory->SetPos(640 - 190 * 2, 0);
+            g_pMyInventory->SetPos(PanelColumnX(2), 0);
             if (IsVisible(INTERFACE_INVENTORY_EXT))
             {
-                g_pMyInventory->SetPos(640 - 190 * 3, 0);
+                g_pMyInventory->SetPos(PanelColumnX(3), 0);
                 Hide(INTERFACE_HERO_POSITION_INFO);
             }
         }
         else if (IsVisible(INTERFACE_MYQUEST))
         {
-            g_pMyQuestInfoWindow->SetPos(640 - 190 * 2, 0);
+            g_pMyQuestInfoWindow->SetPos(PanelColumnX(2), 0);
         }
         g_pCharacterInfoWindow->OpenningProcess();
     }
@@ -747,7 +778,7 @@ void CNewUISystem::Show(DWORD dwKey)
 
         if (IsVisible(INTERFACE_CHARACTER))
         {
-            g_pMyQuestInfoWindow->SetPos(640 - 190 * 2, 0);
+            g_pMyQuestInfoWindow->SetPos(PanelColumnX(2), 0);
         }
         if (IsVisible(INTERFACE_INVENTORY))
         {
@@ -771,6 +802,7 @@ void CNewUISystem::Show(DWORD dwKey)
         HideAllGroupA();
         g_pNPCShop->OpenningProcess();
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY);
+        g_pNPCShop->SetPos(PanelColumnX(2), 0);
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
     }
     else if (dwKey == INTERFACE_STORAGE)
@@ -781,12 +813,12 @@ void CNewUISystem::Show(DWORD dwKey)
         if (isExtendedInventoryOpen)
         {
             Show(INTERFACE_INVENTORY_EXT);
-            g_pStorageInventory->SetPos(640 - 190 * 3, 0);
+            g_pStorageInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
         }
         else
         {
-            g_pStorageInventory->SetPos(640 - 190 * 2, 0);
+            g_pStorageInventory->SetPos(PanelColumnX(2), 0);
             Show(INTERFACE_HERO_POSITION_INFO);
         }
 
@@ -800,8 +832,8 @@ void CNewUISystem::Show(DWORD dwKey)
         }
 
         Hide(INTERFACE_HERO_POSITION_INFO);
-        g_pStorageInventory->SetPos(640 - 190 * 2, 0);
-        g_pStorageInventoryExt->SetPos(640 - 190 * 3, 0);
+        g_pStorageInventory->SetPos(PanelColumnX(2), 0);
+        g_pStorageInventoryExt->SetPos(PanelColumnX(3), 0);
 
         m_pNewUIMng->ShowInterface(INTERFACE_STORAGE_EXT);
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
@@ -814,12 +846,12 @@ void CNewUISystem::Show(DWORD dwKey)
         if (isExtendedInventoryOpen)
         {
             Show(INTERFACE_INVENTORY_EXT);
-            g_pMyShopInventory->SetPos(640 - 190 * 3, 0);
+            g_pMyShopInventory->SetPos(PanelColumnX(3), 0);
             Hide(INTERFACE_HERO_POSITION_INFO);
         }
         else
         {
-            g_pMyShopInventory->SetPos(640 - 190 * 2, 0);
+            g_pMyShopInventory->SetPos(PanelColumnX(2), 0);
             Show(INTERFACE_HERO_POSITION_INFO);
         }
 
@@ -1055,10 +1087,10 @@ void CNewUISystem::Show(DWORD dwKey)
         if (IsVisible(INTERFACE_MYQUEST))
         {
             Hide(INTERFACE_MYQUEST);
-            g_pQuestProgressByEtc->SetPos(640 - 190, 0);
+            g_pQuestProgressByEtc->SetPos(PanelColumnX(1), 0);
         }
         if (IsVisible(INTERFACE_CHARACTER))
-            g_pQuestProgressByEtc->SetPos(640 - 190 * 2, 0);
+            g_pQuestProgressByEtc->SetPos(PanelColumnX(2), 0);
         g_pQuestProgressByEtc->ProcessOpening();
     }
     else if (dwKey == INTERFACE_EMPIREGUARDIAN_NPC)
@@ -1077,7 +1109,7 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         HideAllGroupA();
         g_pNewUIGensRanking->OpenningProcess();
-        g_pNewUIGensRanking->SetPos(640 - 190, 0);
+        g_pNewUIGensRanking->SetPos(PanelColumnX(1), 0);
     }
     else if (dwKey == INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
     {
@@ -1095,6 +1127,8 @@ void CNewUISystem::Show(DWORD dwKey)
     }
 
     m_pNewUIMng->ShowInterface(dwKey);
+
+    UpdateHeroPositionInfoVisibilityForLayoutChange(dwKey);
 
     int iScreenWidth = GetScreenWidth();
     m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
@@ -1119,11 +1153,11 @@ void CNewUISystem::Hide(DWORD dwKey)
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_CHAINFO, false);
         if (IsVisible(INTERFACE_MYQUEST))
         {
-            g_pMyQuestInfoWindow->SetPos(640 - 190, 0);
+            g_pMyQuestInfoWindow->SetPos(PanelColumnX(1), 0);
         }
         if (IsVisible((INTERFACE_INVENTORY)))
         {
-            g_pMyInventory->SetPos(640 - 190, 0);
+            g_pMyInventory->SetPos(PanelColumnX(1), 0);
         }
         if (IsVisible((INTERFACE_PET)))
         {
@@ -1131,12 +1165,12 @@ void CNewUISystem::Hide(DWORD dwKey)
         }
         if (IsVisible((INTERFACE_QUEST_PROGRESS_ETC)))
         {
-            g_pQuestProgressByEtc->SetPos(640 - 190, 0);
+            g_pQuestProgressByEtc->SetPos(PanelColumnX(1), 0);
         }
     }
     else if (dwKey == INTERFACE_INVENTORY_EXT)
     {
-        constexpr auto secondColumnX = 640 - 190 * 2;
+        constexpr auto secondColumnX = PanelColumnX(2);
         if (IsVisible(INTERFACE_MYSHOP_INVENTORY))
         {
             g_pMyShopInventory->SetPos(secondColumnX, 0);
@@ -1170,7 +1204,7 @@ void CNewUISystem::Hide(DWORD dwKey)
 
         if (IsVisible(INTERFACE_INVENTORY_EXT))
         {
-            m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY_EXT, false);
+            Hide(INTERFACE_INVENTORY_EXT);
         }
 
         if (IsVisible(INTERFACE_MIXINVENTORY))
@@ -1231,7 +1265,7 @@ void CNewUISystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_LUCKYITEMWND, false);
         }
 
-        g_pMyInventory->SetPos(640 - 190, 0);
+        g_pMyInventory->SetPos(PanelColumnX(1), 0);
         g_pMyInventory->ClosingProcess();
     }
     else if (dwKey == INTERFACE_MIXINVENTORY)
@@ -1246,6 +1280,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_NPCSHOP)
     {
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         g_pNPCShop->ClosingProcess();
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
@@ -1260,7 +1298,7 @@ void CNewUISystem::Hide(DWORD dwKey)
         {
             g_pPurchaseShopInventory->ClosingProcess();
         }
-        g_pMyInventory->SetPos(640 - 190, 0);
+        g_pMyInventory->SetPos(PanelColumnX(1), 0);
         Show(INTERFACE_HERO_POSITION_INFO);
     }
     else if (dwKey == INTERFACE_STORAGE)
@@ -1269,7 +1307,10 @@ void CNewUISystem::Hide(DWORD dwKey)
         if (!g_pStorageInventory->ProcessClosing())
             return;
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
-        m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY_EXT, false);
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
         Show(INTERFACE_HERO_POSITION_INFO);
     }
@@ -1289,7 +1330,7 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         m_pNewMyQuestInfoWindow->ClosingProcess();
 
-        m_pNewMyQuestInfoWindow->SetPos(640 - 190, 0);
+        m_pNewMyQuestInfoWindow->SetPos(PanelColumnX(1), 0);
     }
     else if (dwKey == INTERFACE_SENATUS)
     {
@@ -1325,6 +1366,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_TRADE)
     {
+        if (IsVisible(INTERFACE_INVENTORY_EXT))
+        {
+            Hide(INTERFACE_INVENTORY_EXT);
+        }
         g_pTrade->ProcessClosing();
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
@@ -1510,6 +1555,8 @@ void CNewUISystem::Hide(DWORD dwKey)
 
     m_pNewUIMng->ShowInterface(dwKey, false);
 
+    UpdateHeroPositionInfoVisibilityForLayoutChange(dwKey);
+
     int iScreenWidth = GetScreenWidth();
     m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
     m_pNewBuffWindow->SetPos(iScreenWidth);
@@ -1691,6 +1738,49 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
             m_pNewUIMng->ShowInterface(dwGroupC[i], false);
         }
     }
+}
+
+void CNewUISystem::UpdateHeroPositionInfoVisibilityForLayoutChange(DWORD dwKey)
+{
+    if (IsHeroPositionLayoutInterface(dwKey))
+    {
+        SyncHeroPositionInfoVisibility();
+    }
+}
+
+void CNewUISystem::SyncHeroPositionInfoVisibility()
+{
+    if (!m_pNewUIMng)
+    {
+        return;
+    }
+
+    m_pNewUIMng->ShowInterface(INTERFACE_HERO_POSITION_INFO, !ShouldHideHeroPositionInfo());
+}
+
+bool CNewUISystem::ShouldHideHeroPositionInfo()
+{
+    if (!m_pNewUIMng)
+    {
+        return false;
+    }
+
+    if (IsVisible(INTERFACE_STORAGE_EXT))
+    {
+        return true;
+    }
+
+    if (!IsVisible(INTERFACE_INVENTORY_EXT))
+    {
+        return false;
+    }
+
+    return IsVisible(INTERFACE_CHARACTER)
+        || IsVisible(INTERFACE_STORAGE)
+        || IsVisible(INTERFACE_MYSHOP_INVENTORY)
+        || IsVisible(INTERFACE_NPCSHOP)
+        || IsVisible(INTERFACE_MIXINVENTORY)
+        || IsVisible(INTERFACE_TRADE);
 }
 
 void CNewUISystem::Enable(DWORD dwKey)

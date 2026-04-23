@@ -1070,7 +1070,6 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                 break;
             case BITMAP_JOINT_LASER + 1:
                 o->bTileMapping = true;
-                break;
             case BITMAP_BLUR + 1:
                 o->Scale = 60.f;
                 o->Velocity = 40.f;
@@ -4763,10 +4762,9 @@ void MoveJoint(JOINT* o, int iIndex)
                 Vector(Luminosity * 0.f, Luminosity * 0.1f, Luminosity * 0.2f, Light);
             }
             AddTerrainLight(o->Position[0], o->Position[1], Light, 2, PrimaryTerrainLight);
-            Vector(0.f, -o->Velocity * FPS_ANIMATION_FACTOR, 0.f, Position);
+            Vector(0.f, -o->Velocity, 0.f, Position);
             VectorRotate(Position, Matrix, p);
-            // cppcheck-suppress unknownMacro
-            VectorScale(p, FPS_ANIMATION_FACTOR, p) VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
+            VectorAddScaled(o->Position, p, o->Position, FPS_ANIMATION_FACTOR);
         }
         break;
     case BITMAP_JOINT_THUNDER:
