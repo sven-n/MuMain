@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "_struct.h"
+#include "mu_struct.h"
 
 namespace SEASON3B
 {
