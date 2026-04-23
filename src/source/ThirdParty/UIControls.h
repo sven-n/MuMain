@@ -876,6 +876,29 @@ void SaveIMEStatus();
 void RestoreIMEStatus();
 void CheckTextInputBoxIME(int iMode);
 
+// Declarative configuration for a CUITextInputBox. Replaces the hand-written
+// SetState + SetOption + SetBackColor + SetTextLimit + SetSize + SetPosition +
+// SetFont ritual that every call site currently repeats. All coordinates (pos,
+// size) are in DESIGN UNITS (640x480 virtual space); Configure forwards them
+// to the existing setters without DPI conversion, preserving the unit
+// convention the individual setters already use.
+struct InputBoxConfig
+{
+    POINT pos = { INT_MIN, INT_MIN };          // {INT_MIN,...} = keep current
+    SIZE size = { 0, 0 };                      // {0,0} = keep current
+    int textLimit = MAX_TEXT_LENGTH;
+    DWORD options = UIOPTION_NULL;
+    bool password = false;
+    BYTE textAlpha = 255;
+    BYTE textR = 0, textG = 0, textB = 0;
+    BYTE backAlpha = 0;
+    BYTE backR = 0, backG = 0, backB = 0;
+    BYTE selectAlpha = 255;
+    BYTE selectR = 255, selectG = 255, selectB = 255;
+    HFONT font = nullptr;                      // nullptr = keep current
+    int state = UISTATE_NORMAL;
+};
+
 class CUITextInputBox : public CUIControl
 {
 public:
@@ -906,6 +929,16 @@ public:
     // own configuration — otherwise leftover text, options, or focus from the
     // prior consumer leak into the next prompt.
     virtual void Reset();
+
+    // Apply every field of an InputBoxConfig in the correct internal order.
+    // Configure does NOT call Init(); the caller must Init() once before the
+    // first Configure.
+    virtual void Configure(const InputBoxConfig& cfg);
+
+    // Runtime toggle for password masking — needed so one underlying box can
+    // serve both plaintext and password prompts (precondition for Story 7-9-12
+    // collapsing the two singletons behind SinglePrompt::Acquire).
+    virtual void SetIsPassword(bool bIsPassword) { m_bPasswordInput = bIsPassword ? TRUE : FALSE; }
 
     HWND GetHandle() { return m_hEditWnd; }
     HWND GetParentHandle() { return m_hParentWnd; }

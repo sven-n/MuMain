@@ -247,10 +247,9 @@ void CCharMakeWin::Show(bool bShow)
         InputTextMax[0] = MAX_USERNAME_SIZE;
         if (g_iChatInputType == 1)
         {
-            g_pSingleTextInputBox->SetState(UISTATE_NORMAL);
-            g_pSingleTextInputBox->SetOption(UIOPTION_NULL);
-            g_pSingleTextInputBox->SetBackColor(0, 0, 0, 0);
-            g_pSingleTextInputBox->SetTextLimit(10);
+            g_pSingleTextInputBox->Configure({
+                .textLimit = 10,
+            });
             g_pSingleTextInputBox->GiveFocus();
         }
     }

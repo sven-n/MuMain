@@ -3725,6 +3725,41 @@ void CUITextInputBox::Reset()
     m_bLock = FALSE;
 }
 
+void CUITextInputBox::Configure(const InputBoxConfig& cfg)
+{
+    // Order rationale:
+    //   1. Font first so any subsequent metric-dependent setter sees the right font.
+    //   2. Size before position — SetSize reallocates the backing bitmap; doing it
+    //      after position would leave a frame where the box renders at the old size
+    //      at the new coords.
+    //   3. Password flag before text limit — keeps ordering stable if masking ever
+    //      affects the effective limit.
+    //   4. Colors + option bits before state — UIOPTION_PAINTBACK must be set before
+    //      the first frame triggered by State = NORMAL, otherwise frame zero draws a
+    //      black background.
+    //   5. State last — transitioning to UISTATE_NORMAL can trigger focus/render
+    //      side effects that assume everything else is already in place.
+    if (cfg.font != nullptr)
+    {
+        SetFont(cfg.font);
+    }
+    if (cfg.size.cx > 0 && cfg.size.cy > 0)
+    {
+        SetSize(cfg.size.cx, cfg.size.cy);
+    }
+    if (cfg.pos.x != INT_MIN || cfg.pos.y != INT_MIN)
+    {
+        SetPosition(cfg.pos.x, cfg.pos.y);
+    }
+    SetIsPassword(cfg.password);
+    SetTextLimit(cfg.textLimit);
+    SetOption(cfg.options);
+    SetTextColor(cfg.textAlpha, cfg.textR, cfg.textG, cfg.textB);
+    SetBackColor(cfg.backAlpha, cfg.backR, cfg.backG, cfg.backB);
+    SetSelectBackColor(cfg.selectAlpha, cfg.selectR, cfg.selectG, cfg.selectB);
+    SetState(cfg.state);
+}
+
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
 {
     if (iWidth == 0 || iHeight == 0) return;

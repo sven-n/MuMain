@@ -346,12 +346,11 @@ void CUIGuildMaster::RenderCreateGuild()
 
     if (g_iChatInputType == 1)
     {
-        g_pSingleTextInputBox->SetState(UISTATE_NORMAL);
-        g_pSingleTextInputBox->SetOption(UIOPTION_NULL);
-        g_pSingleTextInputBox->SetBackColor(0, 0, 0, 0);
-        g_pSingleTextInputBox->SetTextLimit(8);
-        g_pSingleTextInputBox->SetSize(70, 14);
-        g_pSingleTextInputBox->SetPosition(ptOrigin.x + 38, ptOrigin.y);
+        g_pSingleTextInputBox->Configure({
+            .pos = {ptOrigin.x + 38, ptOrigin.y},
+            .size = {70, 14},
+            .textLimit = 8,
+        });
         g_pSingleTextInputBox->GiveFocus();
         g_pSingleTextInputBox->DoAction();
         g_pSingleTextInputBox->Render();
