@@ -967,33 +967,45 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                         SetItemColorState(pItem);
                     }
 
-                    if (pItem->byColorState == ITEM_COLOR_NORMAL)
+                    // Durability / trade warning tint for the slot — restored from
+                    // glColor4f() calls stripped in 95b86aae. Without these the
+                    // slot rendered as the RenderColor default (semi-transparent
+                    // black), so yellow/orange/red durability warnings that tell
+                    // the player to repair gear were invisible.
+                    unsigned int tintARGB = 0x99508080u; // NORMAL: translucent teal
+                    if (pItem->byColorState == ITEM_COLOR_DURABILITY_50)
                     {
-                    }
-                    else if (pItem->byColorState == ITEM_COLOR_DURABILITY_50)
-                    {
+                        tintARGB = 0x66FFFF00u; // yellow
                     }
                     else if (pItem->byColorState == ITEM_COLOR_DURABILITY_70)
                     {
+                        tintARGB = 0x66FFA800u; // amber
                     }
                     else if (pItem->byColorState == ITEM_COLOR_DURABILITY_80)
                     {
+                        tintARGB = 0x66FF5400u; // orange
                     }
                     else if (pItem->byColorState == ITEM_COLOR_DURABILITY_100)
                     {
+                        tintARGB = 0x66FF0000u; // red — broken
                     }
                     else if (pItem->byColorState == ITEM_COLOR_TRADE_WARNING)
                     {
+                        tintARGB = 0x66FF331Au; // red-orange — not tradeable
                     }
+
+                    RenderColorQuadARGB(m_Pos.x + (x * INVENTORY_SQUARE_WIDTH),
+                                        m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT), INVENTORY_SQUARE_WIDTH,
+                                        INVENTORY_SQUARE_HEIGHT, tintARGB);
                 }
                 else
                 {
                     this->ClearSlotKey(slotKey);
                     this->RequestInventoryRefresh();
+                    RenderColor(m_Pos.x + (x * INVENTORY_SQUARE_WIDTH), m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT),
+                                INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
                 }
 
-                RenderColor(m_Pos.x + (x * INVENTORY_SQUARE_WIDTH), m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT),
-                            INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
                 EndRenderColor();
             }
 
