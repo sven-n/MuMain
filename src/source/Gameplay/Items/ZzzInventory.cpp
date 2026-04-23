@@ -7454,7 +7454,7 @@ void SetDescriptorOrangeTextColor(GroundItemLabelDescriptor& descriptor)
 template <size_t BufferSize, typename... Args>
 void FormatGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* format, Args... args)
 {
-    _snwprintf_s(buffer, BufferSize, _TRUNCATE, format, args...);
+    mu_swprintf_s(buffer, BufferSize, format, args...);
 }
 
 template <size_t BufferSize>
@@ -7472,7 +7472,7 @@ void AppendGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* form
         return;
     }
 
-    _snwprintf_s(buffer + currentLength, BufferSize - currentLength, _TRUNCATE, format, args...);
+    mu_swprintf_s(buffer + currentLength, BufferSize - currentLength, format, args...);
 }
 
 GroundItemLabelCacheKey BuildGroundItemLabelCacheKey(OBJECT* o, ITEM* ip)
@@ -7511,10 +7511,14 @@ int GetNextPowerOfTwo(int value)
 
 void DeleteGroundItemLabelTexture(GLuint textureId)
 {
+#ifndef MU_ENABLE_SDL3
     if (textureId != 0)
     {
         glDeleteTextures(1, &textureId);
     }
+#else
+    (void)textureId;
+#endif
 }
 
 void PruneGroundItemLabelCache(DWORD currentTick)
@@ -7945,6 +7949,13 @@ void ApplyGroundItemLabelDescriptor(const GroundItemLabelDescriptor& descriptor)
 
 bool CreateGroundItemLabelTexture(const GroundItemLabelDescriptor& descriptor, GroundItemLabelCacheEntry& cacheEntry)
 {
+#ifdef MU_ENABLE_SDL3
+    // SDL3/cross-platform builds skip the OpenGL+GDI texture cache;
+    // callers fall back to direct g_pRenderText->RenderText().
+    (void)descriptor;
+    (void)cacheEntry;
+    return false;
+#else
     HDC fontDc = g_pRenderText->GetFontDC();
     BYTE* fontBuffer = g_pRenderText->GetFontBuffer();
     if (fontDc == nullptr || fontBuffer == nullptr || descriptor.Name[0] == L'\0')
@@ -8030,10 +8041,15 @@ bool CreateGroundItemLabelTexture(const GroundItemLabelDescriptor& descriptor, G
     cacheEntry.TextureHeight = textureHeight;
     cacheEntry.BgColor = descriptor.BgColor;
     return true;
+#endif
 }
 
 void RenderGroundItemLabelTexture(OBJECT* o, const GroundItemLabelCacheEntry& cacheEntry)
 {
+#ifdef MU_ENABLE_SDL3
+    (void)o;
+    (void)cacheEntry;
+#else
     if (cacheEntry.TextureId == 0)
     {
         return;
@@ -8057,6 +8073,7 @@ void RenderGroundItemLabelTexture(OBJECT* o, const GroundItemLabelCacheEntry& ca
     float textureVHeight = (cacheEntry.TextHeight + 0.01f) / static_cast<float>(cacheEntry.TextureHeight);
     RenderBitmap(-static_cast<int>(cacheEntry.TextureId), renderX, renderY, static_cast<float>(cacheEntry.TextWidth),
         static_cast<float>(cacheEntry.TextHeight), 0.f, 0.f, textureUWidth, textureVHeight, false, false);
+#endif
 }
 
 bool RenderGroundItemLabelCached(OBJECT* o, ITEM* ip)
@@ -8140,7 +8157,17 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else
     {
-        RenderGroundItemLabelCached(o, ip);
+        if (!RenderGroundItemLabelCached(o, ip))
+        {
+            // Cache unavailable (e.g. SDL3 build) — render the label directly.
+            GroundItemLabelDescriptor descriptor;
+            BuildGroundItemLabelDescriptor(o, ip, descriptor);
+            ApplyGroundItemLabelDescriptor(descriptor);
+            g_pRenderText->RenderText(
+                static_cast<int>(o->ScreenX * g_fScreenRate_x),
+                static_cast<int>((o->ScreenY - 15) * g_fScreenRate_y),
+                descriptor.Name, 0, 0, RT3_WRITE_CENTER);
+        }
     }
 
     g_pRenderText->SetTextColor(255, 230, 200, 255);
