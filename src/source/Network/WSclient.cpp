@@ -1983,14 +1983,12 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
         MUHelper::g_MuHelper.AddTarget(Key, false);
     }
 
-    c->PositionX = Data->SourceX;
-    c->PositionY = Data->SourceY;
     c->TargetX = Data->TargetX;
     c->TargetY = Data->TargetY;
     c->TargetAngle = Data->PathMetadata >> 4;
 
     mu::log::Get("network")->debug("ID : {} | sX : {} | sY : {} | tX : {} | tY : {}", mu_wchar_to_utf8(c->ID),
-                                   c->PositionX, c->PositionY, c->TargetX, c->TargetY);
+                                   Data->SourceX, Data->SourceY, c->TargetX, c->TargetY);
 
     if (Key == HeroKey)
     {
@@ -2013,18 +2011,6 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
         return;
     }
 
-    // If already walking and receiving another walk command, don't interrupt with SetPlayerStop
-    if (c->Movement && pathNum == 0)
-    {
-        c->Movement = false;
-        SetPlayerStop(c);
-    }
-
-    auto pathData = const_cast<BYTE*>(ReceiveBuffer.subspan(fixedSize).data());
-
-    PATH_t* pCharPath = &c->Path;
-    pCharPath->Lock.lock();
-
     if (c->Appear == 0)
     {
         int iDefaultWall = TW_CHARACTER;
@@ -2035,31 +2021,16 @@ void ReceiveMoveCharacter(std::span<const BYTE> ReceiveBuffer)
             iDefaultWall = TW_NOMOVE;
         }
 
-        BYTE direction = c->TargetAngle;
-        POINT nextPos = MovePoint(static_cast<EPathDirection>(direction), {Data->SourceX, Data->SourceY});
-
-        pCharPath->PathX[0] = nextPos.x;
-        pCharPath->PathY[0] = nextPos.y;
-
-        for (int i = 0; i < pathNum; ++i)
+        if (PathFinding2(c->PositionX, c->PositionY, c->TargetX, c->TargetY, &c->Path, 0.0f, iDefaultWall))
         {
-            int byteIndex = i / 2;
-
-            direction = (i % 2 == 0) ? (pathData[byteIndex] >> 4) & 0x0F : (pathData[byteIndex] & 0x0F);
-
-            nextPos = MovePoint(static_cast<EPathDirection>(direction), nextPos);
-
-            pCharPath->PathX[i + 1] = nextPos.x;
-            pCharPath->PathY[i + 1] = nextPos.y;
+            c->Movement = true;
         }
-
-        pCharPath->PathNum = pathNum + 1;
-        pCharPath->Direction = direction;
-        pCharPath->CurrentPath = 0;
-        pCharPath->CurrentPathFloat = 0;
+        else
+        {
+            c->Movement = false;
+            SetPlayerStop(c);
+        }
     }
-
-    pCharPath->Lock.unlock();
 }
 
 void ReceiveMovePosition(const BYTE* ReceiveBuffer)
