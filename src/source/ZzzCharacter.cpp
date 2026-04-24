@@ -12380,7 +12380,7 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     if (pHelper == NULL)
     {
         DeleteMount(o);
-        ThePetProcess().DeletePet(c, c->Helper.Type, true);
+        ThePetProcess().DeletePet(c, c->Helper.Type - MODEL_ITEM, true);
     }
     else
     {
@@ -12745,7 +12745,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
     if (pHelper == nullptr)
     {
         DeleteMount(o);
-        ThePetProcess().DeletePet(c, c->Helper.Type, true);
+        ThePetProcess().DeletePet(c, c->Helper.Type - MODEL_ITEM, true);
     }
     else
     {
