@@ -21,6 +21,7 @@ build/
 build-test/
 !tests/build/
 build-mingw/
+build_validation/
 /cmake-build-debug/
 /cmake-build-release/
 /CMakeFiles/
@@ -45,6 +46,9 @@ build-mingw/
 **/imgui.ini
 
 graphify-out/
+
+# PCC / BMad workflow telemetry (session-local event streams)
+.paw/metrics/
 
 
 **/*.log

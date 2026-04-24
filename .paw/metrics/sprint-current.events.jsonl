@@ -1,2 +1,0 @@
-{"timestamp":"2026-03-23T17:15:00Z","event_type":"workflow_metric:code_review_completed","story_key":"6-4-1-ui-windows-validation","step":"code-review-finalize","sprint":"sprint-6","epic":"epic-6","data":{"final_status":"done","issues_fixed":7,"action_items":0,"blocker_count":0,"gate_result":"PASSED"}}
-{"timestamp":"2026-03-25T12:39:30Z","event_type":"workflow_metric:code_review_completed","story_key":"7-5-1","step":"code-review-finalize","sprint":"sprint-7","epic":"7","data":{"final_status":"done","issues_fixed":8,"action_items":2,"blocker_count":0,"gate_result":"PASSED"}}
