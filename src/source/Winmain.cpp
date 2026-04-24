@@ -1083,6 +1083,11 @@ void UpdateResolutionDependentSystems()
     {
         g_pNewUI3DRenderMng->UpdateAllCameraDimensions(WindowWidth, WindowHeight);
     }
+
+    // Reposition old-style CWin-based UI for the current scene. Without this,
+    // login/character-scene info boxes stay anchored to the old screen size
+    // until the player re-enters the scene.
+    CUIMng::Instance().RepositionSceneUI();
 }
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)

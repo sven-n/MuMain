@@ -40,6 +40,21 @@ static const struct { int width; int height; const wchar_t* label; } s_Resolutio
 };
 static const int s_NumResolutions = sizeof(s_Resolutions) / sizeof(s_Resolutions[0]);
 
+// Label pointer array for the resolution combo box. Built once on first use
+// from s_Resolutions so the combo can consume a plain `const wchar_t* const*`.
+static const wchar_t* const* GetResolutionLabels()
+{
+    static const wchar_t* labels[s_NumResolutions] = {};
+    static bool initialized = false;
+    if (!initialized)
+    {
+        for (int i = 0; i < s_NumResolutions; i++)
+            labels[i] = s_Resolutions[i].label;
+        initialized = true;
+    }
+    return labels;
+}
+
 namespace
 {
     // Volume levels are integers 0..MAX_VOLUME; the slider track is SLIDER_WIDTH pixels wide.
@@ -57,11 +72,12 @@ namespace
     constexpr int RENDER_SLIDER_HEIGHT = 29;
     constexpr float RENDER_LEVEL_MAX = 5.f;
 
-    // Resolution arrow buttons
-    constexpr int RES_Y_LOCAL = 279;
-    constexpr int RES_LEFT_X_LOCAL = 22;
-    constexpr int RES_RIGHT_X_LOCAL = 155;
-    constexpr int RES_ARROW_SIZE = 15;
+    // Resolution combo box placement (relative to m_Pos)
+    constexpr int RES_COMBO_X_LOCAL = 22;
+    constexpr int RES_COMBO_Y_LOCAL = 278;
+    constexpr int RES_COMBO_WIDTH   = 148;  // spans the old left-to-right arrow area
+    constexpr int RES_COMBO_HEIGHT  = 16;
+    constexpr int RES_COMBO_MAX_VISIBLE = 4;  // scrollbar appears when list > this
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -99,8 +115,22 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
     SetPos(x, y);
     LoadImages();
     SetButtonInfo();
+    InitResolutionCombo();
     Show(false);
     return true;
+}
+
+void SEASON3B::CNewUIOptionWindow::InitResolutionCombo()
+{
+    m_ResolutionCombo.Setup(
+        m_Pos.x + RES_COMBO_X_LOCAL,
+        m_Pos.y + RES_COMBO_Y_LOCAL,
+        RES_COMBO_WIDTH,
+        RES_COMBO_HEIGHT,
+        GetResolutionLabels(),
+        s_NumResolutions,
+        m_iResolutionIndex,
+        RES_COMBO_MAX_VISIBLE);
 }
 
 void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
@@ -127,6 +157,7 @@ void SEASON3B::CNewUIOptionWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+    m_ResolutionCombo.SetPos(m_Pos.x + RES_COMBO_X_LOCAL, m_Pos.y + RES_COMBO_Y_LOCAL);
 }
 
 bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
@@ -146,9 +177,16 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
         OnMusicVolumeChanged();
 
     HandleRenderLevelSlider();
-    HandleResolutionArrows();
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 337) == true)
+    if (m_ResolutionCombo.UpdateMouseEvent())
+    {
+        m_iResolutionIndex = m_ResolutionCombo.GetSelectedIndex();
+        ApplyResolution();
+    }
+
+    // Consume clicks inside the window OR inside the combo's expanded dropdown
+    // (which overflows the window's bottom edge) so they don't fall through.
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 337) || m_ResolutionCombo.IsMouseOverWidget())
         return false;
 
     return true;
@@ -259,26 +297,6 @@ void SEASON3B::CNewUIOptionWindow::HandleRenderLevelSlider()
     m_iRenderLevel = (int)((RENDER_LEVEL_MAX * x) / (float)RENDER_SLIDER_WIDTH);
 }
 
-void SEASON3B::CNewUIOptionWindow::HandleResolutionArrows()
-{
-    if (!SEASON3B::IsPress(VK_LBUTTON))
-        return;
-
-    if (CheckMouseIn(m_Pos.x + RES_LEFT_X_LOCAL, m_Pos.y + RES_Y_LOCAL, RES_ARROW_SIZE, RES_ARROW_SIZE))
-    {
-        m_iResolutionIndex--;
-        if (m_iResolutionIndex < 0)
-            m_iResolutionIndex = s_NumResolutions - 1;
-        ApplyResolution();
-    }
-    else if (CheckMouseIn(m_Pos.x + RES_RIGHT_X_LOCAL, m_Pos.y + RES_Y_LOCAL, RES_ARROW_SIZE, RES_ARROW_SIZE))
-    {
-        m_iResolutionIndex++;
-        if (m_iResolutionIndex >= s_NumResolutions)
-            m_iResolutionIndex = 0;
-        ApplyResolution();
-    }
-}
 
 bool SEASON3B::CNewUIOptionWindow::UpdateKeyEvent()
 {
@@ -323,10 +341,16 @@ float SEASON3B::CNewUIOptionWindow::GetKeyEventOrder()	// 10.f;
 
 void SEASON3B::CNewUIOptionWindow::OpenningProcess()
 {
+    // Resolution may have been changed elsewhere (e.g. DevEditor) while the
+    // option window was hidden -- resync the combo to the actual current size.
+    m_iResolutionIndex = FindCurrentResolutionIndex();
+    m_ResolutionCombo.SetSelectedIndex(m_iResolutionIndex);
+    m_ResolutionCombo.Close();
 }
 
 void SEASON3B::CNewUIOptionWindow::ClosingProcess()
 {
+    m_ResolutionCombo.Close();
 }
 
 void SEASON3B::CNewUIOptionWindow::LoadImages()
@@ -492,44 +516,9 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
         RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 238, 15, 15, 0, 15.f);
     }
 
-    // Resolution arrow box backgrounds
-    bool bHoverLeft = CheckMouseIn(m_Pos.x + 22, m_Pos.y + 278, 18, 16);
-    bool bHoverRight = CheckMouseIn(m_Pos.x + 152, m_Pos.y + 278, 18, 16);
-
-    // Draw solid colored arrow boxes
-    glDisable(GL_TEXTURE_2D);
-    for (int side = 0; side < 2; side++)
-    {
-        float bx = ConvertX(side == 0 ? m_Pos.x + 22.f : m_Pos.x + 152.f);
-        float by = ConvertY(m_Pos.y + 278.f);
-        float bw = ConvertX(18.f);
-        float bh = ConvertY(16.f);
-        by = (float)WindowHeight - by;
-        bool hover = (side == 0) ? bHoverLeft : bHoverRight;
-
-        if (hover)
-            glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
-        else
-            glColor4f(0.05f, 0.05f, 0.05f, 1.0f);
-
-        glBegin(GL_QUADS);
-        glVertex2f(bx, by);
-        glVertex2f(bx + bw, by);
-        glVertex2f(bx + bw, by - bh);
-        glVertex2f(bx, by - bh);
-        glEnd();
-    }
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glEnable(GL_TEXTURE_2D);
-
-    // Resolution arrows and label
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(255, 230, 200, 255);
-    g_pRenderText->RenderText(m_Pos.x + 24, m_Pos.y + 282, L"<<");
-    g_pRenderText->RenderText(m_Pos.x + 155, m_Pos.y + 282, L">>");
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x + 50, m_Pos.y + 282, s_Resolutions[m_iResolutionIndex].label);
+    // Resolution combo box. Drawn last so its expanded dropdown sits on top
+    // of anything else in the window.
+    m_ResolutionCombo.Render();
 }
 
 void SEASON3B::CNewUIOptionWindow::SetAutoAttack(bool bAuto)

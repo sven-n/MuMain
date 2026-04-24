@@ -9,6 +9,7 @@
 
 #include "NewUIManager.h"
 #include "NewUIMyInventory.h"
+#include "NewUIComboBox.h"
 
 namespace SEASON3B
 {
@@ -84,7 +85,6 @@ namespace SEASON3B
         void OnSoundVolumeChanged();
         void OnMusicVolumeChanged();
         void HandleRenderLevelSlider();
-        void HandleResolutionArrows();
 
     private:
         CNewUIManager* m_pNewUIMng;
@@ -101,8 +101,11 @@ namespace SEASON3B
         bool m_bRenderAllEffects;
         int m_iResolutionIndex;
 
+        CNewUIComboBox m_ResolutionCombo;
+
         void ApplyResolution();
         int FindCurrentResolutionIndex();
+        void InitResolutionCombo();
     };
 }
 

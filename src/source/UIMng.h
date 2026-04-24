@@ -67,6 +67,17 @@ public:
     void CreateLoginScene();
     void CreateCharacterScene();
     void CreateMainScene();
+
+    /**
+     * @brief Re-layouts the current scene's UI for the current WindowWidth/
+     * Height. Call after a runtime resolution change so info boxes, menus,
+     * etc. don't end up anchored to the old screen size.
+     *
+     * Only affects the old-style CWin-based windows owned by CUIMng; the
+     * new-style CNewUI* windows are driven by g_pNewUISystem separately.
+     */
+    void RepositionSceneUI();
+
     void Update(double dDeltaTick);
     void Render();
 
