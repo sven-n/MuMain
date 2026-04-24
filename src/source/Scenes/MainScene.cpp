@@ -33,6 +33,7 @@
 #include "Camera/CameraMode.h"
 #ifdef _EDITOR
 #include "Camera/FrustumRenderer.h"
+#include "Camera/CameraDebugLog.h"
 #endif
 
 // External declarations
@@ -602,6 +603,57 @@ bool RenderMainScene()
         ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
         if (spectated)
             RenderFrustumWireframe(spectated->GetFrustum());
+    }
+
+    // DEBUG: Render mouse ray as a visible line (magenta) from MousePosition to MouseTarget
+    {
+        GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
+        GLboolean tex2d = glIsEnabled(GL_TEXTURE_2D);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_TEXTURE_2D);
+        glLineWidth(2.0f);
+        glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+        glBegin(GL_LINES);
+        glVertex3fv(MousePosition);
+        glVertex3fv(MouseTarget);
+        glEnd();
+
+        // Draw a small cross at MousePosition (green)
+        constexpr float S = 30.0f;
+        glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+        glBegin(GL_LINES);
+        glVertex3f(MousePosition[0] - S, MousePosition[1], MousePosition[2]);
+        glVertex3f(MousePosition[0] + S, MousePosition[1], MousePosition[2]);
+        glVertex3f(MousePosition[0], MousePosition[1] - S, MousePosition[2]);
+        glVertex3f(MousePosition[0], MousePosition[1] + S, MousePosition[2]);
+        glEnd();
+
+        glLineWidth(1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        if (depthTest) glEnable(GL_DEPTH_TEST);
+        if (tex2d) glEnable(GL_TEXTURE_2D);
+    }
+
+    // DEBUG: Log ray state on left click (debounced to one log per click)
+    {
+        extern bool MouseLButtonPush;
+        static bool wasPressed = false;
+        if (MouseLButtonPush && !wasPressed)
+        {
+            wasPressed = true;
+            extern int MouseX, MouseY;
+            CAMERA_LOG("[RAY] Click: Mouse=(%d,%d) Pos=(%.0f,%.0f,%.0f) Target=(%.0f,%.0f,%.0f) "
+                       "CamPos=(%.0f,%.0f,%.0f) PerspX=%.6f PerspY=%.6f CenterX=%d CenterY=%d FOV=%.1f ViewFar=%.0f",
+                       MouseX, MouseY,
+                       MousePosition[0], MousePosition[1], MousePosition[2],
+                       MouseTarget[0], MouseTarget[1], MouseTarget[2],
+                       g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
+                       g_Camera.PerspectiveX, g_Camera.PerspectiveY,
+                       g_Camera.ScreenCenterX, g_Camera.ScreenCenterY,
+                       g_Camera.FOV, g_Camera.ViewFar);
+        }
+        if (!MouseLButtonPush)
+            wasPressed = false;
     }
 #endif
 

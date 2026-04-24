@@ -310,10 +310,11 @@ void CNewUIInGameShop::RenderDisplayItems()
     EndBitmap();
 
     glMatrixMode(GL_PROJECTION);
+    SaveCameraPerspective();
     glPushMatrix();
     glLoadIdentity();
     glViewport2(0, 0, WindowWidth, WindowHeight);
-    CameraProjection::SetupPerspective(g_Camera, 2.0f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
+    gluPerspective2(2.0f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
@@ -337,6 +338,7 @@ void CNewUIInGameShop::RenderDisplayItems()
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
 
+    RestoreCameraPerspective();
     BeginBitmap();
 }
 

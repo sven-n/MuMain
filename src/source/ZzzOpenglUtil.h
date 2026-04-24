@@ -64,6 +64,17 @@ void EndTextureStream();
 void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void EndOpengl();
 
+// Perspective setup for item/3D-UI rendering. Sets g_Camera perspective state
+// so item rendering can compute screen positions. Use SaveCameraPerspective /
+// RestoreCameraPerspective around item-rendering blocks to prevent corruption
+// of the main camera's cached values between frames.
+void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar);
+
+// Save/restore g_Camera perspective state around item-rendering blocks.
+// Prevents gluPerspective2's FOV=1 values from leaking to ScreenToWorldRay.
+void SaveCameraPerspective();
+void RestoreCameraPerspective();
+
 void InitVSync();
 bool IsVSyncAvailable();
 bool IsVSyncEnabled();

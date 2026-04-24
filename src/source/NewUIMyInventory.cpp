@@ -4,6 +4,10 @@
 #include "stdafx.h"
 #include "NewUIMyInventory.h"
 #include "NewUISystem.h"
+#ifdef _EDITOR
+#include "UI/Console/MuEditorConsoleUI.h"
+extern bool SelectFlag;
+#endif
 #include "NewUICustomMessageBox.h"
 #include "GOBoid.h"
 #include "ZzzEffect.h"
@@ -509,7 +513,17 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             return false;
         }
         RenderTerrain(true);
-        if (RenderTerrainTile(SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, true))
+#ifdef _EDITOR
+        {
+            char dbg[256];
+            sprintf_s(dbg, "[DROP] SelectFlag=%d SelectXF=%.1f SelectYF=%.1f "
+                           "CollisionPos=(%.0f,%.0f,%.0f)",
+                      (int)SelectFlag, SelectXF, SelectYF,
+                      CollisionPosition[0], CollisionPosition[1], CollisionPosition[2]);
+            g_MuEditorConsoleUI.LogEditor(dbg);
+        }
+#endif
+        if (SelectFlag)
         {
             const int iSourceIndex = pPickedItem->GetSourceLinealPos();
             const int tx = (int)(CollisionPosition[0] / TERRAIN_SCALE);

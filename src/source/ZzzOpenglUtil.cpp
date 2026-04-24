@@ -478,6 +478,54 @@ void glViewport2(int x, int y, int Width, int Height)
     CameraProjection::SetViewport(x, y, Width, Height);
 }
 
+// Saved camera state for save/restore around item rendering blocks.
+// Item rendering calls gluPerspective2 (corrupts PerspectiveX/Y/ScreenCenter)
+// and GetOpenGLMatrix(g_Camera.Matrix) (corrupts the camera matrix). Both must
+// be restored so ScreenToWorldRay reads correct values for click detection.
+static struct
+{
+    float PerspectiveX, PerspectiveY;
+    int ScreenCenterX, ScreenCenterY, ScreenCenterYFlip;
+    float Matrix[3][4];
+} s_SavedCameraState;
+
+void SaveCameraPerspective()
+{
+    s_SavedCameraState.PerspectiveX     = g_Camera.PerspectiveX;
+    s_SavedCameraState.PerspectiveY     = g_Camera.PerspectiveY;
+    s_SavedCameraState.ScreenCenterX    = g_Camera.ScreenCenterX;
+    s_SavedCameraState.ScreenCenterY    = g_Camera.ScreenCenterY;
+    s_SavedCameraState.ScreenCenterYFlip = g_Camera.ScreenCenterYFlip;
+    memcpy(s_SavedCameraState.Matrix, g_Camera.Matrix, sizeof(g_Camera.Matrix));
+}
+
+void RestoreCameraPerspective()
+{
+    g_Camera.PerspectiveX     = s_SavedCameraState.PerspectiveX;
+    g_Camera.PerspectiveY     = s_SavedCameraState.PerspectiveY;
+    g_Camera.ScreenCenterX    = s_SavedCameraState.ScreenCenterX;
+    g_Camera.ScreenCenterY    = s_SavedCameraState.ScreenCenterY;
+    g_Camera.ScreenCenterYFlip = s_SavedCameraState.ScreenCenterYFlip;
+    memcpy(g_Camera.Matrix, s_SavedCameraState.Matrix, sizeof(g_Camera.Matrix));
+}
+
+// Perspective setup for item/3D-UI rendering. Sets GL perspective AND updates
+// g_Camera perspective cache so item rendering can compute screen positions.
+// Callers should wrap the entire item-rendering block in SaveCameraPerspective /
+// RestoreCameraPerspective to avoid leaking FOV=1 values to ScreenToWorldRay.
+void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
+{
+    gluPerspective(Fov, Aspect, ZNear, ZFar);
+
+    g_Camera.ScreenCenterX = OpenglWindowX + OpenglWindowWidth / 2;
+    g_Camera.ScreenCenterY = OpenglWindowY + OpenglWindowHeight / 2;
+    g_Camera.ScreenCenterYFlip = WindowWidth - g_Camera.ScreenCenterY;
+
+    float fovRad = Fov * 0.5f * Q_PI / 180.0f;
+    g_Camera.PerspectiveX = tanf(fovRad) / (float)(OpenglWindowWidth / 2) * Aspect;
+    g_Camera.PerspectiveY = tanf(fovRad) / (float)(OpenglWindowHeight / 2);
+}
+
 float ConvertX(float x)
 {
     return x * (float)WindowWidth / (float)REFERENCE_WIDTH;

@@ -21,20 +21,17 @@ void CameraProjection::SetupPerspective(CameraState& state, float fov, float asp
     // Set up OpenGL perspective
     gluPerspective(fov, aspect, zNear, zFar);
 
-    // Use actual viewport dimensions (set by SetViewport) for screen center and perspective
+    // Use actual viewport dimensions (set by SetViewport) for screen center and
+    // perspective. This accounts for the game viewport being narrower/shorter than
+    // the full window when UI panels (inventory, NPC shop, etc.) are open.
     int vpWidth = s_ViewportWidth > 0 ? s_ViewportWidth : OpenglWindowWidth;
     int vpHeight = s_ViewportHeight > 0 ? s_ViewportHeight : OpenglWindowHeight;
 
-    // Cache screen center relative to viewport
     state.ScreenCenterX = OpenglWindowX + vpWidth / 2;
     state.ScreenCenterY = OpenglWindowY + vpHeight / 2;
     state.ScreenCenterYFlip = WindowWidth - state.ScreenCenterY;
 
-    // Cache perspective factors for screen-space transformations
-    // Mouse coords are converted to pixels then offset by ScreenCenter (viewport-relative),
-    // so PerspectiveX/Y map viewport-pixel-offsets to frustum-edge angles directly.
     float fovRad = fov * 0.5f * Q_PI / 180.0f;
-
     state.PerspectiveX = tanf(fovRad) / (float)(vpWidth / 2) * aspect;
     state.PerspectiveY = tanf(fovRad) / (float)(vpHeight / 2);
 }
@@ -59,16 +56,12 @@ void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy
 
     vec3_t p1, p2;
 
-    // Choose far plane based on use case
-    // Apply RENDER_DISTANCE_MULTIPLIER to match terrain rendering/culling distance
-    float farDist = bFixView ? (state.ViewFar * RENDER_DISTANCE_MULTIPLIER) : RENDER_ITEMVIEW_FAR;
+    float farDist = bFixView ? state.ViewFar : RENDER_ITEMVIEW_FAR;
 
-    // Calculate ray endpoint at far plane
     p1[0] = (float)(sx - state.ScreenCenterX) * farDist * state.PerspectiveX;
     p1[1] = -(float)(sy - state.ScreenCenterY) * farDist * state.PerspectiveY;
     p1[2] = -farDist;
 
-    // Extract camera position from matrix and transform ray
     p2[0] = -state.Matrix[0][3];
     p2[1] = -state.Matrix[1][3];
     p2[2] = -state.Matrix[2][3];

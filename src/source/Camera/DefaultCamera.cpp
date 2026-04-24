@@ -37,9 +37,6 @@ extern "C" void DevEditor_GetCameraConfigFOV(float* outHFOV);
 
 namespace
 {
-    // MainScene: Z offset so the character is centered on screen (was showing feet at center)
-    constexpr float MAIN_SCENE_CHARACTER_HEIGHT_OFFSET = 150.0f;
-
     // LoginScene fallback when no tour waypoints available
     constexpr float LOGIN_SCENE_FALLBACK_Z = 500.0f;
     constexpr float LOGIN_SCENE_FALLBACK_PITCH = -80.0f;
@@ -110,14 +107,11 @@ void DefaultCamera::InitMainScene()
     m_Config = CameraConfig::ForMainSceneDefaultCamera();
     ApplyConfigToState();
 
-    // Position will be calculated from Hero in Update()
+    // Initial position will be recalculated from Hero on the next Update() frame
     if (IsHeroValid())
     {
         extern CHARACTER* Hero;
-        m_State.Position[0] = Hero->Object.Position[0];
-        m_State.Position[1] = Hero->Object.Position[1];
-        // Add offset to center character on screen (was showing feet at center)
-        m_State.Position[2] = Hero->Object.Position[2] + MAIN_SCENE_CHARACTER_HEIGHT_OFFSET;
+        VectorCopy(Hero->Object.Position, m_State.Position);
     }
 }
 
@@ -304,6 +298,7 @@ bool DefaultCamera::Update()
         }
         else
         {
+            AdjustHeroHeight();
             CalculateCameraPosition();
             SetCameraAngle();
             UpdateCustomCameraDistance();
@@ -528,32 +523,89 @@ void DefaultCamera::CalculateCameraViewFar()
     }
 }
 
+namespace
+{
+    // Per-mount Z offsets (world units above terrain).
+    // Camera lift for ground mounts (character stays on terrain, camera rises
+    // for a better vantage point). Dinorant gets 0 because MoveCharacterPosition
+    // already lifts the character model (+30 normal, +90 sky maps).
+    constexpr float MOUNT_OFFSET_GROUND         = 30.0f;
+
+    // Time-based smooth transition for mount/dismount (frame-rate independent).
+    // Uses exponential decay: reaches ~95% of target in MOUNT_TRANSITION_MS.
+    constexpr float MOUNT_TRANSITION_MS         = 500.0f;
+    constexpr float MOUNT_LERP_TAU              = MOUNT_TRANSITION_MS / 3000.0f;  // time constant (seconds)
+
+    // Snap threshold — when the offset is close enough, snap to target
+    // to avoid endless micro-oscillation.
+    constexpr float MOUNT_LERP_SNAP_THRESHOLD   = 0.5f;
+}
+
+float DefaultCamera::GetTargetMountOffset() const
+{
+    if (!IsHeroValid() || Hero->SafeZone || gMapManager.WorldActive == -1)
+        return 0.0f;
+
+    switch (Hero->Helper.Type)
+    {
+    case MODEL_HORN_OF_DINORANT:
+        return 0.0f;  // Character model already floats via MoveCharacterPosition
+    case MODEL_HORN_OF_UNIRIA:
+    case MODEL_DARK_HORSE_ITEM:
+    case MODEL_HORN_OF_FENRIR:
+        return MOUNT_OFFSET_GROUND;
+    default:
+        return 0.0f;
+    }
+}
+
+void DefaultCamera::SyncMountOffset()
+{
+    m_CurrentMountOffset = GetTargetMountOffset();
+    m_LastMountType = IsHeroValid() ? Hero->Helper.Type : -1;
+}
+
 void DefaultCamera::AdjustHeroHeight()
 {
-    // Phase 5: NULL check - this function only applies when Hero exists
     if (!IsHeroValid())
         return;
 
-    if (gMapManager.InChaosCastle() == false || !Hero->Object.m_bActionStart)
+    // Chaos Castle and Kanturu 3rd: special Z handling, skip normal logic
+    if (gMapManager.InChaosCastle() && Hero->Object.m_bActionStart)
+        return;
+    if (gMapManager.WorldActive == WD_39KANTURU_3RD && Hero->Object.m_bActionStart)
+        return;
+
+    // Set hero height. Must match MoveCharacterPosition() in ZzzCharacter.cpp
+    // so there's no jump between standing (this code) and moving (that code).
+    // Dinorant flies above terrain; all other mounts stay on the ground.
+    float baseHeight = RequestTerrainHeight(Hero->Object.Position[0], Hero->Object.Position[1]);
+    if (Hero->Helper.Type == MODEL_HORN_OF_DINORANT && !Hero->SafeZone && gMapManager.WorldActive != -1)
     {
-        // Skip height adjustment for Kanturu 3rd when action has started
-        if (gMapManager.WorldActive == WD_39KANTURU_3RD && Hero->Object.m_bActionStart)
-        {
-            // No-op: Hero maintains current Z position during action in Kanturu 3rd
-        }
-        else if (gMapManager.WorldActive == -1 || Hero->Helper.Type != MODEL_HORN_OF_DINORANT || Hero->SafeZone)
-        {
-            Hero->Object.Position[2] = RequestTerrainHeight(Hero->Object.Position[0], Hero->Object.Position[1]);
-        }
+        if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
+            Hero->Object.Position[2] = baseHeight + 90.f;
         else
-        {
-            float baseHeight = RequestTerrainHeight(Hero->Object.Position[0], Hero->Object.Position[1]);
-            if (gMapManager.WorldActive == WD_8TARKAN || gMapManager.WorldActive == WD_10HEAVEN)
-                Hero->Object.Position[2] = baseHeight + 90.f;
-            else
-                Hero->Object.Position[2] = baseHeight + 30.f;
-        }
+            Hero->Object.Position[2] = baseHeight + 30.f;
     }
+    else
+    {
+        Hero->Object.Position[2] = baseHeight;
+    }
+
+    // Compute target mount offset and lerp for camera
+    float targetOffset = GetTargetMountOffset();
+
+    if (Hero->Helper.Type != m_LastMountType)
+        m_LastMountType = Hero->Helper.Type;
+
+    // Time-based exponential lerp (frame-rate independent).
+    extern float FPS_ANIMATION_FACTOR;
+    float dt = FPS_ANIMATION_FACTOR / 25.0f;  // REFERENCE_FPS = 25
+    float delta = targetOffset - m_CurrentMountOffset;
+    if (fabsf(delta) < MOUNT_LERP_SNAP_THRESHOLD)
+        m_CurrentMountOffset = targetOffset;
+    else
+        m_CurrentMountOffset += delta * (1.0f - expf(-dt / MOUNT_LERP_TAU));
 }
 
 void DefaultCamera::CalculateCameraPosition()
@@ -631,6 +683,10 @@ void DefaultCamera::CalculateCameraPosition()
         m_State.Position[2] = g_fSpecialHeight = 1200.f + 1;
     }
     m_State.Position[2] += m_State.Distance - 150.f;
+
+    // Raise camera when mounted (smooth lerp computed in AdjustHeroHeight).
+    // Character stays on the ground; only the camera view lifts.
+    m_State.Position[2] += m_CurrentMountOffset;
 
     // Apply custom camera distance for special terrain
     if (m_State.CustomDistance != 0.f)

@@ -280,10 +280,11 @@ void RenderInfomation3D()
     if (Success)
     {
         glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
+        SaveCameraPerspective();
+    glPushMatrix();
         glLoadIdentity();
         glViewport2(0, 0, WindowWidth, WindowHeight);
-        CameraProjection::SetupPerspective(g_Camera, 1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
+        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
@@ -325,6 +326,7 @@ void RenderInfomation3D()
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
         UpdateMousePositionn();
+    RestoreCameraPerspective();
     }
 }
 

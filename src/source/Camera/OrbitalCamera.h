@@ -88,6 +88,10 @@ private:
     int m_LastSceneFlag;          // Track scene changes to reset target
     bool m_bJustActivated;        // Skip DefaultCamera update on first frame after activation
 
+    // Mount offset that was baked into the inherited position at activation time.
+    // We subtract this so only the DELTA is applied, avoiding double-offset.
+    float m_ActivationMountOffset = 0.0f;
+
     // Constraints
     static constexpr float MIN_PITCH = -80.0f;  // Look down limit
     static constexpr float MAX_PITCH = 80.0f;   // Look up limit

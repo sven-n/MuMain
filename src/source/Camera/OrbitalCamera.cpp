@@ -192,6 +192,14 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
 
     // Skip DefaultCamera's first-frame update so our inherited pose isn't overwritten
     m_bJustActivated = true;
+
+    // Sync the internal DefaultCamera's mount state immediately so
+    // GetMountCameraOffset() returns the correct value — without this,
+    // on the first-ever activation the internal DefaultCamera hasn't run
+    // Update() yet and would return 0 even though the inherited position
+    // already has the offset baked in from the main DefaultCamera.
+    m_pDefaultCamera->SyncMountOffset();
+    m_ActivationMountOffset = m_pDefaultCamera->GetMountCameraOffset();
 }
 
 void OrbitalCamera::CalculateOrbitOriginForStaticScene(EGameScene scene, const CameraState& previousState)
@@ -396,6 +404,15 @@ bool OrbitalCamera::Update()
     if (!m_bFreeCameraMode && !skipTransformThisFrame)
     {
         ComputeCameraTransform();
+
+        // Apply mount camera offset. The lerp is computed by the internal DefaultCamera's
+        // AdjustHeroHeight (already ran in m_pDefaultCamera->Update() above). Only apply
+        // the DELTA from the activation baseline — the inherited position at OnActivate
+        // already had m_ActivationMountOffset baked in, so adding the full offset would
+        // double-count it.
+        float mountDelta = m_pDefaultCamera->GetMountCameraOffset() - m_ActivationMountOffset;
+        if (fabsf(mountDelta) > 0.5f)
+            m_State.Position[2] += mountDelta;
 
         // Clamp m_DeltaPitch based on what was actually achieved
         // If we tried to pitch but didn't move much, we're stuck at a constraint

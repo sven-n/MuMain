@@ -115,10 +115,11 @@ bool SEASON3B::CNewUI3DCamera::Render()
 
     EndBitmap();
     glMatrixMode(GL_PROJECTION);
+    SaveCameraPerspective();
     glPushMatrix();
     glLoadIdentity();
     glViewport2(0, 0, m_uiWidth, m_uiHeight);
-    CameraProjection::SetupPerspective(g_Camera, 1.f, (float)(m_uiWidth) / (float)(m_uiHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
+    gluPerspective2(1.f, (float)(m_uiWidth) / (float)(m_uiHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
@@ -142,6 +143,7 @@ bool SEASON3B::CNewUI3DCamera::Render()
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     BeginBitmap();
+    RestoreCameraPerspective();
 
     while (!m_deque2DEffects.empty())
     {

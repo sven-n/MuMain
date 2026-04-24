@@ -30,6 +30,14 @@ public:
     // Phase 5: Scene-specific reset
     void ResetForScene(EGameScene scene);
 
+    // Current mount camera offset (smoothly lerped). Used by OrbitalCamera
+    // to apply the same lift without duplicating the lerp logic.
+    float GetMountCameraOffset() const { return m_CurrentMountOffset; }
+
+    // Snap m_CurrentMountOffset to the current target (skip the lerp).
+    // Call on camera activation so the internal state matches immediately.
+    void SyncMountOffset();
+
     // Phase 1: Configuration & Frustum Management
     const CameraConfig& GetConfig() const override { return m_Config; }
     void SetConfig(const CameraConfig& config) override;
@@ -88,6 +96,11 @@ private:
     void InitCharacterScene();
     void InitMainScene();
     void InitLoginScene();
+
+    // Mount height offset — smooth lerp when mounting/dismounting
+    float GetTargetMountOffset() const;
+    float m_CurrentMountOffset = 0.0f;
+    int   m_LastMountType = -1;
 
     // Phase 5: WASD+QE free camera movement
     void HandleFreeCameraMovement();

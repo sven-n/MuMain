@@ -289,26 +289,6 @@ static void ApplySelectedCharacterLighting()
 }
 
 /**
- * @brief Adjusts character heights based on their mount/helper type.
- */
-static void AdjustCharacterHeights()
-{
-    // Character Z positions on the selection screen (tuned to align feet with the podium).
-    constexpr float CHARACTER_Z_ON_DINORANT = 194.5f;
-    constexpr float CHARACTER_Z_DEFAULT     = 169.5f;
-
-    for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; ++i)
-    {
-        CHARACTER* pCha = &CharactersClient[i];
-        OBJECT* pObj = &pCha->Object;
-
-        pObj->Position[2] = (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
-            ? CHARACTER_Z_ON_DINORANT
-            : CHARACTER_Z_DEFAULT;
-    }
-}
-
-/**
  * @brief Renders all 3D elements for the character selection scene.
  */
 static void RenderCharacterScene3D()
@@ -419,7 +399,6 @@ bool NewRenderCharacterScene(HDC hDC)
     int width, height;
     SetupCharacterSceneViewport(width, height);
     ApplySelectedCharacterLighting();
-    AdjustCharacterHeights();
     RenderCharacterScene3D();
     RenderSelectedCharacterEffects();
 

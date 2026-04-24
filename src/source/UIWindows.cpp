@@ -1766,10 +1766,11 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     gMapManager.WorldActive = WorldBackup;
 
     glMatrixMode(GL_PROJECTION);
+    SaveCameraPerspective();
     glPushMatrix();
     glLoadIdentity();
     glViewport2(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y, m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
-    CameraProjection::SetupPerspective(g_Camera, 1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
+    gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
@@ -1828,6 +1829,7 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glViewport2(0, 0, WindowWidth, WindowHeight);
+    RestoreCameraPerspective();
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)

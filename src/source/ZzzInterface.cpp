@@ -79,6 +79,7 @@ extern CMurdererMove g_MurdererMove;
 
 
 extern vec3_t MousePosition, MouseTarget;
+extern bool SelectFlag;
 
 extern void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime = 0);
 extern void UnRegisterBuff(eBuffState buff, OBJECT* o);
@@ -4788,7 +4789,7 @@ bool CheckTarget(CHARACTER* c)
     else
     {
         RenderTerrain(true);
-        if (RenderTerrainTile(SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, true))
+        if (SelectFlag)
         {
             VectorCopy(CollisionPosition, c->TargetPosition);
             TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
@@ -7745,9 +7746,8 @@ void MoveHero()
             else if (HIBYTE(GetAsyncKeyState(VK_SHIFT)) != 128)
             {
                 RenderTerrain(true);
-                bool Success = RenderTerrainTile(SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, true);
 
-                if (Success && c->Object.Live)
+                if (SelectFlag && c->Object.Live)
                 {
                     TargetX = (BYTE)(CollisionPosition[0] / TERRAIN_SCALE);
                     TargetY = (BYTE)(CollisionPosition[1] / TERRAIN_SCALE);
