@@ -771,7 +771,7 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
     g_pRenderText->SetFont(g_hFont);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, wcslen(strTooltip), &fontsize);
 
-    const auto multiplier = ((float)WindowHeight / 480);
+    const auto multiplier = ((float)WindowHeight / REFERENCE_HEIGHT);
     fontsize.cx = fontsize.cx / multiplier;
     fontsize.cy = fontsize.cy / multiplier;
 

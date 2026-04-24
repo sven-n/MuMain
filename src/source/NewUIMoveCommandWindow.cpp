@@ -115,7 +115,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
     m_StrifePos.x = m_Pos.x + 20;
     switch (WindowWidth)
     {
-    case 640:
+    case REFERENCE_WIDTH:
         m_MapNameUISize.x = 220; m_MapNamePos.x = m_Pos.x + 62; m_ReqLevelPos.x = m_Pos.x + 119; m_ReqZenPos.x = m_Pos.x + 159;
         break;
     case 800:
@@ -150,7 +150,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
     m_MapNameUISize.x += 10;
 
     m_listMoveInfoData = CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
-    m_iRealFontHeight = FontHeight * 640 / WindowWidth + 2;
+    m_iRealFontHeight = FontHeight * REFERENCE_WIDTH / WindowWidth + 2;
 
     m_MapNameUISize.y = 60 + (m_iRealFontHeight * MOVECOMMAND_MAX_RENDER_TEXTLINE);
 

@@ -420,8 +420,8 @@ bool SEASON3B::CNewUIButton::Render(bool RendOption)
         g_pRenderText->SetFont(m_hTextFont);
         GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
 
-        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
-        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
+        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
+        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
 
         int x = m_Pos.x + ((m_Size.x / 2) - (Fontsize.cx / 2));
         int y = m_Pos.y + ((m_Size.y / 2) - (Fontsize.cy / 2));
@@ -448,14 +448,14 @@ bool SEASON3B::CNewUIButton::Render(bool RendOption)
             g_pRenderText->SetFont(m_hToolTipFont);
             GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
 
-            Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
-            Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
+            Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
+            Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
 
             int x = m_Pos.x + ((m_Size.x / 2) - (Fontsize.cx / 2));
             int y = m_Pos.y + m_Size.y + 2;
 
             int _iTempWidth = x + Fontsize.cx + 6;
-            x = (_iTempWidth > 640) ? (x - (_iTempWidth - 640)) : x;
+            x = (_iTempWidth > REFERENCE_WIDTH) ? (x - (_iTempWidth - REFERENCE_WIDTH)) : x;
 
             if (m_IsTopPos) y = m_Pos.y - (Fontsize.cy + 2);
 
@@ -748,8 +748,8 @@ bool CNewUIRadioButton::Render()
 
         GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
 
-        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
-        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
+        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
+        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
 
         int x = m_Pos.x + ((m_Size.x / 2) - (Fontsize.cx / 2));
         int y = m_Pos.y + ((m_Size.y / 2) - (Fontsize.cy / 2));
@@ -974,7 +974,7 @@ void CNewUIRadioGroupButton::ChangeFrame(int buttonIndex)
     }
 }
 
-// Ãß°¡ : Pruarin(07.09.03)
+// ï¿½ß°ï¿½ : Pruarin(07.09.03)
 void CNewUIRadioGroupButton::LockButtonindex(int buttonIndex)
 {
     int i = 0;

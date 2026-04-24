@@ -9,6 +9,7 @@
 #include "DSPlaySound.h"
 #include "GameConfig/GameConfig.h"
 #include "wzAudio.h"
+#include <algorithm>
 
 extern int m_MusicOnOff;
 extern int m_SoundOnOff;
@@ -38,6 +39,30 @@ static const struct { int width; int height; const wchar_t* label; } s_Resolutio
     { 2560, 1440, L"2560 x 1440" },
 };
 static const int s_NumResolutions = sizeof(s_Resolutions) / sizeof(s_Resolutions[0]);
+
+namespace
+{
+    // Volume levels are integers 0..MAX_VOLUME; the slider track is SLIDER_WIDTH pixels wide.
+    constexpr int MAX_VOLUME = 10;
+    constexpr int SLIDER_WIDTH = 124;        // pixels
+    constexpr int SLIDER_HIT_PADDING = 8;    // extra px on each side for easier clicks
+    constexpr int SLIDER_HIT_HEIGHT = 16;
+    constexpr int SLIDER_X_LOCAL = 33;       // slider start relative to m_Pos.x
+    constexpr int WZAUDIO_VOLUME_SCALE = 10; // 0..10 → 0..100
+
+    // Render-level slider dimensions
+    constexpr int RENDER_SLIDER_X_LOCAL = 25;
+    constexpr int RENDER_SLIDER_Y_LOCAL = 196;
+    constexpr int RENDER_SLIDER_WIDTH = 141;
+    constexpr int RENDER_SLIDER_HEIGHT = 29;
+    constexpr float RENDER_LEVEL_MAX = 5.f;
+
+    // Resolution arrow buttons
+    constexpr int RES_Y_LOCAL = 279;
+    constexpr int RES_LEFT_X_LOCAL = 22;
+    constexpr int RES_RIGHT_X_LOCAL = 155;
+    constexpr int RES_ARROW_SIZE = 15;
+}
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -112,150 +137,147 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 150, m_Pos.y + 43, 15, 15))
-    {
-        m_bAutoAttack = !m_bAutoAttack;
-    }
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 150, m_Pos.y + 65, 15, 15))
-    {
-        m_bWhisperSound = !m_bWhisperSound;
-    }
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 150, m_Pos.y + 155, 15, 15))
-    {
-        m_bSlideHelp = !m_bSlideHelp;
-    }
+    HandleCheckboxInputs();
 
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 150, m_Pos.y + 238, 15, 15))
-    {
-        m_bRenderAllEffects = !m_bRenderAllEffects;
-    }
+    if (HandleVolumeSlider(m_iVolumeLevel, 104))
+        OnSoundVolumeChanged();
 
-    if (CheckMouseIn(m_Pos.x + 33 - 8, m_Pos.y + 104, 124 + 8, 16))
-    {
-        int iOldValue = m_iVolumeLevel;
-        if (MouseWheel > 0)
-        {
-            MouseWheel = 0;
-            m_iVolumeLevel++;
-            if (m_iVolumeLevel > 10)
-            {
-                m_iVolumeLevel = 10;
-            }
-        }
-        else if (MouseWheel < 0)
-        {
-            MouseWheel = 0;
-            m_iVolumeLevel--;
-            if (m_iVolumeLevel < 0)
-            {
-                m_iVolumeLevel = 0;
-            }
-        }
-        if (SEASON3B::IsRepeat(VK_LBUTTON))
-        {
-            int x = MouseX - (m_Pos.x + 33);
-            if (x < 0)
-            {
-                m_iVolumeLevel = 0;
-            }
-            else
-            {
-                float fValue = (10.f * x) / 124.f;
-                m_iVolumeLevel = (int)fValue + 1;
-            }
-        }
+    if (HandleVolumeSlider(m_iMusicLevel, 132))
+        OnMusicVolumeChanged();
 
-        if (iOldValue != m_iVolumeLevel)
-        {
-            m_SoundOnOff = (m_iVolumeLevel > 0) ? 1 : 0;
-            SetEffectVolumeLevel(m_iVolumeLevel);
-            GameConfig::GetInstance().SetSoundVolume(m_iVolumeLevel);
-            GameConfig::GetInstance().Save();
-        }
-    }
-    // Music volume slider (y+132)
-    if (CheckMouseIn(m_Pos.x + 33 - 8, m_Pos.y + 132, 124 + 8, 16))
-    {
-        int iOldValue = m_iMusicLevel;
-        if (MouseWheel > 0)
-        {
-            MouseWheel = 0;
-            m_iMusicLevel++;
-            if (m_iMusicLevel > 10) m_iMusicLevel = 10;
-        }
-        else if (MouseWheel < 0)
-        {
-            MouseWheel = 0;
-            m_iMusicLevel--;
-            if (m_iMusicLevel < 0) m_iMusicLevel = 0;
-        }
-        if (SEASON3B::IsRepeat(VK_LBUTTON))
-        {
-            int x = MouseX - (m_Pos.x + 33);
-            if (x < 0)
-                m_iMusicLevel = 0;
-            else
-                m_iMusicLevel = (int)((10.f * x) / 124.f) + 1;
-        }
-        if (m_iMusicLevel > 10) m_iMusicLevel = 10;
-
-        if (iOldValue != m_iMusicLevel)
-        {
-            bool wasOff = (m_MusicOnOff == 0);
-            m_MusicOnOff = (m_iMusicLevel > 0) ? 1 : 0;
-
-            // Set music volume using internal mode (don't touch Windows app volume)
-            wzAudioSetMixerMode(_mmInternalVolume);
-            wzAudioSetVolume(m_iMusicLevel * 10);
-
-            // Clear cached filename so PlayMp3 will actually play when re-enabled
-            if (wasOff && m_MusicOnOff)
-            {
-                Mp3FileName[0] = '\0';
-            }
-            // Stop music when slider reaches 0
-            if (m_iMusicLevel == 0)
-            {
-                wzAudioStop();
-            }
-
-            GameConfig::GetInstance().SetMusicVolume(m_iMusicLevel);
-            GameConfig::GetInstance().Save();
-        }
-    }
-
-    // Render level slider (y+196)
-    if (CheckMouseIn(m_Pos.x + 25, m_Pos.y + 196, 141, 29))
-    {
-        if (SEASON3B::IsRepeat(VK_LBUTTON))
-        {
-            int x = MouseX - (m_Pos.x + 25);
-            float fValue = (5.f * x) / 141.f;
-            m_iRenderLevel = (int)fValue;
-        }
-    }
-
-    // Resolution left arrow box
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 22, m_Pos.y + 279, 15, 15))
-    {
-        m_iResolutionIndex--;
-        if (m_iResolutionIndex < 0) m_iResolutionIndex = s_NumResolutions - 1;
-        ApplyResolution();
-    }
-    // Resolution right arrow box
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 155, m_Pos.y + 279, 15, 15))
-    {
-        m_iResolutionIndex++;
-        if (m_iResolutionIndex >= s_NumResolutions) m_iResolutionIndex = 0;
-        ApplyResolution();
-    }
+    HandleRenderLevelSlider();
+    HandleResolutionArrows();
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 337) == true)
+        return false;
+
+    return true;
+}
+
+void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
+{
+    struct Checkbox { int yLocal; bool* target; };
+    const Checkbox boxes[] = {
+        {  43, &m_bAutoAttack        },
+        {  65, &m_bWhisperSound      },
+        { 155, &m_bSlideHelp         },
+        { 238, &m_bRenderAllEffects  },
+    };
+
+    constexpr int CHECKBOX_X_LOCAL = 150;
+    constexpr int CHECKBOX_SIZE = 15;
+
+    if (!SEASON3B::IsPress(VK_LBUTTON))
+        return;
+
+    for (const auto& cb : boxes)
+    {
+        if (CheckMouseIn(m_Pos.x + CHECKBOX_X_LOCAL, m_Pos.y + cb.yLocal, CHECKBOX_SIZE, CHECKBOX_SIZE))
+            *cb.target = !*cb.target;
+    }
+}
+
+// Handles wheel + drag input on a volume slider track.
+// Returns true if the level changed this frame.
+bool SEASON3B::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOffset)
+{
+    if (!CheckMouseIn(m_Pos.x + SLIDER_X_LOCAL - SLIDER_HIT_PADDING,
+                      m_Pos.y + yOffset,
+                      SLIDER_WIDTH + SLIDER_HIT_PADDING,
+                      SLIDER_HIT_HEIGHT))
     {
         return false;
     }
 
-    return true;
+    const int oldValue = level;
+
+    if (MouseWheel > 0)
+    {
+        MouseWheel = 0;
+        level++;
+    }
+    else if (MouseWheel < 0)
+    {
+        MouseWheel = 0;
+        level--;
+    }
+
+    if (SEASON3B::IsRepeat(VK_LBUTTON))
+    {
+        int x = MouseX - (m_Pos.x + SLIDER_X_LOCAL);
+        if (x < 0)
+            level = 0;
+        else
+            level = (int)(((float)MAX_VOLUME * x) / (float)SLIDER_WIDTH) + 1;
+    }
+
+    // Clamp once after all adjustments
+    level = std::clamp(level, 0, MAX_VOLUME);
+
+    return (level != oldValue);
+}
+
+void SEASON3B::CNewUIOptionWindow::OnSoundVolumeChanged()
+{
+    m_SoundOnOff = (m_iVolumeLevel > 0) ? 1 : 0;
+    SetEffectVolumeLevel(m_iVolumeLevel);
+    GameConfig::GetInstance().SetSoundVolume(m_iVolumeLevel);
+    GameConfig::GetInstance().Save();
+}
+
+void SEASON3B::CNewUIOptionWindow::OnMusicVolumeChanged()
+{
+    const bool wasOff = (m_MusicOnOff == 0);
+    m_MusicOnOff = (m_iMusicLevel > 0) ? 1 : 0;
+
+    // Use internal volume mode so wzAudio doesn't touch the system master volume
+    wzAudioSetMixerMode(_mmInternalVolume);
+    wzAudioSetVolume(m_iMusicLevel * WZAUDIO_VOLUME_SCALE);
+
+    // Clear cached filename so PlayMp3 will actually play when re-enabled
+    if (wasOff && m_MusicOnOff)
+        Mp3FileName[0] = '\0';
+
+    // Stop music when slider reaches 0
+    if (m_iMusicLevel == 0)
+        wzAudioStop();
+
+    GameConfig::GetInstance().SetMusicVolume(m_iMusicLevel);
+    GameConfig::GetInstance().Save();
+}
+
+void SEASON3B::CNewUIOptionWindow::HandleRenderLevelSlider()
+{
+    if (!CheckMouseIn(m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
+                      RENDER_SLIDER_WIDTH, RENDER_SLIDER_HEIGHT))
+        return;
+
+    if (!SEASON3B::IsRepeat(VK_LBUTTON))
+        return;
+
+    int x = MouseX - (m_Pos.x + RENDER_SLIDER_X_LOCAL);
+    m_iRenderLevel = (int)((RENDER_LEVEL_MAX * x) / (float)RENDER_SLIDER_WIDTH);
+}
+
+void SEASON3B::CNewUIOptionWindow::HandleResolutionArrows()
+{
+    if (!SEASON3B::IsPress(VK_LBUTTON))
+        return;
+
+    if (CheckMouseIn(m_Pos.x + RES_LEFT_X_LOCAL, m_Pos.y + RES_Y_LOCAL, RES_ARROW_SIZE, RES_ARROW_SIZE))
+    {
+        m_iResolutionIndex--;
+        if (m_iResolutionIndex < 0)
+            m_iResolutionIndex = s_NumResolutions - 1;
+        ApplyResolution();
+    }
+    else if (CheckMouseIn(m_Pos.x + RES_RIGHT_X_LOCAL, m_Pos.y + RES_Y_LOCAL, RES_ARROW_SIZE, RES_ARROW_SIZE))
+    {
+        m_iResolutionIndex++;
+        if (m_iResolutionIndex >= s_NumResolutions)
+            m_iResolutionIndex = 0;
+        ApplyResolution();
+    }
 }
 
 bool SEASON3B::CNewUIOptionWindow::UpdateKeyEvent()
@@ -585,8 +607,8 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
     WindowWidth = s_Resolutions[m_iResolutionIndex].width;
     WindowHeight = s_Resolutions[m_iResolutionIndex].height;
 
-    g_fScreenRate_x = (float)WindowWidth / 640.0f;
-    g_fScreenRate_y = (float)WindowHeight / 480.0f;
+    g_fScreenRate_x = (float)WindowWidth / (float)REFERENCE_WIDTH;
+    g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
 
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;

@@ -215,31 +215,34 @@ static void UpdateCameraWaypoint()
 }
 
 /**
- * @brief Interpolates camera position/angle towards target waypoint.
+ * @brief Interpolates camera position/angle towards the current target waypoint.
+ *
+ * Two walk modes, selected per waypoint via WALK_PATHS[...][6]:
+ *  - Type 0 (smooth): exponential ease toward target (divide by SMOOTH_EASING_FACTOR each frame).
+ *  - Type 1 (linear): step by a precomputed per-frame delta (see CalculateWalkDelta).
+ *
+ * Both modes update all 3 position components AND all 3 angle components so camera
+ * rotation tracks the waypoint pose, not just X/Y translation.
  */
 static void InterpolateCameraMovement()
 {
+    constexpr int SMOOTH_EASING_FACTOR = 6;
+    const int target = g_loginCamera.currentNumber;
+
     if (g_loginCamera.currentWalkType == 0)
     {
-        // Smooth interpolation
         for (int i = 0; i < 3; i++)
         {
-            g_loginCamera.currentPosition[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 6;
-            g_loginCamera.currentAngle[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 6;
+            g_loginCamera.currentPosition[i] += (LoginCameraState::WALK_PATHS[target][i] - g_loginCamera.currentPosition[i]) / SMOOTH_EASING_FACTOR;
+            g_loginCamera.currentAngle[i]    += (LoginCameraState::WALK_PATHS[target][i + 3] - g_loginCamera.currentAngle[i]) / SMOOTH_EASING_FACTOR;
         }
     }
     else
     {
-        // Linear movement using delta
-        // FIX: Update all 3 position components (X, Y, Z), not just X and Y
         for (int i = 0; i < 3; i++)
         {
             g_loginCamera.currentPosition[i] += g_loginCamera.currentWalkDelta[i];
-        }
-        // FIX: Also update angles for linear movement
-        for (int i = 0; i < 3; i++)
-        {
-            g_loginCamera.currentAngle[i] += g_loginCamera.currentWalkDelta[i + 3];
+            g_loginCamera.currentAngle[i]    += g_loginCamera.currentWalkDelta[i + 3];
         }
     }
 }
@@ -383,7 +386,7 @@ bool NewRenderLogInScene(HDC hDC)
 
     glColor3f(1.f, 1.f, 1.f);
 
-    Height = 480;
+    Height = REFERENCE_HEIGHT;
     Width = GetScreenWidth();
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
@@ -391,11 +394,11 @@ bool NewRenderLogInScene(HDC hDC)
 #ifdef _EDITOR
     g_Camera.ViewFar = DevEditor_GetLoginTerrainDist();
 #else
-    g_Camera.ViewFar = 3995.f;
+    g_Camera.ViewFar = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
 #endif
     g_Camera.ViewNear = 100.f;  // Push near plane out to preserve z-buffer precision
 
-    BeginOpengl(0, 25, 640, 430);
+    BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
 
     // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
     // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and
@@ -452,17 +455,17 @@ bool NewRenderLogInScene(HDC hDC)
 
     wcscpy_s(Text, 100, GlobalText[454]);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(335 - Size.cx * 640 / WindowWidth, 480 - Size.cy * 640 / WindowWidth - 1, Text);
+    g_pRenderText->RenderText(335 - Size.cx * REFERENCE_WIDTH / WindowWidth, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
 
     wcscpy_s(Text, 100, GlobalText[455]);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(335, 480 - Size.cy * 640 / WindowWidth - 1, Text);
+    g_pRenderText->RenderText(335, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
 
     swprintf_s(Text, 100, GlobalText[456], m_ExeVersion);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(0, 480 - Size.cy * 640 / WindowWidth - 1, Text);
+    g_pRenderText->RenderText(0, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
 
     RenderInfomation();
 

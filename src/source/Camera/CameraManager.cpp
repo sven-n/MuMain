@@ -5,7 +5,6 @@
 #include "DefaultCamera.h"
 #include "OrbitalCamera.h"
 #ifdef _EDITOR
-#include "UI/Console/MuEditorConsoleUI.h"
 #include "FreeFlyCamera.h"
 #endif
 
@@ -64,9 +63,7 @@ bool CameraManager::Update()
 {
     // Lazy initialization on first use
     if (!m_pActiveCamera && !m_pDefaultCamera)
-    {
         Initialize();
-    }
 
     if (!m_pActiveCamera)
         return false;
@@ -75,62 +72,74 @@ bool CameraManager::Update()
     // Orbital camera is MainScene-only; if the scene changed, switch back
     extern EGameScene SceneFlag;
     if (SceneFlag != MAIN_SCENE && m_CurrentMode != CameraMode::Default)
-    {
         SetCameraMode(CameraMode::Default);
-    }
 
 #ifdef _EDITOR
-    // When in FreeFly mode, also update the spectated camera so it keeps tracking.
-    // We must isolate g_Camera so the spectated camera sees its OWN previous state
-    // (not FreeFly's angles/position), otherwise e.g. OrbitalCamera inherits FreeFly's yaw.
     if (m_pSpectatedCamera && m_CurrentMode == CameraMode::FreeFly)
-    {
-        // Save FreeFly's state
-        vec3_t savedPos, savedAngle;
-        VectorCopy(g_Camera.Position, savedPos);
-        VectorCopy(g_Camera.Angle, savedAngle);
-        float savedFOV = g_Camera.FOV;
-        float savedViewFar = g_Camera.ViewFar;
-        float savedDistance = g_Camera.Distance;
-        float savedDistanceTarget = g_Camera.DistanceTarget;
-
-        // Restore spectated camera's own last state so Update() reads correct values
-        if (m_bHasSpectatedState)
-        {
-            VectorCopy(m_SpectatedPos, g_Camera.Position);
-            VectorCopy(m_SpectatedAngle, g_Camera.Angle);
-            g_Camera.FOV = m_SpectatedFOV;
-            g_Camera.ViewFar = m_SpectatedViewFar;
-            g_Camera.Distance = m_SpectatedDistance;
-            g_Camera.DistanceTarget = m_SpectatedDistanceTarget;
-        }
-
-        m_pSpectatedCamera->Update();
-
-        // Force frustum rebuild on spectated camera (bypasses NeedsFrustumUpdate optimization)
-        m_pSpectatedCamera->SetConfig(m_pSpectatedCamera->GetConfig());
-
-        // Save spectated camera's computed state for next frame
-        VectorCopy(g_Camera.Position, m_SpectatedPos);
-        VectorCopy(g_Camera.Angle, m_SpectatedAngle);
-        m_SpectatedFOV = g_Camera.FOV;
-        m_SpectatedViewFar = g_Camera.ViewFar;
-        m_SpectatedDistance = g_Camera.Distance;
-        m_SpectatedDistanceTarget = g_Camera.DistanceTarget;
-        m_bHasSpectatedState = true;
-
-        // Restore FreeFly's state so rendering uses FreeFly's viewpoint
-        VectorCopy(savedPos, g_Camera.Position);
-        VectorCopy(savedAngle, g_Camera.Angle);
-        g_Camera.FOV = savedFOV;
-        g_Camera.ViewFar = savedViewFar;
-        g_Camera.Distance = savedDistance;
-        g_Camera.DistanceTarget = savedDistanceTarget;
-    }
+        UpdateSpectatedCamera();
 #endif
 
     return m_pActiveCamera->Update();
 }
+
+#ifdef _EDITOR
+void CameraManager::SaveGlobalToSpectated()
+{
+    VectorCopy(g_Camera.Position, m_Spectated.Position);
+    VectorCopy(g_Camera.Angle, m_Spectated.Angle);
+    m_Spectated.FOV = g_Camera.FOV;
+    m_Spectated.ViewFar = g_Camera.ViewFar;
+    m_Spectated.Distance = g_Camera.Distance;
+    m_Spectated.DistanceTarget = g_Camera.DistanceTarget;
+    m_Spectated.HasData = true;
+}
+
+void CameraManager::RestoreSpectatedToGlobal()
+{
+    VectorCopy(m_Spectated.Position, g_Camera.Position);
+    VectorCopy(m_Spectated.Angle, g_Camera.Angle);
+    g_Camera.FOV = m_Spectated.FOV;
+    g_Camera.ViewFar = m_Spectated.ViewFar;
+    g_Camera.Distance = m_Spectated.Distance;
+    g_Camera.DistanceTarget = m_Spectated.DistanceTarget;
+}
+
+void CameraManager::UpdateSpectatedCamera()
+{
+    // When in FreeFly mode, also update the spectated camera so it keeps tracking.
+    // We must isolate g_Camera so the spectated camera sees its OWN previous state
+    // (not FreeFly's angles/position), otherwise e.g. OrbitalCamera inherits FreeFly's yaw.
+
+    // Save FreeFly's current g_Camera state
+    SpectatedState savedFreeFly;
+    VectorCopy(g_Camera.Position, savedFreeFly.Position);
+    VectorCopy(g_Camera.Angle, savedFreeFly.Angle);
+    savedFreeFly.FOV = g_Camera.FOV;
+    savedFreeFly.ViewFar = g_Camera.ViewFar;
+    savedFreeFly.Distance = g_Camera.Distance;
+    savedFreeFly.DistanceTarget = g_Camera.DistanceTarget;
+
+    // Restore spectated camera's own last state so Update() reads correct values
+    if (m_Spectated.HasData)
+        RestoreSpectatedToGlobal();
+
+    m_pSpectatedCamera->Update();
+
+    // Force frustum rebuild on spectated camera (bypasses NeedsFrustumUpdate optimization)
+    m_pSpectatedCamera->SetConfig(m_pSpectatedCamera->GetConfig());
+
+    // Save spectated camera's computed state for next frame
+    SaveGlobalToSpectated();
+
+    // Restore FreeFly's state so rendering uses FreeFly's viewpoint
+    VectorCopy(savedFreeFly.Position, g_Camera.Position);
+    VectorCopy(savedFreeFly.Angle, g_Camera.Angle);
+    g_Camera.FOV = savedFreeFly.FOV;
+    g_Camera.ViewFar = savedFreeFly.ViewFar;
+    g_Camera.Distance = savedFreeFly.Distance;
+    g_Camera.DistanceTarget = savedFreeFly.DistanceTarget;
+}
+#endif
 
 bool CameraManager::SetCameraMode(CameraMode mode)
 {
@@ -181,10 +190,10 @@ void CameraManager::CycleToNextMode()
 #ifdef _EDITOR
 bool CameraManager::GetSpectatedCameraState(vec3_t outPos, vec3_t outAngle) const
 {
-    if (!m_pSpectatedCamera || !m_bHasSpectatedState)
+    if (!m_pSpectatedCamera || !m_Spectated.HasData)
         return false;
-    VectorCopy(m_SpectatedPos, outPos);
-    VectorCopy(m_SpectatedAngle, outAngle);
+    VectorCopy(m_Spectated.Position, outPos);
+    VectorCopy(m_Spectated.Angle, outAngle);
     return true;
 }
 #endif
@@ -205,31 +214,16 @@ void CameraManager::TransitionToCamera(ICamera* pNewCamera)
     {
         m_pSpectatedCamera = m_pActiveCamera;
         static_cast<FreeFlyCamera*>(pNewCamera)->InheritFOV(m_pActiveCamera->GetConfig().hFov);
-
-        // Snapshot current g_Camera as the spectated camera's initial state
-        VectorCopy(g_Camera.Position, m_SpectatedPos);
-        VectorCopy(g_Camera.Angle, m_SpectatedAngle);
-        m_SpectatedFOV = g_Camera.FOV;
-        m_SpectatedViewFar = g_Camera.ViewFar;
-        m_SpectatedDistance = g_Camera.Distance;
-        m_SpectatedDistanceTarget = g_Camera.DistanceTarget;
-        m_bHasSpectatedState = true;
+        SaveGlobalToSpectated();
     }
     // When transitioning FROM FreeFly, restore spectated camera's state to g_Camera
     // so the returning camera continues seamlessly from where it was
     else if (m_pActiveCamera == m_pFreeFlyCamera.get())
     {
-        if (m_bHasSpectatedState)
-        {
-            VectorCopy(m_SpectatedPos, g_Camera.Position);
-            VectorCopy(m_SpectatedAngle, g_Camera.Angle);
-            g_Camera.FOV = m_SpectatedFOV;
-            g_Camera.ViewFar = m_SpectatedViewFar;
-            g_Camera.Distance = m_SpectatedDistance;
-            g_Camera.DistanceTarget = m_SpectatedDistanceTarget;
-        }
+        if (m_Spectated.HasData)
+            RestoreSpectatedToGlobal();
         m_pSpectatedCamera = nullptr;
-        m_bHasSpectatedState = false;
+        m_Spectated = {};
     }
 #endif
 
@@ -297,13 +291,5 @@ extern "C" void GetActiveCameraConfig(float* outFOV, float* outNearPlane, float*
         if (outNearPlane) *outNearPlane = config.nearPlane;
         if (outFarPlane) *outFarPlane = config.farPlane;
         if (outTerrainCullRange) *outTerrainCullRange = config.terrainCullRange;
-
-#ifdef _EDITOR
-        // DEBUG: Log what DevEditor is reading
-        // char debugMsg[256];
-        // sprintf_s(debugMsg, "[CAM] GetActiveCameraConfig: Camera=%s, FOV=%.1f, Far=%.0f, TerrainCull=%.0f",
-        //           camera->GetName(), config.hFov, config.farPlane, config.terrainCullRange);
-        // g_MuEditorConsoleUI.LogEditor(debugMsg);
-#endif
     }
 }

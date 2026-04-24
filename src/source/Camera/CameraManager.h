@@ -75,13 +75,20 @@ private:
 
     // Saved g_Camera state for the spectated camera, so its Update() sees its own
     // previous state instead of FreeFly's values (which would corrupt yaw, distance, etc.)
-    vec3_t m_SpectatedPos = {};
-    vec3_t m_SpectatedAngle = {};
-    float m_SpectatedFOV = 0.0f;
-    float m_SpectatedViewFar = 0.0f;
-    float m_SpectatedDistance = 0.0f;
-    float m_SpectatedDistanceTarget = 0.0f;
-    bool m_bHasSpectatedState = false;
+    struct SpectatedState
+    {
+        vec3_t Position = {};
+        vec3_t Angle = {};
+        float FOV = 0.0f;
+        float ViewFar = 0.0f;
+        float Distance = 0.0f;
+        float DistanceTarget = 0.0f;
+        bool HasData = false;
+    } m_Spectated;
+
+    void SaveGlobalToSpectated();
+    void RestoreSpectatedToGlobal();
+    void UpdateSpectatedCamera();
 #endif
 
     void TransitionToCamera(ICamera* pNewCamera);

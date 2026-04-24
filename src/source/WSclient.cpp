@@ -6382,8 +6382,8 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     if (g_bUseWindowMode == FALSE)
     {
 #endif	// WINDOWMODE
-        int x = 260 * MouseX / 640;
-        SetCursorPos((x)*WindowWidth / 640, (MouseY)*WindowHeight / 480);
+        int x = 260 * MouseX / REFERENCE_WIDTH;
+        SetCursorPos((x)*WindowWidth / REFERENCE_WIDTH, (MouseY)*WindowHeight / REFERENCE_HEIGHT);
 #ifdef WINDOWMODE
     }
 #endif	// WINDOWMODE

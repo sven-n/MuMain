@@ -104,7 +104,7 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
 void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
 {
     int x_Next = 489;
-    int y_Next = 480 - 51;
+    int y_Next = REFERENCE_HEIGHT - 51;
     int x_Add = 30;
     int y_Add = 41;
     m_BtnCShop.ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -207,7 +207,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFrame()
     float x, y;
 
     width = 256.f; height = 51.f;
-    x = 0.f; y = 480.f - height;
+    x = 0.f; y = (float)REFERENCE_HEIGHT - height;
     SEASON3B::RenderImage(IMAGE_MENU_1, x, y, width, height);
     width = 128.f;
     x = 256.f;
@@ -271,7 +271,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
     width = 45.f;
     x = 158;
     height = 39.f;
-    y = 480.f - 48.f;
+    y = (float)REFERENCE_HEIGHT - 48.f;
 
     fY = y + (fLife * height);
     fH = height - (fLife * height);
@@ -285,7 +285,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
         RenderBitmap(IMAGE_GAUGE_RED, x, fY, width, fH, 0.f, fV * height / 64.f, width / 64.f, (1.0f - fV) * height / 64.f);
     }
 
-    SEASON3B::RenderNumber(x + 25, 480 - 18, wLife);
+    SEASON3B::RenderNumber(x + 25, REFERENCE_HEIGHT - 18, wLife);
 
     wchar_t strTipText[256];
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
@@ -298,14 +298,14 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
     width = 45.f;
     x = 256.f + 128.f + 53.f;
     height = 39.f;
-    y = 480.f - 48.f;
+    y = (float)REFERENCE_HEIGHT - 48.f;
 
     fY = y + (fMana * height);
     fH = height - (fMana * height);
     fV = fMana;
     RenderBitmap(IMAGE_GAUGE_BLUE, x, fY, width, fH, 0.f, fV * height / 64.f, width / 64.f, (1.0f - fV) * height / 64.f);
 
-    SEASON3B::RenderNumber(x + 30, 480 - 18, wMana);
+    SEASON3B::RenderNumber(x + 30, REFERENCE_HEIGHT - 18, wMana);
 
     // mana
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
@@ -341,13 +341,13 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
     }
 
     width = 16.f, height = 39.f;
-    x = 256 + 128 + 36; y = 480.f - 49.f;
+    x = 256 + 128 + 36; y = (float)REFERENCE_HEIGHT - 49.f;
     fY = y + (fSkillMana * height);
     fH = height - (fSkillMana * height);
     fV = fSkillMana;
 
     RenderBitmap(IMAGE_GAUGE_AG, x, fY, width, fH, 0.f, fV * height / 64.f, width / 16.f, (1.0f - fV) * height / 64.f);
-    SEASON3B::RenderNumber(x + 10, 480 - 18, (int)dwSkillMana);
+    SEASON3B::RenderNumber(x + 10, REFERENCE_HEIGHT - 18, (int)dwSkillMana);
 
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
@@ -384,16 +384,16 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
     }
 
     width = 16.f, height = 39.f;
-    x = 204; y = 480.f - 49.f;
+    x = 204; y = (float)REFERENCE_HEIGHT - 49.f;
     fY = y + (fShield * height);
     fH = height - (fShield * height);
     fV = fShield;
 
     RenderBitmap(IMAGE_GAUGE_SD, x, fY, width, fH, 0.f, fV * height / 64.f, width / 16.f, (1.0f - fV) * height / 64.f);
-    SEASON3B::RenderNumber(x + 15, 480 - 18, (int)wShield);
+    SEASON3B::RenderNumber(x + 15, REFERENCE_HEIGHT - 18, (int)wShield);
 
     height = 39.f;
-    y = 480.f - 10.f - 39.f;
+    y = (float)REFERENCE_HEIGHT - 10.f - 39.f;
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
         wchar_t strTipText[256];
@@ -670,7 +670,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCharInfoButton()
     {
         if (!(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
             || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)))
-            RenderImage(IMAGE_MENU_BTN_CHAINFO, 489 + 30, 480 - 51, 30, 41, 0.0f, 41.f);
+            RenderImage(IMAGE_MENU_BTN_CHAINFO, 489 + 30, REFERENCE_HEIGHT - 51, 30, 41, 0.0f, 41.f);
     }
 }
 
@@ -710,20 +710,20 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFriendButtonState()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == true)
     {
-        RenderImage(IMAGE_MENU_BTN_FRIEND, 489 + (30 * 3), 480 - 51, 30, 41, 0.0f, 123.f);
+        RenderImage(IMAGE_MENU_BTN_FRIEND, 489 + (30 * 3), REFERENCE_HEIGHT - 51, 30, 41, 0.0f, 123.f);
     }
     else
     {
-        RenderImage(IMAGE_MENU_BTN_FRIEND, 489 + (30 * 3), 480 - 51, 30, 41, 0.0f, 41.f);
+        RenderImage(IMAGE_MENU_BTN_FRIEND, 489 + (30 * 3), REFERENCE_HEIGHT - 51, 30, 41, 0.0f, 41.f);
     }
 #else //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == true)
     {
-        RenderImage(IMAGE_MENU_BTN_FRIEND, 488 + 76, 480 - 51, 38, 42, 0.0f, 126.f);
+        RenderImage(IMAGE_MENU_BTN_FRIEND, 488 + 76, REFERENCE_HEIGHT - 51, 38, 42, 0.0f, 126.f);
     }
     else
     {
-        RenderImage(IMAGE_MENU_BTN_FRIEND, 488 + 76, 480 - 51, 38, 42, 0.0f, 42.f);
+        RenderImage(IMAGE_MENU_BTN_FRIEND, 488 + 76, REFERENCE_HEIGHT - 51, 38, 42, 0.0f, 42.f);
     }
 #endif//defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
 }

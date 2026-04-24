@@ -194,11 +194,11 @@ void SEASON3B::CNewUICursedTempleResult::RenderResultPanel()
 
     if (m_WinState == 1)
     {
-        RenderImage(IMAGE_CURSEDTEMPLERESULT_SUCCESS, (640 - 360) / 2, m_Pos.y - 110, 351.f, 115.f);
+        RenderImage(IMAGE_CURSEDTEMPLERESULT_SUCCESS, (REFERENCE_WIDTH - 360) / 2, m_Pos.y - 110, 351.f, 115.f);
     }
     else
     {
-        RenderImage(IMAGE_CURSEDTEMPLERESULT_FAILURE, (640 - 360) / 2, m_Pos.y - 110, 351.f, 115.f);
+        RenderImage(IMAGE_CURSEDTEMPLERESULT_FAILURE, (REFERENCE_WIDTH - 360) / 2, m_Pos.y - 110, 351.f, 115.f);
     }
 
     glColor4f(1.f, 1.f, 1.f, 1.f);

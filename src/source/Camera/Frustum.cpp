@@ -3,6 +3,79 @@
 #include "_define.h"
 #include <cmath>
 
+namespace
+{
+    // Epsilon when comparing cull distances to decide whether the terrain 2D-hull
+    // extension is needed. Anything closer than this to farDist is treated as equal.
+    constexpr float TERRAIN_EXTENSION_EPSILON = 1.0f;
+
+    // Compute the 4 corners of a rectangular plane (top-left, top-right, bottom-right, bottom-left)
+    // given its center, half-dimensions, up, and right axes.
+    // NOTE: vec3_t params are non-const because the project's vector helpers don't take const.
+    inline void ComputePlaneCorners(vec3_t center, float halfHeight, float halfWidth,
+                                    vec3_t up, vec3_t right,
+                                    vec3_t outTL, vec3_t outTR, vec3_t outBR, vec3_t outBL)
+    {
+        vec3_t temp;
+        VectorMA(center,  halfHeight, up, temp);  VectorMA(temp, -halfWidth, right, outTL);
+        VectorMA(center,  halfHeight, up, temp);  VectorMA(temp,  halfWidth, right, outTR);
+        VectorMA(center, -halfHeight, up, temp);  VectorMA(temp,  halfWidth, right, outBR);
+        VectorMA(center, -halfHeight, up, temp);  VectorMA(temp, -halfWidth, right, outBL);
+    }
+
+    struct Point2D { float x, y; };
+
+    // Cross product (z-component) of (b - a) × (c - a) for three 2D points.
+    inline float Cross2D(const Point2D& a, const Point2D& b, const Point2D& c)
+    {
+        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    }
+
+    // Sort points by x then y (insertion sort - we always have <= 12 points).
+    inline void SortPoints2D(Point2D* pts, int count)
+    {
+        for (int i = 1; i < count; i++)
+        {
+            Point2D key = pts[i];
+            int j = i - 1;
+            while (j >= 0 && (pts[j].x > key.x || (pts[j].x == key.x && pts[j].y > key.y)))
+            {
+                pts[j + 1] = pts[j];
+                j--;
+            }
+            pts[j + 1] = key;
+        }
+    }
+
+    // Andrew's monotone chain convex hull. `pts` must be sorted. Writes CCW hull to `outHull`.
+    // Returns the number of hull points.
+    inline int ConvexHullCCW(const Point2D* pts, int numPts, Point2D* outHull, int hullCapacity)
+    {
+        int k = 0;
+
+        // Lower hull
+        for (int i = 0; i < numPts; i++)
+        {
+            while (k >= 2 && Cross2D(outHull[k - 2], outHull[k - 1], pts[i]) <= 0.f)
+                k--;
+            if (k < hullCapacity)
+                outHull[k++] = pts[i];
+        }
+
+        // Upper hull
+        int lowerSize = k + 1;
+        for (int i = numPts - 2; i >= 0; i--)
+        {
+            while (k >= lowerSize && Cross2D(outHull[k - 2], outHull[k - 1], pts[i]) <= 0.f)
+                k--;
+            if (k < hullCapacity)
+                outHull[k++] = pts[i];
+        }
+        k--;  // Remove duplicate last point
+        return k;
+    }
+}
+
 Frustum::Frustum()
     : m_2DCount(0)
     , m_bHasTerrainExtension(false)
@@ -34,161 +107,128 @@ void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const
                                float fovDegrees, float aspectRatio, float nearDist, float farDist,
                                float terrainCullDist)
 {
-    // If terrainCullDist not specified, use farDist for terrain culling
     if (terrainCullDist < 0.0f)
         terrainCullDist = farDist;
-    // Calculate right vector (need temp copies - CrossProduct doesn't accept const)
+
+    // Build orthonormal basis from camera vectors (CrossProduct needs non-const args)
     vec3_t right, forwardTemp, upTemp;
     VectorCopy(forward, forwardTemp);
     VectorCopy(up, upTemp);
     CrossProduct(forwardTemp, upTemp, right);
     VectorNormalize(right);
 
-    // Calculate actual up vector (ensure orthogonal)
     vec3_t actualUp;
-    VectorCopy(forward, forwardTemp);
     CrossProduct(right, forwardTemp, actualUp);
     VectorNormalize(actualUp);
 
-    // Calculate frustum dimensions
-    float fovRadians = fovDegrees * Q_PI / 180.0f;
-    float tanHalfFov = tanf(fovRadians * 0.5f);
+    float tanHalfFov = tanf((fovDegrees * Q_PI / 180.0f) * 0.5f);
 
-    float nearHeight = 2.0f * tanHalfFov * nearDist;
-    float nearWidth = nearHeight * aspectRatio;
+    // Near/far plane centers, needed by CalculatePlanes
+    vec3_t nearCenter, farCenter, posTemp;
+    VectorCopy(position, posTemp);
+    VectorMA(posTemp, nearDist, forwardTemp, nearCenter);
+    VectorCopy(position, posTemp);
+    VectorMA(posTemp, farDist, forwardTemp, farCenter);
 
-    float farHeight = 2.0f * tanHalfFov * farDist;
-    float farWidth = farHeight * aspectRatio;
+    CalculateFrustumVertices(position, forward, actualUp, right, tanHalfFov, aspectRatio, nearDist, farDist);
 
-    // Calculate centers of near and far planes
-    vec3_t nearCenter, farCenter;
-    vec3_t posTemp2, forwardTemp2;
-    VectorCopy(position, posTemp2);
-    VectorCopy(forward, forwardTemp2);
-    VectorMA(posTemp2, nearDist, forwardTemp2, nearCenter);
-    VectorCopy(position, posTemp2);
-    VectorCopy(forward, forwardTemp2);
-    VectorMA(posTemp2, farDist, forwardTemp2, farCenter);
-
-    // Calculate the 8 corner vertices
-    // Near plane corners
-    vec3_t temp1, temp2;
-
-    // Near top-left
-    VectorMA(nearCenter, nearHeight * 0.5f, actualUp, temp1);
-    VectorMA(temp1, -nearWidth * 0.5f, right, m_Vertices[0]);
-
-    // Near top-right
-    VectorMA(nearCenter, nearHeight * 0.5f, actualUp, temp1);
-    VectorMA(temp1, nearWidth * 0.5f, right, m_Vertices[1]);
-
-    // Near bottom-right
-    VectorMA(nearCenter, -nearHeight * 0.5f, actualUp, temp1);
-    VectorMA(temp1, nearWidth * 0.5f, right, m_Vertices[2]);
-
-    // Near bottom-left
-    VectorMA(nearCenter, -nearHeight * 0.5f, actualUp, temp1);
-    VectorMA(temp1, -nearWidth * 0.5f, right, m_Vertices[3]);
-
-    // Far plane corners
-    // Far top-left
-    VectorMA(farCenter, farHeight * 0.5f, actualUp, temp1);
-    VectorMA(temp1, -farWidth * 0.5f, right, m_Vertices[4]);
-
-    // Far top-right
-    VectorMA(farCenter, farHeight * 0.5f, actualUp, temp1);
-    VectorMA(temp1, farWidth * 0.5f, right, m_Vertices[5]);
-
-    // Far bottom-right
-    VectorMA(farCenter, -farHeight * 0.5f, actualUp, temp1);
-    VectorMA(temp1, farWidth * 0.5f, right, m_Vertices[6]);
-
-    // Far bottom-left
-    VectorMA(farCenter, -farHeight * 0.5f, actualUp, temp1);
-    VectorMA(temp1, -farWidth * 0.5f, right, m_Vertices[7]);
-
-    // Compute extended terrain cull far vertices (for 2D hull only)
-    // When terrainCullDist > farDist, the 2D terrain tile culling range extends
-    // beyond the 3D frustum far plane to match the rendering extent
-    m_bHasTerrainExtension = (terrainCullDist > farDist + 1.0f);
+    m_bHasTerrainExtension = (terrainCullDist > farDist + TERRAIN_EXTENSION_EPSILON);
     if (m_bHasTerrainExtension)
-    {
-        float tcFarHeight = 2.0f * tanHalfFov * terrainCullDist;
-        float tcFarWidth = tcFarHeight * aspectRatio;
+        CalculateTerrainExtension(position, forward, actualUp, right, tanHalfFov, aspectRatio, farDist, terrainCullDist);
 
-        vec3_t tcFarCenter;
-        VectorCopy(position, posTemp2);
-        VectorCopy(forward, forwardTemp2);
-        VectorMA(posTemp2, terrainCullDist, forwardTemp2, tcFarCenter);
+    CalculatePlanes(position, forward, nearCenter, farCenter);
+    CalculateBoundingBox();
+    Calculate2DProjection();
+}
 
-        // Terrain far top-left
-        VectorMA(tcFarCenter, tcFarHeight * 0.5f, actualUp, temp1);
-        VectorMA(temp1, -tcFarWidth * 0.5f, right, m_TerrainFarVertices[0]);
+void Frustum::CalculateFrustumVertices(const vec3_t position, const vec3_t forward,
+                                        const vec3_t up, const vec3_t right,
+                                        float tanHalfFov, float aspectRatio,
+                                        float nearDist, float farDist)
+{
+    float nearHeight = 2.0f * tanHalfFov * nearDist;
+    float nearWidth  = nearHeight * aspectRatio;
+    float farHeight  = 2.0f * tanHalfFov * farDist;
+    float farWidth   = farHeight * aspectRatio;
 
-        // Terrain far top-right
-        VectorMA(tcFarCenter, tcFarHeight * 0.5f, actualUp, temp1);
-        VectorMA(temp1, tcFarWidth * 0.5f, right, m_TerrainFarVertices[1]);
+    vec3_t posMut, forwardMut, upMut, rightMut;
+    VectorCopy(position, posMut);
+    VectorCopy(forward,  forwardMut);
+    VectorCopy(up,       upMut);
+    VectorCopy(right,    rightMut);
 
-        // Terrain far bottom-right
-        VectorMA(tcFarCenter, -tcFarHeight * 0.5f, actualUp, temp1);
-        VectorMA(temp1, tcFarWidth * 0.5f, right, m_TerrainFarVertices[2]);
+    vec3_t nearCenter, farCenter, posTemp;
+    VectorCopy(posMut, posTemp);
+    VectorMA(posTemp, nearDist, forwardMut, nearCenter);
+    VectorCopy(posMut, posTemp);
+    VectorMA(posTemp, farDist, forwardMut, farCenter);
 
-        // Terrain far bottom-left
-        VectorMA(tcFarCenter, -tcFarHeight * 0.5f, actualUp, temp1);
-        VectorMA(temp1, -tcFarWidth * 0.5f, right, m_TerrainFarVertices[3]);
-    }
+    // Near plane: vertices 0..3 = TL, TR, BR, BL
+    ComputePlaneCorners(nearCenter, nearHeight * 0.5f, nearWidth * 0.5f, upMut, rightMut,
+                        m_Vertices[0], m_Vertices[1], m_Vertices[2], m_Vertices[3]);
+    // Far plane: vertices 4..7 = TL, TR, BR, BL
+    ComputePlaneCorners(farCenter, farHeight * 0.5f, farWidth * 0.5f, upMut, rightMut,
+                        m_Vertices[4], m_Vertices[5], m_Vertices[6], m_Vertices[7]);
+}
 
-    // Calculate the 6 frustum planes
-    // Need temporary copies for FaceNormalize (doesn't accept const)
+void Frustum::CalculateTerrainExtension(const vec3_t position, const vec3_t forward,
+                                         const vec3_t up, const vec3_t right,
+                                         float tanHalfFov, float aspectRatio,
+                                         float /*farDist*/, float terrainCullDist)
+{
+    // When terrainCullDist > farDist, the 2D terrain tile culling range extends
+    // beyond the 3D frustum far plane to match the rendering extent.
+    float tcHeight = 2.0f * tanHalfFov * terrainCullDist;
+    float tcWidth  = tcHeight * aspectRatio;
+
+    vec3_t posMut, forwardMut, upMut, rightMut;
+    VectorCopy(position, posMut);
+    VectorCopy(forward,  forwardMut);
+    VectorCopy(up,       upMut);
+    VectorCopy(right,    rightMut);
+
+    vec3_t tcCenter, posTemp;
+    VectorCopy(posMut, posTemp);
+    VectorMA(posTemp, terrainCullDist, forwardMut, tcCenter);
+
+    ComputePlaneCorners(tcCenter, tcHeight * 0.5f, tcWidth * 0.5f, upMut, rightMut,
+                        m_TerrainFarVertices[0], m_TerrainFarVertices[1],
+                        m_TerrainFarVertices[2], m_TerrainFarVertices[3]);
+}
+
+void Frustum::CalculatePlanes(const vec3_t position, const vec3_t forward,
+                               const vec3_t nearCenter, const vec3_t farCenter)
+{
+    // Phase 5: CRITICAL -- match old CreateFrustrum() plane indices!
+    // Old winding: [0]=TOP, [1]=RIGHT, [2]=BOTTOM, [3]=LEFT
+    // TestFrustrum() relies on this ordering.
+    struct PlaneDef { int v2, v3; };
+    const PlaneDef planeDefs[4] = {
+        { 4, 5 },  // TOP:    apex → far-TL → far-TR
+        { 5, 6 },  // RIGHT:  apex → far-TR → far-BR
+        { 6, 7 },  // BOTTOM: apex → far-BR → far-BL
+        { 7, 4 },  // LEFT:   apex → far-BL → far-TL
+    };
+
     vec3_t v1, v2, v3;
-
-    // Phase 5: CRITICAL FIX - Match old CreateFrustrum() plane indices!
-    // Old system had planes in different order due to vertex winding:
-    // Old [0] = TOP, [1] = RIGHT, [2] = BOTTOM, [3] = LEFT (rotated 90° from expected!)
-    // New [0] = LEFT, [1] = RIGHT, [2] = TOP, [3] = BOTTOM (standard order)
-    // Must use old winding to match TestFrustrum() expectations
-
-    // Plane [0]: Old TOP plane - apex → far-left-top → far-right-top
-    VectorCopy(position, v1);
-    VectorCopy(m_Vertices[4], v2);  // Far top-left
-    VectorCopy(m_Vertices[5], v3);  // Far top-right
-    FaceNormalize(v1, v2, v3, m_Planes[0].normal);
-    m_Planes[0].distance = -DotProduct(position, m_Planes[0].normal);
-
-    // Plane [1]: Old RIGHT plane - apex → far-right-top → far-right-bottom
-    VectorCopy(position, v1);
-    VectorCopy(m_Vertices[5], v2);  // Far top-right
-    VectorCopy(m_Vertices[6], v3);  // Far bottom-right
-    FaceNormalize(v1, v2, v3, m_Planes[1].normal);
-    m_Planes[1].distance = -DotProduct(position, m_Planes[1].normal);
-
-    // Plane [2]: Old BOTTOM plane - apex → far-right-bottom → far-left-bottom
-    VectorCopy(position, v1);
-    VectorCopy(m_Vertices[6], v2);  // Far bottom-right
-    VectorCopy(m_Vertices[7], v3);  // Far bottom-left
-    FaceNormalize(v1, v2, v3, m_Planes[2].normal);
-    m_Planes[2].distance = -DotProduct(position, m_Planes[2].normal);
-
-    // Plane [3]: Old LEFT plane - apex → far-left-bottom → far-left-top
-    VectorCopy(position, v1);
-    VectorCopy(m_Vertices[7], v2);  // Far bottom-left
-    VectorCopy(m_Vertices[4], v3);  // Far top-left
-    FaceNormalize(v1, v2, v3, m_Planes[3].normal);
-    m_Planes[3].distance = -DotProduct(position, m_Planes[3].normal);
+    for (int i = 0; i < 4; i++)
+    {
+        VectorCopy(position, v1);
+        VectorCopy(m_Vertices[planeDefs[i].v2], v2);
+        VectorCopy(m_Vertices[planeDefs[i].v3], v3);
+        FaceNormalize(v1, v2, v3, m_Planes[i].normal);
+        m_Planes[i].distance = -DotProduct(position, m_Planes[i].normal);
+    }
 
     // Near plane: forward direction
     VectorCopy(forward, m_Planes[4].normal);
     m_Planes[4].distance = -DotProduct(nearCenter, m_Planes[4].normal);
 
-    // Far plane: negative forward direction
-    VectorScale(forward, -1.0f, m_Planes[5].normal);
+    // Far plane: negative forward direction (VectorScale needs non-const input)
+    vec3_t forwardMut;
+    VectorCopy(forward, forwardMut);
+    VectorScale(forwardMut, -1.0f, m_Planes[5].normal);
     m_Planes[5].distance = -DotProduct(farCenter, m_Planes[5].normal);
-
-    // Calculate bounding box
-    CalculateBoundingBox();
-
-    // Calculate 2D ground-plane projection for cheap culling
-    Calculate2DProjection();
 }
 
 bool Frustum::TestSphere(const vec3_t center, float radius) const
@@ -261,75 +301,32 @@ void Frustum::CalculateBoundingBox()
 
 void Frustum::Calculate2DProjection()
 {
-    // Project frustum vertices to XY ground plane in tile coordinates
-    // Include terrain cull far vertices if present (extends 2D hull beyond 3D far plane)
-    struct Point2D { float x, y; };
+    // Project frustum vertices to XY ground plane in tile coordinates (world / TERRAIN_SCALE).
+    // Include terrain-cull far vertices if present (extends 2D hull beyond 3D far plane).
+    constexpr int MAX_HULL_POINTS = 12;   // 8 frustum corners + 4 terrain-extension corners
+    constexpr float WORLD_TO_TILE = 1.0f / TERRAIN_SCALE;
 
     int numPts = 8 + (m_bHasTerrainExtension ? 4 : 0);
-    Point2D pts[12];
+    Point2D pts[MAX_HULL_POINTS];
 
     for (int i = 0; i < 8; i++)
     {
-        pts[i].x = m_Vertices[i][0] * 0.01f;
-        pts[i].y = m_Vertices[i][1] * 0.01f;
+        pts[i].x = m_Vertices[i][0] * WORLD_TO_TILE;
+        pts[i].y = m_Vertices[i][1] * WORLD_TO_TILE;
     }
-
     if (m_bHasTerrainExtension)
     {
         for (int i = 0; i < 4; i++)
         {
-            pts[8 + i].x = m_TerrainFarVertices[i][0] * 0.01f;
-            pts[8 + i].y = m_TerrainFarVertices[i][1] * 0.01f;
+            pts[8 + i].x = m_TerrainFarVertices[i][0] * WORLD_TO_TILE;
+            pts[8 + i].y = m_TerrainFarVertices[i][1] * WORLD_TO_TILE;
         }
     }
 
-    // Sort by X, then Y (simple insertion sort for N<=12)
-    for (int i = 1; i < numPts; i++)
-    {
-        Point2D key = pts[i];
-        int j = i - 1;
-        while (j >= 0 && (pts[j].x > key.x || (pts[j].x == key.x && pts[j].y > key.y)))
-        {
-            pts[j + 1] = pts[j];
-            j--;
-        }
-        pts[j + 1] = key;
-    }
+    SortPoints2D(pts, numPts);
 
-    // Andrew's monotone chain convex hull (produces CCW ordering)
-    Point2D hull[24];
-    int k = 0;
-
-    // Lower hull
-    for (int i = 0; i < numPts; i++)
-    {
-        while (k >= 2)
-        {
-            float cross = (hull[k-1].x - hull[k-2].x) * (pts[i].y - hull[k-2].y)
-                        - (hull[k-1].y - hull[k-2].y) * (pts[i].x - hull[k-2].x);
-            if (cross <= 0.f) k--;
-            else break;
-        }
-        hull[k++] = pts[i];
-    }
-
-    // Upper hull
-    int lowerSize = k + 1;
-    for (int i = numPts - 2; i >= 0; i--)
-    {
-        while (k >= lowerSize)
-        {
-            float cross = (hull[k-1].x - hull[k-2].x) * (pts[i].y - hull[k-2].y)
-                        - (hull[k-1].y - hull[k-2].y) * (pts[i].x - hull[k-2].x);
-            if (cross <= 0.f) k--;
-            else break;
-        }
-        hull[k++] = pts[i];
-    }
-    k--; // Remove duplicate last point
-
-    // Clamp to max array size
-    if (k > 12) k = 12;
+    Point2D hull[MAX_HULL_POINTS];
+    int k = ConvexHullCCW(pts, numPts, hull, MAX_HULL_POINTS);
 
     // Reverse to CW order (the original TestFrustrum2D cross-product test expects CW winding)
     m_2DCount = k;

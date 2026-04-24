@@ -23,9 +23,7 @@
 #include "../GMDoppelGanger2.h"
 #include "../w_MapHeaders.h"
 #include "../UIManager.h"
-#ifdef _EDITOR
-#include "UI/Console/MuEditorConsoleUI.h"
-#endif
+#include "CameraDebugLog.h"
 
 // External variable declarations
 extern short g_shCameraLevel;
@@ -37,20 +35,24 @@ extern "C" bool DevEditor_IsConfigOverrideEnabled();
 extern "C" void DevEditor_GetCameraConfigFOV(float* outHFOV);
 #endif
 
+namespace
+{
+    // MainScene: Z offset so the character is centered on screen (was showing feet at center)
+    constexpr float MAIN_SCENE_CHARACTER_HEIGHT_OFFSET = 150.0f;
+
+    // LoginScene fallback when no tour waypoints available
+    constexpr float LOGIN_SCENE_FALLBACK_Z = 500.0f;
+    constexpr float LOGIN_SCENE_FALLBACK_PITCH = -80.0f;
+
+    // Sentinel value used to invalidate the frustum cache (forces next-frame rebuild)
+    constexpr float CACHE_INVALIDATE_SENTINEL = -999999.0f;
+}
+
 DefaultCamera::DefaultCamera(CameraState& state)
     : m_State(state)
     , m_Config(CameraConfig::ForMainSceneOrbitalCamera())  // Phase 1: Initialize with gameplay config
 {
-    // Phase 5: Initialize frustum cache to force first update
-    m_LastFrustumPosition[0] = m_LastFrustumPosition[1] = m_LastFrustumPosition[2] = 0.0f;
-    m_LastFrustumAngle[0] = m_LastFrustumAngle[1] = m_LastFrustumAngle[2] = 0.0f;
-    m_LastFrustumViewFar = 0.0f;
-
-    // Phase 5: Initialize DevEditor config cache to force first update
-    m_LastEditorFOV = 0.0f;
-    m_LastEditorFarPlane = 0.0f;
-    m_LastEditorNearPlane = 0.0f;
-    m_LastEditorTerrainCullRange = 0.0f;
+    m_FrustumCache = {};
 }
 
 bool DefaultCamera::IsHeroValid() const
@@ -67,132 +69,112 @@ void DefaultCamera::Reset()
     m_bFreeCameraMode = false;
 }
 
+void DefaultCamera::ApplyConfigToState()
+{
+    // Apply the loaded m_Config to m_State (FOV/ViewFar/TopViewEnable).
+    extern unsigned int WindowWidth, WindowHeight;
+    float aspect = (float)WindowWidth / (float)WindowHeight;
+    m_State.ViewFar = m_Config.farPlane;
+    m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
+    m_State.TopViewEnable = false;
+}
+
+void DefaultCamera::InvalidateFrustumCache()
+{
+    m_FrustumCache.Position[0] = m_FrustumCache.Position[1] = m_FrustumCache.Position[2] = CACHE_INVALIDATE_SENTINEL;
+    m_FrustumCache.Angle[0] = m_FrustumCache.Angle[1] = m_FrustumCache.Angle[2] = CACHE_INVALIDATE_SENTINEL;
+    m_FrustumCache.ViewFar = CACHE_INVALIDATE_SENTINEL;
+#ifdef _EDITOR
+    m_FrustumCache.EditorFOV = -1.0f;
+    m_FrustumCache.EditorFarPlane = -1.0f;
+    m_FrustumCache.EditorNearPlane = -1.0f;
+    m_FrustumCache.EditorTerrainCullRange = -1.0f;
+#endif
+}
+
+void DefaultCamera::InitCharacterScene()
+{
+    m_Config = CameraConfig::ForCharacterScene();
+    ApplyConfigToState();
+
+    m_State.Angle[0] = CharacterSceneCamera::ANGLE_PITCH;
+    m_State.Angle[1] = 0.0f;
+    m_State.Angle[2] = CharacterSceneCamera::ANGLE_ROLL;
+    m_State.Position[0] = CharacterSceneCamera::POSITION_X;
+    m_State.Position[1] = CharacterSceneCamera::POSITION_Y;
+    m_State.Position[2] = CharacterSceneCamera::POSITION_Z;
+}
+
+void DefaultCamera::InitMainScene()
+{
+    m_Config = CameraConfig::ForMainSceneDefaultCamera();
+    ApplyConfigToState();
+
+    // Position will be calculated from Hero in Update()
+    if (IsHeroValid())
+    {
+        extern CHARACTER* Hero;
+        m_State.Position[0] = Hero->Object.Position[0];
+        m_State.Position[1] = Hero->Object.Position[1];
+        // Add offset to center character on screen (was showing feet at center)
+        m_State.Position[2] = Hero->Object.Position[2] + MAIN_SCENE_CHARACTER_HEIGHT_OFFSET;
+    }
+}
+
+void DefaultCamera::InitLoginScene()
+{
+    m_Config = CameraConfig::ForLoginScene();
+    ApplyConfigToState();
+
+    // Initialize to LoginScene WALK_PATHS[0] starting position.
+    // Tour mode will update this, but we need a valid initial position.
+    if (!CCameraMove::GetInstancePtr()->IsTourMode())
+        return;
+
+    vec3_t tourPos;
+    CCameraMove::GetInstancePtr()->GetCurrentCameraPos(tourPos);
+    if (tourPos[0] != 0.0f || tourPos[1] != 0.0f || tourPos[2] != 0.0f)
+    {
+        VectorCopy(tourPos, m_State.Position);
+        m_State.Angle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
+        m_State.Angle[1] = 0.0f;
+        m_State.Angle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
+        return;
+    }
+
+    // Fallback: Use WALK_PATHS[0] with transformation
+    vec3_t startPos = {0.f, 0.f, LOGIN_SCENE_FALLBACK_Z};
+    vec3_t startAngle = {LOGIN_SCENE_FALLBACK_PITCH, 0.f, 0.f};
+    float tempAngle[3] = {0.f, 0.f, startAngle[2]};
+    float Matrix[3][4];
+    AngleMatrix(tempAngle, Matrix);
+    VectorIRotate(startPos, Matrix, m_State.Position);
+    VectorCopy(startAngle, m_State.Angle);
+}
+
 void DefaultCamera::ResetForScene(EGameScene scene)
 {
-    // Phase 5: Proper scene-specific reset using switch statement
     switch (scene)
     {
         case CHARACTER_SCENE:
-        {
-            // Load CharacterScene config
-            m_Config = CameraConfig::ForCharacterScene();
-
-            // FORCE all CharacterScene values DIRECTLY to state
-            m_State.ViewFar = m_Config.farPlane;      // 4100
-            {
-                extern unsigned int WindowWidth, WindowHeight;
-                float aspect = (float)WindowWidth / (float)WindowHeight;
-                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
-            }
-            m_State.TopViewEnable = false;
-
-            // Set static CharacterScene position
-            m_State.Angle[0] = -84.5f;
-            m_State.Angle[1] = 0.0f;
-            m_State.Angle[2] = -75.0f;
-            m_State.Position[0] = 9758.93f;
-            m_State.Position[1] = 18913.11f;
-            m_State.Position[2] = 675.5f;
+            InitCharacterScene();
             break;
-        }
-
         case MAIN_SCENE:
-        {
-            // Load MainScene config with conservative values
-            m_Config = CameraConfig::ForMainSceneDefaultCamera();
-
-            // Set MainScene defaults
-            m_State.ViewFar = m_Config.farPlane;
-            {
-                extern unsigned int WindowWidth, WindowHeight;
-                float aspect = (float)WindowWidth / (float)WindowHeight;
-                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
-            }
-            m_State.TopViewEnable = false;
-
-            // Position will be calculated from Hero in Update()
-            if (IsHeroValid())
-            {
-                extern CHARACTER* Hero;
-                m_State.Position[0] = Hero->Object.Position[0];
-                m_State.Position[1] = Hero->Object.Position[1];
-                // Add offset to center character on screen (was showing feet at center)
-                m_State.Position[2] = Hero->Object.Position[2] + 150.0f;
-            }
+            InitMainScene();
             break;
-        }
-
         case LOG_IN_SCENE:
-        {
-            // Use LoginScene-specific config with correct near plane
-            m_Config = CameraConfig::ForLoginScene();
-            m_State.ViewFar = m_Config.farPlane;
-            {
-                extern unsigned int WindowWidth, WindowHeight;
-                float aspect = (float)WindowWidth / (float)WindowHeight;
-                m_State.FOV = HFovToVFov(m_Config.hFov, aspect);
-            }
-            m_State.TopViewEnable = false;
-
-            // FIX: Initialize to LoginScene WALK_PATHS[0] starting position
-            // Tour mode will update this, but we need valid initial position
-            if (CCameraMove::GetInstancePtr()->IsTourMode())
-            {
-                vec3_t tourPos;
-                CCameraMove::GetInstancePtr()->GetCurrentCameraPos(tourPos);
-                if (tourPos[0] != 0.0f || tourPos[1] != 0.0f || tourPos[2] != 0.0f)
-                {
-                    m_State.Position[0] = tourPos[0];
-                    m_State.Position[1] = tourPos[1];
-                    m_State.Position[2] = tourPos[2];
-                    m_State.Angle[0] = CCameraMove::GetInstancePtr()->GetAngleFrustum();
-                    m_State.Angle[1] = 0.0f;
-                    m_State.Angle[2] = CCameraMove::GetInstancePtr()->GetCameraAngle();
-                }
-                else
-                {
-                    // Fallback: Use WALK_PATHS[0] with transformation
-                    vec3_t startPos = {0.f, -0.f, 500.f};
-                    vec3_t startAngle = {-80.f, 0.f, 0.f};
-                    vec3_t origin = {0.f, 0.f, 0.f};
-                    float tempAngle[3] = {0.f, 0.f, startAngle[2]};
-                    float Matrix[3][4];
-                    AngleMatrix(tempAngle, Matrix);
-                    vec3_t transformPos;
-                    VectorIRotate(startPos, Matrix, transformPos);
-                    VectorAdd(origin, transformPos, m_State.Position);
-                    m_State.Angle[0] = startAngle[0];
-                    m_State.Angle[1] = startAngle[1];
-                    m_State.Angle[2] = startAngle[2];
-                }
-            }
+            InitLoginScene();
             break;
-        }
-
         case SERVER_LIST_SCENE:
         case WEBZEN_SCENE:
         case LOADING_SCENE:
         default:
-        {
-            // Use gameplay config as default
             m_Config = CameraConfig::ForMainSceneOrbitalCamera();
             m_State.TopViewEnable = false;
             break;
-        }
     }
 
-    // Force frustum rebuild
-    m_LastFrustumPosition[0] = m_LastFrustumPosition[1] = m_LastFrustumPosition[2] = -999999.0f;
-    m_LastFrustumAngle[0] = m_LastFrustumAngle[1] = m_LastFrustumAngle[2] = -999999.0f;
-    m_LastFrustumViewFar = -999999.0f;
-
-#ifdef _EDITOR
-    // Clear DevEditor cache
-    m_LastEditorFOV = -1.0f;
-    m_LastEditorFarPlane = -1.0f;
-    m_LastEditorNearPlane = -1.0f;
-    m_LastEditorTerrainCullRange = -1.0f;
-#endif
+    InvalidateFrustumCache();
 }
 
 void DefaultCamera::OnActivate(const CameraState& previousState)
@@ -200,16 +182,11 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     // Phase 5: When activating, ensure camera is configured for current scene
     extern EGameScene SceneFlag;
 
-#ifdef _EDITOR
-    // DEBUG: Log activation to Editor console
-    char debugMsg[512];
-    sprintf_s(debugMsg, "[CAM] DefaultCamera::OnActivate - Scene=%d, PrevPos=(%.1f,%.1f,%.1f), PrevAngle=(%.1f,%.1f,%.1f), PrevDist=%.0f",
-              (int)SceneFlag,
-              previousState.Position[0], previousState.Position[1], previousState.Position[2],
-              previousState.Angle[0], previousState.Angle[1], previousState.Angle[2],
-              previousState.Distance);
-    g_MuEditorConsoleUI.LogEditor(debugMsg);
-#endif
+    CAMERA_LOG("[CAM] DefaultCamera::OnActivate - Scene=%d, PrevPos=(%.1f,%.1f,%.1f), PrevAngle=(%.1f,%.1f,%.1f), PrevDist=%.0f",
+               (int)SceneFlag,
+               previousState.Position[0], previousState.Position[1], previousState.Position[2],
+               previousState.Angle[0], previousState.Angle[1], previousState.Angle[2],
+               previousState.Distance);
 
     // FIX: Save previousState before ResetForScene overwrites m_State
     vec3_t savedPosition, savedAngle;
@@ -223,12 +200,8 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     // ResetForScene also handles position/angle initialization for each scene
     ResetForScene(SceneFlag);
 
-#ifdef _EDITOR
-    // DEBUG: Log config after ResetForScene
-    sprintf_s(debugMsg, "[CAM]   Config: Far=%.0f, hFOV=%.1f, TerrainCull=%.0f",
-              m_Config.farPlane, m_Config.hFov, m_Config.terrainCullRange);
-    g_MuEditorConsoleUI.LogEditor(debugMsg);
-#endif
+    CAMERA_LOG("[CAM]   Config: Far=%.0f, hFOV=%.1f, TerrainCull=%.0f",
+               m_Config.farPlane, m_Config.hFov, m_Config.terrainCullRange);
 
     // FIX: Inherit position and angles from previous camera for seamless transition
     VectorCopy(savedPosition, m_State.Position);
@@ -236,19 +209,10 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
     m_State.Distance = savedDistance;
     m_State.DistanceTarget = savedDistanceTarget;
 
-#ifdef _EDITOR
-    sprintf_s(debugMsg, "[CAM]   After inherit: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f), Dist=%.0f",
-              m_State.Position[0], m_State.Position[1], m_State.Position[2],
-              m_State.Angle[0], m_State.Angle[1], m_State.Angle[2],
-              m_State.Distance);
-    g_MuEditorConsoleUI.LogEditor(debugMsg);
-#endif
-
-    // Don't override angles - preserve inherited angles for seamless transition
-    // The angles will be recalculated naturally on subsequent frames
-
-    // Phase 3 fix: Initialize frustum immediately on activation
-    // UpdateFrustum();
+    CAMERA_LOG("[CAM]   After inherit: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f), Dist=%.0f",
+               m_State.Position[0], m_State.Position[1], m_State.Position[2],
+               m_State.Angle[0], m_State.Angle[1], m_State.Angle[2],
+               m_State.Distance);
 
     // Update scene tracking to prevent redundant reset in Update()
     m_LastSceneFlag = (int)SceneFlag;
@@ -351,13 +315,9 @@ bool DefaultCamera::Update()
         // Still need to call SetCameraFOV for proper FOV setup
         SetCameraFOV();
 
-#ifdef _EDITOR
-        char debugMsg[256];
-        sprintf_s(debugMsg, "[CAM] DefaultCamera first frame: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
-                  m_State.Position[0], m_State.Position[1], m_State.Position[2],
-                  m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
-        g_MuEditorConsoleUI.LogEditor(debugMsg);
-#endif
+        CAMERA_LOG("[CAM] DefaultCamera first frame: Pos=(%.1f,%.1f,%.1f), Angle=(%.1f,%.1f,%.1f)",
+                   m_State.Position[0], m_State.Position[1], m_State.Position[2],
+                   m_State.Angle[0], m_State.Angle[1], m_State.Angle[2]);
 
         m_bJustActivated = false;
     }
@@ -367,19 +327,6 @@ bool DefaultCamera::Update()
         m_FramesSinceActivation++;
 
     UpdateCameraDistance();
-
-#ifdef _EDITOR
-    // Log if UpdateCameraDistance changed anything
-    static vec3_t lastPos = {0,0,0};
-    if (VectorCompare(m_State.Position, lastPos) == false)
-    {
-        char debugMsg[256];
-        // sprintf_s(debugMsg, "[CAM] After UpdateCameraDistance: Pos=(%.1f,%.1f,%.1f)",
-        //           m_State.Position[0], m_State.Position[1], m_State.Position[2]);
-        // g_MuEditorConsoleUI.LogEditor(debugMsg);
-        VectorCopy(m_State.Position, lastPos);
-    }
-#endif
 
     // Phase 5 fix: Update frustum only when camera state actually changes
     // This avoids expensive frustum rebuild every frame (20-25% performance gain)
@@ -435,16 +382,14 @@ bool DefaultCamera::Update()
 
     // FIX Issue #1: Use m_Config.farPlane for rendering, not zoom-adjusted m_State.ViewFar
     float effectiveFarPlane = m_Config.farPlane;
-#ifdef _EDITOR
 
-    // Debug: Log when g_Camera.ViewFar is set
+#ifdef _EDITOR
+    // Log only when the value changes
     static float lastLoggedValue = -1.0f;
     if (effectiveFarPlane != lastLoggedValue)
     {
-        char debugMsg[256];
-        sprintf_s(debugMsg, "[CAM] DefaultCamera: Setting g_Camera.ViewFar=%.0f (from m_Config.farPlane=%.0f)",
-                  effectiveFarPlane, m_Config.farPlane);
-        g_MuEditorConsoleUI.LogEditor(debugMsg);
+        CAMERA_LOG("[CAM] DefaultCamera: Setting g_Camera.ViewFar=%.0f (from m_Config.farPlane=%.0f)",
+                   effectiveFarPlane, m_Config.farPlane);
         lastLoggedValue = effectiveFarPlane;
     }
 #endif
@@ -969,18 +914,17 @@ void DefaultCamera::UpdateFrustum()
     );
 
     // Phase 5: Cache current state for next frame's comparison
-    VectorCopy(m_State.Position, m_LastFrustumPosition);
-    VectorCopy(m_State.Angle, m_LastFrustumAngle);
-    m_LastFrustumViewFar = effectiveFarPlane;  // Cache the actual far plane used
+    VectorCopy(m_State.Position, m_FrustumCache.Position);
+    VectorCopy(m_State.Angle, m_FrustumCache.Angle);
+    m_FrustumCache.ViewFar = effectiveFarPlane;
 
 #ifdef _EDITOR
-    // Cache DevEditor config values
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        m_LastEditorFOV = m_Config.hFov;
-        m_LastEditorFarPlane = m_Config.farPlane;
-        m_LastEditorNearPlane = m_Config.nearPlane;
-        m_LastEditorTerrainCullRange = m_Config.terrainCullRange;
+        m_FrustumCache.EditorFOV = m_Config.hFov;
+        m_FrustumCache.EditorFarPlane = m_Config.farPlane;
+        m_FrustumCache.EditorNearPlane = m_Config.nearPlane;
+        m_FrustumCache.EditorTerrainCullRange = m_Config.terrainCullRange;
     }
 #endif
 }
@@ -997,7 +941,7 @@ bool DefaultCamera::NeedsFrustumUpdate() const
         float currentFOV;
         DevEditor_GetCameraConfigFOV(&currentFOV);
 
-        if (fabs(currentFOV - m_LastEditorFOV) > EPSILON)
+        if (fabs(currentFOV - m_FrustumCache.EditorFOV) > EPSILON)
         {
             return true;  // Config changed, rebuild needed
         }
@@ -1005,23 +949,23 @@ bool DefaultCamera::NeedsFrustumUpdate() const
 #endif
 
     // Check position change
-    if (fabs(m_State.Position[0] - m_LastFrustumPosition[0]) > EPSILON ||
-        fabs(m_State.Position[1] - m_LastFrustumPosition[1]) > EPSILON ||
-        fabs(m_State.Position[2] - m_LastFrustumPosition[2]) > EPSILON)
+    if (fabs(m_State.Position[0] - m_FrustumCache.Position[0]) > EPSILON ||
+        fabs(m_State.Position[1] - m_FrustumCache.Position[1]) > EPSILON ||
+        fabs(m_State.Position[2] - m_FrustumCache.Position[2]) > EPSILON)
     {
         return true;
     }
 
     // Check angle change
-    if (fabs(m_State.Angle[0] - m_LastFrustumAngle[0]) > EPSILON ||
-        fabs(m_State.Angle[1] - m_LastFrustumAngle[1]) > EPSILON ||
-        fabs(m_State.Angle[2] - m_LastFrustumAngle[2]) > EPSILON)
+    if (fabs(m_State.Angle[0] - m_FrustumCache.Angle[0]) > EPSILON ||
+        fabs(m_State.Angle[1] - m_FrustumCache.Angle[1]) > EPSILON ||
+        fabs(m_State.Angle[2] - m_FrustumCache.Angle[2]) > EPSILON)
     {
         return true;
     }
 
     // Check ViewFar change
-    if (fabs(m_State.ViewFar - m_LastFrustumViewFar) > EPSILON)
+    if (fabs(m_State.ViewFar - m_FrustumCache.ViewFar) > EPSILON)
     {
         return true;
     }

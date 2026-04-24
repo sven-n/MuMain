@@ -95,11 +95,14 @@ private:
     static constexpr float MAX_RADIUS = 2000.0f;
     static constexpr float DEFAULT_RADIUS = 1100.0f;  // +300 to match Default Camera (3 scroll ticks further out)
 
-    // Input state
-    bool m_bRotating;             // Middle mouse button held?
-    int m_LastMouseX;
-    int m_LastMouseY;
-    float m_LastEffectivePitch;   // Last effective pitch applied (after constraints)
+    // Input state (middle-mouse drag tracking)
+    struct InputState
+    {
+        bool Rotating = false;             // Middle mouse button held?
+        int LastMouseX = 0;
+        int LastMouseY = 0;
+        float LastEffectivePitch = 0.0f;   // Last effective pitch applied (after constraints)
+    } m_Input;
 
     // Helper methods
     void HandleInput();
@@ -107,6 +110,14 @@ private:
     void ComputeCameraTransform();
     void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
     void UpdateConfigForView();  // Phase 1: Adjust config based on zoom level and pitch
+
+    // OnActivate / ResetForScene helpers
+    void LoadConfigForScene(EGameScene scene);
+    void ApplyConfigToState();
+    void CalculateOrbitOriginForStaticScene(EGameScene scene, const CameraState& previousState);
+    void CalculateLookAtPoint(EGameScene scene, vec3_t outLookAt) const;
+    void InitializeOrbitalFromCurrentState(const vec3_t lookAtPoint, const CameraState& previousState);
+    void SyncStateToGlobalCamera();
 
     // Phase 5: WASD+QE free camera movement
     void HandleFreeCameraMovement();

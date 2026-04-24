@@ -125,27 +125,33 @@ namespace
     }
 }
 
-// Global offset values for LoginScene camera correction
-// Can be adjusted at runtime via DevEditor
-float g_LoginSceneOffsetX = -300.0f;      // Left/right correction
-float g_LoginSceneOffsetY = 650.0f;   // Forward/back correction
-float g_LoginSceneOffsetZ = 950.0f;    // Up/down correction
+// LoginScene camera offset correction
+// ------------------------------------
+// The waypoint file used for the LoginScene tour camera was authored against
+// an older version of the map; the terrain has since been re-centered/re-scaled,
+// so every waypoint needs a fixed translation applied to land on the intended
+// visual path. The default values live in LoginSceneCameraDefaults (CameraMove.h)
+// and are empirically tuned for the current LoginScene terrain; these globals can
+// be adjusted at runtime via DevEditor.
+//
+// Applied only when WorldActive == WD_73NEW_LOGIN_SCENE (see ApplyLoginSceneOffset).
+float g_LoginSceneOffsetX   = LoginSceneCameraDefaults::OFFSET_X;
+float g_LoginSceneOffsetY   = LoginSceneCameraDefaults::OFFSET_Y;
+float g_LoginSceneOffsetZ   = LoginSceneCameraDefaults::OFFSET_Z;
+float g_LoginSceneAnglePitch = LoginSceneCameraDefaults::ANGLE_PITCH;
+float g_LoginSceneAngleYaw   = LoginSceneCameraDefaults::ANGLE_YAW;
 
-// Global angle offset values for LoginScene camera
-float g_LoginSceneAnglePitch = 40.0f;   // Pitch offset (up/down tilt)
-float g_LoginSceneAngleYaw = -5.0f;     // Yaw offset (left/right rotation)
-
-// Helper function to apply LoginScene offset to waypoint coordinates
-// This corrects for outdated waypoint file coordinates
+// Applies the LoginScene waypoint correction to a world-space position in-place.
+// Only active on the LoginScene map; other worlds pass through unchanged.
 static void ApplyLoginSceneOffset(float& x, float& y, float& z)
 {
     extern CMapManager gMapManager;
-    if (gMapManager.WorldActive == 73)  // WD_73NEW_LOGIN_SCENE
-    {
-        x += g_LoginSceneOffsetX;
-        y += g_LoginSceneOffsetY;
-        z += g_LoginSceneOffsetZ;
-    }
+    if (gMapManager.WorldActive != WD_73NEW_LOGIN_SCENE)
+        return;
+
+    x += g_LoginSceneOffsetX;
+    y += g_LoginSceneOffsetY;
+    z += g_LoginSceneOffsetZ;
 }
 
 void CCameraMove::Init()

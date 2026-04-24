@@ -78,6 +78,14 @@ namespace SEASON3B
         void RenderContents();
         void RenderButtons();
 
+        // UpdateMouseEvent helpers
+        void HandleCheckboxInputs();
+        bool HandleVolumeSlider(int& level, int yOffset);
+        void OnSoundVolumeChanged();
+        void OnMusicVolumeChanged();
+        void HandleRenderLevelSlider();
+        void HandleResolutionArrows();
+
     private:
         CNewUIManager* m_pNewUIMng;
         POINT						m_Pos;

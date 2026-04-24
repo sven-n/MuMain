@@ -142,6 +142,13 @@
 #include "UIDefaultBase.h"
 #include "NewUICommon.h"
 #include "./Math/ZzzMathLib.h"
+
+// Reference resolution -- all UI coordinates and screen-space math use this as the base.
+// Must be declared BEFORE ZzzOpenglUtil.h because BeginOpengl() uses them as default args.
+// g_fScreenRate_x/y (declared further below) scale from reference to actual window size.
+inline constexpr int REFERENCE_WIDTH = 640;
+inline constexpr int REFERENCE_HEIGHT = 480;
+
 #include "ZzzOpenglUtil.h"
 
 #include "MultiLanguage.h"
@@ -161,5 +168,6 @@
 #include "_crypt.h"
 
 inline std::wstring g_strSelectedML = L"";
+// Scale factors from REFERENCE_WIDTH/HEIGHT (above) to the actual window size.
 inline float g_fScreenRate_x = 0;
 inline float g_fScreenRate_y = 0;

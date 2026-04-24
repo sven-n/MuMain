@@ -29,6 +29,23 @@ inline float HFovToVFov(float hFovDeg, float aspectRatio)
 constexpr float RENDER_DISTANCE_MULTIPLIER = 1.4f;
 
 /**
+ * @brief Fixed camera transform used in CharacterScene
+ *
+ * CharacterScene uses a static hardcoded camera pose (the original game didn't move
+ * the camera on this screen). Both DefaultCamera and OrbitalCamera need these values:
+ * DefaultCamera snaps to them directly, OrbitalCamera uses them as a ray-cast origin
+ * to compute where to place the orbit pivot.
+ */
+namespace CharacterSceneCamera
+{
+    constexpr float POSITION_X = 9758.93f;
+    constexpr float POSITION_Y = 18913.11f;
+    constexpr float POSITION_Z = 675.5f;
+    constexpr float ANGLE_PITCH = -84.5f;  // Angle[0]
+    constexpr float ANGLE_ROLL  = -75.0f;  // Angle[2]
+}
+
+/**
  * @brief Camera rendering configuration
  *
  * Encapsulates all parameters that define how a camera renders the scene.

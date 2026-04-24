@@ -573,8 +573,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             WindowHeight = HIWORD(lParam);
 
             // Update screen rate factors
-            g_fScreenRate_x = (float)WindowWidth / 640.0f;
-            g_fScreenRate_y = (float)WindowHeight / 480.0f;
+            g_fScreenRate_x = (float)WindowWidth / (float)REFERENCE_WIDTH;
+            g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
 
             // Update OpenGL viewport dimensions
             OpenglWindowWidth = WindowWidth;
@@ -639,12 +639,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         MouseY = (float)HIWORD(lParam) / g_fScreenRate_y;
         if (MouseX < 0)
             MouseX = 0;
-        if (MouseX > 640)
-            MouseX = 640;
+        if (MouseX > REFERENCE_WIDTH)
+            MouseX = REFERENCE_WIDTH;
         if (MouseY < 0)
             MouseY = 0;
-        if (MouseY > 480)
-            MouseY = 480;
+        if (MouseY > REFERENCE_HEIGHT)
+            MouseY = REFERENCE_HEIGHT;
     }
     break;
     case WM_LBUTTONDOWN:
@@ -963,54 +963,109 @@ MSG MainLoop()
     return msg;
 }
 
+// Declared at file scope -- an `extern` inside the anonymous namespace below would
+// give the symbol internal linkage and fail to resolve against the real global.
+extern int g_iRenderTextType;
+
+namespace
+{
+    // Tahoma font size scales with window height; these are the tuned base values.
+    constexpr int BASE_FONT_HEIGHT = 12;
+    constexpr float FONT_HEIGHT_GROWTH_PER_PIXEL = 1.f / 200.f;
+    constexpr int FIX_FONT_HEIGHT_SMALL = 14;  // used when WindowHeight <= 600
+    constexpr int FIX_FONT_HEIGHT_LARGE = 15;
+    constexpr int SMALL_WINDOW_HEIGHT_THRESHOLD = 600;
+
+    struct FontSizes { int uiFontSize; int fixFontSize; };
+
+    FontSizes CalculateFontSizes()
+    {
+        FontHeight = static_cast<int>(std::ceil(
+            BASE_FONT_HEIGHT + (WindowHeight - REFERENCE_HEIGHT) * FONT_HEIGHT_GROWTH_PER_PIXEL));
+        int fixFontHeight = (WindowHeight <= SMALL_WINDOW_HEIGHT_THRESHOLD)
+            ? FIX_FONT_HEIGHT_SMALL : FIX_FONT_HEIGHT_LARGE;
+        return { FontHeight - 1, fixFontHeight - 1 };
+    }
+
+    HFONT CreateTahoma(int size, int weight)
+    {
+        return CreateFont(size, 0, 0, 0, weight, 0, 0, 0, DEFAULT_CHARSET,
+                          OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY,
+                          DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    }
+
+    void CreateNewFonts(FontSizes sizes)
+    {
+        g_hFont     = CreateTahoma(sizes.uiFontSize, FW_NORMAL);
+        g_hFontBold = CreateTahoma(sizes.uiFontSize, FW_SEMIBOLD);
+        g_hFontBig  = CreateTahoma(sizes.uiFontSize * 2, FW_SEMIBOLD);
+        g_hFixFont  = CreateTahoma(sizes.fixFontSize, FW_NORMAL);
+    }
+
+    void ReinitializeTextRenderer()
+    {
+        // Recreates the font buffer bitmap with new g_fScreenRate values
+        g_pRenderText->Release();
+        g_pRenderText->Create(g_iRenderTextType, g_hDC);
+        g_pRenderText->SetFont(g_hFont);
+    }
+
+    void RefreshInventoryEquipmentSlots()
+    {
+        // Inventory slot positions depend on the text buffer size; MUST run after
+        // ReinitializeTextRenderer().
+        if (!g_pNewUISystem)
+            return;
+        auto* pInventory = g_pNewUISystem->GetUI_NewMyInventory();
+        if (pInventory)
+            pInventory->SetEquipmentSlotInfo();
+    }
+
+    // Audio volume levels are stored as 0-10 scale; wzAudio wants 0-100.
+    constexpr int VOLUME_SCALE_FACTOR = 10;
+    constexpr int VOLUME_MIN = 0;
+    constexpr int VOLUME_MAX = 10;
+    constexpr int VOLUME_DEFAULT = 5;
+
+    int ClampVolume(int value)
+    {
+        if (value < VOLUME_MIN || value > VOLUME_MAX)
+            return VOLUME_DEFAULT;
+        return value;
+    }
+
+    // Creates the audio device and applies the music volume from config.
+    // Used both from WinMain startup and from code paths that need to (re)init audio.
+    void InitializeAudioSystem()
+    {
+        wzAudioCreate(g_hWnd);
+        wzAudioOption(WZAOPT_STOPBEFOREPLAY, 1);
+        // Use internal volume mode so wzAudio doesn't touch the system master volume
+        wzAudioSetMixerMode(_mmInternalVolume);
+        wzAudioSetVolume(GameConfig::GetInstance().GetMusicVolume() * VOLUME_SCALE_FACTOR);
+    }
+}
+
 // Reinitialize fonts when window resolution changes
 void ReinitializeFonts()
 {
-    // Save old font handles
-    HFONT hOldFont = g_hFont;
+    // Save old font handles so we can delete them after the renderer has switched over
+    HFONT hOldFont     = g_hFont;
     HFONT hOldFontBold = g_hFontBold;
-    HFONT hOldFontBig = g_hFontBig;
-    HFONT hOldFixFont = g_hFixFont;
+    HFONT hOldFontBig  = g_hFontBig;
+    HFONT hOldFixFont  = g_hFixFont;
 
-    // Recalculate font sizes based on new WindowHeight
-    FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
-    int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
-    int iFontSize = FontHeight - 1;
-    int nFixFontSize = nFixFontHeight - 1;
+    FontSizes sizes = CalculateFontSizes();
+    CreateNewFonts(sizes);
+    ReinitializeTextRenderer();
 
-    // Create new fonts
-    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-
-    // Reinitialize the text rendering system with new device context and fonts
-    // This recreates the font buffer bitmap with new g_fScreenRate values
-    extern int g_iRenderTextType;
-    g_pRenderText->Release();
-    g_pRenderText->Create(g_iRenderTextType, g_hDC);
-    g_pRenderText->SetFont(g_hFont);
-
-    // Delete old fonts after the rendering system has been updated
-    if (hOldFont) DeleteObject(hOldFont);
+    if (hOldFont)     DeleteObject(hOldFont);
     if (hOldFontBold) DeleteObject(hOldFontBold);
-    if (hOldFontBig) DeleteObject(hOldFontBig);
-    if (hOldFixFont) DeleteObject(hOldFixFont);
+    if (hOldFontBig)  DeleteObject(hOldFontBig);
+    if (hOldFixFont)  DeleteObject(hOldFixFont);
 
-    // Reinitialize CInput dimensions
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
-
-    // Refresh inventory equipment slot positions for 3D item rendering
-    // MUST be called here immediately after text rendering system is reinitialized
-    // because inventory position calculations depend on the text buffer size
-    if (g_pNewUISystem)
-    {
-        auto* pInventory = g_pNewUISystem->GetUI_NewMyInventory();
-        if (pInventory)
-        {
-            pInventory->SetEquipmentSlotInfo();
-        }
-    }
+    RefreshInventoryEquipmentSlots();
 }
 
 // Update camera state when window resolution changes
@@ -1123,8 +1178,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         GameConfig::GetInstance().DecryptCredentials(m_Username, m_Password, _countof(m_Username), _countof(m_Password));
     }
 
-    g_fScreenRate_x = (float)WindowWidth / 640;
-    g_fScreenRate_y = (float)WindowHeight / 480;
+    g_fScreenRate_x = (float)WindowWidth / (float)REFERENCE_WIDTH;
+    g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
 
 
     pMultiLanguage = new CMultiLanguage(g_strSelectedML);
@@ -1333,19 +1388,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         SetTargetFps(-1); // unlimited
     }
 
-    FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
-
-    int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
-    int nFixFontSize;
-    int iFontSize;
-
-    iFontSize = FontHeight - 1;
-    nFixFontSize = nFixFontHeight - 1;
-
-    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    CreateNewFonts(CalculateFontSizes());
 
     setlocale(LC_ALL, "english");
 
@@ -1354,18 +1397,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_pNewUISystem->Create();
 
     // Always initialize audio system so music can be enabled at runtime
-    wzAudioCreate(g_hWnd);
-    wzAudioOption(WZAOPT_STOPBEFOREPLAY, 1);
-    // Use internal volume mode so wzAudio doesn't touch the system master volume
-    wzAudioSetMixerMode(_mmInternalVolume);
-    wzAudioSetVolume(GameConfig::GetInstance().GetMusicVolume() * 10);
+    InitializeAudioSystem();
 
     // Always initialize sound so it can be toggled at runtime
     InitDirectSound(g_hWnd);
 
     {
-        int value = GameConfig::GetInstance().GetSoundVolume();
-        if (value < 0 || value > 10) value = 5;
+        int value = ClampVolume(GameConfig::GetInstance().GetSoundVolume());
         g_pOption->SetVolumeLevel(value);
         SetEffectVolumeLevel(value);
     }

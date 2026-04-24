@@ -41,6 +41,80 @@ extern "C" bool DevEditor_ShouldShowCharacterCullingSpheres();
 static bool s_bShowCharacterCullingSpheres = false;
 #endif
 
+// Character pick-box dimensions. Single source of truth -- both SelectCharacter()
+// (mouse picking) and the editor debug overlay derive their boxes from these.
+namespace
+{
+    // In-game: grow the model OBB to better match the visible silhouette at steep angles
+    constexpr float PICK_IN_GAME_HEIGHT_GROWTH = 65.0f;
+    constexpr float PICK_IN_GAME_PADDING       = 5.0f;
+
+    // Character selection screen: synthesize a generous axis-aligned box
+    constexpr float PICK_CHAR_SCENE_MIN_HEIGHT = 300.0f;
+    constexpr float PICK_CHAR_SCENE_HALF_WIDTH = 72.0f;
+}
+
+void BuildCharacterPickOBB(const OBJECT* o, bool mainScene, OBB_t& outOBB)
+{
+    outOBB = o->OBB;
+
+    if (mainScene)
+    {
+        outOBB.ZAxis[2]    += PICK_IN_GAME_HEIGHT_GROWTH;
+        outOBB.StartPos[0] += PICK_IN_GAME_PADDING;
+        outOBB.StartPos[1] += PICK_IN_GAME_PADDING;
+        outOBB.XAxis[0]    -= PICK_IN_GAME_PADDING * 2.0f;
+        outOBB.YAxis[1]    -= PICK_IN_GAME_PADDING * 2.0f;
+        return;
+    }
+
+    float charHeight = Models[o->Type].fTransformedSize * 2.0f;
+    if (charHeight < PICK_CHAR_SCENE_MIN_HEIGHT)
+        charHeight = PICK_CHAR_SCENE_MIN_HEIGHT;
+
+    outOBB.StartPos[0] = o->Position[0] - PICK_CHAR_SCENE_HALF_WIDTH;
+    outOBB.StartPos[1] = o->Position[1] - PICK_CHAR_SCENE_HALF_WIDTH;
+    outOBB.StartPos[2] = o->Position[2];
+    outOBB.XAxis[0] = PICK_CHAR_SCENE_HALF_WIDTH * 2.0f;
+    outOBB.XAxis[1] = 0.0f;
+    outOBB.XAxis[2] = 0.0f;
+    outOBB.YAxis[0] = 0.0f;
+    outOBB.YAxis[1] = PICK_CHAR_SCENE_HALF_WIDTH * 2.0f;
+    outOBB.YAxis[2] = 0.0f;
+    outOBB.ZAxis[0] = 0.0f;
+    outOBB.ZAxis[1] = 0.0f;
+    outOBB.ZAxis[2] = charHeight;
+}
+
+#ifdef _EDITOR
+// Declared at file scope -- an `extern` inside an anonymous namespace would give
+// the symbol internal linkage and fail to resolve against the real global.
+extern EGameScene SceneFlag;
+
+namespace
+{
+    constexpr float DEBUG_BOX_COLOR_R = 0.0f;
+    constexpr float DEBUG_BOX_COLOR_G = 1.0f;
+    constexpr float DEBUG_BOX_COLOR_B = 1.0f;
+
+    // Draws the pick volume used by SelectCharacter() as a wireframe box.
+    void RenderCharacterPickBoxDebug(const OBJECT* o)
+    {
+        const bool mainScene = (SceneFlag != CHARACTER_SCENE);
+
+        OBB_t pickBox;
+        BuildCharacterPickOBB(o, mainScene, pickBox);
+
+        // RenderDebugBox takes origin + extents; our OBB is axis-aligned in this path
+        // (both code paths set XAxis/YAxis/ZAxis with only the diagonal populated or
+        // inherited from the model OBB), so using the diagonal components is safe here.
+        RenderDebugBox(pickBox.StartPos,
+                       pickBox.XAxis[0], pickBox.YAxis[1], pickBox.ZAxis[2],
+                       DEBUG_BOX_COLOR_R, DEBUG_BOX_COLOR_G, DEBUG_BOX_COLOR_B);
+    }
+}
+#endif
+
 #include "CSChaosCastle.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
@@ -11287,34 +11361,8 @@ void RenderCharactersClient()
                     battleCastle::CreateBattleCastleCharacter_Visual(c, o);
 
 #ifdef _EDITOR
-                // Debug visualization: Render the actual pick volume (matches SelectCharacter)
                 if (s_bShowCharacterCullingSpheres)
-                {
-                    extern EGameScene SceneFlag;
-                    if (SceneFlag == CHARACTER_SCENE)
-                    {
-                        float charHeight = Models[o->Type].fTransformedSize * 2.0f;
-                        if (charHeight < 300.0f) charHeight = 300.0f;
-                        float halfWidth = 72.0f;
-
-                        vec3_t boxOrigin;
-                        boxOrigin[0] = o->Position[0] - halfWidth;
-                        boxOrigin[1] = o->Position[1] - halfWidth;
-                        boxOrigin[2] = o->Position[2];
-
-                        RenderDebugBox(boxOrigin, halfWidth * 2.0f, halfWidth * 2.0f, charHeight,
-                                       0.0f, 1.0f, 1.0f);
-                    }
-                    else
-                    {
-                        vec3_t adj;
-                        VectorCopy(o->OBB.StartPos, adj);
-                        adj[0] += 5.0f;
-                        adj[1] += 5.0f;
-                        RenderDebugBox(adj, o->OBB.XAxis[0] - 10.0f, o->OBB.YAxis[1] - 10.0f, o->OBB.ZAxis[2] + 65.0f,
-                                       0.0f, 1.0f, 1.0f);
-                    }
-                }
+                    RenderCharacterPickBoxDebug(o);
 #endif
             }
         }

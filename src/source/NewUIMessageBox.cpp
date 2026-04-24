@@ -120,7 +120,7 @@ void SEASON3B::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWO
 
 void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
 {
-    float fWidth = 640.0f, fHeight = 480.0f;
+    float fWidth = (float)REFERENCE_WIDTH, fHeight = (float)REFERENCE_HEIGHT;
     float fPosX = 0.0f, fPosY = 0.0f;
     if (_bRender)
     {

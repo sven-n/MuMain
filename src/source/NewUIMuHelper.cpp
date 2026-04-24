@@ -1944,7 +1944,7 @@ bool CNewUIMuHelperSkillList::Render()
     float iconOffsetY = (boxHeight - iconHeight) / 2.f;
 
     // x position relative to the position of mu helper window
-    float startX = 640.f - 190.f - 32.f;
+    float startX = (float)REFERENCE_WIDTH - 190.f - 32.f;
     // y position relative to the skill/buff selection in mu helper window
     float startY = m_bFilterByAttackSkills ? 171.f : 293.f;
 

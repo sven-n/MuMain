@@ -161,7 +161,7 @@ bool CheckName()
 
 BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
 {
-    if (CheckMouseIn((640 - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
+    if (CheckMouseIn((REFERENCE_WIDTH - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
     {
         MouseLButtonPush = false;
         MouseUpdateTime = 0;
@@ -292,7 +292,7 @@ void RenderInfomation3D()
         EnableDepthMask();
 
         float Width, Height;
-        float x = (640 - 150) / 2;
+        float x = (REFERENCE_WIDTH - 150) / 2;
         float y;
         if (ErrorMessage == MESSAGE_TRADE_CHECK)
         {

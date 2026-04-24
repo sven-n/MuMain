@@ -262,8 +262,8 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
 
         GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_strText.c_str(), m_strText.size(), &Fontsize);
 
-        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
-        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
+        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
+        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
 
         int x = m_x + ((m_width / 2) - (Fontsize.cx / 2));
         int y = m_y + ((m_height / 2) - (Fontsize.cy / 2));

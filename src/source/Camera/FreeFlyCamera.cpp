@@ -15,6 +15,34 @@ extern int MouseY;
 extern float FPS_ANIMATION_FACTOR;
 extern CameraState g_Camera;
 
+namespace
+{
+    // Degrees the camera rotates per pixel of mouse delta while right-clicking.
+    constexpr float MOUSE_LOOK_SENSITIVITY = 0.3f;
+
+    // Full rotation in degrees, used to wrap yaw into [0, 360).
+    constexpr float FULL_ROTATION_DEG = 360.0f;
+
+    // Compute the camera forward vector from yaw/pitch in degrees.
+    // Matches the OpenGL rendering direction: glRotatef(pitch, 1,0,0) then glRotatef(yaw, 0,0,1).
+    inline void ComputeForwardVector(float yawDeg, float pitchDeg, vec3_t outForward)
+    {
+        float yawRad = yawDeg * (Q_PI / 180.0f);
+        float pitchRad = pitchDeg * (Q_PI / 180.0f);
+        outForward[0] = -sinf(yawRad) * sinf(pitchRad);
+        outForward[1] = -cosf(yawRad) * sinf(pitchRad);
+        outForward[2] = -cosf(pitchRad);
+    }
+
+    // Compute the right vector (perpendicular to forward in the XY plane).
+    inline void ComputeRightVectorXY(float yawDeg, float& outRightX, float& outRightY)
+    {
+        float yawRad = yawDeg * (Q_PI / 180.0f);
+        outRightX = cosf(yawRad);
+        outRightY = -sinf(yawRad);
+    }
+}
+
 FreeFlyCamera::FreeFlyCamera(CameraState& state)
     : m_State(state)
     , m_Yaw(0.0f)
@@ -117,12 +145,11 @@ void FreeFlyCamera::HandleInput()
             int deltaX = MouseX - m_LastMouseX;
             int deltaY = MouseY - m_LastMouseY;
 
-            const float sensitivity = 0.3f;
-            m_Yaw += deltaX * sensitivity;
-            m_Pitch += deltaY * sensitivity;
+            m_Yaw += deltaX * MOUSE_LOOK_SENSITIVITY;
+            m_Pitch += deltaY * MOUSE_LOOK_SENSITIVITY;
 
-            // Normalize yaw
-            m_Yaw = fmodf(m_Yaw + 360.0f, 360.0f);
+            // Normalize yaw into [0, 360)
+            m_Yaw = fmodf(m_Yaw + FULL_ROTATION_DEG, FULL_ROTATION_DEG);
 
             // Clamp pitch
             m_Pitch = std::clamp(m_Pitch, MIN_PITCH, MAX_PITCH);
@@ -137,61 +164,52 @@ void FreeFlyCamera::HandleInput()
     }
 }
 
-void FreeFlyCamera::HandleMovement()
+void FreeFlyCamera::ReadMovementInput(float& outForward, float& outStrafe, float& outVertical)
 {
     // Arrow keys for XY movement (avoids WASD conflict with game UI)
-    // Forward arrow moves in camera look direction (projected to XY plane)
-    float forward = 0.0f, strafe = 0.0f, vertical = 0.0f;
+    outForward = 0.0f;
+    outStrafe = 0.0f;
+    outVertical = 0.0f;
 
-    if (GetAsyncKeyState(VK_UP) & 0x8000)
-        forward += 1.0f;
-    if (GetAsyncKeyState(VK_DOWN) & 0x8000)
-        forward -= 1.0f;
-    if (GetAsyncKeyState(VK_LEFT) & 0x8000)
-        strafe -= 1.0f;
-    if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
-        strafe += 1.0f;
+    if (GetAsyncKeyState(VK_UP) & 0x8000)    outForward += 1.0f;
+    if (GetAsyncKeyState(VK_DOWN) & 0x8000)  outForward -= 1.0f;
+    if (GetAsyncKeyState(VK_LEFT) & 0x8000)  outStrafe -= 1.0f;
+    if (GetAsyncKeyState(VK_RIGHT) & 0x8000) outStrafe += 1.0f;
 
     // PageUp/PageDown for vertical movement
-    if (GetAsyncKeyState(VK_PRIOR) & 0x8000)  // Page Up
-        vertical += 1.0f;
-    if (GetAsyncKeyState(VK_NEXT) & 0x8000)   // Page Down
-        vertical -= 1.0f;
+    if (GetAsyncKeyState(VK_PRIOR) & 0x8000) outVertical += 1.0f;
+    if (GetAsyncKeyState(VK_NEXT)  & 0x8000) outVertical -= 1.0f;
+}
+
+void FreeFlyCamera::HandleMovement()
+{
+    float forward, strafe, vertical;
+    ReadMovementInput(forward, strafe, vertical);
 
     float inputLength = sqrtf(forward * forward + strafe * strafe + vertical * vertical);
-    if (inputLength > 0.0f)
-    {
-        // Normalize input
-        forward /= inputLength;
-        strafe /= inputLength;
-        vertical /= inputLength;
+    if (inputLength == 0.0f)
+        return;
 
-        // Apply speed
-        float speed = BASE_SPEED;
-        if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
-            speed *= SPRINT_MULTIPLIER;
+    // Normalize input so diagonal movement isn't faster
+    forward /= inputLength;
+    strafe /= inputLength;
+    vertical /= inputLength;
 
-        speed *= FPS_ANIMATION_FACTOR;
+    float speed = BASE_SPEED;
+    if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+        speed *= SPRINT_MULTIPLIER;
+    speed *= FPS_ANIMATION_FACTOR;
 
-        // Forward vector derived from OpenGL view matrix (matches rendering direction)
-        // BeginOpengl applies: glRotatef(pitch, 1,0,0) then glRotatef(yaw, 0,0,1)
-        // Camera forward = inverse rotation applied to eye-space -Z
-        float yawRad = m_Yaw * (Q_PI / 180.0f);
-        float pitchRad = m_Pitch * (Q_PI / 180.0f);
+    vec3_t forwardVec;
+    ComputeForwardVector(m_Yaw, m_Pitch, forwardVec);
 
-        float forwardX = -sinf(yawRad) * sinf(pitchRad);
-        float forwardY = -cosf(yawRad) * sinf(pitchRad);
-        float forwardZ = -cosf(pitchRad);
+    float rightX, rightY;
+    ComputeRightVectorXY(m_Yaw, rightX, rightY);
 
-        // Right vector (perpendicular to forward in XY plane)
-        float rightX = cosf(yawRad);
-        float rightY = -sinf(yawRad);
-
-        // Compose world-space movement
-        m_Position[0] += (forwardX * forward + rightX * strafe) * speed;
-        m_Position[1] += (forwardY * forward + rightY * strafe) * speed;
-        m_Position[2] += (forwardZ * forward + vertical) * speed;
-    }
+    // Compose world-space movement
+    m_Position[0] += (forwardVec[0] * forward + rightX * strafe) * speed;
+    m_Position[1] += (forwardVec[1] * forward + rightY * strafe) * speed;
+    m_Position[2] += (forwardVec[2] * forward + vertical) * speed;
 }
 
 void FreeFlyCamera::ComputeCameraTransform()
@@ -224,31 +242,16 @@ void FreeFlyCamera::ComputeCameraTransform()
 
 void FreeFlyCamera::UpdateFrustum()
 {
-    // Calculate forward vector from yaw and pitch
-    float yawRad = m_Yaw * (Q_PI / 180.0f);
-    float pitchRad = m_Pitch * (Q_PI / 180.0f);
-
-    // Forward vector matches OpenGL rendering direction
     vec3_t forward;
-    forward[0] = -sinf(yawRad) * sinf(pitchRad);
-    forward[1] = -cosf(yawRad) * sinf(pitchRad);
-    forward[2] = -cosf(pitchRad);
+    ComputeForwardVector(m_Yaw, m_Pitch, forward);
     VectorNormalize(forward);
 
-    // World up
+    // Orthonormal basis: build right from forward × world up, then real up from right × forward
     vec3_t worldUp = { 0.0f, 0.0f, 1.0f };
-
-    // Calculate right vector
-    vec3_t right, forwardTemp, upTemp;
-    VectorCopy(forward, forwardTemp);
-    VectorCopy(worldUp, upTemp);
-    CrossProduct(forwardTemp, upTemp, right);
+    vec3_t right;
+    CrossProduct(forward, worldUp, right);
     VectorNormalize(right);
-
-    // Calculate actual up vector
-    VectorCopy(right, forwardTemp);
-    VectorCopy(forward, upTemp);
-    CrossProduct(forwardTemp, upTemp, worldUp);
+    CrossProduct(right, forward, worldUp);
     VectorNormalize(worldUp);
 
     extern unsigned int WindowWidth, WindowHeight;

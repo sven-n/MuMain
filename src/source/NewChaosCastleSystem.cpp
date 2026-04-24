@@ -171,7 +171,7 @@ void CNewChaosCastleSystem::RenderMatchTimes(void)
 
 void CNewChaosCastleSystem::RenderMatchResult(void)
 {
-    int x = 640 / 2;
+    int x = REFERENCE_WIDTH / 2;
     int yPos = m_PosResult.y + 40;
     wchar_t lpszStr[256] = { NULL, };
 

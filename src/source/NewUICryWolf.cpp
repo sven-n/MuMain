@@ -484,12 +484,12 @@ bool SEASON3B::CNewUICryWolf::Update()
 
 float SEASON3B::CNewUICryWolf::ConvertX(float x)
 {
-    return x * (float)WindowWidth / 640.f;
+    return x * (float)WindowWidth / (float)REFERENCE_WIDTH;
 }
 
 float SEASON3B::CNewUICryWolf::ConvertY(float y)
 {
-    return y * (float)WindowHeight / 480.f;
+    return y * (float)WindowHeight / (float)REFERENCE_HEIGHT;
 }
 
 bool SEASON3B::CNewUICryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index, bool Scale, bool StartScale, float Alpha)

@@ -89,6 +89,7 @@ private:
     // Helper methods
     void HandleInput();
     void HandleMovement();
+    void ReadMovementInput(float& outForward, float& outStrafe, float& outVertical);
     void ComputeCameraTransform();
     void UpdateFrustum();
 };

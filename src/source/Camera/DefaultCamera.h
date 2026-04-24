@@ -82,6 +82,13 @@ private:
     void UpdateFrustum();  // Phase 1: Rebuild frustum from current state
     bool NeedsFrustumUpdate() const;  // Phase 5: Check if frustum needs rebuild
 
+    // ResetForScene helpers: each loads the scene-specific config and initial transform.
+    void ApplyConfigToState();   // Apply m_Config to m_State (FOV/ViewFar/TopView)
+    void InvalidateFrustumCache();
+    void InitCharacterScene();
+    void InitMainScene();
+    void InitLoginScene();
+
     // Phase 5: WASD+QE free camera movement
     void HandleFreeCameraMovement();
     bool m_bFreeCameraMode = false;
@@ -90,14 +97,15 @@ private:
     void HandleEditorMode();
 #endif
 
-    // Phase 5: Cache last frustum state to avoid unnecessary rebuilds
-    mutable vec3_t m_LastFrustumPosition;
-    mutable vec3_t m_LastFrustumAngle;
-    mutable float m_LastFrustumViewFar;
-
-    // Phase 5: Cache last DevEditor config to detect changes
-    mutable float m_LastEditorFOV;
-    mutable float m_LastEditorFarPlane;
-    mutable float m_LastEditorNearPlane;
-    mutable float m_LastEditorTerrainCullRange;
+    // Phase 5: Cache last frustum state + editor config to avoid unnecessary rebuilds
+    mutable struct FrustumCache
+    {
+        vec3_t Position = {};
+        vec3_t Angle = {};
+        float ViewFar = 0.0f;
+        float EditorFOV = 0.0f;
+        float EditorFarPlane = 0.0f;
+        float EditorNearPlane = 0.0f;
+        float EditorTerrainCullRange = 0.0f;
+    } m_FrustumCache;
 };

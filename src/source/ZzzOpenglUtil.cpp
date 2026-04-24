@@ -480,20 +480,20 @@ void glViewport2(int x, int y, int Width, int Height)
 
 float ConvertX(float x)
 {
-    return x * (float)WindowWidth / 640.f;
+    return x * (float)WindowWidth / (float)REFERENCE_WIDTH;
 }
 
 float ConvertY(float y)
 {
-    return y * (float)WindowHeight / 480.f;
+    return y * (float)WindowHeight / (float)REFERENCE_HEIGHT;
 }
 
 void BeginOpengl(int x, int y, int Width, int Height)
 {
-    x = x * WindowWidth / 640;
-    y = y * WindowHeight / 480;
-    Width = Width * WindowWidth / 640;
-    Height = Height * WindowHeight / 480;
+    x = x * WindowWidth / REFERENCE_WIDTH;
+    y = y * WindowHeight / REFERENCE_HEIGHT;
+    Width = Width * WindowWidth / REFERENCE_WIDTH;
+    Height = Height * WindowHeight / REFERENCE_HEIGHT;
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -1364,15 +1364,15 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
         float dx, dy;
         dx = p4[0][0] + (WindowWidth / 2.f);
         dy = p4[0][1] + (WindowHeight / 2.f);
-        dx = dx * (float)(640.f / WindowWidth);
-        dy = dy * (float)(480.f / WindowHeight);
+        dx = dx * (float)((float)REFERENCE_WIDTH / WindowWidth);
+        dy = dy * (float)((float)REFERENCE_HEIGHT / WindowHeight);
         if (Num >= 100)
         {
-            g_pNewUIMiniMap->SetBtnPos(Num - 100, dx - (iWidth / 2), (480 - dy) - (iHeight / 2), iWidth, iHeight);
+            g_pNewUIMiniMap->SetBtnPos(Num - 100, dx - (iWidth / 2), (REFERENCE_HEIGHT - dy) - (iHeight / 2), iWidth, iHeight);
         }
         else
         {
-            g_pNewUIMiniMap->SetBtnPos(Num, dx, 480 - dy, iWidth / 2, iHeight / 2);
+            g_pNewUIMiniMap->SetBtnPos(Num, dx, REFERENCE_HEIGHT - dy, iWidth / 2, iHeight / 2);
         }
     }
 }

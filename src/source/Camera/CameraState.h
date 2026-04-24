@@ -29,10 +29,6 @@ public:
     float DistanceTarget;         // Target distance (smooth interpolation)
     short ZoomLevel;              // Camera zoom level (0-5)
 
-    // Legacy 3D camera flags (unused in Phase 1, but kept for compatibility)
-    float FOV3D;                  // 3D FOV override
-    bool Roll3D;                  // 3D roll enable
-
     // Custom camera distance (for special terrain)
     float CustomDistance;
 

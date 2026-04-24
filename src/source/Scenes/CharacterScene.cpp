@@ -244,18 +244,18 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     MoveMainCamera();
 
     glColor3f(1.f, 1.f, 1.f);
-    outHeight = 480;
+    outHeight = REFERENCE_HEIGHT;
     outWidth = GetScreenWidth();
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
-    BeginOpengl(0, 25, 640, 430);
+    BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
 
     // Build global frustum arrays for TestFrustrum/TestFrustrum2D
     // Must be called after BeginOpengl (needs GL matrices) in every scene that renders terrain/objects
     {
         vec3_t cameraPos;
         VectorCopy(g_Camera.Position, cameraPos);
-        CreateFrustrum((float)outWidth / 640.f, 430.f / 480.f, cameraPos);
+        CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH, 430.f / (float)REFERENCE_HEIGHT, cameraPos);
     }
 
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
@@ -293,19 +293,18 @@ static void ApplySelectedCharacterLighting()
  */
 static void AdjustCharacterHeights()
 {
+    // Character Z positions on the selection screen (tuned to align feet with the podium).
+    constexpr float CHARACTER_Z_ON_DINORANT = 194.5f;
+    constexpr float CHARACTER_Z_DEFAULT     = 169.5f;
+
     for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; ++i)
     {
         CHARACTER* pCha = &CharactersClient[i];
         OBJECT* pObj = &pCha->Object;
 
-        if (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
-        {
-            pObj->Position[2] = 194.5f;
-        }
-        else
-        {
-            pObj->Position[2] = 169.5f;
-        }
+        pObj->Position[2] = (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
+            ? CHARACTER_Z_ON_DINORANT
+            : CHARACTER_Z_DEFAULT;
     }
 }
 
@@ -345,9 +344,15 @@ static void RenderSelectedCharacterEffects()
     if (!o->Live)
         return;
 
+    // Aurora luminance pulses between (BASE - AMPLITUDE) and (BASE + AMPLITUDE)
+    // with period ~2π / FREQUENCY ms.
+    constexpr float AURORA_FREQUENCY = 0.0015f;
+    constexpr float AURORA_AMPLITUDE = 0.3f;
+    constexpr float AURORA_BASE_LUMINANCE = 0.5f;
+
     vec3_t vLight;
     Vector(1.0f, 1.0f, 1.f, vLight);
-    float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
+    float fLumi = sinf(WorldTime * AURORA_FREQUENCY) * AURORA_AMPLITUDE + AURORA_BASE_LUMINANCE;
     Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
 
     EnableAlphaBlend();

@@ -253,8 +253,8 @@ void ClearInput(BOOL bClearWhisperTarget)
 
 void SetPositionIME_Wnd(float x, float y)
 {
-    float xRatio_Input = x / 640.f;
-    float yRatio_Input = y / 480.f;
+    float xRatio_Input = x / (float)REFERENCE_WIDTH;
+    float yRatio_Input = y / (float)REFERENCE_HEIGHT;
 
     COMPOSITIONFORM comForm;
     comForm.dwStyle = CFS_POINT;
@@ -917,8 +917,8 @@ void RenderBoolean(int x, int y, CHAT* c)
         SetPlayerColor(c->Color);
     }
 
-    if (c->x <= MouseX && MouseX < (int)(c->x + c->Width * 640 / WindowWidth) &&
-        c->y <= MouseY && MouseY < (int)(c->y + c->Height * 480 / WindowHeight) &&
+    if (c->x <= MouseX && MouseX < (int)(c->x + c->Width * REFERENCE_WIDTH / WindowWidth) &&
+        c->y <= MouseY && MouseY < (int)(c->y + c->Height * REFERENCE_HEIGHT / WindowHeight) &&
         InputEnable && Hero->SafeZone && wcscmp(c->ID, Hero->ID) != NULL &&
         (DWORD)WorldTime % 24 < 12)
     {
@@ -3943,8 +3943,8 @@ void SendMove(CHARACTER* c, OBJECT* o)
         if (g_bUseWindowMode == FALSE)
         {
 #endif	// WINDOWMODE
-            int x = 640 * MouseX / 260;
-            SetCursorPos((x)*WindowWidth / 640, (MouseY)*WindowHeight / 480);
+            int x = REFERENCE_WIDTH * MouseX / 260;
+            SetCursorPos((x)*WindowWidth / REFERENCE_WIDTH, (MouseY)*WindowHeight / REFERENCE_HEIGHT);
 #ifdef WINDOWMODE
         }
 #endif	// WINDOWMODE
@@ -7430,9 +7430,9 @@ void MoveHero()
     {
         int mousePosY = MouseY;
 
-        if (mousePosY > 480)
+        if (mousePosY > REFERENCE_HEIGHT)
         {
-            mousePosY = 480;
+            mousePosY = REFERENCE_HEIGHT;
         }
         Hero->Object.HeadTargetAngle[0] = (float)Angle;
         Hero->Object.HeadTargetAngle[1] = (HeroY - mousePosY) * 0.05f;
@@ -7922,37 +7922,8 @@ int SelectCharacter(BYTE Kind)
                     o->OBB.ZAxis[2] += 100.f;
                 }
 
-                // Character scene: build a generous pick box from foot level upward
-                // (the model OBB is too tight for the steep camera angle).
-                // In-game: use the original model OBB.
-                OBB_t pickOBB = o->OBB;
-                if (Main)
-                {
-                    pickOBB.ZAxis[2] += 65.0f;
-                    pickOBB.StartPos[0] += 5.0f;
-                    pickOBB.StartPos[1] += 5.0f;
-                    pickOBB.XAxis[0] -= 10.0f;
-                    pickOBB.YAxis[1] -= 10.0f;
-                }
-                else
-                {
-                    float charHeight = Models[o->Type].fTransformedSize * 2.0f;
-                    if (charHeight < 300.0f) charHeight = 300.0f;
-                    float halfWidth = 72.0f;
-
-                    pickOBB.StartPos[0] = o->Position[0] - halfWidth;
-                    pickOBB.StartPos[1] = o->Position[1] - halfWidth;
-                    pickOBB.StartPos[2] = o->Position[2];
-                    pickOBB.XAxis[0] = halfWidth * 2.0f;
-                    pickOBB.XAxis[1] = 0.0f;
-                    pickOBB.XAxis[2] = 0.0f;
-                    pickOBB.YAxis[0] = 0.0f;
-                    pickOBB.YAxis[1] = halfWidth * 2.0f;
-                    pickOBB.YAxis[2] = 0.0f;
-                    pickOBB.ZAxis[0] = 0.0f;
-                    pickOBB.ZAxis[1] = 0.0f;
-                    pickOBB.ZAxis[2] = charHeight;
-                }
+                OBB_t pickOBB;
+                BuildCharacterPickOBB(o, Main, pickOBB);
 
                 if (CollisionDetectLineToOBB(MousePosition, MouseTarget, pickOBB))
                 {
@@ -8424,8 +8395,8 @@ void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disa
     {
         if (x < 0) x = 0;
         if (y < 0) y = 0;
-        if (x + Width + 4 > 640) x = 640 - (Width + 1 + 4);
-        if (y + Height + 4 > 480 - 47) y = 480 - 47 - (Height + 1 + 4);
+        if (x + Width + 4 > REFERENCE_WIDTH) x = REFERENCE_WIDTH - (Width + 1 + 4);
+        if (y + Height + 4 > REFERENCE_HEIGHT - 47) y = REFERENCE_HEIGHT - 47 - (Height + 1 + 4);
     }
 
     EnableAlphaTest();
@@ -8476,7 +8447,7 @@ void RenderSwichState()
             g_pRenderText->SetFont(g_hFont);
             g_pRenderText->SetTextColor(255, 255, 255, 255);
             g_pRenderText->SetBgColor(0);
-            g_pRenderText->RenderText(0, 480 - 85 + (i * 15), Buff, 640, 0, RT3_SORT_CENTER);
+            g_pRenderText->RenderText(0, REFERENCE_HEIGHT - 85 + (i * 15), Buff, REFERENCE_WIDTH, 0, RT3_SORT_CENTER);
         }
     }
 }
@@ -8507,9 +8478,9 @@ void RenderOutSides()
         EnableAlphaBlend();
         glColor3f(0.3f, 0.3f, 0.25f);
         float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, 640.f, 480.f - 45.f, WindX, 0.f, 0.3f, 0.3f);
+        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.001f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, 640.f, 480.f - 45.f, WindX2, 0.f, 3.f, 2.f);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f);
     }
 #ifdef ASG_ADD_MAP_KARUTAN
     else if (IsKarutanMap())
@@ -8518,7 +8489,7 @@ void RenderOutSides()
         EnableAlphaBlend();
         glColor3f(0.3f, 0.3f, 0.25f);
         float fWindX = (float)((int)WorldTime % 100000) * 0.004f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, 640.f, 480.f - 45.f, fWindX, 0.f, 3.f, 2.f);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, fWindX, 0.f, 3.f, 2.f);
     }
 #endif	// ASG_ADD_MAP_KARUTAN
     else if (WD_34CRYWOLF_1ST == gMapManager.WorldActive)
@@ -8550,8 +8521,8 @@ void MoveTournamentInterface()
 {
     static unsigned int s_effectCount = 0;
     int Width = 70, Height = 20;
-    int WindowX = (640 - Width) / 2;
-    int WindowY = (480 - Height) / 2 + 50;
+    int WindowX = (REFERENCE_WIDTH - Width) / 2;
+    int WindowY = (REFERENCE_HEIGHT - Height) / 2 + 50;
     if (MouseLButtonPush)
     {
         float wRight = WindowX + Width;
@@ -8622,7 +8593,7 @@ void MoveBattleSoccerEffect(CHARACTER* c)
 void RenderTournamentInterface()
 {
     int Width = 300, Height = 2 * 5 + 6 * 30;
-    int WindowX = (640 - Width) / 2;
+    int WindowX = (REFERENCE_WIDTH - Width) / 2;
     int WindowY = 120 + 0;
     float x = 0.0f, y = 0.0f;
     wchar_t t_Str[20];
@@ -8674,7 +8645,7 @@ void RenderTournamentInterface()
         return;
     }
 
-    Width = 300; Height = 2 * 5 + 5 * 40; WindowX = (640 - Width) / 2; WindowY = 120 + 0;
+    Width = 300; Height = 2 * 5 + 5 * 40; WindowX = (REFERENCE_WIDTH - Width) / 2; WindowY = 120 + 0;
     int yPos = WindowY;
     RenderBitmap(BITMAP_INTERFACE + 22, (float)WindowX, (float)yPos, (float)Width, (float)5, 0.f, 0.f, Width / 512.f, 5.f / 8.f);
     yPos += 5;
@@ -8746,7 +8717,7 @@ void RenderTournamentInterface()
     }
     g_pRenderText->SetFont(g_hFont);
 
-    Width = 70; Height = 20; x = (640 - Width) / 2; y = (480 - Height) / 2 + 50;
+    Width = 70; Height = 20; x = (REFERENCE_WIDTH - Width) / 2; y = (REFERENCE_HEIGHT - Height) / 2 + 50;
     if (MouseX >= x && MouseX < x + Width && MouseY >= y && MouseY < y + Height)
     {
         RenderBitmap(BITMAP_INTERFACE + 12, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, Width / 128.f, Height / 32.f);
@@ -8894,7 +8865,7 @@ void RenderTimes()
     {
         constexpr float width = 50;
         constexpr float height = 2;
-        constexpr int y = 480 - 48 - 40;
+        constexpr int y = REFERENCE_HEIGHT - 48 - 40;
         const float x = (static_cast<float>(GetScreenWidth()) - width) / 2.0f;
 
         const uint64_t remainingMacroCooldownTime = MacroCooldownMs - (currentTickCount - LastMacroTime);
@@ -9143,7 +9114,7 @@ void EditObjects()
                     PickObject->Scale += 0.02f;
                 if (HIBYTE(GetAsyncKeyState('F')) == 128)
                     PickObject->Scale -= 0.02f;
-                if (MouseX >= 640 - 100 && MouseY < 100)
+                if (MouseX >= REFERENCE_WIDTH - 100 && MouseY < 100)
                 {
                     DeleteObject(PickObject, &ObjectBlock[PickObject->Block]);
                     PickObject = NULL;
@@ -9247,7 +9218,7 @@ void EditObjects()
     }
     if (EditFlag == EDIT_MAPPING)
     {
-        int sx = 640 - 30;
+        int sx = REFERENCE_WIDTH - 30;
         int sy = 0;
         for (int i = 0; i < 14; i++)
         {
@@ -9341,7 +9312,7 @@ void RenderDebugWindow()
     wchar_t Text[256] {};
     if (EditFlag == EDIT_MAPPING)
     {
-        int sx = 640 - 30;
+        int sx = REFERENCE_WIDTH - 30;
         int sy = 0;
         for (int i = 0; i < 14; i++)
         {
@@ -9352,16 +9323,16 @@ void RenderDebugWindow()
             RenderBitmap(BITMAP_MAPTILE + i, (float)(sx), (float)(sy + i * 30), 30.f, 30.f);
         }
         if (CurrentLayer == 0)
-            g_pRenderText->RenderText(640 - 100, sy, L"Background");
+            g_pRenderText->RenderText(REFERENCE_WIDTH - 100, sy, L"Background");
         else
-            g_pRenderText->RenderText(640 - 100, sy, L"Layer1");
+            g_pRenderText->RenderText(REFERENCE_WIDTH - 100, sy, L"Layer1");
         mu_swprintf(Text, L"Brush Size: %d", BrushSize * 2 + 1);
-        g_pRenderText->RenderText(640 - 100, sy + 11, Text);
+        g_pRenderText->RenderText(REFERENCE_WIDTH - 100, sy + 11, Text);
     }
     glColor3f(1.f, 1.f, 1.f);
     if (EditFlag == EDIT_OBJECT)
     {
-        g_pRenderText->RenderText(640 - 100, 0, L"Garbage");
+        g_pRenderText->RenderText(REFERENCE_WIDTH - 100, 0, L"Garbage");
         CMultiLanguage::ConvertFromUtf8(Text, Models[SelectModel].Name, sizeof Models[SelectModel].Name);
         g_pRenderText->RenderText(0, 0, Text);
     }
@@ -9375,7 +9346,7 @@ void RenderDebugWindow()
                 glColor3f(1.f, 1.f, 1.f);
 
             mu_swprintf(Text, L"%2d: %ls", MonsterScript[i].Type, MonsterScript[i].Name);
-            g_pRenderText->RenderText(640 - 100, i * 10, Text);
+            g_pRenderText->RenderText(REFERENCE_WIDTH - 100, i * 10, Text);
         }
     }
     if (EditFlag == EDIT_LIGHT)
@@ -9387,7 +9358,7 @@ void RenderDebugWindow()
             else
                 glColor3f(1.f, 1.f, 1.f);
 
-            g_pRenderText->RenderText(640 - 64, i * 10, ColorTable[i]);
+            g_pRenderText->RenderText(REFERENCE_WIDTH - 64, i * 10, ColorTable[i]);
         }
     }
 #endif //ENABLE_EDIT

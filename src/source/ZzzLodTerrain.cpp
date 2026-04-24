@@ -2012,66 +2012,77 @@ static ICamera* s_pCachedCamera = nullptr;
 
 extern int GetScreenWidth();
 
-// Helper: build a CW convex hull from points projected to tile-space XY,
-// then store into FrustrumX/Y/Count and compute iteration bounds.
-static void BuildHull2DAndBounds(const float* ptsX, const float* ptsY, int numPts)
+namespace
 {
+    // Max vertices in the 2D frustum hull. Matches the capacity of FrustrumX/Y and is
+    // large enough for 8 frustum corners + 4 terrain-extension corners.
+    constexpr int MAX_HULL_VERTICES = 12;
+
+    // Iteration bounds are snapped to a tile grid of this size so we iterate whole LOD tiles.
+    constexpr int TERRAIN_ITERATION_TILE = 4;
+
+    // Insertion-sort threshold for degenerate-edge detection during hull expansion.
+    constexpr float EDGE_LENGTH_EPSILON = 0.001f;
+
+    // Bisector scale clamp when interior angle approaches 180° (cosHalf → 0).
+    constexpr float BISECTOR_COS_MIN = 0.1f;
+
     struct Pt { float x, y; };
-    Pt sorted[12];
-    int n = (numPts > 12) ? 12 : numPts;
-    for (int i = 0; i < n; i++) { sorted[i].x = ptsX[i]; sorted[i].y = ptsY[i]; }
 
-    // Insertion sort by X then Y
-    for (int i = 1; i < n; i++)
+    // Insertion sort by X then Y (points are always <= MAX_HULL_VERTICES).
+    void SortPointsByXThenY(Pt* pts, int n)
     {
-        Pt key = sorted[i];
-        int j = i - 1;
-        while (j >= 0 && (sorted[j].x > key.x || (sorted[j].x == key.x && sorted[j].y > key.y)))
+        for (int i = 1; i < n; i++)
         {
-            sorted[j + 1] = sorted[j];
-            j--;
+            Pt key = pts[i];
+            int j = i - 1;
+            while (j >= 0 && (pts[j].x > key.x || (pts[j].x == key.x && pts[j].y > key.y)))
+            {
+                pts[j + 1] = pts[j];
+                j--;
+            }
+            pts[j + 1] = key;
         }
-        sorted[j + 1] = key;
     }
 
-    // Andrew's monotone chain (CCW)
-    Pt hull[24];
-    int k = 0;
-    for (int i = 0; i < n; i++)
+    inline float Cross2D(const Pt& a, const Pt& b, const Pt& c)
     {
-        while (k >= 2)
+        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    }
+
+    // Andrew's monotone chain. Input must be sorted by X then Y. Writes CCW hull to `outHull`.
+    int ConvexHullCCW(const Pt* sorted, int n, Pt* outHull, int capacity)
+    {
+        int k = 0;
+        // Lower hull
+        for (int i = 0; i < n; i++)
         {
-            float cross = (hull[k-1].x - hull[k-2].x) * (sorted[i].y - hull[k-2].y)
-                        - (hull[k-1].y - hull[k-2].y) * (sorted[i].x - hull[k-2].x);
-            if (cross <= 0.f) k--;
-            else break;
+            while (k >= 2 && Cross2D(outHull[k - 2], outHull[k - 1], sorted[i]) <= 0.f)
+                k--;
+            if (k < capacity)
+                outHull[k++] = sorted[i];
         }
-        hull[k++] = sorted[i];
-    }
-    int lower = k + 1;
-    for (int i = n - 2; i >= 0; i--)
-    {
-        while (k >= lower)
+        // Upper hull
+        int lowerSize = k + 1;
+        for (int i = n - 2; i >= 0; i--)
         {
-            float cross = (hull[k-1].x - hull[k-2].x) * (sorted[i].y - hull[k-2].y)
-                        - (hull[k-1].y - hull[k-2].y) * (sorted[i].x - hull[k-2].x);
-            if (cross <= 0.f) k--;
-            else break;
+            while (k >= lowerSize && Cross2D(outHull[k - 2], outHull[k - 1], sorted[i]) <= 0.f)
+                k--;
+            if (k < capacity)
+                outHull[k++] = sorted[i];
         }
-        hull[k++] = sorted[i];
+        k--;  // Remove duplicate last point
+        return k;
     }
-    k--;
-    if (k > 12) k = 12;
+}
 
-    // Reverse to CW (TestFrustrum2D expects CW winding)
-    FrustrumCount = k;
-    for (int i = 0; i < k; i++)
-    {
-        FrustrumX[i] = hull[k - 1 - i].x;
-        FrustrumY[i] = hull[k - 1 - i].y;
-    }
+// Compute FrustrumBound{Min,Max}{X,Y} from the current FrustrumX/Y/Count hull.
+// Snaps to a TERRAIN_ITERATION_TILE grid and clamps to valid terrain range.
+static void ComputeIterationBoundsFromHull()
+{
+    if (FrustrumCount <= 0)
+        return;
 
-    // Compute iteration bounds
     float minX = FrustrumX[0], minY = FrustrumY[0];
     float maxX = FrustrumX[0], maxY = FrustrumY[0];
     for (int i = 1; i < FrustrumCount; i++)
@@ -2081,15 +2092,41 @@ static void BuildHull2DAndBounds(const float* ptsX, const float* ptsY, int numPt
         if (FrustrumX[i] > maxX) maxX = FrustrumX[i];
         if (FrustrumY[i] > maxY) maxY = FrustrumY[i];
     }
-    int tileWidth = 4;
-    FrustrumBoundMinX = (int)(minX) / tileWidth * tileWidth - tileWidth;
-    FrustrumBoundMinY = (int)(minY) / tileWidth * tileWidth - tileWidth;
-    FrustrumBoundMaxX = (int)(maxX) / tileWidth * tileWidth + tileWidth;
-    FrustrumBoundMaxY = (int)(maxY) / tileWidth * tileWidth + tileWidth;
+
+    constexpr int T = TERRAIN_ITERATION_TILE;
+    FrustrumBoundMinX = (int)(minX) / T * T - T;
+    FrustrumBoundMinY = (int)(minY) / T * T - T;
+    FrustrumBoundMaxX = (int)(maxX) / T * T + T;
+    FrustrumBoundMaxY = (int)(maxY) / T * T + T;
     FrustrumBoundMinX = std::max(FrustrumBoundMinX, 0);
     FrustrumBoundMinY = std::max(FrustrumBoundMinY, 0);
-    FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE_MASK - tileWidth);
-    FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE_MASK - tileWidth);
+    FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE_MASK - T);
+    FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE_MASK - T);
+}
+
+// Build a CW convex hull from points projected to tile-space XY, storing into
+// FrustrumX/Y/Count, then compute iteration bounds.
+static void BuildHull2DAndBounds(const float* ptsX, const float* ptsY, int numPts)
+{
+    const int n = std::min(numPts, MAX_HULL_VERTICES);
+
+    Pt sorted[MAX_HULL_VERTICES];
+    for (int i = 0; i < n; i++) { sorted[i].x = ptsX[i]; sorted[i].y = ptsY[i]; }
+
+    SortPointsByXThenY(sorted, n);
+
+    Pt hull[MAX_HULL_VERTICES];
+    int k = ConvexHullCCW(sorted, n, hull, MAX_HULL_VERTICES);
+
+    // Reverse to CW (TestFrustrum2D expects CW winding)
+    FrustrumCount = k;
+    for (int i = 0; i < k; i++)
+    {
+        FrustrumX[i] = hull[k - 1 - i].x;
+        FrustrumY[i] = hull[k - 1 - i].y;
+    }
+
+    ComputeIterationBoundsFromHull();
 }
 
 // Expand CW convex hull outward by `offset` tiles.
@@ -2100,7 +2137,7 @@ static void ExpandHullOutward(float offset)
 {
     if (FrustrumCount < 3) return;
 
-    float newX[12], newY[12];
+    float newX[MAX_HULL_VERTICES], newY[MAX_HULL_VERTICES];
 
     for (int i = 0; i < FrustrumCount; i++)
     {
@@ -2116,7 +2153,7 @@ static void ExpandHullOutward(float offset)
         float e2y = FrustrumY[next] - FrustrumY[i];
         float len2 = sqrtf(e2x * e2x + e2y * e2y);
 
-        if (len1 < 0.001f || len2 < 0.001f)
+        if (len1 < EDGE_LENGTH_EPSILON || len2 < EDGE_LENGTH_EPSILON)
         {
             newX[i] = FrustrumX[i];
             newY[i] = FrustrumY[i];
@@ -2132,13 +2169,13 @@ static void ExpandHullOutward(float offset)
         float by = n1y + n2y;
         float blen = sqrtf(bx * bx + by * by);
 
-        if (blen > 0.001f)
+        if (blen > EDGE_LENGTH_EPSILON)
         {
             bx /= blen;
             by /= blen;
             // Scale by 1/cos(halfAngle) to maintain perpendicular offset distance
             float cosHalf = n1x * bx + n1y * by;
-            float scale = (cosHalf > 0.1f) ? (offset / cosHalf) : (offset * 2.0f);
+            float scale = (cosHalf > BISECTOR_COS_MIN) ? (offset / cosHalf) : (offset * 2.0f);
             newX[i] = FrustrumX[i] + bx * scale;
             newY[i] = FrustrumY[i] + by * scale;
         }
@@ -2155,25 +2192,7 @@ static void ExpandHullOutward(float offset)
         FrustrumY[i] = newY[i];
     }
 
-    // Recompute iteration bounds from expanded hull
-    float minX = FrustrumX[0], minY = FrustrumY[0];
-    float maxX = FrustrumX[0], maxY = FrustrumY[0];
-    for (int i = 1; i < FrustrumCount; i++)
-    {
-        if (FrustrumX[i] < minX) minX = FrustrumX[i];
-        if (FrustrumY[i] < minY) minY = FrustrumY[i];
-        if (FrustrumX[i] > maxX) maxX = FrustrumX[i];
-        if (FrustrumY[i] > maxY) maxY = FrustrumY[i];
-    }
-    int tileWidth = 4;
-    FrustrumBoundMinX = (int)(minX) / tileWidth * tileWidth - tileWidth;
-    FrustrumBoundMinY = (int)(minY) / tileWidth * tileWidth - tileWidth;
-    FrustrumBoundMaxX = (int)(maxX) / tileWidth * tileWidth + tileWidth;
-    FrustrumBoundMaxY = (int)(maxY) / tileWidth * tileWidth + tileWidth;
-    FrustrumBoundMinX = std::max(FrustrumBoundMinX, 0);
-    FrustrumBoundMinY = std::max(FrustrumBoundMinY, 0);
-    FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE_MASK - tileWidth);
-    FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE_MASK - tileWidth);
+    ComputeIterationBoundsFromHull();
 }
 
 void CreateFrustrum2D(vec3_t Position)
@@ -2227,13 +2246,13 @@ void CreateFrustrum2D(vec3_t Position)
             extern unsigned int WindowWidth, WindowHeight;
             extern EGameScene SceneFlag;
             int refWidth = GetScreenWidth();
-            int refHeight = 480;
+            int refHeight = REFERENCE_HEIGHT;
             if (SceneFlag == MAIN_SCENE && !g_Camera.TopViewEnable)
-                refHeight = 480 - 48;
+                refHeight = REFERENCE_HEIGHT - 48;
             else if (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
                 refHeight = 430;
-            float vpW = (float)(refWidth * WindowWidth) / 640.0f;
-            float vpH = (float)(refHeight * WindowHeight) / 480.0f;
+            float vpW = (float)(refWidth * WindowWidth) / (float)REFERENCE_WIDTH;
+            float vpH = (float)(refHeight * WindowHeight) / (float)REFERENCE_HEIGHT;
             float aspect = vpW / vpH;
 
             float halfH = tanHalf * terrainDist;
@@ -2344,7 +2363,7 @@ void CreateFrustrum2D(vec3_t Position)
 
     if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
     {
-        Width = (float)GetScreenWidth() / 480.f;
+        Width = (float)GetScreenWidth() / (float)REFERENCE_HEIGHT;
         if (battleCastle::InBattleCastle2(Hero->Object.Position) && (Hero->Object.Position[0] < 17100.f || Hero->Object.Position[0]>18300.f))
         {
             CameraViewFar_local = 5100.f;
@@ -2397,15 +2416,15 @@ void CreateFrustrum2D(vec3_t Position)
             }
             else if (SceneFlag == CHARACTER_SCENE)
             {
-                Width = (float)GetScreenWidth() / 640.f * 9.1f * 0.404998f;
+                Width = (float)GetScreenWidth() / (float)REFERENCE_WIDTH * 9.1f * 0.404998f;
             }
             else if (g_Direction.m_CKanturu.IsMayaScene())
             {
-                Width = (float)GetScreenWidth() / 640.f * 10.0f * 0.115f;
+                Width = (float)GetScreenWidth() / (float)REFERENCE_WIDTH * 10.0f * 0.115f;
             }
             else
             {
-                Width = (float)GetScreenWidth() / 640.f * 1.1f;
+                Width = (float)GetScreenWidth() / (float)REFERENCE_WIDTH * 1.1f;
             }
 
             if (SceneFlag == LOG_IN_SCENE)
@@ -2426,7 +2445,7 @@ void CreateFrustrum2D(vec3_t Position)
 
             if (SceneFlag == LOG_IN_SCENE)
             {
-                Width = (float)GetScreenWidth() / 640.f;
+                Width = (float)GetScreenWidth() / (float)REFERENCE_WIDTH;
                 CameraViewFar_local = 2400.f * 17.0f * 13.0f;
                 CameraViewNear_local = 2400.f * 17.0f * 0.5f;
                 CameraViewTarget_local = 2400.f * 17.0f * 0.5f;
@@ -2492,7 +2511,7 @@ void CreateFrustrum2D(vec3_t Position)
     if (WindowHeight > 0)
     {
         float windowAspect = (float)WindowWidth / (float)WindowHeight;
-        float referenceAspect = 640.0f / 480.0f;
+        float referenceAspect = (float)REFERENCE_WIDTH / (float)REFERENCE_HEIGHT;
         float aspectCorrection = windowAspect / referenceAspect;
         WidthFar *= aspectCorrection;
         WidthNear *= aspectCorrection;
@@ -2616,8 +2635,8 @@ void ResetFrustrumBoundsFullTerrain()
 {
     FrustrumBoundMinX = 0;
     FrustrumBoundMinY = 0;
-    FrustrumBoundMaxX = TERRAIN_SIZE_MASK - 4;
-    FrustrumBoundMaxY = TERRAIN_SIZE_MASK - 4;
+    FrustrumBoundMaxX = TERRAIN_SIZE_MASK - TERRAIN_ITERATION_TILE;
+    FrustrumBoundMaxY = TERRAIN_SIZE_MASK - TERRAIN_ITERATION_TILE;
 }
 
 /**

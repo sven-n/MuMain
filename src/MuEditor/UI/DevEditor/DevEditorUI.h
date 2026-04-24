@@ -2,6 +2,8 @@
 
 #ifdef _EDITOR
 
+#include "CameraMove.h"
+
 class CDevEditorUI
 {
 public:
@@ -51,6 +53,21 @@ private:
     void RenderScenesTab();
     void RenderGraphicsTab();
 
+    // RenderScenesTab sections
+    void RenderCameraModeControls();
+    void RenderCameraSummaryLine(int cameraMode);
+    void RenderLoginSceneSection();
+    void RenderGameSceneSection(int cameraMode, class ICamera* currentCamera, const char*& lastCameraName);
+    void RenderScenesDebugSection();
+
+    // RenderGraphicsTab sections
+    void RenderGraphicsDebugInfo();
+    void RenderWindowSizePresets();
+    void RenderCustomResolutionInput();
+    void RenderFullscreenToggle();
+    // Shared helper used by preset/custom/fullscreen paths
+    void ApplyNewWindowSize(int newWidth, int newHeight, const char* logReason);
+
     // CameraConfig values for live editing
     bool m_ConfigOverrideEnabled = false;
     float m_HFOV = 90.0f;             // Horizontal field of view in degrees
@@ -91,9 +108,11 @@ private:
     // Runtime adjustable culling radii
     float m_CullRadiusItem = 100.0f;
 
-    // Login scene render distances (adjustable via sliders)
-    float m_LoginTerrainDist = 3995.0f;
-    float m_LoginObjectDist = 5903.0f;
+    // Login scene render distances (adjustable via sliders).
+    // Defaults live in LoginSceneCameraDefaults (CameraMove.h) so the non-editor
+    // fallback in ZzzObject.cpp uses the same source of truth.
+    float m_LoginTerrainDist = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
+    float m_LoginObjectDist  = LoginSceneCameraDefaults::RENDER_OBJECT_DIST;
 
 public:
     // Login scene accessors

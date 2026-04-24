@@ -299,10 +299,10 @@ CPersonalShopTitleImp* CPersonalShopTitleImp::GetObjPtr()
 
 void CPersonalShopTitleImp::UpdatePosition()
 {
-    float Width = GetScreenWidth(), Height = 480;
+    float Width = GetScreenWidth(), Height = REFERENCE_HEIGHT;
 
     if (!g_Camera.TopViewEnable)
-        Height = 480 - 48;
+        Height = REFERENCE_HEIGHT - 48;
 
     EndBitmap();
     BeginOpengl(0, 0, Width, Height);
@@ -404,8 +404,8 @@ void CPersonalShopTitleImp::CalculateBooleanPos(IN CHARACTER* pPlayer, IN const 
     CameraProjection::WorldToScreen(g_Camera, posTemp, (int*)&ptFloating.x, (int*)&ptFloating.y);
 
     //. pos : real position
-    pos.x = (ptFloating.x * (int)WindowWidth / 640) - size.cx / 2;
-    pos.y = (ptFloating.y * (int)WindowHeight / 480) - (12 * 3 * (int)WindowHeight / 480);
+    pos.x = (ptFloating.x * (int)WindowWidth / REFERENCE_WIDTH) - size.cx / 2;
+    pos.y = (ptFloating.y * (int)WindowHeight / REFERENCE_HEIGHT) - (12 * 3 * (int)WindowHeight / REFERENCE_HEIGHT);
 }
 
 CPersonalShopTitleImp::CShopTitleDrawObj::CShopTitleDrawObj() { Init(); }

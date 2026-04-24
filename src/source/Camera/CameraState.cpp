@@ -29,8 +29,6 @@ void CameraState::Reset()
     Distance = 1000.0f;
     DistanceTarget = 1000.0f;
     ZoomLevel = 0;
-    FOV3D = 0.0f;
-    Roll3D = false;
     CustomDistance = 0.0f;
 
     // Projection cache

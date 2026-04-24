@@ -24,8 +24,8 @@ namespace SEASON3B
         MSGBOX_FONT_BOLD,
     };
 
-    static constexpr float SCREEN_WIDTH = 640.0f;
-    static constexpr float SCREEN_HEIGHT = 480.0f;
+    static constexpr float SCREEN_WIDTH = (float)REFERENCE_WIDTH;
+    static constexpr float SCREEN_HEIGHT = (float)REFERENCE_HEIGHT;
 
     static constexpr float MSGBOX_WIDTH = 230.0f;
     static constexpr float MSGBOX_TOP_HEIGHT = 67.0f;

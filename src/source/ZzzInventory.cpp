@@ -227,7 +227,7 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
 
     if (Tab == 0)
     {
-        sx -= (TextWidth + Tab) * 640 / WindowWidth / 2;
+        sx -= (TextWidth + Tab) * REFERENCE_WIDTH / WindowWidth / 2;
     }
 
     for (int i = 0; i < TextNum; i++)
@@ -5948,7 +5948,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
 
-    int Height = ((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) * 480 / WindowHeight;
+    int Height = ((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) * REFERENCE_HEIGHT / WindowHeight;
     if (sy - Height >= 0)
         sy -= Height;
     else
@@ -7530,7 +7530,7 @@ int GetScreenWidth()
         && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT)
         && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY))
     {
-        iWidth = 640 - (190 * 3);
+        iWidth = REFERENCE_WIDTH - (190 * 3);
     }
     else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
         && (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
@@ -7546,24 +7546,24 @@ int GetScreenWidth()
             || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
             ))
     {
-        iWidth = 640 - (190 * 2);
+        iWidth = REFERENCE_WIDTH - (190 * 2);
     }
     else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
         && (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST)
             || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
         )
     {
-        iWidth = 640 - (190 * 2);
+        iWidth = REFERENCE_WIDTH - (190 * 2);
     }
     else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
         && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PET)
         )
     {
-        iWidth = 640 - (190 * 2);
+        iWidth = REFERENCE_WIDTH - (190 * 2);
     }
     else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_REFINERY))
     {
-        iWidth = 640 - (190 * 2);
+        iWidth = REFERENCE_WIDTH - (190 * 2);
     }
     else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY)
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)
@@ -7594,11 +7594,11 @@ int GetScreenWidth()
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MUHELPER)
         )
     {
-        iWidth = 640 - 190;
+        iWidth = REFERENCE_WIDTH - 190;
     }
     else
     {
-        iWidth = 640;
+        iWidth = REFERENCE_WIDTH;
     }
 
     return iWidth;
@@ -11294,7 +11294,7 @@ void InitPartyList()
 void MoveServerDivisionInventory()
 {
     if (!g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION)) return;
-    int x = 640 - 190;
+    int x = REFERENCE_WIDTH - 190;
     int y = 0;
     int Width, Height;
 
@@ -11364,7 +11364,7 @@ void HideKeyPad(void)
 int CheckMouseOnKeyPad(void)
 {
     int Width, Height, WindowX, WindowY;
-    Width = 213; Height = 2 * 5 + 6 * 40; WindowX = (640 - Width) / 2; WindowY = 60 + 40;//60 220
+    Width = 213; Height = 2 * 5 + 6 * 40; WindowX = (REFERENCE_WIDTH - Width) / 2; WindowY = 60 + 40;//60 220
 
     int iButtonTop = 50;
 
@@ -11416,7 +11416,7 @@ void MovePersonalShop()
                 OkYesOrNo = -1;
             }
         }
-        g_ptPersonalShop.x = 640 - 190 * 2;
+        g_ptPersonalShop.x = REFERENCE_WIDTH - 190 * 2;
         g_ptPersonalShop.y = 0;
 
         int Width = 56, Height = 24;
@@ -11836,7 +11836,7 @@ void RenderGuildList(int StartX, int StartY)
     else
         mu_swprintf(Text, L"%ls (Score:%d)", GuildMark[Hero->GuildMarkIndex].GuildName, GuildTotalScore);
 
-    g_pRenderText->RenderText(StartX + 95 - 60, StartY + 12, Text, 120 * WindowWidth / 640, true, 3);
+    g_pRenderText->RenderText(StartX + 95 - 60, StartY + 12, Text, 120 * WindowWidth / REFERENCE_WIDTH, true, 3);
 
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
@@ -11872,7 +11872,7 @@ void RenderServerDivision()
     glColor3f(1.f, 1.f, 1.f);
     EnableAlphaTest();
 
-    InventoryStartX = 640 - 190;
+    InventoryStartX = REFERENCE_WIDTH - 190;
     InventoryStartY = 0;
     Width = 213; Height = 40; x = (float)InventoryStartX; y = (float)InventoryStartY;
     RenderInventoryInterface((int)x, (int)y, 1);

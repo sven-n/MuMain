@@ -1,6 +1,7 @@
 ﻿///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "CameraMove.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
@@ -3321,7 +3322,7 @@ void RenderObjects(ICamera* camera)
 #ifdef _EDITOR
                                 float fDis = DevEditor_GetLoginObjectDist();
 #else
-                                float fDis = 5903.0f;
+                                float fDis = LoginSceneCameraDefaults::RENDER_OBJECT_DIST;
 #endif
 
                                 if (((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127)) &&

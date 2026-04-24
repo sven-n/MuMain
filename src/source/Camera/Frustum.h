@@ -162,4 +162,17 @@ private:
     // Helper methods
     void CalculateBoundingBox();
     void Calculate2DProjection();
+
+    // BuildFromCamera helpers. Inputs are logically const but declared non-const because
+    // the project's vec3_t helpers don't accept const; these methods copy to locals internally.
+    void CalculateFrustumVertices(const vec3_t position, const vec3_t forward,
+                                  const vec3_t up, const vec3_t right,
+                                  float tanHalfFov, float aspectRatio,
+                                  float nearDist, float farDist);
+    void CalculateTerrainExtension(const vec3_t position, const vec3_t forward,
+                                    const vec3_t up, const vec3_t right,
+                                    float tanHalfFov, float aspectRatio,
+                                    float farDist, float terrainCullDist);
+    void CalculatePlanes(const vec3_t position, const vec3_t forward,
+                         const vec3_t nearCenter, const vec3_t farCenter);
 };

@@ -211,7 +211,7 @@ static void UpdateUIAndInput()
     if (g_Camera.TopViewEnable || LoadingWorld >= 30)
         return;
 
-    if (MouseY >= (int)(480 - 48))
+    if (MouseY >= (int)(REFERENCE_HEIGHT - 48))
         MouseOnWindow = true;
 
     g_pPartyManager->Update();
@@ -344,11 +344,11 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     {
         // Use hardcoded value from original game (in 640×480 reference coordinates)
         // This is then scaled by BeginOpengl() to actual window size
-        outHeight = 480 - 48;
+        outHeight = REFERENCE_HEIGHT - 48;
     }
     else
     {
-        outHeight = 480;
+        outHeight = REFERENCE_HEIGHT;
     }
 
     outWidth = GetScreenWidth();
@@ -357,7 +357,7 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     // All background colors are now centralized in SceneManager.cpp
 
     BeginOpengl(0, 0, outWidth, outHeight);
-    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, cameraPos);
+    CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH, (float)outHeight / (float)REFERENCE_HEIGHT, cameraPos);
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())

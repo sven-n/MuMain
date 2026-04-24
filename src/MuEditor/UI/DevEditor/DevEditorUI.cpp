@@ -32,6 +32,29 @@ extern "C" CCameraMove* CCameraMove__GetInstancePtr();
 // CHARACTER external
 extern CHARACTER* Hero;
 
+namespace
+{
+    // Horizontal FOV slider range (degrees). Matches the CameraConfig clamp used elsewhere.
+    constexpr float MIN_HFOV = 10.0f;
+    constexpr float MAX_HFOV = 150.0f;
+
+    // Camera mode enum values as exposed by GetCurrentCameraMode()
+    constexpr int CAMERA_MODE_DEFAULT = 0;
+    constexpr int CAMERA_MODE_ORBITAL = 1;
+    constexpr int CAMERA_MODE_FREEFLY = 2;
+
+    // Login-scene render-distance slider range (world units)
+    constexpr float LOGIN_DIST_MIN = 1000.0f;
+    constexpr float LOGIN_DIST_MAX = 30000.0f;
+
+    // Custom resolution input clamping (pixels)
+    constexpr int CUSTOM_RES_MAX_WIDTH  = 3840;
+    constexpr int CUSTOM_RES_MAX_HEIGHT = 2160;
+
+    // World-to-tile scale (100 world units = 1 tile)
+    constexpr float WORLD_TO_TILE_DIVISOR = 100.0f;
+}
+
 CDevEditorUI& CDevEditorUI::GetInstance()
 {
     static CDevEditorUI instance;
@@ -77,185 +100,24 @@ void CDevEditorUI::Render(bool* p_open)
 void CDevEditorUI::RenderScenesTab()
 {
     extern EGameScene SceneFlag;
-    extern CameraState g_Camera;
-    extern CameraManager& CameraManager_Instance();
-    auto& camMgrRef = CameraManager_Instance();
+    auto& camMgr = CameraManager_Instance();
     int cameraMode = GetCurrentCameraMode();
 
-    // Get the camera whose config we're editing — in FreeFly, that's the spectated camera
-    ICamera* currentCamera = camMgrRef.GetActiveCamera();
-    if (camMgrRef.GetCurrentMode() == CameraMode::FreeFly)
+    // In FreeFly mode we edit the spectated camera's config, otherwise the active one.
+    ICamera* currentCamera = camMgr.GetActiveCamera();
+    if (camMgr.GetCurrentMode() == CameraMode::FreeFly)
     {
-        ICamera* spectated = camMgrRef.GetSpectatedCamera();
-        if (spectated)
+        if (ICamera* spectated = camMgr.GetSpectatedCamera())
             currentCamera = spectated;
     }
-    const char* currentCameraName = currentCamera ? currentCamera->GetName() : nullptr;
 
-    // ===== FreeFly Camera (always available) =====
-    {
-        auto& camMgr = CameraManager::Instance();
-        CameraMode currentMode = camMgr.GetCurrentMode();
-        bool isFreeFly = (currentMode == CameraMode::FreeFly);
-
-        if (isFreeFly)
-        {
-            if (ImGui::Button("Switch to Game Camera", ImVec2(250, 0)))
-            {
-                ICamera* spectated = camMgr.GetSpectatedCamera();
-                if (spectated)
-                {
-                    const char* name = spectated->GetName();
-                    if (strcmp(name, "Orbital") == 0)
-                        camMgr.SetCameraMode(CameraMode::Orbital);
-                    else
-                        camMgr.SetCameraMode(CameraMode::Default);
-                }
-                else
-                    camMgr.SetCameraMode(CameraMode::Default);
-            }
-            ImGui::SameLine();
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "FreeFly");
-
-            ICamera* spectated = camMgr.GetSpectatedCamera();
-            if (spectated)
-            {
-                ImGui::Text("Spectating: %s", spectated->GetName());
-                ImGui::SameLine();
-                vec3_t snapPos, snapAngle;
-                if (camMgr.GetSpectatedCameraState(snapPos, snapAngle))
-                {
-                    if (ImGui::Button("Snap to Spectated"))
-                    {
-                        auto* freeFly = static_cast<FreeFlyCamera*>(camMgr.GetActiveCamera());
-                        freeFly->SnapToPosition(snapPos, snapAngle[2], snapAngle[0]);
-                    }
-                }
-            }
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast");
-        }
-        else
-        {
-            if (ImGui::Button("Switch to FreeFly", ImVec2(250, 0)))
-            {
-                camMgr.SetCameraMode(CameraMode::FreeFly);
-            }
-            ImGui::SameLine();
-            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s", camMgr.GetActiveCamera()->GetName());
-        }
-    }
-
-    // Camera info summary line
-    {
-        const char* modeName;
-        switch (cameraMode)
-        {
-            case 0: modeName = "Default"; break;
-            case 1: modeName = "Orbital"; break;
-            case 2: modeName = "FreeFly"; break;
-            default: modeName = "Unknown"; break;
-        }
-        ImGui::Text("%s | Pos: %.0f, %.0f, %.0f | Tile: (%d, %d) | Pitch: %.1f Yaw: %.1f",
-                    modeName, g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
-                    (int)(g_Camera.Position[0] / 100.0f), (int)(g_Camera.Position[1] / 100.0f),
-                    g_Camera.Angle[0], g_Camera.Angle[2]);
-    }
-
+    RenderCameraModeControls();
+    RenderCameraSummaryLine(cameraMode);
     ImGui::Separator();
 
-    // ===== Login Scene (only visible in login scene) =====
     if (SceneFlag == LOG_IN_SCENE && ImGui::CollapsingHeader("Login Scene"))
-    {
-        ImGui::Indent();
+        RenderLoginSceneSection();
 
-        // Camera Offsets
-        extern float g_LoginSceneOffsetX;
-        extern float g_LoginSceneOffsetY;
-        extern float g_LoginSceneOffsetZ;
-        extern float g_LoginSceneAnglePitch;
-        extern float g_LoginSceneAngleYaw;
-
-        ImGui::PushItemWidth(150);
-        ImGui::InputFloat("Offset X", &g_LoginSceneOffsetX, 50.0f, 200.0f, "%.1f");
-        ImGui::InputFloat("Offset Y", &g_LoginSceneOffsetY, 50.0f, 200.0f, "%.1f");
-        ImGui::InputFloat("Offset Z", &g_LoginSceneOffsetZ, 50.0f, 200.0f, "%.1f");
-        ImGui::InputFloat("Pitch", &g_LoginSceneAnglePitch, 1.0f, 5.0f, "%.1f");
-        ImGui::InputFloat("Yaw", &g_LoginSceneAngleYaw, 1.0f, 5.0f, "%.1f");
-        ImGui::PopItemWidth();
-
-        if (ImGui::Button("Reset Offsets"))
-        {
-            g_LoginSceneOffsetX = -300.0f;
-            g_LoginSceneOffsetY = 650.0f;
-            g_LoginSceneOffsetZ = 950.0f;
-            g_LoginSceneAnglePitch = 40.0f;
-            g_LoginSceneAngleYaw = -5.0f;
-        }
-
-        ImGui::Spacing();
-
-        // Tour Mode Controls
-        extern CCameraMove* CCameraMove__GetInstancePtr();
-        CCameraMove* cameraMove = CCameraMove__GetInstancePtr();
-        if (cameraMove)
-        {
-            BOOL isTourMode = cameraMove->IsTourMode();
-            BOOL isTourPaused = cameraMove->IsTourPaused();
-
-            ImGui::Text("Tour: %s%s", isTourMode ? "ACTIVE" : "INACTIVE",
-                        (isTourMode && isTourPaused) ? " (PAUSED)" : "");
-
-            if (isTourMode)
-            {
-                if (isTourPaused)
-                {
-                    if (ImGui::Button("Resume")) cameraMove->PauseTour(FALSE);
-                }
-                else
-                {
-                    if (ImGui::Button("Pause")) cameraMove->PauseTour(TRUE);
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Restart"))
-                {
-                    if (Hero)
-                    {
-                        cameraMove->SetTourMode(FALSE, FALSE, 0);
-                        cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
-                        cameraMove->SetTourMode(TRUE, FALSE, 0);
-                    }
-                }
-            }
-            else
-            {
-                if (ImGui::Button("Start Tour"))
-                {
-                    if (Hero)
-                    {
-                        cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
-                        cameraMove->SetTourMode(TRUE, FALSE, 0);
-                    }
-                }
-            }
-        }
-
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Text("Render Distances:");
-        ImGui::PushItemWidth(200);
-        ImGui::SliderFloat("Terrain ViewFar", &m_LoginTerrainDist, 1000.0f, 30000.0f, "%.0f");
-        ImGui::SliderFloat("Object Distance", &m_LoginObjectDist, 1000.0f, 30000.0f, "%.0f");
-        ImGui::PopItemWidth();
-        if (ImGui::Button("Reset Distances"))
-        {
-            m_LoginTerrainDist = 3995.0f;
-            m_LoginObjectDist = 5903.0f;
-        }
-
-        ImGui::Unindent();
-    }
-
-    // ===== Character Scene (only visible in character scene) =====
     if (SceneFlag == CHARACTER_SCENE && ImGui::CollapsingHeader("Character Scene"))
     {
         ImGui::Indent();
@@ -263,197 +125,376 @@ void CDevEditorUI::RenderScenesTab()
         ImGui::Unindent();
     }
 
-    // ===== Game Scene (only visible in main game) =====
     if (SceneFlag == MAIN_SCENE && ImGui::CollapsingHeader("Game Scene"))
+        RenderGameSceneSection(cameraMode, currentCamera, m_LastActiveCameraName);
+
+    if (ImGui::CollapsingHeader("Debug"))
+        RenderScenesDebugSection();
+}
+
+void CDevEditorUI::RenderCameraModeControls()
+{
+    auto& camMgr = CameraManager::Instance();
+    const bool isFreeFly = (camMgr.GetCurrentMode() == CameraMode::FreeFly);
+
+    if (!isFreeFly)
     {
-        ImGui::Indent();
-
-        // Camera Config Override
-        if (m_ConfigOverrideEnabled && m_LastActiveCameraName != currentCameraName)
-        {
-            if (currentCamera)
-                m_HFOV = currentCamera->GetConfig().hFov;
-            m_LastActiveCameraName = currentCameraName;
-        }
-
-        bool previousOverrideState = m_ConfigOverrideEnabled;
-        ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
-
-        if (m_ConfigOverrideEnabled && !previousOverrideState)
-        {
-            if (currentCamera)
-                m_HFOV = currentCamera->GetConfig().hFov;
-            m_LastActiveCameraName = currentCameraName;
-        }
-        if (!m_ConfigOverrideEnabled && previousOverrideState)
-        {
-            m_LastActiveCameraName = nullptr;
-            m_FogOverride = false;
-        }
-
-        if (currentCamera)
-        {
-            const CameraConfig& cfg = currentCamera->GetConfig();
-            ImGui::Text("Near: %.0f  Far: %.0f  ViewFar: %.0f  ProjFar: %.0f",
-                        cfg.nearPlane, cfg.farPlane, g_Camera.ViewFar,
-                        g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
-        }
-
-        if (m_ConfigOverrideEnabled)
-        {
-            extern unsigned int WindowWidth, WindowHeight;
-            float aspect = (float)WindowWidth / (float)WindowHeight;
-            float computedVFov = HFovToVFov(m_HFOV, aspect);
-
-            ImGui::PushItemWidth(200);
-            ImGui::SliderFloat("H-FOV", &m_HFOV, 10.0f, 150.0f, "%.1f");
-            ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                              "V-FOV: %.1f (aspect %.2f)", computedVFov, aspect);
-
-            // Fog controls
-            ImGui::Spacing();
-            extern bool FogEnable;
-
-            ImGui::Checkbox("Override Fog", &m_FogOverride);
-            if (m_FogOverride)
-            {
-                ImGui::SameLine();
-                ImGui::Checkbox("Fog On", &m_FogOverrideValue);
-            }
-            ImGui::SameLine();
-            if (FogEnable)
-                ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "ON");
-            else
-                ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "OFF");
-
-            float startDisplay = m_FogStartPct * 100.0f;
-            float endDisplay = m_FogEndPct * 100.0f;
-            if (ImGui::SliderFloat("Fog Start %", &startDisplay, 0.0f, 200.0f, "%.0f%%"))
-                m_FogStartPct = startDisplay / 100.0f;
-            if (ImGui::SliderFloat("Fog End %", &endDisplay, 0.0f, 200.0f, "%.0f%%"))
-                m_FogEndPct = endDisplay / 100.0f;
-
-            float actualStart = g_Camera.ViewFar * m_FogStartPct;
-            float actualEnd = g_Camera.ViewFar * m_FogEndPct;
-            ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                              "Fog: %.0f - %.0f (ViewFar=%.0f)", actualStart, actualEnd, g_Camera.ViewFar);
-            ImGui::PopItemWidth();
-
-            ImGui::Spacing();
-            if (ImGui::Button("Reset##config"))
-            {
-                if (currentCamera)
-                    m_HFOV = currentCamera->GetConfig().hFov;
-                m_FogStartPct = 1.00f;
-                m_FogEndPct = 1.25f;
-            }
-        }
-        else if (currentCamera)
-        {
-            extern unsigned int WindowWidth, WindowHeight;
-            float aspect = (float)WindowWidth / (float)WindowHeight;
-            float hFov = currentCamera->GetConfig().hFov;
-            ImGui::Text("  FOV: %.1f H / %.1f V  Fog: %.0f%%/%.0f%%",
-                        hFov, HFovToVFov(hFov, aspect),
-                        m_FogStartPct * 100.0f, m_FogEndPct * 100.0f);
-        }
-
-        // Orbital info
-        if (cameraMode == 1)
-        {
-            ImGui::Spacing();
-            float radius = GetOrbitalCameraRadius();
-            float orbitalYaw = 0.0f, orbitalPitch = 0.0f;
-            GetOrbitalCameraAngles(&orbitalYaw, &orbitalPitch);
-            ImGui::Text("Orbital: Zoom=%.0f  Yaw=%.1f  Pitch=%.1f", radius, orbitalYaw, orbitalPitch);
-        }
-
-        ImGui::Unindent();
+        if (ImGui::Button("Switch to FreeFly", ImVec2(250, 0)))
+            camMgr.SetCameraMode(CameraMode::FreeFly);
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s", camMgr.GetActiveCamera()->GetName());
+        return;
     }
 
-    // ===== Debug =====
-    if (ImGui::CollapsingHeader("Debug"))
+    if (ImGui::Button("Switch to Game Camera", ImVec2(250, 0)))
     {
-        ImGui::Indent();
+        ICamera* spectated = camMgr.GetSpectatedCamera();
+        CameraMode target = CameraMode::Default;
+        if (spectated && strcmp(spectated->GetName(), "Orbital") == 0)
+            target = CameraMode::Orbital;
+        camMgr.SetCameraMode(target);
+    }
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "FreeFly");
 
-        // Debug visualization
-        ImGui::Checkbox("Character Cuboids", &m_ShowCharacterCullingSpheres);
+    if (ICamera* spectated = camMgr.GetSpectatedCamera())
+    {
+        ImGui::Text("Spectating: %s", spectated->GetName());
         ImGui::SameLine();
-        ImGui::Checkbox("Dropped Item Spheres", &m_ShowItemCullingSpheres);
-        ImGui::Checkbox("Tile Grid", &m_ShowTileGrid);
+        vec3_t snapPos, snapAngle;
+        if (camMgr.GetSpectatedCameraState(snapPos, snapAngle))
+        {
+            if (ImGui::Button("Snap to Spectated"))
+            {
+                auto* freeFly = static_cast<FreeFlyCamera*>(camMgr.GetActiveCamera());
+                freeFly->SnapToPosition(snapPos, snapAngle[2], snapAngle[0]);
+            }
+        }
+    }
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast");
+}
 
-        ImGui::PushItemWidth(150);
-        ImGui::InputFloat("Dropped Item Cull Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
-        if (m_CullRadiusItem < 0.0f) m_CullRadiusItem = 0.0f;
+void CDevEditorUI::RenderCameraSummaryLine(int cameraMode)
+{
+    const char* modeName;
+    switch (cameraMode)
+    {
+        case CAMERA_MODE_DEFAULT: modeName = "Default"; break;
+        case CAMERA_MODE_ORBITAL: modeName = "Orbital"; break;
+        case CAMERA_MODE_FREEFLY: modeName = "FreeFly"; break;
+        default:                  modeName = "Unknown"; break;
+    }
+    ImGui::Text("%s | Pos: %.0f, %.0f, %.0f | Tile: (%d, %d) | Pitch: %.1f Yaw: %.1f",
+                modeName, g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
+                (int)(g_Camera.Position[0] / WORLD_TO_TILE_DIVISOR),
+                (int)(g_Camera.Position[1] / WORLD_TO_TILE_DIVISOR),
+                g_Camera.Angle[0], g_Camera.Angle[2]);
+}
+
+void CDevEditorUI::RenderLoginSceneSection()
+{
+    ImGui::Indent();
+
+    ImGui::PushItemWidth(150);
+    ImGui::InputFloat("Offset X", &g_LoginSceneOffsetX, 50.0f, 200.0f, "%.1f");
+    ImGui::InputFloat("Offset Y", &g_LoginSceneOffsetY, 50.0f, 200.0f, "%.1f");
+    ImGui::InputFloat("Offset Z", &g_LoginSceneOffsetZ, 50.0f, 200.0f, "%.1f");
+    ImGui::InputFloat("Pitch", &g_LoginSceneAnglePitch, 1.0f, 5.0f, "%.1f");
+    ImGui::InputFloat("Yaw", &g_LoginSceneAngleYaw, 1.0f, 5.0f, "%.1f");
+    ImGui::PopItemWidth();
+
+    if (ImGui::Button("Reset Offsets"))
+    {
+        g_LoginSceneOffsetX   = LoginSceneCameraDefaults::OFFSET_X;
+        g_LoginSceneOffsetY   = LoginSceneCameraDefaults::OFFSET_Y;
+        g_LoginSceneOffsetZ   = LoginSceneCameraDefaults::OFFSET_Z;
+        g_LoginSceneAnglePitch = LoginSceneCameraDefaults::ANGLE_PITCH;
+        g_LoginSceneAngleYaw   = LoginSceneCameraDefaults::ANGLE_YAW;
+    }
+
+    ImGui::Spacing();
+
+    // Tour mode controls
+    if (CCameraMove* cameraMove = CCameraMove__GetInstancePtr())
+    {
+        BOOL isTourMode = cameraMove->IsTourMode();
+        BOOL isTourPaused = cameraMove->IsTourPaused();
+
+        ImGui::Text("Tour: %s%s", isTourMode ? "ACTIVE" : "INACTIVE",
+                    (isTourMode && isTourPaused) ? " (PAUSED)" : "");
+
+        if (isTourMode)
+        {
+            if (isTourPaused)
+            {
+                if (ImGui::Button("Resume")) cameraMove->PauseTour(FALSE);
+            }
+            else
+            {
+                if (ImGui::Button("Pause")) cameraMove->PauseTour(TRUE);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Restart") && Hero)
+            {
+                cameraMove->SetTourMode(FALSE, FALSE, 0);
+                cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
+                cameraMove->SetTourMode(TRUE, FALSE, 0);
+            }
+        }
+        else if (ImGui::Button("Start Tour") && Hero)
+        {
+            cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
+            cameraMove->SetTourMode(TRUE, FALSE, 0);
+        }
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Text("Render Distances:");
+    ImGui::PushItemWidth(200);
+    ImGui::SliderFloat("Terrain ViewFar", &m_LoginTerrainDist, LOGIN_DIST_MIN, LOGIN_DIST_MAX, "%.0f");
+    ImGui::SliderFloat("Object Distance", &m_LoginObjectDist, LOGIN_DIST_MIN, LOGIN_DIST_MAX, "%.0f");
+    ImGui::PopItemWidth();
+    if (ImGui::Button("Reset Distances"))
+    {
+        m_LoginTerrainDist = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
+        m_LoginObjectDist  = LoginSceneCameraDefaults::RENDER_OBJECT_DIST;
+    }
+
+    ImGui::Unindent();
+}
+
+void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera, const char*& lastCameraName)
+{
+    ImGui::Indent();
+
+    const char* currentCameraName = currentCamera ? currentCamera->GetName() : nullptr;
+
+    // Re-sync FOV when the active/spectated camera changes under us
+    if (m_ConfigOverrideEnabled && lastCameraName != currentCameraName)
+    {
+        if (currentCamera)
+            m_HFOV = currentCamera->GetConfig().hFov;
+        lastCameraName = currentCameraName;
+    }
+
+    const bool previousOverrideState = m_ConfigOverrideEnabled;
+    ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
+
+    if (m_ConfigOverrideEnabled && !previousOverrideState)
+    {
+        if (currentCamera)
+            m_HFOV = currentCamera->GetConfig().hFov;
+        lastCameraName = currentCameraName;
+    }
+    if (!m_ConfigOverrideEnabled && previousOverrideState)
+    {
+        lastCameraName = nullptr;
+        m_FogOverride = false;
+    }
+
+    if (currentCamera)
+    {
+        const CameraConfig& cfg = currentCamera->GetConfig();
+        ImGui::Text("Near: %.0f  Far: %.0f  ViewFar: %.0f  ProjFar: %.0f",
+                    cfg.nearPlane, cfg.farPlane, g_Camera.ViewFar,
+                    g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+    }
+
+    if (m_ConfigOverrideEnabled)
+    {
+        extern unsigned int WindowWidth, WindowHeight;
+        const float aspect = (float)WindowWidth / (float)WindowHeight;
+        const float computedVFov = HFovToVFov(m_HFOV, aspect);
+
+        ImGui::PushItemWidth(200);
+        ImGui::SliderFloat("H-FOV", &m_HFOV, MIN_HFOV, MAX_HFOV, "%.1f");
+        ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
+                          "V-FOV: %.1f (aspect %.2f)", computedVFov, aspect);
+
+        ImGui::Spacing();
+        extern bool FogEnable;
+
+        ImGui::Checkbox("Override Fog", &m_FogOverride);
+        if (m_FogOverride)
+        {
+            ImGui::SameLine();
+            ImGui::Checkbox("Fog On", &m_FogOverrideValue);
+        }
+        ImGui::SameLine();
+        if (FogEnable)
+            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "ON");
+        else
+            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "OFF");
+
+        float startDisplay = m_FogStartPct * 100.0f;
+        float endDisplay   = m_FogEndPct   * 100.0f;
+        if (ImGui::SliderFloat("Fog Start %", &startDisplay, 0.0f, 200.0f, "%.0f%%"))
+            m_FogStartPct = startDisplay / 100.0f;
+        if (ImGui::SliderFloat("Fog End %", &endDisplay, 0.0f, 200.0f, "%.0f%%"))
+            m_FogEndPct = endDisplay / 100.0f;
+
+        const float actualStart = g_Camera.ViewFar * m_FogStartPct;
+        const float actualEnd   = g_Camera.ViewFar * m_FogEndPct;
+        ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
+                          "Fog: %.0f - %.0f (ViewFar=%.0f)", actualStart, actualEnd, g_Camera.ViewFar);
         ImGui::PopItemWidth();
 
         ImGui::Spacing();
-
-        extern OrbitalCamera* GetOrbitalCameraInstance();
-        OrbitalCamera* orbitalCam = GetOrbitalCameraInstance();
-        if (orbitalCam)
+        if (ImGui::Button("Reset##config"))
         {
-            vec3_t target = {0, 0, 0};
-            orbitalCam->GetTargetPosition(target);
-            ImGui::Text("Orbital Target: %.0f, %.0f, %.0f  Tile: (%d, %d)",
-                        target[0], target[1], target[2],
-                        (int)(target[0] / 100.0f), (int)(target[1] / 100.0f));
+            if (currentCamera)
+                m_HFOV = currentCamera->GetConfig().hFov;
+            m_FogStartPct = 1.00f;
+            m_FogEndPct   = 1.25f;
         }
-
-        // Render Toggles
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Text("Render Toggles:");
-
-        ImGui::Columns(2, nullptr, false);
-        ImGui::Checkbox("Terrain", &m_RenderTerrain);
-        ImGui::Checkbox("Static Objects", &m_RenderStaticObjects);
-        ImGui::Checkbox("Effects", &m_RenderEffects);
-        ImGui::NextColumn();
-        ImGui::Checkbox("Dropped Items", &m_RenderDroppedItems);
-        ImGui::Checkbox("Weather", &m_RenderWeatherEffects);
-        ImGui::Checkbox("Item Labels", &m_RenderItemLabels);
-        ImGui::Columns(1);
-
-        if (ImGui::Button("All ON"))
-        {
-            m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = true;
-            m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = true;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("All OFF"))
-        {
-            m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = false;
-            m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = false;
-        }
-
-        ImGui::Spacing();
-        ImGui::Separator();
-
-        // TODO: Not working yet (tested - too complex)
-        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "TODO - Not Working:");
-        ImGui::BeginDisabled();
-        ImGui::Columns(2, nullptr, false);
-        ImGui::Checkbox("Shaders", &m_RenderShaders);
-        ImGui::Checkbox("Skill Effects", &m_RenderSkillEffects);
-        ImGui::NextColumn();
-        ImGui::Checkbox("Equipped Items", &m_RenderEquippedItems);
-        ImGui::Checkbox("UI", &m_RenderUI);
-        ImGui::Columns(1);
-
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "TODO - Not Implemented:");
-        ImGui::Columns(3, nullptr, false);
-        ImGui::Checkbox("Hero", &m_RenderHero);
-        ImGui::NextColumn();
-        ImGui::Checkbox("NPCs", &m_RenderNPCs);
-        ImGui::NextColumn();
-        ImGui::Checkbox("Monsters", &m_RenderMonsters);
-        ImGui::Columns(1);
-        ImGui::EndDisabled();
-
-        ImGui::Unindent();
     }
+    else if (currentCamera)
+    {
+        extern unsigned int WindowWidth, WindowHeight;
+        const float aspect = (float)WindowWidth / (float)WindowHeight;
+        const float hFov = currentCamera->GetConfig().hFov;
+        ImGui::Text("  FOV: %.1f H / %.1f V  Fog: %.0f%%/%.0f%%",
+                    hFov, HFovToVFov(hFov, aspect),
+                    m_FogStartPct * 100.0f, m_FogEndPct * 100.0f);
+    }
+
+    if (cameraMode == CAMERA_MODE_ORBITAL)
+    {
+        ImGui::Spacing();
+        float radius = GetOrbitalCameraRadius();
+        float orbitalYaw = 0.0f, orbitalPitch = 0.0f;
+        GetOrbitalCameraAngles(&orbitalYaw, &orbitalPitch);
+        ImGui::Text("Orbital: Zoom=%.0f  Yaw=%.1f  Pitch=%.1f", radius, orbitalYaw, orbitalPitch);
+    }
+
+    ImGui::Unindent();
+}
+
+void CDevEditorUI::RenderScenesDebugSection()
+{
+    ImGui::Indent();
+
+    // Debug visualization
+    ImGui::Checkbox("Character Cuboids", &m_ShowCharacterCullingSpheres);
+    ImGui::SameLine();
+    ImGui::Checkbox("Dropped Item Spheres", &m_ShowItemCullingSpheres);
+    ImGui::Checkbox("Tile Grid", &m_ShowTileGrid);
+
+    ImGui::PushItemWidth(150);
+    ImGui::InputFloat("Dropped Item Cull Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
+    if (m_CullRadiusItem < 0.0f) m_CullRadiusItem = 0.0f;
+    ImGui::PopItemWidth();
+
+    ImGui::Spacing();
+
+    if (OrbitalCamera* orbitalCam = GetOrbitalCameraInstance())
+    {
+        vec3_t target = {0, 0, 0};
+        orbitalCam->GetTargetPosition(target);
+        ImGui::Text("Orbital Target: %.0f, %.0f, %.0f  Tile: (%d, %d)",
+                    target[0], target[1], target[2],
+                    (int)(target[0] / WORLD_TO_TILE_DIVISOR),
+                    (int)(target[1] / WORLD_TO_TILE_DIVISOR));
+    }
+
+    // Render Toggles
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Text("Render Toggles:");
+
+    ImGui::Columns(2, nullptr, false);
+    ImGui::Checkbox("Terrain", &m_RenderTerrain);
+    ImGui::Checkbox("Static Objects", &m_RenderStaticObjects);
+    ImGui::Checkbox("Effects", &m_RenderEffects);
+    ImGui::NextColumn();
+    ImGui::Checkbox("Dropped Items", &m_RenderDroppedItems);
+    ImGui::Checkbox("Weather", &m_RenderWeatherEffects);
+    ImGui::Checkbox("Item Labels", &m_RenderItemLabels);
+    ImGui::Columns(1);
+
+    if (ImGui::Button("All ON"))
+    {
+        m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = true;
+        m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("All OFF"))
+    {
+        m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = false;
+        m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = false;
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "TODO - Not Working:");
+    ImGui::BeginDisabled();
+    ImGui::Columns(2, nullptr, false);
+    ImGui::Checkbox("Shaders", &m_RenderShaders);
+    ImGui::Checkbox("Skill Effects", &m_RenderSkillEffects);
+    ImGui::NextColumn();
+    ImGui::Checkbox("Equipped Items", &m_RenderEquippedItems);
+    ImGui::Checkbox("UI", &m_RenderUI);
+    ImGui::Columns(1);
+
+    ImGui::Spacing();
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "TODO - Not Implemented:");
+    ImGui::Columns(3, nullptr, false);
+    ImGui::Checkbox("Hero", &m_RenderHero);
+    ImGui::NextColumn();
+    ImGui::Checkbox("NPCs", &m_RenderNPCs);
+    ImGui::NextColumn();
+    ImGui::Checkbox("Monsters", &m_RenderMonsters);
+    ImGui::Columns(1);
+    ImGui::EndDisabled();
+
+    ImGui::Unindent();
+}
+
+// Shared helper: applies a new window size. Used by preset buttons, custom-size apply,
+// and (partially) fullscreen toggle. Updates WindowWidth/Height, screen rate, OpenGL
+// viewport, config file, fonts, and resizes the window if in windowed mode.
+void CDevEditorUI::ApplyNewWindowSize(int newWidth, int newHeight, const char* logReason)
+{
+    extern unsigned int WindowWidth, WindowHeight;
+    extern float g_fScreenRate_x, g_fScreenRate_y;
+    extern int OpenglWindowWidth, OpenglWindowHeight;
+    extern BOOL g_bUseWindowMode;
+    extern HWND g_hWnd;
+    extern void ReinitializeFonts();
+    extern void UpdateResolutionDependentSystems();
+
+    WindowWidth  = (unsigned)newWidth;
+    WindowHeight = (unsigned)newHeight;
+
+    g_fScreenRate_x = (float)WindowWidth  / (float)REFERENCE_WIDTH;
+    g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
+
+    OpenglWindowWidth  = (int)WindowWidth;
+    OpenglWindowHeight = (int)WindowHeight;
+
+    GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
+    GameConfig::GetInstance().Save();
+
+    ReinitializeFonts();
+    UpdateResolutionDependentSystems();
+
+    if (g_bUseWindowMode && g_hWnd)
+    {
+        RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
+        AdjustWindowRect(&windowRect,
+                         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
+                         FALSE);
+        SetWindowPos(g_hWnd, HWND_TOP, 0, 0,
+                     windowRect.right - windowRect.left,
+                     windowRect.bottom - windowRect.top,
+                     SWP_NOMOVE | SWP_NOZORDER);
+    }
+
+    char msg[128];
+    sprintf_s(msg, "Window resized to %s%ux%u", logReason ? logReason : "", WindowWidth, WindowHeight);
+    g_MuEditorConsoleUI.LogEditor(msg);
 }
 
 void CDevEditorUI::RenderGraphicsTab()
@@ -461,17 +502,70 @@ void CDevEditorUI::RenderGraphicsTab()
     ImGui::Text("Graphics Settings");
     ImGui::Separator();
 
-    // Window dimensions
-    extern unsigned int WindowWidth;
-    extern unsigned int WindowHeight;
+    RenderGraphicsDebugInfo();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    RenderWindowSizePresets();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    RenderCustomResolutionInput();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    RenderFullscreenToggle();
+    ImGui::Separator();
+
+    // Info
+    ImGui::Spacing();
+    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Camera Auto-Adapts:");
+    ImGui::Text("• FOV stays constant (set in Camera tab)");
+    ImGui::Text("• Aspect ratio adjusts automatically");
+    ImGui::Text("• Wider screens = more horizontal view");
+    ImGui::Text("• Frustum cone updates each frame");
+
+    ImGui::Separator();
+
+    extern unsigned int WindowWidth, WindowHeight;
+    const float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    ImGui::Text("Current Aspect Ratio: %.3f (%s)", aspectRatio,
+                aspectRatio > 1.7f ? "Ultra-wide" :
+                aspectRatio > 1.6f ? "16:10" :
+                aspectRatio > 1.5f ? "16:9" :
+                aspectRatio > 1.4f ? "3:2" :
+                aspectRatio > 1.2f ? "5:4" : "4:3");
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.5f, 1.0f), "Settings Auto-Save:");
+    ImGui::Text("• Settings save automatically when:");
+    ImGui::Text("  - Changing resolution");
+    ImGui::Text("  - Toggling window mode");
+    ImGui::Text("  - Exiting the game");
+    ImGui::Spacing();
+
+    extern BOOL g_bUseWindowMode;
+    if (ImGui::Button("Save Settings Now", ImVec2(200, 0)))
+    {
+        GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
+        GameConfig::GetInstance().SetWindowMode(g_bUseWindowMode == TRUE);
+        GameConfig::GetInstance().Save();
+        g_MuEditorConsoleUI.LogEditor("Settings saved to config.ini");
+    }
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Saves to config.ini)");
+}
+
+void CDevEditorUI::RenderGraphicsDebugInfo()
+{
+    extern unsigned int WindowWidth, WindowHeight;
     extern BOOL g_bUseWindowMode;
     extern HWND g_hWnd;
-    extern int OpenglWindowWidth;
-    extern int OpenglWindowHeight;
-    extern float g_fScreenRate_x;
-    extern float g_fScreenRate_y;
+    extern int OpenglWindowWidth, OpenglWindowHeight;
+    extern float g_fScreenRate_x, g_fScreenRate_y;
 
-    // Display all debug info
     ImGui::Text("Current Resolution: %u x %u", WindowWidth, WindowHeight);
     ImGui::Text("OpenGL Viewport: %d x %d", OpenglWindowWidth, OpenglWindowHeight);
     ImGui::Text("Screen Rate: %.2f x %.2f", g_fScreenRate_x, g_fScreenRate_y);
@@ -479,29 +573,22 @@ void CDevEditorUI::RenderGraphicsTab()
 
     int clientWidth = 0, clientHeight = 0;
     float calculatedScaleX = 0, calculatedScaleY = 0;
-
-    // Show actual window client rect
     if (g_hWnd)
     {
         RECT clientRect;
         GetClientRect(g_hWnd, &clientRect);
-        clientWidth = clientRect.right - clientRect.left;
+        clientWidth  = clientRect.right  - clientRect.left;
         clientHeight = clientRect.bottom - clientRect.top;
         ImGui::Text("Actual Window Client: %d x %d", clientWidth, clientHeight);
 
-        // Calculate what the UI *thinks* the scaling should be
-        calculatedScaleX = (float)clientWidth / 640.0f;
-        calculatedScaleY = (float)clientHeight / 480.0f;
+        calculatedScaleX = (float)clientWidth  / (float)REFERENCE_WIDTH;
+        calculatedScaleY = (float)clientHeight / (float)REFERENCE_HEIGHT;
         ImGui::Text("Calculated Scale from Client: %.2f x %.2f", calculatedScaleX, calculatedScaleY);
     }
 
-    // Show if there's a mismatch
     if (WindowWidth != OpenglWindowWidth || WindowHeight != OpenglWindowHeight)
-    {
         ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "WARNING: Window size mismatch detected!");
-    }
 
-    // Copy to clipboard button
     ImGui::Spacing();
     if (ImGui::Button("Copy Debug Info to Clipboard", ImVec2(250, 0)))
     {
@@ -515,8 +602,8 @@ void CDevEditorUI::RenderGraphicsTab()
             "Actual Window Client: %d x %d\n"
             "Calculated Scale from Client: %.2f x %.2f\n"
             "Mismatch: %s\n"
-            "UI Reference System: 640 x 480\n"
-            "Expected UI Scale: WindowWidth/640 = %.2f, WindowHeight/480 = %.2f\n"
+            "UI Reference System: %d x %d\n"
+            "Expected UI Scale: WindowWidth/%d = %.2f, WindowHeight/%d = %.2f\n"
             "Aspect Ratio: %.3f\n",
             WindowWidth, WindowHeight,
             OpenglWindowWidth, OpenglWindowHeight,
@@ -525,7 +612,9 @@ void CDevEditorUI::RenderGraphicsTab()
             clientWidth, clientHeight,
             calculatedScaleX, calculatedScaleY,
             (WindowWidth != OpenglWindowWidth || WindowHeight != OpenglWindowHeight) ? "YES" : "NO",
-            (float)WindowWidth / 640.0f, (float)WindowHeight / 480.0f,
+            REFERENCE_WIDTH, REFERENCE_HEIGHT,
+            REFERENCE_WIDTH, (float)WindowWidth / (float)REFERENCE_WIDTH,
+            REFERENCE_HEIGHT, (float)WindowHeight / (float)REFERENCE_HEIGHT,
             (float)WindowWidth / (float)WindowHeight
         );
         ImGui::SetClipboardText(debugInfo);
@@ -533,85 +622,41 @@ void CDevEditorUI::RenderGraphicsTab()
     }
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "(Paste in Discord/notepad)");
+}
 
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    // Window size presets
+void CDevEditorUI::RenderWindowSizePresets()
+{
     ImGui::Text("Window Size Presets:");
 
     static const struct { int width; int height; const char* label; } resolutions[] = {
-        { 640, 480, "640 x 480 (4:3)" },
-        { 800, 600, "800 x 600 (4:3)" },
-        { 1024, 768, "1024 x 768 (4:3)" },
+        {  640,  480, "640 x 480 (4:3)"   },
+        {  800,  600, "800 x 600 (4:3)"   },
+        { 1024,  768, "1024 x 768 (4:3)"  },
         { 1280, 1024, "1280 x 1024 (5:4)" },
-        { 1280, 720, "1280 x 720 (16:9)" },
-        { 1600, 900, "1600 x 900 (16:9)" },
+        { 1280,  720, "1280 x 720 (16:9)" },
+        { 1600,  900, "1600 x 900 (16:9)" },
         { 1600, 1200, "1600 x 1200 (4:3)" },
         { 1680, 1050, "1680 x 1050 (16:10)" },
         { 1920, 1080, "1920 x 1080 (16:9)" },
         { 2560, 1440, "2560 x 1440 (16:9)" },
     };
+    constexpr int NUM_RESOLUTIONS = sizeof(resolutions) / sizeof(resolutions[0]);
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < NUM_RESOLUTIONS; i++)
     {
         if (i > 0 && i % 2 == 0)
             ImGui::Spacing();
 
         if (ImGui::Button(resolutions[i].label, ImVec2(200, 0)))
-        {
-            // Update window dimensions
-            WindowWidth = resolutions[i].width;
-            WindowHeight = resolutions[i].height;
-
-            // Update screen rate factors
-            extern float g_fScreenRate_x;
-            extern float g_fScreenRate_y;
-            g_fScreenRate_x = (float)WindowWidth / 640.0f;
-            g_fScreenRate_y = (float)WindowHeight / 480.0f;
-
-            // Update OpenGL viewport dimensions
-            extern int OpenglWindowWidth;
-            extern int OpenglWindowHeight;
-            OpenglWindowWidth = WindowWidth;
-            OpenglWindowHeight = WindowHeight;
-
-            // Save to config file
-            GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
-             GameConfig::GetInstance().Save();
-
-            // Reinitialize fonts and update resolution-dependent systems
-            extern void ReinitializeFonts();
-            extern void UpdateResolutionDependentSystems();
-            ReinitializeFonts();
-            UpdateResolutionDependentSystems();
-
-            // Resize window if in windowed mode
-            if (g_bUseWindowMode && g_hWnd)
-            {
-                RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
-                AdjustWindowRect(&windowRect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, FALSE);
-
-                int windowWidth = windowRect.right - windowRect.left;
-                int windowHeight = windowRect.bottom - windowRect.top;
-
-                SetWindowPos(g_hWnd, HWND_TOP, 0, 0, windowWidth, windowHeight,
-                            SWP_NOMOVE | SWP_NOZORDER);
-            }
-
-            char msg[128];
-            sprintf_s(msg, "Window resized to %ux%u", WindowWidth, WindowHeight);
-            g_MuEditorConsoleUI.LogEditor(msg);
-        }
+            ApplyNewWindowSize(resolutions[i].width, resolutions[i].height, "");
 
         if (i % 2 == 0)
             ImGui::SameLine();
     }
+}
 
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    // Custom resolution
+void CDevEditorUI::RenderCustomResolutionInput()
+{
     ImGui::Text("Custom Resolution:");
     static int customWidth = 1920;
     static int customHeight = 1080;
@@ -621,77 +666,37 @@ void CDevEditorUI::RenderGraphicsTab()
     ImGui::InputInt("Height", &customHeight, 10, 100);
     ImGui::PopItemWidth();
 
-    // Clamp values
-    if (customWidth < 640) customWidth = 640;
-    if (customWidth > 3840) customWidth = 3840;
-    if (customHeight < 480) customHeight = 480;
-    if (customHeight > 2160) customHeight = 2160;
+    if (customWidth  < REFERENCE_WIDTH)        customWidth  = REFERENCE_WIDTH;
+    if (customWidth  > CUSTOM_RES_MAX_WIDTH)   customWidth  = CUSTOM_RES_MAX_WIDTH;
+    if (customHeight < REFERENCE_HEIGHT)       customHeight = REFERENCE_HEIGHT;
+    if (customHeight > CUSTOM_RES_MAX_HEIGHT)  customHeight = CUSTOM_RES_MAX_HEIGHT;
 
     if (ImGui::Button("Apply Custom Size", ImVec2(200, 0)))
-    {
-        WindowWidth = customWidth;
-        WindowHeight = customHeight;
+        ApplyNewWindowSize(customWidth, customHeight, "custom ");
+}
 
-        extern float g_fScreenRate_x;
-        extern float g_fScreenRate_y;
-        g_fScreenRate_x = (float)WindowWidth / 640.0f;
-        g_fScreenRate_y = (float)WindowHeight / 480.0f;
+void CDevEditorUI::RenderFullscreenToggle()
+{
+    extern unsigned int WindowWidth, WindowHeight;
+    extern BOOL g_bUseWindowMode;
+    extern HWND g_hWnd;
+    extern int OpenglWindowWidth, OpenglWindowHeight;
+    extern void ReinitializeFonts();
+    extern void UpdateResolutionDependentSystems();
 
-        // Update OpenGL viewport dimensions
-        extern int OpenglWindowWidth;
-        extern int OpenglWindowHeight;
-        OpenglWindowWidth = WindowWidth;
-        OpenglWindowHeight = WindowHeight;
-
-        // Save to config file
-         GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
-         GameConfig::GetInstance().Save();
-
-        // Reinitialize fonts and update resolution-dependent systems
-        ReinitializeFonts();
-        UpdateResolutionDependentSystems();
-
-        if (g_bUseWindowMode && g_hWnd)
-        {
-            RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
-            AdjustWindowRect(&windowRect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, FALSE);
-
-            int windowWidth = windowRect.right - windowRect.left;
-            int windowHeight = windowRect.bottom - windowRect.top;
-
-            SetWindowPos(g_hWnd, HWND_TOP, 0, 0, windowWidth, windowHeight,
-                        SWP_NOMOVE | SWP_NOZORDER);
-        }
-
-        char msg[128];
-        sprintf_s(msg, "Window resized to custom %ux%u", WindowWidth, WindowHeight);
-        g_MuEditorConsoleUI.LogEditor(msg);
-    }
-
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    // Fullscreen toggle
     ImGui::Text("Display Mode:");
 
-    bool isWindowed = g_bUseWindowMode == TRUE;
+    bool isWindowed = (g_bUseWindowMode == TRUE);
     if (ImGui::Checkbox("Windowed Mode", &isWindowed))
     {
         g_bUseWindowMode = isWindowed ? TRUE : FALSE;
 
-        // Update OpenGL viewport dimensions
-        extern int OpenglWindowWidth;
-        extern int OpenglWindowHeight;
-        OpenglWindowWidth = WindowWidth;
-        OpenglWindowHeight = WindowHeight;
+        OpenglWindowWidth  = (int)WindowWidth;
+        OpenglWindowHeight = (int)WindowHeight;
 
-        // Save window mode to config
-         GameConfig::GetInstance().SetWindowMode(g_bUseWindowMode == TRUE);
-         GameConfig::GetInstance().Save();
+        GameConfig::GetInstance().SetWindowMode(g_bUseWindowMode == TRUE);
+        GameConfig::GetInstance().Save();
 
-        // Reinitialize fonts and update resolution-dependent systems
-        extern void ReinitializeFonts();
-        extern void UpdateResolutionDependentSystems();
         ReinitializeFonts();
         UpdateResolutionDependentSystems();
 
@@ -708,21 +713,19 @@ void CDevEditorUI::RenderGraphicsTab()
                 RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
                 AdjustWindowRect(&windowRect, style, FALSE);
 
-                int windowWidth = windowRect.right - windowRect.left;
-                int windowHeight = windowRect.bottom - windowRect.top;
-
-                SetWindowPos(g_hWnd, HWND_NOTOPMOST, 100, 100, windowWidth, windowHeight,
-                            SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+                SetWindowPos(g_hWnd, HWND_NOTOPMOST, 100, 100,
+                             windowRect.right - windowRect.left,
+                             windowRect.bottom - windowRect.top,
+                             SWP_SHOWWINDOW | SWP_FRAMECHANGED);
 
                 g_MuEditorConsoleUI.LogEditor("Switched to windowed mode");
             }
             else
             {
                 // Switch to fullscreen
-                DEVMODE dmScreenSettings;
-                memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+                DEVMODE dmScreenSettings = {};
                 dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-                dmScreenSettings.dmPelsWidth = WindowWidth;
+                dmScreenSettings.dmPelsWidth  = WindowWidth;
                 dmScreenSettings.dmPelsHeight = WindowHeight;
                 dmScreenSettings.dmBitsPerPel = 32;
                 dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
@@ -733,7 +736,6 @@ void CDevEditorUI::RenderGraphicsTab()
                     SetWindowLongPtr(g_hWnd, GWL_STYLE, style);
                     SetWindowPos(g_hWnd, HWND_TOPMOST, 0, 0, WindowWidth, WindowHeight,
                                 SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-
                     g_MuEditorConsoleUI.LogEditor("Switched to fullscreen mode");
                 }
                 else
@@ -747,48 +749,6 @@ void CDevEditorUI::RenderGraphicsTab()
 
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Toggle between windowed and fullscreen)");
-
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    // Info
-    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Camera Auto-Adapts:");
-    ImGui::Text("• FOV stays constant (set in Camera tab)");
-    ImGui::Text("• Aspect ratio adjusts automatically");
-    ImGui::Text("• Wider screens = more horizontal view");
-    ImGui::Text("• Frustum cone updates each frame");
-
-    ImGui::Separator();
-
-    // Aspect ratio info
-    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
-    ImGui::Text("Current Aspect Ratio: %.3f (%s)", aspectRatio,
-                aspectRatio > 1.7f ? "Ultra-wide" :
-                aspectRatio > 1.6f ? "16:10" :
-                aspectRatio > 1.5f ? "16:9" :
-                aspectRatio > 1.4f ? "3:2" :
-                aspectRatio > 1.2f ? "5:4" : "4:3");
-
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    // Manual save button
-    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.5f, 1.0f), "Settings Auto-Save:");
-    ImGui::Text("• Settings save automatically when:");
-    ImGui::Text("  - Changing resolution");
-    ImGui::Text("  - Toggling window mode");
-    ImGui::Text("  - Exiting the game");
-    ImGui::Spacing();
-
-    if (ImGui::Button("Save Settings Now", ImVec2(200, 0)))
-    {
-         GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
-         GameConfig::GetInstance().SetWindowMode(g_bUseWindowMode == TRUE);
-         GameConfig::GetInstance().Save();
-        g_MuEditorConsoleUI.LogEditor("Settings saved to config.ini");
-    }
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Saves to config.ini)");
 }
 
 // Accessors for external use
