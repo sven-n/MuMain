@@ -35,25 +35,13 @@ public:
     bool ShouldRenderShaders() const { return m_RenderShaders; }
     bool ShouldRenderSkillEffects() const { return m_RenderSkillEffects; }
 
-    // Phase 5: Custom Origin accessors
-    bool IsCustomOriginEnabled() const { return m_CustomOriginEnabled; }
-    float GetCustomOriginX() const { return m_CustomOriginX; }
-    float GetCustomOriginY() const { return m_CustomOriginY; }
-    float GetCustomOriginZ() const { return m_CustomOriginZ; }
 
-    // Phase 5: Character targeting accessors
-    bool IsTargetCharacterEnabled() const { return m_TargetCharacterEnabled; }
-    int GetTargetCharacterIndex() const { return m_TargetCharacterIndex; }
-
-    // Culling sphere visualization accessors
-    bool ShouldShowTerrainCullingSpheres() const { return m_ShowTerrainCullingSpheres; }
-    bool ShouldShowObjectCullingSpheres() const { return m_ShowObjectCullingSpheres; }
+    // Debug visualization accessors
     bool ShouldShowCharacterCullingSpheres() const { return m_ShowCharacterCullingSpheres; }
+    bool ShouldShowItemCullingSpheres() const { return m_ShowItemCullingSpheres; }
     bool ShouldShowTileGrid() const { return m_ShowTileGrid; }
 
     // Culling radius accessors
-    float GetCullRadiusTerrain() const { return m_CullRadiusTerrain; }
-
     float GetCullRadiusItem() const { return m_CullRadiusItem; }
 
 private:
@@ -74,15 +62,6 @@ private:
     float m_FogStartPct = 1.00f;     // Fog start as fraction of ViewFar (100%)
     float m_FogEndPct = 1.25f;       // Fog end as fraction of ViewFar (125%)
 
-    // Phase 5 Debug: Custom Origin Controls
-    bool m_CustomOriginEnabled = false;
-    float m_CustomOriginX = 0.0f;     // X coordinate (0-255 game tiles, converted to world units)
-    float m_CustomOriginY = 0.0f;     // Y coordinate (0-255 game tiles, converted to world units)
-    float m_CustomOriginZ = 100.0f;   // Z height (world units)
-
-    // Phase 5: Character Scene - Target specific character
-    bool m_TargetCharacterEnabled = false;
-    int m_TargetCharacterIndex = 0;   // 0-4 for characters 1-5
 
     // Render toggle flags
     // Working toggles
@@ -104,14 +83,12 @@ private:
     bool m_RenderNPCs = true;             // NOT IMPLEMENTED
     bool m_RenderMonsters = true;         // NOT IMPLEMENTED
 
-    // Culling sphere visualization flags
-    bool m_ShowTerrainCullingSpheres = false;    // Show terrain tile culling spheres
-    bool m_ShowObjectCullingSpheres = false;     // Show object culling spheres (trees, items, etc.)
-    bool m_ShowCharacterCullingSpheres = false;  // Show character culling spheres
-    bool m_ShowTileGrid = false;                 // Show terrain tile borders
+    // Debug visualization flags
+    bool m_ShowCharacterCullingSpheres = false;
+    bool m_ShowItemCullingSpheres = false;
+    bool m_ShowTileGrid = false;
 
     // Runtime adjustable culling radii
-    float m_CullRadiusTerrain = 100.0f;
     float m_CullRadiusItem = 100.0f;
 
     // Login scene render distances (adjustable via sliders)

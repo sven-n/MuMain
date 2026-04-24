@@ -32,13 +32,9 @@
 
 // DevEditor function declarations
 #ifdef _EDITOR
-extern "C" bool DevEditor_ShouldShowTerrainCullingSpheres();
 extern "C" bool DevEditor_ShouldShowTileGrid();
-extern "C" float DevEditor_GetCullRadiusTerrain();
 // Per-frame cached DevEditor state (avoid per-tile function calls)
-static bool s_bShowTerrainCullingSpheres = false;
 static bool s_bShowTileGrid = false;
-static float s_fCullRadiusTerrain = 0.0f;
 #endif
 
 //-------------------------------------------------------------------------------------------------------------
@@ -2735,9 +2731,7 @@ void CacheActiveFrustum()
 {
     s_pCachedCamera = CameraManager::Instance().GetActiveCamera();
 #ifdef _EDITOR
-    s_bShowTerrainCullingSpheres = DevEditor_ShouldShowTerrainCullingSpheres();
     s_bShowTileGrid = DevEditor_ShouldShowTileGrid();
-    s_fCullRadiusTerrain = DevEditor_GetCullRadiusTerrain();
 #endif
 }
 
@@ -3114,19 +3108,6 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
                 // No per-tile distance cap — effects (flames etc.) are tied to terrain blocks
                 RenderTerrainBlock(xf, yf, xi, yi, EditFlag, camera);
 
-#ifdef _EDITOR
-                // Debug visualization: Render terrain tile culling sphere
-                if (!EditFlag && s_bShowTerrainCullingSpheres)
-                {
-                    float cullRadius = s_fCullRadiusTerrain;
-                    vec3_t tileCenter;
-                    tileCenter[0] = (xi + 2.0f) * 100.0f;  // Center of 4x4 block
-                    tileCenter[1] = (yi + 2.0f) * 100.0f;
-                    // Use actual terrain height instead of Z=0
-                    tileCenter[2] = RequestTerrainHeight(tileCenter[0], tileCenter[1]);
-                    RenderDebugSphere(tileCenter, cullRadius, 0.0f, 1.0f, 0.0f);  // Green wireframe
-                }
-#endif
             }
         }
     }

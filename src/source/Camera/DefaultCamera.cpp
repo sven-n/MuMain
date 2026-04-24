@@ -434,15 +434,8 @@ bool DefaultCamera::Update()
     g_Camera.FOV = m_State.FOV;
 
     // FIX Issue #1: Use m_Config.farPlane for rendering, not zoom-adjusted m_State.ViewFar
-    // Apply DevEditor override if enabled
     float effectiveFarPlane = m_Config.farPlane;
 #ifdef _EDITOR
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        float fov, nearPlane, farPlane, terrainCull;
-        DevEditor_GetCameraConfig(&fov, &nearPlane, &farPlane, &terrainCull);
-        effectiveFarPlane = farPlane;
-    }
 
     // Debug: Log when g_Camera.ViewFar is set
     static float lastLoggedValue = -1.0f;

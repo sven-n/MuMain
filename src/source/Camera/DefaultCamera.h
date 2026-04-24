@@ -4,10 +4,6 @@
 #include "CameraState.h"
 #include "CullingConstants.h"
 
-#ifdef _EDITOR
-extern "C" float DevEditor_GetCullRadiusTerrain();
-#endif
-
 /**
  * @brief Default legacy third-person follow camera
  *

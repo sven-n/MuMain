@@ -4,7 +4,6 @@
 #include "CameraManager.h"
 #include "DefaultCamera.h"
 #include "OrbitalCamera.h"
-#include "LegacyCamera.h"
 #ifdef _EDITOR
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "FreeFlyCamera.h"
@@ -35,7 +34,6 @@ void CameraManager::Initialize()
     // Create camera instances
     m_pDefaultCamera = std::make_unique<DefaultCamera>(g_Camera);
     m_pOrbitalCamera = std::make_unique<OrbitalCamera>(g_Camera);
-    m_pLegacyCamera = std::make_unique<LegacyCamera>(g_Camera);
 #ifdef _EDITOR
     m_pFreeFlyCamera = std::make_unique<FreeFlyCamera>(g_Camera);
 #endif
@@ -56,7 +54,6 @@ void CameraManager::Shutdown()
 
     m_pDefaultCamera.reset();
     m_pOrbitalCamera.reset();
-    m_pLegacyCamera.reset();
 #ifdef _EDITOR
     m_pFreeFlyCamera.reset();
     m_pSpectatedCamera = nullptr;
@@ -75,7 +72,7 @@ bool CameraManager::Update()
         return false;
 
     // Auto-reset to DefaultCamera when leaving MainScene
-    // Orbital/Legacy cameras are MainScene-only; if the scene changed, switch back
+    // Orbital camera is MainScene-only; if the scene changed, switch back
     extern EGameScene SceneFlag;
     if (SceneFlag != MAIN_SCENE && m_CurrentMode != CameraMode::Default)
     {
@@ -85,7 +82,7 @@ bool CameraManager::Update()
 #ifdef _EDITOR
     // When in FreeFly mode, also update the spectated camera so it keeps tracking.
     // We must isolate g_Camera so the spectated camera sees its OWN previous state
-    // (not FreeFly's angles/position), otherwise e.g. LegacyCamera inherits FreeFly's yaw.
+    // (not FreeFly's angles/position), otherwise e.g. OrbitalCamera inherits FreeFly's yaw.
     if (m_pSpectatedCamera && m_CurrentMode == CameraMode::FreeFly)
     {
         // Save FreeFly's state
@@ -142,7 +139,7 @@ bool CameraManager::SetCameraMode(CameraMode mode)
 
     // FIX: Only allow OrbitalCamera in MainScene
     extern EGameScene SceneFlag;
-    if ((mode == CameraMode::Orbital || mode == CameraMode::Legacy) && SceneFlag != MAIN_SCENE)
+    if (mode == CameraMode::Orbital && SceneFlag != MAIN_SCENE)
     {
         // Silently ignore orbital camera request in non-MainScene
         return false;
@@ -157,9 +154,6 @@ bool CameraManager::SetCameraMode(CameraMode mode)
             break;
         case CameraMode::Orbital:
             pNewCamera = m_pOrbitalCamera.get();
-            break;
-        case CameraMode::Legacy:
-            pNewCamera = m_pLegacyCamera.get();
             break;
 #ifdef _EDITOR
         case CameraMode::FreeFly:

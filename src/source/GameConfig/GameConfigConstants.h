@@ -7,6 +7,7 @@ namespace CfgSections
     inline constexpr wchar_t CfgSectionAudio[]      = L"Audio";
     inline constexpr wchar_t CfgSectionLogin[]      = L"LOGIN";
     inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
+    inline constexpr wchar_t CfgSectionCamera[] = L"Camera";
 }
 
 namespace CfgKeys
@@ -34,6 +35,9 @@ namespace CfgKeys
     // Connection
     inline constexpr wchar_t CfgKeyServerIP[]   = L"ServerIP";
     inline constexpr wchar_t CfgKeyServerPort[] = L"ServerPort";
+
+    // Camera
+    inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
 }
 
 namespace CfgDefaults
@@ -57,4 +61,6 @@ namespace CfgDefaults
 
     inline constexpr wchar_t CfgDefaultServerIP[] = L"127.127.127.127";
     inline constexpr int CfgDefaultServerPort = 44406;
+
+    inline constexpr int CfgDefaultZoom = 1100;  // OrbitalCamera DEFAULT_RADIUS
 }

@@ -56,6 +56,8 @@ void GameConfig::Load()
 
     m_serverIP   = ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP);
     m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
+
+    m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
 }
 
 void GameConfig::Save()
@@ -81,6 +83,8 @@ void GameConfig::Save()
 
     WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
     WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
+
+    WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
 }
 
 void GameConfig::SetWindowSize(int width, int height)
@@ -147,6 +151,11 @@ void GameConfig::SetServerIP(const std::wstring& ip)
 void GameConfig::SetServerPort(int port)
 {
     m_serverPort = port;
+}
+
+void GameConfig::SetZoom(int zoom)
+{
+    m_zoom = zoom;
 }
 
 // Helper function to convert binary data to hex string

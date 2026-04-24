@@ -6,10 +6,6 @@
 #include "CullingConstants.h"
 #include <memory>
 
-#ifdef _EDITOR
-extern "C" float DevEditor_GetCullRadiusTerrain();
-#endif
-
 /**
  * @brief Orbital camera - spherical coordinates around character
  *

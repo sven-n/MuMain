@@ -108,8 +108,6 @@ void CDevEditorUI::RenderScenesTab()
                     const char* name = spectated->GetName();
                     if (strcmp(name, "Orbital") == 0)
                         camMgr.SetCameraMode(CameraMode::Orbital);
-                    else if (strcmp(name, "Legacy") == 0)
-                        camMgr.SetCameraMode(CameraMode::Legacy);
                     else
                         camMgr.SetCameraMode(CameraMode::Default);
                 }
@@ -154,8 +152,7 @@ void CDevEditorUI::RenderScenesTab()
         {
             case 0: modeName = "Default"; break;
             case 1: modeName = "Orbital"; break;
-            case 2: modeName = "Legacy"; break;
-            case 3: modeName = "FreeFly"; break;
+            case 2: modeName = "FreeFly"; break;
             default: modeName = "Unknown"; break;
         }
         ImGui::Text("%s | Pos: %.0f, %.0f, %.0f | Tile: (%d, %d) | Pitch: %.1f Yaw: %.1f",
@@ -166,8 +163,8 @@ void CDevEditorUI::RenderScenesTab()
 
     ImGui::Separator();
 
-    // ===== Login Scene =====
-    if (ImGui::CollapsingHeader("Login Scene"))
+    // ===== Login Scene (only visible in login scene) =====
+    if (SceneFlag == LOG_IN_SCENE && ImGui::CollapsingHeader("Login Scene"))
     {
         ImGui::Indent();
 
@@ -258,73 +255,16 @@ void CDevEditorUI::RenderScenesTab()
         ImGui::Unindent();
     }
 
-    // ===== Character Scene =====
-    if (ImGui::CollapsingHeader("Character Scene"))
+    // ===== Character Scene (only visible in character scene) =====
+    if (SceneFlag == CHARACTER_SCENE && ImGui::CollapsingHeader("Character Scene"))
     {
         ImGui::Indent();
-
-        ImGui::Checkbox("Target Specific Character", &m_TargetCharacterEnabled);
-
-        if (m_TargetCharacterEnabled)
-        {
-            const char* charLabels[] = { "Char 1", "Char 2", "Char 3", "Char 4", "Char 5" };
-            ImGui::PushItemWidth(150);
-            ImGui::Combo("Target", &m_TargetCharacterIndex, charLabels, 5);
-            ImGui::PopItemWidth();
-
-            extern CHARACTER* CharactersClient;
-            if (CharactersClient && CharactersClient[m_TargetCharacterIndex].Object.Live)
-            {
-                CHARACTER* targetChar = &CharactersClient[m_TargetCharacterIndex];
-                ImGui::Text("Pos: %.0f, %.0f, %.0f",
-                    targetChar->Object.Position[0],
-                    targetChar->Object.Position[1],
-                    targetChar->Object.Position[2]);
-
-                if (ImGui::Button("Set Origin to This Character"))
-                {
-                    m_CustomOriginEnabled = true;
-                    m_CustomOriginX = targetChar->Object.Position[0] / 100.0f;
-                    m_CustomOriginY = targetChar->Object.Position[1] / 100.0f;
-                    m_CustomOriginZ = targetChar->Object.Position[2];
-                }
-            }
-            else
-            {
-                ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "Character %d not loaded", m_TargetCharacterIndex + 1);
-            }
-        }
-
-        // Custom Origin
-        ImGui::Checkbox("Custom Origin", &m_CustomOriginEnabled);
-        if (m_CustomOriginEnabled)
-        {
-            ImGui::PushItemWidth(120);
-            ImGui::InputFloat("X (tiles)", &m_CustomOriginX, 1.0f, 10.0f, "%.1f");
-            ImGui::InputFloat("Y (tiles)", &m_CustomOriginY, 1.0f, 10.0f, "%.1f");
-            ImGui::InputFloat("Z (height)", &m_CustomOriginZ, 10.0f, 50.0f, "%.1f");
-            ImGui::PopItemWidth();
-
-            if (ImGui::Button("Set to Camera Pos"))
-            {
-                m_CustomOriginX = g_Camera.Position[0] / 100.0f;
-                m_CustomOriginY = g_Camera.Position[1] / 100.0f;
-                m_CustomOriginZ = g_Camera.Position[2];
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Reset##origin"))
-            {
-                m_CustomOriginX = 0.0f;
-                m_CustomOriginY = 0.0f;
-                m_CustomOriginZ = 100.0f;
-            }
-        }
-
+        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Nothing here yet.");
         ImGui::Unindent();
     }
 
-    // ===== Game Scene =====
-    if (ImGui::CollapsingHeader("Game Scene"))
+    // ===== Game Scene (only visible in main game) =====
+    if (SceneFlag == MAIN_SCENE && ImGui::CollapsingHeader("Game Scene"))
     {
         ImGui::Indent();
 
@@ -436,17 +376,15 @@ void CDevEditorUI::RenderScenesTab()
     {
         ImGui::Indent();
 
-        // Culling visualization
-        ImGui::Checkbox("Terrain Spheres", &m_ShowTerrainCullingSpheres);
-        ImGui::SameLine();
-        ImGui::Checkbox("Object Spheres", &m_ShowObjectCullingSpheres);
+        // Debug visualization
         ImGui::Checkbox("Character Cuboids", &m_ShowCharacterCullingSpheres);
         ImGui::SameLine();
+        ImGui::Checkbox("Dropped Item Spheres", &m_ShowItemCullingSpheres);
         ImGui::Checkbox("Tile Grid", &m_ShowTileGrid);
 
         ImGui::PushItemWidth(150);
-        ImGui::InputFloat("Terrain Cull Radius", &m_CullRadiusTerrain, 10.0f, 50.0f, "%.1f");
-        ImGui::InputFloat("Item Cull Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
+        ImGui::InputFloat("Dropped Item Cull Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
+        if (m_CullRadiusItem < 0.0f) m_CullRadiusItem = 0.0f;
         ImGui::PopItemWidth();
 
         ImGui::Spacing();
@@ -912,32 +850,6 @@ extern "C"
         return g_DevEditorUI.GetFogOverrideValue();
     }
 
-    // Character Scene settings — only apply in CHARACTER_SCENE
-    bool DevEditor_IsCustomOriginEnabled()
-    {
-        extern EGameScene SceneFlag;
-        if (SceneFlag != CHARACTER_SCENE) return false;
-        return g_DevEditorUI.IsCustomOriginEnabled();
-    }
-
-    void DevEditor_GetCustomOrigin(float* outX, float* outY, float* outZ)
-    {
-        if (outX) *outX = g_DevEditorUI.GetCustomOriginX() * 100.0f;
-        if (outY) *outY = g_DevEditorUI.GetCustomOriginY() * 100.0f;
-        if (outZ) *outZ = g_DevEditorUI.GetCustomOriginZ();
-    }
-
-    bool DevEditor_IsTargetCharacterEnabled()
-    {
-        extern EGameScene SceneFlag;
-        if (SceneFlag != CHARACTER_SCENE) return false;
-        return g_DevEditorUI.IsTargetCharacterEnabled();
-    }
-
-    int DevEditor_GetTargetCharacterIndex()
-    {
-        return g_DevEditorUI.GetTargetCharacterIndex();
-    }
 
     // Render toggle accessors
     bool DevEditor_ShouldRenderTerrain()
@@ -1012,24 +924,6 @@ extern "C"
 
 // C linkage wrappers for external C code (always available, return false when _EDITOR not defined)
 extern "C" {
-    bool DevEditor_ShouldShowTerrainCullingSpheres()
-    {
-#ifdef _EDITOR
-        return g_DevEditorUI.ShouldShowTerrainCullingSpheres();
-#else
-        return false;
-#endif
-    }
-
-    bool DevEditor_ShouldShowObjectCullingSpheres()
-    {
-#ifdef _EDITOR
-        return g_DevEditorUI.ShouldShowObjectCullingSpheres();
-#else
-        return false;
-#endif
-    }
-
     bool DevEditor_ShouldShowCharacterCullingSpheres()
     {
 #ifdef _EDITOR
@@ -1048,15 +942,14 @@ extern "C" {
 #endif
     }
 
-    float DevEditor_GetCullRadiusTerrain()
+    bool DevEditor_ShouldShowItemCullingSpheres()
     {
 #ifdef _EDITOR
-        return g_DevEditorUI.GetCullRadiusTerrain();
+        return g_DevEditorUI.ShouldShowItemCullingSpheres();
 #else
-        return 100.0f;
+        return false;
 #endif
     }
-
 
     float DevEditor_GetCullRadiusItem()
     {

@@ -40,12 +40,12 @@
 
 // DevEditor function declarations
 #ifdef _EDITOR
-extern "C" bool DevEditor_ShouldShowObjectCullingSpheres();
+extern "C" bool DevEditor_ShouldShowItemCullingSpheres();
 extern "C" float DevEditor_GetCullRadiusItem();
 extern "C" float DevEditor_GetLoginObjectDist();
 
-// Per-frame cached DevEditor state (avoid per-object function calls)
-static bool s_bShowObjectCullingSpheres = false;
+// Per-frame cached DevEditor state
+static bool s_bShowItemCullingSpheres = false;
 static float s_fCullRadiusItem = 0.0f;
 #endif
 
@@ -3271,7 +3271,7 @@ void RenderObjectVisual(OBJECT* o)
 void RenderObjects(ICamera* camera)
 {
 #ifdef _EDITOR
-    s_bShowObjectCullingSpheres = DevEditor_ShouldShowObjectCullingSpheres();
+    s_bShowItemCullingSpheres = DevEditor_ShouldShowItemCullingSpheres();
     s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
 #endif
 
@@ -3438,13 +3438,6 @@ void RenderObjects(ICamera* camera)
                                                 {
                                                     RenderObject(o);
                                                     RenderObjectVisual(o);
-
-#ifdef _EDITOR
-                                                    if (s_bShowObjectCullingSpheres)
-                                                    {
-                                                        RenderDebugSphere(o->Position, o->CollisionRange * 100.0f, 1.0f, 1.0f, 0.0f);
-                                                    }
-#endif
                                                 }
                                             }
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
@@ -3637,24 +3630,6 @@ void RenderObjects_AfterCharacter(ICamera* camera)
                                                 if (Success)
                                                 {
                                                     RenderObject_AfterCharacter(o);
-
-#ifdef _EDITOR
-                                                    // Debug visualization: Render world object culling sphere (trees, walls, etc)
-                                                    if (s_bShowObjectCullingSpheres)
-                                                    {
-                                                        // Note: CollisionRange is typically negative (tolerance in tile units)
-                                                        // For 2D culling: negative = expanded frustum (more permissive)
-                                                        // For visualization: show absolute value as approximate radius
-                                                        float cullRadius = o->CollisionRange + range;
-                                                        if (cullRadius < 0)
-                                                        {
-                                                            // Negative means expanded frustum tolerance
-                                                            // Show as approximate sphere for visualization purposes
-                                                            cullRadius = fabsf(cullRadius) * 100.0f;  // Convert tile tolerance to world units
-                                                        }
-                                                        RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
-                                                    }
-#endif
                                                 }
                                             }
                         }
@@ -6441,8 +6416,8 @@ void RenderItems()
             o->Visible = TestFrustrum(o->Position, cullRadius);
 
 #ifdef _EDITOR
-            // Debug visualization: Render object culling sphere
-            if (s_bShowObjectCullingSpheres)
+            // Debug visualization: Render item culling sphere
+            if (s_bShowItemCullingSpheres)
             {
                 RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
             }

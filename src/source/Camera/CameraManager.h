@@ -69,7 +69,6 @@ private:
     // Camera instances
     std::unique_ptr<ICamera> m_pDefaultCamera;
     std::unique_ptr<ICamera> m_pOrbitalCamera;
-    std::unique_ptr<ICamera> m_pLegacyCamera;
 #ifdef _EDITOR
     std::unique_ptr<ICamera> m_pFreeFlyCamera;
     ICamera* m_pSpectatedCamera = nullptr;  // Camera being spectated while in FreeFly mode

@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "UIControls.h"
+#include "GameConfig/GameConfig.h"
 #ifdef _EDITOR
 #include "UI/Console/MuEditorConsoleUI.h"
 #endif
@@ -27,10 +28,6 @@ extern int MouseY;
 // DevEditor config override functions (global scope required for extern "C")
 extern "C" bool DevEditor_IsConfigOverrideEnabled();
 extern "C" void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
-extern "C" bool DevEditor_IsCustomOriginEnabled();
-extern "C" void DevEditor_GetCustomOrigin(float* outX, float* outY, float* outZ);
-extern "C" bool DevEditor_IsTargetCharacterEnabled();
-extern "C" int DevEditor_GetTargetCharacterIndex();
 #endif
 
 OrbitalCamera::OrbitalCamera(CameraState& state)
@@ -42,7 +39,7 @@ OrbitalCamera::OrbitalCamera(CameraState& state)
     , m_BasePitch(0.0f)
     , m_DeltaYaw(0.0f)
     , m_DeltaPitch(0.0f)
-    , m_Radius(DEFAULT_RADIUS)
+    , m_Radius((float)GameConfig::GetInstance().GetZoom())
     , m_LastSceneFlag(-1)  // Phase 5: Initialize to invalid scene
     , m_bJustActivated(false)  // Initialize activation flag
     , m_bRotating(false)
@@ -53,8 +50,8 @@ OrbitalCamera::OrbitalCamera(CameraState& state)
     IdentityVector3D(m_Target);
     IdentityVector3D(m_InitialCameraOffset);
 
-    // Ensure ViewFar matches the config
-    m_State.ViewFar = m_Config.farPlane;
+    // Sync ViewFar with loaded zoom level
+    UpdateConfigForView();
 }
 
 void OrbitalCamera::Reset()
@@ -63,7 +60,7 @@ void OrbitalCamera::Reset()
     m_BasePitch = 0.0f;
     m_DeltaYaw = 0.0f;
     m_DeltaPitch = 0.0f;
-    m_Radius = DEFAULT_RADIUS;
+    m_Radius = (float)GameConfig::GetInstance().GetZoom();
     m_bRotating = false;
     m_bInitialOffsetSet = false;
     m_bFreeCameraMode = false;
@@ -74,6 +71,10 @@ void OrbitalCamera::Reset()
 
 void OrbitalCamera::ResetForScene(EGameScene scene)
 {
+    // Save current zoom before scene transition
+    GameConfig::GetInstance().SetZoom((int)m_Radius);
+    GameConfig::GetInstance().Save();
+
     // Phase 5: Proper scene-specific reset using switch statement
     switch (scene)
     {
@@ -94,7 +95,7 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
             // Reset orbital parameters for new scene
             m_DeltaYaw = 0.0f;
             m_DeltaPitch = 0.0f;
-            m_Radius = DEFAULT_RADIUS;
+            m_Radius = (float)GameConfig::GetInstance().GetZoom();
             m_bInitialOffsetSet = false;
             break;
         }
@@ -116,7 +117,7 @@ void OrbitalCamera::ResetForScene(EGameScene scene)
             // Reset orbital parameters for new scene
             m_DeltaYaw = 0.0f;
             m_DeltaPitch = 0.0f;
-            m_Radius = DEFAULT_RADIUS;
+            m_Radius = (float)GameConfig::GetInstance().GetZoom();
             m_bInitialOffsetSet = false;
             break;
         }
@@ -352,7 +353,7 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
 
     // Use horizontal distance as radius to maintain similar zoom level as DefaultCamera
     // This prevents the camera from appearing zoomed out when including vertical offset
-    m_Radius = DEFAULT_RADIUS;
+    m_Radius = (float)GameConfig::GetInstance().GetZoom();
     m_Radius = std::clamp(m_Radius, MIN_RADIUS, MAX_RADIUS);
 
     // Use the calculated look-at point as the pivot for orbital rotation
@@ -416,6 +417,10 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
 void OrbitalCamera::OnDeactivate()
 {
     m_bRotating = false;
+
+    // Save zoom level to config.ini
+    GameConfig::GetInstance().SetZoom((int)m_Radius);
+    GameConfig::GetInstance().Save();
 }
 
 bool OrbitalCamera::Update()
@@ -611,31 +616,6 @@ bool OrbitalCamera::IsHeroValid() const
 
 void OrbitalCamera::GetTargetPosition(vec3_t outTarget) const
 {
-#ifdef _EDITOR
-    extern EGameScene SceneFlag;
-
-    // Priority 1: Target specific character (ONLY in CharacterScene)
-    if (SceneFlag == CHARACTER_SCENE && DevEditor_IsTargetCharacterEnabled())
-    {
-        int charIndex = DevEditor_GetTargetCharacterIndex();
-        extern CHARACTER* CharactersClient;
-        if (CharactersClient && CharactersClient[charIndex].Object.Live)
-        {
-            VectorCopy(CharactersClient[charIndex].Object.Position, outTarget);
-            return;
-        }
-        // If character not loaded, fall through to next priority
-    }
-
-    // Priority 2: Custom origin from DevEditor
-    if (DevEditor_IsCustomOriginEnabled())
-    {
-        // Use custom origin from DevEditor
-        DevEditor_GetCustomOrigin(&outTarget[0], &outTarget[1], &outTarget[2]);
-        return;
-    }
-#endif
-
     extern CHARACTER* Hero;
     if (IsHeroValid())
     {
@@ -784,11 +764,8 @@ void OrbitalCamera::ComputeCameraTransform()
     m_State.Distance = m_Radius;
     m_State.DistanceTarget = m_Radius;
 
-    // FIX Issue #1/#2: Use m_Config.farPlane directly, don't scale with zoom
-    // The scaling was causing frustum/rendering mismatch and black background
-    m_State.ViewFar = m_Config.farPlane;
-
-    // Phase 1: Update frustum after changing ViewFar
+    // Sync ViewFar and fog distances with current zoom level
+    UpdateConfigForView();
     UpdateFrustum();
 }
 
