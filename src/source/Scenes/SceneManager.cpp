@@ -517,6 +517,43 @@ static void RenderDebugInfo()
     swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", g_Camera.FOV, g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
+    // Compile-time build info: configuration, feature flags, compiler, arch,
+    // and the binary's build timestamp. Useful for verifying which build is
+    // actually running without having to check executable metadata.
+    constexpr const char* kBuildType =
+#if defined(_DEBUG) || defined(DEBUG)
+        "Debug";
+#else
+        "Release";
+#endif
+    constexpr const char* kEditor =
+#ifdef _EDITOR
+        "Editor";
+#else
+        "NoEditor";
+#endif
+    constexpr const char* kCompiler =
+#if defined(__MINGW32__) || defined(__MINGW64__)
+        "MinGW";
+#elif defined(__clang__)
+        "Clang";
+#elif defined(_MSC_VER)
+        "MSVC";
+#elif defined(__GNUC__)
+        "GCC";
+#else
+        "Unknown";
+#endif
+    constexpr const char* kArch =
+#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
+        "x64";
+#else
+        "x86";
+#endif
+    swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
+             kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
     // Frame time graph below text
     RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
 

@@ -3,12 +3,17 @@
 #include <cmath>
 
 /// Convert horizontal FOV (degrees) to vertical FOV (degrees) for gluPerspective.
-/// hFovDeg is the total horizontal field of view; aspectRatio = width / height.
-inline float HFovToVFov(float hFovDeg, float aspectRatio)
+/// hFovDeg is the horizontal FOV at the 4:3 reference aspect. The `aspectRatio`
+/// argument is intentionally ignored — we want vFov tied to the reference
+/// aspect so wider resolutions extend the side view via gluPerspective rather
+/// than stretching or cropping vertically. The UI is still scaled to actual
+/// aspect separately (g_fScreenRate_x/y) which is the intended behavior there.
+inline float HFovToVFov(float hFovDeg, float /*aspectRatio*/)
 {
     constexpr float PI = 3.14159265358979323846f;
+    constexpr float REFERENCE_ASPECT = 4.0f / 3.0f;
     float hHalfRad = hFovDeg * 0.5f * PI / 180.0f;
-    float vHalfRad = atanf(tanf(hHalfRad) / aspectRatio);
+    float vHalfRad = atanf(tanf(hHalfRad) / REFERENCE_ASPECT);
     return vHalfRad * 2.0f * 180.0f / PI;
 }
 
