@@ -34,7 +34,7 @@ extern float g_fSpecialHeight;
 #ifdef _EDITOR
 // DevEditor config override functions (global scope required for extern "C")
 extern "C" bool DevEditor_IsConfigOverrideEnabled();
-extern "C" void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
+extern "C" void DevEditor_GetCameraConfigFOV(float* outHFOV);
 #endif
 
 DefaultCamera::DefaultCamera(CameraState& state)
@@ -913,7 +913,7 @@ void DefaultCamera::UpdateFrustum()
     // Check if DevEditor is overriding config values
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        DevEditor_GetCameraConfig(&m_Config.hFov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
+        DevEditor_GetCameraConfigFOV(&m_Config.hFov);
     }
 #endif
 
@@ -950,9 +950,7 @@ void DefaultCamera::UpdateFrustum()
     // DevEditor can still override config values if needed
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        DevEditor_GetCameraConfig(&m_Config.hFov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
-        effectiveFarPlane = m_Config.farPlane;
-        effectiveTerrainCullRange = m_Config.terrainCullRange;
+        DevEditor_GetCameraConfigFOV(&m_Config.hFov);
     }
 #endif
 
@@ -996,13 +994,10 @@ bool DefaultCamera::NeedsFrustumUpdate() const
     // Check if DevEditor config changed
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        float currentFOV, currentNearPlane, currentFarPlane, currentTerrainCullRange;
-        DevEditor_GetCameraConfig(&currentFOV, &currentNearPlane, &currentFarPlane, &currentTerrainCullRange);
+        float currentFOV;
+        DevEditor_GetCameraConfigFOV(&currentFOV);
 
-        if (fabs(currentFOV - m_LastEditorFOV) > EPSILON ||
-            fabs(currentFarPlane - m_LastEditorFarPlane) > EPSILON ||
-            fabs(currentNearPlane - m_LastEditorNearPlane) > EPSILON ||
-            fabs(currentTerrainCullRange - m_LastEditorTerrainCullRange) > EPSILON)
+        if (fabs(currentFOV - m_LastEditorFOV) > EPSILON)
         {
             return true;  // Config changed, rebuild needed
         }

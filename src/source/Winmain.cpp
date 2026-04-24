@@ -367,7 +367,7 @@ extern PATH* path;
 void DestroyWindow()
 {
     // Save game configuration to config.ini
-    GameConfig::GetInstance().SetVolumeLevel(g_pOption->GetVolumeLevel());
+    GameConfig::GetInstance().SetSoundVolume(g_pOption->GetVolumeLevel());
     GameConfig::GetInstance().Save();
 
 #ifdef _EDITOR
@@ -580,8 +580,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             OpenglWindowWidth = WindowWidth;
             OpenglWindowHeight = WindowHeight;
 
-            // Note: Projection matrix and frustum will be updated on next BeginOpengl() call
-            // No need to rebuild immediately - happens naturally in render loop
+            // Reinitialize fonts and update resolution-dependent systems
+            ReinitializeFonts();
+            UpdateResolutionDependentSystems();
         }
         break;
     case WM_PAINT:
@@ -1103,9 +1104,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_bUseWindowMode = GameConfig::GetInstance().GetWindowMode() ? TRUE : FALSE;
     g_bUseFullscreenMode = !g_bUseWindowMode;
 
-    // Apply audio settings from INI
-    m_SoundOnOff = GameConfig::GetInstance().GetSoundEnabled();
-    m_MusicOnOff = GameConfig::GetInstance().GetMusicEnabled();
+    // Apply audio settings from INI — volume 0 = off, >0 = on
+    m_SoundOnOff = (GameConfig::GetInstance().GetSoundVolume() > 0) ? 1 : 0;
+    m_MusicOnOff = (GameConfig::GetInstance().GetMusicVolume() > 0) ? 1 : 0;
 
     // Apply graphics settings from INI
     m_nColorDepth = GameConfig::GetInstance().GetColorDepth();
@@ -1352,23 +1353,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     g_pNewUISystem->Create();
 
-    if (m_MusicOnOff)
+    // Always initialize audio system so music can be enabled at runtime
+    wzAudioCreate(g_hWnd);
+    wzAudioOption(WZAOPT_STOPBEFOREPLAY, 1);
+    // Use internal volume mode so wzAudio doesn't touch the system master volume
+    wzAudioSetMixerMode(_mmInternalVolume);
+    wzAudioSetVolume(GameConfig::GetInstance().GetMusicVolume() * 10);
+
+    // Always initialize sound so it can be toggled at runtime
+    InitDirectSound(g_hWnd);
+
     {
-        wzAudioCreate(g_hWnd);
-        wzAudioOption(WZAOPT_STOPBEFOREPLAY, 1);
-    }
-
-    if (m_SoundOnOff)
-    {
-        InitDirectSound(g_hWnd);
-
-        // Load volume level from config.ini
-        int value = GameConfig::GetInstance().GetVolumeLevel();
-        if (value < 0 || value >= 10)
-            value = 5;
-
+        int value = GameConfig::GetInstance().GetSoundVolume();
+        if (value < 0 || value > 10) value = 5;
         g_pOption->SetVolumeLevel(value);
-        SetEffectVolumeLevel(g_pOption->GetVolumeLevel());
+        SetEffectVolumeLevel(value);
     }
 
     SetTimer(g_hWnd, HACK_TIMER, 20 * 1000, nullptr);

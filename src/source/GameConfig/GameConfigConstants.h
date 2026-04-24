@@ -24,7 +24,8 @@ namespace CfgKeys
     // Audio
     inline constexpr wchar_t CfgKeySoundEnabled[] = L"SoundEnabled";
     inline constexpr wchar_t CfgKeyMusicEnabled[] = L"MusicEnabled";
-    inline constexpr wchar_t CfgKeyVolumeLevel[]  = L"VolumeLevel";
+    inline constexpr wchar_t CfgKeySoundVolume[]  = L"SoundVolume";
+    inline constexpr wchar_t CfgKeyMusicVolume[] = L"MusicVolume";
 
     // Login
     inline constexpr wchar_t CfgKeyRememberMe[]        = L"RememberMe";
@@ -50,7 +51,8 @@ namespace CfgDefaults
 
     inline constexpr bool CfgDefaultSoundEnabled = true;
     inline constexpr bool CfgDefaultMusicEnabled = false;
-    inline constexpr int  CfgDefaultVolumeLevel  = 5;
+    inline constexpr int  CfgDefaultSoundVolume  = 5;
+    inline constexpr int  CfgDefaultMusicVolume = 5;
 
     inline constexpr int CfgDefaultRenderTextType = 0;
 

@@ -45,7 +45,8 @@ void GameConfig::Load()
 
     m_soundEnabled = ReadBool(CfgSectionAudio, CfgKeySoundEnabled, CfgDefaultSoundEnabled);
     m_musicEnabled = ReadBool(CfgSectionAudio, CfgKeyMusicEnabled, CfgDefaultMusicEnabled);
-    m_volumeLevel  = ReadInt(CfgSectionAudio, CfgKeyVolumeLevel, CfgDefaultVolumeLevel);
+    m_soundVolume  = ReadInt(CfgSectionAudio, CfgKeySoundVolume, CfgDefaultSoundVolume);
+    m_musicVolume  = ReadInt(CfgSectionAudio, CfgKeyMusicVolume, CfgDefaultMusicVolume);
 
     m_renderTextType = ReadInt(CfgSectionGraphics, CfgKeyRenderTextType, CfgDefaultRenderTextType);
 
@@ -74,7 +75,8 @@ void GameConfig::Save()
 
     WriteBool(CfgSectionAudio, CfgKeySoundEnabled, m_soundEnabled);
     WriteBool(CfgSectionAudio, CfgKeyMusicEnabled, m_musicEnabled);
-    WriteInt(CfgSectionAudio, CfgKeyVolumeLevel, m_volumeLevel);
+    WriteInt(CfgSectionAudio, CfgKeySoundVolume, m_soundVolume);
+    WriteInt(CfgSectionAudio, CfgKeyMusicVolume, m_musicVolume);
 
     WriteBool(CfgSectionLogin, CfgKeyRememberMe, m_rememberMe);
     WriteString(CfgSectionLogin, CfgKeyLanguage, m_languageSelection);
@@ -113,9 +115,14 @@ void GameConfig::SetMusicEnabled(bool enabled)
     m_musicEnabled = enabled;
 }
 
-void GameConfig::SetVolumeLevel(int level)
+void GameConfig::SetSoundVolume(int level)
 {
-    m_volumeLevel = level;
+    m_soundVolume = level;
+}
+
+void GameConfig::SetMusicVolume(int level)
+{
+    m_musicVolume = level;
 }
 
 void GameConfig::SetRenderTextType(int type)

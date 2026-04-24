@@ -27,6 +27,7 @@
 #include "../UIControls.h"
 #include "SceneCommon.h"
 #include "../ZzzOpenData.h"
+#include "../NewUISystem.h"
 
 // External declarations
 extern int DeleteGuildIndex;
@@ -341,20 +342,7 @@ void NewMoveLogInScene()
         ThePetProcess().UpdatePets();
     }
 
-    if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-    {
-        CUIMng& rUIMng = CUIMng::Instance();
-        if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_LoginWin.IsShow()
-            || rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow()
-            || rUIMng.m_CreditWin.IsShow()
-            )
-            && rUIMng.m_LoginMainWin.IsShow() && rUIMng.m_ServerSelWin.IsShow()
-            && rUIMng.IsSysMenuWinShow())
-        {
-            ::PlayBuffer(SOUND_CLICK01);
-            rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
-        }
-    }
+    // ESC menu toggle is handled by CUIMng::Update()
     if (RECEIVE_LOG_IN_SUCCESS == CurrentProtocolState)
     {
         g_ErrorReport.Write(L"> Request Character list\r\n");
@@ -387,6 +375,9 @@ bool NewRenderLogInScene(HDC hDC)
     }
 
     MoveMainCamera();
+
+    // Play login music (called every frame — PlayMp3 no-ops if already playing)
+    ::PlayMp3(MUSIC_LOGIN_THEME);
 
     int Width, Height;
 
@@ -478,6 +469,14 @@ bool NewRenderLogInScene(HDC hDC)
 #ifdef ENABLE_EDIT
     RenderDebugWindow();
 #endif
+
+    // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    {
+        g_pOption->UpdateMouseEvent();
+        g_pOption->UpdateKeyEvent();
+        g_pOption->Render();
+    }
 
     EndBitmap();
 

@@ -28,11 +28,13 @@ public:
     // Audio
     bool GetSoundEnabled() const { return m_soundEnabled; }
     bool GetMusicEnabled() const { return m_musicEnabled; }
-    int  GetVolumeLevel()  const { return m_volumeLevel; }
+    int  GetSoundVolume()  const { return m_soundVolume; }
+    int  GetMusicVolume()  const { return m_musicVolume; }
 
     void SetSoundEnabled(bool enabled);
     void SetMusicEnabled(bool enabled);
-    void SetVolumeLevel(int level);
+    void SetSoundVolume(int level);
+    void SetMusicVolume(int level);
 
     // Text rendering
     int GetRenderTextType() const { return m_renderTextType; }
@@ -84,7 +86,8 @@ private:
 
     bool m_soundEnabled;
     bool m_musicEnabled;
-    int  m_volumeLevel;
+    int  m_soundVolume;
+    int  m_musicVolume;
 
     int m_renderTextType;
 

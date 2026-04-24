@@ -84,12 +84,17 @@ namespace SEASON3B
 
         CNewUIButton m_BtnClose;
 
-        bool m_bAutoAttack;		// 자동 공격
-        bool m_bWhisperSound;	// 귓말 알림음
-        bool m_bSlideHelp;		// 슬라이드 도움말
-        int m_iVolumeLevel;		// 볼륨조절
-        int m_iRenderLevel;		// 효과제한
+        bool m_bAutoAttack;
+        bool m_bWhisperSound;
+        bool m_bSlideHelp;
+        int m_iVolumeLevel;     // Sound volume (0=off, 10=max)
+        int m_iMusicLevel;      // Music volume (0=off, 10=max)
+        int m_iRenderLevel;
         bool m_bRenderAllEffects;
+        int m_iResolutionIndex;
+
+        void ApplyResolution();
+        int FindCurrentResolutionIndex();
     };
 }
 

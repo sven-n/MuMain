@@ -201,17 +201,7 @@ void NewMoveCharacterScene()
             ::StartGame();
         }
     }
-    else if (rInput.IsKeyDown(VK_ESCAPE))
-    {
-        if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
-            || rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow()
-            )
-            && rUIMng.IsSysMenuWinShow())
-        {
-            ::PlayBuffer(SOUND_CLICK01);
-            rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
-        }
-    }
+    // ESC menu toggle is handled by CUIMng::Update()
 
     if (rUIMng.IsCursorOnUI())
     {
@@ -438,6 +428,16 @@ bool NewRenderCharacterScene(HDC hDC)
 #endif
 
     RenderCharacterSceneUI();
+
+    // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    {
+        g_pOption->UpdateMouseEvent();
+        g_pOption->UpdateKeyEvent();
+        BeginBitmap();
+        g_pOption->Render();
+        EndBitmap();
+    }
 
     EndOpengl();
 

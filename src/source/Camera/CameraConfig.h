@@ -135,16 +135,16 @@ struct CameraConfig
     }
 
     /**
- * @brief MainScene default camera configuration
+ * @brief MainScene orbital camera configuration
  *
  * Optimized configuration for MainScene OrbitalCamera.
  * Balanced for performance and visibility.
  *
- * Values (user-specified):
- * - FOV: 72 degrees
- * - Near Plane: 10
- * - Far Plane: 1700 (3D object culling)
- * - Terrain Cull Range: 1700 (2D terrain culling)
+ * Values:
+ * - FOV: 90 degrees
+ * - Near Plane: 500
+ * - Far Plane: 3800 (3D object culling)
+ * - Terrain Cull Range: 5320 (farPlane * RENDER_DISTANCE_MULTIPLIER)
  */
     static CameraConfig ForMainSceneOrbitalCamera()
     {

@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "UIMng.h"
 #include "Input.h"
+#include "DSPlaySound.h"
 #include "Sprite.h"
 #include "GaugeBar.h"
 #include "ZzzOpenglUtil.h"
@@ -585,9 +586,25 @@ void CUIMng::Update(double dDeltaTick)
     }
 
     CInput& rInput = CInput::Instance();
+
+    // ESC toggles system menu in login/character scenes
     if (rInput.IsKeyDown(VK_ESCAPE))
     {
-        m_bSysMenuWinShow = !m_bSysMenuWinShow;
+        extern EGameScene SceneFlag;
+        if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+        {
+            if (m_SysMenuWin.IsShow())
+            {
+                HideWin(&m_SysMenuWin);
+            }
+            else if (!m_MsgWin.IsShow() && !m_OptionWin.IsShow()
+                     && !m_LoginWin.IsShow() && !m_CreditWin.IsShow()
+                     && !m_CharMakeWin.IsShow())
+            {
+                ::PlayBuffer(SOUND_CLICK01);
+                ShowWin(&m_SysMenuWin);
+            }
+        }
     }
 
     CWin* pWin;

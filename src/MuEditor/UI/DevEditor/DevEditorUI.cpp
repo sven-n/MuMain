@@ -590,7 +590,7 @@ void CDevEditorUI::RenderGraphicsTab()
             if (g_bUseWindowMode && g_hWnd)
             {
                 RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
-                AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
+                AdjustWindowRect(&windowRect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, FALSE);
 
                 int windowWidth = windowRect.right - windowRect.left;
                 int windowHeight = windowRect.bottom - windowRect.top;
@@ -654,7 +654,7 @@ void CDevEditorUI::RenderGraphicsTab()
         if (g_bUseWindowMode && g_hWnd)
         {
             RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
-            AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
+            AdjustWindowRect(&windowRect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, FALSE);
 
             int windowWidth = windowRect.right - windowRect.left;
             int windowHeight = windowRect.bottom - windowRect.top;
@@ -826,7 +826,7 @@ extern "C"
         return g_DevEditorUI.IsConfigOverrideEnabled();
     }
 
-    void DevEditor_GetCameraConfig(float* outHFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange)
+    void DevEditor_GetCameraConfigFOV(float* outHFOV)
     {
         if (outHFOV) *outHFOV = g_DevEditorUI.GetHFOV();
     }

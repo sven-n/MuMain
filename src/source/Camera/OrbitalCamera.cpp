@@ -27,7 +27,7 @@ extern int MouseY;
 #ifdef _EDITOR
 // DevEditor config override functions (global scope required for extern "C")
 extern "C" bool DevEditor_IsConfigOverrideEnabled();
-extern "C" void DevEditor_GetCameraConfig(float* outFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange);
+extern "C" void DevEditor_GetCameraConfigFOV(float* outHFOV);
 #endif
 
 OrbitalCamera::OrbitalCamera(CameraState& state)
@@ -387,21 +387,7 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     g_Camera.FOV = m_State.FOV;
 
     // Apply DevEditor override if enabled
-    float effectiveFarPlane = m_Config.farPlane;
-#ifdef _EDITOR
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        float fov, nearPlane, farPlane, terrainCull;
-        DevEditor_GetCameraConfig(&fov, &nearPlane, &farPlane, &terrainCull);
-        effectiveFarPlane = farPlane;
-    }
-
-    // Debug: Log what we're setting g_Camera.ViewFar to
-    sprintf_s(debugMsg, "[CAM]   OnActivate: Setting g_Camera.ViewFar=%.0f (from m_Config.farPlane=%.0f)",
-              effectiveFarPlane, m_Config.farPlane);
-    g_MuEditorConsoleUI.LogEditor(debugMsg);
-#endif
-    g_Camera.ViewFar = effectiveFarPlane;
+    g_Camera.ViewFar = m_Config.farPlane;
 
     // Step 9: Initialize frustum immediately on activation
     UpdateFrustum();
@@ -879,7 +865,7 @@ void OrbitalCamera::UpdateFrustum()
     // Check if DevEditor is overriding config values
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        DevEditor_GetCameraConfig(&m_Config.hFov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
+        DevEditor_GetCameraConfigFOV(&m_Config.hFov);
     }
 #endif
 
@@ -935,9 +921,7 @@ void OrbitalCamera::UpdateFrustum()
     // DevEditor can still override config values if needed
     if (DevEditor_IsConfigOverrideEnabled())
     {
-        DevEditor_GetCameraConfig(&m_Config.hFov, &m_Config.nearPlane, &m_Config.farPlane, &m_Config.terrainCullRange);
-        effectiveFarPlane = m_Config.farPlane;
-        effectiveTerrainCullRange = m_Config.terrainCullRange;
+        DevEditor_GetCameraConfigFOV(&m_Config.hFov);
     }
 #endif
 
