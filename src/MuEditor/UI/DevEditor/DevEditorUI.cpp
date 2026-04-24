@@ -53,9 +53,9 @@ void CDevEditorUI::Render(bool* p_open)
     // Tab bar
     if (ImGui::BeginTabBar("DevEditorTabs"))
     {
-        if (ImGui::BeginTabItem("Camera"))
+        if (ImGui::BeginTabItem("Scenes"))
         {
-            RenderCameraTab();
+            RenderScenesTab();
             ImGui::EndTabItem();
         }
 
@@ -74,12 +74,25 @@ void CDevEditorUI::Render(bool* p_open)
     ImGui::End();
 }
 
-void CDevEditorUI::RenderCameraTab()
+void CDevEditorUI::RenderScenesTab()
 {
-    ImGui::Text("Camera System Controls");
-    ImGui::Separator();
+    extern EGameScene SceneFlag;
+    extern CameraState g_Camera;
+    extern CameraManager& CameraManager_Instance();
+    auto& camMgrRef = CameraManager_Instance();
+    int cameraMode = GetCurrentCameraMode();
 
-    // FreeFly / Game Camera Toggle
+    // Get the camera whose config we're editing — in FreeFly, that's the spectated camera
+    ICamera* currentCamera = camMgrRef.GetActiveCamera();
+    if (camMgrRef.GetCurrentMode() == CameraMode::FreeFly)
+    {
+        ICamera* spectated = camMgrRef.GetSpectatedCamera();
+        if (spectated)
+            currentCamera = spectated;
+    }
+    const char* currentCameraName = currentCamera ? currentCamera->GetName() : nullptr;
+
+    // ===== FreeFly Camera (always available) =====
     {
         auto& camMgr = CameraManager::Instance();
         CameraMode currentMode = camMgr.GetCurrentMode();
@@ -133,442 +146,137 @@ void CDevEditorUI::RenderCameraTab()
             ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s", camMgr.GetActiveCamera()->GetName());
         }
     }
-    ImGui::Separator();
 
-    // Culling sphere visualization toggles
-    ImGui::Text("Culling Sphere Visualization:");
-    ImGui::Indent();
-    ImGui::Checkbox("Show Terrain Culling Spheres", &m_ShowTerrainCullingSpheres);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Green wireframe)");
-
-    ImGui::Checkbox("Show Object Culling Spheres", &m_ShowObjectCullingSpheres);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Yellow wireframe)");
-
-    ImGui::Checkbox("Show Character Culling Spheres", &m_ShowCharacterCullingSpheres);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Cyan wireframe)");
-
-    ImGui::Checkbox("Show Tile Grid", &m_ShowTileGrid);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Cyan tile borders)");
-    ImGui::Unindent();
-
-    ImGui::Separator();
-
-    // Culling radius adjustments
-    ImGui::Text("Culling Radii:");
-    ImGui::Indent();
-    ImGui::PushItemWidth(200);
-    ImGui::InputFloat("Terrain Radius", &m_CullRadiusTerrain, 10.0f, 50.0f, "%.1f");
-    ImGui::InputFloat("Character Radius", &m_CullRadiusCharacter, 10.0f, 50.0f, "%.1f");
-    ImGui::InputFloat("Item Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
-    ImGui::PopItemWidth();
-    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Adjust culling sphere radii in real-time");
-    ImGui::Unindent();
-
-    ImGui::Separator();
-
-    // Current camera info
-    ImGui::Text("Current Camera Info:");
-    ImGui::Indent();
-
-    int cameraMode = GetCurrentCameraMode();
-    const char* modeName;
-    switch (cameraMode)
+    // Camera info summary line
     {
-        case 0: modeName = "Default"; break;
-        case 1: modeName = "Orbital"; break;
-        case 2: modeName = "Legacy"; break;
-#ifdef _EDITOR
-        case 3: modeName = "FreeFly"; break;
-#endif
-        default: modeName = "Unknown"; break;
-    }
-    ImGui::Text("Mode: %s (Press F9 to cycle)", modeName);
-
-    ImGui::Spacing();
-
-    // Camera position in world space
-    ImGui::Text("Position: X=%.1f, Y=%.1f, Z=%.1f",
-                g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2]);
-
-    // Camera angles (pitch and yaw from CameraState)
-    ImGui::Text("Pitch: %.1f°, Yaw: %.1f°",
-                g_Camera.Angle[0], g_Camera.Angle[1]);
-
-    if (cameraMode == 1)  // Orbital camera
-    {
-        ImGui::Spacing();
-        float radius = GetOrbitalCameraRadius();
-        ImGui::Text("Zoom Distance: %.0f units", radius);
-
-        // Get orbital-specific rotation info
-        float orbitalYaw = 0.0f, orbitalPitch = 0.0f;
-        GetOrbitalCameraAngles(&orbitalYaw, &orbitalPitch);
-        ImGui::Text("Orbital Yaw: %.1f°, Pitch: %.1f°", orbitalYaw, orbitalPitch);
-
-        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
-                          "(200 = closest, 800 = default, 2000 = farthest)");
-    }
-
-    // Get the camera whose config we're editing — in FreeFly, that's the spectated camera
-    extern CameraManager& CameraManager_Instance();
-    auto& camMgrRef = CameraManager_Instance();
-    ICamera* currentCamera = camMgrRef.GetActiveCamera();
-    if (camMgrRef.GetCurrentMode() == CameraMode::FreeFly)
-    {
-        ICamera* spectated = camMgrRef.GetSpectatedCamera();
-        if (spectated)
-            currentCamera = spectated;
-    }
-    const char* currentCameraName = currentCamera ? currentCamera->GetName() : nullptr;
-
-    ImGui::Unindent();
-    ImGui::Separator();
-
-    // CameraConfig controls
-    ImGui::Text("Camera Configuration");
-    ImGui::Separator();
-
-    // Refresh FOV from current camera when override is active and camera changes
-    if (m_ConfigOverrideEnabled && m_LastActiveCameraName != currentCameraName)
-    {
-        if (currentCamera)
-            m_HFOV = currentCamera->GetConfig().hFov;
-        m_LastActiveCameraName = currentCameraName;
-    }
-
-    bool previousOverrideState = m_ConfigOverrideEnabled;
-    ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
-
-    // If override was just enabled, initialize FOV from current camera
-    if (m_ConfigOverrideEnabled && !previousOverrideState)
-    {
-        if (currentCamera)
-            m_HFOV = currentCamera->GetConfig().hFov;
-        m_LastActiveCameraName = currentCameraName;
-    }
-
-    // If override was just disabled, clear tracking and fog override
-    if (!m_ConfigOverrideEnabled && previousOverrideState)
-    {
-        m_LastActiveCameraName = nullptr;
-        m_FogOverride = false;
-    }
-
-    // Always show live near/far plane from camera (changes with zoom)
-    if (currentCamera)
-    {
-        const CameraConfig& cfg = currentCamera->GetConfig();
-        ImGui::Text("Near: %.0f  Far: %.0f  ViewFar: %.0f  ProjFar: %.0f",
-                    cfg.nearPlane, cfg.farPlane, g_Camera.ViewFar,
-                    g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
-    }
-
-    if (m_ConfigOverrideEnabled)
-    {
-        // Compute vertical FOV from current horizontal FOV for display
-        extern unsigned int WindowWidth, WindowHeight;
-        float aspect = (float)WindowWidth / (float)WindowHeight;
-        float computedVFov = HFovToVFov(m_HFOV, aspect);
-
-        ImGui::PushItemWidth(200);
-
-        ImGui::SliderFloat("Horizontal FOV (degrees)", &m_HFOV, 10.0f, 150.0f, "%.1f");
-
-        ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                          "Vertical FOV: %.1f° (at %.2f aspect)", computedVFov, aspect);
-
-        // Fog controls
-        ImGui::Spacing();
-        extern bool FogEnable;
-
-        ImGui::Checkbox("Override Fog", &m_FogOverride);
-        if (m_FogOverride)
+        const char* modeName;
+        switch (cameraMode)
         {
-            ImGui::SameLine();
-            ImGui::Checkbox("Fog On", &m_FogOverrideValue);
+            case 0: modeName = "Default"; break;
+            case 1: modeName = "Orbital"; break;
+            case 2: modeName = "Legacy"; break;
+            case 3: modeName = "FreeFly"; break;
+            default: modeName = "Unknown"; break;
         }
-        ImGui::SameLine();
-        if (FogEnable)
-            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "ENABLED");
-        else
-            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "DISABLED");
-        if (!m_FogOverride)
-        {
-            float fogPitch = g_Camera.Angle[0];
-            if (cameraMode == 1)
-            {
-                float yaw, orbitalPitch;
-                GetOrbitalCameraAngles(&yaw, &orbitalPitch);
-                fogPitch = orbitalPitch;
-            }
-            ImGui::SameLine();
-            ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "(auto: pitch %.1f°)", fogPitch);
-        }
-
-        float startDisplay = m_FogStartPct * 100.0f;
-        float endDisplay = m_FogEndPct * 100.0f;
-        if (ImGui::SliderFloat("Fog Start %", &startDisplay, 0.0f, 200.0f, "%.0f%%"))
-            m_FogStartPct = startDisplay / 100.0f;
-        if (ImGui::SliderFloat("Fog End %", &endDisplay, 0.0f, 200.0f, "%.0f%%"))
-            m_FogEndPct = endDisplay / 100.0f;
-
-        float actualStart = g_Camera.ViewFar * m_FogStartPct;
-        float actualEnd = g_Camera.ViewFar * m_FogEndPct;
-        ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                          "Fog: %.0f - %.0f (ViewFar=%.0f)", actualStart, actualEnd, g_Camera.ViewFar);
-
-        ImGui::PopItemWidth();
-
-        ImGui::Spacing();
-        if (ImGui::Button("Reset to Defaults"))
-        {
-            if (currentCamera)
-                m_HFOV = currentCamera->GetConfig().hFov;
-            m_FogStartPct = 1.00f;
-            m_FogEndPct = 1.25f;
-        }
-
-        ImGui::Separator();
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Changes applied in real-time!");
-    }
-    else
-    {
-        // Display current config (read-only)
-        if (currentCamera)
-        {
-            extern unsigned int WindowWidth, WindowHeight;
-            float aspect = (float)WindowWidth / (float)WindowHeight;
-            float hFov = currentCamera->GetConfig().hFov;
-            ImGui::Text("  FOV: %.1f° H / %.1f° V", hFov, HFovToVFov(hFov, aspect));
-            ImGui::Text("  Fog: %.0f%% - %.0f%% of ViewFar",
-                        m_FogStartPct * 100.0f, m_FogEndPct * 100.0f);
-        }
+        ImGui::Text("%s | Pos: %.0f, %.0f, %.0f | Tile: (%d, %d) | Pitch: %.1f Yaw: %.1f",
+                    modeName, g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
+                    (int)(g_Camera.Position[0] / 100.0f), (int)(g_Camera.Position[1] / 100.0f),
+                    g_Camera.Angle[0], g_Camera.Angle[2]);
     }
 
     ImGui::Separator();
-    ImGui::Spacing();
 
-    // Phase 5 Debug: Camera Debug Info & Custom Origin
-    ImGui::Text("Camera Debug Info");
-    ImGui::Separator();
-
-    // Get current camera info
-    extern CameraState g_Camera;
-    ImGui::Text("Current Camera Position:");
-    ImGui::Text("  X: %.2f  Y: %.2f  Z: %.2f", g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2]);
-    ImGui::Text("Tile: (%d, %d)", (int)(g_Camera.Position[0] / 100.0f), (int)(g_Camera.Position[1] / 100.0f));
-
-    // Get orbital camera target (if active)
-    extern OrbitalCamera* GetOrbitalCameraInstance();
-    OrbitalCamera* orbitalCam = GetOrbitalCameraInstance();
-    if (orbitalCam)
+    // ===== Login Scene =====
+    if (ImGui::CollapsingHeader("Login Scene"))
     {
-        vec3_t target = {0, 0, 0};
-        orbitalCam->GetTargetPosition(target);
-        ImGui::Text("Orbital Target:");
-        ImGui::Text("  X: %.2f  Y: %.2f  Z: %.2f", target[0], target[1], target[2]);
-        ImGui::Text("Tile: (%d, %d)", (int)(target[0] / 100.0f), (int)(target[1] / 100.0f));
-    }
+        ImGui::Indent();
 
-    ImGui::Spacing();
-    ImGui::Separator();
+        // Camera Offsets
+        extern float g_LoginSceneOffsetX;
+        extern float g_LoginSceneOffsetY;
+        extern float g_LoginSceneOffsetZ;
+        extern float g_LoginSceneAnglePitch;
+        extern float g_LoginSceneAngleYaw;
 
-    // Custom Origin Controls
-    ImGui::Text("Custom Origin (Orbital Camera)");
-    ImGui::Separator();
-
-    ImGui::Checkbox("Enable Custom Origin", &m_CustomOriginEnabled);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Override Hero position)");
-
-    if (m_CustomOriginEnabled)
-    {
         ImGui::PushItemWidth(150);
-        ImGui::InputFloat("Origin X (tiles)", &m_CustomOriginX, 1.0f, 10.0f, "%.1f");
-        ImGui::InputFloat("Origin Y (tiles)", &m_CustomOriginY, 1.0f, 10.0f, "%.1f");
-        ImGui::InputFloat("Origin Z (height)", &m_CustomOriginZ, 10.0f, 50.0f, "%.1f");
+        ImGui::InputFloat("Offset X", &g_LoginSceneOffsetX, 50.0f, 200.0f, "%.1f");
+        ImGui::InputFloat("Offset Y", &g_LoginSceneOffsetY, 50.0f, 200.0f, "%.1f");
+        ImGui::InputFloat("Offset Z", &g_LoginSceneOffsetZ, 50.0f, 200.0f, "%.1f");
+        ImGui::InputFloat("Pitch", &g_LoginSceneAnglePitch, 1.0f, 5.0f, "%.1f");
+        ImGui::InputFloat("Yaw", &g_LoginSceneAngleYaw, 1.0f, 5.0f, "%.1f");
         ImGui::PopItemWidth();
 
-        ImGui::Text("World Units: (%.0f, %.0f, %.0f)",
-            m_CustomOriginX * 100.0f, m_CustomOriginY * 100.0f, m_CustomOriginZ);
-
-        if (ImGui::Button("Set to Current Camera Position"))
+        if (ImGui::Button("Reset Offsets"))
         {
-            m_CustomOriginX = g_Camera.Position[0] / 100.0f;
-            m_CustomOriginY = g_Camera.Position[1] / 100.0f;
-            m_CustomOriginZ = g_Camera.Position[2];
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Reset to 0,0,100"))
-        {
-            m_CustomOriginX = 0.0f;
-            m_CustomOriginY = 0.0f;
-            m_CustomOriginZ = 100.0f;
-        }
-    }
-    else
-    {
-        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to set custom orbit center");
-    }
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // LoginScene Camera Offset Controls
-    ImGui::Text("LoginScene Camera Offset");
-    ImGui::Separator();
-    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
-                      "Adjust tour waypoint positions in real-time");
-
-    extern float g_LoginSceneOffsetX;
-    extern float g_LoginSceneOffsetY;
-    extern float g_LoginSceneOffsetZ;
-
-    ImGui::PushItemWidth(150);
-    ImGui::InputFloat("Offset X (Left/Right)", &g_LoginSceneOffsetX, 50.0f, 200.0f, "%.1f");
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(0 = default)");
-
-    ImGui::InputFloat("Offset Y (Forward/Back)", &g_LoginSceneOffsetY, 50.0f, 200.0f, "%.1f");
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(1000 = default)");
-
-    ImGui::InputFloat("Offset Z (Up/Down)", &g_LoginSceneOffsetZ, 50.0f, 200.0f, "%.1f");
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(700 = default)");
-
-    ImGui::Spacing();
-    ImGui::Text("Angle Offsets");
-
-    extern float g_LoginSceneAnglePitch;
-    extern float g_LoginSceneAngleYaw;
-
-    ImGui::InputFloat("Pitch (Up/Down Tilt)", &g_LoginSceneAnglePitch, 1.0f, 5.0f, "%.1f");
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(0 = default)");
-
-    ImGui::InputFloat("Yaw (Left/Right Rotation)", &g_LoginSceneAngleYaw, 1.0f, 5.0f, "%.1f");
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(0 = default)");
-    ImGui::PopItemWidth();
-
-    if (ImGui::Button("Reset to Defaults"))
-    {
-        g_LoginSceneOffsetX = -300.0f;
-        g_LoginSceneOffsetY = 650.0f;
-        g_LoginSceneOffsetZ = 950.0f;
-        g_LoginSceneAnglePitch = 40.0f;
-        g_LoginSceneAngleYaw = -5.0f;
-    }
-
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Changes apply in real-time!");
-
-    ImGui::Spacing();
-    ImGui::Text("Tour Mode Controls");
-    ImGui::Separator();
-
-    extern CCameraMove* CCameraMove__GetInstancePtr();
-    CCameraMove* cameraMove = CCameraMove__GetInstancePtr();
-
-    if (cameraMove)
-    {
-        BOOL isTourMode = cameraMove->IsTourMode();
-        BOOL isTourPaused = cameraMove->IsTourPaused();
-
-        ImGui::Text("Tour Mode: %s", isTourMode ? "ACTIVE" : "INACTIVE");
-        if (isTourMode)
-        {
-            ImGui::Text("Status: %s", isTourPaused ? "PAUSED" : "RUNNING");
+            g_LoginSceneOffsetX = -300.0f;
+            g_LoginSceneOffsetY = 650.0f;
+            g_LoginSceneOffsetZ = 950.0f;
+            g_LoginSceneAnglePitch = 40.0f;
+            g_LoginSceneAngleYaw = -5.0f;
         }
 
         ImGui::Spacing();
 
-        // Control buttons
-        if (isTourMode)
+        // Tour Mode Controls
+        extern CCameraMove* CCameraMove__GetInstancePtr();
+        CCameraMove* cameraMove = CCameraMove__GetInstancePtr();
+        if (cameraMove)
         {
-            // Pause/Resume toggle
-            if (isTourPaused)
+            BOOL isTourMode = cameraMove->IsTourMode();
+            BOOL isTourPaused = cameraMove->IsTourPaused();
+
+            ImGui::Text("Tour: %s%s", isTourMode ? "ACTIVE" : "INACTIVE",
+                        (isTourMode && isTourPaused) ? " (PAUSED)" : "");
+
+            if (isTourMode)
             {
-                if (ImGui::Button("Resume"))
+                if (isTourPaused)
                 {
-                    cameraMove->PauseTour(FALSE);
+                    if (ImGui::Button("Resume")) cameraMove->PauseTour(FALSE);
+                }
+                else
+                {
+                    if (ImGui::Button("Pause")) cameraMove->PauseTour(TRUE);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Restart"))
+                {
+                    if (Hero)
+                    {
+                        cameraMove->SetTourMode(FALSE, FALSE, 0);
+                        cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
+                        cameraMove->SetTourMode(TRUE, FALSE, 0);
+                    }
                 }
             }
             else
             {
-                if (ImGui::Button("Pause"))
+                if (ImGui::Button("Start Tour"))
                 {
-                    cameraMove->PauseTour(TRUE);
-                }
-            }
-            ImGui::SameLine();
-        }
-
-        // Restart button (always available when tour is active)
-        if (isTourMode)
-        {
-            if (ImGui::Button("Restart"))
-            {
-                if (Hero)
-                {
-                    cameraMove->SetTourMode(FALSE, FALSE, 0);  // Disable first
-                    cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
-                    cameraMove->SetTourMode(TRUE, FALSE, 0);   // Re-enable from waypoint 0
+                    if (Hero)
+                    {
+                        cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
+                        cameraMove->SetTourMode(TRUE, FALSE, 0);
+                    }
                 }
             }
         }
-        else
-        {
-            // Start Tour button (only when not active)
-            if (ImGui::Button("Start Tour"))
-            {
-                if (Hero)
-                {
-                    cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
-                    cameraMove->SetTourMode(TRUE, FALSE, 0);
-                }
-            }
-        }
-    }
-    else
-    {
-        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Camera Move system not available");
-    }
 
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // Character Scene - Target Specific Character
-    extern EGameScene SceneFlag;
-    if (SceneFlag == CHARACTER_SCENE)
-    {
-        ImGui::Text("Character Scene - Target Character");
+        ImGui::Spacing();
         ImGui::Separator();
+        ImGui::Text("Render Distances:");
+        ImGui::PushItemWidth(200);
+        ImGui::SliderFloat("Terrain ViewFar", &m_LoginTerrainDist, 1000.0f, 30000.0f, "%.0f");
+        ImGui::SliderFloat("Object Distance", &m_LoginObjectDist, 1000.0f, 30000.0f, "%.0f");
+        ImGui::PopItemWidth();
+        if (ImGui::Button("Reset Distances"))
+        {
+            m_LoginTerrainDist = 3995.0f;
+            m_LoginObjectDist = 5903.0f;
+        }
+
+        ImGui::Unindent();
+    }
+
+    // ===== Character Scene =====
+    if (ImGui::CollapsingHeader("Character Scene"))
+    {
+        ImGui::Indent();
 
         ImGui::Checkbox("Target Specific Character", &m_TargetCharacterEnabled);
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Orbit specific character 1-5)");
 
         if (m_TargetCharacterEnabled)
         {
-            // Character selector (1-5)
-            const char* charLabels[] = { "Character 1", "Character 2", "Character 3", "Character 4", "Character 5" };
+            const char* charLabels[] = { "Char 1", "Char 2", "Char 3", "Char 4", "Char 5" };
             ImGui::PushItemWidth(150);
-            ImGui::Combo("Target Character", &m_TargetCharacterIndex, charLabels, 5);
+            ImGui::Combo("Target", &m_TargetCharacterIndex, charLabels, 5);
             ImGui::PopItemWidth();
 
-            // Display character info if available
             extern CHARACTER* CharactersClient;
             if (CharactersClient && CharactersClient[m_TargetCharacterIndex].Object.Live)
             {
                 CHARACTER* targetChar = &CharactersClient[m_TargetCharacterIndex];
-                ImGui::Text("Character Position:");
-                ImGui::Text("  X: %.2f  Y: %.2f  Z: %.2f",
+                ImGui::Text("Pos: %.0f, %.0f, %.0f",
                     targetChar->Object.Position[0],
                     targetChar->Object.Position[1],
                     targetChar->Object.Position[2]);
@@ -586,128 +294,228 @@ void CDevEditorUI::RenderCameraTab()
                 ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "Character %d not loaded", m_TargetCharacterIndex + 1);
             }
         }
-        else
+
+        // Custom Origin
+        ImGui::Checkbox("Custom Origin", &m_CustomOriginEnabled);
+        if (m_CustomOriginEnabled)
         {
-            ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Enable to target specific character");
+            ImGui::PushItemWidth(120);
+            ImGui::InputFloat("X (tiles)", &m_CustomOriginX, 1.0f, 10.0f, "%.1f");
+            ImGui::InputFloat("Y (tiles)", &m_CustomOriginY, 1.0f, 10.0f, "%.1f");
+            ImGui::InputFloat("Z (height)", &m_CustomOriginZ, 10.0f, 50.0f, "%.1f");
+            ImGui::PopItemWidth();
+
+            if (ImGui::Button("Set to Camera Pos"))
+            {
+                m_CustomOriginX = g_Camera.Position[0] / 100.0f;
+                m_CustomOriginY = g_Camera.Position[1] / 100.0f;
+                m_CustomOriginZ = g_Camera.Position[2];
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Reset##origin"))
+            {
+                m_CustomOriginX = 0.0f;
+                m_CustomOriginY = 0.0f;
+                m_CustomOriginZ = 100.0f;
+            }
         }
 
-        ImGui::Separator();
+        ImGui::Unindent();
+    }
+
+    // ===== Game Scene =====
+    if (ImGui::CollapsingHeader("Game Scene"))
+    {
+        ImGui::Indent();
+
+        // Camera Config Override
+        if (m_ConfigOverrideEnabled && m_LastActiveCameraName != currentCameraName)
+        {
+            if (currentCamera)
+                m_HFOV = currentCamera->GetConfig().hFov;
+            m_LastActiveCameraName = currentCameraName;
+        }
+
+        bool previousOverrideState = m_ConfigOverrideEnabled;
+        ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
+
+        if (m_ConfigOverrideEnabled && !previousOverrideState)
+        {
+            if (currentCamera)
+                m_HFOV = currentCamera->GetConfig().hFov;
+            m_LastActiveCameraName = currentCameraName;
+        }
+        if (!m_ConfigOverrideEnabled && previousOverrideState)
+        {
+            m_LastActiveCameraName = nullptr;
+            m_FogOverride = false;
+        }
+
+        if (currentCamera)
+        {
+            const CameraConfig& cfg = currentCamera->GetConfig();
+            ImGui::Text("Near: %.0f  Far: %.0f  ViewFar: %.0f  ProjFar: %.0f",
+                        cfg.nearPlane, cfg.farPlane, g_Camera.ViewFar,
+                        g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+        }
+
+        if (m_ConfigOverrideEnabled)
+        {
+            extern unsigned int WindowWidth, WindowHeight;
+            float aspect = (float)WindowWidth / (float)WindowHeight;
+            float computedVFov = HFovToVFov(m_HFOV, aspect);
+
+            ImGui::PushItemWidth(200);
+            ImGui::SliderFloat("H-FOV", &m_HFOV, 10.0f, 150.0f, "%.1f");
+            ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
+                              "V-FOV: %.1f (aspect %.2f)", computedVFov, aspect);
+
+            // Fog controls
+            ImGui::Spacing();
+            extern bool FogEnable;
+
+            ImGui::Checkbox("Override Fog", &m_FogOverride);
+            if (m_FogOverride)
+            {
+                ImGui::SameLine();
+                ImGui::Checkbox("Fog On", &m_FogOverrideValue);
+            }
+            ImGui::SameLine();
+            if (FogEnable)
+                ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "ON");
+            else
+                ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "OFF");
+
+            float startDisplay = m_FogStartPct * 100.0f;
+            float endDisplay = m_FogEndPct * 100.0f;
+            if (ImGui::SliderFloat("Fog Start %", &startDisplay, 0.0f, 200.0f, "%.0f%%"))
+                m_FogStartPct = startDisplay / 100.0f;
+            if (ImGui::SliderFloat("Fog End %", &endDisplay, 0.0f, 200.0f, "%.0f%%"))
+                m_FogEndPct = endDisplay / 100.0f;
+
+            float actualStart = g_Camera.ViewFar * m_FogStartPct;
+            float actualEnd = g_Camera.ViewFar * m_FogEndPct;
+            ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
+                              "Fog: %.0f - %.0f (ViewFar=%.0f)", actualStart, actualEnd, g_Camera.ViewFar);
+            ImGui::PopItemWidth();
+
+            ImGui::Spacing();
+            if (ImGui::Button("Reset##config"))
+            {
+                if (currentCamera)
+                    m_HFOV = currentCamera->GetConfig().hFov;
+                m_FogStartPct = 1.00f;
+                m_FogEndPct = 1.25f;
+            }
+        }
+        else if (currentCamera)
+        {
+            extern unsigned int WindowWidth, WindowHeight;
+            float aspect = (float)WindowWidth / (float)WindowHeight;
+            float hFov = currentCamera->GetConfig().hFov;
+            ImGui::Text("  FOV: %.1f H / %.1f V  Fog: %.0f%%/%.0f%%",
+                        hFov, HFovToVFov(hFov, aspect),
+                        m_FogStartPct * 100.0f, m_FogEndPct * 100.0f);
+        }
+
+        // Orbital info
+        if (cameraMode == 1)
+        {
+            ImGui::Spacing();
+            float radius = GetOrbitalCameraRadius();
+            float orbitalYaw = 0.0f, orbitalPitch = 0.0f;
+            GetOrbitalCameraAngles(&orbitalYaw, &orbitalPitch);
+            ImGui::Text("Orbital: Zoom=%.0f  Yaw=%.1f  Pitch=%.1f", radius, orbitalYaw, orbitalPitch);
+        }
+
+        ImGui::Unindent();
+    }
+
+    // ===== Debug =====
+    if (ImGui::CollapsingHeader("Debug"))
+    {
+        ImGui::Indent();
+
+        // Culling visualization
+        ImGui::Checkbox("Terrain Spheres", &m_ShowTerrainCullingSpheres);
+        ImGui::SameLine();
+        ImGui::Checkbox("Object Spheres", &m_ShowObjectCullingSpheres);
+        ImGui::Checkbox("Character Cuboids", &m_ShowCharacterCullingSpheres);
+        ImGui::SameLine();
+        ImGui::Checkbox("Tile Grid", &m_ShowTileGrid);
+
+        ImGui::PushItemWidth(150);
+        ImGui::InputFloat("Terrain Cull Radius", &m_CullRadiusTerrain, 10.0f, 50.0f, "%.1f");
+        ImGui::InputFloat("Item Cull Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
+        ImGui::PopItemWidth();
+
         ImGui::Spacing();
+
+        extern OrbitalCamera* GetOrbitalCameraInstance();
+        OrbitalCamera* orbitalCam = GetOrbitalCameraInstance();
+        if (orbitalCam)
+        {
+            vec3_t target = {0, 0, 0};
+            orbitalCam->GetTargetPosition(target);
+            ImGui::Text("Orbital Target: %.0f, %.0f, %.0f  Tile: (%d, %d)",
+                        target[0], target[1], target[2],
+                        (int)(target[0] / 100.0f), (int)(target[1] / 100.0f));
+        }
+
+        // Render Toggles
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Text("Render Toggles:");
+
+        ImGui::Columns(2, nullptr, false);
+        ImGui::Checkbox("Terrain", &m_RenderTerrain);
+        ImGui::Checkbox("Static Objects", &m_RenderStaticObjects);
+        ImGui::Checkbox("Effects", &m_RenderEffects);
+        ImGui::NextColumn();
+        ImGui::Checkbox("Dropped Items", &m_RenderDroppedItems);
+        ImGui::Checkbox("Weather", &m_RenderWeatherEffects);
+        ImGui::Checkbox("Item Labels", &m_RenderItemLabels);
+        ImGui::Columns(1);
+
+        if (ImGui::Button("All ON"))
+        {
+            m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = true;
+            m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = true;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("All OFF"))
+        {
+            m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = false;
+            m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = false;
+        }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+
+        // TODO: Not working yet (tested - too complex)
+        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "TODO - Not Working:");
+        ImGui::BeginDisabled();
+        ImGui::Columns(2, nullptr, false);
+        ImGui::Checkbox("Shaders", &m_RenderShaders);
+        ImGui::Checkbox("Skill Effects", &m_RenderSkillEffects);
+        ImGui::NextColumn();
+        ImGui::Checkbox("Equipped Items", &m_RenderEquippedItems);
+        ImGui::Checkbox("UI", &m_RenderUI);
+        ImGui::Columns(1);
+
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "TODO - Not Implemented:");
+        ImGui::Columns(3, nullptr, false);
+        ImGui::Checkbox("Hero", &m_RenderHero);
+        ImGui::NextColumn();
+        ImGui::Checkbox("NPCs", &m_RenderNPCs);
+        ImGui::NextColumn();
+        ImGui::Checkbox("Monsters", &m_RenderMonsters);
+        ImGui::Columns(1);
+        ImGui::EndDisabled();
+
+        ImGui::Unindent();
     }
-
-    // Render Toggles Section
-    ImGui::Text("Rendering Toggles");
-    ImGui::Separator();
-
-    // Working toggles
-    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "✓ Working Toggles:");
-    ImGui::Columns(2, nullptr, false);
-
-    ImGui::Checkbox("Terrain", &m_RenderTerrain);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Ground tiles)");
-
-    ImGui::Checkbox("Static Objects", &m_RenderStaticObjects);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Trees, stones, walls)");
-
-    ImGui::Checkbox("Effects", &m_RenderEffects);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Particles, magic)");
-
-    ImGui::NextColumn();
-
-    ImGui::Checkbox("Dropped Items", &m_RenderDroppedItems);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Ground loot)");
-
-    ImGui::Checkbox("Weather Effects", &m_RenderWeatherEffects);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Rain, snow, leaves)");
-
-    ImGui::Checkbox("Item Labels", &m_RenderItemLabels);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Item text boxes)");
-
-    ImGui::Columns(1);
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // Not working section
-    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "✗ Not Working (tested - too complex):");
-    ImGui::BeginDisabled();
-    ImGui::Columns(2, nullptr, false);
-
-    ImGui::Checkbox("Shaders", &m_RenderShaders);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Too low level)");
-
-    ImGui::Checkbox("Skill Effects", &m_RenderSkillEffects);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Too complex)");
-
-    ImGui::NextColumn();
-
-    ImGui::Checkbox("Equipped Items", &m_RenderEquippedItems);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Character system)");
-
-    ImGui::Checkbox("UI", &m_RenderUI);
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(Needs grouping)");
-
-    ImGui::Columns(1);
-    ImGui::EndDisabled();
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // Not implemented section
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "⊘ Not Implemented:");
-    ImGui::BeginDisabled();
-    ImGui::Columns(3, nullptr, false);
-
-    ImGui::Checkbox("Hero", &m_RenderHero);
-    ImGui::NextColumn();
-    ImGui::Checkbox("NPCs", &m_RenderNPCs);
-    ImGui::NextColumn();
-    ImGui::Checkbox("Monsters", &m_RenderMonsters);
-
-    ImGui::Columns(1);
-    ImGui::EndDisabled();
-
-    ImGui::Spacing();
-    ImGui::Text("Quick Actions:");
-    if (ImGui::Button("All ON"))
-    {
-        m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = true;
-        m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = true;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("All OFF"))
-    {
-        m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = false;
-        m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = false;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Only Static"))
-    {
-        m_RenderTerrain = true;
-        m_RenderStaticObjects = true;
-        m_RenderEffects = m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = false;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Only Items"))
-    {
-        m_RenderTerrain = true;
-        m_RenderDroppedItems = true;
-        m_RenderItemLabels = true;
-        m_RenderStaticObjects = m_RenderEffects = m_RenderWeatherEffects = false;
-    }
-
-    ImGui::Separator();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "Legend: ✓ Working  ✗ Not Working  ⊘ Not Implemented");
 }
 
 void CDevEditorUI::RenderGraphicsTab()
@@ -1072,21 +880,21 @@ extern "C"
     // Note: GetOrbitalCameraAngles is implemented in CameraManager.cpp
 
     // New CameraConfig accessors
+    // Game Scene settings — only apply in MAIN_SCENE
     bool DevEditor_IsConfigOverrideEnabled()
     {
+        extern EGameScene SceneFlag;
+        if (SceneFlag != MAIN_SCENE) return false;
         return g_DevEditorUI.IsConfigOverrideEnabled();
     }
 
     void DevEditor_GetCameraConfig(float* outHFOV, float* outNearPlane, float* outFarPlane, float* outTerrainCullRange)
     {
-        // Only override FOV — near/far plane change dynamically with zoom
-        // and must not be locked by the DevEditor override
         if (outHFOV) *outHFOV = g_DevEditorUI.GetHFOV();
     }
 
     void DevEditor_GetFogConfig(float* outStart, float* outEnd)
     {
-        // Convert percentages to absolute distances using current view distance
         extern CameraState g_Camera;
         if (outStart) *outStart = g_Camera.ViewFar * g_DevEditorUI.GetFogStartPct();
         if (outEnd) *outEnd = g_Camera.ViewFar * g_DevEditorUI.GetFogEndPct();
@@ -1094,6 +902,8 @@ extern "C"
 
     bool DevEditor_IsFogOverrideEnabled()
     {
+        extern EGameScene SceneFlag;
+        if (SceneFlag != MAIN_SCENE) return false;
         return g_DevEditorUI.IsConfigOverrideEnabled() && g_DevEditorUI.IsFogOverrideEnabled();
     }
 
@@ -1102,22 +912,25 @@ extern "C"
         return g_DevEditorUI.GetFogOverrideValue();
     }
 
-    // Phase 5: Custom Origin accessors
+    // Character Scene settings — only apply in CHARACTER_SCENE
     bool DevEditor_IsCustomOriginEnabled()
     {
+        extern EGameScene SceneFlag;
+        if (SceneFlag != CHARACTER_SCENE) return false;
         return g_DevEditorUI.IsCustomOriginEnabled();
     }
 
     void DevEditor_GetCustomOrigin(float* outX, float* outY, float* outZ)
     {
-        if (outX) *outX = g_DevEditorUI.GetCustomOriginX() * 100.0f;  // Convert tiles to world units
+        if (outX) *outX = g_DevEditorUI.GetCustomOriginX() * 100.0f;
         if (outY) *outY = g_DevEditorUI.GetCustomOriginY() * 100.0f;
         if (outZ) *outZ = g_DevEditorUI.GetCustomOriginZ();
     }
 
-    // Phase 5: Character targeting accessors
     bool DevEditor_IsTargetCharacterEnabled()
     {
+        extern EGameScene SceneFlag;
+        if (SceneFlag != CHARACTER_SCENE) return false;
         return g_DevEditorUI.IsTargetCharacterEnabled();
     }
 
@@ -1244,14 +1057,6 @@ extern "C" {
 #endif
     }
 
-    float DevEditor_GetCullRadiusCharacter()
-    {
-#ifdef _EDITOR
-        return g_DevEditorUI.GetCullRadiusCharacter();
-#else
-        return 100.0f;
-#endif
-    }
 
     float DevEditor_GetCullRadiusItem()
     {
@@ -1259,6 +1064,24 @@ extern "C" {
         return g_DevEditorUI.GetCullRadiusItem();
 #else
         return 100.0f;
+#endif
+    }
+
+    float DevEditor_GetLoginTerrainDist()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.GetLoginTerrainDist();
+#else
+        return 10000.0f;
+#endif
+    }
+
+    float DevEditor_GetLoginObjectDist()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.GetLoginObjectDist();
+#else
+        return 10000.0f;
 #endif
     }
 

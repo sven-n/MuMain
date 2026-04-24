@@ -37,10 +37,8 @@
 // DevEditor function declarations
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowCharacterCullingSpheres();
-extern "C" float DevEditor_GetCullRadiusCharacter();
 
 static bool s_bShowCharacterCullingSpheres = false;
-static float s_fCullRadiusCharacter = 0.0f;
 #endif
 
 #include "CSChaosCastle.h"
@@ -11221,7 +11219,6 @@ void RenderCharactersClient()
 {
 #ifdef _EDITOR
     s_bShowCharacterCullingSpheres = DevEditor_ShouldShowCharacterCullingSpheres();
-    s_fCullRadiusCharacter = DevEditor_GetCullRadiusCharacter();
 #endif
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -11290,10 +11287,33 @@ void RenderCharactersClient()
                     battleCastle::CreateBattleCastleCharacter_Visual(c, o);
 
 #ifdef _EDITOR
-                // Debug visualization: Render character culling sphere
+                // Debug visualization: Render the actual pick volume (matches SelectCharacter)
                 if (s_bShowCharacterCullingSpheres)
                 {
-                    RenderDebugSphere(o->Position, s_fCullRadiusCharacter, 0.0f, 1.0f, 1.0f);  // Cyan wireframe
+                    extern EGameScene SceneFlag;
+                    if (SceneFlag == CHARACTER_SCENE)
+                    {
+                        float charHeight = Models[o->Type].fTransformedSize * 2.0f;
+                        if (charHeight < 300.0f) charHeight = 300.0f;
+                        float halfWidth = 72.0f;
+
+                        vec3_t boxOrigin;
+                        boxOrigin[0] = o->Position[0] - halfWidth;
+                        boxOrigin[1] = o->Position[1] - halfWidth;
+                        boxOrigin[2] = o->Position[2];
+
+                        RenderDebugBox(boxOrigin, halfWidth * 2.0f, halfWidth * 2.0f, charHeight,
+                                       0.0f, 1.0f, 1.0f);
+                    }
+                    else
+                    {
+                        vec3_t adj;
+                        VectorCopy(o->OBB.StartPos, adj);
+                        adj[0] += 5.0f;
+                        adj[1] += 5.0f;
+                        RenderDebugBox(adj, o->OBB.XAxis[0] - 10.0f, o->OBB.YAxis[1] - 10.0f, o->OBB.ZAxis[2] + 65.0f,
+                                       0.0f, 1.0f, 1.0f);
+                    }
                 }
 #endif
             }

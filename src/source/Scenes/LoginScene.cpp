@@ -41,6 +41,10 @@ extern HFONT g_hFont;
 extern wchar_t m_ExeVersion[11];
 extern HWND g_hWnd;
 
+#ifdef _EDITOR
+extern "C" float DevEditor_GetLoginTerrainDist();
+#endif
+
 //=============================================================================
 // LoginScene Camera State (local to this file)
 //=============================================================================
@@ -392,6 +396,14 @@ bool NewRenderLogInScene(HDC hDC)
     Width = GetScreenWidth();
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
+    // Set ViewFar BEFORE BeginOpengl so the projection matrix covers the full render distance
+#ifdef _EDITOR
+    g_Camera.ViewFar = DevEditor_GetLoginTerrainDist();
+#else
+    g_Camera.ViewFar = 3995.f;
+#endif
+    g_Camera.ViewNear = 100.f;  // Push near plane out to preserve z-buffer precision
+
     BeginOpengl(0, 25, 640, 430);
 
     // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
@@ -405,10 +417,7 @@ bool NewRenderLogInScene(HDC hDC)
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
-        g_Camera.ViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
-
         RenderTerrain(false, activeCamera);
-        g_Camera.ViewFar = 7000.f;
         RenderCharactersClient();
         RenderMount();
         RenderObjects(activeCamera);

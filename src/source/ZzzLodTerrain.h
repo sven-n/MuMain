@@ -81,6 +81,7 @@ float RequestTerrainHeight(float xf, float yf);
 
 // Debug visualization
 void RenderDebugSphere(const vec3_t center, float radius, float r, float g, float b);
+void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, float r, float g, float b);
 
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 

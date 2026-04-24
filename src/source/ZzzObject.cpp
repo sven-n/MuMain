@@ -42,6 +42,7 @@
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowObjectCullingSpheres();
 extern "C" float DevEditor_GetCullRadiusItem();
+extern "C" float DevEditor_GetLoginObjectDist();
 
 // Per-frame cached DevEditor state (avoid per-object function calls)
 static bool s_bShowObjectCullingSpheres = false;
@@ -3317,7 +3318,11 @@ void RenderObjects(ICamera* camera)
                                 float fDistance_x = g_Camera.Position[0] - o->Position[0];
                                 float fDistance_y = g_Camera.Position[1] - o->Position[1];
                                 float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
-                                float fDis = 2000.0f;
+#ifdef _EDITOR
+                                float fDis = DevEditor_GetLoginObjectDist();
+#else
+                                float fDis = 5903.0f;
+#endif
 
                                 if (((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127)) &&
                                     TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis * 2.0f)

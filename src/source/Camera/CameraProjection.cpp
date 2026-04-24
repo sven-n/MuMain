@@ -11,32 +11,40 @@ extern int OpenglWindowY;
 extern int OpenglWindowWidth;
 extern int OpenglWindowHeight;
 
+// Actual viewport dimensions (distinct from OpenglWindowWidth/Height which are full window)
+static int s_ViewportWidth = 0;
+static int s_ViewportHeight = 0;
+
 void CameraProjection::SetupPerspective(CameraState& state, float fov, float aspect,
                                           float zNear, float zFar)
 {
     // Set up OpenGL perspective
     gluPerspective(fov, aspect, zNear, zFar);
 
-    // Cache screen center
-    state.ScreenCenterX = OpenglWindowX + OpenglWindowWidth / 2;
-    state.ScreenCenterY = OpenglWindowY + OpenglWindowHeight / 2;
+    // Use actual viewport dimensions (set by SetViewport) for screen center and perspective
+    int vpWidth = s_ViewportWidth > 0 ? s_ViewportWidth : OpenglWindowWidth;
+    int vpHeight = s_ViewportHeight > 0 ? s_ViewportHeight : OpenglWindowHeight;
+
+    // Cache screen center relative to viewport
+    state.ScreenCenterX = OpenglWindowX + vpWidth / 2;
+    state.ScreenCenterY = OpenglWindowY + vpHeight / 2;
     state.ScreenCenterYFlip = WindowWidth - state.ScreenCenterY;
 
     // Cache perspective factors for screen-space transformations
-    float aspectY = (float)WindowHeight / (float)OpenglWindowHeight;
+    // Mouse coords are converted to pixels then offset by ScreenCenter (viewport-relative),
+    // so PerspectiveX/Y map viewport-pixel-offsets to frustum-edge angles directly.
     float fovRad = fov * 0.5f * Q_PI / 180.0f;
 
-    state.PerspectiveX = tanf(fovRad) / (float)(OpenglWindowWidth / 2) * aspect;
-    state.PerspectiveY = tanf(fovRad) / (float)(OpenglWindowHeight / 2) * aspectY;
+    state.PerspectiveX = tanf(fovRad) / (float)(vpWidth / 2) * aspect;
+    state.PerspectiveY = tanf(fovRad) / (float)(vpHeight / 2);
 }
 
 void CameraProjection::SetViewport(int x, int y, int width, int height)
 {
-    // Update cached viewport position only
-    // Do NOT update OpenglWindowWidth/Height - those are the full window dimensions
-    // and should only be set at startup or on window resize
     OpenglWindowX = x;
     OpenglWindowY = y;
+    s_ViewportWidth = width;
+    s_ViewportHeight = height;
 
     // Set OpenGL viewport (Y coordinate is flipped)
     glViewport(x, WindowHeight - (y + height), width, height);

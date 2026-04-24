@@ -7922,7 +7922,39 @@ int SelectCharacter(BYTE Kind)
                     o->OBB.ZAxis[2] += 100.f;
                 }
 
-                if (CollisionDetectLineToOBB(MousePosition, MouseTarget, o->OBB))
+                // Character scene: build a generous pick box from foot level upward
+                // (the model OBB is too tight for the steep camera angle).
+                // In-game: use the original model OBB.
+                OBB_t pickOBB = o->OBB;
+                if (Main)
+                {
+                    pickOBB.ZAxis[2] += 65.0f;
+                    pickOBB.StartPos[0] += 5.0f;
+                    pickOBB.StartPos[1] += 5.0f;
+                    pickOBB.XAxis[0] -= 10.0f;
+                    pickOBB.YAxis[1] -= 10.0f;
+                }
+                else
+                {
+                    float charHeight = Models[o->Type].fTransformedSize * 2.0f;
+                    if (charHeight < 300.0f) charHeight = 300.0f;
+                    float halfWidth = 72.0f;
+
+                    pickOBB.StartPos[0] = o->Position[0] - halfWidth;
+                    pickOBB.StartPos[1] = o->Position[1] - halfWidth;
+                    pickOBB.StartPos[2] = o->Position[2];
+                    pickOBB.XAxis[0] = halfWidth * 2.0f;
+                    pickOBB.XAxis[1] = 0.0f;
+                    pickOBB.XAxis[2] = 0.0f;
+                    pickOBB.YAxis[0] = 0.0f;
+                    pickOBB.YAxis[1] = halfWidth * 2.0f;
+                    pickOBB.YAxis[2] = 0.0f;
+                    pickOBB.ZAxis[0] = 0.0f;
+                    pickOBB.ZAxis[1] = 0.0f;
+                    pickOBB.ZAxis[2] = charHeight;
+                }
+
+                if (CollisionDetectLineToOBB(MousePosition, MouseTarget, pickOBB))
                 {
                     vec3_t vSub;
                     VectorSubtract(o->Position, g_Camera.Position, vSub);

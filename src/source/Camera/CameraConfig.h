@@ -174,9 +174,9 @@ struct CameraConfig
         CameraConfig config;
         config.hFov = 90.0f;
         config.nearPlane = 10.0f;
-        config.farPlane = 5000.0f;
-        config.terrainCullRange = 5000.0f;
-        config.objectCullRange = 5000.0f;
+        config.farPlane = 20000.0f;
+        config.terrainCullRange = 20000.0f;
+        config.objectCullRange = 20000.0f;
         config.fogStart = config.farPlane * 1.0f;
         config.fogEnd = config.farPlane * 1.25f;
         return config;

@@ -35,7 +35,6 @@
 extern "C" bool DevEditor_ShouldShowTerrainCullingSpheres();
 extern "C" bool DevEditor_ShouldShowTileGrid();
 extern "C" float DevEditor_GetCullRadiusTerrain();
-
 // Per-frame cached DevEditor state (avoid per-tile function calls)
 static bool s_bShowTerrainCullingSpheres = false;
 static bool s_bShowTileGrid = false;
@@ -2691,6 +2690,47 @@ void RenderDebugSphere(const vec3_t center, float radius, float r, float g, floa
     if (lighting) glEnable(GL_LIGHTING);
 }
 
+void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, float r, float g, float b)
+{
+    GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean texture2D = glIsEnabled(GL_TEXTURE_2D);
+    GLboolean lighting = glIsEnabled(GL_LIGHTING);
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+
+    glColor3f(r, g, b);
+    glLineWidth(1.0f);
+
+    float x0 = origin[0], y0 = origin[1], z0 = origin[2];
+    float x1 = x0 + sizeX, y1 = y0 + sizeY, z1 = z0 + sizeZ;
+
+    // Bottom face
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(x0, y0, z0); glVertex3f(x1, y0, z0);
+    glVertex3f(x1, y1, z0); glVertex3f(x0, y1, z0);
+    glEnd();
+
+    // Top face
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(x0, y0, z1); glVertex3f(x1, y0, z1);
+    glVertex3f(x1, y1, z1); glVertex3f(x0, y1, z1);
+    glEnd();
+
+    // Vertical edges
+    glBegin(GL_LINES);
+    glVertex3f(x0, y0, z0); glVertex3f(x0, y0, z1);
+    glVertex3f(x1, y0, z0); glVertex3f(x1, y0, z1);
+    glVertex3f(x1, y1, z0); glVertex3f(x1, y1, z1);
+    glVertex3f(x0, y1, z0); glVertex3f(x0, y1, z1);
+    glEnd();
+
+    if (!depthTest) glDisable(GL_DEPTH_TEST);
+    if (texture2D) glEnable(GL_TEXTURE_2D);
+    if (lighting) glEnable(GL_LIGHTING);
+}
+
 void CacheActiveFrustum()
 {
     s_pCachedCamera = CameraManager::Instance().GetActiveCamera();
@@ -3070,15 +3110,8 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
         {
             if (TestFrustrum2D(xf + 2.f, yf + 2.f, g_fFrustumRange) || g_Camera.TopViewEnable)
             {
-                if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
-                {
-                    float fDistance_x = g_Camera.Position[0] - xf / 0.01f;
-                    float fDistance_y = g_Camera.Position[1] - yf / 0.01f;
-                    float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
-
-                    if (fDistance > 5200.f)
-                        continue;
-                }
+                // Login scene: terrain distance is controlled by ViewFar (projection clipping)
+                // No per-tile distance cap — effects (flames etc.) are tied to terrain blocks
                 RenderTerrainBlock(xf, yf, xi, yi, EditFlag, camera);
 
 #ifdef _EDITOR

@@ -53,14 +53,14 @@ public:
 
     // Culling radius accessors
     float GetCullRadiusTerrain() const { return m_CullRadiusTerrain; }
-    float GetCullRadiusCharacter() const { return m_CullRadiusCharacter; }
+
     float GetCullRadiusItem() const { return m_CullRadiusItem; }
 
 private:
     CDevEditorUI() = default;
     ~CDevEditorUI() = default;
 
-    void RenderCameraTab();
+    void RenderScenesTab();
     void RenderGraphicsTab();
 
     // CameraConfig values for live editing
@@ -112,8 +112,16 @@ private:
 
     // Runtime adjustable culling radii
     float m_CullRadiusTerrain = 100.0f;
-    float m_CullRadiusCharacter = 100.0f;
     float m_CullRadiusItem = 100.0f;
+
+    // Login scene render distances (adjustable via sliders)
+    float m_LoginTerrainDist = 3995.0f;
+    float m_LoginObjectDist = 5903.0f;
+
+public:
+    // Login scene accessors
+    float GetLoginTerrainDist() const { return m_LoginTerrainDist; }
+    float GetLoginObjectDist() const { return m_LoginObjectDist; }
 };
 
 #define g_DevEditorUI CDevEditorUI::GetInstance()
