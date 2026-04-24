@@ -21,9 +21,7 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyColorDepth[]     = L"ColorDepth";
     inline constexpr wchar_t CfgKeyRenderTextType[] = L"RenderTextType";
 
-    // Audio
-    inline constexpr wchar_t CfgKeySoundEnabled[] = L"SoundEnabled";
-    inline constexpr wchar_t CfgKeyMusicEnabled[] = L"MusicEnabled";
+    // Audio — volume 0 = off, >0 = on (no separate Enabled flag).
     inline constexpr wchar_t CfgKeySoundVolume[]  = L"SoundVolume";
     inline constexpr wchar_t CfgKeyMusicVolume[] = L"MusicVolume";
 
@@ -49,9 +47,7 @@ namespace CfgDefaults
 
     inline constexpr int  CfgDefaultColorDepth = 0;
 
-    inline constexpr bool CfgDefaultSoundEnabled = true;
-    inline constexpr bool CfgDefaultMusicEnabled = false;
-    inline constexpr int  CfgDefaultSoundVolume  = 5;
+    inline constexpr int  CfgDefaultSoundVolume = 5;
     inline constexpr int  CfgDefaultMusicVolume = 5;
 
     inline constexpr int CfgDefaultRenderTextType = 0;

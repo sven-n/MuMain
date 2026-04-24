@@ -187,6 +187,15 @@ void SEASON3B::CNewUIChatInputBox::SetFont(HFONT hFont)
     m_pWhsprIDInputBox->SetFont(hFont);
 }
 
+void SEASON3B::CNewUIChatInputBox::RebuildScaledResources()
+{
+    if (m_pChatInputBox)    m_pChatInputBox->RebuildScaledResources();
+    if (m_pWhsprIDInputBox) m_pWhsprIDInputBox->RebuildScaledResources();
+    // SetSize already SelectObject'd the (old) g_hFont into the new DC;
+    // re-apply with the CURRENT g_hFont so sizing/measuring is consistent.
+    SetFont(g_hFont);
+}
+
 bool SEASON3B::CNewUIChatInputBox::HaveFocus()
 {
     return (m_pChatInputBox->HaveFocus() || m_pWhsprIDInputBox->HaveFocus());

@@ -91,6 +91,11 @@ extern void DestroySound();
 extern void ReinitializeFonts();
 extern void UpdateResolutionDependentSystems();
 
+// Confines the mouse cursor to the window's client area when in fullscreen
+// and the window is active; releases clipping otherwise. Safe to call any
+// time the relevant state changes (mode toggle, activation, resize).
+extern void UpdateCursorClip();
+
 //#if defined _DEBUG || defined PBG_LOG_PACKET_WINSOCKERROR
 //	#include "./Utilities/Log/DebugAngel.h"
 //#define ExecutionLog	DebugAngel_Write

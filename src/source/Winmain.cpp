@@ -493,6 +493,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (g_bUseWindowMode == FALSE)
 #endif	// ACTIVE_FOCUS_OUT
                 g_bWndActive = false;
+            // Release the cursor when losing focus so Windows can route input
+            // to other apps / the Alt-Tab target.
+            ClipCursor(nullptr);
 
             if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
             {
@@ -524,6 +527,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 SetTargetFps(g_TargetFpsBeforeInactive);
                 g_HasInactiveFpsOverride = false;
             }
+            // Re-clip on regaining focus if we're in fullscreen.
+            UpdateCursorClip();
         }
         break;
     case WM_TIMER:
@@ -583,6 +588,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             // Reinitialize fonts and update resolution-dependent systems
             ReinitializeFonts();
             UpdateResolutionDependentSystems();
+            UpdateCursorClip();
         }
         break;
     case WM_PAINT:
@@ -1066,6 +1072,37 @@ void ReinitializeFonts()
 
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
     RefreshInventoryEquipmentSlots();
+
+    // The chat input is built on native Edit controls backed by GDI DIB
+    // sections sized by g_fScreenRate at Init time. A plain SetFont() isn't
+    // enough after a resolution change — the DIB buffer is still at the old
+    // pixel scale, so rendered text gets upscaled from a stale bitmap and
+    // comes out unreadable. Rebuild the DC/bitmap at the current scale.
+    if (g_pNewUISystem)
+    {
+        if (auto* chat = g_pNewUISystem->GetUI_NewChatInputBox())
+            chat->RebuildScaledResources();
+    }
+}
+
+void UpdateCursorClip()
+{
+    // Confine cursor in fullscreen + active only. In windowed mode the user
+    // must be able to move the cursor to other windows; when deactivated we
+    // must also release so Windows can focus other apps.
+    if (!g_hWnd || g_bUseWindowMode || !g_bWndActive)
+    {
+        ClipCursor(nullptr);
+        return;
+    }
+    RECT client;
+    if (!GetClientRect(g_hWnd, &client)) return;
+    POINT tl = { client.left, client.top };
+    POINT br = { client.right, client.bottom };
+    ClientToScreen(g_hWnd, &tl);
+    ClientToScreen(g_hWnd, &br);
+    RECT clip = { tl.x, tl.y, br.x, br.y };
+    ClipCursor(&clip);
 }
 
 // Update camera state when window resolution changes
@@ -1217,14 +1254,28 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     if (g_bUseWindowMode == FALSE && g_bUseFullscreenMode == TRUE)
     {
-        for (int n2 = 0; n2 < nModes; n2++)
+        // Force an exclusive fullscreen mode change at WindowWidth × WindowHeight @ 32bpp.
+        // The old path iterated EnumDisplaySettings looking for a match at dwBitsPerPel
+        // (which defaulted to 16), but modern displays don't expose <32bpp modes — so
+        // the loop matched nothing, ChangeDisplaySettings was never called, and the
+        // game ended up as a small popup on top of the desktop instead of true fullscreen.
+        DEVMODE dmScreenSettings = {};
+        dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
+        dmScreenSettings.dmPelsWidth  = WindowWidth;
+        dmScreenSettings.dmPelsHeight = WindowHeight;
+        dmScreenSettings.dmBitsPerPel = 32;
+        dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
+        if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
         {
-            if (pDevmodes[n2].dmPelsWidth == WindowWidth && pDevmodes[n2].dmPelsHeight == WindowHeight && pDevmodes[n2].dmBitsPerPel == dwBitsPerPel)
-            {
-                g_ErrorReport.Write(L"> Change display setting %dx%d.\r\n", pDevmodes[n2].dmPelsWidth, pDevmodes[n2].dmPelsHeight);
-                ChangeDisplaySettings(&pDevmodes[n2], 0);
-                break;
-            }
+            g_ErrorReport.Write(L"> Change display setting %dx%d.\r\n", WindowWidth, WindowHeight);
+        }
+        else
+        {
+            g_ErrorReport.Write(L"> Fullscreen %dx%d unavailable, falling back to windowed.\r\n",
+                                WindowWidth, WindowHeight);
+            g_bUseWindowMode     = TRUE;
+            g_bUseFullscreenMode = FALSE;
         }
     }
 

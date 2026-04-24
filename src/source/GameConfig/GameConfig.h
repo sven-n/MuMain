@@ -25,14 +25,10 @@ public:
     int GetColorDepth() const { return m_colorDepth; }
     void SetColorDepth(int depth);
 
-    // Audio
-    bool GetSoundEnabled() const { return m_soundEnabled; }
-    bool GetMusicEnabled() const { return m_musicEnabled; }
+    // Audio — volume 0 = off, >0 = on. No separate Enabled flag.
     int  GetSoundVolume()  const { return m_soundVolume; }
     int  GetMusicVolume()  const { return m_musicVolume; }
 
-    void SetSoundEnabled(bool enabled);
-    void SetMusicEnabled(bool enabled);
     void SetSoundVolume(int level);
     void SetMusicVolume(int level);
 
@@ -84,8 +80,6 @@ private:
 
     int m_colorDepth;
 
-    bool m_soundEnabled;
-    bool m_musicEnabled;
     int  m_soundVolume;
     int  m_musicVolume;
 

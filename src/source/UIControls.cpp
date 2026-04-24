@@ -3304,6 +3304,16 @@ void CUITextInputBox::SetTextLimit(int iLimit)
     SendMessageW(m_hEditWnd, EM_SETLIMITTEXT, iLimit, 0);
 }
 
+void CUITextInputBox::RebuildScaledResources()
+{
+    // Bypass SetSize's unchanged-dimensions early-return by clearing the cached
+    // dims first, so the GDI resources are fully recreated at the current scale.
+    if (m_iWidth == 0 || m_iHeight == 0) return;
+    int w = m_iWidth, h = m_iHeight;
+    m_iWidth = 0; m_iHeight = 0;
+    SetSize(w, h);
+}
+
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
 {
     if (iWidth == 0 || iHeight == 0) return;

@@ -840,6 +840,12 @@ public:
 
     virtual void SetSize(int iWidth, int iHeight);
 
+    // Force-recreate the DC/bitmap and child edit window at the current
+    // g_fScreenRate using the stored reference dimensions. SetSize() early-returns
+    // when dimensions are unchanged, so it can't be used after a resolution change
+    // where the pixel scale shifted but reference dimensions stayed the same.
+    void RebuildScaledResources();
+
     virtual void Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength = 50, BOOL bIsPassword = FALSE);
     virtual void Render();
     virtual void GiveFocus(BOOL bSel = FALSE);

@@ -43,8 +43,6 @@ void GameConfig::Load()
 
     m_colorDepth = ReadInt(CfgSectionGraphics, CfgKeyColorDepth, CfgDefaultColorDepth);
 
-    m_soundEnabled = ReadBool(CfgSectionAudio, CfgKeySoundEnabled, CfgDefaultSoundEnabled);
-    m_musicEnabled = ReadBool(CfgSectionAudio, CfgKeyMusicEnabled, CfgDefaultMusicEnabled);
     m_soundVolume  = ReadInt(CfgSectionAudio, CfgKeySoundVolume, CfgDefaultSoundVolume);
     m_musicVolume  = ReadInt(CfgSectionAudio, CfgKeyMusicVolume, CfgDefaultMusicVolume);
 
@@ -73,8 +71,6 @@ void GameConfig::Save()
     WriteInt(CfgSectionGraphics, CfgKeyColorDepth, m_colorDepth);
     WriteInt(CfgSectionGraphics, CfgKeyRenderTextType, m_renderTextType);
 
-    WriteBool(CfgSectionAudio, CfgKeySoundEnabled, m_soundEnabled);
-    WriteBool(CfgSectionAudio, CfgKeyMusicEnabled, m_musicEnabled);
     WriteInt(CfgSectionAudio, CfgKeySoundVolume, m_soundVolume);
     WriteInt(CfgSectionAudio, CfgKeyMusicVolume, m_musicVolume);
 
@@ -103,16 +99,6 @@ void GameConfig::SetWindowMode(bool windowed)
 void GameConfig::SetColorDepth(int depth)
 {
     m_colorDepth = depth;
-}
-
-void GameConfig::SetSoundEnabled(bool enabled)
-{
-    m_soundEnabled = enabled;
-}
-
-void GameConfig::SetMusicEnabled(bool enabled)
-{
-    m_musicEnabled = enabled;
 }
 
 void GameConfig::SetSoundVolume(int level)
