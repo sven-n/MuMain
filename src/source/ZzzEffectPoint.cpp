@@ -65,8 +65,8 @@ void RenderNumberPoints(vec3_t Position, int Num, vec3_t Color, float Alpha, flo
     p[0] -= Length * Scale * 0.125f;
     p[1] -= Length * Scale * 0.125f;
 
-    float sinTh = sinf((float)(ANGLE_TO_RAD * (CameraAngle[2])));
-    float cosTh = cosf((float)(ANGLE_TO_RAD * (CameraAngle[2])));
+    float sinTh = sinf((float)(ANGLE_TO_RAD * (g_Camera.Angle[2])));
+    float cosTh = cosf((float)(ANGLE_TO_RAD * (g_Camera.Angle[2])));
 
     for (unsigned int i = 0;i < Length;i++)
     {

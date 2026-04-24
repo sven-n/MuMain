@@ -28,6 +28,21 @@
 #include "PhysicsManager.h"
 #include "GOBoid.h"
 #include "CSItemOption.h"
+
+// Phase 5: Camera system includes for 3D frustum culling
+#include "Camera/CameraManager.h"
+#include "Camera/ICamera.h"
+#include "CullingConstants.h"
+
+// DevEditor function declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldShowCharacterCullingSpheres();
+extern "C" float DevEditor_GetCullRadiusCharacter();
+
+static bool s_bShowCharacterCullingSpheres = false;
+static float s_fCullRadiusCharacter = 0.0f;
+#endif
+
 #include "CSChaosCastle.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
@@ -11204,6 +11219,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
 void RenderCharactersClient()
 {
+#ifdef _EDITOR
+    s_bShowCharacterCullingSpheres = DevEditor_ShouldShowCharacterCullingSpheres();
+    s_fCullRadiusCharacter = DevEditor_GetCullRadiusCharacter();
+#endif
+
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -11268,6 +11288,14 @@ void RenderCharactersClient()
 
                 if (o->Type == MODEL_PLAYER)
                     battleCastle::CreateBattleCastleCharacter_Visual(c, o);
+
+#ifdef _EDITOR
+                // Debug visualization: Render character culling sphere
+                if (s_bShowCharacterCullingSpheres)
+                {
+                    RenderDebugSphere(o->Position, s_fCullRadiusCharacter, 0.0f, 1.0f, 1.0f);  // Cyan wireframe
+                }
+#endif
             }
         }
     }

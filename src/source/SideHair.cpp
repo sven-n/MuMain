@@ -28,7 +28,7 @@ CSideHair::~CSideHair()
 
 void CSideHair::Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga)
 {
-    VectorSubtract(Hero->Object.Position, CameraPosition, m_vLight);
+    VectorSubtract(Hero->Object.Position, g_Camera.Position, m_vLight);
     VectorNormalize(m_vLight);
 
     if (o->Alpha < 0.01f)

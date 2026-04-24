@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "NewUI3DRenderMng.h"
 #include "NewUIManager.h"
+#include "Camera/CameraProjection.h"
 
 using namespace SEASON3B;
 
@@ -37,6 +38,12 @@ void SEASON3B::CNewUI3DCamera::Release()
 {
     RemoveAll3DRenderObjs();
     m_deque2DEffects.clear();
+}
+
+void SEASON3B::CNewUI3DCamera::UpdateDimensions(UINT uiWidth, UINT uiHeight)
+{
+    m_uiWidth = uiWidth;
+    m_uiHeight = uiHeight;
 }
 
 bool SEASON3B::CNewUI3DCamera::IsEmpty()
@@ -111,11 +118,11 @@ bool SEASON3B::CNewUI3DCamera::Render()
     glPushMatrix();
     glLoadIdentity();
     glViewport2(0, 0, m_uiWidth, m_uiHeight);
-    gluPerspective2(1.f, (float)(m_uiWidth) / (float)(m_uiHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
+    CameraProjection::SetupPerspective(g_Camera, 1.f, (float)(m_uiWidth) / (float)(m_uiHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    GetOpenGLMatrix(CameraMatrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -185,6 +192,17 @@ bool SEASON3B::CNewUI3DRenderMng::Create(CNewUIManager* pNewUIMng)
 void SEASON3B::CNewUI3DRenderMng::Release()
 {
     RemoveAll3DRenderObjs();
+}
+
+void SEASON3B::CNewUI3DRenderMng::UpdateAllCameraDimensions(UINT uiWidth, UINT uiHeight)
+{
+    for (auto it = m_listCamera.begin(); it != m_listCamera.end(); ++it)
+    {
+        if (*it)
+        {
+            (*it)->UpdateDimensions(uiWidth, uiHeight);
+        }
+    }
 }
 
 void SEASON3B::CNewUI3DRenderMng::Add3DRenderObj(INewUI3DRenderObj* pObj, float fZOrder/* = INFORMATION_CAMERA_Z_ORDER*/)
