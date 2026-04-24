@@ -9,6 +9,7 @@
 // Format supported: [section] / key=value / ; comment lines
 
 #include <algorithm>
+#include <codecvt>
 #include <filesystem>
 #include <fstream>
 #include <locale>
@@ -18,6 +19,34 @@
 #include <vector>
 
 #include "MuLogger.h"
+
+namespace detail
+{
+// Build a locale with a UTF-8 <-> wchar_t facet. codecvt_utf8 is deprecated in
+// C++17 but still the only standard way to get a portable UTF-8 facet without
+// pulling in ICU or writing one by hand. Suppression is localized to this helper.
+inline std::locale MakeUtf8Locale()
+{
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#elif defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+    return std::locale(std::locale::classic(), new std::codecvt_utf8<wchar_t>);
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#elif defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+}
+}  // namespace detail
 
 class IniFile
 {
@@ -108,11 +137,10 @@ public:
             mu::log::Get("core")->error("IniFile::Save failed to open '{}' for writing", m_path.string());
             return;
         }
-        // Use platform default locale (typically UTF-8 on Linux/macOS) for wide
-        // character encoding. Without this, the default "C" locale only handles
-        // ASCII on non-Windows platforms. Config values are ASCII-only today, but
-        // this ensures correct behaviour as the codebase evolves. See HIGH-2 fix.
-        out.imbue(std::locale(""));
+        // Fixed UTF-8 facet: config.ini stays byte-identical across Windows (ACP
+        // varies), Linux, and macOS. std::locale("") reads $LANG / system ACP and
+        // silently produces different encodings per platform.
+        out.imbue(detail::MakeUtf8Locale());
 
         for (const auto& sec : m_sectionOrder)
         {
@@ -158,11 +186,9 @@ private:
             // caller-supplied defaults. This is the expected first-launch path.
             return;
         }
-        // Use platform default locale (typically UTF-8 on Linux/macOS) for wide
-        // character encoding. Without this, the default "C" locale only handles
-        // ASCII on non-Windows platforms. Config values are ASCII-only today, but
-        // this ensures correct behaviour as the codebase evolves. See HIGH-2 fix.
-        in.imbue(std::locale(""));
+        // Match Save(): fixed UTF-8 facet so files written on any host round-trip
+        // cleanly on any other host. See detail::MakeUtf8Locale().
+        in.imbue(detail::MakeUtf8Locale());
 
         std::wstring currentSection;
         std::wstring line;

@@ -128,7 +128,7 @@ endif()
 
 if(NOT MU_ENABLE_SHADER_COMPILATION)
     # Offline fallback: copy pre-compiled blobs from src/shaders/compiled/ at configure time.
-    file(GLOB MU_PRECOMPILED_BLOBS "${MU_SHADER_COMPILED_DIR}/*")
+    file(GLOB MU_PRECOMPILED_BLOBS CONFIGURE_DEPENDS "${MU_SHADER_COMPILED_DIR}/*")
     set(MU_FOUND_NONEMPTY_BLOB FALSE)
     foreach(blob IN LISTS MU_PRECOMPILED_BLOBS)
         if(EXISTS "${blob}")
