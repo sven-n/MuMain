@@ -48,8 +48,8 @@ extern "C" bool DevEditor_ShouldRenderItemLabels();
 extern "C" bool DevEditor_ShouldRenderEquippedItems();
 extern "C" bool DevEditor_ShouldRenderWeatherEffects();
 extern "C" bool DevEditor_ShouldRenderUI();
-extern "C" bool DevEditor_IsFogOverrideEnabled();
-extern "C" bool DevEditor_GetFogOverrideValue();
+extern "C" bool DevEditor_IsCameraFogOverrideEnabled(const char* cameraName);
+extern "C" bool DevEditor_GetCameraFogOverrideValue(const char* cameraName);
 #endif
 
 extern HWND g_hWnd;
@@ -567,10 +567,24 @@ bool RenderMainScene()
         return false;
     }
 
+    // Per-camera fog default: Orbital uses fog (noticeable at longer view distances),
+    // Default camera's fog zone sits at/beyond its far clip and reads as visual noise,
+    // so fog is off by default for Default. DevEditor can override either below.
+    if (ICamera* active = CameraManager::Instance().GetActiveCamera())
+    {
+        const char* name = active->GetName();
+        if (strcmp(name, "Default") == 0)       FogEnable = false;
+        else if (strcmp(name, "Orbital") == 0)  FogEnable = true;
+    }
+
 #ifdef _EDITOR
-    // DevEditor override: allow disabling fog for debugging
-    if (DevEditor_IsFogOverrideEnabled())
-        FogEnable = DevEditor_GetFogOverrideValue();
+    // DevEditor override: allow forcing fog on/off for debugging.
+    if (ICamera* active = CameraManager::Instance().GetActiveCamera())
+    {
+        const char* name = active->GetName();
+        if (DevEditor_IsCameraFogOverrideEnabled(name))
+            FogEnable = DevEditor_GetCameraFogOverrideValue(name);
+    }
 #endif
 
     vec3_t cameraPos;

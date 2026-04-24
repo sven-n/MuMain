@@ -100,6 +100,7 @@ namespace SEASON3B
         int m_iRenderLevel;
         bool m_bRenderAllEffects;
         int m_iResolutionIndex;
+        bool m_bWindowedMode;
 
         CNewUIComboBox m_ResolutionCombo;
 

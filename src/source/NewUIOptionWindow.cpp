@@ -98,6 +98,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
     m_iResolutionIndex = FindCurrentResolutionIndex();
+    m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
 SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
@@ -137,7 +138,7 @@ void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 297, 54, 30);
+    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 322, 54, 30);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
@@ -168,7 +169,16 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
         return false;
     }
 
+    bool oldWindowedMode = m_bWindowedMode;
     HandleCheckboxInputs();
+
+    // Apply windowed mode toggle if changed
+    if (m_bWindowedMode != oldWindowedMode)
+    {
+        g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
+        GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);
+        GameConfig::GetInstance().Save();
+    }
 
     if (HandleVolumeSlider(m_iVolumeLevel, 104))
         OnSoundVolumeChanged();
@@ -186,7 +196,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 
     // Consume clicks inside the window OR inside the combo's expanded dropdown
     // (which overflows the window's bottom edge) so they don't fall through.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 337) || m_ResolutionCombo.IsMouseOverWidget())
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 362) || m_ResolutionCombo.IsMouseOverWidget())
         return false;
 
     return true;
@@ -200,6 +210,7 @@ void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
         {  65, &m_bWhisperSound      },
         { 155, &m_bSlideHelp         },
         { 238, &m_bRenderAllEffects  },
+        { 300, &m_bWindowedMode      },
     };
 
     constexpr int CHECKBOX_X_LOCAL = 150;
@@ -341,11 +352,11 @@ float SEASON3B::CNewUIOptionWindow::GetKeyEventOrder()	// 10.f;
 
 void SEASON3B::CNewUIOptionWindow::OpenningProcess()
 {
-    // Resolution may have been changed elsewhere (e.g. DevEditor) while the
-    // option window was hidden -- resync the combo to the actual current size.
+    // Resync state that may have been changed externally while the window was hidden.
     m_iResolutionIndex = FindCurrentResolutionIndex();
     m_ResolutionCombo.SetSelectedIndex(m_iResolutionIndex);
     m_ResolutionCombo.Close();
+    m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
 void SEASON3B::CNewUIOptionWindow::ClosingProcess()
@@ -455,6 +466,10 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     y += 22.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Resolution
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 265, L"Resolution");
+
+    y += 35.f;
+    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 302, L"Windowed Mode");
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
@@ -514,6 +529,15 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
     else
     {
         RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 238, 15, 15, 0, 15.f);
+    }
+
+    if (m_bWindowedMode)
+    {
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 300, 15, 15, 0, 0);
+    }
+    else
+    {
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 300, 15, 15, 0, 15.f);
     }
 
     // Resolution combo box. Drawn last so its expanded dropdown sits on top

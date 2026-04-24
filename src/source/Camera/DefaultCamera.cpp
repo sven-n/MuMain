@@ -30,9 +30,12 @@ extern short g_shCameraLevel;
 extern float g_fSpecialHeight;
 
 #ifdef _EDITOR
-// DevEditor config override functions (global scope required for extern "C")
-extern "C" bool DevEditor_IsConfigOverrideEnabled();
-extern "C" void DevEditor_GetCameraConfigFOV(float* outHFOV);
+// DevEditor per-camera config override (global scope required for extern "C").
+// DefaultCamera always passes "Default" so the DevEditor routes to this
+// camera's override state.
+extern "C" bool DevEditor_IsCameraOverrideEnabled(const char* cameraName);
+extern "C" void DevEditor_ApplyCameraOverride(const char* cameraName, CameraConfig* cfg);
+extern "C" void DevEditor_GetDefaultCameraOffset(float* outX, float* outY, float* outZ);
 #endif
 
 namespace
@@ -374,6 +377,9 @@ bool DefaultCamera::Update()
     VectorCopy(m_State.Position, g_Camera.Position);
     VectorCopy(m_State.Angle, g_Camera.Angle);
     g_Camera.FOV = m_State.FOV;
+    // g_Camera.ViewNear intentionally NOT set from m_Config.nearPlane — the
+    // CameraConfig nearPlane is for frustum culling; gluPerspective uses the
+    // legacy ViewNear (20.0) for depth precision. Syncing would clip geometry.
 
     // FIX Issue #1: Use m_Config.farPlane for rendering, not zoom-adjusted m_State.ViewFar
     float effectiveFarPlane = m_Config.farPlane;
@@ -697,6 +703,15 @@ void DefaultCamera::CalculateCameraPosition()
         VectorIRotate(Position, Matrix, TransformPosition);
         VectorAdd(m_State.Position, TransformPosition, m_State.Position);
     }
+
+#ifdef _EDITOR
+    // DevEditor: additive world-space camera offset (no-op when override disabled).
+    float ox = 0.0f, oy = 0.0f, oz = 0.0f;
+    DevEditor_GetDefaultCameraOffset(&ox, &oy, &oz);
+    m_State.Position[0] += ox;
+    m_State.Position[1] += oy;
+    m_State.Position[2] += oz;
+#endif
 }
 
 void DefaultCamera::SetCameraAngle()
@@ -911,11 +926,9 @@ void DefaultCamera::SetConfig(const CameraConfig& config)
 void DefaultCamera::UpdateFrustum()
 {
 #ifdef _EDITOR
-    // Check if DevEditor is overriding config values
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        DevEditor_GetCameraConfigFOV(&m_Config.hFov);
-    }
+    // DevEditor may be overriding any subset of this camera's CameraConfig.
+    if (DevEditor_IsCameraOverrideEnabled("Default"))
+        DevEditor_ApplyCameraOverride("Default", &m_Config);
 #endif
 
     // Derive forward/up from camera angles matching GL rotation convention.
@@ -945,15 +958,9 @@ void DefaultCamera::UpdateFrustum()
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
 
     // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
+    // (Override was already applied at the top of this function.)
     float effectiveFarPlane = m_Config.farPlane;
     float effectiveTerrainCullRange = m_Config.terrainCullRange;
-#ifdef _EDITOR
-    // DevEditor can still override config values if needed
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        DevEditor_GetCameraConfigFOV(&m_Config.hFov);
-    }
-#endif
 
     // Convert horizontal FOV to vertical FOV for frustum building
     float vFov = HFovToVFov(m_Config.hFov, aspectRatio);
@@ -975,7 +982,7 @@ void DefaultCamera::UpdateFrustum()
     m_FrustumCache.ViewFar = effectiveFarPlane;
 
 #ifdef _EDITOR
-    if (DevEditor_IsConfigOverrideEnabled())
+    if (DevEditor_IsCameraOverrideEnabled("Default"))
     {
         m_FrustumCache.EditorFOV = m_Config.hFov;
         m_FrustumCache.EditorFarPlane = m_Config.farPlane;
@@ -991,17 +998,10 @@ bool DefaultCamera::NeedsFrustumUpdate() const
     const float EPSILON = 0.01f;  // Small threshold to avoid floating point comparison issues
 
 #ifdef _EDITOR
-    // Check if DevEditor config changed
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        float currentFOV;
-        DevEditor_GetCameraConfigFOV(&currentFOV);
-
-        if (fabs(currentFOV - m_FrustumCache.EditorFOV) > EPSILON)
-        {
-            return true;  // Config changed, rebuild needed
-        }
-    }
+    // If the DevEditor override is active, force a rebuild every frame —
+    // any of {hFov, near, far, terrainCull, objectCull} may have been nudged.
+    if (DevEditor_IsCameraOverrideEnabled("Default"))
+        return true;
 #endif
 
     // Check position change

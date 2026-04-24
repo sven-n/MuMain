@@ -17,8 +17,8 @@
 #include "Camera/CameraConfig.h"
 
 #ifdef _EDITOR
-extern "C" void DevEditor_GetFogConfig(float*, float*);
-extern "C" bool DevEditor_IsConfigOverrideEnabled();
+extern "C" bool DevEditor_IsCameraOverrideEnabled(const char* cameraName);
+extern "C" void DevEditor_GetCameraFogRange(const char* cameraName, float viewFar, float* outStart, float* outEnd);
 #endif
 
 extern "C" CameraManager& CameraManager_Instance();
@@ -588,10 +588,14 @@ void BeginOpengl(int x, int y, int Width, int Height)
         float fogEnd   = g_Camera.ViewFar * 1.25f;
 
 #ifdef _EDITOR
-        // Allow DevEditor to override fog percentages
-        if (DevEditor_IsConfigOverrideEnabled())
+        // Allow DevEditor to override fog percentages for the active camera.
+        // Active camera name is used so Default/Orbital have independent fog
+        // start/end percentages.
+        if (ICamera* active = CameraManager_Instance().GetActiveCamera())
         {
-            DevEditor_GetFogConfig(&fogStart, &fogEnd);
+            const char* name = active->GetName();
+            if (DevEditor_IsCameraOverrideEnabled(name))
+                DevEditor_GetCameraFogRange(name, g_Camera.ViewFar, &fogStart, &fogEnd);
         }
 #endif
 

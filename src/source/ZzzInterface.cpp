@@ -7922,8 +7922,13 @@ int SelectCharacter(BYTE Kind)
                     o->OBB.ZAxis[2] += 100.f;
                 }
 
+                // Character scene uses a generous synthesized box (model OBB is too
+                // tight at the steep camera angle). Main scene uses the model OBB.
                 OBB_t pickOBB;
-                BuildCharacterPickOBB(o, Main, pickOBB);
+                if (!Main)
+                    BuildCharacterScenePickOBB(o, pickOBB);
+                else
+                    pickOBB = o->OBB;
 
                 if (CollisionDetectLineToOBB(MousePosition, MouseTarget, pickOBB))
                 {

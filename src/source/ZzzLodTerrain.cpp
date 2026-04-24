@@ -33,6 +33,11 @@
 // DevEditor function declarations
 #ifdef _EDITOR
 extern "C" bool DevEditor_ShouldShowTileGrid();
+extern "C" void DevEditor_GetDefaultTrapezoidMultipliers(float* outNearMul, float* outFarMul);
+// Returns true + fills outputs when the Orbital override is active (in MAIN_SCENE).
+// Returns false otherwise — caller must fall back to the default pyramid hull.
+extern "C" bool DevEditor_GetOrbitalHullTrapezoid(float* outFarDist, float* outFarWidth,
+                                                  float* outNearDist, float* outNearWidth);
 // Per-frame cached DevEditor state (avoid per-tile function calls)
 static bool s_bShowTileGrid = false;
 #endif
@@ -2255,21 +2260,77 @@ void CreateFrustrum2D(vec3_t Position)
             float vpH = (float)(refHeight * WindowHeight) / (float)REFERENCE_HEIGHT;
             float aspect = vpW / vpH;
 
+#ifdef _EDITOR
+            // DevEditor override: replace the view-cone pyramid with a user-defined
+            // view-aligned trapezoid. Corners are in camera-local coordinates
+            // (forward = view -Z, lateral = view X) and transformed by the camera
+            // matrix, so the shape tracks yaw AND pitch — it follows exactly what
+            // the camera is looking at for any angle.
+            float ovFarDist = 0, ovFarW = 0, ovNearDist = 0, ovNearW = 0;
+            if (DevEditor_GetOrbitalHullTrapezoid(&ovFarDist, &ovFarW, &ovNearDist, &ovNearW))
+            {
+                const float farHalf  = ovFarW  * 0.5f;
+                const float nearHalf = ovNearW * 0.5f;
+
+                // 8 view-space corners: 4 near quad + 4 far quad. Y extent (view-up)
+                // tracks X extent via aspect so the projected ground shape reads
+                // as "wider/deeper" intuitively when camera pitches down.
+                const float farHalfH  = farHalf  / aspect;
+                const float nearHalfH = nearHalf / aspect;
+
+                vec3_t viewPts[8];
+                Vector(-nearHalf,  nearHalfH, -ovNearDist, viewPts[0]);
+                Vector( nearHalf,  nearHalfH, -ovNearDist, viewPts[1]);
+                Vector( nearHalf, -nearHalfH, -ovNearDist, viewPts[2]);
+                Vector(-nearHalf, -nearHalfH, -ovNearDist, viewPts[3]);
+                Vector(-farHalf,   farHalfH,  -ovFarDist,  viewPts[4]);
+                Vector( farHalf,   farHalfH,  -ovFarDist,  viewPts[5]);
+                Vector( farHalf,  -farHalfH,  -ovFarDist,  viewPts[6]);
+                Vector(-farHalf,  -farHalfH,  -ovFarDist,  viewPts[7]);
+
+                float opx[8], opy[8];
+                for (int i = 0; i < 8; i++)
+                {
+                    vec3_t world;
+                    VectorIRotate(viewPts[i], g_Camera.Matrix, world);
+                    VectorAdd(world, g_Camera.Position, world);
+                    opx[i] = world[0] * 0.01f;
+                    opy[i] = world[1] * 0.01f;
+                }
+
+                BuildHull2DAndBounds(opx, opy, 8);
+                ExpandHullOutward(1.0f);
+                return;  // Skip the default pyramid path + far-clip line clip.
+            }
+#endif
+
             float halfH = tanHalf * terrainDist;
             float halfW = halfH * aspect;
 
-            // View-space frustum corners: apex (camera) + 4 far corners at terrainDist
-            vec3_t viewPts[5];
-            Vector(0.f, 0.f, 0.f, viewPts[0]);
-            Vector(-halfW,  halfH, -terrainDist, viewPts[1]);
-            Vector( halfW,  halfH, -terrainDist, viewPts[2]);
-            Vector( halfW, -halfH, -terrainDist, viewPts[3]);
-            Vector(-halfW, -halfH, -terrainDist, viewPts[4]);
+            // Natural Orbital hull: 8 view-space corners (near quad + far quad).
+            // Near quad is centered on the camera (view-Z=0) with a non-zero half-width.
+            // An apex pyramid (near half-width = 0) leaves a gap at the camera footprint
+            // where tile-center-in-polygon tests miss the tiles directly under the camera,
+            // making static 3D objects anchored to those tiles pop in/out of view.
+            // 400 world units (= 800 total width) covers the footprint reliably.
+            constexpr float NATURAL_NEAR_HALF_WIDTH = 400.0f;
+            const float nearHalfW = NATURAL_NEAR_HALF_WIDTH;
+            const float nearHalfH = nearHalfW / aspect;
+
+            vec3_t viewPts[8];
+            Vector(-nearHalfW,  nearHalfH, 0.0f,         viewPts[0]);
+            Vector( nearHalfW,  nearHalfH, 0.0f,         viewPts[1]);
+            Vector( nearHalfW, -nearHalfH, 0.0f,         viewPts[2]);
+            Vector(-nearHalfW, -nearHalfH, 0.0f,         viewPts[3]);
+            Vector(-halfW,      halfH,     -terrainDist, viewPts[4]);
+            Vector( halfW,      halfH,     -terrainDist, viewPts[5]);
+            Vector( halfW,     -halfH,     -terrainDist, viewPts[6]);
+            Vector(-halfW,     -halfH,     -terrainDist, viewPts[7]);
 
             // Transform to world space using the actual GL modelview matrix
             // (g_Camera.Matrix was set by CameraProjection::GetOpenGLMatrix in BeginOpengl)
-            float px[5], py[5];
-            for (int i = 0; i < 5; i++)
+            float px[8], py[8];
+            for (int i = 0; i < 8; i++)
             {
                 vec3_t world;
                 VectorIRotate(viewPts[i], g_Camera.Matrix, world);
@@ -2278,7 +2339,7 @@ void CreateFrustrum2D(vec3_t Position)
                 py[i] = world[1] * 0.01f;
             }
 
-            BuildHull2DAndBounds(px, py, 5);
+            BuildHull2DAndBounds(px, py, 8);
 
             // --- Clip hull against the far-clip plane at ground level (Z=0) ---
             // The GL modelview matrix maps world→view. For a point at ground (z=0):
@@ -2516,6 +2577,14 @@ void CreateFrustrum2D(vec3_t Position)
         WidthFar *= aspectCorrection;
         WidthNear *= aspectCorrection;
     }
+
+#ifdef _EDITOR
+    // DevEditor: trapezoid width multipliers (no-op when Default-camera override disabled).
+    float nearMul = 1.0f, farMul = 1.0f;
+    DevEditor_GetDefaultTrapezoidMultipliers(&nearMul, &farMul);
+    WidthNear *= nearMul;
+    WidthFar  *= farMul;
+#endif
 
     vec3_t p[4];
     Vector(-WidthFar, CameraViewFar_local - CameraViewTarget_local, 0.f, p[0]);

@@ -139,6 +139,14 @@ public:
      */
     const float* Get2DY() const { return m_2DY; }
 
+    /**
+     * @brief Overwrites the 2D ground-plane hull with custom points.
+     *
+     * Used by DevEditor overrides to inject a user-defined trapezoid. The points
+     * must already be in tile coordinates (world / 100). Up to 12 points.
+     */
+    void SetCustom2DHull(const float* xs, const float* ys, int count);
+
 private:
     // 6 frustum planes: Left, Right, Top, Bottom, Near, Far
     Plane m_Planes[6];

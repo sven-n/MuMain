@@ -23,10 +23,19 @@ extern int MouseY;
 // Hero is declared in ZzzCharacter.h as CHARACTER*
 
 #ifdef _EDITOR
-// DevEditor config override functions (global scope required for extern "C")
-extern "C" bool DevEditor_IsConfigOverrideEnabled();
-extern "C" void DevEditor_GetCameraConfigFOV(float* outHFOV);
+// DevEditor per-camera config override (global scope required for extern "C").
+extern "C" bool DevEditor_IsCameraOverrideEnabled(const char* cameraName);
+extern "C" void DevEditor_ApplyCameraOverride(const char* cameraName, CameraConfig* cfg);
+extern "C" bool DevEditor_GetOrbitalHullTrapezoid(float* outFarDist, float* outFarWidth,
+                                                  float* outNearDist, float* outNearWidth);
 #endif
+
+namespace
+{
+    // Match the natural-pyramid near-edge width used by ZzzLodTerrain's Orbital
+    // path so FreeFly-spectator hull equals the active-render hull.
+    constexpr float NATURAL_NEAR_HALF_WIDTH = 400.0f;
+}
 
 namespace
 {
@@ -802,11 +811,10 @@ void OrbitalCamera::HandleFreeCameraMovement()
 void OrbitalCamera::UpdateFrustum()
 {
 #ifdef _EDITOR
-    // Check if DevEditor is overriding config values
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        DevEditor_GetCameraConfigFOV(&m_Config.hFov);
-    }
+    // Scaffolding: the Orbital override is wired but has no sliders at present,
+    // so this is a no-op until a future pass adds Orbital-specific tuning.
+    if (DevEditor_IsCameraOverrideEnabled("Orbital"))
+        DevEditor_ApplyCameraOverride("Orbital", &m_Config);
 #endif
 
     // Derive forward and up vectors from m_State.Angle to match the OpenGL view setup.
@@ -855,15 +863,9 @@ void OrbitalCamera::UpdateFrustum()
     float viewportHeight = (float)(refHeight * WindowHeight) / (float)REFERENCE_HEIGHT;
     float aspectRatio = viewportWidth / viewportHeight;
 
+    // Override was already applied at the top of this function (if enabled).
     float effectiveFarPlane = m_Config.farPlane;
     float effectiveTerrainCullRange = m_Config.terrainCullRange;
-#ifdef _EDITOR
-    // DevEditor can still override config values if needed
-    if (DevEditor_IsConfigOverrideEnabled())
-    {
-        DevEditor_GetCameraConfigFOV(&m_Config.hFov);
-    }
-#endif
 
     // Use g_Camera.FOV (= m_State.FOV) directly — same vFov that BeginOpengl passes
     // to gluPerspective. Combined with viewport aspect, this matches the GL projection exactly.
@@ -879,4 +881,77 @@ void OrbitalCamera::UpdateFrustum()
         effectiveFarPlane,
         effectiveTerrainCullRange
     );
+
+    // Inject Orbital's actual 2D terrain-cull hull into m_Frustum so FreeFly
+    // spectator (which reads Frustum::Get2DX/Y) sees exactly what Orbital's
+    // active-render path uses. Matches ZzzLodTerrain::CreateFrustrum2D logic:
+    //   - override on  → user's trapezoid (farDist/farWidth/nearDist/nearWidth)
+    //   - override off → natural pyramid + 400 half-width at near edge
+    {
+        float hullFarDist, hullFarHalfW, hullNearDist, hullNearHalfW;
+#ifdef _EDITOR
+        float ovFarD = 0, ovFarW = 0, ovNearD = 0, ovNearW = 0;
+        if (DevEditor_GetOrbitalHullTrapezoid(&ovFarD, &ovFarW, &ovNearD, &ovNearW))
+        {
+            hullFarDist   = ovFarD;
+            hullFarHalfW  = ovFarW * 0.5f;
+            hullNearDist  = ovNearD;
+            hullNearHalfW = ovNearW * 0.5f;
+        }
+        else
+#endif
+        {
+            const float tanHalfV = tanf(vFov * 0.5f * Q_PI / 180.0f);
+            hullFarDist   = effectiveTerrainCullRange;
+            hullFarHalfW  = tanHalfV * effectiveTerrainCullRange * aspectRatio;
+            hullNearDist  = 0.0f;
+            hullNearHalfW = NATURAL_NEAR_HALF_WIDTH;
+        }
+        const float hullFarHalfH  = hullFarHalfW  / aspectRatio;
+        const float hullNearHalfH = hullNearHalfW / aspectRatio;
+
+        // Build the SAME rotation matrix BeginOpengl produces (Ry(A1) * Rx(A0) * Rz(A2))
+        // so the transform matches g_Camera.Matrix exactly. Using AngleMatrix directly
+        // would apply a different convention and the hull would counter-rotate in spectator.
+        float mat[3][4];
+        {
+            const float a0 = m_State.Angle[0] * (Q_PI / 180.0f);
+            const float a1 = m_State.Angle[1] * (Q_PI / 180.0f);
+            const float a2 = m_State.Angle[2] * (Q_PI / 180.0f);
+            const float s0 = sinf(a0), c0 = cosf(a0);
+            const float s1 = sinf(a1), c1 = cosf(a1);
+            const float s2 = sinf(a2), c2 = cosf(a2);
+            mat[0][0] =  c1 * c2 + s1 * s0 * s2;
+            mat[0][1] = -c1 * s2 + s1 * s0 * c2;
+            mat[0][2] =  s1 * c0;
+            mat[1][0] =  c0 * s2;
+            mat[1][1] =  c0 * c2;
+            mat[1][2] = -s0;
+            mat[2][0] = -s1 * c2 + c1 * s0 * s2;
+            mat[2][1] =  s1 * s2 + c1 * s0 * c2;
+            mat[2][2] =  c1 * c0;
+            mat[0][3] = mat[1][3] = mat[2][3] = 0.0f;
+        }
+
+        vec3_t viewPts[8];
+        Vector(-hullNearHalfW,  hullNearHalfH, -hullNearDist, viewPts[0]);
+        Vector( hullNearHalfW,  hullNearHalfH, -hullNearDist, viewPts[1]);
+        Vector( hullNearHalfW, -hullNearHalfH, -hullNearDist, viewPts[2]);
+        Vector(-hullNearHalfW, -hullNearHalfH, -hullNearDist, viewPts[3]);
+        Vector(-hullFarHalfW,   hullFarHalfH,  -hullFarDist,  viewPts[4]);
+        Vector( hullFarHalfW,   hullFarHalfH,  -hullFarDist,  viewPts[5]);
+        Vector( hullFarHalfW,  -hullFarHalfH,  -hullFarDist,  viewPts[6]);
+        Vector(-hullFarHalfW,  -hullFarHalfH,  -hullFarDist,  viewPts[7]);
+
+        float hx[8], hy[8];
+        for (int i = 0; i < 8; i++)
+        {
+            vec3_t world;
+            VectorIRotate(viewPts[i], mat, world);
+            VectorAdd(world, m_State.Position, world);
+            hx[i] = world[0] * 0.01f;
+            hy[i] = world[1] * 0.01f;
+        }
+        m_Frustum.SetCustom2DHull(hx, hy, 8);
+    }
 }

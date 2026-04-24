@@ -141,6 +141,59 @@ void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const
     Calculate2DProjection();
 }
 
+void Frustum::SetCustom2DHull(const float* xs, const float* ys, int count)
+{
+    if (!xs || !ys || count <= 0) return;
+    if (count > 12) count = 12;
+
+    // Sort copy by (x, y) then run Andrew's monotone chain to produce a proper
+    // convex hull in CCW order. Callers (e.g. OrbitalCamera) pass frustum corners
+    // in view-space walking order, which is NOT the hull outline — rendering
+    // would connect edges across the hull interior and look broken. The hull
+    // computation fixes the winding for any input order.
+    struct Pt { float x, y; };
+    Pt input[12];
+    for (int i = 0; i < count; i++) { input[i].x = xs[i]; input[i].y = ys[i]; }
+
+    // Insertion sort (n ≤ 12).
+    for (int i = 1; i < count; i++)
+    {
+        Pt key = input[i];
+        int j = i - 1;
+        while (j >= 0 && (input[j].x > key.x || (input[j].x == key.x && input[j].y > key.y)))
+        {
+            input[j + 1] = input[j];
+            j--;
+        }
+        input[j + 1] = key;
+    }
+
+    auto cross = [](const Pt& o, const Pt& a, const Pt& b) -> float {
+        return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    };
+
+    Pt hull[24];  // 2 * count worst case
+    int k = 0;
+    // Lower hull
+    for (int i = 0; i < count; i++)
+    {
+        while (k >= 2 && cross(hull[k - 2], hull[k - 1], input[i]) <= 0.f) k--;
+        hull[k++] = input[i];
+    }
+    // Upper hull
+    const int lowerSize = k + 1;
+    for (int i = count - 2; i >= 0; i--)
+    {
+        while (k >= lowerSize && cross(hull[k - 2], hull[k - 1], input[i]) <= 0.f) k--;
+        hull[k++] = input[i];
+    }
+    k--;  // drop duplicate first-last
+
+    if (k > 12) k = 12;
+    for (int i = 0; i < k; i++) { m_2DX[i] = hull[i].x; m_2DY[i] = hull[i].y; }
+    m_2DCount = k;
+}
+
 void Frustum::CalculateFrustumVertices(const vec3_t position, const vec3_t forward,
                                         const vec3_t up, const vec3_t right,
                                         float tanHalfFov, float aspectRatio,

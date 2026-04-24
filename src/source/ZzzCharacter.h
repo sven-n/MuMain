@@ -19,19 +19,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
 
 /**
- * @brief Builds the pick volume (OBB) used for mouse-clicking a character.
+ * @brief Builds a generous axis-aligned pick box for the character selection screen.
  *
- * Shape depends on the scene:
- *  - In-game (mainScene = true): the model OBB, grown a bit so the box better
- *    matches the visible silhouette at steep camera angles.
- *  - Character selection screen (mainScene = false): the model OBB is too tight,
- *    so an axis-aligned box is synthesized around the character position.
- *
- * Used by `SelectCharacter()` (ZzzInterface.cpp) and by the editor's debug
- * visualization (`RenderCharactersClient` in ZzzCharacter.cpp). Both MUST call
- * this so the overlay matches the actual pick volume.
+ * The model OBB is too tight at the steep camera angle used in CHARACTER_SCENE,
+ * so we synthesize a wider box from the character's position and model height.
+ * Only used in CHARACTER_SCENE; main scene uses the model's own OBB directly.
  */
-void BuildCharacterPickOBB(const OBJECT* o, bool mainScene, OBB_t& outOBB);
+void BuildCharacterScenePickOBB(const OBJECT* o, OBB_t& outOBB);
 void MoveCharacterClient(CHARACTER* cc);
 void MoveCharactersClient();
 

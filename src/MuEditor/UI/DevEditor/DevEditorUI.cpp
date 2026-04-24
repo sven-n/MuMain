@@ -61,6 +61,25 @@ CDevEditorUI& CDevEditorUI::GetInstance()
     return instance;
 }
 
+void CDevEditorUI::ApplyOrbitalOverrideToConfig(CameraConfig& cfg) const
+{
+    (void)cfg;
+    // No Orbital config fields are exposed yet; this hook is here so the
+    // extern-C dispatcher has somewhere to route once sliders are added.
+}
+
+void CDevEditorUI::ApplyDefaultOverrideToConfig(CameraConfig& cfg) const
+{
+    if (!m_DefaultOverride.enabled) return;
+    // hFov / terrainCullRange intentionally NOT overridden: the Default camera
+    // derives its horizontal extent and terrain cull shape from a hardcoded 2D
+    // trapezoid (see WidthFar/WidthNear in ZzzLodTerrain.cpp), not from a
+    // symmetric FOV or a terrainCullRange radius. Width multipliers (exposed
+    // via DevEditor_GetDefaultTrapezoidMultipliers) are the real knobs there.
+    cfg.nearPlane        = m_DefaultOverride.nearPlane;
+    cfg.farPlane         = m_DefaultOverride.farPlane;
+}
+
 void CDevEditorUI::Render(bool* p_open)
 {
     if (!p_open || !*p_open)
@@ -126,7 +145,7 @@ void CDevEditorUI::RenderScenesTab()
     }
 
     if (SceneFlag == MAIN_SCENE && ImGui::CollapsingHeader("Game Scene"))
-        RenderGameSceneSection(cameraMode, currentCamera, m_LastActiveCameraName);
+        RenderGameSceneSection(cameraMode, currentCamera);
 
     if (ImGui::CollapsingHeader("Debug"))
         RenderScenesDebugSection();
@@ -264,34 +283,9 @@ void CDevEditorUI::RenderLoginSceneSection()
     ImGui::Unindent();
 }
 
-void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera, const char*& lastCameraName)
+void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera)
 {
     ImGui::Indent();
-
-    const char* currentCameraName = currentCamera ? currentCamera->GetName() : nullptr;
-
-    // Re-sync FOV when the active/spectated camera changes under us
-    if (m_ConfigOverrideEnabled && lastCameraName != currentCameraName)
-    {
-        if (currentCamera)
-            m_HFOV = currentCamera->GetConfig().hFov;
-        lastCameraName = currentCameraName;
-    }
-
-    const bool previousOverrideState = m_ConfigOverrideEnabled;
-    ImGui::Checkbox("Override Camera Config", &m_ConfigOverrideEnabled);
-
-    if (m_ConfigOverrideEnabled && !previousOverrideState)
-    {
-        if (currentCamera)
-            m_HFOV = currentCamera->GetConfig().hFov;
-        lastCameraName = currentCameraName;
-    }
-    if (!m_ConfigOverrideEnabled && previousOverrideState)
-    {
-        lastCameraName = nullptr;
-        m_FogOverride = false;
-    }
 
     if (currentCamera)
     {
@@ -301,65 +295,22 @@ void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera
                     g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
     }
 
-    if (m_ConfigOverrideEnabled)
-    {
-        extern unsigned int WindowWidth, WindowHeight;
-        const float aspect = (float)WindowWidth / (float)WindowHeight;
-        const float computedVFov = HFovToVFov(m_HFOV, aspect);
+    // Route panel by the currently-focused camera name rather than camera mode,
+    // so that when FreeFly is spectating Default/Orbital the override panel for
+    // the spectated camera stays visible and editable.
+    const char* focusedName = currentCamera ? currentCamera->GetName() : nullptr;
+    const bool focusingDefault = focusedName && strcmp(focusedName, "Default") == 0;
+    const bool focusingOrbital = focusedName && strcmp(focusedName, "Orbital") == 0;
 
-        ImGui::PushItemWidth(200);
-        ImGui::SliderFloat("H-FOV", &m_HFOV, MIN_HFOV, MAX_HFOV, "%.1f");
-        ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                          "V-FOV: %.1f (aspect %.2f)", computedVFov, aspect);
+    if (focusingDefault)
+        RenderDefaultCameraOverridePanel();
+    else if (focusingOrbital)
+        RenderOrbitalCameraOverridePanel();
+    else
+        ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f),
+                           "Switch to (or spectate) Default or Orbital to edit overrides.");
 
-        ImGui::Spacing();
-        extern bool FogEnable;
-
-        ImGui::Checkbox("Override Fog", &m_FogOverride);
-        if (m_FogOverride)
-        {
-            ImGui::SameLine();
-            ImGui::Checkbox("Fog On", &m_FogOverrideValue);
-        }
-        ImGui::SameLine();
-        if (FogEnable)
-            ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "ON");
-        else
-            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "OFF");
-
-        float startDisplay = m_FogStartPct * 100.0f;
-        float endDisplay   = m_FogEndPct   * 100.0f;
-        if (ImGui::SliderFloat("Fog Start %", &startDisplay, 0.0f, 200.0f, "%.0f%%"))
-            m_FogStartPct = startDisplay / 100.0f;
-        if (ImGui::SliderFloat("Fog End %", &endDisplay, 0.0f, 200.0f, "%.0f%%"))
-            m_FogEndPct = endDisplay / 100.0f;
-
-        const float actualStart = g_Camera.ViewFar * m_FogStartPct;
-        const float actualEnd   = g_Camera.ViewFar * m_FogEndPct;
-        ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                          "Fog: %.0f - %.0f (ViewFar=%.0f)", actualStart, actualEnd, g_Camera.ViewFar);
-        ImGui::PopItemWidth();
-
-        ImGui::Spacing();
-        if (ImGui::Button("Reset##config"))
-        {
-            if (currentCamera)
-                m_HFOV = currentCamera->GetConfig().hFov;
-            m_FogStartPct = 1.00f;
-            m_FogEndPct   = 1.25f;
-        }
-    }
-    else if (currentCamera)
-    {
-        extern unsigned int WindowWidth, WindowHeight;
-        const float aspect = (float)WindowWidth / (float)WindowHeight;
-        const float hFov = currentCamera->GetConfig().hFov;
-        ImGui::Text("  FOV: %.1f H / %.1f V  Fog: %.0f%%/%.0f%%",
-                    hFov, HFovToVFov(hFov, aspect),
-                    m_FogStartPct * 100.0f, m_FogEndPct * 100.0f);
-    }
-
-    if (cameraMode == CAMERA_MODE_ORBITAL)
+    if (focusingOrbital)
     {
         ImGui::Spacing();
         float radius = GetOrbitalCameraRadius();
@@ -369,6 +320,139 @@ void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera
     }
 
     ImGui::Unindent();
+}
+
+void CDevEditorUI::RenderDefaultCameraOverridePanel()
+{
+    DevEditorDefaultCameraOverride& ov = m_DefaultOverride;
+
+    ImGui::Checkbox("Override Default Camera Config", &ov.enabled);
+    if (!ov.enabled)
+    {
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+                           "Hero-relative camera with hardcoded 2D trapezoid culling.");
+        return;
+    }
+
+    ImGui::PushItemWidth(200);
+
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "View Frustum");
+    ImGui::SliderFloat("Far Plane##def",   &ov.farPlane,         500.0f, 20000.0f, "%.0f");
+
+    ImGui::Spacing();
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Camera Offset (world units, from hero)");
+    ImGui::SliderFloat("Offset X",    &ov.offsetX, -2000.0f, 2000.0f, "%.0f");
+    ImGui::SliderFloat("Offset Y",    &ov.offsetY, -2000.0f, 2000.0f, "%.0f");
+    ImGui::SliderFloat("Offset Z",    &ov.offsetZ, -1000.0f, 1000.0f, "%.0f");
+
+    ImGui::Spacing();
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "2D Culling Trapezoid Width");
+    ImGui::SliderFloat("Bottom (near) x", &ov.widthNearMul, 0.25f, 4.0f, "%.2f");
+    ImGui::SliderFloat("Top (far) x",     &ov.widthFarMul,  0.25f, 4.0f, "%.2f");
+
+    ImGui::Spacing();
+    extern bool FogEnable;
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Fog");
+    ImGui::Checkbox("Override Fog##def", &ov.fogOverride);
+    if (ov.fogOverride)
+    {
+        ImGui::SameLine();
+        ImGui::Checkbox("Fog On##def", &ov.fogOn);
+    }
+    ImGui::SameLine();
+    ImGui::TextColored(FogEnable ? ImVec4(0.5f,1.0f,0.5f,1.0f) : ImVec4(1.0f,0.5f,0.5f,1.0f),
+                       FogEnable ? "ON" : "OFF");
+    float startDisp = ov.fogStartPct * 100.0f, endDisp = ov.fogEndPct * 100.0f;
+    if (ImGui::SliderFloat("Fog Start %##def", &startDisp, 0.0f, 200.0f, "%.0f%%")) ov.fogStartPct = startDisp / 100.0f;
+    if (ImGui::SliderFloat("Fog End %##def",   &endDisp,   0.0f, 200.0f, "%.0f%%")) ov.fogEndPct   = endDisp   / 100.0f;
+    ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
+                       "Fog: %.0f - %.0f (ViewFar=%.0f)",
+                       g_Camera.ViewFar * ov.fogStartPct, g_Camera.ViewFar * ov.fogEndPct,
+                       g_Camera.ViewFar);
+
+    ImGui::PopItemWidth();
+    ImGui::Spacing();
+    if (ImGui::Button("Reset to Camera Defaults##def"))
+    {
+        const CameraConfig cfg = CameraConfig::ForMainSceneDefaultCamera();
+        ov.nearPlane = cfg.nearPlane;
+        ov.farPlane  = cfg.farPlane;
+        ov.offsetX = ov.offsetY = ov.offsetZ = 0.0f;
+        ov.widthNearMul = ov.widthFarMul = 1.0f;
+        ov.fogStartPct = 1.00f;
+        ov.fogEndPct   = 1.25f;
+    }
+}
+
+void CDevEditorUI::RenderOrbitalCameraOverridePanel()
+{
+    DevEditorOrbitalCameraOverride& ov = m_OrbitalOverride;
+
+    // Seed the trapezoid from the natural view pyramid when the override is
+    // first enabled. This way enabling at "defaults" == identical hull to
+    // override-off, and user sees zero visible change until they touch a slider.
+    auto seedFromNaturalPyramid = [&ov]()
+    {
+        if (ICamera* cam = CameraManager::Instance().GetActiveCamera())
+        {
+            const CameraConfig& cfg = cam->GetConfig();
+            extern unsigned int WindowWidth, WindowHeight;
+            const float aspect = (float)WindowWidth / (float)WindowHeight;
+            const float vFov = HFovToVFov(cfg.hFov, aspect);
+            const float tanHalf = tanf(vFov * 0.5f * Q_PI / 180.0f);
+            ov.farDist   = cfg.terrainCullRange;
+            ov.farWidth  = 2.0f * tanHalf * cfg.terrainCullRange * aspect;
+            ov.nearDist  = 0.0f;
+            ov.nearWidth = 800.0f;  // covers camera footprint so static 3D objects don't pop
+        }
+    };
+
+    static bool s_wasEnabled = false;
+    ImGui::Checkbox("Override Orbital Camera Config", &ov.enabled);
+    if (ov.enabled && !s_wasEnabled) seedFromNaturalPyramid();
+    s_wasEnabled = ov.enabled;
+
+    if (!ov.enabled)
+    {
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+                           "Tunes the 2D terrain-cull hull; does not touch FOV / far clip.");
+        return;
+    }
+
+    ImGui::PushItemWidth(200);
+
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "2D Culling Trapezoid (world units)");
+    // InputFloat: type any value directly, or use the +/- buttons (step = fine, Ctrl+click = coarse).
+    ImGui::InputFloat("Far distance##orb",         &ov.farDist,   100.0f, 500.0f, "%.0f");
+    ImGui::InputFloat("Top (far) width##orb",      &ov.farWidth,  100.0f, 500.0f, "%.0f");
+    ImGui::InputFloat("Near distance##orb",        &ov.nearDist,   50.0f, 250.0f, "%.0f");
+    ImGui::InputFloat("Bottom (near) width##orb",  &ov.nearWidth,  50.0f, 250.0f, "%.0f");
+    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f),
+                       "View-aligned: follows camera yaw + pitch (tracks what you look at).");
+
+    ImGui::Spacing();
+    extern bool FogEnable;
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "Fog");
+    ImGui::Checkbox("Fog##orb", &ov.fogOn);
+    ImGui::SameLine();
+    ImGui::TextColored(FogEnable ? ImVec4(0.5f,1.0f,0.5f,1.0f) : ImVec4(1.0f,0.5f,0.5f,1.0f),
+                       FogEnable ? "ON" : "OFF");
+    float startDisp = ov.fogStartPct * 100.0f, endDisp = ov.fogEndPct * 100.0f;
+    if (ImGui::InputFloat("Fog Start %##orb", &startDisp, 5.0f, 25.0f, "%.0f%%")) ov.fogStartPct = startDisp / 100.0f;
+    if (ImGui::InputFloat("Fog End %##orb",   &endDisp,   5.0f, 25.0f, "%.0f%%")) ov.fogEndPct   = endDisp   / 100.0f;
+    ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
+                       "Fog: %.0f - %.0f (ViewFar=%.0f)",
+                       g_Camera.ViewFar * ov.fogStartPct, g_Camera.ViewFar * ov.fogEndPct,
+                       g_Camera.ViewFar);
+
+    ImGui::PopItemWidth();
+    ImGui::Spacing();
+    if (ImGui::Button("Reset to Natural Pyramid##orb"))
+    {
+        seedFromNaturalPyramid();
+        ov.fogStartPct = 1.00f;
+        ov.fogEndPct   = 1.25f;
+    }
 }
 
 void CDevEditorUI::RenderScenesDebugSection()
@@ -453,109 +537,12 @@ void CDevEditorUI::RenderScenesDebugSection()
 }
 
 // Shared helper: applies a new window size. Used by preset buttons, custom-size apply,
-// and (partially) fullscreen toggle. Updates WindowWidth/Height, screen rate, OpenGL
-// viewport, config file, fonts, and resizes the window if in windowed mode.
-void CDevEditorUI::ApplyNewWindowSize(int newWidth, int newHeight, const char* logReason)
-{
-    extern unsigned int WindowWidth, WindowHeight;
-    extern float g_fScreenRate_x, g_fScreenRate_y;
-    extern int OpenglWindowWidth, OpenglWindowHeight;
-    extern BOOL g_bUseWindowMode;
-    extern HWND g_hWnd;
-    extern void ReinitializeFonts();
-    extern void UpdateResolutionDependentSystems();
-
-    WindowWidth  = (unsigned)newWidth;
-    WindowHeight = (unsigned)newHeight;
-
-    g_fScreenRate_x = (float)WindowWidth  / (float)REFERENCE_WIDTH;
-    g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
-
-    OpenglWindowWidth  = (int)WindowWidth;
-    OpenglWindowHeight = (int)WindowHeight;
-
-    GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
-    GameConfig::GetInstance().Save();
-
-    ReinitializeFonts();
-    UpdateResolutionDependentSystems();
-
-    if (g_bUseWindowMode && g_hWnd)
-    {
-        RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
-        AdjustWindowRect(&windowRect,
-                         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
-                         FALSE);
-        SetWindowPos(g_hWnd, HWND_TOP, 0, 0,
-                     windowRect.right - windowRect.left,
-                     windowRect.bottom - windowRect.top,
-                     SWP_NOMOVE | SWP_NOZORDER);
-    }
-
-    char msg[128];
-    sprintf_s(msg, "Window resized to %s%ux%u", logReason ? logReason : "", WindowWidth, WindowHeight);
-    g_MuEditorConsoleUI.LogEditor(msg);
-}
-
 void CDevEditorUI::RenderGraphicsTab()
 {
-    ImGui::Text("Graphics Settings");
+    ImGui::Text("Graphics Debug Info");
     ImGui::Separator();
 
     RenderGraphicsDebugInfo();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    RenderWindowSizePresets();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    RenderCustomResolutionInput();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    RenderFullscreenToggle();
-    ImGui::Separator();
-
-    // Info
-    ImGui::Spacing();
-    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "Camera Auto-Adapts:");
-    ImGui::Text("• FOV stays constant (set in Camera tab)");
-    ImGui::Text("• Aspect ratio adjusts automatically");
-    ImGui::Text("• Wider screens = more horizontal view");
-    ImGui::Text("• Frustum cone updates each frame");
-
-    ImGui::Separator();
-
-    extern unsigned int WindowWidth, WindowHeight;
-    const float aspectRatio = (float)WindowWidth / (float)WindowHeight;
-    ImGui::Text("Current Aspect Ratio: %.3f (%s)", aspectRatio,
-                aspectRatio > 1.7f ? "Ultra-wide" :
-                aspectRatio > 1.6f ? "16:10" :
-                aspectRatio > 1.5f ? "16:9" :
-                aspectRatio > 1.4f ? "3:2" :
-                aspectRatio > 1.2f ? "5:4" : "4:3");
-
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.5f, 1.0f), "Settings Auto-Save:");
-    ImGui::Text("• Settings save automatically when:");
-    ImGui::Text("  - Changing resolution");
-    ImGui::Text("  - Toggling window mode");
-    ImGui::Text("  - Exiting the game");
-    ImGui::Spacing();
-
-    extern BOOL g_bUseWindowMode;
-    if (ImGui::Button("Save Settings Now", ImVec2(200, 0)))
-    {
-        GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
-        GameConfig::GetInstance().SetWindowMode(g_bUseWindowMode == TRUE);
-        GameConfig::GetInstance().Save();
-        g_MuEditorConsoleUI.LogEditor("Settings saved to config.ini");
-    }
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Saves to config.ini)");
 }
 
 void CDevEditorUI::RenderGraphicsDebugInfo()
@@ -624,133 +611,6 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "(Paste in Discord/notepad)");
 }
 
-void CDevEditorUI::RenderWindowSizePresets()
-{
-    ImGui::Text("Window Size Presets:");
-
-    static const struct { int width; int height; const char* label; } resolutions[] = {
-        {  640,  480, "640 x 480 (4:3)"   },
-        {  800,  600, "800 x 600 (4:3)"   },
-        { 1024,  768, "1024 x 768 (4:3)"  },
-        { 1280, 1024, "1280 x 1024 (5:4)" },
-        { 1280,  720, "1280 x 720 (16:9)" },
-        { 1600,  900, "1600 x 900 (16:9)" },
-        { 1600, 1200, "1600 x 1200 (4:3)" },
-        { 1680, 1050, "1680 x 1050 (16:10)" },
-        { 1920, 1080, "1920 x 1080 (16:9)" },
-        { 2560, 1440, "2560 x 1440 (16:9)" },
-    };
-    constexpr int NUM_RESOLUTIONS = sizeof(resolutions) / sizeof(resolutions[0]);
-
-    for (int i = 0; i < NUM_RESOLUTIONS; i++)
-    {
-        if (i > 0 && i % 2 == 0)
-            ImGui::Spacing();
-
-        if (ImGui::Button(resolutions[i].label, ImVec2(200, 0)))
-            ApplyNewWindowSize(resolutions[i].width, resolutions[i].height, "");
-
-        if (i % 2 == 0)
-            ImGui::SameLine();
-    }
-}
-
-void CDevEditorUI::RenderCustomResolutionInput()
-{
-    ImGui::Text("Custom Resolution:");
-    static int customWidth = 1920;
-    static int customHeight = 1080;
-
-    ImGui::PushItemWidth(150);
-    ImGui::InputInt("Width", &customWidth, 10, 100);
-    ImGui::InputInt("Height", &customHeight, 10, 100);
-    ImGui::PopItemWidth();
-
-    if (customWidth  < REFERENCE_WIDTH)        customWidth  = REFERENCE_WIDTH;
-    if (customWidth  > CUSTOM_RES_MAX_WIDTH)   customWidth  = CUSTOM_RES_MAX_WIDTH;
-    if (customHeight < REFERENCE_HEIGHT)       customHeight = REFERENCE_HEIGHT;
-    if (customHeight > CUSTOM_RES_MAX_HEIGHT)  customHeight = CUSTOM_RES_MAX_HEIGHT;
-
-    if (ImGui::Button("Apply Custom Size", ImVec2(200, 0)))
-        ApplyNewWindowSize(customWidth, customHeight, "custom ");
-}
-
-void CDevEditorUI::RenderFullscreenToggle()
-{
-    extern unsigned int WindowWidth, WindowHeight;
-    extern BOOL g_bUseWindowMode;
-    extern HWND g_hWnd;
-    extern int OpenglWindowWidth, OpenglWindowHeight;
-    extern void ReinitializeFonts();
-    extern void UpdateResolutionDependentSystems();
-
-    ImGui::Text("Display Mode:");
-
-    bool isWindowed = (g_bUseWindowMode == TRUE);
-    if (ImGui::Checkbox("Windowed Mode", &isWindowed))
-    {
-        g_bUseWindowMode = isWindowed ? TRUE : FALSE;
-
-        OpenglWindowWidth  = (int)WindowWidth;
-        OpenglWindowHeight = (int)WindowHeight;
-
-        GameConfig::GetInstance().SetWindowMode(g_bUseWindowMode == TRUE);
-        GameConfig::GetInstance().Save();
-
-        ReinitializeFonts();
-        UpdateResolutionDependentSystems();
-
-        if (g_hWnd)
-        {
-            if (g_bUseWindowMode)
-            {
-                // Switch to windowed
-                ChangeDisplaySettings(nullptr, 0);
-
-                DWORD style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
-                SetWindowLongPtr(g_hWnd, GWL_STYLE, style);
-
-                RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
-                AdjustWindowRect(&windowRect, style, FALSE);
-
-                SetWindowPos(g_hWnd, HWND_NOTOPMOST, 100, 100,
-                             windowRect.right - windowRect.left,
-                             windowRect.bottom - windowRect.top,
-                             SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-
-                g_MuEditorConsoleUI.LogEditor("Switched to windowed mode");
-            }
-            else
-            {
-                // Switch to fullscreen
-                DEVMODE dmScreenSettings = {};
-                dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-                dmScreenSettings.dmPelsWidth  = WindowWidth;
-                dmScreenSettings.dmPelsHeight = WindowHeight;
-                dmScreenSettings.dmBitsPerPel = 32;
-                dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-                if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
-                {
-                    DWORD style = WS_POPUP | WS_VISIBLE;
-                    SetWindowLongPtr(g_hWnd, GWL_STYLE, style);
-                    SetWindowPos(g_hWnd, HWND_TOPMOST, 0, 0, WindowWidth, WindowHeight,
-                                SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-                    g_MuEditorConsoleUI.LogEditor("Switched to fullscreen mode");
-                }
-                else
-                {
-                    g_bUseWindowMode = TRUE;  // Revert on failure
-                    g_MuEditorConsoleUI.LogEditor("Failed to switch to fullscreen mode");
-                }
-            }
-        }
-    }
-
-    ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "(Toggle between windowed and fullscreen)");
-}
-
 // Accessors for external use
 extern "C"
 {
@@ -777,38 +637,117 @@ extern "C"
 
     // Note: GetOrbitalCameraAngles is implemented in CameraManager.cpp
 
-    // New CameraConfig accessors
-    // Game Scene settings — only apply in MAIN_SCENE
-    bool DevEditor_IsConfigOverrideEnabled()
+    // Per-camera CameraConfig overrides — only apply in MAIN_SCENE.
+    // Cameras pass their own GetName() ("Default" / "Orbital") so each maintains
+    // an independent override state in the DevEditor UI.
+    bool DevEditor_IsCameraOverrideEnabled(const char* cameraName)
     {
         extern EGameScene SceneFlag;
-        if (SceneFlag != MAIN_SCENE) return false;
-        return g_DevEditorUI.IsConfigOverrideEnabled();
+        if (SceneFlag != MAIN_SCENE || !cameraName) return false;
+        if (strcmp(cameraName, "Default") == 0) return g_DevEditorUI.GetDefaultOverride().enabled;
+        if (strcmp(cameraName, "Orbital") == 0) return g_DevEditorUI.GetOrbitalOverride().enabled;
+        return false;
     }
 
-    void DevEditor_GetCameraConfigFOV(float* outHFOV)
-    {
-        if (outHFOV) *outHFOV = g_DevEditorUI.GetHFOV();
-    }
-
-    void DevEditor_GetFogConfig(float* outStart, float* outEnd)
-    {
-        extern CameraState g_Camera;
-        if (outStart) *outStart = g_Camera.ViewFar * g_DevEditorUI.GetFogStartPct();
-        if (outEnd) *outEnd = g_Camera.ViewFar * g_DevEditorUI.GetFogEndPct();
-    }
-
-    bool DevEditor_IsFogOverrideEnabled()
+    void DevEditor_ApplyCameraOverride(const char* cameraName, CameraConfig* cfg)
     {
         extern EGameScene SceneFlag;
-        if (SceneFlag != MAIN_SCENE) return false;
-        return g_DevEditorUI.IsConfigOverrideEnabled() && g_DevEditorUI.IsFogOverrideEnabled();
+        if (SceneFlag != MAIN_SCENE || !cfg || !cameraName) return;
+        if (strcmp(cameraName, "Default") == 0) g_DevEditorUI.ApplyDefaultOverrideToConfig(*cfg);
+        else if (strcmp(cameraName, "Orbital") == 0) g_DevEditorUI.ApplyOrbitalOverrideToConfig(*cfg);
     }
 
-    bool DevEditor_GetFogOverrideValue()
+    bool DevEditor_IsCameraFogOverrideEnabled(const char* cameraName)
     {
-        return g_DevEditorUI.GetFogOverrideValue();
+        extern EGameScene SceneFlag;
+        if (SceneFlag != MAIN_SCENE || !cameraName) return false;
+        if (strcmp(cameraName, "Default") == 0)
+        {
+            const auto& ov = g_DevEditorUI.GetDefaultOverride();
+            return ov.enabled && ov.fogOverride;
+        }
+        if (strcmp(cameraName, "Orbital") == 0)
+        {
+            // Orbital has a single Fog toggle that always applies when the
+            // override is enabled (no separate fogOverride gate).
+            const auto& ov = g_DevEditorUI.GetOrbitalOverride();
+            return ov.enabled;
+        }
+        return false;
     }
+
+    bool DevEditor_GetCameraFogOverrideValue(const char* cameraName)
+    {
+        if (cameraName)
+        {
+            if (strcmp(cameraName, "Default") == 0) return g_DevEditorUI.GetDefaultOverride().fogOn;
+            if (strcmp(cameraName, "Orbital") == 0) return g_DevEditorUI.GetOrbitalOverride().fogOn;
+        }
+        return true;
+    }
+
+    void DevEditor_GetCameraFogRange(const char* cameraName, float viewFar, float* outStart, float* outEnd)
+    {
+        float startPct = 1.00f, endPct = 1.25f;
+        if (cameraName)
+        {
+            if (strcmp(cameraName, "Default") == 0)
+            {
+                startPct = g_DevEditorUI.GetDefaultOverride().fogStartPct;
+                endPct   = g_DevEditorUI.GetDefaultOverride().fogEndPct;
+            }
+            else if (strcmp(cameraName, "Orbital") == 0)
+            {
+                const auto& ov = g_DevEditorUI.GetOrbitalOverride();
+                startPct = ov.fogStartPct;
+                endPct   = ov.fogEndPct;
+                // Scale fog off the trapezoid's Far distance when override is on,
+                // so sliding "Far distance" also pushes fog out to match.
+                if (ov.enabled) viewFar = ov.farDist;
+            }
+        }
+        if (outStart) *outStart = viewFar * startPct;
+        if (outEnd)   *outEnd   = viewFar * endPct;
+    }
+
+    // Default-camera-only accessors (position offset + 2D trapezoid width multipliers).
+    // Return identity/zero when override disabled or not in MAIN_SCENE.
+    void DevEditor_GetDefaultCameraOffset(float* outX, float* outY, float* outZ)
+    {
+        extern EGameScene SceneFlag;
+        const auto& ov = g_DevEditorUI.GetDefaultOverride();
+        const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
+        if (outX) *outX = active ? ov.offsetX : 0.0f;
+        if (outY) *outY = active ? ov.offsetY : 0.0f;
+        if (outZ) *outZ = active ? ov.offsetZ : 0.0f;
+    }
+
+    // Orbital 2D culling: returns `true` when a custom view-aligned trapezoid
+    // should replace the view-cone pyramid. Values are in absolute world units
+    // in camera-local space (forward = view -Z, lateral = view X).
+    bool DevEditor_GetOrbitalHullTrapezoid(float* outFarDist, float* outFarWidth,
+                                           float* outNearDist, float* outNearWidth)
+    {
+        extern EGameScene SceneFlag;
+        const auto& ov = g_DevEditorUI.GetOrbitalOverride();
+        const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
+        if (!active) return false;
+        if (outFarDist)   *outFarDist   = ov.farDist;
+        if (outFarWidth)  *outFarWidth  = ov.farWidth;
+        if (outNearDist)  *outNearDist  = ov.nearDist;
+        if (outNearWidth) *outNearWidth = ov.nearWidth;
+        return true;
+    }
+
+    void DevEditor_GetDefaultTrapezoidMultipliers(float* outNearMul, float* outFarMul)
+    {
+        extern EGameScene SceneFlag;
+        const auto& ov = g_DevEditorUI.GetDefaultOverride();
+        const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
+        if (outNearMul) *outNearMul = active ? ov.widthNearMul : 1.0f;
+        if (outFarMul)  *outFarMul  = active ? ov.widthFarMul  : 1.0f;
+    }
+
 
 
     // Render toggle accessors
