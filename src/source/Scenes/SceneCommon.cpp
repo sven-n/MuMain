@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+﻿///////////////////////////////////////////////////////////////////////////////
 // SceneCommon.cpp - Shared utilities used by multiple scenes
 // Extracted from ZzzScene.cpp as part of scene refactoring
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,45 +171,80 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
     return FALSE;
 }
 
-int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize)
-{
+
+/**
+ * @brief Splits a wide-character string into multiple lines with word-wrap support.
+ * @param lpszText      Source string.
+ * @param lpszSeparated Destination 2D buffer (wchar_t[iMaxLine][iLineSize]).
+ * @param iMaxLine      Max number of rows.
+ * @param iLineSize     Size of each row (including \0).
+ * @return int          Total lines created (Guaranteed not to exceed iMaxLine).
+ */
+int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize) {
+    if (!lpszText || !lpszSeparated || iMaxLine <= 0 || iLineSize <= 0) return 0;
+
     int iLine = 0;
-    const wchar_t* lpLineStart = lpszText;
-    wchar_t* lpDst = lpszSeparated;
-    const wchar_t* lpSpace = NULL;
-    int iMbclen = 0;
-    for (const wchar_t* lpSeek = lpszText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
-    {
-        // For wide characters, always 1 character per unit
-        iMbclen = 1;
-        if (iMbclen + (lpSeek - lpLineStart) >= iLineSize)
-        {
-            if (lpSpace && (lpSeek - lpSpace) < std::min<int>(10, iLineSize / 2))
-            {
-                lpDst -= lpSeek - lpSpace - 1;
-                lpSeek = lpSpace + 1;
-            }
+    const int iVisualLimit = iLineSize - 1; // Precalculate the maximum printable width
+    const wchar_t* lpSeek = lpszText;
+    const wchar_t* lpLastSpaceInSource = nullptr;
+    wchar_t* lpDstInCurrentRow = nullptr;
 
-            lpLineStart = lpSeek;
-            *lpDst = L'\0';
-            if (iLine >= iMaxLine - 1)
-            {
-                break;
-            }
-            ++iLine;
-            lpDst = lpszSeparated + iLine * iLineSize;
-            lpSpace = NULL;
+    int iCurrentWidth = 0; // Optimized: Use integer instead of float for performance
+    wchar_t* lpWrite = lpszSeparated;
+
+    while (*lpSeek && iLine < iMaxLine) {
+        // Calculate character width: Full-width/CJK (Unicode > 255) = 2, Half-width = 1
+        int iCharWidth = (*lpSeek > 255) ? 2 : 1;
+
+        // Record space position for word-wrapping (English logic)
+        if (*lpSeek == L' ') {
+            lpLastSpaceInSource = lpSeek;
+            lpDstInCurrentRow = lpWrite;
         }
 
-        memcpy(lpDst, lpSeek, iMbclen);
-        if (*lpSeek == L' ')
-        {
-            lpSpace = lpSeek;
+        // Check if the current character exceeds the row's visual width limit
+        if (iCurrentWidth + iCharWidth > iVisualLimit) {
+
+            // WORD-WRAP LOGIC: If we are in the middle of a word and saw a space earlier
+            if (lpLastSpaceInSource && iCharWidth == 1 && *lpSeek != L' ') {
+                // Terminate the line at the last space found
+                *lpDstInCurrentRow = L'\0';
+                // Rewind source pointer to the character immediately after the space
+                lpSeek = lpLastSpaceInSource + 1;
+            }
+            else {
+                // For CJK or if no space was found, perform a hard break
+                *lpWrite = L'\0';
+            }
+
+            // Move to the next row
+            iLine++;
+            if (iLine >= iMaxLine) break;
+
+            // Reset pointers and counters for the new line
+            lpWrite = lpszSeparated + (iLine * iLineSize);
+            iCurrentWidth = 0;
+            lpLastSpaceInSource = nullptr;
+            lpDstInCurrentRow = nullptr;
+
+            // Skip leading spaces on the new line
+            while (*lpSeek == L' ') lpSeek++;
+            continue;
         }
+
+        // Write character to buffer and advance pointers compactly
+        *lpWrite++ = *lpSeek++;
+        iCurrentWidth += iCharWidth;
     }
-    *lpDst = L'\0';
 
-    return (iLine + 1);
+    // Ensure the final line is properly null-terminated
+    if (iLine < iMaxLine) {
+        *lpWrite = L'\0';
+        return iLine + 1;
+    }
+
+    // Return iMaxLine safely to prevent out-of-bounds access in the caller
+    return iMaxLine;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
