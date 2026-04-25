@@ -66,7 +66,6 @@ void DefaultCamera::Reset()
     m_State.Reset();
     // Phase 5: Reset scene tracking to force config reload on next Update()
     m_LastSceneFlag = -1;
-    m_bFreeCameraMode = false;
 }
 
 void DefaultCamera::ApplyConfigToState()
@@ -221,7 +220,7 @@ void DefaultCamera::OnActivate(const CameraState& previousState)
 
 void DefaultCamera::OnDeactivate()
 {
-    // Nothing to cleanup
+    // Nothing to clean up.
 }
 
 bool DefaultCamera::Update()
@@ -249,27 +248,6 @@ bool DefaultCamera::Update()
 
     // Note: Tour mode is handled internally by CalculateCameraPosition() and SetCameraAngle()
     // No need to return early - let normal flow continue
-
-    // Phase 5: Handle WASD+QE free camera movement (toggle with F8)
-    if (HIBYTE(GetAsyncKeyState(VK_F8)) == 128)
-    {
-        static bool bF8Pressed = false;
-        if (!bF8Pressed)
-        {
-            m_bFreeCameraMode = !m_bFreeCameraMode;
-            bF8Pressed = true;
-        }
-    }
-    else
-    {
-        static bool bF8Pressed = false;
-        bF8Pressed = false;
-    }
-
-    if (m_bFreeCameraMode)
-    {
-        HandleFreeCameraMovement();
-    }
 
     bool bLockCamera = false;
 
@@ -345,8 +323,7 @@ bool DefaultCamera::Update()
         const int lineHeight = 15;
 
         // Camera type and scene
-        swprintf(debugText, 256, L"Camera: DefaultCamera | Scene: %d | FreeMode: %s",
-                 (int)SceneFlag, m_bFreeCameraMode ? L"ON" : L"OFF");
+        swprintf(debugText, 256, L"Camera: DefaultCamera | Scene: %d", (int)SceneFlag);
         g_pRenderText->RenderText(10, yPos, debugText);
         yPos += lineHeight;
 
@@ -397,72 +374,6 @@ bool DefaultCamera::Update()
     g_Camera.ViewFar = effectiveFarPlane;
 
     return bLockCamera;
-}
-
-void DefaultCamera::HandleFreeCameraMovement()
-{
-    // Phase 5: WASD+QE free camera movement
-    const float moveSpeed = 50.0f;
-    const float rotSpeed = 2.0f;
-
-    // Forward/Backward: W/S
-    if (HIBYTE(GetAsyncKeyState('W')) == 128)
-    {
-        float angle = m_State.Angle[2] * M_PI / 180.0f;
-        m_State.Position[0] += sinf(angle) * moveSpeed;
-        m_State.Position[1] += cosf(angle) * moveSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState('S')) == 128)
-    {
-        float angle = m_State.Angle[2] * M_PI / 180.0f;
-        m_State.Position[0] -= sinf(angle) * moveSpeed;
-        m_State.Position[1] -= cosf(angle) * moveSpeed;
-    }
-
-    // Strafe Left/Right: A/D
-    if (HIBYTE(GetAsyncKeyState('A')) == 128)
-    {
-        float angle = (m_State.Angle[2] + 90.0f) * M_PI / 180.0f;
-        m_State.Position[0] += sinf(angle) * moveSpeed;
-        m_State.Position[1] += cosf(angle) * moveSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState('D')) == 128)
-    {
-        float angle = (m_State.Angle[2] - 90.0f) * M_PI / 180.0f;
-        m_State.Position[0] += sinf(angle) * moveSpeed;
-        m_State.Position[1] += cosf(angle) * moveSpeed;
-    }
-
-    // Up/Down: E/Q
-    if (HIBYTE(GetAsyncKeyState('E')) == 128)
-    {
-        m_State.Position[2] += moveSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState('Q')) == 128)
-    {
-        m_State.Position[2] -= moveSpeed;
-    }
-
-    // Mouse look: Arrow keys for rotation
-    if (HIBYTE(GetAsyncKeyState(VK_UP)) == 128)
-    {
-        m_State.Angle[0] += rotSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState(VK_DOWN)) == 128)
-    {
-        m_State.Angle[0] -= rotSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128)
-    {
-        m_State.Angle[2] += rotSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
-    {
-        m_State.Angle[2] -= rotSpeed;
-    }
-
-    // Force frustum update when in free camera mode
-    UpdateFrustum();
 }
 
 void DefaultCamera::CalculateCameraViewFar()

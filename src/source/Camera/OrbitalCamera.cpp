@@ -79,7 +79,6 @@ void OrbitalCamera::Reset()
     m_Radius = (float)GameConfig::GetInstance().GetZoom();
     m_Input.Rotating = false;
     m_bInitialOffsetSet = false;
-    m_bFreeCameraMode = false;
     // Phase 5: Reset scene tracking to force config reload
     m_LastSceneFlag = -1;
     m_pDefaultCamera->Reset();
@@ -364,30 +363,7 @@ bool OrbitalCamera::Update()
         ResetForScene(SceneFlag);
     }
 
-    // Phase 5: Handle WASD+QE free camera movement (toggle with F8)
-    if (HIBYTE(GetAsyncKeyState(VK_F8)) == 128)
-    {
-        static bool bF8Pressed = false;
-        if (!bF8Pressed)
-        {
-            m_bFreeCameraMode = !m_bFreeCameraMode;
-            bF8Pressed = true;
-        }
-    }
-    else
-    {
-        static bool bF8Pressed = false;
-        bF8Pressed = false;
-    }
-
-    if (m_bFreeCameraMode)
-    {
-        HandleFreeCameraMovement();
-    }
-    else
-    {
-        HandleInput();
-    }
+    HandleInput();
 
     UpdateTarget();
 
@@ -408,9 +384,9 @@ bool OrbitalCamera::Update()
         m_bJustActivated = false;  // Clear flag for next frame
     }
 
-    // Then modify it with our orbital transformations (unless in free camera mode)
+    // Then modify it with our orbital transformations.
     // BUT skip ComputeCameraTransform on first frame to preserve inherited position
-    if (!m_bFreeCameraMode && !skipTransformThisFrame)
+    if (!skipTransformThisFrame)
     {
         ComputeCameraTransform();
 
@@ -446,8 +422,7 @@ bool OrbitalCamera::Update()
         const int lineHeight = 15;
 
         // Camera type and scene
-        swprintf(debugText, 256, L"Camera: OrbitalCamera | Scene: %d | FreeMode: %s",
-                 (int)SceneFlag, m_bFreeCameraMode ? L"ON" : L"OFF");
+        swprintf(debugText, 256, L"Camera: OrbitalCamera | Scene: %d", (int)SceneFlag);
         g_pRenderText->RenderText(10, yPos, debugText);
         yPos += lineHeight;
 
@@ -740,72 +715,6 @@ void OrbitalCamera::UpdateConfigForView()
 
     // Terrain cull range = rendering distance
     m_Config.terrainCullRange = m_Config.farPlane * RENDER_DISTANCE_MULTIPLIER;
-}
-
-void OrbitalCamera::HandleFreeCameraMovement()
-{
-    // Phase 5: WASD+QE free camera movement (same as DefaultCamera)
-    const float moveSpeed = 50.0f;
-    const float rotSpeed = 2.0f;
-
-    // Forward/Backward: W/S
-    if (HIBYTE(GetAsyncKeyState('W')) == 128)
-    {
-        float angle = m_State.Angle[2] * M_PI / 180.0f;
-        m_State.Position[0] += sinf(angle) * moveSpeed;
-        m_State.Position[1] += cosf(angle) * moveSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState('S')) == 128)
-    {
-        float angle = m_State.Angle[2] * M_PI / 180.0f;
-        m_State.Position[0] -= sinf(angle) * moveSpeed;
-        m_State.Position[1] -= cosf(angle) * moveSpeed;
-    }
-
-    // Strafe Left/Right: A/D
-    if (HIBYTE(GetAsyncKeyState('A')) == 128)
-    {
-        float angle = (m_State.Angle[2] + 90.0f) * M_PI / 180.0f;
-        m_State.Position[0] += sinf(angle) * moveSpeed;
-        m_State.Position[1] += cosf(angle) * moveSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState('D')) == 128)
-    {
-        float angle = (m_State.Angle[2] - 90.0f) * M_PI / 180.0f;
-        m_State.Position[0] += sinf(angle) * moveSpeed;
-        m_State.Position[1] += cosf(angle) * moveSpeed;
-    }
-
-    // Up/Down: E/Q
-    if (HIBYTE(GetAsyncKeyState('E')) == 128)
-    {
-        m_State.Position[2] += moveSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState('Q')) == 128)
-    {
-        m_State.Position[2] -= moveSpeed;
-    }
-
-    // Mouse look: Arrow keys for rotation
-    if (HIBYTE(GetAsyncKeyState(VK_UP)) == 128)
-    {
-        m_State.Angle[0] += rotSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState(VK_DOWN)) == 128)
-    {
-        m_State.Angle[0] -= rotSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128)
-    {
-        m_State.Angle[2] += rotSpeed;
-    }
-    if (HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
-    {
-        m_State.Angle[2] -= rotSpeed;
-    }
-
-    // Force frustum update when in free camera mode
-    UpdateFrustum();
 }
 
 void OrbitalCamera::UpdateFrustum()

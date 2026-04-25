@@ -102,10 +102,6 @@ private:
     float m_CurrentMountOffset = 0.0f;
     int   m_LastMountType = -1;
 
-    // Phase 5: WASD+QE free camera movement
-    void HandleFreeCameraMovement();
-    bool m_bFreeCameraMode = false;
-
 #ifdef ENABLE_EDIT2
     void HandleEditorMode();
 #endif

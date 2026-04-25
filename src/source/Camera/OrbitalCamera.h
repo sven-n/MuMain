@@ -123,10 +123,6 @@ private:
     void InitializeOrbitalFromCurrentState(const vec3_t lookAtPoint, const CameraState& previousState);
     void SyncStateToGlobalCamera();
 
-    // Phase 5: WASD+QE free camera movement
-    void HandleFreeCameraMovement();
-    bool m_bFreeCameraMode = false;
-
     // Phase 5: Hero validity check (private)
     bool IsHeroValid() const;
 };
