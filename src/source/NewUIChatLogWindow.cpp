@@ -789,7 +789,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
             }
         }
 
-        POINT ptResizingBtn = { m_WndPos.x, m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT };
+        POINT ptResizingBtn = { m_WndPos.x, (LONG)(m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT) };
         if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
             SEASON3B::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
         {

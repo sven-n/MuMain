@@ -4,9 +4,9 @@
 #include "stdafx.h"
 #include "NewUIMyInventory.h"
 #include "NewUISystem.h"
+extern bool SelectFlag;
 #ifdef _EDITOR
 #include "UI/Console/MuEditorConsoleUI.h"
-extern bool SelectFlag;
 #endif
 #include "NewUICustomMessageBox.h"
 #include "GOBoid.h"
