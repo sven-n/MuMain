@@ -1573,6 +1573,12 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
                         m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
                         Hero->CurrentSkill = m_iHotKeySkillType[iIndex];
                         PlayBuffer(SOUND_CLICK01);
+                        // Consume the click so MoveHero doesn't treat the same UP edge
+                        // as a world click-to-move at the skill-bar position.
+                        // Mirrors CNewUISystem::Hide() and CNewUIMyInventory::ResetMouseLButton().
+                        MouseLButton = false;
+                        MouseLButtonPush = false;
+                        MouseLButtonPop = false;
                         return false;
                     }
                     else
@@ -1695,6 +1701,10 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
             m_bSkillList = false;
 
             PlayBuffer(SOUND_CLICK01);
+            // Consume the click — see hotkey-strip path above.
+            MouseLButton = false;
+            MouseLButtonPush = false;
+            MouseLButtonPop = false;
             return false;
         }
     }
@@ -1746,6 +1756,10 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
                     Hero->CurrentSkill = i;
                     m_bSkillList = false;
                     PlayBuffer(SOUND_CLICK01);
+                    // Consume the click — see hotkey-strip path above.
+                    MouseLButton = false;
+                    MouseLButtonPush = false;
+                    MouseLButtonPop = false;
                     return false;
                 }
             }
