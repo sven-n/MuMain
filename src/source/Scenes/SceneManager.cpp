@@ -38,6 +38,11 @@ FrameTimingState g_frameTiming;
 #include "../GlobalText.h"
 #include "../ZzzAI.h"
 #include "../Winmain.h"
+#include "../ZzzCharacter.h"
+#include "../ZzzObject.h"
+#include "../SkillEffectMgr.h"
+#include "../Camera/CameraManager.h"
+#include "../Camera/CameraMode.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -59,6 +64,7 @@ extern int HeroTile;
 extern bool Destroy;
 extern double WorldTime;
 extern float FPS_ANIMATION_FACTOR;
+extern OBJECT Effects[MAX_EFFECTS];
 
 static bool g_bShowDebugInfo =
 #ifdef _DEBUG
@@ -552,6 +558,93 @@ static void RenderDebugInfo()
 #endif
     swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
              kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Active camera mode (cycled with F9; F8 toggles in-camera free-fly).
+    swprintf(szLine, L"Camera: %hs", CameraModeToString(CameraManager::Instance().GetCurrentMode()));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Frustum-culled visibility counts. Visible flags are set during the previous
+    // frame's render passes, so this reflects what was actually drawn last frame.
+    // Each "X/Y" pair below is (visible / total live in scene).
+    auto bmdTriangles = [](int type) -> int
+    {
+        if (type < 0 || Models == nullptr) return 0;
+        const BMD& b = Models[type];
+        if (b.Meshs == nullptr) return 0;
+        int t = 0;
+        for (int m = 0; m < b.NumMeshs; ++m)
+            t += b.Meshs[m].NumTriangles;
+        return t;
+    };
+
+    int visPlayers = 0, livePlayers = 0;
+    int visMonsters = 0, liveMonsters = 0;
+    int visNpcs = 0, liveNpcs = 0;
+    int trisChars = 0;
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        const OBJECT& o = CharactersClient[i].Object;
+        if (!o.Live) continue;
+        const bool isPlayer  = (o.Type == MODEL_PLAYER);
+        const bool isMonster = (o.Type >= MODEL_MONSTER01 && o.Type < MODEL_MONSTER_END);
+        const bool isNpc     = (o.Type >= MODEL_NPC_BEGIN && o.Type < MODEL_NPC_END);
+        if (isPlayer)       ++livePlayers;
+        else if (isMonster) ++liveMonsters;
+        else if (isNpc)     ++liveNpcs;
+        if (!o.Visible) continue;
+        if (isPlayer)       ++visPlayers;
+        else if (isMonster) ++visMonsters;
+        else if (isNpc)     ++visNpcs;
+        trisChars += bmdTriangles(o.Type);
+    }
+
+    int visItems = 0, totalItems = 0, trisItems = 0;
+    for (int i = 0; i < MAX_ITEMS; ++i)
+    {
+        const OBJECT& o = Items[i].Object;
+        if (!o.Live) continue;
+        ++totalItems;
+        if (!o.Visible) continue;
+        ++visItems;
+        trisItems += bmdTriangles(o.Type);
+    }
+
+    int visEffects = 0, totalEffects = 0, trisEffects = 0;
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+    {
+        const OBJECT& o = Effects[i];
+        if (!o.Live) continue;
+        ++totalEffects;
+        if (!o.Visible) continue;
+        ++visEffects;
+        trisEffects += bmdTriangles(o.Type);
+    }
+    const int skillCount = g_SkillEffects.GetSize();
+    for (int i = 0; i < skillCount; ++i)
+    {
+        const OBJECT* o = g_SkillEffects.GetEffect(i);
+        if (!o || !o->Live) continue;
+        ++totalEffects;
+        if (!o->Visible) continue;
+        ++visEffects;
+        trisEffects += bmdTriangles(o->Type);
+    }
+
+    swprintf(szLine, L"Visible  Players:%d/%d  Monsters:%d/%d  NPCs:%d/%d",
+             visPlayers, livePlayers, visMonsters, liveMonsters, visNpcs, liveNpcs);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    swprintf(szLine, L"Visible  Items:%d/%d  Effects:%d/%d",
+             visItems, totalItems, visEffects, totalEffects);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Approximate triangle count for visible BMD models (chars/items/effects).
+    // Excludes terrain, water, particles and player equipment parts (body+helm+
+    // armor+pants+...), so this is a lower bound on the actual scene triangle load.
+    const int trisTotal = trisChars + trisItems + trisEffects;
+    swprintf(szLine, L"Tris~%d  (chars:%d items:%d fx:%d)",
+             trisTotal, trisChars, trisItems, trisEffects);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     // Frame time graph below text
