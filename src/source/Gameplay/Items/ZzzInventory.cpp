@@ -8174,12 +8174,13 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
         if (!RenderGroundItemLabelCached(o, ip))
         {
             // Cache unavailable (e.g. SDL3 build) — render the label directly.
+            // o->ScreenX/Y are already in 640x480 base space (Projection() rescales
+            // them by 640/WindowWidth, 480/WindowHeight); CUIRenderText::RenderText
+            // applies g_fScreenRate_* internally, so don't pre-scale here.
             GroundItemLabelDescriptor descriptor;
             BuildGroundItemLabelDescriptor(o, ip, descriptor);
             ApplyGroundItemLabelDescriptor(descriptor);
-            g_pRenderText->RenderText(
-                static_cast<int>(o->ScreenX * g_fScreenRate_x),
-                static_cast<int>((o->ScreenY - 15) * g_fScreenRate_y),
+            g_pRenderText->RenderText(o->ScreenX, o->ScreenY - 15,
                 descriptor.Name, 0, 0, RT3_WRITE_CENTER);
         }
     }
