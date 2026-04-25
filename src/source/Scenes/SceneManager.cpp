@@ -569,9 +569,13 @@ static void RenderDebugInfo()
     // Each "X/Y" pair below is (visible / total live in scene).
     auto bmdTriangles = [](int type) -> int
     {
-        if (type < 0 || Models == nullptr) return 0;
+        // Models is BMD[MAX_MODELS], zero-initialized; unloaded slots have
+        // NumMeshs == 0 and Meshs == nullptr. Some object Types (e.g. equipment
+        // pieces remapped at render time) live above MAX_MODELS, so guard the
+        // upper bound explicitly to avoid reading past the array.
+        if (type < 0 || type >= MAX_MODELS || Models == nullptr) return 0;
         const BMD& b = Models[type];
-        if (b.Meshs == nullptr) return 0;
+        if (b.Meshs == nullptr || b.NumMeshs <= 0) return 0;
         int t = 0;
         for (int m = 0; m < b.NumMeshs; ++m)
             t += b.Meshs[m].NumTriangles;
