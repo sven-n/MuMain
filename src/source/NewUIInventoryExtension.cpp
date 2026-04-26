@@ -290,7 +290,7 @@ bool CNewUIInventoryExtension::InsertItem(int iIndex, std::span<const BYTE> pbyI
 {
     if (const auto& extension = TryGetExtensionByInventoryIndex(iIndex))
     {
-        extension->AddItem(iIndex, pbyItemPacket);
+        return extension->AddItem(iIndex, pbyItemPacket);
     }
 
     return false;
@@ -300,9 +300,8 @@ void CNewUIInventoryExtension::DeleteItem(int iIndex) const
 {
     if (const auto& extension = TryGetExtensionByInventoryIndex(iIndex))
     {
-        if (const auto& pItem = extension->FindItem(iIndex))
+        if (extension->RemoveItemAt(iIndex))
         {
-            extension->RemoveItem(pItem);
             return;
         }
 

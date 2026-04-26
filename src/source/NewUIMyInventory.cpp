@@ -73,6 +73,8 @@ bool CNewUIMyInventory::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNew
         return false;
     }
 
+    m_ActionController.SetContext(this); 
+
     SetPos(x, y);
     LoadImages();
     SetEquipmentSlotInfo();
@@ -121,7 +123,6 @@ bool CNewUIMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacke
     ITEM* pTempItem = g_pNewItemMng->CreateItem(pbyItemPacket);
 
     if (nullptr == pTempItem)
-    //if(NULL == pTempItem || false == IsEquipable(iIndex, pTempItem))
     {
         return false;
     }
@@ -143,9 +144,10 @@ bool CNewUIMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacke
     g_pNewItemMng->DeleteItem(pTempItem);
 
     CreateEquippingEffect(pTargetItemSlot);
-    
+
     return true;
 }
+
 void CNewUIMyInventory::UnequipItem(int iIndex)
 {
     if (iIndex >= 0 && iIndex < MAX_EQUIPMENT_INDEX && g_pNewItemMng && CharacterMachine)
@@ -185,6 +187,7 @@ void CNewUIMyInventory::UnequipItem(int iIndex)
         }
     }
 }
+
 void CNewUIMyInventory::UnequipAllItems()
 {
     if (CharacterMachine)
@@ -196,7 +199,7 @@ void CNewUIMyInventory::UnequipAllItems()
     }
 }
 
-bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
+bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
 {
     if (pItem == nullptr)
         return false;
@@ -248,7 +251,6 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem)
 
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
     {
-        //ITEM *r = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
         const ITEM* l = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
         if (iIndex == EQUIPMENT_WEAPON_RIGHT && l->Type != ITEM_BOLT
             && (l->Type >= ITEM_BOW && l->Type < ITEM_BOW + MAX_ITEM_INDEX))
@@ -373,31 +375,30 @@ bool CNewUIMyInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPack
 
     return false;
 }
+
 void CNewUIMyInventory::DeleteItem(int iIndex) const
 {
     if (m_pNewInventoryCtrl)
     {
-        ITEM* pItem = m_pNewInventoryCtrl->FindItem(iIndex);
-        if (pItem != nullptr)
+        if (m_pNewInventoryCtrl->RemoveItemAt(iIndex))
         {
-            m_pNewInventoryCtrl->RemoveItem(pItem);
+            return;
         }
-        else
+
+        CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+        if (pPickedItem)
         {
-            CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-            if (pPickedItem)
+            if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
             {
-                if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
+                if (pPickedItem->GetSourceLinealPos() == iIndex)
                 {
-                    if (pPickedItem->GetSourceLinealPos() == iIndex)
-                    {
-                        CNewUIInventoryCtrl::DeletePickedItem();
-                    }
+                    CNewUIInventoryCtrl::DeletePickedItem();
                 }
             }
         }
     }
 }
+
 void CNewUIMyInventory::DeleteAllItems() const
 {
     if (m_pNewInventoryCtrl)
@@ -423,7 +424,7 @@ const POINT& CNewUIMyInventory::GetPos() const
     return m_Pos;
 }
 
-CNewUIMyInventory::REPAIR_MODE CNewUIMyInventory::GetRepairMode() const
+SEASON3B::REPAIR_MODE CNewUIMyInventory::GetRepairMode() const
 {
     return m_RepairMode;
 }
@@ -1282,7 +1283,6 @@ void CNewUIMyInventory::RenderEquippedItem()
             const int iLevel = pEquipmentItemSlot->Level;
             const int iMaxDurability = CalcMaxDurability(pEquipmentItemSlot, pItemAttr, iLevel);
 
-            // 용사/전사의반지 예외처리
             if (i == EQUIPMENT_RING_LEFT || i == EQUIPMENT_RING_RIGHT)
             {
                 if (pEquipmentItemSlot->Type == ITEM_WIZARDS_RING && iLevel == 1
@@ -1548,861 +1548,6 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
     return false;
 }
-
-bool CNewUIMyInventory::RepairItemAtMousePoint(CNewUIInventoryCtrl* targetControl)
-{
-    ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
-    if (pItem == nullptr)
-    {
-        return true;
-    }
-
-    if (IsRepairBan(pItem) == true)
-    {
-        return true;
-    }
-
-    int iIndex = targetControl->GetIndex(pItem->x, pItem->y);
-
-    if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) && g_pNPCShop->IsRepairShop())
-    {
-        SocketClient->ToGameServer()->SendRepairItemRequest(iIndex, 0);
-    }
-    else
-    {
-        SocketClient->ToGameServer()->SendRepairItemRequest(iIndex, 1);
-    }
-
-    return true;
-}
-
-bool CNewUIMyInventory::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem, const int iSourceIndex, const int iTargetIndex)
-{
-    auto pItem = targetControl->FindItem(iTargetIndex);
-    if (!pItem)
-    {
-        return false;
-    }
-
-    const int	iType = pItem->Type;
-    const int	iLevel = pItem->Level;
-    const int	iDurability = pItem->Durability;
-
-    bool bSuccess = true;
-
-    if (iType > ITEM_WINGS_OF_DARKNESS
-        && iType != ITEM_CAPE_OF_LORD
-        && !(iType >= ITEM_WING_OF_STORM && iType <= ITEM_WING_OF_DIMENSION)
-        && !(ITEM_WING + 130 <= iType && iType <= ITEM_WING + 134)
-        && !(iType >= ITEM_CAPE_OF_FIGHTER && iType <= ITEM_CAPE_OF_OVERRULE)
-        && (iType != ITEM_WING + 135))
-    {
-        bSuccess = false;
-    }
-
-    if (iType == ITEM_BOLT || iType == ITEM_ARROWS)
-    {
-        bSuccess = false;
-    }
-
-    if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS && iLevel >= 6) || (pPickItem->Type == ITEM_JEWEL_OF_SOUL && iLevel >= 9))
-    {
-        bSuccess = false;
-    }
-
-    if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
-    {
-        CFenrirRepairMsgBox* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CFenrirRepairMsgBoxLayout), &pMsgBox);
-        pMsgBox->SetSourceIndex(iSourceIndex);
-
-        auto iIndex = targetControl->GetIndex(pItem->x, pItem->y);
-        pMsgBox->SetTargetIndex(iIndex);
-
-        pPickedItem->HidePickedItem();
-        return true;
-    }
-
-    if (pPickItem->Type == ITEM_JEWEL_OF_HARMONY)
-    {
-        if (g_SocketItemMgr.IsSocketItem(pItem))
-        {
-            bSuccess = false;
-        }
-        else
-            if (pItem->Jewel_Of_Harmony_Option != 0)
-            {
-                bSuccess = false;
-            }
-            else
-            {
-                const StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pItem->Type));
-
-                if (strengthitem == SI_None)
-                {
-                    bSuccess = false;
-                }
-            }
-    }
-
-    if (pPickItem->Type == ITEM_LOWER_REFINE_STONE || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
-    {
-        if (g_SocketItemMgr.IsSocketItem(pItem))
-        {
-            bSuccess = false;
-        }
-        else if (pItem->Jewel_Of_Harmony_Option == 0)
-        {
-            bSuccess = false;
-        }
-    }
-
-    if (Check_LuckyItem(pItem->Type))
-    {
-        bSuccess = false;
-        if (pPickItem->Type == ITEM_POTION + 161)
-        {
-            if (pItem->Jewel_Of_Harmony_Option == 0)	bSuccess = true;
-        }
-        else if (pPickItem->Type == ITEM_POTION + 160)
-        {
-            if (pItem->Durability > 0)					bSuccess = true;
-        }
-    }
-
-    if (bSuccess)
-    {
-        const int targetIndex = targetControl->GetIndexByItem(pItem);
-        SendRequestUse(iSourceIndex, targetIndex);
-        PlayBuffer(SOUND_GET_ITEM01);
-        return true;
-    }
-
-    return false;
-}
-
-bool CNewUIMyInventory::TryStackItems(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem, const int iSourceIndex, const int iTargetIndex)
-{
-    if (ITEM* pItem = targetControl->FindItem(iTargetIndex))
-    {
-        if (targetControl->AreItemsStackable(pPickItem, pItem))
-        {
-            SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pPickItem, STORAGE_TYPE::INVENTORY, iTargetIndex);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool CNewUIMyInventory::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, const int iIndex)
-{
-    if (pItem == nullptr)
-    {
-        return false;
-    }
-
-    if (pItem->Type == ITEM_TOWN_PORTAL_SCROLL)
-    {
-        SendRequestUse(iIndex, 0);
-        return true;
-    }
-
-    const auto isApple = pItem->Type == ITEM_APPLE;
-    const auto isPotion =
-        (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_ALE)
-        || (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION);
-
-    if (isApple || isPotion
-        || (pItem->Type == ITEM_POTION + 20 && pItem->Level == 0)
-        || (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK)
-        || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 14)
-        || (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71)
-        || (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77)
-        || pItem->Type == ITEM_HELPER + 60
-        || pItem->Type == ITEM_POTION + 94
-        || (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_CHERRY_BLOSSOM_FLOWER_PETAL)
-        || (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98)
-        || pItem->Type == ITEM_HELPER + 81
-        || pItem->Type == ITEM_HELPER + 82
-        || pItem->Type == ITEM_POTION + 133
-        )
-    {
-        SendRequestUse(iIndex, 0);
-        if (isApple)
-        {
-            PlayBuffer(SOUND_EAT_APPLE01);
-        }
-        else if (isPotion)
-        {
-            PlayBuffer(SOUND_DRINK01);
-        }
-
-        return true;
-    }
-
-    if ((pItem->Type >= ITEM_POTION + 78 && pItem->Type <= ITEM_POTION + 82))
-    {
-        std::list<eBuffState> secretPotionbufflist;
-        secretPotionbufflist.push_back(eBuff_SecretPotion1);
-        secretPotionbufflist.push_back(eBuff_SecretPotion2);
-        secretPotionbufflist.push_back(eBuff_SecretPotion3);
-        secretPotionbufflist.push_back(eBuff_SecretPotion4);
-        secretPotionbufflist.push_back(eBuff_SecretPotion5);
-
-        if (g_isCharacterBufflist((&Hero->Object), secretPotionbufflist) == eBuffNone) {
-            SendRequestUse(iIndex, 0);
-            return true;
-        }
-
-        CreateOkMessageBox(GlobalText[2530], RGBA(255, 30, 0, 255));
-        return false;
-    }
-
-    if ((pItem->Type >= ITEM_HELPER + 54 && pItem->Type <= ITEM_HELPER + 57) || (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD))
-    {
-        bool result = true;
-        WORD point[5] = { 0, };
-
-        point[0] = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-        point[1] = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-        point[2] = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
-        point[3] = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-        point[4] = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-
-        wchar_t nStat[MAX_CLASS][5] =
-        {
-            18, 18, 15, 30,	0,
-            28, 20, 25, 10,	0,
-            22, 25, 20, 15,	0,
-            26, 26, 26, 26,	0,
-            26, 20, 20, 15, 25,
-            21, 21, 18, 23,	0,
-            32, 27, 25, 20, 0,
-        };
-
-        const auto attributeType = pItem->Type - (ITEM_HELPER + 54);
-        const int characterClass = gCharacterManager.GetBaseClass(Hero->Class);
-        point[attributeType] -= nStat[characterClass][attributeType];
-        if (point[attributeType] < (pItem->Durability * 10))
-        {
-            g_pMyInventory->SetStandbyItemKey(pItem->Key);
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUsePartChargeFruitMsgBoxLayout));
-            return false;
-        }
-
-        SendRequestUse(iIndex, 0);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
-    {
-        CreateOkMessageBox(GlobalText[1905]);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_ARMOR_OF_GUARDSMAN)
-    {
-        if (IsUnitedMarketPlace())
-        {
-            wchar_t	szOutputText[512];
-            mu_swprintf(szOutputText, L"%ls %ls", GlobalText[3014], GlobalText[3015]);
-
-            CreateOkMessageBox(szOutputText);
-            return true;
-        }
-
-        if (Hero->SafeZone == false)
-        {
-            CreateOkMessageBox(GlobalText[2330]);
-            return false;
-        }
-
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::ChaosCastle, pItem->Level);
-        g_pMyInventory->SetStandbyItemKey(pItem->Key);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 46)
-    {
-        const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_DEVILSQUARE);
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::DevilSquare, byPossibleLevel);
-        return false;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 47)
-    {
-        const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_BLOODCASTLE);
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::BloodCastle, byPossibleLevel);
-        return false;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 48)
-    {
-        if (Hero->SafeZone || gMapManager.InHellas())
-        {
-            g_pSystemLogBox->AddText(GlobalText[1238], TYPE_ERROR_MESSAGE);
-            return false;
-        }
-
-        SendRequestUse(iIndex, 0);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 61)
-    {
-        const BYTE byPossibleLevel = CaculateFreeTicketLevel(FREETICKET_TYPE_CURSEDTEMPLE);
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::CursedTemple, byPossibleLevel);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 121)
-    {
-        if (Hero->SafeZone == false)
-        {
-            CreateOkMessageBox(GlobalText[2330]);
-            return false;
-        }
-
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::ChaosCastle, pItem->Level);
-        g_pMyInventory->SetStandbyItemKey(pItem->Key);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_SCROLL_OF_BLOOD)
-    {
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::IllusionTemple, pItem->Level);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_DEVILS_INVITATION)
-    {
-        SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::DevilSquare, pItem->Level);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_INVISIBILITY_CLOAK)
-    {
-        if (pItem->Level == 0)
-        {
-            g_pSystemLogBox->AddText(GlobalText[2089], TYPE_ERROR_MESSAGE);
-        }
-        else
-        {
-            SocketClient->ToGameServer()->SendMiniGameOpeningStateRequest(MiniGameType::BloodCastle, pItem->Level - 1);
-        }
-
-        return true;
-    }
-
-    if ((pItem->Type >= ITEM_SCROLL_OF_POISON && pItem->Type < ITEM_ETC + MAX_ITEM_INDEX)
-        || (pItem->Type >= ITEM_ORB_OF_TWISTING_SLASH && pItem->Type <= ITEM_ORB_OF_GREATER_FORTITUDE)
-        || (pItem->Type >= ITEM_ORB_OF_FIRE_SLASH && pItem->Type <= ITEM_ORB_OF_DEATH_STAB)
-        || (pItem->Type == ITEM_WING + 20)
-        || (pItem->Type >= ITEM_SCROLL_OF_FIREBURST && pItem->Type <= ITEM_SCROLL_OF_ELECTRIC_SPARK)
-        || (pItem->Type == ITEM_SCROLL_OF_FIRE_SCREAM)
-        || (pItem->Type == ITEM_CRYSTAL_OF_DESTRUCTION)
-        || (pItem->Type == ITEM_CRYSTAL_OF_FLAME_STRIKE)
-        || (pItem->Type == ITEM_CRYSTAL_OF_RECOVERY)
-        || (pItem->Type == ITEM_CRYSTAL_OF_MULTI_SHOT)
-        || (pItem->Type == ITEM_SCROLL_OF_CHAOTIC_DISEIER)
-        || (pItem->Type == ITEM_SCROLL_OF_GIGANTIC_STORM)
-        || (pItem->Type == ITEM_SCROLL_OF_WIZARDRY_ENHANCE)
-        )
-    {
-        bool bReadBookGem = true;
-
-        if ((pItem->Type == ITEM_SCROLL_OF_NOVA)
-            || (pItem->Type == ITEM_SCROLL_OF_WIZARDRY_ENHANCE)
-            || pItem->Type == ITEM_CRYSTAL_OF_MULTI_SHOT
-            || (pItem->Type == ITEM_CRYSTAL_OF_RECOVERY)
-            || (pItem->Type == ITEM_CRYSTAL_OF_DESTRUCTION)
-            )
-        {
-            if (g_csQuest.getQuestState2(QUEST_CHANGE_UP_3) != QUEST_END)
-
-                bReadBookGem = false;
-        }
-        if (pItem->Type == ITEM_SCROLL_OF_CHAOTIC_DISEIER)
-        {
-            const int Level = CharacterAttribute->Level;
-            if (Level < 220)
-                bReadBookGem = false;
-        }
-        if (bReadBookGem)
-        {
-            WORD Strength, Energy;
-            Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-            Energy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-
-            if (CharacterAttribute->Level >= ItemAttribute[pItem->Type].RequireLevel &&
-                Energy >= pItem->RequireEnergy &&
-                Strength >= pItem->RequireStrength)
-            {
-                SendRequestUse(iIndex, 0);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    if (pItem->Type == ITEM_FRUITS)
-    {
-        const int Level = CharacterAttribute->Level;
-
-        if (Level >= 10)
-        {
-            bool bEquipmentEmpty = true;
-            for (int i = 0; i < MAX_EQUIPMENT; i++)
-            {
-                if (CharacterMachine->Equipment[i].Type != -1)
-                {
-                    bEquipmentEmpty = false;
-                }
-            }
-            const auto Class = CharacterAttribute->Class;
-
-            if (bEquipmentEmpty == true)
-            {
-                if (pItem->Level == 4) // Command Fruit
-                {
-                    if (gCharacterManager.GetBaseClass(Class) != CLASS_DARK_LORD)
-                    {
-                        CreateOkMessageBox(GlobalText[1905]);
-                        return true;
-                    }
-                }
-                g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseFruitMsgBoxLayout));
-                return true;
-            }
-
-            CreateOkMessageBox(GlobalText[1909]);
-            return true;
-        }
-
-        CreateOkMessageBox(GlobalText[749]);
-        return true;
-    }
-
-    if (pItem->Type == ITEM_LIFE_STONE_ITEM)
-    {
-        bool bUse = false;
-        switch (pItem->Level)
-        {
-        case 0:
-            bUse = true;
-            break;
-        case 1:
-            if (Hero->GuildStatus != G_MASTER)
-                bUse = true;
-            break;
-        }
-        if (bUse)
-        {
-            SendRequestUse(iIndex, 0);
-            return true;
-        }
-
-        return false;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 69)
-    {
-        if (g_PortalMgr.IsRevivePositionSaved())
-        {
-            if (g_PortalMgr.IsPortalUsable())
-            {
-                g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseReviveCharmMsgBoxLayout));
-            }
-            else
-            {
-                CreateOkMessageBox(GlobalText[2608]);
-            }
-        }
-
-        return false;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 70)
-    {
-        if (g_PortalMgr.IsPortalUsable())
-        {
-            if (pItem->Durability == 2)
-            {
-                if (g_PortalMgr.IsPortalPositionSaved())
-                {
-                    CreateOkMessageBox(GlobalText[2610]);
-                }
-                else
-                {
-                    g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                    CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUsePortalCharmMsgBoxLayout));
-                }
-            }
-            else if (pItem->Durability == 1)
-            {
-                g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CReturnPortalCharmMsgBoxLayout));
-            }
-        }
-        else
-        {
-            CreateOkMessageBox(GlobalText[2608]);
-        }
-
-        return false;
-    }
-
-    if (pItem->Type == ITEM_HELPER + 66)
-    {
-        g_pMyInventory->SetStandbyItemKey(pItem->Key);
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseSantaInvitationMsgBoxLayout));
-    }
-
-    return false;
-}
-
-bool CNewUIMyInventory::TryTransferBetweenInventorySections(CNewUIInventoryCtrl* sourceControl)
-{
-    if (sourceControl == nullptr || g_pMyInventoryExt == nullptr)
-    {
-        return false;
-    }
-
-    ITEM* pItem = sourceControl->FindItemAtPt(MouseX, MouseY);
-    if (pItem == nullptr)
-    {
-        return false;
-    }
-
-    const int sourceIndex = sourceControl->GetIndexByItem(pItem);
-    if (sourceIndex < 0)
-    {
-        return false;
-    }
-
-    const ITEM_ATTRIBUTE* itemAttribute = &ItemAttribute[pItem->Type];
-    int destinationIndex = -1;
-
-    if (sourceControl == g_pMyInventory->GetInventoryCtrl())
-    {
-        destinationIndex = g_pMyInventoryExt->FindEmptySlot(itemAttribute->Width, itemAttribute->Height);
-    }
-    else
-    {
-        destinationIndex = g_pMyInventory->FindEmptySlot(itemAttribute->Width, itemAttribute->Height);
-    }
-
-    if (destinationIndex == -1 || destinationIndex == sourceIndex)
-    {
-        return true;
-    }
-
-    if (!CNewUIInventoryCtrl::CreatePickedItem(sourceControl, pItem))
-    {
-        return false;
-    }
-
-    sourceControl->RemoveItem(pItem);
-
-    CNewUIPickedItem* pickedItem = CNewUIInventoryCtrl::GetPickedItem();
-    if (pickedItem == nullptr || pickedItem->GetItem() == nullptr)
-    {
-        CNewUIInventoryCtrl::BackupPickedItem();
-        return false;
-    }
-
-    pickedItem->HidePickedItem();
-
-    if (!SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, sourceIndex,
-        pickedItem->GetItem(), STORAGE_TYPE::INVENTORY, destinationIndex))
-    {
-        CNewUIInventoryCtrl::BackupPickedItem();
-        return false;
-    }
-
-    return true;
-}
-
-// TODO: This whole logic (and possibly others) should be moved into a 'controller' class or similar.
-bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetControl)
-{
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-    if (pPickedItem && IsRelease(VK_LBUTTON))
-    {
-        ITEM* pPickItem = pPickedItem->GetItem();
-        if (pPickItem == nullptr)
-        {
-            return true;
-        }
-
-        const int iSourceIndex = pPickedItem->GetSourceLinealPos();
-        const int iTargetIndex = pPickedItem->GetTargetLinealPos(targetControl);
-
-        if (pPickedItem->GetOwnerInventory() == targetControl
-            || g_pMyInventoryExt->GetOwnerOf(pPickedItem)) // Movement between Inventory (and within extensions)
-        {
-            // Apply Jewels:
-            if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS
-                || pPickItem->Type == ITEM_JEWEL_OF_SOUL
-                || pPickItem->Type == ITEM_JEWEL_OF_LIFE
-                || pPickItem->Type == ITEM_JEWEL_OF_HARMONY
-                || pPickItem->Type == ITEM_LOWER_REFINE_STONE
-                || pPickItem->Type == ITEM_HIGHER_REFINE_STONE
-                || pPickItem->Type == ITEM_POTION + 160
-                || pPickItem->Type == ITEM_POTION + 161
-                ) && ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex))
-            {
-                return true;
-            }
-
-            if (iTargetIndex != -1 && TryStackItems(targetControl, pPickItem, iSourceIndex, iTargetIndex))
-            {
-                return true;
-            }
-        }
-
-        // If nothing of above applied, we try to move the item.
-        if (iTargetIndex >= 0 && targetControl->CanMove(iTargetIndex, pPickItem))
-        {
-            const auto sourceStorageType = pPickedItem->GetSourceStorageType();
-            const auto targetStorageType = targetControl->GetStorageType();
-            if (iTargetIndex != iSourceIndex)
-            {
-                return SendRequestEquipmentItem(sourceStorageType, iSourceIndex,
-                    pPickItem, targetStorageType, iTargetIndex);
-            }
-            else
-            {
-                CNewUIInventoryCtrl::BackupPickedItem();
-            }
-        }
-    }
-    else if (g_pMyInventory->GetRepairMode() == REPAIR_MODE_OFF && IsPress(VK_RBUTTON))
-    {
-        // handle right click (item usage etc.)
-        g_pMyInventory->ResetMouseRButton();
-
-        if (g_pNewUISystem->IsVisible(INTERFACE_STORAGE))
-        {
-            if (g_pStorageInventory->ProcessMyInvenItemAutoMove(targetControl))
-            {
-                return true;
-            }
-
-            if (g_pNewUISystem->IsVisible(INTERFACE_STORAGE_EXT))
-            {
-                return g_pStorageInventoryExt->ProcessMyInvenItemAutoMove(targetControl);
-            }
-
-            return false;
-        }
-
-        // Right-click to sell items at NPC shop
-        if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) && g_pNewUISystem->IsVisible(INTERFACE_INVENTORY))
-        {
-            // Don't process right-click if there's already a picked item (being dragged)
-            CNewUIPickedItem* pExistingPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-            if (pExistingPickedItem)
-            {
-                return false;
-            }
-
-            // Only process if mouse is over the inventory control area
-            if (!targetControl->CheckPtInRect(MouseX, MouseY))
-            {
-                return false;
-            }
-
-            // Only process for inventory storage type
-            if (targetControl->GetStorageType() != STORAGE_TYPE::INVENTORY)
-            {
-                return false;
-            }
-
-            ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
-            if (!pItem)
-            {
-                return false;
-            }
-
-            if (g_pNPCShop->IsSellingItem())
-            {
-                return false;
-            }
-
-            if (IsSellingBan(pItem))
-            {
-                g_pSystemLogBox->AddText(GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
-                return true;
-            }
-
-            const int iIndex = targetControl->GetIndexByItem(pItem);
-            if (iIndex < 0)
-            {
-                return false;
-            }
-
-            // Create a picked item (same as drag-and-drop)
-            if (!CNewUIInventoryCtrl::CreatePickedItem(targetControl, pItem))
-            {
-                return false;
-            }
-
-            // Verify the picked item was created successfully before removing from inventory
-            CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-            if (!pPickedItem)
-            {
-                return false;
-            }
-
-            // Now it's safe to remove item from inventory display (will be restored if sell fails)
-            targetControl->RemoveItem(pItem);
-
-            // Hide the picked item so it's not visually displayed while selling
-            pPickedItem->HidePickedItem();
-
-            const int sourceIndex = pPickedItem->GetSourceLinealPos();
-            if (sourceIndex < MAX_EQUIPMENT_INDEX || sourceIndex >= MAX_MY_INVENTORY_EX_INDEX)
-            {
-                CNewUIInventoryCtrl::BackupPickedItem();
-                return false;
-            }
-
-            if (IsHighValueItem(pItem))
-            {
-                // Show confirmation dialog for expensive items
-                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHighValueItemCheckMsgBoxLayout));
-                return true;
-            }
-
-            // For regular items, send sell request immediately
-            SocketClient->ToGameServer()->SendSellItemToNpcRequest(sourceIndex);
-            g_pNPCShop->SetSellingItem(true);
-            return true;
-        }
-
-        if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY)
-            && !g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
-            && !g_pNewUISystem->IsVisible(INTERFACE_TRADE)
-            && !g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE)
-            && !g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE)
-            && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
-            && !g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY))
-        {
-            if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY_EXT))
-            {
-                return TryTransferBetweenInventorySections(targetControl);
-            }
-
-            ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
-            if (!pItem)
-            {
-                return false;
-            }
-
-            const int iIndex = targetControl->GetIndexByItem(pItem);
-            if (iIndex >= 0 && TryConsumeItem(targetControl, pItem, iIndex))
-            {
-                return true;
-            }
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-            else if (g_pMyInventory->IsInvenItem(pItem->Type))
-            {
-#ifdef LJH_FIX_APP_SHUTDOWN_WEQUIPPING_INVENITEM_WITH_CLICKING_MOUSELBTN
-                if (MouseLButton || MouseLButtonPop || MouseLButtonPush)
-                    return false;
-#endif //LJH_FIX_APP_SHUTDOWN_WEQUIPPING_INVENITEM_WITH_CLICKING_MOUSELBTN
-                if (pItem->Durability == 0)
-                    return false;
-
-                int iChangeInvenItemStatus = 0;
-                (pItem->Durability == 255) ? iChangeInvenItemStatus = 254 : iChangeInvenItemStatus = 255;
-
-                SendRequestEquippingInventoryItem(iIndex, iChangeInvenItemStatus);
-            }
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-            //-- Equip item
-            if (!EquipmentItem)
-            {
-                const int iSrcIndex = iIndex;
-
-                const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
-
-                int nDstIndex = pItemAttr->m_byItemSlot;
-
-                if (nDstIndex >= 0 && nDstIndex < MAX_EQUIPMENT_INDEX)
-                {
-                    const ITEM* pEquipment = &CharacterMachine->Equipment[nDstIndex];
-
-                    if (pEquipment && pEquipment->Type != -1)
-                    {
-                        if (nDstIndex == EQUIPMENT_WEAPON_RIGHT)
-                        {
-                            if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK
-                                || gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER)
-                            {
-                                if (!pItemAttr->TwoHand)
-                                {
-                                    nDstIndex = EQUIPMENT_WEAPON_LEFT;
-                                    pEquipment = &CharacterMachine->Equipment[nDstIndex];
-
-                                    if (!(pEquipment && pEquipment->Type != -1))
-                                    {
-                                        goto LABEL_32;
-                                    }
-                                }
-                            }
-                        }
-                        else if (nDstIndex == EQUIPMENT_RING_RIGHT)
-                        {
-                            nDstIndex = EQUIPMENT_RING_LEFT;
-                            pEquipment = &CharacterMachine->Equipment[nDstIndex];
-
-                            if (!(pEquipment && pEquipment->Type != -1))
-                            {
-                                goto LABEL_32;
-                            }
-                        }
-
-                        return true;
-                    }
-                LABEL_32: // wtf...
-                    if (g_pMyInventory->IsEquipable(nDstIndex, pItem))
-                    {
-                        if (CNewUIInventoryCtrl::CreatePickedItem(nullptr, pItem))
-                        {
-                            targetControl->RemoveItem(pItem);
-
-                            const auto pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-                            pPickedItem->HidePickedItem();
-                        }
-
-                        SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSrcIndex, pItem, STORAGE_TYPE::INVENTORY, nDstIndex);
-                    }
-                }
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    if (g_pMyInventory->GetRepairMode() == REPAIR_MODE_ON && IsPress(VK_LBUTTON))
-    {
-        // Repair stuff
-
-        return RepairItemAtMousePoint(targetControl);
-    }
-
-    return false;
-}
-
 bool CNewUIMyInventory::InventoryProcess() const
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
@@ -2415,7 +1560,7 @@ bool CNewUIMyInventory::InventoryProcess() const
         return false;
     }
 
-    return HandleInventoryActions(m_pNewInventoryCtrl);
+    return m_ActionController.HandleInventoryActions(m_pNewInventoryCtrl);
 }
 
 bool CNewUIMyInventory::BtnProcess()
@@ -2547,6 +1692,15 @@ bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
     return false;
 }
 
+bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetControl)
+{
+    if (g_pMyInventory)
+    {
+        return g_pMyInventory->m_ActionController.HandleInventoryActions(targetControl);
+    }
+    return false;
+}
+
 bool CNewUIMyInventory::CanOpenMyShopInterface()
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
@@ -2597,7 +1751,6 @@ void CNewUIMyInventory::LockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(100, 100, 100, 255));
     m_BtnMyShop.Lock();
-    // 1125 "개인상점열기(S)"
     m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
@@ -2606,13 +1759,11 @@ void CNewUIMyInventory::UnlockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(255, 255, 255, 255));
     m_BtnMyShop.UnLock();
-    // 1125 "개인상점열기(S)"
     m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
 }
 
 void CNewUIMyInventory::ToggleRepairMode()
 {
-    //. 토글 수리모드
     if (m_RepairMode == REPAIR_MODE_OFF)
     {
         SetRepairMode(true);

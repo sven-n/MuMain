@@ -20,6 +20,7 @@
 #include "UIManager.h"
 #include "InventoryUtils.h"
 #include "NewUISystem.h"
+#include <vector>
 
 extern BYTE m_CrywolfState;
 
@@ -2768,6 +2769,17 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
 void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
 {
     BITMAP_t* b = &Bitmaps[BITMAP_FONT];
+    int uploadWidth = Width;
+    int uploadHeight = Height;
+    if (uploadWidth > static_cast<int>(b->Width))
+    {
+        uploadWidth = static_cast<int>(b->Width);
+    }
+    if (uploadHeight > static_cast<int>(b->Height))
+    {
+        uploadHeight = static_cast<int>(b->Height);
+    }
+
     float TextureU = 0.f, TextureV = 0.f;
     if (sx < 0)
     {
@@ -2792,7 +2804,29 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
     if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
     {
         glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-        glTexImage2D(GL_TEXTURE_2D, 0, b->Components, (int)b->Width, (int)b->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+        if (uploadWidth > 0 && uploadHeight > 0)
+        {
+            if (uploadWidth == static_cast<int>(b->Width))
+            {
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, uploadWidth, uploadHeight, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+            }
+            else
+            {
+                const size_t tightRowSize = static_cast<size_t>(uploadWidth) * 4;
+                const size_t sourceRowSize = static_cast<size_t>(b->Width) * 4;
+                m_tightUploadBuffer.resize(tightRowSize * uploadHeight);
+
+                for (int row = 0; row < uploadHeight; ++row)
+                {
+                    memcpy(
+                        m_tightUploadBuffer.data() + tightRowSize * row,
+                        b->Buffer + sourceRowSize * row,
+                        tightRowSize);
+                }
+
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, uploadWidth, uploadHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_tightUploadBuffer.data());
+            }
+        }
 
         float TextureUWidth = (Width + 0.01f) / b->Width;
         float TextureVHeight = (Height + 0.01f) / b->Height;

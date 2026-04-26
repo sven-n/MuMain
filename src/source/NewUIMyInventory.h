@@ -11,19 +11,24 @@
 #include "NewUIMessageBox.h"
 #include "NewUI3DRenderMng.h"
 #include "NewUIButton.h"
+#include "NewUIInventoryActionController.h"
+#include "IInventoryActionContext.h"
 #include <span>
 #include "_enum.h"
 
 namespace SEASON3B
 {
-    class CNewUIMyInventory : public CNewUIObj, public INewUI3DRenderObj
+    class CNewUIMyInventory
+        : public CNewUIObj
+        , public INewUI3DRenderObj
+        , public IInventoryActionContext
     {
     public:
         enum IMAGE_LIST
         {
             IMAGE_INVENTORY_MYSHOP_OPEN_BTN = BITMAP_MYSHOPINTERFACE_NEW_PERSONALINVENTORY_BEGIN + 1,
             IMAGE_INVENTORY_MYSHOP_CLOSE_BTN = BITMAP_MYSHOPINTERFACE_NEW_PERSONALINVENTORY_BEGIN + 2,
-            IMAGE_INVENTORY_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_INVENTORY_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
             IMAGE_INVENTORY_BACK_TOP = BITMAP_INTERFACE_NEW_PERSONALINVENTORY_BEGIN,	//"newui_item_back01.tga"
             IMAGE_INVENTORY_BACK_TOP2,	//"newui_item_back04.tga"
             IMAGE_INVENTORY_BACK_LEFT,	//"newui_item_back02-L.tga"
@@ -46,12 +51,6 @@ namespace SEASON3B
             IMAGE_INVENTORY_EXPAND_BTN, //"newui_expansion_btn.tga"
         };
 
-        enum REPAIR_MODE
-        {
-            REPAIR_MODE_OFF = 0,
-            REPAIR_MODE_ON,
-        };
-
         enum MYSHOP_MODE
         {
             MYSHOP_MODE_OPEN = 0,
@@ -65,8 +64,9 @@ namespace SEASON3B
             ITEM_SOCKET_SET_OPTION = 2,
         };
 
-        static constexpr float INVENTORY_WIDTH = 190.0f;
+        static constexpr float INVENTORY_WIDTH  = 190.0f;
         static constexpr float INVENTORY_HEIGHT = 429.0f;
+
         typedef struct tagEQUIPMENT_ITEM
         {
             int x, y;
@@ -77,6 +77,7 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         CNewUI3DRenderMng* m_pNewUI3DRenderMng;
         CNewUIInventoryCtrl* m_pNewInventoryCtrl;
+        CNewUIInventoryActionController m_ActionController;
         POINT m_Pos;
 
         EQUIPMENT_ITEM m_EquipmentSlots[MAX_EQUIPMENT_INDEX];
@@ -88,7 +89,7 @@ namespace SEASON3B
         CNewUIButton m_BtnExpand;
 
         MYSHOP_MODE m_MyShopMode;
-        REPAIR_MODE m_RepairMode;
+        SEASON3B::REPAIR_MODE m_RepairMode;
         DWORD m_dwStandbyItemKey;
 
         bool m_bRepairEnableLevel;
@@ -105,7 +106,12 @@ namespace SEASON3B
         void UnequipItem(int iIndex);
         void UnequipAllItems();
 
-        bool IsEquipable(int iIndex, ITEM* pItem);
+        SEASON3B::REPAIR_MODE GetRepairMode() const override;
+        bool IsEquipable(int iIndex, ITEM* pItem) const override;
+        void ResetMouseRButton() override;
+        void ResetMouseLButton() override;
+        int  FindEmptySlot(ITEM* pItem) const override;
+        bool IsRepairEnableLevel() const override;
 
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const;
         void DeleteItem(int iIndex) const;
@@ -114,12 +120,11 @@ namespace SEASON3B
         void SetPos(int x, int y);
         const POINT& GetPos() const;
 
-        REPAIR_MODE GetRepairMode() const;
         void SetRepairMode(bool bRepair);
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
         BOOL IsInvenItem(const short sType);
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
+#endif
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
@@ -132,35 +137,32 @@ namespace SEASON3B
         void OpenningProcess();
         void ClosingProcess();
 
-        float GetLayerDepth();	//. 4.2f
+        float GetLayerDepth();
 
         CNewUIInventoryCtrl* GetInventoryCtrl() const;
 
         ITEM* FindItem(int iLinealPos) const;
         ITEM* FindItemByKey(DWORD dwKey) const;
-        int FindItemIndex(short int siType, int iLevel = -1) const;
-        int FindItemReverseIndex(short sType, int iLevel = -1) const;
-        int FindEmptySlot(IN int cx, IN int cy) const;
-        int FindEmptySlot(ITEM* pItem) const;
-        int FindEmptySlotIncludingExtensions(IN int cx, IN int cy) const;
-        int FindEmptySlotIncludingExtensions(ITEM* pItem) const;
-        bool IsItem(short int siType, bool bcheckPick = false) const;
-        int	GetNumItemByKey(DWORD dwItemKey) const;
-        int GetNumItemByType(short sItemType) const;
-        BYTE GetDurabilityPointedItem() const;
-        int GetPointedItemIndex() const;
-        int FindManaItemIndex() const;
-        int FindHealingItemIndex() const;
+        int   FindItemIndex(short int siType, int iLevel = -1) const;
+        int   FindItemReverseIndex(short sType, int iLevel = -1) const;
+        int   FindEmptySlot(IN int cx, IN int cy) const;
+        int   FindEmptySlotIncludingExtensions(IN int cx, IN int cy) const;
+        int   FindEmptySlotIncludingExtensions(ITEM* pItem) const;
+        bool  IsItem(short int siType, bool bcheckPick = false) const;
+        int   GetNumItemByKey(DWORD dwItemKey) const;
+        int   GetNumItemByType(short sItemType) const;
+        BYTE  GetDurabilityPointedItem() const;
+        int   GetPointedItemIndex() const;
+        int   FindManaItemIndex() const;
+        int   FindHealingItemIndex() const;
 
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
-        //. Exporting Functions
-        void SetStandbyItemKey(DWORD dwItemKey);
+        void  SetStandbyItemKey(DWORD dwItemKey);
         DWORD GetStandbyItemKey() const;
-        int GetStandbyItemIndex() const;
+        int   GetStandbyItemIndex() const;
         ITEM* GetStandbyItem() const;
 
-        bool IsRepairEnableLevel() const;
         void SetRepairEnableLevel(bool bOver);
 
         void ChangeMyShopButtonStateOpen();
@@ -172,6 +174,7 @@ namespace SEASON3B
 
         static bool CanRegisterItemHotKey(int iType);
         static bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl);
+
     protected:
         void DeleteEquippingEffect();
         void DeleteEquippingEffectBug(ITEM* pItem);
@@ -191,24 +194,14 @@ namespace SEASON3B
         void RenderInventoryDetails() const;
 
         bool EquipmentWindowProcess();
-        static bool RepairItemAtMousePoint(CNewUIInventoryCtrl* targetControl);
-        static bool ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem,
-            int iSourceIndex, int iTargetIndex);
-        static bool TryStackItems(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex,
-            int iTargetIndex);
-        static bool TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, const int iIndex);
-        static bool TryTransferBetweenInventorySections(CNewUIInventoryCtrl* sourceControl);
-
         bool InventoryProcess() const;
         bool BtnProcess();
 
         void RenderItemToolTip(int iSlotIndex) const;
         bool CanOpenMyShopInterface();
         void ToggleRepairMode();
-
-        void ResetMouseLButton();
-        void ResetMouseRButton();
     };
-}
+
+} // namespace SEASON3B
 
 #endif // !defined(AFX_NEWUIMYINVENTORY_H__74DA6D7A_CF5A_46E9_8C72_9D38F0DC95EC__INCLUDED_)
