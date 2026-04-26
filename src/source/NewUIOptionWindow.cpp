@@ -819,18 +819,12 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
                      SWP_SHOWWINDOW | SWP_FRAMECHANGED);
     }
 
-    // Now state is fully in sync; recreate fonts + the text-buffer DIB at the
-    // correct size.
-    WindowWidth        = newWidth;
-    WindowHeight       = newHeight;
-    g_fScreenRate_x    = (float)WindowWidth  / (float)REFERENCE_WIDTH;
-    g_fScreenRate_y    = (float)WindowHeight / (float)REFERENCE_HEIGHT;
-    OpenglWindowWidth  = (int)WindowWidth;
-    OpenglWindowHeight = (int)WindowHeight;
+    // SetWindowPos above triggered WM_SIZE synchronously, which already set
+    // WindowWidth/Height/screen rates and called ReinitializeFonts() and
+    // UpdateResolutionDependentSystems(). Don't repeat that work here — just
+    // persist the new size in config.
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
-    ReinitializeFonts();
-    UpdateResolutionDependentSystems();
 
     // Fullscreen SetWindowPos with SWP_FRAMECHANGED deactivated the window;
     // re-assert focus and activation so subsequent clicks aren't dropped.
