@@ -3271,7 +3271,7 @@ void RenderObjectVisual(OBJECT* o)
     }
 }
 
-void RenderObjects(ICamera* camera)
+void RenderObjects()
 {
 #ifdef _EDITOR
     s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
@@ -3489,9 +3489,8 @@ void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate, int Select, int
     }
 }
 
-void RenderObjects_AfterCharacter(ICamera* camera)
+void RenderObjects_AfterCharacter()
 {
-    // Phase 3: Accept optional camera parameter for direct culling
     if (!(gMapManager.WorldActive == WD_37KANTURU_1ST || gMapManager.WorldActive == WD_38KANTURU_2ND || gMapManager.WorldActive == WD_39KANTURU_3RD
         || gMapManager.WorldActive == WD_40AREA_FOR_GM
         || gMapManager.WorldActive == WD_41CHANGEUP3RD_1ST

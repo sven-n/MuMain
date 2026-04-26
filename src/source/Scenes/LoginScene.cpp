@@ -406,21 +406,18 @@ bool NewRenderLogInScene(HDC hDC)
     // don't restrict the render loop.
     ResetFrustrumBoundsFullTerrain();
 
-    // Get active camera for rendering (frustum already updated in camera Update())
-    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
-
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
         RenderTerrain(false);
         RenderCharactersClient();
         RenderMount();
-        RenderObjects(activeCamera);
+        RenderObjects();
         RenderJoints();
         RenderEffects();
         CheckSprites();
         RenderLeaves();
         RenderBoids();
-        RenderObjects_AfterCharacter(activeCamera);
+        RenderObjects_AfterCharacter();
         ThePetProcess().RenderPets();
     }
 

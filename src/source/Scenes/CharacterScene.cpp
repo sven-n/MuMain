@@ -293,10 +293,8 @@ static void ApplySelectedCharacterLighting()
  */
 static void RenderCharacterScene3D()
 {
-    ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
-
     RenderTerrain(false);
-    RenderObjects(activeCamera);
+    RenderObjects();
     RenderCharactersClient();
 
     if (!CUIMng::Instance().IsCursorOnUI())
@@ -308,7 +306,7 @@ static void RenderCharacterScene3D()
     RenderEffects();
     ThePetProcess().RenderPets();
     RenderBoids();
-    RenderObjects_AfterCharacter(activeCamera);
+    RenderObjects_AfterCharacter();
     CheckSprites();
 }
 
