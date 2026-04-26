@@ -2056,8 +2056,11 @@ static void ComputeIterationBoundsFromHull()
     FrustrumBoundMaxY = (int)(maxY) / T * T + T;
     FrustrumBoundMinX = std::max(FrustrumBoundMinX, 0);
     FrustrumBoundMinY = std::max(FrustrumBoundMinY, 0);
-    FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE_MASK - T);
-    FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE_MASK - T);
+    // Clamp so the final 4×4 block fits in [TERRAIN_SIZE_MASK]. With T=4 this is
+    // TERRAIN_SIZE - T = 252; clamping to TERRAIN_SIZE_MASK - T (= 251) would
+    // leave tiles 252–255 at the high edge of the map permanently un-iterated.
+    FrustrumBoundMaxX = std::min(FrustrumBoundMaxX, TERRAIN_SIZE - T);
+    FrustrumBoundMaxY = std::min(FrustrumBoundMaxY, TERRAIN_SIZE - T);
 }
 
 // Build a CW convex hull from points projected to tile-space XY, storing into
