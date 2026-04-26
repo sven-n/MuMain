@@ -3096,29 +3096,6 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
             if (TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) || g_Camera.TopViewEnable)
             {
                 RenderTerrainTile(xf, yf, xi + j, yi + i, lodf, lodi, EditFlag);
-
-#ifdef _EDITOR
-                if (!EditFlag && s_bShowTileGrid)
-                {
-                    float sx = xf * TERRAIN_SCALE;
-                    float sy = yf * TERRAIN_SCALE;
-                    float z0 = RequestTerrainHeight(sx, sy) + 2.0f;
-                    float z1 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + 2.0f;
-                    float z2 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + 2.0f;
-                    float z3 = RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + 2.0f;
-
-                    glDisable(GL_TEXTURE_2D);
-                    glDisable(GL_LIGHTING);
-                    glColor4f(0.0f, 1.0f, 1.0f, 0.4f);
-                    glBegin(GL_LINE_LOOP);
-                    glVertex3f(sx, sy, z0);
-                    glVertex3f(sx + TERRAIN_SCALE, sy, z1);
-                    glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, z2);
-                    glVertex3f(sx, sy + TERRAIN_SCALE, z3);
-                    glEnd();
-                    glEnable(GL_TEXTURE_2D);
-                }
-#endif
             }
             xf += lodf;
         }
@@ -3194,6 +3171,63 @@ void RenderTerrainFrustrum_After(bool EditFlag)
 extern int SelectMapping;
 extern void RenderCharactersClient();
 
+#ifdef _EDITOR
+// Batched tile-grid debug pass. Mirrors the same visible-tile iteration as
+// RenderTerrainFrustrum -> RenderTerrainBlock, but emits ALL line segments inside
+// a single glBegin(GL_LINES) with GL state toggled once. The previous per-tile
+// glDisable(GL_TEXTURE_2D)/glBegin/glEnd/glEnable cost ~9 GL calls + state
+// changes per visible tile and tanked FPS when the toggle was on.
+static void RenderTileGridDebug()
+{
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glColor4f(0.0f, 1.0f, 1.0f, 0.4f);
+    glBegin(GL_LINES);
+
+    int byi = FrustrumBoundMinY;
+    auto byf = (float)byi;
+    for (; byi <= FrustrumBoundMaxY; byi += 4, byf += 4.f)
+    {
+        int bxi = FrustrumBoundMinX;
+        auto bxf = (float)bxi;
+        for (; bxi <= FrustrumBoundMaxX; bxi += 4, bxf += 4.f)
+        {
+            if (!TestFrustrum2D(bxf + 2.f, byf + 2.f, g_fFrustumRange) && !g_Camera.TopViewEnable)
+                continue;
+
+            // 4x4 sub-tile expansion mirroring RenderTerrainBlock
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    float xf = bxf + (float)j;
+                    float yf = byf + (float)i;
+                    if (!TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) && !g_Camera.TopViewEnable)
+                        continue;
+
+                    float sx = xf * TERRAIN_SCALE;
+                    float sy = yf * TERRAIN_SCALE;
+                    float z00 = RequestTerrainHeight(sx, sy) + 2.0f;
+                    float z10 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + 2.0f;
+                    float z11 = RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + 2.0f;
+                    float z01 = RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + 2.0f;
+
+                    // GL_LINE_LOOP expanded to GL_LINES (4 segments × 2 verts = 8 verts/tile)
+                    glVertex3f(sx, sy, z00);                                glVertex3f(sx + TERRAIN_SCALE, sy, z10);
+                    glVertex3f(sx + TERRAIN_SCALE, sy, z10);                glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, z11);
+                    glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, z11); glVertex3f(sx, sy + TERRAIN_SCALE, z01);
+                    glVertex3f(sx, sy + TERRAIN_SCALE, z01);                glVertex3f(sx, sy, z00);
+                }
+            }
+        }
+    }
+
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
+}
+#endif
+
 void RenderTerrain(bool EditFlag)
 {
     if (!EditFlag)
@@ -3239,6 +3273,10 @@ void RenderTerrain(bool EditFlag)
             TerrainFlag = TERRAIN_MAP_GRASS;
             RenderTerrainFrustrum(EditFlag);
         }
+#ifdef _EDITOR
+        if (s_bShowTileGrid)
+            RenderTileGridDebug();
+#endif
         DisableDepthTest();
         EnableCullFace();
         RenderPointers();
