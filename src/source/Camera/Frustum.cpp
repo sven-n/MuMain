@@ -46,7 +46,7 @@ Frustum::Frustum()
         Vector(0.f, 0.f, 0.f, m_TerrainFarVertices[i]);
     }
 
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < MAX_2D_HULL_POINTS; i++)
     {
         m_2DX[i] = 0.f;
         m_2DY[i] = 0.f;
@@ -94,22 +94,24 @@ void Frustum::BuildFromCamera(const vec3_t position, const vec3_t forward, const
 void Frustum::SetCustom2DHull(const float* xs, const float* ys, int count)
 {
     if (!xs || !ys || count <= 0) return;
-    if (count > 12) count = 12;
+    if (count > MAX_2D_HULL_POINTS) count = MAX_2D_HULL_POINTS;
 
     // Run the points through SortPoints2D + ConvexHullCCW to produce a proper
     // convex hull in CCW order. Callers (e.g. OrbitalCamera) pass frustum corners
     // in view-space walking order, which is NOT the hull outline — rendering
     // would connect edges across the hull interior and look broken. The hull
     // computation fixes the winding for any input order.
-    Point2D input[12];
+    Point2D input[MAX_2D_HULL_POINTS];
     for (int i = 0; i < count; i++) { input[i].x = xs[i]; input[i].y = ys[i]; }
 
     SortPoints2D(input, count);
 
-    Point2D hull[24];  // 2 * count worst case
-    int k = ConvexHullCCW(input, count, hull, 24);
+    // Andrew's monotone chain produces at most `count` hull points for `count`
+    // inputs; bounding the output buffer to MAX_2D_HULL_POINTS makes the
+    // capacity match m_2DX/m_2DY storage so no truncation can happen.
+    Point2D hull[MAX_2D_HULL_POINTS];
+    int k = ConvexHullCCW(input, count, hull, MAX_2D_HULL_POINTS);
 
-    if (k > 12) k = 12;
     for (int i = 0; i < k; i++) { m_2DX[i] = hull[i].x; m_2DY[i] = hull[i].y; }
     m_2DCount = k;
 }
@@ -276,11 +278,10 @@ void Frustum::Calculate2DProjection()
 {
     // Project frustum vertices to XY ground plane in tile coordinates (world / TERRAIN_SCALE).
     // Include terrain-cull far vertices if present (extends 2D hull beyond 3D far plane).
-    constexpr int MAX_HULL_POINTS = 12;   // 8 frustum corners + 4 terrain-extension corners
     constexpr float WORLD_TO_TILE = 1.0f / TERRAIN_SCALE;
 
     int numPts = 8 + (m_bHasTerrainExtension ? 4 : 0);
-    Point2D pts[MAX_HULL_POINTS];
+    Point2D pts[MAX_2D_HULL_POINTS];
 
     for (int i = 0; i < 8; i++)
     {
@@ -298,8 +299,8 @@ void Frustum::Calculate2DProjection()
 
     SortPoints2D(pts, numPts);
 
-    Point2D hull[MAX_HULL_POINTS];
-    int k = ConvexHullCCW(pts, numPts, hull, MAX_HULL_POINTS);
+    Point2D hull[MAX_2D_HULL_POINTS];
+    int k = ConvexHullCCW(pts, numPts, hull, MAX_2D_HULL_POINTS);
 
     // Reverse to CW order (the original TestFrustrum2D cross-product test expects CW winding)
     m_2DCount = k;

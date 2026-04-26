@@ -158,9 +158,10 @@ private:
     AABB m_BoundingBox;
 
     // 2D ground-plane projection (convex hull of vertices projected to XY, in tile coords)
-    // Max 12 points: 8 frustum corners + up to 4 terrain-cull far corners
-    float m_2DX[12];
-    float m_2DY[12];
+    // 8 frustum corners + up to 4 terrain-cull far corners
+    static constexpr int MAX_2D_HULL_POINTS = 12;
+    float m_2DX[MAX_2D_HULL_POINTS];
+    float m_2DY[MAX_2D_HULL_POINTS];
     int m_2DCount;
 
     // Extended terrain cull far vertices (when terrainCullDist > farDist)
