@@ -29,7 +29,7 @@ void CameraProjection::SetupPerspective(CameraState& state, float fov, float asp
 
     state.ScreenCenterX = OpenglWindowX + vpWidth / 2;
     state.ScreenCenterY = OpenglWindowY + vpHeight / 2;
-    state.ScreenCenterYFlip = WindowWidth - state.ScreenCenterY;
+    state.ScreenCenterYFlip = WindowHeight - state.ScreenCenterY;
 
     float fovRad = fov * 0.5f * Q_PI / 180.0f;
     state.PerspectiveX = tanf(fovRad) / (float)(vpWidth / 2) * aspect;
