@@ -2129,9 +2129,12 @@ static void ExpandHullOutward(float offset)
         {
             bx /= blen;
             by /= blen;
-            // Scale by 1/cos(halfAngle) to maintain perpendicular offset distance
+            // Scale by 1/cos(halfAngle) to maintain perpendicular offset distance.
+            // Clamp cosHalf at BISECTOR_COS_MIN so the expansion is continuous at
+            // very flat corners (cap at offset / BISECTOR_COS_MIN) rather than
+            // jumping to a fixed multiplier.
             float cosHalf = n1x * bx + n1y * by;
-            float scale = (cosHalf > BISECTOR_COS_MIN) ? (offset / cosHalf) : (offset * 2.0f);
+            float scale = offset / std::max(cosHalf, BISECTOR_COS_MIN);
             newX[i] = FrustrumX[i] + bx * scale;
             newY[i] = FrustrumY[i] + by * scale;
         }
