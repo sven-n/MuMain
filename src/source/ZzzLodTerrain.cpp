@@ -2012,9 +2012,6 @@ static vec3_t FrustrumVertex[5];
 static vec3_t FrustrumFaceNormal[5];
 static float  FrustrumFaceD[5];
 
-// Cached per-frame camera pointer for TestFrustrum shim
-static ICamera* s_pCachedCamera = nullptr;
-
 extern int GetScreenWidth();
 
 namespace
@@ -2817,7 +2814,6 @@ void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, 
 
 void CacheActiveFrustum()
 {
-    s_pCachedCamera = CameraManager::Instance().GetActiveCamera();
 #ifdef _EDITOR
     s_bShowTileGrid = DevEditor_ShouldShowTileGrid();
 #endif
