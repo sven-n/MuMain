@@ -2001,11 +2001,12 @@ int     FrustrumBoundMinY = 0;
 int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
-// 2D frustum convex hull vertices (in tile coordinates, i.e. world * 0.01)
-// Up to 12 vertices when using camera's projected frustum (8 frustum + 4 terrain cull extension),
-// 4 for legacy trapezoid.
-float FrustrumX[12];
-float FrustrumY[12];
+// 2D frustum convex hull vertices (in tile coordinates, i.e. world * 0.01).
+// Up to MAX_HULL_VERTICES vertices: 8 camera frustum corners + 4 terrain-cull
+// extension corners (legacy trapezoid uses 4).
+static constexpr int MAX_HULL_VERTICES = 12;
+float FrustrumX[MAX_HULL_VERTICES];
+float FrustrumY[MAX_HULL_VERTICES];
 int FrustrumCount = 4;
 
 // 3D frustum data (used by TestFrustrum / 3D culling)
@@ -2017,10 +2018,6 @@ extern int GetScreenWidth();
 
 namespace
 {
-    // Max vertices in the 2D frustum hull. Matches the capacity of FrustrumX/Y and is
-    // large enough for 8 frustum corners + 4 terrain-extension corners.
-    constexpr int MAX_HULL_VERTICES = 12;
-
     // Iteration bounds are snapped to a tile grid of this size so we iterate whole LOD tiles.
     constexpr int TERRAIN_ITERATION_TILE = 4;
 
@@ -2305,8 +2302,9 @@ void CreateFrustrum2D(vec3_t Position)
             float B = g_Camera.Matrix[2][1] * 100.0f;
             float D = g_Camera.Matrix[2][3] + terrainDist;
 
-            // Sutherland-Hodgman: clip polygon against half-plane A*x + B*y + D >= 0
-            float clipX[24], clipY[24];
+            // Sutherland-Hodgman: clip polygon against half-plane A*x + B*y + D >= 0.
+            // Single-plane clip can at most double the vertex count temporarily.
+            float clipX[2 * MAX_HULL_VERTICES], clipY[2 * MAX_HULL_VERTICES];
             int clipCount = 0;
 
             for (int i = 0; i < FrustrumCount; i++)
@@ -2332,7 +2330,7 @@ void CreateFrustrum2D(vec3_t Position)
                 }
             }
 
-            if (clipCount >= 3 && clipCount <= 12)
+            if (clipCount >= 3 && clipCount <= MAX_HULL_VERTICES)
             {
                 FrustrumCount = clipCount;
                 for (int i = 0; i < clipCount; i++)
