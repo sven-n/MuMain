@@ -583,7 +583,10 @@ void BeginOpengl(int x, int y, int Width, int Height)
         glFogi(GL_FOG_MODE, GL_LINEAR);
 
         // Fog scales dynamically with view distance (g_Camera.ViewFar) so it
-        // stays at consistent percentages when zooming. Default: 80%/90%.
+        // stays at consistent percentages when zooming. The actual GL far clip
+        // plane is at g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER (1.4 — see
+        // SetupPerspective), so fogStart=1.0×/fogEnd=1.25× both sit inside
+        // the visible range and fog completes before the clip plane.
         float fogStart = g_Camera.ViewFar * 1.00f;
         float fogEnd   = g_Camera.ViewFar * 1.25f;
 
