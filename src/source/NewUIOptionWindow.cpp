@@ -196,9 +196,14 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
             if (m_bWindowedMode)
             {
                 // Fullscreen → windowed: restore default display mode + OS-framed style.
+                // Use the same restrictive style as the initial CreateWindow path
+                // (Winmain.cpp) and ApplyResolution() so window behaviour is identical
+                // regardless of which UI route the user took to enter windowed mode.
                 ChangeDisplaySettings(nullptr, 0);
 
-                DWORD style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
+                DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU
+                            | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN
+                            | WS_VISIBLE;
                 SetWindowLongPtr(g_hWnd, GWL_STYLE, style);
 
                 RECT windowRect = { 0, 0, (LONG)WindowWidth, (LONG)WindowHeight };
