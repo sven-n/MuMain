@@ -1085,6 +1085,15 @@ void ReinitializeFonts()
     }
 }
 
+DWORD GetDesktopBitsPerPel()
+{
+    DEVMODE dm = {};
+    dm.dmSize = sizeof(dm);
+    if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm))
+        return dm.dmBitsPerPel;
+    return 32;
+}
+
 void UpdateCursorClip()
 {
     // Confine cursor in fullscreen + active only. In windowed mode the user
@@ -1259,19 +1268,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         // (which defaulted to 16), but modern displays don't expose <32bpp modes — so
         // the loop matched nothing, ChangeDisplaySettings was never called, and the
         // game ended up as a small popup on top of the desktop instead of true fullscreen.
-        // Query the current desktop bit depth so we don't hardcode 32 on configurations
-        // that still run at a different depth.
-        DEVMODE dmCurrent = {};
-        dmCurrent.dmSize = sizeof(dmCurrent);
-        DWORD dwDesktopBpp = 32;
-        if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dmCurrent))
-            dwDesktopBpp = dmCurrent.dmBitsPerPel;
-
         DEVMODE dmScreenSettings = {};
         dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
         dmScreenSettings.dmPelsWidth  = WindowWidth;
         dmScreenSettings.dmPelsHeight = WindowHeight;
-        dmScreenSettings.dmBitsPerPel = dwDesktopBpp;
+        dmScreenSettings.dmBitsPerPel = GetDesktopBitsPerPel();
         dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
         if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)

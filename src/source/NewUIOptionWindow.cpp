@@ -23,6 +23,7 @@ extern bool g_bWndActive;
 void ReinitializeFonts();
 void UpdateResolutionDependentSystems();
 void UpdateCursorClip();
+DWORD GetDesktopBitsPerPel();
 float ConvertX(float x);
 float ConvertY(float y);
 
@@ -231,15 +232,15 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
             else
             {
                 // Windowed → fullscreen: try to change display mode to current
-                // (WindowWidth × WindowHeight, 32bpp). Windows can reject this
-                // when a previous display change is still settling, so use a
-                // drain-pump + retry loop, and first force-reset the display
+                // (WindowWidth × WindowHeight, desktop bpp). Windows can reject
+                // this when a previous display change is still settling, so use
+                // a drain-pump + retry loop, and first force-reset the display
                 // so we always start from a known clean desktop mode.
                 DEVMODE dmScreenSettings = {};
                 dmScreenSettings.dmSize        = sizeof(dmScreenSettings);
                 dmScreenSettings.dmPelsWidth   = WindowWidth;
                 dmScreenSettings.dmPelsHeight  = WindowHeight;
-                dmScreenSettings.dmBitsPerPel  = 32;
+                dmScreenSettings.dmBitsPerPel  = GetDesktopBitsPerPel();
                 dmScreenSettings.dmFields      = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
                 auto pumpMessages = []()
@@ -789,7 +790,7 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
         dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
         dmScreenSettings.dmPelsWidth  = newWidth;
         dmScreenSettings.dmPelsHeight = newHeight;
-        dmScreenSettings.dmBitsPerPel = 32;
+        dmScreenSettings.dmBitsPerPel = GetDesktopBitsPerPel();
         dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
         if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
