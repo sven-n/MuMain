@@ -406,7 +406,7 @@ bool SEASON3B::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOffset)
         if (x < 0)
             level = 0;
         else
-            level = (int)(((float)MAX_VOLUME * x) / (float)SLIDER_WIDTH);
+            level = (int)(((float)MAX_VOLUME * x) / (float)SLIDER_WIDTH + 0.5f);
     }
 
     // Clamp once after all adjustments
@@ -449,7 +449,7 @@ void SEASON3B::CNewUIOptionWindow::HandleRenderLevelSlider()
         return;
 
     int x = MouseX - (m_Pos.x + RENDER_SLIDER_X_LOCAL);
-    m_iRenderLevel = (int)((RENDER_LEVEL_MAX * x) / (float)RENDER_SLIDER_WIDTH);
+    m_iRenderLevel = (int)((RENDER_LEVEL_MAX * x) / (float)RENDER_SLIDER_WIDTH + 0.5f);
 }
 
 
