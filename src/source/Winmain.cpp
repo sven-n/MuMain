@@ -1254,16 +1254,24 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     if (g_bUseWindowMode == FALSE && g_bUseFullscreenMode == TRUE)
     {
-        // Force an exclusive fullscreen mode change at WindowWidth × WindowHeight @ 32bpp.
+        // Force an exclusive fullscreen mode change at WindowWidth × WindowHeight.
         // The old path iterated EnumDisplaySettings looking for a match at dwBitsPerPel
         // (which defaulted to 16), but modern displays don't expose <32bpp modes — so
         // the loop matched nothing, ChangeDisplaySettings was never called, and the
         // game ended up as a small popup on top of the desktop instead of true fullscreen.
+        // Query the current desktop bit depth so we don't hardcode 32 on configurations
+        // that still run at a different depth.
+        DEVMODE dmCurrent = {};
+        dmCurrent.dmSize = sizeof(dmCurrent);
+        DWORD dwDesktopBpp = 32;
+        if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dmCurrent))
+            dwDesktopBpp = dmCurrent.dmBitsPerPel;
+
         DEVMODE dmScreenSettings = {};
         dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
         dmScreenSettings.dmPelsWidth  = WindowWidth;
         dmScreenSettings.dmPelsHeight = WindowHeight;
-        dmScreenSettings.dmBitsPerPel = 32;
+        dmScreenSettings.dmBitsPerPel = dwDesktopBpp;
         dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
         if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
