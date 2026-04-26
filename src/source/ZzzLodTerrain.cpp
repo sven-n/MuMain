@@ -3179,6 +3179,11 @@ extern void RenderCharactersClient();
 // changes per visible tile and tanked FPS when the toggle was on.
 static void RenderTileGridDebug()
 {
+    // Snapshot/restore GL_TEXTURE_2D + GL_LIGHTING enable state around the pass.
+    // Terrain wants texture on / lighting off; characters, objects, and effects
+    // rendered AFTER us inherit whatever we leave behind, so guessing the right
+    // post-pass state breaks somebody. Push/pop is the only safe option.
+    glPushAttrib(GL_ENABLE_BIT);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
     glColor4f(0.0f, 1.0f, 1.0f, 0.4f);
@@ -3223,8 +3228,7 @@ static void RenderTileGridDebug()
     }
 
     glEnd();
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
+    glPopAttrib();
 }
 #endif
 
