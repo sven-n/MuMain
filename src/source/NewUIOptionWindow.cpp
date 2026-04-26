@@ -406,7 +406,7 @@ bool SEASON3B::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOffset)
         if (x < 0)
             level = 0;
         else
-            level = (int)(((float)MAX_VOLUME * x) / (float)SLIDER_WIDTH) + 1;
+            level = (int)(((float)MAX_VOLUME * x) / (float)SLIDER_WIDTH);
     }
 
     // Clamp once after all adjustments
