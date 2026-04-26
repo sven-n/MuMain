@@ -46,6 +46,19 @@ namespace
 
     // Sentinel value used to invalidate the frustum cache (forces next-frame rebuild)
     constexpr float CACHE_INVALIDATE_SENTINEL = -999999.0f;
+
+    // Camera position tuning constants. The values were inherited as magic
+    // numbers in the legacy code; they're kept identical here, just named.
+    constexpr float TOUR_VIEWFAR_PER_LEVEL = 390.f;          // ViewFar = 390 * tourLevel
+    constexpr float DIRECTION_MODE_HERO_Z = 300.0f;          // Hero Z when in direction mode
+    constexpr float BATTLE_CASTLE_CAMERA_Z = 255.f;          // Forced camera Z inside Battle Castle
+    constexpr float TW_HEIGHT_CAMERA_Z = 1200.f;             // Camera Z on tiles flagged TW_HEIGHT
+    constexpr float CAMERA_DISTANCE_HEIGHT_OFFSET = 150.f;   // Subtracted from Distance for Z
+    constexpr float CUSTOM_DISTANCE_PITCH_DEG = -45.f;       // Pitch used for custom-distance offset
+
+    constexpr float TOUR_BASE_DISTANCE = 1100.f;             // Base distance in tour & Battle Castle
+    constexpr float CAMERA_DISTANCE_LEVEL_BASE = 1300.f;     // Distance at g_shCameraLevel == 0
+    constexpr float CAMERA_DISTANCE_LEVEL_STEP = 100.f;      // Per-level increment
 }
 
 DefaultCamera::DefaultCamera(CameraState& state)
@@ -541,7 +554,7 @@ void DefaultCamera::CalculateCameraPosition()
     {
         CCameraMove::GetInstancePtr()->UpdateTourWayPoint();
         CCameraMove::GetInstancePtr()->GetCurrentCameraPos(Position);
-        m_State.ViewFar = 390.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
+        m_State.ViewFar = TOUR_VIEWFAR_PER_LEVEL * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
 
         // Tour mode handles camera completely - set position and return
         VectorAdd(Position, TransformPosition, m_State.Position);
@@ -565,7 +578,7 @@ void DefaultCamera::CalculateCameraPosition()
 
     if (g_Direction.IsDirection() && !g_Direction.m_bDownHero)
     {
-        Hero->Object.Position[2] = 300.0f;
+        Hero->Object.Position[2] = DIRECTION_MODE_HERO_Z;
         g_shCameraLevel = g_Direction.GetCameraPosition(Position);
     }
     else if (gMapManager.IsPKField() || IsDoppelGanger2())
@@ -588,7 +601,7 @@ void DefaultCamera::CalculateCameraPosition()
 
     if (gMapManager.InBattleCastle())
     {
-        m_State.Position[2] = 255.f;
+        m_State.Position[2] = BATTLE_CASTLE_CAMERA_Z;
     }
     else if (!CCameraMove::GetInstancePtr()->IsTourMode())
     {
@@ -597,9 +610,9 @@ void DefaultCamera::CalculateCameraPosition()
 
     if ((TerrainWall[iIndex] & TW_HEIGHT) == TW_HEIGHT)
     {
-        m_State.Position[2] = g_fSpecialHeight = 1200.f + 1;
+        m_State.Position[2] = g_fSpecialHeight = TW_HEIGHT_CAMERA_Z + 1;
     }
-    m_State.Position[2] += m_State.Distance - 150.f;
+    m_State.Position[2] += m_State.Distance - CAMERA_DISTANCE_HEIGHT_OFFSET;
 
     // Raise camera when mounted (smooth lerp computed in AdjustHeroHeight).
     // Character stays on the ground; only the camera view lifts.
@@ -608,7 +621,7 @@ void DefaultCamera::CalculateCameraPosition()
     // Apply custom camera distance for special terrain
     if (m_State.CustomDistance != 0.f)
     {
-        vec3_t angle = { 0.f, 0.f, -45.f };
+        vec3_t angle = { 0.f, 0.f, CUSTOM_DISTANCE_PITCH_DEG };
         Vector(0.f, m_State.CustomDistance, 0.f, Position);
         AngleMatrix(angle, Matrix);
         VectorIRotate(Position, Matrix, TransformPosition);
@@ -696,25 +709,25 @@ void DefaultCamera::UpdateCameraDistance()
     }
     else if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
-        m_State.DistanceTarget = 1100.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;
+        m_State.DistanceTarget = TOUR_BASE_DISTANCE * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;
         m_State.Distance = m_State.DistanceTarget;
     }
     else
     {
         if (gMapManager.InBattleCastle())
         {
-            m_State.DistanceTarget = 1100.f;
+            m_State.DistanceTarget = TOUR_BASE_DISTANCE;
             m_State.Distance = m_State.DistanceTarget;
         }
         else
         {
             switch (g_shCameraLevel)
             {
-            case 0: m_State.DistanceTarget = 1300.f; break;  // +300 (3 scroll ticks)
-            case 1: m_State.DistanceTarget = 1400.f; break;  // +300
-            case 2: m_State.DistanceTarget = 1500.f; break;  // +300
-            case 3: m_State.DistanceTarget = 1600.f; break;  // +300
-            case 4: m_State.DistanceTarget = 1700.f; break;  // +300
+            case 0: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 0 * CAMERA_DISTANCE_LEVEL_STEP; break;
+            case 1: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 1 * CAMERA_DISTANCE_LEVEL_STEP; break;
+            case 2: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 2 * CAMERA_DISTANCE_LEVEL_STEP; break;
+            case 3: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 3 * CAMERA_DISTANCE_LEVEL_STEP; break;
+            case 4: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 4 * CAMERA_DISTANCE_LEVEL_STEP; break;
             case 5: m_State.DistanceTarget = g_Direction.m_fCameraViewFar; break;
             }
 
