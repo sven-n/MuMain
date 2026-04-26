@@ -112,8 +112,16 @@ void Frustum::SetCustom2DHull(const float* xs, const float* ys, int count)
     Point2D hull[MAX_2D_HULL_POINTS];
     int k = ConvexHullCCW(input, count, hull, MAX_2D_HULL_POINTS);
 
-    for (int i = 0; i < k; i++) { m_2DX[i] = hull[i].x; m_2DY[i] = hull[i].y; }
+    // Reverse to CW order — TestPoint2D's cross-product winding test expects
+    // CW. Calculate2DProjection does the same flip; without it the cull test
+    // inverts and tiles inside the custom hull get culled instead of those
+    // outside (visible when DevEditor's orbital trapezoid override is active).
     m_2DCount = k;
+    for (int i = 0; i < k; i++)
+    {
+        m_2DX[i] = hull[k - 1 - i].x;
+        m_2DY[i] = hull[k - 1 - i].y;
+    }
 }
 
 void Frustum::CalculateFrustumVertices(const vec3_t position, const vec3_t forward,
