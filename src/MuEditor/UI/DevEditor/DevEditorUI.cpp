@@ -459,14 +459,18 @@ void CDevEditorUI::RenderScenesDebugSection()
 {
     ImGui::Indent();
 
-    // Debug visualization
-    ImGui::Checkbox("Character Cuboids", &m_ShowCharacterCullingSpheres);
-    ImGui::SameLine();
-    ImGui::Checkbox("Dropped Item Spheres", &m_ShowItemCullingSpheres);
-    ImGui::Checkbox("Tile Grid", &m_ShowTileGrid);
+    // Debug Visualization — wireframes overlaid on the scene
+    ImGui::Text("Debug Visualization:");
+    ImGui::Columns(2, nullptr, false);
+    ImGui::Checkbox("Character Pick Boxes", &m_ShowCharacterPickBoxes);
+    ImGui::Checkbox("Item Pick Boxes",      &m_ShowItemPickBoxes);
+    ImGui::NextColumn();
+    ImGui::Checkbox("Item Cull Sphere",     &m_ShowItemCullSphere);
+    ImGui::Checkbox("Tile Grid",            &m_ShowTileGrid);
+    ImGui::Columns(1);
 
     ImGui::PushItemWidth(150);
-    ImGui::InputFloat("Dropped Item Cull Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
+    ImGui::InputFloat("Item Cull Radius", &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
     if (m_CullRadiusItem < 0.0f) m_CullRadiusItem = 0.0f;
     ImGui::PopItemWidth();
 
@@ -482,10 +486,10 @@ void CDevEditorUI::RenderScenesDebugSection()
                     (int)(target[1] / WORLD_TO_TILE_DIVISOR));
     }
 
-    // Render Toggles
+    // Rendering — toggles for what gets drawn each frame
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::Text("Render Toggles:");
+    ImGui::Text("Rendering:");
 
     ImGui::Columns(2, nullptr, false);
     ImGui::Checkbox("Terrain", &m_RenderTerrain);
@@ -823,10 +827,10 @@ extern "C"
 
 // C linkage wrappers for external C code (always available, return false when _EDITOR not defined)
 extern "C" {
-    bool DevEditor_ShouldShowCharacterCullingSpheres()
+    bool DevEditor_ShouldShowCharacterPickBoxes()
     {
 #ifdef _EDITOR
-        return g_DevEditorUI.ShouldShowCharacterCullingSpheres();
+        return g_DevEditorUI.ShouldShowCharacterPickBoxes();
 #else
         return false;
 #endif
@@ -841,10 +845,19 @@ extern "C" {
 #endif
     }
 
-    bool DevEditor_ShouldShowItemCullingSpheres()
+    bool DevEditor_ShouldShowItemCullSphere()
     {
 #ifdef _EDITOR
-        return g_DevEditorUI.ShouldShowItemCullingSpheres();
+        return g_DevEditorUI.ShouldShowItemCullSphere();
+#else
+        return false;
+#endif
+    }
+
+    bool DevEditor_ShouldShowItemPickBoxes()
+    {
+#ifdef _EDITOR
+        return g_DevEditorUI.ShouldShowItemPickBoxes();
 #else
         return false;
 #endif

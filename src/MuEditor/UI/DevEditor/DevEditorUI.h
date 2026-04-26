@@ -102,8 +102,9 @@ public:
 
 
     // Debug visualization accessors
-    bool ShouldShowCharacterCullingSpheres() const { return m_ShowCharacterCullingSpheres; }
-    bool ShouldShowItemCullingSpheres() const { return m_ShowItemCullingSpheres; }
+    bool ShouldShowCharacterPickBoxes() const { return m_ShowCharacterPickBoxes; }
+    bool ShouldShowItemPickBoxes() const { return m_ShowItemPickBoxes; }
+    bool ShouldShowItemCullSphere() const { return m_ShowItemCullSphere; }
     bool ShouldShowTileGrid() const { return m_ShowTileGrid; }
 
     // Culling radius accessors
@@ -154,8 +155,9 @@ private:
     bool m_RenderMonsters = true;         // NOT IMPLEMENTED
 
     // Debug visualization flags
-    bool m_ShowCharacterCullingSpheres = false;
-    bool m_ShowItemCullingSpheres = false;
+    bool m_ShowCharacterPickBoxes = false;  // Wireframe of OBB used by SelectCharacter
+    bool m_ShowItemPickBoxes = false;       // Wireframe of OBB used by SelectItem
+    bool m_ShowItemCullSphere = false;      // Wireframe of frustum-cull sphere for items
     bool m_ShowTileGrid = false;
 
     // Runtime adjustable culling radii

@@ -41,12 +41,14 @@
 
 // DevEditor function declarations
 #ifdef _EDITOR
-extern "C" bool DevEditor_ShouldShowItemCullingSpheres();
+extern "C" bool DevEditor_ShouldShowItemCullSphere();
+extern "C" bool DevEditor_ShouldShowItemPickBoxes();
 extern "C" float DevEditor_GetCullRadiusItem();
 extern "C" float DevEditor_GetLoginObjectDist();
 
 // Per-frame cached DevEditor state
-static bool s_bShowItemCullingSpheres = false;
+static bool s_bShowItemCullSphere = false;
+static bool s_bShowItemPickBoxes = false;
 static float s_fCullRadiusItem = 0.0f;
 #endif
 
@@ -3272,7 +3274,8 @@ void RenderObjectVisual(OBJECT* o)
 void RenderObjects(ICamera* camera)
 {
 #ifdef _EDITOR
-    s_bShowItemCullingSpheres = DevEditor_ShouldShowItemCullingSpheres();
+    s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
+    s_bShowItemPickBoxes = DevEditor_ShouldShowItemPickBoxes();
     s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
 #endif
 
@@ -6417,8 +6420,8 @@ void RenderItems()
             o->Visible = TestFrustrum(o->Position, cullRadius);
 
 #ifdef _EDITOR
-            // Debug visualization: Render item culling sphere
-            if (s_bShowItemCullingSpheres)
+            // Debug visualization: frustum-cull sphere (NOT the pick volume)
+            if (s_bShowItemCullSphere)
             {
                 RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
             }
@@ -6477,6 +6480,17 @@ void RenderItems()
 
                 RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
                 VectorCopy(vBackup, o->Position);
+
+#ifdef _EDITOR
+                // Debug visualization: OBB used by SelectItem for ray-vs-pickup test.
+                // Drawn after RenderPartObject because that's what refreshes o->OBB this frame.
+                if (s_bShowItemPickBoxes)
+                {
+                    RenderDebugBox(o->OBB.StartPos,
+                                   o->OBB.XAxis[0], o->OBB.YAxis[1], o->OBB.ZAxis[2],
+                                   1.0f, 0.0f, 1.0f);  // Magenta wireframe
+                }
+#endif
 
                 vec3_t Position;
                 VectorCopy(o->Position, Position);

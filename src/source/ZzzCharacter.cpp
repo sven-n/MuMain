@@ -36,9 +36,9 @@
 
 // DevEditor function declarations
 #ifdef _EDITOR
-extern "C" bool DevEditor_ShouldShowCharacterCullingSpheres();
+extern "C" bool DevEditor_ShouldShowCharacterPickBoxes();
 
-static bool s_bShowCharacterCullingSpheres = false;
+static bool s_bShowCharacterPickBoxes = false;
 #endif
 
 namespace
@@ -11274,7 +11274,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 void RenderCharactersClient()
 {
 #ifdef _EDITOR
-    s_bShowCharacterCullingSpheres = DevEditor_ShouldShowCharacterCullingSpheres();
+    s_bShowCharacterPickBoxes = DevEditor_ShouldShowCharacterPickBoxes();
 #endif
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -11343,7 +11343,7 @@ void RenderCharactersClient()
                     battleCastle::CreateBattleCastleCharacter_Visual(c, o);
 
 #ifdef _EDITOR
-                if (s_bShowCharacterCullingSpheres)
+                if (s_bShowCharacterPickBoxes)
                     RenderCharacterPickBoxDebug(o);
 #endif
             }
