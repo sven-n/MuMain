@@ -171,6 +171,20 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
         return false;
     }
 
+    // Process the resolution combo box BEFORE checkboxes/sliders. The expanded
+    // dropdown overflows below the option window and overlaps the windowed-mode
+    // checkbox; if checkboxes ran first, a click on a dropdown item would also
+    // toggle the checkbox behind it. Consume the click here when it's inside
+    // the combo's hit box (closed widget OR open dropdown).
+    if (m_ResolutionCombo.UpdateMouseEvent())
+    {
+        m_iResolutionIndex = m_ResolutionCombo.GetSelectedIndex();
+        ApplyResolution();
+        return false;
+    }
+    if (m_ResolutionCombo.IsMouseOverWidget())
+        return false;
+
     bool oldWindowedMode = m_bWindowedMode;
     HandleCheckboxInputs();
 
@@ -342,15 +356,9 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 
     HandleRenderLevelSlider();
 
-    if (m_ResolutionCombo.UpdateMouseEvent())
-    {
-        m_iResolutionIndex = m_ResolutionCombo.GetSelectedIndex();
-        ApplyResolution();
-    }
-
-    // Consume clicks inside the window OR inside the combo's expanded dropdown
-    // (which overflows the window's bottom edge) so they don't fall through.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 362) || m_ResolutionCombo.IsMouseOverWidget())
+    // Combo box already processed at the top. Just consume clicks inside the
+    // option window itself so they don't fall through to the world.
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 362))
         return false;
 
     return true;
