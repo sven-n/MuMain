@@ -189,6 +189,12 @@ void OrbitalCamera::OnActivate(const CameraState& previousState)
     CalculateLookAtPoint(SceneFlag, lookAtPoint);
     InitializeOrbitalFromCurrentState(lookAtPoint, previousState);
 
+    // Apply zoom-scaled farPlane / cull ranges now, before the first render. The
+    // first Update() skips ComputeCameraTransform (and therefore UpdateConfigForView)
+    // to preserve the inherited pose — without this call the first frame would
+    // render with the unscaled base config and pop to zoom-scaled values on frame 2.
+    UpdateConfigForView();
+
     // Step 5: Update matrix so rendering uses inherited pose, then sync to g_Camera
     m_State.UpdateMatrix();
     SyncStateToGlobalCamera();
