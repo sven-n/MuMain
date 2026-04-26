@@ -112,6 +112,7 @@ private:
         vec3_t Position = {};
         vec3_t Angle = {};
         float ViewFar = 0.0f;
+        float AspectRatio = 0.0f;
         float EditorFOV = 0.0f;
         float EditorFarPlane = 0.0f;
         float EditorNearPlane = 0.0f;

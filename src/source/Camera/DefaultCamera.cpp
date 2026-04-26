@@ -846,6 +846,7 @@ void DefaultCamera::UpdateFrustum()
     VectorCopy(m_State.Position, m_FrustumCache.Position);
     VectorCopy(m_State.Angle, m_FrustumCache.Angle);
     m_FrustumCache.ViewFar = effectiveFarPlane;
+    m_FrustumCache.AspectRatio = aspectRatio;
 
 #ifdef _EDITOR
     if (DevEditor_IsCameraOverrideEnabled("Default"))
@@ -888,6 +889,17 @@ bool DefaultCamera::NeedsFrustumUpdate() const
 
     // Check ViewFar change
     if (fabs(m_State.ViewFar - m_FrustumCache.ViewFar) > EPSILON)
+    {
+        return true;
+    }
+
+    // Check aspect ratio change (window resize / runtime resolution switch).
+    // Frustum width depends on aspect; without this the cache would stay valid
+    // through a resize and culling at the screen edges would go stale.
+    extern unsigned int WindowWidth;
+    extern unsigned int WindowHeight;
+    const float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    if (fabs(aspectRatio - m_FrustumCache.AspectRatio) > EPSILON)
     {
         return true;
     }
