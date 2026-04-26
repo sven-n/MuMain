@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include "SceneManager.h"
+#include "../Utilities/FrameProfiler.h"
 
 //=============================================================================
 // Frame Timing State Implementation
@@ -559,6 +560,18 @@ static void RenderDebugInfo()
     // Active camera mode (cycled with F9).
     swprintf(szLine, L"Camera: %hs", CameraModeToString(CameraManager::Instance().GetCurrentMode()));
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Per-pass frame timing (ms) — accumulated by FRAME_PROFILE scopes around the
+    // major render passes in MainScene. Reset just below so next frame starts fresh.
+    using FP = FrameProfiler::Pass;
+    swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f",
+             FrameProfiler::AccumulatorMs(FP::Terrain),
+             FrameProfiler::AccumulatorMs(FP::Objects),
+             FrameProfiler::AccumulatorMs(FP::Characters),
+             FrameProfiler::AccumulatorMs(FP::Items),
+             FrameProfiler::AccumulatorMs(FP::Effects));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    FrameProfiler::ResetFrame();
 
     // Frame time graph below text
     RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
