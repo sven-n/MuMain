@@ -85,10 +85,7 @@ void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, 
 
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 
-// Forward declaration for Phase 3
-class ICamera;
-
-void RenderTerrain(bool EditFlag, ICamera* camera = nullptr);
+void RenderTerrain(bool EditFlag);
 
 void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 void RenderTerrain_After(bool EditFlag);

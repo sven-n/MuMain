@@ -295,7 +295,7 @@ static void RenderCharacterScene3D()
 {
     ICamera* activeCamera = CameraManager::Instance().GetActiveCamera();
 
-    RenderTerrain(false, activeCamera);
+    RenderTerrain(false);
     RenderObjects(activeCamera);
     RenderCharactersClient();
 

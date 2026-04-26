@@ -3127,7 +3127,7 @@ void InitTerrainRay(int HeroX, int HeroY)
     }*/
 }
 
-void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag, ICamera* camera = nullptr)
+void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
 {
     //int x = ((xi/4)&63);
     //int y = ((yi/4)&63);
@@ -3173,7 +3173,7 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag, ICame
     }
 }
 
-void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
+void RenderTerrainFrustrum(bool EditFlag)
 {
     int     xi;
     int     yi = FrustrumBoundMinY;
@@ -3190,7 +3190,7 @@ void RenderTerrainFrustrum(bool EditFlag, ICamera* camera = nullptr)
             {
                 // Login scene: terrain distance is controlled by ViewFar (projection clipping)
                 // No per-tile distance cap — effects (flames etc.) are tied to terrain blocks
-                RenderTerrainBlock(xf, yf, xi, yi, EditFlag, camera);
+                RenderTerrainBlock(xf, yf, xi, yi, EditFlag);
 
             }
         }
@@ -3240,7 +3240,7 @@ void RenderTerrainFrustrum_After(bool EditFlag)
 extern int SelectMapping;
 extern void RenderCharactersClient();
 
-void RenderTerrain(bool EditFlag, ICamera* camera)
+void RenderTerrain(bool EditFlag)
 {
     if (!EditFlag)
     {
@@ -3271,7 +3271,7 @@ void RenderTerrain(bool EditFlag, ICamera* camera)
     }
 
     TerrainFlag = TERRAIN_MAP_NORMAL;
-    RenderTerrainFrustrum(EditFlag, camera);
+    RenderTerrainFrustrum(EditFlag);
     //
     if (EditFlag && SelectFlag)
     {
@@ -3283,7 +3283,7 @@ void RenderTerrain(bool EditFlag, ICamera* camera)
         if (TerrainGrassEnable && gMapManager.WorldActive != WD_7ATLANSE && !IsDoppelGanger3())
         {
             TerrainFlag = TERRAIN_MAP_GRASS;
-            RenderTerrainFrustrum(EditFlag, camera);
+            RenderTerrainFrustrum(EditFlag);
         }
         DisableDepthTest();
         EnableCullFace();

@@ -411,7 +411,7 @@ bool NewRenderLogInScene(HDC hDC)
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
-        RenderTerrain(false, activeCamera);
+        RenderTerrain(false);
         RenderCharactersClient();
         RenderMount();
         RenderObjects(activeCamera);
