@@ -28,6 +28,7 @@
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/Frustum.h"
+#include "Camera/ConvexHull2D.h"
 #include "CullingConstants.h"
 
 // DevEditor function declarations
@@ -2029,53 +2030,6 @@ namespace
     // Bisector scale clamp when interior angle approaches 180° (cosHalf → 0).
     constexpr float BISECTOR_COS_MIN = 0.1f;
 
-    struct Pt { float x, y; };
-
-    // Insertion sort by X then Y (points are always <= MAX_HULL_VERTICES).
-    void SortPointsByXThenY(Pt* pts, int n)
-    {
-        for (int i = 1; i < n; i++)
-        {
-            Pt key = pts[i];
-            int j = i - 1;
-            while (j >= 0 && (pts[j].x > key.x || (pts[j].x == key.x && pts[j].y > key.y)))
-            {
-                pts[j + 1] = pts[j];
-                j--;
-            }
-            pts[j + 1] = key;
-        }
-    }
-
-    inline float Cross2D(const Pt& a, const Pt& b, const Pt& c)
-    {
-        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-    }
-
-    // Andrew's monotone chain. Input must be sorted by X then Y. Writes CCW hull to `outHull`.
-    int ConvexHullCCW(const Pt* sorted, int n, Pt* outHull, int capacity)
-    {
-        int k = 0;
-        // Lower hull
-        for (int i = 0; i < n; i++)
-        {
-            while (k >= 2 && Cross2D(outHull[k - 2], outHull[k - 1], sorted[i]) <= 0.f)
-                k--;
-            if (k < capacity)
-                outHull[k++] = sorted[i];
-        }
-        // Upper hull
-        int lowerSize = k + 1;
-        for (int i = n - 2; i >= 0; i--)
-        {
-            while (k >= lowerSize && Cross2D(outHull[k - 2], outHull[k - 1], sorted[i]) <= 0.f)
-                k--;
-            if (k < capacity)
-                outHull[k++] = sorted[i];
-        }
-        k--;  // Remove duplicate last point
-        return k;
-    }
 }
 
 // Compute FrustrumBound{Min,Max}{X,Y} from the current FrustrumX/Y/Count hull.
@@ -2112,12 +2066,12 @@ static void BuildHull2DAndBounds(const float* ptsX, const float* ptsY, int numPt
 {
     const int n = std::min(numPts, MAX_HULL_VERTICES);
 
-    Pt sorted[MAX_HULL_VERTICES];
+    Point2D sorted[MAX_HULL_VERTICES];
     for (int i = 0; i < n; i++) { sorted[i].x = ptsX[i]; sorted[i].y = ptsY[i]; }
 
-    SortPointsByXThenY(sorted, n);
+    SortPoints2D(sorted, n);
 
-    Pt hull[MAX_HULL_VERTICES];
+    Point2D hull[MAX_HULL_VERTICES];
     int k = ConvexHullCCW(sorted, n, hull, MAX_HULL_VERTICES);
 
     // Reverse to CW (TestFrustrum2D expects CW winding)

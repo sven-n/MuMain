@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Frustum.h"
+#include "ConvexHull2D.h"
 #include "_define.h"
 #include <cmath>
 
@@ -23,57 +24,6 @@ namespace
         VectorMA(center, -halfHeight, up, temp);  VectorMA(temp, -halfWidth, right, outBL);
     }
 
-    struct Point2D { float x, y; };
-
-    // Cross product (z-component) of (b - a) × (c - a) for three 2D points.
-    inline float Cross2D(const Point2D& a, const Point2D& b, const Point2D& c)
-    {
-        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-    }
-
-    // Sort points by x then y (insertion sort - we always have <= 12 points).
-    inline void SortPoints2D(Point2D* pts, int count)
-    {
-        for (int i = 1; i < count; i++)
-        {
-            Point2D key = pts[i];
-            int j = i - 1;
-            while (j >= 0 && (pts[j].x > key.x || (pts[j].x == key.x && pts[j].y > key.y)))
-            {
-                pts[j + 1] = pts[j];
-                j--;
-            }
-            pts[j + 1] = key;
-        }
-    }
-
-    // Andrew's monotone chain convex hull. `pts` must be sorted. Writes CCW hull to `outHull`.
-    // Returns the number of hull points.
-    inline int ConvexHullCCW(const Point2D* pts, int numPts, Point2D* outHull, int hullCapacity)
-    {
-        int k = 0;
-
-        // Lower hull
-        for (int i = 0; i < numPts; i++)
-        {
-            while (k >= 2 && Cross2D(outHull[k - 2], outHull[k - 1], pts[i]) <= 0.f)
-                k--;
-            if (k < hullCapacity)
-                outHull[k++] = pts[i];
-        }
-
-        // Upper hull
-        int lowerSize = k + 1;
-        for (int i = numPts - 2; i >= 0; i--)
-        {
-            while (k >= lowerSize && Cross2D(outHull[k - 2], outHull[k - 1], pts[i]) <= 0.f)
-                k--;
-            if (k < hullCapacity)
-                outHull[k++] = pts[i];
-        }
-        k--;  // Remove duplicate last point
-        return k;
-    }
 }
 
 Frustum::Frustum()
@@ -146,48 +96,18 @@ void Frustum::SetCustom2DHull(const float* xs, const float* ys, int count)
     if (!xs || !ys || count <= 0) return;
     if (count > 12) count = 12;
 
-    // Sort copy by (x, y) then run Andrew's monotone chain to produce a proper
+    // Run the points through SortPoints2D + ConvexHullCCW to produce a proper
     // convex hull in CCW order. Callers (e.g. OrbitalCamera) pass frustum corners
     // in view-space walking order, which is NOT the hull outline — rendering
     // would connect edges across the hull interior and look broken. The hull
     // computation fixes the winding for any input order.
-    struct Pt { float x, y; };
-    Pt input[12];
+    Point2D input[12];
     for (int i = 0; i < count; i++) { input[i].x = xs[i]; input[i].y = ys[i]; }
 
-    // Insertion sort (n ≤ 12).
-    for (int i = 1; i < count; i++)
-    {
-        Pt key = input[i];
-        int j = i - 1;
-        while (j >= 0 && (input[j].x > key.x || (input[j].x == key.x && input[j].y > key.y)))
-        {
-            input[j + 1] = input[j];
-            j--;
-        }
-        input[j + 1] = key;
-    }
+    SortPoints2D(input, count);
 
-    auto cross = [](const Pt& o, const Pt& a, const Pt& b) -> float {
-        return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-    };
-
-    Pt hull[24];  // 2 * count worst case
-    int k = 0;
-    // Lower hull
-    for (int i = 0; i < count; i++)
-    {
-        while (k >= 2 && cross(hull[k - 2], hull[k - 1], input[i]) <= 0.f) k--;
-        hull[k++] = input[i];
-    }
-    // Upper hull
-    const int lowerSize = k + 1;
-    for (int i = count - 2; i >= 0; i--)
-    {
-        while (k >= lowerSize && cross(hull[k - 2], hull[k - 1], input[i]) <= 0.f) k--;
-        hull[k++] = input[i];
-    }
-    k--;  // drop duplicate first-last
+    Point2D hull[24];  // 2 * count worst case
+    int k = ConvexHullCCW(input, count, hull, 24);
 
     if (k > 12) k = 12;
     for (int i = 0; i < k; i++) { m_2DX[i] = hull[i].x; m_2DY[i] = hull[i].y; }
