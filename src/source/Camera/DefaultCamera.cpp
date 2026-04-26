@@ -18,9 +18,6 @@
 #include "../CameraMove.h"
 #include "../NewUISystem.h"
 #include "../CDirection.h"
-#include "../GMBattleCastle.h"
-#include "../GMDoppelGanger1.h"
-#include "../GMDoppelGanger2.h"
 #include "../w_MapHeaders.h"
 #include "../UIManager.h"
 #include "CameraDebugLog.h"
@@ -51,7 +48,6 @@ namespace
     // numbers in the legacy code; they're kept identical here, just named.
     constexpr float TOUR_VIEWFAR_PER_LEVEL = 390.f;          // ViewFar = 390 * tourLevel
     constexpr float DIRECTION_MODE_HERO_Z = 300.0f;          // Hero Z when in direction mode
-    constexpr float BATTLE_CASTLE_CAMERA_Z = 255.f;          // Forced camera Z inside Battle Castle
     constexpr float TW_HEIGHT_CAMERA_Z = 1200.f;             // Camera Z on tiles flagged TW_HEIGHT
     constexpr float CAMERA_DISTANCE_HEIGHT_OFFSET = 150.f;   // Subtracted from Distance for Z
     constexpr float CUSTOM_DISTANCE_PITCH_DEG = -45.f;       // Pitch used for custom-distance offset
@@ -391,34 +387,10 @@ bool DefaultCamera::Update()
 
 void DefaultCamera::CalculateCameraViewFar()
 {
-    // Phase 5: Use config's farPlane as single source of truth
-    // Apply multipliers for specific scenes/maps that need different view distances
+    // Use config's farPlane as single source of truth.
+    // Per-map ViewFar multipliers (BattleCastle/PK Field/6th-char-home/etc)
+    // were removed so all gameplay maps share the same zoom-level scaling.
     float baseFarPlane = m_Config.farPlane;
-
-    // Phase 5: NULL check for Hero
-    if (IsHeroValid() && battleCastle::InBattleCastle2(Hero->Object.Position))
-    {
-        m_State.ViewFar = baseFarPlane * 1.25f;  // 25% more for BattleCastle2
-        return;
-    }
-
-    if (gMapManager.InBattleCastle() && SceneFlag == MAIN_SCENE)
-    {
-        m_State.ViewFar = baseFarPlane * 1.04f;  // Slightly more for BattleCastle
-        return;
-    }
-
-    if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR)
-    {
-        m_State.ViewFar = baseFarPlane * 1.34f;  // 34% more for 6th character home
-        return;
-    }
-
-    if (gMapManager.IsPKField() || IsDoppelGanger2())
-    {
-        m_State.ViewFar = baseFarPlane * 1.54f;  // 54% more for PK field
-        return;
-    }
 
     // Handle camera level based view distance (zoom levels)
     switch (g_shCameraLevel)
@@ -581,14 +553,6 @@ void DefaultCamera::CalculateCameraPosition()
         Hero->Object.Position[2] = DIRECTION_MODE_HERO_Z;
         g_shCameraLevel = g_Direction.GetCameraPosition(Position);
     }
-    else if (gMapManager.IsPKField() || IsDoppelGanger2())
-    {
-        g_shCameraLevel = 5;
-    }
-    else if (IsDoppelGanger1())
-    {
-        g_shCameraLevel = 5;
-    }
     else g_shCameraLevel = 0;
 
     if (CCameraMove::GetInstancePtr()->IsTourMode())
@@ -599,11 +563,7 @@ void DefaultCamera::CalculateCameraPosition()
 
     VectorAdd(Position, TransformPosition, m_State.Position);
 
-    if (gMapManager.InBattleCastle())
-    {
-        m_State.Position[2] = BATTLE_CASTLE_CAMERA_Z;
-    }
-    else if (!CCameraMove::GetInstancePtr()->IsTourMode())
+    if (!CCameraMove::GetInstancePtr()->IsTourMode())
     {
         m_State.Position[2] = Hero->Object.Position[2];
     }
@@ -702,47 +662,29 @@ void DefaultCamera::UpdateCustomCameraDistance()
 
 void DefaultCamera::UpdateCameraDistance()
 {
-    if (gMapManager.WorldActive == 5)
-    {
-        m_State.Angle[0] += sinf(WorldTime * 0.0005f) * 2.f;
-        m_State.Angle[1] += sinf(WorldTime * 0.0008f) * 2.5f;
-    }
-    else if (CCameraMove::GetInstancePtr()->IsTourMode())
+    if (CCameraMove::GetInstancePtr()->IsTourMode())
     {
         m_State.DistanceTarget = TOUR_BASE_DISTANCE * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel() * 0.1f;
         m_State.Distance = m_State.DistanceTarget;
+        return;
     }
-    else
-    {
-        if (gMapManager.InBattleCastle())
-        {
-            m_State.DistanceTarget = TOUR_BASE_DISTANCE;
-            m_State.Distance = m_State.DistanceTarget;
-        }
-        else
-        {
-            switch (g_shCameraLevel)
-            {
-            case 0: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 0 * CAMERA_DISTANCE_LEVEL_STEP; break;
-            case 1: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 1 * CAMERA_DISTANCE_LEVEL_STEP; break;
-            case 2: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 2 * CAMERA_DISTANCE_LEVEL_STEP; break;
-            case 3: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 3 * CAMERA_DISTANCE_LEVEL_STEP; break;
-            case 4: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 4 * CAMERA_DISTANCE_LEVEL_STEP; break;
-            case 5: m_State.DistanceTarget = g_Direction.m_fCameraViewFar; break;
-            }
 
-            // FIX: Disable distance smoothing for first 2 frames after activation
-            // This prevents camera interpolation when switching from OrbitalCamera
-            if (m_FramesSinceActivation < 2)
-            {
-                m_State.Distance = m_State.DistanceTarget;  // Snap immediately
-            }
-            else
-            {
-                m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3;  // Smooth interpolation
-            }
-        }
+    switch (g_shCameraLevel)
+    {
+    case 0: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 0 * CAMERA_DISTANCE_LEVEL_STEP; break;
+    case 1: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 1 * CAMERA_DISTANCE_LEVEL_STEP; break;
+    case 2: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 2 * CAMERA_DISTANCE_LEVEL_STEP; break;
+    case 3: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 3 * CAMERA_DISTANCE_LEVEL_STEP; break;
+    case 4: m_State.DistanceTarget = CAMERA_DISTANCE_LEVEL_BASE + 4 * CAMERA_DISTANCE_LEVEL_STEP; break;
+    case 5: m_State.DistanceTarget = g_Direction.m_fCameraViewFar; break;
     }
+
+    // Disable distance smoothing for first 2 frames after activation to
+    // prevent visible interpolation when switching from OrbitalCamera.
+    if (m_FramesSinceActivation < 2)
+        m_State.Distance = m_State.DistanceTarget;
+    else
+        m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3;
 }
 
 void DefaultCamera::SetCameraFOV()
