@@ -146,7 +146,10 @@ struct CameraConfig
     {
         CameraConfig config;
         config.hFov = 40.0f;  // ~30° vFOV on 4:3, preserves original game look
-        config.nearPlane = 500.0f;
+        // Match the projection's near plane (g_Camera.ViewNear = 20). Higher
+        // values here would CPU-cull objects that the GPU still renders,
+        // making them vanish as they approach the camera.
+        config.nearPlane = 20.0f;
         config.farPlane = 3000.0f;
         // Use RENDER_DISTANCE_MULTIPLIER to ensure terrain culling matches rendering/picking distance
         config.terrainCullRange = 3000.0f * RENDER_DISTANCE_MULTIPLIER;  // = 4200.0f
@@ -164,7 +167,7 @@ struct CameraConfig
  *
  * Values:
  * - FOV: 90 degrees
- * - Near Plane: 500
+ * - Near Plane: 20 (matches projection's ViewNear)
  * - Far Plane: 3800 (3D object culling)
  * - Terrain Cull Range: 5320 (farPlane * RENDER_DISTANCE_MULTIPLIER)
  */
@@ -172,7 +175,10 @@ struct CameraConfig
     {
         CameraConfig config;
         config.hFov = 90.0f;  // Good 3D game default; ~59° vFOV on 16:9
-        config.nearPlane = 500.0f;
+        // Match the projection's near plane (g_Camera.ViewNear = 20). Higher
+        // values here would CPU-cull objects the GPU still renders — visible
+        // in zoomed-in orbital where the camera sits ~200 units from hero.
+        config.nearPlane = 20.0f;
         config.farPlane = 3800.0f;  // Direct value — RENDER_DISTANCE_MULTIPLIER already applied in BeginOpengl()
         config.objectCullRange = 3800.0f;
         config.fogStart = config.farPlane * 1.0f;
