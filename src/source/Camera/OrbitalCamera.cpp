@@ -392,11 +392,27 @@ bool OrbitalCamera::Update()
     {
         ComputeCameraTransform();
 
-        // Apply mount camera offset. The lerp is computed by the internal DefaultCamera's
-        // AdjustHeroHeight (already ran in m_pDefaultCamera->Update() above). Only apply
-        // the DELTA from the activation baseline — the inherited position at OnActivate
-        // already had m_ActivationMountOffset baked in, so adding the full offset would
-        // double-count it.
+        // Apply mount camera offset as a DELTA from a fixed activation baseline.
+        //
+        // m_ActivationMountOffset is captured once at OnActivate and is intentionally
+        // never updated while the orbital camera is active — it is a *reference
+        // point*, not a "current" value. The reasoning:
+        //
+        //   - At activation, the inherited pose already had m_ActivationMountOffset
+        //     baked into Position[2] (DefaultCamera applied it before handoff). The
+        //     spherical (BaseYaw, BasePitch, Radius) we derived from that pose
+        //     therefore reproduces an inheritedZ that includes the activation offset.
+        //   - GetMountCameraOffset() is the DefaultCamera's current (lerped) offset,
+        //     updated by AdjustHeroHeight() each frame.
+        //   - mountDelta = current - activation. While the player is in the same
+        //     mount state as activation, delta == 0 and Z matches the inherited pose.
+        //     When the player dismounts, current → 0 and delta → -activation, so the
+        //     camera correctly drops by the lost mount lift. When they remount,
+        //     delta returns to 0 and the camera returns to the activation height.
+        //
+        // Updating m_ActivationMountOffset on mount changes (a reasonable-sounding
+        // "fix" against staleness) would make delta always 0 and freeze the camera
+        // height across mount/dismount transitions — the opposite of what we want.
         float mountDelta = m_pDefaultCamera->GetMountCameraOffset() - m_ActivationMountOffset;
         if (fabsf(mountDelta) > 0.5f)
             m_State.Position[2] += mountDelta;
