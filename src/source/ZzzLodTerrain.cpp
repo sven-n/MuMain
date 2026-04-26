@@ -2002,9 +2002,12 @@ int     FrustrumBoundMaxX = TERRAIN_SIZE_MASK;
 int     FrustrumBoundMaxY = TERRAIN_SIZE_MASK;
 
 // 2D frustum convex hull vertices (in tile coordinates, i.e. world * 0.01).
-// Up to MAX_HULL_VERTICES vertices: 8 camera frustum corners + 4 terrain-cull
-// extension corners (legacy trapezoid uses 4).
-static constexpr int MAX_HULL_VERTICES = 12;
+// Source hull is at most 12 (8 camera frustum corners + 4 terrain-cull extension
+// corners; legacy trapezoid uses 4). Sutherland-Hodgman clipping against a
+// single plane can grow an N-vertex convex polygon to N+1 vertices, so the
+// post-clip storage needs to be at least 13. Use 16 for headroom and to
+// accommodate any future multi-plane clipping extension.
+static constexpr int MAX_HULL_VERTICES = 16;
 float FrustrumX[MAX_HULL_VERTICES];
 float FrustrumY[MAX_HULL_VERTICES];
 int FrustrumCount = 4;
