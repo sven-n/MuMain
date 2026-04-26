@@ -115,10 +115,17 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
     GLfloat depth;
     glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 
-    // Calculate expected depth
-    float z = 1.0f - state.ViewNear / -worldPosition[2] + state.ViewNear / state.ViewFar;
+    // Expected window-space depth from a standard gluPerspective projection:
+    //   z_window = (f / (f - n)) * (1 + n / z_eye)        with z_eye < 0
+    // This evaluates to 0 at the near plane and 1 at the far plane. The
+    // earlier approximation (1 - n/-z + n/f) was off by n/f at the near plane,
+    // which can cause false occlusion for objects very close to the camera.
+    const float n = state.ViewNear;
+    const float f = state.ViewFar;
+    const float z_eye = worldPosition[2];  // negative for points in front of camera
+    const float expected = (f / (f - n)) * (1.0f + n / z_eye);
 
-    return (depth >= z);
+    return (depth >= expected);
 }
 
 void CameraProjection::GetOpenGLMatrix(float outMatrix[3][4])
