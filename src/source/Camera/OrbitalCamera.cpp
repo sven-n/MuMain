@@ -130,8 +130,7 @@ void OrbitalCamera::LoadConfigForScene(EGameScene scene)
             m_Config = CameraConfig::ForCharacterScene();
             break;
         case MAIN_SCENE:
-            // FIX Issue #1: Use ForMainScene to match DefaultCamera's config
-            m_Config = CameraConfig::ForMainSceneDefaultCamera();
+            m_Config = CameraConfig::ForMainSceneOrbitalCamera();
             break;
         default:
             m_Config = CameraConfig::ForMainSceneOrbitalCamera();
@@ -713,8 +712,11 @@ void OrbitalCamera::UpdateConfigForView()
     m_State.ViewFar = m_Config.farPlane;
     g_Camera.ViewFar = m_Config.farPlane;
 
-    // Terrain cull range = rendering distance
+    // Keep cull ranges in lockstep with farPlane. Previously objectCullRange was
+    // set once at config load and never updated, so zooming the camera widened
+    // the terrain hull but left object culling at the static initial value.
     m_Config.terrainCullRange = m_Config.farPlane * RENDER_DISTANCE_MULTIPLIER;
+    m_Config.objectCullRange  = m_Config.farPlane;
 }
 
 void OrbitalCamera::UpdateFrustum()
