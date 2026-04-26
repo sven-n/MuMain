@@ -35,10 +35,7 @@ namespace
     // Match the natural-pyramid near-edge width used by ZzzLodTerrain's Orbital
     // path so FreeFly-spectator hull equals the active-render hull.
     constexpr float NATURAL_NEAR_HALF_WIDTH = 400.0f;
-}
 
-namespace
-{
     // Fallback orbit-origin parameters used by non-MainScene activation.
     // We synthesize a "static camera" and ray-cast from it to find where to
     // place the orbit pivot at the character's Z height.
