@@ -86,6 +86,63 @@ TEST_CASE("hebrew: counts as single-width")
     CHECK(n == 1);
 }
 
+TEST_CASE("japanese: hiragana hard-breaks (full-width)")
+{
+    // 8 hiragana, each full-width. iLineSize=5 → limit=4 → 2 chars per line.
+    wchar_t out[5][5] = {};
+    int n = SeparateTextIntoLines(L"あいうえおあいう", out[0], 5, 5);
+    CHECK(n == 4);
+    CHECK(wcscmp(out[0], L"あい") == 0);
+    CHECK(wcscmp(out[1], L"うえ") == 0);
+    CHECK(wcscmp(out[2], L"おあ") == 0);
+    CHECK(wcscmp(out[3], L"いう") == 0);
+}
+
+TEST_CASE("korean: hangul syllables hard-break (full-width)")
+{
+    // Hangul syllables live in 0xAC00–0xD7A3 — exercises that range explicitly.
+    wchar_t out[5][5] = {};
+    int n = SeparateTextIntoLines(L"안녕하세요여러분", out[0], 5, 5);
+    CHECK(n == 4);
+    CHECK(wcscmp(out[0], L"안녕") == 0);
+    CHECK(wcscmp(out[1], L"하세") == 0);
+    CHECK(wcscmp(out[2], L"요여") == 0);
+    CHECK(wcscmp(out[3], L"러분") == 0);
+}
+
+TEST_CASE("full-width latin: counted as 2 cols, hard-breaks")
+{
+    // 'Ａ'–'Ｆ' are in 0xFF21–0xFF26, the full-width Latin block (0xFF00–0xFF60).
+    wchar_t out[4][5] = {};
+    int n = SeparateTextIntoLines(L"ＡＢＣＤＥＦ", out[0], 4, 5);
+    CHECK(n == 3);
+    CHECK(wcscmp(out[0], L"ＡＢ") == 0);
+    CHECK(wcscmp(out[1], L"ＣＤ") == 0);
+    CHECK(wcscmp(out[2], L"ＥＦ") == 0);
+}
+
+TEST_CASE("mixed: latin + cyrillic wraps at space (both single-width)")
+{
+    // "Hi Привет" — 9 cols total. iLineSize=7 → limit=6. Overflow at 'в' on
+    // row 0 wraps at the space: "Hi" / "Привет".
+    wchar_t out[4][7] = {};
+    int n = SeparateTextIntoLines(L"Hi Привет", out[0], 4, 7);
+    CHECK(n == 2);
+    CHECK(wcscmp(out[0], L"Hi") == 0);
+    CHECK(wcscmp(out[1], L"Привет") == 0);
+}
+
+TEST_CASE("mixed: cyrillic + cjk wraps at space when the cjk char overflows")
+{
+    // "Привет 你" — visual 1*6 + 1 + 2 = 9. iLineSize=8 → limit=7. Overflow
+    // happens at 你 (cur=7+2=9>7); the space at col 7 is the wrap point.
+    wchar_t out[4][8] = {};
+    int n = SeparateTextIntoLines(L"Привет 你", out[0], 4, 8);
+    CHECK(n == 2);
+    CHECK(wcscmp(out[0], L"Привет") == 0);
+    CHECK(wcscmp(out[1], L"你") == 0);
+}
+
 TEST_CASE("mixed: latin then cjk hard-breaks at the cjk overflow")
 {
     // "ab你好" — visual cols 1+1+2+2 = 6. iLineSize=5 → limit=4 → "ab你" (4 cols),
