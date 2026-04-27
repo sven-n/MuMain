@@ -20,6 +20,7 @@
 namespace MUnique.Client.Library;
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -63,9 +64,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -97,9 +98,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -133,9 +134,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -169,9 +170,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -215,9 +216,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -261,9 +262,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -307,9 +308,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -341,9 +342,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -377,9 +378,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -408,9 +409,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -444,9 +445,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -478,9 +479,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -509,9 +510,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -545,9 +546,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -583,9 +584,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -619,9 +620,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -653,9 +654,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -687,9 +688,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -725,9 +726,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -768,9 +769,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -808,9 +809,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -846,9 +847,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -882,9 +883,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -916,9 +917,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -947,9 +948,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -981,9 +982,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1015,9 +1016,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1051,9 +1052,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1087,9 +1088,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1125,9 +1126,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1163,9 +1164,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1201,9 +1202,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1255,9 +1256,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1286,9 +1287,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1317,9 +1318,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1351,9 +1352,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1382,9 +1383,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1416,9 +1417,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1452,9 +1453,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1488,9 +1489,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1528,9 +1529,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1559,9 +1560,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1595,9 +1596,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1629,9 +1630,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1665,9 +1666,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1705,9 +1706,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1739,9 +1740,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1770,9 +1771,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1801,9 +1802,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1832,9 +1833,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1863,9 +1864,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1899,9 +1900,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1933,9 +1934,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1964,9 +1965,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -1998,9 +1999,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2029,9 +2030,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2063,9 +2064,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2094,9 +2095,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2125,9 +2126,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2156,9 +2157,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2187,9 +2188,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2218,9 +2219,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2249,9 +2250,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2280,9 +2281,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2311,9 +2312,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2342,9 +2343,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2373,9 +2374,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2404,9 +2405,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2438,9 +2439,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2482,9 +2483,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2530,9 +2531,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2566,9 +2567,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2604,9 +2605,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2644,9 +2645,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2678,9 +2679,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2712,9 +2713,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2748,9 +2749,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2782,9 +2783,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2813,9 +2814,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2849,9 +2850,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2889,9 +2890,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2920,9 +2921,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2954,9 +2955,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -2988,9 +2989,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3024,9 +3025,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3067,9 +3068,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3110,9 +3111,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3146,9 +3147,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3182,9 +3183,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3216,9 +3217,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3252,9 +3253,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3288,9 +3289,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3322,9 +3323,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3356,9 +3357,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3390,9 +3391,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3421,9 +3422,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3452,9 +3453,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3487,9 +3488,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3521,9 +3522,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3559,9 +3560,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3595,9 +3596,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3631,9 +3632,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3667,9 +3668,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3703,9 +3704,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3747,9 +3748,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3787,9 +3788,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3827,9 +3828,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3863,9 +3864,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3899,9 +3900,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3930,9 +3931,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3964,9 +3965,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -3998,9 +3999,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4032,9 +4033,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4066,9 +4067,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4100,9 +4101,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4131,9 +4132,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4177,9 +4178,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4211,9 +4212,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4247,9 +4248,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4281,9 +4282,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4317,9 +4318,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4348,9 +4349,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4385,9 +4386,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4422,9 +4423,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4456,9 +4457,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4487,9 +4488,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4521,9 +4522,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4555,9 +4556,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4593,9 +4594,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4627,9 +4628,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4665,9 +4666,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4705,9 +4706,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4736,9 +4737,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4770,9 +4771,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4801,9 +4802,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4835,9 +4836,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4871,9 +4872,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4902,9 +4903,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4933,9 +4934,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -4967,9 +4968,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5001,9 +5002,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5035,9 +5036,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5071,9 +5072,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5105,9 +5106,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5143,9 +5144,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5174,9 +5175,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5210,9 +5211,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5248,9 +5249,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5286,9 +5287,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5322,9 +5323,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5360,9 +5361,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5391,9 +5392,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5422,9 +5423,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5453,9 +5454,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5487,9 +5488,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5521,9 +5522,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5552,9 +5553,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5586,9 +5587,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5621,9 +5622,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5659,9 +5660,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5697,9 +5698,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5733,9 +5734,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5769,9 +5770,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5805,9 +5806,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5836,9 +5837,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5872,9 +5873,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5903,9 +5904,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5934,9 +5935,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5965,9 +5966,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -5999,9 +6000,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6033,9 +6034,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6064,9 +6065,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6098,9 +6099,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6129,9 +6130,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6165,9 +6166,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6201,9 +6202,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6237,9 +6238,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6268,9 +6269,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6299,9 +6300,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6333,9 +6334,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6367,9 +6368,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6405,9 +6406,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6441,9 +6442,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6475,9 +6476,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6511,9 +6512,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6547,9 +6548,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6583,9 +6584,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6621,9 +6622,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6652,9 +6653,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6686,9 +6687,9 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }
 
@@ -6717,8 +6718,8 @@ public unsafe partial class ConnectionManager
                 return length;
             });
         }
-        catch
+        catch (Exception ex)
         {
-            // Log exception
+            Debug.WriteLine(ex);
         }
     }}

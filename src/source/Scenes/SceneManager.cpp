@@ -1,0 +1,1054 @@
+///////////////////////////////////////////////////////////////////////////////
+// SceneManager.cpp - Scene management and rendering orchestration
+///////////////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include "SceneManager.h"
+#include "../Utilities/FrameProfiler.h"
+
+//=============================================================================
+// Frame Timing State Implementation
+//=============================================================================
+
+// Global instance
+FrameTimingState g_frameTiming;
+
+//=============================================================================
+// Scene Manager Implementation
+//=============================================================================
+#include "SceneCommon.h"
+#include "WebzenScene.h"
+#include "LoginScene.h"
+#include "CharacterScene.h"
+#include "MainScene.h"
+#include "LoadingScene.h"
+#include "../DSPlaySound.h"
+#include "../ZzzOpenglUtil.h"
+#include "../PhysicsManager.h"
+#include "../Time/Timer.h"
+#include "../Input.h"
+#include "../UIMng.h"
+#include "../WSclient.h"
+#include "../w_CursedTemple.h"
+#include "../ServerListManager.h"
+#include "../NewUISystem.h"
+#include "../ZzzInterface.h"
+#include "../GlobalText.h"
+#include "../ZzzAI.h"
+#include "../Winmain.h"
+#include "../Camera/CameraManager.h"
+#include "../Camera/CameraMode.h"
+
+#ifdef _EDITOR
+#include "../MuEditor/Core/MuEditorCore.h"
+#include "imgui.h"
+#endif
+
+// External declarations
+extern int GrabScreen;
+extern int WaterTextureNumber;
+extern float g_Luminosity;
+extern int g_iNoMouseTime;
+extern CPhysicsManager g_PhysicsManager;
+extern EGameScene SceneFlag;
+extern CTimer* g_pTimer;
+extern DWORD g_dwMouseUseUIID;
+extern wchar_t GrabFileName[256];
+extern CHARACTER* Hero;
+extern int HeroTile;
+extern bool Destroy;
+extern double WorldTime;
+extern float FPS_ANIMATION_FACTOR;
+
+static bool g_bShowDebugInfo =
+#ifdef _DEBUG
+    true;
+#else
+    false;
+#endif
+
+static bool g_bShowFpsCounter = false;
+
+void SetShowDebugInfo(bool enabled)
+{
+    g_bShowDebugInfo = enabled;
+    if (enabled) g_bShowFpsCounter = false;
+}
+
+void SetShowFpsCounter(bool enabled)
+{
+    g_bShowFpsCounter = enabled;
+    if (enabled) g_bShowDebugInfo = false;
+}
+
+//=============================================================================
+// Frame Statistics Tracker
+//=============================================================================
+
+static constexpr int FRAME_HISTORY_SIZE = 300;      // ~5 seconds at 60fps
+static constexpr float MIN_FRAME_TIME_MS = 0.5f;    // clamp to 2000fps max
+static constexpr double STATS_UPDATE_INTERVAL = 500.0; // ms between percentile recalculations
+static constexpr int MIN_FRAMES_FOR_STATS = 10;
+static constexpr float GRAPH_MAX_MS = 33.3f;        // graph Y-axis scale (30fps)
+static constexpr float THRESHOLD_60FPS_MS = 16.67f;  // 60 FPS threshold
+static constexpr float THRESHOLD_40FPS_MS = 25.0f;   // 40 FPS threshold
+static constexpr float DEBUG_TEXT_X = 10.0f;          // debug overlay X position
+static constexpr int DEBUG_TEXT_Y_START = 26;         // debug overlay Y start
+static constexpr int DEBUG_TEXT_LINE_HEIGHT = 10;     // line spacing
+static constexpr float DEBUG_GRAPH_WIDTH = 200.0f;    // frame graph width
+static constexpr float DEBUG_GRAPH_HEIGHT = 40.0f;    // frame graph height
+static constexpr float DEBUG_GRAPH_Y_OFFSET = 2.0f;   // gap between text and graph
+
+static float s_frameTimesMs[FRAME_HISTORY_SIZE] = {};
+static int s_frameIndex = 0;
+static int s_frameCount = 0;
+static double s_lastFrameTime = 0.0;
+static double s_highestFps = 0.0;
+
+// Percentile stats (updated periodically)
+static float s_avgFps = 0.0f;
+static float s_onePercentLow = 0.0f;
+static float s_slowestFrameFps = 0.0f;
+static double s_lastStatsUpdate = 0.0;
+
+void ResetFrameStats()
+{
+    memset(s_frameTimesMs, 0, sizeof(s_frameTimesMs));
+    s_frameIndex = 0;
+    s_frameCount = 0;
+    s_lastFrameTime = 0.0;
+    s_highestFps = 0.0;
+    s_avgFps = 0.0f;
+    s_onePercentLow = 0.0f;
+    s_slowestFrameFps = 0.0f;
+    s_lastStatsUpdate = 0.0;
+}
+
+static void UpdateFrameStats()
+{
+    double now = WorldTime;
+    if (s_lastFrameTime > 0.0)
+    {
+        double dt = now - s_lastFrameTime;
+        if (dt < MIN_FRAME_TIME_MS) dt = MIN_FRAME_TIME_MS;
+        s_frameTimesMs[s_frameIndex] = static_cast<float>(dt);
+        s_frameIndex = (s_frameIndex + 1) % FRAME_HISTORY_SIZE;
+        if (s_frameCount < FRAME_HISTORY_SIZE) s_frameCount++;
+
+        double instantaneousFps = 1000.0 / dt;
+        if (instantaneousFps > s_highestFps) s_highestFps = instantaneousFps;
+    }
+    s_lastFrameTime = now;
+
+    // Update percentile stats periodically
+    if (now - s_lastStatsUpdate > STATS_UPDATE_INTERVAL && s_frameCount > MIN_FRAMES_FOR_STATS)
+    {
+        s_lastStatsUpdate = now;
+
+        // Copy and sort frame times (descending = slowest first)
+        static float sorted[FRAME_HISTORY_SIZE];
+        memcpy(sorted, s_frameTimesMs, sizeof(float) * s_frameCount);
+        std::sort(sorted, sorted + s_frameCount, std::greater<float>());
+
+        // Average
+        float sum = std::accumulate(sorted, sorted + s_frameCount, 0.0f);
+        float avgMs = sum / s_frameCount;
+        s_avgFps = (avgMs > 0.0f) ? 1000.0f / avgMs : 0.0f;
+
+        // 1% low: average of the slowest 1% of frames
+        int onePercCount = std::max(1, s_frameCount / 100);
+        float onePercSum = std::accumulate(sorted, sorted + onePercCount, 0.0f);
+        float onePercAvgMs = onePercSum / onePercCount;
+        s_onePercentLow = (onePercAvgMs > 0.0f) ? 1000.0f / onePercAvgMs : 0.0f;
+
+        // Slowest frame: the single slowest frame in the window
+        s_slowestFrameFps = (sorted[0] > 0.0f) ? 1000.0f / sorted[0] : 0.0f;
+    }
+}
+
+void SetTargetFps(double targetFps)
+{
+    if (IsVSyncEnabled() && targetFps >= GetFPSLimit())
+    {
+        targetFps = -1;
+    }
+
+    g_frameTiming.SetTargetFps(targetFps);
+}
+
+double GetTargetFps()
+{
+    return g_frameTiming.GetTargetFps();
+}
+
+/**
+ * @brief Generates a timestamped filename and message for screenshot capture.
+ * @param outFileName Buffer to receive the filename
+ * @param outMessage Buffer to receive the log message
+ */
+static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage)
+{
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg",
+        st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
+    swprintf(outMessage, GlobalText[459], outFileName);
+
+    wchar_t lpszTemp[64];
+    swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+    wcscat(outMessage, lpszTemp);
+}
+
+/**
+ * @brief Captures the current frame buffer and saves it as a JPEG screenshot.
+ */
+static void CaptureScreenshot()
+{
+    std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
+    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, Buffer.data());
+    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100);
+
+    GrabScreen++;
+    GrabScreen %= 10000;
+}
+
+/**
+ * @brief Handles screenshot capture toggle and execution.
+ */
+static void HandleScreenshotCapture()
+{
+    if (PressKey(VK_SNAPSHOT))
+    {
+        GrabEnable = !GrabEnable;
+    }
+
+    if (!GrabEnable)
+    {
+        return;
+    }
+
+    const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
+    wchar_t screenshotText[256];
+
+    GenerateScreenshotFilename(GrabFileName, screenshotText);
+
+    if (addTimeStampToCapture)
+    {
+        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
+
+    CaptureScreenshot();
+
+    if (!addTimeStampToCapture)
+    {
+        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
+
+    GrabEnable = false;
+}
+
+/**
+ * @brief Updates the active scene based on current scene flag.
+ */
+static void UpdateActiveScene()
+{
+    switch (SceneFlag)
+    {
+    case LOG_IN_SCENE:
+        NewMoveLogInScene();
+        break;
+
+    case CHARACTER_SCENE:
+        NewMoveCharacterScene();
+        break;
+
+    case MAIN_SCENE:
+        MoveMainScene();
+        break;
+    }
+}
+
+/**
+ * @brief Updates scene state, handles input, and manages screenshot capture.
+ */
+void UpdateSceneState()
+{
+    g_pNewKeyInput->ScanAsyncKeyState();
+    g_dwMouseUseUIID = 0;
+
+    UpdateActiveScene();
+    MoveNotices();
+    HandleScreenshotCapture();
+}
+
+/**
+ * @brief Updates UI and input systems for login and character scenes.
+ *
+ * @param dDeltaTick Time delta for frame updates
+ */
+static void UpdateLoginAndCharacterScenes()
+{
+    double dDeltaTick = g_pTimer->GetTimeElapsed();
+    dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
+
+    CInput::Instance().Update();
+    CUIMng::Instance().Update(dDeltaTick);
+}
+
+/**
+ * @brief Updates water animation texture cycling.
+ *
+ * Advances water texture animation based on elapsed time at reference FPS rate.
+ */
+static void UpdateWaterAnimation()
+{
+    constexpr int NumberOfWaterTextures = 32;
+    const double timePerFrame = 1000 / REFERENCE_FPS;
+    auto time_since_last_render = g_frameTiming.currentTickCount - g_frameTiming.lastWaterChange;
+    while (time_since_last_render > timePerFrame)
+    {
+        WaterTextureNumber++;
+        WaterTextureNumber %= NumberOfWaterTextures;
+        time_since_last_render -= timePerFrame;
+        g_frameTiming.lastWaterChange = g_frameTiming.currentTickCount;
+    }
+}
+
+/**
+ * @brief Updates core game systems (physics, bitmaps, audio positioning).
+ */
+static void UpdateCoreSystems()
+{
+    g_PhysicsManager.Move(0.025f * FPS_ANIMATION_FACTOR);
+    Bitmaps.Manage();
+    Set3DSoundPosition();
+}
+
+/**
+ * @brief Sets both the OpenGL clear color and the global fog color to the same RGB.
+ *
+ * Every world uses the fog color as its clear color, so this keeps them in sync
+ * and avoids duplicating the two assignments at every call site.
+ */
+static void SetClearAndFogColor(float r, float g, float b)
+{
+    extern GLfloat FogColor[4];
+    glClearColor(r, g, b, 1.f);
+    FogColor[0] = r;
+    FogColor[1] = g;
+    FogColor[2] = b;
+    FogColor[3] = 1.f;
+}
+
+/**
+ * @brief Sets the OpenGL clear color based on the current world/map.
+ *
+ * Different maps have different background colors for visual atmosphere.
+ */
+static void SetWorldClearColor()
+{
+    // Convenience: build a 0-255 color at call site; dividing by 256 matches legacy values.
+    constexpr float BYTE_TO_FLOAT = 1.f / 256.f;
+    auto rgb8 = [](int r, int g, int b) {
+        SetClearAndFogColor(r * BYTE_TO_FLOAT, g * BYTE_TO_FLOAT, b * BYTE_TO_FLOAT);
+    };
+
+    const int world = gMapManager.WorldActive;
+
+    if (world == WD_0LORENCIA)
+        rgb8(10, 20, 14);                              // Dark green
+    else if (world == WD_2DEVIAS)
+        SetClearAndFogColor(0.75f, 0.85f, 1.0f);       // Light snowy blue
+    else if (world == WD_10HEAVEN)
+        rgb8(3, 25, 44);                               // Blue
+    else if (world == WD_73NEW_LOGIN_SCENE || world == WD_74NEW_CHARACTER_SCENE)
+        SetClearAndFogColor(0.f, 0.f, 0.f);            // Black
+    else if (gMapManager.InHellas(world))
+        rgb8(30, 40, 40);                              // Teal
+    else if (gMapManager.InChaosCastle())
+        SetClearAndFogColor(0.f, 0.f, 0.f);            // Black
+    else if (gMapManager.InBattleCastle() && battleCastle::InBattleCastle2(Hero->Object.Position))
+        SetClearAndFogColor(0.f, 0.f, 0.f);            // Black
+    else if (world >= WD_45CURSEDTEMPLE_LV1 && world <= WD_45CURSEDTEMPLE_LV6)
+        rgb8(9, 8, 33);                                // Dark purple
+    else if (world == WD_51HOME_6TH_CHAR)
+        rgb8(178, 178, 178);                           // Gray
+    else if (world == WD_65DOPPLEGANGER1)
+        rgb8(148, 179, 223);                           // Light blue
+    else
+        SetClearAndFogColor(0.f, 0.f, 0.f);            // Black (default)
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/**
+ * @brief Renders the appropriate scene based on current SceneFlag.
+ *
+ * @param hDC Device context for rendering
+ * @return true if rendering succeeded, false otherwise
+ */
+static bool RenderCurrentScene(HDC hDC)
+{
+    bool Success = false;
+
+    if (SceneFlag == LOG_IN_SCENE)
+    {
+        Success = NewRenderLogInScene(hDC);
+    }
+    else if (SceneFlag == CHARACTER_SCENE)
+    {
+        Success = NewRenderCharacterScene(hDC);
+    }
+    else if (SceneFlag == MAIN_SCENE)
+    {
+        Success = RenderMainScene();
+    }
+
+    g_PhysicsManager.Render();
+    return Success;
+}
+
+/**
+ * @brief Renders a frame time graph using raw OpenGL quads.
+ *
+ * Draws a bar chart of recent frame times inside BeginBitmap's 2D ortho projection.
+ * Coordinates are in virtual 640x480 space, converted to window pixels.
+ */
+static void RenderFrameGraph(float graphX, float graphY, float graphW, float graphH)
+{
+    if (s_frameCount < 2)
+        return;
+
+    // Convert virtual 640x480 coords to actual window pixels
+    float gx = graphX * (float)WindowWidth / (float)REFERENCE_WIDTH;
+    float gy = graphY * (float)WindowHeight / (float)REFERENCE_HEIGHT;
+    float gw = graphW * (float)WindowWidth / (float)REFERENCE_WIDTH;
+    float gh = graphH * (float)WindowHeight / (float)REFERENCE_HEIGHT;
+
+    // Flip Y for OpenGL (origin bottom-left)
+    float glBottom = (float)WindowHeight - gy - gh;
+    float glTop = (float)WindowHeight - gy;
+
+    // Background
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+    glBegin(GL_QUADS);
+    glVertex2f(gx, glBottom);
+    glVertex2f(gx + gw, glBottom);
+    glVertex2f(gx + gw, glTop);
+    glVertex2f(gx, glTop);
+    glEnd();
+
+    // Target line at 16.67ms (60fps)
+    float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
+    float lineY = glBottom + target60 * gh;
+    glColor4f(0.3f, 0.8f, 0.3f, 0.5f);
+    glBegin(GL_LINES);
+    glVertex2f(gx, lineY);
+    glVertex2f(gx + gw, lineY);
+    glEnd();
+
+    // Frame bars
+    float barW = gw / FRAME_HISTORY_SIZE;
+    int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
+
+    glBegin(GL_QUADS);
+    for (int i = 0; i < s_frameCount; i++)
+    {
+        int idx = (oldest + i) % FRAME_HISTORY_SIZE;
+        float ms = s_frameTimesMs[idx];
+        float norm = std::min(ms / GRAPH_MAX_MS, 1.0f);
+        float barH = norm * gh;
+
+        // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
+        if (ms < THRESHOLD_60FPS_MS)
+            glColor4f(0.2f, 0.9f, 0.2f, 0.8f);
+        else if (ms < THRESHOLD_40FPS_MS)
+            glColor4f(0.9f, 0.9f, 0.2f, 0.8f);
+        else
+            glColor4f(0.9f, 0.2f, 0.2f, 0.8f);
+
+        float bx = gx + i * barW;
+        glVertex2f(bx, glBottom);
+        glVertex2f(bx + barW, glBottom);
+        glVertex2f(bx + barW, glBottom + barH);
+        glVertex2f(bx, glBottom + barH);
+    }
+    glEnd();
+
+    glEnable(GL_TEXTURE_2D);
+}
+
+/**
+ * @brief Renders debug information overlay.
+ *
+ * Shows FPS stats, percentile lows, mouse position, camera info, and frame time graph.
+ */
+static void RenderDebugInfo()
+{
+    if (!g_bShowDebugInfo)
+        return;
+
+    UpdateFrameStats();
+
+    BeginBitmap();
+
+    wchar_t szLine[128];
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+
+    int y = DEBUG_TEXT_Y_START;
+    swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%",
+        FPS_AVG, s_avgFps, s_highestFps, IsVSyncEnabled(), CPU_AVG);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms",
+        s_onePercentLow, s_slowestFrameFps,
+        (s_avgFps > 0.0f) ? 1000.0f / s_avgFps : 0.0f);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", g_Camera.FOV, g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Compile-time build info: configuration, feature flags, compiler, arch,
+    // and the binary's build timestamp. Useful for verifying which build is
+    // actually running without having to check executable metadata.
+    constexpr const char* kBuildType =
+#if defined(_DEBUG) || defined(DEBUG)
+        "Debug";
+#else
+        "Release";
+#endif
+    constexpr const char* kEditor =
+#ifdef _EDITOR
+        "Editor";
+#else
+        "NoEditor";
+#endif
+    constexpr const char* kCompiler =
+#if defined(__MINGW32__) || defined(__MINGW64__)
+        "MinGW";
+#elif defined(__clang__)
+        "Clang";
+#elif defined(_MSC_VER)
+        "MSVC";
+#elif defined(__GNUC__)
+        "GCC";
+#else
+        "Unknown";
+#endif
+    constexpr const char* kArch =
+#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
+        "x64";
+#else
+        "x86";
+#endif
+    swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
+             kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Active camera mode (cycled with F9).
+    swprintf(szLine, L"Camera: %hs", CameraModeToString(CameraManager::Instance().GetCurrentMode()));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Per-pass frame timing (ms) — accumulated by FRAME_PROFILE scopes around the
+    // major render passes in MainScene. Reset just below so next frame starts fresh.
+    using FP = FrameProfiler::Pass;
+    swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f",
+             FrameProfiler::AccumulatorMs(FP::Terrain),
+             FrameProfiler::AccumulatorMs(FP::Objects),
+             FrameProfiler::AccumulatorMs(FP::Characters),
+             FrameProfiler::AccumulatorMs(FP::Items),
+             FrameProfiler::AccumulatorMs(FP::Effects));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    FrameProfiler::ResetFrame();
+
+    // Frame time graph below text
+    RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
+
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
+}
+
+/**
+ * @brief Renders a simple FPS counter overlay showing only current FPS.
+ */
+static void RenderFpsCounter()
+{
+    if (!g_bShowFpsCounter)
+        return;
+
+    BeginBitmap();
+
+    wchar_t szLine[64];
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+
+    swprintf(szLine, L"FPS: %.1f", FPS_AVG);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, DEBUG_TEXT_Y_START, szLine);
+
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
+}
+
+/**
+ * @brief Checks and handles server connection loss.
+ */
+static void CheckServerConnection()
+{
+    if (SocketClient == nullptr || !SocketClient->IsConnected())
+    {
+        static BOOL s_bClosed = FALSE;
+        if (!s_bClosed)
+        {
+            s_bClosed = TRUE;
+            g_ErrorReport.Write(L"> Connection closed. ");
+            g_ErrorReport.WriteCurrentTime();
+            g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+            CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+        }
+    }
+}
+
+/**
+ * @brief Plays ambient sound effects for the current world/map.
+ *
+ * Handles world-specific ambient sounds like wind, rain, desert, water, etc.
+ */
+static void PlayWorldAmbientSounds()
+{
+    switch (gMapManager.WorldActive)
+    {
+    case WD_0LORENCIA:
+                if (HeroTile == 4)
+                {
+                    StopBuffer(SOUND_WIND01, true);
+                    StopBuffer(SOUND_RAIN01, true);
+                }
+                else
+                {
+                    PlayBuffer(SOUND_WIND01, NULL, true);
+                    if (RainCurrent > 0)
+                        PlayBuffer(SOUND_RAIN01, NULL, true);
+                }
+                break;
+            case WD_1DUNGEON:
+                PlayBuffer(SOUND_DUNGEON01, NULL, true);
+                break;
+            case WD_2DEVIAS:
+                if (HeroTile == 3 || HeroTile >= 10)
+                    StopBuffer(SOUND_WIND01, true);
+                else
+                    PlayBuffer(SOUND_WIND01, NULL, true);
+                break;
+            case WD_3NORIA:
+                PlayBuffer(SOUND_WIND01, NULL, true);
+                if (rand_fps_check(512))
+                    PlayBuffer(SOUND_FOREST01);
+                break;
+            case WD_4LOSTTOWER:
+                PlayBuffer(SOUND_TOWER01, NULL, true);
+                break;
+            case WD_5UNKNOWN:
+                //PlayBuffer(SOUND_BOSS01,NULL,true);
+                break;
+            case WD_7ATLANSE:
+                PlayBuffer(SOUND_WATER01, NULL, true);
+                break;
+            case WD_8TARKAN:
+                PlayBuffer(SOUND_DESERT01, NULL, true);
+                break;
+            case WD_10HEAVEN:
+                PlayBuffer(SOUND_HEAVEN01, NULL, true);
+                if (rand_fps_check(100))
+                {
+                    //                PlayBuffer(SOUND_HEAVEN01);
+                }
+                else if (rand_fps_check(10))
+                {
+                    //                PlayBuffer(SOUND_THUNDERS02);
+                }
+                break;
+            case WD_58ICECITY_BOSS:
+                PlayBuffer(SOUND_WIND01, NULL, true);
+                break;
+            case WD_79UNITEDMARKETPLACE:
+            {
+                PlayBuffer(SOUND_WIND01, NULL, true);
+                PlayBuffer(SOUND_RAIN01, NULL, true);
+            }
+            break;
+#ifdef ASG_ADD_MAP_KARUTAN
+            case WD_80KARUTAN1:
+                PlayBuffer(SOUND_KARUTAN_DESERT_ENV, NULL, true);
+                break;
+            case WD_81KARUTAN2:
+                if (HeroTile == 12)
+                {
+                    StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
+                    PlayBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, NULL, true);
+                }
+                else
+                {
+                    StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
+                    PlayBuffer(SOUND_KARUTAN_DESERT_ENV, NULL, true);
+                }
+                break;
+#endif	// ASG_ADD_MAP_KARUTAN
+    }
+}
+
+/**
+ * @brief Stops ambient sounds that don't belong to the current world.
+ *
+ * Ensures only the current world's ambient sounds are playing.
+ */
+static void StopInactiveAmbientSounds()
+{
+    if (gMapManager.WorldActive != WD_0LORENCIA && gMapManager.WorldActive != WD_2DEVIAS && gMapManager.WorldActive != WD_3NORIA && gMapManager.WorldActive != WD_58ICECITY_BOSS && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE)
+    {
+        StopBuffer(SOUND_WIND01, true);
+    }
+    if (gMapManager.WorldActive != WD_0LORENCIA && gMapManager.InDevilSquare() == false && gMapManager.WorldActive != WD_79UNITEDMARKETPLACE)
+    {
+        StopBuffer(SOUND_RAIN01, true);
+    }
+    if (gMapManager.WorldActive != WD_1DUNGEON)
+    {
+        StopBuffer(SOUND_DUNGEON01, true);
+    }
+    if (gMapManager.WorldActive != WD_3NORIA)
+    {
+        StopBuffer(SOUND_FOREST01, true);
+    }
+    if (gMapManager.WorldActive != WD_4LOSTTOWER)
+    {
+        StopBuffer(SOUND_TOWER01, true);
+    }
+    if (gMapManager.WorldActive != WD_7ATLANSE)
+    {
+        StopBuffer(SOUND_WATER01, true);
+    }
+    if (gMapManager.WorldActive != WD_8TARKAN)
+    {
+        StopBuffer(SOUND_DESERT01, true);
+    }
+    if (gMapManager.WorldActive != WD_10HEAVEN)
+    {
+        StopBuffer(SOUND_HEAVEN01, true);
+    }
+    if (gMapManager.WorldActive != WD_51HOME_6TH_CHAR)
+    {
+        StopBuffer(SOUND_ELBELAND_VILLAGEPROTECTION01, true);
+        StopBuffer(SOUND_ELBELAND_WATERFALLSMALL01, true);
+        StopBuffer(SOUND_ELBELAND_WATERWAY01, true);
+        StopBuffer(SOUND_ELBELAND_ENTERDEVIAS01, true);
+        StopBuffer(SOUND_ELBELAND_WATERSMALL01, true);
+        StopBuffer(SOUND_ELBELAND_RAVINE01, true);
+        StopBuffer(SOUND_ELBELAND_ENTERATLANCE01, true);
+    }
+#ifdef ASG_ADD_MAP_KARUTAN
+    if (!IsKarutanMap())
+        StopBuffer(SOUND_KARUTAN_DESERT_ENV, true);
+    if (gMapManager.WorldActive != WD_80KARUTAN1)
+        StopBuffer(SOUND_KARUTAN_INSECT_ENV, true);
+    if (gMapManager.WorldActive != WD_81KARUTAN2)
+        StopBuffer(SOUND_KARUTAN_KARDAMAHAL_ENV, true);
+#endif	// ASG_ADD_MAP_KARUTAN
+}
+
+/**
+ * @brief Manages background music playback for the current world/map.
+ *
+ * Plays and stops background music tracks based on world and player location.
+ */
+static void ManageBackgroundMusic()
+{
+    if (gMapManager.WorldActive == WD_0LORENCIA)
+    {
+        if (Hero->SafeZone)
+        {
+            if (HeroTile == 4)
+                PlayMp3(MUSIC_PUB);
+            else
+                PlayMp3(MUSIC_MAIN_THEME);
+        }
+    }
+    else
+    {
+        StopMp3(MUSIC_PUB);
+        StopMp3(MUSIC_MAIN_THEME);
+    }
+
+    if (gMapManager.WorldActive == WD_2DEVIAS)
+    {
+        if (Hero->SafeZone)
+        {
+            if ((Hero->PositionX) >= 205 && (Hero->PositionX) <= 214 &&
+                (Hero->PositionY) >= 13 && (Hero->PositionY) <= 31)
+            {
+                PlayMp3(MUSIC_CHURCH);
+            }
+            else
+            {
+                PlayMp3(MUSIC_DEVIAS);
+            }
+        }
+    }
+    else
+    {
+        StopMp3(MUSIC_CHURCH);
+        StopMp3(MUSIC_DEVIAS);
+    }
+
+    if (gMapManager.WorldActive == WD_3NORIA)
+    {
+        if (Hero->SafeZone)
+            PlayMp3(MUSIC_NORIA);
+    }
+    else
+    {
+        StopMp3(MUSIC_NORIA);
+    }
+
+    if (gMapManager.WorldActive == WD_1DUNGEON || gMapManager.WorldActive == WD_5UNKNOWN)
+    {
+        PlayMp3(MUSIC_DUNGEON);
+    }
+    else
+    {
+        StopMp3(MUSIC_DUNGEON);
+    }
+
+    if (gMapManager.WorldActive == WD_7ATLANSE) {
+        PlayMp3(MUSIC_ATLANS);
+    }
+    else {
+        StopMp3(MUSIC_ATLANS);
+    }
+
+    if (gMapManager.WorldActive == WD_10HEAVEN) {
+        PlayMp3(MUSIC_ICARUS);
+    }
+    else {
+        StopMp3(MUSIC_ICARUS);
+    }
+
+    if (gMapManager.WorldActive == WD_8TARKAN) {
+        PlayMp3(MUSIC_TARKAN);
+    }
+    else {
+        StopMp3(MUSIC_TARKAN);
+    }
+
+    if (gMapManager.WorldActive == WD_4LOSTTOWER) {
+        PlayMp3(MUSIC_LOSTTOWER_A);
+    }
+    else {
+        StopMp3(MUSIC_LOSTTOWER_A);
+    }
+
+    if (gMapManager.InHellas(gMapManager.WorldActive)) {
+        PlayMp3(MUSIC_KALIMA);
+    }
+    else {
+        StopMp3(MUSIC_KALIMA);
+    }
+
+    if (gMapManager.WorldActive == WD_31HUNTING_GROUND) {
+        PlayMp3(MUSIC_BC_HUNTINGGROUND);
+    }
+    else {
+        StopMp3(MUSIC_BC_HUNTINGGROUND);
+    }
+
+    if (gMapManager.WorldActive == WD_33AIDA) {
+        PlayMp3(MUSIC_BC_ADIA);
+    }
+    else {
+        StopMp3(MUSIC_BC_ADIA);
+    }
+
+    M34CryWolf1st::ChangeBackGroundMusic(gMapManager.WorldActive);
+    M39Kanturu3rd::ChangeBackGroundMusic(gMapManager.WorldActive);
+
+    if (gMapManager.WorldActive == WD_37KANTURU_1ST)
+        PlayMp3(MUSIC_KANTURU_1ST);
+    else
+        StopMp3(MUSIC_KANTURU_1ST);
+
+    M38Kanturu2nd::PlayBGM();
+    SEASON3A::CGM3rdChangeUp::Instance().PlayBGM();
+
+    if (gMapManager.IsCursedTemple())
+    {
+        g_CursedTemple->PlayBGM();
+    }
+
+    if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR) {
+        PlayMp3(MUSIC_ELBELAND);
+    }
+    else {
+        StopMp3(MUSIC_ELBELAND);
+    }
+
+    if (gMapManager.WorldActive == WD_56MAP_SWAMP_OF_QUIET) {
+        PlayMp3(MUSIC_SWAMP_OF_QUIET);
+    }
+    else {
+        StopMp3(MUSIC_SWAMP_OF_QUIET);
+    }
+
+    g_Raklion.PlayBGM();
+    g_SantaTown.PlayBGM();
+    g_PKField.PlayBGM();
+    g_DoppelGanger1.PlayBGM();
+    g_EmpireGuardian1.PlayBGM();
+    g_EmpireGuardian2.PlayBGM();
+    g_EmpireGuardian3.PlayBGM();
+    g_EmpireGuardian4.PlayBGM();
+    g_UnitedMarketPlace.PlayBGM();
+#ifdef ASG_ADD_MAP_KARUTAN
+    g_Karutan1.PlayBGM();
+#endif	// ASG_ADD_MAP_KARUTAN
+}
+
+/**
+ * @brief Manages all audio (ambient sounds and music) for the main game scene.
+ *
+ * Orchestrates three audio subsystems:
+ * - World-specific ambient sound effects
+ * - Stopping inactive ambient sounds
+ * - Background music management
+ *
+ * @note Only active when SceneFlag == MAIN_SCENE
+ */
+static void ManageMainSceneAudio()
+{
+    if (SceneFlag != MAIN_SCENE)
+        return;
+
+    PlayWorldAmbientSounds();
+    StopInactiveAmbientSounds();
+    ManageBackgroundMusic();
+}
+
+/**
+ * @brief Main scene rendering and update function.
+ *
+ * This is the primary entry point for rendering all game scenes (login, character, main game).
+ * Orchestrates:
+ * - Input/UI updates for login and character scenes
+ * - Water animation updates
+ * - Core system updates (physics, bitmaps, audio positioning)
+ * - Scene-specific rendering
+ * - Audio management for the main game scene
+ * - Debug information rendering
+ * - Server connection monitoring
+ *
+ * @param hDC Device context for rendering
+ */
+void MainScene(HDC hDC)
+{
+    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+    {
+        UpdateLoginAndCharacterScenes();
+    }
+
+    UpdateWaterAnimation();
+
+    if (Destroy)
+    {
+        return;
+    }
+
+    UpdateCoreSystems();
+    SetWorldClearColor();
+
+    bool Success = false;
+
+    try
+    {
+        Success = RenderCurrentScene(hDC);
+        RenderDebugInfo();
+        RenderFpsCounter();
+
+        if (Success)
+        {
+#ifdef _EDITOR
+            // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
+            g_MuEditorCore.Render();
+
+            // Render game cursor on top of ImGui if not hovering UI
+            extern bool g_bRenderGameCursor;
+            if (g_bRenderGameCursor)
+            {
+                BeginBitmap();
+                RenderCursor();
+                EndBitmap();
+            }
+#endif
+            SwapBuffers(hDC);
+        }
+
+        CheckServerConnection();
+        ManageMainSceneAudio();
+    }
+    catch (const std::exception& e)
+    {
+        // Log exception in MainScene
+        char errorMsg[256];
+        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in MainScene: %s", e.what());
+        OutputDebugStringA(errorMsg);
+    }
+}
+
+void RenderScene(HDC hDC)
+{
+    CalcFPS();
+    UpdateSceneState();
+
+    g_frameTiming.MarkFrameRendered();
+
+    try
+    {
+        g_Luminosity = sinf(WorldTime * 0.004f) * 0.15f + 0.6f;
+        switch (SceneFlag)
+        {
+        case WEBZEN_SCENE:
+            WebzenScene(hDC);
+            break;
+        case LOADING_SCENE:
+            LoadingScene(hDC);
+            break;
+        case LOG_IN_SCENE:
+        case CHARACTER_SCENE:
+        case MAIN_SCENE:
+            MainScene(hDC);
+            break;
+        }
+
+        if (g_iNoMouseTime > 31)
+        {
+            KillGLWindow();
+        }
+    }
+    catch (const std::exception& e)
+    {
+        // Log exception in RenderScene
+        char errorMsg[256];
+        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in RenderScene: %s", e.what());
+        OutputDebugStringA(errorMsg);
+    }
+}

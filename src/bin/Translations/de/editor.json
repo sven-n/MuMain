@@ -1,0 +1,49 @@
+{
+  "_comment": "MuEditor UI Translations - German",
+  "language_name": "Deutsch",
+
+  "btn_save": "Gegenstände Speichern",
+  "btn_save_skills": "Fähigkeiten Speichern",
+  "btn_export_s6e3": "Als S6E3 Exportieren",
+  "btn_export_csv": "Als CSV Exportieren",
+  "btn_export_csv_skills": "Fähigkeiten Als CSV Exportieren",
+  "btn_columns": "Spalten",
+  "btn_select_all": "Alle Auswählen",
+  "btn_unselect_all": "Auswahl Aufheben",
+  "btn_ok": "OK",
+
+  "msg_save_success": "Erfolgreich gespeichert!",
+  "msg_save_failed": "Fehler beim Speichern der Gegenstände!",
+  "msg_save_skills_success": "Fähigkeiten erfolgreich gespeichert!",
+  "msg_save_skills_failed": "Fehler beim Speichern der Fähigkeiten!",
+  "msg_export_s6e3_success": "S6E3 Export erfolgreich abgeschlossen!",
+  "msg_export_s6e3_failed": "Fehler beim Exportieren in das S6E3 Format!",
+  "msg_export_csv_success": "CSV Export erfolgreich abgeschlossen!",
+  "msg_export_csv_failed": "Fehler beim Exportieren als CSV!",
+  "msg_export_csv_skills_success": "Fähigkeiten erfolgreich als CSV exportiert!",
+  "msg_export_csv_skills_failed": "Fehler beim Exportieren der Fähigkeiten als CSV!",
+
+  "error_file_not_found": "Datei nicht gefunden: {0}",
+  "error_invalid_index": "Ungültiger Index: {0}",
+  "error_index_in_use": "Fehler: Index {0} wird bereits verwendet!",
+
+  "label_search_text": "Suchen:",
+  "label_freeze_columns": "Index/Name Fixieren",
+  "label_no_columns": "Keine Spalten ausgewählt. Klicken Sie auf 'Spalten', um Spalten anzuzeigen.",
+  "label_index": "Index",
+
+  "popup_toggle_columns": "Spaltensichtbarkeit Umschalten:",
+  "popup_save_success": "Gegenstände erfolgreich gespeichert!",
+  "popup_save_failed": "Fehler beim Speichern der Gegenstände!",
+  "popup_save_skills_success": "Fähigkeiten erfolgreich gespeichert!",
+  "popup_save_skills_failed": "Fehler beim Speichern der Fähigkeiten!",
+  "popup_export_csv_success": "Gegenstände erfolgreich als CSV exportiert!",
+  "popup_export_csv_failed": "Fehler beim Exportieren der Gegenstandsattribute als CSV!",
+  "popup_export_csv_skills_success": "Fähigkeiten erfolgreich als CSV exportiert!",
+  "popup_export_csv_skills_failed": "Fehler beim Exportieren der Fähigkeitsattribute als CSV!",
+  "popup_export_s6e3_success": "Erfolgreich als Legacy-Format exportiert!",
+  "popup_export_s6e3_failed": "Fehler beim Export als Legacy-Format!",
+
+  "label_skill_editor_title": "Fähigkeiten-Editor",
+  "label_search_skills": "Fähigkeiten Suchen:"
+}

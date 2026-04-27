@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeSharedSettings">
+    <configurations>
+      <configuration PROFILE_NAME="x86Debug" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR$/toolchain-x86.cmake -DENABLE_EDITOR=OFF" />
+      <configuration PROFILE_NAME="x86Debug-MuEditor" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR$/toolchain-x86.cmake -DENABLE_EDITOR=ON" />
+      <configuration PROFILE_NAME="x86Release" ENABLED="true" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR$/toolchain-x86.cmake -DENABLE_EDITOR=OFF" />
+      <configuration PROFILE_NAME="x86Release-MuEditor" ENABLED="true" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR$/toolchain-x86.cmake -DENABLE_EDITOR=ON" />
+      <configuration PROFILE_NAME="x64Debug" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR$/toolchain-x64.cmake -DENABLE_EDITOR=OFF">
+        <ENVIRONMENT>
+          <env name="LIB" value="" />
+          <env name="LIBPATH" value="" />
+        </ENVIRONMENT>
+      </configuration>
+      <configuration PROFILE_NAME="x64Debug-MuEditor" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR$/toolchain-x64.cmake -DENABLE_EDITOR=ON">
+        <ENVIRONMENT>
+          <env name="LIB" value="" />
+          <env name="LIBPATH" value="" />
+        </ENVIRONMENT>
+      </configuration>
+      <configuration PROFILE_NAME="x64Release" ENABLED="true" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR$/toolchain-x64.cmake -DENABLE_EDITOR=OFF">
+        <ENVIRONMENT>
+          <env name="LIB" value="" />
+          <env name="LIBPATH" value="" />
+        </ENVIRONMENT>
+      </configuration>
+      <configuration PROFILE_NAME="x64Release-MuEditor" ENABLED="true" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G Ninja -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR$/toolchain-x64.cmake -DENABLE_EDITOR=ON">
+        <ENVIRONMENT>
+          <env name="LIB" value="" />
+          <env name="LIBPATH" value="" />
+        </ENVIRONMENT>
+      </configuration>
+    </configurations>
+  </component>
+</project>

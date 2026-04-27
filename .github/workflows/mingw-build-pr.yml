@@ -1,0 +1,61 @@
+name: MinGW Cross-Compilation Build (PR)
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-mingw:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install MinGW-w64 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake ninja-build
+
+      - name: Cache libjpeg-turbo (MinGW i686)
+        uses: actions/cache@v4
+        with:
+          path: _deps/mingw-i686
+          key: libjpeg-turbo-mingw-i686-3.1.3-v1
+
+      - name: Build libjpeg-turbo (MinGW i686 static)
+        run: |
+          if [ -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a" ]; then
+            echo "Using cached libturbojpeg.a"
+          else
+            rm -rf _deps/libjpeg-turbo _deps/build-turbo
+            git clone --depth 1 --branch 3.1.3 https://github.com/libjpeg-turbo/libjpeg-turbo.git _deps/libjpeg-turbo
+            cmake -S _deps/libjpeg-turbo -B _deps/build-turbo \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_SYSTEM_PROCESSOR=i686 \
+              -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc \
+              -DCMAKE_CXX_COMPILER=i686-w64-mingw32-g++ \
+              -DCMAKE_RC_COMPILER=i686-w64-mingw32-windres \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DENABLE_SHARED=OFF \
+              -DENABLE_STATIC=ON \
+              -DWITH_SIMD=OFF \
+              -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/_deps/mingw-i686"
+            cmake --build _deps/build-turbo -j$(nproc)
+            cmake --install _deps/build-turbo
+          fi
+
+          test -f "${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a"
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build-mingw \
+            -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-i686.cmake" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a"
+
+      - name: Build
+        run: |
+          cmake --build build-mingw -j$(nproc)
