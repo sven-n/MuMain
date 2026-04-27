@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // SceneCommon.cpp - Shared utilities used by multiple scenes
 // Extracted from ZzzScene.cpp as part of scene refactoring
 ///////////////////////////////////////////////////////////////////////////////
@@ -173,6 +173,22 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
 }
 
 
+// True for codepoints drawn at twice the width of a half-width glyph (CJK
+// ideographs, kana, Hangul, full-width Latin/punctuation, ...). A naive
+// `c > 255` test misclassifies Cyrillic/Greek/Hebrew/Arabic, which sit above
+// U+00FF but render at single width.
+static bool IsFullWidthCharacter(wchar_t c)
+{
+    return (c >= 0x1100 && c <= 0x115F)   // Hangul Jamo
+        || (c >= 0x2E80 && c <= 0x9FFF)   // CJK radicals / ideographs / kana
+        || (c >= 0xA000 && c <= 0xA4CF)   // Yi
+        || (c >= 0xAC00 && c <= 0xD7A3)   // Hangul syllables
+        || (c >= 0xF900 && c <= 0xFAFF)   // CJK compatibility ideographs
+        || (c >= 0xFE30 && c <= 0xFE4F)   // CJK compatibility forms
+        || (c >= 0xFF00 && c <= 0xFF60)   // full-width Latin / punctuation
+        || (c >= 0xFFE0 && c <= 0xFFE6);  // full-width signs
+}
+
 /**
  * @brief Splits a wide-character string into multiple lines with word-wrap support.
  * @param lpszText      Source string.
@@ -194,8 +210,7 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
     wchar_t* lpWrite = lpszSeparated;
 
     while (*lpSeek && iLine < iMaxLine) {
-        // Calculate character width: Full-width/CJK (Unicode > 255) = 2, Half-width = 1
-        int iCharWidth = (*lpSeek > 255) ? 2 : 1;
+        int iCharWidth = IsFullWidthCharacter(*lpSeek) ? 2 : 1;
 
         // Record space position for word-wrapping (English logic)
         if (*lpSeek == L' ') {
