@@ -50,6 +50,18 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
                 lpSeek = lpLastSpaceInSource + 1;
             }
             else {
+                // Forward-progress guard: at the start of a line with no space
+                // to wrap at, a character whose width exceeds the visual limit
+                // would otherwise loop forever (iLine increments, lpSeek does
+                // not). Place the character on its own row anyway — when there
+                // is room for any payload — and advance past it so the loop
+                // makes progress.
+                if (iCurrentWidth == 0) {
+                    if (iLineSize > 1) {
+                        *lpWrite++ = *lpSeek;
+                    }
+                    ++lpSeek;
+                }
                 *lpWrite = L'\0';
             }
 

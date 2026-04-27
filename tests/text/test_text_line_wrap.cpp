@@ -184,3 +184,20 @@ TEST_CASE("iMaxLine cap is honoured")
     CHECK(wcscmp(out[0], L"abcd") == 0);
     CHECK(wcscmp(out[1], L"efgh") == 0);
 }
+
+TEST_CASE("forward progress: char wider than the line lands on its own row")
+{
+    // Regression: with iLineSize=2 (visual limit=1), each CJK char's width
+    // (2) exceeds the limit. Without the forward-progress guard the wrap
+    // path incremented iLine without advancing lpSeek, so the loop ran
+    // iMaxLine times against the same character and dropped the input.
+    // Each character should now land on its own row, exceeding the visual
+    // limit by one column rather than being lost.
+    wchar_t out[5][2] = {};
+    int n = SeparateTextIntoLines(L"你好世", out[0], 5, 2);
+    CHECK(n == 4);
+    CHECK(out[0][0] == L'你');
+    CHECK(out[0][1] == L'\0');
+    CHECK(out[1][0] == L'好');
+    CHECK(out[2][0] == L'世');
+}
