@@ -5,6 +5,14 @@
 add_library(mu_test_main STATIC main.cpp)
 target_include_directories(mu_test_main PUBLIC third_party/doctest)
 target_compile_features(mu_test_main PUBLIC cxx_std_20)
+# Test sources contain non-ASCII wide string literals. MSVC defaults to the
+# system codepage when reading sources, which mangles UTF-8 characters into
+# wrong codepoints and breaks every non-Latin language test. /utf-8 forces
+# both the source charset and the narrow execution charset to UTF-8; the wide
+# execution charset stays UTF-16 (Windows wchar_t).
+if(MSVC)
+    target_compile_options(mu_test_main PUBLIC /utf-8)
+endif()
 
 # Helper for module CMakeLists. Usage:
 #   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2)
@@ -16,6 +24,9 @@ function(mu_add_test)
         ${CMAKE_SOURCE_DIR}/src/source
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/doctest
     )
+    if(MSVC)
+        target_compile_options(${MAT_NAME} PRIVATE /utf-8)
+    endif()
     if(WIN32 AND NOT CMAKE_HOST_WIN32)
         # Cross-compiled Windows binary on a non-Windows host — run via wine.
         if(NOT WINE_EXECUTABLE)
