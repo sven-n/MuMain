@@ -89,12 +89,24 @@ TEST_CASE("hebrew: counts as single-width")
 TEST_CASE("mixed: latin then cjk hard-breaks at the cjk overflow")
 {
     // "ab你好" — visual cols 1+1+2+2 = 6. iLineSize=5 → limit=4 → "ab你" (4 cols),
-    // hard break, "好".
+    // hard break, "好". No space on the line, so a hard break is the only option.
     wchar_t out[4][5] = {};
     int n = SeparateTextIntoLines(L"ab你好", out[0], 4, 5);
     CHECK(n == 2);
     CHECK(wcscmp(out[0], L"ab你") == 0);
     CHECK(wcscmp(out[1], L"好") == 0);
+}
+
+TEST_CASE("mixed: latin word then cjk wraps at the preceding space")
+{
+    // "Hello 你好" — visual cols 1+1+1+1+1+1+2+2 = 10. iLineSize=8 → limit=7.
+    // Overflow happens at 你 (cur=6 + 2 > 7). A space was seen at col 6, so we
+    // wrap there: row 0 = "Hello" (no trailing space), row 1 = "你好".
+    wchar_t out[4][8] = {};
+    int n = SeparateTextIntoLines(L"Hello 你好", out[0], 4, 8);
+    CHECK(n == 2);
+    CHECK(wcscmp(out[0], L"Hello") == 0);
+    CHECK(wcscmp(out[1], L"你好") == 0);
 }
 
 TEST_CASE("long unbroken word hard-breaks")

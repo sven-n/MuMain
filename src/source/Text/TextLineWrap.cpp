@@ -41,7 +41,11 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
         }
 
         if (iCurrentWidth + iCharWidth > iVisualLimit) {
-            if (lpLastSpaceInSource && iCharWidth == 1 && *lpSeek != L' ') {
+            // Wrap at the preceding space whenever one was seen on this line.
+            // Works for the overflow being half-width or full-width — important
+            // for mixed strings like "Hello 你好" where the CJK char triggers
+            // the overflow but breaking at the space gives cleaner output.
+            if (lpLastSpaceInSource && *lpSeek != L' ') {
                 *lpDstInCurrentRow = L'\0';
                 lpSeek = lpLastSpaceInSource + 1;
             }
