@@ -196,6 +196,57 @@ cmake --build --preset windows-x86-mueditor-debug
 
 ---
 
+## Tests
+
+Unit tests live under `tests/` and use [doctest](https://github.com/doctest/doctest) (single-header, vendored at `tests/third_party/doctest/doctest.h`).
+
+```
+tests/
+  CMakeLists.txt              <-- entry point + mu_add_test() helper
+  main.cpp                    <-- doctest entry point (DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN)
+  third_party/doctest/        <-- vendored single header
+  text/                       <-- one subdirectory per module under test
+    CMakeLists.txt
+    test_text_line_wrap.cpp
+```
+
+Tests are gated by `-DBUILD_TESTING=ON` and target the same MinGW i686 toolchain as the game so they catch Windows-specific behaviour (16-bit `wchar_t`, MinGW C++ runtime). On Linux/WSL hosts CTest invokes the test binaries through `wine`; on Windows hosts they run natively.
+
+### Run tests in WSL
+
+```bash
+sudo apt-get install -y wine wine32
+
+cmake -S . -B build-mingw -G Ninja \
+  -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-i686.cmake \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_TESTING=ON \
+  -DMU_TURBOJPEG_STATIC_LIB=_deps/mingw-i686/lib/libturbojpeg.a
+
+cmake --build build-mingw -j$(nproc)
+ctest --test-dir build-mingw --output-on-failure
+```
+
+### Run tests in CI
+
+`.github/workflows/mingw-build-pr.yml` configures with `BUILD_TESTING=ON` and runs `ctest` after the build. A failing test blocks the PR.
+
+### Add a new test module
+
+1. Create `tests/<module>/` with a `CMakeLists.txt` and one or more `test_*.cpp` files.
+2. In `tests/<module>/CMakeLists.txt`, call:
+   ```cmake
+   mu_add_test(
+       NAME test_<thing>
+       SOURCES test_<thing>.cpp ${CMAKE_SOURCE_DIR}/src/source/<path>/<unit>.cpp
+   )
+   ```
+   `mu_add_test` links against `mu_test_main` (which provides doctest's `main()`), wires the `tests/third_party/doctest` and `src/source` include paths, and registers the test with CTest (wrapping it in `wine` on non-Windows hosts).
+3. Add `add_subdirectory(<module>)` to `tests/CMakeLists.txt`.
+4. Pass the source files of the unit under test directly via `SOURCES`. This keeps the test binary independent of `Main` — a unit must be linkable without the rest of the game (no `stdafx.h`, no scene globals). If a function isn't isolated, extract it to its own `.cpp` first (see `src/source/Text/TextLineWrap.cpp` for the pattern).
+
+---
+
 ## Directory Layout Per Scenario
 
 ### 1. Windows — Visual Studio Presets
