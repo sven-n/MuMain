@@ -28,6 +28,7 @@ TradeOwn = 2, ///< The own trading storage.
 TradeOther = 3, ///< The trading storage of the other player.
 Crafting = 4, ///< The crafting storage of the player.
 PersonalShop = 5, ///< The shop storage of another player.
+NpcShop = 6, ///< The shop storage of an NPC (merchant).
 InventoryPetSlot = 254, ///< The inventory slot of the pet. That's used when a pet leveled up.
 };
 

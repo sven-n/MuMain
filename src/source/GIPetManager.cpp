@@ -444,7 +444,7 @@ namespace giPetManager
             }
             else if ((iItemIndex = g_pNPCShop->GetPointedItemIndex()) != -1)
             {
-                iInvenType = (StorageType)6; // TODO: add enum value in packet definitions
+                iInvenType = StorageType::NpcShop;
             }
 
             SocketClient->ToGameServer()->SendPetInfoRequest(static_cast<::PetType>(PetType), iInvenType, iItemIndex);
