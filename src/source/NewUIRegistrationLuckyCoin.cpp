@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "NewUIRegistrationLuckyCoin.h"
 #include "NewUISystem.h"
+#include "Camera/CameraProjection.h"
 
 
 namespace SEASON3B
@@ -108,14 +109,15 @@ namespace SEASON3B
         EndBitmap();
 
         glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
+        SaveCameraPerspective();
+    glPushMatrix();
         glLoadIdentity();
         glViewport2(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
-        GetOpenGLMatrix(CameraMatrix);
+        CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
 
@@ -132,6 +134,7 @@ namespace SEASON3B
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
 
+    RestoreCameraPerspective();
         BeginBitmap();
     }
 

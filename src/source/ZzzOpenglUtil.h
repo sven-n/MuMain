@@ -1,7 +1,8 @@
 #pragma once
 
-extern float PerspectiveX;
-extern float PerspectiveY;
+// Include CameraState before compatibility layer
+#include "Camera/CameraState.h"
+
 extern int OpenglWindowWidth;
 extern int OpenglWindowHeight;
 extern unsigned int WindowWidth;
@@ -11,14 +12,6 @@ extern double  FPS;
 extern double  FPS_AVG;
 extern float  FPS_ANIMATION_FACTOR;
 extern double  WorldTime;
-extern bool   CameraTopViewEnable;
-extern float  CameraViewNear;
-extern float  CameraViewFar;
-extern float  CameraFOV;
-extern vec3_t CameraPosition;
-extern vec3_t CameraAngle;
-extern float  CameraMatrix[3][4];
-extern float  g_fCameraCustomDistance;
 extern bool   FogEnable;
 extern bool   TextureEnable;
 extern bool   DepthTestEnable;
@@ -47,13 +40,7 @@ extern bool         GrabEnable;
 
 //  etc
 bool CheckID_HistoryDay(wchar_t* Name, WORD day);
-void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar);
 void glViewport2(int x, int y, int Width, int Height);
-void CreateScreenVector(int sx, int sy, vec3_t Target, bool bFixView = true);
-void Projection(vec3_t Position, int* sx, int* sy);
-void GetOpenGLMatrix(float Matrix[3][4]);
-void TransformPosition(vec3_t Position, vec3_t WorldPosition, int* x, int* y);
-bool TestDepthBuffer(vec3_t Position);
 void BeginSprite();
 void EndSprite();
 void EnableDepthTest();
@@ -74,8 +61,19 @@ void EnableAlphaBlend4();
 void BindTexture(int tex);
 void BindTextureStream(int tex);
 void EndTextureStream();
-void BeginOpengl(int x = 0, int y = 0, int Width = 640, int Height = 480);
+void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void EndOpengl();
+
+// Perspective setup for item/3D-UI rendering. Sets g_Camera perspective state
+// so item rendering can compute screen positions. Use SaveCameraPerspective /
+// RestoreCameraPerspective around item-rendering blocks to prevent corruption
+// of the main camera's cached values between frames.
+void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar);
+
+// Save/restore g_Camera perspective state around item-rendering blocks.
+// Prevents gluPerspective2's FOV=1 values from leaking to ScreenToWorldRay.
+void SaveCameraPerspective();
+void RestoreCameraPerspective();
 
 void InitVSync();
 bool IsVSyncAvailable();
@@ -116,3 +114,6 @@ bool CollisionDetectLineToFace(vec3_t Position, vec3_t Target, int Polygon, floa
 bool CollisionDetectLineToOBB(vec3_t p1, vec3_t p2, OBB_t obb);
 void CalcFPS();
 bool rand_fps_check(int reference_frames);
+
+// Camera zoom level (external, not part of CameraState yet)
+extern short g_shCameraLevel;

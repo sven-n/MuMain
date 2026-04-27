@@ -99,7 +99,7 @@ void SEASON3B::CNewUIMiniMap::Release()
 
 void SEASON3B::CNewUIMiniMap::SetPos(int x, int y)
 {
-    m_BtnExit.ChangeButtonInfo(640 - 27, 3, 30, 25);
+    m_BtnExit.ChangeButtonInfo(REFERENCE_WIDTH - 27, 3, 30, 25);
 }
 
 void SEASON3B::CNewUIMiniMap::SetBtnPos(int Num, float x, float y, float nx, float ny)
@@ -132,7 +132,7 @@ bool SEASON3B::CNewUIMiniMap::Render()
         return m_bSuccess;
 
     EnableAlphaTest();
-    RenderColor(0, 0, 640, 430, 0.85f, 1);
+    RenderColor(0, 0, REFERENCE_WIDTH, 430, 0.85f, 1);
     DisableAlphaBlend();
     EnableAlphaTest();
     glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -184,13 +184,13 @@ bool SEASON3B::CNewUIMiniMap::Render()
     for (i = 0; i < 20; i++)
     {
         RenderBitmapRotate(IMAGE_MINIMAP_INTERFACE + 2, (Ui_Hig / 2.f), i * (Ui_wid - 3.f), Ui_wid, Ui_Hig, -90.f, 0.f, 0.f, uvxy, uvxy_Line);
-        RenderBitmapRotate(IMAGE_MINIMAP_INTERFACE + 2, 640 - (Ui_Hig / 2.f), i * (Ui_wid - 3.f), Ui_wid, Ui_Hig, 90.f, 0.f, 0.f, uvxy, uvxy_Line);
+        RenderBitmapRotate(IMAGE_MINIMAP_INTERFACE + 2, REFERENCE_WIDTH - (Ui_Hig / 2.f), i * (Ui_wid - 3.f), Ui_wid, Ui_Hig, 90.f, 0.f, 0.f, uvxy, uvxy_Line);
     }
 
     RenderImage(IMAGE_MINIMAP_INTERFACE + 1, 0, 0, Ui_wid, Ui_wid, 0.f, 0.f, uvxy, uvxy);
-    RenderImage(IMAGE_MINIMAP_INTERFACE + 1, 640 - Ui_wid, 0, Ui_wid, Ui_wid, uvxy, 0.f, -uvxy, uvxy);
+    RenderImage(IMAGE_MINIMAP_INTERFACE + 1, REFERENCE_WIDTH - Ui_wid, 0, Ui_wid, Ui_wid, uvxy, 0.f, -uvxy, uvxy);
     RenderImage(IMAGE_MINIMAP_INTERFACE + 1, 0, 430 - Ui_wid, Ui_wid, Ui_wid, 0.f, uvxy, uvxy, -uvxy);
-    RenderImage(IMAGE_MINIMAP_INTERFACE + 1, 640 - Ui_wid, 430 - Ui_wid, Ui_wid, Ui_wid, uvxy, uvxy, -uvxy, -uvxy);
+    RenderImage(IMAGE_MINIMAP_INTERFACE + 1, REFERENCE_WIDTH - Ui_wid, 430 - Ui_wid, Ui_wid, Ui_wid, uvxy, uvxy, -uvxy, -uvxy);
 
     m_BtnExit.Render(true);
 
@@ -302,7 +302,7 @@ bool SEASON3B::CNewUIMiniMap::UpdateMouseEvent()
         }
     }
 
-    if (CheckMouseIn(0, 0, 640, 430))
+    if (CheckMouseIn(0, 0, REFERENCE_WIDTH, 430))
     {
         return false;
     }
@@ -329,8 +329,8 @@ bool SEASON3B::CNewUIMiniMap::Check_Btn(int mx, int my)
                 g_pRenderText->SetFont(g_hFont);
                 GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
 
-                Fontsize.cx = Fontsize.cx / ((float)WindowWidth / 640);
-                Fontsize.cy = Fontsize.cy / ((float)WindowHeight / 480);
+                Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
+                Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
 
                 int x = m_Btn_Loc[i][0] + ((m_Btn_Loc[i][2] / 2) - (Fontsize.cx / 2));
                 int y = m_Btn_Loc[i][1] + m_Btn_Loc[i][3] + 2;

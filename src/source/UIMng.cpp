@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "UIMng.h"
 #include "Input.h"
+#include "DSPlaySound.h"
 #include "Sprite.h"
 #include "GaugeBar.h"
 #include "ZzzOpenglUtil.h"
@@ -285,6 +286,59 @@ void CUIMng::CreateMainScene()
     m_CharInfoBalloonMng.Release();
 
     m_nScene = UIM_SCENE_MAIN;
+}
+
+void CUIMng::RepositionSceneUI()
+{
+    // A lightweight SetPosition sweep isn't enough: CSprite caches
+    // m_fScrHeight = WindowHeight at Create() time and uses it for the
+    // Y-flipped coordinate math in SetPosition(). When the window resizes,
+    // every sprite's cached screen height is stale, so a pure SetPosition
+    // call lands the windows in the wrong place.
+    //
+    // The only clean way to refresh that cache is to re-Create the sprites,
+    // which is exactly what the scene's Create*Scene() function does. But
+    // that also resets each window's m_bShow flag, so we snapshot the
+    // current visibility here and restore it right after.
+    if (m_nScene == UIM_SCENE_LOGIN)
+    {
+        const bool wasShown_MsgWin       = m_MsgWin.IsShow();
+        const bool wasShown_SysMenuWin   = m_SysMenuWin.IsShow();
+        const bool wasShown_OptionWin    = m_OptionWin.IsShow();
+        const bool wasShown_LoginMainWin = m_LoginMainWin.IsShow();
+        const bool wasShown_ServerSelWin = m_ServerSelWin.IsShow();
+        const bool wasShown_LoginWin     = m_LoginWin.IsShow();
+        const bool wasShown_CreditWin    = m_CreditWin.IsShow();
+
+        CreateLoginScene();
+
+        // Restore visibility BEFORE re-populating dynamic windows: child
+        // elements like server/group buttons read `CWin::m_bShow` of their
+        // parent when `UpdateDisplay()` decides which sub-elements to show.
+        // If the parent is still hidden at that moment, nothing renders.
+        if (wasShown_MsgWin)       ShowWin(&m_MsgWin);
+        if (wasShown_SysMenuWin)   ShowWin(&m_SysMenuWin);
+        if (wasShown_OptionWin)    ShowWin(&m_OptionWin);
+        if (wasShown_LoginMainWin) ShowWin(&m_LoginMainWin);
+        if (wasShown_ServerSelWin) ShowWin(&m_ServerSelWin);
+        if (wasShown_LoginWin)     ShowWin(&m_LoginWin);
+        if (wasShown_CreditWin)    ShowWin(&m_CreditWin);
+
+        // Re-populate the server / server-group buttons from the existing
+        // network-side data. Create() clears the button labels, so without
+        // this the server list and groups render empty after a resolution
+        // change.
+        m_ServerSelWin.UpdateDisplay();
+    }
+    else if (m_nScene == UIM_SCENE_CHARACTER)
+    {
+        // CreateCharacterScene() ends with an explicit ShowWin(&m_CharSelMainWin)
+        // so visibility of the main panel is already preserved. Other character-
+        // scene windows (msg box, server msg, char make) are shown on demand
+        // by game events, matching the fresh-scene state.
+        CreateCharacterScene();
+    }
+    // MainScene uses the new UI system which resizes itself; nothing to do.
 }
 
 CWin* CUIMng::SetActiveWin(CWin* pWin)
@@ -585,9 +639,25 @@ void CUIMng::Update(double dDeltaTick)
     }
 
     CInput& rInput = CInput::Instance();
+
+    // ESC toggles system menu in login/character scenes
     if (rInput.IsKeyDown(VK_ESCAPE))
     {
-        m_bSysMenuWinShow = !m_bSysMenuWinShow;
+        extern EGameScene SceneFlag;
+        if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+        {
+            if (m_SysMenuWin.IsShow())
+            {
+                HideWin(&m_SysMenuWin);
+            }
+            else if (!m_MsgWin.IsShow() && !m_OptionWin.IsShow()
+                     && !m_LoginWin.IsShow() && !m_CreditWin.IsShow()
+                     && !m_CharMakeWin.IsShow())
+            {
+                ::PlayBuffer(SOUND_CLICK01);
+                ShowWin(&m_SysMenuWin);
+            }
+        }
     }
 
     CWin* pWin;

@@ -14,6 +14,7 @@
 #include "MsgBoxIGSGiftStorageItemInfo.h"
 #include "MapManager.h"
 #include "DSPlaySound.h"
+#include "Camera/CameraProjection.h"
 
 using namespace SEASON3B;
 
@@ -309,6 +310,7 @@ void CNewUIInGameShop::RenderDisplayItems()
     EndBitmap();
 
     glMatrixMode(GL_PROJECTION);
+    SaveCameraPerspective();
     glPushMatrix();
     glLoadIdentity();
     glViewport2(0, 0, WindowWidth, WindowHeight);
@@ -316,7 +318,7 @@ void CNewUIInGameShop::RenderDisplayItems()
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    GetOpenGLMatrix(CameraMatrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
@@ -336,6 +338,7 @@ void CNewUIInGameShop::RenderDisplayItems()
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
 
+    RestoreCameraPerspective();
     BeginBitmap();
 }
 

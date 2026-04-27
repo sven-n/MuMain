@@ -23,6 +23,7 @@
 
 #include "Guild/GuildCache.h"
 #include "ZzzInterface.h"
+#include "Camera/CameraProjection.h"
 
 
 extern  int     WaterTextureNumber;
@@ -318,8 +319,7 @@ namespace battleCastle
 
             int ScreenX, ScreenY;
             int Width = 50, Height = 2;
-
-            Projection(bt.m_vPosition, &ScreenX, &ScreenY);
+            CameraProjection::WorldToScreen(g_Camera, bt.m_vPosition, &ScreenX, &ScreenY);
             ScreenX -= (int)(Width / 2);
 
             int Time = bt.m_byBuildTime / 5.f * (int)Width;
@@ -594,10 +594,10 @@ namespace battleCastle
 
         glColor3f(0.3f, 0.3f, 0.25f);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, 640.f, 480.f - 45.f, WindX2, 0.f, 3.f, 2.f);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f);
         EnableAlphaBlend();
         float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, 640.f, 480.f - 45.f, WindX, 0.f, 0.3f, 0.3f);
+        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
     }
 
     bool CreateFireSnuff(PARTICLE* o)
@@ -625,7 +625,7 @@ namespace battleCastle
         VectorCopy(Position, o->Position);
         VectorCopy(Position, o->StartPosition);
         o->Velocity[0] = -(float)(rand() % 64 + 64) * 0.1f;
-        if (Position[1] < CameraPosition[1] + 400.f)
+        if (Position[1] < g_Camera.Position[1] + 400.f)
         {
             o->Velocity[0] = -o->Velocity[0] + 3.2f;
         }

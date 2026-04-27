@@ -14,6 +14,10 @@
 #include "CameraMove.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzAI.h"
+#include "MapManager.h"
+
+// Forward declaration for LoginScene offset helper
+static void ApplyLoginSceneOffset(float& x, float& y, float& z);
 
 CCameraMove::CCameraMove()
 {
@@ -119,6 +123,35 @@ namespace
     {
         return {(a.x * (1.0f - alpha)) + (b.x * alpha), (a.y * (1.0f - alpha)) + (b.y * alpha)};
     }
+}
+
+// LoginScene camera offset correction
+// ------------------------------------
+// The waypoint file used for the LoginScene tour camera was authored against
+// an older version of the map; the terrain has since been re-centered/re-scaled,
+// so every waypoint needs a fixed translation applied to land on the intended
+// visual path. The default values live in LoginSceneCameraDefaults (CameraMove.h)
+// and are empirically tuned for the current LoginScene terrain; these globals can
+// be adjusted at runtime via DevEditor.
+//
+// Applied only when WorldActive == WD_73NEW_LOGIN_SCENE (see ApplyLoginSceneOffset).
+float g_LoginSceneOffsetX   = LoginSceneCameraDefaults::OFFSET_X;
+float g_LoginSceneOffsetY   = LoginSceneCameraDefaults::OFFSET_Y;
+float g_LoginSceneOffsetZ   = LoginSceneCameraDefaults::OFFSET_Z;
+float g_LoginSceneAnglePitch = LoginSceneCameraDefaults::ANGLE_PITCH;
+float g_LoginSceneAngleYaw   = LoginSceneCameraDefaults::ANGLE_YAW;
+
+// Applies the LoginScene waypoint correction to a world-space position in-place.
+// Only active on the LoginScene map; other worlds pass through unchanged.
+static void ApplyLoginSceneOffset(float& x, float& y, float& z)
+{
+    extern CMapManager gMapManager;
+    if (gMapManager.WorldActive != WD_73NEW_LOGIN_SCENE)
+        return;
+
+    x += g_LoginSceneOffsetX;
+    y += g_LoginSceneOffsetY;
+    z += g_LoginSceneOffsetZ;
 }
 
 void CCameraMove::Init()
@@ -423,6 +456,9 @@ void CCameraMove::GetCurrentCameraPos(float CameraPos[3])
         CameraPos[0] = m_vTourCameraPos[0];
         CameraPos[1] = m_vTourCameraPos[1];
         CameraPos[2] = m_vTourCameraPos[2];
+
+        // FIX: Apply LoginScene position offset
+        ApplyLoginSceneOffset(CameraPos[0], CameraPos[1], CameraPos[2]);
     }
     else
     {
@@ -540,6 +576,12 @@ CCameraMove* CCameraMove::GetInstancePtr()
     return &s_CameraWalkInstance;
 }
 
+// C-style wrapper for DevEditor access
+extern "C" CCameraMove* CCameraMove__GetInstancePtr()
+{
+    return CCameraMove::GetInstancePtr();
+}
+
 CCameraMove::WAYPOINT* CCameraMove::GetWayPointByIndex(std::size_t index)
 {
     if (index >= m_listWayPoint.size())
@@ -626,6 +668,12 @@ BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart, int index)
     m_CameraStartPos[0] = m_CurrentCameraPos[0] = m_vTourCameraPos[0] = startWaypoint->fCameraX;
     m_CameraStartPos[1] = m_CurrentCameraPos[1] = m_vTourCameraPos[1] = startWaypoint->fCameraY;
     m_CameraStartPos[2] = m_CurrentCameraPos[2] = m_vTourCameraPos[2] = startWaypoint->fCameraZ;
+
+    // FIX: Apply position offset for LoginScene waypoints during initialization
+    // Offset is also applied in GetCurrentCameraPos() for ongoing tour movement
+    ApplyLoginSceneOffset(m_CameraStartPos[0], m_CameraStartPos[1], m_CameraStartPos[2]);
+    ApplyLoginSceneOffset(m_CurrentCameraPos[0], m_CurrentCameraPos[1], m_CurrentCameraPos[2]);
+    ApplyLoginSceneOffset(m_vTourCameraPos[0], m_vTourCameraPos[1], m_vTourCameraPos[2]);
 
     CameraVector2 toTarget{targetWaypoint->fCameraX - startWaypoint->fCameraX, targetWaypoint->fCameraY - startWaypoint->fCameraY};
     const CameraVector2 forwardDir = toTarget.Normalized();

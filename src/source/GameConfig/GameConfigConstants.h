@@ -7,6 +7,7 @@ namespace CfgSections
     inline constexpr wchar_t CfgSectionAudio[]      = L"Audio";
     inline constexpr wchar_t CfgSectionLogin[]      = L"LOGIN";
     inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
+    inline constexpr wchar_t CfgSectionCamera[] = L"Camera";
 }
 
 namespace CfgKeys
@@ -20,10 +21,9 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyColorDepth[]     = L"ColorDepth";
     inline constexpr wchar_t CfgKeyRenderTextType[] = L"RenderTextType";
 
-    // Audio
-    inline constexpr wchar_t CfgKeySoundEnabled[] = L"SoundEnabled";
-    inline constexpr wchar_t CfgKeyMusicEnabled[] = L"MusicEnabled";
-    inline constexpr wchar_t CfgKeyVolumeLevel[]  = L"VolumeLevel";
+    // Audio — volume 0 = off, >0 = on (no separate Enabled flag).
+    inline constexpr wchar_t CfgKeySoundVolume[]  = L"SoundVolume";
+    inline constexpr wchar_t CfgKeyMusicVolume[] = L"MusicVolume";
 
     // Login
     inline constexpr wchar_t CfgKeyRememberMe[]        = L"RememberMe";
@@ -34,6 +34,9 @@ namespace CfgKeys
     // Connection
     inline constexpr wchar_t CfgKeyServerIP[]   = L"ServerIP";
     inline constexpr wchar_t CfgKeyServerPort[] = L"ServerPort";
+
+    // Camera
+    inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
 }
 
 namespace CfgDefaults
@@ -44,9 +47,8 @@ namespace CfgDefaults
 
     inline constexpr int  CfgDefaultColorDepth = 0;
 
-    inline constexpr bool CfgDefaultSoundEnabled = true;
-    inline constexpr bool CfgDefaultMusicEnabled = false;
-    inline constexpr int  CfgDefaultVolumeLevel  = 5;
+    inline constexpr int  CfgDefaultSoundVolume = 5;
+    inline constexpr int  CfgDefaultMusicVolume = 5;
 
     inline constexpr int CfgDefaultRenderTextType = 0;
 
@@ -57,4 +59,6 @@ namespace CfgDefaults
 
     inline constexpr wchar_t CfgDefaultServerIP[] = L"127.127.127.127";
     inline constexpr int CfgDefaultServerPort = 44406;
+
+    inline constexpr int CfgDefaultZoom = 1100;  // OrbitalCamera DEFAULT_RADIUS
 }

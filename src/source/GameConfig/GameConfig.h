@@ -25,14 +25,12 @@ public:
     int GetColorDepth() const { return m_colorDepth; }
     void SetColorDepth(int depth);
 
-    // Audio
-    bool GetSoundEnabled() const { return m_soundEnabled; }
-    bool GetMusicEnabled() const { return m_musicEnabled; }
-    int  GetVolumeLevel()  const { return m_volumeLevel; }
+    // Audio — volume 0 = off, >0 = on. No separate Enabled flag.
+    int  GetSoundVolume()  const { return m_soundVolume; }
+    int  GetMusicVolume()  const { return m_musicVolume; }
 
-    void SetSoundEnabled(bool enabled);
-    void SetMusicEnabled(bool enabled);
-    void SetVolumeLevel(int level);
+    void SetSoundVolume(int level);
+    void SetMusicVolume(int level);
 
     // Text rendering
     int GetRenderTextType() const { return m_renderTextType; }
@@ -58,6 +56,10 @@ public:
     void SetServerIP(const std::wstring& ip);
     void SetServerPort(int port);
 
+    // Camera
+    int GetZoom() const { return m_zoom; }
+    void SetZoom(int zoom);
+
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
     static std::vector<BYTE> HexToBinary(const std::wstring& hex);
@@ -78,9 +80,8 @@ private:
 
     int m_colorDepth;
 
-    bool m_soundEnabled;
-    bool m_musicEnabled;
-    int  m_volumeLevel;
+    int  m_soundVolume;
+    int  m_musicVolume;
 
     int m_renderTextType;
 
@@ -91,6 +92,8 @@ private:
 
     std::wstring m_serverIP;
     int m_serverPort;
+
+    int m_zoom;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

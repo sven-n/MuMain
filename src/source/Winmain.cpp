@@ -52,6 +52,8 @@
 
 
 #include "NewUISystem.h"
+#include "Camera/CameraConfig.h"
+#include "Camera/CameraProjection.h"
 #include "Translation/i18n.h"
 
 #ifdef _EDITOR
@@ -365,7 +367,7 @@ extern PATH* path;
 void DestroyWindow()
 {
     // Save game configuration to config.ini
-    GameConfig::GetInstance().SetVolumeLevel(g_pOption->GetVolumeLevel());
+    GameConfig::GetInstance().SetSoundVolume(g_pOption->GetVolumeLevel());
     GameConfig::GetInstance().Save();
 
 #ifdef _EDITOR
@@ -491,6 +493,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (g_bUseWindowMode == FALSE)
 #endif	// ACTIVE_FOCUS_OUT
                 g_bWndActive = false;
+            // Release the cursor when losing focus so Windows can route input
+            // to other apps / the Alt-Tab target.
+            ClipCursor(nullptr);
 
             if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
             {
@@ -522,6 +527,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 SetTargetFps(g_TargetFpsBeforeInactive);
                 g_HasInactiveFpsOverride = false;
             }
+            // Re-clip on regaining focus if we're in fullscreen.
+            UpdateCursorClip();
         }
         break;
     case WM_TIMER:
@@ -562,6 +569,27 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
     case WM_ERASEBKGND:
         return TRUE;
+        break;
+    case WM_SIZE:
+        if (wParam != SIZE_MINIMIZED)
+        {
+            // Update window dimensions
+            WindowWidth = LOWORD(lParam);
+            WindowHeight = HIWORD(lParam);
+
+            // Update screen rate factors
+            g_fScreenRate_x = (float)WindowWidth / (float)REFERENCE_WIDTH;
+            g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
+
+            // Update OpenGL viewport dimensions
+            OpenglWindowWidth = WindowWidth;
+            OpenglWindowHeight = WindowHeight;
+
+            // Reinitialize fonts and update resolution-dependent systems
+            ReinitializeFonts();
+            UpdateResolutionDependentSystems();
+            UpdateCursorClip();
+        }
         break;
     case WM_PAINT:
     {
@@ -617,12 +645,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         MouseY = (float)HIWORD(lParam) / g_fScreenRate_y;
         if (MouseX < 0)
             MouseX = 0;
-        if (MouseX > 640)
-            MouseX = 640;
+        if (MouseX > REFERENCE_WIDTH)
+            MouseX = REFERENCE_WIDTH;
         if (MouseY < 0)
             MouseY = 0;
-        if (MouseY > 480)
-            MouseY = 480;
+        if (MouseY > REFERENCE_HEIGHT)
+            MouseY = REFERENCE_HEIGHT;
     }
     break;
     case WM_LBUTTONDOWN:
@@ -941,6 +969,173 @@ MSG MainLoop()
     return msg;
 }
 
+// Declared at file scope -- an `extern` inside the anonymous namespace below would
+// give the symbol internal linkage and fail to resolve against the real global.
+extern int g_iRenderTextType;
+
+namespace
+{
+    // Tahoma font size scales with window height; these are the tuned base values.
+    constexpr int BASE_FONT_HEIGHT = 12;
+    constexpr float FONT_HEIGHT_GROWTH_PER_PIXEL = 1.f / 200.f;
+    constexpr int FIX_FONT_HEIGHT_SMALL = 14;  // used when WindowHeight <= 600
+    constexpr int FIX_FONT_HEIGHT_LARGE = 15;
+    constexpr int SMALL_WINDOW_HEIGHT_THRESHOLD = 600;
+
+    struct FontSizes { int uiFontSize; int fixFontSize; };
+
+    FontSizes CalculateFontSizes()
+    {
+        FontHeight = static_cast<int>(std::ceil(
+            BASE_FONT_HEIGHT + (WindowHeight - REFERENCE_HEIGHT) * FONT_HEIGHT_GROWTH_PER_PIXEL));
+        int fixFontHeight = (WindowHeight <= SMALL_WINDOW_HEIGHT_THRESHOLD)
+            ? FIX_FONT_HEIGHT_SMALL : FIX_FONT_HEIGHT_LARGE;
+        return { FontHeight - 1, fixFontHeight - 1 };
+    }
+
+    HFONT CreateTahoma(int size, int weight)
+    {
+        return CreateFont(size, 0, 0, 0, weight, 0, 0, 0, DEFAULT_CHARSET,
+                          OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY,
+                          DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    }
+
+    void CreateNewFonts(FontSizes sizes)
+    {
+        g_hFont     = CreateTahoma(sizes.uiFontSize, FW_NORMAL);
+        g_hFontBold = CreateTahoma(sizes.uiFontSize, FW_SEMIBOLD);
+        g_hFontBig  = CreateTahoma(sizes.uiFontSize * 2, FW_SEMIBOLD);
+        g_hFixFont  = CreateTahoma(sizes.fixFontSize, FW_NORMAL);
+    }
+
+    void ReinitializeTextRenderer()
+    {
+        // Recreates the font buffer bitmap with new g_fScreenRate values
+        g_pRenderText->Release();
+        g_pRenderText->Create(g_iRenderTextType, g_hDC);
+        g_pRenderText->SetFont(g_hFont);
+    }
+
+    void RefreshInventoryEquipmentSlots()
+    {
+        // Inventory slot positions depend on the text buffer size; MUST run after
+        // ReinitializeTextRenderer().
+        if (!g_pNewUISystem)
+            return;
+        auto* pInventory = g_pNewUISystem->GetUI_NewMyInventory();
+        if (pInventory)
+            pInventory->SetEquipmentSlotInfo();
+    }
+
+    // Audio volume levels are stored as 0-10 scale; wzAudio wants 0-100.
+    constexpr int VOLUME_SCALE_FACTOR = 10;
+    constexpr int VOLUME_MIN = 0;
+    constexpr int VOLUME_MAX = 10;
+    constexpr int VOLUME_DEFAULT = 5;
+
+    int ClampVolume(int value)
+    {
+        if (value < VOLUME_MIN || value > VOLUME_MAX)
+            return VOLUME_DEFAULT;
+        return value;
+    }
+
+    // Creates the audio device and applies the music volume from config.
+    // Used both from WinMain startup and from code paths that need to (re)init audio.
+    void InitializeAudioSystem()
+    {
+        wzAudioCreate(g_hWnd);
+        wzAudioOption(WZAOPT_STOPBEFOREPLAY, 1);
+        // Use internal volume mode so wzAudio doesn't touch the system master volume
+        wzAudioSetMixerMode(_mmInternalVolume);
+        wzAudioSetVolume(GameConfig::GetInstance().GetMusicVolume() * VOLUME_SCALE_FACTOR);
+    }
+}
+
+// Reinitialize fonts when window resolution changes
+void ReinitializeFonts()
+{
+    // Save old font handles so we can delete them after the renderer has switched over
+    HFONT hOldFont     = g_hFont;
+    HFONT hOldFontBold = g_hFontBold;
+    HFONT hOldFontBig  = g_hFontBig;
+    HFONT hOldFixFont  = g_hFixFont;
+
+    FontSizes sizes = CalculateFontSizes();
+    CreateNewFonts(sizes);
+    ReinitializeTextRenderer();
+
+    if (hOldFont)     DeleteObject(hOldFont);
+    if (hOldFontBold) DeleteObject(hOldFontBold);
+    if (hOldFontBig)  DeleteObject(hOldFontBig);
+    if (hOldFixFont)  DeleteObject(hOldFixFont);
+
+    CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
+    RefreshInventoryEquipmentSlots();
+
+    // The chat input is built on native Edit controls backed by GDI DIB
+    // sections sized by g_fScreenRate at Init time. A plain SetFont() isn't
+    // enough after a resolution change — the DIB buffer is still at the old
+    // pixel scale, so rendered text gets upscaled from a stale bitmap and
+    // comes out unreadable. Rebuild the DC/bitmap at the current scale.
+    if (g_pNewUISystem)
+    {
+        if (auto* chat = g_pNewUISystem->GetUI_NewChatInputBox())
+            chat->RebuildScaledResources();
+    }
+}
+
+DWORD GetDesktopBitsPerPel()
+{
+    DEVMODE dm = {};
+    dm.dmSize = sizeof(dm);
+    if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm))
+        return dm.dmBitsPerPel;
+    return 32;
+}
+
+void UpdateCursorClip()
+{
+    // Confine cursor in fullscreen + active only. In windowed mode the user
+    // must be able to move the cursor to other windows; when deactivated we
+    // must also release so Windows can focus other apps.
+    if (!g_hWnd || g_bUseWindowMode || !g_bWndActive)
+    {
+        ClipCursor(nullptr);
+        return;
+    }
+    RECT client;
+    if (!GetClientRect(g_hWnd, &client)) return;
+    POINT tl = { client.left, client.top };
+    POINT br = { client.right, client.bottom };
+    ClientToScreen(g_hWnd, &tl);
+    ClientToScreen(g_hWnd, &br);
+    RECT clip = { tl.x, tl.y, br.x, br.y };
+    ClipCursor(&clip);
+}
+
+// Update camera state when window resolution changes
+void UpdateResolutionDependentSystems()
+{
+    // Force camera state update with new viewport dimensions
+    // This updates ScreenCenterX/Y and PerspectiveX/Y used for 3D item positioning
+    extern CameraState g_Camera;
+    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio,
+                                       g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+
+    // Update all 3D UI camera dimensions for proper item rendering
+    if (g_pNewUI3DRenderMng)
+    {
+        g_pNewUI3DRenderMng->UpdateAllCameraDimensions(WindowWidth, WindowHeight);
+    }
+
+    // Reposition old-style CWin-based UI for the current scene. Without this,
+    // login/character-scene info boxes stay anchored to the old screen size
+    // until the player re-enters the scene.
+    CUIMng::Instance().RepositionSceneUI();
+}
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 {
     wchar_t lpszExeVersion[256] = L"unknown";
@@ -1015,9 +1210,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_bUseWindowMode = GameConfig::GetInstance().GetWindowMode() ? TRUE : FALSE;
     g_bUseFullscreenMode = !g_bUseWindowMode;
 
-    // Apply audio settings from INI
-    m_SoundOnOff = GameConfig::GetInstance().GetSoundEnabled();
-    m_MusicOnOff = GameConfig::GetInstance().GetMusicEnabled();
+    // Apply audio settings from INI — volume 0 = off, >0 = on
+    m_SoundOnOff = (GameConfig::GetInstance().GetSoundVolume() > 0) ? 1 : 0;
+    m_MusicOnOff = (GameConfig::GetInstance().GetMusicVolume() > 0) ? 1 : 0;
 
     // Apply graphics settings from INI
     m_nColorDepth = GameConfig::GetInstance().GetColorDepth();
@@ -1034,8 +1229,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         GameConfig::GetInstance().DecryptCredentials(m_Username, m_Password, _countof(m_Username), _countof(m_Password));
     }
 
-    g_fScreenRate_x = (float)WindowWidth / 640;
-    g_fScreenRate_y = (float)WindowHeight / 480;
+    g_fScreenRate_x = (float)WindowWidth / (float)REFERENCE_WIDTH;
+    g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
 
 
     pMultiLanguage = new CMultiLanguage(g_strSelectedML);
@@ -1068,14 +1263,28 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     if (g_bUseWindowMode == FALSE && g_bUseFullscreenMode == TRUE)
     {
-        for (int n2 = 0; n2 < nModes; n2++)
+        // Force an exclusive fullscreen mode change at WindowWidth × WindowHeight.
+        // The old path iterated EnumDisplaySettings looking for a match at dwBitsPerPel
+        // (which defaulted to 16), but modern displays don't expose <32bpp modes — so
+        // the loop matched nothing, ChangeDisplaySettings was never called, and the
+        // game ended up as a small popup on top of the desktop instead of true fullscreen.
+        DEVMODE dmScreenSettings = {};
+        dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
+        dmScreenSettings.dmPelsWidth  = WindowWidth;
+        dmScreenSettings.dmPelsHeight = WindowHeight;
+        dmScreenSettings.dmBitsPerPel = GetDesktopBitsPerPel();
+        dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
+        if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
         {
-            if (pDevmodes[n2].dmPelsWidth == WindowWidth && pDevmodes[n2].dmPelsHeight == WindowHeight && pDevmodes[n2].dmBitsPerPel == dwBitsPerPel)
-            {
-                g_ErrorReport.Write(L"> Change display setting %dx%d.\r\n", pDevmodes[n2].dmPelsWidth, pDevmodes[n2].dmPelsHeight);
-                ChangeDisplaySettings(&pDevmodes[n2], 0);
-                break;
-            }
+            g_ErrorReport.Write(L"> Change display setting %dx%d.\r\n", WindowWidth, WindowHeight);
+        }
+        else
+        {
+            g_ErrorReport.Write(L"> Fullscreen %dx%d unavailable, falling back to windowed.\r\n",
+                                WindowWidth, WindowHeight);
+            g_bUseWindowMode     = TRUE;
+            g_bUseFullscreenMode = FALSE;
         }
     }
 
@@ -1131,6 +1340,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     }
 
     g_ErrorReport.Write(L"> Start window success.\r\n");
+
+    // Initialize OpenGL viewport dimensions to match window dimensions
+    // This ensures they're correct even if WM_SIZE hasn't fired yet or sent wrong values
+    OpenglWindowWidth = WindowWidth;
+    OpenglWindowHeight = WindowHeight;
 
     PIXELFORMATDESCRIPTOR pfd;
 
@@ -1239,19 +1453,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         SetTargetFps(-1); // unlimited
     }
 
-    FontHeight = static_cast<int>(std::ceil(12 + ((WindowHeight - 480) / 200.f)));
-
-    int nFixFontHeight = WindowHeight <= 600 ? 14 : 15;
-    int nFixFontSize;
-    int iFontSize;
-
-    iFontSize = FontHeight - 1;
-    nFixFontSize = nFixFontHeight - 1;
-
-    g_hFont = CreateFont(iFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBold = CreateFont(iFontSize, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFontBig = CreateFont(iFontSize * 2, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
-    g_hFixFont = CreateFont(nFixFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+    CreateNewFonts(CalculateFontSizes());
 
     setlocale(LC_ALL, "english");
 
@@ -1259,23 +1461,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     g_pNewUISystem->Create();
 
-    if (m_MusicOnOff)
+    // Always initialize audio system so music can be enabled at runtime
+    InitializeAudioSystem();
+
+    // Always initialize sound so it can be toggled at runtime
+    InitDirectSound(g_hWnd);
+
     {
-        wzAudioCreate(g_hWnd);
-        wzAudioOption(WZAOPT_STOPBEFOREPLAY, 1);
-    }
-
-    if (m_SoundOnOff)
-    {
-        InitDirectSound(g_hWnd);
-
-        // Load volume level from config.ini
-        int value = GameConfig::GetInstance().GetVolumeLevel();
-        if (value < 0 || value >= 10)
-            value = 5;
-
+        int value = ClampVolume(GameConfig::GetInstance().GetSoundVolume());
         g_pOption->SetVolumeLevel(value);
-        SetEffectVolumeLevel(g_pOption->GetVolumeLevel());
+        SetEffectVolumeLevel(value);
     }
 
     SetTimer(g_hWnd, HACK_TIMER, 20 * 1000, nullptr);

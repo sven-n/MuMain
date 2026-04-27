@@ -46,9 +46,9 @@ bool CNewUIDuelWatchMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRe
 
     LoadImages();
 
-    m_BtnExit.SetPos(640 - 36, 480 - 29);
+    m_BtnExit.SetPos(REFERENCE_WIDTH - 36, REFERENCE_HEIGHT - 29);
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeButtonInfo(640 - 36, 480 - 29, 36, 29);
+    m_BtnExit.ChangeButtonInfo(REFERENCE_WIDTH - 36, REFERENCE_HEIGHT - 29, 36, 29);
     m_BtnExit.ChangeToolTipText(GlobalText[2702], true);
 
     Show(false);
@@ -102,7 +102,7 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
     if (g_DuelMgr.GetCurrentChannel() == -1)
         return true;
 
-    POINT ptOrigin = { 0, (long)(480.f - 51.f) };
+    POINT ptOrigin = { 0, (long)((float)REFERENCE_HEIGHT - 51.f) };
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->RenderText(ptOrigin.x + 320 - 80, ptOrigin.y + 36, g_DuelMgr.GetDuelPlayerID(DUEL_HERO), 55, 0, RT3_SORT_CENTER);
@@ -115,7 +115,7 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
     }
     for (i = 0; i < g_DuelMgr.GetScore(DUEL_ENEMY); ++i)
     {
-        RenderImage(IMAGE_DUELWATCH_MAINFRAME_SCORE, 640 - 74 - 17 * i, 460, 16.f, 17.f);
+        RenderImage(IMAGE_DUELWATCH_MAINFRAME_SCORE, REFERENCE_WIDTH - 74 - 17 * i, 460, 16.f, 17.f);
     }
 
     if (m_bHasHPReceived == FALSE || g_DuelMgr.GetFighterRegenerated())
@@ -289,7 +289,7 @@ void CNewUIDuelWatchMainFrameWindow::RenderFrame()
     float x, y;
 
     width = 256.f; height = 51.f;
-    x = 0.f; y = 480.f - height;
+    x = 0.f; y = (float)REFERENCE_HEIGHT - height;
     SEASON3B::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK1, x, y, width, height);
     width = 128.f;
     x = 256.f;

@@ -129,7 +129,7 @@ static CSQuest g_csQuestSingleton;
 
 
 CSQuest::CSQuest(void) : m_byClass(255), m_byCurrQuestIndex(0), m_byCurrQuestIndexWnd(0),
-m_byStartQuestList(0), m_shCurrPage(0), m_byViewQuest(QUEST_VIEW_NONE), m_byQuestType(TYPE_QUEST), m_iStartX(640 - 190), m_iStartY(0)
+m_byStartQuestList(0), m_shCurrPage(0), m_byViewQuest(QUEST_VIEW_NONE), m_byQuestType(TYPE_QUEST), m_iStartX(REFERENCE_WIDTH - 190), m_iStartY(0)
 {
 }
 

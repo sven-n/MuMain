@@ -28,6 +28,75 @@
 #include "PhysicsManager.h"
 #include "GOBoid.h"
 #include "CSItemOption.h"
+
+// Phase 5: Camera system includes for 3D frustum culling
+#include "Camera/CameraManager.h"
+#include "Camera/ICamera.h"
+#include "CullingConstants.h"
+
+// DevEditor function declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldShowCharacterPickBoxes();
+
+static bool s_bShowCharacterPickBoxes = false;
+#endif
+
+namespace
+{
+    // Character selection screen: generous axis-aligned pick box dimensions.
+    constexpr float CHARSCENE_PICK_MIN_HEIGHT = 300.0f;
+    constexpr float CHARSCENE_PICK_HALF_WIDTH = 72.0f;
+}
+
+void BuildCharacterScenePickOBB(const OBJECT* o, OBB_t& outOBB)
+{
+    float charHeight = Models[o->Type].fTransformedSize * 2.0f;
+    if (charHeight < CHARSCENE_PICK_MIN_HEIGHT)
+        charHeight = CHARSCENE_PICK_MIN_HEIGHT;
+
+    outOBB.StartPos[0] = o->Position[0] - CHARSCENE_PICK_HALF_WIDTH;
+    outOBB.StartPos[1] = o->Position[1] - CHARSCENE_PICK_HALF_WIDTH;
+    outOBB.StartPos[2] = o->Position[2];
+    outOBB.XAxis[0] = CHARSCENE_PICK_HALF_WIDTH * 2.0f;
+    outOBB.XAxis[1] = 0.0f;
+    outOBB.XAxis[2] = 0.0f;
+    outOBB.YAxis[0] = 0.0f;
+    outOBB.YAxis[1] = CHARSCENE_PICK_HALF_WIDTH * 2.0f;
+    outOBB.YAxis[2] = 0.0f;
+    outOBB.ZAxis[0] = 0.0f;
+    outOBB.ZAxis[1] = 0.0f;
+    outOBB.ZAxis[2] = charHeight;
+}
+
+#ifdef _EDITOR
+// Declared at file scope -- an `extern` inside an anonymous namespace would give
+// the symbol internal linkage and fail to resolve against the real global.
+extern EGameScene SceneFlag;
+
+namespace
+{
+    // Draws the pick volume used by SelectCharacter as a wireframe box.
+    // Main scene: model OBB. Character scene: our synthesized box.
+    void RenderCharacterPickBoxDebug(const OBJECT* o)
+    {
+        if (SceneFlag == CHARACTER_SCENE)
+        {
+            OBB_t pickBox;
+            BuildCharacterScenePickOBB(o, pickBox);
+            RenderDebugBox(pickBox.StartPos,
+                           pickBox.XAxis[0], pickBox.YAxis[1], pickBox.ZAxis[2],
+                           0.0f, 1.0f, 1.0f);
+        }
+        else
+        {
+            RenderDebugBox(o->OBB.StartPos,
+                           o->OBB.XAxis[0], o->OBB.YAxis[1], o->OBB.ZAxis[2],
+                           0.0f, 1.0f, 1.0f);
+        }
+    }
+}
+#endif
+
 #include "CSChaosCastle.h"
 #include "GIPetManager.h"
 #include "CSParts.h"
@@ -11204,6 +11273,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
 void RenderCharactersClient()
 {
+#ifdef _EDITOR
+    s_bShowCharacterPickBoxes = DevEditor_ShouldShowCharacterPickBoxes();
+#endif
+
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -11268,6 +11341,11 @@ void RenderCharactersClient()
 
                 if (o->Type == MODEL_PLAYER)
                     battleCastle::CreateBattleCastleCharacter_Visual(c, o);
+
+#ifdef _EDITOR
+                if (s_bShowCharacterPickBoxes)
+                    RenderCharacterPickBoxDebug(o);
+#endif
             }
         }
     }

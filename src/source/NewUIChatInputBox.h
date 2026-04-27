@@ -148,6 +148,12 @@ namespace SEASON3B
 
         void SetFont(HFONT hFont);
 
+        // Recreate the internal text-input DCs at the current g_fScreenRate.
+        // Call after a resolution change so the GDI buffers match the new scale;
+        // without this the chat input renders readable but scaled from a stale
+        // buffer and characters come out garbled at the new resolution.
+        void RebuildScaledResources();
+
         bool HaveFocus();
 
         void AddChatHistory(const type_string& strText);

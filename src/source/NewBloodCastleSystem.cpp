@@ -125,7 +125,7 @@ void CNewBloodCastleSystem::RenderMatchTimes(void)
 
 void CNewBloodCastleSystem::RenderMatchResult(void)
 {
-    int x = 640 / 2;
+    int x = REFERENCE_WIDTH / 2;
     int yPos = m_PosResult.y + 40;
 
     EnableAlphaTest();

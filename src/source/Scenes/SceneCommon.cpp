@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "SceneCommon.h"
 #include "SceneCore.h"
+#include "Camera/CameraProjection.h"
 
 //=============================================================================
 // Character Selection State Implementation
@@ -160,7 +161,7 @@ bool CheckName()
 
 BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
 {
-    if (CheckMouseIn((640 - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
+    if (CheckMouseIn((REFERENCE_WIDTH - 120) / 2, 30 + iOptionPos_y, 120, 22) && MouseLButtonPush)
     {
         MouseLButtonPush = false;
         MouseUpdateTime = 0;
@@ -279,19 +280,20 @@ void RenderInfomation3D()
     if (Success)
     {
         glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
+        SaveCameraPerspective();
+    glPushMatrix();
         glLoadIdentity();
         glViewport2(0, 0, WindowWidth, WindowHeight);
-        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), CameraViewNear, CameraViewFar);
+        gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadIdentity();
-        GetOpenGLMatrix(CameraMatrix);
+        CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
 
         float Width, Height;
-        float x = (640 - 150) / 2;
+        float x = (REFERENCE_WIDTH - 150) / 2;
         float y;
         if (ErrorMessage == MESSAGE_TRADE_CHECK)
         {
@@ -324,6 +326,7 @@ void RenderInfomation3D()
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
         UpdateMousePositionn();
+    RestoreCameraPerspective();
     }
 }
 

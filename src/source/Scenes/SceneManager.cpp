@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include "SceneManager.h"
+#include "../Utilities/FrameProfiler.h"
 
 //=============================================================================
 // Frame Timing State Implementation
@@ -38,6 +39,8 @@ FrameTimingState g_frameTiming;
 #include "../GlobalText.h"
 #include "../ZzzAI.h"
 #include "../Winmain.h"
+#include "../Camera/CameraManager.h"
+#include "../Camera/CameraMode.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -325,49 +328,58 @@ static void UpdateCoreSystems()
 }
 
 /**
+ * @brief Sets both the OpenGL clear color and the global fog color to the same RGB.
+ *
+ * Every world uses the fog color as its clear color, so this keeps them in sync
+ * and avoids duplicating the two assignments at every call site.
+ */
+static void SetClearAndFogColor(float r, float g, float b)
+{
+    extern GLfloat FogColor[4];
+    glClearColor(r, g, b, 1.f);
+    FogColor[0] = r;
+    FogColor[1] = g;
+    FogColor[2] = b;
+    FogColor[3] = 1.f;
+}
+
+/**
  * @brief Sets the OpenGL clear color based on the current world/map.
  *
  * Different maps have different background colors for visual atmosphere.
  */
 static void SetWorldClearColor()
 {
-    if (gMapManager.WorldActive == WD_10HEAVEN)
-    {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE || gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE)
-    {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    }
-    else if (gMapManager.InHellas(gMapManager.WorldActive))
-    {
-        glClearColor(30.f / 256.f, 40.f / 256.f, 40.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InChaosCastle() == true)
-    {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
-    }
+    // Convenience: build a 0-255 color at call site; dividing by 256 matches legacy values.
+    constexpr float BYTE_TO_FLOAT = 1.f / 256.f;
+    auto rgb8 = [](int r, int g, int b) {
+        SetClearAndFogColor(r * BYTE_TO_FLOAT, g * BYTE_TO_FLOAT, b * BYTE_TO_FLOAT);
+    };
+
+    const int world = gMapManager.WorldActive;
+
+    if (world == WD_0LORENCIA)
+        rgb8(10, 20, 14);                              // Dark green
+    else if (world == WD_2DEVIAS)
+        SetClearAndFogColor(0.75f, 0.85f, 1.0f);       // Light snowy blue
+    else if (world == WD_10HEAVEN)
+        rgb8(3, 25, 44);                               // Blue
+    else if (world == WD_73NEW_LOGIN_SCENE || world == WD_74NEW_CHARACTER_SCENE)
+        SetClearAndFogColor(0.f, 0.f, 0.f);            // Black
+    else if (gMapManager.InHellas(world))
+        rgb8(30, 40, 40);                              // Teal
+    else if (gMapManager.InChaosCastle())
+        SetClearAndFogColor(0.f, 0.f, 0.f);            // Black
     else if (gMapManager.InBattleCastle() && battleCastle::InBattleCastle2(Hero->Object.Position))
-    {
-        glClearColor(0.f, 0.f, 0.f, 1.f);
-    }
-    else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
-    {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-        )
-    {
-        glClearColor(178.f / 256.f, 178.f / 256.f, 178.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
-    {
-        glClearColor(148.f / 256.f, 179.f / 256.f, 223.f / 256.f, 1.f);
-    }
+        SetClearAndFogColor(0.f, 0.f, 0.f);            // Black
+    else if (world >= WD_45CURSEDTEMPLE_LV1 && world <= WD_45CURSEDTEMPLE_LV6)
+        rgb8(9, 8, 33);                                // Dark purple
+    else if (world == WD_51HOME_6TH_CHAR)
+        rgb8(178, 178, 178);                           // Gray
+    else if (world == WD_65DOPPLEGANGER1)
+        rgb8(148, 179, 223);                           // Light blue
     else
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
+        SetClearAndFogColor(0.f, 0.f, 0.f);            // Black (default)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -411,10 +423,10 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
         return;
 
     // Convert virtual 640x480 coords to actual window pixels
-    float gx = graphX * (float)WindowWidth / 640.f;
-    float gy = graphY * (float)WindowHeight / 480.f;
-    float gw = graphW * (float)WindowWidth / 640.f;
-    float gh = graphH * (float)WindowHeight / 480.f;
+    float gx = graphX * (float)WindowWidth / (float)REFERENCE_WIDTH;
+    float gy = graphY * (float)WindowHeight / (float)REFERENCE_HEIGHT;
+    float gw = graphW * (float)WindowWidth / (float)REFERENCE_WIDTH;
+    float gh = graphH * (float)WindowHeight / (float)REFERENCE_HEIGHT;
 
     // Flip Y for OpenGL (origin bottom-left)
     float glBottom = (float)WindowHeight - gy - gh;
@@ -505,8 +517,61 @@ static void RenderDebugInfo()
     swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", CameraFOV, CameraAngle[0], CameraAngle[1], CameraAngle[2]);
+    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", g_Camera.FOV, g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Compile-time build info: configuration, feature flags, compiler, arch,
+    // and the binary's build timestamp. Useful for verifying which build is
+    // actually running without having to check executable metadata.
+    constexpr const char* kBuildType =
+#if defined(_DEBUG) || defined(DEBUG)
+        "Debug";
+#else
+        "Release";
+#endif
+    constexpr const char* kEditor =
+#ifdef _EDITOR
+        "Editor";
+#else
+        "NoEditor";
+#endif
+    constexpr const char* kCompiler =
+#if defined(__MINGW32__) || defined(__MINGW64__)
+        "MinGW";
+#elif defined(__clang__)
+        "Clang";
+#elif defined(_MSC_VER)
+        "MSVC";
+#elif defined(__GNUC__)
+        "GCC";
+#else
+        "Unknown";
+#endif
+    constexpr const char* kArch =
+#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
+        "x64";
+#else
+        "x86";
+#endif
+    swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
+             kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Active camera mode (cycled with F9).
+    swprintf(szLine, L"Camera: %hs", CameraModeToString(CameraManager::Instance().GetCurrentMode()));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Per-pass frame timing (ms) — accumulated by FRAME_PROFILE scopes around the
+    // major render passes in MainScene. Reset just below so next frame starts fresh.
+    using FP = FrameProfiler::Pass;
+    swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f",
+             FrameProfiler::AccumulatorMs(FP::Terrain),
+             FrameProfiler::AccumulatorMs(FP::Objects),
+             FrameProfiler::AccumulatorMs(FP::Characters),
+             FrameProfiler::AccumulatorMs(FP::Items),
+             FrameProfiler::AccumulatorMs(FP::Effects));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    FrameProfiler::ResetFrame();
 
     // Frame time graph below text
     RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);

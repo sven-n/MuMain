@@ -101,7 +101,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 
     switch (WindowWidth)
     {
-    case 640:
+    case REFERENCE_WIDTH:
         iInfoWidth = 90;
         iLabelHeight = 38;
         iDataHeight = 52;
@@ -155,7 +155,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     {
         iType = 5;
 
-        if (WindowWidth == 640 || WindowWidth == 1280)
+        if (WindowWidth == REFERENCE_WIDTH || WindowWidth == 1280)
             TabSpace += int(5940 / iInfoWidth);
         else if (WindowWidth == 800 || WindowWidth == 1024)
             TabSpace += int(5200 / iInfoWidth);

@@ -128,7 +128,7 @@ int DoGuildRelationReplyAction(POPUP_RESULT Result)
 CUIGuildMaster::CUIGuildMaster()
 {
     m_bOpened = false;
-    SetPosition(640 - 190, 0);
+    SetPosition(REFERENCE_WIDTH - 190, 0);
     SetSize(190, 90);
     m_nCurrMode = MODE_NONE;
     m_eCurrStep = STEP_MAIN;

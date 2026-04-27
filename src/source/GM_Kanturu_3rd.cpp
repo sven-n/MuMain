@@ -1701,8 +1701,8 @@ void M39Kanturu3rd::Kanturu3rdSuccess()
 
     fWidth = 372.0f;
     fHeight = 99.0f;
-    fPosX = (640.0f - fWidth) / 2.0f;
-    fPosY = (480.0f - fWidth) / 2.0f;
+    fPosX = ((float)REFERENCE_WIDTH - fWidth) / 2.0f;
+    fPosY = ((float)REFERENCE_HEIGHT - fWidth) / 2.0f;
     tu = fWidth / 512.f;
     tv = fHeight / 128.f;
 
@@ -1724,8 +1724,8 @@ void M39Kanturu3rd::Kanturu3rdFailed()
 
     fWidth = 372.0f;
     fHeight = 99.0f;
-    fPosX = (640.0f - fWidth) / 2.0f;
-    fPosY = (480.0f - fWidth) / 2.0f;
+    fPosX = ((float)REFERENCE_WIDTH - fWidth) / 2.0f;
+    fPosY = ((float)REFERENCE_HEIGHT - fWidth) / 2.0f;
     tu = fWidth / 512.f;
     tv = fHeight / 128.f;
 

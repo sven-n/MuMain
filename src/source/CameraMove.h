@@ -4,6 +4,30 @@
 #include <string>
 #include <vector>
 
+// LoginScene camera offset defaults (empirically tuned to correct outdated
+// waypoint-file coordinates on the current LoginScene terrain).
+// See CameraMove.cpp for details.
+namespace LoginSceneCameraDefaults
+{
+    constexpr float OFFSET_X = -300.0f;
+    constexpr float OFFSET_Y =  650.0f;
+    constexpr float OFFSET_Z =  950.0f;
+    constexpr float ANGLE_PITCH = 40.0f;
+    constexpr float ANGLE_YAW   = -5.0f;
+
+    // Default render distances for LoginScene (tour camera).
+    // DevEditor exposes these as sliders; release builds use these as fixed values.
+    constexpr float RENDER_TERRAIN_DIST = 3995.0f;
+    constexpr float RENDER_OBJECT_DIST  = 5903.0f;
+}
+
+// Runtime-adjustable offsets (initially set to the defaults above)
+extern float g_LoginSceneOffsetX;
+extern float g_LoginSceneOffsetY;
+extern float g_LoginSceneOffsetZ;
+extern float g_LoginSceneAnglePitch;
+extern float g_LoginSceneAngleYaw;
+
 class CCameraMove
 {
 #pragma pack(push, 1)

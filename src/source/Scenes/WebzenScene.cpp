@@ -119,7 +119,7 @@ void WebzenScene(HDC hDC)
 
     rUIMng.CreateTitleSceneUI();
 
-    FogEnable = false;
+    FogEnable = true;
 
     ::EnableAlphaTest();
     OpenBasicData(hDC);

@@ -175,11 +175,12 @@ namespace SEASON3B
         static bool CanRegisterItemHotKey(int iType);
         static bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl);
 
+        // Public to allow refresh when resolution changes
+        void SetEquipmentSlotInfo();
+
     protected:
         void DeleteEquippingEffect();
         void DeleteEquippingEffectBug(ITEM* pItem);
-
-        void SetEquipmentSlotInfo();
         void SetButtonInfo();
 
     private:

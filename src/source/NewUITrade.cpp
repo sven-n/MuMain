@@ -617,8 +617,8 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
 
         InitTradeInfo();
 
-        int x = 260 * MouseX / 640;
-        SetCursorPos(x * WindowWidth / 640, MouseY * WindowHeight / 480);
+        int x = 260 * MouseX / REFERENCE_WIDTH;
+        SetCursorPos(x * WindowWidth / REFERENCE_WIDTH, MouseY * WindowHeight / REFERENCE_HEIGHT);
 
         wchar_t szTempID[MAX_USERNAME_SIZE + 1]{ };
         CMultiLanguage::ConvertFromUtf8(szTempID, pTradeData->ID, MAX_USERNAME_SIZE);

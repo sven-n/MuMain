@@ -90,7 +90,7 @@ void SEASON3B::CNewUIMasterLevel::SetPos()
 {
     this->PosX = 0;
     this->PosY = 0;
-    this->width = 640;
+    this->width = REFERENCE_WIDTH;
     this->height = 428;
 }
 

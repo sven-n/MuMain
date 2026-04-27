@@ -7,6 +7,7 @@
 
 #include "UIManager.h"
 #include "NewUISystem.h"
+#include "Camera/CameraProjection.h"
 
 CPersonalShopTitleImp::CPersonalShopTitleImp() : m_iHighlightFrame(0), m_bShow(true)
 {}
@@ -298,10 +299,10 @@ CPersonalShopTitleImp* CPersonalShopTitleImp::GetObjPtr()
 
 void CPersonalShopTitleImp::UpdatePosition()
 {
-    float Width = GetScreenWidth(), Height = 480;
+    float Width = GetScreenWidth(), Height = REFERENCE_HEIGHT;
 
-    if (!CameraTopViewEnable)
-        Height = 480 - 48;
+    if (!g_Camera.TopViewEnable)
+        Height = REFERENCE_HEIGHT - 48;
 
     EndBitmap();
     BeginOpengl(0, 0, Width, Height);
@@ -400,11 +401,11 @@ void CPersonalShopTitleImp::CalculateBooleanPos(IN CHARACTER* pPlayer, IN const 
     Vector(pObject->Position[0], pObject->Position[1], pObject->Position[2] + pObject->BoundingBoxMax[2] + 60.f, posTemp);
 
     POINT ptFloating;
-    Projection(posTemp, (int*)&ptFloating.x, (int*)&ptFloating.y);		//. logical position
+    CameraProjection::WorldToScreen(g_Camera, posTemp, (int*)&ptFloating.x, (int*)&ptFloating.y);
 
     //. pos : real position
-    pos.x = (ptFloating.x * (int)WindowWidth / 640) - size.cx / 2;
-    pos.y = (ptFloating.y * (int)WindowHeight / 480) - (12 * 3 * (int)WindowHeight / 480);
+    pos.x = (ptFloating.x * (int)WindowWidth / REFERENCE_WIDTH) - size.cx / 2;
+    pos.y = (ptFloating.y * (int)WindowHeight / REFERENCE_HEIGHT) - (12 * 3 * (int)WindowHeight / REFERENCE_HEIGHT);
 }
 
 CPersonalShopTitleImp::CShopTitleDrawObj::CShopTitleDrawObj() { Init(); }

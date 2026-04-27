@@ -17,6 +17,15 @@ CHARACTER* FindCharacterByKey(int Key);
 void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1, bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
+
+/**
+ * @brief Builds a generous axis-aligned pick box for the character selection screen.
+ *
+ * The model OBB is too tight at the steep camera angle used in CHARACTER_SCENE,
+ * so we synthesize a wider box from the character's position and model height.
+ * Only used in CHARACTER_SCENE; main scene uses the model's own OBB directly.
+ */
+void BuildCharacterScenePickOBB(const OBJECT* o, OBB_t& outOBB);
 void MoveCharacterClient(CHARACTER* cc);
 void MoveCharactersClient();
 

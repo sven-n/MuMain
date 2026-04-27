@@ -19,6 +19,7 @@
 #include "../CDirection.h"
 #include "../w_PetProcess.h"
 #include "../Utilities/Log/muConsoleDebug.h"
+#include "../Utilities/FrameProfiler.h"
 #include "../ZzzInterface.h"
 #include "../WSclient.h"
 #include "../GOBoid.h"
@@ -28,9 +29,30 @@
 #include "../PortalMgr.h"
 #include "../Guild/GuildCache.h"
 #include "../UIMapName.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/CameraManager.h"
+#include "Camera/CameraMode.h"
+#ifdef _EDITOR
+#include "Camera/FrustumRenderer.h"
+#include "Camera/CameraDebugLog.h"
+#endif
 
 // External declarations
-extern float CameraAngle[3];
+#ifdef _EDITOR
+extern "C" bool DevEditor_IsDebugVisualizationEnabled();
+// DevEditor render toggle functions
+extern "C" bool DevEditor_ShouldRenderTerrain();
+extern "C" bool DevEditor_ShouldRenderStaticObjects();
+extern "C" bool DevEditor_ShouldRenderEffects();
+extern "C" bool DevEditor_ShouldRenderDroppedItems();
+extern "C" bool DevEditor_ShouldRenderItemLabels();
+extern "C" bool DevEditor_ShouldRenderEquippedItems();
+extern "C" bool DevEditor_ShouldRenderWeatherEffects();
+extern "C" bool DevEditor_ShouldRenderUI();
+extern "C" bool DevEditor_IsCameraFogOverrideEnabled(const char* cameraName);
+extern "C" bool DevEditor_GetCameraFogOverrideValue(const char* cameraName);
+#endif
+
 extern HWND g_hWnd;
 extern CErrorReport g_ErrorReport;
 extern float EarthQuake;
@@ -114,7 +136,7 @@ static void InitializeMainScene()
 
     CUIMng::Instance().CreateMainScene();
 
-    CameraAngle[2] = -45.f;
+    g_Camera.Angle[2] = -45.f;
 
     ClearInput();
     InputEnable = false;
@@ -184,14 +206,14 @@ static void InitializeSceneFrame()
  * - Interface movement and tournament interface updates
  *
  * @note Only processes input when not in top-view camera mode and loading is complete.
- * @note Skips processing if CameraTopViewEnable is true or LoadingWorld >= 30.
+ * @note Skips processing if g_Camera.TopViewEnable is true or LoadingWorld >= 30.
  */
 static void UpdateUIAndInput()
 {
-    if (CameraTopViewEnable || LoadingWorld >= 30)
+    if (g_Camera.TopViewEnable || LoadingWorld >= 30)
         return;
 
-    if (MouseY >= (int)(480 - 48))
+    if (MouseY >= (int)(REFERENCE_HEIGHT - 48))
         MouseOnWindow = true;
 
     g_pPartyManager->Update();
@@ -238,7 +260,7 @@ static void UpdateGameEntities()
 {
     MoveObjects();
 
-    if (!CameraTopViewEnable)
+    if (!g_Camera.TopViewEnable)
         MoveItems();
 
     if (RequireLeavesEffect())
@@ -320,50 +342,24 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
 {
     outByWaterMap = 0;
 
-    if (CameraTopViewEnable == false)
+    if (g_Camera.TopViewEnable == false)
     {
-        outHeight = 480 - 48;
+        // Use hardcoded value from original game (in 640×480 reference coordinates)
+        // This is then scaled by BeginOpengl() to actual window size
+        outHeight = REFERENCE_HEIGHT - 48;
     }
     else
     {
-        outHeight = 480;
+        outHeight = REFERENCE_HEIGHT;
     }
 
     outWidth = GetScreenWidth();
 
-    // Set clear color based on world
-    if (gMapManager.WorldActive == WD_0LORENCIA)
-    {
-        glClearColor(10 / 256.f, 20 / 256.f, 14 / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_2DEVIAS)
-    {
-        glClearColor(0.f / 256.f, 0.f / 256.f, 10.f / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive == WD_10HEAVEN)
-    {
-        glClearColor(3.f / 256.f, 25.f / 256.f, 44.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InChaosCastle() == true)
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
-    else if (gMapManager.WorldActive >= WD_45CURSEDTEMPLE_LV1 && gMapManager.WorldActive <= WD_45CURSEDTEMPLE_LV6)
-    {
-        glClearColor(9.f / 256.f, 8.f / 256.f, 33.f / 256.f, 1.f);
-    }
-    else if (gMapManager.InHellas() == true)
-    {
-        outByWaterMap = 1;
-        glClearColor(0.f / 256.f, 0.f / 256.f, 0.f / 256.f, 1.f);
-    }
-    else
-    {
-        glClearColor(0 / 256.f, 0 / 256.f, 0 / 256.f, 1.f);
-    }
+    // NOTE: Clear color is set by SceneManager::SetWorldClearColor() before this function is called
+    // All background colors are now centralized in SceneManager.cpp
 
     BeginOpengl(0, 0, outWidth, outHeight);
-    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, cameraPos);
+    CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH, (float)outHeight / (float)REFERENCE_HEIGHT, cameraPos);
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())
@@ -373,13 +369,9 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
             vec3_t Color = { 0.f, 0.f, 0.f };
             battleCastle::StartFog(Color);
         }
-        else
-        {
-            glDisable(GL_FOG);
-        }
+        // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
-
-    CreateScreenVector(MouseX, MouseY, MouseTarget);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 }
 
 /**
@@ -391,52 +383,80 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
  */
 static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 {
-    if (IsWaterTerrain() == false)
+#ifdef _EDITOR
+    // DevEditor render toggle checks
+    bool renderTerrain = DevEditor_ShouldRenderTerrain();
+    bool renderStatic = DevEditor_ShouldRenderStaticObjects();
+    bool renderEffects = DevEditor_ShouldRenderEffects();
+    bool renderDroppedItems = DevEditor_ShouldRenderDroppedItems();
+    bool renderWeatherEffects = DevEditor_ShouldRenderWeatherEffects();
+#else
+    bool renderTerrain = true;
+    bool renderStatic = true;
+    bool renderEffects = true;
+    bool renderDroppedItems = true;
+    bool renderWeatherEffects = true;
+#endif
+
+    if (IsWaterTerrain() == false && renderTerrain)
     {
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
-                RenderTerrain(false);
+                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
         }
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
             {
-                if (gMapManager.IsPKField() || IsDoppelGanger2())
+                if ((gMapManager.IsPKField() || IsDoppelGanger2()) && renderStatic)
                 {
-                    RenderObjects();
+                    FRAME_PROFILE(Objects); RenderObjects();
                 }
-                RenderTerrain(false);
+                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
             }
     }
 
-    if (!gMapManager.IsPKField() && !IsDoppelGanger2())
-        RenderObjects();
+    if (!gMapManager.IsPKField() && !IsDoppelGanger2() && renderStatic)
+        { FRAME_PROFILE(Objects); RenderObjects(); }
 
-    RenderEffectShadows();
-    RenderBoids();
-
-    RenderCharactersClient();
-
-    if (EditFlag != EDIT_NONE)
+    if (renderEffects)
     {
-        RenderTerrain(true);
+        RenderEffectShadows();
+        RenderBoids();
     }
-    if (!CameraTopViewEnable)
-        RenderItems();
+
+    { FRAME_PROFILE(Characters); RenderCharactersClient(); }
+
+    if (EditFlag != EDIT_NONE && renderTerrain)
+    {
+        FRAME_PROFILE(Terrain); RenderTerrain(true);
+    }
+    if (!g_Camera.TopViewEnable && renderDroppedItems)
+        { FRAME_PROFILE(Items); RenderItems(); }
 
     RenderFishs();
     RenderMount();
-    RenderLeaves();
+
+    if (renderWeatherEffects)
+        RenderLeaves();
 
     if (!gMapManager.InChaosCastle())
         ThePetProcess().RenderPets();
 
-    RenderBoids(true);
-    RenderObjects_AfterCharacter();
+    if (renderEffects)
+        RenderBoids(true);
+
+    if (renderStatic)
+        { FRAME_PROFILE(Objects); RenderObjects_AfterCharacter(); }
 
     RenderJoints(byWaterMap);
-    RenderEffects();
-    RenderBlurs();
+
+    if (renderEffects)
+    {
+        FRAME_PROFILE(Effects);
+        RenderEffects();
+        RenderBlurs();
+    }
     CheckSprites();
     BeginSprite();
 
@@ -501,7 +521,7 @@ static void RenderMainSceneUI()
     BeginBitmap();
     RenderObjectDescription();
 
-    if (CameraTopViewEnable == false)
+    if (g_Camera.TopViewEnable == false)
     {
         RenderInterface(true);
     }
@@ -549,7 +569,25 @@ bool RenderMainScene()
         return false;
     }
 
-    FogEnable = false;
+    // Per-camera fog default: Orbital uses fog (noticeable at longer view distances),
+    // Default camera's fog zone sits at/beyond its far clip and reads as visual noise,
+    // so fog is off by default for Default. DevEditor can override either below.
+    if (ICamera* active = CameraManager::Instance().GetActiveCamera())
+    {
+        const char* name = active->GetName();
+        if (strcmp(name, "Default") == 0)       FogEnable = false;
+        else if (strcmp(name, "Orbital") == 0)  FogEnable = true;
+    }
+
+#ifdef _EDITOR
+    // DevEditor override: allow forcing fog on/off for debugging.
+    if (ICamera* active = CameraManager::Instance().GetActiveCamera())
+    {
+        const char* name = active->GetName();
+        if (DevEditor_IsCameraFogOverrideEnabled(name))
+            FogEnable = DevEditor_GetCameraFogOverrideValue(name);
+    }
+#endif
 
     vec3_t cameraPos;
     int width, height;
@@ -572,7 +610,71 @@ bool RenderMainScene()
 
     SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
     RenderGameWorld(byWaterMap, width, height);
+
+#ifdef _EDITOR
+    // Render spectated camera frustum wireframe when in FreeFly mode
+    CameraMode cameraMode = CameraManager::Instance().GetCurrentMode();
+    if (cameraMode == CameraMode::FreeFly)
+    {
+        ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
+        if (spectated)
+            RenderFrustumWireframe(spectated->GetFrustum());
+    }
+
+    // DEBUG: Render mouse ray as a visible line (magenta) from MousePosition to MouseTarget
+    {
+        GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
+        GLboolean tex2d = glIsEnabled(GL_TEXTURE_2D);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_TEXTURE_2D);
+        glLineWidth(2.0f);
+        glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+        glBegin(GL_LINES);
+        glVertex3fv(MousePosition);
+        glVertex3fv(MouseTarget);
+        glEnd();
+
+        // Draw a small cross at MousePosition (green)
+        constexpr float S = 30.0f;
+        glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+        glBegin(GL_LINES);
+        glVertex3f(MousePosition[0] - S, MousePosition[1], MousePosition[2]);
+        glVertex3f(MousePosition[0] + S, MousePosition[1], MousePosition[2]);
+        glVertex3f(MousePosition[0], MousePosition[1] - S, MousePosition[2]);
+        glVertex3f(MousePosition[0], MousePosition[1] + S, MousePosition[2]);
+        glEnd();
+
+        glLineWidth(1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        if (depthTest) glEnable(GL_DEPTH_TEST);
+        if (tex2d) glEnable(GL_TEXTURE_2D);
+    }
+
+    // DEBUG: Log ray state on left click (debounced to one log per click)
+    {
+        extern bool MouseLButtonPush;
+        static bool wasPressed = false;
+        if (MouseLButtonPush && !wasPressed)
+        {
+            wasPressed = true;
+            extern int MouseX, MouseY;
+            CAMERA_LOG("[RAY] Click: Mouse=(%d,%d) Pos=(%.0f,%.0f,%.0f) Target=(%.0f,%.0f,%.0f) "
+                       "CamPos=(%.0f,%.0f,%.0f) PerspX=%.6f PerspY=%.6f CenterX=%d CenterY=%d FOV=%.1f ViewFar=%.0f",
+                       MouseX, MouseY,
+                       MousePosition[0], MousePosition[1], MousePosition[2],
+                       MouseTarget[0], MouseTarget[1], MouseTarget[2],
+                       g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
+                       g_Camera.PerspectiveX, g_Camera.PerspectiveY,
+                       g_Camera.ScreenCenterX, g_Camera.ScreenCenterY,
+                       g_Camera.FOV, g_Camera.ViewFar);
+        }
+        if (!MouseLButtonPush)
+            wasPressed = false;
+    }
+#endif
+
     RenderMainSceneUI();
+
 
     EndOpengl();
 

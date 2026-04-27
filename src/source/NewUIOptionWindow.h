@@ -9,6 +9,7 @@
 
 #include "NewUIManager.h"
 #include "NewUIMyInventory.h"
+#include "NewUIComboBox.h"
 
 namespace SEASON3B
 {
@@ -78,18 +79,34 @@ namespace SEASON3B
         void RenderContents();
         void RenderButtons();
 
+        // UpdateMouseEvent helpers
+        void HandleCheckboxInputs();
+        bool HandleVolumeSlider(int& level, int yOffset);
+        void OnSoundVolumeChanged();
+        void OnMusicVolumeChanged();
+        void HandleRenderLevelSlider();
+
     private:
         CNewUIManager* m_pNewUIMng;
         POINT						m_Pos;
 
         CNewUIButton m_BtnClose;
 
-        bool m_bAutoAttack;		// 자동 공격
-        bool m_bWhisperSound;	// 귓말 알림음
-        bool m_bSlideHelp;		// 슬라이드 도움말
-        int m_iVolumeLevel;		// 볼륨조절
-        int m_iRenderLevel;		// 효과제한
+        bool m_bAutoAttack;
+        bool m_bWhisperSound;
+        bool m_bSlideHelp;
+        int m_iVolumeLevel;     // Sound volume (0=off, 10=max)
+        int m_iMusicLevel;      // Music volume (0=off, 10=max)
+        int m_iRenderLevel;
         bool m_bRenderAllEffects;
+        int m_iResolutionIndex;
+        bool m_bWindowedMode;
+
+        CNewUIComboBox m_ResolutionCombo;
+
+        void ApplyResolution();
+        int FindCurrentResolutionIndex();
+        void InitResolutionCombo();
     };
 }
 

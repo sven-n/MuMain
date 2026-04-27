@@ -11,22 +11,25 @@
 #include "ZzzInfomation.h"
 #include "NewUISystem.h"
 #include "wglext.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/CameraManager.h"
+#include "Camera/CameraMode.h"
+#include "Camera/CameraConfig.h"
 
-int     OpenglWindowX;
-int     OpenglWindowY;
-int     OpenglWindowWidth;
-int     OpenglWindowHeight;
-bool    CameraTopViewEnable = false;
-float   CameraViewNear = 20.f;
-float   CameraViewFar = 2000.f;
-float   CameraFOV = 55.f;
-vec3_t  CameraPosition;
-vec3_t  CameraAngle;
-float   CameraMatrix[3][4];
+#ifdef _EDITOR
+extern "C" bool DevEditor_IsCameraOverrideEnabled(const char* cameraName);
+extern "C" void DevEditor_GetCameraFogRange(const char* cameraName, float viewFar, float* outStart, float* outEnd);
+#endif
+
+extern "C" CameraManager& CameraManager_Instance();
+
+int     OpenglWindowX = 0;
+int     OpenglWindowY = 0;
+int     OpenglWindowWidth = 1024;
+int     OpenglWindowHeight = 768;
 vec3_t  MousePosition;
 vec3_t  MouseTarget;
-float   g_fCameraCustomDistance = 0.f;
-bool    FogEnable = false;
+bool    FogEnable = true;
 GLfloat FogDensity = 0.0004f;
 GLfloat FogColor[4] = { 30 / 256.f,20 / 256.f,10 / 256.f, };
 
@@ -137,103 +140,6 @@ bool CheckID_HistoryDay(wchar_t* Name, WORD day)
 bool GrabEnable = false;
 wchar_t GrabFileName[MAX_PATH];
 int  GrabScreen = 0;
-
-float PerspectiveX;
-float PerspectiveY;
-int   ScreenCenterX;
-int   ScreenCenterY;
-int   ScreenCenterYFlip;
-
-void GetOpenGLMatrix(float Matrix[3][4])
-{
-    float OpenGLMatrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, OpenGLMatrix);
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            Matrix[i][j] = OpenGLMatrix[j * 4 + i];
-        }
-    }
-}
-
-void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
-{
-    gluPerspective(Fov, Aspect, ZNear, ZFar);
-
-    ScreenCenterX = OpenglWindowX + OpenglWindowWidth / 2;
-    ScreenCenterY = OpenglWindowY + OpenglWindowHeight / 2;
-    ScreenCenterYFlip = WindowWidth - ScreenCenterY;
-
-    float AspectY = (float)(WindowHeight) / (float)(OpenglWindowHeight);
-    PerspectiveX = tanf(Fov * 0.5f * Q_PI / 180.f) / (float)(OpenglWindowWidth / 2) * Aspect;
-    PerspectiveY = tanf(Fov * 0.5f * Q_PI / 180.f) / (float)(OpenglWindowHeight / 2) * AspectY;
-}
-
-void CreateScreenVector(int sx, int sy, vec3_t Target, bool bFixView)
-{
-    sx = sx * WindowWidth / 640;
-    sy = sy * WindowHeight / 480;
-    vec3_t p1, p2;
-    if (bFixView)
-    {
-        p1[0] = (float)(sx - ScreenCenterX) * CameraViewFar * PerspectiveX;
-        p1[1] = -(float)(sy - ScreenCenterY) * CameraViewFar * PerspectiveY;
-        p1[2] = -CameraViewFar;
-    }
-    else
-    {
-        p1[0] = (float)(sx - ScreenCenterX) * RENDER_ITEMVIEW_FAR * PerspectiveX;
-        p1[1] = -(float)(sy - ScreenCenterY) * RENDER_ITEMVIEW_FAR * PerspectiveY;
-        p1[2] = -RENDER_ITEMVIEW_FAR;
-    }
-
-    p2[0] = -CameraMatrix[0][3];
-    p2[1] = -CameraMatrix[1][3];
-    p2[2] = -CameraMatrix[2][3];
-    VectorIRotate(p2, CameraMatrix, MousePosition);
-    VectorIRotate(p1, CameraMatrix, p2);
-    VectorAdd(MousePosition, p2, Target);
-}
-
-void Projection(vec3_t Position, int* sx, int* sy)
-{
-    vec3_t TrasformPosition;
-    VectorTransform(Position, CameraMatrix, TrasformPosition);
-    *sx = -(int)(TrasformPosition[0] / PerspectiveX / TrasformPosition[2]) + ScreenCenterX;
-    *sy = (int)(TrasformPosition[1] / PerspectiveY / TrasformPosition[2]) + ScreenCenterY;
-    *sx = *sx * 640 / (int)WindowWidth;
-    *sy = *sy * 480 / (int)WindowHeight;
-}
-
-void TransformPosition(vec3_t Position, vec3_t WorldPosition, int* x, int* y)
-{
-    vec3_t Temp;
-    VectorSubtract(Position, CameraPosition, Temp);
-    VectorRotate(Temp, CameraMatrix, WorldPosition);
-
-    *x = (int)(WorldPosition[0] / PerspectiveX / -WorldPosition[2]) + (ScreenCenterX);
-    *y = (int)(WorldPosition[1] / PerspectiveY / -WorldPosition[2]) + (ScreenCenterYFlip);
-    //*y = (int)(WorldPosition[1]/PerspectiveY/-WorldPosition[2]) + (WindowHeight/2);
-}
-
-bool TestDepthBuffer(vec3_t Position)
-{
-    vec3_t WorldPosition;
-    int x, y;
-    TransformPosition(Position, WorldPosition, &x, &y);
-    if (x < OpenglWindowX ||
-        y < OpenglWindowY ||
-        x >= (int)OpenglWindowX + OpenglWindowWidth ||
-        y >= (int)OpenglWindowY + OpenglWindowHeight) return false;
-
-    GLfloat key[3];
-    glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, key);
-
-    float z = 1.f - CameraViewNear / -WorldPosition[2] + CameraViewNear / CameraViewFar;
-    if (key[0] >= z) return true;
-    return false;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // opengl render util
@@ -565,43 +471,99 @@ void glViewport2(int x, int y, int Width, int Height)
 {
     OpenglWindowX = x;
     OpenglWindowY = y;
-    OpenglWindowWidth = Width;
-    OpenglWindowHeight = Height;
-    glViewport(x, WindowHeight - (y + Height), Width, Height);
+    // NOTE: Do NOT update OpenglWindowWidth/Height here!
+    // These represent the FULL window dimensions for UI rendering,
+    // while Width/Height here are the game viewport (which may be smaller due to UI bars)
+    // OpenglWindowWidth/Height are set once at startup and updated only on window resize
+    CameraProjection::SetViewport(x, y, Width, Height);
+}
+
+// Saved camera state for save/restore around item rendering blocks.
+// Item rendering calls gluPerspective2 (corrupts PerspectiveX/Y/ScreenCenter)
+// and GetOpenGLMatrix(g_Camera.Matrix) (corrupts the camera matrix). Both must
+// be restored so ScreenToWorldRay reads correct values for click detection.
+static struct
+{
+    float PerspectiveX, PerspectiveY;
+    int ScreenCenterX, ScreenCenterY, ScreenCenterYFlip;
+    float Matrix[3][4];
+} s_SavedCameraState;
+
+void SaveCameraPerspective()
+{
+    s_SavedCameraState.PerspectiveX     = g_Camera.PerspectiveX;
+    s_SavedCameraState.PerspectiveY     = g_Camera.PerspectiveY;
+    s_SavedCameraState.ScreenCenterX    = g_Camera.ScreenCenterX;
+    s_SavedCameraState.ScreenCenterY    = g_Camera.ScreenCenterY;
+    s_SavedCameraState.ScreenCenterYFlip = g_Camera.ScreenCenterYFlip;
+    memcpy(s_SavedCameraState.Matrix, g_Camera.Matrix, sizeof(g_Camera.Matrix));
+}
+
+void RestoreCameraPerspective()
+{
+    g_Camera.PerspectiveX     = s_SavedCameraState.PerspectiveX;
+    g_Camera.PerspectiveY     = s_SavedCameraState.PerspectiveY;
+    g_Camera.ScreenCenterX    = s_SavedCameraState.ScreenCenterX;
+    g_Camera.ScreenCenterY    = s_SavedCameraState.ScreenCenterY;
+    g_Camera.ScreenCenterYFlip = s_SavedCameraState.ScreenCenterYFlip;
+    memcpy(g_Camera.Matrix, s_SavedCameraState.Matrix, sizeof(g_Camera.Matrix));
+}
+
+// Perspective setup for item/3D-UI rendering. Sets GL perspective AND updates
+// g_Camera perspective cache so item rendering can compute screen positions.
+// Callers should wrap the entire item-rendering block in SaveCameraPerspective /
+// RestoreCameraPerspective to avoid leaking FOV=1 values to ScreenToWorldRay.
+void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
+{
+    gluPerspective(Fov, Aspect, ZNear, ZFar);
+
+    g_Camera.ScreenCenterX = OpenglWindowX + OpenglWindowWidth / 2;
+    g_Camera.ScreenCenterY = OpenglWindowY + OpenglWindowHeight / 2;
+    g_Camera.ScreenCenterYFlip = WindowHeight - g_Camera.ScreenCenterY;
+
+    float fovRad = Fov * 0.5f * Q_PI / 180.0f;
+    g_Camera.PerspectiveX = tanf(fovRad) / (float)(OpenglWindowWidth / 2) * Aspect;
+    g_Camera.PerspectiveY = tanf(fovRad) / (float)(OpenglWindowHeight / 2);
 }
 
 float ConvertX(float x)
 {
-    return x * (float)WindowWidth / 640.f;
+    return x * (float)WindowWidth / (float)REFERENCE_WIDTH;
 }
 
 float ConvertY(float y)
 {
-    return y * (float)WindowHeight / 480.f;
+    return y * (float)WindowHeight / (float)REFERENCE_HEIGHT;
 }
 
 void BeginOpengl(int x, int y, int Width, int Height)
 {
-    x = x * WindowWidth / 640;
-    y = y * WindowHeight / 480;
-    Width = Width * WindowWidth / 640;
-    Height = Height * WindowHeight / 480;
+    x = x * WindowWidth / REFERENCE_WIDTH;
+    y = y * WindowHeight / REFERENCE_HEIGHT;
+    Width = Width * WindowWidth / REFERENCE_WIDTH;
+    Height = Height * WindowHeight / REFERENCE_HEIGHT;
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
     glViewport2(x, y, Width, Height);
 
-    gluPerspective2(CameraFOV, (float)Width / (float)Height, CameraViewNear, CameraViewFar * 1.4f);
+    // Calculate aspect ratio dynamically from viewport dimensions
+    // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)
+    // FOV stays constant, aspect ratio scales the horizontal view accordingly
+    float aspectRatio = (float)Width / (float)Height;
+
+    // Apply RENDER_DISTANCE_MULTIPLIER for consistent rendering distance across all systems
+    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    glRotatef(CameraAngle[1], 0.f, 1.f, 0.f);
-    if (CameraTopViewEnable == false)
-        glRotatef(CameraAngle[0], 1.f, 0.f, 0.f);
-    glRotatef(CameraAngle[2], 0.f, 0.f, 1.f);
-    glTranslatef(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+    glRotatef(g_Camera.Angle[1], 0.f, 1.f, 0.f);
+    if (g_Camera.TopViewEnable == false)
+        glRotatef(g_Camera.Angle[0], 1.f, 0.f, 0.f);
+    glRotatef(g_Camera.Angle[2], 0.f, 0.f, 1.f);
+    glTranslatef(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
 
     glDisable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
@@ -619,7 +581,30 @@ void BeginOpengl(int x, int y, int Width, int Height)
     {
         glEnable(GL_FOG);
         glFogi(GL_FOG_MODE, GL_LINEAR);
-        glFogf(GL_FOG_DENSITY, FogDensity);
+
+        // Fog scales dynamically with view distance (g_Camera.ViewFar) so it
+        // stays at consistent percentages when zooming. The actual GL far clip
+        // plane is at g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER (1.4 — see
+        // SetupPerspective), so fogStart=1.0×/fogEnd=1.25× both sit inside
+        // the visible range and fog completes before the clip plane.
+        float fogStart = g_Camera.ViewFar * 1.00f;
+        float fogEnd   = g_Camera.ViewFar * 1.25f;
+
+#ifdef _EDITOR
+        // Allow DevEditor to override fog percentages for the active camera.
+        // Active camera name is used so Default/Orbital have independent fog
+        // start/end percentages.
+        if (ICamera* active = CameraManager_Instance().GetActiveCamera())
+        {
+            const char* name = active->GetName();
+            if (DevEditor_IsCameraOverrideEnabled(name))
+                DevEditor_GetCameraFogRange(name, g_Camera.ViewFar, &fogStart, &fogEnd);
+        }
+#endif
+
+        glFogf(GL_FOG_START, fogStart);
+        glFogf(GL_FOG_END, fogEnd);
+
         glFogfv(GL_FOG_COLOR, FogColor);
     }
     else
@@ -627,7 +612,7 @@ void BeginOpengl(int x, int y, int Width, int Height)
         glDisable(GL_FOG);
     }
 
-    GetOpenGLMatrix(CameraMatrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
 }
 
 void EndOpengl()
@@ -643,11 +628,11 @@ void UpdateMousePositionn()
     vec3_t vPos;
 
     glLoadIdentity();
-    glTranslatef(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
-    GetOpenGLMatrix(CameraMatrix);
+    glTranslatef(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
 
-    Vector(-CameraMatrix[0][3], -CameraMatrix[1][3], -CameraMatrix[2][3], vPos);
-    VectorIRotate(vPos, CameraMatrix, MousePosition);
+    Vector(-g_Camera.Matrix[0][3], -g_Camera.Matrix[1][3], -g_Camera.Matrix[2][3], vPos);
+    VectorIRotate(vPos, g_Camera.Matrix, MousePosition);
 }
 
 BOOL IsGLExtensionSupported(const wchar_t* extension)
@@ -981,7 +966,7 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     BindTexture(Texture);
 
     vec3_t p2;
-    VectorTransform(Position, CameraMatrix, p2);
+    VectorTransform(Position, g_Camera.Matrix, p2);
     //VectorCopy(Position,p2);
     float x = p2[0];
     float y = p2[1];
@@ -1046,7 +1031,7 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     BindTexture(Texture);
 
     vec3_t p2;
-    VectorTransform(Position, CameraMatrix, p2);
+    VectorTransform(Position, g_Camera.Matrix, p2);
     float x = p2[0];
     float y = p2[1];
     float z = p2[2];
@@ -1136,8 +1121,11 @@ void BeginBitmap()
     glPushMatrix();
     glLoadIdentity();
 
+    // Always use full window dimensions for UI/bitmap rendering
+    // UI bitmaps use ConvertX/Y to scale from 640×480 reference,
+    // so we need the full window size here (not the game viewport which may be smaller)
     glViewport(0, 0, WindowWidth, WindowHeight);
-    gluPerspective(CameraFOV, (WindowWidth) / ((float)WindowHeight), CameraViewNear, CameraViewFar);
+    gluPerspective(g_Camera.FOV, (WindowWidth) / ((float)WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
 
     glLoadIdentity();
     gluOrtho2D(0, WindowWidth, 0, WindowHeight);
@@ -1431,15 +1419,15 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
         float dx, dy;
         dx = p4[0][0] + (WindowWidth / 2.f);
         dy = p4[0][1] + (WindowHeight / 2.f);
-        dx = dx * (float)(640.f / WindowWidth);
-        dy = dy * (float)(480.f / WindowHeight);
+        dx = dx * (float)((float)REFERENCE_WIDTH / WindowWidth);
+        dy = dy * (float)((float)REFERENCE_HEIGHT / WindowHeight);
         if (Num >= 100)
         {
-            g_pNewUIMiniMap->SetBtnPos(Num - 100, dx - (iWidth / 2), (480 - dy) - (iHeight / 2), iWidth, iHeight);
+            g_pNewUIMiniMap->SetBtnPos(Num - 100, dx - (iWidth / 2), (REFERENCE_HEIGHT - dy) - (iHeight / 2), iWidth, iHeight);
         }
         else
         {
-            g_pNewUIMiniMap->SetBtnPos(Num, dx, 480 - dy, iWidth / 2, iHeight / 2);
+            g_pNewUIMiniMap->SetBtnPos(Num, dx, REFERENCE_HEIGHT - dy, iWidth / 2, iHeight / 2);
         }
     }
 }

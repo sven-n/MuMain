@@ -187,6 +187,15 @@ void SEASON3B::CNewUIChatInputBox::SetFont(HFONT hFont)
     m_pWhsprIDInputBox->SetFont(hFont);
 }
 
+void SEASON3B::CNewUIChatInputBox::RebuildScaledResources()
+{
+    if (m_pChatInputBox)    m_pChatInputBox->RebuildScaledResources();
+    if (m_pWhsprIDInputBox) m_pWhsprIDInputBox->RebuildScaledResources();
+    // SetSize already SelectObject'd the (old) g_hFont into the new DC;
+    // re-apply with the CURRENT g_hFont so sizing/measuring is consistent.
+    SetFont(g_hFont);
+}
+
 bool SEASON3B::CNewUIChatInputBox::HaveFocus()
 {
     return (m_pChatInputBox->HaveFocus() || m_pWhsprIDInputBox->HaveFocus());
@@ -771,7 +780,7 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
     g_pRenderText->SetFont(g_hFont);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, wcslen(strTooltip), &fontsize);
 
-    const auto multiplier = ((float)WindowHeight / 480);
+    const auto multiplier = ((float)WindowHeight / REFERENCE_HEIGHT);
     fontsize.cx = fontsize.cx / multiplier;
     fontsize.cy = fontsize.cy / multiplier;
 

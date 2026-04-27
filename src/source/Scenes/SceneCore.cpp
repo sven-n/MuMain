@@ -104,14 +104,7 @@ extern BOOL g_bIMEBlock;
 
 bool MoveMainCamera();
 
-// Legacy global variables (kept for backward compatibility)
-float CameraDistanceTarget = 1000.f;
-float CameraDistance = 1000.f;
-float Camera3DFov = 0.f;
-bool Camera3DRoll = false;
-
-// Camera state structure instance (uses legacy variables via references)
-CameraState g_CameraState;
+// Note: Camera variables now in g_Camera (see backward compatibility layer in ZzzOpenglUtil.h)
 
 extern int WaterTextureNumber;
 

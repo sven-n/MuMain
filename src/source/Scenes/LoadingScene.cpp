@@ -86,7 +86,7 @@ void LoadingScene(HDC hDC)
         rUIMng.m_pLoadingScene->Create();
     }
 
-    FogEnable = false;
+    FogEnable = true;
     ::BeginOpengl();
     ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ::BeginBitmap();

@@ -67,7 +67,7 @@ void CSBaseMatch::clearMatchInfo(void)
     m_iMatchTime = -1;
     m_iMaxKillMonster = -1;
     m_iKillMonster = -1;
-    SetPosition(640 - 230 / 2, 100);
+    SetPosition(REFERENCE_WIDTH - 230 / 2, 100);
 }
 
 bool CSBaseMatch::getEqualMonster(int addV)
@@ -96,7 +96,7 @@ void CSBaseMatch::SetMatchInfo(const std::uint8_t byType, const int iMaxTime, co
     m_iMatchTime = iTime;
     m_iMaxKillMonster = iMaxMonster;
     m_iKillMonster = iKillMonster;
-    SetPosition(640 - 230 / 2, 100);
+    SetPosition(REFERENCE_WIDTH - 230 / 2, 100);
 }
 
 void CSBaseMatch::RenderTime(void)
@@ -120,7 +120,7 @@ void CSBaseMatch::RenderTime(void)
     EnableAlphaTest(false);
 
     x = 10.0f;
-    y = 480.0f - 70.0f;
+    y = (float)REFERENCE_HEIGHT - 70.0f;
     g_pRenderText->SetTextColor(128, 128, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 
@@ -158,7 +158,7 @@ void CSBaseMatch::RenderTime(void)
         WriteWide(lpszStr, GlobalText[textNum], remainingSeconds);
     }
 
-    g_pRenderText->RenderText(640 / 2, static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(REFERENCE_WIDTH / 2, static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
 }
 
 void CSBaseMatch::renderOnlyTime(float x, float y, int MatchTime)
@@ -244,7 +244,7 @@ void CSDevilSquareMatch::RenderMatchResult(void)
     g_pRenderText->RenderText(xPos[2], yPos, GlobalText[680], xPos[3] - xPos[1], RT3_SORT_CENTER);
     g_pRenderText->RenderText(xPos[3], yPos, GlobalText[682], xPos[4] - xPos[3], RT3_SORT_CENTER);
     g_pRenderText->RenderText(xPos[4], yPos, GlobalText[683], xPos[5] - xPos[4], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[5], yPos, GlobalText[684], (640 - 230) / 2 + 210 - xPos[5], RT3_SORT_CENTER);
+    g_pRenderText->RenderText(xPos[5], yPos, GlobalText[684], (REFERENCE_WIDTH - 230) / 2 + 210 - xPos[5], RT3_SORT_CENTER);
     yPos += 20;
 
     int yStartPos = yPos;

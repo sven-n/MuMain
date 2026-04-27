@@ -2661,8 +2661,8 @@ bool CUIRenderTextOriginal::Create(HDC hDC)
     DIB_INFO = (BITMAPINFO*)new BYTE[sizeof(BITMAPINFOHEADER) + sizeof(PALETTEENTRY) * 256];
     memset(DIB_INFO, 0x00, sizeof(BITMAPINFOHEADER));
     DIB_INFO->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    DIB_INFO->bmiHeader.biWidth = 640 * g_fScreenRate_x;		//. 640
-    DIB_INFO->bmiHeader.biHeight = -(480 * g_fScreenRate_y);		//. 480
+    DIB_INFO->bmiHeader.biWidth = REFERENCE_WIDTH * g_fScreenRate_x;		//. 640
+    DIB_INFO->bmiHeader.biHeight = -(REFERENCE_HEIGHT * g_fScreenRate_y);		//. 480
     DIB_INFO->bmiHeader.biPlanes = 1;
     DIB_INFO->bmiHeader.biBitCount = 24;
     DIB_INFO->bmiHeader.biCompression = BI_RGB;
@@ -2722,7 +2722,7 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
 {
     const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
 
-    SIZE FontDCSize = { (int)(640 * g_fScreenRate_x), (int)(480 * g_fScreenRate_y) };
+    SIZE FontDCSize = { (int)(REFERENCE_WIDTH * g_fScreenRate_x), (int)(REFERENCE_HEIGHT * g_fScreenRate_y) };
     int iPitch = ((FontDCSize.cx * 24 + 31) & ~31) >> 3;
 
     BITMAP_t* pBitmapFont = &Bitmaps[BITMAP_FONT];
@@ -3302,6 +3302,16 @@ void CUITextInputBox::SetText(const wchar_t* pszText)
 void CUITextInputBox::SetTextLimit(int iLimit)
 {
     SendMessageW(m_hEditWnd, EM_SETLIMITTEXT, iLimit, 0);
+}
+
+void CUITextInputBox::RebuildScaledResources()
+{
+    // Bypass SetSize's unchanged-dimensions early-return by clearing the cached
+    // dims first, so the GDI resources are fully recreated at the current scale.
+    if (m_iWidth == 0 || m_iHeight == 0) return;
+    int w = m_iWidth, h = m_iHeight;
+    m_iWidth = 0; m_iHeight = 0;
+    SetSize(w, h);
 }
 
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
@@ -4097,7 +4107,7 @@ void CUISlideHelp::Init(BOOL bBold, BOOL bBlink)
     memset(m_szSlideTextA, 0, SLIDE_TEXT_LENGTH);
     memset(m_szSlideTextB, 0, SLIDE_TEXT_LENGTH);
 
-    m_fMovePosition = 640.0f;
+    m_fMovePosition = (float)REFERENCE_WIDTH;
     m_fMoveAccel = 1.0f;
     m_fMoveSpeed = 0;
     m_iCutLength = 0;
@@ -4215,7 +4225,7 @@ void CUISlideHelp::SlideMove()
     if (m_fMovePosition < m_iCutSize * -1)
     {
         memset(m_pszSlideText, 0, SLIDE_TEXT_LENGTH);
-        m_fMovePosition = 640.0f;
+        m_fMovePosition = (float)REFERENCE_WIDTH;
         m_iCutSize = CheckCutSize(m_pszSlideText, 4);
         m_iCutSize /= g_fScreenRate_x;
     }

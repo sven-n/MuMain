@@ -27,8 +27,14 @@
 #include "../Winmain.h"
 #include "SceneCommon.h"
 #include "../Camera/CameraUtility.h"
+#include "../Camera/CameraManager.h"
 #include "../ZzzOpenData.h"
 #include "LoginScene.h"
+#include "Camera/CameraProjection.h"
+#ifdef _EDITOR
+#include "Camera/CameraMode.h"
+#include "Camera/FrustumRenderer.h"
+#endif
 
 // External declarations
 extern EGameScene SceneFlag;
@@ -47,7 +53,6 @@ extern double WorldTime;
 extern int MouseX;
 extern int MouseY;
 extern vec3_t MouseTarget;
-extern float CameraViewFar;
 
 // Forward declaration
 BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring& lpszString);
@@ -155,6 +160,11 @@ void NewMoveCharacterScene()
     InitTerrainLight();
     MoveObjects();
     MoveMounts();
+
+    // Update camera BEFORE checking character visibility
+    MoveCamera();
+
+    // Now check character visibility with updated frustum
     MoveCharactersClient();
     MoveCharacterClient(&CharacterView);
 
@@ -164,8 +174,6 @@ void NewMoveCharacterScene()
     MoveBoids();
 
     ThePetProcess().UpdatePets();
-
-    MoveCamera();
 
 #if defined _DEBUG || defined FOR_WORK
     std::wstring lpszTemp = { 0 };
@@ -193,17 +201,7 @@ void NewMoveCharacterScene()
             ::StartGame();
         }
     }
-    else if (rInput.IsKeyDown(VK_ESCAPE))
-    {
-        if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
-            || rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow()
-            )
-            && rUIMng.IsSysMenuWinShow())
-        {
-            ::PlayBuffer(SOUND_CLICK01);
-            rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
-        }
-    }
+    // ESC menu toggle is handled by CUIMng::Update()
 
     if (rUIMng.IsCursorOnUI())
     {
@@ -246,14 +244,21 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     MoveMainCamera();
 
     glColor3f(1.f, 1.f, 1.f);
-    outHeight = 480;
+    outHeight = REFERENCE_HEIGHT;
     outWidth = GetScreenWidth();
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
-    BeginOpengl(0, 25, 640, 430);
+    BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
 
-    CreateFrustrum((float)outWidth / (float)640, (float)outHeight / 480.f, pos);
-    CreateScreenVector(MouseX, MouseY, MouseTarget);
+    // Build global frustum arrays for TestFrustrum/TestFrustrum2D
+    // Must be called after BeginOpengl (needs GL matrices) in every scene that renders terrain/objects
+    {
+        vec3_t cameraPos;
+        VectorCopy(g_Camera.Position, cameraPos);
+        CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH, 430.f / (float)REFERENCE_HEIGHT, cameraPos);
+    }
+
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 
     // Reset character positions and lighting
     for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)
@@ -281,27 +286,6 @@ static void ApplySelectedCharacterLighting()
     Vector(1.0f, 1.0f, 1.0f, o->Light);
     AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
     DisableAlphaBlend();
-}
-
-/**
- * @brief Adjusts character heights based on their mount/helper type.
- */
-static void AdjustCharacterHeights()
-{
-    for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; ++i)
-    {
-        CHARACTER* pCha = &CharactersClient[i];
-        OBJECT* pObj = &pCha->Object;
-
-        if (pCha->Helper.Type == MODEL_HORN_OF_DINORANT)
-        {
-            pObj->Position[2] = 194.5f;
-        }
-        else
-        {
-            pObj->Position[2] = 169.5f;
-        }
-    }
 }
 
 /**
@@ -338,9 +322,15 @@ static void RenderSelectedCharacterEffects()
     if (!o->Live)
         return;
 
+    // Aurora luminance pulses between (BASE - AMPLITUDE) and (BASE + AMPLITUDE)
+    // with period ~2π / FREQUENCY ms.
+    constexpr float AURORA_FREQUENCY = 0.0015f;
+    constexpr float AURORA_AMPLITUDE = 0.3f;
+    constexpr float AURORA_BASE_LUMINANCE = 0.5f;
+
     vec3_t vLight;
     Vector(1.0f, 1.0f, 1.f, vLight);
-    float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
+    float fLumi = sinf(WorldTime * AURORA_FREQUENCY) * AURORA_AMPLITUDE + AURORA_BASE_LUMINANCE;
     Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
 
     EnableAlphaBlend();
@@ -402,15 +392,34 @@ bool NewRenderCharacterScene(HDC hDC)
         return false;
     }
 
-    FogEnable = false;
+    FogEnable = true;
 
     int width, height;
     SetupCharacterSceneViewport(width, height);
     ApplySelectedCharacterLighting();
-    AdjustCharacterHeights();
     RenderCharacterScene3D();
     RenderSelectedCharacterEffects();
+
+#ifdef _EDITOR
+    if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)
+    {
+        ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
+        if (spectated)
+            RenderFrustumWireframe(spectated->GetFrustum());
+    }
+#endif
+
     RenderCharacterSceneUI();
+
+    // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    {
+        g_pOption->UpdateMouseEvent();
+        g_pOption->UpdateKeyEvent();
+        BeginBitmap();
+        g_pOption->Render();
+        EndBitmap();
+    }
 
     EndOpengl();
 

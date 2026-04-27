@@ -17,7 +17,7 @@
 #include "CharacterManager.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
-
+#include "Camera/CameraProjection.h"
 
 
 extern int	 g_iChatInputType;
@@ -204,9 +204,9 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         {
             if (m_WindowMapIter->second->GetPosition_x() == iPos_x && m_WindowMapIter->second->GetPosition_y() == iPos_y)
             {
-                if (iPos_x + pbw->GetWidth() + 20 <= 640) iPos_x += 20;
-                if (iPos_y + pbw->GetHeight() + 20 <= 480) iPos_y += 20;
-                if (iPos_x + pbw->GetWidth() + 20 > 640 && iPos_y + pbw->GetHeight() + 20 > 480)
+                if (iPos_x + pbw->GetWidth() + 20 <= REFERENCE_WIDTH) iPos_x += 20;
+                if (iPos_y + pbw->GetHeight() + 20 <= REFERENCE_HEIGHT) iPos_y += 20;
+                if (iPos_x + pbw->GetWidth() + 20 > REFERENCE_WIDTH && iPos_y + pbw->GetHeight() + 20 > REFERENCE_HEIGHT)
                 {
                     if (iPos_y % 10 == 9)
                     {
@@ -409,7 +409,7 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
         int iHideSize = m_HideWindowList.size();
         if (iHideSize - iCount > 0)
         {
-            OpenMainWnd(640 - 250, 432 - 170);
+            OpenMainWnd(REFERENCE_WIDTH - 250, 432 - 170);
         }
         if (iCount > 0 && GetTopNotMainWindowUIID() > 0)
         {
@@ -1157,16 +1157,16 @@ BOOL CUIBaseWindow::DoMouseAction()
             MouseOnWindow = true;
 
             if (m_iPos_x + MouseX - m_iMouseClickPos_x < 0) m_iPos_x = 0;
-            else if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > 640) m_iPos_x = 640 - m_iWidth;
+            else if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > REFERENCE_WIDTH) m_iPos_x = REFERENCE_WIDTH - m_iWidth;
             else m_iPos_x += MouseX - m_iMouseClickPos_x;
 
             if (m_iPos_y + MouseY - m_iMouseClickPos_y < 0)
             {
                 m_iPos_y = 0;
             }
-            else if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > 480)
+            else if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > REFERENCE_HEIGHT)
             {
-                m_iPos_y = 480 - m_iHeight;
+                m_iPos_y = REFERENCE_HEIGHT - m_iHeight;
             }
             else
             {
@@ -1191,7 +1191,7 @@ BOOL CUIBaseWindow::DoMouseAction()
                 if (g_dwMouseUseUIID == 0) g_dwMouseUseUIID = GetUIID();
                 MouseOnWindow = true;
 
-                if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > 640) m_iWidth = 640 - m_iPos_x;
+                if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > REFERENCE_WIDTH) m_iWidth = REFERENCE_WIDTH - m_iPos_x;
                 else m_iWidth += MouseX - m_iMouseClickPos_x;
 
                 if (m_iWidth < m_iMinWidth)
@@ -1204,7 +1204,7 @@ BOOL CUIBaseWindow::DoMouseAction()
                 }
                 else m_iMouseClickPos_x = MouseX;
 
-                if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > 480) m_iHeight = 480 - m_iPos_y;
+                if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > REFERENCE_HEIGHT) m_iHeight = REFERENCE_HEIGHT - m_iPos_y;
                 else m_iHeight += MouseY - m_iMouseClickPos_y;
 
                 if (m_iHeight < m_iMinHeight)
@@ -1257,7 +1257,7 @@ void CUIBaseWindow::Maximize()
         m_iBackPos_y = m_iPos_y;
         m_iBackHeight = m_iHeight;
         m_iPos_y = 0;
-        m_iHeight = 480 - 48;
+        m_iHeight = REFERENCE_HEIGHT - 48;
         Refresh();
         m_bIsMaximize = TRUE;
     }
@@ -1625,7 +1625,7 @@ BOOL CUIChatWindow::HandleMessage()
 
                 UpdateInvitePalList();
 
-                if (m_iPos_x + m_iWidth > 640) m_iPos_x = 640 - m_iWidth;
+                if (m_iPos_x + m_iWidth > REFERENCE_WIDTH) m_iPos_x = REFERENCE_WIDTH - m_iWidth;
                 Refresh();
             }
             else if (m_iShowType >= 2)
@@ -1766,14 +1766,15 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     gMapManager.WorldActive = WorldBackup;
 
     glMatrixMode(GL_PROJECTION);
+    SaveCameraPerspective();
     glPushMatrix();
     glLoadIdentity();
     glViewport2(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y, m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
-    gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//CameraViewNear,CameraViewFar);
+    gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    GetOpenGLMatrix(CameraMatrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
@@ -1828,6 +1829,7 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glViewport2(0, 0, WindowWidth, WindowHeight);
+    RestoreCameraPerspective();
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)

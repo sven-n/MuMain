@@ -88,6 +88,18 @@ extern int GetMp3PlayPosition();
 extern GLvoid KillGLWindow(GLvoid);
 extern void DestroyWindow();
 extern void DestroySound();
+extern void ReinitializeFonts();
+extern void UpdateResolutionDependentSystems();
+
+// Confines the mouse cursor to the window's client area when in fullscreen
+// and the window is active; releases clipping otherwise. Safe to call any
+// time the relevant state changes (mode toggle, activation, resize).
+extern void UpdateCursorClip();
+
+// Returns the desktop's current bit depth (queried via EnumDisplaySettings),
+// falling back to 32 if the query fails. Used by every fullscreen-mode change
+// site so we don't hardcode a value that doesn't match the user's display.
+extern DWORD GetDesktopBitsPerPel();
 
 //#if defined _DEBUG || defined PBG_LOG_PACKET_WINSOCKERROR
 //	#include "./Utilities/Log/DebugAngel.h"

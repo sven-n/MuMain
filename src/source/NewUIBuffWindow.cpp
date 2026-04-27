@@ -68,7 +68,7 @@ void SEASON3B::CNewUIBuffWindow::SetPos(int x, int y)
 
 void SEASON3B::CNewUIBuffWindow::SetPos(int iScreenWidth)
 {
-    if (iScreenWidth == 640) {
+    if (iScreenWidth == REFERENCE_WIDTH) {
         SetPos(220, 15);
     }
     else if (iScreenWidth == 450) {

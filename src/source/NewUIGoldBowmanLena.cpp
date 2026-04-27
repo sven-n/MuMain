@@ -6,6 +6,7 @@
 #include "NewUISystem.h"
 
 #include "MixMgr.h"
+#include "Camera/CameraProjection.h"
 
 namespace
 {
@@ -260,6 +261,7 @@ void CNewUIGoldBowmanLena::Render3D()
     EndBitmap();
 
     glMatrixMode(GL_PROJECTION);
+    SaveCameraPerspective();
     glPushMatrix();
     glLoadIdentity();
     glViewport2(0, 0, WindowWidth, WindowHeight);
@@ -267,13 +269,13 @@ void CNewUIGoldBowmanLena::Render3D()
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    GetOpenGLMatrix(CameraMatrix);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
     int Type = ITEM_POTION + 21;
     int Level = 0;
-    float x = 640.f - 120.f;
+    float x = (float)REFERENCE_WIDTH - 120.f;
     float y = 200.f;
     float Width = (float)ItemAttribute[Type].Width * INVENTORY_SCALE;
     float Height = (float)ItemAttribute[Type].Height * INVENTORY_SCALE;
@@ -287,5 +289,6 @@ void CNewUIGoldBowmanLena::Render3D()
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
 
+    RestoreCameraPerspective();
     BeginBitmap();
 }

@@ -43,9 +43,8 @@ void GameConfig::Load()
 
     m_colorDepth = ReadInt(CfgSectionGraphics, CfgKeyColorDepth, CfgDefaultColorDepth);
 
-    m_soundEnabled = ReadBool(CfgSectionAudio, CfgKeySoundEnabled, CfgDefaultSoundEnabled);
-    m_musicEnabled = ReadBool(CfgSectionAudio, CfgKeyMusicEnabled, CfgDefaultMusicEnabled);
-    m_volumeLevel  = ReadInt(CfgSectionAudio, CfgKeyVolumeLevel, CfgDefaultVolumeLevel);
+    m_soundVolume  = ReadInt(CfgSectionAudio, CfgKeySoundVolume, CfgDefaultSoundVolume);
+    m_musicVolume  = ReadInt(CfgSectionAudio, CfgKeyMusicVolume, CfgDefaultMusicVolume);
 
     m_renderTextType = ReadInt(CfgSectionGraphics, CfgKeyRenderTextType, CfgDefaultRenderTextType);
 
@@ -56,6 +55,8 @@ void GameConfig::Load()
 
     m_serverIP   = ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP);
     m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
+
+    m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
 }
 
 void GameConfig::Save()
@@ -70,9 +71,8 @@ void GameConfig::Save()
     WriteInt(CfgSectionGraphics, CfgKeyColorDepth, m_colorDepth);
     WriteInt(CfgSectionGraphics, CfgKeyRenderTextType, m_renderTextType);
 
-    WriteBool(CfgSectionAudio, CfgKeySoundEnabled, m_soundEnabled);
-    WriteBool(CfgSectionAudio, CfgKeyMusicEnabled, m_musicEnabled);
-    WriteInt(CfgSectionAudio, CfgKeyVolumeLevel, m_volumeLevel);
+    WriteInt(CfgSectionAudio, CfgKeySoundVolume, m_soundVolume);
+    WriteInt(CfgSectionAudio, CfgKeyMusicVolume, m_musicVolume);
 
     WriteBool(CfgSectionLogin, CfgKeyRememberMe, m_rememberMe);
     WriteString(CfgSectionLogin, CfgKeyLanguage, m_languageSelection);
@@ -81,6 +81,8 @@ void GameConfig::Save()
 
     WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
     WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
+
+    WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
 }
 
 void GameConfig::SetWindowSize(int width, int height)
@@ -99,19 +101,14 @@ void GameConfig::SetColorDepth(int depth)
     m_colorDepth = depth;
 }
 
-void GameConfig::SetSoundEnabled(bool enabled)
+void GameConfig::SetSoundVolume(int level)
 {
-    m_soundEnabled = enabled;
+    m_soundVolume = level;
 }
 
-void GameConfig::SetMusicEnabled(bool enabled)
+void GameConfig::SetMusicVolume(int level)
 {
-    m_musicEnabled = enabled;
-}
-
-void GameConfig::SetVolumeLevel(int level)
-{
-    m_volumeLevel = level;
+    m_musicVolume = level;
 }
 
 void GameConfig::SetRenderTextType(int type)
@@ -147,6 +144,11 @@ void GameConfig::SetServerIP(const std::wstring& ip)
 void GameConfig::SetServerPort(int port)
 {
     m_serverPort = port;
+}
+
+void GameConfig::SetZoom(int zoom)
+{
+    m_zoom = zoom;
 }
 
 // Helper function to convert binary data to hex string

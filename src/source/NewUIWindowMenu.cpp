@@ -203,7 +203,7 @@ void SEASON3B::CNewUIWindowMenu::RenderFrame()
         y += 15.f;
     }
 
-    y = 480 - 50 - 45;
+    y = REFERENCE_HEIGHT - 50 - 45;
 
     RenderImage(IMAGE_WINDOW_MENU_FRAME_DOWN, m_Pos.x, y, 112.f, 45.f);
 

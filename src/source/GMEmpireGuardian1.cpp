@@ -2232,9 +2232,9 @@ void GMEmpireGuardian1::RenderFrontSideVisual()
         glColor3f(0.6f, 0.6f, 0.9f);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.00005f;
         float WindY2 = (float)((int)WorldTime % 100000) * 0.00008f;
-        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, 640.f, 480.f - 45.f, WindX2, WindY2, 2.0f, 2.0f);
+        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, WindY2, 2.0f, 2.0f);
         float WindX = -(float)((int)WorldTime % 100000) * 0.00005f;
-        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, 640.f, 480.f - 45.f, WindX, 0.f, 0.3f, 0.3f);
+        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
     }
     break;
     case WEATHER_STORM:
@@ -2245,10 +2245,10 @@ void GMEmpireGuardian1::RenderFrontSideVisual()
             glColor3f(0.7f, 0.7f, 0.9f);
             float WindX2 = (float)((int)WorldTime % 100000) * 0.0006f;
             float WindY2 = -(float)((int)WorldTime % 100000) * 0.0006f;
-            RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, 640.f, 480.f - 45.f, WindX2, WindY2, 3.0f, 2.0f);
+            RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, WindY2, 3.0f, 2.0f);
             WindX2 = -(float)((int)WorldTime % 100000) * 0.0006f;
             WindY2 = (float)((int)WorldTime % 100000) * 0.0006f;
-            RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, 640.f, 480.f - 45.f, WindX2, WindY2, 3.0f, 2.0f);
+            RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, WindY2, 3.0f, 2.0f);
         }
     }
     break;

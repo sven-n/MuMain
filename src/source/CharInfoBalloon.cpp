@@ -13,6 +13,8 @@
 #include <array>
 #include <cwchar>
 
+#include "Camera/CameraProjection.h"
+
 namespace
 {
     template <std::size_t N>
@@ -99,7 +101,7 @@ void CCharInfoBalloon::Render()
     afPos[2] += 350.0f;
 
     int nPosX, nPosY;
-    ::Projection(afPos, &nPosX, &nPosY);
+    CameraProjection::WorldToScreen(g_Camera, afPos, &nPosX, &nPosY);
 
     CSprite::SetPosition(
         int(nPosX * g_fScreenRate_x),

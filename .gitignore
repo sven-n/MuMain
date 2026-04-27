@@ -39,3 +39,6 @@ build-mingw/
 **/imgui.ini
 
 **/*.log
+# Local-only files
+docs/CODING_RULES.md
+docs/reviews/

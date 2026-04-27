@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "LoginScene.h"
 #include "../Camera/CameraUtility.h"
+#include "../Camera/CameraManager.h"
 #include "../CameraMove.h"
 #include "../DSPlaySound.h"
 #include "../ZzzOpenglUtil.h"
@@ -26,12 +27,10 @@
 #include "../UIControls.h"
 #include "SceneCommon.h"
 #include "../ZzzOpenData.h"
+#include "../NewUISystem.h"
 
 // External declarations
 extern int DeleteGuildIndex;
-extern float CameraAngle[3];
-extern float CameraPosition[3];
-extern float CameraFOV;
 extern EGameScene SceneFlag;
 extern int g_iChatInputType;
 extern CUITextInputBox* g_pSinglePasswdInputBox;
@@ -42,6 +41,10 @@ extern double WorldTime;
 extern HFONT g_hFont;
 extern wchar_t m_ExeVersion[11];
 extern HWND g_hWnd;
+
+#ifdef _EDITOR
+extern "C" float DevEditor_GetLoginTerrainDist();
+#endif
 
 //=============================================================================
 // LoginScene Camera State (local to this file)
@@ -125,14 +128,14 @@ void DeleteCharacter()
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle)
 {
     vec3_t TransformPosition;
-    CameraAngle[0] = 0.f;
-    CameraAngle[1] = 0.f;
-    CameraAngle[2] = Angle[2];
+    g_Camera.Angle[0] = 0.f;
+    g_Camera.Angle[1] = 0.f;
+    g_Camera.Angle[2] = Angle[2];
     float Matrix[3][4];
-    AngleMatrix(CameraAngle, Matrix);
+    AngleMatrix(g_Camera.Angle, Matrix);
     VectorIRotate(Position, Matrix, TransformPosition);
-    VectorAdd(Origin, TransformPosition, CameraPosition);
-    CameraAngle[0] = Angle[0];
+    VectorAdd(Origin, TransformPosition, g_Camera.Position);
+    g_Camera.Angle[0] = Angle[0];
 }
 
 /**
@@ -212,25 +215,34 @@ static void UpdateCameraWaypoint()
 }
 
 /**
- * @brief Interpolates camera position/angle towards target waypoint.
+ * @brief Interpolates camera position/angle towards the current target waypoint.
+ *
+ * Two walk modes, selected per waypoint via WALK_PATHS[...][6]:
+ *  - Type 0 (smooth): exponential ease toward target (divide by SMOOTH_EASING_FACTOR each frame).
+ *  - Type 1 (linear): step by a precomputed per-frame delta (see CalculateWalkDelta).
+ *
+ * Both modes update all 3 position components AND all 3 angle components so camera
+ * rotation tracks the waypoint pose, not just X/Y translation.
  */
 static void InterpolateCameraMovement()
 {
+    constexpr int SMOOTH_EASING_FACTOR = 6;
+    const int target = g_loginCamera.currentNumber;
+
     if (g_loginCamera.currentWalkType == 0)
     {
-        // Smooth interpolation
         for (int i = 0; i < 3; i++)
         {
-            g_loginCamera.currentPosition[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i] - g_loginCamera.currentPosition[i]) / 6;
-            g_loginCamera.currentAngle[i] += (LoginCameraState::WALK_PATHS[g_loginCamera.currentNumber][i + 3] - g_loginCamera.currentAngle[i]) / 6;
+            g_loginCamera.currentPosition[i] += (LoginCameraState::WALK_PATHS[target][i] - g_loginCamera.currentPosition[i]) / SMOOTH_EASING_FACTOR;
+            g_loginCamera.currentAngle[i]    += (LoginCameraState::WALK_PATHS[target][i + 3] - g_loginCamera.currentAngle[i]) / SMOOTH_EASING_FACTOR;
         }
     }
     else
     {
-        // Linear movement using delta
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
         {
             g_loginCamera.currentPosition[i] += g_loginCamera.currentWalkDelta[i];
+            g_loginCamera.currentAngle[i]    += g_loginCamera.currentWalkDelta[i + 3];
         }
     }
 }
@@ -253,7 +265,7 @@ void MoveCamera()
     UpdateCameraWaypoint();
     InterpolateCameraMovement();
 
-    CameraFOV = 45.f;
+    g_Camera.FOV = 45.f;
     vec3_t Position;
     Vector(0.f, 0.f, 0.f, Position);
     MoveCharacterCamera(Position, g_loginCamera.currentPosition, g_loginCamera.currentAngle);
@@ -290,8 +302,11 @@ void CreateLogInScene()
     InputNumber = 2;
     InputTextHide[1] = 1;
 
+    // FIX: Enable tour mode with offset correction
+    // Tour mode waypoints work well for movement, but need position offset
+    // Offset is applied in CCameraMove::GetCurrentCameraPos()
     CCameraMove::GetInstancePtr()->PlayCameraWalk(Hero->Object.Position, 1000);
-    CCameraMove::GetInstancePtr()->SetTourMode(TRUE, FALSE, 1);
+    CCameraMove::GetInstancePtr()->SetTourMode(TRUE, FALSE, 0);  // Start from waypoint 0
 
     MoveMainCamera();
 
@@ -316,29 +331,21 @@ void NewMoveLogInScene()
         MoveObjects();
         MoveMounts();
         MoveLeaves();
+
+        // Update camera BEFORE checking character visibility
+        MoveCamera();
+
+        // Now check character visibility with updated frustum
         MoveCharactersClient();
+
         MoveEffects();
         MoveJoints();
         MoveParticles();
         MoveBoids();
         ThePetProcess().UpdatePets();
-        MoveCamera();
     }
 
-    if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-    {
-        CUIMng& rUIMng = CUIMng::Instance();
-        if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_LoginWin.IsShow()
-            || rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow()
-            || rUIMng.m_CreditWin.IsShow()
-            )
-            && rUIMng.m_LoginMainWin.IsShow() && rUIMng.m_ServerSelWin.IsShow()
-            && rUIMng.IsSysMenuWinShow())
-        {
-            ::PlayBuffer(SOUND_CLICK01);
-            rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
-        }
-    }
+    // ESC menu toggle is handled by CUIMng::Update()
     if (RECEIVE_LOG_IN_SUCCESS == CurrentProtocolState)
     {
         g_ErrorReport.Write(L"> Request Character list\r\n");
@@ -361,34 +368,47 @@ bool NewRenderLogInScene(HDC hDC)
 {
     if (!InitLogIn) return false;
 
-    FogEnable = false;
+    FogEnable = true;
 
     vec3_t pos;
-    VectorCopy(CameraPosition, pos);
+    VectorCopy(g_Camera.Position, pos);
     if (CCameraMove::GetInstancePtr()->IsCameraMove())
     {
-        VectorCopy(CameraPosition, pos);
+        VectorCopy(g_Camera.Position, pos);
     }
 
     MoveMainCamera();
+
+    // Play login music (called every frame — PlayMp3 no-ops if already playing)
+    ::PlayMp3(MUSIC_LOGIN_THEME);
 
     int Width, Height;
 
     glColor3f(1.f, 1.f, 1.f);
 
-    Height = 480;
+    Height = REFERENCE_HEIGHT;
     Width = GetScreenWidth();
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
-    BeginOpengl(0, 25, 640, 430);
-    CreateFrustrum((float)Width / (float)640, (float)Height / 480.f, pos);
+    // Set ViewFar BEFORE BeginOpengl so the projection matrix covers the full render distance
+#ifdef _EDITOR
+    g_Camera.ViewFar = DevEditor_GetLoginTerrainDist();
+#else
+    g_Camera.ViewFar = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
+#endif
+    g_Camera.ViewNear = 100.f;  // Push near plane out to preserve z-buffer precision
+
+    BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
+
+    // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
+    // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and
+    // we reset iteration bounds to cover the full terrain so stale bounds from other scenes
+    // don't restrict the render loop.
+    ResetFrustrumBoundsFullTerrain();
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
-        CameraViewFar = 330.f * CCameraMove::GetInstancePtr()->GetCurrentCameraDistanceLevel();
-
         RenderTerrain(false);
-        CameraViewFar = 7000.f;
         RenderCharactersClient();
         RenderMount();
         RenderObjects();
@@ -432,23 +452,31 @@ bool NewRenderLogInScene(HDC hDC)
 
     wcscpy_s(Text, 100, GlobalText[454]);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(335 - Size.cx * 640 / WindowWidth, 480 - Size.cy * 640 / WindowWidth - 1, Text);
+    g_pRenderText->RenderText(335 - Size.cx * REFERENCE_WIDTH / WindowWidth, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
 
     wcscpy_s(Text, 100, GlobalText[455]);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(335, 480 - Size.cy * 640 / WindowWidth - 1, Text);
+    g_pRenderText->RenderText(335, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
 
     swprintf_s(Text, 100, GlobalText[456], m_ExeVersion);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(0, 480 - Size.cy * 640 / WindowWidth - 1, Text);
+    g_pRenderText->RenderText(0, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
 
     RenderInfomation();
 
 #ifdef ENABLE_EDIT
     RenderDebugWindow();
 #endif
+
+    // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    {
+        g_pOption->UpdateMouseEvent();
+        g_pOption->UpdateKeyEvent();
+        g_pOption->Render();
+    }
 
     EndBitmap();
 

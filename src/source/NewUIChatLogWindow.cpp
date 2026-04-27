@@ -789,7 +789,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
             }
         }
 
-        POINT ptResizingBtn = { m_WndPos.x, m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT };
+        POINT ptResizingBtn = { m_WndPos.x, (LONG)(m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT) };
         if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
             SEASON3B::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
         {
@@ -817,7 +817,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
                 for (int i = 0; i < nTopSections; i++)
                 {
                     if (SEASON3B::CheckMouseIn(0, ptResizingBtn.y - RESIZING_BTN_HEIGHT - ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3 * 2),
-                        640, SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
+                        REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
                     {
                         SetNumberOfShowingLines(GetNumberOfShowingLines() + (i + 1) * 3);
                         return false;
@@ -826,18 +826,18 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
                 for (int i = 0; i < nBottomSections; i++)
                 {
                     if (SEASON3B::CheckMouseIn(0, ptResizingBtn.y + RESIZING_BTN_HEIGHT + ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3),
-                        640, RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
+                        REFERENCE_WIDTH, RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
                     {
                         SetNumberOfShowingLines(GetNumberOfShowingLines() - (i + 1) * 3);
                         return false;
                     }
                 }
-                if (SEASON3B::CheckMouseIn(0, 0, 640, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
+                if (SEASON3B::CheckMouseIn(0, 0, REFERENCE_WIDTH, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
                 {
                     SetNumberOfShowingLines(15);
                 }
                 if (SEASON3B::CheckMouseIn(0, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2),
-                    640, SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
+                    REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
                 {
                     SetNumberOfShowingLines(3);
                 }

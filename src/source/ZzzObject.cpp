@@ -1,6 +1,7 @@
 ﻿///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "CameraMove.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzBMD.h"
 #include "ZzzInfomation.h"
@@ -15,6 +16,7 @@
 #include "Scenes/SceneCore.h"
 #include "ZzzOpenData.h"
 #include "DSPlaySound.h"
+#include "Camera/ICamera.h"
 
 #include "SideHair.h"
 #include "PhysicsManager.h"
@@ -32,6 +34,23 @@
 #include "w_MapHeaders.h"
 #include "MonkSystem.h"
 #include "NewUISystem.h"
+#include "Camera/CameraManager.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/OrbitalCamera.h"
+#include "CullingConstants.h"
+
+// DevEditor function declarations
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldShowItemCullSphere();
+extern "C" bool DevEditor_ShouldShowItemPickBoxes();
+extern "C" float DevEditor_GetCullRadiusItem();
+extern "C" float DevEditor_GetLoginObjectDist();
+
+// Per-frame cached DevEditor state
+static bool s_bShowItemCullSphere = false;
+static bool s_bShowItemPickBoxes = false;
+static float s_fCullRadiusItem = 0.0f;
+#endif
 
 extern vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
 extern vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
@@ -3254,6 +3273,12 @@ void RenderObjectVisual(OBJECT* o)
 
 void RenderObjects()
 {
+#ifdef _EDITOR
+    s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
+    s_bShowItemPickBoxes = DevEditor_ShouldShowItemPickBoxes();
+    s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
+#endif
+
     float   range = 0.f;
     if (gMapManager.WorldActive == WD_10HEAVEN)
     {
@@ -3269,6 +3294,7 @@ void RenderObjects()
         for (int j = 0; j < 16; j++)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
+
             ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
             if (g_Direction.m_CKanturu.IsMayaScene()
                 || gMapManager.WorldActive == WD_51HOME_6TH_CHAR
@@ -3293,10 +3319,14 @@ void RenderObjects()
                         else
                             if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
                             {
-                                float fDistance_x = CameraPosition[0] - o->Position[0];
-                                float fDistance_y = CameraPosition[1] - o->Position[1];
+                                float fDistance_x = g_Camera.Position[0] - o->Position[0];
+                                float fDistance_y = g_Camera.Position[1] - o->Position[1];
                                 float fDistance = sqrtf(fDistance_x * fDistance_x + fDistance_y * fDistance_y);
-                                float fDis = 2000.0f;
+#ifdef _EDITOR
+                                float fDis = DevEditor_GetLoginObjectDist();
+#else
+                                float fDis = LoginSceneCameraDefaults::RENDER_OBJECT_DIST;
+#endif
 
                                 if (((o->Type >= 122 && o->Type <= 124) || (o->Type == 159) || (o->Type == 126) || (o->Type == 129) || (o->Type == 127)) &&
                                     TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis * 2.0f)
@@ -3369,7 +3399,7 @@ void RenderObjects()
                 }
             }
 
-            if (ob->Visible || CameraTopViewEnable)
+            if (ob->Visible || g_Camera.TopViewEnable)
             {
                 OBJECT* o = ob->Head;
                 while (1)
@@ -3391,7 +3421,7 @@ void RenderObjects()
                                         else if ((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type == 129 || o->Type == 98));
 
                                         else
-                                            if (o->Visible || CameraTopViewEnable)
+                                            if (o->Visible || g_Camera.TopViewEnable)
                                             {
                                                 bool Success = false;
                                                 if (gMapManager.WorldActive == WD_2DEVIAS && o->Type == 100)
@@ -3497,6 +3527,7 @@ void RenderObjects_AfterCharacter()
         for (int j = 0; j < 16; j++)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
+
             ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
 
             if (g_Direction.m_CKanturu.IsMayaScene())
@@ -3562,7 +3593,7 @@ void RenderObjects_AfterCharacter()
                 }
             }
 
-            if (ob->Visible || CameraTopViewEnable)
+            if (ob->Visible || g_Camera.TopViewEnable)
             {
                 OBJECT* o = ob->Head;
                 while (1)
@@ -3581,7 +3612,7 @@ void RenderObjects_AfterCharacter()
                                     else
                                         if (IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68));
                                         else
-                                            if (o->Visible || CameraTopViewEnable)
+                                            if (o->Visible || g_Camera.TopViewEnable)
                                             {
                                                 bool Success = false;
                                                 if (gMapManager.WorldActive == WD_2DEVIAS && o->Type == 100)
@@ -6238,6 +6269,37 @@ void CreateShiny(OBJECT* o)
     }
 }
 
+// Helper: Handle item falling animation
+static void HandleItemFalling(OBJECT* o)
+{
+    if (o->Type >= MODEL_SHIELD && o->Type < MODEL_SHIELD + MAX_ITEM_INDEX)
+        o->Angle[1] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+    else
+        o->Angle[0] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+}
+
+// Helper: Handle item on ground (set angle and camera rotation)
+static void HandleItemOnGround(OBJECT* o)
+{
+    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+    if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
+        o->Position[2] += 40.f;
+
+    // Set default item angle
+    ItemAngle(o);
+
+    // Rotate items with camera when in orbital mode (after default angle is set)
+    if (CameraManager::Instance().GetCurrentMode() == CameraMode::Orbital)
+    {
+        OrbitalCamera* orbitalCam = static_cast<OrbitalCamera*>(CameraManager::Instance().GetActiveCamera());
+        if (orbitalCam)
+        {
+            float cameraYaw = orbitalCam->GetTotalYaw();
+            o->Angle[2] += cameraYaw;  // Add camera yaw to default angle
+        }
+    }
+}
+
 void MoveItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
@@ -6245,24 +6307,26 @@ void MoveItems()
         OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
+            // Apply gravity physics
             o->Position[2] += o->Gravity * FPS_ANIMATION_FACTOR;
             o->Gravity -= 6.f;
-            float Height = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
+
+            // Calculate ground height
+            float groundHeight = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
             if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-                Height += 40.f;
-            if (o->Position[2] <= Height)
+                groundHeight += 40.f;
+
+            // Check if item is on ground or still falling
+            if (o->Position[2] <= groundHeight)
             {
-                o->Position[2] = Height;
-                ItemAngle(o);
+                HandleItemOnGround(o);
             }
             else
             {
-                if (o->Type >= MODEL_SHIELD && o->Type < MODEL_SHIELD + MAX_ITEM_INDEX)
-                    o->Angle[1] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
-                else
-                    o->Angle[0] = -o->Gravity * 10.f * FPS_ANIMATION_FACTOR;
+                HandleItemFalling(o);
             }
 
+            // Create shiny particle effect
             if (rand_fps_check(1))
             {
                 CreateShiny(o);
@@ -6339,6 +6403,7 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
     VectorCopy(tempPosition, o->Position);
 }
 
+// Render dropped items and fall animation and camera rotation for items on the ground
 void RenderItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
@@ -6346,7 +6411,20 @@ void RenderItems()
         OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
-            o->Visible = TestFrustrum(o->Position, 400.f);
+#ifdef _EDITOR
+            float cullRadius = s_fCullRadiusItem;
+#else
+            float cullRadius = DEFAULT_CULL_RADIUS_ITEM;
+#endif
+            o->Visible = TestFrustrum(o->Position, cullRadius);
+
+#ifdef _EDITOR
+            // Debug visualization: frustum-cull sphere (NOT the pick volume)
+            if (s_bShowItemCullSphere)
+            {
+                RenderDebugSphere(o->Position, cullRadius, 1.0f, 1.0f, 0.0f);  // Yellow wireframe
+            }
+#endif
 
             if (o->Visible)
             {
@@ -6402,11 +6480,22 @@ void RenderItems()
                 RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
                 VectorCopy(vBackup, o->Position);
 
+#ifdef _EDITOR
+                // Debug visualization: OBB used by SelectItem for ray-vs-pickup test.
+                // Drawn after RenderPartObject because that's what refreshes o->OBB this frame.
+                if (s_bShowItemPickBoxes)
+                {
+                    RenderDebugBox(o->OBB.StartPos,
+                                   o->OBB.XAxis[0], o->OBB.YAxis[1], o->OBB.ZAxis[2],
+                                   1.0f, 0.0f, 1.0f);  // Magenta wireframe
+                }
+#endif
+
                 vec3_t Position;
                 VectorCopy(o->Position, Position);
                 Position[2] += 30.f;
                 int ScreenX, ScreenY;
-                Projection(Position, &ScreenX, &ScreenY);
+                CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
                 o->ScreenX = ScreenX;
                 o->ScreenY = ScreenY;
             }
