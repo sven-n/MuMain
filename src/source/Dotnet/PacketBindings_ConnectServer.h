@@ -17,7 +17,8 @@
 #include "Connection.h"
 #include <coreclr_delegates.h>
 
-
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_ConnectServer_Enums.h"
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendConnectionInfoRequest075)(int32_t, BYTE );
 inline SendConnectionInfoRequest075 dotnet_SendConnectionInfoRequest075 = reinterpret_cast<SendConnectionInfoRequest075>(symLoad(munique_client_library_handle, "SendConnectionInfoRequest075"));

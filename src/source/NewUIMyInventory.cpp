@@ -133,13 +133,13 @@ bool CNewUIMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacke
 
     if (pTempItem->Type == ITEM_DARK_HORSE_ITEM)
     {
-        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, iIndex);
+        SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkHorse, StorageType::Inventory, iIndex);
     }
 
     if (pTempItem->Type == ITEM_DARK_RAVEN_ITEM)
     {
         CreatePetDarkSpirit(Hero);
-        SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, iIndex);
+        SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkRaven, StorageType::Inventory, iIndex);
     }
 
     pTempItem->lineal_pos = iIndex;
@@ -1562,7 +1562,6 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
     return false;
 }
-
 bool CNewUIMyInventory::InventoryProcess() const
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)

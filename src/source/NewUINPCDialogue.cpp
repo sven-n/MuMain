@@ -582,19 +582,19 @@ void CNewUINPCDialogue::ProcessSelTextResult()
                 g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPC_DIALOGUE);
                 break;
             case 903:
-                SocketClient->ToGameServer()->SendGensJoinRequest(1);
+                SocketClient->ToGameServer()->SendGensJoinRequest(GensType::Duprian);
                 break;
             case 904:
-                SocketClient->ToGameServer()->SendGensJoinRequest(2);
+                SocketClient->ToGameServer()->SendGensJoinRequest(GensType::Vanert);
                 break;
             case 905:
                 SocketClient->ToGameServer()->SendGensLeaveRequest();
                 break;
             case 906:
-                SocketClient->ToGameServer()->SendGensRewardRequest(1);
+                SocketClient->ToGameServer()->SendGensRewardRequest(GensType::Duprian);
                 break;
             case 907:
-                SocketClient->ToGameServer()->SendGensRewardRequest(2);
+                SocketClient->ToGameServer()->SendGensRewardRequest(GensType::Vanert);
                 break;
 
             default:

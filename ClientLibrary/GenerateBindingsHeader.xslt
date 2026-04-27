@@ -28,7 +28,10 @@
 #include "Connection.h"
 #include &lt;coreclr_delegates.h&gt;
 
-
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_</xsl:text>
+    <xsl:value-of select="$subNamespace"/>
+    <xsl:text>_Enums.h"
 </xsl:text>
     <xsl:apply-templates select="pd:Packets/pd:Packet" mode="function_binding" />
 

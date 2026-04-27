@@ -3720,11 +3720,11 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 				{
 					ITEM* pItem = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
 					if (pItem->Type == ITEM_DARK_HORSE_ITEM)
-						SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_HORSE, 0, EQUIPMENT_HELPER);
+						SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkHorse, StorageType::Inventory, EQUIPMENT_HELPER);
 
 					pItem = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
 					if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
-						SocketClient->ToGameServer()->SendPetInfoRequest(PET_TYPE_DARK_SPIRIT, 0, EQUIPMENT_WEAPON_LEFT);
+						SocketClient->ToGameServer()->SendPetInfoRequest(PetType::DarkRaven, StorageType::Inventory, EQUIPMENT_WEAPON_LEFT);
 				}
 			}
 
@@ -4340,19 +4340,19 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     if (!wcscmp(Text, GlobalText[1354]) || !wcsicmp(Text, L"/union"))
                     {
                         //SendRequestGuildRelationShip(0x01, 0x01, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
-                        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x01, 0x01, CharactersClient[SelectedCharacter].Key);
+                        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Alliance, GuildRequestType::Join, CharactersClient[SelectedCharacter].Key);
                     }
                     else if (!wcscmp(Text, GlobalText[1356]) || !wcsicmp(Text, L"/rival"))
                     {
                         //SendRequestGuildRelationShip(0x02, 0x01, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
-                        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x01, CharactersClient[SelectedCharacter].Key);
+                        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Hostility, GuildRequestType::Join, CharactersClient[SelectedCharacter].Key);
                     }
                     else
                     {
                         SetAction(&Hero->Object, PLAYER_RESPECT1);
                         SendRequestAction(Hero->Object, AT_RESPECT1);
                         //SendRequestGuildRelationShip(0x02, 0x02, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
-                        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x02, CharactersClient[SelectedCharacter].Key);
+                        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Hostility, GuildRequestType::Leave, CharactersClient[SelectedCharacter].Key);
                     }
                 }
             }
@@ -4371,19 +4371,19 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         if (!wcscmp(Text, GlobalText[1354]) || !wcsicmp(Text, L"/union"))
                         {
                             //SendRequestGuildRelationShip(0x01, 0x01, HIBYTE(c->Key), LOBYTE(c->Key));
-                            SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x01, 0x01, c->Key);
+                            SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Alliance, GuildRequestType::Join, c->Key);
                         }
                         else if (!wcscmp(Text, GlobalText[1356]) || !wcsicmp(Text, L"/rival"))
                         {
                             //SendRequestGuildRelationShip(0x02, 0x01, HIBYTE(c->Key), LOBYTE(c->Key));
-                            SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x01, c->Key);
+                            SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Hostility, GuildRequestType::Join, c->Key);
                         }
                         else
                         {
                             SetAction(&Hero->Object, PLAYER_RESPECT1);
                             SendRequestAction(Hero->Object, AT_RESPECT1);
                             //SendRequestGuildRelationShip(0x02, 0x02, HIBYTE(c->Key), LOBYTE(c->Key));
-                            SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x02, c->Key);
+                            SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Hostility, GuildRequestType::Leave, c->Key);
                         }
                         break;
                     }

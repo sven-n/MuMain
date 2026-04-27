@@ -1112,8 +1112,8 @@ typedef struct
 typedef struct
 {
     PBMSG_HEADER	Header;
-    BYTE			byRelationShipType;
-    BYTE			byRequestType;
+    GuildRelationshipType			byRelationShipType;
+    GuildRequestType			byRequestType;
     BYTE			byTargetUserIndexH;
     BYTE			byTargetUserIndexL;
 } PMSG_GUILD_RELATIONSHIP, * LPPMSG_GUILD_RELATIONSHIP;

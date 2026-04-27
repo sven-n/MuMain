@@ -320,7 +320,7 @@ void CSPetDarkSpirit::MovePet(void)
     {
         m_byCommand = 0;
         auto* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
-        SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xFFFF);
+        SocketClient->ToGameServer()->SendPetCommandRequest(static_cast<PetType>(pPet->GetPetType()), PetCommandMode::Normal, 0xFFFF);
         g_DuelMgr.EnablePetDuel(TRUE);
     }
 
@@ -338,7 +338,7 @@ void CSPetDarkSpirit::MovePet(void)
             float Distance = sqrtf(dx * dx + dy * dy);
 
             c->TargetCharacter = -1;
-            SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xFFFF);
+            SocketClient->ToGameServer()->SendPetCommandRequest(static_cast<PetType>(pPet->GetPetType()), PetCommandMode::Normal, 0xFFFF);
             SetAI(PET_STAND);
             if (Distance > 50 || (o->AI != PET_STAND_START && o->AI >= PET_FLYING && o->AI <= PET_STAND))
             {
@@ -356,7 +356,7 @@ void CSPetDarkSpirit::MovePet(void)
         float Distance = sqrtf(dx * dx + dy * dy);
 
         c->TargetCharacter = -1;
-        SocketClient->ToGameServer()->SendPetCommandRequest(pPet->GetPetType(), AT_PET_COMMAND_DEFAULT, 0xFFFF);
+        SocketClient->ToGameServer()->SendPetCommandRequest(static_cast<PetType>(pPet->GetPetType()), PetCommandMode::Normal, 0xFFFF);
         SetAI(PET_STAND);
         if (Distance > 50 || (o->AI != PET_STAND_START && o->AI >= PET_FLYING && o->AI <= PET_STAND))
         {

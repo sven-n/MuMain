@@ -387,15 +387,15 @@ namespace MUHelper
 
         if (m_config.iDarkRavenMode == PET_ATTACK_CEASE)
         {
-            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_DEFAULT, 0xFFFF);
+            SocketClient->ToGameServer()->SendPetCommandRequest(PetType::DarkRaven, PetCommandMode::Normal, 0xFFFF);
         }
         else if (m_config.iDarkRavenMode == PET_ATTACK_AUTO)
         {
-            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_RANDOM, 0xFFFF);
+            SocketClient->ToGameServer()->SendPetCommandRequest(PetType::DarkRaven, PetCommandMode::AttackRandom, 0xFFFF);
         }
         else if (m_config.iDarkRavenMode == PET_ATTACK_TOGETHER)
         {
-            SocketClient->ToGameServer()->SendPetCommandRequest(PET_TYPE_DARK_SPIRIT, AT_PET_COMMAND_OWNER, 0xFFFF);
+            SocketClient->ToGameServer()->SendPetCommandRequest(PetType::DarkRaven, PetCommandMode::AttackWithOwner, 0xFFFF);
         }
 
         m_bPetActivated = true;

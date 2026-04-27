@@ -158,7 +158,8 @@ bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
     if (PLAYER_WORDS_MODE != m_eLowerView || !m_bCanClick)
         return false;
 
-    m_nSelAnswer = 0;
+    m_nSelAnswer = QuestProceedAction::Undefined;
+
     if (MouseX < m_Pos.x + 11 || MouseX > m_Pos.x + 179)
         return false;
 
@@ -172,12 +173,12 @@ bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
 
         if (nTopY <= MouseY && MouseY < nBottomY)
         {
-            m_nSelAnswer = i + 1;
+            m_nSelAnswer = static_cast<QuestProceedAction>(i + 1);
             if (SEASON3B::IsRelease(VK_LBUTTON))
             {
                 const auto questNumber = static_cast<uint16_t>((m_dwCurQuestIndex & 0xFF00) >> 16);
                 const auto questGroup = static_cast<uint16_t>(m_dwCurQuestIndex & 0xFF);
-                SocketClient->ToGameServer()->SendQuestProceedRequest(questNumber, questGroup, (BYTE)m_nSelAnswer);
+                SocketClient->ToGameServer()->SendQuestProceedRequest(questNumber, questGroup, m_nSelAnswer);
                 PlayBuffer(SOUND_CLICK01);
                 m_bCanClick = false;
                 return true;
@@ -253,16 +254,17 @@ void CNewUIQuestProgress::RenderSelTextBlock()
     if (PLAYER_WORDS_MODE != m_eLowerView)
         return;
 
-    if (0 == m_nSelAnswer)
+    if (m_nSelAnswer == QuestProceedAction::Undefined)
         return;
 
     int nBlockPosY = m_Pos.y + 251;
     int i;
-    for (i = 0; i < m_nSelAnswer - 1; ++i)
+    int answerIndex = static_cast<int>(m_nSelAnswer) - 1;
+    for (i = 0; i < answerIndex; ++i)
         nBlockPosY += QP_TEXT_GAP * m_anAnswerLine[i];
 
     ::glColor4f(0.5f, 0.7f, 0.3f, 0.5f);
-    ::RenderColor(m_Pos.x + 11, nBlockPosY, 168.f, QP_TEXT_GAP * m_anAnswerLine[m_nSelAnswer - 1]);
+    ::RenderColor(m_Pos.x + 11, nBlockPosY, 168.f, QP_TEXT_GAP * m_anAnswerLine[answerIndex]);
     ::EndRenderColor();
 }
 
@@ -373,7 +375,7 @@ void CNewUIQuestProgress::SetContents(DWORD dwQuestIndex)
     {
         SetCurPlayerWords();
         m_eLowerView = NON_PLAYER_WORDS_MODE;
-        m_nSelAnswer = 0;
+        m_nSelAnswer = QuestProceedAction::Undefined;
 
         m_btnProgressR.UnLock();
     }

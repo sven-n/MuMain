@@ -301,7 +301,7 @@ namespace giPetManager
             return false;
         }
 
-        const auto petCommand = Index - AT_PET_COMMAND_DEFAULT;
+        const auto petCommand = static_cast<PetCommandMode>(Index - AT_PET_COMMAND_DEFAULT);
         if (Index == AT_PET_COMMAND_TARGET)
         {
             if (CheckAttack() && SelectedCharacter != -1)
@@ -309,13 +309,13 @@ namespace giPetManager
                 CHARACTER* targetCharacter = &CharactersClient[SelectedCharacter];
                 if (targetCharacter->Object.Kind == KIND_MONSTER || targetCharacter->Object.Kind == KIND_PLAYER)
                 {
-                    SocketClient->ToGameServer()->SendPetCommandRequest(petSystem->GetPetType(), petCommand, targetCharacter->Key);
+                    SocketClient->ToGameServer()->SendPetCommandRequest(static_cast<PetType>(petSystem->GetPetType()), petCommand, targetCharacter->Key);
                 }
             }
         }
         else
         {
-            SocketClient->ToGameServer()->SendPetCommandRequest(petSystem->GetPetType(), petCommand, kInvalidTargetKey);
+            SocketClient->ToGameServer()->SendPetCommandRequest(static_cast<PetType>(petSystem->GetPetType()), petCommand, kInvalidTargetKey);
         }
 
         ClearRightMouseInputState();
@@ -407,46 +407,47 @@ namespace giPetManager
                 PetType = PET_TYPE_DARK_HORSE;
             }
 
-            int iInvenType = 0, iItemIndex = 0;
+            StorageType iInvenType = StorageType::Inventory;
+            int iItemIndex = 0;
 
             if ((iItemIndex = g_pMyInventory->GetPointedItemIndex()) != -1)
             {
-                iInvenType = 0;
+                iInvenType = StorageType::Inventory;
             }
             else if ((iItemIndex = g_pMyShopInventory->GetPointedItemIndex()) != -1)
             {
-                iInvenType = 0;
+                iInvenType = StorageType::Inventory;
             }
             else if ((iItemIndex = g_pStorageInventory->GetPointedItemIndex()) != -1)
             {
-                iInvenType = 1;
+                iInvenType = StorageType::Vault;
             }
             else if ((iItemIndex = g_pStorageInventoryExt->GetPointedItemIndex()) != -1)
             {
-                iInvenType = 1;
+                iInvenType = StorageType::Vault;
             }
             else if ((iItemIndex = g_pTrade->GetPointedItemIndexMyInven()) != -1)
             {
-                iInvenType = 2;
+                iInvenType = StorageType::TradeOwn;
             }
             else if ((iItemIndex = g_pTrade->GetPointedItemIndexYourInven()) != -1)
             {
-                iInvenType = 3;
+                iInvenType = StorageType::TradeOther;
             }
             else if ((iItemIndex = g_pMixInventory->GetPointedItemIndex()) != -1)
             {
-                iInvenType = 4;
+                iInvenType = StorageType::Crafting;
             }
             else if ((iItemIndex = g_pPurchaseShopInventory->GetPointedItemIndex()) != -1)
             {
-                iInvenType = 5;
+                iInvenType = StorageType::PersonalShop;
             }
             else if ((iItemIndex = g_pNPCShop->GetPointedItemIndex()) != -1)
             {
-                iInvenType = 6;
+                iInvenType = StorageType::NpcShop;
             }
 
-            SocketClient->ToGameServer()->SendPetInfoRequest(PetType, iInvenType, iItemIndex);
+            SocketClient->ToGameServer()->SendPetInfoRequest(static_cast<::PetType>(PetType), iInvenType, iItemIndex);
 
             return true;
         }

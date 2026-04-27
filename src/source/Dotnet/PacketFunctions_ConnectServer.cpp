@@ -12,6 +12,8 @@
 //------------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_ConnectServer_Enums.h"
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketBindings_ConnectServer.h"
 

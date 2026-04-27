@@ -125,7 +125,7 @@ void CSysMenuWin::UpdateWhileActive(double dDeltaTick)
         g_ErrorReport.Write(L"> Menu - Join another server.");
         g_ErrorReport.WriteCurrentTime();
         LogOut = true;
-        SocketClient->ToGameServer()->SendLogOut(2);
+        SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToServerSelection);
         g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
 
         CUIMng& rUIMng = CUIMng::Instance();

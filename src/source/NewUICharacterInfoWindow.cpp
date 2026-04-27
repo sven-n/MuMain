@@ -184,7 +184,7 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
         {
             if (m_BtnStat[i].UpdateMouseEvent() == true)
             {
-                SocketClient->ToGameServer()->SendIncreaseCharacterStatPoint(i);
+                SocketClient->ToGameServer()->SendIncreaseCharacterStatPoint(static_cast<CharacterStatAttribute>(i));
                 PlayBuffer(SOUND_CLICK01);
                 return true;
             }

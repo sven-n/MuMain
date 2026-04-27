@@ -51,12 +51,12 @@ namespace COMGEM
 
 void COMGEM::SendReqUnMix()
 {
-    SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x01, m_cGemType / 2, iUnMixLevel, iUnMixIndex);
+    SocketClient->ToGameServer()->SendLahapJewelMixRequest(MixType::Unmix, static_cast<ItemType>(m_cGemType / 2), static_cast<StackSize>(iUnMixLevel), iUnMixIndex);
 }
 
 void COMGEM::SendReqMix()
 {
-    SocketClient->ToGameServer()->SendLahapJewelMixRequest(0x00, m_cGemType / 2, (m_cComType / 10 - 1), 0);
+    SocketClient->ToGameServer()->SendLahapJewelMixRequest(MixType::Mix, static_cast<ItemType>(m_cGemType / 2), static_cast<StackSize>(m_cComType / 10 - 1), 0);
 }
 
 void COMGEM::ProcessCSAction()

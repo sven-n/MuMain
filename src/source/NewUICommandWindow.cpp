@@ -529,7 +529,7 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
     }
     if (pSelectedCha->GuildStatus == G_MASTER)
     {
-        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x01, 0x01, pSelectedCha->Key);
+        SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Alliance, GuildRequestType::Join, pSelectedCha->Key);
         return true;
     }
 
@@ -550,7 +550,7 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
         return false;
     }
 
-    SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x01, pSelectedCha->Key);
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Hostility, GuildRequestType::Join, pSelectedCha->Key);
 
     return true;
 }
@@ -570,7 +570,7 @@ bool SEASON3B::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelected
 
     SetAction(&Hero->Object, PLAYER_RESPECT1);
     SendRequestAction(Hero->Object, AT_RESPECT1);
-    SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(0x02, 0x02, pSelectedCha->Key);
+    SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Hostility, GuildRequestType::Leave, pSelectedCha->Key);
     return true;
 }
 

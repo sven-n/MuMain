@@ -12,6 +12,8 @@
 //------------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include "PacketFunctions_CommonEnums.h"
+#include "PacketFunctions_ChatServer_Enums.h"
 #include "PacketFunctions_ChatServer.h"
 #include "PacketBindings_ChatServer.h"
 

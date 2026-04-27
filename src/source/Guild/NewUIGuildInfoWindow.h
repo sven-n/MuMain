@@ -20,12 +20,12 @@ namespace SEASON3B
 {
     struct ServerMessageInfo
     {
-        BYTE s_byRelationShipType;
-        BYTE s_byRelationShipRequestType;
+        GuildRelationshipType s_byRelationShipType;
+        GuildRequestType s_byRelationShipRequestType;
         BYTE s_byTargetUserIndexH;
         BYTE s_byTargetUserIndexL;
 
-        ServerMessageInfo() : s_byRelationShipType(0), s_byRelationShipRequestType(0),
+        ServerMessageInfo() : s_byRelationShipType(GuildRelationshipType::Undefined), s_byRelationShipRequestType(GuildRequestType::Undefined),
             s_byTargetUserIndexH(0), s_byTargetUserIndexL(0) {}
     };
 
@@ -148,7 +148,7 @@ namespace SEASON3B
         const ServerMessageInfo& GetServerMessage();
 
     public:
-        void ReceiveGuildRelationShip(BYTE byRelationShipType, BYTE byRequestType,
+        void ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
             BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL);
 
     private:

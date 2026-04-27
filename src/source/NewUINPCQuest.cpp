@@ -132,7 +132,7 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
                 else if (2 == nAnswer)
                     g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCQUEST);
                 else if (3 == nAnswer)
-                    SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(byCurQuestIndex, 1);
+                    SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(byCurQuestIndex, LegacyQuestState::Active);
 
                 ::PlayBuffer(SOUND_INTERFACE01);
 
@@ -483,7 +483,7 @@ bool CNewUINPCQuest::ProcessBtns()
     {
         if (m_btnComplete.UpdateMouseEvent())
         {
-            SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(g_csQuest.GetCurrQuestIndex(), 1);
+            SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(g_csQuest.GetCurrQuestIndex(), LegacyQuestState::Active);
             PlayBuffer(SOUND_INTERFACE01);
             return true;
         }

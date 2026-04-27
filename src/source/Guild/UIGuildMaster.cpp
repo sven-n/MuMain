@@ -21,8 +21,8 @@ extern int				g_iChatInputType;
 
 static eCurrentMode		m_nCurrMode;
 static eCurrentStep		m_eCurrStep;
-static BYTE				m_byRelationShipType;
-static BYTE				m_byRelationShipRequestType;
+static GuildRelationshipType	m_byRelationShipType;
+static GuildRequestType	m_byRelationShipRequestType;
 static BYTE				m_byTargetUserIndexH;
 static BYTE				m_byTargetUserIndexL;
 
@@ -152,8 +152,8 @@ CUIGuildMaster::CUIGuildMaster()
     m_NextButton.SetSize(50, 18);
 
     m_dwGuildRelationShipReplyPopup = 0;
-    m_byRelationShipType = 0;
-    m_byRelationShipRequestType = 0;
+    m_byRelationShipType = GuildRelationshipType::Undefined;
+    m_byRelationShipRequestType = GuildRequestType::Undefined;
     m_byTargetUserIndexH = 0;
     m_byTargetUserIndexL = 0;
 }
@@ -527,7 +527,7 @@ void CUIGuildMaster::RenderGuildMasterMain()
     }
 }
 
-void CUIGuildMaster::ReceiveGuildRelationShip(BYTE byRelationShipType, BYTE byRequestType, BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL)
+void CUIGuildMaster::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType, BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL)
 {
     if (g_pUIPopup->GetPopupID() != 0)
     {
@@ -551,9 +551,9 @@ void CUIGuildMaster::ReceiveGuildRelationShip(BYTE byRelationShipType, BYTE byRe
     CHARACTER* pPlayer = &CharactersClient[nIndex];
 
     wchar_t szText[3][64];
-    if (m_byRelationShipType == 0x01)			// Union
+    if (m_byRelationShipType == GuildRelationshipType::Alliance)			// Union
     {
-        if (m_byRelationShipRequestType == 0x01)	// Join
+        if (m_byRelationShipRequestType == GuildRequestType::Join)	// Join
         {
             mu_swprintf(szText[0], GlobalText[1280]);
             mu_swprintf(szText[1], GlobalText[1281], pPlayer->ID);
@@ -566,9 +566,9 @@ void CUIGuildMaster::ReceiveGuildRelationShip(BYTE byRelationShipType, BYTE byRe
             mu_swprintf(szText[2], GlobalText[1283]);
         }
     }
-    else if (m_byRelationShipType == 0x02)		// Rival
+    else if (m_byRelationShipType == GuildRelationshipType::Hostility) // Rival
     {
-        if (m_byRelationShipRequestType == 0x01)	// Join
+        if (m_byRelationShipRequestType == GuildRequestType::Join)	// Join
         {
             mu_swprintf(szText[0], GlobalText[1284], pPlayer->ID);
             mu_swprintf(szText[1], GlobalText[1286]);
