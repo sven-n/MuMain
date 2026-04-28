@@ -314,8 +314,13 @@ void CSQuest::setQuestList(int index, int result)
     m_byCurrQuestIndex = static_cast<std::uint8_t>(index);
     m_byCurrQuestIndexWnd = std::max<std::uint8_t>(static_cast<std::uint8_t>(index), m_byCurrQuestIndexWnd);
 
-    const auto questState = static_cast<std::uint8_t>(result & QUEST_STATE_MASK);
-    StoreQuestState(m_byQuestList.data(), m_byQuestList.size(), index, questState);
+    // Server protocol 0xA1/0xA2: 'result' is the complete byte holding the packed states
+    // of all four quests in the same group as 'index'. Store it as-is.
+    const auto byteIndex = static_cast<std::size_t>(index) / QUEST_STATES_PER_ENTRY;
+    if (byteIndex < m_byQuestList.size())
+    {
+        m_byQuestList[byteIndex] = static_cast<std::uint8_t>(result);
+    }
 
     Hero->byExtensionSkill = 0;
     if (getQuestState(QUEST_COMBO) == QUEST_END)
