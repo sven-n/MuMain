@@ -8,6 +8,9 @@ on:
 jobs:
   build-mingw:
     runs-on: ubuntu-latest
+    env:
+      WINEDEBUG: -all
+      WINEPREFIX: ${{ github.workspace }}/.wineprefix
 
     steps:
       - name: Checkout repository
@@ -15,8 +18,13 @@ jobs:
 
       - name: Install MinGW-w64 toolchain
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake ninja-build
+          sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake ninja-build wine wine32:i386
+
+      - name: Initialise wine prefix
+        run: |
+          wineboot --init >/dev/null 2>&1 || true
 
       - name: Cache libjpeg-turbo (MinGW i686)
         uses: actions/cache@v4
@@ -54,8 +62,13 @@ jobs:
             -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-i686.cmake" \
             -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=ON \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-i686/lib/libturbojpeg.a"
 
       - name: Build
         run: |
           cmake --build build-mingw -j$(nproc)
+
+      - name: Run tests
+        run: |
+          ctest --test-dir build-mingw --output-on-failure

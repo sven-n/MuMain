@@ -172,46 +172,8 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
     return FALSE;
 }
 
-int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int iMaxLine, int iLineSize)
-{
-    int iLine = 0;
-    const wchar_t* lpLineStart = lpszText;
-    wchar_t* lpDst = lpszSeparated;
-    const wchar_t* lpSpace = NULL;
-    int iMbclen = 0;
-    for (const wchar_t* lpSeek = lpszText; *lpSeek; lpSeek += iMbclen, lpDst += iMbclen)
-    {
-        // For wide characters, always 1 character per unit
-        iMbclen = 1;
-        if (iMbclen + (lpSeek - lpLineStart) >= iLineSize)
-        {
-            if (lpSpace && (lpSeek - lpSpace) < std::min<int>(10, iLineSize / 2))
-            {
-                lpDst -= lpSeek - lpSpace - 1;
-                lpSeek = lpSpace + 1;
-            }
-
-            lpLineStart = lpSeek;
-            *lpDst = L'\0';
-            if (iLine >= iMaxLine - 1)
-            {
-                break;
-            }
-            ++iLine;
-            lpDst = lpszSeparated + iLine * iLineSize;
-            lpSpace = NULL;
-        }
-
-        memcpy(lpDst, lpSeek, iMbclen);
-        if (*lpSeek == L' ')
-        {
-            lpSpace = lpSeek;
-        }
-    }
-    *lpDst = L'\0';
-
-    return (iLine + 1);
-}
+// SeparateTextIntoLines lives in src/source/Text/TextLineWrap.cpp so it can be
+// unit-tested without dragging in the full scene/UI translation unit.
 
 ///////////////////////////////////////////////////////////////////////////////
 // Audio and Viewport Functions
