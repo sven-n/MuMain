@@ -99,6 +99,7 @@ private:
     void WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value);
 
     void RemoveObsoleteKey(const wchar_t* section, const wchar_t* key);
+    void RemoveObsoleteSection(const wchar_t* section);
 
     std::wstring DecryptSetting(const std::wstring& hexInput);
     std::wstring EncryptSetting(const wchar_t* input);

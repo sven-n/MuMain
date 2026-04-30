@@ -56,10 +56,16 @@ void GameConfig::Load()
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
 
-    // Strip keys we used to write but no longer use, so user config files
-    // don't accumulate orphans. Append one line per retired key — no central
-    // registry of valid keys to keep in sync.
+    // Strip keys/sections we used to write but no longer use, so user config
+    // files don't accumulate orphans. Append one line per retired key — no
+    // central registry of valid keys to keep in sync.
     RemoveObsoleteKey(CfgSectionGraphics, L"RenderTextType");
+    RemoveObsoleteKey(CfgSectionAudio,    L"SoundEnabled");   // replaced by SoundVolume==0
+    RemoveObsoleteKey(CfgSectionAudio,    L"MusicEnabled");   // replaced by MusicVolume==0
+    RemoveObsoleteKey(CfgSectionAudio,    L"VolumeLevel");    // legacy single-volume key
+    RemoveObsoleteKey(CfgSectionLogin,    L"Version");        // launcher metadata, never read by client
+    RemoveObsoleteKey(CfgSectionLogin,    L"TestVersion");    // launcher metadata, never read by client
+    RemoveObsoleteSection(L"PARTITION");                      // launcher metadata, never read by client
 }
 
 void GameConfig::Save()
@@ -259,6 +265,12 @@ void GameConfig::RemoveObsoleteKey(const wchar_t* section, const wchar_t* key)
 {
     // Passing nullptr as the value deletes the key (Windows INI API).
     WritePrivateProfileStringW(section, key, nullptr, m_configPath.c_str());
+}
+
+void GameConfig::RemoveObsoleteSection(const wchar_t* section)
+{
+    // Passing nullptr as the key deletes the entire section.
+    WritePrivateProfileStringW(section, nullptr, nullptr, m_configPath.c_str());
 }
 
 std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
