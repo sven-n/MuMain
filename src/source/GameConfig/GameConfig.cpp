@@ -41,8 +41,6 @@ void GameConfig::Load()
     m_windowHeight = ReadInt(CfgSectionWindow, CfgKeyHeight, CfgDefaultWindowHeight);
     m_windowMode   = ReadBool(CfgSectionWindow, CfgKeyWindowed, CfgDefaultWindowed);
 
-    m_colorDepth = ReadInt(CfgSectionGraphics, CfgKeyColorDepth, CfgDefaultColorDepth);
-
     m_soundVolume  = ReadInt(CfgSectionAudio, CfgKeySoundVolume, CfgDefaultSoundVolume);
     m_musicVolume  = ReadInt(CfgSectionAudio, CfgKeyMusicVolume, CfgDefaultMusicVolume);
 
@@ -60,11 +58,13 @@ void GameConfig::Load()
     // files don't accumulate orphans. Append one line per retired key — no
     // central registry of valid keys to keep in sync.
     RemoveObsoleteKey(CfgSectionGraphics, L"RenderTextType");
+    RemoveObsoleteKey(CfgSectionGraphics, L"ColorDepth");      // 16/32bpp toggle, dead since fullscreen uses GetDesktopBitsPerPel
     RemoveObsoleteKey(CfgSectionAudio,    L"SoundEnabled");   // replaced by SoundVolume==0
     RemoveObsoleteKey(CfgSectionAudio,    L"MusicEnabled");   // replaced by MusicVolume==0
     RemoveObsoleteKey(CfgSectionAudio,    L"VolumeLevel");    // legacy single-volume key
     RemoveObsoleteKey(CfgSectionLogin,    L"Version");        // launcher metadata, never read by client
     RemoveObsoleteKey(CfgSectionLogin,    L"TestVersion");    // launcher metadata, never read by client
+    RemoveObsoleteSection(CfgSectionGraphics);                // empty after RenderTextType + ColorDepth removal
     RemoveObsoleteSection(L"PARTITION");                      // launcher metadata, never read by client
 }
 
@@ -76,8 +76,6 @@ void GameConfig::Save()
     WriteInt(CfgSectionWindow, CfgKeyWidth, m_windowWidth);
     WriteInt(CfgSectionWindow, CfgKeyHeight, m_windowHeight);
     WriteBool(CfgSectionWindow, CfgKeyWindowed, m_windowMode);
-
-    WriteInt(CfgSectionGraphics, CfgKeyColorDepth, m_colorDepth);
 
     WriteInt(CfgSectionAudio, CfgKeySoundVolume, m_soundVolume);
     WriteInt(CfgSectionAudio, CfgKeyMusicVolume, m_musicVolume);
@@ -102,11 +100,6 @@ void GameConfig::SetWindowSize(int width, int height)
 void GameConfig::SetWindowMode(bool windowed)
 {
     m_windowMode = windowed;
-}
-
-void GameConfig::SetColorDepth(int depth)
-{
-    m_colorDepth = depth;
 }
 
 void GameConfig::SetSoundVolume(int level)

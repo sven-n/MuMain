@@ -21,10 +21,6 @@ public:
     void SetWindowSize(int width, int height);
     void SetWindowMode(bool windowed);
 
-    // Graphics
-    int GetColorDepth() const { return m_colorDepth; }
-    void SetColorDepth(int depth);
-
     // Audio — volume 0 = off, >0 = on. No separate Enabled flag.
     int  GetSoundVolume()  const { return m_soundVolume; }
     int  GetMusicVolume()  const { return m_musicVolume; }
@@ -73,8 +69,6 @@ private:
     int  m_windowWidth;
     int  m_windowHeight;
     bool m_windowMode;
-
-    int m_colorDepth;
 
     int  m_soundVolume;
     int  m_musicVolume;
