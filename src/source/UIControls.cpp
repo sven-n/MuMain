@@ -2536,7 +2536,7 @@ void CUISocketListBox::DeleteText(int iSocketIndex)
     m_TextList.erase(m_TextListIter);
 }
 
-CUIRenderText::CUIRenderText() : m_pRenderText(nullptr), m_iRenderTextType(-1) {}
+CUIRenderText::CUIRenderText() : m_pRenderText(nullptr) {}
 CUIRenderText::~CUIRenderText() { Release(); }
 
 CUIRenderText* CUIRenderText::GetInstance()
@@ -2545,36 +2545,23 @@ CUIRenderText* CUIRenderText::GetInstance()
     return &s_RenderText;
 }
 
-bool CUIRenderText::Create(int iRenderTextType, HDC hDC)
+bool CUIRenderText::Create(HDC hDC)
 {
-    if (m_pRenderText && m_iRenderTextType == iRenderTextType)
+    if (m_pRenderText)
     {
         return true;
     }
 
-    Release();
-
-    switch (iRenderTextType)
+    m_pRenderText = new CUIRenderTextOriginal;
+    if (!m_pRenderText->Create(hDC))
     {
-    case 0:
-        m_pRenderText = new CUIRenderTextOriginal;
-        if (!m_pRenderText->Create(hDC))
-        {
-            delete m_pRenderText;
-            m_pRenderText = nullptr;
-            return false;
-        }
-        break;
-    case 1:
-        //m_pRenderText = new CUIRenderTextAdvance;
-        return false;
-    default:
+        delete m_pRenderText;
+        m_pRenderText = nullptr;
         return false;
     }
-
-    m_iRenderTextType = iRenderTextType;
     return true;
 }
+
 void CUIRenderText::Release()
 {
     if (m_pRenderText)
@@ -2582,10 +2569,7 @@ void CUIRenderText::Release()
         delete m_pRenderText;
         m_pRenderText = nullptr;
     }
-    m_iRenderTextType = -1;
 }
-
-int CUIRenderText::GetRenderTextType() const { return m_iRenderTextType; }
 
 HDC CUIRenderText::GetFontDC() const
 {

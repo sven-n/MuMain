@@ -762,7 +762,6 @@ int  m_MusicOnOff;
 int  m_Resolution;
 int	m_nColorDepth;
 int m_RememberMe;
-int	g_iRenderTextType = 0;
 
 wchar_t g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = { '\0' };
 
@@ -969,10 +968,6 @@ MSG MainLoop()
     return msg;
 }
 
-// Declared at file scope -- an `extern` inside the anonymous namespace below would
-// give the symbol internal linkage and fail to resolve against the real global.
-extern int g_iRenderTextType;
-
 namespace
 {
     // Tahoma font size scales with window height; these are the tuned base values.
@@ -1012,7 +1007,7 @@ namespace
     {
         // Recreates the font buffer bitmap with new g_fScreenRate values
         g_pRenderText->Release();
-        g_pRenderText->Create(g_iRenderTextType, g_hDC);
+        g_pRenderText->Create(g_hDC);
         g_pRenderText->SetFont(g_hFont);
     }
 
@@ -1216,7 +1211,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     // Apply graphics settings from INI
     m_nColorDepth = GameConfig::GetInstance().GetColorDepth();
-    g_iRenderTextType = GameConfig::GetInstance().GetRenderTextType();
 
     // Apply login settings from INI
     m_RememberMe = GameConfig::GetInstance().GetRememberMe() ? 1 : 0;

@@ -797,17 +797,14 @@ class CUIRenderText
     CUIRenderText();
 
     IUIRenderText* m_pRenderText;
-    int m_iRenderTextType;
 
 public:
     virtual ~CUIRenderText();
 
     static CUIRenderText* GetInstance();
 
-    bool Create(int iRenderTextType, HDC hDC);
+    bool Create(HDC hDC);
     void Release();
-
-    int GetRenderTextType() const;
 
     HDC GetFontDC() const;
     BYTE* GetFontBuffer() const;

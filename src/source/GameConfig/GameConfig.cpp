@@ -46,8 +46,6 @@ void GameConfig::Load()
     m_soundVolume  = ReadInt(CfgSectionAudio, CfgKeySoundVolume, CfgDefaultSoundVolume);
     m_musicVolume  = ReadInt(CfgSectionAudio, CfgKeyMusicVolume, CfgDefaultMusicVolume);
 
-    m_renderTextType = ReadInt(CfgSectionGraphics, CfgKeyRenderTextType, CfgDefaultRenderTextType);
-
     m_rememberMe        = ReadBool(CfgSectionLogin, CfgKeyRememberMe, CfgDefaultRememberMe);
     m_languageSelection = ReadString(CfgSectionLogin, CfgKeyLanguage, CfgDefaultLanguage);
     m_encryptedUsername = ReadString(CfgSectionLogin, CfgKeyEncryptedUsername, CfgDefaultEncryptedUsername);
@@ -57,6 +55,11 @@ void GameConfig::Load()
     m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
+
+    // Strip keys we used to write but no longer use, so user config files
+    // don't accumulate orphans. Append one line per retired key — no central
+    // registry of valid keys to keep in sync.
+    RemoveObsoleteKey(CfgSectionGraphics, L"RenderTextType");
 }
 
 void GameConfig::Save()
@@ -69,7 +72,6 @@ void GameConfig::Save()
     WriteBool(CfgSectionWindow, CfgKeyWindowed, m_windowMode);
 
     WriteInt(CfgSectionGraphics, CfgKeyColorDepth, m_colorDepth);
-    WriteInt(CfgSectionGraphics, CfgKeyRenderTextType, m_renderTextType);
 
     WriteInt(CfgSectionAudio, CfgKeySoundVolume, m_soundVolume);
     WriteInt(CfgSectionAudio, CfgKeyMusicVolume, m_musicVolume);
@@ -109,11 +111,6 @@ void GameConfig::SetSoundVolume(int level)
 void GameConfig::SetMusicVolume(int level)
 {
     m_musicVolume = level;
-}
-
-void GameConfig::SetRenderTextType(int type)
-{
-    m_renderTextType = type;
 }
 
 void GameConfig::SetRememberMe(bool remember)
@@ -256,6 +253,12 @@ std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, 
 void GameConfig::WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value)
 {
     WritePrivateProfileStringW(section, key, value.c_str(), m_configPath.c_str());
+}
+
+void GameConfig::RemoveObsoleteKey(const wchar_t* section, const wchar_t* key)
+{
+    // Passing nullptr as the value deletes the key (Windows INI API).
+    WritePrivateProfileStringW(section, key, nullptr, m_configPath.c_str());
 }
 
 std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)

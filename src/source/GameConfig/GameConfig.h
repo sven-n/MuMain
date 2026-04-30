@@ -32,10 +32,6 @@ public:
     void SetSoundVolume(int level);
     void SetMusicVolume(int level);
 
-    // Text rendering
-    int GetRenderTextType() const { return m_renderTextType; }
-    void SetRenderTextType(int type);
-
     // Login
     bool GetRememberMe() const { return m_rememberMe; }
     void SetRememberMe(bool remember);
@@ -83,8 +79,6 @@ private:
     int  m_soundVolume;
     int  m_musicVolume;
 
-    int m_renderTextType;
-
     bool m_rememberMe;
     std::wstring m_languageSelection;
     std::wstring m_encryptedUsername;
@@ -103,6 +97,8 @@ private:
 
     std::wstring ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue);
     void WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value);
+
+    void RemoveObsoleteKey(const wchar_t* section, const wchar_t* key);
 
     std::wstring DecryptSetting(const std::wstring& hexInput);
     std::wstring EncryptSetting(const wchar_t* input);
