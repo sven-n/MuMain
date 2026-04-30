@@ -2536,8 +2536,8 @@ void CUISocketListBox::DeleteText(int iSocketIndex)
     m_TextList.erase(m_TextListIter);
 }
 
-CUIRenderText::CUIRenderText() : m_pRenderText(nullptr) {}
-CUIRenderText::~CUIRenderText() { Release(); }
+CUIRenderText::CUIRenderText() = default;
+CUIRenderText::~CUIRenderText() = default;
 
 CUIRenderText* CUIRenderText::GetInstance()
 {
@@ -2552,11 +2552,10 @@ bool CUIRenderText::Create(HDC hDC)
         return true;
     }
 
-    m_pRenderText = new CUIRenderTextOriginal;
+    m_pRenderText = std::make_unique<CUIRenderTextOriginal>();
     if (!m_pRenderText->Create(hDC))
     {
-        delete m_pRenderText;
-        m_pRenderText = nullptr;
+        m_pRenderText.reset();
         return false;
     }
     return true;
@@ -2564,11 +2563,7 @@ bool CUIRenderText::Create(HDC hDC)
 
 void CUIRenderText::Release()
 {
-    if (m_pRenderText)
-    {
-        delete m_pRenderText;
-        m_pRenderText = nullptr;
-    }
+    m_pRenderText.reset();
 }
 
 HDC CUIRenderText::GetFontDC() const
