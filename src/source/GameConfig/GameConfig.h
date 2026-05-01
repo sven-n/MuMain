@@ -21,20 +21,12 @@ public:
     void SetWindowSize(int width, int height);
     void SetWindowMode(bool windowed);
 
-    // Graphics
-    int GetColorDepth() const { return m_colorDepth; }
-    void SetColorDepth(int depth);
-
     // Audio — volume 0 = off, >0 = on. No separate Enabled flag.
     int  GetSoundVolume()  const { return m_soundVolume; }
     int  GetMusicVolume()  const { return m_musicVolume; }
 
     void SetSoundVolume(int level);
     void SetMusicVolume(int level);
-
-    // Text rendering
-    int GetRenderTextType() const { return m_renderTextType; }
-    void SetRenderTextType(int type);
 
     // Login
     bool GetRememberMe() const { return m_rememberMe; }
@@ -78,12 +70,8 @@ private:
     int  m_windowHeight;
     bool m_windowMode;
 
-    int m_colorDepth;
-
     int  m_soundVolume;
     int  m_musicVolume;
-
-    int m_renderTextType;
 
     bool m_rememberMe;
     std::wstring m_languageSelection;
@@ -103,6 +91,9 @@ private:
 
     std::wstring ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue);
     void WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value);
+
+    void RemoveObsoleteKey(const wchar_t* section, const wchar_t* key);
+    void RemoveObsoleteSection(const wchar_t* section);
 
     std::wstring DecryptSetting(const std::wstring& hexInput);
     std::wstring EncryptSetting(const wchar_t* input);

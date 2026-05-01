@@ -6,6 +6,7 @@
 #include "WSclient.h"
 #include "QuestMng.h"
 #include "Time/Timer.h"
+#include <memory>
 #include <vector>
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -735,6 +736,8 @@ struct RENDER_TEXT_DATA
 class IUIRenderText
 {
 public:
+    virtual ~IUIRenderText() = default;
+
     virtual bool Create(HDC hDC) = 0;
     virtual void Release() = 0;
 
@@ -796,18 +799,15 @@ class CUIRenderText
 {
     CUIRenderText();
 
-    IUIRenderText* m_pRenderText;
-    int m_iRenderTextType;
+    std::unique_ptr<IUIRenderText> m_pRenderText;
 
 public:
     virtual ~CUIRenderText();
 
     static CUIRenderText* GetInstance();
 
-    bool Create(int iRenderTextType, HDC hDC);
+    bool Create(HDC hDC);
     void Release();
-
-    int GetRenderTextType() const;
 
     HDC GetFontDC() const;
     BYTE* GetFontBuffer() const;
