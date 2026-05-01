@@ -41,6 +41,11 @@ static  DWORD   g_dwWorldStateBack = 0;
 
 CGlobalTextW GlobalText;
 
+void LogMissingGlobalText(int key)
+{
+    g_ErrorReport.Write(L"GlobalText: missing key %d\r\n", key);
+}
+
 void SaveTextFile(wchar_t* FileName)
 {
     FILE* fp = _wfopen(FileName, L"wb");

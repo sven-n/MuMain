@@ -74,11 +74,15 @@ namespace detail
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <map>
 #include <string>
 #include <type_traits>
 #include <vector>
+
+void LogMissingGlobalText(int key);
 
 template <class T>
 class TGlobalText
@@ -129,6 +133,9 @@ class TGlobalText
     };
 
     leaf::TStringSet<T>		m_StringSet;
+    std::map<int, std::basic_string<T>>	m_MissingTextCache;
+
+    static constexpr std::size_t MISSING_TEXT_BUFFER_SIZE = 64;
 
 public:
 
@@ -250,9 +257,18 @@ public:
 
     bool Add(int key, const T* szString) { return m_StringSet.Add(key, szString); }
     bool Remove(int key) { return m_StringSet.Remove(key); }
-    void RemoveAll() { m_StringSet.RemoveAll(); }
+    void RemoveAll()
+    {
+        m_StringSet.RemoveAll();
+        m_MissingTextCache.clear();
+    }
 
-    const T* Get(int key) { return m_StringSet[key]; }
+    const T* Get(int key)
+    {
+        if (const T* found = m_StringSet.Find(key))
+            return found;
+        return GetMissingFallback(key);
+    }
     size_t GetStringSize(int key) { return m_StringSet.FindObj(key).size(); }
 
     std::uint16_t GetNumCountryCode(const std::wstring& strAlpha3Code)
@@ -277,6 +293,31 @@ public:
     }
 
 protected:
+    const T* GetMissingFallback(int key)
+    {
+        auto it = m_MissingTextCache.find(key);
+        if (it != m_MissingTextCache.end())
+            return it->second.c_str();
+
+        LogMissingGlobalText(key);
+
+        std::basic_string<T> fallback;
+        if constexpr (std::is_same_v<T, wchar_t>)
+        {
+            wchar_t buf[MISSING_TEXT_BUFFER_SIZE];
+            std::swprintf(buf, MISSING_TEXT_BUFFER_SIZE, L"No Translation for %d", key);
+            fallback.assign(buf);
+        }
+        else
+        {
+            char buf[MISSING_TEXT_BUFFER_SIZE];
+            std::snprintf(buf, MISSING_TEXT_BUFFER_SIZE, "No Translation for %d", key);
+            fallback.assign(buf);
+        }
+        auto inserted = m_MissingTextCache.emplace(key, std::move(fallback));
+        return inserted.first->second.c_str();
+    }
+
     static void BuxConvert(std::uint8_t* data, std::size_t length)
     {
         static constexpr std::array<std::uint8_t, 3> byBuxCode{ 0xfc,0xcf,0xab };
