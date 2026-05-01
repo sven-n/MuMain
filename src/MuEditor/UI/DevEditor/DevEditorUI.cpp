@@ -199,16 +199,20 @@ void CDevEditorUI::RenderCameraSummaryLine(int cameraMode)
     const char* modeName;
     switch (cameraMode)
     {
-        case CAMERA_MODE_DEFAULT: modeName = "Default"; break;
-        case CAMERA_MODE_ORBITAL: modeName = "Orbital"; break;
-        case CAMERA_MODE_FREEFLY: modeName = "FreeFly"; break;
-        default:                  modeName = "Unknown"; break;
+        case CAMERA_MODE_DEFAULT: modeName = EDITOR_TEXT("dev_label_camera_default"); break;
+        case CAMERA_MODE_ORBITAL: modeName = EDITOR_TEXT("dev_label_camera_orbital"); break;
+        case CAMERA_MODE_FREEFLY: modeName = EDITOR_TEXT("dev_label_freefly");        break;
+        default:                  modeName = EDITOR_TEXT("dev_label_camera_unknown"); break;
     }
-    ImGui::Text("%s | Pos: %.0f, %.0f, %.0f | Tile: (%d, %d) | Pitch: %.1f Yaw: %.1f",
-                modeName, g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
+    ImGui::Text("%s | %s: %.0f, %.0f, %.0f | %s: (%d, %d) | %s: %.1f %s: %.1f",
+                modeName,
+                EDITOR_TEXT("dev_label_pos"),
+                g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
+                EDITOR_TEXT("dev_label_tile"),
                 (int)(g_Camera.Position[0] / WORLD_TO_TILE_DIVISOR),
                 (int)(g_Camera.Position[1] / WORLD_TO_TILE_DIVISOR),
-                g_Camera.Angle[0], g_Camera.Angle[2]);
+                EDITOR_TEXT("dev_label_pitch"), g_Camera.Angle[0],
+                EDITOR_TEXT("dev_label_yaw"),   g_Camera.Angle[2]);
 }
 
 void CDevEditorUI::RenderLoginSceneSection()
@@ -240,8 +244,10 @@ void CDevEditorUI::RenderLoginSceneSection()
         BOOL isTourMode = cameraMove->IsTourMode();
         BOOL isTourPaused = cameraMove->IsTourPaused();
 
-        ImGui::Text("Tour: %s%s", isTourMode ? "ACTIVE" : "INACTIVE",
-                    (isTourMode && isTourPaused) ? " (PAUSED)" : "");
+        ImGui::Text("%s: %s%s",
+                    EDITOR_TEXT("dev_label_tour"),
+                    isTourMode ? EDITOR_TEXT("dev_label_active") : EDITOR_TEXT("dev_label_inactive"),
+                    (isTourMode && isTourPaused) ? EDITOR_TEXT("dev_label_paused_suffix") : "");
 
         if (isTourMode)
         {
@@ -291,9 +297,11 @@ void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera
     if (currentCamera)
     {
         const CameraConfig& cfg = currentCamera->GetConfig();
-        ImGui::Text("Near: %.0f  Far: %.0f  ViewFar: %.0f  ProjFar: %.0f",
-                    cfg.nearPlane, cfg.farPlane, g_Camera.ViewFar,
-                    g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+        ImGui::Text("%s: %.0f  %s: %.0f  %s: %.0f  %s: %.0f",
+                    EDITOR_TEXT("dev_label_near"),    cfg.nearPlane,
+                    EDITOR_TEXT("dev_label_far"),     cfg.farPlane,
+                    EDITOR_TEXT("dev_label_viewfar"), g_Camera.ViewFar,
+                    EDITOR_TEXT("dev_label_projfar"), g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
     }
 
     // Route panel by the currently-focused camera name rather than camera mode,
@@ -317,7 +325,11 @@ void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera
         float radius = GetOrbitalCameraRadius();
         float orbitalYaw = 0.0f, orbitalPitch = 0.0f;
         GetOrbitalCameraAngles(&orbitalYaw, &orbitalPitch);
-        ImGui::Text("Orbital: Zoom=%.0f  Yaw=%.1f  Pitch=%.1f", radius, orbitalYaw, orbitalPitch);
+        ImGui::Text("%s: %s=%.0f  %s=%.1f  %s=%.1f",
+                    EDITOR_TEXT("dev_label_camera_orbital"),
+                    EDITOR_TEXT("dev_label_zoom"),  radius,
+                    EDITOR_TEXT("dev_label_yaw"),   orbitalYaw,
+                    EDITOR_TEXT("dev_label_pitch"), orbitalPitch);
     }
 
     ImGui::Unindent();
@@ -372,9 +384,10 @@ void CDevEditorUI::RenderDefaultCameraOverridePanel()
     if (ImGui::SliderFloat(EDITOR_TEXT("dev_label_fog_start_pct"), &startDisp, 0.0f, 200.0f, "%.0f%%")) ov.fogStartPct = startDisp / 100.0f;
     if (ImGui::SliderFloat(EDITOR_TEXT("dev_label_fog_end_pct"),   &endDisp,   0.0f, 200.0f, "%.0f%%")) ov.fogEndPct   = endDisp   / 100.0f;
     ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                       "Fog: %.0f - %.0f (ViewFar=%.0f)",
+                       "%s: %.0f - %.0f (%s=%.0f)",
+                       EDITOR_TEXT("dev_label_fog"),
                        g_Camera.ViewFar * ov.fogStartPct, g_Camera.ViewFar * ov.fogEndPct,
-                       g_Camera.ViewFar);
+                       EDITOR_TEXT("dev_label_viewfar"), g_Camera.ViewFar);
 
     ImGui::PopItemWidth();
     ImGui::Spacing();
@@ -452,9 +465,10 @@ void CDevEditorUI::RenderOrbitalCameraOverridePanel()
     if (ImGui::InputFloat(EDITOR_TEXT("dev_label_fog_start_pct"), &startDisp, 5.0f, 25.0f, "%.0f%%")) ov.fogStartPct = startDisp / 100.0f;
     if (ImGui::InputFloat(EDITOR_TEXT("dev_label_fog_end_pct"),   &endDisp,   5.0f, 25.0f, "%.0f%%")) ov.fogEndPct   = endDisp   / 100.0f;
     ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
-                       "Fog: %.0f - %.0f (ViewFar=%.0f)",
+                       "%s: %.0f - %.0f (%s=%.0f)",
+                       EDITOR_TEXT("dev_label_fog"),
                        g_Camera.ViewFar * ov.fogStartPct, g_Camera.ViewFar * ov.fogEndPct,
-                       g_Camera.ViewFar);
+                       EDITOR_TEXT("dev_label_viewfar"), g_Camera.ViewFar);
 
     ImGui::PopItemWidth();
     ImGui::Spacing();
@@ -493,8 +507,10 @@ void CDevEditorUI::RenderScenesDebugSection()
     {
         vec3_t target = {0, 0, 0};
         orbitalCam->GetTargetPosition(target);
-        ImGui::Text("Orbital Target: %.0f, %.0f, %.0f  Tile: (%d, %d)",
+        ImGui::Text("%s: %.0f, %.0f, %.0f  %s: (%d, %d)",
+                    EDITOR_TEXT("dev_label_orbital_target"),
                     target[0], target[1], target[2],
+                    EDITOR_TEXT("dev_label_tile"),
                     (int)(target[0] / WORLD_TO_TILE_DIVISOR),
                     (int)(target[1] / WORLD_TO_TILE_DIVISOR));
     }
@@ -570,10 +586,11 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
     extern int OpenglWindowWidth, OpenglWindowHeight;
     extern float g_fScreenRate_x, g_fScreenRate_y;
 
-    ImGui::Text("Current Resolution: %u x %u", WindowWidth, WindowHeight);
-    ImGui::Text("OpenGL Viewport: %d x %d", OpenglWindowWidth, OpenglWindowHeight);
-    ImGui::Text("Screen Rate: %.2f x %.2f", g_fScreenRate_x, g_fScreenRate_y);
-    ImGui::Text("Window Mode: %s", g_bUseWindowMode ? "Windowed" : "Fullscreen");
+    ImGui::Text("%s: %u x %u", EDITOR_TEXT("dev_label_current_resolution"), WindowWidth, WindowHeight);
+    ImGui::Text("%s: %d x %d", EDITOR_TEXT("dev_label_opengl_viewport"), OpenglWindowWidth, OpenglWindowHeight);
+    ImGui::Text("%s: %.2f x %.2f", EDITOR_TEXT("dev_label_screen_rate"), g_fScreenRate_x, g_fScreenRate_y);
+    ImGui::Text("%s: %s", EDITOR_TEXT("dev_label_window_mode"),
+                g_bUseWindowMode ? EDITOR_TEXT("dev_label_windowed") : EDITOR_TEXT("dev_label_fullscreen"));
 
     int clientWidth = 0, clientHeight = 0;
     float calculatedScaleX = 0, calculatedScaleY = 0;
@@ -583,11 +600,11 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
         GetClientRect(g_hWnd, &clientRect);
         clientWidth  = clientRect.right  - clientRect.left;
         clientHeight = clientRect.bottom - clientRect.top;
-        ImGui::Text("Actual Window Client: %d x %d", clientWidth, clientHeight);
+        ImGui::Text("%s: %d x %d", EDITOR_TEXT("dev_label_actual_window_client"), clientWidth, clientHeight);
 
         calculatedScaleX = (float)clientWidth  / (float)REFERENCE_WIDTH;
         calculatedScaleY = (float)clientHeight / (float)REFERENCE_HEIGHT;
-        ImGui::Text("Calculated Scale from Client: %.2f x %.2f", calculatedScaleX, calculatedScaleY);
+        ImGui::Text("%s: %.2f x %.2f", EDITOR_TEXT("dev_label_calculated_scale"), calculatedScaleX, calculatedScaleY);
     }
 
     if (WindowWidth != OpenglWindowWidth || WindowHeight != OpenglWindowHeight)
@@ -622,7 +639,7 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
             (float)WindowWidth / (float)WindowHeight
         );
         ImGui::SetClipboardText(debugInfo);
-        g_MuEditorConsoleUI.LogEditor("Debug info copied to clipboard");
+        g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("dev_log_debug_info_copied"));
     }
     ImGui::SameLine();
     ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", EDITOR_TEXT("dev_label_paste_hint"));
