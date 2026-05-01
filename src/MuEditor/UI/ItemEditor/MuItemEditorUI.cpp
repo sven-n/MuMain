@@ -105,7 +105,7 @@ void CMuItemEditorUI::Render(bool& showEditor)
     );
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
-    if (ImGui::Begin("Item Editor", &showEditor, flags))
+    if (ImGui::Begin(EDITOR_TEXT("label_item_editor_title"), &showEditor, flags))
     {
         // Clamp window position to stay within bounds
         ImVec2 windowPos = ImGui::GetWindowPos();

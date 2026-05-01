@@ -79,11 +79,13 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     fontConfig.PixelSnapH = true;
 
     // Build font atlas with multiple Unicode ranges
+    // CJK ranges are handled by a separate merged font below — primary font
+    // (e.g. Segoe UI) does not contain Han glyphs, so listing CJK here would
+    // just rasterize empty glyphs.
     ImFontGlyphRangesBuilder builder;
     builder.AddRanges(io.Fonts->GetGlyphRangesDefault());        // Basic Latin + Latin Supplement
     builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());       // Cyrillic (Russian, Ukrainian, etc.)
     builder.AddRanges(io.Fonts->GetGlyphRangesGreek());          // Greek
-    builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());       // Includes common Asian characters
 
     // Add additional specific characters if needed
     static const ImWchar additionalRanges[] = {
@@ -94,19 +96,37 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     };
     builder.AddRanges(additionalRanges);
 
-    ImVector<ImWchar> ranges;
+    // ImGui stores the ranges pointer in ImFontConfig and reads it lazily when
+    // the atlas is built (after Initialize returns), so the storage must outlive
+    // this function — keep it static.
+    static ImVector<ImWchar> ranges;
+    ranges.clear();
     builder.BuildRanges(&ranges);
+
+    // CJK ranges supplied by a merged system CJK font. Full covers Traditional
+    // Chinese (zh-TW translations) and is a superset of Japanese kana/kanji.
+    const ImWchar* cjkRanges = io.Fonts->GetGlyphRangesChineseFull();
 
     // Load default font with extended ranges
     // Try platform-specific fonts that support extended Unicode
     bool fontLoaded = false;
+
+    // Config for the merged CJK font: same atlas, glyphs fill into the primary
+    // ImFont so CJK codepoints render alongside Latin without manual font switching.
+    // Skip oversampling for CJK — ChineseFull rasterizes ~21k ideographs and 2x2
+    // oversampling can blow past the GPU's max texture size.
+    ImFontConfig cjkConfig = fontConfig;
+    cjkConfig.MergeMode = true;
+    cjkConfig.OversampleH = 1;
+    cjkConfig.OversampleV = 1;
 
 #ifdef _WIN32
     // Windows: Get fonts directory dynamically
     wchar_t windowsDir[MAX_PATH];
     if (GetWindowsDirectoryW(windowsDir, MAX_PATH) > 0)
     {
-        std::wstring fontPathW = std::wstring(windowsDir) + L"\\Fonts\\segoeui.ttf";
+        std::wstring fontDirW = std::wstring(windowsDir) + L"\\Fonts\\";
+        std::wstring fontPathW = fontDirW + L"segoeui.ttf";
 
         // Convert to UTF-8 using StringUtils helper
         std::string fontPath = StringUtils::WideToNarrow(fontPathW.c_str());
@@ -115,6 +135,27 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
             if (io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, &fontConfig, ranges.Data) != nullptr)
             {
                 fontLoaded = true;
+            }
+        }
+
+        if (fontLoaded)
+        {
+            // Try Traditional Chinese first (matches zh-TW translations), then
+            // Simplified, then older fallbacks. First successful merge wins.
+            const wchar_t* cjkFonts[] = {
+                L"msjh.ttc",   // Microsoft JhengHei (Traditional)
+                L"msyh.ttc",   // Microsoft YaHei (Simplified)
+                L"mingliu.ttc",
+                L"simsun.ttc",
+            };
+            for (const wchar_t* name : cjkFonts)
+            {
+                std::string cjkPath = StringUtils::WideToNarrow((fontDirW + name).c_str());
+                if (!cjkPath.empty() &&
+                    io.Fonts->AddFontFromFileTTF(cjkPath.c_str(), 16.0f, &cjkConfig, cjkRanges) != nullptr)
+                {
+                    break;
+                }
             }
         }
     }
@@ -133,6 +174,20 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
             break;
         }
     }
+    if (fontLoaded)
+    {
+        const char* cjkFonts[] = {
+            "/System/Library/Fonts/PingFang.ttc",
+            "/Library/Fonts/Arial Unicode.ttf",
+        };
+        for (const char* path : cjkFonts)
+        {
+            if (io.Fonts->AddFontFromFileTTF(path, 16.0f, &cjkConfig, cjkRanges) != nullptr)
+            {
+                break;
+            }
+        }
+    }
 #else
     // Linux: Try common fonts with Unicode support
     const char* linuxFonts[] = {
@@ -147,6 +202,22 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
         {
             fontLoaded = true;
             break;
+        }
+    }
+    if (fontLoaded)
+    {
+        const char* cjkFonts[] = {
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+            "/usr/share/fonts/wqy-microhei/wqy-microhei.ttc",
+        };
+        for (const char* path : cjkFonts)
+        {
+            if (io.Fonts->AddFontFromFileTTF(path, 16.0f, &cjkConfig, cjkRanges) != nullptr)
+            {
+                break;
+            }
         }
     }
 #endif
