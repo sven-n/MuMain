@@ -9,6 +9,19 @@
 
 using namespace SEASON3B;
 
+namespace
+{
+    // Engine-only help-text entries registered programmatically via
+    // SEASON3B::RegisterCustomHelpText(). Keys are above MAX_NUMBER_OF_TEXTS
+    // (9999) so they can't collide with shipped GlobalText.bmd entries.
+    constexpr int HELP_KEY_F9_TOGGLE_CAMERA = 10000;
+}
+
+void SEASON3B::RegisterCustomHelpText()
+{
+    GlobalText.Add(HELP_KEY_F9_TOGGLE_CAMERA, L"F9 - Toggle 3D Camera");
+}
+
 SEASON3B::CNewUIHelpWindow::CNewUIHelpWindow()
 {
     m_pNewUIMng = NULL;
@@ -119,7 +132,27 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        for (int i = 0; i < 19; ++i)
+        // Render F1-F4 entries (GlobalText[121..124]) first.
+        for (int i = 0; i < 4; ++i)
+        {
+            wcscpy(TextList[iTextNum], GlobalText[121 + i]);
+            TextListColor[iTextNum] = TEXT_COLOR_WHITE;
+            TextBold[iTextNum] = false;
+            iTextNum++;
+        }
+
+        // Insert engine-added F9 entry between F4 and the rest.
+        // wcsncpy + explicit terminator: HELP_KEY_F9_TOGGLE_CAMERA can be
+        // overridden by .bmd translations of arbitrary length, so guard
+        // the 100-wchar TextList row against overflow.
+        wcsncpy(TextList[iTextNum], GlobalText[HELP_KEY_F9_TOGGLE_CAMERA], 99);
+        TextList[iTextNum][99] = L'\0';
+        TextListColor[iTextNum] = TEXT_COLOR_WHITE;
+        TextBold[iTextNum] = false;
+        iTextNum++;
+
+        // Render the remaining shipped entries (GlobalText[125..139]).
+        for (int i = 4; i < 19; ++i)
         {
             wcscpy(TextList[iTextNum], GlobalText[121 + i]);
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
