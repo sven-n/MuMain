@@ -1,0 +1,49 @@
+{
+  "_comment": "MuEditor UI Translations - Traditional Chinese",
+  "language_name": "繁體中文",
+
+  "btn_save": "保存物品",
+  "btn_save_skills": "保存技能",
+  "btn_export_s6e3": "導出為 S6E3 格式",
+  "btn_export_csv": "導出為 CSV 格式",
+  "btn_export_csv_skills": "導出技能為 CSV 格式",
+  "btn_columns": "欄位設定",
+  "btn_select_all": "全選",
+  "btn_unselect_all": "取消全選",
+  "btn_ok": "確定",
+
+  "msg_save_success": "保存成功!",
+  "msg_save_failed": "保存失敗!",
+  "msg_save_skills_success": "技能保存成功!",
+  "msg_save_skills_failed": "技能保存失敗!",
+  "msg_export_s6e3_success": "導出 S6E3 成功!",
+  "msg_export_s6e3_failed": "導出 S6E3 格式失敗!",
+  "msg_export_csv_success": "導出 CSV 成功!",
+  "msg_export_csv_failed": "導出 CSV 失敗!",
+  "msg_export_csv_skills_success": "技能導出 CSV 成功!",
+  "msg_export_csv_skills_failed": "技能導出 CSV 失敗!",
+
+  "error_file_not_found": "找不到檔案: {0}",
+  "error_invalid_index": "無效索引: {0}",
+  "error_index_in_use": "錯誤: 索引 {0} 已被使用!",
+
+  "label_search_text": "搜尋:",
+  "label_freeze_columns": "固定 索引/名稱",
+  "label_no_columns": "未選擇任何欄位。請點擊 '欄位' 以顯示欄位.",
+  "label_index": "索引",
+
+  "popup_toggle_columns": "切換欄位顯示狀態:",
+  "popup_save_success": "物品保存成功!",
+  "popup_save_failed": "物品保存失敗!",
+  "popup_save_skills_success": "技能保存成功!",
+  "popup_save_skills_failed": "技能保存失敗!",
+  "popup_export_s6e3_success": "導出舊版格式成功!",
+  "popup_export_s6e3_failed": "導出舊版格式失敗!",
+  "popup_export_csv_success": "物品導出 CSV 成功!",
+  "popup_export_csv_failed": "物品屬性導出 CSV 失敗!",
+  "popup_export_csv_skills_success": "技能導出 CSV 成功!",
+  "popup_export_csv_skills_failed": "技能屬性導出 CSV 失敗!",
+
+  "label_skill_editor_title": "技能編輯器",
+  "label_search_skills": "搜尋技能:"
+}
