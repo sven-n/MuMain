@@ -259,6 +259,16 @@ The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.1
 will work as well. By default, it connects to localhost and port `44406`.
 The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 
+## Contributing
+
+### Coding rules
+
+All code changes — by humans and AI assistants — should follow
+[`docs/CODING_RULES.md`](docs/CODING_RULES.md). Read it before opening a PR.
+
+AI coding assistants (Claude Code, Cursor, Codex, etc.) should also read
+[`AGENTS.md`](AGENTS.md), which points at the same rules and at the build guide.
+
 ## Credits
 
   * Webzen

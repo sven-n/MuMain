@@ -40,5 +40,4 @@ build-mingw/
 
 **/*.log
 # Local-only files
-docs/CODING_RULES.md
 docs/reviews/
