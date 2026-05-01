@@ -2,6 +2,10 @@
 
 These rules apply to all code changes in this project. Read before you commit.
 
+The rules are language-agnostic in spirit. Where a rule cites C++ specifics
+(e.g. `.h`/`.cpp` separation, RAII, smart pointers), the equivalent idiom
+applies to the C# tree (e.g. one type per file, `IDisposable` + `using`).
+
 ---
 
 ## 1. Keep Functions Short and Focused — Break Apart Monoliths
