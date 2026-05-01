@@ -60,7 +60,7 @@
   "dev_btn_switch_to_freefly": "切換至自由飛行",
   "dev_btn_switch_to_game_camera": "切換至遊戲相機",
   "dev_label_freefly": "自由飛行",
-  "dev_label_spectating": "正在觀察: %s",
+  "dev_label_spectating": "正在觀察",
   "dev_btn_snap_to_spectated": "對齊至觀察對象",
   "dev_label_freefly_help": "方向鍵/PgUp/PgDn=移動  右鍵=視角  Shift=加速",
   "dev_label_offset_x": "偏移 X",

@@ -60,7 +60,7 @@
   "dev_btn_switch_to_freefly": "Cambiar a FreeFly",
   "dev_btn_switch_to_game_camera": "Cambiar a Cámara de Juego",
   "dev_label_freefly": "FreeFly",
-  "dev_label_spectating": "Observando: %s",
+  "dev_label_spectating": "Observando",
   "dev_btn_snap_to_spectated": "Saltar al Observado",
   "dev_label_freefly_help": "Flechas/PgUp/PgDn=Mover  Botón derecho=Mirar  Shift=Rápido",
   "dev_label_offset_x": "Desplazamiento X",

@@ -60,7 +60,7 @@
   "dev_btn_switch_to_freefly": "Lumipat sa FreeFly",
   "dev_btn_switch_to_game_camera": "Lumipat sa Game Camera",
   "dev_label_freefly": "FreeFly",
-  "dev_label_spectating": "Pinapanood: %s",
+  "dev_label_spectating": "Pinapanood",
   "dev_btn_snap_to_spectated": "Lumipat sa Pinapanood",
   "dev_label_freefly_help": "Arrows/PgUp/PgDn=Galaw  RMB=Tingnan  Shift=Mabilis",
   "dev_label_offset_x": "Offset X",

@@ -60,7 +60,7 @@
   "dev_btn_switch_to_freefly": "Switch to FreeFly",
   "dev_btn_switch_to_game_camera": "Switch to Game Camera",
   "dev_label_freefly": "FreeFly",
-  "dev_label_spectating": "Spectating: %s",
+  "dev_label_spectating": "Spectating",
   "dev_btn_snap_to_spectated": "Snap to Spectated",
   "dev_label_freefly_help": "Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast",
   "dev_label_offset_x": "Offset X",

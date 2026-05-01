@@ -60,7 +60,7 @@
   "dev_btn_switch_to_freefly": "Перемкнути на FreeFly",
   "dev_btn_switch_to_game_camera": "Перемкнути на Ігрову Камеру",
   "dev_label_freefly": "FreeFly",
-  "dev_label_spectating": "Спостереження: %s",
+  "dev_label_spectating": "Спостереження",
   "dev_btn_snap_to_spectated": "Перейти до Спостережуваного",
   "dev_label_freefly_help": "Стрілки/PgUp/PgDn=Рух  ПКМ=Огляд  Shift=Швидко",
   "dev_label_offset_x": "Зміщення X",

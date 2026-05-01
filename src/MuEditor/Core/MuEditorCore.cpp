@@ -96,7 +96,11 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     };
     builder.AddRanges(additionalRanges);
 
-    ImVector<ImWchar> ranges;
+    // ImGui stores the ranges pointer in ImFontConfig and reads it lazily when
+    // the atlas is built (after Initialize returns), so the storage must outlive
+    // this function — keep it static.
+    static ImVector<ImWchar> ranges;
+    ranges.clear();
     builder.BuildRanges(&ranges);
 
     // CJK ranges supplied by a merged system CJK font. Full covers Traditional
@@ -109,8 +113,12 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
 
     // Config for the merged CJK font: same atlas, glyphs fill into the primary
     // ImFont so CJK codepoints render alongside Latin without manual font switching.
+    // Skip oversampling for CJK — ChineseFull rasterizes ~21k ideographs and 2x2
+    // oversampling can blow past the GPU's max texture size.
     ImFontConfig cjkConfig = fontConfig;
     cjkConfig.MergeMode = true;
+    cjkConfig.OversampleH = 1;
+    cjkConfig.OversampleV = 1;
 
 #ifdef _WIN32
     // Windows: Get fonts directory dynamically

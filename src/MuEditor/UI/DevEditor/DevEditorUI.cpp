@@ -179,7 +179,7 @@ void CDevEditorUI::RenderCameraModeControls()
 
     if (ICamera* spectated = camMgr.GetSpectatedCamera())
     {
-        ImGui::Text(EDITOR_TEXT("dev_label_spectating"), spectated->GetName());
+        ImGui::Text("%s: %s", EDITOR_TEXT("dev_label_spectating"), spectated->GetName());
         ImGui::SameLine();
         vec3_t snapPos, snapAngle;
         if (camMgr.GetSpectatedCameraState(snapPos, snapAngle))
@@ -457,7 +457,7 @@ void CDevEditorUI::RenderOrbitalCameraOverridePanel()
     ImGui::Spacing();
     extern bool FogEnable;
     ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", EDITOR_TEXT("dev_label_fog"));
-    ImGui::Checkbox(EDITOR_TEXT("dev_label_fog"), &ov.fogOn);
+    ImGui::Checkbox(EDITOR_TEXT("dev_chk_fog_on"), &ov.fogOn);
     ImGui::SameLine();
     ImGui::TextColored(FogEnable ? ImVec4(0.5f,1.0f,0.5f,1.0f) : ImVec4(1.0f,0.5f,0.5f,1.0f),
                        "%s", FogEnable ? EDITOR_TEXT("dev_label_on") : EDITOR_TEXT("dev_label_off"));
