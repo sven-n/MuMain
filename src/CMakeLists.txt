@@ -149,11 +149,9 @@ endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   # Build as a Windows GUI application (no console window) and let CMake
   # add the default system libraries like kernel32, user32, gdi32, etc.
-  set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
   message(STATUS "=== DEBUG: CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
   message(STATUS "=== DEBUG: CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
   message(STATUS "=== DEBUG: CMAKE_BINARY_DIR = ${CMAKE_BINARY_DIR}")
-  message(STATUS "=== DEBUG: Assets directory: ${ASSETS_DIR}")
   message(STATUS "=== DEBUG: Executable will be at: $<TARGET_FILE:Main>")
   message(STATUS "=== DEBUG: Executable directory: $<TARGET_FILE_DIR:Main>")
   set_target_properties(Main PROPERTIES
@@ -164,18 +162,37 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   target_sources(Main PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/source/resource.rc"
   )
-
-  # Copy assets directory next to executable (portable, IDE-agnostic solution)
-  add_custom_command(
-    TARGET Main
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying assets from ${ASSETS_DIR} to $<TARGET_FILE_DIR:Main>"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${ASSETS_DIR}"
-            "$<TARGET_FILE_DIR:Main>"
-    COMMENT "Copying game assets to executable directory"
-  )
 endif()
+
+# Copy assets directory next to executable. Platform-agnostic: any build
+# that produces the Main executable needs the assets alongside it.
+# The custom command's stamp file depends on every file under
+# ${ASSETS_DIR}, so the copy only runs when at least one asset is newer
+# than the stamp -- unchanged builds skip the copy entirely, edited
+# assets re-trigger it. CONFIGURE_DEPENDS makes CMake re-evaluate the
+# glob at build time so newly-added asset files are picked up without a
+# manual reconfigure.
+set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+message(STATUS "=== DEBUG: Assets directory: ${ASSETS_DIR}")
+file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/*")
+# $<CONFIG> in the stamp name keeps multi-config generators (Visual
+# Studio, Xcode) honest: each configuration's output directory needs
+# its own stamp, otherwise switching from Debug to Release would see
+# the Debug stamp and skip the copy, leaving the Release dir empty.
+set(ASSETS_STAMP "${CMAKE_CURRENT_BINARY_DIR}/.assets_copied_$<CONFIG>.stamp")
+add_custom_command(
+  OUTPUT "${ASSETS_STAMP}"
+  COMMAND ${CMAKE_COMMAND} -E echo "=== Copying assets from ${ASSETS_DIR} to $<TARGET_FILE_DIR:Main>"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          "${ASSETS_DIR}"
+          "$<TARGET_FILE_DIR:Main>"
+  COMMAND ${CMAKE_COMMAND} -E touch "${ASSETS_STAMP}"
+  DEPENDS ${ASSET_FILES}
+  COMMENT "Copying game assets (sources changed)"
+  VERBATIM
+)
+add_custom_target(CopyAssets DEPENDS "${ASSETS_STAMP}")
+add_dependencies(Main CopyAssets)
 
 # Skeleton Linux-native linkage. This intentionally depends only on
 # ubiquitous system libraries so we can focus on getting the project to
