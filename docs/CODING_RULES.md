@@ -2,9 +2,9 @@
 
 These rules apply to all code changes in this project. Read before you commit.
 
-The rules are language-agnostic in spirit. Where a rule cites C++ specifics
-(e.g. `.h`/`.cpp` separation, RAII, smart pointers), the equivalent idiom
-applies to the C# tree (e.g. one type per file, `IDisposable` + `using`).
+The rules apply to both the C++ client and the C# `ClientLibrary`. Where the
+right idiom differs between the two languages, the rule below calls out each
+language explicitly.
 
 ---
 
@@ -44,9 +44,9 @@ applies to the C# tree (e.g. one type per file, `IDisposable` + `using`).
 
 ## 6. One Class Per File
 
-- Each new class or significant struct gets its **own file**, named after the class.
-- Header and implementation separated (`.h` / `.cpp`).
-- Small helper structs tightly coupled to a single class may stay in that class's header.
+- Each new class or significant struct/type gets its **own file**, named after the class.
+- **C++:** header and implementation separated (`.h` / `.cpp`). Small helper structs tightly coupled to a single class may stay in that class's header.
+- **C#:** one public type per `.cs` file. Small helper types (private nested types, tightly coupled `record`s/`enum`s) may stay in the owning class's file.
 
 ## 7. Consistent Style
 
@@ -56,9 +56,10 @@ applies to the C# tree (e.g. one type per file, `IDisposable` + `using`).
 
 ## 8. Guard Against Leaks and Dangling State
 
-- Every allocation has a clear owner and a clear cleanup path.
-- Prefer RAII and smart pointers over manual memory management when possible.
-- Don't leave resources (handles, connections, textures) open on early-exit paths.
+- Every allocation/resource has a clear owner and a clear cleanup path.
+- **C++:** prefer RAII and smart pointers (`std::unique_ptr`, `std::shared_ptr`) over manual `new` / `delete`.
+- **C#:** implement `IDisposable` for types that own unmanaged resources, and consume them with `using` statements/blocks.
+- Don't leave resources (handles, connections, textures, streams) open on early-exit paths.
 
 ## 9. Readable Over Clever
 
