@@ -51,3 +51,16 @@ function(mu_add_test)
 endfunction()
 
 add_subdirectory(text)
+
+# Add Editor Leak Test (only runs when ENABLE_EDITOR is OFF)
+if(NOT ENABLE_EDITOR)
+    # Generate a text file containing all sources of the Main target
+    file(GENERATE 
+         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/main_sources.txt" 
+         CONTENT "$<JOIN:$<TARGET_PROPERTY:Main,SOURCES>,\n>")
+
+    # Add a test that runs a Python script to verify MuEditor isn't in those sources
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME test_editor_leak 
+             COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/editor/test_leak.py "${CMAKE_CURRENT_BINARY_DIR}/main_sources.txt")
+endif()
