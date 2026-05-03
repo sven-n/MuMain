@@ -4,7 +4,6 @@
 /*.dat
 *.sdf
 .tmp/
-.tmp/
 *.bak
 *.sbr
 *.tlog
