@@ -13,7 +13,7 @@ if(NOT ENABLE_EDITOR)
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
          add_test(NAME test_editor_leak
-                   COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/editor/test_leak.py "${CMAKE_CURRENT_BINARY_DIR}/main_sources.txt")
+                   COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/test_leak.py "${CMAKE_CURRENT_BINARY_DIR}/main_sources.txt")
     else()
          message(STATUS "Skipping test_editor_leak: Python3 interpreter not found")
     endif()
