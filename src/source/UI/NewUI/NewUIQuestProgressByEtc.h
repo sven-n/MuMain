@@ -6,7 +6,7 @@
 #include "NewUIBase.h"
 #include "NewUIMyQuestInfoWindow.h"
 #include "NewUIQuestProgress.h"
-#include "QuestMng.h"
+#include "GameLogic/Quests/QuestMng.h"
 
 #define QPE_NPC_LINE_MAX	35
 #define QPE_PLAYER_LINE_MAX	10

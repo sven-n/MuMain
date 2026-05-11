@@ -21,7 +21,7 @@
 
 #include "GameLogic/Events/MatchEvent.h"
 #include "GOBoid.h"
-#include "CSQuest.h"
+#include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
@@ -60,7 +60,7 @@
 #include "DuelMgr.h"
 
 #include "GambleSystem.h"
-#include "QuestMng.h"
+#include "GameLogic/Quests/QuestMng.h"
 #include "Scenes/SceneCommon.h"
 #ifdef PBG_ADD_SECRETBUFF
 #include "FatigueTimeSystem.h"

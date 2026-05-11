@@ -15,7 +15,7 @@
 
 #include "PhysicsManager.h"
 
-#include "CSQuest.h"
+#include "GameLogic/Quests/CSQuest.h"
 #include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIMapName.h"	// rozy
 #include "./Time/Timer.h"
