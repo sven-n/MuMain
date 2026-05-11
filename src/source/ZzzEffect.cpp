@@ -16,8 +16,8 @@
 #include "CDirection.h"
 #include "MapManager.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
-#include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "Character/CharacterManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "ZzzInterface.h"
 
