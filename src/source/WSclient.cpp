@@ -57,7 +57,7 @@
 #include "w_MapHeaders.h"
 
 #include "PortalMgr.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 
 #include "GambleSystem.h"
 #include "GameLogic/Quests/QuestMng.h"

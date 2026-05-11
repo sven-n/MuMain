@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "NewUIDuelWatchUserListWindow.h"
 #include "NewUISystem.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 
 using namespace SEASON3B;
 

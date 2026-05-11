@@ -13,7 +13,7 @@
 #include "Guild/UIGuildInfo.h"
 #include "ZzzAI.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 #include "MapManager.h"
 
 using namespace SEASON3B;

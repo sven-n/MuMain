@@ -112,7 +112,7 @@ namespace
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
 #include "w_MapHeaders.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 #include "MonkSystem.h"
 #include "UI/NewUI/NewUISystem.h"
 

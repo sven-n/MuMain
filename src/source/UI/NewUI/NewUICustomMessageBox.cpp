@@ -12,7 +12,7 @@
 #include "GameLogic/Items/MixMgr.h"
 #include "npcBreeder.h"
 #include "ZzzOpenData.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 #include "InventoryUtils.h"
 #include "NewUISystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"

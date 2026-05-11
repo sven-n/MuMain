@@ -14,7 +14,7 @@
 #include "ZzzCharacter.h"
 
 #include "DSPlaySound.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 
 using namespace SEASON3B;
 
