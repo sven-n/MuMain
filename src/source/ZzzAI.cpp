@@ -27,7 +27,7 @@
 #include "DSPlaySound.h"
 #include "ZzzPath.h"
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 namespace
 {

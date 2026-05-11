@@ -44,10 +44,10 @@
 #include "UI/NewUI/NewUICustomMessageBox.h"
 #include "UI/NewUI/NewUIInventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "SummonSystem.h"
+#include "GameLogic/Skills/SummonSystem.h"
 
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "GameShop/InGameShopSystem.h"

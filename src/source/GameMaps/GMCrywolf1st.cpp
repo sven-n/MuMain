@@ -16,7 +16,7 @@
 #include "MapManager.h"
 #include "Character/CharacterManager.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 extern void MonsterMoveSandSmoke(OBJECT* o);
 extern void MonsterDieSandSmoke(OBJECT* o);

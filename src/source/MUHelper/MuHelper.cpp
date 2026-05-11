@@ -10,7 +10,7 @@
 #include "ZzzInterface.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Utilities/Log/muConsoleDebug.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "PartyManager.h"
 #include "MapManager.h"
 #include "WSclient.h"

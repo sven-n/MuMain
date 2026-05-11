@@ -11,7 +11,7 @@
 #include "LoadData.h"
 #include "Character/CharacterManager.h"
 #include "DSPlaySound.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "MapManager.h"
 #include "WSclient.h"
 #include "ZzzInterface.h"

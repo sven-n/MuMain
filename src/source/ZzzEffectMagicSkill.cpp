@@ -13,7 +13,7 @@
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
 #include "WSclient.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "Random.h"
 
 #include <cmath>

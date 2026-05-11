@@ -5,7 +5,7 @@
 #include "CharacterManager.h"
 #include "CSItemOption.h"
 #include "GlobalText.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "ZzzInfomation.h"
 
 #include <algorithm>

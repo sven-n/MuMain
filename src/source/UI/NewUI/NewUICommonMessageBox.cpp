@@ -21,7 +21,7 @@
 #include "DSPlaySound.h"
 #include "NewUILuckyItemWnd.h"
 #include "NewUISystem.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "ZzzInterface.h"
 
 using namespace SEASON3B;

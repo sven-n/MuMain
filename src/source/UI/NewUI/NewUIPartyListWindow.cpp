@@ -8,7 +8,7 @@
 
 #include "ZzzInventory.h"
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "ZzzInterface.h"
 #include "Camera/CameraProjection.h"
 

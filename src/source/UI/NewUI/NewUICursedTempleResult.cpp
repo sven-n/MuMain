@@ -16,7 +16,7 @@
 #include "CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "UI/Legacy/UIControls.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
 #include "NewUISystem.h"
 

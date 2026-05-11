@@ -10,7 +10,7 @@ using namespace SEASON3B;
 #include "ZzzInventory.h"
 #include "Guild/UIGuildInfo.h"
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 SEASON3B::CNewUISiegeWarBase::CNewUISiegeWarBase()
 {

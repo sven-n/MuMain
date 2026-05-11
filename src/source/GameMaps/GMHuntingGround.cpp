@@ -11,7 +11,7 @@
 #include "DSPlaySound.h"
 #include "MapManager.h"
 #include "BoneManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 DWORD g_MusicStartStamp = 0;
 

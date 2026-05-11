@@ -6,7 +6,7 @@
 #include "CSItemOption.h"
 #include "UI/Legacy/UIJewelHarmony.h"
 #include "SocketSystem.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 using namespace SEASON3A;
 
