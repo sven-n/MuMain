@@ -11,7 +11,7 @@
 #include "Random.h"
 #include "CSPetSystem.h"
 #include "MapManager.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 #include "UI/Legacy/UIManager.h"
 #include "ZzzAI.h"
 #include "ZzzBMD.h"

@@ -42,7 +42,7 @@
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "w_MapHeaders.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 #include "ChangeRingManager.h"
 #include "UI/NewUI/NewUIGensRanking.h"
 #include "MonkSystem.h"

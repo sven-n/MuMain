@@ -8,7 +8,7 @@
 #include "ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "UI/Legacy/UIControls.h"
-#include "DuelMgr.h"
+#include "GameLogic/Combat/DuelMgr.h"
 
 using namespace SEASON3B;
 

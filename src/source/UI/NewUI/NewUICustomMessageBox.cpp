@@ -6,16 +6,16 @@
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 
-#include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "CComGem.h"
+#include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Events/MatchEvent.h"
+#include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Items/MixMgr.h"
+#include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "npcBreeder.h"
 #include "ZzzOpenData.h"
-#include "DuelMgr.h"
 #include "InventoryUtils.h"
 #include "NewUISystem.h"
-#include "GameLogic/Events/w_CursedTemple.h"
 
 extern int DeleteIndex;
 extern int AppointStatus;
