@@ -21,7 +21,7 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "MapManager.h"
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "./Time/CTimCheck.h"
 #include "MonkSystem.h"
 

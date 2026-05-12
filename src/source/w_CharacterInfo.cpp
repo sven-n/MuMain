@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "w_CharacterInfo.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 #include "UI/NewUI/NewUIGensRanking.h"
 

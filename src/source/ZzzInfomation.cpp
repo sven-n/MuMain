@@ -24,7 +24,7 @@
 #include "SocketSystem.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 CLASS_ATTRIBUTE     ClassAttribute[MAX_CLASS];
 MONSTER_SCRIPT      MonsterScript[MAX_MONSTER];

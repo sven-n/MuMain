@@ -12,7 +12,7 @@
 #include "ZzzInterface.h"
 #include "Scenes/SceneCore.h"
 #include "ZzzInventory.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "UI/Legacy/UIJewelHarmony.h"
 #include "UI/Legacy/UIManager.h"
 #include "ServerListManager.h"

@@ -12,7 +12,7 @@
 #include "GOBoid.h"
 #include "UIManager.h"
 #include "CSParts.h"
-#include "SummonSystem.h"
+#include "GameLogic/Skills/SummonSystem.h"
 #include "MapManager.h"
 #include "Character/CharacterManager.h"
 #include "DSPlaySound.h"

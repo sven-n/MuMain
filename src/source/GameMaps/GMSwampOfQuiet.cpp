@@ -17,7 +17,7 @@
 #include "GOBoid.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "MapManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 using namespace SEASON3C;
 

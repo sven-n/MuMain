@@ -18,7 +18,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "MapManager.h"
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
 
 extern  int  WaterTextureNumber;

@@ -8,7 +8,7 @@
 
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 using namespace SEASON3B;
 

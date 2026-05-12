@@ -49,7 +49,7 @@
 
 #include "MapManager.h"
 #include "Character/CharacterManager.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;

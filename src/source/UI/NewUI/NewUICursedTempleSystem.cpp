@@ -23,7 +23,7 @@
 #include "MapManager.h"
 #include "NewUIInventoryCtrl.h"
 #include "NewUISystem.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 extern int TextNum;
 extern wchar_t TextList[50][100];

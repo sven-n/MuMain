@@ -13,7 +13,7 @@
 #include "Character/CharacterManager.h"
 #include "UI/Legacy/UIControls.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 #include "CSItemOption.h"
 
 #include <algorithm>

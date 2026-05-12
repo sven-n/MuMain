@@ -8,7 +8,7 @@
 
 #include "DSPlaySound.h"
 #include "NewUICommonMessageBox.h"
-#include "SkillManager.h"
+#include "GameLogic/Skills/SkillManager.h"
 
 namespace 
 {
