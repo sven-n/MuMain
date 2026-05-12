@@ -7,7 +7,7 @@
 #include "NewUIMessageBox.h"
 #include "NewUIMyInventory.h"
 #include "NewUIMyQuestInfoWindow.h"
-#include "QuestMng.h"
+#include "GameLogic/Quests/QuestMng.h"
 #include "UI/Legacy/UIControls.h"
 
 #define QP_NPC_LINE_MAX		35

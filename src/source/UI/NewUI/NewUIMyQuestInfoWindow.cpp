@@ -4,10 +4,10 @@
 #include "stdafx.h"
 #include "NewUIMyQuestInfoWindow.h"
 
-#include "CSQuest.h"
+#include "GameLogic/Quests/CSQuest.h"
+#include "GameLogic/Quests/QuestMng.h"
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "QuestMng.h"
 
 using namespace SEASON3B;
 

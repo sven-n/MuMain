@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "NewUINPCQuest.h"
 #include "NewUISystem.h"
-#include "CSQuest.h"
+#include "GameLogic/Quests/CSQuest.h"
 
 #include "Character/CharacterManager.h"
 #include "DSPlaySound.h"

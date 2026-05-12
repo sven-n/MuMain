@@ -15,7 +15,7 @@
 #include "SMD.h"
 
 #include "PhysicsManager.h"
-#include "CSQuest.h"
+#include "GameLogic/Quests/CSQuest.h"
 #include "CSItemOption.h"
 #include "MoveCommandData.h"
 #include "UI/Legacy/UIMng.h"
@@ -26,7 +26,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/NewUIHelpWindow.h"
 #include "CameraMove.h"
-#include "QuestMng.h"
+#include "GameLogic/Quests/QuestMng.h"
 #include "ServerListManager.h"
 #include "MonkSystem.h"
 #include "DataHandler/SkillData/SkillDataHandler.h"

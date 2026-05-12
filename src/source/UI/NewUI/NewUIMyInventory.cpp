@@ -18,7 +18,7 @@ extern bool SelectFlag;
 #include "CDirection.h"
 #include "ZzzInventory.h"
 #include "ZzzLodTerrain.h"
-#include "CSQuest.h"
+#include "GameLogic/Quests/CSQuest.h"
 #include "Guild/UIGuildInfo.h"
 #include "UI/Legacy/UIManager.h"
 #include "CSItemOption.h"

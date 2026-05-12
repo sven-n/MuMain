@@ -19,7 +19,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "ChangeRingManager.h"
 #include "PortalMgr.h"
-#include "CSQuest.h"
+#include "GameLogic/Quests/CSQuest.h"
 
 namespace SEASON3B
 {

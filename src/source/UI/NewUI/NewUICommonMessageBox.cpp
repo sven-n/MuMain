@@ -14,7 +14,7 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "CComGem.h"
 #include "GameLogic/Items/MixMgr.h"
-#include "CSQuest.h"
+#include "GameLogic/Quests/CSQuest.h"
 #include "PortalMgr.h"
 #include "GambleSystem.h"
 #include "Character/CharacterManager.h"
