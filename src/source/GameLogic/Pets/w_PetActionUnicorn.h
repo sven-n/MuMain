@@ -4,7 +4,7 @@
 #pragma once
 
 #include "w_PetAction.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "w_PetActionCollecter.h"
 
 SmartPointer(PetActionUnicorn);

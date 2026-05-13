@@ -7,8 +7,8 @@
 #include "Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "Local.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 

@@ -2,14 +2,14 @@
 // GM_Raklion.cpp: implementation of the CGM_Raklion class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzAI.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "ZzzOpenData.h"
-#include "BoneManager.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Models/BoneManager.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"

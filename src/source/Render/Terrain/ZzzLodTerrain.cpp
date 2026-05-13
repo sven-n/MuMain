@@ -7,16 +7,16 @@
 #include <GL/glu.h>
 #include <math.h>
 #include <iterator>
-#include "ZzzOpenglUtil.h"
-#include "ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzLodTerrain.h"
 #include "ZzzPath.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "CMVP1stDirection.h"

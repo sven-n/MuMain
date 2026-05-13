@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Guild/UIGuildInfo.h"
 #include "PersonalShopTitleImp.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzInterface.h"
 
 #include "UI/Legacy/UIManager.h"

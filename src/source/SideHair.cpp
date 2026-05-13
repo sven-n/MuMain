@@ -3,13 +3,13 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
-#include "ShadowVolume.h"
-#include "ZzzLodTerrain.h"
-#include "ZzzTexture.h"
+#include "Render/Models/ShadowVolume.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "SideHair.h"
 #include "ZzzCharacter.h"
 

@@ -11,7 +11,7 @@
 
 #include "NewUI3DRenderMng.h"
 #include <span>
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 
 namespace SEASON3B
 {

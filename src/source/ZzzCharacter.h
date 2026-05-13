@@ -1,7 +1,7 @@
 #ifndef __ZZCHARACTER_H__
 #define __ZZCHARACTER_H__
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 
 extern Script_Skill MonsterSkill[];
 extern CHARACTER* CharactersClient;

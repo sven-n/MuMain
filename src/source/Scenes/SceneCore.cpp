@@ -2,10 +2,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "ZzzInfomation.h"
 #include "ZzzInterface.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "SceneCore.h"
 
 #ifdef _EDITOR

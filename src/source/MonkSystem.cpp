@@ -4,9 +4,9 @@
 #include "stdafx.h"
 
 #include "MonkSystem.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "ZzzAI.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 
 #include "LoadData.h"
 #include "Character/CharacterManager.h"

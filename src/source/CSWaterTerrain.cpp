@@ -10,16 +10,16 @@
 #include <cmath>
 
 #include "Random.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "ZzzInfomation.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "CSWaterTerrain.h"
 #include "MapManager.h"
 

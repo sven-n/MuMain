@@ -4,11 +4,11 @@
 #include "stdafx.h"
 #include <process.h>
 #include "UI/Legacy/UIManager.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzCharacter.h"
 #include "ZzzInventory.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 
 #include "npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"

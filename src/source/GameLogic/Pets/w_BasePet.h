@@ -1,7 +1,7 @@
 #pragma once
 
 #include "w_PetAction.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Time/Timer.h"
 
 SmartPointer(PetObject);

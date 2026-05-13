@@ -7,7 +7,7 @@
 #include "Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "ZzzInfomation.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "DSPlaySound.h"
 #include "ZzzCharacter.h"

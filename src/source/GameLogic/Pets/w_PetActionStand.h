@@ -3,7 +3,7 @@
 #pragma once
 
 #include "w_PetAction.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 
 SmartPointer(PetActionStand);
 

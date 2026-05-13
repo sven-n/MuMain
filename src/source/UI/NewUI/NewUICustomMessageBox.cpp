@@ -2,7 +2,7 @@
 #include "NewUICustomMessageBox.h"
 #include "DSPlaySound.h"
 #include "UI/Legacy/UIControls.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 

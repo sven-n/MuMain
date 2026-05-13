@@ -12,7 +12,7 @@
 #include <memory>
 
 #include "CameraMove.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "ZzzAI.h"
 #include "MapManager.h"
 

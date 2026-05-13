@@ -2,11 +2,11 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzAI.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"
 #include "ZzzOpenData.h"

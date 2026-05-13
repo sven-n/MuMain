@@ -5,8 +5,8 @@
 #include "stdafx.h"
 #include "UIMapName.h"
 #include "MapManager.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
 
 #include "UIWindows.h"
 #ifdef ASG_ADD_GENS_SYSTEM

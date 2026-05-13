@@ -7,16 +7,16 @@
 #include <codecvt>
 #include <sstream>
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
 #include "ZzzInterface.h"
 #include "ReadScript.h"
 #include "ZzzInventory.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
-#include "ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "CSItemOption.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "CComGem.h"

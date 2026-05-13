@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Legacy/UIWindows.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzBMD.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Models/ZzzBMD.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 #include "MatchEvent.h"
 #include "MapManager.h"

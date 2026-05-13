@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "UI/Legacy/UIManager.h"
 #include "ZzzCharacter.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzAI.h"
 #include "npcGateSwitch.h"
 

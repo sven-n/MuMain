@@ -8,9 +8,9 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "ZzzInterface.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "UI/Legacy/UIMng.h"
 #include "MapManager.h"
 #include "Character/CharacterManager.h"

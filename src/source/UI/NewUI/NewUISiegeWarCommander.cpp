@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "NewUISiegeWarCommander.h"
 #include "UI/Legacy/UIControls.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 
 #include "ZzzCharacter.h"
 

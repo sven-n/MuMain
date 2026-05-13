@@ -3,9 +3,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "UI/Legacy/UIManager.h"
 #include "UIGuildInfo.h"
 #include "CSParts.h"

@@ -6,11 +6,11 @@
 
 #include "Random.h"
 #include "UI/Legacy/UIWindows.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
-#include "ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Scenes/SceneCore.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "UI/Legacy/UIManager.h"
 #include "CSChaosCastle.h"
 

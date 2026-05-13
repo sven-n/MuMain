@@ -4,7 +4,7 @@
 #ifndef __CSPARTS_H__
 #define __CSPARTS_H__
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

@@ -6,7 +6,7 @@
 #include "LoginWin.h"
 #include "Input.h"
 #include "UI/Legacy/UIMng.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

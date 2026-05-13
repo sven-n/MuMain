@@ -8,8 +8,8 @@
 
 #include "../Input.h"
 #include "../UI/Legacy/UIMng.h"
-#include "../ZzzOpenglUtil.h"
-#include "../ZzzTexture.h"
+#include "../Render/Textures/ZzzOpenglUtil.h"
+#include "../Render/Textures/ZzzTexture.h"
 #include "SceneCore.h"
 #include "../ZzzInterface.h"
 #include "SceneCommon.h"

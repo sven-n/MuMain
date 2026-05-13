@@ -5,13 +5,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzLodTerrain.h"
-#include "ZzzTexture.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"

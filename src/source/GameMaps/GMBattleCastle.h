@@ -4,7 +4,7 @@
 #ifndef __GMBATTLECASTLE_H__
 #define __GMBATTLECASTLE_H__
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 
 namespace   battleCastle
 {

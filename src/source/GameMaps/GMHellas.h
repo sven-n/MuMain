@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 
 bool    CreateWaterTerrain(int mapIndex);
 bool    IsWaterTerrain(void);

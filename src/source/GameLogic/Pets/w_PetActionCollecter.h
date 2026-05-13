@@ -4,7 +4,7 @@
 #pragma once
 
 #include "w_PetAction.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 
 #define SEARCH_LENGTH 300.0f
 #define CIRCLE_STAND_RADIAN 50.0f

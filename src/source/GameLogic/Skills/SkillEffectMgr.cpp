@@ -4,13 +4,13 @@
 
 #include "stdafx.h"
 #include "SkillEffectMgr.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "CDirection.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzAI.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 
 CSkillEffectMgr g_SkillEffects;
 

@@ -4,7 +4,7 @@
 #ifdef PJH_ADD_PANDA_PET
 
 #include "w_PetAction.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "w_PetActionCollecter.h"
 
 #pragma once

@@ -4,16 +4,16 @@
 
 #include "stdafx.h"
 #include "UI/Legacy/UIManager.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
-#include "ZzzEffect.h"
-#include "ZzzTexture.h"
+#include "Render/Effects/ZzzEffect.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "Guild/GuildCache.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "CSParts.h"
 
 #include <memory>

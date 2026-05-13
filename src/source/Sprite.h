@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "UIBaseDef.h"
 
 #define	SPR_SIZING_DATUMS_LT	0x00

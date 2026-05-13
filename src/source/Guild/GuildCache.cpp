@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "UI/Legacy/UIManager.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "GuildCache.h"
 #include "GuildConstants.h"
 

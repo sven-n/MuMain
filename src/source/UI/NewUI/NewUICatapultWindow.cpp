@@ -7,7 +7,7 @@
 #include "NewUISystem.h"
 #include "ZzzCharacter.h"
 #include "ZzzAI.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "DSPlaySound.h"
 
 

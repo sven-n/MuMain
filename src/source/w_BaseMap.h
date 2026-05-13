@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "MapManager.h"
 
 class BaseMap

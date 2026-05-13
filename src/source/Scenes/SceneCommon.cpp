@@ -37,8 +37,8 @@ bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
 //=============================================================================
 #include "../ZzzInterface.h"
 #include "../ZzzInventory.h"
-#include "../ZzzTexture.h"
-#include "../ZzzOpenglUtil.h"
+#include "../Render/Textures/ZzzTexture.h"
+#include "../Render/Textures/ZzzOpenglUtil.h"
 #include "../ZzzObject.h"
 #include "../ZzzInfomation.h"
 #include "../ZzzOpenData.h"

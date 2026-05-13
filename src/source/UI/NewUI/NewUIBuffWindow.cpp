@@ -4,9 +4,9 @@
 #include "stdafx.h"
 
 #include "NewUIBuffWindow.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzInventory.h"
 #include "UI/Legacy/UIControls.h"
 #include "NewUICommonMessageBox.h"

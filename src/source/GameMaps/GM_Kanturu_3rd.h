@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 
 namespace M39Kanturu3rd {
     bool IsInKanturu3rd();

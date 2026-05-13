@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
