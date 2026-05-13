@@ -19,7 +19,7 @@
 #include "../MapManager.h"
 #include "../UI/Legacy/UIMng.h"
 #include "../Input.h"
-#include "../Network/Server/WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "../Utilities/Log/muConsoleDebug.h"
 #include "../ZzzInterface.h"
 #include "../GlobalText.h"
