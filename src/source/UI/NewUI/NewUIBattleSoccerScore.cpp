@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "NewUIBattleSoccerScore.h"
 #include "UI/Legacy/UIControls.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "ZzzInventory.h"

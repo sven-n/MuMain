@@ -3,7 +3,7 @@
 //*****************************************************************************
 #pragma once
 
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 
 #define QM_MAX_ND_ANSWER	10
 #define QM_MAX_ANSWER		5

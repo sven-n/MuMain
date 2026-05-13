@@ -7,7 +7,7 @@
 
 #include "Input.h"
 #include "UI/Legacy/UIMng.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 
 //=============================================================================
 // Global Variables

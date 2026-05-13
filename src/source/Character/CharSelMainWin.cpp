@@ -14,7 +14,7 @@
 #include "Guild/UIGuildInfo.h"
 #include "ZzzOpenData.h"
 #include "ZzzOpenglUtil.h"
-#include "ServerListManager.h"
+#include "Network/Server/ServerListManager.h"
 
 #include <algorithm>
 #include <utility>

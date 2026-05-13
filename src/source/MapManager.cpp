@@ -18,7 +18,7 @@
 #include "ZzzOpenData.h"
 #include "ZzzTexture.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 
 
 CMapManager gMapManager;

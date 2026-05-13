@@ -9,7 +9,7 @@
 #include "ZzzObject.h"
 
 #include "DSPlaySound.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

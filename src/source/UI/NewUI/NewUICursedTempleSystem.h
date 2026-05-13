@@ -10,7 +10,7 @@
 #include "NewUIBase.h"
 #include "NewUIMessageBox.h"
 #include "NewUIButton.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "UI/Legacy/UIControls.h"
 #include "NewUIMainFrameWindow.h"
 

@@ -4,7 +4,7 @@
 #include "ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "Dotnet/Connection.h"
 #include <mutex>
 

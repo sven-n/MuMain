@@ -11,7 +11,7 @@
 #include <thread>
 
 #include "MultiLanguage.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "ZzzCharacter.h"
 #include "ZzzOpenData.h"
 

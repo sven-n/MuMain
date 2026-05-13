@@ -16,7 +16,7 @@
 #include "ZzzInterface.h"
 
 #include "UIControls.h"
-#include "ServerListManager.h"
+#include "Network/Server/ServerListManager.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"

@@ -21,7 +21,7 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "CComGem.h"
 #include "UI/NewUI/NewUIInventoryCtrl.h"
-#include "SocketSystem.h"
+#include "Network/Server/SocketSystem.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"

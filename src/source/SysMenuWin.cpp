@@ -13,7 +13,7 @@
 #include "DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "Utilities/Log/ErrorReport.h"
 #include "Utilities/Log/muConsoleDebug.h"
 
