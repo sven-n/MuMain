@@ -27,12 +27,12 @@
 #include "UI/NewUI/NewUIHelpWindow.h"
 #include "CameraMove.h"
 #include "GameLogic/Quests/QuestMng.h"
-#include "ServerListManager.h"
+#include "Network/Server/ServerListManager.h"
 #include "MonkSystem.h"
 #include "DataHandler/SkillData/SkillDataHandler.h"
 
 #include "DataHandler/ItemData/ItemDataHandler.h"
-#include "SocketSystem.h"
+#include "Network/Server/SocketSystem.h"
 
 ///////////////////////////////////////////
 extern BOOL g_bUseChatListBox;

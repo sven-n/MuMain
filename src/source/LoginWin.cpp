@@ -18,7 +18,7 @@
 #include "UI/NewUI/NewUISystem.h"
 
 
-#include "ServerListManager.h"
+#include "Network/Server/ServerListManager.h"
 #include <dpapi.h>
 
 #include "GameConfig/GameConfig.h"

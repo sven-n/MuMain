@@ -12,7 +12,7 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Random.h"
 

@@ -8,7 +8,7 @@
 #include "ZzzCharacter.h"
 
 #include "Character/CharacterManager.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 
 #include <algorithm>
 #include <cwchar>

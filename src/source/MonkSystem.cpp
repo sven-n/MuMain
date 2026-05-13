@@ -13,7 +13,7 @@
 #include "DSPlaySound.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "MapManager.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "ZzzInterface.h"
 
 //////////////////////////////////////////////////////////////////////

@@ -10,7 +10,7 @@
 #include <vector>
 #include "ZzzTexture.h"
 
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "turbojpeg.h"
 
 CGlobalBitmap Bitmaps;

@@ -12,7 +12,7 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 
 extern float g_fBoneSave[10][3][4];

@@ -7,7 +7,7 @@
 #include <chrono>
 #include <cstdint>
 
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 
 using MatchClock = std::chrono::steady_clock;
 

@@ -3,7 +3,7 @@
 
 #include "ZzzInfomation.h"
 
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "GameLogic/Quests/QuestMng.h"
 #include "Time/Timer.h"
 #include <memory>

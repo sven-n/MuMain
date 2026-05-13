@@ -13,7 +13,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "PartyManager.h"
 #include "MapManager.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 
 #include "MuHelper.h"
 

@@ -15,7 +15,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/Legacy/UIJewelHarmony.h"
 #include "UI/Legacy/UIManager.h"
-#include "ServerListManager.h"
+#include "Network/Server/ServerListManager.h"
 
 using namespace SEASON3B;
 

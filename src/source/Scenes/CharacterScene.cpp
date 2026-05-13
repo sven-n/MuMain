@@ -18,7 +18,7 @@
 #include "../GameLogic/Pets/w_PetProcess.h"
 #include "../UI/Legacy/UIMng.h"
 #include "../Input.h"
-#include "../WSclient.h"
+#include "../Network/Server/WSclient.h"
 #include "../CSMapServer.h"
 #include "../Utilities/Log/muConsoleDebug.h"
 #include "../ZzzInterface.h"

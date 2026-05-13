@@ -13,7 +13,7 @@
 #include "ZzzAI.h"
 #include "ZzzEffect.h"
 #include "DSPlaySound.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "MapManager.h"
 #include "UI/NewUI/NewUISystem.h"
 

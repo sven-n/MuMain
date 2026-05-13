@@ -23,7 +23,7 @@ extern bool SelectFlag;
 #include "UI/Legacy/UIManager.h"
 #include "CSItemOption.h"
 #include "MapManager.h"
-#include "SocketSystem.h"
+#include "Network/Server/SocketSystem.h"
 #include "PortalMgr.h"
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 #include "GameLogic/Events/Event.h"

@@ -8,7 +8,7 @@
 #include "ZzzInterface.h"
 #include "ChangeRingManager.h"
 #include "KeyGenerater.h"
-#include "ServerListManager.h"
+#include "Network/Server/ServerListManager.h"
 #include "ZzzOpenData.h"
 #include "MapManager.h"
 #include "Character/CharacterManager.h"

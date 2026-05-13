@@ -37,10 +37,10 @@
 #include "UI/NewUI/NewUICustomMessageBox.h"
 #include "UI/NewUI/NewUIInventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "SocketSystem.h"
+#include "Network/Server/SocketSystem.h"
 #include "PortalMgr.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "ServerListManager.h"
+#include "Network/Server/ServerListManager.h"
 #include <algorithm>
 #include <time.h>
 #include <unordered_map>

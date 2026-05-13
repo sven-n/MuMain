@@ -11,7 +11,7 @@
 #include "ZzzEffect.h"
 #include "ZzzCharacter.h"
 #include "ZzzObject.h"
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 #include "DSPlaySound.h"
 
 PetActionCollecterAddPtr PetActionCollecterAdd::Make()

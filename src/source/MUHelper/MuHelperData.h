@@ -4,7 +4,7 @@
 #include <set>
 #include <array>
 #include <string>
-#include "WSclient.h"
+#include "Network/Server/WSclient.h"
 
 namespace MUHelper
 {
