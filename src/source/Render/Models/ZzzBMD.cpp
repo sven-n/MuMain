@@ -3,13 +3,13 @@
 
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "ZzzInfomation.h" 
+#include "Engine/Object/ZzzInfomation.h" 
 #include "ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "SMD.h"
 #include "Render/Effects/ZzzEffect.h"
 

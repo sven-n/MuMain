@@ -8,7 +8,7 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "DSPlaySound.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 using namespace SEASON3B;
 

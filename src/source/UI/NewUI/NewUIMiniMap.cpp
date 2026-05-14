@@ -13,7 +13,7 @@
 #include "NewUIButton.h"
 #include "NewUIMyInventory.h"
 #include "CSItemOption.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 extern BYTE m_OccupationState;
 

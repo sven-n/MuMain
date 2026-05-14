@@ -8,7 +8,7 @@
 #pragma once
 
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
 
 class CItemEqualType

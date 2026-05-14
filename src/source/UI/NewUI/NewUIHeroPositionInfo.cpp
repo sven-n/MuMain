@@ -6,7 +6,7 @@
 
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "MUHelper/MuHelper.h"
 
 using namespace SEASON3B;

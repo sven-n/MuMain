@@ -7,8 +7,8 @@
 #pragma once
 
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzObject.h"
 #include "BaseCls.h"
 
 #define PVS_NORMAL		( 0x00)

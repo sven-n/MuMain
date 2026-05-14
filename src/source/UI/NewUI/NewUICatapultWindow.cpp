@@ -6,7 +6,7 @@
 #include "NewUICatapultWindow.h"
 #include "NewUISystem.h"
 #include "ZzzCharacter.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "DSPlaySound.h"
 

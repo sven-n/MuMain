@@ -6,19 +6,19 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "DSPlaySound.h"
 
 #include "Scenes/SceneCore.h"
 
-#include "./Utilities/Debouncer.h"
+#include "./Core/Utilities/Debouncer.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -38,7 +38,7 @@
 #include "UI/NewUI/NewUIInventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/SocketSystem.h"
-#include "PortalMgr.h"
+#include "World/MapInfra/PortalMgr.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
@@ -47,7 +47,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"

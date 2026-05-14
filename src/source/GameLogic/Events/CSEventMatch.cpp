@@ -7,7 +7,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "CSEventMatch.h"
 
 #include "UI/NewUI/NewUICustomMessageBox.h"

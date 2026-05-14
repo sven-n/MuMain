@@ -9,7 +9,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "DSPlaySound.h"
 #include "CSChaosCastle.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 using namespace SEASON3B;
 

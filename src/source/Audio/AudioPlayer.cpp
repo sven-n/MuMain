@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Audio/AudioPlayer.h"
 
-#include "GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Winmain.h"
 
 #include <SDL3/SDL.h>

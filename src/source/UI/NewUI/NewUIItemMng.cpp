@@ -6,7 +6,7 @@
 #include "NewUIItemMng.h"
 #include "CSItemOption.h"
 #include "GameLogic/Pets/GIPetManager.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "Network/Server/SocketSystem.h"
 
 using namespace SEASON3B;

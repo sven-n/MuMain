@@ -14,7 +14,7 @@
 #include "UI/NewUI/NewUICommonMessageBox.h"
 #include "Local.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern int				g_iChatInputType;

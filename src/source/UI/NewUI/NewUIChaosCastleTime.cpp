@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "NewUIChaosCastleTime.h"
 #include "NewUISystem.h"
 #include "GameLogic/Events/MatchEvent.h"

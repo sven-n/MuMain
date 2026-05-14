@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "UIMapName.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 

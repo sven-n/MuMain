@@ -5,7 +5,7 @@
 #include <process.h>
 #include "UI/Legacy/UIManager.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "ZzzCharacter.h"
 #include "ZzzInventory.h"
 #include "Render/Textures/ZzzTexture.h"

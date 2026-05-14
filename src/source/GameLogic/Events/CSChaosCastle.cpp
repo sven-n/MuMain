@@ -15,7 +15,7 @@
 #include "CSChaosCastle.h"
 
 #include "UI/NewUI/NewUICustomMessageBox.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"

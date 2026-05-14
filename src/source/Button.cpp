@@ -11,10 +11,10 @@
 #include "Input.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "DSPlaySound.h"
 #include "UI/Legacy/UIControls.h"
 

@@ -8,10 +8,10 @@
 #include "UI/Legacy/UIMng.h"
 #include <crtdbg.h>
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "GOBoid.h"
 #include "Scenes/SceneCore.h"
 #include "DSPlaySound.h"
@@ -19,7 +19,7 @@
 #include "UI/Legacy/UIControls.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCommon.h"
-#include "Utilities/Log/ErrorReport.h"
+#include "Core/Utilities/Log/ErrorReport.h"
 
 #define	MW_OK		0
 #define	MW_CANCEL	1

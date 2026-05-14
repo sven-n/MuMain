@@ -7,7 +7,7 @@
 
 #include <dpapi.h>
 #include <clocale>
-#include "GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "UI/Legacy/UIWindows.h"
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -15,23 +15,23 @@
 #include "ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
-#include "ZzzAI.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Engine/AI/ZzzAI.h"
 #include "ZzzCharacter.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "DSPlaySound.h"
 
 #include "Platform/Windows/resource.h"
 #include <imm.h>
-#include "ZzzPath.h"
+#include "Engine/Pathing/ZzzPath.h"
 #include "Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
 #include "UI/Legacy/UIMapName.h"		// rozy
-#include "./Utilities/CpuUsage.h"
+#include "./Core/Utilities/CpuUsage.h"
 
 #include "MUHelper/MuHelper.h"
 #include "Camera/CameraManager.h"
@@ -42,11 +42,11 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include <io.h>
 #include "Input.h"
-#include "./Time/Timer.h"
+#include "./Core/Time/Timer.h"
 #include "UI/Legacy/UIMng.h"
 
 
-#include "w_MapHeaders.h"
+#include "World/MapInfra/w_MapHeaders.h"
 
 #include "GameLogic/Pets/w_PetProcess.h"
 
@@ -55,7 +55,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"

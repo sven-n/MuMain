@@ -3,9 +3,9 @@
 
 // - ����
 
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
 
 inline POINT MakePos(long x, long y)

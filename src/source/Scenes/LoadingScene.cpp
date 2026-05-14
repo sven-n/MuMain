@@ -11,7 +11,7 @@
 #include "../Render/Textures/ZzzOpenglUtil.h"
 #include "../Render/Textures/ZzzTexture.h"
 #include "SceneCore.h"
-#include "../ZzzInterface.h"
+#include "../Engine/Object/ZzzInterface.h"
 #include "SceneCommon.h"
 
 

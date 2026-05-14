@@ -12,7 +12,7 @@
 #include "MsgBoxIGSCommon.h"
 #include "MsgBoxIGSStorageItemInfo.h"
 #include "MsgBoxIGSGiftStorageItemInfo.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "DSPlaySound.h"
 #include "Camera/CameraProjection.h"
 

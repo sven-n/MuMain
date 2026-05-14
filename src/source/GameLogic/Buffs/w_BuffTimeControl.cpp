@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "UI/Legacy/UIManager.h"
 #include "ItemAddOptioninfo.h"
 #include "w_BuffTimeControl.h"

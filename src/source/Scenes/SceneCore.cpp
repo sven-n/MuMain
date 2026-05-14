@@ -3,8 +3,8 @@
 
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "ZzzInfomation.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "SceneCore.h"
 
@@ -18,7 +18,7 @@
 #include "GameLogic/Quests/CSQuest.h"
 #include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIMapName.h"	// rozy
-#include "./Time/Timer.h"
+#include "./Core/Time/Timer.h"
 #include "UI/Legacy/UIMng.h"
 #include "LoadingScene.h"
 #include "CDirection.h"

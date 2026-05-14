@@ -9,9 +9,9 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "ZzzInventory.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "DSPlaySound.h"
 
 

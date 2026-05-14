@@ -10,7 +10,7 @@
 #include "Guild/UIGuildInfo.h"
 #include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIPopup.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
 
 extern bool	View_Bal;

@@ -5,16 +5,16 @@
 
 #include "MonkSystem.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 
 #include "LoadData.h"
 #include "Character/CharacterManager.h"
 #include "DSPlaySound.h"
 #include "GameLogic/Skills/SkillManager.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "Network/Server/WSclient.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

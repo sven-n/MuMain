@@ -4,13 +4,13 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "ZzzOpenData.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "CDirection.h"
 #include "CKANTURUDirection.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <cstdint>
 

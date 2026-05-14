@@ -7,9 +7,9 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "CDirection.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 
 CSkillEffectMgr g_SkillEffects;

@@ -5,7 +5,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "ZzzCharacter.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "npcGateSwitch.h"
 
 #include "DSPlaySound.h"

@@ -7,9 +7,9 @@
 #include <memory>
 #include <string>
 
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
 
 namespace BoneManager {

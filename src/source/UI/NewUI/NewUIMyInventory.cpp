@@ -22,9 +22,9 @@ extern bool SelectFlag;
 #include "Guild/UIGuildInfo.h"
 #include "UI/Legacy/UIManager.h"
 #include "CSItemOption.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "Network/Server/SocketSystem.h"
-#include "PortalMgr.h"
+#include "World/MapInfra/PortalMgr.h"
 #ifdef CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
 #include "GameLogic/Events/Event.h"
 #endif // CSK_FIX_BLUELUCKYBAG_MOVECOMMAND
@@ -32,7 +32,7 @@ extern bool SelectFlag;
 #include "MonkSystem.h"
 #include "Character/CharacterManager.h"
 #include "DSPlaySound.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 
 using namespace SEASON3B;
 

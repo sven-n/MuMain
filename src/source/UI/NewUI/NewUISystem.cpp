@@ -3,7 +3,7 @@
 #include "NewUIMessageBox.h"
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 
 using namespace SEASON3B;

@@ -7,7 +7,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 #define RENDER_CLOTH
 #define ADD_COLLISION

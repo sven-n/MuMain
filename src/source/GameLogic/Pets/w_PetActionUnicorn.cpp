@@ -3,10 +3,10 @@
 
 #include "stdafx.h"
 #include "w_PetActionUnicorn.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "ZzzCharacter.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 
 #include "DSPlaySound.h"
 #include "Network/Server/WSclient.h"

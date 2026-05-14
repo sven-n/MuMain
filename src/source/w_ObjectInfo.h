@@ -3,7 +3,7 @@
 #pragma once
 
 #include <vector>
-#include "./Math/ZzzMathLib.h"
+#include "./Core/Math/ZzzMathLib.h"
 #include "GameLogic/Buffs/w_Buff.h"
 
 class	CInterpolateContainer

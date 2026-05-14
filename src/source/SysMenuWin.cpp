@@ -7,15 +7,15 @@
 
 #include "Input.h"
 #include "UI/Legacy/UIMng.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "Scenes/SceneCore.h"
 
 #include "DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 
 #include "Network/Server/WSclient.h"
-#include "Utilities/Log/ErrorReport.h"
-#include "Utilities/Log/muConsoleDebug.h"
+#include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Utilities/Log/muConsoleDebug.h"
 
 #define	SMW_BTN_GAP		4
 

@@ -3,7 +3,7 @@
 #include "PersonalShopTitleImp.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 
 #include "UI/Legacy/UIManager.h"
 #include "UI/NewUI/NewUISystem.h"

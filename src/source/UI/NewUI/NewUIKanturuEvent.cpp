@@ -6,7 +6,7 @@
 #include "NewUIKanturuEvent.h"
 #include "NewUICommonMessageBox.h"
 #include "NewUISystem.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 
 #include "ChangeRingManager.h"
