@@ -623,10 +623,6 @@ void CPhysicsCloth::GetPosition(int index, vec3_t* pPos)
     m_pVertices[index].GetPosition(pPos);
 }
 
-#ifdef _DEBUG
-#include "ZzzCharacter.h"
-#endif
-
 void CPhysicsCloth::InitForces(void)
 {
     const int iSeed = static_cast<int>(WorldTime / 400.f) * 101 % m_iNumVertices;
