@@ -4,9 +4,9 @@
 
 #include "SkillEditorTable.h"
 #include "SkillEditorColumns.h"
-#include "GameData/SkillData/SkillFieldMetadata.h"
+#include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 #include "_struct.h"
 #include "_define.h"
 #include "imgui.h"

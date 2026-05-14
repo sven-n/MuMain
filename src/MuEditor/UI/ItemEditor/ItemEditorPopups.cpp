@@ -4,7 +4,7 @@
 
 #include "ItemEditorPopups.h"
 #include "imgui.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 
 bool CItemEditorPopups::RenderSimplePopup(const char* popupId, const char* message)
 {

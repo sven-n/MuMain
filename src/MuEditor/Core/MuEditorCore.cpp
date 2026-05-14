@@ -14,8 +14,8 @@
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
-#include "Translation/i18n.h"
-#include "Utilities/StringUtils.h"
+#include "Data/Translation/i18n.h"
+#include "Core/Utilities/StringUtils.h"
 
 // Windows cursor display counter thresholds
 // The cursor is visible when the counter is >= CURSOR_VISIBLE_THRESHOLD
