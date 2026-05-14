@@ -6,7 +6,7 @@
 class BMD;
 
 #include "World/MapInfra/w_BaseMap.h"
-#include "./Core/Time/Timer.h"
+#include "Core/Time/Timer.h"
 
 namespace SEASON4A
 {

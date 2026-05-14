@@ -22,7 +22,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
-#include "./Core/Time/CTimCheck.h"
+#include "Core/Time/CTimCheck.h"
 #include "MonkSystem.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME

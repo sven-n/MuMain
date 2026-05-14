@@ -18,7 +18,7 @@
 #include "GameLogic/Quests/CSQuest.h"
 #include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIMapName.h"	// rozy
-#include "./Core/Time/Timer.h"
+#include "Core/Time/Timer.h"
 #include "UI/Legacy/UIMng.h"
 #include "LoadingScene.h"
 #include "CDirection.h"

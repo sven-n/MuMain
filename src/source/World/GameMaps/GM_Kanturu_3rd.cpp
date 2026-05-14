@@ -12,7 +12,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "CDirection.h"
 #include "Render/Models/BoneManager.h"
-#include "./Core/Time/CTimCheck.h"
+#include "Core/Time/CTimCheck.h"
 #include "DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
 

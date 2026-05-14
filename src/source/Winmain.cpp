@@ -31,7 +31,7 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
 #include "UI/Legacy/UIMapName.h"		// rozy
-#include "./Core/Utilities/CpuUsage.h"
+#include "Core/Utilities/CpuUsage.h"
 
 #include "MUHelper/MuHelper.h"
 #include "Camera/CameraManager.h"
@@ -42,7 +42,7 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include <io.h>
 #include "Input.h"
-#include "./Core/Time/Timer.h"
+#include "Core/Time/Timer.h"
 #include "UI/Legacy/UIMng.h"
 
 

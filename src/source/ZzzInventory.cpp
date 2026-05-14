@@ -18,7 +18,7 @@
 
 #include "Scenes/SceneCore.h"
 
-#include "./Core/Utilities/Debouncer.h"
+#include "Core/Utilities/Debouncer.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"

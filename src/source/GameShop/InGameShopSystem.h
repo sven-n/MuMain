@@ -8,8 +8,8 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#include "./GameShop/ShopListManager/ShopListManager.h"
-#include "./GameShop/ShopListManager/BannerListManager.h"
+#include "GameShop/ShopListManager/ShopListManager.h"
+#include "GameShop/ShopListManager/BannerListManager.h"
 
 #define INGAMESHOP_ERROR_ZERO_SIZE		(-1)
 #define INGAMESHOP_ERROR_INVALID_INDEX	(-2)

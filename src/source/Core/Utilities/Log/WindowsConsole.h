@@ -2,7 +2,7 @@
 #define _WINDOWSCONSOLE_H_
 
 #pragma once
-#include "./Core/Time/Timer.h"
+#include "Core/Time/Timer.h"
 
 #pragma warning(disable : 4786)
 #include <string>
