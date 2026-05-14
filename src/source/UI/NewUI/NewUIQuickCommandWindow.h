@@ -8,7 +8,7 @@
 
 #include "NewUIManager.h"
 #include "NewUIWindowMenu.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
 
 namespace SEASON3B

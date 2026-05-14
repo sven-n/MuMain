@@ -3,9 +3,9 @@
 
 // common
 #include "stdafx.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzOpenData.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "ChangeRingManager.h"
 #include "LoadData.h"

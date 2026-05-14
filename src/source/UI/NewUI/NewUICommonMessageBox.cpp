@@ -7,7 +7,7 @@
 #include "Guild/NewUIGuildInfoWindow.h"
 #include "NewUIMyInventory.h"
 #include "UI/Legacy/UIControls.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "Guild/UIGuildInfo.h"
 #include "UI/Legacy/UIManager.h"

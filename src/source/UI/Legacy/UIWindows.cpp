@@ -3,9 +3,9 @@
 
 #include "stdafx.h"
 #include "UIWindows.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
-#include "ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "ZzzAI.h"

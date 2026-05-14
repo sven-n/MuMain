@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 
 // TODO
 namespace M38Kanturu2nd

@@ -4,7 +4,7 @@
 // - ����
 
 #include "ZzzInfomation.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 

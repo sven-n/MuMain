@@ -1,17 +1,17 @@
 ﻿#include "stdafx.h"
 #include "UI/Legacy/UIWindows.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
-#include "ZzzBMD.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
+#include "Render/Models/ZzzBMD.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "ZzzAI.h"
 #include "ZzzOpenData.h"
 #include "ZzzCharacter.h"
 #include "DSPlaySound.h"
 #include "MapManager.h"
-#include "BoneManager.h"
+#include "Render/Models/BoneManager.h"
 
 DWORD g_MusicStartStamp2 = 0;
 

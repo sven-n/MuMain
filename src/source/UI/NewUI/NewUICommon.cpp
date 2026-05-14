@@ -8,8 +8,8 @@
 #include "NewUIRenderNumber.h"
 #include "NewUISystem.h"
 #include "NewUICommonMessageBox.h"
-#include "ZzzTexture.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"

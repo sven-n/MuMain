@@ -6,7 +6,7 @@
 #include "NewUIWindowMenu.h"
 #include "NewUISystem.h"
 #include "NewUICustomMessageBox.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "UI/Legacy/UIControls.h"
 #include "DSPlaySound.h"
 

@@ -6,7 +6,7 @@
 
 #include "FreeFlyCamera.h"
 #include "CameraManager.h"
-#include "../ZzzOpenglUtil.h"
+#include "../Render/Textures/ZzzOpenglUtil.h"
 
 // External globals
 extern bool MouseRButton;

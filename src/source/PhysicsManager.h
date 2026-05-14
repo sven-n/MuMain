@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "BaseCls.h"

@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "CharInfoBalloon.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
 #include "UI/Legacy/UIControls.h"
 #include "CharacterManager.h"

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "NewUIBase.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "NewUI3DRenderMng.h"
 #include "NewUIButton.h"
 

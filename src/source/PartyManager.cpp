@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "PartyManager.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "ZzzInventory.h"
 

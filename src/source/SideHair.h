@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "ShadowVolume.h"
+#include "Render/Models/ShadowVolume.h"
 
 class CSideHair : CShadowVolume
 {

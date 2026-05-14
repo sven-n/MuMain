@@ -7,7 +7,7 @@
 #include "NewUIButton.h"
 #include "UI/Legacy/UIControls.h"
 #include "GlobalBitmap.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

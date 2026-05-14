@@ -1,15 +1,15 @@
 ﻿#include "stdafx.h"
 #include "UI/Legacy/UIWindows.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
-#include "ZzzBMD.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
+#include "Render/Models/ZzzBMD.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "ZzzAI.h"
 #include "ZzzOpenData.h"
 #include "MapManager.h"
-#include "BoneManager.h"
+#include "Render/Models/BoneManager.h"
 
 bool M34CryingWolf2nd::IsCyringWolf2nd()
 {

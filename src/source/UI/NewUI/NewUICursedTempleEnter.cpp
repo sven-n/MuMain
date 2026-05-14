@@ -8,7 +8,7 @@
 #include "NewUICommonMessageBox.h"
 #include "UIBaseDef.h"
 #include "DSPlaySound.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"

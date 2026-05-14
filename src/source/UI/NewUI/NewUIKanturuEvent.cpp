@@ -7,7 +7,7 @@
 #include "NewUICommonMessageBox.h"
 #include "NewUISystem.h"
 #include "ZzzAI.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 
 #include "ChangeRingManager.h"
 #include "CDirection.h"

@@ -2,7 +2,7 @@
 #include "SocketSystem.h"
 
 #include "ZzzInventory.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "WSclient.h"
 #include "UI/Legacy/UIControls.h"

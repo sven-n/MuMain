@@ -9,11 +9,11 @@
 #include <fcntl.h>
 #include <iostream>
 #include "ZzzInterface.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "WindowsConsole.h"
 
 #include "GlobalBitmap.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
 

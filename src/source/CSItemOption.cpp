@@ -2,10 +2,10 @@
     INCLUDE.
 +++++++++++++++++++++++++++++++++++++*/
 #include "stdafx.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "ZzzInfomation.h"
-#include "ZzzBMD.h"
-#include "ZzzTexture.h"
+#include "Render/Models/ZzzBMD.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
 #include "ZzzInterface.h"

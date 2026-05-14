@@ -8,9 +8,9 @@ using namespace SEASON3B;
 
 #include "NewChaosCastleSystem.h"
 #include "UI/Legacy/UIWindows.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 #include "UI/NewUI/NewUICustomMessageBox.h"
 #include "MapManager.h"

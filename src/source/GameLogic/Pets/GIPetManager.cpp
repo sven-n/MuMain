@@ -22,12 +22,12 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "UI/Legacy/UIManager.h"
-#include "ZzzBMD.h"
-#include "ZzzEffect.h"
+#include "Render/Models/ZzzBMD.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "ZzzOpenglUtil.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
 
 extern  bool    SkillEnable;
 extern	wchar_t TextList[50][100];

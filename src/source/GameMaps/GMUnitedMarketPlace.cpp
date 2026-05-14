@@ -2,16 +2,16 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzAI.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "w_MapHeaders.h"
 #include "DSPlaySound.h"
 #include "ZzzOpenData.h"
-#include "ZzzLodTerrain.h"
-#include "BoneManager.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Models/BoneManager.h"
 #include "PhysicsManager.h"
 
 #include "GOBoid.h"

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "w_PetActionDemon.h"
 #include "ZzzAI.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 
 PetActionDemonPtr PetActionDemon::Make()
 {

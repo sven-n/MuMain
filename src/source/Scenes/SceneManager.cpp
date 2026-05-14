@@ -26,7 +26,7 @@ FrameTimingState g_frameTiming;
 #include "MainScene.h"
 #include "LoadingScene.h"
 #include "../DSPlaySound.h"
-#include "../ZzzOpenglUtil.h"
+#include "../Render/Textures/ZzzOpenglUtil.h"
 #include "../PhysicsManager.h"
 #include "../Time/Timer.h"
 #include "../Input.h"

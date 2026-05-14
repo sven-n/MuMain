@@ -6,14 +6,14 @@
 #include "CharSelMainWin.h"
 #include "Input.h"
 #include "UI/Legacy/UIMng.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "ZzzInterface.h"
 #include "Guild/UIGuildInfo.h"
 #include "ZzzOpenData.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "Network/Server/ServerListManager.h"
 
 #include <algorithm>

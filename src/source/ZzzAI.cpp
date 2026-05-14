@@ -6,11 +6,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "ZzzAI.h"
 
 #include <algorithm>
@@ -19,10 +19,10 @@
 #include <mutex>
 
 #include "Random.h"
-#include "ZzzTexture.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzTexture.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "ZzzInterface.h"
-#include "ZzzEffect.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Scenes/SceneCore.h"
 #include "DSPlaySound.h"
 #include "ZzzPath.h"

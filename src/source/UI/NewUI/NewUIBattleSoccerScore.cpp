@@ -6,10 +6,10 @@
 #include "NewUIBattleSoccerScore.h"
 #include "UI/Legacy/UIControls.h"
 #include "Network/Server/WSclient.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "ZzzInventory.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 
 using namespace SEASON3B;
 

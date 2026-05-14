@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

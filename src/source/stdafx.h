@@ -151,7 +151,7 @@
 inline constexpr int REFERENCE_WIDTH = 640;
 inline constexpr int REFERENCE_HEIGHT = 480;
 
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include "MultiLanguage.h"
 

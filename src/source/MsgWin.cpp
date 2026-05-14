@@ -7,7 +7,7 @@
 #include "Input.h"
 #include "UI/Legacy/UIMng.h"
 #include <crtdbg.h>
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"
@@ -17,7 +17,7 @@
 #include "DSPlaySound.h"
 
 #include "UI/Legacy/UIControls.h"
-#include "ZzzOpenglUtil.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCommon.h"
 #include "Utilities/Log/ErrorReport.h"
 

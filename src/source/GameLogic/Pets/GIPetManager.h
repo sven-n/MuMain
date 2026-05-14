@@ -4,7 +4,7 @@
 #define __CIPET_MANAGER_H__
 
 #include <cstdint>
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzInfomation.h"
 #include "ZzzObject.h"
 #include "ZzzCharacter.h"

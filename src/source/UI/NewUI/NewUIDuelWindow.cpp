@@ -3,9 +3,9 @@
 
 #include "stdafx.h"
 #include "NewUIDuelWindow.h"
-#include "ZzzTexture.h"
+#include "Render/Textures/ZzzTexture.h"
 #include "ZzzInventory.h"
-#include "ZzzBMD.h"
+#include "Render/Models/ZzzBMD.h"
 #include "ZzzCharacter.h"
 #include "UI/Legacy/UIControls.h"
 #include "GameLogic/Combat/DuelMgr.h"
