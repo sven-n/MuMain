@@ -24,7 +24,6 @@
 #include "GameLogic/Events/MatchEvent.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Quests/CSQuest.h"
-#include "Render/Textures/ZzzOpenglUtil.h"
 #include "CSItemOption.h"
 #include "npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"

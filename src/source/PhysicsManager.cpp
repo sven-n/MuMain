@@ -625,7 +625,6 @@ void CPhysicsCloth::GetPosition(int index, vec3_t* pPos)
 
 #ifdef _DEBUG
 #include "ZzzCharacter.h"
-#include "Render/Effects/ZzzEffect.h"
 #endif
 
 void CPhysicsCloth::InitForces(void)
