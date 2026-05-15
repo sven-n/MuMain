@@ -3,7 +3,7 @@
 #include "UIControls.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Network/Server/WSclient.h"
 #include "Dotnet/Connection.h"
 #include <mutex>

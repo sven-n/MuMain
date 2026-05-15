@@ -2,23 +2,23 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "CComGem.h"
+#include "GameLogic/Items/CComGem.h"
 #include "UIControls.h"
 #include "UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzInventory.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 
-#include "ReadScript.h"
-#include "CMVP1stDirection.h"
+#include "Core/Utilities/ReadScript.h"
+#include "GameLogic/Events/Cinematic/CMVP1stDirection.h"
 #include "UIManager.h"
-#include "InventoryUtils.h"
+#include "GameLogic/Items/InventoryUtils.h"
 #include "UI/NewUI/NewUISystem.h"
 #include <vector>
 

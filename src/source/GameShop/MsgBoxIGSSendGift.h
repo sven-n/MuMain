@@ -4,8 +4,8 @@
 #pragma once
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/NewUIMessageBox.h"
-#include "UI/NewUI/NewUICommonMessageBox.h"
+#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 
 using namespace SEASON3B;
 

@@ -10,7 +10,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 
 namespace BoneManager {
     void RegisterBone(CHARACTER* pCharacter, const std::wstring& name, int nBone);

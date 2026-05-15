@@ -9,7 +9,7 @@
 #include "MsgBoxIGSDeleteItemConfirm.h"
 
 
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

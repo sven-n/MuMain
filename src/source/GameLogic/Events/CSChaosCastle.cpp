@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 
-#include "Random.h"
+#include "Core/Utilities/Random.h"
 #include "UI/Legacy/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -14,10 +14,10 @@
 #include "UI/Legacy/UIManager.h"
 #include "CSChaosCastle.h"
 
-#include "UI/NewUI/NewUICustomMessageBox.h"
+#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 
 #include <algorithm>

@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "Win.h"
-#include "Button.h"
+#include "UI/Widgets/Win.h"
+#include "UI/Widgets/Button.h"
 
 #define	CSMW_SPR_DECO			0
 #define	CSMW_SPR_INFO			1

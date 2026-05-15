@@ -8,7 +8,7 @@
 #include "../Render/Textures/ZzzOpenglUtil.h"
 #include "../Render/Textures/ZzzTexture.h"
 #include "../Engine/Object/ZzzInterface.h"
-#include "../ZzzOpenData.h"
+#include "../Engine/Object/ZzzOpenData.h"
 #include "../UI/Legacy/UIMng.h"
 #include "../UI/NewUI/NewUISystem.h"
 

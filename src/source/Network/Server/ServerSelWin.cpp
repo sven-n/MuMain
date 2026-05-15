@@ -4,13 +4,13 @@
 
 #include "stdafx.h"
 #include "ServerSelWin.h"
-#include "Input.h"
+#include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
-#include "Local.h"
+#include "Platform/Windows/Local.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 
 #include "UI/Legacy/UIControls.h"
 

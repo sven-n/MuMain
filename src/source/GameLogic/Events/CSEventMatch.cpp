@@ -10,7 +10,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "CSEventMatch.h"
 
-#include "UI/NewUI/NewUICustomMessageBox.h"
+#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "UI/NewUI/NewUISystem.h"
 
 #include <algorithm>

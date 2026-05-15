@@ -6,7 +6,7 @@
 #include <array>
 #include <cstdint>
 
-#include "Singleton.h"
+#include "Core/Utilities/Singleton.h"
 #include "_enum.h"
 #include "_struct.h"
 

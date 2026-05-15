@@ -4,15 +4,15 @@
 
 #include "stdafx.h"
 #include "CharSelMainWin.h"
-#include "Input.h"
+#include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Guild/UIGuildInfo.h"
-#include "ZzzOpenData.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Network/Server/ServerListManager.h"
 

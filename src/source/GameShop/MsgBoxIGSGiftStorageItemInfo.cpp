@@ -10,7 +10,7 @@
 
 #include "MsgBoxIGSGiftStorageItemInfo.h"
 
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 #include "MsgBoxIGSUseItemConfirm.h"
 

@@ -9,7 +9,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/ZzzAI.h"
 
@@ -18,13 +18,13 @@
 #include <limits>
 #include <mutex>
 
-#include "Random.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Scenes/SceneCore.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"

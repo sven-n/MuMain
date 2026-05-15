@@ -9,10 +9,10 @@
 #include "UI/Legacy/UIManager.h"
 #include "UIGuildInfo.h"
 #include "CSParts.h"
-#include "UI/NewUI/NewUICommonMessageBox.h"
+#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 #include "Character/CharacterManager.h"
-#include "DSPlaySound.h"
-#include "ZzzInventory.h"
+#include "Audio/DSPlaySound.h"
+#include "Engine/Object/ZzzInventory.h"
 
 
 

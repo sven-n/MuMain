@@ -6,7 +6,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/AI/ZzzAI.h"
 #include "GOBoid.h"
@@ -15,7 +15,7 @@
 #include "GameLogic/Skills/SummonSystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
 

@@ -7,7 +7,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "wglext.h"
 #include "Camera/CameraProjection.h"

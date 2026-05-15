@@ -4,7 +4,7 @@
 #include "OrbitalCamera.h"
 #include "CameraManager.h"
 #include "../Render/Textures/ZzzOpenglUtil.h"
-#include "../ZzzCharacter.h"
+#include "../Engine/Object/ZzzCharacter.h"
 #include <cmath>
 
 #include "UI/Legacy/UIControls.h"

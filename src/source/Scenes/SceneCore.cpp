@@ -21,7 +21,7 @@
 #include "Core/Time/Timer.h"
 #include "UI/Legacy/UIMng.h"
 #include "LoadingScene.h"
-#include "CDirection.h"
+#include "GameLogic/Events/Cinematic/CDirection.h"
 
 #include "UI/NewUI/NewUISystem.h"
 #include <chrono>

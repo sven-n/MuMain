@@ -9,10 +9,10 @@
 #include "w_PetActionCollecter_Add.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Network/Server/WSclient.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 PetActionCollecterAddPtr PetActionCollecterAdd::Make()
 {

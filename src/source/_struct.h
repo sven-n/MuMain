@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "w_ObjectInfo.h"
+#include "Engine/Object/w_ObjectInfo.h"
 class OBJECT;
-#include "w_CharacterInfo.h"
+#include "Engine/Object/w_CharacterInfo.h"
 class CHARACTER;
 #include "Guild/GuildConstants.h"
 

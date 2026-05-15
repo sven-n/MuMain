@@ -3,7 +3,7 @@
 //=============================================================================
 
 #pragma once
-#include "NewUIBase.h"
+#include "UI/NewUI/NewUIBase.h"
 #include <vector>
 
 namespace SEASON3B

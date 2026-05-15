@@ -10,8 +10,8 @@
 #include "ShadowVolume.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "BaseCls.h"
-#include "ZzzCharacter.h"
+#include "UI/Widgets/BaseCls.h"
+#include "Engine/Object/ZzzCharacter.h"
 
 CQueue<CShadowVolume*> m_qSV;
 

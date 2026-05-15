@@ -12,7 +12,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "WindowsConsole.h"
 
-#include "GlobalBitmap.h"
+#include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"

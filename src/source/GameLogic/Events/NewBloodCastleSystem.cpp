@@ -5,9 +5,9 @@
 #include "stdafx.h"
 
 #include "NewBloodCastleSystem.h"
-#include "UI/NewUI/NewUICustomMessageBox.h"
+#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
 

@@ -12,9 +12,9 @@ using namespace SEASON3B;
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
-#include "UI/NewUI/NewUICustomMessageBox.h"
+#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "World/MapInfra/MapManager.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 
 extern int g_iChatInputType;

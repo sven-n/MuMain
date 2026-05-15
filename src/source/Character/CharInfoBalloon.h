@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "Sprite.h"
+#include "Render/Sprites/Sprite.h"
 
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 
 class CCharInfoBalloon : public CSprite
 {

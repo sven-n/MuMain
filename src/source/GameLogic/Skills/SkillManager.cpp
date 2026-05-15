@@ -5,7 +5,7 @@
 #include "SkillManager.h"
 #include "Character/CharacterManager.h"
 #include "World/MapInfra/MapManager.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 
 CSkillManager gSkillManager;
 extern bool CheckAttack();

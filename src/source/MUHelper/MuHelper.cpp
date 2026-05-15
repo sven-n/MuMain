@@ -6,12 +6,12 @@
 #include <cmath>
 
 #include "Engine/AI/ZzzAI.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "GameLogic/Skills/SkillManager.h"
-#include "PartyManager.h"
+#include "GameLogic/Social/PartyManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Network/Server/WSclient.h"
 

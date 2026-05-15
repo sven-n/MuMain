@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Legacy/UIManager.h"
-#include "ItemAddOptioninfo.h"
+#include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "w_BuffStateValueControl.h"
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

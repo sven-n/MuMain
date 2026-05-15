@@ -36,18 +36,18 @@ bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
 // Scene Common Utilities
 //=============================================================================
 #include "../Engine/Object/ZzzInterface.h"
-#include "../ZzzInventory.h"
+#include "../Engine/Object/ZzzInventory.h"
 #include "../Render/Textures/ZzzTexture.h"
 #include "../Render/Textures/ZzzOpenglUtil.h"
 #include "../Engine/Object/ZzzObject.h"
 #include "../Engine/Object/ZzzInfomation.h"
-#include "../ZzzOpenData.h"
+#include "../Engine/Object/ZzzOpenData.h"
 #include "../UI/Legacy/UIManager.h"
-#include "../DSPlaySound.h"
-#include "../Local.h"
+#include "../Audio/DSPlaySound.h"
+#include "../Platform/Windows/Local.h"
 #include "../GlobalText.h"
 #include "../GameLogic/Items/PersonalShopTitleImp.h"
-#include "../CComGem.h"
+#include "../GameLogic/Items/CComGem.h"
 #include "../UI/Legacy/UIMng.h"
 
 // External variable declarations (defined in ZzzScene.cpp or other files)

@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "NewUISystem.h"
-#include "NewUIMessageBox.h"
+#include "UI/NewUI/NewUISystem.h"
+#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "World/MapInfra/MapManager.h"

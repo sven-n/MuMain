@@ -6,7 +6,7 @@
 #include "Engine/Object/ZzzInfomation.h" 
 #include "ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
@@ -14,7 +14,7 @@
 #include "Render/Effects/ZzzEffect.h"
 
 #include "UI/Legacy/UIMng.h"
-#include "CameraMove.h"
+#include "Camera/CameraMove.h"
 #include "PhysicsManager.h"
 #include "UI/NewUI/NewUISystem.h"
 

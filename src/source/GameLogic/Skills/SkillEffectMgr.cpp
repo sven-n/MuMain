@@ -5,10 +5,10 @@
 #include "stdafx.h"
 #include "SkillEffectMgr.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "CDirection.h"
+#include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 

@@ -4,7 +4,7 @@ extern bool g_bShowPath;
 #endif // CSK_DEBUG_MAP_PATHFINDING
 
 #include <math.h>
-#include "BaseCls.h"
+#include "UI/Widgets/BaseCls.h"
 
 
 class PATH

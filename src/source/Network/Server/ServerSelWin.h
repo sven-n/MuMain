@@ -3,10 +3,10 @@
 //*****************************************************************************
 #pragma once
 
-#include "Win.h"
-#include "Button.h"
-#include "GaugeBar.h"
-#include "WinEx.h"
+#include "UI/Widgets/Win.h"
+#include "UI/Widgets/Button.h"
+#include "UI/Widgets/GaugeBar.h"
+#include "UI/Widgets/WinEx.h"
 
 #define SSW_SERVER_G_MAX	21
 #define SSW_SERVER_MAX		16

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "WinEx.h"
+#include "UI/Widgets/WinEx.h"
 
 #define SMW_MSG_LINE_MAX	5
 #define SMW_MSG_ROW_MAX		83

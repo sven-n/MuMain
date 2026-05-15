@@ -4,19 +4,19 @@
 
 #include "stdafx.h"
 #include "CharMakeWin.h"
-#include "Input.h"
+#include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Scenes/SceneCore.h"
 #include "UI/Legacy/UIControls.h"
 
-#include "Local.h"
+#include "Platform/Windows/Local.h"
 #include "CharacterManager.h"
 
 #include <algorithm>

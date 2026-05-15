@@ -2,7 +2,7 @@
 //	NewUIGroup.cpp
 //=============================================================================
 #include "stdafx.h"
-#include "NewUIGroup.h"
+#include "UI/NewUI/NewUIGroup.h"
 
 using namespace SEASON3B;
 

@@ -3,9 +3,9 @@
 #include <array>
 #include <vector>
 
-#include "NewUIBase.h"
-#include "NewUIManager.h"
-#include "NewUIButton.h"
+#include "UI/NewUI/NewUIBase.h"
+#include "UI/NewUI/NewUIManager.h"
+#include "UI/NewUI/Widgets/NewUIButton.h"
 #include "MUHelper/MuHelper.h"
 
 namespace SEASON3B

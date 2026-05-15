@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "CameraUtility.h"
 #include "CameraManager.h"
-#include "CameraMove.h"
+#include "Camera/CameraMove.h"
 #include "../Render/Terrain/ZzzLodTerrain.h"
 
 // External variable declarations

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-#include "iexplorer.h"
+#include "Platform/Windows/iexplorer.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "NewUIInGameShop.h"
 #include "MsgBoxIGSBuyPackageItem.h"
@@ -13,7 +13,7 @@
 #include "MsgBoxIGSStorageItemInfo.h"
 #include "MsgBoxIGSGiftStorageItemInfo.h"
 #include "World/MapInfra/MapManager.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "Camera/CameraProjection.h"
 
 using namespace SEASON3B;

@@ -8,12 +8,12 @@
 #pragma once
 
 #include "UI/NewUI/NewUIBase.h"
-#include "UI/NewUI/NewUIInventoryCtrl.h"
-#include "UI/NewUI/NewUIMessageBox.h"
-#include "UI/NewUI/NewUIMyInventory.h"
-#include "UI/NewUI/NewUIChatLogWindow.h"
+#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/NewUI/Inventory/NewUIMyInventory.h"
+#include "UI/NewUI/HUD/NewUIChatLogWindow.h"
 #include "NewUIGuildMakeWindow.h"
-#include "UI/NewUI/NewUIButton.h"
+#include "UI/NewUI/Widgets/NewUIButton.h"
 #include "GuildConstants.h"
 
 namespace SEASON3B

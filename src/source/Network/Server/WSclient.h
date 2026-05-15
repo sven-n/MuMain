@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Dotnet/Connection.h"
-#include "CSMapServer.h"
+#include "Network/Server/CSMapServer.h"
 #include <span>
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)

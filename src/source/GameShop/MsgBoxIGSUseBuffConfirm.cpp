@@ -5,7 +5,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSUseBuffConfirm.h"
 
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 CMsgBoxIGSUseBuffConfirm::CMsgBoxIGSUseBuffConfirm()
 {

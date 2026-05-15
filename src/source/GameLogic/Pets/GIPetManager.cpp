@@ -12,12 +12,12 @@
 #include <cwctype>
 #include <string>
 
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Character/CharacterManager.h"
 #include "CSPetSystem.h"
-#include "DSPlaySound.h"
-#include "Input.h"
+#include "Audio/DSPlaySound.h"
+#include "Core/Input/Input.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -25,7 +25,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "ZzzInventory.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 

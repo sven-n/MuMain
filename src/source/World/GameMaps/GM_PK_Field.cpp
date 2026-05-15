@@ -11,13 +11,13 @@
 #include "stdafx.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "ZzzOpenData.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/w_MapHeaders.h"
-#include "DSPlaySound.h"
-#include "Random.h"
+#include "Audio/DSPlaySound.h"
+#include "Core/Utilities/Random.h"
 
 namespace
 {

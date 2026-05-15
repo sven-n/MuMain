@@ -8,7 +8,7 @@
 #include <locale>
 #include <shlwapi.h>
 
-#include "GlobalBitmap.h"
+#include "Render/Sprites/GlobalBitmap.h"
 
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"

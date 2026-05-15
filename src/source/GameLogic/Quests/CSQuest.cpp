@@ -19,14 +19,14 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "ZzzInventory.h"
+#include "Engine/Object/ZzzInventory.h"
 
 #include "CSQuest.h"
-#include "UsefulDef.h"
-#include "UI/NewUI/NewUIInventoryCtrl.h"
+#include "Core/Utilities/UsefulDef.h"
+#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
 #include "Character/CharacterManager.h"
 #include "UI/NewUI/NewUISystem.h"
 

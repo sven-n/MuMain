@@ -6,7 +6,7 @@
 
 #include "LoadingScene.h"
 
-#include "../Input.h"
+#include "../Core/Input/Input.h"
 #include "../UI/Legacy/UIMng.h"
 #include "../Render/Textures/ZzzOpenglUtil.h"
 #include "../Render/Textures/ZzzTexture.h"
