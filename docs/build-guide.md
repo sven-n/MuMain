@@ -243,7 +243,7 @@ ctest --test-dir build-mingw --output-on-failure
    ```
    `mu_add_test` links against `mu_test_main` (which provides doctest's `main()`), wires the `tests/third_party/doctest` and `src/source` include paths, and registers the test with CTest (wrapping it in `wine` on non-Windows hosts).
 3. Add `add_subdirectory(<module>)` to `tests/CMakeLists.txt`.
-4. Pass the source files of the unit under test directly via `SOURCES`. This keeps the test binary independent of `Main` — a unit must be linkable without the rest of the game (no `stdafx.h`, no scene globals). If a function isn't isolated, extract it to its own `.cpp` first (see `src/source/Text/TextLineWrap.cpp` for the pattern).
+4. Pass the source files of the unit under test directly via `SOURCES`. This keeps the test binary independent of `Main` — a unit must be linkable without the rest of the game (no `stdafx.h`, no scene globals). If a function isn't isolated, extract it to its own `.cpp` first (see `src/source/Core/Text/TextLineWrap.cpp` for the pattern).
 
 ---
 

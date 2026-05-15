@@ -170,7 +170,7 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
     return FALSE;
 }
 
-// SeparateTextIntoLines lives in src/source/Text/TextLineWrap.cpp so it can be
+// SeparateTextIntoLines lives in src/source/Core/Text/TextLineWrap.cpp so it can be
 // unit-tested without dragging in the full scene/UI translation unit.
 
 ///////////////////////////////////////////////////////////////////////////////
