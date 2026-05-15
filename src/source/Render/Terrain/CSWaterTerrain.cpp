@@ -20,7 +20,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "Render/Sprites/CSWaterTerrain.h"
+#include "CSWaterTerrain.h"
 #include "World/MapInfra/MapManager.h"
 
 extern  double   WorldTime;

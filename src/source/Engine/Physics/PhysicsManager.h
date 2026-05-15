@@ -9,7 +9,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
-#include "UI/Widgets/BaseCls.h"
+#include "Core/Utilities/BaseCls.h"
 
 #define PVS_NORMAL		( 0x00)
 #define PVS_FIXEDPOS	( 0x01)

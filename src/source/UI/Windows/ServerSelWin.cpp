@@ -15,7 +15,7 @@
 #include "UI/Legacy/UIControls.h"
 
 #include "UI/NewUI/NewUISystem.h"
-#include "ServerListManager.h"
+#include "Network/Server/ServerListManager.h"
 
 #define	SSW_GAP_WIDTH	28
 #define	SSW_GAP_HEIGHT	5

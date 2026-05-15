@@ -10,7 +10,7 @@
 #include "Render/Models/ShadowVolume.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Windows/SideHair.h"
+#include "SideHair.h"
 #include "Engine/Object/ZzzCharacter.h"
 
 //////////////////////////////////////////////////////////////////////

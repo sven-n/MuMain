@@ -18,7 +18,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Camera/ICamera.h"
 
-#include "UI/Windows/SideHair.h"
+#include "Render/Models/SideHair.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Engine/AI/GOBoid.h"
 #include "Character/CSParts.h"

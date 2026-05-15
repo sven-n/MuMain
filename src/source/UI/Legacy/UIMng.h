@@ -8,13 +8,13 @@
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/OptionWin.h"
 #include "UI/Windows/LoginMainWin.h"
-#include "Network/Server/ServerSelWin.h"
+#include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "Character/CharSelMainWin.h"
 #include "Character/CharMakeWin.h"
 #include "Character/CharInfoBalloonMng.h"
-#include "Network/Server/ServerMsgWin.h"
+#include "UI/Windows/ServerMsgWin.h"
 
 #define	UIM_SCENE_NONE			0
 #define	UIM_SCENE_TITLE			1

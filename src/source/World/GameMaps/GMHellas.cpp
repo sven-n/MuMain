@@ -13,7 +13,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Physics/PhysicsManager.h"
-#include "Render/Sprites/CSWaterTerrain.h"
+#include "Render/Terrain/CSWaterTerrain.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "World/MapInfra/MapManager.h"
