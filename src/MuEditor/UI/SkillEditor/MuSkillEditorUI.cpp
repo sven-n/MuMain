@@ -6,10 +6,10 @@
 #include "SkillEditorTable.h"
 #include "SkillEditorActions.h"
 #include "SkillEditorPopups.h"
-#include "GameData/SkillData/SkillFieldMetadata.h"
+#include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 #include "imgui.h"
 #include <algorithm>
 #include <cctype>

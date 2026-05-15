@@ -9,7 +9,7 @@
 #include "Local.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
 
 #include "UI/Legacy/UIControls.h"

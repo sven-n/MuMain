@@ -15,13 +15,13 @@
 
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
 
 #include "CSQuest.h"

@@ -3,13 +3,13 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "ZzzCharacter.h"
 #include "CDirection.h"
 
 #include "DSPlaySound.h"
 
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "UI/NewUI/NewUIInventoryCtrl.h"
 #include "UI/NewUI/NewUISystem.h"
 

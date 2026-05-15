@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "GameData/SkillData/SkillFieldMetadata.h"
+#include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "_struct.h"
 #include <string>
 

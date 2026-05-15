@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "DuelMgr.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "ZzzCharacter.h"
 
 #include "Character/CharacterManager.h"

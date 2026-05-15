@@ -11,17 +11,17 @@
 
 #include "Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "ZzzCharacter.h"
 #include "Scenes/SceneCore.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "CSWaterTerrain.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 extern  double   WorldTime;
 extern  float   TerrainMappingAlpha[TERRAIN_SIZE * TERRAIN_SIZE];

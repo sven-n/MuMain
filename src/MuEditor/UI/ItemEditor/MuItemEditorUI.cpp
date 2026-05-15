@@ -6,10 +6,10 @@
 #include "ItemEditorTable.h"
 #include "ItemEditorActions.h"
 #include "ItemEditorPopups.h"
-#include "GameData/ItemData/ItemFieldMetadata.h"
+#include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 #include "imgui.h"
 #include <algorithm>
 #include <cctype>

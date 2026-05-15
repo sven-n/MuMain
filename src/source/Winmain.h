@@ -101,7 +101,7 @@ extern void UpdateCursorClip();
 extern DWORD GetDesktopBitsPerPel();
 
 //#if defined _DEBUG || defined PBG_LOG_PACKET_WINSOCKERROR
-//	#include "./Utilities/Log/DebugAngel.h"
+//	#include "Core/Utilities/Log/DebugAngel.h"
 //#define ExecutionLog	DebugAngel_Write
 //#else
 //#define ExecutionLog	{}

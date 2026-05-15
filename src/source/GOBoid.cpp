@@ -4,20 +4,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "GOBoid.h"
 #include "ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "ZzzOpenData.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "CDirection.h"
 #include "DSPlaySound.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "CameraMove.h"
 #include "UI/NewUI/NewUISystem.h"
 

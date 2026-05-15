@@ -3,7 +3,7 @@
 #ifdef _EDITOR
 
 #include <windows.h>
-#include "GameData/ItemData/ItemFieldMetadata.h"
+#include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "_struct.h"
 
 // Forward declaration

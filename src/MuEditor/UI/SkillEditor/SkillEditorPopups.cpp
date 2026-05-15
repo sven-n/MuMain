@@ -4,7 +4,7 @@
 
 #include "SkillEditorPopups.h"
 #include "imgui.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 
 bool CSkillEditorPopups::RenderSimplePopup(const char* popupId, const char* message)
 {

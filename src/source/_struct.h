@@ -143,7 +143,7 @@ typedef struct
 } DIALOG_SCRIPT;//Script_Dialog
 
 // Item attribute structures moved to GameData/ItemData/ItemStructs.h
-#include "GameData/ItemData/ItemStructs.h"
+#include "Data/GameData/ItemData/ItemStructs.h"
 
 typedef struct _MASTER_LEVEL_DATA
 {
@@ -271,7 +271,7 @@ typedef struct
 
 // SKILL_ATTRIBUTE_FILE and SKILL_ATTRIBUTE definitions moved to GameData/SkillData/SkillStructs.h
 // This is now the single source of truth for ALL builds (editor and release)
-#include "GameData/SkillData/SkillStructs.h"
+#include "Data/GameData/SkillData/SkillStructs.h"
 /*
 typedef struct
 {

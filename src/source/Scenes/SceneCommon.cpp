@@ -35,12 +35,12 @@ bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
 //=============================================================================
 // Scene Common Utilities
 //=============================================================================
-#include "../ZzzInterface.h"
+#include "../Engine/Object/ZzzInterface.h"
 #include "../ZzzInventory.h"
 #include "../Render/Textures/ZzzTexture.h"
 #include "../Render/Textures/ZzzOpenglUtil.h"
-#include "../ZzzObject.h"
-#include "../ZzzInfomation.h"
+#include "../Engine/Object/ZzzObject.h"
+#include "../Engine/Object/ZzzInfomation.h"
 #include "../ZzzOpenData.h"
 #include "../UI/Legacy/UIManager.h"
 #include "../DSPlaySound.h"
@@ -170,7 +170,7 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
     return FALSE;
 }
 
-// SeparateTextIntoLines lives in src/source/Text/TextLineWrap.cpp so it can be
+// SeparateTextIntoLines lives in src/source/Core/Text/TextLineWrap.cpp so it can be
 // unit-tested without dragging in the full scene/UI translation unit.
 
 ///////////////////////////////////////////////////////////////////////////////

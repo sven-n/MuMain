@@ -7,12 +7,12 @@
 #include "DSPlaySound.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 
 #include "Render/Effects/ZzzEffect.h"
 #include "UI/Legacy/UIMng.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "GameShop/InGameShopSystem.h"

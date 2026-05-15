@@ -4,7 +4,7 @@
 
 #include "DevEditorUI.h"
 #include "imgui.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
@@ -12,7 +12,7 @@
 #include "Camera/FreeFlyCamera.h"
 #include "CameraMove.h"
 #include "ZzzCharacter.h"
-#include "GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "UI/Console/MuEditorConsoleUI.h"
 
 // External C functions

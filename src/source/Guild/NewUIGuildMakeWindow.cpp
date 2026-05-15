@@ -7,7 +7,7 @@
 #include "UI/NewUI/NewUICommonMessageBox.h"
 #include "DSPlaySound.h"
 
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "Local.h"
 #include "UI/NewUI/NewUISystem.h"

@@ -11,7 +11,7 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "CSItemOption.h"
 #include "Network/Server/SocketSystem.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "GameLogic/Items/MixMgr.h"
 using namespace SEASON3B;
 

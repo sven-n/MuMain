@@ -7,7 +7,7 @@
 #include "imgui.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 
 // UI Layout constants

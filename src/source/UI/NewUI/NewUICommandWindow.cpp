@@ -8,13 +8,13 @@
 
 #include "DSPlaySound.h"
 #include "NewUISystem.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "Guild/UIGuildInfo.h"
-#include "ZzzAI.h"
-#include "MapManager.h"
+#include "Engine/AI/ZzzAI.h"
+#include "World/MapInfra/MapManager.h"
 
 using namespace SEASON3B;
 

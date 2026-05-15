@@ -143,7 +143,7 @@
 #include "_TextureIndex.h"
 #include "UI/Legacy/UIDefaultBase.h"
 #include "UI/NewUI/NewUICommon.h"
-#include "./Math/ZzzMathLib.h"
+#include "Core/Math/ZzzMathLib.h"
 
 // Reference resolution -- all UI coordinates and screen-space math use this as the base.
 // Must be declared BEFORE ZzzOpenglUtil.h because BeginOpengl() uses them as default args.
@@ -156,16 +156,16 @@ inline constexpr int REFERENCE_HEIGHT = 480;
 #include "MultiLanguage.h"
 
 
-#include "./Utilities/Log/muConsoleDebug.h"
-#include "./Utilities/Log/ErrorReport.h"
-#include "./Utilities/Log/WindowsConsole.h"
+#include "Core/Utilities/Log/muConsoleDebug.h"
+#include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Utilities/Log/WindowsConsole.h"
 
 // Redirect console output to ImGui when editor is enabled
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleRedirectUI.h"
 #endif
 
-#include "w_MapHeaders.h"
+#include "World/MapInfra/w_MapHeaders.h"
 
 #include "_crypt.h"
 

@@ -9,7 +9,7 @@
 #include "DSPlaySound.h"
 #include "ZzzCharacter.h"
 #include "UI/Legacy/UIControls.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "Scenes/SceneCore.h"
 #include "ZzzInventory.h"
 #include "GameLogic/Skills/SkillManager.h"

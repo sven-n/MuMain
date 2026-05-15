@@ -7,7 +7,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -18,7 +18,7 @@
 #include "UI/Legacy/UIControls.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/NewUIInventoryCtrl.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 
 

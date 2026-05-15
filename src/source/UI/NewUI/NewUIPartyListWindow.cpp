@@ -9,7 +9,7 @@
 #include "ZzzInventory.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "Camera/CameraProjection.h"
 
 using namespace SEASON3B;

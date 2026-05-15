@@ -3,7 +3,7 @@
 #include "DSPlaySound.h"
 #include "UI/Legacy/UIControls.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
 
 #include "CComGem.h"

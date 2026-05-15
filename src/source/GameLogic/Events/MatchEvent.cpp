@@ -6,7 +6,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 #include "MatchEvent.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "w_CursedTemple.h"
 
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];

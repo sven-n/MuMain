@@ -13,7 +13,7 @@ using namespace SEASON3B;
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 #include "UI/NewUI/NewUICustomMessageBox.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 

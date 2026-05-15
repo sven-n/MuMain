@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "UIManager.h"
 #include "UIPopup.h"
 #include "UI/NewUI/NewUISystem.h"

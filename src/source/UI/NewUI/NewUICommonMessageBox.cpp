@@ -15,14 +15,14 @@
 #include "CComGem.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "GameLogic/Quests/CSQuest.h"
-#include "PortalMgr.h"
+#include "World/MapInfra/PortalMgr.h"
 #include "GambleSystem.h"
 #include "Character/CharacterManager.h"
 #include "DSPlaySound.h"
 #include "NewUILuckyItemWnd.h"
 #include "NewUISystem.h"
 #include "GameLogic/Skills/SkillManager.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 
 using namespace SEASON3B;
 

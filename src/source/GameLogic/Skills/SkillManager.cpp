@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "SkillManager.h"
 #include "Character/CharacterManager.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "ZzzCharacter.h"
 
 CSkillManager gSkillManager;

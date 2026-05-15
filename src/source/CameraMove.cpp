@@ -13,8 +13,8 @@
 
 #include "CameraMove.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "ZzzAI.h"
-#include "MapManager.h"
+#include "Engine/AI/ZzzAI.h"
+#include "World/MapInfra/MapManager.h"
 
 // Forward declaration for LoginScene offset helper
 static void ApplyLoginSceneOffset(float& x, float& y, float& z);

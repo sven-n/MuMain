@@ -1,6 +1,6 @@
 #include "doctest.h"
 
-#include "Text/TextLineWrap.h"
+#include "Core/Text/TextLineWrap.h"
 
 #include <cwchar>
 

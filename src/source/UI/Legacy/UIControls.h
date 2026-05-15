@@ -1,11 +1,11 @@
 #ifndef __UICONTROL_H__
 #define __UICONTROL_H__
 
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Quests/QuestMng.h"
-#include "Time/Timer.h"
+#include "Core/Time/Timer.h"
 #include <memory>
 #include <vector>
 

@@ -4,7 +4,7 @@
 #ifndef __GOBOID_H__
 #define __GOBOID_H__
 
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 
 bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int SubType = 0, int LinkBone = 0);
 void CreateMount(int Type, vec3_t Position, OBJECT* Owner, int SubType = 0, int LinkBone = 0);

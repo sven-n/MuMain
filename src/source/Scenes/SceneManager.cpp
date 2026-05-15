@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include "SceneManager.h"
-#include "../Utilities/FrameProfiler.h"
+#include "../Core/Utilities/FrameProfiler.h"
 
 //=============================================================================
 // Frame Timing State Implementation
@@ -28,16 +28,16 @@ FrameTimingState g_frameTiming;
 #include "../DSPlaySound.h"
 #include "../Render/Textures/ZzzOpenglUtil.h"
 #include "../PhysicsManager.h"
-#include "../Time/Timer.h"
+#include "../Core/Time/Timer.h"
 #include "../Input.h"
 #include "../UI/Legacy/UIMng.h"
 #include "Network/Server/WSclient.h"
 #include "../GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/ServerListManager.h"
 #include "../UI/NewUI/NewUISystem.h"
-#include "../ZzzInterface.h"
+#include "../Engine/Object/ZzzInterface.h"
 #include "../GlobalText.h"
-#include "../ZzzAI.h"
+#include "../Engine/AI/ZzzAI.h"
 #include "../Winmain.h"
 #include "../Camera/CameraManager.h"
 #include "../Camera/CameraMode.h"

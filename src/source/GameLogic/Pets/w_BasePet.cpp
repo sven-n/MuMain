@@ -4,8 +4,8 @@
 #include "stdafx.h"
 #include "w_BasePet.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "ZzzObject.h"
-#include "ZzzAI.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 
 extern float EarthQuake;

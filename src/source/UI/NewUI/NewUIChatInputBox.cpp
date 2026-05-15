@@ -6,8 +6,8 @@
 #include "UI/Legacy/UIControls.h"
 #include "NewUISystem.h"
 #include "ZzzOpenData.h"
-#include "MapManager.h"
-#include "ZzzInterface.h"
+#include "World/MapInfra/MapManager.h"
+#include "Engine/Object/ZzzInterface.h"
 
 #ifdef _EDITOR
 #include "imgui.h"

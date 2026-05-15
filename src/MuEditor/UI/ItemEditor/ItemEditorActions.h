@@ -1,5 +1,5 @@
 #pragma once
-#include "GameData/ItemData/ItemFieldMetadata.h"
+#include "Data/GameData/ItemData/ItemFieldMetadata.h"
 
 #ifdef _EDITOR
 

@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "CharInfoBalloon.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "UI/Legacy/UIControls.h"
 #include "CharacterManager.h"
 

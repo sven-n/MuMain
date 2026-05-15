@@ -5,14 +5,14 @@
 #include <chrono>
 #include <cmath>
 
-#include "ZzzAI.h"
+#include "Engine/AI/ZzzAI.h"
 #include "ZzzCharacter.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "Utilities/Log/muConsoleDebug.h"
+#include "Core/Utilities/Log/muConsoleDebug.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "PartyManager.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "Network/Server/WSclient.h"
 
 #include "MuHelper.h"

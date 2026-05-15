@@ -5,15 +5,15 @@
 #include "stdafx.h"
 #include "NewUINameWindow.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "UI/Legacy/UIControls.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Events/MatchEvent.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 // DevEditor forward declarations (must be at global scope)
 #ifdef _EDITOR

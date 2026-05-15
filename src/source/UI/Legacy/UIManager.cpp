@@ -7,7 +7,7 @@
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"

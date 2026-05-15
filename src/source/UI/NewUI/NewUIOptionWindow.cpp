@@ -7,7 +7,7 @@
 #include "NewUISystem.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "DSPlaySound.h"
-#include "GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Audio/AudioPlayer.h"
 #include <algorithm>
 

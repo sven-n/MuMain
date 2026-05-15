@@ -11,9 +11,9 @@
 #include "UIGuildInfo.h"
 #include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIPopup.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "ZzzInventory.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInfomation.h"
 
 #include "Character/CharacterManager.h"
 

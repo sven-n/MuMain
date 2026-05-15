@@ -38,5 +38,5 @@ window writes to these sections:
   only key the camera rework added.
 
 Missing keys fall back to compile-time defaults from
-`src/source/GameConfig/GameConfigConstants.h`. If `config.ini` doesn't exist,
+`src/source/Data/GameConfig/GameConfigConstants.h`. If `config.ini` doesn't exist,
 it's created the first time anything calls `Save()`.

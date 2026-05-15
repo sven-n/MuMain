@@ -7,10 +7,10 @@
 #include "Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzInfomation.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzCharacter.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "UI/Legacy/UIControls.h"
 #include "Scenes/SceneCore.h"
 
@@ -21,8 +21,8 @@
 #include "Network/Server/ServerListManager.h"
 #include <dpapi.h>
 
-#include "GameConfig/GameConfig.h"
-#include "GameConfig/GameConfigConstants.h"
+#include "Data/GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfigConstants.h"
 
 #define	LIW_ACCOUNT		0
 #define	LIW_PASSWORD	1

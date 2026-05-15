@@ -3,10 +3,10 @@
 #ifdef _EDITOR
 
 #include "ItemEditorActions.h"
-#include "DataHandler/ItemData/ItemDataHandler.h"
-#include "GameData/ItemData/ItemFieldMetadata.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
-#include "Translation/i18n.h"
+#include "Data/Translation/i18n.h"
 #include "imgui.h"
 #include <string>
 #include <sstream>

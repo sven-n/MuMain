@@ -6,14 +6,14 @@
 #include "NewUICustomMessageBox.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "ZzzObject.h"
+#include "Engine/Object/ZzzObject.h"
 #include "ZzzInventory.h"
-#include "ZzzInterface.h"
-#include "ZzzInfomation.h"
+#include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/ZzzInfomation.h"
 #include "ZzzCharacter.h"
 
 #include "DSPlaySound.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 
 using namespace SEASON3B;
 

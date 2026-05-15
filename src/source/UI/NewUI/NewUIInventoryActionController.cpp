@@ -10,15 +10,15 @@
 #include "ZzzInventory.h"
 #include "UI/Legacy/UIJewelHarmony.h"
 #include "CSItemOption.h"
-#include "MapManager.h"
+#include "World/MapInfra/MapManager.h"
 #include "Network/Server/SocketSystem.h"
 #include "MonkSystem.h"
 #include "Character/CharacterManager.h"
 #include "DSPlaySound.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 #include "UI/Legacy/UIManager.h"
 #include "ChangeRingManager.h"
-#include "PortalMgr.h"
+#include "World/MapInfra/PortalMgr.h"
 #include "GameLogic/Quests/CSQuest.h"
 
 namespace SEASON3B

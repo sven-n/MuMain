@@ -7,10 +7,10 @@
 #include "DSPlaySound.h"
 #include "Render/Effects/ZzzEffect.h"
 
-#include "ZzzAI.h"
-#include "MapManager.h"
+#include "Engine/AI/ZzzAI.h"
+#include "World/MapInfra/MapManager.h"
 #include "SkillManager.h"
-#include "ZzzInterface.h"
+#include "Engine/Object/ZzzInterface.h"
 
 CSummonSystem g_SummonSystem;
 

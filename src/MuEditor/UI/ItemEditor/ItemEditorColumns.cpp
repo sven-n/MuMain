@@ -5,8 +5,8 @@
 #include "ItemEditorColumns.h"
 #include "ItemEditorTable.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
-#include "GameData/ItemData/ItemFieldDefs.h"
-#include "Translation/i18n.h"
+#include "Data/GameData/ItemData/ItemFieldDefs.h"
+#include "Data/Translation/i18n.h"
 #include "_struct.h"
 #include "_define.h"
 #include "imgui.h"
@@ -15,7 +15,7 @@
 
 #include "ItemEditorTable.h"
 #include "../Console/MuEditorConsoleUI.h"
-#include "GameData/ItemData/ItemFieldMetadata.h"
+#include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/UI/ItemEditor/ItemEditorColumns.h"
 
 extern ITEM_ATTRIBUTE* ItemAttribute;

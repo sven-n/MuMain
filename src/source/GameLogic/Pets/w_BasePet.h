@@ -2,7 +2,7 @@
 
 #include "w_PetAction.h"
 #include "Render/Models/ZzzBMD.h"
-#include "Time/Timer.h"
+#include "Core/Time/Timer.h"
 
 SmartPointer(PetObject);
 class PetObject
