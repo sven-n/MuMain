@@ -353,6 +353,7 @@ typedef struct
     BYTE InventoryExtensions;
     BYTE IsVaultExtended;
     WORD Level;
+    DWORD Resets;
 
     WORD Strength;
     WORD Dexterity;

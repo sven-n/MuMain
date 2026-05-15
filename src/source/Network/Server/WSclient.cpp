@@ -969,6 +969,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CharacterAttribute->wMinusPoint = Data->wMinusPoint;
     CharacterAttribute->wMaxMinusPoint = Data->wMaxMinusPoint;
     CharacterAttribute->InventoryExtensions = Data->InventoryExtensions;
+    CharacterAttribute->Resets = Data->Resets;
     CharacterAttribute->AttackSpeed = Data->AttackSpeed;
     CharacterAttribute->MagicSpeed = Data->MagicSpeed;
     CharacterAttribute->MaxAttackSpeed = Data->MaxAttackSpeed;
