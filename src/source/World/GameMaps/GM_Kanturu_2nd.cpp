@@ -21,7 +21,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "LoadData.h"
+#include "Data/DataHandler/LoadData.h"
 #include "UI/NewUI/NewUISystem.h"
 
 

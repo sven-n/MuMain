@@ -11,9 +11,9 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Models/BoneManager.h"
-#include "PhysicsManager.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "World/MapInfra/MapManager.h"
-#include "GOBoid.h"
+#include "Engine/AI/GOBoid.h"
 
 
 

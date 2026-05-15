@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "_enum.h"
+#include "Core/Globals/_enum.h"
 #include <eh.h>
 #include "UI/Legacy/UIManager.h"
 #include "Guild/GuildCache.h"
@@ -25,8 +25,8 @@
 #include "Scenes/SceneCore.h"
 #include "Audio/DSPlaySound.h"
 
-#include "PhysicsManager.h"
-#include "GOBoid.h"
+#include "Engine/Physics/PhysicsManager.h"
+#include "Engine/AI/GOBoid.h"
 #include "GameLogic/Items/CSItemOption.h"
 
 // Phase 5: Camera system includes for 3D frustum culling
@@ -100,7 +100,7 @@ namespace
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Pets/w_PetProcess.h"
-#include "CSParts.h"
+#include "Character/CSParts.h"
 #include "Render/Models/BoneManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Core/Input/Input.h"

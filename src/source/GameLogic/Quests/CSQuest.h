@@ -7,8 +7,8 @@
 #include <cstdint>
 
 #include "Core/Utilities/Singleton.h"
-#include "_enum.h"
-#include "_struct.h"
+#include "Core/Globals/_enum.h"
+#include "Core/Globals/_struct.h"
 
 class CSQuest : public Singleton<CSQuest>
 {

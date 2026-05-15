@@ -14,7 +14,7 @@
 #include "../Engine/Object/ZzzInterface.h"
 #include "../Engine/Object/ZzzInfomation.h"
 #include "../Render/Effects/ZzzEffect.h"
-#include "../GOBoid.h"
+#include "../Engine/AI/GOBoid.h"
 #include "../GameLogic/Pets/w_PetProcess.h"
 #include "../UI/Legacy/UIMng.h"
 #include "../Core/Input/Input.h"

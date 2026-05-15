@@ -1,17 +1,17 @@
-// KeyGenerater.h: interface for the CKeyGenerater class.
+// KeyGenerator.h: interface for the CKeyGenerator class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-CONST int MAX_KEY_GENERATER_FILTER = 10;
+CONST int MAX_KEY_GENERATOR_FILTER = 10;
 
-class CKeyGenerater
+class CKeyGenerator
 {
 public:
-    CKeyGenerater();
-    virtual ~CKeyGenerater();
+    CKeyGenerator();
+    virtual ~CKeyGenerator();
     DWORD		GenerateKeyValue(DWORD dwKeyValue);
     bool		CheckKeyValue(DWORD* dwOldKeyValue, DWORD dwReceiveKeyValue);
 
 };
 
-extern CKeyGenerater g_KeyGenerater;
+extern CKeyGenerator g_KeyGenerator;

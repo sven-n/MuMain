@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "GlobalText.h"
+#include "Data/Translation/GlobalText.h"
 
 void SaveTextFile(wchar_t* FileName);
 

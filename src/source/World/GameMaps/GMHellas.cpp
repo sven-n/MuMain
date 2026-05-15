@@ -12,7 +12,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "PhysicsManager.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "Render/Sprites/CSWaterTerrain.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"

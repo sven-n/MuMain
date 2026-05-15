@@ -15,7 +15,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "GOBoid.h"
+#include "Engine/AI/GOBoid.h"
 #include "UI/NewUI/NewUISystem.h"
 
 

@@ -12,7 +12,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "UI/Legacy/UIManager.h"
-#include "CSParts.h"
+#include "Character/CSParts.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "UI/Legacy/UIControls.h"

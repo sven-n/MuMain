@@ -21,7 +21,7 @@
 #include "../Core/Utilities/Log/muConsoleDebug.h"
 #include "../Core/Utilities/FrameProfiler.h"
 #include "Network/Server/WSclient.h"
-#include "../GOBoid.h"
+#include "../Engine/AI/GOBoid.h"
 #include "../GameLogic/Items/PersonalShopTitleImp.h"
 #include "../UI/Legacy/UIManager.h"
 #include "../Engine/Object/ZzzInventory.h"

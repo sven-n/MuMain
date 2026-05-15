@@ -27,7 +27,7 @@
 
 #include <objbase.h>
 #include <dsound.h>
-#include "Audio/DSwaveIO.h"
+#include "Audio/DSWaveIO.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Audio/DSPlaySound.h"
 

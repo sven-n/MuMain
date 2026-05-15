@@ -1,7 +1,7 @@
 // NewUIGensRanking.h: interface for the CNewUIGensRanking class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
-#include "_TextureIndex.h"
+#include "Core/Globals/_TextureIndex.h"
 
 #ifdef PBG_ADD_GENSRANKING
 

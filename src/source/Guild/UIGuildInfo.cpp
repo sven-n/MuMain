@@ -8,7 +8,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Legacy/UIManager.h"
 #include "UIGuildInfo.h"
-#include "CSParts.h"
+#include "Character/CSParts.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"

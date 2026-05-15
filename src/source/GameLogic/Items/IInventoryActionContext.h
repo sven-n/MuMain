@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "_struct.h"
+#include "Core/Globals/_struct.h"
 
 namespace SEASON3B
 {

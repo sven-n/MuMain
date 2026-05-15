@@ -15,11 +15,11 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Models/BoneManager.h"
-#include "GOBoid.h"
+#include "Engine/AI/GOBoid.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Skills/SkillManager.h"
-#include "_enum.h"
+#include "Core/Globals/_enum.h"
 
 #include "World/MapInfra/w_BaseMap.h"
 #include "World/MapInfra/w_MapHeaders.h"

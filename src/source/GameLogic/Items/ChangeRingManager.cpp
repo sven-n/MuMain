@@ -8,7 +8,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "LoadData.h"
+#include "Data/DataHandler/LoadData.h"
 #include "Character/CharacterManager.h"
 
 #include <algorithm>

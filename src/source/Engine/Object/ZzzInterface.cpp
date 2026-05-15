@@ -27,7 +27,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
-#include "CSParts.h"
+#include "Character/CSParts.h"
 #include "UI/Legacy/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"

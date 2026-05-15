@@ -3,10 +3,10 @@
 #include "Data/DataHandler/SkillData/SkillDataLoader.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Data/GameData/SkillData/SkillStructs.h"
-#include "_struct.h"
-#include "_define.h"
+#include "Core/Globals/_struct.h"
+#include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "MultiLanguage.h"
+#include "Data/Translation/MultiLanguage.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"

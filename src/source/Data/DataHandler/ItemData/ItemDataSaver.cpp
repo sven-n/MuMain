@@ -5,10 +5,10 @@
 #include "ItemDataSaver.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/Translation/i18n.h"
-#include "_struct.h"
-#include "_define.h"
+#include "Core/Globals/_struct.h"
+#include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "MultiLanguage.h"
+#include "Data/Translation/MultiLanguage.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include <sstream>
 #include <memory>

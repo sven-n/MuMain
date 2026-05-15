@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "ItemDataHandler.h"
 #include "ItemDataLoader.h"
-#include "_struct.h"
-#include "_define.h"
+#include "Core/Globals/_struct.h"
+#include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
 
 #ifdef _EDITOR

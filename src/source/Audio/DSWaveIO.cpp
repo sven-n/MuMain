@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Audio/DSwaveIO.h"
+#include "Audio/DSWaveIO.h"
 
 #include <cwchar>
 #include <cstring>

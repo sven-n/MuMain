@@ -9,11 +9,11 @@ extern bool SelectFlag;
 #include "UI/Console/MuEditorConsoleUI.h"
 #endif
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
-#include "GOBoid.h"
+#include "Engine/AI/GOBoid.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Pets/w_PetProcess.h"
-#include "CSParts.h"
+#include "Character/CSParts.h"
 #include "UI/Legacy/UIJewelHarmony.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Engine/Object/ZzzInventory.h"

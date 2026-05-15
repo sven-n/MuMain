@@ -14,7 +14,7 @@
 #include "UI/NewUI/Inventory/NewUIInventoryActionController.h"
 #include "GameLogic/Items/IInventoryActionContext.h"
 #include <span>
-#include "_enum.h"
+#include "Core/Globals/_enum.h"
 
 namespace SEASON3B
 {

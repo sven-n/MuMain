@@ -8,7 +8,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 
-#include "LoadData.h"
+#include "Data/DataHandler/LoadData.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Skills/SkillManager.h"

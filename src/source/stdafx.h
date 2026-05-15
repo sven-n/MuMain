@@ -131,16 +131,16 @@
 //patch
 //winmain
 #include "Platform/Windows/Winmain.h"
-#include "Defined_Global.h"
+#include "Core/Globals/Defined_Global.h"
 
 //client
-#include "_define.h"
-#include "_enum.h"
-#include "_types.h"
-#include "_struct.h"
-#include "w_WindowMessageHandler.h"
+#include "Core/Globals/_define.h"
+#include "Core/Globals/_enum.h"
+#include "Core/Globals/_types.h"
+#include "Core/Globals/_struct.h"
+#include "Platform/Windows/w_WindowMessageHandler.h"
 #include "Core/Utilities/_GlobalFunctions.h"
-#include "_TextureIndex.h"
+#include "Core/Globals/_TextureIndex.h"
 #include "UI/Legacy/UIDefaultBase.h"
 #include "UI/NewUI/NewUICommon.h"
 #include "Core/Math/ZzzMathLib.h"
@@ -153,7 +153,7 @@ inline constexpr int REFERENCE_HEIGHT = 480;
 
 #include "Render/Textures/ZzzOpenglUtil.h"
 
-#include "MultiLanguage.h"
+#include "Data/Translation/MultiLanguage.h"
 
 
 #include "Core/Utilities/Log/muConsoleDebug.h"
@@ -167,7 +167,7 @@ inline constexpr int REFERENCE_HEIGHT = 480;
 
 #include "World/MapInfra/w_MapHeaders.h"
 
-#include "_crypt.h"
+#include "Core/Globals/_crypt.h"
 
 inline std::wstring g_strSelectedML = L"";
 // Scale factors from REFERENCE_WIDTH/HEIGHT (above) to the actual window size.

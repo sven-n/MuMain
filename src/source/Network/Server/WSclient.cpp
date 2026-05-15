@@ -20,7 +20,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "GameLogic/Events/MatchEvent.h"
-#include "GOBoid.h"
+#include "Engine/AI/GOBoid.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/NPCs/npcBreeder.h"
@@ -33,8 +33,8 @@
 #include "UI/Legacy/UIMapName.h" // rozy
 #include "UI/Legacy/UIMng.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
-#include "CSParts.h"
-#include "PhysicsManager.h"
+#include "Character/CSParts.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Events/Event.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "World/MapInfra/MapManager.h"

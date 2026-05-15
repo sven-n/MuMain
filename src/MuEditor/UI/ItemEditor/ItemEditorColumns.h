@@ -4,7 +4,7 @@
 
 #include <windows.h>
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
-#include "_struct.h"
+#include "Core/Globals/_struct.h"
 
 // Forward declaration
 class CItemEditorTable;

@@ -15,7 +15,7 @@
 
 #include "UI/Legacy/UIMng.h"
 #include "Camera/CameraMove.h"
-#include "PhysicsManager.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "UI/NewUI/NewUISystem.h"
 
 BMD* Models;

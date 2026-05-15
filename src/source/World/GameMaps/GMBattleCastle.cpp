@@ -14,8 +14,8 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "PhysicsManager.h"
-#include "CSParts.h"
+#include "Engine/Physics/PhysicsManager.h"
+#include "Character/CSParts.h"
 
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Pets/GIPetManager.h"

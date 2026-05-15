@@ -7,7 +7,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "Core/Utilities/KeyGenerater.h"
+#include "Core/Utilities/KeyGenerator.h"
 #include "Network/Server/ServerListManager.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/MapManager.h"
@@ -294,7 +294,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetMoveCommandKey(DWORD dwKey)
 
 DWORD SEASON3B::CNewUIMoveCommandWindow::GetMoveCommandKey()
 {
-    m_dwMoveCommandKey = g_KeyGenerater.GenerateKeyValue(m_dwMoveCommandKey);
+    m_dwMoveCommandKey = g_KeyGenerator.GenerateKeyValue(m_dwMoveCommandKey);
 
     return m_dwMoveCommandKey;
 }

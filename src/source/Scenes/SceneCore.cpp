@@ -13,7 +13,7 @@
 #include "imgui.h"
 #endif
 
-#include "PhysicsManager.h"
+#include "Engine/Physics/PhysicsManager.h"
 
 #include "GameLogic/Quests/CSQuest.h"
 #include "UI/Legacy/UIControls.h"

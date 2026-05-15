@@ -7,7 +7,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Sprites/GlobalBitmap.h"
-#include "LoadData.h"
+#include "Data/DataHandler/LoadData.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "Render/Models/ZzzBMD.h"

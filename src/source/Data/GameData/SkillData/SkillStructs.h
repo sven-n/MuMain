@@ -59,7 +59,7 @@ typedef struct
     } while(0)
 
 // Helper template to copy from file structure to runtime structure
-// Requires: #include "MultiLanguage.h"
+// Requires: #include "Data/Translation/MultiLanguage.h"
 template<typename TSource>
 inline void CopySkillAttributeFromSource(SKILL_ATTRIBUTE& dest, const TSource& source)
 {
@@ -68,7 +68,7 @@ inline void CopySkillAttributeFromSource(SKILL_ATTRIBUTE& dest, const TSource& s
 }
 
 // Helper template to copy from runtime structure to file structure
-// Requires: #include "MultiLanguage.h"
+// Requires: #include "Data/Translation/MultiLanguage.h"
 template<typename TDest>
 inline void CopySkillAttributeToDestination(TDest& dest, const SKILL_ATTRIBUTE& source)
 {

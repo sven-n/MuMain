@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Camera/CameraMove.h"
@@ -19,9 +19,9 @@
 #include "Camera/ICamera.h"
 
 #include "UI/Windows/SideHair.h"
-#include "PhysicsManager.h"
-#include "GOBoid.h"
-#include "CSParts.h"
+#include "Engine/Physics/PhysicsManager.h"
+#include "Engine/AI/GOBoid.h"
+#include "Character/CSParts.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"

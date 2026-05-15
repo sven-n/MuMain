@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Utilities/stringset.h"
+#include "Core/Utilities/StringSet.h"
 #include <cwchar>
 #include <cwctype>
 #include <string>

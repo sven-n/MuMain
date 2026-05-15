@@ -5,10 +5,10 @@
 #include "ItemDataExportS6E3.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
-#include "_struct.h"
-#include "_define.h"
+#include "Core/Globals/_struct.h"
+#include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "MultiLanguage.h"
+#include "Data/Translation/MultiLanguage.h"
 #include <memory>
 
 // External references

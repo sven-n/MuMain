@@ -14,12 +14,12 @@
 
 #include "Render/Models/SMD.h"
 
-#include "PhysicsManager.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/CSItemOption.h"
-#include "MoveCommandData.h"
+#include "Network/MoveCommandData.h"
 #include "UI/Legacy/UIMng.h"
-#include "LoadData.h"
+#include "Data/DataHandler/LoadData.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
 #include "GameLogic/Items/ChangeRingManager.h"

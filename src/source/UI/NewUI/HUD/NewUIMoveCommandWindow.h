@@ -4,7 +4,7 @@
 
 #include "UI/NewUI/NewUIBase.h"
 #include "UI/NewUI/NewUIManager.h"
-#include "MoveCommandData.h"
+#include "Network/MoveCommandData.h"
 #include "UI/NewUI/HUD/NewUIChatLogWindow.h"
 
 namespace SEASON3B

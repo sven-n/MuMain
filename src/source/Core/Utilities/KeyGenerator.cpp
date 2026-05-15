@@ -1,12 +1,12 @@
-// KeyGenerater.cpp: implementation of the CKeyGenerater class.
+// KeyGenerator.cpp: implementation of the CKeyGenerator class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "Core/Utilities/KeyGenerater.h"
+#include "Core/Utilities/KeyGenerator.h"
 
-CKeyGenerater g_KeyGenerater;
+CKeyGenerator g_KeyGenerator;
 
-static int KEY_GENERATE_FILTER[MAX_KEY_GENERATER_FILTER][4] =
+static int KEY_GENERATE_FILTER[MAX_KEY_GENERATOR_FILTER][4] =
 {
     { 321,	37531879,	8734,	32 },		// 0
     { 873,	64374332,	3546,	87 },
@@ -20,26 +20,26 @@ static int KEY_GENERATE_FILTER[MAX_KEY_GENERATER_FILTER][4] =
     { 454,	57684216,	6875,	45 }
 };
 
-CKeyGenerater::CKeyGenerater()
+CKeyGenerator::CKeyGenerator()
 {
 }
 
-CKeyGenerater::~CKeyGenerater()
+CKeyGenerator::~CKeyGenerator()
 {
 }
 
-DWORD CKeyGenerater::GenerateKeyValue(DWORD dwKeyValue)
+DWORD CKeyGenerator::GenerateKeyValue(DWORD dwKeyValue)
 {
     DWORD dwRegenerateKeyValue = 0;
     BYTE btNumericValue = 0;
 
-    btNumericValue = dwKeyValue % MAX_KEY_GENERATER_FILTER;
+    btNumericValue = dwKeyValue % MAX_KEY_GENERATOR_FILTER;
 
     dwRegenerateKeyValue = dwKeyValue * KEY_GENERATE_FILTER[btNumericValue][0] + KEY_GENERATE_FILTER[btNumericValue][1] - KEY_GENERATE_FILTER[btNumericValue][2] / KEY_GENERATE_FILTER[btNumericValue][3];
     return dwRegenerateKeyValue;
 }
 
-bool CKeyGenerater::CheckKeyValue(DWORD* dwOldKeyValue, DWORD dwReceiveKeyValue)
+bool CKeyGenerator::CheckKeyValue(DWORD* dwOldKeyValue, DWORD dwReceiveKeyValue)
 {
     DWORD dwGeneratedKeyValue = 0;
 

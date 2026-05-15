@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include "MultiLanguage.h"
+#include "Data/Translation/MultiLanguage.h"
 
 // Forward declarations for constants
 #ifndef MAX_CLASS
@@ -59,7 +59,7 @@ typedef struct
     } while(0)
 
 // Helper template to copy from file structure to runtime structure
-// Requires: #include "MultiLanguage.h"
+// Requires: #include "Data/Translation/MultiLanguage.h"
 template<typename TSource>
 inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, const TSource& source)
 {
@@ -68,7 +68,7 @@ inline void CopyItemAttributeFromSource(ITEM_ATTRIBUTE& dest, const TSource& sou
 }
 
 // Helper template to copy from runtime structure to file structure
-// Requires: #include "MultiLanguage.h"
+// Requires: #include "Data/Translation/MultiLanguage.h"
 template<typename TDest>
 inline void CopyItemAttributeToDestination(TDest& dest, const ITEM_ATTRIBUTE& source)
 {

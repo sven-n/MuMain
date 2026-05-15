@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "World/MapInfra/w_BaseMap.h"
-#include "_struct.h"
+#include "Core/Globals/_struct.h"
 
 class BMD;
 struct OBJECT;

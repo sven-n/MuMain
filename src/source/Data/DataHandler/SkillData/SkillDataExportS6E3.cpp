@@ -5,8 +5,8 @@
 #include "SkillDataExportS6E3.h"
 #include "Data/DataHandler/DataFileIO.h"
 #include "Data/GameData/SkillData/SkillStructs.h"
-#include "_struct.h"
-#include "_define.h"
+#include "Core/Globals/_struct.h"
+#include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include <memory>
 

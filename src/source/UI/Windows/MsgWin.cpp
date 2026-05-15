@@ -12,7 +12,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "GOBoid.h"
+#include "Engine/AI/GOBoid.h"
 #include "Scenes/SceneCore.h"
 #include "Audio/DSPlaySound.h"
 

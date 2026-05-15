@@ -19,7 +19,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "UI/Widgets/UIBaseDef.h"
 #include "Audio/DSPlaySound.h"
-#include "LoadData.h"
+#include "Data/DataHandler/LoadData.h"
 #include "Event.h"
 #include "Core/Utilities/Random.h"
 

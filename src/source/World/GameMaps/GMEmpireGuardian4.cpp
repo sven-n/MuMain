@@ -10,9 +10,9 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
-#include "GOBoid.h"
+#include "Engine/AI/GOBoid.h"
 
-#include "LoadData.h"
+#include "Data/DataHandler/LoadData.h"
 
 
 
