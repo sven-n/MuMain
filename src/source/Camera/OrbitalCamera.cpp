@@ -3,8 +3,8 @@
 #include "stdafx.h"
 #include "OrbitalCamera.h"
 #include "CameraManager.h"
-#include "../Render/Textures/ZzzOpenglUtil.h"
-#include "../Engine/Object/ZzzCharacter.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include <cmath>
 
 #include "UI/Legacy/UIControls.h"

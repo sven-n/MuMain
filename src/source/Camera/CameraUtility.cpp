@@ -5,7 +5,7 @@
 #include "CameraUtility.h"
 #include "CameraManager.h"
 #include "Camera/CameraMove.h"
-#include "../Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 
 // External variable declarations
 extern short g_shCameraLevel;

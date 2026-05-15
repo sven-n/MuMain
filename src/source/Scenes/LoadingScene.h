@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../Render/Sprites/Sprite.h"
+#include "Render/Sprites/Sprite.h"
 
 #define LDS_BACK_MAX	4
 

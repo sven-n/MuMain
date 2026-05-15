@@ -5,7 +5,7 @@
 #include "FrustumRenderer.h"
 #include "CameraConfig.h"
 #include "Core/Globals/_types.h"
-#include "../Core/Globals/_define.h"
+#include "Core/Globals/_define.h"
 #include <cmath>
 #include <cstring>
 
