@@ -6,7 +6,7 @@
 #include "UIGateKeeper.h"
 #include "UIPopup.h"
 #include "UIJewelHarmony.h"
-#include "ItemAddOptioninfo.h"
+#include "GameLogic/Items/ItemAddOptioninfo.h"
 
 extern CUIGateKeeper* g_pUIGateKeeper;
 extern CUIPopup* g_pUIPopup;

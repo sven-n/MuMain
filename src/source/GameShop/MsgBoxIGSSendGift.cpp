@@ -3,10 +3,10 @@
 
 #include "stdafx.h"
 
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSSendGift.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 #include "MsgBoxIGSCommon.h"
 #include "MsgBoxIGSSendGiftConfirm.h"

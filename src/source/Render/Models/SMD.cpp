@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include "ZzzBMD.h"
 #include "SMD.h"
-#include "ReadScript.h"
+#include "Core/Utilities/ReadScript.h"
 
 
 NodeGroup_t     NodeGroup;

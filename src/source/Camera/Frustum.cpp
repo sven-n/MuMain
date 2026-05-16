@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Frustum.h"
 #include "ConvexHull2D.h"
-#include "_define.h"
+#include "Core/Globals/_define.h"
 #include <cmath>
 
 namespace

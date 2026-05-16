@@ -5,8 +5,8 @@
 #include <array>
 
 #include "UI/Legacy/UIControls.h"
-#include "NewUISystem.h"
-#include "NewUIMuHelper.h"
+#include "UI/NewUI/NewUISystem.h"
+#include "UI/NewUI/NewUIMuHelper.h"
 #include "Character/CharacterManager.h"
 #include "MUHelper/MuHelper.h"
 

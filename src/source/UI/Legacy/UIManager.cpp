@@ -8,13 +8,13 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "ZzzInventory.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "CComGem.h"
-#include "DSPlaySound.h"
-#include "UI/NewUI/NewUICustomMessageBox.h"
-#include "UI/NewUI/NewUINPCShop.h"
+#include "GameLogic/Items/CComGem.h"
+#include "Audio/DSPlaySound.h"
+#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/NewUI/NPCs/NewUINPCShop.h"
 
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;

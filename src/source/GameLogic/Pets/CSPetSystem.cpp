@@ -8,24 +8,24 @@
 #include <cmath>
 #include <limits>
 
-#include "Random.h"
+#include "Core/Utilities/Random.h"
 #include "CSPetSystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "UI/Legacy/UIManager.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "ZzzInventory.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 namespace
 {

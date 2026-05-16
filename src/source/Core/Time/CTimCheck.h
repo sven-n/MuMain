@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "Singleton.h"
+#include "Core/Utilities/Singleton.h"
 
 struct TimeCheck
 {

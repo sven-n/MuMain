@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "Win.h"
-#include "Button.h"
+#include "UI/Widgets/Win.h"
+#include "UI/Widgets/Button.h"
 
 #define	CMW_SPR_INPUT		0
 #define	CMW_SPR_STAT		1

@@ -1,7 +1,7 @@
 #ifndef __ZZZTEXTURE_H__
 #define __ZZZTEXTURE_H__
 
-#include "GlobalBitmap.h"
+#include "Render/Sprites/GlobalBitmap.h"
 //extern CGlobalBitmap Bitmaps;
 
 bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat);

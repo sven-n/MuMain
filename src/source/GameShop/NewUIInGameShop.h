@@ -10,11 +10,11 @@
 
 #include "UI/NewUI/NewUIBase.h"
 #include "UI/NewUI/NewUIManager.h"
-#include "UI/NewUI/NewUIMessageBox.h"
-#include "UI/NewUI/NewUIMyInventory.h"
-#include "UI/NewUI/NewUICommonMessageBox.h"
-#include "ZzzInventory.h"
-#include "Sprite.h"
+#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/NewUI/Inventory/NewUIMyInventory.h"
+#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "Render/Sprites/Sprite.h"
 #include "InGameShopSystem.h"
 
 namespace SEASON3B

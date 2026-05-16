@@ -4,10 +4,10 @@
 
 #include "stdafx.h"
 
-#include "NewUICommon.h"
-#include "NewUIRenderNumber.h"
-#include "NewUISystem.h"
-#include "NewUICommonMessageBox.h"
+#include "UI/NewUI/NewUICommon.h"
+#include "UI/NewUI/Widgets/NewUIRenderNumber.h"
+#include "UI/NewUI/NewUISystem.h"
+#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 

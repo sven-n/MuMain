@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "World/MapInfra/PortalMgr.h"
 #include "Render/Models/ZzzBMD.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "World/MapInfra/MapManager.h"
 
 CPortalMgr g_PortalMgr;

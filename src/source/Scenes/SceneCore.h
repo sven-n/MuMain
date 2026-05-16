@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Object/ZzzInfomation.h"
-#include "SpinLock.h"
+#include "Core/Utilities/SpinLock.h"
 
 // Include refactored scene headers
 #ifdef USE_REFACTORED_SCENES

@@ -6,7 +6,7 @@
 
 #include "MsgBoxIGSCommon.h"
 
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 CMsgBoxIGSCommon::CMsgBoxIGSCommon()
 {

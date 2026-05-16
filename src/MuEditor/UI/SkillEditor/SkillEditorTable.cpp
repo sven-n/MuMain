@@ -7,8 +7,8 @@
 #include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/Translation/i18n.h"
-#include "_struct.h"
-#include "_define.h"
+#include "Core/Globals/_struct.h"
+#include "Core/Globals/_define.h"
 #include "imgui.h"
 #include <algorithm>
 #include <sstream>

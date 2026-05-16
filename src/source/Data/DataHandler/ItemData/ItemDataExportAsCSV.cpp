@@ -3,8 +3,8 @@
 #ifdef _EDITOR
 
 #include "ItemDataExportAsCSV.h"
-#include "_struct.h"
-#include "_define.h"
+#include "Core/Globals/_struct.h"
+#include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Data/GameData/ItemData/ItemFieldDefs.h"
 #include "Core/Utilities/StringUtils.h"

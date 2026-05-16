@@ -9,9 +9,9 @@
 
 #include "UI/NewUI/NewUIBase.h"
 #include "UIGuildMaster.h"
-#include "UI/NewUI/NewUIMessageBox.h"
-#include "UI/NewUI/NewUIMyInventory.h"
-#include "UI/NewUI/NewUIButton.h"
+#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/NewUI/Inventory/NewUIMyInventory.h"
+#include "UI/NewUI/Widgets/NewUIButton.h"
 
 namespace SEASON3B
 {

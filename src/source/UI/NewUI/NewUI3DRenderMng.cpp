@@ -3,8 +3,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "NewUI3DRenderMng.h"
-#include "NewUIManager.h"
+#include "UI/NewUI/NewUI3DRenderMng.h"
+#include "UI/NewUI/NewUIManager.h"
 #include "Camera/CameraProjection.h"
 
 using namespace SEASON3B;

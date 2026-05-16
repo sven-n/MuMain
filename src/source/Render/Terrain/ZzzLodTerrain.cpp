@@ -14,22 +14,22 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Effects/ZzzEffect.h"
 
 #include "GameLogic/Events/CSChaosCastle.h"
-#include "CMVP1stDirection.h"
-#include "CDirection.h"
+#include "GameLogic/Events/Cinematic/CMVP1stDirection.h"
+#include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
-#include "CameraMove.h"
+#include "Camera/CameraMove.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/Frustum.h"
 #include "Camera/ConvexHull2D.h"
-#include "CullingConstants.h"
+#include "Engine/Object/CullingConstants.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR

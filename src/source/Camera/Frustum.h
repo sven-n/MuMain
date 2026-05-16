@@ -1,6 +1,6 @@
 #pragma once
 
-#include "_types.h"
+#include "Core/Globals/_types.h"
 
 /**
  * @brief Axis-Aligned Bounding Box for culling tests

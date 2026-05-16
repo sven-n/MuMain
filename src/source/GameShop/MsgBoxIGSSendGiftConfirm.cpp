@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSSendGiftConfirm.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 
 CMsgBoxIGSSendGiftConfirm::CMsgBoxIGSSendGiftConfirm()

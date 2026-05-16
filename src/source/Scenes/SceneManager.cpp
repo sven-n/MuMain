@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include "SceneManager.h"
-#include "../Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/FrameProfiler.h"
 
 //=============================================================================
 // Frame Timing State Implementation
@@ -25,22 +25,22 @@ FrameTimingState g_frameTiming;
 #include "CharacterScene.h"
 #include "MainScene.h"
 #include "LoadingScene.h"
-#include "../DSPlaySound.h"
-#include "../Render/Textures/ZzzOpenglUtil.h"
-#include "../PhysicsManager.h"
-#include "../Core/Time/Timer.h"
-#include "../Input.h"
-#include "../UI/Legacy/UIMng.h"
+#include "Audio/DSPlaySound.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Engine/Physics/PhysicsManager.h"
+#include "Core/Time/Timer.h"
+#include "Core/Input/Input.h"
+#include "UI/Legacy/UIMng.h"
 #include "Network/Server/WSclient.h"
-#include "../GameLogic/Events/w_CursedTemple.h"
+#include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/ServerListManager.h"
-#include "../UI/NewUI/NewUISystem.h"
-#include "../Engine/Object/ZzzInterface.h"
-#include "../GlobalText.h"
-#include "../Engine/AI/ZzzAI.h"
-#include "../Winmain.h"
-#include "../Camera/CameraManager.h"
-#include "../Camera/CameraMode.h"
+#include "UI/NewUI/NewUISystem.h"
+#include "Engine/Object/ZzzInterface.h"
+#include "Data/Translation/GlobalText.h"
+#include "Engine/AI/ZzzAI.h"
+#include "Platform/Windows/Winmain.h"
+#include "Camera/CameraManager.h"
+#include "Camera/CameraMode.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"

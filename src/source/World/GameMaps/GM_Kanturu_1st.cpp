@@ -6,16 +6,16 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Legacy/UIWindows.h"
-#include "ZzzOpenData.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "CDirection.h"
+#include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Models/BoneManager.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 
 bool M40GMArea::IsGmArea()

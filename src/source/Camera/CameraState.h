@@ -1,5 +1,5 @@
 #pragma once
-#include "_types.h"
+#include "Core/Globals/_types.h"
 
 /**
  * @brief Encapsulates all camera state data

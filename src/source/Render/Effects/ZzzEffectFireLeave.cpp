@@ -9,18 +9,18 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "Random.h"
+#include "Core/Utilities/Random.h"
 
 #include <cmath>
 

@@ -4,12 +4,12 @@
 #include "stdafx.h"
 #include "NewUIGuildMakeWindow.h"
 #include "UI/NewUI/NewUIManager.h"
-#include "UI/NewUI/NewUICommonMessageBox.h"
-#include "DSPlaySound.h"
+#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "Audio/DSPlaySound.h"
 
 #include "Engine/Object/ZzzInterface.h"
-#include "ZzzInventory.h"
-#include "Local.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "Platform/Windows/Local.h"
 #include "UI/NewUI/NewUISystem.h"
 
 extern MARK_t		GuildMark[MAX_MARKS];

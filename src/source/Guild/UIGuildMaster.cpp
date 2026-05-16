@@ -4,15 +4,15 @@
 
 #include "stdafx.h"
 #include "UIGuildInfo.h"
-#include "ZzzInventory.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Legacy/UIManager.h"
 #include "UIGuildMaster.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
-#include "UI/NewUI/NewUICommonMessageBox.h"
-#include "Local.h"
+#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "Platform/Windows/Local.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 

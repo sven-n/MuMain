@@ -13,7 +13,7 @@
 #include "imgui.h"
 #endif
 
-#include "PhysicsManager.h"
+#include "Engine/Physics/PhysicsManager.h"
 
 #include "GameLogic/Quests/CSQuest.h"
 #include "UI/Legacy/UIControls.h"
@@ -21,7 +21,7 @@
 #include "Core/Time/Timer.h"
 #include "UI/Legacy/UIMng.h"
 #include "LoadingScene.h"
-#include "CDirection.h"
+#include "GameLogic/Events/Cinematic/CDirection.h"
 
 #include "UI/NewUI/NewUISystem.h"
 #include <chrono>

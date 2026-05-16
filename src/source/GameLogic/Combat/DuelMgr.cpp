@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "DuelMgr.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 
 #include "Character/CharacterManager.h"
 #include "Network/Server/WSclient.h"

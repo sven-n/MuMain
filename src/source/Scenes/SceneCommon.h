@@ -3,7 +3,7 @@
 // SceneCommon.h - Shared utilities used by multiple scenes
 
 #include <windows.h>
-#include "../Engine/Object/ZzzInfomation.h"  // For MAX_CHARACTERS_PER_ACCOUNT
+#include "Engine/Object/ZzzInfomation.h"  // For MAX_CHARACTERS_PER_ACCOUNT
 
 //=============================================================================
 // Character Selection State

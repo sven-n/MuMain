@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "CameraMove.h"
+#include "Camera/CameraMove.h"
 
 struct CameraConfig;
 

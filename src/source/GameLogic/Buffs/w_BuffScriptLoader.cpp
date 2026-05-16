@@ -3,9 +3,9 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "ReadScript.h"
+#include "Core/Utilities/ReadScript.h"
 #include "UI/Legacy/UIManager.h"
-#include "ItemAddOptioninfo.h"
+#include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "w_BuffScriptLoader.h"
 
 //////////////////////////////////////////////////////////////////////

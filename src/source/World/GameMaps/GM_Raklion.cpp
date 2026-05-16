@@ -4,15 +4,15 @@
 #include "stdafx.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "ZzzOpenData.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Render/Models/BoneManager.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 
 using namespace SEASON4A;
 

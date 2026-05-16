@@ -3,8 +3,8 @@
 
 #include "stdafx.h"
 #include "CharacterManager.h"
-#include "CSItemOption.h"
-#include "GlobalText.h"
+#include "GameLogic/Items/CSItemOption.h"
+#include "Data/Translation/GlobalText.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 

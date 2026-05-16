@@ -10,7 +10,7 @@
 
 #include "UIWindows.h"
 #ifdef ASG_ADD_GENS_SYSTEM
-#include "ZzzInventory.h"
+#include "Engine/Object/ZzzInventory.h"
 #endif	// ASG_ADD_GENS_SYSTEM
 
 

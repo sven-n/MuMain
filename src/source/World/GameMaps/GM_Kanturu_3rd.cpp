@@ -7,13 +7,13 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
-#include "ZzzOpenData.h"
-#include "ZzzCharacter.h"
+#include "Engine/Object/ZzzOpenData.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "CDirection.h"
+#include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Render/Models/BoneManager.h"
 #include "Core/Time/CTimCheck.h"
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
 
 extern unsigned int WindowWidth;

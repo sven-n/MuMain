@@ -1,7 +1,7 @@
 #ifndef __ZZZBMD_H__
 #define __ZZZBMD_H__
 
-#include "TextureScript.h"
+#include "Render/Sprites/TextureScript.h"
 
 #define MAX_BONES    200
 #define MAX_MESH     50

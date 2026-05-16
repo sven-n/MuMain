@@ -10,8 +10,8 @@
 #include "Camera/CameraConfig.h"
 #include "Camera/OrbitalCamera.h"
 #include "Camera/FreeFlyCamera.h"
-#include "CameraMove.h"
-#include "ZzzCharacter.h"
+#include "Camera/CameraMove.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Console/MuEditorConsoleUI.h"
 

@@ -10,7 +10,7 @@
 #include <crtdbg.h>
 
 #include "UI/NewUI/NewUISystem.h"
-#include "UsefulDef.h"
+#include "Core/Utilities/UsefulDef.h"
 
 #define	QM_NPCDIALOGUE_FILE			L"Data\\Local\\NPCDialogue.bmd"
 #define	QM_QUESTPROGRESS_FILE		L"Data\\Local\\QuestProgress.bmd"

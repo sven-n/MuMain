@@ -7,9 +7,9 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
-#include "ZzzOpenData.h"
-#include "ZzzCharacter.h"
-#include "DSPlaySound.h"
+#include "Engine/Object/ZzzOpenData.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Models/BoneManager.h"
 

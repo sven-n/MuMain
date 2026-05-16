@@ -7,7 +7,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSStorageItemInfo.h"
 
-#include "DSPlaySound.h"
+#include "Audio/DSPlaySound.h"
 #include "MsgBoxIGSUseItemConfirm.h"
 
 CMsgBoxIGSStorageItemInfo::CMsgBoxIGSStorageItemInfo()
