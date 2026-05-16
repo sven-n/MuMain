@@ -262,7 +262,7 @@ void CSkillManager::RebuildSkillRequirementsCache()
         skillRequirements.SkillStrength = SkillAttribute[baseSkill].Strength;
         skillRequirements.SkillDexterity = SkillAttribute[baseSkill].Dexterity;
         skillRequirements.SkillVitality = 0;
-        skillRequirements.SkillEnergy = (20 + (SkillAttribute[baseSkill].Energy * SkillAttribute[baseSkill].Level) * 0.04);
+        skillRequirements.SkillEnergy = SkillAttribute[baseSkill].Energy;
         skillRequirements.SkillCharisma = SkillAttribute[baseSkill].Charisma;
 
         m_aSkillRequirementsFulfilled[skillType] = (skillRequirements <= heroCharacterInfo);

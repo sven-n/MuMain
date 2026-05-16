@@ -193,17 +193,7 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
 
 bool CSItemOption::IsDisableSkill(ActionSkillType Type, int Energy, int Charisma)
 {
-    int SkillEnergy = 20 + SkillAttribute[Type].Energy * (SkillAttribute[Type].Level) * 4 / 100;
-
-    if (Type == AT_SKILL_SUMMON_EXPLOSION || Type == AT_SKILL_SUMMON_REQUIEM)
-    {
-        SkillEnergy = 20 + SkillAttribute[Type].Energy * (SkillAttribute[Type].Level) * 3 / 100;
-    }
-
-    if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT)
-    {
-        SkillEnergy = 10 + SkillAttribute[Type].Energy * (SkillAttribute[Type].Level) * 4 / 100;
-    }
+    int SkillEnergy = SkillAttribute[Type].Energy;
 
     switch (Type)
     {
