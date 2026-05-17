@@ -61,8 +61,13 @@ When extracting free functions from a monolithic file into a new file:
 1. **Wrap them in a namespace** following `<Layer>::<Concern>[::<SubConcern>]`.
    The hierarchy is **domain-first**: code about skills lives under `UI::Skills`
    regardless of which HUD area renders it; code about combat lives under
-   `UI::Combat`; etc. Examples: `UI::Skills::Tooltip::Render`,
-   `UI::Items::Tooltip::Render`, `GameLogic::Combat::CalculateDamage`.
+   `UI::Combat`; etc. Examples (fully-qualified function calls, parentheses
+   show where the function name ends and the namespace ends):
+   `UI::Skills::Tooltip::Render()`, `UI::Items::Tooltip::Render()`,
+   `GameLogic::Combat::CalculateDamage()`. The last `::Tooltip` / `::Combat`
+   segment is a sub-concern namespace; the verb (`Render`, `CalculateDamage`)
+   is the function. Don't nest a `Render` namespace just to hold a `Render()`
+   function.
 
 2. **Drop the legacy `NewUI` prefix** from the new file name. New extractions
    use bare names like `SkillTooltip.cpp` / `SkillTooltip.h`, not
@@ -115,7 +120,7 @@ the pattern accretes consistently.
 - Don't micro-optimize cold paths (startup, one-shot setup, save/load) - clarity wins over saving 1-iteration-out-of-10.
 - DO be careful on **hot paths**. When adding or touching code, ask: is this called per-frame, per-network-packet, per-character-tick, per-entity, or inside another tight loop?
 - On hot paths, avoid:
-  - **Heap allocations** (`new`, `std::vector` / `std::string` constructed per call) - prefer stack arrays, pre-allocated static buffers, or caches that only rebuild on state change.
+  - **Heap allocations** (`new`, `std::vector` / `std::string` constructed per call) - prefer small stack arrays (keep them small to avoid stack-overflow risk), thread-local or pooled buffers, or caches that only rebuild on state change. Plain file-scope `static` buffers are fine for known single-threaded paths (e.g. the main render loop) but risky in worker threads - default to thread-local when in doubt.
   - **I/O inside the loop** (file reads, registry queries, network calls).
   - **O(N²) when O(N log N) or O(N)** is straightforward.
   - **String formatting in inner loops** - cache or pre-build where possible.
