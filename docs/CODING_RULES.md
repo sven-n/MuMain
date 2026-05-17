@@ -109,3 +109,15 @@ the pattern accretes consistently.
   - Where it helps, note how the original S6 client handled it vs. how we do it now - the contrast is often the most useful part for a future reader.
 - Extend an existing file in `docs/` for related content rather than starting a new one. A distinct, self-contained system (e.g. `camera-system.md`, `options-window.md`) can have its own file.
 - If it doesn't help a player, an admin, or someone reaching for a formula, don't write it.
+
+## 12. Performance: be deliberate on hot paths
+
+- Don't micro-optimize cold paths (startup, one-shot setup, save/load) - clarity wins over saving 1-iteration-out-of-10.
+- DO be careful on **hot paths**. When adding or touching code, ask: is this called per-frame, per-network-packet, per-character-tick, per-entity, or inside another tight loop?
+- On hot paths, avoid:
+  - **Heap allocations** (`new`, `std::vector` / `std::string` constructed per call) - prefer stack arrays, pre-allocated static buffers, or caches that only rebuild on state change.
+  - **I/O inside the loop** (file reads, registry queries, network calls).
+  - **O(N²) when O(N log N) or O(N)** is straightforward.
+  - **String formatting in inner loops** - cache or pre-build where possible.
+- When existing hot-path code is wasteful on a path you're touching, fix it or file a follow-up. Don't add new abstractions that slow it further without justification.
+- "Hot path" is judged by call frequency and N, not by code prominence. A render function called 60×/sec for 50 visible objects is hot. A config reader called once at boot is not.
