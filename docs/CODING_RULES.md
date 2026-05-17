@@ -54,6 +54,37 @@ language explicitly.
 - Use the existing naming conventions for the module you're working in.
 - Keep includes minimal — only what the file actually uses.
 
+### Namespaces and file names for extracted free functions (new files only)
+
+When extracting free functions from a monolithic file into a new file:
+
+1. **Wrap them in a namespace** following `<Layer>::<Concern>[::<SubConcern>]`.
+   The hierarchy is **domain-first**: code about skills lives under `UI::Skills`
+   regardless of which HUD area renders it; code about combat lives under
+   `UI::Combat`; etc. Examples (fully-qualified function calls, parentheses
+   show where the function name ends and the namespace ends):
+   `UI::Skills::Tooltip::Render()`, `UI::Items::Tooltip::Render()`,
+   `GameLogic::Combat::CalculateDamage()`. The last `::Tooltip` / `::Combat`
+   segment is a sub-concern namespace; the verb (`Render`, `CalculateDamage`)
+   is the function. Don't nest a `Render` namespace just to hold a `Render()`
+   function.
+
+2. **Drop the legacy `NewUI` prefix** from the new file name. New extractions
+   use bare names like `SkillTooltip.cpp` / `SkillTooltip.h`, not
+   `NewUISkillTooltip.cpp`. The `NewUI` prefix on existing files is technical
+   debt from a prior UI generation and conveys nothing useful; new files start
+   clean. Existing files keep their names until a separate broader rename.
+
+These conventions apply only to **new files containing extracted free
+functions**. Existing global functions and existing `C*`-style classes stay
+as they are; they would be migrated as part of a future broader modernization,
+not piecemeal. Anonymous namespaces for file-private helpers remain unchanged.
+
+The first file using this convention is
+`src/source/UI/NewUI/HUD/Skills/SkillTooltip.cpp` (`namespace
+UI::Skills::Tooltip`). Subsequent extractions should follow the same shape so
+the pattern accretes consistently.
+
 ## 8. Guard Against Leaks and Dangling State
 
 - Every allocation/resource has a clear owner and a clear cleanup path.
@@ -83,3 +114,15 @@ language explicitly.
   - Where it helps, note how the original S6 client handled it vs. how we do it now - the contrast is often the most useful part for a future reader.
 - Extend an existing file in `docs/` for related content rather than starting a new one. A distinct, self-contained system (e.g. `camera-system.md`, `options-window.md`) can have its own file.
 - If it doesn't help a player, an admin, or someone reaching for a formula, don't write it.
+
+## 12. Performance: be deliberate on hot paths
+
+- Don't micro-optimize cold paths (startup, one-shot setup, save/load) - clarity wins over saving 1-iteration-out-of-10.
+- DO be careful on **hot paths**. When adding or touching code, ask: is this called per-frame, per-network-packet, per-character-tick, per-entity, or inside another tight loop?
+- On hot paths, avoid:
+  - **Heap allocations** (`new`, `std::vector` / `std::string` constructed per call) - prefer small stack arrays (keep them small to avoid stack-overflow risk), thread-local or pooled buffers, or caches that only rebuild on state change. Plain file-scope `static` buffers are fine for known single-threaded paths (e.g. the main render loop) but risky in worker threads - default to thread-local when in doubt.
+  - **I/O inside the loop** (file reads, registry queries, network calls).
+  - **O(N²) when O(N log N) or O(N)** is straightforward.
+  - **String formatting in inner loops** - cache or pre-build where possible.
+- When existing hot-path code is wasteful on a path you're touching, fix it or file a follow-up. Don't add new abstractions that slow it further without justification.
+- "Hot path" is judged by call frequency and N, not by code prominence. A render function called 60×/sec for 50 visible objects is hot. A config reader called once at boot is not.
