@@ -54,6 +54,32 @@ language explicitly.
 - Use the existing naming conventions for the module you're working in.
 - Keep includes minimal — only what the file actually uses.
 
+### Namespaces and file names for extracted free functions (new files only)
+
+When extracting free functions from a monolithic file into a new file:
+
+1. **Wrap them in a namespace** following `<Layer>::<Concern>[::<SubConcern>]`.
+   The hierarchy is **domain-first**: code about skills lives under `UI::Skills`
+   regardless of which HUD area renders it; code about combat lives under
+   `UI::Combat`; etc. Examples: `UI::Skills::Tooltip::Render`,
+   `UI::Items::Tooltip::Render`, `GameLogic::Combat::CalculateDamage`.
+
+2. **Drop the legacy `NewUI` prefix** from the new file name. New extractions
+   use bare names like `SkillTooltip.cpp` / `SkillTooltip.h`, not
+   `NewUISkillTooltip.cpp`. The `NewUI` prefix on existing files is technical
+   debt from a prior UI generation and conveys nothing useful; new files start
+   clean. Existing files keep their names until a separate broader rename.
+
+These conventions apply only to **new files containing extracted free
+functions**. Existing global functions and existing `C*`-style classes stay
+as they are; they would be migrated as part of a future broader modernization,
+not piecemeal. Anonymous namespaces for file-private helpers remain unchanged.
+
+The first file using this convention is
+`src/source/UI/NewUI/HUD/Skills/SkillTooltip.cpp` (`namespace
+UI::Skills::Tooltip`). Subsequent extractions should follow the same shape so
+the pattern accretes consistently.
+
 ## 8. Guard Against Leaks and Dangling State
 
 - Every allocation/resource has a clear owner and a clear cleanup path.
