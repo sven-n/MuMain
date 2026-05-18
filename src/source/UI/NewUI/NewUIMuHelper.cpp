@@ -1674,7 +1674,7 @@ void CNewUIMuHelper::RenderSkillIcon(int skill, float x, float y, float width, f
         fV = 2 * height / 256.f;
         iKindofSkill = KOS_SKILL2;
     }
-    else if (skill == AT_SKILL_GAOTIC)
+    else if (skill == AT_SKILL_CHAOTIC_DISEIER)
     {
         fU = 3 * width / 256.f;
         fV = 8 * height / 256.f;
@@ -2063,7 +2063,7 @@ void CNewUIMuHelperSkillList::RenderSkillIcon(int iSkillType, float x, float y, 
         fV = 2 * height / 256.f;
         iKindofSkill = KOS_SKILL2;
     }
-    else if (iSkillType == AT_SKILL_GAOTIC)
+    else if (iSkillType == AT_SKILL_CHAOTIC_DISEIER)
     {
         fU = 3 * width / 256.f;
         fV = 8 * height / 256.f;

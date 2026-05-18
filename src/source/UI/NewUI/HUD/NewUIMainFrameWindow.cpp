@@ -2106,7 +2106,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
     int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
 
-    if (!gSkillManager.AreSkillRequirementsFulfilled(bySkillType))
+    if (!gSkillManager.AreSkillAttributeRequirementsMet(bySkillType))
     {
         bCantSkill = true;
     }
@@ -2153,13 +2153,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         bCantSkill = true;
     }
 
-    int iEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-
-    if (gSkillManager.IsSkillDisabled(bySkillType, iEnergy))
-    {
-        bCantSkill = true;
-    }
-
     if (bySkillType == AT_SKILL_PARTY_TELEPORT && PartyNumber <= 0)
     {
         bCantSkill = true;
@@ -2200,10 +2193,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
         )
     {
-        if (gSkillManager.IsSkillDisabled(bySkillType, iEnergy))
-        {
-            bCantSkill = true;
-        }
         if ((g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow)) || (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower)))
         {
             bCantSkill = true;
@@ -2291,13 +2280,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         }
     }
 
-    int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-
-    if (gSkillManager.IsSkillDisabled(bySkillType, iEnergy, iCharisma))
-    {
-        bCantSkill = true;
-    }
-
     if (!g_CMonkSystem.IsSwordformGlovesUseSkill(bySkillType))
     {
         bCantSkill = true;
@@ -2378,7 +2360,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         fV = 2 * height / 256.f;
         iKindofSkill = KOS_SKILL2;
     }
-    else if (bySkillType == AT_SKILL_GAOTIC)
+    else if (bySkillType == AT_SKILL_CHAOTIC_DISEIER)
     {
         fU = 3 * width / 256.f;
         fV = 8 * height / 256.f;

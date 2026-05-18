@@ -23,8 +23,8 @@ constexpr int ENERGY_REQ_SCALE_SUMMON_PERCENT = 3;
 
 CSkillManager::CSkillManager() // OK
 {
-    m_bSkillRequirementsCacheDirty = true;
-    memset(m_aSkillRequirementsFulfilled, 0, sizeof(m_aSkillRequirementsFulfilled));
+    m_bSkillAttributeRequirementsCacheDirty = true;
+    memset(m_aSkillAttributeRequirementsMet, 0, sizeof(m_aSkillAttributeRequirementsMet));
 }
 
 CSkillManager::~CSkillManager() // OK
@@ -72,11 +72,20 @@ void CSkillManager::GetSkillInformation_Energy(int iType, int* piEnergy)
 
     SKILL_ATTRIBUTE* p = &SkillAttribute[iType];
 
+    // Skills with no energy cost in the BMD are free regardless of their
+    // character-level requirement. Without this short-circuit the formula
+    // below would charge a fixed ENERGY_REQ_BASE_DEFAULT (20) for any
+    // Level>0 skill that the BMD author left at Energy=0, which gates many
+    // low-tier or special skills incorrectly.
+    if (p->Energy == 0)
+    {
+        *piEnergy = 0;
+        return;
+    }
+
     // BMD Energy is dual-purpose. For Level=0 skills it's the direct cost
-    // (Falling Slash=0, Summon Goblin=90, Summon Soldier=280, etc., matching
-    // OpenMU server's energyRequirement values). For Level>0 skills it's a
-    // per-level scaling factor that the formula multiplies up to produce the
-    // actual requirement (also matching server).
+    // (Summon Goblin=30, Summon Soldier=300, etc.). For Level>0 skills it's
+    // a per-level scaling factor that the formula multiplies up.
     if (p->Level == 0)
     {
         *piEnergy = p->Energy;
@@ -94,79 +103,6 @@ void CSkillManager::GetSkillInformation_Energy(int iType, int* piEnergy)
     {
         *piEnergy = ENERGY_REQ_BASE_KNIGHT + (p->Energy * p->Level * ENERGY_REQ_SCALE_DEFAULT_PERCENT / 100);
     }
-}
-
-bool CSkillManager::IsSkillDisabled(ActionSkillType Type, int Energy, int Charisma)
-{
-    int SkillEnergy = 0;
-    GetSkillInformation_Energy(Type, &SkillEnergy);
-
-    switch (Type)
-    {
-    case 17:SkillEnergy = 0; break;
-    case 30:SkillEnergy = 30; break;
-    case 31:SkillEnergy = 60; break;
-    case 32:SkillEnergy = 90; break;
-    case 33:SkillEnergy = 130; break;
-    case 34:SkillEnergy = 170; break;
-    case 35:SkillEnergy = 210; break;
-    case 36:SkillEnergy = 300; break;
-    case 37:SkillEnergy = 500; break;
-    case 60:SkillEnergy = 15; break;
-    case AT_SKILL_EARTHSHAKE_STR:
-    case AT_SKILL_EARTHSHAKE_MASTERY:
-    case AT_SKILL_EARTHSHAKE:    SkillEnergy = 0; break;
-    case AT_PET_COMMAND_DEFAULT: SkillEnergy = 0; break;
-    case AT_PET_COMMAND_RANDOM:  SkillEnergy = 0; break;
-    case AT_PET_COMMAND_OWNER:   SkillEnergy = 0; break;
-    case AT_PET_COMMAND_TARGET:  SkillEnergy = 0; break;
-    case AT_SKILL_PLASMA_STORM_FENRIR: SkillEnergy = 0; break;
-    case AT_SKILL_INFINITY_ARROW:
-    case AT_SKILL_INFINITY_ARROW_STR: SkillEnergy = 0; break;
-    case AT_SKILL_STRIKE_OF_DESTRUCTION:
-    case AT_SKILL_STRIKE_OF_DESTRUCTION_STR: SkillEnergy = 0; break;
-    case AT_SKILL_RECOVER:
-    case AT_SKILL_GAOTIC:
-    case AT_SKILL_MULTI_SHOT:
-    case AT_SKILL_FIRE_SCREAM_STR:
-    case AT_SKILL_FIRE_SCREAM:
-        SkillEnergy = 0;
-        break;
-
-    case AT_SKILL_EXPLODE:
-        SkillEnergy = 0;
-        break;
-    }
-
-    if (Type >= AT_SKILL_STUN && Type <= AT_SKILL_REMOVAL_BUFF)
-    {
-        SkillEnergy = 0;
-    }
-    else
-        if ((Type >= 18 && Type <= 23) || (Type >= 41 && Type <= 43) || (Type >= 47 && Type <= 49) || Type == 24 || Type == 51 || Type == 52 || Type == 55 || Type == 56)
-        {
-            SkillEnergy = 0;
-        }
-        else if (Type == 44 || Type == 45 || Type == 46 || Type == 57 || Type == 73 || Type == 74)
-        {
-            SkillEnergy = 0;
-        }
-
-    if (Charisma > 0)
-    {
-        const int SkillCharisma = SkillAttribute[Type].Charisma;
-        if (Charisma < SkillCharisma)
-        {
-            return true;
-        }
-    }
-
-    if (Energy < SkillEnergy)
-    {
-        return true;
-    }
-
-    return false;
 }
 
 void CSkillManager::GetSkillInformation_Charisma(int iType, int* piCharisma)
@@ -293,7 +229,7 @@ bool CSkillManager::skillVScharactorCheck(const DemendConditionInfo& basicInfo, 
     return false;
 }
 
-bool CSkillManager::AreSkillRequirementsFulfilled(ActionSkillType skillType)
+bool CSkillManager::AreSkillAttributeRequirementsMet(ActionSkillType skillType)
 {
     if (skillType >= MAX_SKILLS)
     {
@@ -301,28 +237,28 @@ bool CSkillManager::AreSkillRequirementsFulfilled(ActionSkillType skillType)
     }
 
     // Rebuild cache if dirty (on first call after stat/skill changes)
-    if (m_bSkillRequirementsCacheDirty)
+    if (m_bSkillAttributeRequirementsCacheDirty)
     {
-        RebuildSkillRequirementsCache();
+        RebuildSkillAttributeRequirementsCache();
     }
 
-    return m_aSkillRequirementsFulfilled[skillType];
+    return m_aSkillAttributeRequirementsMet[skillType];
 }
 
-void CSkillManager::InvalidateSkillRequirementsCache()
+void CSkillManager::InvalidateSkillAttributeRequirementsCache()
 {
-    m_bSkillRequirementsCacheDirty = true;
+    m_bSkillAttributeRequirementsCacheDirty = true;
 }
 
-void CSkillManager::InitializeSkillRequirementsCache()
+void CSkillManager::InitializeSkillAttributeRequirementsCache()
 {
-    m_bSkillRequirementsCacheDirty = true;
-    RebuildSkillRequirementsCache();
+    m_bSkillAttributeRequirementsCacheDirty = true;
+    RebuildSkillAttributeRequirementsCache();
 }
 
-void CSkillManager::RebuildSkillRequirementsCache()
+void CSkillManager::RebuildSkillAttributeRequirementsCache()
 {
-    if (!m_bSkillRequirementsCacheDirty)
+    if (!m_bSkillAttributeRequirementsCacheDirty)
     {
         return;
     }
@@ -342,7 +278,7 @@ void CSkillManager::RebuildSkillRequirementsCache()
         ActionSkillType baseSkill = MasterSkillToBaseSkillIndex(static_cast<ActionSkillType>(skillType));
         if (isGuardian && (baseSkill == AT_SKILL_TELEPORT_ALLY || baseSkill == AT_SKILL_TELEPORT))
         {
-            m_aSkillRequirementsFulfilled[skillType] = false;
+            m_aSkillAttributeRequirementsMet[skillType] = false;
             continue;
         }
 
@@ -356,8 +292,8 @@ void CSkillManager::RebuildSkillRequirementsCache()
         skillRequirements.SkillEnergy = static_cast<WORD>(reqEnergy);
         skillRequirements.SkillCharisma = SkillAttribute[baseSkill].Charisma;
 
-        m_aSkillRequirementsFulfilled[skillType] = (skillRequirements <= heroCharacterInfo);
+        m_aSkillAttributeRequirementsMet[skillType] = (skillRequirements <= heroCharacterInfo);
     }
 
-    m_bSkillRequirementsCacheDirty = false;
+    m_bSkillAttributeRequirementsCacheDirty = false;
 }

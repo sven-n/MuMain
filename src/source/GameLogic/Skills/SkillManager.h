@@ -48,18 +48,16 @@ public:
     BYTE GetSkillMasteryType(ActionSkillType iType);
     ActionSkillType MasterSkillToBaseSkillIndex(ActionSkillType masterSkill);
     bool skillVScharactorCheck(const DemendConditionInfo& basicInfo, const DemendConditionInfo& heroInfo);
-    bool AreSkillRequirementsFulfilled(ActionSkillType skilltype);
-    bool IsSkillDisabled(ActionSkillType Type, int Energy, int Charisma = 0);
+    bool AreSkillAttributeRequirementsMet(ActionSkillType skilltype);
 
-    // Cache management
-    void InvalidateSkillRequirementsCache();
-    void InitializeSkillRequirementsCache();
+    void InvalidateSkillAttributeRequirementsCache();
+    void InitializeSkillAttributeRequirementsCache();
 
 private:
-    void RebuildSkillRequirementsCache();
+    void RebuildSkillAttributeRequirementsCache();
 
-    bool m_bSkillRequirementsCacheDirty;
-    bool m_aSkillRequirementsFulfilled[MAX_SKILLS];
+    bool m_bSkillAttributeRequirementsCacheDirty;
+    bool m_aSkillAttributeRequirementsMet[MAX_SKILLS];
 };
 
 extern CSkillManager gSkillManager;
