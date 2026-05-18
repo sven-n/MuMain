@@ -9,9 +9,10 @@ Esta etapa cria apenas o scaffold inicial: ainda e nao jogavel / not playable.
 - Incremental: o cliente legado continua sendo a referencia funcional.
 - Sem runtime jogavel, UI, assets, audio, editor ou gameplay em Rust nesta fase.
 - O modo `--control-http` e um servidor HTTP local de teste para consultar
-  estado e enviar comandos; ele nao substitui a rede do jogo.
+  estado e enviar comandos; detalhes em `docs/control-http.md`.
 - O binario `mu_fake_server` e um servidor fake de connect-server para testes
-  locais, sem persistencia, configurado inteiramente por CLI.
+  locais, sem persistencia, configurado inteiramente por CLI; detalhes em
+  `docs/face_server.md`.
 - Nenhum arquivo de implementacao legado deve ser movido para ca sem uma fase planejada.
 
 ## Validacao local prevista
@@ -51,6 +52,11 @@ rtk cargo run --manifest-path port_rust/Cargo.toml -p mu_fake_server -- \
 
 Repita `--server` para adicionar mais entradas na lista de servidores. Cada
 entrada usa o formato `CONNECT_INDEX:PERCENT`.
+
+Veja tambem:
+
+- `docs/control-http.md` para o fluxo completo do servidor HTTP de controle.
+- `docs/face_server.md` para o fluxo completo do fake connect-server.
 
 ## Dependencias dos scripts de port
 
