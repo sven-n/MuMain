@@ -46,6 +46,7 @@ mod tests {
             editor_admin: false,
             offline_fixture: None,
             headless: true,
+            control_http: None,
             evidence_dir: None,
         }
     }
