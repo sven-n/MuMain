@@ -1,5 +1,5 @@
 use std::io::{self, BufRead, BufReader, Read, Write};
-use std::net::{SocketAddr, TcpListener, TcpStream};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
@@ -332,7 +332,7 @@ fn split_target(target: &str) -> (String, String) {
 }
 
 fn poke_shutdown(address: SocketAddr) -> io::Result<()> {
-    let mut stream = TcpStream::connect(address)?;
+    let mut stream = TcpStream::connect(wakeup_target(address))?;
     write_all(
         &mut stream,
         "GET /__shutdown HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n",
@@ -340,6 +340,19 @@ fn poke_shutdown(address: SocketAddr) -> io::Result<()> {
     let mut response = Vec::new();
     let _ = stream.read_to_end(&mut response);
     Ok(())
+}
+
+fn wakeup_target(address: SocketAddr) -> SocketAddr {
+    if !address.ip().is_unspecified() {
+        return address;
+    }
+
+    let ip = match address {
+        SocketAddr::V4(_) => IpAddr::V4(Ipv4Addr::LOCALHOST),
+        SocketAddr::V6(_) => IpAddr::V6(Ipv6Addr::LOCALHOST),
+    };
+
+    SocketAddr::new(ip, address.port())
 }
 
 fn write_response(
@@ -511,6 +524,17 @@ mod tests {
     #[test]
     fn shutdown_request_joins_cleanly() {
         let handle = spawn("127.0.0.1:0".parse().unwrap(), AppState::Boot).unwrap();
+
+        handle.request_shutdown();
+
+        let final_snapshot = handle.join().unwrap();
+        assert_eq!(final_snapshot.state, AppState::Boot);
+        assert_eq!(final_snapshot.command_count, 0);
+    }
+
+    #[test]
+    fn shutdown_request_joins_cleanly_on_wildcard_bind() {
+        let handle = spawn("0.0.0.0:0".parse().unwrap(), AppState::Boot).unwrap();
 
         handle.request_shutdown();
 

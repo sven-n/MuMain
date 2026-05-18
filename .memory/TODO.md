@@ -29,3 +29,7 @@ The migration plan in `.features/20260518-0000-rust-bevy-port/plan.md` is comple
 # [high] Legacy comparison harness
 
 `F2.S1.T2` is done locally. Next local step is `F2.S1.T3`, adding the comparison harness under `port_rust/crates/mu_test_support` so fixture and evidence tracking can continue.
+
+# [high] Source inventory audit blocked
+
+`F2.S1.T5` is the next planned implementation step after the UI fixture and evidence-doc work. It remains blocked until implementation authorization, and will add the source/dependency classification audit under `port_rust/crates/mu_test_support` and `port_rust/tests/rust/source_inventory.rs`.

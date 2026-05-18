@@ -1,8 +1,8 @@
 # Port completo Rust + Bevy do cliente MU
 
-Status atual: F2.S1.T2 concluído localmente; F2.S1.T3 é o próximo passo local
+Status atual: F2.S2.T1 concluído localmente; F2.S1.T5 permanece bloqueado até existir autorização de implementação
 
-Próximo passo concreto: iniciar `F2.S1.T3` localmente, o harness de comparação legado em `mu_test_support`; `F1.S2.T2` permanece bloqueado até existir artefato/checksum/log de Actions.
+Próximo passo concreto: aguardar autorização para `F2.S1.T5`, a auditoria de classificação de fonte/dependência; `F1.S2.T2` continua bloqueado até existir artefato/checksum/log de Actions.
 
 Sincronização com git: `rtk git status --short --untracked-files=all` agora mostra `.features/20260518-0000-rust-bevy-port/progress.md`, `.memory/{RULES_AND_DEFINITION.md,TODO.md}`, `port_rust/crates/mu_protocol/tests/**` e `port_rust/tests/rust/protocol_inventory.rs`; o relatório local `tmp/asset-inventory/data-report.txt` continua sendo artefato ignorado e também está representado em "Arquivos tocados".
 
@@ -38,10 +38,10 @@ Validation Gate F1: todo.
 |---|---|---|---|---|---|---|---|
 | F2.S1.T1 | done | `feature-assets` | `port_rust/crates/mu_asset_pipeline/src/{inventory.rs,main.rs}` | `port_rust/crates/mu_asset_pipeline/src/inventory.rs`, `port_rust/crates/mu_asset_pipeline/src/main.rs`, `port_rust/crates/mu_asset_pipeline/src/lib.rs`, `port_rust/crates/mu_asset_pipeline/Cargo.toml`, `tmp/asset-inventory/data-report.txt` | fixture report matching Asset Inventory | scanner conta arquivos por extensão e diretório, rejeita `.att1`, `.ozj2`, `.rar` e `World1/xxx`; relatório real encontrou 13.168 arquivos e 4 rejeições esperadas | nenhum |
 | F2.S1.T2 | done | `feature-network` | `port_rust/crates/mu_protocol/tests/fixtures/**`, `port_rust/tests/rust/protocol_inventory.rs` | `port_rust/crates/mu_protocol/tests/protocol_inventory.rs`, `port_rust/tests/rust/protocol_inventory.rs`, `port_rust/crates/mu_protocol/tests/fixtures/*.txt` | fixture manifest checked into tests | 14 placeholders registrados e validados por teste Cargo-runnable que inclui o manifesto do workspace no crate `mu_protocol` | nenhum |
-| F2.S1.T3 | todo | `feature-test-support` | `port_rust/crates/mu_test_support/src/{legacy.rs,fixtures.rs,evidence.rs}` | nenhum | harness unit tests | pendente | aguarda autorização de implementação |
-| F2.S1.T4 | todo | `feature-ui` | `port_rust/tests/rust/ui_fixtures/**`, `port_rust/crates/mu_ui/src/fixture_routes.rs` | nenhum | snapshot manifest | pendente | aguarda autorização de implementação |
+| F2.S1.T3 | done | `feature-test-support` | `port_rust/crates/mu_test_support/src/{legacy.rs,fixtures.rs,evidence.rs}` | `port_rust/crates/mu_test_support/Cargo.toml`, `port_rust/crates/mu_test_support/src/{lib.rs,fixtures.rs,evidence.rs,legacy.rs}` | harness unit tests | helpers de fixtures/evidence/legacy comparison com slugs estáveis, paths canônicos para logs/screenshots/reports/diffs e testes unitários cobrindo os builders; validação passou em fmt, testes focados, workspace, smoke headless e clippy | nenhum |
+| F2.S1.T4 | done | `feature-ui` | `port_rust/tests/rust/ui_fixtures/**`, `port_rust/crates/mu_ui/src/fixture_routes.rs` | `port_rust/tests/rust/ui_fixtures.rs`, `port_rust/tests/rust/ui_fixtures/manifest.txt`, `port_rust/crates/mu_ui/src/fixture_routes.rs`, `port_rust/crates/mu_ui/src/lib.rs` | snapshot manifest | fixture manifest de UI/editor fechado com 35 slugs e caminhos estáveis; validação passou em `cargo fmt --manifest-path port_rust/Cargo.toml --all --check`, `cargo test --manifest-path port_rust/Cargo.toml --workspace` e `cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings` | nenhum |
 | F2.S1.T5 | todo | `feature-test-support` | `port_rust/crates/mu_test_support/src/source_inventory.rs`, `port_rust/tests/rust/source_inventory.rs`, `docs/rust-client.md` | nenhum | source inventory report + test | pendente | aguarda autorização de implementação |
-| F2.S2.T1 | todo | `feature-test-support` | `docs/rust-client.md`, `port_rust/crates/mu_test_support/src/evidence.rs` | nenhum | sample evidence output | pendente | aguarda autorização de implementação |
+| F2.S2.T1 | done | `feature-test-support` | `docs/rust-client.md`, `port_rust/crates/mu_test_support/src/evidence.rs` | `docs/rust-client.md`, `port_rust/crates/mu_test_support/src/evidence.rs` | sample evidence output | layout de evidência documentado com exemplos estáveis para logs, screenshots, reports e diffs; validação passou em fmt, testes do workspace e clippy | nenhum |
 
 Validation Gate F2: todo.
 
@@ -239,9 +239,9 @@ Removidos:
 
 ## Contagem de tarefas
 
-- done: 4 documentais + 7 implementação
+- done: 4 documentais + 10 implementação
 - doing: 0
-- todo: 58 implementação
+- todo: 55 implementação
 - blocked: 1
 - failed: 0
 
@@ -256,5 +256,5 @@ Removidos:
 - F2.S1.T1 concluída com scanner e relatório local de inventário de assets.
 - F2.S1.T2 concluída com manifesto e fixtures de inventário de protocolo; o teste Cargo-runnable inclui o manifesto do workspace no crate `mu_protocol`.
 - Nenhuma fase jogável foi iniciada.
-- Próxima tarefa executável local é `F2.S1.T3`.
+- Próxima tarefa executável local é `F2.S1.T5`, mas segue bloqueada até existir autorização de implementação.
 - Evidências já disponíveis: `cargo metadata`, `cargo tree --manifest-path port_rust/Cargo.toml --workspace --depth 1`, `cargo test --manifest-path port_rust/Cargo.toml --workspace`, `cargo build --manifest-path port_rust/Cargo.toml -p mu_client`, `cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings`, `cargo fmt --manifest-path port_rust/Cargo.toml --all --check`, smokes headless, `rg` da política central, `port_rust/Cargo.lock` e relatório local de inventário.
