@@ -1,0 +1,9 @@
+[package]
+name = "mu_asset_pipeline"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+camino.workspace = true
+clap.workspace = true

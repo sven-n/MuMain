@@ -1,4 +1,36 @@
 [workspace]
-members = ["crates/port_rust"]
+members = [
+    "crates/port_rust",
+    "crates/mu_client",
+    "crates/mu_app",
+    "crates/mu_core",
+    "crates/mu_protocol",
+    "crates/mu_network",
+    "crates/mu_assets",
+    "crates/mu_asset_pipeline",
+    "crates/mu_render",
+    "crates/mu_ui",
+    "crates/mu_audio",
+    "crates/mu_input",
+    "crates/mu_gameplay",
+    "crates/mu_editor_admin",
+    "crates/mu_test_support",
+]
 resolver = "2"
 
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace.dependencies]
+bevy = { version = "0.18", default-features = false }
+camino = "1"
+clap = { version = "4", features = ["derive", "env"] }
+insta = "1"
+proptest = "1"
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "sync", "time"] }
+toml = "0.9"
+tracing = "0.1"

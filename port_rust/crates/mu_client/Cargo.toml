@@ -1,0 +1,9 @@
+[package]
+name = "mu_client"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+clap.workspace = true
+mu_app = { path = "../mu_app" }

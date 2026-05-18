@@ -1,0 +1,48 @@
+name: Rust Client
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  rust-client:
+    name: rust-client
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            port_rust/target
+          key: rust-client-${{ runner.os }}-${{ hashFiles('port_rust/Cargo.lock') }}
+
+      - name: Check formatting
+        run: |
+          cargo fmt --manifest-path port_rust/Cargo.toml --all --check
+
+      - name: Run Clippy
+        run: |
+          cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings
+
+      - name: Run tests
+        run: |
+          cargo test --manifest-path port_rust/Cargo.toml --workspace
+
+      - name: Build client
+        run: |
+          cargo build --manifest-path port_rust/Cargo.toml -p mu_client

@@ -1,0 +1,52 @@
+name: Rust Client Windows
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  rust-client-windows:
+    name: rust-client-windows-x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\.cargo\registry
+            ~\.cargo\git
+            port_rust\target
+          key: rust-client-windows-${{ runner.os }}-${{ hashFiles('port_rust/Cargo.lock') }}
+
+      - name: Build release client
+        run: |
+          cargo build --manifest-path port_rust/Cargo.toml --release -p mu_client
+
+      - name: Generate checksum
+        shell: pwsh
+        run: |
+          Get-FileHash port_rust\target\release\mu_client.exe -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLower())  port_rust\target\release\mu_client.exe" } |
+            Set-Content port_rust\target\release\mu_client.exe.sha256
+
+      - name: Upload client artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-windows-x64
+          path: |
+            port_rust/target/release/mu_client.exe
+            port_rust/target/release/mu_client.exe.sha256
+          if-no-files-found: error

@@ -13,7 +13,7 @@ Status: READY_FOR_EXEC
 
 ## Approach
 
-Criar um workspace Rust paralelo ao cliente atual. O binário `mu_client` usa Bevy no runtime e orquestra crates separadas para app state, protocolo, rede, assets, renderização, UI, áudio, input, gameplay, editor/admin e suporte de testes. O runtime nunca chama o pipeline de conversão de assets.
+Criar um workspace Rust dentro de `port_rust/`, paralelo ao cliente atual. O binário `mu_client` usa Bevy no runtime e orquestra crates separadas para app state, protocolo, rede, assets, renderização, UI, áudio, input, gameplay, editor/admin e suporte de testes. O runtime nunca chama o pipeline de conversão de assets.
 
 O trabalho é faseado por inventário verificável. Cada fase produz evidência local/CI e, quando libera superfície visível ou sensível, handoff para `e2e-validator`. Nenhuma superfície do `spec.md` pode ser marcada migrada sem teste automatizado, snapshot, log verificável ou relatório e2e.
 
@@ -27,24 +27,24 @@ Arquivos alterados por esta etapa documental:
 
 Arquivos planejados para implementação futura:
 
-- `rust-toolchain.toml`
-- `Cargo.toml`
-- `Cargo.lock`
-- `crates/mu_client/**`
-- `crates/mu_app/**`
-- `crates/mu_core/**`
-- `crates/mu_protocol/**`
-- `crates/mu_network/**`
-- `crates/mu_assets/**`
-- `crates/mu_asset_pipeline/**`
-- `crates/mu_render/**`
-- `crates/mu_ui/**`
-- `crates/mu_audio/**`
-- `crates/mu_input/**`
-- `crates/mu_gameplay/**`
-- `crates/mu_editor_admin/**`
-- `crates/mu_test_support/**`
-- `tests/rust/**`
+- `port_rust/rust-toolchain.toml`
+- `port_rust/Cargo.toml`
+- `port_rust/Cargo.lock`
+- `port_rust/crates/mu_client/**`
+- `port_rust/crates/mu_app/**`
+- `port_rust/crates/mu_core/**`
+- `port_rust/crates/mu_protocol/**`
+- `port_rust/crates/mu_network/**`
+- `port_rust/crates/mu_assets/**`
+- `port_rust/crates/mu_asset_pipeline/**`
+- `port_rust/crates/mu_render/**`
+- `port_rust/crates/mu_ui/**`
+- `port_rust/crates/mu_audio/**`
+- `port_rust/crates/mu_input/**`
+- `port_rust/crates/mu_gameplay/**`
+- `port_rust/crates/mu_editor_admin/**`
+- `port_rust/crates/mu_test_support/**`
+- `port_rust/tests/rust/**`
 - `.github/workflows/rust-client.yml`
 - `.github/workflows/rust-client-windows.yml`
 - `docs/rust-client.md`
@@ -65,7 +65,7 @@ Arquivos planejados para implementação futura:
 - UI contract: Bevy UI routes represent boot, login, server select, character select/create/delete, world, HUD, inventory, NPC/shop, chat, options, GameShop, MU Helper, quests/events/social, editor/admin, loading and error states.
 - Translation contract: Rust loader consumes converted `Translations/{locale}/{game,editor,metadata}.json`; fallback is deterministic and missing keys are logged without crashing.
 - Log contract: structured `tracing`; no password, token, raw session ID, payment secret or credential in logs.
-- CI contract: Rust PR gates run `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, Linux build, Windows x64 release build when applicable, and existing CMake/doctest gates while the legacy client coexists.
+- CI contract: Rust PR gates run `cargo fmt --manifest-path port_rust/Cargo.toml --all --check`, `cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings`, `cargo test --manifest-path port_rust/Cargo.toml --workspace`, Linux build, Windows x64 release build when applicable, and existing CMake/doctest gates while the legacy client coexists.
 - External API/DB/billing: no new public HTTP API, database migration or billing contract change.
 
 ## Legacy Source Inventory
@@ -177,132 +177,132 @@ All C# NativeAOT entrypoints in `ClientLibrary` are comparison inputs. The Rust 
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F1.S1.T1 Workspace skeleton | `feature-rust-foundation` | `rust-toolchain.toml`, `Cargo.toml`, `Cargo.lock`, `crates/*/Cargo.toml`, `crates/*/src/lib.rs` | none | `cargo metadata` lists all planned crates | `cargo metadata --no-deps --format-version 1` |
-| F1.S1.T2 Dependency policy | `feature-rust-foundation` | `Cargo.toml`, crate manifests | F1.S1.T1 | Bevy `0.18`, `serde`, `thiserror`, `tracing`, `tokio`, `clap`, `toml`, `camino`, `insta`, `proptest` centralized | `cargo tree --workspace --depth 1` |
-| F1.S1.T3 App state shell | `feature-rust-foundation` | `crates/mu_client/src/main.rs`, `crates/mu_app/src/{lib.rs,state.rs,cli.rs}` | F1.S1.T2 | states `Boot`, `AssetCheckFailed`, `ReadyForLogin`, `Exit` are testable in headless mode | unit tests + headless smoke |
+| F1.S1.T1 Workspace skeleton | `feature-rust-foundation` | `port_rust/rust-toolchain.toml`, `port_rust/Cargo.toml`, `port_rust/Cargo.lock`, `port_rust/crates/*/Cargo.toml`, `port_rust/crates/*/src/lib.rs` | none | `cargo metadata` lists all planned crates | `cargo metadata --manifest-path port_rust/Cargo.toml --no-deps --format-version 1` |
+| F1.S1.T2 Dependency policy | `feature-rust-foundation` | `port_rust/Cargo.toml`, crate manifests | F1.S1.T1 | Bevy `0.18`, `serde`, `thiserror`, `tracing`, `tokio`, `clap`, `toml`, `camino`, `insta`, `proptest` centralized | `cargo tree --manifest-path port_rust/Cargo.toml --workspace --depth 1` |
+| F1.S1.T3 App state shell | `feature-rust-foundation` | `port_rust/crates/mu_client/src/main.rs`, `port_rust/crates/mu_app/src/{lib.rs,state.rs,cli.rs}` | F1.S1.T2 | states `Boot`, `AssetCheckFailed`, `ReadyForLogin`, `Exit` are testable in headless mode | unit tests + headless smoke |
 | F1.S2.T1 Linux Rust CI | `feature-ci` | `.github/workflows/rust-client.yml` | F1.S1.T1 | workflow runs fmt, clippy, test, build | local equivalent or Actions log |
 | F1.S2.T2 Windows x64 CI | `feature-ci` | `.github/workflows/rust-client-windows.yml` | F1.S1.T1 | release artifact `mu_client.exe` is produced | artifact/checksum + release build log |
 | F1.S2.T3 Legacy CI coexistence | `feature-ci` | `.github/workflows/*.yml`, docs notes if needed | F1.S2.T1 | Rust gates do not disable current CMake/doctest gates | CI matrix evidence |
 
-Validation Gate F1: `cargo fmt --check`; `cargo clippy --workspace --all-targets -- -D warnings`; `cargo test --workspace`; `cargo build -p mu_client`; existing CMake/doctest gates still present.
+Validation Gate F1: `cargo fmt --manifest-path port_rust/Cargo.toml --all --check`; `cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings`; `cargo test --manifest-path port_rust/Cargo.toml --workspace`; `cargo build --manifest-path port_rust/Cargo.toml -p mu_client`; existing CMake/doctest gates still present.
 
 ### F2. Inventory, fixtures and comparison harness
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F2.S1.T1 Asset inventory scanner | `feature-assets` | `crates/mu_asset_pipeline/src/{inventory.rs,main.rs}` | F1 | scanner emits counts by dir/extension and rejects anomalies | fixture report matching `Asset Inventory` |
-| F2.S1.T2 Protocol inventory fixtures | `feature-network` | `crates/mu_protocol/tests/fixtures/**`, `tests/rust/protocol_inventory.rs` | F1 | all protocol groups have fixture placeholders or captured golden packets | fixture manifest checked into tests |
-| F2.S1.T3 Legacy comparison harness | `feature-test-support` | `crates/mu_test_support/src/{legacy.rs,fixtures.rs,evidence.rs}` | F1 | tests can record output paths, screenshots/logs and legacy-vs-Rust diffs | harness unit tests |
-| F2.S1.T4 UI visual fixture list | `feature-ui` | `tests/rust/ui_fixtures/**`, `crates/mu_ui/src/fixture_routes.rs` | F1 | every UI/editor surface has named offline fixture | snapshot manifest |
-| F2.S1.T5 Source/dependency classification audit | `feature-test-support` | `crates/mu_test_support/src/source_inventory.rs`, `tests/rust/source_inventory.rs`, `docs/rust-client.md` | F1 | every legacy source/dependency path is classified and mapped to target, replacement, fixture-only use or rejection | source inventory report + test |
-| F2.S2.T1 Evidence artifact conventions | `feature-test-support` | `docs/rust-client.md`, `crates/mu_test_support/src/evidence.rs` | F2.S1.T3 | logs/screenshots/reports follow stable path naming | sample evidence output |
+| F2.S1.T1 Asset inventory scanner | `feature-assets` | `port_rust/crates/mu_asset_pipeline/src/{inventory.rs,main.rs}` | F1 | scanner emits counts by dir/extension and rejects anomalies | fixture report matching `Asset Inventory` |
+| F2.S1.T2 Protocol inventory fixtures | `feature-network` | `port_rust/crates/mu_protocol/tests/fixtures/**`, `port_rust/tests/rust/protocol_inventory.rs` | F1 | all protocol groups have fixture placeholders or captured golden packets | fixture manifest checked into tests |
+| F2.S1.T3 Legacy comparison harness | `feature-test-support` | `port_rust/crates/mu_test_support/src/{legacy.rs,fixtures.rs,evidence.rs}` | F1 | tests can record output paths, screenshots/logs and legacy-vs-Rust diffs | harness unit tests |
+| F2.S1.T4 UI visual fixture list | `feature-ui` | `port_rust/tests/rust/ui_fixtures/**`, `port_rust/crates/mu_ui/src/fixture_routes.rs` | F1 | every UI/editor surface has named offline fixture | snapshot manifest |
+| F2.S1.T5 Source/dependency classification audit | `feature-test-support` | `port_rust/crates/mu_test_support/src/source_inventory.rs`, `port_rust/tests/rust/source_inventory.rs`, `docs/rust-client.md` | F1 | every legacy source/dependency path is classified and mapped to target, replacement, fixture-only use or rejection | source inventory report + test |
+| F2.S2.T1 Evidence artifact conventions | `feature-test-support` | `docs/rust-client.md`, `port_rust/crates/mu_test_support/src/evidence.rs` | F2.S1.T3 | logs/screenshots/reports follow stable path naming | sample evidence output |
 
-Validation Gate F2: `cargo test -p mu_test_support -p mu_protocol -p mu_asset_pipeline`; source/dependency classification report has no unclassified paths; generated fixture inventories under test artifact directory; `e2e-validator` not required yet unless UI smoke is enabled.
+Validation Gate F2: `cargo test --manifest-path port_rust/Cargo.toml -p mu_test_support -p mu_protocol -p mu_asset_pipeline`; source/dependency classification report has no unclassified paths; generated fixture inventories under test artifact directory; `e2e-validator` not required yet unless UI smoke is enabled.
 
 ### F3. Assets and localization
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F3.S1.T1 Manifest schema/runtime validator | `feature-assets` | `crates/mu_assets/src/{manifest.rs,validation.rs,runtime.rs}`, tests | F2 | valid manifest passes; missing/schema/hash mismatch blocks boot | unit/integration tests |
-| F3.S1.T2 Texture conversion | `feature-assets` | `crates/mu_asset_pipeline/src/{textures.rs,manifest_writer.rs}` | F3.S1.T1 | `.ozj`, `.ozt`, `.bmp`, `.tga` convert or reject with reason | converter tests with sample fixtures |
-| F3.S1.T3 Model conversion | `feature-assets` | `crates/mu_asset_pipeline/src/{models.rs,bmd.rs,smd.rs,obj.rs}` | F3.S1.T1 | `.bmd`, `.smd`, `.obj` produce loadable mesh/skeleton metadata | golden model fixture |
-| F3.S1.T4 Terrain conversion | `feature-assets` | `crates/mu_asset_pipeline/src/{terrain.rs,map.rs,att.rs,ozb.rs}` | F3.S1.T1 | `.map`, `.att`, `.ozb` produce terrain/collision/light data | terrain fixture + checksum |
-| F3.S1.T5 Game data conversion | `feature-assets` | `crates/mu_asset_pipeline/src/{game_data.rs,shop_data.rs}` | F3.S1.T1 | `Local`, GameShop scripts and data files are parsed or classified | data parser tests |
-| F3.S1.T6 Runtime no-conversion architecture test | `feature-assets` | `crates/mu_assets/tests/runtime_dependencies.rs` | F3.S1.T2-F3.S1.T5 | runtime crates do not depend on pipeline crate | dependency test |
-| F3.S2.T1 Translation loader | `feature-ui` | `crates/mu_ui/src/i18n.rs`, `crates/mu_assets/src/translations.rs` | F3.S1.T1 | locales `de,en,es,id,pl,pt,ru,tl,uk,zh-TW` load with fallback | missing-key/fallback tests |
-| F3.S2.T2 Audio asset classification | `feature-audio` | `crates/mu_assets/src/audio.rs`, `crates/mu_audio/src/assets.rs` | F3.S1.T1 | music/SFX references are in manifest and missing assets diagnose safely | audio asset tests |
+| F3.S1.T1 Manifest schema/runtime validator | `feature-assets` | `port_rust/crates/mu_assets/src/{manifest.rs,validation.rs,runtime.rs}`, tests | F2 | valid manifest passes; missing/schema/hash mismatch blocks boot | unit/integration tests |
+| F3.S1.T2 Texture conversion | `feature-assets` | `port_rust/crates/mu_asset_pipeline/src/{textures.rs,manifest_writer.rs}` | F3.S1.T1 | `.ozj`, `.ozt`, `.bmp`, `.tga` convert or reject with reason | converter tests with sample fixtures |
+| F3.S1.T3 Model conversion | `feature-assets` | `port_rust/crates/mu_asset_pipeline/src/{models.rs,bmd.rs,smd.rs,obj.rs}` | F3.S1.T1 | `.bmd`, `.smd`, `.obj` produce loadable mesh/skeleton metadata | golden model fixture |
+| F3.S1.T4 Terrain conversion | `feature-assets` | `port_rust/crates/mu_asset_pipeline/src/{terrain.rs,map.rs,att.rs,ozb.rs}` | F3.S1.T1 | `.map`, `.att`, `.ozb` produce terrain/collision/light data | terrain fixture + checksum |
+| F3.S1.T5 Game data conversion | `feature-assets` | `port_rust/crates/mu_asset_pipeline/src/{game_data.rs,shop_data.rs}` | F3.S1.T1 | `Local`, GameShop scripts and data files are parsed or classified | data parser tests |
+| F3.S1.T6 Runtime no-conversion architecture test | `feature-assets` | `port_rust/crates/mu_assets/tests/runtime_dependencies.rs` | F3.S1.T2-F3.S1.T5 | runtime crates do not depend on pipeline crate | dependency test |
+| F3.S2.T1 Translation loader | `feature-ui` | `port_rust/crates/mu_ui/src/i18n.rs`, `port_rust/crates/mu_assets/src/translations.rs` | F3.S1.T1 | locales `de,en,es,id,pl,pt,ru,tl,uk,zh-TW` load with fallback | missing-key/fallback tests |
+| F3.S2.T2 Audio asset classification | `feature-audio` | `port_rust/crates/mu_assets/src/audio.rs`, `port_rust/crates/mu_audio/src/assets.rs` | F3.S1.T1 | music/SFX references are in manifest and missing assets diagnose safely | audio asset tests |
 
-Validation Gate F3: `cargo test -p mu_assets -p mu_asset_pipeline -p mu_ui -p mu_audio`; converter runs on minimal fixture; `mu_client --asset-root <invalid>` shows safe error; e2e-validator validates asset error and valid boot smoke.
+Validation Gate F3: `cargo test --manifest-path port_rust/Cargo.toml -p mu_assets -p mu_asset_pipeline -p mu_ui -p mu_audio`; converter runs on minimal fixture; `mu_client --asset-root <invalid>` shows safe error; e2e-validator validates asset error and valid boot smoke.
 
 ### F4. Config, logging and app services
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F4.S1.T1 Config persistence | `feature-config` | `crates/mu_app/src/config.rs`, `crates/mu_input/src/bindings.rs`, `crates/mu_audio/src/settings.rs` | F1 | TOML roundtrip preserves video/audio/controls/network/locale and omits secrets | roundtrip tests |
-| F4.S1.T2 CLI/env merge rules | `feature-config` | `crates/mu_app/src/cli.rs`, `crates/mu_app/src/config.rs` | F4.S1.T1 | CLI/env/config precedence is deterministic | precedence tests |
-| F4.S2.T1 Structured logging | `feature-observability` | `crates/mu_app/src/logging.rs`, `crates/mu_network/src/redaction.rs` | F1 | logs include component/error IDs and redact secrets | redaction tests |
-| F4.S2.T2 Error catalog | `feature-observability` | `crates/mu_core/src/error.rs`, `crates/mu_ui/src/error.rs` | F4.S2.T1 | user-safe messages map to technical diagnostics | catalog tests |
+| F4.S1.T1 Config persistence | `feature-config` | `port_rust/crates/mu_app/src/config.rs`, `port_rust/crates/mu_input/src/bindings.rs`, `port_rust/crates/mu_audio/src/settings.rs` | F1 | TOML roundtrip preserves video/audio/controls/network/locale and omits secrets | roundtrip tests |
+| F4.S1.T2 CLI/env merge rules | `feature-config` | `port_rust/crates/mu_app/src/cli.rs`, `port_rust/crates/mu_app/src/config.rs` | F4.S1.T1 | CLI/env/config precedence is deterministic | precedence tests |
+| F4.S2.T1 Structured logging | `feature-observability` | `port_rust/crates/mu_app/src/logging.rs`, `port_rust/crates/mu_network/src/redaction.rs` | F1 | logs include component/error IDs and redact secrets | redaction tests |
+| F4.S2.T2 Error catalog | `feature-observability` | `port_rust/crates/mu_core/src/error.rs`, `port_rust/crates/mu_ui/src/error.rs` | F4.S2.T1 | user-safe messages map to technical diagnostics | catalog tests |
 
-Validation Gate F4: `cargo test -p mu_app -p mu_input -p mu_audio -p mu_network -p mu_core`; generated config artifact; redaction report.
+Validation Gate F4: `cargo test --manifest-path port_rust/Cargo.toml -p mu_app -p mu_input -p mu_audio -p mu_network -p mu_core`; generated config artifact; redaction report.
 
 ### F5. Protocol and network
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F5.S1.T1 Packet framing/codec | `feature-network` | `crates/mu_protocol/src/{codec.rs,frame.rs,error.rs}` | F2.S1.T2 | encode/decode supports legacy framing and error cases | golden tests |
-| F5.S1.T2 Connect/chat/session packets | `feature-network` | `crates/mu_protocol/src/{connect.rs,chat.rs,session.rs,login.rs}` | F5.S1.T1 | entrypoints in connect/chat/session groups covered | golden tests |
-| F5.S1.T3 Character/world/movement packets | `feature-network` | `crates/mu_protocol/src/{character.rs,world.rs,movement.rs}` | F5.S1.T1 | character/world groups covered | golden/property tests |
-| F5.S1.T4 Item/vault/trade/shop packets | `feature-network` | `crates/mu_protocol/src/{items.rs,vault.rs,trade.rs,player_shop.rs}` | F5.S1.T1 | item/vault/trade/player-shop groups covered | property + golden tests |
-| F5.S1.T5 Combat/skill/pet packets | `feature-network` | `crates/mu_protocol/src/{combat.rs,skills.rs,pets.rs}` | F5.S1.T1 | combat/skill/pet groups covered | golden tests |
-| F5.S1.T6 Guild/social/quest/event packets | `feature-network` | `crates/mu_protocol/src/{guild.rs,social.rs,quests.rs,events.rs}` | F5.S1.T1 | guild/social/quest/event groups covered | golden tests |
-| F5.S1.T7 GameShop/MU Helper/admin packets | `feature-network` | `crates/mu_protocol/src/{cash_shop.rs,mu_helper.rs,admin.rs}` | F5.S1.T1 | cash shop/helper/admin commands covered | golden tests |
-| F5.S2.T1 Async transport/fake server | `feature-network` | `crates/mu_network/src/{transport.rs,client.rs,fake_server.rs}` | F5.S1.T2 | connect, timeout, disconnect, malformed packet and reconnect behavior covered | integration tests |
-| F5.S2.T2 Session state integration | `feature-network` | `crates/mu_app/src/session_state.rs`, `crates/mu_network/src/session.rs` | F5.S2.T1 | login/logout/disconnect transitions are observable | fake server tests + logs |
+| F5.S1.T1 Packet framing/codec | `feature-network` | `port_rust/crates/mu_protocol/src/{codec.rs,frame.rs,error.rs}` | F2.S1.T2 | encode/decode supports legacy framing and error cases | golden tests |
+| F5.S1.T2 Connect/chat/session packets | `feature-network` | `port_rust/crates/mu_protocol/src/{connect.rs,chat.rs,session.rs,login.rs}` | F5.S1.T1 | entrypoints in connect/chat/session groups covered | golden tests |
+| F5.S1.T3 Character/world/movement packets | `feature-network` | `port_rust/crates/mu_protocol/src/{character.rs,world.rs,movement.rs}` | F5.S1.T1 | character/world groups covered | golden/property tests |
+| F5.S1.T4 Item/vault/trade/shop packets | `feature-network` | `port_rust/crates/mu_protocol/src/{items.rs,vault.rs,trade.rs,player_shop.rs}` | F5.S1.T1 | item/vault/trade/player-shop groups covered | property + golden tests |
+| F5.S1.T5 Combat/skill/pet packets | `feature-network` | `port_rust/crates/mu_protocol/src/{combat.rs,skills.rs,pets.rs}` | F5.S1.T1 | combat/skill/pet groups covered | golden tests |
+| F5.S1.T6 Guild/social/quest/event packets | `feature-network` | `port_rust/crates/mu_protocol/src/{guild.rs,social.rs,quests.rs,events.rs}` | F5.S1.T1 | guild/social/quest/event groups covered | golden tests |
+| F5.S1.T7 GameShop/MU Helper/admin packets | `feature-network` | `port_rust/crates/mu_protocol/src/{cash_shop.rs,mu_helper.rs,admin.rs}` | F5.S1.T1 | cash shop/helper/admin commands covered | golden tests |
+| F5.S2.T1 Async transport/fake server | `feature-network` | `port_rust/crates/mu_network/src/{transport.rs,client.rs,fake_server.rs}` | F5.S1.T2 | connect, timeout, disconnect, malformed packet and reconnect behavior covered | integration tests |
+| F5.S2.T2 Session state integration | `feature-network` | `port_rust/crates/mu_app/src/session_state.rs`, `port_rust/crates/mu_network/src/session.rs` | F5.S2.T1 | login/logout/disconnect transitions are observable | fake server tests + logs |
 
-Validation Gate F5: `cargo test -p mu_protocol -p mu_network -p mu_app`; offline fixtures `login-success`, `login-failure`, `disconnect`; e2e-validator required for login/network.
+Validation Gate F5: `cargo test --manifest-path port_rust/Cargo.toml -p mu_protocol -p mu_network -p mu_app`; offline fixtures `login-success`, `login-failure`, `disconnect`; e2e-validator required for login/network.
 
 ### F6. UI shell, options, HUD and audio
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F6.S1.T1 Bevy UI shell/routes | `feature-ui` | `crates/mu_ui/src/{lib.rs,routes.rs,widgets.rs,layout.rs}` | F4, F5 | boot/login/server/character/world/options/error routes exist | route tests |
-| F6.S1.T2 Login/server/options UI | `feature-ui` | `crates/mu_ui/src/{login.rs,server_select.rs,options.rs,messages.rs}` | F6.S1.T1 | legacy states from UI Windows inventory visible | snapshots |
-| F6.S1.T3 Character select/create/delete UI | `feature-ui` | `crates/mu_ui/src/character_select.rs` | F6.S1.T1, F5 | list/empty/loading/error/action denied states visible | fake server + screenshots |
-| F6.S2.T1 HUD/chat/minimap/hotkeys | `feature-ui` | `crates/mu_ui/src/{hud.rs,chat.rs,minimap.rs,hotkeys.rs}` | F6.S1.T1 | health/mana/XP/buffs/party/chat/minimap states visible | visual snapshots |
-| F6.S2.T2 Audio runtime | `feature-audio` | `crates/mu_audio/src/{lib.rs,diagnostics.rs,events.rs}` | F3, F4 | music/SFX/volume/mute work or fail diagnostically | audio tests/logs |
+| F6.S1.T1 Bevy UI shell/routes | `feature-ui` | `port_rust/crates/mu_ui/src/{lib.rs,routes.rs,widgets.rs,layout.rs}` | F4, F5 | boot/login/server/character/world/options/error routes exist | route tests |
+| F6.S1.T2 Login/server/options UI | `feature-ui` | `port_rust/crates/mu_ui/src/{login.rs,server_select.rs,options.rs,messages.rs}` | F6.S1.T1 | legacy states from UI Windows inventory visible | snapshots |
+| F6.S1.T3 Character select/create/delete UI | `feature-ui` | `port_rust/crates/mu_ui/src/character_select.rs` | F6.S1.T1, F5 | list/empty/loading/error/action denied states visible | fake server + screenshots |
+| F6.S2.T1 HUD/chat/minimap/hotkeys | `feature-ui` | `port_rust/crates/mu_ui/src/{hud.rs,chat.rs,minimap.rs,hotkeys.rs}` | F6.S1.T1 | health/mana/XP/buffs/party/chat/minimap states visible | visual snapshots |
+| F6.S2.T2 Audio runtime | `feature-audio` | `port_rust/crates/mu_audio/src/{lib.rs,diagnostics.rs,events.rs}` | F3, F4 | music/SFX/volume/mute work or fail diagnostically | audio tests/logs |
 
-Validation Gate F6: `cargo test -p mu_ui -p mu_audio -p mu_app`; offline fixtures `ui-login`, `ui-options`, `hud-audio`; e2e-validator validates visible UI/audio diagnostics.
+Validation Gate F6: `cargo test --manifest-path port_rust/Cargo.toml -p mu_ui -p mu_audio -p mu_app`; offline fixtures `ui-login`, `ui-options`, `hud-audio`; e2e-validator validates visible UI/audio diagnostics.
 
 ### F7. World, render, input and entities
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F7.S1.T1 Render asset loader | `feature-render` | `crates/mu_render/src/{assets.rs,materials.rs,models.rs,textures.rs}` | F3 | converted textures/models load in Bevy without legacy files | render smoke |
-| F7.S1.T2 Terrain/world scene | `feature-world` | `crates/mu_render/src/terrain.rs`, `crates/mu_gameplay/src/world.rs`, `crates/mu_assets/src/map.rs` | F7.S1.T1 | fixture map renders terrain, collision and lights | screenshot + terrain tests |
-| F7.S1.T3 Camera/input/movement | `feature-input-world` | `crates/mu_input/src/{movement.rs,camera.rs}`, `crates/mu_gameplay/src/movement.rs` | F7.S1.T2, F5 | local/remote movement and camera are observable | replay/integration tests |
-| F7.S2.T1 Entities/objects/NPCs/monsters | `feature-world` | `crates/mu_gameplay/src/{entities.rs,npcs.rs,monsters.rs}`, `crates/mu_render/src/entities.rs` | F7.S1.T2 | local player, remote players, objects, NPCs and monsters spawn from fixture | e2e screenshot |
-| F7.S2.T2 Effects/particles | `feature-render` | `crates/mu_render/src/{effects.rs,particles.rs}` | F7.S2.T1 | representative effects render without frame errors | visual fixture |
+| F7.S1.T1 Render asset loader | `feature-render` | `port_rust/crates/mu_render/src/{assets.rs,materials.rs,models.rs,textures.rs}` | F3 | converted textures/models load in Bevy without legacy files | render smoke |
+| F7.S1.T2 Terrain/world scene | `feature-world` | `port_rust/crates/mu_render/src/terrain.rs`, `port_rust/crates/mu_gameplay/src/world.rs`, `port_rust/crates/mu_assets/src/map.rs` | F7.S1.T1 | fixture map renders terrain, collision and lights | screenshot + terrain tests |
+| F7.S1.T3 Camera/input/movement | `feature-input-world` | `port_rust/crates/mu_input/src/{movement.rs,camera.rs}`, `port_rust/crates/mu_gameplay/src/movement.rs` | F7.S1.T2, F5 | local/remote movement and camera are observable | replay/integration tests |
+| F7.S2.T1 Entities/objects/NPCs/monsters | `feature-world` | `port_rust/crates/mu_gameplay/src/{entities.rs,npcs.rs,monsters.rs}`, `port_rust/crates/mu_render/src/entities.rs` | F7.S1.T2 | local player, remote players, objects, NPCs and monsters spawn from fixture | e2e screenshot |
+| F7.S2.T2 Effects/particles | `feature-render` | `port_rust/crates/mu_render/src/{effects.rs,particles.rs}` | F7.S2.T1 | representative effects render without frame errors | visual fixture |
 
-Validation Gate F7: `cargo test -p mu_gameplay -p mu_render -p mu_input -p mu_assets`; offline fixture `world-minimal`; e2e-validator required for playable surface.
+Validation Gate F7: `cargo test --manifest-path port_rust/Cargo.toml -p mu_gameplay -p mu_render -p mu_input -p mu_assets`; offline fixture `world-minimal`; e2e-validator required for playable surface.
 
 ### F8. Gameplay systems
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F8.S1.T1 Character stats/classes/master level | `feature-gameplay` | `crates/mu_gameplay/src/{characters.rs,stats.rs,classes.rs,master_level.rs}` | F5, F6 | Season 6 class/stat behavior matches fixtures | golden tests |
-| F8.S1.T2 Combat formulas/buffs/XP | `feature-combat` | `crates/mu_gameplay/src/{combat.rs,buffs.rs,experience.rs}` | F7 | damage, XP, buffs/debuffs match vectors or approved diffs | formula/golden tests |
-| F8.S1.T3 Skill execution/feedback | `feature-combat` | `crates/mu_gameplay/src/skills.rs`, `crates/mu_render/src/effects.rs`, `crates/mu_audio/src/events.rs` | F8.S1.T2, F6 | targeted/area/rage skills have feedback and server sync | replay + visual/audio evidence |
-| F8.S2.T1 Items/inventory/equipment/vault | `feature-items` | `crates/mu_gameplay/src/{items.rs,inventory.rs,equipment.rs,vault.rs}`, `crates/mu_ui/src/inventory.rs` | F5, F6 | move/use/equip/desequip/serialize/sync errors work | property + fake server tests |
-| F8.S2.T2 NPC/shop/dialog/repair | `feature-npc` | `crates/mu_gameplay/src/npc.rs`, `crates/mu_ui/src/{npc.rs,shop.rs}` | F8.S2.T1 | buy/sell/repair/confirm/cancel/fail visible | integration tests |
-| F8.S2.T3 Trade/player shop/mail | `feature-social` | `crates/mu_gameplay/src/{trade.rs,player_shop.rs,mail.rs}`, UI files | F8.S2.T1 | trade/player shop/mail flows match protocol fixtures | fake server tests |
-| F8.S3.T1 Party/friend/guild/alliance | `feature-social` | `crates/mu_gameplay/src/{party.rs,friend.rs,guild.rs}`, UI files | F5, F6 | party/friend/guild/alliance actions and denials visible | fake server tests |
-| F8.S3.T2 Quests/events/duel/gens | `feature-events` | `crates/mu_gameplay/src/{quests.rs,events.rs,duel.rs,gens.rs}`, UI files | F7, F8.S1 | listed quest/event/duel/gens packet groups have UI/gameplay coverage | integration + e2e fixtures |
-| F8.S3.T3 Pets/summons/mounts | `feature-gameplay` | `crates/mu_gameplay/src/{pets.rs,summons.rs,mounts.rs}` | F8.S1 | pet commands/info and visual states match fixtures | fake server + visual tests |
+| F8.S1.T1 Character stats/classes/master level | `feature-gameplay` | `port_rust/crates/mu_gameplay/src/{characters.rs,stats.rs,classes.rs,master_level.rs}` | F5, F6 | Season 6 class/stat behavior matches fixtures | golden tests |
+| F8.S1.T2 Combat formulas/buffs/XP | `feature-combat` | `port_rust/crates/mu_gameplay/src/{combat.rs,buffs.rs,experience.rs}` | F7 | damage, XP, buffs/debuffs match vectors or approved diffs | formula/golden tests |
+| F8.S1.T3 Skill execution/feedback | `feature-combat` | `port_rust/crates/mu_gameplay/src/skills.rs`, `port_rust/crates/mu_render/src/effects.rs`, `port_rust/crates/mu_audio/src/events.rs` | F8.S1.T2, F6 | targeted/area/rage skills have feedback and server sync | replay + visual/audio evidence |
+| F8.S2.T1 Items/inventory/equipment/vault | `feature-items` | `port_rust/crates/mu_gameplay/src/{items.rs,inventory.rs,equipment.rs,vault.rs}`, `port_rust/crates/mu_ui/src/inventory.rs` | F5, F6 | move/use/equip/desequip/serialize/sync errors work | property + fake server tests |
+| F8.S2.T2 NPC/shop/dialog/repair | `feature-npc` | `port_rust/crates/mu_gameplay/src/npc.rs`, `port_rust/crates/mu_ui/src/{npc.rs,shop.rs}` | F8.S2.T1 | buy/sell/repair/confirm/cancel/fail visible | integration tests |
+| F8.S2.T3 Trade/player shop/mail | `feature-social` | `port_rust/crates/mu_gameplay/src/{trade.rs,player_shop.rs,mail.rs}`, UI files | F8.S2.T1 | trade/player shop/mail flows match protocol fixtures | fake server tests |
+| F8.S3.T1 Party/friend/guild/alliance | `feature-social` | `port_rust/crates/mu_gameplay/src/{party.rs,friend.rs,guild.rs}`, UI files | F5, F6 | party/friend/guild/alliance actions and denials visible | fake server tests |
+| F8.S3.T2 Quests/events/duel/gens | `feature-events` | `port_rust/crates/mu_gameplay/src/{quests.rs,events.rs,duel.rs,gens.rs}`, UI files | F7, F8.S1 | listed quest/event/duel/gens packet groups have UI/gameplay coverage | integration + e2e fixtures |
+| F8.S3.T3 Pets/summons/mounts | `feature-gameplay` | `port_rust/crates/mu_gameplay/src/{pets.rs,summons.rs,mounts.rs}` | F8.S1 | pet commands/info and visual states match fixtures | fake server + visual tests |
 
-Validation Gate F8: `cargo test -p mu_gameplay -p mu_ui -p mu_protocol -p mu_render -p mu_audio`; fixtures `combat-items-npc-chat`, `social-events-pets`; e2e-validator validates gameplay surface.
+Validation Gate F8: `cargo test --manifest-path port_rust/Cargo.toml -p mu_gameplay -p mu_ui -p mu_protocol -p mu_render -p mu_audio`; fixtures `combat-items-npc-chat`, `social-events-pets`; e2e-validator validates gameplay surface.
 
 ### F9. MU Helper and GameShop
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F9.S1.T1 MU Helper data model | `feature-helper` | `crates/mu_gameplay/src/mu_helper.rs`, `crates/mu_protocol/src/mu_helper.rs` | F8 | helper data serializes and validates limits | rules/property tests |
-| F9.S1.T2 MU Helper UI/execution | `feature-helper` | `crates/mu_ui/src/mu_helper.rs`, `crates/mu_gameplay/src/mu_helper_runtime.rs` | F9.S1.T1 | active/inactive/invalid/resource/server-limit states visible | fake server + screenshots |
-| F9.S2.T1 GameShop catalog/storage | `feature-gameshop` | `crates/mu_gameplay/src/game_shop.rs`, `crates/mu_ui/src/game_shop.rs` | F5, F6 | catalog/details/storage/empty/error states visible | fake server tests |
-| F9.S2.T2 GameShop transaction safety | `feature-gameshop` | `crates/mu_gameplay/src/game_shop_transaction.rs`, `crates/mu_network/src/shop.rs` | F9.S2.T1 | purchase success/failure/insufficient funds do not duplicate purchase | idempotency tests + redacted logs |
+| F9.S1.T1 MU Helper data model | `feature-helper` | `port_rust/crates/mu_gameplay/src/mu_helper.rs`, `port_rust/crates/mu_protocol/src/mu_helper.rs` | F8 | helper data serializes and validates limits | rules/property tests |
+| F9.S1.T2 MU Helper UI/execution | `feature-helper` | `port_rust/crates/mu_ui/src/mu_helper.rs`, `port_rust/crates/mu_gameplay/src/mu_helper_runtime.rs` | F9.S1.T1 | active/inactive/invalid/resource/server-limit states visible | fake server + screenshots |
+| F9.S2.T1 GameShop catalog/storage | `feature-gameshop` | `port_rust/crates/mu_gameplay/src/game_shop.rs`, `port_rust/crates/mu_ui/src/game_shop.rs` | F5, F6 | catalog/details/storage/empty/error states visible | fake server tests |
+| F9.S2.T2 GameShop transaction safety | `feature-gameshop` | `port_rust/crates/mu_gameplay/src/game_shop_transaction.rs`, `port_rust/crates/mu_network/src/shop.rs` | F9.S2.T1 | purchase success/failure/insufficient funds do not duplicate purchase | idempotency tests + redacted logs |
 
-Validation Gate F9: `cargo test -p mu_gameplay -p mu_ui -p mu_protocol -p mu_network`; fixture `helper-shop`; e2e-validator required for MU Helper/GameShop.
+Validation Gate F9: `cargo test --manifest-path port_rust/Cargo.toml -p mu_gameplay -p mu_ui -p mu_protocol -p mu_network`; fixture `helper-shop`; e2e-validator required for MU Helper/GameShop.
 
 ### F10. Editor/admin equivalent
 
 | ID | Owner | Planned files | Dependencies | Done when | Required evidence |
 |---|---|---|---|---|---|
-| F10.S1.T1 Admin auth and release blocking | `feature-editor-admin` | `crates/mu_editor_admin/src/auth.rs`, `crates/mu_ui/src/admin.rs` | F5, F6 | unauthorized users see blocked state; release player mode hides admin entry | auth tests + screenshots |
-| F10.S1.T2 Editor core shell/console/dev editor | `feature-editor-admin` | `crates/mu_editor_admin/src/{core.rs,console.rs,dev_editor.rs}`, UI files | F10.S1.T1 | console/dev panels match supported behavior | UI tests |
-| F10.S2.T1 Item editor parity | `feature-editor-admin` | `crates/mu_editor_admin/src/item_editor.rs`, `crates/mu_ui/src/admin_item_editor.rs` | F10.S1.T2, F8.S2.T1 | inspect/edit/save/cancel/fail item data | fake server + audit log |
-| F10.S2.T2 Skill editor parity | `feature-editor-admin` | `crates/mu_editor_admin/src/skill_editor.rs`, `crates/mu_ui/src/admin_skill_editor.rs` | F10.S1.T2, F8.S1.T3 | inspect/edit/save/cancel/fail skill data | fake server + audit log |
+| F10.S1.T1 Admin auth and release blocking | `feature-editor-admin` | `port_rust/crates/mu_editor_admin/src/auth.rs`, `port_rust/crates/mu_ui/src/admin.rs` | F5, F6 | unauthorized users see blocked state; release player mode hides admin entry | auth tests + screenshots |
+| F10.S1.T2 Editor core shell/console/dev editor | `feature-editor-admin` | `port_rust/crates/mu_editor_admin/src/{core.rs,console.rs,dev_editor.rs}`, UI files | F10.S1.T1 | console/dev panels match supported behavior | UI tests |
+| F10.S2.T1 Item editor parity | `feature-editor-admin` | `port_rust/crates/mu_editor_admin/src/item_editor.rs`, `port_rust/crates/mu_ui/src/admin_item_editor.rs` | F10.S1.T2, F8.S2.T1 | inspect/edit/save/cancel/fail item data | fake server + audit log |
+| F10.S2.T2 Skill editor parity | `feature-editor-admin` | `port_rust/crates/mu_editor_admin/src/skill_editor.rs`, `port_rust/crates/mu_ui/src/admin_skill_editor.rs` | F10.S1.T2, F8.S1.T3 | inspect/edit/save/cancel/fail skill data | fake server + audit log |
 | F10.S2.T3 Admin documentation evidence | `feature-docs` | `docs/admin-editor-rust.md`, `docs/dev-editor.md` if needed | F10.S2.T1-F10.S2.T2 | admin usage documented without internals | docs review + screenshot |
 
-Validation Gate F10: `cargo test -p mu_editor_admin -p mu_ui -p mu_gameplay`; fixture `admin-editor`; redacted audit logs; e2e-validator required.
+Validation Gate F10: `cargo test --manifest-path port_rust/Cargo.toml -p mu_editor_admin -p mu_ui -p mu_gameplay`; fixture `admin-editor`; redacted audit logs; e2e-validator required.
 
 ### F11. Packaging, docs and release parity
 
@@ -314,7 +314,7 @@ Validation Gate F10: `cargo test -p mu_editor_admin -p mu_ui -p mu_gameplay`; fi
 | F11.S2.T2 Player and QA docs | `feature-docs` | `docs/player-rust-client.md`, `docs/rust-client.md`, `docs/build-guide.md` | F11.S1 | player/QA/dev usage documented | smoke following docs |
 | F11.S3.T1 Final e2e validation | `e2e-validator` | evidence artifacts under `MU_E2E_ARTIFACT_DIR` | F11.S1-F11.S2 | login to playable world, assets invalid path, GameShop, MU Helper, editor/admin and logs pass | e2e-validator report |
 
-Validation Gate F11: `cargo fmt --check`; `cargo clippy --workspace --all-targets -- -D warnings`; `cargo test --workspace`; `cargo build --release -p mu_client`; Linux/Windows workflows pass; current CMake/doctest gates pass while legacy coexists; final `e2e-validator` approved.
+Validation Gate F11: `cargo fmt --manifest-path port_rust/Cargo.toml --all --check`; `cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings`; `cargo test --manifest-path port_rust/Cargo.toml --workspace`; `cargo build --manifest-path port_rust/Cargo.toml --release -p mu_client`; Linux/Windows workflows pass; current CMake/doctest gates pass while legacy coexists; final `e2e-validator` approved.
 
 ## Test Strategy
 
@@ -367,7 +367,7 @@ Validation Gate F11: `cargo fmt --check`; `cargo clippy --workspace --all-target
 
 ## Risks & Rollback
 
-- Bevy API instability. Mitigation: pin toolchain/dependencies in `Cargo.lock`; rollback by reverting dependency upgrade commit.
+- Bevy API instability. Mitigation: pin toolchain/dependencies in `port_rust/Cargo.lock`; rollback by reverting dependency upgrade commit.
 - Protocol gaps in OpenMU extensions. Mitigation: golden fixtures per protocol group; rollback by reverting affected protocol task and blocking dependent UI/gameplay surface.
 - Asset converter incompleteness. Mitigation: strict manifest classification and per-format fixtures; rollback by reverting converter for affected format and marking dependent surfaces blocked.
 - Runtime accidentally depending on converter. Mitigation: dependency architecture test; rollback by removing dependency edge before release.
@@ -387,10 +387,10 @@ Validation Gate F11: `cargo fmt --check`; `cargo clippy --workspace --all-target
 ## Gate Final
 
 - All F1-F11 tasks done with required evidence.
-- `cargo fmt --check`
-- `cargo clippy --workspace --all-targets -- -D warnings`
-- `cargo test --workspace`
-- `cargo build --release -p mu_client`
+- `cargo fmt --manifest-path port_rust/Cargo.toml --all --check`
+- `cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings`
+- `cargo test --manifest-path port_rust/Cargo.toml --workspace`
+- `cargo build --manifest-path port_rust/Cargo.toml --release -p mu_client`
 - Linux Rust workflow approved.
 - Windows x64 release workflow approved with artifact/checksum.
 - Current CMake/doctest gates approved while legacy coexists.
