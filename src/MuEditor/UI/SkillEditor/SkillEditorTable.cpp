@@ -4,6 +4,7 @@
 
 #include "SkillEditorTable.h"
 #include "SkillEditorColumns.h"
+#include "SkillTooltipEditor.h"
 #include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/Translation/i18n.h"
@@ -49,7 +50,8 @@ void CSkillEditorTable::Render(
     const std::string& searchFilter,
     std::map<std::string, bool>& columnVisibility,
     int& selectedRow,
-    bool freezeColumns)
+    bool freezeColumns,
+    bool showHoverTooltip)
 {
     // Get metadata fields once at function scope
     const SkillFieldDescriptor* fields = GetSkillFieldDescriptors();
@@ -189,6 +191,18 @@ void CSkillEditorTable::Render(
                 ImGui::TableNextRow();
                 ImGui::PushID(skillIndex);
 
+                // Invisible row-spanning selectable for hover detection.
+                // Save/restore cursor Y so the Selectable's height doesn't
+                // push column content onto a second line, and use AllowOverlap
+                // so column items still receive their own clicks.
+                ImGui::TableSetColumnIndex(0);
+                const float rowCursorY = ImGui::GetCursorPosY();
+                ImGui::Selectable("##rowhover", false,
+                    ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap,
+                    ImVec2(0, ImGui::GetTextLineHeight()));
+                const bool rowHovered = ImGui::IsItemHovered();
+                ImGui::SetCursorPosY(rowCursorY);
+
                 bool rowInteracted = false;
                 int colIdx = 0;
 
@@ -204,6 +218,11 @@ void CSkillEditorTable::Render(
                     bool isVisible = columnVisibility.find(fields[i].name) != columnVisibility.end() &&
                                      columnVisibility[fields[i].name];
                     m_pColumns->RenderFieldByDescriptor(fields[i], colIdx, skillIndex, skill, rowInteracted, isVisible);
+                }
+
+                if (rowHovered && showHoverTooltip)
+                {
+                    MuEditor::Skills::Tooltip::Render(skillIndex);
                 }
 
                 // Update selected row

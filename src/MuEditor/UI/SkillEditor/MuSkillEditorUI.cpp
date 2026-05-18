@@ -21,6 +21,7 @@
 CMuSkillEditorUI::CMuSkillEditorUI()
     : m_selectedRow(-1)
     , m_bFreezeColumns(false)
+    , m_bShowHoverTooltip(false)
     , m_pTable(nullptr)
 {
     memset(m_szSkillSearchBuffer, 0, sizeof(m_szSkillSearchBuffer));
@@ -141,13 +142,17 @@ void CMuSkillEditorUI::Render(bool& showEditor)
         ImGui::SameLine();
         ImGui::Checkbox(EDITOR_TEXT("label_freeze_columns"), &m_bFreezeColumns);
 
+        // Row hover tooltip toggle (opt-in)
+        ImGui::SameLine();
+        ImGui::Checkbox("Show tooltip on hover", &m_bShowHoverTooltip);
+
         ImGui::Separator();
 
         // Render table with current search filter
         std::string searchFilter = m_szSkillSearchBuffer;
         std::transform(searchFilter.begin(), searchFilter.end(), searchFilter.begin(), ::tolower);
 
-        m_pTable->Render(searchFilter, m_columnVisibility, m_selectedRow, m_bFreezeColumns);
+        m_pTable->Render(searchFilter, m_columnVisibility, m_selectedRow, m_bFreezeColumns, m_bShowHoverTooltip);
 
         // Render popups
         CSkillEditorPopups::RenderPopups();

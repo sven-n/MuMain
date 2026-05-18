@@ -21,7 +21,8 @@ public:
     void Render(const std::string& searchFilter,
                 std::map<std::string, bool>& columnVisibility,
                 int& selectedRow,
-                bool freezeColumns);
+                bool freezeColumns,
+                bool showHoverTooltip);
 
     // Request scroll to a specific skill index
     static void RequestScrollToIndex(int index);
