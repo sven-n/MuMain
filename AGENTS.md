@@ -42,6 +42,13 @@ Don't perform large retroactive cleanups of existing code to fit the rules unles
 the user explicitly asks for it. Apply the rules going forward; pre-existing
 code can be refactored opportunistically when you're already touching it.
 
+## Documentation
+
+- When a change adds or alters a user-facing flow, add or update usage
+  documentation in `docs/` or `port_rust/docs/` so readers know how to use it
+  and, when useful, how it behaves. Keep the docs at the usage level unless the
+  rules or formulas themselves are the point.
+
 ## Fake Server
 
 - `port_rust/crates/mu_fake_server` is intentionally minimal and CLI-configured.

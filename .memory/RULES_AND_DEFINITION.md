@@ -1,16 +1,7 @@
-# Planejamento por fase
+# Document usage and behavior
 
-Antes de começar cada fase, passar por uma etapa de planejamento individual.
+When a change adds or alters a user-facing flow, add or update usage
+documentation in `docs/` or `port_rust/docs/` so readers know how to use it
+and, when useful, how it behaves. Keep the docs at the usage level unless the
+rules or formulas themselves are the point.
 
-# Código do port em port_rust
-
-Todo código do port Rust deve ficar dentro do projeto `port_rust/`. Não criar workspace, crates, lockfile ou toolchain do port na raiz do repositório.
-
-# Prefixo rtk
-
-Todos os comandos de shell devem ser prefixados com `rtk`.
-
-# Fake server minimalista
-
-O fake connect server do `port_rust/` e CLI-only, sem persistencia, e deve ser
-estendido por handlers de protocolo explicitos e helpers em `mu_protocol`.
