@@ -5,6 +5,7 @@
 #include <array>
 
 #include "UI/Legacy/UIControls.h"
+#include "UI/NewUI/HUD/Skills/SkillTooltip.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/NewUIMuHelper.h"
 #include "Character/CharacterManager.h"
@@ -1986,7 +1987,7 @@ bool CNewUIMuHelperSkillList::Render()
 
 void CNewUIMuHelperSkillList::RenderSkillInfo()
 {
-    ::RenderSkillInfo(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
+    UI::Skills::Tooltip::Render(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
 }
 
 float CNewUIMuHelperSkillList::GetLayerDepth()

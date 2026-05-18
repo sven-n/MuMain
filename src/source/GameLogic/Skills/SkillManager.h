@@ -49,6 +49,7 @@ public:
     ActionSkillType MasterSkillToBaseSkillIndex(ActionSkillType masterSkill);
     bool skillVScharactorCheck(const DemendConditionInfo& basicInfo, const DemendConditionInfo& heroInfo);
     bool AreSkillRequirementsFulfilled(ActionSkillType skilltype);
+    bool IsSkillDisabled(ActionSkillType Type, int Energy, int Charisma = 0);
 
     // Cache management
     void InvalidateSkillRequirementsCache();

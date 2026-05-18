@@ -96,6 +96,79 @@ void CSkillManager::GetSkillInformation_Energy(int iType, int* piEnergy)
     }
 }
 
+bool CSkillManager::IsSkillDisabled(ActionSkillType Type, int Energy, int Charisma)
+{
+    int SkillEnergy = 0;
+    GetSkillInformation_Energy(Type, &SkillEnergy);
+
+    switch (Type)
+    {
+    case 17:SkillEnergy = 0; break;
+    case 30:SkillEnergy = 30; break;
+    case 31:SkillEnergy = 60; break;
+    case 32:SkillEnergy = 90; break;
+    case 33:SkillEnergy = 130; break;
+    case 34:SkillEnergy = 170; break;
+    case 35:SkillEnergy = 210; break;
+    case 36:SkillEnergy = 300; break;
+    case 37:SkillEnergy = 500; break;
+    case 60:SkillEnergy = 15; break;
+    case AT_SKILL_EARTHSHAKE_STR:
+    case AT_SKILL_EARTHSHAKE_MASTERY:
+    case AT_SKILL_EARTHSHAKE:    SkillEnergy = 0; break;
+    case AT_PET_COMMAND_DEFAULT: SkillEnergy = 0; break;
+    case AT_PET_COMMAND_RANDOM:  SkillEnergy = 0; break;
+    case AT_PET_COMMAND_OWNER:   SkillEnergy = 0; break;
+    case AT_PET_COMMAND_TARGET:  SkillEnergy = 0; break;
+    case AT_SKILL_PLASMA_STORM_FENRIR: SkillEnergy = 0; break;
+    case AT_SKILL_INFINITY_ARROW:
+    case AT_SKILL_INFINITY_ARROW_STR: SkillEnergy = 0; break;
+    case AT_SKILL_STRIKE_OF_DESTRUCTION:
+    case AT_SKILL_STRIKE_OF_DESTRUCTION_STR: SkillEnergy = 0; break;
+    case AT_SKILL_RECOVER:
+    case AT_SKILL_GAOTIC:
+    case AT_SKILL_MULTI_SHOT:
+    case AT_SKILL_FIRE_SCREAM_STR:
+    case AT_SKILL_FIRE_SCREAM:
+        SkillEnergy = 0;
+        break;
+
+    case AT_SKILL_EXPLODE:
+        SkillEnergy = 0;
+        break;
+    }
+
+    if (Type >= AT_SKILL_STUN && Type <= AT_SKILL_REMOVAL_BUFF)
+    {
+        SkillEnergy = 0;
+    }
+    else
+        if ((Type >= 18 && Type <= 23) || (Type >= 41 && Type <= 43) || (Type >= 47 && Type <= 49) || Type == 24 || Type == 51 || Type == 52 || Type == 55 || Type == 56)
+        {
+            SkillEnergy = 0;
+        }
+        else if (Type == 44 || Type == 45 || Type == 46 || Type == 57 || Type == 73 || Type == 74)
+        {
+            SkillEnergy = 0;
+        }
+
+    if (Charisma > 0)
+    {
+        const int SkillCharisma = SkillAttribute[Type].Charisma;
+        if (Charisma < SkillCharisma)
+        {
+            return true;
+        }
+    }
+
+    if (Energy < SkillEnergy)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void CSkillManager::GetSkillInformation_Charisma(int iType, int* piCharisma)
 {
     SKILL_ATTRIBUTE* p = &SkillAttribute[iType];

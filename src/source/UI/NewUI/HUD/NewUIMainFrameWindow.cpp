@@ -22,6 +22,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/NewUI/HUD/Skills/SkillTooltip.h"
 #include "Core/Time/CTimCheck.h"
 #include "GameLogic/Social/MonkSystem.h"
 
@@ -2042,7 +2043,7 @@ bool SEASON3B::CNewUISkillList::Render()
 
 void SEASON3B::CNewUISkillList::RenderSkillInfo()
 {
-    ::RenderSkillInfo(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
+    UI::Skills::Tooltip::Render(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
 }
 
 float SEASON3B::CNewUISkillList::GetLayerDepth()
@@ -2154,7 +2155,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 
     int iEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
 
-    if (g_csItemOption.IsDisableSkill(bySkillType, iEnergy))
+    if (gSkillManager.IsSkillDisabled(bySkillType, iEnergy))
     {
         bCantSkill = true;
     }
@@ -2199,7 +2200,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
         )
     {
-        if (g_csItemOption.IsDisableSkill(bySkillType, iEnergy))
+        if (gSkillManager.IsSkillDisabled(bySkillType, iEnergy))
         {
             bCantSkill = true;
         }
@@ -2292,7 +2293,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 
     int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
-    if (g_csItemOption.IsDisableSkill(bySkillType, iEnergy, iCharisma))
+    if (gSkillManager.IsSkillDisabled(bySkillType, iEnergy, iCharisma))
     {
         bCantSkill = true;
     }
