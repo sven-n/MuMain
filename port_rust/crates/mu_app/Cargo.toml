@@ -7,3 +7,4 @@ publish.workspace = true
 [dependencies]
 camino.workspace = true
 clap.workspace = true
+mu_assets = { path = "../mu_assets" }

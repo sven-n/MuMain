@@ -13,6 +13,9 @@ Esta etapa cria apenas o scaffold inicial: ainda e nao jogavel / not playable.
 - O binario `mu_fake_server` e um servidor fake de connect-server para testes
   locais, sem persistencia, configurado inteiramente por CLI; detalhes em
   `docs/face_server.md`.
+- Quando `--asset-root` e informado, o root precisa conter
+  `manifest.muasset.json` e os assets convertidos com hashes coerentes; falhas
+  de manifest ou checksum mantem o cliente em `asset-check-failed`.
 - Nenhum arquivo de implementacao legado deve ser movido para ca sem uma fase planejada.
 
 ## Validacao local prevista

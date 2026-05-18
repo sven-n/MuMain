@@ -1,10 +1,15 @@
 use std::io::{self, Write};
 use std::process::ExitCode;
 
-use crate::{boot_state, control_http, AppState, Cli};
+use crate::state::boot;
+use crate::{control_http, AppState, Cli};
 
 pub fn run(cli: Cli) -> ExitCode {
-    let state = boot_state(&cli);
+    let (state, asset_error) = boot(&cli);
+
+    if let Some(error) = asset_error {
+        eprintln!("asset validation failed: {error}");
+    }
 
     if let Some(address) = cli.control_http {
         if let Err(error) = write_line(state.as_str()) {
