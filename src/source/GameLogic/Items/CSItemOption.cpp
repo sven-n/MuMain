@@ -193,7 +193,8 @@ bool CSItemOption::OpenItemSetOption(const wchar_t* filename)
 
 bool CSItemOption::IsDisableSkill(ActionSkillType Type, int Energy, int Charisma)
 {
-    int SkillEnergy = SkillAttribute[Type].Energy;
+    int SkillEnergy = 0;
+    gSkillManager.GetSkillInformation_Energy(Type, &SkillEnergy);
 
     switch (Type)
     {

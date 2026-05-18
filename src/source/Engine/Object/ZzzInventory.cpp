@@ -6042,6 +6042,34 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
     return Alpha;
 }
 
+namespace
+{
+constexpr int GLOBAL_TEXT_REQUIRED_LEVEL = 76;
+constexpr int GLOBAL_TEXT_REQUIRED_STRENGTH = 73;
+constexpr int GLOBAL_TEXT_REQUIRED_DEXTERITY = 75;
+constexpr int GLOBAL_TEXT_REQUIRED_ENERGY = 77;
+constexpr int GLOBAL_TEXT_REQUIRED_CHARISMA = 698;
+constexpr int GLOBAL_TEXT_NEED_MORE_STAT = 74;
+
+void AddSkillRequirementLine(int requiredValue, int currentValue, int reqStringIndex, int& TextNum)
+{
+    if (requiredValue <= 0) return;
+
+    mu_swprintf(TextList[TextNum], GlobalText[reqStringIndex], requiredValue);
+    const bool requirementMet = (currentValue >= requiredValue);
+    TextListColor[TextNum] = requirementMet ? TEXT_COLOR_WHITE : TEXT_COLOR_RED;
+    TextBold[TextNum] = false;
+    ++TextNum;
+
+    if (requirementMet) return;
+
+    mu_swprintf(TextList[TextNum], GlobalText[GLOBAL_TEXT_NEED_MORE_STAT], requiredValue - currentValue);
+    TextListColor[TextNum] = TEXT_COLOR_RED;
+    TextBold[TextNum] = false;
+    ++TextNum;
+}
+}
+
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*= STRP_NONE*/)
 {
     wchar_t lpszName[256];
@@ -6354,6 +6382,16 @@ void RenderSkillInfo(int sx, int sy, int Type, int SkillNum, int iRenderPoint /*
         mu_swprintf(TextList[TextNum], GlobalText[360], iSkillMana);
         TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
     }
+
+    int reqEnergy = 0;
+    gSkillManager.GetSkillInformation_Energy(SkillType, &reqEnergy);
+
+    AddSkillRequirementLine(SkillAttribute[SkillType].Level, CharacterAttribute->Level, GLOBAL_TEXT_REQUIRED_LEVEL, TextNum);
+    AddSkillRequirementLine(SkillAttribute[SkillType].Strength, Strength, GLOBAL_TEXT_REQUIRED_STRENGTH, TextNum);
+    AddSkillRequirementLine(SkillAttribute[SkillType].Dexterity, Dexterity, GLOBAL_TEXT_REQUIRED_DEXTERITY, TextNum);
+    AddSkillRequirementLine(reqEnergy, Energy, GLOBAL_TEXT_REQUIRED_ENERGY, TextNum);
+    AddSkillRequirementLine(SkillAttribute[SkillType].Charisma, Charisma, GLOBAL_TEXT_REQUIRED_CHARISMA, TextNum);
+
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT)
     {
         if (CharacterAttribute->Skill[Type] == AT_SKILL_IMPALE)

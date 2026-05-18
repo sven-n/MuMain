@@ -10,6 +10,17 @@
 CSkillManager gSkillManager;
 extern bool CheckAttack();
 
+namespace
+{
+// Energy requirement formula constants. The scaling formula for a skill is
+// `<base> + (BMD.Energy * BMD.Level * <scale>) / 100`, where <base> and
+// <scale> vary by class and skill family.
+constexpr int ENERGY_REQ_BASE_DEFAULT = 20;
+constexpr int ENERGY_REQ_BASE_KNIGHT = 10;
+constexpr int ENERGY_REQ_SCALE_DEFAULT_PERCENT = 4;
+constexpr int ENERGY_REQ_SCALE_SUMMON_PERCENT = 3;
+}
+
 CSkillManager::CSkillManager() // OK
 {
     m_bSkillRequirementsCacheDirty = true;
@@ -57,26 +68,31 @@ void CSkillManager::GetSkillInformation(int iType, int iLevel, wchar_t* lpszName
 
 void CSkillManager::GetSkillInformation_Energy(int iType, int* piEnergy)
 {
+    if (!piEnergy) return;
+
     SKILL_ATTRIBUTE* p = &SkillAttribute[iType];
 
-    if (piEnergy)
+    // BMD Energy is dual-purpose. For Level=0 skills it's the direct cost
+    // (Falling Slash=0, Summon Goblin=90, Summon Soldier=280, etc., matching
+    // OpenMU server's energyRequirement values). For Level>0 skills it's a
+    // per-level scaling factor that the formula multiplies up to produce the
+    // actual requirement (also matching server).
+    if (p->Level == 0)
     {
-        if (p->Energy == 0)
-        {
-            *piEnergy = 0;
-        }
-        else
-        {
-            *piEnergy = 20 + (p->Energy * p->Level * 4 / 100);
+        *piEnergy = p->Energy;
+        return;
+    }
 
-            if (iType == AT_SKILL_SUMMON_EXPLOSION || iType == AT_SKILL_SUMMON_REQUIEM) {
-                *piEnergy = 20 + (p->Energy * p->Level * 3 / 100);
-            }
+    *piEnergy = ENERGY_REQ_BASE_DEFAULT + (p->Energy * p->Level * ENERGY_REQ_SCALE_DEFAULT_PERCENT / 100);
 
-            if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT) {
-                *piEnergy = 10 + (p->Energy * p->Level * 4 / 100);
-            }
-        }
+    if (iType == AT_SKILL_SUMMON_EXPLOSION || iType == AT_SKILL_SUMMON_REQUIEM)
+    {
+        *piEnergy = ENERGY_REQ_BASE_DEFAULT + (p->Energy * p->Level * ENERGY_REQ_SCALE_SUMMON_PERCENT / 100);
+    }
+
+    if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT)
+    {
+        *piEnergy = ENERGY_REQ_BASE_KNIGHT + (p->Energy * p->Level * ENERGY_REQ_SCALE_DEFAULT_PERCENT / 100);
     }
 }
 
@@ -262,7 +278,9 @@ void CSkillManager::RebuildSkillRequirementsCache()
         skillRequirements.SkillStrength = SkillAttribute[baseSkill].Strength;
         skillRequirements.SkillDexterity = SkillAttribute[baseSkill].Dexterity;
         skillRequirements.SkillVitality = 0;
-        skillRequirements.SkillEnergy = SkillAttribute[baseSkill].Energy;
+        int reqEnergy = 0;
+        GetSkillInformation_Energy(baseSkill, &reqEnergy);
+        skillRequirements.SkillEnergy = static_cast<WORD>(reqEnergy);
         skillRequirements.SkillCharisma = SkillAttribute[baseSkill].Charisma;
 
         m_aSkillRequirementsFulfilled[skillType] = (skillRequirements <= heroCharacterInfo);
