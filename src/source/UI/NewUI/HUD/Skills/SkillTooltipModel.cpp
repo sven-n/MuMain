@@ -27,6 +27,12 @@ constexpr int GLOBAL_TEXT_REQUIRED_CHARISMA = 698;
 constexpr int GLOBAL_TEXT_NEED_MORE_STAT = 74;
 constexpr int GLOBAL_TEXT_MASTERY_TYPE_BASE = 1080;
 
+// SkillAttribute.Delay is stored in milliseconds; the tooltip displays it as
+// seconds with one decimal. No GlobalText entry exists for this line yet, so
+// the format string lives here until a localized one is added.
+constexpr wchar_t kCooldownFormat[] = L"Cooldown: %.1f sec";
+constexpr float kMillisPerSecond = 1000.0f;
+
 bool IsCastleSiegeOnlySkill(int skillType)
 {
     switch (skillType)
@@ -172,29 +178,43 @@ void EmitTopBanners(Model& m, int skillType)
     EndSection(m, before);
 }
 
-void EmitBodyDamage(Model& m, int skillType)
+// Locals shared by the EmitBodyDamage sub-emitters. Built once per call and
+// passed by const ref so each helper stays self-contained without recomputing
+// from globals.
+struct DamageContext
 {
-    const int before = m.count;
-    const int HeroClass = gCharacterManager.GetBaseClass(Hero->Class);
+    int heroClass;
+    WORD strength;
+    WORD dexterity;
+    WORD vitality;
+    WORD energy;
+    WORD charisma;
+    int magicMin;
+    int magicMax;
+    int skillMin;
+    int skillMax;
+    int skillAttackPowerRate;
+};
 
-    const WORD Dexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-    const WORD Energy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-    const WORD Strength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-    const WORD Vitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
-    const WORD Charisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
+DamageContext BuildDamageContext(int skillType)
+{
+    DamageContext ctx{};
+    ctx.heroClass = gCharacterManager.GetBaseClass(Hero->Class);
+    ctx.dexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
+    ctx.energy    = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
+    ctx.strength  = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
+    ctx.vitality  = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
+    ctx.charisma  = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
-    int iMinDamage = 0, iMaxDamage = 0;
-    int iSkillMinDamage = 0, iSkillMaxDamage = 0;
-    gCharacterManager.GetMagicSkillDamage(skillType, &iMinDamage, &iMaxDamage);
-    gCharacterManager.GetSkillDamage(skillType, &iSkillMinDamage, &iSkillMaxDamage);
+    gCharacterManager.GetMagicSkillDamage(skillType, &ctx.magicMin, &ctx.magicMax);
+    gCharacterManager.GetSkillDamage(skillType, &ctx.skillMin, &ctx.skillMax);
 
-    int AttackDamageMin = 0, AttackDamageMax = 0;
-    GetAttackDamage(&AttackDamageMin, &AttackDamageMax);
-    iSkillMinDamage += AttackDamageMin;
-    iSkillMaxDamage += AttackDamageMax;
+    int attackMin = 0, attackMax = 0;
+    GetAttackDamage(&attackMin, &attackMax);
+    ctx.skillMin += attackMin;
+    ctx.skillMax += attackMax;
 
     // Jewel of Harmony skill-power bonuses from equipped weapons.
-    int skillattackpowerRate = 0;
     StrengthenCapability rightinfo{}, leftinfo{};
     ITEM* rightweapon = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
     ITEM* leftweapon = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
@@ -204,205 +224,223 @@ void EmitBodyDamage(Model& m, int skillType)
         g_pUIJewelHarmonyinfo->GetStrengthenCapability(&leftinfo, leftweapon, 1);
     if (rightinfo.SI_isSP)
     {
-        skillattackpowerRate += rightinfo.SI_SP.SI_skillattackpower;
-        skillattackpowerRate += rightinfo.SI_SP.SI_magicalpower;
+        ctx.skillAttackPowerRate += rightinfo.SI_SP.SI_skillattackpower;
+        ctx.skillAttackPowerRate += rightinfo.SI_SP.SI_magicalpower;
     }
     if (leftinfo.SI_isSP)
-        skillattackpowerRate += leftinfo.SI_SP.SI_skillattackpower;
+        ctx.skillAttackPowerRate += leftinfo.SI_SP.SI_skillattackpower;
 
-    // Wizard/Summoner: Soul Barrier specifics + regular damage.
-    if (HeroClass == CLASS_WIZARD || HeroClass == CLASS_SUMMONER)
+    return ctx;
+}
+
+// Wizard/Summoner: Soul Barrier specifics + regular magical damage.
+void EmitMagicalDamage(Model& m, int skillType, const DamageContext& ctx)
+{
+    if (ctx.heroClass != CLASS_WIZARD && ctx.heroClass != CLASS_SUMMONER) return;
+
+    if (skillType == AT_SKILL_SOUL_BARRIER
+        || skillType == AT_SKILL_SOUL_BARRIER_STR
+        || skillType == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
     {
-        if (skillType == AT_SKILL_SOUL_BARRIER
-            || skillType == AT_SKILL_SOUL_BARRIER_STR
-            || skillType == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
+        int damageShield = (int)(10 + (ctx.dexterity / 50.f) + (ctx.energy / 200.f));
+        if (skillType == AT_SKILL_SOUL_BARRIER_STR || skillType == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
         {
-            int iDamageShield = (int)(10 + (Dexterity / 50.f) + (Energy / 200.f));
-            if (skillType == AT_SKILL_SOUL_BARRIER_STR || skillType == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
-            {
-                auto additionalValue = CharacterAttribute->MasterSkillInfo[skillType].GetSkillValue();
-                iDamageShield += (int)additionalValue;
-            }
-            int iDeleteMana = (int)(CharacterAttribute->ManaMax * 0.02f);
-            int iLimitTime = (int)(60 + (Energy / 40.f));
+            auto additionalValue = CharacterAttribute->MasterSkillInfo[skillType].GetSkillValue();
+            damageShield += (int)additionalValue;
+        }
+        int deleteMana = (int)(CharacterAttribute->ManaMax * 0.02f);
+        int limitTime  = (int)(60 + (ctx.energy / 40.f));
 
-            AddFormatted(m, 578, LineColor::White, iDamageShield);
-            AddFormatted(m, 880, LineColor::White, iDeleteMana);
-            AddFormatted(m, 881, LineColor::White, iLimitTime);
-        }
-        else if (skillType != AT_SKILL_EXPANSION_OF_WIZARDRY
-            && skillType != AT_SKILL_EXPANSION_OF_WIZARDRY_STR
-            && skillType != AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY
-            && skillType != AT_SKILL_ALICE_SLEEP
-            && skillType != AT_SKILL_ALICE_SLEEP_STR)
-        {
-            WORD bySkill = skillType;
-            if (!(AT_SKILL_STUN <= bySkill && bySkill <= AT_SKILL_MANA)
-                && !(AT_SKILL_ALICE_THORNS <= bySkill && bySkill <= AT_SKILL_ALICE_ENERVATION)
-                && bySkill != AT_SKILL_TELEPORT && bySkill != AT_SKILL_TELEPORT_ALLY)
-            {
-                if (AT_SKILL_SUMMON_EXPLOSION <= bySkill && bySkill <= AT_SKILL_SUMMON_POLLUTION)
-                {
-                    gCharacterManager.GetCurseSkillDamage(bySkill, &iMinDamage, &iMaxDamage);
-                    AddFormatted(m, 1692, LineColor::White, iMinDamage, iMaxDamage);
-                }
-                else
-                {
-                    AddFormatted(m, 170, LineColor::White,
-                        iMinDamage + skillattackpowerRate, iMaxDamage + skillattackpowerRate);
-                }
-            }
-        }
+        AddFormatted(m, 578, LineColor::White, damageShield);
+        AddFormatted(m, 880, LineColor::White, deleteMana);
+        AddFormatted(m, 881, LineColor::White, limitTime);
+        return;
     }
 
-    // Knight/Dark/Elf/Dark Lord/Rage Fighter: physical skill damage.
-    if (HeroClass == CLASS_KNIGHT || HeroClass == CLASS_DARK || HeroClass == CLASS_ELF
-        || HeroClass == CLASS_DARK_LORD || HeroClass == CLASS_RAGEFIGHTER)
+    if (skillType == AT_SKILL_EXPANSION_OF_WIZARDRY
+        || skillType == AT_SKILL_EXPANSION_OF_WIZARDRY_STR
+        || skillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY
+        || skillType == AT_SKILL_ALICE_SLEEP
+        || skillType == AT_SKILL_ALICE_SLEEP_STR) return;
+
+    const WORD s = skillType;
+    if ((AT_SKILL_STUN <= s && s <= AT_SKILL_MANA)
+        || (AT_SKILL_ALICE_THORNS <= s && s <= AT_SKILL_ALICE_ENERVATION)
+        || s == AT_SKILL_TELEPORT || s == AT_SKILL_TELEPORT_ALLY) return;
+
+    if (AT_SKILL_SUMMON_EXPLOSION <= s && s <= AT_SKILL_SUMMON_POLLUTION)
     {
-        switch (skillType)
-        {
-        case AT_SKILL_TELEPORT:
-        case AT_SKILL_TELEPORT_ALLY:
-        case AT_SKILL_SOUL_BARRIER:
-        case AT_SKILL_SOUL_BARRIER_STR:
-        case AT_SKILL_SOUL_BARRIER_PROFICIENCY:
-        case AT_SKILL_BLOCKING:
-        case AT_SKILL_SWELL_LIFE:
-        case AT_SKILL_SWELL_LIFE_STR:
-        case AT_SKILL_SWELL_LIFE_PROFICIENCY:
-        case AT_SKILL_HEALING:
-        case AT_SKILL_HEALING_STR:
-        case AT_SKILL_DEFENSE:
-        case AT_SKILL_DEFENSE_STR:
-        case AT_SKILL_DEFENSE_MASTERY:
-        case AT_SKILL_ATTACK:
-        case AT_SKILL_ATTACK_STR:
-        case AT_SKILL_ATTACK_MASTERY:
-        case AT_SKILL_SUMMON:
-        case AT_SKILL_SUMMON + 1:
-        case AT_SKILL_SUMMON + 2:
-        case AT_SKILL_SUMMON + 3:
-        case AT_SKILL_SUMMON + 4:
-        case AT_SKILL_SUMMON + 5:
-        case AT_SKILL_SUMMON + 6:
-        case AT_SKILL_SUMMON + 7:
-        case AT_SKILL_IMPROVE_AG:
-        case AT_SKILL_STUN:
-        case AT_SKILL_REMOVAL_STUN:
-        case AT_SKILL_MANA:
-        case AT_SKILL_INVISIBLE:
-        case AT_SKILL_REMOVAL_INVISIBLE:
-        case AT_SKILL_REMOVAL_BUFF:
-        case AT_SKILL_INFINITY_ARROW:
-        case AT_SKILL_INFINITY_ARROW_STR:
-            break;
-        case AT_SKILL_PARTY_TELEPORT:
-        case AT_SKILL_ADD_CRITICAL:
-        case AT_SKILL_ADD_CRITICAL_STR1:
-        case AT_SKILL_ADD_CRITICAL_STR2:
-        case AT_SKILL_ADD_CRITICAL_STR3:
-            break;
-        case AT_SKILL_EARTHSHAKE:
-        case AT_SKILL_EARTHSHAKE_STR:
-        case AT_SKILL_EARTHSHAKE_MASTERY:
-            AddRaw(m, GlobalText[1237], LineColor::DarkRed);
-            break;
-        case AT_SKILL_BRAND_OF_SKILL:
-            break;
-        case AT_SKILL_PLASMA_STORM_FENRIR:
-        case AT_SKILL_RECOVER:
-        case AT_SKILL_ATT_UP_OURFORCES:
-        case AT_SKILL_HP_UP_OURFORCES:
-        case AT_SKILL_HP_UP_OURFORCES_STR:
-        case AT_SKILL_DEF_UP_OURFORCES:
-        case AT_SKILL_DEF_UP_OURFORCES_STR:
-        case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
-            break;
-        default:
-            AddFormatted(m, 879, LineColor::White,
-                iSkillMinDamage, iSkillMaxDamage + skillattackpowerRate);
-            break;
-        }
+        int curseMin = 0, curseMax = 0;
+        gCharacterManager.GetCurseSkillDamage(s, &curseMin, &curseMax);
+        AddFormatted(m, 1692, LineColor::White, curseMin, curseMax);
+        return;
     }
 
-    // Plasma Storm Fenrir: class-specific damage formula.
-    if (skillType == AT_SKILL_PLASMA_STORM_FENRIR)
+    AddFormatted(m, 170, LineColor::White,
+        ctx.magicMin + ctx.skillAttackPowerRate, ctx.magicMax + ctx.skillAttackPowerRate);
+}
+
+// Knight/Dark/Elf/Dark Lord/Rage Fighter: physical skill damage.
+void EmitPhysicalDamage(Model& m, int skillType, const DamageContext& ctx)
+{
+    if (ctx.heroClass != CLASS_KNIGHT && ctx.heroClass != CLASS_DARK
+        && ctx.heroClass != CLASS_ELF && ctx.heroClass != CLASS_DARK_LORD
+        && ctx.heroClass != CLASS_RAGEFIGHTER) return;
+
+    switch (skillType)
     {
-        int iSkillDamage = 0;
-        gSkillManager.GetSkillInformation_Damage(AT_SKILL_PLASMA_STORM_FENRIR, &iSkillDamage);
-
-        if (HeroClass == CLASS_KNIGHT || HeroClass == CLASS_DARK)
-            iSkillMinDamage = (Strength / 3) + (Dexterity / 5) + (Vitality / 5) + (Energy / 7) + iSkillDamage;
-        else if (HeroClass == CLASS_WIZARD || HeroClass == CLASS_SUMMONER)
-            iSkillMinDamage = (Strength / 5) + (Dexterity / 5) + (Vitality / 7) + (Energy / 3) + iSkillDamage;
-        else if (HeroClass == CLASS_ELF)
-            iSkillMinDamage = (Strength / 5) + (Dexterity / 3) + (Vitality / 7) + (Energy / 5) + iSkillDamage;
-        else if (HeroClass == CLASS_DARK_LORD)
-            iSkillMinDamage = (Strength / 5) + (Dexterity / 5) + (Vitality / 7) + (Energy / 3) + (Charisma / 3) + iSkillDamage;
-        else if (HeroClass == CLASS_RAGEFIGHTER)
-            iSkillMinDamage = (Strength / 5) + (Dexterity / 5) + (Vitality / 3) + (Energy / 7) + iSkillDamage;
-
-        iSkillMaxDamage = iSkillMinDamage + 30;
+    case AT_SKILL_TELEPORT:
+    case AT_SKILL_TELEPORT_ALLY:
+    case AT_SKILL_SOUL_BARRIER:
+    case AT_SKILL_SOUL_BARRIER_STR:
+    case AT_SKILL_SOUL_BARRIER_PROFICIENCY:
+    case AT_SKILL_BLOCKING:
+    case AT_SKILL_SWELL_LIFE:
+    case AT_SKILL_SWELL_LIFE_STR:
+    case AT_SKILL_SWELL_LIFE_PROFICIENCY:
+    case AT_SKILL_HEALING:
+    case AT_SKILL_HEALING_STR:
+    case AT_SKILL_DEFENSE:
+    case AT_SKILL_DEFENSE_STR:
+    case AT_SKILL_DEFENSE_MASTERY:
+    case AT_SKILL_ATTACK:
+    case AT_SKILL_ATTACK_STR:
+    case AT_SKILL_ATTACK_MASTERY:
+    case AT_SKILL_SUMMON:
+    case AT_SKILL_SUMMON + 1:
+    case AT_SKILL_SUMMON + 2:
+    case AT_SKILL_SUMMON + 3:
+    case AT_SKILL_SUMMON + 4:
+    case AT_SKILL_SUMMON + 5:
+    case AT_SKILL_SUMMON + 6:
+    case AT_SKILL_SUMMON + 7:
+    case AT_SKILL_IMPROVE_AG:
+    case AT_SKILL_STUN:
+    case AT_SKILL_REMOVAL_STUN:
+    case AT_SKILL_MANA:
+    case AT_SKILL_INVISIBLE:
+    case AT_SKILL_REMOVAL_INVISIBLE:
+    case AT_SKILL_REMOVAL_BUFF:
+    case AT_SKILL_INFINITY_ARROW:
+    case AT_SKILL_INFINITY_ARROW_STR:
+    case AT_SKILL_PARTY_TELEPORT:
+    case AT_SKILL_ADD_CRITICAL:
+    case AT_SKILL_ADD_CRITICAL_STR1:
+    case AT_SKILL_ADD_CRITICAL_STR2:
+    case AT_SKILL_ADD_CRITICAL_STR3:
+    case AT_SKILL_BRAND_OF_SKILL:
+    case AT_SKILL_PLASMA_STORM_FENRIR:
+    case AT_SKILL_RECOVER:
+    case AT_SKILL_ATT_UP_OURFORCES:
+    case AT_SKILL_HP_UP_OURFORCES:
+    case AT_SKILL_HP_UP_OURFORCES_STR:
+    case AT_SKILL_DEF_UP_OURFORCES:
+    case AT_SKILL_DEF_UP_OURFORCES_STR:
+    case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
+        return;
+    case AT_SKILL_EARTHSHAKE:
+    case AT_SKILL_EARTHSHAKE_STR:
+    case AT_SKILL_EARTHSHAKE_MASTERY:
+        AddRaw(m, GlobalText[1237], LineColor::DarkRed);
+        return;
+    default:
         AddFormatted(m, 879, LineColor::White,
-            iSkillMinDamage, iSkillMaxDamage + skillattackpowerRate);
+            ctx.skillMin, ctx.skillMax + ctx.skillAttackPowerRate);
+        return;
     }
+}
 
-    // Elf buff-value computations.
-    if (HeroClass == CLASS_ELF)
+// Plasma Storm Fenrir uses a class-specific damage formula.
+void EmitPlasmaStormFenrirDamage(Model& m, int skillType, const DamageContext& ctx)
+{
+    if (skillType != AT_SKILL_PLASMA_STORM_FENRIR) return;
+
+    int skillDamageBase = 0;
+    gSkillManager.GetSkillInformation_Damage(AT_SKILL_PLASMA_STORM_FENRIR, &skillDamageBase);
+
+    int minDamage = 0;
+    if (ctx.heroClass == CLASS_KNIGHT || ctx.heroClass == CLASS_DARK)
+        minDamage = (ctx.strength / 3) + (ctx.dexterity / 5) + (ctx.vitality / 5) + (ctx.energy / 7) + skillDamageBase;
+    else if (ctx.heroClass == CLASS_WIZARD || ctx.heroClass == CLASS_SUMMONER)
+        minDamage = (ctx.strength / 5) + (ctx.dexterity / 5) + (ctx.vitality / 7) + (ctx.energy / 3) + skillDamageBase;
+    else if (ctx.heroClass == CLASS_ELF)
+        minDamage = (ctx.strength / 5) + (ctx.dexterity / 3) + (ctx.vitality / 7) + (ctx.energy / 5) + skillDamageBase;
+    else if (ctx.heroClass == CLASS_DARK_LORD)
+        minDamage = (ctx.strength / 5) + (ctx.dexterity / 5) + (ctx.vitality / 7) + (ctx.energy / 3) + (ctx.charisma / 3) + skillDamageBase;
+    else if (ctx.heroClass == CLASS_RAGEFIGHTER)
+        minDamage = (ctx.strength / 5) + (ctx.dexterity / 5) + (ctx.vitality / 3) + (ctx.energy / 7) + skillDamageBase;
+
+    const int maxDamage = minDamage + 30;
+    AddFormatted(m, 879, LineColor::White, minDamage, maxDamage + ctx.skillAttackPowerRate);
+}
+
+// Elf buff-value computations (Healing/Defense/Attack/Recover).
+void EmitElfBuffValues(Model& m, int skillType, const DamageContext& ctx)
+{
+    if (ctx.heroClass != CLASS_ELF) return;
+
+    switch (skillType)
     {
-        switch (skillType)
-        {
-        case AT_SKILL_HEALING_STR:
-        {
-            int value = (Energy / 5) + 5;
-            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_HEALING_STR].GetSkillValue();
-            value += static_cast<int>((value * boostPercent) / 100.0);
-            AddFormatted(m, 171, LineColor::White, value);
-            break;
-        }
-        case AT_SKILL_HEALING:
-            AddFormatted(m, 171, LineColor::White, Energy / 5 + 5);
-            break;
-        case AT_SKILL_DEFENSE_STR:
-        case AT_SKILL_DEFENSE_MASTERY:
-        {
-            int value = Energy / 8 + 2;
-            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_STR].GetSkillValue();
-            auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_MASTERY].GetSkillValue();
-            value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
-            AddFormatted(m, 172, LineColor::White, value);
-            break;
-        }
-        case AT_SKILL_DEFENSE:
-            AddFormatted(m, 172, LineColor::White, Energy / 8 + 2);
-            break;
-        case AT_SKILL_ATTACK_STR:
-        case AT_SKILL_ATTACK_MASTERY:
-        {
-            int value = Energy / 7 + 3;
-            auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_STR].GetSkillValue();
-            auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_MASTERY].GetSkillValue();
-            value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
-            AddFormatted(m, 173, LineColor::White, value);
-            break;
-        }
-        case AT_SKILL_ATTACK:
-            AddFormatted(m, 173, LineColor::White, Energy / 7 + 3);
-            break;
-        case AT_SKILL_RECOVER:
-        {
-            int Cal = Energy / 4;
-            AddFormatted(m, 1782, LineColor::White, (int)((float)Cal + (float)CharacterAttribute->Level));
-            break;
-        }
-        default:
-            break;
-        }
+    case AT_SKILL_HEALING_STR:
+    {
+        int value = (ctx.energy / 5) + 5;
+        auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_HEALING_STR].GetSkillValue();
+        value += static_cast<int>((value * boostPercent) / 100.0);
+        AddFormatted(m, 171, LineColor::White, value);
+        return;
     }
+    case AT_SKILL_HEALING:
+        AddFormatted(m, 171, LineColor::White, ctx.energy / 5 + 5);
+        return;
+    case AT_SKILL_DEFENSE_STR:
+    case AT_SKILL_DEFENSE_MASTERY:
+    {
+        int value = ctx.energy / 8 + 2;
+        auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_STR].GetSkillValue();
+        auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_MASTERY].GetSkillValue();
+        value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
+        AddFormatted(m, 172, LineColor::White, value);
+        return;
+    }
+    case AT_SKILL_DEFENSE:
+        AddFormatted(m, 172, LineColor::White, ctx.energy / 8 + 2);
+        return;
+    case AT_SKILL_ATTACK_STR:
+    case AT_SKILL_ATTACK_MASTERY:
+    {
+        int value = ctx.energy / 7 + 3;
+        auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_STR].GetSkillValue();
+        auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_MASTERY].GetSkillValue();
+        value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
+        AddFormatted(m, 173, LineColor::White, value);
+        return;
+    }
+    case AT_SKILL_ATTACK:
+        AddFormatted(m, 173, LineColor::White, ctx.energy / 7 + 3);
+        return;
+    case AT_SKILL_RECOVER:
+    {
+        int cal = ctx.energy / 4;
+        AddFormatted(m, 1782, LineColor::White, (int)((float)cal + (float)CharacterAttribute->Level));
+        return;
+    }
+    default:
+        return;
+    }
+}
+
+void EmitBodyDamage(Model& m, int skillType)
+{
+    const int before = m.count;
+    const DamageContext ctx = BuildDamageContext(skillType);
+    EmitMagicalDamage(m, skillType, ctx);
+    EmitPhysicalDamage(m, skillType, ctx);
+    EmitPlasmaStormFenrirDamage(m, skillType, ctx);
+    EmitElfBuffValues(m, skillType, ctx);
     EndSection(m, before);
 }
 
-void EmitBodyStats(Model& m, int skillType, int iDistance, int iMana, int iSkillMana)
+void EmitBodyStats(Model& m, int skillType, int iDistance, int iMana, int iSkillMana, int iDelayMs)
 {
     const int before = m.count;
     if (skillType != AT_SKILL_EXPANSION_OF_WIZARDRY
@@ -414,6 +452,13 @@ void EmitBodyStats(Model& m, int skillType, int iDistance, int iMana, int iSkill
 
     AddFormatted(m, 175, LineColor::White, iMana);
     if (iSkillMana > 0) AddFormatted(m, 360, LineColor::White, iSkillMana);
+
+    if (iDelayMs > 0)
+    {
+        wchar_t buf[MAX_TOOLTIP_LINE_TEXT];
+        mu_swprintf(buf, kCooldownFormat, iDelayMs / kMillisPerSecond);
+        AddRaw(m, buf, LineColor::White);
+    }
     EndSection(m, before);
 }
 
@@ -590,7 +635,7 @@ void BuildModel(const BuildOptions& options, Model& outModel)
     EmitHeader(outModel, lpszName);
     EmitTopBanners(outModel, SkillType);
     if (options.includeCharacterSpecific) EmitBodyDamage(outModel, SkillType);
-    EmitBodyStats(outModel, SkillType, iDistance, iMana, iSkillMana);
+    EmitBodyStats(outModel, SkillType, iDistance, iMana, iSkillMana, SkillAttribute[SkillType].Delay);
     EmitRequirements(outModel, options, SkillType);
     EmitBottomBanners(outModel, options, SkillType);
     EmitBlueTags(outModel, SkillType);
