@@ -46,12 +46,16 @@ void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STR
     BuildModel(options, model);
 
     // Copy the model into the legacy TextList / Color / Bold buffers that
-    // RenderTipTextList consumes. Pre-allocated globals, no heap.
+    // RenderTipTextList consumes. Pre-allocated globals, no heap. The legacy
+    // TextList row is wchar_t[100] while the model line buffer is wider, so
+    // truncate rather than overflow.
+    constexpr size_t kLegacyLineCap = 100;
     const int lineCount = (model.count < MAX_TOOLTIP_LINES) ? model.count : MAX_TOOLTIP_LINES;
     for (int i = 0; i < lineCount; ++i)
     {
         const Line& src = model.lines[i];
-        wcscpy(TextList[i], src.text);
+        wcsncpy(TextList[i], src.text, kLegacyLineCap - 1);
+        TextList[i][kLegacyLineCap - 1] = L'\0';
         TextListColor[i] = LegacyColor(src.color);
         TextBold[i] = src.isBold ? 1 : 0;
     }

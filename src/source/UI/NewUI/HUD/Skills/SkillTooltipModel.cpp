@@ -579,7 +579,7 @@ void BuildModel(const BuildOptions& options, Model& outModel)
     {
         for (int i = 0; i < CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].SpecialNum; i++)
         {
-            if (CharacterMachine->Equipment[0].Special[i] == AT_SKILL_FORCE_WAVE)
+            if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Special[i] == AT_SKILL_FORCE_WAVE)
             {
                 mu_swprintf(lpszName, L"%ls", GlobalText[1200]);
                 break;
