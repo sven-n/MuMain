@@ -1,0 +1,2 @@
+group=game_shop_cash_shop
+status=placeholder

@@ -1,10 +1,10 @@
 # Port completo Rust + Bevy do cliente MU
 
-Status atual: F2.S1.T1 concluído localmente; F1.S2.T2 segue aguardando evidência de Actions
+Status atual: F2.S1.T2 concluído localmente; F2.S1.T3 é o próximo passo local
 
-Próximo passo concreto: iniciar `F2.S1.T2 Protocol inventory fixtures` localmente; `F1.S2.T2` permanece bloqueado até existir artefato/checksum/log de Actions.
+Próximo passo concreto: iniciar `F2.S1.T3` localmente, o harness de comparação legado em `mu_test_support`; `F1.S2.T2` permanece bloqueado até existir artefato/checksum/log de Actions.
 
-Sincronização com git: `rtk git status --short --untracked-files=all` mostra as atualizações em `.features/20260518-0000-rust-bevy-port/{plan.md,progress.md}`, `.memory/{RULES_AND_DEFINITION.md,TODO.md}`, os workflows Rust e o workspace Rust em `port_rust/Cargo.toml`, `port_rust/Cargo.lock`, `port_rust/rust-toolchain.toml` e `port_rust/crates/mu_*/...`; o relatório local `tmp/asset-inventory/data-report.txt` é artefato ignorado e também está representado em "Arquivos tocados".
+Sincronização com git: `rtk git status --short --untracked-files=all` agora mostra `.features/20260518-0000-rust-bevy-port/progress.md`, `.memory/{RULES_AND_DEFINITION.md,TODO.md}`, `port_rust/crates/mu_protocol/tests/**` e `port_rust/tests/rust/protocol_inventory.rs`; o relatório local `tmp/asset-inventory/data-report.txt` continua sendo artefato ignorado e também está representado em "Arquivos tocados".
 
 ## Controle documental
 
@@ -37,7 +37,7 @@ Validation Gate F1: todo.
 | ID | Status | Owner/subagent | Planned files | Actual files touched | Required evidence | Produced evidence | Blocker/cause |
 |---|---|---|---|---|---|---|---|
 | F2.S1.T1 | done | `feature-assets` | `port_rust/crates/mu_asset_pipeline/src/{inventory.rs,main.rs}` | `port_rust/crates/mu_asset_pipeline/src/inventory.rs`, `port_rust/crates/mu_asset_pipeline/src/main.rs`, `port_rust/crates/mu_asset_pipeline/src/lib.rs`, `port_rust/crates/mu_asset_pipeline/Cargo.toml`, `tmp/asset-inventory/data-report.txt` | fixture report matching Asset Inventory | scanner conta arquivos por extensão e diretório, rejeita `.att1`, `.ozj2`, `.rar` e `World1/xxx`; relatório real encontrou 13.168 arquivos e 4 rejeições esperadas | nenhum |
-| F2.S1.T2 | todo | `feature-network` | `port_rust/crates/mu_protocol/tests/fixtures/**`, `port_rust/tests/rust/protocol_inventory.rs` | nenhum | fixture manifest checked into tests | pendente | aguarda autorização de implementação |
+| F2.S1.T2 | done | `feature-network` | `port_rust/crates/mu_protocol/tests/fixtures/**`, `port_rust/tests/rust/protocol_inventory.rs` | `port_rust/crates/mu_protocol/tests/protocol_inventory.rs`, `port_rust/tests/rust/protocol_inventory.rs`, `port_rust/crates/mu_protocol/tests/fixtures/*.txt` | fixture manifest checked into tests | 14 placeholders registrados e validados por teste Cargo-runnable que inclui o manifesto do workspace no crate `mu_protocol` | nenhum |
 | F2.S1.T3 | todo | `feature-test-support` | `port_rust/crates/mu_test_support/src/{legacy.rs,fixtures.rs,evidence.rs}` | nenhum | harness unit tests | pendente | aguarda autorização de implementação |
 | F2.S1.T4 | todo | `feature-ui` | `port_rust/tests/rust/ui_fixtures/**`, `port_rust/crates/mu_ui/src/fixture_routes.rs` | nenhum | snapshot manifest | pendente | aguarda autorização de implementação |
 | F2.S1.T5 | todo | `feature-test-support` | `port_rust/crates/mu_test_support/src/source_inventory.rs`, `port_rust/tests/rust/source_inventory.rs`, `docs/rust-client.md` | nenhum | source inventory report + test | pendente | aguarda autorização de implementação |
@@ -193,6 +193,9 @@ Novos:
 - `port_rust/crates/mu_gameplay/{Cargo.toml,src/lib.rs}` — representado por `F1.S1.T1` e `F1.S1.T2`.
 - `port_rust/crates/mu_editor_admin/{Cargo.toml,src/lib.rs}` — representado por `F1.S1.T1` e `F1.S1.T2`.
 - `port_rust/crates/mu_test_support/{Cargo.toml,src/lib.rs}` — representado por `F1.S1.T1` e `F1.S1.T2`.
+- `port_rust/tests/rust/protocol_inventory.rs` — representado por `F2.S1.T2`.
+- `port_rust/crates/mu_protocol/tests/protocol_inventory.rs` — representado por `F2.S1.T2`.
+- `port_rust/crates/mu_protocol/tests/fixtures/**` — representado por `F2.S1.T2`.
 
 Modificados:
 
@@ -216,7 +219,7 @@ Removidos:
 | `rtk cargo metadata --manifest-path port_rust/Cargo.toml --no-deps --format-version 1` | passou; workspace com 14 crates listadas |
 | `rtk cargo tree --manifest-path port_rust/Cargo.toml --workspace --depth 1` | passou; workspace lista 14 crates |
 | `rtk rg -n "bevy\|serde\|thiserror\|tracing\|tokio\|clap\|toml\|camino\|insta\|proptest" port_rust/Cargo.toml port_rust/crates/*/Cargo.toml` | passou; política central registrada no `port_rust/Cargo.toml` raiz |
-| `rtk cargo test --manifest-path port_rust/Cargo.toml --workspace` | passou; 5 testes, 33 suites de unidade/doc |
+| `rtk cargo test --manifest-path port_rust/Cargo.toml --workspace` | passou; 10 testes, 34 suites de unidade/doc; inclui `mu_protocol/tests/protocol_inventory.rs` |
 | `rtk cargo build --manifest-path port_rust/Cargo.toml -p mu_client` | passou |
 | `rtk cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings` | passou sem issues |
 | `rtk cargo run --manifest-path port_rust/Cargo.toml -p mu_client -- --headless` | passou; saída `ready-for-login` |
@@ -232,13 +235,13 @@ Removidos:
 | `tmp/asset-inventory/data-report.txt` | relatório local: 13.168 arquivos, `.map` 90, `.att` 123, `.ozb` 48, `.obj` 56, `.bmd` 5308, `.smd` 3, `.ozj` 5730, `.ozt` 1751; 4 rejeições |
 | `rtk rg -n "anomalous" tmp/asset-inventory/data-report.txt` | passou; rejeitou `World7/TerrainLight.OZJ2`, `World1/xxx`, `World1/EncTerrain1.att1`, `InGameShopScript/512.2011.006.rar` |
 | `rtk rg ... stale root port paths ...` | passou sem saída; docs não apontam mais código do port fora de `port_rust/` |
-| `rtk git status --short --untracked-files=all` | mostra `.features/20260518-0000-rust-bevy-port/{plan.md,progress.md}`, `.memory/{RULES_AND_DEFINITION.md,TODO.md}`, os workflows Rust, `port_rust/Cargo.toml`, `port_rust/Cargo.lock`, `port_rust/rust-toolchain.toml` e os crates novos do workspace |
+| `rtk git status --short --untracked-files=all` | mostra `.features/20260518-0000-rust-bevy-port/progress.md`, `.memory/{RULES_AND_DEFINITION.md,TODO.md}`, `port_rust/crates/mu_protocol/tests/**` e `port_rust/tests/rust/protocol_inventory.rs`; o restante do workspace segue limpo nesta etapa |
 
 ## Contagem de tarefas
 
-- done: 4 documentais + 6 implementação
+- done: 4 documentais + 7 implementação
 - doing: 0
-- todo: 59 implementação
+- todo: 58 implementação
 - blocked: 1
 - failed: 0
 
@@ -251,6 +254,7 @@ Removidos:
 - F1.S2.T2 tem workflow Windows x64 criado, mas falta evidência de GitHub Actions.
 - F1.S2.T3 concluída; workflows Rust coexistem com os workflows MinGW existentes.
 - F2.S1.T1 concluída com scanner e relatório local de inventário de assets.
+- F2.S1.T2 concluída com manifesto e fixtures de inventário de protocolo; o teste Cargo-runnable inclui o manifesto do workspace no crate `mu_protocol`.
 - Nenhuma fase jogável foi iniciada.
-- Próxima tarefa executável local é `F2.S1.T2`.
+- Próxima tarefa executável local é `F2.S1.T3`.
 - Evidências já disponíveis: `cargo metadata`, `cargo tree --manifest-path port_rust/Cargo.toml --workspace --depth 1`, `cargo test --manifest-path port_rust/Cargo.toml --workspace`, `cargo build --manifest-path port_rust/Cargo.toml -p mu_client`, `cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings`, `cargo fmt --manifest-path port_rust/Cargo.toml --all --check`, smokes headless, `rg` da política central, `port_rust/Cargo.lock` e relatório local de inventário.

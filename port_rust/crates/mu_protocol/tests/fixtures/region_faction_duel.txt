@@ -1,0 +1,2 @@
+group=region_faction_duel
+status=placeholder

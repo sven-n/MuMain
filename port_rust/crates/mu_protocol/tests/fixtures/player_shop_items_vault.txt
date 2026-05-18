@@ -1,0 +1,2 @@
+group=player_shop_items_vault
+status=placeholder

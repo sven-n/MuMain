@@ -1,0 +1,2 @@
+group=trade_mail_friend_social
+status=placeholder

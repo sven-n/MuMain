@@ -25,3 +25,7 @@ The migration plan in `.features/20260518-0000-rust-bevy-port/plan.md` is comple
 # [high] Protocol inventory fixtures
 
 `F2.S1.T1` is complete locally. Continue migration with `F2.S1.T2`, creating protocol inventory fixtures under `port_rust/crates/mu_protocol/tests/fixtures/**` and `port_rust/tests/rust/protocol_inventory.rs`.
+
+# [high] Legacy comparison harness
+
+`F2.S1.T2` is done locally. Next local step is `F2.S1.T3`, adding the comparison harness under `port_rust/crates/mu_test_support` so fixture and evidence tracking can continue.

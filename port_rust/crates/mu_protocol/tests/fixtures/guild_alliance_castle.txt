@@ -1,0 +1,2 @@
+group=guild_alliance_castle
+status=placeholder
