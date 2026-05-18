@@ -5,6 +5,7 @@ members = [
     "crates/mu_app",
     "crates/mu_core",
     "crates/mu_protocol",
+    "crates/mu_fake_server",
     "crates/mu_network",
     "crates/mu_assets",
     "crates/mu_asset_pipeline",

@@ -10,6 +10,8 @@ Esta etapa cria apenas o scaffold inicial: ainda e nao jogavel / not playable.
 - Sem runtime jogavel, UI, assets, audio, editor ou gameplay em Rust nesta fase.
 - O modo `--control-http` e um servidor HTTP local de teste para consultar
   estado e enviar comandos; ele nao substitui a rede do jogo.
+- O binario `mu_fake_server` e um servidor fake de connect-server para testes
+  locais, sem persistencia, configurado inteiramente por CLI.
 - Nenhum arquivo de implementacao legado deve ser movido para ca sem uma fase planejada.
 
 ## Validacao local prevista
@@ -38,6 +40,17 @@ O servidor expõe:
   mudar o estado ou encerrar o processo.
 
 Ao iniciar, o binario imprime o estado inicial e a URL efetiva do servidor.
+
+O servidor fake de connect-server pode ser iniciado com:
+
+```bash
+rtk cargo run --manifest-path port_rust/Cargo.toml -p mu_fake_server -- \
+  --bind 127.0.0.1:44405 \
+  --server 0:100
+```
+
+Repita `--server` para adicionar mais entradas na lista de servidores. Cada
+entrada usa o formato `CONNECT_INDEX:PERCENT`.
 
 ## Dependencias dos scripts de port
 

@@ -157,6 +157,14 @@ name = "mu_editor_admin"
 version = "0.1.0"
 
 [[package]]
+name = "mu_fake_server"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "mu_protocol",
+]
+
+[[package]]
 name = "mu_gameplay"
 version = "0.1.0"
 

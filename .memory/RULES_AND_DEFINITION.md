@@ -9,3 +9,8 @@ Todo código do port Rust deve ficar dentro do projeto `port_rust/`. Não criar 
 # Prefixo rtk
 
 Todos os comandos de shell devem ser prefixados com `rtk`.
+
+# Fake server minimalista
+
+O fake connect server do `port_rust/` e CLI-only, sem persistencia, e deve ser
+estendido por handlers de protocolo explicitos e helpers em `mu_protocol`.

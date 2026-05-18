@@ -1,0 +1,10 @@
+[package]
+name = "mu_fake_server"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+clap.workspace = true
+mu_protocol = { path = "../mu_protocol" }
+
