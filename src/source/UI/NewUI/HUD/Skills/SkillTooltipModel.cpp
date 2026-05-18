@@ -74,13 +74,19 @@ void AddRaw(Model& m, const wchar_t* text, LineColor color, bool bold = false)
     l.isBlank = false;
 }
 
-void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1, int v2 = 0)
+void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1)
 {
     Line& l = NextSlot(m);
-    if (v2 != 0)
-        mu_swprintf(l.text, GlobalText[globalTextIdx], v1, v2);
-    else
-        mu_swprintf(l.text, GlobalText[globalTextIdx], v1);
+    mu_swprintf(l.text, GlobalText[globalTextIdx], v1);
+    l.color = color;
+    l.isBold = false;
+    l.isBlank = false;
+}
+
+void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1, int v2)
+{
+    Line& l = NextSlot(m);
+    mu_swprintf(l.text, GlobalText[globalTextIdx], v1, v2);
     l.color = color;
     l.isBold = false;
     l.isBlank = false;
@@ -178,7 +184,7 @@ void BuildModel(const BuildOptions& options, Model& outModel)
 
         // Jewel of Harmony skill-power bonuses from equipped weapons.
         int skillattackpowerRate = 0;
-        StrengthenCapability rightinfo, leftinfo;
+        StrengthenCapability rightinfo{}, leftinfo{};
         ITEM* rightweapon = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
         ITEM* leftweapon = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
         if (g_pUIJewelHarmonyinfo && rightweapon->Level >= rightweapon->Jewel_Of_Harmony_OptionLevel)

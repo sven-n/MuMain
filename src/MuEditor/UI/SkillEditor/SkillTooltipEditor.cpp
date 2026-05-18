@@ -8,6 +8,9 @@
 #include "UI/NewUI/HUD/Skills/SkillTooltipModel.h"
 #include "imgui.h"
 
+#include <string>
+#include <vector>
+
 namespace MuEditor::Skills::Tooltip
 {
 
@@ -43,14 +46,23 @@ bool HasRedBackground(LineColor c) { return c == LineColor::DarkRed; }
 
 void RenderModelCentered(const Model& model)
 {
-    // Two-pass for center alignment: compute the widest line, then indent
-    // each line by half the difference so the tooltip auto-sizes nicely.
+    // Two-pass for center alignment: first pass measures the widest line and
+    // caches the UTF-8 conversion; second pass centers and renders. The buffer
+    // is reused across calls so hovering doesn't allocate on every frame.
+    thread_local std::vector<std::string> utf8Lines;
+    utf8Lines.clear();
+    utf8Lines.reserve(model.count);
+
     float maxWidth = 0.0f;
     for (int i = 0; i < model.count; ++i)
     {
-        if (model.lines[i].isBlank) continue;
-        const std::string utf8 = StringUtils::WideToNarrow(model.lines[i].text);
-        const float w = ImGui::CalcTextSize(utf8.c_str()).x;
+        if (model.lines[i].isBlank)
+        {
+            utf8Lines.emplace_back();
+            continue;
+        }
+        utf8Lines.emplace_back(StringUtils::WideToNarrow(model.lines[i].text));
+        const float w = ImGui::CalcTextSize(utf8Lines.back().c_str()).x;
         if (w > maxWidth) maxWidth = w;
     }
 
@@ -63,9 +75,9 @@ void RenderModelCentered(const Model& model)
             continue;
         }
 
-        const std::string utf8 = StringUtils::WideToNarrow(line.text);
-        const float textWidth = ImGui::CalcTextSize(utf8.c_str()).x;
-        const float indent = (maxWidth - textWidth) * 0.5f;
+        const std::string& utf8 = utf8Lines[i];
+        const ImVec2 textSize = ImGui::CalcTextSize(utf8.c_str());
+        const float indent = (maxWidth - textSize.x) * 0.5f;
         if (indent > 0.0f)
         {
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + indent);
@@ -73,7 +85,6 @@ void RenderModelCentered(const Model& model)
 
         if (HasRedBackground(line.color))
         {
-            const ImVec2 textSize = ImGui::CalcTextSize(utf8.c_str());
             const ImVec2 cursorScreen = ImGui::GetCursorScreenPos();
             const float padX = 4.0f;
             const float padY = 1.0f;
