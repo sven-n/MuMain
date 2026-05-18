@@ -179,6 +179,9 @@ version = "0.1.0"
 [[package]]
 name = "mu_test_support"
 version = "0.1.0"
+dependencies = [
+ "camino",
+]
 
 [[package]]
 name = "mu_ui"
