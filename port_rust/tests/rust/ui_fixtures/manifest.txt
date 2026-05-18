@@ -1,0 +1,35 @@
+boot|Boot|ui_fixtures/boot.snap
+loading|Loading|ui_fixtures/loading.snap
+login|Login|ui_fixtures/login.snap
+server-select|Server Select|ui_fixtures/server-select.snap
+options|Options|ui_fixtures/options.snap
+messages|Messages|ui_fixtures/messages.snap
+character-select|Character Select|ui_fixtures/character-select.snap
+character-create|Character Create|ui_fixtures/character-create.snap
+character-delete|Character Delete|ui_fixtures/character-delete.snap
+world|World|ui_fixtures/world.snap
+hud|HUD|ui_fixtures/hud.snap
+chat|Chat|ui_fixtures/chat.snap
+minimap|Minimap|ui_fixtures/minimap.snap
+hotkeys|Hotkeys|ui_fixtures/hotkeys.snap
+inventory|Inventory|ui_fixtures/inventory.snap
+trade|Trade|ui_fixtures/trade.snap
+vault|Vault|ui_fixtures/vault.snap
+shop|Shop|ui_fixtures/shop.snap
+npc|NPC|ui_fixtures/npc.snap
+gate|Gate|ui_fixtures/gate.snap
+events|Events|ui_fixtures/events.snap
+combat|Combat|ui_fixtures/combat.snap
+duel|Duel|ui_fixtures/duel.snap
+siege|Siege|ui_fixtures/siege.snap
+party|Party|ui_fixtures/party.snap
+friend|Friend|ui_fixtures/friend.snap
+guild|Guild|ui_fixtures/guild.snap
+quests|Quests|ui_fixtures/quests.snap
+mu-helper|MU Helper|ui_fixtures/mu-helper.snap
+game-shop|GameShop|ui_fixtures/game-shop.snap
+editor-admin|Editor Admin|ui_fixtures/editor-admin.snap
+admin-core|Admin Core|ui_fixtures/admin-core.snap
+admin-item-editor|Admin Item Editor|ui_fixtures/admin-item-editor.snap
+admin-skill-editor|Admin Skill Editor|ui_fixtures/admin-skill-editor.snap
+error|Error|ui_fixtures/error.snap

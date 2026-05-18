@@ -1,3 +1,5 @@
+//! Stable evidence artifact layout for legacy-vs-Rust comparison tests.
+
 use crate::fixtures::{artifact_file_name, slugify};
 use camino::{Utf8Path, Utf8PathBuf};
 
