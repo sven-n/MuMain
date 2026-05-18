@@ -135,7 +135,6 @@ public:
     }
     bool OpenItemSetScript();
 
-    static bool    IsDisableSkill(ActionSkillType Type, int Energy, int Charisma = 0);
     std::uint8_t    IsChangeSetItem(const int Type, const int SubType = -1);
     std::uint16_t    GetMixItemLevel(const int Type) const;
     bool	GetSetItemName(wchar_t* strName, const int iType, const int setType) const;

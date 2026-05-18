@@ -2186,7 +2186,7 @@ bool SkillWarrior(CHARACTER* c, ITEM* p)
 
     if (Skill == AT_SKILL_FIRE_SCREAM
         || Skill == AT_SKILL_FIRE_SCREAM_STR
-        || Skill == AT_SKILL_GAOTIC
+        || Skill == AT_SKILL_CHAOTIC_DISEIER
         )
     {
         int iMana;
@@ -2256,7 +2256,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         case AT_SKILL_FIRE_SCREAM:
         case AT_SKILL_FIRE_SCREAM_STR:
             break;
-        case AT_SKILL_GAOTIC:
+        case AT_SKILL_CHAOTIC_DISEIER:
             break;
         case AT_SKILL_FORCE:
         case AT_SKILL_FORCE_WAVE:
@@ -2317,7 +2317,7 @@ void UseSkillWarrior(CHARACTER* c, OBJECT* o)
         o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
     }
 
-    if (Skill != AT_SKILL_GAOTIC)
+    if (Skill != AT_SKILL_CHAOTIC_DISEIER)
     {
         WORD TKey = 0xffff;
         if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
@@ -5197,7 +5197,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
         || Skill == AT_SKILL_FIRE_SCREAM
         || Skill == AT_SKILL_FIRE_SCREAM_STR
         || Skill == AT_SKILL_GIGANTIC_STORM
-        || Skill == AT_SKILL_GAOTIC
+        || Skill == AT_SKILL_CHAOTIC_DISEIER
         || Skill == AT_SKILL_TWISTING_SLASH
         || Skill == AT_SKILL_TWISTING_SLASH_STR
         || Skill == AT_SKILL_TWISTING_SLASH_STR_MG
@@ -5388,7 +5388,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     }
                 }
                 break;
-            case AT_SKILL_GAOTIC:
+            case AT_SKILL_CHAOTIC_DISEIER:
             {
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
 
@@ -6901,7 +6901,7 @@ bool CanExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         }
     }
 
-    if (!gSkillManager.AreSkillRequirementsFulfilled(Skill))
+    if (!gSkillManager.AreSkillAttributeRequirementsMet(Skill))
     {
         return false;
     }
@@ -7089,7 +7089,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                     {
                         switch (Skill)
                         {
-                        case AT_SKILL_GAOTIC:
+                        case AT_SKILL_CHAOTIC_DISEIER:
                         case AT_SKILL_IMPALE:
                         case AT_SKILL_RIDER:
                         case AT_SKILL_DEATHSTAB:

@@ -36,6 +36,9 @@ private:
     // Column freezing state
     bool m_bFreezeColumns;
 
+    // Show the skill hover tooltip on row hover (opt-in)
+    bool m_bShowHoverTooltip;
+
     // Table renderer
     CSkillEditorTable* m_pTable;
 };

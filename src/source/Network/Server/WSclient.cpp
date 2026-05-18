@@ -1090,7 +1090,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     }
 
     // Initialize skill requirements cache on character login
-    gSkillManager.InitializeSkillRequirementsCache();
+    gSkillManager.InitializeSkillAttributeRequirementsCache();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
 
@@ -1376,7 +1376,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
         CharacterAttribute->Skill[Skill_Bool] = AT_SKILL_UNDEFINED;
 
     // Skills have changed, invalidate skill requirements cache
-    gSkillManager.InvalidateSkillRequirementsCache();
+    gSkillManager.InvalidateSkillAttributeRequirementsCache();
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
@@ -4787,7 +4787,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         so->m_bActionStart = FALSE;
     }
     break;
-    case AT_SKILL_GAOTIC:
+    case AT_SKILL_CHAOTIC_DISEIER:
     {
         if (so->Type == MODEL_PLAYER)
         {
@@ -5144,7 +5144,7 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
             case AT_SKILL_PLASMA_STORM_FENRIR:
                 SetAction_Fenrir_Skill(sc, so);
                 break;
-            case AT_SKILL_GAOTIC:
+            case AT_SKILL_CHAOTIC_DISEIER:
             {
                 if (sc->Helper.Type == MODEL_HORN_OF_FENRIR)
                 {
@@ -6710,7 +6710,7 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
         CharacterAttribute->Mana = Data->MaxMana;
 
         // Character level changed, invalidate skill requirements cache
-        gSkillManager.InvalidateSkillRequirementsCache();
+        gSkillManager.InvalidateSkillAttributeRequirementsCache();
         CharacterAttribute->ShieldMax = Data->MaxShield;
         CharacterAttribute->SkillManaMax = Data->SkillManaMax;
         CharacterAttribute->AddPoint = Data->AddPoint;
@@ -6729,7 +6729,7 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
         CharacterAttribute->Mana = Data->MaxMana;
 
         // Character level changed, invalidate skill requirements cache
-        gSkillManager.InvalidateSkillRequirementsCache();
+        gSkillManager.InvalidateSkillAttributeRequirementsCache();
         CharacterAttribute->ShieldMax = Data->MaxShield;
         CharacterAttribute->SkillManaMax = Data->SkillManaMax;
         CharacterAttribute->AddPoint = Data->AddPoint;
@@ -6844,7 +6844,7 @@ void ReceiveSetPointsExtended(const BYTE* ReceiveBuffer)
 
     // Character stats changed, invalidate skill requirements cache
     // it is called in `CalculatedAll` already, but for future changes and understandability also kept here because it does not have a huge impact.
-    gSkillManager.InvalidateSkillRequirementsCache();
+    gSkillManager.InvalidateSkillAttributeRequirementsCache();
 }
 
 void ReceiveStatsExtended(const BYTE* ReceiveBuffer)

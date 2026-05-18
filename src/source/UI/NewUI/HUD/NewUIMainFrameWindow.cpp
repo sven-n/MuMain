@@ -22,6 +22,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/NewUI/HUD/Skills/SkillTooltip.h"
 #include "Core/Time/CTimCheck.h"
 #include "GameLogic/Social/MonkSystem.h"
 
@@ -2042,7 +2043,7 @@ bool SEASON3B::CNewUISkillList::Render()
 
 void SEASON3B::CNewUISkillList::RenderSkillInfo()
 {
-    ::RenderSkillInfo(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
+    UI::Skills::Tooltip::Render(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
 }
 
 float SEASON3B::CNewUISkillList::GetLayerDepth()
@@ -2105,7 +2106,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
     BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
     int Skill_Icon = SkillAttribute[bySkillType].Magic_Icon;
 
-    if (!gSkillManager.AreSkillRequirementsFulfilled(bySkillType))
+    if (!gSkillManager.AreSkillAttributeRequirementsMet(bySkillType))
     {
         bCantSkill = true;
     }
@@ -2152,13 +2153,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         bCantSkill = true;
     }
 
-    int iEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
-
-    if (g_csItemOption.IsDisableSkill(bySkillType, iEnergy))
-    {
-        bCantSkill = true;
-    }
-
     if (bySkillType == AT_SKILL_PARTY_TELEPORT && PartyNumber <= 0)
     {
         bCantSkill = true;
@@ -2199,10 +2193,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         || (bySkillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
         )
     {
-        if (g_csItemOption.IsDisableSkill(bySkillType, iEnergy))
-        {
-            bCantSkill = true;
-        }
         if ((g_isCharacterBuff((&Hero->Object), eBuff_InfinityArrow)) || (g_isCharacterBuff((&Hero->Object), eBuff_SwellOfMagicPower)))
         {
             bCantSkill = true;
@@ -2290,13 +2280,6 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         }
     }
 
-    int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-
-    if (g_csItemOption.IsDisableSkill(bySkillType, iEnergy, iCharisma))
-    {
-        bCantSkill = true;
-    }
-
     if (!g_CMonkSystem.IsSwordformGlovesUseSkill(bySkillType))
     {
         bCantSkill = true;
@@ -2377,7 +2360,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         fV = 2 * height / 256.f;
         iKindofSkill = KOS_SKILL2;
     }
-    else if (bySkillType == AT_SKILL_GAOTIC)
+    else if (bySkillType == AT_SKILL_CHAOTIC_DISEIER)
     {
         fU = 3 * width / 256.f;
         fV = 8 * height / 256.f;

@@ -10,10 +10,21 @@
 CSkillManager gSkillManager;
 extern bool CheckAttack();
 
+namespace
+{
+// Energy requirement formula constants. The scaling formula for a skill is
+// `<base> + (BMD.Energy * BMD.Level * <scale>) / 100`, where <base> and
+// <scale> vary by class and skill family.
+constexpr int ENERGY_REQ_BASE_DEFAULT = 20;
+constexpr int ENERGY_REQ_BASE_KNIGHT = 10;
+constexpr int ENERGY_REQ_SCALE_DEFAULT_PERCENT = 4;
+constexpr int ENERGY_REQ_SCALE_SUMMON_PERCENT = 3;
+}
+
 CSkillManager::CSkillManager() // OK
 {
-    m_bSkillRequirementsCacheDirty = true;
-    memset(m_aSkillRequirementsFulfilled, 0, sizeof(m_aSkillRequirementsFulfilled));
+    m_bSkillAttributeRequirementsCacheDirty = true;
+    memset(m_aSkillAttributeRequirementsMet, 0, sizeof(m_aSkillAttributeRequirementsMet));
 }
 
 CSkillManager::~CSkillManager() // OK
@@ -57,26 +68,40 @@ void CSkillManager::GetSkillInformation(int iType, int iLevel, wchar_t* lpszName
 
 void CSkillManager::GetSkillInformation_Energy(int iType, int* piEnergy)
 {
+    if (!piEnergy) return;
+
     SKILL_ATTRIBUTE* p = &SkillAttribute[iType];
 
-    if (piEnergy)
+    // Skills with no energy cost in the BMD are free regardless of their
+    // character-level requirement. Without this short-circuit the formula
+    // below would charge a fixed ENERGY_REQ_BASE_DEFAULT (20) for any
+    // Level>0 skill that the BMD author left at Energy=0, which gates many
+    // low-tier or special skills incorrectly.
+    if (p->Energy == 0)
     {
-        if (p->Energy == 0)
-        {
-            *piEnergy = 0;
-        }
-        else
-        {
-            *piEnergy = 20 + (p->Energy * p->Level * 4 / 100);
+        *piEnergy = 0;
+        return;
+    }
 
-            if (iType == AT_SKILL_SUMMON_EXPLOSION || iType == AT_SKILL_SUMMON_REQUIEM) {
-                *piEnergy = 20 + (p->Energy * p->Level * 3 / 100);
-            }
+    // BMD Energy is dual-purpose. For Level=0 skills it's the direct cost
+    // (Summon Goblin=30, Summon Soldier=300, etc.). For Level>0 skills it's
+    // a per-level scaling factor that the formula multiplies up.
+    if (p->Level == 0)
+    {
+        *piEnergy = p->Energy;
+        return;
+    }
 
-            if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT) {
-                *piEnergy = 10 + (p->Energy * p->Level * 4 / 100);
-            }
-        }
+    *piEnergy = ENERGY_REQ_BASE_DEFAULT + (p->Energy * p->Level * ENERGY_REQ_SCALE_DEFAULT_PERCENT / 100);
+
+    if (iType == AT_SKILL_SUMMON_EXPLOSION || iType == AT_SKILL_SUMMON_REQUIEM)
+    {
+        *piEnergy = ENERGY_REQ_BASE_DEFAULT + (p->Energy * p->Level * ENERGY_REQ_SCALE_SUMMON_PERCENT / 100);
+    }
+
+    if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT)
+    {
+        *piEnergy = ENERGY_REQ_BASE_KNIGHT + (p->Energy * p->Level * ENERGY_REQ_SCALE_DEFAULT_PERCENT / 100);
     }
 }
 
@@ -204,7 +229,7 @@ bool CSkillManager::skillVScharactorCheck(const DemendConditionInfo& basicInfo, 
     return false;
 }
 
-bool CSkillManager::AreSkillRequirementsFulfilled(ActionSkillType skillType)
+bool CSkillManager::AreSkillAttributeRequirementsMet(ActionSkillType skillType)
 {
     if (skillType >= MAX_SKILLS)
     {
@@ -212,28 +237,28 @@ bool CSkillManager::AreSkillRequirementsFulfilled(ActionSkillType skillType)
     }
 
     // Rebuild cache if dirty (on first call after stat/skill changes)
-    if (m_bSkillRequirementsCacheDirty)
+    if (m_bSkillAttributeRequirementsCacheDirty)
     {
-        RebuildSkillRequirementsCache();
+        RebuildSkillAttributeRequirementsCache();
     }
 
-    return m_aSkillRequirementsFulfilled[skillType];
+    return m_aSkillAttributeRequirementsMet[skillType];
 }
 
-void CSkillManager::InvalidateSkillRequirementsCache()
+void CSkillManager::InvalidateSkillAttributeRequirementsCache()
 {
-    m_bSkillRequirementsCacheDirty = true;
+    m_bSkillAttributeRequirementsCacheDirty = true;
 }
 
-void CSkillManager::InitializeSkillRequirementsCache()
+void CSkillManager::InitializeSkillAttributeRequirementsCache()
 {
-    m_bSkillRequirementsCacheDirty = true;
-    RebuildSkillRequirementsCache();
+    m_bSkillAttributeRequirementsCacheDirty = true;
+    RebuildSkillAttributeRequirementsCache();
 }
 
-void CSkillManager::RebuildSkillRequirementsCache()
+void CSkillManager::RebuildSkillAttributeRequirementsCache()
 {
-    if (!m_bSkillRequirementsCacheDirty)
+    if (!m_bSkillAttributeRequirementsCacheDirty)
     {
         return;
     }
@@ -253,7 +278,7 @@ void CSkillManager::RebuildSkillRequirementsCache()
         ActionSkillType baseSkill = MasterSkillToBaseSkillIndex(static_cast<ActionSkillType>(skillType));
         if (isGuardian && (baseSkill == AT_SKILL_TELEPORT_ALLY || baseSkill == AT_SKILL_TELEPORT))
         {
-            m_aSkillRequirementsFulfilled[skillType] = false;
+            m_aSkillAttributeRequirementsMet[skillType] = false;
             continue;
         }
 
@@ -262,11 +287,13 @@ void CSkillManager::RebuildSkillRequirementsCache()
         skillRequirements.SkillStrength = SkillAttribute[baseSkill].Strength;
         skillRequirements.SkillDexterity = SkillAttribute[baseSkill].Dexterity;
         skillRequirements.SkillVitality = 0;
-        skillRequirements.SkillEnergy = (20 + (SkillAttribute[baseSkill].Energy * SkillAttribute[baseSkill].Level) * 0.04);
+        int reqEnergy = 0;
+        GetSkillInformation_Energy(baseSkill, &reqEnergy);
+        skillRequirements.SkillEnergy = static_cast<WORD>(reqEnergy);
         skillRequirements.SkillCharisma = SkillAttribute[baseSkill].Charisma;
 
-        m_aSkillRequirementsFulfilled[skillType] = (skillRequirements <= heroCharacterInfo);
+        m_aSkillAttributeRequirementsMet[skillType] = (skillRequirements <= heroCharacterInfo);
     }
 
-    m_bSkillRequirementsCacheDirty = false;
+    m_bSkillAttributeRequirementsCacheDirty = false;
 }

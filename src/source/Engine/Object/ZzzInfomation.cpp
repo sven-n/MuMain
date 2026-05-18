@@ -1966,7 +1966,7 @@ int64_t ItemValue(ITEM* ip, int goldType)
             case AT_SKILL_TRIPLE_SHOT_STR:
             case AT_SKILL_TRIPLE_SHOT_MASTERY:
             case AT_SKILL_RECOVER:
-            case AT_SKILL_GAOTIC:
+            case AT_SKILL_CHAOTIC_DISEIER:
             case AT_SKILL_MULTI_SHOT:
             case AT_SKILL_POWER_SLASH:
             case AT_SKILL_POWER_SLASH_STR:
@@ -3654,5 +3654,5 @@ void CHARACTER_MACHINE::CalculateAll()
         FinalSuccessDefense = false;
 
     // Stats recalculated (equipment/items changed), invalidate skill requirements cache
-    gSkillManager.InvalidateSkillRequirementsCache();
+    gSkillManager.InvalidateSkillAttributeRequirementsCache();
 }

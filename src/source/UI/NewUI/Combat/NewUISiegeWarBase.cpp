@@ -11,6 +11,7 @@ using namespace SEASON3B;
 #include "Guild/UIGuildInfo.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/NewUI/HUD/Skills/SkillTooltip.h"
 
 SEASON3B::CNewUISiegeWarBase::CNewUISiegeWarBase()
 {
@@ -471,7 +472,7 @@ void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
 
     if (m_bRenderToolTip == true)
     {
-        RenderSkillInfo(m_SkillTooltipPos.x, m_SkillTooltipPos.y, FindHotKey(Hero->GuildSkill), Hero->GuildSkill, STRP_BOTTOMCENTER);
+        UI::Skills::Tooltip::Render(m_SkillTooltipPos.x, m_SkillTooltipPos.y, FindHotKey(Hero->GuildSkill), Hero->GuildSkill, STRP_BOTTOMCENTER);
     }
 }
 
