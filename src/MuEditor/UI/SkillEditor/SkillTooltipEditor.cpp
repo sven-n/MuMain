@@ -88,9 +88,12 @@ void RenderModelCentered(const Model& model)
             const ImVec2 cursorScreen = ImGui::GetCursorScreenPos();
             const float padX = 4.0f;
             const float padY = 1.0f;
+            // Stretch the background to the tooltip's content width (maxWidth)
+            // so every banner looks the same regardless of its text length.
+            const float leftEdge = cursorScreen.x - indent;
             ImGui::GetWindowDrawList()->AddRectFilled(
-                ImVec2(cursorScreen.x - padX, cursorScreen.y - padY),
-                ImVec2(cursorScreen.x + textSize.x + padX, cursorScreen.y + textSize.y + padY),
+                ImVec2(leftEdge - padX, cursorScreen.y - padY),
+                ImVec2(leftEdge + maxWidth + padX, cursorScreen.y + textSize.y + padY),
                 IMGUI_BG_DARKRED);
         }
 
