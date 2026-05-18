@@ -200,26 +200,27 @@ fn handle_connection(
         Ok(request) => request,
         Err(_) => {
             let mut stream = reader.into_inner();
-            write_response(
+            let _ = write_response(
                 &mut stream,
                 400,
                 "Bad Request",
                 "application/json",
                 r#"{"error":"bad request"}"#,
-            )?;
+            );
             return Ok(());
         }
     };
 
     let mut stream = reader.into_inner();
     let response = route_request(request, snapshot, shutdown);
-    write_response(
+    let _ = write_response(
         &mut stream,
         response.status,
         response.reason,
         response.content_type,
         &response.body,
-    )
+    );
+    Ok(())
 }
 
 fn route_request(
@@ -336,6 +337,8 @@ fn poke_shutdown(address: SocketAddr) -> io::Result<()> {
         &mut stream,
         "GET /__shutdown HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n",
     )?;
+    let mut response = Vec::new();
+    let _ = stream.read_to_end(&mut response);
     Ok(())
 }
 
@@ -503,5 +506,16 @@ mod tests {
 
         handle.request_shutdown();
         let _ = handle.join();
+    }
+
+    #[test]
+    fn shutdown_request_joins_cleanly() {
+        let handle = spawn("127.0.0.1:0".parse().unwrap(), AppState::Boot).unwrap();
+
+        handle.request_shutdown();
+
+        let final_snapshot = handle.join().unwrap();
+        assert_eq!(final_snapshot.state, AppState::Boot);
+        assert_eq!(final_snapshot.command_count, 0);
     }
 }
