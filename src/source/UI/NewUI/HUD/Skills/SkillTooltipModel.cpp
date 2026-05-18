@@ -133,6 +133,8 @@ void BuildModel(const BuildOptions& options, Model& outModel)
 {
     outModel.Reset();
 
+    if (options.includeCharacterSpecific && (!Hero || !CharacterAttribute || !CharacterMachine)) return;
+
     const int SkillType = options.skillType;
     if (SkillType < 0 || SkillType >= MAX_SKILLS) return;
     if (SkillAttribute[SkillType].Name[0] == L'\0') return;

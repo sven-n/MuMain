@@ -33,6 +33,8 @@ void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STR
     // Pet command icons get a different UI entirely (delegated to giPetManager).
     if (giPetManager::RenderPetCmdInfo(sx, sy, Type)) return;
 
+    if (!CharacterAttribute) return;
+
     const int skillType = CharacterAttribute->Skill[Type];
 
     BuildOptions options;
