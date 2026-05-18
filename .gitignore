@@ -39,5 +39,16 @@ build-mingw/
 **/imgui.ini
 
 **/*.log
+
+# Rust build outputs
+**/target/
+
+# Python local caches
+**/__pycache__/
+*.py[cod]
+
 # Local-only files
 docs/reviews/
+
+port_rust/assets/
+tmp/

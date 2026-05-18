@@ -1,0 +1,4 @@
+[workspace]
+members = ["crates/port_rust"]
+resolver = "2"
+
