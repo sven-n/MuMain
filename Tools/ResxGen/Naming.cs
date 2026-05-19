@@ -11,12 +11,13 @@ internal static class Naming
     /// English sentence.
     public const int MaxIdentifierLength = 64;
 
-    /// Slug a free-form key (e.g. "Save Skills", "Are you sure?") into a
-    /// PascalCase C++ identifier: "SaveSkills", "AreYouSure".
+    /// Slug a free-form key (e.g. "Save Skills", "Are you sure?", "BlessAegis Mining Lab")
+    /// into a PascalCase C++ identifier: "SaveSkills", "AreYouSure", "BlessAegisMiningLab".
     ///
-    /// Word boundaries are any run of non-alphanumeric characters. Letters
-    /// inside a word are lowercased; the first letter of each word is
-    /// upper-cased. Empty input throws.
+    /// Word boundaries are any run of non-alphanumeric characters. The first
+    /// letter of each word is forced upper-case; everything else preserves its
+    /// original case so PascalCase content in the source ("BlessAegis") survives.
+    /// Empty input throws.
     public static string ToIdentifier(string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -29,7 +30,7 @@ internal static class Naming
             {
                 sb.Append(atWordStart
                     ? char.ToUpper(c, CultureInfo.InvariantCulture)
-                    : char.ToLower(c, CultureInfo.InvariantCulture));
+                    : c);
                 atWordStart = false;
             }
             else
