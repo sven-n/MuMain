@@ -33,3 +33,23 @@ The migration plan in `.features/20260518-0000-rust-bevy-port/plan.md` is comple
 # [high] Source inventory audit blocked
 
 `F2.S1.T5` is the next planned implementation step after the UI fixture and evidence-doc work. It remains blocked until implementation authorization, and will add the source/dependency classification audit under `port_rust/crates/mu_test_support` and `port_rust/tests/rust/source_inventory.rs`.
+
+# [high] Asset manifest validator
+
+`F3.S1.T1` is the next open implementation slice after the source inventory audit. It will add the manifest/runtime validator under `port_rust/crates/mu_assets` and keep the asset boot gate aligned with the plan.
+
+# [high] Asset model conversion pipeline
+
+`F3.S1.T3` is the next concrete asset-pipeline task after texture conversion and manifest writing. It will add the model conversion modules and golden fixture coverage under `port_rust/crates/mu_asset_pipeline`.
+
+# [high] Asset game data parsers
+
+`F3.S1.T5` is the next open asset-pipeline task after terrain conversion. It will add the game_data/shop_data parsers under `port_rust/crates/mu_asset_pipeline` once implementation time is allocated.
+
+# [medium] Audio asset loader
+
+`F3.S2.T2` is the next pending localization slice. It will add the audio asset loaders under `port_rust/crates/mu_assets/src/audio.rs` and `port_rust/crates/mu_audio/src/assets.rs` with tests once implementation starts.
+
+# [medium] Workspace clippy blockers
+
+`rtk cargo clippy --manifest-path port_rust/Cargo.toml --workspace --all-targets -- -D warnings` still fails in pre-existing `port_rust/crates/mu_asset_pipeline/{bmd.rs,obj.rs,smd.rs}`. `game_data.rs` is clean now; next follow-up is to triage or fix the remaining lint errors so the full workspace gate passes again.
