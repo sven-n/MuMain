@@ -14,429 +14,429 @@
   </resheader>
 
   <data name="Save Items" xml:space="preserve">
-    <value>Gegenstände Speichern</value>
+    <value>Сохранить Предметы</value>
   </data>
   <data name="Save Skills" xml:space="preserve">
-    <value>Fähigkeiten Speichern</value>
+    <value>Сохранить Навыки</value>
   </data>
   <data name="Export as S6E3" xml:space="preserve">
-    <value>Als S6E3 Exportieren</value>
+    <value>Экспорт в S6E3</value>
   </data>
   <data name="Export as CSV" xml:space="preserve">
-    <value>Als CSV Exportieren</value>
+    <value>Экспорт в CSV</value>
   </data>
   <data name="Export Skills as CSV" xml:space="preserve">
-    <value>Fähigkeiten Als CSV Exportieren</value>
+    <value>Экспорт Навыков в CSV</value>
   </data>
   <data name="Columns" xml:space="preserve">
-    <value>Spalten</value>
+    <value>Столбцы</value>
   </data>
   <data name="Select All" xml:space="preserve">
-    <value>Alle Auswählen</value>
+    <value>Выбрать Все</value>
   </data>
   <data name="Unselect All" xml:space="preserve">
-    <value>Auswahl Aufheben</value>
+    <value>Снять Выбор</value>
   </data>
   <data name="OK" xml:space="preserve">
-    <value>OK</value>
+    <value>ОК</value>
   </data>
   <data name="Save completed successfully!" xml:space="preserve">
-    <value>Erfolgreich gespeichert!</value>
+    <value>Сохранение завершено успешно!</value>
   </data>
   <data name="Failed to save items!" xml:space="preserve">
-    <value>Fehler beim Speichern der Gegenstände!</value>
+    <value>Не удалось сохранить предметы!</value>
   </data>
   <data name="Skills saved successfully!" xml:space="preserve">
-    <value>Fähigkeiten erfolgreich gespeichert!</value>
+    <value>Навыки сохранены успешно!</value>
   </data>
   <data name="Failed to save skills!" xml:space="preserve">
-    <value>Fehler beim Speichern der Fähigkeiten!</value>
+    <value>Не удалось сохранить навыки!</value>
   </data>
   <data name="S6E3 export completed successfully!" xml:space="preserve">
-    <value>S6E3 Export erfolgreich abgeschlossen!</value>
+    <value>Экспорт S6E3 завершён успешно!</value>
   </data>
   <data name="Failed to export as S6E3 format!" xml:space="preserve">
-    <value>Fehler beim Exportieren in das S6E3 Format!</value>
+    <value>Не удалось экспортировать в формат S6E3!</value>
   </data>
   <data name="CSV export completed successfully!" xml:space="preserve">
-    <value>CSV Export erfolgreich abgeschlossen!</value>
+    <value>Экспорт CSV завершён успешно!</value>
   </data>
   <data name="Failed to export as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren als CSV!</value>
+    <value>Не удалось экспортировать в CSV!</value>
   </data>
   <data name="Skills exported as CSV successfully!" xml:space="preserve">
-    <value>Fähigkeiten erfolgreich als CSV exportiert!</value>
+    <value>Навыки экспортированы в CSV успешно!</value>
   </data>
   <data name="Failed to export skills as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Fähigkeiten als CSV!</value>
+    <value>Не удалось экспортировать навыки в CSV!</value>
   </data>
   <data name="File not found: {0}" xml:space="preserve">
-    <value>Datei nicht gefunden: {0}</value>
+    <value>Файл не найден: {0}</value>
   </data>
   <data name="Invalid index: {0}" xml:space="preserve">
-    <value>Ungültiger Index: {0}</value>
+    <value>Недопустимый индекс: {0}</value>
   </data>
   <data name="Error: Index {0} already in use!" xml:space="preserve">
-    <value>Fehler: Index {0} wird bereits verwendet!</value>
+    <value>Ошибка: Индекс {0} уже используется!</value>
   </data>
   <data name="Search:" xml:space="preserve">
-    <value>Suchen:</value>
+    <value>Поиск:</value>
   </data>
   <data name="Freeze Index/Name" xml:space="preserve">
-    <value>Index/Name Fixieren</value>
+    <value>Закрепить Индекс/Имя</value>
   </data>
   <data name="No columns selected. Click 'Columns' to show columns." xml:space="preserve">
-    <value>Keine Spalten ausgewählt. Klicken Sie auf 'Spalten', um Spalten anzuzeigen.</value>
+    <value>Столбцы не выбраны. Нажмите 'Столбцы', чтобы показать столбцы.</value>
   </data>
   <data name="Index" xml:space="preserve">
-    <value>Index</value>
+    <value>Индекс</value>
   </data>
   <data name="Toggle Column Visibility:" xml:space="preserve">
-    <value>Spaltensichtbarkeit Umschalten:</value>
+    <value>Переключить Видимость Столбцов:</value>
   </data>
   <data name="Items saved successfully!" xml:space="preserve">
-    <value>Gegenstände erfolgreich gespeichert!</value>
+    <value>Предметы сохранены успешно!</value>
   </data>
   <data name="Exported as legacy format successfully!" xml:space="preserve">
-    <value>Erfolgreich als Legacy-Format exportiert!</value>
+    <value>Успешно экспортировано в устаревшем формате!</value>
   </data>
   <data name="Failed to export as legacy format!" xml:space="preserve">
-    <value>Fehler beim Export als Legacy-Format!</value>
+    <value>Не удалось экспортировать в устаревшем формате!</value>
   </data>
   <data name="Items exported as CSV successfully!" xml:space="preserve">
-    <value>Gegenstände erfolgreich als CSV exportiert!</value>
+    <value>Предметы экспортированы в CSV успешно!</value>
   </data>
   <data name="Failed to export item attributes as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Gegenstandsattribute als CSV!</value>
+    <value>Не удалось экспортировать атрибуты предметов в CSV!</value>
   </data>
   <data name="Failed to export skill attributes as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Fähigkeitsattribute als CSV!</value>
+    <value>Не удалось экспортировать атрибуты навыков в CSV!</value>
   </data>
   <data name="Skill Editor" xml:space="preserve">
-    <value>Fähigkeiten-Editor</value>
+    <value>Редактор Навыков</value>
   </data>
   <data name="Search Skills:" xml:space="preserve">
-    <value>Fähigkeiten Suchen:</value>
+    <value>Поиск Навыков:</value>
   </data>
   <data name="Item Editor" xml:space="preserve">
-    <value>Gegenstands-Editor</value>
+    <value>Редактор Предметов</value>
   </data>
   <data name="Dev Editor" xml:space="preserve">
-    <value>Entwickler-Editor</value>
+    <value>Редактор Разработчика</value>
   </data>
   <data name="Scenes" xml:space="preserve">
-    <value>Szenen</value>
+    <value>Сцены</value>
   </data>
   <data name="Graphics" xml:space="preserve">
-    <value>Grafik</value>
+    <value>Графика</value>
   </data>
   <data name="Login Scene" xml:space="preserve">
-    <value>Login-Szene</value>
+    <value>Сцена Входа</value>
   </data>
   <data name="Character Scene" xml:space="preserve">
-    <value>Charakter-Szene</value>
+    <value>Сцена Персонажа</value>
   </data>
   <data name="Game Scene" xml:space="preserve">
-    <value>Spielszene</value>
+    <value>Игровая Сцена</value>
   </data>
   <data name="Debug" xml:space="preserve">
-    <value>Debug</value>
+    <value>Отладка</value>
   </data>
   <data name="Nothing here yet." xml:space="preserve">
-    <value>Hier gibt es noch nichts.</value>
+    <value>Здесь пока ничего нет.</value>
   </data>
   <data name="Switch to FreeFly" xml:space="preserve">
-    <value>Zu FreeFly wechseln</value>
+    <value>Переключить на FreeFly</value>
   </data>
   <data name="Switch to Game Camera" xml:space="preserve">
-    <value>Zur Spielkamera wechseln</value>
+    <value>Переключить на Игровую Камеру</value>
   </data>
   <data name="FreeFly" xml:space="preserve">
     <value>FreeFly</value>
   </data>
   <data name="Spectating" xml:space="preserve">
-    <value>Beobachtet</value>
+    <value>Наблюдение</value>
   </data>
   <data name="Snap to Spectated" xml:space="preserve">
-    <value>An Beobachtete heranführen</value>
+    <value>Прыгнуть к Наблюдаемому</value>
   </data>
   <data name="Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast" xml:space="preserve">
-    <value>Pfeile/PgUp/PgDn=Bewegen  RMT=Umsehen  Shift=Schnell</value>
+    <value>Стрелки/PgUp/PgDn=Движение  ПКМ=Обзор  Shift=Быстро</value>
   </data>
   <data name="Offset X" xml:space="preserve">
-    <value>Versatz X</value>
+    <value>Смещение X</value>
   </data>
   <data name="Offset Y" xml:space="preserve">
-    <value>Versatz Y</value>
+    <value>Смещение Y</value>
   </data>
   <data name="Offset Z" xml:space="preserve">
-    <value>Versatz Z</value>
+    <value>Смещение Z</value>
   </data>
   <data name="Pitch" xml:space="preserve">
-    <value>Neigung</value>
+    <value>Наклон</value>
   </data>
   <data name="Yaw" xml:space="preserve">
-    <value>Gier</value>
+    <value>Поворот</value>
   </data>
   <data name="Reset Offsets" xml:space="preserve">
-    <value>Versätze zurücksetzen</value>
+    <value>Сброс Смещений</value>
   </data>
   <data name="Resume" xml:space="preserve">
-    <value>Fortsetzen</value>
+    <value>Продолжить</value>
   </data>
   <data name="Pause" xml:space="preserve">
-    <value>Pause</value>
+    <value>Пауза</value>
   </data>
   <data name="Restart" xml:space="preserve">
-    <value>Neu starten</value>
+    <value>Перезапуск</value>
   </data>
   <data name="Start Tour" xml:space="preserve">
-    <value>Tour starten</value>
+    <value>Начать Тур</value>
   </data>
   <data name="Render Distances:" xml:space="preserve">
-    <value>Render-Distanzen:</value>
+    <value>Дистанции Рендеринга:</value>
   </data>
   <data name="Terrain ViewFar" xml:space="preserve">
-    <value>Gelände-Sichtweite</value>
+    <value>Дальность Ландшафта</value>
   </data>
   <data name="Object Distance" xml:space="preserve">
-    <value>Objekt-Distanz</value>
+    <value>Дистанция Объектов</value>
   </data>
   <data name="Reset Distances" xml:space="preserve">
-    <value>Distanzen zurücksetzen</value>
+    <value>Сброс Дистанций</value>
   </data>
   <data name="Switch to (or spectate) Default or Orbital to edit overrides." xml:space="preserve">
-    <value>Wechsle zu (oder beobachte) Default oder Orbital, um Overrides zu bearbeiten.</value>
+    <value>Переключитесь на (или наблюдайте) Default или Orbital, чтобы редактировать переопределения.</value>
   </data>
   <data name="Override Default Camera Config" xml:space="preserve">
-    <value>Default-Kamera-Konfig überschreiben</value>
+    <value>Переопределить Конфиг Default</value>
   </data>
   <data name="Hero-relative camera with hardcoded 2D trapezoid culling." xml:space="preserve">
-    <value>Held-relative Kamera mit fest verdrahtetem 2D-Trapez-Culling.</value>
+    <value>Камера, привязанная к герою, с жёстко прописанным 2D-трапециевидным отсечением.</value>
   </data>
   <data name="View Frustum" xml:space="preserve">
-    <value>Sichtkegel</value>
+    <value>Усечённая Пирамида Вида</value>
   </data>
   <data name="Far Plane" xml:space="preserve">
-    <value>Ferne Ebene</value>
+    <value>Дальняя Плоскость</value>
   </data>
   <data name="Camera Offset (world units, from hero)" xml:space="preserve">
-    <value>Kamera-Versatz (Welteinheiten, vom Helden)</value>
+    <value>Смещение Камеры (мировые единицы, от героя)</value>
   </data>
   <data name="2D Culling Trapezoid Width" xml:space="preserve">
-    <value>2D-Culling-Trapezbreite</value>
+    <value>Ширина Трапеции 2D-Отсечения</value>
   </data>
   <data name="Bottom (near) x" xml:space="preserve">
-    <value>Unten (nah) x</value>
+    <value>Низ (близко) x</value>
   </data>
   <data name="Top (far) x" xml:space="preserve">
-    <value>Oben (fern) x</value>
+    <value>Верх (далеко) x</value>
   </data>
   <data name="Fog" xml:space="preserve">
-    <value>Nebel</value>
+    <value>Туман</value>
   </data>
   <data name="Override Fog" xml:space="preserve">
-    <value>Nebel überschreiben</value>
+    <value>Переопределить Туман</value>
   </data>
   <data name="Fog On" xml:space="preserve">
-    <value>Nebel an</value>
+    <value>Туман Вкл</value>
   </data>
   <data name="ON" xml:space="preserve">
-    <value>AN</value>
+    <value>ВКЛ</value>
   </data>
   <data name="OFF" xml:space="preserve">
-    <value>AUS</value>
+    <value>ВЫКЛ</value>
   </data>
   <data name="Fog Start %" xml:space="preserve">
-    <value>Nebel Start %</value>
+    <value>Начало Тумана %</value>
   </data>
   <data name="Fog End %" xml:space="preserve">
-    <value>Nebel Ende %</value>
+    <value>Конец Тумана %</value>
   </data>
   <data name="Reset to Camera Defaults" xml:space="preserve">
-    <value>Auf Kamera-Defaults zurücksetzen</value>
+    <value>Сброс к Настройкам Камеры</value>
   </data>
   <data name="Override Orbital Camera Config" xml:space="preserve">
-    <value>Orbital-Kamera-Konfig überschreiben</value>
+    <value>Переопределить Конфиг Orbital</value>
   </data>
   <data name="Tunes the 2D terrain-cull hull; does not touch FOV / far clip." xml:space="preserve">
-    <value>Stellt die 2D-Gelände-Cull-Hülle ein; FOV / Far-Clip bleiben unangetastet.</value>
+    <value>Настраивает оболочку 2D-отсечения ландшафта; не влияет на FOV / дальний клип.</value>
   </data>
   <data name="2D Culling Trapezoid (world units)" xml:space="preserve">
-    <value>2D-Culling-Trapez (Welteinheiten)</value>
+    <value>Трапеция 2D-Отсечения (мировые единицы)</value>
   </data>
   <data name="Far distance" xml:space="preserve">
-    <value>Ferne Distanz</value>
+    <value>Дальняя дистанция</value>
   </data>
   <data name="Top (far) width" xml:space="preserve">
-    <value>Obere (ferne) Breite</value>
+    <value>Верх (далеко) ширина</value>
   </data>
   <data name="Near distance" xml:space="preserve">
-    <value>Nahe Distanz</value>
+    <value>Ближняя дистанция</value>
   </data>
   <data name="Bottom (near) width" xml:space="preserve">
-    <value>Untere (nahe) Breite</value>
+    <value>Низ (близко) ширина</value>
   </data>
   <data name="View-aligned: follows camera yaw + pitch (tracks what you look at)." xml:space="preserve">
-    <value>Sicht-ausgerichtet: folgt Kamera-Gier + Neigung (verfolgt das Blickziel).</value>
+    <value>Выравнено по виду: следует за поворотом + наклоном камеры (отслеживает то, на что вы смотрите).</value>
   </data>
   <data name="Reset to Natural Pyramid" xml:space="preserve">
-    <value>Auf natürliche Pyramide zurücksetzen</value>
+    <value>Сброс к Естественной Пирамиде</value>
   </data>
   <data name="Debug Visualization:" xml:space="preserve">
-    <value>Debug-Visualisierung:</value>
+    <value>Визуализация Отладки:</value>
   </data>
   <data name="Character Pick Boxes" xml:space="preserve">
-    <value>Charakter-Auswahlboxen</value>
+    <value>Боксы Выбора Персонажей</value>
   </data>
   <data name="Item Pick Boxes" xml:space="preserve">
-    <value>Gegenstand-Auswahlboxen</value>
+    <value>Боксы Выбора Предметов</value>
   </data>
   <data name="Item Cull Sphere" xml:space="preserve">
-    <value>Gegenstand-Cull-Kugel</value>
+    <value>Сфера Отсечения Предметов</value>
   </data>
   <data name="Tile Grid" xml:space="preserve">
-    <value>Kachelgitter</value>
+    <value>Сетка Тайлов</value>
   </data>
   <data name="Item Cull Radius" xml:space="preserve">
-    <value>Gegenstand-Cull-Radius</value>
+    <value>Радиус Отсечения Предметов</value>
   </data>
   <data name="Rendering:" xml:space="preserve">
-    <value>Rendering:</value>
+    <value>Рендеринг:</value>
   </data>
   <data name="Terrain" xml:space="preserve">
-    <value>Gelände</value>
+    <value>Ландшафт</value>
   </data>
   <data name="Static Objects" xml:space="preserve">
-    <value>Statische Objekte</value>
+    <value>Статические Объекты</value>
   </data>
   <data name="Effects" xml:space="preserve">
-    <value>Effekte</value>
+    <value>Эффекты</value>
   </data>
   <data name="Dropped Items" xml:space="preserve">
-    <value>Fallengelassene Gegenstände</value>
+    <value>Выпавшие Предметы</value>
   </data>
   <data name="Weather" xml:space="preserve">
-    <value>Wetter</value>
+    <value>Погода</value>
   </data>
   <data name="Item Labels" xml:space="preserve">
-    <value>Gegenstands-Beschriftung</value>
+    <value>Метки Предметов</value>
   </data>
   <data name="All ON" xml:space="preserve">
-    <value>Alle AN</value>
+    <value>Все ВКЛ</value>
   </data>
   <data name="All OFF" xml:space="preserve">
-    <value>Alle AUS</value>
+    <value>Все ВЫКЛ</value>
   </data>
   <data name="TODO - Not Working:" xml:space="preserve">
-    <value>TODO - Funktioniert nicht:</value>
+    <value>TODO - Не работает:</value>
   </data>
   <data name="Shaders" xml:space="preserve">
-    <value>Shader</value>
+    <value>Шейдеры</value>
   </data>
   <data name="Skill Effects" xml:space="preserve">
-    <value>Fähigkeit-Effekte</value>
+    <value>Эффекты Навыков</value>
   </data>
   <data name="Equipped Items" xml:space="preserve">
-    <value>Ausgerüstete Gegenstände</value>
+    <value>Надетые Предметы</value>
   </data>
   <data name="UI" xml:space="preserve">
-    <value>UI</value>
+    <value>Интерфейс</value>
   </data>
   <data name="TODO - Not Implemented:" xml:space="preserve">
-    <value>TODO - Nicht implementiert:</value>
+    <value>TODO - Не реализовано:</value>
   </data>
   <data name="Hero" xml:space="preserve">
-    <value>Held</value>
+    <value>Герой</value>
   </data>
   <data name="NPCs" xml:space="preserve">
-    <value>NPCs</value>
+    <value>NPC</value>
   </data>
   <data name="Monsters" xml:space="preserve">
-    <value>Monster</value>
+    <value>Монстры</value>
   </data>
   <data name="Graphics Debug Info" xml:space="preserve">
-    <value>Grafik-Debug-Info</value>
+    <value>Отладочная Инфо Графики</value>
   </data>
   <data name="WARNING: Window size mismatch detected!" xml:space="preserve">
-    <value>WARNUNG: Fenstergröße stimmt nicht überein!</value>
+    <value>ВНИМАНИЕ: Обнаружено несоответствие размера окна!</value>
   </data>
   <data name="Copy Debug Info to Clipboard" xml:space="preserve">
-    <value>Debug-Info in Zwischenablage kopieren</value>
+    <value>Копировать Отладочную Инфо</value>
   </data>
   <data name="(Paste in Discord/notepad)" xml:space="preserve">
-    <value>(In Discord/Notepad einfügen)</value>
+    <value>(Вставьте в Discord/блокнот)</value>
   </data>
   <data name="Default" xml:space="preserve">
-    <value>Standard</value>
+    <value>Стандартная</value>
   </data>
   <data name="Orbital" xml:space="preserve">
-    <value>Orbital</value>
+    <value>Орбитальная</value>
   </data>
   <data name="Unknown" xml:space="preserve">
-    <value>Unbekannt</value>
+    <value>Неизвестно</value>
   </data>
   <data name="Pos" xml:space="preserve">
-    <value>Pos</value>
+    <value>Поз</value>
   </data>
   <data name="Tile" xml:space="preserve">
-    <value>Kachel</value>
+    <value>Тайл</value>
   </data>
   <data name="Tour" xml:space="preserve">
-    <value>Tour</value>
+    <value>Тур</value>
   </data>
   <data name="ACTIVE" xml:space="preserve">
-    <value>AKTIV</value>
+    <value>АКТИВЕН</value>
   </data>
   <data name="INACTIVE" xml:space="preserve">
-    <value>INAKTIV</value>
+    <value>НЕАКТИВЕН</value>
   </data>
   <data name=" (PAUSED)" xml:space="preserve">
-    <value> (PAUSIERT)</value>
+    <value> (НА ПАУЗЕ)</value>
   </data>
   <data name="Near" xml:space="preserve">
-    <value>Nah</value>
+    <value>Близко</value>
   </data>
   <data name="Far" xml:space="preserve">
-    <value>Fern</value>
+    <value>Далеко</value>
   </data>
   <data name="ViewFar" xml:space="preserve">
-    <value>Sichtweite</value>
+    <value>ВидДаль</value>
   </data>
   <data name="ProjFar" xml:space="preserve">
-    <value>Proj-Fern</value>
+    <value>ПроекДаль</value>
   </data>
   <data name="Zoom" xml:space="preserve">
-    <value>Zoom</value>
+    <value>Зум</value>
   </data>
   <data name="Orbital Target" xml:space="preserve">
-    <value>Orbital-Ziel</value>
+    <value>Цель Орбитальной</value>
   </data>
   <data name="Current Resolution" xml:space="preserve">
-    <value>Aktuelle Auflösung</value>
+    <value>Текущее Разрешение</value>
   </data>
   <data name="OpenGL Viewport" xml:space="preserve">
-    <value>OpenGL-Viewport</value>
+    <value>Viewport OpenGL</value>
   </data>
   <data name="Screen Rate" xml:space="preserve">
-    <value>Bildschirmrate</value>
+    <value>Коэффициент Экрана</value>
   </data>
   <data name="Window Mode" xml:space="preserve">
-    <value>Fenstermodus</value>
+    <value>Режим Окна</value>
   </data>
   <data name="Windowed" xml:space="preserve">
-    <value>Fenster</value>
+    <value>Оконный</value>
   </data>
   <data name="Fullscreen" xml:space="preserve">
-    <value>Vollbild</value>
+    <value>Полный Экран</value>
   </data>
   <data name="Actual Window Client" xml:space="preserve">
-    <value>Tatsächlicher Fenster-Client</value>
+    <value>Реальный Клиент Окна</value>
   </data>
   <data name="Calculated Scale from Client" xml:space="preserve">
-    <value>Berechneter Maßstab aus Client</value>
+    <value>Рассчитанный Масштаб от Клиента</value>
   </data>
   <data name="Debug info copied to clipboard" xml:space="preserve">
-    <value>Debug-Info in Zwischenablage kopiert</value>
+    <value>Отладочная инфо скопирована в буфер</value>
   </data>
 </root>

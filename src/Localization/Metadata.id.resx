@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Name" xml:space="preserve">
+    <value>Nama</value>
+  </data>
+  <data name="Two-Hand" xml:space="preserve">
+    <value>Dua Tangan</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="Slot" xml:space="preserve">
+    <value>Slot</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Skill</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>Lebar</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Tinggi</value>
+  </data>
+  <data name="Min Damage" xml:space="preserve">
+    <value>Damage Min</value>
+  </data>
+  <data name="Max Damage" xml:space="preserve">
+    <value>Damage Maks</value>
+  </data>
+  <data name="Block Rate" xml:space="preserve">
+    <value>Tingkat Block</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>Pertahanan</value>
+  </data>
+  <data name="Magic Defense" xml:space="preserve">
+    <value>Pertahanan Sihir</value>
+  </data>
+  <data name="Attack Speed" xml:space="preserve">
+    <value>Kecepatan Serangan</value>
+  </data>
+  <data name="Move Speed" xml:space="preserve">
+    <value>Kecepatan Gerak</value>
+  </data>
+  <data name="Durability" xml:space="preserve">
+    <value>Daya Tahan</value>
+  </data>
+  <data name="Magic Durability" xml:space="preserve">
+    <value>Daya Tahan Sihir</value>
+  </data>
+  <data name="Magic Power" xml:space="preserve">
+    <value>Kekuatan Sihir</value>
+  </data>
+  <data name="Req Strength" xml:space="preserve">
+    <value>Strength Diperlukan</value>
+  </data>
+  <data name="Req Dexterity" xml:space="preserve">
+    <value>Agility Diperlukan</value>
+  </data>
+  <data name="Req Energy" xml:space="preserve">
+    <value>Energy Diperlukan</value>
+  </data>
+  <data name="Req Vitality" xml:space="preserve">
+    <value>Vitality Diperlukan</value>
+  </data>
+  <data name="Req Leadership" xml:space="preserve">
+    <value>Command Diperlukan</value>
+  </data>
+  <data name="Req Level" xml:space="preserve">
+    <value>Level Diperlukan</value>
+  </data>
+  <data name="Sell Value" xml:space="preserve">
+    <value>Nilai Jual</value>
+  </data>
+  <data name="Buy Price" xml:space="preserve">
+    <value>Harga Beli</value>
+  </data>
+  <data name="Attack Type" xml:space="preserve">
+    <value>Tipe Serangan</value>
+  </data>
+  <data name="DW/SM" xml:space="preserve">
+    <value>DW/SM</value>
+  </data>
+  <data name="DK/BK" xml:space="preserve">
+    <value>DK/BK</value>
+  </data>
+  <data name="ELF/ME" xml:space="preserve">
+    <value>ELF/ME</value>
+  </data>
+  <data name="MG/DM" xml:space="preserve">
+    <value>MG/DM</value>
+  </data>
+  <data name="DL/LE" xml:space="preserve">
+    <value>DL/LE</value>
+  </data>
+  <data name="SUM/BS" xml:space="preserve">
+    <value>SUM/BS</value>
+  </data>
+  <data name="RF/FM" xml:space="preserve">
+    <value>RF/FM</value>
+  </data>
+  <data name="Ice Resistance" xml:space="preserve">
+    <value>Resistensi Es</value>
+  </data>
+  <data name="Poison Resistance" xml:space="preserve">
+    <value>Resistensi Racun</value>
+  </data>
+  <data name="Lightning Resistance" xml:space="preserve">
+    <value>Resistensi Petir</value>
+  </data>
+  <data name="Fire Resistance" xml:space="preserve">
+    <value>Resistensi Api</value>
+  </data>
+  <data name="Earth Resistance" xml:space="preserve">
+    <value>Resistensi Tanah</value>
+  </data>
+  <data name="Wind Resistance" xml:space="preserve">
+    <value>Resistensi Angin</value>
+  </data>
+  <data name="Water Resistance" xml:space="preserve">
+    <value>Resistensi Air</value>
+  </data>
+  <data name="Resistance 7" xml:space="preserve">
+    <value>Resistensi 7</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Mana" xml:space="preserve">
+    <value>Mana</value>
+  </data>
+  <data name="AG Cost" xml:space="preserve">
+    <value>Biaya AG</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>Jangkauan</value>
+  </data>
+  <data name="Cooldown" xml:space="preserve">
+    <value>Cooldown</value>
+  </data>
+  <data name="Mastery Type" xml:space="preserve">
+    <value>Tipe Mastery</value>
+  </data>
+  <data name="Use Type" xml:space="preserve">
+    <value>Tipe Penggunaan</value>
+  </data>
+  <data name="Brand" xml:space="preserve">
+    <value>Merek</value>
+  </data>
+  <data name="Kill Count" xml:space="preserve">
+    <value>Jumlah Kill</value>
+  </data>
+  <data name="Rank" xml:space="preserve">
+    <value>Peringkat</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>Ikon</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Tipe</value>
+  </data>
+  <data name="Item Skill" xml:space="preserve">
+    <value>Skill Item</value>
+  </data>
+  <data name="Is Damage" xml:space="preserve">
+    <value>Memberikan Damage</value>
+  </data>
+  <data name="Effect" xml:space="preserve">
+    <value>Efek</value>
+  </data>
+  <data name="Duty 0" xml:space="preserve">
+    <value>Tugas 0</value>
+  </data>
+  <data name="Duty 1" xml:space="preserve">
+    <value>Tugas 1</value>
+  </data>
+  <data name="Duty 2" xml:space="preserve">
+    <value>Tugas 2</value>
+  </data>
+</root>

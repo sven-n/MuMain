@@ -14,429 +14,429 @@
   </resheader>
 
   <data name="Save Items" xml:space="preserve">
-    <value>Gegenstände Speichern</value>
+    <value>Salvar Itens</value>
   </data>
   <data name="Save Skills" xml:space="preserve">
-    <value>Fähigkeiten Speichern</value>
+    <value>Salvar Habilidades</value>
   </data>
   <data name="Export as S6E3" xml:space="preserve">
-    <value>Als S6E3 Exportieren</value>
+    <value>Exportar como S6E3</value>
   </data>
   <data name="Export as CSV" xml:space="preserve">
-    <value>Als CSV Exportieren</value>
+    <value>Exportar como CSV</value>
   </data>
   <data name="Export Skills as CSV" xml:space="preserve">
-    <value>Fähigkeiten Als CSV Exportieren</value>
+    <value>Exportar Habilidades como CSV</value>
   </data>
   <data name="Columns" xml:space="preserve">
-    <value>Spalten</value>
+    <value>Colunas</value>
   </data>
   <data name="Select All" xml:space="preserve">
-    <value>Alle Auswählen</value>
+    <value>Selecionar Tudo</value>
   </data>
   <data name="Unselect All" xml:space="preserve">
-    <value>Auswahl Aufheben</value>
+    <value>Desselecionar Tudo</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
   </data>
   <data name="Save completed successfully!" xml:space="preserve">
-    <value>Erfolgreich gespeichert!</value>
+    <value>Salvamento concluído com sucesso!</value>
   </data>
   <data name="Failed to save items!" xml:space="preserve">
-    <value>Fehler beim Speichern der Gegenstände!</value>
+    <value>Falha ao salvar itens!</value>
   </data>
   <data name="Skills saved successfully!" xml:space="preserve">
-    <value>Fähigkeiten erfolgreich gespeichert!</value>
+    <value>Habilidades salvas com sucesso!</value>
   </data>
   <data name="Failed to save skills!" xml:space="preserve">
-    <value>Fehler beim Speichern der Fähigkeiten!</value>
+    <value>Falha ao salvar habilidades!</value>
   </data>
   <data name="S6E3 export completed successfully!" xml:space="preserve">
-    <value>S6E3 Export erfolgreich abgeschlossen!</value>
+    <value>Exportação S6E3 concluída com sucesso!</value>
   </data>
   <data name="Failed to export as S6E3 format!" xml:space="preserve">
-    <value>Fehler beim Exportieren in das S6E3 Format!</value>
+    <value>Falha ao exportar no formato S6E3!</value>
   </data>
   <data name="CSV export completed successfully!" xml:space="preserve">
-    <value>CSV Export erfolgreich abgeschlossen!</value>
+    <value>Exportação CSV concluída com sucesso!</value>
   </data>
   <data name="Failed to export as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren als CSV!</value>
+    <value>Falha ao exportar como CSV!</value>
   </data>
   <data name="Skills exported as CSV successfully!" xml:space="preserve">
-    <value>Fähigkeiten erfolgreich als CSV exportiert!</value>
+    <value>Habilidades exportadas como CSV com sucesso!</value>
   </data>
   <data name="Failed to export skills as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Fähigkeiten als CSV!</value>
+    <value>Falha ao exportar habilidades como CSV!</value>
   </data>
   <data name="File not found: {0}" xml:space="preserve">
-    <value>Datei nicht gefunden: {0}</value>
+    <value>Arquivo não encontrado: {0}</value>
   </data>
   <data name="Invalid index: {0}" xml:space="preserve">
-    <value>Ungültiger Index: {0}</value>
+    <value>Índice inválido: {0}</value>
   </data>
   <data name="Error: Index {0} already in use!" xml:space="preserve">
-    <value>Fehler: Index {0} wird bereits verwendet!</value>
+    <value>Erro: Índice {0} já está em uso!</value>
   </data>
   <data name="Search:" xml:space="preserve">
-    <value>Suchen:</value>
+    <value>Pesquisar:</value>
   </data>
   <data name="Freeze Index/Name" xml:space="preserve">
-    <value>Index/Name Fixieren</value>
+    <value>Congelar Índice/Nome</value>
   </data>
   <data name="No columns selected. Click 'Columns' to show columns." xml:space="preserve">
-    <value>Keine Spalten ausgewählt. Klicken Sie auf 'Spalten', um Spalten anzuzeigen.</value>
+    <value>Nenhuma coluna selecionada. Clique em 'Colunas' para mostrar colunas.</value>
   </data>
   <data name="Index" xml:space="preserve">
-    <value>Index</value>
+    <value>Índice</value>
   </data>
   <data name="Toggle Column Visibility:" xml:space="preserve">
-    <value>Spaltensichtbarkeit Umschalten:</value>
+    <value>Alternar Visibilidade de Colunas:</value>
   </data>
   <data name="Items saved successfully!" xml:space="preserve">
-    <value>Gegenstände erfolgreich gespeichert!</value>
+    <value>Itens salvos com sucesso!</value>
   </data>
   <data name="Exported as legacy format successfully!" xml:space="preserve">
-    <value>Erfolgreich als Legacy-Format exportiert!</value>
+    <value>Exportado como formato legado com sucesso!</value>
   </data>
   <data name="Failed to export as legacy format!" xml:space="preserve">
-    <value>Fehler beim Export als Legacy-Format!</value>
+    <value>Falha ao exportar como formato legado!</value>
   </data>
   <data name="Items exported as CSV successfully!" xml:space="preserve">
-    <value>Gegenstände erfolgreich als CSV exportiert!</value>
+    <value>Itens exportados como CSV com sucesso!</value>
   </data>
   <data name="Failed to export item attributes as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Gegenstandsattribute als CSV!</value>
+    <value>Falha ao exportar atributos de itens como CSV!</value>
   </data>
   <data name="Failed to export skill attributes as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Fähigkeitsattribute als CSV!</value>
+    <value>Falha ao exportar atributos de habilidades como CSV!</value>
   </data>
   <data name="Skill Editor" xml:space="preserve">
-    <value>Fähigkeiten-Editor</value>
+    <value>Editor de Habilidades</value>
   </data>
   <data name="Search Skills:" xml:space="preserve">
-    <value>Fähigkeiten Suchen:</value>
+    <value>Pesquisar Habilidades:</value>
   </data>
   <data name="Item Editor" xml:space="preserve">
-    <value>Gegenstands-Editor</value>
+    <value>Editor de Itens</value>
   </data>
   <data name="Dev Editor" xml:space="preserve">
-    <value>Entwickler-Editor</value>
+    <value>Editor de Desenvolvimento</value>
   </data>
   <data name="Scenes" xml:space="preserve">
-    <value>Szenen</value>
+    <value>Cenas</value>
   </data>
   <data name="Graphics" xml:space="preserve">
-    <value>Grafik</value>
+    <value>Gráficos</value>
   </data>
   <data name="Login Scene" xml:space="preserve">
-    <value>Login-Szene</value>
+    <value>Cena de Login</value>
   </data>
   <data name="Character Scene" xml:space="preserve">
-    <value>Charakter-Szene</value>
+    <value>Cena de Personagem</value>
   </data>
   <data name="Game Scene" xml:space="preserve">
-    <value>Spielszene</value>
+    <value>Cena de Jogo</value>
   </data>
   <data name="Debug" xml:space="preserve">
-    <value>Debug</value>
+    <value>Depuração</value>
   </data>
   <data name="Nothing here yet." xml:space="preserve">
-    <value>Hier gibt es noch nichts.</value>
+    <value>Ainda não há nada aqui.</value>
   </data>
   <data name="Switch to FreeFly" xml:space="preserve">
-    <value>Zu FreeFly wechseln</value>
+    <value>Mudar para FreeFly</value>
   </data>
   <data name="Switch to Game Camera" xml:space="preserve">
-    <value>Zur Spielkamera wechseln</value>
+    <value>Mudar para Câmera do Jogo</value>
   </data>
   <data name="FreeFly" xml:space="preserve">
     <value>FreeFly</value>
   </data>
   <data name="Spectating" xml:space="preserve">
-    <value>Beobachtet</value>
+    <value>Observando</value>
   </data>
   <data name="Snap to Spectated" xml:space="preserve">
-    <value>An Beobachtete heranführen</value>
+    <value>Saltar para Observado</value>
   </data>
   <data name="Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast" xml:space="preserve">
-    <value>Pfeile/PgUp/PgDn=Bewegen  RMT=Umsehen  Shift=Schnell</value>
+    <value>Setas/PgUp/PgDn=Mover  Botão direito=Olhar  Shift=Rápido</value>
   </data>
   <data name="Offset X" xml:space="preserve">
-    <value>Versatz X</value>
+    <value>Deslocamento X</value>
   </data>
   <data name="Offset Y" xml:space="preserve">
-    <value>Versatz Y</value>
+    <value>Deslocamento Y</value>
   </data>
   <data name="Offset Z" xml:space="preserve">
-    <value>Versatz Z</value>
+    <value>Deslocamento Z</value>
   </data>
   <data name="Pitch" xml:space="preserve">
-    <value>Neigung</value>
+    <value>Inclinação</value>
   </data>
   <data name="Yaw" xml:space="preserve">
-    <value>Gier</value>
+    <value>Guinada</value>
   </data>
   <data name="Reset Offsets" xml:space="preserve">
-    <value>Versätze zurücksetzen</value>
+    <value>Redefinir Deslocamentos</value>
   </data>
   <data name="Resume" xml:space="preserve">
-    <value>Fortsetzen</value>
+    <value>Continuar</value>
   </data>
   <data name="Pause" xml:space="preserve">
-    <value>Pause</value>
+    <value>Pausar</value>
   </data>
   <data name="Restart" xml:space="preserve">
-    <value>Neu starten</value>
+    <value>Reiniciar</value>
   </data>
   <data name="Start Tour" xml:space="preserve">
-    <value>Tour starten</value>
+    <value>Iniciar Tour</value>
   </data>
   <data name="Render Distances:" xml:space="preserve">
-    <value>Render-Distanzen:</value>
+    <value>Distâncias de Renderização:</value>
   </data>
   <data name="Terrain ViewFar" xml:space="preserve">
-    <value>Gelände-Sichtweite</value>
+    <value>Visão Distante do Terreno</value>
   </data>
   <data name="Object Distance" xml:space="preserve">
-    <value>Objekt-Distanz</value>
+    <value>Distância de Objetos</value>
   </data>
   <data name="Reset Distances" xml:space="preserve">
-    <value>Distanzen zurücksetzen</value>
+    <value>Redefinir Distâncias</value>
   </data>
   <data name="Switch to (or spectate) Default or Orbital to edit overrides." xml:space="preserve">
-    <value>Wechsle zu (oder beobachte) Default oder Orbital, um Overrides zu bearbeiten.</value>
+    <value>Mude para (ou observe) Default ou Orbital para editar substituições.</value>
   </data>
   <data name="Override Default Camera Config" xml:space="preserve">
-    <value>Default-Kamera-Konfig überschreiben</value>
+    <value>Substituir Configuração de Câmera Default</value>
   </data>
   <data name="Hero-relative camera with hardcoded 2D trapezoid culling." xml:space="preserve">
-    <value>Held-relative Kamera mit fest verdrahtetem 2D-Trapez-Culling.</value>
+    <value>Câmera relativa ao herói com descarte de trapézio 2D fixo.</value>
   </data>
   <data name="View Frustum" xml:space="preserve">
-    <value>Sichtkegel</value>
+    <value>Frustum de Visão</value>
   </data>
   <data name="Far Plane" xml:space="preserve">
-    <value>Ferne Ebene</value>
+    <value>Plano Distante</value>
   </data>
   <data name="Camera Offset (world units, from hero)" xml:space="preserve">
-    <value>Kamera-Versatz (Welteinheiten, vom Helden)</value>
+    <value>Deslocamento de Câmera (unidades do mundo, do herói)</value>
   </data>
   <data name="2D Culling Trapezoid Width" xml:space="preserve">
-    <value>2D-Culling-Trapezbreite</value>
+    <value>Largura do Trapézio de Descarte 2D</value>
   </data>
   <data name="Bottom (near) x" xml:space="preserve">
-    <value>Unten (nah) x</value>
+    <value>Inferior (perto) x</value>
   </data>
   <data name="Top (far) x" xml:space="preserve">
-    <value>Oben (fern) x</value>
+    <value>Superior (longe) x</value>
   </data>
   <data name="Fog" xml:space="preserve">
-    <value>Nebel</value>
+    <value>Névoa</value>
   </data>
   <data name="Override Fog" xml:space="preserve">
-    <value>Nebel überschreiben</value>
+    <value>Substituir Névoa</value>
   </data>
   <data name="Fog On" xml:space="preserve">
-    <value>Nebel an</value>
+    <value>Névoa Ligada</value>
   </data>
   <data name="ON" xml:space="preserve">
-    <value>AN</value>
+    <value>LIG</value>
   </data>
   <data name="OFF" xml:space="preserve">
-    <value>AUS</value>
+    <value>DESL</value>
   </data>
   <data name="Fog Start %" xml:space="preserve">
-    <value>Nebel Start %</value>
+    <value>Início da Névoa %</value>
   </data>
   <data name="Fog End %" xml:space="preserve">
-    <value>Nebel Ende %</value>
+    <value>Fim da Névoa %</value>
   </data>
   <data name="Reset to Camera Defaults" xml:space="preserve">
-    <value>Auf Kamera-Defaults zurücksetzen</value>
+    <value>Redefinir para Padrões da Câmera</value>
   </data>
   <data name="Override Orbital Camera Config" xml:space="preserve">
-    <value>Orbital-Kamera-Konfig überschreiben</value>
+    <value>Substituir Configuração de Câmera Orbital</value>
   </data>
   <data name="Tunes the 2D terrain-cull hull; does not touch FOV / far clip." xml:space="preserve">
-    <value>Stellt die 2D-Gelände-Cull-Hülle ein; FOV / Far-Clip bleiben unangetastet.</value>
+    <value>Ajusta o casco de descarte 2D do terreno; não afeta FOV / clip distante.</value>
   </data>
   <data name="2D Culling Trapezoid (world units)" xml:space="preserve">
-    <value>2D-Culling-Trapez (Welteinheiten)</value>
+    <value>Trapézio de Descarte 2D (unidades do mundo)</value>
   </data>
   <data name="Far distance" xml:space="preserve">
-    <value>Ferne Distanz</value>
+    <value>Distância distante</value>
   </data>
   <data name="Top (far) width" xml:space="preserve">
-    <value>Obere (ferne) Breite</value>
+    <value>Largura superior (longe)</value>
   </data>
   <data name="Near distance" xml:space="preserve">
-    <value>Nahe Distanz</value>
+    <value>Distância próxima</value>
   </data>
   <data name="Bottom (near) width" xml:space="preserve">
-    <value>Untere (nahe) Breite</value>
+    <value>Largura inferior (perto)</value>
   </data>
   <data name="View-aligned: follows camera yaw + pitch (tracks what you look at)." xml:space="preserve">
-    <value>Sicht-ausgerichtet: folgt Kamera-Gier + Neigung (verfolgt das Blickziel).</value>
+    <value>Alinhado à visão: segue guinada + inclinação da câmera (rastreia o que você olha).</value>
   </data>
   <data name="Reset to Natural Pyramid" xml:space="preserve">
-    <value>Auf natürliche Pyramide zurücksetzen</value>
+    <value>Redefinir para Pirâmide Natural</value>
   </data>
   <data name="Debug Visualization:" xml:space="preserve">
-    <value>Debug-Visualisierung:</value>
+    <value>Visualização de Depuração:</value>
   </data>
   <data name="Character Pick Boxes" xml:space="preserve">
-    <value>Charakter-Auswahlboxen</value>
+    <value>Caixas de Seleção de Personagem</value>
   </data>
   <data name="Item Pick Boxes" xml:space="preserve">
-    <value>Gegenstand-Auswahlboxen</value>
+    <value>Caixas de Seleção de Item</value>
   </data>
   <data name="Item Cull Sphere" xml:space="preserve">
-    <value>Gegenstand-Cull-Kugel</value>
+    <value>Esfera de Descarte de Item</value>
   </data>
   <data name="Tile Grid" xml:space="preserve">
-    <value>Kachelgitter</value>
+    <value>Grade de Tiles</value>
   </data>
   <data name="Item Cull Radius" xml:space="preserve">
-    <value>Gegenstand-Cull-Radius</value>
+    <value>Raio de Descarte de Item</value>
   </data>
   <data name="Rendering:" xml:space="preserve">
-    <value>Rendering:</value>
+    <value>Renderização:</value>
   </data>
   <data name="Terrain" xml:space="preserve">
-    <value>Gelände</value>
+    <value>Terreno</value>
   </data>
   <data name="Static Objects" xml:space="preserve">
-    <value>Statische Objekte</value>
+    <value>Objetos Estáticos</value>
   </data>
   <data name="Effects" xml:space="preserve">
-    <value>Effekte</value>
+    <value>Efeitos</value>
   </data>
   <data name="Dropped Items" xml:space="preserve">
-    <value>Fallengelassene Gegenstände</value>
+    <value>Itens Caídos</value>
   </data>
   <data name="Weather" xml:space="preserve">
-    <value>Wetter</value>
+    <value>Clima</value>
   </data>
   <data name="Item Labels" xml:space="preserve">
-    <value>Gegenstands-Beschriftung</value>
+    <value>Rótulos de Item</value>
   </data>
   <data name="All ON" xml:space="preserve">
-    <value>Alle AN</value>
+    <value>Todos LIG</value>
   </data>
   <data name="All OFF" xml:space="preserve">
-    <value>Alle AUS</value>
+    <value>Todos DESL</value>
   </data>
   <data name="TODO - Not Working:" xml:space="preserve">
-    <value>TODO - Funktioniert nicht:</value>
+    <value>TODO - Não Funciona:</value>
   </data>
   <data name="Shaders" xml:space="preserve">
-    <value>Shader</value>
+    <value>Shaders</value>
   </data>
   <data name="Skill Effects" xml:space="preserve">
-    <value>Fähigkeit-Effekte</value>
+    <value>Efeitos de Habilidade</value>
   </data>
   <data name="Equipped Items" xml:space="preserve">
-    <value>Ausgerüstete Gegenstände</value>
+    <value>Itens Equipados</value>
   </data>
   <data name="UI" xml:space="preserve">
-    <value>UI</value>
+    <value>Interface</value>
   </data>
   <data name="TODO - Not Implemented:" xml:space="preserve">
-    <value>TODO - Nicht implementiert:</value>
+    <value>TODO - Não Implementado:</value>
   </data>
   <data name="Hero" xml:space="preserve">
-    <value>Held</value>
+    <value>Herói</value>
   </data>
   <data name="NPCs" xml:space="preserve">
     <value>NPCs</value>
   </data>
   <data name="Monsters" xml:space="preserve">
-    <value>Monster</value>
+    <value>Monstros</value>
   </data>
   <data name="Graphics Debug Info" xml:space="preserve">
-    <value>Grafik-Debug-Info</value>
+    <value>Info de Depuração de Gráficos</value>
   </data>
   <data name="WARNING: Window size mismatch detected!" xml:space="preserve">
-    <value>WARNUNG: Fenstergröße stimmt nicht überein!</value>
+    <value>AVISO: Inconsistência de tamanho de janela detectada!</value>
   </data>
   <data name="Copy Debug Info to Clipboard" xml:space="preserve">
-    <value>Debug-Info in Zwischenablage kopieren</value>
+    <value>Copiar Info de Depuração</value>
   </data>
   <data name="(Paste in Discord/notepad)" xml:space="preserve">
-    <value>(In Discord/Notepad einfügen)</value>
+    <value>(Cole no Discord/bloco de notas)</value>
   </data>
   <data name="Default" xml:space="preserve">
-    <value>Standard</value>
+    <value>Padrão</value>
   </data>
   <data name="Orbital" xml:space="preserve">
     <value>Orbital</value>
   </data>
   <data name="Unknown" xml:space="preserve">
-    <value>Unbekannt</value>
+    <value>Desconhecido</value>
   </data>
   <data name="Pos" xml:space="preserve">
     <value>Pos</value>
   </data>
   <data name="Tile" xml:space="preserve">
-    <value>Kachel</value>
+    <value>Tile</value>
   </data>
   <data name="Tour" xml:space="preserve">
     <value>Tour</value>
   </data>
   <data name="ACTIVE" xml:space="preserve">
-    <value>AKTIV</value>
+    <value>ATIVO</value>
   </data>
   <data name="INACTIVE" xml:space="preserve">
-    <value>INAKTIV</value>
+    <value>INATIVO</value>
   </data>
   <data name=" (PAUSED)" xml:space="preserve">
-    <value> (PAUSIERT)</value>
+    <value> (PAUSADO)</value>
   </data>
   <data name="Near" xml:space="preserve">
-    <value>Nah</value>
+    <value>Perto</value>
   </data>
   <data name="Far" xml:space="preserve">
-    <value>Fern</value>
+    <value>Longe</value>
   </data>
   <data name="ViewFar" xml:space="preserve">
-    <value>Sichtweite</value>
+    <value>VistaLonge</value>
   </data>
   <data name="ProjFar" xml:space="preserve">
-    <value>Proj-Fern</value>
+    <value>ProjLonge</value>
   </data>
   <data name="Zoom" xml:space="preserve">
     <value>Zoom</value>
   </data>
   <data name="Orbital Target" xml:space="preserve">
-    <value>Orbital-Ziel</value>
+    <value>Alvo Orbital</value>
   </data>
   <data name="Current Resolution" xml:space="preserve">
-    <value>Aktuelle Auflösung</value>
+    <value>Resolução Atual</value>
   </data>
   <data name="OpenGL Viewport" xml:space="preserve">
-    <value>OpenGL-Viewport</value>
+    <value>Viewport OpenGL</value>
   </data>
   <data name="Screen Rate" xml:space="preserve">
-    <value>Bildschirmrate</value>
+    <value>Taxa da Tela</value>
   </data>
   <data name="Window Mode" xml:space="preserve">
-    <value>Fenstermodus</value>
+    <value>Modo de Janela</value>
   </data>
   <data name="Windowed" xml:space="preserve">
-    <value>Fenster</value>
+    <value>Janela</value>
   </data>
   <data name="Fullscreen" xml:space="preserve">
-    <value>Vollbild</value>
+    <value>Tela Cheia</value>
   </data>
   <data name="Actual Window Client" xml:space="preserve">
-    <value>Tatsächlicher Fenster-Client</value>
+    <value>Cliente Real da Janela</value>
   </data>
   <data name="Calculated Scale from Client" xml:space="preserve">
-    <value>Berechneter Maßstab aus Client</value>
+    <value>Escala Calculada do Cliente</value>
   </data>
   <data name="Debug info copied to clipboard" xml:space="preserve">
-    <value>Debug-Info in Zwischenablage kopiert</value>
+    <value>Info de depuração copiada para a área de transferência</value>
   </data>
 </root>

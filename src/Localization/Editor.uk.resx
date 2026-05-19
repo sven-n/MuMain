@@ -14,429 +14,429 @@
   </resheader>
 
   <data name="Save Items" xml:space="preserve">
-    <value>Gegenstände Speichern</value>
+    <value>Зберегти Предмети</value>
   </data>
   <data name="Save Skills" xml:space="preserve">
-    <value>Fähigkeiten Speichern</value>
+    <value>Зберегти Навички</value>
   </data>
   <data name="Export as S6E3" xml:space="preserve">
-    <value>Als S6E3 Exportieren</value>
+    <value>Експорт у S6E3</value>
   </data>
   <data name="Export as CSV" xml:space="preserve">
-    <value>Als CSV Exportieren</value>
+    <value>Експорт у CSV</value>
   </data>
   <data name="Export Skills as CSV" xml:space="preserve">
-    <value>Fähigkeiten Als CSV Exportieren</value>
+    <value>Експорт Навичок у CSV</value>
   </data>
   <data name="Columns" xml:space="preserve">
-    <value>Spalten</value>
+    <value>Стовпці</value>
   </data>
   <data name="Select All" xml:space="preserve">
-    <value>Alle Auswählen</value>
+    <value>Вибрати Все</value>
   </data>
   <data name="Unselect All" xml:space="preserve">
-    <value>Auswahl Aufheben</value>
+    <value>Зняти Вибір</value>
   </data>
   <data name="OK" xml:space="preserve">
-    <value>OK</value>
+    <value>ОК</value>
   </data>
   <data name="Save completed successfully!" xml:space="preserve">
-    <value>Erfolgreich gespeichert!</value>
+    <value>Збереження завершено успішно!</value>
   </data>
   <data name="Failed to save items!" xml:space="preserve">
-    <value>Fehler beim Speichern der Gegenstände!</value>
+    <value>Не вдалося зберегти предмети!</value>
   </data>
   <data name="Skills saved successfully!" xml:space="preserve">
-    <value>Fähigkeiten erfolgreich gespeichert!</value>
+    <value>Навички збережено успішно!</value>
   </data>
   <data name="Failed to save skills!" xml:space="preserve">
-    <value>Fehler beim Speichern der Fähigkeiten!</value>
+    <value>Не вдалося зберегти навички!</value>
   </data>
   <data name="S6E3 export completed successfully!" xml:space="preserve">
-    <value>S6E3 Export erfolgreich abgeschlossen!</value>
+    <value>Експорт S6E3 завершено успішно!</value>
   </data>
   <data name="Failed to export as S6E3 format!" xml:space="preserve">
-    <value>Fehler beim Exportieren in das S6E3 Format!</value>
+    <value>Не вдалося експортувати у формат S6E3!</value>
   </data>
   <data name="CSV export completed successfully!" xml:space="preserve">
-    <value>CSV Export erfolgreich abgeschlossen!</value>
+    <value>Експорт CSV завершено успішно!</value>
   </data>
   <data name="Failed to export as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren als CSV!</value>
+    <value>Не вдалося експортувати у CSV!</value>
   </data>
   <data name="Skills exported as CSV successfully!" xml:space="preserve">
-    <value>Fähigkeiten erfolgreich als CSV exportiert!</value>
+    <value>Навички експортовано у CSV успішно!</value>
   </data>
   <data name="Failed to export skills as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Fähigkeiten als CSV!</value>
+    <value>Не вдалося експортувати навички у CSV!</value>
   </data>
   <data name="File not found: {0}" xml:space="preserve">
-    <value>Datei nicht gefunden: {0}</value>
+    <value>Файл не знайдено: {0}</value>
   </data>
   <data name="Invalid index: {0}" xml:space="preserve">
-    <value>Ungültiger Index: {0}</value>
+    <value>Недопустимий індекс: {0}</value>
   </data>
   <data name="Error: Index {0} already in use!" xml:space="preserve">
-    <value>Fehler: Index {0} wird bereits verwendet!</value>
+    <value>Помилка: Індекс {0} вже використовується!</value>
   </data>
   <data name="Search:" xml:space="preserve">
-    <value>Suchen:</value>
+    <value>Пошук:</value>
   </data>
   <data name="Freeze Index/Name" xml:space="preserve">
-    <value>Index/Name Fixieren</value>
+    <value>Закріпити Індекс/Ім'я</value>
   </data>
   <data name="No columns selected. Click 'Columns' to show columns." xml:space="preserve">
-    <value>Keine Spalten ausgewählt. Klicken Sie auf 'Spalten', um Spalten anzuzeigen.</value>
+    <value>Стовпці не вибрано. Натисніть 'Стовпці', щоб показати стовпці.</value>
   </data>
   <data name="Index" xml:space="preserve">
-    <value>Index</value>
+    <value>Індекс</value>
   </data>
   <data name="Toggle Column Visibility:" xml:space="preserve">
-    <value>Spaltensichtbarkeit Umschalten:</value>
+    <value>Перемикач Видимості Стовпців:</value>
   </data>
   <data name="Items saved successfully!" xml:space="preserve">
-    <value>Gegenstände erfolgreich gespeichert!</value>
+    <value>Предмети збережено успішно!</value>
   </data>
   <data name="Exported as legacy format successfully!" xml:space="preserve">
-    <value>Erfolgreich als Legacy-Format exportiert!</value>
+    <value>Успішно експортовано у застарілому форматі!</value>
   </data>
   <data name="Failed to export as legacy format!" xml:space="preserve">
-    <value>Fehler beim Export als Legacy-Format!</value>
+    <value>Не вдалося експортувати у застарілому форматі!</value>
   </data>
   <data name="Items exported as CSV successfully!" xml:space="preserve">
-    <value>Gegenstände erfolgreich als CSV exportiert!</value>
+    <value>Предмети експортовано у CSV успішно!</value>
   </data>
   <data name="Failed to export item attributes as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Gegenstandsattribute als CSV!</value>
+    <value>Не вдалося експортувати атрибути предметів у CSV!</value>
   </data>
   <data name="Failed to export skill attributes as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Fähigkeitsattribute als CSV!</value>
+    <value>Не вдалося експортувати атрибути навичок у CSV!</value>
   </data>
   <data name="Skill Editor" xml:space="preserve">
-    <value>Fähigkeiten-Editor</value>
+    <value>Редактор Навичок</value>
   </data>
   <data name="Search Skills:" xml:space="preserve">
-    <value>Fähigkeiten Suchen:</value>
+    <value>Пошук Навичок:</value>
   </data>
   <data name="Item Editor" xml:space="preserve">
-    <value>Gegenstands-Editor</value>
+    <value>Редактор Предметів</value>
   </data>
   <data name="Dev Editor" xml:space="preserve">
-    <value>Entwickler-Editor</value>
+    <value>Редактор Розробника</value>
   </data>
   <data name="Scenes" xml:space="preserve">
-    <value>Szenen</value>
+    <value>Сцени</value>
   </data>
   <data name="Graphics" xml:space="preserve">
-    <value>Grafik</value>
+    <value>Графіка</value>
   </data>
   <data name="Login Scene" xml:space="preserve">
-    <value>Login-Szene</value>
+    <value>Сцена Входу</value>
   </data>
   <data name="Character Scene" xml:space="preserve">
-    <value>Charakter-Szene</value>
+    <value>Сцена Персонажа</value>
   </data>
   <data name="Game Scene" xml:space="preserve">
-    <value>Spielszene</value>
+    <value>Ігрова Сцена</value>
   </data>
   <data name="Debug" xml:space="preserve">
-    <value>Debug</value>
+    <value>Налагодження</value>
   </data>
   <data name="Nothing here yet." xml:space="preserve">
-    <value>Hier gibt es noch nichts.</value>
+    <value>Тут поки нічого немає.</value>
   </data>
   <data name="Switch to FreeFly" xml:space="preserve">
-    <value>Zu FreeFly wechseln</value>
+    <value>Перемкнути на FreeFly</value>
   </data>
   <data name="Switch to Game Camera" xml:space="preserve">
-    <value>Zur Spielkamera wechseln</value>
+    <value>Перемкнути на Ігрову Камеру</value>
   </data>
   <data name="FreeFly" xml:space="preserve">
     <value>FreeFly</value>
   </data>
   <data name="Spectating" xml:space="preserve">
-    <value>Beobachtet</value>
+    <value>Спостереження</value>
   </data>
   <data name="Snap to Spectated" xml:space="preserve">
-    <value>An Beobachtete heranführen</value>
+    <value>Перейти до Спостережуваного</value>
   </data>
   <data name="Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast" xml:space="preserve">
-    <value>Pfeile/PgUp/PgDn=Bewegen  RMT=Umsehen  Shift=Schnell</value>
+    <value>Стрілки/PgUp/PgDn=Рух  ПКМ=Огляд  Shift=Швидко</value>
   </data>
   <data name="Offset X" xml:space="preserve">
-    <value>Versatz X</value>
+    <value>Зміщення X</value>
   </data>
   <data name="Offset Y" xml:space="preserve">
-    <value>Versatz Y</value>
+    <value>Зміщення Y</value>
   </data>
   <data name="Offset Z" xml:space="preserve">
-    <value>Versatz Z</value>
+    <value>Зміщення Z</value>
   </data>
   <data name="Pitch" xml:space="preserve">
-    <value>Neigung</value>
+    <value>Нахил</value>
   </data>
   <data name="Yaw" xml:space="preserve">
-    <value>Gier</value>
+    <value>Поворот</value>
   </data>
   <data name="Reset Offsets" xml:space="preserve">
-    <value>Versätze zurücksetzen</value>
+    <value>Скинути Зміщення</value>
   </data>
   <data name="Resume" xml:space="preserve">
-    <value>Fortsetzen</value>
+    <value>Продовжити</value>
   </data>
   <data name="Pause" xml:space="preserve">
-    <value>Pause</value>
+    <value>Пауза</value>
   </data>
   <data name="Restart" xml:space="preserve">
-    <value>Neu starten</value>
+    <value>Перезапуск</value>
   </data>
   <data name="Start Tour" xml:space="preserve">
-    <value>Tour starten</value>
+    <value>Почати Тур</value>
   </data>
   <data name="Render Distances:" xml:space="preserve">
-    <value>Render-Distanzen:</value>
+    <value>Відстані Рендерингу:</value>
   </data>
   <data name="Terrain ViewFar" xml:space="preserve">
-    <value>Gelände-Sichtweite</value>
+    <value>Дальність Ландшафту</value>
   </data>
   <data name="Object Distance" xml:space="preserve">
-    <value>Objekt-Distanz</value>
+    <value>Відстань Об'єктів</value>
   </data>
   <data name="Reset Distances" xml:space="preserve">
-    <value>Distanzen zurücksetzen</value>
+    <value>Скинути Відстані</value>
   </data>
   <data name="Switch to (or spectate) Default or Orbital to edit overrides." xml:space="preserve">
-    <value>Wechsle zu (oder beobachte) Default oder Orbital, um Overrides zu bearbeiten.</value>
+    <value>Перемкніть на (або спостерігайте) Default чи Orbital, щоб редагувати перевизначення.</value>
   </data>
   <data name="Override Default Camera Config" xml:space="preserve">
-    <value>Default-Kamera-Konfig überschreiben</value>
+    <value>Перевизначити Конфіг Default</value>
   </data>
   <data name="Hero-relative camera with hardcoded 2D trapezoid culling." xml:space="preserve">
-    <value>Held-relative Kamera mit fest verdrahtetem 2D-Trapez-Culling.</value>
+    <value>Камера, прив'язана до героя, з жорстко прописаним 2D-трапецієподібним відсіканням.</value>
   </data>
   <data name="View Frustum" xml:space="preserve">
-    <value>Sichtkegel</value>
+    <value>Усічена Піраміда Вигляду</value>
   </data>
   <data name="Far Plane" xml:space="preserve">
-    <value>Ferne Ebene</value>
+    <value>Далека Площина</value>
   </data>
   <data name="Camera Offset (world units, from hero)" xml:space="preserve">
-    <value>Kamera-Versatz (Welteinheiten, vom Helden)</value>
+    <value>Зміщення Камери (світові одиниці, від героя)</value>
   </data>
   <data name="2D Culling Trapezoid Width" xml:space="preserve">
-    <value>2D-Culling-Trapezbreite</value>
+    <value>Ширина Трапеції 2D-Відсікання</value>
   </data>
   <data name="Bottom (near) x" xml:space="preserve">
-    <value>Unten (nah) x</value>
+    <value>Низ (близько) x</value>
   </data>
   <data name="Top (far) x" xml:space="preserve">
-    <value>Oben (fern) x</value>
+    <value>Верх (далеко) x</value>
   </data>
   <data name="Fog" xml:space="preserve">
-    <value>Nebel</value>
+    <value>Туман</value>
   </data>
   <data name="Override Fog" xml:space="preserve">
-    <value>Nebel überschreiben</value>
+    <value>Перевизначити Туман</value>
   </data>
   <data name="Fog On" xml:space="preserve">
-    <value>Nebel an</value>
+    <value>Туман Увім</value>
   </data>
   <data name="ON" xml:space="preserve">
-    <value>AN</value>
+    <value>УВІМ</value>
   </data>
   <data name="OFF" xml:space="preserve">
-    <value>AUS</value>
+    <value>ВИМК</value>
   </data>
   <data name="Fog Start %" xml:space="preserve">
-    <value>Nebel Start %</value>
+    <value>Початок Туману %</value>
   </data>
   <data name="Fog End %" xml:space="preserve">
-    <value>Nebel Ende %</value>
+    <value>Кінець Туману %</value>
   </data>
   <data name="Reset to Camera Defaults" xml:space="preserve">
-    <value>Auf Kamera-Defaults zurücksetzen</value>
+    <value>Скинути до Налаштувань Камери</value>
   </data>
   <data name="Override Orbital Camera Config" xml:space="preserve">
-    <value>Orbital-Kamera-Konfig überschreiben</value>
+    <value>Перевизначити Конфіг Orbital</value>
   </data>
   <data name="Tunes the 2D terrain-cull hull; does not touch FOV / far clip." xml:space="preserve">
-    <value>Stellt die 2D-Gelände-Cull-Hülle ein; FOV / Far-Clip bleiben unangetastet.</value>
+    <value>Налаштовує оболонку 2D-відсікання ландшафту; не впливає на FOV / далекий кліп.</value>
   </data>
   <data name="2D Culling Trapezoid (world units)" xml:space="preserve">
-    <value>2D-Culling-Trapez (Welteinheiten)</value>
+    <value>Трапеція 2D-Відсікання (світові одиниці)</value>
   </data>
   <data name="Far distance" xml:space="preserve">
-    <value>Ferne Distanz</value>
+    <value>Далека відстань</value>
   </data>
   <data name="Top (far) width" xml:space="preserve">
-    <value>Obere (ferne) Breite</value>
+    <value>Верх (далеко) ширина</value>
   </data>
   <data name="Near distance" xml:space="preserve">
-    <value>Nahe Distanz</value>
+    <value>Ближня відстань</value>
   </data>
   <data name="Bottom (near) width" xml:space="preserve">
-    <value>Untere (nahe) Breite</value>
+    <value>Низ (близько) ширина</value>
   </data>
   <data name="View-aligned: follows camera yaw + pitch (tracks what you look at)." xml:space="preserve">
-    <value>Sicht-ausgerichtet: folgt Kamera-Gier + Neigung (verfolgt das Blickziel).</value>
+    <value>Вирівняно за виглядом: слідує за поворотом + нахилом камери (стежить за тим, на що ви дивитесь).</value>
   </data>
   <data name="Reset to Natural Pyramid" xml:space="preserve">
-    <value>Auf natürliche Pyramide zurücksetzen</value>
+    <value>Скинути до Природної Піраміди</value>
   </data>
   <data name="Debug Visualization:" xml:space="preserve">
-    <value>Debug-Visualisierung:</value>
+    <value>Візуалізація Налагодження:</value>
   </data>
   <data name="Character Pick Boxes" xml:space="preserve">
-    <value>Charakter-Auswahlboxen</value>
+    <value>Бокси Вибору Персонажів</value>
   </data>
   <data name="Item Pick Boxes" xml:space="preserve">
-    <value>Gegenstand-Auswahlboxen</value>
+    <value>Бокси Вибору Предметів</value>
   </data>
   <data name="Item Cull Sphere" xml:space="preserve">
-    <value>Gegenstand-Cull-Kugel</value>
+    <value>Сфера Відсікання Предметів</value>
   </data>
   <data name="Tile Grid" xml:space="preserve">
-    <value>Kachelgitter</value>
+    <value>Сітка Плиток</value>
   </data>
   <data name="Item Cull Radius" xml:space="preserve">
-    <value>Gegenstand-Cull-Radius</value>
+    <value>Радіус Відсікання Предметів</value>
   </data>
   <data name="Rendering:" xml:space="preserve">
-    <value>Rendering:</value>
+    <value>Рендеринг:</value>
   </data>
   <data name="Terrain" xml:space="preserve">
-    <value>Gelände</value>
+    <value>Ландшафт</value>
   </data>
   <data name="Static Objects" xml:space="preserve">
-    <value>Statische Objekte</value>
+    <value>Статичні Об'єкти</value>
   </data>
   <data name="Effects" xml:space="preserve">
-    <value>Effekte</value>
+    <value>Ефекти</value>
   </data>
   <data name="Dropped Items" xml:space="preserve">
-    <value>Fallengelassene Gegenstände</value>
+    <value>Випавші Предмети</value>
   </data>
   <data name="Weather" xml:space="preserve">
-    <value>Wetter</value>
+    <value>Погода</value>
   </data>
   <data name="Item Labels" xml:space="preserve">
-    <value>Gegenstands-Beschriftung</value>
+    <value>Мітки Предметів</value>
   </data>
   <data name="All ON" xml:space="preserve">
-    <value>Alle AN</value>
+    <value>Все УВІМ</value>
   </data>
   <data name="All OFF" xml:space="preserve">
-    <value>Alle AUS</value>
+    <value>Все ВИМК</value>
   </data>
   <data name="TODO - Not Working:" xml:space="preserve">
-    <value>TODO - Funktioniert nicht:</value>
+    <value>TODO - Не працює:</value>
   </data>
   <data name="Shaders" xml:space="preserve">
-    <value>Shader</value>
+    <value>Шейдери</value>
   </data>
   <data name="Skill Effects" xml:space="preserve">
-    <value>Fähigkeit-Effekte</value>
+    <value>Ефекти Навичок</value>
   </data>
   <data name="Equipped Items" xml:space="preserve">
-    <value>Ausgerüstete Gegenstände</value>
+    <value>Одягнені Предмети</value>
   </data>
   <data name="UI" xml:space="preserve">
-    <value>UI</value>
+    <value>Інтерфейс</value>
   </data>
   <data name="TODO - Not Implemented:" xml:space="preserve">
-    <value>TODO - Nicht implementiert:</value>
+    <value>TODO - Не реалізовано:</value>
   </data>
   <data name="Hero" xml:space="preserve">
-    <value>Held</value>
+    <value>Герой</value>
   </data>
   <data name="NPCs" xml:space="preserve">
-    <value>NPCs</value>
+    <value>NPC</value>
   </data>
   <data name="Monsters" xml:space="preserve">
-    <value>Monster</value>
+    <value>Монстри</value>
   </data>
   <data name="Graphics Debug Info" xml:space="preserve">
-    <value>Grafik-Debug-Info</value>
+    <value>Налагоджувальна Інфо Графіки</value>
   </data>
   <data name="WARNING: Window size mismatch detected!" xml:space="preserve">
-    <value>WARNUNG: Fenstergröße stimmt nicht überein!</value>
+    <value>УВАГА: Виявлено невідповідність розміру вікна!</value>
   </data>
   <data name="Copy Debug Info to Clipboard" xml:space="preserve">
-    <value>Debug-Info in Zwischenablage kopieren</value>
+    <value>Копіювати Налагоджувальну Інфо</value>
   </data>
   <data name="(Paste in Discord/notepad)" xml:space="preserve">
-    <value>(In Discord/Notepad einfügen)</value>
+    <value>(Вставте в Discord/блокнот)</value>
   </data>
   <data name="Default" xml:space="preserve">
-    <value>Standard</value>
+    <value>Стандартна</value>
   </data>
   <data name="Orbital" xml:space="preserve">
-    <value>Orbital</value>
+    <value>Орбітальна</value>
   </data>
   <data name="Unknown" xml:space="preserve">
-    <value>Unbekannt</value>
+    <value>Невідомо</value>
   </data>
   <data name="Pos" xml:space="preserve">
-    <value>Pos</value>
+    <value>Поз</value>
   </data>
   <data name="Tile" xml:space="preserve">
-    <value>Kachel</value>
+    <value>Плитка</value>
   </data>
   <data name="Tour" xml:space="preserve">
-    <value>Tour</value>
+    <value>Тур</value>
   </data>
   <data name="ACTIVE" xml:space="preserve">
-    <value>AKTIV</value>
+    <value>АКТИВНИЙ</value>
   </data>
   <data name="INACTIVE" xml:space="preserve">
-    <value>INAKTIV</value>
+    <value>НЕАКТИВНИЙ</value>
   </data>
   <data name=" (PAUSED)" xml:space="preserve">
-    <value> (PAUSIERT)</value>
+    <value> (НА ПАУЗІ)</value>
   </data>
   <data name="Near" xml:space="preserve">
-    <value>Nah</value>
+    <value>Близько</value>
   </data>
   <data name="Far" xml:space="preserve">
-    <value>Fern</value>
+    <value>Далеко</value>
   </data>
   <data name="ViewFar" xml:space="preserve">
-    <value>Sichtweite</value>
+    <value>ВидДаль</value>
   </data>
   <data name="ProjFar" xml:space="preserve">
-    <value>Proj-Fern</value>
+    <value>ПроєкДаль</value>
   </data>
   <data name="Zoom" xml:space="preserve">
-    <value>Zoom</value>
+    <value>Зум</value>
   </data>
   <data name="Orbital Target" xml:space="preserve">
-    <value>Orbital-Ziel</value>
+    <value>Ціль Орбітальної</value>
   </data>
   <data name="Current Resolution" xml:space="preserve">
-    <value>Aktuelle Auflösung</value>
+    <value>Поточна Роздільна Здатність</value>
   </data>
   <data name="OpenGL Viewport" xml:space="preserve">
-    <value>OpenGL-Viewport</value>
+    <value>Viewport OpenGL</value>
   </data>
   <data name="Screen Rate" xml:space="preserve">
-    <value>Bildschirmrate</value>
+    <value>Коефіцієнт Екрану</value>
   </data>
   <data name="Window Mode" xml:space="preserve">
-    <value>Fenstermodus</value>
+    <value>Режим Вікна</value>
   </data>
   <data name="Windowed" xml:space="preserve">
-    <value>Fenster</value>
+    <value>Віконний</value>
   </data>
   <data name="Fullscreen" xml:space="preserve">
-    <value>Vollbild</value>
+    <value>Повний Екран</value>
   </data>
   <data name="Actual Window Client" xml:space="preserve">
-    <value>Tatsächlicher Fenster-Client</value>
+    <value>Реальний Клієнт Вікна</value>
   </data>
   <data name="Calculated Scale from Client" xml:space="preserve">
-    <value>Berechneter Maßstab aus Client</value>
+    <value>Розрахований Масштаб з Клієнта</value>
   </data>
   <data name="Debug info copied to clipboard" xml:space="preserve">
-    <value>Debug-Info in Zwischenablage kopiert</value>
+    <value>Налагоджувальна інфо скопійована в буфер</value>
   </data>
 </root>

@@ -14,429 +14,429 @@
   </resheader>
 
   <data name="Save Items" xml:space="preserve">
-    <value>Gegenstände Speichern</value>
+    <value>保存物品</value>
   </data>
   <data name="Save Skills" xml:space="preserve">
-    <value>Fähigkeiten Speichern</value>
+    <value>保存技能</value>
   </data>
   <data name="Export as S6E3" xml:space="preserve">
-    <value>Als S6E3 Exportieren</value>
+    <value>導出為 S6E3 格式</value>
   </data>
   <data name="Export as CSV" xml:space="preserve">
-    <value>Als CSV Exportieren</value>
+    <value>導出為 CSV 格式</value>
   </data>
   <data name="Export Skills as CSV" xml:space="preserve">
-    <value>Fähigkeiten Als CSV Exportieren</value>
+    <value>導出技能為 CSV 格式</value>
   </data>
   <data name="Columns" xml:space="preserve">
-    <value>Spalten</value>
+    <value>欄位設定</value>
   </data>
   <data name="Select All" xml:space="preserve">
-    <value>Alle Auswählen</value>
+    <value>全選</value>
   </data>
   <data name="Unselect All" xml:space="preserve">
-    <value>Auswahl Aufheben</value>
+    <value>取消全選</value>
   </data>
   <data name="OK" xml:space="preserve">
-    <value>OK</value>
+    <value>確定</value>
   </data>
   <data name="Save completed successfully!" xml:space="preserve">
-    <value>Erfolgreich gespeichert!</value>
+    <value>保存成功!</value>
   </data>
   <data name="Failed to save items!" xml:space="preserve">
-    <value>Fehler beim Speichern der Gegenstände!</value>
+    <value>保存失敗!</value>
   </data>
   <data name="Skills saved successfully!" xml:space="preserve">
-    <value>Fähigkeiten erfolgreich gespeichert!</value>
+    <value>技能保存成功!</value>
   </data>
   <data name="Failed to save skills!" xml:space="preserve">
-    <value>Fehler beim Speichern der Fähigkeiten!</value>
+    <value>技能保存失敗!</value>
   </data>
   <data name="S6E3 export completed successfully!" xml:space="preserve">
-    <value>S6E3 Export erfolgreich abgeschlossen!</value>
+    <value>導出 S6E3 成功!</value>
   </data>
   <data name="Failed to export as S6E3 format!" xml:space="preserve">
-    <value>Fehler beim Exportieren in das S6E3 Format!</value>
+    <value>導出 S6E3 格式失敗!</value>
   </data>
   <data name="CSV export completed successfully!" xml:space="preserve">
-    <value>CSV Export erfolgreich abgeschlossen!</value>
+    <value>導出 CSV 成功!</value>
   </data>
   <data name="Failed to export as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren als CSV!</value>
+    <value>導出 CSV 失敗!</value>
   </data>
   <data name="Skills exported as CSV successfully!" xml:space="preserve">
-    <value>Fähigkeiten erfolgreich als CSV exportiert!</value>
+    <value>技能導出 CSV 成功!</value>
   </data>
   <data name="Failed to export skills as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Fähigkeiten als CSV!</value>
+    <value>技能導出 CSV 失敗!</value>
   </data>
   <data name="File not found: {0}" xml:space="preserve">
-    <value>Datei nicht gefunden: {0}</value>
+    <value>找不到檔案: {0}</value>
   </data>
   <data name="Invalid index: {0}" xml:space="preserve">
-    <value>Ungültiger Index: {0}</value>
+    <value>無效索引: {0}</value>
   </data>
   <data name="Error: Index {0} already in use!" xml:space="preserve">
-    <value>Fehler: Index {0} wird bereits verwendet!</value>
+    <value>錯誤: 索引 {0} 已被使用!</value>
   </data>
   <data name="Search:" xml:space="preserve">
-    <value>Suchen:</value>
+    <value>搜尋:</value>
   </data>
   <data name="Freeze Index/Name" xml:space="preserve">
-    <value>Index/Name Fixieren</value>
+    <value>固定 索引/名稱</value>
   </data>
   <data name="No columns selected. Click 'Columns' to show columns." xml:space="preserve">
-    <value>Keine Spalten ausgewählt. Klicken Sie auf 'Spalten', um Spalten anzuzeigen.</value>
+    <value>未選擇任何欄位。請點擊 '欄位' 以顯示欄位.</value>
   </data>
   <data name="Index" xml:space="preserve">
-    <value>Index</value>
+    <value>索引</value>
   </data>
   <data name="Toggle Column Visibility:" xml:space="preserve">
-    <value>Spaltensichtbarkeit Umschalten:</value>
+    <value>切換欄位顯示狀態:</value>
   </data>
   <data name="Items saved successfully!" xml:space="preserve">
-    <value>Gegenstände erfolgreich gespeichert!</value>
+    <value>物品保存成功!</value>
   </data>
   <data name="Exported as legacy format successfully!" xml:space="preserve">
-    <value>Erfolgreich als Legacy-Format exportiert!</value>
+    <value>導出舊版格式成功!</value>
   </data>
   <data name="Failed to export as legacy format!" xml:space="preserve">
-    <value>Fehler beim Export als Legacy-Format!</value>
+    <value>導出舊版格式失敗!</value>
   </data>
   <data name="Items exported as CSV successfully!" xml:space="preserve">
-    <value>Gegenstände erfolgreich als CSV exportiert!</value>
+    <value>物品導出 CSV 成功!</value>
   </data>
   <data name="Failed to export item attributes as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Gegenstandsattribute als CSV!</value>
+    <value>物品屬性導出 CSV 失敗!</value>
   </data>
   <data name="Failed to export skill attributes as CSV!" xml:space="preserve">
-    <value>Fehler beim Exportieren der Fähigkeitsattribute als CSV!</value>
+    <value>技能屬性導出 CSV 失敗!</value>
   </data>
   <data name="Skill Editor" xml:space="preserve">
-    <value>Fähigkeiten-Editor</value>
+    <value>技能編輯器</value>
   </data>
   <data name="Search Skills:" xml:space="preserve">
-    <value>Fähigkeiten Suchen:</value>
+    <value>搜尋技能:</value>
   </data>
   <data name="Item Editor" xml:space="preserve">
-    <value>Gegenstands-Editor</value>
+    <value>物品編輯器</value>
   </data>
   <data name="Dev Editor" xml:space="preserve">
-    <value>Entwickler-Editor</value>
+    <value>開發編輯器</value>
   </data>
   <data name="Scenes" xml:space="preserve">
-    <value>Szenen</value>
+    <value>場景</value>
   </data>
   <data name="Graphics" xml:space="preserve">
-    <value>Grafik</value>
+    <value>圖形</value>
   </data>
   <data name="Login Scene" xml:space="preserve">
-    <value>Login-Szene</value>
+    <value>登入場景</value>
   </data>
   <data name="Character Scene" xml:space="preserve">
-    <value>Charakter-Szene</value>
+    <value>角色場景</value>
   </data>
   <data name="Game Scene" xml:space="preserve">
-    <value>Spielszene</value>
+    <value>遊戲場景</value>
   </data>
   <data name="Debug" xml:space="preserve">
-    <value>Debug</value>
+    <value>除錯</value>
   </data>
   <data name="Nothing here yet." xml:space="preserve">
-    <value>Hier gibt es noch nichts.</value>
+    <value>尚無內容。</value>
   </data>
   <data name="Switch to FreeFly" xml:space="preserve">
-    <value>Zu FreeFly wechseln</value>
+    <value>切換至自由飛行</value>
   </data>
   <data name="Switch to Game Camera" xml:space="preserve">
-    <value>Zur Spielkamera wechseln</value>
+    <value>切換至遊戲相機</value>
   </data>
   <data name="FreeFly" xml:space="preserve">
-    <value>FreeFly</value>
+    <value>自由飛行</value>
   </data>
   <data name="Spectating" xml:space="preserve">
-    <value>Beobachtet</value>
+    <value>正在觀察</value>
   </data>
   <data name="Snap to Spectated" xml:space="preserve">
-    <value>An Beobachtete heranführen</value>
+    <value>對齊至觀察對象</value>
   </data>
   <data name="Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast" xml:space="preserve">
-    <value>Pfeile/PgUp/PgDn=Bewegen  RMT=Umsehen  Shift=Schnell</value>
+    <value>方向鍵/PgUp/PgDn=移動  右鍵=視角  Shift=加速</value>
   </data>
   <data name="Offset X" xml:space="preserve">
-    <value>Versatz X</value>
+    <value>偏移 X</value>
   </data>
   <data name="Offset Y" xml:space="preserve">
-    <value>Versatz Y</value>
+    <value>偏移 Y</value>
   </data>
   <data name="Offset Z" xml:space="preserve">
-    <value>Versatz Z</value>
+    <value>偏移 Z</value>
   </data>
   <data name="Pitch" xml:space="preserve">
-    <value>Neigung</value>
+    <value>俯仰</value>
   </data>
   <data name="Yaw" xml:space="preserve">
-    <value>Gier</value>
+    <value>偏航</value>
   </data>
   <data name="Reset Offsets" xml:space="preserve">
-    <value>Versätze zurücksetzen</value>
+    <value>重設偏移</value>
   </data>
   <data name="Resume" xml:space="preserve">
-    <value>Fortsetzen</value>
+    <value>繼續</value>
   </data>
   <data name="Pause" xml:space="preserve">
-    <value>Pause</value>
+    <value>暫停</value>
   </data>
   <data name="Restart" xml:space="preserve">
-    <value>Neu starten</value>
+    <value>重新開始</value>
   </data>
   <data name="Start Tour" xml:space="preserve">
-    <value>Tour starten</value>
+    <value>開始巡覽</value>
   </data>
   <data name="Render Distances:" xml:space="preserve">
-    <value>Render-Distanzen:</value>
+    <value>繪製距離:</value>
   </data>
   <data name="Terrain ViewFar" xml:space="preserve">
-    <value>Gelände-Sichtweite</value>
+    <value>地形視野</value>
   </data>
   <data name="Object Distance" xml:space="preserve">
-    <value>Objekt-Distanz</value>
+    <value>物件距離</value>
   </data>
   <data name="Reset Distances" xml:space="preserve">
-    <value>Distanzen zurücksetzen</value>
+    <value>重設距離</value>
   </data>
   <data name="Switch to (or spectate) Default or Orbital to edit overrides." xml:space="preserve">
-    <value>Wechsle zu (oder beobachte) Default oder Orbital, um Overrides zu bearbeiten.</value>
+    <value>請切換至 (或觀察) 預設或環繞相機以編輯覆寫設定。</value>
   </data>
   <data name="Override Default Camera Config" xml:space="preserve">
-    <value>Default-Kamera-Konfig überschreiben</value>
+    <value>覆寫預設相機設定</value>
   </data>
   <data name="Hero-relative camera with hardcoded 2D trapezoid culling." xml:space="preserve">
-    <value>Held-relative Kamera mit fest verdrahtetem 2D-Trapez-Culling.</value>
+    <value>以英雄為中心的相機，使用內建的 2D 梯形剔除。</value>
   </data>
   <data name="View Frustum" xml:space="preserve">
-    <value>Sichtkegel</value>
+    <value>視錐</value>
   </data>
   <data name="Far Plane" xml:space="preserve">
-    <value>Ferne Ebene</value>
+    <value>遠平面</value>
   </data>
   <data name="Camera Offset (world units, from hero)" xml:space="preserve">
-    <value>Kamera-Versatz (Welteinheiten, vom Helden)</value>
+    <value>相機偏移 (世界單位，相對於英雄)</value>
   </data>
   <data name="2D Culling Trapezoid Width" xml:space="preserve">
-    <value>2D-Culling-Trapezbreite</value>
+    <value>2D 剔除梯形寬度</value>
   </data>
   <data name="Bottom (near) x" xml:space="preserve">
-    <value>Unten (nah) x</value>
+    <value>底部 (近) x</value>
   </data>
   <data name="Top (far) x" xml:space="preserve">
-    <value>Oben (fern) x</value>
+    <value>頂部 (遠) x</value>
   </data>
   <data name="Fog" xml:space="preserve">
-    <value>Nebel</value>
+    <value>霧</value>
   </data>
   <data name="Override Fog" xml:space="preserve">
-    <value>Nebel überschreiben</value>
+    <value>覆寫霧</value>
   </data>
   <data name="Fog On" xml:space="preserve">
-    <value>Nebel an</value>
+    <value>霧開啟</value>
   </data>
   <data name="ON" xml:space="preserve">
-    <value>AN</value>
+    <value>開</value>
   </data>
   <data name="OFF" xml:space="preserve">
-    <value>AUS</value>
+    <value>關</value>
   </data>
   <data name="Fog Start %" xml:space="preserve">
-    <value>Nebel Start %</value>
+    <value>霧起始 %</value>
   </data>
   <data name="Fog End %" xml:space="preserve">
-    <value>Nebel Ende %</value>
+    <value>霧結束 %</value>
   </data>
   <data name="Reset to Camera Defaults" xml:space="preserve">
-    <value>Auf Kamera-Defaults zurücksetzen</value>
+    <value>重設為相機預設值</value>
   </data>
   <data name="Override Orbital Camera Config" xml:space="preserve">
-    <value>Orbital-Kamera-Konfig überschreiben</value>
+    <value>覆寫環繞相機設定</value>
   </data>
   <data name="Tunes the 2D terrain-cull hull; does not touch FOV / far clip." xml:space="preserve">
-    <value>Stellt die 2D-Gelände-Cull-Hülle ein; FOV / Far-Clip bleiben unangetastet.</value>
+    <value>調整 2D 地形剔除外殼，不影響 FOV / 遠裁剪面。</value>
   </data>
   <data name="2D Culling Trapezoid (world units)" xml:space="preserve">
-    <value>2D-Culling-Trapez (Welteinheiten)</value>
+    <value>2D 剔除梯形 (世界單位)</value>
   </data>
   <data name="Far distance" xml:space="preserve">
-    <value>Ferne Distanz</value>
+    <value>遠距離</value>
   </data>
   <data name="Top (far) width" xml:space="preserve">
-    <value>Obere (ferne) Breite</value>
+    <value>頂部 (遠) 寬度</value>
   </data>
   <data name="Near distance" xml:space="preserve">
-    <value>Nahe Distanz</value>
+    <value>近距離</value>
   </data>
   <data name="Bottom (near) width" xml:space="preserve">
-    <value>Untere (nahe) Breite</value>
+    <value>底部 (近) 寬度</value>
   </data>
   <data name="View-aligned: follows camera yaw + pitch (tracks what you look at)." xml:space="preserve">
-    <value>Sicht-ausgerichtet: folgt Kamera-Gier + Neigung (verfolgt das Blickziel).</value>
+    <value>視角對齊: 跟隨相機的偏航與俯仰 (追蹤所視物件)。</value>
   </data>
   <data name="Reset to Natural Pyramid" xml:space="preserve">
-    <value>Auf natürliche Pyramide zurücksetzen</value>
+    <value>重設為自然視錐</value>
   </data>
   <data name="Debug Visualization:" xml:space="preserve">
-    <value>Debug-Visualisierung:</value>
+    <value>除錯視覺化:</value>
   </data>
   <data name="Character Pick Boxes" xml:space="preserve">
-    <value>Charakter-Auswahlboxen</value>
+    <value>角色拾取框</value>
   </data>
   <data name="Item Pick Boxes" xml:space="preserve">
-    <value>Gegenstand-Auswahlboxen</value>
+    <value>物品拾取框</value>
   </data>
   <data name="Item Cull Sphere" xml:space="preserve">
-    <value>Gegenstand-Cull-Kugel</value>
+    <value>物品剔除球體</value>
   </data>
   <data name="Tile Grid" xml:space="preserve">
-    <value>Kachelgitter</value>
+    <value>地塊網格</value>
   </data>
   <data name="Item Cull Radius" xml:space="preserve">
-    <value>Gegenstand-Cull-Radius</value>
+    <value>物品剔除半徑</value>
   </data>
   <data name="Rendering:" xml:space="preserve">
-    <value>Rendering:</value>
+    <value>繪製:</value>
   </data>
   <data name="Terrain" xml:space="preserve">
-    <value>Gelände</value>
+    <value>地形</value>
   </data>
   <data name="Static Objects" xml:space="preserve">
-    <value>Statische Objekte</value>
+    <value>靜態物件</value>
   </data>
   <data name="Effects" xml:space="preserve">
-    <value>Effekte</value>
+    <value>特效</value>
   </data>
   <data name="Dropped Items" xml:space="preserve">
-    <value>Fallengelassene Gegenstände</value>
+    <value>掉落物品</value>
   </data>
   <data name="Weather" xml:space="preserve">
-    <value>Wetter</value>
+    <value>天氣</value>
   </data>
   <data name="Item Labels" xml:space="preserve">
-    <value>Gegenstands-Beschriftung</value>
+    <value>物品標籤</value>
   </data>
   <data name="All ON" xml:space="preserve">
-    <value>Alle AN</value>
+    <value>全部開啟</value>
   </data>
   <data name="All OFF" xml:space="preserve">
-    <value>Alle AUS</value>
+    <value>全部關閉</value>
   </data>
   <data name="TODO - Not Working:" xml:space="preserve">
-    <value>TODO - Funktioniert nicht:</value>
+    <value>待辦 - 尚未正常運作:</value>
   </data>
   <data name="Shaders" xml:space="preserve">
-    <value>Shader</value>
+    <value>著色器</value>
   </data>
   <data name="Skill Effects" xml:space="preserve">
-    <value>Fähigkeit-Effekte</value>
+    <value>技能特效</value>
   </data>
   <data name="Equipped Items" xml:space="preserve">
-    <value>Ausgerüstete Gegenstände</value>
+    <value>裝備中物品</value>
   </data>
   <data name="UI" xml:space="preserve">
-    <value>UI</value>
+    <value>介面</value>
   </data>
   <data name="TODO - Not Implemented:" xml:space="preserve">
-    <value>TODO - Nicht implementiert:</value>
+    <value>待辦 - 尚未實作:</value>
   </data>
   <data name="Hero" xml:space="preserve">
-    <value>Held</value>
+    <value>英雄</value>
   </data>
   <data name="NPCs" xml:space="preserve">
-    <value>NPCs</value>
+    <value>NPC</value>
   </data>
   <data name="Monsters" xml:space="preserve">
-    <value>Monster</value>
+    <value>怪物</value>
   </data>
   <data name="Graphics Debug Info" xml:space="preserve">
-    <value>Grafik-Debug-Info</value>
+    <value>圖形除錯資訊</value>
   </data>
   <data name="WARNING: Window size mismatch detected!" xml:space="preserve">
-    <value>WARNUNG: Fenstergröße stimmt nicht überein!</value>
+    <value>警告: 偵測到視窗尺寸不一致！</value>
   </data>
   <data name="Copy Debug Info to Clipboard" xml:space="preserve">
-    <value>Debug-Info in Zwischenablage kopieren</value>
+    <value>複製除錯資訊至剪貼簿</value>
   </data>
   <data name="(Paste in Discord/notepad)" xml:space="preserve">
-    <value>(In Discord/Notepad einfügen)</value>
+    <value>(貼至 Discord/記事本)</value>
   </data>
   <data name="Default" xml:space="preserve">
-    <value>Standard</value>
+    <value>預設</value>
   </data>
   <data name="Orbital" xml:space="preserve">
-    <value>Orbital</value>
+    <value>環繞</value>
   </data>
   <data name="Unknown" xml:space="preserve">
-    <value>Unbekannt</value>
+    <value>未知</value>
   </data>
   <data name="Pos" xml:space="preserve">
-    <value>Pos</value>
+    <value>位置</value>
   </data>
   <data name="Tile" xml:space="preserve">
-    <value>Kachel</value>
+    <value>地塊</value>
   </data>
   <data name="Tour" xml:space="preserve">
-    <value>Tour</value>
+    <value>巡覽</value>
   </data>
   <data name="ACTIVE" xml:space="preserve">
-    <value>AKTIV</value>
+    <value>啟用中</value>
   </data>
   <data name="INACTIVE" xml:space="preserve">
-    <value>INAKTIV</value>
+    <value>未啟用</value>
   </data>
   <data name=" (PAUSED)" xml:space="preserve">
-    <value> (PAUSIERT)</value>
+    <value> (已暫停)</value>
   </data>
   <data name="Near" xml:space="preserve">
-    <value>Nah</value>
+    <value>近</value>
   </data>
   <data name="Far" xml:space="preserve">
-    <value>Fern</value>
+    <value>遠</value>
   </data>
   <data name="ViewFar" xml:space="preserve">
-    <value>Sichtweite</value>
+    <value>視野遠</value>
   </data>
   <data name="ProjFar" xml:space="preserve">
-    <value>Proj-Fern</value>
+    <value>投影遠</value>
   </data>
   <data name="Zoom" xml:space="preserve">
-    <value>Zoom</value>
+    <value>縮放</value>
   </data>
   <data name="Orbital Target" xml:space="preserve">
-    <value>Orbital-Ziel</value>
+    <value>環繞目標</value>
   </data>
   <data name="Current Resolution" xml:space="preserve">
-    <value>Aktuelle Auflösung</value>
+    <value>當前解析度</value>
   </data>
   <data name="OpenGL Viewport" xml:space="preserve">
-    <value>OpenGL-Viewport</value>
+    <value>OpenGL 視口</value>
   </data>
   <data name="Screen Rate" xml:space="preserve">
-    <value>Bildschirmrate</value>
+    <value>螢幕比率</value>
   </data>
   <data name="Window Mode" xml:space="preserve">
-    <value>Fenstermodus</value>
+    <value>視窗模式</value>
   </data>
   <data name="Windowed" xml:space="preserve">
-    <value>Fenster</value>
+    <value>視窗</value>
   </data>
   <data name="Fullscreen" xml:space="preserve">
-    <value>Vollbild</value>
+    <value>全螢幕</value>
   </data>
   <data name="Actual Window Client" xml:space="preserve">
-    <value>Tatsächlicher Fenster-Client</value>
+    <value>實際視窗客戶區</value>
   </data>
   <data name="Calculated Scale from Client" xml:space="preserve">
-    <value>Berechneter Maßstab aus Client</value>
+    <value>從客戶區計算的縮放</value>
   </data>
   <data name="Debug info copied to clipboard" xml:space="preserve">
-    <value>Debug-Info in Zwischenablage kopiert</value>
+    <value>除錯資訊已複製至剪貼簿</value>
   </data>
 </root>
