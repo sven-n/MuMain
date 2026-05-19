@@ -372,6 +372,10 @@ dependencies = [
 [[package]]
 name = "mu_ui"
 version = "0.1.0"
+dependencies = [
+ "camino",
+ "mu_assets",
+]
 
 [[package]]
 name = "num-traits"
