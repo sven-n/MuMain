@@ -8,6 +8,7 @@
 #include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "imgui.h"
@@ -78,7 +79,7 @@ void CSkillEditorTable::Render(
 
     if (visibleColumnCount == 0)
     {
-        ImGui::Text(EDITOR_TEXT("label_no_columns"));
+        ImGui::Text(I18N::Editor::NoColumnsSelectedClickColumnsToShowColumns);
         return;
     }
 
@@ -147,7 +148,7 @@ void CSkillEditorTable::Render(
         bool indexVisible = columnVisibility.find("Index") != columnVisibility.end() && columnVisibility["Index"];
         if (indexVisible)
         {
-            ImGui::TableSetupColumn(EDITOR_TEXT("label_index"), ImGuiTableColumnFlags_None, 60.0f);
+            ImGui::TableSetupColumn(I18N::Editor::Index, ImGuiTableColumnFlags_None, 60.0f);
         }
 
         for (int i = 0; i < fieldCount; ++i)

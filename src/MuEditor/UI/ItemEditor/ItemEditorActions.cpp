@@ -7,6 +7,7 @@
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 #include "imgui.h"
 #include <string>
 #include <sstream>
@@ -129,7 +130,7 @@ void CItemEditorActions::RenderSaveButton()
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
 
-    if (ImGui::Button(EDITOR_TEXT("btn_save")))
+    if (ImGui::Button(I18N::Editor::SaveItems))
     {
         wchar_t fileName[256];
         swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
@@ -151,7 +152,7 @@ void CItemEditorActions::RenderSaveButton()
             }
             else
             {
-                g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_save_failed"));
+                g_MuEditorConsoleUI.LogEditor(I18N::Editor::FailedToSaveItems);
                 ImGui::OpenPopup("Save Failed");
             }
         }
@@ -165,7 +166,7 @@ void CItemEditorActions::RenderExportS6E3Button()
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.4f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.5f, 0.9f, 1.0f));
 
-    if (ImGui::Button(EDITOR_TEXT("btn_export_s6e3")))
+    if (ImGui::Button(I18N::Editor::ExportAsS6E3))
     {
         wchar_t fileName[256];
         swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_S6E3.bmd", g_strSelectedML.c_str());
@@ -178,7 +179,7 @@ void CItemEditorActions::RenderExportS6E3Button()
         }
         else
         {
-            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_export_s6e3_failed"));
+            g_MuEditorConsoleUI.LogEditor(I18N::Editor::FailedToExportAsS6E3Format);
             ImGui::OpenPopup("Export S6E3 Failed");
         }
     }
@@ -191,7 +192,7 @@ void CItemEditorActions::RenderExportCSVButton()
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.6f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.7f, 1.0f));
 
-    if (ImGui::Button(EDITOR_TEXT("btn_export_csv")))
+    if (ImGui::Button(I18N::Editor::ExportAsCSV))
     {
         wchar_t csvFileName[256];
         swprintf_s(csvFileName, _countof(csvFileName), L"Data\\Local\\%ls\\Item.csv", g_strSelectedML.c_str());
@@ -204,7 +205,7 @@ void CItemEditorActions::RenderExportCSVButton()
         }
         else
         {
-            g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("msg_export_csv_failed"));
+            g_MuEditorConsoleUI.LogEditor(I18N::Editor::FailedToExportAsCSV);
             ImGui::OpenPopup("Export CSV Failed");
         }
     }

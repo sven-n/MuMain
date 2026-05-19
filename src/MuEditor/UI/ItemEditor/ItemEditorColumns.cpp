@@ -7,6 +7,7 @@
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/ItemData/ItemFieldDefs.h"
 #include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "imgui.h"
@@ -224,7 +225,7 @@ void CItemEditorColumns::RenderIndexColumn(int& colIdx, int itemIndex, bool& row
         }
         else if (!m_errorLogged)
         {
-            std::string errorMsg = i18n::FormatEditor("error_index_in_use", {
+            std::string errorMsg = I18N::Format(I18N::Editor::ErrorIndex0AlreadyInUse, {
                 std::to_string(newIndex)
             });
             g_MuEditorConsoleUI.LogEditor(errorMsg);

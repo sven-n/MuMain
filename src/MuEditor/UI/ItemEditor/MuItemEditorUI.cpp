@@ -10,6 +10,7 @@
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 #include "imgui.h"
 #include <algorithm>
 #include <cctype>
@@ -105,7 +106,7 @@ void CMuItemEditorUI::Render(bool& showEditor)
     );
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse;
-    if (ImGui::Begin(EDITOR_TEXT("label_item_editor_title"), &showEditor, flags))
+    if (ImGui::Begin(I18N::Editor::ItemEditor, &showEditor, flags))
     {
         // Clamp window position to stay within bounds
         ImVec2 windowPos = ImGui::GetWindowPos();
@@ -149,7 +150,7 @@ void CMuItemEditorUI::Render(bool& showEditor)
         ImGui::SameLine();
         RenderColumnVisibilityMenu();
         ImGui::SameLine();
-        ImGui::Checkbox(EDITOR_TEXT("label_freeze_columns"), &m_bFreezeColumns);
+        ImGui::Checkbox(I18N::Editor::FreezeIndexName, &m_bFreezeColumns);
         ImGui::Separator();
 
         // Convert search to lowercase for case-insensitive search
@@ -171,7 +172,7 @@ void CMuItemEditorUI::Render(bool& showEditor)
 void CMuItemEditorUI::RenderSearchBar()
 {
     // Search bar
-    ImGui::Text(EDITOR_TEXT("label_search_text"));
+    ImGui::Text(I18N::Editor::Search);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(300);
     ImGui::InputText("##ItemSearch", m_szItemSearchBuffer, sizeof(m_szItemSearchBuffer));
@@ -179,7 +180,7 @@ void CMuItemEditorUI::RenderSearchBar()
 
 void CMuItemEditorUI::RenderColumnVisibilityMenu()
 {
-    if (ImGui::Button(EDITOR_TEXT("btn_columns")))
+    if (ImGui::Button(I18N::Editor::Columns))
     {
         ImGui::OpenPopup("ColumnVisibility");
     }
@@ -190,11 +191,11 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
 
     if (ImGui::BeginPopup("ColumnVisibility"))
     {
-        ImGui::Text(EDITOR_TEXT("popup_toggle_columns"));
+        ImGui::Text(I18N::Editor::ToggleColumnVisibility);
         ImGui::Separator();
 
         // Select All / Unselect All buttons
-        if (ImGui::Button(EDITOR_TEXT("btn_select_all")))
+        if (ImGui::Button(I18N::Editor::SelectAll))
         {
             for (auto& col : m_columnVisibility)
             {
@@ -203,7 +204,7 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
             SaveColumnPreferences();
         }
         ImGui::SameLine();
-        if (ImGui::Button(EDITOR_TEXT("btn_unselect_all")))
+        if (ImGui::Button(I18N::Editor::UnselectAll))
         {
             for (auto& col : m_columnVisibility)
             {
@@ -217,7 +218,7 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
         bool changed = false;
 
         // Index column (special case, not in metadata)
-        changed |= ImGui::Checkbox(EDITOR_TEXT("label_index"), &m_columnVisibility["Index"]);
+        changed |= ImGui::Checkbox(I18N::Editor::Index, &m_columnVisibility["Index"]);
 
         // Get all fields from metadata and render checkboxes
         const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
