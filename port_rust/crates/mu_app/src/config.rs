@@ -82,6 +82,10 @@ impl Config {
         self.save(Self::path_in(root))
     }
 
+    pub fn default_path() -> Utf8PathBuf {
+        Utf8PathBuf::from(CONFIG_DIR).join(CONFIG_FILE_NAME)
+    }
+
     pub fn path_in(root: impl AsRef<Utf8Path>) -> Utf8PathBuf {
         root.as_ref().join(CONFIG_DIR).join(CONFIG_FILE_NAME)
     }
