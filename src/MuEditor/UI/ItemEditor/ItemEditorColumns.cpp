@@ -6,7 +6,6 @@
 #include "ItemEditorTable.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/ItemData/ItemFieldDefs.h"
-#include "Data/Translation/i18n.h"
 #include "I18N/All.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"

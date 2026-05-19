@@ -9,7 +9,6 @@
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
-#include "Data/Translation/i18n.h"
 #include "I18N/All.h"
 #include "imgui.h"
 #include <algorithm>

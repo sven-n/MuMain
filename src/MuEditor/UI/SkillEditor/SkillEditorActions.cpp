@@ -6,7 +6,6 @@
 #include "SkillEditorPopups.h"
 #include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
-#include "Data/Translation/i18n.h"
 #include "I18N/All.h"
 #include "imgui.h"
 #include <string>

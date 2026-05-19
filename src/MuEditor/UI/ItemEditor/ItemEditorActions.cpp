@@ -6,7 +6,6 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
-#include "Data/Translation/i18n.h"
 #include "I18N/All.h"
 #include "imgui.h"
 #include <string>

@@ -9,7 +9,6 @@
 #include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
-#include "Data/Translation/i18n.h"
 #include "I18N/All.h"
 #include "imgui.h"
 #include <algorithm>

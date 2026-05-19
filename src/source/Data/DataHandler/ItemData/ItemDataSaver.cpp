@@ -4,7 +4,6 @@
 
 #include "ItemDataSaver.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
-#include "Data/Translation/i18n.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "Engine/Object/ZzzInfomation.h"
