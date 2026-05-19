@@ -106,6 +106,10 @@ internal static class CppEmitter
 
         sb.AppendLine("#pragma once");
         sb.AppendLine();
+        sb.AppendLine("#include <initializer_list>");
+        sb.AppendLine("#include <string>");
+        sb.AppendLine("#include <string_view>");
+        sb.AppendLine();
         foreach (var g in groups)
         {
             sb.AppendLine($"#include \"{g.Name}.h\"");
@@ -117,6 +121,11 @@ internal static class CppEmitter
             // Switches every group to the given locale. Unknown locales fall
             // back to the default locale (en).
             void SetLocale(const char* locale) noexcept;
+
+            // Substitutes {0}, {1}, ... in `format` with the given arguments and
+            // returns the result. Used for translated strings that contain
+            // placeholders, e.g. Format(Editor::ErrorIndexAlreadyInUse, {idxStr}).
+            std::string Format(const char* format, std::initializer_list<std::string_view> args);
 
             }  // namespace {{RootNamespace}}
 
@@ -133,6 +142,8 @@ internal static class CppEmitter
         sb.Append($$"""
             #include "{{MasterFileName}}.h"
 
+            #include <cstddef>
+
             namespace {{RootNamespace}} {
 
             void SetLocale(const char* locale) noexcept
@@ -146,6 +157,49 @@ internal static class CppEmitter
         }
 
         sb.Append($$"""
+            }
+
+            std::string Format(const char* format, std::initializer_list<std::string_view> args)
+            {
+                if (format == nullptr) return {};
+
+                // Pre-compute the final size to do exactly one allocation for the
+                // common case where every placeholder is found at most once. We
+                // walk the format string twice; the placeholder scan is cheap
+                // compared to the heap traffic of std::string growth.
+                std::string result;
+                result.reserve(std::char_traits<char>::length(format));
+
+                for (const char* p = format; *p != '\0'; )
+                {
+                    if (*p == '{')
+                    {
+                        // Parse {N} where N is a non-negative integer index.
+                        const char* digits = p + 1;
+                        std::size_t index = 0;
+                        bool hasDigit = false;
+                        while (*digits >= '0' && *digits <= '9')
+                        {
+                            index = index * 10 + static_cast<std::size_t>(*digits - '0');
+                            ++digits;
+                            hasDigit = true;
+                        }
+                        if (hasDigit && *digits == '}')
+                        {
+                            if (index < args.size())
+                            {
+                                const auto& arg = *(args.begin() + index);
+                                result.append(arg.data(), arg.size());
+                            }
+                            // Unknown index: silently drop the placeholder.
+                            p = digits + 1;
+                            continue;
+                        }
+                    }
+                    result.push_back(*p++);
+                }
+
+                return result;
             }
 
             }  // namespace {{RootNamespace}}
