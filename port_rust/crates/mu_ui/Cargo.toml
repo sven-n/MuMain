@@ -6,4 +6,5 @@ publish.workspace = true
 
 [dependencies]
 camino.workspace = true
+mu_core = { path = "../mu_core" }
 mu_assets = { path = "../mu_assets" }

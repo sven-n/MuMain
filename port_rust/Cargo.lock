@@ -428,6 +428,7 @@ version = "0.1.0"
 dependencies = [
  "camino",
  "mu_assets",
+ "mu_core",
 ]
 
 [[package]]
