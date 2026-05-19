@@ -13,6 +13,9 @@ Esta etapa cria apenas o scaffold inicial: ainda e nao jogavel / not playable.
 - O binario `mu_fake_server` e um servidor fake de connect-server para testes
   locais, sem persistencia, configurado inteiramente por CLI; detalhes em
   `docs/face_server.md`.
+- As configuracoes persistidas ficam em `config/client.toml`; elas cobrem
+  video, audio, controles, performance, rede e idioma, e nao gravam segredos
+  como senha ou token.
 - Quando `--asset-root` e informado, o root precisa conter
   `manifest.muasset.json` e os assets convertidos com hashes coerentes; falhas
   de manifest ou checksum mantem o cliente em `asset-check-failed`.

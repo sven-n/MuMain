@@ -7,4 +7,6 @@ publish.workspace = true
 [dependencies]
 camino.workspace = true
 mu_assets = { path = "../mu_assets" }
+serde.workspace = true
 thiserror.workspace = true
+toml.workspace = true

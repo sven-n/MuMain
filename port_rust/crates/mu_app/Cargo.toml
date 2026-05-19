@@ -8,3 +8,8 @@ publish.workspace = true
 camino.workspace = true
 clap.workspace = true
 mu_assets = { path = "../mu_assets" }
+mu_audio = { path = "../mu_audio" }
+mu_input = { path = "../mu_input" }
+serde.workspace = true
+thiserror.workspace = true
+toml.workspace = true
