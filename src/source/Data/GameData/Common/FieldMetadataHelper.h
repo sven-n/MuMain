@@ -3,8 +3,7 @@
 #ifdef _EDITOR
 
 #include <windows.h>
-#include <string>
-#include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 
 // ============================================================================
 // SHARED FIELD TYPE SYSTEM
@@ -35,7 +34,8 @@ enum class EFieldType
 template<typename TStruct>
 struct FieldDescriptor
 {
-    const char* name;
+    const char* name;                  // raw C++ field name (used for CSV headers, debug)
+    const char* const* displayName;    // points to an I18N::Metadata::* extern pointer
     EFieldType type;
     size_t offset;
     float width;
@@ -45,15 +45,12 @@ struct FieldDescriptor
 // SHARED HELPER FUNCTIONS
 // ============================================================================
 
-// Get translated field name with fallback to raw field name
-inline const char* GetFieldDisplayName(const char* fieldName)
+// Get translated field name. The displayName slot follows the active locale
+// because it points at one of the I18N::Metadata::* runtime pointers.
+template<typename TStruct>
+inline const char* GetFieldDisplayName(const FieldDescriptor<TStruct>& desc)
 {
-    std::string translationKey = std::string("field_") + fieldName;
-    if (i18n::HasTranslation(i18n::Domain::Metadata, translationKey.c_str()))
-    {
-        return i18n::TranslateMetadata(translationKey.c_str(), fieldName);
-    }
-    return fieldName;  // Fallback to raw field name if no translation
+    return *desc.displayName;
 }
 
 // ============================================================================
@@ -79,7 +76,7 @@ inline void RenderFieldByDescriptor(
 
     BYTE* dataPtr = reinterpret_cast<BYTE*>(&data);
     void* fieldPtr = dataPtr + desc.offset;
-    const char* displayName = GetFieldDisplayName(desc.name);
+    const char* displayName = GetFieldDisplayName(desc);
 
     // Generate unique ID for ImGui
     int uniqueId = 0;

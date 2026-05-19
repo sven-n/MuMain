@@ -76,7 +76,7 @@ std::string CSkillEditorActions::GetCSVHeader()
     ss << "Index";
     for (int i = 0; i < fieldCount; ++i)
     {
-        ss << "," << GetSkillFieldDisplayName(fields[i].name);
+        ss << "," << GetSkillFieldDisplayName(fields[i]);
     }
 
     return ss.str();
@@ -92,7 +92,7 @@ std::string CSkillEditorActions::ExportSkillToReadable(int skillIndex, SKILL_ATT
 
     for (int i = 0; i < fieldCount; ++i)
     {
-        const char* displayName = GetSkillFieldDisplayName(fields[i].name);
+        const char* displayName = GetSkillFieldDisplayName(fields[i]);
         std::string value = GetFieldValueAsString(skill, fields[i]);
         ss << "  " << displayName << ": " << value << "\n";
     }

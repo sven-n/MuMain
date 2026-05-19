@@ -70,7 +70,7 @@ std::string CItemEditorActions::GetCSVHeader()
     ss << "Index";
     for (int i = 0; i < fieldCount; ++i)
     {
-        ss << "," << GetFieldDisplayName(fields[i].name);
+        ss << "," << GetFieldDisplayName(fields[i]);
     }
 
     return ss.str();
@@ -86,7 +86,7 @@ std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBU
 
     for (int i = 0; i < fieldCount; ++i)
     {
-        ss << ", " << GetFieldDisplayName(fields[i].name) << " = ";
+        ss << ", " << GetFieldDisplayName(fields[i]) << " = ";
         ss << GetFieldValueAsString(item, fields[i]);
     }
 

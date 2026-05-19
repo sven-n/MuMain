@@ -156,7 +156,7 @@ void CSkillEditorTable::Render(
             if (columnVisibility.find(fields[i].name) != columnVisibility.end() &&
                 columnVisibility[fields[i].name])
             {
-                const char* displayName = GetSkillFieldDisplayName(fields[i].name);
+                const char* displayName = GetSkillFieldDisplayName(fields[i]);
                 ImGui::TableSetupColumn(displayName, ImGuiTableColumnFlags_None, fields[i].width);
             }
         }

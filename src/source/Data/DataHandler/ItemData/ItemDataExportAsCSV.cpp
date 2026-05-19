@@ -14,8 +14,8 @@
 extern ITEM_ATTRIBUTE* ItemAttribute;
 
 // X-Macro helpers for CSV generation
-#define CSV_HEADER_SIMPLE(name, type, arraySize, width) "," #name
-#define CSV_HEADER_ARRAY(nameWithIndex, baseName, index, type, width) "," #nameWithIndex
+#define CSV_HEADER_SIMPLE(name, type, arraySize, width, i18nName) "," #name
+#define CSV_HEADER_ARRAY(nameWithIndex, baseName, index, type, width, i18nName) "," #nameWithIndex
 
 // Complete CSV header with Index and Name
 #define CSV_FULL_HEADER "Index,Name" ITEM_FIELDS_SIMPLE(CSV_HEADER_SIMPLE) ITEM_FIELDS_ARRAYS(CSV_HEADER_ARRAY)
@@ -26,8 +26,8 @@ extern ITEM_ATTRIBUTE* ItemAttribute;
 #define PRINT_FIELD_Word(item, name) fprintf(csvFp, ",%d", (item).name)
 #define PRINT_FIELD_Int(item, name) fprintf(csvFp, ",%d", (item).name)
 
-#define CSV_PRINT_SIMPLE(name, type, arraySize, width) PRINT_FIELD_##type(item, name);
-#define CSV_PRINT_ARRAY(nameWithIndex, baseName, index, type, width) fprintf(csvFp, ",%d", item.baseName[index]);
+#define CSV_PRINT_SIMPLE(name, type, arraySize, width, i18nName) PRINT_FIELD_##type(item, name);
+#define CSV_PRINT_ARRAY(nameWithIndex, baseName, index, type, width, i18nName) fprintf(csvFp, ",%d", item.baseName[index]);
 
 bool ItemDataExportAsCSV::ExportToCsv(wchar_t* fileName)
 {

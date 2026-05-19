@@ -224,7 +224,7 @@ void CMuItemEditorUI::RenderColumnVisibilityMenu()
         const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
         for (int i = 0; i < fieldCount; ++i)
         {
-            const char* displayName = GetFieldDisplayName(fields[i].name);
+            const char* displayName = GetFieldDisplayName(fields[i]);
             changed |= ImGui::Checkbox(displayName, &m_columnVisibility[fields[i].name]);
         }
 

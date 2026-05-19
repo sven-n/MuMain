@@ -207,7 +207,7 @@ void CMuSkillEditorUI::RenderColumnVisibilityMenu()
 
         for (int i = 0; i < fieldCount; ++i)
         {
-            const char* displayName = GetSkillFieldDisplayName(fields[i].name);
+            const char* displayName = GetSkillFieldDisplayName(fields[i]);
             ImGui::Checkbox(displayName, &m_columnVisibility[fields[i].name]);
         }
 

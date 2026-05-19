@@ -145,7 +145,7 @@ void CItemEditorTable::Render(
         if (columnVisibility.find(fields[i].name) != columnVisibility.end() &&
             columnVisibility[fields[i].name])
         {
-            ImGui::TableSetupColumn(GetFieldDisplayName(fields[i].name),
+            ImGui::TableSetupColumn(GetFieldDisplayName(fields[i]),
                                    ImGuiTableColumnFlags_WidthFixed,
                                    fields[i].width);
         }
