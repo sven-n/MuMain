@@ -404,6 +404,58 @@ if (DOTNET_EXECUTABLE)
   )
 
   add_custom_target(ConstantsReplacer DEPENDS "${CONSTANTS_REPLACER_OUTPUT}")
+
+  # ResxGen: .resx -> typed C++ accessors under namespace I18N::<Group>.
+  # Discovers groups from filenames (<Group>.<locale>.resx) and emits one
+  # .h/.cpp per group plus a master All.h/All.cpp. Generated output lives
+  # in the build tree only and is consumed by Main via target_sources.
+  set(RESXGEN_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../Tools/ResxGen/ResxGen.csproj")
+  set(RESX_INPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Localization")
+  set(RESX_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Generated/I18N")
+  file(MAKE_DIRECTORY "${RESX_OUTPUT_DIR}")
+
+  file(GLOB RESX_FILES CONFIGURE_DEPENDS "${RESX_INPUT_DIR}/*.resx")
+  file(GLOB_RECURSE RESXGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../Tools/ResxGen/*.cs")
+
+  if (RESX_FILES)
+    # Compute groups from filenames: Editor.en.resx -> group "Editor".
+    set(RESX_GROUPS "")
+    foreach(resx_file IN LISTS RESX_FILES)
+      get_filename_component(stem "${resx_file}" NAME_WE)  # Editor.en
+      string(REGEX REPLACE "\\.[^.]*$" "" group_name "${stem}")
+      list(APPEND RESX_GROUPS "${group_name}")
+    endforeach()
+    list(REMOVE_DUPLICATES RESX_GROUPS)
+
+    # Predict generator output for the custom command's OUTPUT list.
+    set(RESX_GEN_HEADERS "${RESX_OUTPUT_DIR}/All.h")
+    set(RESX_GEN_SOURCES "${RESX_OUTPUT_DIR}/All.cpp")
+    foreach(group_name IN LISTS RESX_GROUPS)
+      list(APPEND RESX_GEN_HEADERS "${RESX_OUTPUT_DIR}/${group_name}.h")
+      list(APPEND RESX_GEN_SOURCES "${RESX_OUTPUT_DIR}/${group_name}.cpp")
+    endforeach()
+
+    mu_native_path("${RESXGEN_PROJ}" RESXGEN_PROJ_NATIVE)
+    mu_native_path("${RESX_INPUT_DIR}" RESX_INPUT_DIR_NATIVE)
+    mu_native_path("${RESX_OUTPUT_DIR}" RESX_OUTPUT_DIR_NATIVE)
+
+    add_custom_command(
+      OUTPUT ${RESX_GEN_HEADERS} ${RESX_GEN_SOURCES}
+      COMMAND ${CMAKE_COMMAND} -E env
+              "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+              "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+              "${DOTNET_EXECUTABLE}" run --project "${RESXGEN_PROJ_NATIVE}" -c $<CONFIG>
+              -- --input "${RESX_INPUT_DIR_NATIVE}" --output "${RESX_OUTPUT_DIR_NATIVE}"
+      DEPENDS ${RESX_FILES} ${RESXGEN_SOURCES} "${RESXGEN_PROJ}"
+      COMMENT "ResxGen: regenerating C++ I18N accessors from .resx"
+      VERBATIM
+    )
+
+    add_custom_target(ResxGen DEPENDS ${RESX_GEN_HEADERS} ${RESX_GEN_SOURCES})
+    add_dependencies(Main ResxGen)
+    target_sources(Main PRIVATE ${RESX_GEN_SOURCES})
+    target_include_directories(Main PRIVATE "${CMAKE_BINARY_DIR}/Generated")
+  endif()
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
     "The game will run but cannot connect to the server. Install .NET SDK 10.0+ to enable.")
