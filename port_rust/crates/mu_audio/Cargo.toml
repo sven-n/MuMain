@@ -5,3 +5,6 @@ edition.workspace = true
 publish.workspace = true
 
 [dependencies]
+camino.workspace = true
+mu_assets = { path = "../mu_assets" }
+thiserror.workspace = true

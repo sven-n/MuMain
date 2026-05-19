@@ -317,6 +317,11 @@ dependencies = [
 [[package]]
 name = "mu_audio"
 version = "0.1.0"
+dependencies = [
+ "camino",
+ "mu_assets",
+ "thiserror",
+]
 
 [[package]]
 name = "mu_client"
