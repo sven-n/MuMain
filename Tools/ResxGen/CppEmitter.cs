@@ -27,6 +27,24 @@ internal static class CppEmitter
     /// Master header/source filename (without extension).
     private const string MasterFileName = "All";
 
+    /// Display name for each known locale, in that locale's own language.
+    /// Locales emitted by the generator but missing here fall through to
+    /// returning the locale code itself at runtime.
+    private static readonly IReadOnlyDictionary<string, string> KnownLanguageDisplayNames =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["de"]    = "Deutsch",
+            ["en"]    = "English",
+            ["es"]    = "Español",
+            ["id"]    = "Bahasa Indonesia",
+            ["pl"]    = "Polski",
+            ["pt"]    = "Português",
+            ["ru"]    = "Русский",
+            ["tl"]    = "Tagalog",
+            ["uk"]    = "Українська",
+            ["zh-TW"] = "繁體中文",
+        };
+
     /// Banner placed at the top of every generated file.
     private const string GeneratedBanner = """
         // =============================================================
@@ -107,6 +125,7 @@ internal static class CppEmitter
         sb.AppendLine("#pragma once");
         sb.AppendLine();
         sb.AppendLine("#include <initializer_list>");
+        sb.AppendLine("#include <span>");
         sb.AppendLine("#include <string>");
         sb.AppendLine("#include <string_view>");
         sb.AppendLine();
@@ -127,6 +146,16 @@ internal static class CppEmitter
             // placeholders, e.g. Format(Editor::ErrorIndexAlreadyInUse, {idxStr}).
             std::string Format(const char* format, std::initializer_list<std::string_view> args);
 
+            // Returns the locale codes this build was generated with, default
+            // locale ("en") first. The span backs static storage and is valid
+            // for the program's lifetime.
+            std::span<const char* const> GetAvailableLocales() noexcept;
+
+            // Returns the display name for `locale` in that locale's own
+            // language (e.g. "Deutsch" for "de"). Returns `locale` itself for
+            // codes the generator does not have a display name for.
+            const char* GetLanguageDisplayName(const char* locale) noexcept;
+
             }  // namespace {{RootNamespace}}
 
             """);
@@ -143,8 +172,18 @@ internal static class CppEmitter
             #include "{{MasterFileName}}.h"
 
             #include <cstddef>
+            #include <cstring>
 
             namespace {{RootNamespace}} {
+            namespace {
+
+            """);
+
+        WriteLocaleRegistry(sb, groups);
+
+        sb.Append($$"""
+
+            }  // namespace
 
             void SetLocale(const char* locale) noexcept
             {
@@ -157,6 +196,21 @@ internal static class CppEmitter
         }
 
         sb.Append($$"""
+            }
+
+            std::span<const char* const> GetAvailableLocales() noexcept
+            {
+                return {kLocales, sizeof(kLocales) / sizeof(kLocales[0])};
+            }
+
+            const char* GetLanguageDisplayName(const char* locale) noexcept
+            {
+                if (locale == nullptr) return "";
+                for (const auto& entry : kLanguageDisplayNames)
+                {
+                    if (std::strcmp(entry.code, locale) == 0) return entry.name;
+                }
+                return locale;
             }
 
             std::string Format(const char* format, std::initializer_list<std::string_view> args)
@@ -207,6 +261,34 @@ internal static class CppEmitter
             """);
 
         File.WriteAllText(Path.Combine(outputDir, $"{MasterFileName}.cpp"), sb.ToString());
+    }
+
+    private static void WriteLocaleRegistry(StringBuilder sb, IReadOnlyList<ResourceGroup> groups)
+    {
+        // Union of locales across all groups, default locale first, rest sorted.
+        var locales = groups.SelectMany(g => g.Locales)
+                            .Distinct(StringComparer.Ordinal)
+                            .OrderBy(l => l == ResxLoader.DefaultLocale ? "" : l, StringComparer.Ordinal)
+                            .ToList();
+
+        sb.AppendLine("constexpr const char* kLocales[] = {");
+        foreach (var locale in locales)
+        {
+            sb.AppendLine($"    {Naming.EscapeCppString(locale)},");
+        }
+        sb.AppendLine("};");
+        sb.AppendLine();
+
+        sb.AppendLine("struct LanguageDisplayEntry { const char* code; const char* name; };");
+        sb.AppendLine("constexpr LanguageDisplayEntry kLanguageDisplayNames[] = {");
+        foreach (var locale in locales)
+        {
+            if (KnownLanguageDisplayNames.TryGetValue(locale, out var displayName))
+            {
+                sb.AppendLine($"    {{ {Naming.EscapeCppString(locale)}, {Naming.EscapeCppString(displayName)} }},");
+            }
+        }
+        sb.AppendLine("};");
     }
 
     private static void WriteLocaleTables(StringBuilder sb, ResourceGroup group)
