@@ -298,6 +298,7 @@ dependencies = [
  "clap",
  "image",
  "mu_assets",
+ "serde",
  "serde_json",
  "thiserror",
 ]

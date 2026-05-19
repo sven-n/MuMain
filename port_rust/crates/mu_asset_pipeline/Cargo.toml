@@ -9,5 +9,6 @@ camino.workspace = true
 clap.workspace = true
 image = { version = "0.25", default-features = false, features = ["bmp", "jpeg", "png", "tga"] }
 mu_assets = { path = "../mu_assets" }
+serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
