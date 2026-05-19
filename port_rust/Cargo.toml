@@ -37,3 +37,4 @@ thiserror = "2"
 tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "sync", "time"] }
 toml = "0.9"
 tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt"] }

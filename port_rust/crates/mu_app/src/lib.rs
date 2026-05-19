@@ -1,6 +1,7 @@
 pub mod cli;
 pub mod config;
 pub mod control_http;
+pub mod logging;
 mod runtime;
 pub mod state;
 
