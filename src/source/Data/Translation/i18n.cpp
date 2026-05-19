@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "i18n.h"
+#include "I18N/All.h"
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -80,6 +81,7 @@ bool Translator::LoadTranslations(Domain domain, const std::wstring& filePath) {
 
 void Translator::SetLocale(const std::string& locale) {
     m_currentLocale = locale;
+    I18N::SetLocale(locale.c_str());
 }
 
 const char* Translator::Translate(Domain domain, const char* key, const char* fallback) const {
@@ -197,6 +199,7 @@ bool Translator::SwitchLanguage(const std::string& locale) {
     // Only change locale if at least game translations loaded successfully
     if (gameLoaded) {
         m_currentLocale = locale;
+        I18N::SetLocale(locale.c_str());
         return true;
     }
 

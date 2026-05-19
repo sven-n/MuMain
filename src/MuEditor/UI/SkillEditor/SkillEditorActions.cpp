@@ -7,6 +7,7 @@
 #include "Data/GameData/SkillData/SkillFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 #include "imgui.h"
 #include <string>
 #include <sstream>
@@ -132,7 +133,7 @@ void CSkillEditorActions::RenderSaveButton()
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.9f, 1.0f));
 
-    if (ImGui::Button(EDITOR_TEXT("btn_save_skills")))
+    if (ImGui::Button(I18N::Editor::SaveSkills))
     {
         wchar_t fileName[256];
         swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Skill_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
