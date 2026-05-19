@@ -141,6 +141,10 @@ internal static class CppEmitter
             // back to the default locale (en).
             void SetLocale(const char* locale) noexcept;
 
+            // Returns the locale code passed to the last successful SetLocale
+            // (or the default locale before any explicit call). Never null.
+            const char* GetCurrentLocale() noexcept;
+
             // Substitutes {0}, {1}, ... in `format` with the given arguments and
             // returns the result. Used for translated strings that contain
             // placeholders, e.g. Format(Editor::ErrorIndexAlreadyInUse, {idxStr}).
@@ -183,19 +187,37 @@ internal static class CppEmitter
 
         sb.Append($$"""
 
+            const char* g_currentLocale = "{{ResxLoader.DefaultLocale}}";
+
+            const char* ResolveLocale(const char* locale) noexcept
+            {
+                if (locale == nullptr) return "{{ResxLoader.DefaultLocale}}";
+                for (const char* known : kLocales)
+                {
+                    if (std::strcmp(known, locale) == 0) return known;
+                }
+                return "{{ResxLoader.DefaultLocale}}";
+            }
+
             }  // namespace
 
             void SetLocale(const char* locale) noexcept
             {
+                g_currentLocale = ResolveLocale(locale);
 
             """);
 
         foreach (var g in groups)
         {
-            sb.AppendLine($"    {g.Name}::ApplyLocale(locale);");
+            sb.AppendLine($"    {g.Name}::ApplyLocale(g_currentLocale);");
         }
 
         sb.Append($$"""
+            }
+
+            const char* GetCurrentLocale() noexcept
+            {
+                return g_currentLocale;
             }
 
             std::span<const char* const> GetAvailableLocales() noexcept
