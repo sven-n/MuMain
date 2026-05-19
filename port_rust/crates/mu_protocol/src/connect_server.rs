@@ -1,9 +1,14 @@
-use std::error::Error;
-use std::fmt;
+use std::convert::TryFrom;
+
+pub use crate::codec::{decode_packet, encode_packet};
 
 pub const CONNECT_SERVER_HEADCODE: u8 = 0xF4;
 pub const SERVER_LIST_REQUEST_SUBCODE: u8 = 0x06;
 pub const SERVER_LIST_RESPONSE_SUBCODE: u8 = 0x06;
+const SERVER_LIST_RESPONSE_CODE: u8 = 0xC2;
+
+pub use crate::error::PacketCodecError as EncodeError;
+pub use crate::frame::PacketFrame as PacketView;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ServerEntry {
@@ -20,95 +25,43 @@ impl ServerEntry {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PacketView<'a> {
-    pub code: u8,
-    pub size: usize,
-    pub headcode: u8,
-    pub subcode: u8,
-    pub payload: &'a [u8],
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum EncodeError {
-    PacketTooLarge { size: usize },
-}
-
-impl fmt::Display for EncodeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::PacketTooLarge { size } => {
-                write!(f, "connect-server packet too large: {size}")
-            }
-        }
-    }
-}
-
-impl Error for EncodeError {}
-
-pub fn decode_packet(bytes: &[u8]) -> Option<PacketView<'_>> {
-    let code = *bytes.first()?;
-    if code % 2 == 1 {
-        let size = usize::from(*bytes.get(1)?);
-        if size < 4 || bytes.len() < size {
-            return None;
-        }
-
-        Some(PacketView {
-            code,
-            size,
-            headcode: *bytes.get(2)?,
-            subcode: *bytes.get(3)?,
-            payload: &bytes[4..size],
-        })
-    } else {
-        let size = usize::from(u16::from_be_bytes([*bytes.get(1)?, *bytes.get(2)?]));
-        if size < 5 || bytes.len() < size {
-            return None;
-        }
-
-        Some(PacketView {
-            code,
-            size,
-            headcode: *bytes.get(3)?,
-            subcode: *bytes.get(4)?,
-            payload: &bytes[5..size],
-        })
-    }
-}
-
 pub fn is_server_list_request(bytes: &[u8]) -> bool {
-    decode_packet(bytes).is_some_and(|packet| {
+    matches!(decode_packet(bytes), Ok(packet) if {
         packet.headcode == CONNECT_SERVER_HEADCODE && packet.subcode == SERVER_LIST_REQUEST_SUBCODE
     })
 }
 
 pub fn encode_server_list_response(entries: &[ServerEntry]) -> Result<Vec<u8>, EncodeError> {
+    let payload = build_server_list_payload(entries)?;
+    encode_packet(
+        SERVER_LIST_RESPONSE_CODE,
+        CONNECT_SERVER_HEADCODE,
+        SERVER_LIST_RESPONSE_SUBCODE,
+        &payload,
+    )
+}
+
+fn build_server_list_payload(entries: &[ServerEntry]) -> Result<Vec<u8>, EncodeError> {
     let payload_bytes = entries
         .len()
         .checked_mul(3)
-        .and_then(|value| 7usize.checked_add(value))
+        .and_then(|value| value.checked_add(2))
         .ok_or(EncodeError::PacketTooLarge { size: usize::MAX })?;
-    let size = u16::try_from(payload_bytes).map_err(|_| EncodeError::PacketTooLarge {
-        size: payload_bytes,
-    })?;
-    let count = u16::try_from(entries.len()).map_err(|_| EncodeError::PacketTooLarge {
-        size: entries.len(),
-    })?;
+    let packet_bytes = payload_bytes
+        .checked_add(5)
+        .ok_or(EncodeError::PacketTooLarge { size: usize::MAX })?;
+    let count = u16::try_from(entries.len())
+        .map_err(|_| EncodeError::PacketTooLarge { size: packet_bytes })?;
 
-    let mut packet = Vec::with_capacity(usize::from(size));
-    packet.push(0xC2);
-    packet.extend_from_slice(&size.to_be_bytes());
-    packet.push(CONNECT_SERVER_HEADCODE);
-    packet.push(SERVER_LIST_RESPONSE_SUBCODE);
-    packet.extend_from_slice(&count.to_be_bytes());
+    let mut payload = Vec::with_capacity(payload_bytes);
+    payload.extend_from_slice(&count.to_be_bytes());
 
     for entry in entries {
-        packet.extend_from_slice(&entry.connect_index.to_le_bytes());
-        packet.push(entry.percent);
+        payload.extend_from_slice(&entry.connect_index.to_le_bytes());
+        payload.push(entry.percent);
     }
 
-    Ok(packet)
+    Ok(payload)
 }
 
 #[cfg(test)]
