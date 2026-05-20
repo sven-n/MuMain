@@ -142,15 +142,21 @@ internal static class Naming
     /// Render a C# string as a C++ string literal.
     /// `wide=true` produces an L"..." UTF-16 wide literal (used by wide groups
     /// whose accessors return const wchar_t*); otherwise a plain UTF-8 literal.
-    /// Non-ASCII characters pass through as-is (UTF-8 source); the compiler is
-    /// responsible for translating them to the appropriate execution charset.
+    ///
+    /// Non-ASCII codepoints are emitted as \uHHHH (or \UHHHHHHHH for chars
+    /// beyond the BMP) so the compiler never has to guess the source encoding.
+    /// MSVC defaults to the system codepage when reading sources, so a raw
+    /// "ä" byte in the generated file would otherwise be misinterpreted; the
+    /// universal-character-name escape side-steps that entirely and gives the
+    /// right code unit in both narrow (UTF-8 bytes) and wide (UTF-16) literals.
     public static string EscapeCppString(string s, bool wide = false)
     {
         var sb = new StringBuilder(s.Length + 3);
         if (wide) sb.Append('L');
         sb.Append('"');
-        foreach (var c in s)
+        for (var i = 0; i < s.Length; i++)
         {
+            var c = s[i];
             switch (c)
             {
                 case '\\': sb.Append("\\\\"); break;
@@ -164,9 +170,21 @@ internal static class Naming
                     {
                         sb.Append(CultureInfo.InvariantCulture, $"\\x{(int)c:x2}");
                     }
-                    else
+                    else if (c < 0x80)
                     {
                         sb.Append(c);
+                    }
+                    else if (char.IsHighSurrogate(c) && i + 1 < s.Length && char.IsLowSurrogate(s[i + 1]))
+                    {
+                        // Supplementary plane (non-BMP) character - encode as
+                        // an 8-digit universal character name from the pair.
+                        var codepoint = char.ConvertToUtf32(c, s[i + 1]);
+                        sb.Append(CultureInfo.InvariantCulture, $"\\U{codepoint:x8}");
+                        i++;
+                    }
+                    else
+                    {
+                        sb.Append(CultureInfo.InvariantCulture, $"\\u{(int)c:x4}");
                     }
                     break;
             }
