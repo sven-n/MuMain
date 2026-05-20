@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "I18N/All.h"
 
 #include <cstring>
@@ -179,8 +180,11 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, b
                 if (ImGui::Selectable(displayName, isSelected))
                 {
                     I18N::SetLocale(locale);
-                    g_MuEditorConfig.SetLanguage(locale);
-                    g_MuEditorConfig.Save();
+                    // Persist to GameConfig.UILocale so the game options
+                    // window and editor stay in sync across restarts.
+                    std::wstring wide(locale, locale + std::strlen(locale));
+                    GameConfig::GetInstance().SetUILocale(wide);
+                    GameConfig::GetInstance().Save();
                     g_MuEditorConsoleUI.LogEditor(std::string("Language switched to: ") + displayName);
                 }
 

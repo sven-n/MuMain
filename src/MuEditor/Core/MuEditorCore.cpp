@@ -249,14 +249,12 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     m_bInitialized = true;
     g_MuEditorConsoleUI.LogEditor("MU Editor initialized");
 
-    // Load configuration (includes language preference)
+    // Editor config holds editor-only preferences (column visibility etc.).
+    // The active UI locale lives in GameConfig.UILocale and was applied by
+    // Winmain before we got here; do not touch I18N::SetLocale from editor
+    // init or it'll overwrite the game-side selection.
     g_MuEditorConfig.Load();
-    std::string savedLanguage = g_MuEditorConfig.GetLanguage();
-
-    // Restore the saved locale (compiled-in resx tables; no files to load).
-    const char* desiredLocale = savedLanguage.empty() ? "en" : savedLanguage.c_str();
-    I18N::SetLocale(desiredLocale);
-    g_MuEditorConsoleUI.LogEditor(std::string("Language set to: ") + I18N::GetCurrentLocale());
+    g_MuEditorConsoleUI.LogEditor(std::string("Active locale: ") + I18N::GetCurrentLocale());
 
     fwprintf(stderr, L"[MuEditor] Initialize() completed\n");
     fflush(stderr);
