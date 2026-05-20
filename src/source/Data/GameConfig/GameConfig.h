@@ -48,6 +48,12 @@ public:
     void SetServerIP(const std::wstring& ip);
     void SetServerPort(int port);
 
+    // UI — I18N locale code ("en", "de", ...) for the typed translation
+    // accessors. Distinct from GetLanguageSelection above, which is the
+    // legacy "Eng"/"Por"/"Spn" data-dir prefix used by .bmd asset loaders.
+    std::wstring GetUILocale() const { return m_uiLocale; }
+    void SetUILocale(const std::wstring& locale);
+
     // Camera
     int GetZoom() const { return m_zoom; }
     void SetZoom(int zoom);
@@ -80,6 +86,8 @@ private:
 
     std::wstring m_serverIP;
     int m_serverPort;
+
+    std::wstring m_uiLocale;
 
     int m_zoom;
 

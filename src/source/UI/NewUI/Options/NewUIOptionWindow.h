@@ -101,12 +101,18 @@ namespace SEASON3B
         bool m_bRenderAllEffects;
         int m_iResolutionIndex;
         bool m_bWindowedMode;
+        int m_iLanguageIndex;
 
         CNewUIComboBox m_ResolutionCombo;
+        CNewUIComboBox m_LanguageCombo;
 
         void ApplyResolution();
         int FindCurrentResolutionIndex();
         void InitResolutionCombo();
+
+        void ApplyLanguage();
+        int FindCurrentLanguageIndex();
+        void InitLanguageCombo();
     };
 }
 

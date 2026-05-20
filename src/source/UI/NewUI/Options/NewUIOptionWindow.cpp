@@ -10,6 +10,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Audio/AudioPlayer.h"
 #include <algorithm>
+#include <cstring>
 #include "I18N/All.h"
 
 extern int m_MusicOnOff;
@@ -43,6 +44,24 @@ static const struct { int width; int height; const wchar_t* label; } s_Resolutio
 };
 static const int s_NumResolutions = sizeof(s_Resolutions) / sizeof(s_Resolutions[0]);
 
+// I18N locale codes (ASCII) paired with the language's display name in that
+// language. The set mirrors what ResxGen emits and what I18N::GetAvailableLocales()
+// returns at runtime; held here as wide strings so the CNewUIComboBox can show
+// them without per-frame UTF-8 -> wide conversions.
+static const struct { const char* code; const wchar_t* label; } s_Languages[] = {
+    { "en",    L"English" },
+    { "de",    L"Deutsch" },
+    { "es",    L"Español" },
+    { "id",    L"Bahasa Indonesia" },
+    { "pl",    L"Polski" },
+    { "pt",    L"Português" },
+    { "ru",    L"Русский" },
+    { "tl",    L"Tagalog" },
+    { "uk",    L"Українська" },
+    { "zh-TW", L"繁體中文" },
+};
+static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
+
 // Label pointer array for the resolution combo box. Built once on first use
 // from s_Resolutions so the combo can consume a plain `const wchar_t* const*`.
 static const wchar_t* const* GetResolutionLabels()
@@ -53,6 +72,19 @@ static const wchar_t* const* GetResolutionLabels()
     {
         for (int i = 0; i < s_NumResolutions; i++)
             labels[i] = s_Resolutions[i].label;
+        initialized = true;
+    }
+    return labels;
+}
+
+static const wchar_t* const* GetLanguageLabels()
+{
+    static const wchar_t* labels[s_NumLanguages] = {};
+    static bool initialized = false;
+    if (!initialized)
+    {
+        for (int i = 0; i < s_NumLanguages; i++)
+            labels[i] = s_Languages[i].label;
         initialized = true;
     }
     return labels;
@@ -80,6 +112,21 @@ namespace
     constexpr int RES_COMBO_WIDTH   = 148;  // spans the old left-to-right arrow area
     constexpr int RES_COMBO_HEIGHT  = 16;
     constexpr int RES_COMBO_MAX_VISIBLE = 4;  // scrollbar appears when list > this
+
+    // Language combo box placement (relative to m_Pos). Sits below the
+    // resolution dropdown; everything from the windowed-mode row downwards
+    // is pushed down by LANGUAGE_ROW_HEIGHT to make room.
+    constexpr int LANG_LABEL_Y_LOCAL = 304;
+    constexpr int LANG_COMBO_X_LOCAL = 22;
+    constexpr int LANG_COMBO_Y_LOCAL = 317;
+    constexpr int LANG_COMBO_WIDTH   = 148;
+    constexpr int LANG_COMBO_HEIGHT  = 16;
+    constexpr int LANG_COMBO_MAX_VISIBLE = 5;
+
+    // How far the language row pushes the windowed-mode row and close button
+    // down compared to the pre-language layout. Used so the frame slats and
+    // the click-hit rect stay in sync.
+    constexpr int LANGUAGE_ROW_HEIGHT = 39;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -101,6 +148,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_bRenderAllEffects = true;
     m_iResolutionIndex = FindCurrentResolutionIndex();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
+    m_iLanguageIndex = FindCurrentLanguageIndex();
 }
 
 SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
@@ -119,6 +167,7 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
     LoadImages();
     SetButtonInfo();
     InitResolutionCombo();
+    InitLanguageCombo();
     Show(false);
     return true;
 }
@@ -136,11 +185,24 @@ void SEASON3B::CNewUIOptionWindow::InitResolutionCombo()
         RES_COMBO_MAX_VISIBLE);
 }
 
+void SEASON3B::CNewUIOptionWindow::InitLanguageCombo()
+{
+    m_LanguageCombo.Setup(
+        m_Pos.x + LANG_COMBO_X_LOCAL,
+        m_Pos.y + LANG_COMBO_Y_LOCAL,
+        LANG_COMBO_WIDTH,
+        LANG_COMBO_HEIGHT,
+        GetLanguageLabels(),
+        s_NumLanguages,
+        m_iLanguageIndex,
+        LANG_COMBO_MAX_VISIBLE);
+}
+
 void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 322, 54, 30);
+    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 322 + LANGUAGE_ROW_HEIGHT, 54, 30);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
@@ -161,6 +223,7 @@ void SEASON3B::CNewUIOptionWindow::SetPos(int x, int y)
     m_Pos.x = x;
     m_Pos.y = y;
     m_ResolutionCombo.SetPos(m_Pos.x + RES_COMBO_X_LOCAL, m_Pos.y + RES_COMBO_Y_LOCAL);
+    m_LanguageCombo.SetPos(m_Pos.x + LANG_COMBO_X_LOCAL, m_Pos.y + LANG_COMBO_Y_LOCAL);
 }
 
 bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
@@ -183,6 +246,17 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
         return false;
     }
     if (m_ResolutionCombo.IsMouseOverWidget())
+        return false;
+
+    // Same pattern for the language combo: must run before the windowed-mode
+    // checkbox so its dropdown doesn't double-click the checkbox underneath.
+    if (m_LanguageCombo.UpdateMouseEvent())
+    {
+        m_iLanguageIndex = m_LanguageCombo.GetSelectedIndex();
+        ApplyLanguage();
+        return false;
+    }
+    if (m_LanguageCombo.IsMouseOverWidget())
         return false;
 
     bool oldWindowedMode = m_bWindowedMode;
@@ -358,7 +432,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 
     // Combo box already processed at the top. Just consume clicks inside the
     // option window itself so they don't fall through to the world.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 362))
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 362 + LANGUAGE_ROW_HEIGHT))
         return false;
 
     return true;
@@ -372,7 +446,7 @@ void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
         {  65, &m_bWhisperSound      },
         { 155, &m_bSlideHelp         },
         { 238, &m_bRenderAllEffects  },
-        { 300, &m_bWindowedMode      },
+        { 300 + LANGUAGE_ROW_HEIGHT, &m_bWindowedMode      },
     };
 
     constexpr int CHECKBOX_X_LOCAL = 150;
@@ -512,12 +586,16 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_iResolutionIndex = FindCurrentResolutionIndex();
     m_ResolutionCombo.SetSelectedIndex(m_iResolutionIndex);
     m_ResolutionCombo.Close();
+    m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_LanguageCombo.SetSelectedIndex(m_iLanguageIndex);
+    m_LanguageCombo.Close();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
 void SEASON3B::CNewUIOptionWindow::ClosingProcess()
 {
     m_ResolutionCombo.Close();
+    m_LanguageCombo.Close();
 }
 
 void SEASON3B::CNewUIOptionWindow::LoadImages()
@@ -559,10 +637,16 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     float x, y;
     x = m_Pos.x;
     y = m_Pos.y;
-    RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, 337.f);
+    // Frame is composed of: 64px top + N*10px middle slats + 45px bottom. The
+    // extra slats below the original 23 cover the LANGUAGE_ROW_HEIGHT space
+    // inserted between the resolution combo and the windowed-mode row.
+    constexpr int EXTRA_SLATS_FOR_LANGUAGE = (LANGUAGE_ROW_HEIGHT + 9) / 10;
+    constexpr int SLAT_COUNT = 23 + EXTRA_SLATS_FOR_LANGUAGE;
+    constexpr float FRAME_HEIGHT = 64.f + SLAT_COUNT * 10.f + 45.f;
+    RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, FRAME_HEIGHT);
     RenderImage(IMAGE_OPTION_FRAME_UP, x, y, 190.f, 64.f);
     y += 64.f;
-    for (int i = 0; i < 23; ++i)
+    for (int i = 0; i < SLAT_COUNT; ++i)
     {
         RenderImage(IMAGE_OPTION_FRAME_LEFT, x, y, 21.f, 10.f);
         RenderImage(IMAGE_OPTION_FRAME_RIGHT, x + 190 - 21, y, 21.f, 10.f);
@@ -623,9 +707,13 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Resolution
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 265, L"Resolution");
 
+    y += 39.f;
+    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Language
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + LANG_LABEL_Y_LOCAL, L"Language");
+
     y += 35.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 302, L"Windowed Mode");
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 302 + LANGUAGE_ROW_HEIGHT, L"Windowed Mode");
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
@@ -689,16 +777,17 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
 
     if (m_bWindowedMode)
     {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 300, 15, 15, 0, 0);
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 300 + LANGUAGE_ROW_HEIGHT, 15, 15, 0, 0);
     }
     else
     {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 300, 15, 15, 0, 15.f);
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 300 + LANGUAGE_ROW_HEIGHT, 15, 15, 0, 15.f);
     }
 
-    // Resolution combo box. Drawn last so its expanded dropdown sits on top
-    // of anything else in the window.
+    // Combo boxes drawn last so their expanded dropdowns sit on top of
+    // anything else in the window.
     m_ResolutionCombo.Render();
+    m_LanguageCombo.Render();
 }
 
 void SEASON3B::CNewUIOptionWindow::SetAutoAttack(bool bAuto)
@@ -769,6 +858,30 @@ int SEASON3B::CNewUIOptionWindow::FindCurrentResolutionIndex()
             return i;
     }
     return 8; // default to 1920x1080
+}
+
+int SEASON3B::CNewUIOptionWindow::FindCurrentLanguageIndex()
+{
+    const char* current = I18N::GetCurrentLocale();
+    if (current == nullptr) return 0;
+    for (int i = 0; i < s_NumLanguages; ++i)
+    {
+        if (std::strcmp(s_Languages[i].code, current) == 0)
+            return i;
+    }
+    return 0;  // default to English
+}
+
+void SEASON3B::CNewUIOptionWindow::ApplyLanguage()
+{
+    const char* code = s_Languages[m_iLanguageIndex].code;
+    I18N::SetLocale(code);
+
+    // Persist as wide string so it round-trips cleanly through the existing
+    // GameConfig string-IO. Locale codes are ASCII so the conversion is safe.
+    std::wstring wide(code, code + std::strlen(code));
+    GameConfig::GetInstance().SetUILocale(wide);
+    GameConfig::GetInstance().Save();
 }
 
 void SEASON3B::CNewUIOptionWindow::ApplyResolution()

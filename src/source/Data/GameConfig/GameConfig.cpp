@@ -52,6 +52,8 @@ void GameConfig::Load()
     m_serverIP   = ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP);
     m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
 
+    m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
+
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
 
     // Strip keys/sections we used to write but no longer use, so user config
@@ -88,6 +90,8 @@ void GameConfig::Save()
     WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
     WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
 
+    WriteString(CfgSectionUI, CfgKeyUILocale, m_uiLocale);
+
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
 }
 
@@ -120,6 +124,11 @@ void GameConfig::SetRememberMe(bool remember)
 void GameConfig::SetLanguageSelection(const std::wstring& lang)
 {
     m_languageSelection = lang;
+}
+
+void GameConfig::SetUILocale(const std::wstring& locale)
+{
+    m_uiLocale = locale;
 }
 
 void GameConfig::SetEncryptedUsername(const std::wstring& encryptedUsername)

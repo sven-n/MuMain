@@ -1313,9 +1313,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
 
-    // Initialize translations with the default locale; the editor restores
-    // the saved language preference later in its own init.
-    I18N::SetLocale("en");
+    // Initialize translations with the saved UI locale (defaults to "en").
+    // The editor still restores its own MuEditorConfig language preference
+    // later in its init, which feeds through to I18N::SetLocale as well.
+    {
+        std::wstring uiLocaleW = GameConfig::GetInstance().GetUILocale();
+        std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
+        I18N::SetLocale(uiLocale.c_str());
+    }
 
 #ifdef _EDITOR
     // Initialize MU Editor
