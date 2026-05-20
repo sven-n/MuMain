@@ -9,6 +9,7 @@
 #include "Scenes/SceneCore.h"
 #include "Engine/AI/ZzzAI.h"
 #include "CSEventMatch.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -130,7 +131,7 @@ void CSBaseMatch::RenderTime(void)
     if (m_iMatchCountDownType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_CASTLE_END)
     {
         const int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CASTLE_ENTER_CLOSE;
-        WriteWide(lpszStr, GlobalText[textNum], GlobalText[1146], remainingSeconds);
+        WriteWide(lpszStr, I18N::Game::Lookup(textNum), I18N::Game::BloodCastle, remainingSeconds);
     }
     else if (m_iMatchCountDownType >= TYPE_MATCH_CHAOS_ENTER_START && m_iMatchCountDownType <= TYPE_MATCH_CHAOS_END)
     {
@@ -139,23 +140,23 @@ void CSBaseMatch::RenderTime(void)
         {
             textNum = 828;
         }
-        WriteWide(lpszStr, GlobalText[textNum], GlobalText[1147], remainingSeconds);
+        WriteWide(lpszStr, I18N::Game::Lookup(textNum), I18N::Game::ChaosCastle, remainingSeconds);
     }
     else if (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE
         || m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START)
     {
         int textNum = (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START) ? 2386 : 2384;
-        WriteWide(lpszStr, GlobalText[textNum], remainingSeconds);
+        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
     }
     else if (m_iMatchCountDownType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
     {
         const int textNum = 2860 + m_iMatchCountDownType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE;
-        WriteWide(lpszStr, GlobalText[textNum], remainingSeconds);
+        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
     }
     else
     {
         const int textNum = 640 + m_iMatchCountDownType - TYPE_MATCH_DEVIL_ENTER_START;
-        WriteWide(lpszStr, GlobalText[textNum], remainingSeconds);
+        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
     }
 
     g_pRenderText->RenderText(REFERENCE_WIDTH / 2, static_cast<int>(y), lpszStr, 0, 0, RT3_WRITE_CENTER);
@@ -234,17 +235,17 @@ void CSDevilSquareMatch::RenderMatchResult(void)
     wchar_t lpszStr[256] { 0 };
 
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(xPos[2], yPos, GlobalText[647]);
+    g_pRenderText->RenderText(xPos[2], yPos, I18N::Game::Congratulations);
     yPos += 16;
-    WriteWide(lpszStr, GlobalText[648], Hero->ID);
+    WriteWide(lpszStr, I18N::Game::SYourBraveryIsProvenInDevilSquare, Hero->ID);
     g_pRenderText->RenderText((xPos[2]), yPos, lpszStr);
     yPos += 24;
 
     g_pRenderText->SetTextColor(0, 255, 0, 255);
-    g_pRenderText->RenderText(xPos[2], yPos, GlobalText[680], xPos[3] - xPos[1], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[3], yPos, GlobalText[682], xPos[4] - xPos[3], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[4], yPos, GlobalText[683], xPos[5] - xPos[4], RT3_SORT_CENTER);
-    g_pRenderText->RenderText(xPos[5], yPos, GlobalText[684], (REFERENCE_WIDTH - 230) / 2 + 210 - xPos[5], RT3_SORT_CENTER);
+    g_pRenderText->RenderText(xPos[2], yPos, I18N::Game::Rank, xPos[3] - xPos[1], RT3_SORT_CENTER);
+    g_pRenderText->RenderText(xPos[3], yPos, I18N::Game::Point, xPos[4] - xPos[3], RT3_SORT_CENTER);
+    g_pRenderText->RenderText(xPos[4], yPos, I18N::Game::EXP, xPos[5] - xPos[4], RT3_SORT_CENTER);
+    g_pRenderText->RenderText(xPos[5], yPos, I18N::Game::Reward, (REFERENCE_WIDTH - 230) / 2 + 210 - xPos[5], RT3_SORT_CENTER);
     yPos += 20;
 
     int yStartPos = yPos;
@@ -298,7 +299,7 @@ void CSDevilSquareMatch::RenderMatchResult(void)
         g_pRenderText->SetTextColor(200, 120, 0, 255); // Special color
 
         // "My Ranking" label
-        g_pRenderText->RenderText(xPos[0], yPos, GlobalText[685], 230, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(xPos[0], yPos, I18N::Game::MyInfo, 230, 0, RT3_SORT_CENTER);
         yPos += 20;
 
         // Render my rank

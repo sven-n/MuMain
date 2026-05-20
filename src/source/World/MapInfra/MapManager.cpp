@@ -19,6 +19,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/WSclient.h"
+#include "I18N/All.h"
 
 
 CMapManager gMapManager;
@@ -1678,138 +1679,138 @@ const wchar_t* CMapManager::GetMapName(int iMap)
 {
     if (iMap == WD_34CRYWOLF_1ST)
     {
-        return(GlobalText[1851]);
+        return(I18N::Game::CrywolfFortress);
     }
     else if (iMap == WD_33AIDA)
     {
-        return(GlobalText[1850]);
+        return(I18N::Game::Aida);
     }
     else if (iMap == WD_37KANTURU_1ST)
     {
-        return(GlobalText[2177]);
+        return(I18N::Game::Kanturu);
     }
     else if (iMap == WD_38KANTURU_2ND)
     {
-        return(GlobalText[2178]);
+        return(I18N::Game::Kanturu3);
     }
     else if (iMap == WD_39KANTURU_3RD)
     {
-        return(GlobalText[2179]);
+        return(I18N::Game::RefineryTower);
     }
     else if (iMap == WD_40AREA_FOR_GM)
     {
-        return(GlobalText[2324]);
+        return(I18N::Game::GMSummonZone);
     }
     else if (iMap == WD_51HOME_6TH_CHAR)
     {
-        return(GlobalText[1853]);
+        return(I18N::Game::Elveland);
     }
     else if (iMap == WD_57ICECITY)
     {
-        return(GlobalText[1855]);
+        return(I18N::Game::LaCleon);
     }
     else if (iMap == WD_58ICECITY_BOSS)
     {
-        return(GlobalText[1856]);
+        return(I18N::Game::Hatchery);
     }
 
     if (gMapManager.InBattleCastle(iMap) == true)
     {
-        return (GlobalText[669]);
+        return (I18N::Game::ValleyOfLoren);
     }
     if (iMap == WD_31HUNTING_GROUND)
     {
-        return (GlobalText[59]);
+        return (I18N::Game::LandOfTrials);
     }
     if (InChaosCastle(iMap) == true)
     {
-        return (GlobalText[57]);
+        return (I18N::Game::ChaosCastle);
     }
     if (InHellas(iMap) == true)
     {
         if (InHiddenHellas(iMap) == true)
-            return (GlobalText[1852]);
-        return (GlobalText[58]);
+            return (I18N::Game::LostKalima);
+        return (I18N::Game::Kalima);
     }
     if (InBloodCastle(iMap) == true)
     {
-        return (GlobalText[56]);
+        return (I18N::Game::BloodCastle);
     }
     if (iMap == WD_10HEAVEN)
     {
-        return (GlobalText[55 + iMap - WD_10HEAVEN]);
+        return (I18N::Game::Lookup(55 + iMap - WD_10HEAVEN));
     }
     if (iMap == 32)
     {
-        return (GlobalText[39]);
+        return (I18N::Game::DevilSquare);
     }
     if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
-        return GlobalText[1678];
+        return I18N::Game::BalgassBarrack;
     else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasRefugeMap())
-        return GlobalText[1679];
+        return I18N::Game::BalgassRestingPlace;
     if (this->IsCursedTemple())
     {
-        return (GlobalText[2369]);
+        return (I18N::Game::IllusionTemple);
     }
     if (iMap == WD_51HOME_6TH_CHAR)
     {
-        return (GlobalText[1853]);
+        return (I18N::Game::Elveland);
     }
     if (iMap == WD_56MAP_SWAMP_OF_QUIET)
     {
-        return (GlobalText[1854]);
+        return (I18N::Game::SwampOfPeace);
     }
     if (iMap == WD_62SANTA_TOWN)
     {
-        return (GlobalText[2611]);
+        return (I18N::Game::SantaSVillage);
     }
     if (iMap == WD_64DUELARENA)
     {
-        return (GlobalText[2703]);
+        return (I18N::Game::Colosseum);
     }
     if (iMap == WD_63PK_FIELD)
     {
-        return (GlobalText[2686]);
+        return (I18N::Game::Vulcanus);
     }
     if (iMap == WD_65DOPPLEGANGER1)
     {
-        return (GlobalText[3057]);
+        return (I18N::Game::Doppelganger);
     }
     if (iMap == WD_66DOPPLEGANGER2)
     {
-        return (GlobalText[3057]);
+        return (I18N::Game::Doppelganger);
     }
     if (iMap == WD_67DOPPLEGANGER3)
     {
-        return (GlobalText[3057]);
+        return (I18N::Game::Doppelganger);
     }
     if (iMap == WD_68DOPPLEGANGER4)
     {
-        return (GlobalText[3057]);
+        return (I18N::Game::Doppelganger);
     }
     if (iMap == WD_69EMPIREGUARDIAN1)
     {
-        return (GlobalText[2806]);
+        return (I18N::Game::Varka);
     }
     if (iMap == WD_70EMPIREGUARDIAN2)
     {
-        return (GlobalText[2806]);
+        return (I18N::Game::Varka);
     }
     if (iMap == WD_71EMPIREGUARDIAN3)
     {
-        return (GlobalText[2806]);
+        return (I18N::Game::Varka);
     }
     if (iMap == WD_72EMPIREGUARDIAN4)
     {
-        return (GlobalText[2806]);
+        return (I18N::Game::Varka);
     }
     if (iMap == WD_79UNITEDMARKETPLACE)
     {
-        return (GlobalText[3017]);
+        return (I18N::Game::LorenMarket);
     }
     if (iMap == WD_80KARUTAN1 || iMap == WD_81KARUTAN2)
     {
-        return (GlobalText[3285]);
+        return (I18N::Game::Karutan);
     }
-    return (GlobalText[30 + iMap]);
+    return (I18N::Game::Lookup(30 + iMap));
 }

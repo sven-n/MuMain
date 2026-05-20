@@ -4,6 +4,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "I18N/All.h"
 
 #include "UI/Legacy/UIManager.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -451,7 +452,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxContent(const std::wstring&
     m_fulltitle = title;
 
     g_pRenderText->SetFont(g_hFontBold);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], GlobalText.GetStringSize(1104), &m_icon);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Store1104, GlobalText.GetStringSize(1104), &m_icon);
 
     SeparateShopTitle(title, m_topTitle, m_bottomTitle);
     CalculateBooleanSize(name, m_topTitle, m_bottomTitle, m_size);
@@ -548,7 +549,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(iIconBkColor);
     g_pRenderText->SetTextColor(iIconTextColor);
-    g_pRenderText->RenderText(RenderPos.x, RenderPos.y, GlobalText[1104], RenderIconSize.cx, iLineHeight);
+    g_pRenderText->RenderText(RenderPos.x, RenderPos.y, I18N::Game::Store1104, RenderIconSize.cx, iLineHeight);
 
     g_pRenderText->SetBgColor(iNameBkColor);
     g_pRenderText->SetTextColor(iNameTextColor);

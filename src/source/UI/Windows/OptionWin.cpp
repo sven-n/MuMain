@@ -15,6 +15,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Legacy/UIControls.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "I18N/All.h"
 
 #define	OW_BTN_GAP		25
 #define	OW_SLD_GAP		48
@@ -54,7 +55,7 @@ void COptionWin::Create()
 
     DWORD adwBtnClr[4] = { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };
     m_aBtn[OW_BTN_CLOSE].Create(108, 30, BITMAP_TEXT_BTN, 4, 2, 1);
-    m_aBtn[OW_BTN_CLOSE].SetText(GlobalText[388], adwBtnClr);
+    m_aBtn[OW_BTN_CLOSE].SetText(I18N::Game::Close, adwBtnClr);
     CWin::RegisterButton(&m_aBtn[OW_BTN_CLOSE]);
 
     SImgInfo iiThumb = { BITMAP_SLIDER, 0, 0, 13, 13 };
@@ -193,10 +194,10 @@ void COptionWin::RenderControls()
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(int(m_winBack.GetXPos() / g_fScreenRate_x),
         int((m_winBack.GetYPos() + 10) / g_fScreenRate_y),
-        GlobalText[385], m_winBack.GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
+        I18N::Game::Option385, m_winBack.GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
 
     const wchar_t* apszBtnText[3] =
-    { GlobalText[386], GlobalText[387], GlobalText[919] };
+    { I18N::Game::AutomaticAttack, I18N::Game::BeepSoundForWhispering, I18N::Game::SlideHelp };
     for (int i = 0; i <= OW_BTN_SLIDE_HELP; ++i)
     {
         g_pRenderText->RenderText(int((m_aBtn[i].GetXPos() + 24) / g_fScreenRate_x),
@@ -204,7 +205,7 @@ void COptionWin::RenderControls()
     }
 
     int nTextPosY;
-    const wchar_t* apszSldText[OW_SLD_MAX] = { GlobalText[389], GlobalText[1840] };
+    const wchar_t* apszSldText[OW_SLD_MAX] = { I18N::Game::Volume, I18N::Game::EffectLimitation };
     int anVal[OW_SLD_MAX] = { g_pOption->GetVolumeLevel(), g_pOption->GetRenderLevel() * 2 + 5 };
 
     wchar_t szVal[3];

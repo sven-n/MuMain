@@ -6,6 +6,7 @@
 #include "UI/NewUI/Events/NewUIBloodCastleTime.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Events/MatchEvent.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 using namespace matchEvent;
@@ -112,16 +113,16 @@ bool CNewUIBloodCastle::Render()
     {
         if (g_csMatchInfo->GetMatchType() == 5)
         {
-            mu_swprintf(szText, GlobalText[866], m_iKilledMonster, m_iMaxKillMonster);
+            mu_swprintf(szText, I18N::Game::MagicSkeletonDD, m_iKilledMonster, m_iMaxKillMonster);
         }
         else
         {
-            mu_swprintf(szText, GlobalText[864], m_iKilledMonster, m_iMaxKillMonster);
+            mu_swprintf(szText, I18N::Game::MonsterDD, m_iKilledMonster, m_iMaxKillMonster);
         }
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, szText, BLOODCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
     }
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 38, GlobalText[865], BLOODCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 38, I18N::Game::TimeLeft, BLOODCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
 
     if (m_iTimeState == BC_TIME_STATE_IMMINENCE)
         g_pRenderText->SetTextColor(255, 32, 32, 255);

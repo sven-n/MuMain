@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "I18N/All.h"
 
 #include <codecvt>
 #include <sstream>
@@ -54,7 +55,7 @@ void SaveTextFile(wchar_t* FileName)
     BYTE* Buffer = new BYTE[Size];
     for (int i = 0; i < MAX_TEXTS; i++)
     {
-        memcpy(Buffer, GlobalText[i], Size);
+        memcpy(Buffer, I18N::Game::Lookup(i), Size);
         BuxConvert(Buffer, Size);
         fwrite(Buffer, Size, 1, fp);
     }

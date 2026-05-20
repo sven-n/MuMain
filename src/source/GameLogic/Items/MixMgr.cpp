@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "MixMgr.h"
+#include "I18N/All.h"
 
 #include "UI/Legacy/UIManager.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -546,19 +547,19 @@ BOOL CMixRecipes::GetCurRecipeName(wchar_t* pszNameOut, int iNameLine)
             switch (g_MixRecipeMgr.GetMixInventoryType())
             {
             case MIXTYPE_TRAINER:
-                mu_swprintf(pszNameOut, GlobalText[1213], GlobalText[1212]);
+                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::Resurrection);
                 break;
             case MIXTYPE_OSBOURNE:
-                mu_swprintf(pszNameOut, GlobalText[1213], GlobalText[2061]);
+                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::Refine);
                 break;
             case MIXTYPE_JERRIDON:
-                mu_swprintf(pszNameOut, GlobalText[1213], GlobalText[2062]);
+                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::Restore);
                 break;
             case MIXTYPE_ELPIS:
-                mu_swprintf(pszNameOut, GlobalText[1213], GlobalText[2063]);
+                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::Refine);
                 break;
             default:
-                mu_swprintf(pszNameOut, L"%ls", GlobalText[601]);
+                mu_swprintf(pszNameOut, L"%ls", I18N::Game::ImproperItemsForCombination);
                 break;
             }
             return TRUE;
@@ -581,7 +582,7 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iN
         {
             if (iNameLine == 1)
             {
-                mu_swprintf(pszNameOut, L"%ls", GlobalText[2194]);
+                mu_swprintf(pszNameOut, L"%ls", I18N::Game::Add380ItemOption);
                 return TRUE;
             }
             return FALSE;
@@ -667,36 +668,36 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
     else
     {
         if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_ADD380ITEM)
-            mu_swprintf(szTempName, GlobalText[2335]);
+            mu_swprintf(szTempName, I18N::Game::_380LevelItem);
         else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_BOOTS + MAX_ITEM_INDEX - 1)
-            mu_swprintf(szTempName, GlobalText[2336]);
+            mu_swprintf(szTempName, I18N::Game::EquipmentItem);
         else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_HELPER + MAX_ITEM_INDEX - 1)
-            mu_swprintf(szTempName, GlobalText[2336]);
+            mu_swprintf(szTempName, I18N::Game::EquipmentItem);
         else if (pMixRecipeItem->m_sTypeMin == 0 && pMixRecipeItem->m_sTypeMax == ITEM_STAFF + MAX_ITEM_INDEX - 1)
-            mu_swprintf(szTempName, GlobalText[2337]);
+            mu_swprintf(szTempName, I18N::Game::WeaponItem);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_SHIELD && pMixRecipeItem->m_sTypeMax == ITEM_BOOTS + MAX_ITEM_INDEX - 1)
-            mu_swprintf(szTempName, GlobalText[2338]);
+            mu_swprintf(szTempName, I18N::Game::DefenseItem);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING && pMixRecipeItem->m_sTypeMax == ITEM_WINGS_OF_SATAN)
-            mu_swprintf(szTempName, GlobalText[2339]);
+            mu_swprintf(szTempName, I18N::Game::BasicWing);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WINGS_OF_SPIRITS && pMixRecipeItem->m_sTypeMax == ITEM_WINGS_OF_DARKNESS)
-            mu_swprintf(szTempName, GlobalText[2348]);
+            mu_swprintf(szTempName, I18N::Game::_2ndWing);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WING_OF_CURSE && pMixRecipeItem->m_sTypeMax == ITEM_WING_OF_CURSE)
-            mu_swprintf(szTempName, GlobalText[2339]);
+            mu_swprintf(szTempName, I18N::Game::BasicWing);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_WINGS_OF_DESPAIR && pMixRecipeItem->m_sTypeMax == ITEM_WINGS_OF_DESPAIR)
-            mu_swprintf(szTempName, GlobalText[2348]);
+            mu_swprintf(szTempName, I18N::Game::_2ndWing);
         else if (pMixRecipeItem->m_sTypeMin == pMixRecipeItem->m_sTypeMax &&
             (pMixRecipeItem->m_sTypeMin == ITEM_CHAOS_DRAGON_AXE || pMixRecipeItem->m_sTypeMin == ITEM_CHAOS_NATURE_BOW || pMixRecipeItem->m_sTypeMin == ITEM_CHAOS_LIGHTNING_STAFF))
-            mu_swprintf(szTempName, GlobalText[2340]);
+            mu_swprintf(szTempName, I18N::Game::ChaosWeapon);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_SEED_FIRE && pMixRecipeItem->m_sTypeMax == ITEM_SEED_EARTH)
-            mu_swprintf(szTempName, GlobalText[2680]);
+            mu_swprintf(szTempName, I18N::Game::Seed);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_SPHERE_MONO && pMixRecipeItem->m_sTypeMax == ITEM_SPHERE_5)
-            mu_swprintf(szTempName, GlobalText[2681]);
+            mu_swprintf(szTempName, I18N::Game::Sphere);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_SEED_SPHERE_FIRE_1 && pMixRecipeItem->m_sTypeMax == ITEM_SEED_SPHERE_EARTH_5)
-            mu_swprintf(szTempName, GlobalText[2682]);
+            mu_swprintf(szTempName, I18N::Game::SeedSphere);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_SEED_SPHERE_FIRE_1 && pMixRecipeItem->m_sTypeMax == ITEM_SEED_SPHERE_LIGHTNING_5)
-            mu_swprintf(szTempName, L"%ls (%ls)", GlobalText[2682], GlobalText[2684]);
+            mu_swprintf(szTempName, L"%ls (%ls)", I18N::Game::SeedSphere, I18N::Game::FireIceLightning);
         else if (pMixRecipeItem->m_sTypeMin == ITEM_SEED_SPHERE_WATER_1 && pMixRecipeItem->m_sTypeMax == ITEM_SEED_SPHERE_EARTH_5)
-            mu_swprintf(szTempName, L"%ls (%ls)", GlobalText[2682], GlobalText[2685]);
+            mu_swprintf(szTempName, L"%ls (%ls)", I18N::Game::SeedSphere, I18N::Game::WaterWindEarth);
         else
         {
             int iNameLen = wcslen(szTempName);
@@ -710,53 +711,53 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
         else if (pMixRecipeItem->m_iLevelMin == pMixRecipeItem->m_iLevelMax)
             mu_swprintf(szTempName, L"%ls +%d", szTempName, pMixRecipeItem->m_iLevelMin);
         else if (pMixRecipeItem->m_iLevelMin == 0)
-            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iLevelMax, GlobalText[2342]);
+            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iLevelMax, I18N::Game::Maximum);
         else if (pMixRecipeItem->m_iLevelMax == 255)
-            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iLevelMin, GlobalText[2341]);
+            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iLevelMin, I18N::Game::Minimum);
         else
             mu_swprintf(szTempName, L"%ls +%d~%d", szTempName, pMixRecipeItem->m_iLevelMin, pMixRecipeItem->m_iLevelMax);
 
         if (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255);
         else if (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax)
-            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343]);
+            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, I18N::Game::Option2343);
         else if (pMixRecipeItem->m_iOptionMin == 0)
-            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMax, GlobalText[2343], GlobalText[2342]);
+            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMax, I18N::Game::Option2343, I18N::Game::Maximum);
         else if (pMixRecipeItem->m_iOptionMax == 255)
-            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMin, GlobalText[2343], GlobalText[2341]);
+            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMin, I18N::Game::Option2343, I18N::Game::Minimum);
         else
-            mu_swprintf(szTempName, L"%ls +%d~%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, GlobalText[2343]);
+            mu_swprintf(szTempName, L"%ls +%d~%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, I18N::Game::Option2343);
     }
 
     if (pMixRecipeItem->m_iCountMin == 0 && pMixRecipeItem->m_iCountMax == 255)
-        mu_swprintf(szTempName, L"%ls (%ls)", szTempName, GlobalText[2344]);
+        mu_swprintf(szTempName, L"%ls (%ls)", szTempName, I18N::Game::RateIncrease);
     else if (pMixRecipeItem->m_iCountMin == pMixRecipeItem->m_iCountMax)
-        mu_swprintf(szTempName, L"%ls %d%ls", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345]);
+        mu_swprintf(szTempName, L"%ls %d%ls", szTempName, pMixRecipeItem->m_iCountMin, I18N::Game::Quantity);
     else if (pMixRecipeItem->m_iCountMin == 0)
-        mu_swprintf(szTempName, L"%ls %d%ls %ls", szTempName, pMixRecipeItem->m_iCountMax, GlobalText[2345], GlobalText[2342]);
+        mu_swprintf(szTempName, L"%ls %d%ls %ls", szTempName, pMixRecipeItem->m_iCountMax, I18N::Game::Quantity, I18N::Game::Maximum);
     else if (pMixRecipeItem->m_iCountMax == 255)
-        mu_swprintf(szTempName, L"%ls %d%ls %ls", szTempName, pMixRecipeItem->m_iCountMin, GlobalText[2345], GlobalText[2341]);
+        mu_swprintf(szTempName, L"%ls %d%ls %ls", szTempName, pMixRecipeItem->m_iCountMin, I18N::Game::Quantity, I18N::Game::Minimum);
     else
-        mu_swprintf(szTempName, L"%ls %d~%d%ls", szTempName, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax, GlobalText[2345]);
+        mu_swprintf(szTempName, L"%ls %d~%d%ls", szTempName, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax, I18N::Game::Quantity);
 
     BOOL bPreName = FALSE;
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_EXCELLENT)
     {
-        mu_swprintf(pszNameOut, L"%ls %ls", GlobalText[620], szTempName);
+        mu_swprintf(pszNameOut, L"%ls %ls", I18N::Game::Excellent, szTempName);
         bPreName = TRUE;
     }
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_SETITEM)
     {
-        mu_swprintf(pszNameOut, L"%ls %ls", GlobalText[1089], szTempName);
+        mu_swprintf(pszNameOut, L"%ls %ls", I18N::Game::Set, szTempName);
         bPreName = TRUE;
     }
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_HARMONY)
     {
-        mu_swprintf(pszNameOut, L"%ls %ls", GlobalText[1550], szTempName);
+        mu_swprintf(pszNameOut, L"%ls %ls", I18N::Game::Improve, szTempName);
         bPreName = TRUE;
     }
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_SOCKETITEM)
     {
-        mu_swprintf(pszNameOut, L"%ls %ls", GlobalText[2650], szTempName);
+        mu_swprintf(pszNameOut, L"%ls %ls", I18N::Game::Socket, szTempName);
         bPreName = TRUE;
     }
     if (bPreName == FALSE)

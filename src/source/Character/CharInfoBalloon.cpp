@@ -8,6 +8,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Legacy/UIControls.h"
 #include "CharacterManager.h"
+#include "I18N/All.h"
 
 #include <algorithm>
 #include <array>
@@ -166,7 +167,7 @@ void CCharInfoBalloon::SetInfo()
     CopyWideString(m_szName, m_pCharInfo->ID);
 
     const int guildTextIndex = ResolveGuildTextIndex(m_pCharInfo->GuildStatus);
-    mu_swprintf_s(m_szGuild, L"(%ls)", GlobalText[guildTextIndex]);
+    mu_swprintf_s(m_szGuild, L"(%ls)", I18N::Game::Lookup(guildTextIndex));
     mu_swprintf_s(m_szClass, L"%ls %d",
         gCharacterManager.GetCharacterClassText(m_pCharInfo->Class),
         m_pCharInfo->Level);

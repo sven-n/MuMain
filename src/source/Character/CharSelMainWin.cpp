@@ -15,6 +15,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Network/Server/ServerListManager.h"
+#include "I18N/All.h"
 
 #include <algorithm>
 #include <utility>
@@ -91,8 +92,8 @@ namespace
     {
         g_pRenderText->SetTextColor(0, 0, 0, 255);
         g_pRenderText->SetBgColor(255, 255, 0, 128);
-        g_pRenderText->RenderText(kAccountBlockMsgX, kAccountBlockPrimaryY, GlobalText[436], 0, 0, RT3_WRITE_CENTER);
-        g_pRenderText->RenderText(kAccountBlockMsgX, kAccountBlockSecondaryY, GlobalText[437], 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(kAccountBlockMsgX, kAccountBlockPrimaryY, I18N::Game::ThisAccountIsItemBlocked, 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(kAccountBlockMsgX, kAccountBlockSecondaryY, I18N::Game::PleaseCheckOnHttpMuonlineWebzenComSite, 0, 0, RT3_WRITE_CENTER);
     }
 }
 

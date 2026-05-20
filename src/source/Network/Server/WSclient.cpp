@@ -16,6 +16,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 
@@ -499,7 +500,7 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
     }
 
     wchar_t Text[100];
-    mu_swprintf(Text, GlobalText[481], IP, Data->Port);
+    mu_swprintf(Text, I18N::Game::YouAreConnectedToTheServer, IP, Data->Port);
     g_pSystemLogBox->AddText( Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
@@ -1068,7 +1069,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     else
     {
         wchar_t Text[256];
-        mu_swprintf(Text, L"%ls%ls", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
+        mu_swprintf(Text, L"%ls%ls", I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
 
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
@@ -1437,7 +1438,7 @@ void ReceiveMuHelperStatusUpdate(std::span<const BYTE> ReceiveBuffer)
             int iTotalCost = MUHelper::g_MuHelper.GetTotalCost();
 
             wchar_t Text[100];
-            mu_swprintf(Text, GlobalText[3586], iTotalCost);
+            mu_swprintf(Text, I18N::Game::DZenSHaveBeenSpentInImplementingOfficialMUHelper, iTotalCost);
             g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
@@ -1602,7 +1603,7 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
     }
     else if (Data->SubCode == 5)
     {
-        g_pSystemLogBox->AddText(GlobalText[1208], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ResurrectionFailed, SEASON3B::TYPE_ERROR_MESSAGE);
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_BREAK01);
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
@@ -1806,7 +1807,7 @@ void ReceiveChatWhisperResult(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        g_pChatListBox->AddText(ChatWhisperID, GlobalText[482], SEASON3B::TYPE_ERROR_MESSAGE, SEASON3B::TYPE_WHISPER_MESSAGE);
+        g_pChatListBox->AddText(ChatWhisperID, I18N::Game::NoUsers, SEASON3B::TYPE_ERROR_MESSAGE, SEASON3B::TYPE_WHISPER_MESSAGE);
     }
     }
 }
@@ -1863,7 +1864,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     else if (Data->Result == 2)
     {
         wchar_t FullText[300] {0};
-        mu_swprintf(FullText, GlobalText[483], Text);
+        mu_swprintf(FullText, I18N::Game::NoticeForGuildMembersS, Text);
         CreateNotice(FullText, 1);
         g_pGuildInfoWindow->AddGuildNotice(Text);
     }
@@ -2097,7 +2098,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             else
             {
                 wchar_t Text[256];
-                mu_swprintf(Text, L"%ls%ls", GlobalText[484], gMapManager.GetMapName(gMapManager.WorldActive));
+                mu_swprintf(Text, L"%ls%ls", I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
 
                 g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
@@ -2932,7 +2933,7 @@ void ReceiveCreateSummonViewport(const BYTE* ReceiveBuffer)
         if (Type < 152 || Type>158)
         {
             wchar_t Temp[100] {};
-            wcscat(c->ID, GlobalText[485]);
+            wcscat(c->ID, I18N::Game::Of);
             CMultiLanguage::ConvertFromUtf8(Temp, Data2->ID, MAX_USERNAME_SIZE);
             wcscat(c->ID, Temp);
 
@@ -3957,7 +3958,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     {
         if (Success == false)
         {
-            g_pSystemLogBox->AddText(GlobalText[2249], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::StongerEffectHasTakenPlace, SEASON3B::TYPE_SYSTEM_MESSAGE);
             return FALSE;
         }
     }
@@ -5566,10 +5567,10 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         wchar_t Text[100];
         if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
         {
-            mu_swprintf(Text, GlobalText[1750], Exp);
+            mu_swprintf(Text, I18N::Game::MasterEXPAchievementD, Exp);
         }
         else
-            mu_swprintf(Text, GlobalText[486], Exp);
+            mu_swprintf(Text, I18N::Game::ObtainedDExp, Exp);
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
@@ -5669,11 +5670,11 @@ BOOL ReceiveDieExpLarge(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
         if (experienceType == eExperienceType_Master)
         {
-            mu_swprintf(Text, GlobalText[1750], addedExperience);
+            mu_swprintf(Text, I18N::Game::MasterEXPAchievementD, addedExperience);
         }
         else
         {
-            mu_swprintf(Text, GlobalText[486], addedExperience);
+            mu_swprintf(Text, I18N::Game::ObtainedDExp, addedExperience);
         }
 
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
@@ -5935,7 +5936,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
 
             if (getGold > 0)
             {
-                mu_swprintf(szMessage, L"%d %ls %ls", getGold, GlobalText[224], GlobalText[918]);
+                mu_swprintf(szMessage, L"%d %ls %ls", getGold, I18N::Game::Zen, I18N::Game::Obtained);
                 g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
@@ -5991,7 +5992,7 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             GetItemName(pickedItem->Type, level, szItem);
 
             wchar_t szMessage[128];
-            mu_swprintf(szMessage, L"%ls %ls", szItem, GlobalText[918]);
+            mu_swprintf(szMessage, L"%ls %ls", szItem, I18N::Game::Obtained);
             g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
             int Type = pickedItem->Type;
@@ -6419,7 +6420,7 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
     {
         g_pNewUISystem->HideAll();
 
-        g_pChatListBox->AddText(Hero->ID, GlobalText[732], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeTraded, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     BuyCost = 0;
 
@@ -6449,7 +6450,7 @@ void ReceiveBuyExtended(const std::span<const BYTE> ReceiveBuffer)
     if (Data->Index == BUY_FAILED)
     {
         g_pNewUISystem->HideAll();
-        g_pChatListBox->AddText(Hero->ID, GlobalText[732], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeTraded, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else if (Data->Index == BUY_FAILED_SILENT)
     {
@@ -6524,31 +6525,31 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
         case SEASON3A::MIXTYPE_GOBLIN_ADD380:
         case SEASON3A::MIXTYPE_EXTRACT_SEED:
         case SEASON3A::MIXTYPE_SEED_SPHERE:
-            mu_swprintf(szText, GlobalText[594]);
+            mu_swprintf(szText, I18N::Game::ChaosCombinationHasFailed);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
             // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, GlobalText[1208]);	// 부활 실패
+            // 				wprintf(szText, I18N::Game::ResurrectionFailed);	// 부활 실패
             // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             // 				break;
         case SEASON3A::MIXTYPE_OSBOURNE:
-            mu_swprintf(szText, GlobalText[2105], GlobalText[2061]);
+            mu_swprintf(szText, I18N::Game::SHasFailed2105, I18N::Game::Refine);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_JERRIDON:
-            mu_swprintf(szText, GlobalText[2105], GlobalText[2062]);
+            mu_swprintf(szText, I18N::Game::SHasFailed2105, I18N::Game::Restore);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_ELPIS:
-            mu_swprintf(szText, GlobalText[2112], GlobalText[2063]);
+            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::Refine);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHAOS_CARD:
-            mu_swprintf(szText, GlobalText[2112], GlobalText[2265]);
+            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::ChaosCardCombination);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            mu_swprintf(szText, GlobalText[2112], GlobalText[2560]);
+            mu_swprintf(szText, I18N::Game::SHasFailed2112, I18N::Game::CherryBlossomsBranchesAssembly);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         }
@@ -6570,31 +6571,31 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
         case SEASON3A::MIXTYPE_GOBLIN_ADD380:
         case SEASON3A::MIXTYPE_EXTRACT_SEED:
         case SEASON3A::MIXTYPE_SEED_SPHERE:
-            mu_swprintf(szText, GlobalText[595]);
+            mu_swprintf(szText, I18N::Game::ChaosCombinationHasSucceeded);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
             // 			case SEASON3A::MIXTYPE_TRAINER:
-            // 				wprintf(szText, GlobalText[1209]);
+            // 				wprintf(szText, I18N::Game::ResurrectionSuccessful);
             // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             // 				break;
         case SEASON3A::MIXTYPE_OSBOURNE:
-            mu_swprintf(szText, GlobalText[2106], GlobalText[2061]);
+            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Refine);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_JERRIDON:
-            mu_swprintf(szText, GlobalText[2106], GlobalText[2062]);
+            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Restore);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_ELPIS:
-            mu_swprintf(szText, GlobalText[2113], GlobalText[2063]);
+            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::Refine);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHAOS_CARD:
-            mu_swprintf(szText, GlobalText[2113], GlobalText[2265]);
+            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::ChaosCardCombination);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
-            mu_swprintf(szText, GlobalText[2113], GlobalText[2560]);
+            mu_swprintf(szText, I18N::Game::SWasSuccessful, I18N::Game::CherryBlossomsBranchesAssembly);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
             break;
         }
@@ -6610,16 +6611,16 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     case 0x0B:
     {
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_READY);
-        g_pSystemLogBox->AddText(GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotEnoughZenToCombineItems, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     break;
     case 4:
-        SEASON3B::CreateOkMessageBox(GlobalText[649]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::MustBeOverLevel10ToCombineTheInvitationToDevilSquare);
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
         break;
 
     case 9:
-        SEASON3B::CreateOkMessageBox(GlobalText[689]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::MustBeOverLevel15ToCombineACloakOfInvisibility);
         g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_FINISHED);
         break;
 
@@ -6656,13 +6657,13 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
         {
             SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
 
-            g_pChatListBox->AddText(Hero->ID, GlobalText[733], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeSold, SEASON3B::TYPE_ERROR_MESSAGE);
         }
         else if (Data->Flag == 0xfe)
         {
             g_pNewUISystem->HideAll();
 
-            g_pChatListBox->AddText(Hero->ID, GlobalText[733], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeSold, SEASON3B::TYPE_ERROR_MESSAGE);
         }
         else
         {
@@ -6914,26 +6915,26 @@ void ReceivePK(const BYTE* ReceiveBuffer)
     {
     case 1: case 2:
     {
-        wcscat(message, GlobalText[487]);
+        wcscat(message, I18N::Game::Hero);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 3:
     {
-        wcscat(message, GlobalText[488]);
+        wcscat(message, I18N::Game::Commoner);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     break;
     case 4:
     {
-        wcscat(message, GlobalText[489]);
+        wcscat(message, I18N::Game::OutlawWarning);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 5:
     {
         wchar_t szTemp[100];
-        mu_swprintf(szTemp, L"%ls %d%ls", GlobalText[490], 1, GlobalText[491]);
+        mu_swprintf(szTemp, L"%ls %d%ls", I18N::Game::_1stStageOutlaw, 1, I18N::Game::_2ndStageOutlaw);
         wcscat(message, szTemp);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_ERROR_MESSAGE);
     }
@@ -6941,7 +6942,7 @@ void ReceivePK(const BYTE* ReceiveBuffer)
     case 6:
     {
         wchar_t szTemp[100];
-        mu_swprintf(szTemp, L"%ls %d%ls", GlobalText[490], 2, GlobalText[491]);
+        mu_swprintf(szTemp, L"%ls %d%ls", I18N::Game::_1stStageOutlaw, 2, I18N::Game::_2ndStageOutlaw);
         wcscat(message, szTemp);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_ERROR_MESSAGE);
     }
@@ -7138,15 +7139,15 @@ void ReceivePartyResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pSystemLogBox->AddText(GlobalText[497], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 1:g_pSystemLogBox->AddText(GlobalText[498], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pSystemLogBox->AddText(GlobalText[499], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pSystemLogBox->AddText(GlobalText[500], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pSystemLogBox->AddText(GlobalText[501], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pSystemLogBox->AddText(GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 6:g_pSystemLogBox->AddText(GlobalText[2990], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 7:g_pSystemLogBox->AddText(GlobalText[2997], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 8:g_pSystemLogBox->AddText(GlobalText[2998], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pSystemLogBox->AddText(I18N::Game::CreatingAPartyHasFailed, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 1:g_pSystemLogBox->AddText(I18N::Game::YourRequestHasBeenDenied, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pSystemLogBox->AddText(I18N::Game::PartyIsFull, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pSystemLogBox->AddText(I18N::Game::TheUserHasLeftTheGame, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pSystemLogBox->AddText(I18N::Game::TheUserIsAlreadyInAnotherParty, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pSystemLogBox->AddText(I18N::Game::YouHaveJustLeftTheParty, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 6:g_pSystemLogBox->AddText(I18N::Game::YouCannotFormAPartyWithAMemberOfTheOpposingGens, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 7:g_pSystemLogBox->AddText(I18N::Game::YouCannotFormAPartyWithinABattleZone, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 8:g_pSystemLogBox->AddText(I18N::Game::PartiesAreNotActivatedWithinABattleZone, SEASON3B::TYPE_ERROR_MESSAGE); break;
     }
 }
 
@@ -7193,7 +7194,7 @@ void ReceivePartyInfo(const BYTE* ReceiveBuffer)
 void ReceivePartyLeave(const BYTE* ReceiveBuffer)
 {
     PartyNumber = 0;
-    g_pSystemLogBox->AddText(GlobalText[502], SEASON3B::TYPE_ERROR_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::YouHaveJustLeftTheParty, SEASON3B::TYPE_ERROR_MESSAGE);
 
     if (g_iFollowCharacter >= 0)
     {
@@ -7226,17 +7227,17 @@ void ReceivePartyGetItem(const BYTE* ReceiveBuffer)
     wchar_t itemName[100] = { 0, };
     wchar_t Text[200] = { 0, };
 
-    if ((Data->ItemInfo & 0x10000))      mu_swprintf(itemName, L"%ls ", GlobalText[620]);
-    else if ((Data->ItemInfo & 0x20000)) mu_swprintf(itemName, L"%ls ", GlobalText[1089]);
+    if ((Data->ItemInfo & 0x10000))      mu_swprintf(itemName, L"%ls ", I18N::Game::Excellent);
+    else if ((Data->ItemInfo & 0x20000)) mu_swprintf(itemName, L"%ls ", I18N::Game::Set);
 
     int itemLevel = Data->ItemLevel;
     GetItemName(itemType, itemLevel, Text);
     wcscat(itemName, Text);
-    if ((Data->ItemInfo & 0x02000)) wcscat(itemName, GlobalText[176]);
-    if ((Data->ItemInfo & 0x08000)) wcscat(itemName, GlobalText[177]);
-    if ((Data->ItemInfo & 0x04000)) wcscat(itemName, GlobalText[178]);
+    if ((Data->ItemInfo & 0x02000)) wcscat(itemName, I18N::Game::Skill);
+    if ((Data->ItemInfo & 0x08000)) wcscat(itemName, I18N::Game::Option177);
+    if ((Data->ItemInfo & 0x04000)) wcscat(itemName, I18N::Game::Luck);
 
-    mu_swprintf(Text, L"%ls : %ls %ls", c->ID, itemName, GlobalText[918]);
+    mu_swprintf(Text, L"%ls : %ls %ls", c->ID, itemName, I18N::Game::Obtained);
 
     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
@@ -7251,7 +7252,7 @@ void ReceiveGuild(const BYTE* ReceiveBuffer)
     SEASON3B::CNewUICommonMessageBox* pMsgBox;
     SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildRequestMsgBoxLayout), &pMsgBox);
     pMsgBox->AddMsg(CharactersClient[FindCharacterIndex(GuildPlayerKey)].ID);
-    pMsgBox->AddMsg(GlobalText[429]);
+    pMsgBox->AddMsg(I18N::Game::YouHaveReceivedAnOfferToJoinAGuild);
 }
 
 void ReceiveGuildResult(const BYTE* ReceiveBuffer)
@@ -7259,17 +7260,17 @@ void ReceiveGuildResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pSystemLogBox->AddText(GlobalText[503], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 1:g_pSystemLogBox->AddText(GlobalText[504], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pSystemLogBox->AddText(GlobalText[505], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pSystemLogBox->AddText(GlobalText[506], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pSystemLogBox->AddText(GlobalText[508], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 6:g_pSystemLogBox->AddText(GlobalText[509], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 7:g_pSystemLogBox->AddText(GlobalText[510], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 0xA1:g_pSystemLogBox->AddText(GlobalText[2992], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 0xA2:g_pSystemLogBox->AddText(GlobalText[2995], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 0xA3:g_pSystemLogBox->AddText(GlobalText[2996], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pSystemLogBox->AddText(I18N::Game::GuildMasterHasRefusedYourRequestToJoinTheGuild, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 1:g_pSystemLogBox->AddText(I18N::Game::YouHaveJustJoinedTheGuild, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pSystemLogBox->AddText(I18N::Game::TheGuildIsFull, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pSystemLogBox->AddText(I18N::Game::TheUserHasLeftTheGame, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pSystemLogBox->AddText(I18N::Game::YouCannotJoinMoreThanOneGuild, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 6:g_pSystemLogBox->AddText(I18N::Game::TheGuildMasterIsTooBusyToApproveYourRequestToJoinTheGuild, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 7:g_pSystemLogBox->AddText(I18N::Game::ChractersOverLevel6CanJoinAGuild, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0xA1:g_pSystemLogBox->AddText(I18N::Game::TheGuildMasterHasNotJoinedTheGens, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0xA2:g_pSystemLogBox->AddText(I18N::Game::TheGuildMasterIsWithADifferentGens, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0xA3:g_pSystemLogBox->AddText(I18N::Game::YouMustBelongToTheSame, SEASON3B::TYPE_ERROR_MESSAGE); break;
     }
 }
 
@@ -7305,12 +7306,12 @@ void ReceiveGuildLeave(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pSystemLogBox->AddText(GlobalText[511], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 1:g_pSystemLogBox->AddText(GlobalText[512], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pSystemLogBox->AddText(GlobalText[513], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pSystemLogBox->AddText(GlobalText[514], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pSystemLogBox->AddText(GlobalText[515], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pSystemLogBox->AddText(GlobalText[568], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pSystemLogBox->AddText(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 1:g_pSystemLogBox->AddText(I18N::Game::YouHaveLeftTheGuild, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pSystemLogBox->AddText(I18N::Game::OnlyAGuildMasterCanDisbandAGuild, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pSystemLogBox->AddText(I18N::Game::YouHaveFailedFromTheGuild, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pSystemLogBox->AddText(I18N::Game::TheGuildHasBeenDissolved, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pSystemLogBox->AddText(I18N::Game::GuildMemberHasBeenWithdrawn, SEASON3B::TYPE_ERROR_MESSAGE); break;
     }
     if (Data->Value == 1 || Data->Value == 4)
     {
@@ -7371,12 +7372,12 @@ void ReceiveCreateGuildResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPMSG_GUILD_CREATE_RESULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pSystemLogBox->AddText(GlobalText[516], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pSystemLogBox->AddText(GlobalText[517], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pSystemLogBox->AddText(GlobalText[518], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pSystemLogBox->AddText(GlobalText[940], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pSystemLogBox->AddText(GlobalText[941], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 6:g_pSystemLogBox->AddText(GlobalText[942], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pSystemLogBox->AddText(I18N::Game::TheGuildNameAlreadyExists, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pSystemLogBox->AddText(I18N::Game::GuildNameMustBeAtLeast4Characters, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild518, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pSystemLogBox->AddText(I18N::Game::NoSpaceAllowedInGuildNames, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pSystemLogBox->AddText(I18N::Game::NoSymbolsAllowedInGuildNames, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 6:g_pSystemLogBox->AddText(I18N::Game::ReservedName, SEASON3B::TYPE_ERROR_MESSAGE); break;
     case 1:
         memset(InputText[0], 0, MAX_USERNAME_SIZE);
         InputLength[0] = 0;
@@ -7422,13 +7423,13 @@ void ReceiveDeclareWarResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     switch (Data->Value)
     {
-    case 0:g_pSystemLogBox->AddText(GlobalText[519], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 1:g_pSystemLogBox->AddText(GlobalText[520], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 2:g_pSystemLogBox->AddText(GlobalText[521], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 3:g_pSystemLogBox->AddText(GlobalText[522], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 4:g_pSystemLogBox->AddText(GlobalText[523], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 5:g_pSystemLogBox->AddText(GlobalText[524], SEASON3B::TYPE_ERROR_MESSAGE); break;
-    case 6:g_pSystemLogBox->AddText(GlobalText[525], SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 0:g_pSystemLogBox->AddText(I18N::Game::ThatGuildDoesNotExist, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 1:g_pSystemLogBox->AddText(I18N::Game::YouHaveDeclaredAGuildWar, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 2:g_pSystemLogBox->AddText(I18N::Game::TheOpposingGuildMasterIsNotInTheGame, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 3:g_pSystemLogBox->AddText(I18N::Game::ThatGuildDoesNotExist, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 4:g_pSystemLogBox->AddText(I18N::Game::YouCanNotDeclareAGuildWarNow, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 5:g_pSystemLogBox->AddText(I18N::Game::OnlyGuildMastersCanDeclareAGuildWar, SEASON3B::TYPE_ERROR_MESSAGE); break;
+    case 6:g_pSystemLogBox->AddText(I18N::Game::YourRequestForAGuildWarIsRefused, SEASON3B::TYPE_ERROR_MESSAGE); break;
     }
     if (Data->Value != 1 && !EnableGuildWar)
     {
@@ -7447,11 +7448,11 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
 
     if (Data->Type == 0)
     {
-        mu_swprintf(Text, GlobalText[526], GuildWarName);
+        mu_swprintf(Text, I18N::Game::AGuildWarAgainstSGuildHasStarted, GuildWarName);
     }
     else
     {
-        mu_swprintf(Text, GlobalText[533], GuildWarName);
+        mu_swprintf(Text, I18N::Game::ABattleSoccerHasStartedWithSGuild, GuildWarName);
         EnableSoccer = true;
     }
 
@@ -7490,13 +7491,13 @@ void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
     int Win = 0;
     switch (Data->Value)
     {
-    case 0:wprintf(Text, GlobalText[527]); break;
-    case 1:wprintf(Text, GlobalText[528]); Win = 2; break;
-    case 2:wprintf(Text, GlobalText[529]); Win = 2; break;
-    case 3:wprintf(Text, GlobalText[530]); break;
-    case 4:wprintf(Text, GlobalText[531]); Win = 2; break;
-    case 5:wprintf(Text, GlobalText[532]); break;
-    case 6:wprintf(Text, GlobalText[480]); Win = 1; break;
+    case 0:wprintf(Text, I18N::Game::YouHaveLostTheGuildWar); break;
+    case 1:wprintf(Text, I18N::Game::YouHaveWonTheGuildWar); Win = 2; break;
+    case 2:wprintf(Text, I18N::Game::YouHaveWonTheGuildWarOpposingGuildMasterLeft); Win = 2; break;
+    case 3:wprintf(Text, I18N::Game::YouHaveLostTheGuildWarGuildMasterLeft); break;
+    case 4:wprintf(Text, I18N::Game::YouHaveWonTheGuildWarOpposingGuildDisbanded); Win = 2; break;
+    case 5:wprintf(Text, I18N::Game::YouHaveLostTheGuildWarGuildDisbanded); break;
+    case 6:wprintf(Text, I18N::Game::Tied); Win = 1; break;
     default:mu_swprintf(Text, L""); break;
     }
 
@@ -7613,13 +7614,13 @@ void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
         switch (pData->byType)
         {
         case 0x01:
-            wcscpy(szTemp, GlobalText[1374]);
+            wcscpy(szTemp, I18N::Game::Appointed);
             break;
         case 0x02:
-            wcscpy(szTemp, GlobalText[1375]);
+            wcscpy(szTemp, I18N::Game::Changed);
             break;
         case 0x03:
-            wcscpy(szTemp, GlobalText[1376]);
+            wcscpy(szTemp, I18N::Game::Cancelled);
             break;
         default:
             assert(!"Packet(0xE1)");
@@ -7631,16 +7632,16 @@ void ReceiveGuildAssign(const BYTE* ReceiveBuffer)
         switch (pData->byResult)
         {
         case GUILD_ANS_NOTEXIST_GUILD:
-            wcscpy(szTemp, GlobalText[522]);
+            wcscpy(szTemp, I18N::Game::ThatGuildDoesNotExist);
             break;
         case GUILD_ANS_NOTEXIST_PERMISSION:
-            wcscpy(szTemp, GlobalText[1386]);
+            wcscpy(szTemp, I18N::Game::NoAuthorization);
             break;
         case GUILD_ANS_NOTEXIST_EXTRA_STATUS:
-            wcscpy(szTemp, GlobalText[1326]);
+            wcscpy(szTemp, I18N::Game::CanNoLongerBeAppointed);
             break;
         case GUILD_ANS_NOTEXIST_EXTRA_TYPE:
-            wcscpy(szTemp, GlobalText[1327]);
+            wcscpy(szTemp, I18N::Game::WrongAppointment);
             break;
         default:
             assert(!"Packet(0xE1)");
@@ -7667,79 +7668,79 @@ void ReceiveGuildRelationShipResult(const BYTE* ReceiveBuffer)
         {
             if (pData->byRequestType == 0x01)
             {
-                wcscpy(szTemp, GlobalText[1381]);
+                wcscpy(szTemp, I18N::Game::GuildAllianceRegistrationIsSuccessful);
             }
             else if (pData->byRequestType == 0x02)
             {
-                wcscpy(szTemp, GlobalText[1382]);
+                wcscpy(szTemp, I18N::Game::GuildAllianceWithdrawalIsSuccessful);
             }
             else if (pData->byRequestType == 0x10)
             {
-                wcscpy(szTemp, GlobalText[1635]);
+                wcscpy(szTemp, I18N::Game::DisbandOfAllianceGuildOrRequest);
             }
         }
         else
         {
-            if (pData->byRequestType == 0x01)	wcscpy(szTemp, GlobalText[1383]);
-            else								wcscpy(szTemp, GlobalText[1384]);
+            if (pData->byRequestType == 0x01)	wcscpy(szTemp, I18N::Game::HostileGuildIsConnected);
+            else								wcscpy(szTemp, I18N::Game::HostileGuildIsDisconnected);
         }
     }
     else if (pData->byResult == 0)
     {
-        wcscpy(szTemp, GlobalText[1328]);
+        wcscpy(szTemp, I18N::Game::Failed);
     }
     else
     {
         switch (pData->byResult)
         {
         case GUILD_ANS_UNIONFAIL_BY_CASTLE:
-            wcscpy(szTemp, GlobalText[1637]);
+            wcscpy(szTemp, I18N::Game::AllianceFunctionWillBeRestrictedDueToTheCastleSiege);
             break;
         case GUILD_ANS_NOTEXIST_PERMISSION:
-            wcscpy(szTemp, GlobalText[1386]);
+            wcscpy(szTemp, I18N::Game::NoAuthorization);
             break;
         case GUILD_ANS_EXIST_RELATIONSHIP_UNION:
-            wcscpy(szTemp, GlobalText[1250]);
+            wcscpy(szTemp, I18N::Game::AllianceGuild);
             break;
         case GUILD_ANS_EXIST_RELATIONSHIP_RIVAL:
-            wcscpy(szTemp, GlobalText[1251]);
+            wcscpy(szTemp, I18N::Game::HostileGuild);
             break;
         case GUILD_ANS_EXIST_UNION:
-            wcscpy(szTemp, GlobalText[1252]);
+            wcscpy(szTemp, I18N::Game::GuildAllianceExists);
             break;
         case GUILD_ANS_EXIST_RIVAL:
-            wcscpy(szTemp, GlobalText[1253]);
+            wcscpy(szTemp, I18N::Game::HostileGuildExists);
             break;
         case GUILD_ANS_NOTEXIST_UNION:
-            wcscpy(szTemp, GlobalText[1254]);
+            wcscpy(szTemp, I18N::Game::GuildAllianceDoesNotExist);
             break;
         case GUILD_ANS_NOTEXIST_RIVAL:
-            wcscpy(szTemp, GlobalText[1255]);
+            wcscpy(szTemp, I18N::Game::HostileGuildDoesNotExist);
             break;
         case GUILD_ANS_NOT_UNION_MASTER:
-            wcscpy(szTemp, GlobalText[1333]);
+            wcscpy(szTemp, I18N::Game::NotAMasterOfGuildAlliance);
             break;
         case GUILD_ANS_NOT_GUILD_RIVAL:
-            wcscpy(szTemp, GlobalText[1329]);
+            wcscpy(szTemp, I18N::Game::Income);
             break;
         case GUILD_ANS_CANNOT_BE_UNION_MASTER_GUILD:
-            wcscpy(szTemp, GlobalText[1331]);
+            wcscpy(szTemp, I18N::Game::IncompleteRequirementsForCreatingAGuildAlliance);
             break;
         case GUILD_ANS_EXCEED_MAX_UNION_MEMBER:
-            wcscpy(szTemp, GlobalText[1287]);
+            wcscpy(szTemp, I18N::Game::MaximumNoOfGuildAllianceIs7);
             break;
         case GUILD_ANS_CANCEL_REQUEST:
-            wcscpy(szTemp, GlobalText[1268]);
+            wcscpy(szTemp, I18N::Game::RequestHasBeenCancelled);
             break;
 #ifdef ASG_ADD_GENS_SYSTEM
         case GUILD_ANS_UNION_MASTER_NOT_GENS:
-            wcscpy(szTemp, GlobalText[2991]);
+            wcscpy(szTemp, I18N::Game::TheAllianceMasterHasNotJoinedTheGens);
             break;
         case GUILD_ANS_GUILD_MASTER_NOT_GENS:
-            wcscpy(szTemp, GlobalText[2992]);
+            wcscpy(szTemp, I18N::Game::TheGuildMasterHasNotJoinedTheGens);
             break;
         case GUILD_ANS_UNION_MASTER_DISAGREE_GENS:
-            wcscpy(szTemp, GlobalText[2993]);
+            wcscpy(szTemp, I18N::Game::YouAreWithADifferentGensThanTheAllianceMaster);
             break;
 #endif	// ASG_ADD_GENS_SYSTEM
         default:
@@ -7767,7 +7768,7 @@ void ReceiveBanUnionGuildResult(const BYTE* ReceiveBuffer)
     }
     else if (pData->byResult == 0)
     {
-        g_pSystemLogBox->AddText(GlobalText[1328], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::Failed, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -7859,9 +7860,9 @@ void ReceiveSoccerGoal(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     wchar_t Text[100];
     if (Data->Value == HeroSoccerTeam)
-        mu_swprintf(Text, GlobalText[534], GuildMark[Hero->GuildMarkIndex].GuildName);
+        mu_swprintf(Text, I18N::Game::SGuildWinsAPoint, GuildMark[Hero->GuildMarkIndex].GuildName);
     else
-        mu_swprintf(Text, GlobalText[534], GuildWarName);
+        mu_swprintf(Text, I18N::Game::SGuildWinsAPoint, GuildWarName);
     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
@@ -7894,7 +7895,7 @@ void Receive_Master_LevelUp(const BYTE* ReceiveBuffer, int Size)
     DWORD iExp = Master_Level_Data.lNext_MasterLevel_Experince - Master_Level_Data.lMasterLevel_Experince;
     if (iExp > 0)
     {
-        mu_swprintf(szText, GlobalText[1750], iExp);
+        mu_swprintf(szText, I18N::Game::MasterEXPAchievementD, iExp);
         g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
@@ -8048,19 +8049,19 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     case 1:
         if (Data->Cmd2 >= 20)
         {
-            SEASON3B::CreateOkMessageBox(GlobalText[830 + Data->Cmd2 - 20]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::Lookup(830 + Data->Cmd2 - 20));
         }
         else
         {
-            SEASON3B::CreateOkMessageBox(GlobalText[650 + Data->Cmd2]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::Lookup(650 + Data->Cmd2));
         }
         break;
 
     case 3:
-        SEASON3B::CreateOkMessageBox(GlobalText[710 + Data->Cmd2]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::Lookup(710 + Data->Cmd2));
         break;
     case 4:
-        SEASON3B::CreateOkMessageBox(GlobalText[725 + Data->Cmd2]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::Lookup(725 + Data->Cmd2));
         break;
     case 5:
     {
@@ -8076,10 +8077,10 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     break;
 
     case 6:
-        SEASON3B::CreateOkMessageBox(GlobalText[449]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::DissolveOrLeaveYourGuild);
         break;
     case 13:
-        SEASON3B::CreateOkMessageBox(GlobalText[1826]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouCanNowStandAloneWithoutMySupport);
         break;
     case 14:
     {
@@ -8090,23 +8091,23 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
             break;
 
         case 1:
-            SEASON3B::CreateOkMessageBox(GlobalText[2024]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::ThisIsNotAEventPrize);
             break;
 
         case 2:
-            SEASON3B::CreateOkMessageBox(GlobalText[2022]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::ItemHasAlreadyGiven);
             break;
 
         case 3:
-            SEASON3B::CreateOkMessageBox(GlobalText[2023]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::FailedToGetAnItemPleaseTryAgain);
             break;
 
         case 4:
-            //ShowCustomMessageBox(GlobalText[858]);
+            //ShowCustomMessageBox(I18N::Game::CongratulationsYouHaveSuccessfully);
             break;
 
         case 5:
-            SEASON3B::CreateOkMessageBox(GlobalText[2023]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::FailedToGetAnItemPleaseTryAgain);
             break;
         }
     }
@@ -8116,13 +8117,13 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         switch (Data->Cmd2)
         {
         case 0:
-            SEASON3B::CreateOkMessageBox(GlobalText[2022]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::ItemHasAlreadyGiven);
             break;
         case 1:
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHarvestEventLayout));
             break;
         case 2:
-            SEASON3B::CreateOkMessageBox(GlobalText[2023]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::FailedToGetAnItemPleaseTryAgain);
             break;
         }
     }
@@ -8135,17 +8136,17 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         {
         case 0:
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSantaTownSantaMsgBoxLayout), &pMsgBox);
-            pMsgBox->AddMsg(GlobalText[2588]);
+            pMsgBox->AddMsg(I18N::Game::WelcomeToSantaSVillageHere);
             break;
         case 1:
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSantaTownSantaMsgBoxLayout), &pMsgBox);
-            pMsgBox->AddMsg(GlobalText[2585]);
+            pMsgBox->AddMsg(I18N::Game::WelcomeToSantaSVillagePleaseComeClaimYourGift);
             break;
         case 2:
-            SEASON3B::CreateOkMessageBox(GlobalText[2587]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::YouCanClickOnlyOnce);
             break;
         case 3:
-            SEASON3B::CreateOkMessageBox(GlobalText[2023]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::FailedToGetAnItemPleaseTryAgain);
             break;
         }
     }
@@ -8156,26 +8157,26 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     case 47:
     case 48:
     case 49:
-        SEASON3B::CreateOkMessageBox(GlobalText[1823 + Data->Cmd1 - 47]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::Lookup(1823 + Data->Cmd1 - 47));
         break;
     case 55:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[2043], GlobalText[39]);
+        mu_swprintf(strText, I18N::Game::KillersAreRestrictedToEnterS, I18N::Game::DevilSquare);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 56:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[2043], GlobalText[56]);
+        mu_swprintf(strText, I18N::Game::KillersAreRestrictedToEnterS, I18N::Game::BloodCastle);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 57:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[2043], GlobalText[57]);
+        mu_swprintf(strText, I18N::Game::KillersAreRestrictedToEnterS, I18N::Game::ChaosCastle);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8229,7 +8230,7 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     case 2:
     case 3:
     {
-        mu_swprintf(sBuf, L"%ls%ls %ls", GlobalText[1801], GlobalText[1816], GlobalText[868]);
+        mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To, I18N::Game::EntranceIsAllowedForDTimes);
         g_pSystemLogBox->AddText(sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
@@ -8241,13 +8242,13 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     break;
     case 4:
     {
-        g_pSystemLogBox->AddText(GlobalText[1817], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ItemsForCombinationSystemIsLacking, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 5:
     {
-        g_pSystemLogBox->AddText(GlobalText[1811], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ZenIsInsufficient, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -8265,7 +8266,7 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     case 0:
     case 5:
     {
-        mu_swprintf(sBuf, L"%ls%ls %ls", GlobalText[1800], GlobalText[1816], GlobalText[868]);
+        mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To, I18N::Game::EntranceIsAllowedForDTimes);
         g_pSystemLogBox->AddText(sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
@@ -8280,19 +8281,19 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     case 4:
     case 6:
     {
-        g_pSystemLogBox->AddText(GlobalText[1812], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CorrespondingItemIsInappropriate, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 7:
     {
-        g_pSystemLogBox->AddText(GlobalText[1815], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::InventorySpaceIsInsufficient, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
     case 8:
     {
-        g_pSystemLogBox->AddText(GlobalText[1811], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ZenIsInsufficient, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
     break;
@@ -8309,29 +8310,29 @@ void ReceiveMoveToDevilSquareResult(const BYTE* ReceiveBuffer)
     case 0:
         break;
     case 1:
-        SEASON3B::CreateOkMessageBox(GlobalText[677]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::BringTheDevilSInvitationToEnter);
         break;
 
     case 2:
-        SEASON3B::CreateOkMessageBox(GlobalText[678]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouVeComeTooLateToEnterTheDevilSquare);
         break;
 
     case 3:
-        SEASON3B::CreateOkMessageBox(GlobalText[686]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouReUnderestimatingYourselfChooseAnotherSquare);
         break;
 
     case 4:
-        SEASON3B::CreateOkMessageBox(GlobalText[687]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::IfYouWishToStayAliveChooseAnotherSquare);
         break;
 
     case 5:
-        SEASON3B::CreateOkMessageBox(GlobalText[679]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::DevilSquareIsFull);
         break;
 
     case 6:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[2043], GlobalText[39]);
+        mu_swprintf(strText, I18N::Game::KillersAreRestrictedToEnterS, I18N::Game::DevilSquare);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8343,12 +8344,12 @@ void ReceiveDevilSquareOpenTime(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT)ReceiveBuffer;
     if (0 == Data->Value)
     {
-        SEASON3B::CreateOkMessageBox(GlobalText[643]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouCanEnterDevilSquareNow);
     }
     else
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[644], (int)Data->Value);
+        mu_swprintf(strText, I18N::Game::DevilSquareWillOpenInDMinutes, (int)Data->Value);
         SEASON3B::CreateOkMessageBox(strText);
     }
 }
@@ -8395,29 +8396,29 @@ void ReceiveMoveToEventMatchResult(const BYTE* ReceiveBuffer)
     case 0:
         break;
     case 1:
-        SEASON3B::CreateOkMessageBox(GlobalText[854]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::TheLevelOfTheCloakOfInvisibilityIsIncorrect);
         break;
 
     case 2:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[852], GlobalText[1146]);
+        mu_swprintf(strText, I18N::Game::TheTimeToEnterSHasPassed, I18N::Game::BloodCastle);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
 
     case 3:
-        SEASON3B::CreateOkMessageBox(GlobalText[686]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouReUnderestimatingYourselfChooseAnotherSquare);
         break;
 
     case 4:
-        SEASON3B::CreateOkMessageBox(GlobalText[687]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::IfYouWishToStayAliveChooseAnotherSquare);
         break;
 
     case 5:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[853], GlobalText[1146], MAX_BLOOD_CASTLE_MEN);
+        mu_swprintf(strText, I18N::Game::TheMaximumCapacityOfSHasBeenReachedTheMaxNumberAllowedIsD, I18N::Game::BloodCastle, MAX_BLOOD_CASTLE_MEN);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8425,21 +8426,21 @@ void ReceiveMoveToEventMatchResult(const BYTE* ReceiveBuffer)
     case 6:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[867], 6);
+        mu_swprintf(strText, I18N::Game::YouAreNotAllowedToEnterMoreThanDTimesInOneDay, 6);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 7:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[2043], GlobalText[56]);
+        mu_swprintf(strText, I18N::Game::KillersAreRestrictedToEnterS, I18N::Game::BloodCastle);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
     case 8:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[852], GlobalText[1147]);
+        mu_swprintf(strText, I18N::Game::TheTimeToEnterSHasPassed, I18N::Game::ChaosCastle);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8447,7 +8448,7 @@ void ReceiveMoveToEventMatchResult(const BYTE* ReceiveBuffer)
     case 9:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[853], GlobalText[1147], MAX_CHAOS_CASTLE_MEN);
+        mu_swprintf(strText, I18N::Game::TheMaximumCapacityOfSHasBeenReachedTheMaxNumberAllowedIsD, I18N::Game::ChaosCastle, MAX_CHAOS_CASTLE_MEN);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8461,12 +8462,12 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
     {
         if (0 == Data->KeyH)
         {
-            SEASON3B::CreateOkMessageBox(GlobalText[643]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::YouCanEnterDevilSquareNow);
         }
         else
         {
             wchar_t strText[128];
-            mu_swprintf(strText, GlobalText[644], (int)Data->KeyH);
+            mu_swprintf(strText, I18N::Game::DevilSquareWillOpenInDMinutes, (int)Data->KeyH);
             SEASON3B::CreateOkMessageBox(strText);
         }
     }
@@ -8475,11 +8476,11 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
         wchar_t strText[256];
         if (0 == Data->KeyH)
         {
-            mu_swprintf(strText, GlobalText[850], GlobalText[1146]);
+            mu_swprintf(strText, I18N::Game::YouCanEnterSNow, I18N::Game::BloodCastle);
         }
         else
         {
-            mu_swprintf(strText, GlobalText[851], (int)Data->KeyH, GlobalText[1146]);
+            mu_swprintf(strText, I18N::Game::AfterDMinutesYouMayEnterS, (int)Data->KeyH, I18N::Game::BloodCastle);
         }
         SEASON3B::CreateOkMessageBox(strText);
     }
@@ -8492,8 +8493,8 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             wchar_t szOpenTime1[256] = { 0, };
             wchar_t szOpenTime2[256] = { 0, };
 
-            mu_swprintf(szOpenTime1, GlobalText[850], GlobalText[1147]);
-            mu_swprintf(szOpenTime2, GlobalText[1156], GlobalText[1147], Data->KeyM, 100);
+            mu_swprintf(szOpenTime1, I18N::Game::YouCanEnterSNow, I18N::Game::ChaosCastle);
+            mu_swprintf(szOpenTime2, I18N::Game::InSCurrentlyDDEntered, I18N::Game::ChaosCastle, Data->KeyM, 100);
 
             GlobalText.Remove(1154);
             GlobalText.Remove(1155);
@@ -8504,8 +8505,8 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
             if (pMsgBox)
             {
-                pMsgBox->AddMsg(GlobalText[1154]);
-                pMsgBox->AddMsg(GlobalText[1155]);
+                pMsgBox->AddMsg(I18N::Game::Lookup(1154));
+                pMsgBox->AddMsg(I18N::Game::Lookup(1155));
             }
         }
         else
@@ -8516,8 +8517,8 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
 
             wchar_t szOpenTime[256] = { 0, };
 
-            mu_swprintf(szOpenTime, GlobalText[1164], Hour);
-            mu_swprintf(Text, GlobalText[851], Mini, GlobalText[1147]);
+            mu_swprintf(szOpenTime, I18N::Game::WhenD, Hour);
+            mu_swprintf(Text, I18N::Game::AfterDMinutesYouMayEnterS, Mini, I18N::Game::ChaosCastle);
             wcscat(szOpenTime, Text);
 
             GlobalText.Remove(1154);
@@ -8527,7 +8528,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
             if (pMsgBox)
             {
-                pMsgBox->AddMsg(GlobalText[1154]);
+                pMsgBox->AddMsg(I18N::Game::Lookup(1154));
             }
         }
     }
@@ -8536,11 +8537,11 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
         wchar_t strText[256];
         if (0 == Data->KeyH)
         {
-            mu_swprintf(strText, GlobalText[850], GlobalText[2369]);
+            mu_swprintf(strText, I18N::Game::YouCanEnterSNow, I18N::Game::IllusionTemple);
         }
         else
         {
-            mu_swprintf(strText, GlobalText[851], (int)Data->KeyH, GlobalText[2369]);
+            mu_swprintf(strText, I18N::Game::AfterDMinutesYouMayEnterS, (int)Data->KeyH, I18N::Game::IllusionTemple);
         }
         SEASON3B::CreateOkMessageBox(strText);
     }
@@ -8556,29 +8557,29 @@ void ReceiveMoveToEventMatchResult2(const BYTE* ReceiveBuffer)
     case 0:
         break;
     case 1:
-        SEASON3B::CreateOkMessageBox(GlobalText[854]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::TheLevelOfTheCloakOfInvisibilityIsIncorrect);
         break;
 
     case 2:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[852], GlobalText[1147]);
+        mu_swprintf(strText, I18N::Game::TheTimeToEnterSHasPassed, I18N::Game::ChaosCastle);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
 
     case 3:
-        SEASON3B::CreateOkMessageBox(GlobalText[686]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouReUnderestimatingYourselfChooseAnotherSquare);
         break;
 
     case 4:
-        SEASON3B::CreateOkMessageBox(GlobalText[687]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::IfYouWishToStayAliveChooseAnotherSquare);
         break;
 
     case 5:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[853], GlobalText[1147], MAX_CHAOS_CASTLE_MEN);
+        mu_swprintf(strText, I18N::Game::TheMaximumCapacityOfSHasBeenReachedTheMaxNumberAllowedIsD, I18N::Game::ChaosCastle, MAX_CHAOS_CASTLE_MEN);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8586,19 +8587,19 @@ void ReceiveMoveToEventMatchResult2(const BYTE* ReceiveBuffer)
     case 6:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[867], 6);
+        mu_swprintf(strText, I18N::Game::YouAreNotAllowedToEnterMoreThanDTimesInOneDay, 6);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
 
     case 7:
-        SEASON3B::CreateOkMessageBox(GlobalText[423]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
         break;
 
     case 8:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[2043], GlobalText[57]);
+        mu_swprintf(strText, I18N::Game::KillersAreRestrictedToEnterS, I18N::Game::ChaosCastle);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -8694,7 +8695,7 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
         g_DuelMgr.EnableDuel(TRUE);
         g_DuelMgr.SetHeroAsDuelPlayer(DUEL_HERO);
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
-        mu_swprintf(szMessage, GlobalText[912], g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
+        mu_swprintf(szMessage, I18N::Game::SHasAcceptedYourChallenge, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
         g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
 
         g_pNewUISystem->Show(SEASON3B::INTERFACE_DUEL_WINDOW);
@@ -8703,7 +8704,7 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
     else if (Data->nResult == 15)
     {
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
-        mu_swprintf(szMessage, GlobalText[913], g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
+        mu_swprintf(szMessage, I18N::Game::SHasDeclinedYourChallenge, g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY));
         g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else if (Data->nResult == 16)
@@ -8713,13 +8714,13 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
     else if (Data->nResult == 28)
     {
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
-        mu_swprintf(szMessage, GlobalText[2704], 30);
+        mu_swprintf(szMessage, I18N::Game::OpenOnlyForLevelDOrHigher, 30);
         g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else if (Data->nResult == 30)
     {
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
-        mu_swprintf(szMessage, GlobalText[1811]);
+        mu_swprintf(szMessage, I18N::Game::ZenIsInsufficient);
         g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_ERROR_MESSAGE);
     }
 }
@@ -8736,7 +8737,7 @@ void ReceiveDuelEnd(const BYTE* ReceiveBuffer)
         g_DuelMgr.EnableDuel(FALSE);
         g_DuelMgr.SetDuelPlayer(DUEL_ENEMY, MAKEWORD(Data->bIndexL, Data->bIndexH), playerName);
 
-        g_pSystemLogBox->AddText(GlobalText[914], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheDuelHasBeenCanceled, SEASON3B::TYPE_ERROR_MESSAGE);
 
         if (g_wtMatchTimeLeft.m_Type == 2)
             g_wtMatchTimeLeft.m_Time = 0;
@@ -8874,7 +8875,7 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
     auto Data = (LPPMSG_DUEL_RESULT_BROADCAST)ReceiveBuffer;
 
     wchar_t szMessage[256];
-    mu_swprintf(szMessage, GlobalText[2689], 10);
+    mu_swprintf(szMessage, I18N::Game::DuelFinishedYouWillBeWarpedBackToTheViallageInDSeconds, 10);
     g_pSystemLogBox->AddText(szMessage, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
     SEASON3B::CDuelResultMsgBox* lpMsgBox = nullptr;
@@ -9091,7 +9092,7 @@ void ReceivePersonalShopItemList(std::span<const BYTE> ReceiveBuffer)
         {
         case Fail1:
         {
-            g_pSystemLogBox->AddText(GlobalText[1120], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::StoreIsNotOpenAtTheMoment, SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
         case Fail2:
@@ -9221,7 +9222,7 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
     }
     else if (Header->Result == PURCHASEITEM_RESULTINFO::NameMismatchOrPriceMissing)
     {
-        g_pSystemLogBox->AddText(GlobalText[1166], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::FailedToPurchasePleaseTryAgain, SEASON3B::TYPE_ERROR_MESSAGE);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY);
     }
@@ -9231,12 +9232,12 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         {
         case PURCHASEITEM_RESULTINFO::LackOfMoney:
         {
-            g_pSystemLogBox->AddText(GlobalText[423], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfZen, SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
         case PURCHASEITEM_RESULTINFO::MoneyOverflowOrNotEnoughSpace:
         {
-            g_pSystemLogBox->AddText(GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::InventoryIsFull, SEASON3B::TYPE_ERROR_MESSAGE);
         }
         break;
         case PURCHASEITEM_RESULTINFO::ItemBlock:
@@ -9254,7 +9255,7 @@ void NotifySoldItem(const BYTE* ReceiveBuffer)
 
     CMultiLanguage::ConvertFromUtf8(szId, Header->szId, MAX_USERNAME_SIZE);
     wchar_t Text[100];
-    mu_swprintf(Text, GlobalText[1122], szId);
+    mu_swprintf(Text, I18N::Game::ItemWasSoldToS, szId);
     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
@@ -9265,7 +9266,7 @@ void NotifyClosePersonalShop(const BYTE* ReceiveBuffer)
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY);
 
-        g_pSystemLogBox->AddText(GlobalText[1126], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheOtherCharacterHasClosedTheStore, SEASON3B::TYPE_ERROR_MESSAGE);
     }
 }
 
@@ -9364,7 +9365,7 @@ void ReceiveFriendList(const BYTE* ReceiveBuffer)
     if (Header->MemoCount > 0)
     {
         wchar_t temp[MAX_TEXT_LENGTH + 1];
-        mu_swprintf(temp, GlobalText[1072], Header->MemoCount, Header->MaxMemo);
+        mu_swprintf(temp, I18N::Game::DLettersAreSavedInYourMailboxMaxD, Header->MemoCount, Header->MaxMemo);
         g_pSystemLogBox->AddText(temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
@@ -9384,12 +9385,12 @@ void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        wcscat(szText, GlobalText[1047]);
+        wcscat(szText, I18N::Game::IDDoesNotExist);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     case 0x01:
     {
-        g_pSystemLogBox->AddText(GlobalText[1075], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheFriendSStatusWillBe, SEASON3B::TYPE_SYSTEM_MESSAGE);
         g_pFriendList->AddFriend(szName, 0, Data->Server);
         g_pFriendList->Sort();
         g_pWindowMgr->RefreshMainWndPalList();
@@ -9397,19 +9398,19 @@ void ReceiveAddFriendResult(const BYTE* ReceiveBuffer)
     }
     break;
     case 0x03:
-        wcscpy(szText, GlobalText[1048]);
+        wcscpy(szText, I18N::Game::YouCannotAddMorePleaseDeleteToAdd);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     case 0x04:
-        wcscat(szText, GlobalText[1049]);
+        wcscat(szText, I18N::Game::IsAlreadyRegistered);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     case 0x05:
-        wcscpy(szText, GlobalText[1050]);
+        wcscpy(szText, I18N::Game::YouCannotRegisterYourOwnID);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     case 0x06:
-        wcscpy(szText, GlobalText[1068]);
+        wcscpy(szText, I18N::Game::TheOtherCharacterMustBeOverLevel6);
         g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, szText);
         break;
     default:
@@ -9429,7 +9430,7 @@ void ReceiveRequestAcceptAddFriend(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(szText, Data->Name, MAX_USERNAME_SIZE);
     szText[MAX_USERNAME_SIZE] = '\0';
 
-    mu_swprintf(szText, L"%ls %ls", szText, GlobalText[1051]); // " has requested to list you as a friend."
+    mu_swprintf(szText, L"%ls %ls", szText, I18N::Game::HasRequestedToListYouAsAFriend); // " has requested to list you as a friend."
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == false)
     {
@@ -9455,7 +9456,7 @@ void ReceiveDeleteFriendResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1052]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::CouldnTDelete);
         break;
     case 0x01:
         g_pFriendList->RemoveFriend(szName);
@@ -9512,41 +9513,41 @@ void ReceiveLetterSendResult(const BYTE* ReceiveBuffer)
     case 0x00:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1053]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::TheLetterCouldNotBeSentPleaseTryAgain);
         break;
     case 0x01:
     {
         if (Data->WindowGuid != 0)
             g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, Data->WindowGuid, 0);
         wchar_t temp[MAX_TEXT_LENGTH + 1];
-        mu_swprintf(temp, GlobalText[1046], g_cdwLetterCost);
+        mu_swprintf(temp, I18N::Game::LetterHasBeenSentCostDZen, g_cdwLetterCost);
         g_pSystemLogBox->AddText(temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
     break;
     case 0x02:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1061]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::TheLetterCanTBeSentBecauseTheReceiverSMailBoxIsFull);
         break;
     case 0x03:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1064]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EitherTheReceiverDoesNotExistOrThereIsNoMailBox);
         break;
     case 0x04:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1065]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::YouCannotSendALetterToYourself);
         break;
     case 0x06:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1068]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::TheOtherCharacterMustBeOverLevel6);
         break;
     case 0x07:
         if (Data->WindowGuid != 0)
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(Data->WindowGuid))->SetSendState(FALSE);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[423]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::YouAreShortOfZen);
         break;
     default:
         break;
@@ -9576,7 +9577,7 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
     case 0x02:
         PlayBuffer(SOUND_FRIEND_MAIL_ALERT);
         g_pFriendMenu->SetNewMailAlert(TRUE);
-        g_pSystemLogBox->AddText(GlobalText[1062], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NewMailHasArrived, SEASON3B::TYPE_SYSTEM_MESSAGE);
         g_pLetterList->AddLetter(Data->Index, szName, szSubject, szDate, szTime, 0x00);
         g_pLetterList->Sort();
         break;
@@ -9593,7 +9594,7 @@ void ReceiveLetter(const BYTE* ReceiveBuffer)
 
     if (g_pLetterList->GetLetterCount() >= g_iMaxLetterCount)
     {
-        g_pSystemLogBox->AddText(GlobalText[1073], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YourMailboxIsFullYouMustDeleteLettersToReceiveNewOnes, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 
@@ -9626,7 +9627,7 @@ void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached)
     g_pWindowMgr->RefreshMainWndLetterList();
 
     wchar_t tempTxt[MAX_TEXT_LENGTH + 1];
-    mu_swprintf(tempTxt, GlobalText[1054], pLetterHead->m_szText);
+    mu_swprintf(tempTxt, I18N::Game::ReadLetterS, pLetterHead->m_szText);
     DWORD dwUIID = 0;
     if (g_iLetterReadNextPos_x == UIWND_DEFAULT)
     {
@@ -9670,7 +9671,7 @@ void ReceiveLetterDeleteResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1055]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::CouldnTDeleteLetter);
         break;
     case 0x01:
         g_pLetterList->RemoveLetter(Data->Index);
@@ -9697,13 +9698,13 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
     {
     case 0x00:
         g_pFriendMenu->RemoveRequestWindow(szName);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1069]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::TheConversationCannotContinue);
         break;
     case 0x01:
         g_pFriendMenu->RemoveRequestWindow(szName);
         if (Data->Type == 0)
         {
-            DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, GlobalText[994]);
+            DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT, 100, 100, I18N::Game::Talking);
             ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
         }
         else if (Data->Type == 1)
@@ -9711,7 +9712,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
             DWORD dwUIID = g_pFriendMenu->CheckChatRoomDuplication(szName);
             if (dwUIID == 0)
             {
-                dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
+                dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, I18N::Game::Talking);
                 ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
                 g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
                 g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
@@ -9728,7 +9729,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
         }
         else if (Data->Type == 2)
         {
-            DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, GlobalText[994]);
+            DWORD dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_CHAT_READY, 100, 100, I18N::Game::Talking);
             ((CUIChatWindow*)g_pWindowMgr->GetWindow(dwUIID))->ConnectToChatServer(szIP, Data->RoomNumber, Data->Ticket);
             g_pWindowMgr->GetWindow(dwUIID)->SetState(UISTATE_READY);
             g_pWindowMgr->SendUIMessage(UI_MESSAGE_BOTTOM, dwUIID, 0);
@@ -9736,7 +9737,7 @@ void ReceiveCreateChatRoomResult(const BYTE* ReceiveBuffer)
         break;
     case 0x02:
         g_pFriendMenu->RemoveRequestWindow(szName);
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1070]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::TheChatServerIsNowUnavailable);
         break;
     default:
         break;
@@ -9752,7 +9753,7 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        pChatWindow->AddChatText(255, GlobalText[1056], 1, 0);
+        pChatWindow->AddChatText(255, I18N::Game::UserIsOffline, 1, 0);
         break;
     case 0x01:
         if (pChatWindow->GetCurrentInvitePal() != nullptr)
@@ -9760,7 +9761,7 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
             wchar_t szText[MAX_TEXT_LENGTH + 1] = { 0 };
             wcsncpy(szText, pChatWindow->GetCurrentInvitePal()->m_szID, MAX_USERNAME_SIZE);
             szText[MAX_USERNAME_SIZE] = '\0';
-            wcscat(szText, GlobalText[1057]);
+            wcscat(szText, I18N::Game::HasBeenInvited);
             pChatWindow->AddChatText(255, szText, 1, 0);
         }
         else
@@ -9769,7 +9770,7 @@ void ReceiveChatRoomInviteResult(const BYTE* ReceiveBuffer)
         }
         break;
     case 0x03:
-        pChatWindow->AddChatText(255, GlobalText[1074], 1, 0);
+        pChatWindow->AddChatText(255, I18N::Game::YouHaveReachedTheMaximumNumberOfFriendsYouCanList, 1, 0);
         break;
     default:
         break;
@@ -9906,7 +9907,7 @@ void ReceiveBuffState(const BYTE* ReceiveBuffer)
 
         if (bufftype == eBuff_HelpNpc)
         {
-            g_pSystemLogBox->AddText(GlobalText[1828], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::DamageAndDefenseIncreasedWithABlessing, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
     else
@@ -9951,11 +9952,11 @@ void ReceiveScratchResult(const BYTE* ReceiveBuffer)
     case 2:
     case 3:
     case 4:
-        SEASON3B::CreateOkMessageBox(GlobalText[886 + Data->m_byIsRegistered]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::Lookup(886 + Data->m_byIsRegistered));
         break;
 
     case 5:
-        SEASON3B::CreateOkMessageBox(GlobalText[899]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouHaveAlreadyRegistered);
         break;
     }
 
@@ -10248,7 +10249,7 @@ void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
             g_pQuestProgress->EnableCompleteBtn(false);
         else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
             g_pQuestProgressByEtc->EnableCompleteBtn(false);
-        g_pSystemLogBox->AddText(GlobalText[2816], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouHaveReachedYourZenLimit, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
@@ -10256,8 +10257,8 @@ void ReceiveQuestCompleteResult(const BYTE* ReceiveBuffer)
             g_pQuestProgress->EnableCompleteBtn(false);
         else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
             g_pQuestProgressByEtc->EnableCompleteBtn(false);
-        g_pSystemLogBox->AddText(GlobalText[375], SEASON3B::TYPE_ERROR_MESSAGE);
-        g_pSystemLogBox->AddText(GlobalText[374], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::InventoryIsFull, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheSameItemThatYouWantToTrade, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
 }
@@ -10406,18 +10407,18 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 
             CharacterAttribute->AddPoint += point;
 
-            mu_swprintf(strText, GlobalText[379], GlobalText[index], point, GlobalText[1412]);
+            mu_swprintf(strText, I18N::Game::SFruitStatDPointsHaveBeenS, I18N::Game::Lookup(index), point, I18N::Game::Create);
             SEASON3B::CreateOkMessageBox(strText);
         }
         break;
 
     case 0x01:
-        SEASON3B::CreateOkMessageBox(GlobalText[378]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::StatCreationFailedFromFruitCombination);
         break;
 
     case 0x02:
     {
-        mu_swprintf(strText, GlobalText[1904], GlobalText[1412]);
+        mu_swprintf(strText, I18N::Game::ThisStatCannotBeSAnymore, I18N::Game::Create);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -10457,19 +10458,19 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
             CharacterAttribute->wMinusPoint += point;
 
             wchar_t strText[128];
-            mu_swprintf(strText, GlobalText[379], GlobalText[index], point, GlobalText[1903]);
+            mu_swprintf(strText, I18N::Game::SFruitStatDPointsHaveBeenS, I18N::Game::Lookup(index), point, I18N::Game::Decrease);
             SEASON3B::CreateOkMessageBox(strText);
         }
         break;
 
     case 0x04:
-        SEASON3B::CreateOkMessageBox(GlobalText[1906]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::FruitDecreaseIsFailed);
         break;
 
     case 0x05:
     {
         wchar_t strText[128];
-        mu_swprintf(strText, GlobalText[1904], GlobalText[1903]);
+        mu_swprintf(strText, I18N::Game::ThisStatCannotBeSAnymore, I18N::Game::Decrease);
         SEASON3B::CreateOkMessageBox(strText);
     }
     break;
@@ -10508,34 +10509,34 @@ void ReceiveUseStateItem(const BYTE* ReceiveBuffer)
 
             CharacterAttribute->LevelUpPoint += point;
 
-            mu_swprintf(Text, GlobalText[379], GlobalText[index], point, GlobalText[1903]);
+            mu_swprintf(Text, I18N::Game::SFruitStatDPointsHaveBeenS, I18N::Game::Lookup(index), point, I18N::Game::Decrease);
             SEASON3B::CreateOkMessageBox(Text);
         }
         break;
     case 0x07:
-        SEASON3B::CreateOkMessageBox(GlobalText[1906]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::FruitDecreaseIsFailed);
         break;
     case 0x08:
         wchar_t Text[MAX_GLOBAL_TEXT_STRING];
-        mu_swprintf(Text, GlobalText[1904], GlobalText[1903]);
+        mu_swprintf(Text, I18N::Game::ThisStatCannotBeSAnymore, I18N::Game::Decrease);
         SEASON3B::CreateOkMessageBox(Text);
         break;
     case 0x10:
     {
-        SEASON3B::CreateOkMessageBox(GlobalText[1909]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::ToDecreaseTheFruitWeaponsArmorsAndOthersMustBeRemoved);
     }
     break;
 
     case 0x21:
-        SEASON3B::CreateOkMessageBox(GlobalText[1911]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::ImpossibleSinceTheUsableFruitPointsAreAtMaximum);
         break;
 
     case 0x25:
-        SEASON3B::CreateOkMessageBox(GlobalText[1911]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::ImpossibleSinceTheUsableFruitPointsAreAtMaximum);
         break;
 
     case 0x26:
-        SEASON3B::CreateOkMessageBox(GlobalText[1912]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::CannotBeDecreasedUnderTheDefaultStatValue);
         break;
     }
 
@@ -10639,7 +10640,7 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pSystemLogBox->AddText(GlobalText[1500], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CastleInformationFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
     case 0x02:
@@ -10647,10 +10648,10 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
         g_pGuardWindow->SetData(Data);
         break;
     case 0x03:
-        g_pSystemLogBox->AddText(GlobalText[1501], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::UnusualCastleInformation, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x04:
-        g_pSystemLogBox->AddText(GlobalText[1502], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CastleGuildIsDisappeared, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10662,32 +10663,32 @@ void ReceiveBCReg(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pSystemLogBox->AddText(GlobalText[1503], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::FailedToRegisterForCastleSiege, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
         g_GuardsMan.SetRegStatus(1);
-        g_pSystemLogBox->AddText(GlobalText[1504], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CastleSiegeRegistrationIsSuccessful, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x02:
-        g_pSystemLogBox->AddText(GlobalText[1505], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::AlreadyRegisteredInCastleSiege, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pSystemLogBox->AddText(GlobalText[1506], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouBelongToTheGuildOfTheDefendingTeam, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x04:
-        g_pSystemLogBox->AddText(GlobalText[1507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::IncorrectGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x05:
-        g_pSystemLogBox->AddText(GlobalText[1508], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::GuildMasterSLevelIsInsufficient, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x06:
-        g_pSystemLogBox->AddText(GlobalText[1509], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NoAffiliatedGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x07:
-        g_pSystemLogBox->AddText(GlobalText[1510], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ItSNotARegistrationPeriodForCastleSiege, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x08:
-        g_pSystemLogBox->AddText(GlobalText[1511], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NumberOfGuildMembersIsLacking, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     default:
         assert(!"ReceiveBCReg(0xB2, 0x01)");
@@ -10702,19 +10703,19 @@ void ReceiveBCGiveUp(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pSystemLogBox->AddText(GlobalText[1512], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::SurrenderingCastleSiegeHasFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
         SocketClient->ToGameServer()->SendCastleSiegeRegistrationStateRequest();
         SocketClient->ToGameServer()->SendCastleSiegeRegisteredGuildsListRequest();
         g_GuardsMan.SetRegStatus(0);
-        g_pSystemLogBox->AddText(GlobalText[1513], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::SurrenderingCastleSiegeIsSuccessful, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x02:
-        g_pSystemLogBox->AddText(GlobalText[1514], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ThisGuildIsNotRegisteredInCastleSiege, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pSystemLogBox->AddText(GlobalText[1515], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ItSNotASurrenderingPeriodForCastleSiege, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     default:
         assert(!"ReceiveBCGiveUp(0xB2,0x02)");
@@ -10756,7 +10757,7 @@ void ReceiveBCRegMark(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0x00:
-        g_pSystemLogBox->AddText(GlobalText[1516], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::RegistrationOfSignHasFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x01:
     {
@@ -10770,10 +10771,10 @@ void ReceiveBCRegMark(const BYTE* ReceiveBuffer)
     }
     break;
     case 0x02:
-        g_pSystemLogBox->AddText(GlobalText[1517], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ThisGuildHasNotParticipatedInCastleSiege, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 0x03:
-        g_pSystemLogBox->AddText(GlobalText[1518], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::IncorrectItemWasRegistered, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10784,19 +10785,19 @@ void ReceiveBCNPCBuy(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::FailedToPurchase, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.BuyNewNPC(Data->iNpcNumber, Data->iNpcIndex);
         break;
     case 2:
-        g_pSystemLogBox->AddText(GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::PurchasingCostIsInsufficient, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(GlobalText[1616], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::AlreadyExists, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10808,7 +10809,7 @@ void ReceiveBCNPCRepair(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        g_pSystemLogBox->AddText(GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::FailedToPurchase, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
     break;
@@ -10821,10 +10822,10 @@ void ReceiveBCNPCRepair(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pSystemLogBox->AddText(GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::PurchasingCostIsInsufficient, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10835,7 +10836,7 @@ void ReceiveBCNPCUpgrade(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(GlobalText[1519], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::FailedToPurchase, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -10850,22 +10851,22 @@ void ReceiveBCNPCUpgrade(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pSystemLogBox->AddText(GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(GlobalText[1520], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::PurchasingCostIsInsufficient, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(GlobalText[1521], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::JewelIsLacking, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 5:
-        g_pSystemLogBox->AddText(GlobalText[1522], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::IncorrectType, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 6:
-        g_pSystemLogBox->AddText(GlobalText[1523], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::IncorrectRequestedValue, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 7:
-        g_pSystemLogBox->AddText(GlobalText[1524], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NPCDoesNotExist, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10876,13 +10877,13 @@ void ReceiveBCGetTaxInfo(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(GlobalText[1525], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::AcquiringTaxRateInformationHasFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.SetTaxInfo(Data);
         break;
     case 2:
-        g_pSystemLogBox->AddText(GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10893,7 +10894,7 @@ void ReceiveBCChangeTaxRate(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(GlobalText[1526], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ChangingTaxRateInformationHasFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         if (Data->btTaxType == 3)
@@ -10906,7 +10907,7 @@ void ReceiveBCChangeTaxRate(const BYTE* ReceiveBuffer)
         }
         break;
     case 2:
-        g_pSystemLogBox->AddText(GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10917,13 +10918,13 @@ void ReceiveBCWithdraw(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(GlobalText[1527], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::WithdrawalFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
         g_SenatusInfo.ChangeCastleMoney(Data);
         break;
     case 2:
-        g_pSystemLogBox->AddText(GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -10956,7 +10957,7 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     case 0:
     {
         g_pUIPopup->CancelPopup();
-        g_pUIPopup->SetPopup(GlobalText[860], 1, 50, POPUP_OK, nullptr);
+        g_pUIPopup->SetPopup(I18N::Game::UnfortunatelyYouHaveFailed, 1, 50, POPUP_OK, nullptr);
     }
     break;
 
@@ -10967,7 +10968,7 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     case 2:
     {
         g_pUIPopup->CancelPopup();
-        g_pUIPopup->SetPopup(GlobalText[1386], 1, 50, POPUP_OK, nullptr);
+        g_pUIPopup->SetPopup(I18N::Game::NoAuthorization, 1, 50, POPUP_OK, nullptr);
     }
     break;
     }
@@ -10981,7 +10982,7 @@ void ReceiveBCNPCList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::UnfortunatelyYouHaveFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -10994,7 +10995,7 @@ void ReceiveBCNPCList(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pSystemLogBox->AddText(GlobalText[1386], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NoAuthorization, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11007,7 +11008,7 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::UnfortunatelyYouHaveFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11044,7 +11045,7 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
     switch (Data->btResult)
     {
     case 0:
-        g_pSystemLogBox->AddText(GlobalText[860], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::UnfortunatelyYouHaveFailed, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 1:
     {
@@ -11062,10 +11063,10 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
     }
     break;
     case 2:
-        g_pSystemLogBox->AddText(GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::HasNotBeenConfirmedYet, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     case 3:
-        g_pSystemLogBox->AddText(GlobalText[1609], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::HasNotBeenConfirmedYet, SEASON3B::TYPE_SYSTEM_MESSAGE);
         break;
     }
 }
@@ -11180,15 +11181,15 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
         {
             if (pCha != nullptr && pCha->ID != nullptr)
             {
-                mu_swprintf(strText, GlobalText[1486], pCha->ID);
+                mu_swprintf(strText, I18N::Game::CharacterSIs, pCha->ID);
             }
             else
             {
-                mu_swprintf(strText, GlobalText[1487]);
+                mu_swprintf(strText, I18N::Game::CharacterIs);
             }
             pMsgBox->AddMsg(strText);
 
-            mu_swprintf(strText, GlobalText[1488], CrownSwitch->ID);
+            mu_swprintf(strText, I18N::Game::AlreadyPressingS, CrownSwitch->ID);
             pMsgBox->AddMsg(strText);
         }
     }
@@ -11221,7 +11222,7 @@ void ReceiveCrownRegist(const BYTE* ReceiveBuffer)
             int iTime = (pData->m_dwCrownAccessTime / 1000);
             if (iTime >= 59)
                 iTime = 59;
-            mu_swprintf(strText, GlobalText[1980], GlobalText[1489], iTime);
+            mu_swprintf(strText, I18N::Game::SAccumulatedHourDseconds, I18N::Game::OfficialSealRegistrationWillStart, iTime);
             pMsgBox->AddMsg(strText);
             pMsgBox->SetElapseTime(60000 - pData->m_dwCrownAccessTime);
         }
@@ -11242,7 +11243,7 @@ void ReceiveCrownRegist(const BYTE* ReceiveBuffer)
             int iTime = (pData->m_dwCrownAccessTime / 1000);
             if (iTime >= 59)
                 iTime = 59;
-            mu_swprintf(strText, GlobalText[1980], GlobalText[1491], iTime);
+            mu_swprintf(strText, I18N::Game::SAccumulatedHourDseconds, I18N::Game::OfficialSealRegistrationIsFailed, iTime);
             pMsgBox->AddMsg(strText);
         }
     }
@@ -11408,7 +11409,7 @@ void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
     case 0:
     {
         wchar_t Text[100];
-        mu_swprintf(Text, GlobalText[1496], guildName);
+        mu_swprintf(Text, I18N::Game::SAllianceIsTryingToRegisterTheOfficialSealNow, guildName);
         CreateNotice(Text, 1);
     }
     break;
@@ -11417,7 +11418,7 @@ void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
     {
         ChangeBattleFormation(guildName, true);
         wchar_t Text2[100];
-        mu_swprintf(Text2, GlobalText[1497], guildName);
+        mu_swprintf(Text2, I18N::Game::SGuildHasRegisteredTheOfficialSealSuccessfully, guildName);
         CreateNotice(Text2, 1);
     }
     break;
@@ -12070,7 +12071,7 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     case 1:
     {
         //g_pNewUISystem->Hide(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN);
-        g_pSystemLogBox->AddText(GlobalText[1888], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ExchangeHasBeenMade, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }break;
     case 2:
     {
@@ -12097,12 +12098,12 @@ bool ReceiveEnterDoppelGangerEvent(const BYTE* ReceiveBuffer)
         g_pDoppelGangerWindow->LockEnterButton(TRUE);
         break;
     case 2:
-        mu_swprintf(szText, GlobalText[2864]);
+        mu_swprintf(szText, I18N::Game::BattleHasAlreadyCommencedYouCannotEnter);
         g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         g_pDoppelGangerWindow->LockEnterButton(TRUE);
         break;
     case 3:
-        mu_swprintf(szText, GlobalText[2865]);
+        mu_swprintf(szText, I18N::Game::YouCannotEnterIfYouAreA1stStageOutlaw);
         g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         g_pDoppelGangerWindow->LockEnterButton(TRUE);
         break;
@@ -12139,11 +12140,11 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
 
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2763], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::_3MonstersReachingTheMagicCircle, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(L" ");
-        pMsgBox->AddMsg(GlobalText[2764], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::TheCharacterDyingTheServerDisconnectingOrUsingTheWarpCommand, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(L" ");
-        pMsgBox->AddMsg(GlobalText[2765], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::WillResultInDoppelgangerDefenseFailure, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }
     break;
     case 3:		// play->end
@@ -12202,13 +12203,13 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
 
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2769], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::Congratulations, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(L" ");
-        pMsgBox->AddMsg(GlobalText[2770], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::YouVeSuccessfullyDefendedDoppelganger, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
         // 			pMsgBox->AddMsg(L" ");
         // 			pMsgBox->AddMsg(L" ");
         // 			char szText[256] = { 0, };
-        // 			wprintf(szText, GlobalText[2771], Data->dwRewardExp);
+        // 			wprintf(szText, I18N::Game::RewardedExpD, Data->dwRewardExp);
         // 			pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_BOLD);
     }
     break;
@@ -12216,16 +12217,16 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
     {
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2766], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::DoppelgangerDefenseFailed, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }
     break;
     case 2:
     {
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDoppelGangerMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2767], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::YouFailedToFendOffMonstersAnd, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(L" ");
-        pMsgBox->AddMsg(GlobalText[2768], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::AllowedThemToReachThePointLine, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }
     break;
     }
@@ -12297,35 +12298,35 @@ bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
     {
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2798], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::EntryTime2798, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(L" ");
         wchar_t szText[256] = {};
-        mu_swprintf(szText, GlobalText[2799], (Data->RemainTick / 60000));
+        mu_swprintf(szText, I18N::Game::EnterAfterDMinutes, (Data->RemainTick / 60000));
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 2:
     {
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2839], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::QuestItemMissing, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 3:
     {
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2841], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::CapacityExceeded, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 4:
     {
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2842], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::ThereIsStillTimeRemainingInThisZone, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 5:
     {
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2843], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
 
     default:
@@ -12361,8 +12362,8 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
     {
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[2803], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(GlobalText[2804], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::YouHaveFailedToConquerThe, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::FortressOfEmpireGuardians, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 1:
     {
@@ -12371,9 +12372,9 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         wchar_t szText[256] = {};
-        mu_swprintf(szText, GlobalText[2801], day);
+        mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        mu_swprintf(szText, L"%d%ls", zone, GlobalText[2840]);
+        mu_swprintf(szText, L"%d%ls", zone, I18N::Game::ZoneCleared);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     case 2:
@@ -12382,10 +12383,10 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
         SEASON3B::CNewUICommonMessageBox* pMsgBox;
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         wchar_t szText[256] = {};
-        mu_swprintf(szText, GlobalText[2801], day);
+        mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(GlobalText[2802], RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
-        mu_swprintf(szText, GlobalText[861], Data->Exp);
+        pMsgBox->AddMsg(I18N::Game::HasBeenCleared, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
+        mu_swprintf(szText, I18N::Game::RewardedExpD, Data->Exp);
         pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), SEASON3B::MSGBOX_FONT_NORMAL);
     }break;
     }
@@ -12444,21 +12445,21 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[2953]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::DatabaseAccessFailed);
     }
     break;
     case static_cast<BYTE>(-1):
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[2954]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ADatabaseErrorHasOccurred);
     }
     break;
     case 0:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2900], GlobalText[2901]);
+        pMsgBox->Initialize(I18N::Game::PurchaseCompleted, I18N::Game::YourPurchaseHasBeenMade);
 
         SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
 
@@ -12470,67 +12471,67 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[2903]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::YouDoNotHaveEnoughWCoinOrPoints);
     }
     break;
     case 2:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[2904]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::YouDoNotHaveEnoughSpaceInStorage);
     }
     break;
     case 3:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[2956]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ThisItemHasSoldOut);
     }
     break;
     case 4:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[2957]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ThisItemIsNotCurrentlyAvailable);
     }
     break;
     case 5:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[2958]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ThisItemIsNoLongerAvailable);
     }
     break;
     case 6:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[3052]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ThisItemCannotBeBought);
     }break;
     case 7:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[3053]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::EventItemsCannotBeBought);
     }break;
     case 8:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[3054]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::YouVeExceededTheMaximumNumberOfTimesYouCanPurchaseEventItems);
     }break;
     case 9:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2902], GlobalText[3264]);
+        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::YouHaveSelectedAnIncorrectWCoinTypePleaseSelectAgain);
     }
     break;
     default:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);
+        pMsgBox->Initialize(I18N::Game::Error2, I18N::Game::UnknownError);
     }
     break;
     }
@@ -12550,21 +12551,21 @@ bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2953]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::DatabaseAccessFailed);
     }
     break;
     case static_cast<BYTE>(-1):
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2954]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ADatabaseErrorHasOccurred);
     }
     break;
     case 0:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2910], GlobalText[2911]);
+        pMsgBox->Initialize(I18N::Game::GiftDelivered, I18N::Game::YourGiftHasBeenDelivered);
 
         SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
     }
@@ -12573,83 +12574,83 @@ bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2913]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::YouDoNotHaveEnoughCash);
     }
     break;
     case 2:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2914]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::TheRecipientSStorageIsFull);
     }
     break;
     case 3:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2915]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::CannotFindTheRecipient);
     }
     break;
     case 4:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2956]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemHasSoldOut);
     }
     break;
     case 5:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2958]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemIsNoLongerAvailable);
     }
     break;
     case 6:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2945], GlobalText[2958]);
+        pMsgBox->Initialize(I18N::Game::Error2, I18N::Game::ThisItemIsNoLongerAvailable);
     }break;
     case 7:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2959]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemCannotBeSentAsAGift);
     }
     break;
     case 8:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2960]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisEventItemCannotBeSentAsAGift);
     }
     break;
     case 9:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[2961]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::YouVeExceededTheNumberOfEventItemGiftsAllowed);
     }
     break;
     case 10:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[3264]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::YouHaveSelectedAnIncorrectWCoinTypePleaseSelectAgain);
     }
     break;
     case 20:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2912], GlobalText[3263]);
+        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::IDDoesNotExist);
     }
     break;
     default:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);
+        pMsgBox->Initialize(I18N::Game::Error2, I18N::Game::UnknownError);
     }
     break;
     }
@@ -12732,21 +12733,21 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[2967]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::ADatabaseAccessErrorHasOccurred);
     }
     break;
     case static_cast<BYTE>(-1):
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[2966]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::ThereHasBeenAnError);
     }
     break;
     case 0:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2924], GlobalText[2925]);
+        pMsgBox->Initialize(I18N::Game::ItemUsed, I18N::Game::TheItemHasBeenUsed);
 
         g_pInGameShop->UpdateStorageItemList();
     }
@@ -12755,41 +12756,41 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[2962]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::UseStorageDoesNotExist);
     }
     break;
     case 2:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[2963]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::YouCanReceiveThisItemOnlyFromAPCCafe);
     }
     break;
     case 3:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[2964]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::AnActiveColorPlanExistsInTheSelectedPeriod);
     }
     break;
     case 4:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[2965]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::AnActivePersonalFixedPlanExistsInTheSelectedPeriod);
     }break;
     case 21:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[2284]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::NotEnoughSpacePleaseCheckFreeSpaceInYourInventory);
     }
     break;
     case 22:
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[3036]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::CannotUseTheSelectedItem);
     }
     break;
 #ifdef LEM_FIX_SERVERMSG_SEALITEM
@@ -12797,7 +12798,7 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2928], GlobalText[2610]);
+        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::ThisItemCannotBeUsedAlongWithAnItemThatSAlreadyInUse);
     }
     break;
 #endif	// LEM_FIX_SERVERMSG_SEALITEM
@@ -12805,7 +12806,7 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
     {
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2945], GlobalText[890]);
+        pMsgBox->Initialize(I18N::Game::Error2, I18N::Game::UnknownError);
     }
     break;
     }
@@ -14784,42 +14785,42 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
 
             if (buff == eBuff_BlessingOfXmax)
             {
-                g_pSystemLogBox->AddText(GlobalText[2591], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::TheAttackAndDefensePowerHaveIncreased, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 CharacterMachine->CalculateDamage();
                 CharacterMachine->CalculateDefense();
             }
             else if (buff == eBuff_StrengthOfSanta)
             {
-                mu_swprintf(_Temp, GlobalText[2594], 30);
+                mu_swprintf(_Temp, I18N::Game::AttackPowerHasIncreasedOfD, 30);
                 g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                 CharacterMachine->CalculateDamage();
             }
             else if (buff == eBuff_DefenseOfSanta)
             {
-                mu_swprintf(_Temp, GlobalText[2595], 100);
+                mu_swprintf(_Temp, I18N::Game::DefenseHasIncreasedOfD, 100);
                 g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                 CharacterMachine->CalculateDefense();
             }
             else if (buff == eBuff_QuickOfSanta)
             {
-                mu_swprintf(_Temp, GlobalText[2598], 15);
+                mu_swprintf(_Temp, I18N::Game::AttackSpeedHasIncreasedOfD, 15);
                 g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             else if (buff == eBuff_LuckOfSanta)
             {
-                mu_swprintf(_Temp, GlobalText[2599], 10);
+                mu_swprintf(_Temp, I18N::Game::AGRecoverySpeedHasIncreasedOfD, 10);
                 g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             else if (buff == eBuff_CureOfSanta)
             {
-                mu_swprintf(_Temp, GlobalText[2592], 500);
+                mu_swprintf(_Temp, I18N::Game::MaximumLifeHasBeenIncreasedOfD, 500);
                 g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             else if (buff == eBuff_SafeGuardOfSanta)
             {
-                mu_swprintf(_Temp, GlobalText[2593], 500);
+                mu_swprintf(_Temp, I18N::Game::MaximumManaHasIncreasedOfD, 500);
                 g_pSystemLogBox->AddText(_Temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }

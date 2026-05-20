@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "UI/NewUI/Inventory/NewUIInventoryExtension.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/NewUISystem.h"
 
@@ -219,7 +220,7 @@ void CNewUIInventoryExtension::RenderTexts() const
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, GlobalText[3323], WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, I18N::Game::ExpandedInventory, WIDTH, 0, RT3_SORT_CENTER);
 }
 
 float CNewUIInventoryExtension::GetLayerDepth()
@@ -230,7 +231,7 @@ float CNewUIInventoryExtension::GetLayerDepth()
 void CNewUIInventoryExtension::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
 }
 
 void CNewUIInventoryExtension::LoadImages()

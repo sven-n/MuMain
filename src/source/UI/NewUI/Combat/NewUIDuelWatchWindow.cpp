@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Combat/DuelMgr.h"
@@ -44,7 +45,7 @@ bool CNewUIDuelWatchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     for (int i = 0; i < 4; ++i)
     {
         m_bChannelEnable[i] = FALSE;
-        InitButton(m_BtnChannel + i, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 100 + i * 90, GlobalText[2701]);
+        InitButton(m_BtnChannel + i, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 100 + i * 90, I18N::Game::Watch);
     }
 
     Show(false);
@@ -143,7 +144,7 @@ bool CNewUIDuelWatchWindow::Render()
     wchar_t szText[256];
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[2699], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::SelectAnColosseumYouDLikeToWatch, 190, 0, RT3_SORT_CENTER);
 
     RenderImage(IMAGE_DUELWATCHWINDOW_LINE, m_Pos.x + 1, m_Pos.y + 130, 188.f, 21.f);
     RenderImage(IMAGE_DUELWATCHWINDOW_LINE, m_Pos.x + 1, m_Pos.y + 130 + 90, 188.f, 21.f);
@@ -154,7 +155,7 @@ bool CNewUIDuelWatchWindow::Render()
     for (i = 0; i < 4; ++i)
     {
         g_pRenderText->SetTextColor(255, 255, 128, 255);
-        mu_swprintf(szText, GlobalText[2700], i + 1);
+        mu_swprintf(szText, I18N::Game::ColosseumD, i + 1);
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 20, szText, 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 90;
@@ -175,7 +176,7 @@ bool CNewUIDuelWatchWindow::Render()
         else
         {
             g_pRenderText->SetTextColor(255, 255, 255, 255);
-            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, GlobalText[2705], 190, 0, RT3_SORT_CENTER);
+            g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 35, I18N::Game::NoDuelOn, 190, 0, RT3_SORT_CENTER);
         }
 
         ptOrigin.y += 90;
@@ -243,7 +244,7 @@ void CNewUIDuelWatchWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    mu_swprintf(szText, L"%ls", GlobalText[2698]);
+    mu_swprintf(szText, L"%ls", I18N::Game::DoorkeeperTitus);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

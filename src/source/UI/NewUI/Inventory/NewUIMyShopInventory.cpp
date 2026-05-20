@@ -7,6 +7,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
+#include "I18N/All.h"
 
 const int iMAX_SHOPTITLE_MULTI = 26;
 
@@ -70,15 +71,15 @@ bool SEASON3B::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int x, in
 
     m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_EXIT_BTN, false);
     m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_EXIT].ChangeToolTipText(GlobalText[1002], true);
+    m_Button[MYSHOPINVENTORY_EXIT].ChangeToolTipText(I18N::Game::Close, true);
 
     m_Button[MYSHOPINVENTORY_OPEN].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_OPEN, false);
     m_Button[MYSHOPINVENTORY_OPEN].ChangeButtonInfo(m_Pos.x + 53, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1107], true);
+    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Open, true);
 
     m_Button[MYSHOPINVENTORY_CLOSE].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_CLOSE, false);
     m_Button[MYSHOPINVENTORY_CLOSE].ChangeButtonInfo(m_Pos.x + 93, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_CLOSE].ChangeToolTipText(GlobalText[1108], true);
+    m_Button[MYSHOPINVENTORY_CLOSE].ChangeToolTipText(I18N::Game::Closed, true);
 
     m_EditBox = new CUITextInputBox;
 
@@ -208,7 +209,7 @@ void SEASON3B::CNewUIMyShopInventory::ChangePersonal(bool state)
         m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1106], true);
+        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Apply1106, true);
         m_Button[MYSHOPINVENTORY_CLOSE].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_CLOSE].ChangeTextColor(RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_CLOSE].UnLock();
@@ -221,7 +222,7 @@ void SEASON3B::CNewUIMyShopInventory::ChangePersonal(bool state)
         m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1107], true);
+        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Open, true);
     }
 }
 
@@ -230,7 +231,7 @@ void SEASON3B::CNewUIMyShopInventory::OpenButtonLock()
     m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(100, 100, 100, 255));
     m_Button[MYSHOPINVENTORY_OPEN].Lock();
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1107], true);
+    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Open, true);
 }
 
 void SEASON3B::CNewUIMyShopInventory::OpenButtonUnLock()
@@ -238,7 +239,7 @@ void SEASON3B::CNewUIMyShopInventory::OpenButtonUnLock()
     m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
     m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(GlobalText[1106], true);
+    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Apply1106, true);
 }
 
 const bool SEASON3B::CNewUIMyShopInventory::IsEnablePersonalShop() const
@@ -303,7 +304,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         {
             if (IsPersonalShopBan(pItemObj) == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ThisItemIsNotAllowedToUseThePrivateStore, SEASON3B::TYPE_ERROR_MESSAGE);
                 return true;
             }
 
@@ -323,7 +324,7 @@ bool SEASON3B::CNewUIMyShopInventory::MyShopInventoryProcess()
         {
             if (IsPersonalShopBan(pItemObj) == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[2226], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ThisItemIsNotAllowedToUseThePrivateStore, SEASON3B::TYPE_ERROR_MESSAGE);
                 return true;
             }
 
@@ -447,7 +448,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
                 }
                 else
                 {
-                    g_pSystemLogBox->AddText(GlobalText[1119], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::ThereSNoStoreNameOrItemPrice, SEASON3B::TYPE_ERROR_MESSAGE);
                 }
             }
             return false;
@@ -503,7 +504,7 @@ void SEASON3B::CNewUIMyShopInventory::RenderFrame()
     RenderImage(IMAGE_MYSHOPINVENTORY_EDIT, m_Pos.x + 12, m_Pos.y + 49, 169.f, 26.f);
 
     wchar_t Text[100] = {};
-    mu_swprintf(Text, GlobalText[1102]);
+    mu_swprintf(Text, I18N::Game::PersonalStore1102);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, INVENTORY_WIDTH, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 
@@ -513,39 +514,39 @@ void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
 
     if (m_EnablePersonalShop)
     {
-        RenderText(GlobalText[1103], m_Pos.x, m_Pos.y + 200, INVENTORY_WIDTH, 0, RGBA(215, 138, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold);
+        RenderText(I18N::Game::StillOpening, m_Pos.x, m_Pos.y + 200, INVENTORY_WIDTH, 0, RGBA(215, 138, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold);
     }
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, GlobalText[370]);
+    mu_swprintf(Text, I18N::Game::Warning370);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, GlobalText[1109]);
+    mu_swprintf(Text, I18N::Game::SellingPriceWhenOpeningTheStore);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, GlobalText[1111]);
+    mu_swprintf(Text, I18N::Game::PleaseVerify);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, GlobalText[1112]);
+    mu_swprintf(Text, I18N::Game::AlreadyInThePersonalStore);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, GlobalText[1113]);
+    mu_swprintf(Text, I18N::Game::CancelSoldItem);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, GlobalText[1115]);
+    mu_swprintf(Text, I18N::Game::CanTBeReturned);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, GlobalText[1134]);
+    mu_swprintf(Text, I18N::Game::AllItemTrading);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, GlobalText[1135]);
+    mu_swprintf(Text, I18N::Game::CanOnlyBeDoneUsingZen);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 }
 

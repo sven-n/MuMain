@@ -11,6 +11,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
@@ -46,11 +47,11 @@ bool CNewUIUnitedMarketPlaceWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRen
 
     LoadImages();
 
-    InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 230, GlobalText[3016]);
+    InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 230, I18N::Game::Warp3016);
 
     m_BtnClose.ChangeButtonImgState(true, IMAGE_UNITEDMARKETPLACEWINDOW_BTN_CLOSE);
     m_BtnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_BtnClose.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnClose.ChangeToolTipText(I18N::Game::Close, true);
 
     Show(false);
 
@@ -162,22 +163,22 @@ bool CNewUIUnitedMarketPlaceWindow::Render()
     if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
     {
         g_pRenderText->SetFont(g_hFont);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 10, GlobalText[3010], 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 30, GlobalText[3011], 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 50, GlobalText[3012], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 10, I18N::Game::WillYouBeGoingBackToTownNow, 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 30, I18N::Game::HaveAnotherGreatDay, 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 50, I18N::Game::AndStayPositiveAtAllTimes, 190, 0, RT3_SORT_CENTER);
 
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 130, GlobalText[3013], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 130, I18N::Game::WouldYouLikeToGoToTown, 190, 0, RT3_SORT_CENTER);
     }
     else
     {
         g_pRenderText->SetFont(g_hFont);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 10, GlobalText[3003], 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 30, GlobalText[3004], 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 50, GlobalText[3005], 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 70, GlobalText[3006], 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 90, GlobalText[3007], 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 110, GlobalText[3008], 190, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 130, GlobalText[3009], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 10, I18N::Game::IfYouGoToTheMarketInLorencia, 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 30, I18N::Game::YouLlFindManyItemsYouNeed, 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 50, I18N::Game::AvailableForPurchase, 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 70, I18N::Game::IfYouHaveItemsYouWantToSell, 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 90, I18N::Game::YouCanSellThem, 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 110, I18N::Game::AtTheMarket, 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 130, I18N::Game::WouldYouLikeToGoToTheMarket, 190, 0, RT3_SORT_CENTER);
     }
 
     if (m_bIsEnterButtonLocked == TRUE)
@@ -272,7 +273,7 @@ void CNewUIUnitedMarketPlaceWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    mu_swprintf(szText, L"%ls", GlobalText[3000]);
+    mu_swprintf(szText, L"%ls", I18N::Game::Julia);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

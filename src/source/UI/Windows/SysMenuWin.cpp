@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Windows/SysMenuWin.h"
+#include "I18N/All.h"
 
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
@@ -46,7 +47,7 @@ void CSysMenuWin::Create()
     m_winBack.Create(aiiBack, 1, 10);
 
     const wchar_t* apszBtnText[SMW_BTN_MAX] =
-    { GlobalText[381], GlobalText[382], GlobalText[385], GlobalText[388] };
+    { I18N::Game::ExitGame, I18N::Game::SelectServer, I18N::Game::Option385, I18N::Game::Close };
     DWORD adwBtnClr[4] =
     { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };
     for (int i = 0; i < SMW_BTN_MAX; ++i)

@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "SocketSystem.h"
+#include "I18N/All.h"
 
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Models/ZzzBMD.h"
@@ -209,7 +210,7 @@ void CSocketItemMgr::CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID,
 
     CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, fOptionValue);
 
-    mu_swprintf(pszOptionText, L"%ls(%ls %ls)", GlobalText[2640 + pInfo->m_iOptionCategory - 1], pInfo->m_szOptionName, szOptionValueText);
+    mu_swprintf(pszOptionText, L"%ls(%ls %ls)", I18N::Game::Lookup(2640 + pInfo->m_iOptionCategory - 1), pInfo->m_szOptionName, szOptionValueText);
 }
 
 extern int SkipNum;
@@ -219,7 +220,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
     if (pItem->SocketCount == 0) return iTextNum;
 
     mu_swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
-    mu_swprintf(TextList[iTextNum], L"%ls %ls", GlobalText[2650], GlobalText[159]);
+    mu_swprintf(TextList[iTextNum], L"%ls %ls", I18N::Game::Socket, I18N::Game::ItemOptionInfo);
     TextListColor[iTextNum] = TEXT_COLOR_PURPLE;
     TextBold[iTextNum] = false;
     ++iTextNum;
@@ -232,7 +233,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
     {
         if (pItem->SocketSeedID[i] == SOCKET_EMPTY)
         {
-            mu_swprintf(szOptionText, GlobalText[2652]);
+            mu_swprintf(szOptionText, I18N::Game::NoItemApplication);
             TextListColor[iTextNum] = TEXT_COLOR_GRAY;
         }
         else if (pItem->SocketSeedID[i] < MAX_SOCKET_OPTION)
@@ -245,7 +246,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
             assert(!"Socket index error");
         }
 
-        mu_swprintf(TextList[iTextNum], GlobalText[2655], i + 1, szOptionText);
+        mu_swprintf(TextList[iTextNum], I18N::Game::SocketDS, i + 1, szOptionText);
         TextBold[iTextNum] = false;
         ++iTextNum;
     }
@@ -257,7 +258,7 @@ int CSocketItemMgr::AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum)
         {
             mu_swprintf(TextList[iTextNum], L"\n"); ++iTextNum; ++SkipNum;
 
-            mu_swprintf(TextList[iTextNum], L"%ls", GlobalText[2656]);
+            mu_swprintf(TextList[iTextNum], L"%ls", I18N::Game::BonusSocketOption);
             TextListColor[iTextNum] = TEXT_COLOR_PURPLE;
             TextBold[iTextNum] = false;
             ++iTextNum;
@@ -280,7 +281,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
     if (pItem->Type >= ITEM_SEED_FIRE && pItem->Type <= ITEM_SEED_EARTH)
     {
         int iCategoryIndex = pItem->Type - (ITEM_SEED_FIRE) + 1;
-        mu_swprintf(TextList[iTextNum], GlobalText[2653], GlobalText[2640 + iCategoryIndex - 1]);
+        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, I18N::Game::Lookup(2640 + iCategoryIndex - 1));
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -319,7 +320,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
     else if (pItem->Type >= ITEM_SPHERE_MONO && pItem->Type <= ITEM_SPHERE_5)
     {
         int iSphereLevel = pItem->Type - (ITEM_SPHERE_MONO) + 1;
-        mu_swprintf(TextList[iTextNum], GlobalText[2654], iSphereLevel);
+        mu_swprintf(TextList[iTextNum], I18N::Game::LevelD, iSphereLevel);
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -327,7 +328,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
     else if (pItem->Type >= ITEM_SEED_SPHERE_FIRE_1 && pItem->Type <= ITEM_SEED_SPHERE_EARTH_5)
     {
         int iCategoryIndex = (pItem->Type - (ITEM_SEED_SPHERE_FIRE_1)) % 6 + 1;
-        mu_swprintf(TextList[iTextNum], GlobalText[2653], GlobalText[2640 + iCategoryIndex - 1]);
+        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, I18N::Game::Lookup(2640 + iCategoryIndex - 1));
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -399,7 +400,7 @@ void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
         mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
         mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
 
-        mu_swprintf(TextList[TextNum], GlobalText[2657]);
+        mu_swprintf(TextList[TextNum], I18N::Game::SocketPackageOption);
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = true;
         TextNum++;

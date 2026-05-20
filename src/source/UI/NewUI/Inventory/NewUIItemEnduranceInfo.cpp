@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/Inventory/NewUIItemEnduranceInfo.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "I18N/All.h"
 
 #include "Character/CharacterManager.h"
 
@@ -352,7 +353,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszN
     EndRenderColor();
 
 #ifdef PJH_FIX_SPRIT
-    if (wcscmp(pszName, GlobalText[1214]) == 0)
+    if (wcscmp(pszName, I18N::Game::DarkRaven) == 0)
     {
         int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
         PET_INFO PetInfo;
@@ -421,7 +422,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
         {
         case MODEL_HELPER:
         {
-            mu_swprintf(szText, GlobalText[353]);
+            mu_swprintf(szText, I18N::Game::GuardianAngel);
         }
         break;
         case MODEL_IMP:
@@ -432,22 +433,22 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
         break;
         case MODEL_HORN_OF_UNIRIA:
         {
-            mu_swprintf(szText, GlobalText[355]);
+            mu_swprintf(szText, I18N::Game::Uniria);
         }
         break;
         case MODEL_HORN_OF_DINORANT:
         {
-            mu_swprintf(szText, GlobalText[354]);
+            mu_swprintf(szText, I18N::Game::Dinorant);
         }
         break;
         case MODEL_DARK_HORSE_ITEM:
         {
-            mu_swprintf(szText, GlobalText[1187]);
+            mu_swprintf(szText, I18N::Game::DarkHorse);
         }
         break;
         case MODEL_HORN_OF_FENRIR:
         {
-            mu_swprintf(szText, GlobalText[1916]);
+            mu_swprintf(szText, I18N::Game::Fenrir);
         }
         break;
         case MODEL_DEMON:
@@ -498,7 +499,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedPetLife(int iX, int iY)
         return false;
 
     wchar_t szText[256] = {};
-    mu_swprintf(szText, GlobalText[1214]);
+    mu_swprintf(szText, I18N::Game::DarkRaven);
 
     int iLife = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability;
 
@@ -512,7 +513,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderSummonMonsterLife(int iX, int iY)
         return false;
 
     wchar_t szText[256] = {};
-    mu_swprintf(szText, GlobalText[356]);
+    mu_swprintf(szText, I18N::Game::SummonedMonsterHP);
 
     RenderHPUI(iX, iY, szText, SummonLife, 100);
 
@@ -540,7 +541,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
         if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type != ITEM_ARROWS))
             return false;
 
-        mu_swprintf(szText, GlobalText[351], iNumEquipedArrowDurability, iNumArrowSetInInven);
+        mu_swprintf(szText, I18N::Game::ArrowsDD, iNumEquipedArrowDurability, iNumArrowSetInInven);
     }
     else if (m_iCurArrowType == ARROWTYPE_CROSSBOW)
     {
@@ -554,7 +555,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
         if ((iNumArrowSetInInven == 0) && (CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type != ITEM_BOLT))
             return false;
 
-        mu_swprintf(szText, GlobalText[352], iNumEquipedArrowDurability, iNumArrowSetInInven);
+        mu_swprintf(szText, I18N::Game::BoltsDD, iNumEquipedArrowDurability, iNumArrowSetInInven);
     }
 
     g_pRenderText->SetBgColor(0, 0, 0, 180);

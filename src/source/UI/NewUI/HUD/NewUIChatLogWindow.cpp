@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/HUD/NewUIChatLogWindow.h"
 #include "UI/NewUI/NewUIManager.h"
@@ -572,7 +573,7 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
     if (token == nullptr)
     {
         ResetFilter();
-        AddText(L"", GlobalText[756], TYPE_SYSTEM_MESSAGE);
+        AddText(L"", I18N::Game::FilteringHasBeenCanceled, TYPE_SYSTEM_MESSAGE);
     }
     else
     {
@@ -586,7 +587,7 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
             token = wcstok_s(nullptr, L" ", &context);
         }
 
-        AddText(L"", GlobalText[755], TYPE_SYSTEM_MESSAGE);
+        AddText(L"", I18N::Game::FilteringHasBeenActivated, TYPE_SYSTEM_MESSAGE);
     }
 }
 

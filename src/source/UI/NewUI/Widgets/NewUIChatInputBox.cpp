@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "UI/NewUI/Widgets/NewUIChatInputBox.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/HUD/NewUIChatLogWindow.h"
@@ -541,7 +542,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                 {
                     //if (CheckAbuseFilter(szChatText))
                     //{
-                    //    wstrText = GlobalText[570];
+                    //    wstrText = I18N::Game::PwnedByTheFilter;
                     //}
 
                     if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && wcslen(szChatText) && wcslen(szWhisperID) > 0)
@@ -550,7 +551,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                         g_pChatListBox->AddText(Hero->ID, szChatText, SEASON3B::TYPE_WHISPER_MESSAGE);
                         AddWhsprIDHistory(szWhisperID);
                     }
-                    else if (wcsncmp(szChatText, GlobalText[260], GlobalText.GetStringSize(260)) == 0)
+                    else if (wcsncmp(szChatText, I18N::Game::Warp260, GlobalText.GetStringSize(260)) == 0)
                     {
                         wchar_t* pszMapName = szChatText + GlobalText.GetStringSize(260) + 1;
                         int iMapIndex = g_pMoveCommandWindow->GetMapIndexFromMovereq(pszMapName);

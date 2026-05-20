@@ -6,6 +6,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
@@ -128,7 +129,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        wcscpy(TextList[iTextNum], GlobalText[120]);
+        wcscpy(TextList[iTextNum], I18N::Game::KeyFunction);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
@@ -136,10 +137,10 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        // Render F1-F4 entries (GlobalText[121..124]) first.
+        // Render F1-F4 entries (I18N::Game::Lookup(121..124)) first.
         for (int i = 0; i < 4; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[121 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(121 + i));
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -156,16 +157,16 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         };
         for (int key : kCustomKeys)
         {
-            wcsncpy_s(TextList[iTextNum], GlobalText[key], 99);
+            wcsncpy_s(TextList[iTextNum], I18N::Game::Lookup(key), 99);
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
         }
 
-        // Render the remaining shipped entries (GlobalText[125..139]).
+        // Render the remaining shipped entries (I18N::Game::Lookup(125..139)).
         for (int i = 4; i < 19; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[121 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(121 + i));
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -183,7 +184,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        wcscpy(TextList[iTextNum], GlobalText[140]);
+        wcscpy(TextList[iTextNum], I18N::Game::ChattingInstructions);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
@@ -193,7 +194,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
 
         for (int i = 0; i < 16; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[141 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(141 + i));
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -211,14 +212,14 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        wcscpy(TextList[iTextNum], GlobalText[2421]);
+        wcscpy(TextList[iTextNum], I18N::Game::AMPM);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
 
         for (int i = 0; i < 24; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[2422 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(2422 + i));
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -236,14 +237,14 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        wcscpy(TextList[iTextNum], GlobalText[2446]);
+        wcscpy(TextList[iTextNum], I18N::Game::ChaosCastleDevilSSquare);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
 
         for (int i = 0; i < 18; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[2447 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(2447 + i));
             if (i == 0 || i == 8 || i == 9)
             {
                 TextListColor[iTextNum] = TEXT_COLOR_BLUE;

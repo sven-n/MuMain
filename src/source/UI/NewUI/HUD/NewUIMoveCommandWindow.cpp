@@ -13,6 +13,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
@@ -242,8 +243,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
 
     if (IsLuckySealBuff() == false) {
         wchar_t lpszStr1[1024]; wchar_t* lpszStr2 = NULL;
-        if (src.find(GlobalText[260]) != std::wstring::npos) {
-            std::wstring temp = GlobalText[260];
+        if (src.find(I18N::Game::Warp260) != std::wstring::npos) {
+            std::wstring temp = I18N::Game::Warp260;
             temp += ' ';
             mu_swprintf(lpszStr1, src.c_str());
             wchar_t* context = nullptr;
@@ -370,7 +371,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
             ITEM* pEquipedHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
             ITEM* pEquipedWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
 
-            if (wcscmp((*li)->_ReqInfo.szMainMapName, GlobalText[55]) == 0)
+            if (wcscmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Icarus) == 0)
             {
                 if (
                     (
@@ -394,7 +395,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
                     (*li)->_bCanMove = false;
                 }
             }
-            else if (wcsncmp((*li)->_ReqInfo.szMainMapName, GlobalText[37], wcslen(GlobalText[37])) == 0)
+            else if (wcsncmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Atlans, wcslen(I18N::Game::Atlans)) == 0)
             {
                 if (pEquipedHelper->Type == ITEM_HORN_OF_UNIRIA || pEquipedHelper->Type == ITEM_HORN_OF_DINORANT)
                 {
@@ -405,7 +406,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
                     (*li)->_bCanMove = true;
                 }
             }
-            else if ((g_ServerListManager->IsNonPvP() == true) && (wcscmp((*li)->_ReqInfo.szMainMapName, GlobalText[2686]) == 0))
+            else if ((g_ServerListManager->IsNonPvP() == true) && (wcscmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Vulcanus) == 0))
             {
                 (*li)->_bCanMove = false;
             }
@@ -774,13 +775,13 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(255, 204, 26, 255);
-    g_pRenderText->RenderText(m_StartUISubjectName.x, m_StartUISubjectName.y, GlobalText[933], 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_StartUISubjectName.x, m_StartUISubjectName.y, I18N::Game::WarpCommandWindow, 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(127, 178, 255, 255);
-    g_pRenderText->RenderText(m_StrifePos.x, m_StartUISubjectName.y + 20, GlobalText[2988], 0, 0, RT3_WRITE_CENTER);
-    g_pRenderText->RenderText(m_MapNamePos.x, m_StartUISubjectName.y + 20, GlobalText[934], 0, 0, RT3_WRITE_CENTER);
-    g_pRenderText->RenderText(m_ReqLevelPos.x, m_StartUISubjectName.y + 20, GlobalText[935], 0, 0, RT3_WRITE_CENTER);
-    g_pRenderText->RenderText(m_ReqZenPos.x, m_StartUISubjectName.y + 20, GlobalText[936], 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_StrifePos.x, m_StartUISubjectName.y + 20, I18N::Game::BattleZone, 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_MapNamePos.x, m_StartUISubjectName.y + 20, I18N::Game::Map, 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_ReqLevelPos.x, m_StartUISubjectName.y + 20, I18N::Game::MinLevel, 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_ReqZenPos.x, m_StartUISubjectName.y + 20, I18N::Game::Cost, 0, 0, RT3_WRITE_CENTER);
 }
 
 bool SEASON3B::CNewUIMoveCommandWindow::Render()
@@ -830,7 +831,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
             g_pRenderText->SetTextColor(255, 255, 255, 255);
 
             if ((*li)->_bStrife)
-                g_pRenderText->RenderText(m_StrifePos.x, iY, GlobalText[2987], 0, 0, RT3_WRITE_CENTER);
+                g_pRenderText->RenderText(m_StrifePos.x, iY, I18N::Game::Battle2987, 0, 0, RT3_WRITE_CENTER);
             g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0, 0, RT3_WRITE_CENTER);
             _itow(iReqLevel, szText, 10);
             g_pRenderText->RenderText(m_ReqLevelPos.x, iY, szText, 0, 0, RT3_WRITE_CENTER);
@@ -850,7 +851,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
             g_pRenderText->SetTextColor(164, 39, 17, 255);
 
             if ((*li)->_bStrife)
-                g_pRenderText->RenderText(m_StrifePos.x, iY, GlobalText[2987], 0, 0, RT3_WRITE_CENTER);
+                g_pRenderText->RenderText(m_StrifePos.x, iY, I18N::Game::Battle2987, 0, 0, RT3_WRITE_CENTER);
 
             g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0, 0, RT3_WRITE_CENTER);
 
@@ -881,7 +882,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
     }
 
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_MapNameUISize.x / 2, m_MapNameUISize.y - m_iRealFontHeight - 5, GlobalText[1002], 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_MapNameUISize.x / 2, m_MapNameUISize.y - m_iRealFontHeight - 5, I18N::Game::Close, 0, 0, RT3_WRITE_CENTER);
     DisableAlphaBlend();
     return true;
 }

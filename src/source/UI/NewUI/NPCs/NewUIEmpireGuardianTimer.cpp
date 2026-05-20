@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/NPCs/NewUIEmpireGuardianTimer.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
@@ -87,7 +88,7 @@ bool CNewUIEmpireGuardianTimer::Render()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
 
-    mu_swprintf(szText, GlobalText[2805], m_iDay, m_iZone);
+    mu_swprintf(szText, I18N::Game::RoundDZoneD, m_iDay, m_iZone);
     g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 13, szText, 110, 0, RT3_SORT_CENTER);
 
     switch (m_iType)
@@ -95,11 +96,11 @@ bool CNewUIEmpireGuardianTimer::Render()
     case 0:
     case 1:
         g_pRenderText->SetTextColor(10, 200, 10, 255);
-        g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 38, GlobalText[2844], 110, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 38, I18N::Game::StandbyTime, 110, 0, RT3_SORT_CENTER);
         break;
     case 2:
         g_pRenderText->SetTextColor(255, 150, 0, 255);
-        mu_swprintf(szText, L"%ls (%ls)", GlobalText[865], GlobalText[2845]);
+        mu_swprintf(szText, L"%ls (%ls)", I18N::Game::TimeLeft, I18N::Game::RemainingMonsters);
         g_pRenderText->RenderText(m_Pos.x + (TIMER_WINDOW_WIDTH / 2) - 55, m_Pos.y + 38, szText, 110, 0, RT3_SORT_CENTER);
         break;
     }

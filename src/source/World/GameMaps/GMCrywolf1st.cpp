@@ -17,6 +17,7 @@
 #include "Character/CharacterManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "I18N/All.h"
 
 extern void MonsterMoveSandSmoke(OBJECT* o);
 extern void MonsterDieSandSmoke(OBJECT* o);
@@ -257,11 +258,11 @@ void M34CryWolf1st::RenderNoticesCryWolf()
         nText = 1957 + i + iTemp;
         if (1966 == nText || 1967 == nText)
         {
-            mu_swprintf(szText, GlobalText[nText]);
+            mu_swprintf(szText, I18N::Game::Lookup(nText));
             g_pRenderText->RenderText(190, 63 + i * 13, szText);
         }
         else
-            g_pRenderText->RenderText(190, 63 + i * 13, GlobalText[nText]);
+            g_pRenderText->RenderText(190, 63 + i * 13, I18N::Game::Lookup(nText));
     }
 }
 
@@ -2171,10 +2172,10 @@ void M34CryWolf1st::Set_Message_Box(int Str, int Num, int Key, int ObjNum)
     if (Str == 56)
     {
         BYTE State = (m_AltarState[ObjNum] & 0x0f);
-        mu_swprintf(Box_String[Num], GlobalText[1950 + Str], State);
+        mu_swprintf(Box_String[Num], I18N::Game::Lookup(1950 + Str), State);
     }
     else
-        wcscpy(Box_String[Num], GlobalText[1950 + Str]);
+        wcscpy(Box_String[Num], I18N::Game::Lookup(1950 + Str));
     if (Str == 56 || Str == 57)
         Message_Box = 1;
     else
@@ -2414,13 +2415,13 @@ bool M34CryWolf1st::Render_Mvp_Interface()
         g_pRenderText->SetTextColor(255, 148, 21, 255);
         g_pRenderText->SetBgColor(0x00000000);
 
-        mu_swprintf(Text, L"%ls", GlobalText[680]);
+        mu_swprintf(Text, L"%ls", I18N::Game::Rank);
         g_pRenderText->RenderText(240, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        mu_swprintf(Text, L"%ls", GlobalText[681]);
+        mu_swprintf(Text, L"%ls", I18N::Game::Character);
         g_pRenderText->RenderText(285, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        mu_swprintf(Text, L"%ls", GlobalText[1973]);
+        mu_swprintf(Text, L"%ls", I18N::Game::Class);
         g_pRenderText->RenderText(333, 160, Text, 0, 0, RT3_WRITE_CENTER);
-        mu_swprintf(Text, L"%ls", GlobalText[1977]);
+        mu_swprintf(Text, L"%ls", I18N::Game::Score);
         g_pRenderText->RenderText(387, 160, Text, 0, 0, RT3_WRITE_CENTER);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetBgColor(0x00000000);
@@ -2449,12 +2450,12 @@ bool M34CryWolf1st::Render_Mvp_Interface()
 
         if (View_Suc_Or_Fail == 1)
         {
-            g_pRenderText->RenderText(330, 175 + icntIndex * 17, GlobalText[2000], 0, 0, RT3_WRITE_CENTER); icntIndex++;
-            g_pRenderText->RenderText(328, 175 + icntIndex * 17, GlobalText[2001], 0, 0, RT3_WRITE_CENTER);
+            g_pRenderText->RenderText(330, 175 + icntIndex * 17, I18N::Game::MonsterStrengthDecreased10, 0, 0, RT3_WRITE_CENTER); icntIndex++;
+            g_pRenderText->RenderText(328, 175 + icntIndex * 17, I18N::Game::_5IncreaseInCastleAndArenaInvitationCombineRate, 0, 0, RT3_WRITE_CENTER);
         }
         else
         {
-            g_pRenderText->RenderText(330, 175 + icntIndex * 17, GlobalText[2009], 0, 0, RT3_WRITE_CENTER);
+            g_pRenderText->RenderText(330, 175 + icntIndex * 17, I18N::Game::AllNPCsInCrywolfHaveBeenDeleted, 0, 0, RT3_WRITE_CENTER);
         }
 
         if (MouseX > 300 && MouseX < 300 + 54 && MouseY > 300 && MouseY < 300 + 30)
@@ -2619,7 +2620,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 148, 21, 255);
     g_pRenderText->SetBgColor(0);
-    mu_swprintf(Text, GlobalText[1948], Dark_elf_Num);
+    mu_swprintf(Text, I18N::Game::DarkElfD12, Dark_elf_Num);
     g_pRenderText->RenderText(582, 359, Text, 0, 0, RT3_WRITE_CENTER);
 
     if (View_Bal == true)
@@ -2630,7 +2631,7 @@ bool M34CryWolf1st::Render_Mvp_Interface()
         {
             g_pCryWolfInterface->Render(bar[0], bar[1], bar[2], bar[3], 0.f, 0.f, bar[4], bar[5], 0);
             g_pCryWolfInterface->Render(Val_Icon[0], Val_Icon[1], Val_Icon[2], Val_Icon[3], 0.f, 0.f, Val_Icon[4], Val_Icon[5], 4);
-            mu_swprintf(Text, GlobalText[1949]);
+            mu_swprintf(Text, I18N::Game::Balgass);
             g_pRenderText->RenderText(38, 101, Text, 0, 0, RT3_WRITE_CENTER);
 
             float Hp = ((67.f / 100.f) * (float)Val_Hp);

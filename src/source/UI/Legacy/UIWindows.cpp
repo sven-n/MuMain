@@ -18,6 +18,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
+#include "I18N/All.h"
 
 
 extern int	 g_iChatInputType;
@@ -151,7 +152,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
             auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
 
             if (pMainWnd != NULL)
-                pMainWnd->AddWindow(pbw->GetUIID(), GlobalText[991]);
+                pMainWnd->AddWindow(pbw->GetUIID(), I18N::Game::Question);
         }
         if (iWindowType == UIWNDTYPE_QUESTION) g_dwTopWindow = pbw->GetUIID();
         else AddForceTopWindowList(pbw->GetUIID());
@@ -163,7 +164,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         {
             auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
             if (pMainWnd != NULL)
-                pMainWnd->AddWindow(pbw->GetUIID(), GlobalText[228]);
+                pMainWnd->AddWindow(pbw->GetUIID(), I18N::Game::OK);
         }
         if (iWindowType == UIWNDTYPE_OK) g_dwTopWindow = pbw->GetUIID();
         else AddForceTopWindowList(pbw->GetUIID());
@@ -635,16 +636,16 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
     g_pWindowMgr->HideAllWindowClear();
     if (g_iChatInputType == 0)
     {
-        if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[992], 2) == FALSE)
-            g_pSystemLogBox->AddText(GlobalText[992], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouCannotUseTheMyFriend, 2) == FALSE)
+            g_pSystemLogBox->AddText(I18N::Game::YouCannotUseTheMyFriend, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return;
     }
     int iLevel = CharacterAttribute->Level;
 
     if (iLevel < 6)
     {
-        if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
-            g_pSystemLogBox->AddText(GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction) == FALSE)
+            g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return;
     }
 
@@ -664,7 +665,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
     }
     if (m_iMainWindowWidth == 0)
     {
-        AddWindow(UIWNDTYPE_FRIENDMAIN, iPos_x, iPos_y, GlobalText[m_iFriendMainWindowTitleNumber]);
+        AddWindow(UIWNDTYPE_FRIENDMAIN, iPos_x, iPos_y, I18N::Game::Lookup(m_iFriendMainWindowTitleNumber));
         g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, m_dwMainWindowUIID, 0);
         RefreshMainWndChatRoomList();
         PlayBuffer(SOUND_CLICK01);
@@ -672,7 +673,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
     }
     else
     {
-        AddWindow(UIWNDTYPE_FRIENDMAIN, m_iMainWindowPos_x, m_iMainWindowPos_y, GlobalText[m_iFriendMainWindowTitleNumber]);
+        AddWindow(UIWNDTYPE_FRIENDMAIN, m_iMainWindowPos_x, m_iMainWindowPos_y, I18N::Game::Lookup(m_iFriendMainWindowTitleNumber));
         g_pWindowMgr->SendUIMessage(UI_MESSAGE_SELECT, m_dwMainWindowUIID, 0);
         CUIBaseWindow* pWindow = GetWindow(m_dwMainWindowUIID);
         if (pWindow != NULL)
@@ -781,7 +782,7 @@ void CUIWindowMgr::SetServerEnable(BOOL bFlag)
         {
             m_iFriendMainWindowTitleNumber = 990;
             if (GetFriendMainWindow() != NULL)
-                GetFriendMainWindow()->SetTitle(GlobalText[m_iFriendMainWindowTitleNumber]);
+                GetFriendMainWindow()->SetTitle(I18N::Game::Lookup(m_iFriendMainWindowTitleNumber));
         }
     }
     else
@@ -790,7 +791,7 @@ void CUIWindowMgr::SetServerEnable(BOOL bFlag)
         {
             m_iFriendMainWindowTitleNumber = 1066;
             if (GetFriendMainWindow() != NULL)
-                GetFriendMainWindow()->SetTitle(GlobalText[m_iFriendMainWindowTitleNumber]);
+                GetFriendMainWindow()->SetTitle(I18N::Game::Lookup(m_iFriendMainWindowTitleNumber));
         }
     }
 }
@@ -1295,12 +1296,12 @@ void CUIChatWindow::InitControls()
     m_TextInputBox.SetState(UISTATE_NORMAL);
     m_TextInputBox.SetTextLimit(MAX_CHATROOM_TEXT_LENGTH - 1);
 
-    m_InviteButton.Init(1, GlobalText[993]);
+    m_InviteButton.Init(1, I18N::Game::Invite);
     m_InviteButton.SetParentUIID(GetUIID());
     m_InviteButton.SetSize(53, 13);
     m_InviteButton.SetArrangeType(3, 54, 14);
 
-    m_CloseInviteButton.Init(2, GlobalText[993]);
+    m_CloseInviteButton.Init(2, I18N::Game::Invite);
     m_CloseInviteButton.SetParentUIID(GetUIID());
     m_CloseInviteButton.SetSize(73, 13);
     m_CloseInviteButton.SetArrangeType(3, 74, 14);
@@ -1430,7 +1431,7 @@ int CUIChatWindow::AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server)
         m_PalListBox.AddText(pszID, Number, Server);
 
     wchar_t szTitle[128] = { 0 };
-    wcsncpy(szTitle, GlobalText[994], GlobalText.GetStringSize(994));
+    wcsncpy(szTitle, I18N::Game::Talking, GlobalText.GetStringSize(994));
     m_PalListBox.MakeTitleText(szTitle);
     SetTitle(szTitle);
     g_pWindowMgr->RefreshMainWndChatRoomList();
@@ -1458,7 +1459,7 @@ void CUIChatWindow::RemoveChatPal(const wchar_t* pszID)
         m_PalListBox.DeleteText(pszID);
 
         wchar_t szTitle[128] = { 0 };
-        wcsncpy(szTitle, GlobalText[994], GlobalText.GetStringSize(994));
+        wcsncpy(szTitle, I18N::Game::Talking, GlobalText.GetStringSize(994));
         m_PalListBox.MakeTitleText(szTitle);
         SetTitle(szTitle);
         g_pWindowMgr->RefreshMainWndChatRoomList();
@@ -1579,7 +1580,7 @@ BOOL CUIChatWindow::HandleMessage()
         m_TextInputBox.GetText(pszText, MAX_CHATROOM_TEXT_LENGTH);
         //if (CheckAbuseFilter(pszText, false))
         //{
-        //    wcsncpy(pszText, GlobalText[570], sizeof pszText);
+        //    wcsncpy(pszText, I18N::Game::PwnedByTheFilter, sizeof pszText);
         //}
 
         if (wcsncmp(m_szLastText, pszText, MAX_CHATROOM_TEXT_LENGTH) != 0)
@@ -1621,7 +1622,7 @@ BOOL CUIChatWindow::HandleMessage()
                 m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
                 m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
                 m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-                m_InviteButton.SetCaption(GlobalText[996]);
+                m_InviteButton.SetCaption(I18N::Game::CloseInvitation);
 
                 UpdateInvitePalList();
 
@@ -1640,7 +1641,7 @@ BOOL CUIChatWindow::HandleMessage()
                 m_ChatListBox.SendUIMessageDirect(UI_MESSAGE_P_RESIZE, 0, 0);
                 m_CloseInviteButton.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
                 m_InvitePalListBox.SendUIMessageDirect(UI_MESSAGE_P_MOVE, 0, 0);
-                m_InviteButton.SetCaption(GlobalText[993]);
+                m_InviteButton.SetCaption(I18N::Game::Invite);
             }
             break;
         case 2:
@@ -1649,7 +1650,7 @@ BOOL CUIChatWindow::HandleMessage()
                 if (m_PalListBox.GetLineNum() <= 1);
                 else if (m_PalListBox.GetLineNum() >= 30)
                 {
-                    AddChatText(255, GlobalText[1074], 1, 0);
+                    AddChatText(255, I18N::Game::YouHaveReachedTheMaximumNumberOfFriendsYouCanList, 1, 0);
                 }
                 else
                 {
@@ -1728,9 +1729,9 @@ void CUIChatWindow::Lock(BOOL bFlag)
     {
         m_TextInputBox.Lock(TRUE);
         wchar_t szTitle[128] = { 0 };
-        if (wcsncmp(GetTitle(), GlobalText[995], GlobalText.GetStringSize(995)) != 0)
+        if (wcsncmp(GetTitle(), I18N::Game::Offline995, GlobalText.GetStringSize(995)) != 0)
         {
-            wcsncpy(szTitle, GlobalText[995], GlobalText.GetStringSize(995));
+            wcsncpy(szTitle, I18N::Game::Offline995, GlobalText.GetStringSize(995));
         }
         wcsncat(szTitle, GetTitle(), 128);
         SetTitle(szTitle);
@@ -1738,7 +1739,7 @@ void CUIChatWindow::Lock(BOOL bFlag)
     else
     {
         m_TextInputBox.Lock(FALSE);
-        if (wcsncmp(GetTitle(), GlobalText[995], GlobalText.GetStringSize(995)) == 0)
+        if (wcsncmp(GetTitle(), I18N::Game::Offline995, GlobalText.GetStringSize(995)) == 0)
         {
             wchar_t szTitle[128] = { 0 };
             wcsncpy(szTitle, GetTitle() + GlobalText.GetStringSize(995), 128);
@@ -2499,9 +2500,9 @@ void CUIPhotoViewer::Render()
             glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
             TextNum = 0;
-            mu_swprintf(TextList[TextNum], GlobalText[997]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], GlobalText[998]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], GlobalText[999]); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            mu_swprintf(TextList[TextNum], I18N::Game::WheelButtonZoomInOut); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            mu_swprintf(TextList[TextNum], I18N::Game::LeftClickRotation); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+            mu_swprintf(TextList[TextNum], I18N::Game::RightClickDefault); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
             SIZE TextSize;
             GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
             TextSize.cy /= g_fScreenRate_y;
@@ -2513,7 +2514,7 @@ void CUIPhotoViewer::Render()
 void CUILetterWriteWindow::InitControls()
 {
     SIZE size;
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], GlobalText.GetStringSize(1000), &size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, GlobalText.GetStringSize(1000), &size);
 
     size.cx = (size.cx / g_fScreenRate_x) + 0.5f;
 
@@ -2552,27 +2553,27 @@ void CUILetterWriteWindow::InitControls()
     m_TitleInputBox.SetTabTarget(&m_TextInputBox);
     m_TextInputBox.SetTabTarget(&m_MailtoInputBox);
 
-    m_SendButton.Init(1, GlobalText[1001]);
+    m_SendButton.Init(1, I18N::Game::Send);
     m_SendButton.SetParentUIID(GetUIID());
     m_SendButton.SetArrangeType(2, 12, 16);
     m_SendButton.SetSize(50, 14);
 
-    m_CloseButton.Init(2, GlobalText[1002]);
+    m_CloseButton.Init(2, I18N::Game::Close);
     m_CloseButton.SetParentUIID(GetUIID());
     m_CloseButton.SetArrangeType(2, 63, 16);
     m_CloseButton.SetSize(50, 14);
 
-    //	m_PhotoShowButton.Init(3, GlobalText[1064]);
+    //	m_PhotoShowButton.Init(3, I18N::Game::EitherTheReceiverDoesNotExistOrThereIsNoMailBox);
     //	m_PhotoShowButton.SetParentUIID(GetUIID());
     //	m_PhotoShowButton.SetArrangeType(2, 114, 16);
     //	m_PhotoShowButton.SetSize(50, 14);
 
-    m_PrevPoseButton.Init(4, GlobalText[1003]);
+    m_PrevPoseButton.Init(4, I18N::Game::PrevAction);
     m_PrevPoseButton.SetParentUIID(GetUIID());
     m_PrevPoseButton.SetArrangeType(2, 250, 16);
     m_PrevPoseButton.SetSize(50, 14);
 
-    m_NextPoseButton.Init(5, GlobalText[1004]);
+    m_NextPoseButton.Init(5, I18N::Game::NextAction);
     m_NextPoseButton.SetParentUIID(GetUIID());
     m_NextPoseButton.SetArrangeType(2, 301, 16);
     m_NextPoseButton.SetSize(50, 14);
@@ -2676,9 +2677,9 @@ void CUILetterWriteWindow::RenderSub()
     SIZE size;
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1000], GlobalText.GetStringSize(1000), &size);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(3), GlobalText[1000], size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), GlobalText[1005], size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, GlobalText.GetStringSize(1000), &size);
+    g_pRenderText->RenderText(RPos_x(3), RPos_y(3), I18N::Game::Receiver, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
+    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title1005, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
 
     m_MailtoInputBox.Render();
     m_TitleInputBox.Render();
@@ -2765,9 +2766,9 @@ BOOL CUILetterWriteWindow::HandleMessage()
                 //wcsncpy(szTempText, strText.c_str(), sizeof szTempText);
 
                 //if (CheckAbuseFilter(wstrTitle, false))
-                //    g_pMultiLanguage->ConvertCharToWideStr(wstrTitle, GlobalText[570]);
+                //    g_pMultiLanguage->ConvertCharToWideStr(wstrTitle, I18N::Game::PwnedByTheFilter);
                 //if (CheckAbuseFilter(wstrText, false))
-                //    g_pMultiLanguage->ConvertCharToWideStr(wstrText, GlobalText[570]);
+                //    g_pMultiLanguage->ConvertCharToWideStr(wstrText, I18N::Game::PwnedByTheFilter);
 
                 //g_pMultiLanguage->ConvertWideCharToStr(strTitle, wstrTitle.c_str(), CP_UTF8);
                 //g_pMultiLanguage->ConvertWideCharToStr(strText, wstrText.c_str(), CP_UTF8);
@@ -2776,7 +2777,7 @@ BOOL CUILetterWriteWindow::HandleMessage()
 
                 if (szMailto[0] == '\0' || wcslen(szMailto) == 0)
                 {
-                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1006]);
+                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EnterTheNameOfTheReceiver);
                     m_MailtoInputBox.GiveFocus();
                     m_iLastTabIndex = 0;
                     break;
@@ -2784,7 +2785,7 @@ BOOL CUILetterWriteWindow::HandleMessage()
 
                 if (szTitle[0] == '\0' || wcslen(szTitle) == 0)
                 {
-                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1007]);
+                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EnterTheTitle);
                     m_TitleInputBox.GiveFocus();
                     m_iLastTabIndex = 1;
                     break;
@@ -2792,7 +2793,7 @@ BOOL CUILetterWriteWindow::HandleMessage()
 
                 if (szTempText[0] == '\0' || wcslen(szTempText) == 0)
                 {
-                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1008]);
+                    g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EnterYourMessage);
                     m_TextInputBox.GiveFocus();
                     m_iLastTabIndex = 2;
                     break;
@@ -2892,7 +2893,7 @@ BOOL CUILetterWriteWindow::CloseCheck()
     }
     else
     {
-        g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1009], GetUIID());
+        g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::DoYouWishToQuitWritingThisLetter, GetUIID());
         return FALSE;
     }
 }
@@ -2917,17 +2918,17 @@ void CUILetterReadWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     m_LetterTextBox.SetArrangeType(2, 0, 20);
     m_LetterTextBox.SetResizeType(3, 0, -36);
 
-    m_ReplyButton.Init(1, GlobalText[1010]);
+    m_ReplyButton.Init(1, I18N::Game::Reply);
     m_ReplyButton.SetParentUIID(GetUIID());
     m_ReplyButton.SetArrangeType(2, 2, 16);
     m_ReplyButton.SetSize(50, 14);
 
-    m_DeleteButton.Init(2, GlobalText[1011]);
+    m_DeleteButton.Init(2, I18N::Game::Delete);
     m_DeleteButton.SetParentUIID(GetUIID());
     m_DeleteButton.SetArrangeType(2, 53, 16);
     m_DeleteButton.SetSize(50, 14);
 
-    m_CloseButton.Init(3, GlobalText[1002]);
+    m_CloseButton.Init(3, I18N::Game::Close);
     m_CloseButton.SetParentUIID(GetUIID());
     m_CloseButton.SetArrangeType(2, 186, 16);
     m_CloseButton.SetSize(50, 14);
@@ -2937,12 +2938,12 @@ void CUILetterReadWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     //	m_PhotoButton.SetArrangeType(2, 186, 16);
     //	m_PhotoButton.SetSize(50, 14);
 
-    m_PrevButton.Init(5, GlobalText[1012]);
+    m_PrevButton.Init(5, I18N::Game::Previous);
     m_PrevButton.SetParentUIID(GetUIID());
     m_PrevButton.SetArrangeType(2, 104, 16);
     m_PrevButton.SetSize(40, 14);
 
-    m_NextButton.Init(6, GlobalText[1013]);
+    m_NextButton.Init(6, I18N::Game::Next);
     m_NextButton.SetParentUIID(GetUIID());
     m_NextButton.SetArrangeType(2, 145, 16);
     m_NextButton.SetSize(40, 14);
@@ -3036,7 +3037,7 @@ void CUILetterReadWindow::RenderSub()
     EndRenderColor();
 
     wchar_t szMailFrom[256] = { 0 };
-    mu_swprintf(szMailFrom, GlobalText[1014], m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);
+    mu_swprintf(szMailFrom, I18N::Game::SenderSSS, m_LetterHead.m_szID, m_LetterHead.m_szDate, m_LetterHead.m_szTime);
     g_pRenderText->RenderText(RPos_x(3), RPos_y(3), szMailFrom);
 
     m_ReplyButton.Render();
@@ -3071,13 +3072,13 @@ BOOL CUILetterReadWindow::HandleMessage()
         case 1:
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            mu_swprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
 
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
             if (dwUIID == 0) break;
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(m_LetterHead.m_szID);
             wchar_t szMailTitle[MAX_TEXT_LENGTH + 1] = { 0 };
-            mu_swprintf(szMailTitle, GlobalText[1016], m_LetterHead.m_szText);
+            mu_swprintf(szMailTitle, I18N::Game::ReS, m_LetterHead.m_szText);
             wchar_t szMailTitleResult[32 + 1] = { 0 };
             CutText4(szMailTitle, szMailTitleResult, NULL, 32);
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);
@@ -3086,7 +3087,7 @@ BOOL CUILetterReadWindow::HandleMessage()
         case 2:
         {
             wchar_t tempTxt[MAX_TEXT_LENGTH + 1] = { 0 };
-            wcscat(tempTxt, GlobalText[1017]);
+            wcscat(tempTxt, I18N::Game::AreYouSureYouWantToDeleteTheLetter);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
         }
         break;
@@ -3333,22 +3334,22 @@ void CUIFriendListTabWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     m_PalListBox.SetResizeType(3, 0, -39);
     m_PalListBox.SetLayout(1);
 
-    m_AddFriendButton.Init(1, GlobalText[1018]);
+    m_AddFriendButton.Init(1, I18N::Game::AddFriend);
     m_AddFriendButton.SetParentUIID(GetUIID());
     m_AddFriendButton.SetArrangeType(2, 2, 17);
     m_AddFriendButton.SetSize(50, 14);
 
-    m_DelFriendButton.Init(2, GlobalText[1019]);
+    m_DelFriendButton.Init(2, I18N::Game::DeleteFriend);
     m_DelFriendButton.SetParentUIID(GetUIID());
     m_DelFriendButton.SetArrangeType(2, 53, 17);
     m_DelFriendButton.SetSize(50, 14);
 
-    m_TalkButton.Init(3, GlobalText[1020]);
+    m_TalkButton.Init(3, I18N::Game::Chat);
     m_TalkButton.SetParentUIID(GetUIID());
     m_TalkButton.SetArrangeType(2, 104, 17);
     m_TalkButton.SetSize(50, 14);
 
-    m_LetterButton.Init(4, GlobalText[1015]);
+    m_LetterButton.Init(4, I18N::Game::Write);
     m_LetterButton.SetParentUIID(GetUIID());
     m_LetterButton.SetArrangeType(2, 155, 17);
     m_LetterButton.SetSize(50, 14);
@@ -3426,20 +3427,20 @@ void CUIFriendListTabWindow::RenderSub()
     if (CheckMouseIn(RPos_x(0) + m_PalListBox.GetColumnPos_x(0), RPos_y(0), m_PalListBox.GetColumnWidth(0), 19) == TRUE || g_pFriendList->GetCurrentSortType() == 0)
     {
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(0), RPos_y(3), GlobalText[1021]);
+        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(0), RPos_y(3), I18N::Game::FriendSName);
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
     else
-        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(0), RPos_y(3), GlobalText[1021]);
+        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(0), RPos_y(3), I18N::Game::FriendSName);
 
     if (CheckMouseIn(RPos_x(0) + m_PalListBox.GetColumnPos_x(1), RPos_y(0), m_PalListBox.GetColumnWidth(1), 19) == TRUE || g_pFriendList->GetCurrentSortType() == 1)
     {
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(1), RPos_y(3), GlobalText[1022]);
+        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(1), RPos_y(3), I18N::Game::Server);
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
     else
-        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(1), RPos_y(3), GlobalText[1022]);
+        g_pRenderText->RenderText(RPos_x(4) + m_PalListBox.GetColumnPos_x(1), RPos_y(3), I18N::Game::Server);
 
     DisableAlphaBlend();
 }
@@ -3464,14 +3465,14 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         switch (m_WorkMessage.m_iParam1)
         {
         case 1:
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_TEXTINPUT, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1023], GetUIID());
+            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_TEXTINPUT, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::EnterTheIDOfTheFriendYouDLikeToAdd, GetUIID());
             g_pWindowMgr->SetAddFriendWindow(dwUIID);
             break;
         case 2:
         {
             if (GetCurrentSelectedFriend() == NULL) break;
             wchar_t tempTxt[MAX_TEXT_LENGTH + 1] = { 0 };
-            mu_swprintf(tempTxt, L"%ls %ls", GlobalText[1024], GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
+            mu_swprintf(tempTxt, L"%ls %ls", I18N::Game::DoYouReallyWishToDeleteThisFriend, GetCurrentSelectedFriend()); // "Do you really wish to delete this friend?"
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, tempTxt, GetUIID());
         }
         break;
@@ -3504,7 +3505,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         case 4:		// 편지쓰기
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            mu_swprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);	// "편지쓰기"
             if (dwUIID == 0) break;
             if (GetCurrentSelectedFriend() != NULL)
@@ -3711,7 +3712,7 @@ void ReceiveChatRoomConnectResult(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
     switch (Data->Result)
     {
     case 0x00:
-        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1058]);
+        g_pWindowMgr->AddWindow(UIWNDTYPE_OK_FORCE, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::ChatRoomIsFull);
         break;
     case 0x01:
         break;
@@ -3736,14 +3737,14 @@ void ReceiveChatRoomUserStateChange(DWORD dwWindowUIID, const BYTE* ReceiveBuffe
     case 0x00:
         if (pChatWindow->AddChatPal(szName, Data->Index, 0) >= 3)
         {
-            wcscat(szText, GlobalText[1059]);
+            wcscat(szText, I18N::Game::HasEntered);
             pChatWindow->AddChatText(255, szText, 1, 0);
         }
         break;
     case 0x01:
         if (pChatWindow->GetUserCount() >= 3)
         {
-            wcscat(szText, GlobalText[1060]);
+            wcscat(szText, I18N::Game::HasLeft);
             pChatWindow->AddChatText(255, szText, 1, 0);
         }
         pChatWindow->RemoveChatPal(szName);
@@ -3789,7 +3790,7 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
     if (pChatWindow->GetState() == UISTATE_READY)
     {
         g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
-        g_pSystemLogBox->AddText(GlobalText[1063], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NewMessageHasArrived, SEASON3B::TYPE_SYSTEM_MESSAGE);
         pChatWindow->SetState(UISTATE_HIDE);
         if (g_pWindowMgr->GetFriendMainWindow() != NULL)
         {
@@ -3881,7 +3882,7 @@ void CChatRoomSocketList::ProcessSocketMessage(DWORD dwSocketID, WORD wMessage)
     case FD_CLOSE :
         CUIChatWindow * pWindow = (CUIChatWindow *)g_pWindowMgr->GetWindow(pChatroomSocket->m_dwWindowUIID);
         if (pWindow != NULL)
-            pWindow->AddChatText(255, GlobalText[402], 1, 0);
+            pWindow->AddChatText(255, I18N::Game::YouAreDisconnectedFromTheServer, 1, 0);
         pSocketClient->Close();
         break;
     }
@@ -3913,7 +3914,7 @@ void CUIChatRoomListTabWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     m_WindowListBox.SetArrangeType(2, 0, 22);
     m_WindowListBox.SetResizeType(3, 0, -39);
 
-    m_HideAllButton.Init(1, GlobalText[1025]);
+    m_HideAllButton.Init(1, I18N::Game::HideAll);
     m_HideAllButton.SetParentUIID(GetUIID());
     m_HideAllButton.SetArrangeType(2, 2, 17);
     m_HideAllButton.SetSize(50, 14);
@@ -3980,7 +3981,7 @@ void CUIChatRoomListTabWindow::RenderSub()
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->RenderText(RPos_x(8), RPos_y(3), GlobalText[1026]);
+    g_pRenderText->RenderText(RPos_x(8), RPos_y(3), I18N::Game::WindowTitle);
     DisableAlphaBlend();
 }
 
@@ -4242,22 +4243,22 @@ void CUILetterBoxTabWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     m_LetterListBox.SetArrangeType(2, 0, 22);
     m_LetterListBox.SetResizeType(3, 0, -39);
 
-    m_WriteButton.Init(1, GlobalText[1015]);
+    m_WriteButton.Init(1, I18N::Game::Write);
     m_WriteButton.SetParentUIID(GetUIID());
     m_WriteButton.SetArrangeType(2, 2, 17);
     m_WriteButton.SetSize(50, 14);
 
-    m_ReadButton.Init(2, GlobalText[1027]);
+    m_ReadButton.Init(2, I18N::Game::Read);
     m_ReadButton.SetParentUIID(GetUIID());
     m_ReadButton.SetArrangeType(2, 53, 17);
     m_ReadButton.SetSize(50, 14);
 
-    m_ReplyButton.Init(3, GlobalText[1010]);
+    m_ReplyButton.Init(3, I18N::Game::Reply);
     m_ReplyButton.SetParentUIID(GetUIID());
     m_ReplyButton.SetArrangeType(2, 104, 17);
     m_ReplyButton.SetSize(50, 14);
 
-    m_DeleteButton.Init(4, GlobalText[1011]);
+    m_DeleteButton.Init(4, I18N::Game::Delete);
     m_DeleteButton.SetParentUIID(GetUIID());
     m_DeleteButton.SetArrangeType(2, 155, 17);
     m_DeleteButton.SetSize(50, 14);
@@ -4354,34 +4355,34 @@ void CUILetterBoxTabWindow::RenderSub()
     if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(1), RPos_y(0), m_LetterListBox.GetColumnWidth(1), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 1)
     {
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(1), RPos_y(3), GlobalText[1028]);
+        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(1), RPos_y(3), I18N::Game::Sender);
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
     else
     {
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(1), RPos_y(3), GlobalText[1028]);
+        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(1), RPos_y(3), I18N::Game::Sender);
     }
 
     if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(2), RPos_y(0), m_LetterListBox.GetColumnWidth(2), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 2)
     {
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), GlobalText[1029]);
+        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), I18N::Game::DateRcvd);
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
     else
     {
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), GlobalText[1029]);
+        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(2), RPos_y(3), I18N::Game::DateRcvd);
     }
 
     if (CheckMouseIn(RPos_x(0) + m_LetterListBox.GetColumnPos_x(3), RPos_y(0), m_LetterListBox.GetColumnWidth(3), 19) == TRUE || g_pLetterList->GetCurrentSortType() == 3)
     {
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), GlobalText[1030]);
+        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), I18N::Game::Title1030);
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
     else
     {
-        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), GlobalText[1030]);
+        g_pRenderText->RenderText(RPos_x(4) + m_LetterListBox.GetColumnPos_x(3), RPos_y(3), I18N::Game::Title1030);
     }
 
     DisableAlphaBlend();
@@ -4414,7 +4415,7 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
         case 1:
         {
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            mu_swprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
         }
         break;
@@ -4447,12 +4448,12 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
         {
             if (GetCurrentSelectedLetter() == NULL) break;
             wchar_t temp[MAX_TEXT_LENGTH + 1];
-            mu_swprintf(temp, GlobalText[1071], g_cdwLetterCost);
+            mu_swprintf(temp, I18N::Game::WriteLetterCostDZen, g_cdwLetterCost);
             dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_WRITELETTER, 100, 100, temp);
             if (dwUIID == 0) break;
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMailtoText(GetCurrentSelectedLetter()->m_szID);
             wchar_t szMailTitle[MAX_TEXT_LENGTH + 1] = { 0 };
-            mu_swprintf(szMailTitle, GlobalText[1016], GetCurrentSelectedLetter()->m_szText);
+            mu_swprintf(szMailTitle, I18N::Game::ReS, GetCurrentSelectedLetter()->m_szText);
             wchar_t szMailTitleResult[32 + 1] = { 0 };
             CutText4(szMailTitle, szMailTitleResult, NULL, 32);
             ((CUILetterWriteWindow*)g_pWindowMgr->GetWindow(dwUIID))->SetMainTitleText(szMailTitleResult);
@@ -4462,10 +4463,10 @@ BOOL CUILetterBoxTabWindow::HandleMessage()
         {
             if (m_LetterListBox.HaveCheckedLine() == FALSE)
             {
-                dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1031]);
+                dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_OK, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::SelectTheLetterYouDLikeToDelete);
                 break;
             }
-            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1017], GetUIID());
+            dwUIID = g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::AreYouSureYouWantToDeleteTheLetter, GetUIID());
         }
         break;
         case 5:
@@ -4593,9 +4594,9 @@ void CUIFriendWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     SetSize(250, 170);
     SetLimitSize(250, 150);
 
-    m_FriendListWnd.Init(GlobalText[1032], GetUIID());
-    m_ChatRoomListWnd.Init(GlobalText[1033], GetUIID());
-    m_LetterBoxWnd.Init(GlobalText[1034], GetUIID());
+    m_FriendListWnd.Init(I18N::Game::FriendsList, GetUIID());
+    m_ChatRoomListWnd.Init(I18N::Game::WindowList, GetUIID());
+    m_LetterBoxWnd.Init(I18N::Game::LetterBox, GetUIID());
 
     g_pWindowMgr->AddWindowFinder(&m_FriendListWnd);
     g_pWindowMgr->AddWindowFinder(&m_ChatRoomListWnd);
@@ -4763,8 +4764,8 @@ void CUIFriendWindow::RenderSub()
     }
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], GlobalText.GetStringSize(1035), &TextSize);
-    g_pRenderText->RenderText(RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, GlobalText[1035]);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, GlobalText.GetStringSize(1035), &TextSize);
+    g_pRenderText->RenderText(RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, I18N::Game::RefuseChat);
 
     float fCheckBoxPos_x = RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2 - 14;
     float fCheckBoxPos_y = RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2;
@@ -4890,7 +4891,7 @@ void CUIFriendWindow::DoMouseActionSub()
         m_iTabMouseOverIndex = m_iTabIndex;
         SIZE TextSize;
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1035], GlobalText.GetStringSize(1035), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, GlobalText.GetStringSize(1035), &TextSize);
 
         if (CheckMouseIn(RPos_x(0) + RWidth() - TextSize.cx - 2 - 14,
             RPos_y(4), TextSize.cx + 2 + 14, 20) == TRUE)
@@ -4905,7 +4906,7 @@ void CUIFriendWindow::DoMouseActionSub()
                 }
                 else
                 {
-                    g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, GlobalText[1036], GetUIID());
+                    g_pWindowMgr->AddWindow(UIWNDTYPE_QUESTION, UIWND_DEFAULT, UIWND_DEFAULT, I18N::Game::IfYouRefuseChatAllChatWindowsWillClose, GetUIID());
                 }
                 MouseLButtonPop = FALSE;
             }
@@ -4931,12 +4932,12 @@ void CUITextInputWindow::InitControls()
     m_TextInputBox.SetArrangeType(0, 30, 14);
     m_TextInputBox.SetState(UISTATE_NORMAL);
 
-    m_AddButton.Init(1, GlobalText[228]);
+    m_AddButton.Init(1, I18N::Game::OK);
     m_AddButton.SetParentUIID(GetUIID());
     m_AddButton.SetArrangeType(0, 18, 40);
     m_AddButton.SetSize(50, 20);
 
-    m_CancelButton.Init(2, GlobalText[229]);
+    m_CancelButton.Init(2, I18N::Game::Cancel);
     m_CancelButton.SetParentUIID(GetUIID());
     m_CancelButton.SetArrangeType(0, 73, 40);
     m_CancelButton.SetSize(50, 20);
@@ -5044,8 +5045,8 @@ void CUITextInputWindow::DoMouseActionSub()
 
 void CUIQuestionWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
 {
-    if (m_iDialogType == 0) SetTitle(GlobalText[991]);
-    else if (m_iDialogType == 1) SetTitle(GlobalText[228]);
+    if (m_iDialogType == 0) SetTitle(I18N::Game::Question);
+    else if (m_iDialogType == 1) SetTitle(I18N::Game::OK);
     SetParentUIID(0);
     m_dwReturnWindowUIID = dwParentID;
     memset(m_szCaption, 0, sizeof(m_szCaption));
@@ -5060,19 +5061,19 @@ void CUIQuestionWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
 
     if (m_iDialogType == 0)
     {
-        m_AddButton.Init(1, GlobalText[1037]);
+        m_AddButton.Init(1, I18N::Game::Yes);
         m_AddButton.SetParentUIID(GetUIID());
         m_AddButton.SetArrangeType(0, 18, 40);
         m_AddButton.SetSize(50, 20);
 
-        m_CancelButton.Init(2, GlobalText[1038]);
+        m_CancelButton.Init(2, I18N::Game::No);
         m_CancelButton.SetParentUIID(GetUIID());
         m_CancelButton.SetArrangeType(0, 73, 40);
         m_CancelButton.SetSize(50, 20);
     }
     else if (m_iDialogType == 1)
     {
-        m_AddButton.Init(1, GlobalText[228]);
+        m_AddButton.Init(1, I18N::Game::OK);
         m_AddButton.SetParentUIID(GetUIID());
         m_AddButton.SetArrangeType(0, 45, 40);
         m_AddButton.SetSize(50, 20);
@@ -5496,7 +5497,7 @@ void CUIFriendMenu::RenderWindowList()
 
         if (wcslen(pszChatTitle) > GlobalText.GetStringSize(994))
         {
-            if (wcsncmp(pszChatTitle, GlobalText[995], GlobalText.GetStringSize(995)) == 0)
+            if (wcsncmp(pszChatTitle, I18N::Game::Offline995, GlobalText.GetStringSize(995)) == 0)
             {
                 CutText3(pszChatTitle + GlobalText.GetStringSize(995) + GlobalText.GetStringSize(994), szText, m_iWidth - 8, 1, 64);
             }
@@ -5507,7 +5508,7 @@ void CUIFriendMenu::RenderWindowList()
         }
         else
         {
-            wcscpy(szText, GlobalText[995]);
+            wcscpy(szText, I18N::Game::Offline995);
         }
         g_pRenderText->RenderText(m_iPos_x + 2, m_iFriendMenuPos_y - (m_fLineHeight + 4) * i + 3, szText);
 
@@ -5741,7 +5742,7 @@ void CUIFriendMenu::LockAllChatWindow()
         pWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(*m_WindowListIter);
         if (pWindow != NULL)
         {
-            pWindow->AddChatText(255, GlobalText[402], 1, 0);
+            pWindow->AddChatText(255, I18N::Game::YouAreDisconnectedFromTheServer, 1, 0);
             pWindow->Lock(TRUE);
         }
     }

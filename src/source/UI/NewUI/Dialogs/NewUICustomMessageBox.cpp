@@ -5,6 +5,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Combat/DuelMgr.h"
@@ -907,27 +908,27 @@ bool SEASON3B::CUseFruitCheckMsgBox::Create(float fPriority)
         switch (pItem->Level)
         {
         case 0:
-            mu_swprintf(strName, L"%ls", GlobalText[168]);
+            mu_swprintf(strName, L"%ls", I18N::Game::ENG);
             break;
         case 1:
-            mu_swprintf(strName, L"%ls", GlobalText[169]);
+            mu_swprintf(strName, L"%ls", I18N::Game::STA);
             break;
         case 2:
-            mu_swprintf(strName, L"%ls", GlobalText[167]);
+            mu_swprintf(strName, L"%ls", I18N::Game::AGI);
             break;
         case 3:
-            mu_swprintf(strName, L"%ls", GlobalText[166]);
+            mu_swprintf(strName, L"%ls", I18N::Game::STR);
             break;
         case 4:
-            mu_swprintf(strName, L"%ls", GlobalText[1900]);
+            mu_swprintf(strName, L"%ls", I18N::Game::Command);
             break;
         }
     }
 
     wchar_t strText[128] = { 0, };
-    mu_swprintf(strText, L"( %ls%ls )", strName, GlobalText[1901]);
+    mu_swprintf(strText, L"( %ls%ls )", strName, I18N::Game::Fruit);
     AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-    AddMsg(GlobalText[1902], RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
+    AddMsg(I18N::Game::Choose, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
 
     return true;
 }
@@ -1083,15 +1084,15 @@ void SEASON3B::CUseFruitCheckMsgBox::SetButtonInfo()
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     height = MSGBOX_BTN_EMPTY_HEIGHT;
     m_BtnAdd.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnAdd.SetText(GlobalText[1412]);
+    m_BtnAdd.SetText(I18N::Game::Create);
 
     x = GetPos().x + triwidth + (triwidth / 2) - btnhalf;
     m_BtnMinus.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnMinus.SetText(GlobalText[1903]);
+    m_BtnMinus.SetText(I18N::Game::Decrease);
 
     x = GetPos().x + (triwidth * 2) + (triwidth / 2) - btnhalf;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(GlobalText[229]);
+    m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
 void SEASON3B::CUseFruitCheckMsgBox::RenderFrame()
@@ -1182,10 +1183,10 @@ bool SEASON3B::CGemIntegrationMsgBox::Create(float fPriority)
 
     CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
 
-    AddMsg(GlobalText[1801], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
+    AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 
-    AddMsg(GlobalText[3307]);
-    AddMsg(GlobalText[3308]);
+    AddMsg(I18N::Game::YouCanCombineOrDissolve);
+    AddMsg(I18N::Game::VariousJewels);
 
     SetButtonInfo();
 
@@ -1284,7 +1285,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::DisjointBtnDown(class CNewUIMes
 
     if (!COMGEM::FindWantedList())
     {
-        g_pSystemLogBox->AddText(GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, SEASON3B::TYPE_ERROR_MESSAGE);
         return CALLBACK_BREAK;
     }
 
@@ -1319,13 +1320,13 @@ void SEASON3B::CGemIntegrationMsgBox::SetButtonInfo()
     height = MSGBOX_BTN_EMPTY_HEIGHT;
     m_BtnUnity.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
 
-    m_BtnUnity.SetText(GlobalText[1801]);
+    m_BtnUnity.SetText(I18N::Game::JewelCombination);
 
     x = GetPos().x + msgboxhalfwidth - btnhalf;
     y += BTN_GAP;
     m_BtnDisjoint.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
 
-    m_BtnDisjoint.SetText(GlobalText[1800]);
+    m_BtnDisjoint.SetText(I18N::Game::DismantleJewel);
 
     btnhalf = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalf;
@@ -1333,7 +1334,7 @@ void SEASON3B::CGemIntegrationMsgBox::SetButtonInfo()
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
 
-    m_BtnCancel.SetText(GlobalText[1002]);
+    m_BtnCancel.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CGemIntegrationMsgBox::RenderFrame()
@@ -1422,7 +1423,7 @@ bool SEASON3B::CGemIntegrationUnityMsgBox::Create(float fPriority)
 
     CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
 
-    AddMsg(GlobalText[1801], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
+    AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
     SetText();
     SetButtonInfo();
 
@@ -1434,13 +1435,13 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetText(void)
     m_MsgDataList.clear();
     if (COMGEM::m_cGemType == COMGEM::NOGEM)
     {
-        AddMsg(GlobalText[1801], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-        AddMsg(GlobalText[3309]);
+        AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
+        AddMsg(I18N::Game::SelectAJewelToCombine);
     }
     else
     {
-        AddMsg(GlobalText[1801], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-        AddMsg(GlobalText[3310]);
+        AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
+        AddMsg(I18N::Game::ChooseANumberButtonToCombine);
     }
 }
 
@@ -1557,7 +1558,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
     {
         cButton.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x + 50.0f, y + (height + 10.0f) * k, MSGBOX_BTN_EMPTY_WIDTH + 20, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
         // 1808 "%d개 조합(%d젠 소요)"
-        mu_swprintf(szTemp, GlobalText[1808], 10 * (k + 1), 500000 * (k + 1));
+        mu_swprintf(szTemp, I18N::Game::CombineDDZenIsRequired, 10 * (k + 1), 500000 * (k + 1));
         cButton.SetText(szTemp);
         m_cMixButton.push_back(cButton);
     }
@@ -1567,7 +1568,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y += 15.0f + (height + 10.0f) * (int)COMGEM::eCOMTYPE_END;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(GlobalText[1002]);
+    m_BtnCancel.SetText(I18N::Game::Close);
 
     ResetWndSize(0);
 }
@@ -1713,10 +1714,10 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNe
     if (pMsgBox)
     {
         wchar_t strText[256] = { 0, };
-        mu_swprintf(strText, GlobalText[COMGEM::GetJewelIndex(COMGEM::m_cGemType, 0)], GlobalText[1807], COMGEM::m_cCount);
+        mu_swprintf(strText, I18N::Game::Lookup(COMGEM::GetJewelIndex(COMGEM::m_cGemType, 0)), I18N::Game::JewelOfSoul, COMGEM::m_cCount);
         pMsgBox->AddMsg(strText, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
 
-        mu_swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
+        mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
         pMsgBox->AddMsg(strText, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
     }
 
@@ -1739,14 +1740,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TenBtnDown(class CNewUIMes
             wchar_t strText[256] = { 0, };
             if (COMGEM::m_cGemType == COMGEM::CELE)
             {
-                mu_swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
             }
             else if (COMGEM::m_cGemType == COMGEM::SOUL)
             {
-                mu_swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
             }
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            mu_swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
+            mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
         }
 
@@ -1779,14 +1780,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CNewUI
             wchar_t strText[256] = { 0, };
             if (COMGEM::m_cGemType == COMGEM::CELE)
             {
-                mu_swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
             }
             else if (COMGEM::m_cGemType == COMGEM::SOUL)
             {
-                mu_swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
             }
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            mu_swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
+            mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
         }
 
@@ -1819,14 +1820,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CNewUI
             wchar_t strText[256] = { 0, };
             if (COMGEM::m_cGemType == COMGEM::CELE)
             {
-                mu_swprintf(strText, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
             }
             else if (COMGEM::m_cGemType == COMGEM::SOUL)
             {
-                mu_swprintf(strText, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
             }
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            mu_swprintf(strText, GlobalText[1810], COMGEM::m_iValue);
+            mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
             pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
         }
 
@@ -1880,11 +1881,11 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Create(float fPriority)
 
     CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
 
-    AddMsg(GlobalText[1800], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
+    AddMsg(I18N::Game::DismantleJewel, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
     SetButtonInfo();
     ChangeMiddleFrameBig();
     AddMsg(L" ", RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-    AddMsg(GlobalText[3311], CLRDW_YELLOW, MSGBOX_FONT_BOLD);
+    AddMsg(I18N::Game::SelectAJewelToDissolve, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
 
     return true;
 }
@@ -2023,7 +2024,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class C
 
     if (COMGEM::m_UnmixTarList.IsEmpty() == true)
     {
-        g_pSystemLogBox->AddText(GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, SEASON3B::TYPE_ERROR_MESSAGE);
         COMGEM::GetBack();
         pMsgBox->ChangeMiddleFrameSmall();
     }
@@ -2050,7 +2051,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewU
 
     if (COMGEM::m_UnmixTarList.IsEmpty() == true)
     {
-        g_pSystemLogBox->AddText(GlobalText[1818], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, SEASON3B::TYPE_ERROR_MESSAGE);
         COMGEM::GetBack();
         pMsgBox->ChangeMiddleFrameSmall();
     }
@@ -2084,10 +2085,10 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
             int	iGemLevel = COMGEM::GetUnMixGemLevel() + 1;
             int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
             COMGEM::SetGem(nIdx);
-            mu_swprintf(strText, GlobalText[1813], GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], iGemLevel);
+            mu_swprintf(strText, I18N::Game::AreYouSureToDisbandSD, I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)), iGemLevel);
 
             pMsgBox->AddMsg(strText, CLRDW_DARKYELLOW, MSGBOX_FONT_BOLD);
-            mu_swprintf(strText, GlobalText[1814], COMGEM::m_iValue);
+            mu_swprintf(strText, I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
             pMsgBox->AddMsg(strText, CLRDW_DARKYELLOW, MSGBOX_FONT_BOLD);
         }
     }
@@ -2123,12 +2124,12 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 40;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(GlobalText[1002]);
+    m_BtnCancel.SetText(I18N::Game::Close);
 
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     m_BtnDisjoint.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnDisjoint.SetText(GlobalText[188]);
+    m_BtnDisjoint.SetText(I18N::Game::Disband);
     m_BtnDisjoint.SetEnable(false);
 }
 
@@ -2318,23 +2319,23 @@ void SEASON3B::CSystemMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 23;
     m_BtnGameOver.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnGameOver.SetText(GlobalText[381]);
+    m_BtnGameOver.SetText(I18N::Game::ExitGame);
 
     y += 30.f;
     m_BtnChooseServer.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnChooseServer.SetText(GlobalText[382]);
+    m_BtnChooseServer.SetText(I18N::Game::SelectServer);
 
     y += 30.f;
     m_BtnChooseCharacter.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnChooseCharacter.SetText(GlobalText[383]);
+    m_BtnChooseCharacter.SetText(I18N::Game::SwitchCharacter);
 
     y += 30.f;
     m_BtnOption.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnOption.SetText(GlobalText[385]);
+    m_BtnOption.SetText(I18N::Game::Option385);
 
     y += 30.f;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnCancel.SetText(GlobalText[384]);
+    m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
 CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -2397,7 +2398,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
     {
-        g_pSystemLogBox->AddText(GlobalText[592], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -2427,7 +2428,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
     {
-        g_pSystemLogBox->AddText(GlobalText[592], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, SEASON3B::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -2459,7 +2460,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
 
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
     {
-        g_pSystemLogBox->AddText(GlobalText[592], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
     else
     {
@@ -2957,22 +2958,22 @@ void SEASON3B::CChaosMixMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
     m_BtnGeneralMix.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnGeneralMix.SetText(GlobalText[735]);
+    m_BtnGeneralMix.SetText(I18N::Game::RegularCombination);
 
     y = GetPos().y + 155;
     m_BtnChaosMix.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnChaosMix.SetText(GlobalText[736]);
+    m_BtnChaosMix.SetText(I18N::Game::ChaosWeaponCombination);
 
     y = GetPos().y + 225;
     m_BtnMix380.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnMix380.SetText(GlobalText[2193]);
+    m_BtnMix380.SetText(I18N::Game::ItemOptionCombination);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(GlobalText[1002]);
+    m_BtnCancel.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CChaosMixMenuMsgBox::RenderFrame()
@@ -3005,28 +3006,28 @@ void SEASON3B::CChaosMixMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 128, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[734]);
+    mu_swprintf(szText, I18N::Game::SelectMethodOfCombination);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFont);
 
-    mu_swprintf(szText, GlobalText[872]);
+    mu_swprintf(szText, I18N::Game::Wings7TypesFruitDevilSInvitation);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[873], Hero->ID);
+    mu_swprintf(szText, I18N::Game::Dinorant1015ItemsCloakOfInvisibility, Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[1680], Hero->ID);
+    mu_swprintf(szText, I18N::Game::FenrirSHornScrollOfBloodCondorSFeather, Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 3 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 100;
-    mu_swprintf(szText, GlobalText[870], Hero->ID);
+    mu_swprintf(szText, I18N::Game::ChaosDragonAxeChaosLightningStaff, Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[871], Hero->ID);
+    mu_swprintf(szText, I18N::Game::ChaosNatureBow, Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 85;
-    mu_swprintf(szText, GlobalText[2194], Hero->ID);
+    mu_swprintf(szText, I18N::Game::Add380ItemOption, Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -3232,7 +3233,7 @@ void SEASON3B::CDialogMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnEnd.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnEnd.SetText(GlobalText[609]);
+    m_BtnEnd.SetText(I18N::Game::ConversationIsOver);
 }
 
 void SEASON3B::CDialogMsgBox::AddButtonBlank(int iAddLine)
@@ -3994,8 +3995,8 @@ void SEASON3B::CDuelMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + 135, GlobalText[910], MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + 151, GlobalText[911], MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + 135, I18N::Game::YouAreChallengedToADuel, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + 151, I18N::Game::WouldYouLikeToAcceptTheChallenge, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CDuelMsgBox::RenderButton()
@@ -4145,16 +4146,16 @@ void SEASON3B::CDuelResultMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + 100, GlobalText[2694], MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + 100, I18N::Game::DuelFinished, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(strDuelID, GlobalText[2695], m_szWinnerID);
+    mu_swprintf(strDuelID, I18N::Game::SHasJustWon, m_szWinnerID);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 120, strDuelID, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
-    mu_swprintf(strDuelID, GlobalText[2696], m_szLoserID);
+    mu_swprintf(strDuelID, I18N::Game::TheDuelWithS, m_szLoserID);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 135, strDuelID, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + 151, GlobalText[2697], MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + 151, I18N::Game::Lookup(2697), MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CDuelResultMsgBox::RenderButton()
@@ -4341,15 +4342,15 @@ void CCherryBlossomMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 50;
     m_BtnWhiteCB.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnWhiteCB.SetText(GlobalText[2542]);
+    m_BtnWhiteCB.SetText(I18N::Game::Lookup(2542));
 
     y = GetPos().y + 100;
     m_BtnRedCB.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRedCB.SetText(GlobalText[2543]);
+    m_BtnRedCB.SetText(I18N::Game::Lookup(2543));
 
     y = GetPos().y + 150;
     m_BtnGoldCB.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnGoldCB.SetText(GlobalText[2544]);
+    m_BtnGoldCB.SetText(I18N::Game::GoldenCherryBlossomsBranches);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
@@ -4357,7 +4358,7 @@ void CCherryBlossomMsgBox::SetButtonInfo()
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     // 1002 "닫기"
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void CCherryBlossomMsgBox::RenderFrame()
@@ -4396,7 +4397,7 @@ void CCherryBlossomMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(titleinfo, L"%ls", GlobalText[2544]);
+    mu_swprintf(titleinfo, L"%ls", I18N::Game::GoldenCherryBlossomsBranches);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 70, titleinfo, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
 
@@ -4418,7 +4419,7 @@ bool SEASON3B::CTradeZenMsgBoxLayout::SetLayout()
         return false;
 
     pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY | UIOPTION_PAINTBACK);
-    pMsgBox->AddMsg(GlobalText[422]);
+    pMsgBox->AddMsg(I18N::Game::EnterTheAmountOfZenYouWouldLikeToTrade);
     pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -4475,7 +4476,7 @@ bool SEASON3B::CZenReceiptMsgBoxLayout::SetLayout()
         return false;
 
     pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY | UIOPTION_PAINTBACK);
-    pMsgBox->AddMsg(GlobalText[420]);
+    pMsgBox->AddMsg(I18N::Game::EnterTheAmountOfZenYouWouldLikeToDeposit);
     pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -4516,7 +4517,7 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessage
     }
     else
     {
-        SEASON3B::CreateOkMessageBox(GlobalText[423]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -4543,7 +4544,7 @@ bool SEASON3B::CZenPaymentMsgBoxLayout::SetLayout()
         return false;
 
     pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY | UIOPTION_PAINTBACK);
-    pMsgBox->AddMsg(GlobalText[421]);
+    pMsgBox->AddMsg(I18N::Game::EnterTheAmountOfZenYouWouldLikeToWithdraw);
     pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -4597,7 +4598,7 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessage
     }
     else
     {
-        SEASON3B::CreateOkMessageBox(GlobalText[423]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -4624,7 +4625,7 @@ bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
         return false;
 
     pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY | UIOPTION_PAINTBACK);
-    pMsgBox->AddMsg(GlobalText[1129]);
+    pMsgBox->AddMsg(I18N::Game::EnterSellingPrice);
     pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -4683,9 +4684,9 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
         if (lpMsgBox)
         {
             wchar_t strText2[MAX_TEXT_LENGTH] = { 0, };
-            mu_swprintf(strText2, GlobalText[1132], strText);
+            mu_swprintf(strText2, I18N::Game::SellingPriceSZen, strText);
             lpMsgBox->AddMsg(strText2, RGBA(255, 0, 0, 255), MSGBOX_FONT_BOLD);
-            lpMsgBox->AddMsg(GlobalText[1133]);
+            lpMsgBox->AddMsg(I18N::Game::DoYouWantToSellItemAtThisPrice);
             lpMsgBox->SetItemValue(iInputZen);
         }
     }
@@ -4771,7 +4772,7 @@ bool SEASON3B::CPersonalShopNameMsgBoxLayout::SetLayout()
         return false;
 
     pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
-    pMsgBox->AddMsg(GlobalText[1128]);
+    pMsgBox->AddMsg(I18N::Game::EnterStoreName);
     pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -4796,7 +4797,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::ProcessOk(class CNewUIM
     }
     else
     {
-        g_pSystemLogBox->AddText(GlobalText[1130], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::WrongStoreName, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -4834,8 +4835,8 @@ bool SEASON3B::CCastleWithdrawMsgBoxLayout::SetLayout()
 
     pMsgBox->SetInputBoxOption(UIOPTION_NUMBERONLY | UIOPTION_PAINTBACK);
 
-    pMsgBox->AddMsg(GlobalText[1571]);
-    pMsgBox->AddMsg(GlobalText[1570]);
+    pMsgBox->AddMsg(I18N::Game::EnterTheWithdrawalAmount);
+    pMsgBox->AddMsg(I18N::Game::Maximum15000000Zen);
 
     pMsgBox->AddCallbackFunc(CCastleWithdrawMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(CCastleWithdrawMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -4910,8 +4911,8 @@ bool SEASON3B::CPasswordKeyPadMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(KEYPAD_TYPE_MOVE, 4))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[690]);
-    pMsgBox->AddMsg(GlobalText[695]);
+    pMsgBox->AddMsg(I18N::Game::PasswordVerification);
+    pMsgBox->AddMsg(I18N::Game::Choose4DigitsForPassword);
     pMsgBox->AddCallbackFunc(CPasswordKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CPasswordKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
@@ -4966,8 +4967,8 @@ bool SEASON3B::CStorageLockKeyPadMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(KEYPAD_TYPE_LOCK_FIRST, 4))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[693]);
-    pMsgBox->AddMsg(GlobalText[695]);
+    pMsgBox->AddMsg(I18N::Game::ChooseNewPassword);
+    pMsgBox->AddMsg(I18N::Game::Choose4DigitsForPassword);
     pMsgBox->AddCallbackFunc(CStorageLockKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CStorageLockKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
     return true;
@@ -4990,7 +4991,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class CNewUI
         {
             pMsgBox->ClearInput();
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-            SEASON3B::CreateOkMessageBox(GlobalText[442]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::ItIsNotAllowedToUseSame4Numbers);
             return CALLBACK_BREAK;
         }
 
@@ -5024,8 +5025,8 @@ bool SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(KEYPAD_TYPE_LOCK_SECOND, 4))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[694]);
-    pMsgBox->AddMsg(GlobalText[696]);
+    pMsgBox->AddMsg(I18N::Game::VerifyNewPassword);
+    pMsgBox->AddMsg(I18N::Game::EnterPasswordAgain);
     pMsgBox->AddCallbackFunc(CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
     return true;
@@ -5048,7 +5049,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class C
         {
             pMsgBox->ClearInput();
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-            SEASON3B::CreateOkMessageBox(GlobalText[442]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::ItIsNotAllowedToUseSame4Numbers);
             return CALLBACK_BREAK;
         }
 
@@ -5070,7 +5071,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class C
         {
             pMsgBox->ClearInput();
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-            SEASON3B::CreateOkMessageBox(GlobalText[445]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::PasswordIsIncorrect);
             return CALLBACK_BREAK;
         }
     }
@@ -5099,8 +5100,8 @@ bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
     }
 
     pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
-    pMsgBox->AddMsg(GlobalText[691]);
-    pMsgBox->AddMsg(GlobalText[697]);
+    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword691);
+    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword697);
     pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -5164,8 +5165,8 @@ bool SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(KEYPAD_TYPE_LOCK_FINAL, g_iLengthAuthorityCode))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[691]);
-    pMsgBox->AddMsg(GlobalText[697]);
+    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword691);
+    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword697);
     pMsgBox->AddCallbackFunc(CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
@@ -5218,8 +5219,8 @@ bool SEASON3B::CStorageUnlockMsgBoxLayout::SetLayout()
 
     pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
 
-    pMsgBox->AddMsg(GlobalText[242]);
-    pMsgBox->AddMsg(GlobalText[697]);
+    pMsgBox->AddMsg(I18N::Game::WarehouseLockUnlock);
+    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword697);
 
     pMsgBox->AddCallbackFunc(CStorageUnlockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CStorageUnlockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -5274,8 +5275,8 @@ bool SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(KEYPAD_TYPE_UNLOCK, g_iLengthAuthorityCode))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[242]);
-    pMsgBox->AddMsg(GlobalText[697]);
+    pMsgBox->AddMsg(I18N::Game::WarehouseLockUnlock);
+    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword697);
 
     pMsgBox->AddCallbackFunc(CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -5432,7 +5433,7 @@ bool SEASON3B::CCrownSwitchPopLayout::SetLayout()
     if (false == pMsgBox->Create(3000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[1484]);
+    pMsgBox->AddMsg(I18N::Game::CrownSwitchHasBeenReleased);
 
     return true;
 }
@@ -5446,7 +5447,7 @@ bool SEASON3B::CCrownSwitchPushLayout::SetLayout()
     if (false == pMsgBox->Create(3000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[1485]);
+    pMsgBox->AddMsg(I18N::Game::CrownSwitchHasBeenActivated);
 
     return true;
 }
@@ -5484,7 +5485,7 @@ bool SEASON3B::CSealRegisterSuccessLayout::SetLayout()
     if (false == pMsgBox->Create(3000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[1490]);
+    pMsgBox->AddMsg(I18N::Game::OfficialSealRegistrationIsSuccessful);
 
     return true;
 }
@@ -5510,7 +5511,7 @@ bool SEASON3B::CSealRegisterOtherLayout::SetLayout()
     if (false == pMsgBox->Create(3000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[1492]);
+    pMsgBox->AddMsg(I18N::Game::AnotherCharacterIsRegisteringTheOfficialSeal);
 
     return true;
 }
@@ -5524,7 +5525,7 @@ bool SEASON3B::CSealRegisterOtherCampLayout::SetLayout()
     if (false == pMsgBox->Create(3000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[1982]);
+    pMsgBox->AddMsg(I18N::Game::OtherSiegeTeamIsRunningTheCrownSwitch);
 
     return true;
 }
@@ -5538,7 +5539,7 @@ bool SEASON3B::CCrownDefenseRemoveLayout::SetLayout()
     if (false == pMsgBox->Create(3000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[1493]);
+    pMsgBox->AddMsg(I18N::Game::ShieldOfTheCrownHasBeenRemoved);
 
     return true;
 }
@@ -5552,7 +5553,7 @@ bool SEASON3B::CCrownDefenseCreateLayout::SetLayout()
     if (false == pMsgBox->Create(3000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[1494]);
+    pMsgBox->AddMsg(I18N::Game::ShieldOfTheCrownHasBeenActivated);
 
     return true;
 }
@@ -5566,7 +5567,7 @@ bool SEASON3B::CCursedTempleHolicItemGetLayout::SetLayout()
     if (false == pMsgBox->Create(10000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[2417]);
+    pMsgBox->AddMsg(I18N::Game::YouAreCurrentGainingTheSacredItem);
 
     return true;
 }
@@ -5580,7 +5581,7 @@ bool SEASON3B::CCursedTempleHolicItemSaveLayout::SetLayout()
     if (false == pMsgBox->Create(10000))
         return false;
 
-    pMsgBox->AddMsg(GlobalText[2418]);
+    pMsgBox->AddMsg(I18N::Game::YouAreCurrentlyStoringTheSacredItem);
 
     return true;
 }
@@ -5870,7 +5871,7 @@ void SEASON3B::CLuckyTradeMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CLuckyTradeMenuMsgBox::RenderFrame()
@@ -6049,18 +6050,18 @@ void SEASON3B::CTrainerMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
     m_BtnRecover.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRecover.SetText(GlobalText[1204]);
+    m_BtnRecover.SetText(I18N::Game::RestoreLifeDurability);
 
     y = GetPos().y + 120;
     m_BtnRevive.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRevive.SetText(GlobalText[1205]);
+    m_BtnRevive.SetText(I18N::Game::ResurrectSpirit);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CTrainerMenuMsgBox::RenderFrame()
@@ -6093,14 +6094,14 @@ void SEASON3B::CTrainerMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[1227]);
+    mu_swprintf(szText, I18N::Game::Trainer);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, GlobalText[1202]);
+    mu_swprintf(szText, I18N::Game::Hi);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[1203], Hero->ID);
+    mu_swprintf(szText, I18N::Game::SWhatIsYourCommand, Hero->ID);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -6241,11 +6242,11 @@ void SEASON3B::CTrainerRecoverMsgBox::SetButtonInfo()
 
     y = GetPos().y + 65;
     m_BtnRecoverDarkHorse.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRecoverDarkHorse.SetText(GlobalText[1187]);
+    m_BtnRecoverDarkHorse.SetText(I18N::Game::DarkHorse);
 
     y = GetPos().y + 115;
     m_BtnRecoverDarkSpirit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRecoverDarkSpirit.SetText(GlobalText[1214]);
+    m_BtnRecoverDarkSpirit.SetText(I18N::Game::DarkRaven);
 
     btnhalfwidth = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
@@ -6253,7 +6254,7 @@ void SEASON3B::CTrainerRecoverMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CTrainerRecoverMsgBox::RenderFrame()
@@ -6286,12 +6287,12 @@ void SEASON3B::CTrainerRecoverMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[1227]);
+    mu_swprintf(szText, I18N::Game::Trainer);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, GlobalText[1228]);
+    mu_swprintf(szText, I18N::Game::SelectThePetToRecoverLife);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(206, 192, 146, 255);
@@ -6460,22 +6461,22 @@ void SEASON3B::CElpisMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 145;
     m_BtnAboutRefinary.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnAboutRefinary.SetText(GlobalText[2201]);
+    m_BtnAboutRefinary.SetText(I18N::Game::AboutRefinery);
 
     y = GetPos().y + 175;
     m_BtnAboutJewelOfHarmony.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnAboutJewelOfHarmony.SetText(GlobalText[2202]);
+    m_BtnAboutJewelOfHarmony.SetText(I18N::Game::JewelOfHarmony);
 
     y = GetPos().y + 205;
     m_BtnRefine.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRefine.SetText(GlobalText[2203]);
+    m_BtnRefine.SetText(I18N::Game::RefineGemstone);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CElpisMsgBox::RenderFrame()
@@ -6511,7 +6512,7 @@ void SEASON3B::CElpisMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[2206]);
+    mu_swprintf(szText, I18N::Game::Elpis);
     g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
@@ -6520,14 +6521,14 @@ void SEASON3B::CElpisMsgBox::RenderTexts()
     switch (m_iMessageType)
     {
     case 0:
-        mu_swprintf(szText, GlobalText[2074]);
+        mu_swprintf(szText, I18N::Game::WhatWouldYouLikeToKnow);
         g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
         break;
     case MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY:
     {
         wchar_t Textlist[7][100];
         int lineSize = 0;
-        lineSize = CutText3(GlobalText[2198], Textlist[0], MSGBOX_WIDTH - 60.0f, 7, 100);
+        lineSize = CutText3(I18N::Game::GemstoneOfJewelOfHarmonyHas, Textlist[0], MSGBOX_WIDTH - 60.0f, 7, 100);
         for (int i = 0; i < lineSize; ++i)
         {
             g_pRenderText->RenderText(fPos_x + 20, fPos_y + (i + 1) * 18, Textlist[i]);
@@ -6538,7 +6539,7 @@ void SEASON3B::CElpisMsgBox::RenderTexts()
     {
         wchar_t Textlist[7][100];
         int lineSize = 0;
-        lineSize = CutText3(GlobalText[2199], Textlist[0], MSGBOX_WIDTH - 60.0f, 7, 100);
+        lineSize = CutText3(I18N::Game::NewPowerCanBeGrantedTo, Textlist[0], MSGBOX_WIDTH - 60.0f, 7, 100);
         for (int i = 0; i < lineSize; ++i)
         {
             g_pRenderText->RenderText(fPos_x + 20, fPos_y + (i + 1) * 18, Textlist[i]);
@@ -6685,18 +6686,18 @@ void SEASON3B::CSeedMasterMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
     m_BtnExtractSeed.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnExtractSeed.SetText(GlobalText[2664]);
+    m_BtnExtractSeed.SetText(I18N::Game::SeedExtraction);
 
     y = GetPos().y + 120;
     m_BtnSeedSphere.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnSeedSphere.SetText(GlobalText[2665]);
+    m_BtnSeedSphere.SetText(I18N::Game::SeedSphereAssembly);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CSeedMasterMenuMsgBox::RenderFrame()
@@ -6729,14 +6730,14 @@ void SEASON3B::CSeedMasterMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[2666]);
+    mu_swprintf(szText, I18N::Game::SeedMaster);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, GlobalText[2667]);
+    mu_swprintf(szText, I18N::Game::ExtractTheSeedOrTheSeedSphere);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[2668]);
+    mu_swprintf(szText, I18N::Game::YouMayAssemblyThemTogether);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -6876,18 +6877,18 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
     m_BtnAttachSocket.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnAttachSocket.SetText(GlobalText[2669]);
+    m_BtnAttachSocket.SetText(I18N::Game::SeedSphereApplication);
 
     y = GetPos().y + 120;
     m_BtnDetachSocket.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnDetachSocket.SetText(GlobalText[2670]);
+    m_BtnDetachSocket.SetText(I18N::Game::SeedSphereDestruction);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderFrame()
@@ -6920,14 +6921,14 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[2671]);
+    mu_swprintf(szText, I18N::Game::SeedResearcher);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 15;
     g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, GlobalText[2672]);
+    mu_swprintf(szText, I18N::Game::EitherApplyTheSeedSphere);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[2673]);
+    mu_swprintf(szText, I18N::Game::OrDestroyTheSeedSphereAccordingly);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -6977,14 +6978,14 @@ void SEASON3B::CResetCharacterPointMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 105;
     m_ResetCharacterPointBtn.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_ResetCharacterPointBtn.SetText(GlobalText[1884]); // "스탯 초기화"
+    m_ResetCharacterPointBtn.SetText(I18N::Game::StatReInitialization); // "스탯 초기화"
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CResetCharacterPointMsgBox::Release()
@@ -7068,12 +7069,12 @@ void SEASON3B::CResetCharacterPointMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[1885]);
+    mu_swprintf(szText, I18N::Game::ReInitializationHelper);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 25;
     g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, GlobalText[1886]);
+    mu_swprintf(szText, I18N::Game::ClickOnTheButtonToReinitializeAllStatPoints);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -7100,7 +7101,7 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown
     for (int i = 0; i < MAX_EQUIPMENT; i++) {
         if (CharacterMachine->Equipment[i].Type != -1)
         {
-            g_pSystemLogBox->AddText(GlobalText[1883], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheAppliedEquipmentsCannotBeReset, SEASON3B::TYPE_ERROR_MESSAGE);
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
             return CALLBACK_BREAK;
         }
@@ -7131,8 +7132,8 @@ bool SEASON3B::CGuildBreakPasswordMsgBoxLayout::SetLayout()
         return false;
 
     pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
-    pMsgBox->AddMsg(GlobalText[427]);
-    pMsgBox->AddMsg(GlobalText[428]);
+    pMsgBox->AddMsg(I18N::Game::IfYouWantToLeaveYourGuild);
+    pMsgBox->AddMsg(I18N::Game::PleaseEnterYourWEBZENCOMPassword);
 
     pMsgBox->AddCallbackFunc(SEASON3B::CGuildBreakPasswordMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(SEASON3B::CGuildBreakPasswordMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -7172,7 +7173,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
     }
     else
     {
-        g_pSystemLogBox->AddText(GlobalText[401], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, SEASON3B::TYPE_ERROR_MESSAGE);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -7282,24 +7283,24 @@ void SEASON3B::CGuild_ToPerson_Position::SetButtonInfo()
     x = GetPos().x + 57;//(GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth) + 60;
     y = GetPos().y + 30;
     m_BtnBlessing.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnBlessing.SetText(GlobalText[1311]);
+    m_BtnBlessing.SetText(I18N::Game::AppointAsAssistantGuildMaster);
 
     y += 27;
     m_BtnSoul.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnSoul.SetText(GlobalText[1312]);
+    m_BtnSoul.SetText(I18N::Game::AppointAsABattleMaster);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x -= 9;
     y += 70;
     m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnOk.SetText(GlobalText[228]);
+    m_BtnOk.SetText(I18N::Game::OK);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x += 64;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(GlobalText[1002]);
+    m_BtnCancel.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CGuild_ToPerson_Position::RenderFrame()
@@ -7376,7 +7377,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
     wchar_t strText[256];
     if (COMGEM::m_cGemType == COMGEM::CELE)
     {
-        mu_swprintf(strText, GlobalText[1314], GuildList[DeleteIndex].Name, GlobalText[1301]);
+        mu_swprintf(strText, I18N::Game::SAsAS, GuildList[DeleteIndex].Name, I18N::Game::AssistM);
         AppointType = SUBGUILDMASTER;
         AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
         glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
@@ -7390,7 +7391,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
 
     if (COMGEM::m_cGemType == COMGEM::SOUL)
     {
-        mu_swprintf(strText, GlobalText[1314], GuildList[DeleteIndex].Name, GlobalText[1302]);
+        mu_swprintf(strText, I18N::Game::SAsAS, GuildList[DeleteIndex].Name, I18N::Game::BattleM);
         AppointType = BATTLEMASTER;
         AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
         glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
@@ -7404,7 +7405,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
 
     m_BtnOk.Render();
     m_BtnCancel.Render();
-    AddMsg(GlobalText[1315], RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
+    AddMsg(I18N::Game::DoYouWantToAppoint, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 }
 
 CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
@@ -7615,18 +7616,18 @@ void SEASON3B::CDelgardoMainMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
     m_BtnReg.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnReg.SetText(GlobalText[1891]);
+    m_BtnReg.SetText(I18N::Game::LuckyCoinRegistration);
 
     y = GetPos().y + 120;
     m_BtnExchange.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnExchange.SetText(GlobalText[1892]);
+    m_BtnExchange.SetText(I18N::Game::LuckyCoinExchange);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(GlobalText[1002]);
+    m_BtnExit.SetText(I18N::Game::Close);
 }
 
 void SEASON3B::CDelgardoMainMenuMsgBox::RenderFrame()
@@ -7659,16 +7660,16 @@ void SEASON3B::CDelgardoMainMenuMsgBox::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[1890]);
+    mu_swprintf(szText, I18N::Game::Delgado);
     g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 
     fPos_y += 26;
     g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, GlobalText[1932]);
+    mu_swprintf(szText, I18N::Game::RegisterYourLuckyCoinsOr);
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[1933]);
+    mu_swprintf(szText, I18N::Game::UseTheLuckyCoinsYouAlreadyHave);
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[1934]);
+    mu_swprintf(szText, I18N::Game::AndExchangeThemForItems);
     g_pRenderText->RenderText(fPos_x, fPos_y + 3 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 

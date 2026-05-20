@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/NPCs/NewUINPCShop.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -238,10 +239,10 @@ void SEASON3B::CNewUINPCShop::RenderTexts()
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, GlobalText[230], NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, I18N::Game::Merchant, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 
     wchar_t strText[256];
-    mu_swprintf(strText, GlobalText[1623], m_iTaxRate);
+    mu_swprintf(strText, I18N::Game::TaxRateDChangedInRealTime, m_iTaxRate);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strText, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 }
 
@@ -264,7 +265,7 @@ void SEASON3B::CNewUINPCShop::RenderRepairMoney()
         wchar_t strText[256];
         ConvertGold(AllRepairGold, strText);
         g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 362, GlobalText[239]);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 362, I18N::Game::RepairAll);
         g_pRenderText->SetTextColor(getGoldColor(AllRepairGold));
         g_pRenderText->RenderText(m_Pos.x + 100, m_Pos.y + 362, strText);
     }
@@ -332,20 +333,20 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
     {
         if (CharacterMachine->Gold + ItemValue(pItem) > 2000000000)
         {
-            g_pSystemLogBox->AddText(GlobalText[3148], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ExceededMaximumAmountOfZenYouCanPossess, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
             return true;
         }
 
         if (pItem && pItem->Jewel_Of_Harmony_Option != 0)
         {
-            g_pSystemLogBox->AddText(GlobalText[2211], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeSold, SEASON3B::TYPE_ERROR_MESSAGE);
 
             return true;
         }
         if (pItem && IsSellingBan(pItem) == true)
         {
-            g_pSystemLogBox->AddText(GlobalText[668], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, SEASON3B::TYPE_ERROR_MESSAGE);
             m_pNewInventoryCtrl->BackupPickedItem();
 
             return true;
@@ -445,11 +446,11 @@ void SEASON3B::CNewUINPCShop::SetButtonInfo()
 {
     m_BtnRepair.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
     m_BtnRepair.ChangeButtonInfo(m_Pos.x + 54, m_Pos.y + 390, 36, 29);
-    m_BtnRepair.ChangeToolTipText(GlobalText[233], true);
+    m_BtnRepair.ChangeToolTipText(I18N::Game::RepairL, true);
 
     m_BtnRepairAll.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
     m_BtnRepairAll.ChangeButtonInfo(m_Pos.x + 98, m_Pos.y + 390, 36, 29);
-    m_BtnRepairAll.ChangeToolTipText(GlobalText[237], true);
+    m_BtnRepairAll.ChangeToolTipText(I18N::Game::RepairAllA, true);
 }
 
 void SEASON3B::CNewUINPCShop::SetRepairShop(bool bRepair)

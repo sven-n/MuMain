@@ -17,6 +17,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "I18N/All.h"
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Events/Cinematic/CMVP1stDirection.h"
@@ -102,7 +103,7 @@ void InitTerrainMappingLayer()
 
 void ExitProgram()
 {
-    MessageBoxW(g_hWnd, GlobalText[11], NULL, MB_OK);
+    MessageBoxW(g_hWnd, I18N::Game::DataError, NULL, MB_OK);
     PostQuitMessage(0);
 }
 

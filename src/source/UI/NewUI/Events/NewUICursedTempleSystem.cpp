@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "I18N/All.h"
 
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
@@ -543,7 +544,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
                 }
                 else
                 {
-                    g_pSystemLogBox->AddText(GlobalText[2092], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::NoItem, SEASON3B::TYPE_ERROR_MESSAGE);
                 }
             }
             else
@@ -565,10 +566,10 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
         if (g_MessageBox->IsEmpty())
         {
             if (npcindex == AlliedNpc)
-                SEASON3B::CreateOkMessageBox(GlobalText[2359]);
+                SEASON3B::CreateOkMessageBox(I18N::Game::WeHaveEnteredTheHeartOf);
 
             if (npcindex == IllusionNpc)
-                SEASON3B::CreateOkMessageBox(GlobalText[2362]);
+                SEASON3B::CreateOkMessageBox(I18N::Game::ListenToThisTheAlliesHave);
         }
 
         return true;
@@ -792,7 +793,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
 
         mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
 
-        mu_swprintf(TextList[TextNum], L"%ls", GlobalText[2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)]);
+        mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::Lookup(2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)));
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE; TextNum++;
 
         RenderTipTextList(x, y - 20, TextNum, 0);
@@ -808,7 +809,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = 0;
         }
 
-        mu_swprintf(TextList[TextNum], L"%ls", GlobalText[2378]);
+        mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::RequiredKillPoint);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -825,7 +826,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
             TextList[i][0] = 0;
         }
 
-        mu_swprintf(TextList[TextNum], L"%ls", GlobalText[2377]);
+        mu_swprintf(TextList[TextNum], L"%ls", I18N::Game::AchievedKillPoint);
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
         TextNum++;
 
@@ -1040,41 +1041,41 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
 
     if (m_TutorialStepState == 0)
     {
-        wcscpy(TextList[TextNum], GlobalText[2400]);
+        wcscpy(TextList[TextNum], I18N::Game::STEP1BattleBegins);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
         mu_swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2401]);
+        wcscpy(TextList[TextNum], I18N::Game::TheStoneStatueAppearsRandomlyFromOneOfTheTwoLocations);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2402]);
+        wcscpy(TextList[TextNum], I18N::Game::TheSacredItemMayBeAchievedByClickingOnTheStoneStatue);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2403]);
+        wcscpy(TextList[TextNum], I18N::Game::BeCautiousOfTheFactThat);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
     }
     else if (m_TutorialStepState == 1)
     {
-        wcscpy(TextList[TextNum], GlobalText[2404]);
+        wcscpy(TextList[TextNum], I18N::Game::STEP2StorageOfTheSacredItem);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
         mu_swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2405]);
+        wcscpy(TextList[TextNum], I18N::Game::ClickOnTheStorageOfThe);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2406]);
+        wcscpy(TextList[TextNum], I18N::Game::TheGoalIsToAchieveAsManyPointsAsPossibleWithinTheGivenPeriod);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2407]);
+        wcscpy(TextList[TextNum], I18N::Game::TheStoneStatueReappearsAfterTheStorageLookForTheStatue);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
     }
     else if (m_TutorialStepState == 2)
     {
-        wcscpy(TextList[TextNum], GlobalText[2408]);
+        wcscpy(TextList[TextNum], I18N::Game::STEP3OfficialSkills);
         TextListColor[TextNum] = 0xFF49B0FF; ++TextNum;
         mu_swprintf(TextList[TextNum], L"");
         TextListColor[TextNum] = 0xFF000000; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2409]);
+        wcscpy(TextList[TextNum], I18N::Game::YouMayAchieveTheKillPoints);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2410]);
+        wcscpy(TextList[TextNum], I18N::Game::MouseWheelButtonChangeSkillTypesShiftMouseRightClickUse);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
-        wcscpy(TextList[TextNum], GlobalText[2411]);
+        wcscpy(TextList[TextNum], I18N::Game::ThereAre4TypesOfSkills);
         TextListColor[TextNum] = 0xFFffffff; ++TextNum;
     }
 
@@ -1129,7 +1130,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJE
 
     if (m_SkillPoint < MaxKillCount)
     {
-        g_pSystemLogBox->AddText(GlobalText[2392], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::KillPointIsnTSufficient, SEASON3B::TYPE_ERROR_MESSAGE);
         MouseRButtonPush = false;
         return;
     }
@@ -1367,13 +1368,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pSystemLogBox->AddText(GlobalText[2360], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheAlliesAreAdvancingOnWeAreNotFarFromTheVictoryChargeOn, SEASON3B::TYPE_ERROR_MESSAGE);
         }
         else if (m_IllusionPoint != data->btIllusionPoint)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pSystemLogBox->AddText(GlobalText[2361], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::AlthoughWeHaveLostThisBattle, SEASON3B::TYPE_ERROR_MESSAGE);
         }
     }
     else
@@ -1382,13 +1383,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pSystemLogBox->AddText(GlobalText[2363], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::HoorayForTheIllusionSorceryWe, SEASON3B::TYPE_ERROR_MESSAGE);
         }
         else if (m_AlliedPoint != data->btAlliedPoint)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pSystemLogBox->AddText(GlobalText[2364], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouMustNotLoseTheTemple, SEASON3B::TYPE_ERROR_MESSAGE);
         }
     }
 
@@ -1425,7 +1426,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE*
     {
         wchar_t message[100];
         memset(&message, 0, sizeof(char));
-        mu_swprintf(message, GlobalText[2391], data->btSkillPoint - m_SkillPoint);
+        mu_swprintf(message, I18N::Game::KillPointDAchieved, data->btSkillPoint - m_SkillPoint);
         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 

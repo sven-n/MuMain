@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "GIPetManager.h"
 
@@ -350,17 +351,17 @@ namespace giPetManager
             int cmdType = Type - AT_PET_COMMAND_DEFAULT;
 
             TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true;
-            mu_swprintf(TextList[TextNum], GlobalText[1219 + cmdType]); TextNum++; SkipNum++;
+            mu_swprintf(TextList[TextNum], I18N::Game::Lookup(1219 + cmdType)); TextNum++; SkipNum++;
 
             TextListColor[TextNum] = TEXT_COLOR_WHITE;
             mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
             mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
             switch (cmdType)
             {
-            case PET_CMD_DEFAULT: mu_swprintf(TextList[TextNum], GlobalText[1223]); TextNum++; SkipNum++; break;
-            case PET_CMD_RANDOM: mu_swprintf(TextList[TextNum], GlobalText[1224]); TextNum++; SkipNum++; break;
-            case PET_CMD_OWNER: mu_swprintf(TextList[TextNum], GlobalText[1225]); TextNum++; SkipNum++; break;
-            case PET_CMD_TARGET: mu_swprintf(TextList[TextNum], GlobalText[1226]); TextNum++; SkipNum++; break;
+            case PET_CMD_DEFAULT: mu_swprintf(TextList[TextNum], I18N::Game::FollowAroundTheCharacter); TextNum++; SkipNum++; break;
+            case PET_CMD_RANDOM: mu_swprintf(TextList[TextNum], I18N::Game::AttackAnyMonstersAroundTheCharacter); TextNum++; SkipNum++; break;
+            case PET_CMD_OWNER: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterTogetherWithTheCharacter); TextNum++; SkipNum++; break;
+            case PET_CMD_TARGET: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterSelectedByTheCharacter); TextNum++; SkipNum++; break;
             }
 
             SIZE TextSize = { 0, 0 };
@@ -604,8 +605,8 @@ namespace giPetManager
         int SkipNum = 0;
         int RequireLevel = 0;
         int RequireCharisma = 0;
-        const std::wstring priceFormat = SanitizeWideStringFormat(GlobalText[63]);
-        const std::wstring ownershipFormat = SanitizeWideStringFormat(GlobalText[61]);
+        const std::wstring priceFormat = SanitizeWideStringFormat(I18N::Game::SellingPriceS);
+        const std::wstring ownershipFormat = SanitizeWideStringFormat(I18N::Game::CanBeEquippedByS);
 
         auto appendLine = [&](int color, bool bold, bool countForHeight, const wchar_t* format, auto... args)
         {
@@ -669,13 +670,13 @@ namespace giPetManager
                 const auto heroGold = CharacterMachine->Gold;
                 if ((static_cast<std::int64_t>(heroGold) < static_cast<std::int64_t>(price)) && (g_IsPurchaseShop == PSHOPWNDTYPE_PURCHASE))
                 {
-                    appendLine(TEXT_COLOR_RED, true, false, GlobalText[423]);
+                    appendLine(TEXT_COLOR_RED, true, false, I18N::Game::YouAreShortOfZen);
                     appendEmptyLine();
                 }
             }
             else if (g_IsPurchaseShop == PSHOPWNDTYPE_SALE)
             {
-                appendLine(TEXT_COLOR_RED, true, false, GlobalText[1101]);
+                appendLine(TEXT_COLOR_RED, true, false, I18N::Game::RightClickForPriceSetting);
                 appendEmptyLine();
             }
         }
@@ -683,36 +684,36 @@ namespace giPetManager
         if (pItem->Type == ITEM_DARK_HORSE_ITEM)
         {
             RequireLevel = (218 + (pPetInfo->m_wLevel * 2));
-            appendLine(TEXT_COLOR_BLUE, true, true, GlobalText[1187]);
+            appendLine(TEXT_COLOR_BLUE, true, true, I18N::Game::DarkHorse);
         }
         else if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
         {
             RequireCharisma = (185 + (pPetInfo->m_wLevel * 15));
-            appendLine(TEXT_COLOR_BLUE, true, true, GlobalText[1214]);
+            appendLine(TEXT_COLOR_BLUE, true, true, I18N::Game::DarkRaven);
         }
 
         appendEmptyLine();
         appendEmptyLine();
 
-        appendLine(TEXT_COLOR_WHITE, false, true, GlobalText[201], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
-        appendLine(TEXT_COLOR_WHITE, false, true, L"%ls : %d", GlobalText[368], pPetInfo->m_wLevel);
+        appendLine(TEXT_COLOR_WHITE, false, true, I18N::Game::ExpUU, pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
+        appendLine(TEXT_COLOR_WHITE, false, true, L"%ls : %d", I18N::Game::Level368, pPetInfo->m_wLevel);
 
         if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
         {
-            appendLine(TEXT_COLOR_WHITE, false, true, GlobalText[203], pPetInfo->m_wDamageMin, pPetInfo->m_wDamageMax, pPetInfo->m_wAttackSuccess);
-            appendLine(TEXT_COLOR_WHITE, false, true, GlobalText[64], pPetInfo->m_wAttackSpeed);
+            appendLine(TEXT_COLOR_WHITE, false, true, I18N::Game::DmgRateDDD, pPetInfo->m_wDamageMin, pPetInfo->m_wDamageMax, pPetInfo->m_wAttackSuccess);
+            appendLine(TEXT_COLOR_WHITE, false, true, I18N::Game::AttackSpeedD, pPetInfo->m_wAttackSpeed);
         }
-        appendLine(TEXT_COLOR_WHITE, false, true, GlobalText[70], pPetInfo->m_wLife);
+        appendLine(TEXT_COLOR_WHITE, false, true, I18N::Game::LifeD, pPetInfo->m_wLife);
 
         if (pItem->Type == ITEM_DARK_HORSE_ITEM)
         {
             const bool hasLevelRequirement = CharacterAttribute->Level >= RequireLevel;
             const int requirementColor = hasLevelRequirement ? TEXT_COLOR_WHITE : TEXT_COLOR_RED;
-            appendLine(requirementColor, false, false, GlobalText[76], RequireLevel);
+            appendLine(requirementColor, false, false, I18N::Game::MinimumLevelRequirementD, RequireLevel);
 
             if (!hasLevelRequirement)
             {
-                appendLine(TEXT_COLOR_RED, false, false, GlobalText[74], RequireLevel - CharacterAttribute->Level);
+                appendLine(TEXT_COLOR_RED, false, false, I18N::Game::LackingD, RequireLevel - CharacterAttribute->Level);
             }
         }
         else if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
@@ -721,18 +722,18 @@ namespace giPetManager
             const bool hasCharisma = charismaTotal >= RequireCharisma;
             const int charismaColor = hasCharisma ? TEXT_COLOR_WHITE : TEXT_COLOR_RED;
 
-            appendLine(charismaColor, false, false, GlobalText[698], RequireCharisma);
+            appendLine(charismaColor, false, false, I18N::Game::CharismaRequirementD, RequireCharisma);
 
             if (!hasCharisma)
             {
-                appendLine(TEXT_COLOR_RED, false, false, GlobalText[74], RequireCharisma - charismaTotal);
+                appendLine(TEXT_COLOR_RED, false, false, I18N::Game::LackingD, RequireCharisma - charismaTotal);
             }
         }
 
         appendEmptyLine();
 
         const int ownershipColor = (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD) ? TEXT_COLOR_WHITE : TEXT_COLOR_DARKRED;
-        appendLine(ownershipColor, false, true, ownershipFormat.c_str(), GlobalText[24]);
+        appendLine(ownershipColor, false, true, ownershipFormat.c_str(), I18N::Game::DarkLord);
 
         for (int i = 0; i < pItem->SpecialNum; ++i)
         {
@@ -751,8 +752,8 @@ namespace giPetManager
 
         if (pItem->Type == ITEM_DARK_HORSE_ITEM)
         {
-            appendLine(TEXT_COLOR_BLUE, false, true, GlobalText[744], (30 + pPetInfo->m_wLevel) / 2);
-            appendLine(TEXT_COLOR_BLUE, false, false, GlobalText[1188], 2);
+            appendLine(TEXT_COLOR_BLUE, false, true, I18N::Game::AbsorbDAdditionalDamage, (30 + pPetInfo->m_wLevel) / 2);
+            appendLine(TEXT_COLOR_BLUE, false, false, I18N::Game::IncreaseDPossibleAttackDistance, 2);
         }
 
         SIZE TextSize = { 0, 0 };

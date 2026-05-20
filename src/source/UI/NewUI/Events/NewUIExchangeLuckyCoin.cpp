@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/Events/NewUIExchangeLuckyCoin.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -41,20 +42,20 @@ bool CNewUIExchangeLuckyCoin::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_BtnExit.ChangeButtonImgState(true, IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT, true);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + ((EXCHANGE_LUCKYCOIN_WINDOW_WIDTH / 2) - (MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2)), m_Pos.y + 360,
         MSGBOX_BTN_EMPTY_SMALL_WIDTH, MSGBOX_BTN_EMPTY_HEIGHT);
-    m_BtnExit.ChangeText(GlobalText[1002]);
+    m_BtnExit.ChangeText(I18N::Game::Close);
 
     // Exchange Button
     m_BtnExchange[0].ChangeButtonImgState(true, IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, true);
     m_BtnExchange[0].SetFont(g_hFontBold);
-    m_BtnExchange[0].ChangeText(GlobalText[1896]);
+    m_BtnExchange[0].ChangeText(I18N::Game::Exchange10Coins);
 
     m_BtnExchange[1].ChangeButtonImgState(true, IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, true);
     m_BtnExchange[1].SetFont(g_hFontBold);
-    m_BtnExchange[1].ChangeText(GlobalText[1897]);
+    m_BtnExchange[1].ChangeText(I18N::Game::Exchange20Coins);
 
     m_BtnExchange[2].ChangeButtonImgState(true, IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, true);
     m_BtnExchange[2].SetFont(g_hFontBold);
-    m_BtnExchange[2].ChangeText(GlobalText[1898]);
+    m_BtnExchange[2].ChangeText(I18N::Game::Exchange30Coins);
 
     Show(false);
 
@@ -158,19 +159,19 @@ void CNewUIExchangeLuckyCoin::RenderTexts()
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 25, GlobalText[1892], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 25, I18N::Game::LuckyCoinExchange, 190, 0, RT3_SORT_CENTER);
 
-    g_pRenderText->RenderText(m_TextPos.x, m_Pos.y + 200, GlobalText[1940], EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_TextPos.x, m_Pos.y + 200, I18N::Game::Exchange1940, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(255, 255, 0, 255);
-    g_pRenderText->RenderText(m_TextPos.x, m_TextPos.y, GlobalText[1895], EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_TextPos.x, m_TextPos.y, I18N::Game::Warning1895, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     int iTextPosy = m_TextPos.y + (EXCHANGE_TEXT_VAL * 2);
-    g_pRenderText->RenderText(m_TextPos.x, iTextPosy, GlobalText[1938], EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_TextPos.x, iTextPosy, I18N::Game::ExchangedLuckyCoins, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
     iTextPosy += EXCHANGE_TEXT_VAL;
-    g_pRenderText->RenderText(m_TextPos.x, iTextPosy, GlobalText[1939], EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_TextPos.x, iTextPosy, I18N::Game::WillNotBeReturned, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
 }
 
 void CNewUIExchangeLuckyCoin::RenderBtn()

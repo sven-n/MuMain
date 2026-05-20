@@ -14,6 +14,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/SocketSystem.h"
@@ -53,7 +54,7 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnMix.ChangeButtonImgState(true, IMAGE_MIXINVENTORY_MIXBTN, false);
     m_BtnMix.ChangeButtonInfo(m_Pos.x + INVENTORY_WIDTH * 0.5f - 22.f, m_Pos.y + 380, 44.f, 35.f);
-    m_BtnMix.ChangeToolTipText(GlobalText[591], true);
+    m_BtnMix.ChangeToolTipText(I18N::Game::Combining, true);
 
     m_pNewInventoryCtrl->GetSquareColorNormal(m_fInventoryColor);
     m_pNewInventoryCtrl->GetSquareColorWarning(m_fInventoryWarningColor);
@@ -136,7 +137,7 @@ bool CNewUIMixInventory::ClosingProcess()
 {
     if (g_pMixInventory->GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
     {
-        g_pSystemLogBox->AddText(GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CloseInventoryAfterMovingYourItemsInTheInventory, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -233,7 +234,7 @@ bool CNewUIMixInventory::Update()
                 {
                     if (g_MixRecipeMgr.GetFirstItemSocketSeedID(i) == SOCKET_EMPTY)
                     {
-                        mu_swprintf(szSocketText, GlobalText[2652]);
+                        mu_swprintf(szSocketText, I18N::Game::NoItemApplication);
                     }
                     else
                     {
@@ -346,60 +347,60 @@ void CNewUIMixInventory::RenderFrame()
     switch (g_MixRecipeMgr.GetMixInventoryType())
     {
     case SEASON3A::MIXTYPE_GOBLIN_NORMAL:
-        mu_swprintf(szText, L"%ls", GlobalText[735]);
+        mu_swprintf(szText, L"%ls", I18N::Game::RegularCombination);
         break;
     case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
-        mu_swprintf(szText, L"%ls", GlobalText[736]);
+        mu_swprintf(szText, L"%ls", I18N::Game::ChaosWeaponCombination);
         break;
     case SEASON3A::MIXTYPE_GOBLIN_ADD380:
-        mu_swprintf(szText, L"%ls", GlobalText[2193]);
+        mu_swprintf(szText, L"%ls", I18N::Game::ItemOptionCombination);
         break;
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[1640]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Store1640);
         break;
     case SEASON3A::MIXTYPE_TRAINER:
-        mu_swprintf(szText, L"%ls", GlobalText[1205]);
+        mu_swprintf(szText, L"%ls", I18N::Game::ResurrectSpirit);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2061]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Refine);
         break;
     case SEASON3A::MIXTYPE_JERRIDON:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2062]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Restore);
         break;
     case SEASON3A::MIXTYPE_ELPIS:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2063]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Refine);
         break;
     case SEASON3A::MIXTYPE_CHAOS_CARD:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2265]);
+        mu_swprintf(szText, L"%ls", I18N::Game::ChaosCardCombination);
         break;
     case SEASON3A::MIXTYPE_CHERRYBLOSSOM:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2563]);
+        mu_swprintf(szText, L"%ls", I18N::Game::SpiritOfCherryBlossoms);
         break;
     case SEASON3A::MIXTYPE_EXTRACT_SEED:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2660]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Extraction);
         break;
     case SEASON3A::MIXTYPE_SEED_SPHERE:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2661]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Assembly);
         break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2662]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Application);
         break;
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[2663]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Destruction);
         break;
     default:
         fLine_y += 5.0f;
-        mu_swprintf(szText, L"%ls", GlobalText[583]);
+        mu_swprintf(szText, L"%ls", I18N::Game::Chaos);
         break;
     }
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
@@ -411,7 +412,7 @@ void CNewUIMixInventory::RenderFrame()
     case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM:
     case SEASON3A::MIXTYPE_GOBLIN_ADD380:
     case SEASON3A::MIXTYPE_TRAINER:
-        mu_swprintf(szText, GlobalText[1623], g_nChaosTaxRate);
+        mu_swprintf(szText, I18N::Game::TaxRateDChangedInRealTime, g_nChaosTaxRate);
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
         break;
     default:
@@ -453,7 +454,7 @@ void CNewUIMixInventory::RenderFrame()
         {
             g_pRenderText->SetTextColor(255, 255, 48, 255);
             g_pRenderText->SetBgColor(40, 40, 40, 128);
-            mu_swprintf(szText, GlobalText[584], GlobalText[591], g_MixRecipeMgr.GetSuccessRate());
+            mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Combining, g_MixRecipeMgr.GetSuccessRate());
             mu_swprintf(szText, L"%ls + %d%%", szText, g_MixRecipeMgr.GetPlusChaosRate());
             g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
             g_pRenderText->SetTextColor(210, 230, 255, 255);
@@ -469,16 +470,16 @@ void CNewUIMixInventory::RenderFrame()
             case SEASON3A::MIXTYPE_GOBLIN_ADD380:
             case SEASON3A::MIXTYPE_EXTRACT_SEED:
             case SEASON3A::MIXTYPE_SEED_SPHERE:
-                mu_swprintf(szText, GlobalText[584], GlobalText[591], g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Combining, g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_TRAINER:
-                mu_swprintf(szText, GlobalText[584], GlobalText[1212], g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Resurrection, g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_OSBOURNE:
-                mu_swprintf(szText, GlobalText[584], GlobalText[2061], g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Refine, g_MixRecipeMgr.GetSuccessRate());
                 break;
             case SEASON3A::MIXTYPE_ELPIS:
-                mu_swprintf(szText, GlobalText[584], GlobalText[2063], g_MixRecipeMgr.GetSuccessRate());
+                mu_swprintf(szText, I18N::Game::SSuccessRateD, I18N::Game::Refine, g_MixRecipeMgr.GetSuccessRate());
                 break;
             }
             g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
@@ -507,11 +508,11 @@ void CNewUIMixInventory::RenderFrame()
         ConvertChaosTaxGold(g_MixRecipeMgr.GetReqiredZen(), szGoldText2);
         if (g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetCurRecipe()->m_bRequiredZenType == 'C')
         {
-            mu_swprintf(szText, GlobalText[1636], szGoldText2, szGoldText);
+            mu_swprintf(szText, I18N::Game::RequiredZenForPotionSS, szGoldText2, szGoldText);
         }
         else
         {
-            mu_swprintf(szText, GlobalText[1622], szGoldText2, szGoldText);
+            mu_swprintf(szText, I18N::Game::RequiredZenSS, szGoldText2, szGoldText);
         }
 
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
@@ -531,7 +532,7 @@ void CNewUIMixInventory::RenderFrame()
         int iTextLines = 0;
         if (!g_MixRecipeMgr.IsReadyToMix() && g_MixRecipeMgr.GetMostSimilarRecipeName(szTempText[0], 1) == TRUE)
         {
-            mu_swprintf(szText, GlobalText[2334], szTempText[0]);
+            mu_swprintf(szText, I18N::Game::AssemblyPredictionS, szTempText[0]);
             iTextLines = CutStr(szText, szTempText[0], 150, 2, 100);
 
             for (int i = 0; i < iTextLines; i++)
@@ -569,7 +570,7 @@ void CNewUIMixInventory::RenderFrame()
         g_pRenderText->SetTextColor(255, 50, 20, 255);
         g_pRenderText->SetBgColor(40, 40, 40, 128);
 
-        mu_swprintf(szText, GlobalText[2346]);
+        mu_swprintf(szText, I18N::Game::PleaseUploadTheAssemblyItems);
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
         iTextPos_y++;
     }
@@ -578,10 +579,10 @@ void CNewUIMixInventory::RenderFrame()
         g_pRenderText->SetTextColor(255, 50, 20, 255);
         g_pRenderText->SetBgColor(40, 40, 40, 128);
 
-        mu_swprintf(szText, GlobalText[2334], L" ");
+        mu_swprintf(szText, I18N::Game::AssemblyPredictionS, L" ");
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText);
 
-        mu_swprintf(szText, GlobalText[601]);
+        mu_swprintf(szText, I18N::Game::ImproperItemsForCombination);
         g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y + (++iTextPos_y) * 15, szText);
     }
 
@@ -613,31 +614,31 @@ void CNewUIMixInventory::RenderFrame()
     switch (g_MixRecipeMgr.GetMixInventoryType())
     {
     case SEASON3A::MIXTYPE_TRAINER:
-        m_BtnMix.ChangeToolTipText(GlobalText[1212], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Resurrection, true);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
-        m_BtnMix.ChangeToolTipText(GlobalText[2061], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Refine, true);
         break;
     case SEASON3A::MIXTYPE_JERRIDON:
-        m_BtnMix.ChangeToolTipText(GlobalText[2062], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Restore, true);
         break;
     case SEASON3A::MIXTYPE_ELPIS:
-        m_BtnMix.ChangeToolTipText(GlobalText[2063], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Refine, true);
         break;
     case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        m_BtnMix.ChangeToolTipText(GlobalText[2660], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Extraction, true);
         break;
     case SEASON3A::MIXTYPE_SEED_SPHERE:
-        m_BtnMix.ChangeToolTipText(GlobalText[2661], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Assembly, true);
         break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
-        m_BtnMix.ChangeToolTipText(GlobalText[2662], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Application, true);
         break;
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
-        m_BtnMix.ChangeToolTipText(GlobalText[2663], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Destruction, true);
         break;
     default:
-        m_BtnMix.ChangeToolTipText(GlobalText[591], true);
+        m_BtnMix.ChangeToolTipText(I18N::Game::Combining, true);
         break;
     }
     m_BtnMix.Render();
@@ -680,7 +681,7 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(200, 200, 200, 255);
         for (int i = 0; i < 6; ++i)
-            g_pRenderText->RenderText(fPos_x, fPos_y + 270 + i * 13, GlobalText[1644 + i], 160.0f, 0, RT3_SORT_CENTER);
+            g_pRenderText->RenderText(fPos_x, fPos_y + 270 + i * 13, I18N::Game::Lookup(1644 + i), 160.0f, 0, RT3_SORT_CENTER);
     }
     break;
     case SEASON3A::MIXTYPE_TRAINER:
@@ -689,16 +690,16 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
     {
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2220]);
+        mu_swprintf(szText, I18N::Game::RefineTheItemToCreate);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2221]);
+        mu_swprintf(szText, I18N::Game::TheRefiningStone);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2084], GlobalText[2061], GlobalText[2082]);
+        mu_swprintf(szText, I18N::Game::SForOnlyS, I18N::Game::Refine, I18N::Game::WeaponsOrShields);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2098]);
+        mu_swprintf(szText, I18N::Game::Allowed);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 3 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         g_pRenderText->SetTextColor(255, 0, 0, 255);
-        mu_swprintf(szText, GlobalText[2222]);
+        mu_swprintf(szText, I18N::Game::ItemWillDisappearWhenFailed);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
     }
     break;
@@ -706,28 +707,28 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
     {
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2102]);
+        mu_swprintf(szText, I18N::Game::RestorationIsDeletingThe);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2103]);
+        mu_swprintf(szText, I18N::Game::ReinforcementOption);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2104]);
+        mu_swprintf(szText, I18N::Game::OfTheWeapons);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2088]);
+        mu_swprintf(szText, I18N::Game::ForRestoringReinforcedItem);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 3 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2100]);
+        mu_swprintf(szText, I18N::Game::ReinforcementOptionHasToBe);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2101]);
+        mu_swprintf(szText, I18N::Game::DeletedThroughRestoration);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 5 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
     }
     break;
     case SEASON3A::MIXTYPE_ELPIS:
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2071]);
+        mu_swprintf(szText, I18N::Game::GettingThroughRefiningProcess);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2095]);
+        mu_swprintf(szText, I18N::Game::OfJewelOfHarmonyOrignal);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 1 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2096]);
+        mu_swprintf(szText, I18N::Game::GemstoneWillGiveMorePower);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         break;
     case SEASON3A::MIXTYPE_CHAOS_CARD:
@@ -735,19 +736,19 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
         g_pRenderText->SetBgColor(0, 0, 0, 0);
 
         g_pRenderText->SetTextColor(255, 40, 20, 255);
-        mu_swprintf(szText, GlobalText[2223]);
+        mu_swprintf(szText, I18N::Game::Warning2223);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 4 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2262]);
+        mu_swprintf(szText, I18N::Game::CombinationsCanBeUsedOnceAtATime);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 6 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2306]);
+        mu_swprintf(szText, I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 7 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2261]);
+        mu_swprintf(szText, I18N::Game::YouCanAchieveSpecialItemsWithCombinations);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 8 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
     }
     break;
@@ -756,33 +757,33 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
         g_pRenderText->SetBgColor(0, 0, 0, 0);
 
         g_pRenderText->SetTextColor(255, 40, 20, 255);
-        mu_swprintf(szText, GlobalText[2223]);
+        mu_swprintf(szText, I18N::Game::Warning2223);
         g_pRenderText->RenderText(fPos_x, fPos_y + 250 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2565]);
+        mu_swprintf(szText, I18N::Game::_255GoldenCherryBlossomBranches);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 2 * 13, szText, 160.0f, 0, RT3_SORT_LEFT);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2540]);
+        mu_swprintf(szText, I18N::Game::OnlyTheSameTypeOfCherryBlossomsBranchesCanBeUploaded);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 3 * 13, szText, 180.0f, 0, RT3_SORT_LEFT);
 
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        mu_swprintf(szText, GlobalText[2306]);
+        mu_swprintf(szText, I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded);
         g_pRenderText->RenderText(fPos_x - 10, fPos_y + 250 + 4 * 13, szText, 200.0f, 0, RT3_SORT_LEFT);
     }
     break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(200, 200, 200, 255);
-        mu_swprintf(szText, GlobalText[2674]);
+        mu_swprintf(szText, I18N::Game::SelectApplicableSocket);
         g_pRenderText->RenderText(fPos_x, fPos_y + 280 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         m_SocketListBox.Render();
         break;
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(200, 200, 200, 255);
-        mu_swprintf(szText, GlobalText[2675]);
+        mu_swprintf(szText, I18N::Game::SelectDestructibleSocket);
         g_pRenderText->RenderText(fPos_x, fPos_y + 280 + 0 * 13, szText, 160.0f, 0, RT3_SORT_CENTER);
         m_SocketListBox.Render();
         break;
@@ -808,14 +809,14 @@ bool CNewUIMixInventory::Mix()
 
     if (nMixZen > (int)dwGold)
     {
-        g_pSystemLogBox->AddText(GlobalText[596], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotEnoughZenToCombineItems, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
     if (!g_MixRecipeMgr.IsReadyToMix())
     {
         wchar_t szText[100];
-        mu_swprintf(szText, GlobalText[580], GlobalText[591]);
+        mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Combining);
         g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
@@ -826,7 +827,7 @@ bool CNewUIMixInventory::Mix()
         wchar_t szText[100];
         wchar_t szText2[100];
         g_MixRecipeMgr.GetCurRecipeName(szText2, 1);
-        mu_swprintf(szText, GlobalText[2347], g_MixRecipeMgr.GetCurRecipe()->m_iRequiredLevel, szText2);
+        mu_swprintf(szText, I18N::Game::FromAboveTheLevelDSEnabledAndOn, g_MixRecipeMgr.GetCurRecipe()->m_iRequiredLevel, szText2);
         g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
@@ -834,7 +835,7 @@ bool CNewUIMixInventory::Mix()
     if (g_MixRecipeMgr.GetCurRecipe()->m_iWidth != -1 &&
         g_pMyInventory->FindEmptySlot(g_MixRecipeMgr.GetCurRecipe()->m_iWidth, g_MixRecipeMgr.GetCurRecipe()->m_iHeight) == -1)
     {
-        g_pSystemLogBox->AddText(GlobalText[581], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CombineItemsAfterOrganizingYourInventory, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -850,7 +851,7 @@ bool CNewUIMixInventory::Mix()
                 BYTE bySeedSphereID = g_MixRecipeMgr.GetSeedSphereID(0);
                 if (bySocketSeedID == bySeedSphereID)
                 {
-                    g_pSystemLogBox->AddText(GlobalText[2683], SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::YouCannotApplyTheSameTypeOfSphere, SEASON3B::TYPE_ERROR_MESSAGE);
                     return false;
                 }
             }
@@ -858,13 +859,13 @@ bool CNewUIMixInventory::Mix()
 
         if (m_SocketListBox.SLGetSelectLineNum() == 0)
         {
-            g_pSystemLogBox->AddText(GlobalText[2676], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouMustSelectTheSocket, SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
             || g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) != SOCKET_EMPTY)
         {
-            g_pSystemLogBox->AddText(GlobalText[2677], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ItSAlreadyAppliedOnTheCharacter, SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
 
@@ -875,13 +876,13 @@ bool CNewUIMixInventory::Mix()
         int iSelectedLine = m_SocketListBox.GetLineNum() - m_SocketListBox.SLGetSelectLineNum();
         if (m_SocketListBox.SLGetSelectLineNum() == 0)
         {
-            g_pSystemLogBox->AddText(GlobalText[2678], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouMustSelectTheDestructibleSocket, SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
             || g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) == SOCKET_EMPTY)
         {
-            g_pSystemLogBox->AddText(GlobalText[2679], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ThereAreNoDestructibleSeedSpheres, SEASON3B::TYPE_ERROR_MESSAGE);
             return false;
         }
         g_MixRecipeMgr.SetMixSubType(iSelectedLine);
@@ -890,7 +891,7 @@ bool CNewUIMixInventory::Mix()
 #ifdef LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
     if (g_MixRecipeMgr.GetTotalChaosCharmCount() > 0 && g_MixRecipeMgr.GetTotalCharmCount() > 0)
     {
-        g_pSystemLogBox->AddText(GlobalText[3286], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotUseTheTalismanOf, SEASON3B::TYPE_ERROR_MESSAGE);
         return FALSE;
     }
 #endif //LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY

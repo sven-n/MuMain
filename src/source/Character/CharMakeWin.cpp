@@ -15,6 +15,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Scenes/SceneCore.h"
 #include "UI/Legacy/UIControls.h"
+#include "I18N/All.h"
 
 #include "Platform/Windows/Local.h"
 #include "CharacterManager.h"
@@ -168,7 +169,7 @@ void CCharMakeWin::Create()
     {
         m_abtnJob[classIndex].Create(108, 26, BITMAP_LOG_IN + 1, 4, 2, 1, 0, 3, 3, 3, 0);
         const int textId = kClassButtonTextIds[classIndex];
-        m_abtnJob[classIndex].SetText(GlobalText[textId], jobButtonColors.data());
+        m_abtnJob[classIndex].SetText(I18N::Game::Lookup(textId), jobButtonColors.data());
         CWin::RegisterButton(&m_abtnJob[classIndex]);
     }
 
@@ -308,7 +309,7 @@ void CCharMakeWin::UpdateDisplay()
 
     const int descriptionTextId = ResolveDescriptionTextId(m_nSelJob);
     m_nDescLine = ::SeparateTextIntoLines(
-        GlobalText[descriptionTextId],
+        I18N::Game::Lookup(descriptionTextId),
         m_aszJobDesc[0],
         CMW_DESC_LINE_MAX,
         CMW_DESC_ROW_MAX);
@@ -418,7 +419,7 @@ void CCharMakeWin::RenderControls()
         g_pRenderText->RenderText(
             int(statBaseX / g_fScreenRate_x),
             statScreenY,
-            GlobalText[kStatLabelBaseId + static_cast<int>(statIndex)]);
+            I18N::Game::Lookup(kStatLabelBaseId + static_cast<int>(statIndex)));
     }
 
     if (m_nSelJob == CLASS_DARK_LORD)
@@ -435,7 +436,7 @@ void CCharMakeWin::RenderControls()
         g_pRenderText->RenderText(
             int(statBaseX / g_fScreenRate_x),
             leadershipY,
-            GlobalText[kDarkLordLeadershipTextId]);
+            I18N::Game::Lookup(kDarkLordLeadershipTextId));
     }
 
     for (int lineIndex = 0; lineIndex < m_nDescLine; ++lineIndex)

@@ -37,6 +37,7 @@ FrameTimingState g_frameTiming;
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Data/Translation/GlobalText.h"
+#include "I18N/All.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Platform/Windows/Winmain.h"
 #include "Camera/CameraManager.h"
@@ -195,7 +196,7 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
     GetLocalTime(&st);
     swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg",
         st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-    swprintf(outMessage, GlobalText[459], outFileName);
+    swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
 
     wchar_t lpszTemp[64];
     swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);

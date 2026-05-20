@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "QuestMng.h"
+#include "I18N/All.h"
 
 
 
@@ -273,7 +274,7 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
         if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
 
-        g_pSystemLogBox->AddText(GlobalText[2814], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouVeSuccessfullyCompletedTheQuest, SEASON3B::TYPE_ERROR_MESSAGE);
 
         return;
     }
@@ -432,7 +433,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
     aDest[nLine].m_hFont = g_hFontBold;
     aDest[nLine].m_dwColor = ARGB(255, 179, 230, 77);
-    wcscpy(aDest[nLine++].m_szText, GlobalText[2809]);
+    wcscpy(aDest[nLine++].m_szText, I18N::Game::Requirements2809);
 
     SQuestRequest* pRequestInfo;
     for (i = 0; i < pRequestReward->m_byRequestCount; ++i, ++nLine)
@@ -449,7 +450,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
         {
         case QUEST_REQUEST_NONE:
             aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
-            wcscpy(aDest[nLine].m_szText, GlobalText[1361]);
+            wcscpy(aDest[nLine].m_szText, I18N::Game::None);
             break;
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
@@ -486,13 +487,13 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             break;
             case QUEST_REQUEST_LEVEL:
                 ::mu_swprintf(aDest[nLine].m_szText, L"Level: %lu %ls",
-                    pRequestInfo->m_dwValue, GlobalText[2812]);
+                    pRequestInfo->m_dwValue, I18N::Game::Minimum);
                 break;
             case QUEST_REQUEST_ZEN:
                 ::mu_swprintf(aDest[nLine].m_szText, L"Zen : %lu", pRequestInfo->m_dwValue);
                 break;
             case QUEST_REQUEST_PVP_POINT:
-                mu_swprintf(aDest[nLine].m_szText, GlobalText[3278],
+                mu_swprintf(aDest[nLine].m_szText, I18N::Game::EnemyGensMemberXLuLu,
                     MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
                     pRequestInfo->m_dwValue);
                 break;
@@ -567,7 +568,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
             ::mu_swprintf(aDest[nLine].m_szText, L"Level: %lu %ls",
-                pRequestInfo->m_dwValue, GlobalText[2812]);
+                pRequestInfo->m_dwValue, I18N::Game::Minimum);
             break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
@@ -587,10 +588,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (dwQuestIndex)
             {
             case 0x10009:
-                ::mu_swprintf(aDest[nLine].m_szText, L"%ls", GlobalText[2819]);
+                ::mu_swprintf(aDest[nLine].m_szText, L"%ls", I18N::Game::OpenCharacterStatsCWindow);
                 break;
             case 0x1000F:
-                ::mu_swprintf(aDest[nLine].m_szText, L"%ls", GlobalText[2820]);
+                ::mu_swprintf(aDest[nLine].m_szText, L"%ls", I18N::Game::OpenInventoryIVWindow);
                 break;
             }
             break;
@@ -652,7 +653,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 #else	// ASG_ADD_TIME_LIMIT_QUEST
             DWORD curValue = MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue);
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
-            mu_swprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex,
+            mu_swprintf(aDest[nLine].m_szText, I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex,
                 curValue, pRequestInfo->m_dwValue);
         }
         break;
@@ -690,7 +691,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 nTextIndex = 3081;
                 break;
             }
-            mu_swprintf(aDest[nLine].m_szText, GlobalText[nTextIndex], pRequestInfo->m_wIndex);
+            mu_swprintf(aDest[nLine].m_szText, I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex);
         }
         break;
         }
@@ -704,9 +705,9 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
     for (j = 0; j < 2; ++j)
     {
         if (0 == j && pRequestReward->m_byGeneralRewardCount)
-            ::wcscpy(aDest[nLine].m_szText, GlobalText[2810]);
+            ::wcscpy(aDest[nLine].m_szText, I18N::Game::Reward);
         else if (1 == j && pRequestReward->m_byRandRewardCount)
-            mu_swprintf(aDest[nLine].m_szText, GlobalText[3082], pRequestReward->m_byRandGiveCount);
+            mu_swprintf(aDest[nLine].m_szText, I18N::Game::RandomRewardLuDifferentKinds, pRequestReward->m_byRandGiveCount);
         else
             continue;
         aDest[nLine].m_hFont = g_hFontBold;
@@ -729,7 +730,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (pRewardInfo->m_dwType)
             {
             case QUEST_REWARD_NONE:
-                ::wcscpy(aDest[nLine].m_szText, GlobalText[1361]);
+                ::wcscpy(aDest[nLine].m_szText, I18N::Game::None);
                 break;
 
             case QUEST_REWARD_EXP:
@@ -752,13 +753,13 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             {
                 const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRewardInfo->m_wIndex);
                 ::mu_swprintf(aDest[nLine].m_szText, L"Bonus: %ls x %lu%ls", buffinfo.s_BuffName,
-                    pRewardInfo->m_dwValue, GlobalText[2300]);
+                    pRewardInfo->m_dwValue, I18N::Game::Minute);
             }
             break;
 
 #ifdef ASG_ADD_GENS_SYSTEM
             case QUEST_REWARD_CONTRIBUTE:
-                mu_swprintf(aDest[nLine].m_szText, GlobalText[2994], pRewardInfo->m_dwValue);
+                mu_swprintf(aDest[nLine].m_szText, I18N::Game::ContributionLu, pRewardInfo->m_dwValue);
                 break;
 #endif	// ASG_ADD_GENS_SYSTEM
             }

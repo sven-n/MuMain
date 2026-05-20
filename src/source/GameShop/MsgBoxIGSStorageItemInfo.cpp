@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/NewUISystem.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -60,8 +61,8 @@ void CMsgBoxIGSStorageItemInfo::Initialize(int iStorageSeq, int iStorageItemSeq,
     m_szItemType = szItemType;
 
     wcscpy(m_szName, pszName);
-    mu_swprintf(m_szNum, GlobalText[3040], pszNum);
-    mu_swprintf(m_szPeriod, GlobalText[3039], pszPeriod);
+    mu_swprintf(m_szNum, I18N::Game::QuantityS, pszNum);
+    mu_swprintf(m_szPeriod, I18N::Game::DurationS, pszPeriod);
 }
 
 void CMsgBoxIGSStorageItemInfo::Release()
@@ -156,10 +157,10 @@ void CMsgBoxIGSStorageItemInfo::SetButtonInfo()
 {
     m_BtnUse.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_OK_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnUse.MoveTextPos(0, -1);
-    m_BtnUse.SetText(GlobalText[228]);
+    m_BtnUse.SetText(I18N::Game::OK);
     m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnCancel.MoveTextPos(0, -1);
-    m_BtnCancel.SetText(GlobalText[229]);
+    m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
 void CMsgBoxIGSStorageItemInfo::RenderFrame()
@@ -176,7 +177,7 @@ void CMsgBoxIGSStorageItemInfo::RenderTexts()
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
 
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, GlobalText[3049], IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, I18N::Game::ItemInfoWindow, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_ITEM_NAME_POS_Y, m_szName, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);

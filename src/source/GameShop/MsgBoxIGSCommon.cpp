@@ -1,6 +1,7 @@
 // MsgBoxIGSCommon.cpp: implementation of the CMsgBoxIGSCommon class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
@@ -119,7 +120,7 @@ void CMsgBoxIGSCommon::SetButtonInfo()
 {
     m_BtnOk.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + (IMAGE_IGS_FRAME_WIDTH / 2) - (IMAGE_IGS_BTN_WIDTH / 2), (GetPos().y + m_iMsgBoxHeight) - (static_cast<int>(IMAGE_IGS_BTN_HEIGHT) + IGS_BTN_POS_Y), IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnOk.MoveTextPos(0, -1);
-    m_BtnOk.SetText(GlobalText[228]);
+    m_BtnOk.SetText(I18N::Game::OK);
 }
 
 void CMsgBoxIGSCommon::RenderFrame()

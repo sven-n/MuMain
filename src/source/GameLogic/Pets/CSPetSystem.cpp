@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include <algorithm>
 #include <cmath>
@@ -701,7 +702,7 @@ void    CSPetDarkSpirit::RenderCmdType(void)
 
     EnableAlphaTest();
 
-    g_pRenderText->RenderText((int)x + 50, (int)y, GlobalText[1214], 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
+    g_pRenderText->RenderText((int)x + 50, (int)y, I18N::Game::DarkRaven, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     RenderBar(x, y + 12, Width, Height, (float)Life);
 
@@ -714,7 +715,7 @@ void    CSPetDarkSpirit::RenderCmdType(void)
 
     if (MouseX >= x && MouseX <= x + Width && MouseY >= y && MouseY <= y + Height)
     {
-        RenderTipText((int)x, (int)(y + Height), GlobalText[1219 + m_byCommand]);
+        RenderTipText((int)x, (int)(y + Height), I18N::Game::Lookup(1219 + m_byCommand));
     }
 }
 

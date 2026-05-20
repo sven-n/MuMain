@@ -11,6 +11,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 
 #include "UI/Legacy/UIControls.h"
 
@@ -436,8 +437,8 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
                 CUIMng::Instance().HideWin(this);
 
                 SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
-                g_pSystemLogBox->AddText(GlobalText[470], SEASON3B::TYPE_SYSTEM_MESSAGE);
-                g_pSystemLogBox->AddText(GlobalText[471], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                 //if (m_pSelectServerGroup->m_iSequence == 0)
                 //{
@@ -476,9 +477,9 @@ void CServerSelWin::RenderControls()
         if (m_pSelectServerGroup->m_bPvPServer == true)
         {
             g_pRenderText->SetTextColor(ARGB(255, 255, 255, 255));
-            g_pRenderText->RenderText(90, 164 - 60, GlobalText[565]);
-            g_pRenderText->RenderText(90, 164 - 45, GlobalText[566]);
-            g_pRenderText->RenderText(90, 164 - 30, GlobalText[567]);
+            g_pRenderText->RenderText(90, 164 - 60, I18N::Game::SinceHelheimServer);
+            g_pRenderText->RenderText(90, 164 - 45, I18N::Game::TendsToBeCrowded);
+            g_pRenderText->RenderText(90, 164 - 30, I18N::Game::WeRecommendThatYouUseOtherServers);
         }
     }
 }

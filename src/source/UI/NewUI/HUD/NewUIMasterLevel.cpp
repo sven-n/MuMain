@@ -5,6 +5,7 @@
 #include "UI/Legacy/UIControls.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/HUD/NewUIMasterLevel.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
@@ -63,7 +64,7 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
 
     this->m_CloseBT.ChangeButtonInfo(611, 9, 13, 14);
 
-    this->m_CloseBT.ChangeToolTipText(GlobalText[1002]);
+    this->m_CloseBT.ChangeToolTipText(I18N::Game::Close);
 
     for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
     {
@@ -527,11 +528,11 @@ void SEASON3B::CNewUIMasterLevel::RenderText() const
 
     wchar_t Buffer[256] = {};
 
-    mu_swprintf(Buffer, GlobalText[1746], Master_Level_Data.nMLevel);
+    mu_swprintf(Buffer, I18N::Game::MasterLevelD, Master_Level_Data.nMLevel);
 
     g_pRenderText->RenderText(275, 11, Buffer, 0, 0, 1, 0);
 
-    mu_swprintf(Buffer, GlobalText[1747], Master_Level_Data.nMLevelUpMPoint);
+    mu_swprintf(Buffer, I18N::Game::LevelPointD, Master_Level_Data.nMLevelUpMPoint);
 
     g_pRenderText->RenderText(372, 11, Buffer, 0, 0, 1, 0);
 
@@ -568,24 +569,24 @@ void SEASON3B::CNewUIMasterLevel::RenderText() const
         // 현재 획득한 경험치
         const double fExp = (double)Master_Level_Data.lMasterLevel_Experince - (double)iBaseExperience;
 
-        mu_swprintf(Buffer, GlobalText[3335], fExp / fNeedExp * 100.0);
+        mu_swprintf(Buffer, I18N::Game::EXP62f, fExp / fNeedExp * 100.0);
 
         g_pRenderText->RenderText(466, 11, Buffer, 0, 0, 1, 0);
     }
 
-    g_pRenderText->RenderText(154, 11, GlobalText[this->ClassNameTextIndex], 0, 0, 1, nullptr);
+    g_pRenderText->RenderText(154, 11, I18N::Game::Lookup(this->ClassNameTextIndex), 0, 0, 1, nullptr);
 
     g_pRenderText->SetTextColor(255, 155, 0, 0xFFu);
 
-    mu_swprintf(Buffer, GlobalText[this->CategoryTextIndex], this->CategoryPoint[0]);
+    mu_swprintf(Buffer, I18N::Game::Lookup(this->CategoryTextIndex), this->CategoryPoint[0]);
 
     g_pRenderText->RenderText(92, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
 
-    mu_swprintf(Buffer, GlobalText[this->CategoryTextIndex + 1], this->CategoryPoint[1]);
+    mu_swprintf(Buffer, I18N::Game::Lookup(this->CategoryTextIndex + 1), this->CategoryPoint[1]);
 
     g_pRenderText->RenderText(302, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
 
-    mu_swprintf(Buffer, GlobalText[this->CategoryTextIndex + 2], this->CategoryPoint[2]);
+    mu_swprintf(Buffer, I18N::Game::Lookup(this->CategoryTextIndex + 2), this->CategoryPoint[2]);
 
     g_pRenderText->RenderText(513, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
 }
@@ -732,7 +733,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
         if (skillLevel != 0 && skillLevel < it->second.MaxLevel)
         {
-            mu_swprintf(buffer, GlobalText[3328]);
+            mu_swprintf(buffer, I18N::Game::NextLevel);
 
             lineCount = this->SetDivideString(buffer, 0, lineCount, 4, 0, true);
 
@@ -745,7 +746,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
         if (skillLevel < it->second.MaxLevel)
         {
-            mu_swprintf(buffer, GlobalText[3329]);
+            mu_swprintf(buffer, I18N::Game::Requirements3329);
 
             lineCount = this->SetDivideString(buffer, 0, lineCount, 1, 0, true);
 
@@ -901,7 +902,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
 
     if (!g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(skillData.Skill))
     {
-        SEASON3B::CreateOkMessageBox(GlobalText[3336]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouNeedToWearTheRequiredEquipmentToLevelUpThisSkill);
         return true;
     }
 
@@ -909,7 +910,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
         || !this->CheckRankPoint(skillData.Group, lpskill->SkillRank, skillPoint)
         || !this->CheckBeforeSkill(skillData.Skill, skillPoint))
     {
-        SEASON3B::CreateOkMessageBox(GlobalText[3327]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouMustMeetAllSkillRequirements);
 
         return true;
     }
@@ -934,7 +935,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MAS
 
     if (skillLevel >= skillData.MaxLevel)
     {
-        SEASON3B::CreateOkMessageBox(GlobalText[3326]);
+        SEASON3B::CreateOkMessageBox(I18N::Game::YouCanTRaiseAnyMoreLevels);
         return false;
     }
 
@@ -945,7 +946,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MAS
 
     wchar_t Buffer[358] = {};
 
-    mu_swprintf(Buffer, GlobalText[3326], skillData.RequiredPoints - mLevelUpPoint);
+    mu_swprintf(Buffer, I18N::Game::YouCanTRaiseAnyMoreLevels, skillData.RequiredPoints - mLevelUpPoint);
 
     SEASON3B::CreateOkMessageBox(Buffer);
 

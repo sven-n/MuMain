@@ -1,6 +1,7 @@
 // NewUIGensRanking.cpp: implementation of the CNewUIGensRanking class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #ifdef PBG_ADD_GENSRANKING
 #include "UI/NewUI/HUD/NewUIGensRanking.h"
@@ -159,11 +160,11 @@ void CNewUIGensRanking::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[3090]);
+    mu_swprintf(szText, I18N::Game::GensInfoWindow);
     g_pRenderText->RenderText(_x, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_CENTER);
 
     _y += 75;
-    mu_swprintf(szText, GlobalText[3091]);
+    mu_swprintf(szText, I18N::Game::Gens);
     g_pRenderText->SetTextColor(246, 209, 73, 255);
     g_pRenderText->RenderText(_x + 102, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
@@ -174,7 +175,7 @@ void CNewUIGensRanking::RenderTexts()
     _y += 20;
     g_pRenderText->RenderText(_x + 102, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
-    mu_swprintf(szText, GlobalText[3095]);
+    mu_swprintf(szText, I18N::Game::Level3095);
     _y += 24;
     g_pRenderText->RenderText(_x + 100, _y, szText, GENSRANKING_WIDTH, 0, RT3_SORT_LEFT);
 
@@ -183,18 +184,18 @@ void CNewUIGensRanking::RenderTexts()
 
     g_pRenderText->SetTextColor(230, 230, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[3098]);
+    mu_swprintf(szText, I18N::Game::GensRanking);
     _y += 23;
     g_pRenderText->RenderText(_x + 13, _y, szText, 74, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    mu_swprintf(szText, GlobalText[3099], GetRanking());
+    mu_swprintf(szText, I18N::Game::S, GetRanking());
     g_pRenderText->RenderText(_x, _y, szText, GENSRANKING_WIDTH - 20, 0, RT3_SORT_RIGHT);
 
     g_pRenderText->SetTextColor(230, 230, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, GlobalText[3096]);
+    mu_swprintf(szText, I18N::Game::GainContribution);
     _y += 23;
     g_pRenderText->RenderText(_x + 13, _y, szText, 74, 0, RT3_SORT_CENTER);
     g_pRenderText->SetFont(g_hFont);
@@ -210,7 +211,7 @@ void CNewUIGensRanking::RenderTexts()
 
     if (GetNextContribution() > 0)
     {
-        mu_swprintf(_szTempText, GlobalText[3097], GetNextContribution());
+        mu_swprintf(_szTempText, I18N::Game::TheAmountOfContributionNeededForPromotionToTheNextRankIsD, GetNextContribution());
         _TextLineCnt = ::DivideStringByPixel(&_szText[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, _szTempText, 140, true, '#');
         for (int j = 0; j < _TextLineCnt; ++j)
             g_pRenderText->RenderText(_x + 20, _y + (j * _fHeight) + 20, _szText[j], _fWidth, 0, RT3_SORT_LEFT);
@@ -218,7 +219,7 @@ void CNewUIGensRanking::RenderTexts()
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 0, 255);
-    mu_swprintf(szText, GlobalText[3100]);
+    mu_swprintf(szText, I18N::Game::GensDescription);
 
     _y += 78;
     g_pRenderText->RenderText(_x + 13, _y, szText, 58, 0, RT3_SORT_CENTER);
@@ -244,8 +245,8 @@ bool CNewUIGensRanking::Update()
     if (m_pTextBox)
     {
         m_pTextBox->ClearText();
-        m_pTextBox->AddText(GlobalText[3101]);
-        m_pTextBox->AddText(GlobalText[3102]);
+        m_pTextBox->AddText(I18N::Game::GensRankingRewardsAreGivenOut);
+        m_pTextBox->AddText(I18N::Game::GensRankingRewardsCanBeClaimed);
 
         if (m_pTextBox->GetMoveableLine() > 0)
         {
@@ -337,7 +338,7 @@ void CNewUIGensRanking::SetBtnInfo(float _PosX, float _PosY)
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GENS_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(13 + _PosX, 392 + _PosY, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
 }
 
 void CNewUIGensRanking::OpenningProcess()
@@ -417,17 +418,17 @@ bool CNewUIGensRanking::SetGensInfo()
 
     if ((m_byGensInfluence & GENSTYPE_DUPRIAN) == GENSTYPE_DUPRIAN)
     {
-        SetGensTeamName(GlobalText[3092]);
+        SetGensTeamName(I18N::Game::Duprian);
         return true;
     }
     else if ((m_byGensInfluence & GENSTYPE_BARNERT) == GENSTYPE_BARNERT)
     {
-        SetGensTeamName(GlobalText[3093]);
+        SetGensTeamName(I18N::Game::Vanert);
         return true;
     }
     else
     {
-        g_pSystemLogBox->AddText(GlobalText[3094], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouHaveNotJoinedAGens, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     return false;
@@ -451,7 +452,7 @@ wchar_t* CNewUIGensRanking::GetGensTeamName()
 void CNewUIGensRanking::SetTitleName()
 {
     wchar_t _szTempText[256] = { 0, };
-    mu_swprintf(_szTempText, GlobalText[3104]);
+    mu_swprintf(_szTempText, I18N::Game::GrandDukeDukeMarquisCountViscount);
     ::DivideStringByPixel(&m_szTitleName[0][0], TITLENAME_END, MAX_TITLELENGTH, _szTempText, 240, true, '#');
 }
 

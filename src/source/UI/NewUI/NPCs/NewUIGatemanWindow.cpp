@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Legacy/UIGateKeeper.h"
@@ -46,10 +47,10 @@ bool CNewUIGatemanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GATEMANWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
 
-    InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 320, GlobalText[1593]);
-    InitButton(&m_BtnSet, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 220, GlobalText[1619]);
+    InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 320, I18N::Game::Enter);
+    InitButton(&m_BtnSet, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 220, I18N::Game::Confirm);
 
     m_BtnFeeUp.ChangeButtonImgState(true, IMAGE_GATEMANWINDOW_SCROLL_UP_BTN, true);
     m_BtnFeeDn.ChangeButtonImgState(true, IMAGE_GATEMANWINDOW_SCROLL_DOWN_BTN, true);
@@ -215,7 +216,7 @@ void CNewUIGatemanWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    mu_swprintf(szText, L"%ls", GlobalText[1596]);
+    mu_swprintf(szText, L"%ls", I18N::Game::GuardNPC);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -293,23 +294,23 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1597], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::EntranceRestriction, 190, 0, RT3_SORT_CENTER);
     g_pRenderText->SetFont(g_hFont);
     ptOrigin.y += 20;
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1624], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::OnlyTheGuildMembers, 190, 0, RT3_SORT_CENTER);
     ptOrigin.y += 10;
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1625], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AreAllowedToEnter, 190, 0, RT3_SORT_CENTER);
     ptOrigin.y += 10;
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1626], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::IsAllowed, 190, 0, RT3_SORT_CENTER);
     ptOrigin.y += 20;
 
     RenderCheckBox(ptOrigin.x + 35, ptOrigin.y, g_pUIGateKeeper->IsPublic());
-    g_pRenderText->RenderText(ptOrigin.x + 55, ptOrigin.y, GlobalText[1598]);
+    g_pRenderText->RenderText(ptOrigin.x + 55, ptOrigin.y, I18N::Game::OpenItToNonMembers);
     wchar_t szText[256];
     wchar_t szGold[64];
     ptOrigin.y += 18;
     ConvertGold(g_pUIGateKeeper->GetEnteranceFee(), szGold);
-    mu_swprintf(szText, GlobalText[1602], szGold);
+    mu_swprintf(szText, I18N::Game::EntranceFeeSZen, szGold);
     g_pRenderText->RenderText(ptOrigin.x + 35, ptOrigin.y, szText);
 
     glColor4f(0.f, 0.f, 0.f, 0.3f);
@@ -320,12 +321,12 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     ptOrigin.y += 30;
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1599], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::EntranceFeeSetting, 190, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     ConvertGold(g_pUIGateKeeper->GetViewEnteranceFee(), szGold);
 
-    mu_swprintf(szText, L"%ls %ls", szGold, GlobalText[224]);
+    mu_swprintf(szText, L"%ls %ls", szGold, I18N::Game::Zen);
     g_pRenderText->RenderText(ptOrigin.x + 30 + 50, ptOrigin.y + 32, szText, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     ptOrigin.y += 20;
@@ -341,15 +342,15 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     g_pRenderText->SetBgColor(0x00000000);
     g_pRenderText->SetTextColor(0xFFFFFFFF);
     ConvertGold(g_pUIGateKeeper->GetMaxEnteranceFee(), szGold);
-    mu_swprintf(szText, GlobalText[1600], szGold);
+    mu_swprintf(szText, I18N::Game::EntranceFeeRange0SZen, szGold);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 13;
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1601], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::ForSetting, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 13;
     ConvertGold(g_pUIGateKeeper->GetAddEnteranceFee(), szGold);
-    mu_swprintf(szText, GlobalText[1618], szGold);
+    mu_swprintf(szText, I18N::Game::IncreaseUnitSZen, szGold);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 50;
@@ -360,7 +361,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
 void CNewUIGatemanWindow::RenderGuildMemeberMode()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1634], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::WouldYouLikeToEnter, 190, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 50;
     m_BtnEnter.ChangeButtonInfo(m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 100, 53, 23);
@@ -375,7 +376,7 @@ void CNewUIGatemanWindow::RenderGuestMode()
         wchar_t szText[256];
         wchar_t szGold[64];
         ConvertGold(g_pUIGateKeeper->GetEnteranceFee(), szGold);
-        mu_swprintf(szText, GlobalText[1632], szGold);
+        mu_swprintf(szText, I18N::Game::EntranceFeeSzen, szGold);
 
         if (g_pUIGateKeeper->GetEnteranceFee() > (int)CharacterMachine->Gold)
         {
@@ -392,10 +393,10 @@ void CNewUIGatemanWindow::RenderGuestMode()
 
         g_pRenderText->SetTextColor(0xFFFFFFFF);
         g_pRenderText->SetBgColor(0x00000000);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1633], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::PayEntranceFeeToEnter, 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 10;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1634], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::WouldYouLikeToEnter, 190, 0, RT3_SORT_CENTER);
 
         ptOrigin.y += 10;
 
@@ -405,13 +406,13 @@ void CNewUIGatemanWindow::RenderGuestMode()
     }
     else
     {
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1627], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::EnteringIsNotAllowed, 190, 0, RT3_SORT_CENTER);
         ptOrigin.y += 10;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1629], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::ApprovalFromTheLordOfACastleIsRequired, 190, 0, RT3_SORT_CENTER);
         ptOrigin.y += 10;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1630], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::ForEntering, 190, 0, RT3_SORT_CENTER);
         ptOrigin.y += 10;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1631], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::PleaseGoBack, 190, 0, RT3_SORT_CENTER);
         ptOrigin.y += 10;
 
         m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));

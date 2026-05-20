@@ -10,6 +10,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Audio/AudioPlayer.h"
 #include <algorithm>
+#include "I18N/All.h"
 
 extern int m_MusicOnOff;
 extern int m_SoundOnOff;
@@ -610,12 +611,12 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 48, GlobalText[386]);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 70, GlobalText[387]);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 48, I18N::Game::AutomaticAttack);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 70, I18N::Game::BeepSoundForWhispering);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 92, L"Sound Volume");
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 120, L"Music Volume");
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 160, GlobalText[919]);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 182, GlobalText[1840]);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 160, I18N::Game::SlideHelp);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 182, I18N::Game::EffectLimitation);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 242, L"Render Full Effects");
 
     y += 22.f;

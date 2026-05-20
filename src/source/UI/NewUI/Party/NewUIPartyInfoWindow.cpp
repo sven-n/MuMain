@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/Party/NewUIPartyInfoWindow.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -58,7 +59,7 @@ void CNewUIPartyInfoWindow::InitButtons()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_PARTY_BASE_WINDOW_BTN_EXIT);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[221], true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::ClosePartyWindowP, true);
 
     for (int i = 0; i < MAX_PARTYS; i++)
     {
@@ -170,7 +171,7 @@ bool CNewUIPartyInfoWindow::Render()
 
     m_BtnExit.Render();
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, GlobalText[190], 72, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, I18N::Game::Party190, 72, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
 
@@ -193,13 +194,13 @@ bool CNewUIPartyInfoWindow::Render()
     else
     {
         int iStartHeight = 60;
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight, GlobalText[191], 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 15, GlobalText[192], 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 30, GlobalText[193], 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 50, GlobalText[194], 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 65, GlobalText[195], 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 80, GlobalText[196], 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 95, GlobalText[197], 0, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight, I18N::Game::TypePartyWithTheMouseCursorOn, 0, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 15, I18N::Game::ThePlayerYouWouldLike, 0, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 30, I18N::Game::ToCreateAPartyWith, 0, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 50, I18N::Game::AndYouCanCreate, 0, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 65, I18N::Game::APartyWithThem, 0, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 80, I18N::Game::YouCanShareMoreExpWith, 0, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 95, I18N::Game::YourPartyMembersBasedOnLevel, 0, 0, RT3_SORT_CENTER);
     }
 
     g_pRenderText->SetBgColor(dwPreBGColor);
@@ -271,7 +272,7 @@ void CNewUIPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, boo
     RenderImage(IMAGE_PARTY_HPBAR_BACK, iPosX + 8, iPosY + 39, 151, 8);
     RenderImage(IMAGE_PARTY_HPBAR, iPosX + 10, iPosY + 41, iHP, 4);
 
-    mu_swprintf(szText, L"%d %ls %d", pMember->currHP, GlobalText[2374], pMember->maxHP);
+    mu_swprintf(szText, L"%d %ls %d", pMember->currHP, I18N::Game::Text2374, pMember->maxHP);
     g_pRenderText->RenderText(iPosX + 88, iPosY + 51, szText, 70, 0, RT3_SORT_RIGHT);
 
     if (bExitBtnRender)

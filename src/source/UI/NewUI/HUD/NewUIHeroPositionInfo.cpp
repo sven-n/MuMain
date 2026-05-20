@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/HUD/NewUIHeroPositionInfo.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -42,7 +43,7 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
     SetPos(x, y);
     LoadImages();
 
-   std::wstring tooltiptext1 = GlobalText[3561];
+   std::wstring tooltiptext1 = I18N::Game::OfficialMUHelperSetting;
    std::wstring btname1 = L"";
 
     SetButtonInfo(
@@ -60,7 +61,7 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
         tooltiptext1,
         0);
 
-   std::wstring tooltiptext2 = GlobalText[3562];
+   std::wstring tooltiptext2 = I18N::Game::StartOfficialMUHelper;
    std::wstring btname2 = L"";
 
     SetButtonInfo(
@@ -78,7 +79,7 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
         tooltiptext2,
         0);
 
-   std::wstring tooltiptext3 = GlobalText[3563];
+   std::wstring tooltiptext3 = I18N::Game::StopOfficialMUHelper;
    std::wstring btname3 = L"";
 
     SetButtonInfo(

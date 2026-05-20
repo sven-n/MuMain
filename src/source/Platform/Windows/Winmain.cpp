@@ -524,7 +524,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_NPROTECT_EXIT_TWO:
         SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
         SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, nullptr);
-        MessageBox(nullptr, GlobalText[16], L"Error", MB_OK);
+        MessageBox(nullptr, I18N::Game::Error9AHackingToolHasBeen, L"Error", MB_OK);
         break;
     case WM_CTLCOLOREDIT:
         SetBkColor((HDC)wParam, RGB(0, 0, 0));
@@ -1262,7 +1262,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1272,7 +1272,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1280,7 +1280,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1288,7 +1288,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1296,7 +1296,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 

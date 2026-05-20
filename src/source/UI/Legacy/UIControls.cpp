@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 
 #include "Core/Utilities/ReadScript.h"
@@ -1256,9 +1257,9 @@ BOOL CUIGuildListBox::RenderDataLine(int iLineNumber)
             g_pRenderText->SetBgColor(0, 0, 0, 255);
 
             if (wcscmp(m_TextListIter->m_szID, Hero->ID) == 0 && wcscmp(GuildList[0].Name, Hero->ID) == 0)
-                RenderTipText((int)x - 20, (int)y, GlobalText[188]);
+                RenderTipText((int)x - 20, (int)y, I18N::Game::Disband);
             else
-                RenderTipText((int)x - 20, (int)y, GlobalText[189]);
+                RenderTipText((int)x - 20, (int)y, I18N::Game::Leave);
         }
     }
 
@@ -1597,7 +1598,7 @@ CUIChatPalListBox::CUIChatPalListBox()
     SIZE TextSize;
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"ZZZZZZZZZZZZZ", lstrlen(L"ZZZZZZZZZZZZZ"), &TextSize);
     SetColumnWidth(0, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1022], GlobalText.GetStringSize(1022), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Server, GlobalText.GetStringSize(1022), &TextSize);
     SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
 
     m_bForceEditList = FALSE;
@@ -1773,27 +1774,27 @@ BOOL CUIChatPalListBox::RenderDataLine(int iLineNumber)
     {
         if (m_TextListIter->m_Server == 0xFF)
         {
-            mu_swprintf(Text, GlobalText[1039]);
+            mu_swprintf(Text, I18N::Game::Offline1039);
         }
         else if (m_TextListIter->m_Server == 0xFE)
         {
-            mu_swprintf(Text, GlobalText[1039]);
+            mu_swprintf(Text, I18N::Game::Offline1039);
         }
         else if (m_TextListIter->m_Server == 0xFD)
         {
-            mu_swprintf(Text, GlobalText[1041]);
+            mu_swprintf(Text, I18N::Game::CannotUse);
         }
         else if (m_TextListIter->m_Server == 0xFC)
         {
-            mu_swprintf(Text, GlobalText[1039]);
+            mu_swprintf(Text, I18N::Game::Offline1039);
         }
         //		else if (m_TextListIter->m_Server == 0xFB)
         //		{
-        //			mu_swprintf(Text,GlobalText[1040]);
+        //			mu_swprintf(Text,I18N::Game::Waiting);
         //		}
         else
         {
-            mu_swprintf(Text, GlobalText[1042], m_TextListIter->m_Server + 1);
+            mu_swprintf(Text, I18N::Game::_2dServer, m_TextListIter->m_Server + 1);
         }
         g_pRenderText->RenderText(iPos_x + 4 + GetColumnPos_x(1), iPos_y, Text);
     }
@@ -2027,11 +2028,11 @@ CUILetterListBox::CUILetterListBox()
     SIZE TextSize;
 
     SetColumnWidth(0, 15 + 10);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1028], GlobalText.GetStringSize(1028), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Sender, GlobalText.GetStringSize(1028), &TextSize);
     SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1029], GlobalText.GetStringSize(1029), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::DateRcvd, GlobalText.GetStringSize(1029), &TextSize);
     SetColumnWidth(2, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1030], GlobalText.GetStringSize(1030), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Title1030, GlobalText.GetStringSize(1030), &TextSize);
     SetColumnWidth(3, TextSize.cx / g_fScreenRate_x + 8);
 
     m_bForceEditList = FALSE;
@@ -4796,9 +4797,9 @@ void CUINewGuildMemberListBox::RenderInterface()
         }
     }
 
-    g_pRenderText->RenderText(m_iPos_x + 14, m_iPos_y - m_iHeight - 12, GlobalText[1389]);
-    g_pRenderText->RenderText(m_iPos_x + 65, m_iPos_y - m_iHeight - 12, GlobalText[1307]);
-    g_pRenderText->RenderText(m_iPos_x + 106, m_iPos_y - m_iHeight - 12, GlobalText[1022]);
+    g_pRenderText->RenderText(m_iPos_x + 14, m_iPos_y - m_iHeight - 12, I18N::Game::Name);
+    g_pRenderText->RenderText(m_iPos_x + 65, m_iPos_y - m_iHeight - 12, I18N::Game::Position);
+    g_pRenderText->RenderText(m_iPos_x + 106, m_iPos_y - m_iHeight - 12, I18N::Game::Server);
 }
 
 int CUINewGuildMemberListBox::GetRenderLinePos_y(int iLineNumber)
@@ -4863,9 +4864,9 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
     mu_swprintf(Text, L"%ls", m_TextListIter->m_szID);
     g_pRenderText->RenderText(iPos_x, iPos_y, Text);
 
-    if (iCharacterLevel == 0) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1300], 70, 0, RT3_SORT_CENTER);
-    else if (iCharacterLevel == 1) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1301], 70, 0, RT3_SORT_CENTER);
-    else if (iCharacterLevel == 2) g_pRenderText->RenderText(iPos_x + 45, iPos_y, GlobalText[1302], 70, 0, RT3_SORT_CENTER);
+    if (iCharacterLevel == 0) g_pRenderText->RenderText(iPos_x + 45, iPos_y, I18N::Game::Master, 70, 0, RT3_SORT_CENTER);
+    else if (iCharacterLevel == 1) g_pRenderText->RenderText(iPos_x + 45, iPos_y, I18N::Game::AssistM, 70, 0, RT3_SORT_CENTER);
+    else if (iCharacterLevel == 2) g_pRenderText->RenderText(iPos_x + 45, iPos_y, I18N::Game::BattleM, 70, 0, RT3_SORT_CENTER);
 
     if (m_TextListIter->m_Server != 255/* && m_TextListIter->m_Number != 0*/)
     {
@@ -5016,8 +5017,8 @@ void CUIUnionGuildListBox::RenderInterface()
         }
     }
 
-    g_pRenderText->RenderText(m_iPos_x + 15, m_iPos_y - m_iHeight - 12, GlobalText[182]);
-    g_pRenderText->RenderText(m_iPos_x + 113, m_iPos_y - m_iHeight - 12, GlobalText[1330]);
+    g_pRenderText->RenderText(m_iPos_x + 15, m_iPos_y - m_iHeight - 12, I18N::Game::NAME);
+    g_pRenderText->RenderText(m_iPos_x + 113, m_iPos_y - m_iHeight - 12, I18N::Game::Members);
 }
 
 int CUIUnionGuildListBox::GetRenderLinePos_y(int iLineNumber)
@@ -5228,7 +5229,7 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
     if (pItem)
     {
         int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
-        mu_swprintf(oText, L"%ls,  %d", GlobalText[COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)], (m_TextListIter->m_cLevel + 1) * 10);
+        mu_swprintf(oText, L"%ls,  %d", I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)), (m_TextListIter->m_cLevel + 1) * 10);
     }
 
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, oText);
@@ -5360,10 +5361,10 @@ void CUIBCDeclareGuildListBox::RenderInterface()
 
     g_pGuardWindow->RenderScrollBarFrame(m_iPos_x + m_iWidth - 8, m_fScrollBarRange_top, m_fScrollBarRange_bottom - m_fScrollBarRange_top);
     g_pGuardWindow->RenderScrollBar(m_iPos_x + m_iWidth - 12, m_fScrollBarPos_y, (GetState() == UISTATE_SCROLL && MouseLButtonPush));
-    g_pRenderText->RenderText(m_iPos_x + 5, m_iPos_y - m_iHeight - 12, GlobalText[182]);
-    g_pRenderText->RenderText(m_iPos_x + 50, m_iPos_y - m_iHeight - 12, GlobalText[1528]);
-    g_pRenderText->RenderText(m_iPos_x + 98, m_iPos_y - m_iHeight - 12, GlobalText[1529]);
-    g_pRenderText->RenderText(m_iPos_x + 123, m_iPos_y - m_iHeight - 12, GlobalText[1530]);
+    g_pRenderText->RenderText(m_iPos_x + 5, m_iPos_y - m_iHeight - 12, I18N::Game::NAME);
+    g_pRenderText->RenderText(m_iPos_x + 50, m_iPos_y - m_iHeight - 12, I18N::Game::NoReg);
+    g_pRenderText->RenderText(m_iPos_x + 98, m_iPos_y - m_iHeight - 12, I18N::Game::Stat);
+    g_pRenderText->RenderText(m_iPos_x + 123, m_iPos_y - m_iHeight - 12, I18N::Game::Order);
 }
 
 int CUIBCDeclareGuildListBox::GetRenderLinePos_y(int iLineNumber)
@@ -5410,9 +5411,9 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
     g_pRenderText->RenderText(iPos_x + 70, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     if (m_TextListIter->byIsGiveUp)
-        mu_swprintf(Text, L"%ls", GlobalText[1531]);
+        mu_swprintf(Text, L"%ls", I18N::Game::Failed);
     else
-        mu_swprintf(Text, L"%ls", GlobalText[1532]);
+        mu_swprintf(Text, L"%ls", I18N::Game::Processing);
     g_pRenderText->RenderText(iPos_x + 120, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     mu_swprintf(Text, L"%u", m_TextListIter->bySeqNum);
@@ -5527,10 +5528,10 @@ void CUIBCGuildListBox::RenderInterface()
 
     g_pGuardWindow->RenderScrollBarFrame(m_iPos_x + m_iWidth - 8, m_fScrollBarRange_top, m_fScrollBarRange_bottom - m_fScrollBarRange_top);
     g_pGuardWindow->RenderScrollBar(m_iPos_x + m_iWidth - 12, m_fScrollBarPos_y, (GetState() == UISTATE_SCROLL && MouseLButtonPush));
-    g_pRenderText->RenderText(m_iPos_x + 5, m_iPos_y - m_iHeight - 12, GlobalText[182]);
-    g_pRenderText->RenderText(m_iPos_x + 80, m_iPos_y - m_iHeight - 12, GlobalText[1603]);
-    g_pRenderText->RenderText(m_iPos_x + 120, m_iPos_y - m_iHeight - 12, GlobalText[1604]);
-    g_pRenderText->RenderText(m_iPos_x + 18, m_iPos_y + 31 - 1, GlobalText[1977]);
+    g_pRenderText->RenderText(m_iPos_x + 5, m_iPos_y - m_iHeight - 12, I18N::Game::NAME);
+    g_pRenderText->RenderText(m_iPos_x + 80, m_iPos_y - m_iHeight - 12, I18N::Game::Camp);
+    g_pRenderText->RenderText(m_iPos_x + 120, m_iPos_y - m_iHeight - 12, I18N::Game::Maintain);
+    g_pRenderText->RenderText(m_iPos_x + 18, m_iPos_y + 31 - 1, I18N::Game::Score);
 }
 
 int CUIBCGuildListBox::GetRenderLinePos_y(int iLineNumber)
@@ -5575,15 +5576,15 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
     g_pRenderText->RenderText(iPos_x + 2, iPos_y, Text);
 
     if (m_TextListIter->byJoinSide == 1)
-        mu_swprintf(Text, L"%ls", GlobalText[1606]);
+        mu_swprintf(Text, L"%ls", I18N::Game::DefendingTeam);
     else
-        mu_swprintf(Text, L"%ls", GlobalText[1605]);
+        mu_swprintf(Text, L"%ls", I18N::Game::InvadingTeam);
     g_pRenderText->RenderText(iPos_x + 100, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     if (m_TextListIter->byGuildInvolved == 1)
-        mu_swprintf(Text, L"%ls", GlobalText[1607]);
+        mu_swprintf(Text, L"%ls", I18N::Game::Maintain);
     else
-        mu_swprintf(Text, L"%ls", GlobalText[1608]);
+        mu_swprintf(Text, L"%ls", I18N::Game::Assist);
 
     g_pRenderText->RenderText(iPos_x + 137, iPos_y, Text, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 

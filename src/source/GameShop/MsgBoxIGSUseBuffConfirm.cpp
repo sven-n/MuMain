@@ -1,6 +1,7 @@
 // MsgBoxIGSUseBuffConfirm.cpp: implementation of the CMsgBoxIGSUseBuffConfirm class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSUseBuffConfirm.h"
@@ -52,7 +53,7 @@ void CMsgBoxIGSUseBuffConfirm::Initialize(int iStorageSeq, int iStorageItemSeq, 
     m_szItemType = szItemType;
     wcscpy(m_szCurrentBuffName, pszBuffName);
 
-    mu_swprintf(szText, GlobalText[3047], pszItemName, pszBuffName, pszItemName);
+    mu_swprintf(szText, I18N::Game::UsingTheSItemWillNegate, pszItemName, pszBuffName, pszItemName);
     m_iDesciptionLine = ::DivideStringByPixel(&m_szDescription[0][0], UIMAX_TEXT_LINE, MAX_TEXT_LENGTH, szText, IGS_TEXT_DIVIDE_WIDTH, false, '#');
 }
 
@@ -137,11 +138,11 @@ void CMsgBoxIGSUseBuffConfirm::SetButtonInfo()
 {
     m_BtnOk.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_OK_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnOk.MoveTextPos(0, -1);
-    m_BtnOk.SetText(GlobalText[228]);
+    m_BtnOk.SetText(I18N::Game::OK);
 
     m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnCancel.MoveTextPos(0, -1);
-    m_BtnCancel.SetText(GlobalText[229]);
+    m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
 void CMsgBoxIGSUseBuffConfirm::RenderFrame()
@@ -169,7 +170,7 @@ void CMsgBoxIGSUseBuffConfirm::RenderTexts()
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
 
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_Y, GlobalText[3046], IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_Y, I18N::Game::BuffItemUseConfirmation, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
 

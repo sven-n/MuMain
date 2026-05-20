@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/Inventory/NewUIMyInventory.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "I18N/All.h"
 extern bool SelectFlag;
 #ifdef _EDITOR
 #include "UI/Console/MuEditorConsoleUI.h"
@@ -486,14 +487,14 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         ITEM* pItemObj = pPickedItem->GetItem();
         if (pItemObj && pItemObj->Jewel_Of_Harmony_Option != 0)
         {
-            g_pSystemLogBox->AddText(GlobalText[2217], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeDropped, TYPE_ERROR_MESSAGE);
 
             ResetMouseLButton();
             return false;
         }
         if (pItemObj && IsHighValueItem(pItemObj) == true)
         {
-            g_pSystemLogBox->AddText(GlobalText[269], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouAreNotAllowedToDropThisExpensiveItem, TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
@@ -501,7 +502,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         }
         if (pItemObj && IsDropBan(pItemObj))
         {
-            g_pSystemLogBox->AddText(GlobalText[1915], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ThisItemCannotBeDropped, TYPE_ERROR_MESSAGE);
             CNewUIInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
@@ -730,7 +731,7 @@ void CNewUIMyInventory::RenderSetOption()
     }
 
     wchar_t strText[128];
-    mu_swprintf(strText, L"[%ls]", GlobalText[989]);
+    mu_swprintf(strText, L"[%ls]", I18N::Game::SetOption);
     g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.2f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
     if (g_csItemOption.IsViewOptionList() == true)
@@ -754,7 +755,7 @@ void CNewUIMyInventory::RenderSocketOption()
     }
 
     wchar_t strText[128];
-    mu_swprintf(strText, L"[%ls]", GlobalText[2651]);
+    mu_swprintf(strText, L"[%ls]", I18N::Game::SocketOption);
     g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
 
     if (CheckMouseIn(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 20, INVENTORY_WIDTH * 0.5f, 15) == true)
@@ -1189,19 +1190,19 @@ void CNewUIMyInventory::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[225], true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::CloseIV, true);
 
     m_BtnRepair.ChangeButtonImgState(true, IMAGE_INVENTORY_REPAIR_BTN, false);
     m_BtnRepair.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 391, 36, 29);
-    m_BtnRepair.ChangeToolTipText(GlobalText[233], true);
+    m_BtnRepair.ChangeToolTipText(I18N::Game::RepairL, true);
 
     m_BtnMyShop.ChangeButtonImgState(true, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, false);
     m_BtnMyShop.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 391, 36, 29);
-    m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
+    m_BtnMyShop.ChangeToolTipText(I18N::Game::OpenPersonalStoreS, true);
 
     m_BtnExpand.ChangeButtonImgState(true, IMAGE_INVENTORY_EXPAND_BTN, false);
     m_BtnExpand.ChangeButtonInfo(m_Pos.x + 87 + 37, m_Pos.y + 391, 36, 29);
-    m_BtnExpand.ChangeToolTipText(GlobalText[3322], true);
+    m_BtnExpand.ChangeToolTipText(I18N::Game::OpenExpandedInventoryK, true);
 }
 
 void CNewUIMyInventory::LoadImages() const
@@ -1385,7 +1386,7 @@ void CNewUIMyInventory::RenderInventoryDetails() const
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, GlobalText[223], INVENTORY_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, I18N::Game::Inventory, INVENTORY_WIDTH, 0, RT3_SORT_CENTER);
 
     RenderImage(IMAGE_INVENTORY_MONEY, m_Pos.x + 11, m_Pos.y + 364, 170.f, 26.f);
 
@@ -1413,7 +1414,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
             const int iTargetIndex = m_iPointedSlot;
             if (pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
             {
-                g_pSystemLogBox->AddText(GlobalText[2285], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTWearItem, SEASON3B::TYPE_ERROR_MESSAGE);
                 CNewUIInventoryCtrl::BackupPickedItem();
 
                 ResetMouseLButton();
@@ -1433,7 +1434,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
                 if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
                 {
-                    g_pSystemLogBox->AddText(GlobalText[2285], TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::CanTWearItem, TYPE_ERROR_MESSAGE);
                     CNewUIInventoryCtrl::BackupPickedItem();
 
                     ResetMouseLButton();
@@ -1747,7 +1748,7 @@ void CNewUIMyInventory::ChangeMyShopButtonStateOpen()
     m_BtnMyShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 0);
     m_BtnMyShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 1);
     m_BtnMyShop.ChangeImgIndex(IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 0);
-    m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
+    m_BtnMyShop.ChangeToolTipText(I18N::Game::OpenPersonalStoreS, true);
 }
 
 void CNewUIMyInventory::ChangeMyShopButtonStateClose()
@@ -1757,7 +1758,7 @@ void CNewUIMyInventory::ChangeMyShopButtonStateClose()
     m_BtnMyShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 0);
     m_BtnMyShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 1);
     m_BtnMyShop.ChangeImgIndex(IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 0);
-    m_BtnMyShop.ChangeToolTipText(GlobalText[1127], true);
+    m_BtnMyShop.ChangeToolTipText(I18N::Game::ClosePersonalStoreS, true);
 }
 
 void CNewUIMyInventory::LockMyShopButtonOpen()
@@ -1765,7 +1766,7 @@ void CNewUIMyInventory::LockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(100, 100, 100, 255));
     m_BtnMyShop.Lock();
-    m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
+    m_BtnMyShop.ChangeToolTipText(I18N::Game::OpenPersonalStoreS, true);
 }
 
 void CNewUIMyInventory::UnlockMyShopButtonOpen()
@@ -1773,7 +1774,7 @@ void CNewUIMyInventory::UnlockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(255, 255, 255, 255));
     m_BtnMyShop.UnLock();
-    m_BtnMyShop.ChangeToolTipText(GlobalText[1125], true);
+    m_BtnMyShop.ChangeToolTipText(I18N::Game::OpenPersonalStoreS, true);
 }
 
 void CNewUIMyInventory::ToggleRepairMode()

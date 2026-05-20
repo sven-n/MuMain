@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "InGameShopSystem.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -140,10 +141,10 @@ bool CInGameShopSystem::ScriptDownload()
         ShopOpenLock();
 
         wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
-        mu_swprintf(szText, GlobalText[3029], m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId, res.GetErrorMessage());
+        mu_swprintf(szText, I18N::Game::MUItemShopInformationDownloadFailed, m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId, res.GetErrorMessage());
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[3028], szText);
+        pMsgBox->Initialize(I18N::Game::Error, szText);
         return false;
     }
 
@@ -222,10 +223,10 @@ bool CInGameShopSystem::BannerDownload()
 
         // MessageBox
         wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
-        mu_swprintf(szText, GlobalText[3030], m_BannerVerInfo.Zone, m_BannerVerInfo.year, m_BannerVerInfo.yearId, res.GetErrorMessage());
+        mu_swprintf(szText, I18N::Game::BannerDownloadFailedVersionDDDS, m_BannerVerInfo.Zone, m_BannerVerInfo.year, m_BannerVerInfo.yearId, res.GetErrorMessage());
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[3028], szText);
+        pMsgBox->Initialize(I18N::Game::Error, szText);
 
         return false;
     }
@@ -641,21 +642,21 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
                 if (iValue >= 86400)
                 {
                     iValue /= 86400;
-                    wcscpy(pszUnitName, GlobalText[2298]);
+                    wcscpy(pszUnitName, I18N::Game::Day);
                 }
                 else if (iValue >= 3600)
                 {
                     iValue /= 3600;
-                    wcscpy(pszUnitName, GlobalText[2299]);
+                    wcscpy(pszUnitName, I18N::Game::Hour);
                 }
                 else if (iValue >= 60)
                 {
                     iValue /= 60;
-                    wcscpy(pszUnitName, GlobalText[2300]);
+                    wcscpy(pszUnitName, I18N::Game::Minute);
                 }
                 else
                 {
-                    wcscpy(pszUnitName, GlobalText[2301]);
+                    wcscpy(pszUnitName, I18N::Game::Second);
                 }
             }break;
             case 174:
@@ -663,16 +664,16 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
                 if (iValue >= 1440)
                 {
                     iValue /= 1440;
-                    wcscpy(pszUnitName, GlobalText[2298]);
+                    wcscpy(pszUnitName, I18N::Game::Day);
                 }
                 else if (iValue >= 60)
                 {
                     iValue /= 60;
-                    wcscpy(pszUnitName, GlobalText[2299]);
+                    wcscpy(pszUnitName, I18N::Game::Hour);
                 }
                 else
                 {
-                    wcscpy(pszUnitName, GlobalText[2300]);
+                    wcscpy(pszUnitName, I18N::Game::Minute);
                 }
             }break;
             case 172:
@@ -680,11 +681,11 @@ bool CInGameShopSystem::GetProductInfo(CShopProduct* pProduct, int iAttrType, OU
                 if (iValue >= 24)
                 {
                     iValue /= 24;
-                    wcscpy(pszUnitName, GlobalText[2298]);
+                    wcscpy(pszUnitName, I18N::Game::Day);
                 }
                 else
                 {
-                    wcscpy(pszUnitName, GlobalText[2299]);
+                    wcscpy(pszUnitName, I18N::Game::Hour);
                 }
             }break;
             default:
