@@ -27,6 +27,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake ninja-build wine wine32:i386
 
+      - name: Install .NET SDK 10
+        # Required for the ResxGen build-time tool that compiles the
+        # localization .resx files into the I18N C++ accessors that the
+        # rest of the codebase #include's. Without it the generator
+        # never runs and source files fail with "I18N/All.h: No such
+        # file or directory".
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - name: Initialise wine prefix
         run: |
           wineboot --init >/dev/null 2>&1 || true

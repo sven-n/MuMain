@@ -23,6 +23,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y mingw-w64 g++-mingw-w64-i686 cmake ninja-build
 
+      - name: Install .NET SDK 10
+        # Required for the ResxGen build-time tool that compiles the
+        # localization .resx files into the I18N C++ accessors.
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - name: Cache libjpeg-turbo (MinGW i686)
         uses: actions/cache@v4
         with:

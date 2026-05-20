@@ -14,10 +14,17 @@ internal static class Naming
     /// Slug a free-form key (e.g. "Save Skills", "Are you sure?", "BlessAegis Mining Lab")
     /// into a PascalCase C++ identifier: "SaveSkills", "AreYouSure", "BlessAegisMiningLab".
     ///
-    /// Word boundaries are any run of non-alphanumeric characters. The first
-    /// letter of each word is forced upper-case; everything else preserves its
-    /// original case so PascalCase content in the source ("BlessAegis") survives.
-    /// Empty input throws.
+    /// Word boundaries are any run of non-alphanumeric characters. Only
+    /// ASCII letters and digits are kept: MSVC rejects non-ASCII Unicode
+    /// letters in C++ identifiers, and the original bmd has Latin-1-mangled
+    /// Korean leftovers that would slug to identifiers full of garbage
+    /// codepoints. Strings that contain no ASCII alnum at all (typically
+    /// those dead Korean entries) return an empty string, signalling the
+    /// caller that this entry has no usable identifier and should be
+    /// dropped.
+    /// The first letter of each word is forced upper-case; everything else
+    /// preserves its original case so PascalCase content in the source
+    /// ("BlessAegis") survives.
     public static string ToIdentifier(string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
@@ -26,7 +33,8 @@ internal static class Naming
         var atWordStart = true;
         foreach (var c in key)
         {
-            if (char.IsLetterOrDigit(c))
+            var isAsciiAlnum = c < 0x80 && char.IsLetterOrDigit(c);
+            if (isAsciiAlnum)
             {
                 sb.Append(atWordStart
                     ? char.ToUpper(c, CultureInfo.InvariantCulture)
@@ -41,7 +49,20 @@ internal static class Naming
 
         if (sb.Length == 0)
         {
-            throw new ArgumentException($"Key '{key}' produces an empty identifier.", nameof(key));
+            return string.Empty;
+        }
+
+        // Single-letter identifiers are ambiguous: "%s" legitimately slugs
+        // to "S", but so does a Korean-Latin1-garbled string with a single
+        // embedded "%s". Distinguish by source: if the input was pure ASCII
+        // (e.g. "%s"), keep the short identifier; if it contained any
+        // non-ASCII codepoint, treat the slug as nothing-survived and drop.
+        if (sb.Length < 2)
+        {
+            foreach (var c in key)
+            {
+                if (c >= 0x80) return string.Empty;
+            }
         }
 
         if (char.IsDigit(sb[0]))

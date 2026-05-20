@@ -131,6 +131,15 @@ internal static class ResxLoader
         foreach (var (key, defaultRaw) in defaultEntries)
         {
             var identifier = SafeIdentifier(groupName, key);
+            if (identifier.Length == 0)
+            {
+                // No usable ASCII identifier (typically dead Korean leftover
+                // text in the source bmd). Skip the entry so it doesn't
+                // produce non-ASCII identifiers that MSVC refuses to compile.
+                Console.Error.WriteLine(
+                    $"Skipping {groupName} entry with no ASCII identifier: '{key.Substring(0, Math.Min(40, key.Length))}'");
+                continue;
+            }
             EnsureNoIdentifierCollision(groupName, idToKey, identifier, key);
 
             var translations = new Dictionary<string, string>(StringComparer.Ordinal);
