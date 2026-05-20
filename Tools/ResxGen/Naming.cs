@@ -55,6 +55,69 @@ internal static class Naming
     /// Locale codes may contain hyphens (en-US); C++ identifiers cannot.
     public static string SanitizeLocale(string locale) => locale.Replace('-', '_');
 
+    /// MSVC's swprintf treats a bare "%s" inside a wide format string as a
+    /// NARROW-string argument, so feeding it a wchar_t* renders only the
+    /// first byte (the first letter, then a 0x00 from UTF-16 looks like a
+    /// null terminator). Walk the format string and rewrite "%s"/"%S" to
+    /// "%ls" whenever there is no explicit length modifier already, matching
+    /// the legacy GlobalText loader's NormalizePrintfSpecifiers behaviour.
+    /// Only applied to values that will be emitted in wide groups.
+    public static string NormalizePrintfSpecifiersForWide(string s)
+    {
+        const string LengthModifiers = "hlLjztI";
+        const string Conversions = "cCdiouxXeEfgGaAnpsS";
+
+        var sb = new StringBuilder(s.Length + 8);
+        var inFormat = false;
+        var hasLengthModifier = false;
+        foreach (var ch in s)
+        {
+            if (!inFormat)
+            {
+                if (ch == '%')
+                {
+                    inFormat = true;
+                    hasLengthModifier = false;
+                }
+                sb.Append(ch);
+                continue;
+            }
+
+            if (ch == '%')
+            {
+                // "%%" - escaped literal, not a conversion.
+                inFormat = false;
+                sb.Append('%');
+                continue;
+            }
+
+            if (LengthModifiers.IndexOf(ch) >= 0)
+            {
+                hasLengthModifier = true;
+                sb.Append(ch);
+                continue;
+            }
+
+            if (Conversions.IndexOf(ch) >= 0)
+            {
+                if ((ch == 's' || ch == 'S') && !hasLengthModifier)
+                {
+                    sb.Append('l');
+                    sb.Append('s');
+                }
+                else
+                {
+                    sb.Append(ch == 'S' ? 's' : ch);
+                }
+                inFormat = false;
+                continue;
+            }
+
+            sb.Append(ch);
+        }
+        return sb.ToString();
+    }
+
     /// Render a C# string as a C++ string literal.
     /// `wide=true` produces an L"..." UTF-16 wide literal (used by wide groups
     /// whose accessors return const wchar_t*); otherwise a plain UTF-8 literal.

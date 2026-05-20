@@ -345,6 +345,12 @@ internal static class CppEmitter
             foreach (var entry in group.Entries)
             {
                 var value = ResolveValueWithFallback(entry, locale);
+                if (group.IsWide)
+                {
+                    // Rewrite %s/%S -> %ls so swprintf reads the wchar_t* arg
+                    // correctly on Windows; mirrors the legacy bmd loader.
+                    value = Naming.NormalizePrintfSpecifiersForWide(value);
+                }
                 sb.AppendLine($"constexpr const {charType}* k_{sanitized}_{entry.Identifier} = {Naming.EscapeCppString(value, group.IsWide)};");
             }
             sb.AppendLine();
