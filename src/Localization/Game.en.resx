@@ -264,7 +264,7 @@
     <value>Star of Sacred Birth</value>
     <comment>legacy_id=105</comment>
   </data>
-  <data name="Firecracker_106" xml:space="preserve">
+  <data name="Firecracker106" xml:space="preserve">
     <value>Firecracker</value>
     <comment>legacy_id=106</comment>
   </data>
@@ -372,7 +372,7 @@
     <value>+Skill</value>
     <comment>legacy_id=176</comment>
   </data>
-  <data name="Option_177" xml:space="preserve">
+  <data name="Option177" xml:space="preserve">
     <value>+Option</value>
     <comment>legacy_id=177</comment>
   </data>
@@ -384,7 +384,7 @@
     <value>Knight specific skill</value>
     <comment>legacy_id=179</comment>
   </data>
-  <data name="Guild_180" xml:space="preserve">
+  <data name="Guild180" xml:space="preserve">
     <value>Guild</value>
     <comment>legacy_id=180</comment>
   </data>
@@ -424,7 +424,7 @@
     <value>Leave</value>
     <comment>legacy_id=189</comment>
   </data>
-  <data name="Party_190" xml:space="preserve">
+  <data name="Party190" xml:space="preserve">
     <value>Party</value>
     <comment>legacy_id=190</comment>
   </data>
@@ -484,7 +484,7 @@
     <value>Defense: %d (+%d)</value>
     <comment>legacy_id=207</comment>
   </data>
-  <data name="DefenseRateDD_208" xml:space="preserve">
+  <data name="DefenseRateDD208" xml:space="preserve">
     <value>Defense (rate):%d (%d)</value>
     <comment>legacy_id=208</comment>
   </data>
@@ -492,7 +492,7 @@
     <value>HP: %d / %d</value>
     <comment>legacy_id=211</comment>
   </data>
-  <data name="ManaDD_213" xml:space="preserve">
+  <data name="ManaDD213" xml:space="preserve">
     <value>Mana: %d / %d</value>
     <comment>legacy_id=213</comment>
   </data>
@@ -528,7 +528,7 @@
     <value>Close (I,V)</value>
     <comment>legacy_id=225</comment>
   </data>
-  <data name="Trade_226" xml:space="preserve">
+  <data name="Trade226" xml:space="preserve">
     <value>Trade</value>
     <comment>legacy_id=226</comment>
   </data>
@@ -588,7 +588,7 @@
     <value>Number of Registered Rena</value>
     <comment>legacy_id=246</comment>
   </data>
-  <data name="Battle_248" xml:space="preserve">
+  <data name="Battle248" xml:space="preserve">
     <value>/Battle</value>
     <comment>legacy_id=248</comment>
   </data>
@@ -604,15 +604,15 @@
     <value>No more arrows</value>
     <comment>legacy_id=251</comment>
   </data>
-  <data name="Guild_254" xml:space="preserve">
+  <data name="Guild254" xml:space="preserve">
     <value>/guild</value>
     <comment>legacy_id=254</comment>
   </data>
-  <data name="YouAreAlreadyInAGuild_255" xml:space="preserve">
+  <data name="YouAreAlreadyInAGuild255" xml:space="preserve">
     <value>You are already in a guild</value>
     <comment>legacy_id=255</comment>
   </data>
-  <data name="Party_256" xml:space="preserve">
+  <data name="Party256" xml:space="preserve">
     <value>/party</value>
     <comment>legacy_id=256</comment>
   </data>
@@ -620,15 +620,15 @@
     <value>You are already in a party</value>
     <comment>legacy_id=257</comment>
   </data>
-  <data name="Exchange_258" xml:space="preserve">
+  <data name="Exchange258" xml:space="preserve">
     <value>/exchange</value>
     <comment>legacy_id=258</comment>
   </data>
-  <data name="Trade_259" xml:space="preserve">
+  <data name="Trade259" xml:space="preserve">
     <value>/trade</value>
     <comment>legacy_id=259</comment>
   </data>
-  <data name="Warp_260" xml:space="preserve">
+  <data name="Warp260" xml:space="preserve">
     <value>/warp</value>
     <comment>legacy_id=260</comment>
   </data>
@@ -668,11 +668,11 @@
     <value>enjoy the game</value>
     <comment>legacy_id=278</comment>
   </data>
-  <data name="Bye_279" xml:space="preserve">
+  <data name="Bye279" xml:space="preserve">
     <value>Bye</value>
     <comment>legacy_id=279</comment>
   </data>
-  <data name="Bye_280" xml:space="preserve">
+  <data name="Bye280" xml:space="preserve">
     <value>bye</value>
     <comment>legacy_id=280</comment>
   </data>
@@ -716,15 +716,15 @@
     <value>Never</value>
     <comment>legacy_id=298,299</comment>
   </data>
-  <data name="DoNot_300" xml:space="preserve">
+  <data name="DoNot300" xml:space="preserve">
     <value>Do not</value>
     <comment>legacy_id=300</comment>
   </data>
-  <data name="DoNot_301" xml:space="preserve">
+  <data name="DoNot301" xml:space="preserve">
     <value>Do not</value>
     <comment>legacy_id=301</comment>
   </data>
-  <data name="DoNot_302" xml:space="preserve">
+  <data name="DoNot302" xml:space="preserve">
     <value>do not</value>
     <comment>legacy_id=302</comment>
   </data>
@@ -768,11 +768,11 @@
     <value>Great</value>
     <comment>legacy_id=317,318,338</comment>
   </data>
-  <data name="OhYeah_319" xml:space="preserve">
+  <data name="OhYeah319" xml:space="preserve">
     <value>Oh Yeah</value>
     <comment>legacy_id=319</comment>
   </data>
-  <data name="OhYeah_320" xml:space="preserve">
+  <data name="OhYeah320" xml:space="preserve">
     <value>Oh yeah</value>
     <comment>legacy_id=320</comment>
   </data>
@@ -868,7 +868,7 @@
     <value>Life: %d/%d</value>
     <comment>legacy_id=358</comment>
   </data>
-  <data name="ManaDD_359" xml:space="preserve">
+  <data name="ManaDD359" xml:space="preserve">
     <value>Mana: %d/%d</value>
     <comment>legacy_id=359</comment>
   </data>
@@ -892,7 +892,7 @@
     <value>and the items before trading.</value>
     <comment>legacy_id=367</comment>
   </data>
-  <data name="Level_368" xml:space="preserve">
+  <data name="Level368" xml:space="preserve">
     <value>Level</value>
     <comment>legacy_id=368</comment>
   </data>
@@ -900,7 +900,7 @@
     <value>About %d</value>
     <comment>legacy_id=369</comment>
   </data>
-  <data name="Warning_370" xml:space="preserve">
+  <data name="Warning370" xml:space="preserve">
     <value>Warning!</value>
     <comment>legacy_id=370</comment>
   </data>
@@ -940,7 +940,7 @@
     <value>Switch Character</value>
     <comment>legacy_id=383</comment>
   </data>
-  <data name="Option_385" xml:space="preserve">
+  <data name="Option385" xml:space="preserve">
     <value>Option</value>
     <comment>legacy_id=385</comment>
   </data>
@@ -1364,7 +1364,7 @@
     <value>Guild name must be at least 4 characters</value>
     <comment>legacy_id=517</comment>
   </data>
-  <data name="YouAreAlreadyInAGuild_518" xml:space="preserve">
+  <data name="YouAreAlreadyInAGuild518" xml:space="preserve">
     <value>You are already in a guild.</value>
     <comment>legacy_id=518</comment>
   </data>
@@ -1752,7 +1752,7 @@
     <value>If you wish to stay alive, choose another square.</value>
     <comment>legacy_id=687</comment>
   </data>
-  <data name="Firecracker_688" xml:space="preserve">
+  <data name="Firecracker688" xml:space="preserve">
     <value>/Firecracker</value>
     <comment>legacy_id=688</comment>
   </data>
@@ -1764,7 +1764,7 @@
     <value>Password Verification</value>
     <comment>legacy_id=690</comment>
   </data>
-  <data name="EnterYourWEBZENCOMPassword_691" xml:space="preserve">
+  <data name="EnterYourWEBZENCOMPassword691" xml:space="preserve">
     <value>Enter your WEBZEN.COM password.</value>
     <comment>legacy_id=691</comment>
   </data>
@@ -1784,7 +1784,7 @@
     <value>Enter password again</value>
     <comment>legacy_id=696</comment>
   </data>
-  <data name="EnterYourWEBZENCOMPassword_697" xml:space="preserve">
+  <data name="EnterYourWEBZENCOMPassword697" xml:space="preserve">
     <value>Enter your WEBZEN.COM password</value>
     <comment>legacy_id=697</comment>
   </data>
@@ -2176,11 +2176,11 @@
     <value>Reserved name</value>
     <comment>legacy_id=942</comment>
   </data>
-  <data name="Trade_943" xml:space="preserve">
+  <data name="Trade943" xml:space="preserve">
     <value>Trade</value>
     <comment>legacy_id=943</comment>
   </data>
-  <data name="Party_944" xml:space="preserve">
+  <data name="Party944" xml:space="preserve">
     <value>Party</value>
     <comment>legacy_id=944</comment>
   </data>
@@ -2188,7 +2188,7 @@
     <value>Whisper</value>
     <comment>legacy_id=945</comment>
   </data>
-  <data name="Guild_946" xml:space="preserve">
+  <data name="Guild946" xml:space="preserve">
     <value>Guild</value>
     <comment>legacy_id=946</comment>
   </data>
@@ -2276,7 +2276,7 @@
     <value>Talking:</value>
     <comment>legacy_id=994</comment>
   </data>
-  <data name="Offline_995" xml:space="preserve">
+  <data name="Offline995" xml:space="preserve">
     <value>*Offline*</value>
     <comment>legacy_id=995</comment>
   </data>
@@ -2312,7 +2312,7 @@
     <value>Next Action</value>
     <comment>legacy_id=1004</comment>
   </data>
-  <data name="Title_1005" xml:space="preserve">
+  <data name="Title1005" xml:space="preserve">
     <value>Title:</value>
     <comment>legacy_id=1005</comment>
   </data>
@@ -2408,7 +2408,7 @@
     <value> Date Rcvd.</value>
     <comment>legacy_id=1029</comment>
   </data>
-  <data name="Title_1030" xml:space="preserve">
+  <data name="Title1030" xml:space="preserve">
     <value> Title</value>
     <comment>legacy_id=1030</comment>
   </data>
@@ -2444,7 +2444,7 @@
     <value>No</value>
     <comment>legacy_id=1038</comment>
   </data>
-  <data name="Offline_1039" xml:space="preserve">
+  <data name="Offline1039" xml:space="preserve">
     <value>Offline</value>
     <comment>legacy_id=1039</comment>
   </data>
@@ -2612,7 +2612,7 @@
     <value>Right click for price setting</value>
     <comment>legacy_id=1101</comment>
   </data>
-  <data name="PersonalStore_1102" xml:space="preserve">
+  <data name="PersonalStore1102" xml:space="preserve">
     <value>Personal store</value>
     <comment>legacy_id=1102</comment>
   </data>
@@ -2620,11 +2620,11 @@
     <value>Still opening</value>
     <comment>legacy_id=1103</comment>
   </data>
-  <data name="Store_1104" xml:space="preserve">
+  <data name="Store1104" xml:space="preserve">
     <value>[Store]</value>
     <comment>legacy_id=1104</comment>
   </data>
-  <data name="Apply_1106" xml:space="preserve">
+  <data name="Apply1106" xml:space="preserve">
     <value>Apply</value>
     <comment>legacy_id=1106</comment>
   </data>
@@ -2660,11 +2660,11 @@
     <value>Can't be returned.</value>
     <comment>legacy_id=1115</comment>
   </data>
-  <data name="PersonalStore_1117" xml:space="preserve">
+  <data name="PersonalStore1117" xml:space="preserve">
     <value>/Personal store</value>
     <comment>legacy_id=1117</comment>
   </data>
-  <data name="Buy_1118" xml:space="preserve">
+  <data name="Buy1118" xml:space="preserve">
     <value>/Buy</value>
     <comment>legacy_id=1118</comment>
   </data>
@@ -2688,7 +2688,7 @@
     <value>Only above level %d can use.</value>
     <comment>legacy_id=1123</comment>
   </data>
-  <data name="Buy_1124" xml:space="preserve">
+  <data name="Buy1124" xml:space="preserve">
     <value>Buy</value>
     <comment>legacy_id=1124</comment>
   </data>
@@ -2820,7 +2820,7 @@
     <value>Kundun mark +%d level</value>
     <comment>legacy_id=1180</comment>
   </data>
-  <data name="DD_1181" xml:space="preserve">
+  <data name="DD1181" xml:space="preserve">
     <value>%d / %d</value>
     <comment>legacy_id=1181</comment>
   </data>
@@ -3132,7 +3132,7 @@
     <value>Use in siege registration</value>
     <comment>legacy_id=1291</comment>
   </data>
-  <data name="Alliance_1295" xml:space="preserve">
+  <data name="Alliance1295" xml:space="preserve">
     <value>Alliance</value>
     <comment>legacy_id=1295</comment>
   </data>
@@ -3216,7 +3216,7 @@
     <value>Hostility guild</value>
     <comment>legacy_id=1321</comment>
   </data>
-  <data name="SuspendHostilities_1322" xml:space="preserve">
+  <data name="SuspendHostilities1322" xml:space="preserve">
     <value>Suspend hostilities</value>
     <comment>legacy_id=1322</comment>
   </data>
@@ -3264,11 +3264,11 @@
     <value>Not a master of guild alliance</value>
     <comment>legacy_id=1333</comment>
   </data>
-  <data name="Alliance_1352" xml:space="preserve">
+  <data name="Alliance1352" xml:space="preserve">
     <value>Alliance</value>
     <comment>legacy_id=1352</comment>
   </data>
-  <data name="Alliance_1354" xml:space="preserve">
+  <data name="Alliance1354" xml:space="preserve">
     <value>/Alliance</value>
     <comment>legacy_id=1354</comment>
   </data>
@@ -3280,7 +3280,7 @@
     <value>/Hostilities</value>
     <comment>legacy_id=1356</comment>
   </data>
-  <data name="SuspendHostilities_1357" xml:space="preserve">
+  <data name="SuspendHostilities1357" xml:space="preserve">
     <value>/Suspend hostilities</value>
     <comment>legacy_id=1357</comment>
   </data>
@@ -3880,7 +3880,7 @@
     <value>Purchase and repair</value>
     <comment>legacy_id=1557</comment>
   </data>
-  <data name="Buy_1558" xml:space="preserve">
+  <data name="Buy1558" xml:space="preserve">
     <value>Buy</value>
     <comment>legacy_id=1558</comment>
   </data>
@@ -3892,11 +3892,11 @@
     <value>DUR : %d/%d</value>
     <comment>legacy_id=1560</comment>
   </data>
-  <data name="DPD_1561" xml:space="preserve">
+  <data name="DPD1561" xml:space="preserve">
     <value>DP : %d</value>
     <comment>legacy_id=1561</comment>
   </data>
-  <data name="RRD_1562" xml:space="preserve">
+  <data name="RRD1562" xml:space="preserve">
     <value>RR : %d%%</value>
     <comment>legacy_id=1562</comment>
   </data>
@@ -3904,11 +3904,11 @@
     <value>DUR +%d</value>
     <comment>legacy_id=1563</comment>
   </data>
-  <data name="DPD_1564" xml:space="preserve">
+  <data name="DPD1564" xml:space="preserve">
     <value>DP +%d</value>
     <comment>legacy_id=1564</comment>
   </data>
-  <data name="RRD_1565" xml:space="preserve">
+  <data name="RRD1565" xml:space="preserve">
     <value>RR +%d%%</value>
     <comment>legacy_id=1565</comment>
   </data>
@@ -3920,7 +3920,7 @@
     <value>Various NPC tax rate %d%%</value>
     <comment>legacy_id=1567</comment>
   </data>
-  <data name="Apply_1568" xml:space="preserve">
+  <data name="Apply1568" xml:space="preserve">
     <value>Apply?</value>
     <comment>legacy_id=1568</comment>
   </data>
@@ -4176,7 +4176,7 @@
     <value>Increase resistance of Lightning and Ice</value>
     <comment>legacy_id=1639</comment>
   </data>
-  <data name="Store_1640" xml:space="preserve">
+  <data name="Store1640" xml:space="preserve">
     <value>Store</value>
     <comment>legacy_id=1640</comment>
   </data>
@@ -4584,7 +4584,7 @@
     <value>X %d Coins</value>
     <comment>legacy_id=1893</comment>
   </data>
-  <data name="Warning_1895" xml:space="preserve">
+  <data name="Warning1895" xml:space="preserve">
     <value>Warning!</value>
     <comment>legacy_id=1895</comment>
   </data>
@@ -4628,7 +4628,7 @@
     <value>Fruit decrease is failed.</value>
     <comment>legacy_id=1906</comment>
   </data>
-  <data name="DD_1907" xml:space="preserve">
+  <data name="DD1907" xml:space="preserve">
     <value>[+]:%d%%|[-]:%d%%</value>
     <comment>legacy_id=1907</comment>
   </data>
@@ -4720,7 +4720,7 @@
     <value>will not be returned.</value>
     <comment>legacy_id=1939</comment>
   </data>
-  <data name="Exchange_1940" xml:space="preserve">
+  <data name="Exchange1940" xml:space="preserve">
     <value>Exchange</value>
     <comment>legacy_id=1940</comment>
   </data>
@@ -4956,7 +4956,7 @@
     <value>of the weapons.</value>
     <comment>legacy_id=2104</comment>
   </data>
-  <data name="SHasFailed_2105" xml:space="preserve">
+  <data name="SHasFailed2105" xml:space="preserve">
     <value>%s has failed..</value>
     <comment>legacy_id=2105</comment>
   </data>
@@ -4972,11 +4972,11 @@
     <value>Attack rate: %d (+%d)</value>
     <comment>legacy_id=2109</comment>
   </data>
-  <data name="DefenseRateDD_2110" xml:space="preserve">
+  <data name="DefenseRateDD2110" xml:space="preserve">
     <value>Defense rate: %d (+%d)</value>
     <comment>legacy_id=2110</comment>
   </data>
-  <data name="SHasFailed_2112" xml:space="preserve">
+  <data name="SHasFailed2112" xml:space="preserve">
     <value>%s has failed.</value>
     <comment>legacy_id=2112</comment>
   </data>
@@ -5052,11 +5052,11 @@
     <value>You may now enter.</value>
     <comment>legacy_id=2164</comment>
   </data>
-  <data name="NightmareHasLostTheControlOf_2165" xml:space="preserve">
+  <data name="NightmareHasLostTheControlOf2165" xml:space="preserve">
     <value>Nightmare has lost the control of Maya's left hand. Currently there are %d survivors.</value>
     <comment>legacy_id=2165</comment>
   </data>
-  <data name="NightmareHasLostTheControlOf_2166" xml:space="preserve">
+  <data name="NightmareHasLostTheControlOf2166" xml:space="preserve">
     <value>Nightmare has lost the control of Maya's right hand. Currently there are %d surviors.</value>
     <comment>legacy_id=2166</comment>
   </data>
@@ -5220,7 +5220,7 @@
     <value>Item will disappear when failed.</value>
     <comment>legacy_id=2222</comment>
   </data>
-  <data name="Warning_2223" xml:space="preserve">
+  <data name="Warning2223" xml:space="preserve">
     <value>!! Warning !!</value>
     <comment>legacy_id=2223</comment>
   </data>
@@ -5432,7 +5432,7 @@
     <value>Maximum</value>
     <comment>legacy_id=2342</comment>
   </data>
-  <data name="Option_2343" xml:space="preserve">
+  <data name="Option2343" xml:space="preserve">
     <value>Option</value>
     <comment>legacy_id=2343</comment>
   </data>
@@ -5512,7 +5512,7 @@
     <value>Current members: %d</value>
     <comment>legacy_id=2373</comment>
   </data>
-  <data name="Text_2374" xml:space="preserve">
+  <data name="Text2374" xml:space="preserve">
     <value>/</value>
     <comment>legacy_id=2374</comment>
   </data>
@@ -6192,7 +6192,7 @@
     <value>Mirror of Dimensions</value>
     <comment>legacy_id=2760</comment>
   </data>
-  <data name="EntryTime_2761" xml:space="preserve">
+  <data name="EntryTime2761" xml:space="preserve">
     <value>Entry Time</value>
     <comment>legacy_id=2761</comment>
   </data>
@@ -6304,7 +6304,7 @@
     <value>Will you show me the order?</value>
     <comment>legacy_id=2797</comment>
   </data>
-  <data name="EntryTime_2798" xml:space="preserve">
+  <data name="EntryTime2798" xml:space="preserve">
     <value>Entry Time:</value>
     <comment>legacy_id=2798</comment>
   </data>
@@ -6332,7 +6332,7 @@
     <value>Varka</value>
     <comment>legacy_id=2806</comment>
   </data>
-  <data name="Requirements_2809" xml:space="preserve">
+  <data name="Requirements2809" xml:space="preserve">
     <value>Requirements</value>
     <comment>legacy_id=2809</comment>
   </data>
@@ -6444,11 +6444,11 @@
     <value>Dueling is not possible in this area.</value>
     <comment>legacy_id=2866</comment>
   </data>
-  <data name="YouCanDoAGoblinCombination_2875" xml:space="preserve">
+  <data name="YouCanDoAGoblinCombination2875" xml:space="preserve">
     <value>You can do a Goblin combination with a Sealed Golden Box to create a Golden Box.</value>
     <comment>legacy_id=2875</comment>
   </data>
-  <data name="YouCanDoAGoblinCombination_2876" xml:space="preserve">
+  <data name="YouCanDoAGoblinCombination2876" xml:space="preserve">
     <value>You can do a Goblin combination with a Sealed Silver Box to create a Silver Box.</value>
     <comment>legacy_id=2876</comment>
   </data>
@@ -6472,7 +6472,7 @@
     <value>Goblin Points : %s</value>
     <comment>legacy_id=2884</comment>
   </data>
-  <data name="Buy_2886" xml:space="preserve">
+  <data name="Buy2886" xml:space="preserve">
     <value>Buy</value>
     <comment>legacy_id=2886</comment>
   </data>
@@ -6488,7 +6488,7 @@
     <value>Shop</value>
     <comment>legacy_id=2890</comment>
   </data>
-  <data name="Buy_2891" xml:space="preserve">
+  <data name="Buy2891" xml:space="preserve">
     <value>Buy</value>
     <comment>legacy_id=2891</comment>
   </data>
@@ -6716,7 +6716,7 @@
     <value>Gain Contribution: %u</value>
     <comment>legacy_id=2986</comment>
   </data>
-  <data name="Battle_2987" xml:space="preserve">
+  <data name="Battle2987" xml:space="preserve">
     <value>(Battle)</value>
     <comment>legacy_id=2987</comment>
   </data>
@@ -6820,7 +6820,7 @@
     <value>from the market in Lorencia.</value>
     <comment>legacy_id=3015</comment>
   </data>
-  <data name="Warp_3016" xml:space="preserve">
+  <data name="Warp3016" xml:space="preserve">
     <value>Warp</value>
     <comment>legacy_id=3016</comment>
   </data>
@@ -7000,7 +7000,7 @@
     <value>You have not joined a gens.</value>
     <comment>legacy_id=3094</comment>
   </data>
-  <data name="Level_3095" xml:space="preserve">
+  <data name="Level3095" xml:space="preserve">
     <value>Level:</value>
     <comment>legacy_id=3095</comment>
   </data>
@@ -7248,7 +7248,7 @@
     <value># #Next Level:#</value>
     <comment>legacy_id=3328</comment>
   </data>
-  <data name="Requirements_3329" xml:space="preserve">
+  <data name="Requirements3329" xml:space="preserve">
     <value># #Requirements:#</value>
     <comment>legacy_id=3329</comment>
   </data>
@@ -7320,7 +7320,7 @@
     <value>Use Dark Spirits</value>
     <comment>legacy_id=3514</comment>
   </data>
-  <data name="Party_3515" xml:space="preserve">
+  <data name="Party3515" xml:space="preserve">
     <value>Party</value>
     <comment>legacy_id=3515</comment>
   </data>
@@ -7456,7 +7456,7 @@
     <value>Auto Recovery</value>
     <comment>legacy_id=3553</comment>
   </data>
-  <data name="Party_3554" xml:space="preserve">
+  <data name="Party3554" xml:space="preserve">
     <value>Party</value>
     <comment>legacy_id=3554</comment>
   </data>
