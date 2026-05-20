@@ -76,6 +76,22 @@ internal static class CppEmitter
 
             void ApplyLocale(const char* locale) noexcept;
 
+            """);
+
+        if (HasLegacyIds(group))
+        {
+            sb.Append($$"""
+
+                // Resolves a legacy integer ID (from the pre-migration GlobalText[N]
+                // contract) to the corresponding string in the active locale. Returns
+                // a non-null empty literal for unknown IDs.
+                const {{charType}}* Lookup(int legacyId) noexcept;
+
+                """);
+        }
+
+        sb.Append($$"""
+
             }  // namespace {{RootNamespace}}::{{group.Name}}
 
             """);
@@ -108,6 +124,12 @@ internal static class CppEmitter
         WriteRuntimePointers(sb, group);
         sb.AppendLine();
         WriteApplyLocale(sb, group);
+
+        if (HasLegacyIds(group))
+        {
+            sb.AppendLine();
+            WriteLegacyLookup(sb, group);
+        }
 
         sb.Append($$"""
 
@@ -380,6 +402,52 @@ internal static class CppEmitter
         return entry.Translations.TryGetValue(ResxLoader.DefaultLocale, out var defaultValue)
             ? defaultValue
             : entry.Key;
+    }
+
+    private static bool HasLegacyIds(ResourceGroup group)
+    {
+        return group.Entries.Any(e => e.LegacyIds.Count > 0);
+    }
+
+    private static void WriteLegacyLookup(StringBuilder sb, ResourceGroup group)
+    {
+        var charType = group.IsWide ? "wchar_t" : "char";
+
+        // Flatten (legacyId, identifier) pairs and sort by id for binary search.
+        var rows = group.Entries
+                        .SelectMany(e => e.LegacyIds.Select(id => (id, ident: e.Identifier)))
+                        .OrderBy(r => r.id)
+                        .ToList();
+
+        sb.AppendLine("namespace {");
+        sb.AppendLine($"struct LegacyEntry {{ int id; const {charType}* const* slot; }};");
+        sb.AppendLine("constexpr LegacyEntry kLegacyTable[] = {");
+        foreach (var (id, ident) in rows)
+        {
+            sb.AppendLine($"    {{ {id}, &{ident} }},");
+        }
+        sb.AppendLine("};");
+        sb.AppendLine($"constexpr {(group.IsWide ? "wchar_t" : "char")} kLegacyFallback[] = {(group.IsWide ? "L\"\"" : "\"\"")};");
+        sb.AppendLine("}  // namespace");
+        sb.AppendLine();
+        sb.AppendLine($"const {charType}* Lookup(int legacyId) noexcept");
+        sb.AppendLine("{");
+        sb.AppendLine("    // Binary search the sorted table.");
+        sb.AppendLine("    int lo = 0;");
+        sb.AppendLine("    int hi = static_cast<int>(sizeof(kLegacyTable) / sizeof(kLegacyTable[0]));");
+        sb.AppendLine("    while (lo < hi)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        const int mid = lo + (hi - lo) / 2;");
+        sb.AppendLine("        if (kLegacyTable[mid].id < legacyId) lo = mid + 1;");
+        sb.AppendLine("        else hi = mid;");
+        sb.AppendLine("    }");
+        sb.AppendLine("    if (lo < static_cast<int>(sizeof(kLegacyTable) / sizeof(kLegacyTable[0]))");
+        sb.AppendLine("        && kLegacyTable[lo].id == legacyId)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        return *kLegacyTable[lo].slot;");
+        sb.AppendLine("    }");
+        sb.AppendLine("    return kLegacyFallback;");
+        sb.AppendLine("}");
     }
 
     private static void AppendBanner(StringBuilder sb)

@@ -17,4 +17,5 @@ internal sealed record ResourceGroup(
 internal sealed record ResourceEntry(
     string Key,                                          // resx name attribute, = English text
     string Identifier,                                   // PascalCase C++ identifier
-    IReadOnlyDictionary<string, string> Translations);   // locale -> translated text
+    IReadOnlyDictionary<string, string> Translations,    // locale -> translated text
+    IReadOnlyList<int> LegacyIds);                       // optional legacy integer IDs from <comment>legacy_id=...</comment>
