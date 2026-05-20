@@ -785,9 +785,14 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
     }
 
     // Combo boxes drawn last so their expanded dropdowns sit on top of
-    // anything else in the window.
-    m_ResolutionCombo.Render();
-    m_LanguageCombo.Render();
+    // anything else in the window. Within the combo pair, render the
+    // closed one(s) first and any open dropdown last - otherwise a combo
+    // physically below an open one would draw its closed field on top of
+    // that open dropdown's list (since they overlap in screen space when
+    // the upper one expands downward).
+    CNewUIComboBox* combos[] = { &m_ResolutionCombo, &m_LanguageCombo };
+    for (auto* c : combos) if (!c->IsOpen()) c->Render();
+    for (auto* c : combos) if (c->IsOpen())  c->Render();
 }
 
 void SEASON3B::CNewUIOptionWindow::SetAutoAttack(bool bAuto)
