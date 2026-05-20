@@ -1550,7 +1550,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
     for (int i = 0; i < (int)COMGEM::eGEMTYPE_END; i++)
     {
         cButton.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x + 20.0f + (i % 2) * (20 + width), y + (height + 5.0f) * int(i / 2), width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-        cButton.SetText(GlobalText[nBtnIndex[i]]);
+        cButton.SetText(I18N::Game::Lookup(nBtnIndex[i]));
         m_cJewelButton.push_back(cButton);
     }
 

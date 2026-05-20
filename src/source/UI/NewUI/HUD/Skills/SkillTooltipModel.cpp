@@ -3,7 +3,6 @@
 
 #include "Character/CharacterManager.h"
 #include "Core/Globals/_enum.h"
-#include "Data/Translation/GlobalText.h"
 #include "I18N/All.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"

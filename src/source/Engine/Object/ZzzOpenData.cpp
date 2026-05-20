@@ -5377,7 +5377,7 @@ void OpenBasicData(HDC hDC)
     mu_swprintf(Text, L"Data\\Local\\%ls\\SocketItem_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_SocketItemMgr.OpenSocketItemScript(Text);
 
-    OpenTextData();		//. Text.bmd, Testtest.bmd
+    OpenMacro(L"Data\\Macro.txt");
 
     g_csItemOption.OpenItemSetScript();
 
@@ -5414,16 +5414,6 @@ void OpenBasicData(HDC hDC)
     LoadWaveFile(SOUND_RING_EVENT_END, L"Data\\Sound\\iEventEnd.wav", 1);
 
     rUIMng.RenderTitleSceneUI(hDC, 10, 11);
-}
-
-void OpenTextData()
-{
-    wchar_t Text[100];
-
-    mu_swprintf(Text, L"Data\\Local\\%ls\\Text_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-    GlobalText.Load(Text, CGlobalText::LD_USA_CANADA_TEXTS | CGlobalText::LD_FOREIGN_TEXTS);
-    SEASON3B::RegisterCustomHelpText();
-    OpenMacro(L"Data\\Macro.txt");
 }
 
 void ReleaseMainData()

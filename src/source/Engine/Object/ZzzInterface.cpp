@@ -755,7 +755,7 @@ void SetBooleanPosition(CHAT* c)
         SIZE sizeT[2];
         g_pRenderText->SetFont(g_hFontBold);
 
-        if (GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Store1104, GlobalText.GetStringSize(1104), &sizeT[1]))
+        if (GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Store1104, wcslen(I18N::Game::Store1104), &sizeT[1]))
         {
             if (c->Width < sizeT[0].cx + sizeT[1].cx)
                 c->Width = sizeT[0].cx + sizeT[1].cx;
@@ -3958,7 +3958,7 @@ bool CheckMacroLimit(wchar_t* Text)
     int  length;
 
     memcpy(string, Text + 3, sizeof(char) * (256 - 2));
-    length = GlobalText.GetStringSize(258);
+    length = wcslen(I18N::Game::Exchange258);
     if (wcscmp(string, I18N::Game::Exchange258) == 0 || wcscmp(string, I18N::Game::Trade259) == 0 || wcsicmp(string, L"/trade") == 0)
     {
         return  true;
@@ -4468,7 +4468,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         }
 
         wchar_t lpszFilter[] = L"/filter";
-        if ((GlobalText.GetStringSize(753) > 0 && wcsncmp(Text, I18N::Game::Filter, GlobalText.GetStringSize(753)) == 0)
+        if ((wcslen(I18N::Game::Filter) > 0 && wcsncmp(Text, I18N::Game::Filter, wcslen(I18N::Game::Filter)) == 0)
             || (wcsncmp(Text, lpszFilter, wcslen(lpszFilter)) == 0))
         {
             g_pChatListBox->SetFilterText(Text);
@@ -9434,7 +9434,7 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
     }
 
     if ((wcsstr(szChatTextUpperChars, L"/MOVE") != NULL) ||
-        (GlobalText.GetStringSize(260) > 0 && wcsstr(szChatTextUpperChars, I18N::Game::Warp260) != NULL))
+        (wcslen(I18N::Game::Warp260) > 0 && wcsstr(szChatTextUpperChars, I18N::Game::Warp260) != NULL))
     {
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*> m_listMoveInfoData;
         m_listMoveInfoData = SEASON3B::CMoveCommandData::GetInstance()->GetMoveCommandDatalist();

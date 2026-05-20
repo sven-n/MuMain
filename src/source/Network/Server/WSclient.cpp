@@ -8496,17 +8496,12 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(szOpenTime1, I18N::Game::YouCanEnterSNow, I18N::Game::ChaosCastle);
             mu_swprintf(szOpenTime2, I18N::Game::InSCurrentlyDDEntered, I18N::Game::ChaosCastle, Data->KeyM, 100);
 
-            GlobalText.Remove(1154);
-            GlobalText.Remove(1155);
-            GlobalText.Add(1154, szOpenTime1);
-            GlobalText.Add(1155, szOpenTime2);
-
             SEASON3B::CNewUICommonMessageBox* pMsgBox = nullptr;
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
             if (pMsgBox)
             {
-                pMsgBox->AddMsg(I18N::Game::Lookup(1154));
-                pMsgBox->AddMsg(I18N::Game::Lookup(1155));
+                pMsgBox->AddMsg(szOpenTime1);
+                pMsgBox->AddMsg(szOpenTime2);
             }
         }
         else
@@ -8521,14 +8516,11 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(Text, I18N::Game::AfterDMinutesYouMayEnterS, Mini, I18N::Game::ChaosCastle);
             wcscat(szOpenTime, Text);
 
-            GlobalText.Remove(1154);
-            GlobalText.Add(1154, szOpenTime);
-
             SEASON3B::CNewUICommonMessageBox* pMsgBox = nullptr;
             SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
             if (pMsgBox)
             {
-                pMsgBox->AddMsg(I18N::Game::Lookup(1154));
+                pMsgBox->AddMsg(szOpenTime);
             }
         }
     }

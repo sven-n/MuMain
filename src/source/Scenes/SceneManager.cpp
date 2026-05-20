@@ -36,7 +36,6 @@ FrameTimingState g_frameTiming;
 #include "Network/Server/ServerListManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "Data/Translation/GlobalText.h"
 #include "I18N/All.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Platform/Windows/Winmain.h"

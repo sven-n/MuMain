@@ -9,6 +9,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Legacy/UIControls.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
@@ -234,7 +235,7 @@ void SEASON3B::CNewUIWindowMenu::RenderTexts()
         {
             g_pRenderText->SetTextColor(255, 255, 255, 255);
         }
-        g_pRenderText->RenderText(m_Pos.x, y, GlobalText[iTextNumber[i]], 112, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x, y, I18N::Game::Lookup(iTextNumber[i]), 112, 0, RT3_SORT_CENTER);
         y += 20.f;
     }
 }

@@ -605,12 +605,12 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iN
         if (iNameLine == 1)
         {
             if (pRecipe->m_iMixName[1] == 0)
-                mu_swprintf(pszNameOut, L"%ls", GlobalText[pRecipe->m_iMixName[0]]);
+                mu_swprintf(pszNameOut, L"%ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]));
             else if (pRecipe->m_iMixName[2] == 0)
-                mu_swprintf(pszNameOut, L"%ls %ls", GlobalText[pRecipe->m_iMixName[0]], GlobalText[pRecipe->m_iMixName[1]]);
+                mu_swprintf(pszNameOut, L"%ls %ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]), I18N::Game::Lookup(pRecipe->m_iMixName[1]));
             else
-                mu_swprintf(pszNameOut, L"%ls %ls %ls", GlobalText[pRecipe->m_iMixName[0]],
-                    GlobalText[pRecipe->m_iMixName[1]], GlobalText[pRecipe->m_iMixName[2]]);
+                mu_swprintf(pszNameOut, L"%ls %ls %ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]),
+                    I18N::Game::Lookup(pRecipe->m_iMixName[1]), I18N::Game::Lookup(pRecipe->m_iMixName[2]));
             return TRUE;
         }
         return FALSE;
@@ -622,7 +622,7 @@ BOOL CMixRecipes::GetCurRecipeDesc(wchar_t* pszDescOut, int iDescLine)
     if (iDescLine > 3 || iDescLine < 1) return FALSE;
     if (GetCurRecipe() == NULL) return FALSE;
     if (GetCurRecipe()->m_iMixDesc[iDescLine - 1] > 0)
-        wcscpy(pszDescOut, GlobalText[GetCurRecipe()->m_iMixDesc[iDescLine - 1]]);
+        wcscpy(pszDescOut, I18N::Game::Lookup(GetCurRecipe()->m_iMixDesc[iDescLine - 1]));
     else
         return FALSE;
     return TRUE;
@@ -639,7 +639,7 @@ BOOL CMixRecipes::GetRecipeAdvice(wchar_t* pszAdviceOut, int iAdivceLine)
     if (iAdivceLine > 3 || iAdivceLine < 1) return FALSE;
 
     if (GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1] > 0)
-        wcscpy(pszAdviceOut, GlobalText[GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1]]);
+        wcscpy(pszAdviceOut, I18N::Game::Lookup(GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1]));
     else
         return FALSE;
     return TRUE;

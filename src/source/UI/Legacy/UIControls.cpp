@@ -1598,7 +1598,7 @@ CUIChatPalListBox::CUIChatPalListBox()
     SIZE TextSize;
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"ZZZZZZZZZZZZZ", lstrlen(L"ZZZZZZZZZZZZZ"), &TextSize);
     SetColumnWidth(0, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Server, GlobalText.GetStringSize(1022), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Server, wcslen(I18N::Game::Server), &TextSize);
     SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
 
     m_bForceEditList = FALSE;
@@ -2028,11 +2028,11 @@ CUILetterListBox::CUILetterListBox()
     SIZE TextSize;
 
     SetColumnWidth(0, 15 + 10);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Sender, GlobalText.GetStringSize(1028), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Sender, wcslen(I18N::Game::Sender), &TextSize);
     SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::DateRcvd, GlobalText.GetStringSize(1029), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::DateRcvd, wcslen(I18N::Game::DateRcvd), &TextSize);
     SetColumnWidth(2, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Title1030, GlobalText.GetStringSize(1030), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Title1030, wcslen(I18N::Game::Title1030), &TextSize);
     SetColumnWidth(3, TextSize.cx / g_fScreenRate_x + 8);
 
     m_bForceEditList = FALSE;

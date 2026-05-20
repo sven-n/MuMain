@@ -40,13 +40,6 @@ static  int     g_iWorldStateTime = 0;
 static  DWORD   g_dwWorldStateBack = 0;
 #endif// STATE_LIMIT_TIME
 
-CGlobalTextW GlobalText;
-
-void LogMissingGlobalText(int key)
-{
-    g_ErrorReport.Write(L"GlobalText: missing key %d\r\n", key);
-}
-
 void SaveTextFile(wchar_t* FileName)
 {
     FILE* fp = _wfopen(FileName, L"wb");

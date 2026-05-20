@@ -57,7 +57,7 @@ bool CNewUIStorageInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
     for (int i = BTN_INSERT_ZEN; i < MAX_BTN; ++i)
     {
         m_abtn[i].ChangeButtonImgState(true, IMAGE_STORAGE_BTN_INSERT_ZEN + i);
-        m_abtn[i].ChangeToolTipText(GlobalText[anToolTipText[i]], true);
+        m_abtn[i].ChangeToolTipText(I18N::Game::Lookup(anToolTipText[i]), true);
     }
 
     m_BtnExpand.ChangeButtonImgState(true, IMAGE_STORAGE_EXPAND_BTN, false);

@@ -1975,12 +1975,12 @@ bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
         break;
     }
 
-    pMsgBox->AddMsg(GlobalText[nTextIndex[0]], RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
+    pMsgBox->AddMsg(I18N::Game::Lookup(nTextIndex[0]), RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddMsg(L" ");
     for (int i = 1; i < 10; i++)
     {
         if (nTextIndex[i] <= 0)	break;
-        pMsgBox->AddMsg(GlobalText[nTextIndex[i]], RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
+        pMsgBox->AddMsg(I18N::Game::Lookup(nTextIndex[i]), RGBA(255, 255, 255, 255), MSGBOX_FONT_NORMAL);
     }
 
     pMsgBox->AddCallbackFunc(CLuckyItemMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -2019,18 +2019,18 @@ bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
     wchar_t strText[256];
     if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1] == 0)
     {
-        mu_swprintf(strText, L"%ls", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]]);
+        mu_swprintf(strText, L"%ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]));
     }
     else if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2] == 0)
     {
-        mu_swprintf(strText, L"%ls %ls", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
-            GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]]);
+        mu_swprintf(strText, L"%ls %ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
+            I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]));
     }
     else
     {
-        mu_swprintf(strText, L"%ls %ls %ls", GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]],
-            GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]],
-            GlobalText[g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]]);
+        mu_swprintf(strText, L"%ls %ls %ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
+            I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]),
+            I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]));
     }
 
     pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);

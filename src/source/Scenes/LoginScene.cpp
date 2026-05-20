@@ -21,7 +21,6 @@
 #include "Core/Input/Input.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
-#include "Data/Translation/GlobalText.h"
 #include "I18N/All.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "UI/Legacy/UIControls.h"

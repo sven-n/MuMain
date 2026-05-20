@@ -96,7 +96,7 @@ void CNewUILuckyItemWnd::Render_Frame(void)
 
         g_pRenderText->SetFont(g_hFont);
         g_pRenderText->SetTextColor(m_sText[i].s_dwColor);
-        g_pRenderText->RenderText(m_ptPos.x + 10, fTextY + 11.0f * i, GlobalText[m_sText[i].s_nTextIndex], m_fSizeX - 20, 0, m_sText[i].s_nLine);
+        g_pRenderText->RenderText(m_ptPos.x + 10, fTextY + 11.0f * i, I18N::Game::Lookup(m_sText[i].s_nTextIndex), m_fSizeX - 20, 0, m_sText[i].s_nLine);
     }
 }
 

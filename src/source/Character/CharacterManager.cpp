@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "CharacterManager.h"
 #include "GameLogic/Items/CSItemOption.h"
-#include "Data/Translation/GlobalText.h"
 #include "I18N/All.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInfomation.h"

@@ -11,10 +11,6 @@
 
 namespace SEASON3B
 {
-    // Adds engine-only help-text entries to GlobalText that aren't shipped in
-    // the localized .bmd files. Call once after GlobalText.Load().
-    void RegisterCustomHelpText();
-
     class CNewUIHelpWindow : public CNewUIObj
     {
     public:

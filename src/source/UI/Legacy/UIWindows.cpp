@@ -1431,7 +1431,7 @@ int CUIChatWindow::AddChatPal(const wchar_t* pszID, BYTE Number, BYTE Server)
         m_PalListBox.AddText(pszID, Number, Server);
 
     wchar_t szTitle[128] = { 0 };
-    wcsncpy(szTitle, I18N::Game::Talking, GlobalText.GetStringSize(994));
+    wcsncpy(szTitle, I18N::Game::Talking, wcslen(I18N::Game::Talking));
     m_PalListBox.MakeTitleText(szTitle);
     SetTitle(szTitle);
     g_pWindowMgr->RefreshMainWndChatRoomList();
@@ -1459,7 +1459,7 @@ void CUIChatWindow::RemoveChatPal(const wchar_t* pszID)
         m_PalListBox.DeleteText(pszID);
 
         wchar_t szTitle[128] = { 0 };
-        wcsncpy(szTitle, I18N::Game::Talking, GlobalText.GetStringSize(994));
+        wcsncpy(szTitle, I18N::Game::Talking, wcslen(I18N::Game::Talking));
         m_PalListBox.MakeTitleText(szTitle);
         SetTitle(szTitle);
         g_pWindowMgr->RefreshMainWndChatRoomList();
@@ -1729,9 +1729,9 @@ void CUIChatWindow::Lock(BOOL bFlag)
     {
         m_TextInputBox.Lock(TRUE);
         wchar_t szTitle[128] = { 0 };
-        if (wcsncmp(GetTitle(), I18N::Game::Offline995, GlobalText.GetStringSize(995)) != 0)
+        if (wcsncmp(GetTitle(), I18N::Game::Offline995, wcslen(I18N::Game::Offline995)) != 0)
         {
-            wcsncpy(szTitle, I18N::Game::Offline995, GlobalText.GetStringSize(995));
+            wcsncpy(szTitle, I18N::Game::Offline995, wcslen(I18N::Game::Offline995));
         }
         wcsncat(szTitle, GetTitle(), 128);
         SetTitle(szTitle);
@@ -1739,10 +1739,10 @@ void CUIChatWindow::Lock(BOOL bFlag)
     else
     {
         m_TextInputBox.Lock(FALSE);
-        if (wcsncmp(GetTitle(), I18N::Game::Offline995, GlobalText.GetStringSize(995)) == 0)
+        if (wcsncmp(GetTitle(), I18N::Game::Offline995, wcslen(I18N::Game::Offline995)) == 0)
         {
             wchar_t szTitle[128] = { 0 };
-            wcsncpy(szTitle, GetTitle() + GlobalText.GetStringSize(995), 128);
+            wcsncpy(szTitle, GetTitle() + wcslen(I18N::Game::Offline995), 128);
             SetTitle(szTitle);
         }
     }
@@ -2514,7 +2514,7 @@ void CUIPhotoViewer::Render()
 void CUILetterWriteWindow::InitControls()
 {
     SIZE size;
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, GlobalText.GetStringSize(1000), &size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, wcslen(I18N::Game::Receiver), &size);
 
     size.cx = (size.cx / g_fScreenRate_x) + 0.5f;
 
@@ -2677,7 +2677,7 @@ void CUILetterWriteWindow::RenderSub()
     SIZE size;
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, GlobalText.GetStringSize(1000), &size);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, wcslen(I18N::Game::Receiver), &size);
     g_pRenderText->RenderText(RPos_x(3), RPos_y(3), I18N::Game::Receiver, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
     g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title1005, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
 
@@ -4764,7 +4764,7 @@ void CUIFriendWindow::RenderSub()
     }
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, GlobalText.GetStringSize(1035), &TextSize);
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat), &TextSize);
     g_pRenderText->RenderText(RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, I18N::Game::RefuseChat);
 
     float fCheckBoxPos_x = RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2 - 14;
@@ -4891,7 +4891,7 @@ void CUIFriendWindow::DoMouseActionSub()
         m_iTabMouseOverIndex = m_iTabIndex;
         SIZE TextSize;
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, GlobalText.GetStringSize(1035), &TextSize);
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat), &TextSize);
 
         if (CheckMouseIn(RPos_x(0) + RWidth() - TextSize.cx - 2 - 14,
             RPos_y(4), TextSize.cx + 2 + 14, 20) == TRUE)
@@ -5495,15 +5495,15 @@ void CUIFriendMenu::RenderWindowList()
         wchar_t* context = nullptr;
         wchar_t* pszChatTitle = wcstok_s(temp, L",", &context);
 
-        if (wcslen(pszChatTitle) > GlobalText.GetStringSize(994))
+        if (wcslen(pszChatTitle) > wcslen(I18N::Game::Talking))
         {
-            if (wcsncmp(pszChatTitle, I18N::Game::Offline995, GlobalText.GetStringSize(995)) == 0)
+            if (wcsncmp(pszChatTitle, I18N::Game::Offline995, wcslen(I18N::Game::Offline995)) == 0)
             {
-                CutText3(pszChatTitle + GlobalText.GetStringSize(995) + GlobalText.GetStringSize(994), szText, m_iWidth - 8, 1, 64);
+                CutText3(pszChatTitle + wcslen(I18N::Game::Offline995) + wcslen(I18N::Game::Talking), szText, m_iWidth - 8, 1, 64);
             }
             else
             {
-                CutText3(pszChatTitle + GlobalText.GetStringSize(994), szText, m_iWidth - 8, 1, 64);
+                CutText3(pszChatTitle + wcslen(I18N::Game::Talking), szText, m_iWidth - 8, 1, 64);
             }
         }
         else
