@@ -58,7 +58,7 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GUARDWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
 
     InitButton(&m_BtnProclaim, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 120, I18N::Game::Announce);
     InitButton(&m_BtnRegister, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 200, I18N::Game::Register);

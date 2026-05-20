@@ -47,7 +47,7 @@ void CSysMenuWin::Create()
     m_winBack.Create(aiiBack, 1, 10);
 
     const wchar_t* apszBtnText[SMW_BTN_MAX] =
-    { I18N::Game::ExitGame, I18N::Game::SelectServer, I18N::Game::Option385, I18N::Game::Close };
+    { I18N::Game::ExitGame, I18N::Game::SelectServer, I18N::Game::Option385, I18N::Game::Close388 };
     DWORD adwBtnClr[4] =
     { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };
     for (int i = 0; i < SMW_BTN_MAX; ++i)

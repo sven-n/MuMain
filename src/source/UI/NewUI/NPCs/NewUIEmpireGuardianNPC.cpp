@@ -40,7 +40,7 @@ bool CNewUIEmpireGuardianNPC::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng
     LoadImages();
 
     InitButton(&m_btPositive, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 190, I18N::Game::Enter);
-    InitButton(&m_btNegative, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 380, I18N::Game::Close);
+    InitButton(&m_btNegative, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 380, I18N::Game::Close388);
 
     Show(false);
 
@@ -146,7 +146,7 @@ bool CNewUIEmpireGuardianNPC::Render()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->RenderText(Position.x - 100, Position.y + 280, I18N::Game::TheRound7MapSundayCanOnly, 200, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(Position.x - 100, Position.y + 300, I18N::Game::BeAccessedIfYouHaveA, 200, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(Position.x - 100, Position.y + 320, I18N::Game::CompleteSecromicon, 200, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(Position.x - 100, Position.y + 320, I18N::Game::CompleteSecromicon2837, 200, 0, RT3_SORT_CENTER);
     CutStr(I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, szTextOut[0], 155, 2, 300);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 340, szTextOut[0], 200, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 360, szTextOut[1], 200, 0, RT3_SORT_CENTER);

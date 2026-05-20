@@ -280,7 +280,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
             {
                 if (btUserCount < 15)
                 {
-                    mu_swprintf(m_strStateText[0], I18N::Game::NightmareHasLostTheControlOf2165, btUserCount);
+                    mu_swprintf(m_strStateText[0], I18N::Game::NightmareHasLostTheControlOf, btUserCount);
                     mu_swprintf(m_strStateText[1], I18N::Game::MorePowerFromDPlayersAreNeeded, 15 - btUserCount);
                     m_iStateTextNum = 2;
                 }
@@ -432,7 +432,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
     m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 
-    m_BtnClose.ChangeText(I18N::Game::Close);
+    m_BtnClose.ChangeText(I18N::Game::Close388);
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
     m_BtnClose.ChangeButtonInfo(m_Pos.x + 157, m_Pos.y + 220, 53, 23);
@@ -704,7 +704,7 @@ void SEASON3B::CNewUIKanturuInfoWindow::RenderInfo()
         || g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA2
         || g_Direction.m_CKanturu.m_iMayaState == KANTURU_MAYA_DIRECTION_MAYA3)
     {
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, I18N::Game::MonsterBoss);
+        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, I18N::Game::MonsterBoss2182);
     }
     else
     {

@@ -243,8 +243,8 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
 
     if (IsLuckySealBuff() == false) {
         wchar_t lpszStr1[1024]; wchar_t* lpszStr2 = NULL;
-        if (src.find(I18N::Game::Warp260) != std::wstring::npos) {
-            std::wstring temp = I18N::Game::Warp260;
+        if (src.find(I18N::Game::Warp) != std::wstring::npos) {
+            std::wstring temp = I18N::Game::Warp;
             temp += ' ';
             mu_swprintf(lpszStr1, src.c_str());
             wchar_t* context = nullptr;
@@ -882,7 +882,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
     }
 
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_MapNameUISize.x / 2, m_MapNameUISize.y - m_iRealFontHeight - 5, I18N::Game::Close, 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_MapNameUISize.x / 2, m_MapNameUISize.y - m_iRealFontHeight - 5, I18N::Game::Close388, 0, 0, RT3_WRITE_CENTER);
     DisableAlphaBlend();
     return true;
 }

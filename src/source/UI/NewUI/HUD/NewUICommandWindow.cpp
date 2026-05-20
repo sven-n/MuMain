@@ -79,14 +79,14 @@ void SEASON3B::CNewUICommandWindow::InitButtons()
         m_BtnCommand[i].ChangeButtonInfo(m_Pos.x + (COMMAND_WINDOW_WIDTH / 2 - 108 / 2), (m_Pos.y + 33) + (i * (29 + COMMAND_BTN_INTERVAL_SIZE)), 108, 29);
     }
 
-    m_BtnCommand[COMMAND_TRADE].ChangeText(I18N::Game::Trade943);
+    m_BtnCommand[COMMAND_TRADE].ChangeText(I18N::Game::Trade);
     m_BtnCommand[COMMAND_PURCHASE].ChangeText(I18N::Game::Buy1124);
-    m_BtnCommand[COMMAND_PARTY].ChangeText(I18N::Game::Party944);
+    m_BtnCommand[COMMAND_PARTY].ChangeText(I18N::Game::Party);
     m_BtnCommand[COMMAND_WHISPER].ChangeText(I18N::Game::Whisper);
-    m_BtnCommand[COMMAND_GUILD].ChangeText(I18N::Game::Guild946);
-    m_BtnCommand[COMMAND_GUILDUNION].ChangeText(I18N::Game::Alliance1352);
+    m_BtnCommand[COMMAND_GUILD].ChangeText(I18N::Game::Guild);
+    m_BtnCommand[COMMAND_GUILDUNION].ChangeText(I18N::Game::Alliance);
     m_BtnCommand[COMMAND_RIVAL].ChangeText(I18N::Game::HostilityGuild);
-    m_BtnCommand[COMMAND_RIVALOFF].ChangeText(I18N::Game::SuspendHostilities1322);
+    m_BtnCommand[COMMAND_RIVALOFF].ChangeText(I18N::Game::SuspendHostilities);
     m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText(I18N::Game::AddFriend);
     m_BtnCommand[COMMAND_FOLLOW].ChangeText(I18N::Game::Follow);
     m_BtnCommand[COMMAND_BATTLE].ChangeText(I18N::Game::Duel);
@@ -497,7 +497,7 @@ bool SEASON3B::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
 {
     if (Hero->GuildStatus != G_NONE)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild255, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if ((pSelectedChar->GuildMarkIndex < 0) || (pSelectedChar->GuildStatus != G_MASTER))

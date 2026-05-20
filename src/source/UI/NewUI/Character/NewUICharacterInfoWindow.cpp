@@ -1010,7 +1010,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
             }
             else
             {
-                mu_swprintf(strBlocking, I18N::Game::DefenseRateDD208, t_adjdef + maxdefense + iChangeRingAddDefense, defenseSuccessRate);
+                mu_swprintf(strBlocking, I18N::Game::DefenseRateDD, t_adjdef + maxdefense + iChangeRingAddDefense, defenseSuccessRate);
             }
         }
         else
@@ -1197,10 +1197,10 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
-        mu_swprintf(strEnergy, I18N::Game::ManaDD213, CharacterAttribute->Mana, Master_Level_Data.wMaxMana);
+        mu_swprintf(strEnergy, I18N::Game::ManaDD, CharacterAttribute->Mana, Master_Level_Data.wMaxMana);
     }
     else
-        mu_swprintf(strEnergy, I18N::Game::ManaDD213, CharacterAttribute->Mana, CharacterAttribute->ManaMax);
+        mu_swprintf(strEnergy, I18N::Game::ManaDD, CharacterAttribute->Mana, CharacterAttribute->ManaMax);
 
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -1358,7 +1358,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
         else
         {
-            mu_swprintf(strEnergy, I18N::Game::WizardryDmgDD, iMagicDamageMin + maxMg, iMagicDamageMax + maxMg);
+            mu_swprintf(strEnergy, I18N::Game::WizardryDmgDD216, iMagicDamageMin + maxMg, iMagicDamageMax + maxMg);
         }
 
         iY += 13;
@@ -1463,7 +1463,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
         }
         else
         {
-            mu_swprintf(strEnergy, I18N::Game::CurseSpellDD,
+            mu_swprintf(strEnergy, I18N::Game::CurseSpellDD1694,
                 iCurseDamageMin, iCurseDamageMax);
         }
 

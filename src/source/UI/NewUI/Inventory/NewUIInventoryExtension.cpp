@@ -231,7 +231,7 @@ float CNewUIInventoryExtension::GetLayerDepth()
 void CNewUIInventoryExtension::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
 }
 
 void CNewUIInventoryExtension::LoadImages()

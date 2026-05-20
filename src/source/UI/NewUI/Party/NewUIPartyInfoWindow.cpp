@@ -171,7 +171,7 @@ bool CNewUIPartyInfoWindow::Render()
 
     m_BtnExit.Render();
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, I18N::Game::Party190, 72, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, I18N::Game::Party, 72, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
 

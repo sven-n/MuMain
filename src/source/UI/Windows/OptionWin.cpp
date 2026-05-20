@@ -55,7 +55,7 @@ void COptionWin::Create()
 
     DWORD adwBtnClr[4] = { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };
     m_aBtn[OW_BTN_CLOSE].Create(108, 30, BITMAP_TEXT_BTN, 4, 2, 1);
-    m_aBtn[OW_BTN_CLOSE].SetText(I18N::Game::Close, adwBtnClr);
+    m_aBtn[OW_BTN_CLOSE].SetText(I18N::Game::Close388, adwBtnClr);
     CWin::RegisterButton(&m_aBtn[OW_BTN_CLOSE]);
 
     SImgInfo iiThumb = { BITMAP_SLIDER, 0, 0, 13, 13 };

@@ -196,7 +196,7 @@ void CNewUIMuHelper::InitButtons()
     //--
     InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 120, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, I18N::Game::SaveSetting, L"", BUTTON_ID_SAVE_CONFIG, -1);
     InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 65, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, I18N::Game::Initialization, L"", BUTTON_ID_INIT_CONFIG, -1);
-    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, L"", I18N::Game::Close, BUTTON_ID_EXIT_CONFIG, -1);
+    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, L"", I18N::Game::Close388, BUTTON_ID_EXIT_CONFIG, -1);
 
     RegisterBtnCharacter(0xFF, BUTTON_ID_HUNT_RANGE_ADD);
     RegisterBtnCharacter(0xFF, BUTTON_ID_HUNT_RANGE_MINUS);
@@ -244,7 +244,7 @@ void CNewUIMuHelper::InitCheckBox()
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 276, 15, 15, 0, I18N::Game::BuffDuration, CHECKBOX_ID_BUFF_DURATION, 0);
 
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, I18N::Game::UseDarkSpirits, CHECKBOX_ID_USE_PET, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, I18N::Game::Party3515, CHECKBOX_ID_PARTY, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, I18N::Game::Party, CHECKBOX_ID_PARTY, 0);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, I18N::Game::AutoHeal, CHECKBOX_ID_AUTO_HEAL, 0);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, I18N::Game::DrainLife, CHECKBOX_ID_DRAIN_LIFE, 0);
 
@@ -2427,7 +2427,7 @@ void CNewUIMuHelperExt::InitButtons()
     m_BtnClose.ChangeButtonImgState(1, IMAGE_BASE_WINDOW_BTN_EXIT, 0, 0, 0);
     m_BtnClose.ChangeButtonInfo(m_Pos.x + 20, m_Pos.y + 388, 36, 29);
     m_BtnClose.ChangeText(L"");
-    m_BtnClose.ChangeToolTipText(I18N::Game::Close, TRUE); // "Close"
+    m_BtnClose.ChangeToolTipText(I18N::Game::Close388, TRUE); // "Close"
 }
 
 void CNewUIMuHelperExt::InitCheckBox()
@@ -2496,7 +2496,7 @@ bool CNewUIMuHelperExt::Render()
 
     else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG)
     {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::Party3554, 190, 0, RT3_SORT_CENTER); // "Party"
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::Party, 190, 0, RT3_SORT_CENTER); // "Party"
         g_pRenderText->SetTextColor(TextColor);
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, I18N::Game::BuffSupport); // Buff Support
         m_BtnPartyDuration.Render();
@@ -2507,7 +2507,7 @@ bool CNewUIMuHelperExt::Render()
     }
     else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
     {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::Party3554, 190, 0, RT3_SORT_CENTER); // "Party"
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::Party, 190, 0, RT3_SORT_CENTER); // "Party"
         g_pRenderText->SetTextColor(TextColor);
         RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 70, I18N::Game::HealSupport); // Heal Support
         m_BtnPartyHeal.Render();

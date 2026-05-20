@@ -219,7 +219,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
         int ItemLevel = ip->Level;
 
         TextListColor[TextNum] = TEXT_COLOR_WHITE;
-        mu_swprintf(TextList[TextNum], L"%ls %ls       %ls    ", I18N::Game::Kalima, I18N::Game::Level368, I18N::Game::MinLevel); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
+        mu_swprintf(TextList[TextNum], L"%ls %ls       %ls    ", I18N::Game::Kalima, I18N::Game::Level, I18N::Game::MinLevel); TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
         for (int i = 0; i < NUM_HELLAS; i++)
         {
             mu_swprintf(TextList[TextNum], L"        %d             %3d~%3d     ", i + 1, g_iKalimaLevel[startIndex + i][0], std::min<int>(400, g_iKalimaLevel[startIndex + i][1]));
@@ -248,7 +248,7 @@ int RenderHellasItemInfo(ITEM* ip, int textNum)
 
     case ITEM_SYMBOL_OF_KUNDUN:
     {
-        mu_swprintf(TextList[TextNum], I18N::Game::DD1181, ip->Durability, 5); TextNum++;
+        mu_swprintf(TextList[TextNum], I18N::Game::DD, ip->Durability, 5); TextNum++;
         if (ip->Durability >= 5)
         {
             mu_swprintf(TextList[TextNum], I18N::Game::CanCreateLostMap); TextListColor[TextNum] = TEXT_COLOR_YELLOW; TextNum++;

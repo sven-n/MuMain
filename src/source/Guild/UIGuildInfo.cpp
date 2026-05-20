@@ -650,7 +650,7 @@ void CUIGuildInfo::Render()
     ptOrigin.x = GetPosition_x() + 35;
     ptOrigin.y = GetPosition_y() + 12;
     wchar_t szTemp[100];
-    wcscpy(szTemp, I18N::Game::Guild180);
+    wcscpy(szTemp, I18N::Game::Guild);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
@@ -714,7 +714,7 @@ void CUIGuildInfo::Render()
     else glColor4f(0.6f, 0.6f, 0.6f, 1.f);
     RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 0 ? 2 : 0),
         (float)52, (float)16 + (m_nCurrentTab == 0 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 0 ? 1 : 0), I18N::Game::Guild946, 52, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 0 ? 1 : 0), I18N::Game::Guild, 52, 0, RT3_SORT_CENTER);
 
     ptOrigin.x += 54;
     if (m_nCurrentTab == 1) glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -728,7 +728,7 @@ void CUIGuildInfo::Render()
     else glColor4f(0.6f, 0.6f, 0.6f, 1.f);
     RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 2 ? 2 : 0),
         (float)52, (float)16 + (m_nCurrentTab == 2 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 2 ? 1 : 0), I18N::Game::Alliance1352, 52, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 2 ? 1 : 0), I18N::Game::Alliance, 52, 0, RT3_SORT_CENTER);
 
     glColor4f(1.f, 1.f, 1.f, 1.f);
 

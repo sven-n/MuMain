@@ -268,7 +268,7 @@ void CMsgBoxIGSBuySelectItem::SetButtonInfo()
 {
     m_BtnBuy.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_BUY_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnBuy.MoveTextPos(-1, -1);
-    m_BtnBuy.SetText(I18N::Game::Buy2891);
+    m_BtnBuy.SetText(I18N::Game::Buy1124);
 
     m_BtnPresent.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_PRESENT_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnPresent.MoveTextPos(-1, -1);

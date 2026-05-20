@@ -37,9 +37,9 @@ bool CNewUIGateSwitchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GATESWITCHWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
 
-    InitButton(&m_BtnOpen, m_Pos.x + 41, m_Pos.y + 320, I18N::Game::Open);
+    InitButton(&m_BtnOpen, m_Pos.x + 41, m_Pos.y + 320, I18N::Game::Open1107);
 
     Show(false);
 
@@ -130,12 +130,12 @@ bool CNewUIGateSwitchWindow::Render()
     if (npcGateSwitch::IsGateOpened())
     {
         RenderBitmap(BITMAP_INTERFACE_EX + 41, m_Pos.x + 17.5f, m_Pos.y + 120, 155, 168, 0.f, 0.f, 155 / 256.f, 168 / 256.f);
-        m_BtnOpen.ChangeText(I18N::Game::Close);
+        m_BtnOpen.ChangeText(I18N::Game::Close388);
     }
     else
     {
         RenderBitmap(BITMAP_INTERFACE_EX + 40, m_Pos.x + 17.5f, m_Pos.y + 120, 155, 168, 0.f, 0.f, 155 / 256.f, 168 / 256.f);
-        m_BtnOpen.ChangeText(I18N::Game::Open);
+        m_BtnOpen.ChangeText(I18N::Game::Open1107);
     }
 
     m_BtnOpen.Render();

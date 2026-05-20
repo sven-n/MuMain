@@ -240,12 +240,12 @@ void SEASON3B::CNewUIPurchaseShopInventory::RenderFrame()
 
 void SEASON3B::CNewUIPurchaseShopInventory::RenderTextInfo()
 {
-    RenderText(I18N::Game::PersonalStore1102, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
+    RenderText(I18N::Game::PersonalStore, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
     RenderText(m_TitleText.c_str(), m_Pos.x, m_Pos.y + 58, 190, 0, RGBA(0, 255, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold);
     wchar_t Text[100];
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::Warning370);
+    mu_swprintf(Text, I18N::Game::Warning);
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);

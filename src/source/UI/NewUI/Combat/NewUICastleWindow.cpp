@@ -60,14 +60,14 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
 
-    InitButton(&m_BtnBuy, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 250, I18N::Game::Buy1558);
+    InitButton(&m_BtnBuy, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 250, I18N::Game::Buy1124);
     InitButton(&m_BtnRepair, m_Pos.x + 110, m_Pos.y + 260, I18N::Game::Repair);
     InitButton(&m_BtnUpgradeHP, m_Pos.x + 110, m_Pos.y + 310, I18N::Game::Improve);
     InitButton(&m_BtnUpgradeDefense, m_Pos.x + 110, m_Pos.y + 334, I18N::Game::Improve);
     InitButton(&m_BtnUpgradeRecover, m_Pos.x + 110, m_Pos.y + 358, I18N::Game::Improve);
-    InitButton(&m_BtnApplyTax, m_Pos.x + 120, m_Pos.y + 133, I18N::Game::Apply1106);
+    InitButton(&m_BtnApplyTax, m_Pos.x + 120, m_Pos.y + 133, I18N::Game::Apply);
     InitButton(&m_BtnWithdraw, m_Pos.x + 120, m_Pos.y + 322, I18N::Game::Withdraw);
 
     m_BtnChaosTaxUp.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_SCROLL_UP_BTN, true);
@@ -623,7 +623,7 @@ void CNewUICastleWindow::RenderGateManagingTab()
         InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        mu_swprintf(szTemp, I18N::Game::DPD1561, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
+        mu_swprintf(szTemp, I18N::Game::DPD, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
 
         ptOrigin.y += 35;
@@ -736,10 +736,10 @@ void CNewUICastleWindow::RenderStatueManagingTab()
         InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        mu_swprintf(szTemp, I18N::Game::DPD1561, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
+        mu_swprintf(szTemp, I18N::Game::DPD, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        mu_swprintf(szTemp, I18N::Game::RRD1562, g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
+        mu_swprintf(szTemp, I18N::Game::RRD, g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
 
         ptOrigin.y += 22;

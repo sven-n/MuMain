@@ -211,7 +211,7 @@ void SEASON3B::CNewUICatapultWindow::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
     m_BtnFire.ChangeText(I18N::Game::Shoot);
     m_BtnFire.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnFire.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_FIRE, true);

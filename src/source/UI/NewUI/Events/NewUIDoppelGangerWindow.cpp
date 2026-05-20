@@ -48,7 +48,7 @@ bool CNewUIDoppelGangerWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMn
     LoadImages();
 
     InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 190, I18N::Game::Enter);
-    InitButton(&m_BtnClose, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 360, I18N::Game::Close);
+    InitButton(&m_BtnClose, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 360, I18N::Game::Close388);
 
     Show(false);
 
@@ -170,7 +170,7 @@ bool CNewUIDoppelGangerWindow::Render()
     RenderImage(IMAGE_DOPPELGANGERWINDOW_LINE, m_Pos.x + 1, m_Pos.y + 130 + 90, 188.f, 21.f);
 
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 210, I18N::Game::EntryTime2761, 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 210, I18N::Game::EntryTime, 190, 0, RT3_SORT_CENTER);
     if (m_iRemainTime == 0)
     {
         mu_swprintf(szText, I18N::Game::YouMayNowEnter);

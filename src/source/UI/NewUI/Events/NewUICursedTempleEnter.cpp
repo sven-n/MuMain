@@ -111,7 +111,7 @@ void SEASON3B::CNewUICursedTempleEnter::SetButtonInfo()
 
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
     // 1002 "닫기"
-    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeText(I18N::Game::Close);
+    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeText(I18N::Game::Close388);
 }
 
 bool SEASON3B::CNewUICursedTempleEnter::CheckEnterLevel(int& enterlevel)

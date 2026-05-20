@@ -51,7 +51,7 @@ bool CNewUIQuestProgressByEtc::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_btnClose.ChangeButtonImgState(true, IMAGE_QPE_BTN_CLOSE);
     m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_btnClose.ChangeToolTipText(I18N::Game::Close, true);
+    m_btnClose.ChangeToolTipText(I18N::Game::Close388, true);
 
     m_RequestRewardListBox.SetNumRenderLine(QPE_LIST_BOX_LINE_NUM);
     m_RequestRewardListBox.SetSize(174, 158);

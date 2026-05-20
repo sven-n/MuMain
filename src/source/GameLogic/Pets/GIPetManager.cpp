@@ -696,7 +696,7 @@ namespace giPetManager
         appendEmptyLine();
 
         appendLine(TEXT_COLOR_WHITE, false, true, I18N::Game::ExpUU, pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
-        appendLine(TEXT_COLOR_WHITE, false, true, L"%ls : %d", I18N::Game::Level368, pPetInfo->m_wLevel);
+        appendLine(TEXT_COLOR_WHITE, false, true, L"%ls : %d", I18N::Game::Level, pPetInfo->m_wLevel);
 
         if (pItem->Type == ITEM_DARK_RAVEN_ITEM)
         {

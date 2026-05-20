@@ -55,7 +55,7 @@ bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
 
     m_btnClose.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_CLOSE);
     m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_btnClose.ChangeToolTipText(I18N::Game::Close, true);
+    m_btnClose.ChangeToolTipText(I18N::Game::Close388, true);
 
     Show(false);
 

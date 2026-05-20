@@ -719,13 +719,13 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
 
         if (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255);
         else if (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax)
-            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, I18N::Game::Option2343);
+            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, I18N::Game::Option385);
         else if (pMixRecipeItem->m_iOptionMin == 0)
-            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMax, I18N::Game::Option2343, I18N::Game::Maximum);
+            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMax, I18N::Game::Option385, I18N::Game::Maximum);
         else if (pMixRecipeItem->m_iOptionMax == 255)
-            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMin, I18N::Game::Option2343, I18N::Game::Minimum);
+            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMin, I18N::Game::Option385, I18N::Game::Minimum);
         else
-            mu_swprintf(szTempName, L"%ls +%d~%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, I18N::Game::Option2343);
+            mu_swprintf(szTempName, L"%ls +%d~%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, I18N::Game::Option385);
     }
 
     if (pMixRecipeItem->m_iCountMin == 0 && pMixRecipeItem->m_iCountMax == 255)

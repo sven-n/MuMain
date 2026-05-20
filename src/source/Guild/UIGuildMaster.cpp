@@ -524,7 +524,7 @@ void CUIGuildMaster::RenderGuildMasterMain()
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetBgColor(0, 0, 0, 255);
 
-        RenderTipText(x, y - 13, I18N::Game::Close);
+        RenderTipText(x, y - 13, I18N::Game::Close388);
     }
 }
 
@@ -631,7 +631,7 @@ void CUIGuildMaster::Render()
     switch (m_eCurrStep)
     {
     case STEP_MAIN:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Guild180, 120, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Guild, 120, 0, RT3_SORT_CENTER);
         RenderGuildMasterMain();
         break;
     case STEP_CREATE_GUILDINFO:
@@ -647,7 +647,7 @@ void CUIGuildMaster::Render()
         RenderCreateInfo();
         break;
     default:
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Guild180, 120, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Guild, 120, 0, RT3_SORT_CENTER);
         break;
     };
 }

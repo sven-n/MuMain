@@ -60,7 +60,7 @@ bool CNewUIEnterDevilSquare::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_ENTERDS_BASE_WINDOW_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
 
     // Enter Button
     int iVal = 0;

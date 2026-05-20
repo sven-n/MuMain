@@ -57,7 +57,7 @@ bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_abtn[BTN_CLOSE].ChangeButtonImgState(true, IMAGE_TRADE_BTN_CLOSE);
     m_abtn[BTN_CLOSE].ChangeButtonInfo(x + 13, y + 390, 36, 29);
-    m_abtn[BTN_CLOSE].ChangeToolTipText(I18N::Game::Close, true);
+    m_abtn[BTN_CLOSE].ChangeToolTipText(I18N::Game::Close388, true);
 
     m_abtn[BTN_ZEN_INPUT].ChangeButtonImgState(true, IMAGE_TRADE_BTN_ZEN_INPUT);
     m_abtn[BTN_ZEN_INPUT].ChangeButtonInfo(x + 104, y + 390, 36, 29);
@@ -252,7 +252,7 @@ void CNewUITrade::RenderText()
 
     g_pRenderText->SetTextColor(216, 216, 216, 255);
     g_pRenderText->RenderText(
-        m_Pos.x, m_Pos.y + 11, I18N::Game::Trade226, TRADE_WIDTH, 0, RT3_SORT_CENTER);
+        m_Pos.x, m_Pos.y + 11, I18N::Game::Trade, TRADE_WIDTH, 0, RT3_SORT_CENTER);
 
     for (int i = 0; i < MAX_MARKS; ++i)
     {
@@ -302,7 +302,7 @@ void CNewUITrade::RenderText()
 
     int nAlpha = int(std::min<int>(255, sin(WorldTime / 200) * 200 + 275));
     g_pRenderText->SetTextColor(210, 0, 0, nAlpha);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 185, I18N::Game::Warning370);
+    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 185, I18N::Game::Warning);
     g_pRenderText->SetTextColor(255, 220, 150, 255);
     g_pRenderText->RenderText(m_Pos.x + 45, m_Pos.y + 185, I18N::Game::NoticePleaseCheckOut);
     g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 200, I18N::Game::TheLevelOfThePlayer);
@@ -340,7 +340,7 @@ void CNewUITrade::RenderWarningArrow()
             g_pRenderText->SetBgColor(210, 0, 0, 255);
             nWidth = (int)ItemAttribute[pYourItemObj->Type].Width
                 * INVENTORY_SQUARE_WIDTH;
-            g_pRenderText->RenderText((int)fX, (int)fY, I18N::Game::Warning370,
+            g_pRenderText->RenderText((int)fX, (int)fY, I18N::Game::Warning,
                 nWidth, 0, RT3_SORT_CENTER);
         }
     }

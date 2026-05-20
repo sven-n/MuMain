@@ -6533,11 +6533,11 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
             // 				g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             // 				break;
         case SEASON3A::MIXTYPE_OSBOURNE:
-            mu_swprintf(szText, I18N::Game::SHasFailed2105, I18N::Game::Refine);
+            mu_swprintf(szText, I18N::Game::SHasFailed, I18N::Game::Refine);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_JERRIDON:
-            mu_swprintf(szText, I18N::Game::SHasFailed2105, I18N::Game::Restore);
+            mu_swprintf(szText, I18N::Game::SHasFailed, I18N::Game::Restore);
             g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
             break;
         case SEASON3A::MIXTYPE_ELPIS:
@@ -7234,7 +7234,7 @@ void ReceivePartyGetItem(const BYTE* ReceiveBuffer)
     GetItemName(itemType, itemLevel, Text);
     wcscat(itemName, Text);
     if ((Data->ItemInfo & 0x02000)) wcscat(itemName, I18N::Game::Skill);
-    if ((Data->ItemInfo & 0x08000)) wcscat(itemName, I18N::Game::Option177);
+    if ((Data->ItemInfo & 0x08000)) wcscat(itemName, I18N::Game::Option);
     if ((Data->ItemInfo & 0x04000)) wcscat(itemName, I18N::Game::Luck);
 
     mu_swprintf(Text, L"%ls : %ls %ls", c->ID, itemName, I18N::Game::Obtained);
@@ -8230,7 +8230,7 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     case 2:
     case 3:
     {
-        mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To, I18N::Game::EntranceIsAllowedForDTimes);
+        mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To1816, I18N::Game::EntranceIsAllowedForDTimes);
         g_pSystemLogBox->AddText(sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }
@@ -8266,7 +8266,7 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     case 0:
     case 5:
     {
-        mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To, I18N::Game::EntranceIsAllowedForDTimes);
+        mu_swprintf(sBuf, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To1816, I18N::Game::EntranceIsAllowedForDTimes);
         g_pSystemLogBox->AddText(sBuf, SEASON3B::TYPE_SYSTEM_MESSAGE);
         COMGEM::GetBack();
     }

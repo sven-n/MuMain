@@ -1729,9 +1729,9 @@ void CUIChatWindow::Lock(BOOL bFlag)
     {
         m_TextInputBox.Lock(TRUE);
         wchar_t szTitle[128] = { 0 };
-        if (wcsncmp(GetTitle(), I18N::Game::Offline995, wcslen(I18N::Game::Offline995)) != 0)
+        if (wcsncmp(GetTitle(), I18N::Game::Offline, wcslen(I18N::Game::Offline)) != 0)
         {
-            wcsncpy(szTitle, I18N::Game::Offline995, wcslen(I18N::Game::Offline995));
+            wcsncpy(szTitle, I18N::Game::Offline, wcslen(I18N::Game::Offline));
         }
         wcsncat(szTitle, GetTitle(), 128);
         SetTitle(szTitle);
@@ -1739,10 +1739,10 @@ void CUIChatWindow::Lock(BOOL bFlag)
     else
     {
         m_TextInputBox.Lock(FALSE);
-        if (wcsncmp(GetTitle(), I18N::Game::Offline995, wcslen(I18N::Game::Offline995)) == 0)
+        if (wcsncmp(GetTitle(), I18N::Game::Offline, wcslen(I18N::Game::Offline)) == 0)
         {
             wchar_t szTitle[128] = { 0 };
-            wcsncpy(szTitle, GetTitle() + wcslen(I18N::Game::Offline995), 128);
+            wcsncpy(szTitle, GetTitle() + wcslen(I18N::Game::Offline), 128);
             SetTitle(szTitle);
         }
     }
@@ -2558,7 +2558,7 @@ void CUILetterWriteWindow::InitControls()
     m_SendButton.SetArrangeType(2, 12, 16);
     m_SendButton.SetSize(50, 14);
 
-    m_CloseButton.Init(2, I18N::Game::Close);
+    m_CloseButton.Init(2, I18N::Game::Close388);
     m_CloseButton.SetParentUIID(GetUIID());
     m_CloseButton.SetArrangeType(2, 63, 16);
     m_CloseButton.SetSize(50, 14);
@@ -2679,7 +2679,7 @@ void CUILetterWriteWindow::RenderSub()
     g_pRenderText->SetTextColor(230, 220, 200, 255);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, wcslen(I18N::Game::Receiver), &size);
     g_pRenderText->RenderText(RPos_x(3), RPos_y(3), I18N::Game::Receiver, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title1005, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
+    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
 
     m_MailtoInputBox.Render();
     m_TitleInputBox.Render();
@@ -2928,7 +2928,7 @@ void CUILetterReadWindow::Init(const wchar_t* pszTitle, DWORD dwParentID)
     m_DeleteButton.SetArrangeType(2, 53, 16);
     m_DeleteButton.SetSize(50, 14);
 
-    m_CloseButton.Init(3, I18N::Game::Close);
+    m_CloseButton.Init(3, I18N::Game::Close388);
     m_CloseButton.SetParentUIID(GetUIID());
     m_CloseButton.SetArrangeType(2, 186, 16);
     m_CloseButton.SetSize(50, 14);
@@ -5497,9 +5497,9 @@ void CUIFriendMenu::RenderWindowList()
 
         if (wcslen(pszChatTitle) > wcslen(I18N::Game::Talking))
         {
-            if (wcsncmp(pszChatTitle, I18N::Game::Offline995, wcslen(I18N::Game::Offline995)) == 0)
+            if (wcsncmp(pszChatTitle, I18N::Game::Offline, wcslen(I18N::Game::Offline)) == 0)
             {
-                CutText3(pszChatTitle + wcslen(I18N::Game::Offline995) + wcslen(I18N::Game::Talking), szText, m_iWidth - 8, 1, 64);
+                CutText3(pszChatTitle + wcslen(I18N::Game::Offline) + wcslen(I18N::Game::Talking), szText, m_iWidth - 8, 1, 64);
             }
             else
             {
@@ -5508,7 +5508,7 @@ void CUIFriendMenu::RenderWindowList()
         }
         else
         {
-            wcscpy(szText, I18N::Game::Offline995);
+            wcscpy(szText, I18N::Game::Offline);
         }
         g_pRenderText->RenderText(m_iPos_x + 2, m_iFriendMenuPos_y - (m_fLineHeight + 4) * i + 3, szText);
 

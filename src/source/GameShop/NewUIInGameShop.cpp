@@ -496,7 +496,7 @@ void CNewUIInGameShop::SetBtnInfo()
 {
     m_CloseButton.ChangeButtonImgState(true, IMAGE_IGS_EXIT_BTN, false);
     m_CloseButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_EXIT_BTN_POS_X, m_Pos.y + IMAGE_IGS_EXIT_BTN_POS_Y, IMAGE_IGS_EXIT_BTN_WIDTH, IMAGE_IGS_EXIT_BTN_HEIGHT);
-    m_CloseButton.ChangeToolTipText(I18N::Game::Close, true);
+    m_CloseButton.ChangeToolTipText(I18N::Game::Close388, true);
     m_ListBoxTabButton.CreateRadioGroup(IGS_TOTAL_LISTBOX, IMAGE_IGS_LEFT_TAB);
     m_ListBoxTabButton.ChangeRadioButtonInfo(true, m_Pos.x + IMAGE_IGS_TAB_BTN_POS_X, m_Pos.y + IMAGE_IGS_TAB_BTN_POS_Y, IMAGE_IGS_TAB_BTN_WIDTH, IMAGE_IGS_TAB_BTN_HEIGHT, IMAGE_IGS_TAB_BTN_DISTANCE);
     m_ListBoxTabButton.ChangeButtonState(SEASON3B::BUTTON_STATE_DOWN, 0);
@@ -519,7 +519,7 @@ void CNewUIInGameShop::SetBtnInfo()
         m_ViewDetailButton[i].ChangeButtonImgState(true, IMAGE_IGS_VIEWDETAIL_BTN, true, false, true);
         m_ViewDetailButton[i].ChangeButtonInfo(IMAGE_IGS_VIEWDETAIL_BTN_POS_X + ((i % IGS_NUM_ITEMS_WIDTH) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X), IMAGE_IGS_VIEWDETAIL_BTN_POS_Y + ((i / IGS_NUM_ITEMS_HEIGHT) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y), IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
         m_ViewDetailButton[i].MoveTextPos(0, -1);
-        m_ViewDetailButton[i].ChangeText(I18N::Game::Buy2886);
+        m_ViewDetailButton[i].ChangeText(I18N::Game::Buy1124);
     }
 
     m_CashGiftButton.ChangeButtonImgState(true, IMAGE_IGS_ITEMGIFT_BTN, true);

@@ -374,7 +374,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
 
     m_btnQuestOpen.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_OPEN, false);
     m_btnQuestOpen.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 392, 36, 29);

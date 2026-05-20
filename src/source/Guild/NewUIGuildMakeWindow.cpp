@@ -193,7 +193,7 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GUILDMAKE_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
 
     Show(false);
 
@@ -467,7 +467,7 @@ void CNewUIGuildMakeWindow::RenderFrame()
 
     wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, I18N::Game::Guild180);
+    mu_swprintf(Text, I18N::Game::Guild);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 

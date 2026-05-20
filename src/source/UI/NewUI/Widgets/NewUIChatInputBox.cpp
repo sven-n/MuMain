@@ -551,9 +551,9 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                         g_pChatListBox->AddText(Hero->ID, szChatText, SEASON3B::TYPE_WHISPER_MESSAGE);
                         AddWhsprIDHistory(szWhisperID);
                     }
-                    else if (wcsncmp(szChatText, I18N::Game::Warp260, wcslen(I18N::Game::Warp260)) == 0)
+                    else if (wcsncmp(szChatText, I18N::Game::Warp, wcslen(I18N::Game::Warp)) == 0)
                     {
-                        wchar_t* pszMapName = szChatText + wcslen(I18N::Game::Warp260) + 1;
+                        wchar_t* pszMapName = szChatText + wcslen(I18N::Game::Warp) + 1;
                         int iMapIndex = g_pMoveCommandWindow->GetMapIndexFromMovereq(pszMapName);
 
                         if (g_pMoveCommandWindow->IsTheMapInDifferentServer(gMapManager.WorldActive, iMapIndex))

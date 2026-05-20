@@ -1334,7 +1334,7 @@ void SEASON3B::CGemIntegrationMsgBox::SetButtonInfo()
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
 
-    m_BtnCancel.SetText(I18N::Game::Close);
+    m_BtnCancel.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CGemIntegrationMsgBox::RenderFrame()
@@ -1568,7 +1568,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y += 15.0f + (height + 10.0f) * (int)COMGEM::eCOMTYPE_END;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(I18N::Game::Close);
+    m_BtnCancel.SetText(I18N::Game::Close388);
 
     ResetWndSize(0);
 }
@@ -2124,7 +2124,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 40;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(I18N::Game::Close);
+    m_BtnCancel.SetText(I18N::Game::Close388);
 
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
@@ -2973,7 +2973,7 @@ void SEASON3B::CChaosMixMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(I18N::Game::Close);
+    m_BtnCancel.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CChaosMixMenuMsgBox::RenderFrame()
@@ -4358,7 +4358,7 @@ void CCherryBlossomMsgBox::SetButtonInfo()
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     // 1002 "닫기"
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void CCherryBlossomMsgBox::RenderFrame()
@@ -5100,7 +5100,7 @@ bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
     }
 
     pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
-    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword691);
+    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword);
     pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword697);
     pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
@@ -5165,7 +5165,7 @@ bool SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(KEYPAD_TYPE_LOCK_FINAL, g_iLengthAuthorityCode))
         return false;
 
-    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword691);
+    pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword);
     pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword697);
     pMsgBox->AddCallbackFunc(CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
@@ -5871,7 +5871,7 @@ void SEASON3B::CLuckyTradeMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CLuckyTradeMenuMsgBox::RenderFrame()
@@ -6061,7 +6061,7 @@ void SEASON3B::CTrainerMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CTrainerMenuMsgBox::RenderFrame()
@@ -6254,7 +6254,7 @@ void SEASON3B::CTrainerRecoverMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CTrainerRecoverMsgBox::RenderFrame()
@@ -6476,7 +6476,7 @@ void SEASON3B::CElpisMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CElpisMsgBox::RenderFrame()
@@ -6697,7 +6697,7 @@ void SEASON3B::CSeedMasterMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CSeedMasterMenuMsgBox::RenderFrame()
@@ -6888,7 +6888,7 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderFrame()
@@ -6985,7 +6985,7 @@ void SEASON3B::CResetCharacterPointMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CResetCharacterPointMsgBox::Release()
@@ -7300,7 +7300,7 @@ void SEASON3B::CGuild_ToPerson_Position::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x += 64;
     m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(I18N::Game::Close);
+    m_BtnCancel.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CGuild_ToPerson_Position::RenderFrame()
@@ -7627,7 +7627,7 @@ void SEASON3B::CDelgardoMainMenuMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close);
+    m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void SEASON3B::CDelgardoMainMenuMsgBox::RenderFrame()

@@ -433,7 +433,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
 
     aDest[nLine].m_hFont = g_hFontBold;
     aDest[nLine].m_dwColor = ARGB(255, 179, 230, 77);
-    wcscpy(aDest[nLine++].m_szText, I18N::Game::Requirements2809);
+    wcscpy(aDest[nLine++].m_szText, I18N::Game::Requirements);
 
     SQuestRequest* pRequestInfo;
     for (i = 0; i < pRequestReward->m_byRequestCount; ++i, ++nLine)

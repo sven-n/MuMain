@@ -755,7 +755,7 @@ void SetBooleanPosition(CHAT* c)
         SIZE sizeT[2];
         g_pRenderText->SetFont(g_hFontBold);
 
-        if (GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Store1104, wcslen(I18N::Game::Store1104), &sizeT[1]))
+        if (GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Store, wcslen(I18N::Game::Store), &sizeT[1]))
         {
             if (c->Width < sizeT[0].cx + sizeT[1].cx)
                 c->Width = sizeT[0].cx + sizeT[1].cx;
@@ -840,7 +840,7 @@ void RenderBoolean(int x, int y, CHAT* c)
         g_pRenderText->SetBgColor(GetShopBGColor(c->Owner));
 
         g_pRenderText->SetTextColor(GetShopTextColor(c->Owner));
-        g_pRenderText->RenderText(RenderPos.x, RenderPos.y, I18N::Game::Store1104, 0, iLineHeight, RT3_SORT_LEFT, &TextSize);
+        g_pRenderText->RenderText(RenderPos.x, RenderPos.y, I18N::Game::Store, 0, iLineHeight, RT3_SORT_LEFT, &TextSize);
         RenderPos.x += TextSize.cx;
 
         g_pRenderText->SetTextColor(GetShopText2Color(c->Owner));
@@ -1040,13 +1040,13 @@ void AddGuildName(CHAT* c, CHARACTER* Owner)
     if (Owner->GuildMarkIndex >= 0 && GuildMark[Owner->GuildMarkIndex].UnionName[0])
     {
         if (Owner->GuildRelationShip == GR_UNION)
-            mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::Alliance1295);
+            mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::Alliance);
         if (Owner->GuildRelationShip == GR_UNIONMASTER)
         {
             if (Owner->GuildStatus == G_MASTER)
                 mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::AllianceMaster);
             else
-                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::Alliance1295);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::Alliance);
         }
         else if (Owner->GuildRelationShip == GR_RIVAL)
         {
@@ -3958,8 +3958,8 @@ bool CheckMacroLimit(wchar_t* Text)
     int  length;
 
     memcpy(string, Text + 3, sizeof(char) * (256 - 2));
-    length = wcslen(I18N::Game::Exchange258);
-    if (wcscmp(string, I18N::Game::Exchange258) == 0 || wcscmp(string, I18N::Game::Trade259) == 0 || wcsicmp(string, L"/trade") == 0)
+    length = wcslen(I18N::Game::Exchange);
+    if (wcscmp(string, I18N::Game::Exchange) == 0 || wcscmp(string, I18N::Game::Trade259) == 0 || wcsicmp(string, L"/trade") == 0)
     {
         return  true;
     }
@@ -3971,7 +3971,7 @@ bool CheckMacroLimit(wchar_t* Text)
     {
         return  true;
     }
-    if (wcscmp(string, I18N::Game::Battle248) == 0 || wcsicmp(string, L"/GuildWar") == 0)
+    if (wcscmp(string, I18N::Game::Battle) == 0 || wcsicmp(string, L"/GuildWar") == 0)
     {
         return  true;
     }
@@ -4003,7 +4003,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
         if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
         {
-            if (wcscmp(Name, I18N::Game::Exchange258) == 0 || wcscmp(Name, I18N::Game::Trade259) == 0 || wcsicmp(Text, L"/trade") == 0)
+            if (wcscmp(Name, I18N::Game::Exchange) == 0 || wcscmp(Name, I18N::Game::Trade259) == 0 || wcsicmp(Text, L"/trade") == 0)
             {
                 if (gMapManager.InChaosCastle() == true)
                 {
@@ -4107,7 +4107,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
             return true;
         }
-        if (wcsstr(Text, I18N::Game::Buy1118) != nullptr || wcsstr(Text, L"/purchase") != nullptr)
+        if (wcsstr(Text, I18N::Game::Buy) != nullptr || wcsstr(Text, L"/purchase") != nullptr)
         {
             if (gMapManager.InChaosCastle() == true)
             {
@@ -4265,7 +4265,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
             if (Hero->GuildStatus != G_NONE)
             {
-                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild255, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -4487,7 +4487,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         }
         Name[iTextSize] = NULL;
 
-        if (wcscmp(Name, I18N::Game::Warp260) == 0 || wcsicmp(Name, L"/move") == 0)
+        if (wcscmp(Name, I18N::Game::Warp) == 0 || wcsicmp(Name, L"/move") == 0)
         {
             if (IsGMCharacter() == true || FindText2(Hero->ID, L"webzen") == true)
             {
@@ -4614,7 +4614,7 @@ void CheckChatText(wchar_t* Text)
         SetActionClass(c, o, PLAYER_GREETING1, AT_GREETING1);
         SendRequestAction(Hero->Object, AT_GREETING1);
     }
-    else if (FindText(Text, I18N::Game::EnjoyTheGame) || FindText(Text, I18N::Game::Bye279) || FindText(Text, I18N::Game::Bye280))
+    else if (FindText(Text, I18N::Game::EnjoyTheGame) || FindText(Text, I18N::Game::Bye) || FindText(Text, I18N::Game::Bye280))
     {
         SetActionClass(c, o, PLAYER_GOODBYE1, AT_GOODBYE1);
         SendRequestAction(Hero->Object, AT_GOODBYE1);
@@ -4634,7 +4634,7 @@ void CheckChatText(wchar_t* Text)
         SetActionClass(c, o, PLAYER_DIRECTION1, AT_DIRECTION1);
         SendRequestAction(Hero->Object, AT_DIRECTION1);
     }
-    else if (FindText(Text, I18N::Game::Not) || FindText(Text, I18N::Game::Not) || FindText(Text, I18N::Game::Never) || FindText(Text, I18N::Game::Never) || FindText(Text, I18N::Game::DoNot300) || FindText(Text, I18N::Game::DoNot301) || FindText(Text, I18N::Game::DoNot302))
+    else if (FindText(Text, I18N::Game::Not) || FindText(Text, I18N::Game::Not) || FindText(Text, I18N::Game::Never) || FindText(Text, I18N::Game::Never) || FindText(Text, I18N::Game::DoNot) || FindText(Text, I18N::Game::DoNot) || FindText(Text, I18N::Game::DoNot302))
     {
         SetActionClass(c, o, PLAYER_UNKNOWN1, AT_UNKNOWN1);
         SendRequestAction(Hero->Object, AT_UNKNOWN1);
@@ -4659,7 +4659,7 @@ void CheckChatText(wchar_t* Text)
         SetActionClass(c, o, PLAYER_SMILE1, AT_SMILE1);
         SendRequestAction(Hero->Object, AT_SMILE1);
     }
-    else if (FindText(Text, I18N::Game::Great) || FindText(Text, I18N::Game::OhYeah319) || FindText(Text, I18N::Game::OhYeah320) || FindText(Text, I18N::Game::BeatIt))
+    else if (FindText(Text, I18N::Game::Great) || FindText(Text, I18N::Game::OhYeah) || FindText(Text, I18N::Game::OhYeah320) || FindText(Text, I18N::Game::BeatIt))
     {
         SetActionClass(c, o, PLAYER_CHEER1, AT_CHEER1);
         SendRequestAction(Hero->Object, AT_CHEER1);
@@ -9434,7 +9434,7 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
     }
 
     if ((wcsstr(szChatTextUpperChars, L"/MOVE") != NULL) ||
-        (wcslen(I18N::Game::Warp260) > 0 && wcsstr(szChatTextUpperChars, I18N::Game::Warp260) != NULL))
+        (wcslen(I18N::Game::Warp) > 0 && wcsstr(szChatTextUpperChars, I18N::Game::Warp) != NULL))
     {
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*> m_listMoveInfoData;
         m_listMoveInfoData = SEASON3B::CMoveCommandData::GetInstance()->GetMoveCommandDatalist();

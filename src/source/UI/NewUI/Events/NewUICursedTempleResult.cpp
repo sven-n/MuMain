@@ -109,7 +109,7 @@ void SEASON3B::CNewUICursedTempleResult::SetButtonInfo()
 
     m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonImgState(true, CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
     m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonInfo(x, m_Pos.y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 37, 54, 23);
-    m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeText(I18N::Game::Close);
+    m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeText(I18N::Game::Close388);
 }
 
 void SEASON3B::CNewUICursedTempleResult::ResetGameResultInfo()

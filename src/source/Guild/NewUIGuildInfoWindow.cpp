@@ -100,7 +100,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Create(CNewUIManager* pNewUIMng, int x, in
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GUILDINFO_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
 
     Show(false);
 
@@ -468,7 +468,7 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderNoneGuild()
 
     wchar_t Text[128];
     memset(&Text, 0, sizeof(wchar_t) * 128);
-    mu_swprintf(Text, I18N::Game::Guild180);
+    mu_swprintf(Text, I18N::Game::Guild);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetFont(g_hFontBold);
@@ -498,7 +498,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
 {
     wchar_t Text[300];
     POINT ptOrigin;
-    mu_swprintf(Text, I18N::Game::Guild180);
+    mu_swprintf(Text, I18N::Game::Guild);
     RenderText(Text, m_Pos.x, m_Pos.y + 12, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     ptOrigin.x = m_Pos.x + 35;
     ptOrigin.y = m_Pos.y + 48;
@@ -513,7 +513,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     {
         glColor4f(1.f, 1.f, 1.f, 1.f);
     }
-    mu_swprintf(Text, I18N::Game::Guild180);
+    mu_swprintf(Text, I18N::Game::Guild);
     RenderText(Text, m_Pos.x + 13 + (static_cast<int>(GuildConstants::GuildTab::INFO) * GuildConstants::UILayout::TAB_WIDTH),
         m_Pos.y + 76, GuildConstants::UILayout::TAB_WIDTH, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     glColor4f(0.6f, 0.6f, 0.6f, 1.f);
@@ -531,7 +531,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
     {
         glColor4f(1.f, 1.f, 1.f, 1.f);
     }
-    mu_swprintf(Text, I18N::Game::Alliance1352);
+    mu_swprintf(Text, I18N::Game::Alliance);
     RenderText(Text, m_Pos.x + 13 + (static_cast<int>(GuildConstants::GuildTab::UNION) * GuildConstants::UILayout::TAB_WIDTH),
         m_Pos.y + 76, GuildConstants::UILayout::TAB_WIDTH, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     glColor4f(0.6f, 0.6f, 0.6f, 1.f);

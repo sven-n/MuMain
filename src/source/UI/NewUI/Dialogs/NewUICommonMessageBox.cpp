@@ -1755,7 +1755,7 @@ bool SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[256] = { 0, };
-    mu_swprintf(strText, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To, I18N::Game::CongratulationsYouHaveSuccessfully);
+    mu_swprintf(strText, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
     pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
@@ -1821,7 +1821,7 @@ bool SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
         return false;
 
     wchar_t strText[256] = { 0, };
-    mu_swprintf(strText, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To, I18N::Game::CongratulationsYouHaveSuccessfully);
+    mu_swprintf(strText, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
     pMsgBox->AddMsg(strText, RGBA(255, 255, 255, 255), MSGBOX_FONT_BOLD);
     pMsgBox->AddCallbackFunc(CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     return true;

@@ -51,7 +51,7 @@ bool CNewUIUnitedMarketPlaceWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRen
 
     m_BtnClose.ChangeButtonImgState(true, IMAGE_UNITEDMARKETPLACEWINDOW_BTN_CLOSE);
     m_BtnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_BtnClose.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnClose.ChangeToolTipText(I18N::Game::Close388, true);
 
     Show(false);
 

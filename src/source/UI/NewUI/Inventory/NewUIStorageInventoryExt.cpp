@@ -51,7 +51,7 @@ bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
     SetPos(x, y);
     LoadImages();
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close, true);
+    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
     SetItemAutoMove(false);
 
     Show(false);
