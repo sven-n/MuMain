@@ -55,10 +55,15 @@ internal static class Naming
     /// Locale codes may contain hyphens (en-US); C++ identifiers cannot.
     public static string SanitizeLocale(string locale) => locale.Replace('-', '_');
 
-    /// Render a C# string as a C++ UTF-8 string literal.
-    public static string EscapeCppString(string s)
+    /// Render a C# string as a C++ string literal.
+    /// `wide=true` produces an L"..." UTF-16 wide literal (used by wide groups
+    /// whose accessors return const wchar_t*); otherwise a plain UTF-8 literal.
+    /// Non-ASCII characters pass through as-is (UTF-8 source); the compiler is
+    /// responsible for translating them to the appropriate execution charset.
+    public static string EscapeCppString(string s, bool wide = false)
     {
-        var sb = new StringBuilder(s.Length + 2);
+        var sb = new StringBuilder(s.Length + 3);
+        if (wide) sb.Append('L');
         sb.Append('"');
         foreach (var c in s)
         {

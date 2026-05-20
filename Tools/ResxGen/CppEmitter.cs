@@ -66,9 +66,10 @@ internal static class CppEmitter
 
             """);
 
+        var charType = group.IsWide ? "wchar_t" : "char";
         foreach (var entry in group.Entries)
         {
-            sb.AppendLine($"extern const char* {entry.Identifier};   // {EscapeComment(entry.Key)}");
+            sb.AppendLine($"extern const {charType}* {entry.Identifier};   // {EscapeComment(entry.Key)}");
         }
 
         sb.Append($$"""
@@ -315,13 +316,14 @@ internal static class CppEmitter
 
     private static void WriteLocaleTables(StringBuilder sb, ResourceGroup group)
     {
+        var charType = group.IsWide ? "wchar_t" : "char";
         foreach (var locale in group.Locales)
         {
             var sanitized = Naming.SanitizeLocale(locale);
             foreach (var entry in group.Entries)
             {
                 var value = ResolveValueWithFallback(entry, locale);
-                sb.AppendLine($"constexpr const char* k_{sanitized}_{entry.Identifier} = {Naming.EscapeCppString(value)};");
+                sb.AppendLine($"constexpr const {charType}* k_{sanitized}_{entry.Identifier} = {Naming.EscapeCppString(value, group.IsWide)};");
             }
             sb.AppendLine();
         }
@@ -329,10 +331,11 @@ internal static class CppEmitter
 
     private static void WriteRuntimePointers(StringBuilder sb, ResourceGroup group)
     {
+        var charType = group.IsWide ? "wchar_t" : "char";
         var defaultSanitized = Naming.SanitizeLocale(ResxLoader.DefaultLocale);
         foreach (var entry in group.Entries)
         {
-            sb.AppendLine($"const char* {entry.Identifier} = k_{defaultSanitized}_{entry.Identifier};");
+            sb.AppendLine($"const {charType}* {entry.Identifier} = k_{defaultSanitized}_{entry.Identifier};");
         }
     }
 

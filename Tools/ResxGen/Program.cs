@@ -60,6 +60,12 @@ internal static class Program
             return 1;
         }
 
+        // Apply wide-group flag from the CLI; loader doesn't know about it.
+        groups = groups.Select(g => options.WideGroups.Contains(g.Name)
+                                        ? g with { IsWide = true }
+                                        : g)
+                       .ToList();
+
         foreach (var group in groups)
         {
             CppEmitter.WriteGroupHeader(options.OutputDir, group);
