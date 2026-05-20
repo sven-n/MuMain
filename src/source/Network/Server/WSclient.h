@@ -342,7 +342,6 @@ typedef struct
 } PRECEIVE_CREATE_CHARACTER, * LPPRECEIVE_CREATE_CHARACTER;
 
 //receive join map server
-#pragma pack(push, 1)
 typedef struct
 {
     PBMSG_HEADER Header;
@@ -378,9 +377,9 @@ typedef struct
     WORD         MagicSpeed;
     WORD         MaxAttackSpeed;
     BYTE		 InventoryExtensions;
-    DWORD        Resets;
+    BYTE         Spare;
+    WORD         Resets;
 } PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
-#pragma pack(pop)
 
 typedef struct
 {
