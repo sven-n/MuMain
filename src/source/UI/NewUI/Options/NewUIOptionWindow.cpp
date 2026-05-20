@@ -50,15 +50,17 @@ static const int s_NumResolutions = sizeof(s_Resolutions) / sizeof(s_Resolutions
 // them without per-frame UTF-8 -> wide conversions.
 static const struct { const char* code; const wchar_t* label; } s_Languages[] = {
     { "en",    L"English" },
+    // Non-ASCII characters use universal-character-name escapes so MSVC reads
+    // the wide-string literals correctly regardless of source charset.
     { "de",    L"Deutsch" },
-    { "es",    L"Español" },
+    { "es",    L"Espa\u00f1ol" },                                                  // Español
     { "id",    L"Bahasa Indonesia" },
     { "pl",    L"Polski" },
-    { "pt",    L"Português" },
-    { "ru",    L"Русский" },
+    { "pt",    L"Portugu\u00eas" },                                                // Português
+    { "ru",    L"\u0420\u0443\u0441\u0441\u043a\u0438\u0439" },                   // Русский
     { "tl",    L"Tagalog" },
-    { "uk",    L"Українська" },
-    { "zh-TW", L"繁體中文" },
+    { "uk",    L"\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430" }, // Українська
+    { "zh-TW", L"\u7e41\u9ad4\u4e2d\u6587" },                                      // 繁體中文
 };
 static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
 
