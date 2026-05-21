@@ -328,6 +328,8 @@ typedef struct
     BYTE         byGuildStatus;
 } PRECEIVE_CHARACTER_LIST_EXTENDED, * LPPRECEIVE_CHARACTER_LIST_EXTENDED;
 
+#pragma pack(push, 1)
+
 //receive create character
 typedef struct
 {
@@ -397,6 +399,8 @@ typedef struct
 
     DWORD        Gold;
 } PRECEIVE_REVIVAL_EXTENDED, * LPPRECEIVE_REVIVAL_EXTENDED;
+
+#pragma pack(pop)
 
 //inventory
 typedef struct {
