@@ -5,7 +5,7 @@
 namespace MUnique.Client.Library;
 
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -26,12 +26,7 @@ public unsafe partial class ConnectionManager
     /// <summary>
     /// The currently active connections, with their handle as key.
     /// </summary>
-    private static readonly ConcurrentDictionary<int, ConnectionWrapper> Connections = new();
-
-    /// <summary>
-    /// Tracks pending connections that haven't completed the async connect yet.
-    /// </summary>
-    private static readonly ConcurrentDictionary<int, CancellationTokenSource> PendingConnections = new();
+    private static readonly Dictionary<int, ConnectionWrapper> Connections = new();
 
     /// <summary>
     /// The currently used maximum handle number.
@@ -118,12 +113,6 @@ public unsafe partial class ConnectionManager
     [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_Disconnect")]
     public static void Disconnect(int connectionHandle)
     {
-        if (PendingConnections.TryRemove(connectionHandle, out var cts))
-        {
-            cts.Cancel();
-            cts.Dispose();
-        }
-
         if (Connections.TryGetValue(connectionHandle, out var connection))
         {
             connection.DisconnectAndDispose();
@@ -132,107 +121,23 @@ public unsafe partial class ConnectionManager
 
     private static int ConnectInner(string host, int port, bool isEncrypted, delegate* unmanaged<int, int, byte*, void> onPacketReceived, delegate* unmanaged<int, void> onDisconnected)
     {
+        var tcpClient = new TcpClient(host, port);
+
+        var socketConnection = SocketConnection.Create(tcpClient.Client);
+
+        var encryptor = isEncrypted ? new PipelinedXor32Encryptor(new PipelinedSimpleModulusEncryptor(socketConnection.Output, PipelinedSimpleModulusEncryptor.DefaultClientKey).Writer) : null;
+        var decryptor = isEncrypted ? new PipelinedSimpleModulusDecryptor(socketConnection.Input, PipelinedSimpleModulusDecryptor.DefaultClientKey) : null;
+        var connection = new Connection(socketConnection, decryptor, encryptor, new NullLogger<Connection>());
+
         var handle = Interlocked.Increment(ref _maxHandle);
-        var cts = new CancellationTokenSource();
-        PendingConnections[handle] = cts;
-        var userToken = cts.Token;
+        var wrapper = new ConnectionWrapper(handle, connection, onPacketReceived, onDisconnected);
+        Connections.Add(handle, wrapper);
 
-        var onPacketReceivedPtr = (nint)onPacketReceived;
-        var onDisconnectedPtr = (nint)onDisconnected;
-
-        _ = Task.Run(async () =>
+        connection.Disconnected += () =>
         {
-            TcpClient? tcpClient = null;
-            try
-            {
-                tcpClient = new TcpClient();
-                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-
-                using (userToken.Register(() =>
-                {
-                    try
-                    {
-                        tcpClient?.Dispose();
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
-                }))
-                using (timeoutCts.Token.Register(() =>
-                {
-                    try
-                    {
-                        tcpClient?.Dispose();
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
-                }))
-                {
-                    await tcpClient.ConnectAsync(host, port).ConfigureAwait(false);
-                }
-
-                userToken.ThrowIfCancellationRequested();
-
-                var socket = tcpClient.Client;
-                GC.SuppressFinalize(tcpClient);
-                tcpClient = null;
-                var socketConnection = SocketConnection.Create(socket);
-                var encryptor = isEncrypted ? new PipelinedXor32Encryptor(new PipelinedSimpleModulusEncryptor(socketConnection.Output, PipelinedSimpleModulusEncryptor.DefaultClientKey).Writer) : null;
-                var decryptor = isEncrypted ? new PipelinedSimpleModulusDecryptor(socketConnection.Input, PipelinedSimpleModulusDecryptor.DefaultClientKey) : null;
-                var connection = new Connection(socketConnection, decryptor, encryptor, new NullLogger<Connection>());
-
-                unsafe
-                {
-                    var wrapper = new ConnectionWrapper(
-                        handle,
-                        connection,
-                        (delegate* unmanaged<int, int, byte*, void>)onPacketReceivedPtr,
-                        (delegate* unmanaged<int, void>)onDisconnectedPtr);
-                    Connections.TryAdd(handle, wrapper);
-
-                    connection.Disconnected += () =>
-                    {
-                        Connections.TryRemove(handle, out _);
-                        return ValueTask.CompletedTask;
-                    };
-
-                    wrapper.BeginReceive();
-                }
-            }
-            catch (Exception ex)
-            {
-                if (userToken.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                Debug.WriteLine($"Error establishing connection: {ex}");
-
-                unsafe
-                {
-                    var onDisconnectedDel = (delegate* unmanaged<int, void>)onDisconnectedPtr;
-                    try
-                    {
-                        onDisconnectedDel(handle);
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
-                }
-            }
-            finally
-            {
-                tcpClient?.Dispose();
-                if (PendingConnections.TryRemove(handle, out var d))
-                {
-                    d.Dispose();
-                }
-            }
-        });
+            Connections.Remove(handle);
+            return ValueTask.CompletedTask;
+        };
 
         return handle;
     }

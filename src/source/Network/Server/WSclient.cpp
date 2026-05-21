@@ -357,7 +357,7 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
         bResult = FALSE;
         g_ErrorReport.Write(L"Failed to connect. ");
         g_ErrorReport.WriteCurrentTime();
-        delete SocketClient;
+        free(SocketClient);
         SocketClient = nullptr;
         CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
     }
