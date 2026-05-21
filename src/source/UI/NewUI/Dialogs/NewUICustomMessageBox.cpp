@@ -4423,6 +4423,7 @@ bool SEASON3B::CTradeZenMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
+    pMsgBox->AddCallbackFunc(CTradeZenMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
@@ -4479,6 +4480,7 @@ bool SEASON3B::CZenReceiptMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
+    pMsgBox->AddCallbackFunc(CZenReceiptMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
@@ -4546,6 +4548,7 @@ bool SEASON3B::CZenPaymentMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
+    pMsgBox->AddCallbackFunc(CZenPaymentMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
@@ -4626,6 +4629,7 @@ bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
+    pMsgBox->AddCallbackFunc(CPersonalShopItemValueMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
@@ -4772,6 +4776,7 @@ bool SEASON3B::CPersonalShopNameMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
+    pMsgBox->AddCallbackFunc(CPersonalShopNameMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
@@ -4836,6 +4841,7 @@ bool SEASON3B::CCastleWithdrawMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(CCastleWithdrawMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CCastleWithdrawMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
+    pMsgBox->AddCallbackFunc(CCastleWithdrawMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
@@ -5098,6 +5104,7 @@ bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
     pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    pMsgBox->AddCallbackFunc(CStorageLockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
@@ -5217,6 +5224,8 @@ bool SEASON3B::CStorageUnlockMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(CStorageUnlockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CStorageUnlockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
+    pMsgBox->AddCallbackFunc(CStorageUnlockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
+    pMsgBox->AddCallbackFunc(CStorageUnlockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
@@ -7129,6 +7138,7 @@ bool SEASON3B::CGuildBreakPasswordMsgBoxLayout::SetLayout()
     pMsgBox->AddCallbackFunc(SEASON3B::CGuildBreakPasswordMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(SEASON3B::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
+    pMsgBox->AddCallbackFunc(CGuildBreakPasswordMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
