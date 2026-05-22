@@ -103,6 +103,24 @@ template <typename T> T* safe_cast(const std::span<const BYTE> span)
     return reinterpret_cast<T*>(const_cast<BYTE*>(span.data()));
 }
 
+// Logs a size-mismatch when a typed safe_cast fails. Defined in WSclient.cpp
+// so the header stays free of g_ConsoleDebug includes.
+void LogSafeCastSizeMismatch(const char* packet_type, std::size_t received, std::size_t expected);
+
+// Named overload: logs the packet type and observed vs expected size when the
+// cast fails. Use this for any packet whose silent failure would be hard to
+// diagnose (e.g. server packets that, on size mismatch, would freeze the
+// client at a protocol-state transition).
+template <typename T> T* safe_cast(const std::span<const BYTE> span, const char* packet_type)
+{
+    if (auto p = safe_cast<T>(span))
+    {
+        return p;
+    }
+    LogSafeCastSizeMismatch(packet_type, span.size(), sizeof(T));
+    return nullptr;
+}
+
 typedef struct
 {
     BYTE Code;
@@ -342,6 +360,8 @@ typedef struct
     //BYTE         Equipment[24];
 } PRECEIVE_CREATE_CHARACTER, * LPPRECEIVE_CREATE_CHARACTER;
 #pragma pack(pop)
+static_assert(sizeof(PRECEIVE_CREATE_CHARACTER) == 19,
+              "PRECEIVE_CREATE_CHARACTER wire size drift -- check #pragma pack(push, 1)");
 
 //receive join map server
 #pragma pack(push, 1)
@@ -384,6 +404,9 @@ typedef struct
     WORD         Resets;
 } PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
 #pragma pack(pop)
+static_assert(sizeof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED) == 92,
+              "PRECEIVE_JOIN_MAP_SERVER_EXTENDED wire size drift -- check #pragma pack(push, 1). "
+              "OpenMU CharacterInformationExtended is 92 bytes.");
 
 #pragma pack(push, 1)
 typedef struct
@@ -403,6 +426,9 @@ typedef struct
     DWORD        Gold;
 } PRECEIVE_REVIVAL_EXTENDED, * LPPRECEIVE_REVIVAL_EXTENDED;
 #pragma pack(pop)
+static_assert(sizeof(PRECEIVE_REVIVAL_EXTENDED) == 36,
+              "PRECEIVE_REVIVAL_EXTENDED wire size drift -- check #pragma pack(push, 1). "
+              "OpenMU RespawnAfterDeathExtended is 36 bytes.");
 
 //inventory
 typedef struct {

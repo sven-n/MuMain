@@ -998,6 +998,13 @@ void ResetClientToLoginScene()
 
 int HeroIndex;
 
+void LogSafeCastSizeMismatch(const char* packet_type, std::size_t received, std::size_t expected)
+{
+    g_ConsoleDebug->Write(MCD_ERROR,
+        L"safe_cast<%hs>: received %zu bytes, expected at least %zu -- packet dropped",
+        packet_type ? packet_type : "?", received, expected);
+}
+
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
     MouseLButton = false;
@@ -1009,7 +1016,8 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CharacterAttribute->AbilityTime[1] = 0;
     CharacterAttribute->AbilityTime[2] = 0;
 
-    auto const Data = safe_cast<PRECEIVE_JOIN_MAP_SERVER_EXTENDED>(ReceiveBuffer);
+    auto const Data = safe_cast<PRECEIVE_JOIN_MAP_SERVER_EXTENDED>(
+        ReceiveBuffer, "PRECEIVE_JOIN_MAP_SERVER_EXTENDED");
     if (Data == nullptr)
     {
         assert(false);
@@ -13267,6 +13275,11 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
         case 0x03: //receive join map server
             if (!ReceiveJoinMapServer(received_span))
             {
+                // safe_cast logged the size mismatch; reiterate the user-visible
+                // symptom so the cause is obvious in the console.
+                g_ConsoleDebug->Write(MCD_ERROR,
+                    L"[ReceiveJoinMapServer] dropped -- protocol state stays REQUEST_JOIN_MAP_SERVER, "
+                    L"main render will not be enabled (loading screen will appear frozen).");
                 //return ( FALSE);
             }
             break;
