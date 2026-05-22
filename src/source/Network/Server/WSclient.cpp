@@ -1000,9 +1000,13 @@ int HeroIndex;
 
 void LogSafeCastSizeMismatch(const char* packet_type, std::size_t received, std::size_t expected)
 {
+    // %u + cast (instead of %zu) keeps the format compatible with older msvcrt
+    // builds where vswprintf does not recognise C99 length modifiers. Packet
+    // sizes always fit in 32 bits.
     g_ConsoleDebug->Write(MCD_ERROR,
-        L"safe_cast<%hs>: received %zu bytes, expected at least %zu -- packet dropped",
-        packet_type ? packet_type : "?", received, expected);
+        L"safe_cast<%hs>: received %u bytes, expected at least %u -- packet dropped",
+        packet_type ? packet_type : "?",
+        static_cast<unsigned>(received), static_cast<unsigned>(expected));
 }
 
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
