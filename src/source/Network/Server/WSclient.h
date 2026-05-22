@@ -329,6 +329,7 @@ typedef struct
 } PRECEIVE_CHARACTER_LIST_EXTENDED, * LPPRECEIVE_CHARACTER_LIST_EXTENDED;
 
 //receive create character
+#pragma pack(push, 1)
 typedef struct
 {
     PBMSG_HEADER Header;
@@ -340,8 +341,10 @@ typedef struct
     BYTE         Class; // SERVER_CLASS_TYPE, shifted by 3 bits
     //BYTE         Equipment[24];
 } PRECEIVE_CREATE_CHARACTER, * LPPRECEIVE_CREATE_CHARACTER;
+#pragma pack(pop)
 
 //receive join map server
+#pragma pack(push, 1)
 typedef struct
 {
     PBMSG_HEADER Header;
@@ -380,7 +383,9 @@ typedef struct
     BYTE         Spare;
     WORD         Resets;
 } PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 typedef struct
 {
     PBMSG_HEADER Header;
@@ -397,6 +402,7 @@ typedef struct
 
     DWORD        Gold;
 } PRECEIVE_REVIVAL_EXTENDED, * LPPRECEIVE_REVIVAL_EXTENDED;
+#pragma pack(pop)
 
 //inventory
 typedef struct {
