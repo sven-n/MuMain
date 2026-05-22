@@ -338,7 +338,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress(VK_HOME))
+    else if (SEASON3B::IsPress(VK_HOME) && !g_pChatInputBox->HaveFocus())
     {
         MUHelper::g_MuHelper.Toggle();
         PlayBuffer(SOUND_CLICK01);
