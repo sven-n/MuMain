@@ -353,8 +353,6 @@ typedef struct
     //BYTE         Equipment[24];
 } PRECEIVE_CREATE_CHARACTER, * LPPRECEIVE_CREATE_CHARACTER;
 #pragma pack(pop)
-static_assert(sizeof(PRECEIVE_CREATE_CHARACTER) == 19,
-              "PRECEIVE_CREATE_CHARACTER wire size drift -- check #pragma pack(push, 1)");
 
 //receive join map server
 #pragma pack(push, 1)
@@ -397,9 +395,6 @@ typedef struct
     WORD         Resets;
 } PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
 #pragma pack(pop)
-static_assert(sizeof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED) == 92,
-              "PRECEIVE_JOIN_MAP_SERVER_EXTENDED wire size drift -- check #pragma pack(push, 1). "
-              "OpenMU CharacterInformationExtended is 92 bytes.");
 
 #pragma pack(push, 1)
 typedef struct
@@ -419,9 +414,6 @@ typedef struct
     DWORD        Gold;
 } PRECEIVE_REVIVAL_EXTENDED, * LPPRECEIVE_REVIVAL_EXTENDED;
 #pragma pack(pop)
-static_assert(sizeof(PRECEIVE_REVIVAL_EXTENDED) == 36,
-              "PRECEIVE_REVIVAL_EXTENDED wire size drift -- check #pragma pack(push, 1). "
-              "OpenMU RespawnAfterDeathExtended is 36 bytes.");
 
 //inventory
 typedef struct {
@@ -3704,3 +3696,8 @@ typedef struct
     DWORD Pause;
 } PRECEIVE_MUHELPER_STATUS, * LPRECEIVE_MUHELPER_STATUS;
 #pragma pack(pop)
+
+// Generated static_assert size guards. Sourced from OpenMU's authoritative
+// packet XML via tools/gen_wire_sizes.py. Must appear after all packet struct
+// declarations so the asserts can see them.
+#include "Network/Server/wire_sizes.generated.h"

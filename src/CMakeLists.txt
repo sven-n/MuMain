@@ -286,6 +286,28 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   )
 endif()
 
+# --- Generated wire-size guards ----------------------------------------------
+# tools/gen_wire_sizes.py reads OpenMU's authoritative packet XML and emits
+# wire_sizes.generated.h with static_asserts that lock each client packet
+# struct's sizeof <= the wire length declared by the server. Guards against
+# the PR #402 class of bug (silent #pragma pack drift that freezes the client).
+set(WIRE_SIZES_GEN_SCRIPT "${CMAKE_SOURCE_DIR}/tools/gen_wire_sizes.py")
+set(WIRE_SIZES_OPENMU_ROOT "${CMAKE_SOURCE_DIR}/third_party/OpenMU")
+set(WIRE_SIZES_XML "${WIRE_SIZES_OPENMU_ROOT}/src/Network/Packets/ServerToClient/ServerToClientPackets.xml")
+set(WIRE_SIZES_GEN_HEADER "${CMAKE_BINARY_DIR}/generated/Network/Server/wire_sizes.generated.h")
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+add_custom_command(
+  OUTPUT "${WIRE_SIZES_GEN_HEADER}"
+  COMMAND "${Python3_EXECUTABLE}" "${WIRE_SIZES_GEN_SCRIPT}"
+          --openmu-root "${WIRE_SIZES_OPENMU_ROOT}"
+          --output "${WIRE_SIZES_GEN_HEADER}"
+  DEPENDS "${WIRE_SIZES_GEN_SCRIPT}" "${WIRE_SIZES_XML}"
+  COMMENT "Generating wire_sizes.generated.h from OpenMU XML..."
+  VERBATIM
+)
+add_custom_target(GenWireSizes DEPENDS "${WIRE_SIZES_GEN_HEADER}")
+add_dependencies(Main GenWireSizes)
+
 target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/source"
   # source/App holds the moved PCH header (stdafx.h). Keeping App/ on the
@@ -294,6 +316,7 @@ target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/source/App"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
+  "${CMAKE_BINARY_DIR}/generated"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 
