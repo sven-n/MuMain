@@ -18,9 +18,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
+      
       - name: Install MinGW-w64 toolchain
         run: |
           sudo apt-get update

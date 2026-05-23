@@ -7,7 +7,3 @@
 [submodule "src/ThirdParty/SDL_mixer"]
 	path = src/ThirdParty/SDL_mixer
 	url = https://github.com/libsdl-org/SDL_mixer.git
-[submodule "third_party/OpenMU"]
-	path = third_party/OpenMU
-	url = https://github.com/MUnique/OpenMU.git
-	branch = master

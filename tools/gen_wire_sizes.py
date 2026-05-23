@@ -2,8 +2,11 @@
 """Generate wire_sizes.generated.h: static_assert size guards for client
 packet structs, derived from OpenMU's authoritative packet XML.
 
-For each entry in PACKET_MAPPING, look up the wire <Length> in OpenMU's
-ServerToClientPackets.xml and emit:
+The XML lives in the MUnique.OpenMU.Network.Packets NuGet package (the same
+package the .NET ClientLibrary consumes). CMake resolves the path and passes
+it via --xml.
+
+For each entry in PACKET_MAPPING, look up the wire <Length> and emit:
 
     static_assert(sizeof(<cpp_struct>) <= <wire_length>,
                   "wire size drift -- generated from <xml_name> (<N> bytes)");
@@ -61,16 +64,16 @@ def load_lengths(xml_path: Path) -> dict[str, int]:
     return lengths
 
 
-def emit_header(lengths: dict[str, int], out: Path, source_rel: str) -> int:
+def emit_header(lengths: dict[str, int], out: Path, source_label: str) -> int:
     missing = [xml for xml, _ in PACKET_MAPPING if xml not in lengths]
     if missing:
-        print(f"error: XML packets not found in {source_rel}: {missing}",
+        print(f"error: XML packets not found in {source_label}: {missing}",
               file=sys.stderr)
         return 1
 
     lines = [
         "// THIS FILE IS GENERATED. DO NOT EDIT.",
-        f"// Source: {source_rel}",
+        f"// Source: {source_label}",
         "// Generator: tools/gen_wire_sizes.py",
         "//",
         "// Static-assert that each client packet struct fits within the wire packet",
@@ -96,22 +99,25 @@ def emit_header(lengths: dict[str, int], out: Path, source_rel: str) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--openmu-root", required=True, type=Path,
-                    help="Path to the OpenMU repo root (e.g. third_party/OpenMU)")
+    ap.add_argument("--xml", required=True, type=Path,
+                    help="Path to ServerToClientPackets.xml "
+                         "(from the MUnique.OpenMU.Network.Packets NuGet "
+                         "package contentFiles)")
+    ap.add_argument("--source-label", default=None,
+                    help="Optional label written into the generated header's "
+                         "'Source:' comment (e.g. the NuGet package "
+                         "version). Defaults to the XML basename.")
     ap.add_argument("--output", required=True, type=Path,
                     help="Output header path")
     args = ap.parse_args()
 
-    xml_path = (args.openmu_root
-                / "src" / "Network" / "Packets"
-                / "ServerToClient" / "ServerToClientPackets.xml")
-    if not xml_path.exists():
-        print(f"error: not found: {xml_path}", file=sys.stderr)
+    if not args.xml.exists():
+        print(f"error: not found: {args.xml}", file=sys.stderr)
         return 1
 
-    lengths = load_lengths(xml_path)
-    return emit_header(lengths, args.output,
-                       source_rel=str(xml_path.relative_to(args.openmu_root)))
+    lengths = load_lengths(args.xml)
+    label = args.source_label or args.xml.name
+    return emit_header(lengths, args.output, source_label=label)
 
 
 if __name__ == "__main__":
