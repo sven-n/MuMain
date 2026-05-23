@@ -18,6 +18,8 @@
 #include "GameShop/InGameShopSystem.h"
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
+#include "MUHelper/MuHelper.h"
+
 using namespace SEASON3B;
 
 SEASON3B::CNewUIHotKey::CNewUIHotKey() : m_pNewUIMng(NULL), m_bStateGameOver(false)
@@ -333,6 +335,12 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
             return false;
 
         g_pNewUISystem->Toggle(SEASON3B::INTERFACE_GENSRANKING);
+        PlayBuffer(SOUND_CLICK01);
+        return false;
+    }
+    else if (SEASON3B::IsPress(VK_HOME) && !g_pChatInputBox->HaveFocus())
+    {
+        MUHelper::g_MuHelper.Toggle();
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
