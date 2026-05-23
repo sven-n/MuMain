@@ -242,7 +242,7 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
         va_start(pArgsForFile, pStr);
         // C99 4-arg vswprintf -- explicit buffer size, bounded write. The
         // 3-arg MS-extension form is unsafe (no size param, can overflow).
-        vswprintf(szErrorBuffer,
+        _vsnwprintf(szErrorBuffer,
                   sizeof(szErrorBuffer) / sizeof(szErrorBuffer[0]),
                   pStr, pArgsForFile);
         va_end(pArgsForFile);
