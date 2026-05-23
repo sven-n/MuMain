@@ -193,7 +193,7 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GUILDMAKE_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     Show(false);
 
@@ -296,7 +296,7 @@ void CNewUIGuildMakeWindow::ChangeEditBox(const UISTATES type)
 bool CNewUIGuildMakeWindow::UpdateGMInfo()
 {
     m_Button[GUILDMAKEBUTTON_INFO_MAKE].SetPos(m_Pos.x + ((190 / 2) - (108 / 2)), m_Pos.y + 100);
-    m_Button[GUILDMAKEBUTTON_INFO_MAKE].ChangeText(I18N::Game::CreateGuild);
+    m_Button[GUILDMAKEBUTTON_INFO_MAKE].ChangeText(&I18N::Game::CreateGuild);
 
     if (m_Button[GUILDMAKEBUTTON_INFO_MAKE].UpdateMouseEvent())
     {
@@ -323,10 +323,10 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
     //button
     m_Button[GUILDMAKEBUTTON_MARK_LNEXT].SetPos(m_Pos.x + 15, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_MARK_LNEXT].ChangeText(I18N::Game::Back);
+    m_Button[GUILDMAKEBUTTON_MARK_LNEXT].ChangeText(&I18N::Game::Back);
 
     m_Button[GUILDMAKEBUTTON_MARK_RNEXT].SetPos(m_Pos.x + 110, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_MARK_RNEXT].ChangeText(I18N::Game::Next);
+    m_Button[GUILDMAKEBUTTON_MARK_RNEXT].ChangeText(&I18N::Game::Next);
 
     if (m_Button[GUILDMAKEBUTTON_MARK_LNEXT].UpdateMouseEvent())
     {
@@ -379,10 +379,10 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
 {
     m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].SetPos(m_Pos.x + 15, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].ChangeText(I18N::Game::Back);
+    m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].ChangeText(&I18N::Game::Back);
 
     m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].SetPos(m_Pos.x + 110, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].ChangeText(I18N::Game::Next);
+    m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].ChangeText(&I18N::Game::Next);
 
     if (m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].UpdateMouseEvent())
     {

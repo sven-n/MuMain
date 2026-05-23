@@ -59,7 +59,7 @@ void CNewUIPartyInfoWindow::InitButtons()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_PARTY_BASE_WINDOW_BTN_EXIT);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::ClosePartyWindowP, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::ClosePartyWindowP, true);
 
     for (int i = 0; i < MAX_PARTYS; i++)
     {

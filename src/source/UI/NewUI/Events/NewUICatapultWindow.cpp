@@ -48,25 +48,25 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Create(int iType, POI
     {
         m_iBtnNum = 4;
         m_pButton = new CNewUIButton[m_iBtnNum];
-        m_pButton[0].ChangeText(I18N::Game::CastleGate1);
+        m_pButton[0].ChangeText(&I18N::Game::CastleGate1);
         m_pButton[0].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[0].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_SMALL, true);
         m_pButton[0].ChangeButtonInfo(ptWindow.x + 22, ptWindow.y + 135, 46, 36);
         m_pButton[0].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_pButton[0].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[1].ChangeText(I18N::Game::CastleGate2);
+        m_pButton[1].ChangeText(&I18N::Game::CastleGate2);
         m_pButton[1].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[1].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_SMALL, true);
         m_pButton[1].ChangeButtonInfo(ptWindow.x + 74, ptWindow.y + 135, 46, 36);
         m_pButton[1].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_pButton[1].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[2].ChangeText(I18N::Game::CastleGate3);
+        m_pButton[2].ChangeText(&I18N::Game::CastleGate3);
         m_pButton[2].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[2].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_SMALL, true);
         m_pButton[2].ChangeButtonInfo(ptWindow.x + 126, ptWindow.y + 135, 46, 36);
         m_pButton[2].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_pButton[2].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[3].ChangeText(I18N::Game::FrontYard);
+        m_pButton[3].ChangeText(&I18N::Game::FrontYard);
         m_pButton[3].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[3].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
         m_pButton[3].ChangeButtonInfo(ptWindow.x + 59, ptWindow.y + 182, 77, 47);
@@ -77,19 +77,19 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Create(int iType, POI
     {
         m_iBtnNum = 3;
         m_pButton = new CNewUIButton[m_iBtnNum];
-        m_pButton[0].ChangeText(I18N::Game::FrontYard1);
+        m_pButton[0].ChangeText(&I18N::Game::FrontYard1);
         m_pButton[0].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[0].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
         m_pButton[0].ChangeButtonInfo(ptWindow.x + 18, ptWindow.y + 125, 77, 47);
         m_pButton[0].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_pButton[0].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[1].ChangeText(I18N::Game::FrontYard2);
+        m_pButton[1].ChangeText(&I18N::Game::FrontYard2);
         m_pButton[1].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[1].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
         m_pButton[1].ChangeButtonInfo(ptWindow.x + 97, ptWindow.y + 125, 77, 47);
         m_pButton[1].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_pButton[1].ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-        m_pButton[2].ChangeText(I18N::Game::Bridge);
+        m_pButton[2].ChangeText(&I18N::Game::Bridge);
         m_pButton[2].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[2].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
         m_pButton[2].ChangeButtonInfo(ptWindow.x + 56, ptWindow.y + 179, 77, 47);
@@ -211,8 +211,8 @@ void SEASON3B::CNewUICatapultWindow::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
-    m_BtnFire.ChangeText(I18N::Game::Shoot);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
+    m_BtnFire.ChangeText(&I18N::Game::Shoot);
     m_BtnFire.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnFire.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_FIRE, true);
     m_BtnFire.ChangeButtonInfo(m_Pos.x + 41, m_Pos.y + 250, 108, 29);

@@ -49,13 +49,13 @@ bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
 
     LoadImages();
 
-    m_btnComplete.ChangeText(I18N::Game::ProceedWithQuest);
+    m_btnComplete.ChangeText(&I18N::Game::ProceedWithQuest);
     m_btnComplete.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_COMPLETE, true);
     m_btnComplete.ChangeButtonInfo(x + 41, y + 355, 108, 29);
 
     m_btnClose.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_CLOSE);
     m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_btnClose.ChangeToolTipText(I18N::Game::Close388, true);
+    m_btnClose.ChangeToolTipText(&I18N::Game::Close388, true);
 
     Show(false);
 

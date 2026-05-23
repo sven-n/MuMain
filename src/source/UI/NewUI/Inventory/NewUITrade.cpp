@@ -57,11 +57,11 @@ bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_abtn[BTN_CLOSE].ChangeButtonImgState(true, IMAGE_TRADE_BTN_CLOSE);
     m_abtn[BTN_CLOSE].ChangeButtonInfo(x + 13, y + 390, 36, 29);
-    m_abtn[BTN_CLOSE].ChangeToolTipText(I18N::Game::Close388, true);
+    m_abtn[BTN_CLOSE].ChangeToolTipText(&I18N::Game::Close388, true);
 
     m_abtn[BTN_ZEN_INPUT].ChangeButtonImgState(true, IMAGE_TRADE_BTN_ZEN_INPUT);
     m_abtn[BTN_ZEN_INPUT].ChangeButtonInfo(x + 104, y + 390, 36, 29);
-    m_abtn[BTN_ZEN_INPUT].ChangeToolTipText(I18N::Game::ZenTrade, true);
+    m_abtn[BTN_ZEN_INPUT].ChangeToolTipText(&I18N::Game::ZenTrade, true);
 
     ::memset(m_szYourID, 0, MAX_USERNAME_SIZE + 1);
     m_bTradeAlert = false;

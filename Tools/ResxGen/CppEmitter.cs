@@ -161,7 +161,9 @@ internal static class CppEmitter
             namespace {{RootNamespace}} {
 
             // Switches every group to the given locale. Unknown locales fall
-            // back to the default locale (en).
+            // back to the default locale (en). After updating the group pointers,
+            // invokes every registered LocaleObserver so cached UI state (button
+            // tooltips, list labels, etc.) can refresh from the new locale.
             void SetLocale(const char* locale) noexcept;
 
             // Returns the locale code passed to the last successful SetLocale
@@ -183,6 +185,20 @@ internal static class CppEmitter
             // codes the generator does not have a display name for.
             const char* GetLanguageDisplayName(const char* locale) noexcept;
 
+            // Callback invoked from SetLocale after group pointers have been
+            // updated. Implementations should re-read any cached I18N strings.
+            using LocaleObserver = void (*)(void* context) noexcept;
+
+            // Registers `cb` to be invoked on every subsequent SetLocale. The
+            // (cb, ctx) pair identifies the registration: the same callback
+            // function may be registered with different contexts. Duplicate
+            // (cb, ctx) registrations are ignored. Null callbacks are ignored.
+            void RegisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept;
+
+            // Removes a previously registered (cb, ctx) pair. No-op if the pair
+            // is not currently registered.
+            void UnregisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept;
+
             }  // namespace {{RootNamespace}}
 
             """);
@@ -200,6 +216,7 @@ internal static class CppEmitter
 
             #include <cstddef>
             #include <cstring>
+            #include <vector>
 
             namespace {{RootNamespace}} {
             namespace {
@@ -222,6 +239,18 @@ internal static class CppEmitter
                 return "{{ResxLoader.DefaultLocale}}";
             }
 
+            struct ObserverEntry { LocaleObserver cb; void* ctx; };
+
+            // Function-local static keeps construction order well-defined for
+            // observers registered during global init (e.g. statically allocated
+            // UI). Heap usage is bounded by live observer count; locale switches
+            // are user-driven and not on any hot path.
+            std::vector<ObserverEntry>& Observers() noexcept
+            {
+                static std::vector<ObserverEntry> v;
+                return v;
+            }
+
             }  // namespace
 
             void SetLocale(const char* locale) noexcept
@@ -236,6 +265,40 @@ internal static class CppEmitter
         }
 
         sb.Append($$"""
+
+                // Snapshot the registry so observers that unregister themselves
+                // (e.g. via a destructor triggered as a side effect of the
+                // callback) don't shift indices mid-iteration.
+                const std::vector<ObserverEntry> snapshot = Observers();
+                for (const auto& entry : snapshot)
+                {
+                    if (entry.cb != nullptr) entry.cb(entry.ctx);
+                }
+            }
+
+            void RegisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept
+            {
+                if (cb == nullptr) return;
+                auto& list = Observers();
+                for (const auto& entry : list)
+                {
+                    if (entry.cb == cb && entry.ctx == ctx) return;
+                }
+                list.push_back({cb, ctx});
+            }
+
+            void UnregisterLocaleObserver(LocaleObserver cb, void* ctx) noexcept
+            {
+                auto& list = Observers();
+                for (auto it = list.begin(); it != list.end(); ++it)
+                {
+                    if (it->cb == cb && it->ctx == ctx)
+                    {
+                        *it = list.back();
+                        list.pop_back();
+                        return;
+                    }
+                }
             }
 
             const char* GetCurrentLocale() noexcept

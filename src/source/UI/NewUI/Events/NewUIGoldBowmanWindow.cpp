@@ -65,12 +65,12 @@ bool CNewUIGoldBowmanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Serial Button
     m_BtnSerial.ChangeButtonImgState(true, IMAGE_GB_BTN_SERIAL, false);
     m_BtnSerial.ChangeButtonInfo(m_Pos.x + 45, m_Pos.y + 285, 108, 29);
-    m_BtnSerial.ChangeText(I18N::Game::LuckyNumberRegistered);
+    m_BtnSerial.ChangeText(&I18N::Game::LuckyNumberRegistered);
 
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GB_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     Show(false);
 

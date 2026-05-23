@@ -120,11 +120,11 @@ void SEASON3B::CNewUICharacterInfoWindow::SetButtonInfo()
     m_BtnQuest.ChangeToolTipText(strText, true);
     m_BtnPet.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_PET, false);
     m_BtnPet.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 392, 36, 29);
-    m_BtnPet.ChangeToolTipText(I18N::Game::Pet, true);
+    m_BtnPet.ChangeToolTipText(&I18N::Game::Pet, true);
 
     m_BtnMasterLevel.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_MASTERLEVEL, false);
     m_BtnMasterLevel.ChangeButtonInfo(m_Pos.x + 124, m_Pos.y + 392, 36, 29);
-    m_BtnMasterLevel.ChangeToolTipText(I18N::Game::MasterSkillTreeA, true);
+    m_BtnMasterLevel.ChangeToolTipText(&I18N::Game::MasterSkillTreeA, true);
 }
 
 void SEASON3B::CNewUICharacterInfoWindow::Release()

@@ -71,15 +71,15 @@ bool SEASON3B::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int x, in
 
     m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_EXIT_BTN, false);
     m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_EXIT].ChangeToolTipText(I18N::Game::Close388, true);
+    m_Button[MYSHOPINVENTORY_EXIT].ChangeToolTipText(&I18N::Game::Close388, true);
 
     m_Button[MYSHOPINVENTORY_OPEN].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_OPEN, false);
     m_Button[MYSHOPINVENTORY_OPEN].ChangeButtonInfo(m_Pos.x + 53, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Open1107, true);
+    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Open1107, true);
 
     m_Button[MYSHOPINVENTORY_CLOSE].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_CLOSE, false);
     m_Button[MYSHOPINVENTORY_CLOSE].ChangeButtonInfo(m_Pos.x + 93, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_CLOSE].ChangeToolTipText(I18N::Game::Closed, true);
+    m_Button[MYSHOPINVENTORY_CLOSE].ChangeToolTipText(&I18N::Game::Closed, true);
 
     m_EditBox = new CUITextInputBox;
 
@@ -209,7 +209,7 @@ void SEASON3B::CNewUIMyShopInventory::ChangePersonal(bool state)
         m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Apply, true);
+        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Apply, true);
         m_Button[MYSHOPINVENTORY_CLOSE].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_CLOSE].ChangeTextColor(RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_CLOSE].UnLock();
@@ -222,7 +222,7 @@ void SEASON3B::CNewUIMyShopInventory::ChangePersonal(bool state)
         m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
         m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Open1107, true);
+        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Open1107, true);
     }
 }
 
@@ -231,7 +231,7 @@ void SEASON3B::CNewUIMyShopInventory::OpenButtonLock()
     m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(100, 100, 100, 255));
     m_Button[MYSHOPINVENTORY_OPEN].Lock();
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Open1107, true);
+    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Open1107, true);
 }
 
 void SEASON3B::CNewUIMyShopInventory::OpenButtonUnLock()
@@ -239,7 +239,7 @@ void SEASON3B::CNewUIMyShopInventory::OpenButtonUnLock()
     m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
     m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(I18N::Game::Apply, true);
+    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Apply, true);
 }
 
 const bool SEASON3B::CNewUIMyShopInventory::IsEnablePersonalShop() const

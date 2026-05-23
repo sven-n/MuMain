@@ -446,11 +446,11 @@ void SEASON3B::CNewUINPCShop::SetButtonInfo()
 {
     m_BtnRepair.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
     m_BtnRepair.ChangeButtonInfo(m_Pos.x + 54, m_Pos.y + 390, 36, 29);
-    m_BtnRepair.ChangeToolTipText(I18N::Game::RepairL, true);
+    m_BtnRepair.ChangeToolTipText(&I18N::Game::RepairL, true);
 
     m_BtnRepairAll.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
     m_BtnRepairAll.ChangeButtonInfo(m_Pos.x + 98, m_Pos.y + 390, 36, 29);
-    m_BtnRepairAll.ChangeToolTipText(I18N::Game::RepairAllA, true);
+    m_BtnRepairAll.ChangeToolTipText(&I18N::Game::RepairAllA, true);
 }
 
 void SEASON3B::CNewUINPCShop::SetRepairShop(bool bRepair)

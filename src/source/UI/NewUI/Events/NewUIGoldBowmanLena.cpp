@@ -54,13 +54,13 @@ bool CNewUIGoldBowmanLena::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Register Button
     m_BtnRegister.ChangeButtonImgState(true, IMAGE_GBL_BTN_SERIAL, false);
     m_BtnRegister.ChangeButtonInfo(m_Pos.x + 45, m_Pos.y + 285, 108, 29);
-    m_BtnRegister.ChangeText(I18N::Game::RegisteringRena);
-    m_BtnRegister.ChangeToolTipText(I18N::Game::RegisteringRena, true);
+    m_BtnRegister.ChangeText(&I18N::Game::RegisteringRena);
+    m_BtnRegister.ChangeToolTipText(&I18N::Game::RegisteringRena, true);
 
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GBL_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);	// 1002 "닫기"
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);	// 1002 "닫기"
 
     Show(false);
 

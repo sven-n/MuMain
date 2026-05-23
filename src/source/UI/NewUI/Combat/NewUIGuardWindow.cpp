@@ -46,10 +46,10 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    std::list<std::wstring> ltext;
-    ltext.push_back(I18N::Game::Status);
-    ltext.push_back(I18N::Game::Register);
-    ltext.push_back(I18N::Game::List);
+    std::list<const wchar_t* const*> ltext;
+    ltext.push_back(&I18N::Game::Status);
+    ltext.push_back(&I18N::Game::Register);
+    ltext.push_back(&I18N::Game::List);
 
     m_TabBtn.CreateRadioGroup(3, IMAGE_GUARDWINDOW_TAB_BTN);
     m_TabBtn.ChangeRadioText(ltext);
@@ -58,20 +58,20 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GUARDWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
-    InitButton(&m_BtnProclaim, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 120, I18N::Game::Announce);
-    InitButton(&m_BtnRegister, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 200, I18N::Game::Register);
-    InitButton(&m_BtnGiveUp, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 370, I18N::Game::AbandonCastleSiege);
+    InitButton(&m_BtnProclaim, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 120, &I18N::Game::Announce);
+    InitButton(&m_BtnRegister, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 200, &I18N::Game::Register);
+    InitButton(&m_BtnGiveUp, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 370, &I18N::Game::AbandonCastleSiege);
 
     Show(false);
 
     return true;
 }
 
-void CNewUIGuardWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+void CNewUIGuardWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* const* pCaptionSlot)
 {
-    pNewUIButton->ChangeText(pCaption);
+    pNewUIButton->ChangeText(pCaptionSlot);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
     pNewUIButton->ChangeButtonImgState(true, IMAGE_GUARDWINDOW_BUTTON, true);
     pNewUIButton->ChangeButtonInfo(iPos_x, iPos_y, 53, 23);
@@ -167,18 +167,18 @@ bool CNewUIGuardWindow::Render()
 
     RenderFrame();
 
-    static std::list<std::wstring> ltext;
+    static std::list<const wchar_t* const*> ltext;
     if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE)
     {
-        ltext.push_back(I18N::Game::Status);
-        ltext.push_back(I18N::Game::Announce);
-        ltext.push_back(I18N::Game::List);
+        ltext.push_back(&I18N::Game::Status);
+        ltext.push_back(&I18N::Game::Announce);
+        ltext.push_back(&I18N::Game::List);
     }
     else
     {
-        ltext.push_back(I18N::Game::Status);
-        ltext.push_back(I18N::Game::Register);
-        ltext.push_back(I18N::Game::List);
+        ltext.push_back(&I18N::Game::Status);
+        ltext.push_back(&I18N::Game::Register);
+        ltext.push_back(&I18N::Game::List);
     }
     m_TabBtn.ChangeRadioText(ltext);
 

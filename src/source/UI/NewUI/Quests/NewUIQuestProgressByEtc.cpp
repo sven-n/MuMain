@@ -45,13 +45,13 @@ bool CNewUIQuestProgressByEtc::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_btnProgressR.ChangeButtonImgState(true, IMAGE_QPE_BTN_R);
     m_btnProgressR.ChangeButtonInfo(x + 153, y + 165, 17, 18);
 
-    m_btnComplete.ChangeText(I18N::Game::OK);	// "Ȯ     ��"
+    m_btnComplete.ChangeText(&I18N::Game::OK);	// "Ȯ     ��"
     m_btnComplete.ChangeButtonImgState(true, IMAGE_QPE_BTN_COMPLETE, true);
     m_btnComplete.ChangeButtonInfo(x + (QPE_WIDTH - 108) / 2, y + 362, 108, 29);
 
     m_btnClose.ChangeButtonImgState(true, IMAGE_QPE_BTN_CLOSE);
     m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_btnClose.ChangeToolTipText(I18N::Game::Close388, true);
+    m_btnClose.ChangeToolTipText(&I18N::Game::Close388, true);
 
     m_RequestRewardListBox.SetNumRenderLine(QPE_LIST_BOX_LINE_NUM);
     m_RequestRewardListBox.SetSize(174, 158);

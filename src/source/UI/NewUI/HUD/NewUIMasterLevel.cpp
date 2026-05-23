@@ -64,7 +64,7 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
 
     this->m_CloseBT.ChangeButtonInfo(611, 9, 13, 14);
 
-    this->m_CloseBT.ChangeToolTipText(I18N::Game::Close388);
+    this->m_CloseBT.ChangeToolTipText(&I18N::Game::Close388);
 
     for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
     {

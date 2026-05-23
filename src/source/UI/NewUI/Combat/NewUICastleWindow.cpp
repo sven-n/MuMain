@@ -47,11 +47,11 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    std::list<std::wstring> ltext;
-    ltext.push_back(I18N::Game::CastleGate);
-    ltext.push_back(I18N::Game::GuardianStatue);
-    ltext.push_back(I18N::Game::Tax);
-    ltext.push_back(I18N::Game::Store1640);
+    std::list<const wchar_t* const*> ltext;
+    ltext.push_back(&I18N::Game::CastleGate);
+    ltext.push_back(&I18N::Game::GuardianStatue);
+    ltext.push_back(&I18N::Game::Tax);
+    ltext.push_back(&I18N::Game::Store1640);
 
     m_TabBtn.CreateRadioGroup(4, IMAGE_CASTLEWINDOW_TAB_BTN);
     m_TabBtn.ChangeRadioText(ltext);
@@ -60,7 +60,7 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     InitButton(&m_BtnBuy, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 250, I18N::Game::Buy1124);
     InitButton(&m_BtnRepair, m_Pos.x + 110, m_Pos.y + 260, I18N::Game::Repair);

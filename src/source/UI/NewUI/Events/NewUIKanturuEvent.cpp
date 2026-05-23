@@ -418,21 +418,21 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::UnloadImages()
 
 void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
 {
-    m_BtnRefresh.ChangeText(I18N::Game::Refresh);
+    m_BtnRefresh.ChangeText(&I18N::Game::Refresh);
     m_BtnRefresh.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnRefresh.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
     m_BtnRefresh.ChangeButtonInfo(m_Pos.x + 17, m_Pos.y + 220, 53, 23);
     m_BtnRefresh.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnRefresh.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 
-    m_BtnEnter.ChangeText(I18N::Game::Enter);
+    m_BtnEnter.ChangeText(&I18N::Game::Enter);
     m_BtnEnter.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnEnter.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
     m_BtnEnter.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 220, 53, 23);
     m_BtnEnter.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnEnter.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 
-    m_BtnClose.ChangeText(I18N::Game::Close388);
+    m_BtnClose.ChangeText(&I18N::Game::Close388);
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_KANTURU2ND_BTN, true);
     m_BtnClose.ChangeButtonInfo(m_Pos.x + 157, m_Pos.y + 220, 53, 23);

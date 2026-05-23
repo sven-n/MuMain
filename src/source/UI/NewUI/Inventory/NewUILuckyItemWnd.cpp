@@ -329,7 +329,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
         AddText(2223, 0xFF00FFFF);
         AddText(0);
         AddText(3295, 0xFF0000FF), AddText(3296, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(I18N::Game::Combining, true); // 조합
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Combining, true); // 조합
         break;
     case eLuckyItemType_Refinery:
         mu_swprintf(m_szSubject, L"%ls", I18N::Game::RefineLuckyItem);
@@ -337,7 +337,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
         AddText(3300), AddText(3301);
         AddText(0), AddText(0), AddText(0);
         AddText(3302, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(I18N::Game::Refine, true); // 제련
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Refine, true); // 제련
         break;
     }
 }

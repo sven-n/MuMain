@@ -338,7 +338,7 @@ void CNewUIGensRanking::SetBtnInfo(float _PosX, float _PosY)
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GENS_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(13 + _PosX, 392 + _PosY, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 }
 
 void CNewUIGensRanking::OpenningProcess()

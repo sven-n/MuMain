@@ -47,7 +47,7 @@ bool CNewUIGatemanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GATEMANWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 320, I18N::Game::Enter);
     InitButton(&m_BtnSet, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 220, I18N::Game::Confirm);

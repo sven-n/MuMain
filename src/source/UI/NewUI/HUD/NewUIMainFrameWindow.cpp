@@ -115,7 +115,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     x_Next += x_Add;
     m_BtnCShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnCShop.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnCShop.ChangeToolTipText(I18N::Game::MUItemShopX, true);
+    m_BtnCShop.ChangeToolTipText(&I18N::Game::MUItemShopX, true);
 
     m_BtnChaInfo.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnChaInfo.ChangeButtonImgState(true, IMAGE_MENU_BTN_CHAINFO, true);
@@ -123,7 +123,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     x_Next += x_Add;
     m_BtnChaInfo.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnChaInfo.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnChaInfo.ChangeToolTipText(I18N::Game::CharacterC, true);
+    m_BtnChaInfo.ChangeToolTipText(&I18N::Game::CharacterC, true);
 
     m_BtnMyInven.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnMyInven.ChangeButtonImgState(true, IMAGE_MENU_BTN_MYINVEN, true);
@@ -131,7 +131,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     x_Next += x_Add;
     m_BtnMyInven.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyInven.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnMyInven.ChangeToolTipText(I18N::Game::InventoryIV, true);
+    m_BtnMyInven.ChangeToolTipText(&I18N::Game::InventoryIV, true);
 
     m_BtnFriend.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnFriend.ChangeButtonImgState(true, IMAGE_MENU_BTN_FRIEND, true);
@@ -139,14 +139,14 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     x_Next += x_Add;
     m_BtnFriend.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnFriend.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnFriend.ChangeToolTipText(I18N::Game::FriendF, true);
+    m_BtnFriend.ChangeToolTipText(&I18N::Game::FriendF, true);
 
     m_BtnWindow.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnWindow.ChangeButtonImgState(true, IMAGE_MENU_BTN_WINDOW, true);
     m_BtnWindow.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);
     m_BtnWindow.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnWindow.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnWindow.ChangeToolTipText(I18N::Game::MenuU, true);
+    m_BtnWindow.ChangeToolTipText(&I18N::Game::MenuU, true);
 }
 
 void SEASON3B::CNewUIMainFrameWindow::Release()

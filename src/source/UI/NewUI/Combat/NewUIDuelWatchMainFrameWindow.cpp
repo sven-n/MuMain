@@ -50,7 +50,7 @@ bool CNewUIDuelWatchMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRe
     m_BtnExit.SetPos(REFERENCE_WIDTH - 36, REFERENCE_HEIGHT - 29);
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(REFERENCE_WIDTH - 36, REFERENCE_HEIGHT - 29, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::DuelFinished, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::DuelFinished, true);
 
     Show(false);
 

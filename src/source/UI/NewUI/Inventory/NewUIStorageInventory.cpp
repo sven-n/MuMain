@@ -61,7 +61,7 @@ bool CNewUIStorageInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
     }
 
     m_BtnExpand.ChangeButtonImgState(true, IMAGE_STORAGE_EXPAND_BTN, false);
-    m_BtnExpand.ChangeToolTipText(I18N::Game::OpeningAnExpandedVaultH, true);
+    m_BtnExpand.ChangeToolTipText(&I18N::Game::OpeningAnExpandedVaultH, true);
 
     m_bLock = false;
     SetItemAutoMove(false);

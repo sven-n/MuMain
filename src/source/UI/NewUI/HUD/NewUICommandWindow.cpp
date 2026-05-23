@@ -79,17 +79,17 @@ void SEASON3B::CNewUICommandWindow::InitButtons()
         m_BtnCommand[i].ChangeButtonInfo(m_Pos.x + (COMMAND_WINDOW_WIDTH / 2 - 108 / 2), (m_Pos.y + 33) + (i * (29 + COMMAND_BTN_INTERVAL_SIZE)), 108, 29);
     }
 
-    m_BtnCommand[COMMAND_TRADE].ChangeText(I18N::Game::Trade);
-    m_BtnCommand[COMMAND_PURCHASE].ChangeText(I18N::Game::Buy1124);
-    m_BtnCommand[COMMAND_PARTY].ChangeText(I18N::Game::Party);
-    m_BtnCommand[COMMAND_WHISPER].ChangeText(I18N::Game::Whisper);
-    m_BtnCommand[COMMAND_GUILD].ChangeText(I18N::Game::Guild);
-    m_BtnCommand[COMMAND_GUILDUNION].ChangeText(I18N::Game::Alliance);
-    m_BtnCommand[COMMAND_RIVAL].ChangeText(I18N::Game::HostilityGuild);
-    m_BtnCommand[COMMAND_RIVALOFF].ChangeText(I18N::Game::SuspendHostilities);
-    m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText(I18N::Game::AddFriend);
-    m_BtnCommand[COMMAND_FOLLOW].ChangeText(I18N::Game::Follow);
-    m_BtnCommand[COMMAND_BATTLE].ChangeText(I18N::Game::Duel);
+    m_BtnCommand[COMMAND_TRADE].ChangeText(&I18N::Game::Trade);
+    m_BtnCommand[COMMAND_PURCHASE].ChangeText(&I18N::Game::Buy1124);
+    m_BtnCommand[COMMAND_PARTY].ChangeText(&I18N::Game::Party);
+    m_BtnCommand[COMMAND_WHISPER].ChangeText(&I18N::Game::Whisper);
+    m_BtnCommand[COMMAND_GUILD].ChangeText(&I18N::Game::Guild);
+    m_BtnCommand[COMMAND_GUILDUNION].ChangeText(&I18N::Game::Alliance);
+    m_BtnCommand[COMMAND_RIVAL].ChangeText(&I18N::Game::HostilityGuild);
+    m_BtnCommand[COMMAND_RIVALOFF].ChangeText(&I18N::Game::SuspendHostilities);
+    m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText(&I18N::Game::AddFriend);
+    m_BtnCommand[COMMAND_FOLLOW].ChangeText(&I18N::Game::Follow);
+    m_BtnCommand[COMMAND_BATTLE].ChangeText(&I18N::Game::Duel);
 }
 
 void SEASON3B::CNewUICommandWindow::OpenningProcess()

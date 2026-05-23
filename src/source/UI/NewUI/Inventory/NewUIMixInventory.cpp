@@ -54,7 +54,7 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnMix.ChangeButtonImgState(true, IMAGE_MIXINVENTORY_MIXBTN, false);
     m_BtnMix.ChangeButtonInfo(m_Pos.x + INVENTORY_WIDTH * 0.5f - 22.f, m_Pos.y + 380, 44.f, 35.f);
-    m_BtnMix.ChangeToolTipText(I18N::Game::Combining, true);
+    m_BtnMix.ChangeToolTipText(&I18N::Game::Combining, true);
 
     m_pNewInventoryCtrl->GetSquareColorNormal(m_fInventoryColor);
     m_pNewInventoryCtrl->GetSquareColorWarning(m_fInventoryWarningColor);
@@ -614,31 +614,31 @@ void CNewUIMixInventory::RenderFrame()
     switch (g_MixRecipeMgr.GetMixInventoryType())
     {
     case SEASON3A::MIXTYPE_TRAINER:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Resurrection, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Resurrection, true);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Refine, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Refine, true);
         break;
     case SEASON3A::MIXTYPE_JERRIDON:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Restore, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Restore, true);
         break;
     case SEASON3A::MIXTYPE_ELPIS:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Refine, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Refine, true);
         break;
     case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Extraction, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Extraction, true);
         break;
     case SEASON3A::MIXTYPE_SEED_SPHERE:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Assembly, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Assembly, true);
         break;
     case SEASON3A::MIXTYPE_ATTACH_SOCKET:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Application, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Application, true);
         break;
     case SEASON3A::MIXTYPE_DETACH_SOCKET:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Destruction, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Destruction, true);
         break;
     default:
-        m_BtnMix.ChangeToolTipText(I18N::Game::Combining, true);
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Combining, true);
         break;
     }
     m_BtnMix.Render();

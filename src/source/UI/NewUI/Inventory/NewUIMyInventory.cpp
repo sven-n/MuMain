@@ -1190,19 +1190,19 @@ void CNewUIMyInventory::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::CloseIV, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::CloseIV, true);
 
     m_BtnRepair.ChangeButtonImgState(true, IMAGE_INVENTORY_REPAIR_BTN, false);
     m_BtnRepair.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 391, 36, 29);
-    m_BtnRepair.ChangeToolTipText(I18N::Game::RepairL, true);
+    m_BtnRepair.ChangeToolTipText(&I18N::Game::RepairL, true);
 
     m_BtnMyShop.ChangeButtonImgState(true, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, false);
     m_BtnMyShop.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 391, 36, 29);
-    m_BtnMyShop.ChangeToolTipText(I18N::Game::OpenPersonalStoreS, true);
+    m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 
     m_BtnExpand.ChangeButtonImgState(true, IMAGE_INVENTORY_EXPAND_BTN, false);
     m_BtnExpand.ChangeButtonInfo(m_Pos.x + 87 + 37, m_Pos.y + 391, 36, 29);
-    m_BtnExpand.ChangeToolTipText(I18N::Game::OpenExpandedInventoryK, true);
+    m_BtnExpand.ChangeToolTipText(&I18N::Game::OpenExpandedInventoryK, true);
 }
 
 void CNewUIMyInventory::LoadImages() const
@@ -1748,7 +1748,7 @@ void CNewUIMyInventory::ChangeMyShopButtonStateOpen()
     m_BtnMyShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 0);
     m_BtnMyShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 1);
     m_BtnMyShop.ChangeImgIndex(IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 0);
-    m_BtnMyShop.ChangeToolTipText(I18N::Game::OpenPersonalStoreS, true);
+    m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 }
 
 void CNewUIMyInventory::ChangeMyShopButtonStateClose()
@@ -1758,7 +1758,7 @@ void CNewUIMyInventory::ChangeMyShopButtonStateClose()
     m_BtnMyShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 0);
     m_BtnMyShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 1);
     m_BtnMyShop.ChangeImgIndex(IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 0);
-    m_BtnMyShop.ChangeToolTipText(I18N::Game::ClosePersonalStoreS, true);
+    m_BtnMyShop.ChangeToolTipText(&I18N::Game::ClosePersonalStoreS, true);
 }
 
 void CNewUIMyInventory::LockMyShopButtonOpen()
@@ -1766,7 +1766,7 @@ void CNewUIMyInventory::LockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(100, 100, 100, 255));
     m_BtnMyShop.Lock();
-    m_BtnMyShop.ChangeToolTipText(I18N::Game::OpenPersonalStoreS, true);
+    m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 }
 
 void CNewUIMyInventory::UnlockMyShopButtonOpen()
@@ -1774,7 +1774,7 @@ void CNewUIMyInventory::UnlockMyShopButtonOpen()
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(255, 255, 255, 255));
     m_BtnMyShop.UnLock();
-    m_BtnMyShop.ChangeToolTipText(I18N::Game::OpenPersonalStoreS, true);
+    m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 }
 
 void CNewUIMyInventory::ToggleRepairMode()

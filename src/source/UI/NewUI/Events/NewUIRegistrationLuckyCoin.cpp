@@ -183,11 +183,11 @@ namespace SEASON3B
         m_RegistButton.ChangeButtonImgState(true, IMAGE_CLOSE_REGIST, true);
         m_RegistButton.ChangeButtonInfo(_x, _y, m_width, m_height);
         m_RegistButton.SetFont(g_hFontBold);
-        m_RegistButton.ChangeText(I18N::Game::Register);
+        m_RegistButton.ChangeText(&I18N::Game::Register);
         m_CloseButton.ChangeButtonImgState(true, IMAGE_CLOSE_REGIST, true);
         m_CloseButton.ChangeButtonInfo(_x, 360, m_width, m_height);
         m_CloseButton.SetFont(g_hFontBold);
-        m_CloseButton.ChangeText(I18N::Game::Close388);
+        m_CloseButton.ChangeText(&I18N::Game::Close388);
     }
 
     bool CNewUIRegistrationLuckyCoin::Update()

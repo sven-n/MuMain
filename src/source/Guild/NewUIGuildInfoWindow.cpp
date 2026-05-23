@@ -94,13 +94,13 @@ bool SEASON3B::CNewUIGuildInfoWindow::Create(CNewUIManager* pNewUIMng, int x, in
     m_Button[BUTTON_GET_POSITION].SetPos(m_Pos.x + 3, m_Pos.y + 360);
     m_Button[BUTTON_FREE_POSITION].SetPos(m_Pos.x + 64, m_Pos.y + 360);
     m_Button[BUTTON_GET_OUT].SetPos(m_Pos.x + 125, m_Pos.y + 360);
-    m_Button[BUTTON_GET_POSITION].ChangeText(I18N::Game::Position);
-    m_Button[BUTTON_FREE_POSITION].ChangeText(I18N::Game::Dissolve);
-    m_Button[BUTTON_GET_OUT].ChangeText(I18N::Game::Release);
+    m_Button[BUTTON_GET_POSITION].ChangeText(&I18N::Game::Position);
+    m_Button[BUTTON_FREE_POSITION].ChangeText(&I18N::Game::Dissolve);
+    m_Button[BUTTON_GET_OUT].ChangeText(&I18N::Game::Release);
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GUILDINFO_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(I18N::Game::Close388, true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     Show(false);
 
@@ -541,11 +541,11 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
         m_Button[BUTTON_GUILD_OUT].SetPos(m_Pos.x + 100, m_Pos.y + 350);
         if (Hero->GuildStatus == G_MASTER)
         {
-            m_Button[BUTTON_GUILD_OUT].ChangeText(I18N::Game::Disband);
+            m_Button[BUTTON_GUILD_OUT].ChangeText(&I18N::Game::Disband);
         }
         else
         {
-            m_Button[BUTTON_GUILD_OUT].ChangeText(I18N::Game::Leave);
+            m_Button[BUTTON_GUILD_OUT].ChangeText(&I18N::Game::Leave);
         }
 
         mu_swprintf(Text, I18N::Game::GuildAnnouncement);
@@ -608,8 +608,8 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
             glColor4f(1.f, 1.f, 1.f, 1.f);
             m_Button[BUTTON_UNION_CREATE].SetPos(m_Pos.x + 30, m_Pos.y + 230);
             m_Button[BUTTON_UNION_OUT].SetPos(m_Pos.x + 100, m_Pos.y + 230);
-            m_Button[BUTTON_UNION_CREATE].ChangeText(I18N::Game::DisbandAlliance);
-            m_Button[BUTTON_UNION_OUT].ChangeText(I18N::Game::DisbandGuildAlliance);
+            m_Button[BUTTON_UNION_CREATE].ChangeText(&I18N::Game::DisbandAlliance);
+            m_Button[BUTTON_UNION_OUT].ChangeText(&I18N::Game::DisbandGuildAlliance);
             if (GuildMark[Hero->GuildMarkIndex].UnionName[0] != 0)
             {
                 RenderText((wchar_t*)I18N::Game::NAME, m_Pos.x + 34, m_Pos.y + 115, 40, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_LEFT);
