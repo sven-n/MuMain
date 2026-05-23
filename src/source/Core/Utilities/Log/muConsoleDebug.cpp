@@ -240,7 +240,11 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
         wchar_t szErrorBuffer[256] = L"";
         va_list pArgsForFile;
         va_start(pArgsForFile, pStr);
-        vswprintf(szErrorBuffer, pStr, pArgsForFile);
+        // C99 4-arg vswprintf -- explicit buffer size, bounded write. The
+        // 3-arg MS-extension form is unsafe (no size param, can overflow).
+        vswprintf(szErrorBuffer,
+                  sizeof(szErrorBuffer) / sizeof(szErrorBuffer[0]),
+                  pStr, pArgsForFile);
         va_end(pArgsForFile);
         g_ErrorReport.Write(L"[MCD_ERROR] %ls\r\n", szErrorBuffer);
     }

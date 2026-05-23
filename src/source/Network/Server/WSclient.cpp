@@ -1004,7 +1004,7 @@ void LogSafeCastSizeMismatch(const char* packet_type, std::size_t received, std:
     // builds where vswprintf does not recognise C99 length modifiers. Packet
     // sizes always fit in 32 bits.
     g_ConsoleDebug->Write(MCD_ERROR,
-        L"safe_cast<%hs>: received %u bytes, expected at least %u -- packet dropped",
+        L"safe_cast<%.64hs>: received %u bytes, expected at least %u -- packet dropped",
         packet_type ? packet_type : "?",
         static_cast<unsigned>(received), static_cast<unsigned>(expected));
 }
