@@ -331,12 +331,14 @@ internal static class CppEmitter
             {
                 if (format == nullptr) return {};
 
-                // Pre-compute the final size to do exactly one allocation for the
-                // common case where every placeholder is found at most once. We
-                // walk the format string twice; the placeholder scan is cheap
-                // compared to the heap traffic of std::string growth.
+                // Reserve format length plus the total size of all arguments.
+                // This is an over-estimate when args appear fewer times than
+                // they are provided, but it eliminates string growth for the
+                // common case where every arg expands at least once.
+                std::size_t reserveSize = std::char_traits<char>::length(format);
+                for (const auto& arg : args) reserveSize += arg.size();
                 std::string result;
-                result.reserve(std::char_traits<char>::length(format));
+                result.reserve(reserveSize);
 
                 for (const char* p = format; *p != '\0'; )
                 {
@@ -359,7 +361,13 @@ internal static class CppEmitter
                                 const auto& arg = *(args.begin() + index);
                                 result.append(arg.data(), arg.size());
                             }
-                            // Unknown index: silently drop the placeholder.
+                            else
+                            {
+                                // Unknown index: keep the original {N} text so
+                                // missing or mis-numbered arguments are visible
+                                // in-game and during translation review.
+                                result.append(p, static_cast<std::size_t>(digits + 1 - p));
+                            }
                             p = digits + 1;
                             continue;
                         }

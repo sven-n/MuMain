@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Text;
 
 namespace MuMain.Tools.DialogImporter;
@@ -59,20 +60,22 @@ internal static class BmdReader
         var text = ReadCString(buf, off, TextSize, textEncoding);
         off += TextSize;
 
-        var numAnswer = BitConverter.ToInt32(buf, off);
+        // BMD ints are written as little-endian by the original toolchain;
+        // read them explicitly so the importer works on any host endianness.
+        var numAnswer = BinaryPrimitives.ReadInt32LittleEndian(buf.AsSpan(off));
         off += 4;
 
         var links = new int[MaxAnswer];
         for (var i = 0; i < MaxAnswer; i++)
         {
-            links[i] = BitConverter.ToInt32(buf, off);
+            links[i] = BinaryPrimitives.ReadInt32LittleEndian(buf.AsSpan(off));
             off += 4;
         }
 
         var returns = new int[MaxAnswer];
         for (var i = 0; i < MaxAnswer; i++)
         {
-            returns[i] = BitConverter.ToInt32(buf, off);
+            returns[i] = BinaryPrimitives.ReadInt32LittleEndian(buf.AsSpan(off));
             off += 4;
         }
 
