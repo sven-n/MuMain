@@ -87,6 +87,12 @@ internal static class CppEmitter
                 // a non-null empty literal for unknown IDs.
                 const {{charType}}* Lookup(int legacyId) noexcept;
 
+                // Slot variant of Lookup: returns a pointer to the runtime
+                // I18N slot rather than its current value. Useful for widgets
+                // that take a const T* const* and refresh themselves on
+                // locale change. Returns nullptr for unknown IDs.
+                const {{charType}}* const* LookupSlot(int legacyId) noexcept;
+
                 """);
         }
 
@@ -497,9 +503,8 @@ internal static class CppEmitter
         }
         sb.AppendLine("};");
         sb.AppendLine($"constexpr {(group.IsWide ? "wchar_t" : "char")} kLegacyFallback[] = {(group.IsWide ? "L\"\"" : "\"\"")};");
-        sb.AppendLine("}  // namespace");
         sb.AppendLine();
-        sb.AppendLine($"const {charType}* Lookup(int legacyId) noexcept");
+        sb.AppendLine("const LegacyEntry* FindLegacyEntry(int legacyId) noexcept");
         sb.AppendLine("{");
         sb.AppendLine("    // Binary search the sorted table.");
         sb.AppendLine("    int lo = 0;");
@@ -513,9 +518,22 @@ internal static class CppEmitter
         sb.AppendLine("    if (lo < static_cast<int>(sizeof(kLegacyTable) / sizeof(kLegacyTable[0]))");
         sb.AppendLine("        && kLegacyTable[lo].id == legacyId)");
         sb.AppendLine("    {");
-        sb.AppendLine("        return *kLegacyTable[lo].slot;");
+        sb.AppendLine("        return &kLegacyTable[lo];");
         sb.AppendLine("    }");
-        sb.AppendLine("    return kLegacyFallback;");
+        sb.AppendLine("    return nullptr;");
+        sb.AppendLine("}");
+        sb.AppendLine("}  // namespace");
+        sb.AppendLine();
+        sb.AppendLine($"const {charType}* Lookup(int legacyId) noexcept");
+        sb.AppendLine("{");
+        sb.AppendLine("    const LegacyEntry* entry = FindLegacyEntry(legacyId);");
+        sb.AppendLine("    return entry != nullptr ? *entry->slot : kLegacyFallback;");
+        sb.AppendLine("}");
+        sb.AppendLine();
+        sb.AppendLine($"const {charType}* const* LookupSlot(int legacyId) noexcept");
+        sb.AppendLine("{");
+        sb.AppendLine("    const LegacyEntry* entry = FindLegacyEntry(legacyId);");
+        sb.AppendLine("    return entry != nullptr ? entry->slot : nullptr;");
         sb.AppendLine("}");
     }
 
