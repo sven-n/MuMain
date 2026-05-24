@@ -113,7 +113,9 @@ internal static class CppEmitter
         sb.Append($$"""
             #include "{{group.Name}}.h"
 
+            #include <algorithm>
             #include <cstring>
+            #include <iterator>
 
             namespace {{RootNamespace}}::{{group.Name}} {
 
@@ -514,20 +516,10 @@ internal static class CppEmitter
         sb.AppendLine();
         sb.AppendLine("const LegacyEntry* FindLegacyEntry(int legacyId) noexcept");
         sb.AppendLine("{");
-        sb.AppendLine("    // Binary search the sorted table.");
-        sb.AppendLine("    int lo = 0;");
-        sb.AppendLine("    int hi = static_cast<int>(sizeof(kLegacyTable) / sizeof(kLegacyTable[0]));");
-        sb.AppendLine("    while (lo < hi)");
-        sb.AppendLine("    {");
-        sb.AppendLine("        const int mid = lo + (hi - lo) / 2;");
-        sb.AppendLine("        if (kLegacyTable[mid].id < legacyId) lo = mid + 1;");
-        sb.AppendLine("        else hi = mid;");
-        sb.AppendLine("    }");
-        sb.AppendLine("    if (lo < static_cast<int>(sizeof(kLegacyTable) / sizeof(kLegacyTable[0]))");
-        sb.AppendLine("        && kLegacyTable[lo].id == legacyId)");
-        sb.AppendLine("    {");
-        sb.AppendLine("        return &kLegacyTable[lo];");
-        sb.AppendLine("    }");
+        sb.AppendLine("    const auto* const end = std::end(kLegacyTable);");
+        sb.AppendLine("    const auto* it = std::lower_bound(std::begin(kLegacyTable), end, legacyId,");
+        sb.AppendLine("        [](const LegacyEntry& e, int id) { return e.id < id; });");
+        sb.AppendLine("    if (it != end && it->id == legacyId) return it;");
         sb.AppendLine("    return nullptr;");
         sb.AppendLine("}");
         sb.AppendLine("}  // namespace");
