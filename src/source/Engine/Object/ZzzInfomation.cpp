@@ -293,31 +293,6 @@ BOOL IsCorrectSkillType_CommonAttack(INT iSkillSeq)
 ///////////////////////////////////////////////////////////////////////////////
 
 int g_iCurrentDialog = -1;
-DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
-
-void OpenDialogFile(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-        return;
-    }
-    int Size = sizeof(DIALOG_SCRIPT);
-    BYTE* Buffer = new BYTE[Size];
-    for (int i = 0; i < MAX_DIALOG; i++)
-    {
-        fread(Buffer, Size, 1, fp);
-        BuxConvert(Buffer, Size);
-        memcpy(&g_DialogScript[i], Buffer, Size);
-    }
-    delete[] Buffer;
-    fclose(fp);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // item

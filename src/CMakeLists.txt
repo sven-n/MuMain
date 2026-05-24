@@ -451,7 +451,7 @@ if (DOTNET_EXECUTABLE)
               "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
               "${DOTNET_EXECUTABLE}" run --project "${RESXGEN_PROJ_NATIVE}" -c $<CONFIG>
               -- --input "${RESX_INPUT_DIR_NATIVE}" --output "${RESX_OUTPUT_DIR_NATIVE}"
-              --wide-groups Game
+              --wide-groups Game,Dialog
       DEPENDS ${RESX_FILES} ${RESXGEN_SOURCES} "${RESXGEN_PROJ}"
       COMMENT "ResxGen: regenerating C++ I18N accessors from .resx"
       VERBATIM

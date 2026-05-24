@@ -133,15 +133,6 @@ typedef struct
     WORD m_wMaxLevel;
 } GATE_ATTRIBUTE;
 
-typedef struct
-{
-    char m_lpszText[MAX_LENGTH_DIALOG];
-    int m_iNumAnswer;
-    int m_iLinkForAnswer[MAX_ANSWER_FOR_DIALOG];
-    int m_iReturnForAnswer[MAX_ANSWER_FOR_DIALOG];
-    char m_lpszAnswer[MAX_ANSWER_FOR_DIALOG][MAX_LENGTH_ANSWER];
-} DIALOG_SCRIPT;//Script_Dialog
-
 // Item attribute structures moved to GameData/ItemData/ItemStructs.h
 #include "Data/GameData/ItemData/ItemStructs.h"
 

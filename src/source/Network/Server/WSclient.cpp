@@ -8069,9 +8069,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CDialogMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
-            wchar_t Text[300];
-            CMultiLanguage::ConvertFromUtf8(Text, g_DialogScript[Data->Cmd2].m_lpszText);
-            pMsgBox->AddMsg(Text);
+            pMsgBox->AddMsg(I18N::Dialog::Lookup(Data->Cmd2));
         }
     }
     break;

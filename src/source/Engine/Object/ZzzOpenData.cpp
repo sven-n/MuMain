@@ -5356,8 +5356,12 @@ void OpenBasicData(HDC hDC)
 
     g_ServerListManager->LoadServerListScript();
 
-    mu_swprintf(Text, L"Data\\Local\\%ls\\Dialog_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
-    OpenDialogFile(Text);
+    // NPC dialog text used to live in Data\Local\<lang>\Dialog_<lang>.bmd
+    // and was loaded into g_DialogScript here. The text and answer labels
+    // now live in I18N::Dialog (generated from src/Localization/Dialog.*.resx),
+    // and the structural branching data lives in
+    // GameLogic::Quests::Dialog::GetEntry, so there is nothing to load at
+    // runtime any more.
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Item_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_ItemDataHandler.Load(Text);

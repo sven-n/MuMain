@@ -6,6 +6,7 @@
 #include "UI/NewUI/Quests/NewUINPCQuest.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Quests/CSQuest.h"
+#include "GameLogic/Quests/DialogStructure.h"
 #include "I18N/All.h"
 
 #include "Character/CharacterManager.h"
@@ -125,8 +126,10 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
 
             if (iButtonPush >= 0)
             {
-                int nAnswer
-                    = g_DialogScript[g_iCurrentDialogScript].m_iReturnForAnswer[iButtonPush];
+                const auto& entry = GameLogic::Quests::Dialog::GetEntry(g_iCurrentDialogScript);
+                if (iButtonPush >= entry.numAnswer) return false;
+
+                int nAnswer = entry.answers[iButtonPush].returnCode;
 
                 if (1 == nAnswer)
                     bErrorMessage = g_csQuest.ProcessNextProgress();
@@ -137,8 +140,7 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
 
                 ::PlayBuffer(SOUND_INTERFACE01);
 
-                int nNextDialogIndex
-                    = g_DialogScript[g_iCurrentDialogScript].m_iLinkForAnswer[iButtonPush];
+                int nNextDialogIndex = entry.answers[iButtonPush].link;
                 if (0 < nNextDialogIndex && !bErrorMessage)
                     g_csQuest.ShowDialogText(nNextDialogIndex);
 

@@ -1,0 +1,947 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Text_0" xml:space="preserve">
+    <value>Seid gegrüßt! Benötigt Ihr etwas?</value>
+    <comment>legacy_id=0</comment>
+  </data>
+  <data name="Text_1" xml:space="preserve">
+    <value>Seid gegrüßt! Ich bin Pasi der Magier. Hahaha! Hmmm... Der Lauf der Sterne scheint nicht ganz stimmig zu sein. Eure Zukunft... Hmm... Auch Eure Zukunft kann ich nicht erkennen... Wie kann das sein...?</value>
+    <comment>legacy_id=1</comment>
+  </data>
+  <data name="Text_2" xml:space="preserve">
+    <value>Seid gegrüßt! Mein Name ist Baz, und ich bin der Lagerverwalter. Ich kann Euch überall hin nützlich sein. Zögert nicht, mir Eure Habseligkeiten anzuvertrauen.</value>
+    <comment>legacy_id=2</comment>
+  </data>
+  <data name="Text_3" xml:space="preserve">
+    <value>Viele Abenteurer haben mir erzählt, dass der Klang der Harfe sie beruhigt und ihre Müdigkeit vertreibt. Benötigt Ihr meine Hilfe?</value>
+    <comment>legacy_id=3</comment>
+  </data>
+  <data name="Text_4" xml:space="preserve">
+    <value>Seid gegrüßt! Mein Name ist Baz und ich bin der Lagerverwalter. Ich kann Euch helfen, wohin Ihr auch geht. Zögert nicht, Eure Habseligkeiten bei mir zu lassen.</value>
+    <comment>legacy_id=4</comment>
+  </data>
+  <data name="Text_5" xml:space="preserve">
+    <value>Habt Ihr genug Geld dabei? Ohne Gold kann ich die Gegenstände nicht kombinieren, denn meine Forschung verlangt nach Mitteln. Verstanden? Wollt Ihr wissen, wie viel Gold benötigt wird?</value>
+    <comment>legacy_id=5</comment>
+  </data>
+  <data name="Text_6" xml:space="preserve">
+    <value>Willkommen in MU! Drückt die F1-Taste, falls Ihr auf Euren Reisen über den Kontinent von MU Hilfe benötigt.</value>
+    <comment>legacy_id=6</comment>
+  </data>
+  <data name="Text_7" xml:space="preserve">
+    <value>Seid Ihr zum ersten Mal in Lorencia? Geht zum südöstlichen Ausgang vor dem Brunnen und versucht Euch an Budge-Drachen oder Spinnen. Die Skelette im Nordwesten sind zu gefährlich.</value>
+    <comment>legacy_id=7</comment>
+  </data>
+  <data name="Text_8" xml:space="preserve">
+    <value>Willkommen in Noria. Wenn Ihr zum ersten Mal hier seid, geht am Tresorwächter vorbei und nehmt den Südausgang. Versucht Euch an schwachen Monstern wie Skorpionen oder Goblins.</value>
+    <comment>legacy_id=8</comment>
+  </data>
+  <data name="Text_9" xml:space="preserve">
+    <value>Wenn Ihr eine ausführliche Anleitung zum Kontinent MU benötigt, besucht http://muonline.webzen.net</value>
+    <comment>legacy_id=9</comment>
+  </data>
+  <data name="Text_50" xml:space="preserve">
+    <value>Die 'Schriftrolle des Kaisers', die von Muren, dem ersten Kaiser von MU, berichtet, soll im Verlorenen Turm, in Atlans und im Dungeon gesichtet worden sein.</value>
+    <comment>legacy_id=50</comment>
+  </data>
+  <data name="Answer_50_Slot_0" xml:space="preserve">
+    <value>Ich wusste nicht, dass es so etwas gibt...</value>
+    <comment>legacy_id=1500</comment>
+  </data>
+  <data name="Text_51" xml:space="preserve">
+    <value>Eure Opfergabe an Gott ist nicht ausreichend. Ich werde Euch vom Orakel berichten, wenn Ihr ein Opfer von 1.000.000 Zen darbringt.</value>
+    <comment>legacy_id=51</comment>
+  </data>
+  <data name="Answer_51_Slot_0" xml:space="preserve">
+    <value>Ich werde mit 1.000.000 Zen zurückkehren.</value>
+    <comment>legacy_id=1510</comment>
+  </data>
+  <data name="Text_52" xml:space="preserve">
+    <value>Die 'Schriftrolle des Kaisers', die von Muren erzählt, dem ersten Kaiser, der MU einte, soll im Verlorenen Turm, in Atlans und im Dungeon gesichtet worden sein.</value>
+    <comment>legacy_id=52</comment>
+  </data>
+  <data name="Answer_52_Slot_0" xml:space="preserve">
+    <value>Erzählt mir mehr.</value>
+    <comment>legacy_id=1520</comment>
+  </data>
+  <data name="Text_53" xml:space="preserve">
+    <value>Die 'Schriftrolle des Kaisers' ist von einer mächtigen Kraft umhüllt. Wer sie liest, wird mit dieser mächtigen Kraft gesegnet.</value>
+    <comment>legacy_id=53</comment>
+  </data>
+  <data name="Answer_53_Slot_0" xml:space="preserve">
+    <value>Erzählt die Geschichte bitte noch einmal.</value>
+    <comment>legacy_id=1530</comment>
+  </data>
+  <data name="Answer_53_Slot_1" xml:space="preserve">
+    <value>Ich werde sie suchen.</value>
+    <comment>legacy_id=1531</comment>
+  </data>
+  <data name="Answer_53_Slot_2" xml:space="preserve">
+    <value>Das ist mir gleich.</value>
+    <comment>legacy_id=1532</comment>
+  </data>
+  <data name="Text_54" xml:space="preserve">
+    <value>Macht Euch auf die Suche nach der 'Schriftrolle des Kaisers'. Wer sie liest, dem wird große Macht zuteil.</value>
+    <comment>legacy_id=54</comment>
+  </data>
+  <data name="Answer_54_Slot_0" xml:space="preserve">
+    <value>Ich werde es suchen gehen.</value>
+    <comment>legacy_id=1540</comment>
+  </data>
+  <data name="Text_55" xml:space="preserve">
+    <value>Ihr habt die 'Schriftrolle des Kaisers' gefunden! Hier wurde das Gedenken an die Vereinigung durch Muren, den ersten Kaiser des Mu-Reiches, mit der Kraft der Magie festgehalten, müsst Ihr wissen. Wer die 'Schriftrolle des Kaisers' besitzt, dem wird große Macht verliehen.</value>
+    <comment>legacy_id=55</comment>
+  </data>
+  <data name="Answer_55_Slot_0" xml:space="preserve">
+    <value>Erzählt mir von der Aufzeichnung.</value>
+    <comment>legacy_id=1550</comment>
+  </data>
+  <data name="Text_56" xml:space="preserve">
+    <value>Eine geschichtliche Aufzeichnung über den ersten Kaiser Muren würdigt den Frieden, den Muren durch seinen Sieg über alle Kriegsherren errang und damit den Kontinent zum Kaiserreich MU vereinte.</value>
+    <comment>legacy_id=56</comment>
+  </data>
+  <data name="Answer_56_Slot_0" xml:space="preserve">
+    <value>Bitte fahrt fort.</value>
+    <comment>legacy_id=1560</comment>
+  </data>
+  <data name="Text_57" xml:space="preserve">
+    <value>Muren war einer der drei Helden, die dem Chaos ein Ende setzten, das Sekneums Invasion über das Volk brachte.</value>
+    <comment>legacy_id=57</comment>
+  </data>
+  <data name="Answer_57_Slot_0" xml:space="preserve">
+    <value>Erzählt mir die vorherige Geschichte.</value>
+    <comment>legacy_id=1570</comment>
+  </data>
+  <data name="Answer_57_Slot_1" xml:space="preserve">
+    <value>Bitte fahrt fort.</value>
+    <comment>legacy_id=1571</comment>
+  </data>
+  <data name="Text_58" xml:space="preserve">
+    <value>Es heißt, magische Artefakte könnten gefunden werden, sie tragen die Namen 'Zerbrochenes Schwert', 'Träne der Elfe' und 'Seele des Magiers'. Das 'Zerbrochene Schwert' wurde von den Dunklen Rittern als Sinnbild ihres Mutes, ihrer Treue und ihres Strebens nach Wohlstand dargebracht.</value>
+    <comment>legacy_id=58</comment>
+  </data>
+  <data name="Answer_58_Slot_0" xml:space="preserve">
+    <value>Erzählt mir die vorherige Geschichte.</value>
+    <comment>legacy_id=1580</comment>
+  </data>
+  <data name="Answer_58_Slot_1" xml:space="preserve">
+    <value>Bitte fahrt fort.</value>
+    <comment>legacy_id=1581</comment>
+  </data>
+  <data name="Text_59" xml:space="preserve">
+    <value>Die 'Seele des Magiers' wurde von den Dunklen Magiern als Sinnbild ihres Gelübdes dargebracht, ihre Macht für den Frieden und die Freiheit des Reiches einzusetzen. Mu-Jahr 10, ein Auszug aus der Chronik des Friedensgedenkens ...</value>
+    <comment>legacy_id=59</comment>
+  </data>
+  <data name="Answer_59_Slot_0" xml:space="preserve">
+    <value>Erzählt mir die vorherige Geschichte.</value>
+    <comment>legacy_id=1590</comment>
+  </data>
+  <data name="Answer_59_Slot_1" xml:space="preserve">
+    <value>So ist es also geschehen...</value>
+    <comment>legacy_id=1591</comment>
+  </data>
+  <data name="Text_60" xml:space="preserve">
+    <value>Wenn Ihr die 'Schriftrolle des Kaisers' gelesen habt, sucht das 'Zerbrochene Schwert', das die alten Dunklen Ritter zur Feier des Friedens trugen. Wie ich hörte, haben einige Dunkle Ritter es in Atlans, im Verlorenen Turm und in Tarkan gefunden.</value>
+    <comment>legacy_id=60</comment>
+  </data>
+  <data name="Answer_60_Slot_0" xml:space="preserve">
+    <value>Ich werde es finden.</value>
+    <comment>legacy_id=1600</comment>
+  </data>
+  <data name="Answer_60_Slot_1" xml:space="preserve">
+    <value>Ich gebe auf.</value>
+    <comment>legacy_id=1601</comment>
+  </data>
+  <data name="Text_61" xml:space="preserve">
+    <value>An jenen Orten lauert hinter jeder Ecke Gefahr, und das 'Zerbrochene Schwert' ist nicht leicht zu finden. Doch wenn Ihr es findet, wird Euch neue Macht verliehen! Kehrt zu mir zurück, sobald Ihr das 'Zerbrochene Schwert' habt.</value>
+    <comment>legacy_id=61</comment>
+  </data>
+  <data name="Answer_61_Slot_0" xml:space="preserve">
+    <value>Ich werde es finden und damit zurückkehren.</value>
+    <comment>legacy_id=1610</comment>
+  </data>
+  <data name="Text_62" xml:space="preserve">
+    <value>Tapferer Dunkelritter, Ihr habt das 'Zerbrochene Schwert' gefunden! Nach der Einigung des Kontinents Mu zerbrach Muren, der erste Kaiser, sein Schwert 'Apocalypse' als Zeichen seines Wunsches, dass nie wieder ein Krieg ausbrechen möge.</value>
+    <comment>legacy_id=62</comment>
+  </data>
+  <data name="Answer_62_Slot_0" xml:space="preserve">
+    <value>Erzählt mir mehr.</value>
+    <comment>legacy_id=1620</comment>
+  </data>
+  <data name="Text_63" xml:space="preserve">
+    <value>Nach dem Krieg begannen Dunkle Ritter, die Klingenritter werden wollten, das uralte 'Zerbrochene Schwert' zu suchen, um ihren Mut zu beweisen.</value>
+    <comment>legacy_id=63</comment>
+  </data>
+  <data name="Answer_63_Slot_0" xml:space="preserve">
+    <value>So ist es also geschehen!</value>
+    <comment>legacy_id=1630</comment>
+  </data>
+  <data name="Text_64" xml:space="preserve">
+    <value>Ihr habt die 'Schriftrolle des Kaisers' gelesen, nicht wahr. Dann müsst Ihr von den 3 Schätzen wissen, die darin verzeichnet sind. Findet den Kristall 'Träne der Elfen', den die alten Elfen mit der Kraft des Geistes erschufen.</value>
+    <comment>legacy_id=64</comment>
+  </data>
+  <data name="Answer_64_Slot_0" xml:space="preserve">
+    <value>Bitte erzählt mir mehr.</value>
+    <comment>legacy_id=1640</comment>
+  </data>
+  <data name="Text_65" xml:space="preserve">
+    <value>Jener Ort ist überaus gefährlich, und die 'Träne der Elfe' ist äußerst schwer zu finden. Doch wenn Ihr die 'Träne der Elfe' findet, wird Euch eine neue Kraft verliehen. Nun macht Euch auf, findet die 'Träne der Elfe' und kehrt zu mir zurück.</value>
+    <comment>legacy_id=65</comment>
+  </data>
+  <data name="Answer_65_Slot_0" xml:space="preserve">
+    <value> Ich werde die 'Träne der Elfe' suchen!</value>
+    <comment>legacy_id=1650</comment>
+  </data>
+  <data name="Text_66" xml:space="preserve">
+    <value>Ihr habt die 'Träne der Elfen' gefunden! Nach dem Krieg erschuf Lunedil, die Elfenkönigin, den Tränenstein, indem sie den Geiststein verzauberte, damit die Elfen die Macht der Göttin anrufen und ihre eigene Stärke aufbauen konnten.</value>
+    <comment>legacy_id=66</comment>
+  </data>
+  <data name="Answer_66_Slot_0" xml:space="preserve">
+    <value>Bitte fahrt fort.</value>
+    <comment>legacy_id=1660</comment>
+  </data>
+  <data name="Text_67" xml:space="preserve">
+    <value>Ihr habt also die 'Schriftrolle des Kaisers' gelesen. Dann müsst Ihr auch von den 3 Schätzen wissen, die darin verzeichnet sind.</value>
+    <comment>legacy_id=67</comment>
+  </data>
+  <data name="Answer_67_Slot_0" xml:space="preserve">
+    <value>Bitte fahrt fort.</value>
+    <comment>legacy_id=1670</comment>
+  </data>
+  <data name="Text_68" xml:space="preserve">
+    <value>Mit Eurer Kraft seid Ihr gewiss imstande, die 'Seele des Magiers' zu finden. Nun zieht aus und sucht die 'Seele des Magiers', und kehrt zu mir zurück, sobald Ihr sie gefunden habt.</value>
+    <comment>legacy_id=68</comment>
+  </data>
+  <data name="Answer_68_Slot_0" xml:space="preserve">
+    <value>Ich werde die 'Seele des Magiers' finden.</value>
+    <comment>legacy_id=1680</comment>
+  </data>
+  <data name="Text_69" xml:space="preserve">
+    <value>Ich wusste, dass Ihr die 'Seele des Magiers' finden würdet! Etramu, der größte Magier von Arka, schuf einen seelenschützenden Magiestein aus Sorge, die schwachen Dunkelritter könnten dem Angriff Kunduns nicht standhalten.</value>
+    <comment>legacy_id=69</comment>
+  </data>
+  <data name="Answer_69_Slot_0" xml:space="preserve">
+    <value>Bitte erzählt mir mehr.</value>
+    <comment>legacy_id=1690</comment>
+  </data>
+  <data name="Text_70" xml:space="preserve">
+    <value>Ein dunkler Magier, der diesen Magiestein besitzt, wird zum Seelenmeister.</value>
+    <comment>legacy_id=70</comment>
+  </data>
+  <data name="Answer_70_Slot_0" xml:space="preserve">
+    <value>Ich bin nun ein Soul Master!</value>
+    <comment>legacy_id=1700</comment>
+  </data>
+  <data name="Text_71" xml:space="preserve">
+    <value>Eure Opfergabe an Gott genügt nicht. Ich werde Euch vom Orakel berichten, wenn Ihr eine Gabe von 2.000.000 Zen darbringt.</value>
+    <comment>legacy_id=71</comment>
+  </data>
+  <data name="Answer_71_Slot_0" xml:space="preserve">
+    <value>Ich werde mit 2.000.000 Zen zurückkehren.</value>
+    <comment>legacy_id=1710</comment>
+  </data>
+  <data name="Text_72" xml:space="preserve">
+    <value>Dank Eures starken Willens und Eurer Stärke ist Euch neue Macht verliehen worden. Möge Lugards Gnade Euch zu jeder Zeit begleiten.</value>
+    <comment>legacy_id=72</comment>
+  </data>
+  <data name="Answer_72_Slot_0" xml:space="preserve">
+    <value>Möge Gottes Gnade mit Euch sein...</value>
+    <comment>legacy_id=1720</comment>
+  </data>
+  <data name="Text_73" xml:space="preserve">
+    <value>Ihr besitzt bereits große Macht. Ich habe kein Orakel für Euch.</value>
+    <comment>legacy_id=73</comment>
+  </data>
+  <data name="Answer_73_Slot_0" xml:space="preserve">
+    <value>Ich kehre später zurück.</value>
+    <comment>legacy_id=1730</comment>
+  </data>
+  <data name="Text_74" xml:space="preserve">
+    <value>Kehrt zurück, wenn Ihr stärker geworden seid.</value>
+    <comment>legacy_id=74</comment>
+  </data>
+  <data name="Answer_74_Slot_0" xml:space="preserve">
+    <value>Ich werde zurückkehren, wenn ich stärker bin.</value>
+    <comment>legacy_id=1740</comment>
+  </data>
+  <data name="Text_75" xml:space="preserve">
+    <value>Wenn Ihr Euch zu einem starken Krieger entwickelt habt, werdet Ihr es finden können.</value>
+    <comment>legacy_id=75</comment>
+  </data>
+  <data name="Answer_75_Slot_0" xml:space="preserve">
+    <value>Fahrt bitte fort.</value>
+    <comment>legacy_id=1750</comment>
+  </data>
+  <data name="Text_76" xml:space="preserve">
+    <value>Von da an entstand der Brauch, dass dunkle Ritter, die Klingenritter werden wollten, ihre Schwerter zerbrachen - als Symbol des Gelübdes, ihre Klinge niemals ungerecht zu führen.</value>
+    <comment>legacy_id=76</comment>
+  </data>
+  <data name="Answer_76_Slot_0" xml:space="preserve">
+    <value>Erzählt mir mehr.</value>
+    <comment>legacy_id=1760</comment>
+  </data>
+  <data name="Text_77" xml:space="preserve">
+    <value>Einige der abenteuerlustigen Elfen berichteten, sie hätten sie im Verlorenen Turm, in Atlans und in Tarkan gesehen.</value>
+    <comment>legacy_id=77</comment>
+  </data>
+  <data name="Answer_77_Slot_0" xml:space="preserve">
+    <value>'Ich werde es suchen gehen!</value>
+    <comment>legacy_id=1770</comment>
+  </data>
+  <data name="Answer_77_Slot_1" xml:space="preserve">
+    <value>An einen solchen Ort möchte ich nicht reisen.</value>
+    <comment>legacy_id=1771</comment>
+  </data>
+  <data name="Text_78" xml:space="preserve">
+    <value>Dies wird die 'Träne der Elfe' genannt, und die Elfe, die diesen Stein findet, wird zur Musen-Elfe und vermag die Macht der elfischen Göttinnen heraufzubeschwören.</value>
+    <comment>legacy_id=78</comment>
+  </data>
+  <data name="Answer_78_Slot_0" xml:space="preserve">
+    <value>Ich bin zur Musenelfe geworden!</value>
+    <comment>legacy_id=1780</comment>
+  </data>
+  <data name="Text_79" xml:space="preserve">
+    <value>Da Ihr sowohl die 'Schriftrolle des Kaisers' als auch das 'Zerbrochene Schwert' gefunden habt, werdet Ihr von nun an ein Klingenritter genannt.</value>
+    <comment>legacy_id=79</comment>
+  </data>
+  <data name="Answer_79_Slot_0" xml:space="preserve">
+    <value>Ich bin zum Klingenritter geworden!</value>
+    <comment>legacy_id=1790</comment>
+  </data>
+  <data name="Text_80" xml:space="preserve">
+    <value>Nachdem das Reich vereint war, schworen die Menschen dem Kaiser ihre Treue. Einige der Schätze, die als Zeichen ihrer Loyalität dargebracht wurden, sind die folgenden.</value>
+    <comment>legacy_id=80</comment>
+  </data>
+  <data name="Answer_80_Slot_0" xml:space="preserve">
+    <value>Erzählt mir die vorige Geschichte.</value>
+    <comment>legacy_id=1800</comment>
+  </data>
+  <data name="Answer_80_Slot_1" xml:space="preserve">
+    <value>Bitte fahrt fort.</value>
+    <comment>legacy_id=1801</comment>
+  </data>
+  <data name="Text_81" xml:space="preserve">
+    <value>Die 'Träne der Elfe' wurde von den Elfen als Zeichen ihres Schwurs dargebracht, die Macht der Elfen und Menschen zu stärken.</value>
+    <comment>legacy_id=81</comment>
+  </data>
+  <data name="Answer_81_Slot_0" xml:space="preserve">
+    <value>Erzählt mir die vorherige Geschichte.</value>
+    <comment>legacy_id=1810</comment>
+  </data>
+  <data name="Answer_81_Slot_1" xml:space="preserve">
+    <value>Bitte fahrt fort.</value>
+    <comment>legacy_id=1811</comment>
+  </data>
+  <data name="Text_82" xml:space="preserve">
+    <value>Sucht die 'Seele des Magiers'. Den alten dunklen Magiern zufolge wurde sie zuletzt in der Nähe des Verlorenen Turms, in Atlans und Tarkan gesehen.</value>
+    <comment>legacy_id=82</comment>
+  </data>
+  <data name="Answer_82_Slot_0" xml:space="preserve">
+    <value>Ich werde ihn suchen</value>
+    <comment>legacy_id=1820</comment>
+  </data>
+  <data name="Answer_82_Slot_1" xml:space="preserve">
+    <value>Ich komme später wieder.</value>
+    <comment>legacy_id=1821</comment>
+  </data>
+  <data name="Text_90" xml:space="preserve">
+    <value>Ihr habt das 'Dekret des Kaisers' zu Ende gelesen. Doch wisst Ihr von dem geheimen Pakt zwischen Muren und Semeden, dem Anführer der Beschwörer? Muren wurde eines versprochen, dafür dass Elbe unter die Herrschaft des Reiches gestellt wurde.</value>
+    <comment>legacy_id=90</comment>
+  </data>
+  <data name="Answer_90_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=1900</comment>
+  </data>
+  <data name="Text_91" xml:space="preserve">
+    <value>Der Kontinent MU besaß das Tor zu einer anderen Dimension, das unter der Obhut der Beschwörer stand. Und Semeden hatte den Abgrund des Auges als Zeichen seines Versprechens überreicht. Bitte zieht aus und bringt den Abgrund des Auges zurück.</value>
+    <comment>legacy_id=91</comment>
+  </data>
+  <data name="Answer_91_Slot_0" xml:space="preserve">
+    <value>Auftrag annehmen</value>
+    <comment>legacy_id=1910</comment>
+  </data>
+  <data name="Answer_91_Slot_1" xml:space="preserve">
+    <value>Die Bitte ablehnen</value>
+    <comment>legacy_id=1911</comment>
+  </data>
+  <data name="Text_92" xml:space="preserve">
+    <value>Ich habe gehört, dass das Auge des Abgrunds in der Nähe von Atlans, dem Verlorenen Turm und Tarkan gefunden wurde. Kehrt zurück, sobald Ihr das Auge des Abgrunds gefunden habt.</value>
+    <comment>legacy_id=92</comment>
+  </data>
+  <data name="Answer_92_Slot_0" xml:space="preserve">
+    <value>Die Geschichte zu Ende erzählen</value>
+    <comment>legacy_id=1920</comment>
+  </data>
+  <data name="Text_93" xml:space="preserve">
+    <value>Ihr habt den Abgrund des Auges gefunden. Er ist bekannt als ein Gegenstand, der aus einem Element besteht, das in der wirklichen Welt nicht existiert. Er ist ein Überbleibsel aus der Welt vor der gegenwärtigen, deren Erinnerung mit ihm zurückkehrt.</value>
+    <comment>legacy_id=93</comment>
+  </data>
+  <data name="Answer_93_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=1930</comment>
+  </data>
+  <data name="Text_94" xml:space="preserve">
+    <value>Das Auge des Abgrunds hat für mich eine besondere Bedeutung, denn ich überwache die Dimensionen dieser Welt und verständige mich durch sie. Wenn Ihr mir das Auge des Abgrunds bringt, verleihe ich Euch im Namen Semedens, des Hüters Eurer Dimension, den Titel des Blutbeschwörers.</value>
+    <comment>legacy_id=94</comment>
+  </data>
+  <data name="Answer_94_Slot_0" xml:space="preserve">
+    <value>Ernennung zum Blutbeschwörer</value>
+    <comment>legacy_id=1940</comment>
+  </data>
+  <data name="Text_100" xml:space="preserve">
+    <value>Der legendäre Schatz namens 'Ring des Ruhms' wird benötigt, um den Segen und die Stärke Murens zu erlangen. Er ist in unseren Landen erneut in Erscheinung getreten. Doch Ihr seid noch nicht bereit. Wartet, bis Ihr mehr Erfahrung gesammelt habt.</value>
+    <comment>legacy_id=100</comment>
+  </data>
+  <data name="Answer_100_Slot_0" xml:space="preserve">
+    <value>Was muss ich denn tun?</value>
+    <comment>legacy_id=2000</comment>
+  </data>
+  <data name="Text_101" xml:space="preserve">
+    <value>Für diese Aufgabe wird mehr Erfahrung benötigt, um zu bestehen. Kehrt zurück, wenn Ihr nach den Prüfungen des verlorenen Reiches Stufe 220 erreicht habt.</value>
+    <comment>legacy_id=101</comment>
+  </data>
+  <data name="Answer_101_Slot_0" xml:space="preserve">
+    <value>Ich werde zurückkehren, wenn meine Zeit gekommen ist.</value>
+    <comment>legacy_id=2010</comment>
+  </data>
+  <data name="Text_102" xml:space="preserve">
+    <value>Der legendäre Schatz, der 'Ring des Ruhms' genannt wird, ist nötig, um Murens Segen und Stärke zu erlangen. Er hat seine Gegenwart in unseren Landen erneut offenbart.</value>
+    <comment>legacy_id=102</comment>
+  </data>
+  <data name="Answer_102_Slot_0" xml:space="preserve">
+    <value>Ich möchte mehr erfahren.</value>
+    <comment>legacy_id=2020</comment>
+  </data>
+  <data name="Text_103" xml:space="preserve">
+    <value>Wer den 'Ring des Ruhms' besitzt, erlangt den Segen Murens. Es heißt, er sei in den Wüsten jenseits des Meeres zu finden.</value>
+    <comment>legacy_id=103</comment>
+  </data>
+  <data name="Answer_103_Slot_0" xml:space="preserve">
+    <value>Warum das?</value>
+    <comment>legacy_id=2030</comment>
+  </data>
+  <data name="Text_104" xml:space="preserve">
+    <value>Die Monster dort sind äußerst mächtig. Sie tragen den Ring bei sich.</value>
+    <comment>legacy_id=104</comment>
+  </data>
+  <data name="Answer_104_Slot_0" xml:space="preserve">
+    <value>Bitte erzählt die Geschichte noch einmal.</value>
+    <comment>legacy_id=2040</comment>
+  </data>
+  <data name="Answer_104_Slot_1" xml:space="preserve">
+    <value>Ich werde es versuchen.</value>
+    <comment>legacy_id=2041</comment>
+  </data>
+  <data name="Answer_104_Slot_2" xml:space="preserve">
+    <value>Ich bin noch nicht bereit.</value>
+    <comment>legacy_id=2042</comment>
+  </data>
+  <data name="Text_105" xml:space="preserve">
+    <value>Der 'Ring des Ruhms' liegt vielleicht näher, als Ihr denkt. Sobald Ihr ihn erlangt, werdet Ihr eine deutliche Veränderung Eurer Kräfte spüren. Doch ein leichtes Unterfangen wird es nicht sein.</value>
+    <comment>legacy_id=105</comment>
+  </data>
+  <data name="Answer_105_Slot_0" xml:space="preserve">
+    <value>Ich werde damit zurückkehren.</value>
+    <comment>legacy_id=2050</comment>
+  </data>
+  <data name="Text_108" xml:space="preserve">
+    <value>Dies ist in der Tat der 'Ring des Ruhms'. Er strahlt eine mystische Aura aus, weit stärker, als ich mir vorgestellt hatte. Dieser Ring birgt eine Legende, die Ihr Euch kaum auszumalen vermögt. In Euren Händen ist er ein wahrer Segen.</value>
+    <comment>legacy_id=108</comment>
+  </data>
+  <data name="Answer_108_Slot_0" xml:space="preserve">
+    <value>Ich verstehe.</value>
+    <comment>legacy_id=2080</comment>
+  </data>
+  <data name="Text_109" xml:space="preserve">
+    <value>Dieser Ring soll Leben erwecken und ewige Jugend gewähren. Doch er wirkt nur bei Helden, welche die Macht besitzen, seine Kraft zu lenken.</value>
+    <comment>legacy_id=109</comment>
+  </data>
+  <data name="Answer_109_Slot_0" xml:space="preserve">
+    <value>Wieso das?</value>
+    <comment>legacy_id=2090</comment>
+  </data>
+  <data name="Text_110" xml:space="preserve">
+    <value>Das liegt daran, dass Etramu, der Zauberer von Arka, einen Bann darauf legte, damit das Böse ihn nicht missbrauchen kann. Doch der Ring sagt, dass Ihr seiner würdig seid.</value>
+    <comment>legacy_id=110</comment>
+  </data>
+  <data name="Answer_110_Slot_0" xml:space="preserve">
+    <value>Ist das so?</value>
+    <comment>legacy_id=2100</comment>
+  </data>
+  <data name="Text_111" xml:space="preserve">
+    <value>Der 'Ring des Ruhms' wurde geschaffen, als die Prophezeiung Secromicon aus einem unvergänglichen Metall erschaffen wurde. Beide galten als heilig, doch ihr Verbleib wurde ungewiss, als sie während des Aufstands des Vizekommandanten Gaion entwendet wurden.</value>
+    <comment>legacy_id=111</comment>
+  </data>
+  <data name="Answer_111_Slot_0" xml:space="preserve">
+    <value>Ist das wahr?!</value>
+    <comment>legacy_id=2110</comment>
+  </data>
+  <data name="Text_112" xml:space="preserve">
+    <value>Nun, da der 'Ring des Ruhms' gefunden wurde, werdet Ihr als Krieger noch weiter wachsen können.</value>
+    <comment>legacy_id=112</comment>
+  </data>
+  <data name="Answer_112_Slot_0" xml:space="preserve">
+    <value>Ich spüre, wie meine Fähigkeiten wachsen!</value>
+    <comment>legacy_id=2120</comment>
+  </data>
+  <data name="Text_113" xml:space="preserve">
+    <value>Ihr werdet zu einem weitaus mächtigeren Wesen heranwachsen als zuvor. Setzt Eure Macht bitte für den Frieden unseres Reiches ein.</value>
+    <comment>legacy_id=113</comment>
+  </data>
+  <data name="Answer_113_Slot_0" xml:space="preserve">
+    <value>Das werde ich.</value>
+    <comment>legacy_id=2130</comment>
+  </data>
+  <data name="Text_114" xml:space="preserve">
+    <value>Ihr besitzt bereits die heilige Macht.</value>
+    <comment>legacy_id=114</comment>
+  </data>
+  <data name="Answer_114_Slot_0" xml:space="preserve">
+    <value>Ich komme später wieder.</value>
+    <comment>legacy_id=2140</comment>
+  </data>
+  <data name="Text_115" xml:space="preserve">
+    <value>Der 'Dunkle Stein', der Kriegern neue Macht verleihen soll, wurde auf dem Kontinent Mu gefunden. Doch Ihr seid noch nicht bereit, diese Macht zu nutzen. Wartet, bis Ihr es seid.</value>
+    <comment>legacy_id=115</comment>
+  </data>
+  <data name="Answer_115_Slot_0" xml:space="preserve">
+    <value>Ich werde zurückkehren, wenn ich bereit bin.</value>
+    <comment>legacy_id=2150</comment>
+  </data>
+  <data name="Text_116" xml:space="preserve">
+    <value>Um die volle Kraft zu erlangen, müsst Ihr Euch mit der 'Schriftrolle des Kaisers' wappnen, welche die historischen Taten von Kaiser Muren festhält. Begebt Euch zu 'Sevina' in Devias.</value>
+    <comment>legacy_id=116</comment>
+  </data>
+  <data name="Answer_116_Slot_0" xml:space="preserve">
+    <value>Ich kehre zurück, wenn ich bereit bin.</value>
+    <comment>legacy_id=2160</comment>
+  </data>
+  <data name="Text_117" xml:space="preserve">
+    <value>Ihr habt es nicht vermocht, ein Blade Knight zu werden. Kehrt zurück, wenn Ihr durch den 'Ring des Ruhms' neue Kraft erlangt habt.</value>
+    <comment>legacy_id=117</comment>
+  </data>
+  <data name="Answer_117_Slot_0" xml:space="preserve">
+    <value>Ich kehre zurück, sobald ich bereit bin.</value>
+    <comment>legacy_id=2170</comment>
+  </data>
+  <data name="Text_118" xml:space="preserve">
+    <value>Ihr müsst den Göttern 3.000.000 Zen darbringen, um diese Aufgabe zu weihen. Euer Zen reicht nicht aus</value>
+    <comment>legacy_id=118</comment>
+  </data>
+  <data name="Answer_118_Slot_0" xml:space="preserve">
+    <value>Ich werde mit 3.000.000 Zen zurückkehren.</value>
+    <comment>legacy_id=2180</comment>
+  </data>
+  <data name="Text_119" xml:space="preserve">
+    <value>Eure Opfergabe an die Götter genügt nicht. Ich werde Euch vom Orakel berichten, wenn Ihr eine Opfergabe von 2.000.000 Zen darbringt.</value>
+    <comment>legacy_id=119</comment>
+  </data>
+  <data name="Answer_119_Slot_0" xml:space="preserve">
+    <value>Ich kehre mit 2.000.000 Zen zurück</value>
+    <comment>legacy_id=2190</comment>
+  </data>
+  <data name="Text_130" xml:space="preserve">
+    <value>Das ist wahrhaftig der 'Ring des Ruhmes'. Seht nur, wie er glänzt. Dieser Ring birgt Zeit und Legenden, die Ihr kaum zu erahnen vermögt. Welch ein Segen, dass Ihr ihn gefunden habt!.</value>
+    <comment>legacy_id=130</comment>
+  </data>
+  <data name="Answer_130_Slot_0" xml:space="preserve">
+    <value>Das überrascht mich zu hören!</value>
+    <comment>legacy_id=2300</comment>
+  </data>
+  <data name="Text_131" xml:space="preserve">
+    <value>Ja, dem Ring wird die Macht nachgesagt, die Toten zum Leben zu erwecken und ewige Jugend zu verleihen. Seine volle Kraft entfaltet er nur in den Händen eines wahren Helden, der sie zu beherrschen vermag.</value>
+    <comment>legacy_id=131</comment>
+  </data>
+  <data name="Answer_131_Slot_0" xml:space="preserve">
+    <value>Warum ist das so?</value>
+    <comment>legacy_id=2310</comment>
+  </data>
+  <data name="Text_132" xml:space="preserve">
+    <value>Das liegt daran, dass Etramu, der Magier von Arka, einen Zauber darauf gelegt hat, damit es nicht in falsche Hände gerät. Doch es scheint, als wäret Ihr die richtige Person!</value>
+    <comment>legacy_id=132</comment>
+  </data>
+  <data name="Answer_132_Slot_0" xml:space="preserve">
+    <value>Ach wirklich!</value>
+    <comment>legacy_id=2320</comment>
+  </data>
+  <data name="Text_133" xml:space="preserve">
+    <value>Der 'Ring des Ruhms' entstand, als die Prophezeiung Secromicon aus einem unvergänglichen Metall geschaffen wurde. Beide galten als heilig, doch ihr Verbleib wurde unbekannt, als sie während des Aufstands des stellvertretenden Befehlshabers Gaion entwendet wurden.</value>
+    <comment>legacy_id=133</comment>
+  </data>
+  <data name="Answer_133_Slot_0" xml:space="preserve">
+    <value>Ist das so!</value>
+    <comment>legacy_id=2330</comment>
+  </data>
+  <data name="Text_134" xml:space="preserve">
+    <value>Nun, da der 'Ring des Ruhms' gefunden wurde, werdet Ihr als Krieger noch weiter wachsen können.</value>
+    <comment>legacy_id=134</comment>
+  </data>
+  <data name="Answer_134_Slot_0" xml:space="preserve">
+    <value>Ich spüre, wie meine Kräfte wachsen!</value>
+    <comment>legacy_id=2340</comment>
+  </data>
+  <data name="Text_135" xml:space="preserve">
+    <value>Wenn Ihr neue Macht erlangen wollt, hört mir gut zu. Der 'Dunkle Stein', der Kriegern neue Macht verleihen soll, wurde auf dem Kontinent Mu gefunden.</value>
+    <comment>legacy_id=135</comment>
+  </data>
+  <data name="Answer_135_Slot_0" xml:space="preserve">
+    <value>Ich würde gern mehr hören.</value>
+    <comment>legacy_id=2350</comment>
+  </data>
+  <data name="Text_136" xml:space="preserve">
+    <value>Mit dem 'Dunklen Stein' könnt Ihr eine neue Fähigkeit meistern. Es wird keine leichte Aufgabe sein, doch da es Euch gelungen ist, den 'Ring des Ruhms' zu erlangen, könnte es Euch möglich sein.</value>
+    <comment>legacy_id=136</comment>
+  </data>
+  <data name="Answer_136_Slot_0" xml:space="preserve">
+    <value>Was muss ich tun?</value>
+    <comment>legacy_id=2360</comment>
+  </data>
+  <data name="Text_137" xml:space="preserve">
+    <value>Es heißt, man könne den Stein in Tarkan und Icarus finden. Hütet Euch vor den Monstern. Jene Monster, die den Stein in sich tragen, regieren nur auf solche, die eine besondere Gabe besitzen.</value>
+    <comment>legacy_id=137</comment>
+  </data>
+  <data name="Answer_137_Slot_0" xml:space="preserve">
+    <value>Bitte erzählt die Geschichte noch einmal.</value>
+    <comment>legacy_id=2370</comment>
+  </data>
+  <data name="Answer_137_Slot_1" xml:space="preserve">
+    <value>Dann werde ich es versuchen!</value>
+    <comment>legacy_id=2371</comment>
+  </data>
+  <data name="Answer_137_Slot_2" xml:space="preserve">
+    <value>Ich fühle mich noch nicht bereit.</value>
+    <comment>legacy_id=2372</comment>
+  </data>
+  <data name="Text_138" xml:space="preserve">
+    <value>Der 'Dunkle Stein' ruft Euch in diesem Augenblick. Mit ihm in der Hand werdet Ihr gewiss eine Macht erlangen, die Ihr nie zuvor gespürt habt, doch auch viele andere Krieger suchen verzweifelt nach dem Stein.</value>
+    <comment>legacy_id=138</comment>
+  </data>
+  <data name="Answer_138_Slot_0" xml:space="preserve">
+    <value>Ich werde mit dem 'Dunklen Stein' zurückkehren.</value>
+    <comment>legacy_id=2380</comment>
+  </data>
+  <data name="Text_139" xml:space="preserve">
+    <value>Ihr habt also den 'Dunklen Stein' gefunden. Den Überlieferungen nach ist dieser Stein das eingetrocknete Blut des Helden 'Benelope', der im Krieg der Götter gegen Satan kämpfte.</value>
+    <comment>legacy_id=139</comment>
+  </data>
+  <data name="Answer_139_Slot_0" xml:space="preserve">
+    <value>Erzählt mir mehr.</value>
+    <comment>legacy_id=2390</comment>
+  </data>
+  <data name="Text_140" xml:space="preserve">
+    <value>Benelope entstammt einem Rittergeschlecht. Nach seiner Niederlage im Krieg übte er sich in neuer Magie und Kampfeskunst. Diese Künste werden im Stillen an Krieger mit dem Blut eines Ritters weitergegeben, um gegen die übermächtige Macht Kunduns zu bestehen.</value>
+    <comment>legacy_id=140</comment>
+  </data>
+  <data name="Answer_140_Slot_0" xml:space="preserve">
+    <value>Und weiter...</value>
+    <comment>legacy_id=2400</comment>
+  </data>
+  <data name="Text_141" xml:space="preserve">
+    <value>Ja, in Euren Adern fließt das Blut eines Kriegers. Daher wird Euch die Macht von Benelope durch den Dunklen Stein verliehen.</value>
+    <comment>legacy_id=141</comment>
+  </data>
+  <data name="Answer_141_Slot_0" xml:space="preserve">
+    <value>Mir wurde neue Macht verliehen!</value>
+    <comment>legacy_id=2410</comment>
+  </data>
+  <data name="Text_142" xml:space="preserve">
+    <value>Ihr habt durch den 'Ring des Ruhms' neue Macht erlangt. Doch es gibt etwas, das Ihr nicht wisst.</value>
+    <comment>legacy_id=142</comment>
+  </data>
+  <data name="Answer_142_Slot_0" xml:space="preserve">
+    <value>Was ist das?</value>
+    <comment>legacy_id=2420</comment>
+  </data>
+  <data name="Text_143" xml:space="preserve">
+    <value>Möglicherweise könnt Ihr neue Macht erlangen. Der legendäre Schatz namens 'Dunkler Stein', der ebenso wie der 'Ring des Ruhms' als heilig galt, ruft nach Euch.</value>
+    <comment>legacy_id=143</comment>
+  </data>
+  <data name="Answer_143_Slot_0" xml:space="preserve">
+    <value>Das ist kaum zu glauben!</value>
+    <comment>legacy_id=2430</comment>
+  </data>
+  <data name="Text_144" xml:space="preserve">
+    <value>Lugard, der Gott des Lichts, hat Euch um einen Gefallen gebeten. Doch Ihr seid noch nicht würdig. Kehrt zurück, wenn Ihr stärker geworden seid.</value>
+    <comment>legacy_id=144</comment>
+  </data>
+  <data name="Answer_144_Slot_0" xml:space="preserve">
+    <value>Ich komme zurück, wenn ich stärker bin.</value>
+    <comment>legacy_id=2440</comment>
+  </data>
+  <data name="Text_145" xml:space="preserve">
+    <value> Lugard, der Gott des Lichts, hat Euch um einen Gefallen gebeten. Doch seid Ihr noch nicht würdig. Kehrt zurück, sobald Ihr die vorherige Aufgabe vollendet habt.</value>
+    <comment>legacy_id=145</comment>
+  </data>
+  <data name="Answer_145_Slot_0" xml:space="preserve">
+    <value>Ich komme wieder, sobald ich es vollbracht habe.</value>
+    <comment>legacy_id=2450</comment>
+  </data>
+  <data name="Text_146" xml:space="preserve">
+    <value>Ihr habt nicht genügend Zen. Ihr könnt Euch für diese Mission bewerben, indem Ihr Lugard 5.000.000 Zen darbietet.</value>
+    <comment>legacy_id=146</comment>
+  </data>
+  <data name="Answer_146_Slot_0" xml:space="preserve">
+    <value>Ich komme zurück, sobald ich bereit bin.</value>
+    <comment>legacy_id=2460</comment>
+  </data>
+  <data name="Text_147" xml:space="preserve">
+    <value> Lugard, der Gott des Lichts, hat Euch um einen Gefallen gebeten.</value>
+    <comment>legacy_id=147</comment>
+  </data>
+  <data name="Answer_147_Slot_0" xml:space="preserve">
+    <value>Worum geht es?</value>
+    <comment>legacy_id=2470</comment>
+  </data>
+  <data name="Text_148" xml:space="preserve">
+    <value> Lugard hat Euch gebeten, Helden zu suchen, die sich Balgass' neuer Bedrohung für MU entgegenstellen.</value>
+    <comment>legacy_id=148</comment>
+  </data>
+  <data name="Answer_148_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2480</comment>
+  </data>
+  <data name="Text_149" xml:space="preserve">
+    <value>Wir wissen, dass Balgass' Heer durch die Festung Cry Wolf gegen den Kontinent Mu zieht, doch eine vollständige Deutung des Geschehens steht noch aus.</value>
+    <comment>legacy_id=149</comment>
+  </data>
+  <data name="Answer_149_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2490</comment>
+  </data>
+  <data name="Text_150" xml:space="preserve">
+    <value>Wir bemühen uns redlich, die Bedeutung von Lugars Vertrauen in uns zu begreifen, doch unsere unzulänglichen Fähigkeiten machen es uns schwer.</value>
+    <comment>legacy_id=150</comment>
+  </data>
+  <data name="Answer_150_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2500</comment>
+  </data>
+  <data name="Text_151" xml:space="preserve">
+    <value>Ich glaube, Ihr seid diejenigen, die uns helfen können. Habt Ihr Interesse, mit uns zusammenzuarbeiten?</value>
+    <comment>legacy_id=151</comment>
+  </data>
+  <data name="Answer_151_Slot_0" xml:space="preserve">
+    <value>Erneut zuhören.</value>
+    <comment>legacy_id=2510</comment>
+  </data>
+  <data name="Answer_151_Slot_1" xml:space="preserve">
+    <value>Den Auftrag annehmen</value>
+    <comment>legacy_id=2511</comment>
+  </data>
+  <data name="Answer_151_Slot_2" xml:space="preserve">
+    <value>Die Bitte ablehnen</value>
+    <comment>legacy_id=2512</comment>
+  </data>
+  <data name="Text_152" xml:space="preserve">
+    <value>Um uns helfen zu können, müsst Ihr Euch Balgass' Armee entgegenstellen. Doch zuvor muss ich prüfen, ob Ihr für diese Mission stark genug seid.</value>
+    <comment>legacy_id=152</comment>
+  </data>
+  <data name="Answer_152_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2520</comment>
+  </data>
+  <data name="Text_153" xml:space="preserve">
+    <value>Vernichtet die Monster Death Beam, Hellmaine und Dark Phoenix, die über Tarkan, Aida und Icarus herrschen, und bringt mir je einen Beweis ihres Falls.</value>
+    <comment>legacy_id=153</comment>
+  </data>
+  <data name="Answer_153_Slot_0" xml:space="preserve">
+    <value>Die Geschichte zu Ende erzählen</value>
+    <comment>legacy_id=2530</comment>
+  </data>
+  <data name="Text_154" xml:space="preserve">
+    <value>Glückwunsch, Ihr habt die Pflicht erfüllt. Hier ist eine kleine Anerkennung für Eure Mühen.</value>
+    <comment>legacy_id=154</comment>
+  </data>
+  <data name="Answer_154_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2540</comment>
+  </data>
+  <data name="Text_155" xml:space="preserve">
+    <value>Balgass stellt eine große Bedrohung dar, denn er steht im Bunde mit Eresia, der Königin der Zauberei, und hat damit großes Unheil über diese Welt gebracht.</value>
+    <comment>legacy_id=155</comment>
+  </data>
+  <data name="Answer_155_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2550</comment>
+  </data>
+  <data name="Text_156" xml:space="preserve">
+    <value>Wir vermuten, dass Balgass mit seinem Heer böser Zauberei eine neue Bedrohung gegen den Kontinent MU plant.</value>
+    <comment>legacy_id=156</comment>
+  </data>
+  <data name="Answer_156_Slot_0" xml:space="preserve">
+    <value>Die Geschichte zu Ende erzählen</value>
+    <comment>legacy_id=2560</comment>
+  </data>
+  <data name="Text_157" xml:space="preserve">
+    <value>Ihr habt nicht genügend Mittel. Bitte überreicht Lugard 7.000.000 Zen, um Euch für diese Mission zu bewerben.</value>
+    <comment>legacy_id=157</comment>
+  </data>
+  <data name="Answer_157_Slot_0" xml:space="preserve">
+    <value>Ich komme wieder, wenn ich bereit bin.</value>
+    <comment>legacy_id=2570</comment>
+  </data>
+  <data name="Text_158" xml:space="preserve">
+    <value>Seid willkommen, nun seid Ihr wahrhaftig bereit, uns beizustehen.</value>
+    <comment>legacy_id=158</comment>
+  </data>
+  <data name="Answer_158_Slot_0" xml:space="preserve">
+    <value>Wobei braucht Ihr Hilfe?</value>
+    <comment>legacy_id=2580</comment>
+  </data>
+  <data name="Text_159" xml:space="preserve">
+    <value>Nun, unseren Informationen zufolge hat Balgass einen Ort errichtet, der die Kaserne genannt wird. Die 12 Apostel Lugards halten dies für eine neue Bedrohung durch Balgass.</value>
+    <comment>legacy_id=159</comment>
+  </data>
+  <data name="Answer_159_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2590</comment>
+  </data>
+  <data name="Text_160" xml:space="preserve">
+    <value>Genaue Kenntnis über die 'Baracke' treibt einen dazu, die Baracken-Zone zu betreten, um die drohende Erstarkung von Balgass' Heer einzudämmen.</value>
+    <comment>legacy_id=160</comment>
+  </data>
+  <data name="Answer_160_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2600</comment>
+  </data>
+  <data name="Text_161" xml:space="preserve">
+    <value>Glücklicherweise konnte Lugards Schutz dabei helfen, einen Weg in Balgass' Kaserne zu finden. Betretet die Zone, vernichtet die Soldaten und beschafft genaue Informationen. Werdet Ihr die entsprechenden Daten zurückbringen?</value>
+    <comment>legacy_id=161</comment>
+  </data>
+  <data name="Answer_161_Slot_0" xml:space="preserve">
+    <value>Erneut anhören.</value>
+    <comment>legacy_id=2610</comment>
+  </data>
+  <data name="Answer_161_Slot_1" xml:space="preserve">
+    <value>Den Auftrag annehmen</value>
+    <comment>legacy_id=2611</comment>
+  </data>
+  <data name="Answer_161_Slot_2" xml:space="preserve">
+    <value>Die Bitte ablehnen</value>
+    <comment>legacy_id=2612</comment>
+  </data>
+  <data name="Text_162" xml:space="preserve">
+    <value>Geht zum nördlichen Friedhof der Cry-Wolf-Region und sucht den geflohenen Soldaten aus Balgass' Kaserne. Lugars Segen hat einem von ihnen Verstand verliehen. Er nennt sich Werwolf-Wächter.</value>
+    <comment>legacy_id=162</comment>
+  </data>
+  <data name="Answer_162_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2620</comment>
+  </data>
+  <data name="Text_163" xml:space="preserve">
+    <value>Er wird Euch zu Balgass' Kaserne führen. Betretet das Gebiet und vernichtet mindestens 10 Monster in der Kaserne.</value>
+    <comment>legacy_id=163</comment>
+  </data>
+  <data name="Answer_163_Slot_0" xml:space="preserve">
+    <value>Die Geschichte zu Ende erzählen</value>
+    <comment>legacy_id=2630</comment>
+  </data>
+  <data name="Text_164" xml:space="preserve">
+    <value>Ihr habt die Pflicht wohlbehalten erfüllt. Ich danke Euch für Eure harte Arbeit und Euren festen Willen.</value>
+    <comment>legacy_id=164</comment>
+  </data>
+  <data name="Answer_164_Slot_0" xml:space="preserve">
+    <value>Weiterreden.</value>
+    <comment>legacy_id=2640</comment>
+  </data>
+  <data name="Text_165" xml:space="preserve">
+    <value>Mit den Informationen und all den vernichteten Monstern habt Ihr einen großen Beitrag geleistet, um Frieden auf dem Kontinent MU und in Cry Wolf zu schaffen.</value>
+    <comment>legacy_id=165</comment>
+  </data>
+  <data name="Answer_165_Slot_0" xml:space="preserve">
+    <value>Die Geschichte zu Ende erzählen</value>
+    <comment>legacy_id=2650</comment>
+  </data>
+  <data name="Text_166" xml:space="preserve">
+    <value>Ihr seid noch nicht würdig. Sucht Wachmann Mallon auf und kehrt zurück, wenn Ihr für die Mission vollständig qualifiziert seid.</value>
+    <comment>legacy_id=166</comment>
+  </data>
+  <data name="Answer_166_Slot_0" xml:space="preserve">
+    <value>Die Geschichte beenden.</value>
+    <comment>legacy_id=2660</comment>
+  </data>
+  <data name="Text_167" xml:space="preserve">
+    <value>Ihr habt nicht genug Gold. Bietet Lugard 10.000.000 Zen dar, um Euch für diese Mission zu bewerben.</value>
+    <comment>legacy_id=167</comment>
+  </data>
+  <data name="Answer_167_Slot_0" xml:space="preserve">
+    <value>Ich komme zurück, wenn ich bereit bin.</value>
+    <comment>legacy_id=2670</comment>
+  </data>
+  <data name="Text_168" xml:space="preserve">
+    <value>Euer eigenmächtiger Mut hat uns allen große Hoffnung geschenkt.</value>
+    <comment>legacy_id=168</comment>
+  </data>
+  <data name="Answer_168_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2680</comment>
+  </data>
+  <data name="Text_169" xml:space="preserve">
+    <value>Balgass hat sich an einem abgesonderten Ort verborgen, um sich von seinem geschundenen Leib zu erholen.</value>
+    <comment>legacy_id=169</comment>
+  </data>
+  <data name="Answer_169_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2690</comment>
+  </data>
+  <data name="Text_170" xml:space="preserve">
+    <value>Um den von Lugard anvertrauten Auftrag zu erfüllen, muss Balgass' genauer Aufenthaltsort gefunden und sein in Ausbildung befindliches Heer vernichtet werden.</value>
+    <comment>legacy_id=170</comment>
+  </data>
+  <data name="Answer_170_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2700</comment>
+  </data>
+  <data name="Text_171" xml:space="preserve">
+    <value>Die letzte Mission, die auf Lugars Auftrag folgt, beinhaltet eine gewaltige und schwierige Prüfung. Habt Ihr noch immer Interesse?</value>
+    <comment>legacy_id=171</comment>
+  </data>
+  <data name="Answer_171_Slot_0" xml:space="preserve">
+    <value>Erneut anhören.</value>
+    <comment>legacy_id=2710</comment>
+  </data>
+  <data name="Answer_171_Slot_1" xml:space="preserve">
+    <value>Auftrag annehmen</value>
+    <comment>legacy_id=2711</comment>
+  </data>
+  <data name="Answer_171_Slot_2" xml:space="preserve">
+    <value>Die Bitte ablehnen</value>
+    <comment>legacy_id=2712</comment>
+  </data>
+  <data name="Text_172" xml:space="preserve">
+    <value>Tretet durch das Tor am nördlichen Rand von Balgass' Kaserne ein; wir werden den Ort im Voraus bereithalten.</value>
+    <comment>legacy_id=172</comment>
+  </data>
+  <data name="Answer_172_Slot_0" xml:space="preserve">
+    <value>Die Geschichte zu Ende erzählen</value>
+    <comment>legacy_id=2720</comment>
+  </data>
+  <data name="Text_173" xml:space="preserve">
+    <value>Glückwunsch, Ihr habt Lugars letzte Prüfung bestanden. Sein Segen wird Euch nun begleiten, wohin Ihr auch geht.</value>
+    <comment>legacy_id=173</comment>
+  </data>
+  <data name="Answer_173_Slot_0" xml:space="preserve">
+    <value>Weiter zuhören.</value>
+    <comment>legacy_id=2730</comment>
+  </data>
+  <data name="Text_174" xml:space="preserve">
+    <value>Eure harte Arbeit hat sich gelohnt, um den Frieden auf dem Kontinent MU und in Cry Wolf vor Balgass' neuer Bedrohung zu bewahren. Ich danke Euch zutiefst für Eure Hilfe.</value>
+    <comment>legacy_id=174</comment>
+  </data>
+  <data name="Answer_174_Slot_0" xml:space="preserve">
+    <value>Die Geschichte zu Ende erzählen</value>
+    <comment>legacy_id=2740</comment>
+  </data>
+</root>
