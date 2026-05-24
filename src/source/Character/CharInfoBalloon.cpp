@@ -73,10 +73,21 @@ namespace
 
 CCharInfoBalloon::CCharInfoBalloon() : m_pCharInfo(nullptr)
 {
+    I18N::RegisterLocaleObserver(&CCharInfoBalloon::OnLocaleChanged, this);
 }
 
 CCharInfoBalloon::~CCharInfoBalloon()
 {
+    I18N::UnregisterLocaleObserver(&CCharInfoBalloon::OnLocaleChanged, this);
+}
+
+void CCharInfoBalloon::OnLocaleChanged(void* ctx) noexcept
+{
+    auto* self = static_cast<CCharInfoBalloon*>(ctx);
+    if (self->m_pCharInfo != nullptr)
+    {
+        self->SetInfo();
+    }
 }
 
 void CCharInfoBalloon::Create(CHARACTER* pCharInfo)
