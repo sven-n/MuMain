@@ -48,13 +48,25 @@ internal static class Program
             Console.WriteLine($"Wrote {path} ({n} entries)");
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(opts.StructHeaderPath)!);
-        Directory.CreateDirectory(Path.GetDirectoryName(opts.StructSourcePath)!);
+        EnsureParentDirectoryExists(opts.StructHeaderPath);
+        EnsureParentDirectoryExists(opts.StructSourcePath);
         StructureWriter.Write(opts.StructHeaderPath, opts.StructSourcePath, eng);
         Console.WriteLine($"Wrote {opts.StructHeaderPath}");
         Console.WriteLine($"Wrote {opts.StructSourcePath}");
 
         return 0;
+    }
+
+    /// Creates the parent directory of `path` if needed. Skips the call when
+    /// `path` is a bare filename (Path.GetDirectoryName returns null for that)
+    /// so we don't crash on ArgumentNullException.
+    private static void EnsureParentDirectoryExists(string path)
+    {
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
     }
 
     /// Maps a locale code to the encoding the original tool chain wrote the

@@ -127,6 +127,7 @@ internal static class ResxLoader
     {
         var entries = new List<ResourceEntry>(defaultEntries.Count);
         var idToKey = new Dictionary<string, string>(StringComparer.Ordinal);
+        var legacyIdToKey = new Dictionary<int, string>();
 
         foreach (var (key, defaultRaw) in defaultEntries)
         {
@@ -141,6 +142,7 @@ internal static class ResxLoader
                 continue;
             }
             EnsureNoIdentifierCollision(groupName, idToKey, identifier, key);
+            EnsureNoLegacyIdCollision(groupName, legacyIdToKey, defaultRaw.LegacyIds, key);
 
             var translations = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (var (locale, entriesForLocale) in perLocale)
@@ -155,6 +157,26 @@ internal static class ResxLoader
         }
 
         return entries;
+    }
+
+    private static void EnsureNoLegacyIdCollision(
+        string groupName,
+        Dictionary<int, string> legacyIdToKey,
+        IReadOnlyList<int> legacyIds,
+        string key)
+    {
+        foreach (var legacyId in legacyIds)
+        {
+            if (legacyIdToKey.TryGetValue(legacyId, out var firstKey))
+            {
+                throw new ResxLoadException(
+                    $"Group '{groupName}': legacy_id={legacyId} is assigned to both " +
+                    $"'{firstKey}' and '{key}'. Each legacy_id must be unique within a " +
+                    "group because I18N::<Group>::Lookup(int) does a binary search that " +
+                    "assumes unique sorted IDs.");
+            }
+            legacyIdToKey[legacyId] = key;
+        }
     }
 
     private static string SafeIdentifier(string groupName, string key)

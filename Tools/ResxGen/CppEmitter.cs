@@ -372,6 +372,16 @@ internal static class CppEmitter
                 {
                     if (*p == '{')
                     {
+                        // Two adjacent open braces collapse to one literal,
+                        // so translations can carry brace characters next to
+                        // placeholders.
+                        if (p[1] == '{')
+                        {
+                            result.push_back('{');
+                            p += 2;
+                            continue;
+                        }
+
                         // Parse {N} where N is a non-negative integer index.
                         const char* digits = p + 1;
                         std::size_t index = 0;
@@ -399,6 +409,14 @@ internal static class CppEmitter
                             p = digits + 1;
                             continue;
                         }
+                    }
+                    else if (*p == '}' && p[1] == '}')
+                    {
+                        // Two adjacent close braces collapse to one literal,
+                        // symmetric with the open-brace escape above.
+                        result.push_back('}');
+                        p += 2;
+                        continue;
                     }
                     result.push_back(*p++);
                 }
@@ -548,6 +566,22 @@ internal static class CppEmitter
         }
         sb.AppendLine("};");
         sb.AppendLine($"constexpr {(group.IsWide ? "wchar_t" : "char")} kLegacyFallback[] = {(group.IsWide ? "L\"\"" : "\"\"")};");
+        sb.AppendLine();
+        sb.AppendLine("// Compile-time guard: the lookup uses std::lower_bound and assumes");
+        sb.AppendLine("// strictly-increasing IDs. ResxGen already rejects duplicate");
+        sb.AppendLine("// legacy_id entries at generation time; this assert protects against");
+        sb.AppendLine("// the generated file being hand-edited out of sync.");
+        sb.AppendLine("constexpr bool LegacyTableStrictlySorted() noexcept");
+        sb.AppendLine("{");
+        sb.AppendLine("    for (std::size_t i = 1; i < std::size(kLegacyTable); ++i)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        if (kLegacyTable[i - 1].id >= kLegacyTable[i].id) return false;");
+        sb.AppendLine("    }");
+        sb.AppendLine("    return true;");
+        sb.AppendLine("}");
+        sb.AppendLine($"static_assert(LegacyTableStrictlySorted(),");
+        sb.AppendLine($"    \"Duplicate or unsorted legacy_id in I18N::{group.Name}::kLegacyTable; \"");
+        sb.AppendLine($"    \"Lookup(int) requires unique IDs. Check Tools/ResxGen output.\");");
         sb.AppendLine();
         sb.AppendLine("const LegacyEntry* FindLegacyEntry(int legacyId) noexcept");
         sb.AppendLine("{");
