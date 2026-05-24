@@ -53,6 +53,18 @@ internal static class CppEmitter
         // =============================================================
         """;
 
+    /// Locale ordering used by both the master kLocales table and every
+    /// group's data-driven kSlots table. Default locale first, the rest in
+    /// ordinal order. Every group's per-identifier value array indexes into
+    /// this list, so the order MUST stay in sync.
+    public static IReadOnlyList<string> ComputeMasterLocales(IReadOnlyList<ResourceGroup> groups)
+    {
+        return groups.SelectMany(g => g.Locales)
+                     .Distinct(StringComparer.Ordinal)
+                     .OrderBy(l => l == ResxLoader.DefaultLocale ? "" : l, StringComparer.Ordinal)
+                     .ToList();
+    }
+
     public static void WriteGroupHeader(string outputDir, ResourceGroup group)
     {
         var sb = new StringBuilder();
@@ -74,7 +86,11 @@ internal static class CppEmitter
 
         sb.Append($$"""
 
-            void ApplyLocale(const char* locale) noexcept;
+            // Switches every string in this group to the locale identified by
+            // `localeIndex` (the index into I18N::GetAvailableLocales, also the
+            // value returned by I18N::LocaleIndex). The master SetLocale
+            // resolves the locale string once and dispatches the int here.
+            void ApplyLocale(int localeIndex) noexcept;
 
             """);
 
@@ -105,7 +121,7 @@ internal static class CppEmitter
         File.WriteAllText(Path.Combine(outputDir, $"{group.Name}.h"), sb.ToString());
     }
 
-    public static void WriteGroupSource(string outputDir, ResourceGroup group)
+    public static void WriteGroupSource(string outputDir, ResourceGroup group, IReadOnlyList<string> masterLocales)
     {
         var sb = new StringBuilder();
         AppendBanner(sb);
@@ -131,7 +147,9 @@ internal static class CppEmitter
 
         WriteRuntimePointers(sb, group);
         sb.AppendLine();
-        WriteApplyLocale(sb, group);
+        WriteSlotTable(sb, group, masterLocales);
+        sb.AppendLine();
+        WriteApplyLocale(sb);
 
         if (HasLegacyIds(group))
         {
@@ -188,6 +206,11 @@ internal static class CppEmitter
             // for the program's lifetime.
             std::span<const char* const> GetAvailableLocales() noexcept;
 
+            // Returns the position of `locale` in GetAvailableLocales (0-based,
+            // default locale at 0). Returns -1 for unknown or null. Used by
+            // each group's data-driven ApplyLocale(int) dispatch.
+            int LocaleIndex(const char* locale) noexcept;
+
             // Returns the display name for `locale` in that locale's own
             // language (e.g. "Deutsch" for "de"). Returns `locale` itself for
             // codes the generator does not have a display name for.
@@ -235,17 +258,8 @@ internal static class CppEmitter
 
         sb.Append($$"""
 
-            const char* g_currentLocale = "{{ResxLoader.DefaultLocale}}";
-
-            const char* ResolveLocale(const char* locale) noexcept
-            {
-                if (locale == nullptr) return "{{ResxLoader.DefaultLocale}}";
-                for (const char* known : kLocales)
-                {
-                    if (std::strcmp(known, locale) == 0) return known;
-                }
-                return "{{ResxLoader.DefaultLocale}}";
-            }
+            constexpr int kDefaultLocaleIndex = 0;
+            const char* g_currentLocale = kLocales[kDefaultLocaleIndex];
 
             struct ObserverEntry { LocaleObserver cb; void* ctx; };
 
@@ -261,15 +275,27 @@ internal static class CppEmitter
 
             }  // namespace
 
+            int LocaleIndex(const char* locale) noexcept
+            {
+                if (locale == nullptr) return -1;
+                for (int i = 0; i < static_cast<int>(std::size(kLocales)); ++i)
+                {
+                    if (std::strcmp(kLocales[i], locale) == 0) return i;
+                }
+                return -1;
+            }
+
             void SetLocale(const char* locale) noexcept
             {
-                g_currentLocale = ResolveLocale(locale);
+                int idx = LocaleIndex(locale);
+                if (idx < 0) idx = kDefaultLocaleIndex;
+                g_currentLocale = kLocales[idx];
 
             """);
 
         foreach (var g in groups)
         {
-            sb.AppendLine($"    {g.Name}::ApplyLocale(g_currentLocale);");
+            sb.AppendLine($"    {g.Name}::ApplyLocale(idx);");
         }
 
         sb.Append($$"""
@@ -389,11 +415,7 @@ internal static class CppEmitter
 
     private static void WriteLocaleRegistry(StringBuilder sb, IReadOnlyList<ResourceGroup> groups)
     {
-        // Union of locales across all groups, default locale first, rest sorted.
-        var locales = groups.SelectMany(g => g.Locales)
-                            .Distinct(StringComparer.Ordinal)
-                            .OrderBy(l => l == ResxLoader.DefaultLocale ? "" : l, StringComparer.Ordinal)
-                            .ToList();
+        var locales = ComputeMasterLocales(groups);
 
         sb.AppendLine("constexpr const char* kLocales[] = {");
         foreach (var locale in locales)
@@ -446,34 +468,47 @@ internal static class CppEmitter
         }
     }
 
-    private static void WriteApplyLocale(StringBuilder sb, ResourceGroup group)
+    /// Emits the per-identifier {dest, values[]} table that ApplyLocale
+    /// walks. Each row carries the address of the identifier's runtime
+    /// pointer plus one value per master locale (in master-locale order).
+    /// When this group has no translation for a master locale, the value
+    /// for that column falls back to the default-locale literal, so the
+    /// runtime never needs to branch on a missing-translation case.
+    private static void WriteSlotTable(StringBuilder sb, ResourceGroup group, IReadOnlyList<string> masterLocales)
     {
+        var charType = group.IsWide ? "wchar_t" : "char";
         var defaultSanitized = Naming.SanitizeLocale(ResxLoader.DefaultLocale);
+        var groupLocaleSet = new HashSet<string>(group.Locales, StringComparer.Ordinal);
 
-        sb.AppendLine("void ApplyLocale(const char* locale) noexcept");
-        sb.AppendLine("{");
-
-        // Non-default locales first: pattern is one branch per locale, each
-        // assigns all pointers and returns. Fallback at the bottom handles
-        // both nullptr and unknown locales.
-        foreach (var locale in group.Locales.Where(l => l != ResxLoader.DefaultLocale))
-        {
-            var sanitized = Naming.SanitizeLocale(locale);
-            sb.AppendLine($"    if (locale != nullptr && std::strcmp(locale, \"{locale}\") == 0)");
-            sb.AppendLine("    {");
-            foreach (var entry in group.Entries)
-            {
-                sb.AppendLine($"        {entry.Identifier} = k_{sanitized}_{entry.Identifier};");
-            }
-            sb.AppendLine("        return;");
-            sb.AppendLine("    }");
-        }
-
+        sb.AppendLine("namespace {");
+        sb.AppendLine($"struct LocaleSlot {{ const {charType}** dest; const {charType}* values[{masterLocales.Count}]; }};");
+        sb.AppendLine("constexpr LocaleSlot kSlots[] = {");
         foreach (var entry in group.Entries)
         {
-            sb.AppendLine($"    {entry.Identifier} = k_{defaultSanitized}_{entry.Identifier};");
+            sb.Append($"    {{ &{entry.Identifier}, {{ ");
+            for (var i = 0; i < masterLocales.Count; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                var locale = masterLocales[i];
+                var key = groupLocaleSet.Contains(locale)
+                    ? Naming.SanitizeLocale(locale)
+                    : defaultSanitized;
+                sb.Append($"k_{key}_{entry.Identifier}");
+            }
+            sb.AppendLine(" } },");
         }
+        sb.AppendLine("};");
+        sb.AppendLine("}  // namespace");
+    }
 
+    private static void WriteApplyLocale(StringBuilder sb)
+    {
+        sb.AppendLine("void ApplyLocale(int localeIndex) noexcept");
+        sb.AppendLine("{");
+        sb.AppendLine("    for (const auto& slot : kSlots)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        *slot.dest = slot.values[localeIndex];");
+        sb.AppendLine("    }");
         sb.AppendLine("}");
     }
 

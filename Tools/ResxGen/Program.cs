@@ -66,10 +66,12 @@ internal static class Program
                                         : g)
                        .ToList();
 
+        var masterLocales = CppEmitter.ComputeMasterLocales(groups);
+
         foreach (var group in groups)
         {
             CppEmitter.WriteGroupHeader(options.OutputDir, group);
-            CppEmitter.WriteGroupSource(options.OutputDir, group);
+            CppEmitter.WriteGroupSource(options.OutputDir, group, masterLocales);
         }
 
         CppEmitter.WriteMasterHeader(options.OutputDir, groups);
