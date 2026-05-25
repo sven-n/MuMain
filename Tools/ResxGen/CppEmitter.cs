@@ -37,6 +37,7 @@ internal static class CppEmitter
             ["en"]    = "English",
             ["es"]    = "Español",
             ["id"]    = "Bahasa Indonesia",
+            ["ja"]    = "日本語",
             ["pl"]    = "Polski",
             ["pt"]    = "Português",
             ["ru"]    = "Русский",
