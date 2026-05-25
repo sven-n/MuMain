@@ -55,6 +55,7 @@ static const struct { const char* code; const wchar_t* label; } s_Languages[] = 
     { "de",    L"Deutsch" },
     { "es",    L"Espa\u00f1ol" },                                                  // Español
     { "id",    L"Bahasa Indonesia" },
+    { "ja",    L"\u65E5\u672C\u8A9E" },                                       // 日本語
     { "pl",    L"Polski" },
     { "pt",    L"Portugu\u00eas" },                                                // Português
     { "ru",    L"\u0420\u0443\u0441\u0441\u043a\u0438\u0439" },                   // Русский
