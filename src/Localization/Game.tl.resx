@@ -496,6 +496,18 @@
     <value>F4 : Ayusin ang laki ng Chat Window</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F9 - Toggle 3D Camera" xml:space="preserve">
+    <value>F9 - I-toggle ang 3D Camera</value>
+  </data>
+  <data name="F10 - Lock / Unlock Camera Zoom" xml:space="preserve">
+    <value>F10 - I-lock / I-unlock ang Camera Zoom</value>
+  </data>
+  <data name="F11 - Reset Camera View" xml:space="preserve">
+    <value>F11 - I-reset ang Camera View</value>
+  </data>
+  <data name="Home - Toggle MU Helper" xml:space="preserve">
+    <value>Home - I-toggle ang MU Helper</value>
+  </data>
   <data name="Enter: Chatting Mode" xml:space="preserve">
     <value>Pumasok: Chatting Mode</value>
     <comment>legacy_id=125</comment>
