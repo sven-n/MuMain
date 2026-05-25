@@ -142,7 +142,9 @@ const auto msg = I18N::Format(I18N::Editor::ErrorIndexAlreadyInUse, { idxStr });
 `const char*` format string (UTF-8); the second is an
 `std::initializer_list<std::string_view>` of values to splice in. Result is a
 `std::string` (UTF-8). Wide-group strings use `%s` / `%ls` directly through
-`mu_swprintf` / `wsprintf` rather than `Format`.
+the bounds-checked `mu_swprintf_s` (or `swprintf_s`) rather than `Format`.
+Avoid `wsprintf` and `mu_swprintf` - they don't take a destination size and
+will overflow the buffer if a translated string is longer than expected.
 
 ### Master entry points
 
@@ -253,8 +255,8 @@ generator is the place to add it (`Tools/ResxGen/CppEmitter.cs`).
    needed; CMake re-runs the generator automatically on the next build.
 
 If your new string contains placeholders, prefer `{0}`/`{1}` and `I18N::Format`
-for narrow groups. For wide groups, `%s` / `%ls` via `mu_swprintf` is the
-existing pattern.
+for narrow groups. For wide groups, `%s` / `%ls` via the bounds-checked
+`mu_swprintf_s` is the existing pattern.
 
 ## Adding a new locale
 
