@@ -700,23 +700,23 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 48, I18N::Game::AutomaticAttack);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 70, I18N::Game::BeepSoundForWhispering);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 92, L"Sound Volume");
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 120, L"Music Volume");
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 92, I18N::Game::SoundVolume);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 120, I18N::Game::MusicVolume);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 160, I18N::Game::SlideHelp);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 182, I18N::Game::EffectLimitation);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 242, L"Render Full Effects");
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 242, I18N::Game::RenderFullEffects);
 
     y += 22.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Resolution
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 265, L"Resolution");
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 265, I18N::Game::Resolution);
 
     y += 39.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Language
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + LANG_LABEL_Y_LOCAL, L"Language");
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + LANG_LABEL_Y_LOCAL, I18N::Game::Language);
 
     y += 35.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 302 + LANGUAGE_ROW_HEIGHT, L"Windowed Mode");
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 302 + LANGUAGE_ROW_HEIGHT, I18N::Game::WindowedMode);
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()

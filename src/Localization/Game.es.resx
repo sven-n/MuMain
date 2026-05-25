@@ -1412,6 +1412,24 @@
     <value>Sonido de pitido para susurrar</value>
     <comment>legacy_id=387</comment>
   </data>
+  <data name="Sound volume" xml:space="preserve">
+    <value>Volumen del sonido</value>
+  </data>
+  <data name="Music volume" xml:space="preserve">
+    <value>Volumen de la música</value>
+  </data>
+  <data name="Render full effects" xml:space="preserve">
+    <value>Renderizar todos los efectos</value>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>Resolución</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="Windowed mode" xml:space="preserve">
+    <value>Modo ventana</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>Cerca</value>
     <comment>legacy_id=388,1002</comment>

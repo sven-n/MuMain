@@ -1412,6 +1412,24 @@
     <value>Beep sound for whispering</value>
     <comment>legacy_id=387</comment>
   </data>
+  <data name="Sound volume" xml:space="preserve">
+    <value>Sound volume</value>
+  </data>
+  <data name="Music volume" xml:space="preserve">
+    <value>Music volume</value>
+  </data>
+  <data name="Render full effects" xml:space="preserve">
+    <value>Render full effects</value>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>Resolution</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Windowed mode" xml:space="preserve">
+    <value>Windowed mode</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>Close</value>
     <comment>legacy_id=388,1002</comment>

@@ -1412,6 +1412,24 @@
     <value>竊竊私語時會發出嘟嘟聲</value>
     <comment>legacy_id=387</comment>
   </data>
+  <data name="Sound volume" xml:space="preserve">
+    <value>音效音量</value>
+  </data>
+  <data name="Music volume" xml:space="preserve">
+    <value>音樂音量</value>
+  </data>
+  <data name="Render full effects" xml:space="preserve">
+    <value>完整特效</value>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>解析度</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>語言</value>
+  </data>
+  <data name="Windowed mode" xml:space="preserve">
+    <value>視窗模式</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>關閉</value>
     <comment>legacy_id=388,1002</comment>

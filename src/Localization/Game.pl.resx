@@ -1412,6 +1412,24 @@
     <value>Sygnał dźwiękowy przy szeptaniu</value>
     <comment>legacy_id=387</comment>
   </data>
+  <data name="Sound volume" xml:space="preserve">
+    <value>Głośność dźwięku</value>
+  </data>
+  <data name="Music volume" xml:space="preserve">
+    <value>Głośność muzyki</value>
+  </data>
+  <data name="Render full effects" xml:space="preserve">
+    <value>Renderuj pełne efekty</value>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>Rozdzielczość</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Język</value>
+  </data>
+  <data name="Windowed mode" xml:space="preserve">
+    <value>Tryb okienkowy</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>Zamknąć</value>
     <comment>legacy_id=388,1002</comment>
