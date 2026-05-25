@@ -1412,6 +1412,24 @@
     <value>Suara bip untuk berbisik</value>
     <comment>legacy_id=387</comment>
   </data>
+  <data name="Sound volume" xml:space="preserve">
+    <value>Volume suara</value>
+  </data>
+  <data name="Music volume" xml:space="preserve">
+    <value>Volume musik</value>
+  </data>
+  <data name="Render full effects" xml:space="preserve">
+    <value>Tampilkan semua efek</value>
+  </data>
+  <data name="Resolution" xml:space="preserve">
+    <value>Resolusi</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Bahasa</value>
+  </data>
+  <data name="Windowed mode" xml:space="preserve">
+    <value>Mode jendela</value>
+  </data>
   <data name="Close388" xml:space="preserve">
     <value>Menutup</value>
     <comment>legacy_id=388,1002</comment>

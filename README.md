@@ -50,7 +50,7 @@ What I have done so far:
     * Ancient set labels
   * The code has been refactored. A lot of magic values have been replaced by
     enums and constants.
-  * 🔥 New Translation system (see [TRANSLATION_SYSTEM_INTEGRATION.md](TRANSLATION_SYSTEM_INTEGRATION.md))
+  * 🔥 New Translation system (see [docs/translation-system.md](docs/translation-system.md))
 
 What needs to be done for Season 6:
   * Lucky Items
@@ -273,8 +273,9 @@ The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
   resolution / windowed toggle, slider rounding, and what the options
   window stores in `config.ini`.
 - [Build guide](docs/build-guide.md) - platform-specific build notes.
-- [Translation system](TRANSLATION_SYSTEM_INTEGRATION.md) - translation
-  pipeline and integration notes.
+- [Translation system](docs/translation-system.md) - how the .resx ->
+  generated C++ accessors pipeline works, how to add a string or a locale,
+  runtime locale switching, and observer hooks for cached UI strings.
 
 ## Contributing
 
