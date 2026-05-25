@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/HUD/NewUIHotKey.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -100,7 +101,7 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
             }
             else
             {
-                g_pSystemLogBox->AddText(GlobalText[1388], SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ItCannotBeUsedDueToTheDistance, SEASON3B::TYPE_ERROR_MESSAGE);
                 g_pQuickCommand->CloseQuickCommand();
             }
 
@@ -178,9 +179,9 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 
         if (iLevel < 6)
         {
-            if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
+            if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction) == FALSE)
             {
-                g_pSystemLogBox->AddText(GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
         else
@@ -246,8 +247,8 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
     {
         if (::IsStrifeMap(gMapManager.WorldActive))
         {
-            if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[2989]) == FALSE)
-                g_pSystemLogBox->AddText(GlobalText[2989], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone) == FALSE)
+                g_pSystemLogBox->AddText(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
         else
         {

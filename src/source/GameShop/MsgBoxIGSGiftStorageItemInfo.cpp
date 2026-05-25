@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/NewUISystem.h"
 
@@ -94,14 +95,14 @@ void CMsgBoxIGSGiftStorageItemInfo::Initialize(int iStorageSeq, int iStorageItem
     wcscpy(m_szName, pszName);
 
     // Num
-    mu_swprintf(m_szNum, GlobalText[3040], pszNum);		// "���� : %ls"
+    mu_swprintf(m_szNum, I18N::Game::QuantityS, pszNum);		// "���� : %ls"
 
     // Period
-    mu_swprintf(m_szPeriod, GlobalText[3039], pszPeriod);	// "�Ⱓ : %ls"
+    mu_swprintf(m_szPeriod, I18N::Game::DurationS, pszPeriod);	// "�Ⱓ : %ls"
 
     // ID Info
     // "\'%ls\' ���� ���� �����Դϴ�."
-    mu_swprintf(m_szIDInfo, GlobalText[3041], pszID);
+    mu_swprintf(m_szIDInfo, I18N::Game::ItSAGiftFromS, pszID);
 
     m_MessageInputBox.SetText(pszMessage);
 }
@@ -227,13 +228,13 @@ void CMsgBoxIGSGiftStorageItemInfo::SetButtonInfo()
     m_BtnUse.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_OK_POS_X, GetPos().y + IGS_BTN_POS_Y + 102,
         IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnUse.MoveTextPos(0, -1);
-    m_BtnUse.SetText(GlobalText[228]);
+    m_BtnUse.SetText(I18N::Game::OK);
 
     // ��� ��ư
     m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y + 102,
         IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnCancel.MoveTextPos(0, -1);
-    m_BtnCancel.SetText(GlobalText[229]);
+    m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
 //--------------------------------------------
@@ -252,7 +253,7 @@ void CMsgBoxIGSGiftStorageItemInfo::RenderTexts()
     g_pRenderText->SetFont(g_hFontBold);
 
     // Title "���� ����â"
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, GlobalText[3048], IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, I18N::Game::GiftInfoWindow, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
 
     // Item Name
     g_pRenderText->SetTextColor(255, 255, 0, 255);

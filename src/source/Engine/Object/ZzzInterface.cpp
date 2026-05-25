@@ -19,6 +19,7 @@
 #include "Scenes/SceneCore.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 
 #include "GameLogic/Events/MatchEvent.h"
@@ -645,7 +646,7 @@ bool CheckWhisperLevel(int lvl, wchar_t* text)
         }
     }
 
-    g_pSystemLogBox->AddText(GlobalText[479], SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheWhisperCommandAtCharacterLevel6, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
     return  false;
 }
@@ -754,7 +755,7 @@ void SetBooleanPosition(CHAT* c)
         SIZE sizeT[2];
         g_pRenderText->SetFont(g_hFontBold);
 
-        if (GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && GetTextExtentPoint32(g_pRenderText->GetFontDC(), GlobalText[1104], GlobalText.GetStringSize(1104), &sizeT[1]))
+        if (GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Store, wcslen(I18N::Game::Store), &sizeT[1]))
         {
             if (c->Width < sizeT[0].cx + sizeT[1].cx)
                 c->Width = sizeT[0].cx + sizeT[1].cx;
@@ -839,7 +840,7 @@ void RenderBoolean(int x, int y, CHAT* c)
         g_pRenderText->SetBgColor(GetShopBGColor(c->Owner));
 
         g_pRenderText->SetTextColor(GetShopTextColor(c->Owner));
-        g_pRenderText->RenderText(RenderPos.x, RenderPos.y, GlobalText[1104], 0, iLineHeight, RT3_SORT_LEFT, &TextSize);
+        g_pRenderText->RenderText(RenderPos.x, RenderPos.y, I18N::Game::Store, 0, iLineHeight, RT3_SORT_LEFT, &TextSize);
         RenderPos.x += TextSize.cx;
 
         g_pRenderText->SetTextColor(GetShopText2Color(c->Owner));
@@ -1039,23 +1040,23 @@ void AddGuildName(CHAT* c, CHARACTER* Owner)
     if (Owner->GuildMarkIndex >= 0 && GuildMark[Owner->GuildMarkIndex].UnionName[0])
     {
         if (Owner->GuildRelationShip == GR_UNION)
-            mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
+            mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::Alliance);
         if (Owner->GuildRelationShip == GR_UNIONMASTER)
         {
             if (Owner->GuildStatus == G_MASTER)
-                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1296]);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::AllianceMaster);
             else
-                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1295]);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::Alliance);
         }
         else if (Owner->GuildRelationShip == GR_RIVAL)
         {
             if (Owner->GuildStatus == G_MASTER)
-                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1298]);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::OpposingMaster);
             else
-                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1297]);
+                mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::Oppose);
         }
         else if (Owner->GuildRelationShip == GR_RIVALUNION)
-            mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, GlobalText[1299]);
+            mu_swprintf(c->Union, L"<%ls> %ls", GuildMark[Owner->GuildMarkIndex].UnionName, I18N::Game::OpposingAllianceMaster);
         else
             mu_swprintf(c->Union, L"<%ls>", GuildMark[Owner->GuildMarkIndex].UnionName);
     }
@@ -1067,13 +1068,13 @@ void AddGuildName(CHAT* c, CHARACTER* Owner)
         c->GuildColor = Owner->GuildTeam;
 
         if (Owner->GuildStatus == G_PERSON)
-            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1330]);
+            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, I18N::Game::Members);
         else if (Owner->GuildStatus == G_MASTER)
-            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1300]);
+            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, I18N::Game::Master);
         else if (Owner->GuildStatus == G_SUB_MASTER)
-            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1301]);
+            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, I18N::Game::AssistM);
         else if (Owner->GuildStatus == G_BATTLE_MASTER)
-            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, GlobalText[1302]);
+            mu_swprintf(c->Guild, L"[%ls] %ls", GuildMark[Owner->GuildMarkIndex].GuildName, I18N::Game::BattleM);
         else
             mu_swprintf(c->Guild, L"[%ls]", GuildMark[Owner->GuildMarkIndex].GuildName);
     }
@@ -3120,7 +3121,7 @@ void ReloadArrow()
                     SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_RIGHT);
                 }
                 g_pMyInventory->DeleteItem(Index);
-                g_pSystemLogBox->AddText(GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             else
                 if ((gCharacterManager.GetEquipedBowType(rp) == BOWTYPE_CROSSBOW) && (lp->Type == -1))
@@ -3132,15 +3133,15 @@ void ReloadArrow()
                         SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_LEFT);
                     }
                     g_pMyInventory->DeleteItem(Index);
-                    g_pSystemLogBox->AddText(GlobalText[250], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
         }
     }
     else
     {
-        if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[251]) == FALSE)
+        if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::NoMoreArrows) == FALSE)
         {
-            g_pSystemLogBox->AddText(GlobalText[251], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::NoMoreArrows, SEASON3B::TYPE_ERROR_MESSAGE);
         }
     }
 }
@@ -3554,7 +3555,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         else if (g_pMyInventory->FindEmptySlotIncludingExtensions(&Items[ItemKey].Item) == -1)
         {
             wchar_t Text[256];
-            mu_swprintf(Text, GlobalText[375]);
+            mu_swprintf(Text, I18N::Game::InventoryIsFull);
 
             g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
@@ -3593,7 +3594,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 				if (monsterIndex == MONSTER_CHAOS_GOBLIN && level < 10)
 				{
 					wchar_t text[100];
-					mu_swprintf(text, GlobalText[663], CHAOS_MIX_LEVEL);
+					mu_swprintf(text, I18N::Game::OnlyLevelAboveDCanDoTheChaosCombination, CHAOS_MIX_LEVEL);
 					g_pSystemLogBox->AddText(text, SEASON3B::TYPE_SYSTEM_MESSAGE);
 					break;
 				}
@@ -3667,9 +3668,9 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
 					wchar_t temp[32] = { 0 };
 					if (monsterIndex == MONSTER_LITTLE_SANTA_RED)
-						mu_swprintf(temp, GlobalText[2596], 100);
+						mu_swprintf(temp, I18N::Game::HealthHasBeenRecoveredOf100, 100);
 					else if (monsterIndex == MONSTER_LITTLE_SANTA_BLUE)
-						mu_swprintf(temp, GlobalText[2597], 100);
+						mu_swprintf(temp, I18N::Game::ManaHasBeenRecoveredOf100, 100);
 
 					g_pSystemLogBox->AddText(temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
 				}
@@ -3957,24 +3958,24 @@ bool CheckMacroLimit(wchar_t* Text)
     int  length;
 
     memcpy(string, Text + 3, sizeof(char) * (256 - 2));
-    length = GlobalText.GetStringSize(258);
-    if (wcscmp(string, GlobalText[258]) == 0 || wcscmp(string, GlobalText[259]) == 0 || wcsicmp(string, L"/trade") == 0)
+    length = wcslen(I18N::Game::Exchange);
+    if (wcscmp(string, I18N::Game::Exchange) == 0 || wcscmp(string, I18N::Game::Trade259) == 0 || wcsicmp(string, L"/trade") == 0)
     {
         return  true;
     }
-    if (wcscmp(string, GlobalText[256]) == 0 || wcsicmp(string, L"/party") == 0 || wcsicmp(string, L"/pt") == 0)
+    if (wcscmp(string, I18N::Game::Party256) == 0 || wcsicmp(string, L"/party") == 0 || wcsicmp(string, L"/pt") == 0)
     {
         return  true;
     }
-    if (wcscmp(string, GlobalText[254]) == 0 || wcsicmp(string, L"/guild") == 0)
+    if (wcscmp(string, I18N::Game::Guild254) == 0 || wcsicmp(string, L"/guild") == 0)
     {
         return  true;
     }
-    if (wcscmp(string, GlobalText[248]) == 0 || wcsicmp(string, L"/GuildWar") == 0)
+    if (wcscmp(string, I18N::Game::Battle) == 0 || wcsicmp(string, L"/GuildWar") == 0)
     {
         return  true;
     }
-    if (wcscmp(string, GlobalText[249]) == 0 || wcsicmp(string, L"/BattleSoccer") == 0)
+    if (wcscmp(string, I18N::Game::BattleSoccer) == 0 || wcsicmp(string, L"/BattleSoccer") == 0)
     {
         return  true;
     }
@@ -4002,18 +4003,18 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
         if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
         {
-            if (wcscmp(Name, GlobalText[258]) == 0 || wcscmp(Name, GlobalText[259]) == 0 || wcsicmp(Text, L"/trade") == 0)
+            if (wcscmp(Name, I18N::Game::Exchange) == 0 || wcscmp(Name, I18N::Game::Trade259) == 0 || wcsicmp(Text, L"/trade") == 0)
             {
                 if (gMapManager.InChaosCastle() == true)
                 {
-                    g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
 
                     return false;
                 }
 
                 if (::IsStrifeMap(gMapManager.WorldActive))
                 {
-                    g_pSystemLogBox->AddText(GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     return false;
                 }
 
@@ -4021,7 +4022,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
                 if (level < TRADELIMITLEVEL)
                 {
-                    g_pSystemLogBox->AddText(GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheTradeCommandAtCharacterLevel6, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     return true;
                 }
 
@@ -4040,13 +4041,13 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (IsShopInViewport(c))
                         {
-                            g_pSystemLogBox->AddText(GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_ERROR_MESSAGE);
                             return true;
                         }
 
                         SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                         wchar_t message[100]{};
-                        mu_swprintf(message, GlobalText[475], c->ID);
+                        mu_swprintf(message, I18N::Game::YouHaveRequestedSToTrade, c->ID);
                         g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
                     }
                 }
@@ -4061,7 +4062,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (IsShopInViewport(c))
                         {
-                            g_pSystemLogBox->AddText(GlobalText[493], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_SYSTEM_MESSAGE);
                             return true;
                         }
 
@@ -4070,7 +4071,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         if (abs(Dir1 - Dir2) == 4) {
                             SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                             wchar_t message[100]{};
-                            mu_swprintf(message, GlobalText[475], c->ID);
+                            mu_swprintf(message, I18N::Game::YouHaveRequestedSToTrade, c->ID);
                             g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
                             break;
                         }
@@ -4080,16 +4081,16 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
         }
 
-        if (wcscmp(Text, GlobalText[688]) == 0)
+        if (wcscmp(Text, I18N::Game::Firecracker688) == 0)
         {
             return false;
         }
 
-        if (wcscmp(Text, GlobalText[1117]) == 0 || wcsicmp(Text, L"/personalshop") == 0)
+        if (wcscmp(Text, I18N::Game::PersonalStore1117) == 0 || wcsicmp(Text, L"/personalshop") == 0)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
@@ -4101,22 +4102,22 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             else
             {
                 wchar_t szError[48] = L"";
-                mu_swprintf(szError, GlobalText[1123], 6);
+                mu_swprintf(szError, I18N::Game::OnlyAboveLevelDCanUse, 6);
                 g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
             return true;
         }
-        if (wcsstr(Text, GlobalText[1118]) != nullptr || wcsstr(Text, L"/purchase") != nullptr)
+        if (wcsstr(Text, I18N::Game::Buy) != nullptr || wcsstr(Text, L"/purchase") != nullptr)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
             if (::IsStrifeMap(gMapManager.WorldActive))
             {
-                g_pSystemLogBox->AddText(GlobalText[3147], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
@@ -4128,7 +4129,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
                 )
             {
-                g_pSystemLogBox->AddText(GlobalText[1121], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::StoreCanTBeOpened, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             wchar_t szCmd[24];
@@ -4176,23 +4177,23 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             return true;
         }
 
-        if (wcscmp(Text, GlobalText[1136]) == 0)
+        if (wcscmp(Text, I18N::Game::ViewStoreOn) == 0)
         {
             ShowShopTitles();
-            g_pSystemLogBox->AddText(GlobalText[1138], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CanViewPersonalStoreWindow, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
 
-        if (wcscmp(Text, GlobalText[1137]) == 0)
+        if (wcscmp(Text, I18N::Game::ViewStoreOff) == 0)
         {
             HideShopTitles();
-            g_pSystemLogBox->AddText(GlobalText[1139], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CannotViewPersonalStoreWindow, SEASON3B::TYPE_ERROR_MESSAGE);
         }
-        if (wcscmp(Text, GlobalText[908]) == 0 || wcsicmp(Text, L"/duelstart") == 0)
+        if (wcscmp(Text, I18N::Game::DuelChallenge) == 0 || wcsicmp(Text, L"/duelstart") == 0)
         {
 #ifndef GUILD_WAR_EVENT
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 #endif// UILD_WAR_EVENT
@@ -4202,7 +4203,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 if (iLevel < 30)
                 {
                     wchar_t szError[48] = L"";
-                    mu_swprintf(szError, GlobalText[2704], 30);
+                    mu_swprintf(szError, I18N::Game::OpenOnlyForLevelDOrHigher, 30);
                     g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_ERROR_MESSAGE);
                     return 3;
                 }
@@ -4238,15 +4239,15 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
             else
             {
-                g_pSystemLogBox->AddText(GlobalText[915], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouCannotChallengePlayerIsAlreadyInADuel, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }
         }
-        if (wcscmp(Text, GlobalText[909]) == 0 || wcsicmp(Text, L"/duelend") == 0)
+        if (wcscmp(Text, I18N::Game::DuelCancel) == 0 || wcsicmp(Text, L"/duelend") == 0)
         {
 #ifndef GUILD_WAR_EVENT
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 #endif// GUILD_WAR_EVENT
@@ -4255,16 +4256,16 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 SocketClient->ToGameServer()->SendDuelStopRequest();
             }
         }
-        if (wcscmp(Text, GlobalText[254]) == 0 || wcsicmp(Text, L"/guild") == 0)
+        if (wcscmp(Text, I18N::Game::Guild254) == 0 || wcsicmp(Text, L"/guild") == 0)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (Hero->GuildStatus != G_NONE)
             {
-                g_pSystemLogBox->AddText(GlobalText[255], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -4279,7 +4280,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     GuildPlayerKey = c->Key;
                     SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                     wchar_t Text[100];
-                    mu_swprintf(Text, GlobalText[477], c->ID);
+                    mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourGuild, c->ID);
                     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
@@ -4299,7 +4300,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         GuildPlayerKey = c->Key;
                         SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                         wchar_t Text[100];
-                        mu_swprintf(Text, GlobalText[477], c->ID);
+                        mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourGuild, c->ID);
                         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
@@ -4307,18 +4308,18 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
             return true;
         }
-        if (!wcscmp(Text, GlobalText[1354]) || !wcsicmp(Text, L"/union") ||
-            !wcscmp(Text, GlobalText[1356]) || !wcsicmp(Text, L"/rival") ||
-            !wcscmp(Text, GlobalText[1357]) || !wcsicmp(Text, L"/rivaloff"))
+        if (!wcscmp(Text, I18N::Game::Alliance1354) || !wcsicmp(Text, L"/union") ||
+            !wcscmp(Text, I18N::Game::Hostilities) || !wcsicmp(Text, L"/rival") ||
+            !wcscmp(Text, I18N::Game::SuspendHostilities1357) || !wcsicmp(Text, L"/rivaloff"))
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (Hero->GuildStatus == G_NONE)
             {
-                g_pSystemLogBox->AddText(GlobalText[1355], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::DoNotBelongToTheGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -4330,12 +4331,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     abs((c->PositionX) - (Hero->PositionX)) <= 1 &&
                     abs((c->PositionY) - (Hero->PositionY)) <= 1)
                 {
-                    if (!wcscmp(Text, GlobalText[1354]) || !wcsicmp(Text, L"/union"))
+                    if (!wcscmp(Text, I18N::Game::Alliance1354) || !wcsicmp(Text, L"/union"))
                     {
                         //SendRequestGuildRelationShip(0x01, 0x01, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
                         SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Alliance, GuildRequestType::Join, CharactersClient[SelectedCharacter].Key);
                     }
-                    else if (!wcscmp(Text, GlobalText[1356]) || !wcsicmp(Text, L"/rival"))
+                    else if (!wcscmp(Text, I18N::Game::Hostilities) || !wcsicmp(Text, L"/rival"))
                     {
                         //SendRequestGuildRelationShip(0x02, 0x01, HIBYTE(CharactersClient[SelectedCharacter].Key), LOBYTE(CharactersClient[SelectedCharacter].Key));
                         SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Hostility, GuildRequestType::Join, CharactersClient[SelectedCharacter].Key);
@@ -4361,12 +4362,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     BYTE Dir1 = (BYTE)((o->Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                     BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                     if (abs(Dir1 - Dir2) == 4) {
-                        if (!wcscmp(Text, GlobalText[1354]) || !wcsicmp(Text, L"/union"))
+                        if (!wcscmp(Text, I18N::Game::Alliance1354) || !wcsicmp(Text, L"/union"))
                         {
                             //SendRequestGuildRelationShip(0x01, 0x01, HIBYTE(c->Key), LOBYTE(c->Key));
                             SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Alliance, GuildRequestType::Join, c->Key);
                         }
-                        else if (!wcscmp(Text, GlobalText[1356]) || !wcsicmp(Text, L"/rival"))
+                        else if (!wcscmp(Text, I18N::Game::Hostilities) || !wcsicmp(Text, L"/rival"))
                         {
                             //SendRequestGuildRelationShip(0x02, 0x01, HIBYTE(c->Key), LOBYTE(c->Key));
                             SocketClient->ToGameServer()->SendGuildRelationshipChangeRequest(GuildRelationshipType::Hostility, GuildRequestType::Join, c->Key);
@@ -4384,16 +4385,16 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
             return true;
         }
-        if (wcscmp(Text, GlobalText[256]) == 0 || wcsicmp(Text, L"/party") == 0 || wcsicmp(Text, L"/pt") == 0)
+        if (wcscmp(Text, I18N::Game::Party256) == 0 || wcsicmp(Text, L"/party") == 0 || wcsicmp(Text, L"/pt") == 0)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(GlobalText[1150], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != 0)
             {
-                g_pSystemLogBox->AddText(GlobalText[257], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAParty, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -4406,7 +4407,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     PartyKey = c->Key;
                     SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                     wchar_t Text[100];
-                    mu_swprintf(Text, GlobalText[476], c->ID);
+                    mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourParty, c->ID);
                     g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
@@ -4423,7 +4424,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         PartyKey = c->Key;
                         SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                         wchar_t Text[100];
-                        mu_swprintf(Text, GlobalText[476], c->ID);
+                        mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourParty, c->ID);
                         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
@@ -4467,7 +4468,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         }
 
         wchar_t lpszFilter[] = L"/filter";
-        if ((GlobalText.GetStringSize(753) > 0 && wcsncmp(Text, GlobalText[753], GlobalText.GetStringSize(753)) == 0)
+        if ((wcslen(I18N::Game::Filter) > 0 && wcsncmp(Text, I18N::Game::Filter, wcslen(I18N::Game::Filter)) == 0)
             || (wcsncmp(Text, lpszFilter, wcslen(lpszFilter)) == 0))
         {
             g_pChatListBox->SetFilterText(Text);
@@ -4486,7 +4487,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         }
         Name[iTextSize] = NULL;
 
-        if (wcscmp(Name, GlobalText[260]) == 0 || wcsicmp(Name, L"/move") == 0)
+        if (wcscmp(Name, I18N::Game::Warp) == 0 || wcsicmp(Name, L"/move") == 0)
         {
             if (IsGMCharacter() == true || FindText2(Hero->ID, L"webzen") == true)
             {
@@ -4608,117 +4609,117 @@ void CheckChatText(wchar_t* Text)
 {
     CHARACTER* c = Hero;
     OBJECT* o = &c->Object;
-    if (FindText(Text, GlobalText[270]) || FindText(Text, GlobalText[271]) || FindText(Text, GlobalText[272]) || FindText(Text, GlobalText[273]) || FindText(Text, GlobalText[274]) || FindText(Text, GlobalText[275]) || FindText(Text, GlobalText[276]) || FindText(Text, GlobalText[277]))
+    if (FindText(Text, I18N::Game::Hello) || FindText(Text, I18N::Game::Hi) || FindText(Text, I18N::Game::Welcome) || FindText(Text, I18N::Game::Welcome) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks) || FindText(Text, I18N::Game::Thanks))
     {
         SetActionClass(c, o, PLAYER_GREETING1, AT_GREETING1);
         SendRequestAction(Hero->Object, AT_GREETING1);
     }
-    else if (FindText(Text, GlobalText[278]) || FindText(Text, GlobalText[279]) || FindText(Text, GlobalText[280]))
+    else if (FindText(Text, I18N::Game::EnjoyTheGame) || FindText(Text, I18N::Game::Bye) || FindText(Text, I18N::Game::Bye280))
     {
         SetActionClass(c, o, PLAYER_GOODBYE1, AT_GOODBYE1);
         SendRequestAction(Hero->Object, AT_GOODBYE1);
     }
-    else if (FindText(Text, GlobalText[281]) || FindText(Text, GlobalText[282]) || FindText(Text, GlobalText[283]) || FindText(Text, GlobalText[284]) || FindText(Text, GlobalText[285]) || FindText(Text, GlobalText[286]))
+    else if (FindText(Text, I18N::Game::Good) || FindText(Text, I18N::Game::Good) || FindText(Text, I18N::Game::Wow) || FindText(Text, I18N::Game::Wow) || FindText(Text, I18N::Game::Nice) || FindText(Text, I18N::Game::Nice))
     {
         SetActionClass(c, o, PLAYER_CLAP1, AT_CLAP1);
         SendRequestAction(Hero->Object, AT_CLAP1);
     }
-    else if (FindText(Text, GlobalText[287]) || FindText(Text, GlobalText[288]) || FindText(Text, GlobalText[289]) || FindText(Text, GlobalText[290]))
+    else if (FindText(Text, I18N::Game::Here) || FindText(Text, I18N::Game::Here) || FindText(Text, I18N::Game::Come) || FindText(Text, I18N::Game::Come))
     {
         SetActionClass(c, o, PLAYER_GESTURE1, AT_GESTURE1);
         SendRequestAction(Hero->Object, AT_GESTURE1);
     }
-    else if (FindText(Text, GlobalText[292]) || FindText(Text, GlobalText[293]) || FindText(Text, GlobalText[294]) || FindText(Text, GlobalText[295]))
+    else if (FindText(Text, I18N::Game::There) || FindText(Text, I18N::Game::There) || FindText(Text, I18N::Game::That) || FindText(Text, I18N::Game::That))
     {
         SetActionClass(c, o, PLAYER_DIRECTION1, AT_DIRECTION1);
         SendRequestAction(Hero->Object, AT_DIRECTION1);
     }
-    else if (FindText(Text, GlobalText[296]) || FindText(Text, GlobalText[297]) || FindText(Text, GlobalText[298]) || FindText(Text, GlobalText[299]) || FindText(Text, GlobalText[300]) || FindText(Text, GlobalText[301]) || FindText(Text, GlobalText[302]))
+    else if (FindText(Text, I18N::Game::Not) || FindText(Text, I18N::Game::Not) || FindText(Text, I18N::Game::Never) || FindText(Text, I18N::Game::Never) || FindText(Text, I18N::Game::DoNot) || FindText(Text, I18N::Game::DoNot) || FindText(Text, I18N::Game::DoNot302))
     {
         SetActionClass(c, o, PLAYER_UNKNOWN1, AT_UNKNOWN1);
         SendRequestAction(Hero->Object, AT_UNKNOWN1);
     }
-    else if (FindText(Text, L";") || FindText(Text, GlobalText[303]) || FindText(Text, GlobalText[304]) || FindText(Text, GlobalText[305]))
+    else if (FindText(Text, L";") || FindText(Text, I18N::Game::Sorry) || FindText(Text, I18N::Game::Sorry) || FindText(Text, I18N::Game::Sorry))
     {
         SetActionClass(c, o, PLAYER_AWKWARD1, AT_AWKWARD1);
         SendRequestAction(Hero->Object, AT_AWKWARD1);
     }
-    else if (FindText(Text, L"ㅠ.ㅠ") || FindText(Text, L"ㅜ.ㅜ") || FindText(Text, L"T_T") || FindText(Text, GlobalText[306]) || FindText(Text, GlobalText[307]) || FindText(Text, GlobalText[308]) || FindText(Text, GlobalText[309]))
+    else if (FindText(Text, L"ㅠ.ㅠ") || FindText(Text, L"ㅜ.ㅜ") || FindText(Text, L"T_T") || FindText(Text, I18N::Game::Sad) || FindText(Text, I18N::Game::Sad) || FindText(Text, I18N::Game::Cry) || FindText(Text, I18N::Game::Cry))
     {
         SetActionClass(c, o, PLAYER_CRY1, AT_CRY1);
         SendRequestAction(Hero->Object, AT_CRY1);
     }
-    else if (FindText(Text, L"ㅡ.ㅡ") || FindText(Text, L"ㅡ.,ㅡ") || FindText(Text, L"ㅡ,.ㅡ") || FindText(Text, L"-.-") || FindText(Text, L"-_-") || FindText(Text, GlobalText[310]) || FindText(Text, GlobalText[311]))
+    else if (FindText(Text, L"ㅡ.ㅡ") || FindText(Text, L"ㅡ.,ㅡ") || FindText(Text, L"ㅡ,.ㅡ") || FindText(Text, L"-.-") || FindText(Text, L"-_-") || FindText(Text, I18N::Game::Huh) || FindText(Text, I18N::Game::Pooh))
     {
         SetActionClass(c, o, PLAYER_SEE1, AT_SEE1);
         SendRequestAction(Hero->Object, AT_SEE1);
     }
-    else if (FindText(Text, L"^^") || FindText(Text, L"^.^") || FindText(Text, L"^_^") || FindText(Text, GlobalText[312]) || FindText(Text, GlobalText[313]) || FindText(Text, GlobalText[314]) || FindText(Text, GlobalText[315]) || FindText(Text, GlobalText[316]))
+    else if (FindText(Text, L"^^") || FindText(Text, L"^.^") || FindText(Text, L"^_^") || FindText(Text, I18N::Game::Haha) || FindText(Text, I18N::Game::Hehe) || FindText(Text, I18N::Game::Hoho) || FindText(Text, I18N::Game::Hoho) || FindText(Text, I18N::Game::Hihi))
     {
         SetActionClass(c, o, PLAYER_SMILE1, AT_SMILE1);
         SendRequestAction(Hero->Object, AT_SMILE1);
     }
-    else if (FindText(Text, GlobalText[318]) || FindText(Text, GlobalText[319]) || FindText(Text, GlobalText[320]) || FindText(Text, GlobalText[321]))
+    else if (FindText(Text, I18N::Game::Great) || FindText(Text, I18N::Game::OhYeah) || FindText(Text, I18N::Game::OhYeah320) || FindText(Text, I18N::Game::BeatIt))
     {
         SetActionClass(c, o, PLAYER_CHEER1, AT_CHEER1);
         SendRequestAction(Hero->Object, AT_CHEER1);
     }
-    else if (FindText(Text, GlobalText[322]) || FindText(Text, GlobalText[323]) || FindText(Text, GlobalText[324]) || FindText(Text, GlobalText[325]))
+    else if (FindText(Text, I18N::Game::Win) || FindText(Text, I18N::Game::Win) || FindText(Text, I18N::Game::Victory) || FindText(Text, I18N::Game::Victory))
     {
         SetActionClass(c, o, PLAYER_WIN1, AT_WIN1);
         SendRequestAction(Hero->Object, AT_WIN1);
     }
-    else if (FindText(Text, GlobalText[326]) || FindText(Text, GlobalText[327]) || FindText(Text, GlobalText[328]) || FindText(Text, GlobalText[329]))
+    else if (FindText(Text, I18N::Game::Sleep) || FindText(Text, I18N::Game::Sleep) || FindText(Text, I18N::Game::Tired) || FindText(Text, I18N::Game::Tired))
     {
         SetActionClass(c, o, PLAYER_SLEEP1, AT_SLEEP1);
         SendRequestAction(Hero->Object, AT_SLEEP1);
     }
-    else if (FindText(Text, GlobalText[330]) || FindText(Text, GlobalText[331]) || FindText(Text, GlobalText[332]) || FindText(Text, GlobalText[333]) || FindText(Text, GlobalText[334]))
+    else if (FindText(Text, I18N::Game::Cold) || FindText(Text, I18N::Game::Cold) || FindText(Text, I18N::Game::Hurt) || FindText(Text, I18N::Game::Hurt) || FindText(Text, I18N::Game::Hurt))
     {
         SetActionClass(c, o, PLAYER_COLD1, AT_COLD1);
         SendRequestAction(Hero->Object, AT_COLD1);
     }
-    else if (FindText(Text, GlobalText[335]) || FindText(Text, GlobalText[336]) || FindText(Text, GlobalText[337]) || FindText(Text, GlobalText[338]))
+    else if (FindText(Text, I18N::Game::Again) || FindText(Text, I18N::Game::Again) || FindText(Text, I18N::Game::OK) || FindText(Text, I18N::Game::Great))
     {
         SetActionClass(c, o, PLAYER_AGAIN1, AT_AGAIN1);
         SendRequestAction(Hero->Object, AT_AGAIN1);
     }
-    else if (FindText(Text, GlobalText[339]) || FindText(Text, GlobalText[340]) || FindText(Text, GlobalText[341]))
+    else if (FindText(Text, I18N::Game::Respect) || FindText(Text, I18N::Game::Respect) || FindText(Text, I18N::Game::Defeated))
     {
         SetActionClass(c, o, PLAYER_RESPECT1, AT_RESPECT1);
         SendRequestAction(Hero->Object, AT_RESPECT1);
     }
-    else if (FindText(Text, GlobalText[342]) || FindText(Text, GlobalText[343]) || FindText(Text, L"/ㅡ") || FindText(Text, L"ㅡ^"))
+    else if (FindText(Text, I18N::Game::Sir) || FindText(Text, I18N::Game::Sir) || FindText(Text, L"/ㅡ") || FindText(Text, L"ㅡ^"))
     {
         SetActionClass(c, o, PLAYER_SALUTE1, AT_SALUTE1);
         SendRequestAction(Hero->Object, AT_SALUTE1);
     }
-    else if (FindText(Text, GlobalText[344]) || FindText(Text, GlobalText[345]) || FindText(Text, GlobalText[346]) || FindText(Text, GlobalText[347]))
+    else if (FindText(Text, I18N::Game::Rush) || FindText(Text, I18N::Game::Rush) || FindText(Text, I18N::Game::GoGo) || FindText(Text, I18N::Game::GoGo))
     {
         SetActionClass(c, o, PLAYER_RUSH1, AT_RUSH1);
         SendRequestAction(Hero->Object, AT_RUSH1);
     }
-    else if (FindText(Text, GlobalText[783]) || FindText(Text, L"hustle"))
+    else if (FindText(Text, I18N::Game::Hustle) || FindText(Text, L"hustle"))
     {
         SetActionClass(c, o, PLAYER_HUSTLE, AT_HUSTLE);
         SendRequestAction(Hero->Object, AT_HUSTLE);
     }
-    else if (FindText(Text, GlobalText[291]))
+    else if (FindText(Text, I18N::Game::ComeOn))
     {
         SetActionClass(c, o, PLAYER_PROVOCATION, AT_PROVOCATION);
         SendRequestAction(Hero->Object, AT_PROVOCATION);
     }
-    else if (FindText(Text, GlobalText[317]))
+    else if (FindText(Text, I18N::Game::Great))
     {
         SetActionClass(c, o, PLAYER_CHEERS, AT_CHEERS);
         SendRequestAction(Hero->Object, AT_CHEERS);
     }
-    else if (FindText(Text, GlobalText[348]))
+    else if (FindText(Text, I18N::Game::LookAround))
     {
         SetActionClass(c, o, PLAYER_LOOK_AROUND, AT_LOOK_AROUND);
         SendRequestAction(Hero->Object, AT_LOOK_AROUND);
     }
-    else if (FindText(Text, GlobalText[2228]))
+    else if (FindText(Text, I18N::Game::TheForehead))
     {
         ITEM* pItem_rr = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
         ITEM* pItem_rl = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
@@ -4739,7 +4740,7 @@ void CheckChatText(wchar_t* Text)
             o->m_iAnimation = 0;
         }
     }
-    else if (FindText(Text, GlobalText[2243]))
+    else if (FindText(Text, I18N::Game::Christmas))
     {
         ITEM* pItem_rr = &CharacterMachine->Equipment[EQUIPMENT_RING_RIGHT];
         ITEM* pItem_rl = &CharacterMachine->Equipment[EQUIPMENT_RING_LEFT];
@@ -7227,7 +7228,7 @@ void CheckGate()
                         if (((i >= 45 && i <= 49) || (i >= 55 && i <= 56)) &&
                             ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HORN_OF_UNIRIA && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HORN_OF_DINORANT)))
                         {
-                            g_pSystemLogBox->AddText(GlobalText[261], SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, SEASON3B::TYPE_ERROR_MESSAGE);
                         }
                         else if ((62 <= i && i <= 65) &&
                             !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WINGS_OF_DARKNESS
@@ -7240,25 +7241,25 @@ void CheckGate()
                                 || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_CAPE_OF_FIGHTER && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_CAPE_OF_OVERRULE)
                                 || (CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_WING + 135)))
                         {
-                            g_pSystemLogBox->AddText(GlobalText[263], SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, SEASON3B::TYPE_ERROR_MESSAGE);
 
                             if (CharacterAttribute->Level < Level)
                             {
                                 wchar_t Text[100];
-                                mu_swprintf(Text, GlobalText[350], Level);
+                                mu_swprintf(Text, I18N::Game::OnlyCharactersOverLevelDCanEnter, Level);
                                 g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
                             }
                         }
 
                         else if ((62 <= i && i <= 65) && (CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_UNIRIA))
                         {
-                            g_pSystemLogBox->AddText(GlobalText[569], SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotWarpWhileRidingOnAUnicorn, SEASON3B::TYPE_ERROR_MESSAGE);
                         }
                         else if (CharacterAttribute->Level < Level)
                         {
                             LoadingWorld = 50;
                             wchar_t Text[100];
-                            mu_swprintf(Text, GlobalText[350], Level);
+                            mu_swprintf(Text, I18N::Game::OnlyCharactersOverLevelDCanEnter, Level);
                             g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
                             //							return;
                         }
@@ -8198,7 +8199,7 @@ void SendMacroChat(wchar_t* Text)
 
         //if (CheckAbuseFilter(Text))
         //{
-        //    SendChat(GlobalText[570]);
+        //    SendChat(I18N::Game::PwnedByTheFilter);
         //}
         //else
         //{
@@ -8352,22 +8353,22 @@ void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 
         if (day != 0)
         {
-            mu_swprintf(buff, L"%d %ls %d %ls %d %ls %d %ls", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buff, L"%d %ls %d %ls %d %ls %d %ls", day, I18N::Game::Day, oClock, I18N::Game::Hour, minutes, I18N::Game::Minute, second, I18N::Game::Second);
             timeText = buff;
         }
         else if (day == 0 && oClock != 0)
         {
-            mu_swprintf(buff, L"%d %ls %d %ls %d %ls", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buff, L"%d %ls %d %ls %d %ls", oClock, I18N::Game::Hour, minutes, I18N::Game::Minute, second, I18N::Game::Second);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            mu_swprintf(buff, L"%d %ls %d %ls", minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buff, L"%d %ls %d %ls", minutes, I18N::Game::Minute, second, I18N::Game::Second);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes == 0)
         {
-            timeText = GlobalText[2308];
+            timeText = I18N::Game::LessThan1Minutes;
         }
     }
     else
@@ -8378,17 +8379,17 @@ void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 
         if (day != 0)
         {
-            mu_swprintf(buff, L"%d %ls %d %ls %d %ls", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            mu_swprintf(buff, L"%d %ls %d %ls %d %ls", day, I18N::Game::Day, oClock, I18N::Game::Hour, minutes, I18N::Game::Minute);
             timeText = buff;
         }
         else if (day == 0 && oClock != 0)
         {
-            mu_swprintf(buff, L"%d %ls %d %ls", oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            mu_swprintf(buff, L"%d %ls %d %ls", oClock, I18N::Game::Hour, minutes, I18N::Game::Minute);
             timeText = buff;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            mu_swprintf(buff, L"%d %ls", minutes, GlobalText[2300]);
+            mu_swprintf(buff, L"%d %ls", minutes, I18N::Game::Minute);
             timeText = buff;
         }
     }
@@ -8448,7 +8449,7 @@ void RenderSwichState()
     {
         if (Switch_Info[i].m_bySwitchState > 0)
         {
-            mu_swprintf(Buff, L"%ls%d / %ls / %ls", GlobalText[1981], i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
+            mu_swprintf(Buff, L"%ls%d / %ls / %ls", I18N::Game::CrownSwitch, i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
             g_pRenderText->SetFont(g_hFont);
             g_pRenderText->SetTextColor(255, 255, 255, 255);
             g_pRenderText->SetBgColor(0);
@@ -8617,7 +8618,7 @@ void RenderTournamentInterface()
             if (g_wtMatchTimeLeft.m_Type == 3)
             {
                 g_pRenderText->SetTextColor(255, 255, 10, 255);
-                mu_swprintf(t_Str, GlobalText[1392], t_valueSec);
+                mu_swprintf(t_Str, I18N::Game::ItWillStartAfterDSeconds, t_valueSec);
             }
             else
             {
@@ -8627,11 +8628,11 @@ void RenderTournamentInterface()
                 }
                 if (t_valueSec < 10)
                 {
-                    mu_swprintf(t_Str, GlobalText[1390], t_valueMin, t_valueSec);
+                    mu_swprintf(t_Str, I18N::Game::RemainingHoursD0D, t_valueMin, t_valueSec);
                 }
                 else
                 {
-                    mu_swprintf(t_Str, GlobalText[1391], t_valueMin, t_valueSec);
+                    mu_swprintf(t_Str, I18N::Game::RemainingSecondsDD, t_valueMin, t_valueSec);
                 }
             }
             x += (float)GetScreenWidth() / 2; y += 350;
@@ -8667,11 +8668,11 @@ void RenderTournamentInterface()
     glColor4f(1.f, 1.f, 1.f, 1.f);
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->SetTextColor(200, 240, 255, 255);
-    mu_swprintf(t_Str, GlobalText[1393]);
+    mu_swprintf(t_Str, I18N::Game::TournamentResult);
     g_pRenderText->RenderText(WindowX + Width / 2 - 50, WindowY + 20, t_Str);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    mu_swprintf(t_Str, GlobalText[1394]);
+    mu_swprintf(t_Str, I18N::Game::VS);
     g_pRenderText->SetTextColor(255, 255, 10, 255);
     g_pRenderText->RenderText(WindowX + Width / 2 - 13, WindowY + 50, t_Str);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -8693,7 +8694,7 @@ void RenderTournamentInterface()
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 255);
-        mu_swprintf(t_Str, GlobalText[1395]);
+        mu_swprintf(t_Str, I18N::Game::Tie);
         g_pRenderText->RenderText(WindowX + Width / 2 - 35, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -8702,10 +8703,10 @@ void RenderTournamentInterface()
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 10);
-        mu_swprintf(t_Str, GlobalText[1396]);
+        mu_swprintf(t_Str, I18N::Game::Win);
         g_pRenderText->RenderText(WindowX + 47, WindowY + 115, t_Str);
         g_pRenderText->SetTextColor(255, 10, 10, 255);
-        mu_swprintf(t_Str, GlobalText[1397]);
+        mu_swprintf(t_Str, I18N::Game::Lose);
         g_pRenderText->RenderText(WindowX + Width - 82, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
     }
@@ -8713,10 +8714,10 @@ void RenderTournamentInterface()
     {
         g_pRenderText->SetFont(g_hFontBig);
         g_pRenderText->SetTextColor(255, 255, 10, 10);
-        mu_swprintf(t_Str, GlobalText[1397]);
+        mu_swprintf(t_Str, I18N::Game::Lose);
         g_pRenderText->RenderText(WindowX + 47, WindowY + 115, t_Str);
         g_pRenderText->SetTextColor(255, 10, 10, 255);
-        mu_swprintf(t_Str, GlobalText[1396]);
+        mu_swprintf(t_Str, I18N::Game::Win);
         g_pRenderText->RenderText(WindowX + Width - 82, WindowY + 115, t_Str);
         g_pRenderText->SetFont(g_hFont);
     }
@@ -9433,7 +9434,7 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
     }
 
     if ((wcsstr(szChatTextUpperChars, L"/MOVE") != NULL) ||
-        (GlobalText.GetStringSize(260) > 0 && wcsstr(szChatTextUpperChars, GlobalText[260]) != NULL))
+        (wcslen(I18N::Game::Warp) > 0 && wcsstr(szChatTextUpperChars, I18N::Game::Warp) != NULL))
     {
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*> m_listMoveInfoData;
         m_listMoveInfoData = SEASON3B::CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
@@ -9455,11 +9456,11 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
 
         if (li != m_listMoveInfoData.end())
         {
-            if (wcsicmp((*li)->_ReqInfo.szMainMapName, GlobalText[37]) == 0)
+            if (wcsicmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Atlans) == 0)
             {
                 bMoveAtlans = true;
             }
-            else if (wcsicmp((*li)->_ReqInfo.szMainMapName, GlobalText[55]) == 0)
+            else if (wcsicmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Icarus) == 0)
             {
                 bMoveIcarus = true;
             }
@@ -9468,13 +9469,13 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
 
     if (bCantSwim && bMoveAtlans)
     {
-        g_pSystemLogBox->AddText(GlobalText[261], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return true;
     }
 
     if ((bCantFly || bEquipChangeRing) && bMoveIcarus)
     {
-        g_pSystemLogBox->AddText(GlobalText[263], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return true;
     }
 

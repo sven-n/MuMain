@@ -2,6 +2,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/Character/NewUIPetInfoWindow.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -58,10 +59,10 @@ void CNewUIPetInfoWindow::Release()
 
 void CNewUIPetInfoWindow::InitButtons()
 {
-    std::list<std::wstring> ltext;
+    std::list<const wchar_t* const*> ltext;
 
-    ltext.push_back(GlobalText[1187]);
-    ltext.push_back(GlobalText[1214]);
+    ltext.push_back(&I18N::Game::DarkHorse);
+    ltext.push_back(&I18N::Game::DarkRaven);
 
     // Tab Button
     m_BtnTab.CreateRadioGroup(2, IMAGE_PETINFO_TAB_BUTTON);
@@ -72,7 +73,7 @@ void CNewUIPetInfoWindow::InitButtons()
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_PETINFO_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);	// 1002 "�ݱ�"
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);	// 1002 "�ݱ�"
 }
 
 void CNewUIPetInfoWindow::SetPos(int x, int y)
@@ -129,7 +130,7 @@ bool CNewUIPetInfoWindow::Render()
     RenderImage(IMAGE_PETINFO_BOTTOM, m_Pos.x, m_Pos.y + float(PETINFOWINDOW_HEIGHT) - 45.f, float(PETINFOWINDOW_WIDTH), 45.f);
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 13, GlobalText[1217], 70, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 13, I18N::Game::Pet, 70, 0, RT3_SORT_CENTER);
     g_pRenderText->SetFont(g_hFont);
     m_BtnTab.Render();
 
@@ -146,7 +147,7 @@ bool CNewUIPetInfoWindow::Render()
             g_pRenderText->SetTextColor(0xFF0000FF);
             g_pRenderText->SetFont(g_hFontBold);
             wchar_t szText[256] = { 0, };
-            mu_swprintf(szText, GlobalText[1233], GlobalText[1187]);
+            mu_swprintf(szText, I18N::Game::NoS, I18N::Game::DarkHorse);
             g_pRenderText->RenderText(m_Pos.x + 15, m_Pos.y + 100, szText, 160, 30, RT3_SORT_CENTER);
         }
         else
@@ -163,7 +164,7 @@ bool CNewUIPetInfoWindow::Render()
         {
             g_pRenderText->SetTextColor(0xFF0000FF);
             g_pRenderText->SetFont(g_hFontBold);
-            g_pRenderText->RenderText(m_Pos.x + 15, m_Pos.y + 100, GlobalText[1169], 160, 30, RT3_SORT_CENTER);
+            g_pRenderText->RenderText(m_Pos.x + 15, m_Pos.y + 100, I18N::Game::NoPet, 160, 30, RT3_SORT_CENTER);
         }
         else
         {
@@ -187,7 +188,7 @@ bool CNewUIPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 25, GlobalText[1187], 70, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 25, I18N::Game::DarkHorse, 70, 0, RT3_SORT_CENTER);
 
     int iPosX = m_Pos.x + 12;
     int iPosY = m_Pos.y + 75;
@@ -197,22 +198,22 @@ bool CNewUIPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetFont(g_hFontBold);
 
-    mu_swprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
+    mu_swprintf(szText, I18N::Game::LevelD, pPetInfo->m_wLevel);
     g_pRenderText->RenderText(iPosX + 2, iPosY + 8, szText, 70 - 14, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    mu_swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
+    mu_swprintf(szText, I18N::Game::LifeDD, pPetInfo->m_wLife, 255);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 28, szText, 0, 0, RT3_SORT_CENTER);
     RenderImage(IMAGE_PETINFO_LIFEBAR, iPosX + 7, iPosY + 40, 151, 12);
     int iHP = (std::min<int>(pPetInfo->m_wLife, 255) * 147) / 255;
     RenderImage(IMAGE_PETINFO_LIFE, iPosX + 9, iPosY + 42, iHP, 8);
-    mu_swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
+    mu_swprintf(szText, I18N::Game::ExpDD, pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 59, szText, 0, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1], pPetInfo->m_wAttackSuccess);
+    mu_swprintf(szText, I18N::Game::DmgRateDDD, m_aiDamage[0], m_aiDamage[1], pPetInfo->m_wAttackSuccess);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 72, szText, 0, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
+    mu_swprintf(szText, I18N::Game::AttackSpeedD, pPetInfo->m_wAttackSpeed);
     g_pRenderText->RenderText(iPosX + 10, iPosY + 85, szText, 0, 0, RT3_SORT_CENTER);
     return true;
 }
@@ -223,7 +224,7 @@ bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 25, GlobalText[1214], 70, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 25, I18N::Game::DarkRaven, 70, 0, RT3_SORT_CENTER);
 
     int iGBox1PosX = m_Pos.x + 12;
     int iGBox1PosY = m_Pos.y + 75;
@@ -236,26 +237,26 @@ bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
 
-    mu_swprintf(szText, GlobalText[200], pPetInfo->m_wLevel);
+    mu_swprintf(szText, I18N::Game::LevelD, pPetInfo->m_wLevel);
     g_pRenderText->RenderText(iGBox1PosX + 2, iGBox1PosY + 8, szText, 70 - 14, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(iGBox2PosX + 2, iGBox2PosY + 8, GlobalText[1218], 70 - 14, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(iGBox2PosX + 2, iGBox2PosY + 8, I18N::Game::Commands, 70 - 14, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    mu_swprintf(szText, GlobalText[358], pPetInfo->m_wLife, 255);
+    mu_swprintf(szText, I18N::Game::LifeDD, pPetInfo->m_wLife, 255);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 28, szText, 0, 0, RT3_SORT_CENTER);
     RenderImage(IMAGE_PETINFO_LIFEBAR, iGBox1PosX + 7, iGBox1PosY + 40, 151, 12);
     int iHP = (std::min<int>(pPetInfo->m_wLife, 255) * 147) / 255;
     RenderImage(IMAGE_PETINFO_LIFE, iGBox1PosX + 9, iGBox1PosY + 42, iHP, 8);
-    mu_swprintf(szText, GlobalText[357], pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
+    mu_swprintf(szText, I18N::Game::ExpDD, pPetInfo->m_dwExp1, pPetInfo->m_dwExp2);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 59, szText, 0, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[203], m_aiDamage[0], m_aiDamage[1],
+    mu_swprintf(szText, I18N::Game::DmgRateDDD, m_aiDamage[0], m_aiDamage[1],
         pPetInfo->m_wAttackSuccess);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 72, szText, 0, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[64], pPetInfo->m_wAttackSpeed);
+    mu_swprintf(szText, I18N::Game::AttackSpeedD, pPetInfo->m_wAttackSpeed);
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 85, szText, 0, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, GlobalText[698], (185 + (pPetInfo->m_wLevel * 15)));
+    mu_swprintf(szText, I18N::Game::CharismaRequirementD, (185 + (pPetInfo->m_wLevel * 15)));
     g_pRenderText->RenderText(iGBox1PosX + 10, iGBox1PosY + 98, szText, 0, 0, RT3_SORT_CENTER);
 
     // SkillBox
@@ -269,10 +270,10 @@ bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
     RenderImage(IMAGE_PETINFO_SKILL, iGBox2PosX + 17, iGBox2PosY + 114, 19.f, 27.f, 41.f, 0.f);
     RenderImage(IMAGE_PETINFO_SKILL, iGBox2PosX + 17, iGBox2PosY + 154, 19.f, 27.f, 61.f, 0.f);
 
-    g_pRenderText->RenderText(iGBox2PosX + 52, iGBox2PosY + 45, GlobalText[1219], 0, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(iGBox2PosX + 52, iGBox2PosY + 85, GlobalText[1220], 0, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(iGBox2PosX + 52, iGBox2PosY + 125, GlobalText[1221], 0, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(iGBox2PosX + 52, iGBox2PosY + 165, GlobalText[1222], 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(iGBox2PosX + 52, iGBox2PosY + 45, I18N::Game::BasicAction, 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(iGBox2PosX + 52, iGBox2PosY + 85, I18N::Game::RandomAutomaticAttack, 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(iGBox2PosX + 52, iGBox2PosY + 125, I18N::Game::AttackWithOwner, 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(iGBox2PosX + 52, iGBox2PosY + 165, I18N::Game::AttackTarget, 0, 0, RT3_SORT_CENTER);
     return true;
 }
 

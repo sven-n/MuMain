@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/Inventory/NewUIStorageInventory.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -56,11 +57,11 @@ bool CNewUIStorageInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
     for (int i = BTN_INSERT_ZEN; i < MAX_BTN; ++i)
     {
         m_abtn[i].ChangeButtonImgState(true, IMAGE_STORAGE_BTN_INSERT_ZEN + i);
-        m_abtn[i].ChangeToolTipText(GlobalText[anToolTipText[i]], true);
+        m_abtn[i].ChangeToolTipText(I18N::Game::LookupSlot(anToolTipText[i]), true);
     }
 
     m_BtnExpand.ChangeButtonImgState(true, IMAGE_STORAGE_EXPAND_BTN, false);
-    m_BtnExpand.ChangeToolTipText(GlobalText[3338], true);
+    m_BtnExpand.ChangeToolTipText(&I18N::Game::OpeningAnExpandedVaultH, true);
 
     m_bLock = false;
     SetItemAutoMove(false);
@@ -207,7 +208,7 @@ void CNewUIStorageInventory::RenderText()
     g_pRenderText->SetBgColor(0);
 
     mu_swprintf(
-        szTemp, L"%ls (%ls)", GlobalText[234], GlobalText[m_bLock ? 241 : 240]);
+        szTemp, L"%ls (%ls)", I18N::Game::Storage, I18N::Game::Lookup(m_bLock ? 241 : 240));
     if (m_bLock)
         g_pRenderText->SetTextColor(240, 32, 32, 255);
     else
@@ -222,7 +223,7 @@ void CNewUIStorageInventory::RenderText()
         m_Pos.x + 168, m_Pos.y + 342 + 8, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
 
     g_pRenderText->SetTextColor(240, 64, 64, 255);
-    g_pRenderText->RenderText(m_Pos.x + 10 + 15, m_Pos.y + 342 + 29, GlobalText[266]);
+    g_pRenderText->RenderText(m_Pos.x + 10 + 15, m_Pos.y + 342 + 29, I18N::Game::StorageFee);
 
     __int64 iTotalLevel = (__int64)CharacterAttribute->Level + Master_Level_Data.nMLevel;
 
@@ -464,10 +465,10 @@ void CNewUIStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInven
         // MessageBox
         CMsgBoxIGSCommon* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[3028], GlobalText[667]);
+        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::TheseItemsCannotBeStoredInTheInventory);
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
-        g_pSystemLogBox->AddText(GlobalText[667], TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeStoredInTheInventory, TYPE_ERROR_MESSAGE);
         CNewUIInventoryCtrl::BackupPickedItem();
 
         if (IsItemAutoMove())
@@ -587,13 +588,13 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
         break;
 
     case 10:
-        CreateOkMessageBox(GlobalText[440]);
+        CreateOkMessageBox(I18N::Game::IncorrectPassword);
         CNewUIInventoryCtrl::BackupPickedItem();
         ProcessStorageItemAutoMoveFailure();
         break;
 
     case 11:
-        CreateOkMessageBox(GlobalText[441]);
+        CreateOkMessageBox(I18N::Game::InventoryIsAlreadyLocked);
         break;
 
     case 12:
@@ -635,7 +636,7 @@ void CNewUIStorageInventory::ProcessToReceiveStorageStatus(BYTE byStatus)
         break;
 
     case 13:
-        CreateOkMessageBox(GlobalText[401]);
+        CreateOkMessageBox(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect);
         break;
     }
 }

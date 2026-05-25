@@ -9,6 +9,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "I18N/All.h"
 
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
@@ -30,7 +31,7 @@ namespace npcBreeder
             ip = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
             if (ip->Type != ITEM_DARK_HORSE_ITEM)
             {
-                mu_swprintf(Text, GlobalText[1229]);
+                mu_swprintf(Text, I18N::Game::PetIsNotEquipped);
                 return -1;
             }
             break;
@@ -39,12 +40,12 @@ namespace npcBreeder
             ip = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
             if (ip->Type != ITEM_DARK_RAVEN_ITEM)
             {
-                mu_swprintf(Text, GlobalText[1229]);
+                mu_swprintf(Text, I18N::Game::PetIsNotEquipped);
                 return -1;
             }
             break;
         default:
-            mu_swprintf(Text, GlobalText[1229]);
+            mu_swprintf(Text, I18N::Game::PetIsNotEquipped);
             return -1;
         }
 
@@ -64,7 +65,7 @@ namespace npcBreeder
         switch (Gold)
         {
         case 0:
-            mu_swprintf(Text, GlobalText[1230]);
+            mu_swprintf(Text, I18N::Game::LifeHasBeenRecovered);
             break;
 
         default:
@@ -75,11 +76,11 @@ namespace npcBreeder
             if ((int)CharacterMachine->Gold < Gold)
             {
                 ConvertGold((double)Gold - CharacterMachine->Gold, Text);
-                mu_swprintf(Text2, GlobalText[1231], Text);
+                mu_swprintf(Text2, I18N::Game::SZenIsLackingToRecoverLife, Text);
             }
             else
             {
-                mu_swprintf(Text2, GlobalText[1232], Text);
+                mu_swprintf(Text2, I18N::Game::SZenIsRequiredToRecoverLife, Text);
             }
 
             int Length = wcslen(Text2);

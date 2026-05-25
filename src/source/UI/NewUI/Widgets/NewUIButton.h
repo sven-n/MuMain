@@ -138,6 +138,10 @@ namespace SEASON3B
     public:
         void ChangeImgColor(BUTTON_STATE eventstate, unsigned int color);
         void ChangeText(std::wstring btname);
+        // Slot overload: stores a pointer to an I18N::<Group>::<Identifier>
+        // variable so the cached label is refreshed automatically when the
+        // locale changes. Pass &I18N::Game::SomeKey at the call site.
+        void ChangeText(const wchar_t* const* nameSlot);
         void SetFont(HFONT hFont);
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -150,6 +154,8 @@ namespace SEASON3B
         void ChangeTextColor(const DWORD color);
 
         void ChangeToolTipText(std::wstring tooltiptext, bool istoppos = false);
+        // Slot overload â€” see ChangeText(const wchar_t* const*).
+        void ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos = false);
         void ChangeToolTipTextColor(const DWORD color);
         void SetToolTipFont(HFONT hFont);
 
@@ -172,6 +178,15 @@ namespace SEASON3B
     private:
        std::wstring		m_Name;
        std::wstring		m_TooltipText;
+       // Optional I18N indirection: when non-null, the corresponding cached
+       // string is refreshed from *m_p*Slot on every locale change. Set by
+       // the slot-pointer overloads of ChangeText / ChangeToolTipText.
+       const wchar_t* const* m_pNameSlot = nullptr;
+       const wchar_t* const* m_pTooltipSlot = nullptr;
+       // True once we have called I18N::RegisterLocaleObserver for this
+       // instance, so EnsureLocaleObserver is idempotent and the destructor
+       // knows whether an Unregister call is owed.
+       bool                  m_LocaleObserverRegistered = false;
 
         HFONT					m_hTextFont;
         HFONT					m_hToolTipFont;
@@ -198,6 +213,10 @@ namespace SEASON3B
         int						m_iMoveTextTipPosX;
         int						m_iMoveTextTipPosY;
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+    private:
+        void EnsureLocaleObserver();
+        static void OnLocaleChanged(void* ctx) noexcept;
     };
 
     inline void CNewUIButton::ChangeImgWidth(bool isimgwidth)
@@ -207,6 +226,9 @@ namespace SEASON3B
 
     inline void CNewUIButton::ChangeText(std::wstring btname)
     {
+        // Caller is overriding any prior I18N slot binding with a literal
+        // string; drop the slot so the locale observer won't clobber it.
+        m_pNameSlot = nullptr;
         m_Name = btname;
     }
 
@@ -231,6 +253,8 @@ namespace SEASON3B
     inline
         void CNewUIButton::ChangeToolTipText(std::wstring tooltiptext, bool istoppos)
     {
+        // See ChangeText(std::wstring): literal overrides drop the slot.
+        m_pTooltipSlot = nullptr;
         m_TooltipText = tooltiptext;
         m_IsTopPos = istoppos;
         //m_hToolTipFont = g_hFont;
@@ -266,6 +290,8 @@ namespace SEASON3B
     public:
         void ChangeImgColor(BUTTON_STATE eventstate, unsigned int color);
         void ChangeText(std::wstring btname);
+        // Slot overload â€” see CNewUIButton::ChangeText(const wchar_t* const*).
+        void ChangeText(const wchar_t* const* nameSlot);
         void ChangeTextBackColor(const DWORD bcolor);
         void ChangeTextColor(const DWORD color);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -293,6 +319,9 @@ namespace SEASON3B
     private:
         ButtonStateMap           m_RadioButtonInfo;
        std::wstring		 m_Name;
+       // See CNewUIButton::m_pNameSlot â€” same purpose for radio buttons.
+       const wchar_t* const* m_pNameSlot = nullptr;
+       bool                  m_LocaleObserverRegistered = false;
 
         DWORD					m_NameColor;
         DWORD					m_NameBackColor;
@@ -308,11 +337,16 @@ namespace SEASON3B
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
         bool					m_bLockImage;
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
+
+    private:
+        void EnsureLocaleObserver();
+        static void OnLocaleChanged(void* ctx) noexcept;
     };
 
     inline
         void CNewUIRadioButton::ChangeText(std::wstring btname)
     {
+        m_pNameSlot = nullptr;
         m_Name = btname;
     }
 
@@ -352,6 +386,9 @@ namespace SEASON3B
         void ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
         void ChangeRadioText(std::list<std::wstring>& textlist);
+        // Slot overload: list entries are pointers to I18N runtime variables
+        // (e.g. &I18N::Game::Hunting). Labels refresh on language change.
+        void ChangeRadioText(std::list<const wchar_t* const*>& slotList);
         void ChangeFrame(int buttonIndex);
         void LockButtonindex(int buttonIndex);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -390,7 +427,7 @@ namespace SEASON3B
         RadioButtonList				m_RadioList;
         DWORD						m_CurButtonIndex;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-        int							m_iButtonDistance;			// ¹öÆ°°ú ¹öÆ°»çÀÌÀÇ °£°Ý
+        int							m_iButtonDistance;			// ï¿½ï¿½Æ°ï¿½ï¿½ ï¿½ï¿½Æ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
     };
 
@@ -414,6 +451,8 @@ namespace SEASON3B
         void CheckBoxImgState(int imgindex);
         void RegisterBoxState(bool eventstate);
         void ChangeText(std::wstring btname);
+        // Slot overload â€” see CNewUIButton::ChangeText(const wchar_t* const*).
+        void ChangeText(const wchar_t* const* nameSlot);
         void CheckBoxInfo(int x, int y, int sx, int sy);
         bool GetBoxState();
 
@@ -424,12 +463,18 @@ namespace SEASON3B
         POINT					m_Pos;
         POINT					m_Size;
        std::wstring		m_Name;
+       const wchar_t* const* m_pNameSlot = nullptr;
+       bool                  m_LocaleObserverRegistered = false;
         HFONT					m_hTextFont;
         DWORD					m_NameColor;
         DWORD					m_NameBackColor;
         float					m_ImgWidth;
         float					m_ImgHeight;
         bool					State;
+
+    private:
+        void EnsureLocaleObserver();
+        static void OnLocaleChanged(void* ctx) noexcept;
     };
 };
 

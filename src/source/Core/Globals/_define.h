@@ -334,7 +334,6 @@ constexpr int ITEM_ACTION_BLOCK_SELL_ONLY = 1;      // 0,0,0,0,1,0 - Blocks sell
 #define MAX_LANGUAGE_NAME_LENGTH	4
 
 #define MAX_GATES           512
-#define MAX_DIALOG			200
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #define MAX_GIFT_MESSAGE_SIZE	200

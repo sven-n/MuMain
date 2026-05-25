@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/Events/NewUIGateSwitchWindow.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -36,9 +37,9 @@ bool CNewUIGateSwitchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GATESWITCHWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
-    InitButton(&m_BtnOpen, m_Pos.x + 41, m_Pos.y + 320, GlobalText[1479]);
+    InitButton(&m_BtnOpen, m_Pos.x + 41, m_Pos.y + 320, I18N::Game::Open1107);
 
     Show(false);
 
@@ -117,11 +118,11 @@ bool CNewUIGateSwitchWindow::Render()
 
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
 
-    g_pRenderText->RenderText(ptOrigin.x + 95, ptOrigin.y, GlobalText[1476], 0, 0, RT3_WRITE_CENTER); ptOrigin.y += 17;
-    g_pRenderText->RenderText(ptOrigin.x + 95, ptOrigin.y, GlobalText[1477], 0, 0, RT3_WRITE_CENTER); ptOrigin.y += 17;
+    g_pRenderText->RenderText(ptOrigin.x + 95, ptOrigin.y, I18N::Game::CanCommandToOpenOrClose, 0, 0, RT3_WRITE_CENTER); ptOrigin.y += 17;
+    g_pRenderText->RenderText(ptOrigin.x + 95, ptOrigin.y, I18N::Game::TheCastleGateInFront, 0, 0, RT3_WRITE_CENTER); ptOrigin.y += 17;
 
     g_pRenderText->SetBgColor(160, 0, 0, 255);
-    g_pRenderText->RenderText(ptOrigin.x + 95, ptOrigin.y, GlobalText[1478], 0, 0, RT3_WRITE_CENTER); ptOrigin.y += 17;
+    g_pRenderText->RenderText(ptOrigin.x + 95, ptOrigin.y, I18N::Game::BeCarefulItMightBeBeneficialToTheEnemy, 0, 0, RT3_WRITE_CENTER); ptOrigin.y += 17;
     g_pRenderText->SetBgColor(0);
 
     RenderOutlineUpper(m_Pos.x + 0, m_Pos.y + 120, 162, 159);
@@ -129,12 +130,12 @@ bool CNewUIGateSwitchWindow::Render()
     if (npcGateSwitch::IsGateOpened())
     {
         RenderBitmap(BITMAP_INTERFACE_EX + 41, m_Pos.x + 17.5f, m_Pos.y + 120, 155, 168, 0.f, 0.f, 155 / 256.f, 168 / 256.f);
-        m_BtnOpen.ChangeText(GlobalText[1002]);
+        m_BtnOpen.ChangeText(&I18N::Game::Close388);
     }
     else
     {
         RenderBitmap(BITMAP_INTERFACE_EX + 40, m_Pos.x + 17.5f, m_Pos.y + 120, 155, 168, 0.f, 0.f, 155 / 256.f, 168 / 256.f);
-        m_BtnOpen.ChangeText(GlobalText[1479]);
+        m_BtnOpen.ChangeText(&I18N::Game::Open1107);
     }
 
     m_BtnOpen.Render();
@@ -211,7 +212,7 @@ void CNewUIGateSwitchWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    mu_swprintf(szText, L"%ls", GlobalText[1475]);
+    mu_swprintf(szText, L"%ls", I18N::Game::CastleGateSwitch);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

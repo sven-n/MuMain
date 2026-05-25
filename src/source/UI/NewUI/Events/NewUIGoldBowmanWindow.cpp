@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/Events/NewUIGoldBowmanWindow.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "I18N/All.h"
 
 #include "GameLogic/Items/MixMgr.h"
 
@@ -64,12 +65,12 @@ bool CNewUIGoldBowmanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Serial Button
     m_BtnSerial.ChangeButtonImgState(true, IMAGE_GB_BTN_SERIAL, false);
     m_BtnSerial.ChangeButtonInfo(m_Pos.x + 45, m_Pos.y + 285, 108, 29);
-    m_BtnSerial.ChangeText(GlobalText[895]);
+    m_BtnSerial.ChangeText(&I18N::Game::LuckyNumberRegistered);
 
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GB_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     Show(false);
 
@@ -142,7 +143,7 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
         SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         if (pNewInventoryCtrl->FindEmptySlot(2, 4) == -1)
         {
-            SEASON3B::CreateOkMessageBox(GlobalText[896]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::LeaveAtLeastOneEmptySlotInYourInventory);
         }
         else
         {
@@ -244,37 +245,37 @@ void CNewUIGoldBowmanWindow::RenderTexts()
     RenderText(name, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[891]); //"100%%
+    mu_swprintf(Text, I18N::Game::EnterThe12DigitLuckyNumber); //"100%%
     RenderText(Text, m_Pos.x, m_Pos.y + 80, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[892]);
+    mu_swprintf(Text, I18N::Game::WrittenOnThe100WinningCard);
     RenderText(Text, m_Pos.x, m_Pos.y + 95, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[897]);
+    mu_swprintf(Text, I18N::Game::LuckyNumberRegistrationPeriod);
     RenderText(Text, m_Pos.x, m_Pos.y + 110, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[898]);
+    mu_swprintf(Text, I18N::Game::Oct282003Nov30);
     RenderText(Text, m_Pos.x, m_Pos.y + 125, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     /////////////////////////////// bottom text /////////////////////////////////////////////////////
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[893]);
+    mu_swprintf(Text, I18N::Game::EnterTheLuckyNumber);
     RenderText(Text, m_Pos.x, m_Pos.y + 180, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[894]);
+    mu_swprintf(Text, I18N::Game::ExAUS919DKL2J9);
     RenderText(Text, m_Pos.x, m_Pos.y + 195, 190, 0, 0xFF18FF00, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[916]);
+    mu_swprintf(Text, I18N::Game::PleaseMakeSureToDifferentiate);
     RenderText(Text, m_Pos.x, m_Pos.y + 210, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[917]);
+    mu_swprintf(Text, I18N::Game::AlphabetOAndNumber0AndAlphabetIAndNumber1);
     RenderText(Text, m_Pos.x, m_Pos.y + 225, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     if (wcscmp(g_strGiftName, L""))

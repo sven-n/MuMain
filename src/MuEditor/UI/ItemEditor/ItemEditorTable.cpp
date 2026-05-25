@@ -7,7 +7,7 @@
 #include "ItemEditorActions.h"
 #include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
-#include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
 #include "imgui.h"
@@ -76,7 +76,7 @@ void CItemEditorTable::Render(
 
     if (visibleColumnCount == 0)
     {
-        ImGui::Text(EDITOR_TEXT("label_no_columns"));
+        ImGui::Text(I18N::Editor::NoColumnsSelectedClickColumnsToShowColumns);
         return;
     }
 
@@ -136,7 +136,7 @@ void CItemEditorTable::Render(
     // Setup columns based on visibility - METADATA-DRIVEN
     if (hasIndex)
     {
-        ImGui::TableSetupColumn(EDITOR_TEXT("label_index"), ImGuiTableColumnFlags_WidthFixed, 50.0f);
+        ImGui::TableSetupColumn(I18N::Editor::Index, ImGuiTableColumnFlags_WidthFixed, 50.0f);
     }
 
     for (int i = 0; i < fieldCount; ++i)
@@ -144,7 +144,7 @@ void CItemEditorTable::Render(
         if (columnVisibility.find(fields[i].name) != columnVisibility.end() &&
             columnVisibility[fields[i].name])
         {
-            ImGui::TableSetupColumn(GetFieldDisplayName(fields[i].name),
+            ImGui::TableSetupColumn(GetFieldDisplayName(fields[i]),
                                    ImGuiTableColumnFlags_WidthFixed,
                                    fields[i].width);
         }

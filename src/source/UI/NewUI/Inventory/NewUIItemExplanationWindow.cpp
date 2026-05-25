@@ -8,6 +8,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
@@ -186,7 +187,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     mu_swprintf(TextList[TextNum], L"\n");
     TextNum++;
 
-    wcscpy(TextList[TextNum], GlobalText[160]);
+    wcscpy(TextList[TextNum], I18N::Game::ItemInfo);
     TextListColor[TextNum] = TEXT_COLOR_BLUE;
     TextBold[TextNum] = true;
     TextNum++;
@@ -263,7 +264,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
         if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 1 ) )
         {
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            mu_swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], HIBYTE( mixLevel ) );TextNum++;
+            mu_swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, I18N::Game::Set, I18N::Game::Combining, I18N::Game::AncientMetal, HIBYTE( mixLevel ) );TextNum++;
         }
     }
     if ( LOBYTE( mixLevel)<=3 )
@@ -272,7 +273,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
         if ( g_csItemOption.GetSetItemName( Text, ItemHelp, 2 ) )
         {
             TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            mu_swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, GlobalText[1089], GlobalText[591], GlobalText[1090], LOBYTE( mixLevel ) );TextNum++;
+            mu_swprintf(TextList[TextNum],"%ls %ls %ls:(%ls+%d)", Text, I18N::Game::Set, I18N::Game::Combining, I18N::Game::AncientMetal, LOBYTE( mixLevel ) );TextNum++;
         }
     }
     */

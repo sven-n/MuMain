@@ -19,6 +19,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
 #include "World/MapInfra/MapManager.h"
+#include "I18N/All.h"
 
 
 
@@ -978,7 +979,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 void CursedTemple::UpdateTempleSystemMsg(int _Value)
 {
     wchar_t szText[256] = { 0, };
-    mu_swprintf(szText, GlobalText[2367]);
+    mu_swprintf(szText, I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch);
     switch (_Value)
     {
     case 0:
@@ -988,22 +989,22 @@ void CursedTemple::UpdateTempleSystemMsg(int _Value)
     case 2:
         break;
     case 3:
-        g_pSystemLogBox->AddText(GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(GlobalText[2368], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotEnterTheZoneWithTheNumberOfMembersExceedingTheLimit, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 5:
-        mu_swprintf(szText, GlobalText[829], 6);
+        mu_swprintf(szText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
         g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 6:
         break;
     case 7:
-        g_pSystemLogBox->AddText(GlobalText[2865], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotEnterIfYouAreA1stStageOutlaw, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     case 8:
-        g_pSystemLogBox->AddText(GlobalText[2175], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCanTWarpWearingTheRingOfTransformation, SEASON3B::TYPE_ERROR_MESSAGE);
         break;
     }
 }

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/Events/NewUIDoppelGangerFrame.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
@@ -105,11 +106,11 @@ bool CNewUIDoppelGangerFrame::Render()
         g_pRenderText->SetTextColor(255, 0, 0, 255);
     }
 
-    mu_swprintf(szText, GlobalText[2772], m_iEnteredMonsters, m_iMaxMonsters);
+    mu_swprintf(szText, I18N::Game::MonstersPassedDD, m_iEnteredMonsters, m_iMaxMonsters);
     g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 13, szText, 110, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(255, 150, 0, 255);
-    g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 38, GlobalText[865], 110, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 117, m_Pos.y + 38, I18N::Game::TimeLeft, 110, 0, RT3_SORT_CENTER);
 
     int iMinute = m_iTime / 60;
     int iSecond = 99 - (int)WorldTime % 100;

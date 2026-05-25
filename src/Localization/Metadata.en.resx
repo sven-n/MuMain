@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Two-Hand" xml:space="preserve">
+    <value>Two-Hand</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="Slot" xml:space="preserve">
+    <value>Slot</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Skill</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Height</value>
+  </data>
+  <data name="Min Damage" xml:space="preserve">
+    <value>Min Damage</value>
+  </data>
+  <data name="Max Damage" xml:space="preserve">
+    <value>Max Damage</value>
+  </data>
+  <data name="Block Rate" xml:space="preserve">
+    <value>Block Rate</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>Defense</value>
+  </data>
+  <data name="Magic Defense" xml:space="preserve">
+    <value>Magic Defense</value>
+  </data>
+  <data name="Attack Speed" xml:space="preserve">
+    <value>Attack Speed</value>
+  </data>
+  <data name="Move Speed" xml:space="preserve">
+    <value>Move Speed</value>
+  </data>
+  <data name="Durability" xml:space="preserve">
+    <value>Durability</value>
+  </data>
+  <data name="Magic Durability" xml:space="preserve">
+    <value>Magic Durability</value>
+  </data>
+  <data name="Magic Power" xml:space="preserve">
+    <value>Magic Power</value>
+  </data>
+  <data name="Req Strength" xml:space="preserve">
+    <value>Req Strength</value>
+  </data>
+  <data name="Req Dexterity" xml:space="preserve">
+    <value>Req Dexterity</value>
+  </data>
+  <data name="Req Energy" xml:space="preserve">
+    <value>Req Energy</value>
+  </data>
+  <data name="Req Vitality" xml:space="preserve">
+    <value>Req Vitality</value>
+  </data>
+  <data name="Req Leadership" xml:space="preserve">
+    <value>Req Leadership</value>
+  </data>
+  <data name="Req Level" xml:space="preserve">
+    <value>Req Level</value>
+  </data>
+  <data name="Sell Value" xml:space="preserve">
+    <value>Sell Value</value>
+  </data>
+  <data name="Buy Price" xml:space="preserve">
+    <value>Buy Price</value>
+  </data>
+  <data name="Attack Type" xml:space="preserve">
+    <value>Attack Type</value>
+  </data>
+  <data name="DW/SM" xml:space="preserve">
+    <value>DW/SM</value>
+  </data>
+  <data name="DK/BK" xml:space="preserve">
+    <value>DK/BK</value>
+  </data>
+  <data name="ELF/ME" xml:space="preserve">
+    <value>ELF/ME</value>
+  </data>
+  <data name="MG/DM" xml:space="preserve">
+    <value>MG/DM</value>
+  </data>
+  <data name="DL/LE" xml:space="preserve">
+    <value>DL/LE</value>
+  </data>
+  <data name="SUM/BS" xml:space="preserve">
+    <value>SUM/BS</value>
+  </data>
+  <data name="RF/FM" xml:space="preserve">
+    <value>RF/FM</value>
+  </data>
+  <data name="Ice Resistance" xml:space="preserve">
+    <value>Ice Resistance</value>
+  </data>
+  <data name="Poison Resistance" xml:space="preserve">
+    <value>Poison Resistance</value>
+  </data>
+  <data name="Lightning Resistance" xml:space="preserve">
+    <value>Lightning Resistance</value>
+  </data>
+  <data name="Fire Resistance" xml:space="preserve">
+    <value>Fire Resistance</value>
+  </data>
+  <data name="Earth Resistance" xml:space="preserve">
+    <value>Earth Resistance</value>
+  </data>
+  <data name="Wind Resistance" xml:space="preserve">
+    <value>Wind Resistance</value>
+  </data>
+  <data name="Water Resistance" xml:space="preserve">
+    <value>Water Resistance</value>
+  </data>
+  <data name="Resistance 7" xml:space="preserve">
+    <value>Resistance 7</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Mana" xml:space="preserve">
+    <value>Mana</value>
+  </data>
+  <data name="AG Cost" xml:space="preserve">
+    <value>AG Cost</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>Range</value>
+  </data>
+  <data name="Cooldown" xml:space="preserve">
+    <value>Cooldown</value>
+  </data>
+  <data name="Mastery Type" xml:space="preserve">
+    <value>Mastery Type</value>
+  </data>
+  <data name="Use Type" xml:space="preserve">
+    <value>Use Type</value>
+  </data>
+  <data name="Brand" xml:space="preserve">
+    <value>Brand</value>
+  </data>
+  <data name="Kill Count" xml:space="preserve">
+    <value>Kill Count</value>
+  </data>
+  <data name="Rank" xml:space="preserve">
+    <value>Rank</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>Icon</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Item Skill" xml:space="preserve">
+    <value>Item Skill</value>
+  </data>
+  <data name="Is Damage" xml:space="preserve">
+    <value>Is Damage</value>
+  </data>
+  <data name="Effect" xml:space="preserve">
+    <value>Effect</value>
+  </data>
+  <data name="Duty 0" xml:space="preserve">
+    <value>Duty 0</value>
+  </data>
+  <data name="Duty 1" xml:space="preserve">
+    <value>Duty 1</value>
+  </data>
+  <data name="Duty 2" xml:space="preserve">
+    <value>Duty 2</value>
+  </data>
+</root>

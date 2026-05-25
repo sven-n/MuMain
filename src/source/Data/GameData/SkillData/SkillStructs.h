@@ -47,7 +47,7 @@ typedef struct
 // ============================================================================
 
 // Generate field copy statements from X-macro
-#define COPY_SKILL_FIELD(name, type, arraySize, width) (dest).name = (source).name;
+#define COPY_SKILL_FIELD(name, type, arraySize, width, i18nName) (dest).name = (source).name;
 
 // Macro to copy all non-name fields from source to dest
 #define COPY_SKILL_ATTRIBUTE_FIELDS(dest, source) \

@@ -3,7 +3,7 @@
 
 #include "Character/CharacterManager.h"
 #include "Core/Globals/_enum.h"
-#include "Data/Translation/GlobalText.h"
+#include "I18N/All.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"   // PartyNumber, STRP_*
@@ -83,7 +83,7 @@ void AddRaw(Model& m, const wchar_t* text, LineColor color, bool bold = false)
 void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1)
 {
     Line& l = NextSlot(m);
-    mu_swprintf(l.text, GlobalText[globalTextIdx], v1);
+    mu_swprintf(l.text, I18N::Game::Lookup(globalTextIdx), v1);
     l.color = color;
     l.isBold = false;
     l.isBlank = false;
@@ -92,7 +92,7 @@ void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1)
 void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1, int v2)
 {
     Line& l = NextSlot(m);
-    mu_swprintf(l.text, GlobalText[globalTextIdx], v1, v2);
+    mu_swprintf(l.text, I18N::Game::Lookup(globalTextIdx), v1, v2);
     l.color = color;
     l.isBold = false;
     l.isBlank = false;
@@ -101,7 +101,7 @@ void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1, int v2)
 void AddFormattedWide(Model& m, int globalTextIdx, LineColor color, const wchar_t* arg)
 {
     Line& l = NextSlot(m);
-    mu_swprintf(l.text, GlobalText[globalTextIdx], arg);
+    mu_swprintf(l.text, I18N::Game::Lookup(globalTextIdx), arg);
     l.color = color;
     l.isBold = false;
     l.isBlank = false;
@@ -119,7 +119,7 @@ void AddRequirementLine(Model& m, int requiredValue, int currentValue, int reqSt
 
     {
         Line& l = NextSlot(m);
-        mu_swprintf(l.text, GlobalText[reqStringIndex], requiredValue);
+        mu_swprintf(l.text, I18N::Game::Lookup(reqStringIndex), requiredValue);
         l.color = requirementMet ? LineColor::White : LineColor::Red;
         l.isBold = false;
         l.isBlank = false;
@@ -128,7 +128,7 @@ void AddRequirementLine(Model& m, int requiredValue, int currentValue, int reqSt
     if (editorMode || requirementMet) return;
 
     Line& deficit = NextSlot(m);
-    mu_swprintf(deficit.text, GlobalText[GLOBAL_TEXT_NEED_MORE_STAT], requiredValue - currentValue);
+    mu_swprintf(deficit.text, I18N::Game::Lookup(GLOBAL_TEXT_NEED_MORE_STAT), requiredValue - currentValue);
     deficit.color = LineColor::Red;
     deficit.isBold = false;
     deficit.isBlank = false;
@@ -173,7 +173,7 @@ void EmitTopBanners(Model& m, int skillType)
     const int before = m.count;
     if (skillType == AT_SKILL_INFINITY_ARROW || skillType == AT_SKILL_INFINITY_ARROW_STR)
     {
-        AddRaw(m, GlobalText[2040], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::ArrowWillNotDecreaseDuringActivation, LineColor::DarkRed);
     }
     EndSection(m, before);
 }
@@ -341,7 +341,7 @@ void EmitPhysicalDamage(Model& m, int skillType, const DamageContext& ctx)
     case AT_SKILL_EARTHSHAKE:
     case AT_SKILL_EARTHSHAKE_STR:
     case AT_SKILL_EARTHSHAKE_MASTERY:
-        AddRaw(m, GlobalText[1237], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::CheckTheDetailsInPetInformationWindow, LineColor::DarkRed);
         return;
     default:
         AddFormatted(m, 879, LineColor::White,
@@ -501,7 +501,7 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
 
     if ((!gameMode || gameModeKnight) && skillType == AT_SKILL_IMPALE)
     {
-        AddRaw(m, GlobalText[96], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::CanOnlyBeUsedInMovingUnit, LineColor::DarkRed);
     }
 
     if (!gameMode || gameModeKnightExt)
@@ -522,12 +522,12 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
             || skillType == AT_SKILL_DEATHSTAB
             || skillType == AT_SKILL_DEATHSTAB_STR)
         {
-            AddRaw(m, GlobalText[99], LineColor::DarkRed);
+            AddRaw(m, I18N::Game::Combo, LineColor::DarkRed);
         }
         else if (skillType == AT_SKILL_STRIKE_OF_DESTRUCTION
             || skillType == AT_SKILL_STRIKE_OF_DESTRUCTION_STR)
         {
-            AddRaw(m, GlobalText[2115], LineColor::DarkRed);
+            AddRaw(m, I18N::Game::CombinationAvailable2StepOnly, LineColor::DarkRed);
         }
     }
 
@@ -541,7 +541,7 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
     }
     if (SkillUseType == SKILL_USE_TYPE_MASTER)
     {
-        AddRaw(m, GlobalText[1482], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::ThisIsAMasterSkillInGuildBattleAndCastleSiege, LineColor::DarkRed);
         AddFormatted(m, 1483, LineColor::DarkRed, SkillAttribute[skillType].KillCount);
     }
 
@@ -550,20 +550,20 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
         && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD
         && skillType == AT_SKILL_PARTY_TELEPORT && PartyNumber <= 0)
     {
-        AddRaw(m, GlobalText[1185], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::CanOnlyBeUsedDuringParty, LineColor::DarkRed);
     }
 
     // Plasma Storm Fenrir extra notes (skill-type-only, both modes).
     if (skillType == AT_SKILL_PLASMA_STORM_FENRIR)
     {
-        AddRaw(m, GlobalText[1926], LineColor::DarkRed);
-        AddRaw(m, GlobalText[1927], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::WhenTheAttackIsSuccessfulItWillDecreaseTheDurabilityOf, LineColor::DarkRed);
+        AddRaw(m, I18N::Game::OneOfTheCertainWeaponsTo50, LineColor::DarkRed);
     }
 
     // Castle-siege-only badge.
     if (IsCastleSiegeOnlySkill(skillType))
     {
-        AddRaw(m, GlobalText[2047], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::OnlyInCastleSiege, LineColor::DarkRed);
     }
 
     // Stun / Invisible / Buff-removal: usable in CS with kill count.
@@ -571,13 +571,13 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
         || skillType == AT_SKILL_INVISIBLE || skillType == AT_SKILL_REMOVAL_INVISIBLE
         || skillType == AT_SKILL_REMOVAL_BUFF)
     {
-        AddRaw(m, GlobalText[2048], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::CanBeUsedDuringCastleSiegeWithRequiredKillCount, LineColor::DarkRed);
     }
 
     // Impale flavor note.
     if (skillType == AT_SKILL_IMPALE)
     {
-        AddRaw(m, GlobalText[2049], LineColor::DarkRed);
+        AddRaw(m, I18N::Game::CanBeUsedFromTheMountItem, LineColor::DarkRed);
     }
     EndSection(m, before);
 }
@@ -589,14 +589,14 @@ void EmitBlueTags(Model& m, int skillType)
     const BYTE MasteryType = gSkillManager.GetSkillMasteryType(static_cast<ActionSkillType>(skillType));
     if (MasteryType != 255)
     {
-        AddRaw(m, GlobalText[GLOBAL_TEXT_MASTERY_TYPE_BASE + MasteryType], LineColor::Blue);
+        AddRaw(m, I18N::Game::Lookup(GLOBAL_TEXT_MASTERY_TYPE_BASE + MasteryType), LineColor::Blue);
     }
 
     if (skillType == AT_SKILL_EXPANSION_OF_WIZARDRY
         || skillType == AT_SKILL_EXPANSION_OF_WIZARDRY_STR
         || skillType == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
     {
-        AddRaw(m, GlobalText[2054], LineColor::Blue);
+        AddRaw(m, I18N::Game::MinimumWizardryIncrement20, LineColor::Blue);
     }
     EndSection(m, before);
 }
@@ -626,7 +626,7 @@ void BuildModel(const BuildOptions& options, Model& outModel)
         {
             if (CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Special[i] == AT_SKILL_FORCE_WAVE)
             {
-                mu_swprintf(lpszName, L"%ls", GlobalText[1200]);
+                mu_swprintf(lpszName, L"%ls", I18N::Game::ForceWave);
                 break;
             }
         }

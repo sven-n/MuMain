@@ -13,6 +13,7 @@
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "I18N/All.h"
 
 
 
@@ -102,16 +103,16 @@ void RenderAppoint()
 
     RenderGoldRect(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 19, 170, 20.f, (s_eAppointType == APPOINT_SUBGUILDMASTER ? 1 : 0));
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24, GlobalText[1311], 170, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24, I18N::Game::AppointAsAssistantGuildMaster, 170, 0, RT3_SORT_CENTER);
 
     RenderGoldRect(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 19 + 25 - 5, 170, 20.f, (s_eAppointType == APPOINT_BATTLEMASTSER ? 1 : 0));
-    g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24 + 25 - 3, GlobalText[1312], 170, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24 + 25 - 3, I18N::Game::AppointAsABattleMaster, 170, 0, RT3_SORT_CENTER);
 
     wchar_t Text[64];
-    mu_swprintf(Text, GlobalText[1314], s_szTargetID, (s_eAppointType == APPOINT_SUBGUILDMASTER ? GlobalText[1301] : GlobalText[1302]));
+    mu_swprintf(Text, I18N::Game::SAsAS, s_szTargetID, (s_eAppointType == APPOINT_SUBGUILDMASTER ? I18N::Game::AssistM : I18N::Game::BattleM));
 
     g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24 + 25 * 2 + 1, Text, 170, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24 + 25 * 2 + 1 + 18, GlobalText[1315], 170, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(s_ptAppointWindow.x + 20, s_ptAppointWindow.y + 24 + 25 * 2 + 1 + 18, I18N::Game::DoYouWantToAppoint, 170, 0, RT3_SORT_CENTER);
 
     s_PopupAppointOkButton.SetPosition(s_ptAppointWindow.x + 15 + 40, s_ptAppointWindow.y + 117);
     s_PopupAppointOkButton.Render();
@@ -139,28 +140,28 @@ CUIGuildInfo::CUIGuildInfo()
     m_BreakUpGuildButton.SetPosition(GetPosition_x() + 70, GetPosition_y() + m_iHeight - m_BreakUpGuildButton.GetHeight());
 
     s_ptAppointWindow.x = s_ptAppointWindow.y = 0;
-    m_AppointButton.Init(nButtonID++, GlobalText[1307]);
+    m_AppointButton.Init(nButtonID++, I18N::Game::Position);
     m_AppointButton.SetParentUIID(GetUIID());
     m_AppointButton.SetSize(50, 18);
     m_AppointButton.SetPosition(GetPosition_x() + 15 + 3, GetPosition_y() + 365);
 
-    m_DisbandButton.Init(nButtonID++, GlobalText[1308]);
+    m_DisbandButton.Init(nButtonID++, I18N::Game::Dissolve);
     m_DisbandButton.SetParentUIID(GetUIID());
     m_DisbandButton.SetSize(50, 18);
     m_DisbandButton.SetPosition(GetPosition_x() + 15 + 55, GetPosition_y() + 365);
 
-    m_FireButton.Init(nButtonID++, GlobalText[1309]);
+    m_FireButton.Init(nButtonID++, I18N::Game::Release);
     m_FireButton.SetParentUIID(GetUIID());
     m_FireButton.SetSize(50, 18);
     m_FireButton.SetPosition(GetPosition_x() + 15 + 107, GetPosition_y() + 365);
 
     s_eAppointType = APPOINT_SUBGUILDMASTER;
 
-    s_PopupAppointOkButton.Init(nButtonID++, GlobalText[228]);
+    s_PopupAppointOkButton.Init(nButtonID++, I18N::Game::OK);
     s_PopupAppointOkButton.SetParentUIID(GetUIID());
     s_PopupAppointOkButton.SetSize(50, 18);
 
-    s_PopupAppointCancelButton.Init(nButtonID++, GlobalText[229]);
+    s_PopupAppointCancelButton.Init(nButtonID++, I18N::Game::Cancel);
     s_PopupAppointCancelButton.SetParentUIID(GetUIID());
     s_PopupAppointCancelButton.SetSize(50, 18);
 
@@ -169,7 +170,7 @@ CUIGuildInfo::CUIGuildInfo()
     m_BreakUnionButton.SetSize(50, 18);
     m_BreakUnionButton.SetPosition(GetPosition_x() + 15 + 55, GetPosition_y() + 350);
 
-    m_BanUnionButton.Init(nButtonID++, GlobalText[1422]);
+    m_BanUnionButton.Init(nButtonID++, I18N::Game::DisbandAlliance);
     m_BanUnionButton.SetParentUIID(GetUIID());
     m_BanUnionButton.SetSize(50, 18);
     m_BanUnionButton.SetPosition(GetPosition_x() + 15 + 55, GetPosition_y() + 220);
@@ -198,7 +199,7 @@ const wchar_t* CUIGuildInfo::GetGuildMasterName()
             return GuildList[i].Name;
     }
 
-    return GlobalText[1361];
+    return I18N::Game::None;
 }
 
 const wchar_t* CUIGuildInfo::GetSubGuildMasterName()
@@ -209,7 +210,7 @@ const wchar_t* CUIGuildInfo::GetSubGuildMasterName()
             return GuildList[i].Name;
     }
 
-    return GlobalText[1361];
+    return I18N::Game::None;
 }
 
 const wchar_t* CUIGuildInfo::GetBattleMasterName()
@@ -220,7 +221,7 @@ const wchar_t* CUIGuildInfo::GetBattleMasterName()
             return GuildList[i].Name;
     }
 
-    return GlobalText[1361];
+    return I18N::Game::None;
 }
 
 void CUIGuildInfo::CloseMyPopup()
@@ -243,17 +244,17 @@ void CUIGuildInfo::DoGuildInfoTabMouseAction()
             if (!wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName))
             {
                 wchar_t szText[50];
-                wcscpy(szText, GlobalText[1270]);
+                wcscpy(szText, I18N::Game::AllianceMasterCanTDisbandTheGuild);
                 m_dwPopupID = g_pUIPopup->SetPopup(szText, 1, 50, POPUP_OK, NULL);
             }
             else
             {
                 wchar_t szText[4][100];
 
-                wcscpy(szText[0], GlobalText[1363]);
-                wcscpy(szText[1], GlobalText[1364]);
-                wcscpy(szText[2], GlobalText[1365]);
-                wcscpy(szText[3], GlobalText[1366]);
+                wcscpy(szText[0], I18N::Game::OnceYouDisbandTheGuild);
+                wcscpy(szText[1], I18N::Game::AllTheItemsAndZenInTheGuildVaultWillDisappear);
+                wcscpy(szText[2], I18N::Game::AlsoTheGuildRankingInformationWillDisappear);
+                wcscpy(szText[3], I18N::Game::WouldYouLikeToDisbandTheGuild);
                 m_dwPopupID = g_pUIPopup->SetPopup(&szText[0][0], 4, 100, POPUP_YESNO, ::DoBreakUpGuildAction);
             }
         }
@@ -285,10 +286,10 @@ void CUIGuildInfo::RenderGuildInfoTab()
     RenderGoldRect(ptOrigin.x, ptOrigin.y, 140, 62);
     ptOrigin.x += 5;
     ptOrigin.y += 8;
-    mu_swprintf(szTemp, L"%ls :", GlobalText[1332]);
+    mu_swprintf(szTemp, L"%ls :", I18N::Game::GuildCreationDate);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
     ptOrigin.y += 13;
-    mu_swprintf(szTemp, GlobalText[1256], GuildTotalScore);
+    mu_swprintf(szTemp, I18N::Game::GuildScoreD, GuildTotalScore);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.y += 13;
@@ -299,24 +300,24 @@ void CUIGuildInfo::RenderGuildInfoTab()
         {
             int nCount = CharacterAttribute->Level / 10 + CharacterAttribute->Charisma / 10;
             if (nCount > 80)	nCount = 80;
-            mu_swprintf(szTemp, GlobalText[1362], g_nGuildMemberCount, nCount);
+            mu_swprintf(szTemp, I18N::Game::GuildMembersDD, g_nGuildMemberCount, nCount);
         }
         else
-            mu_swprintf(szTemp, GlobalText[1362], g_nGuildMemberCount, CharacterAttribute->Level / 10);
+            mu_swprintf(szTemp, I18N::Game::GuildMembersDD, g_nGuildMemberCount, CharacterAttribute->Level / 10);
     }
     else
     {
-        mu_swprintf(szTemp, GlobalText[1310], g_nGuildMemberCount);
+        mu_swprintf(szTemp, I18N::Game::GuildMemberD, g_nGuildMemberCount);
     }
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.y += 13;
-    mu_swprintf(szTemp, L"%ls : %ls", GlobalText[1321], m_szRivalGuildName[0] ? m_szRivalGuildName : GlobalText[1361]);
+    mu_swprintf(szTemp, L"%ls : %ls", I18N::Game::HostilityGuild, m_szRivalGuildName[0] ? m_szRivalGuildName : I18N::Game::None);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 140 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.x -= 5;
     ptOrigin.y += 33;
-    g_pRenderText->RenderText(ptOrigin.x + 5, ptOrigin.y, GlobalText[1323], 136 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
+    g_pRenderText->RenderText(ptOrigin.x + 5, ptOrigin.y, I18N::Game::GuildAnnouncement, 136 * g_fScreenRate_x, 0, RT3_SORT_LEFT);
 
     ptOrigin.y += 10;
     m_GuildNoticeListBox.SetSize(136, 80);
@@ -324,7 +325,7 @@ void CUIGuildInfo::RenderGuildInfoTab()
     m_GuildNoticeListBox.Render();
     RenderGoldRect(ptOrigin.x, ptOrigin.y - 14, 140, 95);
 
-    m_BreakUpGuildButton.SetCaption(IsGuildMaster() ? GlobalText[188] : GlobalText[189]);
+    m_BreakUpGuildButton.SetCaption(IsGuildMaster() ? I18N::Game::Disband : I18N::Game::Leave);
     m_BreakUpGuildButton.Render();
 }
 
@@ -366,8 +367,8 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                 {
                     wchar_t szText[2][64];
                     GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText();
-                    mu_swprintf(szText[0], GlobalText[1367], pText->m_szID);
-                    wcscpy(szText[1], GlobalText[1368]);
+                    mu_swprintf(szText[0], I18N::Game::CharacterS, pText->m_szID);
+                    wcscpy(szText[1], I18N::Game::WouldYouLikeToCancelTheRanking);
 
                     if (GUILDLIST_TEXT* pText = m_GuildMemberListBox.GetSelectedText())
                         wcscpy(s_szTargetID, pText->m_szID);
@@ -391,8 +392,8 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                     }
 
                     wchar_t szText[2][64];
-                    mu_swprintf(szText[0], GlobalText[1367], pText->m_szID);
-                    wcscpy(szText[1], GlobalText[1369]);
+                    mu_swprintf(szText[0], I18N::Game::CharacterS, pText->m_szID);
+                    wcscpy(szText[1], I18N::Game::WouldYouLikeToRelease);
                     m_dwPopupID = g_pUIPopup->SetPopup(&szText[0][0], 2, 64, POPUP_YESNO, ::DoFireAction);
                 }
             }
@@ -437,7 +438,7 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
                 if (!wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName))
                 {
                     wchar_t szText[50];
-                    wcscpy(szText, GlobalText[1271]);
+                    wcscpy(szText, I18N::Game::AllianceMasterCanTWithdrawTheGuild);
                     m_dwPopupID = g_pUIPopup->SetPopup(szText, 1, 50, POPUP_OK, NULL);
                 }
                 else
@@ -454,8 +455,8 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
                     {
                         wchar_t szText[2][64];
 
-                        mu_swprintf(szText[0], GlobalText[1423], pText->szName);
-                        wcscpy(szText[1], GlobalText[1369]);
+                        mu_swprintf(szText[0], I18N::Game::SGuildFromTheAlliance, pText->szName);
+                        wcscpy(szText[1], I18N::Game::WouldYouLikeToRelease);
                         wcscpy(s_szTargetID, pText->szName);
 
                         m_dwPopupID = g_pUIPopup->SetPopup(&szText[0][0], 2, 64, POPUP_YESNO, ::DoBanUnionGuildAction);
@@ -475,31 +476,31 @@ void CUIGuildInfo::RenderGuildUnionTab()
         ptOrigin.x += 10;
         ptOrigin.y += 8;
 
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1257]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::ToMakeTheAlliance);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1258]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::FaceTheGuildMaster);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1259]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::OfDesiredGuildForGuildAlliance);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1260]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::EnterAllianceOrGuildAlliance);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1261]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::ButtonInCommandWindow);
 
         g_pRenderText->SetTextColor(0xFFFFFFFF);
         g_pRenderText->SetBgColor(0xFF0000CC);
 
         ptOrigin.y += 25;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1262]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::IfTheOppositeIsNotAGuild);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1263]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AllianceOppositeAllianceShould);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1264]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::BeTheMainAllianceForCreating);
         ptOrigin.y += 20;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1265]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::GuildAllianceRequestThe);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1266]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::RegistrationToOppositeAlliance);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1267]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::IfTheOppositeIsGuildAlliance);
 
         g_pRenderText->SetTextColor(0xFFFFFFFF);
     }
@@ -514,13 +515,13 @@ void CUIGuildInfo::RenderGuildUnionTab()
         {
             if (!wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName))
             {
-                m_BreakUnionButton.SetCaption(GlobalText[1324]);
+                m_BreakUnionButton.SetCaption(I18N::Game::DisbandGuildAlliance);
                 m_BanUnionButton.SetState(UISTATE_NORMAL);
                 m_BanUnionButton.Render();
             }
             else
             {
-                m_BreakUnionButton.SetCaption(GlobalText[1325]);
+                m_BreakUnionButton.SetCaption(I18N::Game::WithdrawGuildAlliance);
                 m_BanUnionButton.SetState(UISTATE_DISABLE);
             }
             m_BreakUnionButton.Render();
@@ -649,7 +650,7 @@ void CUIGuildInfo::Render()
     ptOrigin.x = GetPosition_x() + 35;
     ptOrigin.y = GetPosition_y() + 12;
     wchar_t szTemp[100];
-    wcscpy(szTemp, GlobalText[180]);
+    wcscpy(szTemp, I18N::Game::Guild);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
@@ -671,11 +672,11 @@ void CUIGuildInfo::Render()
     {
         g_pRenderText->SetFont(g_hFont);
         g_pRenderText->SetTextColor(230, 230, 230, 255);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[185]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::TypeGuildInFrontOf);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[186]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::TheGuildMasterYouWantToJoin);
         ptOrigin.y += 15;
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[187]);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AndYouCanJoinTheGuild);
     }
 
     glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -687,7 +688,7 @@ void CUIGuildInfo::Render()
         g_pRenderText->SetFont(g_hFont);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetBgColor(0, 0, 0, 255);
-        RenderTipText(ptOrigin.x, ptOrigin.y - 13, GlobalText[220]);
+        RenderTipText(ptOrigin.x, ptOrigin.y - 13, I18N::Game::CloseGuildWindowG);
     }
 
     if (Hero->GuildStatus == G_NONE)
@@ -713,21 +714,21 @@ void CUIGuildInfo::Render()
     else glColor4f(0.6f, 0.6f, 0.6f, 1.f);
     RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 0 ? 2 : 0),
         (float)52, (float)16 + (m_nCurrentTab == 0 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 0 ? 1 : 0), GlobalText[946], 52, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 0 ? 1 : 0), I18N::Game::Guild, 52, 0, RT3_SORT_CENTER);
 
     ptOrigin.x += 54;
     if (m_nCurrentTab == 1) glColor4f(1.f, 1.f, 1.f, 1.f);
     else glColor4f(0.6f, 0.6f, 0.6f, 1.f);
     RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 1 ? 2 : 0),
         (float)52, (float)16 + (m_nCurrentTab == 1 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 1 ? 1 : 0), GlobalText[1330], 52, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 1 ? 1 : 0), I18N::Game::Members, 52, 0, RT3_SORT_CENTER);
 
     ptOrigin.x += 54;
     if (m_nCurrentTab == 2) glColor4f(1.f, 1.f, 1.f, 1.f);
     else glColor4f(0.6f, 0.6f, 0.6f, 1.f);
     RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 2 ? 2 : 0),
         (float)52, (float)16 + (m_nCurrentTab == 2 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 2 ? 1 : 0), GlobalText[1352], 52, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 2 ? 1 : 0), I18N::Game::Alliance, 52, 0, RT3_SORT_CENTER);
 
     glColor4f(1.f, 1.f, 1.f, 1.f);
 

@@ -8,6 +8,7 @@
 #include "UI/Legacy/UIControls.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "I18N/All.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -170,9 +171,50 @@ void SEASON3B::CNewUIButton::Initialize()
 
 void SEASON3B::CNewUIButton::Destroy()
 {
+    if (m_LocaleObserverRegistered)
+    {
+        I18N::UnregisterLocaleObserver(&CNewUIButton::OnLocaleChanged, this);
+        m_LocaleObserverRegistered = false;
+    }
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     UnRegisterButtonState();
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+}
+
+void SEASON3B::CNewUIButton::ChangeText(const wchar_t* const* nameSlot)
+{
+    m_pNameSlot = nameSlot;
+    m_Name = (nameSlot != nullptr && *nameSlot != nullptr) ? *nameSlot : L"";
+    EnsureLocaleObserver();
+}
+
+void SEASON3B::CNewUIButton::ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos)
+{
+    m_pTooltipSlot = tooltipSlot;
+    m_TooltipText = (tooltipSlot != nullptr && *tooltipSlot != nullptr) ? *tooltipSlot : L"";
+    m_IsTopPos = istoppos;
+    EnsureLocaleObserver();
+}
+
+void SEASON3B::CNewUIButton::EnsureLocaleObserver()
+{
+    if (m_LocaleObserverRegistered) return;
+    I18N::RegisterLocaleObserver(&CNewUIButton::OnLocaleChanged, this);
+    m_LocaleObserverRegistered = true;
+}
+
+void SEASON3B::CNewUIButton::OnLocaleChanged(void* ctx) noexcept
+{
+    auto* self = static_cast<CNewUIButton*>(ctx);
+    if (self->m_pNameSlot != nullptr && *self->m_pNameSlot != nullptr)
+    {
+        self->m_Name = *self->m_pNameSlot;
+    }
+    if (self->m_pTooltipSlot != nullptr && *self->m_pTooltipSlot != nullptr)
+    {
+        self->m_TooltipText = *self->m_pTooltipSlot;
+    }
 }
 
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
@@ -488,9 +530,38 @@ void CNewUIRadioButton::Initialize()
 
 void CNewUIRadioButton::Destroy()
 {
+    if (m_LocaleObserverRegistered)
+    {
+        I18N::UnregisterLocaleObserver(&CNewUIRadioButton::OnLocaleChanged, this);
+        m_LocaleObserverRegistered = false;
+    }
+
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     UnRegisterButtonState();
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+}
+
+void CNewUIRadioButton::ChangeText(const wchar_t* const* nameSlot)
+{
+    m_pNameSlot = nameSlot;
+    m_Name = (nameSlot != nullptr && *nameSlot != nullptr) ? *nameSlot : L"";
+    EnsureLocaleObserver();
+}
+
+void CNewUIRadioButton::EnsureLocaleObserver()
+{
+    if (m_LocaleObserverRegistered) return;
+    I18N::RegisterLocaleObserver(&CNewUIRadioButton::OnLocaleChanged, this);
+    m_LocaleObserverRegistered = true;
+}
+
+void CNewUIRadioButton::OnLocaleChanged(void* ctx) noexcept
+{
+    auto* self = static_cast<CNewUIRadioButton*>(ctx);
+    if (self->m_pNameSlot != nullptr && *self->m_pNameSlot != nullptr)
+    {
+        self->m_Name = *self->m_pNameSlot;
+    }
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -952,6 +1023,21 @@ void CNewUIRadioGroupButton::ChangeRadioText(std::list<std::wstring>& textlist)
     }
 }
 
+void CNewUIRadioGroupButton::ChangeRadioText(std::list<const wchar_t* const*>& slotList)
+{
+    auto slotIter = slotList.begin();
+
+    for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); ++iter)
+    {
+        if (slotIter == slotList.end()) break;
+
+        CNewUIRadioButton* button = *iter;
+        if (button != nullptr) button->ChangeText(*slotIter);
+
+        ++slotIter;
+    }
+}
+
 void CNewUIRadioGroupButton::ChangeFrame(int buttonIndex)
 {
     int i = 0;
@@ -1143,6 +1229,11 @@ SEASON3B::CNewUICheckBox::CNewUICheckBox()
 
 SEASON3B::CNewUICheckBox::~CNewUICheckBox()
 {
+    if (m_LocaleObserverRegistered)
+    {
+        I18N::UnregisterLocaleObserver(&CNewUICheckBox::OnLocaleChanged, this);
+        m_LocaleObserverRegistered = false;
+    }
 }
 
 void SEASON3B::CNewUICheckBox::CheckBoxImgState(int imgindex)
@@ -1157,7 +1248,31 @@ void SEASON3B::CNewUICheckBox::RegisterBoxState(bool eventstate)
 
 void SEASON3B::CNewUICheckBox::ChangeText(std::wstring btname)
 {
+    m_pNameSlot = nullptr;
     m_Name = btname;
+}
+
+void SEASON3B::CNewUICheckBox::ChangeText(const wchar_t* const* nameSlot)
+{
+    m_pNameSlot = nameSlot;
+    m_Name = (nameSlot != nullptr && *nameSlot != nullptr) ? *nameSlot : L"";
+    EnsureLocaleObserver();
+}
+
+void SEASON3B::CNewUICheckBox::EnsureLocaleObserver()
+{
+    if (m_LocaleObserverRegistered) return;
+    I18N::RegisterLocaleObserver(&CNewUICheckBox::OnLocaleChanged, this);
+    m_LocaleObserverRegistered = true;
+}
+
+void SEASON3B::CNewUICheckBox::OnLocaleChanged(void* ctx) noexcept
+{
+    auto* self = static_cast<CNewUICheckBox*>(ctx);
+    if (self->m_pNameSlot != nullptr && *self->m_pNameSlot != nullptr)
+    {
+        self->m_Name = *self->m_pNameSlot;
+    }
 }
 
 void SEASON3B::CNewUICheckBox::CheckBoxInfo(int x, int y, int sx, int sy)

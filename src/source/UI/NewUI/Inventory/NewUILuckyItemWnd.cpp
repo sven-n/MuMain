@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/Inventory/NewUILuckyItemWnd.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -95,7 +96,7 @@ void CNewUILuckyItemWnd::Render_Frame(void)
 
         g_pRenderText->SetFont(g_hFont);
         g_pRenderText->SetTextColor(m_sText[i].s_dwColor);
-        g_pRenderText->RenderText(m_ptPos.x + 10, fTextY + 11.0f * i, GlobalText[m_sText[i].s_nTextIndex], m_fSizeX - 20, 0, m_sText[i].s_nLine);
+        g_pRenderText->RenderText(m_ptPos.x + 10, fTextY + 11.0f * i, I18N::Game::Lookup(m_sText[i].s_nTextIndex), m_fSizeX - 20, 0, m_sText[i].s_nLine);
     }
 }
 
@@ -217,7 +218,7 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const 
         break;
     }
 
-    if (nMessage > nDefault)	g_pChatListBox->AddText(L"", GlobalText[nMessage], SEASON3B::TYPE_ERROR_MESSAGE);
+    if (nMessage > nDefault)	g_pChatListBox->AddText(L"", I18N::Game::Lookup(nMessage), SEASON3B::TYPE_ERROR_MESSAGE);
     if (nPlaySound > nDefault)	PlayBuffer(static_cast<ESound>(nPlaySound));
     if (bInitInven)			g_pLuckyItemWnd->Process_InventoryCtrl_DeleteItem(-1);
     if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, pbyItemPacket);
@@ -322,21 +323,21 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
     switch (m_eType)
     {
     case eLuckyItemType_Trade:
-        mu_swprintf(m_szSubject, L"%ls", GlobalText[3288]);
+        mu_swprintf(m_szSubject, L"%ls", I18N::Game::ExchangeLuckyItem);
         AddText(3291, 0xFF0000FF, RT3_SORT_LEFT), AddText(0), AddText(0), AddText(3292), AddText(3293), AddText(3294);
         AddText(0), AddText(0);
         AddText(2223, 0xFF00FFFF);
         AddText(0);
         AddText(3295, 0xFF0000FF), AddText(3296, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(GlobalText[591], true); // 조합
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Combining, true); // 조합
         break;
     case eLuckyItemType_Refinery:
-        mu_swprintf(m_szSubject, L"%ls", GlobalText[3289]);
+        mu_swprintf(m_szSubject, L"%ls", I18N::Game::RefineLuckyItem);
         AddText(2346, 0xFF0000FF, RT3_SORT_LEFT), AddText(0), AddText(0);
         AddText(3300), AddText(3301);
         AddText(0), AddText(0), AddText(0);
         AddText(3302, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(GlobalText[2061], true); // 제련
+        m_BtnMix.ChangeToolTipText(&I18N::Game::Refine, true); // 제련
         break;
     }
 }
@@ -373,7 +374,7 @@ bool CNewUILuckyItemWnd::ClosingProcess(void)
 {
     if (GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
     {
-        g_pChatListBox->AddText(L"", GlobalText[593], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", I18N::Game::CloseInventoryAfterMovingYourItemsInTheInventory, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -512,12 +513,12 @@ bool CNewUILuckyItemWnd::Process_BTN_Action(void)
 
     if (!Check_LuckyItem_InWnd())
     {
-        g_pChatListBox->AddText(L"", GlobalText[1817], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", I18N::Game::ItemsForCombinationSystemIsLacking, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
     if (!Check_LuckyItem(m_pNewInventoryCtrl->GetItem(0)))
     {
-        g_pChatListBox->AddText(L"", GlobalText[1812], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", I18N::Game::CorrespondingItemIsInappropriate, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 #ifdef LEM_FIX_LUCKYITEM_SLOTCHECK
@@ -526,7 +527,7 @@ bool CNewUILuckyItemWnd::Process_BTN_Action(void)
     if (g_pMyInventory->GetInventoryCtrl()->FindEmptySlot(4, 4) == -1)
 #endif // LEM_FIX_LUCKYITEM_SLOTCHECK
     {
-        g_pChatListBox->AddText(L"", GlobalText[1815], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", I18N::Game::InventorySpaceIsInsufficient, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 

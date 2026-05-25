@@ -6,6 +6,7 @@
 #include "UI/NewUI/HUD/NewUIQuickCommandWindow.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
@@ -269,7 +270,7 @@ void SEASON3B::CNewUIQuickCommandWindow::RenderContents()
         {
             g_pRenderText->SetTextColor(255, 255, 255, 255);
         }
-        g_pRenderText->RenderText(m_Pos.x, y, GlobalText[iGlobalText[i]], 112, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x, y, I18N::Game::Lookup(iGlobalText[i]), 112, 0, RT3_SORT_CENTER);
         y += 19.f;
     }
 }

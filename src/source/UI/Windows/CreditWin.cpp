@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Platform/Windows/Local.h"
+#include "I18N/All.h"
 
 #include "UI/Legacy/UIControls.h"
 
@@ -133,7 +134,7 @@ void CCreditWin::Create()
 	case 1024:	nFontSize = 18;	break;
 	case 1280:	nFontSize = 24;	break;
 	}
-	HFONT fontHandle = CreateFont(nFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, GlobalText[0][0] ? GlobalText[0] : NULL);
+	HFONT fontHandle = CreateFont(nFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, I18N::Game::Gulim[0] ? I18N::Game::Gulim : NULL);
 	m_font.reset(fontHandle);
 
 	LoadText();

@@ -5,6 +5,7 @@
 #include "UI/NewUI/Events/NewUIRegistrationLuckyCoin.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
+#include "I18N/All.h"
 
 
 namespace SEASON3B
@@ -74,25 +75,25 @@ namespace SEASON3B
         g_pRenderText->SetBgColor(0, 0, 0, 0);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
         g_pRenderText->SetFont(g_hFontBold);
-        mu_swprintf(szText, GlobalText[1891]);
+        mu_swprintf(szText, I18N::Game::LuckyCoinRegistration);
         g_pRenderText->RenderText(_x, _y, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetFont(g_hFont);
-        mu_swprintf(szText, GlobalText[2855]);
+        mu_swprintf(szText, I18N::Game::Register255LuckyCoinsDuringTheEvent);
         g_pRenderText->RenderText(_x, _y + 40, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2856]);
+        mu_swprintf(szText, I18N::Game::ForAChanceToGet);
         g_pRenderText->RenderText(_x, _y + 60, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2857]);
+        mu_swprintf(szText, I18N::Game::TheAbsoluteWeapon);
         g_pRenderText->RenderText(_x, _y + 80, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
-        mu_swprintf(szText, GlobalText[2858]);
+        mu_swprintf(szText, I18N::Game::PleaseCheckTheWebPageForTheEventDetails);
         g_pRenderText->RenderText(_x, _y + 100, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
         g_pRenderText->SetFont(g_hFontBold);
 
-        mu_swprintf(szText, GlobalText[1889]);
+        mu_swprintf(szText, I18N::Game::Registered);
         g_pRenderText->RenderText(_x, _y + 120, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
 
-        mu_swprintf(szText, GlobalText[1893], GetRegistCount());
+        mu_swprintf(szText, I18N::Game::XDCoins, GetRegistCount());
         g_pRenderText->RenderText(_x + 24, _y + 150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
     }
 
@@ -182,11 +183,11 @@ namespace SEASON3B
         m_RegistButton.ChangeButtonImgState(true, IMAGE_CLOSE_REGIST, true);
         m_RegistButton.ChangeButtonInfo(_x, _y, m_width, m_height);
         m_RegistButton.SetFont(g_hFontBold);
-        m_RegistButton.ChangeText(GlobalText[1894]);
+        m_RegistButton.ChangeText(&I18N::Game::Register);
         m_CloseButton.ChangeButtonImgState(true, IMAGE_CLOSE_REGIST, true);
         m_CloseButton.ChangeButtonInfo(_x, 360, m_width, m_height);
         m_CloseButton.SetFont(g_hFontBold);
-        m_CloseButton.ChangeText(GlobalText[1002]);
+        m_CloseButton.ChangeText(&I18N::Game::Close388);
     }
 
     bool CNewUIRegistrationLuckyCoin::Update()

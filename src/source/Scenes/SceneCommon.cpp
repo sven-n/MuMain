@@ -45,7 +45,7 @@ bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
 #include "UI/Legacy/UIManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Platform/Windows/Local.h"
-#include "Data/Translation/GlobalText.h"
+#include "I18N/All.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"
 #include "UI/Legacy/UIMng.h"
@@ -148,7 +148,7 @@ bool CheckName()
         FindText(InputText[0], L" ") || FindText(InputText[0], L"　") ||
         FindText(InputText[0], L".") || FindText(InputText[0], L"·") || FindText(InputText[0], L"∼") ||
         FindText(InputText[0], L"Webzen") || FindText(InputText[0], L"WebZen") || FindText(InputText[0], L"webzen") || FindText(InputText[0], L"WEBZEN") ||
-        FindText(InputText[0], GlobalText[457]) || FindText(InputText[0], GlobalText[458]))
+        FindText(InputText[0], I18N::Game::Operation) || FindText(InputText[0], I18N::Game::WEBZEN))
         return true;
     return false;
 }
@@ -296,23 +296,23 @@ static void SetupItemUseStateMessage(int num, int index, int message)
     {
         switch (TargetItem.Level)
         {
-        case 0:swprintf_s(Name, 50, L"%ls", GlobalText[168]); break;
-        case 1:swprintf_s(Name, 50, L"%ls", GlobalText[169]); break;
-        case 2:swprintf_s(Name, 50, L"%ls", GlobalText[167]); break;
-        case 3:swprintf_s(Name, 50, L"%ls", GlobalText[166]); break;
-        case 4:swprintf_s(Name, 50, L"%ls", GlobalText[1900]); break;
+        case 0:swprintf_s(Name, 50, L"%ls", I18N::Game::ENG); break;
+        case 1:swprintf_s(Name, 50, L"%ls", I18N::Game::STA); break;
+        case 2:swprintf_s(Name, 50, L"%ls", I18N::Game::AGI); break;
+        case 3:swprintf_s(Name, 50, L"%ls", I18N::Game::STR); break;
+        case 4:swprintf_s(Name, 50, L"%ls", I18N::Game::Command); break;
         }
     }
 
     if (message == MESSAGE_USE_STATE2)
-        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls%ls )", Name, GlobalText[1901]);
+        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls%ls )", Name, I18N::Game::Fruit);
     else
         swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls )", Name);
 
     num++;
     for (int i = 1; i < num; ++i)
     {
-        swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, GlobalText[index]);
+        swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index));
     }
     g_iNumLineMessageBoxCustom = num;
 }
@@ -324,11 +324,11 @@ static void SetupPersonalShopWarningMessage(int num, int index)
 {
     wchar_t szGold[256];
     ConvertGold(InputGold, szGold);
-    swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, GlobalText[index], szGold);
+    swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, I18N::Game::Lookup(index), szGold);
 
     for (int i = 1; i < num; ++i)
     {
-        swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, GlobalText[index + i]);
+        swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index + i));
     }
     g_iNumLineMessageBoxCustom = num;
 }
@@ -341,7 +341,7 @@ static void SetupChaosCastleCheckMessage(int num, int index)
     g_iNumLineMessageBoxCustom = 0;
     for (int i = 0; i < num; ++i)
     {
-        g_iNumLineMessageBoxCustom += SeparateTextIntoLines(GlobalText[index + i],
+        g_iNumLineMessageBoxCustom += SeparateTextIntoLines(I18N::Game::Lookup(index + i),
             g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], NUM_LINE_CMB, MAX_LENGTH_CMB);
     }
 }
@@ -359,9 +359,9 @@ static void SetupGemIntegrationMessage()
     if (COMGEM::isComMode())
     {
         if (COMGEM::m_cGemType == 0)
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, GlobalText[1809], GlobalText[1806], COMGEM::m_cCount);
+            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
         else
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, GlobalText[1809], GlobalText[1807], COMGEM::m_cCount);
+            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
 
         g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
             tLines[g_iNumLineMessageBoxCustom], 2, 30);
@@ -370,16 +370,16 @@ static void SetupGemIntegrationMessage()
             wcscpy_s(g_lpszMessageBoxCustom[t], MAX_LENGTH_CMB, tLines[t]);
 
         swprintf_s(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], MAX_LENGTH_CMB,
-            GlobalText[1810], COMGEM::m_iValue);
+            I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
         ++g_iNumLineMessageBoxCustom;
     }
     else
     {
         int t_GemLevel = COMGEM::GetUnMixGemLevel() + 1;
         if (COMGEM::m_cGemType == 0)
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, GlobalText[1813], GlobalText[1806], t_GemLevel);
+            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToDisbandSD, I18N::Game::JewelOfBless, t_GemLevel);
         else
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, GlobalText[1813], GlobalText[1807], t_GemLevel);
+            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToDisbandSD, I18N::Game::JewelOfSoul, t_GemLevel);
 
         g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
             tLines[g_iNumLineMessageBoxCustom], 2, 30);
@@ -388,7 +388,7 @@ static void SetupGemIntegrationMessage()
             wcscpy_s(g_lpszMessageBoxCustom[t], MAX_LENGTH_CMB, tLines[t]);
 
         swprintf_s(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], MAX_LENGTH_CMB,
-            GlobalText[1814], COMGEM::m_iValue);
+            I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
         ++g_iNumLineMessageBoxCustom;
     }
 }
@@ -399,7 +399,7 @@ static void SetupGemIntegrationMessage()
 static void SetupCancelSkillMessage(int index)
 {
     wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-    swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, L"%ls%ls", SkillAttribute[index].Name, GlobalText[2046]);
+    swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, L"%ls%ls", SkillAttribute[index].Name, I18N::Game::WouldYouLikeToCancel);
     g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
     g_iCancelSkillTarget = index;
 }
@@ -411,7 +411,7 @@ static void SetupGenericMessage(int num, int index)
 {
     for (int i = 0; i < num; ++i)
     {
-        wcscpy_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, GlobalText[index + i]);
+        wcscpy_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index + i));
     }
     g_iNumLineMessageBoxCustom = num;
 }

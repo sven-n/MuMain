@@ -134,13 +134,19 @@ namespace SEASON3B
         int UpdateMouseBtnList();
         void RegisterBtnCharacter(BYTE class_character, int Identifier);
         void RegisterButton(int Identifier, CButtonTap button);
-        void InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, int Identifier, int iNumTab);
+        // `btnameSlot` and `tooltipSlot` are pointers to I18N runtime
+        // string variables (e.g. &I18N::Game::Setting). Pass nullptr when
+        // the button has no visible label or no tooltip; the slot-overloads
+        // on the underlying widget keep the cached strings refreshed across
+        // language changes.
+        void InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, const wchar_t* const* btnameSlot, const wchar_t* const* tooltipSlot, int Identifier, int iNumTab);
         //--
         void RenderBoxList();
         int UpdateMouseBoxList();
         void RegisterBoxCharacter(BYTE class_character, int Identifier);
         void RegisterCheckBox(int Identifier, CheckBoxTap button);
-        void InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg,std::wstring btname, int Identifier, int iNumTab);
+        // `btnameSlot` — see InsertButton. Pass nullptr for an unlabeled box.
+        void InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg, const wchar_t* const* btnameSlot, int Identifier, int iNumTab);
         //--
         void RenderIconList();
         int UpdateMouseIconList();

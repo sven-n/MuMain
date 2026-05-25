@@ -20,6 +20,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "World/MapInfra/PortalMgr.h"
 #include "GameLogic/Quests/CSQuest.h"
+#include "I18N/All.h"
 
 namespace SEASON3B
 {
@@ -210,7 +211,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
 
     if (IsSellingBan(pItem))
     {
-        g_pSystemLogBox->AddText(GlobalText[668], TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, TYPE_ERROR_MESSAGE);
         return true;
     }
 
@@ -403,13 +404,13 @@ bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetCon
 
     if (IsHighValueItem(pItem))
     {
-        g_pSystemLogBox->AddText(GlobalText[269], TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouAreNotAllowedToDropThisExpensiveItem, TYPE_ERROR_MESSAGE);
         return true;
     }
 
     if (IsDropBan(pItem))
     {
-        g_pSystemLogBox->AddText(GlobalText[1915], TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ThisItemCannotBeDropped, TYPE_ERROR_MESSAGE);
         return true;
     }
 
@@ -663,7 +664,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
             return true;
         }
 
-        CreateOkMessageBox(GlobalText[2530], RGBA(255, 30, 0, 255));
+        CreateOkMessageBox(I18N::Game::YouCannotUseThisItemWhileThePotionEffectsRemainActive, RGBA(255, 30, 0, 255));
         return false;
     }
 
@@ -707,7 +708,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     if (pItem->Type == ITEM_HELPER + 58
         && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
     {
-        CreateOkMessageBox(GlobalText[1905]);
+        CreateOkMessageBox(I18N::Game::OnlyDarklordCanUseIt);
         return true;
     }
 
@@ -716,14 +717,14 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         if (IsUnitedMarketPlace())
         {
             wchar_t szOutputText[512];
-            mu_swprintf(szOutputText, L"%ls %ls", GlobalText[3014], GlobalText[3015]);
+            mu_swprintf(szOutputText, L"%ls %ls", I18N::Game::YouCannotEnterChaosCastle, I18N::Game::FromTheMarketInLorencia);
             CreateOkMessageBox(szOutputText);
             return true;
         }
 
         if (Hero->SafeZone == false)
         {
-            CreateOkMessageBox(GlobalText[2330]);
+            CreateOkMessageBox(I18N::Game::YouCanOnlyUseThisInASafeZone);
             return false;
         }
 
@@ -750,7 +751,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     {
         if (Hero->SafeZone || gMapManager.InHellas())
         {
-            g_pSystemLogBox->AddText(GlobalText[1238], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CanTBeUsedInTheSafeZone, TYPE_ERROR_MESSAGE);
             return false;
         }
 
@@ -769,7 +770,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     {
         if (Hero->SafeZone == false)
         {
-            CreateOkMessageBox(GlobalText[2330]);
+            CreateOkMessageBox(I18N::Game::YouCanOnlyUseThisInASafeZone);
             return false;
         }
 
@@ -794,7 +795,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     {
         if (pItem->Level == 0)
         {
-            g_pSystemLogBox->AddText(GlobalText[2089], TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::IncorrectItem, TYPE_ERROR_MESSAGE);
         }
         else
         {
@@ -862,7 +863,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     {
         if (CharacterAttribute->Level < 10)
         {
-            CreateOkMessageBox(GlobalText[749]);
+            CreateOkMessageBox(I18N::Game::MustBeOverLevel10ToUseFruits);
             return true;
         }
 
@@ -878,7 +879,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
 
         if (!bEquipmentEmpty)
         {
-            CreateOkMessageBox(GlobalText[1909]);
+            CreateOkMessageBox(I18N::Game::ToDecreaseTheFruitWeaponsArmorsAndOthersMustBeRemoved);
             return true;
         }
 
@@ -886,7 +887,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         {
             if (gCharacterManager.GetBaseClass(CharacterAttribute->Class) != CLASS_DARK_LORD)
             {
-                CreateOkMessageBox(GlobalText[1905]);
+                CreateOkMessageBox(I18N::Game::OnlyDarklordCanUseIt);
                 return true;
             }
         }
@@ -925,7 +926,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
             }
             else
             {
-                CreateOkMessageBox(GlobalText[2608]);
+                CreateOkMessageBox(I18N::Game::YouCannotUseTheItemAtCertainApplicableLocations);
             }
         }
 
@@ -940,7 +941,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
             {
                 if (g_PortalMgr.IsPortalPositionSaved())
                 {
-                    CreateOkMessageBox(GlobalText[2610]);
+                    CreateOkMessageBox(I18N::Game::ThisItemCannotBeUsedAlongWithAnItemThatSAlreadyInUse);
                 }
                 else
                 {
@@ -956,7 +957,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         }
         else
         {
-            CreateOkMessageBox(GlobalText[2608]);
+            CreateOkMessageBox(I18N::Game::YouCannotUseTheItemAtCertainApplicableLocations);
         }
 
         return false;

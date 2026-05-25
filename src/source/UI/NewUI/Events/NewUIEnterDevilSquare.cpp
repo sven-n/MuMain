@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/Events/NewUIEnterDevilSquare.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -59,7 +60,7 @@ bool CNewUIEnterDevilSquare::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_ENTERDS_BASE_WINDOW_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     // Enter Button
     int iVal = 0;
@@ -157,14 +158,14 @@ bool CNewUIEnterDevilSquare::Render()
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0xFFFFFFFF);
     g_pRenderText->SetBgColor(0x00000000);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, GlobalText[39], 72, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, I18N::Game::DevilSquare, 72, 0, RT3_SORT_CENTER);
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y, GlobalText[670], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 15, GlobalText[671], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 30, GlobalText[672], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 45, GlobalText[673], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 60, GlobalText[674], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 75, GlobalText[675], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y, I18N::Game::YouVeBeenGivenAChanceToProveYourBravery, 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 15, I18N::Game::NoOneHasEverEnteredTheDevilSquareYet, 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 30, I18N::Game::NoHumanHasEverGoneThere, 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 45, I18N::Game::DoNotBelieveAnythingYouSeeInThere, 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 60, I18N::Game::OnlyTrustYourBraveryAndStrength, 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_EnterUITextPos.x, m_EnterUITextPos.y + 75, I18N::Game::OnlyYourBraveryAndStrengthWillKeepYouAlive, 190, 0, RT3_SORT_CENTER);
 
     for (int i = 0; i < MAX_ENTER_GRADE; i++)
     {
@@ -272,14 +273,14 @@ void CNewUIEnterDevilSquare::OpenningProcess()
 
     for (int i = 0; i < MAX_ENTER_GRADE - 1; i++)
     {
-        mu_swprintf(sztext, GlobalText[645], i + 1
+        mu_swprintf(sztext, I18N::Game::TheDSquareDDLevel, i + 1
             , m_iDevilSquareLimitLevel[(iLimitLVIndex * (MAX_ENTER_GRADE)) + i][0]
             , m_iDevilSquareLimitLevel[(iLimitLVIndex * (MAX_ENTER_GRADE)) + i][1]);
         m_BtnEnter[i].SetFont(g_hFontBold);
         m_BtnEnter[i].ChangeText(sztext);
     }
 
-    mu_swprintf(sztext, GlobalText[1778], 7);
+    mu_swprintf(sztext, I18N::Game::SquareNoDMasterLevel, 7);
     m_BtnEnter[MAX_ENTER_GRADE - 1].SetFont(g_hFontBold);
     m_BtnEnter[MAX_ENTER_GRADE - 1].ChangeText(sztext);
 }

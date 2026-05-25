@@ -287,14 +287,17 @@ if (NOT DOTNET_EXECUTABLE)
   find_program(DOTNET_EXECUTABLE dotnet)
 endif()
 if (DOTNET_EXECUTABLE)
-  # Native AOT cannot cross-compile across OS boundaries.  A Linux dotnet
-  # targeting win-x86/win-x64 will fail.  Only proceed when we have a Windows
-  # dotnet.exe (native or via WSL interop).
+  # Native AOT can't cross-compile across OS boundaries: a Linux dotnet
+  # targeting win-x86/win-x64 will fail at publish time. Build-time C#
+  # tools that emit C++ source (ConstantsReplacer, ResxGen) are unaffected
+  # and only need a working dotnet on the host - so gate the ClientLibrary
+  # step separately rather than clearing DOTNET_EXECUTABLE altogether.
+  set(DOTNET_CAN_BUILD_CLIENT_LIBRARY TRUE)
   if (NOT DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(WARNING "Found Linux dotnet but target is Windows. "
       "Cross-OS Native AOT is not supported. MUnique.Client.Library.dll will NOT be built. "
       "Install the Windows .NET SDK or use WSL interop (dotnet.exe) to enable.")
-    set(DOTNET_EXECUTABLE "")
+    set(DOTNET_CAN_BUILD_CLIENT_LIBRARY FALSE)
   endif()
 endif()
 if (DOTNET_EXECUTABLE)
@@ -357,36 +360,38 @@ if (DOTNET_EXECUTABLE)
     message(STATUS ".NET Client Library will build for x86 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   endif()
 
-  add_custom_command(
-          OUTPUT "${DOTNET_DLL_PATH}"
-          COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
-          COMMAND ${CMAKE_COMMAND} -E env
-                  "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
-                  "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
-                  "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
-                  "TMP=${DOTNET_TEMP_DIR_NATIVE}"
-                  "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
-          DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
-          COMMENT "Checking for .NET Client Library updates..."
-          VERBATIM
-  )
+  if (DOTNET_CAN_BUILD_CLIENT_LIBRARY)
+    add_custom_command(
+            OUTPUT "${DOTNET_DLL_PATH}"
+            COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
+            COMMAND ${CMAKE_COMMAND} -E env
+                    "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+                    "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+                    "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
+                    "TMP=${DOTNET_TEMP_DIR_NATIVE}"
+                    "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
+            DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
+            COMMENT "Checking for .NET Client Library updates..."
+            VERBATIM
+    )
 
-  # 4. Create a target for the DLL and link it to Main
-  add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
-  add_dependencies(Main ClientLibrary)
-  set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    # 4. Create a target for the DLL and link it to Main
+    add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
+    add_dependencies(Main ClientLibrary)
+    set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-  # Copy ClientLibrary DLL to the executable's output directory
-  add_custom_command(TARGET Main POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL from: ${DOTNET_DLL_PATH}"
-    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL to: $<TARGET_FILE_DIR:Main>"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${DOTNET_DLL_PATH}"
-      $<TARGET_FILE_DIR:Main>
-    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: ClientLibrary DLL copy complete"
-    COMMENT "Copying ClientLibrary DLL to build directory"
-  )
+    # Copy ClientLibrary DLL to the executable's output directory
+    add_custom_command(TARGET Main POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL from: ${DOTNET_DLL_PATH}"
+      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL to: $<TARGET_FILE_DIR:Main>"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${DOTNET_DLL_PATH}"
+        $<TARGET_FILE_DIR:Main>
+      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: ClientLibrary DLL copy complete"
+      COMMENT "Copying ClientLibrary DLL to build directory"
+    )
+  endif()
 
   # ConstantsReplacer build target
   set(CONSTANTS_REPLACER_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ConstantsReplacer/ConstantsReplacer.csproj")
@@ -404,6 +409,59 @@ if (DOTNET_EXECUTABLE)
   )
 
   add_custom_target(ConstantsReplacer DEPENDS "${CONSTANTS_REPLACER_OUTPUT}")
+
+  # ResxGen: .resx -> typed C++ accessors under namespace I18N::<Group>.
+  # Discovers groups from filenames (<Group>.<locale>.resx) and emits one
+  # .h/.cpp per group plus a master All.h/All.cpp. Generated output lives
+  # in the build tree only and is consumed by Main via target_sources.
+  set(RESXGEN_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../Tools/ResxGen/ResxGen.csproj")
+  set(RESX_INPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Localization")
+  set(RESX_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Generated/I18N")
+  file(MAKE_DIRECTORY "${RESX_OUTPUT_DIR}")
+
+  file(GLOB RESX_FILES CONFIGURE_DEPENDS "${RESX_INPUT_DIR}/*.resx")
+  file(GLOB_RECURSE RESXGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../Tools/ResxGen/*.cs")
+
+  if (RESX_FILES)
+    # Compute groups from filenames: Editor.en.resx -> group "Editor".
+    set(RESX_GROUPS "")
+    foreach(resx_file IN LISTS RESX_FILES)
+      get_filename_component(stem "${resx_file}" NAME_WE)  # Editor.en
+      string(REGEX REPLACE "\\.[^.]*$" "" group_name "${stem}")
+      list(APPEND RESX_GROUPS "${group_name}")
+    endforeach()
+    list(REMOVE_DUPLICATES RESX_GROUPS)
+
+    # Predict generator output for the custom command's OUTPUT list.
+    set(RESX_GEN_HEADERS "${RESX_OUTPUT_DIR}/All.h")
+    set(RESX_GEN_SOURCES "${RESX_OUTPUT_DIR}/All.cpp")
+    foreach(group_name IN LISTS RESX_GROUPS)
+      list(APPEND RESX_GEN_HEADERS "${RESX_OUTPUT_DIR}/${group_name}.h")
+      list(APPEND RESX_GEN_SOURCES "${RESX_OUTPUT_DIR}/${group_name}.cpp")
+    endforeach()
+
+    mu_native_path("${RESXGEN_PROJ}" RESXGEN_PROJ_NATIVE)
+    mu_native_path("${RESX_INPUT_DIR}" RESX_INPUT_DIR_NATIVE)
+    mu_native_path("${RESX_OUTPUT_DIR}" RESX_OUTPUT_DIR_NATIVE)
+
+    add_custom_command(
+      OUTPUT ${RESX_GEN_HEADERS} ${RESX_GEN_SOURCES}
+      COMMAND ${CMAKE_COMMAND} -E env
+              "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+              "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+              "${DOTNET_EXECUTABLE}" run --project "${RESXGEN_PROJ_NATIVE}" -c $<CONFIG>
+              -- --input "${RESX_INPUT_DIR_NATIVE}" --output "${RESX_OUTPUT_DIR_NATIVE}"
+              --wide-groups Game,Dialog
+      DEPENDS ${RESX_FILES} ${RESXGEN_SOURCES} "${RESXGEN_PROJ}"
+      COMMENT "ResxGen: regenerating C++ I18N accessors from .resx"
+      VERBATIM
+    )
+
+    add_custom_target(ResxGen DEPENDS ${RESX_GEN_HEADERS} ${RESX_GEN_SOURCES})
+    add_dependencies(Main ResxGen)
+    target_sources(Main PRIVATE ${RESX_GEN_SOURCES})
+    target_include_directories(Main PRIVATE "${CMAKE_BINARY_DIR}/Generated")
+  endif()
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
     "The game will run but cannot connect to the server. Install .NET SDK 10.0+ to enable.")

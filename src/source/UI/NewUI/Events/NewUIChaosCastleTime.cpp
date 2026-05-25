@@ -6,6 +6,7 @@
 #include "UI/NewUI/Events/NewUIChaosCastleTime.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Events/MatchEvent.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
@@ -103,11 +104,11 @@ bool CNewUIChaosCastleTime::Render()
 
     if (m_iMaxKillMonster != MAX_KILL_MONSTER)
     {
-        mu_swprintf(szText, GlobalText[1161], m_iKilledMonster, m_iMaxKillMonster);
+        mu_swprintf(szText, I18N::Game::CharacterDD, m_iKilledMonster, m_iMaxKillMonster);
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, szText, CHAOSCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
     }
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 38, GlobalText[865], CHAOSCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 38, I18N::Game::TimeLeft, CHAOSCASTLE_TIME_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
 
     if (m_iTimeState == CC_TIME_STATE_IMMINENCE)
         g_pRenderText->SetTextColor(255, 32, 32, 255);

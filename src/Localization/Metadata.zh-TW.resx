@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Name" xml:space="preserve">
+    <value>名稱</value>
+  </data>
+  <data name="Two-Hand" xml:space="preserve">
+    <value>雙手</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>等級</value>
+  </data>
+  <data name="Slot" xml:space="preserve">
+    <value>裝備欄位</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>技能</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>寬度</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>高度</value>
+  </data>
+  <data name="Min Damage" xml:space="preserve">
+    <value>最小傷害</value>
+  </data>
+  <data name="Max Damage" xml:space="preserve">
+    <value>最大傷害</value>
+  </data>
+  <data name="Block Rate" xml:space="preserve">
+    <value>格擋率</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>防禦</value>
+  </data>
+  <data name="Magic Defense" xml:space="preserve">
+    <value>魔法防禦</value>
+  </data>
+  <data name="Attack Speed" xml:space="preserve">
+    <value>攻擊速度</value>
+  </data>
+  <data name="Move Speed" xml:space="preserve">
+    <value>移動速度</value>
+  </data>
+  <data name="Durability" xml:space="preserve">
+    <value>耐久度</value>
+  </data>
+  <data name="Magic Durability" xml:space="preserve">
+    <value>魔法耐久度</value>
+  </data>
+  <data name="Magic Power" xml:space="preserve">
+    <value>魔法攻擊力</value>
+  </data>
+  <data name="Req Strength" xml:space="preserve">
+    <value>所需力量</value>
+  </data>
+  <data name="Req Dexterity" xml:space="preserve">
+    <value>所需敏捷</value>
+  </data>
+  <data name="Req Energy" xml:space="preserve">
+    <value>所需精神</value>
+  </data>
+  <data name="Req Vitality" xml:space="preserve">
+    <value>所需體力</value>
+  </data>
+  <data name="Req Leadership" xml:space="preserve">
+    <value>所需統率</value>
+  </data>
+  <data name="Req Level" xml:space="preserve">
+    <value>所需等級</value>
+  </data>
+  <data name="Sell Value" xml:space="preserve">
+    <value>販售價格</value>
+  </data>
+  <data name="Buy Price" xml:space="preserve">
+    <value>購買價格</value>
+  </data>
+  <data name="Attack Type" xml:space="preserve">
+    <value>攻擊類型</value>
+  </data>
+  <data name="DW/SM" xml:space="preserve">
+    <value>DW/SM</value>
+  </data>
+  <data name="DK/BK" xml:space="preserve">
+    <value>DK/BK</value>
+  </data>
+  <data name="ELF/ME" xml:space="preserve">
+    <value>ELF/ME</value>
+  </data>
+  <data name="MG/DM" xml:space="preserve">
+    <value>MG/DM</value>
+  </data>
+  <data name="DL/LE" xml:space="preserve">
+    <value>DL/LE</value>
+  </data>
+  <data name="SUM/BS" xml:space="preserve">
+    <value>SUM/BS</value>
+  </data>
+  <data name="RF/FM" xml:space="preserve">
+    <value>RF/FM</value>
+  </data>
+  <data name="Ice Resistance" xml:space="preserve">
+    <value>冰抗性</value>
+  </data>
+  <data name="Poison Resistance" xml:space="preserve">
+    <value>毒抗性</value>
+  </data>
+  <data name="Lightning Resistance" xml:space="preserve">
+    <value>雷抗性</value>
+  </data>
+  <data name="Fire Resistance" xml:space="preserve">
+    <value>火抗性</value>
+  </data>
+  <data name="Earth Resistance" xml:space="preserve">
+    <value>土抗性</value>
+  </data>
+  <data name="Wind Resistance" xml:space="preserve">
+    <value>風抗性</value>
+  </data>
+  <data name="Water Resistance" xml:space="preserve">
+    <value>水抗性</value>
+  </data>
+  <data name="Resistance 7" xml:space="preserve">
+    <value>抗性 7</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>傷害</value>
+  </data>
+  <data name="Mana" xml:space="preserve">
+    <value>魔力</value>
+  </data>
+  <data name="AG Cost" xml:space="preserve">
+    <value>AG 消耗</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>範圍</value>
+  </data>
+  <data name="Cooldown" xml:space="preserve">
+    <value>冷卻時間</value>
+  </data>
+  <data name="Mastery Type" xml:space="preserve">
+    <value>精通類型</value>
+  </data>
+  <data name="Use Type" xml:space="preserve">
+    <value>使用類型</value>
+  </data>
+  <data name="Brand" xml:space="preserve">
+    <value>刻印</value>
+  </data>
+  <data name="Kill Count" xml:space="preserve">
+    <value>擊殺次數</value>
+  </data>
+  <data name="Rank" xml:space="preserve">
+    <value>等級</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>圖示</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>類型</value>
+  </data>
+  <data name="Item Skill" xml:space="preserve">
+    <value>物品技能</value>
+  </data>
+  <data name="Is Damage" xml:space="preserve">
+    <value>是否為傷害性</value>
+  </data>
+  <data name="Effect" xml:space="preserve">
+    <value>效果</value>
+  </data>
+  <data name="Duty 0" xml:space="preserve">
+    <value>轉職階段 0</value>
+  </data>
+  <data name="Duty 1" xml:space="preserve">
+    <value>轉職階段 1</value>
+  </data>
+  <data name="Duty 2" xml:space="preserve">
+    <value>轉職階段 2</value>
+  </data>
+</root>

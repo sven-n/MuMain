@@ -6,24 +6,21 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 using namespace SEASON3B;
 
 namespace
 {
-    // Engine-only help-text entries registered programmatically via
-    // SEASON3B::RegisterCustomHelpText(). Keys are above MAX_NUMBER_OF_TEXTS
-    // (9999) so they can't collide with shipped GlobalText.bmd entries.
-    constexpr int HELP_KEY_F9_TOGGLE_CAMERA   = 10000;
-    constexpr int HELP_KEY_F10_TOGGLE_ZOOM    = 10001;
-    constexpr int HELP_KEY_F11_RESET_VIEW     = 10002;
-}
-
-void SEASON3B::RegisterCustomHelpText()
-{
-    GlobalText.Add(HELP_KEY_F9_TOGGLE_CAMERA, L"F9 - Toggle 3D Camera");
-    GlobalText.Add(HELP_KEY_F10_TOGGLE_ZOOM,  L"F10 - Lock / Unlock Camera Zoom");
-    GlobalText.Add(HELP_KEY_F11_RESET_VIEW,   L"F11 - Reset Camera View");
+    // Engine-only help-text entries. These three lines describe debug camera
+    // hotkeys that the original game didn't ship with, so they live outside
+    // the resx-driven translation pipeline; they're rendered as-is in the
+    // F1 help panel.
+    constexpr const wchar_t* kCustomHelpLines[] = {
+        L"F9 - Toggle 3D Camera",
+        L"F10 - Lock / Unlock Camera Zoom",
+        L"F11 - Reset Camera View",
+    };
 }
 
 SEASON3B::CNewUIHelpWindow::CNewUIHelpWindow()
@@ -128,7 +125,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        wcscpy(TextList[iTextNum], GlobalText[120]);
+        wcscpy(TextList[iTextNum], I18N::Game::KeyFunction);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
@@ -136,36 +133,28 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        // Render F1-F4 entries (GlobalText[121..124]) first.
+        // Render F1-F4 entries (I18N::Game::Lookup(121..124)) first.
         for (int i = 0; i < 4; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[121 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(121 + i));
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
         }
 
         // Insert engine-added F9 / F10 / F11 entries between F4 and the rest.
-        // wcsncpy + explicit terminator: these GlobalText entries can be
-        // overridden by .bmd translations of arbitrary length, so guard
-        // the 100-wchar TextList row against overflow.
-        const int kCustomKeys[] = {
-            HELP_KEY_F9_TOGGLE_CAMERA,
-            HELP_KEY_F10_TOGGLE_ZOOM,
-            HELP_KEY_F11_RESET_VIEW,
-        };
-        for (int key : kCustomKeys)
+        for (const wchar_t* line : kCustomHelpLines)
         {
-            wcsncpy_s(TextList[iTextNum], GlobalText[key], 99);
+            wcsncpy_s(TextList[iTextNum], line, 99);
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
         }
 
-        // Render the remaining shipped entries (GlobalText[125..139]).
+        // Render the remaining shipped entries (I18N::Game::Lookup(125..139)).
         for (int i = 4; i < 19; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[121 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(121 + i));
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -183,7 +172,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        wcscpy(TextList[iTextNum], GlobalText[140]);
+        wcscpy(TextList[iTextNum], I18N::Game::ChattingInstructions);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
@@ -193,7 +182,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
 
         for (int i = 0; i < 16; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[141 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(141 + i));
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -211,14 +200,14 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        wcscpy(TextList[iTextNum], GlobalText[2421]);
+        wcscpy(TextList[iTextNum], I18N::Game::AMPM);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
 
         for (int i = 0; i < 24; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[2422 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(2422 + i));
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;
             TextBold[iTextNum] = false;
             iTextNum++;
@@ -236,14 +225,14 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         mu_swprintf(TextList[iTextNum], L"\n");
         iTextNum++;
 
-        wcscpy(TextList[iTextNum], GlobalText[2446]);
+        wcscpy(TextList[iTextNum], I18N::Game::ChaosCastleDevilSSquare);
         TextListColor[iTextNum] = TEXT_COLOR_BLUE;
         TextBold[iTextNum] = true;
         iTextNum++;
 
         for (int i = 0; i < 18; ++i)
         {
-            wcscpy(TextList[iTextNum], GlobalText[2447 + i]);
+            wcscpy(TextList[iTextNum], I18N::Game::Lookup(2447 + i));
             if (i == 0 || i == 8 || i == 9)
             {
                 TextListColor[iTextNum] = TEXT_COLOR_BLUE;

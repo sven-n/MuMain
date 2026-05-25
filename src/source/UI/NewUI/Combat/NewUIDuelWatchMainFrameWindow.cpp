@@ -5,6 +5,7 @@
 #include "UI/NewUI/Combat/NewUIDuelWatchMainFrameWindow.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Combat/DuelMgr.h"
+#include "I18N/All.h"
 
 
 using namespace SEASON3B;
@@ -49,7 +50,7 @@ bool CNewUIDuelWatchMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRe
     m_BtnExit.SetPos(REFERENCE_WIDTH - 36, REFERENCE_HEIGHT - 29);
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(REFERENCE_WIDTH - 36, REFERENCE_HEIGHT - 29, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[2702], true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::DuelFinished, true);
 
     Show(false);
 

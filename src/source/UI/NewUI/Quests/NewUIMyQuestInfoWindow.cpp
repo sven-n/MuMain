@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/Quests/NewUIMyQuestInfoWindow.h"
+#include "I18N/All.h"
 
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Quests/QuestMng.h"
@@ -323,17 +324,17 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderCastleInfo()
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 105, GlobalText[56], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 105, I18N::Game::BloodCastle, 190, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
     wchar_t strText[256];
-    mu_swprintf(strText, GlobalText[868], g_csQuest.GetEventCount(2));
+    mu_swprintf(strText, I18N::Game::EntranceIsAllowedForDTimes, g_csQuest.GetEventCount(2));
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 125, strText, 190, 0, RT3_SORT_CENTER);
 
-    mu_swprintf(strText, GlobalText[829], 6);
+    mu_swprintf(strText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 145, strText, 190, 0, RT3_SORT_CENTER);
 }
 
@@ -343,17 +344,17 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderTempleInfo()
     g_pRenderText->SetTextColor(255, 255, 0, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 285, GlobalText[2369], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 285, I18N::Game::IllusionTemple, 190, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
     wchar_t strText[256];
-    mu_swprintf(strText, GlobalText[868], g_csQuest.GetEventCount(3));
+    mu_swprintf(strText, I18N::Game::EntranceIsAllowedForDTimes, g_csQuest.GetEventCount(3));
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 305, strText, 190, 0, RT3_SORT_CENTER);
 
-    mu_swprintf(strText, GlobalText[829], 6);
+    mu_swprintf(strText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 325, strText, 190, 0, RT3_SORT_CENTER);
 }
 
@@ -373,15 +374,15 @@ void SEASON3B::CNewUIMyQuestInfoWindow::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     m_btnQuestOpen.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_OPEN, false);
     m_btnQuestOpen.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 392, 36, 29);
-    m_btnQuestOpen.ChangeToolTipText(GlobalText[2822], true);
+    m_btnQuestOpen.ChangeToolTipText(&I18N::Game::StartQuest, true);
 
     m_btnQuestGiveUp.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_GIVE_UP, false);
     m_btnQuestGiveUp.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 392, 36, 29);
-    m_btnQuestGiveUp.ChangeToolTipText(GlobalText[2823], true);
+    m_btnQuestGiveUp.ChangeToolTipText(&I18N::Game::GiveUpQuest, true);
 }
 
 CNewUIMyQuestInfoWindow::TAB_BUTTON_INDEX CNewUIMyQuestInfoWindow::UpdateTabBtn()
@@ -415,28 +416,28 @@ void CNewUIMyQuestInfoWindow::RenderTabBtn()
     {
         RenderImage(IMAGE_MYQUEST_TAB_SMALL, m_Pos.x + 10, m_Pos.y + 27, 48.f, 22.f);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 34, GlobalText[1140], 48, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 34, I18N::Game::Quest, 48, 0, RT3_SORT_CENTER);
         g_pRenderText->SetTextColor(181, 181, 181, 181);
-        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 35, GlobalText[2821], 48, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 35, GlobalText[2824], 72, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 35, I18N::Game::ChangeClass, 48, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 35, I18N::Game::CastleTemple, 72, 0, RT3_SORT_CENTER);
     }
     else if (m_eTabBtnIndex == TAB_JOB_CHANGE)
     {
         RenderImage(IMAGE_MYQUEST_TAB_SMALL, m_Pos.x + 57, m_Pos.y + 27, 48.f, 22.f);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 34, GlobalText[2821], 48, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 34, I18N::Game::ChangeClass, 48, 0, RT3_SORT_CENTER);
         g_pRenderText->SetTextColor(181, 181, 181, 181);
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, GlobalText[1140], 48, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 35, GlobalText[2824], 72, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, I18N::Game::Quest, 48, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 35, I18N::Game::CastleTemple, 72, 0, RT3_SORT_CENTER);
     }
     else if (m_eTabBtnIndex == TAB_CASTLE_TEMPLE)
     {
         RenderImage(IMAGE_MYQUEST_TAB_BIG, m_Pos.x + 104, m_Pos.y + 27, 72.f, 22.f);
         g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 34, GlobalText[2824], 72, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 34, I18N::Game::CastleTemple, 72, 0, RT3_SORT_CENTER);
         g_pRenderText->SetTextColor(181, 181, 181, 181);
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, GlobalText[1140], 48, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 35, GlobalText[2821], 48, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, I18N::Game::Quest, 48, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 35, I18N::Game::ChangeClass, 48, 0, RT3_SORT_CENTER);
     }
 }
 
@@ -579,5 +580,5 @@ void CNewUIMyQuestInfoWindow::SetMessage(int nGlobalTextIndex)
 {
     memset(m_aszMsg, 0, sizeof m_aszMsg);
     g_pRenderText->SetFont(g_hFontBold);
-    m_nMsgLine = ::DivideStringByPixel(&m_aszMsg[0][0], 2, 64, GlobalText[nGlobalTextIndex], 140);
+    m_nMsgLine = ::DivideStringByPixel(&m_aszMsg[0][0], 2, 64, I18N::Game::Lookup(nGlobalTextIndex), 140);
 }

@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Save Items" xml:space="preserve">
+    <value>Simpan Item</value>
+  </data>
+  <data name="Save Skills" xml:space="preserve">
+    <value>Simpan Skill</value>
+  </data>
+  <data name="Export as S6E3" xml:space="preserve">
+    <value>Ekspor sebagai S6E3</value>
+  </data>
+  <data name="Export as CSV" xml:space="preserve">
+    <value>Ekspor sebagai CSV</value>
+  </data>
+  <data name="Export Skills as CSV" xml:space="preserve">
+    <value>Ekspor Skill sebagai CSV</value>
+  </data>
+  <data name="Columns" xml:space="preserve">
+    <value>Kolom</value>
+  </data>
+  <data name="Select All" xml:space="preserve">
+    <value>Pilih Semua</value>
+  </data>
+  <data name="Unselect All" xml:space="preserve">
+    <value>Batalkan Pilihan</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Save completed successfully!" xml:space="preserve">
+    <value>Berhasil disimpan!</value>
+  </data>
+  <data name="Failed to save items!" xml:space="preserve">
+    <value>Gagal menyimpan item!</value>
+  </data>
+  <data name="Skills saved successfully!" xml:space="preserve">
+    <value>Skill berhasil disimpan!</value>
+  </data>
+  <data name="Failed to save skills!" xml:space="preserve">
+    <value>Gagal menyimpan skill!</value>
+  </data>
+  <data name="S6E3 export completed successfully!" xml:space="preserve">
+    <value>Ekspor S6E3 berhasil diselesaikan!</value>
+  </data>
+  <data name="Failed to export as S6E3 format!" xml:space="preserve">
+    <value>Gagal mengekspor ke format S6E3!</value>
+  </data>
+  <data name="CSV export completed successfully!" xml:space="preserve">
+    <value>Ekspor CSV berhasil diselesaikan!</value>
+  </data>
+  <data name="Failed to export as CSV!" xml:space="preserve">
+    <value>Gagal mengekspor sebagai CSV!</value>
+  </data>
+  <data name="Skills exported as CSV successfully!" xml:space="preserve">
+    <value>Skill berhasil diekspor sebagai CSV!</value>
+  </data>
+  <data name="Failed to export skills as CSV!" xml:space="preserve">
+    <value>Gagal mengekspor skill sebagai CSV!</value>
+  </data>
+  <data name="File not found: {0}" xml:space="preserve">
+    <value>File tidak ditemukan: {0}</value>
+  </data>
+  <data name="Invalid index: {0}" xml:space="preserve">
+    <value>Indeks tidak valid: {0}</value>
+  </data>
+  <data name="Error: Index {0} already in use!" xml:space="preserve">
+    <value>Error: Indeks {0} sudah digunakan!</value>
+  </data>
+  <data name="Search:" xml:space="preserve">
+    <value>Cari:</value>
+  </data>
+  <data name="Freeze Index/Name" xml:space="preserve">
+    <value>Bekukan Indeks/Nama</value>
+  </data>
+  <data name="No columns selected. Click 'Columns' to show columns." xml:space="preserve">
+    <value>Tidak ada kolom yang dipilih. Klik 'Kolom' untuk menampilkan kolom.</value>
+  </data>
+  <data name="Index" xml:space="preserve">
+    <value>Indeks</value>
+  </data>
+  <data name="Toggle Column Visibility:" xml:space="preserve">
+    <value>Alihkan Visibilitas Kolom:</value>
+  </data>
+  <data name="Items saved successfully!" xml:space="preserve">
+    <value>Item berhasil disimpan!</value>
+  </data>
+  <data name="Exported as legacy format successfully!" xml:space="preserve">
+    <value>Berhasil diekspor sebagai format lawas!</value>
+  </data>
+  <data name="Failed to export as legacy format!" xml:space="preserve">
+    <value>Gagal mengekspor sebagai format lawas!</value>
+  </data>
+  <data name="Items exported as CSV successfully!" xml:space="preserve">
+    <value>Item berhasil diekspor sebagai CSV!</value>
+  </data>
+  <data name="Failed to export item attributes as CSV!" xml:space="preserve">
+    <value>Gagal mengekspor atribut item sebagai CSV!</value>
+  </data>
+  <data name="Failed to export skill attributes as CSV!" xml:space="preserve">
+    <value>Gagal mengekspor atribut skill sebagai CSV!</value>
+  </data>
+  <data name="Skill Editor" xml:space="preserve">
+    <value>Editor Skill</value>
+  </data>
+  <data name="Search Skills:" xml:space="preserve">
+    <value>Cari Skill:</value>
+  </data>
+  <data name="Item Editor" xml:space="preserve">
+    <value>Editor Item</value>
+  </data>
+  <data name="Dev Editor" xml:space="preserve">
+    <value>Editor Pengembang</value>
+  </data>
+  <data name="Scenes" xml:space="preserve">
+    <value>Scene</value>
+  </data>
+  <data name="Graphics" xml:space="preserve">
+    <value>Grafik</value>
+  </data>
+  <data name="Login Scene" xml:space="preserve">
+    <value>Scene Login</value>
+  </data>
+  <data name="Character Scene" xml:space="preserve">
+    <value>Scene Karakter</value>
+  </data>
+  <data name="Game Scene" xml:space="preserve">
+    <value>Scene Game</value>
+  </data>
+  <data name="Debug" xml:space="preserve">
+    <value>Debug</value>
+  </data>
+  <data name="Nothing here yet." xml:space="preserve">
+    <value>Belum ada apa-apa di sini.</value>
+  </data>
+  <data name="Switch to FreeFly" xml:space="preserve">
+    <value>Beralih ke FreeFly</value>
+  </data>
+  <data name="Switch to Game Camera" xml:space="preserve">
+    <value>Beralih ke Kamera Game</value>
+  </data>
+  <data name="FreeFly" xml:space="preserve">
+    <value>FreeFly</value>
+  </data>
+  <data name="Spectating" xml:space="preserve">
+    <value>Mengamati</value>
+  </data>
+  <data name="Snap to Spectated" xml:space="preserve">
+    <value>Lompat ke Yang Diamati</value>
+  </data>
+  <data name="Arrows/PgUp/PgDn=Move  RMB=Look  Shift=Fast" xml:space="preserve">
+    <value>Panah/PgUp/PgDn=Bergerak  Klik kanan=Lihat  Shift=Cepat</value>
+  </data>
+  <data name="Offset X" xml:space="preserve">
+    <value>Offset X</value>
+  </data>
+  <data name="Offset Y" xml:space="preserve">
+    <value>Offset Y</value>
+  </data>
+  <data name="Offset Z" xml:space="preserve">
+    <value>Offset Z</value>
+  </data>
+  <data name="Pitch" xml:space="preserve">
+    <value>Pitch</value>
+  </data>
+  <data name="Yaw" xml:space="preserve">
+    <value>Yaw</value>
+  </data>
+  <data name="Reset Offsets" xml:space="preserve">
+    <value>Reset Offset</value>
+  </data>
+  <data name="Resume" xml:space="preserve">
+    <value>Lanjutkan</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>Jeda</value>
+  </data>
+  <data name="Restart" xml:space="preserve">
+    <value>Mulai Ulang</value>
+  </data>
+  <data name="Start Tour" xml:space="preserve">
+    <value>Mulai Tur</value>
+  </data>
+  <data name="Render Distances:" xml:space="preserve">
+    <value>Jarak Render:</value>
+  </data>
+  <data name="Terrain ViewFar" xml:space="preserve">
+    <value>Jarak Pandang Medan</value>
+  </data>
+  <data name="Object Distance" xml:space="preserve">
+    <value>Jarak Objek</value>
+  </data>
+  <data name="Reset Distances" xml:space="preserve">
+    <value>Reset Jarak</value>
+  </data>
+  <data name="Switch to (or spectate) Default or Orbital to edit overrides." xml:space="preserve">
+    <value>Beralih ke (atau amati) Default atau Orbital untuk mengedit override.</value>
+  </data>
+  <data name="Override Default Camera Config" xml:space="preserve">
+    <value>Override Konfig Kamera Default</value>
+  </data>
+  <data name="Hero-relative camera with hardcoded 2D trapezoid culling." xml:space="preserve">
+    <value>Kamera relatif terhadap hero dengan culling trapesium 2D yang fixed.</value>
+  </data>
+  <data name="View Frustum" xml:space="preserve">
+    <value>View Frustum</value>
+  </data>
+  <data name="Far Plane" xml:space="preserve">
+    <value>Far Plane</value>
+  </data>
+  <data name="Camera Offset (world units, from hero)" xml:space="preserve">
+    <value>Offset Kamera (unit dunia, dari hero)</value>
+  </data>
+  <data name="2D Culling Trapezoid Width" xml:space="preserve">
+    <value>Lebar Trapesium Culling 2D</value>
+  </data>
+  <data name="Bottom (near) x" xml:space="preserve">
+    <value>Bawah (dekat) x</value>
+  </data>
+  <data name="Top (far) x" xml:space="preserve">
+    <value>Atas (jauh) x</value>
+  </data>
+  <data name="Fog" xml:space="preserve">
+    <value>Kabut</value>
+  </data>
+  <data name="Override Fog" xml:space="preserve">
+    <value>Override Kabut</value>
+  </data>
+  <data name="Fog On" xml:space="preserve">
+    <value>Kabut Aktif</value>
+  </data>
+  <data name="ON" xml:space="preserve">
+    <value>ON</value>
+  </data>
+  <data name="OFF" xml:space="preserve">
+    <value>OFF</value>
+  </data>
+  <data name="Fog Start %" xml:space="preserve">
+    <value>Awal Kabut %</value>
+  </data>
+  <data name="Fog End %" xml:space="preserve">
+    <value>Akhir Kabut %</value>
+  </data>
+  <data name="Reset to Camera Defaults" xml:space="preserve">
+    <value>Reset ke Default Kamera</value>
+  </data>
+  <data name="Override Orbital Camera Config" xml:space="preserve">
+    <value>Override Konfig Kamera Orbital</value>
+  </data>
+  <data name="Tunes the 2D terrain-cull hull; does not touch FOV / far clip." xml:space="preserve">
+    <value>Mengatur cangkang culling medan 2D; tidak mempengaruhi FOV / far clip.</value>
+  </data>
+  <data name="2D Culling Trapezoid (world units)" xml:space="preserve">
+    <value>Trapesium Culling 2D (unit dunia)</value>
+  </data>
+  <data name="Far distance" xml:space="preserve">
+    <value>Jarak jauh</value>
+  </data>
+  <data name="Top (far) width" xml:space="preserve">
+    <value>Lebar atas (jauh)</value>
+  </data>
+  <data name="Near distance" xml:space="preserve">
+    <value>Jarak dekat</value>
+  </data>
+  <data name="Bottom (near) width" xml:space="preserve">
+    <value>Lebar bawah (dekat)</value>
+  </data>
+  <data name="View-aligned: follows camera yaw + pitch (tracks what you look at)." xml:space="preserve">
+    <value>Sejajar dengan pandangan: mengikuti yaw + pitch kamera (melacak yang Anda lihat).</value>
+  </data>
+  <data name="Reset to Natural Pyramid" xml:space="preserve">
+    <value>Reset ke Piramida Alami</value>
+  </data>
+  <data name="Debug Visualization:" xml:space="preserve">
+    <value>Visualisasi Debug:</value>
+  </data>
+  <data name="Character Pick Boxes" xml:space="preserve">
+    <value>Kotak Pick Karakter</value>
+  </data>
+  <data name="Item Pick Boxes" xml:space="preserve">
+    <value>Kotak Pick Item</value>
+  </data>
+  <data name="Item Cull Sphere" xml:space="preserve">
+    <value>Bola Cull Item</value>
+  </data>
+  <data name="Tile Grid" xml:space="preserve">
+    <value>Grid Tile</value>
+  </data>
+  <data name="Item Cull Radius" xml:space="preserve">
+    <value>Radius Cull Item</value>
+  </data>
+  <data name="Rendering:" xml:space="preserve">
+    <value>Rendering:</value>
+  </data>
+  <data name="Terrain" xml:space="preserve">
+    <value>Medan</value>
+  </data>
+  <data name="Static Objects" xml:space="preserve">
+    <value>Objek Statis</value>
+  </data>
+  <data name="Effects" xml:space="preserve">
+    <value>Efek</value>
+  </data>
+  <data name="Dropped Items" xml:space="preserve">
+    <value>Item Terjatuh</value>
+  </data>
+  <data name="Weather" xml:space="preserve">
+    <value>Cuaca</value>
+  </data>
+  <data name="Item Labels" xml:space="preserve">
+    <value>Label Item</value>
+  </data>
+  <data name="All ON" xml:space="preserve">
+    <value>Semua ON</value>
+  </data>
+  <data name="All OFF" xml:space="preserve">
+    <value>Semua OFF</value>
+  </data>
+  <data name="TODO - Not Working:" xml:space="preserve">
+    <value>TODO - Belum Berfungsi:</value>
+  </data>
+  <data name="Shaders" xml:space="preserve">
+    <value>Shader</value>
+  </data>
+  <data name="Skill Effects" xml:space="preserve">
+    <value>Efek Skill</value>
+  </data>
+  <data name="Equipped Items" xml:space="preserve">
+    <value>Item Terpakai</value>
+  </data>
+  <data name="UI" xml:space="preserve">
+    <value>UI</value>
+  </data>
+  <data name="TODO - Not Implemented:" xml:space="preserve">
+    <value>TODO - Belum Diimplementasikan:</value>
+  </data>
+  <data name="Hero" xml:space="preserve">
+    <value>Hero</value>
+  </data>
+  <data name="NPCs" xml:space="preserve">
+    <value>NPC</value>
+  </data>
+  <data name="Monsters" xml:space="preserve">
+    <value>Monster</value>
+  </data>
+  <data name="Graphics Debug Info" xml:space="preserve">
+    <value>Info Debug Grafik</value>
+  </data>
+  <data name="WARNING: Window size mismatch detected!" xml:space="preserve">
+    <value>PERINGATAN: Ukuran jendela tidak cocok!</value>
+  </data>
+  <data name="Copy Debug Info to Clipboard" xml:space="preserve">
+    <value>Salin Info Debug ke Clipboard</value>
+  </data>
+  <data name="(Paste in Discord/notepad)" xml:space="preserve">
+    <value>(Paste di Discord/notepad)</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Orbital" xml:space="preserve">
+    <value>Orbital</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Tidak Diketahui</value>
+  </data>
+  <data name="Pos" xml:space="preserve">
+    <value>Pos</value>
+  </data>
+  <data name="Tile" xml:space="preserve">
+    <value>Tile</value>
+  </data>
+  <data name="Tour" xml:space="preserve">
+    <value>Tur</value>
+  </data>
+  <data name="ACTIVE" xml:space="preserve">
+    <value>AKTIF</value>
+  </data>
+  <data name="INACTIVE" xml:space="preserve">
+    <value>TIDAK AKTIF</value>
+  </data>
+  <data name=" (PAUSED)" xml:space="preserve">
+    <value> (DIJEDA)</value>
+  </data>
+  <data name="Near" xml:space="preserve">
+    <value>Dekat</value>
+  </data>
+  <data name="Far" xml:space="preserve">
+    <value>Jauh</value>
+  </data>
+  <data name="ViewFar" xml:space="preserve">
+    <value>ViewFar</value>
+  </data>
+  <data name="ProjFar" xml:space="preserve">
+    <value>ProjFar</value>
+  </data>
+  <data name="Zoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="Orbital Target" xml:space="preserve">
+    <value>Target Orbital</value>
+  </data>
+  <data name="Current Resolution" xml:space="preserve">
+    <value>Resolusi Saat Ini</value>
+  </data>
+  <data name="OpenGL Viewport" xml:space="preserve">
+    <value>Viewport OpenGL</value>
+  </data>
+  <data name="Screen Rate" xml:space="preserve">
+    <value>Rasio Layar</value>
+  </data>
+  <data name="Window Mode" xml:space="preserve">
+    <value>Mode Jendela</value>
+  </data>
+  <data name="Windowed" xml:space="preserve">
+    <value>Berjendela</value>
+  </data>
+  <data name="Fullscreen" xml:space="preserve">
+    <value>Layar Penuh</value>
+  </data>
+  <data name="Actual Window Client" xml:space="preserve">
+    <value>Klien Jendela Aktual</value>
+  </data>
+  <data name="Calculated Scale from Client" xml:space="preserve">
+    <value>Skala Dihitung dari Klien</value>
+  </data>
+  <data name="Debug info copied to clipboard" xml:space="preserve">
+    <value>Info debug disalin ke clipboard</value>
+  </data>
+</root>

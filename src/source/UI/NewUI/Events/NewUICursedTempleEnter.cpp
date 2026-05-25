@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/Events/NewUICursedTempleEnter.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
@@ -103,14 +104,14 @@ void SEASON3B::CNewUICursedTempleEnter::SetButtonInfo()
     m_Button[CURSEDTEMPLEENTER_OPEN].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
 
     // 2147 "입장하기"
-    m_Button[CURSEDTEMPLEENTER_OPEN].ChangeText(GlobalText[2147]);
+    m_Button[CURSEDTEMPLEENTER_OPEN].ChangeText(&I18N::Game::Enter);
 
     x = m_Pos.x + (CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) + (((CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) - MSGBOX_BTN_WIDTH) / 2);
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonImgState(true, CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
 
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
     // 1002 "닫기"
-    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeText(GlobalText[1002]);
+    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeText(&I18N::Game::Close388);
 }
 
 bool SEASON3B::CNewUICursedTempleEnter::CheckEnterLevel(int& enterlevel)
@@ -195,7 +196,7 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
         }
         else
         {
-            g_pSystemLogBox->AddText(GlobalText[2367], SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch, SEASON3B::TYPE_ERROR_MESSAGE);
         }
 
         return false;
@@ -240,7 +241,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
 
     memset(&Text, 0, sizeof(wchar_t));
 
-    mu_swprintf(Text, GlobalText[2358]);
+    mu_swprintf(Text, I18N::Game::DoYouWishToGoToTheIllusionTemple);
     DrawText(Text, m_Pos.x, m_Pos.y + 13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, true);
 
     int enterlevel = -1;
@@ -249,7 +250,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
     {
         memset(&Text, 0, sizeof(Text));
 
-        mu_swprintf(Text, GlobalText[2370], enterlevel);
+        mu_swprintf(Text, I18N::Game::TheDIllusionTemple, enterlevel);
         DrawText(Text, m_Pos.x + 3, m_Pos.y + 42, 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
 
         for (int i = 0; i < EnterLevelCount + 1; ++i)
@@ -258,35 +259,35 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
 
             if (i == 5)
             {
-                wcscpy(Text, GlobalText[737]);
+                wcscpy(Text, I18N::Game::MasterLevel);
             }
             else
             {
-                mu_swprintf(Text, GlobalText[2371], EnterMinLevel[i], EnterMaxLevel[i]);
+                mu_swprintf(Text, I18N::Game::LevelDD, EnterMinLevel[i], EnterMaxLevel[i]);
             }
 
             if (enterlevel == i + 1)
             {
                 DisableAlphaBlend();
-                mu_swprintf(Text, L"%ls %ls", Text, GlobalText[2412]);
+                mu_swprintf(Text, L"%ls %ls", Text, I18N::Game::EntranceEnabled);
                 DrawText(Text, m_Pos.x + 3, m_Pos.y + 67 + (i * 15), 0xffffffff, 0xff0000ff, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
                 EnableAlphaTest();
             }
             else
             {
-                mu_swprintf(Text, L"%ls %ls", Text, GlobalText[2413]);
+                mu_swprintf(Text, L"%ls %ls", Text, I18N::Game::EntranceDisabled);
                 DrawText(Text, m_Pos.x + 3, m_Pos.y + 67 + (i * 15), 0xffffffff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
             }
         }
 
         memset(&Text, 0, sizeof(char));
-        mu_swprintf(Text, GlobalText[2373], m_EnterCount);
+        mu_swprintf(Text, I18N::Game::CurrentMembersD, m_EnterCount);
         DrawText(Text, m_Pos.x + 3, m_Pos.y + 70 + ((EnterLevelCount + 1) * 15), 0xff0000ff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH - 10, false);
     }
     else
     {
         memset(&Text, 0, sizeof(char));
-        mu_swprintf(Text, GlobalText[2366]);
+        mu_swprintf(Text, I18N::Game::YouMustBeOfTheMinimumLevel220ToEnterTheZone);
         DrawText(Text, m_Pos.x, m_Pos.y + 52, 0xff0000ff, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, false);
     }
 }

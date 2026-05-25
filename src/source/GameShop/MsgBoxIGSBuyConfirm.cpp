@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "MsgBoxIGSBuyConfirm.h"
@@ -52,12 +53,12 @@ void CMsgBoxIGSBuyConfirm::Initialize(WORD wItemCode, int iPackageSeq, int iDisp
     m_iPriceSeq = iPriceSeq;
     m_iCashType = iCashType;
 
-    mu_swprintf(m_szItemName, GlobalText[3037], pszName);
-    mu_swprintf(m_szItemPrice, GlobalText[3038], pszPrice);
-    mu_swprintf(m_szItemPeriod, GlobalText[3039], pszPeriod);
+    mu_swprintf(m_szItemName, I18N::Game::ItemS, pszName);
+    mu_swprintf(m_szItemPrice, I18N::Game::PriceS, pszPrice);
+    mu_swprintf(m_szItemPeriod, I18N::Game::DurationS, pszPeriod);
 
-    //int m_iNumNoticeLine = SeparateTextIntoLines( GlobalText[2898], txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
-    m_iNumNoticeLine = ::DivideStringByPixel(&m_szNotice[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, GlobalText[2898], IGS_TEXT_NOTICE_WIDTH);
+    //int m_iNumNoticeLine = SeparateTextIntoLines( I18N::Game::BoughtItemsUsedOrTakenOutOfStorageCannotBeReturned, txtline[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
+    m_iNumNoticeLine = ::DivideStringByPixel(&m_szNotice[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, I18N::Game::BoughtItemsUsedOrTakenOutOfStorageCannotBeReturned, IGS_TEXT_NOTICE_WIDTH);
 }
 
 void CMsgBoxIGSBuyConfirm::Release()
@@ -138,10 +139,10 @@ void CMsgBoxIGSBuyConfirm::SetButtonInfo()
 {
     m_BtnOk.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_OK_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnOk.MoveTextPos(0, -1);
-    m_BtnOk.SetText(GlobalText[228]);
+    m_BtnOk.SetText(I18N::Game::OK);
     m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnCancel.MoveTextPos(0, -1);
-    m_BtnCancel.SetText(GlobalText[229]);
+    m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
 void CMsgBoxIGSBuyConfirm::RenderFrame()
@@ -166,9 +167,9 @@ void CMsgBoxIGSBuyConfirm::RenderTexts()
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, GlobalText[2896], IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, I18N::Game::PurchaseConfirmation, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_QUESTION_POS_Y, GlobalText[2897], IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_QUESTION_POS_Y, I18N::Game::DoYouWishToBuyTheFollowingItemS, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
     g_pRenderText->SetTextColor(247, 186, 0, 255);
     g_pRenderText->RenderText(GetPos().x + IGS_TEXT_ITEM_INFO_POS_X, GetPos().y + IGS_TEXT_ITEM_INFO_NAME_POS_Y, m_szItemName, IGS_TEXT_ITEM_INFO_WIDTH, 0, RT3_SORT_LEFT);
     g_pRenderText->RenderText(GetPos().x + IGS_TEXT_ITEM_INFO_POS_X, GetPos().y + IGS_TEXT_ITEM_INFO_PRICE_POS_Y, m_szItemPrice, IGS_TEXT_ITEM_INFO_WIDTH, 0, RT3_SORT_LEFT);

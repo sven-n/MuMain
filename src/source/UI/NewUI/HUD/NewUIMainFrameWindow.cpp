@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include <algorithm>
+#include "I18N/All.h"
 
 #include "UI/NewUI/HUD/NewUIMainFrameWindow.h"	// self
 #include "UI/NewUI/Options/NewUIOptionWindow.h"
@@ -114,7 +115,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     x_Next += x_Add;
     m_BtnCShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnCShop.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnCShop.ChangeToolTipText(GlobalText[2277], true);
+    m_BtnCShop.ChangeToolTipText(&I18N::Game::MUItemShopX, true);
 
     m_BtnChaInfo.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnChaInfo.ChangeButtonImgState(true, IMAGE_MENU_BTN_CHAINFO, true);
@@ -122,7 +123,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     x_Next += x_Add;
     m_BtnChaInfo.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnChaInfo.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnChaInfo.ChangeToolTipText(GlobalText[362], true);
+    m_BtnChaInfo.ChangeToolTipText(&I18N::Game::CharacterC, true);
 
     m_BtnMyInven.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnMyInven.ChangeButtonImgState(true, IMAGE_MENU_BTN_MYINVEN, true);
@@ -130,7 +131,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     x_Next += x_Add;
     m_BtnMyInven.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyInven.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnMyInven.ChangeToolTipText(GlobalText[363], true);
+    m_BtnMyInven.ChangeToolTipText(&I18N::Game::InventoryIV, true);
 
     m_BtnFriend.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnFriend.ChangeButtonImgState(true, IMAGE_MENU_BTN_FRIEND, true);
@@ -138,14 +139,14 @@ void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
     x_Next += x_Add;
     m_BtnFriend.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnFriend.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnFriend.ChangeToolTipText(GlobalText[1043], true);
+    m_BtnFriend.ChangeToolTipText(&I18N::Game::FriendF, true);
 
     m_BtnWindow.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnWindow.ChangeButtonImgState(true, IMAGE_MENU_BTN_WINDOW, true);
     m_BtnWindow.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);
     m_BtnWindow.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnWindow.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnWindow.ChangeToolTipText(GlobalText[1744], true);
+    m_BtnWindow.ChangeToolTipText(&I18N::Game::MenuU, true);
 }
 
 void SEASON3B::CNewUIMainFrameWindow::Release()
@@ -291,7 +292,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
     wchar_t strTipText[256];
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
-        mu_swprintf(strTipText, GlobalText[358], wLife, wLifeMax);
+        mu_swprintf(strTipText, I18N::Game::LifeDD, wLife, wLifeMax);
         RenderTipText((int)x, (int)418, strTipText);
     }
 
@@ -311,7 +312,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
     // mana
     if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
-        mu_swprintf(strTipText, GlobalText[359], wMana, wManaMax);
+        mu_swprintf(strTipText, I18N::Game::ManaDD359, wMana, wManaMax);
         RenderTipText((int)x, (int)418, strTipText);
     }
 }
@@ -354,7 +355,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
     {
         wchar_t strTipText[256];
 
-        mu_swprintf(strTipText, GlobalText[214], dwSkillMana, dwMaxSkillMana);
+        mu_swprintf(strTipText, I18N::Game::AGDD, dwSkillMana, dwMaxSkillMana);
         RenderTipText((int)x - 20, (int)418, strTipText);
     }
 }
@@ -399,7 +400,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
     {
         wchar_t strTipText[256];
 
-        mu_swprintf(strTipText, GlobalText[2037], wShield, wMaxShield);
+        mu_swprintf(strTipText, I18N::Game::SDDD, wShield, wMaxShield);
         RenderTipText((int)x - 20, (int)418, strTipText);
     }
 }
@@ -539,7 +540,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
         {
             wchar_t strTipText[256];
 
-            mu_swprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
+            mu_swprintf(strTipText, I18N::Game::EXPI64dI64d, dwExperience, dwNexExperience);
             RenderTipText(280, 418, strTipText);
         }
     }
@@ -632,7 +633,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
         {
             wchar_t strTipText[256];
 
-            mu_swprintf(strTipText, GlobalText[1748], dwExperience, dwNexExperience);
+            mu_swprintf(strTipText, I18N::Game::EXPI64dI64d, dwExperience, dwNexExperience);
             RenderTipText(280, 418, strTipText);
         }
     }
@@ -786,9 +787,9 @@ bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
 
             if (iLevel < 6)
             {
-                if (g_pSystemLogBox->CheckChatRedundancy(GlobalText[1067]) == FALSE)
+                if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction) == FALSE)
                 {
-                    g_pSystemLogBox->AddText(GlobalText[1067], SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, SEASON3B::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else
@@ -977,7 +978,7 @@ bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
             secretPotionbufflist.push_back(eBuff_SecretPotion5);
 
             if (g_isCharacterBufflist((&Hero->Object), secretPotionbufflist) != eBuffNone) {
-                SEASON3B::CreateOkMessageBox(GlobalText[2530], RGBA(255, 30, 0, 255));
+                SEASON3B::CreateOkMessageBox(I18N::Game::YouCannotUseThisItemWhileThePotionEffectsRemainActive, RGBA(255, 30, 0, 255));
             }
             else {
                 SendRequestUse(iIndex, 0);

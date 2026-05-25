@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Legacy/UIControls.h"
 #include "Scenes/SceneCore.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -215,11 +216,11 @@ void CLoginWin::RenderControls()
     const int baseX = GetXPos();
     const int baseY = GetYPos();
 
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 113) / g_fScreenRate_y), GlobalText[450]);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 139) / g_fScreenRate_y), GlobalText[451]);
+    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 113) / g_fScreenRate_y), I18N::Game::Account);
+    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 139) / g_fScreenRate_y), I18N::Game::Password);
 
     wchar_t szServerName[MAX_TEXT_LENGTH] = {};
-    const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? GlobalText[461] : GlobalText[460];
+    const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? I18N::Game::SDServer : I18N::Game::SDNonPvPServer;
     mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
     g_pRenderText->RenderText(int((baseX + 111) / g_fScreenRate_x), int((baseY + 80) / g_fScreenRate_y), szServerName);
 
@@ -268,8 +269,8 @@ void CLoginWin::RequestLogin()
 
             SocketClient->ToGameServer()->SendLogin(m_Username, m_Password, Version, Serial);
 
-            g_pSystemLogBox->AddText(GlobalText[472], SEASON3B::TYPE_SYSTEM_MESSAGE);
-            g_pSystemLogBox->AddText(GlobalText[473], SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::VerifyingYourAccount, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
         }
     }
 }

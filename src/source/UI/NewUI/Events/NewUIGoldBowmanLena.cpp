@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/Events/NewUIGoldBowmanLena.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "I18N/All.h"
 
 #include "GameLogic/Items/MixMgr.h"
 #include "Camera/CameraProjection.h"
@@ -53,13 +54,13 @@ bool CNewUIGoldBowmanLena::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Register Button
     m_BtnRegister.ChangeButtonImgState(true, IMAGE_GBL_BTN_SERIAL, false);
     m_BtnRegister.ChangeButtonInfo(m_Pos.x + 45, m_Pos.y + 285, 108, 29);
-    m_BtnRegister.ChangeText(GlobalText[243]);
-    m_BtnRegister.ChangeToolTipText(GlobalText[243], true);
+    m_BtnRegister.ChangeText(&I18N::Game::RegisteringRena);
+    m_BtnRegister.ChangeToolTipText(&I18N::Game::RegisteringRena, true);
 
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GBL_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);	// 1002 "닫기"
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);	// 1002 "닫기"
 
     Show(false);
 
@@ -216,14 +217,14 @@ void CNewUIGoldBowmanLena::RenderTexts()
     memset(&Text, 0, sizeof(wchar_t) * 100);
     for (int i = 0; i < 3; ++i) {
         memset(&Text, 0, sizeof(wchar_t) * 100);
-        mu_swprintf(Text, GlobalText[700 + i]);
+        mu_swprintf(Text, I18N::Game::Lookup(700 + i));
         RenderText(Text, m_Pos.x, m_Pos.y + 100 + (i * 15), 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
     }
 
     int registerItem = g_pMyInventory->GetInventoryCtrl()->GetItemCount(ITEM_POTION + 21, 0);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, L"%ls", GlobalText[245]);
+    mu_swprintf(Text, L"%ls", I18N::Game::NumberOfRenaYouHaveCollected);
     RenderText(Text, m_Pos.x + 20, m_Pos.y + 180, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
@@ -231,7 +232,7 @@ void CNewUIGoldBowmanLena::RenderTexts()
     RenderText(Text, m_Pos.x + 5, m_Pos.y + 202, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, L"%ls", GlobalText[246]);
+    mu_swprintf(Text, L"%ls", I18N::Game::NumberOfRegisteredRena);
     RenderText(Text, m_Pos.x + 20, m_Pos.y + 225, 190, 0, 0xFF47DFFA, 0x00000000, RT3_SORT_LEFT);
 
     memset(&Text, 0, sizeof(wchar_t) * 100);
@@ -240,7 +241,7 @@ void CNewUIGoldBowmanLena::RenderTexts()
 
     for (int j = 0; j < 2; ++j) {
         memset(&Text, 0, sizeof(wchar_t) * 100);
-        mu_swprintf(Text, GlobalText[703 + j]);
+        mu_swprintf(Text, I18N::Game::Lookup(703 + j));
         RenderText(Text, m_Pos.x, m_Pos.y + 350 + (j * 15), 190, 0, 0xFFFA47D6, 0x00000000, RT3_SORT_CENTER);
     }
 }

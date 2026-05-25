@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include <algorithm>
 #include <array>
@@ -25,6 +26,7 @@
 #include "Engine/Object/ZzzInventory.h"
 
 #include "CSQuest.h"
+#include "GameLogic/Quests/DialogStructure.h"
 #include "Core/Utilities/UsefulDef.h"
 #include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
 #include "Character/CharacterManager.h"
@@ -128,13 +130,36 @@ namespace
 static CSQuest g_csQuestSingleton;
 
 
+namespace
+{
+    // Re-runs ShowDialogText for the currently-displayed dialog page so the
+    // cached split-lines buffers pick up the new locale's NPC text and reply
+    // labels. No-op when no dialog is open (g_iCurrentDialogScript < 0).
+    void RefreshDialogTextOnLocaleChange(void* /*ctx*/) noexcept
+    {
+        if (g_iCurrentDialogScript < 0) return;
+        try
+        {
+            g_csQuest.ShowDialogText(g_iCurrentDialogScript);
+        }
+        catch (...)
+        {
+            // ShowDialogText only manipulates fixed-size buffers; swallow
+            // any unexpected exception to honour the noexcept observer
+            // contract.
+        }
+    }
+}
+
 CSQuest::CSQuest(void) : m_byClass(255), m_byCurrQuestIndex(0), m_byCurrQuestIndexWnd(0),
 m_byStartQuestList(0), m_shCurrPage(0), m_byViewQuest(QUEST_VIEW_NONE), m_byQuestType(TYPE_QUEST), m_iStartX(REFERENCE_WIDTH - 190), m_iStartY(0)
 {
+    I18N::RegisterLocaleObserver(&RefreshDialogTextOnLocaleChange, nullptr);
 }
 
 CSQuest::~CSQuest(void)
 {
+    I18N::UnregisterLocaleObserver(&RefreshDialogTextOnLocaleChange, nullptr);
 }
 
 bool CSQuest::IsInit(void)
@@ -544,21 +569,21 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 {
     g_iCurrentDialogScript = iDialogIndex;
 
-    wchar_t Text[300] {};
-    CMultiLanguage::ConvertFromUtf8(Text, g_DialogScript[g_iCurrentDialogScript].m_lpszText);
-
-    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(Text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
+    const wchar_t* text = I18N::Dialog::Lookup(iDialogIndex);
+    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(
+        text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
     wchar_t lpszAnswer[MAX_LENGTH_ANSWER + 8] {};
     g_iNumAnswer = 0;
     std::memset(g_lpszDialogAnswer, 0, sizeof g_lpszDialogAnswer);
 
+    const auto& entry = GameLogic::Quests::Dialog::GetEntry(iDialogIndex);
     int iTextSize = 0;
 
-    for (int i = 0; i < g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer; ++i)
+    for (int i = 0; i < entry.numAnswer; ++i)
     {
-        wchar_t answerText[64] {};
-        CMultiLanguage::ConvertFromUtf8(answerText, g_DialogScript[g_iCurrentDialogScript].m_lpszAnswer[i]);
+        const wchar_t* answerText = I18N::Dialog::Lookup(
+            GameLogic::Quests::Dialog::DialogAnswerLegacyId(iDialogIndex, i));
         mu_swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)
@@ -570,9 +595,9 @@ void CSQuest::ShowDialogText(int iDialogIndex)
         iTextSize = i;
     }
 
-    if (0 == g_DialogScript[g_iCurrentDialogScript].m_iNumAnswer)
+    if (0 == entry.numAnswer)
     {
-        mu_swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", iTextSize + 1, GlobalText[609]);
+        mu_swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", iTextSize + 1, I18N::Game::ConversationIsOver);
         wcscpy_s(g_lpszDialogAnswer[0][0], MAX_LENGTH_CMB, lpszAnswer);
         g_iNumAnswer = 1;
     }
@@ -739,7 +764,7 @@ void CSQuest::RenderDevilSquare(void)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
     g_pRenderText->SetBgColor(20, 20, 20, 255);
-    g_pRenderText->RenderText(m_iStartX + 95 - 60, m_iStartY + 12, GlobalText[1145], 120, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_iStartX + 95 - 60, m_iStartY + 12, I18N::Game::DevilSquare, 120, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(200, 220, 255, 255);
     //	RenderText ( m_iStartX+95-73, m_iStartY+22, m_Quest[m_byCurrQuestIndex].strQuestName, 150*WindowWidth/640, true );
@@ -751,17 +776,17 @@ void CSQuest::RenderBloodCastle(void)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
     g_pRenderText->SetBgColor(20, 20, 20, 255);
-    g_pRenderText->RenderText(m_iStartX + 95 - 60, m_iStartY + 12, GlobalText[1146], 120, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_iStartX + 95 - 60, m_iStartY + 12, I18N::Game::BloodCastle, 120, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(223, 191, 103, 255);
     g_pRenderText->SetBgColor(0);
-    mu_swprintf_s(Text, std::size(Text), GlobalText[869], BLOODCASTLE_QUEST_NUM, GlobalText[1146], GlobalText[1140]);
+    mu_swprintf_s(Text, std::size(Text), I18N::Game::DSSSchedule, BLOODCASTLE_QUEST_NUM, I18N::Game::BloodCastle, I18N::Game::Quest);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 80, Text, 0, 0, RT3_WRITE_CENTER);
     g_pRenderText->SetTextColor(255, 230, 210, 255);
-    g_pRenderText->RenderText(m_iStartX + 85, m_iStartY + 100, GlobalText[877], 0, 0, RT3_WRITE_CENTER);
-    g_pRenderText->RenderText(m_iStartX + 105, m_iStartY + 120, GlobalText[878], 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_iStartX + 85, m_iStartY + 100, I18N::Game::Lookup(877), 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_iStartX + 105, m_iStartY + 120, I18N::Game::Lookup(878), 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetFont(g_hFontBig);
-    mu_swprintf_s(Text, std::size(Text), GlobalText[868], m_byEventCount[m_byQuestType]);
+    mu_swprintf_s(Text, std::size(Text), I18N::Game::EntranceIsAllowedForDTimes, m_byEventCount[m_byQuestType]);
     g_pRenderText->RenderText(m_iStartX + 95, m_iStartY + 65 + 60 * 4, Text, 0, 0, RT3_WRITE_CENTER);
 }

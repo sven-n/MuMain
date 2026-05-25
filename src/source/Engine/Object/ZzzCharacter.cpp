@@ -24,6 +24,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 #include "Engine/Physics/PhysicsManager.h"
 #include "Engine/AI/GOBoid.h"
@@ -3354,18 +3355,18 @@ void OnlyNpcChatProcess(CHARACTER* c, OBJECT* o)
         case MODEL_MERCHANT_GIRL:
             if (gMapManager.InBattleCastle() == false)
             {
-                CreateChat(c->ID, GlobalText[1974], c);
+                CreateChat(c->ID, I18N::Game::FeelTheUnusualForcesAroundTheFortressOfCrywolf, c);
             }
             break;
         case MODEL_ELF_WIZARD:
-            CreateChat(c->ID, GlobalText[1975], c);
+            CreateChat(c->ID, I18N::Game::ThePowerOfTheWolfStatue, c);
             break;
         case MODEL_MASTER:
-            CreateChat(c->ID, GlobalText[1976], c);
+            CreateChat(c->ID, I18N::Game::CrywolfIsAskingForYourHelpOnlyYouCanSaveThisContinent, c);
             break;
         case MODEL_PLAYER:
             if (c->MonsterIndex == MONSTER_ELF_SOLDIER)
-                CreateChat(c->ID, GlobalText[1827], c);
+                CreateChat(c->ID, I18N::Game::ILlBeYourStrengthForTheJourneyToBecomeAWarrior, c);
             break;
         }
     }
@@ -3424,7 +3425,7 @@ void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
         }
 
         wchar_t szText[512];
-        mu_swprintf(szText, GlobalText[TextIndex]);
+        mu_swprintf(szText, I18N::Game::Lookup(TextIndex));
         CreateChat(c->ID, szText, c);
     }
 }
@@ -4008,7 +4009,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
         wchar_t Text[100];
         wchar_t ID[100];
         mu_swprintf(ID, L"%ls .", c->ID);
-        mu_swprintf(Text, GlobalText[1176], c->Level);
+        mu_swprintf(Text, I18N::Game::DToKalima, c->Level);
         wcscat(ID, Text);
         AddObjectDescription(ID, o->Position);
     }

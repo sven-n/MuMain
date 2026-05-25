@@ -1,7 +1,5 @@
 #pragma once
 
-void OpenTextData();
-
 void DeleteNpcs();
 void OpenNpc(int Type);
 void DeleteMonsters();

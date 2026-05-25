@@ -5,6 +5,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Legacy/UIManager.h"
+#include "I18N/All.h"
 
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 
@@ -76,21 +77,21 @@ void ItemAddOptioninfo::GetItemAddOtioninfoText(std::vector<std::wstring>& outte
 
         switch (optiontype)
         {
-        case 1: mu_swprintf(TempText, GlobalText[2184], optionvalue);
+        case 1: mu_swprintf(TempText, I18N::Game::AttackSucessRateIncreaseD, optionvalue);
             break;
-        case 2: mu_swprintf(TempText, GlobalText[2185], optionvalue);
+        case 2: mu_swprintf(TempText, I18N::Game::AdditionalDamageD, optionvalue);
             break;
-        case 3: mu_swprintf(TempText, GlobalText[2186], optionvalue);
+        case 3: mu_swprintf(TempText, I18N::Game::DefenseSuccessRateIncreaseD, optionvalue);
             break;
-        case 4: mu_swprintf(TempText, GlobalText[2187], optionvalue);
+        case 4: mu_swprintf(TempText, I18N::Game::DefensiveSkillD, optionvalue);
             break;
-        case 5: mu_swprintf(TempText, GlobalText[2188], optionvalue);
+        case 5: mu_swprintf(TempText, I18N::Game::MaxHPIncreaseD, optionvalue);
             break;
-        case 6: mu_swprintf(TempText, GlobalText[2189], optionvalue);
+        case 6: mu_swprintf(TempText, I18N::Game::MaxSDIncreaseD, optionvalue);
             break;
-        case 7: mu_swprintf(TempText, GlobalText[2190]);
+        case 7: mu_swprintf(TempText, I18N::Game::SDAutoRecovery);
             break;
-        case 8: mu_swprintf(TempText, GlobalText[2191], optionvalue);
+        case 8: mu_swprintf(TempText, I18N::Game::SDRecoveryRateIncreaseD, optionvalue);
             break;
         }
 

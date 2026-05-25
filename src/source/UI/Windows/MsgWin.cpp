@@ -15,6 +15,7 @@
 #include "Engine/AI/GOBoid.h"
 #include "Scenes/SceneCore.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 #include "UI/Legacy/UIControls.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -205,7 +206,7 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
                 else
                 {
                     wchar_t szMsg[64]{};
-                    mu_swprintf(szMsg, GlobalText[380], m_nGameExit);
+                    mu_swprintf(szMsg, I18N::Game::YouWillExitGameInDSeconds, m_nGameExit);
                     SetMsg(m_eType, szMsg, L"");
                 }
             }
@@ -303,107 +304,107 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         break;
     case MESSAGE_GAME_END_COUNTDOWN:
         m_nGameExit = 5;
-        mu_swprintf(szTempMsg, GlobalText[380], m_nGameExit);
+        mu_swprintf(szTempMsg, I18N::Game::YouWillExitGameInDSeconds, m_nGameExit);
         lpszMsg = szTempMsg;
         eType = MWT_NON;
         break;
     case MESSAGE_WAIT:
-        lpszMsg = GlobalText[471];
+        lpszMsg = I18N::Game::PleaseWait;
         eType = MWT_NON;
         break;
     case MESSAGE_SERVER_BUSY:
     case RECEIVE_LOG_IN_FAIL_SERVER_BUSY:
-        lpszMsg = GlobalText[416];
+        lpszMsg = I18N::Game::TheServerIsFull;
         break;
     case RECEIVE_JOIN_SERVER_WAITING:
         rUIMng.ShowWin(&rUIMng.m_ServerSelWin);
-        lpszMsg = GlobalText[416];
+        lpszMsg = I18N::Game::TheServerIsFull;
         break;
     case MESSAGE_SERVER_LOST:
-        lpszMsg = GlobalText[402];
+        lpszMsg = I18N::Game::YouAreDisconnectedFromTheServer;
         break;
     case MESSAGE_VERSION:
     case RECEIVE_LOG_IN_FAIL_VERSION:
-        lpszMsg = GlobalText[405];
-        lpszMsg2 = GlobalText[406];
+        lpszMsg = I18N::Game::NewVersionOfGameIsRequired;
+        lpszMsg2 = I18N::Game::PleaseDownloadTheNewVersion;
         break;
     case MESSAGE_INPUT_ID:
-        lpszMsg = GlobalText[403];
+        lpszMsg = I18N::Game::EnterYourAccount;
         break;
     case MESSAGE_INPUT_PASSWORD:
-        lpszMsg = GlobalText[404];
+        lpszMsg = I18N::Game::EnterYourPassword;
         break;
     case RECEIVE_LOG_IN_FAIL_ID:
-        lpszMsg = GlobalText[414];
+        lpszMsg = I18N::Game::YourAccountIsInvalid;
         break;
     case RECEIVE_LOG_IN_FAIL_PASSWORD:
-        lpszMsg = GlobalText[407];
+        lpszMsg = I18N::Game::PasswordIsIncorrect;
         break;
     case RECEIVE_LOG_IN_FAIL_ID_CONNECTED:
-        lpszMsg = GlobalText[415];
+        lpszMsg = I18N::Game::YourAccountIsAlreadyConnected;
         break;
     case RECEIVE_LOG_IN_FAIL_ID_BLOCK:
     case MESSAGE_DELETE_CHARACTER_ID_BLOCK:
-        lpszMsg = GlobalText[417];
+        lpszMsg = I18N::Game::ThisAccountIsBlocked;
         break;
     case RECEIVE_LOG_IN_FAIL_CONNECT:
-        lpszMsg = GlobalText[408];
+        lpszMsg = I18N::Game::ConnectionError;
         break;
     case RECEIVE_LOG_IN_FAIL_ERROR:
-        lpszMsg = GlobalText[409];
+        lpszMsg = I18N::Game::ConnectionClosedDueTo3FailedAttempts;
         break;
     case RECEIVE_LOG_IN_FAIL_NO_PAYMENT_INFO:
-        lpszMsg = GlobalText[433];
+        lpszMsg = I18N::Game::NoChargeInfo;
         break;
     case RECEIVE_LOG_IN_FAIL_USER_TIME1:
-        lpszMsg = GlobalText[410];
+        lpszMsg = I18N::Game::YourIndividualSubscriptionTermIsOver;
         break;
     case RECEIVE_LOG_IN_FAIL_USER_TIME2:
-        lpszMsg = GlobalText[411];
+        lpszMsg = I18N::Game::YourIndividualSubscriptionTimeIsOver;
         break;
     case RECEIVE_LOG_IN_FAIL_PC_TIME1:
-        lpszMsg = GlobalText[412];
+        lpszMsg = I18N::Game::SubscriptionTermIsOverOnYourIP;
         break;
     case RECEIVE_LOG_IN_FAIL_PC_TIME2:
-        lpszMsg = GlobalText[413];
+        lpszMsg = I18N::Game::SubscriptionTimeIsOverOnYourIP;
         break;
     case RECEIVE_LOG_IN_FAIL_ONLY_OVER_15:
-        lpszMsg = GlobalText[435];
+        lpszMsg = I18N::Game::OnlyPlayersAge18AndOverArePermittedToConnectToThisServer;
         break;
     case RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL:
-        lpszMsg = GlobalText[3118];
+        lpszMsg = I18N::Game::PleasePurchaseGoldChannelTicketToEnter;
         break;
     case RECEIVE_LOG_IN_FAIL_POINT_DATE:
-        lpszMsg = GlobalText[597];
+        lpszMsg = I18N::Game::PointNoMoreDates;
         break;
     case RECEIVE_LOG_IN_FAIL_POINT_HOUR:
-        lpszMsg = GlobalText[598];
+        lpszMsg = I18N::Game::PointNoMorePointsLeft;
         break;
     case RECEIVE_LOG_IN_FAIL_INVALID_IP:
-        lpszMsg = GlobalText[599];
+        lpszMsg = I18N::Game::YourIPIsNotAllowedToConnect;
         break;
     case MESSAGE_DELETE_CHARACTER_GUILDWARNING:
-        lpszMsg = GlobalText[1654];
+        lpszMsg = I18N::Game::YouCanTDeleteTheCharacterThatBelongsToTheGuild;
         break;
     case MESSAGE_DELETE_CHARACTER_WARNING:
-        mu_swprintf(szTempMsg, GlobalText[1711], CHAR_DEL_LIMIT_LV);
+        mu_swprintf(szTempMsg, I18N::Game::CharacterLevelAboveDCannotBeDeleted, CHAR_DEL_LIMIT_LV);
         lpszMsg = szTempMsg;
         break;
     case MESSAGE_DELETE_CHARACTER_CONFIRM:
-        mu_swprintf(szTempMsg, GlobalText[1712], CharactersClient[SelectedHero].ID);
+        mu_swprintf(szTempMsg, I18N::Game::WouldYouLikeToDeleteSCharacter, CharactersClient[SelectedHero].ID);
         lpszMsg = szTempMsg;
         eType = MWT_BTN_BOTH;
         break;
     case MESSAGE_DELETE_CHARACTER_RESIDENT:
-        lpszMsg = GlobalText[1713];
+        lpszMsg = I18N::Game::PleaseEnterYourWEBZENCOMPassword;
         eType = MWT_STR_INPUT;
         InitResidentNumInput();
         break;
     case MESSAGE_DELETE_CHARACTER_ITEM_BLOCK:
-        lpszMsg = GlobalText[439];
+        lpszMsg = I18N::Game::TheCharacterIsItemBlocked;
         break;
     case MESSAGE_STORAGE_RESIDENTWRONG:
-        lpszMsg = GlobalText[401];
+        lpszMsg = I18N::Game::ThePasswordYouHaveEnteredIsIncorrect;
         break;
     case MESSAGE_DELETE_CHARACTER_SUCCESS:
         CharactersClient[SelectedHero].Object.Live = false;
@@ -411,27 +412,27 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         SelectedHero = -1;
         rUIMng.m_CharSelMainWin.UpdateDisplay();
         rUIMng.m_CharInfoBalloonMng.UpdateDisplay();
-        lpszMsg = GlobalText[1714];
+        lpszMsg = I18N::Game::CharacterWasDeletedSuccessfully;
         break;
     case MESSAGE_BLOCKED_CHARACTER:
-        lpszMsg = GlobalText[434];
+        lpszMsg = I18N::Game::ThisIsABlockedCharacter;
         break;
     case MESSAGE_MIN_LENGTH:
-        lpszMsg = GlobalText[390];
+        lpszMsg = I18N::Game::TypeMoreThan4Letters;
         break;
     case MESSAGE_ID_SPACE_ERROR:
-        lpszMsg = GlobalText[1715];
+        lpszMsg = I18N::Game::ItContainsProhibitedWords;
         break;
     case MESSAGE_SPECIAL_NAME:
-        lpszMsg = GlobalText[391];
+        lpszMsg = I18N::Game::CannotUseSymbols;
         break;
     case RECEIVE_CREATE_CHARACTER_FAIL:
         rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-        lpszMsg = GlobalText[1716];
+        lpszMsg = I18N::Game::IncorrectCharacterNameWasEnteredOrSameCharacterNameExists;
         break;
     case RECEIVE_CREATE_CHARACTER_FAIL2:
         rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
-        lpszMsg = GlobalText[396];
+        lpszMsg = I18N::Game::NoMoreCharactersCanBeCreated;
         break;
     default:
         m_nMsgCode = -1;

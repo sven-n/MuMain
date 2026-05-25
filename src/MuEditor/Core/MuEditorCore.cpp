@@ -14,7 +14,7 @@
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
-#include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 #include "Core/Utilities/StringUtils.h"
 
 // Windows cursor display counter thresholds
@@ -249,61 +249,12 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     m_bInitialized = true;
     g_MuEditorConsoleUI.LogEditor("MU Editor initialized");
 
-    // Load configuration (includes language preference)
+    // Editor config holds editor-only preferences (column visibility etc.).
+    // The active UI locale lives in GameConfig.UILocale and was applied by
+    // Winmain before we got here; do not touch I18N::SetLocale from editor
+    // init or it'll overwrite the game-side selection.
     g_MuEditorConfig.Load();
-    std::string savedLanguage = g_MuEditorConfig.GetLanguage();
-
-    // Load translation files (editor only - game translations loaded by main game code)
-    i18n::Translator& translator = i18n::Translator::GetInstance();
-
-    // Helper lambda to try loading from multiple possible paths
-    auto TryLoadTranslation = [&translator, &savedLanguage](i18n::Domain domain, const wchar_t* relativePath) -> bool {
-        std::wstring lang(savedLanguage.begin(), savedLanguage.end());
-        std::wstring paths[] = {
-            std::wstring(L"Translations\\") + lang + L"\\" + relativePath,
-            std::wstring(L"bin\\Translations\\") + lang + L"\\" + relativePath
-        };
-
-        for (const auto& path : paths) {
-            if (translator.LoadTranslations(domain, path.c_str())) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    bool editorLoaded = TryLoadTranslation(i18n::Domain::Editor, L"editor.json");
-    bool metadataLoaded = TryLoadTranslation(i18n::Domain::Metadata, L"metadata.json");
-
-    // Set locale to saved language preference (or default "en")
-    if (!savedLanguage.empty() && translator.SwitchLanguage(savedLanguage))
-    {
-        g_MuEditorConsoleUI.LogEditor("Language restored to: " + savedLanguage);
-    }
-    else
-    {
-        translator.SetLocale("en");
-    }
-
-    if (editorLoaded && metadataLoaded)
-    {
-        g_MuEditorConsoleUI.LogEditor("Editor translations loaded successfully");
-    }
-    else
-    {
-        g_MuEditorConsoleUI.LogEditor("WARNING: Some editor translation files not loaded");
-        if (!editorLoaded) g_MuEditorConsoleUI.LogEditor("  - editor.json missing");
-        if (!metadataLoaded) g_MuEditorConsoleUI.LogEditor("  - metadata.json missing");
-
-        // Debug: Log current working directory
-        wchar_t cwd[MAX_PATH];
-        if (GetCurrentDirectoryW(MAX_PATH, cwd))
-        {
-            char cwdUtf8[MAX_PATH];
-            WideCharToMultiByte(CP_UTF8, 0, cwd, -1, cwdUtf8, MAX_PATH, NULL, NULL);
-            g_MuEditorConsoleUI.LogEditor(std::string("  Working directory: ") + cwdUtf8);
-        }
-    }
+    g_MuEditorConsoleUI.LogEditor(std::string("Active locale: ") + I18N::GetCurrentLocale());
 
     fwprintf(stderr, L"[MuEditor] Initialize() completed\n");
     fflush(stderr);

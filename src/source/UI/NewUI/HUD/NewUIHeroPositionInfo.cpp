@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/HUD/NewUIHeroPositionInfo.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -42,9 +43,6 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
     SetPos(x, y);
     LoadImages();
 
-   std::wstring tooltiptext1 = GlobalText[3561];
-   std::wstring btname1 = L"";
-
     SetButtonInfo(
         &m_BtnConfig,
         IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 3,
@@ -56,12 +54,9 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
         0,
         1,
         1u,
-        btname1,
-        tooltiptext1,
+        nullptr,
+        &I18N::Game::OfficialMUHelperSetting,
         0);
-
-   std::wstring tooltiptext2 = GlobalText[3562];
-   std::wstring btname2 = L"";
 
     SetButtonInfo(
         &m_BtnStart,
@@ -74,12 +69,9 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
         0,
         1,
         1u,
-        btname2,
-        tooltiptext2,
+        nullptr,
+        &I18N::Game::StartOfficialMUHelper,
         0);
-
-   std::wstring tooltiptext3 = GlobalText[3563];
-   std::wstring btname3 = L"";
 
     SetButtonInfo(
         &m_BtnStop,
@@ -92,8 +84,8 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
         0,
         1,
         1u,
-        btname2,
-        tooltiptext3,
+        nullptr,
+        &I18N::Game::StopOfficialMUHelper,
         0);
 
     MoveTextTipPos(&m_BtnConfig, -20, 9);
@@ -240,13 +232,13 @@ void CNewUIHeroPositionInfo::UnloadImages()
     DeleteBitmap(IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 2);
 }
 
-void CNewUIHeroPositionInfo::SetButtonInfo(CNewUIButton* m_Btn, int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt,std::wstring btname,std::wstring tooltiptext, bool istoppos)
+void CNewUIHeroPositionInfo::SetButtonInfo(CNewUIButton* m_Btn, int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, const wchar_t* const* btnameSlot, const wchar_t* const* tooltipSlot, bool istoppos)
 {
     m_Btn->ChangeButtonImgState(1, imgindex, overflg, isimgwidth, bClickEffect);
     m_Btn->ChangeButtonInfo(x, y, sx, sy);
 
-    m_Btn->ChangeText(btname);
-    m_Btn->ChangeToolTipText(tooltiptext, istoppos);
+    if (btnameSlot != nullptr) m_Btn->ChangeText(btnameSlot);
+    if (tooltipSlot != nullptr) m_Btn->ChangeToolTipText(tooltipSlot, istoppos);
 
     if (MoveTxt)
     {

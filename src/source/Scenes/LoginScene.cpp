@@ -21,7 +21,7 @@
 #include "Core/Input/Input.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
-#include "Data/Translation/GlobalText.h"
+#include "I18N/All.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "UI/Legacy/UIControls.h"
 #include "SceneCommon.h"
@@ -449,16 +449,16 @@ bool NewRenderLogInScene(HDC hDC)
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 
-    wcscpy_s(Text, 100, GlobalText[454]);
+    wcscpy_s(Text, 100, I18N::Game::CCopyright2001Webzen);
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335 - Size.cx * REFERENCE_WIDTH / WindowWidth, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
 
-    wcscpy_s(Text, 100, GlobalText[455]);
+    wcscpy_s(Text, 100, I18N::Game::AllRightsReserved);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(335, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
 
-    swprintf_s(Text, 100, GlobalText[456], m_ExeVersion);
+    swprintf_s(Text, 100, I18N::Game::VerS, m_ExeVersion);
 
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
     g_pRenderText->RenderText(0, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);

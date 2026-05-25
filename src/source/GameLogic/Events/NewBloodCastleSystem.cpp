@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "NewBloodCastleSystem.h"
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
@@ -138,15 +139,15 @@ void CNewBloodCastleSystem::RenderMatchResult(void)
 
     if (m_iNumResult)
     {
-        g_pRenderText->RenderText(x, yPos, GlobalText[857], 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(x, yPos, I18N::Game::CompletedTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
-        g_pRenderText->RenderText(x, yPos, GlobalText[858], 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(x, yPos, I18N::Game::CongratulationsYouHaveSuccessfully, 0, 0, RT3_WRITE_CENTER);
     }
     else
     {
-        g_pRenderText->RenderText(x, yPos, GlobalText[859], 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(x, yPos, I18N::Game::ToCompleteTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
         yPos += 16;
-        g_pRenderText->RenderText(x, yPos, GlobalText[860], 0, 0, RT3_WRITE_CENTER);
+        g_pRenderText->RenderText(x, yPos, I18N::Game::UnfortunatelyYouHaveFailed, 0, 0, RT3_WRITE_CENTER);
     }
 
     yPos += 30;
@@ -155,20 +156,20 @@ void CNewBloodCastleSystem::RenderMatchResult(void)
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(210, 255, 210, 255);
-    mu_swprintf(lpszStr, GlobalText[861], pResult->m_dwExp);
+    mu_swprintf(lpszStr, I18N::Game::RewardedExpD, pResult->m_dwExp);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
     yPos += 24;
 
     if (m_iNumResult)
     {
         g_pRenderText->SetTextColor(255, 210, 210, 255);
-        mu_swprintf(lpszStr, GlobalText[862], pResult->m_iZen);
+        mu_swprintf(lpszStr, I18N::Game::RewardedZenD, pResult->m_iZen);
         g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
         yPos += 24;
     }
 
     g_pRenderText->SetTextColor(210, 210, 255, 255);
-    mu_swprintf(lpszStr, GlobalText[863], pResult->m_iScore);
+    mu_swprintf(lpszStr, I18N::Game::BloodCastlePointD, pResult->m_iScore);
     g_pRenderText->RenderText(x, yPos, lpszStr, 0, 0, RT3_WRITE_CENTER);
 
     DisableAlphaBlend();

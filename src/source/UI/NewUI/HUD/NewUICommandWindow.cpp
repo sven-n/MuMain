@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/HUD/NewUICommandWindow.h"
 
@@ -66,7 +67,7 @@ void SEASON3B::CNewUICommandWindow::Release()
 void SEASON3B::CNewUICommandWindow::InitButtons()
 {
     wchar_t szText[256] = {};
-    mu_swprintf(szText, GlobalText[927], L"D");
+    mu_swprintf(szText, I18N::Game::CloseS, L"D");
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
@@ -78,17 +79,17 @@ void SEASON3B::CNewUICommandWindow::InitButtons()
         m_BtnCommand[i].ChangeButtonInfo(m_Pos.x + (COMMAND_WINDOW_WIDTH / 2 - 108 / 2), (m_Pos.y + 33) + (i * (29 + COMMAND_BTN_INTERVAL_SIZE)), 108, 29);
     }
 
-    m_BtnCommand[COMMAND_TRADE].ChangeText(GlobalText[943]);
-    m_BtnCommand[COMMAND_PURCHASE].ChangeText(GlobalText[1124]);
-    m_BtnCommand[COMMAND_PARTY].ChangeText(GlobalText[944]);
-    m_BtnCommand[COMMAND_WHISPER].ChangeText(GlobalText[945]);
-    m_BtnCommand[COMMAND_GUILD].ChangeText(GlobalText[946]);
-    m_BtnCommand[COMMAND_GUILDUNION].ChangeText(GlobalText[1352]);
-    m_BtnCommand[COMMAND_RIVAL].ChangeText(GlobalText[1321]);
-    m_BtnCommand[COMMAND_RIVALOFF].ChangeText(GlobalText[1322]);
-    m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText(GlobalText[947]);
-    m_BtnCommand[COMMAND_FOLLOW].ChangeText(GlobalText[948]);
-    m_BtnCommand[COMMAND_BATTLE].ChangeText(GlobalText[949]);
+    m_BtnCommand[COMMAND_TRADE].ChangeText(&I18N::Game::Trade);
+    m_BtnCommand[COMMAND_PURCHASE].ChangeText(&I18N::Game::Buy1124);
+    m_BtnCommand[COMMAND_PARTY].ChangeText(&I18N::Game::Party);
+    m_BtnCommand[COMMAND_WHISPER].ChangeText(&I18N::Game::Whisper);
+    m_BtnCommand[COMMAND_GUILD].ChangeText(&I18N::Game::Guild);
+    m_BtnCommand[COMMAND_GUILDUNION].ChangeText(&I18N::Game::Alliance);
+    m_BtnCommand[COMMAND_RIVAL].ChangeText(&I18N::Game::HostilityGuild);
+    m_BtnCommand[COMMAND_RIVALOFF].ChangeText(&I18N::Game::SuspendHostilities);
+    m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText(&I18N::Game::AddFriend);
+    m_BtnCommand[COMMAND_FOLLOW].ChangeText(&I18N::Game::Follow);
+    m_BtnCommand[COMMAND_BATTLE].ChangeText(&I18N::Game::Duel);
 }
 
 void SEASON3B::CNewUICommandWindow::OpenningProcess()
@@ -211,7 +212,7 @@ bool SEASON3B::CNewUICommandWindow::Render()
     }
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, GlobalText[938], 72, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, I18N::Game::CommandWindow, 72, 0, RT3_SORT_CENTER);
 
     if ((m_iCurMouseCursor == CURSOR_IDSELECT) && (m_bSelectedChar == true))
 
@@ -448,12 +449,12 @@ bool SEASON3B::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
 
     if (level < TRADELIMITLEVEL)
     {
-        g_pSystemLogBox->AddText(GlobalText[478], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheTradeCommandAtCharacterLevel6, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (IsShopInViewport(pSelectedCha))
     {
-        g_pSystemLogBox->AddText(GlobalText[493], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -476,7 +477,7 @@ bool SEASON3B::CNewUICommandWindow::CommandParty(SHORT iChaKey)
 {
     if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != 0)
     {
-        g_pSystemLogBox->AddText(GlobalText[257], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAParty, SEASON3B::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -496,12 +497,12 @@ bool SEASON3B::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
 {
     if (Hero->GuildStatus != G_NONE)
     {
-        g_pSystemLogBox->AddText(GlobalText[255], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if ((pSelectedChar->GuildMarkIndex < 0) || (pSelectedChar->GuildStatus != G_MASTER))
     {
-        g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -514,17 +515,17 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus == G_NONE)
     {
-        g_pSystemLogBox->AddText(GlobalText[1385], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ThisDoesNotBelongToTheGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus == G_MASTER)
@@ -540,13 +541,13 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -559,12 +560,12 @@ bool SEASON3B::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelected
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(GlobalText[1320], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(GlobalText[507], SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -603,18 +604,18 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     if (iLevel < 30)
     {
         wchar_t szError[48] = L"";
-        mu_swprintf(szError, GlobalText[2704], 30);
+        mu_swprintf(szError, I18N::Game::OpenOnlyForLevelDOrHigher, 30);
         g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
     {
-        g_pSystemLogBox->AddText(GlobalText[2866], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::DuelingIsNotPossibleInThisArea, SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
     {
-        g_pSystemLogBox->AddText(GlobalText[3063], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotEngageInDuelsWhileInLorenMarket, SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (!g_DuelMgr.IsDuelEnabled())
@@ -629,7 +630,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     }
     else
     {
-        g_pSystemLogBox->AddText(GlobalText[915], SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotChallengePlayerIsAlreadyInADuel, SEASON3B::TYPE_ERROR_MESSAGE);
         return 3;
     }
     return 0;

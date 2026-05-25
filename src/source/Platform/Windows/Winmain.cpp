@@ -55,7 +55,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
-#include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -524,7 +524,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_NPROTECT_EXIT_TWO:
         SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
         SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, nullptr);
-        MessageBox(nullptr, GlobalText[16], L"Error", MB_OK);
+        MessageBox(nullptr, I18N::Game::Error9AHackingToolHasBeen, L"Error", MB_OK);
         break;
     case WM_CTLCOLOREDIT:
         SetBkColor((HDC)wParam, RGB(0, 0, 0));
@@ -1262,7 +1262,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1272,7 +1272,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1280,7 +1280,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1288,7 +1288,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1296,7 +1296,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     {
         g_ErrorReport.Write(L"OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
         KillGLWindow();
-        MessageBox(nullptr, GlobalText[4], L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
@@ -1313,23 +1313,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
 
-    // Initialize game translations (always available)
+    // Initialize translations with the saved UI locale (defaults to "en").
+    // The editor still restores its own MuEditorConfig language preference
+    // later in its init, which feeds through to I18N::SetLocale as well.
     {
-        i18n::Translator& translator = i18n::Translator::GetInstance();
-        bool gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
-            L"Translations\\en\\game.json");
-        if (!gameLoaded) gameLoaded = translator.LoadTranslations(i18n::Domain::Game,
-            L"bin\\Translations\\en\\game.json");
-        translator.SetLocale("en");
-
-        if (gameLoaded)
-        {
-            g_ErrorReport.Write(L"> Game translations loaded successfully.\r\n");
-        }
-        else
-        {
-            g_ErrorReport.Write(L"> WARNING: Game translations not found (game.json missing).\r\n");
-        }
+        std::wstring uiLocaleW = GameConfig::GetInstance().GetUILocale();
+        std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
+        I18N::SetLocale(uiLocale.c_str());
     }
 
 #ifdef _EDITOR

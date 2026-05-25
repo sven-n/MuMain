@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/Inventory/NewUIStorageInventoryExt.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -50,7 +51,7 @@ bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
     SetPos(x, y);
     LoadImages();
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
     SetItemAutoMove(false);
 
     Show(false);
@@ -171,7 +172,7 @@ void CNewUIStorageInventoryExt::RenderText() const
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 11, GlobalText[3339], STORAGE_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 11, I18N::Game::ExpandedVault, STORAGE_WIDTH, 0, RT3_SORT_CENTER);
 }
 
 float CNewUIStorageInventoryExt::GetLayerDepth()

@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "ServerListManager.h"
+#include "I18N/All.h"
 
 CServerListManager::CServerListManager()
 {
@@ -184,22 +185,22 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     {
     case 0:
         mu_swprintf(pServerInfo->m_bName, L"%ls-%d %ls", pServerGroup->m_szName,
-            pServerInfo->m_iIndex, GlobalText[iTextIndex]);
+            pServerInfo->m_iIndex, I18N::Game::Lookup(iTextIndex));
         break;
 
     case 1:
         mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Non-PVP) %ls", pServerGroup->m_szName,
-            pServerInfo->m_iIndex, GlobalText[iTextIndex]);
+            pServerInfo->m_iIndex, I18N::Game::Lookup(iTextIndex));
         break;
 
     case 2:
         mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Gold PVP) %ls", pServerGroup->m_szName,
-            pServerInfo->m_iIndex, GlobalText[iTextIndex]);
+            pServerInfo->m_iIndex, I18N::Game::Lookup(iTextIndex));
         break;
 
     case 3:
         mu_swprintf(pServerInfo->m_bName, L"%ls-%d(Gold) %ls", pServerGroup->m_szName,
-            pServerInfo->m_iIndex, GlobalText[iTextIndex]);
+            pServerInfo->m_iIndex, I18N::Game::Lookup(iTextIndex));
         break;
     }
 

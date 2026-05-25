@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Name" xml:space="preserve">
+    <value>Назва</value>
+  </data>
+  <data name="Two-Hand" xml:space="preserve">
+    <value>Дворучний</value>
+  </data>
+  <data name="Level" xml:space="preserve">
+    <value>Рівень</value>
+  </data>
+  <data name="Slot" xml:space="preserve">
+    <value>Слот</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Навичка</value>
+  </data>
+  <data name="Width" xml:space="preserve">
+    <value>Ширина</value>
+  </data>
+  <data name="Height" xml:space="preserve">
+    <value>Висота</value>
+  </data>
+  <data name="Min Damage" xml:space="preserve">
+    <value>Мін Урон</value>
+  </data>
+  <data name="Max Damage" xml:space="preserve">
+    <value>Макс Урон</value>
+  </data>
+  <data name="Block Rate" xml:space="preserve">
+    <value>Шанс Блоку</value>
+  </data>
+  <data name="Defense" xml:space="preserve">
+    <value>Захист</value>
+  </data>
+  <data name="Magic Defense" xml:space="preserve">
+    <value>Магічний Захист</value>
+  </data>
+  <data name="Attack Speed" xml:space="preserve">
+    <value>Швидкість Атаки</value>
+  </data>
+  <data name="Move Speed" xml:space="preserve">
+    <value>Швидкість Руху</value>
+  </data>
+  <data name="Durability" xml:space="preserve">
+    <value>Міцність</value>
+  </data>
+  <data name="Magic Durability" xml:space="preserve">
+    <value>Магічна Міцність</value>
+  </data>
+  <data name="Magic Power" xml:space="preserve">
+    <value>Магічна Сила</value>
+  </data>
+  <data name="Req Strength" xml:space="preserve">
+    <value>Потр Сила</value>
+  </data>
+  <data name="Req Dexterity" xml:space="preserve">
+    <value>Потр Спритність</value>
+  </data>
+  <data name="Req Energy" xml:space="preserve">
+    <value>Потр Енергія</value>
+  </data>
+  <data name="Req Vitality" xml:space="preserve">
+    <value>Потр Витривалість</value>
+  </data>
+  <data name="Req Leadership" xml:space="preserve">
+    <value>Потр Лідерство</value>
+  </data>
+  <data name="Req Level" xml:space="preserve">
+    <value>Потр Рівень</value>
+  </data>
+  <data name="Sell Value" xml:space="preserve">
+    <value>Ціна Продажу</value>
+  </data>
+  <data name="Buy Price" xml:space="preserve">
+    <value>Ціна Купівлі</value>
+  </data>
+  <data name="Attack Type" xml:space="preserve">
+    <value>Тип Атаки</value>
+  </data>
+  <data name="DW/SM" xml:space="preserve">
+    <value>DW/SM</value>
+  </data>
+  <data name="DK/BK" xml:space="preserve">
+    <value>DK/BK</value>
+  </data>
+  <data name="ELF/ME" xml:space="preserve">
+    <value>ELF/ME</value>
+  </data>
+  <data name="MG/DM" xml:space="preserve">
+    <value>MG/DM</value>
+  </data>
+  <data name="DL/LE" xml:space="preserve">
+    <value>DL/LE</value>
+  </data>
+  <data name="SUM/BS" xml:space="preserve">
+    <value>SUM/BS</value>
+  </data>
+  <data name="RF/FM" xml:space="preserve">
+    <value>RF/FM</value>
+  </data>
+  <data name="Ice Resistance" xml:space="preserve">
+    <value>Опір Льоду</value>
+  </data>
+  <data name="Poison Resistance" xml:space="preserve">
+    <value>Опір Отруті</value>
+  </data>
+  <data name="Lightning Resistance" xml:space="preserve">
+    <value>Опір Блискавці</value>
+  </data>
+  <data name="Fire Resistance" xml:space="preserve">
+    <value>Опір Вогню</value>
+  </data>
+  <data name="Earth Resistance" xml:space="preserve">
+    <value>Опір Землі</value>
+  </data>
+  <data name="Wind Resistance" xml:space="preserve">
+    <value>Опір Вітру</value>
+  </data>
+  <data name="Water Resistance" xml:space="preserve">
+    <value>Опір Воді</value>
+  </data>
+  <data name="Resistance 7" xml:space="preserve">
+    <value>Опір 7</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Урон</value>
+  </data>
+  <data name="Mana" xml:space="preserve">
+    <value>Мана</value>
+  </data>
+  <data name="AG Cost" xml:space="preserve">
+    <value>Вартість AG</value>
+  </data>
+  <data name="Range" xml:space="preserve">
+    <value>Дальність</value>
+  </data>
+  <data name="Cooldown" xml:space="preserve">
+    <value>Перезарядка</value>
+  </data>
+  <data name="Mastery Type" xml:space="preserve">
+    <value>Тип Майстерності</value>
+  </data>
+  <data name="Use Type" xml:space="preserve">
+    <value>Тип Використання</value>
+  </data>
+  <data name="Brand" xml:space="preserve">
+    <value>Бренд</value>
+  </data>
+  <data name="Kill Count" xml:space="preserve">
+    <value>Лічильник Вбивств</value>
+  </data>
+  <data name="Rank" xml:space="preserve">
+    <value>Ранг</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>Іконка</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Тип</value>
+  </data>
+  <data name="Item Skill" xml:space="preserve">
+    <value>Навичка Предмета</value>
+  </data>
+  <data name="Is Damage" xml:space="preserve">
+    <value>Завдає Урон</value>
+  </data>
+  <data name="Effect" xml:space="preserve">
+    <value>Ефект</value>
+  </data>
+  <data name="Duty 0" xml:space="preserve">
+    <value>Обов'язок 0</value>
+  </data>
+  <data name="Duty 1" xml:space="preserve">
+    <value>Обов'язок 1</value>
+  </data>
+  <data name="Duty 2" xml:space="preserve">
+    <value>Обов'язок 2</value>
+  </data>
+</root>

@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/Combat/NewUICastleWindow.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -46,11 +47,11 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    std::list<std::wstring> ltext;
-    ltext.push_back(GlobalText[1589]);
-    ltext.push_back(GlobalText[1590]);
-    ltext.push_back(GlobalText[1591]);
-    ltext.push_back(GlobalText[1640]);
+    std::list<const wchar_t* const*> ltext;
+    ltext.push_back(&I18N::Game::CastleGate);
+    ltext.push_back(&I18N::Game::GuardianStatue);
+    ltext.push_back(&I18N::Game::Tax);
+    ltext.push_back(&I18N::Game::Store1640);
 
     m_TabBtn.CreateRadioGroup(4, IMAGE_CASTLEWINDOW_TAB_BTN);
     m_TabBtn.ChangeRadioText(ltext);
@@ -59,15 +60,15 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
-    InitButton(&m_BtnBuy, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 250, GlobalText[1558]);
-    InitButton(&m_BtnRepair, m_Pos.x + 110, m_Pos.y + 260, GlobalText[1559]);
-    InitButton(&m_BtnUpgradeHP, m_Pos.x + 110, m_Pos.y + 310, GlobalText[1550]);
-    InitButton(&m_BtnUpgradeDefense, m_Pos.x + 110, m_Pos.y + 334, GlobalText[1550]);
-    InitButton(&m_BtnUpgradeRecover, m_Pos.x + 110, m_Pos.y + 358, GlobalText[1550]);
-    InitButton(&m_BtnApplyTax, m_Pos.x + 120, m_Pos.y + 133, GlobalText[1106]);
-    InitButton(&m_BtnWithdraw, m_Pos.x + 120, m_Pos.y + 322, GlobalText[236]);
+    InitButton(&m_BtnBuy, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 250, I18N::Game::Buy1124);
+    InitButton(&m_BtnRepair, m_Pos.x + 110, m_Pos.y + 260, I18N::Game::Repair);
+    InitButton(&m_BtnUpgradeHP, m_Pos.x + 110, m_Pos.y + 310, I18N::Game::Improve);
+    InitButton(&m_BtnUpgradeDefense, m_Pos.x + 110, m_Pos.y + 334, I18N::Game::Improve);
+    InitButton(&m_BtnUpgradeRecover, m_Pos.x + 110, m_Pos.y + 358, I18N::Game::Improve);
+    InitButton(&m_BtnApplyTax, m_Pos.x + 120, m_Pos.y + 133, I18N::Game::Apply);
+    InitButton(&m_BtnWithdraw, m_Pos.x + 120, m_Pos.y + 322, I18N::Game::Withdraw);
 
     m_BtnChaosTaxUp.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_SCROLL_UP_BTN, true);
     m_BtnChaosTaxDn.ChangeButtonImgState(true, IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN, true);
@@ -286,7 +287,7 @@ void CNewUICastleWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    mu_swprintf(szText, L"%ls", GlobalText[1588]);
+    mu_swprintf(szText, L"%ls", I18N::Game::SeniorNPC);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
@@ -338,52 +339,52 @@ void CNewUICastleWindow::UpdateGateManagingTab()
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_GATE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1551]);
-        mu_swprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
+        pMsgBox->AddMsg(I18N::Game::ToPurchaseSelectedCastleGate);
+        mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1612]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToPurchase);
     }
     else if (m_BtnRepair.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_GATE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1552]);
-        mu_swprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
+        pMsgBox->AddMsg(I18N::Game::ToRepairSelectedCastleGate);
+        mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1612]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToPurchase);
     }
     else if (m_BtnUpgradeHP.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_HP);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1555]);
+        pMsgBox->AddMsg(I18N::Game::UpgradingTheDurabilityOfSelectedCastleGate);
 
         if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrGateInfo()) == 0)
-            mu_swprintf(szText, GlobalText[1553], 2, 1000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 2, 1000000);
         else if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrGateInfo()) == 1)
-            mu_swprintf(szText, GlobalText[1553], 3, 1000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 3, 1000000);
         else
-            mu_swprintf(szText, GlobalText[1553], 4, 1000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 4, 1000000);
         InsertComma(szText, 1000000);
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1554]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
     }
     else if (m_BtnUpgradeDefense.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_DEFENSE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1556]);
+        pMsgBox->AddMsg(I18N::Game::UpgradingTheDefensivePowerOfSelectedCastleGate);
         if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrGateInfo()) == 0)
-            mu_swprintf(szText, GlobalText[1553], 2, 3000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 2, 3000000);
         else if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrGateInfo()) == 1)
-            mu_swprintf(szText, GlobalText[1553], 3, 3000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 3, 3000000);
         else
-            mu_swprintf(szText, GlobalText[1553], 4, 3000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 4, 3000000);
         InsertComma(szText, 3000000);
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1554]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
     }
 }
 
@@ -412,69 +413,69 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_STATUE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1610]);
-        mu_swprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
+        pMsgBox->AddMsg(I18N::Game::ToPurchaseSelectedStatue);
+        mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1612]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToPurchase);
     }
     else if (m_BtnRepair.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_STATUE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1611]);
-        mu_swprintf(szText, GlobalText[1617], g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
+        pMsgBox->AddMsg(I18N::Game::ToRepairSelectedStatue);
+        mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1554]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
     }
     else if (m_BtnUpgradeHP.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_HP);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1613]);
+        pMsgBox->AddMsg(I18N::Game::UpgradingDurabilityOfSelectedCastleGate);
 
         if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
-            mu_swprintf(szText, GlobalText[1553], 3, 1000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 3, 1000000);
         else if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 1)
-            mu_swprintf(szText, GlobalText[1553], 5, 1000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 5, 1000000);
         else
-            mu_swprintf(szText, GlobalText[1553], 7, 1000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 1000000);
         InsertComma(szText, 1000000);
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1554]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
     }
     else if (m_BtnUpgradeDefense.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_DEFENSE);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1614]);
+        pMsgBox->AddMsg(I18N::Game::UpgradingDefensivePowerOfSelectedStatue);
 
         if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
-            mu_swprintf(szText, GlobalText[1553], 3, 3000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 3, 3000000);
         else if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 1)
-            mu_swprintf(szText, GlobalText[1553], 5, 3000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 5, 3000000);
         else
-            mu_swprintf(szText, GlobalText[1553], 7, 3000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 3000000);
         InsertComma(szText, 3000000);
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1554]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
     }
     else if (m_BtnUpgradeRecover.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_RECOVER);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(GlobalText[1615]);
+        pMsgBox->AddMsg(I18N::Game::UpgradingRecoveryPowerOfSelectedStatue);
 
         if (g_SenatusInfo.GetRecoverLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
-            mu_swprintf(szText, GlobalText[1553], 3, 5000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 3, 5000000);
         else if (g_SenatusInfo.GetRecoverLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 1)
-            mu_swprintf(szText, GlobalText[1553], 5, 5000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 5, 5000000);
         else
-            mu_swprintf(szText, GlobalText[1553], 7, 5000000);
+            mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 5000000);
         InsertComma(szText, 5000000);
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1554]);
+        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
     }
 }
 
@@ -486,11 +487,11 @@ void CNewUICastleWindow::UpdateTaxManagingTab()
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_APPLY_TAX);
         SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
-        mu_swprintf(szText, GlobalText[1566], g_SenatusInfo.GetChaosTaxRate());
+        mu_swprintf(szText, I18N::Game::ChaosCombinationGoblinTaxRateD, g_SenatusInfo.GetChaosTaxRate());
         pMsgBox->AddMsg(szText);
-        mu_swprintf(szText, GlobalText[1567], g_SenatusInfo.GetNormalTaxRate());
+        mu_swprintf(szText, I18N::Game::VariousNPCTaxRateD, g_SenatusInfo.GetNormalTaxRate());
         pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(GlobalText[1568]);
+        pMsgBox->AddMsg(I18N::Game::Apply1568);
     }
     else if (m_BtnWithdraw.UpdateMouseEvent() == true)
     {
@@ -551,7 +552,7 @@ void CNewUICastleWindow::RenderGateManagingTab()
 
     ptOrigin.y += 6;
     RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 165);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1557], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::PurchaseAndRepair, 190, 0, RT3_SORT_CENTER);
     RenderBitmap(BITMAP_INTERFACE_EX + 35, ptOrigin.x + 15, ptOrigin.y + 12, 160.f, 165.f, 0.f, 0.f, 160.f / 256.f, 165.f / 256.f);
     RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 165);
 
@@ -617,12 +618,12 @@ void CNewUICastleWindow::RenderGateManagingTab()
         g_pRenderText->SetTextColor(0xFFFFFFFF);
 
         wchar_t szTemp[256];
-        mu_swprintf(szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
+        mu_swprintf(szTemp, I18N::Game::DURDD, pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
         InsertComma(szTemp, pNPCInfo->iNpcHp);
         InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        mu_swprintf(szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
+        mu_swprintf(szTemp, I18N::Game::DPD, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
 
         ptOrigin.y += 35;
@@ -630,15 +631,15 @@ void CNewUICastleWindow::RenderGateManagingTab()
         RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 78);
 
         g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1550], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Improve, 190, 0, RT3_SORT_CENTER);
         g_pRenderText->SetFont(g_hFont);
 
         ptOrigin.y += 24;
-        mu_swprintf(szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP(pNPCInfo));
+        mu_swprintf(szTemp, I18N::Game::DURD, g_SenatusInfo.GetNextAddHP(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddHP(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
         ptOrigin.y += 23;
-        mu_swprintf(szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense(pNPCInfo));
+        mu_swprintf(szTemp, I18N::Game::DPD1564, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
     }
@@ -653,7 +654,7 @@ void CNewUICastleWindow::RenderStatueManagingTab()
 
     ptOrigin.y += 6;
     RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 165);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1557], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::PurchaseAndRepair, 190, 0, RT3_SORT_CENTER);
     RenderBitmap(BITMAP_INTERFACE_EX + 35, ptOrigin.x + 15, ptOrigin.y + 12, 160.f, 165.f, 0.f, 0.f, 160.f / 256.f, 165.f / 256.f);
     RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 165);
 
@@ -730,34 +731,34 @@ void CNewUICastleWindow::RenderStatueManagingTab()
         g_pRenderText->SetBgColor(0);
 
         wchar_t szTemp[256];
-        mu_swprintf(szTemp, GlobalText[1560], pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
+        mu_swprintf(szTemp, I18N::Game::DURDD, pNPCInfo->iNpcHp, pNPCInfo->iNpcMaxHp);
         InsertComma(szTemp, pNPCInfo->iNpcHp);
         InsertComma(szTemp, pNPCInfo->iNpcMaxHp);
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        mu_swprintf(szTemp, GlobalText[1561], g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
+        mu_swprintf(szTemp, I18N::Game::DPD, g_SenatusInfo.GetDefense(pNPCInfo->iNpcNumber, pNPCInfo->iNpcDfLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
         ptOrigin.y += 13;
-        mu_swprintf(szTemp, GlobalText[1562], g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
+        mu_swprintf(szTemp, I18N::Game::RRD, g_SenatusInfo.GetRecover(pNPCInfo->iNpcNumber, pNPCInfo->iNpcRgLevel));
         g_pRenderText->RenderText(ptOrigin.x + 20, ptOrigin.y, szTemp);
 
         ptOrigin.y += 22;
         RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 78);
         RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 78);
         g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1550], 190, 0, RT3_SORT_CENTER);
+        g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::Improve, 190, 0, RT3_SORT_CENTER);
         g_pRenderText->SetFont(g_hFont);
 
         ptOrigin.y += 24;
-        mu_swprintf(szTemp, GlobalText[1563], g_SenatusInfo.GetNextAddHP(pNPCInfo));
+        mu_swprintf(szTemp, I18N::Game::DURD, g_SenatusInfo.GetNextAddHP(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddHP(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
         ptOrigin.y += 23;
-        mu_swprintf(szTemp, GlobalText[1564], g_SenatusInfo.GetNextAddDefense(pNPCInfo));
+        mu_swprintf(szTemp, I18N::Game::DPD1564, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddDefense(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
         ptOrigin.y += 23;
-        mu_swprintf(szTemp, GlobalText[1565], g_SenatusInfo.GetNextAddRecover(pNPCInfo));
+        mu_swprintf(szTemp, I18N::Game::RRD1565, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
         InsertComma(szTemp, g_SenatusInfo.GetNextAddRecover(pNPCInfo));
         g_pRenderText->RenderText(ptOrigin.x + 30, ptOrigin.y, szTemp);
     }
@@ -780,7 +781,7 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     RenderOutlineUpper(ptOrigin.x, ptOrigin.y, 160, 55);
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, GlobalText[1572], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AdjustTaxRate, 190, 0, RT3_SORT_CENTER);
 
     RenderOutlineLower(ptOrigin.x, ptOrigin.y, 160, 55);
     RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x + 15, ptOrigin.y + 30, 160 - 2, 14);
@@ -794,41 +795,41 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     ptOrigin.y += 23;
     g_pRenderText->SetFont(g_hFont);
 
-    mu_swprintf(szTemp, GlobalText[1573], g_SenatusInfo.GetRealTaxRateChaos(), g_SenatusInfo.GetChaosTaxRate());
+    mu_swprintf(szTemp, I18N::Game::ChaosCombinationGoblinDD, g_SenatusInfo.GetRealTaxRateChaos(), g_SenatusInfo.GetChaosTaxRate());
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 175, 0, RT3_SORT_CENTER);
     ptOrigin.y += 25;
 
-    mu_swprintf(szTemp, GlobalText[1574], g_SenatusInfo.GetRealTaxRateStore(), g_SenatusInfo.GetNormalTaxRate());
+    mu_swprintf(szTemp, I18N::Game::NPCDD, g_SenatusInfo.GetRealTaxRateStore(), g_SenatusInfo.GetNormalTaxRate());
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTemp, 175, 0, RT3_SORT_CENTER);
 
     m_BtnApplyTax.Render();
 
     ptOrigin.y += 53;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1575], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::OnlyTheLordOfTheCastle, 160, 0, RT3_SORT_CENTER);
     ptOrigin.y += 13;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1576], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::CanAdjustTheTaxRate, 160, 0, RT3_SORT_CENTER);
     ptOrigin.y += 13;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1577], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::TaxAdjustmentAvailable, 160, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0xFF947BBB);
 
     ptOrigin.y += 20;
-    mu_swprintf(szTemp, GlobalText[1578]);
+    mu_swprintf(szTemp, I18N::Game::DuringTrucePeriod);
     g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, szTemp, 160, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 12;
-    mu_swprintf(szTemp, GlobalText[1579]);
+    mu_swprintf(szTemp, I18N::Game::MaximumTaxRates3);
     g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, szTemp, 160, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1580], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::NPCsInclude, 160, 0, RT3_SORT_CENTER);
     ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1581], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::ElfLalaPotionGirl, 160, 0, RT3_SORT_CENTER);
     ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1582], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::WizardArenaGuard, 160, 0, RT3_SORT_CENTER);
     ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1583], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::AndEtc, 160, 0, RT3_SORT_CENTER);
 
     ptOrigin.y += 10;
     RenderBitmap(IMAGE_CASTLEWINDOW_LINE, ptOrigin.x + 1, ptOrigin.y,
@@ -839,7 +840,7 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     ptOrigin.y += 18;
     RenderImage(IMAGE_CASTLEWINDOW_MONEY, ptOrigin.x + 10, ptOrigin.y, 170.f, 24.f);
 
-    mu_swprintf(szTemp, GlobalText[1246]);
+    mu_swprintf(szTemp, I18N::Game::Zen);
     g_pRenderText->RenderText(ptOrigin.x + 14, ptOrigin.y + 7, szTemp);
 
     //wchar_t szGoldText[32];
@@ -855,11 +856,11 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     g_pRenderText->SetTextColor(0xFF947BBB);
 
     ptOrigin.y += 54;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1585], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::TaxBelongsToTheCastle, 160, 0, RT3_SORT_CENTER);
     ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1586], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::AndCanBeUsed, 160, 0, RT3_SORT_CENTER);
     ptOrigin.y += 12;
-    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, GlobalText[1587], 160, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::ToOperateTheCastle, 160, 0, RT3_SORT_CENTER);
 }
 
 void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST pInfo)

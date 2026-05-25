@@ -4,14 +4,14 @@
 
 #include "SkillEditorPopups.h"
 #include "imgui.h"
-#include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 
 bool CSkillEditorPopups::RenderSimplePopup(const char* popupId, const char* message)
 {
     if (ImGui::BeginPopupModal(popupId, NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("%s", message);
-        if (ImGui::Button(EDITOR_TEXT("btn_ok"), ImVec2(120, 0)))
+        if (ImGui::Button(I18N::Editor::OK, ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
         }
@@ -24,16 +24,16 @@ bool CSkillEditorPopups::RenderSimplePopup(const char* popupId, const char* mess
 void CSkillEditorPopups::RenderPopups()
 {
     // Save popups
-    RenderSimplePopup("Save Success", EDITOR_TEXT("popup_save_skills_success"));
-    RenderSimplePopup("Save Failed", EDITOR_TEXT("popup_save_skills_failed"));
+    RenderSimplePopup("Save Success", I18N::Editor::SkillsSavedSuccessfully);
+    RenderSimplePopup("Save Failed", I18N::Editor::FailedToSaveSkills);
 
     // Legacy Export popups
-    RenderSimplePopup("Export S6E3 Success", EDITOR_TEXT("popup_export_s6e3_success"));
-    RenderSimplePopup("Export S6E3 Failed", EDITOR_TEXT("popup_export_s6e3_failed"));
+    RenderSimplePopup("Export S6E3 Success", I18N::Editor::ExportedAsLegacyFormatSuccessfully);
+    RenderSimplePopup("Export S6E3 Failed", I18N::Editor::FailedToExportAsLegacyFormat);
 
     // CSV Export popups
-    RenderSimplePopup("Export CSV Success", EDITOR_TEXT("popup_export_csv_skills_success"));
-    RenderSimplePopup("Export CSV Failed", EDITOR_TEXT("popup_export_csv_skills_failed"));
+    RenderSimplePopup("Export CSV Success", I18N::Editor::SkillsExportedAsCSVSuccessfully);
+    RenderSimplePopup("Export CSV Failed", I18N::Editor::FailedToExportSkillAttributesAsCSV);
 }
 
 #endif // _EDITOR

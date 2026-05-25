@@ -22,6 +22,7 @@
 #include "Data/DataHandler/LoadData.h"
 #include "Event.h"
 #include "Core/Utilities/Random.h"
+#include "I18N/All.h"
 
 #include <algorithm>
 #include <array>
@@ -173,13 +174,13 @@ void CXmasEvent::CreateXmasEventEffect(CHARACTER* pCha, OBJECT* pObj, int iType)
     switch (c->Object.SubType)
     {
     case MODEL_XMAS_EVENT_CHA_SSANTA:
-        CopyWideString(c->ID, GlobalText[2245]);
+        CopyWideString(c->ID, I18N::Game::SantaClause);
         break;
     case MODEL_XMAS_EVENT_CHA_DEER:
-        CopyWideString(c->ID, GlobalText[2246]);
+        CopyWideString(c->ID, I18N::Game::Rudolf);
         break;
     case MODEL_XMAS_EVENT_CHA_SNOWMAN:
-        CopyWideString(c->ID, GlobalText[2247]);
+        CopyWideString(c->ID, I18N::Game::Snowman);
         break;
     default:
         CopyWideString(c->ID, L"");

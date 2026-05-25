@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 #include "Platform/Windows/iexplorer.h"
@@ -153,27 +154,27 @@ void CNewUIInGameShop::RenderTexts()
 
     //CreditCard
     ConvertGold(g_InGameShopSystem->GetCashCreditCard(), szValue);
-    mu_swprintf(szText, GlobalText[2883], L"");
+    mu_swprintf(szText, I18N::Game::MyWCoinS, L"");
     g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X, m_Pos.y + TEXT_IGS_CASH_POS_Y, szText, TEXT_IGS_CASH_WIDTH, 0, RT3_SORT_LEFT);
     g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X + 50, m_Pos.y + TEXT_IGS_CASH_POS_Y, szValue, TEXT_IGS_CASH_WIDTH - 56, 0, RT3_SORT_RIGHT);
 
     //Prepaid
     ConvertGold(g_InGameShopSystem->GetCashPrepaid(), szValue);
-    mu_swprintf(szText, GlobalText[3145], L"");
+    mu_swprintf(szText, I18N::Game::MyWCoinPS, L"");
     g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X, m_Pos.y + TEXT_IGS_MILEAGE_POS_Y, szText, TEXT_IGS_CASH_WIDTH, 0, RT3_SORT_LEFT);
     g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X + 50, m_Pos.y + TEXT_IGS_MILEAGE_POS_Y, szValue, TEXT_IGS_CASH_WIDTH - 56, 0, RT3_SORT_RIGHT);
 
     ConvertGold(g_InGameShopSystem->GetTotalMileage(), szValue, 1);
-    mu_swprintf(szText, GlobalText[2884], L"");
+    mu_swprintf(szText, I18N::Game::GoblinPointsS, L"");
     g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X, m_Pos.y + TEXT_IGS_POINT_POS_Y, szText, TEXT_IGS_CASH_WIDTH, 0, RT3_SORT_LEFT);
     g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_CASH_POS_X + 50, m_Pos.y + TEXT_IGS_POINT_POS_Y, szValue, TEXT_IGS_CASH_WIDTH - 56, 0, RT3_SORT_RIGHT);
 
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
 
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_NAME_POS_X, m_Pos.y + TEXT_IGS_STORAGE_NAME_POS_Y, GlobalText[2951], TEXT_IGS_STORAGE_NAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_NAME_POS_X, m_Pos.y + TEXT_IGS_STORAGE_NAME_POS_Y, I18N::Game::ItemName, TEXT_IGS_STORAGE_NAME_WIDTH, 0, RT3_SORT_CENTER);
 
-    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_TIME_POS_X, m_Pos.y + TEXT_IGS_STORAGE_NAME_POS_Y, GlobalText[2952], TEXT_IGS_STORAGE_TIME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_STORAGE_TIME_POS_X, m_Pos.y + TEXT_IGS_STORAGE_NAME_POS_Y, I18N::Game::Duration, TEXT_IGS_STORAGE_TIME_WIDTH, 0, RT3_SORT_CENTER);
 
     // Page Info
     g_pRenderText->RenderText(m_Pos.x + TEXT_IGS_PAGE_POS_X + 23, m_Pos.y + TEXT_IGS_PAGE_POS_Y, L"/", 10, 0, RT3_SORT_CENTER);
@@ -397,7 +398,7 @@ bool CNewUIInGameShop::BtnProcess()
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2937], GlobalText[2938]);
+        pMsgBox->Initialize(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn);
         return true;
     }
 
@@ -405,7 +406,7 @@ bool CNewUIInGameShop::BtnProcess()
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[2937], GlobalText[2938]);
+        pMsgBox->Initialize(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn);
         return true;
     }
 
@@ -422,7 +423,7 @@ bool CNewUIInGameShop::BtnProcess()
         {
             CMsgBoxIGSCommon* pMsgBox = NULL;
             CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-            pMsgBox->Initialize(GlobalText[3028], GlobalText[3033]);
+            pMsgBox->Initialize(I18N::Game::Error, I18N::Game::ThereIsNoUsableItem);
             return true;
         }
 
@@ -495,7 +496,7 @@ void CNewUIInGameShop::SetBtnInfo()
 {
     m_CloseButton.ChangeButtonImgState(true, IMAGE_IGS_EXIT_BTN, false);
     m_CloseButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_EXIT_BTN_POS_X, m_Pos.y + IMAGE_IGS_EXIT_BTN_POS_Y, IMAGE_IGS_EXIT_BTN_WIDTH, IMAGE_IGS_EXIT_BTN_HEIGHT);
-    m_CloseButton.ChangeToolTipText(GlobalText[1002], true);
+    m_CloseButton.ChangeToolTipText(&I18N::Game::Close388, true);
     m_ListBoxTabButton.CreateRadioGroup(IGS_TOTAL_LISTBOX, IMAGE_IGS_LEFT_TAB);
     m_ListBoxTabButton.ChangeRadioButtonInfo(true, m_Pos.x + IMAGE_IGS_TAB_BTN_POS_X, m_Pos.y + IMAGE_IGS_TAB_BTN_POS_Y, IMAGE_IGS_TAB_BTN_WIDTH, IMAGE_IGS_TAB_BTN_HEIGHT, IMAGE_IGS_TAB_BTN_DISTANCE);
     m_ListBoxTabButton.ChangeButtonState(SEASON3B::BUTTON_STATE_DOWN, 0);
@@ -505,9 +506,9 @@ void CNewUIInGameShop::SetBtnInfo()
 
    std::wstring strText;
     std::list<std::wstring> TextList;
-    strText = GlobalText[2888];
+    strText = I18N::Game::Storage;
     TextList.push_back(strText);
-    strText = GlobalText[2889];
+    strText = I18N::Game::GiftInventory;
     TextList.push_back(strText);
 
     m_ListBoxTabButton.ChangeRadioText(TextList);
@@ -518,24 +519,24 @@ void CNewUIInGameShop::SetBtnInfo()
         m_ViewDetailButton[i].ChangeButtonImgState(true, IMAGE_IGS_VIEWDETAIL_BTN, true, false, true);
         m_ViewDetailButton[i].ChangeButtonInfo(IMAGE_IGS_VIEWDETAIL_BTN_POS_X + ((i % IGS_NUM_ITEMS_WIDTH) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_X), IMAGE_IGS_VIEWDETAIL_BTN_POS_Y + ((i / IGS_NUM_ITEMS_HEIGHT) * IMAGE_IGS_VIEWDETAIL_BTN_DISTANCE_Y), IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
         m_ViewDetailButton[i].MoveTextPos(0, -1);
-        m_ViewDetailButton[i].ChangeText(GlobalText[2886]);
+        m_ViewDetailButton[i].ChangeText(&I18N::Game::Buy1124);
     }
 
     m_CashGiftButton.ChangeButtonImgState(true, IMAGE_IGS_ITEMGIFT_BTN, true);
     m_CashGiftButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_ITEMGIFT_BTN_POS_X, m_Pos.y + IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
-    m_CashGiftButton.ChangeToolTipText(GlobalText[2939]);
+    m_CashGiftButton.ChangeToolTipText(&I18N::Game::SendWCoin);
     m_CashChargeButton.ChangeButtonImgState(true, IMAGE_IGS_CASHGIFT_BTN, true);
     m_CashChargeButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_CASHGIFT_BTN_POS_X, m_Pos.y + IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
-    m_CashChargeButton.ChangeToolTipText(GlobalText[2940]);
+    m_CashChargeButton.ChangeToolTipText(&I18N::Game::RechargeWCoin);
 
     m_CashRefreshButton.ChangeButtonImgState(true, IMAGE_IGS_REFRESH_BTN, true);
     m_CashRefreshButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_REFRESH_BTN_POS_X, m_Pos.y + IMAGE_IGS_ICON_BTN_POS_Y, IMAGE_IGS_ICON_BTN_WIDTH, IMAGE_IGS_ICON_BTN_HEIGHT);
-    m_CashRefreshButton.ChangeToolTipText(GlobalText[2941]);
+    m_CashRefreshButton.ChangeToolTipText(&I18N::Game::UpdateInformation);
 
     m_UseButton.ChangeButtonImgState(true, IMAGE_IGS_VIEWDETAIL_BTN, true, false, true);
     m_UseButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_USE_BTN_POS_X, m_Pos.y + IMAGE_IGS_USE_BTN_POS_Y, IMAGE_IGS_VIEWDETAIL_BTN_WIDTH, IMAGE_IGS_VIEWDETAIL_BTN_HEIGHT);
     m_UseButton.MoveTextPos(0, -1);
-    m_UseButton.ChangeText(GlobalText[2887]);
+    m_UseButton.ChangeText(&I18N::Game::Use);
 
     m_PrevButton.ChangeButtonImgState(true, IMAGE_IGS_PAGE_LEFT, true);
     m_PrevButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_PAGE_LEFT_POS_X, m_Pos.y + IMAGE_IGS_PAGE_BUTTON_POS_Y, IMAGE_IGS_PAGE_BTN_WIDTH, IMAGE_IGS_PAGE_BTN_HEIGHT);
@@ -620,8 +621,8 @@ bool CNewUIInGameShop::IsInGameShopOpen()
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[3028], GlobalText[3051]);
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", GlobalText[3051]);
+        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::YouCanOnlyOpenMUItemShopInATownOrSafeZone);
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", I18N::Game::YouCanOnlyOpenMUItemShopInATownOrSafeZone);
         return false;
     }
 
@@ -629,8 +630,8 @@ bool CNewUIInGameShop::IsInGameShopOpen()
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[3028], GlobalText[3035]);
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", GlobalText[3035]);
+        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::CannotOpenMUItemShopPleaseReconnectToTheGame);
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", I18N::Game::CannotOpenMUItemShopPleaseReconnectToTheGame);
         return false;
     }
     g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - true");
@@ -790,10 +791,10 @@ void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int 
         wchar_t szValue[MAX_TEXT_LENGTH] = { '\0', };
         ConvertGold(iCashPoint, szValue);
         // Name
-        mu_swprintf(Item.m_szName, GlobalText[3050], szValue);
+        mu_swprintf(Item.m_szName, I18N::Game::WCoinSCoins, szValue);
 
         // Num
-        mu_swprintf(Item.m_szNum, GlobalText[3043], szValue);
+        mu_swprintf(Item.m_szNum, I18N::Game::SWCoin, szValue);
         Item.m_iNum = iCashPoint;
 
         // Period

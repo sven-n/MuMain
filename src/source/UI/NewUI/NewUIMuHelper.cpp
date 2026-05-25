@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <array>
+#include "I18N/All.h"
 
 #include "UI/Legacy/UIControls.h"
 #include "UI/NewUI/HUD/Skills/SkillTooltip.h"
@@ -168,34 +169,34 @@ void CNewUIMuHelper::SetPos(int x, int y)
 
 void CNewUIMuHelper::InitButtons()
 {
-    std::list<std::wstring> ltext;
-    ltext.push_back(GlobalText[3500]);
-    ltext.push_back(GlobalText[3501]);
-    ltext.push_back(GlobalText[3590]);
+    std::list<const wchar_t* const*> ltext;
+    ltext.push_back(&I18N::Game::Hunting);
+    ltext.push_back(&I18N::Game::Obtaining);
+    ltext.push_back(&I18N::Game::OtherSettings);
 
     m_TabBtn.CreateRadioGroup(3, IMAGE_WINDOW_TAB_BTN, TRUE);
     m_TabBtn.ChangeRadioText(ltext);
     m_TabBtn.ChangeRadioButtonInfo(true, m_Pos.x + 10.f, m_Pos.y + 48.f, 56, 22);
     m_TabBtn.ChangeFrame(m_iCurrentOpenTab);
 
-    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", BUTTON_ID_HUNT_RANGE_ADD, 0);
-    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", BUTTON_ID_HUNT_RANGE_MINUS, 0);
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 191, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", BUTTON_ID_SKILL2_CONFIG, 0); //-- skill 2
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 243, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", BUTTON_ID_SKILL3_CONFIG, 0); //-- skill 3
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", BUTTON_ID_POTION_CONFIG_ELF, 0); //-- Buff
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 79, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", BUTTON_ID_POTION_CONFIG_SUMMY, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", BUTTON_ID_POTION_CONFIG, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", BUTTON_ID_PARTY_CONFIG, 0); //-- potion
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, GlobalText[3502], L"", BUTTON_ID_PARTY_CONFIG_ELF, 0); //-- potion
+    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, nullptr, nullptr, BUTTON_ID_HUNT_RANGE_ADD, 0);
+    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, nullptr, nullptr, BUTTON_ID_HUNT_RANGE_MINUS, 0);
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 191, 38, 24, 1, 0, 1, 1, &I18N::Game::Setting, nullptr, BUTTON_ID_SKILL2_CONFIG, 0); //-- skill 2
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 243, 38, 24, 1, 0, 1, 1, &I18N::Game::Setting, nullptr, BUTTON_ID_SKILL3_CONFIG, 0); //-- skill 3
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, &I18N::Game::Setting, nullptr, BUTTON_ID_POTION_CONFIG_ELF, 0); //-- Buff
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 79, 38, 24, 1, 0, 1, 1, &I18N::Game::Setting, nullptr, BUTTON_ID_POTION_CONFIG_SUMMY, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 84, 38, 24, 1, 0, 1, 1, &I18N::Game::Setting, nullptr, BUTTON_ID_POTION_CONFIG, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, &I18N::Game::Setting, nullptr, BUTTON_ID_PARTY_CONFIG, 0); //-- potion
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 17, m_Pos.y + 234, 38, 24, 1, 0, 1, 1, &I18N::Game::Setting, nullptr, BUTTON_ID_PARTY_CONFIG_ELF, 0); //-- potion
 
-    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, L"", L"", BUTTON_ID_PICK_RANGE_ADD, 1);
-    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, L"", L"", BUTTON_ID_PICK_RANGE_MINUS, 1);
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 208, 38, 24, 1, 0, 1, 1, GlobalText[3505], L"", BUTTON_ID_ADD_OTHER_ITEM, 1); //-- Buff
-    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 309, 38, 24, 1, 0, 1, 1, GlobalText[3506], L"", BUTTON_ID_DELETE_OTHER_ITEM, 1); //-- Buff
+    InsertButton(IMAGE_CHAINFO_BTN_STAT, m_Pos.x + 56, m_Pos.y + 78, 16, 15, 0, 0, 0, 0, nullptr, nullptr, BUTTON_ID_PICK_RANGE_ADD, 1);
+    InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, nullptr, nullptr, BUTTON_ID_PICK_RANGE_MINUS, 1);
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 208, 38, 24, 1, 0, 1, 1, &I18N::Game::Add, nullptr, BUTTON_ID_ADD_OTHER_ITEM, 1); //-- Buff
+    InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 309, 38, 24, 1, 0, 1, 1, &I18N::Game::Delete, nullptr, BUTTON_ID_DELETE_OTHER_ITEM, 1); //-- Buff
     //--
-    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 120, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3503], L"", BUTTON_ID_SAVE_CONFIG, -1);
-    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 65, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, GlobalText[3504], L"", BUTTON_ID_INIT_CONFIG, -1);
-    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, L"", GlobalText[388], BUTTON_ID_EXIT_CONFIG, -1);
+    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 120, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, &I18N::Game::SaveSetting, nullptr, BUTTON_ID_SAVE_CONFIG, -1);
+    InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 65, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, &I18N::Game::Initialization, nullptr, BUTTON_ID_INIT_CONFIG, -1);
+    InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, nullptr, &I18N::Game::Close388, BUTTON_ID_EXIT_CONFIG, -1);
 
     RegisterBtnCharacter(0xFF, BUTTON_ID_HUNT_RANGE_ADD);
     RegisterBtnCharacter(0xFF, BUTTON_ID_HUNT_RANGE_MINUS);
@@ -232,40 +233,40 @@ void CNewUIMuHelper::InitButtons()
 
 void CNewUIMuHelper::InitCheckBox()
 {
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, GlobalText[3507], CHECKBOX_ID_POTION, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 122, 15, 15, 0, GlobalText[3508], CHECKBOX_ID_LONG_DISTANCE, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 137, 15, 15, 0, GlobalText[3509], CHECKBOX_ID_ORIG_POSITION, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 174, 15, 15, 0, GlobalText[3510], CHECKBOX_ID_SKILL2_DELAY, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 191, 15, 15, 0, GlobalText[3511], CHECKBOX_ID_SKILL2_CONDITION, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 226, 15, 15, 0, GlobalText[3510], CHECKBOX_ID_SKILL3_DELAY, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 243, 15, 15, 0, GlobalText[3511], CHECKBOX_ID_SKILL3_CONDITION, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 226, 15, 15, 0, GlobalText[3512], CHECKBOX_ID_COMBO, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 276, 15, 15, 0, GlobalText[3513], CHECKBOX_ID_BUFF_DURATION, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, &I18N::Game::Potion, CHECKBOX_ID_POTION, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 122, 15, 15, 0, &I18N::Game::LongDistanceCounterAttack, CHECKBOX_ID_LONG_DISTANCE, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 137, 15, 15, 0, &I18N::Game::OriginalPosition, CHECKBOX_ID_ORIG_POSITION, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 174, 15, 15, 0, &I18N::Game::Delay, CHECKBOX_ID_SKILL2_DELAY, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 191, 15, 15, 0, &I18N::Game::Con, CHECKBOX_ID_SKILL2_CONDITION, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 226, 15, 15, 0, &I18N::Game::Delay, CHECKBOX_ID_SKILL3_DELAY, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 94, m_Pos.y + 243, 15, 15, 0, &I18N::Game::Con, CHECKBOX_ID_SKILL3_CONDITION, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 226, 15, 15, 0, &I18N::Game::Combo, CHECKBOX_ID_COMBO, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 276, 15, 15, 0, &I18N::Game::BuffDuration, CHECKBOX_ID_BUFF_DURATION, 0);
 
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, GlobalText[3514], CHECKBOX_ID_USE_PET, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, GlobalText[3515], CHECKBOX_ID_PARTY, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3516], CHECKBOX_ID_AUTO_HEAL, 0);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, GlobalText[3517], CHECKBOX_ID_DRAIN_LIFE, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, &I18N::Game::UseDarkSpirits, CHECKBOX_ID_USE_PET, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 218, 15, 15, 0, &I18N::Game::Party, CHECKBOX_ID_PARTY, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, &I18N::Game::AutoHeal, CHECKBOX_ID_AUTO_HEAL, 0);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 97, 15, 15, 0, &I18N::Game::DrainLife, CHECKBOX_ID_DRAIN_LIFE, 0);
 
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, GlobalText[3518], CHECKBOX_ID_REPAIR_ITEM, 1);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 17, m_Pos.y + 125, 15, 15, 0, GlobalText[3519], CHECKBOX_ID_PICK_ALL, 1);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 17, m_Pos.y + 152, 15, 15, 0, GlobalText[3520], CHECKBOX_ID_PICK_SELECTED, 1);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, &I18N::Game::RepairItem, CHECKBOX_ID_REPAIR_ITEM, 1);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 17, m_Pos.y + 125, 15, 15, 0, &I18N::Game::PickAllNearItems, CHECKBOX_ID_PICK_ALL, 1);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 17, m_Pos.y + 152, 15, 15, 0, &I18N::Game::PickSelectedItems, CHECKBOX_ID_PICK_SELECTED, 1);
 
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 170, 15, 15, 0, GlobalText[3521], CHECKBOX_ID_PICK_JEWEL, 1);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 85, m_Pos.y + 170, 15, 15, 0, GlobalText[3522], CHECKBOX_ID_PICK_ANCIENT, 1);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 185, 15, 15, 0, GlobalText[3523], CHECKBOX_ID_PICK_ZEN, 1);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 85, m_Pos.y + 185, 15, 15, 0, GlobalText[3524], CHECKBOX_ID_PICK_EXCELLENT, 1);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 200, 15, 15, 0, GlobalText[3525], CHECKBOX_ID_ADD_OTHER_ITEM, 1);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 170, 15, 15, 0, &I18N::Game::JewelGem, CHECKBOX_ID_PICK_JEWEL, 1);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 85, m_Pos.y + 170, 15, 15, 0, &I18N::Game::SetItem, CHECKBOX_ID_PICK_ANCIENT, 1);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 185, 15, 15, 0, &I18N::Game::Zen, CHECKBOX_ID_PICK_ZEN, 1);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 85, m_Pos.y + 185, 15, 15, 0, &I18N::Game::ExcellentItem, CHECKBOX_ID_PICK_EXCELLENT, 1);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 200, 15, 15, 0, &I18N::Game::AddExtraItem, CHECKBOX_ID_ADD_OTHER_ITEM, 1);
     //--
 
-    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 94, m_Pos.y + 235, 15, 15, 0, GlobalText[3533], CHECKBOX_ID_DR_ATTACK_CEASE, 0);
-    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 30, m_Pos.y + 235, 15, 15, 0, GlobalText[3534], CHECKBOX_ID_DR_ATTACK_AUTO, 0);
-    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 30, m_Pos.y + 250, 15, 15, 0, GlobalText[3535], CHECKBOX_ID_DR_ATTACK_TOGETHER, 0);
+    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 94, m_Pos.y + 235, 15, 15, 0, &I18N::Game::CeaseAttack, CHECKBOX_ID_DR_ATTACK_CEASE, 0);
+    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 30, m_Pos.y + 235, 15, 15, 0, &I18N::Game::AutoAttack, CHECKBOX_ID_DR_ATTACK_AUTO, 0);
+    InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 30, m_Pos.y + 250, 15, 15, 0, &I18N::Game::AttackTogether, CHECKBOX_ID_DR_ATTACK_TOGETHER, 0);
 
     //--
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 80, 15, 15, 0, GlobalText[3591], CHECKBOX_ID_AUTO_ACCEPT_FRIEND, 2);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 125, 15, 15, 0, GlobalText[3593], CHECKBOX_ID_AUTO_DEFEND, 2);
-    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 97, 15, 15, 0, GlobalText[3592], CHECKBOX_ID_AUTO_ACCEPT_GUILD, 2);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 80, 15, 15, 0, &I18N::Game::AutoAcceptFriend, CHECKBOX_ID_AUTO_ACCEPT_FRIEND, 2);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 125, 15, 15, 0, &I18N::Game::PVPCounterattack, CHECKBOX_ID_AUTO_DEFEND, 2);
+    InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 97, 15, 15, 0, &I18N::Game::AutoAcceptGuildMember, CHECKBOX_ID_AUTO_ACCEPT_GUILD, 2);
 
     RegisterBoxCharacter(0xFF, CHECKBOX_ID_POTION);
     RegisterBoxCharacter(0xFF, CHECKBOX_ID_LONG_DISTANCE);
@@ -353,21 +354,21 @@ void CNewUIMuHelper::InitImage()
 
 void CNewUIMuHelper::InitText()
 {
-    InsertText(m_Pos.x + 18, m_Pos.y + 78, GlobalText[3526], 1, 0); // Range
+    InsertText(m_Pos.x + 18, m_Pos.y + 78, I18N::Game::Range, 1, 0); // Range
     InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 2, 0);
-    InsertText(m_Pos.x + 110, m_Pos.y + 141, GlobalText[3527], 3, 0); // Distance
-    //InsertText(m_Pos.x + 162, m_Pos.y + 141, GlobalText[3528], 4, 0);
+    InsertText(m_Pos.x + 110, m_Pos.y + 141, I18N::Game::Distance, 3, 0); // Distance
+    //InsertText(m_Pos.x + 162, m_Pos.y + 141, I18N::Game::Min, 4, 0);
     InsertText(m_Pos.x + 162, m_Pos.y + 141, L"s", 4, 0);
 
-    InsertText(m_Pos.x + 18, m_Pos.y + 160, GlobalText[3529], 5, 0); // Basic Skill
-    InsertText(m_Pos.x + 59, m_Pos.y + 160, GlobalText[3530], 7, 0); // Activation Skill 1
-    //InsertText(m_Pos.x + 162, m_Pos.y + 178, GlobalText[3528], 8, 0);
+    InsertText(m_Pos.x + 18, m_Pos.y + 160, I18N::Game::BasicSkill, 5, 0); // Basic Skill
+    InsertText(m_Pos.x + 59, m_Pos.y + 160, I18N::Game::ActivationSkill1, 7, 0); // Activation Skill 1
+    //InsertText(m_Pos.x + 162, m_Pos.y + 178, I18N::Game::Min, 8, 0);
     InsertText(m_Pos.x + 162, m_Pos.y + 178, L"s", 8, 0);
-    InsertText(m_Pos.x + 59, m_Pos.y + 212, GlobalText[3531], 9, 0); // Activation Skill 2
+    InsertText(m_Pos.x + 59, m_Pos.y + 212, I18N::Game::ActivationSkill2, 9, 0); // Activation Skill 2
 
-    //InsertText(m_Pos.x + 162, m_Pos.y + 230, GlobalText[3528], 10, 0);
+    //InsertText(m_Pos.x + 162, m_Pos.y + 230, I18N::Game::Min, 10, 0);
     InsertText(m_Pos.x + 162, m_Pos.y + 230, L"s", 10, 0);
-    InsertText(m_Pos.x + 18, m_Pos.y + 78, GlobalText[3532], 11, 1); // Range
+    InsertText(m_Pos.x + 18, m_Pos.y + 78, I18N::Game::Range, 11, 1); // Range
     InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 12, 1);
 
     RegisterTextCharacter(0xFF, 1);
@@ -787,7 +788,7 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
 		{
 			if (m_aiSelectedSkills[0] <= 0 || m_aiSelectedSkills[1] <= 0 || m_aiSelectedSkills[2] <= 0)
 			{
-				g_pSystemLogBox->AddText(GlobalText[3565], SEASON3B::TYPE_ERROR_MESSAGE);
+				g_pSystemLogBox->AddText(I18N::Game::InOrderToUseComboSkill, SEASON3B::TYPE_ERROR_MESSAGE);
 				cboxCombo.box->RegisterBoxState(false);
 			}
 		}
@@ -1161,15 +1162,15 @@ bool CNewUIMuHelper::Render()
 
     g_pRenderText->SetFont(g_hFontBold);
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3536], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::OfficialMUHelper, 190, 0, RT3_SORT_CENTER);
 
     RenderBack(m_Pos.x + 12, m_Pos.y + 340, 165, 46);
 
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 347, GlobalText[3537], 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 347, I18N::Game::UsedExtensionFunction, 0, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(0xFF00B4FF);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 365, GlobalText[3538], 0, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 365, I18N::Game::NoExtensionFunctionBeingUsed, 0, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetTextColor(TextColor);
 
@@ -1291,7 +1292,7 @@ void CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identifier)
     }
 }
 
-void CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, std::wstring btname, std::wstring tooltiptext, int Identifier, int iNumTab)
+void CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, const wchar_t* const* btnameSlot, const wchar_t* const* tooltipSlot, int Identifier, int iNumTab)
 {
     CButtonTap cBTN;
     auto* button = new CNewUIButton();
@@ -1299,8 +1300,8 @@ void CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bo
     button->ChangeButtonImgState(1, imgindex, overflg, isimgwidth, bClickEffect);
     button->ChangeButtonInfo(x, y, sx, sy);
 
-    button->ChangeText(btname);
-    button->ChangeToolTipText(tooltiptext, TRUE);
+    if (btnameSlot != nullptr) button->ChangeText(btnameSlot);
+    if (tooltipSlot != nullptr) button->ChangeToolTipText(tooltipSlot, TRUE);
 
     if (MoveTxt)
     {
@@ -1375,7 +1376,7 @@ void CNewUIMuHelper::RegisterCheckBox(int Identifier, CheckBoxTap button)
     m_CheckBoxList.insert(std::pair<int, CheckBoxTap>(Identifier, button));
 }
 
-void CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg, std::wstring btname, int Identifier, int iNumTab)
+void CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg, const wchar_t* const* btnameSlot, int Identifier, int iNumTab)
 {
     CheckBoxTap cBOX;
 
@@ -1384,7 +1385,7 @@ void CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, 
     cbox->CheckBoxImgState(imgindex);
     cbox->CheckBoxInfo(x, y, sx, sy);
 
-    cbox->ChangeText(btname);
+    if (btnameSlot != nullptr) cbox->ChangeText(btnameSlot);
     cbox->RegisterBoxState(overflg);
 
     cBOX.box = cbox;
@@ -2381,52 +2382,52 @@ void CNewUIMuHelperExt::InitButtons()
 {
     m_BtnPreConHuntRange.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnPreConHuntRange.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 78, 15, 15);
-    m_BtnPreConHuntRange.ChangeText(GlobalText[3555]); // "Monster Within Hunting range"
+    m_BtnPreConHuntRange.ChangeText(&I18N::Game::MonsterWithinHuntingRange); // "Monster Within Hunting range"
 
     m_BtnPreConAttacking.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnPreConAttacking.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 93, 15, 15);
-    m_BtnPreConAttacking.ChangeText(GlobalText[3556]); // "Monster Attacking Me"
+    m_BtnPreConAttacking.ChangeText(&I18N::Game::MonsterAttackingMe); // "Monster Attacking Me"
 
     m_BtnSubConMoreThanTwo.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnSubConMoreThanTwo.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 143, 15, 15);
-    m_BtnSubConMoreThanTwo.ChangeText(GlobalText[3557]); // "More Than 2 Mobs"
+    m_BtnSubConMoreThanTwo.ChangeText(&I18N::Game::MoreThan2Mobs); // "More Than 2 Mobs"
 
     m_BtnSubConMoreThanThree.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnSubConMoreThanThree.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 158, 15, 15);
-    m_BtnSubConMoreThanThree.ChangeText(GlobalText[3558]); // "More Than 3 Mobs"
+    m_BtnSubConMoreThanThree.ChangeText(&I18N::Game::MoreThan3Mobs); // "More Than 3 Mobs"
 
     m_BtnSubConMoreThanFour.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnSubConMoreThanFour.CheckBoxInfo(m_Pos.x + 17 + 78, m_Pos.y + 143, 15, 15);
-    m_BtnSubConMoreThanFour.ChangeText(GlobalText[3559]); // "More Than 4 Mobs"
+    m_BtnSubConMoreThanFour.ChangeText(&I18N::Game::MoreThan4Mobs); // "More Than 4 Mobs"
 
     m_BtnSubConMoreThanFive.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnSubConMoreThanFive.CheckBoxInfo(m_Pos.x + 17 + 78, m_Pos.y + 158, 15, 15);
-    m_BtnSubConMoreThanFive.ChangeText(GlobalText[3560]); // "More Than 5 Mobs"
+    m_BtnSubConMoreThanFive.ChangeText(&I18N::Game::MoreThan5Mobs); // "More Than 5 Mobs"
 
     m_BtnPartyHeal.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
     m_BtnPartyHeal.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 78, 15, 15);
-    m_BtnPartyHeal.ChangeText(GlobalText[3539]); // "Preference of Party Heal"
+    m_BtnPartyHeal.ChangeText(&I18N::Game::PreferenceOfPartyHeal); // "Preference of Party Heal"
 
     m_BtnPartyDuration.CheckBoxImgState(IMAGE_OPTION_BTN_CHECK);
     m_BtnPartyDuration.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 168, 15, 15);
-    m_BtnPartyDuration.ChangeText(GlobalText[3540]); // "Buff Duration for All Party Members"
+    m_BtnPartyDuration.ChangeText(&I18N::Game::BuffDurationForAllPartyMembers); // "Buff Duration for All Party Members"
 
     m_BtnSave.ChangeButtonImgState(1, IMAGE_IGS_BUTTON, 1, 0, 1);
     m_BtnSave.ChangeButtonInfo(m_Pos.x + 120, m_Pos.y + 388, 52, 26);
-    m_BtnSave.ChangeText(GlobalText[3503]); // "Save Setting"
+    m_BtnSave.ChangeText(&I18N::Game::SaveSetting); // "Save Setting"
     m_BtnSave.MoveTextPos(0, -1);
     m_BtnSave.ChangeToolTipText(L"", TRUE);
 
     m_BtnReset.ChangeButtonImgState(1, IMAGE_IGS_BUTTON, 1, 0, 1);
     m_BtnReset.ChangeButtonInfo(m_Pos.x + 65, m_Pos.y + 388, 52, 26);
-    m_BtnReset.ChangeText(GlobalText[3504]); // "Initialization"
+    m_BtnReset.ChangeText(&I18N::Game::Initialization); // "Initialization"
     m_BtnReset.MoveTextPos(0, -1);
     m_BtnReset.ChangeToolTipText(L"", TRUE);
 
     m_BtnClose.ChangeButtonImgState(1, IMAGE_BASE_WINDOW_BTN_EXIT, 0, 0, 0);
     m_BtnClose.ChangeButtonInfo(m_Pos.x + 20, m_Pos.y + 388, 36, 29);
     m_BtnClose.ChangeText(L"");
-    m_BtnClose.ChangeToolTipText(GlobalText[388], TRUE); // "Close"
+    m_BtnClose.ChangeToolTipText(&I18N::Game::Close388, TRUE); // "Close"
 }
 
 void CNewUIMuHelperExt::InitCheckBox()
@@ -2455,38 +2456,38 @@ bool CNewUIMuHelperExt::Render()
 
     if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_ELF)
     {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
-        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]); // "HP Status"
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::AutoRecovery, 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, I18N::Game::AutoPotion); // "Auto Potion"
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, I18N::Game::HPStatus); // "HP Status"
 
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, GlobalText[3546]); // "Auto Heal"
-        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, GlobalText[3547]); // "HP Status"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, I18N::Game::AutoHeal); // "Auto Heal"
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, I18N::Game::HPStatus); // "HP Status"
     }
     else if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG_SUMMY)
     {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
-        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]); // "HP Status"
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::AutoRecovery, 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, I18N::Game::AutoPotion); // "Auto Potion"
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, I18N::Game::HPStatus); // "HP Status"
 
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, GlobalText[3517]); // "Drain Life"
-        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, GlobalText[3547]); // "HP Status"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, I18N::Game::DrainLife); // "Drain Life"
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 145, 124.f, 16.f, m_iCurrentHealThreshold, I18N::Game::HPStatus); // "HP Status"
     }
     else if (m_iCurrentPage == SUB_PAGE_POTION_CONFIG)
     {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3553], 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3545]); // "Auto Potion"
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::AutoRecovery, 190, 0, RT3_SORT_CENTER); // "Auto Recovery"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, I18N::Game::AutoPotion); // "Auto Potion"
 
-        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, GlobalText[3547]);
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 80, 124.f, 16.f, m_iCurrentPotionThreshold, I18N::Game::HPStatus);
     }
     else if (m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG
         || m_iCurrentPage == SUB_PAGE_SKILL3_CONFIG)
     {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3552], 190, 0, RT3_SORT_CENTER); // "Activation Skill"
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3543]);  // "Pre-con"
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::ActivationSkill, 190, 0, RT3_SORT_CENTER); // "Activation Skill"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, I18N::Game::PreCon);  // "Pre-con"
         m_BtnPreConHuntRange.Render();
         m_BtnPreConAttacking.Render();
 
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, GlobalText[3544]); // "Sub-con"
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 120, 165, 45, I18N::Game::SubCon); // "Sub-con"
         m_BtnSubConMoreThanTwo.Render();
         m_BtnSubConMoreThanThree.Render();
         m_BtnSubConMoreThanFour.Render();
@@ -2495,26 +2496,26 @@ bool CNewUIMuHelperExt::Render()
 
     else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG)
     {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3554], 190, 0, RT3_SORT_CENTER); // "Party"
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::Party, 190, 0, RT3_SORT_CENTER); // "Party"
         g_pRenderText->SetTextColor(TextColor);
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, GlobalText[3549]); // Buff Support
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 45, I18N::Game::BuffSupport); // Buff Support
         m_BtnPartyDuration.Render();
-        g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 97, GlobalText[3551], 124, 0, RT3_SORT_LEFT); // "Time Space of Casting Buff"
+        g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 97, I18N::Game::TimeSpaceOfCastingBuff, 124, 0, RT3_SORT_LEFT); // "Time Space of Casting Buff"
         RenderImage(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 125, m_Pos.y + 93, 20, 15);
         m_BuffTimeInput.Render();
         g_pRenderText->RenderText(m_Pos.x + 146, m_Pos.y + 97, L"s", 124, 0, RT3_SORT_LEFT); // "s"
     }
     else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG_ELF)
     {
-        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, GlobalText[3554], 190, 0, RT3_SORT_CENTER); // "Party"
+        g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 13, I18N::Game::Party, 190, 0, RT3_SORT_CENTER); // "Party"
         g_pRenderText->SetTextColor(TextColor);
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 70, GlobalText[3548]); // Heal Support
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 55, 165, 70, I18N::Game::HealSupport); // Heal Support
         m_BtnPartyHeal.Render();
-        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 100, 124.f, 16.f, m_iCurrentPartyHealThreshold, GlobalText[3550]); // "HP Status of Party Members"
+        RenderHpLevel(m_Pos.x + 32, m_Pos.y + 100, 124.f, 16.f, m_iCurrentPartyHealThreshold, I18N::Game::HPStatusOfPartyMembers); // "HP Status of Party Members"
 
-        RenderBackPane(m_Pos.x + 12, m_Pos.y + 145, 165, 45, GlobalText[3549]); // Buff Support
+        RenderBackPane(m_Pos.x + 12, m_Pos.y + 145, 165, 45, I18N::Game::BuffSupport); // Buff Support
         m_BtnPartyDuration.Render();
-        g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 187, GlobalText[3551], 124, 0, RT3_SORT_LEFT); // "Time Space of Casting Buff"
+        g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 187, I18N::Game::TimeSpaceOfCastingBuff, 124, 0, RT3_SORT_LEFT); // "Time Space of Casting Buff"
         RenderImage(IMAGE_MACROUI_HELPER_INPUTNUMBER, m_Pos.x + 125, m_Pos.y + 183, 20, 15);
         m_BuffTimeInput.Render();
         g_pRenderText->RenderText(m_Pos.x + 146, m_Pos.y + 187, L"s", 124, 0, RT3_SORT_LEFT); // "s"

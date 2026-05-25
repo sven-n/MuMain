@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "Engine/Object/ZzzCharacter.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -87,11 +88,11 @@ void CMsgBoxIGSSendGift::Initialize(int iPackageSeq, int iDisplaySeq, int iPrice
     m_wItemCode = wItemCode;
     m_iCashType = iCashType;
 
-    mu_swprintf(m_szName, GlobalText[3037], pszName);
-    mu_swprintf(m_szPrice, GlobalText[3038], pszPrice);
-    mu_swprintf(m_szPeriod, GlobalText[3039], pszPeriod);
+    mu_swprintf(m_szName, I18N::Game::ItemS, pszName);
+    mu_swprintf(m_szPrice, I18N::Game::PriceS, pszPrice);
+    mu_swprintf(m_szPeriod, I18N::Game::DurationS, pszPeriod);
 
-    m_iNumNoticeLine = ::DivideStringByPixel(&m_szNotice[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, GlobalText[2920], IGS_TEXT_NOTICE_WIDTH);
+    m_iNumNoticeLine = ::DivideStringByPixel(&m_szNotice[0][0], NUM_LINE_CMB, MAX_TEXT_LENGTH, I18N::Game::GiftedItemsCannotBeReturnedDeliverTheGiftS, IGS_TEXT_NOTICE_WIDTH);
 }
 
 void CMsgBoxIGSSendGift::Release()
@@ -176,13 +177,13 @@ CALLBACK_RESULT CMsgBoxIGSSendGift::OKButtonDown(class CNewUIMessageBoxBase* pOw
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[3028], GlobalText[3031]);
+        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::GiftRecipientSIDIsMissing);
     }
     else if (wcscmp(pOwnMsgBox->m_szID, Hero->ID) == 0)
     {
         CMsgBoxIGSCommon* pMsgBox = NULL;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(GlobalText[3028], GlobalText[3032]);
+        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::YouCannotSendAGiftToYourself);
     }
     else
     {
@@ -207,11 +208,11 @@ void CMsgBoxIGSSendGift::SetButtonInfo()
 {
     m_BtnOk.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_OK_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnOk.MoveTextPos(0, -1);
-    m_BtnOk.SetText(GlobalText[228]);
+    m_BtnOk.SetText(I18N::Game::OK);
 
     m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnCancel.MoveTextPos(0, -1);
-    m_BtnCancel.SetText(GlobalText[229]);
+    m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
 void CMsgBoxIGSSendGift::RenderFrame()
@@ -227,12 +228,12 @@ void CMsgBoxIGSSendGift::RenderTexts()
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetFont(g_hFontBold);
 
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, GlobalText[2916], IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_POS_Y, I18N::Game::SendGiftItems, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
 
-    g_pRenderText->RenderText(GetPos().x + IGS_TEXT_ID_TITLE_POS_X, GetPos().y + IGS_TEXT_ID_TITLE_POS_Y, GlobalText[2918], IGS_TEXT_ID_TITLE_WIDTH, 0, RT3_SORT_LEFT);
+    g_pRenderText->RenderText(GetPos().x + IGS_TEXT_ID_TITLE_POS_X, GetPos().y + IGS_TEXT_ID_TITLE_POS_Y, I18N::Game::RecipientSCharacterName, IGS_TEXT_ID_TITLE_WIDTH, 0, RT3_SORT_LEFT);
 
     g_pRenderText->SetTextColor(0, 0, 0, 255);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_MESSAGE_TITLE_POS_Y, GlobalText[2919], IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_MESSAGE_TITLE_POS_Y, I18N::Game::MessageToTheRecipient, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);

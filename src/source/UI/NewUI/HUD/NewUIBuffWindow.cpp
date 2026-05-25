@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/HUD/NewUIBuffWindow.h"
 #include "Render/Models/ZzzBMD.h"
@@ -310,7 +311,7 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
 
     if (bufftime.size() != 0)
     {
-        mu_swprintf(TextList[TextNum], GlobalText[2533], bufftime.c_str());
+        mu_swprintf(TextList[TextNum], I18N::Game::DurationPeriodS, bufftime.c_str());
         TextListColor[TextNum] = TEXT_COLOR_PURPLE;
         TextBold[TextNum] = false;
         TextNum += 1;

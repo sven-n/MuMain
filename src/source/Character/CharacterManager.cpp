@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "CharacterManager.h"
 #include "GameLogic/Items/CSItemOption.h"
-#include "Data/Translation/GlobalText.h"
+#include "I18N/All.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 
@@ -234,7 +234,7 @@ const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byChara
 {
     const auto it = std::find_if(kClassTextEntries.begin(), kClassTextEntries.end(),
         [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
-    return (it != kClassTextEntries.end()) ? GlobalText[it->textIndex] : GlobalText[kDefaultClassTextIndex];
+    return (it != kClassTextEntries.end()) ? I18N::Game::Lookup(it->textIndex) : I18N::Game::Lookup(kDefaultClassTextIndex);
 }
 
 CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)

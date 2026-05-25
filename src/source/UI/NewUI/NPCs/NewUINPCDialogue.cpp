@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/NewUI/NPCs/NewUINPCDialogue.h"
+#include "I18N/All.h"
 
 #include <crtdbg.h>
 #include "Audio/DSPlaySound.h"
@@ -50,7 +51,7 @@ bool CNewUINPCDialogue::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_btnClose.ChangeButtonImgState(true, IMAGE_ND_BTN_CLOSE);
     m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_btnClose.ChangeToolTipText(GlobalText[1002], true);
+    m_btnClose.ChangeToolTipText(&I18N::Game::Close388, true);
 
     m_nSelTextCount = 0;
     m_bQuestListMode = false;
@@ -326,7 +327,7 @@ void CNewUINPCDialogue::RenderContributePoint()
         RenderImage(IMAGE_ND_CONTRIBUTE_BG, m_Pos.x + 11, m_Pos.y + 27, 168.f, 18.f);
 
         wchar_t szContribute[32];
-        ::wprintf(szContribute, GlobalText[2986], m_dwContributePoint);
+        ::wprintf(szContribute, I18N::Game::GainContributionU, m_dwContributePoint);
         g_pRenderText->SetTextColor(255, 230, 210, 255);
         g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 30, szContribute, ND_WIDTH, 0, RT3_SORT_CENTER);
     }

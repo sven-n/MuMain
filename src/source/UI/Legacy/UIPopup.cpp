@@ -8,6 +8,7 @@
 #include "UIManager.h"
 #include "UIPopup.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "I18N/All.h"
 
 extern CUITextInputBox* g_pSingleTextInputBox;
 extern int				g_iChatInputType;
@@ -17,16 +18,16 @@ extern int				g_iChatInputType;
 CUIPopup::CUIPopup()
 {
     int nButtonID = 0;
-    m_OkButton.Init(nButtonID++, GlobalText[228]);
+    m_OkButton.Init(nButtonID++, I18N::Game::OK);
     m_OkButton.SetParentUIID(0);
     m_OkButton.SetSize(50, 18);
-    m_CancelButton.Init(nButtonID++, GlobalText[229]);
+    m_CancelButton.Init(nButtonID++, I18N::Game::Cancel);
     m_CancelButton.SetParentUIID(0);
     m_CancelButton.SetSize(50, 18);
-    m_YesButton.Init(nButtonID++, GlobalText[1037]);
+    m_YesButton.Init(nButtonID++, I18N::Game::Yes);
     m_YesButton.SetParentUIID(0);
     m_YesButton.SetSize(50, 18);
-    m_NoButton.Init(nButtonID++, GlobalText[1038]);
+    m_NoButton.Init(nButtonID++, I18N::Game::No);
     m_NoButton.SetParentUIID(0);
     m_NoButton.SetSize(50, 18);
 

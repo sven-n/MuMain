@@ -5,6 +5,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/NewUICommon.h"
 #include "UI/NewUI/NPCs/NewUIEmpireGuardianNPC.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Legacy/UIControls.h"
@@ -38,8 +39,8 @@ bool CNewUIEmpireGuardianNPC::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng
 
     LoadImages();
 
-    InitButton(&m_btPositive, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 190, GlobalText[1593]);
-    InitButton(&m_btNegative, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 380, GlobalText[1002]);
+    InitButton(&m_btPositive, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 190, I18N::Game::Enter);
+    InitButton(&m_btNegative, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 380, I18N::Game::Close388);
 
     Show(false);
 
@@ -122,16 +123,16 @@ bool CNewUIEmpireGuardianNPC::Render()
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->RenderText(m_Pos.x, Position.y + 50, GlobalText[2795], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, Position.y + 50, I18N::Game::WithoutGaionSOrder, 190, 0, RT3_SORT_CENTER);
     wchar_t szTextOut[2][300];
-    CutStr(GlobalText[2796], szTextOut[0], 150, 2, 300);
+    CutStr(I18N::Game::YouCannotEnterTheFortressOfEmpireGuardians, szTextOut[0], 150, 2, 300);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 70, szTextOut[0], 190, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 90, szTextOut[1], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_Pos.x, Position.y + 110, GlobalText[2797], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, Position.y + 110, I18N::Game::WillYouShowMeTheOrder, 190, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 240, 0, 255);
-    g_pRenderText->RenderText(Position.x - 55, Position.y + 170, GlobalText[2783], 110, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(Position.x - 55, Position.y + 170, I18N::Game::GaionSOrder, 110, 0, RT3_SORT_CENTER);
 
     m_btPositive.Render();
 
@@ -139,14 +140,14 @@ bool CNewUIEmpireGuardianNPC::Render()
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 0, 0, 255);
-    g_pRenderText->RenderText(Position.x - 55, Position.y + 260, GlobalText[2223], 110, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(Position.x - 55, Position.y + 260, I18N::Game::Warning2223, 110, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
-    g_pRenderText->RenderText(Position.x - 100, Position.y + 280, GlobalText[2835], 200, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(Position.x - 100, Position.y + 300, GlobalText[2836], 200, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(Position.x - 100, Position.y + 320, GlobalText[2837], 200, 0, RT3_SORT_CENTER);
-    CutStr(GlobalText[2838], szTextOut[0], 155, 2, 300);
+    g_pRenderText->RenderText(Position.x - 100, Position.y + 280, I18N::Game::TheRound7MapSundayCanOnly, 200, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(Position.x - 100, Position.y + 300, I18N::Game::BeAccessedIfYouHaveA, 200, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(Position.x - 100, Position.y + 320, I18N::Game::CompleteSecromicon2837, 200, 0, RT3_SORT_CENTER);
+    CutStr(I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, szTextOut[0], 155, 2, 300);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 340, szTextOut[0], 200, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(m_Pos.x, Position.y + 360, szTextOut[1], 200, 0, RT3_SORT_CENTER);
 
@@ -230,7 +231,7 @@ void CNewUIEmpireGuardianNPC::RenderFrame()
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->RenderText(m_Pos.x + (NPC_WINDOW_WIDTH / 2) - 55, m_Pos.y + 13, GlobalText[2794], 110, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + (NPC_WINDOW_WIDTH / 2) - 55, m_Pos.y + 13, I18N::Game::JerintTheAssistant, 110, 0, RT3_SORT_CENTER);
 }
 
 void CNewUIEmpireGuardianNPC::Render3D()

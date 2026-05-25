@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
@@ -62,7 +63,7 @@ void CMsgBoxIGSDeleteItemConfirm::Initialize(int iStorageSeq, int iStorageItemSe
     m_iStorageItemSeq = iStorageItemSeq;
     m_szItemType = szItemType;
 
-    m_iDesciptionLine = ::DivideStringByPixel(&m_szDescription[0][0], UIMAX_TEXT_LINE, MAX_TEXT_LENGTH, GlobalText[2931], IGS_TEXT_DIVIDE_WIDTH, false, '#');
+    m_iDesciptionLine = ::DivideStringByPixel(&m_szDescription[0][0], UIMAX_TEXT_LINE, MAX_TEXT_LENGTH, I18N::Game::ThisWillDeleteTheSelectedItem, IGS_TEXT_DIVIDE_WIDTH, false, '#');
 }
 
 //--------------------------------------------
@@ -164,12 +165,12 @@ void CMsgBoxIGSDeleteItemConfirm::SetButtonInfo()
     // Ȯ�� ��ư
     m_BtnDelete.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_DEL_POS_X, GetPos().y + IGS_BTN_POS_Y,
         IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT);
-    m_BtnDelete.SetText(GlobalText[2932]);
+    m_BtnDelete.SetText(I18N::Game::Delete);
 
     // ��� ��ư
     m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y,
         IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT);
-    m_BtnCancel.SetText(GlobalText[229]);
+    m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
 //--------------------------------------------
@@ -202,7 +203,7 @@ void CMsgBoxIGSDeleteItemConfirm::RenderTexts()
     g_pRenderText->SetFont(g_hFontBold);
 
     // Title - "������ ����"
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_Y, GlobalText[2930], IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(GetPos().x, GetPos().y + IGS_TEXT_TITLE_Y, I18N::Game::DeleteItem, IMAGE_IGS_FRAME_WIDTH, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFont);
 

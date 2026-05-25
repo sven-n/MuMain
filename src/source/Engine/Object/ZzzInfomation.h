@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Data/Translation/GlobalText.h"
 
 void SaveTextFile(wchar_t* FileName);
 
@@ -19,10 +18,6 @@ extern GATE_ATTRIBUTE* GateAttribute;
 
 void OpenGateScript(const wchar_t* FileName);
 void OpenMonsterSkillScript(const wchar_t* FileName);
-
-extern DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
-
-void OpenDialogFile(wchar_t* FileName);
 
 extern ITEM_ATTRIBUTE* ItemAttribute;
 

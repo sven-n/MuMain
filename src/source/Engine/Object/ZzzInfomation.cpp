@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "I18N/All.h"
 
 #include <codecvt>
 #include <sstream>
@@ -39,13 +40,6 @@ static  int     g_iWorldStateTime = 0;
 static  DWORD   g_dwWorldStateBack = 0;
 #endif// STATE_LIMIT_TIME
 
-CGlobalTextW GlobalText;
-
-void LogMissingGlobalText(int key)
-{
-    g_ErrorReport.Write(L"GlobalText: missing key %d\r\n", key);
-}
-
 void SaveTextFile(wchar_t* FileName)
 {
     FILE* fp = _wfopen(FileName, L"wb");
@@ -54,7 +48,7 @@ void SaveTextFile(wchar_t* FileName)
     BYTE* Buffer = new BYTE[Size];
     for (int i = 0; i < MAX_TEXTS; i++)
     {
-        memcpy(Buffer, GlobalText[i], Size);
+        memcpy(Buffer, I18N::Game::Lookup(i), Size);
         BuxConvert(Buffer, Size);
         fwrite(Buffer, Size, 1, fp);
     }
@@ -299,31 +293,6 @@ BOOL IsCorrectSkillType_CommonAttack(INT iSkillSeq)
 ///////////////////////////////////////////////////////////////////////////////
 
 int g_iCurrentDialog = -1;
-DIALOG_SCRIPT g_DialogScript[MAX_DIALOG];
-
-void OpenDialogFile(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp == NULL)
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-        return;
-    }
-    int Size = sizeof(DIALOG_SCRIPT);
-    BYTE* Buffer = new BYTE[Size];
-    for (int i = 0; i < MAX_DIALOG; i++)
-    {
-        fread(Buffer, Size, 1, fp);
-        BuxConvert(Buffer, Size);
-        memcpy(&g_DialogScript[i], Buffer, Size);
-    }
-    delete[] Buffer;
-    fclose(fp);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // item

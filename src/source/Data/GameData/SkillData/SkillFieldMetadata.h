@@ -3,10 +3,10 @@
 #ifdef _EDITOR
 
 #include <windows.h>
-#include <string>
 #include "SkillStructs.h"
 #include "SkillFieldDefs.h"
 #include "Data/GameData/Common/FieldMetadataHelper.h"
+#include "I18N/All.h"
 
 // ============================================================================
 // SKILL-SPECIFIC METADATA
@@ -19,19 +19,18 @@ using ESkillFieldType = EFieldType;
 using SkillFieldDescriptor = FieldDescriptor<SKILL_ATTRIBUTE>;
 
 // Macros for descriptor generation
-#define MAKE_SKILL_FIELD_DESCRIPTOR(name, type, arraySize, width) \
-    { #name, EFieldType::type, offsetof(SKILL_ATTRIBUTE, name), width },
+#define MAKE_SKILL_FIELD_DESCRIPTOR(name, type, arraySize, width, i18nName) \
+    { #name, &I18N::Metadata::i18nName, EFieldType::type, offsetof(SKILL_ATTRIBUTE, name), width },
 
-#define MAKE_SKILL_ARRAY_DESCRIPTOR(nameWithIndex, baseName, index, type, width) \
-    { #nameWithIndex, EFieldType::type, offsetof(SKILL_ATTRIBUTE, baseName[index]), width },
+#define MAKE_SKILL_ARRAY_DESCRIPTOR(nameWithIndex, baseName, index, type, width, i18nName) \
+    { #nameWithIndex, &I18N::Metadata::i18nName, EFieldType::type, offsetof(SKILL_ATTRIBUTE, baseName[index]), width },
 
 // Static descriptor array - automatically generated from X-macros
 namespace SkillFieldMetadataInternal
 {
     static const SkillFieldDescriptor s_descriptors[] = {
-        // Name field is special (UTF-16 string)
-        { "Name", EFieldType::WCharArray, offsetof(SKILL_ATTRIBUTE, Name), 150.0f },
-        // All other fields from X-macros
+        // Name field is special (UTF-16 string) and stands outside the X-macros.
+        { "Name", &I18N::Metadata::Name, EFieldType::WCharArray, offsetof(SKILL_ATTRIBUTE, Name), 150.0f },
         SKILL_FIELDS_SIMPLE(MAKE_SKILL_FIELD_DESCRIPTOR)
         SKILL_FIELDS_ARRAYS(MAKE_SKILL_ARRAY_DESCRIPTOR)
         SKILL_FIELDS_AFTER_ARRAYS(MAKE_SKILL_FIELD_DESCRIPTOR)
@@ -49,10 +48,10 @@ inline constexpr int GetSkillFieldCount()
     return sizeof(SkillFieldMetadataInternal::s_descriptors) / sizeof(SkillFieldDescriptor);
 }
 
-// Get display name for a skill field (with translation support)
-inline const char* GetSkillFieldDisplayName(const char* fieldName)
+// Get display name for a skill field descriptor (follows active locale).
+inline const char* GetSkillFieldDisplayName(const SkillFieldDescriptor& desc)
 {
-    return GetFieldDisplayName(fieldName);
+    return GetFieldDisplayName(desc);
 }
 
 // Helper to render a skill field by descriptor (uses generic helper)

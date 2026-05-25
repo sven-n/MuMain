@@ -6,6 +6,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "w_BuffTimeControl.h"
+#include "I18N/All.h"
 
 BuffTimeControlPtr BuffTimeControl::Make()
 {
@@ -180,22 +181,22 @@ void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isS
 
         if (day != 0)
         {
-            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls %d %ls", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls %d %ls", day, I18N::Game::Day, oClock, I18N::Game::Hour, minutes, I18N::Game::Minute, second, I18N::Game::Second);
             timeText = buffer;
         }
         else if (day == 0 && oClock != 0)
         {
-            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls", oClock, GlobalText[2299], minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls", oClock, I18N::Game::Hour, minutes, I18N::Game::Minute, second, I18N::Game::Second);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            mu_swprintf(buffer, L"%d %ls %d %ls", minutes, GlobalText[2300], second, GlobalText[2301]);
+            mu_swprintf(buffer, L"%d %ls %d %ls", minutes, I18N::Game::Minute, second, I18N::Game::Second);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes == 0)
         {
-            mu_swprintf(buffer, L"%ls", GlobalText[2308]);
+            mu_swprintf(buffer, L"%ls", I18N::Game::LessThan1Minutes);
             timeText = buffer;
         }
     }
@@ -207,17 +208,17 @@ void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isS
 
         if (day != 0)
         {
-            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls", day, GlobalText[2298], oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls", day, I18N::Game::Day, oClock, I18N::Game::Hour, minutes, I18N::Game::Minute);
             timeText = buffer;
         }
         else if (day == 0 && oClock != 0)
         {
-            mu_swprintf(buffer, L"%d %ls %d %ls", oClock, GlobalText[2299], minutes, GlobalText[2300]);
+            mu_swprintf(buffer, L"%d %ls %d %ls", oClock, I18N::Game::Hour, minutes, I18N::Game::Minute);
             timeText = buffer;
         }
         else if (day == 0 && oClock == 0 && minutes != 0)
         {
-            mu_swprintf(buffer, L"%d %ls", minutes, GlobalText[2300]);
+            mu_swprintf(buffer, L"%d %ls", minutes, I18N::Game::Minute);
             timeText = buffer;
         }
     }

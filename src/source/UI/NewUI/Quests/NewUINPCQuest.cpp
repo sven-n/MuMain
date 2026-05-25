@@ -6,6 +6,8 @@
 #include "UI/NewUI/Quests/NewUINPCQuest.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Quests/CSQuest.h"
+#include "GameLogic/Quests/DialogStructure.h"
+#include "I18N/All.h"
 
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
@@ -48,13 +50,13 @@ bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
 
     LoadImages();
 
-    m_btnComplete.ChangeText(GlobalText[699]);
+    m_btnComplete.ChangeText(&I18N::Game::ProceedWithQuest);
     m_btnComplete.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_COMPLETE, true);
     m_btnComplete.ChangeButtonInfo(x + 41, y + 355, 108, 29);
 
     m_btnClose.ChangeButtonImgState(true, IMAGE_NPCQUEST_BTN_CLOSE);
     m_btnClose.ChangeButtonInfo(x + 13, y + 392, 36, 29);
-    m_btnClose.ChangeToolTipText(GlobalText[1002], true);
+    m_btnClose.ChangeToolTipText(&I18N::Game::Close388, true);
 
     Show(false);
 
@@ -124,8 +126,10 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
 
             if (iButtonPush >= 0)
             {
-                int nAnswer
-                    = g_DialogScript[g_iCurrentDialogScript].m_iReturnForAnswer[iButtonPush];
+                const auto& entry = GameLogic::Quests::Dialog::GetEntry(g_iCurrentDialogScript);
+                if (iButtonPush >= entry.numAnswer) return false;
+
+                int nAnswer = entry.answers[iButtonPush].returnCode;
 
                 if (1 == nAnswer)
                     bErrorMessage = g_csQuest.ProcessNextProgress();
@@ -136,8 +140,7 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
 
                 ::PlayBuffer(SOUND_INTERFACE01);
 
-                int nNextDialogIndex
-                    = g_DialogScript[g_iCurrentDialogScript].m_iLinkForAnswer[iButtonPush];
+                int nNextDialogIndex = entry.answers[iButtonPush].link;
                 if (0 < nNextDialogIndex && !bErrorMessage)
                     g_csQuest.ShowDialogText(nNextDialogIndex);
 
@@ -209,7 +212,7 @@ bool CNewUINPCQuest::Render()
         g_pRenderText->SetBgColor(0);
 
         g_pRenderText->SetTextColor(255, 220, 150, 255);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 368, GlobalText[198]);
+        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 368, I18N::Game::Cost);
 
         wchar_t szTemp[128];
         g_pRenderText->SetTextColor(::getGoldColor(g_csQuest.GetNeedZen()));

@@ -6,6 +6,7 @@
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -106,8 +107,8 @@ namespace
         g_pRenderText->SetFont(g_hFont);
         g_pRenderText->SetTextColor(230, 230, 230, 255);
         g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->RenderText(iPos_x + 50, iPos_y + 230, GlobalText[183]);
-        g_pRenderText->RenderText(iPos_x + 50, iPos_y + 245, GlobalText[184]);
+        g_pRenderText->RenderText(iPos_x + 50, iPos_y + 230, I18N::Game::AfterSelectingAColorWith);
+        g_pRenderText->RenderText(iPos_x + 50, iPos_y + 245, I18N::Game::TheMousePleaseDraw);
     }
 
     void RenderGoldRect(float x, float y, float sx, float sy, int fill = 0)
@@ -192,7 +193,7 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     // Exit Button
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GUILDMAKE_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 
     Show(false);
 
@@ -295,7 +296,7 @@ void CNewUIGuildMakeWindow::ChangeEditBox(const UISTATES type)
 bool CNewUIGuildMakeWindow::UpdateGMInfo()
 {
     m_Button[GUILDMAKEBUTTON_INFO_MAKE].SetPos(m_Pos.x + ((190 / 2) - (108 / 2)), m_Pos.y + 100);
-    m_Button[GUILDMAKEBUTTON_INFO_MAKE].ChangeText(GlobalText[1303]);
+    m_Button[GUILDMAKEBUTTON_INFO_MAKE].ChangeText(&I18N::Game::CreateGuild);
 
     if (m_Button[GUILDMAKEBUTTON_INFO_MAKE].UpdateMouseEvent())
     {
@@ -322,10 +323,10 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
     //button
     m_Button[GUILDMAKEBUTTON_MARK_LNEXT].SetPos(m_Pos.x + 15, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_MARK_LNEXT].ChangeText(GlobalText[1306]);
+    m_Button[GUILDMAKEBUTTON_MARK_LNEXT].ChangeText(&I18N::Game::Back);
 
     m_Button[GUILDMAKEBUTTON_MARK_RNEXT].SetPos(m_Pos.x + 110, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_MARK_RNEXT].ChangeText(GlobalText[1305]);
+    m_Button[GUILDMAKEBUTTON_MARK_RNEXT].ChangeText(&I18N::Game::Next);
 
     if (m_Button[GUILDMAKEBUTTON_MARK_LNEXT].UpdateMouseEvent())
     {
@@ -352,15 +353,15 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
         if (CheckSpecialText(tempText) == true)
         {
-            SEASON3B::CreateOkMessageBox(GlobalText[391]);
+            SEASON3B::CreateOkMessageBox(I18N::Game::CannotUseSymbols);
         }
         else if (IsGuildName(tempText) == FALSE)
         {
-            CreateOkMessageBox(GlobalText[390]);
+            CreateOkMessageBox(I18N::Game::TypeMoreThan4Letters);
         }
         else if (IsGuildMark() == FALSE)
         {
-            CreateOkMessageBox(GlobalText[426]);
+            CreateOkMessageBox(I18N::Game::PleaseDrawYourGuildEmblem);
         }
         else
         {
@@ -378,10 +379,10 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
 {
     m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].SetPos(m_Pos.x + 15, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].ChangeText(GlobalText[1306]);
+    m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].ChangeText(&I18N::Game::Back);
 
     m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].SetPos(m_Pos.x + 110, m_Pos.y + 379);
-    m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].ChangeText(GlobalText[1305]);
+    m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].ChangeText(&I18N::Game::Next);
 
     if (m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].UpdateMouseEvent())
     {
@@ -414,7 +415,7 @@ void CNewUIGuildMakeWindow::RenderGMInfo()
     wchar_t Text[100];
 
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[181]);
+    mu_swprintf(Text, I18N::Game::DoYouWishToBeTheGuildMaster);
     RenderText(Text, m_Pos.x, m_Pos.y + 50, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
 
     m_Button[GUILDMAKEBUTTON_INFO_MAKE].Render();
@@ -427,7 +428,7 @@ void CNewUIGuildMakeWindow::RenderGMMark()
     //edit box
     wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[182]);
+    mu_swprintf(Text, I18N::Game::NAME);
     RenderText(Text, m_Pos.x + 10, m_Pos.y + 66, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_LEFT);
 
     RenderImage(IMAGE_GUILDMAKE_EDITBOX, m_Pos.x + 45, m_Pos.y + 60, 108.f, 23.f);
@@ -449,7 +450,7 @@ void CNewUIGuildMakeWindow::RenderGMResultInfo()
 
     wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, L"%ls : %ls", GlobalText[182], GuildMark[MARK_EDIT].GuildName);
+    mu_swprintf(Text, L"%ls : %ls", I18N::Game::NAME, GuildMark[MARK_EDIT].GuildName);
     RenderText(Text, m_Pos.x, m_Pos.y + 140, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 
     m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].Render();
@@ -466,7 +467,7 @@ void CNewUIGuildMakeWindow::RenderFrame()
 
     wchar_t Text[100];
     memset(&Text, 0, sizeof(char) * 100);
-    mu_swprintf(Text, GlobalText[180]);
+    mu_swprintf(Text, I18N::Game::Guild);
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 

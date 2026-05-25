@@ -4,7 +4,7 @@
 
 #include "DevEditorUI.h"
 #include "imgui.h"
-#include "Data/Translation/i18n.h"
+#include "I18N/All.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
@@ -87,7 +87,7 @@ void CDevEditorUI::Render(bool* p_open)
         return;
 
     ImGui::SetNextWindowSize(ImVec2(450, 500), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin(EDITOR_TEXT("label_dev_editor_title"), p_open))
+    if (!ImGui::Begin(I18N::Editor::DevEditor, p_open))
     {
         ImGui::End();
         return;
@@ -96,13 +96,13 @@ void CDevEditorUI::Render(bool* p_open)
     // Tab bar
     if (ImGui::BeginTabBar("DevEditorTabs"))
     {
-        if (ImGui::BeginTabItem(EDITOR_TEXT("dev_tab_scenes")))
+        if (ImGui::BeginTabItem(I18N::Editor::Scenes))
         {
             RenderScenesTab();
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem(EDITOR_TEXT("dev_tab_graphics")))
+        if (ImGui::BeginTabItem(I18N::Editor::Graphics))
         {
             RenderGraphicsTab();
             ImGui::EndTabItem();
@@ -135,20 +135,20 @@ void CDevEditorUI::RenderScenesTab()
     RenderCameraSummaryLine(cameraMode);
     ImGui::Separator();
 
-    if (SceneFlag == LOG_IN_SCENE && ImGui::CollapsingHeader(EDITOR_TEXT("dev_section_login_scene")))
+    if (SceneFlag == LOG_IN_SCENE && ImGui::CollapsingHeader(I18N::Editor::LoginScene))
         RenderLoginSceneSection();
 
-    if (SceneFlag == CHARACTER_SCENE && ImGui::CollapsingHeader(EDITOR_TEXT("dev_section_character_scene")))
+    if (SceneFlag == CHARACTER_SCENE && ImGui::CollapsingHeader(I18N::Editor::CharacterScene))
     {
         ImGui::Indent();
-        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", EDITOR_TEXT("dev_msg_nothing_here"));
+        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", I18N::Editor::NothingHereYet);
         ImGui::Unindent();
     }
 
-    if (SceneFlag == MAIN_SCENE && ImGui::CollapsingHeader(EDITOR_TEXT("dev_section_game_scene")))
+    if (SceneFlag == MAIN_SCENE && ImGui::CollapsingHeader(I18N::Editor::GameScene))
         RenderGameSceneSection(cameraMode, currentCamera);
 
-    if (ImGui::CollapsingHeader(EDITOR_TEXT("dev_section_debug")))
+    if (ImGui::CollapsingHeader(I18N::Editor::Debug))
         RenderScenesDebugSection();
 }
 
@@ -159,14 +159,14 @@ void CDevEditorUI::RenderCameraModeControls()
 
     if (!isFreeFly)
     {
-        if (ImGui::Button(EDITOR_TEXT("dev_btn_switch_to_freefly"), ImVec2(250, 0)))
+        if (ImGui::Button(I18N::Editor::SwitchToFreeFly, ImVec2(250, 0)))
             camMgr.SetCameraMode(CameraMode::FreeFly);
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s", camMgr.GetActiveCamera()->GetName());
         return;
     }
 
-    if (ImGui::Button(EDITOR_TEXT("dev_btn_switch_to_game_camera"), ImVec2(250, 0)))
+    if (ImGui::Button(I18N::Editor::SwitchToGameCamera, ImVec2(250, 0)))
     {
         ICamera* spectated = camMgr.GetSpectatedCamera();
         CameraMode target = CameraMode::Default;
@@ -175,23 +175,23 @@ void CDevEditorUI::RenderCameraModeControls()
         camMgr.SetCameraMode(target);
     }
     ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "%s", EDITOR_TEXT("dev_label_freefly"));
+    ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "%s", I18N::Editor::FreeFly);
 
     if (ICamera* spectated = camMgr.GetSpectatedCamera())
     {
-        ImGui::Text("%s: %s", EDITOR_TEXT("dev_label_spectating"), spectated->GetName());
+        ImGui::Text("%s: %s", I18N::Editor::Spectating, spectated->GetName());
         ImGui::SameLine();
         vec3_t snapPos, snapAngle;
         if (camMgr.GetSpectatedCameraState(snapPos, snapAngle))
         {
-            if (ImGui::Button(EDITOR_TEXT("dev_btn_snap_to_spectated")))
+            if (ImGui::Button(I18N::Editor::SnapToSpectated))
             {
                 auto* freeFly = static_cast<FreeFlyCamera*>(camMgr.GetActiveCamera());
                 freeFly->SnapToPosition(snapPos, snapAngle[2], snapAngle[0]);
             }
         }
     }
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", EDITOR_TEXT("dev_label_freefly_help"));
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", I18N::Editor::ArrowsPgUpPgDnMoveRMBLookShiftFast);
 }
 
 void CDevEditorUI::RenderCameraSummaryLine(int cameraMode)
@@ -199,20 +199,20 @@ void CDevEditorUI::RenderCameraSummaryLine(int cameraMode)
     const char* modeName;
     switch (cameraMode)
     {
-        case CAMERA_MODE_DEFAULT: modeName = EDITOR_TEXT("dev_label_camera_default"); break;
-        case CAMERA_MODE_ORBITAL: modeName = EDITOR_TEXT("dev_label_camera_orbital"); break;
-        case CAMERA_MODE_FREEFLY: modeName = EDITOR_TEXT("dev_label_freefly");        break;
-        default:                  modeName = EDITOR_TEXT("dev_label_camera_unknown"); break;
+        case CAMERA_MODE_DEFAULT: modeName = I18N::Editor::Default; break;
+        case CAMERA_MODE_ORBITAL: modeName = I18N::Editor::Orbital; break;
+        case CAMERA_MODE_FREEFLY: modeName = I18N::Editor::FreeFly;        break;
+        default:                  modeName = I18N::Editor::Unknown; break;
     }
     ImGui::Text("%s | %s: %.0f, %.0f, %.0f | %s: (%d, %d) | %s: %.1f %s: %.1f",
                 modeName,
-                EDITOR_TEXT("dev_label_pos"),
+                I18N::Editor::Pos,
                 g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2],
-                EDITOR_TEXT("dev_label_tile"),
+                I18N::Editor::Tile,
                 (int)(g_Camera.Position[0] / WORLD_TO_TILE_DIVISOR),
                 (int)(g_Camera.Position[1] / WORLD_TO_TILE_DIVISOR),
-                EDITOR_TEXT("dev_label_pitch"), g_Camera.Angle[0],
-                EDITOR_TEXT("dev_label_yaw"),   g_Camera.Angle[2]);
+                I18N::Editor::Pitch, g_Camera.Angle[0],
+                I18N::Editor::Yaw,   g_Camera.Angle[2]);
 }
 
 void CDevEditorUI::RenderLoginSceneSection()
@@ -220,14 +220,14 @@ void CDevEditorUI::RenderLoginSceneSection()
     ImGui::Indent();
 
     ImGui::PushItemWidth(150);
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_offset_x"), &g_LoginSceneOffsetX, 50.0f, 200.0f, "%.1f");
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_offset_y"), &g_LoginSceneOffsetY, 50.0f, 200.0f, "%.1f");
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_offset_z"), &g_LoginSceneOffsetZ, 50.0f, 200.0f, "%.1f");
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_pitch"), &g_LoginSceneAnglePitch, 1.0f, 5.0f, "%.1f");
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_yaw"), &g_LoginSceneAngleYaw, 1.0f, 5.0f, "%.1f");
+    ImGui::InputFloat(I18N::Editor::OffsetX, &g_LoginSceneOffsetX, 50.0f, 200.0f, "%.1f");
+    ImGui::InputFloat(I18N::Editor::OffsetY, &g_LoginSceneOffsetY, 50.0f, 200.0f, "%.1f");
+    ImGui::InputFloat(I18N::Editor::OffsetZ, &g_LoginSceneOffsetZ, 50.0f, 200.0f, "%.1f");
+    ImGui::InputFloat(I18N::Editor::Pitch, &g_LoginSceneAnglePitch, 1.0f, 5.0f, "%.1f");
+    ImGui::InputFloat(I18N::Editor::Yaw, &g_LoginSceneAngleYaw, 1.0f, 5.0f, "%.1f");
     ImGui::PopItemWidth();
 
-    if (ImGui::Button(EDITOR_TEXT("dev_btn_reset_offsets")))
+    if (ImGui::Button(I18N::Editor::ResetOffsets))
     {
         g_LoginSceneOffsetX   = LoginSceneCameraDefaults::OFFSET_X;
         g_LoginSceneOffsetY   = LoginSceneCameraDefaults::OFFSET_Y;
@@ -245,29 +245,29 @@ void CDevEditorUI::RenderLoginSceneSection()
         BOOL isTourPaused = cameraMove->IsTourPaused();
 
         ImGui::Text("%s: %s%s",
-                    EDITOR_TEXT("dev_label_tour"),
-                    isTourMode ? EDITOR_TEXT("dev_label_active") : EDITOR_TEXT("dev_label_inactive"),
-                    (isTourMode && isTourPaused) ? EDITOR_TEXT("dev_label_paused_suffix") : "");
+                    I18N::Editor::Tour,
+                    isTourMode ? I18N::Editor::ACTIVE : I18N::Editor::INACTIVE,
+                    (isTourMode && isTourPaused) ? I18N::Editor::PAUSED : "");
 
         if (isTourMode)
         {
             if (isTourPaused)
             {
-                if (ImGui::Button(EDITOR_TEXT("dev_btn_resume"))) cameraMove->PauseTour(FALSE);
+                if (ImGui::Button(I18N::Editor::Resume)) cameraMove->PauseTour(FALSE);
             }
             else
             {
-                if (ImGui::Button(EDITOR_TEXT("dev_btn_pause"))) cameraMove->PauseTour(TRUE);
+                if (ImGui::Button(I18N::Editor::Pause)) cameraMove->PauseTour(TRUE);
             }
             ImGui::SameLine();
-            if (ImGui::Button(EDITOR_TEXT("dev_btn_restart")) && Hero)
+            if (ImGui::Button(I18N::Editor::Restart) && Hero)
             {
                 cameraMove->SetTourMode(FALSE, FALSE, 0);
                 cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
                 cameraMove->SetTourMode(TRUE, FALSE, 0);
             }
         }
-        else if (ImGui::Button(EDITOR_TEXT("dev_btn_start_tour")) && Hero)
+        else if (ImGui::Button(I18N::Editor::StartTour) && Hero)
         {
             cameraMove->PlayCameraWalk(Hero->Object.Position, 1000);
             cameraMove->SetTourMode(TRUE, FALSE, 0);
@@ -276,12 +276,12 @@ void CDevEditorUI::RenderLoginSceneSection()
 
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::Text("%s", EDITOR_TEXT("dev_label_render_distances"));
+    ImGui::Text("%s", I18N::Editor::RenderDistances);
     ImGui::PushItemWidth(200);
-    ImGui::SliderFloat(EDITOR_TEXT("dev_label_terrain_viewfar"), &m_LoginTerrainDist, LOGIN_DIST_MIN, LOGIN_DIST_MAX, "%.0f");
-    ImGui::SliderFloat(EDITOR_TEXT("dev_label_object_distance"), &m_LoginObjectDist, LOGIN_DIST_MIN, LOGIN_DIST_MAX, "%.0f");
+    ImGui::SliderFloat(I18N::Editor::TerrainViewFar, &m_LoginTerrainDist, LOGIN_DIST_MIN, LOGIN_DIST_MAX, "%.0f");
+    ImGui::SliderFloat(I18N::Editor::ObjectDistance, &m_LoginObjectDist, LOGIN_DIST_MIN, LOGIN_DIST_MAX, "%.0f");
     ImGui::PopItemWidth();
-    if (ImGui::Button(EDITOR_TEXT("dev_btn_reset_distances")))
+    if (ImGui::Button(I18N::Editor::ResetDistances))
     {
         m_LoginTerrainDist = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
         m_LoginObjectDist  = LoginSceneCameraDefaults::RENDER_OBJECT_DIST;
@@ -298,10 +298,10 @@ void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera
     {
         const CameraConfig& cfg = currentCamera->GetConfig();
         ImGui::Text("%s: %.0f  %s: %.0f  %s: %.0f  %s: %.0f",
-                    EDITOR_TEXT("dev_label_near"),    cfg.nearPlane,
-                    EDITOR_TEXT("dev_label_far"),     cfg.farPlane,
-                    EDITOR_TEXT("dev_label_viewfar"), g_Camera.ViewFar,
-                    EDITOR_TEXT("dev_label_projfar"), g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+                    I18N::Editor::Near,    cfg.nearPlane,
+                    I18N::Editor::Far,     cfg.farPlane,
+                    I18N::Editor::ViewFar, g_Camera.ViewFar,
+                    I18N::Editor::ProjFar, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
     }
 
     // Route panel by the currently-focused camera name rather than camera mode,
@@ -317,7 +317,7 @@ void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera
         RenderOrbitalCameraOverridePanel();
     else
         ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s",
-                           EDITOR_TEXT("dev_msg_switch_to_default_orbital"));
+                           I18N::Editor::SwitchToOrSpectateDefaultOrOrbitalToEditOverrides);
 
     if (focusingOrbital)
     {
@@ -326,10 +326,10 @@ void CDevEditorUI::RenderGameSceneSection(int cameraMode, ICamera* currentCamera
         float orbitalYaw = 0.0f, orbitalPitch = 0.0f;
         GetOrbitalCameraAngles(&orbitalYaw, &orbitalPitch);
         ImGui::Text("%s: %s=%.0f  %s=%.1f  %s=%.1f",
-                    EDITOR_TEXT("dev_label_camera_orbital"),
-                    EDITOR_TEXT("dev_label_zoom"),  radius,
-                    EDITOR_TEXT("dev_label_yaw"),   orbitalYaw,
-                    EDITOR_TEXT("dev_label_pitch"), orbitalPitch);
+                    I18N::Editor::Orbital,
+                    I18N::Editor::Zoom,  radius,
+                    I18N::Editor::Yaw,   orbitalYaw,
+                    I18N::Editor::Pitch, orbitalPitch);
     }
 
     ImGui::Unindent();
@@ -343,55 +343,55 @@ void CDevEditorUI::RenderDefaultCameraOverridePanel()
     // (formerly the ##def suffix on each label) so translated labels stay clean.
     ImGui::PushID("def");
 
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_override_default_camera"), &ov.enabled);
+    ImGui::Checkbox(I18N::Editor::OverrideDefaultCameraConfig, &ov.enabled);
     if (!ov.enabled)
     {
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%s",
-                           EDITOR_TEXT("dev_msg_default_camera_help"));
+                           I18N::Editor::HeroRelativeCameraWithHardcoded2DTrapezoidCulling);
         ImGui::PopID();
         return;
     }
 
     ImGui::PushItemWidth(200);
 
-    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", EDITOR_TEXT("dev_label_view_frustum"));
-    ImGui::SliderFloat(EDITOR_TEXT("dev_label_far_plane"), &ov.farPlane, 500.0f, 20000.0f, "%.0f");
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", I18N::Editor::ViewFrustum);
+    ImGui::SliderFloat(I18N::Editor::FarPlane, &ov.farPlane, 500.0f, 20000.0f, "%.0f");
 
     ImGui::Spacing();
-    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", EDITOR_TEXT("dev_label_camera_offset"));
-    ImGui::SliderFloat(EDITOR_TEXT("dev_label_offset_x"), &ov.offsetX, -2000.0f, 2000.0f, "%.0f");
-    ImGui::SliderFloat(EDITOR_TEXT("dev_label_offset_y"), &ov.offsetY, -2000.0f, 2000.0f, "%.0f");
-    ImGui::SliderFloat(EDITOR_TEXT("dev_label_offset_z"), &ov.offsetZ, -1000.0f, 1000.0f, "%.0f");
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", I18N::Editor::CameraOffsetWorldUnitsFromHero);
+    ImGui::SliderFloat(I18N::Editor::OffsetX, &ov.offsetX, -2000.0f, 2000.0f, "%.0f");
+    ImGui::SliderFloat(I18N::Editor::OffsetY, &ov.offsetY, -2000.0f, 2000.0f, "%.0f");
+    ImGui::SliderFloat(I18N::Editor::OffsetZ, &ov.offsetZ, -1000.0f, 1000.0f, "%.0f");
 
     ImGui::Spacing();
-    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", EDITOR_TEXT("dev_label_culling_trapezoid_width"));
-    ImGui::SliderFloat(EDITOR_TEXT("dev_label_bottom_near_mul"), &ov.widthNearMul, 0.25f, 4.0f, "%.2f");
-    ImGui::SliderFloat(EDITOR_TEXT("dev_label_top_far_mul"),     &ov.widthFarMul,  0.25f, 4.0f, "%.2f");
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", I18N::Editor::_2DCullingTrapezoidWidth);
+    ImGui::SliderFloat(I18N::Editor::BottomNearX, &ov.widthNearMul, 0.25f, 4.0f, "%.2f");
+    ImGui::SliderFloat(I18N::Editor::TopFarX,     &ov.widthFarMul,  0.25f, 4.0f, "%.2f");
 
     ImGui::Spacing();
     extern bool FogEnable;
-    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", EDITOR_TEXT("dev_label_fog"));
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_override_fog"), &ov.fogOverride);
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", I18N::Editor::Fog);
+    ImGui::Checkbox(I18N::Editor::OverrideFog, &ov.fogOverride);
     if (ov.fogOverride)
     {
         ImGui::SameLine();
-        ImGui::Checkbox(EDITOR_TEXT("dev_chk_fog_on"), &ov.fogOn);
+        ImGui::Checkbox(I18N::Editor::FogOn, &ov.fogOn);
     }
     ImGui::SameLine();
     ImGui::TextColored(FogEnable ? ImVec4(0.5f,1.0f,0.5f,1.0f) : ImVec4(1.0f,0.5f,0.5f,1.0f),
-                       "%s", FogEnable ? EDITOR_TEXT("dev_label_on") : EDITOR_TEXT("dev_label_off"));
+                       "%s", FogEnable ? I18N::Editor::ON : I18N::Editor::OFF);
     float startDisp = ov.fogStartPct * 100.0f, endDisp = ov.fogEndPct * 100.0f;
-    if (ImGui::SliderFloat(EDITOR_TEXT("dev_label_fog_start_pct"), &startDisp, 0.0f, 200.0f, "%.0f%%")) ov.fogStartPct = startDisp / 100.0f;
-    if (ImGui::SliderFloat(EDITOR_TEXT("dev_label_fog_end_pct"),   &endDisp,   0.0f, 200.0f, "%.0f%%")) ov.fogEndPct   = endDisp   / 100.0f;
+    if (ImGui::SliderFloat(I18N::Editor::FogStart, &startDisp, 0.0f, 200.0f, "%.0f%%")) ov.fogStartPct = startDisp / 100.0f;
+    if (ImGui::SliderFloat(I18N::Editor::FogEnd,   &endDisp,   0.0f, 200.0f, "%.0f%%")) ov.fogEndPct   = endDisp   / 100.0f;
     ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
                        "%s: %.0f - %.0f (%s=%.0f)",
-                       EDITOR_TEXT("dev_label_fog"),
+                       I18N::Editor::Fog,
                        g_Camera.ViewFar * ov.fogStartPct, g_Camera.ViewFar * ov.fogEndPct,
-                       EDITOR_TEXT("dev_label_viewfar"), g_Camera.ViewFar);
+                       I18N::Editor::ViewFar, g_Camera.ViewFar);
 
     ImGui::PopItemWidth();
     ImGui::Spacing();
-    if (ImGui::Button(EDITOR_TEXT("dev_btn_reset_camera_defaults")))
+    if (ImGui::Button(I18N::Editor::ResetToCameraDefaults))
     {
         const CameraConfig cfg = CameraConfig::ForMainSceneDefaultCamera();
         ov.nearPlane = cfg.nearPlane;
@@ -431,48 +431,48 @@ void CDevEditorUI::RenderOrbitalCameraOverridePanel()
     ImGui::PushID("orb");
 
     static bool s_wasEnabled = false;
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_override_orbital_camera"), &ov.enabled);
+    ImGui::Checkbox(I18N::Editor::OverrideOrbitalCameraConfig, &ov.enabled);
     if (ov.enabled && !s_wasEnabled) seedFromNaturalPyramid();
     s_wasEnabled = ov.enabled;
 
     if (!ov.enabled)
     {
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%s",
-                           EDITOR_TEXT("dev_msg_orbital_camera_help"));
+                           I18N::Editor::TunesThe2DTerrainCullHullDoesNotTouchFOVFarClip);
         ImGui::PopID();
         return;
     }
 
     ImGui::PushItemWidth(200);
 
-    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", EDITOR_TEXT("dev_label_culling_trapezoid"));
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", I18N::Editor::_2DCullingTrapezoidWorldUnits);
     // InputFloat: type any value directly, or use the +/- buttons (step = fine, Ctrl+click = coarse).
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_far_distance"),       &ov.farDist,   100.0f, 500.0f, "%.0f");
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_top_far_width"),      &ov.farWidth,  100.0f, 500.0f, "%.0f");
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_near_distance"),      &ov.nearDist,   50.0f, 250.0f, "%.0f");
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_bottom_near_width"),  &ov.nearWidth,  50.0f, 250.0f, "%.0f");
+    ImGui::InputFloat(I18N::Editor::FarDistance,       &ov.farDist,   100.0f, 500.0f, "%.0f");
+    ImGui::InputFloat(I18N::Editor::TopFarWidth,      &ov.farWidth,  100.0f, 500.0f, "%.0f");
+    ImGui::InputFloat(I18N::Editor::NearDistance,      &ov.nearDist,   50.0f, 250.0f, "%.0f");
+    ImGui::InputFloat(I18N::Editor::BottomNearWidth,  &ov.nearWidth,  50.0f, 250.0f, "%.0f");
     ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "%s",
-                       EDITOR_TEXT("dev_msg_view_aligned"));
+                       I18N::Editor::ViewAlignedFollowsCameraYawPitchTracksWhatYouLookAt);
 
     ImGui::Spacing();
     extern bool FogEnable;
-    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", EDITOR_TEXT("dev_label_fog"));
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_fog_on"), &ov.fogOn);
+    ImGui::TextColored(ImVec4(0.8f, 0.9f, 1.0f, 1.0f), "%s", I18N::Editor::Fog);
+    ImGui::Checkbox(I18N::Editor::FogOn, &ov.fogOn);
     ImGui::SameLine();
     ImGui::TextColored(FogEnable ? ImVec4(0.5f,1.0f,0.5f,1.0f) : ImVec4(1.0f,0.5f,0.5f,1.0f),
-                       "%s", FogEnable ? EDITOR_TEXT("dev_label_on") : EDITOR_TEXT("dev_label_off"));
+                       "%s", FogEnable ? I18N::Editor::ON : I18N::Editor::OFF);
     float startDisp = ov.fogStartPct * 100.0f, endDisp = ov.fogEndPct * 100.0f;
-    if (ImGui::InputFloat(EDITOR_TEXT("dev_label_fog_start_pct"), &startDisp, 5.0f, 25.0f, "%.0f%%")) ov.fogStartPct = startDisp / 100.0f;
-    if (ImGui::InputFloat(EDITOR_TEXT("dev_label_fog_end_pct"),   &endDisp,   5.0f, 25.0f, "%.0f%%")) ov.fogEndPct   = endDisp   / 100.0f;
+    if (ImGui::InputFloat(I18N::Editor::FogStart, &startDisp, 5.0f, 25.0f, "%.0f%%")) ov.fogStartPct = startDisp / 100.0f;
+    if (ImGui::InputFloat(I18N::Editor::FogEnd,   &endDisp,   5.0f, 25.0f, "%.0f%%")) ov.fogEndPct   = endDisp   / 100.0f;
     ImGui::TextColored(ImVec4(0.7f, 1.0f, 0.7f, 1.0f),
                        "%s: %.0f - %.0f (%s=%.0f)",
-                       EDITOR_TEXT("dev_label_fog"),
+                       I18N::Editor::Fog,
                        g_Camera.ViewFar * ov.fogStartPct, g_Camera.ViewFar * ov.fogEndPct,
-                       EDITOR_TEXT("dev_label_viewfar"), g_Camera.ViewFar);
+                       I18N::Editor::ViewFar, g_Camera.ViewFar);
 
     ImGui::PopItemWidth();
     ImGui::Spacing();
-    if (ImGui::Button(EDITOR_TEXT("dev_btn_reset_natural_pyramid")))
+    if (ImGui::Button(I18N::Editor::ResetToNaturalPyramid))
     {
         seedFromNaturalPyramid();
         ov.fogStartPct = 1.00f;
@@ -487,17 +487,17 @@ void CDevEditorUI::RenderScenesDebugSection()
     ImGui::Indent();
 
     // Debug Visualization — wireframes overlaid on the scene
-    ImGui::Text("%s", EDITOR_TEXT("dev_label_debug_visualization"));
+    ImGui::Text("%s", I18N::Editor::DebugVisualization);
     ImGui::Columns(2, nullptr, false);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_character_pick_boxes"), &m_ShowCharacterPickBoxes);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_item_pick_boxes"),      &m_ShowItemPickBoxes);
+    ImGui::Checkbox(I18N::Editor::CharacterPickBoxes, &m_ShowCharacterPickBoxes);
+    ImGui::Checkbox(I18N::Editor::ItemPickBoxes,      &m_ShowItemPickBoxes);
     ImGui::NextColumn();
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_item_cull_sphere"),     &m_ShowItemCullSphere);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_tile_grid"),            &m_ShowTileGrid);
+    ImGui::Checkbox(I18N::Editor::ItemCullSphere,     &m_ShowItemCullSphere);
+    ImGui::Checkbox(I18N::Editor::TileGrid,            &m_ShowTileGrid);
     ImGui::Columns(1);
 
     ImGui::PushItemWidth(150);
-    ImGui::InputFloat(EDITOR_TEXT("dev_label_item_cull_radius"), &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
+    ImGui::InputFloat(I18N::Editor::ItemCullRadius, &m_CullRadiusItem, 10.0f, 50.0f, "%.1f");
     if (m_CullRadiusItem < 0.0f) m_CullRadiusItem = 0.0f;
     ImGui::PopItemWidth();
 
@@ -508,9 +508,9 @@ void CDevEditorUI::RenderScenesDebugSection()
         vec3_t target = {0, 0, 0};
         orbitalCam->GetTargetPosition(target);
         ImGui::Text("%s: %.0f, %.0f, %.0f  %s: (%d, %d)",
-                    EDITOR_TEXT("dev_label_orbital_target"),
+                    I18N::Editor::OrbitalTarget,
                     target[0], target[1], target[2],
-                    EDITOR_TEXT("dev_label_tile"),
+                    I18N::Editor::Tile,
                     (int)(target[0] / WORLD_TO_TILE_DIVISOR),
                     (int)(target[1] / WORLD_TO_TILE_DIVISOR));
     }
@@ -518,25 +518,25 @@ void CDevEditorUI::RenderScenesDebugSection()
     // Rendering — toggles for what gets drawn each frame
     ImGui::Spacing();
     ImGui::Separator();
-    ImGui::Text("%s", EDITOR_TEXT("dev_label_rendering"));
+    ImGui::Text("%s", I18N::Editor::Rendering);
 
     ImGui::Columns(2, nullptr, false);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_terrain"), &m_RenderTerrain);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_static_objects"), &m_RenderStaticObjects);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_effects"), &m_RenderEffects);
+    ImGui::Checkbox(I18N::Editor::Terrain, &m_RenderTerrain);
+    ImGui::Checkbox(I18N::Editor::StaticObjects, &m_RenderStaticObjects);
+    ImGui::Checkbox(I18N::Editor::Effects, &m_RenderEffects);
     ImGui::NextColumn();
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_dropped_items"), &m_RenderDroppedItems);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_weather"), &m_RenderWeatherEffects);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_item_labels"), &m_RenderItemLabels);
+    ImGui::Checkbox(I18N::Editor::DroppedItems, &m_RenderDroppedItems);
+    ImGui::Checkbox(I18N::Editor::Weather, &m_RenderWeatherEffects);
+    ImGui::Checkbox(I18N::Editor::ItemLabels, &m_RenderItemLabels);
     ImGui::Columns(1);
 
-    if (ImGui::Button(EDITOR_TEXT("dev_btn_all_on")))
+    if (ImGui::Button(I18N::Editor::AllON))
     {
         m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = true;
         m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = true;
     }
     ImGui::SameLine();
-    if (ImGui::Button(EDITOR_TEXT("dev_btn_all_off")))
+    if (ImGui::Button(I18N::Editor::AllOFF))
     {
         m_RenderTerrain = m_RenderStaticObjects = m_RenderEffects = false;
         m_RenderDroppedItems = m_RenderWeatherEffects = m_RenderItemLabels = false;
@@ -545,24 +545,24 @@ void CDevEditorUI::RenderScenesDebugSection()
     ImGui::Spacing();
     ImGui::Separator();
 
-    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "%s", EDITOR_TEXT("dev_label_todo_not_working"));
+    ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.5f, 1.0f), "%s", I18N::Editor::TODONotWorking);
     ImGui::BeginDisabled();
     ImGui::Columns(2, nullptr, false);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_shaders"), &m_RenderShaders);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_skill_effects"), &m_RenderSkillEffects);
+    ImGui::Checkbox(I18N::Editor::Shaders, &m_RenderShaders);
+    ImGui::Checkbox(I18N::Editor::SkillEffects, &m_RenderSkillEffects);
     ImGui::NextColumn();
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_equipped_items"), &m_RenderEquippedItems);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_ui"), &m_RenderUI);
+    ImGui::Checkbox(I18N::Editor::EquippedItems, &m_RenderEquippedItems);
+    ImGui::Checkbox(I18N::Editor::UI, &m_RenderUI);
     ImGui::Columns(1);
 
     ImGui::Spacing();
-    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", EDITOR_TEXT("dev_label_todo_not_implemented"));
+    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "%s", I18N::Editor::TODONotImplemented);
     ImGui::Columns(3, nullptr, false);
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_hero"), &m_RenderHero);
+    ImGui::Checkbox(I18N::Editor::Hero, &m_RenderHero);
     ImGui::NextColumn();
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_npcs"), &m_RenderNPCs);
+    ImGui::Checkbox(I18N::Editor::NPCs, &m_RenderNPCs);
     ImGui::NextColumn();
-    ImGui::Checkbox(EDITOR_TEXT("dev_chk_monsters"), &m_RenderMonsters);
+    ImGui::Checkbox(I18N::Editor::Monsters, &m_RenderMonsters);
     ImGui::Columns(1);
     ImGui::EndDisabled();
 
@@ -572,7 +572,7 @@ void CDevEditorUI::RenderScenesDebugSection()
 // Shared helper: applies a new window size. Used by preset buttons, custom-size apply,
 void CDevEditorUI::RenderGraphicsTab()
 {
-    ImGui::Text("%s", EDITOR_TEXT("dev_label_graphics_debug_info"));
+    ImGui::Text("%s", I18N::Editor::GraphicsDebugInfo);
     ImGui::Separator();
 
     RenderGraphicsDebugInfo();
@@ -586,11 +586,11 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
     extern int OpenglWindowWidth, OpenglWindowHeight;
     extern float g_fScreenRate_x, g_fScreenRate_y;
 
-    ImGui::Text("%s: %u x %u", EDITOR_TEXT("dev_label_current_resolution"), WindowWidth, WindowHeight);
-    ImGui::Text("%s: %d x %d", EDITOR_TEXT("dev_label_opengl_viewport"), OpenglWindowWidth, OpenglWindowHeight);
-    ImGui::Text("%s: %.2f x %.2f", EDITOR_TEXT("dev_label_screen_rate"), g_fScreenRate_x, g_fScreenRate_y);
-    ImGui::Text("%s: %s", EDITOR_TEXT("dev_label_window_mode"),
-                g_bUseWindowMode ? EDITOR_TEXT("dev_label_windowed") : EDITOR_TEXT("dev_label_fullscreen"));
+    ImGui::Text("%s: %u x %u", I18N::Editor::CurrentResolution, WindowWidth, WindowHeight);
+    ImGui::Text("%s: %d x %d", I18N::Editor::OpenGLViewport, OpenglWindowWidth, OpenglWindowHeight);
+    ImGui::Text("%s: %.2f x %.2f", I18N::Editor::ScreenRate, g_fScreenRate_x, g_fScreenRate_y);
+    ImGui::Text("%s: %s", I18N::Editor::WindowMode,
+                g_bUseWindowMode ? I18N::Editor::Windowed : I18N::Editor::Fullscreen);
 
     int clientWidth = 0, clientHeight = 0;
     float calculatedScaleX = 0, calculatedScaleY = 0;
@@ -600,18 +600,18 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
         GetClientRect(g_hWnd, &clientRect);
         clientWidth  = clientRect.right  - clientRect.left;
         clientHeight = clientRect.bottom - clientRect.top;
-        ImGui::Text("%s: %d x %d", EDITOR_TEXT("dev_label_actual_window_client"), clientWidth, clientHeight);
+        ImGui::Text("%s: %d x %d", I18N::Editor::ActualWindowClient, clientWidth, clientHeight);
 
         calculatedScaleX = (float)clientWidth  / (float)REFERENCE_WIDTH;
         calculatedScaleY = (float)clientHeight / (float)REFERENCE_HEIGHT;
-        ImGui::Text("%s: %.2f x %.2f", EDITOR_TEXT("dev_label_calculated_scale"), calculatedScaleX, calculatedScaleY);
+        ImGui::Text("%s: %.2f x %.2f", I18N::Editor::CalculatedScaleFromClient, calculatedScaleX, calculatedScaleY);
     }
 
     if (WindowWidth != OpenglWindowWidth || WindowHeight != OpenglWindowHeight)
-        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", EDITOR_TEXT("dev_warn_window_size_mismatch"));
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", I18N::Editor::WARNINGWindowSizeMismatchDetected);
 
     ImGui::Spacing();
-    if (ImGui::Button(EDITOR_TEXT("dev_btn_copy_debug_info"), ImVec2(250, 0)))
+    if (ImGui::Button(I18N::Editor::CopyDebugInfoToClipboard, ImVec2(250, 0)))
     {
         char debugInfo[1024];
         sprintf_s(debugInfo,
@@ -639,10 +639,10 @@ void CDevEditorUI::RenderGraphicsDebugInfo()
             (float)WindowWidth / (float)WindowHeight
         );
         ImGui::SetClipboardText(debugInfo);
-        g_MuEditorConsoleUI.LogEditor(EDITOR_TEXT("dev_log_debug_info_copied"));
+        g_MuEditorConsoleUI.LogEditor(I18N::Editor::DebugInfoCopiedToClipboard);
     }
     ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", EDITOR_TEXT("dev_label_paste_hint"));
+    ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", I18N::Editor::PasteInDiscordNotepad);
 }
 
 // Accessors for external use

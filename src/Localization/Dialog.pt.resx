@@ -1,0 +1,943 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Text_1" xml:space="preserve">
+    <value>Olá! Eu sou Pasi o Mago. Hahaha! Hmmm... O movimento das estrelas não parece muito certo. Seu futuro... Hmm... Também não consigo ver seu futuro... Por quê será...?</value>
+    <comment>legacy_id=1</comment>
+  </data>
+  <data name="Text_2" xml:space="preserve">
+    <value>Olá! Meu nome é Baz e cuido dos cofres. Posso ajudá-lo seja onde estiver. Não hesite em deixar seus pertences comigo.</value>
+    <comment>legacy_id=2</comment>
+  </data>
+  <data name="Text_3" xml:space="preserve">
+    <value>Muitos aventureiros me disseram que o som da harpa é confortante e acaba com sua fadiga. Precisa da minha ajuda?</value>
+    <comment>legacy_id=3</comment>
+  </data>
+  <data name="Text_4" xml:space="preserve">
+    <value>Olá! Meu nome é Baz e cuido dos cofres. Posso ajudá-lo seja onde estiver. Não hesite em deixar seus pertences comigo.</value>
+    <comment>legacy_id=4</comment>
+  </data>
+  <data name="Text_5" xml:space="preserve">
+    <value>Você trouxe dinheiro suficiente? Sem ele, não posso combinar os itens porque preciso de dinheiro para continuar minha pesquisa. Entendeu? Quer saber quanto dinheiro precisa?</value>
+    <comment>legacy_id=5</comment>
+  </data>
+  <data name="Text_6" xml:space="preserve">
+    <value>Boas-vindas ao MU! Pressione a tecla F1 se precisar de ajuda ao viajar pelo continente de MU.</value>
+    <comment>legacy_id=6</comment>
+  </data>
+  <data name="Text_7" xml:space="preserve">
+    <value>É a primeira vez que vem a Lorencia? Vá para a saída sudeste na frente da fonte e tente caçar Dragões lentos ou Aranhas. Os Esqueletos a noroeste são muito perigosos.</value>
+    <comment>legacy_id=7</comment>
+  </data>
+  <data name="Text_8" xml:space="preserve">
+    <value>Boas-vindas a Noria. Se for sua primeira visita, passe pelo guarda dos cofres e vá para a saída sul. Tente caçar monstros de nível baixo, como Escorpiões ou Goblins.</value>
+    <comment>legacy_id=8</comment>
+  </data>
+  <data name="Text_9" xml:space="preserve">
+    <value>Se precisar de um guia detalhado do continente de Mu, visite http://muonline.webzen.net</value>
+    <comment>legacy_id=9</comment>
+  </data>
+  <data name="Text_50" xml:space="preserve">
+    <value>Dizem que o 'Pergaminho do Imperador', que fala de Muren, o primeiro imperador de MU, foi visto nos arredores da Torre Perdida, de Atlans e da Masmorra.</value>
+    <comment>legacy_id=50</comment>
+  </data>
+  <data name="Answer_50_Slot_0" xml:space="preserve">
+    <value>Eu não sabia que tal coisa existia...</value>
+    <comment>legacy_id=1500</comment>
+  </data>
+  <data name="Text_51" xml:space="preserve">
+    <value>Sua oferenda para o Deus não é suficiente. Eu lhe contarei sobre o oráculo se fizer uma oferenda de 1.000.000 de Zens.</value>
+    <comment>legacy_id=51</comment>
+  </data>
+  <data name="Answer_51_Slot_0" xml:space="preserve">
+    <value>Voltarei com 1.000.000 de Zens.</value>
+    <comment>legacy_id=1510</comment>
+  </data>
+  <data name="Text_52" xml:space="preserve">
+    <value>Dizem que o 'Pergaminho do Imperador', que fala de Muren, o primeiro imperador de MU, foi visto nos arredores da Torre Perdida, de Atlans e da Masmorra.</value>
+    <comment>legacy_id=52</comment>
+  </data>
+  <data name="Answer_52_Slot_0" xml:space="preserve">
+    <value>Conte-me mais.</value>
+    <comment>legacy_id=1520</comment>
+  </data>
+  <data name="Text_53" xml:space="preserve">
+    <value>O 'Pergaminho do Imperador' está envolto em uma força poderosa. Qualquer pessoa que o leia será abençoado com aquela força poderosa.</value>
+    <comment>legacy_id=53</comment>
+  </data>
+  <data name="Answer_53_Slot_0" xml:space="preserve">
+    <value>Repita a história.</value>
+    <comment>legacy_id=1530</comment>
+  </data>
+  <data name="Answer_53_Slot_1" xml:space="preserve">
+    <value>Vou procurá-lo.</value>
+    <comment>legacy_id=1531</comment>
+  </data>
+  <data name="Answer_53_Slot_2" xml:space="preserve">
+    <value>Não me importo.</value>
+    <comment>legacy_id=1532</comment>
+  </data>
+  <data name="Text_54" xml:space="preserve">
+    <value>Vá procurar o 'Pergaminho do Imperador'. Você receberá um grande poder ao lê-lo.</value>
+    <comment>legacy_id=54</comment>
+  </data>
+  <data name="Answer_54_Slot_0" xml:space="preserve">
+    <value>Vou procurá-lo.</value>
+    <comment>legacy_id=1540</comment>
+  </data>
+  <data name="Text_55" xml:space="preserve">
+    <value>Você encontrou o 'Pergaminho do Imperador'! A comemoração da unificação do primeiro imperador do Império de Mu Muren foi registrado com o poder da mágica aqui. Aquele que possuir o 'Pergaminho do Imperador' receberá grande poder.</value>
+    <comment>legacy_id=55</comment>
+  </data>
+  <data name="Answer_55_Slot_0" xml:space="preserve">
+    <value>Conte-me sobre o registro.</value>
+    <comment>legacy_id=1550</comment>
+  </data>
+  <data name="Text_56" xml:space="preserve">
+    <value>Um registro histórico do primeiro imperador Muren contém a comemoração da paz por meio do triunfo de Muren sobre todos os senhores da guerra e, com isso, a unificação do continente sob o Império de MU.</value>
+    <comment>legacy_id=56</comment>
+  </data>
+  <data name="Answer_56_Slot_0" xml:space="preserve">
+    <value>Continue.</value>
+    <comment>legacy_id=1560</comment>
+  </data>
+  <data name="Text_57" xml:space="preserve">
+    <value>Muren foi um dos três heróis que acabou com o caos trazido ao povo pela invasão de Sekneum.</value>
+    <comment>legacy_id=57</comment>
+  </data>
+  <data name="Answer_57_Slot_0" xml:space="preserve">
+    <value>Conte-me a história anterior.</value>
+    <comment>legacy_id=1570</comment>
+  </data>
+  <data name="Answer_57_Slot_1" xml:space="preserve">
+    <value>Continue.</value>
+    <comment>legacy_id=1571</comment>
+  </data>
+  <data name="Text_58" xml:space="preserve">
+    <value>Artefatos mágicos podem ser encontrados e são a 'Espada quebrada', 'Lágrima do Elfo' e a 'Alma do Mago'. A 'Espada quebrada' foi oferecida pelos cavaleiros negros como um símbolo de sua bravura, lealdade e seu desejo de prosperidade.</value>
+    <comment>legacy_id=58</comment>
+  </data>
+  <data name="Answer_58_Slot_0" xml:space="preserve">
+    <value>Conte-me a história anterior.</value>
+    <comment>legacy_id=1580</comment>
+  </data>
+  <data name="Answer_58_Slot_1" xml:space="preserve">
+    <value>Continue.</value>
+    <comment>legacy_id=1581</comment>
+  </data>
+  <data name="Text_59" xml:space="preserve">
+    <value>A 'Alma do Mago' foi oferecida pelos magos negros como um símbolo de seu voto de usar o poder para a paz e a liberdade do império. No Ano 10 do Mu, um excerto do registro de comemoração de paz...</value>
+    <comment>legacy_id=59</comment>
+  </data>
+  <data name="Answer_59_Slot_0" xml:space="preserve">
+    <value>Conte-me a história anterior.</value>
+    <comment>legacy_id=1590</comment>
+  </data>
+  <data name="Answer_59_Slot_1" xml:space="preserve">
+    <value>Foi isso o que aconteceu...</value>
+    <comment>legacy_id=1591</comment>
+  </data>
+  <data name="Text_60" xml:space="preserve">
+    <value>Se você leu o 'Pergaminho do Imperador', procure pela 'Espada quebrada' que os antigos cavaleiros negros usaram na comemoração da paz. Pelo que ouvi dizer, alguns cavaleiros negros a encontraram em Atlans, na Torre Perdida e Tarkan.</value>
+    <comment>legacy_id=60</comment>
+  </data>
+  <data name="Answer_60_Slot_0" xml:space="preserve">
+    <value>Vou encontrá-la.</value>
+    <comment>legacy_id=1600</comment>
+  </data>
+  <data name="Answer_60_Slot_1" xml:space="preserve">
+    <value>Eu desisto.</value>
+    <comment>legacy_id=1601</comment>
+  </data>
+  <data name="Text_61" xml:space="preserve">
+    <value>O?perigo espreita em cada canto desses lugares e a 'Espada quebrada' não é vista facilmente. Mas se encontrá-la, novo poder será derramado sobre você! Volte aqui depois que encontrar a 'Espada quebrada'.</value>
+    <comment>legacy_id=61</comment>
+  </data>
+  <data name="Answer_61_Slot_0" xml:space="preserve">
+    <value>Vou encontrá-la e retornar com ela.</value>
+    <comment>legacy_id=1610</comment>
+  </data>
+  <data name="Text_62" xml:space="preserve">
+    <value>Bravo cavaleiro negro, você encontrou a 'Espada quebrada'! Depois da unificação do Continente de Mu, Muren, o primeiro imperador, quebrou sua espada 'Apocalipse' como um símbolo de seu desejo de que nenhuma guerra surgisse novamente.</value>
+    <comment>legacy_id=62</comment>
+  </data>
+  <data name="Answer_62_Slot_0" xml:space="preserve">
+    <value>Conte-me mais.</value>
+    <comment>legacy_id=1620</comment>
+  </data>
+  <data name="Text_63" xml:space="preserve">
+    <value>Depois da Guerra, os cavaleiros negros que desejassem se tornar cavaleiros da espada começaram a procurar pela antiga 'Espada quebrada' para provar sua bravura.</value>
+    <comment>legacy_id=63</comment>
+  </data>
+  <data name="Answer_63_Slot_0" xml:space="preserve">
+    <value>Foi isso o que aconteceu!</value>
+    <comment>legacy_id=1630</comment>
+  </data>
+  <data name="Text_64" xml:space="preserve">
+    <value>Você leu o 'Pergaminho do Imperador', não leu? Então você sabe sobre os 3 tesouros registrados no 'Pergaminho do Imperador'. Encontre o cristal 'Lágrima do Elfo' feito pelos elfos antigos com a força do espírito.</value>
+    <comment>legacy_id=64</comment>
+  </data>
+  <data name="Answer_64_Slot_0" xml:space="preserve">
+    <value>Conte-me mais.</value>
+    <comment>legacy_id=1640</comment>
+  </data>
+  <data name="Text_65" xml:space="preserve">
+    <value>Aquele lugar é muito perigoso e a 'Lágrima do Elfo' é extremamente difícil de encontrar. Mas se encontrar a 'Lágrima do Elfo', novo poder será derramado sobre você. Agora, vá encontrar a 'Lágrima do Elfo' e volte aqui.</value>
+    <comment>legacy_id=65</comment>
+  </data>
+  <data name="Answer_65_Slot_0" xml:space="preserve">
+    <value>Vou encontrar a 'Lágrima do Elfo'!</value>
+    <comment>legacy_id=1650</comment>
+  </data>
+  <data name="Text_66" xml:space="preserve">
+    <value>Você encontrou a 'Lágrima do Elfo'! Depois da Guerra, Lunedil, a rainha dos elfos, criou a pedra da lágrima lançando magia sobre a pedra do espírito, para que os elfos pudessem invocar o poder da deusa e aumentar seu poder.</value>
+    <comment>legacy_id=66</comment>
+  </data>
+  <data name="Answer_66_Slot_0" xml:space="preserve">
+    <value>Continue.</value>
+    <comment>legacy_id=1660</comment>
+  </data>
+  <data name="Text_67" xml:space="preserve">
+    <value>Você leu o 'Pergaminho do Imperador', não leu? Então você sabe sobre os 3 tesouros registrados no 'Pergaminho do Imperador'. Encontre o cristal 'Lágrima do Elfo' feito pelos elfos antigos com a força do espírito.</value>
+    <comment>legacy_id=67</comment>
+  </data>
+  <data name="Answer_67_Slot_0" xml:space="preserve">
+    <value>Continue.</value>
+    <comment>legacy_id=1670</comment>
+  </data>
+  <data name="Text_68" xml:space="preserve">
+    <value>Com seu poder, tenho certeza de que encontrará a 'Alma do Mago'. Agora vá encontrar a 'Alma do Mago' e retorne quando encontrá-la.</value>
+    <comment>legacy_id=68</comment>
+  </data>
+  <data name="Answer_68_Slot_0" xml:space="preserve">
+    <value>Vou encontrar a 'Alma do Mago'.</value>
+    <comment>legacy_id=1680</comment>
+  </data>
+  <data name="Text_69" xml:space="preserve">
+    <value>Eu sabia que você encontraria a 'Alma do Mago'! Etramu, o maior mago de Arka, criou uma pedra mágica protetora da alma, preocupado que os cavaleiros negros fracos pudessem falhar no ataque de Kundun.</value>
+    <comment>legacy_id=69</comment>
+  </data>
+  <data name="Answer_69_Slot_0" xml:space="preserve">
+    <value>Conte-me mais.</value>
+    <comment>legacy_id=1690</comment>
+  </data>
+  <data name="Text_70" xml:space="preserve">
+    <value>Um mago negro com esta pedra mágica torna-se um mestre da alma.</value>
+    <comment>legacy_id=70</comment>
+  </data>
+  <data name="Answer_70_Slot_0" xml:space="preserve">
+    <value>Agora sou um mestre da alma!</value>
+    <comment>legacy_id=1700</comment>
+  </data>
+  <data name="Text_71" xml:space="preserve">
+    <value>Sua oferenda para o Deus não é suficiente. Eu lhe contarei sobre o oráculo se fizer uma oferenda de 2.000.000 de Zens.</value>
+    <comment>legacy_id=71</comment>
+  </data>
+  <data name="Answer_71_Slot_0" xml:space="preserve">
+    <value>Voltarei com 2.000.000 de Zens.</value>
+    <comment>legacy_id=1710</comment>
+  </data>
+  <data name="Text_72" xml:space="preserve">
+    <value>Novo poder foi conferido a você como resultado de sua força e de sua vontade. Que a graça de Lugard esteja sempre com você.</value>
+    <comment>legacy_id=72</comment>
+  </data>
+  <data name="Answer_72_Slot_0" xml:space="preserve">
+    <value>Que a graça de Deus esteja com você...</value>
+    <comment>legacy_id=1720</comment>
+  </data>
+  <data name="Text_73" xml:space="preserve">
+    <value>Você já possui grande poder. Não tenho um oráculo para você.</value>
+    <comment>legacy_id=73</comment>
+  </data>
+  <data name="Answer_73_Slot_0" xml:space="preserve">
+    <value>Voltarei mais tarde.</value>
+    <comment>legacy_id=1730</comment>
+  </data>
+  <data name="Text_74" xml:space="preserve">
+    <value>Volte quando estiver mais forte.</value>
+    <comment>legacy_id=74</comment>
+  </data>
+  <data name="Answer_74_Slot_0" xml:space="preserve">
+    <value>Eu retornarei quando estiver mais forte.</value>
+    <comment>legacy_id=1740</comment>
+  </data>
+  <data name="Text_75" xml:space="preserve">
+    <value>Se você se tornou um guerreiro forte, conseguirá encontrá-lo.</value>
+    <comment>legacy_id=75</comment>
+  </data>
+  <data name="Answer_75_Slot_0" xml:space="preserve">
+    <value>Continue.</value>
+    <comment>legacy_id=1750</comment>
+  </data>
+  <data name="Text_76" xml:space="preserve">
+    <value>A partir de então, nasceu o costume de cavaleiros negros que desejassem se tornar cavaleiros da espada quebrassem suas espadas como um símbolo de seu voto de nunca empunhar suas espadas injustamente.</value>
+    <comment>legacy_id=76</comment>
+  </data>
+  <data name="Answer_76_Slot_0" xml:space="preserve">
+    <value>Conte-me mais.</value>
+    <comment>legacy_id=1760</comment>
+  </data>
+  <data name="Text_77" xml:space="preserve">
+    <value>Alguns dos elfos aventureiros disse que eles foram vistos na Torre Perdida, Atlans e Tarkan.</value>
+    <comment>legacy_id=77</comment>
+  </data>
+  <data name="Answer_77_Slot_0" xml:space="preserve">
+    <value>Vou procurá-lo!</value>
+    <comment>legacy_id=1770</comment>
+  </data>
+  <data name="Answer_77_Slot_1" xml:space="preserve">
+    <value>Não quero ir para tal lugar.</value>
+    <comment>legacy_id=1771</comment>
+  </data>
+  <data name="Text_78" xml:space="preserve">
+    <value>Ela é chamada de 'Lágrima do Elfo' e o elfo que encontrar esta pedra se tornará um elfo inspirado, capaz de conjurar o poder das ?Deusas élficas.</value>
+    <comment>legacy_id=78</comment>
+  </data>
+  <data name="Answer_78_Slot_0" xml:space="preserve">
+    <value>Eu me tornei um elfo inspirado!</value>
+    <comment>legacy_id=1780</comment>
+  </data>
+  <data name="Text_79" xml:space="preserve">
+    <value>Como você encontrou o 'Pergaminho do Imperador' e a 'Espada quebrada', a partir de agora será chamado de cavaleiro da espada.</value>
+    <comment>legacy_id=79</comment>
+  </data>
+  <data name="Answer_79_Slot_0" xml:space="preserve">
+    <value>Eu me tornei um Cavaleiro da espada!</value>
+    <comment>legacy_id=1790</comment>
+  </data>
+  <data name="Text_80" xml:space="preserve">
+    <value>Depois que o império foi unificado, o povo jurou lealdade ao imperador. Alguns dos tesouros oferecidos como um símbolo de sua lealdade são os seguintes.</value>
+    <comment>legacy_id=80</comment>
+  </data>
+  <data name="Answer_80_Slot_0" xml:space="preserve">
+    <value>Conte-me a história anterior.</value>
+    <comment>legacy_id=1800</comment>
+  </data>
+  <data name="Answer_80_Slot_1" xml:space="preserve">
+    <value>Continue.</value>
+    <comment>legacy_id=1801</comment>
+  </data>
+  <data name="Text_81" xml:space="preserve">
+    <value>A 'Lágrima do Elfo foi oferecida pelos elfos como um símbolo de seu voto de fortalecer o poder dos elfos e dos humanos.</value>
+    <comment>legacy_id=81</comment>
+  </data>
+  <data name="Answer_81_Slot_0" xml:space="preserve">
+    <value>Conte-me a história anterior.</value>
+    <comment>legacy_id=1810</comment>
+  </data>
+  <data name="Answer_81_Slot_1" xml:space="preserve">
+    <value>Continue.</value>
+    <comment>legacy_id=1811</comment>
+  </data>
+  <data name="Text_82" xml:space="preserve">
+    <value>Vá encontrar a 'Alma do Mago'. De acordo com os antigos magos negros, ela foi vista pela última vez na Torre Perdida, Atlans e Tarkan.</value>
+    <comment>legacy_id=82</comment>
+  </data>
+  <data name="Answer_82_Slot_0" xml:space="preserve">
+    <value>Vou procurá-la.</value>
+    <comment>legacy_id=1820</comment>
+  </data>
+  <data name="Answer_82_Slot_1" xml:space="preserve">
+    <value>Voltarei mais tarde.</value>
+    <comment>legacy_id=1821</comment>
+  </data>
+  <data name="Text_90" xml:space="preserve">
+    <value>Você terminou de ler o 'Decreto do Imperador'. Mas você sabe sobre o contrato confidencial entre Muren e Semeden, o líder invocador? Muren recebeu uma promessa, em vez de transferir Elbe para que ficasse sob o império.</value>
+    <comment>legacy_id=90</comment>
+  </data>
+  <data name="Answer_90_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=1900</comment>
+  </data>
+  <data name="Text_91" xml:space="preserve">
+    <value>O Continente de MU tinha o portal de uma dimensão do mundo sob a supervisão dos invocadores. E Semeden recebeu o Abismo do Olho como um símbolo da promessa. Vá e traga o Abismo do Olho.</value>
+    <comment>legacy_id=91</comment>
+  </data>
+  <data name="Answer_91_Slot_0" xml:space="preserve">
+    <value>Aceitar o pedido</value>
+    <comment>legacy_id=1910</comment>
+  </data>
+  <data name="Answer_91_Slot_1" xml:space="preserve">
+    <value>Negar o pedido</value>
+    <comment>legacy_id=1911</comment>
+  </data>
+  <data name="Text_92" xml:space="preserve">
+    <value>Ouvi dizer que o Abismo do Olho foi encontrado nos arredores de Atlance, Torre Perdida e Tarkan. Volte com o Abismo do Olho assim que encontrá-lo.</value>
+    <comment>legacy_id=92</comment>
+  </data>
+  <data name="Answer_92_Slot_0" xml:space="preserve">
+    <value>Termine de contar a história</value>
+    <comment>legacy_id=1920</comment>
+  </data>
+  <data name="Text_93" xml:space="preserve">
+    <value>Você encontrou o Abismo do Olho. Ele tem sido conhecido como um objeto composto pelo elemento inexistente no mundo real. É contagioso no mundo anterior ao presente, ao qual a memória retorna com ele.</value>
+    <comment>legacy_id=93</comment>
+  </data>
+  <data name="Answer_93_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=1930</comment>
+  </data>
+  <data name="Text_94" xml:space="preserve">
+    <value>O?Abismo do Olho detém um significado especial para mim, pois supervisiono e me comunico por meio das dimensões deste mundo. Se trouxer o Abismo do Olho, eu lhe darei o título de Invocador sanguinário para Semeden, o supervisor de sua dimensão.</value>
+    <comment>legacy_id=94</comment>
+  </data>
+  <data name="Answer_94_Slot_0" xml:space="preserve">
+    <value>Imposição como Invocador sanguinário</value>
+    <comment>legacy_id=1940</comment>
+  </data>
+  <data name="Text_100" xml:space="preserve">
+    <value>O?tesouro lendário chamado 'Anel da Glória' é necessário para adquirir a bênção e a força de Muren. Ele manifestou sua presença mais uma vez dentro de nossas terras. Mas você não está pronto. Espere até que seja mais experiente.</value>
+    <comment>legacy_id=100</comment>
+  </data>
+  <data name="Answer_100_Slot_0" xml:space="preserve">
+    <value>Então o que preciso fazer?</value>
+    <comment>legacy_id=2000</comment>
+  </data>
+  <data name="Text_101" xml:space="preserve">
+    <value>É necessário maior experiência para sobreviver essa Aventura. Retorne quando tiver alcançado o nível de acordo com esse desafio.</value>
+    <comment>legacy_id=101</comment>
+  </data>
+  <data name="Answer_101_Slot_0" xml:space="preserve">
+    <value>Retornarei quando for minha hora.</value>
+    <comment>legacy_id=2010</comment>
+  </data>
+  <data name="Text_102" xml:space="preserve">
+    <value>O?tesouro lendário chamado 'Anel da Glória' é necessário para adquirir a bênção e a força de Muren. Ele manifestou sua presença mais uma vez dentro de nossas terras.</value>
+    <comment>legacy_id=102</comment>
+  </data>
+  <data name="Answer_102_Slot_0" xml:space="preserve">
+    <value>Gostaria de ouvir mais.</value>
+    <comment>legacy_id=2020</comment>
+  </data>
+  <data name="Text_103" xml:space="preserve">
+    <value>Quem possuir o 'Anel da Glória' receberá a bênção de Muren. Diz-se que está nos desertos do outro lado do mar.</value>
+    <comment>legacy_id=103</comment>
+  </data>
+  <data name="Answer_103_Slot_0" xml:space="preserve">
+    <value>Por quê?</value>
+    <comment>legacy_id=2030</comment>
+  </data>
+  <data name="Text_104" xml:space="preserve">
+    <value>Os monstros de lá são bastante poderosos. Eles possuem o anel.</value>
+    <comment>legacy_id=104</comment>
+  </data>
+  <data name="Answer_104_Slot_0" xml:space="preserve">
+    <value>Repita a história.</value>
+    <comment>legacy_id=2040</comment>
+  </data>
+  <data name="Answer_104_Slot_1" xml:space="preserve">
+    <value>Tentarei.</value>
+    <comment>legacy_id=2041</comment>
+  </data>
+  <data name="Answer_104_Slot_2" xml:space="preserve">
+    <value>Ainda não estou pronto.</value>
+    <comment>legacy_id=2042</comment>
+  </data>
+  <data name="Text_105" xml:space="preserve">
+    <value>O 'Anel da Glória' pode estar mais perto do que imagina. Quando o adquirir, definitivamente sentirá uma mudança em seu poder. Mas não será uma tarefa fácil.</value>
+    <comment>legacy_id=105</comment>
+  </data>
+  <data name="Answer_105_Slot_0" xml:space="preserve">
+    <value>Retornarei com ele.</value>
+    <comment>legacy_id=2050</comment>
+  </data>
+  <data name="Text_108" xml:space="preserve">
+    <value>Este é mesmo o 'Anel da Glória'. Ele brilha com uma aura mística, mais forte do que eu imaginava. Este anel possui uma lenda que você nem pode imaginar. É uma verdadeira bênção em suas mãos.</value>
+    <comment>legacy_id=108</comment>
+  </data>
+  <data name="Answer_108_Slot_0" xml:space="preserve">
+    <value>Entendo.</value>
+    <comment>legacy_id=2080</comment>
+  </data>
+  <data name="Text_109" xml:space="preserve">
+    <value>Diz-se que esse anel revive e concede a juventude eterna. Mas só funciona em heróis que possuem o poder de empunhar sua força.</value>
+    <comment>legacy_id=109</comment>
+  </data>
+  <data name="Answer_109_Slot_0" xml:space="preserve">
+    <value>Por quê?</value>
+    <comment>legacy_id=2090</comment>
+  </data>
+  <data name="Text_110" xml:space="preserve">
+    <value>Porque Etramu, o Mago de Arka, lançou uma magia para evitar que o mal tirasse vantagem dele. Mas o anel diz que você é adequado para ele.</value>
+    <comment>legacy_id=110</comment>
+  </data>
+  <data name="Answer_110_Slot_0" xml:space="preserve">
+    <value>É mesmo!</value>
+    <comment>legacy_id=2100</comment>
+  </data>
+  <data name="Text_111" xml:space="preserve">
+    <value>O 'Anel da Glória' foi criado quando o Secromicon da profecia foi feito com um metal que não perece. Os dois foram considerados sagrados, mas sua localização tornou-se desconhecida quando ele foi levado durante a revolta do comandante Gaion.</value>
+    <comment>legacy_id=111</comment>
+  </data>
+  <data name="Answer_111_Slot_0" xml:space="preserve">
+    <value>É mesmo?!</value>
+    <comment>legacy_id=2110</comment>
+  </data>
+  <data name="Text_112" xml:space="preserve">
+    <value>Agora que o 'Anel da Glória' foi encontrado, você conseguirá crescer ainda mais como guerreiro.</value>
+    <comment>legacy_id=112</comment>
+  </data>
+  <data name="Answer_112_Slot_0" xml:space="preserve">
+    <value>Sinto minha habilidade aumentando!</value>
+    <comment>legacy_id=2120</comment>
+  </data>
+  <data name="Text_113" xml:space="preserve">
+    <value>Você crescerá e se transformará em um ser muito maior do que antes. Use seu poder pela paz de nosso império.</value>
+    <comment>legacy_id=113</comment>
+  </data>
+  <data name="Answer_113_Slot_0" xml:space="preserve">
+    <value>Eu o farei.</value>
+    <comment>legacy_id=2130</comment>
+  </data>
+  <data name="Text_114" xml:space="preserve">
+    <value>Você já possui o poder sagrado.</value>
+    <comment>legacy_id=114</comment>
+  </data>
+  <data name="Answer_114_Slot_0" xml:space="preserve">
+    <value>Voltarei mais tarde.</value>
+    <comment>legacy_id=2140</comment>
+  </data>
+  <data name="Text_115" xml:space="preserve">
+    <value>A 'Pedra Negra', que dizem que dá aos guerreiros novo poder, foi encontrada no continente de Mu. No entanto, você não está pronto para usar aquele poder. Espere até que esteja pronto.</value>
+    <comment>legacy_id=115</comment>
+  </data>
+  <data name="Answer_115_Slot_0" xml:space="preserve">
+    <value>Retornarei quando estiver pronto.</value>
+    <comment>legacy_id=2150</comment>
+  </data>
+  <data name="Text_116" xml:space="preserve">
+    <value>Para adquirir o poder completo, você precisará se preparar com o 'Pergaminho do Imperador', que registra os fatos históricos do Imperador Muren. Vá para 'Sevina' em Devias.</value>
+    <comment>legacy_id=116</comment>
+  </data>
+  <data name="Answer_116_Slot_0" xml:space="preserve">
+    <value>Retornarei quando estiver pronto.</value>
+    <comment>legacy_id=2160</comment>
+  </data>
+  <data name="Text_117" xml:space="preserve">
+    <value>Você falhou em se tornar um Cavaleiro da espada. Volte quando tiver adquirido novo poder por meio do 'Anel da Glória'.</value>
+    <comment>legacy_id=117</comment>
+  </data>
+  <data name="Answer_117_Slot_0" xml:space="preserve">
+    <value>Retornarei quando estiver pronto.</value>
+    <comment>legacy_id=2170</comment>
+  </data>
+  <data name="Text_118" xml:space="preserve">
+    <value>Você precisa oferecer 3.000.000 de zens para os Deuses para santificar esta missão. Seu zen não é suficiente</value>
+    <comment>legacy_id=118</comment>
+  </data>
+  <data name="Answer_118_Slot_0" xml:space="preserve">
+    <value>Voltarei com 3.000.000 de Zens.</value>
+    <comment>legacy_id=2180</comment>
+  </data>
+  <data name="Text_119" xml:space="preserve">
+    <value>Sua oferenda para o Deus não é suficiente. Eu lhe contarei sobre o oráculo se fizer uma oferenda de 2.000.000 de Zens.</value>
+    <comment>legacy_id=119</comment>
+  </data>
+  <data name="Answer_119_Slot_0" xml:space="preserve">
+    <value>Voltarei com 2.000.000 de Zens.</value>
+    <comment>legacy_id=2190</comment>
+  </data>
+  <data name="Text_130" xml:space="preserve">
+    <value>Este é mesmo o 'Anel da Glória'. Ele brilha com uma aura mística, mais forte do que eu imaginava. Este anel possui uma lenda que você nem pode imaginar. É uma verdadeira bênção em suas mãos.</value>
+    <comment>legacy_id=130</comment>
+  </data>
+  <data name="Answer_130_Slot_0" xml:space="preserve">
+    <value>Estou surpreso em saber disso!</value>
+    <comment>legacy_id=2300</comment>
+  </data>
+  <data name="Text_131" xml:space="preserve">
+    <value>Diz-se que esse anel revive e concede a juventude eterna. Mas só funciona em heróis que possuem o poder de empunhar sua força.</value>
+    <comment>legacy_id=131</comment>
+  </data>
+  <data name="Answer_131_Slot_0" xml:space="preserve">
+    <value>Por quê?</value>
+    <comment>legacy_id=2310</comment>
+  </data>
+  <data name="Text_132" xml:space="preserve">
+    <value>Porque Etramu, o Mago de Arka, lançou uma magia para evitar que o mal tirasse vantagem dele. Mas o anel diz que você é adequado para ele.</value>
+    <comment>legacy_id=132</comment>
+  </data>
+  <data name="Answer_132_Slot_0" xml:space="preserve">
+    <value>É mesmo!</value>
+    <comment>legacy_id=2320</comment>
+  </data>
+  <data name="Text_133" xml:space="preserve">
+    <value>O 'Anel da Glória' foi criado quando o Secromicon da profecia foi feito com um metal que não perece. Os dois foram considerados sagrados, mas sua localização tornou-se desconhecida quando ele foi levado durante a revolta do comandante Gaion.</value>
+    <comment>legacy_id=133</comment>
+  </data>
+  <data name="Answer_133_Slot_0" xml:space="preserve">
+    <value>É mesmo!</value>
+    <comment>legacy_id=2330</comment>
+  </data>
+  <data name="Text_134" xml:space="preserve">
+    <value>Agora que o 'Anel da Glória' foi encontrado, você conseguirá crescer ainda mais como guerreiro.</value>
+    <comment>legacy_id=134</comment>
+  </data>
+  <data name="Answer_134_Slot_0" xml:space="preserve">
+    <value>Sinto minha habilidade aumentando!</value>
+    <comment>legacy_id=2340</comment>
+  </data>
+  <data name="Text_135" xml:space="preserve">
+    <value>Se quiser adquirir novo poder, escute cuidadosamente. A 'Pedra Negra', que dizem que dá aos guerreiros novo poder, foi encontrada no continente de Mu.</value>
+    <comment>legacy_id=135</comment>
+  </data>
+  <data name="Answer_135_Slot_0" xml:space="preserve">
+    <value>Gostaria de saber mais.</value>
+    <comment>legacy_id=2350</comment>
+  </data>
+  <data name="Text_136" xml:space="preserve">
+    <value>Com a 'Pedra Negra', você poderá dominar uma nova habilidade. Não será uma tarefa fácil, mas, como você conseguiu adquirir o 'Anel da Glória', é possível que consiga.</value>
+    <comment>legacy_id=136</comment>
+  </data>
+  <data name="Answer_136_Slot_0" xml:space="preserve">
+    <value>O que preciso fazer?</value>
+    <comment>legacy_id=2360</comment>
+  </data>
+  <data name="Text_137" xml:space="preserve">
+    <value>Dizem que a pedra pode ser encontrada em Tarkan e Icarus. Tenha cuidado com os monstros. Aqueles monstros que possuem a pedra só reagirão àqueles que tenham uma habilidade especial.</value>
+    <comment>legacy_id=137</comment>
+  </data>
+  <data name="Answer_137_Slot_0" xml:space="preserve">
+    <value>Repita a história novamente.</value>
+    <comment>legacy_id=2370</comment>
+  </data>
+  <data name="Answer_137_Slot_1" xml:space="preserve">
+    <value>Então vou tentar!</value>
+    <comment>legacy_id=2371</comment>
+  </data>
+  <data name="Answer_137_Slot_2" xml:space="preserve">
+    <value>Ainda não me sinto confiante.</value>
+    <comment>legacy_id=2372</comment>
+  </data>
+  <data name="Text_138" xml:space="preserve">
+    <value>A 'Pedra Negra' chama por você agora. Com ela em mãos, você certamente adquirirá poder que nunca sentiu antes, mas muitos dos outros guerreiros também estão buscando a pedra desesperadamente.</value>
+    <comment>legacy_id=138</comment>
+  </data>
+  <data name="Answer_138_Slot_0" xml:space="preserve">
+    <value>Voltarei com a 'Pedra Negra'.</value>
+    <comment>legacy_id=2380</comment>
+  </data>
+  <data name="Text_139" xml:space="preserve">
+    <value>Então você encontrou a 'Pedra Negra. Está registrado que esta pedra é o sangue seco do herói 'Benelope', que lutou na Guerra dos Deuses e Satã.</value>
+    <comment>legacy_id=139</comment>
+  </data>
+  <data name="Answer_139_Slot_0" xml:space="preserve">
+    <value>Conte-me mais.</value>
+    <comment>legacy_id=2390</comment>
+  </data>
+  <data name="Text_140" xml:space="preserve">
+    <value>Benelope descende de um cavaleiro. Depois de sua derrota na Guerra, ele treinou novas habilidades de luta e de magia. Estas habilidades têm sido silenciosamente passadas para guerreiros com sangue de um cavaleiro para lutar contra a poderosa força de Kundun.</value>
+    <comment>legacy_id=140</comment>
+  </data>
+  <data name="Answer_140_Slot_0" xml:space="preserve">
+    <value>Então...</value>
+    <comment>legacy_id=2400</comment>
+  </data>
+  <data name="Text_141" xml:space="preserve">
+    <value>Sim, o sangue de um guerreiro corre em suas veias. Portanto, o poder de Benelope será concedido a você por meio da Pedra Negra.</value>
+    <comment>legacy_id=141</comment>
+  </data>
+  <data name="Answer_141_Slot_0" xml:space="preserve">
+    <value>Eu recebi novo poder!</value>
+    <comment>legacy_id=2410</comment>
+  </data>
+  <data name="Text_142" xml:space="preserve">
+    <value>Você adquiriu novo poder por meio do 'Anel da Glória'. Mas há algo que você não sabe.</value>
+    <comment>legacy_id=142</comment>
+  </data>
+  <data name="Answer_142_Slot_0" xml:space="preserve">
+    <value>O que?</value>
+    <comment>legacy_id=2420</comment>
+  </data>
+  <data name="Text_143" xml:space="preserve">
+    <value>É possível que seja capaz de adquirir um novo poder. O tesouro lendário chamado 'Pedra Negra', que foi considerado sagrado juntamente com o 'Anel da Glória', chama por você.</value>
+    <comment>legacy_id=143</comment>
+  </data>
+  <data name="Answer_143_Slot_0" xml:space="preserve">
+    <value>É difícil de acreditar!</value>
+    <comment>legacy_id=2430</comment>
+  </data>
+  <data name="Text_144" xml:space="preserve">
+    <value>Lugard, o Deus da Luz, solicitou um favor de você. No entanto, você ainda não está qualificado. Sugiro que volte quando estiver mais forte.</value>
+    <comment>legacy_id=144</comment>
+  </data>
+  <data name="Answer_144_Slot_0" xml:space="preserve">
+    <value>Voltarei quando estiver mais forte.</value>
+    <comment>legacy_id=2440</comment>
+  </data>
+  <data name="Text_145" xml:space="preserve">
+    <value>Lugard, o Deus da Luz, solicitou um favor de você. No entanto, você ainda não está qualificado. Volte quando tiver terminado a missão anterior.</value>
+    <comment>legacy_id=145</comment>
+  </data>
+  <data name="Answer_145_Slot_0" xml:space="preserve">
+    <value>Voltarei quando a tiver terminado.</value>
+    <comment>legacy_id=2450</comment>
+  </data>
+  <data name="Text_146" xml:space="preserve">
+    <value>Você não tem Zens suficientes. Você pode pedir esta missão oferecendo 5.000.000 de Zens para Lugard.</value>
+    <comment>legacy_id=146</comment>
+  </data>
+  <data name="Answer_146_Slot_0" xml:space="preserve">
+    <value>Voltarei quando estiver pronto.</value>
+    <comment>legacy_id=2460</comment>
+  </data>
+  <data name="Text_147" xml:space="preserve">
+    <value>Lugard, o Deus da Luz, solicitou um favor de você.</value>
+    <comment>legacy_id=147</comment>
+  </data>
+  <data name="Answer_147_Slot_0" xml:space="preserve">
+    <value>O que é?</value>
+    <comment>legacy_id=2470</comment>
+  </data>
+  <data name="Text_148" xml:space="preserve">
+    <value> Lugard pediu que você procurasse por heróis para enfrentar a nova ameaça de Balgass a MU.</value>
+    <comment>legacy_id=148</comment>
+  </data>
+  <data name="Answer_148_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2480</comment>
+  </data>
+  <data name="Text_149" xml:space="preserve">
+    <value>Entendemos que um exército de Balgass está se aproximando do Continente de MU através da Fortaleza do Uivo do Lobo, mas ainda não houve uma interpretação exata da história completa.</value>
+    <comment>legacy_id=149</comment>
+  </data>
+  <data name="Answer_149_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2490</comment>
+  </data>
+  <data name="Text_150" xml:space="preserve">
+    <value>Estamos tentando entender o significado da confiança de Lugar em nós, mas ainda estamos lutando com nossa habilidade inadequada.</value>
+    <comment>legacy_id=150</comment>
+  </data>
+  <data name="Answer_150_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2500</comment>
+  </data>
+  <data name="Text_151" xml:space="preserve">
+    <value>Acredito que você seja a pessoa que pode nos oferecer ajuda. Está interessado em trabalhar conosco?</value>
+    <comment>legacy_id=151</comment>
+  </data>
+  <data name="Answer_151_Slot_0" xml:space="preserve">
+    <value>Ouvir novamente.</value>
+    <comment>legacy_id=2510</comment>
+  </data>
+  <data name="Answer_151_Slot_1" xml:space="preserve">
+    <value>Aceitar o pedido</value>
+    <comment>legacy_id=2511</comment>
+  </data>
+  <data name="Answer_151_Slot_2" xml:space="preserve">
+    <value>Negar o pedido</value>
+    <comment>legacy_id=2512</comment>
+  </data>
+  <data name="Text_152" xml:space="preserve">
+    <value>Para que possa nos ajudar, você precisará se opor ao exército de Balgass. Antes de começar, preciso verificar se é forte o suficiente para a missão.</value>
+    <comment>legacy_id=152</comment>
+  </data>
+  <data name="Answer_152_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2520</comment>
+  </data>
+  <data name="Text_153" xml:space="preserve">
+    <value>Destrua os monstros Raio da Morte, Hellmaine e Fênix negra que dominam Tarkan, Aida e Icarus e traga 3 provas de que o fez.</value>
+    <comment>legacy_id=153</comment>
+  </data>
+  <data name="Answer_153_Slot_0" xml:space="preserve">
+    <value>Termine de contar a história</value>
+    <comment>legacy_id=2530</comment>
+  </data>
+  <data name="Text_154" xml:space="preserve">
+    <value>Parabéns, você completou a tarefa. Eis um pequeno presente por seu trabalho duro.</value>
+    <comment>legacy_id=154</comment>
+  </data>
+  <data name="Answer_154_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2540</comment>
+  </data>
+  <data name="Text_155" xml:space="preserve">
+    <value>Balgass é uma grande ameaça, pois está cooperando com Eresia, a Rainha da Magia, e trouxe muito perigo para este mundo</value>
+    <comment>legacy_id=155</comment>
+  </data>
+  <data name="Answer_155_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2550</comment>
+  </data>
+  <data name="Text_156" xml:space="preserve">
+    <value>Nossa previsão é de que Balgass esteja tentando uma nova ameaça contra o Continente de MU com seu exército de magia do mal.</value>
+    <comment>legacy_id=156</comment>
+  </data>
+  <data name="Answer_156_Slot_0" xml:space="preserve">
+    <value>Termine de contar a história</value>
+    <comment>legacy_id=2560</comment>
+  </data>
+  <data name="Text_157" xml:space="preserve">
+    <value>Você não tem dinheiro suficiente. Ofereça 7.000.000 de Zens a Lugard para pedir esta missão.</value>
+    <comment>legacy_id=157</comment>
+  </data>
+  <data name="Answer_157_Slot_0" xml:space="preserve">
+    <value>Voltarei quando estiver pronto.</value>
+    <comment>legacy_id=2570</comment>
+  </data>
+  <data name="Text_158" xml:space="preserve">
+    <value>Bem-vindo, você está verdadeiramente pronto agora para nos ajudar.</value>
+    <comment>legacy_id=158</comment>
+  </data>
+  <data name="Answer_158_Slot_0" xml:space="preserve">
+    <value>Em que posso ajudar?</value>
+    <comment>legacy_id=2580</comment>
+  </data>
+  <data name="Text_159" xml:space="preserve">
+    <value>Bem, de acordo com nossas informações, Balgass formou um local chamado Quartel. Os 12 apóstolos de Lugard acreditam que esta é a nova ameaça de Balgass.</value>
+    <comment>legacy_id=159</comment>
+  </data>
+  <data name="Answer_159_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2590</comment>
+  </data>
+  <data name="Text_160" xml:space="preserve">
+    <value>Informações exatas sobre o 'Quartel' orientam a entrar na área do Quartel para diminuir a ameaça de maior desenvolvimento do exército de Balgass.</value>
+    <comment>legacy_id=160</comment>
+  </data>
+  <data name="Answer_160_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2600</comment>
+  </data>
+  <data name="Text_161" xml:space="preserve">
+    <value>Felizmente, a guarda de Lugar pode ajudar a encontrar o caminho para o Quartel de Balgass. Entre na área, destrua os soldados e obtenha informações precisas. Você traria os dados apropriados?</value>
+    <comment>legacy_id=161</comment>
+  </data>
+  <data name="Answer_161_Slot_0" xml:space="preserve">
+    <value>Ouvir novamente.</value>
+    <comment>legacy_id=2610</comment>
+  </data>
+  <data name="Answer_161_Slot_1" xml:space="preserve">
+    <value>Aceitar o pedido</value>
+    <comment>legacy_id=2611</comment>
+  </data>
+  <data name="Answer_161_Slot_2" xml:space="preserve">
+    <value>Negar o pedido</value>
+    <comment>legacy_id=2612</comment>
+  </data>
+  <data name="Text_162" xml:space="preserve">
+    <value>Vá para o cemitério ao norte da área Uivo do Lobo e encontre o refúgio dos soldados do Quartel de Balgass. A bênção de Lugar permitiu que tenham inteligência. Ele chama a si mesmo de Guarda Lobisomem.</value>
+    <comment>legacy_id=162</comment>
+  </data>
+  <data name="Answer_162_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2620</comment>
+  </data>
+  <data name="Text_163" xml:space="preserve">
+    <value>Ele o levará ao Quartel de Balgass. Entre na área e destrua pelo menos 10 monstros no Quartel.</value>
+    <comment>legacy_id=163</comment>
+  </data>
+  <data name="Answer_163_Slot_0" xml:space="preserve">
+    <value>Termine de contar a história</value>
+    <comment>legacy_id=2630</comment>
+  </data>
+  <data name="Text_164" xml:space="preserve">
+    <value>Você completou a tarefa com segurança, aprecio seu trabalho duro e força de vontade.</value>
+    <comment>legacy_id=164</comment>
+  </data>
+  <data name="Answer_164_Slot_0" xml:space="preserve">
+    <value>Continue falando.</value>
+    <comment>legacy_id=2640</comment>
+  </data>
+  <data name="Text_165" xml:space="preserve">
+    <value>Você trouxe grande ajuda para a construção da paz do Continente de MU e Uivo do Lobo com as informações e todos os monstros destruídos.</value>
+    <comment>legacy_id=165</comment>
+  </data>
+  <data name="Answer_165_Slot_0" xml:space="preserve">
+    <value>Termine de contar a história</value>
+    <comment>legacy_id=2650</comment>
+  </data>
+  <data name="Text_166" xml:space="preserve">
+    <value>Você ainda não está qualificado. Visite o Guarda de Segurança Mallon e volte quando estiver totalmente qualificado para a missão.</value>
+    <comment>legacy_id=166</comment>
+  </data>
+  <data name="Answer_166_Slot_0" xml:space="preserve">
+    <value>Termine a história.</value>
+    <comment>legacy_id=2660</comment>
+  </data>
+  <data name="Text_167" xml:space="preserve">
+    <value>Você não tem dinheiro suficiente. Ofereça 10.000.000 de Zens a Lugard para pedir esta missão.</value>
+    <comment>legacy_id=167</comment>
+  </data>
+  <data name="Answer_167_Slot_0" xml:space="preserve">
+    <value>Voltarei quando estiver pronto.</value>
+    <comment>legacy_id=2670</comment>
+  </data>
+  <data name="Text_168" xml:space="preserve">
+    <value>Sua coragem e iniciativa mostraram grande esperança para todos nós.</value>
+    <comment>legacy_id=168</comment>
+  </data>
+  <data name="Answer_168_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2680</comment>
+  </data>
+  <data name="Text_169" xml:space="preserve">
+    <value>Balgass se escondeu em um local separado para restaurar seu corpo cansado.</value>
+    <comment>legacy_id=169</comment>
+  </data>
+  <data name="Answer_169_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2690</comment>
+  </data>
+  <data name="Text_170" xml:space="preserve">
+    <value>Para seguir a missão confiada por Lugar, a localização exata de Balgass deverá ser encontrada e o exército em treinamento deverá ser destruído.</value>
+    <comment>legacy_id=170</comment>
+  </data>
+  <data name="Answer_170_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2700</comment>
+  </data>
+  <data name="Text_171" xml:space="preserve">
+    <value>A missão final a realizar depois da missão de Lugar inclui um teste enorme e difícil. Ainda está interessado?</value>
+    <comment>legacy_id=171</comment>
+  </data>
+  <data name="Answer_171_Slot_0" xml:space="preserve">
+    <value>Ouvir novamente.</value>
+    <comment>legacy_id=2710</comment>
+  </data>
+  <data name="Answer_171_Slot_1" xml:space="preserve">
+    <value>Aceitar o pedido</value>
+    <comment>legacy_id=2711</comment>
+  </data>
+  <data name="Answer_171_Slot_2" xml:space="preserve">
+    <value>Negar o pedido</value>
+    <comment>legacy_id=2712</comment>
+  </data>
+  <data name="Text_172" xml:space="preserve">
+    <value>Entre pela porta na borda ao norte do Quartel de Balgass; Teremos o local pronto com antecedência.</value>
+    <comment>legacy_id=172</comment>
+  </data>
+  <data name="Answer_172_Slot_0" xml:space="preserve">
+    <value>Termine de contar a história</value>
+    <comment>legacy_id=2720</comment>
+  </data>
+  <data name="Text_173" xml:space="preserve">
+    <value>Parabéns, você passou no teste final de Lugar. E agora sua bênção estará com você aonde for.</value>
+    <comment>legacy_id=173</comment>
+  </data>
+  <data name="Answer_173_Slot_0" xml:space="preserve">
+    <value>Continuar ouvindo.</value>
+    <comment>legacy_id=2730</comment>
+  </data>
+  <data name="Text_174" xml:space="preserve">
+    <value>Seu trabalho duro ajudou a manter a paz no Continente de MU e Uivo do Lobo contra a nova ameaça de Balgass. Agradeço muito sua ajuda.</value>
+    <comment>legacy_id=174</comment>
+  </data>
+  <data name="Answer_174_Slot_0" xml:space="preserve">
+    <value>Termine de contar a história</value>
+    <comment>legacy_id=2740</comment>
+  </data>
+</root>

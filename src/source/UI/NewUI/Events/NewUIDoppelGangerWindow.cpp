@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 
@@ -46,8 +47,8 @@ bool CNewUIDoppelGangerWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMn
 
     LoadImages();
 
-    InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 190, GlobalText[1593]);
-    InitButton(&m_BtnClose, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 360, GlobalText[1002]);
+    InitButton(&m_BtnEnter, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 190, I18N::Game::Enter);
+    InitButton(&m_BtnClose, m_Pos.x + INVENTORY_WIDTH / 2 - 27, m_Pos.y + 360, I18N::Game::Close388);
 
     Show(false);
 
@@ -137,16 +138,16 @@ bool CNewUIDoppelGangerWindow::Render()
 
     g_pRenderText->SetFont(g_hFont);
     wchar_t szTextOut[2][300];
-    CutStr(GlobalText[2757], szTextOut[0], 140, 2, 300);
+    CutStr(I18N::Game::OnlyThoseInPossessionOfAMirrorOfDimensions, szTextOut[0], 140, 2, 300);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szTextOut[0], 190, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 15, szTextOut[1], 190, 0, RT3_SORT_CENTER);
-    CutStr(GlobalText[2758], szTextOut[0], 100, 2, 300);
+    CutStr(I18N::Game::MayPassThroughTheDoppelgangerGate, szTextOut[0], 100, 2, 300);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 30, szTextOut[0], 190, 0, RT3_SORT_CENTER);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 45, szTextOut[1], 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 60, GlobalText[2759], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 60, I18N::Game::WillYouShowMeYourMirror, 190, 0, RT3_SORT_CENTER);
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 120, GlobalText[2760], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 120, I18N::Game::MirrorOfDimensions, 190, 0, RT3_SORT_CENTER);
 
     if (m_bIsEnterButtonLocked == TRUE)
     {
@@ -169,14 +170,14 @@ bool CNewUIDoppelGangerWindow::Render()
     RenderImage(IMAGE_DOPPELGANGERWINDOW_LINE, m_Pos.x + 1, m_Pos.y + 130 + 90, 188.f, 21.f);
 
     g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 210, GlobalText[2761], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 210, I18N::Game::EntryTime, 190, 0, RT3_SORT_CENTER);
     if (m_iRemainTime == 0)
     {
-        mu_swprintf(szText, GlobalText[2164]);
+        mu_swprintf(szText, I18N::Game::YouMayNowEnter);
     }
     else
     {
-        mu_swprintf(szText, GlobalText[2762], m_iRemainTime);
+        mu_swprintf(szText, I18N::Game::EnterAfterDMinutes, m_iRemainTime);
     }
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 230, szText, 190, 0, RT3_SORT_CENTER);
 
@@ -255,7 +256,7 @@ void CNewUIDoppelGangerWindow::RenderFrame()
     g_pRenderText->SetTextColor(220, 220, 220, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
 
-    mu_swprintf(szText, L"%ls", GlobalText[2756]);
+    mu_swprintf(szText, L"%ls", I18N::Game::Lugard);
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 

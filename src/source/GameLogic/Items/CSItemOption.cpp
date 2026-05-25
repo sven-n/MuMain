@@ -15,6 +15,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/CSItemOption.h"
+#include "I18N/All.h"
 
 #include <algorithm>
 #include <array>
@@ -389,7 +390,7 @@ bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
     switch (option + AT_SET_OPTION_IMPROVE_STRENGTH)
     {
     case AT_SET_OPTION_IMPROVE_MAGIC_POWER:
-        mu_swprintf(text, GlobalText[632], value);
+        mu_swprintf(text, I18N::Game::IncreaseWizardryDmgD, value);
         return true;
 
     case AT_SET_OPTION_IMPROVE_STRENGTH:
@@ -399,7 +400,7 @@ bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
     case AT_SET_OPTION_IMPROVE_CHARISMA:
     case AT_SET_OPTION_IMPROVE_ATTACK_MIN:
     case AT_SET_OPTION_IMPROVE_ATTACK_MAX:
-        mu_swprintf(text, GlobalText[950 + option], value);
+        mu_swprintf(text, I18N::Game::Lookup(950 + option), value);
         return true;
 
     case AT_SET_OPTION_IMPROVE_DAMAGE:
@@ -415,19 +416,19 @@ bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
     case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE:
     case AT_SET_OPTION_IMPROVE_SKILL_ATTACK:
     case AT_SET_OPTION_DOUBLE_DAMAGE:
-        mu_swprintf(text, GlobalText[949 + option], value);
+        mu_swprintf(text, I18N::Game::Lookup(949 + option), value);
         return true;
 
     case AT_SET_OPTION_DISABLE_DEFENCE:
-        mu_swprintf(text, GlobalText[970], value);
+        mu_swprintf(text, I18N::Game::IgnoreEnemiesDefensiveSkillD, value);
         return true;
 
     case AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE:
-        mu_swprintf(text, GlobalText[983], value);
+        mu_swprintf(text, I18N::Game::IncreaseDamageWhenUsingTwoHandedWeaponsD, value);
         return true;
 
     case AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE:
-        mu_swprintf(text, GlobalText[984], value);
+        mu_swprintf(text, I18N::Game::IncreaseDefensiveSkillWhenUsingShieldWeaponsD, value);
         return true;
 
     case AT_SET_OPTION_IMPROVE_ATTACK_1:
@@ -444,7 +445,7 @@ bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
     case AT_SET_OPTION_WATER_MASTERY:
     case AT_SET_OPTION_WIND_MASTERY:
     case AT_SET_OPTION_EARTH_MASTERY:
-        mu_swprintf(text, GlobalText[971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)], value);
+        mu_swprintf(text, I18N::Game::Lookup(971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)), value);
         return true;
     default:
         return false;
@@ -577,19 +578,19 @@ bool CSItemOption::GetDefaultOptionText(const ITEM* ip, wchar_t* Text)
     switch (ItemAttribute[ip->Type].AttType)
     {
     case SET_OPTION_STRENGTH:
-        mu_swprintf(Text, GlobalText[950], ip->AncientBonusOption * 5);
+        mu_swprintf(Text, I18N::Game::IncreaseStrengthD, ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_DEXTERITY:
-        mu_swprintf(Text, GlobalText[951], ip->AncientBonusOption * 5);
+        mu_swprintf(Text, I18N::Game::IncreaseAgilityD, ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_ENERGY:
-        mu_swprintf(Text, GlobalText[952], ip->AncientBonusOption * 5);
+        mu_swprintf(Text, I18N::Game::IncreaseEnergyD, ip->AncientBonusOption * 5);
         break;
 
     case SET_OPTION_VITALITY:
-        mu_swprintf(Text, GlobalText[953], ip->AncientBonusOption * 5);
+        mu_swprintf(Text, I18N::Game::IncreaseStaminaD, ip->AncientBonusOption * 5);
         break;
 
     default:
@@ -653,7 +654,7 @@ int CSItemOption::RenderDefaultOptionText(const ITEM* ip, int TextNum)
 
         if ((ip->Type >= ITEM_RING_OF_ICE && ip->Type <= ITEM_RING_OF_POISON) || (ip->Type >= ITEM_PENDANT_OF_LIGHTING && ip->Type <= ITEM_PENDANT_OF_FIRE) || (ip->Type >= ITEM_RING_OF_FIRE && ip->Type <= ITEM_PENDANT_OF_WATER))
         {
-            mu_swprintf(TextList[TNum], GlobalText[1165]); // "Increase Attribute Damage"
+            mu_swprintf(TextList[TNum], I18N::Game::IncreaseAttributeDamage); // "Increase Attribute Damage"
             TextListColor[TNum] = TEXT_COLOR_BLUE;
             TNum++;
         }
@@ -904,7 +905,7 @@ void CSItemOption::RenderSetOptionButton(const int StartX, const int StartY)
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0, 0, 0, 255);
     g_pRenderText->SetBgColor(100, 0, 0, 0);
-    mu_swprintf(Text, L"[%ls]", GlobalText[989]);
+    mu_swprintf(Text, L"[%ls]", I18N::Game::SetOption);
     g_pRenderText->RenderText(StartX + 96, (int)(y + 3), Text, 0, 0, RT3_WRITE_CENTER);
 
     g_pRenderText->SetTextColor(0xffffffff);
@@ -943,7 +944,7 @@ void CSItemOption::RenderSetOptionList(const int StartX, const int StartY)
             const auto& set = m_SetSearchResult[i];
 
             // print set name:
-            mu_swprintf(TextList[TextNum], L"%ls %ls", set.SetName, GlobalText[1089]);
+            mu_swprintf(TextList[TextNum], L"%ls %ls", set.SetName, I18N::Game::Set);
             TextListColor[TextNum] = TEXT_COLOR_YELLOW;
             TextBold[TextNum] = true;
             TextNum++;
@@ -1006,7 +1007,7 @@ void CSItemOption::RenderOptionHelper(void)
     }
 
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++;
-    mu_swprintf(TextList[TextNum], L"%ls %ls %ls", setOption.strSetName, GlobalText[1089], GlobalText[159]);
+    mu_swprintf(TextList[TextNum], L"%ls %ls %ls", setOption.strSetName, I18N::Game::Set, I18N::Game::ItemOptionInfo);
     TextListColor[TextNum] = TEXT_COLOR_YELLOW;
     TextNum++;
 
@@ -1078,7 +1079,7 @@ int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bI
 
 
     mu_swprintf(TextList[TNum], L"\n"); TNum++;
-    mu_swprintf(TextList[TNum], L"%ls %ls", GlobalText[1089], GlobalText[159]);
+    mu_swprintf(TextList[TNum], L"%ls %ls", I18N::Game::Set, I18N::Game::ItemOptionInfo);
     TextListColor[TNum] = TEXT_COLOR_YELLOW;
     TNum++;
 

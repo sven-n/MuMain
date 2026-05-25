@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "I18N/All.h"
 
 #include "UI/NewUI/HUD/NewUIMiniMap.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -46,7 +47,7 @@ bool SEASON3B::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_MINIMAP_INTERFACE + 6, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 610, 3, 85, 85);
-    m_BtnExit.ChangeToolTipText(GlobalText[1002], true);	// 1002 "�ݱ�"
+    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);	// 1002 "�ݱ�"
 
     SetPos(x, y);
 

@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "UI/NewUI/Widgets/NewUIChatInputBox.h"
+#include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/HUD/NewUIChatLogWindow.h"
@@ -541,7 +542,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                 {
                     //if (CheckAbuseFilter(szChatText))
                     //{
-                    //    wstrText = GlobalText[570];
+                    //    wstrText = I18N::Game::PwnedByTheFilter;
                     //}
 
                     if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && wcslen(szChatText) && wcslen(szWhisperID) > 0)
@@ -550,9 +551,9 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                         g_pChatListBox->AddText(Hero->ID, szChatText, SEASON3B::TYPE_WHISPER_MESSAGE);
                         AddWhsprIDHistory(szWhisperID);
                     }
-                    else if (wcsncmp(szChatText, GlobalText[260], GlobalText.GetStringSize(260)) == 0)
+                    else if (wcsncmp(szChatText, I18N::Game::Warp, wcslen(I18N::Game::Warp)) == 0)
                     {
-                        wchar_t* pszMapName = szChatText + GlobalText.GetStringSize(260) + 1;
+                        wchar_t* pszMapName = szChatText + wcslen(I18N::Game::Warp) + 1;
                         int iMapIndex = g_pMoveCommandWindow->GetMapIndexFromMovereq(pszMapName);
 
                         if (g_pMoveCommandWindow->IsTheMapInDifferentServer(gMapManager.WorldActive, iMapIndex))
@@ -763,7 +764,7 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
         1681, 1682, 1683, 3321,
         1684, 1685, 750, 1686, 751, 752 };
 
-    mu_swprintf(strTooltip, L"%ls", GlobalText[iTextIndex[m_iTooltipType]]);
+    mu_swprintf(strTooltip, L"%ls", I18N::Game::Lookup(iTextIndex[m_iTooltipType]));
 
     SIZE fontsize;
     g_pRenderText->SetFont(g_hFont);
