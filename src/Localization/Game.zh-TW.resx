@@ -496,6 +496,18 @@
     <value>F4 : 調整聊天視窗大小</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F9 - Toggle 3D Camera" xml:space="preserve">
+    <value>F9 - 切換 3D 攝影機</value>
+  </data>
+  <data name="F10 - Lock / Unlock Camera Zoom" xml:space="preserve">
+    <value>F10 - 鎖定 / 解鎖攝影機縮放</value>
+  </data>
+  <data name="F11 - Reset Camera View" xml:space="preserve">
+    <value>F11 - 重置攝影機視角</value>
+  </data>
+  <data name="Home - Toggle MU Helper" xml:space="preserve">
+    <value>Home - 切換 MU Helper</value>
+  </data>
   <data name="Enter: Chatting Mode" xml:space="preserve">
     <value>進入：聊天模式</value>
     <comment>legacy_id=125</comment>

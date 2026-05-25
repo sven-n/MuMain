@@ -10,19 +10,6 @@
 
 using namespace SEASON3B;
 
-namespace
-{
-    // Engine-only help-text entries. These three lines describe debug camera
-    // hotkeys that the original game didn't ship with, so they live outside
-    // the resx-driven translation pipeline; they're rendered as-is in the
-    // F1 help panel.
-    constexpr const wchar_t* kCustomHelpLines[] = {
-        L"F9 - Toggle 3D Camera",
-        L"F10 - Lock / Unlock Camera Zoom",
-        L"F11 - Reset Camera View",
-    };
-}
-
 SEASON3B::CNewUIHelpWindow::CNewUIHelpWindow()
 {
     m_pNewUIMng = NULL;
@@ -142,8 +129,15 @@ bool SEASON3B::CNewUIHelpWindow::Render()
             iTextNum++;
         }
 
-        // Insert engine-added F9 / F10 / F11 entries between F4 and the rest.
-        for (const wchar_t* line : kCustomHelpLines)
+        // Insert engine-added camera and MU Helper hotkey entries between F4
+        // and the rest of the shipped entries.
+        const wchar_t* const extraHelpLines[] = {
+            I18N::Game::F9Toggle3DCamera,
+            I18N::Game::F10LockUnlockCameraZoom,
+            I18N::Game::F11ResetCameraView,
+            I18N::Game::HomeToggleMUHelper,
+        };
+        for (const wchar_t* line : extraHelpLines)
         {
             wcsncpy_s(TextList[iTextNum], line, 99);
             TextListColor[iTextNum] = TEXT_COLOR_WHITE;

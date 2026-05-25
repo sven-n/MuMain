@@ -496,6 +496,18 @@
     <value>F4 : Größe des Chatfensters anpassen</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F9 - Toggle 3D Camera" xml:space="preserve">
+    <value>F9 - 3D-Kamera umschalten</value>
+  </data>
+  <data name="F10 - Lock / Unlock Camera Zoom" xml:space="preserve">
+    <value>F10 - Kamera-Zoom sperren / entsperren</value>
+  </data>
+  <data name="F11 - Reset Camera View" xml:space="preserve">
+    <value>F11 - Kameraansicht zurücksetzen</value>
+  </data>
+  <data name="Home - Toggle MU Helper" xml:space="preserve">
+    <value>Home - MU Helper umschalten</value>
+  </data>
   <data name="Enter: Chatting Mode" xml:space="preserve">
     <value>Geben Sie ein: Chat-Modus</value>
     <comment>legacy_id=125</comment>

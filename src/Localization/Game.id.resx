@@ -496,6 +496,18 @@
     <value>F4 : Sesuaikan ukuran Jendela Obrolan</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F9 - Toggle 3D Camera" xml:space="preserve">
+    <value>F9 - Alihkan Kamera 3D</value>
+  </data>
+  <data name="F10 - Lock / Unlock Camera Zoom" xml:space="preserve">
+    <value>F10 - Kunci / Buka Kunci Zoom Kamera</value>
+  </data>
+  <data name="F11 - Reset Camera View" xml:space="preserve">
+    <value>F11 - Atur Ulang Tampilan Kamera</value>
+  </data>
+  <data name="Home - Toggle MU Helper" xml:space="preserve">
+    <value>Home - Alihkan MU Helper</value>
+  </data>
   <data name="Enter: Chatting Mode" xml:space="preserve">
     <value>Masuk: Mode Obrolan</value>
     <comment>legacy_id=125</comment>
