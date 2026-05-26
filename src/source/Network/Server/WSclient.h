@@ -3645,7 +3645,14 @@ typedef struct
     BYTE PickAllNearItems : 1;
     BYTE PickSelectedItems : 1;
     BYTE PetAttack;                          // Index: 32
-    BYTE _UnusedPadding[36];
+    
+    BYTE bUseSelfDefense : 1;                // Index: 33 (bit 0)
+    BYTE bAutoAcceptFriend : 1;              // Index: 33 (bit 1)
+    BYTE bAutoAcceptGuild : 1;               // Index: 33 (bit 2)
+    BYTE bFallbackBasicAttack : 1;           // Index: 33 (bit 3)
+    BYTE : 4;                                // Unused bits of Index 33
+
+    BYTE _UnusedPadding[35];                 // Index: 34 (35 bytes remaining)
     char ExtraItems[12][15];                 // Index: 69
 } PRECEIVE_MUHELPER_DATA, * LPRECEIVE_MUHELPER_DATA;
 #pragma pack(pop)

@@ -98,6 +98,7 @@ namespace MUHelper
 		bool bUseSelfDefense = false;
 		bool bAutoAcceptFriend = false;
 		bool bAutoAcceptGuild = false;
+		bool bFallbackBasicAttack = true;
 	} ConfigData;
 
 	class ConfigDataSerDe {

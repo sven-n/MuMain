@@ -12878,4 +12878,7 @@
     <value>Level: %u | Resets: %u</value>
     <comment>legacy_id=3810</comment>
   </data>
+  <data name="BasicAttackFallback" xml:space="preserve">
+    <value>Basic Attack Fallback</value>
+  </data>
 </root>

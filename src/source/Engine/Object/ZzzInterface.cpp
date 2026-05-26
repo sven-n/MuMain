@@ -178,6 +178,18 @@ DWORD g_dwOneToOneTick = 0;
 
 bool g_bGMObservation = false;
 
+static bool IsElfSupportSkill(int skill)
+{
+    return skill == AT_SKILL_HEALING
+        || skill == AT_SKILL_HEALING_STR
+        || skill == AT_SKILL_ATTACK
+        || skill == AT_SKILL_ATTACK_STR
+        || skill == AT_SKILL_ATTACK_MASTERY
+        || skill == AT_SKILL_DEFENSE
+        || skill == AT_SKILL_DEFENSE_STR
+        || skill == AT_SKILL_DEFENSE_MASTERY;
+}
+
 #ifdef LEM_FIX_USER_LOGOUT
 bool g_bExit = false;
 #endif // LEM_FIX_USER_LOGOUT [lem_2010.8.18]
@@ -2488,6 +2500,13 @@ void UseSkillElf(CHARACTER* c, OBJECT* o)
     if (g_MovementSkill.m_iTarget >= 0 && g_MovementSkill.m_iTarget < MAX_CHARACTERS_CLIENT)
     {
         TKey = getTargetCharacterKey(c, g_MovementSkill.m_iTarget);
+    }
+    else if (IsElfSupportSkill(Skill)
+        && SelectedCharacter >= 0
+        && SelectedCharacter < MAX_CHARACTERS_CLIENT
+        && CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
+    {
+        TKey = CharactersClient[SelectedCharacter].Key;
     }
 
     switch (Skill)
@@ -4885,7 +4904,21 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
         g_MovementSkill.m_bMagic = TRUE;
         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-        g_MovementSkill.m_iTarget = SelectedCharacter;
+        if (IsElfSupportSkill(Skill)
+            && SelectedCharacter >= 0
+            && SelectedCharacter < MAX_CHARACTERS_CLIENT
+            && CharactersClient[SelectedCharacter].Object.Kind == KIND_PLAYER)
+        {
+            g_MovementSkill.m_iTarget = SelectedCharacter;
+        }
+        else if (CheckAttack())
+        {
+            g_MovementSkill.m_iTarget = SelectedCharacter;
+        }
+        else
+        {
+            g_MovementSkill.m_iTarget = -1;
+        }
     }
     if (!CheckTile(c, o, Distance))
     {
