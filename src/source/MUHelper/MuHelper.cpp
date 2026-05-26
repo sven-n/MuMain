@@ -869,6 +869,11 @@ namespace MUHelper
 
     int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
+        if (g_pSkillList == nullptr)
+        {
+            return 0;
+        }
+
         const int iSkillIndex = g_pSkillList->GetSkillIndex(iSkill);
         if (iSkillIndex == -1)
         {
