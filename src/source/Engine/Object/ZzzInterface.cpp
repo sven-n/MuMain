@@ -4885,7 +4885,7 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
         g_MovementSkill.m_bMagic = TRUE;
         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-        g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
+        g_MovementSkill.m_iTarget = SelectedCharacter;
     }
     if (!CheckTile(c, o, Distance))
     {
@@ -6262,7 +6262,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
         g_MovementSkill.m_bMagic = TRUE;
         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-        g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
+        g_MovementSkill.m_iTarget = SelectedCharacter;
 
         switch (Skill)
         {
@@ -7135,10 +7135,6 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                 }
                 if (ClassIndex == CLASS_ELF)
                 {
-                    ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
-                    g_MovementSkill.m_bMagic = TRUE;
-                    g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-                    g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
                     if (SkillElf(c, &CharacterMachine->Equipment[i]))
                     {
                         return (int) ExecuteSkillComplete(c);
