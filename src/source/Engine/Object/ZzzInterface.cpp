@@ -6295,7 +6295,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
         g_MovementSkill.m_bMagic = TRUE;
         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-        g_MovementSkill.m_iTarget = SelectedCharacter;
+        g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
 
         switch (Skill)
         {
@@ -7151,15 +7151,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                     {
                         g_MovementSkill.m_bMagic = TRUE;
                         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-
-                        if (CheckAttack())
-                        {
-                            g_MovementSkill.m_iTarget = SelectedCharacter;
-                        }
-                        else
-                        {
-                            g_MovementSkill.m_iTarget = -1;
-                        }
+                        g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
                         if (SkillWarrior(c, &CharacterMachine->Equipment[i]))
                         {
                             return (int) ExecuteSkillComplete(c);
@@ -7168,6 +7160,10 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                 }
                 if (ClassIndex == CLASS_ELF)
                 {
+                    ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
+                    g_MovementSkill.m_bMagic = TRUE;
+                    g_MovementSkill.m_iSkill = Hero->CurrentSkill;
+                    g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
                     if (SkillElf(c, &CharacterMachine->Equipment[i]))
                     {
                         return (int) ExecuteSkillComplete(c);
