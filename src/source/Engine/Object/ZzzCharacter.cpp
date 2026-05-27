@@ -4855,6 +4855,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
             case AT_SKILL_TRIPLE_SHOT_STR:
             case AT_SKILL_TRIPLE_SHOT_MASTERY:
                 CreateArrows(c, o, NULL, FindHotKey((c->Skill)), 1);
+                break;
             case AT_SKILL_PENETRATION:
             case AT_SKILL_PENETRATION_STR:
                 CreateArrows(c, o, NULL, FindHotKey((c->Skill)), 0, (c->Skill));

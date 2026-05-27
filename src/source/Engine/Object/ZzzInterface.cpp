@@ -195,7 +195,7 @@ void PrintPKLog(CHARACTER* pCha)
 
     if (pCha)
     {
-        if (pCha->PK >= PVP_MURDERER2 && pCha->Object.Type == KIND_PLAYER)
+        if (pCha->PK >= PVP_MURDERER2 && pCha->Object.Kind == KIND_PLAYER)
         {
             g_ErrorReport.Write(L"!!!!!!!!!!!!!!!!! PK !!!!!!!!!!!!!!!\n");
             g_ErrorReport.WriteCurrentTime();
@@ -1870,7 +1870,7 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
         }
     }
 
-    if ((sc->PK >= PVP_MURDERER2 && sc->Object.Type == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
+    if ((sc->PK >= PVP_MURDERER2 && sc->Object.Kind == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
     {
         return sc->Key;
     }
@@ -4885,7 +4885,14 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
         g_MovementSkill.m_bMagic = TRUE;
         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-        g_MovementSkill.m_iTarget = SelectedCharacter;
+        if (CheckAttack())
+        {
+            g_MovementSkill.m_iTarget = SelectedCharacter;
+        }
+        else
+        {
+            g_MovementSkill.m_iTarget = -1;
+        }
     }
     if (!CheckTile(c, o, Distance))
     {
@@ -6262,7 +6269,14 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
         g_MovementSkill.m_bMagic = TRUE;
         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-        g_MovementSkill.m_iTarget = SelectedCharacter;
+        if (CheckAttack())
+        {
+            g_MovementSkill.m_iTarget = SelectedCharacter;
+        }
+        else
+        {
+            g_MovementSkill.m_iTarget = -1;
+        }
 
         switch (Skill)
         {
@@ -7135,6 +7149,16 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                 }
                 if (ClassIndex == CLASS_ELF)
                 {
+                    g_MovementSkill.m_bMagic = TRUE;
+                    g_MovementSkill.m_iSkill = Hero->CurrentSkill;
+                    if (CheckAttack())
+                    {
+                        g_MovementSkill.m_iTarget = SelectedCharacter;
+                    }
+                    else
+                    {
+                        g_MovementSkill.m_iTarget = -1;
+                    }
                     if (SkillElf(c, &CharacterMachine->Equipment[i]))
                     {
                         return (int) ExecuteSkillComplete(c);
