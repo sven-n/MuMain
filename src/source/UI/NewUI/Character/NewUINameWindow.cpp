@@ -96,19 +96,12 @@ bool SEASON3B::CNewUINameWindow::UpdateKeyEvent()
 
 bool SEASON3B::CNewUINameWindow::Update()
 {
-    if (GetFocus() == g_hWnd)
+    const bool bF8Down = (GetAsyncKeyState(VK_F8) & 0x8000) != 0;
+    if (bF8Down && !s_bF8KeyPressed)
     {
-        const bool bF8Down = (GetAsyncKeyState(VK_F8) & 0x8000) != 0;
-        if (bF8Down && !s_bF8KeyPressed)
-        {
-            m_bShowMonsterHealthBar = !m_bShowMonsterHealthBar;
-        }
-        s_bF8KeyPressed = bF8Down;
+        m_bShowMonsterHealthBar = !m_bShowMonsterHealthBar;
     }
-    else
-    {
-        s_bF8KeyPressed = false;
-    }
+    s_bF8KeyPressed = bF8Down;
 
     return true;
 }
@@ -265,8 +258,6 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
     if (!m_bShowMonsterHealthBar)
         return;
 
-    BeginOpengl();
-
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -287,8 +278,8 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
         CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
 
         if (ScreenX < -100 || ScreenY < -100
-            || ScreenX > (int)(WindowWidth + 100)
-            || ScreenY > (int)(WindowHeight + 100))
+            || ScreenX > (REFERENCE_WIDTH + 100)
+            || ScreenY > (REFERENCE_HEIGHT + 100))
             continue;
 
         const auto steps = 20;
@@ -327,8 +318,6 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
         }
         DisableAlphaBlend();
     }
-
-    EndOpengl();
 }
 
 float SEASON3B::CNewUINameWindow::GetLayerDepth()
