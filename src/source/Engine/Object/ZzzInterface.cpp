@@ -207,7 +207,7 @@ void PrintPKLog(CHARACTER* pCha)
 
     if (pCha)
     {
-        if (pCha->PK >= PVP_MURDERER2 && pCha->Object.Type == KIND_PLAYER)
+        if (pCha->PK >= PVP_MURDERER2 && pCha->Object.Kind == KIND_PLAYER)
         {
             g_ErrorReport.Write(L"!!!!!!!!!!!!!!!!! PK !!!!!!!!!!!!!!!\n");
             g_ErrorReport.WriteCurrentTime();
@@ -1882,7 +1882,7 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
         }
     }
 
-    if ((sc->PK >= PVP_MURDERER2 && sc->Object.Type == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
+    if ((sc->PK >= PVP_MURDERER2 && sc->Object.Kind == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
     {
         return sc->Key;
     }
