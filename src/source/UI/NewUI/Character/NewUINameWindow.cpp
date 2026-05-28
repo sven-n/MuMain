@@ -14,6 +14,8 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Events/MatchEvent.h"
 #include "World/MapInfra/MapManager.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/CameraState.h"
 
 // DevEditor forward declarations (must be at global scope)
 #ifdef _EDITOR
@@ -25,6 +27,8 @@ using namespace SEASON3B;
 namespace
 {
 constexpr int GROUND_ITEM_LABEL_BUILD_BUDGET_PER_FRAME = 32;
+
+bool s_bF8KeyPressed = false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -37,6 +41,7 @@ SEASON3B::CNewUINameWindow::CNewUINameWindow()
     m_Pos.x = m_Pos.y = 0;
 
     m_bShowItemName = false;
+    m_bShowMonsterHealthBar = false;
 }
 
 SEASON3B::CNewUINameWindow::~CNewUINameWindow()
@@ -91,6 +96,13 @@ bool SEASON3B::CNewUINameWindow::UpdateKeyEvent()
 
 bool SEASON3B::CNewUINameWindow::Update()
 {
+    const bool bF8Down = (GetAsyncKeyState(VK_F8) & 0x8000) != 0;
+    if (bF8Down && !s_bF8KeyPressed)
+    {
+        m_bShowMonsterHealthBar = !m_bShowMonsterHealthBar;
+    }
+    s_bF8KeyPressed = bF8Down;
+
     return true;
 }
 
@@ -102,6 +114,7 @@ bool SEASON3B::CNewUINameWindow::Render()
     RenderTimes();
     matchEvent::RenderMatchTimes();
     RenderBooleans();
+    RenderMonsterHealthBars();
     DrawPersonalShopTitleImp();
     DisableAlphaBlend();
     return true;
@@ -175,7 +188,9 @@ void SEASON3B::CNewUINameWindow::RenderName()
                     glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
                     RenderColor((float)(ScreenX + borderWidth), (float)(ScreenY + borderWidth), stepsWidth, 1.f);
 
-                    int stepHP = (int)(c->HealthStatus * steps);
+        float health = c->HealthStatus;
+        if (health < 0.0f) health = 1.0f;
+        int stepHP = (int)(health * steps);
 
                     glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
                     for (int k = 0; k < stepHP; ++k)
@@ -235,6 +250,70 @@ void SEASON3B::CNewUINameWindow::RenderName()
                 }
             }
         }
+    }
+}
+
+void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
+{
+    if (!m_bShowMonsterHealthBar)
+        return;
+
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        OBJECT* o = &c->Object;
+
+        if (!o->Live || !o->Visible || o->Kind != KIND_MONSTER)
+            continue;
+
+        vec3_t Position;
+        Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 60.f, Position);
+
+        int ScreenX, ScreenY;
+        vec3_t transformPos;
+        VectorTransform(Position, g_Camera.Matrix, transformPos);
+        if (transformPos[2] >= 0)
+            continue;
+
+        BeginOpengl();
+        CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
+        EndOpengl();
+
+        const auto steps = 20;
+        const auto borderWidth = 2.f;
+        const auto widthPerStep = 4;
+        const auto stepSeparatorWidth = 1;
+        const auto stepsWidth = steps * widthPerStep - 2 * stepSeparatorWidth;
+        const auto totalWidth = stepsWidth + borderWidth * 2;
+
+        auto hpBarX = ScreenX - (int)(totalWidth / 2);
+        auto hpBarY = ScreenY;
+
+        EnableAlphaTest();
+        glColor4f(0.f, 0.f, 0.f, 0.5f);
+        RenderColor((float)(hpBarX + 1), (float)(hpBarY + 1), totalWidth, 5.f);
+
+        EnableAlphaBlend();
+        glColor3f(0.2f, 0.0f, 0.0f);
+        RenderColor((float)hpBarX, (float)hpBarY, totalWidth, 5.f);
+
+        glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
+        RenderColor((float)(hpBarX + borderWidth), (float)(hpBarY + borderWidth), stepsWidth, 1.f);
+
+        float health = c->HealthStatus;
+        if (health < 0.0f) health = 1.0f;
+        int stepHP = (int)(health * steps);
+
+        glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
+        for (int k = 0; k < stepHP; ++k)
+        {
+            RenderColor(
+                (float)(hpBarX + borderWidth + (k * widthPerStep)),
+                (float)(hpBarY + borderWidth),
+                widthPerStep - stepSeparatorWidth,
+                2.f);
+        }
+        DisableAlphaBlend();
     }
 }
 
