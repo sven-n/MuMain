@@ -132,6 +132,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         // Insert engine-added camera and MU Helper hotkey entries between F4
         // and the rest of the shipped entries.
         const wchar_t* const extraHelpLines[] = {
+            I18N::Game::F8ToggleMonsterHPBar,
             I18N::Game::F9Toggle3DCamera,
             I18N::Game::F10LockUnlockCameraZoom,
             I18N::Game::F11ResetCameraView,

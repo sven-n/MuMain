@@ -496,6 +496,9 @@
     <value>F4 : 調整聊天視窗大小</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F8 - Toggle Monster HP Bar" xml:space="preserve">
+    <value>F8 - 開啟/關閉怪物血條</value>
+  </data>
   <data name="F9 - Toggle 3D Camera" xml:space="preserve">
     <value>F9 - 切換 3D 攝影機</value>
   </data>

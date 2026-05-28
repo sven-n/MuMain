@@ -263,7 +263,7 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
 
-        if (!o->Live || !o->Visible || o->Alpha <= 0.f || c->Dead > 0 || o->Kind != KIND_MONSTER)
+        if (!o->Live || !o->Visible || o->Kind != KIND_MONSTER)
             continue;
 
         vec3_t Position;
@@ -278,11 +278,6 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
         BeginOpengl();
         CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
         EndOpengl();
-
-        if (ScreenX < -100 || ScreenY < -100
-            || ScreenX > (int)(WindowWidth + 100)
-            || ScreenY > (int)(WindowHeight + 100))
-            continue;
 
         const auto steps = 20;
         const auto borderWidth = 2.f;
@@ -307,15 +302,15 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
 
         float health = c->HealthStatus;
         if (health < 0.0f) health = 1.0f;
+        int stepHP = (int)(health * steps);
 
-        float fillWidth = stepsWidth * health;
-        if (fillWidth > 0.f)
+        glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
+        for (int k = 0; k < stepHP; ++k)
         {
-            glColor3f(250.f / 255.f, 10.f / 255.f, 0.f);
             RenderColor(
-                (float)(hpBarX + borderWidth),
+                (float)(hpBarX + borderWidth + (k * widthPerStep)),
                 (float)(hpBarY + borderWidth),
-                fillWidth,
+                widthPerStep - stepSeparatorWidth,
                 2.f);
         }
         DisableAlphaBlend();

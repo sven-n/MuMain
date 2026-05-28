@@ -496,6 +496,9 @@
     <value>F4: Ajustar el tamaño de la ventana de chat</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F8 - Toggle Monster HP Bar" xml:space="preserve">
+    <value>F8 - Mostrar/ocultar barra de HP de monstruos</value>
+  </data>
   <data name="F9 - Toggle 3D Camera" xml:space="preserve">
     <value>F9 - Alternar cámara 3D</value>
   </data>
