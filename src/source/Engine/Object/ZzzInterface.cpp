@@ -4879,13 +4879,59 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
             }
         }
         break;
+
+    case AT_SKILL_HEALING:
+    case AT_SKILL_HEALING_STR:
+    case AT_SKILL_ATTACK:
+    case AT_SKILL_ATTACK_STR:
+    case AT_SKILL_ATTACK_MASTERY:
+    case AT_SKILL_DEFENSE:
+    case AT_SKILL_DEFENSE_STR:
+    case AT_SKILL_DEFENSE_MASTERY:
+        if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
+        {
+            if (CharactersClient[SelectedCharacter].Object.Kind != KIND_PLAYER)
+            {
+                Attacking = -1;
+                return;
+            }
+
+            if (c != Hero && !g_pPartyManager->IsPartyMember(SelectedCharacter))
+                return;
+
+            c->TargetCharacter = SelectedCharacter;
+
+            ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
+            g_MovementSkill.m_bMagic = TRUE;
+            g_MovementSkill.m_iSkill = Hero->CurrentSkill;
+            g_MovementSkill.m_iTarget = SelectedCharacter;
+
+            if (!CheckTile(c, o, Distance))
+            {
+                if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                {
+                    c->Movement = true;
+                    c->MovementType = MOVEMENT_SKILL;
+                    SendMove(c, o);
+                }
+                return;
+            }
+
+            SendRequestMagic(Skill, CharactersClient[g_MovementSkill.m_iTarget].Key);
+        }
+        else
+        {
+            SendRequestMagic(Skill, HeroKey);
+        }
+        SetPlayerMagic(c);
+        return;
     }
     if (SelectedCharacter != -1)
     {
         ZeroMemory(&g_MovementSkill, sizeof(g_MovementSkill));
         g_MovementSkill.m_bMagic = TRUE;
         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-        g_MovementSkill.m_iTarget = SelectedCharacter;
+        g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
     }
     if (!CheckTile(c, o, Distance))
     {
@@ -5006,17 +5052,6 @@ void AttackElf(CHARACTER* c, int Skill, float Distance)
         //			UseSkillElf( c, o);
     }
     break;
-    case AT_SKILL_HEALING:
-    case AT_SKILL_HEALING_STR:
-    case AT_SKILL_ATTACK:
-    case AT_SKILL_ATTACK_STR:
-    case AT_SKILL_ATTACK_MASTERY:
-    case AT_SKILL_DEFENSE:
-    case AT_SKILL_DEFENSE_STR:
-    case AT_SKILL_DEFENSE_MASTERY:
-        SendRequestMagic(Skill, HeroKey);
-        SetPlayerMagic(c);
-        return;
     case AT_SKILL_MULTI_SHOT:
     {
         if (!CheckArrow())
@@ -6262,7 +6297,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
         g_MovementSkill.m_bMagic = TRUE;
         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-        g_MovementSkill.m_iTarget = SelectedCharacter;
+        g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
 
         switch (Skill)
         {
@@ -7074,7 +7109,9 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
         {
             for (int i = EQUIPMENT_WEAPON_RIGHT; i <= EQUIPMENT_WEAPON_LEFT; i++)
             {
-                if (ClassIndex == CLASS_KNIGHT || ClassIndex == CLASS_DARK || ClassIndex == CLASS_DARK_LORD
+                if (ClassIndex == CLASS_KNIGHT
+                    || ClassIndex == CLASS_DARK
+                    || ClassIndex == CLASS_DARK_LORD
                     || ClassIndex == CLASS_RAGEFIGHTER)
                 {
                     bool bOk = false;
@@ -7118,15 +7155,7 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                     {
                         g_MovementSkill.m_bMagic = TRUE;
                         g_MovementSkill.m_iSkill = Hero->CurrentSkill;
-
-                        if (CheckAttack())
-                        {
-                            g_MovementSkill.m_iTarget = SelectedCharacter;
-                        }
-                        else
-                        {
-                            g_MovementSkill.m_iTarget = -1;
-                        }
+                        g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
                         if (SkillWarrior(c, &CharacterMachine->Equipment[i]))
                         {
                             return (int) ExecuteSkillComplete(c);
@@ -7135,6 +7164,9 @@ int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance)
                 }
                 if (ClassIndex == CLASS_ELF)
                 {
+                    g_MovementSkill.m_bMagic = TRUE;
+                    g_MovementSkill.m_iSkill = Hero->CurrentSkill;
+                    g_MovementSkill.m_iTarget = CheckAttack() ? SelectedCharacter : -1;
                     if (SkillElf(c, &CharacterMachine->Equipment[i]))
                     {
                         return (int) ExecuteSkillComplete(c);

@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
+#include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Social/PartyManager.h"
 #include "World/MapInfra/MapManager.h"
@@ -734,7 +735,16 @@ namespace MUHelper
         m_iCurrentSkill = SelectAttackSkill();
         if (m_iCurrentSkill > AT_SKILL_UNDEFINED)
         {
-            return SimulateAttack(m_iCurrentSkill);
+            const float fSkillDistance = gSkillManager.GetSkillDistance(m_iCurrentSkill, Hero);
+            if (CanExecuteSkill(Hero, m_iCurrentSkill, fSkillDistance))
+            {
+                return SimulateAttack(m_iCurrentSkill);
+            }
+        }
+
+        if (m_config.bFallbackBasicAttack)
+        {
+            return SimulateBasicAttack(m_iCurrentTarget);
         }
 
         return 1;
@@ -968,6 +978,82 @@ namespace MUHelper
         return (int)(iSkillResult == 1);
     }
 
+    int CMuHelper::SimulateBasicAttack(int iTarget)
+    {
+        if (iTarget == -1)
+        {
+            return 0;
+        }
+
+        const int iCharIndex = FindCharacterIndex(iTarget);
+        if (iCharIndex == MAX_CHARACTERS_CLIENT)
+        {
+            DeleteTarget(iTarget);
+            return 0;
+        }
+
+        CHARACTER* pTarget = &CharactersClient[iCharIndex];
+        if (pTarget->Dead > 0 || !IsMonster(pTarget))
+        {
+            DeleteTarget(iTarget);
+            return 0;
+        }
+
+        constexpr float BASIC_RANGE_DEFAULT = 1.8f;
+        constexpr float BASIC_RANGE_SPEAR = 2.2f;
+        constexpr float BASIC_RANGE_BOW = 6.0f;
+
+        float fRange = BASIC_RANGE_DEFAULT;
+        const int iWeaponRight = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
+        if (iWeaponRight >= ITEM_SPEAR && iWeaponRight < ITEM_SPEAR + MAX_ITEM_INDEX)
+        {
+            fRange = BASIC_RANGE_SPEAR;
+        }
+        if (gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE)
+        {
+            fRange = BASIC_RANGE_BOW;
+        }
+
+        SelectedCharacter = iCharIndex;
+        TargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
+        TargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
+
+        PATH_t tempPath;
+        const bool bHasPath = PathFinding2(Hero->PositionX, Hero->PositionY, TargetX, TargetY, &tempPath, m_iHuntingDistance + fRange);
+        if (!bHasPath)
+        {
+            DeleteTarget(iTarget);
+            return 0;
+        }
+
+        const bool bTargetNear = CheckTile(Hero, &Hero->Object, fRange);
+        const bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
+
+        if (!bTargetNear || !bNoWall)
+        {
+            Hero->Path.Lock.lock();
+            const int pathNum = std::min<int>(tempPath.PathNum, 2);
+            for (int i = 0; i < pathNum; i++)
+            {
+                Hero->Path.PathX[i] = tempPath.PathX[i];
+                Hero->Path.PathY[i] = tempPath.PathY[i];
+            }
+            Hero->Path.PathNum = pathNum;
+            Hero->Path.CurrentPath = 0;
+            Hero->Path.CurrentPathFloat = 0;
+            Hero->Path.Lock.unlock();
+
+            SendMove(Hero, &Hero->Object);
+            return 0;
+        }
+
+        Hero->MovementType = MOVEMENT_ATTACK;
+        ActionTarget = iCharIndex;
+        Attacking = 1;
+        Action(Hero, &Hero->Object, true);
+        return 1;
+    }
+
     int CMuHelper::Regroup()
     {
         if (m_config.bReturnToOriginalPosition && m_iSecondsAway > m_config.iMaxSecondsAway)
@@ -1082,7 +1168,6 @@ namespace MUHelper
         }
 
         ITEM_t* pDrop = &Items[m_iCurrentItem];
-        ITEM* pItem = &pDrop->Item;
 
         if (!pDrop->Object.Live)
         {
@@ -1096,7 +1181,7 @@ namespace MUHelper
         int iDistance = ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, { TargetX, TargetY });
         if (iDistance <= m_iObtainingDistance)
         {
-            if (!CheckTile(Hero, &Hero->Object, 1.5f))
+            if (!CheckTile(Hero, &Hero->Object, 2.0f))
             {
                 if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
                 {

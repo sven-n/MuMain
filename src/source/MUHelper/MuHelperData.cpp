@@ -138,6 +138,12 @@ namespace MUHelper
 			}
 			iItemIndex++;
 		}
+
+		// byte 33, client-local. server echoes unchanged, see MuHelperData.h
+		netData.bUseSelfDefense = gameData.bUseSelfDefense ? 1 : 0;
+		netData.bAutoAcceptFriend = gameData.bAutoAcceptFriend ? 1 : 0;
+		netData.bAutoAcceptGuild = gameData.bAutoAcceptGuild ? 1 : 0;
+		netData.bFallbackBasicAttack = gameData.bFallbackBasicAttack ? 1 : 0;
 	}
 
 	void ConfigDataSerDe::Deserialize(const PRECEIVE_MUHELPER_DATA& netData, ConfigData& gameData)
@@ -223,6 +229,12 @@ namespace MUHelper
 				}
 			}
 		}
+
+		// byte 33, client-local. server echoes unchanged, see MuHelperData.h
+		gameData.bUseSelfDefense = (bool)netData.bUseSelfDefense;
+		gameData.bAutoAcceptFriend = (bool)netData.bAutoAcceptFriend;
+		gameData.bAutoAcceptGuild = (bool)netData.bAutoAcceptGuild;
+		gameData.bFallbackBasicAttack = (bool)netData.bFallbackBasicAttack;
 	}
 
 }

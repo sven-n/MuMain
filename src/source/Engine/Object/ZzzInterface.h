@@ -46,6 +46,7 @@ extern int  SelectedNpc;
 extern int  SelectedCharacter;
 extern int  SelectedOperate;
 extern int  Attacking;
+extern int  ActionTarget;
 
 extern int   g_iFollowCharacter;
 extern int  HeroTile;
@@ -140,6 +141,7 @@ void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, u
 void Attack(CHARACTER* c);
 int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
 bool ExecuteSkillComplete(CHARACTER* c);
+bool CanExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
 bool CheckMana(CHARACTER* c, int Skill);
 bool SkillElf(CHARACTER* c, ITEM* p);
 void SendRequestMagic(int Type, int Key);
