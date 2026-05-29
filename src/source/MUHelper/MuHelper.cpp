@@ -1214,6 +1214,7 @@ namespace MUHelper
                         return 1;
                     }
 
+                    m_setSkippedItems.insert(m_iCurrentItem);
                     m_iCurrentItem = MAX_ITEMS;
                     m_iLastObtainItem = MAX_ITEMS;
                     m_iObtainStuckTicks = 0;
