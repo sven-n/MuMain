@@ -10,6 +10,14 @@
 #include <imagehlp.h>
 #include "ErrorReport.h"
 
+// Max UTF-8 bytes for a single log line. Source buffer is wchar_t[1024]; UTF-8 needs
+// up to 3 bytes per BMP character (and 4 bytes per surrogate pair), so a 1024-wchar
+// input expands to at most ~3072 bytes. 4096 gives comfortable margin.
+constexpr int MAX_LOG_LINE_BYTES = 4096;
+// Hex-dump line buffer. Output is pure ASCII (hex digits, spaces, colons, CRLF),
+// so 1 byte per source wchar is sufficient with margin.
+constexpr int MAX_HEX_LINE_BYTES = 512;
+
 void DeleteSocket();
 
 CErrorReport::CErrorReport()
@@ -50,12 +58,16 @@ void CErrorReport::Destroy(void)
 
 void CErrorReport::CutHead(void)
 {
+    // Log file is UTF-8. The "###### Log Begin ######" marker is pure ASCII, and UTF-8
+    // preserves ASCII bytes verbatim (no multi-byte sequence starts with a byte < 0x80),
+    // so byte-level strchr/strncmp on '#' reliably locates the marker even if other lines
+    // contain multi-byte sequences.
     DWORD dwNumber;
-    wchar_t lpszBuffer[128 * 1024];
-    ReadFile(m_hFile, lpszBuffer, 128 * 1024 - 1, &dwNumber, NULL);
+    char lpszBuffer[128 * 1024];
+    ReadFile(m_hFile, lpszBuffer, sizeof(lpszBuffer) - 1, &dwNumber, NULL);
     //m_iKey = Xor_ConvertBuffer( lpszBuffer, dwNumber);
     lpszBuffer[dwNumber] = '\0';
-    wchar_t* lpCut = CheckHeadToCut(lpszBuffer, dwNumber);
+    char* lpCut = CheckHeadToCut(lpszBuffer, dwNumber);
     if (dwNumber >= 32 * 1024 - 1)
     {
         lpCut = &lpszBuffer[32 * 1024 - 1];
@@ -65,26 +77,26 @@ void CErrorReport::CutHead(void)
         CloseHandle(m_hFile);
         DeleteFile(m_lpszFileName);
         m_hFile = CreateFile(m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-        DWORD dwSize = dwNumber - (lpCut - lpszBuffer);
+        DWORD dwSize = dwNumber - static_cast<DWORD>(lpCut - lpszBuffer);
         m_iKey = 0;
         WriteFile(m_hFile, lpCut, dwSize, &dwNumber, NULL);
     }
 }
 
-wchar_t* CErrorReport::CheckHeadToCut( wchar_t* lpszBuffer, DWORD dwNumber)
+char* CErrorReport::CheckHeadToCut(char* lpszBuffer, DWORD dwNumber)
 {
-    const wchar_t* lpszBegin = L"###### Log Begin ######";
-    int iLengthOfBegin = wcslen(lpszBegin);
+    const char* lpszBegin = "###### Log Begin ######";
+    int iLengthOfBegin = static_cast<int>(strlen(lpszBegin));
 
-    wchar_t* lpFoundList[128];
+    char* lpFoundList[128];
     int iFoundCount = 0;
 
-    for (wchar_t* lpFind = lpszBuffer; lpFind && *lpFind; )
+    for (char* lpFind = lpszBuffer; lpFind && *lpFind; )
     {
-        lpFind = wcschr(lpFind, (int)'#');
+        lpFind = strchr(lpFind, '#');
         if (lpFind)
         {
-            if (0 == wcsncmp(lpFind, lpszBegin, iLengthOfBegin))
+            if (0 == strncmp(lpFind, lpszBegin, iLengthOfBegin))
             {
                 lpFoundList[iFoundCount++] = lpFind;
                 lpFind += iLengthOfBegin;
@@ -111,16 +123,24 @@ BOOL CErrorReport::WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesT
 
 void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
 {
-    if (m_hFile != INVALID_HANDLE_VALUE)
-    {
-        DWORD dwNumber;
-        WriteFile(m_hFile, lpszToWrite, wcslen(lpszToWrite), &dwNumber, NULL);
+    if (m_hFile == INVALID_HANDLE_VALUE) return;
 
-        if (dwNumber == 0)
-        {
-            CloseHandle(m_hFile);
-            Create(m_lpszFileName);
-        }
+    // Convert UTF-16 wide string to UTF-8 before writing. UTF-8 is portable across
+    // locales (unlike CP_ACP, where the file's bytes depend on the writer's system
+    // codepage -- Shift-JIS on JP Windows, Windows-1252 on EN, etc. -- making logs
+    // collected from different machines ambiguous without knowing each user's locale).
+    char narrowBuf[MAX_LOG_LINE_BYTES];
+    int len = WideCharToMultiByte(CP_UTF8, 0, lpszToWrite, -1, narrowBuf, sizeof(narrowBuf), nullptr, nullptr);
+    // len includes the null terminator. 0 = conversion failed (e.g. ERROR_INSUFFICIENT_BUFFER);
+    // 1 = empty string (only null terminator). Either way, nothing to write.
+    if (len <= 1) return;
+
+    DWORD dwNumber;
+    WriteFile(m_hFile, narrowBuf, len - 1, &dwNumber, NULL);
+    if (dwNumber == 0)
+    {
+        CloseHandle(m_hFile);
+        Create(m_lpszFileName);
     }
 }
 
@@ -139,14 +159,17 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
 {
     DWORD dwWritten = 0;
     wchar_t szLine[256] = { 0, };
+    char narrowLine[MAX_HEX_LINE_BYTES];
     int offset = 0;
+    int len = 0;
     offset += mu_swprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
     for (int i = 0; i < iSize; i++) {
         offset += mu_swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
         if (i > 0 && i < iSize - 1) {
             if (i % 16 == 15) {	//. new line
                 offset += mu_swprintf(szLine + offset, L"\r\n");
-                WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
+                len = WideCharToMultiByte(CP_UTF8, 0, szLine, -1, narrowLine, sizeof(narrowLine), nullptr, nullptr);
+                if (len > 1) WriteFile(m_hFile, narrowLine, len - 1, &dwWritten, NULL);
                 offset = 0;
                 offset += mu_swprintf(szLine + offset, L"           : ");
             }
@@ -156,7 +179,8 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
         }
     }
     offset += mu_swprintf(szLine + offset, L"\r\n");
-    WriteFile(m_hFile, szLine, wcslen(szLine), &dwWritten, NULL);
+    len = WideCharToMultiByte(CP_UTF8, 0, szLine, -1, narrowLine, sizeof(narrowLine), nullptr, nullptr);
+    if (len > 1) WriteFile(m_hFile, narrowLine, len - 1, &dwWritten, NULL);
 }
 
 void CErrorReport::AddSeparator(void)

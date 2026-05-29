@@ -30,7 +30,7 @@ public:
     void Destroy(void);
 protected:
     void CutHead(void);
-    wchar_t* CheckHeadToCut(wchar_t* lpszBuffer, DWORD dwNumber);
+    char* CheckHeadToCut(char* lpszBuffer, DWORD dwNumber);
 
 protected:
     BOOL WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped);
