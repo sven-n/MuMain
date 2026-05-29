@@ -101,9 +101,6 @@ namespace MUHelper
         m_iCurrentTarget = -1;
         m_iCurrentSkill = (ActionSkillType)m_config.aiSkill[0];
         m_iCurrentItem = MAX_ITEMS;
-        m_iLastObtainItem = MAX_ITEMS;
-        m_iObtainStuckTicks = 0;
-        m_setSkippedItems.clear();
         m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
         m_iHuntingDistance = ComputeDistanceByRange(m_config.iHuntingRange);
@@ -248,8 +245,6 @@ namespace MUHelper
         {
             m_iCurrentTarget = -1;
         }
-
-        m_setSkippedItems.clear();
     }
 
     void CMuHelper::DeleteAllTargets()
@@ -1163,27 +1158,16 @@ namespace MUHelper
 
     int CMuHelper::ObtainItem()
     {
-        constexpr int MAX_OBTAIN_STUCK_TICKS = 15;
-
         if (m_iCurrentItem == MAX_ITEMS)
         {
             m_iCurrentItem = SelectItemToObtain();
             if (m_iCurrentItem == MAX_ITEMS)
             {
-                m_iLastObtainItem = MAX_ITEMS;
-                m_iObtainStuckTicks = 0;
                 return 1;
             }
         }
 
-        if (m_iCurrentItem != m_iLastObtainItem)
-        {
-            m_iLastObtainItem = m_iCurrentItem;
-            m_iObtainStuckTicks = 0;
-        }
-
         ITEM_t* pDrop = &Items[m_iCurrentItem];
-        ITEM* pItem = &pDrop->Item;
 
         if (!pDrop->Object.Live)
         {
@@ -1197,44 +1181,11 @@ namespace MUHelper
         int iDistance = ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, { TargetX, TargetY });
         if (iDistance <= m_iObtainingDistance)
         {
-            constexpr float BLOCKED_PICKUP_RANGE = 2.5f;
-
-            if (!CheckTile(Hero, &Hero->Object, 1.5f))
+            if (!CheckTile(Hero, &Hero->Object, 2.0f))
             {
-                if (IsMonsterOnTile(TargetX, TargetY))
-                {
-                    if (CheckTile(Hero, &Hero->Object, BLOCKED_PICKUP_RANGE))
-                    {
-                        if (SendGetItem == -1)
-                        {
-                            SendGetItem = m_iCurrentItem;
-                            SocketClient->ToGameServer()->SendPickupItemRequest(m_iCurrentItem);
-                            DeleteItem(m_iCurrentItem);
-                        }
-                        return 1;
-                    }
-
-                    m_setSkippedItems.insert(m_iCurrentItem);
-                    m_iCurrentItem = MAX_ITEMS;
-                    m_iLastObtainItem = MAX_ITEMS;
-                    m_iObtainStuckTicks = 0;
-                    return 1;
-                }
-
-                const bool bHasPath = PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path);
-                if (bHasPath)
+                if (PathFinding2((Hero->PositionX), (Hero->PositionY), TargetX, TargetY, &Hero->Path))
                 {
                     SendMove(Hero, &Hero->Object);
-                }
-
-                ++m_iObtainStuckTicks;
-                if (!bHasPath || m_iObtainStuckTicks >= MAX_OBTAIN_STUCK_TICKS)
-                {
-                    m_setSkippedItems.insert(m_iCurrentItem);
-                    m_iCurrentItem = MAX_ITEMS;
-                    m_iLastObtainItem = MAX_ITEMS;
-                    m_iObtainStuckTicks = 0;
-                    return 1;
                 }
 
                 return 0;
@@ -1296,13 +1247,9 @@ namespace MUHelper
         m_setItems.erase(iItemId);
         _itemsLock.unlock();
 
-        m_setSkippedItems.erase(iItemId);
-
         if (iItemId == m_iCurrentItem)
         {
             m_iCurrentItem = MAX_ITEMS;
-            m_iLastObtainItem = MAX_ITEMS;
-            m_iObtainStuckTicks = 0;
         }
     }
 
@@ -1320,11 +1267,6 @@ namespace MUHelper
 
         for (const int& iItemId : setItems)
         {
-            if (m_setSkippedItems.count(iItemId) > 0)
-            {
-                continue;
-            }
-
             if (!ShouldObtainItem(iItemId))
             {
                 continue;
@@ -1342,26 +1284,5 @@ namespace MUHelper
         }
 
         return iClosestItemId;
-    }
-
-    bool CMuHelper::IsMonsterOnTile(int iTileX, int iTileY)
-    {
-        for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
-        {
-            CHARACTER* p = &CharactersClient[i];
-            if (!p->Object.Live || p->Dead > 0)
-            {
-                continue;
-            }
-            if (!IsMonster(p))
-            {
-                continue;
-            }
-            if (p->PositionX == iTileX && p->PositionY == iTileY)
-            {
-                return true;
-            }
-        }
-        return false;
     }
 }

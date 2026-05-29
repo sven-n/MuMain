@@ -72,7 +72,6 @@ namespace MUHelper
 		ActionSkillType GetDrainLifeSkill();
 		bool HasAssignedBuffSkill();
 		bool IsSelfPositionSkill(ActionSkillType iSkill);
-		bool IsMonsterOnTile(int iTileX, int iTileY);
 
 	private:
 		ConfigData m_config;
@@ -83,9 +82,6 @@ namespace MUHelper
 		std::set<int> m_setTargetsAttacking;
 		std::set<int> m_setItems;
 		int m_iCurrentItem;
-		int m_iLastObtainItem;
-		int m_iObtainStuckTicks;
-		std::set<int> m_setSkippedItems;
 		int m_iCurrentTarget;
 		int m_iCurrentBuffIndex;
 		int m_iCurrentBuffPartyIndex;
