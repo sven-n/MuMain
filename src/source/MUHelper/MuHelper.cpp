@@ -305,7 +305,7 @@ namespace MUHelper
             }
 
             int iDistance = ComputeDistanceFromTarget(pTarget);
-            if (iDistance < iMinDistance)
+            if (iDistance <= iMinDistance)
             {
                 iMinDistance = iDistance;
                 iClosestMonsterId = iMonsterId;
@@ -500,7 +500,9 @@ namespace MUHelper
         case AT_SKILL_SWELL_LIFE_STR:
         case AT_SKILL_SWELL_LIFE_PROFICIENCY:
             if (m_iComboState == 2)
+            {
                 return 1;
+            }
             return CastIfMissing(g_isCharacterBuff(obj, eBuff_Life), true, false);
 
         case AT_SKILL_EXPANSION_OF_WIZARDRY:
@@ -746,7 +748,8 @@ namespace MUHelper
 
     ActionSkillType CMuHelper::SelectAttackSkill()
     {
-        for (int i = 1; i < (int)m_config.aiSkill.size(); i++)
+        const size_t safeSize = std::min({m_config.aiSkill.size(), m_config.aiSkillCondition.size(), m_config.aiSkillInterval.size()});
+        for (int i = 1; i < (int)safeSize; i++)
         {
             const int iSkillId = m_config.aiSkill[i];
             if (iSkillId <= 0 || iSkillId >= MAX_SKILLS)
@@ -788,24 +791,17 @@ namespace MUHelper
 
     int CMuHelper::SimulateComboAttack()
     {
-        int iComboLen = 0;
-        for (int i = 0; i < (int)m_config.aiSkill.size(); i++)
+        for (int i = 0; i < m_config.aiSkill.size(); i++)
         {
             if (m_config.aiSkill[i] == 0)
             {
-                break;
+                return 0;
             }
-            iComboLen++;
         }
 
-        if (iComboLen == 0)
+        if (SimulateAttack((ActionSkillType)m_config.aiSkill[m_iComboState]))
         {
-            return 0;
-        }
-
-        if (SimulateAttack((ActionSkillType)m_config.aiSkill[m_iComboState % iComboLen]))
-        {
-            m_iComboState = (m_iComboState + 1) % iComboLen;
+            m_iComboState = (m_iComboState + 1) % 3;
         }
 
         return 1;
@@ -1210,7 +1206,7 @@ namespace MUHelper
     int CMuHelper::SelectItemToObtain()
     {
         int iClosestItemId = MAX_ITEMS;
-        int iMinDistance = m_config.iObtainingRange + 1;
+        int iMinDistance = m_config.iObtainingRange;
 
         std::set<int> setItems;
         {
@@ -1230,7 +1226,7 @@ namespace MUHelper
             int iItemY = (int)(Items[iItemId].Object.Position[1] / TERRAIN_SCALE);
 
             int iDistance = ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, { iItemX, iItemY });
-            if (iDistance < iMinDistance)
+            if (iDistance <= iMinDistance)
             {
                 iMinDistance = iDistance;
                 iClosestItemId = iItemId;
