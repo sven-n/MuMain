@@ -767,9 +767,19 @@ namespace MUHelper
 
             if (m_config.aiSkillCondition[i] & ON_CONDITION)
             {
-                const int iCount = (m_config.aiSkillCondition[i] & ON_MOBS_ATTACKING)
-                    ? (int)m_setTargetsAttacking.size()
-                    : (int)m_setTargets.size();
+                int iCount = 0;
+                if (m_config.aiSkillCondition[i] & ON_MOBS_NEARBY)
+                {
+                    iCount = (int)m_setTargets.size();
+                }
+                else if (m_config.aiSkillCondition[i] & ON_MOBS_ATTACKING)
+                {
+                    iCount = (int)m_setTargetsAttacking.size();
+                }
+                else
+                {
+                    continue;
+                }
 
                 if (((m_config.aiSkillCondition[i] & ON_MORE_THAN_TWO_MOBS)   && iCount >= 2)
                     || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
