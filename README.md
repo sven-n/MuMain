@@ -43,6 +43,7 @@ What I have done so far:
     * Glow for red, blue and black fenrir
     * Additional screen resolutions
   * 🔥 Incorporated MU Helper UI and logic - there's some work to do but core functionality is usable
+  * 🔥 Auto-reconnect system
   * Removed if-defs for Rage Fighter class as we are targeting Season 6, so Rage
     Fighter should always be included.
   * Some minor bug fixes, e.g.:

@@ -32,6 +32,8 @@ FrameTimingState g_frameTiming;
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/ReconnectManager.h"
+#include "UI/NewUI/Dialogs/ReconnectDialog.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/ServerListManager.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -607,17 +609,39 @@ static void RenderFpsCounter()
  */
 static void CheckServerConnection()
 {
-    if (SocketClient == nullptr || !SocketClient->IsConnected())
+    if (SocketClient != nullptr && SocketClient->IsConnected())
     {
-        static BOOL s_bClosed = FALSE;
-        if (!s_bClosed)
-        {
-            s_bClosed = TRUE;
-            g_ErrorReport.Write(L"> Connection closed. ");
-            g_ErrorReport.WriteCurrentTime();
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
-            CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
-        }
+        return;
+    }
+
+    // A reconnect already in progress manages its own connection attempts.
+    if (ReconnectManager::Instance().IsActive())
+    {
+        return;
+    }
+
+    // Auto-reconnect only makes sense in-game, where the server restores the
+    // character's saved position. Other scenes keep the original behaviour.
+    if (SceneFlag == MAIN_SCENE && ReconnectManager::Instance().HasSession())
+    {
+        g_ErrorReport.Write(L"> Connection lost in game - starting auto-reconnect. ");
+        g_ErrorReport.WriteCurrentTime();
+        g_ConsoleDebug->Write(MCD_NORMAL, L"Connection lost in game - starting auto-reconnect");
+        // Grab the clean game frame now (front buffer, dialog not yet drawn) so
+        // the brief re-login phase shows it frozen instead of a black screen.
+        UI::Reconnect::CaptureBackground();
+        ReconnectManager::Instance().RequestBegin();
+        return;
+    }
+
+    static BOOL s_bClosed = FALSE;
+    if (!s_bClosed)
+    {
+        s_bClosed = TRUE;
+        g_ErrorReport.Write(L"> Connection closed. ");
+        g_ErrorReport.WriteCurrentTime();
+        g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
+        CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
     }
 }
 
@@ -983,6 +1007,7 @@ void MainScene(HDC hDC)
         Success = RenderCurrentScene(hDC);
         RenderDebugInfo();
         RenderFpsCounter();
+        UI::Reconnect::RenderDialog();
 
         if (Success)
         {
@@ -1018,6 +1043,11 @@ void RenderScene(HDC hDC)
 {
     CalcFPS();
     UpdateSceneState();
+
+    // Drive auto-reconnect after the scene loops have advanced this frame. It
+    // runs across all scenes because reconnect passes through the login,
+    // character and loading scenes on its way back into the game.
+    ReconnectManager::Instance().Update();
 
     g_frameTiming.MarkFrameRendered();
 

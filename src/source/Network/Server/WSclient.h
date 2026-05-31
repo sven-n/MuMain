@@ -3571,6 +3571,11 @@ extern bool SoccerObserver;
 
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
 void DeleteSocket();
+
+// Tears the live game session down to a clean login-scene state (matching the
+// in-game logout path). Used by the auto-reconnect flow before it replays login.
+void ResetClientToLoginScene();
+
 void ReceiveMovePosition(const BYTE* ReceiveBuffer);
 
 struct PacketInfo

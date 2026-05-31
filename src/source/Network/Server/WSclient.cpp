@@ -16,6 +16,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Network/Reconnect/ReconnectManager.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -358,9 +359,22 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
         bResult = FALSE;
         g_ErrorReport.Write(L"Failed to connect. ");
         g_ErrorReport.WriteCurrentTime();
-        free(SocketClient);
+        delete SocketClient;
         SocketClient = nullptr;
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+
+        // While auto-reconnecting we probe the server repeatedly; the reconnect
+        // dialog already shows the status, so don't stack "server lost" popups.
+        if (!ReconnectManager::Instance().IsActive())
+        {
+            CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+        }
+    }
+    else
+    {
+        // Remember the address we actually connected to so auto-reconnect can
+        // probe it directly. This covers both the connect-server flow and a
+        // direct game-server connection (where ReceiveServerConnect never runs).
+        ReconnectManager::Instance().CacheServer(IpAddr, Port);
     }
 
     return bResult;
@@ -526,7 +540,12 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
         switch (Data2->Result)
         {
         case 0x01:
-            rUIMng.ShowWin(&rUIMng.m_LoginWin);
+            // Auto-reconnect logs in on its own and keeps its dialog on top, so
+            // don't surface the manual login window underneath it.
+            if (!ReconnectManager::Instance().IsActive())
+            {
+                rUIMng.ShowWin(&rUIMng.m_LoginWin);
+            }
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
             break;
@@ -927,6 +946,45 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x02 [ReceiveServerList(%d)]", Data->Value);
 
     return (TRUE);
+}
+
+void ResetClientToLoginScene()
+{
+    // Mirror of the in-game logout path (see ReceiveLogOut, case 2): release the
+    // active game session and return to a clean login scene. The auto-reconnect
+    // flow always runs this from MAIN_SCENE, so the teardown is unconditional.
+    CryWolfMVPInit();
+    StopMusic();
+    AllStopSound();
+    SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+    ReleaseMainData();
+
+    g_GuildCache.Reset();
+    memset(GuildMark[MARK_EDIT].Mark, 0, sizeof(GuildMark[MARK_EDIT].Mark));
+    memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
+    SelectMarkColor = 0;
+
+    if (SocketClient != nullptr)
+    {
+        // Close but do NOT null the pointer: lots of code (and queued packet
+        // handlers) dereference SocketClient unconditionally, and Send/Close
+        // safely no-op on a closed connection. Nulling it here crashes them.
+        // The reconnect's Waiting phase calls DeleteSocket() before reconnecting.
+        SocketClient->Close();
+        g_bGameServerConnected = false;
+    }
+
+    ReleaseCharacterSceneData();
+    SceneFlag = LOG_IN_SCENE;
+    g_sceneInit.ResetForDisconnect();
+    CurrentProtocolState = REQUEST_JOIN_SERVER;
+    LogIn = 0;
+    g_csMapServer.Init();
+    InitGame();
+
+    g_pWindowMgr->Reset();
+    g_pFriendList->ClearFriendList();
+    g_pLetterList->ClearLetterList();
 }
 
 int HeroIndex;
