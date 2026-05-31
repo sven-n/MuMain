@@ -214,18 +214,6 @@ namespace MUHelper
         if ((iDistance <= m_iHuntingDistance)
             || (bIsAttacking && m_config.bLongRangeCounterAttack))
         {
-            // Reject targets that are not reachable (e.g. behind a wall).
-            int iTargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
-            int iTargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
-            if (!CheckWall(Hero->PositionX, Hero->PositionY, iTargetX, iTargetY))
-            {
-                PATH_t tempPath;
-                if (!PathFinding2(Hero->PositionX, Hero->PositionY, iTargetX, iTargetY, &tempPath, m_iHuntingDistance))
-                {
-                    return;
-                }
-            }
-
             _targetsLock.lock();
 
             m_setTargets.insert(iTargetId);
@@ -236,12 +224,11 @@ namespace MUHelper
             }
 
             _targetsLock.unlock();
+        }
 
-            // Only assign as self-defense target if reachability passed above.
-            if (m_config.bUseSelfDefense && IsMonster(pTarget))
-            {
-                m_iCurrentTarget = iTargetId;
-            }
+        if (m_config.bUseSelfDefense && IsMonster(pTarget))
+        {
+            m_iCurrentTarget = iTargetId;
         }
     }
 
