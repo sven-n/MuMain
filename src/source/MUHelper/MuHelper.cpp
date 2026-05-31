@@ -897,11 +897,15 @@ namespace MUHelper
                     return 0;
                 }
 
-                bool bTargetNear = CheckTile(Hero, &Hero->Object, fSkillDistance);
-                bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
+                const bool bTargetNear = CheckTile(Hero, &Hero->Object, fSkillDistance);
+                if (bTargetNear && !CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
+                {
+                    DeleteTarget(iTarget);
+                    return 0;
+                }
 
-                // Target is not near or the path is obstructed by a wall, move closer
-                if (!bTargetNear || !bNoWall)
+                // Target is not yet in range, move closer.
+                if (!bTargetNear)
                 {
                     Hero->Path.Lock.lock();
 
@@ -987,9 +991,14 @@ namespace MUHelper
         }
 
         const bool bTargetNear = CheckTile(Hero, &Hero->Object, fRange);
-        const bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
+        if (bTargetNear && !CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
+        {
+            DeleteTarget(iTarget);
+            return 0;
+        }
 
-        if (!bTargetNear || !bNoWall)
+        // Target is not yet in range, move closer.
+        if (!bTargetNear)
         {
             Hero->Path.Lock.lock();
             const int pathNum = std::min<int>(tempPath.PathNum, 2);
