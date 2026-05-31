@@ -7364,6 +7364,12 @@ void MoveHero()
     CHARACTER* c = Hero;
     OBJECT* o = &c->Object;
 
+    // Re-arm world clicks once the button is released; the latch only suppresses the held click.
+    // Kept above the early returns below (stun/sleep/dead/loading) so a release during any of
+    // those states still clears the latch and the next click is honoured.
+    if (!MouseLButton)
+        s_bIgnoreHeldClickAfterNpcTalk = false;
+
     if (o->CurrentAction == PLAYER_CHANGE_UP)
     {
         return;
@@ -7548,10 +7554,6 @@ void MoveHero()
     }
 
     CheckGate();
-
-    // Re-arm world clicks once the button is released; the latch only suppresses the held click.
-    if (!MouseLButton)
-        s_bIgnoreHeldClickAfterNpcTalk = false;
 
     if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse())
     {
