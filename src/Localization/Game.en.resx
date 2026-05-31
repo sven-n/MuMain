@@ -12881,4 +12881,25 @@
   <data name="BasicAttackFallback" xml:space="preserve">
     <value>Basic Attack Fallback</value>
   </data>
+  <data name="Connection lost" xml:space="preserve">
+    <value>Connection lost</value>
+  </data>
+  <data name="Checking server availability" xml:space="preserve">
+    <value>Checking server availability</value>
+  </data>
+  <data name="Connecting to the server" xml:space="preserve">
+    <value>Connecting to the server</value>
+  </data>
+  <data name="Logging in" xml:space="preserve">
+    <value>Logging in</value>
+  </data>
+  <data name="Loading character list" xml:space="preserve">
+    <value>Loading character list</value>
+  </data>
+  <data name="Entering the game" xml:space="preserve">
+    <value>Entering the game</value>
+  </data>
+  <data name="Retrying in seconds" xml:space="preserve">
+    <value>Retrying in %d seconds...</value>
+  </data>
 </root>

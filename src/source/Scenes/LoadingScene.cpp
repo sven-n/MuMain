@@ -13,6 +13,7 @@
 #include "SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "SceneCommon.h"
+#include "UI/NewUI/Dialogs/ReconnectDialog.h"
 
 
 #ifdef _EDITOR
@@ -109,6 +110,7 @@ void LoadingScene(HDC hDC)
         EndBitmap();
     }
 #endif
+    UI::Reconnect::RenderDialog();
     ::SwapBuffers(hDC);
 
     SAFE_DELETE(rUIMng.m_pLoadingScene);

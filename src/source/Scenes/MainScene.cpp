@@ -21,6 +21,7 @@
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/ReconnectManager.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "UI/Legacy/UIManager.h"
@@ -132,6 +133,9 @@ static void InitializeMainScene()
 
     CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
     SocketClient->ToGameServer()->SendSelectCharacter(CharactersClient[SelectedHero].ID);
+
+    // Remember which character is in play so auto-reconnect can re-select it.
+    ReconnectManager::Instance().CacheCharacter(CharactersClient[SelectedHero].ID);
 
     CUIMng::Instance().CreateMainScene();
 
@@ -319,6 +323,12 @@ void MoveMainScene()
     }
 
     InitializeSceneFrame();
+
+    // While the reconnect dialog is up it's modal: block world clicks so they
+    // don't move the hero and instead reach the dialog's Cancel button.
+    if (ReconnectManager::Instance().IsActive())
+        MouseOnWindow = true;
+
     UpdateUIAndInput();
 
     if (ErrorMessage != 0)

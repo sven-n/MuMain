@@ -84,7 +84,11 @@ public unsafe partial class ConnectionManager
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error sending {0} bytes with handle {1}: {2}", count, handle, ex);
+                // A send failure means the connection is broken. Tear it down so
+                // the Disconnected event fires and the client can auto-reconnect,
+                // instead of silently swallowing the error and looking online.
+                Debug.WriteLine($"Error sending {count} bytes with handle {handle}: {ex}");
+                connection.DisconnectAndDispose();
             }
         }
         else
@@ -123,6 +127,8 @@ public unsafe partial class ConnectionManager
     {
         var tcpClient = new TcpClient(host, port);
 
+        ConfigureKeepAlive(tcpClient.Client);
+
         var socketConnection = SocketConnection.Create(tcpClient.Client);
 
         var encryptor = isEncrypted ? new PipelinedXor32Encryptor(new PipelinedSimpleModulusEncryptor(socketConnection.Output, PipelinedSimpleModulusEncryptor.DefaultClientKey).Writer) : null;
@@ -140,5 +146,80 @@ public unsafe partial class ConnectionManager
         };
 
         return handle;
+    }
+
+    /// <summary>
+    /// Idle time, in seconds, before the OS starts sending TCP keep-alive probes.
+    /// </summary>
+    private const int KeepAliveIdleSeconds = 4;
+
+    /// <summary>
+    /// Interval, in seconds, between TCP keep-alive probes.
+    /// </summary>
+    private const int KeepAliveIntervalSeconds = 2;
+
+    /// <summary>
+    /// Number of unanswered keep-alive probes before the connection is dropped.
+    /// </summary>
+    private const int KeepAliveRetryCount = 3;
+
+    /// <summary>
+    /// Enables aggressive TCP keep-alive so the OS detects dead or half-open
+    /// connections (server crash, network drop) within ~10 seconds and tears the
+    /// socket down. That makes the receive loop fault and raise
+    /// <see cref="Connection.Disconnected"/>, which the game client polls to
+    /// trigger auto-reconnect. Without this, a peer that vanishes without sending
+    /// FIN/RST keeps the connection alive for minutes. Probes are answered by the
+    /// healthy peer's OS automatically, so this never drops a live connection.
+    /// </summary>
+    /// <param name="socket">The connected socket to configure.</param>
+    private static void ConfigureKeepAlive(Socket socket)
+    {
+        try
+        {
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to enable SO_KEEPALIVE: {ex}");
+        }
+
+        // Modern cross-platform options (.NET 5+). Set each independently so an
+        // unsupported one doesn't skip the others (notably the retry count, which
+        // older Windows ignores).
+        TrySetSocketOption(socket, SocketOptionName.TcpKeepAliveTime, KeepAliveIdleSeconds);
+        TrySetSocketOption(socket, SocketOptionName.TcpKeepAliveInterval, KeepAliveIntervalSeconds);
+        TrySetSocketOption(socket, SocketOptionName.TcpKeepAliveRetryCount, KeepAliveRetryCount);
+
+        // Windows fallback/override: SIO_KEEPALIVE_VALS reliably sets the idle
+        // time and probe interval (in milliseconds) where the socket options
+        // above are sometimes ignored.
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                var values = new byte[12];
+                BitConverter.GetBytes(1u).CopyTo(values, 0);                                        // on
+                BitConverter.GetBytes((uint)(KeepAliveIdleSeconds * 1000)).CopyTo(values, 4);       // idle (ms)
+                BitConverter.GetBytes((uint)(KeepAliveIntervalSeconds * 1000)).CopyTo(values, 8);   // interval (ms)
+                socket.IOControl(IOControlCode.KeepAliveValues, values, null);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to configure keep-alive via IOControl: {ex}");
+        }
+    }
+
+    private static void TrySetSocketOption(Socket socket, SocketOptionName option, int value)
+    {
+        try
+        {
+            socket.SetSocketOption(SocketOptionLevel.Tcp, option, value);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to set socket option {option}: {ex}");
+        }
     }
 }

@@ -68,6 +68,12 @@ namespace MUHelper
         if (m_bActive)
         {
             TriggerStop();
+
+            // Stop the client-driven bot immediately instead of waiting for the
+            // server's status reply. After an auto-reconnect the server's new
+            // session doesn't have the helper marked active, so it never replies
+            // and the bot would otherwise keep running with no way to stop it.
+            Stop();
         }
         else
         {

@@ -11,6 +11,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Network/Reconnect/ReconnectManager.h"
 #include "UI/Legacy/UIControls.h"
 #include "Scenes/SceneCore.h"
 #include "I18N/All.h"
@@ -268,6 +269,10 @@ void CLoginWin::RequestLogin()
             CurrentProtocolState = REQUEST_LOG_IN;
 
             SocketClient->ToGameServer()->SendLogin(m_Username, m_Password, Version, Serial);
+
+            // Keep the credentials in memory so auto-reconnect can re-login
+            // without prompting after an in-game disconnect.
+            ReconnectManager::Instance().CacheCredentials(m_Username, m_Password);
 
             g_pSystemLogBox->AddText(I18N::Game::VerifyingYourAccount, SEASON3B::TYPE_SYSTEM_MESSAGE);
             g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
