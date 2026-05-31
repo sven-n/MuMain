@@ -286,8 +286,7 @@ namespace MUHelper
     int CMuHelper::GetNearestTarget()
     {
         int iClosestMonsterId = -1;
-        int iMinDistance = m_config.iHuntingRange + 1;
-
+        int iMinDistance = m_iHuntingDistance;
         std::set<int> setTargets;
         {
             _targetsLock.lock();
@@ -306,7 +305,7 @@ namespace MUHelper
             }
 
             int iDistance = ComputeDistanceFromTarget(pTarget);
-            if (iDistance < iMinDistance)
+            if (iDistance <= iMinDistance)
             {
                 iMinDistance = iDistance;
                 iClosestMonsterId = iMonsterId;
@@ -364,10 +363,11 @@ namespace MUHelper
             if (iIndex == MAX_CHARACTERS_CLIENT)
             {
                 DeleteTarget(iMonsterId);
+                continue;
             }
 
             CHARACTER* pTarget = &CharactersClient[iIndex];
-            if (!pTarget || (pTarget && (pTarget->Dead > 0 || !pTarget->Object.Live)))
+            if (pTarget->Dead > 0 || !pTarget->Object.Live)
             {
                 DeleteTarget(iMonsterId);
             }
@@ -467,72 +467,65 @@ namespace MUHelper
     int CMuHelper::BuffTarget(CHARACTER* pTargetChar, ActionSkillType iBuffSkill)
     {
         // TODO: List other buffs here
-        if ((iBuffSkill == AT_SKILL_ATTACK
-            || iBuffSkill == AT_SKILL_ATTACK_STR)
-            && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Attack) || m_bTimerActivatedBuffOngoing))
-        {
-            return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
-        }
+        OBJECT* obj = &pTargetChar->Object;
 
-        if ((iBuffSkill == AT_SKILL_DEFENSE
-            || iBuffSkill == AT_SKILL_DEFENSE_STR
-            || iBuffSkill == AT_SKILL_DEFENSE_MASTERY)
-            && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Defense) || m_bTimerActivatedBuffOngoing))
+        auto CastIfMissing = [&](bool bBuffActive, bool bTimerRespected, bool bNeedsTarget) -> int
         {
-            return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
-        }
+            if (!bBuffActive || (bTimerRespected && m_bTimerActivatedBuffOngoing))
+                return SimulateSkill(iBuffSkill, bNeedsTarget, pTargetChar->Key);
+            return 1;
+        };
 
-        if ((iBuffSkill == AT_SKILL_INFINITY_ARROW || iBuffSkill == AT_SKILL_INFINITY_ARROW_STR) &&
-            (!g_isCharacterBuff((&pTargetChar->Object), eBuff_InfinityArrow)))
+        switch (iBuffSkill)
         {
-            return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
-        }
+        case AT_SKILL_ATTACK:
+        case AT_SKILL_ATTACK_STR:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_Attack), true, true);
 
-        if ((iBuffSkill == AT_SKILL_SOUL_BARRIER
-            || iBuffSkill == AT_SKILL_SOUL_BARRIER_STR
-            || iBuffSkill == AT_SKILL_SOUL_BARRIER_PROFICIENCY)
-            && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_WizDefense) || m_bTimerActivatedBuffOngoing))
-        {
-            return SimulateSkill(iBuffSkill, true, pTargetChar->Key);
-        }
+        case AT_SKILL_DEFENSE:
+        case AT_SKILL_DEFENSE_STR:
+        case AT_SKILL_DEFENSE_MASTERY:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_Defense), true, true);
 
-        if ((iBuffSkill == AT_SKILL_SWELL_LIFE
-            || iBuffSkill == AT_SKILL_SWELL_LIFE_STR
-            || iBuffSkill == AT_SKILL_SWELL_LIFE_PROFICIENCY)
-            && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Life) || m_bTimerActivatedBuffOngoing))
-        {
+        case AT_SKILL_INFINITY_ARROW:
+        case AT_SKILL_INFINITY_ARROW_STR:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_InfinityArrow), false, false);
+
+        case AT_SKILL_SOUL_BARRIER:
+        case AT_SKILL_SOUL_BARRIER_STR:
+        case AT_SKILL_SOUL_BARRIER_PROFICIENCY:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_WizDefense), true, true);
+
+        case AT_SKILL_SWELL_LIFE:
+        case AT_SKILL_SWELL_LIFE_STR:
+        case AT_SKILL_SWELL_LIFE_PROFICIENCY:
             if (m_iComboState == 2)
             {
                 return 1;
             }
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_Life), true, false);
 
-            return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
-        }
+        case AT_SKILL_EXPANSION_OF_WIZARDRY:
+        case AT_SKILL_EXPANSION_OF_WIZARDRY_STR:
+        case AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_SwellOfMagicPower), false, false);
 
-        if ((iBuffSkill == AT_SKILL_EXPANSION_OF_WIZARDRY || iBuffSkill == AT_SKILL_EXPANSION_OF_WIZARDRY_STR || iBuffSkill == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
-            && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_SwellOfMagicPower)))
-        {
-            return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
-        }
+        case AT_SKILL_ADD_CRITICAL:
+        case AT_SKILL_ADD_CRITICAL_STR1:
+        case AT_SKILL_ADD_CRITICAL_STR2:
+        case AT_SKILL_ADD_CRITICAL_STR3:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_AddCriticalDamage), false, false);
 
-        if ((iBuffSkill == AT_SKILL_ADD_CRITICAL || iBuffSkill == AT_SKILL_ADD_CRITICAL_STR1 || iBuffSkill == AT_SKILL_ADD_CRITICAL_STR2 || iBuffSkill == AT_SKILL_ADD_CRITICAL_STR3)
-            && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_AddCriticalDamage)))
-        {
-            return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
-        }
+        case AT_SKILL_ALICE_BERSERKER:
+        case AT_SKILL_ALICE_BERSERKER_STR:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_Berserker), false, false);
 
-        if ((iBuffSkill == AT_SKILL_ALICE_BERSERKER || iBuffSkill == AT_SKILL_ALICE_BERSERKER_STR)
-            && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Berserker)))
-        {
-            return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
-        }
-        if ((iBuffSkill == AT_SKILL_ALICE_THORNS)
-            && (!g_isCharacterBuff((&pTargetChar->Object), eBuff_Thorns)))
-        {
-            return SimulateSkill(iBuffSkill, false, pTargetChar->Key);
-        }
+        case AT_SKILL_ALICE_THORNS:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_Thorns), false, false);
 
-        return 1;
+        default:
+            return 1;
+        }
     }
 
     int CMuHelper::ConsumePotion()
@@ -744,7 +737,10 @@ namespace MUHelper
 
         if (m_config.bFallbackBasicAttack)
         {
-            return SimulateBasicAttack(m_iCurrentTarget);
+            if (!Hero->Movement)
+            {
+                return SimulateBasicAttack(m_iCurrentTarget);
+            }
         }
 
         return 1;
@@ -752,85 +748,49 @@ namespace MUHelper
 
     ActionSkillType CMuHelper::SelectAttackSkill()
     {
-        // try skill 2 activation conditions
-        if (m_config.aiSkill[1] > 0 && m_config.aiSkill[1] < MAX_SKILLS)
+        const size_t safeSize = std::min({m_config.aiSkill.size(), m_config.aiSkillCondition.size(), m_config.aiSkillInterval.size()});
+        for (int i = 1; i < (int)safeSize; i++)
         {
-            if ((m_config.aiSkillCondition[1] & ON_TIMER)
-                && m_config.aiSkillInterval[1] != 0
-                && m_iSecondsElapsed % m_config.aiSkillInterval[1] == 0)
+            const int iSkillId = m_config.aiSkill[i];
+            if (iSkillId <= 0 || iSkillId >= MAX_SKILLS)
             {
-                return (ActionSkillType)m_config.aiSkill[1];
+                continue;
             }
 
-            if (m_config.aiSkillCondition[1] & ON_CONDITION)
+            if ((m_config.aiSkillCondition[i] & ON_TIMER)
+                && m_config.aiSkillInterval[i] != 0
+                && m_iSecondsElapsed > 0
+                && m_iSecondsElapsed % m_config.aiSkillInterval[i] == 0)
             {
-                if (m_config.aiSkillCondition[1] & ON_MOBS_NEARBY)
-                {
-                    int iCount = m_setTargets.size();
+                return (ActionSkillType)iSkillId;
+            }
 
-                    if (((m_config.aiSkillCondition[1] & ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
-                        || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                        || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
-                        || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
-                    {
-                        return (ActionSkillType)m_config.aiSkill[1];
-                    }
+            if (m_config.aiSkillCondition[i] & ON_CONDITION)
+            {
+                int iCount = 0;
+                if (m_config.aiSkillCondition[i] & ON_MOBS_NEARBY)
+                {
+                    iCount = (int)m_setTargets.size();
                 }
-                else if (m_config.aiSkillCondition[1] & ON_MOBS_ATTACKING)
+                else if (m_config.aiSkillCondition[i] & ON_MOBS_ATTACKING)
                 {
-                    int iCount = m_setTargetsAttacking.size();
+                    iCount = (int)m_setTargetsAttacking.size();
+                }
+                else
+                {
+                    continue;
+                }
 
-                    if (((m_config.aiSkillCondition[1] & ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
-                        || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                        || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
-                        || ((m_config.aiSkillCondition[1] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
-                    {
-                        return (ActionSkillType)m_config.aiSkill[1];
-                    }
+                if (((m_config.aiSkillCondition[i] & ON_MORE_THAN_TWO_MOBS)   && iCount >= 2)
+                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
+                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_FOUR_MOBS)  && iCount >= 4)
+                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_FIVE_MOBS)  && iCount >= 5))
+                {
+                    return (ActionSkillType)iSkillId;
                 }
             }
         }
 
-        // try skill 3 activation conditions
-        if (m_config.aiSkill[2] > 0 && m_config.aiSkill[2] < MAX_SKILLS)
-        {
-            if ((m_config.aiSkillCondition[2] & ON_TIMER)
-                && m_config.aiSkillInterval[2] != 0
-                && m_iSecondsElapsed % m_config.aiSkillInterval[2] == 0)
-            {
-                return (ActionSkillType)m_config.aiSkill[2];
-            }
-
-            if (m_config.aiSkillCondition[2] & ON_CONDITION)
-            {
-                if (m_config.aiSkillCondition[2] & ON_MOBS_NEARBY)
-                {
-                    int iCount = m_setTargets.size();
-
-                    if (((m_config.aiSkillCondition[2] & ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
-                        || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                        || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
-                        || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
-                    {
-                        return (ActionSkillType)m_config.aiSkill[2];
-                    }
-                }
-                else if (m_config.aiSkillCondition[2] & ON_MOBS_ATTACKING)
-                {
-                    int iCount = m_setTargetsAttacking.size();
-
-                    if (((m_config.aiSkillCondition[2] & ON_MORE_THAN_TWO_MOBS) && iCount >= 2)
-                        || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                        || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FOUR_MOBS) && iCount >= 4)
-                        || ((m_config.aiSkillCondition[2] & ON_MORE_THAN_FIVE_MOBS) && iCount >= 5))
-                    {
-                        return (ActionSkillType)m_config.aiSkill[2];
-                    }
-                }
-            }
-        }
-
-        // no skill for activation yet, default to basic skill
         if (m_config.aiSkill[0] > 0)
         {
             return (ActionSkillType)m_config.aiSkill[0];
@@ -1256,7 +1216,7 @@ namespace MUHelper
     int CMuHelper::SelectItemToObtain()
     {
         int iClosestItemId = MAX_ITEMS;
-        int iMinDistance = m_config.iObtainingRange + 1;
+        int iMinDistance = m_config.iObtainingRange;
 
         std::set<int> setItems;
         {
@@ -1276,7 +1236,7 @@ namespace MUHelper
             int iItemY = (int)(Items[iItemId].Object.Position[1] / TERRAIN_SCALE);
 
             int iDistance = ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, { iItemX, iItemY });
-            if (iDistance < iMinDistance)
+            if (iDistance <= iMinDistance)
             {
                 iMinDistance = iDistance;
                 iClosestItemId = iItemId;
