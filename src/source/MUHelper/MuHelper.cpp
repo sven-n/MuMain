@@ -214,6 +214,16 @@ namespace MUHelper
         if ((iDistance <= m_iHuntingDistance)
             || (bIsAttacking && m_config.bLongRangeCounterAttack))
         {
+            // Reject targets that are not reachable (e.g. behind a wall).
+            // Use a temporary path so we don't clobber Hero->Path.
+            int iTargetX = (int)(pTarget->Object.Position[0] / TERRAIN_SCALE);
+            int iTargetY = (int)(pTarget->Object.Position[1] / TERRAIN_SCALE);
+            PATH_t tempPath;
+            if (!PathFinding2(Hero->PositionX, Hero->PositionY, iTargetX, iTargetY, &tempPath, m_iHuntingDistance))
+            {
+                return;
+            }
+
             _targetsLock.lock();
 
             m_setTargets.insert(iTargetId);
@@ -224,11 +234,12 @@ namespace MUHelper
             }
 
             _targetsLock.unlock();
-        }
 
-        if (m_config.bUseSelfDefense && IsMonster(pTarget))
-        {
-            m_iCurrentTarget = iTargetId;
+            // Only assign as self-defense target if reachability passed above.
+            if (m_config.bUseSelfDefense && IsMonster(pTarget))
+            {
+                m_iCurrentTarget = iTargetId;
+            }
         }
     }
 
@@ -897,11 +908,15 @@ namespace MUHelper
                     return 0;
                 }
 
-                bool bTargetNear = CheckTile(Hero, &Hero->Object, fSkillDistance);
-                bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
+                // Path exists but LOS is blocked.
+                if (!CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
+                {
+                    DeleteTarget(iTarget);
+                    return 0;
+                }
 
-                // Target is not near or the path is obstructed by a wall, move closer
-                if (!bTargetNear || !bNoWall)
+                // Target is not yet in range, move closer.
+                if (!CheckTile(Hero, &Hero->Object, fSkillDistance))
                 {
                     Hero->Path.Lock.lock();
 
@@ -986,10 +1001,15 @@ namespace MUHelper
             return 0;
         }
 
-        const bool bTargetNear = CheckTile(Hero, &Hero->Object, fRange);
-        const bool bNoWall = CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY);
+        // Path exists but LOS is blocked.
+        if (!CheckWall(Hero->PositionX, Hero->PositionY, TargetX, TargetY))
+        {
+            DeleteTarget(iTarget);
+            return 0;
+        }
 
-        if (!bTargetNear || !bNoWall)
+        // Target is not yet in range, move closer.
+        if (!CheckTile(Hero, &Hero->Object, fRange))
         {
             Hero->Path.Lock.lock();
             const int pathNum = std::min<int>(tempPath.PathNum, 2);
