@@ -92,6 +92,11 @@ int   LoadingWorld = 0;
 int   ItemHelp = 0;
 int   MouseUpdateTime = 0;
 int   MouseUpdateTimeMax = 6;
+// Latched when a click opens an NPC conversation while the button is still held.
+// The world click handler ignores the held button until it is physically released, so the
+// same click can't fall through to ground movement and instantly close the NPC window.
+// A fresh press (e.g. deliberately clicking the ground to walk away) still works normally.
+static bool s_bIgnoreHeldClickAfterNpcTalk = false;
 bool  WhisperEnable = true;
 bool  ChatWindowEnable = true;
 int   InputFrame = 0;
@@ -7359,6 +7364,12 @@ void MoveHero()
     CHARACTER* c = Hero;
     OBJECT* o = &c->Object;
 
+    // Re-arm world clicks once the button is released; the latch only suppresses the held click.
+    // Kept above the early returns below (stun/sleep/dead/loading) so a release during any of
+    // those states still clears the latch and the next click is honoured.
+    if (!MouseLButton)
+        s_bIgnoreHeldClickAfterNpcTalk = false;
+
     if (o->CurrentAction == PLAYER_CHANGE_UP)
     {
         return;
@@ -7547,7 +7558,7 @@ void MoveHero()
     if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse())
     {
         bool Success = false;
-        if (MouseUpdateTime >= MouseUpdateTimeMax)
+        if (MouseUpdateTime >= MouseUpdateTimeMax && !s_bIgnoreHeldClickAfterNpcTalk)
         {
             if (!EnableFastInput)
             {
@@ -7723,6 +7734,18 @@ void MoveHero()
                 && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
                 )
             {
+                // Talking to an NPC opens a window (dialogue/quest/shop). The physical button is
+                // usually still held at this point, and the held button keeps re-entering this
+                // handler every frame. The moment the cursor isn't on the NPC's pick-box it would
+                // fall through to the ground-move branch below and walk the hero away, instantly
+                // closing the window the same click just opened. Most visible on adjacent NPCs such
+                // as the Elf Soldier, whose narrow dialogue doesn't cover the cursor the way a wide
+                // shop window does. Latch the held click so it's ignored until released; a fresh
+                // press still moves the hero normally. Also restart the debounce like the sibling
+                // branches (attack/ground-move) do.
+                s_bIgnoreHeldClickAfterNpcTalk = true;
+                MouseUpdateTime = 0;
+
                 if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide) == false)
                     c->MovementType = MOVEMENT_TALK;
 
