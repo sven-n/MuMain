@@ -142,8 +142,8 @@ bool CNewUIQuestProgress::ProcessBtns()
     {
         if (m_btnComplete.UpdateMouseEvent())
         {
-            const auto questNumber = static_cast<uint16_t>((m_dwCurQuestIndex & 0xFF00) >> 16);
-            const auto questGroup = static_cast<uint16_t>(m_dwCurQuestIndex & 0xFF);
+            const auto questNumber = static_cast<uint16_t>(LOWORD(m_dwCurQuestIndex));
+            const auto questGroup = static_cast<uint16_t>(HIWORD(m_dwCurQuestIndex));
             SocketClient->ToGameServer()->SendQuestCompletionRequest(questNumber, questGroup);
             PlayBuffer(SOUND_CLICK01);
             m_bCanClick = false;
@@ -177,8 +177,8 @@ bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
             m_nSelAnswer = static_cast<QuestProceedAction>(i + 1);
             if (SEASON3B::IsRelease(VK_LBUTTON))
             {
-                const auto questNumber = static_cast<uint16_t>((m_dwCurQuestIndex & 0xFF00) >> 16);
-                const auto questGroup = static_cast<uint16_t>(m_dwCurQuestIndex & 0xFF);
+                const auto questNumber = static_cast<uint16_t>(LOWORD(m_dwCurQuestIndex));
+                const auto questGroup = static_cast<uint16_t>(HIWORD(m_dwCurQuestIndex));
                 SocketClient->ToGameServer()->SendQuestProceedRequest(questNumber, questGroup, m_nSelAnswer);
                 PlayBuffer(SOUND_CLICK01);
                 m_bCanClick = false;

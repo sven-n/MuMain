@@ -279,7 +279,16 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
         return;
     }
 
-    if (0 == m_mapQuestProgress[dwQuestIndex].m_byUIType)
+    QuestProgressMap::const_iterator iter = m_mapQuestProgress.find(dwQuestIndex);
+    if (iter == m_mapQuestProgress.end())
+    {
+        wchar_t szMessage[128];
+        ::mu_swprintf(szMessage, L"Quest progress entry missing for index 0x%08X\r\n", dwQuestIndex);
+        g_ErrorReport.Write(szMessage);
+        return;
+    }
+
+    if (0 == iter->second.m_byUIType)
     {
         g_pQuestProgress->SetContents(dwQuestIndex);
         if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
@@ -819,8 +828,8 @@ void CQuestMng::SendQuestIndexByEtcSelection()
         return;
 
     auto iter = m_listQuestIndexByEtc.begin();
-    const auto questNumber = static_cast<uint16_t>((*iter & 0xFF00) >> 16);
-    const auto questGroup = static_cast<uint16_t>(*iter & 0xFF);
+    const auto questNumber = static_cast<uint16_t>(LOWORD(*iter));
+    const auto questGroup = static_cast<uint16_t>(HIWORD(*iter));
     SocketClient->ToGameServer()->SendQuestSelectRequest(questNumber, questGroup, 0);
 }
 

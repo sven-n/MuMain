@@ -1306,6 +1306,21 @@ typedef struct
     DWORD			m_dwQuestIndex;
 } PMSG_NPC_QUESTEXP_INFO, * LPPMSG_NPC_QUESTEXP_INFO;
 
+// GC[0xF6][0x0B] QuestStepInfo. C1 packet, 11 bytes. The server sends it
+// when the player selects a quest in the quest list (carrying StartingNumber),
+// when a quest has been started (carrying Number), or after the player refused
+// to start (carrying RefuseNumber). The client uses the (Group, StepNumber)
+// pair to look up the local quest progress entry.
+#pragma pack(push, 1)
+typedef struct
+{
+    PBMSG_HEADER	Header;
+    BYTE			SubCode;
+    WORD			m_wQuestStepNumber;
+    WORD			m_wQuestGroup;
+} PMSG_QUEST_STEP_INFO, * LPPMSG_QUEST_STEP_INFO;
+#pragma pack(pop)
+
 
 enum QUEST_REQUEST_TYPE : BYTE
 {
