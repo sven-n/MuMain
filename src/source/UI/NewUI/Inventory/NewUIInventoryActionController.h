@@ -21,9 +21,10 @@ public:
     void SetContext(IInventoryActionContext* pContext);
     bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl) const;
 
-    // Equip an inventory item (identified by key) into a specific equipment slot, unequipping any
-    // occupant first (and freeing a two-handed conflict). Used by drag-drop to replace on drop.
-    bool EquipToSlotReplacing(DWORD dwItemKey, int nDstSlot) const;
+    // Equip an inventory item (identified by key, in the given control — main or extended) into a
+    // specific equipment slot, unequipping any occupant first (and freeing a two-handed conflict).
+    // Used by drag-drop to replace on drop.
+    bool EquipToSlotReplacing(CNewUIInventoryCtrl* pInvenCtrl, DWORD dwItemKey, int nDstSlot) const;
 
 private:
     bool HandlePickedItemPlacement(CNewUIInventoryCtrl* targetControl) const;
@@ -39,7 +40,7 @@ private:
     bool HandleInventoryRightClickActions(CNewUIInventoryCtrl* targetControl) const;
     bool TryEquipItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const;
     int  CollectEquipBlockers(ITEM* pItem, int nDstIndex, int* outSlots) const;
-    bool SwapEquipItem(ITEM* pItem, int nDstSlot, const int* blockers, int nBlockers) const;
+    bool SwapEquipItem(CNewUIInventoryCtrl* pNewItemInvenCtrl, ITEM* pItem, int nDstSlot, const int* blockers, int nBlockers) const;
     bool TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem) const;
 
     int  FindAlternateEquipSlot(int nOriginalSlot, ITEM* pItem) const;

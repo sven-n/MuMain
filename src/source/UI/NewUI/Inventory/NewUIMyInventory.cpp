@@ -1433,8 +1433,9 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                     && !g_ChangeRingMgr->CheckChangeRing(pItemObj->Type))
                 {
                     const DWORD dwItemKey = pItemObj->Key;
+                    CNewUIInventoryCtrl* pOwner = pPickedItem->GetOwnerInventory();
                     CNewUIInventoryCtrl::BackupPickedItem();
-                    m_ActionController.EquipToSlotReplacing(dwItemKey, iTargetIndex);
+                    m_ActionController.EquipToSlotReplacing(pOwner, dwItemKey, iTargetIndex);
                     return true;
                 }
 

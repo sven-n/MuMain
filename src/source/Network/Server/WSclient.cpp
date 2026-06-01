@@ -780,6 +780,8 @@ extern void StopMusic();
 
 void InitGame()
 {
+    SEASON3B::CancelPendingEquipSwap();   // drop any half-finished equip swap from a prior session
+
     EnableUse = 0;
     SendGetItem = -1;
     SummonLife = 0;

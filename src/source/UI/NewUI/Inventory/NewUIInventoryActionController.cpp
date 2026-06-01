@@ -38,6 +38,7 @@ namespace
     struct PendingEquip
     {
         bool  active       = false;
+        CNewUIInventoryCtrl* pNewItemInvenCtrl = nullptr;     // control holding the item to equip (main or extended)
         int   dstEquipSlot = -1;                              // where the new item will be equipped
         DWORD newItemKey   = 0;                               // identifies the new inventory item
         int   freeSlots[MAX_EQUIP_BLOCKERS] = { -1, -1 };     // equipment slots still to unequip
@@ -49,8 +50,9 @@ namespace
 
     void ClearPendingEquip()
     {
-        s_pendingEquip.active    = false;
-        s_pendingEquip.freeCount = 0;
+        s_pendingEquip.active            = false;
+        s_pendingEquip.pNewItemInvenCtrl = nullptr;
+        s_pendingEquip.freeCount         = 0;
     }
 
     // Pick an inventory item and request the server to move it to an equipment slot.
@@ -203,17 +205,12 @@ void ProcessPendingEquipAfterMove()
         return;   // wait for this unequip's ack before handling the next step
     }
 
-    // Every blocking slot is now free: equip the new item.
+    // Every blocking slot is now free: equip the new item from the control it lives in.
     const int   iDstSlot  = s_pendingEquip.dstEquipSlot;
     const DWORD dwItemKey = s_pendingEquip.newItemKey;
+    CNewUIInventoryCtrl* pInvenCtrl = s_pendingEquip.pNewItemInvenCtrl;
     ClearPendingEquip();
 
-    if (g_pMyInventory == nullptr)
-    {
-        return;
-    }
-
-    CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
     if (pInvenCtrl == nullptr)
     {
         return;
@@ -606,7 +603,7 @@ bool CNewUIInventoryActionController::TryEquipItem(CNewUIInventoryCtrl* targetCo
         return EquipFromInventory(targetControl, pItem, iSrcIndex, nDstIndex);
     }
 
-    return SwapEquipItem(pItem, nDstIndex, blockers, nBlockers);
+    return SwapEquipItem(targetControl, pItem, nDstIndex, blockers, nBlockers);
 }
 
 int CNewUIInventoryActionController::CollectEquipBlockers(ITEM* pItem, int nDstIndex, int* outSlots) const
@@ -638,10 +635,11 @@ int CNewUIInventoryActionController::CollectEquipBlockers(ITEM* pItem, int nDstI
     return nCount;
 }
 
-bool CNewUIInventoryActionController::SwapEquipItem(ITEM* pItem, int nDstSlot, const int* blockers, int nBlockers) const
+bool CNewUIInventoryActionController::SwapEquipItem(CNewUIInventoryCtrl* pNewItemInvenCtrl, ITEM* pItem, int nDstSlot, const int* blockers, int nBlockers) const
 {
+    // Displaced equipment always returns to the main inventory, so reserve space there.
     CNewUIInventoryCtrl* pInvenCtrl = (g_pMyInventory != nullptr) ? g_pMyInventory->GetInventoryCtrl() : nullptr;
-    if (pInvenCtrl == nullptr || nBlockers <= 0)
+    if (pInvenCtrl == nullptr || pNewItemInvenCtrl == nullptr || nBlockers <= 0)
     {
         return true;
     }
@@ -651,17 +649,18 @@ bool CNewUIInventoryActionController::SwapEquipItem(ITEM* pItem, int nDstSlot, c
     int dest[MAX_EQUIP_BLOCKERS] = { -1, -1 };
     if (!ReserveSlotsForBlockers(pInvenCtrl, blockers, nBlockers, dest))
     {
-        g_pSystemLogBox->AddText(GlobalText[1815], TYPE_ERROR_MESSAGE);   // not enough inventory space
+        g_pSystemLogBox->AddText(I18N::Game::InventorySpaceIsInsufficient, TYPE_ERROR_MESSAGE);
         return true;
     }
 
     // Queue the blocking slots to unequip into their reserved destinations, then drive the
     // sequence. The new item is only equipped once every blocker has been cleared (see
     // ProcessPendingEquipAfterMove), so it is never lost even on an intermediate server rejection.
-    s_pendingEquip.active       = true;
-    s_pendingEquip.dstEquipSlot = nDstSlot;
-    s_pendingEquip.newItemKey   = pItem->Key;
-    s_pendingEquip.freeCount    = 0;
+    s_pendingEquip.active            = true;
+    s_pendingEquip.pNewItemInvenCtrl = pNewItemInvenCtrl;
+    s_pendingEquip.dstEquipSlot      = nDstSlot;
+    s_pendingEquip.newItemKey        = pItem->Key;
+    s_pendingEquip.freeCount         = 0;
 
     for (int i = 0; i < nBlockers && i < MAX_EQUIP_BLOCKERS; ++i)
     {
@@ -674,16 +673,10 @@ bool CNewUIInventoryActionController::SwapEquipItem(ITEM* pItem, int nDstSlot, c
     return true;
 }
 
-bool CNewUIInventoryActionController::EquipToSlotReplacing(DWORD dwItemKey, int nDstSlot) const
+bool CNewUIInventoryActionController::EquipToSlotReplacing(CNewUIInventoryCtrl* pInvenCtrl, DWORD dwItemKey, int nDstSlot) const
 {
-    if (m_pContext == nullptr || g_pMyInventory == nullptr
+    if (m_pContext == nullptr || pInvenCtrl == nullptr
         || nDstSlot < 0 || nDstSlot >= MAX_EQUIPMENT_INDEX)
-    {
-        return false;
-    }
-
-    CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
-    if (pInvenCtrl == nullptr)
     {
         return false;
     }
@@ -691,7 +684,7 @@ bool CNewUIInventoryActionController::EquipToSlotReplacing(DWORD dwItemKey, int 
     ITEM* pItem = pInvenCtrl->FindItemByKey(dwItemKey);
     if (pItem == nullptr)
     {
-        return false;   // not in the main inventory; leave it where it was restored
+        return false;   // not in this inventory; leave it where it was restored
     }
 
     if (!m_pContext->IsEquipable(nDstSlot, pItem))
@@ -714,7 +707,7 @@ bool CNewUIInventoryActionController::EquipToSlotReplacing(DWORD dwItemKey, int 
         return EquipFromInventory(pInvenCtrl, pItem, iSrcIndex, nDstSlot);
     }
 
-    return SwapEquipItem(pItem, nDstSlot, blockers, nBlockers);
+    return SwapEquipItem(pInvenCtrl, pItem, nDstSlot, blockers, nBlockers);
 }
 
 bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem) const
