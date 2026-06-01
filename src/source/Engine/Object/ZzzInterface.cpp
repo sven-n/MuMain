@@ -5335,6 +5335,7 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
         {
             switch (Skill)
             {
+            case AT_SKILL_TWISTING_SLASH:
             case AT_SKILL_TWISTING_SLASH_STR:
             case AT_SKILL_TWISTING_SLASH_STR_MG:
             case AT_SKILL_TWISTING_SLASH_MASTERY:
@@ -5360,7 +5361,6 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
                     c->Movement = 0;
                 }
                 break;
-            case AT_SKILL_TWISTING_SLASH:
             case AT_SKILL_FIRE_SLASH:
             case AT_SKILL_FIRE_SLASH_STR:
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
