@@ -34,6 +34,8 @@ private:
     bool HandleSellToNPC(CNewUIInventoryCtrl* targetControl) const;
     bool HandleInventoryRightClickActions(CNewUIInventoryCtrl* targetControl) const;
     bool TryEquipItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const;
+    int  CollectEquipBlockers(ITEM* pItem, int nDstIndex, int* outSlots) const;
+    bool SwapEquipItem(ITEM* pItem, int nDstSlot, const int* blockers, int nBlockers) const;
     bool TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem) const;
 
     int  FindAlternateEquipSlot(int nOriginalSlot, ITEM* pItem) const;
@@ -47,6 +49,10 @@ private:
 
     IInventoryActionContext* m_pContext;
 };
+
+// Sequences the deferred "equip after unequip" step on the inventory move ack.
+void ProcessPendingEquipAfterMove();
+void CancelPendingEquipSwap();
 
 } // namespace SEASON3B
 
