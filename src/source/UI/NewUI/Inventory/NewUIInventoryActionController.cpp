@@ -674,6 +674,49 @@ bool CNewUIInventoryActionController::SwapEquipItem(ITEM* pItem, int nDstSlot, c
     return true;
 }
 
+bool CNewUIInventoryActionController::EquipToSlotReplacing(DWORD dwItemKey, int nDstSlot) const
+{
+    if (m_pContext == nullptr || g_pMyInventory == nullptr
+        || nDstSlot < 0 || nDstSlot >= MAX_EQUIPMENT_INDEX)
+    {
+        return false;
+    }
+
+    CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
+    if (pInvenCtrl == nullptr)
+    {
+        return false;
+    }
+
+    ITEM* pItem = pInvenCtrl->FindItemByKey(dwItemKey);
+    if (pItem == nullptr)
+    {
+        return false;   // not in the main inventory; leave it where it was restored
+    }
+
+    if (!m_pContext->IsEquipable(nDstSlot, pItem))
+    {
+        return true;
+    }
+
+    const int iSrcIndex = pInvenCtrl->GetIndexByItem(pItem);
+    if (iSrcIndex < 0)
+    {
+        return false;
+    }
+
+    // Same unequip-then-equip path as right-click, but into the exact slot the item was dropped on.
+    int blockers[MAX_EQUIP_BLOCKERS];
+    const int nBlockers = CollectEquipBlockers(pItem, nDstSlot, blockers);
+
+    if (nBlockers == 0)
+    {
+        return EquipFromInventory(pInvenCtrl, pItem, iSrcIndex, nDstSlot);
+    }
+
+    return SwapEquipItem(pItem, nDstSlot, blockers, nBlockers);
+}
+
 bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem) const
 {
     if (Hero->Dead != 0)

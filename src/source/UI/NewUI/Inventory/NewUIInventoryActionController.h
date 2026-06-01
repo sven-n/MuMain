@@ -21,6 +21,10 @@ public:
     void SetContext(IInventoryActionContext* pContext);
     bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl) const;
 
+    // Equip an inventory item (identified by key) into a specific equipment slot, unequipping any
+    // occupant first (and freeing a two-handed conflict). Used by drag-drop to replace on drop.
+    bool EquipToSlotReplacing(DWORD dwItemKey, int nDstSlot) const;
+
 private:
     bool HandlePickedItemPlacement(CNewUIInventoryCtrl* targetControl) const;
     bool TryApplyJewel(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
