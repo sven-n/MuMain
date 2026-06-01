@@ -41,6 +41,7 @@ namespace
         int   dstEquipSlot = -1;                              // where the new item will be equipped
         DWORD newItemKey   = 0;                               // identifies the new inventory item
         int   freeSlots[MAX_EQUIP_BLOCKERS] = { -1, -1 };     // equipment slots still to unequip
+        int   freeDest[MAX_EQUIP_BLOCKERS]  = { -1, -1 };     // reserved inventory slot for each
         int   freeCount    = 0;
     };
 
@@ -78,9 +79,10 @@ namespace
         return true;
     }
 
-    // Pick the item in an equipment slot and request the server to move it to a free inventory slot.
-    // Returns false when there is no inventory space (caller must abort without touching anything).
-    bool UnequipToInventory(int nEquipSlot)
+    // Pick the item in an equipment slot and request the server to move it to a pre-reserved
+    // inventory slot. The destination was reserved up front so the whole multi-item swap is
+    // all-or-nothing (see SwapEquipItem); -1 falls back to a fresh search as a safety net.
+    bool UnequipToInventory(int nEquipSlot, int nReservedDest)
     {
         if (g_pMyInventory == nullptr || nEquipSlot < 0 || nEquipSlot >= MAX_EQUIPMENT_INDEX)
         {
@@ -88,7 +90,7 @@ namespace
         }
 
         ITEM* pEquipped = &CharacterMachine->Equipment[nEquipSlot];
-        const int iTempSlot = g_pMyInventory->FindEmptySlot(pEquipped);
+        const int iTempSlot = (nReservedDest != -1) ? nReservedDest : g_pMyInventory->FindEmptySlot(pEquipped);
         if (iTempSlot == -1)
         {
             return false;
@@ -107,6 +109,61 @@ namespace
         SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, nEquipSlot, pEquipped, STORAGE_TYPE::INVENTORY, iTempSlot);
         return true;
     }
+
+    bool EquippedSlotItemSize(int nSlot, int& outWidth, int& outHeight)
+    {
+        if (nSlot < 0 || nSlot >= MAX_EQUIPMENT_INDEX)
+        {
+            return false;
+        }
+
+        const ITEM* pItem = &CharacterMachine->Equipment[nSlot];
+        if (pItem->Type == -1)
+        {
+            return false;
+        }
+
+        const ITEM_ATTRIBUTE* pAttr = &ItemAttribute[pItem->Type];
+        outWidth  = pAttr->Width;
+        outHeight = pAttr->Height;
+        return true;
+    }
+
+    // Reserve a distinct inventory slot for every blocking equipment item, all at once. Returns
+    // false (reserving nothing) unless ALL of them fit, so the caller can abort atomically and
+    // leave the character untouched (mirrors WoW: a 2H swap fails cleanly when the bag is full).
+    bool ReserveSlotsForBlockers(CNewUIInventoryCtrl* pInvenCtrl, const int* blockers, int nBlockers, int* outDest)
+    {
+        if (pInvenCtrl == nullptr || nBlockers <= 0)
+        {
+            return false;
+        }
+
+        int wA, hA;
+        if (!EquippedSlotItemSize(blockers[0], wA, hA))
+        {
+            return false;
+        }
+
+        int wB, hB;
+        const bool bSecond = (nBlockers >= 2) && EquippedSlotItemSize(blockers[1], wB, hB);
+
+        // Only the first slot holds a movable item: a single free slot is enough.
+        if (!bSecond)
+        {
+            const int slot = pInvenCtrl->FindEmptySlot(wA, hA);
+            if (slot == -1)
+            {
+                return false;
+            }
+            outDest[0] = slot;
+            outDest[1] = -1;
+            return true;
+        }
+
+        // Both items must fit at once in non-overlapping space.
+        return pInvenCtrl->FindTwoEmptySlots(wA, hA, wB, hB, outDest[0], outDest[1]);
+    }
 }
 
 void CancelPendingEquipSwap()
@@ -124,7 +181,9 @@ void ProcessPendingEquipAfterMove()
     // Unequip the next still-occupied blocking slot, one per move ack, before the final equip.
     while (s_pendingEquip.freeCount > 0)
     {
-        const int nSlot = s_pendingEquip.freeSlots[--s_pendingEquip.freeCount];
+        const int nIdx  = --s_pendingEquip.freeCount;
+        const int nSlot = s_pendingEquip.freeSlots[nIdx];
+        const int nDest = s_pendingEquip.freeDest[nIdx];
         if (nSlot < 0 || nSlot >= MAX_EQUIPMENT_INDEX)
         {
             continue;
@@ -135,7 +194,7 @@ void ProcessPendingEquipAfterMove()
             continue;   // already empty -> nothing to move, skip to the next blocker
         }
 
-        if (!UnequipToInventory(nSlot))
+        if (!UnequipToInventory(nSlot, nDest))
         {
             ClearPendingEquip();   // no inventory space: stop safely, the new item is untouched
             return;
@@ -581,9 +640,24 @@ int CNewUIInventoryActionController::CollectEquipBlockers(ITEM* pItem, int nDstI
 
 bool CNewUIInventoryActionController::SwapEquipItem(ITEM* pItem, int nDstSlot, const int* blockers, int nBlockers) const
 {
-    // Queue the blocking slots to unequip, then drive the sequence. The new item is only equipped
-    // once every blocker has been cleared (see ProcessPendingEquipAfterMove), so it is never lost
-    // even if the server would reject an intermediate state.
+    CNewUIInventoryCtrl* pInvenCtrl = (g_pMyInventory != nullptr) ? g_pMyInventory->GetInventoryCtrl() : nullptr;
+    if (pInvenCtrl == nullptr || nBlockers <= 0)
+    {
+        return true;
+    }
+
+    // Reserve an inventory slot for EVERY item we are about to displace, up front. If they do not
+    // all fit at once, abort and unequip nothing — the swap is all-or-nothing, like WoW.
+    int dest[MAX_EQUIP_BLOCKERS] = { -1, -1 };
+    if (!ReserveSlotsForBlockers(pInvenCtrl, blockers, nBlockers, dest))
+    {
+        g_pSystemLogBox->AddText(GlobalText[1815], TYPE_ERROR_MESSAGE);   // not enough inventory space
+        return true;
+    }
+
+    // Queue the blocking slots to unequip into their reserved destinations, then drive the
+    // sequence. The new item is only equipped once every blocker has been cleared (see
+    // ProcessPendingEquipAfterMove), so it is never lost even on an intermediate server rejection.
     s_pendingEquip.active       = true;
     s_pendingEquip.dstEquipSlot = nDstSlot;
     s_pendingEquip.newItemKey   = pItem->Key;
@@ -591,7 +665,9 @@ bool CNewUIInventoryActionController::SwapEquipItem(ITEM* pItem, int nDstSlot, c
 
     for (int i = 0; i < nBlockers && i < MAX_EQUIP_BLOCKERS; ++i)
     {
-        s_pendingEquip.freeSlots[s_pendingEquip.freeCount++] = blockers[i];
+        s_pendingEquip.freeSlots[s_pendingEquip.freeCount] = blockers[i];
+        s_pendingEquip.freeDest[s_pendingEquip.freeCount]  = dest[i];
+        s_pendingEquip.freeCount++;
     }
 
     ProcessPendingEquipAfterMove();   // performs the first unequip

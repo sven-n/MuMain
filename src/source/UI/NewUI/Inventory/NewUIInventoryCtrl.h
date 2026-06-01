@@ -165,7 +165,12 @@ namespace SEASON3B
 
         bool CheckSlot(int startIndex, int width, int height);
         bool CheckSlot(int iColumnX, int iRowY, int width, int height);
+        bool IsRectEmpty(int startIndex, int width, int height) const;
     public:
+        // Find two non-overlapping empty placements for items of the given sizes. Output indices
+        // include the storage offset (like FindEmptySlot). Used for atomic all-or-nothing equip
+        // swaps that displace two items. Returns false if both cannot fit at once.
+        bool FindTwoEmptySlots(int wA, int hA, int wB, int hB, int& outSlotA, int& outSlotB) const;
         CNewUIInventoryCtrl();
         virtual ~CNewUIInventoryCtrl();
 

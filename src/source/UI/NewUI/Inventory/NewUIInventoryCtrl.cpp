@@ -1347,6 +1347,58 @@ bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int iColumnX, int iRowY, int width
     return CheckSlot(iIndex, width, height);
 }
 
+bool SEASON3B::CNewUIInventoryCtrl::IsRectEmpty(int startIndex, int width, int height) const
+{
+    const int gridSize = m_nColumn * m_nRow;
+    if (startIndex < 0 || width <= 0 || height <= 0) return false;
+    if (startIndex % m_nColumn > m_nColumn - width) return false;
+
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            const int iIndex = startIndex + (y * m_nColumn) + x;
+            if (iIndex >= gridSize) return false;
+            if (m_pdwItemCheckBox[iIndex] != 0) return false;
+        }
+    }
+    return true;
+}
+
+bool SEASON3B::CNewUIInventoryCtrl::FindTwoEmptySlots(int wA, int hA, int wB, int hB, int& outSlotA, int& outSlotB) const
+{
+    if (wA <= 0 || hA <= 0 || wB <= 0 || hB <= 0) return false;
+
+    const int totalCells = m_nColumn * m_nRow;
+    for (int a = 0; a < totalCells; a++)
+    {
+        if (!IsRectEmpty(a, wA, hA)) continue;
+
+        const int ax = a % m_nColumn;
+        const int ay = a / m_nColumn;
+
+        for (int b = 0; b < totalCells; b++)
+        {
+            if (!IsRectEmpty(b, wB, hB)) continue;
+
+            const int bx = b % m_nColumn;
+            const int by = b / m_nColumn;
+
+            // Both placements are individually empty; accept the first non-overlapping pair.
+            const bool bOverlap =
+                !(ax + wA <= bx || bx + wB <= ax || ay + hA <= by || by + hB <= ay);
+            if (!bOverlap)
+            {
+                outSlotA = a + m_nIndexOffset;
+                outSlotB = b + m_nIndexOffset;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 int CNewUIInventoryCtrl::GetIndex(int column, int row)
 {
     return column + row * m_nColumn + m_nIndexOffset;
