@@ -1022,6 +1022,11 @@ namespace MUHelper
             return 0;
         }
 
+        if (Hero->AttackTime > 0.0f)
+        {
+            return 0;
+        }
+
         Hero->MovementType = MOVEMENT_ATTACK;
         ActionTarget = iCharIndex;
         Attacking = 1;
