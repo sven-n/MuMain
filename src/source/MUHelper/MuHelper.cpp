@@ -955,6 +955,11 @@ namespace MUHelper
             return 0;
         }
 
+        if (Hero->AttackTime > 0.0f)
+        {
+            return 0;
+        }
+
         const int iCharIndex = FindCharacterIndex(iTarget);
         if (iCharIndex == MAX_CHARACTERS_CLIENT)
         {
@@ -1019,11 +1024,6 @@ namespace MUHelper
             Hero->Path.Lock.unlock();
 
             SendMove(Hero, &Hero->Object);
-            return 0;
-        }
-
-        if (Hero->AttackTime > 0.0f)
-        {
             return 0;
         }
 
