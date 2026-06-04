@@ -15,6 +15,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/PlayerActionState.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
@@ -2570,6 +2571,30 @@ int GetHandOfWeapon(OBJECT* o)
     return (Hand);
 }
 
+namespace
+{
+    // The frame at which an attack animation lands its hit; before this the swing
+    // is still winding up.
+    constexpr float ATTACK_IMPACT_FRAME = 5.f;
+
+    bool IsMonsterAttackAction(const OBJECT* o)
+    {
+        return o->Type >= MODEL_MONSTER01 && o->Type < MODEL_MONSTER_END
+            && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2;
+    }
+
+    // True once a player or monster swing has reached its impact frame, i.e. the
+    // moment the hit, damage numbers and sound should fire.
+    bool IsAttackImpactFrame(const OBJECT* o)
+    {
+        if (o->AnimationFrame < ATTACK_IMPACT_FRAME)
+            return false;
+
+        const bool bPlayerAttack = o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction);
+        return bPlayerAttack || IsMonsterAttackAction(o);
+    }
+}
+
 bool AttackStage(CHARACTER* c, OBJECT* o)
 {
     // 무기 위치 얻기
@@ -2726,7 +2751,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 
     case    AT_SKILL_PENETRATION:
     case AT_SKILL_PENETRATION_STR:
-        if (o->Type == MODEL_PLAYER && o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL)
+        if (o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction))
         {
             if (o->AnimationFrame >= 5.f)
             {
@@ -2822,8 +2847,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         }
         break;
     case    AT_SKILL_IMPROVE_AG:
-        if (o->AnimationFrame >= 5.f && ((o->Type == MODEL_PLAYER && o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL) ||
-            ((o->Type >= MODEL_MONSTER01 && o->Type < MODEL_MONSTER_END) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)))
+        if (IsAttackImpactFrame(o))
         {
             c->AttackTime = 15;
         }
@@ -3012,8 +3036,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         {
             c->AttackTime = 15;
         }
-        else if (o->AnimationFrame >= 5.f && ((o->Type == MODEL_PLAYER && o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL) ||
-            ((o->Type >= MODEL_MONSTER01 && o->Type < MODEL_MONSTER_END) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)))
+        else if (IsAttackImpactFrame(o))
         {
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
@@ -6851,7 +6874,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     }
 
     if ((c->Skill == AT_SKILL_PENETRATION || c->Skill == AT_SKILL_PENETRATION_STR) &&
-        ((o->Type == MODEL_PLAYER && o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL)))
+        ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction))))
     {
         if (o->AnimationFrame >= 5.f && o->AnimationFrame <= 10.f)
         {
@@ -8242,7 +8265,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         }
 
         //model_bow action, frame
-        if (o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL)
+        if (Engine::Object::IsAttackAction(o->CurrentAction))
         {
             Vector(0.2f, 0.8f, 0.5f, vLight);
             for (int i = 0; i < 8; i++)
@@ -12090,11 +12113,11 @@ void SetCharacterClass(CHARACTER* c)
     if (gMapManager.InChaosCastle() == true)
         Success = false;
 
-    if (c->Object.CurrentAction >= PLAYER_SIT1 && c->Object.CurrentAction <= PLAYER_POSE_FEMALE1)
+    if (Engine::Object::IsSitOrPoseAction(c->Object.CurrentAction))
     {
         Success = false;
     }
-    if (c->Object.CurrentAction >= PLAYER_ATTACK_FIST && c->Object.CurrentAction <= PLAYER_RIDE_SKILL)
+    if (Engine::Object::IsAttackAction(c->Object.CurrentAction))
     {
         Success = false;
     }
@@ -12198,9 +12221,9 @@ void SetChangeClass(CHARACTER* c)
 
     bool Success = true;
 
-    if (c->Object.CurrentAction >= PLAYER_SIT1 && c->Object.CurrentAction <= PLAYER_POSE_FEMALE1)
+    if (Engine::Object::IsSitOrPoseAction(c->Object.CurrentAction))
         Success = false;
-    if (c->Object.CurrentAction >= PLAYER_ATTACK_FIST && c->Object.CurrentAction <= PLAYER_RIDE_SKILL)
+    if (Engine::Object::IsAttackAction(c->Object.CurrentAction))
         Success = false;
     if (Success)
         SetPlayerStop(c);

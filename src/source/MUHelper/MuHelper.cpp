@@ -8,6 +8,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/PlayerActionState.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "Character/CharacterManager.h"
@@ -823,6 +824,14 @@ namespace MUHelper
         return 1;
     }
 
+    // True while the hero is mid swing; gating helper actions on it makes the
+    // bot's cadence follow AttackSpeed instead of the fixed helper timer, the
+    // same way the manual click path gates in MoveHero (ZzzInterface.cpp).
+    static bool IsHeroSwingInProgress()
+    {
+        return Engine::Object::IsAttackAction(Hero->Object.CurrentAction);
+    }
+
     int CMuHelper::SimulateAttack(ActionSkillType iSkill)
     {
         return SimulateSkill(iSkill, true, m_iCurrentTarget);
@@ -830,6 +839,13 @@ namespace MUHelper
 
     int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
+        // Let the current swing finish before issuing another action, so the
+        // cadence tracks AttackSpeed instead of the fixed helper timer.
+        if (IsHeroSwingInProgress())
+        {
+            return 0;
+        }
+
         g_MovementSkill.m_iSkill = iSkill;
         g_MovementSkill.m_bMagic = true;
 
@@ -951,6 +967,13 @@ namespace MUHelper
     int CMuHelper::SimulateBasicAttack(int iTarget)
     {
         if (iTarget == -1)
+        {
+            return 0;
+        }
+
+        // Let the current swing finish before attacking again, so the cadence
+        // tracks AttackSpeed instead of the fixed helper timer.
+        if (IsHeroSwingInProgress())
         {
             return 0;
         }
