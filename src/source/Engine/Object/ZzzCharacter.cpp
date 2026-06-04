@@ -15,6 +15,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/PlayerActionState.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
@@ -2726,7 +2727,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
 
     case    AT_SKILL_PENETRATION:
     case AT_SKILL_PENETRATION_STR:
-        if (o->Type == MODEL_PLAYER && o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL)
+        if (o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction))
         {
             if (o->AnimationFrame >= 5.f)
             {
@@ -2822,7 +2823,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         }
         break;
     case    AT_SKILL_IMPROVE_AG:
-        if (o->AnimationFrame >= 5.f && ((o->Type == MODEL_PLAYER && o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL) ||
+        if (o->AnimationFrame >= 5.f && ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction)) ||
             ((o->Type >= MODEL_MONSTER01 && o->Type < MODEL_MONSTER_END) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)))
         {
             c->AttackTime = 15;
@@ -3012,7 +3013,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         {
             c->AttackTime = 15;
         }
-        else if (o->AnimationFrame >= 5.f && ((o->Type == MODEL_PLAYER && o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL) ||
+        else if (o->AnimationFrame >= 5.f && ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction)) ||
             ((o->Type >= MODEL_MONSTER01 && o->Type < MODEL_MONSTER_END) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)))
         {
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
@@ -6851,7 +6852,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     }
 
     if ((c->Skill == AT_SKILL_PENETRATION || c->Skill == AT_SKILL_PENETRATION_STR) &&
-        ((o->Type == MODEL_PLAYER && o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL)))
+        ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction))))
     {
         if (o->AnimationFrame >= 5.f && o->AnimationFrame <= 10.f)
         {
@@ -8242,7 +8243,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         }
 
         //model_bow action, frame
-        if (o->CurrentAction >= PLAYER_ATTACK_FIST && o->CurrentAction <= PLAYER_RIDE_SKILL)
+        if (Engine::Object::IsAttackAction(o->CurrentAction))
         {
             Vector(0.2f, 0.8f, 0.5f, vLight);
             for (int i = 0; i < 8; i++)
@@ -12094,7 +12095,7 @@ void SetCharacterClass(CHARACTER* c)
     {
         Success = false;
     }
-    if (c->Object.CurrentAction >= PLAYER_ATTACK_FIST && c->Object.CurrentAction <= PLAYER_RIDE_SKILL)
+    if (Engine::Object::IsAttackAction(c->Object.CurrentAction))
     {
         Success = false;
     }
@@ -12200,7 +12201,7 @@ void SetChangeClass(CHARACTER* c)
 
     if (c->Object.CurrentAction >= PLAYER_SIT1 && c->Object.CurrentAction <= PLAYER_POSE_FEMALE1)
         Success = false;
-    if (c->Object.CurrentAction >= PLAYER_ATTACK_FIST && c->Object.CurrentAction <= PLAYER_RIDE_SKILL)
+    if (Engine::Object::IsAttackAction(c->Object.CurrentAction))
         Success = false;
     if (Success)
         SetPlayerStop(c);

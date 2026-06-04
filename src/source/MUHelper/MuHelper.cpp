@@ -8,6 +8,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/PlayerActionState.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "Character/CharacterManager.h"
@@ -823,16 +824,12 @@ namespace MUHelper
         return 1;
     }
 
-    // A swing is in progress while the hero's current action is one of the
-    // attack/skill animations. That animation's playback speed scales with
-    // AttackSpeed (see SetAttackSpeed in ZzzCharacter.cpp), so gating new helper
-    // actions on it makes the bot's cadence match a player's manual click rate
-    // instead of firing on the fixed helper timer. Mirrors the manual gate in
-    // MoveHero (ZzzInterface.cpp).
+    // True while the hero is mid swing; gating helper actions on it makes the
+    // bot's cadence follow AttackSpeed instead of the fixed helper timer, the
+    // same way the manual click path gates in MoveHero (ZzzInterface.cpp).
     static bool IsHeroSwingInProgress()
     {
-        const int iAction = Hero->Object.CurrentAction;
-        return iAction >= PLAYER_ATTACK_FIST && iAction <= PLAYER_RIDE_SKILL;
+        return Engine::Object::IsAttackAction(Hero->Object.CurrentAction);
     }
 
     int CMuHelper::SimulateAttack(ActionSkillType iSkill)
