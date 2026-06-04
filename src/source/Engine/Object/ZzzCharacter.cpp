@@ -2571,6 +2571,30 @@ int GetHandOfWeapon(OBJECT* o)
     return (Hand);
 }
 
+namespace
+{
+    // The frame at which an attack animation lands its hit; before this the swing
+    // is still winding up.
+    constexpr float ATTACK_IMPACT_FRAME = 5.f;
+
+    bool IsMonsterAttackAction(const OBJECT* o)
+    {
+        return o->Type >= MODEL_MONSTER01 && o->Type < MODEL_MONSTER_END
+            && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2;
+    }
+
+    // True once a player or monster swing has reached its impact frame, i.e. the
+    // moment the hit, damage numbers and sound should fire.
+    bool IsAttackImpactFrame(const OBJECT* o)
+    {
+        if (o->AnimationFrame < ATTACK_IMPACT_FRAME)
+            return false;
+
+        const bool bPlayerAttack = o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction);
+        return bPlayerAttack || IsMonsterAttackAction(o);
+    }
+}
+
 bool AttackStage(CHARACTER* c, OBJECT* o)
 {
     // 무기 위치 얻기
@@ -2823,8 +2847,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         }
         break;
     case    AT_SKILL_IMPROVE_AG:
-        if (o->AnimationFrame >= 5.f && ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction)) ||
-            ((o->Type >= MODEL_MONSTER01 && o->Type < MODEL_MONSTER_END) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)))
+        if (IsAttackImpactFrame(o))
         {
             c->AttackTime = 15;
         }
@@ -3013,8 +3036,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o)
         {
             c->AttackTime = 15;
         }
-        else if (o->AnimationFrame >= 5.f && ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction)) ||
-            ((o->Type >= MODEL_MONSTER01 && o->Type < MODEL_MONSTER_END) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)))
+        else if (IsAttackImpactFrame(o))
         {
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
@@ -12091,7 +12113,7 @@ void SetCharacterClass(CHARACTER* c)
     if (gMapManager.InChaosCastle() == true)
         Success = false;
 
-    if (c->Object.CurrentAction >= PLAYER_SIT1 && c->Object.CurrentAction <= PLAYER_POSE_FEMALE1)
+    if (Engine::Object::IsSitOrPoseAction(c->Object.CurrentAction))
     {
         Success = false;
     }
@@ -12199,7 +12221,7 @@ void SetChangeClass(CHARACTER* c)
 
     bool Success = true;
 
-    if (c->Object.CurrentAction >= PLAYER_SIT1 && c->Object.CurrentAction <= PLAYER_POSE_FEMALE1)
+    if (Engine::Object::IsSitOrPoseAction(c->Object.CurrentAction))
         Success = false;
     if (Engine::Object::IsAttackAction(c->Object.CurrentAction))
         Success = false;

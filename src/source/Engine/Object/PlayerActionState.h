@@ -14,4 +14,12 @@ namespace Engine::Object
     {
         return currentAction >= PLAYER_ATTACK_FIST && currentAction <= PLAYER_RIDE_SKILL;
     }
+
+    // True while a player is sitting or holding a pose (PLAYER_SIT1 ..
+    // PLAYER_POSE_FEMALE1). Used to keep these animations from being reset to the
+    // stand pose when equipment or class changes.
+    inline bool IsSitOrPoseAction(int currentAction)
+    {
+        return currentAction >= PLAYER_SIT1 && currentAction <= PLAYER_POSE_FEMALE1;
+    }
 }
