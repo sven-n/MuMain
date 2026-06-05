@@ -97,9 +97,12 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
 
 # The Windows entry point belongs to the executable, not the engine library.
 # Removing it keeps the library free of a WinMain so it can be linked into
-# test binaries that bring their own entry point.
-list(REMOVE_ITEM MU_CLIENT_SOURCES
-  "${CMAKE_CURRENT_SOURCE_DIR}/source/Platform/Windows/Winmain.cpp")
+# test binaries that bring their own entry point. Match on the trailing
+# filename rather than an absolute path: a path built from
+# ${CMAKE_CURRENT_SOURCE_DIR} can differ from the glob results in drive-letter
+# casing or separators on Windows, which would make the removal silently fail
+# and leak a second WinMain into the library.
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[Ww]in[Mm]ain\\.[Cc]pp$")
 
 # Add MuEditor sources when editor is enabled
 if(ENABLE_EDITOR)
@@ -133,9 +136,10 @@ if(ENABLE_EDITOR)
   # The Win32 + OpenGL2 backends call straight into opengl32 (glOrtho,
   # glShadeModel, ...) and dwmapi. Declaring them as PUBLIC dependencies of
   # imgui lets CMake place these libraries *after* libimgui.a on the final
-  # link line, which MinGW's order-sensitive linker requires. MSVC ignores
-  # link order, so this is harmless there.
-  if (NOT MSVC)
+  # link line, which MinGW's order-sensitive linker requires. Restrict to
+  # Windows non-MSVC (MinGW): these are Windows-only libraries, and MSVC links
+  # them elsewhere and ignores order anyway.
+  if (WIN32 AND NOT MSVC)
     target_link_libraries(imgui PUBLIC opengl32 dwmapi)
   endif()
 
@@ -148,18 +152,26 @@ endif()
 # attached PUBLIC below so both the Main executable and any test binary that
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
-add_library(MuClient::MuClient ALIAS MuClient)
 target_compile_features(MuClient PUBLIC cxx_std_20)
 
+# The engine relies on self-registering globals whose constructors get
+# silently dropped if the linker only pulls archive members on demand, so
+# every consumer must link MuClient with WHOLE_ARCHIVE. Rather than make each
+# consumer remember that, MuClient::MuClient is an interface wrapper that
+# carries the WHOLE_ARCHIVE requirement (and, transitively, all of MuClient's
+# public compile/link properties). Executables and unit tests just link
+# MuClient::MuClient; link the raw MuClient target directly only when an
+# on-demand link is genuinely wanted.
+add_library(MuClient_whole INTERFACE)
+target_link_libraries(MuClient_whole INTERFACE $<LINK_LIBRARY:WHOLE_ARCHIVE,MuClient>)
+add_library(MuClient::MuClient ALIAS MuClient_whole)
+
 # Thin executable: platform bootstrap only, links the engine library.
-# WHOLE_ARCHIVE keeps every engine translation unit in the final binary --
-# the engine relies on self-registering globals whose constructors would be
-# silently dropped if the linker only pulled archive members on demand.
 add_executable(Main
   "${CMAKE_CURRENT_SOURCE_DIR}/source/Platform/Windows/Winmain.cpp"
 )
 target_compile_features(Main PUBLIC cxx_std_20)
-target_link_libraries(Main PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,MuClient>)
+target_link_libraries(Main PRIVATE MuClient::MuClient)
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
