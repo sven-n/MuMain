@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "UI/Chat/ChatInput.h"
 #include "UI/NewUI/Widgets/NewUIChatInputBox.h"
 #include "I18N/All.h"
 
@@ -567,7 +568,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                     {
                         if (Hero->SafeZone || (Hero->Helper.Type != MODEL_HORN_OF_UNIRIA && Hero->Helper.Type != MODEL_HORN_OF_DINORANT && Hero->Helper.Type != MODEL_DARK_HORSE_ITEM && Hero->Helper.Type != MODEL_HORN_OF_FENRIR))
                         {
-                            CheckChatText(szChatText);
+                            UI::Chat::CheckChatText(szChatText);
                         }
 
                         SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, wstrText.c_str());

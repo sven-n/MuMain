@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "UI/Chat/Chat.h"
 #include <memory>
 #include "UI/Legacy/UIManager.h"
 #include "Guild/GuildCache.h"
@@ -1795,12 +1796,12 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             }
             if (pFindGm)
             {
-                AssignChat(ID, Text);
+                UI::Chat::AssignChat(ID, Text);
                 g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GM_MESSAGE);
             }
             else
             {
-                AssignChat(ID, Text, 1);
+                UI::Chat::AssignChat(ID, Text, 1);
             }
         }
         else
@@ -1821,12 +1822,12 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             }
             if (pFindGm)
             {
-                AssignChat(ID, Text);
+                UI::Chat::AssignChat(ID, Text);
                 g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GM_MESSAGE);
             }
             else
             {
-                AssignChat(ID, Text);
+                UI::Chat::AssignChat(ID, Text);
                 g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_CHAT_MESSAGE);
             }
         }
@@ -1896,7 +1897,7 @@ void ReceiveChatKey(const BYTE* ReceiveBuffer)
 
     wchar_t ChatText[sizeof Data->ChatText + 1] {};
     CMultiLanguage::ConvertFromUtf8(ChatText, Data->ChatText, sizeof Data->ChatText);
-    CreateChat(CharactersClient[Index].ID, ChatText, &CharactersClient[Index]);
+    UI::Chat::CreateChat(CharactersClient[Index].ID, ChatText, &CharactersClient[Index]);
 }
 
 void ReceiveNotice(const BYTE* ReceiveBuffer)

@@ -1,6 +1,7 @@
 ﻿// SummonSystem.cpp: implementation of the CSummonSystem class.
 //////////////////////////////////////////////////////////////////////
 
+#include "GameLogic/Combat/CombatTarget.h"
 #include "stdafx.h"
 #include "SummonSystem.h"
 
@@ -71,7 +72,6 @@ void CSummonSystem::CastSummonSkill(int iSkill, CHARACTER* pCharacter, OBJECT* p
     CreateSummonObject(iSkill, pCharacter, pObject, (float)iTargetPos_X * TERRAIN_SCALE, (float)iTargetPos_Y * TERRAIN_SCALE);
 }
 
-bool CheckTarget(CHARACTER* c);
 float RequestTerrainHeight(float xf, float yf);
 
 BOOL CSummonSystem::SendRequestSummonSkill(int iSkill, CHARACTER* pCharacter, OBJECT* pObject)
@@ -83,7 +83,7 @@ BOOL CSummonSystem::SendRequestSummonSkill(int iSkill, CHARACTER* pCharacter, OB
     extern MovementSkill g_MovementSkill;
     extern int SelectedCharacter;
 
-    CheckTarget(pCharacter);
+    GameLogic::Combat::CheckTarget(pCharacter);
 
     int iTargetKey = -1;
     if (CheckAttack())

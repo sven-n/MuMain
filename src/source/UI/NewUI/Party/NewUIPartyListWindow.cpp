@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Chat/Chat.h"
 
 #include "UI/NewUI/Party/NewUIPartyListWindow.h"
 #include "UI/NewUI/NewUISystem.h"
@@ -139,7 +140,7 @@ bool CNewUIPartyListWindow::BtnProcess()
             if (SelectedCharacter == -1) {
                 CHARACTER* c = &CharactersClient[Party[i].index];
                 if (c && c != Hero) {
-                    CreateChat(c->ID, L"", c);
+                    UI::Chat::CreateChat(c->ID, L"", c);
                 }
             }
 
