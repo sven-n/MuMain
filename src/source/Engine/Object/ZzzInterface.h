@@ -76,10 +76,6 @@ bool CheckWhisperLevel(int lvl, wchar_t* text);
 void RegistWhisperID(int lvl, wchar_t* text);
 void ClearWhisperID(void);
 
-void SaveIME_Status();
-void SetIME_Status(bool halfShape);
-bool CheckIME_Status(bool change, int mode);
-void RenderIME_Status();
 
 //  HotKey
 int  FindHotKey(int Skill);
@@ -110,7 +106,6 @@ void RenderOutSides();
 void RenderBooleans();
 void RenderTimes();
 void RenderPartyHP();
-void SetPositionIME_Wnd(float x, float y);
 
 void SendMove(CHARACTER* c, OBJECT* o);
 void SetCharacterPos(CHARACTER* c, BYTE posX, BYTE posY, vec3_t position);

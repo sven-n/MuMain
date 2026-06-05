@@ -7,6 +7,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Core/Input/ImeInput.h"
 #include "UI/NewUI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -1075,7 +1076,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CurrentProtocolState = RECEIVE_JOIN_MAP_SERVER;
 
     LockInputStatus = false;
-    CheckIME_Status(true, 0);
+    Input::IME::CheckStatus(true, 0);
 
     LoadingWorld = 30;
     MouseUpdateTime = 0;
