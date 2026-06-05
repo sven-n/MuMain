@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameLogic/Combat/SkillExecution.h"
-#include "GameLogic/Combat/ClassAttack.h" // per-class executors this dispatches to
+#include "GameLogic/Combat/ClassAttack.h"
+#include "GameLogic/Combat/SkillCast.h" // per-class executors this dispatches to
 #include "Character/CharacterManager.h"   // gCharacterManager
 
 // Includes mirror ZzzInterface.cpp, the unit this was extracted from.
@@ -17,6 +18,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Combat/ClassAttack.h"
+#include "GameLogic/Combat/SkillCast.h"
 #include "Core/Input/ImeInput.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzOpenData.h"
