@@ -7,6 +7,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "UI/Chat/Whisper.h"
 #include "Core/Input/ImeInput.h"
 #include "UI/NewUI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -848,7 +849,7 @@ void InitGame()
     g_shMutoNumber[1] = -1;
     g_shMutoNumber[2] = -1;
 
-    ClearWhisperID();
+    UI::Chat::Whisper::Clear();
 
     matchEvent::ClearMatchInfo();
 
@@ -1850,7 +1851,7 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText, messageSize);
     Text[messageSize] = L'\0';
 
-    RegistWhisperID(10, ID);
+    UI::Chat::Whisper::Register(10, ID);
 
     if (g_pOption->IsWhisperSound())
     {

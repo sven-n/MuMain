@@ -71,11 +71,6 @@ void MoveChat();
 void RenderSwichState();
 void CheckChatText(wchar_t* Text);
 
-//  Whisper
-bool CheckWhisperLevel(int lvl, wchar_t* text);
-void RegistWhisperID(int lvl, wchar_t* text);
-void ClearWhisperID(void);
-
 
 //  HotKey
 int  FindHotKey(int Skill);
