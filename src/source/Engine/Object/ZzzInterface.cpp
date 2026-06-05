@@ -7399,6 +7399,15 @@ void MoveHero()
 
     if (c->JumpTime > 0)
     {
+        // The hero is sliding to a server-set position (the basic weapon skills reposition the
+        // hero on every cast). Returning here freezes all input for the whole slide, which
+        // capped those skills' auto-attack cadence below the player's attack speed (issue #350).
+        // Keep the auto-attack re-cast running through the slide; only manual input stays
+        // suppressed, and the slide itself still animates smoothly.
+        if (g_pOption->IsAutoAttack() && Attacking != -1 && SelectedCharacter != -1)
+        {
+            Attack(Hero);
+        }
         return;
     }
 
