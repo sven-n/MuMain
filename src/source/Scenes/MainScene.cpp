@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Engine/Object/EditObjects.h"
 #include "UI/Chat/Chat.h"
 #include "MainScene.h"
 #include "SceneCommon.h"
@@ -290,7 +291,7 @@ static void UpdateGameEntities()
     g_Direction.CheckDirection();
 
 #ifdef ENABLE_EDIT
-    EditObjects();
+    Editor::EditObjects();
 #endif //ENABLE_EDIT
 }
 
