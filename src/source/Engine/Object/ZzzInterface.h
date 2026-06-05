@@ -81,7 +81,6 @@ void RenderTipText(int sx, int sy, const wchar_t* Text);
 
 extern int g_iWidthEx;
 
-void SelectObjects();
 void RenderInterface(bool);
 void MoveInterface();
 void RenderCursor();

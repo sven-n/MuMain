@@ -11,6 +11,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Input/Selection.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Legacy/UIMng.h"
@@ -526,7 +527,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
  */
 static void RenderMainSceneUI()
 {
-    SelectObjects();
+    Input::Selection::SelectObjects();
     BeginBitmap();
     RenderObjectDescription();
 
