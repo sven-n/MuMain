@@ -17,6 +17,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Combat/ClassAttack.h"
+#include "GameLogic/Combat/CombatTarget.h"
 #include "GameLogic/Combat/SkillExecution.h"
 #include "Core/Input/ImeInput.h"
 #include "Engine/Object/ZzzInventory.h"

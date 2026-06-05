@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameLogic/Combat/SkillExecution.h"
 #include "GameLogic/Combat/ClassAttack.h"
+#include "GameLogic/Combat/CombatTarget.h"
 #include "GameLogic/Combat/SkillCast.h" // per-class executors this dispatches to
 #include "Character/CharacterManager.h"   // gCharacterManager
 
@@ -18,6 +19,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Combat/ClassAttack.h"
+#include "GameLogic/Combat/CombatTarget.h"
 #include "GameLogic/Combat/SkillCast.h"
 #include "Core/Input/ImeInput.h"
 #include "Engine/Object/ZzzInventory.h"

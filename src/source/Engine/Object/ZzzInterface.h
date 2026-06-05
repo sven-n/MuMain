@@ -118,7 +118,6 @@ void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, u
 void Attack(CHARACTER* c);
 void SendRequestMagic(int Type, int Key);
 void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey, BYTE* pSkillSerial);
-bool CheckTarget(CHARACTER* c);
 BYTE GetDestValue(int xPos, int yPos, int xDst, int yDst);
 
 bool IsGMCharacter();

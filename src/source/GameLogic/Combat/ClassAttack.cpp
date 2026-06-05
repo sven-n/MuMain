@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameLogic/Combat/ClassAttack.h"
+#include "GameLogic/Combat/CombatTarget.h"
 #include "GameLogic/Combat/SkillCast.h"
 #include "Character/CharacterManager.h" // gCharacterManager
 #include "GameLogic/Buffs/w_Buff.h"     // UnRegisterBuff

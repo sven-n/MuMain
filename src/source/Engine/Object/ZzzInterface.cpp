@@ -2589,28 +2589,6 @@ void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType)
 }
 
 
-bool CheckTarget(CHARACTER* c)
-{
-    if (SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
-    {
-        TargetX = (int)(CharactersClient[SelectedCharacter].Object.Position[0] / TERRAIN_SCALE);
-        TargetY = (int)(CharactersClient[SelectedCharacter].Object.Position[1] / TERRAIN_SCALE);
-        VectorCopy(CharactersClient[SelectedCharacter].Object.Position, c->TargetPosition);
-        return true;
-    }
-    else
-    {
-        RenderTerrain(true);
-        if (SelectFlag)
-        {
-            VectorCopy(CollisionPosition, c->TargetPosition);
-            TargetX = (int)(c->TargetPosition[0] / TERRAIN_SCALE);
-            TargetY = (int)(c->TargetPosition[1] / TERRAIN_SCALE);
-            return true;
-        }
-    }
-    return false;
-}
 
 bool EnableFastInput = false;
 
