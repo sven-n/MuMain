@@ -78,11 +78,31 @@ endif()
 # Editor mode option (for admin builds)
 option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
 
+# ---------------------------------------------------------------------------
+# Engine/game code -> static library (libMuClient); MuMain -> thin executable.
+#
+# All engine and game logic compiles into the MuClient static library. The
+# Main executable defined further down contains only the platform entry point
+# (WinMain) and links the library. Keeping the two separated lets unit-test
+# binaries link the same engine code instead of recompiling individual
+# translation units, and stops bootstrap-only code from leaking into the
+# engine (issue #345).
+# ---------------------------------------------------------------------------
+
 # Collect all C++ source files under source/
-file(GLOB_RECURSE MU_MAIN_SOURCES
+file(GLOB_RECURSE MU_CLIENT_SOURCES
   CONFIGURE_DEPENDS
         "source/*.cpp"
 )
+
+# The Windows entry point belongs to the executable, not the engine library.
+# Removing it keeps the library free of a WinMain so it can be linked into
+# test binaries that bring their own entry point. Match on the trailing
+# filename rather than an absolute path: a path built from
+# ${CMAKE_CURRENT_SOURCE_DIR} can differ from the glob results in drive-letter
+# casing or separators on Windows, which would make the removal silently fail
+# and leak a second WinMain into the library.
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[Ww]in[Mm]ain\\.[Cc]pp$")
 
 # Add MuEditor sources when editor is enabled
 if(ENABLE_EDITOR)
@@ -90,7 +110,7 @@ if(ENABLE_EDITOR)
     CONFIGURE_DEPENDS
     "MuEditor/*.cpp"
   )
-  list(APPEND MU_MAIN_SOURCES ${MU_EDITOR_SOURCES})
+  list(APPEND MU_CLIENT_SOURCES ${MU_EDITOR_SOURCES})
 endif()
 
 # ImGui static library (required when editor is enabled)
@@ -113,14 +133,45 @@ if(ENABLE_EDITOR)
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
   )
 
+  # The Win32 + OpenGL2 backends call straight into opengl32 (glOrtho,
+  # glShadeModel, ...) and dwmapi. Declaring them as PUBLIC dependencies of
+  # imgui lets CMake place these libraries *after* libimgui.a on the final
+  # link line, which MinGW's order-sensitive linker requires. Restrict to
+  # Windows non-MSVC (MinGW): these are Windows-only libraries, and MSVC links
+  # them elsewhere and ignores order anyway.
+  if (WIN32 AND NOT MSVC)
+    target_link_libraries(imgui PUBLIC opengl32 dwmapi)
+  endif()
+
   # <-- Force C++20 for ImGui here
   target_compile_features(imgui PUBLIC cxx_std_20)
 endif()
 
-add_executable(Main ${MU_MAIN_SOURCES})
+# Engine/game code as a static library. Compile- and link-time usage
+# requirements (C++20, include paths, definitions, third-party libraries) are
+# attached PUBLIC below so both the Main executable and any test binary that
+# links MuClient inherit them automatically.
+add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
+target_compile_features(MuClient PUBLIC cxx_std_20)
 
-# <-- Force C++20 for Main here
+# The engine relies on self-registering globals whose constructors get
+# silently dropped if the linker only pulls archive members on demand, so
+# every consumer must link MuClient with WHOLE_ARCHIVE. Rather than make each
+# consumer remember that, MuClient::MuClient is an interface wrapper that
+# carries the WHOLE_ARCHIVE requirement (and, transitively, all of MuClient's
+# public compile/link properties). Executables and unit tests just link
+# MuClient::MuClient; link the raw MuClient target directly only when an
+# on-demand link is genuinely wanted.
+add_library(MuClient_whole INTERFACE)
+target_link_libraries(MuClient_whole INTERFACE $<LINK_LIBRARY:WHOLE_ARCHIVE,MuClient>)
+add_library(MuClient::MuClient ALIAS MuClient_whole)
+
+# Thin executable: platform bootstrap only, links the engine library.
+add_executable(Main
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Platform/Windows/Winmain.cpp"
+)
 target_compile_features(Main PUBLIC cxx_std_20)
+target_link_libraries(Main PRIVATE MuClient::MuClient)
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
@@ -191,14 +242,14 @@ add_custom_command(TARGET Main POST_BUILD
 # ubiquitous system libraries so we can focus on getting the project to
 # compile; more platform-specific adjustments will follow as we iterate.
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  target_link_libraries(Main PRIVATE
+  target_link_libraries(MuClient PUBLIC
     pthread
     dl
     m
   )
 endif()
 
-target_include_directories(Main PRIVATE
+target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/source"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
@@ -207,7 +258,7 @@ target_include_directories(Main PRIVATE
 
 # Basic compile definitions, roughly mirroring the original MSVC project
 # (fine-tuning per configuration can be done later if needed.)
-target_compile_definitions(Main PRIVATE
+target_compile_definitions(MuClient PUBLIC
   _LANGUAGE_FOREIGN
   _LANGUAGE_ENG
   UNICODE
@@ -218,7 +269,7 @@ target_compile_definitions(Main PRIVATE
 )
 
 if (MSVC)
-  target_compile_definitions(Main PRIVATE
+  target_compile_definitions(MuClient PUBLIC
     WIN32
     _WINDOWS
   )
@@ -231,12 +282,12 @@ if (MSVC)
     set(LIB_ARCH_DIR "x86")
   endif()
 
-  target_link_directories(Main PRIVATE
+  target_link_directories(MuClient PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib/${LIB_ARCH_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib"  # Fallback for arch-independent libs
   )
 
-  target_link_libraries(Main PRIVATE
+  target_link_libraries(MuClient PUBLIC
     imm32
     vfw32
     dsound
@@ -458,9 +509,9 @@ if (DOTNET_EXECUTABLE)
     )
 
     add_custom_target(ResxGen DEPENDS ${RESX_GEN_HEADERS} ${RESX_GEN_SOURCES})
-    add_dependencies(Main ResxGen)
-    target_sources(Main PRIVATE ${RESX_GEN_SOURCES})
-    target_include_directories(Main PRIVATE "${CMAKE_BINARY_DIR}/Generated")
+    add_dependencies(MuClient ResxGen)
+    target_sources(MuClient PRIVATE ${RESX_GEN_SOURCES})
+    target_include_directories(MuClient PUBLIC "${CMAKE_BINARY_DIR}/Generated")
   endif()
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
@@ -472,7 +523,7 @@ endif()
 # For turbojpeg and wzAudio we link against the logically named libraries,
 # which must be provided as MinGW-compatible .a import libraries.
 if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-mingw32")
-  target_link_directories(Main PRIVATE
+  target_link_directories(MuClient PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/lib"
   )
 
@@ -510,7 +561,7 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
     message(FATAL_ERROR "Static libturbojpeg not found (libturbojpeg.a) or CMake picked an import library (.dll.a): '${MU_TURBOJPEG_STATIC_LIB}'. Install/build a MinGW-w64 static libjpeg-turbo to avoid shipping libturbojpeg.dll, or set MU_TURBOJPEG_STATIC_LIB to the full path of libturbojpeg.a.")
   endif()
 
-  target_link_libraries(Main PRIVATE
+  target_link_libraries(MuClient PUBLIC
     imm32
     vfw32
     dsound
@@ -536,18 +587,14 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
 endif()
 
 # Link SDL3 + SDL3_mixer (audio) on all platforms.
-target_link_libraries(Main PRIVATE
+target_link_libraries(MuClient PUBLIC
   SDL3::SDL3
   SDL3_mixer::SDL3_mixer
 )
 
-# Link ImGui for all platforms when editor is enabled
+# Link ImGui for all platforms when editor is enabled. imgui carries its own
+# opengl32/dwmapi link dependencies (see its definition above), so the engine
+# only needs to link the imgui target itself.
 if(ENABLE_EDITOR)
-  target_link_libraries(Main PRIVATE imgui)
-  # MinGW's linker is order-sensitive: opengl32 and dwmapi (needed by ImGui
-  # backends) must appear after the imgui static library.  MSVC already links
-  # these earlier and doesn't care about order.
-  if (NOT MSVC)
-    target_link_libraries(Main PRIVATE opengl32 dwmapi)
-  endif()
+  target_link_libraries(MuClient PUBLIC imgui)
 endif()
