@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Chat/Chat.h"
 #include "Core/Globals/_enum.h"
 #include <eh.h>
 #include "UI/Legacy/UIManager.h"
@@ -3378,18 +3379,18 @@ void OnlyNpcChatProcess(CHARACTER* c, OBJECT* o)
         case MODEL_MERCHANT_GIRL:
             if (gMapManager.InBattleCastle() == false)
             {
-                CreateChat(c->ID, I18N::Game::FeelTheUnusualForcesAroundTheFortressOfCrywolf, c);
+                UI::Chat::CreateChat(c->ID, I18N::Game::FeelTheUnusualForcesAroundTheFortressOfCrywolf, c);
             }
             break;
         case MODEL_ELF_WIZARD:
-            CreateChat(c->ID, I18N::Game::ThePowerOfTheWolfStatue, c);
+            UI::Chat::CreateChat(c->ID, I18N::Game::ThePowerOfTheWolfStatue, c);
             break;
         case MODEL_MASTER:
-            CreateChat(c->ID, I18N::Game::CrywolfIsAskingForYourHelpOnlyYouCanSaveThisContinent, c);
+            UI::Chat::CreateChat(c->ID, I18N::Game::CrywolfIsAskingForYourHelpOnlyYouCanSaveThisContinent, c);
             break;
         case MODEL_PLAYER:
             if (c->MonsterIndex == MONSTER_ELF_SOLDIER)
-                CreateChat(c->ID, I18N::Game::ILlBeYourStrengthForTheJourneyToBecomeAWarrior, c);
+                UI::Chat::CreateChat(c->ID, I18N::Game::ILlBeYourStrengthForTheJourneyToBecomeAWarrior, c);
             break;
         }
     }
@@ -3449,7 +3450,7 @@ void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
 
         wchar_t szText[512];
         mu_swprintf(szText, I18N::Game::Lookup(TextIndex));
-        CreateChat(c->ID, szText, c);
+        UI::Chat::CreateChat(c->ID, szText, c);
     }
 }
 

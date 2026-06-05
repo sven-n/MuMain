@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Chat/Chat.h"
 #include "MainScene.h"
 #include "SceneCommon.h"
 #include "Camera/CameraUtility.h"
@@ -274,7 +275,7 @@ static void UpdateGameEntities()
 
     MoveBoids();
     MoveFishs();
-    MoveChat();
+    UI::Chat::MoveChat();
     UpdatePersonalShopTitleImp();
     MoveHero();
     MoveCharactersClient();

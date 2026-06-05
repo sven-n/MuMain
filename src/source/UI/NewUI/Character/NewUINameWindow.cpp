@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Chat/Chat.h"
 #include "UI/NewUI/Character/NewUINameWindow.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -101,7 +102,7 @@ bool SEASON3B::CNewUINameWindow::Render()
     RenderName();
     RenderTimes();
     matchEvent::RenderMatchTimes();
-    RenderBooleans();
+    UI::Chat::RenderBooleans();
     DrawPersonalShopTitleImp();
     DisableAlphaBlend();
     return true;
@@ -119,7 +120,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
             {
                 if (IsShopTitleVisible(c) == false)
                 {
-                    CreateChat(c->ID, L"", c);
+                    UI::Chat::CreateChat(c->ID, L"", c);
                 }
             }
         }
@@ -138,7 +139,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
         {
             CHARACTER* c = &CharactersClient[SelectedNpc];
             OBJECT* o = &c->Object;
-            CreateChat(c->ID, L"", c);
+            UI::Chat::CreateChat(c->ID, L"", c);
         }
         else if (SelectedCharacter != -1)
         {
@@ -198,7 +199,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
                 {
                     if (IsShopTitleVisible(c) == false)
                     {
-                        CreateChat(c->ID, L"", c);
+                        UI::Chat::CreateChat(c->ID, L"", c);
                     }
                 }
         }

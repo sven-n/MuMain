@@ -64,10 +64,6 @@ void EditObjects();
 
 void ClearInput(BOOL bClearWhisperTarget = TRUE);
 void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t MaxLength);
-void CreateChat(wchar_t* ID, const wchar_t* Text, CHARACTER* c, int Flag = 0, int SetColor = -1);
-int  CreateChat(wchar_t* character_name, const wchar_t* chat_text, OBJECT* Owner, int Flag = 0, int SetColor = -1);
-void AssignChat(wchar_t* ID, const wchar_t* Text, int Flag = 0);
-void MoveChat();
 void RenderSwichState();
 void CheckChatText(wchar_t* Text);
 
@@ -92,12 +88,10 @@ bool FindText(const wchar_t* Text, const wchar_t* Token, bool First = false);
 bool FindTextABS(const wchar_t* Text, const wchar_t* Token, bool First = false);
 bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash = true);
 bool CheckAbuseNameFilter(wchar_t* Text);
-void SetPlayerColor(BYTE PK);
 bool CheckCommand(wchar_t* Text, bool bMacroText = false);
 void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType);
 void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disabled = false, bool clipping = true);
 void RenderOutSides();
-void RenderBooleans();
 void RenderTimes();
 void RenderPartyHP();
 
