@@ -6,7 +6,7 @@
 #include "ServerSelWin.h"
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
-#include "Platform/Windows/Local.h"
+#include "App/Platform/Windows/Local.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"

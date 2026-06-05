@@ -2,7 +2,7 @@
 #include "Core/Input/ImeInput.h"
 
 #include <imm.h>
-#include "Platform/Windows/Winmain.h"   // g_hWnd, WindowWidth/Height
+#include "App/Winmain.h"   // g_hWnd, WindowWidth/Height
 #include "UI/Legacy/UIControls.h"       // g_pRenderText
 #include "Engine/Object/ZzzInterface.h" // LockInputStatus
 

@@ -5,7 +5,7 @@
 #include "I18N/All.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
-#include "Platform/Windows/iexplorer.h"
+#include "App/Platform/Windows/iexplorer.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "NewUIInGameShop.h"
 #include "MsgBoxIGSBuyPackageItem.h"
