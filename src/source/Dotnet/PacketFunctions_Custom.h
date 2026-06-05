@@ -55,6 +55,26 @@ public:
     /// Causes reaction on server side: The server is authenticating the sent login name and password. If it's correct, the state of the player is proceeding to be logged in.
     /// </remarks>
     void SendLogin(const wchar_t* username, const wchar_t* password, const BYTE* clientVersion, const BYTE* clientSerial);
+
+    /// <summary>
+    /// BarnaMu: Sends a jewel bank request (0xBF, sub-code 0x30) to this connection.
+    /// </summary>
+    void SendJewelBankRequest(BYTE operation, BYTE arg1, uint16_t arg2, uint16_t arg3);
+
+    /// <summary>
+    /// BarnaMu: Sends an Auction House request (0xBF, sub-code 0x31) to this connection.
+    /// </summary>
+    void SendAuctionHouseRequest(BYTE operation, BYTE arg1, BYTE currency, BYTE jewelSlot, uint32_t arg2, uint32_t arg3);
+
+    /// <summary>
+    /// BarnaMu: Sends an extended Auction House browse request with market-wide filters.
+    /// </summary>
+    void SendAuctionHouseBrowseRequest(BYTE page, BYTE currencyFilter, BYTE jewelSlot, BYTE minLevel, BYTE maxLevel, BYTE luckFilter, BYTE excellentFilter, const wchar_t* searchText);
+
+    /// <summary>
+    /// BarnaMu: Sends a Duel Ladder request (0xBF, sub-code 0x32) to this connection.
+    /// </summary>
+    void SendDuelLadderRequest(BYTE operation, BYTE arg);
 };
 
 /// <summary>

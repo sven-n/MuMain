@@ -23,6 +23,41 @@ void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, c
     dotnet_SendLogin(this->GetHandle(), username, password, GetTickCount(), clientVersion, clientSerial);
 }
 
+// BarnaMu: jewel bank request (0xBF, sub-code 0x30).
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendJewelBankRequest)(int32_t, BYTE, BYTE, uint16_t, uint16_t);
+inline SendJewelBankRequest dotnet_SendJewelBankRequest = reinterpret_cast<SendJewelBankRequest>(symLoad(munique_client_library_handle, "ConnectionManager_SendJewelBankRequest"));
+
+void PacketFunctions_ClientToServer_Custom::SendJewelBankRequest(BYTE operation, BYTE arg1, uint16_t arg2, uint16_t arg3)
+{
+    dotnet_SendJewelBankRequest(this->GetHandle(), operation, arg1, arg2, arg3);
+}
+
+// BarnaMu: Auction House request (0xBF, sub-code 0x31).
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuctionHouseRequest)(int32_t, BYTE, BYTE, BYTE, BYTE, uint32_t, uint32_t);
+inline SendAuctionHouseRequest dotnet_SendAuctionHouseRequest = reinterpret_cast<SendAuctionHouseRequest>(symLoad(munique_client_library_handle, "ConnectionManager_SendAuctionHouseRequest"));
+
+void PacketFunctions_ClientToServer_Custom::SendAuctionHouseRequest(BYTE operation, BYTE arg1, BYTE currency, BYTE jewelSlot, uint32_t arg2, uint32_t arg3)
+{
+    dotnet_SendAuctionHouseRequest(this->GetHandle(), operation, arg1, currency, jewelSlot, arg2, arg3);
+}
+
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuctionHouseBrowseRequest)(int32_t, BYTE, BYTE, BYTE, BYTE, BYTE, BYTE, BYTE, const wchar_t*);
+inline SendAuctionHouseBrowseRequest dotnet_SendAuctionHouseBrowseRequest = reinterpret_cast<SendAuctionHouseBrowseRequest>(symLoad(munique_client_library_handle, "ConnectionManager_SendAuctionHouseBrowseRequest"));
+
+void PacketFunctions_ClientToServer_Custom::SendAuctionHouseBrowseRequest(BYTE page, BYTE currencyFilter, BYTE jewelSlot, BYTE minLevel, BYTE maxLevel, BYTE luckFilter, BYTE excellentFilter, const wchar_t* searchText)
+{
+    dotnet_SendAuctionHouseBrowseRequest(this->GetHandle(), page, currencyFilter, jewelSlot, minLevel, maxLevel, luckFilter, excellentFilter, searchText);
+}
+
+// BarnaMu: Duel Ladder request (0xBF, sub-code 0x32).
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelLadderRequest)(int32_t, BYTE, BYTE);
+inline SendDuelLadderRequest dotnet_SendDuelLadderRequest = reinterpret_cast<SendDuelLadderRequest>(symLoad(munique_client_library_handle, "ConnectionManager_SendDuelLadderRequest"));
+
+void PacketFunctions_ClientToServer_Custom::SendDuelLadderRequest(BYTE operation, BYTE arg)
+{
+    dotnet_SendDuelLadderRequest(this->GetHandle(), operation, arg);
+}
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExt)(int32_t, uint16_t, uint32_t);
 inline SendAuthenticateExt dotnet_SendAuthenticateExt = reinterpret_cast<SendAuthenticateExt>(symLoad(munique_client_library_handle, "ConnectionManager_SendAuthenticateExt"));
 
