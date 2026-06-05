@@ -7,6 +7,9 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "UI/Chat/Whisper.h"
+#include "Core/Input/ImeInput.h"
+#include "UI/NewUI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Pathing/ZzzPath.h"
@@ -830,7 +833,7 @@ void InitGame()
     RepairEnable = 0;
     CheckSkill = -1;
 
-    ClearNotice();
+    UI::Notices::Clear();
 
     CharacterAttribute->InventoryExtensions = 0;
     CharacterAttribute->Ability = 0;
@@ -846,7 +849,7 @@ void InitGame()
     g_shMutoNumber[1] = -1;
     g_shMutoNumber[2] = -1;
 
-    ClearWhisperID();
+    UI::Chat::Whisper::Clear();
 
     matchEvent::ClearMatchInfo();
 
@@ -1074,7 +1077,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CurrentProtocolState = RECEIVE_JOIN_MAP_SERVER;
 
     LockInputStatus = false;
-    CheckIME_Status(true, 0);
+    Input::IME::CheckStatus(true, 0);
 
     LoadingWorld = 30;
     MouseUpdateTime = 0;
@@ -1848,7 +1851,7 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText, messageSize);
     Text[messageSize] = L'\0';
 
-    RegistWhisperID(10, ID);
+    UI::Chat::Whisper::Register(10, ID);
 
     if (g_pOption->IsWhisperSound())
     {
@@ -1904,7 +1907,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
 
     if (Data->Result == 0)
     {
-        CreateNotice(Text, 0);
+        UI::Notices::Create(Text, 0);
     }
     else if (Data->Result == 1)
     {
@@ -1923,7 +1926,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     {
         wchar_t FullText[300] {0};
         mu_swprintf(FullText, I18N::Game::NoticeForGuildMembersS, Text);
-        CreateNotice(FullText, 1);
+        UI::Notices::Create(FullText, 1);
         g_pGuildInfoWindow->AddGuildNotice(Text);
     }
     else if (Data->Result >= 10 && Data->Result <= 15)
@@ -7514,7 +7517,7 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
         EnableSoccer = true;
     }
 
-    CreateNotice(Text, 1);
+    UI::Notices::Create(Text, 1);
     HeroSoccerTeam = Data->Team;
 
     for (int i = 0; i < MARK_EDIT; i++)
@@ -7562,7 +7565,7 @@ void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
     g_wtMatchTimeLeft.m_Time = 0;
 
 #ifndef GUILD_WAR_EVENT
-    CreateNotice(Text, 1);
+    UI::Notices::Create(Text, 1);
 #endif
 
     EnableGuildWar = false;
@@ -11461,7 +11464,7 @@ void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
     {
         wchar_t Text[100];
         mu_swprintf(Text, I18N::Game::SAllianceIsTryingToRegisterTheOfficialSealNow, guildName);
-        CreateNotice(Text, 1);
+        UI::Notices::Create(Text, 1);
     }
     break;
 
@@ -11470,7 +11473,7 @@ void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
         ChangeBattleFormation(guildName, true);
         wchar_t Text2[100];
         mu_swprintf(Text2, I18N::Game::SGuildHasRegisteredTheOfficialSealSuccessfully, guildName);
-        CreateNotice(Text2, 1);
+        UI::Notices::Create(Text2, 1);
     }
     break;
     }

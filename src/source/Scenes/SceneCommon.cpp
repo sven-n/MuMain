@@ -36,6 +36,7 @@ bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
 // Scene Common Utilities
 //=============================================================================
 #include "Engine/Object/ZzzInterface.h"
+#include "UI/NewUI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -274,7 +275,7 @@ void RenderInfomation3D()
 
 void RenderInfomation()
 {
-    RenderNotices();
+    UI::Notices::Render();
 
     CUIMng::Instance().Render();
 

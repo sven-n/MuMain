@@ -68,22 +68,9 @@ void CreateChat(wchar_t* ID, const wchar_t* Text, CHARACTER* c, int Flag = 0, in
 int  CreateChat(wchar_t* character_name, const wchar_t* chat_text, OBJECT* Owner, int Flag = 0, int SetColor = -1);
 void AssignChat(wchar_t* ID, const wchar_t* Text, int Flag = 0);
 void MoveChat();
-void ClearNotice(void);
-void CreateNotice(const wchar_t* Text, int Color);
-void MoveNotices();
-void RenderNotices();
 void RenderSwichState();
 void CheckChatText(wchar_t* Text);
 
-//  Whisper
-bool CheckWhisperLevel(int lvl, wchar_t* text);
-void RegistWhisperID(int lvl, wchar_t* text);
-void ClearWhisperID(void);
-
-void SaveIME_Status();
-void SetIME_Status(bool halfShape);
-bool CheckIME_Status(bool change, int mode);
-void RenderIME_Status();
 
 //  HotKey
 int  FindHotKey(int Skill);
@@ -114,7 +101,6 @@ void RenderOutSides();
 void RenderBooleans();
 void RenderTimes();
 void RenderPartyHP();
-void SetPositionIME_Wnd(float x, float y);
 
 void SendMove(CHARACTER* c, OBJECT* o);
 void SetCharacterPos(CHARACTER* c, BYTE posX, BYTE posY, vec3_t position);
@@ -156,7 +142,7 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance);
 bool UseSkillRagePosition(CHARACTER* pCha);
 bool CheckTarget(CHARACTER* c);
 void MouseRButtonReset();
-void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance);
+BYTE GetDestValue(int xPos, int yPos, int xDst, int yDst);
 
 bool IsGMCharacter();
 bool IsNonAttackGM();
