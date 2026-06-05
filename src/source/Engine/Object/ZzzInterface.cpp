@@ -4276,13 +4276,6 @@ void RenderDebugWindow()
 #endif //ENABLE_EDIT
 }
 
-void MouseRButtonReset()
-{
-    MouseRButtonPop = false;
-    MouseRButtonPush = false;
-    MouseRButton = false;
-    MouseRButtonPress = 0;
-}
 
 bool IsGMCharacter()
 {
