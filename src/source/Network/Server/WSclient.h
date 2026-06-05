@@ -5,6 +5,7 @@
 
 #include "Dotnet/Connection.h"
 #include "Network/Server/CSMapServer.h"
+#include <cstddef>
 #include <span>
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)
@@ -384,6 +385,10 @@ typedef struct
     WORD         Resets;
 } PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
 #pragma pack(pop)
+
+static_assert(offsetof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED, InventoryExtensions) == 88, "InventoryExtensions offset mismatch");
+static_assert(offsetof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED, Resets) == 90, "Resets offset mismatch");
+static_assert(sizeof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED) == 92, "Join map packet size mismatch");
 
 #pragma pack(push, 1)
 typedef struct
