@@ -142,7 +142,7 @@ void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance);
 bool UseSkillRagePosition(CHARACTER* pCha);
 bool CheckTarget(CHARACTER* c);
 void MouseRButtonReset();
-void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance);
+BYTE GetDestValue(int xPos, int yPos, int xDst, int yDst);
 
 bool IsGMCharacter();
 bool IsNonAttackGM();
