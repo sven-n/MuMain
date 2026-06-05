@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "GameLogic/Combat/SkillExecution.h"
 
 #include <thread>
 #include <atomic>
@@ -736,7 +737,7 @@ namespace MUHelper
         if (m_iCurrentSkill > AT_SKILL_UNDEFINED)
         {
             const float fSkillDistance = gSkillManager.GetSkillDistance(m_iCurrentSkill, Hero);
-            if (CanExecuteSkill(Hero, m_iCurrentSkill, fSkillDistance))
+            if (GameLogic::Combat::CanExecuteSkill(Hero, m_iCurrentSkill, fSkillDistance))
             {
                 return SimulateAttack(m_iCurrentSkill);
             }
@@ -955,7 +956,7 @@ namespace MUHelper
             TargetY = Hero->PositionY;
         }
 
-        int iSkillResult = ExecuteSkill(Hero, iSkill, fSkillDistance);
+        int iSkillResult = GameLogic::Combat::ExecuteSkill(Hero, iSkill, fSkillDistance);
         if (iSkillResult == -1 && iTarget != -1)
         {
             DeleteTarget(iTarget);
