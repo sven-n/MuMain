@@ -3780,8 +3780,10 @@ void CreateWeaponBlur(CHARACTER* c, OBJECT* o, BMD* b)
                 BlurType = 1;
                 BlurMapping = 2;
             }
-            else if (o->CurrentAction == PLAYER_ATTACK_SKILL_SWORD2 || o->CurrentAction == PLAYER_ATTACK_SKILL_SWORD3 || o->CurrentAction == PLAYER_ATTACK_SKILL_SWORD4)
+            else if (o->CurrentAction == PLAYER_ATTACK_SKILL_SWORD1 || o->CurrentAction == PLAYER_ATTACK_SKILL_SWORD2 || o->CurrentAction == PLAYER_ATTACK_SKILL_SWORD3 || o->CurrentAction == PLAYER_ATTACK_SKILL_SWORD4)
             {
+                // SWORD1 is Falling Slash: it was missing here, so a sword-wielder's Falling Slash
+                // got no trail while Lunge/Uppercut/Cyclone (SWORD2/3/4) and Slash (SWORD5, below) did.
                 BlurType = 1;
                 if (Type == MODEL_LIGHTING_SWORD || Type == MODEL_DARK_REIGN_BLADE || Type == MODEL_RUNE_BLADE)
                     BlurMapping = 1;
@@ -3982,7 +3984,11 @@ void CreateWeaponBlur(CHARACTER* c, OBJECT* o, BMD* b)
             else
             {
                 constexpr float inter = 10.f;
-                const float playSpeed = b->Actions[b->CurrentAction].PlaySpeed * FPS_ANIMATION_FACTOR;
+                // The trail spans backward over one animation slice and lays its points along it.
+                // Scaling that slice by FPS_ANIMATION_FACTOR (REFERENCE_FPS / FPS) collapses it at
+                // high frame rates - the points pile onto a single weapon position and the streak
+                // disappears. Span a fixed PlaySpeed slice so the trail renders the same at any FPS.
+                const float playSpeed = b->Actions[b->CurrentAction].PlaySpeed;
                 float animationFrame = o->AnimationFrame - playSpeed;
                 const float priorAnimationFrame = o->PriorAnimationFrame;
                 const float animationSpeed = playSpeed / inter;

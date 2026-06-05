@@ -7360,6 +7360,29 @@ void CheckGate()
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void MoveEffect(OBJECT* o, int iIndex);
 
+namespace
+{
+    // While the hero slides to a server-set position (the basic weapon skills reposition the
+    // hero on every cast), MoveHero would freeze all input until the slide ended, which capped
+    // those skills' auto-attack cadence below the player's attack speed (issue #350). Keep the
+    // auto-attack re-cast running through the slide; the slide still animates smoothly and only
+    // manual move/click input stays suppressed. Returns true when the hero is mid-slide, in
+    // which case MoveHero should stop after this.
+    bool HandleHeroPositionSlide(CHARACTER* c)
+    {
+        if (c->JumpTime <= 0)
+        {
+            return false;
+        }
+
+        if (g_pOption->IsAutoAttack() && Attacking != -1 && SelectedCharacter != -1)
+        {
+            Attack(Hero);
+        }
+        return true;
+    }
+}
+
 void MoveHero()
 {
     CHARACTER* c = Hero;
@@ -7397,7 +7420,7 @@ void MoveHero()
     if (c->Object.Live == 0)
         return;
 
-    if (c->JumpTime > 0)
+    if (HandleHeroPositionSlide(c))
     {
         return;
     }
