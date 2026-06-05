@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Text/TextLineWrap.h"
 #include "UI/Chat/Chat.h"
 #include "Character/CharacterManager.h" // gCharacterManager
 #include "Camera/CameraProjection.h" // CameraProjection

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Text/TextLineWrap.h"
 #include "UI/NewUI/HUD/Notices.h"
 
 #include "UI/Legacy/UIControls.h"        // g_pRenderText, RT3_WRITE_CENTER

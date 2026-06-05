@@ -62,7 +62,6 @@ bool PressKey(int Key);
 void MoveHero();
 
 void ClearInput(BOOL bClearWhisperTarget = TRUE);
-void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t MaxLength);
 void RenderSwichState();
 
 

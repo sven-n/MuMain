@@ -376,29 +376,6 @@ void RenderTipText(int sx, int sy, const wchar_t* Text)
     }
 }
 
-void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t maxLength)
-{
-    auto sourceText = std::wstring(Text);
-    auto halfLength = sourceText.length() / 2;
-    size_t splitOffset = sourceText.find_last_of(L' ', halfLength);
-
-    if (splitOffset == std::wstring::npos)
-    {
-        splitOffset = sourceText.find_first_of(L' ', halfLength);
-    }
-
-    if (splitOffset != std::wstring::npos)
-    {
-        wcsncpy_s(Text1, maxLength, sourceText.substr(0, splitOffset).c_str(), _TRUNCATE);
-        wcsncpy_s(Text2, maxLength, sourceText.substr(splitOffset + 1).c_str(), _TRUNCATE);
-    }
-    else
-    {
-        // No spaces found, assign everything to Text1
-        wcsncpy_s(Text1, maxLength, sourceText.c_str(), _TRUNCATE);
-        Text2[0] = L'\0';  // Empty Text2
-    }
-}
 
 BYTE DebugText[10][256];
 int  DebugTextLength[10];
