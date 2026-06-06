@@ -17,6 +17,7 @@
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "Core/Time/FrameTimerScheduler.h"
+#include <SDL3/SDL.h>
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -91,6 +92,13 @@ HWND      g_hWnd = nullptr;
 HINSTANCE g_hInst = nullptr;
 HDC       g_hDC = nullptr;
 HGLRC     g_hRC = nullptr;
+
+// SDL owns the window and GL context (issue #442). The native HWND is bridged
+// into g_hWnd so the remaining Win32 code (IME, DirectSound, cursor, the legacy
+// EDIT-control text boxes) keeps working until those are migrated.
+static SDL_Window*   g_sdlWindow = nullptr;
+static SDL_GLContext g_sdlGLContext = nullptr;
+static WNDPROC       g_sdlOriginalWndProc = nullptr;
 HFONT     g_hFont = nullptr;
 HFONT     g_hFontBold = nullptr;
 HFONT     g_hFontBig = nullptr;
@@ -154,29 +162,27 @@ void CheckHack()
 
 GLvoid KillGLWindow(GLvoid)
 {
-    if (g_hRC)
+    // Release the bridged GDI DC obtained from the SDL window.
+    if (g_hDC)
     {
-        wglMakeCurrent(nullptr, nullptr);
-        if (!wglDeleteContext(g_hRC))
-        {
-            g_ErrorReport.Write(L"GL - Release Rendering Context Failed\r\n");
-            MessageBox(nullptr, L"Release Rendering Context Failed.", L"Error", MB_OK | MB_ICONINFORMATION);
-        }
-
-        g_hRC = nullptr;
-    }
-
-    if (g_hDC && !ReleaseDC(g_hWnd, g_hDC))
-    {
-        g_ErrorReport.Write(L"GL - OpenGL Release Error\r\n");
-        MessageBox(nullptr, L"OpenGL Release Error.", L"Error", MB_OK | MB_ICONINFORMATION);
+        ReleaseDC(g_hWnd, g_hDC);
         g_hDC = nullptr;
     }
 
-    if (g_bUseWindowMode == FALSE && g_bUseFullscreenMode == TRUE)
+    // SDL owns the GL context and the window (it also restores the display mode
+    // when a fullscreen window is destroyed).
+    if (g_sdlGLContext)
     {
-        ChangeDisplaySettings(nullptr, 0);
-        ShowCursor(TRUE);
+        SDL_GL_DestroyContext(g_sdlGLContext);
+        g_sdlGLContext = nullptr;
+        g_hRC = nullptr;
+    }
+
+    if (g_sdlWindow)
+    {
+        SDL_DestroyWindow(g_sdlWindow);
+        g_sdlWindow = nullptr;
+        g_hWnd = nullptr;
     }
 }
 
@@ -545,17 +551,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     break;
     case WM_DESTROY:
     {
+        // Just request shutdown; the main loop exits on Destroy and the teardown
+        // (sound, GL, window) runs after it. SDL owns the window now, so the GL
+        // context and window must not be torn down from inside a message.
         Destroy = true;
         if (SocketClient != nullptr)
         {
             SocketClient->Close();
             g_bGameServerConnected = false;
         }
-
-        DestroySound();
-        //DestroyWindow();
-        KillGLWindow();
-        PostQuitMessage(0);
     }
     break;
     case WM_SETCURSOR:
@@ -829,28 +833,66 @@ void SetMaxMessagePerCycle(int messages)
     g_MaxMessagePerCycle = (messages > 0) ? std::max<int>(messages, custom_min) : messages;
 }
 
+#ifdef _WIN32
+// Transitional bridge (issue #442): SDL owns the window, but the existing
+// WndProc still handles input, IME, the legacy Win32 EDIT-control text boxes,
+// the cursor, and shutdown. SDL invokes this for every Win32 message it pumps;
+// forward to WndProc and return true so SDL continues its own processing (which
+// also dispatches the child EDIT controls). Removed once input/IME are
+// SDL-native and the legacy text boxes are replaced (issue #447).
+static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
+{
+    // Let SDL own window close. Forwarding WM_CLOSE to WndProc would reach
+    // DefWindowProc, which destroys the window synchronously and out from under
+    // SDL. SDL turns the close into SDL_EVENT_QUIT, which the main loop handles.
+    if (msg->message == WM_CLOSE)
+        return true;
+
+    WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
+    return true;
+}
+
+// SDL owns the window procedure; the message hook above cannot return a value to
+// Windows. WM_CTLCOLOREDIT is sent synchronously to the window proc (it bypasses
+// the queue and the hook) and its return value selects the brush, so we subclass
+// SDL's window proc to color the legacy EDIT text boxes (black background, white
+// text) and forward everything else to SDL. Transitional until the EDIT controls
+// are replaced (issue #447).
+static LRESULT CALLBACK Win32WindowSubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if (msg == WM_CTLCOLOREDIT)
+    {
+        SetBkColor(reinterpret_cast<HDC>(wParam), RGB(0, 0, 0));
+        SetTextColor(reinterpret_cast<HDC>(wParam), RGB(255, 255, 255));
+        return reinterpret_cast<LRESULT>(GetStockObject(BLACK_BRUSH));
+    }
+    return g_sdlOriginalWndProc
+        ? CallWindowProcW(g_sdlOriginalWndProc, hwnd, msg, wParam, lParam)
+        : DefWindowProcW(hwnd, msg, wParam, lParam);
+}
+#endif
+
 MSG MainLoop()
 {
-    MSG msg;
-
     constexpr auto target_resolution = 1;
     auto precise = timeBeginPeriod(target_resolution);
 
-    while (true)
+    while (!Destroy)
     {
+        SDL_Event event;
         int messageProcessed = 0;
 
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        // Pumping SDL drives the Win32 message hook (-> WndProc) and dispatches
+        // the legacy child controls; the SDL events themselves are not consumed
+        // here yet (input still flows through WndProc via the hook).
+        while (SDL_PollEvent(&event))
         {
-            if (msg.message == WM_QUIT)
+            if (event.type == SDL_EVENT_QUIT)
             {
-                return msg;
+                Destroy = true;
             }
 
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
             ++messageProcessed;
-
             if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
             {
                 break;
@@ -901,20 +943,19 @@ MSG MainLoop()
         }
         else
         {
-            if (!PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE))
-            {
-                WaitForNextActivity(precise == TIMERR_NOERROR);
-            }
+            // SDL_PollEvent above already drained pending events, so just pace
+            // the frame.
+            WaitForNextActivity(precise == TIMERR_NOERROR);
         }
 
-    } // while( 1 )
+    } // while (!Destroy)
 
     if (precise == TIMERR_NOERROR)
     {
         timeEndPeriod(target_resolution);
     }
 
-    return msg;
+    return MSG{};
 }
 
 namespace
@@ -1154,77 +1195,35 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     if (g_iChatInputType == 1)
         ShowCursor(FALSE);
 
-    if (g_bUseWindowMode == FALSE && g_bUseFullscreenMode == TRUE)
-    {
-        // Force an exclusive fullscreen mode change at WindowWidth × WindowHeight
-        // at the desktop's bit depth — modern displays don't expose <32bpp modes.
-        DEVMODE dmScreenSettings = {};
-        dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
-        dmScreenSettings.dmPelsWidth  = WindowWidth;
-        dmScreenSettings.dmPelsHeight = WindowHeight;
-        dmScreenSettings.dmBitsPerPel = GetDesktopBitsPerPel();
-        dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-        if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
-        {
-            g_ErrorReport.Write(L"> Change display setting %dx%d.\r\n", WindowWidth, WindowHeight);
-        }
-        else
-        {
-            g_ErrorReport.Write(L"> Fullscreen %dx%d unavailable, falling back to windowed.\r\n",
-                                WindowWidth, WindowHeight);
-            g_bUseWindowMode     = TRUE;
-            g_bUseFullscreenMode = FALSE;
-        }
-    }
-
+    // Fullscreen is requested via an SDL window flag below; SDL handles the
+    // display-mode change and restores it on teardown.
     g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
 
     g_hInst = hInstance;
 
-    const wchar_t* windowName = L"MU Online";
-    WNDCLASS wndClass;
-
-    wndClass.style = CS_HREDRAW | CS_VREDRAW;
-    wndClass.lpfnWndProc = WndProc;
-    wndClass.cbClsExtra = 0;
-    wndClass.cbWndExtra = 0;
-    wndClass.hInstance = hInstance;
-    wndClass.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_ICON1);
-    wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-    wndClass.lpszMenuName = nullptr;
-    wndClass.lpszClassName = windowName;
-
-    if (!RegisterClass(&wndClass))
+    // SDL owns the window and GL context (issue #442).
+    if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
     {
+        g_ErrorReport.Write(L"> SDL video init failed.\r\n");
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }
 
-    if (g_bUseWindowMode == TRUE)
+    // The fixed-function renderer needs a compatibility-profile GL context.
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+
+    SDL_WindowFlags windowFlags = SDL_WINDOW_OPENGL;
+    if (g_bUseWindowMode != TRUE)
+        windowFlags |= SDL_WINDOW_FULLSCREEN;
+
+    g_sdlWindow = SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
+    if (!g_sdlWindow)
     {
-        RECT rc = { 0, 0, static_cast<LONG>(WindowWidth), static_cast<LONG>(WindowHeight) };
-        AdjustWindowRect(&rc, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, 0);
-        g_hWnd = CreateWindow(
-            windowName, windowName,
-            WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN,
-            (GetSystemMetrics(SM_CXSCREEN) - rc.right) / 2,
-            (GetSystemMetrics(SM_CYSCREEN) - rc.bottom) / 2,
-            rc.right - rc.left,
-            rc.bottom - rc.top,
-            nullptr, nullptr, hInstance, nullptr);
-    }
-    else
-    {
-        g_hWnd = CreateWindowEx(
-            WS_EX_TOPMOST | WS_EX_APPWINDOW,
-            windowName, windowName,
-            WS_POPUP,
-            0, 0,
-            WindowWidth,
-            WindowHeight,
-            nullptr, nullptr, hInstance, nullptr);
+        g_ErrorReport.Write(L"> SDL_CreateWindow failed.\r\n");
+        MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
+        return 0;
     }
 
     g_ErrorReport.Write(L"> Start window success.\r\n");
@@ -1234,60 +1233,36 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;
 
-    PIXELFORMATDESCRIPTOR pfd;
-
-    memset(&pfd, 0, sizeof(pfd));
-    pfd.nSize = sizeof(pfd);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 16;
-    pfd.cDepthBits = 16;
-
-    if (!(g_hDC = GetDC(g_hWnd)))
+    g_sdlGLContext = SDL_GL_CreateContext(g_sdlWindow);
+    if (!g_sdlGLContext)
     {
-        g_ErrorReport.Write(L"OpenGL Get DC Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Get DC Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
-    }
-
-    GLuint PixelFormat;
-
-    if (!(PixelFormat = ChoosePixelFormat(g_hDC, &pfd)))
-    {
-        g_ErrorReport.Write(L"OpenGL Choose Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Choose Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
-    }
-
-    if (!SetPixelFormat(g_hDC, PixelFormat, &pfd))
-    {
-        g_ErrorReport.Write(L"OpenGL Set Pixel Format Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Set Pixel Format Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
-    }
-
-    if (!(g_hRC = wglCreateContext(g_hDC)))
-    {
-        g_ErrorReport.Write(L"OpenGL Create Context Error - ErrorCode : %d\r\n", GetLastError());
+        g_ErrorReport.Write(L"OpenGL Create Context Error.\r\n");
         KillGLWindow();
         MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    if (!wglMakeCurrent(g_hDC, g_hRC))
-    {
-        g_ErrorReport.Write(L"OpenGL Make Current Error - ErrorCode : %d\r\n", GetLastError());
-        KillGLWindow();
-        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Make Current Error.", MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;
-    }
+    SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
 
-    ShowWindow(g_hWnd, SW_SHOW);
-    SetForegroundWindow(g_hWnd);
+    // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,
+    // cursor, the legacy EDIT-control text boxes) keeps working.
+    g_hWnd = static_cast<HWND>(SDL_GetPointerProperty(
+        SDL_GetWindowProperties(g_sdlWindow), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
+    g_hDC = GetDC(g_hWnd);
+    g_hRC = wglGetCurrentContext();
+
+    // Drive the existing WndProc from SDL's Win32 messages (transitional, #442).
+    SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
+
+    // Subclass SDL's window proc for messages whose return value must reach
+    // Windows (WM_CTLCOLOREDIT colors the legacy EDIT text boxes). Capture the
+    // original proc before installing ours: Windows can dispatch messages to the
+    // new proc synchronously during SetWindowLongPtrW, so g_sdlOriginalWndProc
+    // must already be set when the subclass first runs.
+    g_sdlOriginalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtrW(g_hWnd, GWLP_WNDPROC));
+    SetWindowLongPtrW(g_hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Win32WindowSubclassProc));
+
+    SDL_RaiseWindow(g_sdlWindow);
     SetFocus(g_hWnd);
 
     g_ErrorReport.Write(L"> OpenGL init success.\r\n");
@@ -1296,8 +1271,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     g_ErrorReport.AddSeparator();
     g_ErrorReport.WriteSoundCardInfo();
 
-    ShowWindow(g_hWnd, nCmdShow);
-    UpdateWindow(g_hWnd);
+    // SDL_CreateWindow already shows the window.
 
     // Initialize translations with the saved UI locale (defaults to "en").
     // The editor still restores its own MuEditorConfig language preference
@@ -1428,7 +1402,19 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     std::thread cpuUsageRecorder(RecordCpuUsage);
     const MSG msg = MainLoop();
 
+    // Teardown that used to run in WM_DESTROY, now after the loop exits (SDL owns
+    // the window/GL context, so they must not be destroyed from a message).
+    DestroySound();
+    KillGLWindow();
     DestroyWindow();
+
+    // RecordCpuUsage loops on !Destroy, so it exits once the loop above ended.
+    // Join it before WinMain returns; a joinable std::thread destroyed unjoined
+    // calls std::terminate.
+    if (cpuUsageRecorder.joinable())
+        cpuUsageRecorder.join();
+
+    SDL_Quit();
 
     return msg.wParam;
 }
