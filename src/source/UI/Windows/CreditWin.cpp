@@ -12,7 +12,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "Platform/Windows/Local.h"
+#include "App/Platform/Windows/Local.h"
 #include "I18N/All.h"
 
 #include "UI/Legacy/UIControls.h"

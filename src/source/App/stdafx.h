@@ -130,7 +130,7 @@
 
 //patch
 //winmain
-#include "Platform/Windows/Winmain.h"
+#include "App/Winmain.h"
 #include "Core/Globals/Defined_Global.h"
 
 //client
@@ -138,7 +138,7 @@
 #include "Core/Globals/_enum.h"
 #include "Core/Globals/_types.h"
 #include "Core/Globals/_struct.h"
-#include "Platform/Windows/w_WindowMessageHandler.h"
+#include "App/Platform/Windows/w_WindowMessageHandler.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "UI/Legacy/UIDefaultBase.h"

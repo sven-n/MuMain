@@ -25,10 +25,10 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Audio/DSPlaySound.h"
 
-#include "Platform/Windows/resource.h"
+#include "App/Platform/Windows/resource.h"
 #include <imm.h>
 #include "Engine/Pathing/ZzzPath.h"
-#include "Platform/Windows/Local.h"
+#include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
 #include "UI/Legacy/UIMapName.h"		// rozy

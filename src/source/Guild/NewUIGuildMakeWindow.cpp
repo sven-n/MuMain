@@ -10,7 +10,7 @@
 
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "Platform/Windows/Local.h"
+#include "App/Platform/Windows/Local.h"
 #include "UI/NewUI/NewUISystem.h"
 
 extern MARK_t		GuildMark[MAX_MARKS];

@@ -166,9 +166,10 @@ add_library(MuClient_whole INTERFACE)
 target_link_libraries(MuClient_whole INTERFACE $<LINK_LIBRARY:WHOLE_ARCHIVE,MuClient>)
 add_library(MuClient::MuClient ALIAS MuClient_whole)
 
-# Thin executable: platform bootstrap only, links the engine library.
+# Thin executable: platform bootstrap only, links the engine library. The
+# executable shell's sources live under source/App/ (see issue #346).
 add_executable(Main
-  "${CMAKE_CURRENT_SOURCE_DIR}/source/Platform/Windows/Winmain.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Winmain.cpp"
 )
 target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)
@@ -192,7 +193,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
   enable_language(RC)
   target_sources(Main PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/source/Platform/Windows/resource.rc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Platform/Windows/resource.rc"
   )
 endif()
 
@@ -251,6 +252,10 @@ endif()
 
 target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/source"
+  # source/App holds the moved PCH header (stdafx.h). Keeping App/ on the
+  # include path lets the ~350 bare #include "stdafx.h" resolve unchanged
+  # after the bootstrap files moved out of source/ (issue #346).
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/App"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>

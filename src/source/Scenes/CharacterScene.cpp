@@ -24,7 +24,7 @@
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Audio/DSPlaySound.h"
-#include "Platform/Windows/Winmain.h"
+#include "App/Winmain.h"
 #include "SceneCommon.h"
 #include "Camera/CameraUtility.h"
 #include "Camera/CameraManager.h"

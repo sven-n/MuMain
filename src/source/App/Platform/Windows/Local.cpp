@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "Platform/Windows/Local.h"
+#include "App/Platform/Windows/Local.h"
 
 bool CheckSpecialText(wchar_t* Text)
 {
