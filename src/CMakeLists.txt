@@ -95,14 +95,18 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
         "source/*.cpp"
 )
 
-# The Windows entry point belongs to the executable, not the engine library.
-# Removing it keeps the library free of a WinMain so it can be linked into
-# test binaries that bring their own entry point. Match on the trailing
-# filename rather than an absolute path: a path built from
-# ${CMAKE_CURRENT_SOURCE_DIR} can differ from the glob results in drive-letter
-# casing or separators on Windows, which would make the removal silently fail
-# and leak a second WinMain into the library.
-list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[Ww]in[Mm]ain\\.[Cc]pp$")
+# Per-platform entry points (App/Platform/<OS>/Winmain.cpp, main.cpp, main.mm)
+# belong to the executable, not the engine library. Removing them keeps the
+# library free of a WinMain/main() so it can be linked into test binaries that
+# bring their own entry point, and so a non-Windows entry (e.g. Linux main.cpp)
+# does not get globbed into MuClient and collide with the executable's own
+# entry symbol at link time. Match only the Platform/<OS>/ entry-file tail, not
+# an absolute path: a ${CMAKE_CURRENT_SOURCE_DIR}-built path can differ from
+# glob results in drive-letter casing or separators on Windows. This excludes
+# only the entry files; other Platform/<OS>/ sources (e.g. Local.cpp) stay in
+# the library.
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\][Ww]in[Mm]ain\\.[Cc]pp$")
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\]main\\.(cpp|mm)$")
 
 # Add MuEditor sources when editor is enabled
 if(ENABLE_EDITOR)
@@ -167,9 +171,41 @@ target_link_libraries(MuClient_whole INTERFACE $<LINK_LIBRARY:WHOLE_ARCHIVE,MuCl
 add_library(MuClient::MuClient ALIAS MuClient_whole)
 
 # Thin executable: platform bootstrap only, links the engine library. The
-# executable shell's sources live under source/App/ (see issue #346).
+# executable shell's sources live under source/App/ (see issue #346). The entry
+# point is selected per platform (issue #441): each OS keeps its bootstrap under
+# source/App/Platform/<OS>/, so adding a platform is a new entry file plus a
+# branch here, not a CMake rewrite. Only the Windows entry point exists today;
+# the Linux/macOS sources are added when that work starts.
+#
+# Unsupported platforms fail loudly rather than silently selecting the Linux
+# entry: the mobile targets need a different entry model and a renderer port
+# (the engine uses fixed-function desktop OpenGL), so quietly compiling a
+# desktop main() for them would be wrong. iOS is matched before the generic
+# APPLE/macOS branch, and Android before the generic UNIX/Linux branch.
+if (WIN32)
+  set(MU_APP_ENTRY "source/App/Platform/Windows/Winmain.cpp")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  message(FATAL_ERROR "iOS is not a supported build target yet: it needs an "
+    "OpenGL ES/Metal renderer port and a touch UI, and distribution is App "
+    "Store restricted. When that work starts, add source/App/Platform/iOS/ "
+    "and replace this branch.")
+elseif (APPLE)
+  set(MU_APP_ENTRY "source/App/Platform/macOS/main.mm")
+elseif (ANDROID)
+  message(FATAL_ERROR "Android is not a supported build target yet: it needs "
+    "an OpenGL ES renderer port, and its entry point is android_main via "
+    "native_app_glue built as a shared library, not an executable. When that "
+    "work starts, add source/App/Platform/Android/ and replace this branch.")
+elseif (UNIX)
+  set(MU_APP_ENTRY "source/App/Platform/Linux/main.cpp")
+else()
+  message(FATAL_ERROR "No executable entry point defined for this platform "
+    "(CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}). Add source/App/Platform/<OS>/ "
+    "and a branch above.")
+endif()
+
 add_executable(Main
-  "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Winmain.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
 )
 target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)

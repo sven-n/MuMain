@@ -41,7 +41,7 @@ FrameTimingState g_frameTiming;
 #include "UI/NewUI/HUD/Notices.h"
 #include "I18N/All.h"
 #include "Engine/AI/ZzzAI.h"
-#include "App/Winmain.h"
+#include "App/Platform/Windows/Winmain.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 
