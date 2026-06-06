@@ -2,6 +2,7 @@
 // Extracted from CameraUtility.cpp
 
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 
 #include <iterator>
 
@@ -802,11 +803,11 @@ void DefaultCamera::HandleEditorMode()
     if (!g_pUIManager->IsInputEnable())
     {
         // Handle camera angle rotation
-        if (HIBYTE(GetAsyncKeyState(VK_INSERT)) == 128)
+        if (Core::Input::IsKeyDown(VK_INSERT))
             m_State.Angle[2] += 15;
-        if (HIBYTE(GetAsyncKeyState(VK_DELETE)) == 128)
+        if (Core::Input::IsKeyDown(VK_DELETE))
             m_State.Angle[2] -= 15;
-        if (HIBYTE(GetAsyncKeyState(VK_HOME)) == 128)
+        if (Core::Input::IsKeyDown(VK_HOME))
             m_State.Angle[2] = -45;
 
         m_State.Angle[2] = fmodf(m_State.Angle[2] + 360.0f, 360.0f) - 360.0f;
@@ -831,7 +832,7 @@ void DefaultCamera::HandleEditorMode()
 
         for (const auto& mapping : keyMappings)
         {
-            if (HIBYTE(GetAsyncKeyState(mapping.vKey)) == 128)
+            if (Core::Input::IsKeyDown(mapping.vKey))
             {
                 Vector(mapping.x, mapping.y, 0.f, p1);
                 EditMove = true;

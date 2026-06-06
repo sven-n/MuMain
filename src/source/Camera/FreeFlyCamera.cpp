@@ -1,6 +1,7 @@
 // FreeFlyCamera.cpp - Free-fly camera for editor mode (spectator tool)
 
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 
 #ifdef _EDITOR
 
@@ -171,14 +172,14 @@ void FreeFlyCamera::ReadMovementInput(float& outForward, float& outStrafe, float
     outStrafe = 0.0f;
     outVertical = 0.0f;
 
-    if (GetAsyncKeyState(VK_UP) & 0x8000)    outForward += 1.0f;
-    if (GetAsyncKeyState(VK_DOWN) & 0x8000)  outForward -= 1.0f;
-    if (GetAsyncKeyState(VK_LEFT) & 0x8000)  outStrafe -= 1.0f;
-    if (GetAsyncKeyState(VK_RIGHT) & 0x8000) outStrafe += 1.0f;
+    if (Core::Input::IsKeyDown(VK_UP))    outForward += 1.0f;
+    if (Core::Input::IsKeyDown(VK_DOWN))  outForward -= 1.0f;
+    if (Core::Input::IsKeyDown(VK_LEFT))  outStrafe -= 1.0f;
+    if (Core::Input::IsKeyDown(VK_RIGHT)) outStrafe += 1.0f;
 
     // PageUp/PageDown for vertical movement
-    if (GetAsyncKeyState(VK_PRIOR) & 0x8000) outVertical += 1.0f;
-    if (GetAsyncKeyState(VK_NEXT)  & 0x8000) outVertical -= 1.0f;
+    if (Core::Input::IsKeyDown(VK_PRIOR)) outVertical += 1.0f;
+    if (Core::Input::IsKeyDown(VK_NEXT)) outVertical -= 1.0f;
 }
 
 void FreeFlyCamera::HandleMovement()
@@ -196,7 +197,7 @@ void FreeFlyCamera::HandleMovement()
     vertical /= inputLength;
 
     float speed = BASE_SPEED;
-    if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+    if (Core::Input::IsKeyDown(VK_SHIFT))
         speed *= SPRINT_MULTIPLIER;
     speed *= FPS_ANIMATION_FACTOR;
 

@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 
 #include "UI/NewUI/NewUICommon.h"
 #include "UI/NewUI/Widgets/NewUIRenderNumber.h"
@@ -174,7 +175,7 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
 
     for (int key = 0; key < 256; key++)
     {
-        if (HIBYTE(GetAsyncKeyState(key)) & 0x80)
+        if (Core::Input::IsKeyDown(key))
         {
             if (m_pInputInfo[key].byKeyState == KEY_NONE || m_pInputInfo[key].byKeyState == KEY_RELEASE)
             {
