@@ -32,6 +32,11 @@ namespace Network
         // network thread.
         void DrainTo(Processor process);
 
+        // Discard all queued packets. Called on session teardown (disconnect /
+        // reconnect) so packets for the old session are not processed against
+        // freed world data.
+        void Clear();
+
     private:
         IncomingPacketQueue() = default;
         ~IncomingPacketQueue();

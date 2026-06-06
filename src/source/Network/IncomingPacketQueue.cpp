@@ -8,8 +8,11 @@ namespace Network
 
     IncomingPacketQueue& IncomingPacketQueue::Instance()
     {
-        static IncomingPacketQueue instance;
-        return instance;
+        // Intentionally leaked: the instance is never destroyed at process exit,
+        // so a network thread still winding down during shutdown can call Push()
+        // without racing a destroyed static. The OS reclaims the memory on exit.
+        static IncomingPacketQueue* instance = new IncomingPacketQueue();
+        return *instance;
     }
 
     void IncomingPacketQueue::Push(std::unique_ptr<PacketInfo> packet)
@@ -42,6 +45,18 @@ namespace Network
         {
             process(pending.front().get());
             pending.pop();
+        }
+    }
+
+    void IncomingPacketQueue::Clear()
+    {
+        // Discard packets queued before a session teardown so they are not
+        // processed against freed world data on the next frame. Swap under the
+        // lock and let the packets destruct after releasing it.
+        std::queue<std::unique_ptr<PacketInfo>> discarded;
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            std::swap(discarded, m_queue);
         }
     }
 }

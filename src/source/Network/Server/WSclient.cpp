@@ -979,6 +979,10 @@ void ResetClientToLoginScene()
         g_bGameServerConnected = false;
     }
 
+    // Drop packets received for the session we just tore down so they are not
+    // processed against the freed world data on the next frame.
+    Network::IncomingPacketQueue::Instance().Clear();
+
     ReleaseCharacterSceneData();
     SceneFlag = LOG_IN_SCENE;
     g_sceneInit.ResetForDisconnect();
