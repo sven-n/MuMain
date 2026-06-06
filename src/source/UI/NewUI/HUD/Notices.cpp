@@ -3,7 +3,7 @@
 #include "UI/NewUI/HUD/Notices.h"
 
 #include "UI/Legacy/UIControls.h"        // g_pRenderText, RT3_WRITE_CENTER
-#include "App/Winmain.h"    // g_hFontBold
+#include "App/Platform/Windows/Winmain.h"    // g_hFontBold
 #include "Render/Textures/ZzzOpenglUtil.h" // EnableAlphaTest
 #include "UI/NewUI/NewUISystem.h"        // g_pNewUISystem
 #include "Engine/AI/ZzzAI.h"             // FPS_ANIMATION_FACTOR

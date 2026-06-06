@@ -13,7 +13,7 @@
 #include "Scenes/CharacterScene.h"     // StartGame
 #include "Engine/Object/ZzzCharacter.h"// CharactersClient
 #include "UI/Legacy/UIMng.h"           // CUIMng, m_LoginWin
-#include "App/Winmain.h"  // WM_START_RECONNECT
+#include "App/Platform/Windows/Winmain.h"  // WM_START_RECONNECT
 #include "MUHelper/MuHelper.h"         // MUHelper::g_MuHelper
 
 // Timing (milliseconds). WorldTime is the wall-clock ms timer the rest of the
