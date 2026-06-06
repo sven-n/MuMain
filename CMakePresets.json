@@ -1,0 +1,130 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-x86",
+      "displayName": "Windows x86",
+      "description": "Standard build without editor features",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "toolchainFile": "${sourceDir}/toolchain-x86.cmake",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "OFF"
+      }
+    },
+    {
+      "name": "windows-x86-mueditor",
+      "displayName": "Windows x86 MuEditor",
+      "description": "Build with editor features",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "toolchainFile": "${sourceDir}/toolchain-x86.cmake",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "ON"
+      }
+    },
+    {
+      "name": "windows-x64",
+      "displayName": "Windows x64",
+      "description": "Standard build without editor features",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "toolchainFile": "${sourceDir}/toolchain-x64.cmake",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "OFF"
+      }
+    },
+    {
+      "name": "windows-x64-mueditor",
+      "displayName": "Windows x64 MuEditor",
+      "description": "Build with editor features",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "toolchainFile": "${sourceDir}/toolchain-x64.cmake",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-x86-debug",
+      "displayName": "x86 Debug",
+      "configurePreset": "windows-x86",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x86-release",
+      "displayName": "x86 Release",
+      "configurePreset": "windows-x86",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x86-mueditor-debug",
+      "displayName": "x86 MuEditor Debug",
+      "configurePreset": "windows-x86-mueditor",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x86-mueditor-release",
+      "displayName": "x86 MuEditor Release",
+      "configurePreset": "windows-x86-mueditor",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-debug",
+      "displayName": "x64 Debug",
+      "configurePreset": "windows-x64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x64-release",
+      "displayName": "x64 Release",
+      "configurePreset": "windows-x64",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-mueditor-debug",
+      "displayName": "x64 MuEditor Debug",
+      "configurePreset": "windows-x64-mueditor",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x64-mueditor-release",
+      "displayName": "x64 MuEditor Release",
+      "configurePreset": "windows-x64-mueditor",
+      "configuration": "Release"
+    }
+  ]
+}

@@ -1,0 +1,674 @@
+// MAX : 512		
+//?????		
+//?????1		
+84	1	"Jefe Guerrero Esqueleto"
+85	1	"Jefe Arquero Esqueleto"
+86	1	"Soldado Calavera Oscura"
+87	1	"Ogro Gigante"
+88	1	"Caballero Rojo Esqueleto"
+89	1	"Esqueleto Mágico"
+//?????2		
+90	1	"Jefe Guerrero Esqueleto"
+91	1	"Jefe Arquero Esqueleto"
+92	1	"Soldado Calavera Oscura"
+93	1	"Ogro Gigante"
+94	1	"Caballero Rojo Esqueleto"
+95	1	"Esqueleto Mágico"
+//?????3		
+96	1	"Jefe Guerrero Esqueleto"
+97	1	"Jefe Arquero Esqueleto"
+98	1	"Soldado Calavera Oscura"
+99	1	"Ogro Gigante"
+111	1	"Caballero Rojo Esqueleto"
+112	1	"Esqueleto Mágico"
+//?????4		
+113	1	"Jefe Guerrero Esqueleto"
+114	1	"Jefe Arquero Esqueleto"
+115	1	"Soldado Calavera Oscura"
+116	1	"Ogro Gigante"
+117	1	"Caballero Rojo Esqueleto"
+118	1	"Esqueleto Mágico"
+//?????5		
+119	1	"Jefe Guerrero Esqueleto"
+120	1	"Jefe Arquero Esqueleto"
+121	1	"Soldado Calavera Oscura"
+122	1	"Ogro Gigante"
+123	1	"Caballero Rojo Esqueleto"
+124	1	"Esqueleto Mágico"
+//?????6		
+125	1	"Jefe Guerrero Esqueleto"
+126	1	"Jefe Arquero Esqueleto"
+127	1	"Soldado Calavera Oscura"
+128	1	"Ogro Gigante"
+129	1	"Caballero Rojo Esqueleto"
+130	1	"Esqueleto Mágico"
+131	1	"Puerta del Castillo"
+132	1	"Estatua de Santo"
+133	1	"Estatua de Santo"
+134	1	"Estatua de Santo"
+		
+// ??? ??		
+135	1	"Mago Blanco"
+136	1	"Soldado ogro destructivo"
+137	1	"Arquero ogro destructivo"
+		
+//?????7		
+138	1	"Jefe Guerrero Esqueleto"
+139	1	"Jefe Arquero Esqueleto"
+140	1	"Soldado Calavera Oscura"
+141	1	"Ogro Gigante"
+142	1	"Caballero Rojo Esqueleto"
+143	1	"Esqueleto Mágico"
+		
+//???_?? 7:05 2004-08-25		
+// 1 ???		
+147	1	"Aegis"
+148	1	"Centurión Canalla"
+146	1	"Soldado Sangriento"
+144	1	"Ángel de la Muerte"
+149	1	"Necron"
+145	1	"Centurión de la Muerte"
+160	1	"Schriker"
+161	1	"Ilusión de Kundun"
+// 2 ???		
+177	1	"Aegis"
+178	1	"Centurión Canalla"
+176	1	"Soldado Sangriento"
+174	1	"Ángel de la Muerte"
+179	1	"Necron"
+175	1	"Centurión de la Muerte"
+180	1	"Schriker"
+181	1	"Ilusión de Kundun"
+// 3 ???		
+185	1	"Aegis"
+186	1	"Centurión Canalla"
+184	1	"Soldado Sangriento"
+182	1	"Ángel de la Muerte"
+187	1	"Necron"
+183	1	"Centurión de la Muerte"
+188	1	"Schriker"
+189	1	"Ilusión de Kundun"
+// 4 ???		
+193	1	"Aegis"
+194	1	"Centurión Canalla"
+192	1	"Soldado Sangriento"
+190	1	"Ángel de la Muerte"
+195	1	"Necron"
+191	1	"Centurión de la Muerte"
+196	1	"Schriker"
+197	1	"Ilusión de Kundun"
+ 		
+//????? ???.		
+162	1	"Castillo del Caos 1"
+163	1	"Castillo del Caos 2"
+164	1	"Castillo del Caos 3"
+165	1	"Castillo del Caos 4"
+166	1	"Castillo del Caos 5"
+167	1	"Castillo del Caos 6"
+168	1	"Castillo del Caos 7"
+169	1	"Castillo del Caos 8"
+170	1	"Castillo del Caos 9"
+171	1	"Castillo del Caos 10"
+172	1	"Castillo del Caos 11"
+173	1	"Castillo del Caos 12"
+		
+83	1	"Rueda Dorada"
+82	1	"Tantalos Dorado"
+81	1	"Vepar Dorado"
+80	1	"Rey Lagarto Dorado"
+79	1	"Derkon Dorado"
+78	1	"Duende Dorado"
+		
+77	1	"Fénix de la Oscuridad"
+76	1	"Escudo de Fénix de Oscuridad"
+75	1	"Gran Drakan"
+74	1	"Corteza Alfa"
+73	1	"Drakan"
+72	1	"Caballero Fantasma"
+71	1	"Mega Corteza"
+70	1	"Reina Rainier"
+69	1	"Alquamos"
+68	1	"Molt"
+		
+57	1	"Rueda de Acero"
+58	1	"Tantalos"
+59	1	"Zaikan"
+60	1	"Lobo Sangriento"
+61	1	"Caballero de Rayo"
+62	1	"Mutante"
+63	1	"Caballero de Rayo de la Muerte"
+		
+64	1	"Arquero Ogro"
+65	1	"Ogre de Élite"
+66	1	"Rey Maldito"
+67	1	"Balrog de Metal"
+		
+36	1	"Sombra"
+39	1	"Sombra Venenosa"
+34	1	"Mago Maldito"
+41	1	"Vaca de la Muerte"
+37	1	"Diablo"
+40	1	"Caballero de la Muerte"
+35	1	"Gorgon de la Muerte"
+38	1	"Balrog"
+		
+3	1	"Araña"
+26	1	"Duende"
+2	1	"Dragón Escurridizo"
+27	1	"Escorpión Cadena"
+0	1	"Toro Luchador"
+33	1	"Duende de Élite"
+1	1	"Sabueso"
+28	1	"Monstruo Escarabajo"
+4	1	"Toro Luchador de Élite"
+29	1	"Cazador"
+6	1	"Lich"
+30	1	"Monstruo del Bosque"
+31	1	"Agon"
+7	1	"Gigante"
+32	1	"Gólem de Piedra"
+14	1	"Esqueleto"
+24	1	"Gusano"
+22	1	"Monstruo de Hielo"
+23	1	"Hommerd"
+12	1	"Larva"
+21	1	"Asesino"
+17	1	"Cíclope"
+19	1	"Yeti"
+11	1	"Espíritu Fantasmal"
+15	1	"Arquero Esqueleto"
+20	1	"Yeti de Élite"
+5	1	"Sabueso Infernal"
+13	1	"Araña Infernal"
+16	1	"Jefe Guerrero Esqueleto"
+9	1	"Lich de Trueno"
+8	1	"Toro Luchador Venenoso"
+10	1	"Caballero Oscuro"
+25	1	"Reina de Hielo"
+18	1	"Gorgon"
+		
+45	1	"Bahamut"
+46	1	"Vepar"
+47	1	"Valquiria"
+48	1	"Rey Lagarto"
+49	1	"Hidra"
+50	1	"Gusano Marítimo"
+51	1	"Gran Bahamut"
+52	1	"Valquiria Plateada"
+		
+43	1	"Dragón Escurridizo Dorado"
+44	1	"Dragón"
+53	1	"Titán Dorado"
+54	1	"Soldado Dorado"
+55	1	"Rey de la Muerte"
+56	1	"Hueso de la Muerte"
+		
+150	1	"Bali"
+151	1	"Soldado"
+152	1	"Piedra mágica de %s "
+153	1	"Piedra mágica de %s "
+154	1	"Piedra mágica de %s "
+155	1	"Piedra mágica de %s "
+156	1	"Piedra mágica de %s "
+157	1	"Piedra mágica de %s "
+158	1	"Piedra mágica de %s "
+//158	1	"Caballero de la Sombra"
+		
+// ?? ( 100 ~ 110 )		
+100	1	"Lance"
+101	1	"Vara de Hierro"
+102	1	"Fuego"
+103	1	"Meteorito"
+		
+// ????.            		
+104	1	"Trampa"
+105	1	"Trampa Cañón"
+106	1	"Trampa Láser"
+200	1	"Bola de Fútbol"
+		
+// ????? ??? MVP (2005.9.23 ??? ??)		
+204	1	"Estatus de Lobo"
+205	1	"Altar de Lobo1"
+206	1	"Altar de Lobo2"
+207	1	"Altar de Lobo3"
+208	1	"Altar de Lobo4"
+209	1	"Altar de Lobo5"
+215	1	"Escudo"
+// ??		
+216	1	"Corona"
+217	1	"Corona Conmutador2"
+218	1	"Corona Conmutador1"
+219	1	"Interruptor Puerta de Castillo"
+220	1	"Guardián de Entrada"
+221	1	"Ataque con honda"
+222	1	"Defensa con honda"
+//NPC		
+223	1	"Superior"
+224	1	"Guardia"
+226	1	"Adiestrador"
+//227	1	"McDonalds"
+//228	1	"Popeyes"
+229	1	"Marlon"
+230	1	"Mercader Errante Alex"
+231	1	"Thompson Kenel"
+232	1	"Arcángel"
+233	1	"Mensajero de Arcángel"
+234	1	"Mascota Adiestrador"
+235	1	"Sebina la Sacerdotisa"
+236	1	"Arquero Dorado"
+237	1	"Charon"
+238	1	"Duende del Caos"
+239	1	"Guardia de la Arena"
+240	1	"Guardián de Seguridad"
+241	1	"Lorence Capitán Guardia Real"
+242	1	"Elfa Lala"
+243	1	"Eo el Artesano"
+244	1	"Caren la Mesera"
+245	1	"Maga Izabel"
+246	1	"Mercader de Armas Zienna"
+247	1	"Guardia"
+248	1	"Mercader Errante Martin"
+249	1	"Guardia"
+250	1	"Mercader Errante"
+251	1	"Hanzo el Herrero"
+252	1	""
+253	1	"Amy la Chica de las Pócimas"
+254	1	"Pasi el Mágico"
+255	1	"Lumen la Mesera"
+256	1	"Lahap"
+257	1	"Soldado Fantasma de la Sombra"
+		
+//??? ???		
+// 5 ???		
+263	1	"Aegis"
+264	1	"Centurión Canalla"
+262	1	"Soldado Sangriento"
+260	1	"Ángel de la Muerte"
+265	1	"Necron"
+261	1	"Centurión de la Muerte"
+266	1	"Schriker"
+267	1	"Ilusión de Kundun"
+// 6 ???		
+271	1	"Aegis"
+272	1	"Centurión Canalla"
+270	1	"Soldado Sangriento"
+268	1	"Ángel de la Muerte"
+273	1	"Necron"
+269	1	"Centurión de la Muerte"
+274	1	"Schriker"
+275	1	"Kundun"
+		
+// ??? ???.		
+277	1	"Puerta del Castillo"
+278	1	"Piedra de la Vida"
+283	1	"Estatua Guardián"
+285	1	"Guardián"
+286	1	"Arquero"
+287	1	"Lancero"
+288	1	"Torre Cañón"
+		
+//??? ?		
+290	1	"Guerrero Lagartija"
+291	1	"Gólem de Fuego"
+292	1	"Reina Abeja"
+293	1	"Gólem Venenoso"
+294	1	"Guerrero Hachero"
+295	1	"Erohim"
+296	1	"Monstruo7"
+		
+// ??????? ???.		
+300	1	"Héroe Mutante"
+301	1	"Ala Omega"
+302	1	"Héroe Axl"
+303	1	"Gólem Gigas"
+		
+		
+//???. ?????. ???? ??? ?? ??_??/??? (?? 3:18 2005-07-26)		
+		
+//??? ???		
+308	1	"Árbol de la Muerte"
+307	1	"Orc del Bosque"
+306	1	"Jinete de la Muerte"
+305	1	"Gólem Azul"
+304	1	"Reina Bruja"
+309	1	"Maine Infernal"
+		
+//?????		
+310	1	"Explorador con Martillo"
+311	1	"Explorador con Lanza"
+312	1	"Explorador con Arco"
+313	1	"Hombre Lobo"
+314	1	"Explorador (Héroe)"
+315	1	"Hombre Lobo (Héroe)"
+316	1	"Balram"
+317	1	"Soram"
+		
+// ????? MVP ??? - ?? 2005.11.23 (???)		
+340	1	"Elfo Oscuro"
+341	1	"Soram"
+344	1	"Balram"
+345	1	"Espíritu de la Muerte"
+348	1	"Tanker"
+349	1	"Balgass"
+		
+//???? ???		
+331	1	"Aegis"
+332	1	"Centurión Canalla"
+333	1	"Soldado Sangriento"
+334	1	"Ángel de la Muerte"
+335	1	"Necron"
+336	1	"Centurión de la Muerte"
+337	1	"Schriker"
+338	1	"Ilusión de Kundun"
+		
+// ????? ?? ? ?? _ 8? 8? ( ??? ) : ????? ?? ??? ? ???? ? ?? ??		
+// ?? 2 NPC? ?? ??		
+// ? ??? ?? ??		
+//344	1	"Invocadora"
+// ???? ?? ???? ??. ?? ??? ?? ?? ( ?????? ?? ?? )		
+//345	1	"Duende del Caos"
+		
+//??? ?? NPC ?? - 2006.1.23 (???)		
+258	1	"Luke el Ayudante"
+//2006.4.17 ?? (???)		
+259	1	"Oráculo Layla"
+		
+//??? ??? ?? - 2006.5.16 (???)		
+350	1	"Energúmeno"
+351	1	"Lobo Esquirla"
+352	1	"Jinete de Hierro"
+353	1	"Sátiros"
+354	1	"Cazador Blade"
+355	1	"Centauros"
+356	1	"Gigantis"
+357	1	"Genocida"
+358	1	"Imagen"
+359	1	"Cola Gemela"
+360	1	"Pavor Terrorífico"
+361	1	"Pesadilla"
+362	1	"Mano de Maya"
+363	1	"Mano de Maya"
+364	1	"Maya"
+		
+//??? npc		
+367	1	"Máquina de Portón"
+368	1	"Elpis"
+//??? ?? ?? npc		
+369	1	"Osbourne"
+370	1	"Jerridon"
+		
+//????? ??? ??? ?? NPC ?? - 2006.8.23 ???		
+371	1	"Leo el Ayudante"
+		
+//??????????? NPC ?? - 2006.9.5 ???		
+372	1	"Soldado Calavera de Élite"
+		
+//?????? NPC ?? - 2006.9.12 ???		
+373	1	"Jack Olantern"
+		
+//????? ????? NPC ?? - 2006.11.30 ???		
+374	1	"Santa"
+		
+// ????? ??		
+375	1	"Amo de Tarjetas de Caos"
+		
+// ??? ?? ?? NPC - 2007.1.22 ???		
+376	1	"Pamela la Proveedora"
+377	1	"Angela la Proveedora"
+		
+// ?? ???? ??		
+365	1	"Saco de Bendiciones"
+378	1	"Amo del Juego"
+379	1	"Natasha, Mercader de Petardos"
+		
+//?? ????		
+380	1	"Estatua de Piedra"
+381	1	"General de Aliados de MU"
+382	1	"Anciano Hechicero de Ilusiones"
+383	1	"Almacén Alianza Ítems Sagrados"
+384	1	"Alm. Ít. Sagrado Cast. Ilusión"
+385	1	"Espejismo"
+// ?? ???? 1 (?? 220~270)		
+386	1	"Espíritu Hechicero de Ilusión"
+387	1	"Espíritu Hechicero de Ilusión"
+388	1	"Espíritu Hechicero de Ilusión"
+// ?? ???? 2 (?? 271~320)		
+389	1	"Espíritu Hechicero de Ilusión"
+390	1	"Espíritu Hechicero de Ilusión"
+391	1	"Espíritu Hechicero de Ilusión"
+// ?? ???? 3 (?? 321~350)		
+392	1	"Espíritu Hechicero de Ilusión"
+393	1	"Espíritu Hechicero de Ilusión"
+394	1	"Espíritu Hechicero de Ilusión"
+// ?? ???? 4 (?? 351~380)		
+395	1	"Espíritu Hechicero de Ilusión"
+396	1	"Espíritu Hechicero de Ilusión"
+397	1	"Espíritu Hechicero de Ilusión"
+// ?? ???? 5 (?? 381~399)		
+398	1	"Espíritu Hechicero de Ilusión"
+399	1	"Espíritu Hechicero de Ilusión"
+400	1	"Espíritu Hechicero de Ilusión"
+// ?? ???? 6 (?? 400)		
+401	1	"Espíritu Hechicero de Ilusión"
+402	1	"Espíritu Hechicero de Ilusión"
+403	1	"Espíritu Hechicero de Ilusión"
+// ???? ??? ??? ???		
+404	1	"Aliados de MU"
+405	1	"Hechicero de Ilusiones"
+		
+// 3? ????		
+406	1	"Apóstol Devin"
+407	1	"Hombre Lobo Quarel"
+408	1	"Guardián de Entrada"
+409	1	"Balram (Soldado Recluta)"
+410	1	"Espíritu de Muerte (Recluta)"
+411	1	"Soram (Soldado Recluta)"
+412	1	"Elfo Oscuro (Soldado Recluta)"
+		
+// ??(2007)???		
+413	1	"Conejo Lunar"
+414	1	"Ayudante Ellen"
+// ????  NPC		
+415	1	"Silvia"
+416	1	"Rhea"
+417	1	"Marce"
+// ???? ??? (2007-09-18 ???)		
+418	1	"Conejo Raro"
+419	1	"Conejo Espantoso"
+420	1	"Hombre Lobo"
+421	1	"Mariposa Contaminada"
+422	1	"Lich Maldito"
+423	1	"Gólem Tótem"
+424	1	"Grizzly"
+425	1	"Capitán Grizzly"
+// ???? ?? ??? ?? ??? ??(2007.10.16)		
+//?????7_??		
+426	1	"Castillo del Caos13"
+427	1	"Castillo del Caos14"
+//?????8_??		
+428	1	"Jefe Guerrero Esqueleto"
+429	1	"Jefe Arquero Esqueleto"
+430	1	"Soldado Calavera Oscura"
+431	1	"Ogro Gigante"
+432	1	"Caballero Rojo Esqueleto"
+433	1	"Esqueleto Mágico"
+//?????7_??		
+434	1	"Gigantis"
+435	1	"Energúmeno"
+436	1	"Balram (Soldado Recluta)"
+437	1	"Soram (Soldado Recluta)"
+438	1	"Imagen"
+439	1	"Pavor Terrorífico"
+440	1	"Elfo Oscuro"
+// ??? ? ??? ??		
+441	1	"Sapi-Unus"
+442	1	"Sapi-Duo"
+443	1	"Sapi-Tres"
+444	1	"Peón Sombra"
+445	1	"Caballero de la Sombra"
+446	1	"Mirada Sombría"
+447	1	"Napin Trueno"
+448	1	"Napin Espíritu Fantasmal"
+449	1	"Napin Llamarada"
+// ????? npc ??		
+450	1	"Espíritu Flor de Cerezo"
+451	1	"Árbol Flor de Cerezo"
+// ?? ??? NPC		
+452	1	"Amo de Simientes"
+453	1	"Investigador de Simientes"
+// ???? ??? ??		
+454	1	"Caminante del Hielo"
+455	1	"Mamut Gigante"
+456	1	"Gigante de Hielo"
+457	1	"Coolutin"
+458	1	"Caballero de Acero"
+459	1	"Selupan"
+460	1	"Huevos de Araña"
+461	1	"Huevos de Araña"
+462	1	"Huevos de Araña"
+// ????? ??		
+463	1	"Espíritu de Llama de Fuego"
+// ????? NPC ??		
+//464	1	"Ayudante de Reinicio"
+// ??? 7?? ??? NPC ??		
+478	1	"Delgado"
+// ???????? NPC ??(?? ?? ??)		
+465	1	"Santa"
+466	1	"Lich Maldito"
+467	1	"Hombre de nieve"
+468	1	"Brioso"
+469	1	"Kermit"
+470	1	"Pequeño Santa"
+471	1	"Cupido"
+472	1	"Acróbata"
+473	1	"Trueno"
+474	1	"Juguetón"
+475	1	"Relámpago"
+476	1	"Santa Maldito"
+477	1	"Hombre de nieve transformado"
+// PK?? ??? NPC ??		
+479	1	"Portero Titus"
+480	1	"Luchador Zombie"
+481	1	"Luchador Zombie"
+482	1	"Gladiador Resucitado"
+483	1	"Gladiador Resucitado"
+484	1	"Descuartizador Ceniza"
+485	1	"Descuartizador Ceniza"
+486	1	"Soldado Sangriento"
+487	1	"Asesino Sangriento Cruel"
+488	1	"Asesino Sangriento Cruel"
+489	1	"Gigante de Lava Ardiente"
+490	1	"Gigante de Lava Despiadado"
+491	1	"Gigante de Lava Despiadado"
+// ?? NPC ??		
+492	1	"Moss"
+// ???????(??)		
+502	1	"Conejo Dorado"
+493	1	"Caballero Oscuro Dorado"
+494	1	"Diablo Dorado"
+495	1	"Gólem de Piedra Dorado"
+496	1	"Corteza Dorada"
+497	1	"Sátiro Dorado"
+498	1	"Cola Gemela Dorada"
+499	1	"Caballero de Hierro Dorado"
+500	1	"Napin Dorado"
+501	1	"Gran Dragón Dorado"
+// 5? ???? ??? (??????)		
+503	1	"Panda transformado"
+// ?? ??? ??? NPC ??		
+// ???		
+504	1	"Gaion Kharein"
+// ? ??		
+505	1	"Jerint"
+506	1	"Raymond"
+507	1	"Erkanne"
+508	1	"Destler"
+509	1	"Vermont"
+510	1	"Kato"
+511	1	"Galia"
+// ? ??		
+512	1	"Amo del Cuartel"
+513	1	"Instructor de Combate"
+514	1	"Comandante de Caballeros"
+515	1	"Gran Mago"
+516	1	"Amo Asesino"
+517	1	"Capitán de Caballería"
+// ?? ???		
+518	1	"Portador de Escudo"
+519	1	"Médico"
+520	1	"Caballeros"
+521	1	"Guardaespaldas"
+// NPC		
+522	1	"Jerint el Asistente"
+// ???? NPC		
+523	1	"Trampa"
+524	1	"Puerta del Castillo 1"
+525	1	"Puerta del Castillo 2"
+526	1	"Estatua de Piedra 1"
+527	1	"Puerta del Castillo 3"
+528	1	"Puerta del Castillo 4"
+// ???? ??? NPC ??		
+// ???		
+// ?? ???		
+529	1	"Descuartizador Furioso"
+530	1	"Descuartizador"
+// ?? ???		
+531	1	"Caminante del Hielo"
+// ?? ???		
+532	1	"Larva"
+533	1	"Doppelganger"
+534	1	"Elfo Doppelganger"
+535	1	"Caballero Doppelganger"
+536	1	"Mago Doppelganger"
+537	1	"Gladiador Mágico Doppelganger"
+538	1	"Señor Oscuro Doppelganger"
+539	1	"Invocadora Doppelganger"
+// NPC		
+540	1	"Lugard"
+541	1	"Arcón de Recompensa Provisorio"
+542	1	"Arcón de Recompensa Final"
+// ?? NPC		
+543	1	"Mayordomo Gens Duprian"
+544	1	"Mayordomo Gens Vanert"
+//???? NPC ?? 2009.11.24 ???		
+545	1	"Christine Mercader Art. Varios"
+546	1	"Joyero Raul"
+547	1	"Julia Miembro Unión de Mercado"
+//????????? ?????? ??		
+548	1	"Esqueleto transformado"
+549	1	"Orc Sangriento"
+550	1	"Jinete Sangriento de la Muerte"
+551	1	"Gólem Sangriento"
+552	1	"Reina Bruja Sangrienta"
+553	1	"Guerrero Energúmeno"
+554	1	"Guerrero Centauro"
+555	1	"Guerrero Gigantis"
+556	1	"Guerrero Genocida"
+557	1	"Reina Sapi"
+558	1	"Napin del Hielo"
+559	1	"Amo de la Sombra"
+560	1	"Reina Sapi"
+561	1	"Medusa"
+562	1	"Mamut Oscuro"
+563	1	"Gigante Oscuro"
+564	1	"Coolutin Oscuro"
+565	1	"Caballero de Hierro Oscuro"
+566	1	"Tercia de Encargados del Gremio Mercenario"
+567	1	"Sacerdotisa Veina"
+568	1	"Comerciante Vagabundo Zyro"
+// ??? ??? ?? 2010-06-30 ???		
+569	1	"Escorpión de Cadena Venenosa"
+570	1	"Escorpión de Hueso"
+571	1	"Orco"
+572	1	"Gollock"
+573	1	"Crypta"
+574	1	"Crypos"
+575	1	"Condra"
+576	1	"Narcondra"																						
+// Ä®·çÅº NPC Ãß°¡ 2010-06-30 È«½Â¿í																													
+577	1	"Leina the General Goods Merchant"																											
+578	1	"Weapons Merchant Bolo"																											
+// ·°Å°¾ÆÀÌÅÛ NPC Ãß°¡ 2010-09-01 ÀÌ±â¼ö																													
+579	1	"David"		
+585	1	"Scarecrow"
+end		

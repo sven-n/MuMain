@@ -1,0 +1,5 @@
+// Local.h: interface for the Local
+//////////////////////////////////////////////////////////////////////
+#pragma once
+
+extern bool CheckSpecialText(wchar_t* Text);

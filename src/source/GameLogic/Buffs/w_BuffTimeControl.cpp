@@ -1,0 +1,267 @@
+// w_BuffTimeControl.cpp: implementation of the BuffTimeControl class.
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "UI/Legacy/UIManager.h"
+#include "GameLogic/Items/ItemAddOptioninfo.h"
+#include "w_BuffTimeControl.h"
+#include "Core/Time/FrameTimerScheduler.h"
+#include "I18N/All.h"
+
+BuffTimeControlPtr BuffTimeControl::Make()
+{
+    BuffTimeControlPtr bufftimecontrol(new BuffTimeControl);
+    return bufftimecontrol;
+}
+
+BuffTimeControl::BuffTimeControl()
+{
+}
+
+BuffTimeControl::~BuffTimeControl()
+{
+    for (auto iter = m_BuffTimeList.begin(); iter != m_BuffTimeList.end(); )
+    {
+        auto tempiter = iter;
+        ++iter;
+
+        auto bufftimetype = static_cast<eBuffTimeType>((*tempiter).first);
+
+        Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
+        m_BuffTimeList.erase(tempiter);
+    }
+
+    m_BuffTimeList.clear();
+}
+
+eBuffTimeType BuffTimeControl::CheckBuffTimeType(eBuffState bufftype)
+{
+    if (g_IsBuffClass(bufftype) == eBuffClass_Count)
+    {
+        return eBuffTime_None;
+    }
+
+    BuffInfo bInfo = g_BuffInfo(bufftype);
+
+    return eBuffTimeType(1005 + bInfo.s_BuffEffectType);
+}
+
+DWORD BuffTimeControl::GetBuffEventTime(eBuffTimeType bufftimetype)
+{
+    return 1000;
+}
+
+DWORD BuffTimeControl::GetBuffMaxTime(eBuffState bufftype, DWORD curbufftime)
+{
+    if (curbufftime == 0)
+    {
+        const BuffInfo& buffinfo = g_BuffInfo(bufftype);
+
+        if (buffinfo.s_ItemType == 255)
+        {
+            return -1;
+        }
+        else
+        {
+            const ITEM_ADD_OPTION& Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ITEMINDEX(buffinfo.s_ItemType, buffinfo.s_ItemIndex));
+
+            if (Item_data.m_Time == 0) return -1;
+
+            return Item_data.m_Time;
+        }
+    }
+
+    return curbufftime;
+}
+
+bool BuffTimeControl::IsBuffTime(eBuffTimeType bufftype)
+{
+    auto iter = m_BuffTimeList.find(bufftype);
+
+    if (iter == m_BuffTimeList.end())
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+void BuffTimeControl::RegisterBuffTime(eBuffState bufftype, DWORD curbufftime)
+{
+    eBuffTimeType  bufftimetype = CheckBuffTimeType(bufftype);
+
+    curbufftime = GetBuffMaxTime(bufftype, curbufftime);
+
+    if (bufftimetype == eBuffTime_None || curbufftime == -1)
+    {
+        return;
+    }
+
+    if (IsBuffTime(bufftimetype)) return;
+
+    BuffTimeInfo  buffinfo;
+    buffinfo.s_BuffType = bufftype;
+    buffinfo.s_CurBuffTime = curbufftime * 1000;
+    buffinfo.s_EventBuffTime = GetTickCount();
+
+    m_BuffTimeList.insert(std::make_pair(bufftimetype, buffinfo));
+
+    // Tick the buff's remaining time every 900ms; the timer removes itself once
+    // the buff expires (replaces the per-buff SetTimer/WM_TIMER).
+    Core::Time::FrameTimerScheduler::Instance().SetRepeating(bufftimetype, 900,
+        [this, bufftimetype]
+        {
+            if (!CheckBuffTime(bufftimetype))
+                Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
+        });
+}
+
+bool BuffTimeControl::UnRegisterBuffTime(eBuffState bufftype)
+{
+    eBuffTimeType  bufftimetype = CheckBuffTimeType(bufftype);
+
+    auto iter = m_BuffTimeList.find(bufftimetype);
+
+    if (iter != m_BuffTimeList.end())
+    {
+        Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
+        g_ConsoleDebug->Write(MCD_NORMAL, L"[Buff End] No. %d\r\n", bufftimetype);
+
+        m_BuffTimeList.erase(iter);
+        return true;
+    }
+
+    return false;
+}
+
+void BuffTimeControl::GetBuffStringTime(eBuffState bufftype, std::wstring& timeText)
+{
+    for (BuffTimeInfoMap::iterator iter = m_BuffTimeList.begin(); iter != m_BuffTimeList.end(); ++iter)
+    {
+        BuffTimeInfo& bufftimeinfo = (*iter).second;
+
+        if (bufftimeinfo.s_BuffType == bufftype)
+        {
+            float fTime = bufftimeinfo.s_CurBuffTime * 0.001f;
+            GetStringTime(fTime, timeText, true);
+        }
+    }
+}
+
+void BuffTimeControl::GetBuffStringTime(DWORD type, std::wstring& timeText, bool issecond)
+{
+    auto iter = m_BuffTimeList.find(type);
+
+    if (iter != m_BuffTimeList.end())
+    {
+        BuffTimeInfo& bufftimeinfo = (*iter).second;
+        float fTime = bufftimeinfo.s_CurBuffTime * 0.001f;
+        GetStringTime(fTime, timeText, issecond);
+    }
+}
+
+const DWORD BuffTimeControl::GetBuffTime(DWORD type)
+{
+    auto iter = m_BuffTimeList.find(type);
+
+    if (iter != m_BuffTimeList.end())
+    {
+        BuffTimeInfo& bufftimeinfo = (*iter).second;
+
+        return bufftimeinfo.s_CurBuffTime;
+    }
+    return 0;
+}
+
+void BuffTimeControl::GetStringTime(DWORD time, std::wstring& timeText, bool isSecond)
+{
+    wchar_t buffer[100];
+
+    if (isSecond)
+    {
+        DWORD day = time / (1440 * 60);
+        DWORD oClock = (time - (day * (1440 * 60))) / 3600;
+        DWORD minutes = (time - ((oClock * 3600) + (day * (1440 * 60)))) / 60;
+        DWORD second = time % 60;
+
+        if (day != 0)
+        {
+            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls %d %ls", day, I18N::Game::Day, oClock, I18N::Game::Hour, minutes, I18N::Game::Minute, second, I18N::Game::Second);
+            timeText = buffer;
+        }
+        else if (day == 0 && oClock != 0)
+        {
+            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls", oClock, I18N::Game::Hour, minutes, I18N::Game::Minute, second, I18N::Game::Second);
+            timeText = buffer;
+        }
+        else if (day == 0 && oClock == 0 && minutes != 0)
+        {
+            mu_swprintf(buffer, L"%d %ls %d %ls", minutes, I18N::Game::Minute, second, I18N::Game::Second);
+            timeText = buffer;
+        }
+        else if (day == 0 && oClock == 0 && minutes == 0)
+        {
+            mu_swprintf(buffer, L"%ls", I18N::Game::LessThan1Minutes);
+            timeText = buffer;
+        }
+    }
+    else
+    {
+        DWORD day = time / 1440;
+        DWORD oClock = (time - (day * 1440)) / 60;
+        DWORD minutes = time % 60;
+
+        if (day != 0)
+        {
+            mu_swprintf(buffer, L"%d %ls %d %ls %d %ls", day, I18N::Game::Day, oClock, I18N::Game::Hour, minutes, I18N::Game::Minute);
+            timeText = buffer;
+        }
+        else if (day == 0 && oClock != 0)
+        {
+            mu_swprintf(buffer, L"%d %ls %d %ls", oClock, I18N::Game::Hour, minutes, I18N::Game::Minute);
+            timeText = buffer;
+        }
+        else if (day == 0 && oClock == 0 && minutes != 0)
+        {
+            mu_swprintf(buffer, L"%d %ls", minutes, I18N::Game::Minute);
+            timeText = buffer;
+        }
+    }
+}
+
+bool BuffTimeControl::CheckBuffTime(DWORD type)
+{
+    auto iter = m_BuffTimeList.find(type);
+
+    if (iter != m_BuffTimeList.end())
+    {
+        BuffTimeInfo& bufftimeinfo = (*iter).second;
+
+        DWORD iCurBufftime = bufftimeinfo.s_CurBuffTime;
+        if (iCurBufftime > GetTickCount() - bufftimeinfo.s_EventBuffTime)
+        {
+            iCurBufftime -= GetTickCount() - bufftimeinfo.s_EventBuffTime;
+        }
+        else
+        {
+            iCurBufftime = 0;
+        }
+        bufftimeinfo.s_EventBuffTime = GetTickCount();
+
+        if (iCurBufftime <= 0)
+        {
+            bufftimeinfo.s_CurBuffTime = 0;
+            return false;
+        }
+        else
+        {
+            bufftimeinfo.s_CurBuffTime = iCurBufftime;
+            return true;
+        }
+    }
+    return false;
+}
+
