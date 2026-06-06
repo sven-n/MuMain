@@ -904,7 +904,10 @@ MSG MainLoop()
                 HandleMouseButton(event);
                 break;
             case SDL_EVENT_MOUSE_WHEEL:
-                MouseWheel = static_cast<int>(event.wheel.y);
+                // SDL does not pre-correct flipped (natural) scrolling; invert.
+                MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+                    ? -static_cast<int>(event.wheel.y)
+                    : static_cast<int>(event.wheel.y);
                 break;
             case SDL_EVENT_WINDOW_RESIZED:
                 HandleWindowResize(event.window.data1, event.window.data2);
