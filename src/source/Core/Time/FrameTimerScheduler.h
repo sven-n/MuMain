@@ -37,11 +37,11 @@ namespace Core::Time
         struct Timer
         {
             unsigned intervalMs;
-            double nextDueMs;
+            std::uint64_t nextDueMs;
             Callback callback;
         };
 
-        static double NowMs();
+        static std::uint64_t NowMs();
 
         std::unordered_map<TimerId, Timer> m_timers;
     };

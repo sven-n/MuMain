@@ -500,10 +500,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
     case WM_NPROTECT_EXIT_TWO:
         SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
-        // Close the window shortly after, giving the logout packet time to send.
-        Core::Time::FrameTimerScheduler::Instance().SetRepeating(
-            WINDOWMINIMIZED_TIMER, 1 * 1000, [] { PostMessage(g_hWnd, WM_CLOSE, 0, 0); });
+        // Inform the user, then close. A frame-ticked timer cannot fire while
+        // this modal dialog blocks the main loop, so close right after the
+        // dialog is dismissed instead of via a timer.
         MessageBox(nullptr, I18N::Game::Error9AHackingToolHasBeen, L"Error", MB_OK);
+        PostMessage(g_hWnd, WM_CLOSE, 0, 0);
         break;
     case WM_CTLCOLOREDIT:
         SetBkColor((HDC)wParam, RGB(0, 0, 0));

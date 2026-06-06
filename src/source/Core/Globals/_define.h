@@ -645,7 +645,6 @@ constexpr int ITEM_GROUP_ETC = 15;
 #define ITEMINDEX( type, index )        static_cast<DWORD>((type*MAX_ITEM_INDEX)+index)
 
 #define HACK_TIMER 1000
-#define WINDOWMINIMIZED_TIMER 1001
 #define CHATCONNECT_TIMER 1002
 #define SLIDEHELP_TIMER 1003
 #define WARNING_TIMER 1004

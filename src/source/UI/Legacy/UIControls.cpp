@@ -4368,6 +4368,9 @@ CSlideHelpMgr::CSlideHelpMgr()
 
 CSlideHelpMgr::~CSlideHelpMgr()
 {
+    // The slide-help timer's callback captures this; kill it so it cannot fire
+    // on a destroyed instance.
+    Core::Time::FrameTimerScheduler::Instance().Kill(SLIDEHELP_TIMER);
     ClearSlideText();
 }
 

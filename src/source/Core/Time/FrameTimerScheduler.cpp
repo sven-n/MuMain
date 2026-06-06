@@ -12,10 +12,10 @@ namespace Core::Time
         return instance;
     }
 
-    double FrameTimerScheduler::NowMs()
+    std::uint64_t FrameTimerScheduler::NowMs()
     {
         using namespace std::chrono;
-        return duration<double, std::milli>(steady_clock::now().time_since_epoch()).count();
+        return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
     }
 
     void FrameTimerScheduler::SetRepeating(TimerId id, unsigned intervalMs, Callback callback)
@@ -30,7 +30,7 @@ namespace Core::Time
 
     void FrameTimerScheduler::Tick()
     {
-        const double now = NowMs();
+        const std::uint64_t now = NowMs();
 
         // Collect the due ids first, then fire. A callback may register or kill
         // timers (e.g. a buff timer kills itself on expiry), so we must not hold
