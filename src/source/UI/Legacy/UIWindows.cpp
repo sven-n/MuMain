@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "UIWindows.h"
+#include "Core/Time/FrameTimerScheduler.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -48,7 +49,8 @@ CUIWindowMgr::CUIWindowMgr()
     m_bChatReject = FALSE;
     m_iLastFriendWindowTabIndex = 0;
 
-    SetTimer(g_hWnd, CHATCONNECT_TIMER, 15 * 1000, 0);
+    Core::Time::FrameTimerScheduler::Instance().SetRepeating(
+        CHATCONNECT_TIMER, 15 * 1000, [] { g_pFriendMenu->SendChatRoomConnectCheck(); });
 
     g_iLetterReadNextPos_x = UIWND_DEFAULT;
     g_iLetterReadNextPos_y = UIWND_DEFAULT;

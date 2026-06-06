@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Time/FrameTimerScheduler.h"
 #include "GameLogic/Items/CComGem.h"
 #include "UIControls.h"
 #include "UIWindows.h"
@@ -4367,6 +4368,9 @@ CSlideHelpMgr::CSlideHelpMgr()
 
 CSlideHelpMgr::~CSlideHelpMgr()
 {
+    // The slide-help timer's callback captures this; kill it so it cannot fire
+    // on a destroyed instance.
+    Core::Time::FrameTimerScheduler::Instance().Kill(SLIDEHELP_TIMER);
     ClearSlideText();
 }
 
@@ -4380,7 +4384,10 @@ void CSlideHelpMgr::Init()
     //m_HelpSlide.SetPosition(0, 429);
     //m_NoticeSlide.SetPosition(0, 429);
 
-    SetTimer(g_hWnd, SLIDEHELP_TIMER, m_iCreateDelay * 1000, nullptr);
+    extern bool g_bWndActive;
+    Core::Time::FrameTimerScheduler::Instance().SetRepeating(
+        SLIDEHELP_TIMER, m_iCreateDelay * 1000,
+        [this] { if (g_bWndActive) CreateSlideText(); });
     CreateSlideText();
 }
 

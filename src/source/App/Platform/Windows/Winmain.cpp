@@ -16,6 +16,7 @@
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
+#include "Core/Time/FrameTimerScheduler.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -497,31 +498,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             UpdateCursorClip();
         }
         break;
-    case WM_TIMER:
-        switch (wParam)
-        {
-        case HACK_TIMER:
-                CheckHack();
-                break;
-        case WINDOWMINIMIZED_TIMER:
-            PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-            break;
-        case CHATCONNECT_TIMER:
-            g_pFriendMenu->SendChatRoomConnectCheck();
-            break;
-        case SLIDEHELP_TIMER:
-            if (g_bWndActive)
-            {
-                if (g_pSlideHelpMgr)
-                    g_pSlideHelpMgr->CreateSlideText();
-            }
-            break;
-        }
-        break;
     case WM_NPROTECT_EXIT_TWO:
         SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
-        SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, nullptr);
+        // Inform the user, then close. A frame-ticked timer cannot fire while
+        // this modal dialog blocks the main loop, so close right after the
+        // dialog is dismissed instead of via a timer.
         MessageBox(nullptr, I18N::Game::Error9AHackingToolHasBeen, L"Error", MB_OK);
+        PostMessage(g_hWnd, WM_CLOSE, 0, 0);
         break;
     case WM_CTLCOLOREDIT:
         SetBkColor((HDC)wParam, RGB(0, 0, 0));
@@ -706,11 +689,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     break;
     }
 
-    if (g_BuffSystem) {
-        LRESULT result;
-        TheBuffStateSystem().HandleWindowMessage(msg, wParam, lParam, result);
-    }
-
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
@@ -886,6 +864,9 @@ MSG MainLoop()
         // Run a pending reconnect teardown between frames (self-guards on its
         // pending flag). Replaces the old WM_START_RECONNECT round-trip.
         ReconnectManager::Instance().Begin();
+
+        // Fire any due timers. Replaces the Win32 SetTimer/WM_TIMER dispatch.
+        Core::Time::FrameTimerScheduler::Instance().Tick();
 
         if (CheckRenderNextFrame())
         {
@@ -1370,8 +1351,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         SetEffectVolumeLevel(value);
     }
 
-    SetTimer(g_hWnd, HACK_TIMER, 20 * 1000, nullptr);
-    SetTimer(g_hWnd, MUHELPER_TIMER, 250 /* ms */, MUHelper::CMuHelper::TimerProc);
+    auto& timers = Core::Time::FrameTimerScheduler::Instance();
+    timers.SetRepeating(HACK_TIMER, 20 * 1000, [] { CheckHack(); });
+    timers.SetRepeating(MUHELPER_TIMER, 250 /* ms */,
+        [] { MUHelper::CMuHelper::TimerProc(nullptr, 0, MUHELPER_TIMER, 0); });
 
     srand((unsigned)time(nullptr));
 

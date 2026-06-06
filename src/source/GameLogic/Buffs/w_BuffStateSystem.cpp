@@ -27,7 +27,7 @@ BuffStateSystem::~BuffStateSystem()
 
 void BuffStateSystem::Initialize()
 {
-    // ÀÓ½Ã ÄÚµå
+    // ï¿½Ó½ï¿½ ï¿½Úµï¿½
     m_BuffInfo = BuffScriptLoader::Make();
     m_BuffTimeControl = BuffTimeControl::Make();
     m_BuffStateValueControl = BuffStateValueControl::Make();
@@ -35,10 +35,4 @@ void BuffStateSystem::Initialize()
 
 void BuffStateSystem::Destroy()
 {
-}
-
-bool BuffStateSystem::HandleWindowMessage(UINT message, WPARAM wParam, LPARAM lParam, LRESULT& result)
-{
-    assert(m_BuffTimeControl);
-    return m_BuffTimeControl->HandleWindowMessage(message, wParam, lParam, result);
 }
