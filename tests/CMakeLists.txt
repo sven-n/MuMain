@@ -51,3 +51,5 @@ function(mu_add_test)
 endfunction()
 
 add_subdirectory(text)
+
+add_subdirectory(editor)
