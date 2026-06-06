@@ -6,6 +6,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "w_BuffTimeControl.h"
+#include "Core/Time/FrameTimerScheduler.h"
 #include "I18N/All.h"
 
 BuffTimeControlPtr BuffTimeControl::Make()
@@ -27,7 +28,7 @@ BuffTimeControl::~BuffTimeControl()
 
         auto bufftimetype = static_cast<eBuffTimeType>((*tempiter).first);
 
-        ::KillTimer(g_hWnd, bufftimetype);
+        Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
         m_BuffTimeList.erase(tempiter);
     }
 
@@ -108,7 +109,14 @@ void BuffTimeControl::RegisterBuffTime(eBuffState bufftype, DWORD curbufftime)
 
     m_BuffTimeList.insert(std::make_pair(bufftimetype, buffinfo));
 
-    ::SetTimer(g_hWnd, bufftimetype, 900, NULL);
+    // Tick the buff's remaining time every 900ms; the timer removes itself once
+    // the buff expires (replaces the per-buff SetTimer/WM_TIMER).
+    Core::Time::FrameTimerScheduler::Instance().SetRepeating(bufftimetype, 900,
+        [this, bufftimetype]
+        {
+            if (!CheckBuffTime(bufftimetype))
+                Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
+        });
 }
 
 bool BuffTimeControl::UnRegisterBuffTime(eBuffState bufftype)
@@ -119,7 +127,7 @@ bool BuffTimeControl::UnRegisterBuffTime(eBuffState bufftype)
 
     if (iter != m_BuffTimeList.end())
     {
-        ::KillTimer(g_hWnd, bufftimetype);
+        Core::Time::FrameTimerScheduler::Instance().Kill(bufftimetype);
         g_ConsoleDebug->Write(MCD_NORMAL, L"[Buff End] No. %d\r\n", bufftimetype);
 
         m_BuffTimeList.erase(iter);
@@ -257,18 +265,3 @@ bool BuffTimeControl::CheckBuffTime(DWORD type)
     return false;
 }
 
-bool BuffTimeControl::HandleWindowMessage(UINT message, WPARAM wParam, LPARAM lParam, LRESULT& result)
-{
-    if (message == WM_TIMER)
-    {
-        if (wParam != eBuffTime_None && wParam >= eBuffTime_Hellowin)
-        {
-            if (!CheckBuffTime(static_cast<DWORD>(wParam)))
-            {
-                KillTimer(g_hWnd, static_cast<DWORD>(wParam));
-            }
-            return true;
-        }
-    }
-    return false;
-}

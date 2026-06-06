@@ -5,15 +5,12 @@
 #include "w_BuffScriptLoader.h"
 
 SmartPointer(BuffStateSystem);
-class BuffStateSystem : public util::WindowMessageHandler
+class BuffStateSystem
 {
 public:
     static BuffStateSystemPtr Make();
     BuffStateSystem();
     virtual ~BuffStateSystem();
-
-public:
-    virtual bool HandleWindowMessage(UINT message, WPARAM wParam, LPARAM lParam, LRESULT& result);
 
 public:
     BuffScriptLoader& GetBuffInfo();

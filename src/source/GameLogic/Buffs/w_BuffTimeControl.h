@@ -19,9 +19,6 @@ public:
     const DWORD GetBuffTime(DWORD type);
     void GetStringTime(DWORD time, std::wstring& timeText, bool isSecond = true);
 
-public:
-    bool HandleWindowMessage(UINT message, WPARAM wParam, LPARAM lParam, LRESULT& result);
-
 private:
     eBuffTimeType CheckBuffTimeType(eBuffState bufftype);
     DWORD GetBuffEventTime(eBuffTimeType bufftimetype);
