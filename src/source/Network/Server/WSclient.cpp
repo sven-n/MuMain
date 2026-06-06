@@ -21,6 +21,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
+#include "Network/IncomingPacketQueue.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -14613,7 +14614,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     std::copy(ReceiveBuffer, ReceiveBuffer + Size, Packet->ReceiveBuffer.get());
     Packet->Size = Size;
 
-    PostMessage(g_hWnd, WM_RECEIVE_BUFFER, reinterpret_cast<WPARAM>(Packet.release()), 0);
+    // Hand the packet to the main thread for processing. The main loop drains
+    // this queue every frame and calls ProcessPacketCallback. Replaces the old
+    // PostMessage(WM_RECEIVE_BUFFER) round-trip through the Win32 message queue.
+    Network::IncomingPacketQueue::Instance().Push(std::move(Packet));
 }
 
 bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)
