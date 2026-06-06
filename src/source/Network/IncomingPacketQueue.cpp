@@ -14,12 +14,24 @@ namespace Network
 
     void IncomingPacketQueue::Push(std::unique_ptr<PacketInfo> packet)
     {
+        if (!packet)
+        {
+            return;
+        }
+
         std::lock_guard<std::mutex> lock(m_mutex);
         m_queue.push(std::move(packet));
     }
 
     void IncomingPacketQueue::DrainTo(Processor process)
     {
+        if (!process)
+        {
+            return;
+        }
+
+        // Push rejects null packets, so every entry here is non-null; no
+        // per-packet guard is needed.
         std::queue<std::unique_ptr<PacketInfo>> pending;
         {
             std::lock_guard<std::mutex> lock(m_mutex);
