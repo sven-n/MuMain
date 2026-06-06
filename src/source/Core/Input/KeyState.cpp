@@ -1,9 +1,13 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+
+#ifndef _WIN32
 #include <SDL3/SDL.h>
+#endif
 
 namespace Core::Input
 {
+#ifndef _WIN32
     namespace
     {
         // Map a Win32 virtual-key code (or ASCII letter/digit) to an SDL
@@ -48,23 +52,26 @@ namespace Core::Input
             }
         }
     }
+#endif // !_WIN32
 
     bool IsKeyDown(int virtualKey)
     {
-        // Mouse buttons: GetAsyncKeyState(VK_LBUTTON/...) reported these too, and
-        // CInput / CNewKeyInput poll them through this path, so honor them via the
-        // SDL mouse state.
+#ifdef _WIN32
+        // On Windows the legacy UI polls global key/mouse-button state that must
+        // keep working while a Win32 child EDIT control holds keyboard focus.
+        // SDL_GetKeyboardState only reflects keys delivered to the SDL window, so
+        // it goes blind whenever an EDIT box is focused (e.g. the login screen).
+        // Keep the global async query here; switch to the SDL path below once the
+        // EDIT controls are replaced (issue #447). GetAsyncKeyState reports the
+        // mouse buttons (VK_LBUTTON/...) and modifiers too, matching the original.
+        return (GetAsyncKeyState(virtualKey) & 0x8000) != 0;
+#else
+        // Mouse buttons and modifiers come from the SDL mouse / mod state.
         switch (virtualKey)
         {
         case VK_LBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_LMASK) != 0;
         case VK_RBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_RMASK) != 0;
         case VK_MBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MMASK) != 0;
-        default: break;
-        }
-
-        // Modifier keys aggregate left and right via the mod state.
-        switch (virtualKey)
-        {
         case VK_SHIFT:   return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
         case VK_CONTROL: return (SDL_GetModState() & SDL_KMOD_CTRL) != 0;
         case VK_MENU:    return (SDL_GetModState() & SDL_KMOD_ALT) != 0;
@@ -76,5 +83,6 @@ namespace Core::Input
 
         const bool* state = SDL_GetKeyboardState(nullptr);
         return state != nullptr && state[sc];
+#endif // _WIN32
     }
 }
