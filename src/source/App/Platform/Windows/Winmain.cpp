@@ -459,51 +459,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     break;
-    case WM_ACTIVATE:
-        if (LOWORD(wParam) == WA_INACTIVE)
-        {
-#ifdef ACTIVE_FOCUS_OUT
-            if (g_bUseWindowMode == FALSE)
-#endif	// ACTIVE_FOCUS_OUT
-                g_bWndActive = false;
-            // Release the cursor when losing focus so Windows can route input
-            // to other apps / the Alt-Tab target.
-            ClipCursor(nullptr);
-
-            if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
-            {
-                g_TargetFpsBeforeInactive = GetTargetFps();
-                SetTargetFps(REFERENCE_FPS);
-                g_HasInactiveFpsOverride = true;
-            }
-            if (g_bUseWindowMode == TRUE)
-            {
-                MouseLButton = false;
-                MouseLButtonPop = false;
-                //MouseLButtonPush = false;
-                MouseRButton = false;
-                MouseRButtonPop = false;
-                MouseRButtonPush = false;
-                MouseLButtonDBClick = false;
-                MouseMButton = false;
-                MouseMButtonPop = false;
-                MouseMButtonPush = false;
-                MouseWheel = 0;
-            }
-        }
-        else
-        {
-            g_bWndActive = true;
-
-            if (g_HasInactiveFpsOverride)
-            {
-                SetTargetFps(g_TargetFpsBeforeInactive);
-                g_HasInactiveFpsOverride = false;
-            }
-            // Re-clip on regaining focus if we're in fullscreen.
-            UpdateCursorClip();
-        }
-        break;
+    // WM_ACTIVATE is handled via SDL window focus events (issue #442).
     case WM_NPROTECT_EXIT_TWO:
         SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
         // Inform the user, then close. A frame-ticked timer cannot fire while
@@ -520,27 +476,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_ERASEBKGND:
         return TRUE;
         break;
-    case WM_SIZE:
-        if (wParam != SIZE_MINIMIZED)
-        {
-            // Update window dimensions
-            WindowWidth = LOWORD(lParam);
-            WindowHeight = HIWORD(lParam);
-
-            // Update screen rate factors
-            g_fScreenRate_x = (float)WindowWidth / (float)REFERENCE_WIDTH;
-            g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
-
-            // Update OpenGL viewport dimensions
-            OpenglWindowWidth = WindowWidth;
-            OpenglWindowHeight = WindowHeight;
-
-            // Reinitialize fonts and update resolution-dependent systems
-            ReinitializeFonts();
-            UpdateResolutionDependentSystems();
-            UpdateCursorClip();
-        }
-        break;
+    // WM_SIZE is handled via SDL window resize events (issue #442).
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
@@ -582,79 +518,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
     }
 
-    MouseLButtonDBClick = false;
-    if (MouseLButtonPop == true && (g_iMousePopPosition_x != MouseX || g_iMousePopPosition_y != MouseY))
-        MouseLButtonPop = false;
+    // Mouse input (move/buttons/wheel) is handled via SDL events (issue #442).
     switch (msg)
     {
-    case WM_MOUSEMOVE:
-    {
-        MouseX = (float)LOWORD(lParam) / g_fScreenRate_x;
-        MouseY = (float)HIWORD(lParam) / g_fScreenRate_y;
-        if (MouseX < 0)
-            MouseX = 0;
-        if (MouseX > REFERENCE_WIDTH)
-            MouseX = REFERENCE_WIDTH;
-        if (MouseY < 0)
-            MouseY = 0;
-        if (MouseY > REFERENCE_HEIGHT)
-            MouseY = REFERENCE_HEIGHT;
-    }
-    break;
-    case WM_LBUTTONDOWN:
-        g_iNoMouseTime = 0;
-        MouseLButtonPop = false;
-        if (!MouseLButton)
-            MouseLButtonPush = true;
-        MouseLButton = true;
-        SetCapture(g_hWnd);
-        break;
-    case WM_LBUTTONUP:
-        g_iNoMouseTime = 0;
-        MouseLButtonPush = false;
-        if(MouseLButton) MouseLButtonPop = true;
-        MouseLButton = false;
-        g_iMousePopPosition_x = MouseX;
-        g_iMousePopPosition_y = MouseY;
-        ReleaseCapture();
-        break;
-    case WM_RBUTTONDOWN:
-        g_iNoMouseTime = 0;
-        MouseRButtonPop = false;
-        if (!MouseRButton) MouseRButtonPush = true;
-        MouseRButton = true;
-        SetCapture(g_hWnd);
-        break;
-    case WM_RBUTTONUP:
-        g_iNoMouseTime = 0;
-        MouseRButtonPush = false;
-        if (MouseRButton) MouseRButtonPop = true;
-        MouseRButton = false;
-        ReleaseCapture();
-        break;
-    case WM_LBUTTONDBLCLK:
-        g_iNoMouseTime = 0;
-        MouseLButtonDBClick = true;
-        break;
-    case WM_MBUTTONDOWN:
-        g_iNoMouseTime = 0;
-        MouseMButtonPop = false;
-        if (!MouseMButton) MouseMButtonPush = true;
-        MouseMButton = true;
-        SetCapture(g_hWnd);
-        break;
-    case WM_MBUTTONUP:
-        g_iNoMouseTime = 0;
-        MouseMButtonPush = false;
-        if (MouseMButton) MouseMButtonPop = true;
-        MouseMButton = false;
-        ReleaseCapture();
-        break;
-    case WM_MOUSEWHEEL:
-    {
-        MouseWheel = (short)HIWORD(wParam) / WHEEL_DELTA;
-    }
-    break;
     case WM_IME_NOTIFY:
     {
         if (g_iChatInputType == 1)
@@ -872,6 +738,138 @@ static LRESULT CALLBACK Win32WindowSubclassProc(HWND hwnd, UINT msg, WPARAM wPar
 }
 #endif
 
+// SDL event translation (issue #442). Mouse and window events are handled from
+// the SDL event loop instead of WndProc, feeding the same global input state.
+namespace
+{
+    void HandleMouseMotion(float winX, float winY)
+    {
+        MouseX = static_cast<int>(winX / g_fScreenRate_x);
+        MouseY = static_cast<int>(winY / g_fScreenRate_y);
+        if (MouseX < 0) MouseX = 0;
+        if (MouseX > REFERENCE_WIDTH) MouseX = REFERENCE_WIDTH;
+        if (MouseY < 0) MouseY = 0;
+        if (MouseY > REFERENCE_HEIGHT) MouseY = REFERENCE_HEIGHT;
+    }
+
+    void HandleMouseButton(const SDL_Event& e)
+    {
+        const bool down = (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
+        g_iNoMouseTime = 0;
+        switch (e.button.button)
+        {
+        case SDL_BUTTON_LEFT:
+            if (down)
+            {
+                MouseLButtonPop = false;
+                if (!MouseLButton) MouseLButtonPush = true;
+                MouseLButton = true;
+                if (e.button.clicks >= 2) MouseLButtonDBClick = true;
+                SetCapture(g_hWnd);
+            }
+            else
+            {
+                MouseLButtonPush = false;
+                if (MouseLButton) MouseLButtonPop = true;
+                MouseLButton = false;
+                g_iMousePopPosition_x = MouseX;
+                g_iMousePopPosition_y = MouseY;
+                ReleaseCapture();
+            }
+            break;
+        case SDL_BUTTON_RIGHT:
+            if (down)
+            {
+                MouseRButtonPop = false;
+                if (!MouseRButton) MouseRButtonPush = true;
+                MouseRButton = true;
+                SetCapture(g_hWnd);
+            }
+            else
+            {
+                MouseRButtonPush = false;
+                if (MouseRButton) MouseRButtonPop = true;
+                MouseRButton = false;
+                ReleaseCapture();
+            }
+            break;
+        case SDL_BUTTON_MIDDLE:
+            if (down)
+            {
+                MouseMButtonPop = false;
+                if (!MouseMButton) MouseMButtonPush = true;
+                MouseMButton = true;
+                SetCapture(g_hWnd);
+            }
+            else
+            {
+                MouseMButtonPush = false;
+                if (MouseMButton) MouseMButtonPop = true;
+                MouseMButton = false;
+                ReleaseCapture();
+            }
+            break;
+        }
+    }
+
+    void HandleWindowResize(int width, int height)
+    {
+        if (width <= 0 || height <= 0) return;
+        WindowWidth = width;
+        WindowHeight = height;
+        g_fScreenRate_x = static_cast<float>(WindowWidth) / static_cast<float>(REFERENCE_WIDTH);
+        g_fScreenRate_y = static_cast<float>(WindowHeight) / static_cast<float>(REFERENCE_HEIGHT);
+        OpenglWindowWidth = WindowWidth;
+        OpenglWindowHeight = WindowHeight;
+        ReinitializeFonts();
+        UpdateResolutionDependentSystems();
+        UpdateCursorClip();
+    }
+
+    void HandleFocusChange(bool active)
+    {
+        if (!active)
+        {
+#ifdef ACTIVE_FOCUS_OUT
+            if (g_bUseWindowMode == FALSE)
+#endif
+                g_bWndActive = false;
+            // Release the cursor when losing focus so input can route elsewhere.
+            ClipCursor(nullptr);
+
+            if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
+            {
+                g_TargetFpsBeforeInactive = GetTargetFps();
+                SetTargetFps(REFERENCE_FPS);
+                g_HasInactiveFpsOverride = true;
+            }
+            if (g_bUseWindowMode == TRUE)
+            {
+                MouseLButton = false;
+                MouseLButtonPop = false;
+                MouseRButton = false;
+                MouseRButtonPop = false;
+                MouseRButtonPush = false;
+                MouseLButtonDBClick = false;
+                MouseMButton = false;
+                MouseMButtonPop = false;
+                MouseMButtonPush = false;
+                MouseWheel = 0;
+            }
+        }
+        else
+        {
+            g_bWndActive = true;
+            if (g_HasInactiveFpsOverride)
+            {
+                SetTargetFps(g_TargetFpsBeforeInactive);
+                g_HasInactiveFpsOverride = false;
+            }
+            UpdateCursorClip();
+        }
+    }
+}
+
 MSG MainLoop()
 {
     constexpr auto target_resolution = 1;
@@ -882,14 +880,46 @@ MSG MainLoop()
         SDL_Event event;
         int messageProcessed = 0;
 
-        // Pumping SDL drives the Win32 message hook (-> WndProc) and dispatches
-        // the legacy child controls; the SDL events themselves are not consumed
-        // here yet (input still flows through WndProc via the hook).
+        // Per-frame mouse-state reset (was done per-message in WndProc): clear a
+        // stale double-click and a pop whose position the cursor has moved off.
+        MouseLButtonDBClick = false;
+        if (MouseLButtonPop && (g_iMousePopPosition_x != MouseX || g_iMousePopPosition_y != MouseY))
+            MouseLButtonPop = false;
+
+        // Pumping SDL also drives the Win32 message hook (-> WndProc) for the
+        // input still on it (IME, the legacy EDIT text boxes); mouse and window
+        // events are handled here, off the hook.
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_EVENT_QUIT)
+            switch (event.type)
             {
+            case SDL_EVENT_QUIT:
                 Destroy = true;
+                break;
+            case SDL_EVENT_MOUSE_MOTION:
+                HandleMouseMotion(event.motion.x, event.motion.y);
+                break;
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+                HandleMouseButton(event);
+                break;
+            case SDL_EVENT_MOUSE_WHEEL:
+                // SDL does not pre-correct flipped (natural) scrolling; invert.
+                MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+                    ? -static_cast<int>(event.wheel.y)
+                    : static_cast<int>(event.wheel.y);
+                break;
+            case SDL_EVENT_WINDOW_RESIZED:
+                HandleWindowResize(event.window.data1, event.window.data2);
+                break;
+            case SDL_EVENT_WINDOW_FOCUS_GAINED:
+                HandleFocusChange(true);
+                break;
+            case SDL_EVENT_WINDOW_FOCUS_LOST:
+                HandleFocusChange(false);
+                break;
+            default:
+                break;
             }
 
             ++messageProcessed;
