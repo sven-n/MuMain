@@ -17,7 +17,7 @@
 #include "UI/Legacy/UIControls.h"
 #include "I18N/All.h"
 
-#include "Platform/Windows/Local.h"
+#include "App/Platform/Windows/Local.h"
 #include "CharacterManager.h"
 
 #include <algorithm>

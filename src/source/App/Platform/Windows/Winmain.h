@@ -49,10 +49,6 @@
 //#define CAMERA_TEST
 
 
-#define WM_RECEIVE_BUFFER	( WM_USER + 2)
-// Posted by the auto-reconnect detector so the heavy session teardown runs in
-// the window-proc context (like packet handlers) instead of mid-render.
-#define WM_START_RECONNECT	( WM_USER + 3)
 #define WM_NPROTECT_EXIT_TWO  (WM_USER + 10001)
 
 extern bool ashies;

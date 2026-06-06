@@ -13,7 +13,7 @@
 #include "I18N/All.h"
 
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
-#include "Platform/Windows/Local.h"
+#include "App/Platform/Windows/Local.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 

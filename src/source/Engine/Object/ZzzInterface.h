@@ -60,30 +60,10 @@ void SendRequestAction(OBJECT& obj, BYTE action);
 
 bool PressKey(int Key);
 void MoveHero();
-void EditObjects();
 
 void ClearInput(BOOL bClearWhisperTarget = TRUE);
-void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t MaxLength);
-void CreateChat(wchar_t* ID, const wchar_t* Text, CHARACTER* c, int Flag = 0, int SetColor = -1);
-int  CreateChat(wchar_t* character_name, const wchar_t* chat_text, OBJECT* Owner, int Flag = 0, int SetColor = -1);
-void AssignChat(wchar_t* ID, const wchar_t* Text, int Flag = 0);
-void MoveChat();
-void ClearNotice(void);
-void CreateNotice(const wchar_t* Text, int Color);
-void MoveNotices();
-void RenderNotices();
 void RenderSwichState();
-void CheckChatText(wchar_t* Text);
 
-//  Whisper
-bool CheckWhisperLevel(int lvl, wchar_t* text);
-void RegistWhisperID(int lvl, wchar_t* text);
-void ClearWhisperID(void);
-
-void SaveIME_Status();
-void SetIME_Status(bool halfShape);
-bool CheckIME_Status(bool change, int mode);
-void RenderIME_Status();
 
 //  HotKey
 int  FindHotKey(int Skill);
@@ -94,7 +74,6 @@ void RenderTipText(int sx, int sy, const wchar_t* Text);
 
 extern int g_iWidthEx;
 
-void SelectObjects();
 void RenderInterface(bool);
 void MoveInterface();
 void RenderCursor();
@@ -106,15 +85,12 @@ bool FindText(const wchar_t* Text, const wchar_t* Token, bool First = false);
 bool FindTextABS(const wchar_t* Text, const wchar_t* Token, bool First = false);
 bool CheckAbuseFilter(wchar_t* Text, bool bCheckSlash = true);
 bool CheckAbuseNameFilter(wchar_t* Text);
-void SetPlayerColor(BYTE PK);
 bool CheckCommand(wchar_t* Text, bool bMacroText = false);
 void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType);
 void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disabled = false, bool clipping = true);
 void RenderOutSides();
-void RenderBooleans();
 void RenderTimes();
 void RenderPartyHP();
-void SetPositionIME_Wnd(float x, float y);
 
 void SendMove(CHARACTER* c, OBJECT* o);
 void SetCharacterPos(CHARACTER* c, BYTE posX, BYTE posY, vec3_t position);
@@ -139,24 +115,9 @@ bool CheckTile(CHARACTER* c, OBJECT* o, float Range);
 void LetHeroStop(CHARACTER* c = NULL, BOOL bSetMovementFalse = FALSE);
 void SendCharacterMove(unsigned short Key, float Angle, unsigned char PathNum, unsigned char* PathX, unsigned char* PathY, unsigned char TargetX, unsigned char TargetY);
 void Attack(CHARACTER* c);
-int ExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
-bool ExecuteSkillComplete(CHARACTER* c);
-bool CanExecuteSkill(CHARACTER* c, ActionSkillType Skill, float Distance);
-bool CheckMana(CHARACTER* c, int Skill);
-bool SkillElf(CHARACTER* c, ITEM* p);
 void SendRequestMagic(int Type, int Key);
 void SendRequestMagicContinue(int Type, int x, int y, int Angle, BYTE Dest, BYTE Tpos, WORD TKey, BYTE* pSkillSerial);
-bool SkillWarrior(CHARACTER* c, ITEM* p);
-void UseSkillWarrior(CHARACTER* c, OBJECT* o);
-void UseSkillWizard(CHARACTER* c, OBJECT* o);
-void UseSkillElf(CHARACTER* c, OBJECT* o);
-void UseSkillSummon(CHARACTER* pCha, OBJECT* pObj);
-void UseSkillRagefighter(CHARACTER* pCha, OBJECT* pObj);
-void AttackRagefighter(CHARACTER* pCha, int nSkill, float fDistance);
-bool UseSkillRagePosition(CHARACTER* pCha);
-bool CheckTarget(CHARACTER* c);
-void MouseRButtonReset();
-void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance);
+BYTE GetDestValue(int xPos, int yPos, int xDst, int yDst);
 
 bool IsGMCharacter();
 bool IsNonAttackGM();

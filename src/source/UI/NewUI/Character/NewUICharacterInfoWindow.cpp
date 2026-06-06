@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Chat/Chat.h"
 #include "UI/NewUI/Character/NewUICharacterInfoWindow.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Character/CharacterManager.h"
@@ -311,7 +312,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(20, 20, 20, 20);
-    SetPlayerColor(Hero->PK);
+    UI::Chat::SetPlayerColor(Hero->PK);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, strID, 190, 0, RT3_SORT_CENTER);
 
     wchar_t strServerName[MAX_TEXT_LENGTH];

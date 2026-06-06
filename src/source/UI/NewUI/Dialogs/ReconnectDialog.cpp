@@ -7,7 +7,7 @@
 #include "UI/Legacy/UIControls.h"            // g_pRenderText, CheckMouseIn, RT3_SORT_CENTER
 #include "UI/NewUI/NewUICommon.h"            // SEASON3B::RenderImage
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"// CNewUIMessageBoxMng::IMAGE_MSGBOX_*
-#include "Platform/Windows/Winmain.h"        // g_hFont, g_hFontBold
+#include "App/Platform/Windows/Winmain.h"        // g_hFont, g_hFontBold
 #include "I18N/All.h"
 
 namespace UI::Reconnect

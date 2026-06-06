@@ -38,9 +38,10 @@ FrameTimingState g_frameTiming;
 #include "Network/Server/ServerListManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "UI/NewUI/HUD/Notices.h"
 #include "I18N/All.h"
 #include "Engine/AI/ZzzAI.h"
-#include "Platform/Windows/Winmain.h"
+#include "App/Platform/Windows/Winmain.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 
@@ -282,7 +283,7 @@ void UpdateSceneState()
     g_dwMouseUseUIID = 0;
 
     UpdateActiveScene();
-    MoveNotices();
+    UI::Notices::Move();
     HandleScreenshotCapture();
 }
 

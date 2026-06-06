@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "GameLogic/Combat/SkillExecution.h"
 
 #include <thread>
 #include <atomic>
@@ -8,6 +9,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/PlayerActionState.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "Character/CharacterManager.h"
@@ -735,7 +737,7 @@ namespace MUHelper
         if (m_iCurrentSkill > AT_SKILL_UNDEFINED)
         {
             const float fSkillDistance = gSkillManager.GetSkillDistance(m_iCurrentSkill, Hero);
-            if (CanExecuteSkill(Hero, m_iCurrentSkill, fSkillDistance))
+            if (GameLogic::Combat::CanExecuteSkill(Hero, m_iCurrentSkill, fSkillDistance))
             {
                 return SimulateAttack(m_iCurrentSkill);
             }
@@ -823,6 +825,14 @@ namespace MUHelper
         return 1;
     }
 
+    // True while the hero is mid swing; gating helper actions on it makes the
+    // bot's cadence follow AttackSpeed instead of the fixed helper timer, the
+    // same way the manual click path gates in MoveHero (ZzzInterface.cpp).
+    static bool IsHeroSwingInProgress()
+    {
+        return Engine::Object::IsAttackAction(Hero->Object.CurrentAction);
+    }
+
     int CMuHelper::SimulateAttack(ActionSkillType iSkill)
     {
         return SimulateSkill(iSkill, true, m_iCurrentTarget);
@@ -830,6 +840,13 @@ namespace MUHelper
 
     int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
+        // Let the current swing finish before issuing another action, so the
+        // cadence tracks AttackSpeed instead of the fixed helper timer.
+        if (IsHeroSwingInProgress())
+        {
+            return 0;
+        }
+
         g_MovementSkill.m_iSkill = iSkill;
         g_MovementSkill.m_bMagic = true;
 
@@ -939,7 +956,7 @@ namespace MUHelper
             TargetY = Hero->PositionY;
         }
 
-        int iSkillResult = ExecuteSkill(Hero, iSkill, fSkillDistance);
+        int iSkillResult = GameLogic::Combat::ExecuteSkill(Hero, iSkill, fSkillDistance);
         if (iSkillResult == -1 && iTarget != -1)
         {
             DeleteTarget(iTarget);
@@ -951,6 +968,13 @@ namespace MUHelper
     int CMuHelper::SimulateBasicAttack(int iTarget)
     {
         if (iTarget == -1)
+        {
+            return 0;
+        }
+
+        // Let the current swing finish before attacking again, so the cadence
+        // tracks AttackSpeed instead of the fixed helper timer.
+        if (IsHeroSwingInProgress())
         {
             return 0;
         }

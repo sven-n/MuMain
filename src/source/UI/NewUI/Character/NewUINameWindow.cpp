@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "UI/Chat/Chat.h"
 #include "UI/NewUI/Character/NewUINameWindow.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -113,7 +114,7 @@ bool SEASON3B::CNewUINameWindow::Render()
     RenderName();
     RenderTimes();
     matchEvent::RenderMatchTimes();
-    RenderBooleans();
+    UI::Chat::RenderBooleans();
     RenderMonsterHealthBars();
     DrawPersonalShopTitleImp();
     DisableAlphaBlend();
@@ -132,7 +133,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
             {
                 if (IsShopTitleVisible(c) == false)
                 {
-                    CreateChat(c->ID, L"", c);
+                    UI::Chat::CreateChat(c->ID, L"", c);
                 }
             }
         }
@@ -151,7 +152,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
         {
             CHARACTER* c = &CharactersClient[SelectedNpc];
             OBJECT* o = &c->Object;
-            CreateChat(c->ID, L"", c);
+            UI::Chat::CreateChat(c->ID, L"", c);
         }
         else if (SelectedCharacter != -1)
         {
@@ -213,7 +214,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
                 {
                     if (IsShopTitleVisible(c) == false)
                     {
-                        CreateChat(c->ID, L"", c);
+                        UI::Chat::CreateChat(c->ID, L"", c);
                     }
                 }
         }
@@ -306,14 +307,15 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
         float health = c->HealthStatus;
         if (health < 0.0f) health = 1.0f;
 
-        float fillWidth = stepsWidth * health;
-        if (fillWidth > 0.f)
+        int stepHP = (int)(health * steps);
+
+        glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
+        for (int k = 0; k < stepHP; ++k)
         {
-            glColor3f(250.f / 255.f, 10.f / 255.f, 0.f);
             RenderColor(
-                (float)(hpBarX + borderWidth),
+                (float)(hpBarX + borderWidth + (k * widthPerStep)),
                 (float)(hpBarY + borderWidth),
-                fillWidth,
+                widthPerStep - stepSeparatorWidth,
                 2.f);
         }
         DisableAlphaBlend();

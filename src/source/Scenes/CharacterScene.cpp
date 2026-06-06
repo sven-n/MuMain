@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Input/Selection.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/GOBoid.h"
@@ -23,7 +24,7 @@
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Audio/DSPlaySound.h"
-#include "Platform/Windows/Winmain.h"
+#include "App/Platform/Windows/Winmain.h"
 #include "SceneCommon.h"
 #include "Camera/CameraUtility.h"
 #include "Camera/CameraManager.h"
@@ -297,7 +298,7 @@ static void RenderCharacterScene3D()
     RenderCharactersClient();
 
     if (!CUIMng::Instance().IsCursorOnUI())
-        SelectObjects();
+        Input::Selection::SelectObjects();
 
     RenderMount();
     RenderBlurs();

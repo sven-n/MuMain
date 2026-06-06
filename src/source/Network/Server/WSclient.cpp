@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "UI/Chat/Chat.h"
 #include <memory>
 #include "UI/Legacy/UIManager.h"
 #include "Guild/GuildCache.h"
@@ -7,6 +8,9 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "UI/Chat/Whisper.h"
+#include "Core/Input/ImeInput.h"
+#include "UI/NewUI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Pathing/ZzzPath.h"
@@ -17,6 +21,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
+#include "Network/IncomingPacketQueue.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -830,7 +835,7 @@ void InitGame()
     RepairEnable = 0;
     CheckSkill = -1;
 
-    ClearNotice();
+    UI::Notices::Clear();
 
     CharacterAttribute->InventoryExtensions = 0;
     CharacterAttribute->Ability = 0;
@@ -846,7 +851,7 @@ void InitGame()
     g_shMutoNumber[1] = -1;
     g_shMutoNumber[2] = -1;
 
-    ClearWhisperID();
+    UI::Chat::Whisper::Clear();
 
     matchEvent::ClearMatchInfo();
 
@@ -974,6 +979,10 @@ void ResetClientToLoginScene()
         g_bGameServerConnected = false;
     }
 
+    // Drop packets received for the session we just tore down so they are not
+    // processed against the freed world data on the next frame.
+    Network::IncomingPacketQueue::Instance().Clear();
+
     ReleaseCharacterSceneData();
     SceneFlag = LOG_IN_SCENE;
     g_sceneInit.ResetForDisconnect();
@@ -1074,7 +1083,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CurrentProtocolState = RECEIVE_JOIN_MAP_SERVER;
 
     LockInputStatus = false;
-    CheckIME_Status(true, 0);
+    Input::IME::CheckStatus(true, 0);
 
     LoadingWorld = 30;
     MouseUpdateTime = 0;
@@ -1792,12 +1801,12 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             }
             if (pFindGm)
             {
-                AssignChat(ID, Text);
+                UI::Chat::AssignChat(ID, Text);
                 g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GM_MESSAGE);
             }
             else
             {
-                AssignChat(ID, Text, 1);
+                UI::Chat::AssignChat(ID, Text, 1);
             }
         }
         else
@@ -1818,12 +1827,12 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
             }
             if (pFindGm)
             {
-                AssignChat(ID, Text);
+                UI::Chat::AssignChat(ID, Text);
                 g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_GM_MESSAGE);
             }
             else
             {
-                AssignChat(ID, Text);
+                UI::Chat::AssignChat(ID, Text);
                 g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_CHAT_MESSAGE);
             }
         }
@@ -1848,7 +1857,7 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(Text, Data->ChatText, messageSize);
     Text[messageSize] = L'\0';
 
-    RegistWhisperID(10, ID);
+    UI::Chat::Whisper::Register(10, ID);
 
     if (g_pOption->IsWhisperSound())
     {
@@ -1893,7 +1902,7 @@ void ReceiveChatKey(const BYTE* ReceiveBuffer)
 
     wchar_t ChatText[sizeof Data->ChatText + 1] {};
     CMultiLanguage::ConvertFromUtf8(ChatText, Data->ChatText, sizeof Data->ChatText);
-    CreateChat(CharactersClient[Index].ID, ChatText, &CharactersClient[Index]);
+    UI::Chat::CreateChat(CharactersClient[Index].ID, ChatText, &CharactersClient[Index]);
 }
 
 void ReceiveNotice(const BYTE* ReceiveBuffer)
@@ -1904,7 +1913,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
 
     if (Data->Result == 0)
     {
-        CreateNotice(Text, 0);
+        UI::Notices::Create(Text, 0);
     }
     else if (Data->Result == 1)
     {
@@ -1923,7 +1932,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
     {
         wchar_t FullText[300] {0};
         mu_swprintf(FullText, I18N::Game::NoticeForGuildMembersS, Text);
-        CreateNotice(FullText, 1);
+        UI::Notices::Create(FullText, 1);
         g_pGuildInfoWindow->AddGuildNotice(Text);
     }
     else if (Data->Result >= 10 && Data->Result <= 15)
@@ -7514,7 +7523,7 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
         EnableSoccer = true;
     }
 
-    CreateNotice(Text, 1);
+    UI::Notices::Create(Text, 1);
     HeroSoccerTeam = Data->Team;
 
     for (int i = 0; i < MARK_EDIT; i++)
@@ -7562,7 +7571,7 @@ void ReceiveGuildEndWar(const BYTE* ReceiveBuffer)
     g_wtMatchTimeLeft.m_Time = 0;
 
 #ifndef GUILD_WAR_EVENT
-    CreateNotice(Text, 1);
+    UI::Notices::Create(Text, 1);
 #endif
 
     EnableGuildWar = false;
@@ -11461,7 +11470,7 @@ void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
     {
         wchar_t Text[100];
         mu_swprintf(Text, I18N::Game::SAllianceIsTryingToRegisterTheOfficialSealNow, guildName);
-        CreateNotice(Text, 1);
+        UI::Notices::Create(Text, 1);
     }
     break;
 
@@ -11470,7 +11479,7 @@ void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
         ChangeBattleFormation(guildName, true);
         wchar_t Text2[100];
         mu_swprintf(Text2, I18N::Game::SGuildHasRegisteredTheOfficialSealSuccessfully, guildName);
-        CreateNotice(Text2, 1);
+        UI::Notices::Create(Text2, 1);
     }
     break;
     }
@@ -14609,7 +14618,10 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     std::copy(ReceiveBuffer, ReceiveBuffer + Size, Packet->ReceiveBuffer.get());
     Packet->Size = Size;
 
-    PostMessage(g_hWnd, WM_RECEIVE_BUFFER, reinterpret_cast<WPARAM>(Packet.release()), 0);
+    // Hand the packet to the main thread for processing. The main loop drains
+    // this queue every frame and calls ProcessPacketCallback. Replaces the old
+    // PostMessage(WM_RECEIVE_BUFFER) round-trip through the Win32 message queue.
+    Network::IncomingPacketQueue::Instance().Push(std::move(Packet));
 }
 
 bool CheckExceptionBuff(eBuffState buff, OBJECT* o, bool iserase)

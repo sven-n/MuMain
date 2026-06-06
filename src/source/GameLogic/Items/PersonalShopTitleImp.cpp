@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Text/TextLineWrap.h"
 #include "Guild/UIGuildInfo.h"
 #include "PersonalShopTitleImp.h"
 #include "Render/Textures/ZzzOpenglUtil.h"

@@ -47,6 +47,12 @@
 
 #pragma warning( push, 3 )
 
+// Win32-only system headers. Guarded behind _WIN32 so the PCH can be parsed by
+// non-Windows toolchains. On Windows _WIN32 is always defined (for both 32-bit
+// and 64-bit targets), so every include below is taken and the build stays
+// unchanged. Win32 types/macros still referenced by portable code past the PCH
+// (e.g. the project headers further down) are a separate, case-by-case follow-up.
+#ifdef _WIN32
 #include <windows.h>
 
 // MinGW workaround: Allow swprintf usage
@@ -54,23 +60,23 @@
 #undef swprintf
 #endif
 
-//windows
 #include <winsock2.h>
 #include <mmsystem.h>
 #include <shellapi.h>
+#include <tchar.h>
+#include <mbstring.h>
+#include <conio.h>
+#endif // _WIN32
 
 //c runtime
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
-#include <tchar.h>
 #include <assert.h>
-#include <mbstring.h>
 #include <time.h>
 #include <math.h>
 #include <stdarg.h>
-#include <conio.h>
 
 #include <string>
 #include <list>
@@ -130,7 +136,7 @@
 
 //patch
 //winmain
-#include "Platform/Windows/Winmain.h"
+#include "App/Platform/Windows/Winmain.h"
 #include "Core/Globals/Defined_Global.h"
 
 //client
@@ -138,7 +144,7 @@
 #include "Core/Globals/_enum.h"
 #include "Core/Globals/_types.h"
 #include "Core/Globals/_struct.h"
-#include "Platform/Windows/w_WindowMessageHandler.h"
+#include "App/Platform/Windows/w_WindowMessageHandler.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "UI/Legacy/UIDefaultBase.h"

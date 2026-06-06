@@ -43,8 +43,8 @@ public:
     bool HasSession() const { return m_hasSession; }
 
     // Lifecycle.
-    void RequestBegin();  // detector asks to start reconnect (posts WM_START_RECONNECT)
-    void Begin();         // performs the teardown; runs in the window-proc context
+    void RequestBegin();  // detector asks to start reconnect (begins probing)
+    void Begin();         // performs the teardown between frames; the main loop calls it once m_beginPending is set
     void Update();        // per-frame driver (runs in the scene-update phase)
     void RequestCancel(); // dialog's Cancel button; processed by Update()
 
