@@ -6,6 +6,7 @@
 #include "Dotnet/Connection.h"
 #include "Network/Server/CSMapServer.h"
 #include <span>
+#include <typeinfo>
 
 #define WM_ASYNCSELECTMSG (WM_USER+0)
 
@@ -92,11 +93,21 @@ inline uint64_t ntoh64(uint64_t value)
         ((value & 0xFF00000000000000ULL) >> 56);
 }
 
-// Template to cast a span to a packet struct in a safe way.
-template <typename T> T* safe_cast(const std::span<const BYTE> span)
+// Logs a size-mismatch when a typed safe_cast fails. Defined in WSclient.cpp
+// so the header stays free of g_ConsoleDebug includes.
+void LogSafeCastSizeMismatch(const char* packet_type, std::size_t received, std::size_t expected);
+
+// Casts a span to a packet struct, returning nullptr if the buffer is smaller
+// than sizeof(T). On failure, logs an MCD_ERROR with the packet type and the
+// observed vs expected size so the failure is never silent. Callers SHOULD
+// pass a human-readable packet_type; if omitted, typeid(T).name() is used as
+// a fallback (the compiler-mangled name, still better than nothing).
+template <typename T> T* safe_cast(const std::span<const BYTE> span, const char* packet_type = nullptr)
 {
     if (span.size() < sizeof(T))
     {
+        LogSafeCastSizeMismatch(packet_type ? packet_type : typeid(T).name(),
+                                span.size(), sizeof(T));
         return nullptr;
     }
 
@@ -3685,3 +3696,8 @@ typedef struct
     DWORD Pause;
 } PRECEIVE_MUHELPER_STATUS, * LPRECEIVE_MUHELPER_STATUS;
 #pragma pack(pop)
+
+// Generated static_assert size guards. Sourced from OpenMU's authoritative
+// packet XML via tools/gen_wire_sizes.py. Must appear after all packet struct
+// declarations so the asserts can see them.
+#include "Network/Server/wire_sizes.generated.h"

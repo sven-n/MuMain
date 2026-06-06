@@ -53,12 +53,13 @@ CmuConsoleDebug::~CmuConsoleDebug()
 
 CmuConsoleDebug* CmuConsoleDebug::GetInstance()
 {
-#ifdef CSK_LH_DEBUG_CONSOLE
+    // Always return a valid instance. Previously returned nullptr in builds
+    // without CSK_LH_DEBUG_CONSOLE, which made every g_ConsoleDebug->Write
+    // call site a null-deref in disguise (it "worked" only because the Write
+    // body was empty when CONSOLE_DEBUG was undefined). Returning a real
+    // instance is required for the always-on MCD_ERROR path below to be safe.
     static CmuConsoleDebug sInstance;
     return &sInstance;
-#else
-    return 0;
-#endif
 }
 
 void CmuConsoleDebug::UpdateMainScene()
@@ -232,6 +233,22 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 
 void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
 {
+    // MCD_ERROR is always logged to MuError.log, regardless of CONSOLE_DEBUG.
+    // Other log levels remain debug-only so they don't spam production logs.
+    if (iType == MCD_ERROR)
+    {
+        wchar_t szErrorBuffer[256] = L"";
+        va_list pArgsForFile;
+        va_start(pArgsForFile, pStr);
+        // C99 4-arg vswprintf -- explicit buffer size, bounded write. The
+        // 3-arg MS-extension form is unsafe (no size param, can overflow).
+        _vsnwprintf(szErrorBuffer,
+                  sizeof(szErrorBuffer) / sizeof(szErrorBuffer[0]),
+                  pStr, pArgsForFile);
+        va_end(pArgsForFile);
+        g_ErrorReport.Write(L"[MCD_ERROR] %ls\r\n", szErrorBuffer);
+    }
+
 #ifdef CONSOLE_DEBUG
     if (m_bInit)
     {

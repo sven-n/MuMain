@@ -286,6 +286,101 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   )
 endif()
 
+# --- .NET / NuGet infrastructure (shared by wire-sizes codegen and ClientLibrary)
+# Lifted up here so the wire-sizes block below can resolve the OpenMU packet
+# XML from the same NuGet cache the ClientLibrary uses.
+find_program(DOTNET_EXECUTABLE dotnet.exe)
+if (NOT DOTNET_EXECUTABLE)
+  find_program(DOTNET_EXECUTABLE dotnet)
+endif()
+
+# Helper macro: convert a path to Windows-native format when using
+# Windows dotnet.exe from WSL. On all other platforms this is a no-op.
+function(mu_native_path input_path output_var)
+  if (DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    execute_process(
+      COMMAND wslpath -w "${input_path}"
+      OUTPUT_VARIABLE native_path
+      RESULT_VARIABLE rc
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if (rc EQUAL 0)
+      set(${output_var} "${native_path}" PARENT_SCOPE)
+    else()
+      message(FATAL_ERROR "wslpath failed for '${input_path}'. Ensure wslpath is available.")
+    endif()
+  else()
+    set(${output_var} "${input_path}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# NuGet cache: defaults to <project>/.nuget, override with -DMU_NUGET_CACHE_DIR=...
+set(MU_NUGET_CACHE_DIR "${CMAKE_SOURCE_DIR}/.nuget" CACHE PATH "NuGet package cache directory")
+file(MAKE_DIRECTORY "${MU_NUGET_CACHE_DIR}")
+
+# --- Generated wire-size guards ----------------------------------------------
+# tools/gen_wire_sizes.py reads OpenMU's authoritative packet XML and emits
+# wire_sizes.generated.h with static_asserts that lock each client packet
+# struct's sizeof <= the wire length declared by the server. Guards against
+# the PR #402 class of bug (silent #pragma pack drift that freezes the client).
+#
+# The XML lives in the MUnique.OpenMU.Network.Packets NuGet package -- the
+# same package the .NET ClientLibrary consumes (see MUnique.Client.Library.csproj).
+# Sourcing from NuGet means a single versioned dependency instead of vendoring
+# the entire OpenMU repository as a submodule.
+set(OPENMU_PACKETS_VERSION "0.9.9" CACHE STRING
+    "Version of MUnique.OpenMU.Network.Packets to source packet XML from")
+set(OPENMU_PACKETS_XML
+    "${MU_NUGET_CACHE_DIR}/munique.openmu.network.packets/${OPENMU_PACKETS_VERSION}/contentFiles/any/net10.0/ServerToClient/ServerToClientPackets.xml")
+
+# Restore the package on demand at configure time if it isn't cached yet.
+# dotnet restore is fast on cache-hit, so re-configuring stays cheap.
+if (NOT EXISTS "${OPENMU_PACKETS_XML}")
+  if (NOT DOTNET_EXECUTABLE)
+    message(FATAL_ERROR
+      "wire-size codegen needs MUnique.OpenMU.Network.Packets v${OPENMU_PACKETS_VERSION} "
+      "but it is not cached at ${MU_NUGET_CACHE_DIR} and no .NET SDK was found to restore "
+      "it. Install dotnet (Linux or Windows) or pre-populate the NuGet cache.")
+  endif()
+  message(STATUS "Restoring MUnique.OpenMU.Network.Packets v${OPENMU_PACKETS_VERSION} for wire-size codegen...")
+  set(_packets_csproj "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
+  mu_native_path("${_packets_csproj}" _packets_csproj_native)
+  mu_native_path("${MU_NUGET_CACHE_DIR}" _packets_nuget_native)
+  # WSLENV=NUGET_PACKAGES/w is needed so the env var crosses the WSL->Windows
+  # interop boundary when DOTNET_EXECUTABLE is dotnet.exe; harmless otherwise.
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E env
+            "WSLENV=NUGET_PACKAGES/w"
+            "NUGET_PACKAGES=${_packets_nuget_native}"
+            "${DOTNET_EXECUTABLE}" restore "${_packets_csproj_native}" --nologo
+    RESULT_VARIABLE _restore_rc
+  )
+  if (NOT _restore_rc EQUAL 0)
+    message(FATAL_ERROR "dotnet restore failed (rc=${_restore_rc}) -- see output above.")
+  endif()
+  if (NOT EXISTS "${OPENMU_PACKETS_XML}")
+    message(FATAL_ERROR
+      "dotnet restore completed but ServerToClientPackets.xml is still missing at "
+      "${OPENMU_PACKETS_XML}. Did the NuGet package layout change?")
+  endif()
+endif()
+
+set(WIRE_SIZES_GEN_SCRIPT "${CMAKE_SOURCE_DIR}/tools/gen_wire_sizes.py")
+set(WIRE_SIZES_GEN_HEADER "${CMAKE_BINARY_DIR}/generated/Network/Server/wire_sizes.generated.h")
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+add_custom_command(
+  OUTPUT "${WIRE_SIZES_GEN_HEADER}"
+  COMMAND "${Python3_EXECUTABLE}" "${WIRE_SIZES_GEN_SCRIPT}"
+          --xml "${OPENMU_PACKETS_XML}"
+          --source-label "MUnique.OpenMU.Network.Packets v${OPENMU_PACKETS_VERSION} (NuGet)"
+          --output "${WIRE_SIZES_GEN_HEADER}"
+  DEPENDS "${WIRE_SIZES_GEN_SCRIPT}" "${OPENMU_PACKETS_XML}"
+  COMMENT "Generating wire_sizes.generated.h from OpenMU NuGet packet XML..."
+  VERBATIM
+)
+add_custom_target(GenWireSizes DEPENDS "${WIRE_SIZES_GEN_HEADER}")
+add_dependencies(Main GenWireSizes)
+
 target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/source"
   # source/App holds the moved PCH header (stdafx.h). Keeping App/ on the
@@ -294,6 +389,7 @@ target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/source/App"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
+  "${CMAKE_BINARY_DIR}/generated"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 
@@ -371,13 +467,8 @@ if (MSVC)
 endif()
 
 # .NET Client Library and tools (platform-agnostic, requires dotnet SDK)
-# Native AOT can only target the OS it runs on, so when cross-compiling from
-# WSL we need the Windows dotnet.exe (available via WSL interop) rather than
-# a Linux dotnet.
-find_program(DOTNET_EXECUTABLE dotnet.exe)
-if (NOT DOTNET_EXECUTABLE)
-  find_program(DOTNET_EXECUTABLE dotnet)
-endif()
+# DOTNET_EXECUTABLE, mu_native_path() and MU_NUGET_CACHE_DIR are already
+# resolved above (shared with the wire-size codegen block).
 if (DOTNET_EXECUTABLE)
   # Native AOT can't cross-compile across OS boundaries: a Linux dotnet
   # targeting win-x86/win-x64 will fail at publish time. Build-time C#
@@ -395,26 +486,6 @@ endif()
 if (DOTNET_EXECUTABLE)
   message(STATUS "Found .NET SDK: ${DOTNET_EXECUTABLE}")
 
-  # Helper macro: convert a path to Windows-native format when using
-  # Windows dotnet.exe from WSL.  On all other platforms this is a no-op.
-  function(mu_native_path input_path output_var)
-    if (DOTNET_EXECUTABLE MATCHES "\\.exe$" AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-      execute_process(
-        COMMAND wslpath -w "${input_path}"
-        OUTPUT_VARIABLE native_path
-        RESULT_VARIABLE rc
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-      if (rc EQUAL 0)
-        set(${output_var} "${native_path}" PARENT_SCOPE)
-      else()
-        message(FATAL_ERROR "wslpath failed for '${input_path}'. Ensure wslpath is available.")
-      endif()
-    else()
-      set(${output_var} "${input_path}" PARENT_SCOPE)
-    endif()
-  endfunction()
-
   # 1. Define the output path using a variable CMake can understand early
   set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library.dll")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
@@ -422,13 +493,9 @@ if (DOTNET_EXECUTABLE)
   # Create temp directories for Native AOT build.
   set(DOTNET_TEMP_OUTPUT "${CMAKE_BINARY_DIR}/dotnet_out")
   set(DOTNET_TEMP_DIR "${CMAKE_BINARY_DIR}/.dotnet_temp")
-
-  # NuGet cache: defaults to <project>/.nuget, override with -DMU_NUGET_CACHE_DIR=...
-  set(MU_NUGET_CACHE_DIR "${CMAKE_SOURCE_DIR}/.nuget" CACHE PATH "NuGet package cache directory")
   set(DOTNET_NUGET_DIR "${MU_NUGET_CACHE_DIR}")
   file(MAKE_DIRECTORY "${DOTNET_TEMP_OUTPUT}")
   file(MAKE_DIRECTORY "${DOTNET_TEMP_DIR}")
-  file(MAKE_DIRECTORY "${DOTNET_NUGET_DIR}")
 
   # Convert paths to Windows-native format for MSBuild (no-op outside WSL).
   mu_native_path("${DOTNET_PROJ}" DOTNET_PROJ_NATIVE)
