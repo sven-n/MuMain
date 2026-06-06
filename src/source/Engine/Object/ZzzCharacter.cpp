@@ -6575,6 +6575,9 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
     Object->Type = Type;
     ItemObjectAttribute(Object);
+    Object->EnableShadow = o->EnableShadow;
+    Object->m_bRenderShadow = o->m_bRenderShadow;
+    Object->m_bySkillCount = o->m_bySkillCount;
     b->LightEnable = Object->LightEnable;
     b->LightEnable = false;
 
@@ -6922,6 +6925,11 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         )
     {
         RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level, Option1, false, 0, RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
+    }
+
+    if (Object->EnableShadow)
+    {
+        return;
     }
 
     float Luminosity;
@@ -8528,8 +8536,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 if (p->Type != -1 && c->SafeZone == false)
                 {
                     int Type = p->Type;
+                    PART_t ShadowPart = *p;
 
-                    RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
+                    RenderLinkObject(0.f, 0.f, 0.f, c, &ShadowPart, Type, 0, 0, false, Translate);
                 }
             }
             o->EnableShadow = false;
