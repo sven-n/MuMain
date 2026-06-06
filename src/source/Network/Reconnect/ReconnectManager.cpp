@@ -13,7 +13,6 @@
 #include "Scenes/CharacterScene.h"     // StartGame
 #include "Engine/Object/ZzzCharacter.h"// CharactersClient
 #include "UI/Legacy/UIMng.h"           // CUIMng, m_LoginWin
-#include "App/Platform/Windows/Winmain.h"  // WM_START_RECONNECT
 #include "MUHelper/MuHelper.h"         // MUHelper::g_MuHelper
 
 // Timing (milliseconds). WorldTime is the wall-clock ms timer the rest of the
@@ -36,7 +35,6 @@ extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 extern BOOL g_bGameServerConnected;
-extern HWND g_hWnd;
 
 ReconnectManager& ReconnectManager::Instance()
 {
@@ -175,11 +173,12 @@ void ReconnectManager::Update()
         {
             if (m_phase == Phase::Probing && SceneFlag == MAIN_SCENE)
             {
-                // The game world is still loaded; its teardown must run in the
-                // window proc, after which we land on the login screen.
+                // The game world is still loaded; its teardown must run between
+                // frames (not mid-render), after which we land on the login
+                // screen. m_beginPending defers it: the main loop calls Begin()
+                // each frame and it fires once the flag is set.
                 m_abortAfterTeardown = true;
                 m_beginPending = true;
-                PostMessage(g_hWnd, WM_START_RECONNECT, 0, 0);
             }
             else
             {
@@ -293,10 +292,9 @@ void ReconnectManager::PollProbe()
 
         if (soError == 0)
         {
-            // Server is up - hand off to Begin() in the window proc to tear down
-            // and re-login.
+            // Server is up - defer to Begin() (called by the main loop each
+            // frame) to tear down and re-login between frames.
             m_beginPending = true;
-            PostMessage(g_hWnd, WM_START_RECONNECT, 0, 0);
         }
         else
         {

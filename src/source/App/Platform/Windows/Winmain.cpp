@@ -15,6 +15,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
+#include "Network/IncomingPacketQueue.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -517,16 +518,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         }
         break;
-    case WM_RECEIVE_BUFFER: {
-        auto Packet = std::unique_ptr<PacketInfo>(reinterpret_cast<PacketInfo*>(wParam));
-        ProcessPacketCallback(Packet.release());
-        break;
-    }
-    case WM_START_RECONNECT:
-        // Runs the in-game teardown in the window-proc context (like packet
-        // handlers), where releasing world data is safe.
-        ReconnectManager::Instance().Begin();
-        break;
     case WM_NPROTECT_EXIT_TWO:
         SocketClient->ToGameServer()->SendLogOutByCheatDetection(0);
         SetTimer(g_hWnd, WINDOWMINIMIZED_TIMER, 1 * 1000, nullptr);
@@ -887,6 +878,14 @@ MSG MainLoop()
                 break;
             }
         }
+
+        // Process server packets handed over from the network thread. Replaces
+        // the old WM_RECEIVE_BUFFER message round-trip; runs on the main thread.
+        Network::IncomingPacketQueue::Instance().DrainTo(ProcessPacketCallback);
+
+        // Run a pending reconnect teardown between frames (self-guards on its
+        // pending flag). Replaces the old WM_START_RECONNECT round-trip.
+        ReconnectManager::Instance().Begin();
 
         if (CheckRenderNextFrame())
         {
