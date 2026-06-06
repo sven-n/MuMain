@@ -842,6 +842,12 @@ void SetMaxMessagePerCycle(int messages)
 // SDL-native and the legacy text boxes are replaced (issue #447).
 static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
 {
+    // Let SDL own window close. Forwarding WM_CLOSE to WndProc would reach
+    // DefWindowProc, which destroys the window synchronously and out from under
+    // SDL. SDL turns the close into SDL_EVENT_QUIT, which the main loop handles.
+    if (msg->message == WM_CLOSE)
+        return true;
+
     WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     return true;
 }
@@ -860,7 +866,9 @@ static LRESULT CALLBACK Win32WindowSubclassProc(HWND hwnd, UINT msg, WPARAM wPar
         SetTextColor(reinterpret_cast<HDC>(wParam), RGB(255, 255, 255));
         return reinterpret_cast<LRESULT>(GetStockObject(BLACK_BRUSH));
     }
-    return CallWindowProcW(g_sdlOriginalWndProc, hwnd, msg, wParam, lParam);
+    return g_sdlOriginalWndProc
+        ? CallWindowProcW(g_sdlOriginalWndProc, hwnd, msg, wParam, lParam)
+        : DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 #endif
 
@@ -1247,9 +1255,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
 
     // Subclass SDL's window proc for messages whose return value must reach
-    // Windows (WM_CTLCOLOREDIT colors the legacy EDIT text boxes).
-    g_sdlOriginalWndProc = reinterpret_cast<WNDPROC>(
-        SetWindowLongPtrW(g_hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Win32WindowSubclassProc)));
+    // Windows (WM_CTLCOLOREDIT colors the legacy EDIT text boxes). Capture the
+    // original proc before installing ours: Windows can dispatch messages to the
+    // new proc synchronously during SetWindowLongPtrW, so g_sdlOriginalWndProc
+    // must already be set when the subclass first runs.
+    g_sdlOriginalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtrW(g_hWnd, GWLP_WNDPROC));
+    SetWindowLongPtrW(g_hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Win32WindowSubclassProc));
 
     SDL_RaiseWindow(g_sdlWindow);
     SetFocus(g_hWnd);
@@ -1396,6 +1407,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     DestroySound();
     KillGLWindow();
     DestroyWindow();
+
+    // RecordCpuUsage loops on !Destroy, so it exits once the loop above ended.
+    // Join it before WinMain returns; a joinable std::thread destroyed unjoined
+    // calls std::terminate.
+    if (cpuUsageRecorder.joinable())
+        cpuUsageRecorder.join();
+
     SDL_Quit();
 
     return msg.wParam;
