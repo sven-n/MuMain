@@ -31,8 +31,8 @@ namespace
  */
 static void HandleCameraHotkeys()
 {
-    const bool bF9Down  = (Core::Input::IsKeyDown(VK_F9)) != 0;
-    const bool bF11Down = (Core::Input::IsKeyDown(VK_F11)) != 0;
+    const bool bF9Down  = Core::Input::IsKeyDown(VK_F9);
+    const bool bF11Down = Core::Input::IsKeyDown(VK_F11);
 
     if (bF9Down && !s_bF9KeyPressed)
         CameraManager::Instance().CycleToNextMode();

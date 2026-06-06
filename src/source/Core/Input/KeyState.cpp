@@ -48,6 +48,7 @@ namespace Core::Input
             case VK_F10:     return SDL_SCANCODE_F10;
             case VK_F11:     return SDL_SCANCODE_F11;
             case VK_F12:     return SDL_SCANCODE_F12;
+            case VK_SNAPSHOT: return SDL_SCANCODE_PRINTSCREEN;
             default:         return SDL_SCANCODE_UNKNOWN;
             }
         }
@@ -69,9 +70,9 @@ namespace Core::Input
         // Mouse buttons and modifiers come from the SDL mouse / mod state.
         switch (virtualKey)
         {
-        case VK_LBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_LMASK) != 0;
-        case VK_RBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_RMASK) != 0;
-        case VK_MBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MMASK) != 0;
+        case VK_LBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) != 0;
+        case VK_RBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) != 0;
+        case VK_MBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE)) != 0;
         case VK_SHIFT:   return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
         case VK_CONTROL: return (SDL_GetModState() & SDL_KMOD_CTRL) != 0;
         case VK_MENU:    return (SDL_GetModState() & SDL_KMOD_ALT) != 0;
