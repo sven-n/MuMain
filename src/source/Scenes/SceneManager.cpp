@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -233,7 +234,7 @@ static void HandleScreenshotCapture()
         return;
     }
 
-    const bool addTimeStampToCapture = !HIBYTE(GetAsyncKeyState(VK_SHIFT));
+    const bool addTimeStampToCapture = !Core::Input::IsKeyDown(VK_SHIFT);
     wchar_t screenshotText[256];
 
     GenerateScreenshotFilename(GrabFileName, screenshotText);

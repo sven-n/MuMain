@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 #include "Input/Selection.h"
 #include "Character/CharacterManager.h" // gCharacterManager
 
@@ -308,7 +309,7 @@ void SelectObjects()
 
     if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429))
     {
-        if (HIBYTE(GetAsyncKeyState(VK_MENU)) == 128)
+        if (Core::Input::IsKeyDown(VK_MENU))
         {
             if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
                 SelectedItem = SelectItem();

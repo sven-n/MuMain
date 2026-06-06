@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
@@ -947,7 +948,7 @@ MSG MainLoop()
 #ifdef _EDITOR
                 // F12 key toggle for editor
                 static bool wasF12Pressed = false;
-                if (GetAsyncKeyState(VK_F12) & 0x8000)
+                if (Core::Input::IsKeyDown(VK_F12))
                 {
                     if (!wasF12Pressed)
                     {

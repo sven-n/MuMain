@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 #include <imm.h>
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -224,7 +225,7 @@ void PrintPKLog(CHARACTER* pCha)
 
 bool PressKey(int Key)
 {
-    if (HIBYTE(GetAsyncKeyState(Key)) == 128)
+    if (Core::Input::IsKeyDown(Key))
     {
         if (KeyState[Key] == false)
         {
@@ -547,7 +548,7 @@ bool CheckAttack_Fenrir(CHARACTER* c)
     }
     else if (::IsStrifeMap(gMapManager.WorldActive) && c != Hero && c->m_byGensInfluence != Hero->m_byGensInfluence)
     {
-        if (((wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == 0) || (g_pPartyManager->IsPartyMember(SelectedCharacter))) && (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128))
+        if (((wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == 0) || (g_pPartyManager->IsPartyMember(SelectedCharacter))) && (Core::Input::IsKeyDown(VK_CONTROL)))
         {
             return true;
         }
@@ -674,7 +675,7 @@ bool CheckAttack_Fenrir(CHARACTER* c)
                 return false;
             }
         }
-        else if (c->PK >= PVP_MURDERER2 || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && c != Hero))
+        else if (c->PK >= PVP_MURDERER2 || (Core::Input::IsKeyDown(VK_CONTROL) && c != Hero))
         {
             return true;
         }
@@ -729,12 +730,12 @@ bool CheckAttack()
         {
             return false;
         }
-        if (HIBYTE(GetAsyncKeyState(VK_MENU)) == 128)
+        if (Core::Input::IsKeyDown(VK_MENU))
         {
             return false;
         }
 
-        if (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128)
+        if (Core::Input::IsKeyDown(VK_CONTROL))
         {
             if (EnableGuildWar)
             {
@@ -913,7 +914,7 @@ bool CheckAttack()
                 return false;
             }
         }
-        else if (c->PK >= PVP_MURDERER2 || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && c != Hero))
+        else if (c->PK >= PVP_MURDERER2 || (Core::Input::IsKeyDown(VK_CONTROL) && c != Hero))
         {
             return true;
         }
@@ -988,7 +989,7 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
         return -1;
     }
 
-    if (::IsStrifeMap(gMapManager.WorldActive) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence && HIBYTE(GetAsyncKeyState(VK_MENU)) != 128)
+    if (::IsStrifeMap(gMapManager.WorldActive) && sc != Hero && sc->m_byGensInfluence != Hero->m_byGensInfluence && !Core::Input::IsKeyDown(VK_MENU))
     {
         if (sc->GuildRelationShip == GR_NONE && !g_pPartyManager->IsPartyMember(SelectedCharacter))
         {
@@ -998,7 +999,7 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
         if ((wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == 0) ||
             g_pPartyManager->IsPartyMember(SelectedCharacter))
         {
-            if (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128)
+            if (Core::Input::IsKeyDown(VK_CONTROL))
             {
                 return sc->Key;
             }
@@ -1007,7 +1008,7 @@ int	getTargetCharacterKey(CHARACTER* c, int selected)
         }
     }
 
-    if ((sc->PK >= PVP_MURDERER2 && sc->Object.Kind == KIND_PLAYER) || (HIBYTE(GetAsyncKeyState(VK_CONTROL)) == 128 && sc != Hero))
+    if ((sc->PK >= PVP_MURDERER2 && sc->Object.Kind == KIND_PLAYER) || (Core::Input::IsKeyDown(VK_CONTROL) && sc != Hero))
     {
         return sc->Key;
     }
@@ -3301,7 +3302,7 @@ void MoveHero()
                     c->MovementType = MOVEMENT_MOVE;
                 }
             }
-            else if (HIBYTE(GetAsyncKeyState(VK_SHIFT)) != 128)
+            else if (!Core::Input::IsKeyDown(VK_SHIFT))
             {
                 RenderTerrain(true);
 
@@ -3428,16 +3429,16 @@ void MoveInterface()
     {
         if (gMapManager.InChaosCastle() == false)
         {
-            if (HIBYTE(GetAsyncKeyState(VK_MENU)))
+            if (Core::Input::IsKeyDown(VK_MENU))
             {
                 for (int i = 0; i < 9; i++)
                 {
-                    if (HIBYTE(GetAsyncKeyState('1' + i)))
+                    if (Core::Input::IsKeyDown('1' + i))
                     {
                         SendMacroChat(MacroText[i]);
                     }
                 }
-                if (HIBYTE(GetAsyncKeyState('0')))
+                if (Core::Input::IsKeyDown('0'))
                 {
                     SendMacroChat(MacroText[9]);
                 }

@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -811,7 +812,7 @@ void UseBattleMasterSkill(void)
 
     if (Hero->GuildMasterKillCount >= MaxKillCount)
     {
-        if (HIBYTE(GetAsyncKeyState(VK_SHIFT)))
+        if (Core::Input::IsKeyDown(VK_SHIFT))
         {
             if (Hero->BackupCurrentSkill == 255)
             {

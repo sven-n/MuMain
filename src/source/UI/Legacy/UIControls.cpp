@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 #include "Core/Time/FrameTimerScheduler.h"
 #include "GameLogic/Items/CComGem.h"
 #include "UIControls.h"
@@ -803,13 +804,13 @@ BOOL CUITextListBox<T>::DoMouseAction()
     {
         BOOL bKeyPress = FALSE;
 
-        if (HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128)
+        if (Core::Input::IsKeyDown(VK_LEFT))
         {
         }
-        if (HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
+        if (Core::Input::IsKeyDown(VK_RIGHT))
         {
         }
-        if (HIBYTE(GetAsyncKeyState(VK_UP)) == 128)
+        if (Core::Input::IsKeyDown(VK_UP))
         {
             bKeyPress = TRUE;
             if (m_bPressCursorKey == 0)
@@ -822,7 +823,7 @@ BOOL CUITextListBox<T>::DoMouseAction()
             else
                 ++m_bPressCursorKey;
         }
-        if (HIBYTE(GetAsyncKeyState(VK_DOWN)) == 128)
+        if (Core::Input::IsKeyDown(VK_DOWN))
         {
             bKeyPress = TRUE;
             if (m_bPressCursorKey == 0)
@@ -3112,10 +3113,10 @@ LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     if (pTextInputBox == nullptr)
         return 0;
 
-    if (HIBYTE(GetAsyncKeyState(VK_UP)) == 128
-        || HIBYTE(GetAsyncKeyState(VK_DOWN)) == 128
-        || HIBYTE(GetAsyncKeyState(VK_LEFT)) == 128
-        || HIBYTE(GetAsyncKeyState(VK_RIGHT)) == 128)
+    if (Core::Input::IsKeyDown(VK_UP)
+        || Core::Input::IsKeyDown(VK_DOWN)
+        || Core::Input::IsKeyDown(VK_LEFT)
+        || Core::Input::IsKeyDown(VK_RIGHT))
     {
         pTextInputBox->m_caretTimer.ResetTimer();
     }

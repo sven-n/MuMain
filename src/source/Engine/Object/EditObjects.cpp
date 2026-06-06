@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 #include "Engine/Object/EditObjects.h"
 
 // Includes mirror ZzzInterface.cpp, the unit this was extracted from.
@@ -131,21 +132,21 @@ void EditObjects()
                     else
                         PickObject->Position[2] += PickObjectHeight;
                 }
-                if (HIBYTE(GetAsyncKeyState('Q')) == 128)
+                if (Core::Input::IsKeyDown('Q'))
                     PickObject->Angle[0] -= 5.f;
-                if (HIBYTE(GetAsyncKeyState('E')) == 128)
+                if (Core::Input::IsKeyDown('E'))
                     PickObject->Angle[0] += 5.f;
-                if (HIBYTE(GetAsyncKeyState('A')) == 128)
+                if (Core::Input::IsKeyDown('A'))
                     PickObject->Angle[2] += 30.f;
-                if (HIBYTE(GetAsyncKeyState('D')) == 128)
+                if (Core::Input::IsKeyDown('D'))
                     PickObject->Angle[2] -= 30.f;
-                if (HIBYTE(GetAsyncKeyState('W')) == 128)
+                if (Core::Input::IsKeyDown('W'))
                     PickObjectHeight += 5.f;
-                if (HIBYTE(GetAsyncKeyState('S')) == 128)
+                if (Core::Input::IsKeyDown('S'))
                     PickObjectHeight -= 5.f;
-                if (HIBYTE(GetAsyncKeyState('R')) == 128)
+                if (Core::Input::IsKeyDown('R'))
                     PickObject->Scale += 0.02f;
-                if (HIBYTE(GetAsyncKeyState('F')) == 128)
+                if (Core::Input::IsKeyDown('F'))
                     PickObject->Scale -= 0.02f;
                 if (MouseX >= REFERENCE_WIDTH - 100 && MouseY < 100)
                 {

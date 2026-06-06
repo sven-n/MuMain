@@ -2,6 +2,7 @@
 // Extracted from ZzzScene.cpp as part of scene refactoring
 
 #include "stdafx.h"
+#include "Core/Input/KeyState.h"
 #include "CameraUtility.h"
 #include "CameraManager.h"
 #include "Camera/CameraMove.h"
@@ -30,8 +31,8 @@ namespace
  */
 static void HandleCameraHotkeys()
 {
-    const bool bF9Down  = (GetAsyncKeyState(VK_F9)  & 0x8000) != 0;
-    const bool bF11Down = (GetAsyncKeyState(VK_F11) & 0x8000) != 0;
+    const bool bF9Down  = Core::Input::IsKeyDown(VK_F9);
+    const bool bF11Down = Core::Input::IsKeyDown(VK_F11);
 
     if (bF9Down && !s_bF9KeyPressed)
         CameraManager::Instance().CycleToNextMode();
