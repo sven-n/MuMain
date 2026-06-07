@@ -159,7 +159,7 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
     g_MuEditorCore.Render();
 #endif
-    ::SwapBuffers(hDC);
+    PlatformSwapBuffers();
 }
 
 void CUIMng::Create()

@@ -1026,7 +1026,7 @@ void MainScene(HDC hDC)
                 EndBitmap();
             }
 #endif
-            SwapBuffers(hDC);
+            PlatformSwapBuffers();
         }
 
         CheckServerConnection();

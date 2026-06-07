@@ -82,6 +82,9 @@ void EnableVSync();
 void DisableVSync();
 int GetFPSLimit();
 
+// Present the current GL frame via SDL (replaces the Win32 ::SwapBuffers, #442).
+void PlatformSwapBuffers();
+
 void UpdateMousePositionn();
 inline void TEXCOORD(float* c, float u, float v)
 {

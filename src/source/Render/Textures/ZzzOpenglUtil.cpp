@@ -9,7 +9,10 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "wglext.h"
+#include <SDL3/SDL.h>
+#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
+#include "wglext.h"  // legacy WGL multisample pixel-format path (disabled by default)
+#endif
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
@@ -34,7 +37,6 @@ GLfloat FogColor[4] = { 30 / 256.f,20 / 256.f,10 / 256.f, };
 
 bool _isVSyncAvailable = false;
 bool _isVSyncEnabled = false;
-PFNWGLSWAPINTERVALEXTPROC       wglSwapIntervalEXT = nullptr;
 
 
 unsigned int WindowWidth = 1024;
@@ -634,6 +636,7 @@ void UpdateMousePositionn()
     VectorIRotate(vPos, g_Camera.Matrix, MousePosition);
 }
 
+#ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL IsGLExtensionSupported(const wchar_t* extension)
 {
     const size_t extlen = wcslen(extension);
@@ -667,37 +670,13 @@ BOOL IsGLExtensionSupported(const wchar_t* extension)
     }
 }
 
-bool WGLExtensionSupported(const char* extension_name)
-{
-    // this is pointer to function which returns pointer to string with list of all wgl extensions
-     PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglGetExtensionsStringEXT = reinterpret_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(wglGetProcAddress("wglGetExtensionsStringEXT"));
-
-    if (strstr(_wglGetExtensionsStringEXT(), extension_name) == nullptr)
-    {
-        // string was not found
-        return false;
-    }
-
-    // extension is supported
-    return true;
-}
+#endif // LDS_ADD_MULTISAMPLEANTIALIASING
 
 void InitVSync()
 {
-    _isVSyncAvailable = WGLExtensionSupported("WGL_EXT_swap_control");
-    if (_isVSyncAvailable)
-    {
-        // Extension is supported, init pointers.
-        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-
-        // this is another function from WGL_EXT_swap_control extension
-        // wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
-    }
-
-    if (wglSwapIntervalEXT == nullptr)
-    {
-        _isVSyncAvailable = false;
-    }
+    // SDL controls the swap interval on the current GL context on every platform;
+    // EnableVSync/DisableVSync just toggle it. No WGL extension probing needed.
+    _isVSyncAvailable = true;
 }
 
 bool IsVSyncAvailable()
@@ -712,30 +691,18 @@ bool IsVSyncEnabled()
 
 void EnableVSync()
 {
-    if (!_isVSyncAvailable)
-    {
-        return;
-    }
-
-    wglSwapIntervalEXT(1);
-    _isVSyncEnabled = true;
+    if (SDL_GL_SetSwapInterval(1))
+        _isVSyncEnabled = true;
 }
 
 void DisableVSync()
 {
-    if (!_isVSyncAvailable)
-    {
-        return;
-    }
-
-    wglSwapIntervalEXT(0);
-    _isVSyncEnabled = false;
+    if (SDL_GL_SetSwapInterval(0))
+        _isVSyncEnabled = false;
 }
 
-int GetFPSLimit()
-{
-    return GetDeviceCaps(g_hDC, VREFRESH);
-}
+// GetFPSLimit() lives in the platform layer (Winmain.cpp): it queries the
+// monitor refresh rate, which SDL exposes per display (issue #442).
 
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd, int iRequestMSAAValue, int& OutiPixelFormat)
