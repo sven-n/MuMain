@@ -44,11 +44,20 @@ typedef wchar_t   WCHAR;  // NOTE: 32-bit here vs 16-bit on Windows; the wchar_t
 typedef void      VOID;
 typedef DWORD     COLORREF;
 
-// MSVC fixed-width keyword aliases (gcc/clang on Linux lack these).
-typedef int64_t   __int64;
-typedef int32_t   __int32;
-typedef int16_t   __int16;
-typedef int8_t    __int8;
+// MSVC fixed-width keyword aliases (gcc/clang lack these). Defined as macros,
+// not typedefs, so the common `unsigned __int64` form stays valid.
+#ifndef __int64
+#define __int64 long long
+#endif
+#ifndef __int32
+#define __int32 int
+#endif
+#ifndef __int16
+#define __int16 short
+#endif
+#ifndef __int8
+#define __int8 char
+#endif
 
 // Pointer-sized message/param/int types.
 typedef uintptr_t UINT_PTR;
@@ -73,23 +82,24 @@ typedef const WCHAR* LPCTSTR;
 #define TEXT(x) L##x
 #endif
 
-// Opaque handles. Real identity is irrelevant to the portable declarations that
-// only store or pass them through.
+// Opaque handles. Each is a distinct incompatible pointer type (as on Windows
+// via DECLARE_HANDLE) so overloads on different handle types don't collapse.
+#define DECLARE_HANDLE(name) struct name##__ { int unused; }; typedef struct name##__ *name
 typedef void* HANDLE;
-typedef void* HWND;
-typedef void* HDC;
-typedef void* HGLRC;
-typedef void* HINSTANCE;
-typedef void* HMODULE;
-typedef void* HMENU;
-typedef void* HICON;
-typedef void* HCURSOR;
-typedef void* HBRUSH;
-typedef void* HFONT;
-typedef void* HBITMAP;
-typedef void* HGDIOBJ;
-typedef void* HKEY;
-typedef void* HIMC;
+DECLARE_HANDLE(HWND);
+DECLARE_HANDLE(HDC);
+DECLARE_HANDLE(HGLRC);
+DECLARE_HANDLE(HINSTANCE);
+DECLARE_HANDLE(HMODULE);
+DECLARE_HANDLE(HMENU);
+DECLARE_HANDLE(HICON);
+DECLARE_HANDLE(HCURSOR);
+DECLARE_HANDLE(HBRUSH);
+DECLARE_HANDLE(HFONT);
+DECLARE_HANDLE(HBITMAP);
+DECLARE_HANDLE(HGDIOBJ);
+DECLARE_HANDLE(HKEY);
+DECLARE_HANDLE(HIMC);
 
 // Pointer aliases.
 typedef void*           LPVOID;
@@ -106,8 +116,10 @@ typedef BOOL*           LPBOOL;
 
 // Small structs used in declarations.
 typedef struct tagPOINT { LONG x, y; } POINT, * LPPOINT;
+typedef const POINT* LPCPOINT;
 typedef struct tagSIZE { LONG cx, cy; } SIZE, * LPSIZE;
 typedef struct tagRECT { LONG left, top, right, bottom; } RECT, * LPRECT;
+typedef const RECT* LPCRECT;
 
 // Calling-convention / annotation macros: no-ops off Windows.
 #ifndef WINAPI
