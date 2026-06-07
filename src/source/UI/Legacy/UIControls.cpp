@@ -3767,6 +3767,41 @@ void CUITextInputBox::RenderScrollbar()
     }
 }
 
+void CUITextInputBox::RenderPortableScrollbar(int iTotalLines, int iVisibleLines)
+{
+    const float fLineNum = (iTotalLines > 0) ? static_cast<float>(iTotalLines) : 1.0f;
+    const float fLineRate = static_cast<float>(iVisibleLines) / fLineNum;
+    const float fPosRate = static_cast<float>(m_iScrollLine) / fLineNum;
+
+    m_fScrollBarWidth = 13;
+    m_fScrollBarRange_top = m_iPos_y + 9;
+    m_fScrollBarRange_bottom = m_iPos_y + m_iHeight - 9;
+    m_fScrollBarHeight = (m_fScrollBarRange_bottom - m_fScrollBarRange_top) * (fLineRate > 1 ? 1 : fLineRate);
+    m_fScrollBarPos_y = m_fScrollBarRange_top
+        + (m_fScrollBarRange_bottom - m_fScrollBarRange_top) * (fPosRate > 1 ? 1 : fPosRate);
+
+    if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - m_fScrollBarWidth, m_iPos_y - 4, 13.0f, 13.0f) == TRUE)
+        RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y - 4, 13.0f, 13.0f, 13.0f / 16.0f, 29.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
+    else
+        RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y - 4, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// up
+
+    if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - m_fScrollBarWidth, m_iPos_y + m_iHeight - 9, 13.0f, 13.0f) == TRUE)
+        RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9, 13.0f, 13.0f, 13.0f / 16.0f, 16.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
+    else
+        RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// down
+
+    EnableAlphaTest();
+    SetLineColor(2);
+    RenderColor((float)m_iPos_x + m_iWidth - m_fScrollBarWidth, m_fScrollBarRange_top, 1.0f, (float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
+    RenderColor((float)m_iPos_x + m_iWidth - 1, m_fScrollBarRange_top, 1.0f, (float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
+    EndRenderColor();
+    DisableAlphaBlend();
+
+    RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarPos_y, m_fScrollBarWidth - 1, m_fScrollBarHeight, 0.0f, 1.0f / 32.0f, 11.0f / 16.0f, 1.0f / 32.0f);
+    RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarPos_y, m_fScrollBarWidth - 2, 1, 0.0f, 0.0f / 32.0f, 11.0f / 16.0f, 1.0f / 32.0f);
+    RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarPos_y + m_fScrollBarHeight, m_fScrollBarWidth - 2, 1, 0.0f, 2.0f / 32.0f, 11.0f / 16.0f, 1.0f / 32.0f);
+}
+
 void CUITextInputBox::SetFont(HFONT hFont)
 {
     if (hFont == nullptr)
@@ -3774,7 +3809,10 @@ void CUITextInputBox::SetFont(HFONT hFont)
 
     if (m_bPortable)
     {
-        m_hFont = hFont;
+        if (hFont == g_hFontBold)     m_fontKind = PortableFontKind::Bold;
+        else if (hFont == g_hFontBig) m_fontKind = PortableFontKind::Big;
+        else if (hFont == g_hFixFont) m_fontKind = PortableFontKind::Fix;
+        else                          m_fontKind = PortableFontKind::Default;
         return;
     }
 
@@ -3785,22 +3823,109 @@ void CUITextInputBox::SetFont(HFONT hFont)
     SelectObject(m_hMemDC, hFont);
 }
 
-BOOL CUITextInputBox::DoMouseAction()
+BOOL CUITextInputBox::DoPortableMouse()
 {
-    if (m_bPortable)
-    {
-        if (::CheckMouseIn(m_iPos_x, m_iPos_y - 4, m_iWidth, m_iHeight + 8) == FALSE)
-            return FALSE;
+    g_pRenderText->SetFont(CurrentFont());
+    const int iLineHeight = LineHeightPx();
 
-        MouseOnWindow = true;
-        if (MouseLButtonPush && GetState() == UISTATE_NORMAL)
+    // Thumb drag in progress: track the mouse until the button is released.
+    if (m_bUseMultiLine && GetState() == UISTATE_SCROLL)
+    {
+        if (MouseLButtonPush)
         {
-            GiveFocus(TRUE);
-            MouseUpdateTime = 0;
-            MouseUpdateTimeMax = 6;
+            MouseOnWindow = true;
+            std::vector<PortableLine> lines;
+            LayoutLines(BuildDisplay(), lines);
+            const float range = m_fScrollBarRange_bottom - m_fScrollBarRange_top;
+            const float rel = (float)MouseY - m_fScrollBarClickPos_y - m_fScrollBarRange_top;
+            int target = (range > 0.f) ? static_cast<int>((rel / range) * lines.size() + 0.5f) : 0;
+            const int iMaxScroll = (static_cast<int>(lines.size()) > m_iNumLines) ? (static_cast<int>(lines.size()) - m_iNumLines) : 0;
+            if (target < 0) target = 0;
+            if (target > iMaxScroll) target = iMaxScroll;
+            m_iScrollLine = target;
+        }
+        else
+        {
+            SetState(UISTATE_NORMAL);
+            if (g_dwActiveUIID == GetUIID()) g_dwActiveUIID = 0;
         }
         return TRUE;
     }
+
+    if (::CheckMouseIn(m_iPos_x, m_iPos_y - 4, m_iWidth, m_iHeight + 8) == FALSE)
+        return FALSE;
+
+    MouseOnWindow = true;
+    if (GetState() != UISTATE_NORMAL)
+        return TRUE;
+
+    // Mouse wheel scrolls a multiline box.
+    if (m_bUseMultiLine && MouseWheel != 0)
+    {
+        m_iScrollLine -= MouseWheel;
+        if (m_iScrollLine < 0) m_iScrollLine = 0;
+    }
+
+    if (!MouseLButtonPush)
+        return TRUE;
+
+    // Scrollbar hit testing (multiline only; geometry set during render).
+    if (m_bUseMultiLine)
+    {
+        if (::CheckMouseIn(m_iPos_x + m_iWidth - 15, m_iPos_y - 4, 13, 13))
+        {
+            if (m_iScrollLine > 0) --m_iScrollLine;
+            return TRUE;
+        }
+        if (::CheckMouseIn(m_iPos_x + m_iWidth - 15, m_iPos_y + m_iHeight - 9, 13, 13))
+        {
+            ++m_iScrollLine;  // clamped on next render
+            return TRUE;
+        }
+        if (::CheckMouseIn(m_iPos_x + m_iWidth - 14, m_fScrollBarPos_y, m_fScrollBarWidth, m_fScrollBarHeight))
+        {
+            if (g_dwActiveUIID == 0)
+            {
+                g_dwActiveUIID = GetUIID();
+                SetState(UISTATE_SCROLL);
+                m_fScrollBarClickPos_y = MouseY - m_fScrollBarPos_y;
+            }
+            return TRUE;
+        }
+    }
+
+    // Click in the text area: focus and place the caret at the click.
+    GiveFocus(FALSE);
+    MouseUpdateTime = 0;
+    MouseUpdateTimeMax = 6;
+
+    const std::wstring display = BuildDisplay();
+    const int targetX = MouseX - m_iPos_x;
+    int idx;
+    if (m_bUseMultiLine)
+    {
+        std::vector<PortableLine> lines;
+        LayoutLines(display, lines);
+        int li = (iLineHeight > 0) ? m_iScrollLine + (MouseY - m_iPos_y) / iLineHeight : 0;
+        if (li < 0) li = 0;
+        if (li >= static_cast<int>(lines.size())) li = static_cast<int>(lines.size()) - 1;
+        idx = IndexAtLineX(display, lines[li], targetX);
+    }
+    else
+    {
+        // Single line scrolls horizontally; map against the visible window.
+        const PortableLine line{ m_iFirstVisible, static_cast<int>(display.length()) };
+        idx = IndexAtLineX(display, line, targetX);
+    }
+    m_iCaret = idx;
+    m_iSelAnchor = idx;
+    return TRUE;
+}
+
+BOOL CUITextInputBox::DoMouseAction()
+{
+    if (m_bPortable)
+        return DoPortableMouse();
 
     BOOL bResult = FALSE;
     if (::CheckMouseIn(m_iPos_x, m_iPos_y - 4, m_iWidth, m_iHeight + 8) == TRUE)
@@ -3943,10 +4068,21 @@ namespace
     constexpr int CARET_WIDTH_PX = 2;     // caret bar width in reference pixels
 }
 
+HFONT CUITextInputBox::CurrentFont() const
+{
+    switch (m_fontKind)
+    {
+    case PortableFontKind::Bold: return g_hFontBold;
+    case PortableFontKind::Big:  return g_hFontBig;
+    case PortableFontKind::Fix:  return g_hFixFont;
+    default:                     return g_hFont;
+    }
+}
+
 int CUITextInputBox::MeasureWidth(const wchar_t* pszText, int iLength) const
 {
     if (pszText == nullptr || iLength <= 0) return 0;
-    if (m_hFont != nullptr) g_pRenderText->SetFont(m_hFont);
+    g_pRenderText->SetFont(CurrentFont());
 
     SIZE sz = { 0, 0 };
     GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszText, iLength, &sz);
@@ -4051,10 +4187,43 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
         MoveCaret(m_iCaret + 1, bShift);
         break;
     case VK_HOME:
-        MoveCaret(0, bShift);
+        if (m_bUseMultiLine)
+        {
+            std::vector<PortableLine> lines;
+            LayoutLines(m_portableText, lines);
+            MoveCaret(lines[CaretToLine(lines)].start, bShift);
+        }
+        else
+        {
+            MoveCaret(0, bShift);
+        }
         break;
     case VK_END:
-        MoveCaret(static_cast<int>(m_portableText.length()), bShift);
+        if (m_bUseMultiLine)
+        {
+            std::vector<PortableLine> lines;
+            LayoutLines(m_portableText, lines);
+            MoveCaret(lines[CaretToLine(lines)].end, bShift);
+        }
+        else
+        {
+            MoveCaret(static_cast<int>(m_portableText.length()), bShift);
+        }
+        break;
+    case VK_UP:
+    case VK_DOWN:
+        if (m_bUseMultiLine)
+        {
+            std::vector<PortableLine> lines;
+            LayoutLines(m_portableText, lines);
+            const int cur = CaretToLine(lines);
+            const int target = cur + (iVirtualKey == VK_UP ? -1 : 1);
+            if (target >= 0 && target < static_cast<int>(lines.size()))
+            {
+                const int caretX = MeasureWidth(m_portableText.c_str() + lines[cur].start, m_iCaret - lines[cur].start);
+                MoveCaret(IndexAtLineX(m_portableText, lines[target], caretX), bShift);
+            }
+        }
         break;
     case VK_BACK:
         if (HasSelection())
@@ -4076,11 +4245,16 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
         }
         break;
     case VK_RETURN:
-        // Mirror the legacy EDIT path: a single-line, unlocked box notifies its
-        // owning UI window so Enter confirms (e.g. submits the dialog). The
-        // login screen instead reads Enter from the global key poll, so the
-        // parentless case needs nothing here.
-        if (IsLocked() == TRUE || UseMultiline() == TRUE) break;
+        if (IsLocked() == TRUE) break;
+        // A multiline box inserts a hard line break; a single-line, unlocked box
+        // notifies its owning UI window so Enter confirms (e.g. submits the
+        // dialog). The login screen instead reads Enter from the global key
+        // poll, so the parentless single-line case needs nothing here.
+        if (UseMultiline() == TRUE)
+        {
+            InsertChar(L'\n');
+            break;
+        }
         if (g_pFriendMenu->IsHotkeyEnable() == TRUE) break;
         if (GetParentUIID() != 0)
             g_pWindowMgr->SendUIMessageToWindow(GetParentUIID(), UI_MESSAGE_TEXTINPUT, 0, 0);
@@ -4094,38 +4268,121 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
     }
 }
 
+int CUITextInputBox::LineHeightPx() const
+{
+    SIZE qSize = { 0, 0 };
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Q", 1, &qSize);
+    int iLineHeight = (g_fScreenRate_y > 0.f) ? static_cast<int>(qSize.cy / g_fScreenRate_y) : qSize.cy;
+    if (iLineHeight <= 0) iLineHeight = 1;
+    return iLineHeight;
+}
+
+int CUITextInputBox::VisibleLineCount(int iLineHeight) const
+{
+    int n = (iLineHeight > 0) ? (m_iHeight / iLineHeight) : 1;
+    return (n < 1) ? 1 : n;
+}
+
+// Break the text into displayed lines: a new line starts after every hard '\n'
+// and wherever a paragraph exceeds the box width (wrapped at the last space, or
+// mid-word when a single word is too long). Each span is [start, end) in buffer
+// indices; end excludes the wrapped space or newline.
+void CUITextInputBox::LayoutLines(const std::wstring& display, std::vector<PortableLine>& lines) const
+{
+    lines.clear();
+    const int n = static_cast<int>(display.length());
+    const wchar_t* p = display.c_str();
+
+    int paraStart = 0;
+    for (int i = 0; i <= n; ++i)
+    {
+        if (i != n && display[i] != L'\n') continue;
+
+        // Wrap the paragraph [paraStart, i).
+        int lineStart = paraStart;
+        int lastSpace = -1;
+        for (int j = paraStart; j < i; ++j)
+        {
+            if (display[j] == L' ') lastSpace = j;
+            if (j > lineStart && MeasureWidth(p + lineStart, j + 1 - lineStart) > m_iWidth)
+            {
+                if (lastSpace > lineStart)
+                {
+                    lines.push_back({ lineStart, lastSpace });
+                    lineStart = lastSpace + 1;
+                }
+                else
+                {
+                    lines.push_back({ lineStart, j });
+                    lineStart = j;
+                }
+                lastSpace = -1;
+            }
+        }
+        lines.push_back({ lineStart, i });
+
+        paraStart = i + 1;
+    }
+
+    if (lines.empty())
+        lines.push_back({ 0, 0 });
+}
+
+int CUITextInputBox::CaretToLine(const std::vector<PortableLine>& lines) const
+{
+    // The caret belongs to the last line whose start is <= caret.
+    int result = 0;
+    for (int i = 0; i < static_cast<int>(lines.size()); ++i)
+    {
+        if (lines[i].start <= m_iCaret) result = i;
+        else break;
+    }
+    return result;
+}
+
+int CUITextInputBox::IndexAtLineX(const std::wstring& display, const PortableLine& line, int targetX) const
+{
+    int best = line.start;
+    int bestDelta = targetX;  // distance from x=0 at line start
+    if (bestDelta < 0) bestDelta = -bestDelta;
+
+    const wchar_t* p = display.c_str() + line.start;
+    for (int k = line.start + 1; k <= line.end; ++k)
+    {
+        int x = MeasureWidth(p, k - line.start);
+        int delta = x - targetX;
+        if (delta < 0) delta = -delta;
+        if (delta < bestDelta)
+        {
+            bestDelta = delta;
+            best = k;
+        }
+    }
+    return best;
+}
+
+std::wstring CUITextInputBox::BuildDisplay() const
+{
+    if (m_bPasswordInput)
+        return std::wstring(m_portableText.length(), L'*');
+    return m_portableText;
+}
+
 void CUITextInputBox::RenderPortable()
 {
-    if (m_hFont == nullptr) return;
-    g_pRenderText->SetFont(m_hFont);
+    if (CurrentFont() == nullptr) return;
+    g_pRenderText->SetFont(CurrentFont());
 
-    std::wstring display;
-    if (m_bPasswordInput)
-        display.assign(m_portableText.length(), L'*');
-    else
-        display = m_portableText;
+    const std::wstring display = BuildDisplay();
 
     const int iLength = static_cast<int>(display.length());
     if (m_iCaret > iLength) m_iCaret = iLength;
     if (m_iSelAnchor > iLength) m_iSelAnchor = iLength;
 
-    // Caret/selection height from a sample glyph, in reference pixels.
-    SIZE qSize = { 0, 0 };
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Q", 1, &qSize);
-    int iLineHeight = (g_fScreenRate_y > 0.f) ? static_cast<int>(qSize.cy / g_fScreenRate_y) : qSize.cy;
-    if (iLineHeight <= 0 || iLineHeight > m_iHeight) iLineHeight = m_iHeight;
+    int iLineHeight = LineHeightPx();
+    if (!m_bUseMultiLine && iLineHeight > m_iHeight) iLineHeight = m_iHeight;
 
-    // Horizontal scroll: never start past the caret, and advance the first
-    // visible character until the caret fits inside the box width.
-    if (m_iFirstVisible > m_iCaret) m_iFirstVisible = m_iCaret;
-    if (m_iFirstVisible < 0) m_iFirstVisible = 0;
-    while (m_iFirstVisible < m_iCaret &&
-        MeasureWidth(display.c_str() + m_iFirstVisible, m_iCaret - m_iFirstVisible) > m_iWidth)
-    {
-        ++m_iFirstVisible;
-    }
-
-    // Background fill.
+    // Background fill (shared by both layouts).
     if (CheckOption(UIOPTION_PAINTBACK))
     {
         EnableAlphaTest();
@@ -4139,6 +4396,24 @@ void CUITextInputBox::RenderPortable()
         glColor4ub(GetRed(m_dwBackColor), GetGreen(m_dwBackColor), GetBlue(m_dwBackColor), GetAlpha(m_dwBackColor));
         RenderColor(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight);
         EndRenderColor();
+    }
+
+    if (m_bUseMultiLine)
+        RenderPortableMultiline(display, iLineHeight);
+    else
+        RenderPortableSingleLine(display, iLineHeight);
+}
+
+void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int iLineHeight)
+{
+    // Horizontal scroll: never start past the caret, and advance the first
+    // visible character until the caret fits inside the box width.
+    if (m_iFirstVisible > m_iCaret) m_iFirstVisible = m_iCaret;
+    if (m_iFirstVisible < 0) m_iFirstVisible = 0;
+    while (m_iFirstVisible < m_iCaret &&
+        MeasureWidth(display.c_str() + m_iFirstVisible, m_iCaret - m_iFirstVisible) > m_iWidth)
+    {
+        ++m_iFirstVisible;
     }
 
     // Selection highlight, clamped to the visible window.
@@ -4164,7 +4439,7 @@ void CUITextInputBox::RenderPortable()
     }
 
     // Visible text.
-    const int iVisibleLen = iLength - m_iFirstVisible;
+    const int iVisibleLen = static_cast<int>(display.length()) - m_iFirstVisible;
     if (iVisibleLen > 0)
     {
         g_pRenderText->SetBgColor(0);
@@ -4184,6 +4459,82 @@ void CUITextInputBox::RenderPortable()
         RenderColor(m_iPos_x + iCaretX, m_iPos_y, CARET_WIDTH_PX, iLineHeight);
         EndRenderColor();
     }
+}
+
+void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int iLineHeight)
+{
+    std::vector<PortableLine> lines;
+    LayoutLines(display, lines);
+
+    const int iTotalLines = static_cast<int>(lines.size());
+    const int iVisibleLines = VisibleLineCount(iLineHeight);
+    m_iNumLines = iVisibleLines;
+
+    // Vertical scroll: keep the caret line within the visible window.
+    const int iCaretLine = CaretToLine(lines);
+    if (iCaretLine < m_iScrollLine) m_iScrollLine = iCaretLine;
+    if (iCaretLine >= m_iScrollLine + iVisibleLines) m_iScrollLine = iCaretLine - iVisibleLines + 1;
+    const int iMaxScroll = (iTotalLines > iVisibleLines) ? (iTotalLines - iVisibleLines) : 0;
+    if (m_iScrollLine > iMaxScroll) m_iScrollLine = iMaxScroll;
+    if (m_iScrollLine < 0) m_iScrollLine = 0;
+
+    const bool bFocused = (s_pFocusedPortable == this);
+    const bool bBlinkOn = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / CARET_BLINK_MS) % 2 == 0;
+
+    const int iSelStart = SelectionStart();
+    const int iSelEnd = SelectionEnd();
+
+    g_pRenderText->SetBgColor(0);
+
+    const int iLast = m_iScrollLine + iVisibleLines;
+    for (int li = m_iScrollLine; li < iLast && li < iTotalLines; ++li)
+    {
+        const PortableLine& line = lines[li];
+        const int y = m_iPos_y + (li - m_iScrollLine) * iLineHeight;
+        const wchar_t* lineText = display.c_str() + line.start;
+        const int lineLen = line.end - line.start;
+
+        // Selection highlight for the part of this line inside the selection.
+        if (HasSelection() && iSelEnd > line.start && iSelStart <= line.end)
+        {
+            const int a = (iSelStart > line.start) ? iSelStart : line.start;
+            const int b = (iSelEnd < line.end) ? iSelEnd : line.end;
+            if (b >= a)
+            {
+                int x0 = MeasureWidth(lineText, a - line.start);
+                int x1 = MeasureWidth(lineText, b - line.start);
+                if (x1 > m_iWidth) x1 = m_iWidth;
+                if (x1 > x0)
+                {
+                    EnableAlphaTest();
+                    glColor4ub(GetRed(m_dwSelectBackColor), GetGreen(m_dwSelectBackColor), GetBlue(m_dwSelectBackColor), GetAlpha(m_dwSelectBackColor));
+                    RenderColor(m_iPos_x + x0, y, x1 - x0, iLineHeight);
+                    EndRenderColor();
+                }
+            }
+        }
+
+        if (lineLen > 0)
+        {
+            const std::wstring lineStr(lineText, lineLen);
+            g_pRenderText->SetTextColor(m_dwTextColor);
+            g_pRenderText->RenderText(m_iPos_x, y, lineStr.c_str(), m_iWidth, iLineHeight, RT3_SORT_LEFT);
+        }
+
+        // Caret on this line.
+        if (bFocused && bBlinkOn && m_iCaret >= line.start && iCaretLine == li)
+        {
+            int iCaretX = MeasureWidth(lineText, m_iCaret - line.start);
+            if (iCaretX > m_iWidth) iCaretX = m_iWidth;
+            EnableAlphaTest();
+            glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
+            RenderColor(m_iPos_x + iCaretX, y, CARET_WIDTH_PX, iLineHeight);
+            EndRenderColor();
+        }
+    }
+
+    if (iTotalLines > iVisibleLines)
+        RenderPortableScrollbar(iTotalLines, iVisibleLines);
 }
 
 void CUIChatInputBox::Init(HWND hWnd)
@@ -4226,15 +4577,9 @@ void CUIChatInputBox::TabMove(int iBoxNumber)
 {
     if (GetState() == UISTATE_HIDE) return;
     if (iBoxNumber == 1)
-    {
-        m_BuddyInputBox.GiveFocus();
-        PostMessage(m_BuddyInputBox.GetHandle(), EM_SETSEL, (WPARAM)0, (LPARAM)-1);
-    }
+        m_BuddyInputBox.GiveFocus(TRUE);
     else
-    {
-        m_TextInputBox.GiveFocus();
-        PostMessage(m_TextInputBox.GetHandle(), EM_SETSEL, (WPARAM)0, (LPARAM)-1);
-    }
+        m_TextInputBox.GiveFocus(TRUE);
 }
 
 void CUIChatInputBox::GetTexts(wchar_t* pText, wchar_t* pBuddyText)
@@ -4297,18 +4642,6 @@ void CUIChatInputBox::MoveHistory(int iDegree)
 {
     if (m_HistoryList.empty() == TRUE) return;
 
-    HIMC hIMC = ImmGetContext(m_TextInputBox.GetHandle());
-    if (hIMC != nullptr)
-    {
-        wchar_t cComText[MAX_TEXT_LENGTH + 1] = { 0 };
-        ImmGetCompositionString(hIMC, GCS_COMPSTR, cComText, MAX_TEXT_LENGTH);
-        if (cComText[0] != '\0')
-            return;
-
-        ImmReleaseContext(m_TextInputBox.GetHandle(), hIMC);
-    }
-    else return;
-
     if (iDegree == 10000)
     {
         m_CurrentHistoryLine = m_HistoryList.begin();
@@ -4325,7 +4658,6 @@ void CUIChatInputBox::MoveHistory(int iDegree)
                 if (m_bHistoryMode == TRUE)
                 {
                     SetText(TRUE, m_szTempText, FALSE, nullptr);
-                    SendMessage(m_TextInputBox.GetHandle(), EM_SETSEL, (WPARAM)10000, (LPARAM)-1);
                     m_TextInputBox.m_caretTimer.ResetTimer();
                     m_bHistoryMode = FALSE;
                 }
@@ -4351,7 +4683,6 @@ void CUIChatInputBox::MoveHistory(int iDegree)
         if (m_CurrentHistoryLine == m_HistoryList.end()) --m_CurrentHistoryLine;
     }
     SetText(TRUE, *m_CurrentHistoryLine, FALSE, nullptr);
-    SendMessage(m_TextInputBox.GetHandle(), EM_SETSEL, (WPARAM)10000, (LPARAM)-1);
     m_TextInputBox.m_caretTimer.ResetTimer();
 }
 

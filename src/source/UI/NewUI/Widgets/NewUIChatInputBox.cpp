@@ -803,8 +803,10 @@ float SEASON3B::CNewUIChatInputBox::GetKeyEventOrder()
 
 void SEASON3B::CNewUIChatInputBox::OpenningProcess()
 {
-    m_pChatInputBox->GiveFocus();
+    // Set the state before focusing: a portable field ignores GiveFocus() while
+    // still hidden, so focusing after showing lets Enter-to-open type right away.
     m_pChatInputBox->SetState(UISTATE_NORMAL);
+    m_pChatInputBox->GiveFocus();
     m_pChatInputBox->SetText(L"");
 
     if (m_bWhisperSend == true)

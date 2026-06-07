@@ -861,7 +861,13 @@ public:
     virtual void SetText(const wchar_t* pszText);
     virtual void GetText(wchar_t* pszText, int iGetLength = MAX_TEXT_LENGTH);
 
-    HWND GetHandle() { return m_hEditWnd; }
+    // For a portable box there is no Win32 EDIT child, so GetHandle() returns a
+    // stable per-instance token instead. It is only used as a focus identity by
+    // the NewUI "related window" routing (compared, never messaged), which lets
+    // that routing keep working unchanged: a focused field's owning widget is
+    // the only one that receives key events, so game hotkeys stay quiet while
+    // the player is typing.
+    HWND GetHandle() { return m_bPortable ? reinterpret_cast<HWND>(this) : m_hEditWnd; }
     HWND GetParentHandle() { return m_hParentWnd; }
     BOOL HaveFocus() { return m_bPortable ? (s_pFocusedPortable == this) : (GetHandle() == GetFocus()); }
     BOOL UseMultiline() { return m_bUseMultiLine; }
@@ -906,8 +912,21 @@ protected:
     void WriteText(int iOffset, int iWidth, int iHeight);
     void UploadText(int sx, int sy, int Width, int Height);
 
-    // Portable single-line implementation (issue #447).
+    // Portable text field implementation (issue #447).
+    struct PortableLine { int start; int end; };  // [start,end) buffer indices; end excludes a wrapped space/newline
+
     void RenderPortable();
+    BOOL DoPortableMouse();
+    std::wstring BuildDisplay() const;  // text with the password mask applied
+    void RenderPortableSingleLine(const std::wstring& display, int iLineHeight);
+    void RenderPortableMultiline(const std::wstring& display, int iLineHeight);
+    void RenderPortableScrollbar(int iTotalLines, int iVisibleLines);
+    void LayoutLines(const std::wstring& display, std::vector<PortableLine>& lines) const;
+    int  CaretToLine(const std::vector<PortableLine>& lines) const;
+    // Buffer index on a line whose rendered x (reference px) is nearest targetX.
+    int  IndexAtLineX(const std::wstring& display, const PortableLine& line, int targetX) const;
+    int  LineHeightPx() const;
+    int  VisibleLineCount(int iLineHeight) const;
     void MoveCaret(int iNewCaret, bool bExtendSelection);
     void InsertChar(wchar_t ch);
     bool HasSelection() const { return m_iSelAnchor != m_iCaret; }
@@ -915,6 +934,7 @@ protected:
     int  SelectionEnd() const { return m_iSelAnchor < m_iCaret ? m_iCaret : m_iSelAnchor; }
     // Width in reference pixels of the first iLength chars rendered in the font.
     int  MeasureWidth(const wchar_t* pszText, int iLength) const;
+    HFONT CurrentFont() const;  // live handle for m_fontKind
 
 public:
     WNDPROC m_hOldProc;
@@ -929,14 +949,20 @@ protected:
     bool m_bSetText = false;
     std::wstring m_sTextToSet;
 
-    // Portable single-line state (issue #447); only used when m_bPortable.
-    bool m_bPortable = false;
+    // Portable state (issue #447). Portable is now the default for every box;
+    // the EDIT-backed path is dormant and removed in a follow-up step.
+    bool m_bPortable = true;
     std::wstring m_portableText;
     int m_iCaret = 0;            // caret index in [0, length]
     int m_iSelAnchor = 0;       // selection anchor; equals caret when no selection
-    int m_iFirstVisible = 0;    // first rendered character (horizontal scroll)
+    int m_iFirstVisible = 0;    // first rendered character (single-line horizontal scroll)
+    int m_iScrollLine = 0;      // first visible wrapped line (multiline vertical scroll)
     int m_iMaxLength = 0;       // text length limit (0 = unlimited)
-    HFONT m_hFont = nullptr;    // font used for measuring and rendering
+    // Which global font this box draws with. Stored by kind (not by HFONT)
+    // because ReinitializeFonts() deletes and recreates the handles on a
+    // resolution change; CurrentFont() re-resolves the live handle each frame.
+    enum class PortableFontKind { Default, Bold, Big, Fix };
+    PortableFontKind m_fontKind = PortableFontKind::Default;
     static CUITextInputBox* s_pFocusedPortable;
 
     CUITextInputBox* m_pTabTarget;

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "UI/NewUI/NewUIManager.h"
+#include "UI/Legacy/UIControls.h"  // CUITextInputBox::GetFocusedPortable (issue #447)
 
 
 using namespace SEASON3B;
@@ -147,6 +148,14 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
 
     auto vecUI = m_vecUI;
 
+    // Portable text fields (issue #447) don't take Win32 focus, so GetFocus()
+    // can't tell which widget owns the keyboard. When a field is focused, use
+    // its stable identity (matches the owning widget's GetRelatedWnd(), which it
+    // set to the same handle); otherwise fall back to the window focus. This
+    // keeps game hotkeys from firing while the player is typing.
+    CUITextInputBox* pFocusedField = CUITextInputBox::GetFocusedPortable();
+    const HWND hFocus = pFocusedField ? reinterpret_cast<HWND>(pFocusedField) : GetFocus();
+
     auto vi = vecUI.begin();
     for (; vi != vecUI.end(); vi++)
     {
@@ -156,7 +165,7 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
             hRelatedWnd = g_hWnd;
         }
 
-        HWND hWnd = GetFocus();
+        HWND hWnd = hFocus;
 
         if ((*vi)->IsEnabled() && hWnd == hRelatedWnd)
         {
@@ -287,7 +296,7 @@ bool SEASON3B::CNewUIManager::CompareKeyEventOrder(INewUIBase* pObj1, INewUIBase
 int SEASON3B::CNewUIManager::GetShowUICnt()
 {
     int m_nShowUICnt = 0;
-    // ÀÏºÎ Æ¯Á¤ ÀÎÅÍÆäÀÌ½º°¡ ¸î°³ ¿­·ÁÀÖ´ÂÁö
+    // ï¿½Ïºï¿½ Æ¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½î°³ ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½
     for (int i = INTERFACE_PARTY; i < INTERFACE_CHARACTER + 1; ++i)
     {
         if (IsInterfaceVisible(i))
