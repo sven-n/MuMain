@@ -2,7 +2,7 @@
 
 // SceneCommon.h - Shared utilities used by multiple scenes
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 #include "Engine/Object/ZzzInfomation.h"  // For MAX_CHARACTERS_PER_ACCOUNT
 
 //=============================================================================

@@ -11,7 +11,7 @@
 #include <cwchar>
 
 #ifdef _WIN32
-#include "windows.h"
+#include "Core/Platform/WinCompat.h"
 #define symLoad GetProcAddress
 #else
 #include "dlfcn.h"

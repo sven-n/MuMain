@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <string>
 #include <vector>
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 class GameConfig
 {

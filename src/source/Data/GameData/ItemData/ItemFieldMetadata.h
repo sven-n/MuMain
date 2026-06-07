@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 #include "ItemStructs.h"
 #include "ItemFieldDefs.h"
 #include "Data/GameData/Common/FieldMetadataHelper.h"

@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "GameConfig.h"
 
+#ifdef _WIN32
 #include <imagehlp.h>
+#endif
 
 #include "GameConfigConstants.h"
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 GameConfig& GameConfig::GetInstance()
 {

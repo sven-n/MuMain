@@ -1,6 +1,6 @@
 #pragma once
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 #include "Data/Translation/MultiLanguage.h"
 
 // Forward declarations for constants

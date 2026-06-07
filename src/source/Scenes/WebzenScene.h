@@ -2,7 +2,7 @@
 
 // WebzenScene.h - Splash screen scene
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 // Splash screen scene
 void WebzenScene(HDC hDC);

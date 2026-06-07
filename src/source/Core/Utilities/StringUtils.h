@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 namespace StringUtils
 {

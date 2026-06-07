@@ -1,6 +1,6 @@
 #pragma once
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 #include <memory>
 #include <functional>
 

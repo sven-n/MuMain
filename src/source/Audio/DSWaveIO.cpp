@@ -4,8 +4,10 @@
 #include <cwchar>
 #include <cstring>
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
+#ifdef _WIN32
 #include <mmsystem.h>
+#endif
 
 // Undefine the editor redirect macro so we can use std::fwprintf directly
 // to log to both stderr and the in-game editor console.

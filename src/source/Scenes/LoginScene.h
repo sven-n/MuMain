@@ -2,7 +2,7 @@
 
 // LoginScene.h - Login scene management
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 #include "Render/Textures/ZzzOpenglUtil.h"  // For vec3_t
 
 // Login scene lifecycle
