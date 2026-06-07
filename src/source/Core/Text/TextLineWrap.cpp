@@ -3,6 +3,7 @@
 #include <string>
 #include <cwchar>
 #include <cstring>
+#include "Core/Platform/SecureCrt.h"  // wcsncpy_s / _TRUNCATE on non-Windows (#462)
 
 namespace
 {
