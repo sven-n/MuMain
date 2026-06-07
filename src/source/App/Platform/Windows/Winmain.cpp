@@ -865,15 +865,36 @@ namespace
         }
     }
 
+    // UTF-8 <-> UTF-16 conversions sized to the input, so text of any length
+    // (typed, copied or pasted) round-trips without truncation (issue #447).
+    std::wstring Utf8ToWide(const char* utf8)
+    {
+        if (utf8 == nullptr) return std::wstring();
+        const int needed = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, nullptr, 0);
+        if (needed <= 1) return std::wstring();  // <=1 means empty or error
+        std::wstring wide(needed - 1, L'\0');  // needed includes the null terminator
+        MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wide.data(), needed);
+        return wide;
+    }
+
+    std::string WideToUtf8(const std::wstring& wide)
+    {
+        if (wide.empty()) return std::string();
+        const int needed = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (needed <= 1) return std::string();  // <=1 means empty or error
+        std::string utf8(needed - 1, '\0');
+        WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), needed, nullptr, nullptr);
+        return utf8;
+    }
+
     void FeedPortableTextInput(const char* utf8)
     {
         auto* box = CUITextInputBox::GetFocusedPortable();
         if (box == nullptr || utf8 == nullptr) return;
 
-        wchar_t wide[64] = {};
-        const int written = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wide, _countof(wide));
-        if (written > 0)
-            box->OnTextInput(wide);
+        const std::wstring wide = Utf8ToWide(utf8);
+        if (!wide.empty())
+            box->OnTextInput(wide.c_str());
     }
 
     // Handle a key for the focused portable field. Returns true if consumed.
@@ -900,11 +921,13 @@ namespace
                 const std::wstring selection = box->GetSelectedText();
                 if (!selection.empty())
                 {
-                    char utf8[256] = {};
-                    WideCharToMultiByte(CP_UTF8, 0, selection.c_str(), -1, utf8, _countof(utf8), nullptr, nullptr);
-                    SDL_SetClipboardText(utf8);
-                    if (key.scancode == SDL_SCANCODE_X)
-                        box->DeleteSelection();
+                    const std::string utf8 = WideToUtf8(selection);
+                    if (!utf8.empty())
+                    {
+                        SDL_SetClipboardText(utf8.c_str());
+                        if (key.scancode == SDL_SCANCODE_X)
+                            box->DeleteSelection();
+                    }
                 }
                 return true;
             }
@@ -913,9 +936,9 @@ namespace
                 char* clip = SDL_GetClipboardText();
                 if (clip != nullptr)
                 {
-                    wchar_t wide[256] = {};
-                    if (MultiByteToWideChar(CP_UTF8, 0, clip, -1, wide, _countof(wide)) > 0)
-                        box->OnTextInput(wide);
+                    const std::wstring wide = Utf8ToWide(clip);
+                    if (!wide.empty())
+                        box->OnTextInput(wide.c_str());
                     SDL_free(clip);
                 }
                 return true;

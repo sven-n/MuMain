@@ -296,7 +296,7 @@ bool SEASON3B::CNewUIManager::CompareKeyEventOrder(INewUIBase* pObj1, INewUIBase
 int SEASON3B::CNewUIManager::GetShowUICnt()
 {
     int m_nShowUICnt = 0;
-    // �Ϻ� Ư�� �������̽��� � �����ִ���
+    // How many of certain interfaces are open
     for (int i = INTERFACE_PARTY; i < INTERFACE_CHARACTER + 1; ++i)
     {
         if (IsInterfaceVisible(i))

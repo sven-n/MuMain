@@ -3439,14 +3439,15 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
     case VK_DOWN:
         if (m_bUseMultiLine)
         {
+            const std::wstring display = BuildDisplay();
             std::vector<PortableLine> lines;
-            LayoutLines(m_portableText, lines);
+            LayoutLines(display, lines);
             const int cur = CaretToLine(lines);
             const int target = cur + (iVirtualKey == VK_UP ? -1 : 1);
             if (target >= 0 && target < static_cast<int>(lines.size()))
             {
-                const int caretX = MeasureWidth(m_portableText.c_str() + lines[cur].start, m_iCaret - lines[cur].start);
-                MoveCaret(IndexAtLineX(m_portableText, lines[target], caretX), bShift);
+                const int caretX = MeasureWidth(display.c_str() + lines[cur].start, m_iCaret - lines[cur].start);
+                MoveCaret(IndexAtLineX(display, lines[target], caretX), bShift);
             }
         }
         break;
@@ -3633,12 +3634,20 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
 {
     // Horizontal scroll: never start past the caret, and advance the first
     // visible character until the caret fits inside the box width.
+    const int iLength = static_cast<int>(display.length());
     if (m_iFirstVisible > m_iCaret) m_iFirstVisible = m_iCaret;
     if (m_iFirstVisible < 0) m_iFirstVisible = 0;
     while (m_iFirstVisible < m_iCaret &&
         MeasureWidth(display.c_str() + m_iFirstVisible, m_iCaret - m_iFirstVisible) > m_iWidth)
     {
         ++m_iFirstVisible;
+    }
+    // Recede left when the text from one char earlier still fits, so deleting or
+    // moving the caret left brings hidden left-side text back into view.
+    while (m_iFirstVisible > 0 &&
+        MeasureWidth(display.c_str() + m_iFirstVisible - 1, iLength - (m_iFirstVisible - 1)) <= m_iWidth)
+    {
+        --m_iFirstVisible;
     }
 
     // Selection highlight, clamped to the visible window.
