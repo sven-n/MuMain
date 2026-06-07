@@ -883,10 +883,16 @@ public:
 
     // Input fed from the SDL event loop.
     void OnTextInput(const wchar_t* pszText);            // committed characters
+    void OnTextEditing(const wchar_t* pszText);          // IME composition preview (uncommitted)
     void OnEditKey(int iVirtualKey, bool bCtrl, bool bShift); // navigation/erase
     void SelectAll();
     std::wstring GetSelectedText() const;
     void DeleteSelection();
+
+    // Caret rectangle in reference pixels (screen space), for positioning the IME
+    // candidate window. Returns false when this box isn't the focused field.
+    // Valid after the box has rendered at least once since gaining focus.
+    bool GetCaretArea(int& x, int& y, int& w, int& h) const;
 
 protected:
     virtual BOOL DoMouseAction();
@@ -897,11 +903,14 @@ protected:
     void RenderPortable();
     BOOL DoPortableMouse();
     std::wstring BuildDisplay() const;  // text with the password mask applied
-    void RenderPortableSingleLine(const std::wstring& display, int iLineHeight);
-    void RenderPortableMultiline(const std::wstring& display, int iLineHeight);
+    // The render helpers take the string to draw, the caret index within it, and
+    // the IME composition span [compStart, compEnd) to underline (compStart < 0
+    // = none). With composition active the caret/scroll follow the preview text.
+    void RenderPortableSingleLine(const std::wstring& display, int iCaret, int iLineHeight, int compStart, int compEnd);
+    void RenderPortableMultiline(const std::wstring& display, int iCaret, int iLineHeight, int compStart, int compEnd);
     void RenderPortableScrollbar(int iTotalLines, int iVisibleLines);
     void LayoutLines(const std::wstring& display, std::vector<PortableLine>& lines) const;
-    int  CaretToLine(const std::vector<PortableLine>& lines) const;
+    int  CaretToLine(const std::vector<PortableLine>& lines, int iCaret) const;
     // Buffer index on a line whose rendered x (reference px) is nearest targetX.
     int  IndexAtLineX(const std::wstring& display, const PortableLine& line, int targetX) const;
     int  LineHeightPx() const;
@@ -923,6 +932,10 @@ protected:
 
     // Portable text field state (issue #447).
     std::wstring m_portableText;
+    std::wstring m_composition;  // IME preedit shown at the caret, not yet committed
+    int m_iCaretAreaX = 0;       // last rendered caret rect (reference px, screen space)
+    int m_iCaretAreaY = 0;       // for positioning the IME candidate window
+    int m_iCaretAreaH = 0;
     int m_iCaret = 0;            // caret index in [0, length]
     int m_iSelAnchor = 0;       // selection anchor; equals caret when no selection
     int m_iFirstVisible = 0;    // first rendered character (single-line horizontal scroll)

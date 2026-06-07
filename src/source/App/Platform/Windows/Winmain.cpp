@@ -1008,6 +1008,11 @@ MSG MainLoop()
                 // Committed characters for the focused portable text field (#447).
                 FeedPortableTextInput(event.text.text);
                 break;
+            case SDL_EVENT_TEXT_EDITING:
+                // IME composition preview for the focused portable field (#447).
+                if (auto* box = CUITextInputBox::GetFocusedPortable())
+                    box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
+                break;
             case SDL_EVENT_KEY_DOWN:
                 // Navigation/erase/clipboard for the focused portable field (#447).
                 FeedPortableKey(event.key);
@@ -1027,7 +1032,8 @@ MSG MainLoop()
         // focus, so SDL only emits SDL_EVENT_TEXT_INPUT while one is active (#447).
         {
             static bool s_textInputActive = false;
-            const bool wantTextInput = CUITextInputBox::GetFocusedPortable() != nullptr;
+            auto* focusedField = CUITextInputBox::GetFocusedPortable();
+            const bool wantTextInput = focusedField != nullptr;
             if (wantTextInput != s_textInputActive && g_sdlWindow != nullptr)
             {
                 if (wantTextInput)
@@ -1035,6 +1041,19 @@ MSG MainLoop()
                 else
                     SDL_StopTextInput(g_sdlWindow);
                 s_textInputActive = wantTextInput;
+            }
+
+            // Anchor the IME candidate window at the caret (reference px -> window
+            // px) so composition UI appears next to the text being typed (#447).
+            int cx, cy, cw, ch;
+            if (wantTextInput && g_sdlWindow != nullptr && focusedField->GetCaretArea(cx, cy, cw, ch))
+            {
+                const SDL_Rect area = {
+                    static_cast<int>(cx * g_fScreenRate_x),
+                    static_cast<int>(cy * g_fScreenRate_y),
+                    static_cast<int>(cw * g_fScreenRate_x),
+                    static_cast<int>(ch * g_fScreenRate_y) };
+                SDL_SetTextInputArea(g_sdlWindow, &area, 0);
             }
         }
 
