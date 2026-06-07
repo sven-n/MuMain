@@ -111,7 +111,7 @@ void LoadingScene(HDC hDC)
     }
 #endif
     UI::Reconnect::RenderDialog();
-    ::SwapBuffers(hDC);
+    PlatformSwapBuffers();
 
     SAFE_DELETE(rUIMng.m_pLoadingScene);
 

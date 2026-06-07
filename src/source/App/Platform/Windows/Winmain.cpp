@@ -186,6 +186,28 @@ GLvoid KillGLWindow(GLvoid)
     }
 }
 
+// Present the current GL frame. SDL owns the window/context, so swapping goes
+// through SDL_GL_SwapWindow instead of the Win32 ::SwapBuffers (issue #442).
+void PlatformSwapBuffers()
+{
+    if (g_sdlWindow)
+        SDL_GL_SwapWindow(g_sdlWindow);
+}
+
+// Monitor refresh rate (Hz) for the display the window is on, via SDL instead
+// of the Win32 GetDeviceCaps(VREFRESH) (issue #442). Falls back to 60.
+int GetFPSLimit()
+{
+    constexpr int DEFAULT_REFRESH_HZ = 60;
+    if (g_sdlWindow)
+    {
+        const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(SDL_GetDisplayForWindow(g_sdlWindow));
+        if (mode && mode->refresh_rate > 0.0f)
+            return static_cast<int>(mode->refresh_rate + 0.5f);
+    }
+    return DEFAULT_REFRESH_HZ;
+}
+
 BOOL GetFileNameOfFilePath(wchar_t* lpszFile, wchar_t* lpszPath)
 {
     auto iFind = (int)'\\';
