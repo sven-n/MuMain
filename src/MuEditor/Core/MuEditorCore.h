@@ -4,12 +4,16 @@
 
 #include "stdafx.h"
 
+struct SDL_Window;
+
 class CMuEditorCore
 {
 public:
     static CMuEditorCore& GetInstance();
 
-    void Initialize(HWND hwnd, HDC hdc);
+    // window/glContext are the SDL window and GL context for the ImGui SDL3
+    // backend (issue #442).
+    void Initialize(SDL_Window* window, void* glContext);
     void Shutdown();
     void Update();
     void Render();

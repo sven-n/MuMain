@@ -128,7 +128,7 @@ if(ENABLE_EDITOR)
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_widgets.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_win32.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_sdl3.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl2.cpp"
   )
 
@@ -136,6 +136,10 @@ if(ENABLE_EDITOR)
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends"
   )
+
+  # The SDL3 ImGui backend (imgui_impl_sdl3.cpp) needs the SDL3 headers; link the
+  # target so its include dirs propagate (issue #442).
+  target_link_libraries(imgui PUBLIC SDL3::SDL3)
 
   # The Win32 + OpenGL2 backends call straight into opengl32 (glOrtho,
   # glShadeModel, ...) and dwmapi. Declaring them as PUBLIC dependencies of
