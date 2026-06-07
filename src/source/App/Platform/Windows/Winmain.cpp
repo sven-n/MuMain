@@ -201,9 +201,18 @@ int GetFPSLimit()
     constexpr int DEFAULT_REFRESH_HZ = 60;
     if (g_sdlWindow)
     {
-        const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(SDL_GetDisplayForWindow(g_sdlWindow));
-        if (mode && mode->refresh_rate > 0.0f)
-            return static_cast<int>(mode->refresh_rate + 0.5f);
+        // Before the window is mapped to a display, SDL_GetDisplayForWindow
+        // returns 0; fall back to the primary display so a high-refresh monitor
+        // isn't capped at the default 60 Hz.
+        SDL_DisplayID displayID = SDL_GetDisplayForWindow(g_sdlWindow);
+        if (displayID == 0)
+            displayID = SDL_GetPrimaryDisplay();
+        if (displayID != 0)
+        {
+            const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(displayID);
+            if (mode && mode->refresh_rate > 0.0f)
+                return static_cast<int>(mode->refresh_rate + 0.5f);
+        }
     }
     return DEFAULT_REFRESH_HZ;
 }
