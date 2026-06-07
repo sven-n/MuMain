@@ -67,7 +67,6 @@
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
-#include "../MuEditor/Core/MuEditorCore.h"
 #endif
 
 CUIMercenaryInputBox* g_pMercenaryInputBox = nullptr;
@@ -1001,7 +1000,9 @@ MSG MainLoop()
         {
 #ifdef _EDITOR
             // Feed every event to the editor's ImGui SDL3 backend (issue #442).
-            ImGui_ImplSDL3_ProcessEvent(&event);
+            // Guard on an active context: editor init can fail or be shut down.
+            if (ImGui::GetCurrentContext() != nullptr)
+                ImGui_ImplSDL3_ProcessEvent(&event);
 #endif
             switch (event.type)
             {
@@ -1580,6 +1581,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     // Teardown that used to run in WM_DESTROY, now after the loop exits (SDL owns
     // the window/GL context, so they must not be destroyed from a message).
     DestroySound();
+#ifdef _EDITOR
+    // Shut the editor's ImGui backends down while the GL context and SDL window
+    // are still alive; the static destructor runs too late (after KillGLWindow).
+    g_MuEditorCore.Shutdown();
+#endif
     KillGLWindow();
     DestroyWindow();
 

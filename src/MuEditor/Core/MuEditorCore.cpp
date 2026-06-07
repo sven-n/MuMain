@@ -57,6 +57,13 @@ void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
     if (m_bInitialized)
         return;
 
+    if (window == nullptr || glContext == nullptr)
+    {
+        fwprintf(stderr, L"[MuEditor] Initialize failed: window or glContext is null\n");
+        fflush(stderr);
+        return;
+    }
+
     fwprintf(stderr, L"[MuEditor] Initialize() called\n");
     fflush(stderr);
 
@@ -240,8 +247,21 @@ void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
     style.WindowRounding = 0.0f;
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.0f);
 
-    ImGui_ImplSDL3_InitForOpenGL(window, glContext);
-    ImGui_ImplOpenGL2_Init();
+    if (!ImGui_ImplSDL3_InitForOpenGL(window, glContext))
+    {
+        fwprintf(stderr, L"[MuEditor] ImGui_ImplSDL3_InitForOpenGL failed\n");
+        fflush(stderr);
+        ImGui::DestroyContext();
+        return;
+    }
+    if (!ImGui_ImplOpenGL2_Init())
+    {
+        fwprintf(stderr, L"[MuEditor] ImGui_ImplOpenGL2_Init failed\n");
+        fflush(stderr);
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
+        return;
+    }
 
     fwprintf(stderr, L"[MuEditor] ImGui backends initialized\n");
     fflush(stderr);
