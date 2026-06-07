@@ -283,12 +283,18 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
             || ScreenY > (REFERENCE_HEIGHT + 100))
             continue;
 
-        const auto steps = 20;
-        const auto borderWidth = 2.f;
-        const auto widthPerStep = 4;
-        const auto stepSeparatorWidth = 1;
-        const auto stepsWidth = steps * widthPerStep - 2 * stepSeparatorWidth;
-        const auto totalWidth = stepsWidth + borderWidth * 2;
+        // Bar width is fixed at ~3/7 of the original; the segment COUNT is
+        // independent of width (widthPerStep is derived), so tuning `steps`
+        // changes only segment thickness, not the bar size. 8 ~= original thickness.
+        const auto barWidthScale = 3.f / 7.f;
+        const auto steps = 8;                             // segment count (HP granularity)
+        const auto borderHeight = 2.f;                    // vertical inset — unchanged
+        const auto borderWidth = 2.f * barWidthScale;     // horizontal inset
+        const auto stepSeparatorWidth = 1.f * barWidthScale;
+        const auto segmentSpan = 80.f * barWidthScale;    // total span of segments (orig 20*4px), width-fixed
+        const auto widthPerStep = segmentSpan / steps;    // derived: fewer steps = wider segments
+        const auto stepsWidth = segmentSpan - 2.f * stepSeparatorWidth;  // inner track
+        const auto totalWidth = stepsWidth + borderWidth * 2.f;
 
         auto hpBarX = ScreenX - (int)(totalWidth / 2);
         auto hpBarY = ScreenY;
@@ -302,7 +308,7 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
         RenderColor((float)hpBarX, (float)hpBarY, totalWidth, 5.f);
 
         glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
-        RenderColor((float)(hpBarX + borderWidth), (float)(hpBarY + borderWidth), stepsWidth, 1.f);
+        RenderColor((float)(hpBarX + borderWidth), (float)(hpBarY + borderHeight), stepsWidth, 1.f);
 
         float health = c->HealthStatus;
         if (health < 0.0f) health = 1.0f;
@@ -314,7 +320,7 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
         {
             RenderColor(
                 (float)(hpBarX + borderWidth + (k * widthPerStep)),
-                (float)(hpBarY + borderWidth),
+                (float)(hpBarY + borderHeight),
                 widthPerStep - stepSeparatorWidth,
                 2.f);
         }
