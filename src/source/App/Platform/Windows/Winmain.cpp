@@ -1053,7 +1053,15 @@ MSG MainLoop()
                     static_cast<int>(cy * g_fScreenRate_y),
                     static_cast<int>(cw * g_fScreenRate_x),
                     static_cast<int>(ch * g_fScreenRate_y) };
-                SDL_SetTextInputArea(g_sdlWindow, &area, 0);
+                // Only push when the caret rect actually moves; resending every
+                // frame is wasteful and can flicker the candidate window.
+                static SDL_Rect s_lastArea = { 0, 0, 0, 0 };
+                if (area.x != s_lastArea.x || area.y != s_lastArea.y ||
+                    area.w != s_lastArea.w || area.h != s_lastArea.h)
+                {
+                    SDL_SetTextInputArea(g_sdlWindow, &area, 0);
+                    s_lastArea = area;
+                }
             }
         }
 

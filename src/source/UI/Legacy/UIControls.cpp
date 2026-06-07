@@ -3625,8 +3625,12 @@ void CUITextInputBox::RenderPortable()
 
     const std::wstring base = BuildDisplay();
     const int iBaseLen = static_cast<int>(base.length());
-    if (m_iCaret > iBaseLen) m_iCaret = iBaseLen;
-    if (m_iSelAnchor > iBaseLen) m_iSelAnchor = iBaseLen;
+    // Clamp both ends before the substr splice below: a negative index would
+    // wrap to a huge size_t and throw std::out_of_range.
+    if (m_iCaret < 0) m_iCaret = 0;
+    else if (m_iCaret > iBaseLen) m_iCaret = iBaseLen;
+    if (m_iSelAnchor < 0) m_iSelAnchor = 0;
+    else if (m_iSelAnchor > iBaseLen) m_iSelAnchor = iBaseLen;
 
     // Splice the IME composition (if any) into the displayed text at the caret.
     // It is not committed to m_portableText; the caret and scroll follow its end,
@@ -3671,7 +3675,8 @@ void CUITextInputBox::RenderPortable()
 void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int iCaret, int iLineHeight, int compStart, int compEnd)
 {
     const int iLength = static_cast<int>(display.length());
-    if (iCaret > iLength) iCaret = iLength;
+    if (iCaret < 0) iCaret = 0;
+    else if (iCaret > iLength) iCaret = iLength;
 
     // Horizontal scroll: never start past the caret, advance until it fits, then
     // recede left so deleting / moving left brings hidden text back into view.
