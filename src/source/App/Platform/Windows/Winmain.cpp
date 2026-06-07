@@ -99,7 +99,6 @@ HGLRC     g_hRC = nullptr;
 // EDIT-control text boxes) keeps working until those are migrated.
 static SDL_Window*   g_sdlWindow = nullptr;
 static SDL_GLContext g_sdlGLContext = nullptr;
-static WNDPROC       g_sdlOriginalWndProc = nullptr;
 HFONT     g_hFont = nullptr;
 HFONT     g_hFontBold = nullptr;
 HFONT     g_hFontBig = nullptr;
@@ -469,11 +468,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         MessageBox(nullptr, I18N::Game::Error9AHackingToolHasBeen, L"Error", MB_OK);
         PostMessage(g_hWnd, WM_CLOSE, 0, 0);
         break;
-    case WM_CTLCOLOREDIT:
-        SetBkColor((HDC)wParam, RGB(0, 0, 0));
-        SetTextColor((HDC)wParam, RGB(255, 255, 255));
-        return (LRESULT)GetStockObject(BLACK_BRUSH);
-        break;
     case WM_ERASEBKGND:
         return TRUE;
         break;
@@ -717,25 +711,6 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
 
     WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     return true;
-}
-
-// SDL owns the window procedure; the message hook above cannot return a value to
-// Windows. WM_CTLCOLOREDIT is sent synchronously to the window proc (it bypasses
-// the queue and the hook) and its return value selects the brush, so we subclass
-// SDL's window proc to color the legacy EDIT text boxes (black background, white
-// text) and forward everything else to SDL. Transitional until the EDIT controls
-// are replaced (issue #447).
-static LRESULT CALLBACK Win32WindowSubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    if (msg == WM_CTLCOLOREDIT)
-    {
-        SetBkColor(reinterpret_cast<HDC>(wParam), RGB(0, 0, 0));
-        SetTextColor(reinterpret_cast<HDC>(wParam), RGB(255, 255, 255));
-        return reinterpret_cast<LRESULT>(GetStockObject(BLACK_BRUSH));
-    }
-    return g_sdlOriginalWndProc
-        ? CallWindowProcW(g_sdlOriginalWndProc, hwnd, msg, wParam, lParam)
-        : DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 #endif
 
@@ -1175,17 +1150,8 @@ void ReinitializeFonts()
 
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
     RefreshInventoryEquipmentSlots();
-
-    // The chat input is built on native Edit controls backed by GDI DIB
-    // sections sized by g_fScreenRate at Init time. A plain SetFont() isn't
-    // enough after a resolution change — the DIB buffer is still at the old
-    // pixel scale, so rendered text gets upscaled from a stale bitmap and
-    // comes out unreadable. Rebuild the DC/bitmap at the current scale.
-    if (g_pNewUISystem)
-    {
-        if (auto* chat = g_pNewUISystem->GetUI_NewChatInputBox())
-            chat->RebuildScaledResources();
-    }
+    // Text fields render through g_pRenderText and resolve their font by kind
+    // each frame, so they need no per-control rebuild after a resolution change.
 }
 
 DWORD GetDesktopBitsPerPel()
@@ -1394,14 +1360,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     // Drive the existing WndProc from SDL's Win32 messages (transitional, #442).
     SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
-
-    // Subclass SDL's window proc for messages whose return value must reach
-    // Windows (WM_CTLCOLOREDIT colors the legacy EDIT text boxes). Capture the
-    // original proc before installing ours: Windows can dispatch messages to the
-    // new proc synchronously during SetWindowLongPtrW, so g_sdlOriginalWndProc
-    // must already be set when the subclass first runs.
-    g_sdlOriginalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtrW(g_hWnd, GWLP_WNDPROC));
-    SetWindowLongPtrW(g_hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Win32WindowSubclassProc));
 
     SDL_RaiseWindow(g_sdlWindow);
     SetFocus(g_hWnd);

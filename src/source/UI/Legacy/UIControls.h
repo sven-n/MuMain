@@ -840,12 +840,6 @@ public:
 
     virtual void SetSize(int iWidth, int iHeight);
 
-    // Force-recreate the DC/bitmap and child edit window at the current
-    // g_fScreenRate using the stored reference dimensions. SetSize() early-returns
-    // when dimensions are unchanged, so it can't be used after a resolution change
-    // where the pixel scale shifted but reference dimensions stayed the same.
-    void RebuildScaledResources();
-
     virtual void Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength = 50, BOOL bIsPassword = FALSE);
     virtual void Render();
     virtual void GiveFocus(BOOL bSel = FALSE);
@@ -861,15 +855,14 @@ public:
     virtual void SetText(const wchar_t* pszText);
     virtual void GetText(wchar_t* pszText, int iGetLength = MAX_TEXT_LENGTH);
 
-    // For a portable box there is no Win32 EDIT child, so GetHandle() returns a
-    // stable per-instance token instead. It is only used as a focus identity by
-    // the NewUI "related window" routing (compared, never messaged), which lets
-    // that routing keep working unchanged: a focused field's owning widget is
-    // the only one that receives key events, so game hotkeys stay quiet while
-    // the player is typing.
-    HWND GetHandle() { return m_bPortable ? reinterpret_cast<HWND>(this) : m_hEditWnd; }
+    // There is no Win32 EDIT child; GetHandle() returns a stable per-instance
+    // token used only as a focus identity by the NewUI "related window" routing
+    // (compared, never messaged). That lets the routing keep working: a focused
+    // field's owning widget is the only one that receives key events, so game
+    // hotkeys stay quiet while the player is typing.
+    HWND GetHandle() { return reinterpret_cast<HWND>(this); }
     HWND GetParentHandle() { return m_hParentWnd; }
-    BOOL HaveFocus() { return m_bPortable ? (s_pFocusedPortable == this) : (GetHandle() == GetFocus()); }
+    BOOL HaveFocus() { return s_pFocusedPortable == this; }
     BOOL UseMultiline() { return m_bUseMultiLine; }
     virtual void SetTabTarget(CUITextInputBox* pTabTarget) { m_pTabTarget = pTabTarget; }
     CUITextInputBox* GetTabTarget() { return m_pTabTarget; }
@@ -878,27 +871,17 @@ public:
     virtual BOOL IsLocked() { return m_bLock; }
     BOOL IsPassword() { return m_bPasswordInput; }
 
-    virtual void SetIMEPosition();
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
     bool GetUseScrollbar() { return m_bUseScrollbarRender; }
     void SetUseScrollbar(bool _scrollbar = TRUE) { m_bUseScrollbarRender = _scrollbar; }
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 
-    // Portable single-line text field (issue #447). When enabled, the control
-    // owns its text buffer and renders through g_pRenderText instead of hosting
-    // a Win32 child EDIT control; input is fed from the SDL event loop. Call
-    // EnablePortableInput() before Init(). The EDIT path remains the default for
-    // boxes that have not opted in (multiline, chat, etc.) until later steps of
-    // the migration replace them too.
-    void EnablePortableInput() { m_bPortable = true; }
-    bool IsPortable() const { return m_bPortable; }
-
-    // The single portable box that currently owns keyboard input, or nullptr.
-    // The SDL event loop routes text/edit keys to it and starts/stops SDL text
-    // input based on whether one is focused.
+    // The single text field that currently owns keyboard input, or nullptr. The
+    // SDL event loop routes text/edit keys to it and starts/stops SDL text input
+    // based on whether one is focused (issue #447).
     static CUITextInputBox* GetFocusedPortable() { return s_pFocusedPortable; }
 
-    // Input fed from the SDL event loop (portable mode only).
+    // Input fed from the SDL event loop.
     void OnTextInput(const wchar_t* pszText);            // committed characters
     void OnEditKey(int iVirtualKey, bool bCtrl, bool bShift); // navigation/erase
     void SelectAll();
@@ -907,10 +890,6 @@ public:
 
 protected:
     virtual BOOL DoMouseAction();
-    void RenderScrollbar();
-
-    void WriteText(int iOffset, int iWidth, int iHeight);
-    void UploadText(int sx, int sy, int Width, int Height);
 
     // Portable text field implementation (issue #447).
     struct PortableLine { int start; int end; };  // [start,end) buffer indices; end excludes a wrapped space/newline
@@ -937,21 +916,12 @@ protected:
     HFONT CurrentFont() const;  // live handle for m_fontKind
 
 public:
-    WNDPROC m_hOldProc;
     CTimer m_caretTimer = { };
 
 protected:
     HWND m_hParentWnd;
-    HWND m_hEditWnd;
-    HDC m_hMemDC;
-    HBITMAP m_hBitmap;
-    BYTE* m_pFontBuffer;
-    bool m_bSetText = false;
-    std::wstring m_sTextToSet;
 
-    // Portable state (issue #447). Portable is now the default for every box;
-    // the EDIT-backed path is dormant and removed in a follow-up step.
-    bool m_bPortable = true;
+    // Portable text field state (issue #447).
     std::wstring m_portableText;
     int m_iCaret = 0;            // caret index in [0, length]
     int m_iSelAnchor = 0;       // selection anchor; equals caret when no selection
@@ -971,15 +941,8 @@ protected:
     DWORD m_dwBackColor;
     DWORD m_dwSelectBackColor;
 
-    float m_fCaretWidth;
-    float m_fCaretHeight;
-
     BOOL m_bPasswordInput;
     BOOL m_bLock;
-
-    BOOL m_bIsReady;
-    int m_iRealWindowPos_x;
-    int m_iRealWindowPos_y;
 
     BOOL m_bUseMultiLine;
     BOOL m_bScrollBtnClick;

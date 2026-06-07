@@ -84,7 +84,6 @@ void CLoginWin::Create()
     SAFE_DELETE(m_pUsernameInputBox);
 
     m_pUsernameInputBox = new CUITextInputBox;
-    m_pUsernameInputBox->EnablePortableInput();  // portable self-rendered field (#447)
     m_pUsernameInputBox->Init(g_hWnd, 140, 14, MAX_USERNAME_SIZE);
     m_pUsernameInputBox->SetBackColor(0, 0, 0, 25);
     m_pUsernameInputBox->SetTextColor(255, 255, 230, 210);
@@ -98,7 +97,6 @@ void CLoginWin::Create()
     SAFE_DELETE(m_pPasswordInputBox);
 
     m_pPasswordInputBox = new CUITextInputBox;
-    m_pPasswordInputBox->EnablePortableInput();  // portable self-rendered field (#447)
     m_pPasswordInputBox->Init(g_hWnd, 140, 14, MAX_PASSWORD_SIZE, TRUE);
     m_pPasswordInputBox->SetBackColor(0, 0, 0, 25);
     m_pPasswordInputBox->SetTextColor(255, 255, 230, 210);

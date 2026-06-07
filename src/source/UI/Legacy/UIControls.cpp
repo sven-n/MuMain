@@ -3020,23 +3020,13 @@ CUITextInputBox* CUITextInputBox::s_pFocusedPortable = nullptr;
 CUITextInputBox::CUITextInputBox()
 {
     m_hParentWnd = nullptr;
-    m_hEditWnd = nullptr;
-    m_hOldProc = nullptr;
-    m_hMemDC = nullptr;
-    m_hBitmap = nullptr;
-    m_pFontBuffer = nullptr;
 
     m_dwTextColor = _ARGB(255, 255, 255, 255);
     m_dwBackColor = _ARGB(255, 0, 0, 0);
     m_dwSelectBackColor = _ARGB(255, 150, 150, 150);
 
     m_caretTimer.ResetTimer();
-    m_fCaretWidth = 0;
-    m_fCaretHeight = 0;
 
-    m_iRealWindowPos_x = 0;
-    m_iRealWindowPos_y = 0;
-    m_bIsReady = FALSE;
     m_bLock = FALSE;
     m_bPasswordInput = FALSE;
 
@@ -3059,390 +3049,53 @@ CUITextInputBox::~CUITextInputBox()
 {
     if (s_pFocusedPortable == this)
         s_pFocusedPortable = nullptr;
-
-    if (m_hEditWnd != nullptr && m_hOldProc != nullptr)
-    {
-        SetWindowLongPtrW(m_hEditWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(m_hOldProc));
-        m_hOldProc = nullptr;
-    }
-
-    if (m_hEditWnd != nullptr)
-    {
-        DestroyWindow(m_hEditWnd);
-        m_hEditWnd = nullptr;
-    }
-    if (m_hMemDC != nullptr)
-    {
-        DeleteDC(m_hMemDC);
-        m_hMemDC = nullptr;
-    }
-    if (m_hBitmap != nullptr)
-    {
-        DeleteObject(m_hBitmap);
-        m_hBitmap = nullptr;
-    }
-}
-
-BOOL ClipboardCheck(HWND hWnd)
-{
-    BOOL bClipboardIsNumber = TRUE;
-    if (OpenClipboard(hWnd))
-    {
-        HGLOBAL hglb = GetClipboardData(CF_TEXT);
-        if (hglb) {
-            auto lpstr = (LPSTR)GlobalLock(hglb);
-            int iLength = strlen(lpstr);
-            for (int i = 0; i < iLength; ++i)
-            {
-                if (lpstr[i] < '0' || lpstr[i]>'9')
-                {
-                    bClipboardIsNumber = FALSE;
-                    break;
-                }
-            }
-            GlobalUnlock(hglb);
-        }
-        CloseClipboard();
-    }
-    else
-    {
-        bClipboardIsNumber = FALSE;
-    }
-    return bClipboardIsNumber;
-}
-
-LRESULT CALLBACK EditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    auto* pTextInputBox = reinterpret_cast<CUITextInputBox*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
-
-    if (pTextInputBox == nullptr)
-        return 0;
-
-    if (Core::Input::IsKeyDown(VK_UP)
-        || Core::Input::IsKeyDown(VK_DOWN)
-        || Core::Input::IsKeyDown(VK_LEFT)
-        || Core::Input::IsKeyDown(VK_RIGHT))
-    {
-        pTextInputBox->m_caretTimer.ResetTimer();
-    }
-
-    switch (msg)
-    {
-    case WM_SYSKEYDOWN:
-    {
-        return 0;
-    }
-    break;
-    case WM_CHAR:
-        pTextInputBox->m_caretTimer.ResetTimer();
-        switch (wParam)
-        {
-        case VK_ESCAPE:
-            return 0;
-            break;
-        case VK_RETURN:
-            if (g_pFriendMenu->IsHotkeyEnable() == TRUE)
-                break;
-            if (pTextInputBox->IsLocked() == TRUE || pTextInputBox->UseMultiline() == TRUE)
-                break;
-            if (pTextInputBox->GetParentUIID() == 0)
-            {
-                SendMessage(pTextInputBox->GetParentHandle(), msg, wParam, lParam);
-            }
-            else
-            {
-                g_pWindowMgr->SendUIMessageToWindow(pTextInputBox->GetParentUIID(), UI_MESSAGE_TEXTINPUT, 0, 0);
-            }
-            return 0;
-            break;
-        case VK_TAB:
-            if (pTextInputBox->GetTabTarget() != nullptr && pTextInputBox->GetTabTarget()->GetState() == UISTATE_NORMAL)
-            {
-                pTextInputBox->GetTabTarget()->GiveFocus(TRUE);
-                pTextInputBox->m_caretTimer.ResetTimer();
-            }
-            else if (pTextInputBox->GetParentUIID() == 0)
-            {
-                SendMessage(pTextInputBox->GetParentHandle(), msg, wParam, lParam);
-            }
-            return 0;
-            break;
-        default:
-        {
-            auto Char = (wchar_t)(wParam);
-            if (Char >= 25 && Char <= 28) return 0;
-
-            wParam = g_pMultiLanguage->ConvertFulltoHalfWidthChar(wParam);
-
-            if (pTextInputBox->CheckOption(UIOPTION_NUMBERONLY))
-            {
-                if (wParam == VK_BACK);
-                else if (wParam == 0x03 || wParam == 0x18);	// Ctrl+C, Ctrl+X
-                else if (Char == 0x16 && ClipboardCheck(hWnd) == TRUE);	// CTRL+V
-                else if (Char < '0' || Char>'9') return 0;
-            }
-            else if (pTextInputBox->CheckOption(UIOPTION_SERIALNUMBER))
-            {
-                if (wParam == VK_BACK);
-                else if (Char >= '0' && Char <= '9');
-                else if (Char >= 'A' && Char <= 'Z');
-                else if (Char >= 'a' && Char <= 'z') wParam -= 32;
-                else return 0;
-            }
-#ifdef LJH_ADD_RESTRICTION_ON_ID
-            else if (pTextInputBox->CheckOption(UIOPTION_NOLOCALIZEDCHARACTERS))
-            {
-                if (wParam == VK_BACK);
-                else if (Char >= 33 && Char <= 126);
-                else return 0;
-            }
-#endif //LJH_ADD_RESTRICTION_ON_ID
-        }
-        break;
-        }
-        break;
-    case WM_IME_COMPOSITION:
-    case WM_IME_STARTCOMPOSITION:
-    case WM_IME_ENDCOMPOSITION:
-    case WM_IME_NOTIFY:
-        pTextInputBox->SetIMEPosition();
-
-        SendMessage(pTextInputBox->GetParentHandle(), msg, wParam, lParam);
-
-        if (msg == WM_IME_NOTIFY && (pTextInputBox->CheckOption(UIOPTION_SERIALNUMBER) || pTextInputBox->CheckOption(UIOPTION_NUMBERONLY)))
-        {
-            switch (wParam)
-            {
-            case IMN_SETOPENSTATUS:
-            {
-                CheckTextInputBoxIME(IME_CONVERSIONMODE);
-            }
-            break;
-            }
-        }
-        break;
-    default:
-        if (PressKey(VK_F5))
-            g_pFriendMenu->ShowMenu(TRUE);
-        break;
-    }
-    return CallWindowProcW(pTextInputBox->m_hOldProc, hWnd, msg, wParam, lParam);
-}
-
-void CUITextInputBox::SetIMEPosition()
-{
-    if (m_bIsReady == FALSE || m_hEditWnd == nullptr) return;
-
-    int iSetPos_x = m_iPos_x * g_fScreenRate_x + WindowWidth;
-    int iSetPos_y = m_iPos_y * g_fScreenRate_y + WindowHeight;
-
-    int iTargetPos_x = iSetPos_x - m_iRealWindowPos_x - WindowWidth;
-    int iTargetPos_y = iSetPos_y - m_iRealWindowPos_y - WindowHeight;
-
-    POINT pt = { 0,0 };
-    GetCaretPos(&pt);
-    iTargetPos_x += pt.x;
-    iTargetPos_y += pt.y;
-
-    HIMC hIMC = ImmGetContext(m_hEditWnd);
-    if (hIMC == nullptr) return;
-
-    COMPOSITIONFORM cpf;
-    ImmGetCompositionWindow(hIMC, &cpf);
-    cpf.dwStyle = CFS_FORCE_POSITION;
-
-    if (cpf.ptCurrentPos.x == iTargetPos_x && cpf.ptCurrentPos.y == iTargetPos_y)
-    {
-        ImmReleaseContext(m_hEditWnd, hIMC);
-        return;
-    }
-
-    cpf.ptCurrentPos.x = iTargetPos_x;
-    cpf.ptCurrentPos.y = iTargetPos_y;
-
-    ImmSetCompositionWindow(hIMC, &cpf);
-    ImmReleaseContext(m_hEditWnd, hIMC);
 }
 
 void CUITextInputBox::GetText(wchar_t* pszText, int iGetLength)
 {
-    if (pszText == nullptr) return;
-
-    if (m_bPortable)
-    {
-        if (iGetLength <= 0) return;
-        wcsncpy(pszText, m_portableText.c_str(), iGetLength - 1);
-        pszText[iGetLength - 1] = L'\0';
-        return;
-    }
-
-    GetWindowText(m_hEditWnd, pszText, iGetLength);
+    if (pszText == nullptr || iGetLength <= 0) return;
+    wcsncpy(pszText, m_portableText.c_str(), iGetLength - 1);
+    pszText[iGetLength - 1] = L'\0';
 }
 
 void CUITextInputBox::SetText(const wchar_t* pszText)
 {
-    std::wstring wstrText = L"";
-    if (pszText != nullptr)
-    {
-        wstrText = std::wstring(pszText);
-    }
-    
-    //g_pMultiLanguage->ConvertCharToWideStr(wstrText, pszText);
-
+    std::wstring wstrText = (pszText != nullptr) ? std::wstring(pszText) : std::wstring();
     if (wstrText.length() > MAX_TEXT_LENGTH) return;
 
-    if (m_bPortable)
-    {
-        if (m_iMaxLength > 0 && static_cast<int>(wstrText.length()) > m_iMaxLength)
-            wstrText.resize(m_iMaxLength);
-        m_portableText = wstrText;
-        m_iCaret = static_cast<int>(m_portableText.length());
-        m_iSelAnchor = m_iCaret;
-        m_iFirstVisible = 0;
-        return;
-    }
-
-    m_sTextToSet = wstrText;
-    m_bSetText = true;
+    if (m_iMaxLength > 0 && static_cast<int>(wstrText.length()) > m_iMaxLength)
+        wstrText.resize(m_iMaxLength);
+    m_portableText = wstrText;
+    m_iCaret = static_cast<int>(m_portableText.length());
+    m_iSelAnchor = m_iCaret;
+    m_iFirstVisible = 0;
 }
 
 void CUITextInputBox::SetTextLimit(int iLimit)
 {
-    if (m_bPortable)
-    {
-        m_iMaxLength = iLimit;
-        return;
-    }
-
-    SendMessageW(m_hEditWnd, EM_SETLIMITTEXT, iLimit, 0);
-}
-
-void CUITextInputBox::RebuildScaledResources()
-{
-    // Bypass SetSize's unchanged-dimensions early-return by clearing the cached
-    // dims first, so the GDI resources are fully recreated at the current scale.
-    if (m_iWidth == 0 || m_iHeight == 0) return;
-    int w = m_iWidth, h = m_iHeight;
-    m_iWidth = 0; m_iHeight = 0;
-    SetSize(w, h);
+    m_iMaxLength = iLimit;
 }
 
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
 {
     if (iWidth == 0 || iHeight == 0) return;
-    if (iWidth == m_iWidth && iHeight == m_iHeight) return;
 
+    // The field renders through g_pRenderText, so size is the only state to keep.
     m_iWidth = iWidth;
     m_iHeight = iHeight;
-
-    // Portable boxes render through g_pRenderText and need no GDI back buffer
-    // or EDIT child; the dimensions above are all SetSize has to track.
-    if (m_bPortable) return;
-
-    if (m_hMemDC != nullptr)
-    {
-        DeleteDC(m_hMemDC);
-        m_hMemDC = nullptr;
-        m_pFontBuffer = nullptr;
-    }
-    if (m_hBitmap != nullptr)
-    {
-        DeleteObject(m_hBitmap);
-        m_hBitmap = nullptr;
-    }
-
-    HDC hDC = GetDC(m_hParentWnd);
-    BITMAPINFO* DIB_INFO;
-    DIB_INFO = (BITMAPINFO*)new BYTE[sizeof(BITMAPINFOHEADER) + sizeof(PALETTEENTRY) * 256];
-    memset(DIB_INFO, 0x00, sizeof(BITMAPINFOHEADER));
-    DIB_INFO->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    DIB_INFO->bmiHeader.biWidth = iWidth * g_fScreenRate_x;
-    DIB_INFO->bmiHeader.biHeight = -(iHeight * g_fScreenRate_y);
-    DIB_INFO->bmiHeader.biPlanes = 1;
-    DIB_INFO->bmiHeader.biBitCount = 24;
-    DIB_INFO->bmiHeader.biCompression = BI_RGB;
-
-    m_hBitmap = CreateDIBSection(hDC, DIB_INFO, DIB_RGB_COLORS, (void**)&m_pFontBuffer, nullptr, 0);
-    m_hMemDC = CreateCompatibleDC(hDC);
-    SelectObject(m_hMemDC, m_hBitmap);
-    SetFont(g_hFont);
-
-    delete[] DIB_INFO;
-
-    if (!m_hMemDC || !m_hBitmap)
-    {
-        if (m_hEditWnd != nullptr)
-        {
-            DestroyWindow(m_hEditWnd);
-            m_hEditWnd = nullptr;
-        }
-        if (m_hMemDC != nullptr)
-        {
-            DeleteDC(m_hMemDC);
-            m_hMemDC = nullptr;
-            m_pFontBuffer = nullptr;
-        }
-        if (m_hBitmap != nullptr)
-        {
-            DeleteObject(m_hBitmap);
-            m_hBitmap = nullptr;
-        }
-        return;
-    }
-
-    if (m_hEditWnd != nullptr)
-    {
-        SetWindowPos(m_hEditWnd, nullptr, 0, 0, iWidth * g_fScreenRate_x, iHeight * g_fScreenRate_y, SWP_NOMOVE | SWP_NOZORDER);
-        SendMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)0, (LPARAM)0);
-    }
 }
 
 void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, BOOL bIsPassword)
 {
     m_hParentWnd = hWnd;
-
-    if (m_bPortable)
-    {
-        m_bPasswordInput = bIsPassword;
-        m_iMaxLength = iMaxLength;
-        m_portableText.clear();
-        m_iCaret = 0;
-        m_iSelAnchor = 0;
-        m_iFirstVisible = 0;
-        SetSize(iWidth, iHeight);
-        m_caretTimer.ResetTimer();
-        return;
-    }
-
-    DWORD dwOptionFlag = 0;
-    if (bIsPassword == TRUE)
-    {
-        dwOptionFlag |= ES_PASSWORD;
-        m_bPasswordInput = TRUE;
-    }
-    if (m_bUseMultiLine == TRUE)
-    {
-        dwOptionFlag |= ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL;
-    }
-    else
-    {
-        dwOptionFlag |= ES_AUTOHSCROLL;
-    }
-
-    m_iRealWindowPos_x = m_iPos_x * g_fScreenRate_x + WindowWidth;
-    m_iRealWindowPos_y = m_iPos_y * g_fScreenRate_y + WindowHeight;
-
-    m_hEditWnd = CreateWindowW(L"edit", NULL, WS_CHILD | WS_VISIBLE | dwOptionFlag, m_iRealWindowPos_x, m_iRealWindowPos_y, iWidth * g_fScreenRate_x, iHeight * g_fScreenRate_y, m_hParentWnd, (HMENU)ID_UICEDIT, g_hInst, NULL);
-
+    m_bPasswordInput = bIsPassword;
+    m_iMaxLength = iMaxLength;
+    m_portableText.clear();
+    m_iCaret = 0;
+    m_iSelAnchor = 0;
+    m_iFirstVisible = 0;
     SetSize(iWidth, iHeight);
-    if (m_hEditWnd)
-    {
-        SetTextLimit(iMaxLength);
-        m_hOldProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(m_hEditWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(EditWndProc)));
-        SetWindowLongPtrW(m_hEditWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-        ShowWindow(m_hEditWnd, SW_HIDE);
-    }
-
+    m_caretTimer.ResetTimer();
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
     m_bUseScrollbarRender = true;
 #endif //PBG_ADD_INGAMESHOPMSGBOX
@@ -3450,321 +3103,38 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 
 void CUITextInputBox::SetState(int iState)
 {
-    if (m_bPortable)
-    {
-        m_iState = iState;
-        // A hidden box must not keep keyboard focus, or the SDL loop would keep
-        // routing input to an invisible field.
-        if (m_iState == UISTATE_HIDE && s_pFocusedPortable == this)
-            s_pFocusedPortable = nullptr;
-        return;
-    }
-
-    if (m_hEditWnd == nullptr) return;
     m_iState = iState;
-    if (m_iState == UISTATE_HIDE)
-        ShowWindow(m_hEditWnd, SW_HIDE);
-    else
-    {
-        ShowWindow(m_hEditWnd, SW_SHOW);
-    }
+    // A hidden box must not keep keyboard focus, or the SDL loop would keep
+    // routing input to an invisible field.
+    if (m_iState == UISTATE_HIDE && s_pFocusedPortable == this)
+        s_pFocusedPortable = nullptr;
 }
 
 void CUITextInputBox::GiveFocus(BOOL SelectText)
 {
-    if (m_bPortable)
-    {
-        if (m_iState == UISTATE_HIDE || m_iState == UISTATE_DISABLE) return;
+    if (m_iState == UISTATE_HIDE || m_iState == UISTATE_DISABLE) return;
 
-        s_pFocusedPortable = this;
-        g_dwKeyFocusUIID = GetUIID();
-        m_caretTimer.ResetTimer();
-
-        const int iLength = static_cast<int>(m_portableText.length());
-        if (SelectText == TRUE)
-        {
-            m_iSelAnchor = 0;
-            m_iCaret = iLength;
-        }
-        else
-        {
-            m_iCaret = iLength;
-            m_iSelAnchor = iLength;
-        }
-        return;
-    }
-
-    if (m_hEditWnd == nullptr) return;
-
-    if (g_iChatInputType == 1 && GetFocus() == g_hWnd && !CheckOption(UIOPTION_SERIALNUMBER) && !CheckOption(UIOPTION_NUMBERONLY))
-    {
-        SetFocus(m_hEditWnd);
-        RestoreIMEStatus();
-    }
-    else
-        SetFocus(m_hEditWnd);
-
+    s_pFocusedPortable = this;
     g_dwKeyFocusUIID = GetUIID();
+    m_caretTimer.ResetTimer();
+
+    const int iLength = static_cast<int>(m_portableText.length());
     if (SelectText == TRUE)
-        PostMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)0, (LPARAM)-1);
+    {
+        m_iSelAnchor = 0;
+        m_iCaret = iLength;
+    }
     else
-        PostMessageW(m_hEditWnd, EM_SETSEL, (WPARAM)-2, (LPARAM)-1);
-}
-
-void CUITextInputBox::UploadText(int sx, int sy, int Width, int Height)
-{
-    BITMAP_t* b = &Bitmaps[BITMAP_FONT];
-    float TextureU = 0.f, TextureV = 0.f;
-    if (sx < 0)
     {
-        TextureU = (-sx + 0.01f) / b->Width;
-        Width += sx;
-        sx = 0.f;
-    }
-    else if (sx + Width > (int)WindowWidth)
-    {
-        Width = WindowWidth - sx;
-    }
-    if (sy < 0)
-    {
-        TextureV = (-sy + 0.01f) / b->Height;
-        Height += sy;
-        sy = 0.f;
-    }
-    else if (sy + Height > (int)WindowHeight)
-    {
-        Height = WindowHeight - sy;
-    }
-    if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
-    {
-        glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-        glTexImage2D(GL_TEXTURE_2D, 0, b->Components, (int)b->Width, (int)b->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
-
-        float TextureUWidth = (Width + 0.01f) / b->Width;
-        float TextureVHeight = (Height + 0.01f) / b->Height;
-        RenderBitmap(BITMAP_FONT, (float)sx, (float)sy, (float)Width, (float)Height,
-            TextureU, TextureV, TextureUWidth, TextureVHeight, false, false);
+        m_iCaret = iLength;
+        m_iSelAnchor = iLength;
     }
 }
 
-void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
-{
-    bool isFocused = GetFocus() == m_hEditWnd;
-    bool isCaretTime = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / 530) % 2 == 0;
-    bool showCaret = isFocused && isCaretTime;
-
-    POINT pt;
-    GetCaretPos(&pt);
-
-    SIZE RealBoxSize = { (long)(m_iWidth * g_fScreenRate_x), (long)(m_iHeight * g_fScreenRate_y) };
-    const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
-    int iPitch = ((RealBoxSize.cx * 24 + 31) & ~31) >> 3;
-
-    int iSectionX = (iOffset % iPitch) / (LIMIT_WIDTH * 3);
-    int iSectionY = iOffset / (iPitch * LIMIT_HEIGHT);
-
-    RECT rcCaret = { pt.x - LIMIT_WIDTH * iSectionX, pt.y - LIMIT_HEIGHT * iSectionY,(int)(pt.x - LIMIT_WIDTH * iSectionX + m_fCaretWidth), (int)(pt.y - LIMIT_HEIGHT * iSectionY + m_fCaretHeight) };
-    const auto caretColor = _ARGB(255, 200, 200, 200);
-
-    BITMAP_t* pBitmapFont = &Bitmaps[BITMAP_FONT];
-    for (int y = 0; y < iHeight; ++y)
-    {
-        int SrcIndex = y * iPitch + iOffset;
-        int DstIndex = y * LIMIT_WIDTH * 4;
-        for (int x = 0; x < iWidth; ++x)
-        {
-            POINT ptProcessing = { x, y };
-            if ((SrcIndex > iPitch * RealBoxSize.cy) || (DstIndex > LIMIT_WIDTH * 4 * LIMIT_HEIGHT))
-            {
-#ifdef _DEBUG
-                __debugbreak();
-#endif // _DEBUG
-                return;
-            }
-
-            if (*(m_pFontBuffer + SrcIndex) == 255)
-            {
-                if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
-                else
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwTextColor;
-            }
-            else if (*(m_pFontBuffer + SrcIndex) == 0)
-            {
-                if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = caretColor;
-                else
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwBackColor;
-            }
-            else
-            {
-                if (showCaret && PtInRect(&rcCaret, ptProcessing))
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = caretColor;
-                else
-                    *((unsigned int*)(pBitmapFont->Buffer + DstIndex)) = m_dwSelectBackColor;
-            }
-            SrcIndex += 3;
-            DstIndex += 4;
-        }
-    }
-}
 void CUITextInputBox::Render()
 {
-    m_bIsReady = TRUE;
-
-    if (m_bPortable)
-    {
-        if (m_iState == UISTATE_HIDE) return;
-        RenderPortable();
-        return;
-    }
-
-    if (m_hEditWnd == nullptr || !IsWindowVisible(m_hEditWnd))
-    {
-        return;
-    }
-
-    if (m_bSetText)
-    {
-        SetWindowTextW(m_hEditWnd, m_sTextToSet.c_str());
-        m_bSetText = false;
-    }
-
-    POINT RealWndPos = { (int)(m_iPos_x * g_fScreenRate_x), (int)(m_iPos_y * g_fScreenRate_y) };
-    SIZE RealWndSize = { (int)(m_iWidth * g_fScreenRate_x), (int)(m_iHeight * g_fScreenRate_y) };
-
-    //. Caret Setting
-    m_fCaretWidth = 2.f;
-    if (m_fCaretHeight == 0)
-    {
-        SIZE TextSize;
-        GetTextExtentPoint32(m_hMemDC, L"Q", 1, &TextSize);
-        m_fCaretHeight = TextSize.cy;
-    }
-
-    if (CheckOption(UIOPTION_PAINTBACK))
-    {
-        EnableAlphaTest();
-        glColor4f(0.f, 0.f, 0.f, 1.f);
-        RenderColor(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight);
-        EndRenderColor();
-    }
-
-    CallWindowProcW(m_hOldProc, m_hEditWnd, WM_ERASEBKGND, (WPARAM)m_hMemDC, 0);
-    CallWindowProcW(m_hOldProc, m_hEditWnd, WM_PAINT, (WPARAM)m_hMemDC, 0);
-
-    const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
-    SIZE RealTextLine = { 0, 0 };
-
-    if (!m_bUseMultiLine)
-    {
-        wchar_t TextCheckUTF16[MAX_TEXT_LENGTH + 1] = { };
-        GetText(TextCheckUTF16);
-        SIZE TextSize;
-
-        if (!IsPassword())
-        {
-            GetTextExtentPoint32(m_hMemDC, TextCheckUTF16, wcslen(TextCheckUTF16), &TextSize);
-        }
-        else
-        {
-            wchar_t szPasswd[MAX_TEXT_LENGTH + 1] = { };
-            memset(szPasswd, '*', MAX_TEXT_LENGTH);
-            g_pRenderText->SetFont(g_hFontBold);
-
-            GetTextExtentPoint32(m_hMemDC, szPasswd, wcslen(TextCheckUTF16), &TextSize);
-            g_pRenderText->SetFont(g_hFont);
-        }
-        RealTextLine.cx = TextSize.cx + m_fCaretWidth;
-        RealTextLine.cy = (TextSize.cy > m_fCaretHeight) ? TextSize.cy : m_fCaretHeight;
-        if (RealTextLine.cx > RealWndSize.cx)
-            RealTextLine.cx = RealWndSize.cx;
-        if (RealTextLine.cy > RealWndSize.cy)
-            RealTextLine.cy = RealWndSize.cy;
-
-        int iNumberOfSections = (RealTextLine.cx / LIMIT_WIDTH) + ((RealTextLine.cx % LIMIT_WIDTH >= 0) ? 1 : 0);
-        for (int i = 0; i < iNumberOfSections; i++)
-        {
-            SIZE RealSectionLine = { LIMIT_WIDTH, RealTextLine.cy };
-            if (i == iNumberOfSections - 1)
-            {
-                RealSectionLine.cx = RealTextLine.cx % LIMIT_WIDTH + m_fCaretWidth * 2;
-            }
-
-            WriteText(LIMIT_WIDTH * i * 3, RealSectionLine.cx, RealSectionLine.cy);
-            UploadText(RealWndPos.x + LIMIT_WIDTH * i, RealWndPos.y, RealSectionLine.cx, RealSectionLine.cy);
-        }
-    }
-    else
-    {
-        m_iNumLines = RealWndSize.cy / m_fCaretHeight;
-        RealTextLine.cx = RealWndSize.cx;
-        RealTextLine.cy = RealWndSize.cy;
-
-        int iNumberOfXSections = (RealTextLine.cx / LIMIT_WIDTH) + ((RealTextLine.cx % LIMIT_WIDTH > 0) ? 1 : 0);
-        int iNumberOfYSections = (RealTextLine.cy / LIMIT_HEIGHT) + ((RealTextLine.cy % LIMIT_HEIGHT > 0) ? 1 : 0);
-        int iPitch = ((RealWndSize.cx * 24 + 31) & ~31) >> 3;
-
-        for (int y = 0; y < iNumberOfYSections; y++)
-        {
-            SIZE RealSectionLine = { LIMIT_WIDTH, LIMIT_HEIGHT };
-            if (y == iNumberOfYSections - 1)
-                RealSectionLine.cy = RealTextLine.cy % LIMIT_HEIGHT;
-
-            for (int x = 0; x < iNumberOfXSections; x++)
-            {
-                if (x == iNumberOfXSections - 1)
-                    RealSectionLine.cx = RealTextLine.cx % LIMIT_WIDTH;
-
-                WriteText(iPitch * LIMIT_HEIGHT * y + LIMIT_WIDTH * x * 3, RealSectionLine.cx, RealSectionLine.cy);
-                UploadText(RealWndPos.x + LIMIT_WIDTH * x, RealWndPos.y + LIMIT_HEIGHT * y, RealSectionLine.cx, RealSectionLine.cy);
-            }
-        }
-#ifdef PBG_ADD_INGAMESHOPMSGBOX
-        if (GetUseScrollbar())
-#endif //PBG_ADD_INGAMESHOPMSGBOX
-            RenderScrollbar();
-    }
-}
-
-void CUITextInputBox::RenderScrollbar()
-{
-    float fScrollPos = GetScrollPos(m_hEditWnd, SB_VERT);
-    float fLineNum = SendMessage(m_hEditWnd, EM_GETLINECOUNT, 0, 0);
-    //m_iNumLines = 15;
-    float fLineRate = m_iNumLines / fLineNum;
-    float fPosRate = fScrollPos / fLineNum;
-
-    m_fScrollBarWidth = 13;
-    m_fScrollBarRange_top = m_iPos_y + 9;
-    m_fScrollBarRange_bottom = m_iPos_y + m_iHeight - 9;
-    m_fScrollBarHeight = (m_fScrollBarRange_bottom - m_fScrollBarRange_top) * (fLineRate > 1 ? 1 : fLineRate);
-    m_fScrollBarPos_y = m_fScrollBarRange_top
-        + (m_fScrollBarRange_bottom - m_fScrollBarRange_top) * (fPosRate > 1 ? 1 : fPosRate);
-
-    //if (GetLineNum() >= m_iNumRenderLine)
-    {
-        if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - m_fScrollBarWidth, m_iPos_y - 4, 13.0f, 13.0f) == TRUE)
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y - 4, 13.0f, 13.0f, 13.0f / 16.0f, 29.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
-        else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y - 4, 13.0f, 13.0f, 0.0f, 3.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ▲
-
-        if (MouseLButtonPush && ::CheckMouseIn(m_iPos_x + m_iWidth - m_fScrollBarWidth, m_iPos_y + m_iHeight - 9, 13.0f, 13.0f) == TRUE)
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9, 13.0f, 13.0f, 13.0f / 16.0f, 16.0f / 32.0f, -13.0f / 16.0f, -13.0f / 32.0f);
-        else
-            RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth, (float)m_iPos_y + m_iHeight - 9, 13.0f, 13.0f, 0.0f, 16.0f / 32.0f, 13.0f / 16.0f, 13.0f / 32.0f);	// ▼
-
-        EnableAlphaTest();
-        SetLineColor(2);
-        RenderColor((float)m_iPos_x + m_iWidth - m_fScrollBarWidth, m_fScrollBarRange_top, 1.0f, (float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
-        RenderColor((float)m_iPos_x + m_iWidth - 1, m_fScrollBarRange_top, 1.0f, (float)m_fScrollBarRange_bottom - m_fScrollBarRange_top);
-        EndRenderColor();
-        DisableAlphaBlend();
-
-        RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarPos_y, m_fScrollBarWidth - 1, m_fScrollBarHeight, 0.0f, 1.0f / 32.0f, 11.0f / 16.0f, 1.0f / 32.0f);
-        RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarPos_y, m_fScrollBarWidth - 2, 1, 0.0f, 0.0f / 32.0f, 11.0f / 16.0f, 1.0f / 32.0f);
-        RenderBitmap(BITMAP_INTERFACE_EX + 12, (float)m_iPos_x + m_iWidth - m_fScrollBarWidth + 1, m_fScrollBarPos_y + m_fScrollBarHeight, m_fScrollBarWidth - 2, 1, 0.0f, 2.0f / 32.0f, 11.0f / 16.0f, 1.0f / 32.0f);
-    }
+    if (m_iState == UISTATE_HIDE) return;
+    RenderPortable();
 }
 
 void CUITextInputBox::RenderPortableScrollbar(int iTotalLines, int iVisibleLines)
@@ -3807,20 +3177,10 @@ void CUITextInputBox::SetFont(HFONT hFont)
     if (hFont == nullptr)
         return;
 
-    if (m_bPortable)
-    {
-        if (hFont == g_hFontBold)     m_fontKind = PortableFontKind::Bold;
-        else if (hFont == g_hFontBig) m_fontKind = PortableFontKind::Big;
-        else if (hFont == g_hFixFont) m_fontKind = PortableFontKind::Fix;
-        else                          m_fontKind = PortableFontKind::Default;
-        return;
-    }
-
-    if (m_hEditWnd == nullptr)
-        return;
-
-    SendMessageW(m_hEditWnd, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), FALSE);
-    SelectObject(m_hMemDC, hFont);
+    if (hFont == g_hFontBold)     m_fontKind = PortableFontKind::Bold;
+    else if (hFont == g_hFontBig) m_fontKind = PortableFontKind::Big;
+    else if (hFont == g_hFixFont) m_fontKind = PortableFontKind::Fix;
+    else                          m_fontKind = PortableFontKind::Default;
 }
 
 BOOL CUITextInputBox::DoPortableMouse()
@@ -3924,143 +3284,8 @@ BOOL CUITextInputBox::DoPortableMouse()
 
 BOOL CUITextInputBox::DoMouseAction()
 {
-    if (m_bPortable)
-        return DoPortableMouse();
-
-    BOOL bResult = FALSE;
-    if (::CheckMouseIn(m_iPos_x, m_iPos_y - 4, m_iWidth, m_iHeight + 8) == TRUE)
-    {
-        if (MouseLButtonPush && GetState() == UISTATE_NORMAL)
-        {
-            if (::CheckMouseIn(m_iPos_x + m_iWidth - 15, m_iPos_y - 4, 13, 13))
-            {
-                if (m_bScrollBtnClick == FALSE)
-                {
-                    SendMessageW(m_hEditWnd, EM_SCROLL, SB_LINEUP, 0);
-                    PlayBuffer(SOUND_CLICK01);
-                    m_bScrollBtnClick = TRUE;
-                }
-                else if (m_bScrollBtnClick > 15)
-                {
-                    SendMessageW(m_hEditWnd, EM_SCROLL, SB_LINEUP, 0);
-                }
-                else
-                {
-                    if (GetParentUIID() == 0 || g_pWindowMgr->IsRenderFrame() == TRUE)
-                        m_bScrollBtnClick++;
-                }
-            }
-            if (::CheckMouseIn(m_iPos_x + m_iWidth - 15, m_iPos_y + m_iHeight - 9, 13, 13))
-            {
-                if (m_bScrollBtnClick == FALSE)
-                {
-                    SendMessageW(m_hEditWnd, EM_SCROLL, SB_LINEDOWN, 0);
-                    PlayBuffer(SOUND_CLICK01);
-                    m_bScrollBtnClick = TRUE;
-                }
-                else if (m_bScrollBtnClick > 15)
-                {
-                    SendMessageW(m_hEditWnd, EM_SCROLL, SB_LINEDOWN, 0);
-                }
-                else
-                {
-                    if (GetParentUIID() == 0 || g_pWindowMgr->IsRenderFrame() == TRUE)
-                        m_bScrollBtnClick++;
-                }
-            }
-            if (SendMessageW(m_hEditWnd, EM_GETLINECOUNT, 0, 0) < m_iNumLines);
-            else if (::CheckMouseIn(m_iPos_x + m_iWidth - 14, m_fScrollBarPos_y,
-                m_fScrollBarWidth, m_fScrollBarHeight))
-            {
-                if (GetState() == UISTATE_NORMAL && g_dwActiveUIID == 0)
-                {
-                    g_dwActiveUIID = GetUIID();
-                    SetState(UISTATE_SCROLL);
-                    m_fScrollBarClickPos_y = MouseY - m_fScrollBarPos_y;
-                }
-            }
-            else if (::CheckMouseIn(m_iPos_x + m_iWidth - 14, m_fScrollBarRange_top,
-                m_fScrollBarWidth, m_fScrollBarPos_y - m_fScrollBarRange_top))
-            {
-                if (GetParentUIID() > 0 && g_pWindowMgr->IsRenderFrame() == FALSE);
-                else if (m_bScrollBarClick == FALSE)
-                {
-                    SendMessageW(m_hEditWnd, EM_SCROLL, SB_PAGEUP, 0);
-                    m_bScrollBarClick = TRUE;
-                }
-                else if (m_bScrollBarClick > 15)
-                {
-                    SendMessageW(m_hEditWnd, EM_SCROLL, SB_PAGEUP, 0);
-                }
-                else
-                {
-                    if (GetParentUIID() == 0 || g_pWindowMgr->IsRenderFrame() == TRUE)
-                        m_bScrollBarClick++;
-                }
-            }
-            else if (::CheckMouseIn(m_iPos_x + m_iWidth - 14, m_fScrollBarPos_y + m_fScrollBarHeight,
-                m_fScrollBarWidth, m_fScrollBarRange_bottom - m_fScrollBarPos_y - m_fScrollBarHeight))
-            {
-                if (GetParentUIID() > 0 && g_pWindowMgr->IsRenderFrame() == FALSE);
-                else if (m_bScrollBarClick == FALSE)
-                {
-                    SendMessageW(m_hEditWnd, EM_SCROLL, SB_PAGEDOWN, 0);
-                    m_bScrollBarClick = TRUE;
-                }
-                else if (m_bScrollBarClick > 15)
-                {
-                    SendMessageW(m_hEditWnd, EM_SCROLL, SB_PAGEDOWN, 0);
-                }
-                else
-                {
-                    if (GetParentUIID() == 0 || g_pWindowMgr->IsRenderFrame() == TRUE)
-                        m_bScrollBarClick++;
-                }
-            }
-        }
-        else
-        {
-            m_bScrollBtnClick = FALSE;
-            m_bScrollBarClick = FALSE;
-        }
-        MouseOnWindow = true;
-        bResult = TRUE;
-
-        if (MouseLButtonPush)
-        {
-            GiveFocus(TRUE);
-            MouseUpdateTime = 0;
-            MouseUpdateTimeMax = 6;
-            //PlayBuffer(SOUND_CLICK01);
-
-//			return TRUE;
-        }
-    }
-
-    if (GetState() == UISTATE_SCROLL)
-    {
-        if (MouseLButtonPush)
-        {
-            MouseOnWindow = true;
-            m_fScrollBarPos_y = (float)MouseY - m_fScrollBarClickPos_y;
-            int iCurrentRenderEndLine = (m_fScrollBarPos_y - m_fScrollBarRange_top + 0.5f) / (m_fScrollBarRange_bottom - m_fScrollBarRange_top) * (float)SendMessage(m_hEditWnd, EM_GETLINECOUNT, 0, 0);
-            SetScrollPos(m_hEditWnd, SB_VERT, iCurrentRenderEndLine, TRUE);
-            SendMessageW(m_hEditWnd, EM_LINESCROLL, 0, -10000);
-            SendMessageW(m_hEditWnd, EM_LINESCROLL, 0, iCurrentRenderEndLine);
-        }
-        else
-        {
-            SetState(UISTATE_NORMAL);
-            if (g_dwActiveUIID == GetUIID()) g_dwActiveUIID = 0;
-        }
-    }
-
-    return bResult;
+    return DoPortableMouse();
 }
-
-// ---------------------------------------------------------------------------
-// Portable single-line text field (issue #447)
-// ---------------------------------------------------------------------------
 
 namespace
 {
