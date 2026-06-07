@@ -13,6 +13,7 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"
 #include "Audio/DSPlaySound.h"
+#include "UI/Legacy/UIControls.h"  // CUITextInputBox::GetFocusedPortable (issue #447)
 #include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
 #include "UI/NewUI/NPCs/NewUINPCShop.h"
 
@@ -134,6 +135,11 @@ bool CUIManager::PressKey(int nKey)
 bool CUIManager::IsInputEnable()
 {
     if (InputEnable || GuildInputEnable || (g_pUIPopup->GetPopupID() != 0 && g_pUIPopup->IsInputEnable()))
+        return true;
+    // A focused portable text field captures the keyboard (issue #447). It no
+    // longer takes Win32 focus, so GetFocus() stays on the main window; report
+    // "input active" explicitly so callers suppress world/camera keys while typing.
+    if (CUITextInputBox::GetFocusedPortable() != nullptr)
         return true;
     if (GetFocus() == g_hWnd)
         return false;

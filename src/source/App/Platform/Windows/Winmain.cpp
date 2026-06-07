@@ -99,7 +99,6 @@ HGLRC     g_hRC = nullptr;
 // EDIT-control text boxes) keeps working until those are migrated.
 static SDL_Window*   g_sdlWindow = nullptr;
 static SDL_GLContext g_sdlGLContext = nullptr;
-static WNDPROC       g_sdlOriginalWndProc = nullptr;
 HFONT     g_hFont = nullptr;
 HFONT     g_hFontBold = nullptr;
 HFONT     g_hFontBig = nullptr;
@@ -469,11 +468,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         MessageBox(nullptr, I18N::Game::Error9AHackingToolHasBeen, L"Error", MB_OK);
         PostMessage(g_hWnd, WM_CLOSE, 0, 0);
         break;
-    case WM_CTLCOLOREDIT:
-        SetBkColor((HDC)wParam, RGB(0, 0, 0));
-        SetTextColor((HDC)wParam, RGB(255, 255, 255));
-        return (LRESULT)GetStockObject(BLACK_BRUSH);
-        break;
     case WM_ERASEBKGND:
         return TRUE;
         break;
@@ -718,25 +712,6 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
     WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     return true;
 }
-
-// SDL owns the window procedure; the message hook above cannot return a value to
-// Windows. WM_CTLCOLOREDIT is sent synchronously to the window proc (it bypasses
-// the queue and the hook) and its return value selects the brush, so we subclass
-// SDL's window proc to color the legacy EDIT text boxes (black background, white
-// text) and forward everything else to SDL. Transitional until the EDIT controls
-// are replaced (issue #447).
-static LRESULT CALLBACK Win32WindowSubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    if (msg == WM_CTLCOLOREDIT)
-    {
-        SetBkColor(reinterpret_cast<HDC>(wParam), RGB(0, 0, 0));
-        SetTextColor(reinterpret_cast<HDC>(wParam), RGB(255, 255, 255));
-        return reinterpret_cast<LRESULT>(GetStockObject(BLACK_BRUSH));
-    }
-    return g_sdlOriginalWndProc
-        ? CallWindowProcW(g_sdlOriginalWndProc, hwnd, msg, wParam, lParam)
-        : DefWindowProcW(hwnd, msg, wParam, lParam);
-}
 #endif
 
 // SDL event translation (issue #442). Mouse and window events are handled from
@@ -869,6 +844,116 @@ namespace
             UpdateCursorClip();
         }
     }
+
+    // --- Portable text field input routing (issue #447) -------------------
+    // Map the SDL keys a single-line text field reacts to onto the Win32 VK
+    // codes the field already understands. Returns 0 for keys it ignores.
+    int MapScancodeToEditVk(SDL_Scancode sc)
+    {
+        switch (sc)
+        {
+        case SDL_SCANCODE_LEFT:      return VK_LEFT;
+        case SDL_SCANCODE_RIGHT:     return VK_RIGHT;
+        case SDL_SCANCODE_HOME:      return VK_HOME;
+        case SDL_SCANCODE_END:       return VK_END;
+        case SDL_SCANCODE_BACKSPACE: return VK_BACK;
+        case SDL_SCANCODE_DELETE:    return VK_DELETE;
+        case SDL_SCANCODE_RETURN:
+        case SDL_SCANCODE_KP_ENTER:  return VK_RETURN;
+        case SDL_SCANCODE_TAB:       return VK_TAB;
+        default:                     return 0;
+        }
+    }
+
+    // UTF-8 <-> UTF-16 conversions sized to the input, so text of any length
+    // (typed, copied or pasted) round-trips without truncation (issue #447).
+    std::wstring Utf8ToWide(const char* utf8)
+    {
+        if (utf8 == nullptr) return std::wstring();
+        const int needed = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, nullptr, 0);
+        if (needed <= 1) return std::wstring();  // <=1 means empty or error
+        std::wstring wide(needed - 1, L'\0');  // needed includes the null terminator
+        MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wide.data(), needed);
+        return wide;
+    }
+
+    std::string WideToUtf8(const std::wstring& wide)
+    {
+        if (wide.empty()) return std::string();
+        const int needed = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        if (needed <= 1) return std::string();  // <=1 means empty or error
+        std::string utf8(needed - 1, '\0');
+        WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), needed, nullptr, nullptr);
+        return utf8;
+    }
+
+    void FeedPortableTextInput(const char* utf8)
+    {
+        auto* box = CUITextInputBox::GetFocusedPortable();
+        if (box == nullptr || utf8 == nullptr) return;
+
+        const std::wstring wide = Utf8ToWide(utf8);
+        if (!wide.empty())
+            box->OnTextInput(wide.c_str());
+    }
+
+    // Handle a key for the focused portable field. Returns true if consumed.
+    bool FeedPortableKey(const SDL_KeyboardEvent& key)
+    {
+        auto* box = CUITextInputBox::GetFocusedPortable();
+        if (box == nullptr) return false;
+
+        const bool ctrl = (key.mod & SDL_KMOD_CTRL) != 0;
+        const bool shift = (key.mod & SDL_KMOD_SHIFT) != 0;
+
+        // Clipboard lives in SDL on this side of the boundary, keeping the text
+        // field itself free of SDL; the field only exposes selection helpers.
+        if (ctrl)
+        {
+            switch (key.scancode)
+            {
+            case SDL_SCANCODE_A:
+                box->SelectAll();
+                return true;
+            case SDL_SCANCODE_C:
+            case SDL_SCANCODE_X:
+            {
+                const std::wstring selection = box->GetSelectedText();
+                if (!selection.empty())
+                {
+                    const std::string utf8 = WideToUtf8(selection);
+                    if (!utf8.empty())
+                    {
+                        SDL_SetClipboardText(utf8.c_str());
+                        if (key.scancode == SDL_SCANCODE_X)
+                            box->DeleteSelection();
+                    }
+                }
+                return true;
+            }
+            case SDL_SCANCODE_V:
+            {
+                char* clip = SDL_GetClipboardText();
+                if (clip != nullptr)
+                {
+                    const std::wstring wide = Utf8ToWide(clip);
+                    if (!wide.empty())
+                        box->OnTextInput(wide.c_str());
+                    SDL_free(clip);
+                }
+                return true;
+            }
+            default:
+                break;
+            }
+        }
+
+        const int vk = MapScancodeToEditVk(key.scancode);
+        if (vk == 0) return false;
+
+        box->OnEditKey(vk, ctrl, shift);
+        return true;
+    }
 }
 
 MSG MainLoop()
@@ -919,6 +1004,14 @@ MSG MainLoop()
             case SDL_EVENT_WINDOW_FOCUS_LOST:
                 HandleFocusChange(false);
                 break;
+            case SDL_EVENT_TEXT_INPUT:
+                // Committed characters for the focused portable text field (#447).
+                FeedPortableTextInput(event.text.text);
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                // Navigation/erase/clipboard for the focused portable field (#447).
+                FeedPortableKey(event.key);
+                break;
             default:
                 break;
             }
@@ -927,6 +1020,21 @@ MSG MainLoop()
             if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
             {
                 break;
+            }
+        }
+
+        // Start/stop SDL text input as a portable text field gains or loses
+        // focus, so SDL only emits SDL_EVENT_TEXT_INPUT while one is active (#447).
+        {
+            static bool s_textInputActive = false;
+            const bool wantTextInput = CUITextInputBox::GetFocusedPortable() != nullptr;
+            if (wantTextInput != s_textInputActive && g_sdlWindow != nullptr)
+            {
+                if (wantTextInput)
+                    SDL_StartTextInput(g_sdlWindow);
+                else
+                    SDL_StopTextInput(g_sdlWindow);
+                s_textInputActive = wantTextInput;
             }
         }
 
@@ -1065,17 +1173,8 @@ void ReinitializeFonts()
 
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
     RefreshInventoryEquipmentSlots();
-
-    // The chat input is built on native Edit controls backed by GDI DIB
-    // sections sized by g_fScreenRate at Init time. A plain SetFont() isn't
-    // enough after a resolution change — the DIB buffer is still at the old
-    // pixel scale, so rendered text gets upscaled from a stale bitmap and
-    // comes out unreadable. Rebuild the DC/bitmap at the current scale.
-    if (g_pNewUISystem)
-    {
-        if (auto* chat = g_pNewUISystem->GetUI_NewChatInputBox())
-            chat->RebuildScaledResources();
-    }
+    // Text fields render through g_pRenderText and resolve their font by kind
+    // each frame, so they need no per-control rebuild after a resolution change.
 }
 
 DWORD GetDesktopBitsPerPel()
@@ -1284,14 +1383,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     // Drive the existing WndProc from SDL's Win32 messages (transitional, #442).
     SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
-
-    // Subclass SDL's window proc for messages whose return value must reach
-    // Windows (WM_CTLCOLOREDIT colors the legacy EDIT text boxes). Capture the
-    // original proc before installing ours: Windows can dispatch messages to the
-    // new proc synchronously during SetWindowLongPtrW, so g_sdlOriginalWndProc
-    // must already be set when the subclass first runs.
-    g_sdlOriginalWndProc = reinterpret_cast<WNDPROC>(GetWindowLongPtrW(g_hWnd, GWLP_WNDPROC));
-    SetWindowLongPtrW(g_hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Win32WindowSubclassProc));
 
     SDL_RaiseWindow(g_sdlWindow);
     SetFocus(g_hWnd);

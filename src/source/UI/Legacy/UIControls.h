@@ -840,12 +840,6 @@ public:
 
     virtual void SetSize(int iWidth, int iHeight);
 
-    // Force-recreate the DC/bitmap and child edit window at the current
-    // g_fScreenRate using the stored reference dimensions. SetSize() early-returns
-    // when dimensions are unchanged, so it can't be used after a resolution change
-    // where the pixel scale shifted but reference dimensions stayed the same.
-    void RebuildScaledResources();
-
     virtual void Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength = 50, BOOL bIsPassword = FALSE);
     virtual void Render();
     virtual void GiveFocus(BOOL bSel = FALSE);
@@ -861,9 +855,14 @@ public:
     virtual void SetText(const wchar_t* pszText);
     virtual void GetText(wchar_t* pszText, int iGetLength = MAX_TEXT_LENGTH);
 
-    HWND GetHandle() { return m_hEditWnd; }
+    // There is no Win32 EDIT child; GetHandle() returns a stable per-instance
+    // token used only as a focus identity by the NewUI "related window" routing
+    // (compared, never messaged). That lets the routing keep working: a focused
+    // field's owning widget is the only one that receives key events, so game
+    // hotkeys stay quiet while the player is typing.
+    HWND GetHandle() { return reinterpret_cast<HWND>(this); }
     HWND GetParentHandle() { return m_hParentWnd; }
-    BOOL HaveFocus() { return (GetHandle() == GetFocus()); }
+    BOOL HaveFocus() { return s_pFocusedPortable == this; }
     BOOL UseMultiline() { return m_bUseMultiLine; }
     virtual void SetTabTarget(CUITextInputBox* pTabTarget) { m_pTabTarget = pTabTarget; }
     CUITextInputBox* GetTabTarget() { return m_pTabTarget; }
@@ -872,32 +871,69 @@ public:
     virtual BOOL IsLocked() { return m_bLock; }
     BOOL IsPassword() { return m_bPasswordInput; }
 
-    virtual void SetIMEPosition();
 #ifdef PBG_ADD_INGAMESHOPMSGBOX
     bool GetUseScrollbar() { return m_bUseScrollbarRender; }
     void SetUseScrollbar(bool _scrollbar = TRUE) { m_bUseScrollbarRender = _scrollbar; }
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 
+    // The single text field that currently owns keyboard input, or nullptr. The
+    // SDL event loop routes text/edit keys to it and starts/stops SDL text input
+    // based on whether one is focused (issue #447).
+    static CUITextInputBox* GetFocusedPortable() { return s_pFocusedPortable; }
+
+    // Input fed from the SDL event loop.
+    void OnTextInput(const wchar_t* pszText);            // committed characters
+    void OnEditKey(int iVirtualKey, bool bCtrl, bool bShift); // navigation/erase
+    void SelectAll();
+    std::wstring GetSelectedText() const;
+    void DeleteSelection();
+
 protected:
     virtual BOOL DoMouseAction();
-    void RenderScrollbar();
 
-    void WriteText(int iOffset, int iWidth, int iHeight);
-    void UploadText(int sx, int sy, int Width, int Height);
+    // Portable text field implementation (issue #447).
+    struct PortableLine { int start; int end; };  // [start,end) buffer indices; end excludes a wrapped space/newline
+
+    void RenderPortable();
+    BOOL DoPortableMouse();
+    std::wstring BuildDisplay() const;  // text with the password mask applied
+    void RenderPortableSingleLine(const std::wstring& display, int iLineHeight);
+    void RenderPortableMultiline(const std::wstring& display, int iLineHeight);
+    void RenderPortableScrollbar(int iTotalLines, int iVisibleLines);
+    void LayoutLines(const std::wstring& display, std::vector<PortableLine>& lines) const;
+    int  CaretToLine(const std::vector<PortableLine>& lines) const;
+    // Buffer index on a line whose rendered x (reference px) is nearest targetX.
+    int  IndexAtLineX(const std::wstring& display, const PortableLine& line, int targetX) const;
+    int  LineHeightPx() const;
+    int  VisibleLineCount(int iLineHeight) const;
+    void MoveCaret(int iNewCaret, bool bExtendSelection);
+    void InsertChar(wchar_t ch);
+    bool HasSelection() const { return m_iSelAnchor != m_iCaret; }
+    int  SelectionStart() const { return m_iSelAnchor < m_iCaret ? m_iSelAnchor : m_iCaret; }
+    int  SelectionEnd() const { return m_iSelAnchor < m_iCaret ? m_iCaret : m_iSelAnchor; }
+    // Width in reference pixels of the first iLength chars rendered in the font.
+    int  MeasureWidth(const wchar_t* pszText, int iLength) const;
+    HFONT CurrentFont() const;  // live handle for m_fontKind
 
 public:
-    WNDPROC m_hOldProc;
     CTimer m_caretTimer = { };
 
 protected:
     HWND m_hParentWnd;
-    HWND m_hEditWnd;
-    HDC m_hMemDC;
-    HBITMAP m_hBitmap;
-    BYTE* m_pFontBuffer;
-    bool m_bSetText = false;
-    std::wstring m_sTextToSet;
 
+    // Portable text field state (issue #447).
+    std::wstring m_portableText;
+    int m_iCaret = 0;            // caret index in [0, length]
+    int m_iSelAnchor = 0;       // selection anchor; equals caret when no selection
+    int m_iFirstVisible = 0;    // first rendered character (single-line horizontal scroll)
+    int m_iScrollLine = 0;      // first visible wrapped line (multiline vertical scroll)
+    int m_iMaxLength = 0;       // text length limit (0 = unlimited)
+    // Which global font this box draws with. Stored by kind (not by HFONT)
+    // because ReinitializeFonts() deletes and recreates the handles on a
+    // resolution change; CurrentFont() re-resolves the live handle each frame.
+    enum class PortableFontKind { Default, Bold, Big, Fix };
+    PortableFontKind m_fontKind = PortableFontKind::Default;
+    static CUITextInputBox* s_pFocusedPortable;
 
     CUITextInputBox* m_pTabTarget;
 
@@ -905,15 +941,8 @@ protected:
     DWORD m_dwBackColor;
     DWORD m_dwSelectBackColor;
 
-    float m_fCaretWidth;
-    float m_fCaretHeight;
-
     BOOL m_bPasswordInput;
     BOOL m_bLock;
-
-    BOOL m_bIsReady;
-    int m_iRealWindowPos_x;
-    int m_iRealWindowPos_y;
 
     BOOL m_bUseMultiLine;
     BOOL m_bScrollBtnClick;

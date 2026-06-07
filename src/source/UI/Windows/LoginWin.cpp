@@ -150,6 +150,12 @@ void CLoginWin::Show(bool bShow)
         m_aBtn[i].Show(bShow);
     }
     m_aBtnRememberMe.Show(bShow);
+
+    // Drive the text fields' state so a hidden login screen releases keyboard
+    // focus (portable fields stop SDL text input when hidden, #447).
+    const int iState = bShow ? UISTATE_NORMAL : UISTATE_HIDE;
+    if (m_pUsernameInputBox) m_pUsernameInputBox->SetState(iState);
+    if (m_pPasswordInputBox) m_pPasswordInputBox->SetState(iState);
 }
 
 bool CLoginWin::CursorInWin(int nArea)
