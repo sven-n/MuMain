@@ -2,7 +2,7 @@
 
 // MainScene.h - Main game scene
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 // Main scene lifecycle
 void MoveMainScene();

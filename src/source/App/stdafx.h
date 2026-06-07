@@ -66,6 +66,10 @@
 #include <tchar.h>
 #include <mbstring.h>
 #include <conio.h>
+#else // !_WIN32
+// Provide the Win32 scalar/handle types the engine declarations use, so the
+// ~350 PCH consumers parse on non-Windows toolchains (issue #462, Phase 1).
+#include "Core/Platform/WinCompat.h"
 #endif // _WIN32
 
 //c runtime

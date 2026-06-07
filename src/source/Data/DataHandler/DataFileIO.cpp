@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "DataFileIO.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 extern HWND g_hWnd;
 

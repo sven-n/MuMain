@@ -2,7 +2,7 @@
 
 // CharacterScene.h - Character selection scene
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 // Character scene lifecycle
 void CreateCharacterScene();

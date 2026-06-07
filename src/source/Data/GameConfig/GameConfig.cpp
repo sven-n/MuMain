@@ -4,7 +4,7 @@
 #include <imagehlp.h>
 
 #include "GameConfigConstants.h"
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 GameConfig& GameConfig::GetInstance()
 {

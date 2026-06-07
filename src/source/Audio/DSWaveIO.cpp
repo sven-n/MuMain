@@ -4,7 +4,7 @@
 #include <cwchar>
 #include <cstring>
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 #include <mmsystem.h>
 
 // Undefine the editor redirect macro so we can use std::fwprintf directly

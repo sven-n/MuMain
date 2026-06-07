@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 #include "I18N/All.h"
 
 // ============================================================================

@@ -2,7 +2,7 @@
 
 // SceneManager.h - Top-level scene orchestration
 
-#include <windows.h>
+#include "Core/Platform/WinCompat.h"
 
 //=============================================================================
 // Frame Timing State
