@@ -3107,7 +3107,10 @@ void CUITextInputBox::SetState(int iState)
     // A hidden box must not keep keyboard focus, or the SDL loop would keep
     // routing input to an invisible field.
     if (m_iState == UISTATE_HIDE && s_pFocusedPortable == this)
+    {
         s_pFocusedPortable = nullptr;
+        m_composition.clear();
+    }
 }
 
 void CUITextInputBox::GiveFocus(BOOL SelectText)
@@ -3116,6 +3119,7 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
 
     s_pFocusedPortable = this;
     g_dwKeyFocusUIID = GetUIID();
+    m_composition.clear();
     m_caretTimer.ResetTimer();
 
     const int iLength = static_cast<int>(m_portableText.length());
@@ -3368,9 +3372,29 @@ std::wstring CUITextInputBox::GetSelectedText() const
     return m_portableText.substr(iStart, iEnd - iStart);
 }
 
+void CUITextInputBox::OnTextEditing(const wchar_t* pszText)
+{
+    // IME preedit: stored for display only, never committed to the buffer.
+    m_composition = (pszText != nullptr) ? std::wstring(pszText) : std::wstring();
+    m_caretTimer.ResetTimer();
+}
+
+bool CUITextInputBox::GetCaretArea(int& x, int& y, int& w, int& h) const
+{
+    if (s_pFocusedPortable != this || m_iCaretAreaH <= 0) return false;
+    x = m_iCaretAreaX;
+    y = m_iCaretAreaY;
+    w = CARET_WIDTH_PX;
+    h = m_iCaretAreaH;
+    return true;
+}
+
 void CUITextInputBox::OnTextInput(const wchar_t* pszText)
 {
     if (pszText == nullptr) return;
+
+    // Committed text supersedes any active IME composition.
+    m_composition.clear();
 
     for (const wchar_t* p = pszText; *p != L'\0'; ++p)
     {
@@ -3415,8 +3439,8 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
         if (m_bUseMultiLine)
         {
             std::vector<PortableLine> lines;
-            LayoutLines(m_portableText, lines);
-            MoveCaret(lines[CaretToLine(lines)].start, bShift);
+            LayoutLines(BuildDisplay(), lines);
+            MoveCaret(lines[CaretToLine(lines, m_iCaret)].start, bShift);
         }
         else
         {
@@ -3427,8 +3451,8 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
         if (m_bUseMultiLine)
         {
             std::vector<PortableLine> lines;
-            LayoutLines(m_portableText, lines);
-            MoveCaret(lines[CaretToLine(lines)].end, bShift);
+            LayoutLines(BuildDisplay(), lines);
+            MoveCaret(lines[CaretToLine(lines, m_iCaret)].end, bShift);
         }
         else
         {
@@ -3442,7 +3466,7 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
             const std::wstring display = BuildDisplay();
             std::vector<PortableLine> lines;
             LayoutLines(display, lines);
-            const int cur = CaretToLine(lines);
+            const int cur = CaretToLine(lines, m_iCaret);
             const int target = cur + (iVirtualKey == VK_UP ? -1 : 1);
             if (target >= 0 && target < static_cast<int>(lines.size()))
             {
@@ -3554,13 +3578,13 @@ void CUITextInputBox::LayoutLines(const std::wstring& display, std::vector<Porta
         lines.push_back({ 0, 0 });
 }
 
-int CUITextInputBox::CaretToLine(const std::vector<PortableLine>& lines) const
+int CUITextInputBox::CaretToLine(const std::vector<PortableLine>& lines, int iCaret) const
 {
     // The caret belongs to the last line whose start is <= caret.
     int result = 0;
     for (int i = 0; i < static_cast<int>(lines.size()); ++i)
     {
-        if (lines[i].start <= m_iCaret) result = i;
+        if (lines[i].start <= iCaret) result = i;
         else break;
     }
     return result;
@@ -3599,11 +3623,29 @@ void CUITextInputBox::RenderPortable()
     if (CurrentFont() == nullptr) return;
     g_pRenderText->SetFont(CurrentFont());
 
-    const std::wstring display = BuildDisplay();
+    const std::wstring base = BuildDisplay();
+    const int iBaseLen = static_cast<int>(base.length());
+    // Clamp both ends before the substr splice below: a negative index would
+    // wrap to a huge size_t and throw std::out_of_range.
+    if (m_iCaret < 0) m_iCaret = 0;
+    else if (m_iCaret > iBaseLen) m_iCaret = iBaseLen;
+    if (m_iSelAnchor < 0) m_iSelAnchor = 0;
+    else if (m_iSelAnchor > iBaseLen) m_iSelAnchor = iBaseLen;
 
-    const int iLength = static_cast<int>(display.length());
-    if (m_iCaret > iLength) m_iCaret = iLength;
-    if (m_iSelAnchor > iLength) m_iSelAnchor = iLength;
+    // Splice the IME composition (if any) into the displayed text at the caret.
+    // It is not committed to m_portableText; the caret and scroll follow its end,
+    // and the preview span is underlined. Password fields don't preview.
+    const bool bFocused = (s_pFocusedPortable == this);
+    std::wstring display = base;
+    int iCaret = m_iCaret;
+    int compStart = -1, compEnd = -1;
+    if (bFocused && !m_composition.empty() && !m_bPasswordInput)
+    {
+        display = base.substr(0, m_iCaret) + m_composition + base.substr(m_iCaret);
+        compStart = m_iCaret;
+        compEnd = m_iCaret + static_cast<int>(m_composition.length());
+        iCaret = compEnd;
+    }
 
     int iLineHeight = LineHeightPx();
     if (!m_bUseMultiLine && iLineHeight > m_iHeight) iLineHeight = m_iHeight;
@@ -3625,33 +3667,34 @@ void CUITextInputBox::RenderPortable()
     }
 
     if (m_bUseMultiLine)
-        RenderPortableMultiline(display, iLineHeight);
+        RenderPortableMultiline(display, iCaret, iLineHeight, compStart, compEnd);
     else
-        RenderPortableSingleLine(display, iLineHeight);
+        RenderPortableSingleLine(display, iCaret, iLineHeight, compStart, compEnd);
 }
 
-void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int iLineHeight)
+void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int iCaret, int iLineHeight, int compStart, int compEnd)
 {
-    // Horizontal scroll: never start past the caret, and advance the first
-    // visible character until the caret fits inside the box width.
     const int iLength = static_cast<int>(display.length());
-    if (m_iFirstVisible > m_iCaret) m_iFirstVisible = m_iCaret;
+    if (iCaret < 0) iCaret = 0;
+    else if (iCaret > iLength) iCaret = iLength;
+
+    // Horizontal scroll: never start past the caret, advance until it fits, then
+    // recede left so deleting / moving left brings hidden text back into view.
+    if (m_iFirstVisible > iCaret) m_iFirstVisible = iCaret;
     if (m_iFirstVisible < 0) m_iFirstVisible = 0;
-    while (m_iFirstVisible < m_iCaret &&
-        MeasureWidth(display.c_str() + m_iFirstVisible, m_iCaret - m_iFirstVisible) > m_iWidth)
+    while (m_iFirstVisible < iCaret &&
+        MeasureWidth(display.c_str() + m_iFirstVisible, iCaret - m_iFirstVisible) > m_iWidth)
     {
         ++m_iFirstVisible;
     }
-    // Recede left when the text from one char earlier still fits, so deleting or
-    // moving the caret left brings hidden left-side text back into view.
     while (m_iFirstVisible > 0 &&
         MeasureWidth(display.c_str() + m_iFirstVisible - 1, iLength - (m_iFirstVisible - 1)) <= m_iWidth)
     {
         --m_iFirstVisible;
     }
 
-    // Selection highlight, clamped to the visible window.
-    if (HasSelection())
+    // Selection highlight (suppressed while an IME composition is active).
+    if (compStart < 0 && HasSelection())
     {
         const int iSelStart = SelectionStart();
         const int iSelEnd = SelectionEnd();
@@ -3673,7 +3716,7 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
     }
 
     // Visible text.
-    const int iVisibleLen = static_cast<int>(display.length()) - m_iFirstVisible;
+    const int iVisibleLen = iLength - m_iFirstVisible;
     if (iVisibleLen > 0)
     {
         g_pRenderText->SetBgColor(0);
@@ -3681,13 +3724,33 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
         g_pRenderText->RenderText(m_iPos_x, m_iPos_y, display.c_str() + m_iFirstVisible, m_iWidth, m_iHeight, RT3_SORT_LEFT);
     }
 
-    // Blinking caret (only while focused).
+    // IME composition underline.
+    if (compStart >= 0)
+    {
+        const int a = (compStart > m_iFirstVisible) ? compStart : m_iFirstVisible;
+        int x0 = MeasureWidth(display.c_str() + m_iFirstVisible, a - m_iFirstVisible);
+        int x1 = MeasureWidth(display.c_str() + m_iFirstVisible, compEnd - m_iFirstVisible);
+        if (x1 > m_iWidth) x1 = m_iWidth;
+        if (x1 > x0)
+        {
+            EnableAlphaTest();
+            glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
+            RenderColor(m_iPos_x + x0, m_iPos_y + iLineHeight - 1, x1 - x0, 1);
+            EndRenderColor();
+        }
+    }
+
+    // Caret: store its rect for IME positioning, draw the bar on the blink.
+    int iCaretX = MeasureWidth(display.c_str() + m_iFirstVisible, iCaret - m_iFirstVisible);
+    if (iCaretX > m_iWidth) iCaretX = m_iWidth;
+    m_iCaretAreaX = m_iPos_x + iCaretX;
+    m_iCaretAreaY = m_iPos_y;
+    m_iCaretAreaH = iLineHeight;
+
     const bool bFocused = (s_pFocusedPortable == this);
     const bool bBlinkOn = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / CARET_BLINK_MS) % 2 == 0;
     if (bFocused && bBlinkOn)
     {
-        int iCaretX = MeasureWidth(display.c_str() + m_iFirstVisible, m_iCaret - m_iFirstVisible);
-        if (iCaretX > m_iWidth) iCaretX = m_iWidth;
         EnableAlphaTest();
         glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
         RenderColor(m_iPos_x + iCaretX, m_iPos_y, CARET_WIDTH_PX, iLineHeight);
@@ -3695,7 +3758,7 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
     }
 }
 
-void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int iLineHeight)
+void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int iCaret, int iLineHeight, int compStart, int compEnd)
 {
     std::vector<PortableLine> lines;
     LayoutLines(display, lines);
@@ -3705,7 +3768,7 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
     m_iNumLines = iVisibleLines;
 
     // Vertical scroll: keep the caret line within the visible window.
-    const int iCaretLine = CaretToLine(lines);
+    const int iCaretLine = CaretToLine(lines, iCaret);
     if (iCaretLine < m_iScrollLine) m_iScrollLine = iCaretLine;
     if (iCaretLine >= m_iScrollLine + iVisibleLines) m_iScrollLine = iCaretLine - iVisibleLines + 1;
     const int iMaxScroll = (iTotalLines > iVisibleLines) ? (iTotalLines - iVisibleLines) : 0;
@@ -3714,7 +3777,7 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
 
     const bool bFocused = (s_pFocusedPortable == this);
     const bool bBlinkOn = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / CARET_BLINK_MS) % 2 == 0;
-
+    const bool bSelection = (compStart < 0) && HasSelection();
     const int iSelStart = SelectionStart();
     const int iSelEnd = SelectionEnd();
 
@@ -3729,7 +3792,7 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
         const int lineLen = line.end - line.start;
 
         // Selection highlight for the part of this line inside the selection.
-        if (HasSelection() && iSelEnd > line.start && iSelStart <= line.end)
+        if (bSelection && iSelEnd > line.start && iSelStart <= line.end)
         {
             const int a = (iSelStart > line.start) ? iSelStart : line.start;
             const int b = (iSelEnd < line.end) ? iSelEnd : line.end;
@@ -3755,15 +3818,38 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
             g_pRenderText->RenderText(m_iPos_x, y, lineStr.c_str(), m_iWidth, iLineHeight, RT3_SORT_LEFT);
         }
 
-        // Caret on this line.
-        if (bFocused && bBlinkOn && m_iCaret >= line.start && iCaretLine == li)
+        // IME composition underline for the part of the preview on this line.
+        if (compStart >= 0 && compEnd > line.start && compStart < line.end)
         {
-            int iCaretX = MeasureWidth(lineText, m_iCaret - line.start);
+            const int a = (compStart > line.start) ? compStart : line.start;
+            const int b = (compEnd < line.end) ? compEnd : line.end;
+            int x0 = MeasureWidth(lineText, a - line.start);
+            int x1 = MeasureWidth(lineText, b - line.start);
+            if (x1 > m_iWidth) x1 = m_iWidth;
+            if (x1 > x0)
+            {
+                EnableAlphaTest();
+                glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
+                RenderColor(m_iPos_x + x0, y + iLineHeight - 1, x1 - x0, 1);
+                EndRenderColor();
+            }
+        }
+
+        // Caret on this line: store its rect for IME positioning, draw on blink.
+        if (iCaretLine == li && iCaret >= line.start)
+        {
+            int iCaretX = MeasureWidth(lineText, iCaret - line.start);
             if (iCaretX > m_iWidth) iCaretX = m_iWidth;
-            EnableAlphaTest();
-            glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
-            RenderColor(m_iPos_x + iCaretX, y, CARET_WIDTH_PX, iLineHeight);
-            EndRenderColor();
+            m_iCaretAreaX = m_iPos_x + iCaretX;
+            m_iCaretAreaY = y;
+            m_iCaretAreaH = iLineHeight;
+            if (bFocused && bBlinkOn)
+            {
+                EnableAlphaTest();
+                glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
+                RenderColor(m_iPos_x + iCaretX, y, CARET_WIDTH_PX, iLineHeight);
+                EndRenderColor();
+            }
         }
     }
 
