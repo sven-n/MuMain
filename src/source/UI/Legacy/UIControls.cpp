@@ -3015,6 +3015,8 @@ void CheckTextInputBoxIME(int iMode)
     }
 }
 
+CUITextInputBox* CUITextInputBox::s_pFocusedPortable = nullptr;
+
 CUITextInputBox::CUITextInputBox()
 {
     m_hParentWnd = nullptr;
@@ -3055,6 +3057,9 @@ CUITextInputBox::CUITextInputBox()
 
 CUITextInputBox::~CUITextInputBox()
 {
+    if (s_pFocusedPortable == this)
+        s_pFocusedPortable = nullptr;
+
     if (m_hEditWnd != nullptr && m_hOldProc != nullptr)
     {
         SetWindowLongPtrW(m_hEditWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(m_hOldProc));
@@ -3262,6 +3267,15 @@ void CUITextInputBox::SetIMEPosition()
 void CUITextInputBox::GetText(wchar_t* pszText, int iGetLength)
 {
     if (pszText == nullptr) return;
+
+    if (m_bPortable)
+    {
+        if (iGetLength <= 0) return;
+        wcsncpy(pszText, m_portableText.c_str(), iGetLength - 1);
+        pszText[iGetLength - 1] = L'\0';
+        return;
+    }
+
     GetWindowText(m_hEditWnd, pszText, iGetLength);
 }
 
@@ -3277,12 +3291,29 @@ void CUITextInputBox::SetText(const wchar_t* pszText)
 
     if (wstrText.length() > MAX_TEXT_LENGTH) return;
 
+    if (m_bPortable)
+    {
+        if (m_iMaxLength > 0 && static_cast<int>(wstrText.length()) > m_iMaxLength)
+            wstrText.resize(m_iMaxLength);
+        m_portableText = wstrText;
+        m_iCaret = static_cast<int>(m_portableText.length());
+        m_iSelAnchor = m_iCaret;
+        m_iFirstVisible = 0;
+        return;
+    }
+
     m_sTextToSet = wstrText;
     m_bSetText = true;
 }
 
 void CUITextInputBox::SetTextLimit(int iLimit)
 {
+    if (m_bPortable)
+    {
+        m_iMaxLength = iLimit;
+        return;
+    }
+
     SendMessageW(m_hEditWnd, EM_SETLIMITTEXT, iLimit, 0);
 }
 
@@ -3303,6 +3334,10 @@ void CUITextInputBox::SetSize(int iWidth, int iHeight)
 
     m_iWidth = iWidth;
     m_iHeight = iHeight;
+
+    // Portable boxes render through g_pRenderText and need no GDI back buffer
+    // or EDIT child; the dimensions above are all SetSize has to track.
+    if (m_bPortable) return;
 
     if (m_hMemDC != nullptr)
     {
@@ -3366,6 +3401,19 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 {
     m_hParentWnd = hWnd;
 
+    if (m_bPortable)
+    {
+        m_bPasswordInput = bIsPassword;
+        m_iMaxLength = iMaxLength;
+        m_portableText.clear();
+        m_iCaret = 0;
+        m_iSelAnchor = 0;
+        m_iFirstVisible = 0;
+        SetSize(iWidth, iHeight);
+        m_caretTimer.ResetTimer();
+        return;
+    }
+
     DWORD dwOptionFlag = 0;
     if (bIsPassword == TRUE)
     {
@@ -3402,6 +3450,16 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 
 void CUITextInputBox::SetState(int iState)
 {
+    if (m_bPortable)
+    {
+        m_iState = iState;
+        // A hidden box must not keep keyboard focus, or the SDL loop would keep
+        // routing input to an invisible field.
+        if (m_iState == UISTATE_HIDE && s_pFocusedPortable == this)
+            s_pFocusedPortable = nullptr;
+        return;
+    }
+
     if (m_hEditWnd == nullptr) return;
     m_iState = iState;
     if (m_iState == UISTATE_HIDE)
@@ -3414,6 +3472,28 @@ void CUITextInputBox::SetState(int iState)
 
 void CUITextInputBox::GiveFocus(BOOL SelectText)
 {
+    if (m_bPortable)
+    {
+        if (m_iState == UISTATE_HIDE || m_iState == UISTATE_DISABLE) return;
+
+        s_pFocusedPortable = this;
+        g_dwKeyFocusUIID = GetUIID();
+        m_caretTimer.ResetTimer();
+
+        const int iLength = static_cast<int>(m_portableText.length());
+        if (SelectText == TRUE)
+        {
+            m_iSelAnchor = 0;
+            m_iCaret = iLength;
+        }
+        else
+        {
+            m_iCaret = iLength;
+            m_iSelAnchor = iLength;
+        }
+        return;
+    }
+
     if (m_hEditWnd == nullptr) return;
 
     if (g_iChatInputType == 1 && GetFocus() == g_hWnd && !CheckOption(UIOPTION_SERIALNUMBER) && !CheckOption(UIOPTION_NUMBERONLY))
@@ -3531,6 +3611,14 @@ void CUITextInputBox::WriteText(int iOffset, int iWidth, int iHeight)
 void CUITextInputBox::Render()
 {
     m_bIsReady = TRUE;
+
+    if (m_bPortable)
+    {
+        if (m_iState == UISTATE_HIDE) return;
+        RenderPortable();
+        return;
+    }
+
     if (m_hEditWnd == nullptr || !IsWindowVisible(m_hEditWnd))
     {
         return;
@@ -3681,7 +3769,16 @@ void CUITextInputBox::RenderScrollbar()
 
 void CUITextInputBox::SetFont(HFONT hFont)
 {
-    if (m_hEditWnd == nullptr || hFont == nullptr)
+    if (hFont == nullptr)
+        return;
+
+    if (m_bPortable)
+    {
+        m_hFont = hFont;
+        return;
+    }
+
+    if (m_hEditWnd == nullptr)
         return;
 
     SendMessageW(m_hEditWnd, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), FALSE);
@@ -3690,6 +3787,21 @@ void CUITextInputBox::SetFont(HFONT hFont)
 
 BOOL CUITextInputBox::DoMouseAction()
 {
+    if (m_bPortable)
+    {
+        if (::CheckMouseIn(m_iPos_x, m_iPos_y - 4, m_iWidth, m_iHeight + 8) == FALSE)
+            return FALSE;
+
+        MouseOnWindow = true;
+        if (MouseLButtonPush && GetState() == UISTATE_NORMAL)
+        {
+            GiveFocus(TRUE);
+            MouseUpdateTime = 0;
+            MouseUpdateTimeMax = 6;
+        }
+        return TRUE;
+    }
+
     BOOL bResult = FALSE;
     if (::CheckMouseIn(m_iPos_x, m_iPos_y - 4, m_iWidth, m_iHeight + 8) == TRUE)
     {
@@ -3819,6 +3931,259 @@ BOOL CUITextInputBox::DoMouseAction()
     }
 
     return bResult;
+}
+
+// ---------------------------------------------------------------------------
+// Portable single-line text field (issue #447)
+// ---------------------------------------------------------------------------
+
+namespace
+{
+    constexpr int CARET_BLINK_MS = 530;   // half-period of the caret blink
+    constexpr int CARET_WIDTH_PX = 2;     // caret bar width in reference pixels
+}
+
+int CUITextInputBox::MeasureWidth(const wchar_t* pszText, int iLength) const
+{
+    if (pszText == nullptr || iLength <= 0) return 0;
+    if (m_hFont != nullptr) g_pRenderText->SetFont(m_hFont);
+
+    SIZE sz = { 0, 0 };
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszText, iLength, &sz);
+    return (g_fScreenRate_x > 0.f) ? static_cast<int>(sz.cx / g_fScreenRate_x) : sz.cx;
+}
+
+void CUITextInputBox::MoveCaret(int iNewCaret, bool bExtendSelection)
+{
+    const int iLength = static_cast<int>(m_portableText.length());
+    if (iNewCaret < 0) iNewCaret = 0;
+    if (iNewCaret > iLength) iNewCaret = iLength;
+
+    m_iCaret = iNewCaret;
+    if (!bExtendSelection)
+        m_iSelAnchor = m_iCaret;
+
+    m_caretTimer.ResetTimer();
+}
+
+void CUITextInputBox::InsertChar(wchar_t ch)
+{
+    if (HasSelection())
+        DeleteSelection();
+
+    if (m_iMaxLength > 0 && static_cast<int>(m_portableText.length()) >= m_iMaxLength)
+        return;
+
+    m_portableText.insert(m_portableText.begin() + m_iCaret, ch);
+    ++m_iCaret;
+    m_iSelAnchor = m_iCaret;
+    m_caretTimer.ResetTimer();
+}
+
+void CUITextInputBox::DeleteSelection()
+{
+    if (!HasSelection()) return;
+
+    const int iStart = SelectionStart();
+    const int iEnd = SelectionEnd();
+    m_portableText.erase(m_portableText.begin() + iStart, m_portableText.begin() + iEnd);
+    m_iCaret = iStart;
+    m_iSelAnchor = iStart;
+    if (m_iFirstVisible > static_cast<int>(m_portableText.length()))
+        m_iFirstVisible = 0;
+}
+
+void CUITextInputBox::SelectAll()
+{
+    m_iSelAnchor = 0;
+    m_iCaret = static_cast<int>(m_portableText.length());
+}
+
+std::wstring CUITextInputBox::GetSelectedText() const
+{
+    if (m_iSelAnchor == m_iCaret) return std::wstring();
+    const int iStart = (m_iSelAnchor < m_iCaret) ? m_iSelAnchor : m_iCaret;
+    const int iEnd = (m_iSelAnchor < m_iCaret) ? m_iCaret : m_iSelAnchor;
+    return m_portableText.substr(iStart, iEnd - iStart);
+}
+
+void CUITextInputBox::OnTextInput(const wchar_t* pszText)
+{
+    if (pszText == nullptr) return;
+
+    for (const wchar_t* p = pszText; *p != L'\0'; ++p)
+    {
+        wchar_t ch = static_cast<wchar_t>(g_pMultiLanguage->ConvertFulltoHalfWidthChar(*p));
+        if (ch < 0x20) continue;  // drop control characters
+
+        if (CheckOption(UIOPTION_NUMBERONLY))
+        {
+            if (ch < L'0' || ch > L'9') continue;
+        }
+        else if (CheckOption(UIOPTION_SERIALNUMBER))
+        {
+            if (ch >= L'0' && ch <= L'9') {}
+            else if (ch >= L'A' && ch <= L'Z') {}
+            else if (ch >= L'a' && ch <= L'z') ch -= 32;  // force uppercase
+            else continue;
+        }
+#ifdef LJH_ADD_RESTRICTION_ON_ID
+        else if (CheckOption(UIOPTION_NOLOCALIZEDCHARACTERS))
+        {
+            if (ch < 33 || ch > 126) continue;
+        }
+#endif // LJH_ADD_RESTRICTION_ON_ID
+
+        InsertChar(ch);
+    }
+}
+
+void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
+{
+    m_caretTimer.ResetTimer();
+
+    switch (iVirtualKey)
+    {
+    case VK_LEFT:
+        MoveCaret(m_iCaret - 1, bShift);
+        break;
+    case VK_RIGHT:
+        MoveCaret(m_iCaret + 1, bShift);
+        break;
+    case VK_HOME:
+        MoveCaret(0, bShift);
+        break;
+    case VK_END:
+        MoveCaret(static_cast<int>(m_portableText.length()), bShift);
+        break;
+    case VK_BACK:
+        if (HasSelection())
+            DeleteSelection();
+        else if (m_iCaret > 0)
+        {
+            m_portableText.erase(m_portableText.begin() + m_iCaret - 1);
+            --m_iCaret;
+            m_iSelAnchor = m_iCaret;
+        }
+        break;
+    case VK_DELETE:
+        if (HasSelection())
+            DeleteSelection();
+        else if (m_iCaret < static_cast<int>(m_portableText.length()))
+        {
+            m_portableText.erase(m_portableText.begin() + m_iCaret);
+            m_iSelAnchor = m_iCaret;
+        }
+        break;
+    case VK_RETURN:
+        // Mirror the legacy EDIT path: a single-line, unlocked box notifies its
+        // owning UI window so Enter confirms (e.g. submits the dialog). The
+        // login screen instead reads Enter from the global key poll, so the
+        // parentless case needs nothing here.
+        if (IsLocked() == TRUE || UseMultiline() == TRUE) break;
+        if (g_pFriendMenu->IsHotkeyEnable() == TRUE) break;
+        if (GetParentUIID() != 0)
+            g_pWindowMgr->SendUIMessageToWindow(GetParentUIID(), UI_MESSAGE_TEXTINPUT, 0, 0);
+        break;
+    case VK_TAB:
+        if (GetTabTarget() != nullptr && GetTabTarget()->GetState() == UISTATE_NORMAL)
+            GetTabTarget()->GiveFocus(TRUE);
+        break;
+    default:
+        break;
+    }
+}
+
+void CUITextInputBox::RenderPortable()
+{
+    if (m_hFont == nullptr) return;
+    g_pRenderText->SetFont(m_hFont);
+
+    std::wstring display;
+    if (m_bPasswordInput)
+        display.assign(m_portableText.length(), L'*');
+    else
+        display = m_portableText;
+
+    const int iLength = static_cast<int>(display.length());
+    if (m_iCaret > iLength) m_iCaret = iLength;
+    if (m_iSelAnchor > iLength) m_iSelAnchor = iLength;
+
+    // Caret/selection height from a sample glyph, in reference pixels.
+    SIZE qSize = { 0, 0 };
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Q", 1, &qSize);
+    int iLineHeight = (g_fScreenRate_y > 0.f) ? static_cast<int>(qSize.cy / g_fScreenRate_y) : qSize.cy;
+    if (iLineHeight <= 0 || iLineHeight > m_iHeight) iLineHeight = m_iHeight;
+
+    // Horizontal scroll: never start past the caret, and advance the first
+    // visible character until the caret fits inside the box width.
+    if (m_iFirstVisible > m_iCaret) m_iFirstVisible = m_iCaret;
+    if (m_iFirstVisible < 0) m_iFirstVisible = 0;
+    while (m_iFirstVisible < m_iCaret &&
+        MeasureWidth(display.c_str() + m_iFirstVisible, m_iCaret - m_iFirstVisible) > m_iWidth)
+    {
+        ++m_iFirstVisible;
+    }
+
+    // Background fill.
+    if (CheckOption(UIOPTION_PAINTBACK))
+    {
+        EnableAlphaTest();
+        glColor4f(0.f, 0.f, 0.f, 1.f);
+        RenderColor(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight);
+        EndRenderColor();
+    }
+    else if (GetAlpha(m_dwBackColor) > 0)
+    {
+        EnableAlphaTest();
+        glColor4ub(GetRed(m_dwBackColor), GetGreen(m_dwBackColor), GetBlue(m_dwBackColor), GetAlpha(m_dwBackColor));
+        RenderColor(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight);
+        EndRenderColor();
+    }
+
+    // Selection highlight, clamped to the visible window.
+    if (HasSelection())
+    {
+        const int iSelStart = SelectionStart();
+        const int iSelEnd = SelectionEnd();
+        if (iSelEnd > m_iFirstVisible)
+        {
+            const int iVisStart = (iSelStart > m_iFirstVisible) ? iSelStart : m_iFirstVisible;
+            int x0 = MeasureWidth(display.c_str() + m_iFirstVisible, iVisStart - m_iFirstVisible);
+            int x1 = MeasureWidth(display.c_str() + m_iFirstVisible, iSelEnd - m_iFirstVisible);
+            if (x0 < 0) x0 = 0;
+            if (x1 > m_iWidth) x1 = m_iWidth;
+            if (x1 > x0)
+            {
+                EnableAlphaTest();
+                glColor4ub(GetRed(m_dwSelectBackColor), GetGreen(m_dwSelectBackColor), GetBlue(m_dwSelectBackColor), GetAlpha(m_dwSelectBackColor));
+                RenderColor(m_iPos_x + x0, m_iPos_y, x1 - x0, iLineHeight);
+                EndRenderColor();
+            }
+        }
+    }
+
+    // Visible text.
+    const int iVisibleLen = iLength - m_iFirstVisible;
+    if (iVisibleLen > 0)
+    {
+        g_pRenderText->SetBgColor(0);
+        g_pRenderText->SetTextColor(m_dwTextColor);
+        g_pRenderText->RenderText(m_iPos_x, m_iPos_y, display.c_str() + m_iFirstVisible, m_iWidth, m_iHeight, RT3_SORT_LEFT);
+    }
+
+    // Blinking caret (only while focused).
+    const bool bFocused = (s_pFocusedPortable == this);
+    const bool bBlinkOn = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / CARET_BLINK_MS) % 2 == 0;
+    if (bFocused && bBlinkOn)
+    {
+        int iCaretX = MeasureWidth(display.c_str() + m_iFirstVisible, m_iCaret - m_iFirstVisible);
+        if (iCaretX > m_iWidth) iCaretX = m_iWidth;
+        EnableAlphaTest();
+        glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
+        RenderColor(m_iPos_x + iCaretX, m_iPos_y, CARET_WIDTH_PX, iLineHeight);
+        EndRenderColor();
+    }
 }
 
 void CUIChatInputBox::Init(HWND hWnd)

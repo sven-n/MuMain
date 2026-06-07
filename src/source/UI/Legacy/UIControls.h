@@ -863,7 +863,7 @@ public:
 
     HWND GetHandle() { return m_hEditWnd; }
     HWND GetParentHandle() { return m_hParentWnd; }
-    BOOL HaveFocus() { return (GetHandle() == GetFocus()); }
+    BOOL HaveFocus() { return m_bPortable ? (s_pFocusedPortable == this) : (GetHandle() == GetFocus()); }
     BOOL UseMultiline() { return m_bUseMultiLine; }
     virtual void SetTabTarget(CUITextInputBox* pTabTarget) { m_pTabTarget = pTabTarget; }
     CUITextInputBox* GetTabTarget() { return m_pTabTarget; }
@@ -878,12 +878,43 @@ public:
     void SetUseScrollbar(bool _scrollbar = TRUE) { m_bUseScrollbarRender = _scrollbar; }
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 
+    // Portable single-line text field (issue #447). When enabled, the control
+    // owns its text buffer and renders through g_pRenderText instead of hosting
+    // a Win32 child EDIT control; input is fed from the SDL event loop. Call
+    // EnablePortableInput() before Init(). The EDIT path remains the default for
+    // boxes that have not opted in (multiline, chat, etc.) until later steps of
+    // the migration replace them too.
+    void EnablePortableInput() { m_bPortable = true; }
+    bool IsPortable() const { return m_bPortable; }
+
+    // The single portable box that currently owns keyboard input, or nullptr.
+    // The SDL event loop routes text/edit keys to it and starts/stops SDL text
+    // input based on whether one is focused.
+    static CUITextInputBox* GetFocusedPortable() { return s_pFocusedPortable; }
+
+    // Input fed from the SDL event loop (portable mode only).
+    void OnTextInput(const wchar_t* pszText);            // committed characters
+    void OnEditKey(int iVirtualKey, bool bCtrl, bool bShift); // navigation/erase
+    void SelectAll();
+    std::wstring GetSelectedText() const;
+    void DeleteSelection();
+
 protected:
     virtual BOOL DoMouseAction();
     void RenderScrollbar();
 
     void WriteText(int iOffset, int iWidth, int iHeight);
     void UploadText(int sx, int sy, int Width, int Height);
+
+    // Portable single-line implementation (issue #447).
+    void RenderPortable();
+    void MoveCaret(int iNewCaret, bool bExtendSelection);
+    void InsertChar(wchar_t ch);
+    bool HasSelection() const { return m_iSelAnchor != m_iCaret; }
+    int  SelectionStart() const { return m_iSelAnchor < m_iCaret ? m_iSelAnchor : m_iCaret; }
+    int  SelectionEnd() const { return m_iSelAnchor < m_iCaret ? m_iCaret : m_iSelAnchor; }
+    // Width in reference pixels of the first iLength chars rendered in the font.
+    int  MeasureWidth(const wchar_t* pszText, int iLength) const;
 
 public:
     WNDPROC m_hOldProc;
@@ -898,6 +929,15 @@ protected:
     bool m_bSetText = false;
     std::wstring m_sTextToSet;
 
+    // Portable single-line state (issue #447); only used when m_bPortable.
+    bool m_bPortable = false;
+    std::wstring m_portableText;
+    int m_iCaret = 0;            // caret index in [0, length]
+    int m_iSelAnchor = 0;       // selection anchor; equals caret when no selection
+    int m_iFirstVisible = 0;    // first rendered character (horizontal scroll)
+    int m_iMaxLength = 0;       // text length limit (0 = unlimited)
+    HFONT m_hFont = nullptr;    // font used for measuring and rendering
+    static CUITextInputBox* s_pFocusedPortable;
 
     CUITextInputBox* m_pTabTarget;
 

@@ -869,6 +869,93 @@ namespace
             UpdateCursorClip();
         }
     }
+
+    // --- Portable text field input routing (issue #447) -------------------
+    // Map the SDL keys a single-line text field reacts to onto the Win32 VK
+    // codes the field already understands. Returns 0 for keys it ignores.
+    int MapScancodeToEditVk(SDL_Scancode sc)
+    {
+        switch (sc)
+        {
+        case SDL_SCANCODE_LEFT:      return VK_LEFT;
+        case SDL_SCANCODE_RIGHT:     return VK_RIGHT;
+        case SDL_SCANCODE_HOME:      return VK_HOME;
+        case SDL_SCANCODE_END:       return VK_END;
+        case SDL_SCANCODE_BACKSPACE: return VK_BACK;
+        case SDL_SCANCODE_DELETE:    return VK_DELETE;
+        case SDL_SCANCODE_RETURN:
+        case SDL_SCANCODE_KP_ENTER:  return VK_RETURN;
+        case SDL_SCANCODE_TAB:       return VK_TAB;
+        default:                     return 0;
+        }
+    }
+
+    void FeedPortableTextInput(const char* utf8)
+    {
+        auto* box = CUITextInputBox::GetFocusedPortable();
+        if (box == nullptr || utf8 == nullptr) return;
+
+        wchar_t wide[64] = {};
+        const int written = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wide, _countof(wide));
+        if (written > 0)
+            box->OnTextInput(wide);
+    }
+
+    // Handle a key for the focused portable field. Returns true if consumed.
+    bool FeedPortableKey(const SDL_KeyboardEvent& key)
+    {
+        auto* box = CUITextInputBox::GetFocusedPortable();
+        if (box == nullptr) return false;
+
+        const bool ctrl = (key.mod & SDL_KMOD_CTRL) != 0;
+        const bool shift = (key.mod & SDL_KMOD_SHIFT) != 0;
+
+        // Clipboard lives in SDL on this side of the boundary, keeping the text
+        // field itself free of SDL; the field only exposes selection helpers.
+        if (ctrl)
+        {
+            switch (key.scancode)
+            {
+            case SDL_SCANCODE_A:
+                box->SelectAll();
+                return true;
+            case SDL_SCANCODE_C:
+            case SDL_SCANCODE_X:
+            {
+                const std::wstring selection = box->GetSelectedText();
+                if (!selection.empty())
+                {
+                    char utf8[256] = {};
+                    WideCharToMultiByte(CP_UTF8, 0, selection.c_str(), -1, utf8, _countof(utf8), nullptr, nullptr);
+                    SDL_SetClipboardText(utf8);
+                    if (key.scancode == SDL_SCANCODE_X)
+                        box->DeleteSelection();
+                }
+                return true;
+            }
+            case SDL_SCANCODE_V:
+            {
+                char* clip = SDL_GetClipboardText();
+                if (clip != nullptr)
+                {
+                    wchar_t wide[256] = {};
+                    if (MultiByteToWideChar(CP_UTF8, 0, clip, -1, wide, _countof(wide)) > 0)
+                        box->OnTextInput(wide);
+                    SDL_free(clip);
+                }
+                return true;
+            }
+            default:
+                break;
+            }
+        }
+
+        const int vk = MapScancodeToEditVk(key.scancode);
+        if (vk == 0) return false;
+
+        box->OnEditKey(vk, ctrl, shift);
+        return true;
+    }
 }
 
 MSG MainLoop()
@@ -919,6 +1006,14 @@ MSG MainLoop()
             case SDL_EVENT_WINDOW_FOCUS_LOST:
                 HandleFocusChange(false);
                 break;
+            case SDL_EVENT_TEXT_INPUT:
+                // Committed characters for the focused portable text field (#447).
+                FeedPortableTextInput(event.text.text);
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                // Navigation/erase/clipboard for the focused portable field (#447).
+                FeedPortableKey(event.key);
+                break;
             default:
                 break;
             }
@@ -927,6 +1022,21 @@ MSG MainLoop()
             if (g_MaxMessagePerCycle > 0 && messageProcessed >= g_MaxMessagePerCycle)
             {
                 break;
+            }
+        }
+
+        // Start/stop SDL text input as a portable text field gains or loses
+        // focus, so SDL only emits SDL_EVENT_TEXT_INPUT while one is active (#447).
+        {
+            static bool s_textInputActive = false;
+            const bool wantTextInput = CUITextInputBox::GetFocusedPortable() != nullptr;
+            if (wantTextInput != s_textInputActive && g_sdlWindow != nullptr)
+            {
+                if (wantTextInput)
+                    SDL_StartTextInput(g_sdlWindow);
+                else
+                    SDL_StopTextInput(g_sdlWindow);
+                s_textInputActive = wantTextInput;
             }
         }
 
