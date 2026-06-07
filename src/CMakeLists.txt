@@ -219,6 +219,17 @@ if (NOT MSVC)
   target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
 endif()
 
+# Minimal cross-platform smoke test for the portable SDL shell: opens a window,
+# creates a GL context, and runs the event loop (issue #442). It links only
+# SDL3 - not the engine, which is still Win32-bound - so it builds and runs on
+# Linux/macOS/Windows as a CI portability guard for the platform-neutral shell.
+add_executable(mu_sdl_smoke
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Platform/SdlShell.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Platform/Linux/main.cpp"
+)
+target_compile_features(mu_sdl_smoke PRIVATE cxx_std_20)
+target_link_libraries(mu_sdl_smoke PRIVATE SDL3::SDL3)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   # Build as a Windows GUI application (no console window) and let CMake
   # add the default system libraries like kernel32, user32, gdi32, etc.
