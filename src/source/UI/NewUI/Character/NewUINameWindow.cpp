@@ -15,6 +15,8 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Events/MatchEvent.h"
 #include "World/MapInfra/MapManager.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/CameraState.h"
 
 // DevEditor forward declarations (must be at global scope)
 #ifdef _EDITOR
@@ -26,6 +28,54 @@ using namespace SEASON3B;
 namespace
 {
 constexpr int GROUND_ITEM_LABEL_BUILD_BUDGET_PER_FRAME = 32;
+
+// Draws a segmented monster HP bar, horizontally centered on centerX with its
+// top edge at topY. `steps` is the segment count (HP granularity); `scale`
+// horizontally compresses the bar (1.0 == original width).
+void DrawHealthBar(int centerX, int topY, float health, int steps, float scale)
+{
+    const float borderHeight = 2.f;                  // vertical inset (unscaled)
+    const float borderWidth = 2.f * scale;           // horizontal inset
+    const float stepSeparatorWidth = 1.f * scale;    // gap between segments
+    const float segmentSpan = 80.f * scale;          // total span of the segment track
+    const float widthPerStep = segmentSpan / steps;  // derived: fewer steps -> wider segments
+    const float stepsWidth = segmentSpan - 2.f * stepSeparatorWidth;
+    const float totalWidth = stepsWidth + borderWidth * 2.f;
+
+    const int x = centerX - (int)(totalWidth / 2);
+    const int y = topY;
+
+    // Drop shadow.
+    EnableAlphaTest();
+    glColor4f(0.f, 0.f, 0.f, 0.5f);
+    RenderColor((float)(x + 1), (float)(y + 1), totalWidth, 5.f);
+
+    // Dark backing.
+    EnableAlphaBlend();
+    glColor3f(0.2f, 0.0f, 0.0f);
+    RenderColor((float)x, (float)y, totalWidth, 5.f);
+
+    // Inner track.
+    glColor3f(50.f / 255.f, 10.f / 255.f, 0.f);
+    RenderColor((float)(x + borderWidth), (float)(y + borderHeight), stepsWidth, 1.f);
+
+    // HealthStatus < 0 is the "HP unknown" sentinel (server sends 0xFF -> -1, and
+    // the field is initialized to -1), so render a full bar instead of an empty one.
+    const float clampedHealth = (health < 0.f) ? 1.f : health;
+    const int stepHP = (int)(clampedHealth * steps);
+
+    // Filled health segments.
+    glColor3f(250.f / 255.f, 10.f / 255.f, 0.f);
+    for (int k = 0; k < stepHP; ++k)
+    {
+        RenderColor(
+            (float)(x + borderWidth + (k * widthPerStep)),
+            (float)(y + borderHeight),
+            widthPerStep - stepSeparatorWidth,
+            2.f);
+    }
+    DisableAlphaBlend();
+}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -38,6 +88,7 @@ SEASON3B::CNewUINameWindow::CNewUINameWindow()
     m_Pos.x = m_Pos.y = 0;
 
     m_bShowItemName = false;
+    m_bShowMonsterHealthBar = false;
 }
 
 SEASON3B::CNewUINameWindow::~CNewUINameWindow()
@@ -87,6 +138,11 @@ bool SEASON3B::CNewUINameWindow::UpdateKeyEvent()
         m_bShowItemName = !m_bShowItemName;
     }
 
+    if (SEASON3B::IsPress(VK_F8) == true)
+    {
+        m_bShowMonsterHealthBar = !m_bShowMonsterHealthBar;
+    }
+
     return true;
 }
 
@@ -103,6 +159,7 @@ bool SEASON3B::CNewUINameWindow::Render()
     RenderTimes();
     matchEvent::RenderMatchTimes();
     UI::Chat::RenderBooleans();
+    RenderMonsterHealthBars();
     DrawPersonalShopTitleImp();
     DisableAlphaBlend();
     return true;
@@ -154,40 +211,8 @@ void SEASON3B::CNewUINameWindow::RenderName()
 
                 if (c->HealthStatus > 0)
                 {
-                    const auto steps = 20;
-                    const auto borderWidth = 2.f;
-                    const auto widthPerStep = 4;
-                    const auto stepSeparatorWidth = 1;
-                    const auto stepsWidth = steps * widthPerStep - 2 * stepSeparatorWidth; //38.f;
-                    const auto totalWidth = stepsWidth + borderWidth * 2;
-                    
-                    auto ScreenX = 320 - totalWidth / 2;
-                    auto ScreenY = 15;
-                    
-
-                    EnableAlphaTest();
-                    glColor4f(0.f, 0.f, 0.f, 0.5f);
-                    RenderColor((float)(ScreenX + 1), (float)(ScreenY + 1), totalWidth, 5.f);
-
-                    EnableAlphaBlend();
-                    glColor3f(0.2f, 0.0f, 0.0f);
-                    RenderColor((float)ScreenX, (float)ScreenY, totalWidth, 5.f);
-
-                    glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
-                    RenderColor((float)(ScreenX + borderWidth), (float)(ScreenY + borderWidth), stepsWidth, 1.f);
-
-                    int stepHP = (int)(c->HealthStatus * steps);
-
-                    glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
-                    for (int k = 0; k < stepHP; ++k)
-                    {
-                        RenderColor(
-                            (float)(ScreenX + borderWidth + (k * widthPerStep)),
-                            (float)(ScreenY + borderWidth),
-                            widthPerStep - stepSeparatorWidth,
-                            2.f);
-                    }
-                    DisableAlphaBlend();
+                    // Full-width bar centered under the selected monster's name.
+                    DrawHealthBar(320, 15, c->HealthStatus, 20, 1.f);
                 }
             }
             else
@@ -236,6 +261,41 @@ void SEASON3B::CNewUINameWindow::RenderName()
                 }
             }
         }
+    }
+}
+
+void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
+{
+    if (!m_bShowMonsterHealthBar)
+        return;
+
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        OBJECT* o = &c->Object;
+
+        if (!o->Live || !o->Visible || o->Alpha <= 0.f || c->Dead > 0 || o->Kind != KIND_MONSTER)
+            continue;
+
+        vec3_t Position;
+        Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 60.f, Position);
+
+        int ScreenX, ScreenY;
+        vec3_t transformPos;
+        VectorTransform(Position, g_Camera.Matrix, transformPos);
+        if (transformPos[2] >= 0)
+            continue;
+
+        CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
+
+        if (ScreenX < -100 || ScreenY < -100
+            || ScreenX > (REFERENCE_WIDTH + 100)
+            || ScreenY > (REFERENCE_HEIGHT + 100))
+            continue;
+
+        // Bar fixed at ~3/7 of the original width, with 8 segments so each one
+        // stays close to the original thickness (see DrawHealthBar for geometry).
+        DrawHealthBar(ScreenX, ScreenY, c->HealthStatus, 8, 3.f / 7.f);
     }
 }
 

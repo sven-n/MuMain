@@ -496,6 +496,9 @@
     <value>F4 : Ayusin ang laki ng Chat Window</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F8 - Toggle Monster HP Bar" xml:space="preserve">
+    <value>F8 - I-on/I-off ang HP Bar ng Monster</value>
+  </data>
   <data name="F9 - Toggle 3D Camera" xml:space="preserve">
     <value>F9 - I-toggle ang 3D Camera</value>
   </data>
