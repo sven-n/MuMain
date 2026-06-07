@@ -496,6 +496,9 @@
     <value>F4: Dostosuj rozmiar okna czatu</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F8 - Toggle Monster HP Bar" xml:space="preserve">
+    <value>F8 - Włącz/wyłącz pasek życia potworów</value>
+  </data>
   <data name="F9 - Toggle 3D Camera" xml:space="preserve">
     <value>F9 - Przełącz kamerę 3D</value>
   </data>

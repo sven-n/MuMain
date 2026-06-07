@@ -496,6 +496,9 @@
     <value>F4: Ajustar o tamanho da janela de bate-papo</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F8 - Toggle Monster HP Bar" xml:space="preserve">
+    <value>F8 - Ativar/desativar barra de HP dos monstros</value>
+  </data>
   <data name="F9 - Toggle 3D Camera" xml:space="preserve">
     <value>F9 - Alternar câmera 3D</value>
   </data>

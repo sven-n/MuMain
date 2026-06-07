@@ -496,6 +496,9 @@
     <value>F4 : Налаштувати розмір вікна чату</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F8 - Toggle Monster HP Bar" xml:space="preserve">
+    <value>F8 - Увімкнути/вимкнути смужку HP монстрів</value>
+  </data>
   <data name="F9 - Toggle 3D Camera" xml:space="preserve">
     <value>F9 - Перемкнути 3D-камеру</value>
   </data>

@@ -11,7 +11,7 @@
 
 namespace SEASON3B
 {
-    // 아이템 이름
+    // item name
     class CNewUINameWindow : public CNewUIObj
     {
     public:
@@ -33,10 +33,13 @@ namespace SEASON3B
     private:
         void RenderName();
 
-        CNewUIManager* m_pNewUIMng;		// UI 매니저.
-        POINT m_Pos;					// 창의 위치.
+        CNewUIManager* m_pNewUIMng;		// UI manager
+        POINT m_Pos;					// window position
 
         bool m_bShowItemName;
+        bool m_bShowMonsterHealthBar;
+
+        void RenderMonsterHealthBars();
     };
 }
 

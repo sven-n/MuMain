@@ -496,6 +496,9 @@
     <value>Ｆ４:チャットウィンドウのサイズ調整</value>
     <comment>legacy_id=124</comment>
   </data>
+  <data name="F8 - Toggle Monster HP Bar" xml:space="preserve">
+    <value>F8 - モンスター体力バー表示切替</value>
+  </data>
   <data name="Enter: Chatting Mode" xml:space="preserve">
     <value>Enter:チャットウィンドウ On/Off</value>
     <comment>legacy_id=125</comment>
