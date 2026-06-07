@@ -65,11 +65,8 @@
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "imgui.h"
-#include "imgui_impl_win32.h"
+#include "imgui_impl_sdl3.h"
 #include "../MuEditor/Config/MuEditorConfig.h"
-#include "../MuEditor/Core/MuEditorCore.h"
-// Forward declare ImGui WndProc handler
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
 CUIMercenaryInputBox* g_pMercenaryInputBox = nullptr;
@@ -471,15 +468,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return 0;
     }
 
-#ifdef _EDITOR
-    // Only forward messages to ImGui when editor is open
-    // When editor is closed, we handle button clicks manually in RenderToolbarOpen
-    if (g_MuEditorCore.IsEnabled())
-    {
-        if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
-            return true;
-    }
-#endif
+    // ImGui (editor) now consumes input from the SDL event loop via
+    // ImGui_ImplSDL3_ProcessEvent, not from Win32 messages (issue #442).
 
     switch (msg)
     {
@@ -1008,6 +998,12 @@ MSG MainLoop()
         // events are handled here, off the hook.
         while (SDL_PollEvent(&event))
         {
+#ifdef _EDITOR
+            // Feed every event to the editor's ImGui SDL3 backend (issue #442).
+            // Guard on an active context: editor init can fail or be shut down.
+            if (ImGui::GetCurrentContext() != nullptr)
+                ImGui_ImplSDL3_ProcessEvent(&event);
+#endif
             switch (event.type)
             {
             case SDL_EVENT_QUIT:
@@ -1463,8 +1459,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     }
 
 #ifdef _EDITOR
-    // Initialize MU Editor
-    g_MuEditorCore.Initialize(g_hWnd, g_hDC);
+    // Initialize MU Editor (ImGui SDL3 backend needs the SDL window + GL context).
+    g_MuEditorCore.Initialize(g_sdlWindow, g_sdlGLContext);
 
     // Check for --editor command line flag
     if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
@@ -1585,6 +1581,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     // Teardown that used to run in WM_DESTROY, now after the loop exits (SDL owns
     // the window/GL context, so they must not be destroyed from a message).
     DestroySound();
+#ifdef _EDITOR
+    // Shut the editor's ImGui backends down while the GL context and SDL window
+    // are still alive; the static destructor runs too late (after KillGLWindow).
+    g_MuEditorCore.Shutdown();
+#endif
     KillGLWindow();
     DestroyWindow();
 

@@ -4,7 +4,7 @@
 
 #include "MuEditorCore.h"
 #include "imgui.h"
-#include "imgui_impl_win32.h"
+#include "imgui_impl_sdl3.h"
 #include "imgui_impl_opengl2.h"
 #include "MuInputBlockerCore.h"
 #include "../Config/MuEditorConfig.h"
@@ -52,10 +52,17 @@ CMuEditorCore& CMuEditorCore::GetInstance()
     return instance;
 }
 
-void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
+void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
 {
     if (m_bInitialized)
         return;
+
+    if (window == nullptr || glContext == nullptr)
+    {
+        fwprintf(stderr, L"[MuEditor] Initialize failed: window or glContext is null\n");
+        fflush(stderr);
+        return;
+    }
 
     fwprintf(stderr, L"[MuEditor] Initialize() called\n");
     fflush(stderr);
@@ -240,8 +247,21 @@ void CMuEditorCore::Initialize(HWND hwnd, HDC hdc)
     style.WindowRounding = 0.0f;
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.0f);
 
-    ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplOpenGL2_Init();
+    if (!ImGui_ImplSDL3_InitForOpenGL(window, glContext))
+    {
+        fwprintf(stderr, L"[MuEditor] ImGui_ImplSDL3_InitForOpenGL failed\n");
+        fflush(stderr);
+        ImGui::DestroyContext();
+        return;
+    }
+    if (!ImGui_ImplOpenGL2_Init())
+    {
+        fwprintf(stderr, L"[MuEditor] ImGui_ImplOpenGL2_Init failed\n");
+        fflush(stderr);
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
+        return;
+    }
 
     fwprintf(stderr, L"[MuEditor] ImGui backends initialized\n");
     fflush(stderr);
@@ -272,7 +292,7 @@ void CMuEditorCore::Shutdown()
     g_MuSkillEditorUI.SaveColumnPreferences();
 
     ImGui_ImplOpenGL2_Shutdown();
-    ImGui_ImplWin32_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
 
     m_bInitialized = false;
@@ -288,35 +308,11 @@ void CMuEditorCore::Update()
     {
         ImGui_ImplOpenGL2_NewFrame();
 
-        // Only let Win32 backend update mouse when editor is open
-        if (m_bEditorMode)
-        {
-            ImGui_ImplWin32_NewFrame();
-        }
-        else
-        {
-            // When closed, manually create a minimal frame and update mouse position
-            ImGuiIO& io = ImGui::GetIO();
-
-            // Get window size
-            extern HWND g_hWnd;
-            RECT rect;
-            GetClientRect(g_hWnd, &rect);
-            io.DisplaySize = ImVec2((float)(rect.right - rect.left), (float)(rect.bottom - rect.top));
-            io.DeltaTime = 1.0f / 60.0f;
-
-            // Manually update mouse position for button detection
-            POINT mousePos;
-            if (GetCursorPos(&mousePos))
-            {
-                ScreenToClient(g_hWnd, &mousePos);
-                io.MousePos = ImVec2((float)mousePos.x, (float)mousePos.y);
-            }
-
-            // Update mouse button states
-            extern bool MouseLButton;
-            io.MouseDown[0] = MouseLButton;
-        }
+        // The SDL3 backend fills display size and mouse/keyboard from the SDL
+        // events fed via ImGui_ImplSDL3_ProcessEvent, so it works the same
+        // whether the editor is open or only the "Open Editor" button is shown
+        // (issue #442) - no manual Win32 frame setup needed.
+        ImGui_ImplSDL3_NewFrame();
 
         ImGui::NewFrame();
         m_bFrameStarted = true;
