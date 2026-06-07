@@ -30,7 +30,12 @@ namespace Platform
             return false;
         }
 
-        SDL_GL_MakeCurrent(window, static_cast<SDL_GLContext>(glContext));
+        if (!SDL_GL_MakeCurrent(window, static_cast<SDL_GLContext>(glContext)))
+        {
+            std::fprintf(stderr, "[SdlShell] SDL_GL_MakeCurrent failed: %s\n", SDL_GetError());
+            Destroy();
+            return false;
+        }
         return true;
     }
 
