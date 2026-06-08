@@ -58,7 +58,9 @@ inline wchar_t* _itow(int value, wchar_t* buffer, int radix)
     if (radix < 2 || radix > 36) { buffer[0] = L'\0'; return buffer; }
 
     const bool negative = (value < 0 && radix == 10);
-    unsigned int v = negative ? static_cast<unsigned int>(-static_cast<long>(value))
+    // Unsigned negation is well-defined and yields the correct magnitude even
+    // for INT_MIN, unlike negating through a (possibly 32-bit) signed long.
+    unsigned int v = negative ? -static_cast<unsigned int>(value)
                               : static_cast<unsigned int>(value);
 
     wchar_t digits[33];
