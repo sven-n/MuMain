@@ -132,7 +132,7 @@ BOOL GetCursorPos(LPPOINT lpPoint)
 // GetCursorPos already returns client-space coordinates, so this is the identity.
 BOOL ScreenToClient(HWND /*hWnd*/, LPPOINT lpPoint)
 {
-    return lpPoint != nullptr;
+    return lpPoint ? TRUE : FALSE;
 }
 
 HWND GetActiveWindow()
