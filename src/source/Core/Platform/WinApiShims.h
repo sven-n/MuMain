@@ -51,6 +51,9 @@ inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nS
     return static_cast<DWORD>(converted);
 }
 
+// Terminate the process (Win32 ExitProcess).
+inline void ExitProcess(UINT uExitCode) { exit(static_cast<int>(uExitCode)); }
+
 // String length (Win32 lstrlen; the engine builds UNICODE, hence the wide form).
 inline int lstrlen(const wchar_t* s) { return s ? static_cast<int>(wcslen(s)) : 0; }
 inline int lstrlen(const char* s)    { return s ? static_cast<int>(strlen(s)) : 0; }
