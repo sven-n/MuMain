@@ -53,4 +53,9 @@ BOOL ScreenToClient(HWND hWnd, LPPOINT lpPoint);
 HWND GetActiveWindow();
 UINT GetDoubleClickTime();
 
+// The keyboard-focus window, or null when the game is unfocused. The engine
+// compares this against the main window (g_hWnd) to ask "is the game focused?",
+// so it returns g_hWnd while the SDL window holds focus.
+HWND GetFocus();
+
 #endif // _WIN32

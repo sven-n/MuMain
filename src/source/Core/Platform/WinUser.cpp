@@ -145,4 +145,14 @@ UINT GetDoubleClickTime()
     return 500;  // the Win32 default
 }
 
+// The engine's main window handle (defined in the platform entry point). Used
+// only to answer "is the game window focused?"; declared here rather than
+// pulling the App-layer header into Core/Platform.
+extern HWND g_hWnd;
+
+HWND GetFocus()
+{
+    return SDL_GetKeyboardFocus() ? g_hWnd : nullptr;
+}
+
 #endif // !_WIN32
