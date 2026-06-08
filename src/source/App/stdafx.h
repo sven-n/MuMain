@@ -74,6 +74,7 @@
 #include "Core/Platform/SecureCrt.h"
 #include "Core/Platform/WinApiShims.h"
 #include "Core/Platform/WinUser.h"
+#include "Core/Platform/WinNls.h"
 #endif // _WIN32
 
 //c runtime
