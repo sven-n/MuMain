@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>    // strlen
 #include <cwchar>
 #include <cwctype>
 #include <strings.h>  // strcasecmp
@@ -30,6 +31,50 @@ inline DWORD GetTickCount()
     return static_cast<DWORD>(duration_cast<milliseconds>(steady_clock::now() - mu_detail::tickEpoch()).count());
 }
 inline DWORD timeGetTime() { return GetTickCount(); }
+
+// String length (Win32 lstrlen; the engine builds UNICODE, hence the wide form).
+inline int lstrlen(const wchar_t* s) { return s ? static_cast<int>(wcslen(s)) : 0; }
+inline int lstrlen(const char* s)    { return s ? static_cast<int>(strlen(s)) : 0; }
+
+// Wide string -> int.
+inline int _wtoi(const wchar_t* s) { return s ? static_cast<int>(wcstol(s, nullptr, 10)) : 0; }
+
+// Bytes in the multibyte character at c. Narrow strings are UTF-8 on Linux, so
+// this is the UTF-8 sequence length taken from the lead byte.
+inline size_t _mbclen(const unsigned char* c)
+{
+    if (!c || *c < 0x80)      return 1;
+    if ((*c & 0xE0) == 0xC0)  return 2;
+    if ((*c & 0xF0) == 0xE0)  return 3;
+    if ((*c & 0xF8) == 0xF0)  return 4;
+    return 1;
+}
+
+// Int -> wide string in the given radix (MSVC _itow). A leading '-' is emitted
+// only for base 10, matching MSVC; the caller's buffer must be large enough.
+inline wchar_t* _itow(int value, wchar_t* buffer, int radix)
+{
+    if (!buffer) return buffer;
+    if (radix < 2 || radix > 36) { buffer[0] = L'\0'; return buffer; }
+
+    const bool negative = (value < 0 && radix == 10);
+    unsigned int v = negative ? static_cast<unsigned int>(-static_cast<long>(value))
+                              : static_cast<unsigned int>(value);
+
+    wchar_t digits[33];
+    int n = 0;
+    do {
+        const unsigned int d = v % static_cast<unsigned int>(radix);
+        digits[n++] = static_cast<wchar_t>(d < 10 ? L'0' + d : L'a' + (d - 10));
+        v /= static_cast<unsigned int>(radix);
+    } while (v != 0);
+
+    int j = 0;
+    if (negative) buffer[j++] = L'-';
+    while (n > 0) buffer[j++] = digits[--n];
+    buffer[j] = L'\0';
+    return buffer;
+}
 
 // Case-insensitive compares.
 inline int _wcsicmp(const wchar_t* a, const wchar_t* b) { return wcscasecmp(a, b); }
