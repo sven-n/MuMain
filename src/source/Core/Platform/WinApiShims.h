@@ -14,6 +14,7 @@
 #include <strings.h>  // strcasecmp
 #include <unistd.h>   // readlink
 #include "Core/Platform/WinCompat.h"  // DWORD, FILE handle types
+#include "Core/Platform/WinNls.h"     // MultiByteToWideChar / CP_UTF8
 
 namespace mu_detail
 {
@@ -41,13 +42,13 @@ inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nS
     char path[4096];
     const ssize_t n = readlink("/proc/self/exe", path, sizeof(path) - 1);
     if (n <= 0) { lpFilename[0] = L'\0'; return 0; }
-    path[n] = '\0';
-
-    const size_t converted = mbstowcs(lpFilename, path, nSize - 1);
-    if (converted == static_cast<size_t>(-1)) { lpFilename[0] = L'\0'; return 0; }
-    const DWORD len = (converted < static_cast<size_t>(nSize - 1)) ? static_cast<DWORD>(converted) : nSize - 1;
-    lpFilename[len] = L'\0';
-    return len;
+    // UTF-8 -> wide via the project's own converter (locale-independent, unlike
+    // mbstowcs which fails on non-ASCII paths in the default "C" locale).
+    const int converted = MultiByteToWideChar(CP_UTF8, 0, path, static_cast<int>(n),
+                                              lpFilename, static_cast<int>(nSize - 1));
+    if (converted <= 0) { lpFilename[0] = L'\0'; return 0; }
+    lpFilename[converted] = L'\0';
+    return static_cast<DWORD>(converted);
 }
 
 // String length (Win32 lstrlen; the engine builds UNICODE, hence the wide form).

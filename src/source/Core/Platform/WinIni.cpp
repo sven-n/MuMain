@@ -13,23 +13,27 @@
 
 namespace
 {
+    // Convert with the source's explicit length (no trailing null), so the
+    // converters never write a terminator one past the string's logical end.
     std::string Narrow(LPCWSTR s)
     {
         if (!s) return std::string();
-        const int n = WideCharToMultiByte(CP_UTF8, 0, s, -1, nullptr, 0, nullptr, nullptr);
-        if (n <= 1) return std::string();
-        std::string out(static_cast<size_t>(n - 1), '\0');
-        WideCharToMultiByte(CP_UTF8, 0, s, -1, out.data(), n, nullptr, nullptr);
+        const int len = static_cast<int>(wcslen(s));
+        const int n = WideCharToMultiByte(CP_UTF8, 0, s, len, nullptr, 0, nullptr, nullptr);
+        if (n <= 0) return std::string();
+        std::string out(static_cast<size_t>(n), '\0');
+        WideCharToMultiByte(CP_UTF8, 0, s, len, out.data(), n, nullptr, nullptr);
         return out;
     }
 
     std::wstring Widen(const std::string& s)
     {
         if (s.empty()) return std::wstring();
-        const int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, nullptr, 0);
-        if (n <= 1) return std::wstring();
-        std::wstring out(static_cast<size_t>(n - 1), L'\0');
-        MultiByteToWideChar(CP_UTF8, 0, s.c_str(), -1, out.data(), n);
+        const int len = static_cast<int>(s.size());
+        const int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), len, nullptr, 0);
+        if (n <= 0) return std::wstring();
+        std::wstring out(static_cast<size_t>(n), L'\0');
+        MultiByteToWideChar(CP_UTF8, 0, s.c_str(), len, out.data(), n);
         return out;
     }
 
