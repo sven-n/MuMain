@@ -17,7 +17,11 @@ namespace
         if (s == nullptr) return out;
         for (const wchar_t* p = s; *p; ++p)
         {
-            const unsigned int c = static_cast<unsigned int>(*p);
+            unsigned int c = static_cast<unsigned int>(*p);
+            // Map surrogates and out-of-range values to U+FFFD so we never emit
+            // invalid UTF-8 to SDL / the font renderer.
+            if ((c >= 0xD800 && c <= 0xDFFF) || c > 0x10FFFF) c = 0xFFFD;
+
             if (c < 0x80)
             {
                 out.push_back(static_cast<char>(c));
@@ -57,6 +61,10 @@ int MessageBoxW(HWND /*owner*/, LPCWSTR text, LPCWSTR caption, UINT type)
     const std::string message = ToUtf8(text);
     const std::string title   = caption ? ToUtf8(caption) : std::string("MU");
 
+    // Parent the dialog to the focused window so it stays in front and modal to
+    // the game; a null parent can spawn behind the window on some Linux WMs.
+    SDL_Window* parent = SDL_GetKeyboardFocus();
+
     if ((type & MB_YESNO) == MB_YESNO)
     {
         const SDL_MessageBoxButtonData buttons[2] = {
@@ -64,7 +72,7 @@ int MessageBoxW(HWND /*owner*/, LPCWSTR text, LPCWSTR caption, UINT type)
             { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, IDNO,  "No"  },
         };
         const SDL_MessageBoxData data = {
-            IconFlags(type), nullptr, title.c_str(), message.c_str(),
+            IconFlags(type), parent, title.c_str(), message.c_str(),
             2, buttons, nullptr
         };
         int buttonId = IDNO;
@@ -72,7 +80,7 @@ int MessageBoxW(HWND /*owner*/, LPCWSTR text, LPCWSTR caption, UINT type)
         return (buttonId == IDYES) ? IDYES : IDNO;
     }
 
-    SDL_ShowSimpleMessageBox(IconFlags(type), title.c_str(), message.c_str(), nullptr);
+    SDL_ShowSimpleMessageBox(IconFlags(type), title.c_str(), message.c_str(), parent);
     return IDOK;
 }
 
