@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <cstdlib>  // wcstombs
+#include <climits>  // LONG_MAX
 
 namespace
 {
@@ -29,7 +30,15 @@ HMMIO mmioOpenW(wchar_t* szFilename, void* /*lpmmioinfo*/, DWORD dwOpenFlags)
     FILE* fp = std::fopen(path, mode);
     if (!fp) return nullptr;
 
-    return static_cast<HMMIO>(new MuMmio{ fp });
+    try
+    {
+        return static_cast<HMMIO>(new MuMmio{ fp });
+    }
+    catch (...)  // don't leak the file if the (tiny) allocation throws
+    {
+        std::fclose(fp);
+        return nullptr;
+    }
 }
 
 int mmioClose(HMMIO hmmio, UINT /*wFlags*/)
@@ -65,15 +74,20 @@ int mmioDescend(HMMIO hmmio, MMCKINFO* lpck, const MMCKINFO* lpckParent, UINT wF
     const FOURCC wantId   = lpck->ckid;     // MMIO_FINDCHUNK
     const FOURCC wantType = lpck->fccType;  // MMIO_FINDRIFF
 
+    // Search limit: the end of the parent chunk's data, or unbounded at top level.
+    // All offset math below is unsigned 64-bit so corrupted chunk sizes can never
+    // overflow into a negative seek or skip a chunk backwards.
+    const unsigned long long parentEnd =
+        lpckParent ? static_cast<unsigned long long>(lpckParent->dwDataOffset) + lpckParent->cksize
+                   : ~0ull;
+
     for (;;)
     {
-        const long chunkStart = std::ftell(h->fp);
-        if (chunkStart < 0) return 1;
+        const long pos = std::ftell(h->fp);
+        if (pos < 0) return 1;
+        const unsigned long long start = static_cast<unsigned long long>(pos);
 
-        // Don't search past the end of the parent chunk's data.
-        if (lpckParent &&
-            static_cast<DWORD>(chunkStart) >= lpckParent->dwDataOffset + lpckParent->cksize)
-            return 1;
+        if (start + 8 > parentEnd) return 1;  // header must fit within the parent
 
         unsigned char header[8];
         if (std::fread(header, 1, sizeof(header), h->fp) != sizeof(header)) return 1;  // EOF
@@ -82,14 +96,15 @@ int mmioDescend(HMMIO hmmio, MMCKINFO* lpck, const MMCKINFO* lpckParent, UINT wF
         lpck->cksize       = ReadFourCC(header + 4);  // little-endian u32
         lpck->fccType      = 0;
         lpck->dwFlags      = 0;
-        lpck->dwDataOffset = static_cast<DWORD>(chunkStart + 8);
+        lpck->dwDataOffset = static_cast<DWORD>(start + 8);
 
         if (lpck->ckid == FOURCC_RIFF || lpck->ckid == FOURCC_LIST)
         {
+            if (start + 12 > parentEnd) return 1;  // form type must fit too
             unsigned char formType[4];
             if (std::fread(formType, 1, sizeof(formType), h->fp) != sizeof(formType)) return 1;
             lpck->fccType      = ReadFourCC(formType);
-            lpck->dwDataOffset = static_cast<DWORD>(chunkStart + 12);
+            lpck->dwDataOffset = static_cast<DWORD>(start + 12);
         }
 
         bool match;
@@ -104,9 +119,11 @@ int mmioDescend(HMMIO hmmio, MMCKINFO* lpck, const MMCKINFO* lpckParent, UINT wF
         }
 
         // Skip to the next chunk; RIFF chunks are word-aligned (pad byte if odd).
-        const long next = chunkStart + 8 + static_cast<long>(lpck->cksize) +
-                          static_cast<long>(lpck->cksize & 1u);
-        if (std::fseek(h->fp, next, SEEK_SET) != 0) return 1;
+        const unsigned long long aligned = static_cast<unsigned long long>(lpck->cksize) + (lpck->cksize & 1u);
+        const unsigned long long next = start + 8 + aligned;  // always advances by >= 8
+        if (next > parentEnd) return 1;                                       // runs past parent
+        if (next > static_cast<unsigned long long>(LONG_MAX)) return 1;       // beyond seekable range
+        if (std::fseek(h->fp, static_cast<long>(next), SEEK_SET) != 0) return 1;
     }
 }
 
@@ -117,10 +134,10 @@ int mmioAscend(HMMIO hmmio, MMCKINFO* lpck, UINT /*wFlags*/)
     auto* h = static_cast<MuMmio*>(hmmio);
     if (!h || !h->fp || !lpck) return 1;
 
-    const long end = static_cast<long>(lpck->dwDataOffset) +
-                     static_cast<long>(lpck->cksize) +
-                     static_cast<long>(lpck->cksize & 1u);
-    return (std::fseek(h->fp, end, SEEK_SET) == 0) ? 0 : 1;
+    const unsigned long long aligned = static_cast<unsigned long long>(lpck->cksize) + (lpck->cksize & 1u);
+    const unsigned long long end = static_cast<unsigned long long>(lpck->dwDataOffset) + aligned;
+    if (end > static_cast<unsigned long long>(LONG_MAX)) return 1;
+    return (std::fseek(h->fp, static_cast<long>(end), SEEK_SET) == 0) ? 0 : 1;
 }
 
 #endif // !_WIN32
