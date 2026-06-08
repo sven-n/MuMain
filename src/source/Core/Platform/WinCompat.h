@@ -21,7 +21,8 @@
 
 #include <cstdint>
 #include <cstddef>
-#include <cstring>  // memset for ZeroMemory
+#include <cstring>       // memset for ZeroMemory
+#include <type_traits>   // underlying_type for DEFINE_ENUM_FLAG_OPERATORS
 
 // Fixed-width scalar aliases. Widths match the Windows definitions (DWORD/LONG
 // are 32-bit there, unlike `long` on LP64 Linux) so struct layouts stay stable.
@@ -103,6 +104,7 @@ DECLARE_HANDLE(HKEY);
 DECLARE_HANDLE(HIMC);
 
 // Pointer aliases.
+typedef void*           PVOID;
 typedef void*           LPVOID;
 typedef const void*     LPCVOID;
 typedef CHAR*           LPSTR;
@@ -121,6 +123,26 @@ typedef const POINT* LPCPOINT;
 typedef struct tagSIZE { LONG cx, cy; } SIZE, * LPSIZE;
 typedef struct tagRECT { LONG left, top, right, bottom; } RECT, * LPRECT;
 typedef const RECT* LPCRECT;
+
+// Async-I/O struct referenced by a few function declarations (minwinbase.h).
+typedef struct _OVERLAPPED {
+    ULONG_PTR Internal;
+    ULONG_PTR InternalHigh;
+    union { struct { DWORD Offset; DWORD OffsetHigh; }; PVOID Pointer; };
+    HANDLE    hEvent;
+} OVERLAPPED, * LPOVERLAPPED;
+
+// Bitwise operators for scoped flag enums (winnt.h). The engine's flag enums
+// invoke this right after their definition; off Windows we provide the same
+// operator set, deducing the integer width from the enum's underlying type.
+#define DEFINE_ENUM_FLAG_OPERATORS(ENUMTYPE) \
+inline constexpr ENUMTYPE operator | (ENUMTYPE a, ENUMTYPE b) { using T = std::underlying_type_t<ENUMTYPE>; return static_cast<ENUMTYPE>(static_cast<T>(a) | static_cast<T>(b)); } \
+inline ENUMTYPE& operator |= (ENUMTYPE& a, ENUMTYPE b) { a = a | b; return a; } \
+inline constexpr ENUMTYPE operator & (ENUMTYPE a, ENUMTYPE b) { using T = std::underlying_type_t<ENUMTYPE>; return static_cast<ENUMTYPE>(static_cast<T>(a) & static_cast<T>(b)); } \
+inline ENUMTYPE& operator &= (ENUMTYPE& a, ENUMTYPE b) { a = a & b; return a; } \
+inline constexpr ENUMTYPE operator ^ (ENUMTYPE a, ENUMTYPE b) { using T = std::underlying_type_t<ENUMTYPE>; return static_cast<ENUMTYPE>(static_cast<T>(a) ^ static_cast<T>(b)); } \
+inline ENUMTYPE& operator ^= (ENUMTYPE& a, ENUMTYPE b) { a = a ^ b; return a; } \
+inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_type_t<ENUMTYPE>; return static_cast<ENUMTYPE>(~static_cast<T>(a)); }
 
 // Calling-convention / annotation macros: no-ops off Windows.
 #ifndef WINAPI

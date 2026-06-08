@@ -21,7 +21,8 @@
 #ifdef _WIN32
 inline const HINSTANCE munique_client_library_handle = LoadLibrary(L"MUnique.Client.Library.dll");
 #else
-inline const void* munique_client_library_handle = dlopen("MUnique.Client.Library.dll", RTLD_LAZY);
+// Not const: dlsym() takes a non-const void* handle.
+inline void* munique_client_library_handle = dlopen("MUnique.Client.Library.dll", RTLD_LAZY);
 #endif
 
 namespace DotNetBridge
