@@ -63,6 +63,7 @@ int MultiByteToWideChar(UINT /*CodePage*/, DWORD /*dwFlags*/, LPCSTR lpMultiByte
                         int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar)
 {
     if (!lpMultiByteStr) return 0;
+    if (cchWideChar != 0 && !lpWideCharStr) return 0;  // would-be null write
     const unsigned char* src = reinterpret_cast<const unsigned char*>(lpMultiByteStr);
     // -1 means null-terminated; include the terminator in the processed length.
     const size_t srcLen = (cbMultiByte < 0) ? (std::strlen(lpMultiByteStr) + 1)
@@ -87,6 +88,7 @@ int WideCharToMultiByte(UINT /*CodePage*/, DWORD /*dwFlags*/, LPCWSTR lpWideChar
                         LPCSTR /*lpDefaultChar*/, LPBOOL /*lpUsedDefaultChar*/)
 {
     if (!lpWideCharStr) return 0;
+    if (cbMultiByte != 0 && !lpMultiByteStr) return 0;  // would-be null write
     // -1 means null-terminated; include the terminator in the processed length.
     const size_t srcLen = (cchWideChar < 0) ? (std::wcslen(lpWideCharStr) + 1)
                                             : static_cast<size_t>(cchWideChar);
