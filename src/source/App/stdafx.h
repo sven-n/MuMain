@@ -75,6 +75,7 @@
 #include "Core/Platform/WinApiShims.h"
 #include "Core/Platform/WinUser.h"
 #include "Core/Platform/WinNls.h"
+#include "Core/Platform/WinGdi.h"
 #endif // _WIN32
 
 //c runtime
