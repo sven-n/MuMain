@@ -77,6 +77,7 @@ private:
 
 #else  // ---- non-Windows ----------------------------------------------------
 
+#include <algorithm>       // std::max
 #include <sys/resource.h>  // getrusage
 #include <thread>          // hardware_concurrency
 
@@ -89,7 +90,7 @@ public:
     Impl()
         : m_numProcessors(std::max(1u, std::thread::hardware_concurrency()))
         , m_lastCheckTime(std::chrono::steady_clock::now())
-        , m_lastProcessTime(0)
+        , m_lastProcessTime(~0ULL)  // sentinel: "no baseline yet" (0 is a valid CPU time)
     {
     }
 
@@ -100,15 +101,17 @@ public:
             return 0.0;
 
         const unsigned long long currentProcessTime =
-            (static_cast<unsigned long long>(ru.ru_utime.tv_sec + ru.ru_stime.tv_sec) * 1000000ULL) +
-            static_cast<unsigned long long>(ru.ru_utime.tv_usec + ru.ru_stime.tv_usec);
+            (static_cast<unsigned long long>(ru.ru_utime.tv_sec) +
+             static_cast<unsigned long long>(ru.ru_stime.tv_sec)) * 1000000ULL +
+            static_cast<unsigned long long>(ru.ru_utime.tv_usec) +
+            static_cast<unsigned long long>(ru.ru_stime.tv_usec);
 
         const auto now = std::chrono::steady_clock::now();
         const long long elapsedWallTime =
             std::chrono::duration_cast<std::chrono::microseconds>(now - m_lastCheckTime).count();
 
         // First call: seed the baselines, no usage yet.
-        if (m_lastProcessTime == 0)
+        if (m_lastProcessTime == ~0ULL)
         {
             m_lastProcessTime = currentProcessTime;
             m_lastCheckTime = now;
