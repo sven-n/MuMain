@@ -12,6 +12,7 @@
 #include <cwchar>
 #include <cwctype>
 #include <strings.h>  // strcasecmp
+#include <unistd.h>   // readlink
 #include "Core/Platform/WinCompat.h"  // DWORD, FILE handle types
 
 namespace mu_detail
@@ -31,6 +32,23 @@ inline DWORD GetTickCount()
     return static_cast<DWORD>(duration_cast<milliseconds>(steady_clock::now() - mu_detail::tickEpoch()).count());
 }
 inline DWORD timeGetTime() { return GetTickCount(); }
+
+// Path of the running executable (Win32 GetModuleFileNameW). The engine only
+// queries its own module (hModule == null), which maps to /proc/self/exe.
+inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nSize)
+{
+    if (!lpFilename || nSize == 0) return 0;
+    char path[4096];
+    const ssize_t n = readlink("/proc/self/exe", path, sizeof(path) - 1);
+    if (n <= 0) { lpFilename[0] = L'\0'; return 0; }
+    path[n] = '\0';
+
+    const size_t converted = mbstowcs(lpFilename, path, nSize - 1);
+    if (converted == static_cast<size_t>(-1)) { lpFilename[0] = L'\0'; return 0; }
+    const DWORD len = (converted < static_cast<size_t>(nSize - 1)) ? static_cast<DWORD>(converted) : nSize - 1;
+    lpFilename[len] = L'\0';
+    return len;
+}
 
 // String length (Win32 lstrlen; the engine builds UNICODE, hence the wide form).
 inline int lstrlen(const wchar_t* s) { return s ? static_cast<int>(wcslen(s)) : 0; }
