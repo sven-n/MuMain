@@ -114,4 +114,35 @@ BOOL PostMessage(HWND /*hWnd*/, UINT Msg, WPARAM /*wParam*/, LPARAM /*lParam*/)
     return TRUE;
 }
 
+void PostQuitMessage(int /*nExitCode*/)
+{
+    RequestQuit();
+}
+
+BOOL GetCursorPos(LPPOINT lpPoint)
+{
+    if (!lpPoint) return FALSE;
+    float x = 0.0f, y = 0.0f;
+    SDL_GetMouseState(&x, &y);  // already window-relative
+    lpPoint->x = static_cast<LONG>(x);
+    lpPoint->y = static_cast<LONG>(y);
+    return TRUE;
+}
+
+// GetCursorPos already returns client-space coordinates, so this is the identity.
+BOOL ScreenToClient(HWND /*hWnd*/, LPPOINT lpPoint)
+{
+    return lpPoint ? TRUE : FALSE;
+}
+
+HWND GetActiveWindow()
+{
+    return reinterpret_cast<HWND>(SDL_GetKeyboardFocus());  // null when unfocused
+}
+
+UINT GetDoubleClickTime()
+{
+    return 500;  // the Win32 default
+}
+
 #endif // !_WIN32
