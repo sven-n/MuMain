@@ -34,4 +34,12 @@ int MessageBoxW(HWND owner, LPCWSTR text, LPCWSTR caption, UINT type);
 #define MessageBox MessageBoxW
 #endif
 
+// Window messaging. The engine only ever sends WM_DESTROY/WM_CLOSE (a request to
+// quit) and one WM_IME_CONTROL (IME, which SDL owns on Linux). The portable
+// versions turn the quit messages into an SDL quit and ignore the rest, so the
+// main loop's existing SDL_EVENT_QUIT handling stops the game. Implemented in
+// WinUser.cpp.
+LRESULT SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+BOOL    PostMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
 #endif // _WIN32

@@ -84,4 +84,34 @@ int MessageBoxW(HWND /*owner*/, LPCWSTR text, LPCWSTR caption, UINT type)
     return IDOK;
 }
 
+namespace
+{
+    bool IsQuitMessage(UINT msg) { return msg == WM_DESTROY || msg == WM_CLOSE || msg == WM_QUIT; }
+
+    bool RequestQuit()
+    {
+        SDL_Event quit;
+        SDL_zero(quit);
+        quit.type = SDL_EVENT_QUIT;
+        if (!SDL_PushEvent(&quit))
+        {
+            SDL_Log("Failed to push quit event: %s", SDL_GetError());
+            return false;
+        }
+        return true;
+    }
+}
+
+LRESULT SendMessage(HWND /*hWnd*/, UINT Msg, WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+    if (IsQuitMessage(Msg)) RequestQuit();
+    return 0;
+}
+
+BOOL PostMessage(HWND /*hWnd*/, UINT Msg, WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+    if (IsQuitMessage(Msg)) return RequestQuit() ? TRUE : FALSE;
+    return TRUE;
+}
+
 #endif // !_WIN32
