@@ -7,6 +7,8 @@
 
 #include "GameConfigConstants.h"
 #include "Core/Platform/WinCompat.h"
+#include "Core/Platform/WinIni.h"  // private-profile (.ini) API
+#include "Core/Platform/Dpapi.h"   // DPAPI credential crypto (no-op off Windows)
 
 GameConfig& GameConfig::GetInstance()
 {
@@ -225,7 +227,7 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
 // Helper functions using Windows INI API
 int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue)
 {
-    return GetPrivateProfileIntW(section, key, defaultValue, m_configPath.c_str());
+    return GetPrivateProfileIntW(section, key, defaultValue, m_configPath.wstring().c_str());
 }
 
 void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
@@ -233,17 +235,17 @@ void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
     wchar_t buffer[32];
     swprintf_s(buffer, L"%d", value);
 
-    WritePrivateProfileStringW(section, key, buffer, m_configPath.c_str());
+    WritePrivateProfileStringW(section, key, buffer, m_configPath.wstring().c_str());
 }
 
 bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue)
 {
-    return GetPrivateProfileIntW(section, key, defaultValue ? 1 : 0, m_configPath.c_str()) != 0;
+    return GetPrivateProfileIntW(section, key, defaultValue ? 1 : 0, m_configPath.wstring().c_str()) != 0;
 }
 
 void GameConfig::WriteBool(const wchar_t* section, const wchar_t* key, bool value)
 {
-    WritePrivateProfileStringW(section, key, value ? L"1" : L"0", m_configPath.c_str());
+    WritePrivateProfileStringW(section, key, value ? L"1" : L"0", m_configPath.wstring().c_str());
 }
 
 std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, const std::wstring& defaultValue)
@@ -251,7 +253,7 @@ std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, 
     std::vector<wchar_t> buffer(2048);
     while (true)
     {
-        DWORD charsRead = GetPrivateProfileStringW(section, key, defaultValue.c_str(), buffer.data(), static_cast<DWORD>(buffer.size()), m_configPath.c_str());
+        DWORD charsRead = GetPrivateProfileStringW(section, key, defaultValue.c_str(), buffer.data(), static_cast<DWORD>(buffer.size()), m_configPath.wstring().c_str());
         if (charsRead < buffer.size() - 1)
         {
             return std::wstring(buffer.data());
@@ -262,19 +264,19 @@ std::wstring GameConfig::ReadString(const wchar_t* section, const wchar_t* key, 
 
 void GameConfig::WriteString(const wchar_t* section, const wchar_t* key, const std::wstring& value)
 {
-    WritePrivateProfileStringW(section, key, value.c_str(), m_configPath.c_str());
+    WritePrivateProfileStringW(section, key, value.c_str(), m_configPath.wstring().c_str());
 }
 
 void GameConfig::RemoveObsoleteKey(const wchar_t* section, const wchar_t* key)
 {
     // Passing nullptr as the value deletes the key (Windows INI API).
-    WritePrivateProfileStringW(section, key, nullptr, m_configPath.c_str());
+    WritePrivateProfileStringW(section, key, nullptr, m_configPath.wstring().c_str());
 }
 
 void GameConfig::RemoveObsoleteSection(const wchar_t* section)
 {
     // Passing nullptr as the key deletes the entire section.
-    WritePrivateProfileStringW(section, nullptr, nullptr, m_configPath.c_str());
+    WritePrivateProfileStringW(section, nullptr, nullptr, m_configPath.wstring().c_str());
 }
 
 std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
