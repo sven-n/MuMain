@@ -39,6 +39,7 @@ inline int _stricmp(const char* a, const char* b) { return strcasecmp(a, b); }
 // In-place wide upper-case.
 inline wchar_t* _wcsupr(wchar_t* s)
 {
+    if (!s) return nullptr;
     for (wchar_t* p = s; *p; ++p) *p = static_cast<wchar_t>(towupper(*p));
     return s;
 }
@@ -46,6 +47,7 @@ inline wchar_t* _wcsupr(wchar_t* s)
 // Wide fopen: convert the path/mode to the locale encoding and open.
 inline FILE* _wfopen(const wchar_t* path, const wchar_t* mode)
 {
+    if (!path || !mode) return nullptr;
     char narrowPath[4096] = { 0 };
     char narrowMode[16] = { 0 };
     if (wcstombs(narrowPath, path, sizeof(narrowPath) - 1) == static_cast<size_t>(-1)) return nullptr;
@@ -57,6 +59,7 @@ inline FILE* _wfopen(const wchar_t* path, const wchar_t* mode)
 // _wsplitpath: any output may be null; `ext` keeps its leading dot.
 inline void _wsplitpath(const wchar_t* path, wchar_t* drive, wchar_t* dir, wchar_t* fname, wchar_t* ext)
 {
+    if (!path) return;
     if (drive) drive[0] = L'\0';
 
     const wchar_t* lastSep = nullptr;
