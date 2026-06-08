@@ -6,7 +6,7 @@
 #include "UI/NewUI/NPCs/NewUINPCDialogue.h"
 #include "I18N/All.h"
 
-#include <crtdbg.h>
+#include "Core/Platform/CrtDbg.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 
