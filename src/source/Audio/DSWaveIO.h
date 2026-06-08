@@ -4,29 +4,8 @@
 #ifdef _WIN32
 #include <mmsystem.h>
 #else
-// Minimal multimedia-IO types so this header parses off Windows (the DirectSound
-// implementation in the .cpp is a Win32 audio subsystem ported later, #462).
-typedef void* HMMIO;
-typedef struct waveformat_tag {
-    WORD  wFormatTag;
-    WORD  nChannels;
-    DWORD nSamplesPerSec;
-    DWORD nAvgBytesPerSec;
-    WORD  nBlockAlign;
-} WAVEFORMAT;
-typedef struct pcmwaveformat_tag {
-    WAVEFORMAT wf;
-    WORD       wBitsPerSample;
-} PCMWAVEFORMAT;
-typedef struct tWAVEFORMATEX {
-    WORD  wFormatTag;
-    WORD  nChannels;
-    DWORD nSamplesPerSec;
-    DWORD nAvgBytesPerSec;
-    WORD  nBlockAlign;
-    WORD  wBitsPerSample;
-    WORD  cbSize;
-} WAVEFORMATEX;
+// mmio RIFF reader/writer + wave-format types used by the .cpp; see WinMM.h.
+#include "Core/Platform/WinMM.h"
 #endif
 #include <cstdint>
 
