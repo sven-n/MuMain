@@ -6,7 +6,7 @@
 #include "GameLogic/Buffs/w_Buff.h"     // UnRegisterBuff
 
 // Includes mirror ZzzInterface.cpp, the unit these functions were extracted from.
-#include <imm.h>
+#include "Core/Platform/Imm.h"
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
