@@ -224,30 +224,68 @@ typedef const RECT* LPCRECT;
 #define STD_ERROR_HANDLE     (static_cast<DWORD>(-12))
 
 // _splitpath component sizes (stdlib.h).
+#ifndef _MAX_PATH
 #define _MAX_PATH   260
+#endif
+#ifndef _MAX_DRIVE
 #define _MAX_DRIVE  3
+#endif
+#ifndef _MAX_DIR
 #define _MAX_DIR    256
+#endif
+#ifndef _MAX_FNAME
 #define _MAX_FNAME  256
+#endif
+#ifndef _MAX_EXT
 #define _MAX_EXT    256
+#endif
 
 // COM-style result codes.
+#ifndef S_OK
 #define S_OK          (static_cast<HRESULT>(0))
+#endif
+#ifndef E_FAIL
 #define E_FAIL        (static_cast<HRESULT>(0x80004005))
+#endif
+#ifndef E_INVALIDARG
 #define E_INVALIDARG  (static_cast<HRESULT>(0x80070057))
+#endif
+#ifndef SUCCEEDED
 #define SUCCEEDED(hr) (static_cast<HRESULT>(hr) >= 0)
+#endif
+#ifndef FAILED
 #define FAILED(hr)    (static_cast<HRESULT>(hr) < 0)
+#endif
+#ifndef INVALID_HANDLE_VALUE
 #define INVALID_HANDLE_VALUE (reinterpret_cast<HANDLE>(static_cast<LONG_PTR>(-1)))
+#endif
 
 // Word/byte/color helper macros (minwindef.h / wingdi.h).
+#ifndef LOWORD
 #define LOWORD(l)    (static_cast<WORD>(static_cast<uintptr_t>(l) & 0xffff))
+#endif
+#ifndef HIWORD
 #define HIWORD(l)    (static_cast<WORD>((static_cast<uintptr_t>(l) >> 16) & 0xffff))
+#endif
+#ifndef LOBYTE
 #define LOBYTE(w)    (static_cast<BYTE>(static_cast<uintptr_t>(w) & 0xff))
+#endif
+#ifndef HIBYTE
 #define HIBYTE(w)    (static_cast<BYTE>((static_cast<uintptr_t>(w) >> 8) & 0xff))
+#endif
+#ifndef MAKEWORD
 #define MAKEWORD(a, b) (static_cast<WORD>((static_cast<BYTE>(a)) | (static_cast<WORD>(static_cast<BYTE>(b)) << 8)))
+#endif
+#ifndef MAKELONG
 #define MAKELONG(a, b) (static_cast<LONG>((static_cast<WORD>(a)) | (static_cast<DWORD>(static_cast<WORD>(b)) << 16)))
+#endif
+#ifndef RGB
 #define RGB(r, g, b) (static_cast<COLORREF>((static_cast<BYTE>(r)) | (static_cast<WORD>(static_cast<BYTE>(g)) << 8) | (static_cast<DWORD>(static_cast<BYTE>(b)) << 16)))
+#endif
 
 // Memory fill helper.
-#define ZeroMemory(dst, len) memset((dst), 0, (len))
+#ifndef ZeroMemory
+#define ZeroMemory(dst, len) std::memset((dst), 0, (len))
+#endif
 
 #endif  // _WIN32
