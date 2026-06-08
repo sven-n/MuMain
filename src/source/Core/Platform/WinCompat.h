@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <cstring>  // memset for ZeroMemory
 
 // Fixed-width scalar aliases. Widths match the Windows definitions (DWORD/LONG
 // are 32-bit there, unlike `long` on LP64 Linux) so struct layouts stay stable.
@@ -149,6 +150,142 @@ typedef const RECT* LPCRECT;
 #endif
 #ifndef MAX_PATH
 #define MAX_PATH 260
+#endif
+
+// ---- Constants & macros (values match the Win32 SDK) ------------------------
+
+// Virtual-key codes (winuser.h). The input layer maps these onto SDL.
+#define VK_LBUTTON   0x01
+#define VK_RBUTTON   0x02
+#define VK_MBUTTON   0x04
+#define VK_BACK      0x08
+#define VK_TAB       0x09
+#define VK_RETURN    0x0D
+#define VK_SHIFT     0x10
+#define VK_CONTROL   0x11
+#define VK_MENU      0x12
+#define VK_ESCAPE    0x1B
+#define VK_SPACE     0x20
+#define VK_PRIOR     0x21
+#define VK_NEXT      0x22
+#define VK_END       0x23
+#define VK_HOME      0x24
+#define VK_LEFT      0x25
+#define VK_UP        0x26
+#define VK_RIGHT     0x27
+#define VK_DOWN      0x28
+#define VK_SNAPSHOT  0x2C
+#define VK_INSERT    0x2D
+#define VK_DELETE    0x2E
+#define VK_LCONTROL  0xA2
+#define VK_F1        0x70
+#define VK_F2        0x71
+#define VK_F3        0x72
+#define VK_F4        0x73
+#define VK_F5        0x74
+#define VK_F6        0x75
+#define VK_F7        0x76
+#define VK_F8        0x77
+#define VK_F9        0x78
+#define VK_F10       0x79
+#define VK_F11       0x7A
+#define VK_F12       0x7B
+
+// Window messages (winuser.h). App-defined WM_USER+n messages live elsewhere.
+#define WM_USER          0x0400
+#define WM_DESTROY       0x0002
+#define WM_SIZE          0x0005
+#define WM_ACTIVATE      0x0006
+#define WM_PAINT         0x000F
+#define WM_CLOSE         0x0010
+#define WM_ERASEBKGND    0x0014
+#define WM_SETCURSOR     0x0020
+#define WM_CHAR          0x0102
+#define WM_SYSKEYDOWN    0x0104
+#define WM_TIMER         0x0113
+#define WM_IME_NOTIFY    0x0282
+#define WM_IME_CONTROL   0x0283
+#define WM_DISPLAYCHANGE 0x007E
+
+// MessageBox flags (winuser.h).
+#define MB_OK              0x00000000
+#define MB_YESNO           0x00000004
+#define MB_ICONERROR       0x00000010
+#define MB_ICONSTOP        0x00000010
+#define MB_ICONEXCLAMATION 0x00000030
+
+// Console attributes / standard handles (wincon.h).
+#define FOREGROUND_BLUE      0x0001
+#define FOREGROUND_GREEN     0x0002
+#define FOREGROUND_RED       0x0004
+#define FOREGROUND_INTENSITY 0x0008
+#define STD_INPUT_HANDLE     (static_cast<DWORD>(-10))
+#define STD_OUTPUT_HANDLE    (static_cast<DWORD>(-11))
+#define STD_ERROR_HANDLE     (static_cast<DWORD>(-12))
+
+// _splitpath component sizes (stdlib.h).
+#ifndef _MAX_PATH
+#define _MAX_PATH   260
+#endif
+#ifndef _MAX_DRIVE
+#define _MAX_DRIVE  3
+#endif
+#ifndef _MAX_DIR
+#define _MAX_DIR    256
+#endif
+#ifndef _MAX_FNAME
+#define _MAX_FNAME  256
+#endif
+#ifndef _MAX_EXT
+#define _MAX_EXT    256
+#endif
+
+// COM-style result codes.
+#ifndef S_OK
+#define S_OK          (static_cast<HRESULT>(0))
+#endif
+#ifndef E_FAIL
+#define E_FAIL        (static_cast<HRESULT>(0x80004005))
+#endif
+#ifndef E_INVALIDARG
+#define E_INVALIDARG  (static_cast<HRESULT>(0x80070057))
+#endif
+#ifndef SUCCEEDED
+#define SUCCEEDED(hr) (static_cast<HRESULT>(hr) >= 0)
+#endif
+#ifndef FAILED
+#define FAILED(hr)    (static_cast<HRESULT>(hr) < 0)
+#endif
+#ifndef INVALID_HANDLE_VALUE
+#define INVALID_HANDLE_VALUE (reinterpret_cast<HANDLE>(static_cast<LONG_PTR>(-1)))
+#endif
+
+// Word/byte/color helper macros (minwindef.h / wingdi.h).
+#ifndef LOWORD
+#define LOWORD(l)    (static_cast<WORD>(static_cast<uintptr_t>(l) & 0xffff))
+#endif
+#ifndef HIWORD
+#define HIWORD(l)    (static_cast<WORD>((static_cast<uintptr_t>(l) >> 16) & 0xffff))
+#endif
+#ifndef LOBYTE
+#define LOBYTE(w)    (static_cast<BYTE>(static_cast<uintptr_t>(w) & 0xff))
+#endif
+#ifndef HIBYTE
+#define HIBYTE(w)    (static_cast<BYTE>((static_cast<uintptr_t>(w) >> 8) & 0xff))
+#endif
+#ifndef MAKEWORD
+#define MAKEWORD(a, b) (static_cast<WORD>((static_cast<BYTE>(a)) | (static_cast<WORD>(static_cast<BYTE>(b)) << 8)))
+#endif
+#ifndef MAKELONG
+#define MAKELONG(a, b) (static_cast<LONG>((static_cast<WORD>(a)) | (static_cast<DWORD>(static_cast<WORD>(b)) << 16)))
+#endif
+#ifndef RGB
+#define RGB(r, g, b) (static_cast<COLORREF>((static_cast<BYTE>(r)) | (static_cast<WORD>(static_cast<BYTE>(g)) << 8) | (static_cast<DWORD>(static_cast<BYTE>(b)) << 16)))
+#endif
+
+// Memory fill helper.
+#ifndef ZeroMemory
+#define ZeroMemory(dst, len) std::memset((dst), 0, (len))
 #endif
 
 #endif  // _WIN32
