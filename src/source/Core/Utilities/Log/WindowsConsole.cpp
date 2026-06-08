@@ -4,6 +4,8 @@
 
 #include "WindowsConsole.h"
 
+#ifdef _WIN32
+
 bool leaf::OpenConsoleWindow(const std::wstring& title)
 {
     return CConsoleWindow::GetInstance()->Open(title);
@@ -73,7 +75,7 @@ CConsoleWindow::CConsoleWindow()
     m_bActiveCloseButton = false;
     m_started = false;
 
-    m_LimitTimer.SetTimer(12000);	//. 12ÃÊ
+    m_LimitTimer.SetTimer(12000);	//. 12ï¿½ï¿½
 }
 CConsoleWindow::~CConsoleWindow() {}
 
@@ -304,3 +306,36 @@ BOOL CALLBACK CConsoleWindow::EnumChildProc(HWND hWnd, LPARAM lParam)
     }
     return TRUE;
 }
+
+#else  // ---- non-Windows ----------------------------------------------------
+
+// The separate debug console is a Win32 concept (a spawned console window with
+// colored text attributes); on Linux stdout is already the terminal. Provide
+// no-op implementations of the public API so the engine builds and links;
+// diagnostic text still flows through the normal logging path.
+namespace leaf {
+
+bool OpenConsoleWindow(const std::wstring& /*title*/)        { return true; }
+void CloseConsoleWindow()                                    {}
+
+bool SetConsoleTitle(const std::wstring& /*title*/)          { return true; }
+const std::wstring& GetConsoleTitle()                        { static const std::wstring s; return s; }
+
+HWND GetConsoleWndHandle()                                   { return nullptr; }
+
+bool IsConsoleVisible()                                      { return false; }
+void ShowConsole(bool /*bShow*/)                             {}
+
+void ClearConsoleScreen()                                    {}
+
+WORD GetConsoleTextColorIndex(WORD* pwBgColorIndex)          { if (pwBgColorIndex) *pwBgColorIndex = 0; return 0; }
+void SetConsoleTextColor(WORD /*text*/, WORD /*bg*/)         {}
+
+void ActivateCloseButton(bool /*bActive*/)                   {}
+bool IsActiveCloseButton()                                   { return false; }
+
+bool SaveConsoleScreenBuffer(const std::wstring& /*file*/)   { return true; }
+
+}  // namespace leaf
+
+#endif // _WIN32
