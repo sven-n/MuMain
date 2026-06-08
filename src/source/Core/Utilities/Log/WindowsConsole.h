@@ -2,6 +2,9 @@
 #define _WINDOWSCONSOLE_H_
 
 #pragma once
+// Self-contained: this header declares HWND/WORD/FOREGROUND_* in its interface,
+// so pull the Win32 types in directly instead of relying on include order.
+#include "Core/Platform/WinCompat.h"
 #include "Core/Time/Timer.h"
 
 #pragma warning(disable : 4786)
