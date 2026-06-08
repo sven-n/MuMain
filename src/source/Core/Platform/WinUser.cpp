@@ -84,4 +84,29 @@ int MessageBoxW(HWND /*owner*/, LPCWSTR text, LPCWSTR caption, UINT type)
     return IDOK;
 }
 
+namespace
+{
+    bool IsQuitMessage(UINT msg) { return msg == WM_DESTROY || msg == WM_CLOSE || msg == WM_QUIT; }
+
+    void RequestQuit()
+    {
+        SDL_Event quit;
+        SDL_zero(quit);
+        quit.type = SDL_EVENT_QUIT;
+        SDL_PushEvent(&quit);
+    }
+}
+
+LRESULT SendMessage(HWND /*hWnd*/, UINT Msg, WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+    if (IsQuitMessage(Msg)) RequestQuit();
+    return 0;
+}
+
+BOOL PostMessage(HWND /*hWnd*/, UINT Msg, WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+    if (IsQuitMessage(Msg)) RequestQuit();
+    return TRUE;
+}
+
 #endif // !_WIN32

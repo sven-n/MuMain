@@ -220,6 +220,7 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #define WM_ACTIVATE      0x0006
 #define WM_PAINT         0x000F
 #define WM_CLOSE         0x0010
+#define WM_QUIT          0x0012
 #define WM_ERASEBKGND    0x0014
 #define WM_SETCURSOR     0x0020
 #define WM_CHAR          0x0102
