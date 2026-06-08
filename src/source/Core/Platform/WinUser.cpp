@@ -88,12 +88,17 @@ namespace
 {
     bool IsQuitMessage(UINT msg) { return msg == WM_DESTROY || msg == WM_CLOSE || msg == WM_QUIT; }
 
-    void RequestQuit()
+    bool RequestQuit()
     {
         SDL_Event quit;
         SDL_zero(quit);
         quit.type = SDL_EVENT_QUIT;
-        SDL_PushEvent(&quit);
+        if (!SDL_PushEvent(&quit))
+        {
+            SDL_Log("Failed to push quit event: %s", SDL_GetError());
+            return false;
+        }
+        return true;
     }
 }
 
@@ -105,7 +110,7 @@ LRESULT SendMessage(HWND /*hWnd*/, UINT Msg, WPARAM /*wParam*/, LPARAM /*lParam*
 
 BOOL PostMessage(HWND /*hWnd*/, UINT Msg, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-    if (IsQuitMessage(Msg)) RequestQuit();
+    if (IsQuitMessage(Msg)) return RequestQuit() ? TRUE : FALSE;
     return TRUE;
 }
 
