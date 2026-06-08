@@ -11,7 +11,7 @@
 #include <iostream>
 #include <wininet.h>
 
-#include <crtdbg.h>
+#include "Core/Platform/CrtDbg.h"
 #include <tchar.h>
 #include <strsafe.h>
 

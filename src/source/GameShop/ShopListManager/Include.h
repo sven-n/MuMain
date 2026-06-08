@@ -38,7 +38,7 @@
 #include <vector>
 #include <string>
 #include <tchar.h>
-#include <crtdbg.h>
+#include "Core/Platform/CrtDbg.h"
 #include <strsafe.h>
 #include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
 #include "GameShop/ShopListManager/interface/DownloadInfo.h"

@@ -13,7 +13,7 @@
 #include "Path.h"
 
 #include <fstream>
-#include <crtdbg.h>
+#include "Core/Platform/CrtDbg.h"
 #include <strsafe.h>
 
 TCHAR* Path::GetCurrentFullPath(TCHAR* szPath)

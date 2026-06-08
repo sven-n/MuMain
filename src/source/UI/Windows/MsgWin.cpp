@@ -6,7 +6,7 @@
 #include "UI/Windows/MsgWin.h"
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
-#include <crtdbg.h>
+#include "Core/Platform/CrtDbg.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"

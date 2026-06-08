@@ -9,7 +9,7 @@
 
 #include "Render/Textures/ZzzOpenglUtil.h"
 
-#include <crtdbg.h>
+#include "Core/Platform/CrtDbg.h"
 
 CSprite::CSprite()
 {
