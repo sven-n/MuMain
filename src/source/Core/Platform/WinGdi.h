@@ -8,7 +8,7 @@
 
 #ifdef _WIN32
 
-// BMP/DIB types come from <wingdi.h> (pulled in by <windows.h>).
+#include <windows.h>  // BMP/DIB types (pulled in via <wingdi.h>)
 
 #else  // ---- non-Windows ----------------------------------------------------
 
