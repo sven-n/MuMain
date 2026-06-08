@@ -72,6 +72,7 @@
 // (issue #462, Phase 1).
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/SecureCrt.h"
+#include "Core/Platform/WinApiShims.h"
 #endif // _WIN32
 
 //c runtime
