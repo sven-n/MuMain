@@ -24,7 +24,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     if (fp == NULL)
     {
         wchar_t errorMsg[256];
-        swprintf(errorMsg, L"Skill file not found: %ls", fileName);
+        mu_swprintf(errorMsg, L"Skill file not found: %ls", fileName);
         DataFileIO::ShowErrorAndExit(errorMsg);
         return false;
     }
