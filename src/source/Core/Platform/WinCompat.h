@@ -310,4 +310,44 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #define ZeroMemory(dst, len) std::memset((dst), 0, (len))
 #endif
 
+// ---- GDI rect/point helpers (winuser.h) -------------------------------------
+// Pure value-type helpers with no platform dependency; same semantics as Win32.
+
+inline BOOL SetRect(RECT* lprc, int left, int top, int right, int bottom)
+{
+    if (!lprc) return FALSE;
+    lprc->left = left; lprc->top = top; lprc->right = right; lprc->bottom = bottom;
+    return TRUE;
+}
+
+// Point is inside the rectangle's [left,right) x [top,bottom) half-open range.
+inline BOOL PtInRect(const RECT* lprc, POINT pt)
+{
+    if (!lprc) return FALSE;
+    return (pt.x >= lprc->left && pt.x < lprc->right &&
+            pt.y >= lprc->top  && pt.y < lprc->bottom) ? TRUE : FALSE;
+}
+
+// Intersection of two rects into dst; returns FALSE (and empties dst) if none.
+inline BOOL IntersectRect(RECT* dst, const RECT* a, const RECT* b)
+{
+    if (!dst || !a || !b) return FALSE;
+    const LONG left   = (a->left   > b->left)   ? a->left   : b->left;
+    const LONG top    = (a->top    > b->top)    ? a->top    : b->top;
+    const LONG right  = (a->right  < b->right)  ? a->right  : b->right;
+    const LONG bottom = (a->bottom < b->bottom) ? a->bottom : b->bottom;
+    if (left < right && top < bottom)
+    {
+        dst->left = left; dst->top = top; dst->right = right; dst->bottom = bottom;
+        return TRUE;
+    }
+    dst->left = dst->top = dst->right = dst->bottom = 0;
+    return FALSE;
+}
+
+// Legacy Win32 pointer-validity probe. There is no portable equivalent, and the
+// API is deprecated even on Windows; the realistic failure the callers guard
+// against is a null pointer, so report only that as "bad".
+inline BOOL IsBadReadPtr(const void* lp, UINT_PTR /*ucb*/) { return lp ? FALSE : TRUE; }
+
 #endif  // _WIN32
