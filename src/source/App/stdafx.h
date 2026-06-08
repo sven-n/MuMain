@@ -73,6 +73,7 @@
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/SecureCrt.h"
 #include "Core/Platform/WinApiShims.h"
+#include "Core/Platform/WinUser.h"
 #endif // _WIN32
 
 //c runtime

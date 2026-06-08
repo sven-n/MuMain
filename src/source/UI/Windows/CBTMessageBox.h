@@ -1,5 +1,9 @@
 #include <string>
 
+// Centers/raises the native Win32 MessageBox via a CBT hook. Windows-only and
+// currently unused; portable code uses the SDL-backed MessageBox (WinUser.h).
+#ifdef _WIN32
+
 namespace leaf {
     int CBTMessageBox(HWND hWnd, const std::wstring& text, const std::wstring& caption, UINT uType, bool bAlwaysOnTop = false);
 
@@ -27,3 +31,5 @@ namespace leaf {
         static LRESULT CALLBACK CBTProc(INT nCode, WPARAM wParam, LPARAM lParam);
     };
 }
+
+#endif // _WIN32

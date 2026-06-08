@@ -3,6 +3,9 @@
 
 #include <algorithm>
 
+// Win32 CBT-hook implementation; non-Windows builds use the SDL MessageBox.
+#ifdef _WIN32
+
 int leaf::CBTMessageBox(HWND hWnd, const std::wstring& text, const std::wstring& caption, UINT uType, bool bAlwaysOnTop)
 {
     return CCBTMessageBox::GetInstance()->OpenMessageBox(hWnd, text.c_str(), caption.c_str(), uType, bAlwaysOnTop);
@@ -154,3 +157,4 @@ LRESULT CALLBACK leaf::CCBTMessageBox::CBTProc(INT nCode, WPARAM wParam, LPARAM 
 
     return 0;
 }
+#endif // _WIN32
