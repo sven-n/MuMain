@@ -41,5 +41,16 @@ int MessageBoxW(HWND owner, LPCWSTR text, LPCWSTR caption, UINT type);
 // WinUser.cpp.
 LRESULT SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 BOOL    PostMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+void    PostQuitMessage(int nExitCode);
+
+// Window / cursor queries, backed by SDL. The engine reads the cursor as
+// GetCursorPos followed by ScreenToClient(window); SDL_GetMouseState already
+// returns window-relative coordinates, so GetCursorPos yields those directly and
+// ScreenToClient is the identity. GetActiveWindow reports the focused window (so
+// `== NULL` means the game is unfocused). Implemented in WinUser.cpp.
+BOOL GetCursorPos(LPPOINT lpPoint);
+BOOL ScreenToClient(HWND hWnd, LPPOINT lpPoint);
+HWND GetActiveWindow();
+UINT GetDoubleClickTime();
 
 #endif // _WIN32
