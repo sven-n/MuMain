@@ -18,11 +18,27 @@
 #define symLoad dlsym
 #endif
 
+// Construct-on-first-use: the library handle is loaded lazily on first access.
+// The inline dotnet_* symbol globals (defined in other translation units) load
+// through this handle during their own dynamic initialization, so a plain inline
+// global here would risk a static-initialization-order fiasco. A function-local
+// static is initialized on first call instead, which is well-defined. The macro
+// keeps every existing call site (`munique_client_library_handle`) unchanged.
 #ifdef _WIN32
-inline const HINSTANCE munique_client_library_handle = LoadLibrary(L"MUnique.Client.Library.dll");
+inline HINSTANCE get_munique_client_library_handle()
+{
+    static const HINSTANCE handle = LoadLibrary(L"MUnique.Client.Library.dll");
+    return handle;
+}
 #else
-inline const void* munique_client_library_handle = dlopen("MUnique.Client.Library.dll", RTLD_LAZY);
+inline void* get_munique_client_library_handle()
+{
+    // Not const-qualified return: dlsym() takes a non-const void* handle.
+    static void* const handle = dlopen("MUnique.Client.Library.dll", RTLD_LAZY);
+    return handle;
+}
 #endif
+#define munique_client_library_handle get_munique_client_library_handle()
 
 namespace DotNetBridge
 {
