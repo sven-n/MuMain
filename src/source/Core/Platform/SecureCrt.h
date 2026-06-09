@@ -96,6 +96,13 @@ inline int _vsnwprintf_s(wchar_t* buf, size_t count, size_t maxcount, const wcha
     return r;
 }
 
+// Non-secure _vsnwprintf(buf, count, fmt, args) -> bounded C99 vswprintf.
+inline int _vsnwprintf(wchar_t* buf, size_t count, const wchar_t* fmt, va_list argptr)
+{
+    if (buf == nullptr || count == 0 || fmt == nullptr) return -1;
+    return vswprintf(buf, count, fmt, argptr);
+}
+
 // ---- swprintf_s --------------------------------------------------------------
 inline int swprintf_s(wchar_t* buf, size_t count, const wchar_t* fmt, ...)
 {
