@@ -12,6 +12,7 @@
 
 #else  // ---- non-Windows ----------------------------------------------------
 
+#include <cwchar>                      // wcslen
 #include "Core/Platform/WinCompat.h"  // WORD, DWORD, LONG, BYTE
 
 #ifndef BI_RGB
@@ -62,5 +63,76 @@ typedef struct tagPALETTEENTRY {
     BYTE peBlue;
     BYTE peFlags;
 } PALETTEENTRY, * LPPALETTEENTRY, * PPALETTEENTRY;
+
+// ---- Font creation / text metrics (wingdi.h) --------------------------------
+// The text is rendered through CUIRenderText, a Win32 GDI font-DC pipeline that
+// is not yet ported (the implementation is still behind the in-game-shop include
+// wall). Until that port, the font handle is a no-op and text extents are an
+// estimate -- enough for layout code to compile and run approximately. The real
+// metrics come with the text-rendering port (issue #462, Phase 4).
+
+#ifndef FW_BOLD
+#define FW_BOLD               700
+#endif
+#ifndef DEFAULT_CHARSET
+#define DEFAULT_CHARSET       1
+#endif
+#ifndef OUT_DEFAULT_PRECIS
+#define OUT_DEFAULT_PRECIS    0
+#endif
+#ifndef CLIP_DEFAULT_PRECIS
+#define CLIP_DEFAULT_PRECIS   0
+#endif
+#ifndef DEFAULT_QUALITY
+#define DEFAULT_QUALITY       0
+#endif
+#ifndef NONANTIALIASED_QUALITY
+#define NONANTIALIASED_QUALITY 3
+#endif
+#ifndef ANTIALIASED_QUALITY
+#define ANTIALIASED_QUALITY   4
+#endif
+#ifndef DEFAULT_PITCH
+#define DEFAULT_PITCH         0
+#endif
+#ifndef FF_DONTCARE
+#define FF_DONTCARE           0
+#endif
+
+// A small fixed cell, used to estimate a string's pixel size until real font
+// metrics are available.
+inline constexpr int MU_APPROX_CHAR_WIDTH  = 8;
+inline constexpr int MU_APPROX_CHAR_HEIGHT = 16;
+
+inline HFONT CreateFontW(int /*cHeight*/, int /*cWidth*/, int /*cEscapement*/, int /*cOrientation*/,
+                         int /*cWeight*/, DWORD /*bItalic*/, DWORD /*bUnderline*/, DWORD /*bStrikeOut*/,
+                         DWORD /*iCharSet*/, DWORD /*iOutPrecision*/, DWORD /*iClipPrecision*/,
+                         DWORD /*iQuality*/, DWORD /*iPitchAndFamily*/, LPCWSTR /*pszFaceName*/)
+{
+    // Non-null so callers treat the font as valid; it is never selected into a
+    // real DC off Windows.
+    return reinterpret_cast<HFONT>(1);
+}
+#ifndef CreateFont
+#define CreateFont CreateFontW
+#endif
+
+inline BOOL GetTextExtentPoint32W(HDC /*hdc*/, LPCWSTR lpString, int c, LPSIZE psizl)
+{
+    if (!psizl) return FALSE;
+    const int len = (c >= 0) ? c : (lpString ? static_cast<int>(wcslen(lpString)) : 0);
+    psizl->cx = len * MU_APPROX_CHAR_WIDTH;
+    psizl->cy = MU_APPROX_CHAR_HEIGHT;
+    return TRUE;
+}
+#ifndef GetTextExtentPoint32
+#define GetTextExtentPoint32 GetTextExtentPoint32W
+#endif
+
+// Release a GDI object. The engine also declares its own DeleteObject(OBJECT*)
+// for game objects; these typed overloads coexist with it (an HFONT/HGDIOBJ
+// argument selects one of these, an OBJECT* selects the engine's).
+inline BOOL DeleteObject(HFONT)   { return TRUE; }
+inline BOOL DeleteObject(HGDIOBJ) { return TRUE; }
 
 #endif // _WIN32
