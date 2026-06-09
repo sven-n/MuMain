@@ -18,6 +18,7 @@
 #include <ctime>
 #include <cstdint>
 #include "Core/Platform/WinCompat.h"  // HANDLE, DWORD, BOOL, LPCWSTR, WORD, INVALID_HANDLE_VALUE
+#include "Core/Platform/WinNls.h"     // WideCharToMultiByte / CP_UTF8 (locale-independent paths)
 
 // dwDesiredAccess
 #ifndef GENERIC_READ
@@ -78,7 +79,7 @@ inline HANDLE CreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD /*sha
     }
 
     char path[4096] = { 0 };
-    if (!lpFileName || std::wcstombs(path, lpFileName, sizeof(path) - 1) == static_cast<size_t>(-1))
+    if (!lpFileName || WideCharToMultiByte(CP_UTF8, 0, lpFileName, -1, path, sizeof(path) - 1, nullptr, nullptr) == 0)
         return INVALID_HANDLE_VALUE;
 
     const int fd = ::open(path, oflag, 0644);
@@ -88,8 +89,13 @@ inline HANDLE CreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD /*sha
 #define CreateFile CreateFileW
 #endif
 
+// A null HANDLE maps to fd 0 (stdin), so guard it: reading/writing/closing it
+// would hang on or clobber standard input.
+inline bool MuFileHandleValid(HANDLE h) { return h != nullptr && h != INVALID_HANDLE_VALUE; }
+
 inline BOOL ReadFile(HANDLE hFile, void* buffer, DWORD count, LPDWORD bytesRead, void* /*ovl*/)
 {
+    if (!MuFileHandleValid(hFile)) { if (bytesRead) *bytesRead = 0; return FALSE; }
     const ssize_t r = ::read(mu_detail::HandleToFd(hFile), buffer, count);
     if (r < 0) { if (bytesRead) *bytesRead = 0; return FALSE; }
     if (bytesRead) *bytesRead = static_cast<DWORD>(r);
@@ -98,6 +104,7 @@ inline BOOL ReadFile(HANDLE hFile, void* buffer, DWORD count, LPDWORD bytesRead,
 
 inline BOOL WriteFile(HANDLE hFile, const void* buffer, DWORD count, LPDWORD bytesWritten, void* /*ovl*/)
 {
+    if (!MuFileHandleValid(hFile)) { if (bytesWritten) *bytesWritten = 0; return FALSE; }
     const ssize_t w = ::write(mu_detail::HandleToFd(hFile), buffer, count);
     if (w < 0) { if (bytesWritten) *bytesWritten = 0; return FALSE; }
     if (bytesWritten) *bytesWritten = static_cast<DWORD>(w);
@@ -106,22 +113,31 @@ inline BOOL WriteFile(HANDLE hFile, const void* buffer, DWORD count, LPDWORD byt
 
 inline BOOL CloseHandle(HANDLE hObject)
 {
-    if (hObject == INVALID_HANDLE_VALUE) return FALSE;
+    if (!MuFileHandleValid(hObject)) return FALSE;
     return (::close(mu_detail::HandleToFd(hObject)) == 0) ? TRUE : FALSE;
 }
 
-inline DWORD SetFilePointer(HANDLE hFile, LONG distance, LONG* /*distanceHigh*/, DWORD moveMethod)
+inline DWORD SetFilePointer(HANDLE hFile, LONG distance, LONG* distanceHigh, DWORD moveMethod)
 {
+    if (!MuFileHandleValid(hFile)) return INVALID_SET_FILE_POINTER;
     const int whence = (moveMethod == FILE_END) ? SEEK_END
                      : (moveMethod == FILE_CURRENT) ? SEEK_CUR : SEEK_SET;
-    const off_t pos = ::lseek(mu_detail::HandleToFd(hFile), distance, whence);
-    return (pos == static_cast<off_t>(-1)) ? INVALID_SET_FILE_POINTER : static_cast<DWORD>(pos);
+
+    // Combine the optional high dword for offsets past 2GB.
+    std::int64_t offset = distance;
+    if (distanceHigh)
+        offset = (static_cast<std::int64_t>(*distanceHigh) << 32) | static_cast<std::uint32_t>(distance);
+
+    const off_t pos = ::lseek(mu_detail::HandleToFd(hFile), static_cast<off_t>(offset), whence);
+    if (pos == static_cast<off_t>(-1)) return INVALID_SET_FILE_POINTER;
+    if (distanceHigh) *distanceHigh = static_cast<LONG>(pos >> 32);
+    return static_cast<DWORD>(pos & 0xFFFFFFFF);
 }
 
 inline BOOL DeleteFileW(LPCWSTR lpFileName)
 {
     char path[4096] = { 0 };
-    if (!lpFileName || std::wcstombs(path, lpFileName, sizeof(path) - 1) == static_cast<size_t>(-1))
+    if (!lpFileName || WideCharToMultiByte(CP_UTF8, 0, lpFileName, -1, path, sizeof(path) - 1, nullptr, nullptr) == 0)
         return FALSE;
     return (::unlink(path) == 0) ? TRUE : FALSE;
 }
