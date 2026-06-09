@@ -311,6 +311,11 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #define ZeroMemory(dst, len) std::memset((dst), 0, (len))
 #endif
 
+// Element count of a stack array (MSVC _countof).
+#ifndef _countof
+#define _countof(a) (sizeof(a) / sizeof((a)[0]))
+#endif
+
 // ---- GDI rect/point helpers (winuser.h) -------------------------------------
 // Pure value-type helpers with no platform dependency; same semantics as Win32.
 

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ReconnectManager.h"
 
-#include <ws2tcpip.h>  // GetAddrInfoW for the reachability probe (IPs + hostnames)
+#include "Core/Platform/WinSock.h"  // GetAddrInfoW + BSD-socket shims for the reachability probe
 
 #include <cmath>
 #include <cwchar>
@@ -286,7 +286,7 @@ void ReconnectManager::PollProbe()
     if (FD_ISSET(probe, &writeSet))
     {
         int soError = 0;
-        int len = sizeof(soError);
+        socklen_t len = sizeof(soError);
         getsockopt(probe, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&soError), &len);
         CloseProbe();
 
