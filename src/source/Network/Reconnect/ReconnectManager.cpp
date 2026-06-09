@@ -125,6 +125,15 @@ void ReconnectManager::Begin()
         return;
     }
 
+    // Point the login scene at the cached game server before tearing down.
+    // ResetClientToLoginScene() switches to LOG_IN_SCENE, and the next frame
+    // NewMoveLogInScene() -> CreateLogInScene() reconnects to
+    // szServerIpAddress/g_ServerPort. Left at the connect-server endpoint that
+    // reconnect hijacks the game-server socket we open below, so the first
+    // attempt connects to the wrong endpoint and only the retry recovers.
+    szServerIpAddress = m_serverIp;
+    g_ServerPort = m_serverPort;
+
     // Tear the live session down to a clean login state.
     ResetClientToLoginScene();
 
