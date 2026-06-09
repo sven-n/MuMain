@@ -44,14 +44,25 @@ inline int WSACleanup() { return 0; }
 inline int WSAGetLastError() { return errno; }
 
 inline int closesocket(SOCKET s) { return ::close(s); }
-inline int ioctlsocket(SOCKET s, long cmd, u_long* argp) { return ::ioctl(s, static_cast<unsigned long>(cmd), argp); }
+
+inline int ioctlsocket(SOCKET s, long cmd, u_long* argp)
+{
+    // Linux ioctl(FIONBIO) expects an int*, not Winsock's u_long*; convert so
+    // the flag is read correctly (size/endianness safe).
+    if (cmd == FIONBIO)
+    {
+        int val = argp ? static_cast<int>(*argp) : 0;
+        return ::ioctl(s, FIONBIO, &val);
+    }
+    return ::ioctl(s, static_cast<unsigned long>(cmd), argp);
+}
 
 // Wide name resolution. The probe only reads ai_addr/ai_family, so map the wide
 // addrinfo onto POSIX addrinfo and convert the node/service to the locale bytes.
 typedef struct addrinfo addrinfoW, ADDRINFOW, * PADDRINFOW;
 
 inline int GetAddrInfoW(const wchar_t* node, const wchar_t* service,
-                        const addrinfo* hints, addrinfo** result)
+                        const addrinfoW* hints, addrinfoW** result)
 {
     char n[256] = { 0 };
     char sv[64] = { 0 };

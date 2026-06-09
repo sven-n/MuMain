@@ -281,7 +281,8 @@ void ReconnectManager::PollProbe()
     FD_SET(probe, &errorSet);
 
     timeval immediate = {};
-    select(0, nullptr, &writeSet, &errorSet, &immediate);
+    // POSIX needs nfds = highest fd + 1; Windows ignores the first argument.
+    select(static_cast<int>(probe + 1), nullptr, &writeSet, &errorSet, &immediate);
 
     if (FD_ISSET(probe, &writeSet))
     {

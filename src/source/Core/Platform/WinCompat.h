@@ -311,9 +311,11 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #define ZeroMemory(dst, len) std::memset((dst), 0, (len))
 #endif
 
-// Element count of a stack array (MSVC _countof).
+// Element count of a stack array (MSVC _countof). Type-safe: a pointer argument
+// fails to match the array helper and is a compile error, not a silent miscount.
 #ifndef _countof
-#define _countof(a) (sizeof(a) / sizeof((a)[0]))
+template <typename T, std::size_t N> char (&mu_countof_helper(T (&)[N]))[N];
+#define _countof(arr) (sizeof(mu_countof_helper(arr)))
 #endif
 
 // ---- GDI rect/point helpers (winuser.h) -------------------------------------
