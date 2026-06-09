@@ -3,11 +3,13 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#ifdef _WIN32
 #include <ddraw.h>
 #include <dinput.h>
 #include <dmusicc.h>
 #include <eh.h>
 #include <imagehlp.h>
+#endif
 #include "ErrorReport.h"
 
 // Max UTF-8 bytes for a single log line. Source buffer is wchar_t[1024]; UTF-8 needs
@@ -226,6 +228,12 @@ void CErrorReport::WriteOpenGLInfo(void)
     glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iResult);
     Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
 }
+
+// ---- Win32 crash-report system info -----------------------------------------
+// IME / sound-card / OS / CPU / DirectX details for the crash log. These pull in
+// DirectX and other Win32 APIs and are only invoked from the Windows entry point
+// (Winmain), so guard the whole section off on non-Windows (issue #462).
+#ifdef _WIN32
 
 void CErrorReport::WriteImeInfo(HWND hWnd)
 {
@@ -714,3 +722,4 @@ void GetSystemInfo(ER_SystemInfo* si)
     DWORD dwDX = GetDXVersion();
     mu_swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
 }
+#endif // _WIN32 (Win32 crash-report system info)
