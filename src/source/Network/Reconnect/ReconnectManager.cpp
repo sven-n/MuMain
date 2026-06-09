@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ReconnectManager.h"
 
-#include <ws2tcpip.h>  // GetAddrInfoW for the reachability probe (IPs + hostnames)
+#include "Core/Platform/WinSock.h"  // GetAddrInfoW + BSD-socket shims for the reachability probe
 
 #include <cmath>
 #include <cwchar>
@@ -281,12 +281,13 @@ void ReconnectManager::PollProbe()
     FD_SET(probe, &errorSet);
 
     timeval immediate = {};
-    select(0, nullptr, &writeSet, &errorSet, &immediate);
+    // POSIX needs nfds = highest fd + 1; Windows ignores the first argument.
+    select(static_cast<int>(probe + 1), nullptr, &writeSet, &errorSet, &immediate);
 
     if (FD_ISSET(probe, &writeSet))
     {
         int soError = 0;
-        int len = sizeof(soError);
+        socklen_t len = sizeof(soError);
         getsockopt(probe, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&soError), &len);
         CloseProbe();
 
