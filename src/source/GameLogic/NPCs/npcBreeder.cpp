@@ -2,7 +2,9 @@
 //  npcBreeder.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#ifdef _WIN32
 #include <process.h>
+#endif
 #include "UI/Legacy/UIManager.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"

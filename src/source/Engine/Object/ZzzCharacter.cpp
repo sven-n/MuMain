@@ -8,7 +8,9 @@
 #include "stdafx.h"
 #include "UI/Chat/Chat.h"
 #include "Core/Globals/_enum.h"
+#ifdef _WIN32
 #include <eh.h>
+#endif
 #include "UI/Legacy/UIManager.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
