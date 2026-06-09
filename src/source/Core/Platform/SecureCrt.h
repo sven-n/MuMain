@@ -96,11 +96,15 @@ inline int _vsnwprintf_s(wchar_t* buf, size_t count, size_t maxcount, const wcha
     return r;
 }
 
-// Non-secure _vsnwprintf(buf, count, fmt, args) -> bounded C99 vswprintf.
+// Non-secure _vsnwprintf(buf, count, fmt, args) -> bounded C99 vswprintf. On
+// failure vswprintf leaves the buffer indeterminate, so null-terminate it
+// (callers don't check the return value) to keep later reads in bounds.
 inline int _vsnwprintf(wchar_t* buf, size_t count, const wchar_t* fmt, va_list argptr)
 {
     if (buf == nullptr || count == 0 || fmt == nullptr) return -1;
-    return vswprintf(buf, count, fmt, argptr);
+    const int r = vswprintf(buf, count, fmt, argptr);
+    if (r < 0) buf[count - 1] = L'\0';
+    return r;
 }
 
 // ---- swprintf_s --------------------------------------------------------------
