@@ -119,8 +119,8 @@ inline HFONT CreateFontW(int /*cHeight*/, int /*cWidth*/, int /*cEscapement*/, i
 
 inline BOOL GetTextExtentPoint32W(HDC /*hdc*/, LPCWSTR lpString, int c, LPSIZE psizl)
 {
-    if (!psizl) return FALSE;
-    const int len = (c >= 0) ? c : (lpString ? static_cast<int>(wcslen(lpString)) : 0);
+    if (!psizl || (!lpString && c != 0)) return FALSE;
+    const int len = (c >= 0) ? c : static_cast<int>(wcslen(lpString));
     psizl->cx = len * MU_APPROX_CHAR_WIDTH;
     psizl->cy = MU_APPROX_CHAR_HEIGHT;
     return TRUE;
@@ -134,5 +134,7 @@ inline BOOL GetTextExtentPoint32W(HDC /*hdc*/, LPCWSTR lpString, int c, LPSIZE p
 // argument selects one of these, an OBJECT* selects the engine's).
 inline BOOL DeleteObject(HFONT)   { return TRUE; }
 inline BOOL DeleteObject(HGDIOBJ) { return TRUE; }
+inline BOOL DeleteObject(HBITMAP) { return TRUE; }
+inline BOOL DeleteObject(HBRUSH)  { return TRUE; }
 
 #endif // _WIN32
