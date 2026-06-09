@@ -145,14 +145,17 @@ UINT GetDoubleClickTime()
     return 500;  // the Win32 default
 }
 
-// The engine's main window handle (defined in the platform entry point). Used
-// only to answer "is the game window focused?"; declared here rather than
-// pulling the App-layer header into Core/Platform.
-extern HWND g_hWnd;
-
 HWND GetFocus()
 {
-    return SDL_GetKeyboardFocus() ? g_hWnd : nullptr;
+    // The UI asks "is the game focused?" with `GetFocus() == g_hWnd`, and
+    // compares the result against widget handles that derive from g_hWnd. On the
+    // SDL path g_hWnd is null (the Win32 HWND bridge is Windows-only), and the
+    // portable text fields (#447) don't take Win32 focus, so the main window is
+    // always treated as focused: returning null keeps every `== g_hWnd`
+    // comparison consistent without the platform layer depending on g_hWnd.
+    // (Note: this can't be GetActiveWindow()/SDL_GetKeyboardFocus(), which return
+    // the SDL window rather than g_hWnd and would invert the comparison.)
+    return nullptr;
 }
 
 #endif // !_WIN32
