@@ -6,7 +6,9 @@
 
 #include <codecvt>
 #include <locale>
+#ifdef _WIN32
 #include <shlwapi.h>
+#endif
 
 #include "Render/Sprites/GlobalBitmap.h"
 

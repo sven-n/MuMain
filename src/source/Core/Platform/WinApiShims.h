@@ -100,6 +100,20 @@ inline wchar_t* _itow(int value, wchar_t* buffer, int radix)
     return buffer;
 }
 
+// Case-insensitive, length-limited wide compare (MSVC _wcsnicmp/wcsnicmp).
+inline int _wcsnicmp(const wchar_t* a, const wchar_t* b, size_t n)
+{
+    for (size_t i = 0; i < n; ++i)
+    {
+        const wint_t ca = towlower(static_cast<wint_t>(a[i]));
+        const wint_t cb = towlower(static_cast<wint_t>(b[i]));
+        if (ca != cb) return (ca < cb) ? -1 : 1;
+        if (a[i] == L'\0') break;
+    }
+    return 0;
+}
+inline int wcsnicmp(const wchar_t* a, const wchar_t* b, size_t n) { return _wcsnicmp(a, b, n); }
+
 // Case-insensitive compares.
 inline int _wcsicmp(const wchar_t* a, const wchar_t* b) { return wcscasecmp(a, b); }
 inline int wcsicmp(const wchar_t* a, const wchar_t* b) { return wcscasecmp(a, b); }
