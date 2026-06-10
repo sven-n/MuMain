@@ -51,12 +51,17 @@ namespace Render::Effects
     // Per-frame draw. Defaults to RenderObject() when left null.
     using RenderHandler = void (*)(OBJECT* o);
 
+    // A descriptor migrates each lifecycle stage independently: a type can have
+    // its rendering driven by the registry while its creation still runs through
+    // the legacy switch, or vice versa. CreateEffect treats creation as migrated
+    // only when `create` or `onCreate` is set; MoveEffect / RenderEffects gate on
+    // their respective handlers. An unset stage falls back to the legacy switch.
     struct EffectDescriptor
     {
-        CreateParams  create;
-        CreateHook    onCreate = nullptr;
-        MoveHandler   move     = nullptr;
-        RenderHandler render   = nullptr;
+        std::optional<CreateParams> create;
+        CreateHook                  onCreate = nullptr;
+        MoveHandler                 move     = nullptr;
+        RenderHandler               render   = nullptr;
     };
 
     // Applies the optional parameters to an already common-initialised effect.

@@ -386,11 +386,12 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             vec3_t p1, p2;
 
             // Data-driven effects: apply their parameter table row and any
-            // one-shot creation hook, then we're done. Types without a registry
-            // entry fall through to the legacy switch below.
-            if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(Type))
+            // one-shot creation hook, then we're done. Types whose creation is
+            // not registry-driven fall through to the legacy switch below.
+            if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(Type); desc && (desc->create || desc->onCreate))
             {
-                Render::Effects::ApplyCreateParams(o, desc->create);
+                if (desc->create)
+                    Render::Effects::ApplyCreateParams(o, *desc->create);
                 if (desc->onCreate)
                     desc->onCreate(o);
                 return;

@@ -46,40 +46,40 @@ namespace Render::Effects
                 // MODEL_DESAIR: short-lived, slightly oversized; rides a joint
                 // and sheds feathers (see Behaviors::MoveDesair). Default render.
                 add({ MODEL_DESAIR }, {
-                    .create = { .lifeTime = 52.f, .scale = 1.4f },
+                    .create = CreateParams{ .lifeTime = 52.f, .scale = 1.4f },
                     .move = &Behaviors::MoveDesair,
                     .render = &Behaviors::RenderDefault });
 
                 // --- Data-only effects -------------------------------------
                 // These set a few creation parameters and nothing else; their
                 // per-frame move/render still runs through the legacy switches.
-                add({ MODEL_MAGIC_CAPSULE2 }, { .create = { .lifeTime = 20.f, .blendMesh = 0, .blendMeshLight = 1.0f } });
-                add({ MODEL_SPEAR },          { .create = { .lifeTime = 10.f } });
+                add({ MODEL_MAGIC_CAPSULE2 }, { .create = CreateParams{ .lifeTime = 20.f, .blendMesh = 0, .blendMeshLight = 1.0f } });
+                add({ MODEL_SPEAR },          { .create = CreateParams{ .lifeTime = 10.f } });
                 add({ MODEL_SUMMONER_SUMMON_NEIL_NIFE1,
                       MODEL_SUMMONER_SUMMON_NEIL_NIFE2,
                       MODEL_SUMMONER_SUMMON_NEIL_NIFE3 },
-                                              { .create = { .lifeTime = 50.f, .scale = 1.0f, .alpha = 1.0f } });
+                                              { .create = CreateParams{ .lifeTime = 50.f, .scale = 1.0f, .alpha = 1.0f } });
                 add({ MODEL_SUMMONER_SUMMON_NEIL_GROUND1,
                       MODEL_SUMMONER_SUMMON_NEIL_GROUND2,
                       MODEL_SUMMONER_SUMMON_NEIL_GROUND3 },
-                                              { .create = { .lifeTime = 50.f, .scale = 1.0f, .alpha = 0.0f } });
-                add({ BITMAP_FIRE_RED },      { .create = { .lifeTime = 40.f } });
-                add({ BITMAP_IMPACT },        { .create = { .lifeTime = 80.f, .scale = 0.f, .blendMesh = -2 } });
-                add({ BITMAP_LIGHT_MARKS },   { .create = { .lifeTime = 65.f } });
-                add({ MODEL_PROTECT },        { .create = { .lifeTime = 10000.f, .velocity = 0.3f, .blendMesh = 0 } });
+                                              { .create = CreateParams{ .lifeTime = 50.f, .scale = 1.0f, .alpha = 0.0f } });
+                add({ BITMAP_FIRE_RED },      { .create = CreateParams{ .lifeTime = 40.f } });
+                add({ BITMAP_IMPACT },        { .create = CreateParams{ .lifeTime = 80.f, .scale = 0.f, .blendMesh = -2 } });
+                add({ BITMAP_LIGHT_MARKS },   { .create = CreateParams{ .lifeTime = 65.f } });
+                add({ MODEL_PROTECT },        { .create = CreateParams{ .lifeTime = 10000.f, .velocity = 0.3f, .blendMesh = 0 } });
                 add({ MODEL_CURSEDTEMPLE_HOLYITEM,
                       MODEL_CURSEDTEMPLE_PRODECTION_SKILL,
                       MODEL_CURSEDTEMPLE_RESTRAINT_SKILL },
-                                              { .create = { .lifeTime = 9999999.f } });
-                add({ MODEL_MAGIC1 },         { .create = { .lifeTime = 20.f, .blendMesh = 0 } });
-                add({ MODEL_SKILL_FISSURE },  { .create = { .lifeTime = 20.f } });
+                                              { .create = CreateParams{ .lifeTime = 9999999.f } });
+                add({ MODEL_MAGIC1 },         { .create = CreateParams{ .lifeTime = 20.f, .blendMesh = 0 } });
+                add({ MODEL_SKILL_FISSURE },  { .create = CreateParams{ .lifeTime = 20.f } });
                 add({ MODEL_FISSURE, MODEL_FISSURE_LIGHT },
-                                              { .create = { .lifeTime = 120.f, .scale = 0.8f } });
-                add({ MODEL_BALGAS_SKILL },   { .create = { .lifeTime = 20.f, .scale = 1.0f, .blendMesh = 0 } });
-                add({ MODEL_MAYASTAR },       { .create = { .lifeTime = 50.f, .scale = 50.0f } });
-                add({ MODEL_BLOOD },          { .create = { .lifeTime = 10.f, .blendMesh = 0 } });
-                add({ MODEL_POISON },         { .create = { .lifeTime = 40.f, .scale = 1.0f, .blendMesh = 1 } });
-                add({ BITMAP_SWORDEFF },      { .create = { .lifeTime = 200.f } });
+                                              { .create = CreateParams{ .lifeTime = 120.f, .scale = 0.8f } });
+                add({ MODEL_BALGAS_SKILL },   { .create = CreateParams{ .lifeTime = 20.f, .scale = 1.0f, .blendMesh = 0 } });
+                add({ MODEL_MAYASTAR },       { .create = CreateParams{ .lifeTime = 50.f, .scale = 50.0f } });
+                add({ MODEL_BLOOD },          { .create = CreateParams{ .lifeTime = 10.f, .blendMesh = 0 } });
+                add({ MODEL_POISON },         { .create = CreateParams{ .lifeTime = 40.f, .scale = 1.0f, .blendMesh = 1 } });
+                add({ BITMAP_SWORDEFF },      { .create = CreateParams{ .lifeTime = 200.f } });
 
                 return e;
             }();
