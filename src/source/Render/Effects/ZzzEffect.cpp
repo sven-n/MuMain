@@ -11,6 +11,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
+#include "Render/Effects/EffectRegistry.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Legacy/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
@@ -383,6 +384,18 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             Vector(0.f, 0.f, 0.f, o->Direction);
             float Matrix[3][4];
             vec3_t p1, p2;
+
+            // Data-driven effects: apply their parameter table row and any
+            // one-shot creation hook, then we're done. Types without a registry
+            // entry fall through to the legacy switch below.
+            if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(Type))
+            {
+                Render::Effects::ApplyCreateParams(o, desc->create);
+                if (desc->onCreate)
+                    desc->onCreate(o);
+                return;
+            }
+
             switch (Type)
             {
             case MODEL_DRAGON:
@@ -435,12 +448,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     Vector(1.f, 1.f, 1.f, o->Light);
                     VectorCopy(o->Light, o->Direction);
                 }
-            }
-            break;
-            case MODEL_DESAIR:
-            {
-                o->LifeTime = 52;
-                o->Scale = 1.4f;
             }
             break;
             case MODEL_INFINITY_ARROW1:
@@ -6769,6 +6776,14 @@ void MoveEffect(OBJECT* o, int iIndex)
     }
     Vector(1.f, 1.f, 1.f, Light);
 
+    // Registry-driven per-frame behaviour. A false return mirrors the legacy
+    // cases that `return` out of the switch, skipping the shared tail below.
+    if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(o->Type); desc && desc->move)
+    {
+        if (!desc->move(o, iIndex))
+            return;
+    }
+    else
     switch (o->Type)
     {
     case MODEL_DRAGON:
@@ -8344,22 +8359,6 @@ void MoveEffect(OBJECT* o, int iIndex)
         break;
         }
         break;
-    case MODEL_DESAIR:
-    {
-        JOINT* oj = &Joints[o->m_sTargetIndex];
-        if (oj->Live == true)
-        {
-            VectorCopy(oj->Position, o->Position);
-            VectorCopy(oj->Angle, o->Angle);
-            if ((int)o->LifeTime % 10 == 0)
-            {
-                //						Vector(0.1f,0.1f,0.1f,Light);
-                CreateEffectFpsChecked(MODEL_FEATHER, o->Position, o->Angle, o->Light, 2, NULL, -1, 0, 0, 0, 1.4f);
-                CreateEffectFpsChecked(MODEL_FEATHER, o->Position, o->Angle, o->Light, 3, NULL, -1, 0, 0, 0, 1.4f);
-            }
-        }
-    }
-    break;
     case BITMAP_PIN_LIGHT:
         switch (o->SubType)
         {
@@ -18107,6 +18106,13 @@ void RenderEffects(bool bRenderBlendMesh)
                     //if ( (o->Position[2]+o->BoundingBoxMax[2])<350.f ) continue;
                 }
 
+                // Registry-driven rendering. Effects with a render handler draw
+                // through it; everything else falls to the legacy switch.
+                if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(o->Type); desc && desc->render)
+                {
+                    desc->render(o);
+                }
+                else
                 switch (o->Type)
                 {
                 case MODEL_DRAGON:
@@ -18116,7 +18122,6 @@ void RenderEffects(bool bRenderBlendMesh)
                 case MODEL_WARP6:
                 case MODEL_WARP5:
                 case MODEL_WARP4:
-                case MODEL_DESAIR:
                 case MODEL_GHOST:
                 case MODEL_TREE_ATTACK:
                     RenderObject(o);
