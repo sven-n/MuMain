@@ -49,10 +49,12 @@ namespace Render::Effects
     // applied.
     using CreateHook = void (*)(OBJECT* o);
 
-    // Per-frame update. Returns true to run MoveEffect's shared tail (lifetime
-    // decrement, particle trail, destruction); false to skip it, mirroring the
-    // handful of legacy cases that `return` early out of the move switch.
-    using MoveHandler = bool (*)(OBJECT* o, int index);
+    // Per-frame update. `luminosity` is the per-frame flicker value MoveEffect
+    // computes once for every effect (so handlers don't draw an extra rand()).
+    // Returns true to run MoveEffect's shared tail (lifetime decrement, particle
+    // trail, destruction); false to skip it, mirroring the handful of legacy
+    // cases that `return` early out of the move switch.
+    using MoveHandler = bool (*)(OBJECT* o, int index, float luminosity);
 
     // Per-frame draw. Defaults to RenderObject() when left null.
     using RenderHandler = void (*)(OBJECT* o);

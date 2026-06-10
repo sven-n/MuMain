@@ -30,7 +30,7 @@ namespace Render::Effects::Behaviors
 
     // MODEL_DESAIR: rides the joint addressed by m_sTargetIndex and sheds
     // feather effects every 10 ticks of life.
-    bool MoveDesair(OBJECT* o, int /*index*/)
+    bool MoveDesair(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         JOINT* oj = &Joints[o->m_sTargetIndex];
         if (oj->Live == true)
@@ -47,7 +47,7 @@ namespace Render::Effects::Behaviors
     }
 
     // MODEL_INFINITY_ARROW4: grows and fades while tracking the owner's hand bone.
-    bool MoveInfinityArrow4(OBJECT* o, int /*index*/)
+    bool MoveInfinityArrow4(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         vec3_t tmp = { 0.f, 0.f, 0.f };
         OBJECT* pOwner = o->Owner;
@@ -64,7 +64,7 @@ namespace Render::Effects::Behaviors
     }
 
     // MODEL_MAGIC_CAPSULE2: sticks to the owner and fades out over its last ticks.
-    bool MoveMagicCapsule2(OBJECT* o, int /*index*/)
+    bool MoveMagicCapsule2(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         VectorCopy(o->Owner->Position, o->Position);
         if (o->LifeTime < 10)
@@ -73,7 +73,7 @@ namespace Render::Effects::Behaviors
     }
 
     // MODEL_SPEAR: trails a flare joint sized by subtype.
-    bool MoveSpear(OBJECT* o, int /*index*/)
+    bool MoveSpear(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         if (1 == o->SubType)
             CreateJointFpsChecked(BITMAP_FLARE, o->Position, o->Position, o->Angle, 12, o, 100.0f);
@@ -83,7 +83,7 @@ namespace Render::Effects::Behaviors
     }
 
     // MODEL_SUMMONER_SUMMON_NEIL_NIFE1..3: fade out near end of life, otherwise fade in.
-    bool MoveSummonerNeilNife(OBJECT* o, int /*index*/)
+    bool MoveSummonerNeilNife(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         if (o->LifeTime < 20) o->Alpha -= 0.05f;
         else if (o->Alpha < 1.0f) o->Alpha += 0.05f;
@@ -91,7 +91,7 @@ namespace Render::Effects::Behaviors
     }
 
     // MODEL_SUMMONER_SUMMON_NEIL_GROUND1..3: same fade-out, faster fade-in.
-    bool MoveSummonerNeilGround(OBJECT* o, int /*index*/)
+    bool MoveSummonerNeilGround(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         if (o->LifeTime < 20) o->Alpha -= 0.05f;
         else if (o->Alpha < 1.0f) o->Alpha += 0.3f;
@@ -99,7 +99,7 @@ namespace Render::Effects::Behaviors
     }
 
     // BITMAP_FIRE: continuously emits its fire particle from the owner.
-    bool MoveBitmapFire(OBJECT* o, int /*index*/)
+    bool MoveBitmapFire(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         vec3_t Light;
         Vector(1.f, 1.f, 1.f, Light);
@@ -108,7 +108,7 @@ namespace Render::Effects::Behaviors
     }
 
     // BITMAP_FIRE_RED: scatters red fire particles around its position.
-    bool MoveBitmapFireRed(OBJECT* o, int /*index*/)
+    bool MoveBitmapFireRed(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         vec3_t Position, Light;
         Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), 0.f, Position);
@@ -119,7 +119,7 @@ namespace Render::Effects::Behaviors
     }
 
     // BITMAP_LIGHT_MARKS: dies with its owner, otherwise loops its lifetime.
-    bool MoveBitmapLightMarks(OBJECT* o, int /*index*/)
+    bool MoveBitmapLightMarks(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         if (o->Owner == NULL || o->Owner->Live == false)
         {
@@ -133,7 +133,7 @@ namespace Render::Effects::Behaviors
     }
 
     // MODEL_MAGIC1: hovers above the owner, spinning and fading over its life.
-    bool MoveMagic1(OBJECT* o, int /*index*/)
+    bool MoveMagic1(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         VectorCopy(o->Owner->Position, o->Position);
         o->Position[2] += (100.f) * FPS_ANIMATION_FACTOR;
@@ -143,7 +143,7 @@ namespace Render::Effects::Behaviors
     }
 
     // MODEL_MAYASTAR: pulses in size, spins, fades at end of life and shakes the screen.
-    bool MoveMayaStar(OBJECT* o, int /*index*/)
+    bool MoveMayaStar(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
         if (o->LifeTime <= 20)
         {

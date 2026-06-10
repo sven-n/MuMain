@@ -4,6 +4,7 @@
 #include "Behaviors/EffectBehaviors.h"
 #include "Behaviors/MoveHandlers.h"
 
+#include <algorithm>
 #include <initializer_list>
 #include <vector>
 
@@ -93,11 +94,19 @@ namespace Render::Effects
                 add({ MODEL_MAYASTONE4, MODEL_MAYASTONE5 }, { .onCreate = &Behaviors::CreateMayaStone45 });
 
                 // --- Move handlers mechanically extracted from MoveEffect -----
-                // (see Behaviors/MoveHandlers.cpp). These types have no other
-                // registry entry, so they carry only a move handler; their
-                // creation and rendering still run through the legacy switches.
+                // (see Behaviors/MoveHandlers.cpp). Merge into an existing entry
+                // when the type already has create params; otherwise add a
+                // move-only entry. Creation and rendering for these types still
+                // run through the legacy switches unless listed above.
                 for (const auto& [type, move] : Behaviors::ExtractedMoveHandlers())
-                    e.push_back({ type, EffectDescriptor{ .move = move } });
+                {
+                    auto it = std::find_if(e.begin(), e.end(),
+                        [type = type](const Entry& en) { return en.type == type; });
+                    if (it != e.end())
+                        it->descriptor.move = move;
+                    else
+                        e.push_back({ type, EffectDescriptor{ .move = move } });
+                }
 
                 return e;
             }();

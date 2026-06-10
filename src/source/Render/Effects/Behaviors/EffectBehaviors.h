@@ -17,15 +17,15 @@ namespace Render::Effects::Behaviors
     // setup, which doesn't reduce to independent scalar parameters.
     void CreateMayaStone45(OBJECT* o);
 
-    bool MoveDesair(OBJECT* o, int index);
-    bool MoveInfinityArrow4(OBJECT* o, int index);
-    bool MoveMagicCapsule2(OBJECT* o, int index);
-    bool MoveSpear(OBJECT* o, int index);
-    bool MoveSummonerNeilNife(OBJECT* o, int index);
-    bool MoveSummonerNeilGround(OBJECT* o, int index);
-    bool MoveBitmapFire(OBJECT* o, int index);
-    bool MoveBitmapFireRed(OBJECT* o, int index);
-    bool MoveBitmapLightMarks(OBJECT* o, int index);
-    bool MoveMagic1(OBJECT* o, int index);
-    bool MoveMayaStar(OBJECT* o, int index);
+    bool MoveDesair(OBJECT* o, int index, float luminosity);
+    bool MoveInfinityArrow4(OBJECT* o, int index, float luminosity);
+    bool MoveMagicCapsule2(OBJECT* o, int index, float luminosity);
+    bool MoveSpear(OBJECT* o, int index, float luminosity);
+    bool MoveSummonerNeilNife(OBJECT* o, int index, float luminosity);
+    bool MoveSummonerNeilGround(OBJECT* o, int index, float luminosity);
+    bool MoveBitmapFire(OBJECT* o, int index, float luminosity);
+    bool MoveBitmapFireRed(OBJECT* o, int index, float luminosity);
+    bool MoveBitmapLightMarks(OBJECT* o, int index, float luminosity);
+    bool MoveMagic1(OBJECT* o, int index, float luminosity);
+    bool MoveMayaStar(OBJECT* o, int index, float luminosity);
 }
