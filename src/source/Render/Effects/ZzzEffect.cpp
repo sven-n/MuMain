@@ -639,14 +639,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     Vector(0.f, -10.f, 0.f, o->Direction);
                 }
                 break;
-            case MODEL_MAGIC_CAPSULE2:
-                o->LifeTime = 20;
-                o->BlendMesh = 0;
-                o->BlendMeshLight = 1.0f;
-                break;
-            case MODEL_SPEAR:
-                o->LifeTime = 10;
-                break;
             case MODEL__SPEAR:
                 o->Angle[0] = o->Angle[1] = o->Angle[2] = 0.0f;
                 o->LifeTime = 5;
@@ -818,20 +810,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
 
                 VectorCopy(Light, o->HeadTargetAngle);
                 Vector(1.0f, 1.0f, 1.0f, o->Light);
-                break;
-            case MODEL_SUMMONER_SUMMON_NEIL_NIFE1:
-            case MODEL_SUMMONER_SUMMON_NEIL_NIFE2:
-            case MODEL_SUMMONER_SUMMON_NEIL_NIFE3:
-                o->LifeTime = 50;
-                o->Scale = 1.0f;
-                o->Alpha = 1.0f;
-                break;
-            case MODEL_SUMMONER_SUMMON_NEIL_GROUND1:
-            case MODEL_SUMMONER_SUMMON_NEIL_GROUND2:
-            case MODEL_SUMMONER_SUMMON_NEIL_GROUND3:
-                o->LifeTime = 50;
-                o->Scale = 1.0f;
-                o->Alpha = 0.0f;
                 break;
             case MODEL_SUMMONER_SUMMON_LAGUL:
                 if (o->SubType == 0)
@@ -1173,16 +1151,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     o->Angle[2] = (float)(rand() % 360);
                 }
                 break;
-            case BITMAP_FIRE_RED:
-                o->LifeTime = 40;
-                break;
-            case BITMAP_IMPACT:
-            {
-                o->LifeTime = 80;
-                o->Scale = 0.f;
-                o->BlendMesh = -2;
-            }
-            break;
             case BITMAP_MAGIC:
                 o->LifeTime = 20;
                 o->Scale = 0.5f;
@@ -1333,9 +1301,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 o->LifeTime = 100;
                 break;
 
-            case BITMAP_LIGHT_MARKS:
-                o->LifeTime = 65;
-                break;
             case BITMAP_GATHERING:
                 o->LifeTime = 10;
 
@@ -1547,12 +1512,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 Vector(0.f, -15.f / o->Scale, -30.f / o->Scale, o->Direction);
                 o->SubType = 1;
                 break;
-            case MODEL_PROTECT:
-                o->LifeTime = 10000;
-                o->Velocity = 0.3f;
-                o->BlendMesh = 0;
-                break;
-
             case MODEL_PIERCING:
                 o->LifeTime = 100;
                 o->BlendMesh = 0;
@@ -1850,21 +1809,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 }
                 o->Weapon = CharacterMachine->PacketSerial;
                 break;
-            case MODEL_CURSEDTEMPLE_HOLYITEM:
-            {
-                o->LifeTime = 9999999;
-            }
-            break;
-            case MODEL_CURSEDTEMPLE_PRODECTION_SKILL:
-            {
-                o->LifeTime = 9999999;
-            }
-            break;
-            case MODEL_CURSEDTEMPLE_RESTRAINT_SKILL:
-            {
-                o->LifeTime = 9999999;
-            }
-            break;
             case MODEL_ARROW_BOMB:
                 o->Velocity = 1.f;
                 o->LifeTime = 30;
@@ -1919,10 +1863,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
 
                     CreateJoint(BITMAP_JOINT_FORCE, o->Position, o->Position, o->Angle, 1, o, 180.f);
                 }
-                break;
-            case MODEL_MAGIC1:
-                o->LifeTime = 20;
-                o->BlendMesh = 0;
                 break;
             case MODEL_SKILL_WHEEL1:
                 o->LifeTime = 5;
@@ -2008,19 +1948,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 o->BlendMesh = 0;
                 if (SubType == 1)
                     o->RenderType = RENDER_DARK;
-                break;
-            case MODEL_SKILL_FISSURE:
-                o->LifeTime = 20;
-                break;
-            case MODEL_FISSURE:
-            case MODEL_FISSURE_LIGHT:
-                o->LifeTime = 120;
-                o->Scale = 0.8f;
-                break;
-            case MODEL_BALGAS_SKILL:
-                o->BlendMesh = 0;
-                o->LifeTime = 20;
-                o->Scale = 1.0f;
                 break;
             case MODEL_CHANGE_UP_EFF:
                 o->BlendMesh = -2;
@@ -2177,12 +2104,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 VectorCopy(Hero->Object.Position, o->StartPosition);
             }
             break;
-            case MODEL_MAYASTAR:
-            {
-                o->LifeTime = 50;
-                o->Scale = 50.0f;
-            }
-            break;
             case MODEL_MAYASTONE1:
             case MODEL_MAYASTONE2:
             case MODEL_MAYASTONE3:
@@ -2281,10 +2202,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     o->LifeTime = 20;
                     o->Scale = 1.f;
                 }
-                break;
-            case MODEL_BLOOD:
-                o->LifeTime = 10;
-                o->BlendMesh = 0;
                 break;
             case MODEL_ICE:
                 switch (o->SubType)
@@ -2991,11 +2908,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 else
                     o->BlendMesh = -4;
                 Vector(0.f, 0.f, 45.f, o->Angle);
-                break;
-            case MODEL_POISON:
-                o->BlendMesh = 1;
-                o->LifeTime = 40;
-                o->Scale = 1.f;
                 break;
             case BITMAP_FIRECRACKERRISE:
                 ZeroMemory(o->Angle, sizeof(o->Angle));
@@ -5990,11 +5902,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 o->LifeTime = 100;
                 Models[MODEL_DOWN_ATTACK_DUMMY_L].Actions[0].PlaySpeed = Models[o->Owner->Type].Actions[PLAYER_SKILL_STAMP].PlaySpeed;
                 Models[MODEL_DOWN_ATTACK_DUMMY_R].Actions[0].PlaySpeed = Models[o->Owner->Type].Actions[PLAYER_SKILL_STAMP].PlaySpeed;
-            }
-            break;
-            case BITMAP_SWORDEFF:
-            {
-                o->LifeTime = 200;
             }
             break;
             case MODEL_SHOCKWAVE01:
