@@ -38,6 +38,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_MOONHARVEST_MOON(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_MOONHARVEST_GAM(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SPEARSKILL(OBJECT* o, int index, float Luminosity);
+    bool Move_BITMAP_FIRE_CURSEDLICH(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMONER_WRISTRING_EFFECT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMONER_EQUIP_HEAD_NEIL(OBJECT* o, int index, float Luminosity);
@@ -50,6 +51,7 @@ namespace Render::Effects::Behaviors
     bool Move_BITMAP_MAGIC_ZIN(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_PIN_LIGHT(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_ORORA(OBJECT* o, int index, float Luminosity);
+    bool Move_BITMAP_GATHERING(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_JOINT_THUNDER(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_IMPACT(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_FLAME(OBJECT* o, int index, float Luminosity);
@@ -58,6 +60,7 @@ namespace Render::Effects::Behaviors
     bool Move_BITMAP_FIRE_HIK2_MONO(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_CLOUD(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_CHAIN_LIGHTNING(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_ALICE_DRAIN_LIFE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_ALICE_BUFFSKILL_EFFECT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_LIGHTNING_SHOCK(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SKILL_BLAST(OBJECT* o, int index, float Luminosity);
@@ -166,6 +169,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_SKILL_JAVELIN(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_ARROW_IMPACT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SWORD_FORCE(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_PROTECTGUILD(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_MOVE_TARGETPOSITION_EFFECT(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_TARGET_POSITION_EFFECT1(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_TARGET_POSITION_EFFECT2(OBJECT* o, int index, float Luminosity);
@@ -176,6 +180,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_NIGHTWATER_01(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_KNIGHT_PLANCRACK_A(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_KNIGHT_PLANCRACK_B(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_EFFECT_FLAME_STRIKE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_1_STREAMBREATHFIRE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY(OBJECT* o, int index, float Luminosity);
@@ -203,7 +208,11 @@ namespace Render::Effects::Behaviors
     bool Move_BITMAP_SWORD_EFFECT_MONO(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_WOLF_HEAD_EFFECT2(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SHOCKWAVE_GROUND01(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_DRAGON_KICK_DUMMY(OBJECT* o, int index, float Luminosity);
+    bool Move_BITMAP_LAVA(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_DRAGON_LOWER_DUMMY(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_TARGETMON_EFFECT(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_VOLCANO_OF_MONK(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_VOLCANO_STONE(OBJECT* o, int index, float Luminosity);
 
     const std::vector<std::pair<int, MoveHandler>>& ExtractedMoveHandlers();

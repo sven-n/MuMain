@@ -843,6 +843,151 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // BITMAP_FIRE_CURSEDLICH
+    bool Move_BITMAP_FIRE_CURSEDLICH(OBJECT* o, int index, float Luminosity)
+    {
+        if (o->SubType == 0)
+        {
+            OBJECT* pObject = o->Owner;
+            if (pObject->Live == false)
+            {
+                o->Live = false;
+                return true;
+            }
+            BMD* pModel = &Models[pObject->Type];
+            vec3_t vPos, vRelative;
+            Vector(0.0f, 0.0f, 0.0f, vRelative);
+            pModel->TransformPosition(pObject->BoneTransform[o->Skill], vRelative, vPos, false);
+            VectorScale(vPos, pModel->BodyScale, vPos);
+            VectorAdd(vPos, pObject->Position, o->Position);
+
+            vec3_t vLight;
+            Vector(o->Alpha * 0.3f, o->Alpha * 0.3f, o->Alpha * 0.3f, vLight);
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 3, 1, pObject);
+        }
+        else if (o->SubType == 1)
+        {
+            vec3_t vFirePosition;
+            for (int i = 0; i < 1; ++i)
+            {
+                Vector(o->Position[0] + (rand() % 100 - 50) * 1.0f,
+                    o->Position[1] + (rand() % 100 - 50) * 1.0f, o->Position[2] + (rand() % 10 + 5) * 1.0f, vFirePosition);
+                float fScale = (rand() % 5 + 13) * 0.1f;
+                switch (rand() % 3)
+                {
+                case 0:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, o->Light, 1, fScale);
+                    break;
+                case 1:
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, o->Light, 5, fScale);
+                    break;
+                case 2:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, o->Light, 1, fScale);
+                    break;
+                }
+            }
+        }
+        else if (o->SubType == 12)
+        {
+            vec3_t vFirePosition;
+            for (int i = 0; i < 1; ++i)
+            {
+                Vector(o->Position[0] + (rand() % 50 - 25) * 1.0f,
+                    o->Position[1] + (rand() % 50 - 25) * 1.0f, o->Position[2] + (rand() % 10 + 5) * 1.0f, vFirePosition);
+                float fScale = ((rand() % 5 + 13) * 0.05f) * o->Scale;
+
+                switch (rand() % 3)
+                {
+                case 0:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, o->Light, 1, fScale);
+                    break;
+                case 1:
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, o->Light, 5, fScale);
+                    break;
+                case 2:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, o->Light, 1, fScale);
+                    break;
+                }
+            }
+        }
+        else if (o->SubType == 2)
+        {
+            if (o->Owner == NULL)
+            {
+                o->Live = false;
+                return true;
+            }
+
+            vec3_t vFirePosition;
+            for (int i = 0; i < 8; ++i)
+            {
+                int iNumBones = Models[o->Owner->Type].NumBones;
+                Models[o->Owner->Type].TransformByObjectBone(vFirePosition, o->Owner, rand() % iNumBones);
+
+                vec3_t vLightFire;
+                Vector(1.0f, 0.2f, 0.0f, vLightFire);
+                CreateSprite(BITMAP_LIGHT, vFirePosition, 4.0f, vLightFire, o->Owner);
+
+                vec3_t vLight;
+                Vector(1.0f, 1.0f, 1.0f, vLight);
+                float fScale = (rand() % 5 + 13) * 0.1f;
+                switch (rand() % 3)
+                {
+                case 0:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vFirePosition, o->Angle, vLight, 0, fScale);
+                    break;
+                case 1:
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vFirePosition, o->Angle, vLight, 4, fScale);
+                    break;
+                case 2:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vFirePosition, o->Angle, vLight, 0, fScale);
+                    break;
+                }
+            }
+        }
+        else if (o->SubType == 3)
+        {
+            for (int i = 0; i < 2; ++i)
+            {
+                float fScale = (rand() % 5 + 18) * 0.03f;
+
+                switch (rand() % 3)
+                {
+                case 0:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, o->Light, 0, fScale);
+                    break;
+                case 1:
+                    CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, o->Light, 4, fScale);
+                    break;
+                case 2:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, o->Light, 0, fScale);
+                    break;
+                }
+            }
+        }
+        else if (o->SubType == 4)
+        {
+            for (int i = 0; i < 2; ++i)
+            {
+                float fScale = (rand() % 5 + 18) * 0.03f;
+                Vector(0.6f, 0.9f, 0.1f, o->Light);
+                switch (rand() % 3)
+                {
+                case 0:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, o->Light, 0, fScale);
+                    break;
+                case 1:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK2_MONO, o->Position, o->Angle, o->Light, 4, fScale);
+                    break;
+                case 2:
+                    CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, o->Position, o->Angle, o->Light, 0, fScale);
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+
     // MODEL_SUMMONER_WRISTRING_EFFECT
     bool Move_MODEL_SUMMONER_WRISTRING_EFFECT(OBJECT* o, int index, float Luminosity)
     {
@@ -1450,6 +1595,75 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // BITMAP_GATHERING
+    bool Move_BITMAP_GATHERING(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Light;
+        Vector(1.f, 1.f, 1.f, Light);
+        vec3_t Angle;
+        vec3_t Position;
+        float Matrix[3][4];
+        vec3_t p;
+        if (o->SubType == 1 || o->SubType == 2)
+        {
+            BMD* b = &Models[o->Owner->Type];
+            Vector(0.f, 0.f, 10.f * FPS_ANIMATION_FACTOR, p);
+            VectorCopy(o->StartPosition, b->BodyOrigin);
+            b->TransformPosition(o->Owner->BoneTransform[33], p, o->Position, true);
+        }
+
+        for (int j = 0; j < 3; ++j)
+        {
+            Vector(0.f, 120.f, 0.f, p);
+
+            if (o->SubType == 3)
+            {
+                Vector(0.f, 25.f, 0.f, p);
+            }
+
+            Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), Angle);
+            AngleMatrix(Angle, Matrix);
+            VectorRotate(p, Matrix, Position);
+            VectorAdd(o->Position, Position, Position);
+
+            if (!rand_fps_check(1))
+            {
+                break;
+            }
+
+            if (o->SubType == 1)
+            {
+                if (((int)o->LifeTime % 2) == 0)
+                {
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
+                }
+                else
+                {
+                    CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
+                }
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, o, (float)(rand() % 360));
+            }
+            else if (o->SubType == 2)
+            {
+                if (((int)o->LifeTime % 2) == 0)
+                {
+                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 3, NULL, 10.f, 10, 10);
+                }
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.2f, o->Light, o, (float)(rand() % 360));
+            }
+            else if (o->SubType == 3)
+            {
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, o->Light, 26, (rand() % 10 + 5) / 25.f, o);
+            }
+            else
+            {
+                CreateSprite(BITMAP_SHINY + 1, o->Position, (float)(rand() % 8 + 8) * 0.3f, o->Light, o, (float)(rand() % 360));
+                CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 2, (rand() % 50 + 10) / 100.f, o);
+            }
+        }
+        return true;
+    }
+
     // BITMAP_JOINT_THUNDER
     bool Move_BITMAP_JOINT_THUNDER(OBJECT* o, int index, float Luminosity)
     {
@@ -1839,6 +2053,152 @@ namespace Render::Effects::Behaviors
             }
         }
         break;
+        }
+    }
+        return true;
+    }
+
+    // MODEL_ALICE_DRAIN_LIFE
+    bool Move_MODEL_ALICE_DRAIN_LIFE(OBJECT* o, int index, float Luminosity)
+    {
+    {
+        int iNumBones = 0;
+
+        vec3_t vSourcePos, vTargetPos, vLight, vRelativePos;
+        Vector(0.0f, 0.0f, 0.0f, vRelativePos);
+
+        OBJECT* pSourceObj = o->Owner;
+        OBJECT* pTargetObj = pSourceObj->Owner;
+        BMD* pSourceModel = &Models[pSourceObj->Type];
+        BMD* pTargetModel = &Models[pTargetObj->Type];
+
+        if (pSourceObj == NULL || pTargetObj == NULL ||
+            pSourceObj->Live == false || pTargetObj->Live == false)
+        {
+            return true;
+        }
+
+        int iRandom = rand() % 10;
+        int iCnt = 0;
+        switch (iRandom)
+        {
+        case 0:
+            iCnt = 0;
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            iCnt = 1;
+            break;
+        case 8:
+        case 9:
+            iCnt = 2;
+            break;
+        }
+
+        for (int i = 0; i < iCnt; i++)
+        {
+            VectorCopy(pSourceObj->Position, vSourcePos);
+            vSourcePos[0] += ((float)((rand() % 80 - 40)));
+            vSourcePos[1] += ((float)((rand() % 60 - 30)));
+            vSourcePos[2] += (80.0f + ((float)((rand() % 180 - 100))));
+            Vector(1.0f, 0.2f, 0.2f, vLight);
+            CreateParticleFpsChecked(BITMAP_LIGHT + 2, vSourcePos, pSourceObj->Angle, vLight, 7, 1.8f);
+        }
+
+        if (o->LifeTime <= 60)
+        {
+            for (int i = 0; i < iCnt; i++)
+            {
+                VectorCopy(pTargetObj->Position, vTargetPos);
+                vTargetPos[0] += ((float)((rand() % 80 - 40)));
+                vTargetPos[1] += ((float)((rand() % 60 - 30)));
+                vTargetPos[2] += (80.0f + ((float)((rand() % 180 - 100))));
+                Vector(1.0f, 0.2f, 0.2f, vLight);
+                CreateParticleFpsChecked(BITMAP_LIGHT + 2, vTargetPos, pTargetObj->Angle, vLight, 7, 1.8f);
+            }
+        }
+
+        if (o->LifeTime <= 70 && o->LifeTime >= 66)
+        {
+            int iRandom = rand() % 10;
+            int iCnt2 = 0;
+            switch (iRandom)
+            {
+            case 0:
+                iCnt2 = 0;
+                break;
+            case 1:
+            case 2:
+            case 3:
+                iCnt2 = 1;
+                break;
+            case 4:
+            case 5:
+                iCnt2 = 2;
+            case 6:
+            case 7:
+            case 8:
+                iCnt2 = 3;
+                break;
+            case 9:
+                iCnt2 = 4;
+                break;
+            }
+
+            float fMatrix[3][4];
+            vec3_t vDir;
+            for (int i = 0; i < iCnt2; i++)
+            {
+                VectorCopy(pSourceObj->Position, pSourceModel->BodyOrigin);
+                pSourceModel->TransformPosition(pSourceObj->BoneTransform[18], vRelativePos, vSourcePos, true);
+
+                AngleMatrix(pSourceObj->Angle, fMatrix);
+                vDir[0] = fMatrix[0][1];
+                vDir[1] = fMatrix[1][1];
+                vDir[2] = fMatrix[2][1];
+
+                VectorNormalize(vDir);
+
+                vSourcePos[0] = vSourcePos[0] + ((vDir[0]) * 100.0f) + (float)((rand() % 10) * 5);
+                vSourcePos[1] = vSourcePos[1] + ((vDir[1]) * 100.0f) + (float)((rand() % 10) * 5);
+                vSourcePos[2] += (float)((rand() % 10) * 5);
+
+                VectorCopy(pTargetObj->Position, vTargetPos);
+                vTargetPos[2] += 100.f + (float)(((rand() % 10 - 5)) * 4);		// 80~120
+
+                Vector(0.8f, 0.1f, 0.2f, vLight);
+                CreateJointFpsChecked(BITMAP_DRAIN_LIFE_GHOST, vSourcePos, vTargetPos, o->Angle, 0, pSourceObj, 40.f, 0, 0, 0, -1, vLight);
+            }
+        }
+
+        if ((int)o->LifeTime == 64)
+        {
+            VectorCopy(pSourceObj->Position, pSourceModel->BodyOrigin);
+            pSourceModel->TransformPosition(pSourceObj->BoneTransform[18], vRelativePos, vSourcePos, true);
+
+            iNumBones = pTargetModel->NumBones;
+
+            for (int i = 0; i < iNumBones; i++)
+            {
+                VectorCopy(pTargetObj->Position, pTargetModel->BodyOrigin);
+                pTargetModel->TransformPosition(pTargetObj->BoneTransform[i], vRelativePos, vTargetPos, true);
+
+                Vector(0.4f, 0.4f, 0.8f, vLight);
+                //CreateParticle( BITMAP_LIGHT, vTargetPos, pTargetObj->Angle, vLight, 14, 3.5f);
+
+                if (rand_fps_check(2))
+                {
+                    VectorCopy(pSourceObj->Position, vSourcePos);
+                    vSourcePos[2] += 80.0f;
+                    Vector(1.0f, 0.0f, 0.1f, vLight);
+                    CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vTargetPos, vSourcePos, pTargetObj->Angle, 45, pSourceObj, 10.0f, -1, 0, 0, -1, vLight);
+                }
+            }
         }
     }
         return true;
@@ -6847,6 +7207,67 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // MODEL_PROTECTGUILD
+    bool Move_MODEL_PROTECTGUILD(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t p;
+    {
+        if (o->Owner == NULL/* || o->Owner->Alpha < 1.0f*/)
+        {
+            o->LifeTime = 0;
+            return true;
+        }
+        if (o->Alpha >= 1.0f) o->Angle[2] += 5.0f;
+        //				o->Alpha = sin((o->LifeTime/130.0f)*3.14f) - 0.1f;
+        if (o->LifeTime > 120)
+        {
+            if (o->LifeTime < 125 && o->LifeTime > 120)
+            {
+                for (int i = 0; i < 5; ++i)
+                    CreateParticleFpsChecked(BITMAP_SPARK, o->Position, o->Angle, o->Light, 6, 1.5f, o);
+            }
+        }
+        else if (o->LifeTime > 95)
+        {
+            if (o->Alpha > 1.0f) o->Alpha = 1.0f;
+            else o->Alpha += 0.4f;
+        }
+        else if (o->LifeTime < 50)
+        {
+            if (o->Alpha < 0) o->Alpha = 0;
+            else o->Alpha -= 0.1f;
+        }
+
+        BMD* b = &Models[o->Owner->Type];
+        vec3_t tempPosition;
+        Vector(0.f, 0.f, 0.f, p);
+        b->TransformPosition(o->Owner->BoneTransform[20], p, tempPosition, true);
+        o->Position[0] = tempPosition[0] + (o->Owner->Position[0] - Hero->Object.Position[0]);
+        o->Position[1] = tempPosition[1] + (o->Owner->Position[1] - Hero->Object.Position[1]);
+
+        float fHeight = o->Owner->Position[2] + tempPosition[2] - o->Owner->Position[2] + 60;
+        if (fHeight < o->Position[2])
+            o->Position[2] += ((fHeight - o->Position[2]) * 0.1f) * FPS_ANIMATION_FACTOR;
+        else
+            o->Position[2] += ((fHeight - o->Position[2]) * 0.5f) * FPS_ANIMATION_FACTOR;
+
+        if (o->LifeTime < 60 && o->LifeTime > 39)
+        {
+            vec3_t p;
+            for (int i = 0; i < 1; ++i)
+            {
+                float fAngle = rand() % 360;
+                Vector(o->Position[0] + (rand() % 26 - 13) * sinf(fAngle),
+                    o->Position[1] + (rand() % 26 - 13) * cosf(fAngle),
+                    //o->Position[2] + 45+(10-o->LifeTime)*1.5f+rand()%5, p);
+                    o->Position[2] + 48 - o->LifeTime + (rand() % 5), p);
+                CreateParticleFpsChecked(BITMAP_SPARK, p, o->Angle, o->Light, 5, 2.0f, o);
+            }
+        }
+    }
+        return true;
+    }
+
     // MODEL_MOVE_TARGETPOSITION_EFFECT
     bool Move_MODEL_MOVE_TARGETPOSITION_EFFECT(OBJECT* o, int index, float Luminosity)
     {
@@ -7273,6 +7694,98 @@ namespace Render::Effects::Behaviors
     {
     {
         o->Alpha -= (0.04f) * FPS_ANIMATION_FACTOR;
+    }
+        return true;
+    }
+
+    // MODEL_EFFECT_FLAME_STRIKE
+    bool Move_MODEL_EFFECT_FLAME_STRIKE(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t p;
+    {
+        if (o->SubType == 0)
+        {
+            if ((o->LifeTime < 20 && o->Alpha < 0.1f) || o->Owner == NULL)
+            {
+                EffectDestructor(o);
+                return true;
+            }
+            if (o->LifeTime < 20) o->Alpha -= 0.1f;
+            else if (o->Alpha < 1.0f) o->Alpha += 0.1f;
+
+            OBJECT* pObject = o;
+            BMD* pModel = &Models[pObject->Type];
+            OBJECT* pOwner = pObject->Owner;
+            BMD* pOwnerModel = &Models[pOwner->Type];
+
+            // blur
+            float Start_Frame = 5.0f;
+            float End_Frame = 13.0f;
+
+            if (pOwner->AnimationFrame > End_Frame || pObject->AI == 1)
+            {
+                pObject->AI = 1;
+            }
+            else if (pOwner->CurrentAction == PLAYER_SKILL_FLAMESTRIKE)
+            {
+                pObject->AnimationFrame = pOwner->AnimationFrame;
+
+                pOwnerModel->BodyScale = pOwner->Scale;
+                pOwnerModel->CurrentAction = pOwner->CurrentAction;
+                VectorCopy(pOwner->Angle, pOwnerModel->BodyAngle);
+                VectorCopy(pOwner->Position, pOwnerModel->BodyOrigin);
+
+                pModel->BodyScale = pObject->Scale;
+                pModel->CurrentAction = pObject->CurrentAction;
+                VectorCopy(pObject->Angle, pModel->BodyAngle);
+                VectorCopy(pObject->Position, pModel->BodyOrigin);
+                pModel->CurrentAnimation = pObject->AnimationFrame;
+                pModel->CurrentAnimationFrame = (int)pObject->AnimationFrame;
+
+                vec3_t  vLight;
+                Vector(1.0f, 1.0f, 1.0f, vLight);
+
+                vec3_t StartPos, StartRelative;
+                vec3_t EndPos, EndRelative;
+
+                float fOwnerActionSpeed = pOwnerModel->Actions[pOwnerModel->CurrentAction].PlaySpeed * FPS_ANIMATION_FACTOR;
+                float fOwnerSpeedPerFrame = fOwnerActionSpeed / 10.f;
+                float fOwnerAnimationFrame = pOwner->AnimationFrame - fOwnerActionSpeed;
+
+                float fActionSpeed = pObject->Velocity * FPS_ANIMATION_FACTOR;
+                float fSpeedPerFrame = fActionSpeed / 10.f;
+                float fAnimationFrame = pObject->AnimationFrame - fActionSpeed;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    pOwnerModel->Animation(BoneTransform,
+                        fOwnerAnimationFrame, (int)fOwnerAnimationFrame - 1,
+                        pOwner->PriorAction, pOwner->Angle, pOwner->HeadAngle, false, false);
+                    pOwnerModel->RotationPosition(BoneTransform[33], p, p);	// ParentMatrix
+
+                    pModel->Animation(BoneTransform, fAnimationFrame,
+                        (int)fAnimationFrame - 1, pObject->PriorAction,
+                        pObject->Angle, pObject->HeadAngle, true, true);	// BoneTransform
+
+                    if (fOwnerAnimationFrame >= Start_Frame && fOwnerAnimationFrame <= End_Frame)
+                    {
+                        Vector(0.f, 0.f, 0.f, StartRelative);
+                        Vector(0.f, 0.f, 0.f, EndRelative);
+                        pModel->TransformPosition(BoneTransform[9], StartRelative, StartPos, true);
+                        pModel->TransformPosition(BoneTransform[6], EndRelative, EndPos, true);
+                        CreateObjectBlur(pObject, StartPos, EndPos, vLight, 2, false, o->m_iAnimation + 1);
+                        CreateObjectBlur(pObject, StartPos, EndPos, vLight, 2, false, o->m_iAnimation + 2);
+
+                        pModel->TransformPosition(BoneTransform[8], StartRelative, StartPos, true);
+                        pModel->TransformPosition(BoneTransform[5], EndRelative, EndPos, true);
+                        CreateObjectBlur(pObject, StartPos, EndPos, vLight, 5, false, o->m_iAnimation + 3);
+                    }
+
+                    fOwnerAnimationFrame += fOwnerSpeedPerFrame;
+                    fAnimationFrame += fSpeedPerFrame;
+                }
+            }
+        }
     }
         return true;
     }
@@ -9304,6 +9817,202 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // MODEL_DRAGON_KICK_DUMMY
+    bool Move_MODEL_DRAGON_KICK_DUMMY(OBJECT* o, int index, float Luminosity)
+    {
+    {
+        if (o->Owner->AnimationFrame > Models[o->Owner->Type].Actions[PLAYER_SKILL_DRAGONKICK].NumAnimationKeys
+            || o->Owner->CurrentAction != PLAYER_SKILL_DRAGONKICK)
+        {
+            o->LifeTime = 0;
+            o->Live = false;
+            return true;
+        }
+
+        if (o->Owner->Live)
+        {
+            vec3_t _StartPos, _EndPos;
+            BMD* pModel = &Models[o->Type];
+
+            if (o->Owner->AnimationFrame > 4 && o->Owner->AnimationFrame < 5)
+            {
+                float fDelay = o->Velocity * 10.0f;
+                float fActionSpeed = pModel->Actions[o->CurrentAction].PlaySpeed * static_cast<float>(FPS_ANIMATION_FACTOR);
+                float fSpeedPerFrame = fActionSpeed / fDelay;
+                float fAnimationFrame = o->Owner->AnimationFrame - fActionSpeed;
+                o->AlphaTarget = fSpeedPerFrame * (o->Velocity / pModel->Actions[o->CurrentAction].PlaySpeed);
+
+                pModel = &Models[o->Owner->Type];
+                for (int i = 0; i < fDelay; i++)
+                {
+                    pModel->Animation(BoneTransform, fAnimationFrame, o->Owner->PriorAnimationFrame, o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle, false, false);
+
+                    pModel->TransformByObjectBone(_StartPos, o, 1);
+                    pModel->TransformByObjectBone(_EndPos, o, 2);
+
+                    CreateJointFpsChecked(BITMAP_GROUND_WIND, _StartPos, _EndPos, o->Angle, i, o, 150.0f);
+                    fAnimationFrame += fSpeedPerFrame;
+                }
+            }
+
+            vec3_t vPosition;
+            if (o->Owner->m_sTargetIndex < 0)
+                return true;
+            VectorCopy(CharactersClient[o->Owner->m_sTargetIndex].Object.Position, vPosition);
+            if (o->Owner->AnimationFrame > 5)
+            {
+                for (int j = 0; j < 2; ++j)
+                {
+                    vec3_t vPos;
+                    float fLuminosity = (float)sinf((WorldTime) * 0.002f) * 0.2f;
+                    VectorCopy(vPosition, vPos);
+                    vPos[2] += 30.0f;
+                    float fScale = ((float)(rand() % 40 + 50) * 0.01f * 1.5f) * o->Scale * 1.8f;
+                    for (int i = 0; i < 4; ++i)
+                    {
+                        CreateParticleFpsChecked(BITMAP_ENERGY, vPos, o->Angle, o->Light, 7, fScale);
+                        CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1, vPos, o->Angle, o->Light, 0, fScale * 0.9f);
+
+                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, o->Light, 3, 1.0f + (fLuminosity * 0.05f));
+                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, o->Light, 8, 1.0f + (fLuminosity * 0.05f));
+
+                        if (i % 2)
+                        {
+                            CreateParticleFpsChecked(BITMAP_SPARK, vPos, o->Angle, o->Light, 13);
+                        }
+
+                        if (i % 2)
+                        {
+                            Vector(vPos[0] + rand() % 40 + 20.0f, vPos[1] + rand() % 30 + 10.0f, vPos[2] + rand() % 30 + 25.0f, vPos);
+                        }
+                        else
+                        {
+                            Vector(vPos[0] - rand() % 20 - 10.0f, vPos[1] + rand() % 30 - 10.0f, vPos[2] + rand() % 30 + 30.0f, vPos);
+                        }
+                    }
+                }
+            }
+            VectorCopy(o->Owner->Angle, o->Angle);
+            VectorCopy(o->Owner->Position, o->Position);
+
+            if (o->Owner->AnimationFrame > 8)
+            {
+                o->LifeTime = 150;
+            }
+            if ((int)o->LifeTime == 150)
+            {
+                PlayBuffer(SOUND_RAGESKILL_DRAGONKICK_ATTACK);
+            }
+        }
+        else
+        {
+            o->LifeTime = 0;
+            o->Live = false;
+        }
+    }
+        return true;
+    }
+
+    // BITMAP_LAVA
+    bool Move_BITMAP_LAVA(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Angle;
+        float Matrix[3][4];
+    {
+        if (o->Owner->AnimationFrame > Models[o->Owner->Type].Actions[PLAYER_SKILL_DRAGONLORE].NumAnimationKeys
+            || o->Owner->CurrentAction != PLAYER_SKILL_DRAGONLORE)
+        {
+            o->Live = false;
+            o->LifeTime = 0;
+            return true;
+        }
+        if (o->Owner->AnimationFrame > 2 && o->Owner->AnimationFrame < 8 & rand_fps_check(1))
+        {
+            BMD* pModel = &Models[o->Owner->Type];
+            vec3_t _StartPos, _EndPos;
+
+            float fDelay = o->Velocity * 10.0f * FPS_ANIMATION_FACTOR;
+            float fActionSpeed = pModel->Actions[o->Owner->CurrentAction].PlaySpeed;
+            float fSpeedPerFrame = fActionSpeed / fDelay;
+            float fAnimationFrame = o->Owner->AnimationFrame - fActionSpeed;
+
+            for (int i = 0; i < fDelay; i++)
+            {
+                pModel->Animation(BoneTransform, fAnimationFrame, o->Owner->PriorAnimationFrame, o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle, false, false);
+
+                pModel->TransformByObjectBone(_StartPos, o->Owner, 36);
+                pModel->TransformByObjectBone(_EndPos, o->Owner, 28);
+
+                CreateJointFpsChecked(BITMAP_LAVA, _StartPos, _StartPos, o->Owner->Angle, i, o->Owner, 20.0f);
+                CreateJointFpsChecked(BITMAP_LAVA, _EndPos, _EndPos, o->Owner->Angle, 7 + i, o->Owner, 20.0f);
+                fAnimationFrame += fSpeedPerFrame;
+            }
+        }
+        vec3_t vLight, vAngle, vPos;
+        Vector(1.0f, 1.0f, 1.0f, vLight);
+        VectorCopy(o->Owner->Angle, vAngle);
+
+        if (o->Owner->AnimationFrame > 5 && o->LifeTime > 100)
+        {
+            Vector(1.0f, 0.12f, 0.0f, vLight);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE01, o->Owner->Position, vAngle, vLight, 1, o->Owner, -1, 0, 0, 0, 1.0f);
+            o->LifeTime = 95;
+        }
+
+        if (o->Owner->AnimationFrame > 5 && o->LifeTime > 80)
+        {
+            Vector(1.0f, 0.1f, 0.0f, vLight);
+            CreateEffectFpsChecked(MODEL_SHOCKWAVE_GROUND01, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.0f);
+            o->LifeTime = 80;
+        }
+
+        if (o->Owner->AnimationFrame > 5)
+        {
+            Vector(1.0f, 1.0f, 1.0f, vLight);
+            float fScale = o->Scale * (rand() % 5 + 18) * 0.1f;
+            VectorCopy(o->Position, vPos);
+            vPos[2] += (80 - o->LifeTime) * 1.0f * 10.0f - (80 - o->LifeTime) * 3.0f;
+
+            switch (rand() % 3)
+            {
+            case 0:
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
+                break;
+            case 1:
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 4, fScale);
+                break;
+            case 2:
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 0, fScale);
+                break;
+            }
+
+            vec3_t PosL, Angle, outPos, tempPos;
+            VectorCopy(vPos, tempPos);
+            VectorScale(vLight, 0.5f, vLight);
+            for (int i = 0; i < 8; ++i)
+            {
+                if (i % 2 == 0)
+                    continue;
+
+                float Matrix[3][4];
+                Vector(rand() % 100 - 50, rand() % 100 - 50, 0.0f, PosL);
+                Vector((float)(rand() % 90), 0.0f, 45.0f * i, Angle);
+                AngleMatrix(Angle, Matrix);
+                VectorRotate(PosL, Matrix, outPos);
+                VectorAdd(vPos, outPos, vPos);
+                vPos[2] = tempPos[2];
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 5, fScale);
+
+                vec3_t TempPos;
+                VectorCopy(vPos, TempPos);
+                TempPos[2] = 250.0f;
+                CreateParticleFpsChecked(BITMAP_SPARK, TempPos, o->Angle, o->Light, 12, 1.5f);
+            }
+        }
+    }
+        return true;
+    }
+
     // MODEL_DRAGON_LOWER_DUMMY
     bool Move_MODEL_DRAGON_LOWER_DUMMY(OBJECT* o, int index, float Luminosity)
     {
@@ -9328,6 +10037,127 @@ namespace Render::Effects::Behaviors
             o->LifeTime = 80;
         }
         o->Alpha *= pow(0.96f, FPS_ANIMATION_FACTOR);
+    }
+        return true;
+    }
+
+    // MODEL_TARGETMON_EFFECT
+    bool Move_MODEL_TARGETMON_EFFECT(OBJECT* o, int index, float Luminosity)
+    {
+    {
+        if (o->Owner == NULL || o->Owner->Live == false)
+        {
+            o->Live = 0;
+            o->LifeTime = 0;
+            return true;
+        }
+
+        if (o->SubType == 1 && o->Owner->m_sTargetIndex < 0)
+            return true;
+
+        BMD* pModel = &Models[o->Owner->Type];
+        vec3_t MonRanPos;
+        VectorCopy(o->Owner->Position, MonRanPos);
+        int BoneIndex = rand() % (pModel->NumBones - 1);
+        pModel->TransformByObjectBone(MonRanPos, o->Owner, BoneIndex);
+
+        vec3_t vLight;
+        Vector(1.0f, 1.0f, 1.0f, vLight);
+        float fScale = o->Scale * (rand() % 5 + 5) * 0.1f;
+        VectorCopy(MonRanPos, o->Position);
+        for (int i = 0; i < 3; ++i)
+        {
+            switch (rand() % 3)
+            {
+            case 0:
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, fScale);
+                break;
+            case 1:
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, fScale);
+                break;
+            case 2:
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, fScale);
+                break;
+            }
+        }
+    }
+        return true;
+    }
+
+    // MODEL_VOLCANO_OF_MONK
+    bool Move_MODEL_VOLCANO_OF_MONK(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Light;
+        Vector(1.f, 1.f, 1.f, Light);
+    {
+        if (o->SubType == 1)
+        {
+            vec3_t vLight, vPos;
+            Vector(1.0f, 1.0f, 1.0f, vLight);
+            VectorCopy(o->Position, vPos);
+            vPos[2] += (80 - o->LifeTime) * (0.9f + rand() % 5 * 0.1f);
+            vPos[2] += o->SubType * 20.0f;
+            if (vPos[2] > 400.0f)
+            {
+                return true;
+            }
+            float fScale = o->Scale * (rand() % 5 + 8) * 0.19f;
+            switch (rand() % 3)
+            {
+            case 0:
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 6, fScale);
+                break;
+            case 1:
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 9, fScale);
+                break;
+            case 2:
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 6, fScale);
+                break;
+            }
+
+            if ((int)o->LifeTime == 10)
+            {
+                for (int i = 0; i < 4; ++i)
+                {
+                    CreateEffectFpsChecked(MODEL_VOLCANO_STONE, o->Position, o->Angle, vLight, 0, o, -1, 0, 0, 0, 1.0f);
+                }
+
+                VectorCopy(o->Position, vPos);
+                Vector(1.0f, 0.1f, 0.0f, vLight);
+                CreateEffectFpsChecked(MODEL_SHOCKWAVE_GROUND01, vPos, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.0f);
+                Vector(1.0f, 1.0f, 1.0f, vLight);
+            }
+            if (o->LifeTime < 20)
+            {
+                o->Alpha = o->LifeTime * 0.1f;
+            }
+            if (o->LifeTime < 30)
+            {
+                o->BlendMeshLight = o->LifeTime * 0.03f;
+            }
+
+            vec3_t Light;
+            float Luminosity = (float)(rand() % 5) * 0.01f;
+            Vector(Luminosity + 1.0f, Luminosity + 0.4f, Luminosity + 0.4f, Light);
+            AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
+        }
+        else if (o->SubType == 2 || o->SubType == 3)
+        {
+            if (o->Owner == NULL || o->Owner->Live == false)
+            {
+                o->Live = 0;
+                o->LifeTime = 0;
+                return true;
+            }
+
+            if ((int)o->LifeTime == 2)
+            {
+                CreateEffectFpsChecked(MODEL_VOLCANO_OF_MONK, o->Position, o->Angle, o->Light, 1, o, -1, 0, 0, 0, 1.0f);
+                o->LifeTime = 0;
+                o->Live = false;
+            }
+            o->Position[2] = -100.0f;
+        }
     }
         return true;
     }
@@ -9432,6 +10262,7 @@ namespace Render::Effects::Behaviors
             { MODEL_MOONHARVEST_SONGPUEN1, &Move_MODEL_MOONHARVEST_GAM },
             { MODEL_MOONHARVEST_SONGPUEN2, &Move_MODEL_MOONHARVEST_GAM },
             { MODEL_SPEARSKILL, &Move_MODEL_SPEARSKILL },
+            { BITMAP_FIRE_CURSEDLICH, &Move_BITMAP_FIRE_CURSEDLICH },
             { MODEL_SUMMONER_WRISTRING_EFFECT, &Move_MODEL_SUMMONER_WRISTRING_EFFECT },
             { MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, &Move_MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT },
             { MODEL_SUMMONER_EQUIP_HEAD_NEIL, &Move_MODEL_SUMMONER_EQUIP_HEAD_NEIL },
@@ -9451,6 +10282,7 @@ namespace Render::Effects::Behaviors
             { BITMAP_MAGIC_ZIN, &Move_BITMAP_MAGIC_ZIN },
             { BITMAP_PIN_LIGHT, &Move_BITMAP_PIN_LIGHT },
             { BITMAP_ORORA, &Move_BITMAP_ORORA },
+            { BITMAP_GATHERING, &Move_BITMAP_GATHERING },
             { BITMAP_JOINT_THUNDER, &Move_BITMAP_JOINT_THUNDER },
             { BITMAP_IMPACT, &Move_BITMAP_IMPACT },
             { BITMAP_FLAME, &Move_BITMAP_FLAME },
@@ -9459,6 +10291,7 @@ namespace Render::Effects::Behaviors
             { BITMAP_FIRE_HIK2_MONO, &Move_BITMAP_FIRE_HIK2_MONO },
             { BITMAP_CLOUD, &Move_BITMAP_CLOUD },
             { MODEL_CHAIN_LIGHTNING, &Move_MODEL_CHAIN_LIGHTNING },
+            { MODEL_ALICE_DRAIN_LIFE, &Move_MODEL_ALICE_DRAIN_LIFE },
             { MODEL_ALICE_BUFFSKILL_EFFECT, &Move_MODEL_ALICE_BUFFSKILL_EFFECT },
             { MODEL_ALICE_BUFFSKILL_EFFECT2, &Move_MODEL_ALICE_BUFFSKILL_EFFECT },
             { MODEL_LIGHTNING_SHOCK, &Move_MODEL_LIGHTNING_SHOCK },
@@ -9599,6 +10432,7 @@ namespace Render::Effects::Behaviors
             { MODEL_SKILL_JAVELIN, &Move_MODEL_SKILL_JAVELIN },
             { MODEL_ARROW_IMPACT, &Move_MODEL_ARROW_IMPACT },
             { MODEL_SWORD_FORCE, &Move_MODEL_SWORD_FORCE },
+            { MODEL_PROTECTGUILD, &Move_MODEL_PROTECTGUILD },
             { MODEL_MOVE_TARGETPOSITION_EFFECT, &Move_MODEL_MOVE_TARGETPOSITION_EFFECT },
             { BITMAP_TARGET_POSITION_EFFECT1, &Move_BITMAP_TARGET_POSITION_EFFECT1 },
             { BITMAP_TARGET_POSITION_EFFECT2, &Move_BITMAP_TARGET_POSITION_EFFECT2 },
@@ -9609,6 +10443,7 @@ namespace Render::Effects::Behaviors
             { MODEL_NIGHTWATER_01, &Move_MODEL_NIGHTWATER_01 },
             { MODEL_KNIGHT_PLANCRACK_A, &Move_MODEL_KNIGHT_PLANCRACK_A },
             { MODEL_KNIGHT_PLANCRACK_B, &Move_MODEL_KNIGHT_PLANCRACK_B },
+            { MODEL_EFFECT_FLAME_STRIKE, &Move_MODEL_EFFECT_FLAME_STRIKE },
             { MODEL_1_STREAMBREATHFIRE, &Move_MODEL_1_STREAMBREATHFIRE },
             { MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD, &Move_MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD },
             { MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD, &Move_MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD },
@@ -9659,7 +10494,11 @@ namespace Render::Effects::Behaviors
             { BITMAP_SWORD_EFFECT_MONO, &Move_BITMAP_SWORD_EFFECT_MONO },
             { MODEL_WOLF_HEAD_EFFECT2, &Move_MODEL_WOLF_HEAD_EFFECT2 },
             { MODEL_SHOCKWAVE_GROUND01, &Move_MODEL_SHOCKWAVE_GROUND01 },
+            { MODEL_DRAGON_KICK_DUMMY, &Move_MODEL_DRAGON_KICK_DUMMY },
+            { BITMAP_LAVA, &Move_BITMAP_LAVA },
             { MODEL_DRAGON_LOWER_DUMMY, &Move_MODEL_DRAGON_LOWER_DUMMY },
+            { MODEL_TARGETMON_EFFECT, &Move_MODEL_TARGETMON_EFFECT },
+            { MODEL_VOLCANO_OF_MONK, &Move_MODEL_VOLCANO_OF_MONK },
             { MODEL_VOLCANO_STONE, &Move_MODEL_VOLCANO_STONE },
         };
         return handlers;
