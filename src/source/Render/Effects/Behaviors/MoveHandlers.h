@@ -1,0 +1,158 @@
+#pragma once
+
+#include <utility>
+#include <vector>
+
+#include "Render/Effects/EffectDef.h"
+
+// Move handlers mechanically extracted from MoveEffect's switch in
+// ZzzEffect.cpp. Each preserves its original case body verbatim (with the
+// shared scratch locals it used re-declared, and early `return;` mapped to
+// `return false;` to skip the shared tail). See EffectRegistry.cpp for wiring.
+namespace Render::Effects::Behaviors
+{
+    bool Move_MODEL_ARROW_AUTOLOAD(OBJECT* o, int index);
+    bool Move_MODEL_INFINITY_ARROW(OBJECT* o, int index);
+    bool Move_MODEL_INFINITY_ARROW1(OBJECT* o, int index);
+    bool Move_MODEL_SHIELD_CRASH(OBJECT* o, int index);
+    bool Move_MODEL_SHIELD_CRASH2(OBJECT* o, int index);
+    bool Move_MODEL_IRON_RIDER_ARROW(OBJECT* o, int index);
+    bool Move_MODEL_MULTI_SHOT3(OBJECT* o, int index);
+    bool Move_MODEL_MULTI_SHOT1(OBJECT* o, int index);
+    bool Move_MODEL_MULTI_SHOT2(OBJECT* o, int index);
+    bool Move_MODEL_KENTAUROS_ARROW(OBJECT* o, int index);
+    bool Move_MODEL_WARP3(OBJECT* o, int index);
+    bool Move_MODEL_GHOST(OBJECT* o, int index);
+    bool Move_MODEL_TREE_ATTACK(OBJECT* o, int index);
+    bool Move_MODEL__SPEAR(OBJECT* o, int index);
+    bool Move_MODEL_HALLOWEEN_CANDY_BLUE(OBJECT* o, int index);
+    bool Move_MODEL_HALLOWEEN_EX(OBJECT* o, int index);
+    bool Move_MODEL_XMAS_EVENT_BOX(OBJECT* o, int index);
+    bool Move_MODEL_XMAS_EVENT_ICEHEART(OBJECT* o, int index);
+    bool Move_MODEL_NEWYEARSDAY_EVENT_BEKSULKI(OBJECT* o, int index);
+    bool Move_MODEL_MOONHARVEST_MOON(OBJECT* o, int index);
+    bool Move_MODEL_MOONHARVEST_GAM(OBJECT* o, int index);
+    bool Move_MODEL_SPEARSKILL(OBJECT* o, int index);
+    bool Move_MODEL_SUMMONER_WRISTRING_EFFECT(OBJECT* o, int index);
+    bool Move_MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT(OBJECT* o, int index);
+    bool Move_MODEL_SUMMONER_EQUIP_HEAD_NEIL(OBJECT* o, int index);
+    bool Move_MODEL_SUMMONER_SUMMON_SAHAMUTT(OBJECT* o, int index);
+    bool Move_MODEL_SUMMONER_SUMMON_NEIL(OBJECT* o, int index);
+    bool Move_MODEL_SUMMONER_SUMMON_LAGUL(OBJECT* o, int index);
+    bool Move_BITMAP_MAGIC(OBJECT* o, int index);
+    bool Move_BITMAP_OUR_INFLUENCE_GROUND(OBJECT* o, int index);
+    bool Move_BITMAP_ORORA(OBJECT* o, int index);
+    bool Move_BITMAP_JOINT_THUNDER(OBJECT* o, int index);
+    bool Move_MODEL_RAKLION_BOSS_CRACKEFFECT(OBJECT* o, int index);
+    bool Move_MODEL_RAKLION_BOSS_MAGIC(OBJECT* o, int index);
+    bool Move_BITMAP_FIRE_HIK2_MONO(OBJECT* o, int index);
+    bool Move_BITMAP_CLOUD(OBJECT* o, int index);
+    bool Move_MODEL_ALICE_BUFFSKILL_EFFECT(OBJECT* o, int index);
+    bool Move_MODEL_LIGHTNING_SHOCK(OBJECT* o, int index);
+    bool Move_MODEL_TAIL(OBJECT* o, int index);
+    bool Move_MODEL_SAW(OBJECT* o, int index);
+    bool Move_MODEL_LASER(OBJECT* o, int index);
+    bool Move_MODEL_SKILL_WHEEL1(OBJECT* o, int index);
+    bool Move_MODEL_SKILL_FURY_STRIKE(OBJECT* o, int index);
+    bool Move_MODEL_CHANGE_UP_EFF(OBJECT* o, int index);
+    bool Move_MODEL_CHANGE_UP_NASA(OBJECT* o, int index);
+    bool Move_MODEL_SUMMON(OBJECT* o, int index);
+    bool Move_MODEL_STORM2(OBJECT* o, int index);
+    bool Move_MODEL_STORM3(OBJECT* o, int index);
+    bool Move_MODEL_MAYASTONE1(OBJECT* o, int index);
+    bool Move_MODEL_MAYASTONEFIRE(OBJECT* o, int index);
+    bool Move_MODEL_MAYAHANDSKILL(OBJECT* o, int index);
+    bool Move_MODEL_CIRCLE(OBJECT* o, int index);
+    bool Move_MODEL_ICE_SMALL(OBJECT* o, int index);
+    bool Move_MODEL_CURSEDTEMPLE_STATUE_PART1(OBJECT* o, int index);
+    bool Move_MODEL_XMAS2008_SNOWMAN_HEAD(OBJECT* o, int index);
+    bool Move_MODEL_XMAS2008_SNOWMAN_BODY(OBJECT* o, int index);
+    bool Move_MODEL_DOPPELGANGER_SLIME_CHIP(OBJECT* o, int index);
+    bool Move_MODEL_DARK_SCREAM_FIRE(OBJECT* o, int index);
+    bool Move_MODEL_ARROW_SPARK(OBJECT* o, int index);
+    bool Move_MODEL_ARROW_TANKER(OBJECT* o, int index);
+    bool Move_MODEL_ARROW_DARKSTINGER(OBJECT* o, int index);
+    bool Move_MODEL_DUNGEON_STONE01(OBJECT* o, int index);
+    bool Move_MODEL_WARCRAFT(OBJECT* o, int index);
+    bool Move_BITMAP_FIRECRACKERRISE(OBJECT* o, int index);
+    bool Move_BITMAP_FIRECRACKER0001(OBJECT* o, int index);
+    bool Move_BITMAP_FIRECRACKER0002(OBJECT* o, int index);
+    bool Move_BITMAP_FIRECRACKER0003(OBJECT* o, int index);
+    bool Move_BITMAP_SWORD_FORCE(OBJECT* o, int index);
+    bool Move_BITMAP_BLIZZARD(OBJECT* o, int index);
+    bool Move_MODEL_SHINE(OBJECT* o, int index);
+    bool Move_MODEL_BLIZZARD(OBJECT* o, int index);
+    bool Move_MODEL_COMBO(OBJECT* o, int index);
+    bool Move_MODEL_WAVES(OBJECT* o, int index);
+    bool Move_MODEL_AIR_FORCE(OBJECT* o, int index);
+    bool Move_MODEL_PIERCING2(OBJECT* o, int index);
+    bool Move_MODEL_DEASULER(OBJECT* o, int index);
+    bool Move_MODEL_DEATH_SPI_SKILL(OBJECT* o, int index);
+    bool Move_MODEL_PIER_PART(OBJECT* o, int index);
+    bool Move_BITMAP_FLARE_FORCE(OBJECT* o, int index);
+    bool Move_MODEL_DARKLORD_SKILL(OBJECT* o, int index);
+    bool Move_MODEL_GROUND_STONE(OBJECT* o, int index);
+    bool Move_BITMAP_TWLIGHT(OBJECT* o, int index);
+    bool Move_BITMAP_DAMAGE_01_MONO(OBJECT* o, int index);
+    bool Move_BITMAP_FLARE(OBJECT* o, int index);
+    bool Move_MODEL_CUNDUN_DRAGON_HEAD(OBJECT* o, int index);
+    bool Move_MODEL_CUNDUN_PHOENIX(OBJECT* o, int index);
+    bool Move_MODEL_CUNDUN_SKILL(OBJECT* o, int index);
+    bool Move_MODEL_BATTLE_GUARD2(OBJECT* o, int index);
+    bool Move_MODEL_ARROW_TANKER_HIT(OBJECT* o, int index);
+    bool Move_MODEL_FLY_BIG_STONE2(OBJECT* o, int index);
+    bool Move_MODEL_BIG_STONE_PART1(OBJECT* o, int index);
+    bool Move_MODEL_GATE_PART1(OBJECT* o, int index);
+    bool Move_MODEL_AURORA(OBJECT* o, int index);
+    bool Move_MODEL_FENRIR_THUNDER(OBJECT* o, int index);
+    bool Move_MODEL_FALL_STONE_EFFECT(OBJECT* o, int index);
+    bool Move_MODEL_FENRIR_FOOT_THUNDER(OBJECT* o, int index);
+    bool Move_MODEL_TWINTAIL_EFFECT(OBJECT* o, int index);
+    bool Move_MODEL_TOWER_GATE_PLANE(OBJECT* o, int index);
+    bool Move_BITMAP_CRATER(OBJECT* o, int index);
+    bool Move_BITMAP_CHROME_ENERGY2(OBJECT* o, int index);
+    bool Move_MODEL_STUN_STONE(OBJECT* o, int index);
+    bool Move_MODEL_SKIN_SHELL(OBJECT* o, int index);
+    bool Move_MODEL_MANA_RUNE(OBJECT* o, int index);
+    bool Move_MODEL_SKILL_JAVELIN(OBJECT* o, int index);
+    bool Move_MODEL_ARROW_IMPACT(OBJECT* o, int index);
+    bool Move_MODEL_SWORD_FORCE(OBJECT* o, int index);
+    bool Move_MODEL_MOVE_TARGETPOSITION_EFFECT(OBJECT* o, int index);
+    bool Move_BITMAP_TARGET_POSITION_EFFECT1(OBJECT* o, int index);
+    bool Move_BITMAP_TARGET_POSITION_EFFECT2(OBJECT* o, int index);
+    bool Move_MODEL_EFFECT_SAPITRES_ATTACK(OBJECT* o, int index);
+    bool Move_MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1(OBJECT* o, int index);
+    bool Move_MODEL_EFFECT_SKURA_ITEM(OBJECT* o, int index);
+    bool Move_MODEL_BLOW_OF_DESTRUCTION(OBJECT* o, int index);
+    bool Move_MODEL_NIGHTWATER_01(OBJECT* o, int index);
+    bool Move_MODEL_KNIGHT_PLANCRACK_A(OBJECT* o, int index);
+    bool Move_MODEL_KNIGHT_PLANCRACK_B(OBJECT* o, int index);
+    bool Move_MODEL_1_STREAMBREATHFIRE(OBJECT* o, int index);
+    bool Move_MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD(OBJECT* o, int index);
+    bool Move_MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY(OBJECT* o, int index);
+    bool Move_MODEL_LAVAGIANT_FOOTPRINT_R(OBJECT* o, int index);
+    bool Move_MODEL_PROJECTILE(OBJECT* o, int index);
+    bool Move_MODEL_DOOR_CRUSH_EFFECT_PIECE01(OBJECT* o, int index);
+    bool Move_MODEL_STATUE_CRUSH_EFFECT_PIECE04(OBJECT* o, int index);
+    bool Move_MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION(OBJECT* o, int index);
+    bool Move_MODEL_EFFECT_SD_AURA(OBJECT* o, int index);
+    bool Move_MODEL_WOLF_HEAD_EFFECT(OBJECT* o, int index);
+    bool Move_BITMAP_SBUMB(OBJECT* o, int index);
+    bool Move_MODEL_DOWN_ATTACK_DUMMY_L(OBJECT* o, int index);
+    bool Move_MODEL_DOWN_ATTACK_DUMMY_R(OBJECT* o, int index);
+    bool Move_MODEL_SHOCKWAVE01(OBJECT* o, int index);
+    bool Move_MODEL_SHOCKWAVE02(OBJECT* o, int index);
+    bool Move_BITMAP_DAMAGE1(OBJECT* o, int index);
+    bool Move_MODEL_SHOCKWAVE_SPIN01(OBJECT* o, int index);
+    bool Move_BITMAP_EVENT_CLOUD(OBJECT* o, int index);
+    bool Move_MODEL_WINDFOCE(OBJECT* o, int index);
+    bool Move_MODEL_WINDFOCE_MIRROR(OBJECT* o, int index);
+    bool Move_BITMAP_SWORD_EFFECT_MONO(OBJECT* o, int index);
+    bool Move_MODEL_WOLF_HEAD_EFFECT2(OBJECT* o, int index);
+    bool Move_MODEL_SHOCKWAVE_GROUND01(OBJECT* o, int index);
+    bool Move_MODEL_DRAGON_LOWER_DUMMY(OBJECT* o, int index);
+
+    // (effect type, move handler) pairs for every extracted handler,
+    // consumed by EffectRegistry to build descriptors.
+    const std::vector<std::pair<int, MoveHandler>>& ExtractedMoveHandlers();
+}

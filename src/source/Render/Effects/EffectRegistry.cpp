@@ -2,6 +2,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "EffectRegistry.h"
 #include "Behaviors/EffectBehaviors.h"
+#include "Behaviors/MoveHandlers.h"
 
 #include <initializer_list>
 #include <vector>
@@ -90,6 +91,13 @@ namespace Render::Effects
 
                 // --- Randomised / directional creation via an onCreate hook ---
                 add({ MODEL_MAYASTONE4, MODEL_MAYASTONE5 }, { .onCreate = &Behaviors::CreateMayaStone45 });
+
+                // --- Move handlers mechanically extracted from MoveEffect -----
+                // (see Behaviors/MoveHandlers.cpp). These types have no other
+                // registry entry, so they carry only a move handler; their
+                // creation and rendering still run through the legacy switches.
+                for (const auto& [type, move] : Behaviors::ExtractedMoveHandlers())
+                    e.push_back({ type, EffectDescriptor{ .move = move } });
 
                 return e;
             }();
