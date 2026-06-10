@@ -6824,22 +6824,6 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
     }
     break;
-    case MODEL_INFINITY_ARROW4:
-    {
-        vec3_t tmp = { 0.f, 0.f, 0.f };
-        OBJECT* pOwner = o->Owner;
-        o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
-        o->Light[0] *= pow(0.9f, FPS_ANIMATION_FACTOR);
-        o->Light[1] *= pow(0.9f, FPS_ANIMATION_FACTOR);
-        o->Light[2] *= pow(0.9f, FPS_ANIMATION_FACTOR);
-
-        VectorTransform(tmp, pOwner->BoneTransform[29], o->Position);
-        VectorScale(o->Position, pOwner->Scale, o->Position);
-        VectorAddScaled(o->Position, pOwner->Position, o->Position, FPS_ANIMATION_FACTOR);
-        VectorCopy(pOwner->Angle, o->Angle);
-    }
-    break;
-
     case MODEL_SHIELD_CRASH:
     {
         float ftmp = 0.f;
@@ -7276,23 +7260,6 @@ void MoveEffect(OBJECT* o, int iIndex)
                 break;*/
                 }
             }
-        }
-        break;
-    case MODEL_MAGIC_CAPSULE2:
-        VectorCopy(o->Owner->Position, o->Position);
-        if (o->LifeTime < 10)
-        {
-            o->BlendMeshLight = (float)o->LifeTime * 0.1f;
-        }
-        break;
-    case MODEL_SPEAR:
-        if (1 == o->SubType)
-        {
-            CreateJointFpsChecked(BITMAP_FLARE, o->Position, o->Position, o->Angle, 12, o, 100.0f);
-        }
-        else if (0 == o->SubType)
-        {
-            CreateJointFpsChecked(BITMAP_FLARE, o->Position, o->Position, o->Angle, 4, o, 50.0f);
         }
         break;
     case MODEL__SPEAR:
@@ -7927,22 +7894,6 @@ void MoveEffect(OBJECT* o, int iIndex)
         // 				EarthQuake = (float)(-rand()%2-5)*0.1f;
     }
     break;
-    case MODEL_SUMMONER_SUMMON_NEIL_NIFE1:
-    case MODEL_SUMMONER_SUMMON_NEIL_NIFE2:
-    case MODEL_SUMMONER_SUMMON_NEIL_NIFE3:
-    {
-        if (o->LifeTime < 20) o->Alpha -= 0.05f;
-        else if (o->Alpha < 1.0f) o->Alpha += 0.05f;
-    }
-    break;
-    case MODEL_SUMMONER_SUMMON_NEIL_GROUND1:
-    case MODEL_SUMMONER_SUMMON_NEIL_GROUND2:
-    case MODEL_SUMMONER_SUMMON_NEIL_GROUND3:
-    {
-        if (o->LifeTime < 20) o->Alpha -= 0.05f;
-        else if (o->Alpha < 1.0f) o->Alpha += 0.3f;
-    }
-    break;
     case MODEL_SUMMONER_SUMMON_LAGUL:
     {
         if (o->SubType == 0)
@@ -7979,9 +7930,6 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
     }
     break;
-    case BITMAP_FIRE:
-        CreateParticleFpsChecked(BITMAP_FIRE, o->Position, o->Angle, Light, 9, 1.f, o->Owner);
-        break;
 
     case BITMAP_FIRE + 1:
         Vector(1.f, 1.f, 1.f, Light);
@@ -8335,15 +8283,6 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         break;
 
-    case BITMAP_LIGHT_MARKS:
-        if (o->Owner == NULL || o->Owner->Live == false)
-            o->Live = false;
-        else
-        {
-            if (o->LifeTime <= 5)
-                o->LifeTime = 65;
-        }
-        break;
     case BITMAP_GATHERING:
         if (o->SubType == 1 || o->SubType == 2)
         {
@@ -8664,12 +8603,6 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Light[2] *= pow(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
             o->Scale += (0.03f) * FPS_ANIMATION_FACTOR;
         }
-        break;
-    case BITMAP_FIRE_RED:
-        Vector((float)(rand() % 32 - 16), (float)(rand() % 32 - 16), 0.f, Position);
-        VectorAdd(Position, o->Position, Position);
-        Vector(1.0f, 0.4f, 0.4f, Light);
-        CreateParticleFpsChecked(BITMAP_FIRE_RED, Position, o->Angle, Light, 0, o->Scale);
         break;
     case BITMAP_SPARK + 1:
     {
@@ -9643,12 +9576,6 @@ void MoveEffect(OBJECT* o, int iIndex)
             o->Velocity += (1.f) * FPS_ANIMATION_FACTOR;
         }
         break;
-    case MODEL_MAGIC1:
-        VectorCopy(o->Owner->Position, o->Position);
-        o->Position[2] += (100.f) * FPS_ANIMATION_FACTOR;
-        o->Angle[1] += (20.f) * FPS_ANIMATION_FACTOR;
-        o->BlendMeshLight = o->LifeTime * 0.1f;
-        break;
     case MODEL_SKILL_WHEEL1:
         CreateEffectFpsChecked(MODEL_SKILL_WHEEL2, o->Position, o->Angle, o->Light, 4 - o->LifeTime, o->Owner, o->PKKey, o->Skill, o->Kind);
         break;
@@ -10549,19 +10476,6 @@ void MoveEffect(OBJECT* o, int iIndex)
                 CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Pos1, Pos2, Angle, 20, o, 20.f);
             }
         }
-    }
-    break;
-    case MODEL_MAYASTAR:
-    {
-        if (o->LifeTime <= 20)
-        {
-            o->Light[0] *= pow(1.0f / (1.2f), FPS_ANIMATION_FACTOR);
-            o->Light[1] *= pow(1.0f / (1.2f), FPS_ANIMATION_FACTOR);
-            o->Light[2] *= pow(1.0f / (1.2f), FPS_ANIMATION_FACTOR);
-        }
-        o->Scale += (sinf(WorldTime * 0.005f) * 2.0f) * FPS_ANIMATION_FACTOR;
-        o->Angle[1] += (10.0f) * FPS_ANIMATION_FACTOR;
-        EarthQuake = (float)(rand() % 6 - 6) * 0.5f;
     }
     break;
     case MODEL_MAYASTONE1:
@@ -13511,11 +13425,6 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         break;
 
-    case BATTLE_CASTLE_WALL1:
-    case BATTLE_CASTLE_WALL2:
-    case BATTLE_CASTLE_WALL3:
-    case BATTLE_CASTLE_WALL4:
-        break;
 
     case MODEL_BATTLE_GUARD2:
         if (o->SubType == 0)

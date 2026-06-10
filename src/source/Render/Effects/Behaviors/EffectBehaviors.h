@@ -14,4 +14,14 @@ namespace Render::Effects::Behaviors
     void RenderDefault(OBJECT* o);
 
     bool MoveDesair(OBJECT* o, int index);
+    bool MoveInfinityArrow4(OBJECT* o, int index);
+    bool MoveMagicCapsule2(OBJECT* o, int index);
+    bool MoveSpear(OBJECT* o, int index);
+    bool MoveSummonerNeilNife(OBJECT* o, int index);
+    bool MoveSummonerNeilGround(OBJECT* o, int index);
+    bool MoveBitmapFire(OBJECT* o, int index);
+    bool MoveBitmapFireRed(OBJECT* o, int index);
+    bool MoveBitmapLightMarks(OBJECT* o, int index);
+    bool MoveMagic1(OBJECT* o, int index);
+    bool MoveMayaStar(OBJECT* o, int index);
 }
