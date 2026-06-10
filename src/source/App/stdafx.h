@@ -77,6 +77,7 @@
 #include "Core/Platform/WinNls.h"
 #include "Core/Platform/WinGdi.h"
 #include "Core/Platform/WinFile.h"
+#include "Core/Platform/Imm.h"
 #endif // _WIN32
 
 //c runtime

@@ -197,12 +197,12 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
-    swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg",
+    mu_swprintf(outFileName, L"Screen(%02d_%02d-%02d_%02d)-%04d.jpg",
         st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
-    swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
+    mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
 
     wchar_t lpszTemp[64];
-    swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
+    mu_swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
     wcscat(outMessage, lpszTemp);
 }
 
@@ -509,19 +509,19 @@ static void RenderDebugInfo()
     g_pRenderText->SetTextColor(255, 255, 255, 200);
 
     int y = DEBUG_TEXT_Y_START;
-    swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%",
+    mu_swprintf(szLine, L"FPS: %.1f  Avg: %.1f  Max: %.1f  Vsync: %d  CPU: %.1f%%",
         FPS_AVG, s_avgFps, s_highestFps, IsVSyncEnabled(), CPU_AVG);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms",
+    mu_swprintf(szLine, L"1%% Low: %.1f  Slowest: %.1f  Frame: %.2fms",
         s_onePercentLow, s_slowestFrameFps,
         (s_avgFps > 0.0f) ? 1000.0f / s_avgFps : 0.0f);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
+    mu_swprintf(szLine, L"MousePos: %d %d %d", MouseX, MouseY, MouseLButtonPush);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", g_Camera.FOV, g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
+    mu_swprintf(szLine, L"Camera3D: %.1f %.1f:%.1f:%.1f", g_Camera.FOV, g_Camera.Angle[0], g_Camera.Angle[1], g_Camera.Angle[2]);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     // Compile-time build info: configuration, feature flags, compiler, arch,
@@ -557,18 +557,18 @@ static void RenderDebugInfo()
 #else
         "x86";
 #endif
-    swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
+    mu_swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
              kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     // Active camera mode (cycled with F9).
-    swprintf(szLine, L"Camera: %hs", CameraModeToString(CameraManager::Instance().GetCurrentMode()));
+    mu_swprintf(szLine, L"Camera: %hs", CameraModeToString(CameraManager::Instance().GetCurrentMode()));
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     // Per-pass frame timing (ms) — accumulated by FRAME_PROFILE scopes around the
     // major render passes in MainScene. Reset just below so next frame starts fresh.
     using FP = FrameProfiler::Pass;
-    swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f",
+    mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f",
              FrameProfiler::AccumulatorMs(FP::Terrain),
              FrameProfiler::AccumulatorMs(FP::Objects),
              FrameProfiler::AccumulatorMs(FP::Characters),
@@ -599,7 +599,7 @@ static void RenderFpsCounter()
     g_pRenderText->SetBgColor(0, 0, 0, 100);
     g_pRenderText->SetTextColor(255, 255, 255, 200);
 
-    swprintf(szLine, L"FPS: %.1f", FPS_AVG);
+    mu_swprintf(szLine, L"FPS: %.1f", FPS_AVG);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, DEBUG_TEXT_Y_START, szLine);
 
     g_pRenderText->SetFont(g_hFont);

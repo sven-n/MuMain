@@ -9,11 +9,15 @@
 #pragma warning(disable : 4995)
 
 #include <iostream>
-#include <wininet.h>
+#include "Core/Platform/WinInet.h"
 
 #include "Core/Platform/CrtDbg.h"
+#ifdef _WIN32
 #include <tchar.h>
+#endif
+#ifdef _WIN32
 #include <strsafe.h>
+#endif
 
 #include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
 #include "GameShop/ShopListManager/interface/DownloadInfo.h"

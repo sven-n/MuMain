@@ -108,6 +108,15 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\][Ww]in[Mm]ain\\.[Cc]pp$")
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\]main\\.(cpp|mm)$")
 
+# The in-game shop is a Win32 subsystem: its .cpp files drive a WinINet/urlmon
+# downloader with no portable equivalent yet (issue #462). Disable it on
+# non-Windows by excluding the GameShop sources from the engine library. The
+# shop headers still parse (via the WinINet type shim) so the rest of the engine
+# compiles; replacing the downloader with libcurl is a follow-up.
+if(NOT WIN32)
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]")
+endif()
+
 # Add MuEditor sources when editor is enabled
 if(ENABLE_EDITOR)
   file(GLOB_RECURSE MU_EDITOR_SOURCES

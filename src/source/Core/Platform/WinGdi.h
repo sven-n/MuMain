@@ -137,4 +137,31 @@ inline BOOL DeleteObject(HGDIOBJ) { return TRUE; }
 inline BOOL DeleteObject(HBITMAP) { return TRUE; }
 inline BOOL DeleteObject(HBRUSH)  { return TRUE; }
 
+// ---- GDI device-context / text rendering (wingdi.h) -------------------------
+// The legacy text renderer rasterizes glyphs into a DIB via a memory DC. That
+// pipeline isn't ported yet, so these are no-ops: CreateDIBSection/
+// CreateCompatibleDC return null, which makes the renderer's Create() fail
+// gracefully and skip GDI text until the SDL_ttf port (issue #462, Phase 4).
+#ifndef DIB_RGB_COLORS
+#define DIB_RGB_COLORS 0
+#endif
+
+inline HBITMAP CreateDIBSection(HDC, const BITMAPINFO*, UINT, void** ppvBits, HANDLE, DWORD)
+{
+    if (ppvBits) *ppvBits = nullptr;
+    return nullptr;
+}
+inline HDC  CreateCompatibleDC(HDC) { return nullptr; }
+inline BOOL DeleteDC(HDC)           { return TRUE; }
+
+// SelectObject returns the previously selected object (a null stub is fine).
+inline HGDIOBJ SelectObject(HDC, HGDIOBJ) { return nullptr; }
+inline HGDIOBJ SelectObject(HDC, HBITMAP) { return nullptr; }
+inline HGDIOBJ SelectObject(HDC, HFONT)   { return nullptr; }
+inline HGDIOBJ GetStockObject(int)        { return nullptr; }
+
+inline BOOL     TextOut(HDC, int, int, LPCWSTR, int) { return TRUE; }
+inline COLORREF SetBkColor(HDC, COLORREF)            { return 0; }
+inline COLORREF SetTextColor(HDC, COLORREF)          { return 0; }
+
 #endif // _WIN32

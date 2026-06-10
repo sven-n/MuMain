@@ -58,4 +58,63 @@ UINT GetDoubleClickTime();
 // so it returns g_hWnd while the SDL window holds focus.
 HWND GetFocus();
 
+// ---- Legacy Win32 window / display management --------------------------------
+// SDL owns the window, GL context and resolution on Linux, so the engine's
+// legacy Win32 window/resolution code is stubbed: these no-ops let it compile
+// (and report success) while the real work happens through SDL elsewhere.
+
+// Display settings (winuser.h / wingdi.h). Only the fields the resolution code
+// touches are provided; layout is irrelevant since ChangeDisplaySettings is a
+// no-op here.
+typedef struct _devicemodeW {
+    WCHAR dmDeviceName[32];
+    WORD  dmSpecVersion, dmDriverVersion, dmSize, dmDriverExtra;
+    DWORD dmFields;
+    LONG  dmPositionX, dmPositionY;
+    DWORD dmDisplayOrientation, dmDisplayFixedOutput;
+    WORD  dmColor, dmDuplex, dmYResolution, dmTTOption, dmCollate;
+    WCHAR dmFormName[32];
+    WORD  dmLogPixels;
+    DWORD dmBitsPerPel, dmPelsWidth, dmPelsHeight, dmDisplayFlags, dmDisplayFrequency;
+} DEVMODEW, DEVMODE, * LPDEVMODE, * PDEVMODE;
+
+typedef struct tagMSG {
+    HWND   hwnd;
+    UINT   message;
+    WPARAM wParam;
+    LPARAM lParam;
+    DWORD  time;
+    POINT  pt;
+} MSG, * LPMSG, * PMSG;
+
+inline HWND     SetFocus(HWND hWnd)                                  { return hWnd; }
+inline BOOL     SetForegroundWindow(HWND)                            { return TRUE; }
+inline BOOL     SetWindowPos(HWND, HWND, int, int, int, int, UINT)   { return TRUE; }
+inline LONG_PTR SetWindowLongPtr(HWND, int, LONG_PTR)                { return 0; }
+inline BOOL     SetCursorPos(int, int)                              { return TRUE; }
+inline BOOL     AdjustWindowRect(LPRECT, DWORD, BOOL)               { return TRUE; }
+inline BOOL     ShowWindow(HWND, int)                              { return TRUE; }
+inline LONG     ChangeDisplaySettings(DEVMODE*, DWORD)             { return DISP_CHANGE_SUCCESSFUL; }
+
+// The legacy code pumps the Win32 queue after a resolution change; SDL drives
+// the real loop, so there is never anything to peek here.
+inline BOOL    PeekMessage(LPMSG, HWND, UINT, UINT, UINT)          { return FALSE; }
+inline BOOL    TranslateMessage(const MSG*)                        { return FALSE; }
+inline LRESULT DispatchMessage(const MSG*)                         { return 0; }
+
+inline int     FillRect(HDC, const RECT*, HBRUSH)                  { return 1; }
+inline LPWSTR  GetCommandLineW()                                   { static wchar_t empty[1] = { 0 }; return empty; }
+#ifndef GetCommandLine
+#define GetCommandLine GetCommandLineW
+#endif
+
+// Open a document/URL. Returns a "succeeded" sentinel (> 32, as Win32 does).
+inline HINSTANCE ShellExecuteW(HWND, LPCWSTR, LPCWSTR, LPCWSTR, LPCWSTR, int)
+{
+    return reinterpret_cast<HINSTANCE>(33);
+}
+#ifndef ShellExecute
+#define ShellExecute ShellExecuteW
+#endif
+
 #endif // _WIN32
