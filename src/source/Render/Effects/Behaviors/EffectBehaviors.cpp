@@ -32,6 +32,8 @@ namespace Render::Effects::Behaviors
     // feather effects every 10 ticks of life.
     bool MoveDesair(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
+        if (o->m_sTargetIndex < 0 || o->m_sTargetIndex >= MAX_JOINTS)
+            return true;
         JOINT* oj = &Joints[o->m_sTargetIndex];
         if (oj->Live == true)
         {
@@ -49,6 +51,11 @@ namespace Render::Effects::Behaviors
     // MODEL_INFINITY_ARROW4: grows and fades while tracking the owner's hand bone.
     bool MoveInfinityArrow4(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
+        if (o->Owner == NULL)
+        {
+            o->LifeTime = 0;
+            return true;
+        }
         vec3_t tmp = { 0.f, 0.f, 0.f };
         OBJECT* pOwner = o->Owner;
         o->Scale *= pow(1.2f, FPS_ANIMATION_FACTOR);
@@ -66,6 +73,11 @@ namespace Render::Effects::Behaviors
     // MODEL_MAGIC_CAPSULE2: sticks to the owner and fades out over its last ticks.
     bool MoveMagicCapsule2(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
+        if (o->Owner == NULL)
+        {
+            o->LifeTime = 0;
+            return true;
+        }
         VectorCopy(o->Owner->Position, o->Position);
         if (o->LifeTime < 10)
             o->BlendMeshLight = (float)o->LifeTime * 0.1f;
@@ -135,6 +147,11 @@ namespace Render::Effects::Behaviors
     // MODEL_MAGIC1: hovers above the owner, spinning and fading over its life.
     bool MoveMagic1(OBJECT* o, int /*index*/, float /*luminosity*/)
     {
+        if (o->Owner == NULL)
+        {
+            o->LifeTime = 0;
+            return true;
+        }
         VectorCopy(o->Owner->Position, o->Position);
         o->Position[2] += (100.f) * FPS_ANIMATION_FACTOR;
         o->Angle[1] += (20.f) * FPS_ANIMATION_FACTOR;
