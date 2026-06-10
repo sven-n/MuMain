@@ -941,7 +941,7 @@ void CNewUIMuHelper::SaveExtraItem()
 {
     wchar_t wsExtraItem[MAX_ITEM_NAME + 1] = { 0 };
 
-    m_ItemInput.GetText(wsExtraItem, MAX_ITEM_NAME + 1);
+    m_ItemInput.GetText(wsExtraItem, std::size(wsExtraItem));
 
     if (wcscmp(wsExtraItem, L"") != 0)
     {
@@ -1114,13 +1114,13 @@ void CNewUIMuHelper::SaveConfig()
 {
     wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
 
-    m_DistanceTimeInput.GetText(wsNumberInput, MAX_NUMBER_DIGITS + 1);
+    m_DistanceTimeInput.GetText(wsNumberInput, std::size(wsNumberInput));
     _TempConfig.iMaxSecondsAway = GetIntFromTextInput(wsNumberInput);
 
-    m_Skill2DelayInput.GetText(wsNumberInput, MAX_NUMBER_DIGITS + 1);
+    m_Skill2DelayInput.GetText(wsNumberInput, std::size(wsNumberInput));
     _TempConfig.aiSkillInterval[1] = GetIntFromTextInput(wsNumberInput);
 
-    m_Skill3DelayInput.GetText(wsNumberInput, MAX_NUMBER_DIGITS + 1);
+    m_Skill3DelayInput.GetText(wsNumberInput, std::size(wsNumberInput));
     _TempConfig.aiSkillInterval[2] = GetIntFromTextInput(wsNumberInput);
 
     _TempConfig.aiSkill[0] = m_aiSelectedSkills[0] > 0 ? m_aiSelectedSkills[0] : 0;
@@ -2951,7 +2951,7 @@ void CNewUIMuHelperExt::Save()
 {
     wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
 
-    m_BuffTimeInput.GetText(wsNumberInput, MAX_NUMBER_DIGITS + 1);
+    m_BuffTimeInput.GetText(wsNumberInput, std::size(wsNumberInput));
     _TempConfig.iBuffCastInterval = CNewUIMuHelper::GetIntFromTextInput(wsNumberInput);
 
     _TempConfig.iPotionThreshold = m_iCurrentPotionThreshold * 10;
