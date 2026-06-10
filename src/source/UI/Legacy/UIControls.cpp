@@ -3135,6 +3135,24 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
     }
 }
 
+// Symmetric counterpart to GiveFocus(): drops keyboard focus from the focused
+// portable text field without hiding or destroying it. GiveFocus() sets both
+// s_pFocusedPortable and g_dwKeyFocusUIID, so release both here (clearing the
+// key-focus id only while it still points at this field, to avoid stomping
+// another widget), letting the field hand focus back to the game window while
+// staying visible.
+void CUITextInputBox::ReleaseFocus()
+{
+    if (s_pFocusedPortable != nullptr)
+    {
+        if (g_dwKeyFocusUIID == s_pFocusedPortable->GetUIID())
+        {
+            g_dwKeyFocusUIID = 0;
+        }
+        s_pFocusedPortable = nullptr;
+    }
+}
+
 void CUITextInputBox::Render()
 {
     if (m_iState == UISTATE_HIDE) return;
