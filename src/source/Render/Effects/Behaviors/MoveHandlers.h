@@ -12,6 +12,7 @@
 // case-level `break;` to `return true;` (run it). See EffectRegistry.cpp for wiring.
 namespace Render::Effects::Behaviors
 {
+    bool Move_MODEL_DRAGON(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_ARROW_AUTOLOAD(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_INFINITY_ARROW(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_INFINITY_ARROW1(OBJECT* o, int index, float Luminosity);
@@ -21,11 +22,13 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_MULTI_SHOT3(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_MULTI_SHOT1(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_MULTI_SHOT2(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_BLADE_SKILL(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_KENTAUROS_ARROW(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_WARP3(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_GHOST(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_TREE_ATTACK(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_BUTTERFLY01(OBJECT* o, int index, float Luminosity);
+    bool Move_BITMAP_SKULL(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL__SPEAR(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_HALLOWEEN_CANDY_BLUE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_HALLOWEEN_EX(OBJECT* o, int index, float Luminosity);
@@ -38,11 +41,14 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_SUMMONER_WRISTRING_EFFECT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMONER_EQUIP_HEAD_NEIL(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_SUMMONER_CASTING_EFFECT1(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMONER_SUMMON_SAHAMUTT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMONER_SUMMON_NEIL(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMONER_SUMMON_LAGUL(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_MAGIC(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_OUR_INFLUENCE_GROUND(OBJECT* o, int index, float Luminosity);
+    bool Move_BITMAP_MAGIC_ZIN(OBJECT* o, int index, float Luminosity);
+    bool Move_BITMAP_PIN_LIGHT(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_ORORA(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_JOINT_THUNDER(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_IMPACT(OBJECT* o, int index, float Luminosity);
@@ -51,6 +57,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_RAKLION_BOSS_MAGIC(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_FIRE_HIK2_MONO(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_CLOUD(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_CHAIN_LIGHTNING(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_ALICE_BUFFSKILL_EFFECT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_LIGHTNING_SHOCK(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SKILL_BLAST(OBJECT* o, int index, float Luminosity);
@@ -64,6 +71,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_SAW(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_LASER(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SKILL_WHEEL1(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_SKILL_WHEEL2(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SKILL_FISSURE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_FISSURE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SKILL_FURY_STRIKE(OBJECT* o, int index, float Luminosity);
@@ -73,6 +81,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_CHANGE_UP_CYLINDER(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_DARK_ELF_SKILL(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_MAGIC2(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_STORM(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SUMMON(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_STORM2(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_STORM3(OBJECT* o, int index, float Luminosity);
@@ -84,6 +93,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_CIRCLE_LIGHT(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_ICE_SMALL(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SKULL(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_CUNDUN_PART1(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_CURSEDTEMPLE_STATUE_PART1(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_XMAS2008_SNOWMAN_HEAD(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_XMAS2008_SNOWMAN_BODY(OBJECT* o, int index, float Luminosity);
@@ -173,8 +183,10 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_PROJECTILE(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_DOOR_CRUSH_EFFECT_PIECE01(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_STATUE_CRUSH_EFFECT_PIECE04(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_EFFECT_SD_AURA(OBJECT* o, int index, float Luminosity);
+    bool Move_BITMAP_WATERFALL_4(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_WOLF_HEAD_EFFECT(OBJECT* o, int index, float Luminosity);
     bool Move_BITMAP_SBUMB(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_DOWN_ATTACK_DUMMY_L(OBJECT* o, int index, float Luminosity);
@@ -192,6 +204,7 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_WOLF_HEAD_EFFECT2(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_SHOCKWAVE_GROUND01(OBJECT* o, int index, float Luminosity);
     bool Move_MODEL_DRAGON_LOWER_DUMMY(OBJECT* o, int index, float Luminosity);
+    bool Move_MODEL_VOLCANO_STONE(OBJECT* o, int index, float Luminosity);
 
     const std::vector<std::pair<int, MoveHandler>>& ExtractedMoveHandlers();
 }

@@ -22,6 +22,78 @@
 
 namespace Render::Effects::Behaviors
 {
+    // MODEL_DRAGON
+    bool Move_MODEL_DRAGON(OBJECT* o, int index, float Luminosity)
+    {
+    {
+        vec3_t vTemp;
+        VectorSubtract(o->Position, o->StartPosition, vTemp);
+        float fTemp = VectorLength(vTemp);
+
+        if (o->Angle[2] >= 360.0f) o->Angle[2] = 0.0f;
+        if (o->Angle[2] <= -360.0f) o->Angle[2] = 0.0f;
+        if (o->Angle[1] >= 360.0f) o->Angle[1] = 0.0f;
+        if (o->Angle[1] <= -360.0f) o->Angle[1] = 0.0f;
+
+        switch (o->Kind)
+        {
+        case 0:
+            o->Timer = 30.0f;
+            break;
+        case 1:
+            o->Timer = -30.0f;
+            break;
+        default:
+            o->Timer = 0.0f;
+            break;
+        }
+        if (o->Timer > o->Angle[1]) o->Angle[1] += 0.5f;
+        if (o->Timer < o->Angle[1]) o->Angle[1] -= 0.5f;
+
+        if (fTemp <= 800.0f && fTemp >= -800.0f)
+        {
+            o->Kind = 2;
+            o->Distance = 0.0f;
+            o->Angle[2] += (0.5f * o->Distance / 2.0f) * FPS_ANIMATION_FACTOR;
+            o->CollisionRange = true;
+        }
+        else
+        {
+            if (o->CollisionRange)
+            {
+                o->Timer = o->Angle[2];
+                o->Gravity = o->Gravity * -1.0f;
+                o->CollisionRange = false;
+            }
+            if (o->Timer >= o->Angle[2] - 60.0f)
+            {
+                o->Angle[2] += (0.5f * o->Gravity * 3.0f) * FPS_ANIMATION_FACTOR;
+                o->Kind = 1;
+            }
+            else if (o->Timer <= o->Angle[2] + 60.0f)
+            {
+                o->Angle[2] += (0.5f * o->Gravity * 3.0f) * FPS_ANIMATION_FACTOR;
+                o->Kind = 0;
+            }
+            else
+            {
+                o->CollisionRange = true;
+                o->Kind = 2;
+            }
+        }
+
+        if (o->LifeTime <= 10)
+            o->LifeTime = 1000;
+        if (o->AnimationFrame >= 40.0f)
+        {
+            o->AnimationFrame = 0.0f;
+            o->PriorAnimationFrame = 0.0f;
+            o->CurrentAction = 0;
+        }
+    }
+        return true;
+    }
+
     // MODEL_ARROW_AUTOLOAD
     bool Move_MODEL_ARROW_AUTOLOAD(OBJECT* o, int index, float Luminosity)
     {
@@ -256,6 +328,97 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // MODEL_BLADE_SKILL
+    bool Move_MODEL_BLADE_SKILL(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Light;
+        Vector(1.f, 1.f, 1.f, Light);
+        vec3_t Angle;
+        vec3_t p;
+    {
+        if (o->SubType == 0)
+        {
+            o->Scale -= (0.1f) * FPS_ANIMATION_FACTOR;
+            if (o->Scale < 0.8f)
+                o->Scale = 0.8f;
+        }
+        else
+            if (o->SubType == 1)
+            {
+                o->BlendMesh = -2;
+                o->BlendMeshLight = (float)o->LifeTime / 14.f;
+                o->Alpha = o->BlendMeshLight;
+
+                vec3_t p, Angle, Light;
+
+                OBJECT* to = NULL;
+
+                if (o->LifeTime >= 3 && (int)o->LifeTime % 2 == 0)
+                {
+                    VectorCopy(o->Owner->Angle, Angle);
+                    int Ran = -1;
+                    CHARACTER* c = &CharactersClient[(int)o->PKKey];
+
+                    Ran = rand() % 6;
+                    if (o->m_sTargetIndex > -1)
+                    {
+                        while (true)
+                        {
+                            Ran = rand() % 6;
+                            if (Ran != o->m_sTargetIndex)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    o->m_sTargetIndex = Ran;
+
+                    switch (Ran)
+                    {
+                    case 0:
+                        o->Owner->Angle[2] = Angle[2] + 7.f;
+                        break;
+                    case 1:
+                        o->Owner->Angle[2] = Angle[2] + 21.f;
+                        break;
+                    case 2:
+                        o->Owner->Angle[2] = Angle[2] + 35.f;
+                        break;
+                    case 3:
+                        o->Owner->Angle[2] = Angle[2] - 7.f;
+                        break;
+                    case 4:
+                        o->Owner->Angle[2] = Angle[2] - 21.f;
+                        break;
+                    case 5:
+                        o->Owner->Angle[2] = Angle[2] - 35.f;
+                        break;
+                    }
+
+                    if (Ran < 0)
+                        Ran = Ran;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        VectorCopy(o->Position, p);
+                        Vector(0.2f, 0.3f, 1.f, Light);
+
+                        p[1] += rand() % 200 - 100;
+                        p[2] += rand() % 200 - 100;
+                        CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 8 + 8) * 0.2f, Light, o->Owner, (float)(rand() % 360));
+                        Vector(1.f, 1.f, 1.f, Light);
+                        CreateSprite(BITMAP_SHINY + 1, p, (float)(rand() % 8 + 8) * 0.07f, Light, o->Owner, (float)(rand() % 360));
+                        VectorCopy(o->Owner->Position, p);
+                        p[2] += ((rand() % 80 - 40) + 200);
+                        CreateJointFpsChecked(BITMAP_SPARK + 1, p, p, o->Owner->Angle, 1, o->Owner, 18.7f);
+                    }
+                    CreateArrow(c, o->Owner, to, FindHotKey((o->Skill)), 1, 0);
+                    o->Owner->Angle[2] = Angle[2];
+                }
+            }
+    }
+        return true;
+    }
+
     // MODEL_KENTAUROS_ARROW
     bool Move_MODEL_KENTAUROS_ARROW(OBJECT* o, int index, float Luminosity)
     {
@@ -414,6 +577,93 @@ namespace Render::Effects::Behaviors
         }
         CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
     }
+        return true;
+    }
+
+    // BITMAP_SKULL
+    bool Move_BITMAP_SKULL(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Light;
+        Vector(1.f, 1.f, 1.f, Light);
+        vec3_t Position;
+        if (o->SubType == 4)
+        {
+            o->Direction[1] -= (o->Velocity) * FPS_ANIMATION_FACTOR;
+            o->Angle[0] -= (1.f) * FPS_ANIMATION_FACTOR;
+            CreateSprite(BITMAP_SKULL, o->Position, 10.0f, o->Light, NULL);
+        }
+        else
+        {
+            if (!o->Owner->Live)
+            {
+                o->LifeTime = 0;
+                o->Live = false;
+            }
+            else
+            {
+                switch (o->SubType)
+                {
+                case 0:
+                    if (g_isCharacterBuff(o->Owner, eDeBuff_Defense))
+                    {
+                        o->LifeTime = 10;
+                        if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
+                        {
+                            o->Visible = false;
+                            break;
+                        }
+                    }
+                case 1:
+                case 3:
+                {
+                    for (int i = 0; i < 3; ++i)
+                    {
+                        float fParam = (float)i * Q_PI * 2 / 3.0f + o->LifeTime * 0.17f;
+                        if (o->SubType == 3)
+                        {
+                            fParam = -fParam;
+                        }
+                        vec3_t Position;
+                        float fDist = 50.f + 20.f * (float)sinf(i * 15.37f + (float)WorldTime * 0.0031f);
+                        Position[0] = o->Owner->Position[0] + fDist * (float)sinf(fParam);
+                        Position[1] = o->Owner->Position[1] + fDist * (float)cosf(fParam);
+                        Position[2] = o->Owner->Position[2] + ((o->SubType == 3) ? 250.0f : 200.0f) * o->Owner->Scale;
+                        CreateSprite(BITMAP_SKULL, Position, 1.0f, Light, o->Owner, 0.0f);
+                    }
+                }
+                break;
+                case 5:
+                {
+                    for (int i = 0; i < 3; ++i)
+                    {
+                        float fParam = (float)i * Q_PI * 2 / 3.0f + o->LifeTime * 0.17f;
+                        vec3_t Position;
+                        Position[0] = o->Owner->Position[0] + 50.0f * (float)sinf(fParam + WorldTime * 0.003f);
+                        Position[1] = o->Owner->Position[1] + 50.0f * (float)cosf(fParam + WorldTime * 0.003f);
+                        Position[2] = o->Owner->Position[2] + (i + 1) * 50.0f * o->Owner->Scale;
+                        vec3_t LightFlame = { 0.6f, 0.6f, 1.0f };
+                        CreateParticleFpsChecked(BITMAP_LIGHT, Position, o->Angle, LightFlame, 5, 0.7f);
+                    }
+                }
+                break;
+                case 2:
+                {
+                    vec3_t Light;
+                    Light[0] = Light[1] = Light[2] = 0.1f * (float)o->LifeTime;
+                    CreateSprite(BITMAP_SKULL, o->Position, 1.5f, Light, o->Owner, 0.0f);
+                }
+                break;
+                /*case 3:
+                {
+                vec3_t Position;
+                VectorCopy( o->Owner->Position, Position);
+                Position[2] += 240.0f;
+                CreateSprite(BITMAP_SKULL,Position,1.5f,o->Light,o->Owner,0.0f);
+                }
+                break;*/
+                }
+            }
+        }
         return true;
     }
 
@@ -734,6 +984,41 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // MODEL_SUMMONER_CASTING_EFFECT1, MODEL_SUMMONER_CASTING_EFFECT11, MODEL_SUMMONER_CASTING_EFFECT111, MODEL_SUMMONER_CASTING_EFFECT2, MODEL_SUMMONER_CASTING_EFFECT22, MODEL_SUMMONER_CASTING_EFFECT222, MODEL_SUMMONER_CASTING_EFFECT4
+    bool Move_MODEL_SUMMONER_CASTING_EFFECT1(OBJECT* o, int index, float Luminosity)
+    {
+    {
+        if (o->LifeTime < 20) o->BlendMeshLight -= 0.03f;
+        else if (o->BlendMeshLight < 0.5f) o->BlendMeshLight += 0.05f;
+
+        switch (o->Type)
+        {
+        case MODEL_SUMMONER_CASTING_EFFECT1:
+            o->Angle[2] -= (3.0f) * FPS_ANIMATION_FACTOR;
+            break;
+        case MODEL_SUMMONER_CASTING_EFFECT11:
+            o->Angle[2] += (3.0f) * FPS_ANIMATION_FACTOR;
+            break;
+        case MODEL_SUMMONER_CASTING_EFFECT111:
+            o->Angle[2] -= (3.0f) * FPS_ANIMATION_FACTOR;
+            break;
+        case MODEL_SUMMONER_CASTING_EFFECT2:
+            o->Angle[2] += (3.0f) * FPS_ANIMATION_FACTOR;
+            break;
+        case MODEL_SUMMONER_CASTING_EFFECT22:
+            o->Angle[2] -= (3.0f) * FPS_ANIMATION_FACTOR;
+            break;
+        case MODEL_SUMMONER_CASTING_EFFECT222:
+            o->Angle[2] += (3.0f) * FPS_ANIMATION_FACTOR;
+            break;
+        case MODEL_SUMMONER_CASTING_EFFECT4:
+            o->Scale += (0.6f) * FPS_ANIMATION_FACTOR;
+            break;
+        }
+    }
+        return true;
+    }
+
     // MODEL_SUMMONER_SUMMON_SAHAMUTT
     bool Move_MODEL_SUMMONER_SUMMON_SAHAMUTT(OBJECT* o, int index, float Luminosity)
     {
@@ -1044,6 +1329,107 @@ namespace Render::Effects::Behaviors
 
             if (1 <= o->LifeTime)
                 o->LifeTime = 50;
+        }
+        return true;
+    }
+
+    // BITMAP_MAGIC_ZIN
+    bool Move_BITMAP_MAGIC_ZIN(OBJECT* o, int index, float Luminosity)
+    {
+        switch (o->SubType)
+        {
+        case 0:
+            if (o->LifeTime < 20)
+                o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 1.0f)
+                o->Alpha += (0.05f) * FPS_ANIMATION_FACTOR;
+            break;
+        case 1:
+            if (o->LifeTime < 20)
+                o->Alpha -= (0.03f) * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 0.7f)
+                o->Alpha += (0.06f) * FPS_ANIMATION_FACTOR;
+            break;
+        case 2:
+            if (o->Scale < 3.5f)
+                o->Scale += (0.1f) * FPS_ANIMATION_FACTOR;
+            if (o->LifeTime < 20)
+                o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 1.0f)
+                o->Alpha += (0.05f) * FPS_ANIMATION_FACTOR;
+            break;
+        }
+        return true;
+    }
+
+    // BITMAP_PIN_LIGHT
+    bool Move_BITMAP_PIN_LIGHT(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Position;
+        switch (o->SubType)
+        {
+        case 3:
+        case 0:
+            Position[0] = o->Position[0] + (float)(rand() % 500 - 250);
+            Position[1] = o->Position[1] + (float)(rand() % 500 - 250);
+            Position[2] = o->Position[2] - (float)(rand() % 100) + 150.0f;
+            if (rand_fps_check(2))
+            {
+                if (o->SubType == 3)
+                    CreateParticleFpsChecked(o->Type, Position, o->Angle, o->Light, 1, o->Scale);
+                else
+                    CreateParticleFpsChecked(o->Type, Position, o->Angle, o->Light, 0, o->Scale);
+            }
+            break;
+        case 1:
+        case 2:
+            if (o->Owner == NULL || o->Owner->Live == false)
+                o->Live = false;
+            else
+            {
+                o->LifeTime = 100;
+                BMD* pModel = &Models[o->Owner->Type];
+                int iBone = rand() % pModel->NumBones;
+                vec3_t vRelativePos, vWorldPos;
+                Vector(0.f, 0.f, 100.f, vRelativePos);
+                if (!pModel->Bones[iBone].Dummy)
+                {
+                    pModel->TransformPosition(o->Owner->BoneTransform[iBone], vRelativePos, vWorldPos, false);
+                    VectorScale(vWorldPos, pModel->BodyScale, vWorldPos);
+                    VectorAdd(vWorldPos, o->Owner->Position, vWorldPos);
+                    if (rand_fps_check(2))
+                    {
+                        vWorldPos[2] -= 20.f;
+                        CreateParticleFpsChecked(o->Type, vWorldPos, o->Angle, o->Light, 0, o->Scale);
+                    }
+                }
+            }
+            break;
+        case 4:
+            if (o->Owner == NULL || o->Owner->Live == false || o->Alpha <= 0.0f)
+            {
+                o->Live = false;
+            }
+            else
+            {
+                o->Scale -= (0.02f) * FPS_ANIMATION_FACTOR;
+                o->Alpha -= (0.001f) * FPS_ANIMATION_FACTOR;
+
+                OBJECT* Owner = o->Owner;
+                BMD* pModel = &Models[o->Owner->Type];
+                vec3_t vWorldPos, vRelativePos;
+                Vector(0.f, 0.f, 0.f, vRelativePos);
+
+                if (!pModel->Bones[11].Dummy)
+                {
+                    pModel->BodyScale = Owner->Scale;
+                    pModel->Animation(BoneTransform, Owner->AnimationFrame, Owner->PriorAnimationFrame, Owner->PriorAction, Owner->Angle, Owner->HeadAngle, false, false);
+                    pModel->TransformByObjectBone(vWorldPos, Owner, 11);
+                    VectorCopy(vWorldPos, o->Position);
+
+                    CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, o->Scale, o->Light, Owner, o->Angle[1]);
+                }
+            }break;
         }
         return true;
     }
@@ -1366,6 +1752,95 @@ namespace Render::Effects::Behaviors
             o->Light[2] *= pow(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
             o->Scale += (0.03f) * FPS_ANIMATION_FACTOR;
         }
+        return true;
+    }
+
+    // MODEL_CHAIN_LIGHTNING
+    bool Move_MODEL_CHAIN_LIGHTNING(OBJECT* o, int index, float Luminosity)
+    {
+    {
+        switch (o->SubType)
+        {
+        case 0:
+        case 1:
+        case 2:
+        {
+            OBJECT* pSourceObj = o->Owner;
+            CHARACTER* pTargetChar = &CharactersClient[FindCharacterIndex(o->m_sTargetIndex)];
+            OBJECT* pTargetObj = &pTargetChar->Object;
+
+            if (pSourceObj == NULL || pSourceObj->Live == false
+                || pTargetObj == NULL || pTargetObj->Live == false || (pTargetChar->Dead > 0) == true)
+            {
+                o->LifeTime = 0;
+                o->Live = false;
+                break;
+            }
+
+            BMD* pSourceModel = &Models[pSourceObj->Type];
+            BMD* pTargetModel = &Models[pTargetObj->Type];
+
+            vec3_t vLight, vRelativePos, vPos, vAngle;
+            Vector(0.0f, 0.0f, 0.0f, vRelativePos);
+
+            if (o->SubType == 1 || o->SubType == 2)
+            {
+                if (pSourceObj == pTargetObj)
+                    break;
+            }
+
+            if (o->SubType == 0)
+            {
+                VectorCopy(pSourceObj->Position, pSourceModel->BodyOrigin);
+
+                Vector(0.4f, 0.4f, 1.0f, vLight);
+                pSourceModel->TransformPosition(pSourceObj->BoneTransform[37], vRelativePos, vPos, true);
+                Vector(-60.f, 0.f, pSourceObj->Angle[2], vAngle);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+                Vector(0.f, 0.f, (pSourceObj->Angle[2]) + 60.f, vAngle);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+
+                pSourceModel->TransformPosition(pSourceObj->BoneTransform[28], vRelativePos, vPos, true);
+                Vector(-60.f, 0.f, pSourceObj->Angle[2], vAngle);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+                Vector(0.f, 0.f, (pSourceObj->Angle[2]) - 60.f, vAngle);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, vAngle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+            }
+            else if (o->SubType == 1 || o->SubType == 2)
+            {
+                VectorCopy(pSourceObj->Position, vPos);
+                vPos[2] += 80.0f;
+                //Vector(0.f, 0.f, (pSourceObj->Angle[2])-60.f, vAngle);
+                vec3_t vTargetPos;
+                VectorCopy(pTargetObj->Position, vTargetPos);
+                vTargetPos[2] += 80.0f;
+                //Vector(0.f, 0.f, 0.f, vAngle);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 50.f, -1, 0, 0, -1, vLight);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vPos, pTargetObj->Position, pTargetObj->Angle, 0, pTargetObj, 10.f, -1, 0, 0, -1, vLight);
+            }
+
+            if ((int)o->LifeTime == 15)
+            {
+                int iNumBones = pTargetModel->NumBones;
+                float fRandom;
+                for (int i = 0; i < iNumBones; i++)
+                {
+                    VectorCopy(pTargetObj->Position, pTargetModel->BodyOrigin);
+                    pTargetModel->TransformPosition(pTargetObj->BoneTransform[i], vRelativePos, vPos, true);
+
+                    Vector(0.2f, 0.2f, 0.8f, vLight);
+                    fRandom = 3.0f + ((float)(rand() % 20 - 10) * 0.1f);
+                    CreateParticleFpsChecked(BITMAP_LIGHT, vPos, vAngle, vLight, 5, fRandom);
+                }
+            }
+        }
+        break;
+        }
+    }
         return true;
     }
 
@@ -1936,6 +2411,87 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // MODEL_SKILL_WHEEL2
+    bool Move_MODEL_SKILL_WHEEL2(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Light;
+        Vector(1.f, 1.f, 1.f, Light);
+        vec3_t Angle;
+        vec3_t Position;
+        float Matrix[3][4];
+        float Height;
+        vec3_t p;
+        switch (o->SubType)
+        {
+        case 1:o->Alpha = 0.6f; break;
+        case 2:o->Alpha = 0.5f; break;
+        case 3:o->Alpha = 0.4f; break;
+        case 4:o->Alpha = 0.3f; break;
+        }
+        if (o->Owner->Weapon >= MODEL_SPEAR - MODEL_SWORD && o->Owner->Weapon < MODEL_SPEAR - MODEL_SWORD + MAX_ITEM_INDEX)
+        {
+            Vector(0.f, -180.f, 0.f, p);
+        }
+        else
+        {
+            Vector(0.f, -150.f, 0.f, p);
+        }
+
+        AngleMatrix(o->Angle, Matrix);
+        VectorRotate(p, Matrix, Position);
+        VectorAdd(o->Owner->Position, Position, o->Position);
+        o->Angle[2] -= 18 * FPS_ANIMATION_FACTOR;
+
+        if (rand_fps_check(1)) {
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+            Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
+            AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
+        }
+
+        Vector(1.f, 1.f, 1.f, Light);
+        Height = 20.f;
+        if (gMapManager.InHellas())
+        {
+            Height = 60.f;
+            Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
+            VectorAdd(Angle, o->Angle, Angle);
+            VectorCopy(o->Position, Position);
+            Position[0] += rand() % 20 - 10;
+            Position[1] += rand() % 20 - 10;
+            Position[2] += 120.f;
+            Vector(0.5f, 0.5f, 0.5f, Light);
+            CreateParticleFpsChecked(BITMAP_WATERFALL_5, Position, Angle, Light, 3);
+        }
+        else
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                if (rand_fps_check(1))
+                {
+                    Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
+                    VectorAdd(Angle, o->Angle, Angle);
+                    VectorCopy(o->Position, Position);
+                    Position[0] += rand() % 20 - 10;
+                    Position[1] += rand() % 20 - 10;
+                    CreateJointFpsChecked(BITMAP_JOINT_SPARK, Position, Position, Angle);
+                    if (rand_fps_check(4)) CreateParticleFpsChecked(BITMAP_SPARK, Position, Angle, Light);
+                }
+            }
+        }
+        VectorCopy(o->Position, Position);
+        Position[2] += Height;
+        Vector(1.f, 0.8f, 0.6f, Light);
+        CreateSprite(BITMAP_LIGHT, Position, 2.f, Light, o);
+
+        if (gMapManager.InHellas() && ((int)o->LifeTime % 4) == 0)
+        {
+            int PositionX = (int)(o->Position[0] / TERRAIN_SCALE);
+            int PositionY = (int)(o->Position[1] / TERRAIN_SCALE);
+            AddWaterWave(PositionX, PositionY, 2, -150);
+        }
+        return true;
+    }
+
     // MODEL_SKILL_FISSURE
     bool Move_MODEL_SKILL_FISSURE(OBJECT* o, int index, float Luminosity)
     {
@@ -2455,6 +3011,106 @@ namespace Render::Effects::Behaviors
             CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light2, NULL, (float)(rand() % 360));
 
             CreateSprite(BITMAP_LIGHT, Position, 3.5f, Light, NULL, (float)(rand() % 360));
+        }
+        return true;
+    }
+
+    // MODEL_STORM
+    bool Move_MODEL_STORM(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Light;
+        Vector(1.f, 1.f, 1.f, Light);
+        vec3_t Angle;
+        vec3_t Position;
+        switch (o->SubType)
+        {
+        case 0:
+            o->BlendMeshLight = o->LifeTime * 0.1f;
+            o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.1f;
+            //VectorAdd(o->Position,o->Direction,o->Position);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 3);
+            Vector(90.f, 0.f, o->Angle[2], Angle);
+            if (rand_fps_check(2))
+            {
+                Vector(o->Position[0] - 200.f, o->Position[1], o->Position[2] + 700.f, Position);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 10.f);
+            }
+            if (rand_fps_check(2))
+            {
+                Vector(o->Position[0] + 200.f, o->Position[1], o->Position[2] + 700.f, Position);
+                CreateJointFpsChecked(BITMAP_JOINT_THUNDER, Position, o->Position, Angle, 0, o, 10.f);
+            }
+            o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+            if (rand_fps_check(4))
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
+            Vector(-Luminosity * 0.4f, -Luminosity * 0.3f, -Luminosity * 0.2f, Light);
+            AddTerrainLight(o->Position[0], o->Position[1], Light, 5, PrimaryTerrainLight);
+
+            if (battleCastle::IsBattleCastleStart())
+            {
+                DWORD att = TERRAIN_ATTRIBUTE(o->Position[0], o->Position[1]);
+                if ((att & TW_NOATTACKZONE) == TW_NOATTACKZONE)
+                {
+                    o->Velocity = 0.f;
+                    Vector(0.f, 0.f, 0.f, o->Direction);
+                    o->LifeTime *= pow(1.0f / (5.f), FPS_ANIMATION_FACTOR);
+                    break;
+                }
+            }
+            if ((int)o->LifeTime % 15 == 0)
+                if (o->Owner == &Hero->Object)
+                    AttackCharacterRange(o->Skill, o->Position, 150.f, o->Weapon, o->PKKey);
+            break;
+
+        case 1:
+            o->BlendMeshLight = o->LifeTime * 0.01f;
+            o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.1f;
+            o->Angle[2] += (rand() % 30 + 30.f) * FPS_ANIMATION_FACTOR;
+
+            VectorCopy(o->Position, Position);
+            Position[2] += 100.f;
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 3);
+            CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 3, 0.1f);
+
+            Vector(-Luminosity * 0.1f, -Luminosity * 0.3f, -Luminosity * 1.f, Light);
+            AddTerrainLight(o->Position[0], o->Position[1], o->Light, 5, PrimaryTerrainLight);
+            break;
+
+        case 2:
+            o->BlendMeshLight = o->LifeTime * 0.1f;
+            o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.1f;
+
+            o->Gravity = (float)(rand() % 360);
+
+            VectorCopy(o->Position, Position);
+            Position[2] += 100.f;
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 3);
+            CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 3, 0.1f);
+
+            Vector(-Luminosity * 0.1f, -Luminosity * 0.3f, -Luminosity * 1.f, Light);
+            AddTerrainLight(o->Position[0], o->Position[1], o->Light, 5, PrimaryTerrainLight);
+            break;
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            EarthQuake = (float)(rand() % 8 - 4) * 0.1f;
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 28);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 29);
+            CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 30);
+            if (rand_fps_check(2))
+                CreateEffectFpsChecked(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light, 2);
+            break;
+        case 8:
+        {
+            o->BlendMeshLight = o->LifeTime * 0.1f;
+            o->BlendMeshTexCoordU = -(float)o->LifeTime * 0.1f;
+
+            Vector(-Luminosity * 0.1f, -Luminosity * 0.3f, -Luminosity * 1.f, Light);
+            AddTerrainLight(o->Position[0], o->Position[1], o->Light, 5, PrimaryTerrainLight);
+        }
+        break;
         }
         return true;
     }
@@ -3025,6 +3681,159 @@ namespace Render::Effects::Behaviors
 
             Vector(Luminosity, Luminosity * 0.3f, Luminosity * 0.1f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 4, PrimaryTerrainLight);
+        }
+        return true;
+    }
+
+    // MODEL_CUNDUN_PART1, MODEL_CUNDUN_PART2, MODEL_CUNDUN_PART3, MODEL_CUNDUN_PART4, MODEL_CUNDUN_PART5, MODEL_CUNDUN_PART6, MODEL_CUNDUN_PART7, MODEL_CUNDUN_PART8, MODEL_ILLUSION_OF_KUNDUN
+    bool Move_MODEL_CUNDUN_PART1(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Light;
+        Vector(1.f, 1.f, 1.f, Light);
+        vec3_t Angle;
+        vec3_t Position;
+        switch (o->SubType)
+        {
+        case 1:
+            o->Alpha -= (0.01f) * FPS_ANIMATION_FACTOR;
+            break;
+        case 2:
+        case 3:
+            if (o->LifeTime < 250 + 50 + (34 - o->Skill) * 5)
+            {
+                //RenderMeshEffect
+                if (o->Position[2] > 350)//o->StartPosition[2])
+                {
+                    if (o->Direction[0] == 0 && o->Direction[1] == 0 && o->Direction[2] == 0)
+                    {
+                        o->Direction[0] = (float)((-1 + (rand() % 2)) * 2);
+                        o->Direction[1] = (float)((-1 + (rand() % 2)) * 2);
+                        o->Direction[2] = 0;
+                    }
+                    o->Direction[2] -= (6.0f) * FPS_ANIMATION_FACTOR;
+                }
+                else// if (o->Direction[2] != o->StartPosition[2])
+                {
+                    BOOL bUseEarthQuake = FALSE;
+                    if (o->Direction[2] != -3.0f) bUseEarthQuake = TRUE;
+
+                    if (bUseEarthQuake == TRUE)
+                    {
+                        int PositionX = (int)(o->Position[0] / TERRAIN_SCALE);
+                        int PositionY = (int)(o->Position[1] / TERRAIN_SCALE);
+                        AddWaterWave(PositionX, PositionY, 2, -1000);
+
+                        vec3_t Light = { 0.3f, 0.3f, 0.3f };
+                        vec3_t Angle;
+                        for (int i = 0; i < 100; ++i)
+                        {
+                            VectorCopy(o->Position, Position);
+                            auto fAngle = (float)(rand() % 360);
+                            auto fLength = (float)(rand() % 30 + 30);
+                            Position[0] += sinf(fAngle) * fLength;
+                            Position[1] += cosf(fAngle) * fLength;
+                            Position[2] -= 30.f;
+                            VectorCopy(o->Angle, Angle);
+                            Angle[2] += rand() % 180;
+                            CreateParticleFpsChecked(BITMAP_WATERFALL_5, Position, Angle, Light, 2);
+                        }
+                    }
+                    VectorCopy(o->Position, Position);
+                    Position[0] += rand() % 40 - 20;
+                    Position[1] += rand() % 40 - 20;
+                    Position[2] -= 50.f;
+                    CreateParticleFpsChecked(BITMAP_BUBBLE, Position, o->Angle, o->Light, 4);
+
+                    o->Direction[0] = 0;
+                    o->Direction[1] = 0;
+                    o->Direction[2] = -3.0f;
+
+                    if (o->HeadAngle[0] == 0)
+                    {
+                        if (o->Angle[0] > -30)
+                        {
+                            Vector(o->Angle[0] - (rand() % 3 + 1), o->Angle[1] - 0.0f, o->Angle[2] - 0.0f, o->Angle);
+                        }
+                        else
+                        {
+                            o->HeadAngle[0] = 1;
+                        }
+                    }
+                    else
+                    {
+                        if (o->Angle[0] < 30)
+                        {
+                            Vector(o->Angle[0] + (rand() % 3 + 1), o->Angle[1] - 0.0f, o->Angle[2] - 0.0f, o->Angle);
+                        }
+                        else
+                        {
+                            o->HeadAngle[0] = 0;
+                        }
+                    }
+                    if (o->LifeTime < 100)
+                    {
+                        o->Alpha -= (0.1f) * FPS_ANIMATION_FACTOR;
+                    }
+                }
+            }
+            else
+            {
+                if (o->SubType != 2 && o->LifeTime > 200 + 50 + 135)
+                {
+                    vec3_t Angle = { 0.0f, 0.0f, 0.0f };
+                    if (rand_fps_check(2))
+                    {
+                        //Angle[2] = ( float)i * 10.0f;
+                        Angle[0] = 0;//( float)( rand() % 360);
+                        Angle[1] = 0;//( float)( rand() % 360);
+                        Angle[2] = (float)(rand() % 360);
+                        vec3_t Position;
+                        VectorCopy(o->Position, Position);
+                        //Position[2] += 100.f;
+                        if (rand_fps_check(2))
+                            CreateJointFpsChecked(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 8, NULL, 50.f, 0, 0);
+                    }
+
+                    if (rand_fps_check(3))
+                    {
+                        vec3_t Light;
+                        Vector(0.5f, 0.5f, 0.5f, Light);
+                        CreateParticleFpsChecked(BITMAP_SMOKE + 3, o->Position, o->Angle, Light, 2, (float)(rand() % 32 + 48) * 0.02f);
+                    }
+                }
+            }
+            break;
+        case 4:
+            if (o->LifeTime < 140)
+            {
+                o->Alpha -= (0.01f) * FPS_ANIMATION_FACTOR;
+                if (o->Position[2] > o->StartPosition[2])
+                {
+                    o->Direction[2] -= (3.5f) * FPS_ANIMATION_FACTOR;
+                }
+                else
+                {
+                    //o->Position[2] = 550;
+                    o->Direction[0] = 0;
+                    o->Direction[1] = 0;
+                    o->Direction[2] = 0;
+                }
+            }
+            else
+            {
+                o->AnimationFrame = 0;
+            }
+            break;
+        case 5:
+            if (o->LifeTime < 150)
+            {
+                o->Alpha -= (0.01f) * FPS_ANIMATION_FACTOR;
+            }
+            else
+            {
+                o->AnimationFrame = 0;
+            }
+            break;
         }
         return true;
     }
@@ -6710,6 +7519,926 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE
+    bool Move_MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_(OBJECT* o, int index, float Luminosity)
+    {
+        vec3_t Angle;
+        vec3_t Position;
+        float Matrix[3][4];
+    {
+        if (o->SubType == 0)
+        {
+        }
+        else if (o->SubType == 1)
+        {
+            float	fEPSILON = 0.000001f;
+            float	fRateAlpha_EraseOver = 0.7f;
+            vec3_t	v3RotateAngleRelative;
+            o->Visible = true;
+
+            float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
+
+            if (o->m_Interpolates.m_vecInterpolatesAngle.size() > 0)
+            {
+                o->m_Interpolates.GetAngleCurrent(v3RotateAngleRelative, fCurrentRate);
+
+                o->Angle[0] = v3RotateAngleRelative[0] + o->HeadAngle[0];
+                o->Angle[1] = v3RotateAngleRelative[1] + o->HeadAngle[1];
+                o->Angle[2] = v3RotateAngleRelative[2] + o->HeadAngle[2];
+            }
+
+            // 6. Position
+            if (o->m_Interpolates.m_vecInterpolatesPos.size() > 0)
+            {
+                o->m_Interpolates.GetPosCurrent(o->Position, fCurrentRate);
+            }
+
+            // 8. Scale
+            if (o->m_Interpolates.m_vecInterpolatesScale.size() > 0)
+            {
+                o->m_Interpolates.GetScaleCurrent(o->Scale, fCurrentRate);
+            }
+
+            // 9. Alpha
+            if (o->m_Interpolates.m_vecInterpolatesScale.size() > 0)
+            {
+                o->m_Interpolates.GetAlphaCurrent(o->Alpha, fCurrentRate);
+            }
+
+            float fRateBlurStart, fRateBlurEnd, fRateShadowStart, fRateShadowEnd, fRateJointStart, fRateJointEnd;
+            fRateBlurStart = fRateBlurEnd = 0.0f;
+            fRateShadowStart = fRateShadowEnd = 0.0f;
+            fRateJointStart = fRateJointEnd = 0.0f;
+            switch (o->Type)
+            {
+            case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                // PlayBuffer ( SOUND_ATTACK_FIRE_BUST_EXP );
+                fRateBlurStart = 0.1f; fRateBlurEnd = 0.90f;
+            }
+            break;
+            case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                fRateBlurStart = 0.1f; fRateBlurEnd = 0.90f;
+            }
+            break;
+            case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                fRateBlurStart = 0.3f; fRateBlurEnd = 1.01f;
+                //fRateBlurStart = 0.2f; fRateBlurEnd = 0.90f;
+
+                fRateShadowStart = 0.3f; fRateShadowEnd = 1.01f;
+                fRateJointStart = 0.25f; fRateJointEnd = 0.29f;
+            }
+            break;
+            case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                fRateBlurStart = 0.3f; fRateBlurEnd = 1.01f;
+
+                fRateShadowStart = 0.3f; fRateShadowEnd = 1.01f;
+                fRateJointStart = 0.25f; fRateJointEnd = 0.29f;
+            }
+            break;
+            case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                fRateBlurStart = 0.0f; fRateBlurEnd = 0.0f;
+            }
+            break;
+            case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
+            {
+                fRateBlurStart = 0.10f; fRateBlurEnd = 1.01f;
+                //						fRateBlurStart = 0.0f; fRateBlurEnd = 0.0f;
+            }
+            break;
+            }
+
+            int		iTYPESWORDFORCE = 0;		// 1: FORCE OF SWORD
+            int		iTYPESWORDSHADOW = 0;		// 1: SHADOW SWORD
+            int		iTYPESWORDJOINT = 0;		// 1: JOINT OF SWORD
+
+            switch (o->Type)
+            {
+            case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
+            {
+                iTYPESWORDFORCE = 1;
+                iTYPESWORDSHADOW = 0;
+            }
+            break;
+            case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK2
+            case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK2
+            {
+                iTYPESWORDFORCE = 1;
+                iTYPESWORDSHADOW = 0;
+            }
+            break;
+            case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK1
+            case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:	// ATTACK1
+            {
+                iTYPESWORDFORCE = 0;
+                iTYPESWORDSHADOW = 1;
+                iTYPESWORDJOINT = 0;
+            }
+            break;
+            }
+
+            if (iTYPESWORDFORCE == 1)
+            {
+                if (fCurrentRate > fRateBlurStart && fCurrentRate < fRateBlurEnd)
+                {
+                    BMD* b = &Models[o->Type];
+                    vec3_t  vLightBlur; Vector(1.0f, 1.0f, 1.0f, vLightBlur);
+                    float	fPreRate = 1.0f - (float)((o->LifeTime) + 1) / (float)(o->ExtState);
+                    SETLIMITS(fPreRate, 1.0f, 0.0f);
+                    if (fPreRate < fCurrentRate)
+                    {
+                        float	fStartRate, fEndRate;
+
+                        fStartRate = 1.0f - (float)((o->LifeTime) + 2) / (float)(o->ExtState);
+                        fEndRate = 1.0f - (float)((o->LifeTime) + 1) / (float)(o->ExtState);
+
+                        SETLIMITS(fStartRate, 1.0f, 0.0f);
+                        SETLIMITS(fEndRate, 1.0f, 0.0f);
+
+                        vec3_t* arrEachBonePos;
+                        arrEachBonePos = new vec3_t[b->NumBones];
+
+                        vec3_t v3CurBlurAngle, v3CurBlurPos;
+                        int	iAccess = 10;
+                        int iBone01, iBone02;
+                        int iBlurIdentity, iTypeBlur;
+                        int iBlurAccessTimeAttk01,
+                            iBlurAccessTimeAttk02,
+                            iBlurAccessTimeAttk03,
+                            iBlurAccessTimeAttk04;
+                        float fUnit;
+                        float fCurrentRateUnit = fStartRate;
+                        float fScale = o->Scale;
+
+                        iBlurAccessTimeAttk01 = 3;
+                        iBlurAccessTimeAttk02 = 20;
+                        iBlurAccessTimeAttk03 = 5;
+                        iBlurAccessTimeAttk04 = 6;
+
+                        switch (o->Type)
+                        {
+                        case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+                        {
+                            iAccess = iBlurAccessTimeAttk02;
+                            iBone01 = 3, iBone02 = 12;
+                            iBlurIdentity = 113;
+                            //iTypeBlur = 2;
+                            iTypeBlur = 13;
+                        }
+                        break;
+                        case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+                        {
+                            iAccess = iBlurAccessTimeAttk02;
+                            iBone01 = 13, iBone02 = 1;
+                            iBlurIdentity = 119;
+                            //iTypeBlur = 2;
+                            iTypeBlur = 13;
+                        }
+                        break;
+                        case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+                        {
+                            iAccess = iBlurAccessTimeAttk01;
+                            iBone01 = 4, iBone02 = 6;
+                            iBlurIdentity = 133;
+                            iTypeBlur = 10;
+                        }
+                        break;
+                        case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+                        {
+                            iAccess = iBlurAccessTimeAttk01;
+                            iBone01 = 4, iBone02 = 6;
+                            iBlurIdentity = 122;
+                            iTypeBlur = 10;
+                        }
+                        break;
+                        case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
+                        {
+                            iAccess = iBlurAccessTimeAttk04;
+                            iBone01 = 4, iBone02 = 9;
+                            iBlurIdentity = 155;
+                            iTypeBlur = 2;
+                        }
+                        break;
+                        }	// switch(o->Type)
+
+                        fUnit = (fEndRate - fStartRate) / (float)iAccess;
+
+                        switch (o->Type)
+                        {
+                        case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+                        case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+                        {
+                            for (int i = 0; i < iAccess; i++)
+                            {
+                                fCurrentRateUnit += fUnit;
+
+                                o->m_Interpolates.GetAngleCurrent(v3CurBlurAngle, fCurrentRateUnit);
+                                o->m_Interpolates.GetPosCurrent(v3CurBlurPos, fCurrentRateUnit);
+
+                                VectorAdd(v3CurBlurAngle, o->HeadAngle, v3CurBlurAngle);
+
+                                b->AnimationTransformOnlySelf(
+                                    arrEachBonePos, v3CurBlurAngle, v3CurBlurPos, fScale);
+
+                                CreateObjectBlur(o,
+                                    arrEachBonePos[iBone01],
+                                    arrEachBonePos[iBone02],
+                                    vLightBlur, iTypeBlur, false, iBlurIdentity, 25);
+
+                                if (rand_fps_check(2))
+                                {
+                                    vec3_t	vAngle, vRandomDir, vRandomDirPosition, vResultRandomPosition;
+                                    vec34_t	matRandomRotation;
+                                    vec3_t	vPosition;
+
+                                    if (o->Type == MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_)
+                                    {
+                                        VectorCopy(arrEachBonePos[12], vPosition);
+                                    }
+                                    else
+                                    {
+                                        VectorCopy(arrEachBonePos[1], vPosition);
+                                    }
+
+                                    float	fRandDistance = (float)(rand() % 100) + 100;
+                                    Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
+
+                                    CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 5, 1.35f);
+
+                                    Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
+                                    AngleMatrix(vAngle, matRandomRotation);
+                                    VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
+                                    VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
+                                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
+                                }
+                            }
+                        }
+                        break;
+                        case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+                        case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+                        {
+                            for (int i = 0; i < iAccess; i++)
+                            {
+                                fCurrentRateUnit += fUnit;
+
+                                o->m_Interpolates.GetAngleCurrent(v3CurBlurAngle, fCurrentRateUnit);
+                                o->m_Interpolates.GetPosCurrent(v3CurBlurPos, fCurrentRateUnit);
+
+                                VectorAdd(v3CurBlurAngle, o->HeadAngle, v3CurBlurAngle);
+
+                                b->AnimationTransformOnlySelf(
+                                    arrEachBonePos, v3CurBlurAngle, v3CurBlurPos, fScale);
+
+                                CreateObjectBlur(o,
+                                    arrEachBonePos[iBone01],
+                                    arrEachBonePos[iBone02],
+                                    vLightBlur, iTypeBlur, false, iBlurIdentity, 3);
+
+                                if (o->Type == MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_ ||
+                                    o->Type == MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_)
+                                {
+                                    vec3_t	vAngle, vRandomDir, vRandomDirPosition, vResultRandomPosition;
+                                    vec34_t	matRandomRotation;
+                                    vec3_t	vPosition;
+
+                                    if (o->Type == MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_)
+                                    {
+                                        VectorCopy(arrEachBonePos[12], vPosition);
+                                    }
+                                    else
+                                    {
+                                        VectorCopy(arrEachBonePos[1], vPosition);
+                                    }
+
+                                    float	fRandDistance = (float)(rand() % 100) + 100;
+                                    Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
+
+                                    CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
+
+                                    Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
+                                    AngleMatrix(vAngle, matRandomRotation);
+                                    VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
+                                    VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
+                                    CreateJointFpsChecked(BITMAP_JOINT_THUNDER, vResultRandomPosition, vPosition, vAngle, 3, NULL, 10.f, 10, 10);
+                                }
+                            }
+                        }
+                        break;
+                        case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
+                        {
+                            float			fRateBlur = 0.f;
+
+                            for (int i = 0; i < iAccess; i++)
+                            {
+                                fCurrentRateUnit += fUnit;
+
+                                o->m_Interpolates.GetAngleCurrent(v3CurBlurAngle, fCurrentRateUnit);
+                                o->m_Interpolates.GetPosCurrent(v3CurBlurPos, fCurrentRateUnit);
+
+                                VectorAdd(v3CurBlurAngle, o->HeadAngle, v3CurBlurAngle);
+
+                                fRateBlur = (float)i / (float)iAccess;
+                                b->AnimationTransformOnlySelf(
+                                    arrEachBonePos, v3CurBlurAngle, v3CurBlurPos, o->Scale, o, o->Velocity, fRateBlur);
+
+                                CreateObjectBlur(o, arrEachBonePos[iBone01],
+                                    arrEachBonePos[iBone02], vLightBlur, 13, false, iBlurIdentity + 2, 11);
+                            }
+                        }
+                        break;
+                        }	// Switch(o->Type)
+
+                        delete[] arrEachBonePos;
+                    }	// if( fPreRate < fCurrentRate )
+                }
+            }
+
+            if (iTYPESWORDSHADOW == 1)
+            {
+                if (fCurrentRate > fRateShadowStart && fCurrentRate < fRateShadowEnd)
+                {
+                    CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 20, o, -1, 0, 0, 0, o->Scale);
+                }
+            }
+
+            if (iTYPESWORDJOINT == 1)
+            {
+                if (fCurrentRate > fRateJointStart && fCurrentRate < fRateJointEnd)
+                {
+                    CreateJointFpsChecked(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 20, o, 160.f, 40);
+                }
+            }
+
+            switch (o->Type)
+            {
+            case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                vec3_t	v3LightTerrain;
+                switch (o->Type)
+                {
+                case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+                {
+                    Vector(0.0f, 0.2f, 0.9f, v3LightTerrain);
+                    AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+                }
+                break;
+                case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+                {
+                    Vector(0.0f, 0.2f, 0.9f, v3LightTerrain);
+                    AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+                }
+                break;
+                case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+                {
+                    Vector(0.0f, 0.2f, 0.9f, v3LightTerrain);
+                    AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+                }
+                break;
+                case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+                {
+                    Vector(0.0f, 0.2f, 0.9f, v3LightTerrain);
+                    AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+                }
+                break;
+                }
+            }
+            break;
+            case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                // 3. APPEAR EFFECT
+                if (fCurrentRate >= 0.0f && fCurrentRate <= 0.6f)
+                {
+                    o->Visible = true;		// MoveEffect CreateEffect
+                    BMD* b = &Models[o->Type];
+                    vec3_t* arrEachBonePos;
+                    vec3_t	v3LightModify;
+
+                    // 1. BonePosition Particle
+                    arrEachBonePos = new vec3_t[b->NumBones];
+
+                    // - APPEAR WITH FIRE EFFECT
+                    vec3_t	vRelativePos, vAngle;
+                    vec3_t	v3CurrentHighHierarchyNodePos;
+
+                    Vector(4.f, 0.f, 0.0f, vRelativePos);
+                    VectorCopy(o->Angle, vAngle);
+
+                    BMD* pBMDSwordModel = &Models[o->Type];
+                    BMD* pOwnerModel = &Models[o->Owner->Type];
+
+                    int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };
+                    int iBoneIdx = arrBoneIdxs[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+
+                    pBMDSwordModel->AnimationTransformWithAttachHighModel(o->Owner, pOwnerModel, iBoneIdx,
+                        v3CurrentHighHierarchyNodePos, arrEachBonePos);
+
+                    // - END EFFECT
+                    vec3_t	v3LightTerrain;
+                    Vector(0.9f, 0.4f, 0.1f, v3LightTerrain);
+
+                    AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+
+                    {
+                        Vector(1.0f, 1.0f, 1.0f, v3LightModify);
+
+                        for (int j = 0; j < 11; ++j)
+                        {
+                            if (rand_fps_check(20))
+                            {
+                                CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
+                            }
+                        }
+                    }
+
+                    delete[] arrEachBonePos;
+                }	// if( fCurrentRate >= 0.0f && fCurrentRate <= 0.01f )
+            }
+            break;
+            case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
+            {
+                if (fCurrentRate >= 0.0f && fCurrentRate <= 0.5f)
+                {
+                    // - APPEAR WITH FIRE EFFECT
+                    vec3_t	vAngle;
+                    vec3_t	v3LightModify, v3PosModify;
+
+                    // 1. BonePosition Particle
+                    BMD* b = &Models[o->Type];
+                    auto* arrEachBonePos = new vec3_t[b->NumBones];
+
+                    b->AnimationTransformOnlySelf(arrEachBonePos, o->Angle, o->Position, o->Scale, o);
+
+                    VectorCopy(o->Angle, vAngle);
+                    Vector(1.0f, 1.0f, 1.0f, v3LightModify);
+
+                    for (int i = 0; i < b->NumBones; i++)
+                    {
+                        v3PosModify[0] = arrEachBonePos[i][0] + (float)((rand() % 80) - 40);
+                        v3PosModify[1] = arrEachBonePos[i][1] + (float)((rand() % 80) - 40);
+                        v3PosModify[2] = arrEachBonePos[i][2] + (float)((rand() % 80) - 40);
+                        if (rand_fps_check(10))
+                        {
+                            CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, v3PosModify, vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale * 1.5f);
+                        }
+                    }
+
+                    delete[] arrEachBonePos;
+                }
+
+                vec3_t	v3LightTerrain;
+                Vector(0.9f, 0.4f, 0.1f, v3LightTerrain);
+
+                AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+            }
+            break;
+            }
+            switch (o->Type)
+            {
+            case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                if ((int)o->LifeTime == 5)
+                {
+                    CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
+                }
+            }
+            break;
+            case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                if ((int)o->LifeTime == 3)
+                {
+                    CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
+                }
+            }
+            break;
+            case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
+            {
+                if ((int)o->LifeTime == 10)
+                {
+                    CreateEffectFpsChecked(MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_,
+                        o->Position, o->Angle, o->Light, 11, o->Owner, -1, 0, 0, 0, o->Scale);
+                }
+            }
+            break;
+            case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                if ((int)o->LifeTime == 1)
+                {
+                    CreateEffectFpsChecked(MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE,
+                        o->Position, o->Angle, o->Light, 1,
+                        o->Owner, -1, 0, 0, 0, o->Scale);
+                }
+            }
+            break;
+            }
+            switch (o->Type)
+            {
+            case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                if ((int)o->LifeTime == o->ExtState - 1)
+                {
+                    //PlayBuffer( SOUND_ASSASSIN );
+                    PlayBuffer(SOUND_BLOODATTACK);
+                }
+            }
+            break;
+            case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                if ((int)o->LifeTime == o->ExtState - 1)
+                {
+                    PlayBuffer(SOUND_ATTACK_MELEE_HIT5);
+                    //PlayBuffer( SOUND_ASSASSIN );
+                }
+            }
+            break;
+            case MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE:
+            {
+                if ((int)o->LifeTime == o->ExtState - 5)
+                {
+                    PlayBuffer(SOUND_SKILL_FLAME_STRIKE);
+                }
+            }
+            break;
+            }
+        }
+        else if (o->SubType == 3)
+        {
+            o->Visible = true;		// MoveEffect
+            vec3_t	v3RotateAngleRelative;
+
+            // 2. RATE %
+            float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
+
+            // 4. Angle
+            if (o->m_Interpolates.m_vecInterpolatesAngle.size() > 0)
+            {
+                o->m_Interpolates.GetAngleCurrent(v3RotateAngleRelative, fCurrentRate);
+
+                o->Angle[0] = v3RotateAngleRelative[0] + o->HeadAngle[0];
+                o->Angle[1] = v3RotateAngleRelative[1] + o->HeadAngle[1];
+                o->Angle[2] = v3RotateAngleRelative[2] + o->HeadAngle[2];
+            }
+
+            // 6. Position
+            if (o->m_Interpolates.m_vecInterpolatesPos.size() > 0)
+            {
+                o->m_Interpolates.GetPosCurrent(o->Position, fCurrentRate);
+            }
+
+            // 8. Scale
+            if (o->m_Interpolates.m_vecInterpolatesScale.size() > 0)
+            {
+                o->m_Interpolates.GetScaleCurrent(o->Scale, fCurrentRate);
+            }
+
+            // 9. Alpha
+            if (o->m_Interpolates.m_vecInterpolatesAlpha.size() > 0)
+            {
+                o->m_Interpolates.GetAlphaCurrent(o->Alpha, fCurrentRate);
+            }
+
+            switch (o->Type)
+            {
+            case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+            case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                // - SWORD POSTEFFECT
+                if ((int)o->LifeTime == 0)
+                {
+                    OBJECT* oHighHier = o->Owner;
+
+                    vec3_t	v3RelativePos, v3OwnerBonePos;
+                    Vector(0.0f, 0.0f, 0.0f, v3RelativePos);
+                    Vector(0.0f, 0.0f, 0.0f, v3OwnerBonePos);
+
+                    CreateEffectFpsChecked(o->Type, oHighHier->Position, oHighHier->Angle, oHighHier->Light,
+                        11, o->Owner, -1, 0, 0, 0, o->Scale);
+                }
+
+                // - COLOR.
+                vec3_t	v3LightTerrain;
+                Vector(0.0f, 0.2f, 0.9f, v3LightTerrain);
+                AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+            }
+            break;
+            case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
+            {
+                if ((int)o->LifeTime == 40)
+                {
+                    vec34_t Matrix;
+                    vec3_t vAngle, vDirection, vPosition, vLight;
+                    float fAngle;
+
+                    Vector(1.0f, 1.0f, 1.0f, vLight);
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        Vector(0.f, 200.f, 0.f, vDirection);
+                        fAngle = o->Angle[2] + i * 72.f;
+                        Vector(0.f, 0.f, fAngle, vAngle);
+                        AngleMatrix(vAngle, Matrix);
+                        VectorRotate(vDirection, Matrix, vPosition);
+                        VectorAdd(vPosition, o->Light, vPosition);
+
+                        CreateEffectFpsChecked(BITMAP_JOINT_THUNDER, vPosition, o->Angle, vLight, 1);
+                    }
+
+                    Vector(1.f, 1.f, 1.f, vLight);
+                    VectorCopy(o->Light, vPosition);
+
+                    CreateEffectFpsChecked(BITMAP_CRATER, vPosition, o->Angle, vLight, 2, NULL, -1, 0, 0, 0, 1.5f);
+                    for (int iu = 0; iu < 20; iu++)
+                    {
+                        CreateEffectFpsChecked(MODEL_STONE2, vPosition, o->Angle, vLight);
+                    }
+
+                    vec3_t	v3Pos;
+                    int		iLimitPos = 200;
+
+                    Vector(0.7f, 0.7f, 1.f, vLight);
+
+                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+
+                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+
+                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+
+                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+
+                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+
+                    v3Pos[0] = vPosition[0] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[1] = vPosition[1] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    v3Pos[2] = vPosition[2] + ((rand() % iLimitPos) - (iLimitPos * 0.5f));
+                    CreateParticleFpsChecked(BITMAP_CLUD64, v3Pos, o->Angle, vLight, 7, 2.0f);
+
+                    Vector(0.3f, 0.2f, 1.f, vLight);
+                    CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, vPosition, o->Angle, vLight, 11);
+                    CreateEffectFpsChecked(BITMAP_SHOCK_WAVE, vPosition, o->Angle, vLight, 11);
+
+                    vPosition[2] += 100.0f;
+                    Vector(0.0f, 0.2f, 1.0f, vLight);
+                    CreateEffectFpsChecked(MODEL_EFFECT_THUNDER_NAPIN_ATTACK_1, vPosition, o->Angle, vLight, 1, NULL, -1, 0, 0, 0, 1.0f);
+                }
+            }
+            break;
+            }
+
+            if ((int)o->LifeTime == 15)
+            {
+                CreateEffectFpsChecked(o->Type, o->Position, o->Angle, o->Light, 12, o->Owner, -1, 0, 0, 0, o->Scale);
+            }
+
+            int	iSwordOnTheLand = (o->ExtState / 2) + 5;
+            if (o->LifeTime <= iSwordOnTheLand && o->LifeTime > 10)
+            {
+                EarthQuake = (float)(rand() % 2 - 2) * 0.5f;
+            }
+
+            if ((int)o->LifeTime == o->ExtState)
+            {
+                PlayBuffer(SOUND_ASSASSIN);
+            }
+
+            if ((int)o->LifeTime == o->ExtState / 2 + 2)
+            {
+                PlayBuffer(SOUND_SKILL_GIGANTIC_STORM);
+            }
+
+            if ((int)o->LifeTime == (o->ExtState / 2) + 5)
+            {
+                PlayBuffer(SOUND_FURY_STRIKE2);
+            }
+        }
+        else if (o->SubType == 11)
+        {
+            float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
+
+            if (o->m_Interpolates.m_vecInterpolatesScale.size() > 0)
+            {
+                o->m_Interpolates.GetAlphaCurrent(o->Alpha, fCurrentRate);
+            }
+
+            // 13. APPEAR EFFECT들
+            if (fCurrentRate >= 0.0f && fCurrentRate <= 0.5f)
+            {
+                o->Visible = true;		// MoveEffect CreateEffect
+                BMD* b = &Models[o->Type];
+                vec3_t* arrEachBonePos;
+                vec3_t	v3LightModify;
+
+                // 1. BonePosition Particle
+                arrEachBonePos = new vec3_t[b->NumBones];
+
+                // - APPEAR WITH FIRE EFFECT
+                vec3_t	vRelativePos, vAngle;
+                vec3_t	v3CurrentHighHierarchyNodePos;
+
+                Vector(4.f, 0.f, 0.0f, vRelativePos);
+                VectorCopy(o->Angle, vAngle);
+
+                BMD* pBMDSwordModel = &Models[o->Type];
+                BMD* pOwnerModel = &Models[o->Owner->Type];
+
+                int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		//INDEX.
+                int iBoneIdx = arrBoneIdxs[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+
+                pBMDSwordModel->AnimationTransformWithAttachHighModel(o->Owner, pOwnerModel, iBoneIdx,
+                    v3CurrentHighHierarchyNodePos, arrEachBonePos);
+
+                vec3_t	v3LightTerrain;
+                Vector(0.9f, 0.4f, 0.1f, v3LightTerrain);
+
+                AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+
+                switch (o->Type)
+                {
+                case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+                case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+                {
+                    for (int j = 0; j < 11; ++j)
+                    {
+                        Vector(1.0f, 1.0f, 1.0f, v3LightModify);
+                        if (rand_fps_check(2))
+                        {
+                            CreateParticleFpsChecked(BITMAP_POUNDING_BALL, arrEachBonePos[j], o->Angle, v3LightModify, 3, 1.3f);
+                        }
+                    }
+                }
+                break;
+                case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+                case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+                {
+                    Vector(0.3f, 0.4f, 1.0f, v3LightModify);
+
+                    for (int j = 0; j < 11; ++j)
+                    {
+                        if (rand_fps_check(2))
+                        {
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
+                        }
+                    }
+                }
+                break;
+                case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
+                {
+                    Vector(1.0f, 1.0f, 1.0f, v3LightModify);
+
+                    for (int j = 0; j < 11; ++j)
+                    {
+                        if (rand_fps_check(20))
+                        {
+                            CreateEffectFpsChecked(BITMAP_FIRE_CURSEDLICH, arrEachBonePos[j], vAngle, v3LightModify, 12, o, -1, 0, 0, 0, o->Scale);
+                        }
+                    }
+                }
+                break;
+                default:
+                {
+                }
+                break;
+                }
+                // 3. APPEAR EFFECT
+
+                delete[] arrEachBonePos;
+            }	// if( fCurrentRate >= 0.0f && fCurrentRate <= 0.01f )
+            //
+
+            // 2. ALpha
+            if (o->m_Interpolates.m_vecInterpolatesAlpha.size() > 0)
+            {
+                o->m_Interpolates.GetAlphaCurrent(o->Alpha, fCurrentRate);
+            }
+        } // else if( o->SubType==11 )
+        else if (o->SubType == 12)		// END EFFECT
+        {
+            // 2. RATE %
+            float	fCurrentRate = 1.0f - ((float)o->LifeTime / (float)o->ExtState);
+
+            // 9. (4) Alpha
+            if (o->m_Interpolates.m_vecInterpolatesScale.size() > 0)
+            {
+                o->m_Interpolates.GetAlphaCurrent(o->Alpha, fCurrentRate);
+            }
+
+            // 3. APPEAR EFFECT들
+            if (fCurrentRate >= 0.0f && fCurrentRate <= 0.6f)
+            {
+                o->Visible = true;		// MoveEffect CreateEffect
+                BMD* b = &Models[o->Type];
+                vec3_t* arrEachBonePos;			// Bone
+                vec3_t	v3LightModify;
+
+                // 1. BonePosition Particle
+                arrEachBonePos = new vec3_t[b->NumBones];
+
+                // - APPEAR WITH FIRE EFFECT
+                vec3_t	vRelativePos, vAngle;
+                vec3_t	v3CurrentHighHierarchyNodePos;		//ATTACH
+
+                Vector(4.f, 0.f, 0.0f, vRelativePos);
+                VectorCopy(o->Angle, vAngle);
+
+                BMD* pBMDSwordModel = &Models[o->Type];
+                BMD* pOwnerModel = &Models[o->Owner->Type];
+
+                int arrBoneIdxs[] = { 4, 2, 8, 10, 6 };		//INDEX.
+                int iBoneIdx = arrBoneIdxs[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+
+                pBMDSwordModel->AnimationTransformWithAttachHighModel(o->Owner, pOwnerModel, iBoneIdx,
+                    v3CurrentHighHierarchyNodePos, arrEachBonePos);
+
+                // EFFECT
+                vec3_t	v3LightTerrain;
+                Vector(0.9f, 0.4f, 0.1f, v3LightTerrain);
+
+                AddTerrainLight(o->Position[0], o->Position[1], v3LightTerrain, 2, PrimaryTerrainLight);
+
+                {
+                    Vector(0.3f, 0.4f, 1.0f, v3LightModify);
+                    for (int j = 0; j < 11; ++j)
+                    {
+                        if (rand_fps_check(2))
+                        {
+                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, arrEachBonePos[j], o->Angle, v3LightModify, 10, o->Scale);
+                        }
+                    }
+                }
+                delete[] arrEachBonePos;
+            }
+
+            // 2. ALpha
+            if (o->m_Interpolates.m_vecInterpolatesAlpha.size() > 0)
+            {
+                o->m_Interpolates.GetAlphaCurrent(o->Alpha, fCurrentRate);
+            }
+        } // else if( o->SubType==11 )
+        else if (o->SubType == 20)		//ALPHA
+        {
+            o->Visible = true;		// MoveEffect CreateEffect Move
+            //float	fRateStatic = 0.6f;
+            float	fCurrentRate = (float)(o->LifeTime) / (float)(o->ExtState);
+            vec3_t	v3RotateAngleRelative;
+
+            if (o->m_Interpolates.m_vecInterpolatesAngle.size() > 0)
+            {
+                o->m_Interpolates.GetAngleCurrent(v3RotateAngleRelative, fCurrentRate);
+
+                o->Angle[0] = v3RotateAngleRelative[0];
+                o->Angle[1] = v3RotateAngleRelative[1];
+                o->Angle[2] = v3RotateAngleRelative[2];
+            }
+
+            // 6. Position
+            if (o->m_Interpolates.m_vecInterpolatesPos.size() > 0)
+            {
+                o->m_Interpolates.GetPosCurrent(o->Position, fCurrentRate);
+            }
+
+            // 8. Scale
+            if (o->m_Interpolates.m_vecInterpolatesScale.size() > 0)
+            {
+                o->m_Interpolates.GetScaleCurrent(o->Scale, fCurrentRate);
+            }
+
+            // 9. Alpha
+            if (o->m_Interpolates.m_vecInterpolatesAlpha.size() > 0)
+            {
+                o->m_Interpolates.GetAlphaCurrent(o->Alpha, fCurrentRate);
+            }
+        }
+    }
+
+        return true;
+    }
+
     // MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION
     bool Move_MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION(OBJECT* o, int index, float Luminosity)
     {
@@ -6838,6 +8567,51 @@ namespace Render::Effects::Behaviors
         Temp_Pos[2] -= 30.0f;
         VectorCopy(Temp_Pos, o->Position);
         o->LifeTime = 100;
+    }
+        return true;
+    }
+
+    // BITMAP_WATERFALL_4
+    bool Move_BITMAP_WATERFALL_4(OBJECT* o, int index, float Luminosity)
+    {
+    {
+        vec3_t Temp_Pos;
+        BMD* b = &Models[o->Owner->Type];
+        b->TransformByObjectBone(Temp_Pos, o->Owner, o->PKKey);
+
+        o->Timer += (0.1f) * FPS_ANIMATION_FACTOR;
+        o->Distance += (2.1f) * FPS_ANIMATION_FACTOR;
+        o->Angle[0] += (0.7f) * FPS_ANIMATION_FACTOR;
+
+        o->Light[0] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+        o->Light[1] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+        o->Light[2] *= pow(0.95f, FPS_ANIMATION_FACTOR);
+        //o->Alpha *= pow(0.92f, FPS_ANIMATION_FACTOR);
+
+        vec3_t vPos;
+        for (int i = 0; i < 3; i++)
+        {
+            switch (i)
+            {
+            case 0:
+                vPos[0] = cosf(o->Timer) * o->Distance + Temp_Pos[0];
+                vPos[1] = Temp_Pos[1];
+                vPos[2] = sinf(o->Timer) * o->Distance + Temp_Pos[2];
+                break;
+            case 1:
+                vPos[0] = sinf(o->Timer) * o->Distance + Temp_Pos[0];
+                vPos[1] = cosf(o->Timer) * o->Distance + Temp_Pos[1];
+                vPos[2] = Temp_Pos[2];
+                break;
+            case 2:
+                vPos[0] = Temp_Pos[0];
+                vPos[1] = sinf(o->Timer) * o->Distance + Temp_Pos[1];
+                vPos[2] = cosf(o->Timer) * o->Distance + Temp_Pos[2];
+                break;
+            }
+
+            CreateSprite(BITMAP_WATERFALL_4, vPos, o->Scale, o->Light, o, o->Angle[0]);
+        }
     }
         return true;
     }
@@ -7558,9 +9332,58 @@ namespace Render::Effects::Behaviors
         return true;
     }
 
+    // MODEL_VOLCANO_STONE
+    bool Move_MODEL_VOLCANO_STONE(OBJECT* o, int index, float Luminosity)
+    {
+        float Height;
+    {
+        float Height;
+        o->HeadAngle[2] -= (o->Gravity) * FPS_ANIMATION_FACTOR;
+
+        o->Position[0] = o->Position[0] + o->HeadAngle[0];
+        o->Position[1] = o->Position[1] + o->HeadAngle[1];
+        o->Position[2] = o->Position[2] + o->HeadAngle[2];
+
+        Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
+        o->Angle[0] += (0.3f * o->LifeTime) * FPS_ANIMATION_FACTOR;
+        o->Angle[1] += (0.3f * o->LifeTime) * FPS_ANIMATION_FACTOR;
+
+        if (o->Position[2] + o->Direction[2] <= Height)
+        {
+            o->Position[2] = Height;
+            o->HeadAngle[0] *= pow(0.6f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[1] *= pow(0.6f, FPS_ANIMATION_FACTOR);
+            o->HeadAngle[2] += (1.0f * o->LifeTime) * FPS_ANIMATION_FACTOR;
+            if (o->HeadAngle[2] < 0.5f)
+                o->HeadAngle[2] = 0;
+
+            o->Alpha -= (0.05f) * FPS_ANIMATION_FACTOR;
+        }
+        o->Scale -= (0.03f) * FPS_ANIMATION_FACTOR;
+
+        vec3_t vLight;
+        Vector(1.0f, 1.0f, 1.0f, vLight);
+        float fScale = o->Scale * (rand() % 5 + 5) * 0.1f;
+        switch (rand() % 3)
+        {
+        case 0:
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, fScale);
+            break;
+        case 1:
+            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, o->Position, o->Angle, vLight, 4, fScale);
+            break;
+        case 2:
+            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, o->Position, o->Angle, vLight, 0, fScale);
+            break;
+        }
+    }
+        return true;
+    }
+
     const std::vector<std::pair<int, MoveHandler>>& ExtractedMoveHandlers()
     {
         static const std::vector<std::pair<int, MoveHandler>> handlers = {
+            { MODEL_DRAGON, &Move_MODEL_DRAGON },
             { MODEL_ARROW_AUTOLOAD, &Move_MODEL_ARROW_AUTOLOAD },
             { MODEL_INFINITY_ARROW, &Move_MODEL_INFINITY_ARROW },
             { MODEL_INFINITY_ARROW1, &Move_MODEL_INFINITY_ARROW1 },
@@ -7572,6 +9395,7 @@ namespace Render::Effects::Behaviors
             { MODEL_MULTI_SHOT3, &Move_MODEL_MULTI_SHOT3 },
             { MODEL_MULTI_SHOT1, &Move_MODEL_MULTI_SHOT1 },
             { MODEL_MULTI_SHOT2, &Move_MODEL_MULTI_SHOT2 },
+            { MODEL_BLADE_SKILL, &Move_MODEL_BLADE_SKILL },
             { MODEL_KENTAUROS_ARROW, &Move_MODEL_KENTAUROS_ARROW },
             { MODEL_WARP3, &Move_MODEL_WARP3 },
             { MODEL_WARP2, &Move_MODEL_WARP3 },
@@ -7582,6 +9406,7 @@ namespace Render::Effects::Behaviors
             { MODEL_GHOST, &Move_MODEL_GHOST },
             { MODEL_TREE_ATTACK, &Move_MODEL_TREE_ATTACK },
             { MODEL_BUTTERFLY01, &Move_MODEL_BUTTERFLY01 },
+            { BITMAP_SKULL, &Move_BITMAP_SKULL },
             { MODEL__SPEAR, &Move_MODEL__SPEAR },
             { MODEL_HALLOWEEN_CANDY_BLUE, &Move_MODEL_HALLOWEEN_CANDY_BLUE },
             { MODEL_HALLOWEEN_CANDY_ORANGE, &Move_MODEL_HALLOWEEN_CANDY_BLUE },
@@ -7610,12 +9435,21 @@ namespace Render::Effects::Behaviors
             { MODEL_SUMMONER_WRISTRING_EFFECT, &Move_MODEL_SUMMONER_WRISTRING_EFFECT },
             { MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, &Move_MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT },
             { MODEL_SUMMONER_EQUIP_HEAD_NEIL, &Move_MODEL_SUMMONER_EQUIP_HEAD_NEIL },
+            { MODEL_SUMMONER_CASTING_EFFECT1, &Move_MODEL_SUMMONER_CASTING_EFFECT1 },
+            { MODEL_SUMMONER_CASTING_EFFECT11, &Move_MODEL_SUMMONER_CASTING_EFFECT1 },
+            { MODEL_SUMMONER_CASTING_EFFECT111, &Move_MODEL_SUMMONER_CASTING_EFFECT1 },
+            { MODEL_SUMMONER_CASTING_EFFECT2, &Move_MODEL_SUMMONER_CASTING_EFFECT1 },
+            { MODEL_SUMMONER_CASTING_EFFECT22, &Move_MODEL_SUMMONER_CASTING_EFFECT1 },
+            { MODEL_SUMMONER_CASTING_EFFECT222, &Move_MODEL_SUMMONER_CASTING_EFFECT1 },
+            { MODEL_SUMMONER_CASTING_EFFECT4, &Move_MODEL_SUMMONER_CASTING_EFFECT1 },
             { MODEL_SUMMONER_SUMMON_SAHAMUTT, &Move_MODEL_SUMMONER_SUMMON_SAHAMUTT },
             { MODEL_SUMMONER_SUMMON_NEIL, &Move_MODEL_SUMMONER_SUMMON_NEIL },
             { MODEL_SUMMONER_SUMMON_LAGUL, &Move_MODEL_SUMMONER_SUMMON_LAGUL },
             { BITMAP_MAGIC, &Move_BITMAP_MAGIC },
             { BITMAP_OUR_INFLUENCE_GROUND, &Move_BITMAP_OUR_INFLUENCE_GROUND },
             { BITMAP_ENEMY_INFLUENCE_GROUND, &Move_BITMAP_OUR_INFLUENCE_GROUND },
+            { BITMAP_MAGIC_ZIN, &Move_BITMAP_MAGIC_ZIN },
+            { BITMAP_PIN_LIGHT, &Move_BITMAP_PIN_LIGHT },
             { BITMAP_ORORA, &Move_BITMAP_ORORA },
             { BITMAP_JOINT_THUNDER, &Move_BITMAP_JOINT_THUNDER },
             { BITMAP_IMPACT, &Move_BITMAP_IMPACT },
@@ -7624,6 +9458,7 @@ namespace Render::Effects::Behaviors
             { MODEL_RAKLION_BOSS_MAGIC, &Move_MODEL_RAKLION_BOSS_MAGIC },
             { BITMAP_FIRE_HIK2_MONO, &Move_BITMAP_FIRE_HIK2_MONO },
             { BITMAP_CLOUD, &Move_BITMAP_CLOUD },
+            { MODEL_CHAIN_LIGHTNING, &Move_MODEL_CHAIN_LIGHTNING },
             { MODEL_ALICE_BUFFSKILL_EFFECT, &Move_MODEL_ALICE_BUFFSKILL_EFFECT },
             { MODEL_ALICE_BUFFSKILL_EFFECT2, &Move_MODEL_ALICE_BUFFSKILL_EFFECT },
             { MODEL_LIGHTNING_SHOCK, &Move_MODEL_LIGHTNING_SHOCK },
@@ -7638,6 +9473,7 @@ namespace Render::Effects::Behaviors
             { MODEL_SAW, &Move_MODEL_SAW },
             { MODEL_LASER, &Move_MODEL_LASER },
             { MODEL_SKILL_WHEEL1, &Move_MODEL_SKILL_WHEEL1 },
+            { MODEL_SKILL_WHEEL2, &Move_MODEL_SKILL_WHEEL2 },
             { MODEL_SKILL_FISSURE, &Move_MODEL_SKILL_FISSURE },
             { MODEL_FISSURE, &Move_MODEL_FISSURE },
             { MODEL_SKILL_FURY_STRIKE, &Move_MODEL_SKILL_FURY_STRIKE },
@@ -7647,6 +9483,7 @@ namespace Render::Effects::Behaviors
             { MODEL_CHANGE_UP_CYLINDER, &Move_MODEL_CHANGE_UP_CYLINDER },
             { MODEL_DARK_ELF_SKILL, &Move_MODEL_DARK_ELF_SKILL },
             { MODEL_MAGIC2, &Move_MODEL_MAGIC2 },
+            { MODEL_STORM, &Move_MODEL_STORM },
             { MODEL_SUMMON, &Move_MODEL_SUMMON },
             { MODEL_STORM2, &Move_MODEL_STORM2 },
             { MODEL_STORM3, &Move_MODEL_STORM3 },
@@ -7665,6 +9502,15 @@ namespace Render::Effects::Behaviors
             { MODEL_BOSS_ATTACK, &Move_MODEL_ICE_SMALL },
             { MODEL_EFFECT_SAPITRES_ATTACK_2, &Move_MODEL_ICE_SMALL },
             { MODEL_SKULL, &Move_MODEL_SKULL },
+            { MODEL_CUNDUN_PART1, &Move_MODEL_CUNDUN_PART1 },
+            { MODEL_CUNDUN_PART2, &Move_MODEL_CUNDUN_PART1 },
+            { MODEL_CUNDUN_PART3, &Move_MODEL_CUNDUN_PART1 },
+            { MODEL_CUNDUN_PART4, &Move_MODEL_CUNDUN_PART1 },
+            { MODEL_CUNDUN_PART5, &Move_MODEL_CUNDUN_PART1 },
+            { MODEL_CUNDUN_PART6, &Move_MODEL_CUNDUN_PART1 },
+            { MODEL_CUNDUN_PART7, &Move_MODEL_CUNDUN_PART1 },
+            { MODEL_CUNDUN_PART8, &Move_MODEL_CUNDUN_PART1 },
+            { MODEL_ILLUSION_OF_KUNDUN, &Move_MODEL_CUNDUN_PART1 },
             { MODEL_CURSEDTEMPLE_STATUE_PART1, &Move_MODEL_CURSEDTEMPLE_STATUE_PART1 },
             { MODEL_CURSEDTEMPLE_STATUE_PART2, &Move_MODEL_CURSEDTEMPLE_STATUE_PART1 },
             { MODEL_XMAS2008_SNOWMAN_HEAD, &Move_MODEL_XMAS2008_SNOWMAN_HEAD },
@@ -7788,8 +9634,15 @@ namespace Render::Effects::Behaviors
             { MODEL_STATUE_CRUSH_EFFECT_PIECE03, &Move_MODEL_DOOR_CRUSH_EFFECT_PIECE01 },
             { MODEL_STATUE_CRUSH_EFFECT_PIECE04, &Move_MODEL_STATUE_CRUSH_EFFECT_PIECE04 },
             { MODEL_DOOR_CRUSH_EFFECT_PIECE10, &Move_MODEL_STATUE_CRUSH_EFFECT_PIECE04 },
+            { MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_, &Move_MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_ },
+            { MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_, &Move_MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_ },
+            { MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_, &Move_MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_ },
+            { MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_, &Move_MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_ },
+            { MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_, &Move_MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_ },
+            { MODEL_EMPIREGUARDIANBOSS_FRAMESTRIKE, &Move_MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_ },
             { MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION, &Move_MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION },
             { MODEL_EFFECT_SD_AURA, &Move_MODEL_EFFECT_SD_AURA },
+            { BITMAP_WATERFALL_4, &Move_BITMAP_WATERFALL_4 },
             { MODEL_WOLF_HEAD_EFFECT, &Move_MODEL_WOLF_HEAD_EFFECT },
             { BITMAP_SBUMB, &Move_BITMAP_SBUMB },
             { MODEL_DOWN_ATTACK_DUMMY_L, &Move_MODEL_DOWN_ATTACK_DUMMY_L },
@@ -7807,6 +9660,7 @@ namespace Render::Effects::Behaviors
             { MODEL_WOLF_HEAD_EFFECT2, &Move_MODEL_WOLF_HEAD_EFFECT2 },
             { MODEL_SHOCKWAVE_GROUND01, &Move_MODEL_SHOCKWAVE_GROUND01 },
             { MODEL_DRAGON_LOWER_DUMMY, &Move_MODEL_DRAGON_LOWER_DUMMY },
+            { MODEL_VOLCANO_STONE, &Move_MODEL_VOLCANO_STONE },
         };
         return handlers;
     }
