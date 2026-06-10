@@ -881,6 +881,10 @@ public:
     // based on whether one is focused (issue #447).
     static CUITextInputBox* GetFocusedPortable() { return s_pFocusedPortable; }
 
+    // Release keyboard focus from the focused portable field (counterpart to
+    // GiveFocus()); the field stays visible. Defined in the .cpp.
+    static void ReleaseFocus();
+
     // Input fed from the SDL event loop.
     void OnTextInput(const wchar_t* pszText);            // committed characters
     void OnTextEditing(const wchar_t* pszText);          // IME composition preview (uncommitted)
