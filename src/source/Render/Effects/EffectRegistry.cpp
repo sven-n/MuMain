@@ -80,6 +80,13 @@ namespace Render::Effects
                 add({ MODEL_BLOOD },          { .create = CreateParams{ .lifeTime = 10.f, .blendMesh = 0 } });
                 add({ MODEL_POISON },         { .create = CreateParams{ .lifeTime = 40.f, .scale = 1.0f, .blendMesh = 1 } });
                 add({ BITMAP_SWORDEFF },      { .create = CreateParams{ .lifeTime = 200.f } });
+                add({ BITMAP_FIRE },          { .create = CreateParams{ .lifeTime = 1000.f } });
+                add({ BATTLE_CASTLE_WALL1, BATTLE_CASTLE_WALL2, BATTLE_CASTLE_WALL3, BATTLE_CASTLE_WALL4 },
+                                              { .create = CreateParams{ .lifeTime = 2.f } });
+                add({ MODEL_INFINITY_ARROW4 },
+                                              { .create = CreateParams{ .lifeTime = 15.f, .scale = 1.f, .light = std::array<float, 3>{ 1.f, 0.5f, 0.3f }, .copyLightToDirection = true } });
+                add({ MODEL_CUNDUN_GHOST },
+                                              { .create = CreateParams{ .lifeTime = 200.f, .scale = 1.80f, .velocity = 0.08f, .blendMesh = -2, .light = std::array<float, 3>{ 0.5f, 0.5f, 0.5f } } });
 
                 return e;
             }();

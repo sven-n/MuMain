@@ -468,14 +468,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             }
             break;
 
-            case MODEL_INFINITY_ARROW4:
-            {
-                o->LifeTime = 15.f;
-                o->Scale = 1.f;
-                Vector(1.f, 0.5f, 0.3f, o->Light);
-                VectorCopy(o->Light, o->Direction);
-            }
-            break;
 
             case MODEL_SHIELD_CRASH:
             {
@@ -1075,9 +1067,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     o->LifeTime = 30;
                     o->Velocity = 0.f;
                 }
-                break;
-            case BITMAP_FIRE:
-                o->LifeTime = 1000;
                 break;
             case BITMAP_FIRE + 1:
                 o->LifeTime = 10;
@@ -3719,14 +3708,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 o->AnimationFrame = float(rand() % 5);
             }
             break;
-            case MODEL_CUNDUN_GHOST:
-                o->Velocity = 0.08f;
-                o->LifeTime = 200;
-                o->BlendMesh = -2;
-                o->Scale = 1.80f;
-                //				o->Scale        = 1.88f;
-                Vector(0.5, 0.5, 0.5, o->Light);
-                break;
             case MODEL_CUNDUN_SKILL:
                 switch (o->SubType)
                 {
@@ -3744,12 +3725,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 };
                 break;
 
-            case BATTLE_CASTLE_WALL1:
-            case BATTLE_CASTLE_WALL2:
-            case BATTLE_CASTLE_WALL3:
-            case BATTLE_CASTLE_WALL4:
-                o->LifeTime = 2;
-                break;
 
             case MODEL_HALLOWEEN_EX:
             {
