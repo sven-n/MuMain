@@ -13,6 +13,10 @@ namespace Render::Effects::Behaviors
     // just "RenderObject(o); break;" opt into the registry render path with this.
     void RenderDefault(OBJECT* o);
 
+    // onCreate hook for effects whose creation mixes randomness with directional
+    // setup, which doesn't reduce to independent scalar parameters.
+    void CreateMayaStone45(OBJECT* o);
+
     bool MoveDesair(OBJECT* o, int index);
     bool MoveInfinityArrow4(OBJECT* o, int index);
     bool MoveMagicCapsule2(OBJECT* o, int index);

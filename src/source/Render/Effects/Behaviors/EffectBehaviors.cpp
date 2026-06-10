@@ -12,6 +12,22 @@ namespace Render::Effects::Behaviors
         RenderObject(o);
     }
 
+    // MODEL_MAYASTONE4 / MODEL_MAYASTONE5: launch a stone with a random lifetime,
+    // size, spin and gravity, its initial direction rotated by the random spin.
+    // The rand() draws happen in the original order so the sequence is preserved.
+    void CreateMayaStone45(OBJECT* o)
+    {
+        vec3_t p1;
+        float Matrix[3][4];
+        Vector(0.f, (float)(rand() % 256 + 64) * 0.1f, 0.f, p1);
+        o->LifeTime = rand() % 16 + 32;
+        o->Scale = (float)(rand() % 10) / 3.0f + 1.0f;
+        o->Angle[2] = (float)(rand() % 360);
+        AngleMatrix(o->Angle, Matrix);
+        VectorRotate(p1, Matrix, o->Direction);
+        o->Gravity = (float)(rand() % 16 + 8);
+    }
+
     // MODEL_DESAIR: rides the joint addressed by m_sTargetIndex and sheds
     // feather effects every 10 ticks of life.
     bool MoveDesair(OBJECT* o, int /*index*/)

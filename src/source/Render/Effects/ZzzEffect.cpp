@@ -2106,16 +2106,6 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                 CreateJoint(BITMAP_SMOKE, o->Position, o->Position, o->HeadAngle, 2, o, 100.f);
             }
             break;
-            case MODEL_MAYASTONE4:
-            case MODEL_MAYASTONE5:
-                Vector(0.f, (float)(rand() % 256 + 64) * 0.1f, 0.f, p1);
-                o->LifeTime = rand() % 16 + 32;
-                o->Scale = (float)(rand() % 10) / 3.0f + 1.0f;
-                o->Angle[2] = (float)(rand() % 360);
-                AngleMatrix(o->Angle, Matrix);
-                VectorRotate(p1, Matrix, o->Direction);
-                o->Gravity = (float)(rand() % 16 + 8);
-                break;
             case MODEL_MAYASTONEFIRE:
             {
                 if (o->SubType == MODEL_MAYASTONE1)

@@ -19,6 +19,12 @@ namespace Render::Effects
     // CreateEffect performs for every effect. Every field is optional: an unset
     // field means "keep whatever the common initialisation chose", so a table
     // row only states what actually differs from the default for that effect.
+    //
+    // These cover effects whose creation is plain data. Randomised creation in
+    // this codebase is almost always fused with angle/direction/matrix setup
+    // (e.g. a stone that picks a random spin, then rotates its launch vector by
+    // that angle), which isn't expressible as independent scalar parameters --
+    // those effects use an onCreate hook instead (see EffectDescriptor).
     struct CreateParams
     {
         std::optional<float> lifeTime;

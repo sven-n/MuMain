@@ -88,6 +88,9 @@ namespace Render::Effects
                 add({ MODEL_CUNDUN_GHOST },
                                               { .create = CreateParams{ .lifeTime = 200.f, .scale = 1.80f, .velocity = 0.08f, .blendMesh = -2, .light = std::array<float, 3>{ 0.5f, 0.5f, 0.5f } } });
 
+                // --- Randomised / directional creation via an onCreate hook ---
+                add({ MODEL_MAYASTONE4, MODEL_MAYASTONE5 }, { .onCreate = &Behaviors::CreateMayaStone45 });
+
                 return e;
             }();
             return entries;
