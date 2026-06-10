@@ -424,6 +424,7 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
     {
         SetWindowsEnable(FALSE);
         SetFocus(g_hWnd);
+        CUITextInputBox::ReleaseFocus();
     }
 }
 
@@ -522,6 +523,7 @@ void CUIWindowMgr::HandleMessage()
                     SaveIMEStatus();
 
                 SetFocus(g_hWnd);
+                CUITextInputBox::ReleaseFocus();
             }
             if (GetWindow(m_WorkMessage.m_iParam1)->GetState() == UISTATE_HIDE)
                 ShowHideWindow(m_WorkMessage.m_iParam1, TRUE);
@@ -564,6 +566,7 @@ void CUIWindowMgr::HandleMessage()
                     {
                         g_pWindowMgr->SetWindowsEnable(FALSE);
                         SetFocus(g_hWnd);
+                        CUITextInputBox::ReleaseFocus();
                     }
                 }
             }
@@ -571,6 +574,7 @@ void CUIWindowMgr::HandleMessage()
             {
                 g_pWindowMgr->SetWindowsEnable(FALSE);
                 SetFocus(g_hWnd);
+                CUITextInputBox::ReleaseFocus();
             }
         }
         break;
@@ -608,6 +612,7 @@ void CUIWindowMgr::HandleMessage()
                     {
                         g_pWindowMgr->SetWindowsEnable(FALSE);
                         SetFocus(g_hWnd);
+                        CUITextInputBox::ReleaseFocus();
                     }
                 }
             }
@@ -615,6 +620,7 @@ void CUIWindowMgr::HandleMessage()
             {
                 g_pWindowMgr->SetWindowsEnable(FALSE);
                 SetFocus(g_hWnd);
+                CUITextInputBox::ReleaseFocus();
             }
         }
         break;
