@@ -357,7 +357,7 @@
     <comment>legacy_id=1821</comment>
   </data>
   <data name="Text_90" xml:space="preserve">
-    <value>Skończyłeś czytać 'Zwój Cesarza'. Lecz czy wiesz o tajnym układzie między Murenem a Semedenem, przywódcą Summonerów? Murenowi obiecano pewną rzecz w zamian za oddanie Elbe pod władzę imperium.</value>
+    <value>Skończyłeś czytać 'Zwój Cesarza'. Lecz czy wiesz o tajnym układzie między Murenem a Semedenem, przywódcą Summonerów? Murenowi obiecano pewną rzecz w zamian za oddanie Elveland pod władzę imperium.</value>
     <comment>legacy_id=90</comment>
   </data>
   <data name="Answer_90_Slot_0" xml:space="preserve">
@@ -393,11 +393,11 @@
     <comment>legacy_id=1930</comment>
   </data>
   <data name="Text_94" xml:space="preserve">
-    <value>'Oko Otchłani' ma dla mnie szczególne znaczenie, gdyż nadzoruję wymiary tego świata i porozumiewam się przez nie. Jeśli przyniesiesz 'Oko Otchłani', nadam ci tytuł Blood Summonera od Semedena, opiekuna twojego wymiaru.</value>
+    <value>'Oko Otchłani' ma dla mnie szczególne znaczenie, gdyż nadzoruję wymiary tego świata i porozumiewam się przez nie. Jeśli przyniesiesz 'Oko Otchłani', nadam ci tytuł Bloody Summonera od Semedena, opiekuna twojego wymiaru.</value>
     <comment>legacy_id=94</comment>
   </data>
   <data name="Answer_94_Slot_0" xml:space="preserve">
-    <value>Przyjmij tytuł Blood Summonera</value>
+    <value>Przyjmij tytuł Bloody Summonera</value>
     <comment>legacy_id=1940</comment>
   </data>
   <data name="Text_100" xml:space="preserve">
