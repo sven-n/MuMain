@@ -5586,15 +5586,15 @@
     <comment>legacy_id=1502</comment>
   </data>
   <data name="Failed to register for Castle Siege" xml:space="preserve">
-    <value>Nie udało się zarejestrować w Castle Siege</value>
+    <value>Nie udało się zarejestrować w Oblężeniu Zamku</value>
     <comment>legacy_id=1503</comment>
   </data>
   <data name="Castle Siege registration is successful" xml:space="preserve">
-    <value>Rejestracja Castle Siege przebiegła pomyślnie</value>
+    <value>Rejestracja na Oblężenie Zamku przebiegła pomyślnie</value>
     <comment>legacy_id=1504</comment>
   </data>
   <data name="Already registered in Castle Siege." xml:space="preserve">
-    <value>Już zarejestrowany w Castle Siege.</value>
+    <value>Już zarejestrowany w Oblężeniu Zamku.</value>
     <comment>legacy_id=1505</comment>
   </data>
   <data name="You belong to the guild of the defending team." xml:space="preserve">
@@ -5614,7 +5614,7 @@
     <comment>legacy_id=1509</comment>
   </data>
   <data name="It's not a registration period for Castle Siege." xml:space="preserve">
-    <value>To nie jest okres rejestracji w Castle Siege.</value>
+    <value>To nie jest okres rejestracji w Oblężeniu Zamku.</value>
     <comment>legacy_id=1510</comment>
   </data>
   <data name="Number of guild members is lacking." xml:space="preserve">
@@ -5630,11 +5630,11 @@
     <comment>legacy_id=1513</comment>
   </data>
   <data name="This guild is not registered in Castle Siege." xml:space="preserve">
-    <value>Gildia ta nie jest zarejestrowana w Castle Siege.</value>
+    <value>Gildia ta nie jest zarejestrowana w Oblężeniu Zamku.</value>
     <comment>legacy_id=1514</comment>
   </data>
   <data name="It's not a surrendering period for Castle Siege." xml:space="preserve">
-    <value>To nie jest okres poddania się Castle Siege.</value>
+    <value>To nie jest okres poddania się w Oblężeniu Zamku.</value>
     <comment>legacy_id=1515</comment>
   </data>
   <data name="Registration of sign has failed." xml:space="preserve">
@@ -5642,7 +5642,7 @@
     <comment>legacy_id=1516</comment>
   </data>
   <data name="This guild has not participated in Castle Siege." xml:space="preserve">
-    <value>Gildia ta nie brała udziału w Castle Siege.</value>
+    <value>Gildia ta nie brała udziału w Oblężeniu Zamku.</value>
     <comment>legacy_id=1517</comment>
   </data>
   <data name="Incorrect item was registered." xml:space="preserve">
@@ -11234,7 +11234,7 @@
     <comment>legacy_id=3295</comment>
   </data>
   <data name="for Dark Wizard will be created." xml:space="preserve">
-    <value>for Dark Wizard zostanie utworzony.</value>
+    <value>dla Dark Wizarda zostanie utworzony.</value>
     <comment>legacy_id=3296</comment>
   </data>
   <data name="Will be exchanged with an item usable for" xml:space="preserve">
