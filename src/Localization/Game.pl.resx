@@ -2414,11 +2414,11 @@
     <comment>legacy_id=640</comment>
   </data>
   <data name="The gate of Devil Square will close down in %d seconds" xml:space="preserve">
-    <value>Brama Devil Square zamknie się za %d sekund</value>
+    <value>Brama do Devil Square zamknie się za %d sekund</value>
     <comment>legacy_id=641</comment>
   </data>
   <data name="The gate of Devil Square is closing down (%d seconds remaining)" xml:space="preserve">
-    <value>Brama Devil Square zamyka się (pozostało %d sekund)</value>
+    <value>Brama do Devil Square zamyka się (pozostało %d sekund)</value>
     <comment>legacy_id=642</comment>
   </data>
   <data name="You can enter Devil Square now!!" xml:space="preserve">
@@ -2466,7 +2466,7 @@
     <comment>legacy_id=653</comment>
   </data>
   <data name="SomeSayThatTheDevilEyes" xml:space="preserve">
-    <value>Niektórzy mówią, że Devil Eyes odnaleziono u niektórych potworów na kontynencie MU. Spróbuj upolować jak najwięcej potworów, aby zdobyć Devil Eyes. Jeśli go zdobędziesz, idź spotkać się z Charonem w Norii.</value>
+    <value>Niektórzy mówią, że Devil Eyes odnaleziono u niektórych potworów na kontynencie MU. Spróbuj upolować jak najwięcej potworów, aby zdobyć Devil Eyes. Jeśli je zdobędziesz, idź spotkać się z Charonem w Norii.</value>
     <comment>legacy_id=654</comment>
   </data>
   <data name="ManyAdventurersAndWarriorsAreCrowding" xml:space="preserve">
@@ -2474,11 +2474,11 @@
     <comment>legacy_id=655</comment>
   </data>
   <data name="DoNotYouWantToProve" xml:space="preserve">
-    <value>Nie chcesz udowodnić, że jesteś najodważniejszy z najodważniejszych. Szansa stoi przed Tobą. Jeśli zdobędziesz Devil Eye and Key, będziesz o krok bliżej tej okazji.</value>
+    <value>Nie chcesz udowodnić, że jesteś najodważniejszy z najodważniejszych. Szansa stoi przed Tobą. Jeśli zdobędziesz Devil Eye i Devil's Key, będziesz o krok bliżej tej okazji.</value>
     <comment>legacy_id=656</comment>
   </data>
   <data name="ThousandsOfYearsAgoTheDevil" xml:space="preserve">
-    <value>Tysiące lat temu Devil Eye and Key istniały kiedyś na kontynencie MU i zniknęły. Ale teraz można je zobaczyć na całym kontynencie. Idź, znajdź ich i przynieś Goblinowi Chaosu w Norii</value>
+    <value>Tysiące lat temu Devil Eye i Devil's Key istniały kiedyś na kontynencie MU i zniknęły. Ale teraz można je zobaczyć na całym kontynencie. Idź, znajdź je i przynieś Goblinowi Chaosu w Norii</value>
     <comment>legacy_id=657</comment>
   </data>
   <data name="AreYouLookingForTheDevil" xml:space="preserve">
@@ -2494,11 +2494,11 @@
     <comment>legacy_id=660</comment>
   </data>
   <data name="FinallyTheGateOfDevilSquare" xml:space="preserve">
-    <value>Wreszcie brama Devil Square ponownie się otworzyła. Charon, strażnik bramy, pozwoli ci wejść na Devil Square</value>
+    <value>Wreszcie brama do Devil Square ponownie się otworzyła. Charon, strażnik bramy, pozwoli ci wejść na Devil Square</value>
     <comment>legacy_id=661</comment>
   </data>
   <data name="ManyAdventurersAreLookingForThe" xml:space="preserve">
-    <value>Wielu poszukiwaczy przygód szuka Devil Eye i Klucza. Potrzebujecie ich obu, aby otrzymać bilet, który zabierze Was na Devil Square.</value>
+    <value>Wielu poszukiwaczy przygód szuka Devil Eye i Devil's Key. Potrzebujecie ich obu, aby otrzymać bilet, który zabierze Was na Devil Square.</value>
     <comment>legacy_id=662</comment>
   </data>
   <data name="Only level above %d can do the Chaos Combination." xml:space="preserve">
@@ -3094,7 +3094,7 @@
     <comment>legacy_id=831</comment>
   </data>
   <data name="YourWillToHelpTheArchangel" xml:space="preserve">
-    <value>Twoja wola pomocy Archaniołowi jest doceniana. Ale bądź ostrożny, młody wojowniku z Blood Castle to niebezpieczne miejsce. Niech Bóg będzie z tobą.</value>
+    <value>Twoja wola pomocy Archaniołowi jest doceniana. Ale bądź ostrożny, młody wojowniku — Blood Castle to niebezpieczne miejsce. Niech Bóg będzie z tobą.</value>
     <comment>legacy_id=832</comment>
   </data>
   <data name="AhGreatWarriorThanksToYour" xml:space="preserve">
@@ -3146,7 +3146,7 @@
     <comment>legacy_id=844</comment>
   </data>
   <data name="TheArchangelIsFightingTheEvil" xml:space="preserve">
-    <value>Archanioł samotnie walczy ze złymi stworzeniami z Kundun w Blood Castle! Jeśli rzeczywiście jesteś tak odważny, jak mówisz, pomóż Archaniołowi!</value>
+    <value>Archanioł samotnie walczy ze złymi stworzeniami Kunduna w Blood Castle! Jeśli rzeczywiście jesteś tak odważny, jak mówisz, pomóż Archaniołowi!</value>
     <comment>legacy_id=845</comment>
   </data>
   <data name="Messenger of Archangel" xml:space="preserve">
@@ -3182,7 +3182,7 @@
     <comment>legacy_id=853</comment>
   </data>
   <data name="The level of the Cloak of Invisibility is incorrect." xml:space="preserve">
-    <value>Poziom Cloak of Invisibility jest nieprawidłowy.</value>
+    <value>Nieprawidłowy poziom Cloak of Invisibility.</value>
     <comment>legacy_id=854</comment>
   </data>
   <data name="EvenIfYouDieOrUse" xml:space="preserve">
@@ -5622,11 +5622,11 @@
     <comment>legacy_id=1511</comment>
   </data>
   <data name="Surrendering Castle Siege has failed." xml:space="preserve">
-    <value>Castle Siege Poddania nie powiodło się.</value>
+    <value>Poddanie w Castle Siege nie powiodło się.</value>
     <comment>legacy_id=1512</comment>
   </data>
   <data name="Surrendering Castle Siege is successful." xml:space="preserve">
-    <value>Castle Siege Poddania zakończyło się sukcesem.</value>
+    <value>Poddanie w Castle Siege zakończyło się sukcesem.</value>
     <comment>legacy_id=1513</comment>
   </data>
   <data name="This guild is not registered in Castle Siege." xml:space="preserve">
@@ -6186,7 +6186,7 @@
     <comment>legacy_id=1659</comment>
   </data>
   <data name="IfYouHavePassedThroughThe" xml:space="preserve">
-    <value>Jeśli zdałeś test Apostoła Devina, Wilkołak Strażnik wyśle ciebie i członków twojej grupy Barrack Balgass.</value>
+    <value>Jeśli zdałeś test Apostoła Devina, Wilkołak Strażnik wyśle ciebie i członków twojej grupy do Balgass' Barrack.</value>
     <comment>legacy_id=1660</comment>
   </data>
   <data name="InOrderToReceiveHelpFrom" xml:space="preserve">
@@ -10022,11 +10022,11 @@
     <comment>legacy_id=2874</comment>
   </data>
   <data name="YouCanDoAGoblinCombination" xml:space="preserve">
-    <value>Możesz wykonać kombinację Goblinów z Zapieczętowanym Golden Box, aby stworzyć Golden Box.</value>
+    <value>Możesz wykonać kombinację Goblinów z Sealed Golden Box, aby stworzyć Golden Box.</value>
     <comment>legacy_id=2875</comment>
   </data>
   <data name="YouCanDoAGoblinCombination2876" xml:space="preserve">
-    <value>Możesz wykonać kombinację Goblinów z Zapieczętowanym Silver Box, aby stworzyć Silver Box.</value>
+    <value>Możesz wykonać kombinację Goblinów z Sealed Silver Box, aby stworzyć Silver Box.</value>
     <comment>legacy_id=2876</comment>
   </data>
   <data name="You can do a Goblin combination with a Gold Key to create a Golden Box." xml:space="preserve">
