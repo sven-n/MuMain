@@ -81,11 +81,11 @@
     <comment>legacy_id=19</comment>
   </data>
   <data name="Dark Wizard" xml:space="preserve">
-    <value>Mroczny Czarodziej</value>
+    <value>Dark Wizard</value>
     <comment>legacy_id=20</comment>
   </data>
   <data name="Dark Knight" xml:space="preserve">
-    <value>Mroczny Rycerz</value>
+    <value>Dark Knight</value>
     <comment>legacy_id=21</comment>
   </data>
   <data name="Elf" xml:space="preserve">
@@ -93,23 +93,23 @@
     <comment>legacy_id=22</comment>
   </data>
   <data name="Magic Gladiator" xml:space="preserve">
-    <value>Magiczny Gladiator</value>
+    <value>Magic Gladiator</value>
     <comment>legacy_id=23</comment>
   </data>
   <data name="Dark Lord" xml:space="preserve">
-    <value>Czarny Pan</value>
+    <value>Dark Lord</value>
     <comment>legacy_id=24</comment>
   </data>
   <data name="Soul Master" xml:space="preserve">
-    <value>Mistrz Duszy</value>
+    <value>Soul Master</value>
     <comment>legacy_id=25</comment>
   </data>
   <data name="Blade Knight" xml:space="preserve">
-    <value>Rycerz Ostrzy</value>
+    <value>Blade Knight</value>
     <comment>legacy_id=26</comment>
   </data>
   <data name="Muse Elf" xml:space="preserve">
-    <value>Muza Elfa</value>
+    <value>Muse Elf</value>
     <comment>legacy_id=27</comment>
   </data>
   <data name="Reserve : Job" xml:space="preserve">
@@ -465,7 +465,7 @@
     <comment>legacy_id=116</comment>
   </data>
   <data name="Heart of Dark Lord" xml:space="preserve">
-    <value>Serce Czarnego Pana</value>
+    <value>Serce Dark Lorda</value>
     <comment>legacy_id=117</comment>
   </data>
   <data name="Moon Cookie" xml:space="preserve">
@@ -2762,7 +2762,7 @@
     <comment>legacy_id=728</comment>
   </data>
   <data name="LorenIsTheNameOfA" xml:space="preserve">
-    <value>Loren to nazwa królestwa zaawansowanych mistrzów miecza i domu wielu znanych Mrocznych Rycerzy.</value>
+    <value>Loren to nazwa królestwa zaawansowanych mistrzów miecza i domu wielu znanych Dark Knightów.</value>
     <comment>legacy_id=729</comment>
   </data>
   <data name="Quest Item" xml:space="preserve">
@@ -4478,7 +4478,7 @@
     <comment>legacy_id=1200</comment>
   </data>
   <data name="Dark Lord exclusive skill" xml:space="preserve">
-    <value>Ekskluzywna umiejętność Czarnego Pana</value>
+    <value>Ekskluzywna umiejętność Dark Lorda</value>
     <comment>legacy_id=1201</comment>
   </data>
   <data name="%s what is your command?" xml:space="preserve">
@@ -4638,7 +4638,7 @@
     <comment>legacy_id=1241</comment>
   </data>
   <data name="Magic Gladiator, Dark lord" xml:space="preserve">
-    <value>Magiczny Gladiator, Mroczny Panie</value>
+    <value>Magic Gladiator, Dark Lord</value>
     <comment>legacy_id=1242</comment>
   </data>
   <data name="Character that can't be created" xml:space="preserve">
@@ -6222,11 +6222,11 @@
     <comment>legacy_id=1668</comment>
   </data>
   <data name="Grand Master" xml:space="preserve">
-    <value>Wielki Mistrz</value>
+    <value>Grand Master</value>
     <comment>legacy_id=1669</comment>
   </data>
   <data name="High Elf" xml:space="preserve">
-    <value>Wysoki Elf</value>
+    <value>High Elf</value>
     <comment>legacy_id=1670</comment>
   </data>
   <data name="Dual Master" xml:space="preserve">
@@ -6294,11 +6294,11 @@
     <comment>legacy_id=1686</comment>
   </data>
   <data name="Summoner" xml:space="preserve">
-    <value>Przywoływacz</value>
+    <value>Summoner</value>
     <comment>legacy_id=1687</comment>
   </data>
   <data name="Bloody Summoner" xml:space="preserve">
-    <value>Krwawy przywoływacz</value>
+    <value>Bloody Summoner</value>
     <comment>legacy_id=1688</comment>
   </data>
   <data name="Dimension Master" xml:space="preserve">
@@ -6378,7 +6378,7 @@
     <comment>legacy_id=1707</comment>
   </data>
   <data name="ComplexCharacterThatHasACharacteristics" xml:space="preserve">
-    <value>Złożona postać posiadająca cechy Mrocznego Rycerza i Mrocznego Czarodzieja. Opanuj walkę w zwarciu i możesz swobodnie władać zaklęciami.</value>
+    <value>Złożona postać posiadająca cechy Dark Knighta i Dark Wizarda. Opanuj walkę w zwarciu i możesz swobodnie władać zaklęciami.</value>
     <comment>legacy_id=1708</comment>
   </data>
   <data name="CharismaticCharacterThatCanCommandThe" xml:space="preserve">
@@ -10878,7 +10878,7 @@
     <comment>legacy_id=3113</comment>
   </data>
   <data name="Dark Lord use only." xml:space="preserve">
-    <value>Tylko do użytku Czarnego Pana.</value>
+    <value>Tylko do użytku Dark Lorda.</value>
     <comment>legacy_id=3115</comment>
   </data>
   <data name="You can enter to Gold Channel." xml:space="preserve">
@@ -11018,11 +11018,11 @@
     <comment>legacy_id=3149</comment>
   </data>
   <data name="Rage Fighter" xml:space="preserve">
-    <value>Wojownik Wściekłości</value>
+    <value>Rage Fighter</value>
     <comment>legacy_id=3150</comment>
   </data>
   <data name="Fist Master" xml:space="preserve">
-    <value>Mistrz Pięści</value>
+    <value>Fist Master</value>
     <comment>legacy_id=3151</comment>
   </data>
   <data name="LegitimateBearersOfTheKarutanRoyal" xml:space="preserve">
@@ -11230,7 +11230,7 @@
     <comment>legacy_id=3294</comment>
   </data>
   <data name="If you are a Dark Wizard, exclusive item" xml:space="preserve">
-    <value>Jeśli jesteś Mrocznym Czarodziejem, ekskluzywny przedmiot</value>
+    <value>Jeśli jesteś Dark Wizardem, ekskluzywny przedmiot</value>
     <comment>legacy_id=3295</comment>
   </data>
   <data name="for Dark Wizard will be created." xml:space="preserve">
