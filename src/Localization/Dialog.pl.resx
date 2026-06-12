@@ -513,7 +513,7 @@
     <comment>legacy_id=2140</comment>
   </data>
   <data name="Text_115" xml:space="preserve">
-    <value>'Mroczny Kamień', który podobno daje wojownikom nową moc, odnaleziono na kontynencie MU. Lecz nie jesteś gotów, by użyć tej mocy. Poczekaj, aż będziesz gotów.</value>
+    <value>'Ciemny Kamień', który podobno daje wojownikom nową moc, odnaleziono na kontynencie MU. Lecz nie jesteś gotów, by użyć tej mocy. Poczekaj, aż będziesz gotów.</value>
     <comment>legacy_id=115</comment>
   </data>
   <data name="Answer_115_Slot_0" xml:space="preserve">
@@ -593,7 +593,7 @@
     <comment>legacy_id=2340</comment>
   </data>
   <data name="Text_135" xml:space="preserve">
-    <value>Jeśli pragniesz zyskać nową moc, słuchaj mnie uważnie. 'Mroczny Kamień', który podobno daje wojownikom nową moc, odnaleziono na kontynencie MU.</value>
+    <value>Jeśli pragniesz zyskać nową moc, słuchaj mnie uważnie. 'Ciemny Kamień', który podobno daje wojownikom nową moc, odnaleziono na kontynencie MU.</value>
     <comment>legacy_id=135</comment>
   </data>
   <data name="Answer_135_Slot_0" xml:space="preserve">
@@ -601,7 +601,7 @@
     <comment>legacy_id=2350</comment>
   </data>
   <data name="Text_136" xml:space="preserve">
-    <value>Dzięki 'Mrocznemu Kamieniowi' możesz opanować nową umiejętność. Nie będzie to łatwe, lecz skoro zdołałeś zdobyć 'Pierścień Chwały', może i to jest dla ciebie możliwe.</value>
+    <value>Dzięki 'Ciemnemu Kamieniowi' możesz opanować nową umiejętność. Nie będzie to łatwe, lecz skoro zdołałeś zdobyć 'Pierścień Chwały', może i to jest dla ciebie możliwe.</value>
     <comment>legacy_id=136</comment>
   </data>
   <data name="Answer_136_Slot_0" xml:space="preserve">
@@ -625,15 +625,15 @@
     <comment>legacy_id=2372</comment>
   </data>
   <data name="Text_138" xml:space="preserve">
-    <value>'Mroczny Kamień' wzywa cię właśnie teraz. Z nim w dłoni z pewnością zyskasz moc, jakiej nigdy wcześniej nie czułeś, lecz wielu innych wojowników również rozpaczliwie go szuka.</value>
+    <value>'Ciemny Kamień' wzywa cię właśnie teraz. Z nim w dłoni z pewnością zyskasz moc, jakiej nigdy wcześniej nie czułeś, lecz wielu innych wojowników również rozpaczliwie go szuka.</value>
     <comment>legacy_id=138</comment>
   </data>
   <data name="Answer_138_Slot_0" xml:space="preserve">
-    <value>Wrócę z 'Mrocznym Kamieniem'.</value>
+    <value>Wrócę z 'Ciemnym Kamieniem'.</value>
     <comment>legacy_id=2380</comment>
   </data>
   <data name="Text_139" xml:space="preserve">
-    <value>A więc odnalazłeś 'Mroczny Kamień'. Zapisano, że ten kamień to zaschła krew bohatera 'Benelope', który walczył w Wojnie Bogów i Szatana.</value>
+    <value>A więc odnalazłeś 'Ciemny Kamień'. Zapisano, że ten kamień to zaschła krew bohatera 'Benelope', który walczył w Wojnie Bogów i Szatana.</value>
     <comment>legacy_id=139</comment>
   </data>
   <data name="Answer_139_Slot_0" xml:space="preserve">
@@ -649,7 +649,7 @@
     <comment>legacy_id=2400</comment>
   </data>
   <data name="Text_141" xml:space="preserve">
-    <value>Tak, płynie w tobie krew wojownika. Dlatego moc Benelope zostanie ci dana poprzez 'Mroczny Kamień'.</value>
+    <value>Tak, płynie w tobie krew wojownika. Dlatego moc Benelope zostanie ci dana poprzez 'Ciemny Kamień'.</value>
     <comment>legacy_id=141</comment>
   </data>
   <data name="Answer_141_Slot_0" xml:space="preserve">
@@ -665,7 +665,7 @@
     <comment>legacy_id=2420</comment>
   </data>
   <data name="Text_143" xml:space="preserve">
-    <value>Możliwe, że zdołasz zdobyć nową moc. Legendarny skarb zwany 'Mrocznym Kamieniem', uważany za święty wraz z 'Pierścieniem Chwały', wzywa cię.</value>
+    <value>Możliwe, że zdołasz zdobyć nową moc. Legendarny skarb zwany 'Ciemnym Kamieniem', uważany za święty wraz z 'Pierścieniem Chwały', wzywa cię.</value>
     <comment>legacy_id=143</comment>
   </data>
   <data name="Answer_143_Slot_0" xml:space="preserve">
