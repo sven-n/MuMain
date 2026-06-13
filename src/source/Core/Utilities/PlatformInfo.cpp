@@ -1,7 +1,11 @@
 #include "stdafx.h"
 #include "PlatformInfo.h"
 
+#include <string>
+
 #ifdef _WIN32
+#include <cwchar>       // swprintf
+#include <iterator>     // std::size
 // Intentionally not including <winternl.h>: it redeclares types already in
 // <windows.h> and conflicts under MinGW. OSVERSIONINFOW (from windows.h) is
 // layout-identical to RTL_OSVERSIONINFOW, so RtlGetVersion can write into it.
@@ -15,12 +19,14 @@
 #include <cstdio>       // sscanf
 #endif
 
-#include <cwchar>       // swprintf
-#include <iterator>     // std::size
-
 // The OS name and version are fixed for the process lifetime, so each platform
 // computes the string once into a function-local static. GetOSVersionString is
 // called every frame from the debug overlay; caching keeps it off the hot path.
+//
+// The non-Windows branches build the result with std::wstring concatenation
+// rather than swprintf("%s", ...): a narrow-to-wide "%s" conversion in a wide
+// printf is non-portable. OS strings are ASCII, so the byte-wise widening via
+// the iterator-pair wstring constructor is safe here.
 
 namespace Core::Platform
 {
@@ -70,9 +76,8 @@ std::wstring GetOSVersionString()
         if (__system_property_get("ro.build.version.release", release) <= 0)
             return L"Android";
 
-        wchar_t buf[64];
-        swprintf(buf, std::size(buf), L"Android %s", release);
-        return buf;
+        const std::string releaseStr(release);
+        return L"Android " + std::wstring(releaseStr.begin(), releaseStr.end());
     }();
     return osVersion;
 }
@@ -84,21 +89,22 @@ std::wstring GetOSVersionString()
     static const std::wstring osVersion = []() -> std::wstring
     {
 #if TARGET_OS_IPHONE
-        const char* osName = "iOS";
+        const std::string name = "iOS";
 #else
-        const char* osName = "macOS";
+        const std::string name = "macOS";
 #endif
+        const std::wstring nameW(name.begin(), name.end());
+
         // kern.osproductversion is the marketing version (e.g. "14.5"),
         // available since macOS 10.13.4 / iOS 11.
         char version[64] = {};
         size_t len = sizeof(version);
-        wchar_t buf[64];
-        if (sysctlbyname("kern.osproductversion", version, &len, nullptr, 0) == 0 &&
-            version[0] != '\0')
-            swprintf(buf, std::size(buf), L"%s %s", osName, version);
-        else
-            swprintf(buf, std::size(buf), L"%s", osName);
-        return buf;
+        if (sysctlbyname("kern.osproductversion", version, &len, nullptr, 0) != 0 ||
+            version[0] == '\0')
+            return nameW;
+
+        const std::string versionStr(version);
+        return nameW + L" " + std::wstring(versionStr.begin(), versionStr.end());
     }();
     return osVersion;
 }
@@ -115,14 +121,15 @@ std::wstring GetOSVersionString()
 
         // sysname is the kernel name ("Linux"); release is like "6.18.33-...".
         // Show only the kernel major.minor to keep the overlay line short.
+        const std::string sysName(uts.sysname);
+        const std::wstring sysNameW(sysName.begin(), sysName.end());
+
         int major = 0;
         int minor = 0;
-        wchar_t buf[64];
-        if (sscanf(uts.release, "%d.%d", &major, &minor) == 2)
-            swprintf(buf, std::size(buf), L"%s %d.%d", uts.sysname, major, minor);
-        else
-            swprintf(buf, std::size(buf), L"%s", uts.sysname);
-        return buf;
+        if (sscanf(uts.release, "%d.%d", &major, &minor) != 2)
+            return sysNameW;
+
+        return sysNameW + L" " + std::to_wstring(major) + L"." + std::to_wstring(minor);
     }();
     return osVersion;
 }
