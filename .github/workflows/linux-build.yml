@@ -50,13 +50,20 @@ jobs:
         run: |
           cmake -S . -B build-linux -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DENABLE_EDITOR=${{ matrix.editor }}
+            -DENABLE_EDITOR=${{ matrix.editor }} \
+            -DBUILD_TESTING=ON
 
       - name: Build wire-size guards
         run: cmake --build build-linux --target GenWireSizes
 
-      - name: Build client (engine + linux-x64 .so)
-        run: cmake --build build-linux --target Main -j"$(nproc)"
+      - name: Build client (engine + linux-x64 .so) and tests
+        run: cmake --build build-linux -j"$(nproc)"
+
+      - name: Run unit tests
+        # Runs natively on Linux (no wine). With editor OFF this includes the
+        # editor_leak guard, which fails if any MuEditor source was compiled
+        # into the non-editor client (issue #359).
+        run: ctest --test-dir build-linux --output-on-failure
 
       - name: Verify the client library was built and is loadable
         run: |
