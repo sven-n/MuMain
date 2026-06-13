@@ -1453,7 +1453,12 @@ namespace Render::Effects::Behaviors
     {
         if (o->SubType == 0)
         {
-            if (o->Owner == NULL || o->Owner->Live == false)
+            if (o->Owner == NULL)
+            {
+                o->Live = false;
+                return true;
+            }
+            if (o->Owner->Live == false)
                 o->Live = false;
 
             VectorCopy(o->Owner->Position, o->Position);
