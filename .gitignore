@@ -14,7 +14,7 @@ _deps/
 _deps
 
 # CMake build directories
-build/
+/build/
 build-mingw/
 /cmake-build-debug/
 /cmake-build-release/

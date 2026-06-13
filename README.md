@@ -273,7 +273,7 @@ The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 - [Options window and config](docs/options-window.md) - runtime
   resolution / windowed toggle, slider rounding, and what the options
   window stores in `config.ini`.
-- [Build guide](docs/build-guide.md) - platform-specific build notes.
+- [Build guide](docs/build/README.md) - platform-specific build notes.
 - [Translation system](docs/translation-system.md) - how the .resx ->
   generated C++ accessors pipeline works, how to add a string or a locale,
   runtime locale switching, and observer hooks for cached UI strings.
