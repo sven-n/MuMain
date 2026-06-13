@@ -410,6 +410,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
             && CheckMouseIn(m_EditBox->GetPosition_x(), m_EditBox->GetPosition_y(), m_EditBox->GetWidth(), m_EditBox->GetHeight()) == false)
         {
             SetFocus(g_hWnd);
+            CUITextInputBox::ReleaseFocus();
         }
     }
 
@@ -584,6 +585,7 @@ void SEASON3B::CNewUIMyShopInventory::ClosingProcess()
     CNewUIInventoryCtrl::BackupPickedItem();
     g_pMyInventory->ChangeMyShopButtonStateOpen();
     SetFocus(g_hWnd);
+    CUITextInputBox::ReleaseFocus();
 }
 
 int SEASON3B::CNewUIMyShopInventory::GetPointedItemIndex()

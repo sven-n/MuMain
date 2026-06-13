@@ -374,11 +374,17 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
             CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
         }
     }
-    else
+    else if (isEncrypted)
     {
         // Remember the address we actually connected to so auto-reconnect can
-        // probe it directly. This covers both the connect-server flow and a
-        // direct game-server connection (where ReceiveServerConnect never runs).
+        // probe it directly. Only cache game-server endpoints: a reconnect
+        // re-runs the login/character/join sequence, which the connect server
+        // can't answer. The connect server is the only unencrypted endpoint
+        // (see the port heuristic above), so caching when isEncrypted captures
+        // both the redirected game server (ReceiveServerConnect), a map-server
+        // change, and a direct game-server connection (where ReceiveServerConnect
+        // never runs), while skipping the connect server that would otherwise
+        // poison the cache and break reconnection (issue #68).
         ReconnectManager::Instance().CacheServer(IpAddr, Port);
     }
 

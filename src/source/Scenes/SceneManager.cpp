@@ -9,6 +9,7 @@
 #include <numeric>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/PlatformInfo.h"
 
 //=============================================================================
 // Frame Timing State Implementation
@@ -559,6 +560,11 @@ static void RenderDebugInfo()
 #endif
     mu_swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
              kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Runtime OS name and version (compile-time arch above doesn't capture which
+    // OS build the binary is actually running on).
+    mu_swprintf(szLine, L"OS: %ls", Core::Platform::GetOSVersionString().c_str());
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     // Active camera mode (cycled with F9).

@@ -547,6 +547,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         {
             g_pNewUISystem->Hide(INTERFACE_MUHELPER);
             SetFocus(g_hWnd);
+            CUITextInputBox::ReleaseFocus();
         }
         else if (iButtonId == BUTTON_ID_INIT_CONFIG)
         {
@@ -557,6 +558,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
             SaveConfig();
             g_pNewUISystem->Hide(INTERFACE_MUHELPER);
             SetFocus(g_hWnd);
+            CUITextInputBox::ReleaseFocus();
         }
 
         return false;
@@ -688,6 +690,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         else
         {
             SetFocus(g_hWnd);
+            CUITextInputBox::ReleaseFocus();
         }
 
         POINT ptExitBtn = { m_Pos.x + 169, m_Pos.y + 7 };
@@ -733,6 +736,7 @@ bool CNewUIMuHelper::UpdateKeyEvent()
             g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
             //PlayBuffer(SOUND_CLICK01);
             SetFocus(g_hWnd);
+            CUITextInputBox::ReleaseFocus();
 
             return false;
         }
@@ -941,7 +945,7 @@ void CNewUIMuHelper::SaveExtraItem()
 {
     wchar_t wsExtraItem[MAX_ITEM_NAME + 1] = { 0 };
 
-    m_ItemInput.GetText(wsExtraItem, sizeof(wsExtraItem));
+    m_ItemInput.GetText(wsExtraItem, std::size(wsExtraItem));
 
     if (wcscmp(wsExtraItem, L"") != 0)
     {
@@ -959,6 +963,7 @@ void CNewUIMuHelper::SaveExtraItem()
 
     m_ItemInput.SetText(L"");
     SetFocus(g_hWnd);
+    CUITextInputBox::ReleaseFocus();
 }
 
 void CNewUIMuHelper::RemoveExtraItem()
@@ -1114,13 +1119,13 @@ void CNewUIMuHelper::SaveConfig()
 {
     wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
 
-    m_DistanceTimeInput.GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_DistanceTimeInput.GetText(wsNumberInput, std::size(wsNumberInput));
     _TempConfig.iMaxSecondsAway = GetIntFromTextInput(wsNumberInput);
 
-    m_Skill2DelayInput.GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_Skill2DelayInput.GetText(wsNumberInput, std::size(wsNumberInput));
     _TempConfig.aiSkillInterval[1] = GetIntFromTextInput(wsNumberInput);
 
-    m_Skill3DelayInput.GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_Skill3DelayInput.GetText(wsNumberInput, std::size(wsNumberInput));
     _TempConfig.aiSkillInterval[2] = GetIntFromTextInput(wsNumberInput);
 
     _TempConfig.aiSkill[0] = m_aiSelectedSkills[0] > 0 ? m_aiSelectedSkills[0] : 0;
@@ -1157,6 +1162,7 @@ void CNewUIMuHelper::Show(bool bShow)
     }
 
     SetFocus(g_hWnd);
+    CUITextInputBox::ReleaseFocus();
 }
 
 bool CNewUIMuHelper::Render()
@@ -1910,6 +1916,7 @@ bool CNewUIMuHelperSkillList::UpdateKeyEvent()
         {
             g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
             SetFocus(g_hWnd);
+            CUITextInputBox::ReleaseFocus();
             //PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -2850,6 +2857,7 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
         else
         {
             SetFocus(g_hWnd);
+            CUITextInputBox::ReleaseFocus();
         }
     }
     else if (m_iCurrentPage == SUB_PAGE_PARTY_CONFIG)
@@ -2861,6 +2869,7 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
         else
         {
             SetFocus(g_hWnd);
+            CUITextInputBox::ReleaseFocus();
         }
     }
 
@@ -2951,7 +2960,7 @@ void CNewUIMuHelperExt::Save()
 {
     wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
 
-    m_BuffTimeInput.GetText(wsNumberInput, sizeof(wsNumberInput));
+    m_BuffTimeInput.GetText(wsNumberInput, std::size(wsNumberInput));
     _TempConfig.iBuffCastInterval = CNewUIMuHelper::GetIntFromTextInput(wsNumberInput);
 
     _TempConfig.iPotionThreshold = m_iCurrentPotionThreshold * 10;
