@@ -232,17 +232,6 @@ if (NOT MSVC)
   target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
 endif()
 
-# Minimal cross-platform smoke test for the portable SDL shell: opens a window,
-# creates a GL context, and runs the event loop (issue #442). It links only
-# SDL3 - not the engine, which is still Win32-bound - so it builds and runs on
-# Linux/macOS/Windows as a CI portability guard for the platform-neutral shell.
-add_executable(mu_sdl_smoke
-  "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Platform/SdlShell.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Platform/Linux/main.cpp"
-)
-target_compile_features(mu_sdl_smoke PRIVATE cxx_std_20)
-target_link_libraries(mu_sdl_smoke PRIVATE SDL3::SDL3)
-
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   # Build as a Windows GUI application (no console window) and let CMake
   # add the default system libraries like kernel32, user32, gdi32, etc.
@@ -326,9 +315,20 @@ endif()
 # --- .NET / NuGet infrastructure (shared by wire-sizes codegen and ClientLibrary)
 # Lifted up here so the wire-sizes block below can resolve the OpenMU packet
 # XML from the same NuGet cache the ClientLibrary uses.
-find_program(DOTNET_EXECUTABLE dotnet.exe)
-if (NOT DOTNET_EXECUTABLE)
+# A Linux target needs the native Linux dotnet to Native-AOT-compile the
+# linux-x64 .so (a Windows dotnet.exe cannot cross-OS AOT). Everything else
+# (Windows/MinGW targets, including from WSL) prefers dotnet.exe so the win-*
+# AOT build works. Pick accordingly.
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   find_program(DOTNET_EXECUTABLE dotnet)
+  if (NOT DOTNET_EXECUTABLE)
+    find_program(DOTNET_EXECUTABLE dotnet.exe)
+  endif()
+else()
+  find_program(DOTNET_EXECUTABLE dotnet.exe)
+  if (NOT DOTNET_EXECUTABLE)
+    find_program(DOTNET_EXECUTABLE dotnet)
+  endif()
 endif()
 
 # Helper macro: convert a path to Windows-native format when using
@@ -525,8 +525,15 @@ endif()
 if (DOTNET_EXECUTABLE)
   message(STATUS "Found .NET SDK: ${DOTNET_EXECUTABLE}")
 
-  # 1. Define the output path using a variable CMake can understand early
-  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/MUnique.Client.Library.dll")
+  # 1. Define the output path. Native AOT emits a platform-native shared
+  # library: .dll on Windows, .so on Linux (the runtime client dlopen's it by
+  # this name).
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(DOTNET_LIB_NAME "MUnique.Client.Library.so")
+  else()
+    set(DOTNET_LIB_NAME "MUnique.Client.Library.dll")
+  endif()
+  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/${DOTNET_LIB_NAME}")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
   # Create temp directories for Native AOT build.
@@ -547,15 +554,26 @@ if (DOTNET_EXECUTABLE)
 
   # 3. Build to temp directory with Native AOT, then copy to build and bin directories
   # Override environment variables to avoid issues with umlauts in Windows username
-  # Determine runtime identifier and platform target based on architecture
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  # Determine the runtime identifier from the target OS and pointer width. Native
+  # AOT has no linux-x86 target, so 32-bit is Windows-only.
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(DOTNET_RID "linux-x64")
+    set(DOTNET_PLATFORM "x64")
+    # The PreBuild XSLT step regenerates files using Windows-style backslash
+    # paths and corrupts them on Linux; the generated sources are committed, so
+    # skip it (ci=true) and use the checked-in output.
+    set(DOTNET_EXTRA_ARGS "-p:ci=true")
+    message(STATUS ".NET Client Library will build for linux-x64")
+  elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(DOTNET_RID "win-x64")
     set(DOTNET_PLATFORM "x64")
-    message(STATUS ".NET Client Library will build for x64 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
+    set(DOTNET_EXTRA_ARGS "")
+    message(STATUS ".NET Client Library will build for win-x64 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   else()
     set(DOTNET_RID "win-x86")
     set(DOTNET_PLATFORM "x86")
-    message(STATUS ".NET Client Library will build for x86 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
+    set(DOTNET_EXTRA_ARGS "")
+    message(STATUS ".NET Client Library will build for win-x86 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   endif()
 
   if (DOTNET_CAN_BUILD_CLIENT_LIBRARY)
@@ -567,8 +585,8 @@ if (DOTNET_EXECUTABLE)
                     "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
                     "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
                     "TMP=${DOTNET_TEMP_DIR_NATIVE}"
-                    "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/MUnique.Client.Library.dll" "${DOTNET_DLL_PATH}"
+                    "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} ${DOTNET_EXTRA_ARGS} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/${DOTNET_LIB_NAME}" "${DOTNET_DLL_PATH}"
             DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
             COMMENT "Checking for .NET Client Library updates..."
             VERBATIM

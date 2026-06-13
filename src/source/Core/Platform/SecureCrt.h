@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cstddef>
+#include <ctime>
 #include "Core/Platform/PathResolve.h"  // MuResolvePath
 
 typedef int errno_t;
@@ -154,6 +155,13 @@ template <size_t N> inline int sprintf_s(char (&buf)[N], const char* fmt, ...)
     const int r = vsprintf_s(buf, N, fmt, a);
     va_end(a);
     return r;
+}
+
+// ---- localtime_s (MSVC arg order: tm* first, then time_t*) ------------------
+inline errno_t localtime_s(struct tm* tmDest, const time_t* sourceTime)
+{
+    if (!tmDest || !sourceTime) return mu__einval();
+    return ::localtime_r(sourceTime, tmDest) != nullptr ? 0 : mu__einval();
 }
 
 // ---- wcstok_s -> C11/glibc reentrant wcstok ---------------------------------

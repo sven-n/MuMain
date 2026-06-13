@@ -7,7 +7,9 @@
 
 #include <cerrno>
 #include <chrono>
+#include <cstdint>
 #include <cstdio>
+#include <pthread.h>
 #include <cstdlib>
 #include <cstring>    // strlen
 #include <ctime>      // tzset
@@ -123,6 +125,14 @@ inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nS
 
 // Terminate the process (Win32 ExitProcess). Never returns, like the real one.
 [[noreturn]] inline void ExitProcess(UINT uExitCode) { exit(static_cast<int>(uExitCode)); }
+
+// Process / thread identifiers (Win32). Used only to tag temp file names, so
+// the POSIX pid / thread id serve the same uniqueness purpose.
+inline DWORD GetCurrentProcessId() { return static_cast<DWORD>(::getpid()); }
+inline DWORD GetCurrentThreadId()
+{
+    return static_cast<DWORD>(reinterpret_cast<std::uintptr_t>(pthread_self()));
+}
 
 // String length (Win32 lstrlen; the engine builds UNICODE, hence the wide form).
 inline int lstrlen(const wchar_t* s) { return s ? static_cast<int>(wcslen(s)) : 0; }

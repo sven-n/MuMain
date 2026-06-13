@@ -1,0 +1,89 @@
+name: Windows Build (MinGW x64)
+
+# Cross-compiles the Windows client for x86_64 with MinGW-w64 on a Linux runner,
+# for both editor configurations, and runs the test suite under wine. This is a
+# compile/link/test guard: the linux-hosted .NET SDK cannot cross-OS Native-AOT
+# compile the win-x64 client library, so the network .dll is not produced here
+# (it is dlopen'd at runtime, not linked).
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-mingw:
+    name: build-mingw-x64 (editor-${{ matrix.editor }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        editor: [OFF, ON]
+    env:
+      WINEDEBUG: -all
+      WINEPREFIX: ${{ github.workspace }}/.wineprefix
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install MinGW-w64 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64 g++-mingw-w64-x86-64 cmake ninja-build wine wine64
+
+      - name: Install .NET SDK 10
+        # Required for the ResxGen build-time tool that compiles the localization
+        # .resx files into the I18N C++ accessors the codebase #include's.
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Initialise wine prefix
+        run: wineboot --init >/dev/null 2>&1 || true
+
+      - name: Cache libjpeg-turbo (MinGW x86_64)
+        uses: actions/cache@v4
+        with:
+          path: _deps/mingw-x86_64
+          key: libjpeg-turbo-mingw-x86_64-3.1.3-v1
+
+      - name: Build libjpeg-turbo (MinGW x86_64 static)
+        run: |
+          if [ -f "${GITHUB_WORKSPACE}/_deps/mingw-x86_64/lib/libturbojpeg.a" ]; then
+            echo "Using cached libturbojpeg.a"
+          else
+            rm -rf _deps/libjpeg-turbo _deps/build-turbo
+            git clone --depth 1 --branch 3.1.3 https://github.com/libjpeg-turbo/libjpeg-turbo.git _deps/libjpeg-turbo
+            cmake -S _deps/libjpeg-turbo -B _deps/build-turbo \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_SYSTEM_PROCESSOR=x86_64 \
+              -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+              -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+              -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DENABLE_SHARED=OFF \
+              -DENABLE_STATIC=ON \
+              -DWITH_SIMD=OFF \
+              -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/_deps/mingw-x86_64"
+            cmake --build _deps/build-turbo -j"$(nproc)"
+            cmake --install _deps/build-turbo
+          fi
+          test -f "${GITHUB_WORKSPACE}/_deps/mingw-x86_64/lib/libturbojpeg.a"
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build-mingw \
+            -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-x86_64.cmake" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=ON \
+            -DENABLE_EDITOR=${{ matrix.editor }} \
+            -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-x86_64/lib/libturbojpeg.a"
+
+      - name: Build
+        run: cmake --build build-mingw -j"$(nproc)"
+
+      - name: Run tests
+        run: ctest --test-dir build-mingw --output-on-failure
