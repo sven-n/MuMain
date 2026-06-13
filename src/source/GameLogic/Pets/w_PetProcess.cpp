@@ -42,17 +42,21 @@ void PetInfo::Destroy()
 
 void PetInfo::SetActions(int count, int* actions, float* speeds)
 {
-    if (NULL == actions || 0 >= count || NULL == speeds)
+    constexpr int MAX_PET_ACTIONS = 100;
+
+    if (NULL == actions || NULL == speeds || count <= 0 || count > MAX_PET_ACTIONS)
     {
         return;
     }
+
+    Destroy();
 
     m_count = count;
     m_actions = new int[count]();
     memcpy(m_actions, actions, sizeof(int) * m_count);
 
     m_speeds = new float[count];
-    memcpy(m_speeds, speeds, sizeof(int) * m_count);
+    memcpy(m_speeds, speeds, sizeof(float) * m_count);
 }
 
 PetProcessPtr g_petProcess;
@@ -198,7 +202,7 @@ bool PetProcess::LoadData()
     float _scale;
     int _count;
     int* _action = new int[_array];
-    auto* _speed = new float[_array];
+    float* _speed = new float[_array];
 
     int _listSize = 0;
     fread(&_listSize, sizeof(DWORD), 1, fp);
@@ -250,8 +254,14 @@ bool PetProcess::LoadData()
             memcpy(_action, pSeek, sizeof(int) * _array);
             pSeek += sizeof(int) * _array;
 
-            memcpy(_speed, pSeek, sizeof(_speed) * _array);
-            pSeek += sizeof(_speed) * _array;
+            memcpy(_speed, pSeek, sizeof(float) * _array);
+            pSeek += sizeof(float) * _array;
+
+            constexpr int MAX_PET_ACTIONS = 100;
+            if (_type < 0 || _type > 10000 || _count <= 0 || _count > _array || _count > MAX_PET_ACTIONS)
+            {
+                continue;
+            }
 
             PetInfoPtr petInfo = PetInfo::Make();
             petInfo->SetBlendMesh(_blendMesh);

@@ -194,14 +194,14 @@ bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
         return false;
     }
 
-    size_t waypointCount = 0;
-    if (fread(&waypointCount, sizeof(size_t), 1, fileHandle.get()) != 1)
+    DWORD waypointCount = 0;
+    if (fread(&waypointCount, sizeof(DWORD), 1, fileHandle.get()) != 1)
     {
         return false;
     }
 
     m_listWayPoint.reserve(waypointCount);
-    for (size_t index = 0; index < waypointCount; ++index)
+    for (DWORD index = 0; index < waypointCount; ++index)
     {
         auto waypoint = std::make_unique<WAYPOINT>();
         if (fread(waypoint.get(), sizeof(WAYPOINT), 1, fileHandle.get()) != 1)
