@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "turbojpeg.h"
 #include "Render/Sprites/GlobalBitmap.h"
+#include "Core/Platform/PathResolve.h"
 
 #include <algorithm>
 #include <array>
@@ -73,7 +74,13 @@ namespace
     std::string NarrowPath(const std::wstring& wide)
     {
         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+#ifdef _WIN32
         return conv.to_bytes(wide);
+#else
+        // Asset paths are Windows-spelled (backslashes, mixed case); resolve
+        // them against the case-sensitive filesystem.
+        return MuResolvePath(conv.to_bytes(wide).c_str());
+#endif
     }
 }
 

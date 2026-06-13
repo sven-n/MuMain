@@ -64,15 +64,25 @@ typedef struct tagPALETTEENTRY {
     BYTE peFlags;
 } PALETTEENTRY, * LPPALETTEENTRY, * PPALETTEENTRY;
 
-// ---- Font creation / text metrics (wingdi.h) --------------------------------
-// The text is rendered through CUIRenderText, a Win32 GDI font-DC pipeline that
-// is not yet ported (the implementation is still behind the in-game-shop include
-// wall). Until that port, the font handle is a no-op and text extents are an
-// estimate -- enough for layout code to compile and run approximately. The real
-// metrics come with the text-rendering port (issue #462, Phase 4).
+// ---- Font creation / text metrics / DIB text rasterization (wingdi.h) -------
+// The text is rendered through CUIRenderText, a Win32 GDI font-DC pipeline:
+// TextOut rasterizes white-on-black into a 24bpp DIB section, the engine scans
+// the pixels into a GL texture. Off Windows the same pipeline is backed by a
+// stb_truetype rasterizer (GdiText.cpp, issue #462 Phase 4): CreateFont picks a
+// system TTF by weight, CreateDIBSection allocates the pixel buffer with DIB
+// pitch rules, and TextOut draws antialiased glyphs into it.
 
 #ifndef FW_BOLD
 #define FW_BOLD               700
+#endif
+#ifndef FW_NORMAL
+#define FW_NORMAL             400
+#endif
+#ifndef FW_SEMIBOLD
+#define FW_SEMIBOLD           600
+#endif
+#ifndef CLEARTYPE_NATURAL_QUALITY
+#define CLEARTYPE_NATURAL_QUALITY 6
 #endif
 #ifndef DEFAULT_CHARSET
 #define DEFAULT_CHARSET       1
@@ -99,32 +109,15 @@ typedef struct tagPALETTEENTRY {
 #define FF_DONTCARE           0
 #endif
 
-// A small fixed cell, used to estimate a string's pixel size until real font
-// metrics are available.
-inline constexpr int MU_APPROX_CHAR_WIDTH  = 8;
-inline constexpr int MU_APPROX_CHAR_HEIGHT = 16;
-
-inline HFONT CreateFontW(int /*cHeight*/, int /*cWidth*/, int /*cEscapement*/, int /*cOrientation*/,
-                         int /*cWeight*/, DWORD /*bItalic*/, DWORD /*bUnderline*/, DWORD /*bStrikeOut*/,
-                         DWORD /*iCharSet*/, DWORD /*iOutPrecision*/, DWORD /*iClipPrecision*/,
-                         DWORD /*iQuality*/, DWORD /*iPitchAndFamily*/, LPCWSTR /*pszFaceName*/)
-{
-    // Non-null so callers treat the font as valid; it is never selected into a
-    // real DC off Windows.
-    return reinterpret_cast<HFONT>(1);
-}
+HFONT CreateFontW(int cHeight, int cWidth, int cEscapement, int cOrientation,
+                  int cWeight, DWORD bItalic, DWORD bUnderline, DWORD bStrikeOut,
+                  DWORD iCharSet, DWORD iOutPrecision, DWORD iClipPrecision,
+                  DWORD iQuality, DWORD iPitchAndFamily, LPCWSTR pszFaceName);
 #ifndef CreateFont
 #define CreateFont CreateFontW
 #endif
 
-inline BOOL GetTextExtentPoint32W(HDC /*hdc*/, LPCWSTR lpString, int c, LPSIZE psizl)
-{
-    if (!psizl || (!lpString && c != 0)) return FALSE;
-    const int len = (c >= 0) ? c : static_cast<int>(wcslen(lpString));
-    psizl->cx = len * MU_APPROX_CHAR_WIDTH;
-    psizl->cy = MU_APPROX_CHAR_HEIGHT;
-    return TRUE;
-}
+BOOL GetTextExtentPoint32W(HDC hdc, LPCWSTR lpString, int c, LPSIZE psizl);
 #ifndef GetTextExtentPoint32
 #define GetTextExtentPoint32 GetTextExtentPoint32W
 #endif
@@ -132,36 +125,27 @@ inline BOOL GetTextExtentPoint32W(HDC /*hdc*/, LPCWSTR lpString, int c, LPSIZE p
 // Release a GDI object. The engine also declares its own DeleteObject(OBJECT*)
 // for game objects; these typed overloads coexist with it (an HFONT/HGDIOBJ
 // argument selects one of these, an OBJECT* selects the engine's).
-inline BOOL DeleteObject(HFONT)   { return TRUE; }
-inline BOOL DeleteObject(HGDIOBJ) { return TRUE; }
-inline BOOL DeleteObject(HBITMAP) { return TRUE; }
-inline BOOL DeleteObject(HBRUSH)  { return TRUE; }
+BOOL DeleteObject(HFONT hObject);
+BOOL DeleteObject(HGDIOBJ hObject);
+BOOL DeleteObject(HBITMAP hObject);
+BOOL DeleteObject(HBRUSH hObject);
 
-// ---- GDI device-context / text rendering (wingdi.h) -------------------------
-// The legacy text renderer rasterizes glyphs into a DIB via a memory DC. That
-// pipeline isn't ported yet, so these are no-ops: CreateDIBSection/
-// CreateCompatibleDC return null, which makes the renderer's Create() fail
-// gracefully and skip GDI text until the SDL_ttf port (issue #462, Phase 4).
 #ifndef DIB_RGB_COLORS
 #define DIB_RGB_COLORS 0
 #endif
 
-inline HBITMAP CreateDIBSection(HDC, const BITMAPINFO*, UINT, void** ppvBits, HANDLE, DWORD)
-{
-    if (ppvBits) *ppvBits = nullptr;
-    return nullptr;
-}
-inline HDC  CreateCompatibleDC(HDC) { return nullptr; }
-inline BOOL DeleteDC(HDC)           { return TRUE; }
+HBITMAP CreateDIBSection(HDC hdc, const BITMAPINFO* pbmi, UINT usage, void** ppvBits, HANDLE hSection, DWORD offset);
+HDC     CreateCompatibleDC(HDC hdc);
+BOOL    DeleteDC(HDC hdc);
 
-// SelectObject returns the previously selected object (a null stub is fine).
-inline HGDIOBJ SelectObject(HDC, HGDIOBJ) { return nullptr; }
-inline HGDIOBJ SelectObject(HDC, HBITMAP) { return nullptr; }
-inline HGDIOBJ SelectObject(HDC, HFONT)   { return nullptr; }
-inline HGDIOBJ GetStockObject(int)        { return nullptr; }
+// SelectObject returns the previously selected object of the same kind.
+HGDIOBJ SelectObject(HDC hdc, HGDIOBJ h);
+HGDIOBJ SelectObject(HDC hdc, HBITMAP h);
+HGDIOBJ SelectObject(HDC hdc, HFONT h);
+inline HGDIOBJ GetStockObject(int) { return nullptr; }
 
-inline BOOL     TextOut(HDC, int, int, LPCWSTR, int) { return TRUE; }
-inline COLORREF SetBkColor(HDC, COLORREF)            { return 0; }
-inline COLORREF SetTextColor(HDC, COLORREF)          { return 0; }
+BOOL     TextOut(HDC hdc, int x, int y, LPCWSTR lpString, int c);
+COLORREF SetBkColor(HDC hdc, COLORREF color);
+COLORREF SetTextColor(HDC hdc, COLORREF color);
 
 #endif // _WIN32

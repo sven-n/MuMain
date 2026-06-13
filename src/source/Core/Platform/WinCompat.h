@@ -108,6 +108,7 @@ typedef void*           PVOID;
 typedef void*           LPVOID;
 typedef const void*     LPCVOID;
 typedef CHAR*           LPSTR;
+typedef CHAR*           PSTR;
 typedef const CHAR*     LPCSTR;
 typedef WCHAR*          LPWSTR;
 typedef const WCHAR*    LPCWSTR;
@@ -123,6 +124,10 @@ typedef const POINT* LPCPOINT;
 typedef struct tagSIZE { LONG cx, cy; } SIZE, * LPSIZE;
 typedef struct tagRECT { LONG left, top, right, bottom; } RECT, * LPRECT;
 typedef const RECT* LPCRECT;
+
+// SEH record, only ever used as an opaque pointer parameter off Windows.
+struct _EXCEPTION_POINTERS;
+typedef struct _EXCEPTION_POINTERS* PEXCEPTION_POINTERS;
 
 // Async-I/O struct referenced by a few function declarations (minwinbase.h).
 typedef struct _OVERLAPPED {
@@ -278,6 +283,7 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #endif
 #ifndef SW_SHOW
 #define SW_HIDE         0
+#define SW_NORMAL       1
 #define SW_SHOW         5
 #endif
 
@@ -297,6 +303,10 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #endif
 
 // PeekMessage flag, stock-object id (winuser.h / wingdi.h).
+#ifndef IMN_SETCONVERSIONMODE
+#define IMN_SETCONVERSIONMODE 0x0006
+#define IMN_SETSENTENCEMODE   0x0007
+#endif
 #ifndef PM_REMOVE
 #define PM_REMOVE       0x0001
 #endif
@@ -343,6 +353,9 @@ typedef int64_t  INT64;
 #endif
 
 // COM-style result codes.
+#ifndef ERROR_SUCCESS
+#define ERROR_SUCCESS 0L
+#endif
 #ifndef S_OK
 #define S_OK          (static_cast<HRESULT>(0))
 #endif
@@ -383,6 +396,9 @@ typedef int64_t  INT64;
 #endif
 #ifndef RGB
 #define RGB(r, g, b) (static_cast<COLORREF>((static_cast<BYTE>(r)) | (static_cast<WORD>(static_cast<BYTE>(g)) << 8) | (static_cast<DWORD>(static_cast<BYTE>(b)) << 16)))
+#define GetRValue(rgb) (static_cast<BYTE>(rgb))
+#define GetGValue(rgb) (static_cast<BYTE>((rgb) >> 8))
+#define GetBValue(rgb) (static_cast<BYTE>((rgb) >> 16))
 #endif
 
 // Memory fill helper.

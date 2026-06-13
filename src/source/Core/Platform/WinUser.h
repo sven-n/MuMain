@@ -103,6 +103,30 @@ inline BOOL    TranslateMessage(const MSG*)                        { return FALS
 inline LRESULT DispatchMessage(const MSG*)                         { return 0; }
 
 inline int     FillRect(HDC, const RECT*, HBRUSH)                  { return 1; }
+
+// Cursor / capture / client-rect helpers -- SDL owns the cursor and input.
+inline int   ShowCursor(BOOL)                     { return 0; }
+inline HWND  SetCapture(HWND)                      { return nullptr; }
+inline BOOL  ReleaseCapture()                      { return TRUE; }
+inline BOOL  ClipCursor(const RECT*)               { return TRUE; }
+inline BOOL  GetClientRect(HWND, LPRECT lpRect)    { if (lpRect) { lpRect->left = lpRect->top = lpRect->right = lpRect->bottom = 0; } return TRUE; }
+inline BOOL  ClientToScreen(HWND, LPPOINT)         { return TRUE; }
+inline HWND  FindWindowW(LPCWSTR, LPCWSTR)         { return nullptr; }
+#ifndef FindWindow
+#define FindWindow FindWindowW
+#endif
+inline HDC   GetDC(HWND)                           { return nullptr; }
+inline int   ReleaseDC(HWND, HDC)                  { return 1; }
+
+// Display enumeration (winuser.h). No legacy enumeration off Windows; SDL owns
+// the modes. ENUM_CURRENT_SETTINGS-style queries report failure.
+#ifndef ENUM_CURRENT_SETTINGS
+#define ENUM_CURRENT_SETTINGS (static_cast<DWORD>(-1))
+#endif
+inline BOOL  EnumDisplaySettingsW(LPCWSTR, DWORD, DEVMODE*) { return FALSE; }
+#ifndef EnumDisplaySettings
+#define EnumDisplaySettings EnumDisplaySettingsW
+#endif
 inline LPWSTR  GetCommandLineW()                                   { static wchar_t empty[1] = { 0 }; return empty; }
 #ifndef GetCommandLine
 #define GetCommandLine GetCommandLineW

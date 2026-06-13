@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cstddef>
+#include "Core/Platform/PathResolve.h"  // MuResolvePath
 
 typedef int errno_t;
 
@@ -162,6 +163,8 @@ inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** context)
 }
 
 // ---- _wfopen_s ---------------------------------------------------------------
+// The path goes through the case-correcting resolver because asset paths are
+// Windows-spelled (backslashes, mixed case).
 inline errno_t _wfopen_s(FILE** pFile, const wchar_t* path, const wchar_t* mode)
 {
     if (pFile == nullptr || path == nullptr || mode == nullptr) return mu__einval();
@@ -171,7 +174,7 @@ inline errno_t _wfopen_s(FILE** pFile, const wchar_t* path, const wchar_t* mode)
     if (pathLen == static_cast<size_t>(-1) || pathLen >= sizeof(narrowPath) - 1) return mu__einval();
     const size_t modeLen = wcstombs(narrowMode, mode, sizeof(narrowMode) - 1);
     if (modeLen == static_cast<size_t>(-1) || modeLen >= sizeof(narrowMode) - 1) return mu__einval();
-    *pFile = fopen(narrowPath, narrowMode);
+    *pFile = fopen(MuResolvePath(narrowPath).c_str(), narrowMode);
     return (*pFile != nullptr) ? 0 : errno;
 }
 

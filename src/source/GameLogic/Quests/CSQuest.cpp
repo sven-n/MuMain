@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "I18N/All.h"
+#include "Core/Platform/PathResolve.h"
 
 #include <algorithm>
 #include <array>
@@ -238,7 +239,13 @@ bool CSQuest::OpenQuestScript(const wchar_t* filename)
         return false;
     }
 
+#ifdef _WIN32
     const std::filesystem::path filePath(filename);
+#else
+    // The script path is Windows-spelled (backslashes, mixed case); resolve it
+    // against the case-sensitive filesystem.
+    const std::filesystem::path filePath(MuResolvePath(std::filesystem::path(filename).string().c_str()));
+#endif
     std::ifstream file(filePath, std::ios::binary);
     if (!file)
     {

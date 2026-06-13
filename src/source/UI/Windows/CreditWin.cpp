@@ -14,6 +14,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "App/Platform/Windows/Local.h"
 #include "I18N/All.h"
+#include "Core/Platform/PathResolve.h"
 
 #include "UI/Legacy/UIControls.h"
 
@@ -367,7 +368,13 @@ void CCreditWin::AnimationIllust(DurationMs deltaTime)
 
 void CCreditWin::LoadText()
 {
+#ifdef _WIN32
 	std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(kCreditDataPath.data(), "rb"), &std::fclose);
+#else
+	// The path is Windows-spelled (backslashes, mixed case); resolve it against
+	// the case-sensitive filesystem.
+	std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(MuResolvePath(kCreditDataPath.data()).c_str(), "rb"), &std::fclose);
+#endif
 	if (!file)
 	{
 		wchar_t szMessage[256];

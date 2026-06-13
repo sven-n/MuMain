@@ -41,9 +41,7 @@
 #include <tchar.h>
 #endif
 #include "Core/Platform/CrtDbg.h"
-#ifdef _WIN32
-#include <strsafe.h>
-#endif
+#include "Core/Platform/StrSafe.h"
 #include "GameShop/ShopListManager/interface/WZResult/WZResult.h"
 #include "GameShop/ShopListManager/interface/DownloadInfo.h"
 #include "GameShop/ShopListManager/interface/FileDownloader.h"

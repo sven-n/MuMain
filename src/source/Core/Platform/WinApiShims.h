@@ -5,6 +5,7 @@
 
 #ifndef _WIN32
 
+#include <cerrno>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -13,9 +14,11 @@
 #include <cwchar>
 #include <cwctype>
 #include <strings.h>  // strcasecmp
+#include <thread>     // Sleep
 #include <unistd.h>   // readlink
 #include "Core/Platform/WinCompat.h"  // DWORD, FILE handle types
 #include "Core/Platform/WinNls.h"     // MultiByteToWideChar / CP_UTF8
+#include "Core/Platform/PathResolve.h" // MuResolvePath
 
 namespace mu_detail
 {
@@ -34,6 +37,23 @@ inline DWORD GetTickCount()
     return static_cast<DWORD>(duration_cast<milliseconds>(steady_clock::now() - mu_detail::tickEpoch()).count());
 }
 inline DWORD timeGetTime() { return GetTickCount(); }
+
+// Block the calling thread (Win32 Sleep, milliseconds).
+inline void Sleep(DWORD dwMilliseconds)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds));
+}
+
+// Thread-local error of the last failing call. The shimmed APIs sit on POSIX,
+// so errno is that error.
+inline DWORD GetLastError() { return static_cast<DWORD>(errno); }
+
+// winmm timer-resolution requests are no-ops without the Windows scheduler API.
+#ifndef TIMERR_NOERROR
+#define TIMERR_NOERROR 0
+#endif
+inline unsigned int timeBeginPeriod(unsigned int) { return TIMERR_NOERROR; }
+inline unsigned int timeEndPeriod(unsigned int)   { return TIMERR_NOERROR; }
 
 // 64-bit millisecond tick (no 49-day wrap).
 inline unsigned long long GetTickCount64()
@@ -97,6 +117,9 @@ inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nS
     lpFilename[converted] = L'\0';
     return static_cast<DWORD>(converted);
 }
+#ifndef GetModuleFileName
+#define GetModuleFileName GetModuleFileNameW
+#endif
 
 // Terminate the process (Win32 ExitProcess). Never returns, like the real one.
 [[noreturn]] inline void ExitProcess(UINT uExitCode) { exit(static_cast<int>(uExitCode)); }
@@ -174,15 +197,16 @@ inline wchar_t* _wcsupr(wchar_t* s)
     return s;
 }
 
-// Wide fopen: convert the path/mode to the locale encoding and open.
+// Wide fopen: convert the path/mode to UTF-8 and open. The path goes through
+// the case-correcting resolver because asset paths are Windows-spelled.
 inline FILE* _wfopen(const wchar_t* path, const wchar_t* mode)
 {
     if (!path || !mode) return nullptr;
     char narrowPath[4096] = { 0 };
     char narrowMode[16] = { 0 };
-    if (wcstombs(narrowPath, path, sizeof(narrowPath) - 1) == static_cast<size_t>(-1)) return nullptr;
-    if (wcstombs(narrowMode, mode, sizeof(narrowMode) - 1) == static_cast<size_t>(-1)) return nullptr;
-    return fopen(narrowPath, narrowMode);
+    if (WideCharToMultiByte(CP_UTF8, 0, path, -1, narrowPath, sizeof(narrowPath) - 1, nullptr, nullptr) == 0) return nullptr;
+    if (WideCharToMultiByte(CP_UTF8, 0, mode, -1, narrowMode, sizeof(narrowMode) - 1, nullptr, nullptr) == 0) return nullptr;
+    return fopen(MuResolvePath(narrowPath).c_str(), narrowMode);
 }
 
 // Split a wide path into components (POSIX has no drive). Matches MSVC's

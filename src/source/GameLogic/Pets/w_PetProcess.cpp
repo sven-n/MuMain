@@ -250,8 +250,11 @@ bool PetProcess::LoadData()
             memcpy(_action, pSeek, sizeof(int) * _array);
             pSeek += sizeof(int) * _array;
 
-            memcpy(_speed, pSeek, sizeof(_speed) * _array);
-            pSeek += sizeof(_speed) * _array;
+            // sizeof(float), not sizeof(_speed): _speed is a pointer, and on a
+            // 64-bit build its size (8) overruns the 4-bytes-per-entry record
+            // layout `Size` was computed with, overflowing the allocation.
+            memcpy(_speed, pSeek, sizeof(float) * _array);
+            pSeek += sizeof(float) * _array;
 
             PetInfoPtr petInfo = PetInfo::Make();
             petInfo->SetBlendMesh(_blendMesh);

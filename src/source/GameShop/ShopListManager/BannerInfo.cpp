@@ -14,9 +14,11 @@
 #include "StringToken.h"
 #include "StringMethod.h"
 
+#ifdef _WIN32
 #include <urlmon.h>
 
 #pragma comment(lib,"Urlmon.lib")
+#endif
 
 CBannerInfo::CBannerInfo() // OK
 {
@@ -64,7 +66,12 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
 
         if (bDonwLoad || GetFileAttributes(this->BannerImagePath) == INVALID_FILE_ATTRIBUTES)
         {
+#ifdef _WIN32
             URLDownloadToFile(0, this->BannerImageURL, this->BannerImagePath, 0, 0);
+#else
+            // No portable downloader yet (issue #462); the banner simply stays
+            // absent and the shop renders without it.
+#endif
         }
     }
 

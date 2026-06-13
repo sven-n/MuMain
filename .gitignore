@@ -11,6 +11,7 @@ src/Global Release/Main
 
 # External dependencies (built locally)
 _deps/
+_deps
 
 # CMake build directories
 build/

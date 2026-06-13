@@ -722,4 +722,78 @@ void GetSystemInfo(ER_SystemInfo* si)
     DWORD dwDX = GetDXVersion();
     mu_swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
 }
+
+#else  // ---- non-Windows ----------------------------------------------------
+
+#include <sys/utsname.h>
+#include <unistd.h>
+#include <climits>
+#include <cstdio>
+#include <cstring>
+
+// IME is a Windows input service; there is nothing to report elsewhere.
+void CErrorReport::WriteImeInfo(HWND /*hWnd*/)
+{
+}
+
+// Audio runs through SDL; the DirectSound device enumeration has no equivalent.
+void CErrorReport::WriteSoundCardInfo(void)
+{
+    Write(L"<Sound device information>\r\n");
+    Write(L"Description \t\t: SDL audio\r\n");
+}
+
+void GetSystemInfo(ER_SystemInfo* si)
+{
+    ZeroMemory(si, sizeof(ER_SystemInfo));
+
+    // CPU: the first "model name" entry of /proc/cpuinfo.
+    mu_swprintf(si->m_lpszCPU, L"Unknown");
+    if (FILE* f = std::fopen("/proc/cpuinfo", "r"))
+    {
+        char line[256];
+        while (std::fgets(line, sizeof(line), f))
+        {
+            if (std::strncmp(line, "model name", 10) != 0)
+                continue;
+            const char* value = std::strchr(line, ':');
+            if (value)
+            {
+                ++value;
+                while (*value == ' ' || *value == '\t') ++value;
+                char name[MAX_LENGTH_CPUNAME] = { 0 };
+                std::strncpy(name, value, sizeof(name) - 1);
+                if (char* nl = std::strchr(name, '\n')) *nl = '\0';
+                MultiByteToWideChar(CP_UTF8, 0, name, -1, si->m_lpszCPU, MAX_LENGTH_CPUNAME);
+            }
+            break;
+        }
+        std::fclose(f);
+    }
+
+    // Memory: physical RAM in bytes, clamped like the DWORD->int path on Windows.
+    const long long pages    = ::sysconf(_SC_PHYS_PAGES);
+    const long long pageSize = ::sysconf(_SC_PAGE_SIZE);
+    if (pages > 0 && pageSize > 0)
+    {
+        const long long bytes = pages * pageSize;
+        si->m_iMemorySize = (bytes > INT_MAX) ? INT_MAX : static_cast<int>(bytes);
+    }
+
+    // OS: kernel name and release.
+    struct utsname un {};
+    if (::uname(&un) == 0)
+    {
+        char os[MAX_LENGTH_OSINFO] = { 0 };
+        std::snprintf(os, sizeof(os), "%s %s", un.sysname, un.release);
+        MultiByteToWideChar(CP_UTF8, 0, os, -1, si->m_lpszOS, MAX_LENGTH_OSINFO);
+    }
+    else
+    {
+        mu_swprintf(si->m_lpszOS, L"Unknown");
+    }
+
+    // No DirectX off Windows; rendering is OpenGL.
+    mu_swprintf(si->m_lpszDxVersion, L"none (OpenGL)");
+}
 #endif // _WIN32 (Win32 crash-report system info)

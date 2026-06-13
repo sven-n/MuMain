@@ -3,6 +3,7 @@
 #ifndef _WIN32
 
 #include "Core/Platform/WinMM.h"
+#include "Core/Platform/PathResolve.h"
 
 #include <cstdio>
 #include <cstdlib>  // wcstombs
@@ -27,7 +28,7 @@ HMMIO mmioOpenW(wchar_t* szFilename, void* /*lpmmioinfo*/, DWORD dwOpenFlags)
     if (std::wcstombs(path, szFilename, sizeof(path) - 1) == static_cast<size_t>(-1)) return nullptr;
 
     const char* mode = (dwOpenFlags & MMIO_WRITE) ? "wb" : "rb";
-    FILE* fp = std::fopen(path, mode);
+    FILE* fp = std::fopen(MuResolvePath(path).c_str(), mode);
     if (!fp) return nullptr;
 
     try

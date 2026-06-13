@@ -33,8 +33,15 @@ inline HINSTANCE get_munique_client_library_handle()
 #else
 inline void* get_munique_client_library_handle()
 {
+    // Native AOT emits a platform-native shared object on Linux (.so), not the
+    // Windows .dll. Try the binary's own directory first (it is copied next to
+    // the executable by the build), then fall back to the loader search path.
     // Not const-qualified return: dlsym() takes a non-const void* handle.
-    static void* const handle = dlopen("MUnique.Client.Library.dll", RTLD_LAZY);
+    static void* const handle = []() -> void* {
+        if (void* h = dlopen("./MUnique.Client.Library.so", RTLD_LAZY))
+            return h;
+        return dlopen("MUnique.Client.Library.so", RTLD_LAZY);
+    }();
     return handle;
 }
 #endif

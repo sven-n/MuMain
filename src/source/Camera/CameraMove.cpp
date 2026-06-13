@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -194,14 +195,18 @@ bool CCameraMove::LoadCameraWalkScript(const std::wstring& filename)
         return false;
     }
 
-    size_t waypointCount = 0;
-    if (fread(&waypointCount, sizeof(size_t), 1, fileHandle.get()) != 1)
+    // The on-disk count is a 32-bit field (written by the original 32-bit
+    // tools). Reading sizeof(size_t) is 8 bytes on LP64 (Linux x64), which
+    // pulls in the first waypoint's bytes and yields a garbage count that
+    // overflows the reserve.
+    std::uint32_t waypointCount = 0;
+    if (fread(&waypointCount, sizeof(waypointCount), 1, fileHandle.get()) != 1)
     {
         return false;
     }
 
     m_listWayPoint.reserve(waypointCount);
-    for (size_t index = 0; index < waypointCount; ++index)
+    for (std::uint32_t index = 0; index < waypointCount; ++index)
     {
         auto waypoint = std::make_unique<WAYPOINT>();
         if (fread(waypoint.get(), sizeof(WAYPOINT), 1, fileHandle.get()) != 1)
@@ -233,10 +238,12 @@ bool CCameraMove::SaveCameraWalkScript(const std::wstring& filename)
     }
 
     const DWORD signature = 0x00535743;
-    const size_t waypointCount = m_listWayPoint.size();
+    // Keep the count a 32-bit field on disk to match the original tools (see
+    // the read path); sizeof(size_t) would emit 8 bytes on LP64.
+    const std::uint32_t waypointCount = static_cast<std::uint32_t>(m_listWayPoint.size());
 
     if (fwrite(&signature, sizeof(DWORD), 1, fileHandle.get()) != 1 ||
-        fwrite(&waypointCount, sizeof(size_t), 1, fileHandle.get()) != 1)
+        fwrite(&waypointCount, sizeof(waypointCount), 1, fileHandle.get()) != 1)
     {
         return false;
     }

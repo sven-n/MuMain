@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <cstdint>
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInfomation.h" 
 #include "ZzzBMD.h"
@@ -2731,7 +2732,9 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     if (Version == 0xC)
     {
         //// wprintf(L"[Open2] Version: %d\n", Version);
-        long encSize = *(long*)(fileData.get() + ptr); ptr += sizeof(long);
+        // The on-disk size field is 32-bit; `long` is 8 bytes on LP64 (Linux
+        // x64), which would read past the field and produce a garbage size.
+        std::int32_t encSize = *(std::int32_t*)(fileData.get() + ptr); ptr += sizeof(std::int32_t);
         unsigned char* encData = fileData.get() + ptr;
         //// wprintf(L"[Open2] Encrypted Size: %ld\n", encSize);
 
@@ -2976,10 +2979,12 @@ bool BMD::Save2(wchar_t* DirName, wchar_t* ModelFileName)
         }
     }
     auto lSize = (long)(pbyCur - pbyBuffer);
-    long lEncSize = MapFileEncrypt(nullptr, pbyBuffer, lSize);
+    // The on-disk size field is 32-bit; writing a `long` would emit 8 bytes on
+    // LP64 (Linux x64) and corrupt the file.
+    auto lEncSize = (std::int32_t)MapFileEncrypt(nullptr, pbyBuffer, lSize);
     auto* pbyEnc = new BYTE[lEncSize];
     MapFileEncrypt(pbyEnc, pbyBuffer, lSize);
-    fwrite(&lEncSize, sizeof(long), 1, fp);
+    fwrite(&lEncSize, sizeof(std::int32_t), 1, fp);
     fwrite(pbyEnc, lEncSize, 1, fp);
     fclose(fp);
     delete[] pbyBuffer;

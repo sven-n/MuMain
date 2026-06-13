@@ -108,13 +108,13 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\][Ww]in[Mm]ain\\.[Cc]pp$")
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\]main\\.(cpp|mm)$")
 
-# The in-game shop is a Win32 subsystem: its .cpp files drive a WinINet/urlmon
-# downloader with no portable equivalent yet (issue #462). Disable it on
-# non-Windows by excluding the GameShop sources from the engine library. The
-# shop headers still parse (via the WinINet type shim) so the rest of the engine
-# compiles; replacing the downloader with libcurl is a follow-up.
+# The in-game shop's catalog downloader is a WinINet/urlmon HTTP+FTP stack with
+# no portable equivalent yet (issue #462). Exclude just that layer on
+# non-Windows; the rest of the shop (UI, list managers) compiles portably and
+# its download entry points fail gracefully there. Replacing the downloader
+# with libcurl is a follow-up.
 if(NOT WIN32)
-  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]")
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\]")
 endif()
 
 # Add MuEditor sources when editor is enabled
@@ -210,7 +210,11 @@ elseif (ANDROID)
     "native_app_glue built as a shared library, not an executable. When that "
     "work starts, add source/App/Platform/Android/ and replace this branch.")
 elseif (UNIX)
-  set(MU_APP_ENTRY "source/App/Platform/Linux/main.cpp")
+  # Linux entry (main.cpp) plus the shared bootstrap/game-loop from Winmain.cpp,
+  # which now compiles off Windows (issue #462). main() calls into it.
+  set(MU_APP_ENTRY
+    "source/App/Platform/Linux/main.cpp"
+    "source/App/Platform/Windows/Winmain.cpp")
 else()
   message(FATAL_ERROR "No executable entry point defined for this platform "
     "(CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}). Add source/App/Platform/<OS>/ "
@@ -303,10 +307,19 @@ add_custom_command(TARGET Main POST_BUILD
 # ubiquitous system libraries so we can focus on getting the project to
 # compile; more platform-specific adjustments will follow as we iterate.
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  # The engine uses fixed-function desktop OpenGL via GLEW; link the system GL
+  # and GLEW so the gl*/glew* symbols resolve in the Linux executable.
+  find_package(OpenGL REQUIRED)
+  find_library(GLEW_LIBRARY NAMES GLEW glew32 REQUIRED)
+  find_library(TURBOJPEG_LIBRARY NAMES turbojpeg REQUIRED)
   target_link_libraries(MuClient PUBLIC
     pthread
     dl
     m
+    OpenGL::GL
+    OpenGL::GLU
+    ${GLEW_LIBRARY}
+    ${TURBOJPEG_LIBRARY}
   )
 endif()
 
@@ -414,6 +427,8 @@ target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
   "${CMAKE_BINARY_DIR}/generated"
+  # stb_truetype backs the portable GDI text rasterizer (issue #462).
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/stb"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 

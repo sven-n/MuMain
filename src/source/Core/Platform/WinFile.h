@@ -13,12 +13,14 @@
 #else  // ---- non-Windows ----------------------------------------------------
 
 #include <fcntl.h>
+#include <sys/stat.h>  // stat, mkdir
 #include <unistd.h>
 #include <cstdlib>   // wcstombs
 #include <ctime>
 #include <cstdint>
 #include "Core/Platform/WinCompat.h"  // HANDLE, DWORD, BOOL, LPCWSTR, WORD, INVALID_HANDLE_VALUE
 #include "Core/Platform/WinNls.h"     // WideCharToMultiByte / CP_UTF8 (locale-independent paths)
+#include "Core/Platform/PathResolve.h" // MuResolvePath (Windows-spelled asset paths)
 
 // dwDesiredAccess
 #ifndef GENERIC_READ
@@ -82,7 +84,7 @@ inline HANDLE CreateFileW(LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD /*sha
     if (!lpFileName || WideCharToMultiByte(CP_UTF8, 0, lpFileName, -1, path, sizeof(path) - 1, nullptr, nullptr) == 0)
         return INVALID_HANDLE_VALUE;
 
-    const int fd = ::open(path, oflag, 0644);
+    const int fd = ::open(MuResolvePath(path).c_str(), oflag, 0644);
     return (fd < 0) ? INVALID_HANDLE_VALUE : mu_detail::FdToHandle(fd);
 }
 #ifndef CreateFile
@@ -134,12 +136,72 @@ inline DWORD SetFilePointer(HANDLE hFile, LONG distance, LONG* distanceHigh, DWO
     return static_cast<DWORD>(pos & 0xFFFFFFFF);
 }
 
+#ifndef INVALID_FILE_SIZE
+#define INVALID_FILE_SIZE (static_cast<DWORD>(-1))
+#endif
+inline DWORD GetFileSize(HANDLE hFile, LPDWORD lpFileSizeHigh)
+{
+    if (!MuFileHandleValid(hFile)) return INVALID_FILE_SIZE;
+    const int fd = mu_detail::HandleToFd(hFile);
+    const off_t cur = ::lseek(fd, 0, SEEK_CUR);
+    const off_t end = ::lseek(fd, 0, SEEK_END);
+    if (cur != static_cast<off_t>(-1)) ::lseek(fd, cur, SEEK_SET);
+    if (end == static_cast<off_t>(-1)) return INVALID_FILE_SIZE;
+    if (lpFileSizeHigh) *lpFileSizeHigh = static_cast<DWORD>(end >> 32);
+    return static_cast<DWORD>(end & 0xFFFFFFFF);
+}
+
+#ifndef INVALID_FILE_ATTRIBUTES
+#define INVALID_FILE_ATTRIBUTES (static_cast<DWORD>(-1))
+#endif
+#ifndef FILE_ATTRIBUTE_DIRECTORY
+#define FILE_ATTRIBUTE_DIRECTORY 0x00000010
+#endif
+inline DWORD GetFileAttributesW(LPCWSTR lpFileName)
+{
+    char path[4096] = { 0 };
+    if (!lpFileName || WideCharToMultiByte(CP_UTF8, 0, lpFileName, -1, path, sizeof(path) - 1, nullptr, nullptr) == 0)
+        return INVALID_FILE_ATTRIBUTES;
+    struct stat st {};
+    if (::stat(MuResolvePath(path).c_str(), &st) != 0)
+        return INVALID_FILE_ATTRIBUTES;
+    return S_ISDIR(st.st_mode) ? FILE_ATTRIBUTE_DIRECTORY : FILE_ATTRIBUTE_NORMAL;
+}
+#ifndef GetFileAttributes
+#define GetFileAttributes GetFileAttributesW
+#endif
+
+inline BOOL CreateDirectoryW(LPCWSTR lpPathName, void* /*securityAttributes*/)
+{
+    char path[4096] = { 0 };
+    if (!lpPathName || WideCharToMultiByte(CP_UTF8, 0, lpPathName, -1, path, sizeof(path) - 1, nullptr, nullptr) == 0)
+        return FALSE;
+    return (::mkdir(MuResolvePath(path).c_str(), 0755) == 0) ? TRUE : FALSE;
+}
+#ifndef CreateDirectory
+#define CreateDirectory CreateDirectoryW
+#endif
+
+// Current working directory (Win32 GetCurrentDirectoryW): returns the length
+// copied (without the terminator), 0 on failure.
+inline DWORD GetCurrentDirectoryW(DWORD nBufferLength, LPWSTR lpBuffer)
+{
+    if (!lpBuffer || nBufferLength == 0) return 0;
+    char path[4096] = { 0 };
+    if (!::getcwd(path, sizeof(path))) return 0;
+    const int converted = MultiByteToWideChar(CP_UTF8, 0, path, -1, lpBuffer, static_cast<int>(nBufferLength));
+    return (converted > 0) ? static_cast<DWORD>(converted - 1) : 0;
+}
+#ifndef GetCurrentDirectory
+#define GetCurrentDirectory GetCurrentDirectoryW
+#endif
+
 inline BOOL DeleteFileW(LPCWSTR lpFileName)
 {
     char path[4096] = { 0 };
     if (!lpFileName || WideCharToMultiByte(CP_UTF8, 0, lpFileName, -1, path, sizeof(path) - 1, nullptr, nullptr) == 0)
         return FALSE;
-    return (::unlink(path) == 0) ? TRUE : FALSE;
+    return (::unlink(MuResolvePath(path).c_str()) == 0) ? TRUE : FALSE;
 }
 #ifndef DeleteFile
 #define DeleteFile DeleteFileW
