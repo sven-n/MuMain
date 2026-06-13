@@ -126,9 +126,15 @@ inline HANDLE FindFirstFileW(LPCWSTR lpFileName, LPWIN32_FIND_DATAW lpFindFileDa
     const std::string glob = (slash == std::string::npos) ? pattern : pattern.substr(slash + 1);
 
     auto* s = new mu_detail::FindState();
-    s->dir = ::opendir(MuResolvePath(dirPath.c_str()).c_str());
+    // Resolve the directory once and reuse it: FillFindData stat()s
+    // dirPathUtf8 + name, so storing the unresolved (wrong-case) path would make
+    // every stat fail on a case-sensitive filesystem and skip every entry.
+    std::string resolvedDir = MuResolvePath(dirPath.c_str());
+    if (!resolvedDir.empty() && resolvedDir.back() != '/')
+        resolvedDir += '/';
+    s->dir = ::opendir(resolvedDir.c_str());
     if (!s->dir) { delete s; return INVALID_HANDLE_VALUE; }
-    s->dirPathUtf8 = dirPath;
+    s->dirPathUtf8 = resolvedDir;
     s->globUtf8 = glob;
 
     if (!mu_detail::FindAdvance(s, *lpFindFileData))

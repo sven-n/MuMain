@@ -75,9 +75,17 @@ namespace
     const MuGdiFace* LoadFace(bool bold)
     {
         static MuGdiFace s_regular, s_bold;
+        static bool s_regularTried = false, s_boldTried = false;
         MuGdiFace& face = bold ? s_bold : s_regular;
-        if (face.valid || !face.data.empty())
-            return face.valid ? &face : nullptr;
+        bool& tried = bold ? s_boldTried : s_regularTried;
+        if (face.valid)
+            return &face;
+        // Already scanned and failed: a bold request reuses the regular face,
+        // a regular request gives up. Avoids re-scanning the filesystem on
+        // every CreateFont call.
+        if (tried)
+            return bold ? LoadFace(false) : nullptr;
+        tried = true;
 
         const char* envPath = std::getenv(bold ? "MU_FONT_BOLD" : "MU_FONT");
         const char* candidates[] = {
@@ -120,7 +128,6 @@ namespace
 
         std::fprintf(stderr, "[GdiText] No usable TTF found; UI text disabled "
                              "(set MU_FONT to a .ttf path).\n");
-        face.data.assign(1, 0);  // mark as attempted
         return nullptr;
     }
 

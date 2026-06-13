@@ -8,10 +8,15 @@
 
 namespace
 {
-    // True if `dir`/`name` exists verbatim.
+    // True if `dir`/`name` exists verbatim. Avoids emitting a leading "//"
+    // (POSIX gives a double leading slash an implementation-defined meaning)
+    // when dir is "/" or already ends in a separator.
     bool EntryExists(const std::string& dir, const std::string& name)
     {
-        const std::string full = dir.empty() ? name : dir + "/" + name;
+        std::string full;
+        if (dir.empty())            full = name;
+        else if (dir.back() == '/') full = dir + name;
+        else                        full = dir + "/" + name;
         return ::access(full.c_str(), F_OK) == 0;
     }
 

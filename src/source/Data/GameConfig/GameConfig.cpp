@@ -29,7 +29,14 @@ GameConfig::GameConfig()
     // setting then falls back to its default).
     wchar_t* lastBackslash = wcsrchr(exePath, L'\\');
     wchar_t* lastForwardSlash = wcsrchr(exePath, L'/');
-    wchar_t* lastSlash = (lastBackslash > lastForwardSlash) ? lastBackslash : lastForwardSlash;
+    // Relational comparison of pointers into different arrays (or with null) is
+    // undefined behavior, and on Linux one of these is always null, so pick the
+    // later separator only when both exist.
+    wchar_t* lastSlash = nullptr;
+    if (lastBackslash && lastForwardSlash)
+        lastSlash = (lastBackslash > lastForwardSlash) ? lastBackslash : lastForwardSlash;
+    else
+        lastSlash = lastBackslash ? lastBackslash : lastForwardSlash;
     if (lastSlash)
     {
         *(lastSlash + 1) = L'\0';  // Keep the trailing separator

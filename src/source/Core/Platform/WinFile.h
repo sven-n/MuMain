@@ -142,13 +142,12 @@ inline DWORD SetFilePointer(HANDLE hFile, LONG distance, LONG* distanceHigh, DWO
 inline DWORD GetFileSize(HANDLE hFile, LPDWORD lpFileSizeHigh)
 {
     if (!MuFileHandleValid(hFile)) return INVALID_FILE_SIZE;
-    const int fd = mu_detail::HandleToFd(hFile);
-    const off_t cur = ::lseek(fd, 0, SEEK_CUR);
-    const off_t end = ::lseek(fd, 0, SEEK_END);
-    if (cur != static_cast<off_t>(-1)) ::lseek(fd, cur, SEEK_SET);
-    if (end == static_cast<off_t>(-1)) return INVALID_FILE_SIZE;
-    if (lpFileSizeHigh) *lpFileSizeHigh = static_cast<DWORD>(end >> 32);
-    return static_cast<DWORD>(end & 0xFFFFFFFF);
+    // fstat is a single syscall, thread-safe, and leaves the fd offset
+    // untouched (unlike seeking to the end and back).
+    struct stat st {};
+    if (::fstat(mu_detail::HandleToFd(hFile), &st) != 0) return INVALID_FILE_SIZE;
+    if (lpFileSizeHigh) *lpFileSizeHigh = static_cast<DWORD>(static_cast<std::uint64_t>(st.st_size) >> 32);
+    return static_cast<DWORD>(static_cast<std::uint64_t>(st.st_size) & 0xFFFFFFFF);
 }
 
 #ifndef INVALID_FILE_ATTRIBUTES
