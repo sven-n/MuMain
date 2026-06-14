@@ -13,6 +13,7 @@
 #else  // ---- non-Windows ----------------------------------------------------
 
 #include <cwchar>                      // wcslen
+#include <string>
 #include "Core/Platform/WinCompat.h"  // WORD, DWORD, LONG, BYTE
 
 #ifndef BI_RGB
@@ -147,5 +148,10 @@ inline HGDIOBJ GetStockObject(int) { return nullptr; }
 BOOL     TextOut(HDC hdc, int x, int y, LPCWSTR lpString, int c);
 COLORREF SetBkColor(HDC hdc, COLORREF color);
 COLORREF SetTextColor(HDC hdc, COLORREF color);
+
+// UI-font discovery diagnostics for the crash log: one line per resolved font
+// weight (which file loaded, or that none was found). Empty until the first
+// font is created. Implemented in GdiText.cpp.
+std::string MuFontDiagnostics();
 
 #endif // _WIN32

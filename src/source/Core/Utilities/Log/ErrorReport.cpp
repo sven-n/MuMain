@@ -229,6 +229,38 @@ void CErrorReport::WriteOpenGLInfo(void)
     Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
 }
 
+void CErrorReport::WriteFontInfo(void)
+{
+    Write(L"<UI font>\r\n");
+#ifdef _WIN32
+    Write(L"Source\t\t: Win32 GDI (system fonts)\r\n");
+#else
+    // On non-Windows the font is discovered at runtime (fontconfig + fallbacks);
+    // log what was found so a "no UI text" report is diagnosable. Paths are
+    // ASCII, written through the %hs narrow conversion.
+    const std::string diag = MuFontDiagnostics();
+    if (diag.empty())
+    {
+        Write(L"(no font resolved)\r\n");
+    }
+    else
+    {
+        size_t pos = 0;
+        while (pos < diag.size())
+        {
+            const size_t nl = diag.find('\n', pos);
+            const std::string line = diag.substr(pos, (nl == std::string::npos ? diag.size() : nl) - pos);
+            pos = (nl == std::string::npos) ? diag.size() : nl + 1;
+            if (!line.empty())
+                Write(L"%hs\r\n", line.c_str());
+        }
+        if (diag.find("NOT FOUND") != std::string::npos)
+            Write(L"!! UI text is disabled - no usable font found. Install a "
+                  L"sans-serif font or set MU_FONT.\r\n");
+    }
+#endif
+}
+
 // ---- Win32 crash-report system info -----------------------------------------
 // IME / sound-card / OS / CPU / DirectX details for the crash log. These pull in
 // DirectX and other Win32 APIs and are only invoked from the Windows entry point

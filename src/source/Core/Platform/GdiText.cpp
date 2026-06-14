@@ -40,6 +40,11 @@ namespace
         bool valid = false;
     };
 
+    // One human-readable line per resolved weight, surfaced to the crash log so
+    // a "no UI text" report shows what was found (or not) on the user's system.
+    std::string g_fontDiag;
+    void RecordFontDiag(const std::string& line) { g_fontDiag += line; g_fontDiag += '\n'; }
+
     struct MuGdiFont : MuGdiObject
     {
         const MuGdiFace* face = nullptr;
@@ -151,14 +156,21 @@ namespace
             }
             std::fclose(fp);
             if (face.valid)
+            {
+                RecordFontDiag((bold ? "bold:    " : "regular: ") + path);
                 return &face;
+            }
             face.data.clear();
         }
 
         // No bold face found: fall back to the regular one rather than no text.
         if (bold)
+        {
+            RecordFontDiag("bold:    not found, using regular");
             return LoadFace(false);
+        }
 
+        RecordFontDiag("regular: NOT FOUND (fontconfig and known paths failed)");
         std::fprintf(stderr, "[GdiText] No usable TTF found; UI text disabled. "
                              "Install a sans-serif font (e.g. fonts-dejavu-core) "
                              "or set MU_FONT to a .ttf path.\n");
@@ -178,6 +190,13 @@ namespace
         }
         return static_cast<int>(std::ceil(pen));
     }
+}
+
+// External linkage so the crash-log writer can read it. One line per resolved
+// font weight; empty until the first font is created.
+std::string MuFontDiagnostics()
+{
+    return g_fontDiag;
 }
 
 HFONT CreateFontW(int cHeight, int /*cWidth*/, int /*cEscapement*/, int /*cOrientation*/,

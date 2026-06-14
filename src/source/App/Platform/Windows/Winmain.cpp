@@ -1567,6 +1567,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     CreateNewFonts(CalculateFontSizes());
 
+    // Log which UI font was resolved now that the fonts have been created (the
+    // discovery is lazy on first CreateFont). Helps diagnose "no UI text".
+    g_ErrorReport.AddSeparator();
+    g_ErrorReport.WriteFontInfo();
+    g_ErrorReport.AddSeparator();
+
     setlocale(LC_ALL, "english");
 
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
