@@ -1099,25 +1099,29 @@ MSG MainLoop()
                     box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
                 break;
             case SDL_EVENT_KEY_DOWN:
+#ifndef _WIN32
+                // These mirror what WndProc does from Win32 messages, for the
+                // SDL-only input path. On Windows WndProc is still driven (via
+                // SDL_SetWindowsMessageHook), so doing them here too would
+                // double-fire - guard them off there.
+                //
                 // Enter is gated through SetEnterPressed: ScanAsyncKeyState
-                // suppresses a VK_RETURN press unless this fired that frame. On
-                // Windows it came from WM_CHAR in WndProc, which the SDL path
-                // does not drive, so without this Enter never reaches the game
-                // (login submit, chat open). Mirror it from the key event.
+                // suppresses a VK_RETURN press unless this fired that frame
+                // (WM_CHAR does it on Windows). Without it Enter never reaches
+                // the game (login submit, chat open).
                 if (event.key.scancode == SDL_SCANCODE_RETURN ||
                     event.key.scancode == SDL_SCANCODE_KP_ENTER)
                 {
                     SetEnterPressed(true);
                 }
-                // F10 toggles the camera zoom lock. On Windows this is handled
-                // in WndProc's WM_SYSKEYDOWN (F10 is a reserved system key); the
-                // SDL path does not drive WndProc, so without this the zoom stays
-                // locked and the mouse wheel can never zoom. Edge-triggered, like
-                // the WM_SYSKEYDOWN PREVIOUS_KEY_STATE check.
+                // F10 toggles the camera zoom lock (WM_SYSKEYDOWN on Windows,
+                // where F10 is a reserved system key). Without it the zoom stays
+                // locked and the mouse wheel can never zoom. Edge-triggered.
                 if (event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
                 {
                     CameraManager::Instance().ToggleZoomLock();
                 }
+#endif
                 // Navigation/erase/clipboard for the focused portable field (#447).
                 FeedPortableKey(event.key);
                 break;

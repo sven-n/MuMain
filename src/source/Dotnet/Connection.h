@@ -15,6 +15,8 @@
 #define symLoad GetProcAddress
 #else
 #include "dlfcn.h"
+#include <unistd.h>   // readlink
+#include <string>
 #define symLoad dlsym
 #endif
 
@@ -34,12 +36,26 @@ inline HINSTANCE get_munique_client_library_handle()
 inline void* get_munique_client_library_handle()
 {
     // Native AOT emits a platform-native shared object on Linux (.so), not the
-    // Windows .dll. Try the binary's own directory first (it is copied next to
-    // the executable by the build), then fall back to the loader search path.
+    // Windows .dll, and the build copies it next to the executable. Resolve the
+    // executable's real directory (via /proc/self/exe) and load by absolute
+    // path, so it works regardless of the working directory the client was
+    // launched from; fall back to the loader search path.
     // Not const-qualified return: dlsym() takes a non-const void* handle.
     static void* const handle = []() -> void* {
-        if (void* h = dlopen("./MUnique.Client.Library.so", RTLD_LAZY))
-            return h;
+        char exe[4096];
+        const ssize_t n = ::readlink("/proc/self/exe", exe, sizeof(exe) - 1);
+        if (n > 0)
+        {
+            std::string path(exe, static_cast<size_t>(n));
+            const std::string::size_type slash = path.find_last_of('/');
+            if (slash != std::string::npos)
+            {
+                path.resize(slash + 1);
+                path += "MUnique.Client.Library.so";
+                if (void* h = dlopen(path.c_str(), RTLD_LAZY))
+                    return h;
+            }
+        }
         return dlopen("MUnique.Client.Library.so", RTLD_LAZY);
     }();
     return handle;

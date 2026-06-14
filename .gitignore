@@ -9,8 +9,7 @@ src/source/Global Release/
 src/Global Release/
 src/Global Release/Main
 
-# External dependencies (built locally)
-_deps/
+# External dependencies (built locally; matches the dir and the symlink form)
 _deps
 
 # CMake build directories

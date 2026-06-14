@@ -131,7 +131,10 @@ inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nS
 inline DWORD GetCurrentProcessId() { return static_cast<DWORD>(::getpid()); }
 inline DWORD GetCurrentThreadId()
 {
-    return static_cast<DWORD>(reinterpret_cast<std::uintptr_t>(pthread_self()));
+    // pthread_t is 8 bytes on LP64; fold the high half into the low half before
+    // truncating so two threads are less likely to collide on the low 32 bits.
+    const std::uint64_t id = reinterpret_cast<std::uintptr_t>(pthread_self());
+    return static_cast<DWORD>(id ^ (id >> 32));
 }
 
 // String length (Win32 lstrlen; the engine builds UNICODE, hence the wide form).
