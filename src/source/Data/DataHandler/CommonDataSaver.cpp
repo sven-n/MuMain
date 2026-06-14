@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "CommonDataSaver.h"
+#include <climits>  // INT_MAX (pulled in transitively by MSVC headers, not libstdc++)
 #include <memory>
 
 #include "UI/Console/MuEditorConsoleUI.h"
