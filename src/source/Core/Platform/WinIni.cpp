@@ -4,6 +4,7 @@
 
 #include "Core/Platform/WinIni.h"
 #include "Core/Platform/WinNls.h"  // WideCharToMultiByte / MultiByteToWideChar
+#include "Core/Platform/PathResolve.h"
 
 #include <cstdio>
 #include <cstring>
@@ -60,7 +61,7 @@ namespace
     std::vector<Section> Load(const std::string& path)
     {
         std::vector<Section> sections;
-        FILE* fp = std::fopen(path.c_str(), "rb");
+        FILE* fp = std::fopen(MuResolvePath(path.c_str()).c_str(), "rb");
         if (!fp) return sections;
 
         std::string content;
@@ -100,7 +101,7 @@ namespace
 
     bool Store(const std::string& path, const std::vector<Section>& sections)
     {
-        FILE* fp = std::fopen(path.c_str(), "wb");
+        FILE* fp = std::fopen(MuResolvePath(path.c_str()).c_str(), "wb");
         if (!fp) return false;
         for (const Section& s : sections)
         {

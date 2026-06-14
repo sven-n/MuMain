@@ -21,12 +21,12 @@ this codebase. Follow the style of surrounding code where the rules don't speak.
 ## Build setup
 
 The project uses CMake. Supported build environments and setup steps are
-documented in [`docs/build-guide.md`](docs/build-guide.md).
+documented in [`docs/build/README.md`](docs/build/README.md).
 
 Quick references:
 
 - Requirements and IDE-specific instructions: [`README.md`](README.md).
-- Cross-platform / WSL build details: [`docs/build-guide.md`](docs/build-guide.md).
+- Cross-platform / WSL build details: [`docs/build/README.md`](docs/build/README.md).
 
 ## Branch and PR conventions
 

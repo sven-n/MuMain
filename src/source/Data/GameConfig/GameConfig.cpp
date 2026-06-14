@@ -22,11 +22,24 @@ GameConfig::GameConfig()
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(nullptr, exePath, MAX_PATH);
 
-    // Find last backslash to get directory
-    wchar_t* lastSlash = wcsrchr(exePath, L'\\');
+    // Find the last path separator to get the directory. GetModuleFileNameW
+    // returns backslashes on Windows but forward slashes on Linux (issue #462),
+    // so accept either; truncating on the wrong one leaves the whole exe path
+    // glued to "config.ini", and the file is silently never found (every
+    // setting then falls back to its default).
+    wchar_t* lastBackslash = wcsrchr(exePath, L'\\');
+    wchar_t* lastForwardSlash = wcsrchr(exePath, L'/');
+    // Relational comparison of pointers into different arrays (or with null) is
+    // undefined behavior, and on Linux one of these is always null, so pick the
+    // later separator only when both exist.
+    wchar_t* lastSlash = nullptr;
+    if (lastBackslash && lastForwardSlash)
+        lastSlash = (lastBackslash > lastForwardSlash) ? lastBackslash : lastForwardSlash;
+    else
+        lastSlash = lastBackslash ? lastBackslash : lastForwardSlash;
     if (lastSlash)
     {
-        *(lastSlash + 1) = L'\0';  // Keep the trailing backslash
+        *(lastSlash + 1) = L'\0';  // Keep the trailing separator
     }
 
     m_configPath = exePath;

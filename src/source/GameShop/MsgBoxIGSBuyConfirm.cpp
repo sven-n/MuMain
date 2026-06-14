@@ -8,7 +8,7 @@
 #include "MsgBoxIGSBuyConfirm.h"
 #include "Audio/DSPlaySound.h"
 
-#include <strsafe.h>
+#include "Core/Platform/StrSafe.h"
 
 CMsgBoxIGSBuyConfirm::CMsgBoxIGSBuyConfirm()
 {

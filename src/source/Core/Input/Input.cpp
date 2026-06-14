@@ -23,8 +23,14 @@ CInput& CInput::Instance()
 
 bool CInput::Create(HWND hWnd, long lScreenWidth, long lScreenHeight)
 {
+#ifdef _WIN32
+    // A null window handle is a genuine error on Windows. On the SDL path
+    // (issue #462) there is no Win32 HWND, so hWnd is legitimately null; bailing
+    // here would leave the screen size unset (0), which makes every centered UI
+    // window compute a negative position and pile up in the top-left corner.
     if (hWnd == NULL)
         return false;
+#endif
 
     m_hWnd = hWnd;
     m_lScreenWidth = lScreenWidth;

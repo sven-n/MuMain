@@ -11,7 +11,9 @@
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ListManager.h"
+#ifdef _WIN32
 #include <process.h>
+#endif
 
 CListManager::CListManager() // OK
 {
@@ -164,6 +166,12 @@ void			CListManager::DeleteScriptFiles() // OK
 
 WZResult		CListManager::FileDownLoad() // OK
 {
+#ifndef _WIN32
+    // The watchdog thread guards a WinInet download that is excluded off
+    // Windows (issue #462); DownLoadFiles fails immediately there, so run it
+    // inline.
+    this->m_Result = this->FileDownLoadImpl();
+#else
     if (this->m_ListManagerInfo.m_dwDownloadMaxTime > 0)
     {
         unsigned int ThreadID = 0;
@@ -200,6 +208,7 @@ WZResult		CListManager::FileDownLoad() // OK
     {
         this->m_Result = this->FileDownLoadImpl();
     }
+#endif // _WIN32
 
     return this->m_Result;
 }
@@ -210,10 +219,12 @@ WZResult		CListManager::FileDownLoadImpl() // OK
     {
         m_pFTPDownLoader->Break();
 
+#ifdef _WIN32
         if (m_pFTPDownLoader->GetFileDownloader() != NULL)
         {
             m_pFTPDownLoader->GetFileDownloader()->Break();
         }
+#endif
     }
 
     SAFE_DELETE(m_pFTPDownLoader); // FIX THIS

@@ -45,6 +45,7 @@ public:
 
     void WriteSystemInfo(ER_SystemInfo* si);
     void WriteOpenGLInfo(void);
+    void WriteFontInfo(void);
     void WriteImeInfo(HWND hWnd);
     void WriteSoundCardInfo(void);
 };

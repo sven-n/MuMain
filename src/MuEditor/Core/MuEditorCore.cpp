@@ -17,6 +17,34 @@
 #include "I18N/All.h"
 #include "Core/Utilities/StringUtils.h"
 
+#ifndef _WIN32
+#include <cstdio>    // popen / pclose
+#include <unistd.h>  // access
+#include <string>
+#include <vector>
+namespace
+{
+    // Resolve a font file via fontconfig (distro-agnostic), e.g.
+    // EditorFcMatch("sans-serif"). Empty if fc-match is unavailable.
+    std::string EditorFcMatch(const char* pattern)
+    {
+        const std::string cmd = std::string("fc-match -f '%{file}' '") + pattern + "' 2>/dev/null";
+        FILE* p = popen(cmd.c_str(), "r");
+        if (!p) return {};
+        std::string out;
+        char buf[4096];
+        size_t n;
+        while ((n = fread(buf, 1, sizeof(buf), p)) > 0)
+            out.append(buf, n);
+        pclose(p);
+        while (!out.empty() && (out.back() == '\n' || out.back() == '\r' || out.back() == ' '))
+            out.pop_back();
+        return out;
+    }
+    bool FontFileExists(const char* path) { return path && path[0] && ::access(path, R_OK) == 0; }
+}
+#endif
+
 // Windows cursor display counter thresholds
 // The cursor is visible when the counter is >= CURSOR_VISIBLE_THRESHOLD
 // The cursor is hidden when the counter is < CURSOR_VISIBLE_THRESHOLD
@@ -196,16 +224,22 @@ void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
         }
     }
 #else
-    // Linux: Try common fonts with Unicode support
-    const char* linuxFonts[] = {
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/TTF/DejaVuSans.ttf",
-        "/usr/share/fonts/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
-    };
-    for (const char* fontPath : linuxFonts)
+    // Linux/Unix: resolve a system font via fontconfig (distro-agnostic), with
+    // well-known paths as a fallback. Skip paths that don't exist so ImGui does
+    // not log "Could not load font file!" for each miss.
+    std::vector<std::string> linuxFonts;
+    if (std::string fc = EditorFcMatch("sans-serif"); !fc.empty())
+        linuxFonts.push_back(std::move(fc));
+    for (const char* p : {
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/TTF/DejaVuSans.ttf",
+            "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf" })
+        linuxFonts.emplace_back(p);
+    for (const std::string& fontPath : linuxFonts)
     {
-        if (io.Fonts->AddFontFromFileTTF(fontPath, 16.0f, &fontConfig, ranges.Data) != nullptr)
+        if (FontFileExists(fontPath.c_str()) &&
+            io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, &fontConfig, ranges.Data) != nullptr)
         {
             fontLoaded = true;
             break;
@@ -213,6 +247,8 @@ void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
     }
     if (fontLoaded)
     {
+        // CJK is best-effort; keep the well-known paths (fc-match can return a
+        // non-CJK font when none is installed), but only try ones that exist.
         const char* cjkFonts[] = {
             "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
             "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
@@ -221,7 +257,8 @@ void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
         };
         for (const char* path : cjkFonts)
         {
-            if (io.Fonts->AddFontFromFileTTF(path, 16.0f, &cjkConfig, cjkRanges) != nullptr)
+            if (FontFileExists(path) &&
+                io.Fonts->AddFontFromFileTTF(path, 16.0f, &cjkConfig, cjkRanges) != nullptr)
             {
                 break;
             }
@@ -452,9 +489,12 @@ void CMuEditorCore::Render()
     extern bool g_bRenderGameCursor;
     g_bRenderGameCursor = !m_bHoveringUI;
 
+#ifdef _WIN32
     // Manage Windows cursor visibility
     // Windows maintains an internal display counter - cursor is visible when counter >= 0
-    // We need to loop to force the counter to the correct state
+    // We need to loop to force the counter to the correct state.
+    // Off Windows the SDL/ImGui backend drives the OS cursor itself, and the
+    // ShowCursor stub returns a constant so these loops would never terminate.
     static bool lastHoveringState = false;
     if (m_bHoveringUI != lastHoveringState)
     {
@@ -470,6 +510,7 @@ void CMuEditorCore::Render()
         }
         lastHoveringState = m_bHoveringUI;
     }
+#endif
 
     // Render ImGui and reset frame state
     ImGui::Render();

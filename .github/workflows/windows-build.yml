@@ -1,0 +1,107 @@
+name: Windows Build (MinGW)
+
+# Cross-compiles the Windows client with MinGW-w64 on a Linux runner, for both
+# architectures (x86_64, i686) and both editor configurations, and runs the test
+# suite under wine. This is a compile/link/test guard: the linux-hosted .NET SDK
+# cannot cross-OS Native-AOT compile the win-* client library, so the network
+# .dll is not produced here (it is dlopen'd at runtime, not linked).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-mingw:
+    name: build-mingw-${{ matrix.arch }} (editor-${{ matrix.editor }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, i686]
+        editor: [OFF, ON]
+        include:
+          - arch: x86_64
+            triple: x86_64-w64-mingw32
+            mingw_pkg: g++-mingw-w64-x86-64
+          - arch: i686
+            triple: i686-w64-mingw32
+            mingw_pkg: g++-mingw-w64-i686
+    env:
+      WINEDEBUG: -all
+      WINEPREFIX: ${{ github.workspace }}/.wineprefix
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install MinGW-w64 toolchain and wine
+        run: |
+          if [ "${{ matrix.arch }}" = "i686" ]; then
+            sudo dpkg --add-architecture i386
+          fi
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64 ${{ matrix.mingw_pkg }} cmake ninja-build wine
+          if [ "${{ matrix.arch }}" = "i686" ]; then
+            sudo apt-get install -y wine32:i386
+          else
+            sudo apt-get install -y wine64
+          fi
+
+      - name: Install .NET SDK 10
+        # Required for the ResxGen build-time tool that compiles the localization
+        # .resx files into the I18N C++ accessors the codebase #include's.
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Initialise wine prefix
+        run: wineboot --init >/dev/null 2>&1 || true
+
+      - name: Cache libjpeg-turbo (MinGW ${{ matrix.arch }})
+        uses: actions/cache@v4
+        with:
+          path: _deps/mingw-${{ matrix.arch }}
+          key: libjpeg-turbo-mingw-${{ matrix.arch }}-3.1.3-v1
+
+      - name: Build libjpeg-turbo (MinGW ${{ matrix.arch }} static)
+        run: |
+          prefix="${GITHUB_WORKSPACE}/_deps/mingw-${{ matrix.arch }}"
+          if [ -f "${prefix}/lib/libturbojpeg.a" ]; then
+            echo "Using cached libturbojpeg.a"
+          else
+            rm -rf _deps/libjpeg-turbo _deps/build-turbo
+            git clone --depth 1 --branch 3.1.3 https://github.com/libjpeg-turbo/libjpeg-turbo.git _deps/libjpeg-turbo
+            cmake -S _deps/libjpeg-turbo -B _deps/build-turbo \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_SYSTEM_PROCESSOR=${{ matrix.arch }} \
+              -DCMAKE_C_COMPILER=${{ matrix.triple }}-gcc \
+              -DCMAKE_CXX_COMPILER=${{ matrix.triple }}-g++ \
+              -DCMAKE_RC_COMPILER=${{ matrix.triple }}-windres \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DENABLE_SHARED=OFF \
+              -DENABLE_STATIC=ON \
+              -DWITH_SIMD=OFF \
+              -DCMAKE_INSTALL_PREFIX="${prefix}"
+            cmake --build _deps/build-turbo -j"$(nproc)"
+            cmake --install _deps/build-turbo
+          fi
+          test -f "${prefix}/lib/libturbojpeg.a"
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build-mingw \
+            -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-${{ matrix.arch }}.cmake" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=ON \
+            -DENABLE_EDITOR=${{ matrix.editor }} \
+            -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-${{ matrix.arch }}/lib/libturbojpeg.a"
+
+      - name: Build
+        run: cmake --build build-mingw -j"$(nproc)"
+
+      - name: Run tests
+        run: ctest --test-dir build-mingw --output-on-failure

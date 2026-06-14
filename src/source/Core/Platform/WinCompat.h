@@ -108,6 +108,7 @@ typedef void*           PVOID;
 typedef void*           LPVOID;
 typedef const void*     LPCVOID;
 typedef CHAR*           LPSTR;
+typedef CHAR*           PSTR;
 typedef const CHAR*     LPCSTR;
 typedef WCHAR*          LPWSTR;
 typedef const WCHAR*    LPCWSTR;
@@ -123,6 +124,10 @@ typedef const POINT* LPCPOINT;
 typedef struct tagSIZE { LONG cx, cy; } SIZE, * LPSIZE;
 typedef struct tagRECT { LONG left, top, right, bottom; } RECT, * LPRECT;
 typedef const RECT* LPCRECT;
+
+// SEH record, only ever used as an opaque pointer parameter off Windows.
+struct _EXCEPTION_POINTERS;
+typedef struct _EXCEPTION_POINTERS* PEXCEPTION_POINTERS;
 
 // Async-I/O struct referenced by a few function declarations (minwinbase.h).
 typedef struct _OVERLAPPED {
@@ -145,6 +150,15 @@ inline ENUMTYPE& operator ^= (ENUMTYPE& a, ENUMTYPE b) { a = a ^ b; return a; } 
 inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_type_t<ENUMTYPE>; return static_cast<ENUMTYPE>(~static_cast<T>(a)); }
 
 // Calling-convention / annotation macros: no-ops off Windows.
+#ifndef __stdcall
+#define __stdcall
+#endif
+#ifndef __cdecl
+#define __cdecl
+#endif
+#ifndef __fastcall
+#define __fastcall
+#endif
 #ifndef WINAPI
 #define WINAPI
 #endif
@@ -237,6 +251,81 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #define MB_ICONSTOP        0x00000010
 #define MB_ICONEXCLAMATION 0x00000030
 
+// Window styles (winuser.h). SDL owns the real window; these let the legacy
+// Win32 window/resolution code compile (it is stubbed out at the call level).
+#ifndef WS_OVERLAPPED
+#define WS_OVERLAPPED   0x00000000L
+#define WS_POPUP        0x80000000L
+#define WS_VISIBLE      0x10000000L
+#define WS_CAPTION      0x00C00000L
+#define WS_BORDER       0x00800000L
+#define WS_SYSMENU      0x00080000L
+#define WS_MINIMIZEBOX  0x00020000L
+#define WS_CLIPCHILDREN 0x02000000L
+#endif
+
+// SetWindowPos flags + insert-after handles (winuser.h).
+#ifndef SWP_NOSIZE
+#define SWP_NOSIZE      0x0001
+#define SWP_NOMOVE      0x0002
+#define SWP_NOZORDER    0x0004
+#define SWP_FRAMECHANGED 0x0020
+#define SWP_SHOWWINDOW  0x0040
+#endif
+#ifndef HWND_TOP
+#define HWND_TOP        (reinterpret_cast<HWND>(0))
+#define HWND_BOTTOM     (reinterpret_cast<HWND>(1))
+#define HWND_TOPMOST    (reinterpret_cast<HWND>(-1))
+#define HWND_NOTOPMOST  (reinterpret_cast<HWND>(-2))
+#endif
+#ifndef GWL_STYLE
+#define GWL_STYLE       (-16)
+#endif
+#ifndef SW_SHOW
+#define SW_HIDE         0
+#define SW_NORMAL       1
+#define SW_SHOW         5
+#endif
+
+// ChangeDisplaySettings / DEVMODE (winuser.h / wingdi.h).
+#ifndef CDS_FULLSCREEN
+#define CDS_FULLSCREEN  0x00000004
+#endif
+#ifndef DISP_CHANGE_SUCCESSFUL
+#define DISP_CHANGE_SUCCESSFUL 0
+#define DISP_CHANGE_FAILED     (-1)
+#endif
+#ifndef DM_BITSPERPEL
+#define DM_BITSPERPEL       0x00040000L
+#define DM_PELSWIDTH        0x00080000L
+#define DM_PELSHEIGHT       0x00100000L
+#define DM_DISPLAYFREQUENCY 0x00400000L
+#endif
+
+// PeekMessage flag, stock-object id (winuser.h / wingdi.h).
+#ifndef IMN_SETCONVERSIONMODE
+#define IMN_SETCONVERSIONMODE 0x0006
+#define IMN_SETSENTENCEMODE   0x0007
+#endif
+#ifndef PM_REMOVE
+#define PM_REMOVE       0x0001
+#endif
+#ifndef BLACK_BRUSH
+#define BLACK_BRUSH     4
+#endif
+
+// MIDI sequencer mapper (mmsystem.h).
+#ifndef MCI_SEQ_MAPPER
+#define MCI_SEQ_MAPPER 0xFFFFu
+#endif
+
+// MSVC keyword / fixed-width aliases.
+#ifndef __forceinline
+#define __forceinline inline
+#endif
+typedef uint64_t u_int64;
+typedef int64_t  INT64;
+
 // Console attributes / standard handles (wincon.h).
 #define FOREGROUND_BLUE      0x0001
 #define FOREGROUND_GREEN     0x0002
@@ -264,6 +353,9 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #endif
 
 // COM-style result codes.
+#ifndef ERROR_SUCCESS
+#define ERROR_SUCCESS 0L
+#endif
 #ifndef S_OK
 #define S_OK          (static_cast<HRESULT>(0))
 #endif
@@ -304,6 +396,9 @@ inline constexpr ENUMTYPE operator ~ (ENUMTYPE a) { using T = std::underlying_ty
 #endif
 #ifndef RGB
 #define RGB(r, g, b) (static_cast<COLORREF>((static_cast<BYTE>(r)) | (static_cast<WORD>(static_cast<BYTE>(g)) << 8) | (static_cast<DWORD>(static_cast<BYTE>(b)) << 16)))
+#define GetRValue(rgb) (static_cast<BYTE>(rgb))
+#define GetGValue(rgb) (static_cast<BYTE>((rgb) >> 8))
+#define GetBValue(rgb) (static_cast<BYTE>((rgb) >> 16))
 #endif
 
 // Memory fill helper.

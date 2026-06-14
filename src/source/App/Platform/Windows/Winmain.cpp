@@ -6,7 +6,9 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
 
+#ifdef _WIN32
 #include <dpapi.h>
+#endif
 #include <clocale>
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Legacy/UIWindows.h"
@@ -42,10 +44,14 @@
 #include "Camera/CameraManager.h"
 
 #include "UI/Windows/CBTMessageBox.h"
+#ifdef _WIN32
 #include "./ExternalObject/Leaf/regkey.h"
+#endif
 
 #include "GameLogic/Events/CSChaosCastle.h"
+#ifdef _WIN32
 #include <io.h>
+#endif
 #include "Core/Input/Input.h"
 #include "Core/Time/Timer.h"
 #include "UI/Legacy/UIMng.h"
@@ -183,12 +189,52 @@ GLvoid KillGLWindow(GLvoid)
     }
 }
 
+#ifndef _WIN32
+// Debug-only framebuffer capture: when MU_CAPTURE_FRAME=<N> is set, dump the
+// Nth presented frame to MU_CAPTURE_PATH (default /tmp/mu-frame.ppm) as a PPM.
+// Used to verify rendering on headless/WSLg setups where X screenshot tools
+// cannot read the window (issue #462). No effect unless the env var is set.
+static void MaybeCaptureFrame()
+{
+    const char* want = std::getenv("MU_CAPTURE_FRAME");
+    if (!want) return;
+    static long s_frame = 0;
+    const long target = std::strtol(want, nullptr, 10);
+    if (++s_frame != target) return;
+
+    int w = 0, h = 0;
+    SDL_GetWindowSizeInPixels(g_sdlWindow, &w, &h);
+    if (w <= 0 || h <= 0) return;
+
+    std::vector<unsigned char> pixels(static_cast<size_t>(w) * h * 3);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+
+    const char* path = std::getenv("MU_CAPTURE_PATH");
+    if (!path) path = "/tmp/mu-frame.ppm";
+    if (FILE* fp = std::fopen(path, "wb"))
+    {
+        std::fprintf(fp, "P6\n%d %d\n255\n", w, h);
+        // glReadPixels origin is bottom-left; write rows top-down for a PPM.
+        for (int y = h - 1; y >= 0; --y)
+            std::fwrite(pixels.data() + static_cast<size_t>(y) * w * 3, 1, static_cast<size_t>(w) * 3, fp);
+        std::fclose(fp);
+        std::fprintf(stderr, "[capture] wrote frame %ld (%dx%d) to %s\n", target, w, h, path);
+    }
+}
+#endif
+
 // Present the current GL frame. SDL owns the window/context, so swapping goes
 // through SDL_GL_SwapWindow instead of the Win32 ::SwapBuffers (issue #442).
 void PlatformSwapBuffers()
 {
     if (g_sdlWindow)
+    {
+#ifndef _WIN32
+        MaybeCaptureFrame();
+#endif
         SDL_GL_SwapWindow(g_sdlWindow);
+    }
 }
 
 // Monitor refresh rate (Hz) for the display the window is on, via SDL instead
@@ -319,6 +365,11 @@ DWORD GetCheckSum(WORD wKey)
 
 BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion)
 {
+#ifndef _WIN32
+    // File version-info is a Win32 crash-report detail; report "unknown".
+    (void)lpszFileName; (void)pwVersion;
+    return FALSE;
+#else
     DWORD dwHandle;
     DWORD dwLen = GetFileVersionInfoSize(lpszFileName, &dwHandle);
     if (dwLen <= 0)
@@ -348,6 +399,7 @@ BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion)
 
     delete[] pbyData;
     return (TRUE);
+#endif
 }
 
 extern PATH* path;
@@ -455,6 +507,9 @@ int g_iMousePopPosition_y = 0;
 extern int TimeRemain;
 extern bool EnableFastInput;
 
+// The legacy Win32 message handler. SDL owns the event loop on Linux and only
+// bridges to this via the Windows-only message hook, so guard it off there.
+#ifdef _WIN32
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     // F10 zoom-lock toggle. Handled before the ImGui forwarder so editor-open
@@ -577,6 +632,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
+#endif // _WIN32 (WndProc)
 
 wchar_t m_Username[11];
 wchar_t m_Password[21];
@@ -622,7 +678,9 @@ BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstrin
     return TRUE;
 }
 
+#ifdef _WIN32
 #include <tlhelp32.h>
+#endif
 
 wchar_t g_lpszCmdURL[50];
 BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
@@ -1041,6 +1099,29 @@ MSG MainLoop()
                     box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
                 break;
             case SDL_EVENT_KEY_DOWN:
+#ifndef _WIN32
+                // These mirror what WndProc does from Win32 messages, for the
+                // SDL-only input path. On Windows WndProc is still driven (via
+                // SDL_SetWindowsMessageHook), so doing them here too would
+                // double-fire - guard them off there.
+                //
+                // Enter is gated through SetEnterPressed: ScanAsyncKeyState
+                // suppresses a VK_RETURN press unless this fired that frame
+                // (WM_CHAR does it on Windows). Without it Enter never reaches
+                // the game (login submit, chat open).
+                if (event.key.scancode == SDL_SCANCODE_RETURN ||
+                    event.key.scancode == SDL_SCANCODE_KP_ENTER)
+                {
+                    SetEnterPressed(true);
+                }
+                // F10 toggles the camera zoom lock (WM_SYSKEYDOWN on Windows,
+                // where F10 is a reserved system key). Without it the zoom stays
+                // locked and the mouse wheel can never zoom. Edge-triggered.
+                if (event.key.scancode == SDL_SCANCODE_F10 && !event.key.repeat)
+                {
+                    CameraManager::Instance().ToggleZoomLock();
+                }
+#endif
                 // Navigation/erase/clipboard for the focused portable field (#447).
                 FeedPortableKey(event.key);
                 break;
@@ -1282,7 +1363,12 @@ void UpdateResolutionDependentSystems()
     CUIMng::Instance().RepositionSceneUI();
 }
 
+#ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
+#else
+// Off Windows the Linux entry point (main.cpp) calls this directly.
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
+#endif
 {
     wchar_t lpszExeVersion[256] = L"unknown";
 
@@ -1428,6 +1514,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
 
+#ifdef _WIN32
     // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,
     // cursor, the legacy EDIT-control text boxes) keeps working.
     g_hWnd = static_cast<HWND>(SDL_GetPointerProperty(
@@ -1437,6 +1524,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 
     // Drive the existing WndProc from SDL's Win32 messages (transitional, #442).
     SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
+#endif // _WIN32
 
     SDL_RaiseWindow(g_sdlWindow);
     SetFocus(g_hWnd);
@@ -1482,6 +1570,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
     }
 
     CreateNewFonts(CalculateFontSizes());
+
+    // Log which UI font was resolved now that the fonts have been created (the
+    // discovery is lazy on first CreateFont). Helps diagnose "no UI text".
+    g_ErrorReport.AddSeparator();
+    g_ErrorReport.WriteFontInfo();
+    g_ErrorReport.AddSeparator();
 
     setlocale(LC_ALL, "english");
 
@@ -1567,6 +1661,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         g_bIMEBlock = TRUE;
     }
 
+#ifdef _WIN32
     if (g_bUseWindowMode == FALSE)
     {
         int nOldVal;
@@ -1574,6 +1669,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
         SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &g_iScreenSaverOldValue, 0);
         SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 300 * 60, nullptr, 0);
     }
+#endif // _WIN32
 
     std::thread cpuUsageRecorder(RecordCpuUsage);
     const MSG msg = MainLoop();

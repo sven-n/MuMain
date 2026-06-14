@@ -12,6 +12,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ShopList.h"
 
+#include <filesystem>
 #include <fstream>
 
 CShopList::CShopList() // OK
@@ -36,14 +37,14 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(szFilePath, std::ifstream::in);
+    ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(szFilePath, std::ifstream::in);
+        ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
         LastError = GetLastError();
     }
 
@@ -88,14 +89,14 @@ WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(szFilePath, std::ifstream::in);
+    ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(szFilePath, std::ifstream::in);
+        ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
         LastError = GetLastError();
     }
 
@@ -139,14 +140,14 @@ WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    ifs.open(szFilePath, std::ifstream::in);
+    ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
 
     DWORD LastError = GetLastError();
 
     for (int n = 0; !ifs.is_open() && n < 10; ++n)
     {
         Sleep(0x64);
-        ifs.open(szFilePath, std::ifstream::in);
+        ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
         LastError = GetLastError();
     }
 
@@ -202,7 +203,7 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
 {
     std::ifstream ifs;
 
-    ifs.open(szFilePath, std::ifstream::in);
+    ifs.open(std::filesystem::path(szFilePath), std::ifstream::in);
 
     if (!ifs.is_open())
     {

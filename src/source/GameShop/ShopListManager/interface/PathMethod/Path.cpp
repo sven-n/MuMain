@@ -12,9 +12,10 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "Path.h"
 
+#include <filesystem>
 #include <fstream>
 #include "Core/Platform/CrtDbg.h"
-#include <strsafe.h>
+#include "Core/Platform/StrSafe.h"
 
 TCHAR* Path::GetCurrentFullPath(TCHAR* szPath)
 {
@@ -164,7 +165,7 @@ TCHAR* Path::ChangeBackSlashToSlash(TCHAR* szPath)
 
 BOOL			Path::ReadFileLastLine(TCHAR* szFile, TCHAR* szLastLine)
 {
-    std::ifstream ifs(szFile, std::ifstream::in | std::ifstream::binary);
+    std::ifstream ifs(std::filesystem::path(szFile), std::ifstream::in | std::ifstream::binary);
 
     char buff[1024] = { 0 };
 
@@ -202,7 +203,7 @@ BOOL			Path::WriteNewFile(TCHAR* szFile, TCHAR* szText, INT nTextSize)
 {
     if (!szFile || !szText) return 0;
 
-    std::wfstream ofs(szFile, std::wfstream::out | std::wfstream::trunc | std::wfstream::binary);
+    std::wfstream ofs(std::filesystem::path(szFile), std::wfstream::out | std::wfstream::trunc | std::wfstream::binary);
 
     if (ofs.is_open())
     {

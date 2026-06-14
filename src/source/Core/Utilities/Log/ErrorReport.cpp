@@ -229,6 +229,38 @@ void CErrorReport::WriteOpenGLInfo(void)
     Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
 }
 
+void CErrorReport::WriteFontInfo(void)
+{
+    Write(L"<UI font>\r\n");
+#ifdef _WIN32
+    Write(L"Source\t\t: Win32 GDI (system fonts)\r\n");
+#else
+    // On non-Windows the font is discovered at runtime (fontconfig + fallbacks);
+    // log what was found so a "no UI text" report is diagnosable. Paths are
+    // ASCII, written through the %hs narrow conversion.
+    const std::string diag = MuFontDiagnostics();
+    if (diag.empty())
+    {
+        Write(L"(no font resolved)\r\n");
+    }
+    else
+    {
+        size_t pos = 0;
+        while (pos < diag.size())
+        {
+            const size_t nl = diag.find('\n', pos);
+            const std::string line = diag.substr(pos, (nl == std::string::npos ? diag.size() : nl) - pos);
+            pos = (nl == std::string::npos) ? diag.size() : nl + 1;
+            if (!line.empty())
+                Write(L"%hs\r\n", line.c_str());
+        }
+        if (diag.find("NOT FOUND") != std::string::npos)
+            Write(L"!! UI text is disabled - no usable font found. Install a "
+                  L"sans-serif font or set MU_FONT.\r\n");
+    }
+#endif
+}
+
 // ---- Win32 crash-report system info -----------------------------------------
 // IME / sound-card / OS / CPU / DirectX details for the crash log. These pull in
 // DirectX and other Win32 APIs and are only invoked from the Windows entry point
@@ -721,5 +753,92 @@ void GetSystemInfo(ER_SystemInfo* si)
     // DX
     DWORD dwDX = GetDXVersion();
     mu_swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
+}
+
+#else  // ---- non-Windows ----------------------------------------------------
+
+#include <sys/utsname.h>
+#include <unistd.h>
+#include <climits>
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include "Core/Utilities/PlatformInfo.h"   // Core::Platform::GetOSDistroName
+
+// IME is a Windows input service; there is nothing to report elsewhere.
+void CErrorReport::WriteImeInfo(HWND /*hWnd*/)
+{
+}
+
+// Audio runs through SDL; the DirectSound device enumeration has no equivalent.
+void CErrorReport::WriteSoundCardInfo(void)
+{
+    Write(L"<Sound device information>\r\n");
+    Write(L"Description \t\t: SDL audio\r\n");
+}
+
+void GetSystemInfo(ER_SystemInfo* si)
+{
+    ZeroMemory(si, sizeof(ER_SystemInfo));
+
+    // CPU: the first "model name" entry of /proc/cpuinfo.
+    mu_swprintf(si->m_lpszCPU, L"Unknown");
+    if (FILE* f = std::fopen("/proc/cpuinfo", "r"))
+    {
+        char line[256];
+        while (std::fgets(line, sizeof(line), f))
+        {
+            if (std::strncmp(line, "model name", 10) != 0)
+                continue;
+            const char* value = std::strchr(line, ':');
+            if (value)
+            {
+                ++value;
+                while (*value == ' ' || *value == '\t') ++value;
+                char name[MAX_LENGTH_CPUNAME] = { 0 };
+                std::strncpy(name, value, sizeof(name) - 1);
+                if (char* nl = std::strchr(name, '\n')) *nl = '\0';
+                MultiByteToWideChar(CP_UTF8, 0, name, -1, si->m_lpszCPU, MAX_LENGTH_CPUNAME);
+            }
+            break;
+        }
+        std::fclose(f);
+    }
+
+    // Memory: physical RAM in bytes, clamped like the DWORD->int path on Windows.
+    const long long pages    = ::sysconf(_SC_PHYS_PAGES);
+    const long long pageSize = ::sysconf(_SC_PAGE_SIZE);
+    if (pages > 0 && pageSize > 0)
+    {
+        const long long bytes = pages * pageSize;
+        si->m_iMemorySize = (bytes > INT_MAX) ? INT_MAX : static_cast<int>(bytes);
+    }
+
+    // OS: distro (if any) plus the full kernel name and release, e.g.
+    // "Ubuntu 24.04.3 LTS (Linux 6.18.33-...)". The distro tells a dev which
+    // distribution the report came from; the full release keeps WSL/variant
+    // suffixes that uname carries.
+    struct utsname un {};
+    if (::uname(&un) == 0)
+    {
+        char kernel[MAX_LENGTH_OSINFO] = { 0 };
+        std::snprintf(kernel, sizeof(kernel), "%s %s", un.sysname, un.release);
+        wchar_t kernelW[MAX_LENGTH_OSINFO] = { 0 };
+        MultiByteToWideChar(CP_UTF8, 0, kernel, -1, kernelW, MAX_LENGTH_OSINFO);
+
+        const std::wstring distro = Core::Platform::GetOSDistroName();
+        const std::wstring osLine = distro.empty()
+            ? std::wstring(kernelW)
+            : distro + L" (" + kernelW + L")";
+        wcsncpy(si->m_lpszOS, osLine.c_str(), MAX_LENGTH_OSINFO - 1);
+        si->m_lpszOS[MAX_LENGTH_OSINFO - 1] = L'\0';
+    }
+    else
+    {
+        mu_swprintf(si->m_lpszOS, L"Unknown");
+    }
+
+    // No DirectX off Windows; rendering is OpenGL.
+    mu_swprintf(si->m_lpszDxVersion, L"none (OpenGL)");
 }
 #endif // _WIN32 (Win32 crash-report system info)

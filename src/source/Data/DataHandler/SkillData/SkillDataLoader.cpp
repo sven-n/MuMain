@@ -74,7 +74,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
         }
 
         wchar_t successMsg[256];
-        swprintf(successMsg, L"Loaded %d skills from %ls", skillCount, fileName);
+        mu_swprintf(successMsg, L"Loaded %d skills from %ls", skillCount, fileName);
         g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
     }
 #endif

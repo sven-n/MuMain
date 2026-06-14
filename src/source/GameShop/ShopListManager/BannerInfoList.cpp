@@ -12,6 +12,7 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "BannerInfoList.h"
 #include "BannerInfo.h"
+#include <filesystem>
 #include <fstream>
 
 CBannerInfoList::CBannerInfoList() // OK
@@ -33,7 +34,7 @@ WZResult CBannerInfoList::LoadBanner(std::wstring strDirPath, std::wstring strSc
 
     std::wstring path = strDirPath + strScriptFileName;
 
-    ifs.open(path.c_str(), std::ifstream::in);
+    ifs.open(std::filesystem::path(path), std::ifstream::in);
 
     if (ifs.is_open())
     {

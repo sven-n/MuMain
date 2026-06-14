@@ -16,6 +16,9 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cstddef>
+#include <ctime>
+#include "Core/Platform/PathResolve.h"  // MuResolvePath
+#include "Core/Platform/WinNls.h"       // WideCharToMultiByte / CP_UTF8
 
 typedef int errno_t;
 
@@ -155,6 +158,13 @@ template <size_t N> inline int sprintf_s(char (&buf)[N], const char* fmt, ...)
     return r;
 }
 
+// ---- localtime_s (MSVC arg order: tm* first, then time_t*) ------------------
+inline errno_t localtime_s(struct tm* tmDest, const time_t* sourceTime)
+{
+    if (!tmDest || !sourceTime) return mu__einval();
+    return ::localtime_r(sourceTime, tmDest) != nullptr ? 0 : mu__einval();
+}
+
 // ---- wcstok_s -> C11/glibc reentrant wcstok ---------------------------------
 inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** context)
 {
@@ -162,16 +172,18 @@ inline wchar_t* wcstok_s(wchar_t* str, const wchar_t* delim, wchar_t** context)
 }
 
 // ---- _wfopen_s ---------------------------------------------------------------
+// The path goes through the case-correcting resolver because asset paths are
+// Windows-spelled (backslashes, mixed case). Uses the locale-independent UTF-8
+// converter (like _wfopen), not wcstombs, which fails on non-ASCII in the "C"
+// locale.
 inline errno_t _wfopen_s(FILE** pFile, const wchar_t* path, const wchar_t* mode)
 {
     if (pFile == nullptr || path == nullptr || mode == nullptr) return mu__einval();
     char narrowPath[4096] = { 0 };  // accommodate Linux PATH_MAX
     char narrowMode[16] = { 0 };
-    const size_t pathLen = wcstombs(narrowPath, path, sizeof(narrowPath) - 1);
-    if (pathLen == static_cast<size_t>(-1) || pathLen >= sizeof(narrowPath) - 1) return mu__einval();
-    const size_t modeLen = wcstombs(narrowMode, mode, sizeof(narrowMode) - 1);
-    if (modeLen == static_cast<size_t>(-1) || modeLen >= sizeof(narrowMode) - 1) return mu__einval();
-    *pFile = fopen(narrowPath, narrowMode);
+    if (WideCharToMultiByte(CP_UTF8, 0, path, -1, narrowPath, sizeof(narrowPath) - 1, nullptr, nullptr) == 0) return mu__einval();
+    if (WideCharToMultiByte(CP_UTF8, 0, mode, -1, narrowMode, sizeof(narrowMode) - 1, nullptr, nullptr) == 0) return mu__einval();
+    *pFile = fopen(MuResolvePath(narrowPath).c_str(), narrowMode);
     return (*pFile != nullptr) ? 0 : errno;
 }
 

@@ -1,0 +1,93 @@
+name: Linux Build (x64)
+
+# Builds the full native Linux client (issue #462): the engine, the SDL/OpenGL
+# runtime, and the linux-x64 Native AOT network library (MUnique.Client.Library.so),
+# for both editor configurations. Replaces the old SDL-shell smoke test now that
+# the whole client compiles, links, and runs on Linux.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-linux:
+    name: build-linux (editor-${{ matrix.editor }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        editor: [OFF, ON]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build tools and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build pkg-config \
+            clang zlib1g-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libglew-dev libegl1-mesa-dev \
+            libturbojpeg0-dev \
+            libx11-dev libxext-dev libxrandr-dev libxi-dev libxcursor-dev \
+            libxfixes-dev libxrender-dev libxss-dev libxtst-dev libxkbcommon-dev \
+            libdrm-dev libgbm-dev \
+            libwayland-dev libdecor-0-dev wayland-protocols \
+            libasound2-dev libpulse-dev libdbus-1-dev libudev-dev \
+            libgl1-mesa-dri xvfb
+
+      - name: Install .NET SDK 10
+        # Builds the linux-x64 Native AOT client library (.so) and, at configure
+        # time, restores the OpenMU packet XML the wire-size codegen reads.
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build-linux -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DENABLE_EDITOR=${{ matrix.editor }} \
+            -DBUILD_TESTING=ON
+
+      - name: Build wire-size guards
+        run: cmake --build build-linux --target GenWireSizes
+
+      - name: Build client (engine + linux-x64 .so) and tests
+        run: cmake --build build-linux -j"$(nproc)"
+
+      - name: Run unit tests
+        # Runs natively on Linux (no wine). With editor OFF this includes the
+        # editor_leak guard, which fails if any MuEditor source was compiled
+        # into the non-editor client (issue #359).
+        run: ctest --test-dir build-linux --output-on-failure
+
+      - name: Verify the client library was built and is loadable
+        run: |
+          so="build-linux/src/MUnique.Client.Library.so"
+          test -f "$so"
+          file "$so" | grep -q "ELF 64-bit"
+          ldd "$so" | grep -i "not found" && exit 1 || true
+
+      - name: Launch the client headless (best effort)
+        # Running needs a display and a GL driver; Xvfb + Mesa software GL cover
+        # that on CI. Don't fail the job if the runner can't provide GL - the
+        # build above is the hard guard. A frame is captured to prove rendering.
+        continue-on-error: true
+        working-directory: build-linux/src
+        run: |
+          MU_CAPTURE_FRAME=120 MU_CAPTURE_PATH=frame.ppm timeout 60 xvfb-run -a ./Main || true
+          test -f frame.ppm && echo "rendered a frame" || echo "no frame (no GL on runner)"
+
+      - name: Upload client binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-linux-x64-editor-${{ matrix.editor }}
+          path: |
+            build-linux/src/Main
+            build-linux/src/MUnique.Client.Library.so
+          if-no-files-found: error

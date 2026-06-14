@@ -1,4 +1,4 @@
-# MinGW-w64 toolchain file for cross-compiling Main on Linux
+# MinGW-w64 toolchain file for cross-compiling Main on Linux (32-bit Windows)
 
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_SYSTEM_PROCESSOR i686)

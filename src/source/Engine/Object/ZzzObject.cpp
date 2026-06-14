@@ -4945,7 +4945,6 @@ int OpenObjects(wchar_t* FileName)
     }
     delete[] Data;
 
-    fclose(fp);
     return iMapNumber;
 }
 
@@ -4989,7 +4988,6 @@ int OpenObjectsEnc(wchar_t* FileName)
     }
     delete[] Data;
 
-    fclose(fp);
     return iMapNumber;
 }
 

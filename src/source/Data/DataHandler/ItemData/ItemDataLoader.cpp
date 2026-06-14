@@ -74,7 +74,7 @@ bool ItemDataLoader::Load(wchar_t* fileName)
         }
 
         wchar_t successMsg[256];
-        swprintf(successMsg, L"Loaded %d items from %ls", itemCount, fileName);
+        mu_swprintf(successMsg, L"Loaded %d items from %ls", itemCount, fileName);
         g_MuEditorConsoleUI.LogEditor(StringUtils::WideToNarrow(successMsg));
     }
 #endif

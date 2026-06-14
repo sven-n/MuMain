@@ -14,7 +14,9 @@
 #include <algorithm>
 #include <cctype>
 #include <fstream>
+#ifdef _WIN32
 #include <direct.h>
+#endif
 #include <filesystem>
 
 #include "imgui_internal.h"

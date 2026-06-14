@@ -5,16 +5,22 @@
 
 #ifndef _WIN32
 
+#include <cerrno>
 #include <chrono>
+#include <cstdint>
 #include <cstdio>
+#include <pthread.h>
 #include <cstdlib>
 #include <cstring>    // strlen
+#include <ctime>      // tzset
 #include <cwchar>
 #include <cwctype>
 #include <strings.h>  // strcasecmp
+#include <thread>     // Sleep
 #include <unistd.h>   // readlink
 #include "Core/Platform/WinCompat.h"  // DWORD, FILE handle types
 #include "Core/Platform/WinNls.h"     // MultiByteToWideChar / CP_UTF8
+#include "Core/Platform/PathResolve.h" // MuResolvePath
 
 namespace mu_detail
 {
@@ -34,6 +40,69 @@ inline DWORD GetTickCount()
 }
 inline DWORD timeGetTime() { return GetTickCount(); }
 
+// Block the calling thread (Win32 Sleep, milliseconds).
+inline void Sleep(DWORD dwMilliseconds)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds));
+}
+
+// Thread-local error of the last failing call. The shimmed APIs sit on POSIX,
+// so errno is that error.
+inline DWORD GetLastError() { return static_cast<DWORD>(errno); }
+
+// winmm timer-resolution requests are no-ops without the Windows scheduler API.
+#ifndef TIMERR_NOERROR
+#define TIMERR_NOERROR 0
+#endif
+inline unsigned int timeBeginPeriod(unsigned int) { return TIMERR_NOERROR; }
+inline unsigned int timeEndPeriod(unsigned int)   { return TIMERR_NOERROR; }
+
+// 64-bit millisecond tick (no 49-day wrap).
+inline unsigned long long GetTickCount64()
+{
+    using namespace std::chrono;
+    return static_cast<unsigned long long>(
+        duration_cast<milliseconds>(steady_clock::now() - mu_detail::tickEpoch()).count());
+}
+
+// Debug output -> stderr.
+inline void OutputDebugStringA(const char* s)    { if (s) std::fputs(s, stderr); }
+inline void OutputDebugStringW(const wchar_t* s) { if (s) std::fputws(s, stderr); }
+#ifndef OutputDebugString
+#define OutputDebugString OutputDebugStringW
+#endif
+
+// Non-secure _snwprintf(buf, count, fmt, ...) -> the bounded _vsnwprintf core.
+inline int _snwprintf(wchar_t* buf, size_t count, const wchar_t* fmt, ...)
+{
+    va_list a; va_start(a, fmt);
+    const int r = _vsnwprintf(buf, count, fmt, a);
+    va_end(a);
+    return r;
+}
+
+inline void _tzset() { ::tzset(); }
+
+// Narrow int -> string (MSVC itoa/_itoa); a leading '-' only for base 10.
+inline char* itoa(int value, char* buffer, int radix)
+{
+    if (!buffer) return buffer;
+    if (radix < 2 || radix > 36) { buffer[0] = '\0'; return buffer; }
+    const bool negative = (value < 0 && radix == 10);
+    unsigned int v = negative ? -static_cast<unsigned int>(value) : static_cast<unsigned int>(value);
+    char digits[33];
+    int n = 0;
+    do { const unsigned int d = v % static_cast<unsigned int>(radix);
+         digits[n++] = static_cast<char>(d < 10 ? '0' + d : 'a' + (d - 10));
+         v /= static_cast<unsigned int>(radix); } while (v != 0);
+    int j = 0;
+    if (negative) buffer[j++] = '-';
+    while (n > 0) buffer[j++] = digits[--n];
+    buffer[j] = '\0';
+    return buffer;
+}
+inline char* _itoa(int value, char* buffer, int radix) { return itoa(value, buffer, radix); }
+
 // Path of the running executable (Win32 GetModuleFileNameW). The engine only
 // queries its own module (hModule == null), which maps to /proc/self/exe.
 inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nSize)
@@ -50,9 +119,23 @@ inline DWORD GetModuleFileNameW(HMODULE /*hModule*/, LPWSTR lpFilename, DWORD nS
     lpFilename[converted] = L'\0';
     return static_cast<DWORD>(converted);
 }
+#ifndef GetModuleFileName
+#define GetModuleFileName GetModuleFileNameW
+#endif
 
 // Terminate the process (Win32 ExitProcess). Never returns, like the real one.
 [[noreturn]] inline void ExitProcess(UINT uExitCode) { exit(static_cast<int>(uExitCode)); }
+
+// Process / thread identifiers (Win32). Used only to tag temp file names, so
+// the POSIX pid / thread id serve the same uniqueness purpose.
+inline DWORD GetCurrentProcessId() { return static_cast<DWORD>(::getpid()); }
+inline DWORD GetCurrentThreadId()
+{
+    // pthread_t is 8 bytes on LP64; fold the high half into the low half before
+    // truncating so two threads are less likely to collide on the low 32 bits.
+    const std::uint64_t id = reinterpret_cast<std::uintptr_t>(pthread_self());
+    return static_cast<DWORD>(id ^ (id >> 32));
+}
 
 // String length (Win32 lstrlen; the engine builds UNICODE, hence the wide form).
 inline int lstrlen(const wchar_t* s) { return s ? static_cast<int>(wcslen(s)) : 0; }
@@ -127,15 +210,16 @@ inline wchar_t* _wcsupr(wchar_t* s)
     return s;
 }
 
-// Wide fopen: convert the path/mode to the locale encoding and open.
+// Wide fopen: convert the path/mode to UTF-8 and open. The path goes through
+// the case-correcting resolver because asset paths are Windows-spelled.
 inline FILE* _wfopen(const wchar_t* path, const wchar_t* mode)
 {
     if (!path || !mode) return nullptr;
     char narrowPath[4096] = { 0 };
     char narrowMode[16] = { 0 };
-    if (wcstombs(narrowPath, path, sizeof(narrowPath) - 1) == static_cast<size_t>(-1)) return nullptr;
-    if (wcstombs(narrowMode, mode, sizeof(narrowMode) - 1) == static_cast<size_t>(-1)) return nullptr;
-    return fopen(narrowPath, narrowMode);
+    if (WideCharToMultiByte(CP_UTF8, 0, path, -1, narrowPath, sizeof(narrowPath) - 1, nullptr, nullptr) == 0) return nullptr;
+    if (WideCharToMultiByte(CP_UTF8, 0, mode, -1, narrowMode, sizeof(narrowMode) - 1, nullptr, nullptr) == 0) return nullptr;
+    return fopen(MuResolvePath(narrowPath).c_str(), narrowMode);
 }
 
 // Split a wide path into components (POSIX has no drive). Matches MSVC's

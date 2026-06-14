@@ -19,7 +19,12 @@ CFTPFileDownLoader::CFTPFileDownLoader() // OK
 
 CFTPFileDownLoader::~CFTPFileDownLoader() // OK
 {
+#ifdef _WIN32
+    // The WinInet FileDownloader is excluded off Windows (issue #462); the
+    // pointer is always null there, and even a delete of a null pointer would
+    // still link against the destructor symbol.
     SAFE_DELETE(this->m_pFileDownloader);
+#endif
 }
 
 WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type,
@@ -35,6 +40,12 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type,
 {
     static WZResult result;
 
+#ifndef _WIN32
+    // The WinInet downloader is excluded off Windows (issue #462); report the
+    // download as failed so the shop falls back to its no-script state.
+    result.SetResult(1, 0, L"File download is not supported on this platform");
+    return result;
+#else
     result.BuildSuccessResult();
 
     DownloadServerInfo ServerInfo;
@@ -81,13 +92,16 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type,
     }
 
     return result;
+#endif // _WIN32
 }
 
 void	CFTPFileDownLoader::Break() // OK
 {
     this->m_Break = 1;
+#ifdef _WIN32
     if (this->m_pFileDownloader != NULL)
         m_pFileDownloader->Break();
+#endif
 }
 
 BOOL CFTPFileDownLoader::CreateFolder(std::wstring strFilePath) // OK
