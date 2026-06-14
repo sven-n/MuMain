@@ -44,9 +44,6 @@
 #include "Camera/CameraManager.h"
 
 #include "UI/Windows/CBTMessageBox.h"
-#ifdef _WIN32
-#include "./ExternalObject/Leaf/regkey.h"
-#endif
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #ifdef _WIN32
