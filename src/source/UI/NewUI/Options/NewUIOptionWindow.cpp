@@ -25,6 +25,9 @@ void ReinitializeFonts();
 void UpdateResolutionDependentSystems();
 void UpdateCursorClip();
 DWORD GetDesktopBitsPerPel();
+#ifndef _WIN32
+void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
+#endif
 float ConvertX(float x);
 float ConvertY(float y);
 
@@ -896,6 +899,16 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
 {
     const unsigned int newWidth  = s_Resolutions[m_iResolutionIndex].width;
     const unsigned int newHeight = s_Resolutions[m_iResolutionIndex].height;
+
+#ifndef _WIN32
+    // SDL owns the window off Windows; the Win32 SetWindowPos/ChangeDisplaySettings
+    // path below is all g_hWnd-gated and never runs here. Resize through SDL,
+    // which updates WindowWidth/Height before we persist them. #462.
+    MuApplyWindowResolution(newWidth, newHeight, g_bUseWindowMode != FALSE);
+    GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
+    GameConfig::GetInstance().Save();
+    return;
+#endif
 
     // Change display mode FIRST (for fullscreen) before recreating fonts and
     // the GL text buffer. ReinitializeTextRenderer allocates a DIB sized off

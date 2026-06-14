@@ -1032,6 +1032,42 @@ namespace
     }
 }
 
+#ifndef _WIN32
+// Portable resolution change (issue #462). The Win32 path in ApplyResolution()
+// is entirely g_hWnd-gated and drives a synchronous WM_SIZE, neither of which
+// exists here, so the option window calls this instead. SDL owns the window;
+// resize it and apply the new dimensions immediately (SDL also posts a resize
+// event, but callers Save() config right after and must see the new size).
+void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed)
+{
+    if (!g_sdlWindow || width == 0 || height == 0) return;
+    const int w = static_cast<int>(width);
+    const int h = static_cast<int>(height);
+
+    if (windowed)
+    {
+        SDL_SetWindowFullscreen(g_sdlWindow, false);
+        SDL_SetWindowSize(g_sdlWindow, w, h);
+        SDL_SetWindowPosition(g_sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    }
+    else
+    {
+        // Pick the closest real fullscreen mode so the monitor switches
+        // resolution; fall back to borderless desktop if none matches.
+        SDL_DisplayMode mode;
+        const SDL_DisplayID display = SDL_GetDisplayForWindow(g_sdlWindow);
+        if (SDL_GetClosestFullscreenDisplayMode(display, w, h, 0.0f, false, &mode))
+            SDL_SetWindowFullscreenMode(g_sdlWindow, &mode);
+        else
+            SDL_SetWindowFullscreenMode(g_sdlWindow, nullptr);
+        SDL_SetWindowSize(g_sdlWindow, w, h);
+        SDL_SetWindowFullscreen(g_sdlWindow, true);
+    }
+
+    HandleWindowResize(w, h);
+}
+#endif // !_WIN32
+
 MSG MainLoop()
 {
     constexpr auto target_resolution = 1;
