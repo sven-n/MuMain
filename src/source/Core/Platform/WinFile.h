@@ -181,13 +181,18 @@ inline BOOL CreateDirectoryW(LPCWSTR lpPathName, void* /*securityAttributes*/)
 #define CreateDirectory CreateDirectoryW
 #endif
 
-// Current working directory (Win32 GetCurrentDirectoryW): returns the length
-// copied (without the terminator), 0 on failure.
+// Current working directory (Win32 GetCurrentDirectoryW): on success returns the
+// length copied (without the terminator); if the buffer is too small or null,
+// returns the required size *including* the terminator, like the Win32 contract,
+// so callers that query-then-allocate keep working; 0 on failure.
 inline DWORD GetCurrentDirectoryW(DWORD nBufferLength, LPWSTR lpBuffer)
 {
-    if (!lpBuffer || nBufferLength == 0) return 0;
     char path[4096] = { 0 };
     if (!::getcwd(path, sizeof(path))) return 0;
+    const int required = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);  // includes the null
+    if (required <= 0) return 0;
+    if (!lpBuffer || nBufferLength < static_cast<DWORD>(required))
+        return static_cast<DWORD>(required);
     const int converted = MultiByteToWideChar(CP_UTF8, 0, path, -1, lpBuffer, static_cast<int>(nBufferLength));
     return (converted > 0) ? static_cast<DWORD>(converted - 1) : 0;
 }

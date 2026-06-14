@@ -191,6 +191,8 @@ inline BOOL CopyFileW(LPCWSTR lpExistingFileName, LPCWSTR lpNewFileName, BOOL bF
     if (::ferror(in)) ok = false;
     ::fclose(in);
     if (::fclose(out) != 0) ok = false;
+    // Don't leave a truncated/corrupt destination behind on failure.
+    if (!ok) ::unlink(dstPath.c_str());
     return ok ? TRUE : FALSE;
 }
 #ifndef CopyFile
