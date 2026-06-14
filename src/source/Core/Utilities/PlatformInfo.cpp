@@ -16,7 +16,8 @@
 #include <sys/sysctl.h>             // sysctlbyname
 #else
 #include <sys/utsname.h>
-#include <cstdio>       // sscanf
+#include <cstdio>       // sscanf, fopen
+#include <cstring>      // strncmp
 #endif
 
 // The OS name and version are fixed for the process lifetime, so each platform
@@ -65,6 +66,8 @@ std::wstring GetOSVersionString()
     return osVersion;
 }
 
+std::wstring GetOSDistroName() { return {}; }  // no distro concept on Windows
+
 #elif defined(__ANDROID__)
 
 std::wstring GetOSVersionString()
@@ -81,6 +84,8 @@ std::wstring GetOSVersionString()
     }();
     return osVersion;
 }
+
+std::wstring GetOSDistroName() { return {}; }  // Android reports its own name
 
 #elif defined(__APPLE__)
 
@@ -109,7 +114,43 @@ std::wstring GetOSVersionString()
     return osVersion;
 }
 
+std::wstring GetOSDistroName() { return {}; }  // macOS/iOS report their own name
+
 #else  // ---- generic POSIX (Linux, BSD) ------------------------------------
+
+namespace
+{
+    // The distro PRETTY_NAME (e.g. "Ubuntu 24.04.3 LTS") from /etc/os-release,
+    // the freedesktop-standard, distro-agnostic source. Empty if unavailable.
+    std::wstring ReadDistroPrettyName()
+    {
+        FILE* f = std::fopen("/etc/os-release", "r");
+        if (!f)
+            return {};
+        std::string pretty;
+        char line[256];
+        while (std::fgets(line, sizeof(line), f))
+        {
+            if (std::strncmp(line, "PRETTY_NAME=", 12) != 0)
+                continue;
+            std::string value(line + 12);
+            while (!value.empty() && (value.back() == '\n' || value.back() == '\r'))
+                value.pop_back();
+            if (value.size() >= 2 && value.front() == '"' && value.back() == '"')
+                value = value.substr(1, value.size() - 2);
+            pretty = value;
+            break;
+        }
+        std::fclose(f);
+        return std::wstring(pretty.begin(), pretty.end());  // PRETTY_NAME is ASCII
+    }
+}
+
+std::wstring GetOSDistroName()
+{
+    static const std::wstring distro = ReadDistroPrettyName();
+    return distro;
+}
 
 std::wstring GetOSVersionString()
 {
@@ -122,14 +163,19 @@ std::wstring GetOSVersionString()
         // sysname is the kernel name ("Linux"); release is like "6.18.33-...".
         // Show only the kernel major.minor to keep the overlay line short.
         const std::string sysName(uts.sysname);
-        const std::wstring sysNameW(sysName.begin(), sysName.end());
+        std::wstring kernel(sysName.begin(), sysName.end());
 
         int major = 0;
         int minor = 0;
-        if (sscanf(uts.release, "%d.%d", &major, &minor) != 2)
-            return sysNameW;
+        if (sscanf(uts.release, "%d.%d", &major, &minor) == 2)
+            kernel += L" " + std::to_wstring(major) + L"." + std::to_wstring(minor);
 
-        return sysNameW + L" " + std::to_wstring(major) + L"." + std::to_wstring(minor);
+        // Prefer "<distro> (<kernel>)" so the overlay shows which distribution
+        // it is, not just the kernel.
+        const std::wstring distro = GetOSDistroName();
+        if (!distro.empty())
+            return distro + L" (" + kernel + L")";
+        return kernel;
     }();
     return osVersion;
 }

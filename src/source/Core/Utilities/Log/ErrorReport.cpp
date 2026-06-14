@@ -762,6 +762,8 @@ void GetSystemInfo(ER_SystemInfo* si)
 #include <climits>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include "Core/Utilities/PlatformInfo.h"   // Core::Platform::GetOSDistroName
 
 // IME is a Windows input service; there is nothing to report elsewhere.
 void CErrorReport::WriteImeInfo(HWND /*hWnd*/)
@@ -812,13 +814,24 @@ void GetSystemInfo(ER_SystemInfo* si)
         si->m_iMemorySize = (bytes > INT_MAX) ? INT_MAX : static_cast<int>(bytes);
     }
 
-    // OS: kernel name and release.
+    // OS: distro (if any) plus the full kernel name and release, e.g.
+    // "Ubuntu 24.04.3 LTS (Linux 6.18.33-...)". The distro tells a dev which
+    // distribution the report came from; the full release keeps WSL/variant
+    // suffixes that uname carries.
     struct utsname un {};
     if (::uname(&un) == 0)
     {
-        char os[MAX_LENGTH_OSINFO] = { 0 };
-        std::snprintf(os, sizeof(os), "%s %s", un.sysname, un.release);
-        MultiByteToWideChar(CP_UTF8, 0, os, -1, si->m_lpszOS, MAX_LENGTH_OSINFO);
+        char kernel[MAX_LENGTH_OSINFO] = { 0 };
+        std::snprintf(kernel, sizeof(kernel), "%s %s", un.sysname, un.release);
+        wchar_t kernelW[MAX_LENGTH_OSINFO] = { 0 };
+        MultiByteToWideChar(CP_UTF8, 0, kernel, -1, kernelW, MAX_LENGTH_OSINFO);
+
+        const std::wstring distro = Core::Platform::GetOSDistroName();
+        const std::wstring osLine = distro.empty()
+            ? std::wstring(kernelW)
+            : distro + L" (" + kernelW + L")";
+        wcsncpy(si->m_lpszOS, osLine.c_str(), MAX_LENGTH_OSINFO - 1);
+        si->m_lpszOS[MAX_LENGTH_OSINFO - 1] = L'\0';
     }
     else
     {
