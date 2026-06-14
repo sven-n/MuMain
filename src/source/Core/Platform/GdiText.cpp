@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
+#include <string>
 #include <vector>
 
 namespace
@@ -72,6 +73,28 @@ namespace
 
     // Candidate faces per weight class, tried in order. MU_FONT/MU_FONT_BOLD
     // override the lookup for systems whose fonts live elsewhere.
+
+    // Ask fontconfig for a font file via fc-match. This is the distro-agnostic
+    // way to locate a system font (paths differ across Debian/Fedora/Arch/etc.),
+    // and works without linking libfontconfig. Empty if fc-match is unavailable.
+    std::string FontconfigMatch(bool bold)
+    {
+        const char* cmd = bold
+            ? "fc-match -f '%{file}' 'sans-serif:bold' 2>/dev/null"
+            : "fc-match -f '%{file}' 'sans-serif' 2>/dev/null";
+        FILE* p = ::popen(cmd, "r");
+        if (!p) return {};
+        std::string out;
+        char buf[4096];
+        size_t n;
+        while ((n = std::fread(buf, 1, sizeof(buf), p)) > 0)
+            out.append(buf, n);
+        ::pclose(p);
+        while (!out.empty() && (out.back() == '\n' || out.back() == '\r' || out.back() == ' '))
+            out.pop_back();
+        return out;
+    }
+
     const MuGdiFace* LoadFace(bool bold)
     {
         static MuGdiFace s_regular, s_bold;
@@ -87,21 +110,31 @@ namespace
             return bold ? LoadFace(false) : nullptr;
         tried = true;
 
-        const char* envPath = std::getenv(bold ? "MU_FONT_BOLD" : "MU_FONT");
-        const char* candidates[] = {
-            envPath,
+        // Order: explicit override, then fontconfig, then well-known paths as a
+        // last resort if fontconfig is missing.
+        std::vector<std::string> candidates;
+        if (const char* envPath = std::getenv(bold ? "MU_FONT_BOLD" : "MU_FONT"))
+            candidates.emplace_back(envPath);
+        if (std::string fc = FontconfigMatch(bold); !fc.empty())
+            candidates.push_back(std::move(fc));
+        const char* fallbacks[] = {
             bold ? "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
                  : "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            bold ? "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf"
+                 : "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+            bold ? "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf"
+                 : "/usr/share/fonts/TTF/DejaVuSans.ttf",
             bold ? "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
                  : "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
             bold ? "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"
                  : "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
         };
+        for (const char* f : fallbacks)
+            candidates.emplace_back(f);
 
-        for (const char* path : candidates)
+        for (const std::string& path : candidates)
         {
-            if (!path) continue;
-            FILE* fp = std::fopen(path, "rb");
+            FILE* fp = std::fopen(path.c_str(), "rb");
             if (!fp) continue;
             std::fseek(fp, 0, SEEK_END);
             const long size = std::ftell(fp);
@@ -126,8 +159,9 @@ namespace
         if (bold)
             return LoadFace(false);
 
-        std::fprintf(stderr, "[GdiText] No usable TTF found; UI text disabled "
-                             "(set MU_FONT to a .ttf path).\n");
+        std::fprintf(stderr, "[GdiText] No usable TTF found; UI text disabled. "
+                             "Install a sans-serif font (e.g. fonts-dejavu-core) "
+                             "or set MU_FONT to a .ttf path.\n");
         return nullptr;
     }
 
