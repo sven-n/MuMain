@@ -1526,6 +1526,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     SDL_RaiseWindow(g_sdlWindow);
     SetFocus(g_hWnd);
 
+#ifndef _WIN32
+    // The engine hid the OS cursor (it draws its own) before the SDL video
+    // subsystem existed, so that call could not reach SDL. Apply the pending
+    // state now that the window is up. On Windows WM_SETCURSOR keeps doing this.
+    MuApplyCursorVisibility();
+#endif
+
     g_ErrorReport.Write(L"> OpenGL init success.\r\n");
     g_ErrorReport.AddSeparator();
     g_ErrorReport.WriteOpenGLInfo();

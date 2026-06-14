@@ -105,7 +105,14 @@ inline LRESULT DispatchMessage(const MSG*)                         { return 0; }
 inline int     FillRect(HDC, const RECT*, HBRUSH)                  { return 1; }
 
 // Cursor / capture / client-rect helpers -- SDL owns the cursor and input.
-inline int   ShowCursor(BOOL)                     { return 0; }
+// ShowCursor keeps Win32 display-counter semantics (visible iff counter >= 0)
+// and drives SDL's cursor to match, so the game's "hide the OS cursor, draw my
+// own" calls actually take effect. Defined in WinUser.cpp (needs SDL).
+int  ShowCursor(BOOL bShow);
+// Re-apply the current cursor visibility to SDL. The engine hides the cursor
+// before the SDL video subsystem exists; call this once the window is up so the
+// pending state takes effect.
+void MuApplyCursorVisibility();
 inline HWND  SetCapture(HWND)                      { return nullptr; }
 inline BOOL  ReleaseCapture()                      { return TRUE; }
 inline BOOL  ClipCursor(const RECT*)               { return TRUE; }

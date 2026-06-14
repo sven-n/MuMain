@@ -158,4 +158,34 @@ HWND GetFocus()
     return nullptr;
 }
 
+namespace
+{
+    // Win32 keeps a process-wide cursor display counter; the cursor is shown
+    // while it is >= 0. The game and the editor toggle it to hide the OS cursor
+    // (they draw their own) and to reveal it over editor UI. Start at 0 to match
+    // the Win32 default (cursor visible).
+    int g_cursorDisplayCount = 0;
+
+    void ApplyCursorVisibility()
+    {
+        // No-op until the SDL video subsystem is up; MuApplyCursorVisibility()
+        // re-applies the pending state once the window exists.
+        if (SDL_WasInit(SDL_INIT_VIDEO) == 0) return;
+        if (g_cursorDisplayCount >= 0) SDL_ShowCursor();
+        else                           SDL_HideCursor();
+    }
+}
+
+int ShowCursor(BOOL bShow)
+{
+    g_cursorDisplayCount += bShow ? 1 : -1;
+    ApplyCursorVisibility();
+    return g_cursorDisplayCount;
+}
+
+void MuApplyCursorVisibility()
+{
+    ApplyCursorVisibility();
+}
+
 #endif // !_WIN32
