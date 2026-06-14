@@ -255,7 +255,13 @@ void CNewUIGuildMakeWindow::ClosingProcess()
         m_EditBox->GetText(tempText);
         if (tempText[0] != L'\0')
         {
-            wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
+            // Bounded copy: GuildName holds GUILD_NAME_BUFFER_SIZE wchar_t, but
+            // tempText is far larger. An over-length name would otherwise run off
+            // GuildName into the adjacent Mark[] (and, at MARK_EDIT = the last
+            // slot, off the end of GuildMark[]) - worse on Linux where wchar_t is
+            // 4 bytes. Truncate and always null-terminate.
+            wcsncpy(GuildMark[MARK_EDIT].GuildName, tempText, GuildConstants::GUILD_NAME_BUFFER_SIZE - 1);
+            GuildMark[MARK_EDIT].GuildName[GuildConstants::GUILD_NAME_BUFFER_SIZE - 1] = L'\0';
         }
     }
 
@@ -336,7 +342,13 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
         m_EditBox->GetText(tempText);
         if (tempText[0] != L'\0')
         {
-            wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
+            // Bounded copy: GuildName holds GUILD_NAME_BUFFER_SIZE wchar_t, but
+            // tempText is far larger. An over-length name would otherwise run off
+            // GuildName into the adjacent Mark[] (and, at MARK_EDIT = the last
+            // slot, off the end of GuildMark[]) - worse on Linux where wchar_t is
+            // 4 bytes. Truncate and always null-terminate.
+            wcsncpy(GuildMark[MARK_EDIT].GuildName, tempText, GuildConstants::GUILD_NAME_BUFFER_SIZE - 1);
+            GuildMark[MARK_EDIT].GuildName[GuildConstants::GUILD_NAME_BUFFER_SIZE - 1] = L'\0';
         }
 
         ChangeWindowState(GUILDMAKE_INFO);
@@ -365,7 +377,13 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
         }
         else
         {
-            wcscpy(GuildMark[MARK_EDIT].GuildName, tempText);
+            // Bounded copy: GuildName holds GUILD_NAME_BUFFER_SIZE wchar_t, but
+            // tempText is far larger. An over-length name would otherwise run off
+            // GuildName into the adjacent Mark[] (and, at MARK_EDIT = the last
+            // slot, off the end of GuildMark[]) - worse on Linux where wchar_t is
+            // 4 bytes. Truncate and always null-terminate.
+            wcsncpy(GuildMark[MARK_EDIT].GuildName, tempText, GuildConstants::GUILD_NAME_BUFFER_SIZE - 1);
+            GuildMark[MARK_EDIT].GuildName[GuildConstants::GUILD_NAME_BUFFER_SIZE - 1] = L'\0';
             ChangeWindowState(GUILDMAKE_RESULTINFO);
             ChangeEditBox(UISTATE_HIDE);
 
