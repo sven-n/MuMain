@@ -176,6 +176,9 @@ inline BOOL CopyFileW(LPCWSTR lpExistingFileName, LPCWSTR lpNewFileName, BOOL bF
 
     const std::string srcPath = MuResolvePath(src);
     const std::string dstPath = MuResolvePath(dst);
+    // Copying a file onto itself would open the destination "wb" and truncate
+    // the source to zero before any bytes are read.
+    if (srcPath == dstPath) return FALSE;
     if (bFailIfExists && ::access(dstPath.c_str(), F_OK) == 0) return FALSE;
 
     FILE* in = ::fopen(srcPath.c_str(), "rb");

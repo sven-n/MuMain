@@ -42,7 +42,14 @@ inline HRESULT StringCchVPrintfW(wchar_t* pszDest, size_t cchDest, const wchar_t
 {
     if (!pszDest || !pszFormat || cchDest == 0) return STRSAFE_E_INVALID_PARAMETER;
     const int r = _vsnwprintf(pszDest, cchDest, pszFormat, args);
-    return (r < 0 || static_cast<size_t>(r) >= cchDest) ? STRSAFE_E_INSUFFICIENT_BUFFER : S_OK;
+    if (r < 0 || static_cast<size_t>(r) >= cchDest)
+    {
+        // Always leave a null-terminated buffer, like the Win32 contract: on
+        // truncation/encoding error vswprintf may not terminate within count.
+        pszDest[cchDest - 1] = L'\0';
+        return STRSAFE_E_INSUFFICIENT_BUFFER;
+    }
+    return S_OK;
 }
 
 inline HRESULT StringCchPrintfW(wchar_t* pszDest, size_t cchDest, const wchar_t* pszFormat, ...)
