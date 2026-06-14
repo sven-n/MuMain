@@ -3054,8 +3054,18 @@ CUITextInputBox::~CUITextInputBox()
 void CUITextInputBox::GetText(wchar_t* pszText, int iGetLength)
 {
     if (pszText == nullptr || iGetLength <= 0) return;
-    wcsncpy(pszText, m_portableText.c_str(), iGetLength - 1);
-    pszText[iGetLength - 1] = L'\0';
+    // Copy only as many characters as the text actually has (capped at the
+    // caller's length), then terminate right after. The previous wcsncpy form
+    // zero-padded all the way to iGetLength-1 and wrote the terminator at
+    // [iGetLength-1], so it always touched iGetLength wchar_t even for a short
+    // string - overflowing every caller whose buffer is smaller than the default
+    // iGetLength (MAX_TEXT_LENGTH = 255). That smashed the stack on Linux, where
+    // wchar_t is 4 bytes (e.g. guild creation's tempText[100], #462).
+    size_t copyLen = m_portableText.size();
+    if (copyLen > static_cast<size_t>(iGetLength - 1))
+        copyLen = static_cast<size_t>(iGetLength - 1);
+    wmemcpy(pszText, m_portableText.c_str(), copyLen);
+    pszText[copyLen] = L'\0';
 }
 
 void CUITextInputBox::SetText(const wchar_t* pszText)

@@ -5128,7 +5128,10 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::ProcessOk(class CNewUIMessag
         return CALLBACK_CONTINUE;
     }
 
-    wchar_t strText[20] = { 0, };
+    // Sized like the other GetInputBoxText callers (MAX_TEXT_LENGTH): GetText
+    // fills up to its default length, so the old [20] buffer overflowed the
+    // stack on Linux when entering the guild security code / break password.
+    wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
 
     pMsgBox->GetInputBoxText(strText);
     int iInputTextSize = wcslen(strText);
@@ -5239,7 +5242,10 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNewUIMess
         return CALLBACK_CONTINUE;
     }
 
-    wchar_t strText[20] = { 0, };
+    // Sized like the other GetInputBoxText callers (MAX_TEXT_LENGTH): GetText
+    // fills up to its default length, so the old [20] buffer overflowed the
+    // stack on Linux when entering the guild security code / break password.
+    wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
 
     pMsgBox->GetInputBoxText(strText);
     int iInputTextSize = wcslen(strText);
@@ -7162,7 +7168,10 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
         return CALLBACK_CONTINUE;
     }
 
-    wchar_t strText[20] = { 0, };
+    // Sized like the other GetInputBoxText callers (MAX_TEXT_LENGTH): GetText
+    // fills up to its default length, so the old [20] buffer overflowed the
+    // stack on Linux when entering the guild security code / break password.
+    wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
 
     pMsgBox->GetInputBoxText(strText);
     int iInputTextSize = wcslen(strText);

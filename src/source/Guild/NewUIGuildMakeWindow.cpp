@@ -252,7 +252,7 @@ void CNewUIGuildMakeWindow::ClosingProcess()
     {
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
-        m_EditBox->GetText(tempText);
+        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
         if (tempText[0] != L'\0')
         {
             // Bounded copy: GuildName holds GUILD_NAME_BUFFER_SIZE wchar_t, but
@@ -339,7 +339,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
         // Save the current text before going back
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
-        m_EditBox->GetText(tempText);
+        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
         if (tempText[0] != L'\0')
         {
             // Bounded copy: GuildName holds GUILD_NAME_BUFFER_SIZE wchar_t, but
@@ -361,7 +361,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
         wchar_t tempText[GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE];
         memset(&tempText, 0, sizeof(tempText));
 
-        m_EditBox->GetText(tempText);
+        m_EditBox->GetText(tempText, GuildConstants::MakeWindow::TEMP_TEXT_BUFFER_SIZE);
 
         if (CheckSpecialText(tempText) == true)
         {
