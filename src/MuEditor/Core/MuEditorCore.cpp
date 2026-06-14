@@ -489,9 +489,12 @@ void CMuEditorCore::Render()
     extern bool g_bRenderGameCursor;
     g_bRenderGameCursor = !m_bHoveringUI;
 
+#ifdef _WIN32
     // Manage Windows cursor visibility
     // Windows maintains an internal display counter - cursor is visible when counter >= 0
-    // We need to loop to force the counter to the correct state
+    // We need to loop to force the counter to the correct state.
+    // Off Windows the SDL/ImGui backend drives the OS cursor itself, and the
+    // ShowCursor stub returns a constant so these loops would never terminate.
     static bool lastHoveringState = false;
     if (m_bHoveringUI != lastHoveringState)
     {
@@ -507,6 +510,7 @@ void CMuEditorCore::Render()
         }
         lastHoveringState = m_bHoveringUI;
     }
+#endif
 
     // Render ImGui and reset frame state
     ImGui::Render();
