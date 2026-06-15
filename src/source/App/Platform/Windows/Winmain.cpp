@@ -1252,19 +1252,24 @@ namespace
         return { FontHeight - 1, fixFontHeight - 1 };
     }
 
-    HFONT CreateTahoma(int size, int weight)
+    HFONT CreateUIFont(int size, int weight)
     {
+        // UI font family from config ([UI] Font); empty keeps the built-in
+        // "Tahoma" default. On Windows GDI honors this face name directly; on
+        // Linux the GdiText shim resolves it via fontconfig (Core/Platform/GdiText.cpp).
+        std::wstring sel = GameConfig::GetInstance().GetFontSelection();
+        const wchar_t* face = sel.empty() ? L"Tahoma" : sel.c_str();
         return CreateFont(size, 0, 0, 0, weight, 0, 0, 0, DEFAULT_CHARSET,
                           OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY,
-                          DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+                          DEFAULT_PITCH | FF_DONTCARE, face);
     }
 
     void CreateNewFonts(FontSizes sizes)
     {
-        g_hFont     = CreateTahoma(sizes.uiFontSize, FW_NORMAL);
-        g_hFontBold = CreateTahoma(sizes.uiFontSize, FW_SEMIBOLD);
-        g_hFontBig  = CreateTahoma(sizes.uiFontSize * 2, FW_SEMIBOLD);
-        g_hFixFont  = CreateTahoma(sizes.fixFontSize, FW_NORMAL);
+        g_hFont     = CreateUIFont(sizes.uiFontSize, FW_NORMAL);
+        g_hFontBold = CreateUIFont(sizes.uiFontSize, FW_SEMIBOLD);
+        g_hFontBig  = CreateUIFont(sizes.uiFontSize * 2, FW_SEMIBOLD);
+        g_hFixFont  = CreateUIFont(sizes.fixFontSize, FW_NORMAL);
     }
 
     void ReinitializeTextRenderer()
