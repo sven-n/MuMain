@@ -102,9 +102,15 @@ namespace SEASON3B
         int m_iResolutionIndex;
         bool m_bWindowedMode;
         int m_iLanguageIndex;
+        int m_iFontIndex;
+
+        // Set when a combo consumes a click; swallows the rest of that mouse-hold
+        // so the release can't fall through to the Close button (see UpdateMouseEvent).
+        bool m_bSwallowClickHold = false;
 
         CNewUIComboBox m_ResolutionCombo;
         CNewUIComboBox m_LanguageCombo;
+        CNewUIComboBox m_FontCombo;
 
         void ApplyResolution();
         int FindCurrentResolutionIndex();
@@ -113,6 +119,10 @@ namespace SEASON3B
         void ApplyLanguage();
         int FindCurrentLanguageIndex();
         void InitLanguageCombo();
+
+        void ApplyFont();
+        int FindCurrentFontIndex();
+        void InitFontCombo();
     };
 }
 

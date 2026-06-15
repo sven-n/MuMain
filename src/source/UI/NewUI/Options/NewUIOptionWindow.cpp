@@ -93,6 +93,30 @@ static const wchar_t* const* GetLanguageLabels()
     return labels;
 }
 
+// UI font families offered by the font combo. `name` is the GameConfig font
+// family value ([UI] Font); empty = the platform default (so the look is
+// unchanged). The curated entries are bundled in the client's ./fonts directory
+// (see Core/Platform/GdiText.cpp), so they resolve even without a system install.
+static const struct { const wchar_t* name; const wchar_t* label; } s_Fonts[] = {
+    { L"",                L"Default" },
+    { L"Liberation Sans", L"Liberation Sans" },
+    { L"DejaVu Sans",     L"DejaVu Sans" },
+};
+static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
+
+static const wchar_t* const* GetFontLabels()
+{
+    static const wchar_t* labels[s_NumFonts] = {};
+    static bool initialized = false;
+    if (!initialized)
+    {
+        for (int i = 0; i < s_NumFonts; i++)
+            labels[i] = s_Fonts[i].label;
+        initialized = true;
+    }
+    return labels;
+}
+
 namespace
 {
     // Volume levels are integers 0..MAX_VOLUME; the slider track is SLIDER_WIDTH pixels wide.
@@ -102,34 +126,46 @@ namespace
     constexpr int SLIDER_HIT_HEIGHT = 16;
     constexpr int SLIDER_X_LOCAL = 33;       // slider start relative to m_Pos.x
 
-    // Render-level slider dimensions
-    constexpr int RENDER_SLIDER_X_LOCAL = 25;
-    constexpr int RENDER_SLIDER_Y_LOCAL = 196;
-    constexpr int RENDER_SLIDER_WIDTH = 141;
-    constexpr int RENDER_SLIDER_HEIGHT = 29;
+    // Render-level slider ("Effect limitation"). Drawn at ~half the legacy
+    // 141x29 and horizontally centered: the window content centers on x+95, so a
+    // 70-wide bar starts at x+60. Y nudged down to keep it centered in its row.
+    // Both the render (RenderButtons) and the hit test (HandleRenderLevelSlider)
+    // read these, so size/position stay in sync.
+    constexpr int RENDER_SLIDER_X_LOCAL = 60;
+    constexpr int RENDER_SLIDER_Y_LOCAL = 191;
+    constexpr int RENDER_SLIDER_WIDTH = 70;
+    constexpr int RENDER_SLIDER_HEIGHT = 15;
     constexpr float RENDER_LEVEL_MAX = 5.f;
+    // Native size of the effect-bar sprite (the 5 numbered squares). Scaled down
+    // to RENDER_SLIDER_WIDTH x HEIGHT via RenderImageStretch, so the whole bar
+    // shrinks instead of cropping.
+    constexpr int EFFECT_BAR_SRC_WIDTH  = 141;
+    constexpr int EFFECT_BAR_SRC_HEIGHT = 29;
 
     // Resolution combo box placement (relative to m_Pos)
     constexpr int RES_COMBO_X_LOCAL = 22;
-    constexpr int RES_COMBO_Y_LOCAL = 278;
+    constexpr int RES_COMBO_Y_LOCAL = 335;
     constexpr int RES_COMBO_WIDTH   = 148;  // spans the old left-to-right arrow area
     constexpr int RES_COMBO_HEIGHT  = 16;
     constexpr int RES_COMBO_MAX_VISIBLE = 4;  // scrollbar appears when list > this
 
-    // Language combo box placement (relative to m_Pos). Sits below the
-    // resolution dropdown; everything from the windowed-mode row downwards
-    // is pushed down by LANGUAGE_ROW_HEIGHT to make room.
-    constexpr int LANG_LABEL_Y_LOCAL = 304;
+    // Language combo box placement (relative to m_Pos).
+    constexpr int LANG_LABEL_Y_LOCAL = 283;
     constexpr int LANG_COMBO_X_LOCAL = 22;
-    constexpr int LANG_COMBO_Y_LOCAL = 317;
+    constexpr int LANG_COMBO_Y_LOCAL = 296;
     constexpr int LANG_COMBO_WIDTH   = 148;
     constexpr int LANG_COMBO_HEIGHT  = 16;
     constexpr int LANG_COMBO_MAX_VISIBLE = 5;
 
-    // How far the language row pushes the windowed-mode row and close button
-    // down compared to the pre-language layout. Used so the frame slats and
-    // the click-hit rect stay in sync.
-    constexpr int LANGUAGE_ROW_HEIGHT = 39;
+    // Font combo box placement (relative to m_Pos). Row order below the effect
+    // rows is: Font, Language, Resolution, Windowed mode (combos grouped at the
+    // top so an open dropdown never overlaps the Close button).
+    constexpr int FONT_LABEL_Y_LOCAL = 244;
+    constexpr int FONT_COMBO_X_LOCAL = 22;
+    constexpr int FONT_COMBO_Y_LOCAL = 257;
+    constexpr int FONT_COMBO_WIDTH   = 148;
+    constexpr int FONT_COMBO_HEIGHT  = 16;
+    constexpr int FONT_COMBO_MAX_VISIBLE = 5;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -152,6 +188,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_iResolutionIndex = FindCurrentResolutionIndex();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_iFontIndex = FindCurrentFontIndex();
 }
 
 SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
@@ -171,6 +208,7 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
     SetButtonInfo();
     InitResolutionCombo();
     InitLanguageCombo();
+    InitFontCombo();
     Show(false);
     return true;
 }
@@ -201,11 +239,24 @@ void SEASON3B::CNewUIOptionWindow::InitLanguageCombo()
         LANG_COMBO_MAX_VISIBLE);
 }
 
+void SEASON3B::CNewUIOptionWindow::InitFontCombo()
+{
+    m_FontCombo.Setup(
+        m_Pos.x + FONT_COMBO_X_LOCAL,
+        m_Pos.y + FONT_COMBO_Y_LOCAL,
+        FONT_COMBO_WIDTH,
+        FONT_COMBO_HEIGHT,
+        GetFontLabels(),
+        s_NumFonts,
+        m_iFontIndex,
+        FONT_COMBO_MAX_VISIBLE);
+}
+
 void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 322 + LANGUAGE_ROW_HEIGHT, 54, 30);
+    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 388, 54, 30);
     m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
@@ -227,40 +278,76 @@ void SEASON3B::CNewUIOptionWindow::SetPos(int x, int y)
     m_Pos.y = y;
     m_ResolutionCombo.SetPos(m_Pos.x + RES_COMBO_X_LOCAL, m_Pos.y + RES_COMBO_Y_LOCAL);
     m_LanguageCombo.SetPos(m_Pos.x + LANG_COMBO_X_LOCAL, m_Pos.y + LANG_COMBO_Y_LOCAL);
+    m_FontCombo.SetPos(m_Pos.x + FONT_COMBO_X_LOCAL, m_Pos.y + FONT_COMBO_Y_LOCAL);
 }
 
 bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 {
+    // A combo selects on mouse-PRESS and closes its dropdown there and then; the
+    // mouse is still held. The Close button fires on RELEASE-over-button, so a
+    // press on a dropdown row that happens to sit over Close would pick the item
+    // AND, on the release, shut the window (feels like a fast double-click).
+    // Once a combo has consumed a click we swallow the rest of that hold until the
+    // button comes up, so the release can't fall through to Close.
+    if (m_bSwallowClickHold)
+    {
+        if (!SEASON3B::IsRepeat(VK_LBUTTON))   // button released → hold is over
+            m_bSwallowClickHold = false;
+        return false;
+    }
+
+    // Combos are processed BEFORE the Close button (and the checkboxes/sliders):
+    // an open dropdown overflows below the window and can overlap the Close button
+    // and the windowed-mode checkbox, so handling combos first lets the dropdown
+    // consume the click - picking an item never also closes the window or toggles
+    // a control behind it.
+
+    // Z-order matters: an OPEN dropdown is drawn on top, so it must win the click
+    // over a closed combo whose field its list overlaps (e.g. the Font dropdown
+    // extends down over the Language field). Process the open combo first, then
+    // the closed ones - a fixed Resolution/Language/Font order would let the
+    // closed combo underneath grab the click and open instead. Selecting an item
+    // also sets m_bSwallowClickHold so the still-held press's release can't fall
+    // through to the Close button or a checkbox behind the dropdown.
+    struct ComboSlot { CNewUIComboBox* combo; int* index; void (CNewUIOptionWindow::*apply)(); };
+    const ComboSlot slots[] = {
+        { &m_ResolutionCombo, &m_iResolutionIndex, &CNewUIOptionWindow::ApplyResolution },
+        { &m_LanguageCombo,   &m_iLanguageIndex,   &CNewUIOptionWindow::ApplyLanguage   },
+        { &m_FontCombo,       &m_iFontIndex,       &CNewUIOptionWindow::ApplyFont        },
+    };
+    for (int pass = 0; pass < 2; ++pass)   // pass 0 = open combo (on top), pass 1 = closed
+    {
+        for (const ComboSlot& s : slots)
+        {
+            const bool wasOpen = s.combo->IsOpen();
+            if (wasOpen != (pass == 0))
+                continue;
+            if (s.combo->UpdateMouseEvent())
+            {
+                *s.index = s.combo->GetSelectedIndex();
+                (this->*s.apply)();
+                m_bSwallowClickHold = true;
+                return false;
+            }
+            if (s.combo->IsMouseOverWidget())
+                return false;
+            // A press elsewhere closed this open dropdown (clicked outside, or
+            // re-picked the current item): consume it and swallow the hold too.
+            if (wasOpen && !s.combo->IsOpen() && SEASON3B::IsPress(VK_LBUTTON))
+            {
+                m_bSwallowClickHold = true;
+                return false;
+            }
+        }
+    }
+
+    // Close button after the combos, so an open dropdown drawn over it wins the
+    // click instead of closing the window.
     if (m_BtnClose.UpdateMouseEvent() == true)
     {
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_OPTION);
         return false;
     }
-
-    // Process the resolution combo box BEFORE checkboxes/sliders. The expanded
-    // dropdown overflows below the option window and overlaps the windowed-mode
-    // checkbox; if checkboxes ran first, a click on a dropdown item would also
-    // toggle the checkbox behind it. Consume the click here when it's inside
-    // the combo's hit box (closed widget OR open dropdown).
-    if (m_ResolutionCombo.UpdateMouseEvent())
-    {
-        m_iResolutionIndex = m_ResolutionCombo.GetSelectedIndex();
-        ApplyResolution();
-        return false;
-    }
-    if (m_ResolutionCombo.IsMouseOverWidget())
-        return false;
-
-    // Same pattern for the language combo: must run before the windowed-mode
-    // checkbox so its dropdown doesn't double-click the checkbox underneath.
-    if (m_LanguageCombo.UpdateMouseEvent())
-    {
-        m_iLanguageIndex = m_LanguageCombo.GetSelectedIndex();
-        ApplyLanguage();
-        return false;
-    }
-    if (m_LanguageCombo.IsMouseOverWidget())
-        return false;
 
     bool oldWindowedMode = m_bWindowedMode;
     HandleCheckboxInputs();
@@ -435,7 +522,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
 
     // Combo box already processed at the top. Just consume clicks inside the
     // option window itself so they don't fall through to the world.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 362 + LANGUAGE_ROW_HEIGHT))
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 419))
         return false;
 
     return true;
@@ -449,7 +536,7 @@ void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
         {  65, &m_bWhisperSound      },
         { 155, &m_bSlideHelp         },
         { 238, &m_bRenderAllEffects  },
-        { 300 + LANGUAGE_ROW_HEIGHT, &m_bWindowedMode      },
+        { 356, &m_bWindowedMode      },
     };
 
     constexpr int CHECKBOX_X_LOCAL = 150;
@@ -592,6 +679,9 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_LanguageCombo.SetSelectedIndex(m_iLanguageIndex);
     m_LanguageCombo.Close();
+    m_iFontIndex = FindCurrentFontIndex();
+    m_FontCombo.SetSelectedIndex(m_iFontIndex);
+    m_FontCombo.Close();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
@@ -599,6 +689,7 @@ void SEASON3B::CNewUIOptionWindow::ClosingProcess()
 {
     m_ResolutionCombo.Close();
     m_LanguageCombo.Close();
+    m_FontCombo.Close();
 }
 
 void SEASON3B::CNewUIOptionWindow::LoadImages()
@@ -641,10 +732,9 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     x = m_Pos.x;
     y = m_Pos.y;
     // Frame is composed of: 64px top + N*10px middle slats + 45px bottom. The
-    // extra slats below the original 23 cover the LANGUAGE_ROW_HEIGHT space
-    // inserted between the resolution combo and the windowed-mode row.
-    constexpr int EXTRA_SLATS_FOR_LANGUAGE = (LANGUAGE_ROW_HEIGHT + 9) / 10;
-    constexpr int SLAT_COUNT = 23 + EXTRA_SLATS_FOR_LANGUAGE;
+    // slat count is tuned so the frame reaches the Close button (Y 388) plus the
+    // bottom border, after the Font/Language/Resolution/Windowed rows.
+    constexpr int SLAT_COUNT = 30;
     constexpr float FRAME_HEIGHT = 64.f + SLAT_COUNT * 10.f + 45.f;
     RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, FRAME_HEIGHT);
     RenderImage(IMAGE_OPTION_FRAME_UP, x, y, 190.f, 64.f);
@@ -668,10 +758,10 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     y += 22.f;
     RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after slide help
 
-    y += 60.f;
+    y += 39.f;
     RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render level
 
-    y += 28.f;
+    y += 25.f;
     RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render full effects
 }
 
@@ -692,7 +782,7 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     y += 22.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Render Level
 
-    y += 60.f;
+    y += 39.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Render Full Effects
 
     g_pRenderText->SetFont(g_hFont);
@@ -704,19 +794,23 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 120, I18N::Game::MusicVolume);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 160, I18N::Game::SlideHelp);
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 182, I18N::Game::EffectLimitation);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 242, I18N::Game::RenderFullEffects);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 221, I18N::Game::RenderFullEffects);
 
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Resolution
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 265, I18N::Game::Resolution);
+    y += 25.f;
+    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Font
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + FONT_LABEL_Y_LOCAL, I18N::Game::Font);
 
     y += 39.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Language
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + LANG_LABEL_Y_LOCAL, I18N::Game::Language);
 
-    y += 35.f;
+    y += 39.f;
+    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Resolution
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 322, I18N::Game::Resolution);
+
+    y += 39.f;
     RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 302 + LANGUAGE_ROW_HEIGHT, I18N::Game::WindowedMode);
+    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 361, I18N::Game::WindowedMode);
 }
 
 void SEASON3B::CNewUIOptionWindow::RenderButtons()
@@ -763,28 +857,35 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
         RenderImage(IMAGE_OPTION_VOLUME_COLOR, m_Pos.x + 33, m_Pos.y + 132, 124.f * 0.1f * (m_iMusicLevel), 16.f);
     }
 
-    RenderImage(IMAGE_OPTION_EFFECT_BACK, m_Pos.x + 25, m_Pos.y + 196, 141.f, 29.f);
+    RenderImageStretch(IMAGE_OPTION_EFFECT_BACK, m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
+                       (float)RENDER_SLIDER_WIDTH, (float)RENDER_SLIDER_HEIGHT,
+                       0.f, 0.f, (float)EFFECT_BAR_SRC_WIDTH, (float)EFFECT_BAR_SRC_HEIGHT);
     if (m_iRenderLevel >= 0)
     {
-        RenderImage(IMAGE_OPTION_EFFECT_COLOR, m_Pos.x + 25, m_Pos.y + 196, 141.f * 0.2f * (m_iRenderLevel + 1), 29.f);
+        // Reveal proportionally to the level: shrink both the dest width and the
+        // sampled source width by the same fraction so the squares stay aligned.
+        const float fill = 0.2f * (m_iRenderLevel + 1);
+        RenderImageStretch(IMAGE_OPTION_EFFECT_COLOR, m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
+                           (float)RENDER_SLIDER_WIDTH * fill, (float)RENDER_SLIDER_HEIGHT,
+                           0.f, 0.f, (float)EFFECT_BAR_SRC_WIDTH * fill, (float)EFFECT_BAR_SRC_HEIGHT);
     }
 
     if (m_bRenderAllEffects)
     {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 238, 15, 15, 0, 0);
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 217, 15, 15, 0, 0);
     }
     else
     {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 238, 15, 15, 0, 15.f);
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 217, 15, 15, 0, 15.f);
     }
 
     if (m_bWindowedMode)
     {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 300 + LANGUAGE_ROW_HEIGHT, 15, 15, 0, 0);
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 0);
     }
     else
     {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 300 + LANGUAGE_ROW_HEIGHT, 15, 15, 0, 15.f);
+        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 15.f);
     }
 
     // Combo boxes drawn last so their expanded dropdowns sit on top of
@@ -793,7 +894,7 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
     // physically below an open one would draw its closed field on top of
     // that open dropdown's list (since they overlap in screen space when
     // the upper one expands downward).
-    CNewUIComboBox* combos[] = { &m_ResolutionCombo, &m_LanguageCombo };
+    CNewUIComboBox* combos[] = { &m_ResolutionCombo, &m_LanguageCombo, &m_FontCombo };
     for (auto* c : combos) if (!c->IsOpen()) c->Render();
     for (auto* c : combos) if (c->IsOpen())  c->Render();
 }
@@ -889,6 +990,25 @@ void SEASON3B::CNewUIOptionWindow::ApplyLanguage()
     // GameConfig string-IO. Locale codes are ASCII so the conversion is safe.
     std::wstring wide(code, code + std::strlen(code));
     GameConfig::GetInstance().SetUILocale(wide);
+    GameConfig::GetInstance().Save();
+}
+
+int SEASON3B::CNewUIOptionWindow::FindCurrentFontIndex()
+{
+    const std::wstring current = GameConfig::GetInstance().GetFontSelection();
+    for (int i = 0; i < s_NumFonts; ++i)
+    {
+        if (current == s_Fonts[i].name)
+            return i;
+    }
+    return 0;  // default ("")
+}
+
+void SEASON3B::CNewUIOptionWindow::ApplyFont()
+{
+    GameConfig::GetInstance().SetFontSelection(s_Fonts[m_iFontIndex].name);
+    // Recreate the GDI fonts from config so the change takes effect live.
+    ReinitializeFonts();
     GameConfig::GetInstance().Save();
 }
 
