@@ -73,6 +73,21 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
     RenderColorBitmap(uiImageType, x, y, width, height, su, sv, uw, vh, color);
 }
 
+void SEASON3B::RenderImageStretch(GLuint uiImageType, float x, float y, float width, float height,
+                                  float sx, float sy, float sw, float sh, DWORD color)
+{
+    BITMAP_t* pImage = &Bitmaps[uiImageType];
+
+    // Normalize the source texel region to UV. Extent is independent of the dest
+    // size, so GL scales the (sw x sh) source onto the (width x height) quad.
+    float u  = (sx + 0.5f) / (float)pImage->Width;
+    float v  = (sy + 0.5f) / (float)pImage->Height;
+    float uw = (sw - 1.0f) / (float)pImage->Width;
+    float vh = (sh - 1.0f) / (float)pImage->Height;
+
+    RenderColorBitmap(uiImageType, x, y, width, height, u, v, uw, vh, color);
+}
+
 void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv)
 {
     BITMAP_t* pImage = &Bitmaps[uiImageType];

@@ -21,6 +21,13 @@ namespace SEASON3B
     void RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv, DWORD color);
     void RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv, float uw, float vh, DWORD color = RGBA(255, 255, 255, 255));
 
+    // Scaled sprite blit: maps a source region (sx,sy,sw,sh, in texels) onto the
+    // dest rect (x,y,width,height, in pixels). Unlike RenderImage above — where
+    // width/height also set the sampled texel extent (1:1, so a smaller size just
+    // crops) — this lets a fixed-size sprite be drawn larger or smaller.
+    void RenderImageStretch(GLuint uiImageType, float x, float y, float width, float height,
+                            float sx, float sy, float sw, float sh, DWORD color = RGBA(255, 255, 255, 255));
+
     float RenderNumber(float x, float y, int iNum, float fScale = 1.0f);
 
     bool IsNone(int iVirtKey);
