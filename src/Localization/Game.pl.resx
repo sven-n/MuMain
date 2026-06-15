@@ -12881,4 +12881,7 @@
     <value>Poziom: %u | Resetuje: %u</value>
     <comment>legacy_id=3810</comment>
   </data>
+  <data name="Font" xml:space="preserve">
+    <value>Czcionka</value>
+  </data>
 </root>

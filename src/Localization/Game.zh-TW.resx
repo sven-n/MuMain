@@ -12881,4 +12881,7 @@
     <value>Level: %u | Resets: %u</value>
     <comment>legacy_id=3810</comment>
   </data>
+  <data name="Font" xml:space="preserve">
+    <value>字型</value>
+  </data>
 </root>
