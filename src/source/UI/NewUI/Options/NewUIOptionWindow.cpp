@@ -984,11 +984,16 @@ int SEASON3B::CNewUIOptionWindow::FindCurrentLanguageIndex()
 void SEASON3B::CNewUIOptionWindow::ApplyLanguage()
 {
     const char* code = s_Languages[m_iLanguageIndex].code;
-    I18N::SetLocale(code);
 
     // Persist as wide string so it round-trips cleanly through the existing
     // GameConfig string-IO. Locale codes are ASCII so the conversion is safe.
     std::wstring wide(code, code + std::strlen(code));
+
+    // Re-selecting the active language is a no-op; skip the relocalize and disk write.
+    if (GameConfig::GetInstance().GetUILocale() == wide)
+        return;
+
+    I18N::SetLocale(code);
     GameConfig::GetInstance().SetUILocale(wide);
     GameConfig::GetInstance().Save();
 }
@@ -1006,6 +1011,10 @@ int SEASON3B::CNewUIOptionWindow::FindCurrentFontIndex()
 
 void SEASON3B::CNewUIOptionWindow::ApplyFont()
 {
+    // Re-selecting the active font is a no-op; skip the font rebuild and disk write.
+    if (GameConfig::GetInstance().GetFontSelection() == s_Fonts[m_iFontIndex].name)
+        return;
+
     GameConfig::GetInstance().SetFontSelection(s_Fonts[m_iFontIndex].name);
     // Recreate the GDI fonts from config so the change takes effect live.
     ReinitializeFonts();
