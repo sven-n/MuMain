@@ -920,7 +920,7 @@
     <comment>legacy_id=228,337,2811</comment>
   </data>
   <data name="Cancel" xml:space="preserve">
-    <value>Anulować</value>
+    <value>Anuluj</value>
     <comment>legacy_id=229,384,3114</comment>
   </data>
   <data name="Merchant" xml:space="preserve">
@@ -1404,7 +1404,7 @@
     <comment>legacy_id=383</comment>
   </data>
   <data name="Option385" xml:space="preserve">
-    <value>Opcja</value>
+    <value>Opcje</value>
     <comment>legacy_id=385,2343</comment>
   </data>
   <data name="Automatic Attack" xml:space="preserve">
@@ -3522,7 +3522,7 @@
     <comment>legacy_id=947,1018</comment>
   </data>
   <data name="Follow" xml:space="preserve">
-    <value>Podążać</value>
+    <value>Podążaj</value>
     <comment>legacy_id=948</comment>
   </data>
   <data name="Duel" xml:space="preserve">
@@ -4198,7 +4198,7 @@
     <comment>legacy_id=1123</comment>
   </data>
   <data name="Buy1124" xml:space="preserve">
-    <value>Kupić</value>
+    <value>Kupuj</value>
     <comment>legacy_id=1124,1558,2886,2891</comment>
   </data>
   <data name="Open personal store(S)" xml:space="preserve">
