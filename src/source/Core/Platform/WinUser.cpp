@@ -158,4 +158,66 @@ HWND GetFocus()
     return nullptr;
 }
 
+namespace
+{
+    // Win32 keeps a process-wide cursor display counter; the cursor is shown
+    // while it is >= 0. The game and the editor toggle it to hide the OS cursor
+    // (they draw their own) and to reveal it over editor UI. Start at 0 to match
+    // the Win32 default (cursor visible).
+    int g_cursorDisplayCount = 0;
+
+    // Some Wayland compositors (seen on KDE Plasma) do not reliably drop the
+    // pointer for SDL_HideCursor() alone, leaving the OS cursor composited over
+    // the game's own cursor sprite (issue #462). Committing an explicit blank
+    // (1x1 transparent) cursor in addition to hiding is honoured everywhere, so
+    // keep one around and set it whenever the cursor should be hidden.
+    SDL_Cursor* BlankCursor()
+    {
+        static SDL_Cursor* blank = nullptr;
+        if (blank == nullptr)
+        {
+            Uint32 transparent = 0;  // single fully-transparent ARGB pixel
+            SDL_Surface* surface = SDL_CreateSurfaceFrom(
+                1, 1, SDL_PIXELFORMAT_ARGB8888, &transparent, sizeof(transparent));
+            if (surface != nullptr)
+            {
+                blank = SDL_CreateColorCursor(surface, 0, 0);
+                SDL_DestroySurface(surface);  // cursor keeps its own copy
+            }
+        }
+        return blank;
+    }
+
+    void ApplyCursorVisibility()
+    {
+        // No-op until the SDL video subsystem is up; MuApplyCursorVisibility()
+        // re-applies the pending state once the window exists.
+        if (SDL_WasInit(SDL_INIT_VIDEO) == 0) return;
+        if (g_cursorDisplayCount >= 0)
+        {
+            // Restore a real cursor first: a prior hide may have left the blank
+            // one active, so SDL_ShowCursor() alone would show nothing.
+            SDL_SetCursor(SDL_GetDefaultCursor());
+            SDL_ShowCursor();
+        }
+        else
+        {
+            SDL_HideCursor();
+            if (SDL_Cursor* blank = BlankCursor()) SDL_SetCursor(blank);
+        }
+    }
+}
+
+int ShowCursor(BOOL bShow)
+{
+    g_cursorDisplayCount += bShow ? 1 : -1;
+    ApplyCursorVisibility();
+    return g_cursorDisplayCount;
+}
+
+void MuApplyCursorVisibility()
+{
+    ApplyCursorVisibility();
+}
+
 #endif // !_WIN32

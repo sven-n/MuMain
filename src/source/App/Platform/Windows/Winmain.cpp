@@ -44,9 +44,6 @@
 #include "Camera/CameraManager.h"
 
 #include "UI/Windows/CBTMessageBox.h"
-#ifdef _WIN32
-#include "./ExternalObject/Leaf/regkey.h"
-#endif
 
 #include "GameLogic/Events/CSChaosCastle.h"
 #ifdef _WIN32
@@ -1035,6 +1032,42 @@ namespace
     }
 }
 
+#ifndef _WIN32
+// Portable resolution change (issue #462). The Win32 path in ApplyResolution()
+// is entirely g_hWnd-gated and drives a synchronous WM_SIZE, neither of which
+// exists here, so the option window calls this instead. SDL owns the window;
+// resize it and apply the new dimensions immediately (SDL also posts a resize
+// event, but callers Save() config right after and must see the new size).
+void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed)
+{
+    if (!g_sdlWindow || width == 0 || height == 0) return;
+    const int w = static_cast<int>(width);
+    const int h = static_cast<int>(height);
+
+    if (windowed)
+    {
+        SDL_SetWindowFullscreen(g_sdlWindow, false);
+        SDL_SetWindowSize(g_sdlWindow, w, h);
+        SDL_SetWindowPosition(g_sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    }
+    else
+    {
+        // Pick the closest real fullscreen mode so the monitor switches
+        // resolution; fall back to borderless desktop if none matches.
+        SDL_DisplayMode mode;
+        const SDL_DisplayID display = SDL_GetDisplayForWindow(g_sdlWindow);
+        if (SDL_GetClosestFullscreenDisplayMode(display, w, h, 0.0f, false, &mode))
+            SDL_SetWindowFullscreenMode(g_sdlWindow, &mode);
+        else
+            SDL_SetWindowFullscreenMode(g_sdlWindow, nullptr);
+        SDL_SetWindowSize(g_sdlWindow, w, h);
+        SDL_SetWindowFullscreen(g_sdlWindow, true);
+    }
+
+    HandleWindowResize(w, h);
+}
+#endif // !_WIN32
+
 MSG MainLoop()
 {
     constexpr auto target_resolution = 1;
@@ -1086,6 +1119,14 @@ MSG MainLoop()
             case SDL_EVENT_WINDOW_FOCUS_GAINED:
                 HandleFocusChange(true);
                 break;
+#ifndef _WIN32
+            case SDL_EVENT_WINDOW_MOUSE_ENTER:
+                // Wayland can deliver the first pointer-enter after the startup
+                // cursor-hide, dropping it and leaving the OS cursor over the
+                // game's own; re-apply the hide on every enter (issue #462).
+                MuApplyCursorVisibility();
+                break;
+#endif
             case SDL_EVENT_WINDOW_FOCUS_LOST:
                 HandleFocusChange(false);
                 break;
@@ -1528,6 +1569,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     SDL_RaiseWindow(g_sdlWindow);
     SetFocus(g_hWnd);
+
+#ifndef _WIN32
+    // The engine hid the OS cursor (it draws its own) before the SDL video
+    // subsystem existed, so that call could not reach SDL. Apply the pending
+    // state now that the window is up. On Windows WM_SETCURSOR keeps doing this.
+    MuApplyCursorVisibility();
+#endif
 
     g_ErrorReport.Write(L"> OpenGL init success.\r\n");
     g_ErrorReport.AddSeparator();
