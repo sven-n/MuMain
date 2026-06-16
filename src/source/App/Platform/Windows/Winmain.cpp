@@ -1119,6 +1119,14 @@ MSG MainLoop()
             case SDL_EVENT_WINDOW_FOCUS_GAINED:
                 HandleFocusChange(true);
                 break;
+#ifndef _WIN32
+            case SDL_EVENT_WINDOW_MOUSE_ENTER:
+                // Wayland can deliver the first pointer-enter after the startup
+                // cursor-hide, dropping it and leaving the OS cursor over the
+                // game's own; re-apply the hide on every enter (issue #462).
+                MuApplyCursorVisibility();
+                break;
+#endif
             case SDL_EVENT_WINDOW_FOCUS_LOST:
                 HandleFocusChange(false);
                 break;
