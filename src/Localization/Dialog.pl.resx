@@ -153,7 +153,7 @@
     <comment>legacy_id=1591</comment>
   </data>
   <data name="Text_60" xml:space="preserve">
-    <value>Jeśli przeczytałeś 'Scroll of the Emperor', odszukaj 'Broken Sword', którego starożytni Mroczni Rycerze użyli podczas upamiętnienia pokoju. Z tego, co słyszałem, kilku Mrocznych Rycerzy znalazło go w Atlans, Lost Tower i Tarkanie.</value>
+    <value>Jeśli przeczytałeś 'Scroll of the Emperor', odszukaj 'Broken Sword', którego starożytni Dark Knights użyli podczas upamiętnienia pokoju. Z tego, co słyszałem, kilku Mrocznych Rycerzy znalazło go w Atlans, Lost Tower i Tarkanie.</value>
     <comment>legacy_id=60</comment>
   </data>
   <data name="Answer_60_Slot_0" xml:space="preserve">
@@ -173,7 +173,7 @@
     <comment>legacy_id=1610</comment>
   </data>
   <data name="Text_62" xml:space="preserve">
-    <value>Dzielny Mroczny Rycerzu, odnalazłeś 'Broken Sword'! Po zjednoczeniu kontynentu MU Muren, pierwszy cesarz, złamał swój miecz 'Apocalypse' na znak pragnienia, by nigdy więcej nie wybuchła wojna.</value>
+    <value>Dzielny Mroczny Rycerzu, odnalazłeś 'Broken Sword'! Po zjednoczeniu kontynentu MU, Muren pierwszy cesarz, złamał swój miecz 'Apocalypse' na znak pragnienia, by nigdy więcej nie wybuchła wojna.</value>
     <comment>legacy_id=62</comment>
   </data>
   <data name="Answer_62_Slot_0" xml:space="preserve">
@@ -181,7 +181,7 @@
     <comment>legacy_id=1620</comment>
   </data>
   <data name="Text_63" xml:space="preserve">
-    <value>Po Wojnie Mroczni Rycerze pragnący zostać Blade Knightami zaczęli szukać starożytnego 'Broken Sword', by dowieść swej odwagi.</value>
+    <value>Po wojnie Dark Knights pragnący zostać Blade Knightami zaczęli szukać starożytnego 'Broken Sword', by dowieść swej odwagi.</value>
     <comment>legacy_id=63</comment>
   </data>
   <data name="Answer_63_Slot_0" xml:space="preserve">
@@ -205,7 +205,7 @@
     <comment>legacy_id=1650</comment>
   </data>
   <data name="Text_66" xml:space="preserve">
-    <value>Odnalazłeś 'Tear of Elf'! Po Wojnie Lunedil, królowa elfów, stworzyła kamień łzy, rzucając magię na kamień ducha, by elfy mogły przywoływać moc bogini i budować swą potęgę.</value>
+    <value>Odnalazłeś 'Tear of Elf'! Po wojnie, Lunedil królowa elfów, stworzyła kamień łzy, rzucając magię na kamień ducha, by elfy mogły przywoływać moc bogini i budować swą potęgę.</value>
     <comment>legacy_id=66</comment>
   </data>
   <data name="Answer_66_Slot_0" xml:space="preserve">
@@ -229,7 +229,7 @@
     <comment>legacy_id=1680</comment>
   </data>
   <data name="Text_69" xml:space="preserve">
-    <value>Wiedziałem, że odnajdziesz 'Soul of Wizard'! Etramu, największy czarodziej z Arki, stworzył magiczny kamień chroniący duszę, w obawie, że słabi Mroczni Rycerze mogą ulec atakowi Kunduna.</value>
+    <value>Wiedziałem, że odnajdziesz 'Soul of Wizard'! Etramu, największy czarodziej z Arki, stworzył magiczny kamień chroniący duszę, w obawie, że słabi Dark Knights mogą ulec atakowi Kunduna.</value>
     <comment>legacy_id=69</comment>
   </data>
   <data name="Answer_69_Slot_0" xml:space="preserve">
@@ -285,7 +285,7 @@
     <comment>legacy_id=1750</comment>
   </data>
   <data name="Text_76" xml:space="preserve">
-    <value>Od tej pory narodził się zwyczaj, że Mroczni Rycerze pragnący zostać Blade Knightami łamali swe miecze na znak przysięgi, że nigdy nie użyją ich niesprawiedliwie.</value>
+    <value>Od tej pory narodził się zwyczaj, że Dark Knights pragnący zostać Blade Knightami łamali swe miecze na znak przysięgi, że nigdy nie użyją ich niesprawiedliwie.</value>
     <comment>legacy_id=76</comment>
   </data>
   <data name="Answer_76_Slot_0" xml:space="preserve">
@@ -633,7 +633,7 @@
     <comment>legacy_id=2380</comment>
   </data>
   <data name="Text_139" xml:space="preserve">
-    <value>A więc odnalazłeś 'Dark Stone'. Zapisano, że ten kamień to zaschła krew bohatera 'Benelope', który walczył w Wojnie Bogów i Szatana.</value>
+    <value>A więc odnalazłeś 'Dark Stone'. Zapisano, że ten kamień to zaschła krew bohatera 'Benelope', który walczył w wojnie Bogów z Szatanem.</value>
     <comment>legacy_id=139</comment>
   </data>
   <data name="Answer_139_Slot_0" xml:space="preserve">
@@ -641,7 +641,7 @@
     <comment>legacy_id=2390</comment>
   </data>
   <data name="Text_140" xml:space="preserve">
-    <value>Benelope pochodzi z rodu rycerskiego. Po klęsce w Wojnie ćwiczył nową magię i sztuki walki. Umiejętności te po cichu przekazywano wojownikom z krwią rycerza, by walczyli z potężną siłą Kunduna.</value>
+    <value>Benelope pochodzi z rodu rycerskiego. Po klęsce w wojnie ćwiczył nową magię i sztuki walki. Umiejętności te po cichu przekazywano wojownikom z krwią rycerza, by walczyli z potężną siłą Kunduna.</value>
     <comment>legacy_id=140</comment>
   </data>
   <data name="Answer_140_Slot_0" xml:space="preserve">
@@ -857,7 +857,7 @@
     <comment>legacy_id=2640</comment>
   </data>
   <data name="Text_165" xml:space="preserve">
-    <value>Wielce pomogłeś w budowaniu pokoju na kontynencie MU i w Crywolf dzięki informacjom i wszystkim zniszczonym potworom.</value>
+    <value>Wielce pomogłeś w budowaniu pokoju na kontynencie MU i w Crywolf dzięki informacjom i zniszczeniu wszystkich potworów.</value>
     <comment>legacy_id=165</comment>
   </data>
   <data name="Answer_165_Slot_0" xml:space="preserve">
@@ -937,7 +937,7 @@
     <comment>legacy_id=2730</comment>
   </data>
   <data name="Text_174" xml:space="preserve">
-    <value>Twój trud opłacił się, by ustrzec pokój na kontynencie MU i w Crywolf przed nowym zagrożeniem Balgassa. Głęboko doceniam twą pomoc.</value>
+    <value>Twój trud opłacił się, by zachować pokój na kontynencie MU i w Crywolf przed nowym zagrożeniem Balgassa. Głęboko doceniam twą pomoc.</value>
     <comment>legacy_id=174</comment>
   </data>
   <data name="Answer_174_Slot_0" xml:space="preserve">
