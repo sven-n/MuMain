@@ -541,12 +541,8 @@ bool CNewUILuckyItemWnd::UpdateMouseEvent(void)
         return false;
     Process_InventoryCtrl();
 
-    POINT ptExitBtn1 = { m_ptPos.x + 169, m_ptPos.y + 7 };
-
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
-    {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_LUCKYITEMWND);
-    }
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    g_pNewUISystem->HandleFrameCornerClose(m_ptPos, SEASON3B::INTERFACE_LUCKYITEMWND);
 
     Process_BTN_Action();
 

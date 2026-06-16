@@ -313,13 +313,9 @@ bool CNewUIGensRanking::UpdateKeyEvent()
 
 bool CNewUIGensRanking::BtnProcess()
 {
-    POINT pClose = { GetPos().x + 169, GetPos().y + 7 };
-
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(pClose.x, pClose.y, 13, 12))
-    {
-        g_pNewUISystem->Hide(INTERFACE_GENSRANKING);
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), INTERFACE_GENSRANKING))
         return false;
-    }
 
     if (m_BtnExit.UpdateMouseEvent())
     {

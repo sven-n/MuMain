@@ -250,12 +250,8 @@ void CNewUIDuelWatchWindow::RenderFrame()
 
 bool CNewUIDuelWatchWindow::BtnProcess()
 {
-    POINT ptExitBtn1 = { m_Pos.x + 169, m_Pos.y + 7 };
-
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
-    {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH);
-    }
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_DUELWATCH);
 
     for (BYTE i = 0; i < 4; ++i)
     {

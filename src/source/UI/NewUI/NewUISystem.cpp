@@ -1807,6 +1807,28 @@ bool CNewUISystem::CheckKeyUse()
     return false;
 }
 
+bool CNewUISystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
+{
+    // Box of the corner glyph in the shared 190-wide frame, enlarged a little
+    // past the original 13x12 so the whole visible "X" is clickable. One place
+    // to tune for every window that uses this frame.
+    constexpr int X_OFFSET = 167, Y_OFFSET = 5, WIDTH = 18, HEIGHT = 18;
+
+    if (IsPress(VK_LBUTTON)
+        && CheckMouseIn(winPos.x + X_OFFSET, winPos.y + Y_OFFSET, WIDTH, HEIGHT))
+    {
+        Hide(dwKey);
+        // Clear the raw button state: world movement reads MouseLButtonPush
+        // directly (not the UI consume result), so without this the click falls
+        // through and walks the character.
+        MouseLButton = false;
+        MouseLButtonPop = false;
+        MouseLButtonPush = false;
+        return true;
+    }
+    return false;
+}
+
 bool CNewUISystem::Update()
 {
     if (m_pNewItemMng)

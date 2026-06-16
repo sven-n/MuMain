@@ -109,11 +109,9 @@ bool CNewUIQuestProgressByEtc::ProcessBtns()
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
         return true;
     }
-    else if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 169, m_Pos.y + 7, 13, 12))
-    {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
         return true;
-    }
     else if (m_btnProgressR.UpdateMouseEvent())
     {
         if (m_nSelNPCPage == m_nMaxNPCPage)

@@ -89,6 +89,10 @@ void CNewUIInventoryExtension::SetPos(int x, int y)
 
 bool CNewUIInventoryExtension::UpdateMouseEvent()
 {
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY_EXT))
+        return false;
+
     for (int i = 0; i < CharacterAttribute->InventoryExtensions; i++)
     {
         if (const auto m_extension = m_extensions[i])

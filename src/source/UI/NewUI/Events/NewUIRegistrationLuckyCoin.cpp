@@ -147,13 +147,9 @@ namespace SEASON3B
 
     bool CNewUIRegistrationLuckyCoin::BtnProcess()
     {
-        POINT pClose = { GetPos().x + 169, GetPos().y + 7 };
-
-        if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(pClose.x, pClose.y, 13, 12))
-        {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION);
+        // Top-right corner close "X" (shared frame): hides + swallows the click.
+        if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION))
             return false;
-        }
 
         if (m_CloseButton.UpdateMouseEvent() == true)
         {

@@ -376,12 +376,9 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
 
 bool SEASON3B::CNewUINPCShop::BtnProcess()
 {
-    POINT ptExitBtn1 = { m_Pos.x + 169, m_Pos.y + 7 };
-
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12) && m_bSellingItem == false)
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (m_bSellingItem == false && g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_NPCSHOP))
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCSHOP);
-
         return true;
     }
 
