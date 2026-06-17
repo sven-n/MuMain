@@ -1809,10 +1809,11 @@ bool CNewUISystem::CheckKeyUse()
 
 bool CNewUISystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
 {
-    // Box of the corner glyph in the shared 190-wide frame, enlarged a little
-    // past the original 13x12 so the whole visible "X" is clickable. One place
-    // to tune for every window that uses this frame.
-    constexpr int X_OFFSET = 167, Y_OFFSET = 5, WIDTH = 18, HEIGHT = 18;
+    // Box of the corner glyph in the shared 190-wide frame. Matches the MU Helper
+    // close "X" exactly (13x12 anchored at +169,+7) — the same hit-box the
+    // per-window copies used originally, so the click feel is identical across
+    // every window. One place to tune for every window that uses this frame.
+    constexpr int X_OFFSET = 169, Y_OFFSET = 7, WIDTH = 13, HEIGHT = 12;
 
     if (IsPress(VK_LBUTTON)
         && CheckMouseIn(winPos.x + X_OFFSET, winPos.y + Y_OFFSET, WIDTH, HEIGHT))
