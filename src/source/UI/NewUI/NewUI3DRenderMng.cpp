@@ -224,7 +224,11 @@ void SEASON3B::CNewUI3DRenderMng::Add3DRenderObj(INewUI3DRenderObj* pObj, float 
         else
         {
 #ifdef _DEBUG
+#if defined(_MSC_VER)
             __debugbreak();
+#else
+            __builtin_trap();
+#endif
 #endif // _DEBUG
         }
     }
