@@ -474,7 +474,6 @@ namespace MUHelper
 
     int CMuHelper::BuffTarget(CHARACTER* pTargetChar, ActionSkillType iBuffSkill)
     {
-        // TODO: List other buffs here
         OBJECT* obj = &pTargetChar->Object;
 
         auto CastIfMissing = [&](bool bBuffActive, bool bTimerRespected, bool bNeedsTarget) -> int
@@ -531,10 +530,24 @@ namespace MUHelper
         case AT_SKILL_ALICE_THORNS:
             return CastIfMissing(g_isCharacterBuff(obj, eBuff_Thorns), false, false);
 
+        // Rage Fighter party buffs — self/party AoE, no explicit target needed.
+        case AT_SKILL_ATT_UP_OURFORCES:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_Att_up_Ourforces), true, false);
+
+        case AT_SKILL_HP_UP_OURFORCES:
+        case AT_SKILL_HP_UP_OURFORCES_STR:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_Hp_up_Ourforces), true, false);
+
+        case AT_SKILL_DEF_UP_OURFORCES:
+        case AT_SKILL_DEF_UP_OURFORCES_STR:
+        case AT_SKILL_DEF_UP_OURFORCES_MASTERY:
+            return CastIfMissing(g_isCharacterBuff(obj, eBuff_Def_up_Ourforces), true, false);
+
         default:
             return 1;
         }
     }
+
 
     int CMuHelper::ConsumePotion()
     {
