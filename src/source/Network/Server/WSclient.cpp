@@ -6495,11 +6495,7 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
         else
         {
 #ifdef _DEBUG
-#if defined(_MSC_VER)
-            __debugbreak();
-#else
-            __builtin_trap();
-#endif
+            MU_DEBUG_BREAK();
 #endif // _DEBUG
         }
 
