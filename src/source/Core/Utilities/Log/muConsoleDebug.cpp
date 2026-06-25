@@ -274,7 +274,7 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
         va_list	pArguments;
 
         va_start(pArguments, pStr);
-        vswprintf(szBuffer, pStr, pArguments);
+        vswprintf(szBuffer, sizeof(szBuffer) / sizeof(wchar_t), pStr, pArguments);
         va_end(pArguments);
 
         std::wcout << szBuffer << std::endl;

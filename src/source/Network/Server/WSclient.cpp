@@ -6495,7 +6495,7 @@ void ReceiveBuy(const BYTE* ReceiveBuffer)
         else
         {
 #ifdef _DEBUG
-            __debugbreak();
+            MU_DEBUG_BREAK();
 #endif // _DEBUG
         }
 

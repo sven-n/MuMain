@@ -1,7 +1,7 @@
 // stdafx.h : include file for standard system include files,
 #pragma once
 
-//warining
+//warning
 #pragma warning( disable : 4067 )
 #pragma warning( disable : 4786 )
 #pragma warning( disable : 4800 )
@@ -44,6 +44,13 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE
+
+// Cross-platform debug breakpoint helper.
+#ifdef _MSC_VER
+#define MU_DEBUG_BREAK() __debugbreak()
+#else
+#define MU_DEBUG_BREAK() __builtin_trap()
+#endif
 
 #pragma warning( push, 3 )
 

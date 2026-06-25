@@ -416,7 +416,13 @@ add_custom_command(
   VERBATIM
 )
 add_custom_target(GenWireSizes DEPENDS "${WIRE_SIZES_GEN_HEADER}")
-add_dependencies(Main GenWireSizes)
+# WSclient.h includes wire_sizes.generated.h, and WSclient.cpp compiles into the
+# MuClient library, not Main. The codegen ordering must therefore hang off
+# MuClient so the header is generated before any consuming TU compiles.
+# Attaching it to Main only ordered codegen before Main's own link step, which
+# let a parallel `cmake --build build` compile MuClient sources before the
+# header existed and fail (workaround was a manual --target GenWireSizes first).
+add_dependencies(MuClient GenWireSizes)
 
 target_include_directories(MuClient PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/source"

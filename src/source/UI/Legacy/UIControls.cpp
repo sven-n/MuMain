@@ -2717,7 +2717,7 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
             if ((SrcIndex > iPitch * FontDCSize.cy) || (DstIndex > LIMIT_WIDTH * 4 * LIMIT_HEIGHT))
             {
 #ifdef _DEBUG
-                __debugbreak();
+                MU_DEBUG_BREAK();
 #endif // _DEBUG
                 return;
             }
