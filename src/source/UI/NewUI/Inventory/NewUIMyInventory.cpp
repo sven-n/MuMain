@@ -1580,13 +1580,9 @@ bool CNewUIMyInventory::InventoryProcess() const
 
 bool CNewUIMyInventory::BtnProcess()
 {
-    const POINT ptExitBtn1 = { m_Pos.x + 169, m_Pos.y + 7 };
-
-    if (IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
-    {
-        g_pNewUISystem->Hide(INTERFACE_INVENTORY);
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY))
         return true;
-    }
     if (m_BtnExit.UpdateMouseEvent())
     {
         if (g_pNewUISystem->IsVisible(INTERFACE_MYSHOP_INVENTORY))

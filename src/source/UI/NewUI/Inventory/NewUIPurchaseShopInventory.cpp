@@ -153,10 +153,9 @@ void SEASON3B::CNewUIPurchaseShopInventory::UnloadImages()
 
 bool SEASON3B::CNewUIPurchaseShopInventory::UpdateMouseEvent()
 {
-    POINT ptExitBtn1 = { m_Pos.x + 169, m_Pos.y + 7 };
-    if (SEASON3B::IsRelease(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY))
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY);
         return false;
     }
     if (m_Button->UpdateMouseEvent())

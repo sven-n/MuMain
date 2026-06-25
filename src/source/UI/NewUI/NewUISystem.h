@@ -106,6 +106,13 @@ namespace SEASON3B
         void Toggle(DWORD dwKey);	//. Show <-> Hide
         void HideAll();
 
+        // Shared handler for the top-right "X" close glyph baked into the common
+        // item-frame (newui_item_back04.tga). Hides `dwKey` when the corner is
+        // left-clicked and swallows the mouse so the click can't fall through to
+        // the world (which would walk the character). Returns true if handled.
+        // Replaces the ptExitBtn1 block that was copy-pasted across the windows.
+        bool HandleFrameCornerClose(const POINT& winPos, DWORD dwKey);
+
         void Enable(DWORD dwKey);
         void Disable(DWORD dwKey);
 

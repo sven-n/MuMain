@@ -348,11 +348,9 @@ bool CNewUIStorageInventoryExt::ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* 
 
 bool CNewUIStorageInventoryExt::ProcessBtns() const
 {
-    if (IsPress(VK_LBUTTON) && CheckMouseIn(m_Pos.x + 169, m_Pos.y + 7, 13, 12))
-    {
-        g_pNewUISystem->Hide(INTERFACE_STORAGE);
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_STORAGE))
         return true;
-    }
 
     return false;
 }

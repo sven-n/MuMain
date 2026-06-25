@@ -112,11 +112,9 @@ void SEASON3B::CNewUICommandWindow::ClosingProcess()
 
 bool SEASON3B::CNewUICommandWindow::BtnProcess()
 {
-    POINT ptExitBtn1 = { m_Pos.x + 169, m_Pos.y + 7 };
-
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptExitBtn1.x, ptExitBtn1.y, 13, 12))
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_COMMAND))
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND);
         PlayBuffer(SOUND_CLICK01);
         return true;
     }
