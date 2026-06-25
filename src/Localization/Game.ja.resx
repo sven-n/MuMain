@@ -10962,4 +10962,7 @@
   <data name="Font" xml:space="preserve">
     <value>フォント</value>
   </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>デフォルト</value>
+  </data>
 </root>

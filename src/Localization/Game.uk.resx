@@ -12884,4 +12884,7 @@
   <data name="Font" xml:space="preserve">
     <value>Шрифт</value>
   </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>За замовчуванням</value>
+  </data>
 </root>

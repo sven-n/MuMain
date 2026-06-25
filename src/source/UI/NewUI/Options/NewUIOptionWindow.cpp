@@ -106,14 +106,13 @@ static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 
 static const wchar_t* const* GetFontLabels()
 {
+    // Rebuilt on every call so the localized "Default" entry follows a live
+    // language switch. The curated font names (Liberation Sans, ...) are proper
+    // nouns and stay as-is.
     static const wchar_t* labels[s_NumFonts] = {};
-    static bool initialized = false;
-    if (!initialized)
-    {
-        for (int i = 0; i < s_NumFonts; i++)
-            labels[i] = s_Fonts[i].label;
-        initialized = true;
-    }
+    labels[0] = I18N::Game::DefaultFont;
+    for (int i = 1; i < s_NumFonts; i++)
+        labels[i] = s_Fonts[i].label;
     return labels;
 }
 

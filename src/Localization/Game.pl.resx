@@ -12884,6 +12884,9 @@
   <data name="Font" xml:space="preserve">
     <value>Czcionka</value>
   </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>Domyślny</value>
+  </data>
   <data name="BasicAttackFallback" xml:space="preserve">
     <value>Awaryjny atak podstawowy</value>
   </data>

@@ -12885,4 +12885,7 @@
   <data name="Font" xml:space="preserve">
     <value>Schriftart</value>
   </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>Standard</value>
+  </data>
 </root>
