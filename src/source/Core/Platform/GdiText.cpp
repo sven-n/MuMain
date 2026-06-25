@@ -27,6 +27,7 @@
 
 #include <unistd.h>                    // readlink (executable path)
 #include "Core/Platform/WinNls.h"      // WideCharToMultiByte / CP_UTF8
+#include "Core/Platform/BundledFonts.h" // curated font list shared with Windows
 
 namespace
 {
@@ -145,13 +146,8 @@ namespace
     // options UI lists and what config stores.
     std::string BundledFontPath(const std::string& family, bool bold)
     {
-        struct Entry { const char* name; const char* regular; const char* bold; };
-        static const Entry kFonts[] = {
-            { "Liberation Sans", "fonts/LiberationSans-Regular.ttf", "fonts/LiberationSans-Bold.ttf" },
-            { "DejaVu Sans",     "fonts/DejaVuSans.ttf",             "fonts/DejaVuSans-Bold.ttf" },
-        };
-        for (const auto& e : kFonts)
-            if (family == e.name)
+        for (const auto& e : kBundledFonts)
+            if (family == e.family)
                 return ExeDir() + (bold ? e.bold : e.regular);
         return {};
     }
