@@ -672,6 +672,7 @@ float SEASON3B::CNewUIOptionWindow::GetKeyEventOrder()	// 10.f;
 void SEASON3B::CNewUIOptionWindow::OpenningProcess()
 {
     // Resync state that may have been changed externally while the window was hidden.
+    m_bSwallowClickHold = false;   // drop any stale combo click-swallow latch
     m_iResolutionIndex = FindCurrentResolutionIndex();
     m_ResolutionCombo.SetSelectedIndex(m_iResolutionIndex);
     m_ResolutionCombo.Close();
