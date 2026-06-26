@@ -1772,7 +1772,7 @@
     <comment>legacy_id=483</comment>
   </data>
   <data name="Welcome to" xml:space="preserve">
-    <value>へようこそ。</value>
+    <value>%sへようこそ。</value>
     <comment>legacy_id=484</comment>
   </data>
   <data name="Of" xml:space="preserve">

@@ -1154,7 +1154,7 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     else
     {
         wchar_t Text[256];
-        mu_swprintf(Text, L"%ls%ls", I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
+        mu_swprintf(Text, I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
 
         g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
@@ -2183,7 +2183,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             else
             {
                 wchar_t Text[256];
-                mu_swprintf(Text, L"%ls%ls", I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
+                mu_swprintf(Text, I18N::Game::WelcomeTo, gMapManager.GetMapName(gMapManager.WorldActive));
 
                 g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
             }

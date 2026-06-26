@@ -129,7 +129,7 @@
     <comment>legacy_id=32</comment>
   </data>
   <data name="Noria" xml:space="preserve">
-    <value>Norii</value>
+    <value>Noria</value>
     <comment>legacy_id=33</comment>
   </data>
   <data name="Lost Tower" xml:space="preserve">
@@ -149,7 +149,7 @@
     <comment>legacy_id=37</comment>
   </data>
   <data name="Tarkan" xml:space="preserve">
-    <value>Tarkana</value>
+    <value>Tarkan</value>
     <comment>legacy_id=38</comment>
   </data>
   <data name="Devil Square" xml:space="preserve">
@@ -193,7 +193,7 @@
     <comment>legacy_id=48,2642</comment>
   </data>
   <data name="Poison" xml:space="preserve">
-    <value>Zatruć</value>
+    <value>Trucizna</value>
     <comment>legacy_id=49</comment>
   </data>
   <data name="Lightning" xml:space="preserve">
@@ -265,7 +265,7 @@
     <comment>legacy_id=66</comment>
   </data>
   <data name="Defense rate: %d" xml:space="preserve">
-    <value>Szybkość obrony: %d</value>
+    <value>Współczynnik obrony: %d</value>
     <comment>legacy_id=67,2045</comment>
   </data>
   <data name="Moving speed: %d" xml:space="preserve">
@@ -289,7 +289,7 @@
     <comment>legacy_id=72</comment>
   </data>
   <data name="Strength Requirement: %d" xml:space="preserve">
-    <value>Wymagania dotyczące wytrzymałości: %d</value>
+    <value>Wymagana siła: %d</value>
     <comment>legacy_id=73</comment>
   </data>
   <data name="(lacking %d)" xml:space="preserve">
@@ -532,7 +532,7 @@
     <comment>legacy_id=129</comment>
   </data>
   <data name="Q : Use Healing Potion" xml:space="preserve">
-    <value>P: Użyj mikstury leczniczej</value>
+    <value>Q: Użyj mikstury leczniczej</value>
     <comment>legacy_id=130</comment>
   </data>
   <data name="W : Use Mana Potion" xml:space="preserve">
@@ -672,7 +672,7 @@
     <comment>legacy_id=164</comment>
   </data>
   <data name="DEF rate" xml:space="preserve">
-    <value>Kurs DEF</value>
+    <value>Wsp. DEF</value>
     <comment>legacy_id=165</comment>
   </data>
   <data name="STR" xml:space="preserve">
@@ -684,7 +684,7 @@
     <comment>legacy_id=167</comment>
   </data>
   <data name="ENG" xml:space="preserve">
-    <value>ANG</value>
+    <value>ENG</value>
     <comment>legacy_id=168</comment>
   </data>
   <data name="STA" xml:space="preserve">
@@ -764,11 +764,11 @@
     <comment>legacy_id=187</comment>
   </data>
   <data name="Disband" xml:space="preserve">
-    <value>Rozpuszczać</value>
+    <value>Rozwiąż</value>
     <comment>legacy_id=188</comment>
   </data>
   <data name="Leave" xml:space="preserve">
-    <value>Wyjechać</value>
+    <value>Opuść</value>
     <comment>legacy_id=189</comment>
   </data>
   <data name="Party" xml:space="preserve">
@@ -780,7 +780,7 @@
     <comment>legacy_id=191</comment>
   </data>
   <data name="the player you would like" xml:space="preserve">
-    <value>odtwarzacz, którego chcesz</value>
+    <value>gracz, którego chcesz</value>
     <comment>legacy_id=192</comment>
   </data>
   <data name="to create a party with" xml:space="preserve">
@@ -824,7 +824,7 @@
     <comment>legacy_id=202</comment>
   </data>
   <data name="Dmg(rate): %d~%d (%d)" xml:space="preserve">
-    <value>Dmg (szybkość): %d ~ %d (%d)</value>
+    <value>Dmg (wsp.): %d ~ %d (%d)</value>
     <comment>legacy_id=203</comment>
   </data>
   <data name="Dmg: %d~%d" xml:space="preserve">
@@ -836,7 +836,7 @@
     <comment>legacy_id=205</comment>
   </data>
   <data name="Defense (rate):%d (%d +%d)" xml:space="preserve">
-    <value>Obrona (szybkość): %d (%d + %d)</value>
+    <value>Obrona (wsp.): %d (%d + %d)</value>
     <comment>legacy_id=206</comment>
   </data>
   <data name="Defense: %d (+%d)" xml:space="preserve">
@@ -844,7 +844,7 @@
     <comment>legacy_id=207</comment>
   </data>
   <data name="Defense (rate):%d (%d)" xml:space="preserve">
-    <value>Obrona (szybkość):%d (%d)</value>
+    <value>Obrona (wsp.): %d (%d)</value>
     <comment>legacy_id=208</comment>
   </data>
   <data name="Vitality: %d" xml:space="preserve">
@@ -900,7 +900,7 @@
     <comment>legacy_id=222</comment>
   </data>
   <data name="Inventory" xml:space="preserve">
-    <value>Spis</value>
+    <value>Ekwipunek</value>
     <comment>legacy_id=223,3425,3453</comment>
   </data>
   <data name="Close (I,V)" xml:space="preserve">
@@ -948,7 +948,7 @@
     <comment>legacy_id=235</comment>
   </data>
   <data name="Withdraw" xml:space="preserve">
-    <value>Wycofać</value>
+    <value>Wycofaj</value>
     <comment>legacy_id=236</comment>
   </data>
   <data name="Repair all (A)" xml:space="preserve">
@@ -988,7 +988,7 @@
     <comment>legacy_id=245</comment>
   </data>
   <data name="Number of Registered Rena" xml:space="preserve">
-    <value>Numer rejestracyjny Rena</value>
+    <value>Liczba zarejestrowanych Ren</value>
     <comment>legacy_id=246</comment>
   </data>
   <data name="Lucky number" xml:space="preserve">
@@ -1288,7 +1288,7 @@
     <comment>legacy_id=354</comment>
   </data>
   <data name="Uniria" xml:space="preserve">
-    <value>Unirii</value>
+    <value>Uniria</value>
     <comment>legacy_id=355</comment>
   </data>
   <data name="Summoned Monster HP" xml:space="preserve">
@@ -1316,7 +1316,7 @@
     <comment>legacy_id=361</comment>
   </data>
   <data name="Character (C)" xml:space="preserve">
-    <value>Znak (C)</value>
+    <value>Postać (C)</value>
     <comment>legacy_id=362</comment>
   </data>
   <data name="Inventory (I,V)" xml:space="preserve">
@@ -1438,7 +1438,7 @@
     <comment>legacy_id=388,1002</comment>
   </data>
   <data name="Volume" xml:space="preserve">
-    <value>Tom</value>
+    <value>Głośność</value>
     <comment>legacy_id=389</comment>
   </data>
   <data name="Type more than 4 letters" xml:space="preserve">
@@ -1478,7 +1478,7 @@
     <comment>legacy_id=398</comment>
   </data>
   <data name="You cannot delete characters" xml:space="preserve">
-    <value>Nie można usuwać znaków</value>
+    <value>Nie można usuwać postaci</value>
     <comment>legacy_id=399</comment>
   </data>
   <data name="over level 40." xml:space="preserve">
@@ -1682,7 +1682,7 @@
     <comment>legacy_id=451</comment>
   </data>
   <data name="Connect" xml:space="preserve">
-    <value>Łączyć</value>
+    <value>Połącz</value>
     <comment>legacy_id=452,562</comment>
   </data>
   <data name="Exit" xml:space="preserve">
@@ -1790,7 +1790,7 @@
     <comment>legacy_id=479</comment>
   </data>
   <data name="Tied!!!" xml:space="preserve">
-    <value>Zawiązany!!!</value>
+    <value>Remis!!!</value>
     <comment>legacy_id=480</comment>
   </data>
   <data name="You are connected to the server" xml:space="preserve">
@@ -1806,7 +1806,7 @@
     <comment>legacy_id=483</comment>
   </data>
   <data name="Welcome to" xml:space="preserve">
-    <value>Witamy w</value>
+    <value>Witamy w %s</value>
     <comment>legacy_id=484</comment>
   </data>
   <data name="Of" xml:space="preserve">
@@ -2026,7 +2026,7 @@
     <comment>legacy_id=541</comment>
   </data>
   <data name="Midgard" xml:space="preserve">
-    <value>Midgardu</value>
+    <value>Midgard</value>
     <comment>legacy_id=542</comment>
   </data>
   <data name="Kara" xml:space="preserve">
@@ -2162,11 +2162,11 @@
     <comment>legacy_id=576</comment>
   </data>
   <data name="Increase %d%% of Damage" xml:space="preserve">
-    <value>Zwiększa obrażenia %d%% of</value>
+    <value>Zwiększa obrażenia o %d%%</value>
     <comment>legacy_id=577</comment>
   </data>
   <data name="Absorb %d%% of Damage" xml:space="preserve">
-    <value>Absorbuj obrażenia %d%% of</value>
+    <value>Pochłania %d%% obrażeń</value>
     <comment>legacy_id=578</comment>
   </data>
   <data name="Increase speed" xml:space="preserve">
@@ -2570,7 +2570,7 @@
     <comment>legacy_id=680</comment>
   </data>
   <data name="Character" xml:space="preserve">
-    <value>Charakter</value>
+    <value>Postać</value>
     <comment>legacy_id=681,3423</comment>
   </data>
   <data name="point" xml:space="preserve">
@@ -2578,7 +2578,7 @@
     <comment>legacy_id=682</comment>
   </data>
   <data name="EXP" xml:space="preserve">
-    <value>DO POTĘGI</value>
+    <value>DOŚW.</value>
     <comment>legacy_id=683</comment>
   </data>
   <data name="Reward" xml:space="preserve">
@@ -2682,7 +2682,7 @@
     <comment>legacy_id=708</comment>
   </data>
   <data name="Rena Exchange" xml:space="preserve">
-    <value>Rena Wymiana</value>
+    <value>Wymiana Reny</value>
     <comment>legacy_id=709</comment>
   </data>
   <data name="TheSeasonOfBlessingHasCome" xml:space="preserve">
@@ -2830,7 +2830,7 @@
     <comment>legacy_id=745</comment>
   </data>
   <data name="Parrying 10%% increased" xml:space="preserve">
-    <value>Parowanie 10%% izwiększone</value>
+    <value>Parowanie zwiększone o 10%%</value>
     <comment>legacy_id=746</comment>
   </data>
   <data name="You have exchanged Dinorants" xml:space="preserve">
@@ -3178,7 +3178,7 @@
     <comment>legacy_id=852</comment>
   </data>
   <data name="The maximum capacity of %s has been reached. The max. number allowed is %d." xml:space="preserve">
-    <value>Osiągnięto maksymalną pojemność %s. Maks. dozwolony numer to %d.</value>
+    <value>Osiągnięto maksymalną pojemność %s. Maks. dozwolona liczba to %d.</value>
     <comment>legacy_id=853</comment>
   </data>
   <data name="The level of the Cloak of Invisibility is incorrect." xml:space="preserve">
@@ -3218,7 +3218,7 @@
     <comment>legacy_id=862</comment>
   </data>
   <data name="Blood Castle Point: %d" xml:space="preserve">
-    <value>Punkt Zamku Krwi: %d</value>
+    <value>Punkty Blood Castle: %d</value>
     <comment>legacy_id=863</comment>
   </data>
   <data name="Monster: ( %d/%d )" xml:space="preserve">
@@ -3262,7 +3262,7 @@
     <comment>legacy_id=873</comment>
   </data>
   <data name="Cape of Lord" xml:space="preserve">
-    <value>Przylądek Pana</value>
+    <value>Cape of Lord</value>
     <comment>legacy_id=874</comment>
   </data>
   <data name="Skill Damage: %d~%d" xml:space="preserve">
@@ -3686,7 +3686,7 @@
     <comment>legacy_id=992</comment>
   </data>
   <data name="Invite" xml:space="preserve">
-    <value>Zapraszać</value>
+    <value>Zaproś</value>
     <comment>legacy_id=993</comment>
   </data>
   <data name="Talking:" xml:space="preserve">
@@ -3718,11 +3718,11 @@
     <comment>legacy_id=1000</comment>
   </data>
   <data name="Send" xml:space="preserve">
-    <value>Wysłać</value>
+    <value>Wyślij</value>
     <comment>legacy_id=1001</comment>
   </data>
   <data name="Prev. Action" xml:space="preserve">
-    <value>Poprzednia Działanie</value>
+    <value>Poprzednie działanie</value>
     <comment>legacy_id=1003</comment>
   </data>
   <data name="Next Action" xml:space="preserve">
@@ -3754,7 +3754,7 @@
     <comment>legacy_id=1010</comment>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>Usuwać</value>
+    <value>Usuń</value>
     <comment>legacy_id=1011,2932,3506</comment>
   </data>
   <data name="Previous" xml:space="preserve">
@@ -3770,7 +3770,7 @@
     <comment>legacy_id=1014</comment>
   </data>
   <data name="Write" xml:space="preserve">
-    <value>Pisać</value>
+    <value>Napisz</value>
     <comment>legacy_id=1015</comment>
   </data>
   <data name="Re: %s" xml:space="preserve">
@@ -3814,7 +3814,7 @@
     <comment>legacy_id=1026</comment>
   </data>
   <data name="Read" xml:space="preserve">
-    <value>Czytać</value>
+    <value>Czytaj</value>
     <comment>legacy_id=1027</comment>
   </data>
   <data name=" Sender" xml:space="preserve">
@@ -3830,7 +3830,7 @@
     <comment>legacy_id=1030</comment>
   </data>
   <data name="Select the letter you'd like to delete" xml:space="preserve">
-    <value>Wybierz literę, którą chcesz usunąć</value>
+    <value>Wybierz list, który chcesz usunąć</value>
     <comment>legacy_id=1031</comment>
   </data>
   <data name="Friends List" xml:space="preserve">
@@ -4126,7 +4126,7 @@
     <comment>legacy_id=1105</comment>
   </data>
   <data name="Apply" xml:space="preserve">
-    <value>Stosować</value>
+    <value>Zastosuj</value>
     <comment>legacy_id=1106</comment>
   </data>
   <data name="Open1107" xml:space="preserve">
@@ -4262,7 +4262,7 @@
     <comment>legacy_id=1139</comment>
   </data>
   <data name="Quest" xml:space="preserve">
-    <value>Poszukiwanie</value>
+    <value>Zadanie</value>
     <comment>legacy_id=1140,3427</comment>
   </data>
   <data name="Castle" xml:space="preserve">
@@ -4318,7 +4318,7 @@
     <comment>legacy_id=1160</comment>
   </data>
   <data name="Character: ( %d/%d )" xml:space="preserve">
-    <value>Znak: ( %d/%d )</value>
+    <value>Postać: ( %d/%d )</value>
     <comment>legacy_id=1161</comment>
   </data>
   <data name="Monster Kill count: %d" xml:space="preserve">
@@ -4350,7 +4350,7 @@
     <comment>legacy_id=1168</comment>
   </data>
   <data name="No pet" xml:space="preserve">
-    <value>Żadnego zwierzaka</value>
+    <value>Brak zwierzaka</value>
     <comment>legacy_id=1169</comment>
   </data>
   <data name="CommandD1170" xml:space="preserve">
@@ -4422,7 +4422,7 @@
     <comment>legacy_id=1186</comment>
   </data>
   <data name="Dark horse" xml:space="preserve">
-    <value>Fuks</value>
+    <value>Dark Horse</value>
     <comment>legacy_id=1187</comment>
   </data>
   <data name="Increase %d possible attack distance" xml:space="preserve">
@@ -4538,7 +4538,7 @@
     <comment>legacy_id=1216</comment>
   </data>
   <data name="Pet" xml:space="preserve">
-    <value>Zwierzak domowy</value>
+    <value>Zwierzak</value>
     <comment>legacy_id=1217</comment>
   </data>
   <data name="Commands" xml:space="preserve">
@@ -4602,7 +4602,7 @@
     <comment>legacy_id=1232</comment>
   </data>
   <data name="No %s." xml:space="preserve">
-    <value>Nie %s.</value>
+    <value>Brak %s.</value>
     <comment>legacy_id=1233</comment>
   </data>
   <data name="Increase pet attack as %d%%" xml:space="preserve">
@@ -4614,7 +4614,7 @@
     <comment>legacy_id=1235</comment>
   </data>
   <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
-    <value>Używany do łączenia Przylądka Lorda i Płaszcza Wojownika</value>
+    <value>Używany do łączenia Cape of Lord i Warrior's Cloak</value>
     <comment>legacy_id=1236</comment>
   </data>
   <data name="Check the details in pet information window" xml:space="preserve">
@@ -4810,7 +4810,7 @@
     <comment>legacy_id=1294</comment>
   </data>
   <data name="Alliance" xml:space="preserve">
-    <value>Przymierze</value>
+    <value>Sojusz</value>
     <comment>legacy_id=1295,1352</comment>
   </data>
   <data name="Alliance master" xml:space="preserve">
@@ -4830,11 +4830,11 @@
     <comment>legacy_id=1299</comment>
   </data>
   <data name="Master" xml:space="preserve">
-    <value>Gospodarz</value>
+    <value>Mistrz</value>
     <comment>legacy_id=1300,1745</comment>
   </data>
   <data name="Assist. M." xml:space="preserve">
-    <value>Wspierać. M.</value>
+    <value>Zast. M.</value>
     <comment>legacy_id=1301</comment>
   </data>
   <data name="Battle M." xml:space="preserve">
@@ -4886,7 +4886,7 @@
     <comment>legacy_id=1314</comment>
   </data>
   <data name="Do you want to appoint?" xml:space="preserve">
-    <value>Chcesz się umówić?</value>
+    <value>Czy chcesz mianować?</value>
     <comment>legacy_id=1315</comment>
   </data>
   <data name="Guild vault" xml:space="preserve">
@@ -4934,11 +4934,11 @@
     <comment>legacy_id=1326</comment>
   </data>
   <data name="Wrong appointment" xml:space="preserve">
-    <value>Błędne spotkanie</value>
+    <value>Błędne mianowanie</value>
     <comment>legacy_id=1327</comment>
   </data>
   <data name="Failed" xml:space="preserve">
-    <value>Przegrany</value>
+    <value>Niepowodzenie</value>
     <comment>legacy_id=1328,1531</comment>
   </data>
   <data name="Income" xml:space="preserve">
@@ -4970,11 +4970,11 @@
     <comment>legacy_id=1335</comment>
   </data>
   <data name="Item in" xml:space="preserve">
-    <value>Pozycja w</value>
+    <value>Przedmiot przychodzący</value>
     <comment>legacy_id=1336</comment>
   </data>
   <data name="Item out" xml:space="preserve">
-    <value>Pozycja wyłączona</value>
+    <value>Przedmiot wychodzący</value>
     <comment>legacy_id=1337</comment>
   </data>
   <data name="Deposit zen" xml:space="preserve">
@@ -5090,7 +5090,7 @@
     <comment>legacy_id=1366</comment>
   </data>
   <data name="Character '%s'" xml:space="preserve">
-    <value>Znak „%s”</value>
+    <value>Postać „%s”</value>
     <comment>legacy_id=1367</comment>
   </data>
   <data name="Would you like to cancel the ranking?" xml:space="preserve">
@@ -5202,11 +5202,11 @@
     <comment>legacy_id=1394</comment>
   </data>
   <data name="Tie!" xml:space="preserve">
-    <value>Krawat!</value>
+    <value>Remis!</value>
     <comment>legacy_id=1395</comment>
   </data>
   <data name="Lose" xml:space="preserve">
-    <value>Stracić</value>
+    <value>Porażka</value>
     <comment>legacy_id=1397</comment>
   </data>
   <data name="Weapon for Invading team" xml:space="preserve">
@@ -5278,7 +5278,7 @@
     <comment>legacy_id=1416</comment>
   </data>
   <data name="Damage +20%% increase effect" xml:space="preserve">
-    <value>Obrażenia +20%% izwiększający efekt</value>
+    <value>Efekt zwiększenia obrażeń o 20%%</value>
     <comment>legacy_id=1417</comment>
   </data>
   <data name="Duration 60 seconds" xml:space="preserve">
@@ -5342,11 +5342,11 @@
     <comment>legacy_id=1437</comment>
   </data>
   <data name="Registered no. of sign: %u" xml:space="preserve">
-    <value>Numer rejestracyjny znaku: %u</value>
+    <value>Liczba zarejestrowanych znaków: %u</value>
     <comment>legacy_id=1438</comment>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Rejestr</value>
+    <value>Zarejestruj</value>
     <comment>legacy_id=1439,1894</comment>
   </data>
   <data name="Announcement and registration period" xml:space="preserve">
@@ -5534,7 +5534,7 @@
     <comment>legacy_id=1488</comment>
   </data>
   <data name="Official seal registration will start" xml:space="preserve">
-    <value>Rozpocznie się oficjalna rejestracja fok</value>
+    <value>Rozpocznie się rejestracja oficjalnej pieczęci</value>
     <comment>legacy_id=1489</comment>
   </data>
   <data name="Official seal registration is successful" xml:space="preserve">
@@ -5546,7 +5546,7 @@
     <comment>legacy_id=1491</comment>
   </data>
   <data name="Another character is registering the official seal" xml:space="preserve">
-    <value>Kolejną postacią jest rejestracja pieczęci urzędowej</value>
+    <value>Inna postać rejestruje pieczęć urzędową</value>
     <comment>legacy_id=1492</comment>
   </data>
   <data name="Shield of the crown has been removed" xml:space="preserve">
@@ -5686,7 +5686,7 @@
     <comment>legacy_id=1527</comment>
   </data>
   <data name="No. Reg." xml:space="preserve">
-    <value>Nie. Reg.</value>
+    <value>Nr rej.</value>
     <comment>legacy_id=1528</comment>
   </data>
   <data name="Stat" xml:space="preserve">
@@ -5694,7 +5694,7 @@
     <comment>legacy_id=1529</comment>
   </data>
   <data name="Order" xml:space="preserve">
-    <value>Zamówienie</value>
+    <value>Kolejność</value>
     <comment>legacy_id=1530</comment>
   </data>
   <data name="Processing" xml:space="preserve">
@@ -5986,7 +5986,7 @@
     <comment>legacy_id=1609</comment>
   </data>
   <data name="To purchase selected statue" xml:space="preserve">
-    <value>Do zakupu wybranej statuetki</value>
+    <value>Do zakupu wybranego posągu</value>
     <comment>legacy_id=1610</comment>
   </data>
   <data name="To repair selected statue" xml:space="preserve">
@@ -6194,7 +6194,7 @@
     <comment>legacy_id=1661</comment>
   </data>
   <data name="Gatekeeper" xml:space="preserve">
-    <value>Portier</value>
+    <value>Odźwierny</value>
     <comment>legacy_id=1662</comment>
   </data>
   <data name="'Hmm, who are you? I'm confused. Are you even approved of Balgass?" xml:space="preserve">
@@ -6218,7 +6218,7 @@
     <comment>legacy_id=1667</comment>
   </data>
   <data name="Blade Master" xml:space="preserve">
-    <value>Mistrz Ostrza</value>
+    <value>Blade Master</value>
     <comment>legacy_id=1668</comment>
   </data>
   <data name="Grand Master" xml:space="preserve">
@@ -6230,11 +6230,11 @@
     <comment>legacy_id=1670</comment>
   </data>
   <data name="Dual Master" xml:space="preserve">
-    <value>Podwójny Mistrz</value>
+    <value>Dual Master</value>
     <comment>legacy_id=1671</comment>
   </data>
   <data name="Lord Emperor" xml:space="preserve">
-    <value>Panie Cesarzu</value>
+    <value>Lord Emperor</value>
     <comment>legacy_id=1672</comment>
   </data>
   <data name="Return's the enemy's attack power in %d%%" xml:space="preserve">
@@ -6278,7 +6278,7 @@
     <comment>legacy_id=1682</comment>
   </data>
   <data name="Guilt chat" xml:space="preserve">
-    <value>Rozmowa o poczuciu winy</value>
+    <value>Czat gildii</value>
     <comment>legacy_id=1683</comment>
   </data>
   <data name="Whisper block: On/Off" xml:space="preserve">
@@ -6302,7 +6302,7 @@
     <comment>legacy_id=1688</comment>
   </data>
   <data name="Dimension Master" xml:space="preserve">
-    <value>Mistrz wymiaru</value>
+    <value>Dimension Master</value>
     <comment>legacy_id=1689</comment>
   </data>
   <data name="StrongMentalityAndExcellentInsightCreates" xml:space="preserve">
@@ -6310,7 +6310,7 @@
     <comment>legacy_id=1690</comment>
   </data>
   <data name="Curse Spell increment %d%%" xml:space="preserve">
-    <value>Klątwa Przyrost zaklęcia %d%%</value>
+    <value>Przyrost zaklęcia klątwy %d%%</value>
     <comment>legacy_id=1691</comment>
   </data>
   <data name="Curse Spell: %d ~ %d" xml:space="preserve">
@@ -6350,7 +6350,7 @@
     <comment>legacy_id=1700</comment>
   </data>
   <data name="Strength" xml:space="preserve">
-    <value>Wytrzymałość</value>
+    <value>Siła</value>
     <comment>legacy_id=1701</comment>
   </data>
   <data name="Agility" xml:space="preserve">
@@ -6498,7 +6498,7 @@
     <comment>legacy_id=1738,1900</comment>
   </data>
   <data name="Long gmae time may be harmful to your health" xml:space="preserve">
-    <value>Długi czas gmae może być szkodliwy dla zdrowia</value>
+    <value>Długi czas gry może być szkodliwy dla zdrowia</value>
     <comment>legacy_id=1739</comment>
   </data>
   <data name="Like studying, you need rest after a certain time of game play." xml:space="preserve">
@@ -6550,7 +6550,7 @@
     <comment>legacy_id=1752</comment>
   </data>
   <data name="Overcome: %d" xml:space="preserve">
-    <value>Pokonaj: %d</value>
+    <value>Przezwyciężenie: %d</value>
     <comment>legacy_id=1753</comment>
   </data>
   <data name="Mystery: %d" xml:space="preserve">
@@ -6606,7 +6606,7 @@
     <comment>legacy_id=1766</comment>
   </data>
   <data name="Determination: %d" xml:space="preserve">
-    <value>Oznaczenie: %d</value>
+    <value>Determinacja: %d</value>
     <comment>legacy_id=1767,3331</comment>
   </data>
   <data name="Justice: %d" xml:space="preserve">
@@ -6614,7 +6614,7 @@
     <comment>legacy_id=1768</comment>
   </data>
   <data name="Conquer: %d" xml:space="preserve">
-    <value>Podbij: %d</value>
+    <value>Podbój: %d</value>
     <comment>legacy_id=1769</comment>
   </data>
   <data name="Glory: %d" xml:space="preserve">
@@ -6626,7 +6626,7 @@
     <comment>legacy_id=1771</comment>
   </data>
   <data name="Master level point requirement: %d" xml:space="preserve">
-    <value>Wymagania punktowe na poziomie magisterskim: %d</value>
+    <value>Wymagania punktowe na poziomie mistrzowskim: %d</value>
     <comment>legacy_id=1772</comment>
   </data>
   <data name="Present investment point: %d" xml:space="preserve">
@@ -6638,7 +6638,7 @@
     <comment>legacy_id=1775</comment>
   </data>
   <data name="%d%% increment" xml:space="preserve">
-    <value>%d%% iprzyrost</value>
+    <value>Przyrost o %d%%</value>
     <comment>legacy_id=1776</comment>
   </data>
   <data name="DIncrement1777" xml:space="preserve">
@@ -6646,11 +6646,11 @@
     <comment>legacy_id=1777</comment>
   </data>
   <data name="Square no. %d (Master Level)" xml:space="preserve">
-    <value>Kwadrat nr. %d (poziom główny)</value>
+    <value>Kwadrat nr. %d (poziom mistrzowski)</value>
     <comment>legacy_id=1778</comment>
   </data>
   <data name="Castle no. %d (Master Level)" xml:space="preserve">
-    <value>Zamek nr. %d (poziom główny)</value>
+    <value>Zamek nr. %d (poziom mistrzowski)</value>
     <comment>legacy_id=1779</comment>
   </data>
   <data name="Maximum Mana/%d recovery" xml:space="preserve">
@@ -6678,7 +6678,7 @@
     <comment>legacy_id=1785</comment>
   </data>
   <data name="Effects increment of 2%% each strengthener level" xml:space="preserve">
-    <value>Efekty zwiększają się o 2%% e na każdym poziomie wzmocnienia</value>
+    <value>Efekty zwiększają się o 2%% na każdym poziomie wzmocnienia</value>
     <comment>legacy_id=1786</comment>
   </data>
   <data name="effect increase by reinforcement process" xml:space="preserve">
@@ -6686,7 +6686,7 @@
     <comment>legacy_id=1787</comment>
   </data>
   <data name="%d%% decrease" xml:space="preserve">
-    <value>%d%% dwzrost</value>
+    <value>Spadek o %d%%</value>
     <comment>legacy_id=1788</comment>
   </data>
   <data name="Pollution skill (Mana: %d)" xml:space="preserve">
@@ -6714,7 +6714,7 @@
     <comment>legacy_id=1804</comment>
   </data>
   <data name="and press the button for no. of jewels" xml:space="preserve">
-    <value>i naciśnij przycisk „nie”. klejnotów</value>
+    <value>i naciśnij przycisk odpowiadający liczbie klejnotów</value>
     <comment>legacy_id=1805</comment>
   </data>
   <data name="Jewel of Bless" xml:space="preserve">
@@ -6874,7 +6874,7 @@
     <comment>legacy_id=1851</comment>
   </data>
   <data name="Lost Kalima" xml:space="preserve">
-    <value>Straciłem Kalimę</value>
+    <value>Lost Kalima</value>
     <comment>legacy_id=1852</comment>
   </data>
   <data name="Elveland" xml:space="preserve">
@@ -6950,7 +6950,7 @@
     <comment>legacy_id=1873</comment>
   </data>
   <data name="Reign (Integration)" xml:space="preserve">
-    <value>Panowanie (integracja)</value>
+    <value>Reign (integracja)</value>
     <comment>legacy_id=1874</comment>
   </data>
   <data name="New Server" xml:space="preserve">
@@ -7050,7 +7050,7 @@
     <comment>legacy_id=1901</comment>
   </data>
   <data name="Choose." xml:space="preserve">
-    <value>Wybierać.</value>
+    <value>Wybierz.</value>
     <comment>legacy_id=1902</comment>
   </data>
   <data name="Decrease" xml:space="preserve">
@@ -7098,7 +7098,7 @@
     <comment>legacy_id=1915</comment>
   </data>
   <data name="Fenrir" xml:space="preserve">
-    <value>Fenrira</value>
+    <value>Fenrir</value>
     <comment>legacy_id=1916</comment>
   </data>
   <data name="FragmentOfHornCanBeMade" xml:space="preserve">
@@ -7194,7 +7194,7 @@
     <comment>legacy_id=1939</comment>
   </data>
   <data name="Exchange1940" xml:space="preserve">
-    <value>Giełda</value>
+    <value>Wymiana</value>
     <comment>legacy_id=1940</comment>
   </data>
   <data name="Dark Elf (%d/12)" xml:space="preserve">
@@ -7390,7 +7390,7 @@
     <comment>legacy_id=2021</comment>
   </data>
   <data name="Item has already given." xml:space="preserve">
-    <value>Pozycja została już podana.</value>
+    <value>Przedmiot został już przyznany.</value>
     <comment>legacy_id=2022</comment>
   </data>
   <data name="Failed to get an item. Please try again." xml:space="preserve">
@@ -7406,7 +7406,7 @@
     <comment>legacy_id=2025</comment>
   </data>
   <data name="Arrow will not decrease during activation" xml:space="preserve">
-    <value>Strzałka nie zmniejszy się podczas aktywacji</value>
+    <value>Strzała nie zmniejszy się podczas aktywacji</value>
     <comment>legacy_id=2026,2040</comment>
   </data>
   <data name="You've been playing for %d hours." xml:space="preserve">
@@ -7426,7 +7426,7 @@
     <comment>legacy_id=2038</comment>
   </data>
   <data name="Infinity arrow activated" xml:space="preserve">
-    <value>Strzałka nieskończoności aktywowana</value>
+    <value>Strzała nieskończoności aktywowana</value>
     <comment>legacy_id=2039</comment>
   </data>
   <data name="Cheer" xml:space="preserve">
@@ -7714,7 +7714,7 @@
     <comment>legacy_id=2153</comment>
   </data>
   <data name="Currently %d players are in battle with Maya's lefe hand." xml:space="preserve">
-    <value>Obecnie gracze %d toczą walkę lewą ręką Mayi.</value>
+    <value>Obecnie %d graczy toczy walkę z lewą ręką Mayi.</value>
     <comment>legacy_id=2154</comment>
   </data>
   <data name="Currently %d players are in battle with Maya's right hand." xml:space="preserve">
@@ -7766,7 +7766,7 @@
     <comment>legacy_id=2166</comment>
   </data>
   <data name="More power from %d players are needed." xml:space="preserve">
-    <value>Potrzebna jest większa moc od odtwarzaczy %d.</value>
+    <value>Potrzebna jest większa moc od %d graczy.</value>
     <comment>legacy_id=2167</comment>
   </data>
   <data name="Nightmare has lost the control of Maya's left hand." xml:space="preserve">
@@ -7818,15 +7818,15 @@
     <comment>legacy_id=2179</comment>
   </data>
   <data name="Character: %d" xml:space="preserve">
-    <value>Znak: %d</value>
+    <value>Postać: %d</value>
     <comment>legacy_id=2180</comment>
   </data>
   <data name="Monster:Boss" xml:space="preserve">
-    <value>Potwór: Szefie</value>
+    <value>Potwór: Boss</value>
     <comment>legacy_id=2181</comment>
   </data>
   <data name="MonsterBoss2182" xml:space="preserve">
-    <value>Potwór: Szefie</value>
+    <value>Potwór: Boss</value>
     <comment>legacy_id=2182</comment>
   </data>
   <data name="Monster : %d" xml:space="preserve">
@@ -8086,7 +8086,7 @@
     <comment>legacy_id=2248</comment>
   </data>
   <data name="Stonger effect has taken place." xml:space="preserve">
-    <value>Nastąpił efekt Stongera.</value>
+    <value>Nastąpił silniejszy efekt.</value>
     <comment>legacy_id=2249</comment>
   </data>
   <data name="Increases the combination rate,but only up to the maximum rate." xml:space="preserve">
@@ -8246,11 +8246,11 @@
     <comment>legacy_id=2288</comment>
   </data>
   <data name="W Coin" xml:space="preserve">
-    <value>Moneta W</value>
+    <value>WCoin</value>
     <comment>legacy_id=2289</comment>
   </data>
   <data name="Buy W Coin" xml:space="preserve">
-    <value>Kup monetę W</value>
+    <value>Kup WCoin</value>
     <comment>legacy_id=2290</comment>
   </data>
   <data name="Price :" xml:space="preserve">
@@ -8282,11 +8282,11 @@
     <comment>legacy_id=2299</comment>
   </data>
   <data name="Minute" xml:space="preserve">
-    <value>Chwila</value>
+    <value>Minuta</value>
     <comment>legacy_id=2300</comment>
   </data>
   <data name="Second" xml:space="preserve">
-    <value>Drugi</value>
+    <value>Sekunda</value>
     <comment>legacy_id=2301</comment>
   </data>
   <data name="Available" xml:space="preserve">
@@ -8334,7 +8334,7 @@
     <comment>legacy_id=2312</comment>
   </data>
   <data name="PC cafe point (%d/%d)" xml:space="preserve">
-    <value>Kawiarnia PC (%d/%d)</value>
+    <value>Punkty PC Cafe (%d/%d)</value>
     <comment>legacy_id=2319</comment>
   </data>
   <data name="%d point achieved" xml:space="preserve">
@@ -8350,7 +8350,7 @@
     <comment>legacy_id=2322</comment>
   </data>
   <data name="GM has gifted this special box." xml:space="preserve">
-    <value>Firma GM podarowała to specjalne pudełko.</value>
+    <value>GM podarował to specjalne pudełko.</value>
     <comment>legacy_id=2323</comment>
   </data>
   <data name="GM summon zone" xml:space="preserve">
@@ -8358,7 +8358,7 @@
     <comment>legacy_id=2324</comment>
   </data>
   <data name="PC cafe point store" xml:space="preserve">
-    <value>Sklep punktowy kawiarni PC</value>
+    <value>Sklep punktowy PC Cafe</value>
     <comment>legacy_id=2325</comment>
   </data>
   <data name="Point2326" xml:space="preserve">
@@ -8366,7 +8366,7 @@
     <comment>legacy_id=2326</comment>
   </data>
   <data name="PC cafe point store allows you to only purchase the objects." xml:space="preserve">
-    <value>Sklep punktowy kawiarni PC pozwala na zakup wyłącznie obiektów.</value>
+    <value>Sklep punktowy PC Cafe pozwala na zakup wyłącznie obiektów.</value>
     <comment>legacy_id=2327</comment>
   </data>
   <data name="Seals applicable immediately after the purchase." xml:space="preserve">
@@ -8566,7 +8566,7 @@
     <comment>legacy_id=2386</comment>
   </data>
   <data name="MU alliance" xml:space="preserve">
-    <value>Sojusz UM</value>
+    <value>Sojusz MU</value>
     <comment>legacy_id=2387</comment>
   </data>
   <data name="Illusion Sorcery" xml:space="preserve">
@@ -8698,7 +8698,7 @@
     <comment>legacy_id=2420</comment>
   </data>
   <data name="&lt;AM&gt; &lt;PM&gt;" xml:space="preserve">
-    <value>&lt;AM&gt; &lt;POŁUDNIE&gt;</value>
+    <value>&lt;AM&gt; &lt;PM&gt;</value>
     <comment>legacy_id=2421</comment>
   </data>
   <data name="0:30 Blood Castle 12:30 Blood Castle" xml:space="preserve">
@@ -8870,11 +8870,11 @@
     <comment>legacy_id=2464</comment>
   </data>
   <data name="Restores HP by 100%% immediately." xml:space="preserve">
-    <value>Natychmiast przywraca HP o 100%% i.</value>
+    <value>Natychmiast przywraca 100%% HP.</value>
     <comment>legacy_id=2500</comment>
   </data>
   <data name="Restores Mana by 100%% immediately." xml:space="preserve">
-    <value>Natychmiast przywraca Manę o 100%% i.</value>
+    <value>Natychmiast przywraca 100%% Many.</value>
     <comment>legacy_id=2501</comment>
   </data>
   <data name="You may continue to use the strengthener power." xml:space="preserve">
@@ -9250,7 +9250,7 @@
     <comment>legacy_id=2611</comment>
   </data>
   <data name="Not applicable to Master level." xml:space="preserve">
-    <value>Nie dotyczy poziomu Master.</value>
+    <value>Nie dotyczy poziomu mistrzowskiego.</value>
     <comment>legacy_id=2612</comment>
   </data>
   <data name="Only characters who are level 15 or above may enter Santa's Village." xml:space="preserve">
@@ -9430,7 +9430,7 @@
     <comment>legacy_id=2685</comment>
   </data>
   <data name="Vulcanus" xml:space="preserve">
-    <value>Wulkan</value>
+    <value>Vulcanus</value>
     <comment>legacy_id=2686</comment>
   </data>
   <data name="%s is now invited to duel." xml:space="preserve">
@@ -9442,7 +9442,7 @@
     <comment>legacy_id=2688</comment>
   </data>
   <data name="Duel Finished. You will be warped back to the viallage in %d seconds." xml:space="preserve">
-    <value>Pojedynek zakończony. Za %d sekund zostaniesz przeniesiony z powrotem do viallage.</value>
+    <value>Pojedynek zakończony. Za %d sekund zostaniesz przeniesiony z powrotem do wioski.</value>
     <comment>legacy_id=2689</comment>
   </data>
   <data name="Duel Invite" xml:space="preserve">
@@ -9506,7 +9506,7 @@
     <comment>legacy_id=2706</comment>
   </data>
   <data name="Too many people in the colossum." xml:space="preserve">
-    <value>Za dużo ludzi w kolosie.</value>
+    <value>Za dużo ludzi w Koloseum.</value>
     <comment>legacy_id=2707</comment>
   </data>
   <data name="+10~+15 When upgrading level item please put it in combination window." xml:space="preserve">
@@ -9570,7 +9570,7 @@
     <comment>legacy_id=2726</comment>
   </data>
   <data name="Increases your luck to create Cape of Emperor." xml:space="preserve">
-    <value>Zwiększa twoje szczęście przy tworzeniu Przylądka Cesarskiego.</value>
+    <value>Zwiększa twoje szczęście przy tworzeniu Cape of Emperor.</value>
     <comment>legacy_id=2727</comment>
   </data>
   <data name="Only increases Master level exp." xml:space="preserve">
@@ -9802,7 +9802,7 @@
     <comment>legacy_id=2796</comment>
   </data>
   <data name="Will you show me the order?" xml:space="preserve">
-    <value>Pokażesz mi zamówienie?</value>
+    <value>Pokażesz mi rozkaz?</value>
     <comment>legacy_id=2797</comment>
   </data>
   <data name="EntryTime2798" xml:space="preserve">
@@ -9814,7 +9814,7 @@
     <comment>legacy_id=2800</comment>
   </data>
   <data name="Fortress of Empire Guardians Round %d" xml:space="preserve">
-    <value>Twierdza Strażników Imperium Okrągła %d</value>
+    <value>Fortress of Empire Guardians runda %d</value>
     <comment>legacy_id=2801</comment>
   </data>
   <data name="has been cleared." xml:space="preserve">
@@ -9830,11 +9830,11 @@
     <comment>legacy_id=2804</comment>
   </data>
   <data name="Round %d (Zone %d)" xml:space="preserve">
-    <value>Okrągły %d (strefa %d)</value>
+    <value>Runda %d (strefa %d)</value>
     <comment>legacy_id=2805</comment>
   </data>
   <data name="Varka" xml:space="preserve">
-    <value>Warka</value>
+    <value>Varka</value>
     <comment>legacy_id=2806</comment>
   </data>
   <data name="Requirements" xml:space="preserve">
@@ -10050,7 +10050,7 @@
     <comment>legacy_id=2882</comment>
   </data>
   <data name="My W Coin : %s" xml:space="preserve">
-    <value>Moja moneta W: %s</value>
+    <value>Moje WCoin: %s</value>
     <comment>legacy_id=2883</comment>
   </data>
   <data name="Goblin Points : %s" xml:space="preserve">
@@ -10062,7 +10062,7 @@
     <comment>legacy_id=2885</comment>
   </data>
   <data name="Use" xml:space="preserve">
-    <value>Używać</value>
+    <value>Użyj</value>
     <comment>legacy_id=2887</comment>
   </data>
   <data name="Gift Inventory" xml:space="preserve">
@@ -10178,7 +10178,7 @@
     <comment>legacy_id=2921</comment>
   </data>
   <data name="Use Confirmation" xml:space="preserve">
-    <value>Użyj potwierdzenia</value>
+    <value>Potwierdzenie użycia</value>
     <comment>legacy_id=2922</comment>
   </data>
   <data name="DoYouWishToUseS" xml:space="preserve">
@@ -10186,11 +10186,11 @@
     <comment>legacy_id=2923</comment>
   </data>
   <data name="Item Used" xml:space="preserve">
-    <value>Przedmiot używany</value>
+    <value>Przedmiot użyty</value>
     <comment>legacy_id=2924</comment>
   </data>
   <data name="The item has been used." xml:space="preserve">
-    <value>Przedmiot był używany.</value>
+    <value>Przedmiot został użyty.</value>
     <comment>legacy_id=2925</comment>
   </data>
   <data name="Unable to Use" xml:space="preserve">
@@ -10246,7 +10246,7 @@
     <comment>legacy_id=2939</comment>
   </data>
   <data name="Recharge W Coin" xml:space="preserve">
-    <value>Naładuj W Monetę</value>
+    <value>Doładuj WCoin</value>
     <comment>legacy_id=2940</comment>
   </data>
   <data name="Update Information" xml:space="preserve">
@@ -10314,7 +10314,7 @@
     <comment>legacy_id=2962</comment>
   </data>
   <data name="You can receive this item only from a PC cafe." xml:space="preserve">
-    <value>Ten przedmiot możesz otrzymać wyłącznie w kawiarni komputerowej.</value>
+    <value>Ten przedmiot możesz otrzymać wyłącznie w PC Cafe.</value>
     <comment>legacy_id=2963</comment>
   </data>
   <data name="An active Color Plan exists in the selected period." xml:space="preserve">
@@ -10454,7 +10454,7 @@
     <comment>legacy_id=2997</comment>
   </data>
   <data name="Parties are not activated within a Battle Zone." xml:space="preserve">
-    <value>Strony nie są aktywowane w Strefie Bitwy.</value>
+    <value>Grupy nie są aktywne w Strefie Bitwy.</value>
     <comment>legacy_id=2998</comment>
   </data>
   <data name="Fee: 5,000 Zens" xml:space="preserve">
@@ -10466,7 +10466,7 @@
     <comment>legacy_id=3000</comment>
   </data>
   <data name="Christine" xml:space="preserve">
-    <value>Krystyna</value>
+    <value>Christine</value>
     <comment>legacy_id=3001</comment>
   </data>
   <data name="Raul" xml:space="preserve">
@@ -10526,7 +10526,7 @@
     <comment>legacy_id=3015</comment>
   </data>
   <data name="Warp3016" xml:space="preserve">
-    <value>Osnowa</value>
+    <value>Warp</value>
     <comment>legacy_id=3016</comment>
   </data>
   <data name="Loren Market" xml:space="preserve">
@@ -10614,11 +10614,11 @@
     <comment>legacy_id=3042,3650</comment>
   </data>
   <data name="%s W Coin" xml:space="preserve">
-    <value>%s W Moneta</value>
+    <value>%s WCoin</value>
     <comment>legacy_id=3043</comment>
   </data>
   <data name="%d W Coin" xml:space="preserve">
-    <value>%d W Moneta</value>
+    <value>%d WCoin</value>
     <comment>legacy_id=3044</comment>
   </data>
   <data name="Quantity: %d / Duration: %s" xml:space="preserve">
@@ -10642,7 +10642,7 @@
     <comment>legacy_id=3049</comment>
   </data>
   <data name="W Coin: %s Coins" xml:space="preserve">
-    <value>W Moneta: Monety %s</value>
+    <value>WCoin: %s</value>
     <comment>legacy_id=3050</comment>
   </data>
   <data name="You can only open MU Item Shop in a town or safe zone." xml:space="preserve">
@@ -10678,7 +10678,7 @@
     <comment>legacy_id=3058</comment>
   </data>
   <data name="PC Cafe Bonus" xml:space="preserve">
-    <value>Bonus w kawiarni PC</value>
+    <value>Bonus PC Cafe</value>
     <comment>legacy_id=3059</comment>
   </data>
   <data name="EXP10IncreasePCCafeChaos" xml:space="preserve">
@@ -10690,7 +10690,7 @@
     <comment>legacy_id=3061</comment>
   </data>
   <data name=" PC Cafe" xml:space="preserve">
-    <value>Kawiarnia PC</value>
+    <value>PC Cafe</value>
     <comment>legacy_id=3062</comment>
   </data>
   <data name="You cannot engage in duels while in Loren Market." xml:space="preserve">
@@ -10750,7 +10750,7 @@
     <comment>legacy_id=3078</comment>
   </data>
   <data name="Devil Square Lv.%lu Point x %lu/%lu" xml:space="preserve">
-    <value>Diabelski kwadrat Lv.%lu Punkt x %lu/%lu</value>
+    <value>Devil Square Lv.%lu Punkt x %lu/%lu</value>
     <comment>legacy_id=3079</comment>
   </data>
   <data name="Devil Square Lv.%lu Cleared" xml:space="preserve">
@@ -10794,7 +10794,7 @@
     <comment>legacy_id=3091</comment>
   </data>
   <data name="Duprian" xml:space="preserve">
-    <value>Dupriana</value>
+    <value>Duprian</value>
     <comment>legacy_id=3092</comment>
   </data>
   <data name="Vanert" xml:space="preserve">
@@ -10838,7 +10838,7 @@
     <comment>legacy_id=3103</comment>
   </data>
   <data name="GrandDukeDukeMarquisCountViscount" xml:space="preserve">
-    <value>Wielki Książę#Duke#Markiz#Hrabia#Wicehrabia#Baron#Dowódca Rycerza#Najwyższy Rycerz#Rycerz#Prefekt Straży#Oficer#Porucznik#Sierżant#Szeregowy</value>
+    <value>Wielki Książę#Książę#Markiz#Hrabia#Wicehrabia#Baron#Dowódca Rycerza#Najwyższy Rycerz#Rycerz#Prefekt Straży#Oficer#Porucznik#Sierżant#Szeregowy</value>
     <comment>legacy_id=3104</comment>
   </data>
   <data name="Can enter the Monday - Saturday map." xml:space="preserve">
@@ -10906,7 +10906,7 @@
     <comment>legacy_id=3121</comment>
   </data>
   <data name="Charm item" xml:space="preserve">
-    <value>Urok przedmiotu</value>
+    <value>Przedmiot typu Charm</value>
     <comment>legacy_id=3122</comment>
   </data>
   <data name="Relic item" xml:space="preserve">
@@ -10994,7 +10994,7 @@
     <comment>legacy_id=3143</comment>
   </data>
   <data name="W Coin(P)" xml:space="preserve">
-    <value>Moneta W (P)</value>
+    <value>WCoin (P)</value>
     <comment>legacy_id=3144</comment>
   </data>
   <data name="My W Coin(P) : %s" xml:space="preserve">
@@ -11034,7 +11034,7 @@
     <comment>legacy_id=3153</comment>
   </data>
   <data name="Beast Uppercut (Mana: %d)" xml:space="preserve">
-    <value>Podbródek Bestii (Mana: %d)</value>
+    <value>Uppercut Bestii (Mana: %d)</value>
     <comment>legacy_id=3154</comment>
   </data>
   <data name="Melee Damage: %d%%" xml:space="preserve">
@@ -11162,7 +11162,7 @@
     <comment>legacy_id=3277</comment>
   </data>
   <data name="Enemy Gens Member x %lu/%lu" xml:space="preserve">
-    <value>Członek wrogiej generacji x %lu/%lu</value>
+    <value>Członek wrogiego Gens x %lu/%lu</value>
     <comment>legacy_id=3278</comment>
   </data>
   <data name="You cannot accept any more quest." xml:space="preserve">
@@ -11186,11 +11186,11 @@
     <comment>legacy_id=3283</comment>
   </data>
   <data name="The same type seal is already in use." xml:space="preserve">
-    <value>Uszczelnienie tego samego typu jest już w użyciu.</value>
+    <value>Pieczęć tego samego typu jest już używana.</value>
     <comment>legacy_id=3284</comment>
   </data>
   <data name="Karutan" xml:space="preserve">
-    <value>Karutana</value>
+    <value>Karutan</value>
     <comment>legacy_id=3285</comment>
   </data>
   <data name="YouCannotUseTheTalismanOf" xml:space="preserve">
@@ -11262,7 +11262,7 @@
     <comment>legacy_id=3302</comment>
   </data>
   <data name="Unequippble items cannot be combined." xml:space="preserve">
-    <value>Niewyposażonych przedmiotów nie można łączyć.</value>
+    <value>Przedmiotów, których nie można założyć, nie można łączyć.</value>
     <comment>legacy_id=3303</comment>
   </data>
   <data name="Jewel used for reinforcing a Lucky Item." xml:space="preserve">
@@ -11314,7 +11314,7 @@
     <comment>legacy_id=3316</comment>
   </data>
   <data name="Lower Refining Stone" xml:space="preserve">
-    <value>Dolny Refining Stone</value>
+    <value>Niższy Refining Stone</value>
     <comment>legacy_id=3317</comment>
   </data>
   <data name="Higher Refining Stone" xml:space="preserve">
@@ -11322,7 +11322,7 @@
     <comment>legacy_id=3318</comment>
   </data>
   <data name="Are you sure you want to dissolve" xml:space="preserve">
-    <value>Czy na pewno chcesz się rozpuścić</value>
+    <value>Czy na pewno chcesz rozwiązać</value>
     <comment>legacy_id=3319</comment>
   </data>
   <data name="%s +%d?" xml:space="preserve">
@@ -11342,7 +11342,7 @@
     <comment>legacy_id=3323,3451</comment>
   </data>
   <data name="You can't buy W coin while in full screen mode." xml:space="preserve">
-    <value>W trybie pełnoekranowym nie można kupić monety W.</value>
+    <value>W trybie pełnoekranowym nie można kupić WCoin.</value>
     <comment>legacy_id=3324</comment>
   </data>
   <data name="You lack %d points." xml:space="preserve">
@@ -11674,7 +11674,7 @@
     <comment>legacy_id=3415</comment>
   </data>
   <data name="Hot Key" xml:space="preserve">
-    <value>Gorący klucz</value>
+    <value>Klawisz skrótu</value>
     <comment>legacy_id=3416</comment>
   </data>
   <data name="Chatting Mode Hot Key" xml:space="preserve">
@@ -11766,7 +11766,7 @@
     <comment>legacy_id=3444</comment>
   </data>
   <data name="Move" xml:space="preserve">
-    <value>Przenosić</value>
+    <value>Przenieś</value>
     <comment>legacy_id=3445</comment>
   </data>
   <data name="F" xml:space="preserve">
@@ -11790,7 +11790,7 @@
     <comment>legacy_id=3450</comment>
   </data>
   <data name="You must purchase Expanded Inventory first." xml:space="preserve">
-    <value>Najpierw musisz kupić rozszerzony asortyment.</value>
+    <value>Najpierw musisz kupić Rozszerzony Ekwipunek.</value>
     <comment>legacy_id=3452</comment>
   </data>
   <data name="Store Name" xml:space="preserve">
@@ -11874,11 +11874,11 @@
     <comment>legacy_id=3504,3542</comment>
   </data>
   <data name="Add" xml:space="preserve">
-    <value>Dodać</value>
+    <value>Dodaj</value>
     <comment>legacy_id=3505</comment>
   </data>
   <data name="Potion" xml:space="preserve">
-    <value>Napój</value>
+    <value>Mikstura</value>
     <comment>legacy_id=3507</comment>
   </data>
   <data name="Long-Distance Counter Attack" xml:space="preserve">
@@ -12346,11 +12346,11 @@
     <comment>legacy_id=3631</comment>
   </data>
   <data name="Acheron" xml:space="preserve">
-    <value>Acherona</value>
+    <value>Acheron</value>
     <comment>legacy_id=3632</comment>
   </data>
   <data name="Arca War" xml:space="preserve">
-    <value>Wojna Arki</value>
+    <value>Arca War</value>
     <comment>legacy_id=3633</comment>
   </data>
   <data name="Arca War results" xml:space="preserve">
@@ -12374,7 +12374,7 @@
     <comment>legacy_id=3638</comment>
   </data>
   <data name="Water Tower" xml:space="preserve">
-    <value>Wieża Ciśnień</value>
+    <value>Wieża Wody</value>
     <comment>legacy_id=3639</comment>
   </data>
   <data name="Earth Tower" xml:space="preserve">
@@ -12414,23 +12414,23 @@
     <comment>legacy_id=3661</comment>
   </data>
   <data name="Slot of Anger (1)" xml:space="preserve">
-    <value>Szczelina Gniewu (1)</value>
+    <value>Gniazdo Gniewu (1)</value>
     <comment>legacy_id=3662</comment>
   </data>
   <data name="Slot of Blessing (2)" xml:space="preserve">
-    <value>Szczelina błogosławieństwa (2)</value>
+    <value>Gniazdo Błogosławieństwa (2)</value>
     <comment>legacy_id=3663</comment>
   </data>
   <data name="Slot of Integrity (3)" xml:space="preserve">
-    <value>Szczelina integralności (3)</value>
+    <value>Gniazdo Integralności (3)</value>
     <comment>legacy_id=3664</comment>
   </data>
   <data name="Slot of Divinity (4)" xml:space="preserve">
-    <value>Szczelina Boskości (4)</value>
+    <value>Gniazdo Boskości (4)</value>
     <comment>legacy_id=3665</comment>
   </data>
   <data name="Slot of Gale (5)" xml:space="preserve">
-    <value>Szczelina Wichury (5)</value>
+    <value>Gniazdo Wichury (5)</value>
     <comment>legacy_id=3666</comment>
   </data>
   <data name="No information regarding Errtel. (DB:%d)" xml:space="preserve">
@@ -12718,7 +12718,7 @@
     <comment>legacy_id=3754</comment>
   </data>
   <data name="Monster wings" xml:space="preserve">
-    <value>Monster wings</value>
+    <value>Skrzydła potwora</value>
     <comment>legacy_id=3755</comment>
   </data>
   <data name="Monster wings ingredient" xml:space="preserve">
@@ -12878,7 +12878,7 @@
     <comment>legacy_id=3809</comment>
   </data>
   <data name="Level: %u | Resets: %u" xml:space="preserve">
-    <value>Poziom: %u | Resetuje: %u</value>
+    <value>Poziom: %u | Resety: %u</value>
     <comment>legacy_id=3810</comment>
   </data>
   <data name="BasicAttackFallback" xml:space="preserve">
