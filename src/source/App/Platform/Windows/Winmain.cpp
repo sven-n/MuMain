@@ -33,6 +33,7 @@
 
 #include "App/Platform/Windows/resource.h"
 #include "Core/Platform/Imm.h"
+#include "Core/Platform/BundledFonts.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -1293,19 +1294,67 @@ namespace
         return { FontHeight - 1, fixFontHeight - 1 };
     }
 
-    HFONT CreateTahoma(int size, int weight)
+#ifdef _WIN32
+    // Absolute path of a bundled font file (relative to ./fonts) next to the exe.
+    // The curated names in kBundledFonts are ASCII, so the byte-wise widen is safe.
+    std::wstring BundledFontFullPath(const char* relative)
     {
+        wchar_t exePath[MAX_PATH] = {};
+        GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+        std::wstring path(exePath);
+        path.resize(path.find_last_of(L"\\/") + 1);   // keep the directory + separator
+        while (*relative)
+            path.push_back(static_cast<wchar_t>(static_cast<unsigned char>(*relative++)));
+        return path;
+    }
+#endif
+
+    // Privately register the TTFs bundled in ./fonts so GDI resolves their face
+    // names even when they are not installed system-wide — parity with the Linux
+    // GdiText shim, which reads ./fonts directly. FR_PRIVATE scopes the faces to
+    // this process, leaving the system font list untouched. No-op off Windows,
+    // where bundled fonts are resolved by GdiText. Shares the kBundledFonts table.
+    void RegisterBundledFonts()
+    {
+#ifdef _WIN32
+        for (const auto& font : kBundledFonts)
+        {
+            AddFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
+            AddFontResourceExW(BundledFontFullPath(font.bold).c_str(),    FR_PRIVATE, nullptr);
+        }
+#endif
+    }
+
+    // Mirrors RegisterBundledFonts so the process leaves no private faces behind.
+    void UnregisterBundledFonts()
+    {
+#ifdef _WIN32
+        for (const auto& font : kBundledFonts)
+        {
+            RemoveFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
+            RemoveFontResourceExW(BundledFontFullPath(font.bold).c_str(),    FR_PRIVATE, nullptr);
+        }
+#endif
+    }
+
+    HFONT CreateUIFont(int size, int weight)
+    {
+        // UI font family from config ([UI] Font); empty keeps the built-in
+        // "Tahoma" default. On Windows GDI honors this face name directly; on
+        // Linux the GdiText shim resolves it via fontconfig (Core/Platform/GdiText.cpp).
+        std::wstring sel = GameConfig::GetInstance().GetFontSelection();
+        const wchar_t* face = sel.empty() ? L"Tahoma" : sel.c_str();
         return CreateFont(size, 0, 0, 0, weight, 0, 0, 0, DEFAULT_CHARSET,
                           OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY,
-                          DEFAULT_PITCH | FF_DONTCARE, L"Tahoma");
+                          DEFAULT_PITCH | FF_DONTCARE, face);
     }
 
     void CreateNewFonts(FontSizes sizes)
     {
-        g_hFont     = CreateTahoma(sizes.uiFontSize, FW_NORMAL);
-        g_hFontBold = CreateTahoma(sizes.uiFontSize, FW_SEMIBOLD);
-        g_hFontBig  = CreateTahoma(sizes.uiFontSize * 2, FW_SEMIBOLD);
-        g_hFixFont  = CreateTahoma(sizes.fixFontSize, FW_NORMAL);
+        g_hFont     = CreateUIFont(sizes.uiFontSize, FW_NORMAL);
+        g_hFontBold = CreateUIFont(sizes.uiFontSize, FW_SEMIBOLD);
+        g_hFontBig  = CreateUIFont(sizes.uiFontSize * 2, FW_SEMIBOLD);
+        g_hFixFont  = CreateUIFont(sizes.fixFontSize, FW_NORMAL);
     }
 
     void ReinitializeTextRenderer()
@@ -1617,6 +1666,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         SetTargetFps(-1); // unlimited
     }
 
+    // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
+    // so a chosen curated font works even without a system-wide install.
+    RegisterBundledFonts();
     CreateNewFonts(CalculateFontSizes());
 
     // Log which UI font was resolved now that the fonts have been created (the
@@ -1730,6 +1782,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // are still alive; the static destructor runs too late (after KillGLWindow).
     g_MuEditorCore.Shutdown();
 #endif
+    UnregisterBundledFonts();   // mirror the startup registration
     KillGLWindow();
     DestroyWindow();
 

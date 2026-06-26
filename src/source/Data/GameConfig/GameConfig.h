@@ -54,6 +54,10 @@ public:
     std::wstring GetUILocale() const { return m_uiLocale; }
     void SetUILocale(const std::wstring& locale);
 
+    // UI font family name (GDI face name). Empty = platform default.
+    std::wstring GetFontSelection() const { return m_fontSelection; }
+    void SetFontSelection(const std::wstring& font);
+
     // Camera
     int GetZoom() const { return m_zoom; }
     void SetZoom(int zoom);
@@ -88,6 +92,7 @@ private:
     int m_serverPort;
 
     std::wstring m_uiLocale;
+    std::wstring m_fontSelection;
 
     int m_zoom;
 

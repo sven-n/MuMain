@@ -10959,4 +10959,10 @@
     <value>JEWELのご購入は、ウィンドウモ?ドでご利用いただくか、一度プログラムを終了してください。</value>
     <comment>legacy_id=3324</comment>
   </data>
+  <data name="Font" xml:space="preserve">
+    <value>フォント</value>
+  </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>デフォルト</value>
+  </data>
 </root>

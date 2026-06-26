@@ -12905,4 +12905,10 @@
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Retrying in %d seconds...</value>
   </data>
+  <data name="Font" xml:space="preserve">
+    <value>Font</value>
+  </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>Default</value>
+  </data>
 </root>
