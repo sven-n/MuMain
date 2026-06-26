@@ -129,7 +129,7 @@
     <comment>legacy_id=1571</comment>
   </data>
   <data name="Text_58" xml:space="preserve">
-    <value>Można odnaleźć magiczne artefakty zwane 'Broken Sword', 'Tear of Elf' i 'Soul of Wizard'. 'Broken Sword' został ofiarowany przez Mrocznych Rycerzy jako symbol ich odwagi, lojalności i pragnienia pomyślności.</value>
+    <value>Można odnaleźć magiczne artefakty zwane 'Broken Sword', 'Tear of Elf' i 'Soul of Wizard'. 'Broken Sword' został ofiarowany przez Dark Knightów jako symbol ich odwagi, lojalności i pragnienia pomyślności.</value>
     <comment>legacy_id=58</comment>
   </data>
   <data name="Answer_58_Slot_0" xml:space="preserve">
@@ -141,7 +141,7 @@
     <comment>legacy_id=1581</comment>
   </data>
   <data name="Text_59" xml:space="preserve">
-    <value>'Soul of Wizard' została ofiarowana przez Mrocznych Czarodziejów jako symbol ich przysięgi, że użyją swej mocy dla pokoju i wolności imperium. Rok 10 ery MU, fragment zapisu upamiętniającego pokój...</value>
+    <value>'Soul of Wizard' została ofiarowana przez Dark Wizardów jako symbol ich przysięgi, że użyją swej mocy dla pokoju i wolności imperium. Rok 10 ery MU, fragment zapisu upamiętniającego pokój...</value>
     <comment>legacy_id=59</comment>
   </data>
   <data name="Answer_59_Slot_0" xml:space="preserve">
@@ -153,7 +153,7 @@
     <comment>legacy_id=1591</comment>
   </data>
   <data name="Text_60" xml:space="preserve">
-    <value>Jeśli przeczytałeś 'Scroll of the Emperor', odszukaj 'Broken Sword', którego starożytni Dark Knights użyli podczas upamiętnienia pokoju. Z tego, co słyszałem, kilku Mrocznych Rycerzy znalazło go w Atlans, Lost Tower i Tarkanie.</value>
+    <value>Jeśli przeczytałeś 'Scroll of the Emperor', odszukaj 'Broken Sword', którego starożytni Dark Knights użyli podczas upamiętnienia pokoju. Z tego, co słyszałem, kilku Dark Knightów znalazło go w Atlans, Lost Tower i Tarkanie.</value>
     <comment>legacy_id=60</comment>
   </data>
   <data name="Answer_60_Slot_0" xml:space="preserve">
@@ -173,7 +173,7 @@
     <comment>legacy_id=1610</comment>
   </data>
   <data name="Text_62" xml:space="preserve">
-    <value>Dzielny Mroczny Rycerzu, odnalazłeś 'Broken Sword'! Po zjednoczeniu kontynentu MU, Muren pierwszy cesarz, złamał swój miecz 'Apocalypse' na znak pragnienia, by nigdy więcej nie wybuchła wojna.</value>
+    <value>Dzielny Dark Knight, odnalazłeś 'Broken Sword'! Po zjednoczeniu kontynentu MU, Muren pierwszy cesarz, złamał swój miecz 'Apocalypse' na znak pragnienia, by nigdy więcej nie wybuchła wojna.</value>
     <comment>legacy_id=62</comment>
   </data>
   <data name="Answer_62_Slot_0" xml:space="preserve">
@@ -237,7 +237,7 @@
     <comment>legacy_id=1690</comment>
   </data>
   <data name="Text_70" xml:space="preserve">
-    <value>Mroczny Czarodziej z tym magicznym kamieniem staje się Soul Masterem.</value>
+    <value>Dark Wizard z tym magicznym kamieniem staje się Soul Masterem.</value>
     <comment>legacy_id=70</comment>
   </data>
   <data name="Answer_70_Slot_0" xml:space="preserve">
@@ -345,7 +345,7 @@
     <comment>legacy_id=1811</comment>
   </data>
   <data name="Text_82" xml:space="preserve">
-    <value>Odnajdź 'Soul of Wizard'. Wedle starożytnych Mrocznych Czarodziejów ostatnio widziano ją w okolicach Lost Tower, Atlans i Tarkanu.</value>
+    <value>Odnajdź 'Soul of Wizard'. Wedle starożytnych Dark Wizardów ostatnio widziano ją w okolicach Lost Tower, Atlans i Tarkanu.</value>
     <comment>legacy_id=82</comment>
   </data>
   <data name="Answer_82_Slot_0" xml:space="preserve">
@@ -809,7 +809,7 @@
     <comment>legacy_id=2590</comment>
   </data>
   <data name="Text_160" xml:space="preserve">
-    <value>Dokładne informacje o 'Barrack' każą wejść do strefy Barrack, by zmniejszyć groźbę dalszego rozrostu armii Balgassa.</value>
+    <value>Dokładne informacje o 'Barrack' skłaniają do wejścia do strefy Barrack, by zmniejszyć groźbę dalszego rozrostu armii Balgassa.</value>
     <comment>legacy_id=160</comment>
   </data>
   <data name="Answer_160_Slot_0" xml:space="preserve">
