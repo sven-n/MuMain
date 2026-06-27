@@ -195,6 +195,9 @@ bool CNewUIMixInventory::UpdateMouseEvent()
     {
         if (SEASON3B::IsPress(VK_RBUTTON))
         {
+            // Right-click on a craft-box item sends it back to the inventory (mirror of the
+            // inventory -> craft-box right-click move).
+            ProcessMixItemAutoMoveToInventory();
             MouseRButton = false;
             MouseRButtonPop = false;
             MouseRButtonPush = false;
@@ -967,6 +970,102 @@ bool CNewUIMixInventory::InventoryProcess()
         }
     }
     return false;
+}
+
+bool CNewUIMixInventory::ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl)
+{
+    if (CNewUIInventoryCtrl::GetPickedItem())
+        return false;
+
+    if (m_pNewInventoryCtrl == nullptr || GetMixState() != MIX_READY)
+        return false;
+
+    if (sourceCtrl == nullptr)
+    {
+        if (g_pMyInventory == nullptr)
+            return false;
+
+        sourceCtrl = g_pMyInventory->GetInventoryCtrl();
+    }
+
+    if (sourceCtrl == nullptr || sourceCtrl->GetStorageType() != STORAGE_TYPE::INVENTORY)
+        return false;
+
+    ITEM* pItemObj = sourceCtrl->FindItemAtPt(MouseX, MouseY);
+    if (pItemObj == nullptr || !g_MixRecipeMgr.IsMixSource(pItemObj))
+        return false;
+
+    const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItemObj->Type];
+    const int iTargetIndex = m_pNewInventoryCtrl->FindEmptySlot(pItemAttr->Width, pItemAttr->Height);
+    if (iTargetIndex < 0 || !m_pNewInventoryCtrl->CanMove(iTargetIndex, pItemObj))
+        return false;
+
+    if (!CNewUIInventoryCtrl::CreatePickedItem(sourceCtrl, pItemObj))
+        return false;
+
+    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    if (pPickedItem == nullptr)
+        return false;
+
+    sourceCtrl->RemoveItem(pItemObj);
+    pPickedItem->HidePickedItem();
+
+    const int iSourceIndex = pPickedItem->GetSourceLinealPos();
+    const STORAGE_TYPE iCurInventory = g_MixRecipeMgr.GetMixInventoryEquipmentIndex();
+    if (!SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, iCurInventory, iTargetIndex))
+    {
+        CNewUIInventoryCtrl::BackupPickedItem();
+        return false;
+    }
+
+    PlayBuffer(SOUND_GET_ITEM01);
+    return true;
+}
+
+bool CNewUIMixInventory::ProcessMixItemAutoMoveToInventory()
+{
+    if (CNewUIInventoryCtrl::GetPickedItem())
+        return false;
+
+    if (m_pNewInventoryCtrl == nullptr || GetMixState() != MIX_READY)
+        return false;
+
+    ITEM* pItemObj = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
+    if (pItemObj == nullptr)
+        return false;
+
+    if (g_pMyInventory == nullptr)
+        return false;
+
+    CNewUIInventoryCtrl* pInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+    if (pInventoryCtrl == nullptr)
+        return false;
+
+    const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItemObj->Type];
+    const int iTargetIndex = pInventoryCtrl->FindEmptySlot(pItemAttr->Width, pItemAttr->Height);
+    if (iTargetIndex < 0 || !pInventoryCtrl->CanMove(iTargetIndex, pItemObj))
+        return false;
+
+    if (!CNewUIInventoryCtrl::CreatePickedItem(m_pNewInventoryCtrl, pItemObj))
+        return false;
+
+    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    if (pPickedItem == nullptr)
+        return false;
+
+    m_pNewInventoryCtrl->RemoveItem(pItemObj);
+    pPickedItem->HidePickedItem();
+
+    const int iSourceIndex = pPickedItem->GetSourceLinealPos();
+    const STORAGE_TYPE iCurInventory = g_MixRecipeMgr.GetMixInventoryEquipmentIndex();
+    if (!SendRequestEquipmentItem(iCurInventory, iSourceIndex, pItemObj, STORAGE_TYPE::INVENTORY, iTargetIndex))
+    {
+        CNewUIInventoryCtrl::BackupPickedItem();
+        return false;
+    }
+
+    PlayBuffer(SOUND_GET_ITEM01);
+    return true;
 }
 
 void CNewUIMixInventory::CheckMixInventory()
