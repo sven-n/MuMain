@@ -981,7 +981,12 @@ bool CNewUIMixInventory::ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceC
         return false;
 
     if (sourceCtrl == nullptr)
+    {
+        if (g_pMyInventory == nullptr)
+            return false;
+
         sourceCtrl = g_pMyInventory->GetInventoryCtrl();
+    }
 
     if (sourceCtrl == nullptr || sourceCtrl->GetStorageType() != STORAGE_TYPE::INVENTORY)
         return false;
@@ -1022,11 +1027,14 @@ bool CNewUIMixInventory::ProcessMixItemAutoMoveToInventory()
     if (CNewUIInventoryCtrl::GetPickedItem())
         return false;
 
-    if (m_pNewInventoryCtrl == nullptr)
+    if (m_pNewInventoryCtrl == nullptr || GetMixState() != MIX_READY)
         return false;
 
     ITEM* pItemObj = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
     if (pItemObj == nullptr)
+        return false;
+
+    if (g_pMyInventory == nullptr)
         return false;
 
     CNewUIInventoryCtrl* pInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
@@ -1035,7 +1043,7 @@ bool CNewUIMixInventory::ProcessMixItemAutoMoveToInventory()
 
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItemObj->Type];
     const int iTargetIndex = pInventoryCtrl->FindEmptySlot(pItemAttr->Width, pItemAttr->Height);
-    if (iTargetIndex < 0)
+    if (iTargetIndex < 0 || !pInventoryCtrl->CanMove(iTargetIndex, pItemObj))
         return false;
 
     if (!CNewUIInventoryCtrl::CreatePickedItem(m_pNewInventoryCtrl, pItemObj))
