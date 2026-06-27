@@ -56,6 +56,7 @@ namespace SEASON3B
 
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
         bool ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl = nullptr);
+        bool ProcessMixItemAutoMoveToInventory();
         void DeleteItem(int iIndex);
         void DeleteAllItems();
 
