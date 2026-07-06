@@ -6117,6 +6117,8 @@ std::unordered_set<int> yellowTextItems = {
     MODEL_BOX_OF_LUCK,
     MODEL_FRUITS,
     MODEL_SPIRIT,
+    MODEL_EVENT + 14,
+    MODEL_EVENT + 15,
     MODEL_EVENT + 16,
     MODEL_EVENT + 5,
     MODEL_OLD_SCROLL,
@@ -6519,7 +6521,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     {
         SetDescriptorOrangeTextColor(descriptor);
     }
-    else if (o->Type == MODEL_ORB_OF_SUMMONING)
+    if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
         SetDescriptorGrayTextColor(descriptor);
         FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, I18N::Game::Jewel);
@@ -6701,7 +6703,6 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else if (o->Type == MODEL_EVENT + 14)
     {
-        SetDescriptorYellowTextColor(descriptor);
         switch (ItemLevel)
         {
         case 2:
@@ -6717,7 +6718,6 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else if (o->Type == MODEL_EVENT + 15)
     {
-        SetDescriptorYellowTextColor(descriptor);
         CopyGroundItemLabelText(descriptor.Name, I18N::Game::RingOfWizard);
     }
     else if (o->Type == MODEL_TRANSFORMATION_RING)
