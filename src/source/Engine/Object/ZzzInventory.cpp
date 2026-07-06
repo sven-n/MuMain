@@ -6117,8 +6117,6 @@ std::unordered_set<int> yellowTextItems = {
     MODEL_BOX_OF_LUCK,
     MODEL_FRUITS,
     MODEL_SPIRIT,
-    MODEL_EVENT + 14,
-    MODEL_EVENT + 15,
     MODEL_EVENT + 16,
     MODEL_EVENT + 5,
     MODEL_OLD_SCROLL,
@@ -6128,7 +6126,8 @@ std::unordered_set<int> yellowTextItems = {
     MODEL_EVENT + 11,
     MODEL_EVENT + 12,
     MODEL_EVENT + 13,
-
+    MODEL_EVENT + 14,
+    MODEL_EVENT + 15,
     MODEL_SUSPICIOUS_SCRAP_OF_PAPER,
     MODEL_GAIONS_ORDER,
     MODEL_FIRST_SECROMICON_FRAGMENT,
