@@ -6126,8 +6126,7 @@ std::unordered_set<int> yellowTextItems = {
     MODEL_EVENT + 11,
     MODEL_EVENT + 12,
     MODEL_EVENT + 13,
-    MODEL_EVENT + 14,
-    MODEL_EVENT + 15,
+
     MODEL_SUSPICIOUS_SCRAP_OF_PAPER,
     MODEL_GAIONS_ORDER,
     MODEL_FIRST_SECROMICON_FRAGMENT,
@@ -6485,18 +6484,22 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     descriptor.TextColor = MakeRgba(255, 255, 255, 255);
     descriptor.BgColor = MakeRgba(0, 0, 0, 255);
 
-    // Use the item name by default
-    if (o->Type == MODEL_ZEN) // Zen
+    // Use the item name by default, only when o->Type is in MODEL_ITEM range
+    // Items with special types (e.g. MODEL_EVENT + N) are handled by overrides below
+    if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM)
     {
-        FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
-    }
-    else if (ItemLevel == 0)
-    {
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else
-    {
-        FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        if (o->Type == MODEL_ZEN) // Zen
+        {
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        }
+        else if (ItemLevel == 0)
+        {
+            CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        }
+        else
+        {
+            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        }
     }
 
     if (boldTextItems.count(o->Type) > 0)
@@ -6698,6 +6701,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else if (o->Type == MODEL_EVENT + 14)
     {
+        SetDescriptorYellowTextColor(descriptor);
         switch (ItemLevel)
         {
         case 2:
@@ -6713,6 +6717,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     }
     else if (o->Type == MODEL_EVENT + 15)
     {
+        SetDescriptorYellowTextColor(descriptor);
         CopyGroundItemLabelText(descriptor.Name, I18N::Game::RingOfWizard);
     }
     else if (o->Type == MODEL_TRANSFORMATION_RING)
