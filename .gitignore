@@ -39,5 +39,23 @@ build-mingw/
 **/imgui.ini
 
 **/*.log
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Local build outputs
+/out/
+/build_validation/
+src/graphify-out/
+
+# Local agent/tool state
+.claude/
+.paw/
+
+# Interrupted editor/temp files
+.!*
+**/.!*
+
 # Local-only files
 docs/reviews/
