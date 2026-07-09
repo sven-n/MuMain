@@ -1179,6 +1179,44 @@ void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned i
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
+void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness, unsigned int argbColor)
+{
+    DisableTexture();
+
+    x1 = ConvertX(x1);
+    y1 = ConvertY(y1);
+    x2 = ConvertX(x2);
+    y2 = ConvertY(y2);
+    y1 = WindowHeight - y1;
+    y2 = WindowHeight - y2;
+
+    const float dx = x2 - x1;
+    const float dy = y2 - y1;
+    const float len = sqrtf(dx * dx + dy * dy);
+    if (len < 1e-6f)
+    {
+        return;
+    }
+
+    const float halfT = thickness * 0.5f;
+    const float ox = -dy / len * halfT;
+    const float oy = dx / len * halfT;
+
+    const GLubyte alpha = static_cast<GLubyte>((argbColor >> 24) & 0xffu);
+    const GLubyte red = static_cast<GLubyte>((argbColor >> 16) & 0xffu);
+    const GLubyte green = static_cast<GLubyte>((argbColor >> 8) & 0xffu);
+    const GLubyte blue = static_cast<GLubyte>(argbColor & 0xffu);
+
+    glColor4ub(red, green, blue, alpha);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(x1 + ox, y1 + oy);
+    glVertex2f(x1 - ox, y1 - oy);
+    glVertex2f(x2 - ox, y2 - oy);
+    glVertex2f(x2 + ox, y2 + oy);
+    glEnd();
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, unsigned int color)
 {
     x = ConvertX(x);

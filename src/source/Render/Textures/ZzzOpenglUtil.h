@@ -100,6 +100,7 @@ float RenderNumber2D(float x, float y, int Num, float Width, float Height);
 void RenderColor(float x, float y, float Width, float Height, float Alpha = 0.f, int Flag = 0);
 void EndRenderColor();
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor);
+void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness, unsigned int argbColor);
 void RenderBitmap(int Texture, float x, float y, float Width, float Height, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, bool Scale = true, bool StartScale = true, float Alpha = 0.f);
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, unsigned int color = 0xffffffff);
 void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Angle, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);

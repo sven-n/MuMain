@@ -11311,55 +11311,22 @@ void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
 {
     RenderBitmap(BITMAP_INVENTORY + 18, x - 1, y - 1, (float)SizeX + 2, (float)SizeY + 2, 0.f, 0.f, SizeX / 32.f, SizeY / 30.f);
 
-    BITMAP_t* b = &Bitmaps[BITMAP_GUILD];
-
-    int Width, Height;
-
-    Width = (int)b->Width;
-    Height = (int)b->Height;
-    BYTE* Buffer = b->Buffer;
-    unsigned int Color = MarkColor[Index];
-
     if (Index == 0)
     {
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                *((unsigned int*)(Buffer)) = 255 << 24;
-                Buffer += 4;
-            }
-        }
-        Color = (255 << 24) + (128 << 16) + (128 << 8) + (128);
-        Buffer = b->Buffer;
-        for (int i = 0; i < 8; i++)
-        {
-            *((unsigned int*)(Buffer)) = Color;
-            Buffer += 8 * 4 + 4;
-        }
-        Buffer = b->Buffer + 7 * 4;
-        for (int i = 0; i < 8; i++)
-        {
-            *((unsigned int*)(Buffer)) = Color;
-            Buffer += 8 * 4 - 4;
-        }
+        const unsigned int black = (255u << 24);
+        const unsigned int gray = (255u << 24) | (128u << 16) | (128u << 8) | 128u;
+        const float fx = x;
+        const float fy = y;
+        const float fw = (float)SizeX;
+        const float fh = (float)SizeY;
+        RenderColorQuadARGB(fx, fy, fw, fh, black);
+        RenderColorLineARGB(fx, fy, fx + fw, fy + fh, 2.0f, gray);
+        RenderColorLineARGB(fx + fw, fy, fx, fy + fh, 2.0f, gray);
     }
     else
     {
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                *((unsigned int*)(Buffer)) = Color;
-                Buffer += 4;
-            }
-        }
+        RenderColorQuadARGB(x, y, (float)SizeX, (float)SizeY, MarkColor[Index]);
     }
-
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, b->Components, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
-    RenderBitmap(BITMAP_GUILD, x, y, (float)SizeX, (float)SizeY);
 }
 
 void RenderGuildList(int StartX, int StartY)
