@@ -23,7 +23,7 @@ void PacketFunctions_ChatServer::SendAuthenticate(uint16_t roomId, const BYTE* t
     dotnet_SendAuthenticate(this->GetHandle(), roomId, token, tokenByteLength);
 }
 
-void PacketFunctions_ChatServer::SendChatRoomClientJoined(BYTE clientIndex, const wchar_t* name)
+void PacketFunctions_ChatServer::SendChatRoomClientJoined(BYTE clientIndex, const char16_t* name)
 {
     dotnet_SendChatRoomClientJoined(this->GetHandle(), clientIndex, name);
 }
@@ -33,7 +33,7 @@ void PacketFunctions_ChatServer::SendLeaveChatRoom()
     dotnet_SendLeaveChatRoom(this->GetHandle());
 }
 
-void PacketFunctions_ChatServer::SendChatRoomClientLeft(BYTE clientIndex, const wchar_t* name)
+void PacketFunctions_ChatServer::SendChatRoomClientLeft(BYTE clientIndex, const char16_t* name)
 {
     dotnet_SendChatRoomClientLeft(this->GetHandle(), clientIndex, name);
 }
