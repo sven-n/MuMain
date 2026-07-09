@@ -1128,6 +1128,12 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
     p[2][0] = x + Width; p[2][1] = y - Height;
     p[3][0] = x + Width; p[3][1] = y;
 
+    const bool useDefaultDarkFill = Alpha <= 0.f;
+    if (useDefaultDarkFill)
+    {
+        glColor4f(0.f, 0.f, 0.f, 0.8f);
+    }
+
     glBegin(GL_TRIANGLE_FAN);
     for (int i = 0; i < 4; i++)
     {
@@ -1146,6 +1152,11 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
         }
     }
     glEnd();
+
+    if (useDefaultDarkFill)
+    {
+        glColor4f(1.f, 1.f, 1.f, 1.f);
+    }
 }
 void EndRenderColor()
 {

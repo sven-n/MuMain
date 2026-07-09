@@ -1487,7 +1487,8 @@ void RenderFace_After(int Texture, int mx, int my)
 
 void RenderFaceAlpha(int Texture, int mx, int my)
 {
-    EnableAlphaTest();
+    DisableDepthTest();
+    EnableAlphaBlend3();
     BindTexture(BITMAP_MAPTILE + Texture);
     glBegin(GL_TRIANGLE_FAN);
     VertexAlpha0();
@@ -1495,6 +1496,7 @@ void RenderFaceAlpha(int Texture, int mx, int my)
     VertexAlpha2();
     VertexAlpha3();
     glEnd();
+    EnableDepthTest();
 }
 
 void RenderFaceBlend(int Texture, int mx, int my)

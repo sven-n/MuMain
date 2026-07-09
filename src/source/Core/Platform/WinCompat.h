@@ -56,7 +56,9 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* text)
         return result;
     }
 
-    for (const wchar_t* p = text; *p; ++p)
+    constexpr size_t kMaxInputCodepoints = 4096;
+    size_t codepoints = 0;
+    for (const wchar_t* p = text; *p && codepoints < kMaxInputCodepoints; ++p, ++codepoints)
     {
         const char32_t ch = static_cast<char32_t>(*p);
         if (ch <= 0xFFFF)

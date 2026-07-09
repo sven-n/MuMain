@@ -3537,7 +3537,12 @@ BOOL CUIFriendListTabWindow::HandleMessage()
     case UI_MESSAGE_TXTRETURN:
         if (m_WorkMessage.m_iParam2 != 0)
         {
-            wchar_t* pText = (wchar_t*)m_WorkMessage.m_iParam2;
+            auto* pText = reinterpret_cast<wchar_t*>(m_WorkMessage.m_iParam2);
+            const uintptr_t addr = reinterpret_cast<uintptr_t>(pText);
+            if (addr < 0x100000ULL || addr >= 0x800000000000ULL)
+            {
+                break;
+            }
             SocketClient->ToGameServer()->SendFriendAddRequest(pText);
             delete[] pText;
         }
@@ -4995,9 +5000,14 @@ void CUITextInputWindow::RenderSub()
 void CUITextInputWindow::ReturnText()
 {
     wchar_t* pszReturnText = new wchar_t[MAX_TEXT_LENGTH + 1];
-    m_TextInputBox.GetText(pszReturnText);
+    pszReturnText[0] = L'\0';
+    m_TextInputBox.GetText(pszReturnText, MAX_TEXT_LENGTH + 1);
     m_TextInputBox.SetText(NULL);
-    if (pszReturnText[0] == '\0') return;
+    if (pszReturnText[0] == L'\0')
+    {
+        delete[] pszReturnText;
+        return;
+    }
 
     g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), reinterpret_cast<LONG_PTR>(pszReturnText));
     g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);

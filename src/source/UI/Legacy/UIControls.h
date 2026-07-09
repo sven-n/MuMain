@@ -880,6 +880,10 @@ public:
     // SDL event loop routes text/edit keys to it and starts/stops SDL text input
     // based on whether one is focused (issue #447).
     static CUITextInputBox* GetFocusedPortable() { return s_pFocusedPortable; }
+    static bool IsAnyInputBoxFocused()
+    {
+        return s_pFocusedPortable != nullptr && s_pFocusedPortable->m_iState != UISTATE_HIDE;
+    }
 
     // Release keyboard focus from the focused portable field (counterpart to
     // GiveFocus()); the field stays visible. Defined in the .cpp.

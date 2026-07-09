@@ -3048,7 +3048,14 @@ CUITextInputBox::CUITextInputBox()
 CUITextInputBox::~CUITextInputBox()
 {
     if (s_pFocusedPortable == this)
+    {
+        if (g_dwKeyFocusUIID == GetUIID())
+        {
+            g_dwKeyFocusUIID = 0;
+        }
         s_pFocusedPortable = nullptr;
+        m_composition.clear();
+    }
 }
 
 void CUITextInputBox::GetText(wchar_t* pszText, int iGetLength)
@@ -3118,6 +3125,10 @@ void CUITextInputBox::SetState(int iState)
     // routing input to an invisible field.
     if (m_iState == UISTATE_HIDE && s_pFocusedPortable == this)
     {
+        if (g_dwKeyFocusUIID == GetUIID())
+        {
+            g_dwKeyFocusUIID = 0;
+        }
         s_pFocusedPortable = nullptr;
         m_composition.clear();
     }
