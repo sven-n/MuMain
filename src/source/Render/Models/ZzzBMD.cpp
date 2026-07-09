@@ -1873,13 +1873,7 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
 
     int iBlendMesh = BlendMesh;
     BeginRender(Alpha);
-    if (!LightEnable)
-    {
-        if (Alpha >= 0.99f)
-            glColor3fv(BodyLight);
-        else
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-    }
+    (void)LightEnable;
     for (int i = 0; i < NumMeshs; i++)
     {
         iBlendMesh = BlendMesh;
@@ -1899,24 +1893,14 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
                 if (shadowType == SHADOW_RENDER_COLOR)
                 {
                     DisableAlphaBlend();
-                    if (Alpha >= 0.99f)
-                        glColor3f(0.f, 0.f, 0.f);
-                    else
-                        glColor4f(0.f, 0.f, 0.f, Alpha);
 
                     RenderMesh(i, RENDER_COLOR | RENDER_SHADOWMAP, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV);
-                    glColor3f(1.f, 1.f, 1.f);
                 }
                 else if (shadowType == SHADOW_RENDER_TEXTURE)
                 {
                     DisableAlphaBlend();
-                    if (Alpha >= 0.99f)
-                        glColor3f(0.f, 0.f, 0.f);
-                    else
-                        glColor4f(0.f, 0.f, 0.f, Alpha);
 
                     RenderMesh(i, RENDER_TEXTURE | RENDER_SHADOWMAP, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV);
-                    glColor3f(1.f, 1.f, 1.f);
                 }
             }
         }
@@ -1936,13 +1920,7 @@ void BMD::RenderBodyAlternative(int iRndExtFlag, int iParam, int Flag, float Alp
     if (NumMeshs == 0) return;
 
     BeginRender(Alpha);
-    if (!LightEnable)
-    {
-        if (Alpha >= 0.99f)
-            glColor3fv(BodyLight);
-        else
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-    }
+    (void)LightEnable;
     for (int i = 0; i < NumMeshs; i++)
     {
         if (i != HiddenMesh)
@@ -2189,13 +2167,7 @@ void BMD::RenderBodyTranslate(int Flag, float Alpha, int BlendMesh, float BlendM
     if (NumMeshs == 0) return;
 
     BeginRender(Alpha);
-    if (!LightEnable)
-    {
-        if (Alpha >= 0.99f)
-            glColor3fv(BodyLight);
-        else
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-    }
+    (void)LightEnable;
     for (int i = 0; i < NumMeshs; i++)
     {
         if (i != HiddenMesh)
