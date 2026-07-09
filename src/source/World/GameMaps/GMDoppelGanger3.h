@@ -10,7 +10,7 @@ public:
     static CGMDoppelGanger3Ptr Make();
     virtual ~CGMDoppelGanger3();
 
-public:	// Object
+public: // Object
     // 오브젝트 생성
     virtual bool CreateObject(OBJECT* o);
     // 오브젝트 프로세서
@@ -22,7 +22,7 @@ public:	// Object
     // 맵 관련 오브젝트 이펙트
     virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
 
-public:	// Character
+public: // Character
     // 몬스터 생성
     virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     // 몬스터(NPC) 프로세서

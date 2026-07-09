@@ -12,8 +12,6 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 
-
-
 CGMDuelArenaPtr CGMDuelArena::Make()
 {
     CGMDuelArenaPtr duelarena(new CGMDuelArena);
@@ -21,28 +19,24 @@ CGMDuelArenaPtr CGMDuelArena::Make()
     return duelarena;
 }
 
-CGMDuelArena::CGMDuelArena()
-{
-}
+CGMDuelArena::CGMDuelArena() {}
 
 CGMDuelArena::~CGMDuelArena()
 {
     Destroy();
 }
 
-void CGMDuelArena::Init()
-{
-}
+void CGMDuelArena::Init() {}
 
-void CGMDuelArena::Destroy()
-{
-}
+void CGMDuelArena::Destroy() {}
 
 bool CGMDuelArena::CreateObject(OBJECT* o)
 {
     switch (o->Type)
     {
-    case 0: case 1: case 32:
+    case 0:
+    case 1:
+    case 32:
         o->CollisionRange = -300;
         return true;
     }
@@ -174,9 +168,7 @@ bool CGMDuelArena::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGMDuelArena::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
-{
-}
+void CGMDuelArena::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon) {}
 
 bool IsDuelArena()
 {
@@ -219,9 +211,7 @@ bool CGMDuelArena::PlayMonsterSound(OBJECT* o)
     return false;
 }
 
-void CGMDuelArena::PlayObjectSound(OBJECT* o)
-{
-}
+void CGMDuelArena::PlayObjectSound(OBJECT* o) {}
 
 void CGMDuelArena::PlayBGM()
 {

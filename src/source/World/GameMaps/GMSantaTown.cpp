@@ -11,8 +11,6 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
 
-
-
 CGMSantaTownPtr CGMSantaTown::Make()
 {
     CGMSantaTownPtr santatown(new CGMSantaTown);
@@ -20,29 +18,26 @@ CGMSantaTownPtr CGMSantaTown::Make()
     return santatown;
 }
 
-CGMSantaTown::CGMSantaTown()
-{
-}
+CGMSantaTown::CGMSantaTown() {}
 
 CGMSantaTown::~CGMSantaTown()
 {
     Destroy();
 }
 
-void CGMSantaTown::Init()
-{
-}
+void CGMSantaTown::Init() {}
 
-void CGMSantaTown::Destroy()
-{
-}
+void CGMSantaTown::Destroy() {}
 
 bool CGMSantaTown::CreateObject(OBJECT* o)
 {
     switch (o->Type)
     {
-    case 21: case 18:
-    case 19: case 12: case 13:
+    case 21:
+    case 18:
+    case 19:
+    case 12:
+    case 13:
     case 25:
         o->CollisionRange = -300;
         return true;
@@ -126,11 +121,15 @@ bool CGMSantaTown::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
     case 16:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
         Vector(0.0f, 0.5f, 0.5f, b->BodyLight);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
         return true;
     }
@@ -189,9 +188,7 @@ bool CGMSantaTown::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGMSantaTown::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
-{
-}
+void CGMSantaTown::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon) {}
 
 bool CGMSantaTown::CreateSnow(PARTICLE* o)
 {
@@ -206,9 +203,8 @@ bool CGMSantaTown::CreateSnow(PARTICLE* o)
         o->Scale = 12.f;
     }
     Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
-        Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
-        Hero->Object.Position[2] + (float)(rand() % 200 + 200),
-        o->Position);
+           Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
+           Hero->Object.Position[2] + (float)(rand() % 200 + 200), o->Position);
     Vector(-20.f, 0.f, 0.f, o->Angle);
     vec3_t Velocity;
     Vector(0.f, 0.f, -(float)(rand() % 8 + 4), Velocity);
@@ -273,9 +269,7 @@ bool CGMSantaTown::PlayMonsterSound(OBJECT* o)
     return false;
 }
 
-void CGMSantaTown::PlayObjectSound(OBJECT* o)
-{
-}
+void CGMSantaTown::PlayObjectSound(OBJECT* o) {}
 
 void CGMSantaTown::PlayBGM()
 {

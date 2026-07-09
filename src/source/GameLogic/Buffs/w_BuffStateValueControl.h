@@ -7,9 +7,9 @@ class BuffStateValueControl
 private:
     struct BuffStateValueInfo
     {
-        DWORD    s_Value1;
-        DWORD    s_Value2;
-        DWORD    s_Time;
+        DWORD s_Value1;
+        DWORD s_Value2;
+        DWORD s_Time;
 
         BuffStateValueInfo() : s_Value1(0), s_Value2(0), s_Time(0) {}
     };
@@ -31,8 +31,8 @@ private:
     BuffStateValueControl();
 
 private:
-    typedef std::map<eBuffState, BuffStateValueInfo>  BuffStateValueMap;
+    typedef std::map<eBuffState, BuffStateValueInfo> BuffStateValueMap;
 
 private:
-    BuffStateValueMap				m_BuffStateValue;
+    BuffStateValueMap m_BuffStateValue;
 };

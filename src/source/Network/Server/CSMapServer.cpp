@@ -28,8 +28,8 @@ constexpr std::chrono::milliseconds kReconnectDelay(20);
 
 std::uint32_t GetCurrentTickMilliseconds()
 {
-    const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now().time_since_epoch());
+    const auto now =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
     return static_cast<std::uint32_t>(now.count());
 }
 } // namespace
@@ -91,10 +91,8 @@ void CSMServer::GetServerAddress(wchar_t* szAddress)
         return;
     }
 
-    CMultiLanguage::ConvertFromUtf8(
-        szAddress,
-        m_serverInfo.m_szMapSvrIpAddress.data(),
-        static_cast<int>(kIpAddressLength));
+    CMultiLanguage::ConvertFromUtf8(szAddress, m_serverInfo.m_szMapSvrIpAddress.data(),
+                                    static_cast<int>(kIpAddressLength));
 }
 
 extern BOOL g_bGameServerConnected;
@@ -113,11 +111,9 @@ void CSMServer::ConnectChangeMapServer(MServerInfo sInfo)
 
     std::this_thread::sleep_for(kReconnectDelay);
 
-    std::array<wchar_t, kIpAddressLength> ipAddress {};
-    CMultiLanguage::ConvertFromUtf8(
-        ipAddress.data(),
-        m_serverInfo.m_szMapSvrIpAddress.data(),
-        static_cast<int>(kIpAddressLength));
+    std::array<wchar_t, kIpAddressLength> ipAddress{};
+    CMultiLanguage::ConvertFromUtf8(ipAddress.data(), m_serverInfo.m_szMapSvrIpAddress.data(),
+                                    static_cast<int>(kIpAddressLength));
 
     if (CreateSocket(ipAddress.data(), m_serverInfo.m_wMapSvrPort))
     {
@@ -135,7 +131,7 @@ void CSMServer::SendChangeMapServer(void)
     constexpr std::size_t kCharacterIdLength = MAX_USERNAME_SIZE + 1;
     constexpr std::size_t kPacketBufferLength = MAX_USERNAME_SIZE + 2;
 
-    std::array<wchar_t, kCharacterIdLength> characterIdBuffer {};
+    std::array<wchar_t, kCharacterIdLength> characterIdBuffer{};
 
     const std::size_t heroIdCopyLength = std::min<std::size_t>(m_heroId.size(), MAX_USERNAME_SIZE);
     std::wmemcpy(characterIdBuffer.data(), m_heroId.c_str(), heroIdCopyLength);
@@ -144,25 +140,16 @@ void CSMServer::SendChangeMapServer(void)
     ClearCharacters(-1);
     InitGame();
 
-    std::array<wchar_t, kPacketBufferLength> loginIdBuffer {};
-    std::array<wchar_t, kPacketBufferLength> characterPacketBuffer {};
+    std::array<wchar_t, kPacketBufferLength> loginIdBuffer{};
+    std::array<wchar_t, kPacketBufferLength> characterPacketBuffer{};
 
     // TODO: Populate loginIdBuffer with LogInID if credentials are required again.
     std::wmemcpy(characterPacketBuffer.data(), characterIdBuffer.data(), heroIdCopyLength + 1);
 
     BuxConvert(reinterpret_cast<BYTE*>(loginIdBuffer.data()), kPacketBufferLength);
     SocketClient->ToGameServer()->SendServerChangeAuthentication(
-        reinterpret_cast<BYTE*>(loginIdBuffer.data()),
-        MAX_USERNAME_SIZE,
-        reinterpret_cast<BYTE*>(characterPacketBuffer.data()),
-        MAX_USERNAME_SIZE,
-        m_serverInfo.m_iJoinAuthCode1,
-        m_serverInfo.m_iJoinAuthCode2,
-        m_serverInfo.m_iJoinAuthCode3,
-        m_serverInfo.m_iJoinAuthCode4,
-        GetCurrentTickMilliseconds(),
-        Version,
-        SIZE_PROTOCOLVERSION,
-        Serial,
-        SIZE_PROTOCOLSERIAL);
+        reinterpret_cast<BYTE*>(loginIdBuffer.data()), MAX_USERNAME_SIZE,
+        reinterpret_cast<BYTE*>(characterPacketBuffer.data()), MAX_USERNAME_SIZE, m_serverInfo.m_iJoinAuthCode1,
+        m_serverInfo.m_iJoinAuthCode2, m_serverInfo.m_iJoinAuthCode3, m_serverInfo.m_iJoinAuthCode4,
+        GetCurrentTickMilliseconds(), Version, SIZE_PROTOCOLVERSION, Serial, SIZE_PROTOCOLSERIAL);
 }

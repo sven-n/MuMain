@@ -13,7 +13,7 @@ public:
     static GMEmpireGuardian1Ptr Make();
     virtual ~GMEmpireGuardian1();
 
-public:	// Object
+public: // Object
     virtual bool CreateObject(OBJECT* o);
     virtual bool MoveObject(OBJECT* o);
     virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
@@ -22,7 +22,7 @@ public:	// Object
     virtual void RenderFrontSideVisual();
     bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
 
-public:	// Character
+public: // Character
     virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
@@ -41,7 +41,7 @@ public:
     void Init();
     void Destroy();
 
-public: //Weather
+public: // Weather
     enum WEATHER_TYPE
     {
         WEATHER_SUN = 0,
@@ -52,8 +52,14 @@ public: //Weather
 
     bool CreateRain(PARTICLE* o);
 
-    void SetWeather(int weather) { m_iWeather = weather; }
-    int GetWeather() { return m_iWeather; }
+    void SetWeather(int weather)
+    {
+        m_iWeather = weather;
+    }
+    int GetWeather()
+    {
+        return m_iWeather;
+    }
 
 private:
     int m_iWeather;

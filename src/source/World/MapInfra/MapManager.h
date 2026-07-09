@@ -3,7 +3,6 @@
 
 #pragma once
 
-
 enum ENUM_WORLD
 {
     WD_0LORENCIA = 0,
@@ -92,6 +91,7 @@ public:
     bool IsEmpireGuardian();
     bool InBattleCastle(int iMap = -1);
     const wchar_t* GetMapName(int iMap);
+
 public:
     int WorldActive;
 };

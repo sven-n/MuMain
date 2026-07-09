@@ -28,7 +28,7 @@ public:
     static CGMKarutan1Ptr Make();
 
     // Object
-        // 오브젝트 생성
+    // 오브젝트 생성
     virtual bool CreateObject(OBJECT* o);
     // 오브젝트 프로세서
     virtual bool MoveObject(OBJECT* o);
@@ -41,7 +41,7 @@ public:
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
     // Character
-        // 몬스터 생성
+    // 몬스터 생성
     virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     // 몬스터(NPC) 프로세서
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
@@ -55,9 +55,9 @@ public:
     virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
     // Sound
-        // 몬스터 사운드
+    // 몬스터 사운드
     virtual bool PlayMonsterSound(OBJECT* o);
-#endif	// ASG_ADD_KARUTAN_MONSTERS
+#endif // ASG_ADD_KARUTAN_MONSTERS
     // 오브젝트 사운드
     virtual void PlayObjectSound(OBJECT* o);
     // 배경음악
@@ -66,6 +66,6 @@ public:
 
 extern bool IsKarutanMap();
 
-#endif	// ASG_ADD_MAP_KARUTAN
+#endif // ASG_ADD_MAP_KARUTAN
 
 #endif // !defined(AFX_GMKARUTAN1_H__A2F56C80_26D8_4474_AECE_63DA2DA511A9__INCLUDED_)

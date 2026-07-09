@@ -21,6 +21,7 @@ PetActionCollecterPtr PetActionCollecter::Make()
     return temp;
 }
 
+// cppcheck-suppress uninitMemberVarPrivate
 PetActionCollecter::PetActionCollecter()
 {
     m_isRooting = false;
@@ -34,9 +35,7 @@ PetActionCollecter::PetActionCollecter()
     m_fRadWidthGet = 0.0f;
 }
 
-PetActionCollecter::~PetActionCollecter()
-{
-}
+PetActionCollecter::~PetActionCollecter() {}
 
 bool PetActionCollecter::Release(OBJECT* obj, CHARACTER* Owner)
 {
@@ -47,14 +46,16 @@ bool PetActionCollecter::Release(OBJECT* obj, CHARACTER* Owner)
 
 bool PetActionCollecter::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    if (NULL == obj || NULL == Owner) return FALSE;
+    if (NULL == obj || NULL == Owner)
+        return FALSE;
 
     return false;
 }
 
 bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    if (NULL == obj || NULL == Owner) return FALSE;
+    if (NULL == obj || NULL == Owner)
+        return FALSE;
 
     FindZen(obj);
 
@@ -99,7 +100,7 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
 
         if (80.0f >= FlyRange)
         {
-            float Angle = CreateAngle2D(obj->Position, targetPos); //test
+            float Angle = CreateAngle2D(obj->Position, targetPos); // test
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f * FPS_ANIMATION_FACTOR);
         }
 
@@ -127,7 +128,7 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
 
         targetPos[0] = m_RootItem.position[0] + (sinf(m_fRadWidthGet) * CIRCLE_STAND_RADIAN);
         targetPos[1] = m_RootItem.position[1] + (cosf(m_fRadWidthGet) * CIRCLE_STAND_RADIAN);
-        targetPos[2] = m_RootItem.position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
+        targetPos[2] = m_RootItem.position[2]; // + 70 + (sinf(fRadHeight) * 70.0f);
 
         VectorSubtract(targetPos, obj->Position, Range);
         //------------------------------//
@@ -135,7 +136,7 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
         Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
         if (Distance >= FlyRange)
         {
-            float Angle = CreateAngle2D(obj->Position, targetPos); //test
+            float Angle = CreateAngle2D(obj->Position, targetPos); // test
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f);
         }
 
@@ -173,9 +174,7 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
         float Angle = CreateAngle2D(obj->Position, targetPos);
         obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f);
 
-        if (CompTimeControl(1000, m_dwSendDelayTime)
-            && &Hero->Object == obj->Owner
-            && SendGetItem == -1)
+        if (CompTimeControl(1000, m_dwSendDelayTime) && &Hero->Object == obj->Owner && SendGetItem == -1)
         {
             SendGetItem = m_RootItem.itemIndex;
             SocketClient->ToGameServer()->SendPickupItemRequest(m_RootItem.itemIndex);
@@ -187,7 +186,7 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
     {
         targetPos[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
         targetPos[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
-        targetPos[2] = obj->Owner->Position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
+        targetPos[2] = obj->Owner->Position[2]; // + 70 + (sinf(fRadHeight) * 70.0f);
 
         VectorSubtract(targetPos, obj->Position, Range);
 
@@ -221,7 +220,8 @@ bool PetActionCollecter::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
 
 bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    if (NULL == obj || NULL == Owner) return FALSE;
+    if (NULL == obj || NULL == Owner)
+        return FALSE;
 
     BMD* b = &Models[obj->Type];
     vec3_t Position, vRelativePos, Light;
@@ -229,7 +229,8 @@ bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, do
     VectorCopy(obj->Position, b->BodyOrigin);
     Vector(0.f, 0.f, 0.f, vRelativePos);
 
-    b->Animation(BoneTransform, obj->AnimationFrame, obj->PriorAnimationFrame, obj->PriorAction, obj->Angle, obj->HeadAngle);
+    b->Animation(BoneTransform, obj->AnimationFrame, obj->PriorAnimationFrame, obj->PriorAction, obj->Angle,
+                 obj->HeadAngle);
 
     float fRad1 = ((Q_PI / 3000.0f) * fmodf(tick, 3000));
     float fSize = sinf(fRad1) * 0.2f;
@@ -263,7 +264,7 @@ bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, do
     Vector(1.0f, 0.1f, 0.2f, Light);
     CreateSprite(BITMAP_LIGHT, Position, (2.0f + fSize), Light, obj);
 
-    int temp[] = { 19, 32, 33, 34, 35 };
+    int temp[] = {19, 32, 33, 34, 35};
     for (int i = 0; i < 5; i++)
     {
         b->TransformPosition(BoneTransform[temp[i]], vRelativePos, Position, false);
@@ -277,7 +278,8 @@ bool PetActionCollecter::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, do
 
 bool PetActionCollecter::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    if (NULL == obj || NULL == Owner) return FALSE;
+    if (NULL == obj || NULL == Owner)
+        return FALSE;
 
     switch (m_state)
     {
@@ -291,7 +293,8 @@ bool PetActionCollecter::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, dou
 
 void PetActionCollecter::FindZen(OBJECT* obj)
 {
-    if (NULL == obj || true == m_isRooting) return;
+    if (NULL == obj || true == m_isRooting)
+        return;
 
     float dx, dy, dl;
 
@@ -310,7 +313,7 @@ void PetActionCollecter::FindZen(OBJECT* obj)
 
         if (SEARCH_LENGTH > dl)
         {
-            //if( -1 == g_pMyInventory->FindEmptySlot(&Items[i].Item) && Items[i].Item.Type != ITEM_POTION+15 )
+            // if( -1 == g_pMyInventory->FindEmptySlot(&Items[i].Item) && Items[i].Item.Type != ITEM_POTION+15 )
             if (Items[i].Item.Type != ITEM_ZEN)
             {
                 continue;

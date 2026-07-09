@@ -40,6 +40,7 @@ public:
     bool ReceiveMapMessage(BYTE code, BYTE subcode, BYTE* ReceiveBuffer);
 
 public:
+    // cppcheck-suppress unknownMacro
     void Register(Smart_Ptr(BaseMap) pMap);
     void UnRegister(ENUM_WORLD type);
 
@@ -54,10 +55,10 @@ private:
     MapProcess();
 
 private:
-    typedef std::list< Smart_Ptr(BaseMap) >		MapList;
+    typedef std::list<Smart_Ptr(BaseMap)> MapList;
 
 private:
-    MapList				m_MapList;
+    MapList m_MapList;
 };
 
 extern MapProcessPtr g_MapProcess;

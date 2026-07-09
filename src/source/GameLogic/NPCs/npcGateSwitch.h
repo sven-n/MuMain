@@ -16,20 +16,20 @@
 //  INCLUDE.
 //////////////////////////////////////////////////////////////////////////
 
-namespace   npcGateSwitch
+namespace npcGateSwitch
 {
-    //////////////////////////////////////////////////////////////////////////
-    //  FUNCTION.
-    //////////////////////////////////////////////////////////////////////////
-    void    GateOpen(CHARACTER* c, OBJECT* o);
-    void    GateClose(CHARACTER* c, OBJECT* o);
-    void    DoInterfaceOpen(int Key);
-    void    ProcessState(int Key, BYTE GateOnOff, BYTE State);
+//////////////////////////////////////////////////////////////////////////
+//  FUNCTION.
+//////////////////////////////////////////////////////////////////////////
+void GateOpen(CHARACTER* c, OBJECT* o);
+void GateClose(CHARACTER* c, OBJECT* o);
+void DoInterfaceOpen(int Key);
+void ProcessState(int Key, BYTE GateOnOff, BYTE State);
 
-    void	SendToggleGate();	// 성문 닫기/열기 패킷 전송
-    bool	IsGateOpened();		// 성문이 열려 있나
-};
+void SendToggleGate(); // 성문 닫기/열기 패킷 전송
+bool IsGateOpened();   // 성문이 열려 있나
+}; // namespace npcGateSwitch
 
 using namespace npcGateSwitch;
 
-#endif// __NPC_GATE_SWITCH_H__
+#endif // __NPC_GATE_SWITCH_H__

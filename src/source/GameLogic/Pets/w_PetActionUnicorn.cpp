@@ -17,6 +17,7 @@ PetActionUnicornPtr PetActionUnicorn::Make()
     return temp;
 }
 
+// cppcheck-suppress uninitMemberVarPrivate
 PetActionUnicorn::PetActionUnicorn()
 {
     m_isRooting = false;
@@ -32,9 +33,7 @@ PetActionUnicorn::PetActionUnicorn()
     m_speed = 0;
 }
 
-PetActionUnicorn::~PetActionUnicorn()
-{
-}
+PetActionUnicorn::~PetActionUnicorn() {}
 
 bool PetActionUnicorn::Release(OBJECT* obj, CHARACTER* Owner)
 {
@@ -45,14 +44,16 @@ bool PetActionUnicorn::Release(OBJECT* obj, CHARACTER* Owner)
 
 bool PetActionUnicorn::Model(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    if (NULL == obj || NULL == Owner) return FALSE;
+    if (NULL == obj || NULL == Owner)
+        return FALSE;
 
     return false;
 }
 
 bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    if (NULL == obj || NULL == Owner) return FALSE;
+    if (NULL == obj || NULL == Owner)
+        return FALSE;
 
     FindZen(obj);
 
@@ -109,7 +110,7 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double
 
         if (80.0f >= FlyRange)
         {
-            float Angle = CreateAngle2D(obj->Position, targetPos); //test
+            float Angle = CreateAngle2D(obj->Position, targetPos); // test
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 8.0f * FPS_ANIMATION_FACTOR);
         }
 
@@ -146,14 +147,14 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double
 
         targetPos[0] = m_RootItem.position[0] + (sinf(m_fRadWidthGet) * CIRCLE_STAND_RADIAN);
         targetPos[1] = m_RootItem.position[1] + (cosf(m_fRadWidthGet) * CIRCLE_STAND_RADIAN);
-        targetPos[2] = m_RootItem.position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
+        targetPos[2] = m_RootItem.position[2]; // + 70 + (sinf(fRadHeight) * 70.0f);
 
         VectorSubtract(targetPos, obj->Position, Range);
 
         Distance = sqrtf(Range[0] * Range[0] + Range[1] * Range[1]);
         if (Distance >= FlyRange)
         {
-            float Angle = CreateAngle2D(obj->Position, targetPos); //test
+            float Angle = CreateAngle2D(obj->Position, targetPos); // test
             obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 20.0f * FPS_ANIMATION_FACTOR);
         }
 
@@ -195,9 +196,7 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double
         obj->Angle[2] = TurnAngle2(obj->Angle[2], Angle, 10.0f * FPS_ANIMATION_FACTOR);
         //------------------------------//
 
-        if (CompTimeControl(1000, m_dwSendDelayTime)
-            && &Hero->Object == obj->Owner
-            && SendGetItem == -1)
+        if (CompTimeControl(1000, m_dwSendDelayTime) && &Hero->Object == obj->Owner && SendGetItem == -1)
         {
             SendGetItem = m_RootItem.itemIndex;
             SocketClient->ToGameServer()->SendPickupItemRequest(m_RootItem.itemIndex);
@@ -210,7 +209,7 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double
     {
         targetPos[0] = obj->Owner->Position[0] + (sinf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
         targetPos[1] = obj->Owner->Position[1] + (cosf(m_fRadWidthStand) * CIRCLE_STAND_RADIAN);
-        targetPos[2] = obj->Owner->Position[2];// + 70 + (sinf(fRadHeight) * 70.0f);
+        targetPos[2] = obj->Owner->Position[2]; // + 70 + (sinf(fRadHeight) * 70.0f);
 
         VectorSubtract(targetPos, obj->Position, Range);
 
@@ -245,7 +244,8 @@ bool PetActionUnicorn::Move(OBJECT* obj, CHARACTER* Owner, int targetKey, double
 
 bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    if (NULL == obj || NULL == Owner) return FALSE;
+    if (NULL == obj || NULL == Owner)
+        return FALSE;
 
     BMD* b = &Models[obj->Type];
     vec3_t Position, vRelativePos, Light;
@@ -253,7 +253,8 @@ bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
     VectorCopy(obj->Position, b->BodyOrigin);
     Vector(0.f, 0.f, 0.f, vRelativePos);
 
-    b->Animation(BoneTransform, obj->AnimationFrame, obj->PriorAnimationFrame, obj->PriorAction, obj->Angle, obj->HeadAngle);
+    b->Animation(BoneTransform, obj->AnimationFrame, obj->PriorAnimationFrame, obj->PriorAction, obj->Angle,
+                 obj->HeadAngle);
 
     Vector(0.f, 0.f, 0.f, vRelativePos);
     b->TransformPosition(BoneTransform[11], vRelativePos, Position, false);
@@ -284,7 +285,8 @@ bool PetActionUnicorn::Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, doub
 
 bool PetActionUnicorn::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender)
 {
-    if (NULL == obj || NULL == Owner) return FALSE;
+    if (NULL == obj || NULL == Owner)
+        return FALSE;
 
     switch (m_state)
     {
@@ -298,7 +300,8 @@ bool PetActionUnicorn::Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, doubl
 
 void PetActionUnicorn::FindZen(OBJECT* obj)
 {
-    if (NULL == obj || true == m_isRooting) return;
+    if (NULL == obj || true == m_isRooting)
+        return;
 
     float dx, dy, dl;
     bool sameItem = false;
