@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -1118,48 +1119,38 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
     Width = ConvertX(Width);
     Height = ConvertY(Height);
 
-    float p[4][2];
     y = WindowHeight - y;
 
-    p[0][0] = x; p[0][1] = y;
-    p[1][0] = x; p[1][1] = y - Height;
-    p[2][0] = x + Width; p[2][1] = y - Height;
-    p[3][0] = x + Width; p[3][1] = y;
-
-    const bool useDefaultDarkFill = Alpha <= 0.f;
-    if (useDefaultDarkFill)
+    std::uint32_t color;
+    if (Alpha > 0.f)
     {
-        glColor4f(0.f, 0.f, 0.f, 0.8f);
-    }
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        if (Alpha > 0.f)
+        const float clampedAlpha = (Alpha > 1.0f) ? 1.0f : Alpha;
+        const auto a = static_cast<std::uint32_t>(clampedAlpha * 255.0f);
+        if (Flag == 0)
         {
-            if (Flag == 0)
-                glColor4f(1.f, 1.f, 1.f, Alpha);
-            else
-                if (Flag == 1)
-                    glColor4f(0.f, 0.f, 0.f, Alpha);
+            color = (a << 24) | 0x00FFFFFFu;
         }
-        glVertex2f(p[i][0], p[i][1]);
-        if (Alpha > 0.f)
+        else
         {
-            glColor4f(1.f, 1.f, 1.f, 1.f);
+            color = (a << 24);
         }
     }
-    glEnd();
-
-    if (useDefaultDarkFill)
+    else
     {
-        glColor4f(1.f, 1.f, 1.f, 1.f);
+        color = 0xCC000000u;
     }
+
+    const mu::Vertex2D vertices[4] = {
+        {x, y, 0.0f, 0.0f, color},
+        {x, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y, 0.0f, 0.0f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
 }
 void EndRenderColor()
 {
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
 }
 
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor)
