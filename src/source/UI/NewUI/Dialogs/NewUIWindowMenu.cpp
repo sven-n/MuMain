@@ -61,7 +61,7 @@ void SEASON3B::CNewUIWindowMenu::SetPos(int x, int y)
 
 bool SEASON3B::CNewUIWindowMenu::UpdateMouseEvent()
 {
-    POINT pt = { m_Pos.x, m_Pos.y + 20 };
+    POINT pt = {m_Pos.x, m_Pos.y + 20};
 
     for (int i = 0; i < MENU_MAX_INDEX; ++i)
     {
@@ -173,8 +173,6 @@ bool SEASON3B::CNewUIWindowMenu::Render()
 {
     EnableAlphaTest();
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderFrame();
     RenderTexts();
     RenderArrow();
@@ -188,7 +186,10 @@ void SEASON3B::CNewUIWindowMenu::RenderFrame()
 {
     float x, y, width, height;
 
-    x = m_Pos.x; y = m_Pos.y; width = 112.f; height = 105 + (MENU_MAX_INDEX - 4) * 20;
+    x = m_Pos.x;
+    y = m_Pos.y;
+    width = 112.f;
+    height = 105 + (MENU_MAX_INDEX - 4) * 20;
 
     RenderBitmap(IMAGE_WINDOW_MENU_BACK, x, y, width, height, 0.f, 0.f, width / 256.f, height / 512.f);
 
@@ -223,7 +224,7 @@ void SEASON3B::CNewUIWindowMenu::RenderTexts()
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
-    int iTextNumber[] = { 1741, 1742, 364, 1743,3055,3103 };
+    int iTextNumber[] = {1741, 1742, 364, 1743, 3055, 3103};
     float y = m_Pos.y + 20.f;
     for (int i = 0; i < MENU_MAX_INDEX; ++i)
     {
@@ -271,9 +272,7 @@ void SEASON3B::CNewUIWindowMenu::OpenningProcess()
     m_iSelectedIndex = -1;
 }
 
-void SEASON3B::CNewUIWindowMenu::ClosingProcess()
-{
-}
+void SEASON3B::CNewUIWindowMenu::ClosingProcess() {}
 
 void SEASON3B::CNewUIWindowMenu::LoadImages()
 {

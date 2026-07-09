@@ -36,11 +36,7 @@ int ClampStateIndex(int state)
 
 CButton* CButton::m_pBtnHeld = nullptr;
 
-CButton::CButton()
-    : m_bEnable(true)
-    , m_bActive(true)
-    , m_bClick(false)
-    , m_bCheck(false)
+CButton::CButton() : m_bEnable(true), m_bActive(true), m_bClick(false), m_bCheck(false)
 {
     m_imageFrames.fill(-1);
 }
@@ -50,12 +46,15 @@ CButton::~CButton()
     Release();
 }
 
+// cppcheck-suppress duplInheritedMember
 void CButton::Release()
 {
     ReleaseText();
 }
 
-void CButton::Create(int nWidth, int nHeight, int nTexID, int nMaxFrame, int nDownFrame, int nActiveFrame, int nDisableFrame, int nCheckUpFrame, int nCheckDownFrame, int nCheckActiveFrame, int nCheckDisableFrame)
+void CButton::Create(int nWidth, int nHeight, int nTexID, int nMaxFrame, int nDownFrame, int nActiveFrame,
+                     int nDisableFrame, int nCheckUpFrame, int nCheckDownFrame, int nCheckActiveFrame,
+                     int nCheckDisableFrame)
 {
     Release();
 
@@ -88,6 +87,7 @@ void CButton::Create(int nWidth, int nHeight, int nTexID, int nMaxFrame, int nDo
     m_bActive = true;
 }
 
+// cppcheck-suppress duplInheritedMember
 void CButton::Show(bool bShow)
 {
     CSprite::Show(bShow);
@@ -97,6 +97,7 @@ void CButton::Show(bool bShow)
     }
 }
 
+// cppcheck-suppress duplInheritedMember
 BOOL CButton::CursorInObject()
 {
     if (!m_bActive)
@@ -173,6 +174,7 @@ void CButton::Update()
     // Button animation update is intentionally disabled (legacy behavior kept).
 }
 
+// cppcheck-suppress duplInheritedMember
 void CButton::Render()
 {
     if (!CSprite::m_bShow)
@@ -210,11 +212,9 @@ void CButton::Render()
     const float textRelativeYPos = (static_cast<float>(CSprite::GetHeight()) - size.cy) * 0.5f;
     g_pRenderText->RenderText(
         static_cast<int>(CSprite::GetXPos() / g_fScreenRate_x),
-        static_cast<int>((static_cast<float>(CSprite::GetYPos()) + textRelativeYPos) / g_fScreenRate_y + m_fTextAddYPos),
-        m_text.c_str(),
-        CSprite::GetWidth() / g_fScreenRate_x,
-        0,
-        RT3_SORT_CENTER);
+        static_cast<int>((static_cast<float>(CSprite::GetYPos()) + textRelativeYPos) / g_fScreenRate_y +
+                         m_fTextAddYPos),
+        m_text.c_str(), CSprite::GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
 }
 
 void CButton::ReleaseText()

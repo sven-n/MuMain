@@ -94,7 +94,6 @@ bool SEASON3B::CNewUIHelpWindow::Update()
 bool SEASON3B::CNewUIHelpWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Reference-bind to the global arrays in ZzzInventory.cpp. A naive
     // `extern wchar_t TextList[50][100];` here would resolve to
@@ -267,13 +266,12 @@ void SEASON3B::CNewUIHelpWindow::OpenningProcess()
     m_iIndex = 0;
 }
 
-void SEASON3B::CNewUIHelpWindow::ClosingProcess()
-{
-}
+void SEASON3B::CNewUIHelpWindow::ClosingProcess() {}
 
 void SEASON3B::CNewUIHelpWindow::AutoUpdateIndex()
 {
-    if (++m_iIndex > 1) {
+    if (++m_iIndex > 1)
+    {
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
     }
 }

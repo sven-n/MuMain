@@ -26,16 +26,22 @@ public:
     virtual ~CUIGateKeeper();
 
 protected:
-    bool		m_bPublic;
-    BYTE        m_byType;
-    int			m_nEntranceFee;
-    int         m_iViewEntranceFee;
-    int         m_iAddEntranceFee;
-    int         m_iMaxEnteranceFee;
+    bool m_bPublic;
+    BYTE m_byType;
+    int m_nEntranceFee;
+    int m_iViewEntranceFee;
+    int m_iAddEntranceFee;
+    int m_iMaxEnteranceFee;
 
 public:
-    void SetPublic(bool bPublic) { m_bPublic = bPublic; }
-    void SetEntranceFee(int nEntranceFee) { m_nEntranceFee = nEntranceFee; }
+    void SetPublic(bool bPublic)
+    {
+        m_bPublic = bPublic;
+    }
+    void SetEntranceFee(int nEntranceFee)
+    {
+        m_nEntranceFee = nEntranceFee;
+    }
     void SetInfo(BYTE byType, bool bPublic, int iEntranceFee, int iAddEntranceFee, int iMaxEntranceFee)
     {
         m_byType = byType;
@@ -45,12 +51,30 @@ public:
         m_iAddEntranceFee = iAddEntranceFee;
         m_iMaxEnteranceFee = iMaxEntranceFee;
     }
-    BYTE GetType() { return m_byType; }
-    BOOL IsPublic() { return m_bPublic; }
-    int GetEnteranceFee() { return m_nEntranceFee; }
-    int GetViewEnteranceFee() { return m_iViewEntranceFee; }
-    int GetAddEnteranceFee() { return m_iAddEntranceFee; }
-    int GetMaxEnteranceFee() { return m_iMaxEnteranceFee; }
+    BYTE GetType()
+    {
+        return m_byType;
+    }
+    BOOL IsPublic()
+    {
+        return m_bPublic;
+    }
+    int GetEnteranceFee()
+    {
+        return m_nEntranceFee;
+    }
+    int GetViewEnteranceFee()
+    {
+        return m_iViewEntranceFee;
+    }
+    int GetAddEnteranceFee()
+    {
+        return m_iAddEntranceFee;
+    }
+    int GetMaxEnteranceFee()
+    {
+        return m_iMaxEnteranceFee;
+    }
 
     void SendPublicSetting();
     void SendEnteranceFee();

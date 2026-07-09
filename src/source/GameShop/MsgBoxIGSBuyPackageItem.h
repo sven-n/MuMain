@@ -91,7 +91,7 @@ private:
 
 #ifdef LEM_FIX_WARNINGMSG_BUYITEM
     bool Add_WarningMsgBuyItem(int _nItemIndex);
-#endif	// LEM_FIX_WARNINGMSG_BUYITEM
+#endif // LEM_FIX_WARNINGMSG_BUYITEM
 
     void LoadImages();
     void UnloadImages();
@@ -100,12 +100,12 @@ private:
     CNewUIMessageBoxButton m_BtnBuy;
     CNewUIMessageBoxButton m_BtnPresent;
     CNewUIMessageBoxButton m_BtnCancel;
-    CUIBuyingListBox	m_PackageInfo;
+    CUIBuyingListBox m_PackageInfo;
 
-    int		m_iPackageSeq;
-    int		m_iDisplaySeq;
-    WORD	m_wItemCode;
-    int		m_iCashType;
+    int m_iPackageSeq;
+    int m_iDisplaySeq;
+    WORD m_wItemCode;
+    int m_iCashType;
 
     wchar_t m_szPackageName[MAX_TEXT_LENGTH];
     wchar_t m_szPrice[MAX_TEXT_LENGTH];

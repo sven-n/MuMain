@@ -23,7 +23,7 @@ class CMsgBoxIGSUseItemConfirm : public CNewUIMessageBoxBase
 public:
     enum IMAGE_IGS_USEITEM_CONFIRM
     {
-        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,				// 인게임샵 버튼
+        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON, // 인게임샵 버튼
         IMAGE_IGS_BACK = CNewUIOptionWindow::IMAGE_OPTION_FRAME_BACK,
         IMAGE_IGS_UP = CNewUIOptionWindow::IMAGE_OPTION_FRAME_UP,
         IMAGE_IGS_DOWN = CNewUIOptionWindow::IMAGE_OPTION_FRAME_DOWN,
@@ -33,25 +33,25 @@ public:
 
     enum IMAGE_IGS_USEITEM_CONFIRM_SIZE
     {
-        IMAGE_IGS_WINDOW_WIDTH = 640,	// 인게임샵 배경 사이즈
+        IMAGE_IGS_WINDOW_WIDTH = 640, // 인게임샵 배경 사이즈
         IMAGE_IGS_WINDOW_HEIGHT = 429,
-        IMAGE_IGS_FRAME_WIDTH = 190,	// 메세지박스 Size
+        IMAGE_IGS_FRAME_WIDTH = 190, // 메세지박스 Size
         IMAGE_IGS_FRAME_HEIGHT = 179,
         IMAGE_IGS_UP_HEIGHT = 64,
         IMAGE_IGS_DOWN_HEIGHT = 45,
         IMAGE_IGS_LINE_WIDTH = 21,
         IMAGE_IGS_LINE_HEIGHT = 10,
-        IMAGE_IGS_BTN_WIDTH = 52,		// 버튼 Size
+        IMAGE_IGS_BTN_WIDTH = 52, // 버튼 Size
         IMAGE_IGS_BTN_HEIGHT = 26,
     };
 
     // 메세지박스상의 상대좌표
     enum IGS_USEITEM_CONFIRM_POS
     {
-        IGS_BTN_OK_POS_X = 33,	// 버튼 Pos
+        IGS_BTN_OK_POS_X = 33, // 버튼 Pos
         IGS_BTN_CANCEL_POS_X = 105,
         IGS_BTN_POS_Y = 140,
-        IGS_TEXT_TITLE_Y = 10,	// Title
+        IGS_TEXT_TITLE_Y = 10, // Title
         IGS_TEXT_DIVIDE_WIDTH = 150,
         IGS_TEXT_DESCRIPTION_POS_X = 20,
         IGS_TEXT_DESCRIPTION_POS_Y = 50,
@@ -95,13 +95,13 @@ private:
 
     wchar_t m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
 
-    int			m_iDesciptionLine;
+    int m_iDesciptionLine;
 
-    int			m_iStorageSeq;			// 보관함 순번
-    int			m_iStorageItemSeq;		// 보관함 상품 순번
-    WORD		m_wItemCode;			// 아이템 코드
-    wchar_t m_szItemName[MAX_TEXT_LENGTH];		// 아이템이름
-    char m_szItemType;		// 상품구분 (C : 캐시, P : 상품)
+    int m_iStorageSeq;                     // 보관함 순번
+    int m_iStorageItemSeq;                 // 보관함 상품 순번
+    WORD m_wItemCode;                      // 아이템 코드
+    wchar_t m_szItemName[MAX_TEXT_LENGTH]; // 아이템이름
+    char m_szItemType;                     // 상품구분 (C : 캐시, P : 상품)
 };
 
 ////////////////////////////////////////////////////////////////////

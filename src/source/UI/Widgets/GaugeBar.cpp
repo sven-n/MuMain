@@ -19,24 +19,21 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CGaugeBar::CGaugeBar()
-    : m_gaugeRect{0, 0, 0, 0}
-{
-}
+CGaugeBar::CGaugeBar() : m_gaugeRect{0, 0, 0, 0} {}
 
 CGaugeBar::~CGaugeBar()
 {
     Release();
 }
 
-void CGaugeBar::Create(int nGaugeWidth, int nGaugeHeight, int nGaugeTexID, const RECT* prcGauge, int nBackWidth, int nBackHeight, int nBackTexID, bool bShortenLeft, float fScaleX, float fScaleY)
+void CGaugeBar::Create(int nGaugeWidth, int nGaugeHeight, int nGaugeTexID, const RECT* prcGauge, int nBackWidth,
+                       int nBackHeight, int nBackTexID, bool bShortenLeft, float fScaleX, float fScaleY)
 {
     Release();
 
     const int nSizingDatums = bShortenLeft ? SPR_SIZING_DATUMS_LT : SPR_SIZING_DATUMS_RT;
 
-    m_sprGauge.Create(nGaugeWidth, nGaugeHeight, nGaugeTexID, 0, nullptr, 0, 0,
-        true, nSizingDatums, fScaleX, fScaleY);
+    m_sprGauge.Create(nGaugeWidth, nGaugeHeight, nGaugeTexID, 0, nullptr, 0, 0, true, nSizingDatums, fScaleX, fScaleY);
 
     if (prcGauge == nullptr)
     {
@@ -51,7 +48,8 @@ void CGaugeBar::Create(int nGaugeWidth, int nGaugeHeight, int nGaugeTexID, const
     if (nBackTexID >= 0)
     {
         m_backgroundSprite = std::make_unique<CSprite>();
-        m_backgroundSprite->Create(nBackWidth, nBackHeight, nBackTexID, 0, nullptr, 0, 0, false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
+        m_backgroundSprite->Create(nBackWidth, nBackHeight, nBackTexID, 0, nullptr, 0, 0, false, SPR_SIZING_DATUMS_LT,
+                                   fScaleX, fScaleY);
         m_responseSize.reset();
     }
     else if (nBackWidth > 0 && nBackHeight > 0)
@@ -129,8 +127,7 @@ void CGaugeBar::SetValue(std::uint32_t dwNow, std::uint32_t dwTotal)
 
     if (IS_SIZING_DATUMS_R(m_sprGauge.GetSizingDatums()))
     {
-        nNowSize
-            += m_sprGauge.GetTexWidth() - gaugeWidth;
+        nNowSize += m_sprGauge.GetTexWidth() - gaugeWidth;
     }
 
     m_sprGauge.SetSize(nNowSize, 0, X);
@@ -208,20 +205,13 @@ CGaugeBar::Rect CGaugeBar::ConvertRect(const RECT& source)
 
 CGaugeBar::Rect CGaugeBar::ScaleRect(const Rect& rect, float scaleX, float scaleY)
 {
-    return Rect{
-        static_cast<int>(rect.left * scaleX),
-        static_cast<int>(rect.top * scaleY),
-        static_cast<int>(rect.right * scaleX),
-        static_cast<int>(rect.bottom * scaleY)};
+    return Rect{static_cast<int>(rect.left * scaleX), static_cast<int>(rect.top * scaleY),
+                static_cast<int>(rect.right * scaleX), static_cast<int>(rect.bottom * scaleY)};
 }
 
 CGaugeBar::Rect CGaugeBar::OffsetRect(const Rect& rect, int offsetX, int offsetY)
 {
-    return Rect{
-        rect.left + offsetX,
-        rect.top + offsetY,
-        rect.right + offsetX,
-        rect.bottom + offsetY};
+    return Rect{rect.left + offsetX, rect.top + offsetY, rect.right + offsetX, rect.bottom + offsetY};
 }
 
 bool CGaugeBar::Contains(const Rect& rect, long x, long y)

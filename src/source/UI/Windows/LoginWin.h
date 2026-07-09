@@ -12,10 +12,10 @@ class CUITextInputBox;
 class CLoginWin : public CWin
 {
 protected:
-    CSprite		m_asprInputBox[2];
-    CButton		m_aBtn[2];
-    CButton     m_aBtnRememberMe;
-    CUITextInputBox* m_pUsernameInputBox, * m_pPasswordInputBox;
+    CSprite m_asprInputBox[2];
+    CButton m_aBtn[2];
+    CButton m_aBtnRememberMe;
+    CUITextInputBox *m_pUsernameInputBox, *m_pPasswordInputBox;
 
 public:
     CLoginWin();
@@ -27,8 +27,14 @@ public:
 
     void ConnectConnectionServer();
 
-    CUITextInputBox* GetUsernameInputBox() const { return m_pUsernameInputBox; }
-    CUITextInputBox* GetPasswordInputBox() const { return m_pPasswordInputBox; }
+    CUITextInputBox* GetUsernameInputBox() const
+    {
+        return m_pUsernameInputBox;
+    }
+    CUITextInputBox* GetPasswordInputBox() const
+    {
+        return m_pPasswordInputBox;
+    }
 
 private:
     int FirstLoad = 0;

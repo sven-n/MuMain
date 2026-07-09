@@ -16,10 +16,13 @@ public:
     CShopListManager();
     virtual ~CShopListManager();
 
-    CShopList* GetListPtr() { return m_ShopList; };
+    CShopList* GetListPtr()
+    {
+        return m_ShopList;
+    };
 
 private:
     CShopList* m_ShopList;
 
-    WZResult		LoadScript(bool bDonwLoad);
+    WZResult LoadScript(bool bDonwLoad);
 };

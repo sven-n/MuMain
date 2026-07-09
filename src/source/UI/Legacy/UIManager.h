@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Guild/UIGuildInfo.h"
-#include "Guild/UIGuildMaster.h"
+#include "UI/Legacy/UIGuildInfo.h"
+#include "UI/Legacy/UIGuildMaster.h"
 #include "UISenatus.h"
 #include "UIGateKeeper.h"
 #include "UIPopup.h"
@@ -61,6 +61,7 @@ public:
 protected:
     bool IsCanOpen(DWORD dwInterfaceFlag);
     bool CloseInterface(std::list<DWORD>& dwInterfaceFlag, DWORD dwExtraData = 0);
+
 public:
     void Init();
     POINT RenderWindowBase(int nHeight, int nOriginY = -1);

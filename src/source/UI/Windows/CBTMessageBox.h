@@ -1,3 +1,7 @@
+#pragma once
+
+#ifdef _WIN32
+
 #include <string>
 
 // Centers/raises the native Win32 MessageBox via a CBT hook. Windows-only and
