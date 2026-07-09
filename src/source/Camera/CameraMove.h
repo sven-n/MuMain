@@ -31,7 +31,8 @@ extern float g_LoginSceneAngleYaw;
 class CCameraMove
 {
 #pragma pack(push, 1)
-    struct WAYPOINT {
+    struct WAYPOINT
+    {
         int iIndex;
 
         float fCameraX;
@@ -55,12 +56,14 @@ class CCameraMove
     float m_CurrentCameraPos[3];
     float m_fCurrentDistanceLevel;
 
-    DWORD	m_dwCurrentIndex;
-    int		m_iSelectedTile;
+    DWORD m_dwCurrentIndex;
+    int m_iSelectedTile;
 
     void Init();
+
 public:
-    enum {
+    enum
+    {
         CAMERAWALK_STATE_READY = 0,
         CAMERAWALK_STATE_MOVE,
         CAMERAWALK_STATE_DONE,
@@ -116,18 +119,31 @@ private:
     float m_vTourCameraPos[3];
     float m_fCameraAngle;
     float m_fFrustumAngle;
+
 public:
     BOOL SetTourMode(BOOL bFlag, BOOL bRandomStart = FALSE, int _index = 0);
-    BOOL IsTourMode() { return m_bTourMode; }
-    BOOL IsTourPaused() { return m_bTourPause; }
+    BOOL IsTourMode()
+    {
+        return m_bTourMode;
+    }
+    BOOL IsTourPaused()
+    {
+        return m_bTourPause;
+    }
     void PauseTour(BOOL bFlag);
     void ForwardTour(float fSpeed);
     void BackwardTour(float fSpeed);
     void UpdateTourWayPoint();
     void SetAngleFrustum(float _Value);
-    const float GetAngleFrustum() const { return m_fCameraAngle; };
+    const float GetAngleFrustum() const
+    {
+        return m_fCameraAngle;
+    };
     void SetFrustumAngle(float _Value);
     float GetFrustumAngle();
 
-    float GetCameraAngle() { return m_fTourCameraAngle; }
+    float GetCameraAngle()
+    {
+        return m_fTourCameraAngle;
+    }
 };
