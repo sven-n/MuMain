@@ -1713,6 +1713,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     std::thread cpuUsageRecorder(RecordCpuUsage);
     const MSG msg = MainLoop();
 
+    // Stop background work before tearing down audio, renderer, window, or SDL
+    // subsystems. The recorder polls process state until Destroy is set.
+    Destroy = true;
+    if (cpuUsageRecorder.joinable())
+        cpuUsageRecorder.join();
+
     // Teardown that used to run in WM_DESTROY, now after the loop exits (SDL owns
     // the window/GL context, so they must not be destroyed from a message).
     DestroySound();
@@ -1723,12 +1729,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 #endif
     KillGLWindow();
     DestroyWindow();
-
-    // RecordCpuUsage loops on !Destroy, so it exits once the loop above ended.
-    // Join it before WinMain returns; a joinable std::thread destroyed unjoined
-    // calls std::terminate.
-    if (cpuUsageRecorder.joinable())
-        cpuUsageRecorder.join();
 
     SDL_Quit();
 
