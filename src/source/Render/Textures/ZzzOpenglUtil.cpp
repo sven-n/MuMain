@@ -691,14 +691,12 @@ bool IsVSyncEnabled()
 
 void EnableVSync()
 {
-    if (SDL_GL_SetSwapInterval(1))
-        _isVSyncEnabled = true;
+    _isVSyncEnabled = true;
 }
 
 void DisableVSync()
 {
-    if (SDL_GL_SetSwapInterval(0))
-        _isVSyncEnabled = false;
+    _isVSyncEnabled = false;
 }
 
 // GetFPSLimit() lives in the platform layer (Winmain.cpp): it queries the

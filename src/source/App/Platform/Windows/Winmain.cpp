@@ -15,6 +15,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
@@ -97,7 +98,7 @@ HINSTANCE g_hInst = nullptr;
 HDC       g_hDC = nullptr;
 HGLRC     g_hRC = nullptr;
 
-// SDL owns the window and GL context (issue #442). The native HWND is bridged
+// SDL owns the window (issue #442). The native HWND is bridged
 // into g_hWnd so the remaining Win32 code (IME, DirectSound, cursor, the legacy
 // EDIT-control text boxes) keeps working until those are migrated.
 static SDL_Window*   g_sdlWindow = nullptr;
@@ -172,14 +173,9 @@ GLvoid KillGLWindow(GLvoid)
         g_hDC = nullptr;
     }
 
-    // SDL owns the GL context and the window (it also restores the display mode
-    // when a fullscreen window is destroyed).
-    if (g_sdlGLContext)
-    {
-        SDL_GL_DestroyContext(g_sdlGLContext);
-        g_sdlGLContext = nullptr;
-        g_hRC = nullptr;
-    }
+    mu::ShutdownSDLGpuRenderer();
+    g_sdlGLContext = nullptr;
+    g_hRC = nullptr;
 
     if (g_sdlWindow)
     {
@@ -224,17 +220,9 @@ static void MaybeCaptureFrame()
 }
 #endif
 
-// Present the current GL frame. SDL owns the window/context, so swapping goes
-// through SDL_GL_SwapWindow instead of the Win32 ::SwapBuffers (issue #442).
+// Legacy presentation hook. SDL_gpu presents in mu::GetRenderer().EndFrame().
 void PlatformSwapBuffers()
 {
-    if (g_sdlWindow)
-    {
-#ifndef _WIN32
-        MaybeCaptureFrame();
-#endif
-        SDL_GL_SwapWindow(g_sdlWindow);
-    }
 }
 
 // Monitor refresh rate (Hz) for the display the window is on, via SDL instead
@@ -1257,8 +1245,9 @@ MSG MainLoop()
                 g_MuEditorCore.Update();
 #endif
 
-                // Render game scene (ImGui rendering happens inside before SwapBuffers)
+                mu::GetRenderer().BeginFrame();
                 RenderScene(g_hDC);
+                mu::GetRenderer().EndFrame();
             }
         }
         else
@@ -1517,7 +1506,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_hInst = hInstance;
 
-    // SDL owns the window and GL context (issue #442).
+    // SDL owns the window; SDL_gpu owns the rendering device.
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
     {
         g_ErrorReport.Write(L"> SDL video init failed.\r\n");
@@ -1525,12 +1514,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         return 0;
     }
 
-    // The fixed-function renderer needs a compatibility-profile GL context.
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-
-    SDL_WindowFlags windowFlags = SDL_WINDOW_OPENGL;
+    SDL_WindowFlags windowFlags = 0;
     if (g_bUseWindowMode != TRUE)
         windowFlags |= SDL_WINDOW_FULLSCREEN;
 
@@ -1544,21 +1528,16 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_ErrorReport.Write(L"> Start window success.\r\n");
 
-    // Initialize OpenGL viewport dimensions to match window dimensions
-    // This ensures they're correct even if WM_SIZE hasn't fired yet or sent wrong values
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;
 
-    g_sdlGLContext = SDL_GL_CreateContext(g_sdlWindow);
-    if (!g_sdlGLContext)
+    if (!mu::InitSDLGpuRenderer(g_sdlWindow))
     {
-        g_ErrorReport.Write(L"OpenGL Create Context Error.\r\n");
+        g_ErrorReport.Write(L"SDL_gpu renderer init failed.\r\n");
         KillGLWindow();
-        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"OpenGL Create Context Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"SDL_gpu Renderer Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
-
-    SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
 
 #ifdef _WIN32
     // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,
@@ -1566,7 +1545,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_hWnd = static_cast<HWND>(SDL_GetPointerProperty(
         SDL_GetWindowProperties(g_sdlWindow), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
     g_hDC = GetDC(g_hWnd);
-    g_hRC = wglGetCurrentContext();
+    g_hRC = nullptr;
 
     // Drive the existing WndProc from SDL's Win32 messages (transitional, #442).
     SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
@@ -1582,9 +1561,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     MuApplyCursorVisibility();
 #endif
 
-    g_ErrorReport.Write(L"> OpenGL init success.\r\n");
+    g_ErrorReport.Write(L"> SDL_gpu init success.\r\n");
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteOpenGLInfo();
+    g_ErrorReport.Write(L"GPU driver\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
     g_ErrorReport.AddSeparator();
     g_ErrorReport.WriteSoundCardInfo();
 

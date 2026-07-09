@@ -149,7 +149,12 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (std140 HLS
     {
         return cmakePath.string();
     }
-    return (mu_get_app_dir() / "shaders" / filename).string();
+    const char* basePath = SDL_GetBasePath();
+    if (basePath != nullptr)
+    {
+        return (std::filesystem::path(basePath) / "shaders" / filename).string();
+    }
+    return (std::filesystem::path("shaders") / filename).string();
 }
 
 // ---------------------------------------------------------------------------

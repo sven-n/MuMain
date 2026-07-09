@@ -24,6 +24,10 @@ set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
 set(SDL_TESTS OFF CACHE BOOL "" FORCE)
 set(SDL_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
+set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+set(BUILD_SHARED_LIBS OFF)
+FetchContent_MakeAvailable(SDL3_ttf)
+set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
 
 # SDL3_mixer — static link, MP3 + Ogg Vorbis only (matches our music assets)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -123,7 +127,7 @@ else()
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]win32[/\\]")
 endif()
 
-list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\]Renderer[/\\]MuRendererSDLGpu\\.cpp$")
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\]Renderer[/\\]MuRenderer\\.cpp$")
 
 # Add MuEditor sources when editor is enabled
 if(ENABLE_EDITOR)
@@ -178,6 +182,11 @@ endif()
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
+target_compile_definitions(MuClient PUBLIC MU_ENABLE_SDL3 GLM_FORCE_DEPTH_ZERO_TO_ONE)
+target_link_libraries(MuClient PUBLIC SDL3::SDL3 glm::glm)
+if(TARGET SDL3_ttf::SDL3_ttf)
+  target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
+endif()
 
 # The engine relies on self-registering globals whose constructors get
 # silently dropped if the linker only pulls archive members on demand, so
@@ -310,24 +319,16 @@ add_custom_command(TARGET Main POST_BUILD
 # ubiquitous system libraries so we can focus on getting the project to
 # compile; more platform-specific adjustments will follow as we iterate.
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  # The engine uses fixed-function desktop OpenGL via GLEW; link the system GL
-  # and GLEW so the gl*/glew* symbols resolve in the Linux executable.
-  find_package(OpenGL REQUIRED)
-  find_library(GLEW_LIBRARY NAMES GLEW glew32 REQUIRED)
   find_library(TURBOJPEG_LIBRARY NAMES turbojpeg REQUIRED)
   target_link_libraries(MuClient PUBLIC
     pthread
     dl
     m
-    OpenGL::GL
-    OpenGL::GLU
-    ${GLEW_LIBRARY}
     ${TURBOJPEG_LIBRARY}
   )
 endif()
 
 if (APPLE)
-  find_library(OPENGL_FRAMEWORK OpenGL REQUIRED)
   find_library(TURBOJPEG_LIBRARY NAMES turbojpeg
     PATHS
       "/opt/homebrew/lib"
@@ -335,7 +336,6 @@ if (APPLE)
     REQUIRED
   )
   target_link_libraries(MuClient PUBLIC
-    ${OPENGL_FRAMEWORK}
     ${TURBOJPEG_LIBRARY}
   )
 endif()

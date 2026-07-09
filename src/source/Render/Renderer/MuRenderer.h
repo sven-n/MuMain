@@ -301,5 +301,7 @@ public:
 // Initially returns MuRendererGL; will return MuRendererSDLGPU after 4.3.1.
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow);
+void ShutdownSDLGpuRenderer();
 
 } // namespace mu
