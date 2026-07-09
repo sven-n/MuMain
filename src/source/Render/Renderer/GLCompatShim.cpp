@@ -30,6 +30,9 @@ constexpr MUCompatGLenum kGLZero = 0;
 constexpr MUCompatGLenum kGLOneMinusSrcColor = 0x0301;
 constexpr MUCompatGLenum kGLOneMinusDstColor = 0x0306;
 constexpr MUCompatGLenum kGLSrcColor = 0x0300;
+constexpr MUCompatGLenum kGLUnsignedByte = 0x1401;
+constexpr MUCompatGLenum kGLRgb = 0x1907;
+constexpr MUCompatGLenum kGLRgba = 0x1908;
 
 struct ImmediateVertex
 {
@@ -132,6 +135,38 @@ void ApplyBlend(MUCompatGLenum sfactor, MUCompatGLenum dfactor)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::LightMap);
     else if (sfactor == kGLOne && dfactor == kGLOne)
         mu::GetRenderer().SetBlendMode(mu::BlendMode::Glow);
+}
+
+[[nodiscard]] const void* PrepareTextureUpload(MUCompatGLenum format, MUCompatGLenum type, const void* pixels,
+                                               MUCompatGLsizei width, MUCompatGLsizei height,
+                                               std::vector<std::uint8_t>& rgbaScratch)
+{
+    if (!pixels || width <= 0 || height <= 0 || type != kGLUnsignedByte)
+    {
+        return pixels;
+    }
+
+    if (format == kGLRgba)
+    {
+        return pixels;
+    }
+
+    if (format != kGLRgb)
+    {
+        return pixels;
+    }
+
+    const auto pixelCount = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+    const auto* src = static_cast<const std::uint8_t*>(pixels);
+    rgbaScratch.resize(pixelCount * 4u);
+    for (std::size_t i = 0; i < pixelCount; ++i)
+    {
+        rgbaScratch[i * 4u + 0u] = src[i * 3u + 0u];
+        rgbaScratch[i * 4u + 1u] = src[i * 3u + 1u];
+        rgbaScratch[i * 4u + 2u] = src[i * 3u + 2u];
+        rgbaScratch[i * 4u + 3u] = 255u;
+    }
+    return rgbaScratch.data();
 }
 } // namespace
 
@@ -256,13 +291,17 @@ void mu_glLineWidth(MUCompatGLfloat) {}
 void mu_glBindTexture(MUCompatGLenum, MUCompatGLuint texture) { s_boundTexture = texture; mu::GetRenderer().BindTexture(static_cast<int>(texture)); }
 void mu_glGenTextures(MUCompatGLsizei n, MUCompatGLuint* textures) { for (int i = 0; i < n; ++i) textures[i] = s_nextTexture++; }
 void mu_glDeleteTextures(MUCompatGLsizei, const MUCompatGLuint*) {}
-void mu_glTexImage2D(MUCompatGLenum, MUCompatGLint, MUCompatGLint, MUCompatGLsizei width, MUCompatGLsizei height, MUCompatGLint, MUCompatGLenum, MUCompatGLenum, const void* pixels)
+void mu_glTexImage2D(MUCompatGLenum, MUCompatGLint, MUCompatGLint, MUCompatGLsizei width, MUCompatGLsizei height, MUCompatGLint, MUCompatGLenum format, MUCompatGLenum type, const void* pixels)
 {
-    mu::GetRenderer().QueueTextureUpdate(s_boundTexture, pixels, static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
+    std::vector<std::uint8_t> rgbaScratch;
+    const void* uploadPixels = PrepareTextureUpload(format, type, pixels, width, height, rgbaScratch);
+    mu::GetRenderer().QueueTextureUpdate(s_boundTexture, uploadPixels, static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
 }
-void mu_glTexSubImage2D(MUCompatGLenum, MUCompatGLint, MUCompatGLint, MUCompatGLint, MUCompatGLsizei width, MUCompatGLsizei height, MUCompatGLenum, MUCompatGLenum, const void* pixels)
+void mu_glTexSubImage2D(MUCompatGLenum, MUCompatGLint, MUCompatGLint, MUCompatGLint, MUCompatGLsizei width, MUCompatGLsizei height, MUCompatGLenum format, MUCompatGLenum type, const void* pixels)
 {
-    mu::GetRenderer().QueueTextureUpdate(s_boundTexture, pixels, static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
+    std::vector<std::uint8_t> rgbaScratch;
+    const void* uploadPixels = PrepareTextureUpload(format, type, pixels, width, height, rgbaScratch);
+    mu::GetRenderer().QueueTextureUpdate(s_boundTexture, uploadPixels, static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
 }
 void mu_glTexParameteri(MUCompatGLenum target, MUCompatGLenum pname, MUCompatGLint param) { mu::GetRenderer().SetTexParameter(static_cast<int>(target), static_cast<int>(pname), param); }
 void mu_glTexEnvi(MUCompatGLenum target, MUCompatGLenum pname, MUCompatGLint param) { mu::GetRenderer().SetTexEnv(static_cast<int>(target), static_cast<int>(pname), param); }
