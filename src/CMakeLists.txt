@@ -35,7 +35,7 @@ set(SDLMIXER_MP3_DRMP3 ON CACHE BOOL "" FORCE)
 # mpg123 is built as a dynamically loaded library — drmp3 alone is enough
 # for the assets we ship and keeps everything statically linked.
 set(SDLMIXER_MP3_MPG123 OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_VORBIS_STB ON CACHE BOOL "" FORCE)
+set(SDLMIXER_VORBIS_STB OFF CACHE BOOL "" FORCE)
 set(SDLMIXER_VORBIS_VORBISFILE OFF CACHE BOOL "" FORCE)
 set(SDLMIXER_FLAC OFF CACHE BOOL "" FORCE)
 set(SDLMIXER_OPUS OFF CACHE BOOL "" FORCE)
@@ -116,6 +116,14 @@ list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\]main\
 if(NOT WIN32)
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\]")
 endif()
+
+if(WIN32)
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]posix[/\\]")
+else()
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]win32[/\\]")
+endif()
+
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\]Renderer[/\\]MuRendererSDLGpu\\.cpp$")
 
 # Add MuEditor sources when editor is enabled
 if(ENABLE_EDITOR)
@@ -203,7 +211,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "iOS")
     "Store restricted. When that work starts, add source/App/Platform/iOS/ "
     "and replace this branch.")
 elseif (APPLE)
-  set(MU_APP_ENTRY "source/App/Platform/macOS/main.mm")
+  set(MU_APP_ENTRY
+    "source/App/Platform/macOS/main.mm"
+    "source/App/Platform/Windows/Winmain.cpp")
 elseif (ANDROID)
   message(FATAL_ERROR "Android is not a supported build target yet: it needs "
     "an OpenGL ES renderer port, and its entry point is android_main via "
@@ -229,7 +239,11 @@ target_link_libraries(Main PRIVATE MuClient::MuClient)
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
-  target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
+  if (APPLE)
+    target_link_options(Main PRIVATE "-Wl,-map,${MU_MAIN_MAP_FILE}")
+  else()
+    target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
+  endif()
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -308,6 +322,20 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     OpenGL::GL
     OpenGL::GLU
     ${GLEW_LIBRARY}
+    ${TURBOJPEG_LIBRARY}
+  )
+endif()
+
+if (APPLE)
+  find_library(OPENGL_FRAMEWORK OpenGL REQUIRED)
+  find_library(TURBOJPEG_LIBRARY NAMES turbojpeg
+    PATHS
+      "/opt/homebrew/lib"
+      "/usr/local/lib"
+    REQUIRED
+  )
+  target_link_libraries(MuClient PUBLIC
+    ${OPENGL_FRAMEWORK}
     ${TURBOJPEG_LIBRARY}
   )
 endif()
@@ -431,11 +459,19 @@ target_include_directories(MuClient PUBLIC
   # after the bootstrap files moved out of source/ (issue #346).
   "${CMAKE_CURRENT_SOURCE_DIR}/source/App"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/miniaudio"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
   "${CMAKE_BINARY_DIR}/generated"
   # stb_truetype backs the portable GDI text rasterizer (issue #462).
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/stb"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
+)
+
+set_source_files_properties(
+  "${CMAKE_CURRENT_SOURCE_DIR}/source/Core/Platform/Audio/MiniAudioImpl.cpp"
+  PROPERTIES
+    SKIP_PRECOMPILE_HEADERS ON
+    COMPILE_OPTIONS "-Wno-error=tautological-compare"
 )
 
 # Basic compile definitions, roughly mirroring the original MSVC project
@@ -444,6 +480,8 @@ target_compile_definitions(MuClient PUBLIC
   _LANGUAGE_FOREIGN
   _LANGUAGE_ENG
   UNICODE
+  "MU_DOTNET_LIB_EXT=\"${CMAKE_SHARED_LIBRARY_SUFFIX}\""
+  MU_ENABLE_SDL3
   $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:_USE_32BIT_TIME_T>  # Use 32-bit time_t only for 32-bit builds
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
@@ -536,6 +574,8 @@ if (DOTNET_EXECUTABLE)
   # this name).
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(DOTNET_LIB_NAME "MUnique.Client.Library.so")
+  elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(DOTNET_LIB_NAME "MUnique.Client.Library.dylib")
   else()
     set(DOTNET_LIB_NAME "MUnique.Client.Library.dll")
   endif()
@@ -570,6 +610,16 @@ if (DOTNET_EXECUTABLE)
     # skip it (ci=true) and use the checked-in output.
     set(DOTNET_EXTRA_ARGS "-p:ci=true")
     message(STATUS ".NET Client Library will build for linux-x64")
+  elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    if (CMAKE_OSX_ARCHITECTURES MATCHES "(^|;)arm64($|;)" OR CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64)$")
+      set(DOTNET_RID "osx-arm64")
+      set(DOTNET_PLATFORM "arm64")
+    else()
+      set(DOTNET_RID "osx-x64")
+      set(DOTNET_PLATFORM "x64")
+    endif()
+    set(DOTNET_EXTRA_ARGS "-p:ci=true")
+    message(STATUS ".NET Client Library will build for ${DOTNET_RID}")
   elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(DOTNET_RID "win-x64")
     set(DOTNET_PLATFORM "x64")
@@ -583,14 +633,36 @@ if (DOTNET_EXECUTABLE)
   endif()
 
   if (DOTNET_CAN_BUILD_CLIENT_LIBRARY)
+    set(DOTNET_PUBLISH_ENV
+      "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
+      "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+      "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
+      "TMP=${DOTNET_TEMP_DIR_NATIVE}"
+    )
+
+    if (APPLE)
+      set(MU_OPENSSL_LIBRARY_PATHS "")
+      foreach(_mu_openssl_prefix IN ITEMS "/opt/homebrew/opt/openssl@3" "/usr/local/opt/openssl@3" "/opt/homebrew" "/usr/local")
+        if (EXISTS "${_mu_openssl_prefix}/lib/libssl.dylib")
+          list(APPEND MU_OPENSSL_LIBRARY_PATHS "${_mu_openssl_prefix}/lib")
+        endif()
+      endforeach()
+
+      if (MU_OPENSSL_LIBRARY_PATHS)
+        list(REMOVE_DUPLICATES MU_OPENSSL_LIBRARY_PATHS)
+        list(JOIN MU_OPENSSL_LIBRARY_PATHS ":" MU_OPENSSL_LIBRARY_PATH)
+        if (DEFINED ENV{LIBRARY_PATH} AND NOT "$ENV{LIBRARY_PATH}" STREQUAL "")
+          string(APPEND MU_OPENSSL_LIBRARY_PATH ":$ENV{LIBRARY_PATH}")
+        endif()
+        list(APPEND DOTNET_PUBLISH_ENV "LIBRARY_PATH=${MU_OPENSSL_LIBRARY_PATH}")
+      endif()
+    endif()
+
     add_custom_command(
             OUTPUT "${DOTNET_DLL_PATH}"
             COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
             COMMAND ${CMAKE_COMMAND} -E env
-                    "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
-                    "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
-                    "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
-                    "TMP=${DOTNET_TEMP_DIR_NATIVE}"
+                    ${DOTNET_PUBLISH_ENV}
                     "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} ${DOTNET_EXTRA_ARGS} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/${DOTNET_LIB_NAME}" "${DOTNET_DLL_PATH}"
             DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
@@ -762,6 +834,15 @@ target_link_libraries(MuClient PUBLIC
   SDL3::SDL3
   SDL3_mixer::SDL3_mixer
 )
+
+if(APPLE)
+  target_link_libraries(MuClient PUBLIC
+    "-framework AudioToolbox"
+    "-framework AudioUnit"
+    "-framework CoreAudio"
+    "-framework CoreFoundation"
+  )
+endif()
 
 # Link ImGui for all platforms when editor is enabled. imgui carries its own
 # opengl32/dwmapi link dependencies (see its definition above), so the engine

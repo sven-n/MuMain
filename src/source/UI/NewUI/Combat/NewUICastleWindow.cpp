@@ -513,7 +513,7 @@ void CNewUICastleWindow::UpdateTaxManagingTab()
 
 void CNewUICastleWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-    POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
+    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
 
     RenderImage(IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT, ptOrigin.x + 12, ptOrigin.y - 4, 14, 14);
@@ -526,7 +526,7 @@ void CNewUICastleWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fW
 
 void CNewUICastleWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-    POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
+    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
     float fBoxHeight = fHeight;
 

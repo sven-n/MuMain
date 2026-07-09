@@ -197,13 +197,13 @@ BOOL CSprite::PtInSprite(long lXPos, long lYPos)
     if (!m_bShow)
         return FALSE;
 
-    POINT pt = { lXPos, lYPos };
+    POINT pt = { static_cast<LONG>(lXPos), static_cast<LONG>(lYPos) };
 
     RECT rc = {
-        long(m_aScrCoord[LT].fX * m_fScaleX),
-        long((m_fScrHeight - m_aScrCoord[LT].fY) * m_fScaleY),
-        long(m_aScrCoord[RB].fX * m_fScaleX),
-        long((m_fScrHeight - m_aScrCoord[RB].fY) * m_fScaleY)
+        static_cast<LONG>(m_aScrCoord[LT].fX * m_fScaleX),
+        static_cast<LONG>((m_fScrHeight - m_aScrCoord[LT].fY) * m_fScaleY),
+        static_cast<LONG>(m_aScrCoord[RB].fX * m_fScaleX),
+        static_cast<LONG>((m_fScrHeight - m_aScrCoord[RB].fY) * m_fScaleY)
     };
 
     return ::PtInRect(&rc, pt);

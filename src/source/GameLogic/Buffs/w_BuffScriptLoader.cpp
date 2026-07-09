@@ -7,7 +7,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "w_BuffScriptLoader.h"
-#include "MuLogger.h"
+#include "Core/Utilities/Log/MuLogger.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

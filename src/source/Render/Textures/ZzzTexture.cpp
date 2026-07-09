@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "MuLogger.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include <setjmp.h>
 #include <array>
 #include <cstdio>
@@ -312,6 +312,6 @@ void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
     }
 
     DestroySound();
-    DestroyWindow(g_hWnd);
+    DestroyWindow();
     ExitProcess(0);
 }

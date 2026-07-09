@@ -5,7 +5,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "UIManager.h"
 #include "UIJewelHarmony.h"
-#include "Core/MuLogger.h"
+#include "Core/Utilities/Log/MuLogger.h"
 
 #define HARMONYJEWELOPTION_DATA_FILE                                                                                   \
     std::wstring(L"Data\\Local\\" + g_strSelectedML + L"\\JewelOfHarmonyOption_" + g_strSelectedML + L".bmd").c_str()

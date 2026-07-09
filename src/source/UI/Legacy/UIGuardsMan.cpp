@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 
-#include "UI/Legacy/UIGuildInfo.h"
+#include "Guild/UIGuildInfo.h"
 #include "UIGuardsMan.h"
 #include "UI/NewUI/Inventory/NewUIMyInventory.h"
 #include "UI/NewUI/NewUISystem.h"

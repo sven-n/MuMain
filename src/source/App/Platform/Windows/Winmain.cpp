@@ -50,7 +50,10 @@
 #include <io.h>
 #endif
 #include "Core/Input/Input.h"
+#include "Core/Platform/IPlatformAudio.h"
+#include "Core/Platform/Audio/MiniAudioBackend.h"
 #include "Core/Time/Timer.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Legacy/UIMng.h"
 
 
@@ -480,10 +483,12 @@ void DestroyWindow()
 }
 void DestroySound()
 {
-    for (int i = 0; i < MAX_BUFFER; i++)
-        ReleaseBuffer(i);
-
-    FreeDirectSound();
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->Shutdown();
+        delete g_platformAudio;
+        g_platformAudio = nullptr;
+    }
     AudioPlayer::Shutdown();
 }
 
@@ -495,8 +500,8 @@ bool HangulDelete = false;
 int Hangul = 0;
 bool g_bEnterPressed = false;
 
-static double g_TargetFpsBeforeInactive = -1.0;
-static bool g_HasInactiveFpsOverride = false;
+double g_TargetFpsBeforeInactive = -1.0;
+bool g_HasInactiveFpsOverride = false;
 
 int g_iMousePopPosition_x = 0;
 int g_iMousePopPosition_y = 0;
@@ -1635,7 +1640,14 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     AudioPlayer::Initialize();
 
     // Always initialize sound so it can be toggled at runtime
-    InitDirectSound(g_hWnd);
+    if (g_platformAudio == nullptr)
+    {
+        g_platformAudio = new mu::MiniAudioBackend();
+        if (!g_platformAudio->Initialize())
+        {
+            mu::log::Get("audio")->error("MiniAudioBackend::Initialize failed; game will run without audio");
+        }
+    }
 
     {
         int value = AudioPlayer::ClampVolume(GameConfig::GetInstance().GetSoundVolume());

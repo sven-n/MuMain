@@ -416,9 +416,12 @@ void CUIMng::CheckDockWin()
 
     CInput& rInput = CInput::Instance();
 
-    POINT pt[4] = { { 0, 0 }, { rInput.GetScreenWidth(), 0 },
-        { 0, rInput.GetScreenHeight() },
-        { rInput.GetScreenWidth(), rInput.GetScreenHeight() } };
+    POINT pt[4] = {
+        { 0, 0 },
+        { static_cast<LONG>(rInput.GetScreenWidth()), 0 },
+        { 0, static_cast<LONG>(rInput.GetScreenHeight()) },
+        { static_cast<LONG>(rInput.GetScreenWidth()), static_cast<LONG>(rInput.GetScreenHeight()) }
+    };
 
     if (::PtInRect(&rcDock[0], pt[0]))
     {
@@ -609,9 +612,13 @@ bool CUIMng::SetDockWinPosition(CWin* pMoveWin, int nDockX, int nDockY)
 {
     CInput& rInput = CInput::Instance();
     RECT rcDummy;
-    RECT rcScreen = { 0, 0, rInput.GetScreenWidth(), rInput.GetScreenHeight() };
-    RECT rcMoveWin = { nDockX, nDockY,
-        nDockX + pMoveWin->GetWidth(), nDockY + pMoveWin->GetHeight() };
+    RECT rcScreen = { 0, 0, static_cast<LONG>(rInput.GetScreenWidth()), static_cast<LONG>(rInput.GetScreenHeight()) };
+    RECT rcMoveWin = {
+        static_cast<LONG>(nDockX),
+        static_cast<LONG>(nDockY),
+        static_cast<LONG>(nDockX + pMoveWin->GetWidth()),
+        static_cast<LONG>(nDockY + pMoveWin->GetHeight())
+    };
 
     if (::IntersectRect(&rcDummy, &rcScreen, &rcMoveWin))
     {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <list>
-#include "mu_types.h" // BuffStateMap, eBuffState, DWORD
+#include "Core/Globals/_types.h" // BuffStateMap, eBuffState, DWORD
 
 SmartPointer(Buff);
 

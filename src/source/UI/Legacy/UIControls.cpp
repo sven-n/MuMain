@@ -2931,7 +2931,7 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* ps
     int iNumberOfSections = (RealRenderingSize.cx / LIMIT_WIDTH) + ((iRealRenderWidth % LIMIT_WIDTH >= 0) ? 1 : 0);
     for (int i = 0; i < iNumberOfSections; i++)
     {
-        SIZE RealSectionLine = { (long)LIMIT_WIDTH, (long)RealRenderingSize.cy };
+        SIZE RealSectionLine = { static_cast<LONG>(LIMIT_WIDTH), static_cast<LONG>(RealRenderingSize.cy) };
         if (i == iNumberOfSections - 1)
             RealSectionLine.cx = iRealRenderWidth % LIMIT_WIDTH;
 

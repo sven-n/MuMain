@@ -1,8 +1,8 @@
 #pragma once
 
-// Story 7.8.1: Include PlatformTypes.h so HRESULT/BOOL/HWND are available on all platforms.
+// Story 7.8.1: Include WinCompat.h so HRESULT/BOOL/HWND are available on all platforms.
 // Forward-declare OBJECT for function parameters that use OBJECT* pointers.
-#include "Platform/PlatformTypes.h"
+#include "Core/Platform/WinCompat.h"
 struct OBJECT;
 
 #define MAX_CHANNEL 4

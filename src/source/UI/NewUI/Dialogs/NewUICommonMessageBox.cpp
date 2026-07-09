@@ -1377,7 +1377,12 @@ bool SEASON3B::CTradeAlertMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    DWORD adwColor[4] = { RGBA(255, 178, 0, 255), RGBA(255, 178, 0, 255), RGBA(255, 178, 0, 255), RGBA(255, 32, 32, 255) };
+    DWORD adwColor[4] = {
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 32, 32, 255))
+    };
 
     for (int i = 0; i < 4; ++i)
         pMsgBox->AddMsg(I18N::Game::Lookup(371 + i), adwColor[i], MSGBOX_FONT_BOLD);

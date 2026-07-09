@@ -1394,7 +1394,7 @@ void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber
 {
     m_dwRoomNumber = dwRoomNumber;
 
-    _connection = new Connection(pszIP, 55980, true, &HandlePacketS);
+    _connection = new Connection(MU_C16(pszIP), 55980, true, &HandlePacketS);
 
     if (!_connection->IsConnected())
     {

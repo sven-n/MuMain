@@ -11,7 +11,7 @@
 
 #include "Connection.h"
 #include "DotNetMessageFormat.h"
-#include "MuLogger.h"
+#include "Core/Utilities/Log/MuLogger.h"
 
 // Full definitions required: Connection.cpp allocates these types (new PacketFunctions_*()).
 // Connection.h uses only forward declarations to avoid include-order failures in TUs

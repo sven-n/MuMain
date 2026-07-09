@@ -104,7 +104,7 @@ void	CFTPFileDownLoader::Break() // OK
 #endif
 }
 
-BOOL CFTPFileDownLoader::CreateFolder(std::wstring strFilePath) // OK
+bool CFTPFileDownLoader::CreateFolder(std::wstring strFilePath) // OK
 {
     if (GetFileAttributes(strFilePath.c_str()) == INVALID_FILE_ATTRIBUTES)
     {

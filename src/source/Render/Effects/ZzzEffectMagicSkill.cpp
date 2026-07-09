@@ -17,7 +17,7 @@
 #include "Core/Utilities/Random.h"
 
 #include <cmath>
-#include "MuRenderer.h"
+#include "Render/Renderer/MuRenderer.h"
 
 void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation,
                   float LightTop, float TextureV)

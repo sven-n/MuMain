@@ -91,7 +91,9 @@
 //c runtime
 #include <stdio.h>
 #include <stdlib.h>
+#if !defined(__APPLE__)
 #include <malloc.h>
+#endif
 #include <memory.h>
 #include <assert.h>
 #include <time.h>
@@ -173,6 +175,8 @@
 #include "Core/Globals/_enum.h"
 #include "Core/Globals/_types.h"
 #include "Core/Globals/_struct.h"
+#include "Dotnet/PacketFunctions_CommonEnums.h"
+#include "Dotnet/PacketFunctions_ClientToServer_Enums.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "UI/Legacy/UIDefaultBase.h"

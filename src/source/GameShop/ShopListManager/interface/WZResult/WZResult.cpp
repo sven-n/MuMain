@@ -23,7 +23,7 @@ WZResult::~WZResult() // OK
 {
 }
 
-BOOL WZResult::IsSuccess() // OK
+bool WZResult::IsSuccess() // OK
 {
     return !this->m_dwErrorCode && !this->m_dwWindowErrorCode;
 }

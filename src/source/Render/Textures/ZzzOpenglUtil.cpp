@@ -1153,6 +1153,32 @@ void EndRenderColor()
     glEnable(GL_TEXTURE_2D);
 }
 
+void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor)
+{
+    DisableTexture();
+
+    x = ConvertX(x);
+    y = ConvertY(y);
+    Width = ConvertX(Width);
+    Height = ConvertY(Height);
+
+    const GLubyte alpha = static_cast<GLubyte>((argbColor >> 24) & 0xffu);
+    const GLubyte red = static_cast<GLubyte>((argbColor >> 16) & 0xffu);
+    const GLubyte green = static_cast<GLubyte>((argbColor >> 8) & 0xffu);
+    const GLubyte blue = static_cast<GLubyte>(argbColor & 0xffu);
+
+    y = WindowHeight - y;
+
+    glColor4ub(red, green, blue, alpha);
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(x, y);
+    glVertex2f(x, y - Height);
+    glVertex2f(x + Width, y - Height);
+    glVertex2f(x + Width, y);
+    glEnd();
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, unsigned int color)
 {
     x = ConvertX(x);

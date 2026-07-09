@@ -10,7 +10,7 @@
 
 inline POINT MakePos(long x, long y)
 {
-    POINT pos = {x, y};
+    POINT pos = {static_cast<LONG>(x), static_cast<LONG>(y)};
     return pos;
 }
 inline SIZE MakeSize(int cx, int cy)

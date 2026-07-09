@@ -35,6 +35,7 @@ protected:
 
     WZResult FileDownLoad();
     WZResult FileDownLoadImpl();
+    static unsigned int __stdcall RunFileDownLoadThread(LPVOID pParam);
 
     virtual WZResult LoadScript(bool bDonwLoad) = 0;
 

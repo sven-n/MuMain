@@ -6,7 +6,7 @@
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "w_BuffStateValueControl.h"
 #include "w_BuffScriptLoader.h"
-#include "_GlobalFunctions.h"
+#include "Core/Utilities/_GlobalFunctions.h"
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////

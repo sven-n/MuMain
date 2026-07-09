@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "w_Buff.h"
 #include "w_BuffScriptLoader.h"
-#include "_GlobalFunctions.h"
+#include "Core/Utilities/_GlobalFunctions.h"
 
 namespace
 {
