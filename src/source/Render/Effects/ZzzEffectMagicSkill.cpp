@@ -17,8 +17,10 @@
 #include "Core/Utilities/Random.h"
 
 #include <cmath>
+#include "MuRenderer.h"
 
-void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation, float LightTop, float TextureV)
+void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation,
+                  float LightTop, float TextureV)
 {
     BindTexture(Type);
 
@@ -61,18 +63,25 @@ void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float Scal
         VectorRotate(p, Matrix1, Position[3]);
         VectorAdd(ObjectPosition, Position[3], Position[3]);
 
-        glBegin(GL_QUADS);
+        mu::Vertex3D quadVerts[4];
         for (int i = 0; i < 4; i++)
         {
-            glTexCoord2f(UV[i][0], UV[i][1] + TextureV);
-            glColor3fv(Light[i]);
-            glVertex3fv(Position[i]);
+            auto r = static_cast<uint8_t>(Light[i][0] * 255.f);
+            auto g = static_cast<uint8_t>(Light[i][1] * 255.f);
+            auto b = static_cast<uint8_t>(Light[i][2] * 255.f);
+            uint32_t color = (0xFFu << 24) | (b << 16) | (g << 8) | r;
+            quadVerts[i] = {Position[i][0], Position[i][1],      Position[i][2], 0.f, 0.f, 1.f,
+                            UV[i][0],       UV[i][1] + TextureV, color};
         }
-        glEnd();
+        mu::Vertex3D triVerts[6] = {
+            quadVerts[0], quadVerts[1], quadVerts[2], quadVerts[0], quadVerts[2], quadVerts[3],
+        };
+        mu::GetRenderer().RenderTriangles(triVerts, 0);
     }
 }
 
-void RenderCircle2D(int Type, vec3_t ScreenPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation, float TextureV, float TextureVScale)
+void RenderCircle2D(int Type, vec3_t ScreenPosition, float ScaleBottom, float ScaleTop, float Height, float Rotation,
+                    float TextureV, float TextureVScale)
 {
     vec3_t ObjectPosition;
     VectorCopy(ScreenPosition, ObjectPosition);
@@ -104,12 +113,14 @@ void RenderCircle2D(int Type, vec3_t ScreenPosition, float ScaleBottom, float Sc
         vec3_t p, Position[4];
         Vector(0.f, ScaleBottom, 0.f, p);
         VectorRotate(p, Matrix1, Position[0]);
-        Luminosity = 0.5f + 0.5f * (-Position[0][0] - Position[0][2]) / sqrtf(Position[0][0] * Position[0][0] + Position[0][2] * Position[0][2]);
+        Luminosity = 0.5f + 0.5f * (-Position[0][0] - Position[0][2]) /
+                                sqrtf(Position[0][0] * Position[0][0] + Position[0][2] * Position[0][2]);
         Vector(Luminosity, Luminosity, Luminosity, Light[0]);
         VectorCopy(Light[0], Light[3]);
         Vector(0.f, ScaleBottom, 0.f, p);
         VectorRotate(p, Matrix2, Position[1]);
-        Luminosity = 0.5f + 0.5f * (-Position[1][0] - Position[1][2]) / sqrtf(Position[1][0] * Position[1][0] + Position[1][2] * Position[1][2]);
+        Luminosity = 0.5f + 0.5f * (-Position[1][0] - Position[1][2]) /
+                                sqrtf(Position[1][0] * Position[1][0] + Position[1][2] * Position[1][2]);
         Vector(Luminosity, Luminosity, Luminosity, Light[1]);
         VectorCopy(Light[1], Light[2]);
         Vector(0.f, ScaleTop, Height, p);
@@ -117,15 +128,17 @@ void RenderCircle2D(int Type, vec3_t ScreenPosition, float ScaleBottom, float Sc
         Vector(0.f, ScaleTop, Height, p);
         VectorRotate(p, Matrix1, Position[3]);
 
-        glBegin(GL_QUADS);
+        mu::Vertex2D quadVerts[4];
         for (int i = 0; i < 4; i++)
         {
-            glTexCoord2f(UV[i][0], UV[i][1] + TextureV);
-            glColor3fv(Light[i]);
             VectorAdd(ObjectPosition, Position[i], Position[i]);
-            glVertex2f(Position[i][0], Position[i][1]);
+            auto cr = static_cast<std::uint32_t>(Light[i][0] * 255.f);
+            auto cg = static_cast<std::uint32_t>(Light[i][1] * 255.f);
+            auto cb = static_cast<std::uint32_t>(Light[i][2] * 255.f);
+            quadVerts[i] = {Position[i][0], Position[i][1], UV[i][0], UV[i][1] + TextureV,
+                            (255u << 24) | (cb << 16) | (cg << 8) | cr};
         }
-        glEnd();
+        mu::GetRenderer().RenderQuad2D(std::span<const mu::Vertex2D>(quadVerts, 4), 0);
     }
 }
 
@@ -135,13 +148,13 @@ void CreateMagicShiny(CHARACTER* c, int Hand)
     BMD* b = &Models[o->Type];
     vec3_t p, Position;
     Vector(0.f, 0.f, 0.f, p);
-    //for(int i=0;i<1;i++)
+    // for(int i=0;i<1;i++)
     {
         b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-        //VectorCopy(o->Position,Position);
-        //Position[2] += 140.f;
+        // VectorCopy(o->Position,Position);
+        // Position[2] += 140.f;
         vec3_t Light;
-        //Vector(o->Alpha,o->Alpha,o->Alpha,Light);
+        // Vector(o->Alpha,o->Alpha,o->Alpha,Light);
         Vector(1.f, 0.5f, 0.2f, Light);
         CreateParticle(BITMAP_SHINY + 1, Position, o->Angle, Light, Hand + 0, 0.f, o);
         CreateParticle(BITMAP_SHINY + 1, Position, o->Angle, Light, Hand + 2, 0.f, o);
@@ -171,8 +184,7 @@ void CreateTeleportEnd(OBJECT* o)
 
 extern int CurrentSkill;
 
-void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to,
-    WORD SkillIndex, WORD Skill, WORD SKKey)
+void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skill, WORD SKKey)
 {
     vec3_t ArrowPos;
     VectorCopy(o->Position, ArrowPos);
@@ -218,46 +230,88 @@ void CreateArrow(CHARACTER* c, OBJECT* o, OBJECT* to,
     {
         switch (Right)
         {
-        case MODEL_CROSSBOW:CreateEffect(MODEL_ARROW_STEEL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_GOLDEN_CROSSBOW:CreateEffect(MODEL_ARROW_STEEL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_ARQUEBUS:CreateEffect(MODEL_ARROW_SAW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_LIGHT_CROSSBOW:CreateEffect(MODEL_ARROW_LASER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SERPENT_CROSSBOW:CreateEffect(MODEL_ARROW_THUNDER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_BLUEWING_CROSSBOW:CreateEffect(MODEL_ARROW_WING, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_AQUAGOLD_CROSSBOW:CreateEffect(MODEL_ARROW_BOMB, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SAINT_CROSSBOW:CreateEffect(MODEL_ARROW_DOUBLE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_DIVINE_CB_OF_ARCHANGEL:
-            CreateEffect(MODEL_ARROW_BEST_CROSSBOW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+        case MODEL_CROSSBOW:
+            CreateEffect(MODEL_ARROW_STEEL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
             break;
-        case MODEL_GREAT_REIGN_CROSSBOW:CreateEffect(MODEL_ARROW_DRILL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_GOLDEN_CROSSBOW:
+            CreateEffect(MODEL_ARROW_STEEL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_ARQUEBUS:
+            CreateEffect(MODEL_ARROW_SAW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_LIGHT_CROSSBOW:
+            CreateEffect(MODEL_ARROW_LASER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_SERPENT_CROSSBOW:
+            CreateEffect(MODEL_ARROW_THUNDER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_BLUEWING_CROSSBOW:
+            CreateEffect(MODEL_ARROW_WING, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_AQUAGOLD_CROSSBOW:
+            CreateEffect(MODEL_ARROW_BOMB, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_SAINT_CROSSBOW:
+            CreateEffect(MODEL_ARROW_DOUBLE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_DIVINE_CB_OF_ARCHANGEL:
+            CreateEffect(MODEL_ARROW_BEST_CROSSBOW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex,
+                         Skill);
+            break;
+        case MODEL_GREAT_REIGN_CROSSBOW:
+            CreateEffect(MODEL_ARROW_DRILL, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
         }
         switch (Left)
         {
-        case MODEL_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SMALL_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_ELVEN_BOW:CreateEffect(MODEL_ARROW_V, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_BATTLE_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_TIGER_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SILVER_BOW:CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_CHAOS_NATURE_BOW:CreateEffect(MODEL_ARROW_NATURE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_CELESTIAL_BOW:CreateEffect(MODEL_ARROW_HOLY, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_ARROW_VIPER_BOW:CreateEffect(MODEL_LACEARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_SYLPH_WIND_BOW:CreateEffect(MODEL_ARROW_SPARK, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_ALBATROSS_BOW:CreateEffect(MODEL_ARROW_RING, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_STINGER_BOW:CreateEffect(MODEL_ARROW_DARKSTINGER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
-        case MODEL_AIR_LYN_BOW:CreateEffect(MODEL_ARROW_GAMBLE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill); break;
+        case MODEL_BOW:
+            CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_SMALL_BOW:
+            CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_ELVEN_BOW:
+            CreateEffect(MODEL_ARROW_V, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_BATTLE_BOW:
+            CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_TIGER_BOW:
+            CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_SILVER_BOW:
+            CreateEffect(MODEL_ARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_CHAOS_NATURE_BOW:
+            CreateEffect(MODEL_ARROW_NATURE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_CELESTIAL_BOW:
+            CreateEffect(MODEL_ARROW_HOLY, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_ARROW_VIPER_BOW:
+            CreateEffect(MODEL_LACEARROW, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_SYLPH_WIND_BOW:
+            CreateEffect(MODEL_ARROW_SPARK, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_ALBATROSS_BOW:
+            CreateEffect(MODEL_ARROW_RING, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
+        case MODEL_STINGER_BOW:
+            CreateEffect(MODEL_ARROW_DARKSTINGER, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex,
+                         Skill);
+            break;
+        case MODEL_AIR_LYN_BOW:
+            CreateEffect(MODEL_ARROW_GAMBLE, ArrowPos, o->Angle, o->Light, SubType, o, o->PKKey, SkillIndex, Skill);
+            break;
         }
     }
 }
 
 void CreateArrows(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Skill, WORD SKKey)
 {
-    if (SKKey == AT_SKILL_PENETRATION
-        || SKKey == AT_SKILL_PENETRATION_STR
-        || SKKey == AT_SKILL_ICE_ARROW
-        || SKKey == AT_SKILL_ICE_ARROW_STR
-        || SKKey == AT_SKILL_DEEPIMPACT
-        )
+    if (SKKey == AT_SKILL_PENETRATION || SKKey == AT_SKILL_PENETRATION_STR || SKKey == AT_SKILL_ICE_ARROW ||
+        SKKey == AT_SKILL_ICE_ARROW_STR || SKKey == AT_SKILL_DEEPIMPACT)
     {
         CreateArrow(c, o, to, SkillIndex, Skill, SKKey);
         CharacterMachine->PacketSerial++;
@@ -266,22 +320,19 @@ void CreateArrows(CHARACTER* c, OBJECT* o, OBJECT* to, WORD SkillIndex, WORD Ski
     {
         if (Skill == 1)
         {
-            if (c->Weapon[0].Type == MODEL_DIVINE_CB_OF_ARCHANGEL
-                || c->Weapon[0].Type == MODEL_GREAT_REIGN_CROSSBOW
-                || c->Weapon[1].Type == MODEL_ALBATROSS_BOW
-                || c->Weapon[1].Type == MODEL_STINGER_BOW
-                || c->Weapon[1].Type == MODEL_AIR_LYN_BOW
-                )
+            if (c->Weapon[0].Type == MODEL_DIVINE_CB_OF_ARCHANGEL || c->Weapon[0].Type == MODEL_GREAT_REIGN_CROSSBOW ||
+                c->Weapon[1].Type == MODEL_ALBATROSS_BOW || c->Weapon[1].Type == MODEL_STINGER_BOW ||
+                c->Weapon[1].Type == MODEL_AIR_LYN_BOW)
             {
-                o->Angle[2] += 5.f;//15.f;//7.5f;
+                o->Angle[2] += 5.f; // 15.f;//7.5f;
                 CreateArrow(c, o, to, SkillIndex, Skill, SKKey);
-                o->Angle[2] += 10.f;//15.f;//7.5f;
+                o->Angle[2] += 10.f; // 15.f;//7.5f;
                 CreateArrow(c, o, to, SkillIndex, Skill, SKKey);
-                o->Angle[2] -= 20.f;//45.f;//22.5f;
+                o->Angle[2] -= 20.f; // 45.f;//22.5f;
                 CreateArrow(c, o, to, SkillIndex, Skill, SKKey);
-                o->Angle[2] -= 10.f;//15.f;//7.5f;
+                o->Angle[2] -= 10.f; // 15.f;//7.5f;
                 CreateArrow(c, o, to, SkillIndex, Skill, SKKey);
-                o->Angle[2] += 30.f;//30.f;//15.f;
+                o->Angle[2] += 30.f; // 30.f;//15.f;
                 CharacterMachine->PacketSerial++;
             }
             else

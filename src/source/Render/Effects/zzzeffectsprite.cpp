@@ -36,7 +36,7 @@ float UpdateAnimationFrame(float currentFrame, bool isVisible)
 }
 } // namespace
 
-OBJECT	Sprites[MAX_SPRITES];
+OBJECT Sprites[MAX_SPRITES];
 
 int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation, int SubType)
 {
@@ -78,39 +78,48 @@ void RenderSprite(OBJECT* o, OBJECT* Owner)
     if (o->Type == BITMAP_FORMATION_MARK)
     {
         float u = 0.0f, v = 0.0f, uw, vw;
-        uw = 0.33f; vw = 0.33f;
+        uw = 0.33f;
+        vw = 0.33f;
         switch (o->SubType)
         {
         case 0:
-            u = 0.f; v = 0.f;
+            u = 0.f;
+            v = 0.f;
             break;
 
         case 1:
-            u = 0.33f; v = 0.f;
+            u = 0.33f;
+            v = 0.f;
             break;
 
         case 2:
-            u = 0.66f; v = 0.f;
+            u = 0.66f;
+            v = 0.f;
             break;
 
         case 3:
-            u = 0.f; v = 0.33f;
+            u = 0.f;
+            v = 0.33f;
             break;
 
         case 4:
-            u = 0.33f; v = 0.33f;
+            u = 0.33f;
+            v = 0.33f;
             break;
 
         case 5:
-            u = 0.66f; v = 0.33f;
+            u = 0.66f;
+            v = 0.33f;
             break;
 
         case 6:
-            u = 0.f; v = 0.66f;
+            u = 0.f;
+            v = 0.66f;
             break;
 
         case 7:
-            u = 0.33f; v = 0.66f;
+            u = 0.33f;
+            v = 0.66f;
             break;
         }
 
