@@ -1,0 +1,8 @@
+--enable=warning,performance,portability
+--std=c++20
+--suppress=missingInclude
+--suppress=unmatchedSuppression
+--suppress=unusedFunction
+--inline-suppr
+-i ThirdParty/
+--platform=win32W
