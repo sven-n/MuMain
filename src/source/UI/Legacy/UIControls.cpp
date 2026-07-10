@@ -6108,7 +6108,7 @@ void CUIInGameShopListBox::AddText(IGS_StorageItem& _StorageItem)
     wcsncpy(sItem.m_szName, _StorageItem.m_szName, MAX_TEXT_LENGTH);
     wcsncpy(sItem.m_szNum, _StorageItem.m_szNum, MAX_TEXT_LENGTH);
     wcsncpy(sItem.m_szPeriod, _StorageItem.m_szPeriod, MAX_TEXT_LENGTH);
-    wcsncpy(&(sItem.m_szType), &(_StorageItem.m_szType), sizeof(wchar_t));
+    sItem.m_szType = _StorageItem.m_szType;
     wcsncpy(sItem.m_szSendUserName, _StorageItem.m_szSendUserName, MAX_USERNAME_SIZE + 1);
     wcsncpy(sItem.m_szMessage, _StorageItem.m_szMessage, MAX_GIFT_MESSAGE_SIZE);
 

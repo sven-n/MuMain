@@ -42,7 +42,7 @@ typedef int       BOOL;
 typedef float     FLOAT;
 typedef char      CHAR;
 typedef unsigned char UCHAR;
-typedef wchar_t   WCHAR;  // NOTE: 32-bit here vs 16-bit on Windows; the wchar_t width migration is Phase 2.
+typedef wchar_t   WCHAR;  // 32-bit here vs 16-bit on Windows; width handled at the .NET interop boundary (#462).
 typedef void      VOID;
 typedef DWORD     COLORREF;
 
