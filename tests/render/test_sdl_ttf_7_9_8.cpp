@@ -119,7 +119,7 @@ TTF_Font* OpenSystemFont(float ptSize)
 #endif // MU_ENABLE_SDL3
 
 // GREEN PHASE: Include the constexpr header directly (replaces RED-phase forward declaration).
-#include "../../src/source/ThirdParty/SDLTtfColorPack.h"
+#include "Render/Text/SDLTtfColorPack.h"
 
 // ---------------------------------------------------------------------------
 // AC-3: Color packing — SetTextColor / SetBgColor storage contract

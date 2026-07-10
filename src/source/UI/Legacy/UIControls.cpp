@@ -6,6 +6,9 @@
 #include "Core/Time/FrameTimerScheduler.h"
 #include "GameLogic/Items/CComGem.h"
 #include "UIControls.h"
+#ifdef MU_ENABLE_SDL3
+#include "Render/Text/CUIRenderTextSDLTtf.h"
+#endif
 #include "UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -2555,7 +2558,11 @@ bool CUIRenderText::Create(HDC hDC)
         return true;
     }
 
+#ifdef MU_ENABLE_SDL3
+    m_pRenderText = std::make_unique<CUIRenderTextSDLTtf>();
+#else
     m_pRenderText = std::make_unique<CUIRenderTextOriginal>();
+#endif
     if (!m_pRenderText->Create(hDC))
     {
         m_pRenderText.reset();
@@ -2590,7 +2597,7 @@ DWORD CUIRenderText::GetTextColor() const
 DWORD CUIRenderText::GetBgColor() const
 {
     if (m_pRenderText)
-        m_pRenderText->GetBgColor();
+        return m_pRenderText->GetBgColor();
     return 0;
 }
 

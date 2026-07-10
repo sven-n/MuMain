@@ -1,6 +1,7 @@
 mu_add_test(
     NAME test_text_line_wrap
     SOURCES
+        test_sdl_ttf_color.cpp
         test_text_line_wrap.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Core/Text/TextLineWrap.cpp
 )

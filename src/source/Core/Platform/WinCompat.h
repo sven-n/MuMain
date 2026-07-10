@@ -77,12 +77,12 @@ inline std::u16string mu_wchar_to_char16(const wchar_t* text)
 
 #define MU_C16(s) mu_wchar_to_char16(s).c_str()
 
-inline std::string mu_wchar_to_utf8(const wchar_t* text)
+inline void mu_wchar_to_utf8(const wchar_t* text, std::string& result)
 {
-    std::string result;
+    result.clear();
     if (text == nullptr)
     {
-        return result;
+        return;
     }
 
     for (const wchar_t* p = text; *p; ++p)
@@ -111,6 +111,12 @@ inline std::string mu_wchar_to_utf8(const wchar_t* text)
             result.push_back(static_cast<char>(0x80 | (ch & 0x3F)));
         }
     }
+}
+
+inline std::string mu_wchar_to_utf8(const wchar_t* text)
+{
+    std::string result;
+    mu_wchar_to_utf8(text, result);
     return result;
 }
 
