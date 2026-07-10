@@ -249,6 +249,11 @@ public:
     {
         (void)textureId;
     }
+    [[nodiscard]] virtual bool IsTextureRegistered(std::uint32_t textureId) const
+    {
+        (void)textureId;
+        return false;
+    }
 
     // -----------------------------------------------------------------------
     // Story 7-9-6: GL state migration — replaces raw OpenGL calls.

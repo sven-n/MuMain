@@ -1978,6 +1978,11 @@ public:
 #endif
     }
 
+    [[nodiscard]] bool IsTextureRegistered(std::uint32_t textureId) const override
+    {
+        return LookupTexture(textureId) != nullptr;
+    }
+
     // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
     [[nodiscard]] const char* GetGPUDriverName() const override
     {

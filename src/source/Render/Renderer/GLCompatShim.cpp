@@ -54,7 +54,9 @@ float s_u = 0.0f;
 float s_v = 0.0f;
 std::uint32_t s_color = 0xFFFFFFFFu;
 std::uint32_t s_boundTexture = 0;
-MUCompatGLuint s_nextTexture = 1;
+constexpr MUCompatGLuint kFirstDynamicTextureId = 0x40000000u;
+constexpr MUCompatGLuint kLastDynamicTextureId = 0x7FFFFFFFu;
+MUCompatGLuint s_nextTexture = kFirstDynamicTextureId;
 bool s_depthTest = false;
 bool s_texture2D = true;
 bool s_blend = false;
@@ -72,6 +74,22 @@ bool s_stencil = false;
 {
     return (static_cast<std::uint32_t>(a) << 24) | (static_cast<std::uint32_t>(b) << 16) |
            (static_cast<std::uint32_t>(g) << 8) | static_cast<std::uint32_t>(r);
+}
+
+[[nodiscard]] MUCompatGLuint AllocateDynamicTextureId()
+{
+    const MUCompatGLuint firstCandidate = s_nextTexture;
+    do
+    {
+        const MUCompatGLuint candidate = s_nextTexture;
+        s_nextTexture = candidate == kLastDynamicTextureId ? kFirstDynamicTextureId : candidate + 1u;
+        if (!mu::GetRenderer().IsTextureRegistered(candidate))
+        {
+            return candidate;
+        }
+    } while (s_nextTexture != firstCandidate);
+
+    return 0u;
 }
 
 void PushVertex(float x, float y, float z)
@@ -293,7 +311,23 @@ void mu_glGetIntegerv(MUCompatGLenum, MUCompatGLint* data)
 void mu_glViewport(MUCompatGLint x, MUCompatGLint y, MUCompatGLsizei width, MUCompatGLsizei height) { mu::GetRenderer().SetViewport(x, y, width, height); }
 void mu_glLineWidth(MUCompatGLfloat) {}
 void mu_glBindTexture(MUCompatGLenum, MUCompatGLuint texture) { s_boundTexture = texture; mu::GetRenderer().BindTexture(static_cast<int>(texture)); }
-void mu_glGenTextures(MUCompatGLsizei n, MUCompatGLuint* textures) { for (int i = 0; i < n; ++i) textures[i] = s_nextTexture++; }
+void mu_glGenTextures(MUCompatGLsizei n, MUCompatGLuint* textures)
+{
+    if (n <= 0 || textures == nullptr)
+    {
+        return;
+    }
+
+    for (int i = 0; i < n; ++i)
+    {
+        textures[i] = AllocateDynamicTextureId();
+        if (textures[i] == 0u)
+        {
+            std::fill(textures + i, textures + n, 0u);
+            return;
+        }
+    }
+}
 void mu_glDeleteTextures(MUCompatGLsizei n, const MUCompatGLuint* textures)
 {
     if (!textures)
