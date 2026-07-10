@@ -164,7 +164,7 @@ void CheckHack()
     }
 }
 
-GLvoid KillGLWindow(GLvoid)
+static void ShutdownRendererWindow()
 {
     // Release the bridged GDI DC obtained from the SDL window.
     if (g_hDC)
@@ -219,11 +219,6 @@ static void MaybeCaptureFrame()
     }
 }
 #endif
-
-// Legacy presentation hook. SDL_gpu presents in mu::GetRenderer().EndFrame().
-void PlatformSwapBuffers()
-{
-}
 
 // Monitor refresh rate (Hz) for the display the window is on, via SDL instead
 // of the Win32 GetDeviceCaps(VREFRESH) (issue #442). Falls back to 60.
@@ -1421,7 +1416,7 @@ static void ShutdownRuntime(std::thread& cpuUsageRecorder)
     // textures referenced by it. This keeps Metal teardown deterministic.
     mu::WaitForSDLGpuIdle();
     DestroyWindow();
-    KillGLWindow();
+    ShutdownRendererWindow();
     SDL_Quit();
 }
 
@@ -1568,7 +1563,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     if (!mu::InitSDLGpuRenderer(g_sdlWindow))
     {
         g_ErrorReport.Write(L"SDL_gpu renderer init failed.\r\n");
-        KillGLWindow();
+        ShutdownRendererWindow();
         MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"SDL_gpu Renderer Error.", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }

@@ -1043,7 +1043,6 @@ void MainScene(HDC hDC)
                 EndBitmap();
             }
 #endif
-            PlatformSwapBuffers();
         }
 
         CheckServerConnection();
@@ -1051,10 +1050,9 @@ void MainScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        // Log exception in MainScene
-        char errorMsg[256];
-        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in MainScene: %s", e.what());
-        OutputDebugStringA(errorMsg);
+        wchar_t errorMessage[256] = {};
+        mbstowcs(errorMessage, e.what(), 255);
+        g_ErrorReport.Write(L"Exception in MainScene: %ls\r\n", errorMessage);
     }
 }
 
@@ -1090,15 +1088,14 @@ void RenderScene(HDC hDC)
 
         if (g_iNoMouseTime > 31)
         {
-            KillGLWindow();
+            Destroy = true;
         }
     }
     catch (const std::exception& e)
     {
-        // Log exception in RenderScene
-        char errorMsg[256];
-        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in RenderScene: %s", e.what());
-        OutputDebugStringA(errorMsg);
+        wchar_t errorMessage[256] = {};
+        mbstowcs(errorMessage, e.what(), 255);
+        g_ErrorReport.Write(L"Exception in RenderScene: %ls\r\n", errorMessage);
     }
 
     // SDL may deliver button-down and button-up in one event batch. Keep these
