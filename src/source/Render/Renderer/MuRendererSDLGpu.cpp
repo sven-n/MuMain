@@ -2341,6 +2341,8 @@ public:
     void SetFogEnabled(bool enabled) override
     {
         m_fogEnabled = enabled;
+        m_fogUniform.fogEnabled = enabled ? 1u : 0u;
+        s_fogDirty = true;
     }
     void BindTexture(int texId) override
     {
@@ -2350,12 +2352,13 @@ public:
     void SetFog(const FogParams& params) override
     {
         m_fogParams = params;
+        m_fogEnabled = params.mode != 0;
 
         // Map GL-style FogParams (mode/start/end/density/color) to the
         // HLSL FogUniforms cbuffer layout used by basic_textured.frag.hlsl.
         // fogEnabled: true when mode != 0 (mode 0 = no fog / GL_LINEAR from caller).
         // alphaDiscardEnabled / alphaThreshold: not in FogParams; default off.
-        m_fogUniform.fogEnabled = (params.mode != 0) ? 1u : 0u;
+        m_fogUniform.fogEnabled = m_fogEnabled ? 1u : 0u;
         // Story 7.9.7: Preserve alpha discard state — SetFog must NOT reset
         // alphaDiscardEnabled/alphaThreshold set by SetAlphaTest/SetAlphaFunc.
         m_fogUniform.pad0 = 0.0f;

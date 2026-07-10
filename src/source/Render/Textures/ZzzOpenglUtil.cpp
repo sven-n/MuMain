@@ -568,9 +568,6 @@ void BeginOpengl(int x, int y, int Width, int Height)
     glAlphaFunc(GL_GREATER, 0.25f);
     if (FogEnable)
     {
-        glEnable(GL_FOG);
-        glFogi(GL_FOG_MODE, GL_LINEAR);
-
         // Fog scales dynamically with view distance (g_Camera.ViewFar) so it
         // stays at consistent percentages when zooming. The actual GL far clip
         // plane is at g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER (1.4 — see
@@ -591,14 +588,20 @@ void BeginOpengl(int x, int y, int Width, int Height)
         }
 #endif
 
-        glFogf(GL_FOG_START, fogStart);
-        glFogf(GL_FOG_END, fogEnd);
-
-        glFogfv(GL_FOG_COLOR, FogColor);
+        mu::FogParams fogParams{};
+        fogParams.mode = GL_LINEAR;
+        fogParams.start = fogStart;
+        fogParams.end = fogEnd;
+        fogParams.density = FogDensity;
+        fogParams.color[0] = FogColor[0];
+        fogParams.color[1] = FogColor[1];
+        fogParams.color[2] = FogColor[2];
+        fogParams.color[3] = FogColor[3];
+        mu::GetRenderer().SetFog(fogParams);
     }
     else
     {
-        glDisable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(false);
     }
 
     CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);

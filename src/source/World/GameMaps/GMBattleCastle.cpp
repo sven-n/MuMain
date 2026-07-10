@@ -9,6 +9,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -572,17 +573,20 @@ namespace battleCastle
 
     void    StartFog(vec3_t Color)
     {
-        glEnable(GL_FOG);
-
-        glFogfv(GL_FOG_COLOR, Color);
-        glFogf(GL_FOG_MODE, GL_LINEAR);
-        glFogf(GL_FOG_START, 2000.f);
-        glFogf(GL_FOG_END, 2700.f);
+        mu::FogParams fogParams{};
+        fogParams.mode = GL_LINEAR;
+        fogParams.start = 2000.f;
+        fogParams.end = 2700.f;
+        fogParams.color[0] = Color[0];
+        fogParams.color[1] = Color[1];
+        fogParams.color[2] = Color[2];
+        fogParams.color[3] = 1.0f;
+        mu::GetRenderer().SetFog(fogParams);
     }
 
     void    EndFog(void)
     {
-        glDisable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(false);
     }
 
     void    RenderBaseSmoke(void)

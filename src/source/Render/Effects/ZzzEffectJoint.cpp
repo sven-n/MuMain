@@ -14,6 +14,10 @@
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Pets/CSPetSystem.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
+
+using mu::PackABGR;
 
 extern float g_fBoneSave[10][3][4];
 
@@ -7064,14 +7068,17 @@ void RenderJoints(BYTE bRenderOneMore)
                 {
                     float Luminosity = ((float)((o->MaxTails - j) / (float)(o->MaxTails)) * 2);
                     Luminosity *= powf(o->Light[0], FPS_ANIMATION_FACTOR);
-                    glColor3f(Luminosity, Luminosity, Luminosity);
 
-                    glBegin(GL_QUADS);
-                    glTexCoord2f(Light1, 0.f); glVertex3fv(currentTail[0]);
-                    glTexCoord2f(Light1, 1.f); glVertex3fv(currentTail[1]);
-                    glTexCoord2f(Light2, 1.f); glVertex3fv(nextTail[1]);
-                    glTexCoord2f(Light2, 0.f); glVertex3fv(nextTail[0]);
-                    glEnd();
+                    const std::uint32_t forceColor = PackABGR(Luminosity, Luminosity, Luminosity, 1.f);
+                    const mu::Vertex3D forceVerts[4] = {
+                        {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                         forceColor},
+                        {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                         forceColor},
+                        {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, forceColor},
+                        {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, forceColor},
+                    };
+                    mu::GetRenderer().RenderQuadStrip(forceVerts, static_cast<std::uint32_t>(o->TexType));
                 }
                 else
                 {
@@ -7144,23 +7151,6 @@ void RenderJoints(BYTE bRenderOneMore)
                             CreateSprite(BITMAP_FLARE_BLUE, Position, scale, Light, NULL);
                         }
                     }
-                    else if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
-                    {
-                        int tail = (int)(o->Light[2]);
-                        if (tail == j)
-                        {
-                            float l = o->Light[2] - j;
-                            glColor3f(l, l, l);
-                        }
-                        else if (tail < j)
-                        {
-                            glColor3f(0.f, 0.f, 0.f);
-                        }
-                        else
-                        {
-                            glColor3f(0.7f, 0.7f, 0.7f);
-                        }
-                    }
                     else if (o->Type == BITMAP_FLARE + 1 && o->SubType == 6)
                     {
                         if (j == 0)
@@ -7193,41 +7183,69 @@ void RenderJoints(BYTE bRenderOneMore)
                             CreateSprite(BITMAP_SHINY + 1, Position, 1.f, o->Light, NULL, (float)(rand() % 360), 3);
                         }
                     }
+                    std::uint32_t faceColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
+                    if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
+                    {
+                        int tail = (int)(o->Light[2]);
+                        if (tail == j)
+                        {
+                            float l = o->Light[2] - j;
+                            faceColor = PackABGR(l, l, l, 1.f);
+                        }
+                        else if (tail < j)
+                        {
+                            faceColor = PackABGR(0.f, 0.f, 0.f, 1.f);
+                        }
+                        else
+                        {
+                            faceColor = PackABGR(0.7f, 0.7f, 0.7f, 1.f);
+                        }
+                    }
                     else if (o->Type == BITMAP_FLARE_FORCE &&
                         ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13))
                         )
                     {
                         float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
-
-                        glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
+                        faceColor =
+                            PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
                     }
                     else if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 1)
                     {
                         float Luminosity = (1.f - ((int)o->NumTails - j) / (float)(o->NumTails)) * 2.f;
-
-                        glColor3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
+                        faceColor =
+                            PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
                     }
 #ifdef GUILD_WAR_EVENT
                     if (o->Type == BITMAP_FLARE && o->SubType == 22)
                     {
                         vec3_t t_bias;
                         VectorSubtract(o->Target->Position, o->StartPosition, t_bias);
-                        glMatrixMode(GL_MODELVIEW);
-                        glPushMatrix();
-                        glTranslatef(t_bias[0], t_bias[1], t_bias[2]);
+                        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+                        mu::GetRenderer().PushMatrix();
+                        mu::GetRenderer().Translate(t_bias[0], t_bias[1], t_bias[2]);
 
-                        glBegin(GL_QUADS);
-                        glTexCoord2f(Light1, 1.f); glVertex3fv(currentTail[2]);
-                        glTexCoord2f(Light1, 0.f); glVertex3fv(currentTail[3]);
-                        glTexCoord2f(Light2, 0.f); glVertex3fv(o->Tails[j + 1][3]);
-                        glTexCoord2f(Light2, 1.f); glVertex3fv(o->Tails[j + 1][2]);
-                        glTexCoord2f(Light1, 0.f); glVertex3fv(currentTail[0]);
-                        glTexCoord2f(Light1, 1.f); glVertex3fv(currentTail[1]);
-                        glTexCoord2f(Light2, 1.f); glVertex3fv(o->Tails[j + 1][1]);
-                        glTexCoord2f(Light2, 0.f); glVertex3fv(o->Tails[j + 1][0]);
-                        glEnd();
+                        const std::uint32_t guildColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
+                        const mu::Vertex3D guildFace1[4] = {
+                            {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                             guildColor},
+                            {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                             guildColor},
+                            {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
+                            {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
+                        };
+                        mu::GetRenderer().RenderQuadStrip(guildFace1, static_cast<std::uint32_t>(o->TexType));
 
-                        glPopMatrix();
+                        const mu::Vertex3D guildFace2[4] = {
+                            {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                             guildColor},
+                            {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                             guildColor},
+                            {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
+                            {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
+                        };
+                        mu::GetRenderer().RenderQuadStrip(guildFace2, static_cast<std::uint32_t>(o->TexType));
+
+                        mu::GetRenderer().PopMatrix();
                         continue;
                     }
 #endif //GUILD_WAR_EVENT
@@ -7249,12 +7267,13 @@ void RenderJoints(BYTE bRenderOneMore)
 
                     if ((o->RenderFace & RENDER_FACE_ONE) == RENDER_FACE_ONE)
                     {
-                        glBegin(GL_QUADS);
-                        glTexCoord2f(L1, V2); glVertex3fv(currentTail[2]);
-                        glTexCoord2f(L1, V1); glVertex3fv(currentTail[3]);
-                        glTexCoord2f(L2, V1); glVertex3fv(nextTail[3]);
-                        glTexCoord2f(L2, V2); glVertex3fv(nextTail[2]);
-                        glEnd();
+                        const mu::Vertex3D faceOneVerts[4] = {
+                            {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
+                            {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
+                            {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
+                            {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
+                        };
+                        mu::GetRenderer().RenderQuadStrip(faceOneVerts, static_cast<std::uint32_t>(o->TexType));
                     }
 
                     if ((o->RenderFace & RENDER_FACE_TWO) == RENDER_FACE_TWO)
@@ -7264,12 +7283,13 @@ void RenderJoints(BYTE bRenderOneMore)
                             L1 += Scroll * 2.f;
                             L2 += Scroll * 2.f;
                         }
-                        glBegin(GL_QUADS);
-                        glTexCoord2f(L1, V1); glVertex3fv(currentTail[0]);
-                        glTexCoord2f(L1, V2); glVertex3fv(currentTail[1]);
-                        glTexCoord2f(L2, V2); glVertex3fv(nextTail[1]);
-                        glTexCoord2f(L2, V1); glVertex3fv(nextTail[0]);
-                        glEnd();
+                        const mu::Vertex3D faceTwoVerts[4] = {
+                            {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
+                            {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
+                            {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
+                            {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
+                        };
+                        mu::GetRenderer().RenderQuadStrip(faceTwoVerts, static_cast<std::uint32_t>(o->TexType));
                     }
                 }
             }

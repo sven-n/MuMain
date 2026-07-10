@@ -18,6 +18,10 @@
 #include "Camera/CameraMove.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
+
+using mu::PackABGR;
 
 BMD* Models;
 BMD* ModelsDump;
@@ -37,6 +41,20 @@ vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
 vec3_t RenderArrayVertices[MAX_VERTICES * 3];
 vec4_t RenderArrayColors[MAX_VERTICES * 3];
 vec2_t RenderArrayTexCoords[MAX_VERTICES * 3];
+
+namespace
+{
+std::vector<mu::Vertex3D>& GetRendererVertexScratch(std::size_t requiredVertexCount)
+{
+    static thread_local std::vector<mu::Vertex3D> vertices;
+    vertices.clear();
+    if (vertices.capacity() < requiredVertexCount)
+    {
+        vertices.reserve(requiredVertexCount);
+    }
+    return vertices;
+}
+} // namespace
 
 bool  StopMotion = false;
 float ParentMatrix[3][4];
@@ -866,12 +884,12 @@ void BMD::ReleaseLightMaps()
 
 void BMD::BeginRender(float Alpha)
 {
-    glPushMatrix();
+    mu::GetRenderer().PushMatrix();
 }
 
 void BMD::EndRender()
 {
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
 }
 
 extern double WorldTime;
@@ -885,10 +903,6 @@ void BMD::BeginRenderCoinHeap()
 
     BindTexture(textureIndex);
     DisableAlphaBlend();
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 int BMD::AddToCoinHeap(int coinIndex, int target_vertex_index)
@@ -929,17 +943,19 @@ void BMD::EndRenderCoinHeap(int coinCount)
     const auto colors = RenderArrayColors;
     const auto texCoords = RenderArrayTexCoords;
 
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glColorPointer(4, GL_FLOAT, 0, colors);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-
     constexpr int meshIndex = 0;
     Mesh_t* m = &Meshs[meshIndex];
-    glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3 * coinCount);
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    const int numVerts = m->NumTriangles * 3 * coinCount;
+    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    for (int i = 0; i < numVerts; ++i)
+    {
+        const vec4_t& c = colors[i];
+        const std::uint32_t color = PackABGR(c[0], c[1], c[2], c[3]);
+        muVerts.push_back(
+            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0], texCoords[i][1], color});
+    }
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
 void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshIndex, float blendMeshAlpha, float blendMeshTextureCoordU, float blendMeshTextureCoordV, int explicitTextureIndex)
@@ -997,7 +1013,6 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     bool enableLight = LightEnable;
     if (meshIndex == StreamMesh)
     {
-        glColor3fv(BodyLight);
         enableLight = false;
     }
     else if (enableLight)
@@ -1009,6 +1024,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     }
 
     int finalRenderFlags = renderFlags;
+    bool useBlendMeshColor = false;
     if ((renderFlags & RENDER_COLOR) == RENDER_COLOR)
     {
         finalRenderFlags = RENDER_COLOR;
@@ -1031,14 +1047,9 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
 
         DisableTexture();
-        if (alpha >= 0.99f)
-        {
-            glColor3fv(BodyLight);
-        }
-        else
+        if (alpha < 0.99f)
         {
             EnableAlphaTest();
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], alpha);
         }
     }
     else if ((renderFlags & RENDER_CHROME) == RENDER_CHROME ||
@@ -1209,10 +1220,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             DisableDepthTest();
         }
 
-        glColor3f(BodyLight[0] * blendMeshAlpha, 
-            BodyLight[1] * blendMeshAlpha,
-            BodyLight[2] * blendMeshAlpha);
-        //glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
+        useBlendMeshColor = true;
         enableLight = false;
     }
     else if ((renderFlags & RENDER_TEXTURE) == RENDER_TEXTURE)
@@ -1271,15 +1279,6 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
     }
 
-    bool enableColor = (enableLight && finalRenderFlags == RENDER_TEXTURE)
-        || finalRenderFlags == RENDER_CHROME
-        || finalRenderFlags == RENDER_CHROME4
-        || finalRenderFlags == RENDER_OIL;
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    if (enableColor) glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
     auto vertices = RenderArrayVertices;
     auto colors = RenderArrayColors;
     auto texCoords = RenderArrayTexCoords;
@@ -1295,7 +1294,14 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
             VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
 
-            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
+            const bool shadowMap = (renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP;
+            const float colorScale = useBlendMeshColor ? blendMeshAlpha : 1.0f;
+            const float baseAlpha = (useBlendMeshColor || meshIndex == StreamMesh) ? 1.0f : alpha;
+            Vector4(shadowMap ? 0.0f : BodyLight[0] * colorScale,
+                    shadowMap ? 0.0f : BodyLight[1] * colorScale,
+                    shadowMap ? 0.0f : BodyLight[2] * colorScale,
+                    baseAlpha,
+                    colors[target_vertex_index]);
 
             auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
             texCoords[target_vertex_index][0] = texco.TexCoordU;
@@ -1362,15 +1368,16 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
     }
 
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    if (enableColor) glColorPointer(4, GL_FLOAT, 0, colors);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-
-    glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3);
-
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (enableColor) glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    const int numVerts = m->NumTriangles * 3;
+    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    for (int i = 0; i < numVerts; ++i)
+    {
+        const vec4_t& c = colors[i];
+        const std::uint32_t color = PackABGR(c[0], c[1], c[2], c[3]);
+        muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0],
+                           texCoords[i][1], color});
+    }
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
 void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
@@ -1404,9 +1411,6 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
     bool EnableLight = LightEnable;
     if (i == StreamMesh)
     {
-        //vec3_t Light;
-        //Vector(1.f,1.f,1.f,Light);
-        glColor3fv(BodyLight);
         EnableLight = false;
     }
     else if (EnableLight)
@@ -1418,6 +1422,7 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
     }
 
     int Render = RenderFlag;
+    bool useBlendMeshColor = false;
     if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
     {
         Render = RENDER_COLOR;
@@ -1434,14 +1439,9 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         }
 
         DisableTexture();
-        if (Alpha >= 0.99f)
-        {
-            glColor3fv(BodyLight);
-        }
-        else
+        if (Alpha < 0.99f)
         {
             EnableAlphaTest();
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
         }
     }
     else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME ||
@@ -1592,8 +1592,7 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             DisableDepthTest();
         }
 
-        glColor3f(BodyLight[0] * BlendMeshLight, BodyLight[1] * BlendMeshLight, BodyLight[2] * BlendMeshLight);
-        //glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
+        useBlendMeshColor = true;
         EnableLight = false;
     }
     else if ((RenderFlag & RENDER_TEXTURE) == RENDER_TEXTURE)
@@ -1643,69 +1642,70 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         Render = RENDER_TEXTURE;
     }
 
-    // ver 1.0 (triangle)
-    glBegin(GL_TRIANGLES);
+    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(m->NumTriangles) * 3);
     for (int j = 0; j < m->NumTriangles; j++)
     {
         Triangle_t* tp = &m->Triangles[j];
         for (int k = 0; k < tp->Polygon; k++)
         {
             int vi = tp->VertexIndex[k];
+            int ni = tp->NormalIndex[k];
+
+            float u = 0.f;
+            float v = 0.f;
+            const float colorScale = useBlendMeshColor ? BlendMeshLight : 1.0f;
+            const float baseAlpha = (useBlendMeshColor || i == StreamMesh) ? 1.0f : Alpha;
+            std::uint32_t color = PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale,
+                                           BodyLight[2] * colorScale, baseAlpha);
+
             switch (Render)
             {
             case RENDER_TEXTURE:
             {
                 TexCoord_t* texp = &m->TexCoords[tp->TexCoordIndex[k]];
-                if (EnableWave)
-                    glTexCoord2f(texp->TexCoordU + BlendMeshTexCoordU, texp->TexCoordV + BlendMeshTexCoordV);
-                else
-                    glTexCoord2f(texp->TexCoordU, texp->TexCoordV);
+                u = EnableWave ? texp->TexCoordU + BlendMeshTexCoordU : texp->TexCoordU;
+                v = EnableWave ? texp->TexCoordV + BlendMeshTexCoordV : texp->TexCoordV;
                 if (EnableLight)
                 {
-                    int ni = tp->NormalIndex[k];
-                    if (Alpha >= 0.99f)
-                    {
-                        glColor3fv(LightTransform[i][ni]);
-                    }
-                    else
-                    {
-                        float* Light = LightTransform[i][ni];
-                        glColor4f(Light[0], Light[1], Light[2], Alpha);
-                    }
+                    float* Light = LightTransform[i][ni];
+                    color = (Alpha >= 0.99f) ? PackABGR(Light[0], Light[1], Light[2], 1.f)
+                                             : PackABGR(Light[0], Light[1], Light[2], Alpha);
                 }
                 break;
             }
             case RENDER_CHROME:
             {
-                if (Alpha >= 0.99f)
-                    glColor3fv(BodyLight);
-                else
-                    glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-                int ni = tp->NormalIndex[k];
-                glTexCoord2f(g_chrome[ni][0], g_chrome[ni][1]);
+                u = g_chrome[ni][0];
+                v = g_chrome[ni][1];
+                color = (Alpha >= 0.99f) ? PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], 1.f)
+                                         : PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
                 break;
             }
             }
+            float px;
+            float py;
+            float pz;
             if ((iRndExtFlag & RNDEXT_WAVE))
             {
-                float vPos[3];
-                float fParam = (float)((int)WorldTime + vi * 931) * 0.007f;
+                float fParam = static_cast<float>(static_cast<int>(WorldTime) + vi * 931) * 0.007f;
                 float fSin = sinf(fParam);
-                int ni = tp->NormalIndex[k];
                 float* Normal = NormalTransform[i][ni];
-                for (int iCoord = 0; iCoord < 3; ++iCoord)
-                {
-                    vPos[iCoord] = VertexTransform[i][vi][iCoord] + Normal[iCoord] * fSin * 28.0f;
-                }
-                glVertex3fv(vPos);
+                px = VertexTransform[i][vi][0] + Normal[0] * fSin * 28.0f;
+                py = VertexTransform[i][vi][1] + Normal[1] * fSin * 28.0f;
+                pz = VertexTransform[i][vi][2] + Normal[2] * fSin * 28.0f;
             }
             else
             {
-                glVertex3fv(VertexTransform[i][vi]);
+                px = VertexTransform[i][vi][0];
+                py = VertexTransform[i][vi][1];
+                pz = VertexTransform[i][vi][2];
             }
+
+            float* n = NormalTransform[i][ni];
+            muVerts.push_back({px, py, pz, n[0], n[1], n[2], u, v, color});
         }
     }
-    glEnd();
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
 void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* obj)
@@ -1971,9 +1971,6 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
     bool EnableLight = LightEnable;
     if (i == StreamMesh)
     {
-        //vec3_t Light;
-        //Vector(1.f,1.f,1.f,Light);
-        glColor3fv(BodyLight);
         EnableLight = false;
     }
     else if (EnableLight)
@@ -1985,6 +1982,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
     }
 
     int Render = RenderFlag;
+    bool useBlendMeshColor = false;
     if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
     {
         Render = RENDER_COLOR;
@@ -1995,7 +1993,6 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         else
             DisableAlphaBlend();
         DisableTexture();
-        glColor3fv(BodyLight);
     }
     else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME
         || (RenderFlag & RENDER_METAL) == RENDER_METAL
@@ -2069,8 +2066,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
             EnableAlphaBlendMinus();
         else
             EnableAlphaBlend();
-        glColor3f(BodyLight[0] * BlendMeshLight, BodyLight[1] * BlendMeshLight, BodyLight[2] * BlendMeshLight);
-        //glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
+        useBlendMeshColor = true;
         EnableLight = false;
     }
     else if ((RenderFlag & RENDER_TEXTURE) == RENDER_TEXTURE)
@@ -2110,7 +2106,7 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         Render = RENDER_TEXTURE;
     }
 
-    glBegin(GL_TRIANGLES);
+    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(m->NumTriangles) * 3);
     for (int j = 0; j < m->NumTriangles; j++)
     {
         vec3_t  pos;
@@ -2118,48 +2114,46 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         for (int k = 0; k < tp->Polygon; k++)
         {
             int vi = tp->VertexIndex[k];
+            int ni = tp->NormalIndex[k];
+
+            float u = 0.f;
+            float v = 0.f;
+            const float colorScale = useBlendMeshColor ? BlendMeshLight : 1.0f;
+            const float baseAlpha = (useBlendMeshColor || i == StreamMesh) ? 1.0f : Alpha;
+            std::uint32_t color = PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale,
+                                           BodyLight[2] * colorScale, baseAlpha);
+
             switch (Render)
             {
             case RENDER_TEXTURE:
             {
                 TexCoord_t* texp = &m->TexCoords[tp->TexCoordIndex[k]];
-                if (EnableWave)
-                    glTexCoord2f(texp->TexCoordU + BlendMeshTexCoordU, texp->TexCoordV + BlendMeshTexCoordV);
-                else
-                    glTexCoord2f(texp->TexCoordU, texp->TexCoordV);
+                u = EnableWave ? texp->TexCoordU + BlendMeshTexCoordU : texp->TexCoordU;
+                v = EnableWave ? texp->TexCoordV + BlendMeshTexCoordV : texp->TexCoordV;
                 if (EnableLight)
                 {
-                    int ni = tp->NormalIndex[k];
-                    if (Alpha >= 0.99f)
-                    {
-                        glColor3fv(LightTransform[i][ni]);
-                    }
-                    else
-                    {
-                        float* Light = LightTransform[i][ni];
-                        glColor4f(Light[0], Light[1], Light[2], Alpha);
-                    }
+                    float* Light = LightTransform[i][ni];
+                    color = (Alpha >= 0.99f) ? PackABGR(Light[0], Light[1], Light[2], 1.f)
+                                             : PackABGR(Light[0], Light[1], Light[2], Alpha);
                 }
                 break;
             }
             case RENDER_CHROME:
             {
-                if (Alpha >= 0.99f)
-                    glColor3fv(BodyLight);
-                else
-                    glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-                int ni = tp->NormalIndex[k];
-                glTexCoord2f(g_chrome[ni][0], g_chrome[ni][1]);
+                u = g_chrome[ni][0];
+                v = g_chrome[ni][1];
+                color = (Alpha >= 0.99f) ? PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], 1.f)
+                                         : PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
                 break;
             }
             }
-            {
-                VectorAdd(VertexTransform[i][vi], BodyOrigin, pos);
-                glVertex3fv(pos);
-            }
+            VectorAdd(VertexTransform[i][vi], BodyOrigin, pos);
+
+            float* n = NormalTransform[i][ni];
+            muVerts.push_back({pos[0], pos[1], pos[2], n[0], n[1], n[2], u, v, color});
         }
     }
-    glEnd();
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
 void BMD::RenderBodyTranslate(int Flag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int HiddenMesh, int Texture)
@@ -2259,10 +2253,13 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
         return;
     }
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    const int numVerts = target_vertex_index + 1;
+    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    for (int i = 0; i < numVerts; ++i)
+    {
+        muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, 0xFF000000u});
+    }
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
 void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh, const float sx, const float sy) const
@@ -2303,10 +2300,13 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
         return;
     }
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vertices);
-    glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    const int numVerts = target_vertex_index + 1;
+    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    for (int i = 0; i < numVerts; ++i)
+    {
+        muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, 0xFF000000u});
+    }
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber, const int endMeshNumber, void* pClothes, const int clothesCount)
@@ -2367,9 +2367,9 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 void BMD::RenderObjectBoundingBox()
 {
     DisableTexture();
-    glPushMatrix();
-    glTranslatef(BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]);
-    glScalef(BodyScale, BodyScale, BodyScale);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().Translate(BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]);
+    mu::GetRenderer().Scale(BodyScale, BodyScale, BodyScale);
     for (int i = 0; i < NumBones; i++)
     {
         Bone_t* b = &Bones[i];
@@ -2381,54 +2381,55 @@ void BMD::RenderObjectBoundingBox()
                 VectorTransform(b->BoundingVertices[j], BoneTransform[i], BoundingVertices[j]);
             }
 
-            glBegin(GL_QUADS);
-            glColor3f(0.2f, 0.2f, 0.2f);
-            glTexCoord2f(1.0F, 1.0F); glVertex3fv(BoundingVertices[7]);
-            glTexCoord2f(1.0F, 0.0F); glVertex3fv(BoundingVertices[6]);
-            glTexCoord2f(0.0F, 0.0F); glVertex3fv(BoundingVertices[4]);
-            glTexCoord2f(0.0F, 1.0F); glVertex3fv(BoundingVertices[5]);
+            auto MakeVtx = [&](const vec3_t& pos, float u, float v, std::uint32_t c) -> mu::Vertex3D
+            { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, u, v, c}; };
 
-            glColor3f(0.2f, 0.2f, 0.2f);
-            glTexCoord2f(0.0F, 1.0F); glVertex3fv(BoundingVertices[0]);
-            glTexCoord2f(1.0F, 1.0F); glVertex3fv(BoundingVertices[2]);
-            glTexCoord2f(1.0F, 0.0F); glVertex3fv(BoundingVertices[3]);
-            glTexCoord2f(0.0F, 0.0F); glVertex3fv(BoundingVertices[1]);
+            constexpr std::uint32_t cDark = 0xFF333333u;
+            constexpr std::uint32_t cMid = 0xFF999999u;
+            constexpr std::uint32_t cLight = 0xFF666666u;
 
-            glColor3f(0.6f, 0.6f, 0.6f);
-            glTexCoord2f(1.0F, 1.0F); glVertex3fv(BoundingVertices[7]);
-            glTexCoord2f(1.0F, 0.0F); glVertex3fv(BoundingVertices[3]);
-            glTexCoord2f(0.0F, 0.0F); glVertex3fv(BoundingVertices[2]);
-            glTexCoord2f(0.0F, 1.0F); glVertex3fv(BoundingVertices[6]);
+            auto& verts = GetRendererVertexScratch(36);
 
-            glColor3f(0.6f, 0.6f, 0.6f);
-            glTexCoord2f(0.0F, 1.0F); glVertex3fv(BoundingVertices[0]);
-            glTexCoord2f(1.0F, 1.0F); glVertex3fv(BoundingVertices[1]);
-            glTexCoord2f(1.0F, 0.0F); glVertex3fv(BoundingVertices[5]);
-            glTexCoord2f(0.0F, 0.0F); glVertex3fv(BoundingVertices[4]);
+            auto EmitQuad = [&](const vec3_t& q0, float u0, float v0, const vec3_t& q1, float u1, float v1,
+                                const vec3_t& q2, float u2, float v2, const vec3_t& q3, float u3, float v3,
+                                std::uint32_t col)
+            {
+                verts.push_back(MakeVtx(q0, u0, v0, col));
+                verts.push_back(MakeVtx(q1, u1, v1, col));
+                verts.push_back(MakeVtx(q2, u2, v2, col));
+                verts.push_back(MakeVtx(q0, u0, v0, col));
+                verts.push_back(MakeVtx(q2, u2, v2, col));
+                verts.push_back(MakeVtx(q3, u3, v3, col));
+            };
 
-            glColor3f(0.4f, 0.4f, 0.4f);
-            glTexCoord2f(1.0F, 1.0F); glVertex3fv(BoundingVertices[7]);
-            glTexCoord2f(1.0F, 0.0F); glVertex3fv(BoundingVertices[5]);
-            glTexCoord2f(0.0F, 0.0F); glVertex3fv(BoundingVertices[1]);
-            glTexCoord2f(0.0F, 1.0F); glVertex3fv(BoundingVertices[3]);
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[6], 1.f, 0.f, BoundingVertices[4], 0.f, 0.f,
+                     BoundingVertices[5], 0.f, 1.f, cDark);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[2], 1.f, 1.f, BoundingVertices[3], 1.f, 0.f,
+                     BoundingVertices[1], 0.f, 0.f, cDark);
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[3], 1.f, 0.f, BoundingVertices[2], 0.f, 0.f,
+                     BoundingVertices[6], 0.f, 1.f, cMid);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[1], 1.f, 1.f, BoundingVertices[5], 1.f, 0.f,
+                     BoundingVertices[4], 0.f, 0.f, cMid);
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[5], 1.f, 0.f, BoundingVertices[1], 0.f, 0.f,
+                     BoundingVertices[3], 0.f, 1.f, cLight);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[4], 1.f, 1.f, BoundingVertices[6], 1.f, 0.f,
+                     BoundingVertices[2], 0.f, 0.f, cLight);
 
-            glColor3f(0.4f, 0.4f, 0.4f);
-            glTexCoord2f(0.0F, 1.0F); glVertex3fv(BoundingVertices[0]);
-            glTexCoord2f(1.0F, 1.0F); glVertex3fv(BoundingVertices[4]);
-            glTexCoord2f(1.0F, 0.0F); glVertex3fv(BoundingVertices[6]);
-            glTexCoord2f(0.0F, 0.0F); glVertex3fv(BoundingVertices[2]);
-            glEnd();
+            mu::GetRenderer().RenderTriangles(verts, 0u);
         }
     }
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
     DisableAlphaBlend();
 }
 
 void BMD::RenderBone(float(*BoneMatrix)[3][4])
 {
     DisableTexture();
-    glDepthFunc(GL_ALWAYS);
-    glColor3f(0.8f, 0.8f, 0.2f);
+    mu::GetRenderer().SetDepthFunc(GL_ALWAYS);
+
+    constexpr std::uint32_t boneColor = 0xFF33CCCCu;
+    auto& allLines = GetRendererVertexScratch(static_cast<std::size_t>(NumBones) * 6);
+
     for (int i = 0; i < NumBones; i++)
     {
         Bone_t* b = &Bones[i];
@@ -2455,18 +2456,23 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
                 {
                     VectorMA(BodyOrigin, BodyScale, BoneVertice, BoneVertice);
                 }
-                glBegin(GL_LINES);
-                glVertex3fv(BoneVertices[0]);
-                glVertex3fv(BoneVertices[1]); 
-                glVertex3fv(BoneVertices[1]);
-                glVertex3fv(BoneVertices[2]);
-                glVertex3fv(BoneVertices[2]);
-                glVertex3fv(BoneVertices[0]);
-                glEnd();
+                auto MakeVtx = [&](const vec3_t& pos) -> mu::Vertex3D
+                { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, 0.f, 0.f, boneColor}; };
+                allLines.push_back(MakeVtx(BoneVertices[0]));
+                allLines.push_back(MakeVtx(BoneVertices[1]));
+                allLines.push_back(MakeVtx(BoneVertices[1]));
+                allLines.push_back(MakeVtx(BoneVertices[2]));
+                allLines.push_back(MakeVtx(BoneVertices[2]));
+                allLines.push_back(MakeVtx(BoneVertices[0]));
             }
         }
     }
-    glDepthFunc(GL_LEQUAL);
+    if (!allLines.empty())
+    {
+        mu::GetRenderer().RenderLines(allLines, 0u);
+    }
+
+    mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
 }
 
 void BMD::Release()
