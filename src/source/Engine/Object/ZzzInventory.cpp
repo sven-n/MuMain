@@ -6779,9 +6779,12 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     {
         SetDescriptorOrangeTextColor(descriptor);
     }
-    else if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM)
+    else if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM
+        && (whiteTextItems.count(o->Type) > 0
+            || yellowTextItems.count(o->Type) > 0
+            || orangeTextItems.count(o->Type) > 0))
     {
-        // Name was already set by the MODEL_ITEM block above, color by Block 1. No override needed.
+        // Color was already set by Block 1 (white/yellow/orange). No override needed.
     }
     else
     {
