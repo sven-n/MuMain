@@ -35,6 +35,7 @@
 #include "MuRenderer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -44,6 +45,7 @@
 #include <span>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -464,6 +466,11 @@ static int s_cachedWinH = 0;
 // ---------------------------------------------------------------------------
 static std::unordered_map<std::uint32_t, void*> s_textureMap;
 static std::unordered_map<std::uint32_t, std::pair<std::uint32_t, std::uint32_t>> s_textureSizes;
+static std::unordered_set<std::uint32_t> s_ownedTextureIds;
+
+// Flag: set when textures are replaced or unregistered mid-frame. EndFrame skips
+// render replay to avoid dangling GPU resource pointers. Reset at BeginFrame.
+static bool s_texturesInvalidated = false;
 
 // ---------------------------------------------------------------------------
 // TextureRegistry free functions (exposed for test linkage).
@@ -474,39 +481,123 @@ static std::unordered_map<std::uint32_t, std::pair<std::uint32_t, std::uint32_t>
 [[nodiscard]] void* LookupTexture(std::uint32_t id)
 {
     auto it = s_textureMap.find(id);
-    if (it == s_textureMap.end())
+    return it != s_textureMap.end() ? it->second : nullptr;
+}
+
+[[nodiscard]] static void* LookupTextureForDraw(std::uint32_t id)
+{
+    void* texture = LookupTexture(id);
+    if (texture)
     {
-#ifdef MU_ENABLE_SDL3
-        ++s_dbgFallbackTextureThisFrame;
-        return s_whiteTexture; // fallback to white texture for unknown IDs
-#else
-        return nullptr;
-#endif
+        return texture;
     }
-    return it->second;
+
+#ifdef MU_ENABLE_SDL3
+    ++s_dbgFallbackTextureThisFrame;
+    return s_whiteTexture;
+#else
+    return nullptr;
+#endif
+}
+
+static void DiscardQueuedTextureUpdates(void* texture)
+{
+    if (!texture)
+    {
+        return;
+    }
+
+    const auto newEnd = std::remove_if(s_textureUpdates.begin(), s_textureUpdates.end(), [texture](const auto& update) {
+        return update.gpuTexture == texture;
+    });
+    s_textureUpdates.erase(newEnd, s_textureUpdates.end());
+}
+
+static bool ReleaseOwnedTextureById(std::uint32_t id)
+{
+    auto owned = s_ownedTextureIds.find(id);
+    if (owned == s_ownedTextureIds.end())
+    {
+        return false;
+    }
+
+    auto texture = s_textureMap.find(id);
+    if (texture != s_textureMap.end())
+    {
+        DiscardQueuedTextureUpdates(texture->second);
+#ifdef MU_ENABLE_SDL3
+        if (s_device && texture->second)
+        {
+            SDL_ReleaseGPUTexture(s_device, static_cast<SDL_GPUTexture*>(texture->second));
+            ++s_dbgTextureReleasesThisFrame;
+        }
+#endif
+        s_textureMap.erase(texture);
+    }
+
+    s_textureSizes.erase(id);
+    s_ownedTextureIds.erase(owned);
+    s_texturesInvalidated = true;
+    return true;
+}
+
+static void ReleaseOwnedTextures()
+{
+    while (!s_ownedTextureIds.empty())
+    {
+        ReleaseOwnedTextureById(*s_ownedTextureIds.begin());
+    }
 }
 
 void RegisterTexture(std::uint32_t id, void* pTex)
 {
-    s_textureMap[id] = pTex;
-}
+    auto existing = s_textureMap.find(id);
+    if (existing != s_textureMap.end() && existing->second == pTex)
+    {
+        return;
+    }
 
-// Flag: set when textures are unregistered mid-frame. EndFrame skips render replay
-// to avoid dangling GPU resource pointers. Reset at BeginFrame.
-static bool s_texturesInvalidated = false;
+    ReleaseOwnedTextureById(id);
+    existing = s_textureMap.find(id);
+    if (existing != s_textureMap.end())
+    {
+        DiscardQueuedTextureUpdates(existing->second);
+        s_texturesInvalidated = true;
+    }
+
+    s_textureMap[id] = pTex;
+    s_textureSizes.erase(id);
+}
 
 void UnregisterTexture(std::uint32_t id)
 {
+    if (ReleaseOwnedTextureById(id))
+    {
+        return;
+    }
+
+    auto texture = s_textureMap.find(id);
+    if (texture != s_textureMap.end())
+    {
+        DiscardQueuedTextureUpdates(texture->second);
+    }
     s_textureMap.erase(id);
     s_textureSizes.erase(id);
+    s_ownedTextureIds.erase(id);
     // Mark that GPU resources were freed — deferred commands may hold dangling pointers.
     s_texturesInvalidated = true;
 }
 
 void ClearTextureRegistry()
 {
+    const bool hadTextures = !s_textureMap.empty();
+    ReleaseOwnedTextures();
     s_textureMap.clear();
     s_textureSizes.clear();
+    if (hadTextures)
+    {
+        s_texturesInvalidated = true;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -884,7 +975,11 @@ public:
         }
 #endif
 
-        // Release white texture from registry if present.
+        s_textureUpdates.clear();
+        ReleaseOwnedTextures();
+        ClearTextureRegistry();
+
+        // Release the independently owned white fallback texture.
         if (s_whiteTexture)
         {
             SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
@@ -1798,6 +1893,7 @@ public:
         void* pTex = LookupTexture(textureId);
         if (!pTex)
         {
+            mu::log::Get("render")->warn("SDL_gpu -- rejecting update for unknown texture {}", textureId);
             return;
         }
 
@@ -1825,16 +1921,18 @@ public:
         auto existing = s_textureMap.find(textureId);
         if (existing != s_textureMap.end())
         {
+            if (!s_ownedTextureIds.contains(textureId))
+            {
+                return;
+            }
+
             auto sizeIt = s_textureSizes.find(textureId);
             if (sizeIt != s_textureSizes.end() && sizeIt->second.first == width && sizeIt->second.second == height)
             {
                 return;
             }
 
-            SDL_ReleaseGPUTexture(s_device, static_cast<SDL_GPUTexture*>(existing->second));
-            s_textureMap.erase(existing);
-            s_textureSizes.erase(textureId);
-            s_texturesInvalidated = true;
+            ReleaseOwnedTextureById(textureId);
         }
 
         SDL_GPUTextureCreateInfo texInfo{};
@@ -1855,8 +1953,9 @@ public:
             return;
         }
 
-        RegisterTexture(textureId, texture);
+        s_textureMap[textureId] = texture;
         s_textureSizes[textureId] = {width, height};
+        s_ownedTextureIds.insert(textureId);
         ++s_dbgTextureCreatesThisFrame;
 #else
         (void)textureId;
@@ -1873,15 +1972,7 @@ public:
             return;
         }
 
-        auto existing = s_textureMap.find(textureId);
-        if (existing == s_textureMap.end())
-        {
-            return;
-        }
-
-        SDL_ReleaseGPUTexture(s_device, static_cast<SDL_GPUTexture*>(existing->second));
-        UnregisterTexture(textureId);
-        ++s_dbgTextureReleasesThisFrame;
+        ReleaseOwnedTextureById(textureId);
 #else
         (void)textureId;
 #endif
@@ -1912,7 +2003,7 @@ public:
             return;
         }
 
-        void* pTex = LookupTexture(textureId);
+        void* pTex = LookupTextureForDraw(textureId);
         if (!pTex)
         {
             mu::log::Get("render")->warn("SDL_gpu::RenderQuad2D -- unknown textureId {}, skipping", textureId);
@@ -2003,7 +2094,7 @@ public:
         }
 
         const std::uint32_t resolvedTexId = ResolveTextureId(textureId);
-        void* pTex = LookupTexture(resolvedTexId);
+        void* pTex = LookupTextureForDraw(resolvedTexId);
         if (!pTex)
         {
             mu::log::Get("render")->warn("SDL_gpu::RenderTriangles -- unknown textureId {}, skipping", textureId);
@@ -2079,7 +2170,7 @@ public:
         }
 
         const std::uint32_t resolvedTexId = ResolveTextureId(textureId);
-        void* pTex = LookupTexture(resolvedTexId);
+        void* pTex = LookupTextureForDraw(resolvedTexId);
         if (!pTex)
         {
             mu::log::Get("render")->warn("SDL_gpu::RenderQuadStrip -- unknown textureId {}, skipping", textureId);
