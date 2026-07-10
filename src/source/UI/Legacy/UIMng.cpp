@@ -8,6 +8,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Render/Sprites/Sprite.h"
 #include "UI/Widgets/GaugeBar.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -138,8 +139,19 @@ void CUIMng::ReleaseTitleSceneUI()
 
 void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 {
+    // Each loading update gets its own frame so the progress bar is visible.
+    // When called inside the game loop, temporarily close the caller frame,
+    // present this loading update, then reopen the caller frame.
+    const bool wasFrameActive = mu::GetRenderer().IsFrameActive();
+    if (wasFrameActive)
+    {
+        mu::GetRenderer().EndFrame();
+    }
+
+    mu::GetRenderer().BeginFrame();
+
     ::BeginOpengl();
-    ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearScreen();
     ::BeginBitmap();
 
     for (int i = 0; i < UIM_TS_MAX; ++i)
@@ -154,12 +166,17 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 
     ::EndBitmap();
     ::EndOpengl();
-    ::glFlush();
 #ifdef _EDITOR
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
     g_MuEditorCore.Render();
 #endif
-    PlatformSwapBuffers();
+
+    mu::GetRenderer().EndFrame();
+
+    if (wasFrameActive)
+    {
+        mu::GetRenderer().BeginFrame();
+    }
 }
 
 void CUIMng::Create()

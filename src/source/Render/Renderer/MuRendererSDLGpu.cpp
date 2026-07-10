@@ -267,6 +267,13 @@ static Uint32 s_swapH = 0u;
 static Uint32 s_dbgFrameCount = 0u;
 static Uint32 s_dbgDrawCallsThisFrame = 0u;
 static Uint32 s_dbgVtxBytesThisFrame = 0u;
+static Uint32 s_dbgFallbackTextureThisFrame = 0u;
+static Uint32 s_dbgTextureUploadsThisFrame = 0u;
+static Uint32 s_dbgTextureCreatesThisFrame = 0u;
+static Uint32 s_dbgTextureReleasesThisFrame = 0u;
+static Uint32 s_dbgRenderCmdsReplayedThisFrame = 0u;
+static Uint32 s_dbgWhiteTextureDrawsThisFrame = 0u;
+static Uint32 s_dbgRealTextureDrawsThisFrame = 0u;
 static bool s_dbgNullPipelineWarned = false;
 
 // Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
@@ -456,6 +463,7 @@ static int s_cachedWinH = 0;
 // Accessible from test TU via forward declarations in mu namespace.
 // ---------------------------------------------------------------------------
 static std::unordered_map<std::uint32_t, void*> s_textureMap;
+static std::unordered_map<std::uint32_t, std::pair<std::uint32_t, std::uint32_t>> s_textureSizes;
 
 // ---------------------------------------------------------------------------
 // TextureRegistry free functions (exposed for test linkage).
@@ -469,6 +477,7 @@ static std::unordered_map<std::uint32_t, void*> s_textureMap;
     if (it == s_textureMap.end())
     {
 #ifdef MU_ENABLE_SDL3
+        ++s_dbgFallbackTextureThisFrame;
         return s_whiteTexture; // fallback to white texture for unknown IDs
 #else
         return nullptr;
@@ -489,6 +498,7 @@ static bool s_texturesInvalidated = false;
 void UnregisterTexture(std::uint32_t id)
 {
     s_textureMap.erase(id);
+    s_textureSizes.erase(id);
     // Mark that GPU resources were freed — deferred commands may hold dangling pointers.
     s_texturesInvalidated = true;
 }
@@ -496,6 +506,7 @@ void UnregisterTexture(std::uint32_t id)
 void ClearTextureRegistry()
 {
     s_textureMap.clear();
+    s_textureSizes.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -944,13 +955,21 @@ public:
         SDL_GetWindowSize(s_window, &s_cachedWinW, &s_cachedWinH);
 
         // Reset vertex scratch offset, deferred command list, and per-frame diagnostics.
+        // Texture uploads may be queued by legacy asset loading before BeginFrame,
+        // so keep s_textureUpdates until EndFrame has submitted them.
         s_vtxOffset = 0u;
         s_renderCmds.clear();
         s_stripIdxScratch.clear();
-        s_textureUpdates.clear();
         s_texturesInvalidated = false; // Reset per-frame texture invalidation flag
         s_dbgDrawCallsThisFrame = 0u;
         s_dbgVtxBytesThisFrame = 0u;
+        s_dbgFallbackTextureThisFrame = 0u;
+        s_dbgTextureUploadsThisFrame = 0u;
+        s_dbgTextureCreatesThisFrame = 0u;
+        s_dbgTextureReleasesThisFrame = 0u;
+        s_dbgRenderCmdsReplayedThisFrame = 0u;
+        s_dbgWhiteTextureDrawsThisFrame = 0u;
+        s_dbgRealTextureDrawsThisFrame = 0u;
         ++s_dbgFrameCount;
 
         // Story 4.3.2 (AC-7): Map vertex transfer buffer once for the whole frame.
@@ -1168,6 +1187,7 @@ public:
                 SDL_ReleaseGPUTransferBuffer(s_device, pu.transfer);
             }
         }
+        s_textureUpdates.clear();
 
         // ---------------------------------------------------------------
         // Phase 3: Render pass — replay all recorded draw commands.
@@ -1209,6 +1229,7 @@ public:
             if (!s_texturesInvalidated)
                 for (const auto& cmd : s_renderCmds)
                 {
+                    ++s_dbgRenderCmdsReplayedThisFrame;
                     switch (cmd.type)
                     {
                     case RenderCmdType::SetViewport:
@@ -1229,6 +1250,10 @@ public:
 
                     case RenderCmdType::DrawTriangles:
                     {
+                        if (!cmd.texture || !cmd.sampler)
+                        {
+                            break;
+                        }
                         SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
                         // Sticky scissor: re-apply after pipeline bind (see note above).
                         SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
@@ -1251,6 +1276,13 @@ public:
 
                     case RenderCmdType::DrawIndexedQuads2D:
                     {
+                        // Guard against dangling sampler/texture — scene transitions may
+                        // unload assets mid-frame before EndFrame replays deferred commands.
+                        if (!cmd.texture || !cmd.sampler)
+                        {
+                            break;
+                        }
+
                         SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
                         SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                         SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
@@ -1265,12 +1297,6 @@ public:
                         idxBind.offset = 0;
                         SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
-                        // Guard against dangling sampler/texture — scene transitions may
-                        // unload assets mid-frame before EndFrame replays deferred commands.
-                        if (!cmd.texture || !cmd.sampler)
-                        {
-                            break;
-                        }
                         SDL_GPUTextureSamplerBinding sampBind{};
                         sampBind.texture = cmd.texture;
                         sampBind.sampler = cmd.sampler;
@@ -1283,6 +1309,13 @@ public:
 
                     case RenderCmdType::DrawIndexedStrip:
                     {
+                        // Guard against dangling sampler/texture — scene transitions may
+                        // unload assets mid-frame before EndFrame replays deferred commands.
+                        if (!cmd.texture || !cmd.sampler)
+                        {
+                            break;
+                        }
+
                         SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
                         SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                         SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
@@ -1297,12 +1330,6 @@ public:
                         idxBind.offset = cmd.stripIdxOffset;
                         SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
-                        // Guard against dangling sampler/texture — scene transitions may
-                        // unload assets mid-frame before EndFrame replays deferred commands.
-                        if (!cmd.texture || !cmd.sampler)
-                        {
-                            break;
-                        }
                         SDL_GPUTextureSamplerBinding sampBind{};
                         sampBind.texture = cmd.texture;
                         sampBind.sampler = cmd.sampler;
@@ -1356,8 +1383,12 @@ public:
         // Emit per-frame diagnostic stats every 300 frames (~5s at 60fps).
         if (s_dbgFrameCount % 300 == 0)
         {
-            SDL_Log("[RENDER diag] frame=%u  draw_calls=%u  vtx_bytes=%u", s_dbgFrameCount, s_dbgDrawCallsThisFrame,
-                    s_dbgVtxBytesThisFrame);
+            SDL_Log("[RENDER diag] frame=%u  draw_calls=%u  replayed=%u  cmds=%zu  vtx_bytes=%u  tex=%zu  fallback=%u  white_draws=%u  real_draws=%u  uploads=%u  creates=%u  releases=%u  invalidated=%d  tex2d=%d  bound=%d",
+                    s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame, s_renderCmds.size(),
+                    s_dbgVtxBytesThisFrame, s_textureMap.size(), s_dbgFallbackTextureThisFrame,
+                    s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame, s_dbgTextureUploadsThisFrame,
+                    s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame, s_texturesInvalidated ? 1 : 0,
+                    m_texture2DEnabled ? 1 : 0, m_boundTextureId);
         }
         // Warn once if frames are rendering but producing no draw calls.
         if (s_dbgFrameCount == 10 && s_dbgDrawCallsThisFrame == 0)
@@ -1759,7 +1790,7 @@ public:
                             std::uint32_t height) override
     {
 #ifdef MU_ENABLE_SDL3
-        if (!s_frameActive || !pixels || width == 0 || height == 0)
+        if (!pixels || width == 0 || height == 0)
         {
             return;
         }
@@ -1779,6 +1810,80 @@ public:
         cmd.height = height;
         cmd.bytesPerRow = width * 4; // RGBA8
         s_textureUpdates.push_back(std::move(cmd));
+        ++s_dbgTextureUploadsThisFrame;
+#endif
+    }
+
+    void EnsureTexture(std::uint32_t textureId, std::uint32_t width, std::uint32_t height) override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (!s_device || textureId == 0 || width == 0 || height == 0)
+        {
+            return;
+        }
+
+        auto existing = s_textureMap.find(textureId);
+        if (existing != s_textureMap.end())
+        {
+            auto sizeIt = s_textureSizes.find(textureId);
+            if (sizeIt != s_textureSizes.end() && sizeIt->second.first == width && sizeIt->second.second == height)
+            {
+                return;
+            }
+
+            SDL_ReleaseGPUTexture(s_device, static_cast<SDL_GPUTexture*>(existing->second));
+            s_textureMap.erase(existing);
+            s_textureSizes.erase(textureId);
+            s_texturesInvalidated = true;
+        }
+
+        SDL_GPUTextureCreateInfo texInfo{};
+        texInfo.type = SDL_GPU_TEXTURETYPE_2D;
+        texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+        texInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+        texInfo.width = width;
+        texInfo.height = height;
+        texInfo.layer_count_or_depth = 1;
+        texInfo.num_levels = 1;
+        texInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
+
+        SDL_GPUTexture* texture = SDL_CreateGPUTexture(s_device, &texInfo);
+        if (!texture)
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- texture {} creation failed ({}x{}): {}", textureId, width,
+                                         height, SDL_GetError());
+            return;
+        }
+
+        RegisterTexture(textureId, texture);
+        s_textureSizes[textureId] = {width, height};
+        ++s_dbgTextureCreatesThisFrame;
+#else
+        (void)textureId;
+        (void)width;
+        (void)height;
+#endif
+    }
+
+    void ReleaseTexture(std::uint32_t textureId) override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (!s_device || textureId == 0)
+        {
+            return;
+        }
+
+        auto existing = s_textureMap.find(textureId);
+        if (existing == s_textureMap.end())
+        {
+            return;
+        }
+
+        SDL_ReleaseGPUTexture(s_device, static_cast<SDL_GPUTexture*>(existing->second));
+        UnregisterTexture(textureId);
+        ++s_dbgTextureReleasesThisFrame;
+#else
+        (void)textureId;
 #endif
     }
 
@@ -1813,6 +1918,10 @@ public:
             mu::log::Get("render")->warn("SDL_gpu::RenderQuad2D -- unknown textureId {}, skipping", textureId);
             return;
         }
+        if (textureId == 0u)
+            ++s_dbgWhiteTextureDrawsThisFrame;
+        else
+            ++s_dbgRealTextureDrawsThisFrame;
 
         const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(Vertex2D));
         const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
@@ -1900,6 +2009,10 @@ public:
             mu::log::Get("render")->warn("SDL_gpu::RenderTriangles -- unknown textureId {}, skipping", textureId);
             return;
         }
+        if (resolvedTexId == 0u)
+            ++s_dbgWhiteTextureDrawsThisFrame;
+        else
+            ++s_dbgRealTextureDrawsThisFrame;
 
         const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(Vertex3D));
         const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
@@ -1972,6 +2085,10 @@ public:
             mu::log::Get("render")->warn("SDL_gpu::RenderQuadStrip -- unknown textureId {}, skipping", textureId);
             return;
         }
+        if (resolvedTexId == 0u)
+            ++s_dbgWhiteTextureDrawsThisFrame;
+        else
+            ++s_dbgRealTextureDrawsThisFrame;
 
         const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(Vertex3D));
         const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
@@ -2640,11 +2757,12 @@ private:
 
     // -----------------------------------------------------------------------
     // Story 4.3.2 (AC-8): CreatePipelines
-    // Creates 4 pipeline sets × 9 blend modes = 36 pipelines total.
-    //   s_pipelines2D[9]       — Vertex2D layout, depth ON
+    // Creates 5 pipeline sets × 9 blend modes = 45 pipelines total.
+    //   s_pipelines2D[9]         — Vertex2D layout, depth ON
     //   s_pipelines2DDepthOff[9] — Vertex2D layout, depth OFF
-    //   s_pipelines3D[9]       — Vertex3D layout, depth ON
+    //   s_pipelines3D[9]         — Vertex3D layout, depth ON
     //   s_pipelines3DDepthOff[9] — Vertex3D layout, depth OFF
+    //   s_pipelines3DDepthReadOnly[9] — Vertex3D layout, depth test ON, depth write OFF
     // Pipeline creation failures are non-fatal (draw calls skip if pipeline is null).
     // -----------------------------------------------------------------------
     [[nodiscard]] static bool CreatePipelines()
@@ -2765,6 +2883,11 @@ private:
             {
                 SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DDepthOff[i]);
                 s_pipelines3DDepthOff[i] = nullptr;
+            }
+            if (s_pipelines3DDepthReadOnly[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DDepthReadOnly[i]);
+                s_pipelines3DDepthReadOnly[i] = nullptr;
             }
         }
     }

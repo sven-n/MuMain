@@ -239,6 +239,16 @@ public:
         (void)width;
         (void)height;
     }
+    virtual void EnsureTexture(std::uint32_t textureId, std::uint32_t width, std::uint32_t height)
+    {
+        (void)textureId;
+        (void)width;
+        (void)height;
+    }
+    virtual void ReleaseTexture(std::uint32_t textureId)
+    {
+        (void)textureId;
+    }
 
     // -----------------------------------------------------------------------
     // Story 7-9-6: GL state migration — replaces raw OpenGL calls.

@@ -7,6 +7,10 @@
 #include <cstring>
 #include <vector>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace
 {
 constexpr MUCompatGLenum kGLDepthTest = 0x0B71;
@@ -290,9 +294,21 @@ void mu_glViewport(MUCompatGLint x, MUCompatGLint y, MUCompatGLsizei width, MUCo
 void mu_glLineWidth(MUCompatGLfloat) {}
 void mu_glBindTexture(MUCompatGLenum, MUCompatGLuint texture) { s_boundTexture = texture; mu::GetRenderer().BindTexture(static_cast<int>(texture)); }
 void mu_glGenTextures(MUCompatGLsizei n, MUCompatGLuint* textures) { for (int i = 0; i < n; ++i) textures[i] = s_nextTexture++; }
-void mu_glDeleteTextures(MUCompatGLsizei, const MUCompatGLuint*) {}
+void mu_glDeleteTextures(MUCompatGLsizei n, const MUCompatGLuint* textures)
+{
+    if (!textures)
+    {
+        return;
+    }
+
+    for (int i = 0; i < n; ++i)
+    {
+        mu::GetRenderer().ReleaseTexture(textures[i]);
+    }
+}
 void mu_glTexImage2D(MUCompatGLenum, MUCompatGLint, MUCompatGLint, MUCompatGLsizei width, MUCompatGLsizei height, MUCompatGLint, MUCompatGLenum format, MUCompatGLenum type, const void* pixels)
 {
+    mu::GetRenderer().EnsureTexture(s_boundTexture, static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
     std::vector<std::uint8_t> rgbaScratch;
     const void* uploadPixels = PrepareTextureUpload(format, type, pixels, width, height, rgbaScratch);
     mu::GetRenderer().QueueTextureUpdate(s_boundTexture, uploadPixels, static_cast<std::uint32_t>(width), static_cast<std::uint32_t>(height));
@@ -320,8 +336,20 @@ const MUCompatGLubyte* mu_glGetString(MUCompatGLenum)
 {
     return reinterpret_cast<const MUCompatGLubyte*>(mu::GetRenderer().GetGPUDriverName());
 }
-void mu_gluPerspective(MUCompatGLdouble, MUCompatGLdouble, MUCompatGLdouble, MUCompatGLdouble) {}
-void mu_gluOrtho2D(MUCompatGLdouble, MUCompatGLdouble, MUCompatGLdouble, MUCompatGLdouble) {}
+void mu_gluPerspective(MUCompatGLdouble fovy, MUCompatGLdouble aspect, MUCompatGLdouble zNear, MUCompatGLdouble zFar)
+{
+    const glm::mat4 perspective = glm::perspective(glm::radians(static_cast<float>(fovy)),
+                                                   static_cast<float>(aspect),
+                                                   static_cast<float>(zNear),
+                                                   static_cast<float>(zFar));
+    mu::GetRenderer().MultMatrix(glm::value_ptr(perspective));
+}
+void mu_gluOrtho2D(MUCompatGLdouble left, MUCompatGLdouble right, MUCompatGLdouble bottom, MUCompatGLdouble top)
+{
+    const glm::mat4 ortho = glm::ortho(static_cast<float>(left), static_cast<float>(right),
+                                       static_cast<float>(bottom), static_cast<float>(top));
+    mu::GetRenderer().MultMatrix(glm::value_ptr(ortho));
+}
 void* mu_gluNewQuadric() { return nullptr; }
 void mu_gluSphere(void*, MUCompatGLdouble, MUCompatGLint, MUCompatGLint) {}
 void mu_glEnableClientState(MUCompatGLenum) {}
