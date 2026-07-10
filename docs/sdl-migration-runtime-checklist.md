@@ -2,14 +2,14 @@
 
 ## Build Matrix
 
-- [ ] macOS arm64 debug: `cmake --build --preset macos-arm64-debug`
+- [x] macOS arm64 debug: `cmake --build out/build/macos-arm64 --config Debug --target Main`
 - [ ] Linux debug preset or documented local Linux command
 - [ ] Windows MSVC debug preset
 - [ ] Windows MinGW preset, if still supported
 
 ## Runtime Scenes
 
-- [ ] Launch app and exit app without macOS crash reporter.
+- [x] Launch app and exit app without macOS crash reporter (three consecutive macOS arm64 exits).
 - [ ] Login scene renders background, logo, text, and buttons.
 - [ ] Character select renders characters, wings, glow, text, and click targets.
 - [ ] Main world renders terrain, sky, water, entities, particles, and UI.
@@ -30,7 +30,6 @@
 ## Known Gaps
 
 - Item glow not yet fixed.
-- macOS app exit currently reports a segmentation fault.
 - Windows OpenGL link path still exists in CMake.
 - Real OpenGL headers are still included before the compatibility shim.
 - Some GL-shaped compatibility calls are no-op and need classification.

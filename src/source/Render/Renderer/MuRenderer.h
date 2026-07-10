@@ -317,6 +317,7 @@ public:
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
 [[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow);
+void WaitForSDLGpuIdle();
 void ShutdownSDLGpuRenderer();
 
 } // namespace mu

@@ -3390,6 +3390,17 @@ private:
     return MuRendererSDLGpu::Init(pNativeWindow);
 }
 
+void WaitForSDLGpuIdle()
+{
+#ifdef MU_ENABLE_SDL3
+    if (s_device && !SDL_WaitForGPUIdle(s_device))
+    {
+        mu::log::Get("render")->error("SDL_gpu -- failed to wait for idle before resource teardown: {}",
+                                      SDL_GetError());
+    }
+#endif
+}
+
 void ShutdownSDLGpuRenderer()
 {
     MuRendererSDLGpu::Shutdown();

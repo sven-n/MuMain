@@ -1403,6 +1403,28 @@ void UpdateResolutionDependentSystems()
     CUIMng::Instance().RepositionSceneUI();
 }
 
+static void ShutdownRuntime(std::thread& cpuUsageRecorder)
+{
+    // The recorder polls process state until Destroy is set.
+    Destroy = true;
+    if (cpuUsageRecorder.joinable())
+    {
+        cpuUsageRecorder.join();
+    }
+
+    DestroySound();
+#ifdef _EDITOR
+    g_MuEditorCore.Shutdown();
+#endif
+
+    // Complete the final submitted frame before UI and bitmap owners release
+    // textures referenced by it. This keeps Metal teardown deterministic.
+    mu::WaitForSDLGpuIdle();
+    DestroyWindow();
+    KillGLWindow();
+    SDL_Quit();
+}
+
 #ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 #else
@@ -1715,25 +1737,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     std::thread cpuUsageRecorder(RecordCpuUsage);
     const MSG msg = MainLoop();
-
-    // Stop background work before tearing down audio, renderer, window, or SDL
-    // subsystems. The recorder polls process state until Destroy is set.
-    Destroy = true;
-    if (cpuUsageRecorder.joinable())
-        cpuUsageRecorder.join();
-
-    // Teardown that used to run in WM_DESTROY, now after the loop exits (SDL owns
-    // the window/GL context, so they must not be destroyed from a message).
-    DestroySound();
-#ifdef _EDITOR
-    // Shut the editor's ImGui backends down while the GL context and SDL window
-    // are still alive; the static destructor runs too late (after KillGLWindow).
-    g_MuEditorCore.Shutdown();
-#endif
-    DestroyWindow();
-    KillGLWindow();
-
-    SDL_Quit();
+    ShutdownRuntime(cpuUsageRecorder);
 
     return msg.wParam;
 }
