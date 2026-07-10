@@ -5,6 +5,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -157,19 +158,9 @@ int  AlphaBlendType;
 
 void BindTexture(int tex)
 {
-    if (CachTexture != tex)
-    {
-        CachTexture = tex;
-        if (tex >= 0)
-        {
-            BITMAP_t* b = &Bitmaps[tex];
-            glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-        }
-        else
-        {
-            glBindTexture(GL_TEXTURE_2D, -1 * tex);
-        }
-    }
+    // Always forward to the renderer. In the deferred SDL renderer this only
+    // updates logical state, and caching can desync when callers bind directly.
+    mu::GetRenderer().BindTexture(tex);
 }
 
 bool TextureStream = false;
@@ -177,23 +168,12 @@ bool TextureStream = false;
 extern  int test;
 void BindTextureStream(int tex)
 {
-    if (CachTexture != tex)
-    {
-        CachTexture = tex;
-        if (TextureStream)
-            glEnd();
-        BITMAP_t* b = &Bitmaps[tex];
-        glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-
-        glBegin(GL_TRIANGLES);
-        TextureStream = true;
-    }
+    mu::GetRenderer().BindTexture(tex);
+    TextureStream = true;
 }
 
 void EndTextureStream()
 {
-    if (TextureStream)
-        glEnd();
     TextureStream = false;
 }
 
@@ -572,6 +552,13 @@ void BeginOpengl(int x, int y, int Width, int Height)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glDepthMask(true);
+
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(true);
+    mu::GetRenderer().SetDepthTest(true);
+    mu::GetRenderer().SetCullFace(true);
+    mu::GetRenderer().SetDepthMask(true);
+
     AlphaTestEnable = false;
     TextureEnable = true;
     DepthTestEnable = true;
@@ -937,6 +924,11 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     float y = p2[1];
     float z = p2[2];
 
+    if (z >= -1.0f)
+    {
+        return;
+    }
+
     Width *= 0.5f;
     Height *= 0.5f;
 
@@ -973,22 +965,32 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     TEXCOORD(c[1], u + uWidth, v + vHeight);
     TEXCOORD(c[0], u, v + vHeight);
 
-    glBegin(GL_QUADS);
+    std::uint32_t color;
     if (Bitmaps[Texture].Components == 3)
-        glColor3fv(Light);
+    {
+        color = mu::PackABGR(Light[0], Light[1], Light[2], 1.0f);
+    }
     else
     {
         if (Texture == BITMAP_BLOOD + 1 || Texture == BITMAP_FONT_HIT)
-            glColor4f(Light[0], Light[1], Light[2], 1.f);
+        {
+            color = mu::PackABGR(Light[0], Light[1], Light[2], 1.0f);
+        }
         else
-            glColor4f(Light[0], Light[1], Light[2], Light[0]);
+        {
+            color = mu::PackABGR(Light[0], Light[1], Light[2], Light[0]);
+        }
     }
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex3fv(p[i]);
-    }
-    glEnd();
+
+    const mu::Vertex3D vertices[6] = {
+        {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, c[0][0], c[0][1], color},
+        {p[1][0], p[1][1], p[1][2], 0.f, 0.f, 0.f, c[1][0], c[1][1], color},
+        {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, c[2][0], c[2][1], color},
+        {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, c[0][0], c[0][1], color},
+        {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, c[2][0], c[2][1], color},
+        {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, c[3][0], c[3][1], color},
+    };
+    mu::GetRenderer().RenderTriangles(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha)
@@ -1001,6 +1003,11 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     float y = p2[1];
     float z = p2[2];
 
+    if (z >= -1.0f)
+    {
+        return;
+    }
+
     Width *= 0.5f;
     Height *= 0.5f;
     vec3_t p[4];
@@ -1009,14 +1016,15 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     Vector(x + Width, y + Height, z, p[2]);
     Vector(x - Width, y + Height, z, p[3]);
 
-    glBegin(GL_QUADS);
-    for (int i = 0; i < 4; i++)
-    {
-        glColor4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
-        glTexCoord2f(UV[i][0], UV[i][1]);
-        glVertex3fv(p[i]);
-    }
-    glEnd();
+    const mu::Vertex3D vertices[6] = {
+        {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, UV[0][0], UV[0][1], mu::PackABGR(Light[0][0], Light[0][1], Light[0][2], Alpha)},
+        {p[1][0], p[1][1], p[1][2], 0.f, 0.f, 0.f, UV[1][0], UV[1][1], mu::PackABGR(Light[1][0], Light[1][1], Light[1][2], Alpha)},
+        {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, UV[2][0], UV[2][1], mu::PackABGR(Light[2][0], Light[2][1], Light[2][2], Alpha)},
+        {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, UV[0][0], UV[0][1], mu::PackABGR(Light[0][0], Light[0][1], Light[0][2], Alpha)},
+        {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, UV[2][0], UV[2][1], mu::PackABGR(Light[2][0], Light[2][1], Light[2][2], Alpha)},
+        {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, UV[3][0], UV[3][1], mu::PackABGR(Light[3][0], Light[3][1], Light[3][2], Alpha)},
+    };
+    mu::GetRenderer().RenderTriangles(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
@@ -1153,6 +1161,15 @@ void EndRenderColor()
     mu::GetRenderer().SetTexture2D(true);
 }
 
+static inline std::uint32_t ArgbToAbgr(unsigned int argb)
+{
+    const std::uint32_t a = (argb >> 24) & 0xffu;
+    const std::uint32_t r = (argb >> 16) & 0xffu;
+    const std::uint32_t g = (argb >> 8) & 0xffu;
+    const std::uint32_t b = argb & 0xffu;
+    return (a << 24) | (b << 16) | (g << 8) | r;
+}
+
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor)
 {
     DisableTexture();
@@ -1161,22 +1178,16 @@ void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned i
     y = ConvertY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
-
-    const GLubyte alpha = static_cast<GLubyte>((argbColor >> 24) & 0xffu);
-    const GLubyte red = static_cast<GLubyte>((argbColor >> 16) & 0xffu);
-    const GLubyte green = static_cast<GLubyte>((argbColor >> 8) & 0xffu);
-    const GLubyte blue = static_cast<GLubyte>(argbColor & 0xffu);
-
     y = WindowHeight - y;
 
-    glColor4ub(red, green, blue, alpha);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(x, y);
-    glVertex2f(x, y - Height);
-    glVertex2f(x + Width, y - Height);
-    glVertex2f(x + Width, y);
-    glEnd();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    const std::uint32_t color = ArgbToAbgr(argbColor);
+    const mu::Vertex2D vertices[4] = {
+        {x, y, 0.0f, 0.0f, color},
+        {x, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y, 0.0f, 0.0f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
 }
 
 void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness, unsigned int argbColor)
@@ -1202,19 +1213,14 @@ void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness
     const float ox = -dy / len * halfT;
     const float oy = dx / len * halfT;
 
-    const GLubyte alpha = static_cast<GLubyte>((argbColor >> 24) & 0xffu);
-    const GLubyte red = static_cast<GLubyte>((argbColor >> 16) & 0xffu);
-    const GLubyte green = static_cast<GLubyte>((argbColor >> 8) & 0xffu);
-    const GLubyte blue = static_cast<GLubyte>(argbColor & 0xffu);
-
-    glColor4ub(red, green, blue, alpha);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex2f(x1 + ox, y1 + oy);
-    glVertex2f(x1 - ox, y1 - oy);
-    glVertex2f(x2 - ox, y2 - oy);
-    glVertex2f(x2 + ox, y2 + oy);
-    glEnd();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    const std::uint32_t color = ArgbToAbgr(argbColor);
+    const mu::Vertex2D vertices[4] = {
+        {x1 + ox, y1 + oy, 0.0f, 0.0f, color},
+        {x1 - ox, y1 - oy, 0.0f, 0.0f, color},
+        {x2 - ox, y2 - oy, 0.0f, 0.0f, color},
+        {x2 + ox, y2 + oy, 0.0f, 0.0f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
 }
 
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, unsigned int color)
@@ -1227,36 +1233,15 @@ void RenderColorBitmap(int Texture, float x, float y, float Width, float Height,
 
     BindTexture(Texture);
 
-    float p[4][2];
-
     y = WindowHeight - y;
 
-    p[0][0] = x; p[0][1] = y;
-    p[1][0] = x; p[1][1] = y - Height;
-    p[2][0] = x + Width; p[2][1] = y - Height;
-    p[3][0] = x + Width; p[3][1] = y;
-
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    glBegin(GL_TRIANGLE_FAN);
-
-    for (int i = 0; i < 4; i++)
-    {
-        glColor4ub(static_cast<GLubyte>((color & 0xff)),         //Rad
-            static_cast<GLubyte>((color >> 8) & 0xff),      //Green
-            static_cast<GLubyte>((color >> 16) & 0xff),     //Blue
-            static_cast<GLubyte>((color >> 24) & 0xff));   //Alpha
-
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex2f(p[i][0], p[i][1]);
-
-        glColor4f(1.f, 1.f, 1.f, 1.f);
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v, color},
+        {x, y - Height, u, v + vHeight, color},
+        {x + Width, y - Height, u + uWidth, v + vHeight, color},
+        {x + Width, y, u + uWidth, v, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, bool Scale, bool StartScale, float Alpha)
@@ -1274,36 +1259,19 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
 
     BindTexture(Texture);
 
-    float p[4][2];
-
     y = WindowHeight - y;
 
-    p[0][0] = x; p[0][1] = y;
-    p[1][0] = x; p[1][1] = y - Height;
-    p[2][0] = x + Width; p[2][1] = y - Height;
-    p[3][0] = x + Width; p[3][1] = y;
+    const float clampedAlpha = (Alpha > 1.0f) ? 1.0f : Alpha;
+    const std::uint32_t color =
+        (clampedAlpha > 0.0f) ? (static_cast<std::uint32_t>(clampedAlpha * 255.0f) << 24) | 0x00FFFFFFu : 0xFFFFFFFFu;
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        if (Alpha > 0.f)
-        {
-            glColor4f(1.f, 1.f, 1.f, Alpha);
-        }
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex2f(p[i][0], p[i][1]);
-        if (Alpha > 0.f)
-        {
-            glColor4f(1.f, 1.f, 1.f, 1.f);
-        }
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v, color},
+        {x, y - Height, u, v + vHeight, color},
+        {x + Width, y - Height, u + uWidth, v + vHeight, color},
+        {x + Width, y, u + uWidth, v, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v, float uWidth, float vHeight)
@@ -1330,20 +1298,18 @@ void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
+    VectorRotate(p[0], Matrix, p2[0]);
+    VectorRotate(p[1], Matrix, p2[1]);
+    VectorRotate(p[2], Matrix, p2[2]);
+    VectorRotate(p[3], Matrix, p2[3]);
 
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        VectorRotate(p[i], Matrix, p2[i]);
-        glVertex2f(p2[i][0] + x, p2[i][1] + y);
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {p2[0][0] + x, p2[0][1] + y, u, v, 0xFFFFFFFFu},
+        {p2[1][0] + x, p2[1][1] + y, u, v + vHeight, 0xFFFFFFFFu},
+        {p2[2][0] + x, p2[2][1] + y, u + uWidth, v + vHeight, 0xFFFFFFFFu},
+        {p2[3][0] + x, p2[3][1] + y, u + uWidth, v, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitRotate(int Texture, float x, float y, float Width, float Height, float Rotate)
@@ -1377,27 +1343,27 @@ void RenderBitRotate(int Texture, float x, float y, float Width, float Height, f
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
 
-    float c[4][2];
-    TEXCOORD(c[0], 0.f, 0.f);
-    TEXCOORD(c[3], 1.f, 0.f);
-    TEXCOORD(c[2], 1.f, 1.f);
-    TEXCOORD(c[1], 0.f, 1.f);
+    VectorRotate(p[0], Matrix, p2[0]);
+    VectorRotate(p[1], Matrix, p2[1]);
+    VectorRotate(p[2], Matrix, p2[2]);
+    VectorRotate(p[3], Matrix, p2[3]);
 
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        VectorRotate(p[i], Matrix, p2[i]);
-        glVertex2f(p2[i][0] + (WindowWidth / 2.f), p2[i][1] + (WindowHeight / 2.f));
-    }
-    glEnd();
+    const float halfW = WindowWidth / 2.f;
+    const float halfH = WindowHeight / 2.f;
+
+    const mu::Vertex2D vertices[4] = {
+        {p2[0][0] + halfW, p2[0][1] + halfH, 0.0f, 0.0f, 0xFFFFFFFFu},
+        {p2[1][0] + halfW, p2[1][1] + halfH, 0.0f, 1.0f, 0xFFFFFFFFu},
+        {p2[2][0] + halfW, p2[2][1] + halfH, 1.0f, 1.0f, 0xFFFFFFFFu},
+        {p2[3][0] + halfW, p2[3][1] + halfH, 1.0f, 0.0f, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width, float Height, float Rotate, float Rotate_Loc, float uWidth, float vHeight, int Num)
 {
-    int i = 0;
     vec3_t p, p2[4], p3, p4[4], Angle;
-    float c[4][2], Matrix[3][4];
+    float Matrix[3][4];
 
     ix = ConvertX(ix);
     iy = ConvertY(iy);
@@ -1426,29 +1392,29 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
     Vector(0.f, 0.f, Rotate_Loc, Angle);
     AngleMatrix(Angle, Matrix);
 
-    TEXCOORD(c[0], 0.f, 0.f);
-    TEXCOORD(c[3], uWidth, 0.f);
-    TEXCOORD(c[2], uWidth, vHeight);
-    TEXCOORD(c[1], 0.f, vHeight);
+    Matrix[0][3] = p3[0] + 25;
+    Matrix[1][3] = p3[1];
+    VectorTransform(p2[0], Matrix, p4[0]);
+    VectorTransform(p2[1], Matrix, p4[1]);
+    VectorTransform(p2[2], Matrix, p4[2]);
+    VectorTransform(p2[3], Matrix, p4[3]);
 
-    glBegin(GL_TRIANGLE_FAN);
-    for (i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
+    const float halfW = WindowWidth / 2.f;
+    const float halfH = WindowHeight / 2.f;
 
-        Matrix[0][3] = p3[0] + 25;
-        Matrix[1][3] = p3[1];
-        VectorTransform(p2[i], Matrix, p4[i]);
-
-        glVertex2f(p4[i][0] + (WindowWidth / 2.f), p4[i][1] + (WindowHeight / 2.f));
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {p4[0][0] + halfW, p4[0][1] + halfH, 0.0f, 0.0f, 0xFFFFFFFFu},
+        {p4[1][0] + halfW, p4[1][1] + halfH, 0.0f, vHeight, 0xFFFFFFFFu},
+        {p4[2][0] + halfW, p4[2][1] + halfH, uWidth, vHeight, 0xFFFFFFFFu},
+        {p4[3][0] + halfW, p4[3][1] + halfH, uWidth, 0.0f, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 
     if (Num > -1)
     {
         float dx, dy;
-        dx = p4[0][0] + (WindowWidth / 2.f);
-        dy = p4[0][1] + (WindowHeight / 2.f);
+        dx = p4[0][0] + halfW;
+        dy = p4[0][1] + halfH;
         dx = dx * (float)((float)REFERENCE_WIDTH / WindowWidth);
         dy = dy * (float)((float)REFERENCE_HEIGHT / WindowHeight);
         if (Num >= 100)
@@ -1464,8 +1430,6 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
 
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v, float uWidth, float vHeight)
 {
-    BindTexture(Texture);
-
     vec3_t p[4];
     x = ConvertX(x);
     y = ConvertY(y);
@@ -1473,31 +1437,29 @@ void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float H
     Width = ConvertX(Width);
     Height = ConvertY(Height);
 
+    BindTexture(Texture);
+
+    const float sinR = sinf(Rotate);
+    const float cosR = cosf(Rotate);
     vec3_t vCenter, vDir;
     Vector(x, y, 0, vCenter);
     Vector(Width * 0.5f, -Height * 0.5f, 0, vDir);
-    p[0][0] = vCenter[0] + (vDir[0]) * cosf(Rotate);
-    p[0][1] = vCenter[1] + (vDir[1]) * sinf(Rotate);
-    p[1][0] = vCenter[0] + (vDir[0]) * sinf(Rotate);
-    p[1][1] = vCenter[1] - (vDir[1]) * cosf(Rotate);
-    p[2][0] = vCenter[0] - (vDir[0]) * cosf(Rotate);
-    p[2][1] = vCenter[1] - (vDir[1]) * sinf(Rotate);
-    p[3][0] = vCenter[0] - (vDir[0]) * sinf(Rotate);
-    p[3][1] = vCenter[1] + (vDir[1]) * cosf(Rotate);
+    p[0][0] = vCenter[0] + (vDir[0]) * cosR;
+    p[0][1] = vCenter[1] + (vDir[1]) * sinR;
+    p[1][0] = vCenter[0] + (vDir[0]) * sinR;
+    p[1][1] = vCenter[1] - (vDir[1]) * cosR;
+    p[2][0] = vCenter[0] - (vDir[0]) * cosR;
+    p[2][1] = vCenter[1] - (vDir[1]) * sinR;
+    p[3][0] = vCenter[0] - (vDir[0]) * sinR;
+    p[3][1] = vCenter[1] + (vDir[1]) * cosR;
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex2f(p[i][0], p[i][1]);
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {p[0][0], p[0][1], u, v, 0xFFFFFFFFu},
+        {p[1][0], p[1][1], u, v + vHeight, 0xFFFFFFFFu},
+        {p[2][0], p[2][1], u + uWidth, v + vHeight, 0xFFFFFFFFu},
+        {p[3][0], p[3][1], u + uWidth, v, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Height)
@@ -1511,35 +1473,33 @@ void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Heigh
         for (int x = 0; x < 4; x++)
         {
             float p[4][2];
-            p[0][0] = sx + ((x)*Width) * 0.25f; p[0][1] = sy - ((y)*Height) * 0.25f;
-            p[1][0] = sx + ((x)*Width) * 0.25f; p[1][1] = sy - ((y + 1) * Height) * 0.25f;
-            p[2][0] = sx + ((x + 1) * Width) * 0.25f; p[2][1] = sy - ((y + 1) * Height) * 0.25f;
-            p[3][0] = sx + ((x + 1) * Width) * 0.25f; p[3][1] = sy - ((y)*Height) * 0.25f;
+            p[0][0] = sx + (static_cast<float>(x) * Width) * 0.25f;
+            p[0][1] = sy - (static_cast<float>(y) * Height) * 0.25f;
+            p[1][0] = sx + (static_cast<float>(x) * Width) * 0.25f;
+            p[1][1] = sy - (static_cast<float>(y + 1) * Height) * 0.25f;
+            p[2][0] = sx + (static_cast<float>(x + 1) * Width) * 0.25f;
+            p[2][1] = sy - (static_cast<float>(y + 1) * Height) * 0.25f;
+            p[3][0] = sx + (static_cast<float>(x + 1) * Width) * 0.25f;
+            p[3][1] = sy - (static_cast<float>(y) * Height) * 0.25f;
 
-            float c[4][2];
-            TEXCOORD(c[0], (x) * 0.25f, (y) * 0.25f);
-            TEXCOORD(c[1], (x) * 0.25f, (y + 1) * 0.25f);
-            TEXCOORD(c[2], (x + 1) * 0.25f, (y + 1) * 0.25f);
-            TEXCOORD(c[3], (x + 1) * 0.25f, (y) * 0.25f);
+            const float u0 = static_cast<float>(x) * 0.25f;
+            const float v0 = static_cast<float>(y) * 0.25f;
+            const float u1 = static_cast<float>(x + 1) * 0.25f;
+            const float v1 = static_cast<float>(y + 1) * 0.25f;
 
             float Alpha[4] = { 1.f,1.f,1.f,1.f };
             if (x == 0) { Alpha[0] = 0.f; Alpha[1] = 0.f; }
             if (x == 3) { Alpha[2] = 0.f; Alpha[3] = 0.f; }
             if (y == 0) { Alpha[0] = 0.f; Alpha[3] = 0.f; }
             if (y == 3) { Alpha[1] = 0.f; Alpha[2] = 0.f; }
-            /*if(x==0&&y==0) Alpha[0] = 0.f;
-            if(x==0&&y==3) Alpha[1] = 0.f;
-            if(x==3&&y==3) Alpha[2] = 0.f;
-            if(x==3&&y==0) Alpha[3] = 0.f;*/
 
-            glBegin(GL_TRIANGLE_FAN);
-            for (int i = 0; i < 4; i++)
-            {
-                glColor4f(1.f, 1.f, 1.f, Alpha[i]);
-                glTexCoord2f(c[i][0], c[i][1]);
-                glVertex2f(p[i][0], p[i][1]);
-            }
-            glEnd();
+            const mu::Vertex2D vertices[4] = {
+                {p[0][0], p[0][1], u0, v0, (static_cast<std::uint32_t>(Alpha[0] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[1][0], p[1][1], u0, v1, (static_cast<std::uint32_t>(Alpha[1] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[2][0], p[2][1], u1, v1, (static_cast<std::uint32_t>(Alpha[2] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[3][0], p[3][1], u1, v0, (static_cast<std::uint32_t>(Alpha[3] * 255.0f) << 24) | 0x00FFFFFFu},
+            };
+            mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
         }
     }
 }
@@ -1552,26 +1512,15 @@ void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, fl
     Height = ConvertY(Height);
     BindTexture(Texture);
 
-    float p[4][2];
     y = WindowHeight - y;
-    p[0][0] = x; p[0][1] = y;
-    p[1][0] = x; p[1][1] = y - Height;
-    p[2][0] = x + Width; p[2][1] = y - Height;
-    p[3][0] = x + Width; p[3][1] = y;
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v + vHeight * 0.25f);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight - vHeight * 0.25f);
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex2f(p[i][0], p[i][1]);
-    }
-    glEnd();
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v + vHeight * 0.25f, 0xFFFFFFFFu},
+        {x, y - Height, u, v + vHeight - vHeight * 0.25f, 0xFFFFFFFFu},
+        {x + Width, y - Height, u + uWidth, v + vHeight, 0xFFFFFFFFu},
+        {x + Width, y, u + uWidth, v, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

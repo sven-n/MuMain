@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -20,6 +21,7 @@
 #include "Scenes/SceneCore.h"
 
 #include "Core/Utilities/Debouncer.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -367,15 +369,13 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 
     if (bUseBG == TRUE && TextNum > 0)
     {
-        glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-        RenderColor((float)iPos_x - 1, fsy - 1, (float)fWidth + 1, (float)1);
-        RenderColor((float)iPos_x - 1, fsy - 1, (float)1, (float)fHeight + 1);
-        RenderColor((float)iPos_x - 1 + fWidth + 1, (float)fsy - 1, (float)1, (float)fHeight + 1);
-        RenderColor((float)iPos_x - 1, fsy - 1 + fHeight + 1, (float)fWidth + 2, (float)1);
+        RenderColor((float)iPos_x - 1, fsy - 1, (float)fWidth + 1, (float)1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1, fsy - 1, (float)1, (float)fHeight + 1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1 + fWidth + 1, (float)fsy - 1, (float)1, (float)fHeight + 1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1, fsy - 1 + fHeight + 1, (float)fWidth + 2, (float)1, 1.0f, 1);
 
-        glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-        RenderColor((float)iPos_x, fsy, (float)fWidth, (float)fHeight);
-        glEnable(GL_TEXTURE_2D);
+        RenderColor((float)iPos_x, fsy, (float)fWidth, (float)fHeight, 0.8f, 1);
+        mu::GetRenderer().SetTexture2D(true);
     }
 
     for (int i = 0; i < TextNum; i++)
@@ -11181,6 +11181,11 @@ void CreateGuildMark(int nMarkIndex, bool blend)
     Width = (int)b->Width;
     Height = (int)b->Height;
     BYTE* Buffer = b->Buffer;
+    if (!Buffer || Width == 0 || Height == 0)
+    {
+        mu::log::Get("gameplay")->error("[CreateGuildMark] BITMAP_GUILD not loaded (BitmapIndex={})", b->BitmapIndex);
+        return;
+    }
     int alpha = 128;
     if (blend)
     {
@@ -11221,9 +11226,9 @@ void CreateGuildMark(int nMarkIndex, bool blend)
         }
     }
 
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, b->Components, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+    mu::GetRenderer().QueueTextureUpdate(b->BitmapIndex, b->Buffer, static_cast<std::uint32_t>(Width),
+                                         static_cast<std::uint32_t>(Height));
+    mu::GetRenderer().BindTexture(b->BitmapIndex);
 }
 
 void CreateCastleMark(int Type, BYTE* buffer, bool blend)
@@ -11302,7 +11307,7 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
             offset += 4;
         }
     }
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
+    glBindTexture(GL_TEXTURE_2D, b->BitmapIndex);
 
     glTexImage2D(GL_TEXTURE_2D, 0, 3, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
 }

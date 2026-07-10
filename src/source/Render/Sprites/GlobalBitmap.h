@@ -15,6 +15,11 @@
 #include <cstdint>
 #include "Core/Time/Timer.h"
 
+#ifdef MU_ENABLE_SDL3
+struct SDL_GPUTexture;
+struct SDL_GPUSampler;
+#endif
+
 #define MAX_BITMAP_FILE_NAME 256
 
 #pragma pack(push, 1)
@@ -35,8 +40,14 @@ struct BITMAP_t
 private:
     friend class CBitmapCache;
     std::uint32_t dwCallCount;
-};
+
+public:
 #pragma pack(pop)
+#ifdef MU_ENABLE_SDL3
+    SDL_GPUTexture* sdlTexture = nullptr;
+    SDL_GPUSampler* sdlSampler = nullptr;
+#endif
+};
 
 class CBitmapCache
 {

@@ -7,6 +7,11 @@
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Core/Platform/PathResolve.h"
 
+#ifdef MU_ENABLE_SDL3
+#include <SDL3/SDL_gpu.h>
+#include "Render/Renderer/MuRenderer.h"
+#endif
+
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -19,6 +24,18 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+#ifdef MU_ENABLE_SDL3
+namespace mu
+{
+void RegisterTexture(std::uint32_t id, void* pTex);
+void UnregisterTexture(std::uint32_t id);
+void RegisterSampler(std::uint32_t id, void* pSampler);
+void UnregisterSampler(std::uint32_t id);
+void ClearTextureRegistry();
+void ClearSamplerRegistry();
+} // namespace mu
+#endif
 
 
 
@@ -82,6 +99,133 @@ namespace
         return MuResolvePath(conv.to_bytes(wide).c_str());
 #endif
     }
+
+#ifdef MU_ENABLE_SDL3
+    SDL_GPUFilter MapGLFilterToSDL(GLuint filter)
+    {
+        return filter == GL_NEAREST ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
+    }
+
+    SDL_GPUSamplerAddressMode MapGLWrapToSDL(GLuint wrapMode)
+    {
+        return wrapMode == GL_REPEAT ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+    }
+
+    std::vector<std::uint8_t> PadRGBToRGBA(const BYTE* rgbData, int width, int height)
+    {
+        const auto pixelCount = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+        std::vector<std::uint8_t> rgba(pixelCount * 4u);
+        for (std::size_t i = 0; i < pixelCount; ++i)
+        {
+            rgba[i * 4u + 0u] = rgbData[i * 3u + 0u];
+            rgba[i * 4u + 1u] = rgbData[i * 3u + 1u];
+            rgba[i * 4u + 2u] = rgbData[i * 3u + 2u];
+            rgba[i * 4u + 3u] = 255u;
+        }
+        return rgba;
+    }
+
+    bool UploadTextureSDLGpu(BITMAP_t* bitmap, const std::uint8_t* pixelData, int width, int height,
+                             SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrapMode)
+    {
+        SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+        if (!device || !bitmap || !pixelData || width <= 0 || height <= 0)
+        {
+            return false;
+        }
+
+        SDL_GPUTextureCreateInfo texInfo{};
+        texInfo.type = SDL_GPU_TEXTURETYPE_2D;
+        texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+        texInfo.width = static_cast<Uint32>(width);
+        texInfo.height = static_cast<Uint32>(height);
+        texInfo.layer_count_or_depth = 1;
+        texInfo.num_levels = 1;
+        texInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+
+        SDL_GPUTexture* gpuTexture = SDL_CreateGPUTexture(device, &texInfo);
+        if (!gpuTexture)
+        {
+            return false;
+        }
+
+        constexpr Uint32 bytesPerPixel = 4u;
+        const Uint32 dataSize = static_cast<Uint32>(width) * static_cast<Uint32>(height) * bytesPerPixel;
+
+        SDL_GPUTransferBufferCreateInfo transferInfo{};
+        transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+        transferInfo.size = dataSize;
+        SDL_GPUTransferBuffer* transfer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
+        if (!transfer)
+        {
+            SDL_ReleaseGPUTexture(device, gpuTexture);
+            return false;
+        }
+
+        void* mapped = SDL_MapGPUTransferBuffer(device, transfer, false);
+        if (!mapped)
+        {
+            SDL_ReleaseGPUTransferBuffer(device, transfer);
+            SDL_ReleaseGPUTexture(device, gpuTexture);
+            return false;
+        }
+        std::memcpy(mapped, pixelData, dataSize);
+        SDL_UnmapGPUTransferBuffer(device, transfer);
+
+        SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(device);
+        if (!commandBuffer)
+        {
+            SDL_ReleaseGPUTransferBuffer(device, transfer);
+            SDL_ReleaseGPUTexture(device, gpuTexture);
+            return false;
+        }
+
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+        if (!copyPass)
+        {
+            SDL_SubmitGPUCommandBuffer(commandBuffer);
+            SDL_ReleaseGPUTransferBuffer(device, transfer);
+            SDL_ReleaseGPUTexture(device, gpuTexture);
+            return false;
+        }
+
+        SDL_GPUTextureTransferInfo src{};
+        src.transfer_buffer = transfer;
+        src.offset = 0;
+        src.pixels_per_row = static_cast<Uint32>(width);
+        src.rows_per_layer = static_cast<Uint32>(height);
+
+        SDL_GPUTextureRegion dst{};
+        dst.texture = gpuTexture;
+        dst.w = static_cast<Uint32>(width);
+        dst.h = static_cast<Uint32>(height);
+        dst.d = 1;
+
+        SDL_UploadToGPUTexture(copyPass, &src, &dst, false);
+        SDL_EndGPUCopyPass(copyPass);
+        SDL_SubmitGPUCommandBuffer(commandBuffer);
+        SDL_ReleaseGPUTransferBuffer(device, transfer);
+
+        SDL_GPUSamplerCreateInfo samplerInfo{};
+        samplerInfo.min_filter = filter;
+        samplerInfo.mag_filter = filter;
+        samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
+        samplerInfo.address_mode_u = wrapMode;
+        samplerInfo.address_mode_v = wrapMode;
+        samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+
+        SDL_GPUSampler* sampler = SDL_CreateGPUSampler(device, &samplerInfo);
+        if (!sampler)
+        {
+            SDL_ReleaseGPUTexture(device, gpuTexture);
+            return false;
+        }
+
+        bitmap->sdlTexture = gpuTexture;
+        bitmap->sdlSampler = sampler;
+        return true;
+    }
+#endif
 }
 
 bool CBitmapCache::Create()
@@ -439,7 +583,26 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 
         if (--pBitmap->Ref == 0 || bForce)
         {
+#ifdef MU_ENABLE_SDL3
+            mu::UnregisterTexture(uiBitmapIndex);
+            mu::UnregisterSampler(uiBitmapIndex);
+            SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+            if (device)
+            {
+                if (pBitmap->sdlSampler)
+                {
+                    SDL_ReleaseGPUSampler(device, pBitmap->sdlSampler);
+                    pBitmap->sdlSampler = nullptr;
+                }
+                if (pBitmap->sdlTexture)
+                {
+                    SDL_ReleaseGPUTexture(device, pBitmap->sdlTexture);
+                    pBitmap->sdlTexture = nullptr;
+                }
+            }
+#else
             glDeleteTextures(1, &(pBitmap->TextureNumber));
+#endif
 
             const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->Width * pBitmap->Height * pBitmap->Components);
             m_dwUsedTextureMemory -= memoryUsed;
@@ -461,11 +624,38 @@ void CGlobalBitmap::UnloadAllImages()
         g_ErrorReport.Write(L"Unload Images\r\n");
 #endif // _DEBUG
 
-    for (auto& pair : m_mapBitmap)
+#ifdef MU_ENABLE_SDL3
+    SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+    if (device)
     {
-        BITMAP_t* pBitmap = pair.second.get();
+        for (auto& pair : m_mapBitmap)
+        {
+            BITMAP_t* pBitmap = pair.second.get();
+            mu::UnregisterTexture(pBitmap->BitmapIndex);
+            mu::UnregisterSampler(pBitmap->BitmapIndex);
+            if (pBitmap->sdlSampler)
+            {
+                SDL_ReleaseGPUSampler(device, pBitmap->sdlSampler);
+                pBitmap->sdlSampler = nullptr;
+            }
+            if (pBitmap->sdlTexture)
+            {
+                SDL_ReleaseGPUTexture(device, pBitmap->sdlTexture);
+                pBitmap->sdlTexture = nullptr;
+            }
+        }
+    }
+    else
+    {
+        mu::ClearTextureRegistry();
+        mu::ClearSamplerRegistry();
+    }
+#endif
 
+    for ([[maybe_unused]] auto& pair : m_mapBitmap)
+    {
 #ifdef _DEBUG
+        BITMAP_t* pBitmap = pair.second.get();
         if (pBitmap->Ref > 1)
         {
             g_ErrorReport.Write(L"Bitmap %ls(RefCount= %d)\r\n", pBitmap->FileName, pBitmap->Ref);
@@ -492,8 +682,7 @@ BITMAP_t* CGlobalBitmap::GetTexture(GLuint uiBitmapIndex)
     }
     if (nullptr == pBitmap)
     {
-        static BITMAP_t s_Error;
-        memset(&s_Error, 0, sizeof(BITMAP_t));
+        static BITMAP_t s_Error{};
         wcscpy(s_Error.FileName, L"CGlobalBitmap::GetTexture Error!!!");
         pBitmap = &s_Error;
     }
@@ -676,6 +865,22 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         memcpy(pNewBitmap->Buffer, decompressedBuffer.data(), static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
     }
 
+#ifdef MU_ENABLE_SDL3
+    pNewBitmap->TextureNumber = uiBitmapIndex;
+    std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, textureWidth, textureHeight);
+    if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData.data(), textureWidth, textureHeight,
+                             MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode)))
+    {
+        g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
+        return false;
+    }
+
+    SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
+    SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
+    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
+    mu::RegisterTexture(uiBitmapIndex, rawTexture);
+    mu::RegisterSampler(uiBitmapIndex, rawSampler);
+#else
     glGenTextures(1, &(pNewBitmap->TextureNumber));
 
     glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
@@ -691,6 +896,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
+#endif
 
     return true;
 }
@@ -765,6 +971,21 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
         }
     }
 
+#ifdef MU_ENABLE_SDL3
+    pNewBitmap->TextureNumber = uiBitmapIndex;
+    if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, Width, Height,
+                             MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode)))
+    {
+        g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
+        return false;
+    }
+
+    SDL_GPUTexture* rawTexture = pNewBitmap->sdlTexture;
+    SDL_GPUSampler* rawSampler = pNewBitmap->sdlSampler;
+    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
+    mu::RegisterTexture(uiBitmapIndex, rawTexture);
+    mu::RegisterSampler(uiBitmapIndex, rawSampler);
+#else
     glGenTextures(1, &(pNewBitmap->TextureNumber));
 
     glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
@@ -782,6 +1003,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
+#endif
 
     return true;
 }

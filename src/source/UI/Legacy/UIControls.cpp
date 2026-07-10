@@ -2785,7 +2785,7 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
     }
     if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
     {
-        glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
+        glBindTexture(GL_TEXTURE_2D, b->BitmapIndex);
         if (uploadWidth > 0 && uploadHeight > 0)
         {
             if (uploadWidth == static_cast<int>(b->Width))
