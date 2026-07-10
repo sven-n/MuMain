@@ -636,13 +636,13 @@ if (DOTNET_EXECUTABLE)
   # Discovers groups from filenames (<Group>.<locale>.resx) and emits one
   # .h/.cpp per group plus a master All.h/All.cpp. Generated output lives
   # in the build tree only and is consumed by Main via target_sources.
-  set(RESXGEN_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../Tools/ResxGen/ResxGen.csproj")
+  set(RESXGEN_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../tools/ResxGen/ResxGen.csproj")
   set(RESX_INPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Localization")
   set(RESX_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Generated/I18N")
   file(MAKE_DIRECTORY "${RESX_OUTPUT_DIR}")
 
   file(GLOB RESX_FILES CONFIGURE_DEPENDS "${RESX_INPUT_DIR}/*.resx")
-  file(GLOB_RECURSE RESXGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../Tools/ResxGen/*.cs")
+  file(GLOB_RECURSE RESXGEN_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../tools/ResxGen/*.cs")
 
   if (RESX_FILES)
     # Compute groups from filenames: Editor.en.resx -> group "Editor".
