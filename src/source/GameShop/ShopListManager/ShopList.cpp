@@ -54,12 +54,17 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
     {
         this->GetCategoryListPtr()->Clear();
 
+        int linesRead = 0;
+        int rowsParsed = 0;
+
         while (true)
         {
             memset(buff, 0, sizeof(buff));
 
             if (!ifs.getline(buff, sizeof(buff)))
                 break;
+
+            ++linesRead;
 
             CShopCategory cat;
 
@@ -68,10 +73,19 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
             if (cat.SetCategory(data))
             {
                 this->GetCategoryListPtr()->Append(cat);
+                ++rowsParsed;
             }
         }
 
         ifs.close();
+
+        // Make a zero-row decode impossible to mistake for success.
+        // If the decoder ever mangles the catalog again, rowsParsed=0 (with a
+        // non-zero linesRead) will be obvious in muConsoleDebug instead of
+        // silently producing an empty shop grid with no error dialog.
+        g_ConsoleDebug->Write(MCD_NORMAL,
+            L"[XShop] LoadCategroy: parsed %d category rows from %d lines (encode=%d) <%ls>",
+            rowsParsed, linesRead, (int)enc, szFilePath);
     }
     else
     {
@@ -238,34 +252,36 @@ std::wstring CShopList::GetDecodedString(const char* buffer, FILE_ENCODE encode)
 {
     std::wstring result;
 
-    if (encode == FE_UTF8)
+    if (encode == FE_UNICODE)
     {
-        int cchWideChar = MultiByteToWideChar(CP_UTF8, 0, buffer, -1, 0, 0);
-        auto lpWideCharStr = new WCHAR[cchWideChar + 1];
-        MultiByteToWideChar(CP_UTF8, 0, buffer, -1, lpWideCharStr, cchWideChar);
-
-        cchWideChar = WideCharToMultiByte(0, 0, lpWideCharStr, -1, 0, 0, 0, 0);
-        char* buff = new char[cchWideChar + 1];
-        WideCharToMultiByte(0, 0, lpWideCharStr, -1, buff, cchWideChar, 0, 0);
-
-        // todo: check if that's correct
-        result = (wchar_t*) buff;
-
-        delete[] lpWideCharStr;
-        delete[] buff;
+        // UTF-16LE input: std::ifstream::getline read the raw little-endian bytes
+        // into a narrow buffer, so they already are wide characters. Reinterpret
+        // is the correct decode here (catalog files are ANSI today, so this path
+        // is not normally exercised, but keep it lossless rather than empty).
+        result = reinterpret_cast<const wchar_t*>(buffer);
+        return result;
     }
-    else
+
+    // FE_ANSI -> CP_ACP, FE_UTF8 -> CP_UTF8. Convert the narrow bytes to UTF-16
+    // properly. The old decompiled code reinterpret-cast the narrow ASCII bytes
+    // as wchar_t* ("todo: check if that's correct"), which turned a row like
+    // "10@Item@200@..." into a single garbage token with no wide '@'
+    // delimiters. CStringToken then yielded 1 field instead of 7, so every row
+    // decoded to Root=0 -> zero category zones -> no tabs and an empty grid.
+    const UINT codePage = (encode == FE_UTF8) ? CP_UTF8 : CP_ACP;
+
+    int cchWideChar = MultiByteToWideChar(codePage, 0, buffer, -1, 0, 0);
+    if (cchWideChar <= 0)
     {
-        if (encode == FE_UNICODE)
-        {
-            result = L"\0";
-        }
-        else
-        {
-            // todo: check if that's correct
-            result = (wchar_t*)(buffer);
-        }
+        return result; // empty string on conversion failure
     }
+
+    auto lpWideCharStr = new WCHAR[cchWideChar];
+    MultiByteToWideChar(codePage, 0, buffer, -1, lpWideCharStr, cchWideChar);
+
+    result = lpWideCharStr;
+
+    delete[] lpWideCharStr;
 
     return result;
 }
