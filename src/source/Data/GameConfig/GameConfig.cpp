@@ -70,6 +70,7 @@ void GameConfig::Load()
     m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
 
     m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
+    m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
 
@@ -108,6 +109,7 @@ void GameConfig::Save()
     WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
 
     WriteString(CfgSectionUI, CfgKeyUILocale, m_uiLocale);
+    WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
 }
@@ -146,6 +148,11 @@ void GameConfig::SetLanguageSelection(const std::wstring& lang)
 void GameConfig::SetUILocale(const std::wstring& locale)
 {
     m_uiLocale = locale;
+}
+
+void GameConfig::SetFontSelection(const std::wstring& font)
+{
+    m_fontSelection = font;
 }
 
 void GameConfig::SetEncryptedUsername(const std::wstring& encryptedUsername)

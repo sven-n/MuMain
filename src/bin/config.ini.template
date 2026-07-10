@@ -13,3 +13,6 @@ MusicVolume=5
 [CONNECTION SETTINGS]
 ServerIP=127.127.127.127
 ServerPort=44406
+[UI]
+Locale=en
+Font=
