@@ -2,6 +2,7 @@
 #include "CameraProjection.h"
 #include "CameraState.h"
 #include "CameraConfig.h"
+#include "Render/Renderer/MuRenderer.h"
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -43,8 +44,8 @@ void CameraProjection::SetViewport(int x, int y, int width, int height)
     s_ViewportWidth = width;
     s_ViewportHeight = height;
 
-    // Set OpenGL viewport (Y coordinate is flipped)
-    glViewport(x, WindowHeight - (y + height), width, height);
+    mu::GetRenderer().SetViewport(x, y, width, height);
+    mu::GetRenderer().SetScissor(x, y, width, height);
 }
 
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,
