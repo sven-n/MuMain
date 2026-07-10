@@ -1083,6 +1083,11 @@ namespace MUHelper
             return 0;
         }
 
+        if (gCharacterManager.GetEquipedBowType() != BOWTYPE_NONE && !CheckArrow())
+        {
+            return 0;
+        }
+
         Hero->MovementType = MOVEMENT_ATTACK;
         ActionTarget = iCharIndex;
         Attacking = 1;
