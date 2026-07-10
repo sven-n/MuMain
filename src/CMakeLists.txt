@@ -13,10 +13,6 @@ mu_ensure_submodule("ThirdParty/SDL"
   INDICATOR "CMakeLists.txt"
   URL "https://github.com/libsdl-org/SDL.git")
 
-mu_ensure_submodule("ThirdParty/SDL_mixer"
-  INDICATOR "CMakeLists.txt"
-  URL "https://github.com/libsdl-org/SDL_mixer.git")
-
 # SDL3 — static link, no tests, no install
 set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 set(SDL_STATIC ON CACHE BOOL "" FORCE)
@@ -28,26 +24,6 @@ set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
 FetchContent_MakeAvailable(SDL3_ttf)
 set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
-
-# SDL3_mixer — static link, MP3 + Ogg Vorbis only (matches our music assets)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_INSTALL OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_VENDORED ON CACHE BOOL "" FORCE)
-set(SDLMIXER_SAMPLES OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_MP3 ON CACHE BOOL "" FORCE)
-set(SDLMIXER_MP3_DRMP3 ON CACHE BOOL "" FORCE)
-# mpg123 is built as a dynamically loaded library — drmp3 alone is enough
-# for the assets we ship and keeps everything statically linked.
-set(SDLMIXER_MP3_MPG123 OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_VORBIS_STB OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_VORBIS_VORBISFILE OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_FLAC OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_OPUS OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_WAVPACK OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_MOD OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_MIDI OFF CACHE BOOL "" FORCE)
-set(SDLMIXER_GME OFF CACHE BOOL "" FORCE)
-add_subdirectory(ThirdParty/SDL_mixer EXCLUDE_FROM_ALL)
 
 # Determine architecture if CMAKE_SIZEOF_VOID_P isn't set
 if (NOT DEFINED CMAKE_SIZEOF_VOID_P OR CMAKE_SIZEOF_VOID_P EQUAL 0)
@@ -510,7 +486,6 @@ if (MSVC)
   target_link_libraries(MuClient PUBLIC
     imm32
     vfw32
-    dsound
     dxguid
     opengl32
     glu32
@@ -526,7 +501,7 @@ if (MSVC)
 
   # Locate required DLLs in bin directory
   set(DLL_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-  set(REQUIRED_DLL_NAMES glew32 ogg vorbisfile)
+  set(REQUIRED_DLL_NAMES glew32)
   set(REQUIRED_DLLS)
 
   foreach(DLL_NAME IN LISTS REQUIRED_DLL_NAMES)
@@ -807,7 +782,6 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
   target_link_libraries(MuClient PUBLIC
     imm32
     vfw32
-    dsound
     dxguid
     opengl32
     glu32
@@ -829,10 +803,10 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
   )
 endif()
 
-# Link SDL3 + SDL3_mixer (audio) on all platforms.
+# SDL provides the window and event layer. Audio is handled by the vendored
+# miniaudio implementation in Core/Platform/Audio on every platform.
 target_link_libraries(MuClient PUBLIC
   SDL3::SDL3
-  SDL3_mixer::SDL3_mixer
 )
 
 if(APPLE)

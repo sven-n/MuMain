@@ -476,13 +476,13 @@ void DestroyWindow()
 }
 void DestroySound()
 {
+    AudioPlayer::Shutdown();
     if (g_platformAudio != nullptr)
     {
         g_platformAudio->Shutdown();
         delete g_platformAudio;
         g_platformAudio = nullptr;
     }
-    AudioPlayer::Shutdown();
 }
 
 int g_iInactiveTime = 0;
@@ -1620,10 +1620,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_pNewUISystem->Create();
 
-    // Always initialize audio system so music can be enabled at runtime
-    AudioPlayer::Initialize();
-
-    // Always initialize sound so it can be toggled at runtime
+    // One miniaudio backend owns both music and sound effects on every platform.
     if (g_platformAudio == nullptr)
     {
         g_platformAudio = new mu::MiniAudioBackend();
@@ -1632,6 +1629,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
             mu::log::Get("audio")->error("MiniAudioBackend::Initialize failed; game will run without audio");
         }
     }
+    AudioPlayer::Initialize();
 
     {
         int value = AudioPlayer::ClampVolume(GameConfig::GetInstance().GetSoundVolume());
