@@ -55,6 +55,8 @@ namespace SEASON3B
         void Release();
 
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
+        bool ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl = nullptr);
+        bool ProcessMixItemAutoMoveToInventory();
         void DeleteItem(int iIndex);
         void DeleteAllItems();
 
@@ -86,6 +88,9 @@ namespace SEASON3B
         void RenderFrame();
         bool InventoryProcess();
         bool BtnProcess();
+
+        bool AutoMoveItem(CNewUIInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
+            CNewUIInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource);
 
         void RenderMixDescriptions(float fPos_x, float fPos_y);
 

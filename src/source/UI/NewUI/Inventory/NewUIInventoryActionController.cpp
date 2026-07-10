@@ -151,6 +151,11 @@ bool CNewUIInventoryActionController::HandleRightClick(CNewUIInventoryCtrl* targ
         return HandleSellToNPC(targetControl);
     }
 
+    if (g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) && g_pNewUISystem->IsVisible(INTERFACE_INVENTORY))
+    {
+        return HandleMixAutoMove(targetControl);
+    }
+
     if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY)
         && !g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
         && !g_pNewUISystem->IsVisible(INTERFACE_TRADE)
@@ -179,6 +184,13 @@ bool CNewUIInventoryActionController::HandleStorageAutoMove(CNewUIInventoryCtrl*
     }
 
     return false;
+}
+
+bool CNewUIInventoryActionController::HandleMixAutoMove(CNewUIInventoryCtrl* targetControl) const
+{
+    // All crafting NPC dialogs (Chaos Machine, Seed Master, Elphis, Osbourne, ...) share the
+    // single mix window, so routing the right-click here covers every crafting NPC at once.
+    return g_pMixInventory->ProcessMyInvenItemAutoMove(targetControl);
 }
 
 bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targetControl) const
