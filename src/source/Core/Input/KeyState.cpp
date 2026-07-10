@@ -7,6 +7,21 @@
 
 namespace Core::Input
 {
+    namespace
+    {
+        bool g_leftMouseButtonPressEdge = false;
+    }
+
+    void RecordLeftMouseButtonPressEdge()
+    {
+        g_leftMouseButtonPressEdge = true;
+    }
+
+    void ClearLeftMouseButtonPressEdge()
+    {
+        g_leftMouseButtonPressEdge = false;
+    }
+
 #ifndef _WIN32
     namespace
     {
@@ -65,12 +80,18 @@ namespace Core::Input
         // Keep the global async query here; switch to the SDL path below once the
         // EDIT controls are replaced (issue #447). GetAsyncKeyState reports the
         // mouse buttons (VK_LBUTTON/...) and modifiers too, matching the original.
+        if (virtualKey == VK_LBUTTON && g_leftMouseButtonPressEdge)
+        {
+            return true;
+        }
         return (GetAsyncKeyState(virtualKey) & 0x8000) != 0;
 #else
         // Mouse buttons and modifiers come from the SDL mouse / mod state.
         switch (virtualKey)
         {
-        case VK_LBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) != 0;
+        case VK_LBUTTON:
+            return g_leftMouseButtonPressEdge
+                || (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) != 0;
         case VK_RBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) != 0;
         case VK_MBUTTON: return (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE)) != 0;
         case VK_SHIFT:   return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;

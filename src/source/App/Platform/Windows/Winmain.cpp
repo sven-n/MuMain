@@ -814,12 +814,12 @@ namespace
                 MouseLButtonPop = false;
                 if (!MouseLButton) MouseLButtonPush = true;
                 MouseLButton = true;
+                Core::Input::RecordLeftMouseButtonPressEdge();
                 if (e.button.clicks >= 2) MouseLButtonDBClick = true;
                 SetCapture(g_hWnd);
             }
             else
             {
-                MouseLButtonPush = false;
                 if (MouseLButton) MouseLButtonPop = true;
                 MouseLButton = false;
                 g_iMousePopPosition_x = MouseX;
@@ -837,7 +837,6 @@ namespace
             }
             else
             {
-                MouseRButtonPush = false;
                 if (MouseRButton) MouseRButtonPop = true;
                 MouseRButton = false;
                 ReleaseCapture();
@@ -853,7 +852,6 @@ namespace
             }
             else
             {
-                MouseMButtonPush = false;
                 if (MouseMButton) MouseMButtonPop = true;
                 MouseMButton = false;
                 ReleaseCapture();
@@ -897,6 +895,7 @@ namespace
             {
                 MouseLButton = false;
                 MouseLButtonPop = false;
+                MouseLButtonPush = false;
                 MouseRButton = false;
                 MouseRButtonPop = false;
                 MouseRButtonPush = false;
@@ -905,6 +904,7 @@ namespace
                 MouseMButtonPop = false;
                 MouseMButtonPush = false;
                 MouseWheel = 0;
+                Core::Input::ClearLeftMouseButtonPressEdge();
             }
         }
         else

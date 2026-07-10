@@ -3235,13 +3235,19 @@ void CUITextInputBox::SetFont(HFONT hFont)
 
 BOOL CUITextInputBox::DoPortableMouse()
 {
+    static bool s_mousePressHandled = false;
+    if (!MouseLButtonPush)
+    {
+        s_mousePressHandled = false;
+    }
+
     g_pRenderText->SetFont(CurrentFont());
     const int iLineHeight = LineHeightPx();
 
     // Thumb drag in progress: track the mouse until the button is released.
     if (m_bUseMultiLine && GetState() == UISTATE_SCROLL)
     {
-        if (MouseLButtonPush)
+        if (MouseLButton)
         {
             MouseOnWindow = true;
             std::vector<PortableLine> lines;
@@ -3278,6 +3284,11 @@ BOOL CUITextInputBox::DoPortableMouse()
 
     if (!MouseLButtonPush)
         return TRUE;
+
+    if (s_mousePressHandled)
+        return TRUE;
+
+    s_mousePressHandled = true;
 
     // Scrollbar hit testing (multiline only; geometry set during render).
     if (m_bUseMultiLine)

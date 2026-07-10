@@ -68,6 +68,17 @@ extern bool Destroy;
 extern double WorldTime;
 extern float FPS_ANIMATION_FACTOR;
 
+namespace
+{
+    void ClearMousePressState()
+    {
+        MouseLButtonPush = false;
+        MouseRButtonPush = false;
+        MouseMButtonPush = false;
+        Core::Input::ClearLeftMouseButtonPressEdge();
+    }
+}
+
 static bool g_bShowDebugInfo =
 #ifdef _DEBUG
     true;
@@ -1089,4 +1100,8 @@ void RenderScene(HDC hDC)
         sprintf_s(errorMsg, sizeof(errorMsg), "Exception in RenderScene: %s", e.what());
         OutputDebugStringA(errorMsg);
     }
+
+    // SDL may deliver button-down and button-up in one event batch. Keep these
+    // one-shot flags alive until scene logic has consumed the rendered frame.
+    ClearMousePressState();
 }

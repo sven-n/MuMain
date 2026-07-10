@@ -1,5 +1,6 @@
 #ifdef MU_ENABLE_SDL3
 
+#include "Core/Input/KeyState.h"
 #include "Core/Platform/sdl3/SDLEventLoop.h"
 #include "Core/Platform/MuPlatform.h"
 #include "Core/Platform/WinCompat.h"
@@ -11,10 +12,6 @@
 extern char g_szSDLTextInput[32];
 extern bool g_bSDLTextInputReady;
 extern bool g_sdl3KeyboardState[512];
-
-// Mouse button press-edge flag — set on BUTTON_DOWN, cleared by ScanAsyncKeyState.
-// Survives same-frame BUTTON_UP so fast clicks aren't missed. [Story 7-9-9, AC-5]
-bool g_bMouseLButtonPressEdge = false;
 
 // External game state — set to true to trigger clean shutdown
 extern bool Destroy;
@@ -262,7 +259,7 @@ bool SDLEventLoop::PollEvents()
                     MouseLButtonPush = true;
                 }
                 MouseLButton = true;
-                g_bMouseLButtonPressEdge = true; // Edge flag for ScanAsyncKeyState [Story 7-9-9, AC-5]
+                Core::Input::RecordLeftMouseButtonPressEdge();
                 if (event.button.clicks == 2)
                 {
                     MouseLButtonDBClick = true;
