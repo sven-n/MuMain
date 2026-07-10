@@ -160,7 +160,13 @@ bool CNewUISystem::Create()
 
 void CNewUISystem::Release()
 {
+    if (m_pNewUIMng == nullptr)
+    {
+        return;
+    }
+
     UnloadMainSceneInterface();
+    g_MessageBox->Release();
 
     SAFE_DELETE(m_pNewSlideWindow);
     SAFE_DELETE(m_pNewOptionWindow);

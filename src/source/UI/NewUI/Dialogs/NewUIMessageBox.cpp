@@ -178,6 +178,11 @@ bool SEASON3B::CNewUIMessageBoxMng::Create(CNewUIManager* pNewUIMng)
 
 void SEASON3B::CNewUIMessageBoxMng::Release()
 {
+    if (m_pNewUIMng == nullptr && m_pMsgBoxFactory == nullptr)
+    {
+        return;
+    }
+
     UnloadImages();
 
     PopAllEvents();

@@ -403,6 +403,11 @@ void DestroyWindow()
     g_MuEditorConfig.Save();
 #endif
 
+    // UI objects own timers, SDL_ttf text, and renderer-facing resources. Tear
+    // them down while the timer scheduler and SDL GPU renderer are still alive.
+    g_pNewUISystem->Release();
+    g_pRenderText->Release();
+
     CUIMng::Instance().Release();
 
     //. release font handle
@@ -1727,8 +1732,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // are still alive; the static destructor runs too late (after KillGLWindow).
     g_MuEditorCore.Shutdown();
 #endif
-    KillGLWindow();
     DestroyWindow();
+    KillGLWindow();
 
     SDL_Quit();
 
