@@ -1425,6 +1425,25 @@ static void ShutdownRuntime(std::thread& cpuUsageRecorder)
     SDL_Quit();
 }
 
+static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD (&fileVersion)[4])
+{
+    g_ErrorReport.Write(L"\r\n");
+    g_ErrorReport.WriteLogBegin();
+    g_ErrorReport.AddSeparator();
+    g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", executableVersion, L"Eng",
+                        fileVersion[0], fileVersion[1], fileVersion[2], fileVersion[3]);
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", fileVersion[0], fileVersion[1],
+                          fileVersion[2], fileVersion[3]);
+
+    g_ErrorReport.WriteCurrentTime();
+    ER_SystemInfo systemInfo;
+    ZeroMemory(&systemInfo, sizeof(systemInfo));
+    GetSystemInfo(&systemInfo);
+    g_ErrorReport.AddSeparator();
+    g_ErrorReport.WriteSystemInfo(&systemInfo);
+    g_ErrorReport.AddSeparator();
+}
+
 #ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 #else
@@ -1451,21 +1470,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         }
     }
 
-    g_ErrorReport.Write(L"\r\n");
-    g_ErrorReport.WriteLogBegin();
-    g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", lpszExeVersion, L"Eng", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
+    WriteStartupDiagnostics(lpszExeVersion, wVersion);
+    ResolvePacketBindings();
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
-
-    g_ErrorReport.WriteCurrentTime();
-    ER_SystemInfo si;
-    ZeroMemory(&si, sizeof(ER_SystemInfo));
-    GetSystemInfo(&si);
-    g_ErrorReport.AddSeparator();
-    g_ErrorReport.WriteSystemInfo(&si);
-    g_ErrorReport.AddSeparator();
-    
     g_ErrorReport.Write(L"> To read config.ini.\r\n");
 
     // Load game settings from INI file first

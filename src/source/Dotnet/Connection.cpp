@@ -63,6 +63,7 @@ void ResolvePacketBindings()
     if (!munique_client_library_handle)
     {
         mu::log::Get("dotnet")->error("NET: ResolvePacketBindings -- library not loaded, skipping");
+        g_ErrorReport.Write(L"NET: ResolvePacketBindings -- library not loaded, skipping\r\n");
         return;
     }
 
@@ -281,6 +282,8 @@ void ResolvePacketBindings()
 
     mu::log::Get("dotnet")->info("NET: ResolvePacketBindings done (SendServerListRequest={})",
                                 dotnet_SendServerListRequest ? "resolved" : "NULL");
+    g_ErrorReport.Write(L"NET: ResolvePacketBindings done (SendServerListRequest=%hs)\r\n",
+                        dotnet_SendServerListRequest ? "resolved" : "NULL");
 }
 
 std::map<int32_t, Connection*> connections;
