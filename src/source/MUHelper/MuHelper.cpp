@@ -843,7 +843,31 @@ namespace MUHelper
     // same way the manual click path gates in MoveHero (ZzzInterface.cpp).
     static bool IsHeroSwingInProgress()
     {
-        return Engine::Object::IsAttackAction(Hero->Object.CurrentAction);
+        const int iAction = Hero->Object.CurrentAction;
+
+        // Outside the swing enum range entirely -> not a swing.
+        if (!Engine::Object::IsAttackAction(iAction))
+            return false;
+
+        // Several non-swing *stance* animations (mounted idle/walk/run, two-hand-
+        // sword stance, ride-horse, rage-fenrir) share the [PLAYER_ATTACK_FIST ..
+        // PLAYER_RIDE_SKILL] enum range that IsAttackAction() spans. MoveHero
+        // (ZzzInterface.cpp) OR-excludes exactly these four ranges when deciding
+        // whether the hero may move; mirror that here. Otherwise a Fenrir-mounted
+        // idle character (CurrentAction == PLAYER_FENRIR_STAND, inside the range)
+        // reads as a perpetual swing, IsHeroSwingInProgress() never clears, and
+        // SimulateSkill()/SimulateAttack() never fire -- the auto-helper is dead
+        // for the whole session while Horn of Fenrir (or any mount) is equipped.
+        if ((iAction >= PLAYER_STOP_TWO_HAND_SWORD_TWO && iAction <= PLAYER_RUN_TWO_HAND_SWORD_TWO)
+            || (iAction >= PLAYER_DARKLORD_STAND && iAction <= PLAYER_RUN_RIDE_HORSE)
+            || (iAction >= PLAYER_FENRIR_RUN && iAction <= PLAYER_FENRIR_WALK_ONE_LEFT)
+            || (iAction >= PLAYER_RAGE_FENRIR_WALK && iAction <= PLAYER_RAGE_FENRIR_STAND_ONE_LEFT))
+            return false;
+
+        // Genuine attack/skill swing -> Fenrir attack/skill actions sit below
+        // PLAYER_FENRIR_RUN, so they stay gated and cadence still tracks
+        // AttackSpeed when mounted.
+        return true;
     }
 
     int CMuHelper::SimulateAttack(ActionSkillType iSkill)
