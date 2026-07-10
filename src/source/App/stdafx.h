@@ -141,6 +141,8 @@
   // overrun smaller buffers, and glibc's _FORTIFY_SOURCE aborts on the
   // mismatch even before anything is written. Only a plain pointer (size
   // unknowable) keeps the 1024 assumption.
+#ifndef MU_SWPRINTF_DEFINED
+#define MU_SWPRINTF_DEFINED
   template<typename Buf, typename... Args>
   inline int mu_swprintf(Buf&& buffer, const wchar_t* format, Args... args) {
       using Array = std::remove_reference_t<Buf>;
@@ -159,6 +161,7 @@
   inline int mu_swprintf_s(wchar_t (&buffer)[N], const wchar_t* format, Args... args) {
       return std::swprintf(buffer, N, format, args...);
   }
+#endif
 #endif
 
 //opengl

@@ -32,7 +32,6 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Audio/DSPlaySound.h"
 
-#include "App/Platform/Windows/resource.h"
 #include "Core/Platform/Imm.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "App/Platform/Windows/Local.h"
