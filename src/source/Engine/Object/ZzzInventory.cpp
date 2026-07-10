@@ -6485,18 +6485,22 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     descriptor.TextColor = MakeRgba(255, 255, 255, 255);
     descriptor.BgColor = MakeRgba(0, 0, 0, 255);
 
-    // Use the item name by default
-    if (o->Type == MODEL_ZEN) // Zen
+    // Use the item name by default, only when o->Type is in MODEL_ITEM range
+    // Items with special types (e.g. MODEL_EVENT + N) are handled by overrides below
+    if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM)
     {
-        FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
-    }
-    else if (ItemLevel == 0)
-    {
-        CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
-    }
-    else
-    {
-        FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        if (o->Type == MODEL_ZEN) // Zen
+        {
+            FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        }
+        else if (ItemLevel == 0)
+        {
+            CopyGroundItemLabelText(descriptor.Name, ItemAttribute[o->Type - MODEL_ITEM].Name);
+        }
+        else
+        {
+            FormatGroundItemLabelText(descriptor.Name, L"%ls +%d", ItemAttribute[o->Type - MODEL_ITEM].Name, ItemLevel);
+        }
     }
 
     if (boldTextItems.count(o->Type) > 0)
@@ -6516,7 +6520,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     {
         SetDescriptorOrangeTextColor(descriptor);
     }
-    else if (o->Type == MODEL_ORB_OF_SUMMONING)
+    if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
         SetDescriptorGrayTextColor(descriptor);
         FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, I18N::Game::Jewel);
@@ -6774,6 +6778,13 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         && o->Type <= static_cast<int>(MODEL_TYPE_CHARM_MIXWING) + EWS_END)
     {
         SetDescriptorOrangeTextColor(descriptor);
+    }
+    else if (o->Type >= MODEL_ITEM && o->Type < MODEL_ITEM + MAX_ITEM
+        && (whiteTextItems.count(o->Type) > 0
+            || yellowTextItems.count(o->Type) > 0
+            || orangeTextItems.count(o->Type) > 0))
+    {
+        // Color was already set by Block 1 (white/yellow/orange). No override needed.
     }
     else
     {
