@@ -89,6 +89,9 @@ namespace SEASON3B
         bool InventoryProcess();
         bool BtnProcess();
 
+        bool AutoMoveItem(CNewUIInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
+            CNewUIInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource);
+
         void RenderMixDescriptions(float fPos_x, float fPos_y);
 
         void CheckMixInventory();
