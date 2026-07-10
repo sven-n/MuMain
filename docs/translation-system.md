@@ -60,7 +60,7 @@ The matching German file uses the same `name=` keys with translated `<value>`s:
 
 ## Build-time generator
 
-`Tools/ResxGen` is a small .NET console app driven from `src/CMakeLists.txt`.
+`tools/ResxGen` is a small .NET console app driven from `src/CMakeLists.txt`.
 On every build it scans `src/Localization/*.resx`, groups files by stem, and
 emits:
 
@@ -241,7 +241,7 @@ automatically without needing their own observer.
 
 There's no per-key "key name shown in red" debug mode today; missing keys
 just fall back. If you want a hard-fail mode for new development, the
-generator is the place to add it (`Tools/ResxGen/CppEmitter.cs`).
+generator is the place to add it (`tools/ResxGen/CppEmitter.cs`).
 
 ## Adding a new string
 
@@ -263,7 +263,7 @@ for narrow groups. For wide groups, `%s` / `%ls` via the bounds-checked
 1. Create `src/Localization/<Group>.<newLocale>.resx` for every group you want
    the new locale to cover. Missing groups fall back to `en` at runtime.
 2. Add a display name for the locale to
-   `Tools/ResxGen/CppEmitter.cs#KnownLanguageDisplayNames` so the language
+   `tools/ResxGen/CppEmitter.cs#KnownLanguageDisplayNames` so the language
    dropdown shows it in its own language (e.g. `["fr"] = "Français"`).
 3. Build. `ResxGen` picks up the new locale automatically from the filename;
    `GetAvailableLocales` will include it next run.
