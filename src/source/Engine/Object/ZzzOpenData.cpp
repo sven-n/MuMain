@@ -23,6 +23,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
 #include "GameLogic/Items/ChangeRingManager.h"
+#include "GameLogic/Items/MixMgr.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUIHelpWindow.h"
 #include "Camera/CameraMove.h"
@@ -5620,6 +5621,8 @@ void OpenBasicData(HDC hDC)
     g_QuestMng.LoadQuestScript();
 
     OpenGateScript(L"Data\\Gate.bmd");
+
+    g_MixRecipeMgr.LoadData();
 
     OpenFilterFile(L"Data\\Local\\Filter.bmd");
 

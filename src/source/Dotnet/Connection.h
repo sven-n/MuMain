@@ -11,9 +11,9 @@
 
 #include "Core/Platform/PlatformLibrary.h"
 
-#include "PacketFunctions_ChatServer.h"
-#include "PacketFunctions_ConnectServer.h"
-#include "PacketFunctions_ClientToServer.h"
+class PacketFunctions_ChatServer;
+class PacketFunctions_ConnectServer;
+class PacketFunctions_ClientToServer;
 
 // MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so"
 // MU_DOTNET_LIB_DIR is defined by CMake for UNIX platforms (Linux + macOS) as the absolute

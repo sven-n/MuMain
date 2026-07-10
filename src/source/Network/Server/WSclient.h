@@ -4,6 +4,9 @@
 #pragma once
 
 #include "Dotnet/Connection.h"
+#include "Dotnet/PacketFunctions_ChatServer.h"
+#include "Dotnet/PacketFunctions_ClientToServer.h"
+#include "Dotnet/PacketFunctions_ConnectServer.h"
 #include "Network/Server/CSMapServer.h"
 #include <span>
 #include <typeinfo>
