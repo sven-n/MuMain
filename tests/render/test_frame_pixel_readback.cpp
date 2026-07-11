@@ -82,6 +82,20 @@ TEST_CASE("second screenshot request is rejected without replacing metadata [scr
     CHECK(state.IncludesMessage());
 }
 
+TEST_CASE("screenshot metadata accepts a new request after clear [screenshot capture]")
+{
+    ScreenshotCaptureState state;
+
+    REQUIRE(state.Begin(L"first.jpg", L"First screenshot", true));
+    state.Clear();
+    REQUIRE(state.Begin(L"second.jpg", L"Second screenshot", false));
+
+    CHECK(state.HasPending());
+    CHECK(state.FileName() == L"second.jpg");
+    CHECK(state.Message() == L"Second screenshot");
+    CHECK_FALSE(state.IncludesMessage());
+}
+
 TEST_CASE("SDL GPU color formats map to frame pixel channel order [frame readback][pixel readback]")
 {
     CHECK(mu::GetSdlGpuPixelChannelOrder(SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM) ==

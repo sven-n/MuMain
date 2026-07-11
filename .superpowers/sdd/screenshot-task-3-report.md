@@ -30,10 +30,15 @@
 - Whitespace: `git diff --check` completed with exit code 0 and no output.
 - Integration scan found no `ReadPixels`, `glReadPixels`, or `glPixelStorei`
   references in `SceneManager.cpp` or `Winmain.cpp`.
+- Review follow-up: `cmake --build out/build/macos-arm64 --config Debug --target
+  frame_pixel_readback_tests -j 8` completed; the focused test binary passed
+  19/19 test cases and 71/71 assertions. `Main` also built in Debug with the
+  existing missing-override warnings and macOS JPEG deployment-version linker
+  warning. `git diff --check` completed with no output.
 
 ## Limitations
 
 - Interactive Print Screen JPEG capture and the `MU_CAPTURE_FRAME` runtime PPM
-  hook were not launched during this non-interactive verification pass. Their
-  renderer contract, state behavior, dimensions, pixel packing, channel order,
-  and row orientation are covered by the focused tests and Debug build.
+  hook were not launched during this non-interactive verification pass.
+  Orientation and channel conversion are covered by the focused unit tests, but
+  PPM file output and JPEG persistence are not directly unit-tested.

@@ -191,16 +191,41 @@ static void ShutdownRendererWindow()
 // cannot read the window (issue #462). No effect unless the env var is set.
 static bool WriteCapturePpm(const char* path, const mu::FramePixels& pixels)
 {
+    constexpr std::size_t RgbBytesPerPixel = 3;
+
+    if (pixels.width == 0 || pixels.height == 0)
+    {
+        return false;
+    }
+
+    const std::size_t pixelWidth = pixels.width;
+    const std::size_t pixelHeight = pixels.height;
+    const std::size_t maximumByteCount = pixels.rgb.max_size();
+    if (pixelWidth > maximumByteCount / RgbBytesPerPixel)
+    {
+        return false;
+    }
+
+    const std::size_t rgbRowBytes = pixelWidth * RgbBytesPerPixel;
+    if (pixelHeight > maximumByteCount / rgbRowBytes)
+    {
+        return false;
+    }
+
+    const std::size_t expectedBytes = rgbRowBytes * pixelHeight;
+    if (pixels.rgb.size() != expectedBytes)
+    {
+        return false;
+    }
+
     FILE* fp = std::fopen(path, "wb");
     if (!fp)
     {
         return false;
     }
 
-    const std::size_t expectedBytes = static_cast<std::size_t>(pixels.width) * pixels.height * 3;
     const bool wroteHeader = std::fprintf(fp, "P6\n%u %u\n255\n", pixels.width, pixels.height) > 0;
-    const bool wrotePixels = pixels.rgb.size() == expectedBytes &&
-        std::fwrite(pixels.rgb.data(), 1, pixels.rgb.size(), fp) == pixels.rgb.size();
+    const bool wrotePixels = std::fwrite(pixels.rgb.data(), 1, expectedBytes, fp) == expectedBytes;
     const bool closed = std::fclose(fp) == 0;
     return wroteHeader && wrotePixels && closed;
 }
