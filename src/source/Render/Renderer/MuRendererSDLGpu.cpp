@@ -267,6 +267,7 @@ static SDL_GPUTexture* s_swapchainTexture = nullptr;
 static Uint32 s_swapW = 0u;
 static Uint32 s_swapH = 0u;
 static FrameReadbackState s_frameReadbackState;
+static SDL_GPUTexture* s_frameReadbackTexture = nullptr;
 
 constexpr Uint32 FrameReadbackBytesPerPixel = 4u;
 constexpr Uint32 FrameReadbackRowAlignment = 256u;
@@ -279,9 +280,61 @@ struct FramePixelDownload
     PixelChannelOrder channelOrder;
 };
 
-[[nodiscard]] static std::optional<FramePixelDownload> EncodeFramePixelDownload(SDL_GPUCommandBuffer* commandBuffer)
+static void ReleaseFrameReadbackTexture()
 {
-    const auto channelOrder = GetSdlGpuPixelChannelOrder(SDL_GetGPUSwapchainTextureFormat(s_device, s_window));
+    if (s_frameReadbackTexture && s_device)
+    {
+        SDL_ReleaseGPUTexture(s_device, s_frameReadbackTexture);
+    }
+    s_frameReadbackTexture = nullptr;
+}
+
+static void FailPendingFrameReadback()
+{
+    if (s_frameReadbackState.IsPending())
+    {
+        s_frameReadbackState.Fail();
+    }
+    ReleaseFrameReadbackTexture();
+}
+
+[[nodiscard]] static bool CreateFrameReadbackTexture(SDL_GPUTextureFormat format)
+{
+    const auto textureInfo = GetSdlGpuFrameCaptureTextureInfo(format, s_swapW, s_swapH);
+    if (!textureInfo)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- unsupported format or dimensions for frame readback");
+        return false;
+    }
+
+    s_frameReadbackTexture = SDL_CreateGPUTexture(s_device, &*textureInfo);
+    if (!s_frameReadbackTexture)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- frame readback texture creation failed: {}", SDL_GetError());
+        return false;
+    }
+    return true;
+}
+
+static void BlitFrameReadbackToSwapchain(SDL_GPUCommandBuffer* commandBuffer)
+{
+    SDL_GPUBlitInfo blit{};
+    blit.source.texture = s_frameReadbackTexture;
+    blit.source.w = s_swapW;
+    blit.source.h = s_swapH;
+    blit.destination.texture = s_swapchainTexture;
+    blit.destination.w = s_swapW;
+    blit.destination.h = s_swapH;
+    blit.load_op = SDL_GPU_LOADOP_DONT_CARE;
+    blit.flip_mode = SDL_FLIP_NONE;
+    blit.filter = SDL_GPU_FILTER_NEAREST;
+    SDL_BlitGPUTexture(commandBuffer, &blit);
+}
+
+[[nodiscard]] static std::optional<FramePixelDownload> EncodeFramePixelDownload(
+    SDL_GPUCommandBuffer* commandBuffer, SDL_GPUTexture* sourceTexture, SDL_GPUTextureFormat format)
+{
+    const auto channelOrder = GetSdlGpuPixelChannelOrder(format);
     if (!channelOrder)
     {
         mu::log::Get("render")->warn("SDL_gpu -- unsupported swapchain format for frame readback");
@@ -318,7 +371,7 @@ struct FramePixelDownload
     }
 
     SDL_GPUTextureRegion source{};
-    source.texture = s_swapchainTexture;
+    source.texture = sourceTexture;
     source.w = s_swapW;
     source.h = s_swapH;
     source.d = 1u;
@@ -335,9 +388,10 @@ struct FramePixelDownload
                               static_cast<Uint32>(byteCount), *channelOrder};
 }
 
-[[nodiscard]] static bool SubmitFramePixelDownload(SDL_GPUCommandBuffer* commandBuffer)
+[[nodiscard]] static bool SubmitFramePixelDownload(
+    SDL_GPUCommandBuffer* commandBuffer, SDL_GPUTexture* sourceTexture, SDL_GPUTextureFormat format)
 {
-    const auto download = EncodeFramePixelDownload(commandBuffer);
+    const auto download = EncodeFramePixelDownload(commandBuffer, sourceTexture, format);
     if (!download)
     {
         s_frameReadbackState.Fail();
@@ -1066,11 +1120,15 @@ public:
     static void Shutdown()
     {
 #ifdef MU_ENABLE_SDL3
-        s_frameReadbackState.Reset();
         if (!s_device)
         {
+            s_frameReadbackState.Reset();
+            s_frameReadbackTexture = nullptr;
             return;
         }
+
+        ReleaseFrameReadbackTexture();
+        s_frameReadbackState.Reset();
 
 #if MU_HAS_SDL_TTF
         // Story 7.9.8 (AC-2): Destroy SDL_ttf resources before the GPU device.
@@ -1164,6 +1222,7 @@ public:
 #ifdef MU_ENABLE_SDL3
         if (!s_device || !s_window)
         {
+            FailPendingFrameReadback();
             return;
         }
 
@@ -1171,6 +1230,7 @@ public:
         if (!s_cmdBuf)
         {
             mu::log::Get("render")->error("SDL_gpu -- SDL_AcquireGPUCommandBuffer failed: {}", SDL_GetError());
+            FailPendingFrameReadback();
             return;
         }
 
@@ -1205,6 +1265,7 @@ public:
                                           SDL_GetError());
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
+            FailPendingFrameReadback();
             return;
         }
 
@@ -1219,6 +1280,7 @@ public:
             s_vtxMappedPtr = nullptr;
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
+            FailPendingFrameReadback();
             return;
         }
 
@@ -1230,6 +1292,7 @@ public:
             s_vtxMappedPtr = nullptr;
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
+            FailPendingFrameReadback();
             return;
         }
 
@@ -1273,6 +1336,7 @@ public:
                 SDL_CancelGPUCommandBuffer(s_cmdBuf);
                 s_cmdBuf = nullptr;
             }
+            FailPendingFrameReadback();
             return;
         }
         s_frameActive = false;
@@ -1416,9 +1480,22 @@ public:
         // Phase 3: Render pass — replay all recorded draw commands.
         // The GPU vertex/index buffers now contain current-frame data.
         // ---------------------------------------------------------------
+        SDL_GPUTextureFormat frameReadbackFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
+        if (s_frameReadbackState.IsPending())
+        {
+            frameReadbackFormat = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
+            if (!CreateFrameReadbackTexture(frameReadbackFormat))
+            {
+                FailPendingFrameReadback();
+            }
+        }
+
+        SDL_GPUTexture* const frameColorTexture =
+            s_frameReadbackTexture ? s_frameReadbackTexture : s_swapchainTexture;
+        bool renderPassCompleted = false;
         {
             SDL_GPUColorTargetInfo colorTarget{};
-            colorTarget.texture = s_swapchainTexture;
+            colorTarget.texture = frameColorTexture;
             colorTarget.clear_color = {0.0f, 0.0f, 0.0f, 1.0f};
             colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
             colorTarget.store_op = SDL_GPU_STOREOP_STORE;
@@ -1593,11 +1670,25 @@ public:
 
             SDL_EndGPURenderPass(s_renderPass);
             s_renderPass = nullptr;
+            renderPassCompleted = true;
         }
 
-        if (s_cmdBuf && s_frameReadbackState.IsPending() && SubmitFramePixelDownload(s_cmdBuf))
+        if (s_frameReadbackTexture)
         {
-            s_cmdBuf = nullptr;
+            if (!renderPassCompleted)
+            {
+                mu::log::Get("render")->warn("SDL_gpu -- frame readback render pass failed: {}", SDL_GetError());
+                FailPendingFrameReadback();
+            }
+            else
+            {
+                BlitFrameReadbackToSwapchain(s_cmdBuf);
+                if (SubmitFramePixelDownload(s_cmdBuf, s_frameReadbackTexture, frameReadbackFormat))
+                {
+                    s_cmdBuf = nullptr;
+                }
+                ReleaseFrameReadbackTexture();
+            }
         }
 
         if (s_cmdBuf)

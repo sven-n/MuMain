@@ -55,6 +55,37 @@ TEST_CASE("SDL GPU color formats map to frame pixel channel order [frame readbac
     CHECK_FALSE(mu::GetSdlGpuPixelChannelOrder(SDL_GPU_TEXTUREFORMAT_D16_UNORM).has_value());
 }
 
+TEST_CASE("SDL GPU frame capture target is readable and matches physical dimensions [frame readback][pixel readback]")
+{
+    constexpr Uint32 width = 2560u;
+    constexpr Uint32 height = 1440u;
+
+    const auto info = mu::GetSdlGpuFrameCaptureTextureInfo(
+        SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM_SRGB, width, height);
+
+    REQUIRE(info.has_value());
+    CHECK(info->type == SDL_GPU_TEXTURETYPE_2D);
+    CHECK(info->format == SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM_SRGB);
+    CHECK(info->usage == (SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET));
+    CHECK(info->width == width);
+    CHECK(info->height == height);
+    CHECK(info->layer_count_or_depth == 1u);
+    CHECK(info->num_levels == 1u);
+    CHECK(info->sample_count == SDL_GPU_SAMPLECOUNT_1);
+}
+
+TEST_CASE("SDL GPU frame capture target rejects invalid inputs [frame readback][pixel readback]")
+{
+    CHECK_FALSE(mu::GetSdlGpuFrameCaptureTextureInfo(
+                    SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM, 0u, 1080u)
+                    .has_value());
+    CHECK_FALSE(mu::GetSdlGpuFrameCaptureTextureInfo(
+                    SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM, 1920u, 0u)
+                    .has_value());
+    CHECK_FALSE(mu::GetSdlGpuFrameCaptureTextureInfo(SDL_GPU_TEXTUREFORMAT_D16_UNORM, 1920u, 1080u)
+                    .has_value());
+}
+
 TEST_CASE("RGBA readback converts to tightly packed top-down RGB [frame readback][pixel readback]")
 {
     const std::array<std::uint8_t, 8> source{255, 0, 0, 7, 0, 255, 0, 9};
