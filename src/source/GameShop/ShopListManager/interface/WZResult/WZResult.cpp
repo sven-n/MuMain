@@ -14,6 +14,8 @@
 #include "Core/Platform/CrtDbg.h"
 #include "Core/Platform/StrSafe.h"
 
+#include <iterator>
+
 WZResult::WZResult() // OK
 {
     this->SetSuccessResult();
@@ -47,7 +49,7 @@ WZResult& WZResult::operator=(const WZResult& a2) // OK
 {
     this->m_dwErrorCode = a2.m_dwErrorCode;
     this->m_dwWindowErrorCode = a2.m_dwWindowErrorCode;
-    StringCchCopy(this->m_szErrorMessage, sizeof(this->m_szErrorMessage), a2.m_szErrorMessage);
+    StringCchCopy(this->m_szErrorMessage, std::size(this->m_szErrorMessage), a2.m_szErrorMessage);
     return *this;
 }
 
@@ -58,14 +60,14 @@ void WZResult::SetResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR
     va_start(va, szFormat);
     this->m_dwErrorCode = dwErrorCode;
     this->m_dwWindowErrorCode = dwWindowErrorCode;
-    StringCchVPrintf(this->m_szErrorMessage, sizeof(this->m_szErrorMessage), szFormat, va);
+    StringCchVPrintf(this->m_szErrorMessage, std::size(this->m_szErrorMessage), szFormat, va);
 }
 
 void WZResult::SetSuccessResult() // OK
 {
     this->m_dwErrorCode = WZ_SUCCESS;
     this->m_dwWindowErrorCode = ERROR_SUCCESS;
-    StringCchCopy(this->m_szErrorMessage, sizeof(this->m_szErrorMessage), L"Success");
+    StringCchCopy(this->m_szErrorMessage, std::size(this->m_szErrorMessage), L"Success");
 }
 
 WZResult WZResult::BuildSuccessResult() // OK
@@ -86,7 +88,7 @@ WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const
     va_start(args, szFormat);
 
     memset(Buffer, 0, sizeof(Buffer));
-    StringCchVPrintf(Buffer, sizeof(Buffer), szFormat, args);
+    StringCchVPrintf(Buffer, std::size(Buffer), szFormat, args);
 
     result.SetResult(dwErrorCode, dwWindowErrorCode, Buffer);
 

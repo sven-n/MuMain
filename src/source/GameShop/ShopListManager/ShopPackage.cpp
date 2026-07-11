@@ -14,6 +14,8 @@
 #include "StringToken.h"
 #include "StringMethod.h"
 
+#include <iterator>
+
 CShopPackage::CShopPackage() // OK
 {
     this->LeftCount = -1;
@@ -37,24 +39,24 @@ bool	CShopPackage::SetPackage(std::wstring strdata) // OK
     this->ProductDisplaySeq = _wtoi(token.nextToken().c_str());
     this->ViewOrder = _wtoi(token.nextToken().c_str());
     this->PackageProductSeq = _wtoi(token.nextToken().c_str());
-    StringCchCopy(this->PackageProductName, sizeof(this->PackageProductName), token.nextToken().c_str());
+    StringCchCopy(this->PackageProductName, std::size(this->PackageProductName), token.nextToken().c_str());
     this->PackageProductType = _wtoi(token.nextToken().c_str());
     this->Price = _wtoi(token.nextToken().c_str());
-    StringCchCopy(this->Description, sizeof(this->Description), token.nextToken().c_str());
-    StringCchCopy(this->Caution, sizeof(this->Caution), token.nextToken().c_str());
+    StringCchCopy(this->Description, std::size(this->Description), token.nextToken().c_str());
+    StringCchCopy(this->Caution, std::size(this->Caution), token.nextToken().c_str());
     this->SalesFlag = _wtoi(token.nextToken().c_str());
     this->GiftFlag = _wtoi(token.nextToken().c_str());
     CStringMethod::ConvertStringToDateTime(this->StartDate, token.nextToken());
     CStringMethod::ConvertStringToDateTime(this->EndDate, token.nextToken());
     this->CapsuleFlag = _wtoi(token.nextToken().c_str());
     this->CapsuleCount = _wtoi(token.nextToken().c_str());
-    StringCchCopy(this->ProductCashName, sizeof(this->ProductCashName), token.nextToken().c_str());
-    StringCchCopy(this->PricUnitName, sizeof(this->PricUnitName), token.nextToken().c_str());
+    StringCchCopy(this->ProductCashName, std::size(this->ProductCashName), token.nextToken().c_str());
+    StringCchCopy(this->PricUnitName, std::size(this->PricUnitName), token.nextToken().c_str());
     this->DeleteFlag = _wtoi(token.nextToken().c_str());
     this->EventFlag = _wtoi(token.nextToken().c_str());
     this->ProductAmount = _wtoi(token.nextToken().c_str());
     this->SetProductSeqList(token.nextToken());
-    StringCchCopy(this->InGamePackageID, sizeof(this->InGamePackageID), token.nextToken().c_str());
+    StringCchCopy(this->InGamePackageID, std::size(this->InGamePackageID), token.nextToken().c_str());
     this->ProductCashSeq = _wtoi(token.nextToken().c_str());
     this->PriceCount = _wtoi(token.nextToken().c_str());
     this->SetPriceSeqList(token.nextToken());

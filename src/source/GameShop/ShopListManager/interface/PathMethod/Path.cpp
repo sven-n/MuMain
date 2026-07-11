@@ -17,6 +17,8 @@
 #include "Core/Platform/CrtDbg.h"
 #include "Core/Platform/StrSafe.h"
 
+#include <iterator>
+
 TCHAR* Path::GetCurrentFullPath(TCHAR* szPath)
 {
     if (!szPath) return 0;
@@ -225,14 +227,14 @@ BOOL			Path::CreateDirectorys(TCHAR* szFilePath, BOOL bIsFile)
     wchar_t PathName[MAX_PATH] = { 0 };
     wchar_t buff2[MAX_PATH] = { 0 };
 
-    StringCchCopy(PathName, sizeof(PathName), szFilePath);
+    StringCchCopy(PathName, std::size(PathName), szFilePath);
 
     if (bIsFile)
         Path::GetDirectory(PathName);
 
     if (CreateDirectory(PathName, 0) == 0)
     {
-        StringCchCopy(buff2, sizeof(buff2), PathName);
+        StringCchCopy(buff2, std::size(buff2), PathName);
 
         wchar_t* chr1 = wcsrchr(buff2, L'\\');
         wchar_t* chr2 = wcschr(buff2, L'\\');
