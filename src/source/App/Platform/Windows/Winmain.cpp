@@ -189,33 +189,69 @@ static void ShutdownRendererWindow()
 // Nth presented frame to MU_CAPTURE_PATH (default /tmp/mu-frame.ppm) as a PPM.
 // Used to verify rendering on headless/WSLg setups where X screenshot tools
 // cannot read the window (issue #462). No effect unless the env var is set.
+static bool WriteCapturePpm(const char* path, const mu::FramePixels& pixels)
+{
+    FILE* fp = std::fopen(path, "wb");
+    if (!fp)
+    {
+        return false;
+    }
+
+    const std::size_t expectedBytes = static_cast<std::size_t>(pixels.width) * pixels.height * 3;
+    const bool wroteHeader = std::fprintf(fp, "P6\n%u %u\n255\n", pixels.width, pixels.height) > 0;
+    const bool wrotePixels = pixels.rgb.size() == expectedBytes &&
+        std::fwrite(pixels.rgb.data(), 1, pixels.rgb.size(), fp) == pixels.rgb.size();
+    const bool closed = std::fclose(fp) == 0;
+    return wroteHeader && wrotePixels && closed;
+}
+
 static void MaybeCaptureFrame()
 {
     const char* want = std::getenv("MU_CAPTURE_FRAME");
-    if (!want) return;
-    static long s_frame = 0;
-    const long target = std::strtol(want, nullptr, 10);
-    if (++s_frame != target) return;
-
-    int w = 0, h = 0;
-    SDL_GetWindowSizeInPixels(g_sdlWindow, &w, &h);
-    if (w <= 0 || h <= 0) return;
-
-    std::vector<unsigned char> pixels(static_cast<size_t>(w) * h * 3);
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
-
-    const char* path = std::getenv("MU_CAPTURE_PATH");
-    if (!path) path = "/tmp/mu-frame.ppm";
-    if (FILE* fp = std::fopen(path, "wb"))
+    if (!want)
     {
-        std::fprintf(fp, "P6\n%d %d\n255\n", w, h);
-        // glReadPixels origin is bottom-left; write rows top-down for a PPM.
-        for (int y = h - 1; y >= 0; --y)
-            std::fwrite(pixels.data() + static_cast<size_t>(y) * w * 3, 1, static_cast<size_t>(w) * 3, fp);
-        std::fclose(fp);
-        std::fprintf(stderr, "[capture] wrote frame %ld (%dx%d) to %s\n", target, w, h, path);
+        return;
     }
+
+    static long s_frame = 0;
+    static bool s_requestPending = false;
+    static bool s_captureFinished = false;
+    const long target = std::strtol(want, nullptr, 10);
+
+    if (s_requestPending)
+    {
+        mu::FramePixels pixels;
+        s_requestPending = false;
+        s_captureFinished = true;
+        if (!mu::GetRenderer().ConsumeFramePixels(pixels))
+        {
+            std::fprintf(stderr, "[capture] frame %ld readback failed\n", target);
+            return;
+        }
+
+        const char* path = std::getenv("MU_CAPTURE_PATH");
+        if (!path)
+        {
+            path = "/tmp/mu-frame.ppm";
+        }
+        if (!WriteCapturePpm(path, pixels))
+        {
+            std::fprintf(stderr, "[capture] failed to write frame %ld to %s\n", target, path);
+            return;
+        }
+
+        std::fprintf(stderr, "[capture] wrote frame %ld (%ux%u) to %s\n",
+                     target, pixels.width, pixels.height, path);
+        return;
+    }
+
+    if (s_captureFinished || ++s_frame != target)
+    {
+        return;
+    }
+
+    s_requestPending = mu::GetRenderer().RequestFramePixels();
+    s_captureFinished = !s_requestPending;
 }
 #endif
 
@@ -1247,6 +1283,9 @@ MSG MainLoop()
                 mu::GetRenderer().BeginFrame();
                 RenderScene(g_hDC);
                 mu::GetRenderer().EndFrame();
+#ifndef _WIN32
+                MaybeCaptureFrame();
+#endif
             }
         }
         else

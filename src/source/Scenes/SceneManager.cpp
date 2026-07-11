@@ -27,7 +27,9 @@ FrameTimingState g_frameTiming;
 #include "CharacterScene.h"
 #include "MainScene.h"
 #include "LoadingScene.h"
+#include "ScreenshotCaptureState.h"
 #include "Audio/DSPlaySound.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Core/Time/Timer.h"
@@ -218,17 +220,80 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
     wcscat(outMessage, lpszTemp);
 }
 
-/**
- * @brief Captures the current frame buffer and saves it as a JPEG screenshot.
- */
-static void CaptureScreenshot()
+static ScreenshotCaptureState g_screenshotCapture;
+
+static bool PrepareJpegPixels(mu::FramePixels& pixels)
 {
-    std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
-    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, Buffer.data());
-    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100);
+    const std::size_t rowBytes = static_cast<std::size_t>(pixels.width) * 3;
+    const std::size_t expectedBytes = rowBytes * pixels.height;
+    if (rowBytes == 0 || pixels.rgb.size() != expectedBytes)
+    {
+        return false;
+    }
+
+    for (std::uint32_t row = 0; row < pixels.height / 2; ++row)
+    {
+        auto top = pixels.rgb.begin() + static_cast<std::size_t>(row) * rowBytes;
+        auto bottom = pixels.rgb.begin() + static_cast<std::size_t>(pixels.height - row - 1) * rowBytes;
+        std::swap_ranges(top, top + rowBytes, bottom);
+    }
+    return true;
+}
+
+static void ConsumeScreenshot()
+{
+    if (!g_screenshotCapture.HasPending())
+    {
+        return;
+    }
+
+    mu::FramePixels pixels;
+    if (!mu::GetRenderer().ConsumeFramePixels(pixels))
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
+
+    if (!PrepareJpegPixels(pixels))
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
+
+    std::wstring fileName = g_screenshotCapture.FileName();
+    const bool saved = WriteJpeg(fileName.data(), static_cast<int>(pixels.width), static_cast<int>(pixels.height),
+                                 pixels.rgb.data(), 100);
+    if (saved && !g_screenshotCapture.IncludesMessage())
+    {
+        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
 
     GrabScreen++;
     GrabScreen %= 10000;
+    g_screenshotCapture.Clear();
+}
+
+static void RequestScreenshot()
+{
+    const bool includesMessage = !Core::Input::IsKeyDown(VK_SHIFT);
+    wchar_t screenshotText[256];
+    GenerateScreenshotFilename(GrabFileName, screenshotText);
+
+    if (!g_screenshotCapture.Begin(GrabFileName, screenshotText, includesMessage))
+    {
+        return;
+    }
+
+    if (!mu::GetRenderer().RequestFramePixels())
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
+
+    if (includesMessage)
+    {
+        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
 }
 
 /**
@@ -236,6 +301,8 @@ static void CaptureScreenshot()
  */
 static void HandleScreenshotCapture()
 {
+    ConsumeScreenshot();
+
     if (PressKey(VK_SNAPSHOT))
     {
         GrabEnable = !GrabEnable;
@@ -246,23 +313,7 @@ static void HandleScreenshotCapture()
         return;
     }
 
-    const bool addTimeStampToCapture = !Core::Input::IsKeyDown(VK_SHIFT);
-    wchar_t screenshotText[256];
-
-    GenerateScreenshotFilename(GrabFileName, screenshotText);
-
-    if (addTimeStampToCapture)
-    {
-        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    }
-
-    CaptureScreenshot();
-
-    if (!addTimeStampToCapture)
-    {
-        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    }
-
+    RequestScreenshot();
     GrabEnable = false;
 }
 

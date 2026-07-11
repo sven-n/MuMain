@@ -9,6 +9,7 @@
 #include "Render/Renderer/FramePixelReadback.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/SdlGpuPixelFormat.h"
+#include "Scenes/ScreenshotCaptureState.h"
 
 namespace
 {
@@ -40,6 +41,45 @@ TEST_CASE("renderer rejects unsupported frame readback by default [frame readbac
 
     CHECK_FALSE(renderer.RequestFramePixels());
     CHECK_FALSE(renderer.ConsumeFramePixels(pixels));
+}
+
+TEST_CASE("screenshot metadata remains pending until cleared [screenshot capture]")
+{
+    ScreenshotCaptureState state;
+
+    REQUIRE(state.Begin(L"capture.jpg", L"Screenshot saved", true));
+    CHECK(state.HasPending());
+    CHECK(state.FileName() == L"capture.jpg");
+    CHECK(state.Message() == L"Screenshot saved");
+    CHECK(state.IncludesMessage());
+
+    state.Clear();
+
+    CHECK_FALSE(state.HasPending());
+    CHECK(state.FileName().empty());
+    CHECK(state.Message().empty());
+    CHECK_FALSE(state.IncludesMessage());
+}
+
+TEST_CASE("screenshot metadata preserves capture without message [screenshot capture]")
+{
+    ScreenshotCaptureState state;
+
+    REQUIRE(state.Begin(L"capture.jpg", L"Screenshot saved", false));
+
+    CHECK_FALSE(state.IncludesMessage());
+}
+
+TEST_CASE("second screenshot request is rejected without replacing metadata [screenshot capture]")
+{
+    ScreenshotCaptureState state;
+
+    REQUIRE(state.Begin(L"first.jpg", L"First screenshot", true));
+    CHECK_FALSE(state.Begin(L"second.jpg", L"Second screenshot", false));
+
+    CHECK(state.FileName() == L"first.jpg");
+    CHECK(state.Message() == L"First screenshot");
+    CHECK(state.IncludesMessage());
 }
 
 TEST_CASE("SDL GPU color formats map to frame pixel channel order [frame readback][pixel readback]")
