@@ -59,6 +59,32 @@ TEST_CASE("readback rejects source buffers that cannot cover every row [frame re
     CHECK_FALSE(mu::ConvertToTopDownRgb(source, 2, 1, 8, mu::PixelChannelOrder::Rgba, false, output));
 }
 
+TEST_CASE("readback rejects zero dimensions [frame readback][pixel readback]")
+{
+    const std::array<std::uint8_t, 4> source{255, 0, 0, 7};
+    mu::FramePixels output;
+
+    CHECK_FALSE(mu::ConvertToTopDownRgb(source, 0, 1, 0, mu::PixelChannelOrder::Rgba, false, output));
+    CHECK_FALSE(mu::ConvertToTopDownRgb(source, 1, 0, 0, mu::PixelChannelOrder::Rgba, false, output));
+}
+
+TEST_CASE("readback rejects row pitches smaller than a source row [frame readback][pixel readback]")
+{
+    const std::array<std::uint8_t, 7> source{255, 0, 0, 7, 0, 255, 0};
+    mu::FramePixels output;
+
+    CHECK_FALSE(mu::ConvertToTopDownRgb(source, 2, 1, 7, mu::PixelChannelOrder::Rgba, false, output));
+}
+
+TEST_CASE("readback rejects unknown channel orders [frame readback][pixel readback]")
+{
+    const std::array<std::uint8_t, 4> source{255, 0, 0, 7};
+    mu::FramePixels output;
+    const auto invalidOrder = static_cast<mu::PixelChannelOrder>(0xFF);
+
+    CHECK_FALSE(mu::ConvertToTopDownRgb(source, 1, 1, 4, invalidOrder, false, output));
+}
+
 TEST_CASE("only one frame readback can be outstanding [frame readback]")
 {
     mu::FrameReadbackState state;

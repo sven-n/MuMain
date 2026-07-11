@@ -72,12 +72,20 @@ bool ConvertToTopDownRgb(std::span<const std::uint8_t> source,
         return false;
     }
 
-    std::size_t redChannelOffset = RgbaRedChannelOffset;
-    std::size_t blueChannelOffset = RgbaBlueChannelOffset;
-    if (channelOrder == PixelChannelOrder::Bgra)
+    std::size_t redChannelOffset = 0;
+    std::size_t blueChannelOffset = 0;
+    switch (channelOrder)
     {
+    case PixelChannelOrder::Rgba:
+        redChannelOffset = RgbaRedChannelOffset;
+        blueChannelOffset = RgbaBlueChannelOffset;
+        break;
+    case PixelChannelOrder::Bgra:
         redChannelOffset = BgraRedChannelOffset;
         blueChannelOffset = BgraBlueChannelOffset;
+        break;
+    default:
+        return false;
     }
 
     FramePixels converted;
