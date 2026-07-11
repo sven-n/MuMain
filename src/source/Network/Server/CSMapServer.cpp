@@ -2,7 +2,6 @@
 
 #include "Network/Server/CSMapServer.h"
 
-#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstddef>
@@ -132,29 +131,33 @@ void CSMServer::SendChangeMapServer(void)
         return;
     }
 
-    constexpr std::size_t kCharacterIdLength = MAX_USERNAME_SIZE + 1;
-    constexpr std::size_t kPacketBufferLength = MAX_USERNAME_SIZE + 2;
+    // The wire fields for the login ID and character name are fixed-width narrow
+    // byte arrays (MAX_USERNAME_SIZE each). The extra byte gives the conversion
+    // room for a null terminator so a full MAX_USERNAME_SIZE-character name is
+    // not truncated; only the first MAX_USERNAME_SIZE bytes are encrypted and
+    // sent.
+    constexpr std::size_t kNameFieldLength = MAX_USERNAME_SIZE + 1;
 
-    std::array<wchar_t, kCharacterIdLength> characterIdBuffer {};
-
-    const std::size_t heroIdCopyLength = std::min<std::size_t>(m_heroId.size(), MAX_USERNAME_SIZE);
-    std::wmemcpy(characterIdBuffer.data(), m_heroId.c_str(), heroIdCopyLength);
-    characterIdBuffer[heroIdCopyLength] = L'\0';
+    // Convert the wide character name down to narrow wire bytes. Reinterpreting
+    // the wchar_t buffer as bytes would embed the platform-dependent wchar_t
+    // width (2 bytes on Windows, 4 on Linux) and interleave null bytes into the
+    // field, corrupting the name the server reads.
+    std::array<char, kNameFieldLength> characterName {};
+    CMultiLanguage::ConvertToUtf8(characterName.data(), m_heroId.c_str(), static_cast<int>(characterName.size()));
 
     ClearCharacters(-1);
     InitGame();
 
-    std::array<wchar_t, kPacketBufferLength> loginIdBuffer {};
-    std::array<wchar_t, kPacketBufferLength> characterPacketBuffer {};
+    // TODO: Populate loginId with LogInID if credentials are required again.
+    // The map change re-authenticates via the auth codes, so it is left empty.
+    std::array<char, kNameFieldLength> loginId {};
 
-    // TODO: Populate loginIdBuffer with LogInID if credentials are required again.
-    std::wmemcpy(characterPacketBuffer.data(), characterIdBuffer.data(), heroIdCopyLength + 1);
-
-    BuxConvert(reinterpret_cast<BYTE*>(loginIdBuffer.data()), kPacketBufferLength);
+    BuxConvert(reinterpret_cast<BYTE*>(loginId.data()), MAX_USERNAME_SIZE);
+    BuxConvert(reinterpret_cast<BYTE*>(characterName.data()), MAX_USERNAME_SIZE);
     SocketClient->ToGameServer()->SendServerChangeAuthentication(
-        reinterpret_cast<BYTE*>(loginIdBuffer.data()),
+        reinterpret_cast<BYTE*>(loginId.data()),
         MAX_USERNAME_SIZE,
-        reinterpret_cast<BYTE*>(characterPacketBuffer.data()),
+        reinterpret_cast<BYTE*>(characterName.data()),
         MAX_USERNAME_SIZE,
         m_serverInfo.m_iJoinAuthCode1,
         m_serverInfo.m_iJoinAuthCode2,
