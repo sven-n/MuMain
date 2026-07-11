@@ -14,6 +14,8 @@
 #include "StringToken.h"
 #include "StringMethod.h"
 
+#include <iterator>
+
 #ifdef _WIN32
 #include <urlmon.h>
 
@@ -43,9 +45,9 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
 
     this->BannerSeq = _wtoi(Token.nextToken().c_str());
 
-    StringCchCopy(this->BannerName, sizeof(this->BannerName), Token.nextToken().c_str());
+    StringCchCopy(this->BannerName, std::size(this->BannerName), Token.nextToken().c_str());
 
-    StringCchCopy(this->BannerImageURL, sizeof(this->BannerImageURL), Token.nextToken().c_str());
+    StringCchCopy(this->BannerImageURL, std::size(this->BannerImageURL), Token.nextToken().c_str());
 
     this->BannerOrder = _wtoi(Token.nextToken().c_str());
     this->BannerDirection = _wtoi(Token.nextToken().c_str());
@@ -53,7 +55,7 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
     CStringMethod::ConvertStringToDateTime(this->BannerStartDate, Token.nextToken());
     CStringMethod::ConvertStringToDateTime(this->BannerEndDate, Token.nextToken());
 
-    StringCchCopy(this->BannerLinkURL, sizeof(this->BannerLinkURL), Token.nextToken().c_str());
+    StringCchCopy(this->BannerLinkURL, std::size(this->BannerLinkURL), Token.nextToken().c_str());
 
     std::wstring url = this->BannerImageURL;
     std::size_t pos = url.rfind(L"/", std::wstring::npos);
@@ -62,7 +64,7 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
     {
         std::wstring sub = url.substr(pos + 1, url.length() - pos - 1);
 
-        StringCchPrintf(this->BannerImagePath, sizeof(this->BannerImagePath), L"%ls%ls", strDirPath.c_str(), sub.c_str());
+        StringCchPrintf(this->BannerImagePath, std::size(this->BannerImagePath), L"%ls%ls", strDirPath.c_str(), sub.c_str());
 
         if (bDonwLoad || GetFileAttributes(this->BannerImagePath) == INVALID_FILE_ATTRIBUTES)
         {

@@ -13,6 +13,8 @@
 #include "ShopCategory.h"
 #include "StringToken.h"
 
+#include <iterator>
+
 CShopCategory::CShopCategory() // OK
 {
     this->CategoryList.clear();
@@ -34,7 +36,7 @@ bool CShopCategory::SetCategory(std::wstring strdata) // OK
         return 0;
 
     this->ProductDisplaySeq = _wtoi(token.nextToken().c_str());
-    StringCchCopy(this->CategroyName, sizeof(this->CategroyName), token.nextToken().c_str());
+    StringCchCopy(this->CategroyName, std::size(this->CategroyName), token.nextToken().c_str());
     this->EventFlag = _wtoi(token.nextToken().c_str());
     this->OpenFlag = _wtoi(token.nextToken().c_str());
     this->ParentProductDisplaySeq = _wtoi(token.nextToken().c_str());

@@ -11,6 +11,9 @@
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "FTPFileDownLoader.h"
+
+#include <iterator>
+
 CFTPFileDownLoader::CFTPFileDownLoader() // OK
 {
     this->m_Break = 0;
@@ -59,7 +62,7 @@ WZResult CFTPFileDownLoader::DownLoadFiles(DownloaderType type,
 
     wchar_t Buffer[MAX_PATH] = { 0 };
 
-    StringCchPrintf(Buffer, sizeof(Buffer), L"%03d.%04d.%03d", Version.Zone, Version.year, Version.yearId);
+    StringCchPrintf(Buffer, std::size(Buffer), L"%03d.%04d.%03d", Version.Zone, Version.year, Version.yearId);
 
     strRemotepath += Buffer;
     strRemotepath += L"/";

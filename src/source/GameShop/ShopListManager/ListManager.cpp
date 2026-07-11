@@ -15,6 +15,8 @@
 #include <process.h>
 #endif
 
+#include <iterator>
+
 CListManager::CListManager() // OK
 {
     this->m_pFTPDownLoader = NULL;
@@ -140,7 +142,7 @@ std::wstring		CListManager::GetScriptPath() // OK
 {
     TCHAR buff[MAX_PATH] = { 0 };
 
-    StringCchPrintf(buff, sizeof(buff), L"%03d.%04d.%03d",
+    StringCchPrintf(buff, std::size(buff), L"%03d.%04d.%03d",
         m_ListManagerInfo.m_Version.Zone,
         m_ListManagerInfo.m_Version.year,
         m_ListManagerInfo.m_Version.yearId);
