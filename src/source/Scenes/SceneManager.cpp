@@ -263,7 +263,7 @@ static void ConsumeScreenshot()
     std::wstring fileName = g_screenshotCapture.FileName();
     const bool saved = WriteJpeg(fileName.data(), static_cast<int>(pixels.width), static_cast<int>(pixels.height),
                                  pixels.rgb.data(), 100);
-    if (saved && !g_screenshotCapture.IncludesMessage())
+    if (saved)
     {
         g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
@@ -275,11 +275,10 @@ static void ConsumeScreenshot()
 
 static void RequestScreenshot()
 {
-    const bool includesMessage = !Core::Input::IsKeyDown(VK_SHIFT);
     wchar_t screenshotText[256];
     GenerateScreenshotFilename(GrabFileName, screenshotText);
 
-    if (!g_screenshotCapture.Begin(GrabFileName, screenshotText, includesMessage))
+    if (!g_screenshotCapture.Begin(GrabFileName, screenshotText))
     {
         return;
     }
@@ -288,11 +287,6 @@ static void RequestScreenshot()
     {
         g_screenshotCapture.Clear();
         return;
-    }
-
-    if (includesMessage)
-    {
-        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
     }
 }
 

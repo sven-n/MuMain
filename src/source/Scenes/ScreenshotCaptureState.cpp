@@ -2,7 +2,7 @@
 
 #include <utility>
 
-bool ScreenshotCaptureState::Begin(std::wstring fileName, std::wstring message, bool includesMessage)
+bool ScreenshotCaptureState::Begin(std::wstring fileName, std::wstring message)
 {
     if (pending_)
     {
@@ -11,7 +11,6 @@ bool ScreenshotCaptureState::Begin(std::wstring fileName, std::wstring message, 
 
     fileName_ = std::move(fileName);
     message_ = std::move(message);
-    includesMessage_ = includesMessage;
     pending_ = true;
     return true;
 }
@@ -31,15 +30,9 @@ const std::wstring& ScreenshotCaptureState::Message() const
     return message_;
 }
 
-bool ScreenshotCaptureState::IncludesMessage() const
-{
-    return includesMessage_;
-}
-
 void ScreenshotCaptureState::Clear()
 {
     fileName_.clear();
     message_.clear();
-    includesMessage_ = false;
     pending_ = false;
 }

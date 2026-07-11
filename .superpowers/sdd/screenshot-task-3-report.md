@@ -5,8 +5,14 @@
 - Added `ScreenshotCaptureState` as a metadata-only one-request state helper.
 - Replaced the synchronous scene screenshot readback with deferred
   `RequestFramePixels()` / `ConsumeFramePixels()` handling.
-- Preserved JPEG quality 100, physical readback dimensions, filename and
-  notification behavior, Shift selection, and `GrabScreen` modulo 10000.
+- Preserved JPEG quality 100, physical readback dimensions, filename, and
+  `GrabScreen` modulo 10000.
+- Deferred the success notification until `WriteJpeg` succeeds. Renderer,
+  pixel-validation, and JPEG failures do not report success.
+- Removed the obsolete Shift/message policy from `ScreenshotCaptureState`; the
+  helper now stores only metadata needed by every pending capture.
+- Kept the existing counter policy: a consumed, valid frame advances
+  `GrabScreen` after the JPEG write attempt, even when that attempt fails.
 - Restored non-Windows `MU_CAPTURE_FRAME` capture after `EndFrame()` and direct
   top-down RGB output to a P6 PPM.
 - Added the helper source and state tests to `frame_pixel_readback_tests`; the
@@ -35,6 +41,12 @@
   19/19 test cases and 71/71 assertions. `Main` also built in Debug with the
   existing missing-override warnings and macOS JPEG deployment-version linker
   warning. `git diff --check` completed with no output.
+- Important-finding RED: the focused build failed with the expected
+  `ScreenshotCaptureState::Begin` arity errors after tests removed the dead
+  message-policy argument.
+- Important-finding GREEN: the focused test binary passed 18/18 test cases and
+  65/65 assertions. Debug `Main` built successfully with the existing warnings
+  noted above, and `git diff --check` completed with no output.
 
 ## Limitations
 

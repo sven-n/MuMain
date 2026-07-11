@@ -47,53 +47,40 @@ TEST_CASE("screenshot metadata remains pending until cleared [screenshot capture
 {
     ScreenshotCaptureState state;
 
-    REQUIRE(state.Begin(L"capture.jpg", L"Screenshot saved", true));
+    REQUIRE(state.Begin(L"capture.jpg", L"Screenshot saved"));
     CHECK(state.HasPending());
     CHECK(state.FileName() == L"capture.jpg");
     CHECK(state.Message() == L"Screenshot saved");
-    CHECK(state.IncludesMessage());
 
     state.Clear();
 
     CHECK_FALSE(state.HasPending());
     CHECK(state.FileName().empty());
     CHECK(state.Message().empty());
-    CHECK_FALSE(state.IncludesMessage());
-}
-
-TEST_CASE("screenshot metadata preserves capture without message [screenshot capture]")
-{
-    ScreenshotCaptureState state;
-
-    REQUIRE(state.Begin(L"capture.jpg", L"Screenshot saved", false));
-
-    CHECK_FALSE(state.IncludesMessage());
 }
 
 TEST_CASE("second screenshot request is rejected without replacing metadata [screenshot capture]")
 {
     ScreenshotCaptureState state;
 
-    REQUIRE(state.Begin(L"first.jpg", L"First screenshot", true));
-    CHECK_FALSE(state.Begin(L"second.jpg", L"Second screenshot", false));
+    REQUIRE(state.Begin(L"first.jpg", L"First screenshot"));
+    CHECK_FALSE(state.Begin(L"second.jpg", L"Second screenshot"));
 
     CHECK(state.FileName() == L"first.jpg");
     CHECK(state.Message() == L"First screenshot");
-    CHECK(state.IncludesMessage());
 }
 
 TEST_CASE("screenshot metadata accepts a new request after clear [screenshot capture]")
 {
     ScreenshotCaptureState state;
 
-    REQUIRE(state.Begin(L"first.jpg", L"First screenshot", true));
+    REQUIRE(state.Begin(L"first.jpg", L"First screenshot"));
     state.Clear();
-    REQUIRE(state.Begin(L"second.jpg", L"Second screenshot", false));
+    REQUIRE(state.Begin(L"second.jpg", L"Second screenshot"));
 
     CHECK(state.HasPending());
     CHECK(state.FileName() == L"second.jpg");
     CHECK(state.Message() == L"Second screenshot");
-    CHECK_FALSE(state.IncludesMessage());
 }
 
 TEST_CASE("SDL GPU color formats map to frame pixel channel order [frame readback][pixel readback]")
