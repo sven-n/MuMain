@@ -4,8 +4,56 @@
 #include <vector>
 
 #include <doctest.h>
+#include <SDL3/SDL_gpu.h>
 
 #include "Render/Renderer/FramePixelReadback.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/SdlGpuPixelFormat.h"
+
+namespace
+{
+
+class MinimalRenderer final : public mu::IMuRenderer
+{
+public:
+    void RenderQuad2D(std::span<const mu::Vertex2D>, std::uint32_t) override {}
+    void RenderTriangles(std::span<const mu::Vertex3D>, std::uint32_t) override {}
+    void RenderQuadStrip(std::span<const mu::Vertex3D>, std::uint32_t) override {}
+    void SetBlendMode(mu::BlendMode) override {}
+    void DisableBlend() override {}
+    void SetDepthTest(bool) override {}
+    void SetFog(const mu::FogParams&) override {}
+    void BeginScene(int, int, int, int) override {}
+    void EndScene() override {}
+    void Begin2DPass() override {}
+    void End2DPass() override {}
+    void ClearScreen() override {}
+    void RenderLines(std::span<const mu::Vertex3D>, std::uint32_t) override {}
+};
+
+} // namespace
+
+TEST_CASE("renderer rejects unsupported frame readback by default [frame readback]")
+{
+    MinimalRenderer renderer;
+    mu::FramePixels pixels;
+
+    CHECK_FALSE(renderer.RequestFramePixels());
+    CHECK_FALSE(renderer.ConsumeFramePixels(pixels));
+}
+
+TEST_CASE("SDL GPU color formats map to frame pixel channel order [frame readback][pixel readback]")
+{
+    CHECK(mu::GetSdlGpuPixelChannelOrder(SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM) ==
+          mu::PixelChannelOrder::Rgba);
+    CHECK(mu::GetSdlGpuPixelChannelOrder(SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM_SRGB) ==
+          mu::PixelChannelOrder::Rgba);
+    CHECK(mu::GetSdlGpuPixelChannelOrder(SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM) ==
+          mu::PixelChannelOrder::Bgra);
+    CHECK(mu::GetSdlGpuPixelChannelOrder(SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM_SRGB) ==
+          mu::PixelChannelOrder::Bgra);
+    CHECK_FALSE(mu::GetSdlGpuPixelChannelOrder(SDL_GPU_TEXTUREFORMAT_D16_UNORM).has_value());
+}
 
 TEST_CASE("RGBA readback converts to tightly packed top-down RGB [frame readback][pixel readback]")
 {

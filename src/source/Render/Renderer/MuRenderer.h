@@ -13,6 +13,8 @@
 //   - No #ifdef _WIN32 in game logic — cross-platform via stubs.
 #pragma once
 
+#include "FramePixelReadback.h"
+
 #include <cstdint>
 #include <span>
 
@@ -168,6 +170,15 @@ public:
     // No-op in the OpenGL backend. Called from MuMain.cpp game loop.
     virtual void BeginFrame() {}
     virtual void EndFrame() {}
+    [[nodiscard]] virtual bool RequestFramePixels()
+    {
+        return false;
+    }
+    [[nodiscard]] virtual bool ConsumeFramePixels(FramePixels& pixels)
+    {
+        (void)pixels;
+        return false;
+    }
 
     // Story 4.4.1 — Texture System Migration: SDL_gpu device accessor.
     // Returns the SDL_GPUDevice* used by the active backend, or nullptr if not available.

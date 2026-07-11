@@ -3,4 +3,7 @@ mu_add_test(
     SOURCES
         test_frame_pixel_readback.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/FramePixelReadback.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/SdlGpuPixelFormat.cpp
+    LINK_LIBS
+        SDL3::SDL3
 )

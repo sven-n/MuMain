@@ -33,6 +33,7 @@
 #endif
 
 #include "MuRenderer.h"
+#include "SdlGpuPixelFormat.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include <algorithm>
@@ -42,6 +43,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <span>
 #include <string>
 #include <unordered_map>
@@ -264,6 +266,131 @@ static SDL_GPUTexture* s_swapchainTexture = nullptr;
 // Used for viewport calculations — distinct from logical window size on HiDPI/Retina.
 static Uint32 s_swapW = 0u;
 static Uint32 s_swapH = 0u;
+static FrameReadbackState s_frameReadbackState;
+
+constexpr Uint32 FrameReadbackBytesPerPixel = 4u;
+constexpr Uint32 FrameReadbackRowAlignment = 256u;
+
+struct FramePixelDownload
+{
+    SDL_GPUTransferBuffer* transferBuffer;
+    Uint32 rowPitch;
+    Uint32 byteCount;
+    PixelChannelOrder channelOrder;
+};
+
+[[nodiscard]] static std::optional<FramePixelDownload> EncodeFramePixelDownload(SDL_GPUCommandBuffer* commandBuffer)
+{
+    const auto channelOrder = GetSdlGpuPixelChannelOrder(SDL_GetGPUSwapchainTextureFormat(s_device, s_window));
+    if (!channelOrder)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- unsupported swapchain format for frame readback");
+        return std::nullopt;
+    }
+
+    const std::uint64_t rowBytes = static_cast<std::uint64_t>(s_swapW) * FrameReadbackBytesPerPixel;
+    const std::uint64_t alignedRowPitch =
+        (rowBytes + FrameReadbackRowAlignment - 1u) & ~(static_cast<std::uint64_t>(FrameReadbackRowAlignment) - 1u);
+    const std::uint64_t maximumByteCount = std::numeric_limits<Uint32>::max();
+    if (s_swapW == 0u || s_swapH == 0u || alignedRowPitch > maximumByteCount / s_swapH)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- invalid frame readback dimensions {}x{}", s_swapW, s_swapH);
+        return std::nullopt;
+    }
+    const std::uint64_t byteCount = alignedRowPitch * s_swapH;
+
+    SDL_GPUTransferBufferCreateInfo transferInfo{};
+    transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD;
+    transferInfo.size = static_cast<Uint32>(byteCount);
+    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(s_device, &transferInfo);
+    if (!transferBuffer)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- frame readback transfer buffer creation failed: {}", SDL_GetError());
+        return std::nullopt;
+    }
+
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+    if (!copyPass)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- frame readback copy pass failed: {}", SDL_GetError());
+        SDL_ReleaseGPUTransferBuffer(s_device, transferBuffer);
+        return std::nullopt;
+    }
+
+    SDL_GPUTextureRegion source{};
+    source.texture = s_swapchainTexture;
+    source.w = s_swapW;
+    source.h = s_swapH;
+    source.d = 1u;
+
+    SDL_GPUTextureTransferInfo destination{};
+    destination.transfer_buffer = transferBuffer;
+    destination.pixels_per_row = static_cast<Uint32>(alignedRowPitch) / FrameReadbackBytesPerPixel;
+    destination.rows_per_layer = s_swapH;
+
+    SDL_DownloadFromGPUTexture(copyPass, &source, &destination);
+    SDL_EndGPUCopyPass(copyPass);
+
+    return FramePixelDownload{transferBuffer, static_cast<Uint32>(alignedRowPitch),
+                              static_cast<Uint32>(byteCount), *channelOrder};
+}
+
+[[nodiscard]] static bool SubmitFramePixelDownload(SDL_GPUCommandBuffer* commandBuffer)
+{
+    const auto download = EncodeFramePixelDownload(commandBuffer);
+    if (!download)
+    {
+        s_frameReadbackState.Fail();
+        return false;
+    }
+
+    SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(commandBuffer);
+    if (!fence)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- frame readback fence acquisition failed: {}", SDL_GetError());
+        SDL_ReleaseGPUTransferBuffer(s_device, download->transferBuffer);
+        s_frameReadbackState.Fail();
+        return true;
+    }
+
+    SDL_GPUFence* fences[] = {fence};
+    const bool waitSucceeded = SDL_WaitForGPUFences(s_device, true, fences, 1u);
+    if (!waitSucceeded)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- frame readback fence wait failed: {}", SDL_GetError());
+    }
+    void* mapped = waitSucceeded ? SDL_MapGPUTransferBuffer(s_device, download->transferBuffer, false) : nullptr;
+    if (waitSucceeded && !mapped)
+    {
+        mu::log::Get("render")->warn("SDL_gpu -- frame readback map failed: {}", SDL_GetError());
+    }
+
+    FramePixels pixels;
+    bool converted = false;
+    if (mapped)
+    {
+        const auto* bytes = static_cast<const std::uint8_t*>(mapped);
+        converted = ConvertToTopDownRgb(std::span<const std::uint8_t>(bytes, download->byteCount), s_swapW, s_swapH,
+                                        download->rowPitch, download->channelOrder, false, pixels);
+        SDL_UnmapGPUTransferBuffer(s_device, download->transferBuffer);
+    }
+
+    SDL_ReleaseGPUFence(s_device, fence);
+    SDL_ReleaseGPUTransferBuffer(s_device, download->transferBuffer);
+
+    if (!converted)
+    {
+        if (mapped)
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- frame readback pixel conversion failed");
+        }
+        s_frameReadbackState.Fail();
+        return true;
+    }
+
+    s_frameReadbackState.Complete(std::move(pixels));
+    return true;
+}
 
 // Diagnostics: per-frame counters, reset in BeginFrame, logged every 300 frames.
 static Uint32 s_dbgFrameCount = 0u;
@@ -939,6 +1066,7 @@ public:
     static void Shutdown()
     {
 #ifdef MU_ENABLE_SDL3
+        s_frameReadbackState.Reset();
         if (!s_device)
         {
             return;
@@ -1467,6 +1595,11 @@ public:
             s_renderPass = nullptr;
         }
 
+        if (s_cmdBuf && s_frameReadbackState.IsPending() && SubmitFramePixelDownload(s_cmdBuf))
+        {
+            s_cmdBuf = nullptr;
+        }
+
         if (s_cmdBuf)
         {
             SDL_SubmitGPUCommandBuffer(s_cmdBuf);
@@ -1492,6 +1625,23 @@ public:
                     "game may not be calling RenderQuad2D/RenderTriangles");
         }
 #endif
+    }
+
+    [[nodiscard]] bool RequestFramePixels() override
+    {
+        return s_frameReadbackState.Request();
+    }
+
+    [[nodiscard]] bool ConsumeFramePixels(FramePixels& pixels) override
+    {
+        FramePixels completed = s_frameReadbackState.Consume();
+        if (completed.rgb.empty())
+        {
+            return false;
+        }
+
+        pixels = std::move(completed);
+        return true;
     }
 
     // -----------------------------------------------------------------------
