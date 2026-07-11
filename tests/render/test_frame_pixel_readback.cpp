@@ -1,0 +1,101 @@
+#include <array>
+#include <cstdint>
+#include <utility>
+#include <vector>
+
+#include <doctest.h>
+
+#include "Render/Renderer/FramePixelReadback.h"
+
+TEST_CASE("RGBA readback converts to tightly packed top-down RGB [frame readback][pixel readback]")
+{
+    const std::array<std::uint8_t, 8> source{255, 0, 0, 7, 0, 255, 0, 9};
+    mu::FramePixels output;
+
+    CHECK(mu::ConvertToTopDownRgb(source, 2, 1, 8, mu::PixelChannelOrder::Rgba, false, output));
+    CHECK(output.width == 2);
+    CHECK(output.height == 1);
+    CHECK(output.rgb == std::vector<std::uint8_t>{255, 0, 0, 0, 255, 0});
+}
+
+TEST_CASE("BGRA readback selects red and blue channels [frame readback][pixel readback]")
+{
+    const std::array<std::uint8_t, 8> source{4, 3, 2, 1, 8, 7, 6, 5};
+    mu::FramePixels output;
+
+    CHECK(mu::ConvertToTopDownRgb(source, 2, 1, 8, mu::PixelChannelOrder::Bgra, false, output));
+    CHECK(output.rgb == std::vector<std::uint8_t>{2, 3, 4, 6, 7, 8});
+}
+
+TEST_CASE("readback ignores padded bytes at the end of each row [frame readback][pixel readback]")
+{
+    const std::array<std::uint8_t, 16> source{
+        1, 2, 3, 4, 99, 98, 97, 96,
+        5, 6, 7, 8, 95, 94, 93, 92,
+    };
+    mu::FramePixels output;
+
+    CHECK(mu::ConvertToTopDownRgb(source, 1, 2, 8, mu::PixelChannelOrder::Rgba, false, output));
+    CHECK(output.rgb == std::vector<std::uint8_t>{1, 2, 3, 5, 6, 7});
+}
+
+TEST_CASE("bottom-up readback is reversed to top-down RGB [frame readback][pixel readback]")
+{
+    const std::array<std::uint8_t, 8> source{
+        10, 11, 12, 13,
+        20, 21, 22, 23,
+    };
+    mu::FramePixels output;
+
+    CHECK(mu::ConvertToTopDownRgb(source, 1, 2, 4, mu::PixelChannelOrder::Rgba, true, output));
+    CHECK(output.rgb == std::vector<std::uint8_t>{20, 21, 22, 10, 11, 12});
+}
+
+TEST_CASE("readback rejects source buffers that cannot cover every row [frame readback][pixel readback]")
+{
+    const std::array<std::uint8_t, 7> source{255, 0, 0, 7, 0, 255, 0};
+    mu::FramePixels output;
+
+    CHECK_FALSE(mu::ConvertToTopDownRgb(source, 2, 1, 8, mu::PixelChannelOrder::Rgba, false, output));
+}
+
+TEST_CASE("only one frame readback can be outstanding [frame readback]")
+{
+    mu::FrameReadbackState state;
+
+    CHECK(state.Request());
+    CHECK_FALSE(state.Request());
+    CHECK(state.IsPending());
+}
+
+TEST_CASE("completed readback is retained until consumed [frame readback]")
+{
+    mu::FrameReadbackState state;
+    mu::FramePixels pixels{2, 1, {1, 2, 3, 4, 5, 6}};
+
+    REQUIRE(state.Request());
+    state.Complete(std::move(pixels));
+
+    CHECK_FALSE(state.IsPending());
+    CHECK_FALSE(state.Request());
+
+    mu::FramePixels consumed = state.Consume();
+    CHECK(consumed.width == 2);
+    CHECK(consumed.height == 1);
+    CHECK(consumed.rgb == std::vector<std::uint8_t>{1, 2, 3, 4, 5, 6});
+    CHECK(state.Request());
+}
+
+TEST_CASE("failed readback resets the request state [frame readback]")
+{
+    mu::FrameReadbackState state;
+
+    REQUIRE(state.Request());
+    state.Fail();
+
+    CHECK_FALSE(state.IsPending());
+    CHECK(state.Request());
+    state.Reset();
+    CHECK_FALSE(state.IsPending());
+    CHECK(state.Request());
+}
