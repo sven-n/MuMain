@@ -108,13 +108,14 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\][Ww]in[Mm]ain\\.[Cc]pp$")
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\]main\\.(cpp|mm)$")
 
-# The in-game shop's catalog downloader is a WinINet/urlmon HTTP+FTP stack with
-# no portable equivalent yet (issue #462). Exclude just that layer on
-# non-Windows; the rest of the shop (UI, list managers) compiles portably and
-# its download entry points fail gracefully there. Replacing the downloader
-# with libcurl is a follow-up.
-if(NOT WIN32)
-  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\]")
+# The in-game shop's catalog downloader is a WinINet/urlmon HTTP+FTP stack on
+# Windows (FileDownloader/FTPConnecter/HTTPConnecter/DownloadInfo). Off Windows
+# it is replaced by a libcurl implementation (CurlFileDownloader, issue #462).
+# Keep only the transport that fits the platform in the build.
+if(WIN32)
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\]CurlFileDownloader\\.cpp$")
+else()
+  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\](FileDownloader|FTPConnecter|HTTPConnecter|DownloadInfo)\\.cpp$")
 endif()
 
 # Add MuEditor sources when editor is enabled
@@ -170,6 +171,13 @@ endif()
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
+
+# The in-game shop downloader uses libcurl off Windows (issue #462); on Windows
+# it uses the OS WinINet/urlmon stack and needs no extra dependency here.
+if(NOT WIN32)
+  find_package(CURL REQUIRED)
+  target_link_libraries(MuClient PUBLIC CURL::libcurl)
+endif()
 
 # The engine relies on self-registering globals whose constructors get
 # silently dropped if the linker only pulls archive members on demand, so
