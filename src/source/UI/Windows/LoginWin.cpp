@@ -71,9 +71,9 @@ void CLoginWin::Create()
         m_Password[0] = L'\0';
     }
 
-    // 25px taller than the original 245 so the second checkbox row and its
-    // trust warning fit on the panel (issue #462 credential consent).
-    CWin::Create(329, 270, BITMAP_LOG_IN + 7);
+    // 75px taller than the original 245 so the second checkbox row, its trust
+    // warning, and the buttons fit on the panel (issue #462 credential consent).
+    CWin::Create(329, 320, BITMAP_LOG_IN + 7);
 
     m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
     m_asprInputBox[LIW_PASSWORD].Create(156, 23, BITMAP_LOG_IN + 8);
@@ -158,8 +158,8 @@ void CLoginWin::SetPosition(int x, int y)
 	// offsets are eyeballed against the login background and may need tuning.
 	m_aBtnRememberMe.SetPosition(x + 109, y + 156);
 	m_aBtnSavePassword.SetPosition(x + 109, y + 176);
-	m_aBtn[LIW_OK].SetPosition(x + 150, y + 226);
-	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 226);
+	m_aBtn[LIW_OK].SetPosition(x + 150, y + 276);
+	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 276);
 }
 
 void CLoginWin::Show(bool bShow)
