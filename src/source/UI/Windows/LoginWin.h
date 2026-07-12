@@ -46,4 +46,9 @@ protected:
     void RenderControls();
     void RequestLogin();
     void CancelLogin();
+
+    // "Remember me" credential handling, split out of the update loop.
+    void UpdateRememberCheckboxes();
+    void ApplyRememberPasswordChoice();
+    void RevokeSavedCredentialsIfEdited();
 };

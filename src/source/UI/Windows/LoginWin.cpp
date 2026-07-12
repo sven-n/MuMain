@@ -219,46 +219,50 @@ void CLoginWin::UpdateWhileActive(double)
 		return;
 	}
 
+	UpdateRememberCheckboxes();
+}
+
+void CLoginWin::UpdateRememberCheckboxes()
+{
+	GameConfig& config = GameConfig::GetInstance();
+
 	if (m_aBtnRememberMe.IsClick())
 	{
 		m_RememberMe = m_aBtnRememberMe.IsCheck();
-		GameConfig::GetInstance().SetRememberMe(m_RememberMe != 0);
+		config.SetRememberMe(m_RememberMe != 0);
 
 		// Saving the password requires remembering the account, so drop the
 		// password consent when "remember me" is switched off.
 		if (!m_RememberMe && m_aBtnSavePassword.IsCheck())
 		{
 			m_aBtnSavePassword.SetCheck(false);
-			GameConfig::GetInstance().SetSavePassword(false);
-		}
-	}
-
-	if (m_aBtnSavePassword.IsClick())
-	{
-		GameConfig& config = GameConfig::GetInstance();
-
-		if (m_aBtnSavePassword.IsCheck())
-		{
-			// Enabling requires confirmation. Revert the tick immediately; it is
-			// re-applied only if the dialog is accepted, so a cancel (however the
-			// dialog closes) always leaves the box unchecked.
-			m_aBtnSavePassword.SetCheck(false);
-
-			// Storing the password implies remembering the account.
-			if (!m_RememberMe)
-			{
-				m_RememberMe = 1;
-				m_aBtnRememberMe.SetCheck(true);
-				config.SetRememberMe(true);
-			}
-			UI::Login::OpenRememberPasswordPrompt();
-		}
-		else
-		{
-			// Player unticked it: revoke the stored password immediately.
 			config.SetSavePassword(false);
 		}
 	}
+
+	if (!m_aBtnSavePassword.IsClick())
+		return;
+
+	if (!m_aBtnSavePassword.IsCheck())
+	{
+		// Player unticked it: revoke the stored password immediately.
+		config.SetSavePassword(false);
+		return;
+	}
+
+	// Enabling requires confirmation. Revert the tick immediately; it is
+	// re-applied only if the dialog is accepted, so a cancel (however the dialog
+	// closes) always leaves the box unchecked.
+	m_aBtnSavePassword.SetCheck(false);
+
+	// Storing the password implies remembering the account.
+	if (!m_RememberMe)
+	{
+		m_RememberMe = 1;
+		m_aBtnRememberMe.SetCheck(true);
+		config.SetRememberMe(true);
+	}
+	UI::Login::OpenRememberPasswordPrompt();
 }
 
 void CLoginWin::UpdateWhileShow(double dDeltaTick)
@@ -266,23 +270,29 @@ void CLoginWin::UpdateWhileShow(double dDeltaTick)
     m_pUsernameInputBox->DoAction();
     m_pPasswordInputBox->DoAction();
 
-    // Apply the confirmation dialog's outcome here rather than in
-    // UpdateWhileActive: the modal message box leaves the login window inactive,
-    // so UpdateWhileActive stops being called, but UpdateWhileShow keeps running.
-    const UI::Login::RememberPasswordChoice choice = UI::Login::RememberPasswordChoiceState();
-    if (choice == UI::Login::RememberPasswordChoice::Ok)
-    {
-        UI::Login::ClearRememberPasswordChoice();
-        GameConfig::GetInstance().SetSavePassword(true);
-        m_aBtnSavePassword.SetCheck(true);
-    }
-    else if (choice == UI::Login::RememberPasswordChoice::Cancel)
-    {
-        UI::Login::ClearRememberPasswordChoice();
-        GameConfig::GetInstance().SetSavePassword(false);
-        m_aBtnSavePassword.SetCheck(false);
-    }
+    ApplyRememberPasswordChoice();
+    RevokeSavedCredentialsIfEdited();
+}
 
+void CLoginWin::ApplyRememberPasswordChoice()
+{
+    // Applied here rather than in UpdateWhileActive because the modal message box
+    // leaves the login window inactive (so UpdateWhileActive stops running),
+    // while UpdateWhileShow keeps being called.
+    const UI::Login::RememberPasswordChoice choice = UI::Login::RememberPasswordChoiceState();
+    if (choice != UI::Login::RememberPasswordChoice::Ok
+        && choice != UI::Login::RememberPasswordChoice::Cancel)
+        return;
+
+    UI::Login::ClearRememberPasswordChoice();
+
+    const bool bAccepted = (choice == UI::Login::RememberPasswordChoice::Ok);
+    GameConfig::GetInstance().SetSavePassword(bAccepted);
+    m_aBtnSavePassword.SetCheck(bAccepted);
+}
+
+void CLoginWin::RevokeSavedCredentialsIfEdited()
+{
     // Editing the account or password drops any stored credentials and revokes
     // the save-password consent, so an out-of-date password never lingers in
     // config.ini for the next person on this machine.
@@ -291,21 +301,21 @@ void CLoginWin::UpdateWhileShow(double dDeltaTick)
     m_pUsernameInputBox->GetText(curUser, _countof(curUser));
     m_pPasswordInputBox->GetText(curPass, _countof(curPass));
 
-    if (wcscmp(curUser, m_prevUsername) != 0 || wcscmp(curPass, m_prevPassword) != 0)
-    {
-        GameConfig& config = GameConfig::GetInstance();
-        const bool bHadStored = m_aBtnSavePassword.IsCheck()
-            || !config.GetEncryptedUsername().empty()
-            || !config.GetEncryptedPassword().empty();
-        if (bHadStored)
-        {
-            m_aBtnSavePassword.SetCheck(false);
-            config.ClearCredentials();
-        }
+    if (wcscmp(curUser, m_prevUsername) == 0 && wcscmp(curPass, m_prevPassword) == 0)
+        return;
 
-        wcscpy_s(m_prevUsername, _countof(m_prevUsername), curUser);
-        wcscpy_s(m_prevPassword, _countof(m_prevPassword), curPass);
+    GameConfig& config = GameConfig::GetInstance();
+    const bool bHadStored = m_aBtnSavePassword.IsCheck()
+        || !config.GetEncryptedUsername().empty()
+        || !config.GetEncryptedPassword().empty();
+    if (bHadStored)
+    {
+        m_aBtnSavePassword.SetCheck(false);
+        config.ClearCredentials();
     }
+
+    wcscpy_s(m_prevUsername, _countof(m_prevUsername), curUser);
+    wcscpy_s(m_prevPassword, _countof(m_prevPassword), curPass);
 }
 
 void CLoginWin::RenderControls()
