@@ -104,6 +104,12 @@ WZResult CurlFileDownloader::DownloadFile(const std::wstring& url,
         return result;
     }
 
+    // Run the throwing UTF-8 conversions before curl_easy_init so no exception
+    // can leak the CURL handle between init and curl_easy_cleanup.
+    const std::string urlUtf8 = WideToUtf8(url);
+    const std::string userUtf8 = WideToUtf8(username);
+    const std::string passwordUtf8 = WideToUtf8(password);
+
     EnsureCurlGlobalInit();
     CURL* curl = curl_easy_init();
     if (curl == nullptr)
@@ -111,10 +117,6 @@ WZResult CurlFileDownloader::DownloadFile(const std::wstring& url,
         result.SetResult(DL_CREATE_SESSION, 0, L"[CurlFileDownloader] Fail : curl_easy_init");
         return result;
     }
-
-    const std::string urlUtf8 = WideToUtf8(url);
-    const std::string userUtf8 = WideToUtf8(username);
-    const std::string passwordUtf8 = WideToUtf8(password);
 
     curl_easy_setopt(curl, CURLOPT_URL, urlUtf8.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteToStream);
