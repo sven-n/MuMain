@@ -3062,8 +3062,16 @@ static void RenderTileGridDebug()
 }
 #endif
 
+// Set by the Map Editor's minimap top-down view: force the whole terrain to
+// render (ignore the camera's 2D frustum bounds) so a top-down screenshot shows
+// the entire map, not just the window around the camera.
+bool g_bMapEditorFullTerrain = false;
+
 void RenderTerrain(bool EditFlag)
 {
+    if (g_bMapEditorFullTerrain)
+        ResetFrustrumBoundsFullTerrain();
+
     if (!EditFlag)
     {
         if (gMapManager.WorldActive == WD_8TARKAN)

@@ -32,6 +32,12 @@ public:
     const char* GetName() const override { return "FreeFly"; }
     void InheritFOV(float hFov);
     void SnapToPosition(const vec3_t pos, float yaw, float pitch);
+    // Positions the camera high above the map centre looking (almost) straight
+    // down, framing the whole 256x256 terrain, with far/cull/fog pushed out - for
+    // capturing a top-down minimap screenshot.
+    void SnapTopDown();
+    // Rotates the view around the vertical axis (for orienting a top-down shot).
+    void RotateYaw(float deltaDeg) { m_Yaw += deltaDeg; }
 
     // Configuration & Frustum Management
     const CameraConfig& GetConfig() const override { return m_Config; }
@@ -84,7 +90,9 @@ private:
     // Constraints
     // Engine convention: Angle[0]=-90 = horizontal, more negative = looking up
     static constexpr float MIN_PITCH = -160.0f;  // Looking steeply upward
-    static constexpr float MAX_PITCH = -20.0f;   // Looking steeply downward
+    static constexpr float MAX_PITCH = -2.0f;    // Near straight-down (pitch 0 =
+                                                 // exactly down but gimbal-locks;
+                                                 // -2 allows top-down minimap views)
 
     // Helper methods
     void HandleInput();

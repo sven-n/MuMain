@@ -7,7 +7,7 @@ class CMuEditorUI
 public:
     static CMuEditorUI& GetInstance();
 
-    void RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showConsole);
+    void RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor, bool& showConsole);
     void RenderCenterViewport();
 
 private:
@@ -15,7 +15,7 @@ private:
     ~CMuEditorUI() = default;
 
     void RenderToolbarOpen(bool& editorEnabled);
-    void RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showConsole);
+    void RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor, bool& showConsole);
 };
 
 #define g_MuEditorUI CMuEditorUI::GetInstance()

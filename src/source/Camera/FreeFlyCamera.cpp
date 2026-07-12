@@ -103,6 +103,27 @@ void FreeFlyCamera::SnapToPosition(const vec3_t pos, float yaw, float pitch)
     m_Pitch = std::clamp(pitch, MIN_PITCH, MAX_PITCH);
 }
 
+void FreeFlyCamera::SnapTopDown()
+{
+    // Map is TERRAIN_SIZE tiles of TERRAIN_SCALE units; centre it in view.
+    const float mapCentre = TERRAIN_SIZE * 0.5f * TERRAIN_SCALE;  // 128 * 100
+    m_Position[0] = mapCentre;
+    m_Position[1] = mapCentre;
+    m_Position[2] = 24000.0f;  // high enough for a 90-deg FOV to frame the map
+    m_Yaw = 0.0f;
+    m_Pitch = MAX_PITCH;       // as close to straight-down as the camera allows
+
+    // Push far clip, culling and fog well past the map's far corners so nothing
+    // is culled or fogged out from up here.
+    m_Config.farPlane = 60000.0f;
+    m_Config.terrainCullRange = 60000.0f;
+    m_Config.objectCullRange = 60000.0f;
+    m_Config.fogStart = 55000.0f;
+    m_Config.fogEnd = 60000.0f;
+
+    UpdateFrustum();
+}
+
 void FreeFlyCamera::OnDeactivate()
 {
     m_bLooking = false;

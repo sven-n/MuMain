@@ -12,6 +12,7 @@
 #include "../MuEditor/UI/ItemEditor/MuItemEditorUI.h"
 #include "../MuEditor/UI/SkillEditor/MuSkillEditorUI.h"
 #include "../MuEditor/UI/DevEditor/DevEditorUI.h"
+#include "../MuEditor/UI/MapEditor/MapEditorUI.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
@@ -63,6 +64,7 @@ CMuEditorCore::CMuEditorCore()
     , m_bShowItemEditor(false)
     , m_bShowSkillEditor(false)
     , m_bShowDevEditor(false)
+    , m_bShowMapEditor(false)
     , m_bShowConsole(true)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
@@ -443,6 +445,11 @@ void CMuEditorCore::Update()
         // Process input blocking for editor UI (keyboard)
         g_MuInputBlockerCore.ProcessInputBlocking();
 
+        // Capture the mouse for the Map Editor and stop painting clicks from
+        // reaching the game (so the hero doesn't walk while painting). Runs here,
+        // before the scene consumes input this frame.
+        g_MapEditorUI.CaptureInputForPainting();
+
         // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in NewUICommon.cpp
         // It prevents the game from scanning keyboard state when ImGui wants to capture it
     }
@@ -461,7 +468,7 @@ void CMuEditorCore::Render()
     m_bHoveringUI = false;
 
     // Render toolbar (handles both open and closed states)
-    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowConsole);
+    g_MuEditorUI.RenderToolbar(m_bEditorMode, m_bShowItemEditor, m_bShowSkillEditor, m_bShowDevEditor, m_bShowMapEditor, m_bShowConsole);
 
     if (m_bEditorMode)
     {
@@ -474,11 +481,22 @@ void CMuEditorCore::Render()
             g_DevEditorUI.Render(&m_bShowDevEditor);
         }
 
+        // Render Map Editor. Called every frame (not gated on the show flag) so
+        // it can restore the game to normal mode the frame after it is closed;
+        // it owns EditFlag while its window is open.
+        g_MapEditorUI.Render(&m_bShowMapEditor);
+
         // Render console (if enabled)
         if (m_bShowConsole)
         {
             g_MuEditorConsoleUI.Render();
         }
+    }
+    else
+    {
+        // Editor fully closed: make sure the Map Editor releases EditFlag so the
+        // game doesn't stay stuck in an edit mode.
+        g_MapEditorUI.Render(nullptr);
     }
 
     // Store current hover state for next frame's input blocking

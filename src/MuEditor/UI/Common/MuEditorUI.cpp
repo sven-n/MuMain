@@ -26,11 +26,11 @@ CMuEditorUI& CMuEditorUI::GetInstance()
     return instance;
 }
 
-void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showConsole)
+void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor, bool& showConsole)
 {
     if (editorEnabled)
     {
-        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showConsole);
+        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showMapEditor, showConsole);
     }
     else
     {
@@ -112,7 +112,7 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     ImGui::PopStyleColor(2);
 }
 
-void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showConsole)
+void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor, bool& showConsole)
 {
     ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, TOOLBAR_HEIGHT), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
@@ -151,6 +151,12 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, b
         if (ImGui::Button("Dev Editor"))
         {
             showDevEditor = !showDevEditor;
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Map Editor"))
+        {
+            showMapEditor = !showMapEditor;
         }
 
         // Console toggle
