@@ -1047,6 +1047,11 @@ void CNewUIMuHelper::ApplyConfig()
 {
     g_MuHelper.Load(_TempConfig);
 
+    if (g_pNewUIMuHelperExt)
+    {
+        g_pNewUIMuHelperExt->ApplySavedConfig();
+    }
+
     m_aiSelectedSkills[0] = _TempConfig.aiSkill[0] ? _TempConfig.aiSkill[0] : -1;
     m_aiSelectedSkills[1] = _TempConfig.aiSkill[1] ? _TempConfig.aiSkill[1] : -1;
     m_aiSelectedSkills[2] = _TempConfig.aiSkill[2] ? _TempConfig.aiSkill[2] : -1;
