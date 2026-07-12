@@ -32,6 +32,12 @@ Carry-forward checkpoints from the prior stub, reviewed against current `GLCompa
 - `c6337e6d` — fix(render): port direct SDL color quads (`context only; not a source-range row`)
 - `e4fd48b1` — fix(render): port glow trail depth fixes (`context only; not a source-range row`)
 
+## Screenshot Readback Verification
+
+- SDL GPU color screenshot readback: `ported`. Release capture frame 120 produced a visually inspected, upright, correctly ordered `P6` RGB image at the physical `1024x768` drawable size (`/tmp/mu-frame.ppm`, exactly 2,359,312 bytes); native window close exited 0. The ordinary path remains free of readback allocation, copy, fence, and wait work, and a capture-disabled Release run held 60 Hz with 15.91-16.94 ms renderer totals and 0.04-0.07 ms submits after startup.
+- Legacy depth readback: `needs-port` and remains out of scope. `CameraProjection.cpp` still calls the default no-op `IMuRenderer::ReadPixels()` for a one-pixel depth sample.
+- This verifies only screenshot color readback; it does not mark the overall SDL migration complete.
+
 ## Source Commits (`src/source`) — 269 rows
 
 | Source | Subsystem | Subject | Old touched paths | Current target paths | Status | Evidence / current reference | Verification required |
