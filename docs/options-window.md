@@ -32,7 +32,9 @@ window writes to these sections:
 - `[Window]` - width, height, windowed flag.
 - `[Graphics]` - render levels, vsync, fps limit.
 - `[Audio]` - volumes.
-- `[Login]`
+- `[Login]` - language, and the remembered-credential keys (`RememberMe`,
+  `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see
+  "Remembering login credentials" below.
 - `[ConnectionSettings]`
 - `[Camera]` - orbital wheel-zoom radius (`Zoom`). **New in this PR**, the
   only key the camera rework added.
@@ -40,3 +42,22 @@ window writes to these sections:
 Missing keys fall back to compile-time defaults from
 `src/source/Data/GameConfig/GameConfigConstants.h`. If `config.ini` doesn't exist,
 it's created the first time anything calls `Save()`.
+
+## Remembering login credentials
+
+The login screen has two separate checkboxes:
+
+- **Remember Username** - fills in your account name next time. Safe to leave
+  on; only the username is stored.
+- **Remember Password** - also stores the password. Because a saved password
+  lets anyone using the same computer log into your account, ticking it opens a
+  confirmation dialog first; the box only stays ticked if you accept it. Leave
+  this off on shared machines (e.g. an internet cafe).
+
+Editing the account or password field clears any stored credentials and turns
+Remember Password back off, so an out-of-date password is never left behind.
+
+Stored credentials are obfuscated (not plaintext) and tied to the current
+machine and user account, so copying `config.ini` to another machine does not
+reveal them. This is protection against a casual reader of the file, not a
+determined attacker - which is why saving the password is opt-in.

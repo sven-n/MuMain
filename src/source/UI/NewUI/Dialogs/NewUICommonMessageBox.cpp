@@ -519,8 +519,27 @@ int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DW
 
             if (TextExtentWidth > (DWORD)_TextSize && cur_offset != 0)
             {
-                strCutText = type_string(strRemainText, 0, prev_offset/* size */);
-                strRemainText = type_string(strRemainText, prev_offset, strRemainText.size() - prev_offset/* size */);
+                // Break at the last space before the overflow so a word is not
+                // split across lines. If the first character alone is wider than
+                // the box (prev_offset == 0), cut that character so the loop
+                // still makes progress instead of hanging; and when the line has
+                // no space, fall back to the exact character cut.
+                int cutSize = cur_offset;
+                int nextStart = cur_offset;
+                if (prev_offset > 0)
+                {
+                    cutSize = prev_offset;
+                    nextStart = prev_offset;
+                    size_t spacePos = strRemainText.rfind(L' ', (size_t)prev_offset);
+                    if (spacePos != type_string::npos && spacePos > 0)
+                    {
+                        cutSize = (int)spacePos;        // line ends before the space
+                        nextStart = (int)spacePos + 1;  // next line starts after it
+                    }
+                }
+
+                strCutText = type_string(strRemainText, 0, cutSize);
+                strRemainText = type_string(strRemainText, nextStart, strRemainText.size() - nextStart);
 
                 auto* pMsg = new MSGBOX_TEXTDATA;
                 pMsg->strMsg = strCutText;

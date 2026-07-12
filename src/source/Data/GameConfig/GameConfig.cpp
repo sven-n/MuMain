@@ -62,6 +62,7 @@ void GameConfig::Load()
     m_musicVolume  = ReadInt(CfgSectionAudio, CfgKeyMusicVolume, CfgDefaultMusicVolume);
 
     m_rememberMe        = ReadBool(CfgSectionLogin, CfgKeyRememberMe, CfgDefaultRememberMe);
+    m_savePassword      = ReadBool(CfgSectionLogin, CfgKeySavePassword, CfgDefaultSavePassword);
     m_languageSelection = ReadString(CfgSectionLogin, CfgKeyLanguage, CfgDefaultLanguage);
     m_encryptedUsername = ReadString(CfgSectionLogin, CfgKeyEncryptedUsername, CfgDefaultEncryptedUsername);
     m_encryptedPassword = ReadString(CfgSectionLogin, CfgKeyEncryptedPassword, CfgDefaultEncryptedPassword);
@@ -101,6 +102,7 @@ void GameConfig::Save()
     WriteInt(CfgSectionAudio, CfgKeyMusicVolume, m_musicVolume);
 
     WriteBool(CfgSectionLogin, CfgKeyRememberMe, m_rememberMe);
+    WriteBool(CfgSectionLogin, CfgKeySavePassword, m_savePassword);
     WriteString(CfgSectionLogin, CfgKeyLanguage, m_languageSelection);
     WriteString(CfgSectionLogin, CfgKeyEncryptedUsername, m_encryptedUsername);
     WriteString(CfgSectionLogin, CfgKeyEncryptedPassword, m_encryptedPassword);
@@ -138,6 +140,19 @@ void GameConfig::SetMusicVolume(int level)
 void GameConfig::SetRememberMe(bool remember)
 {
     m_rememberMe = remember;
+}
+
+void GameConfig::SetSavePassword(bool save)
+{
+    m_savePassword = save;
+}
+
+void GameConfig::ClearCredentials()
+{
+    m_encryptedUsername.clear();
+    m_encryptedPassword.clear();
+    m_savePassword = false;
+    Save();
 }
 
 void GameConfig::SetLanguageSelection(const std::wstring& lang)
@@ -231,16 +246,23 @@ std::vector<BYTE> GameConfig::HexToBinary(const std::wstring& hex)
 
 void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t userBufSize, size_t passBufSize)
 {
+    // Start empty so a missing username/password never leaves stale text behind.
+    if (outUser && userBufSize) outUser[0] = L'\0';
+    if (outPass && passBufSize) outPass[0] = L'\0';
+
     // Decrypt Username
     std::wstring user = DecryptSetting(GetEncryptedUsername());
-    if (!user.empty()) {
+    if (!user.empty() && outUser && userBufSize) {
         wcsncpy_s(outUser, userBufSize, user.c_str(), _TRUNCATE);
     }
 
-    // Decrypt Password
-    std::wstring pass = DecryptSetting(GetEncryptedPassword());
-    if (!pass.empty()) {
-        wcsncpy_s(outPass, passBufSize, pass.c_str(), _TRUNCATE);
+    // Decrypt Password only when the player consented to storing it; otherwise
+    // only the username is remembered.
+    if (m_savePassword) {
+        std::wstring pass = DecryptSetting(GetEncryptedPassword());
+        if (!pass.empty() && outPass && passBufSize) {
+            wcsncpy_s(outPass, passBufSize, pass.c_str(), _TRUNCATE);
+        }
     }
 }
 
@@ -346,12 +368,24 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
 void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* pass)
 {
     std::wstring encUser = EncryptSetting(user);
-    std::wstring encPass = EncryptSetting(pass);
-
-    if (!encUser.empty() && !encPass.empty())
+    if (encUser.empty())
     {
-        SetEncryptedUsername(encUser);
-        SetEncryptedPassword(encPass);
-        Save(); // Actually write to the .ini file
+        // No username to remember; leave any prior credentials untouched.
+        return;
     }
+
+    SetEncryptedUsername(encUser);
+
+    // The password is persisted only with explicit consent. Without it, clear
+    // any previously stored password so it never lingers in config.ini.
+    if (m_savePassword)
+    {
+        SetEncryptedPassword(EncryptSetting(pass));
+    }
+    else
+    {
+        SetEncryptedPassword(L"");
+    }
+
+    Save(); // Actually write to the .ini file
 }
