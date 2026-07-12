@@ -4043,7 +4043,10 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     {
         if (Success == false)
         {
-            g_pSystemLogBox->AddText(I18N::Game::StongerEffectHasTakenPlace, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            if (SourceKey == HeroKey)
+            {
+                g_pSystemLogBox->AddText(I18N::Game::StongerEffectHasTakenPlace, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            }
             return FALSE;
         }
     }
