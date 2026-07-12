@@ -5,9 +5,11 @@
 Runtime capture and timing were produced from the integrated working tree at
 `HEAD cd5f9d5e` plus pre-existing uncommitted renderer/timing migration
 changes. They do not validate a clean commit-only snapshot. In that integrated
-run, SDL GPU color screenshot readback was integration-verified on macOS; no
-Task 1-3 defect was observed, and no code was changed. Legacy depth readback
-remains out of scope and needs porting.
+run, SDL GPU color screenshot readback produced a valid image on macOS. Final
+review later found that the diagnostic request happened after `EndFrame()`, so
+`MU_CAPTURE_FRAME=120` captured frame 121. The numbered-frame runtime evidence
+is superseded pending a corrected rerun. Legacy depth readback remains out of
+scope and needs porting.
 
 The committed Task 1-4 code structure is separately review/test verified. The
 runtime evidence below is limited to the integrated worktree and does not make
@@ -35,7 +37,12 @@ Results:
   format mapping, physical capture-target dimensions, RGB conversion,
   orientation, request state, and screenshot metadata coverage.
 
-## Deterministic Capture
+## Superseded Deterministic Capture
+
+The artifact checks below remain evidence for P6 validation, physical
+dimensions, orientation, and channel order, but no longer prove that frame 120
+was captured. The run must be repeated with the corrected pre-`BeginFrame()`
+request lifecycle before numbered-frame runtime verification can be restored.
 
 Launched from `out/build/macos-arm64/src/Release`:
 
@@ -48,6 +55,9 @@ Integrated-worktree runtime output included:
 ```text
 [capture] wrote frame 120 (1024x768) to /tmp/mu-frame.ppm
 ```
+
+That message reflected the requested label, not the rendered frame actually
+captured by the old lifecycle; the image was from frame 121.
 
 The macOS close control was clicked through System Events. `Main` exited 0,
 with no crash output, and `pgrep -x Main` returned no process afterward.
@@ -107,6 +117,8 @@ process exited 0, and `pgrep -x Main` confirmed no remaining process.
 - A clean commit-only runtime build was not performed because this repository
   contains the larger uncommitted renderer/timing migration integration under
   audit.
+- The corrected `MU_CAPTURE_FRAME=120` runtime rerun is pending; the prior
+  numbered-frame evidence is superseded.
 
 ## Final Checks
 

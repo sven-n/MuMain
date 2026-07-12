@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+#include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
@@ -230,53 +231,67 @@ static bool WriteCapturePpm(const char* path, const mu::FramePixels& pixels)
     return wroteHeader && wrotePixels && closed;
 }
 
-static void MaybeCaptureFrame()
+struct DiagnosticFrameCapture
 {
-    const char* want = std::getenv("MU_CAPTURE_FRAME");
-    if (!want)
+    std::uint64_t targetFrame = 0;
+    mu::DiagnosticFrameCaptureSchedule schedule{0};
+};
+
+static DiagnosticFrameCapture& GetDiagnosticFrameCapture()
+{
+    static DiagnosticFrameCapture capture = [] {
+        const char* target = std::getenv("MU_CAPTURE_FRAME");
+        const std::uint64_t targetFrame = target ? std::strtoull(target, nullptr, 10) : 0;
+        return DiagnosticFrameCapture{targetFrame, mu::DiagnosticFrameCaptureSchedule(targetFrame)};
+    }();
+    return capture;
+}
+
+static void RequestDiagnosticFrameCapture()
+{
+    DiagnosticFrameCapture& capture = GetDiagnosticFrameCapture();
+    if (!capture.schedule.BeforeFrame())
     {
         return;
     }
 
-    static long s_frame = 0;
-    static bool s_requestPending = false;
-    static bool s_captureFinished = false;
-    const long target = std::strtol(want, nullptr, 10);
-
-    if (s_requestPending)
+    if (!mu::GetRenderer().RequestFramePixels())
     {
-        mu::FramePixels pixels;
-        s_requestPending = false;
-        s_captureFinished = true;
-        if (!mu::GetRenderer().ConsumeFramePixels(pixels))
-        {
-            std::fprintf(stderr, "[capture] frame %ld readback failed\n", target);
-            return;
-        }
-
-        const char* path = std::getenv("MU_CAPTURE_PATH");
-        if (!path)
-        {
-            path = "/tmp/mu-frame.ppm";
-        }
-        if (!WriteCapturePpm(path, pixels))
-        {
-            std::fprintf(stderr, "[capture] failed to write frame %ld to %s\n", target, path);
-            return;
-        }
-
-        std::fprintf(stderr, "[capture] wrote frame %ld (%ux%u) to %s\n",
-                     target, pixels.width, pixels.height, path);
-        return;
+        capture.schedule.Finish();
     }
+}
 
-    if (s_captureFinished || ++s_frame != target)
+static void ConsumeDiagnosticFrameCapture()
+{
+    DiagnosticFrameCapture& capture = GetDiagnosticFrameCapture();
+    if (!capture.schedule.AfterFrame())
     {
         return;
     }
 
-    s_requestPending = mu::GetRenderer().RequestFramePixels();
-    s_captureFinished = !s_requestPending;
+    mu::FramePixels pixels;
+    capture.schedule.Finish();
+    if (!mu::GetRenderer().ConsumeFramePixels(pixels))
+    {
+        std::fprintf(stderr, "[capture] frame %llu readback failed\n",
+                     static_cast<unsigned long long>(capture.targetFrame));
+        return;
+    }
+
+    const char* path = std::getenv("MU_CAPTURE_PATH");
+    if (!path)
+    {
+        path = "/tmp/mu-frame.ppm";
+    }
+    if (!WriteCapturePpm(path, pixels))
+    {
+        std::fprintf(stderr, "[capture] failed to write frame %llu to %s\n",
+                     static_cast<unsigned long long>(capture.targetFrame), path);
+        return;
+    }
+
+    std::fprintf(stderr, "[capture] wrote frame %llu (%ux%u) to %s\n",
+                 static_cast<unsigned long long>(capture.targetFrame), pixels.width, pixels.height, path);
 }
 #endif
 
@@ -1305,11 +1320,14 @@ MSG MainLoop()
                 g_MuEditorCore.Update();
 #endif
 
+#ifndef _WIN32
+                RequestDiagnosticFrameCapture();
+#endif
                 mu::GetRenderer().BeginFrame();
                 RenderScene(g_hDC);
                 mu::GetRenderer().EndFrame();
 #ifndef _WIN32
-                MaybeCaptureFrame();
+                ConsumeDiagnosticFrameCapture();
 #endif
             }
         }

@@ -6,6 +6,7 @@
 #include <doctest.h>
 #include <SDL3/SDL_gpu.h>
 
+#include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 #include "Render/Renderer/FramePixelReadback.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/SdlGpuPixelFormat.h"
@@ -41,6 +42,33 @@ TEST_CASE("renderer rejects unsupported frame readback by default [frame readbac
 
     CHECK_FALSE(renderer.RequestFramePixels());
     CHECK_FALSE(renderer.ConsumeFramePixels(pixels));
+}
+
+TEST_CASE("diagnostic capture requests before its numbered frame [diagnostic capture]")
+{
+    mu::DiagnosticFrameCaptureSchedule schedule(2);
+
+    CHECK_FALSE(schedule.BeforeFrame());
+    CHECK_FALSE(schedule.AfterFrame());
+
+    CHECK(schedule.BeforeFrame());
+    CHECK(schedule.AfterFrame());
+}
+
+TEST_CASE("diagnostic capture requests exactly once [diagnostic capture]")
+{
+    mu::DiagnosticFrameCaptureSchedule schedule(1);
+
+    CHECK(schedule.BeforeFrame());
+    CHECK(schedule.AfterFrame());
+
+    CHECK_FALSE(schedule.BeforeFrame());
+    CHECK(schedule.AfterFrame());
+
+    schedule.Finish();
+
+    CHECK_FALSE(schedule.BeforeFrame());
+    CHECK_FALSE(schedule.AfterFrame());
 }
 
 TEST_CASE("screenshot metadata remains pending until cleared [screenshot capture]")

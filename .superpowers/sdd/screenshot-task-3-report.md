@@ -13,8 +13,12 @@
   helper now stores only metadata needed by every pending capture.
 - Kept the existing counter policy: a consumed, valid frame advances
   `GrabScreen` after the JPEG write attempt, even when that attempt fails.
-- Restored non-Windows `MU_CAPTURE_FRAME` capture after `EndFrame()` and direct
-  top-down RGB output to a P6 PPM.
+- Restored non-Windows `MU_CAPTURE_FRAME` capture with a request before
+  `BeginFrame()` for the numbered frame and result consumption after its
+  `EndFrame()`, with direct top-down RGB output to a P6 PPM.
+- Added a pure diagnostic frame schedule with focused tests for one-based frame
+  numbering, pre-frame request timing, post-frame consumption, and request-once
+  behavior.
 - Added the helper source and state tests to `frame_pixel_readback_tests`; the
   recursive client source glob includes the helper in `MuClient` / `Main`.
 
@@ -47,6 +51,12 @@
 - Important-finding GREEN: the focused test binary passed 18/18 test cases and
   65/65 assertions. Debug `Main` built successfully with the existing warnings
   noted above, and `git diff --check` completed with no output.
+- Final-review Important issue 1 RED: the focused target failed during CMake
+  generation because `DiagnosticFrameCaptureSchedule.cpp` did not yet exist.
+- Final-review Important issue 1 GREEN: the focused binary passed 20/20 test
+  cases and 75/75 assertions; the two registered diagnostic scheduling tests
+  passed through CTest, Debug `Main` linked successfully, and full Debug CTest
+  passed 44/44 tests.
 
 ## Limitations
 
@@ -54,3 +64,6 @@
   hook were not launched during this non-interactive verification pass.
   Orientation and channel conversion are covered by the focused unit tests, but
   PPM file output and JPEG persistence are not directly unit-tested.
+- The prior `MU_CAPTURE_FRAME=120` runtime artifact was produced by the old
+  after-`EndFrame()` request hook and therefore captured frame 121. That runtime
+  evidence is superseded and must be regenerated with the corrected lifecycle.

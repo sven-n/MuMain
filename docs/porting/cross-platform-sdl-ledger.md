@@ -34,8 +34,8 @@ Carry-forward checkpoints from the prior stub, reviewed against current `GLCompa
 
 ## Screenshot Readback Verification
 
-- Runtime capture and timing were produced from the integrated working tree at `HEAD cd5f9d5e` plus pre-existing uncommitted renderer/timing migration changes; no clean commit-only runtime build was performed because that larger migration integration remains under audit.
-- SDL GPU color screenshot readback: `ported` code structure is separately review/test verified; integration runtime evidence in that worktree captured frame 120 as a visually inspected, upright, correctly ordered `P6` RGB image at physical `1024x768` (`/tmp/mu-frame.ppm`, exactly 2,359,312 bytes), and native window close exited 0.
+- Runtime capture and timing were produced from the integrated working tree at `HEAD cd5f9d5e` plus pre-existing uncommitted renderer/timing migration changes; no clean commit-only runtime build was performed because that larger migration integration remains under audit. The prior `MU_CAPTURE_FRAME=120` request happened after frame 120 ended and captured frame 121, so its numbered-frame evidence is superseded pending rerun.
+- SDL GPU color screenshot readback: `ported` code structure is separately review/test verified; the superseded integration artifact remains evidence for an upright, correctly ordered `P6` RGB image at physical `1024x768` (`/tmp/mu-frame.ppm`, exactly 2,359,312 bytes), and native window close exited 0, but it does not verify capture of frame 120.
 - Capture-disabled timing in the same integrated worktree showed no observed regression, but raw samples were not retained; it neither measures exact `cd5f9d5e` nor attributes performance solely to the screenshot commits.
 - Legacy depth readback: `needs-port` and remains out of scope. `CameraProjection.cpp` still calls the default no-op `IMuRenderer::ReadPixels()` for a one-pixel depth sample.
 - This verifies only screenshot color readback in the described integrated worktree; it does not mark the overall SDL migration complete.
