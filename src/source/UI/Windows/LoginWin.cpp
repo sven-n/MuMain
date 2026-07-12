@@ -18,7 +18,8 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/Windows/RememberPasswordPrompt.h"
 
 
 #include "Network/Server/ServerListManager.h"
@@ -42,58 +43,6 @@ extern int  LogIn;
 extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
-
-namespace
-{
-// Result of the "Remember Password" confirmation dialog, polled by the login
-// window. The message-box callbacks are static, so they hand the outcome back
-// through this file-scoped state.
-enum class RememberPwConfirm { None, Pending, Ok, Cancel };
-RememberPwConfirm g_RememberPwConfirm = RememberPwConfirm::None;
-
-// OK/Cancel confirmation shown before the password is allowed to be stored.
-// Same shape as the game's other two-button dialogs (e.g. the guild request box).
-class CRememberPasswordMsgBoxLayout : public SEASON3B::TMsgBoxLayout<SEASON3B::CNewUICommonMessageBox>
-{
-public:
-    bool SetLayout() override;
-    static SEASON3B::CALLBACK_RESULT OnOk(SEASON3B::CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static SEASON3B::CALLBACK_RESULT OnCancel(SEASON3B::CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-};
-
-bool CRememberPasswordMsgBoxLayout::SetLayout()
-{
-    SEASON3B::CNewUICommonMessageBox* pMsgBox = GetMsgBox();
-    if (pMsgBox == nullptr)
-        return false;
-
-    if (!pMsgBox->Create(SEASON3B::MSGBOX_COMMON_TYPE_OKCANCEL,
-        L"Saving the password lets anyone using this computer log into your account.\nOnly do this on a PC you trust. Save the password?"))
-        return false;
-
-    pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnOk, SEASON3B::MSGBOX_EVENT_USER_COMMON_OK);
-    pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnCancel, SEASON3B::MSGBOX_EVENT_USER_COMMON_CANCEL);
-    pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnOk, SEASON3B::MSGBOX_EVENT_PRESSKEY_RETURN);
-    pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnCancel, SEASON3B::MSGBOX_EVENT_PRESSKEY_ESC);
-    return true;
-}
-
-SEASON3B::CALLBACK_RESULT CRememberPasswordMsgBoxLayout::OnOk(SEASON3B::CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf&)
-{
-    g_RememberPwConfirm = RememberPwConfirm::Ok;
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, SEASON3B::MSGBOX_EVENT_DESTROY);
-    return SEASON3B::CALLBACK_BREAK;
-}
-
-SEASON3B::CALLBACK_RESULT CRememberPasswordMsgBoxLayout::OnCancel(SEASON3B::CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf&)
-{
-    g_RememberPwConfirm = RememberPwConfirm::Cancel;
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, SEASON3B::MSGBOX_EVENT_DESTROY);
-    return SEASON3B::CALLBACK_BREAK;
-}
-} // namespace
 
 CLoginWin::CLoginWin()
 {
@@ -122,7 +71,9 @@ void CLoginWin::Create()
         m_Password[0] = L'\0';
     }
 
-    CWin::Create(329, 245, BITMAP_LOG_IN + 7);
+    // 25px taller than the original 245 so the second checkbox row and its
+    // trust warning fit on the panel (issue #462 credential consent).
+    CWin::Create(329, 270, BITMAP_LOG_IN + 7);
 
     m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
     m_asprInputBox[LIW_PASSWORD].Create(156, 23, BITMAP_LOG_IN + 8);
@@ -206,9 +157,9 @@ void CLoginWin::SetPosition(int x, int y)
 	// vertically; the OK/Cancel buttons move down to make room. These pixel
 	// offsets are eyeballed against the login background and may need tuning.
 	m_aBtnRememberMe.SetPosition(x + 109, y + 156);
-	m_aBtnSavePassword.SetPosition(x + 109, y + 174);
-	m_aBtn[LIW_OK].SetPosition(x + 150, y + 210);
-	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 210);
+	m_aBtnSavePassword.SetPosition(x + 109, y + 176);
+	m_aBtn[LIW_OK].SetPosition(x + 150, y + 226);
+	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 226);
 }
 
 void CLoginWin::Show(bool bShow)
@@ -283,38 +234,44 @@ void CLoginWin::UpdateWhileActive(double)
 
 	if (m_aBtnSavePassword.IsClick())
 	{
+		GameConfig& config = GameConfig::GetInstance();
+
 		if (m_aBtnSavePassword.IsCheck())
 		{
+			// Enabling requires confirmation. Revert the tick immediately; it is
+			// re-applied only if the dialog is accepted, so a cancel (however the
+			// dialog closes) always leaves the box unchecked.
+			m_aBtnSavePassword.SetCheck(false);
+
 			// Storing the password implies remembering the account.
 			if (!m_RememberMe)
 			{
 				m_RememberMe = 1;
 				m_aBtnRememberMe.SetCheck(true);
-				GameConfig::GetInstance().SetRememberMe(true);
+				config.SetRememberMe(true);
 			}
-
-			// Require an explicit confirmation before consenting. The checkbox
-			// stays ticked while the dialog is open and is reverted on cancel.
-			g_RememberPwConfirm = RememberPwConfirm::Pending;
-			SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CRememberPasswordMsgBoxLayout));
+			UI::Login::OpenRememberPasswordPrompt();
 		}
 		else
 		{
-			GameConfig::GetInstance().SetSavePassword(false);
+			// Player unticked it: revoke the stored password immediately.
+			config.SetSavePassword(false);
 		}
 	}
 
 	// Apply the confirmation dialog's outcome once the player answers it.
-	if (g_RememberPwConfirm == RememberPwConfirm::Ok)
+	const UI::Login::RememberPasswordChoice choice = UI::Login::RememberPasswordChoiceState();
+	if (choice == UI::Login::RememberPasswordChoice::Ok)
 	{
-		g_RememberPwConfirm = RememberPwConfirm::None;
+		UI::Login::ClearRememberPasswordChoice();
 		GameConfig::GetInstance().SetSavePassword(true);
+		m_aBtnSavePassword.SetCheck(true);
 	}
-	else if (g_RememberPwConfirm == RememberPwConfirm::Cancel)
+	else if (choice == UI::Login::RememberPasswordChoice::Cancel)
 	{
-		g_RememberPwConfirm = RememberPwConfirm::None;
-		m_aBtnSavePassword.SetCheck(false);
+		UI::Login::ClearRememberPasswordChoice();
 		GameConfig::GetInstance().SetSavePassword(false);
+		m_aBtnSavePassword.SetCheck(false);
 	}
 }
 
@@ -378,12 +335,13 @@ void CLoginWin::RenderControls()
     g_pRenderText->RenderText(int((baseX + 111) / g_fScreenRate_x), int((baseY + 80) / g_fScreenRate_y), szServerName);
 
     g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), L"Remember Username");
-    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 177) / g_fScreenRate_y), L"Remember Password");
+    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 179) / g_fScreenRate_y), L"Remember Password");
 
-    // Warning directly under the "Remember Password" checkbox. Positions here
-    // are eyeballed against the login background and may need tuning.
+    // Warning directly under the "Remember Password" checkbox, in the extra
+    // space added at the bottom of the window. Positions are eyeballed against
+    // the login background and may need tuning.
     g_pRenderText->SetTextColor(255, 210, 60, 255);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 192) / g_fScreenRate_y), L"Only save the password on a PC you trust.");
+    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 200) / g_fScreenRate_y), L"Only save the password on a PC you trust.");
     g_pRenderText->SetTextColor(CLRDW_WHITE);
 }
 
