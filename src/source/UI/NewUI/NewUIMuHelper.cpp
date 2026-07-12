@@ -2367,6 +2367,8 @@ bool CNewUIMuHelperExt::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     InitText();
 
+    ApplySavedConfig();
+
     Show(false);
 
     return true;
@@ -2741,7 +2743,6 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x + 33 - 8, m_Pos.y + 80, 124 + 8, 16))
     {
-        int iOldValue = m_iCurrentPotionThreshold;
         if (MouseWheel > 0)
         {
             MouseWheel = 0;
@@ -2779,7 +2780,6 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
     {
         if (CheckMouseIn(m_Pos.x + 33 - 8, m_Pos.y + 145, 124 + 8, 16))
         {
-            int iOldValue = m_iCurrentHealThreshold;
             if (MouseWheel > 0)
             {
                 MouseWheel = 0;
@@ -2817,7 +2817,6 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
     {
         if (CheckMouseIn(m_Pos.x + 32 - 8, m_Pos.y + 100, 124 + 8, 16))
         {
-            int iOldValue = m_iCurrentPartyHealThreshold;
             if (MouseWheel > 0)
             {
                 MouseWheel = 0;
