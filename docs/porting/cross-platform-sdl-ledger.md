@@ -34,9 +34,11 @@ Carry-forward checkpoints from the prior stub, reviewed against current `GLCompa
 
 ## Screenshot Readback Verification
 
-- SDL GPU color screenshot readback: `ported`. Release capture frame 120 produced a visually inspected, upright, correctly ordered `P6` RGB image at the physical `1024x768` drawable size (`/tmp/mu-frame.ppm`, exactly 2,359,312 bytes); native window close exited 0. The ordinary path remains free of readback allocation, copy, fence, and wait work, and a capture-disabled Release run held 60 Hz with 15.91-16.94 ms renderer totals and 0.04-0.07 ms submits after startup.
+- Runtime capture and timing were produced from the integrated working tree at `HEAD cd5f9d5e` plus pre-existing uncommitted renderer/timing migration changes; no clean commit-only runtime build was performed because that larger migration integration remains under audit.
+- SDL GPU color screenshot readback: `ported` code structure is separately review/test verified; integration runtime evidence in that worktree captured frame 120 as a visually inspected, upright, correctly ordered `P6` RGB image at physical `1024x768` (`/tmp/mu-frame.ppm`, exactly 2,359,312 bytes), and native window close exited 0.
+- Capture-disabled timing in the same integrated worktree showed no observed regression, but raw samples were not retained; it neither measures exact `cd5f9d5e` nor attributes performance solely to the screenshot commits.
 - Legacy depth readback: `needs-port` and remains out of scope. `CameraProjection.cpp` still calls the default no-op `IMuRenderer::ReadPixels()` for a one-pixel depth sample.
-- This verifies only screenshot color readback; it does not mark the overall SDL migration complete.
+- This verifies only screenshot color readback in the described integrated worktree; it does not mark the overall SDL migration complete.
 
 ## Source Commits (`src/source`) — 269 rows
 
