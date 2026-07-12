@@ -2,6 +2,7 @@
 #include "UI/Windows/RememberPasswordPrompt.h"
 
 #include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 
 namespace
@@ -28,8 +29,8 @@ bool CRememberPasswordMsgBoxLayout::SetLayout()
     if (!pMsgBox->Create(SEASON3B::MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    pMsgBox->AddMsg(L"WARNING!!!", CLRDW_YELLOW, SEASON3B::MSGBOX_FONT_BOLD);
-    pMsgBox->AddMsg(L"Saving the password lets anyone using this computer log into your account. Only do this on a PC you trust. Save the password?", CLRDW_ORANGE);
+    pMsgBox->AddMsg(I18N::Game::LoginSavePasswordWarningTitle, CLRDW_YELLOW, SEASON3B::MSGBOX_FONT_BOLD);
+    pMsgBox->AddMsg(I18N::Game::LoginSavePasswordWarningBody, CLRDW_ORANGE);
 
     pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnOk, SEASON3B::MSGBOX_EVENT_USER_COMMON_OK);
     pMsgBox->AddCallbackFunc(CRememberPasswordMsgBoxLayout::OnCancel, SEASON3B::MSGBOX_EVENT_USER_COMMON_CANCEL);

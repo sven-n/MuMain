@@ -231,12 +231,13 @@ void CLoginWin::UpdateRememberCheckboxes()
 		m_RememberMe = m_aBtnRememberMe.IsCheck();
 		config.SetRememberMe(m_RememberMe != 0);
 
-		// Saving the password requires remembering the account, so drop the
-		// password consent when "remember me" is switched off.
-		if (!m_RememberMe && m_aBtnSavePassword.IsCheck())
+		// Switching off "remember me" revokes everything: drop the stored
+		// credentials from config.ini now so they can't linger if the game is
+		// closed before the next login.
+		if (!m_RememberMe)
 		{
 			m_aBtnSavePassword.SetCheck(false);
-			config.SetSavePassword(false);
+			config.ClearCredentials();
 		}
 	}
 
@@ -245,8 +246,10 @@ void CLoginWin::UpdateRememberCheckboxes()
 
 	if (!m_aBtnSavePassword.IsCheck())
 	{
-		// Player unticked it: revoke the stored password immediately.
+		// Player unticked it: drop the stored password from config.ini now.
 		config.SetSavePassword(false);
+		config.SetEncryptedPassword(L"");
+		config.Save();
 		return;
 	}
 
@@ -347,14 +350,14 @@ void CLoginWin::RenderControls()
     mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
     g_pRenderText->RenderText(int((baseX + 111) / g_fScreenRate_x), int((baseY + 80) / g_fScreenRate_y), szServerName);
 
-    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), L"Remember Username");
-    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 179) / g_fScreenRate_y), L"Remember Password");
+    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), I18N::Game::LoginRememberUsername);
+    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 179) / g_fScreenRate_y), I18N::Game::LoginRememberPassword);
 
     // Trust warning rendered just below the login panel (the panel artwork is a
     // fixed size, so there is no room for this long line inside it). Position is
     // eyeballed against the background and may need tuning.
     g_pRenderText->SetTextColor(255, 210, 60, 255);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 252) / g_fScreenRate_y), L"Only save the password on a PC you trust.");
+    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 252) / g_fScreenRate_y), I18N::Game::LoginTrustWarning);
     g_pRenderText->SetTextColor(CLRDW_WHITE);
 }
 

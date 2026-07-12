@@ -1681,6 +1681,26 @@
     <value>Password</value>
     <comment>legacy_id=451</comment>
   </data>
+  <data name="LoginRememberUsername" xml:space="preserve">
+    <value>Remember Username</value>
+    <comment>Login screen: remember-username checkbox label.</comment>
+  </data>
+  <data name="LoginRememberPassword" xml:space="preserve">
+    <value>Remember Password</value>
+    <comment>Login screen: remember-password checkbox label.</comment>
+  </data>
+  <data name="LoginTrustWarning" xml:space="preserve">
+    <value>Only save the password on a PC you trust.</value>
+    <comment>Login screen: warning under the remember-password checkbox.</comment>
+  </data>
+  <data name="LoginSavePasswordWarningTitle" xml:space="preserve">
+    <value>WARNING!!!</value>
+    <comment>Remember-password confirmation dialog: header.</comment>
+  </data>
+  <data name="LoginSavePasswordWarningBody" xml:space="preserve">
+    <value>Saving the password lets anyone using this computer log into your account. Only do this on a PC you trust. Save the password?</value>
+    <comment>Remember-password confirmation dialog: body.</comment>
+  </data>
   <data name="Connect" xml:space="preserve">
     <value>Connect</value>
     <comment>legacy_id=452,562</comment>

@@ -252,7 +252,7 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
 
     // Decrypt Username
     std::wstring user = DecryptSetting(GetEncryptedUsername());
-    if (!user.empty()) {
+    if (!user.empty() && outUser && userBufSize) {
         wcsncpy_s(outUser, userBufSize, user.c_str(), _TRUNCATE);
     }
 
@@ -260,7 +260,7 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
     // only the username is remembered.
     if (m_savePassword) {
         std::wstring pass = DecryptSetting(GetEncryptedPassword());
-        if (!pass.empty()) {
+        if (!pass.empty() && outPass && passBufSize) {
             wcsncpy_s(outPass, passBufSize, pass.c_str(), _TRUNCATE);
         }
     }
