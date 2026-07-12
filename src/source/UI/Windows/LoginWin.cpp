@@ -71,9 +71,10 @@ void CLoginWin::Create()
         m_Password[0] = L'\0';
     }
 
-    // 75px taller than the original 245 so the second checkbox row, its trust
-    // warning, and the buttons fit on the panel (issue #462 credential consent).
-    CWin::Create(329, 320, BITMAP_LOG_IN + 7);
+    // The login background is fixed artwork and does not scale with the window
+    // size, so keep the original height. The credential-consent controls fit on
+    // the panel and the trust warning is drawn just below it (issue #462).
+    CWin::Create(329, 245, BITMAP_LOG_IN + 7);
 
     m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
     m_asprInputBox[LIW_PASSWORD].Create(156, 23, BITMAP_LOG_IN + 8);
@@ -158,8 +159,8 @@ void CLoginWin::SetPosition(int x, int y)
 	// offsets are eyeballed against the login background and may need tuning.
 	m_aBtnRememberMe.SetPosition(x + 109, y + 156);
 	m_aBtnSavePassword.SetPosition(x + 109, y + 176);
-	m_aBtn[LIW_OK].SetPosition(x + 150, y + 276);
-	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 276);
+	m_aBtn[LIW_OK].SetPosition(x + 150, y + 200);
+	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 200);
 }
 
 void CLoginWin::Show(bool bShow)
@@ -337,11 +338,11 @@ void CLoginWin::RenderControls()
     g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), L"Remember Username");
     g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 179) / g_fScreenRate_y), L"Remember Password");
 
-    // Warning directly under the "Remember Password" checkbox, in the extra
-    // space added at the bottom of the window. Positions are eyeballed against
-    // the login background and may need tuning.
+    // Trust warning rendered just below the login panel (the panel artwork is a
+    // fixed size, so there is no room for this long line inside it). Position is
+    // eyeballed against the background and may need tuning.
     g_pRenderText->SetTextColor(255, 210, 60, 255);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 200) / g_fScreenRate_y), L"Only save the password on a PC you trust.");
+    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 252) / g_fScreenRate_y), L"Only save the password on a PC you trust.");
     g_pRenderText->SetTextColor(CLRDW_WHITE);
 }
 
