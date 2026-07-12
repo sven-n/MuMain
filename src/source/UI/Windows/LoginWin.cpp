@@ -83,6 +83,9 @@ void CLoginWin::Create()
     m_aBtnRememberMe.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
     CWin::RegisterButton(&m_aBtnRememberMe);
 
+    m_aBtnSavePassword.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
+    CWin::RegisterButton(&m_aBtnSavePassword);
+
     SAFE_DELETE(m_pUsernameInputBox);
 
     m_pUsernameInputBox = new CUITextInputBox;
@@ -113,6 +116,15 @@ void CLoginWin::Create()
         m_aBtnRememberMe.SetCheck(true);
     }
 
+    // The password is only pre-filled and re-saved when the player previously
+    // opted in on a trusted machine.
+    m_aBtnSavePassword.SetCheck(m_RememberMe && GameConfig::GetInstance().GetSavePassword());
+
+    // Seed the edit-detection snapshot with what we just loaded so filling the
+    // boxes here is not mistaken for the player editing them.
+    m_pUsernameInputBox->GetText(m_prevUsername, _countof(m_prevUsername));
+    m_pPasswordInputBox->GetText(m_prevPassword, _countof(m_prevPassword));
+
     this->FirstLoad = 1;
 }
 
@@ -140,6 +152,9 @@ void CLoginWin::SetPosition(int x, int y)
 	m_aBtn[LIW_OK].SetPosition(x + 150, y + 178);
 	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 178);
 	m_aBtnRememberMe.SetPosition(x + 109, y + 156);
+	// Sits to the right of "Remember me?" on the same row. These pixel offsets
+	// are tuned by eye against the login background and may need adjustment.
+	m_aBtnSavePassword.SetPosition(x + 215, y + 156);
 }
 
 void CLoginWin::Show(bool bShow)
@@ -152,6 +167,7 @@ void CLoginWin::Show(bool bShow)
         m_aBtn[i].Show(bShow);
     }
     m_aBtnRememberMe.Show(bShow);
+    m_aBtnSavePassword.Show(bShow);
 
     // Drive the text fields' state so a hidden login screen releases keyboard
     // focus (portable fields stop SDL text input when hidden, #447).
@@ -195,6 +211,30 @@ void CLoginWin::UpdateWhileActive(double)
 	{
 		m_RememberMe = m_aBtnRememberMe.IsCheck();
 		GameConfig::GetInstance().SetRememberMe(m_RememberMe != 0);
+
+		// Saving the password requires remembering the account, so drop the
+		// password consent when "remember me" is switched off.
+		if (!m_RememberMe && m_aBtnSavePassword.IsCheck())
+		{
+			m_aBtnSavePassword.SetCheck(false);
+			GameConfig::GetInstance().SetSavePassword(false);
+		}
+	}
+
+	if (m_aBtnSavePassword.IsClick())
+	{
+		const bool bWantSave = m_aBtnSavePassword.IsCheck();
+
+		// Storing the password implies remembering the account; turning it on
+		// also turns "remember me" on.
+		if (bWantSave && !m_RememberMe)
+		{
+			m_RememberMe = 1;
+			m_aBtnRememberMe.SetCheck(true);
+			GameConfig::GetInstance().SetRememberMe(true);
+		}
+
+		GameConfig::GetInstance().SetSavePassword(bWantSave);
 	}
 }
 
@@ -202,6 +242,30 @@ void CLoginWin::UpdateWhileShow(double dDeltaTick)
 {
     m_pUsernameInputBox->DoAction();
     m_pPasswordInputBox->DoAction();
+
+    // Editing the account or password drops any stored credentials and revokes
+    // the save-password consent, so an out-of-date password never lingers in
+    // config.ini for the next person on this machine.
+    wchar_t curUser[MAX_USERNAME_SIZE + 1] = {};
+    wchar_t curPass[MAX_PASSWORD_SIZE + 1] = {};
+    m_pUsernameInputBox->GetText(curUser, _countof(curUser));
+    m_pPasswordInputBox->GetText(curPass, _countof(curPass));
+
+    if (wcscmp(curUser, m_prevUsername) != 0 || wcscmp(curPass, m_prevPassword) != 0)
+    {
+        GameConfig& config = GameConfig::GetInstance();
+        const bool bHadStored = m_aBtnSavePassword.IsCheck()
+            || !config.GetEncryptedUsername().empty()
+            || !config.GetEncryptedPassword().empty();
+        if (bHadStored)
+        {
+            m_aBtnSavePassword.SetCheck(false);
+            config.ClearCredentials();
+        }
+
+        wcscpy_s(m_prevUsername, _countof(m_prevUsername), curUser);
+        wcscpy_s(m_prevPassword, _countof(m_prevPassword), curPass);
+    }
 }
 
 void CLoginWin::RenderControls()
@@ -234,6 +298,16 @@ void CLoginWin::RenderControls()
     g_pRenderText->RenderText(int((baseX + 111) / g_fScreenRate_x), int((baseY + 80) / g_fScreenRate_y), szServerName);
 
     g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), L"Remember me?");
+    g_pRenderText->RenderText(int((baseX + 235) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), L"Save password");
+
+    // Warn while the password is set to be stored. Positions here are eyeballed
+    // against the login background and may need tuning.
+    if (m_aBtnSavePassword.IsCheck())
+    {
+        g_pRenderText->SetTextColor(255, 210, 60, 255);
+        g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 212) / g_fScreenRate_y), L"Save the password only on a computer you trust.");
+        g_pRenderText->SetTextColor(CLRDW_WHITE);
+    }
 }
 
 void CLoginWin::RequestLogin()
@@ -246,17 +320,17 @@ void CLoginWin::RequestLogin()
     m_pUsernameInputBox->GetText(m_Username, _countof(m_Username));
     m_pPasswordInputBox->GetText(m_Password, _countof(m_Password));
 
-    // Handle credentials saving
+    // Handle credentials saving. The username is remembered when "remember me"
+    // is set; the password is only stored on top of that with explicit consent.
     if (m_aBtnRememberMe.IsCheck())
     {
+        GameConfig::GetInstance().SetSavePassword(m_aBtnSavePassword.IsCheck());
         GameConfig::GetInstance().EncryptAndSaveCredentials(m_Username, m_Password);
     }
     else
     {
         // Clear saved credentials if user unchecked "Remember Me"
-        GameConfig::GetInstance().SetEncryptedUsername(L"");
-        GameConfig::GetInstance().SetEncryptedPassword(L"");
-        GameConfig::GetInstance().Save();
+        GameConfig::GetInstance().ClearCredentials();
     }
 
     if (wcslen(m_Username) <= 0)

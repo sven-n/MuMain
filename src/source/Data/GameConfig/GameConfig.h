@@ -32,6 +32,16 @@ public:
     bool GetRememberMe() const { return m_rememberMe; }
     void SetRememberMe(bool remember);
 
+    // Whether the password (not just the username) may be persisted. Off by
+    // default: "remember me" saves only the username unless the player opts in
+    // on a machine they trust.
+    bool GetSavePassword() const { return m_savePassword; }
+    void SetSavePassword(bool save);
+
+    // Drops the saved username and password from config.ini and revokes the
+    // save-password consent. Used when the player edits the credentials.
+    void ClearCredentials();
+
     std::wstring GetLanguageSelection() const { return m_languageSelection; }
     void SetLanguageSelection(const std::wstring& lang);
 
@@ -84,6 +94,7 @@ private:
     int  m_musicVolume;
 
     bool m_rememberMe;
+    bool m_savePassword;
     std::wstring m_languageSelection;
     std::wstring m_encryptedUsername;
     std::wstring m_encryptedPassword;

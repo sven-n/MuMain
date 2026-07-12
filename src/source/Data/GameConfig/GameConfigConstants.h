@@ -24,6 +24,7 @@ namespace CfgKeys
 
     // Login
     inline constexpr wchar_t CfgKeyRememberMe[]        = L"RememberMe";
+    inline constexpr wchar_t CfgKeySavePassword[]      = L"SavePassword";
     inline constexpr wchar_t CfgKeyLanguage[]          = L"Language";
     inline constexpr wchar_t CfgKeyEncryptedUsername[] = L"EncryptedUsername";
     inline constexpr wchar_t CfgKeyEncryptedPassword[] = L"EncryptedPassword";
@@ -50,6 +51,7 @@ namespace CfgDefaults
     inline constexpr int  CfgDefaultMusicVolume = 5;
 
     inline constexpr bool CfgDefaultRememberMe = false;
+    inline constexpr bool CfgDefaultSavePassword = false;
     inline constexpr wchar_t CfgDefaultLanguage[] = L"Eng";
     inline constexpr wchar_t CfgDefaultEncryptedUsername[] = L"";
     inline constexpr wchar_t CfgDefaultEncryptedPassword[] = L"";
