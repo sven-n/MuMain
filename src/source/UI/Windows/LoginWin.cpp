@@ -204,25 +204,6 @@ void CLoginWin::UpdateWhileActive(double)
 	if (!g_MessageBox->IsEmpty())
 		return;
 
-	// Apply the confirmation dialog's outcome first, then swallow this frame's
-	// input so the key or click that dismissed the dialog does not also drive the
-	// login form (e.g. Enter both accepting the dialog and submitting the login).
-	const UI::Login::RememberPasswordChoice choice = UI::Login::RememberPasswordChoiceState();
-	if (choice == UI::Login::RememberPasswordChoice::Ok)
-	{
-		UI::Login::ClearRememberPasswordChoice();
-		GameConfig::GetInstance().SetSavePassword(true);
-		m_aBtnSavePassword.SetCheck(true);
-		return;
-	}
-	if (choice == UI::Login::RememberPasswordChoice::Cancel)
-	{
-		UI::Login::ClearRememberPasswordChoice();
-		GameConfig::GetInstance().SetSavePassword(false);
-		m_aBtnSavePassword.SetCheck(false);
-		return;
-	}
-
 	if (m_aBtn[LIW_OK].IsClick() || CInput::Instance().IsKeyDown(VK_RETURN))
 	{
 		PlayBuffer(SOUND_CLICK01);
@@ -284,6 +265,23 @@ void CLoginWin::UpdateWhileShow(double dDeltaTick)
 {
     m_pUsernameInputBox->DoAction();
     m_pPasswordInputBox->DoAction();
+
+    // Apply the confirmation dialog's outcome here rather than in
+    // UpdateWhileActive: the modal message box leaves the login window inactive,
+    // so UpdateWhileActive stops being called, but UpdateWhileShow keeps running.
+    const UI::Login::RememberPasswordChoice choice = UI::Login::RememberPasswordChoiceState();
+    if (choice == UI::Login::RememberPasswordChoice::Ok)
+    {
+        UI::Login::ClearRememberPasswordChoice();
+        GameConfig::GetInstance().SetSavePassword(true);
+        m_aBtnSavePassword.SetCheck(true);
+    }
+    else if (choice == UI::Login::RememberPasswordChoice::Cancel)
+    {
+        UI::Login::ClearRememberPasswordChoice();
+        GameConfig::GetInstance().SetSavePassword(false);
+        m_aBtnSavePassword.SetCheck(false);
+    }
 
     // Editing the account or password drops any stored credentials and revokes
     // the save-password consent, so an out-of-date password never lingers in
