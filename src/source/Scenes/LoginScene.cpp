@@ -27,6 +27,7 @@
 #include "SceneCommon.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 
 // External declarations
 extern int DeleteGuildIndex;
@@ -475,6 +476,17 @@ bool NewRenderLogInScene(HDC hDC)
         g_pOption->UpdateMouseEvent();
         g_pOption->UpdateKeyEvent();
         g_pOption->Render();
+    }
+
+    // Drive the NewUI message box here too (same reason as the option window):
+    // the login scene skips the full NewUI update, so a confirmation dialog such
+    // as the "Remember Password" prompt would otherwise never update or draw.
+    if (!g_MessageBox->IsEmpty())
+    {
+        g_MessageBox->UpdateMouseEvent();
+        g_MessageBox->UpdateKeyEvent();
+        g_MessageBox->Update();
+        g_MessageBox->Render();
     }
 
     EndBitmap();
