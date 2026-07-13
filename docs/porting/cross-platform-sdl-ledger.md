@@ -34,11 +34,12 @@ Carry-forward checkpoints from the prior stub, reviewed against current `GLCompa
 
 ## Screenshot Readback Verification
 
-- Runtime capture and timing were produced from the integrated working tree at `HEAD cd5f9d5e` plus pre-existing uncommitted renderer/timing migration changes; no clean commit-only runtime build was performed because that larger migration integration remains under audit. The prior `MU_CAPTURE_FRAME=120` request happened after frame 120 ended and captured frame 121, so its numbered-frame evidence is superseded pending rerun.
-- SDL GPU color screenshot readback: `ported` code structure is separately review/test verified; the superseded integration artifact remains evidence for an upright, correctly ordered `P6` RGB image at physical `1024x768` (`/tmp/mu-frame.ppm`, exactly 2,359,312 bytes), and native window close exited 0, but it does not verify capture of frame 120.
-- Capture-disabled timing in the same integrated worktree showed no observed regression, but raw samples were not retained; it neither measures exact `cd5f9d5e` nor attributes performance solely to the screenshot commits.
+- Exact committed-source snapshot: `git archive aec17830` under `/private/tmp/mu-screenshot-aec17830`, with pinned SDL `d9d55367` and imgui `21d3299e` submodule contents copied in; no dirty project source was overlaid and no Git worktree was used. CMake configure succeeded; the full Debug build passed in 720 steps and the full Release build in 721 steps. Committed Debug CTest passed 41/41 in 0.18 seconds; do not conflate that count with the current dirty repository's additional uncommitted test registration.
+- SDL GPU color screenshot readback: `ported` for exact `aec17830`. `env MU_CAPTURE_FRAME=120 MU_CAPTURE_PATH=/tmp/mu-frame-aec17830.ppm ./Main` logged `[capture] wrote frame 120 (1024x768) to /tmp/mu-frame-aec17830.ppm`; the 2,359,312-byte artifact was valid `P6` `1024x768`, converted with `sips` to PNG, and visually inspected as an upright MU logo and readable upright disconnected dialog with plausible blue/orange/gold RGB, nonblank and nonuniform output.
+- Exact clean runtime cadence retained `frame=300 at 20:17:07.929` and `frame=600 at 20:17:12.929`; a second capture-disabled run reported every 300 frames at exact or near five-second intervals from frame 300 through frame 24000, supporting stable 60 Hz cadence. Internal CPU timing was not measured. Both exact runs returned exit 0 and `pgrep -x Main` found no process after cleanup. A native System Events close attempt raced with exit and reported the process absent, so this is shutdown evidence rather than proof that the click caused exit.
+- Print Screen runtime coverage remains incomplete: after focusing `Main` and sending macOS key code 105, no `Screen*.jpg` appeared. Static review and unit coverage exist, but the user-facing JPEG path was not runtime-exercised.
 - Legacy depth readback: `needs-port` and remains out of scope. `CameraProjection.cpp` still calls the default no-op `IMuRenderer::ReadPixels()` for a one-pixel depth sample.
-- This verifies only screenshot color readback in the described integrated worktree; it does not mark the overall SDL migration complete.
+- This verifies only screenshot color readback in the exact committed snapshot; the overall SDL migration remains incomplete.
 
 ## Source Commits (`src/source`) — 269 rows
 

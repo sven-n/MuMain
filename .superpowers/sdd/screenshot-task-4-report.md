@@ -2,128 +2,71 @@
 
 ## Status
 
-Runtime capture and timing were produced from the integrated working tree at
-`HEAD cd5f9d5e` plus pre-existing uncommitted renderer/timing migration
-changes. They do not validate a clean commit-only snapshot. In that integrated
-run, SDL GPU color screenshot readback produced a valid image on macOS. Final
-review later found that the diagnostic request happened after `EndFrame()`, so
-`MU_CAPTURE_FRAME=120` captured frame 121. The numbered-frame runtime evidence
-is superseded pending a corrected rerun. Legacy depth readback remains out of
-scope and needs porting.
+Task 4 screenshot color readback was verified from an exact committed-source
+snapshot at `aec17830`, rather than from the dirty project working tree. The
+source snapshot was created with `git archive aec17830` under
+`/private/tmp/mu-screenshot-aec17830`; pinned SDL `d9d55367` and imgui
+`21d3299e` submodule contents were copied into it. No dirty project source was
+overlaid and no Git worktree was used.
 
-The committed Task 1-4 code structure is separately review/test verified. The
-runtime evidence below is limited to the integrated worktree and does not make
-performance a property of the screenshot commits alone.
+CMake configure succeeded. The exact snapshot completed a full Debug build in
+720 steps and a full Release build in 721 steps. Its committed Debug CTest run
+passed 41/41 tests in 0.18 seconds. The current dirty repository has additional
+uncommitted test registration, so its test count must not be conflated with the
+snapshot result.
 
-## Builds And Tests
+## Deterministic Capture
 
-Commands:
-
-```text
-cmake --build out/build/macos-arm64 --config Debug --target Main -j 8
-cmake --build out/build/macos-arm64 --config Release --target Main -j 8
-ctest --test-dir out/build/macos-arm64 -C Debug --output-on-failure
-```
-
-Results:
-
-- The commands and results below came from the integrated worktree described
-  above, not a clean `cd5f9d5e` checkout.
-- Debug `Main`: exit 0; already current (`ninja: no work to do`).
-- Release `Main`: exit 0 after a full 707-step first Release build. Existing
-  missing-override warnings and the macOS deployment-version warning for
-  `libturbojpeg.0.dylib` remained non-fatal.
-- Full Debug CTest: 42/42 passed, 0 failed, 0.19 seconds. This includes color
-  format mapping, physical capture-target dimensions, RGB conversion,
-  orientation, request state, and screenshot metadata coverage.
-
-## Superseded Deterministic Capture
-
-The artifact checks below remain evidence for P6 validation, physical
-dimensions, orientation, and channel order, but no longer prove that frame 120
-was captured. The run must be repeated with the corrected pre-`BeginFrame()`
-request lifecycle before numbered-frame runtime verification can be restored.
-
-Launched from `out/build/macos-arm64/src/Release`:
+The exact Release runtime command was:
 
 ```text
-MU_CAPTURE_FRAME=120 MU_CAPTURE_PATH=/tmp/mu-frame.ppm ./Main
+env MU_CAPTURE_FRAME=120 MU_CAPTURE_PATH=/tmp/mu-frame-aec17830.ppm ./Main
 ```
 
-Integrated-worktree runtime output included:
+It explicitly logged:
 
 ```text
-[capture] wrote frame 120 (1024x768) to /tmp/mu-frame.ppm
+[capture] wrote frame 120 (1024x768) to /tmp/mu-frame-aec17830.ppm
 ```
 
-That message reflected the requested label, not the rendered frame actually
-captured by the old lifecycle; the image was from frame 121.
+The resulting PPM was 2,359,312 bytes and a valid `P6` `1024x768` image. It was
+converted to PNG with `sips` and visually inspected: the MU logo and
+disconnected dialog were upright and readable; the RGB image had plausible
+blue, orange, and gold colors; and it was nonblank and nonuniform. This
+verifies the committed snapshot's color capture, dimensions, orientation, and
+channel ordering.
 
-The macOS close control was clicked through System Events. `Main` exited 0,
-with no crash output, and `pgrep -x Main` returned no process afterward.
+## Runtime Cadence And Shutdown
 
-Artifact facts:
-
-- `file`: Netpbm raw pixmap, `1024 x 768`.
-- Header bytes: `P6\n1024 768\n255\n`.
-- Length: 2,359,312 bytes, exactly 16 header bytes plus
-  `1024 * 768 * 3` RGB bytes.
-- Pixel range: each channel spans 0-255; 581,423 of 786,432 pixels are
-  nonblack. The red-/blue-dominance counts and their analysis command were not
-  retained, so this report makes no dominance-count claim.
-- The retained PPM facts can be reproduced from the local artifact with:
-
-  ```text
-  python3 -c 'from pathlib import Path; d = Path("/tmp/mu-frame.ppm").read_bytes(); p = d[d.index(b"\n255\n") + 5:]; rgb = zip(p[0::3], p[1::3], p[2::3]); n = sum(bool(r or g or b) for r, g, b in rgb); print({"rgb_bytes": len(p), "channel_min": min(p), "channel_max": max(p), "nonblack": n, "nonuniform": min(p) != max(p)})'
-  ```
-- Representative RGB values include orange fire `(127,79,33)`, blue scene
-  geometry `(4,10,23)`, and gold lighting `(65,44,11)`.
-- `sips` converted the PPM to `/tmp/mu-frame.png` at `1024x768`. Visual
-  inspection confirmed an upright MU logo, readable upright disconnect dialog,
-  expected top-to-bottom scene composition, orange fire, blue architecture,
-  and gold lighting. This verifies orientation and red/blue channel order.
-
-## Ordinary-Frame Timing
-
-Launched capture-disabled from the Release executable directory in the same
-integrated worktree:
+The exact clean runtime retained frame-numbered cadence:
 
 ```text
-MU_RENDER_TIMING=1 ./Main
+frame=300 at 20:17:07.929
+frame=600 at 20:17:12.929
 ```
 
-Raw frame-numbered timing samples were not retained. Accordingly, this report
-makes no auditable extrema or per-frame timing claim. The observation only
-demonstrates that no performance regression was observed in the tested,
-capture-disabled integrated worktree; it does not measure exact `cd5f9d5e` or
-attribute performance solely to the screenshot commits.
+A second capture-disabled run reported every 300 frames at exact or near
+five-second intervals from frame 300 through frame 24000. This supports a
+stable 60 Hz cadence. Internal CPU timing was not measured.
 
-The renderer fast path checks `FrameReadbackState::IsPending()` before creating
-the owned capture target or encoding a download. Without a request it retains
-the ordinary `SDL_SubmitGPUCommandBuffer` path, with no screenshot allocation,
-GPU copy, fence acquisition, wait, map, or RGB copy.
-
-The native close button command returned the `MU Online` window button, the
-process exited 0, and `pgrep -x Main` confirmed no remaining process.
+Both exact runs returned exit 0, and `pgrep -x Main` returned no process after
+cleanup. A native System Events close attempt raced with process exit and
+reported the process absent; the evidence establishes clean shutdown, but does
+not establish that the attempted click caused it.
 
 ## Limitations
 
-- Print Screen JPEG was not exercised. macOS has no reliable Print Screen key
-  mapping in this automation setup, so synthetic input would not be trustworthy.
-- Legacy one-pixel depth sampling is unchanged: `CameraProjection.cpp` still
-  calls the default no-op `IMuRenderer::ReadPixels()` and remains `needs-port`.
-- `/tmp/mu-frame.ppm` and `/tmp/mu-frame.png` are local runtime artifacts and
-  are not committed.
-- A clean commit-only runtime build was not performed because this repository
-  contains the larger uncommitted renderer/timing migration integration under
-  audit.
-- The corrected `MU_CAPTURE_FRAME=120` runtime rerun is pending; the prior
-  numbered-frame evidence is superseded.
+- Print Screen runtime coverage remains incomplete. `Main` was focused and
+  macOS key code 105 was sent, but no `Screen*.jpg` appeared. Static review and
+  unit coverage exist, but the user-facing JPEG path was not runtime-exercised.
+- Legacy one-pixel depth sampling remains `needs-port`: `CameraProjection.cpp`
+  still uses the default no-op `IMuRenderer::ReadPixels()` path.
+- The whole SDL migration remains incomplete.
+- `/tmp/mu-frame-aec17830.ppm` and its PNG conversion are local runtime
+  artifacts and are not committed.
 
 ## Final Checks
 
-- `git diff --check`: exit 0, no output.
-- `git diff --cached --check`: exit 0, no output.
-- The staged Task 4 diff contained only this report and the six-line screenshot
-  readback ledger hunk; unrelated ledger edits remained unstaged.
-- Final `pgrep -x Main`: exit 1, confirming no `Main` process remains.
+- `git diff --check` was run after the documentation correction.
+- Only this report and the Task 4 screenshot-evidence lines in the porting
+  ledger are intended for staging and commit.
