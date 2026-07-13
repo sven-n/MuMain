@@ -51,11 +51,15 @@ namespace
 // The cursor is hidden when the counter is < CURSOR_VISIBLE_THRESHOLD
 constexpr int CURSOR_VISIBLE_THRESHOLD = 0;
 
-// "Open Editor" button layout constants
+// "Open Editor" button layout constants (scaled by the editor UI scale)
 constexpr float EDITOR_BTN_X_OFFSET = 110.0f;
 constexpr float EDITOR_BTN_Y = 8.0f;
 constexpr float EDITOR_BTN_WIDTH = 100.0f;
 constexpr float EDITOR_BTN_HEIGHT = 24.0f;
+
+// Editor UI scale limits (the toolbar's -/+ buttons step by 0.1).
+constexpr float UI_SCALE_MIN = 0.7f;
+constexpr float UI_SCALE_MAX = 2.5f;
 
 CMuEditorCore::CMuEditorCore()
     : m_bEditorMode(false)
@@ -68,7 +72,34 @@ CMuEditorCore::CMuEditorCore()
     , m_bShowConsole(true)
     , m_bHoveringUI(false)
     , m_bPreviousFrameHoveringUI(false)
+    , m_UIScale(1.0f)
+    , m_bScaleDirty(false)
 {
+}
+
+void CMuEditorCore::SetUIScale(float scale)
+{
+    // Clamp to something sane; the toolbar steps this in 0.1 increments.
+    if (scale < UI_SCALE_MIN) scale = UI_SCALE_MIN;
+    if (scale > UI_SCALE_MAX) scale = UI_SCALE_MAX;
+    if (scale == m_UIScale)
+        return;
+    m_UIScale = scale;
+    m_bScaleDirty = true;   // applied in Update(), before the next NewFrame
+}
+
+void CMuEditorCore::ApplyUIScale()
+{
+    // ScaleAllSizes multiplies, so rebuild the style from scratch each time
+    // (defaults -> our theme -> scale) rather than compounding.
+    ImGuiStyle& style = ImGui::GetStyle();
+    style = ImGuiStyle();
+    ImGui::StyleColorsDark();
+    style.WindowRounding = 0.0f;
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.0f);
+    style.ScaleAllSizes(m_UIScale);
+
+    ImGui::GetIO().FontGlobalScale = m_UIScale;
 }
 
 CMuEditorCore::~CMuEditorCore()
@@ -80,6 +111,15 @@ CMuEditorCore& CMuEditorCore::GetInstance()
 {
     static CMuEditorCore instance;
     return instance;
+}
+
+// Queried by game code that must behave differently while the editor is up (e.g.
+// Input/Selection.cpp suppresses the interactable/pose-box pick, whose sit-down
+// cursor would otherwise latch because the editor consumes the clicks that would
+// normally clear it).
+extern "C" bool MuEditor_IsOpen()
+{
+    return CMuEditorCore::GetInstance().IsEnabled();
 }
 
 void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
@@ -342,6 +382,13 @@ void CMuEditorCore::Update()
     if (!m_bInitialized)
         return;
 
+    // Apply a pending UI scale change between frames (never mid-frame).
+    if (m_bScaleDirty)
+    {
+        ApplyUIScale();
+        m_bScaleDirty = false;
+    }
+
     // Only start a new frame if we haven't already
     if (!m_bFrameStarted)
     {
@@ -373,10 +420,10 @@ void CMuEditorCore::Update()
             RECT rect;
             GetClientRect(g_hWnd, &rect);
             float screenWidth = (float)(rect.right - rect.left);
-            float buttonX = screenWidth - EDITOR_BTN_X_OFFSET;
-            float buttonY = EDITOR_BTN_Y;
-            float buttonWidth = EDITOR_BTN_WIDTH;
-            float buttonHeight = EDITOR_BTN_HEIGHT;
+            float buttonX = screenWidth - EDITOR_BTN_X_OFFSET * m_UIScale;
+            float buttonY = EDITOR_BTN_Y * m_UIScale;
+            float buttonWidth = EDITOR_BTN_WIDTH * m_UIScale;
+            float buttonHeight = EDITOR_BTN_HEIGHT * m_UIScale;
 
             if (mousePos.x >= buttonX && mousePos.x <= (buttonX + buttonWidth) &&
                 mousePos.y >= buttonY && mousePos.y <= (buttonY + buttonHeight))
@@ -406,10 +453,10 @@ void CMuEditorCore::Update()
         io.WantCaptureKeyboard = false;
 
         // Check if mouse is over button area (top-right corner)
-        float buttonX = io.DisplaySize.x - EDITOR_BTN_X_OFFSET;
-        float buttonY = EDITOR_BTN_Y;
-        float buttonWidth = EDITOR_BTN_WIDTH;
-        float buttonHeight = EDITOR_BTN_HEIGHT;
+        float buttonX = io.DisplaySize.x - EDITOR_BTN_X_OFFSET * m_UIScale;
+        float buttonY = EDITOR_BTN_Y * m_UIScale;
+        float buttonWidth = EDITOR_BTN_WIDTH * m_UIScale;
+        float buttonHeight = EDITOR_BTN_HEIGHT * m_UIScale;
 
         if (io.MousePos.x >= buttonX && io.MousePos.x <= (buttonX + buttonWidth) &&
             io.MousePos.y >= buttonY && io.MousePos.y <= (buttonY + buttonHeight))

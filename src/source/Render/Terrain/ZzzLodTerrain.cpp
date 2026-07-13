@@ -3060,6 +3060,80 @@ static void RenderTileGridDebug()
     glEnd();
     glPopAttrib();
 }
+
+// Set by the Map Editor's Attribute tab: tint each tile by its TerrainWall bits so
+// you can see walkability while painting it.
+bool g_bMapEditorAttrOverlay = false;
+
+// Colour for a tile's attribute value (matches the standalone terrain_editor tool).
+// Returns false for a plain walkable tile with no special bits.
+static void AttributeTileColour(WORD attr, float& r, float& g, float& b, float& a)
+{
+    if (attr & TW_NOGROUND)       { r = 0.06f; g = 0.06f; b = 0.07f; a = 0.65f; return; }  // void
+    if (attr & TW_WATER)          { r = 0.23f; g = 0.43f; b = 0.82f; a = 0.50f; return; }  // water
+    if (attr & TW_NOMOVE)         { r = 0.85f; g = 0.20f; b = 0.20f; a = 0.50f; return; }  // blocked
+    if (attr & TW_SAFEZONE)       { r = 0.20f; g = 0.80f; b = 0.35f; a = 0.50f; return; }  // safe
+    r = 0.75f; g = 0.75f; b = 0.80f; a = 0.12f;                                             // walkable (faint)
+}
+
+static void RenderAttributeOverlay()
+{
+    // Same push/pop discipline as RenderTileGridDebug: whatever renders after us
+    // inherits the state we leave behind.
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);   // tint on top of terrain, don't write depth
+
+    glBegin(GL_QUADS);
+    int byi = FrustrumBoundMinY;
+    auto byf = (float)byi;
+    for (; byi <= FrustrumBoundMaxY; byi += 4, byf += 4.f)
+    {
+        int bxi = FrustrumBoundMinX;
+        auto bxf = (float)bxi;
+        for (; bxi <= FrustrumBoundMaxX; bxi += 4, bxf += 4.f)
+        {
+            if (!TestFrustrum2D(bxf + 2.f, byf + 2.f, g_fFrustumRange) && !g_Camera.TopViewEnable)
+                continue;
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    const float xf = bxf + (float)j;
+                    const float yf = byf + (float)i;
+                    if (!TestFrustrum2D(xf + 0.5f, yf + 0.5f, 0.f) && !g_Camera.TopViewEnable)
+                        continue;
+
+                    const int xi = (int)xf;
+                    const int yi = (int)yf;
+                    if (xi < 0 || yi < 0 || xi >= TERRAIN_SIZE || yi >= TERRAIN_SIZE)
+                        continue;
+
+                    float r, g, b, a;
+                    AttributeTileColour(TerrainWall[TERRAIN_INDEX(xi, yi)], r, g, b, a);
+                    glColor4f(r, g, b, a);
+
+                    const float sx = xf * TERRAIN_SCALE;
+                    const float sy = yf * TERRAIN_SCALE;
+                    const float lift = 3.0f;   // sit just above the ground to avoid z-fighting
+                    glVertex3f(sx, sy, RequestTerrainHeight(sx, sy) + lift);
+                    glVertex3f(sx + TERRAIN_SCALE, sy, RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + lift);
+                    glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + lift);
+                    glVertex3f(sx, sy + TERRAIN_SCALE, RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + lift);
+                }
+            }
+        }
+    }
+    glEnd();
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    glDepthMask(GL_TRUE);
+    glPopAttrib();
+}
 #endif
 
 // Set by the Map Editor's minimap top-down view: force the whole terrain to
@@ -3118,6 +3192,8 @@ void RenderTerrain(bool EditFlag)
 #ifdef _EDITOR
         if (s_bShowTileGrid)
             RenderTileGridDebug();
+        if (g_bMapEditorAttrOverlay)
+            RenderAttributeOverlay();
 #endif
         DisableDepthTest();
         EnableCullFace();

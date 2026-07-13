@@ -30,9 +30,16 @@ public:
     bool IsHoveringUI() const { return m_bHoveringUI; }
     void SetHoveringUI(bool hovering) { m_bHoveringUI = hovering; }
 
+    // Global scale for ALL editor UI (fonts + widget/padding sizes). Driven by the
+    // -/+ buttons in the toolbar. Applied between frames, not mid-frame.
+    void  SetUIScale(float scale);
+    float GetUIScale() const { return m_UIScale; }
+
 private:
     CMuEditorCore();
     ~CMuEditorCore();
+
+    void ApplyUIScale();
 
     bool m_bEditorMode;
     bool m_bInitialized;
@@ -44,6 +51,9 @@ private:
     bool m_bShowConsole;
     bool m_bHoveringUI;
     bool m_bPreviousFrameHoveringUI;  // Store previous frame's hover state for input blocking
+
+    float m_UIScale;        // 1.0 = default ImGui size
+    bool  m_bScaleDirty;    // apply the new scale at the start of the next frame
 };
 
 // Global accessor

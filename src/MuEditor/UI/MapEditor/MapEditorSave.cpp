@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MapEditorSave.h"
+#include "MapEditorFileUtil.h"
 
 #include "Render/Terrain/ZzzLodTerrain.h"   // terrain arrays + MapFileEncrypt + TERRAIN_SIZE
 #include "UI/Console/MuEditorConsoleUI.h"
@@ -59,6 +60,7 @@ bool SaveMappingEncrypted(int worldNumber, int mapNumber)
     fclose(fp);
 
     g_MuEditorConsoleUI.LogEditor("[MapEditor] Saved terrain mapping (encrypted) to EncTerrain.map");
+    Editor::Files::MirrorNextToExe(fileName, worldNumber);
     return true;
 }
 

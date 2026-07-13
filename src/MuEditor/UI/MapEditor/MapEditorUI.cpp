@@ -4,6 +4,8 @@
 
 #include "MapEditorUI.h"
 #include "MapEditorSave.h"
+#include "MapAttributeSave.h"
+#include "MapEditorFileUtil.h"
 #include "MapTextureBrowser.h"
 #include "MapObjectPlace.h"
 #include "MapObjectBrowser.h"
@@ -41,6 +43,9 @@ extern unsigned char TerrainMappingLayer2[];
 extern float         TerrainMappingAlpha[];
 extern float         BackTerrainHeight[];
 extern bool SelectFlag;
+
+// Tints tiles by their TerrainWall attribute while the Attribute tab is showing.
+extern bool g_bMapEditorAttrOverlay;
 
 // Terrain height sculpt (ZzzLodTerrain.cpp).
 void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer);
@@ -80,10 +85,6 @@ namespace
     // Palette thumbnail size (pixels) and grid width (columns).
     constexpr float TILE_THUMB_SIZE = 56.0f;
     constexpr int   TILE_COLUMNS    = 5;
-
-    // Extra font scale applied to the Map Editor window so it's readable at high
-    // display resolutions (the base ImGui font is small on 2560-wide screens).
-    constexpr float UI_FONT_SCALE = 1.30f;
 
     // Brush half-size clamp. The painted square is (BrushSize*2 + 1) tiles wide.
     constexpr int MAX_BRUSH_HALF = 10;
@@ -157,6 +158,7 @@ void CMapEditorUI::Render(bool* p_open)
     const bool show = (p_open != nullptr && *p_open);
     if (!show)
     {
+        g_bMapEditorAttrOverlay = false;   // no panel -> no overlay
         RestoreGameMode();
         return;
     }
@@ -169,8 +171,6 @@ void CMapEditorUI::Render(bool* p_open)
         return;
     }
 
-    ImGui::SetWindowFontScale(UI_FONT_SCALE);
-
     // Reset the object-thumbnail render budget for this frame.
     g_ObjectThumbnail.BeginFrame();
 
@@ -181,8 +181,10 @@ void CMapEditorUI::Render(bool* p_open)
                                ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         g_MuEditorCore.SetHoveringUI(true);
 
-    // Each tab decides what edit mode it needs this frame; default to none.
+    // Each tab decides what edit mode / overlay it needs this frame; default to none.
+    // The Attribute tab turns the overlay back on below when it's the active tab.
     m_desiredEditFlag = EDIT_NONE;
+    g_bMapEditorAttrOverlay = false;
 
     if (ImGui::BeginTabBar("MapEditorTabs"))
     {
@@ -199,6 +201,11 @@ void CMapEditorUI::Render(bool* p_open)
         if (ImGui::BeginTabItem("Height"))
         {
             RenderHeightTab();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Attribute"))
+        {
+            RenderAttributeTab();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("T. Browse"))
@@ -640,6 +647,161 @@ void CMapEditorUI::RenderSelectedObjectPanel()
     ImGui::PopStyleColor(2);
 }
 
+void CMapEditorUI::RenderAttributeTab()
+{
+    const int world = ResolveWorldNumber();
+    const int serverMap = (m_serverMapOverride >= 0) ? m_serverMapOverride : gMapManager.WorldActive;
+
+    ImGui::Checkbox("Enable attribute editing", &m_bAttrEnabled);
+    if (m_bAttrEnabled)
+    {
+        m_desiredEditFlag = EDIT_WALL;
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "PAINTING");
+    }
+    else
+    {
+        ImGui::SameLine();
+        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "off (walk freely)");
+    }
+
+    ImGui::Checkbox("Show attribute overlay", &m_bAttrOverlay);
+    if (m_bAttrOverlay)
+        g_bMapEditorAttrOverlay = true;
+
+    ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f),
+                       "Left-click paints the selected attribute. Right-click paints Walkable.");
+    ImGui::Separator();
+
+    // Brush attribute. These are the byte-sized TW_* bits the .att stores.
+    ImGui::Text("Brush attribute:");
+    ImGui::RadioButton("Walkable (0)", &m_attrBrushValue, 0);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.75f, 0.75f, 0.80f, 1.0f), "[combat area]");
+    ImGui::RadioButton("Blocked / no-go (4)", &m_attrBrushValue, TW_NOMOVE);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.85f, 0.20f, 0.20f, 1.0f), "[red]");
+    ImGui::RadioButton("Safezone (1)", &m_attrBrushValue, TW_SAFEZONE);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.20f, 0.80f, 0.35f, 1.0f), "[green - no combat]");
+    ImGui::RadioButton("No ground / void (8)", &m_attrBrushValue, TW_NOGROUND);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.45f, 0.45f, 0.50f, 1.0f), "[black]");
+    ImGui::RadioButton("Water (16)", &m_attrBrushValue, TW_WATER);
+    ImGui::SameLine();
+    ImGui::TextColored(ImVec4(0.23f, 0.43f, 0.82f, 1.0f), "[blue]");
+
+    ImGui::SetNextItemWidth(200.0f);
+    ImGui::SliderInt("Brush", &m_attrBrush, 1, 12, "%d tiles");
+
+    ImGui::Separator();
+    ImGui::BeginDisabled(!m_bAttrHasUndo);
+    if (ImGui::Button("Undo last attribute stroke"))
+        UndoAttr();
+    ImGui::EndDisabled();
+
+    // --- Saving: the client and the server each need their own file. ---
+    ImGui::Separator();
+    ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.6f, 1.0f), "1) Client file");
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.3f, 1.0f));
+    if (ImGui::Button("Save client .att", ImVec2(-1.0f, 0.0f)))
+        m_attrStatus = Editor::AttrSave::SaveClientAtt(world, world)
+                     ? "Saved Data\\World" + std::to_string(world) + "\\EncTerrain" +
+                       std::to_string(world) + ".att"
+                     : "Client save failed.";
+    ImGui::PopStyleColor(2);
+
+    ImGui::Spacing();
+    ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.6f, 1.0f), "2) Server file (OpenMU)");
+    // The server keys maps by the world ENUM (Arena = 6); the client folder is
+    // World{enum+1} (World7). Show both so they're never confused.
+    bool autoServer = (m_serverMapOverride < 0);
+    if (ImGui::Checkbox("Auto server map number", &autoServer))
+        m_serverMapOverride = autoServer ? -1 : gMapManager.WorldActive;
+    if (!autoServer)
+    {
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(80.0f);
+        ImGui::InputInt("##servermap", &m_serverMapOverride);
+        if (m_serverMapOverride < 0) m_serverMapOverride = 0;
+    }
+    ImGui::Text("Server \"Number\" = %d   (client folder = World%d)", serverMap, world);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.8f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.6f, 0.9f, 1.0f));
+    if (ImGui::Button("Save server .sql", ImVec2(-1.0f, 0.0f)))
+    {
+        std::wstring path;
+        if (Editor::AttrSave::SaveServerSql(serverMap, path))
+        {
+            char buf[128];
+            snprintf(buf, sizeof(buf), "Wrote %ls (next to Main.exe) - run it on the DB, then restart the server.",
+                     path.c_str());
+            m_attrStatus = buf;
+        }
+        else
+        {
+            m_attrStatus = "Server SQL save failed.";
+        }
+    }
+    ImGui::PopStyleColor(2);
+
+    ImGui::TextColored(ImVec4(0.9f, 0.7f, 0.3f, 1.0f),
+                       "Client + server must match, or players will desync (walk through walls / get pushed back).");
+    if (!m_attrStatus.empty())
+        ImGui::TextColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "%s", m_attrStatus.c_str());
+
+    PaintAttribute();
+}
+
+void CMapEditorUI::PaintAttribute()
+{
+    if (!m_bAttrEnabled || !SelectFlag || g_MuEditorCore.IsHoveringUI())
+    {
+        m_attrStrokeActive = false;
+        return;
+    }
+
+    const bool paint = m_PaintLDown;
+    const bool clear = m_PaintRDown;   // right-click = back to walkable
+    if (!paint && !clear)
+    {
+        m_attrStrokeActive = false;
+        return;
+    }
+
+    if (!m_attrStrokeActive)
+    {
+        TakeAttrUndoSnapshot();
+        m_attrStrokeActive = true;
+    }
+
+    // Set (not OR) the value, matching the standalone terrain editor's behaviour.
+    const auto value = static_cast<unsigned short>(paint ? m_attrBrushValue : 0);
+    const int x = (int)SelectXF;
+    const int y = (int)SelectYF;
+    const int r = m_attrBrush - 1;
+    for (int i = y - r; i <= y + r; ++i)
+        for (int j = x - r; j <= x + r; ++j)
+            TerrainWall[TERRAIN_INDEX_REPEAT(j, i)] = value;
+}
+
+void CMapEditorUI::TakeAttrUndoSnapshot()
+{
+    m_attrUndo.assign(TerrainWall, TerrainWall + CELLS);
+    m_bAttrHasUndo = true;
+}
+
+void CMapEditorUI::UndoAttr()
+{
+    if (!m_bAttrHasUndo)
+        return;
+    std::memcpy(TerrainWall, m_attrUndo.data(), CELLS * sizeof(unsigned short));
+    m_bAttrHasUndo = false;
+    m_attrStatus = "Undo: reverted last attribute stroke.";
+}
+
 void CMapEditorUI::RenderMinimapTab()
 {
     ImGui::TextWrapped("Capture a top-down screenshot of the whole map to make a minimap.");
@@ -728,6 +890,7 @@ void CMapEditorUI::RenderHeightTab()
         swprintf_s(fileName, L"Data\\World%d\\TerrainHeight.OZB", world);
         SaveTerrainHeight(fileName);
         g_MuEditorConsoleUI.LogEditor("[MapEditor] Saved terrain height to TerrainHeight.OZB");
+        Editor::Files::MirrorNextToExe(fileName, world);
     }
     ImGui::PopStyleColor(2);
     ImGui::TextColored(ImVec4(0.9f, 0.7f, 0.3f, 1.0f),

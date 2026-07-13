@@ -43,6 +43,11 @@ private:
     void RenderObjectsTab();
     void RenderHeightTab();
     void RenderMinimapTab();
+    void RenderAttributeTab();
+    // Paints TerrainWall[] with the selected attribute under the cursor.
+    void PaintAttribute();
+    void TakeAttrUndoSnapshot();
+    void UndoAttr();
     // Raises/lowers terrain under the cursor while the Height tab is active.
     void SculptHeight();
     void TakeHeightUndoSnapshot();
@@ -129,6 +134,17 @@ private:
     // terrain to render for a full-map screenshot.
     bool m_bMinimapMode = false;
     bool m_topdownWasActive = false;  // edge-detect so we only own TopViewEnable while active
+
+    // --- Attribute (walkability) tab state ---
+    bool m_bAttrEnabled = false;      // master: take EDIT_WALL (else walk freely)
+    bool m_bAttrOverlay = true;       // tint tiles by their attribute
+    int  m_attrBrushValue = 4;        // TW_* value the brush writes (0 = walkable)
+    int  m_attrBrush = 1;             // brush radius (tiles)
+    bool m_attrStrokeActive = false;
+    bool m_bAttrHasUndo = false;
+    std::vector<unsigned short> m_attrUndo;   // TerrainWall snapshot before a stroke
+    int  m_serverMapOverride = -1;    // -1 = auto (gMapManager.WorldActive)
+    std::string m_attrStatus;
 };
 
 #define g_MapEditorUI CMapEditorUI::GetInstance()

@@ -1,10 +1,10 @@
 # In-Game Map Editor (MuEditor)
 
 An in-client editor to **view and edit a map's terrain textures, terrain height,
-world objects, and to capture a top-down minimap screenshot** — saving back to
-the game's own on-disk formats. It lives inside the `MuEditor` module and is
-compiled only in editor builds (`ENABLE_EDITOR` / `_EDITOR`), so release builds
-are unaffected.
+walkability attributes, and world objects, and to capture a top-down minimap
+screenshot** — saving back to the game's own on-disk formats. It lives inside the
+`MuEditor` module and is compiled only in editor builds (`ENABLE_EDITOR` /
+`_EDITOR`), so release builds are unaffected.
 
 - **Build:** `MuMain\rebuild_x64_mueditor.cmd` (or `Build Client with MuEditor.cmd`).
   Output: `out\build\windows-x64-mueditor\src\Release\Main.exe`.
@@ -43,6 +43,7 @@ All under `src/MuEditor/UI/MapEditor/`:
 |---|---|
 | `MapEditorUI.h/.cpp` | The panel + all tabs (Texture, Objects, Height, T. Browse, Minimap, O. Browse). Owns UI state, edit-mode selection, input capture, and undo. |
 | `MapEditorSave.h/.cpp` | `Editor::MapSave` — **encrypting** save of the terrain mapping (`.map`). |
+| `MapAttributeSave.h/.cpp` | `Editor::AttrSave` — **encrypting** save of the walkability `.att` (client) **and** the OpenMU `.sql` + a HOWTO text file (server). |
 | `MapTextureBrowser.h/.cpp` | **T. Browse** tab — preview a chosen world's tile textures; "Use"/"Upload" a texture onto the current map. |
 | `MapTextureImport.h/.cpp` | `Editor::TextureImport` — put a `.jpg`/`.ozj` into a free `ExtTile` slot and load it live; Windows file dialog. |
 | `MapObjectPlace.h/.cpp` | `Editor::ObjectPlace` — enumerate loaded models, place/reposition/remove objects, save `.obj`, undo snapshot/restore. |
@@ -58,7 +59,7 @@ All under `src/MuEditor/UI/MapEditor/`:
 | `MuEditor/UI/Common/MuEditorUI.h/.cpp` | Toolbar **Map Editor** button + param. |
 | `Render/Sprites/GlobalBitmap.h` | `RefreshCacheEntry(index)` — invalidate one quick-cache slot (see gotcha #4). |
 | `Camera/FreeFlyCamera.h/.cpp` | Widened `MAX_PITCH` to `-2` (near straight-down); `SnapTopDown()`; `RotateYaw()`. |
-| `Render/Terrain/ZzzLodTerrain.cpp` | `g_bMapEditorFullTerrain` flag; `RenderTerrain()` forces `ResetFrustrumBoundsFullTerrain()` when set. |
+| `Render/Terrain/ZzzLodTerrain.cpp` | `g_bMapEditorFullTerrain` flag; `RenderTerrain()` forces `ResetFrustrumBoundsFullTerrain()` when set. Also `g_bMapEditorAttrOverlay` + `RenderAttributeOverlay()` (tints tiles by their `TerrainWall` bits). |
 | `Scenes/MainScene.cpp` | Suppress the FreeFly frustum wireframe while `g_bMapEditorFullTerrain` is set (clean minimap shot). |
 
 ---
@@ -105,6 +106,35 @@ All under `src/MuEditor/UI/MapEditor/`:
 - **Save** → engine `SaveTerrainHeight` → `Data\World{N}\TerrainHeight.OZB` (a plain
   BMP the game reads directly).
 
+### Attribute (`EDIT_WALL`) — walkability
+- Paints `TerrainWall[]` (**sets**, not ORs, the value — same as the standalone
+  `_upscale/terrain_editor.html` tool). Left-click paints the selected attribute,
+  right-click resets to Walkable. Brush size + one-level **undo**.
+- Brushes are the **byte-sized** `TW_*` bits the `.att` stores: Walkable `0`
+  (= normal combat area), Safezone `1`, Blocked/no-go `4` (`TW_NOMOVE`), NoGround
+  `8` (`TW_NOGROUND`), Water `16` (`TW_WATER`).
+  > `TW_NOATTACKZONE` (`0x100`) and friends **don't fit in a byte** and so can't be
+  > stored in the byte-per-cell `.att` these maps use — don't add them as brushes.
+- **In-world overlay** (`g_bMapEditorAttrOverlay` → `RenderAttributeOverlay()`)
+  tints each tile so you can read the walk map while painting: red = blocked,
+  green = safezone, black = void, blue = water, faint grey = walkable.
+- **Two saves are needed — the client and the server each keep their own walk map:**
+  1. **Save client .att** → `Data\World{N}\EncTerrain{N}.att` (see the format table).
+  2. **Save server .sql** → `terrain_map{E}_server.sql` **+ a `_HOWTO.txt`** next to
+     `Main.exe`. Run it against the OpenMU database, then restart the game server.
+- ⚠️ **The two map numbers are different.** The server keys maps by `"Number"` = the
+  **world enum** (Lorencia `0`, Arena `6`); the client folder is `World{enum + 1}`
+  (`World1`, `World7`). The tab prints both side by side. `UPDATE 0` instead of
+  `UPDATE 1` means you used the wrong one.
+- If client and server disagree, players walk through walls and get rubber-banded
+  back. Always ship both.
+
+**Applying the server file** (containers are named in OpenMU's all-in-one compose):
+```bash
+docker exec -i -e PGPASSWORD=admin database psql -U postgres -d openmu < terrain_map0_server.sql
+docker restart openmu-startup
+```
+
 ### Minimap (top-down capture)
 - **Top-down view** switches to the FreeFly camera, snaps it above the map centre
   looking straight down (`SnapTopDown`), and enables full-map rendering:
@@ -128,7 +158,8 @@ Files live in `Data\World{N}\`. **World folder = world enum value + 1**
 | Data | File | Format | Editor save |
 |---|---|---|---|
 | Tile mapping | `EncTerrain{N}.map` | `mapdecrypt` only. `version, mapNum, Layer1[256²], Layer2[256²], Alpha[256²]` | **We re-encrypt** (`MapEditorSave`) — the engine `SaveTerrainMapping` writes **plaintext**. |
-| Walkability | `EncTerrain{N}.att` | `mapdecrypt` + `bux` | (attribute painter not built yet — would also need re-encrypt) |
+| Walkability (client) | `EncTerrain{N}.att` | Decode = `bux(mapdecrypt(f))` → `[version, mapId, 255, 255] + attr[256²]`, **1 byte/cell**, index `y*256+x` (same order as `TerrainWall[]`). | **We re-encrypt**: `MapFileEncrypt(BuxConvert(plain))` (`MapAttributeSave`). The engine `SaveTerrainAttribute` writes **plaintext AND 2 bytes/cell** — unusable. |
+| Walkability (server) | `terrain_map{E}_server.sql` | OpenMU `config."GameMapDefinition"."TerrainData"` (bytea): a **3-byte header** then the 65536 attr bytes (attr `i` at offset `3+i`). Row keyed by `"Number"` = world **enum**. | One `UPDATE` that preserves the header and replaces the block: `substring("TerrainData" from 1 for 3) \|\| decode('<hex>','hex')`. Total must stay **65539** bytes. |
 | Objects | `EncTerrain{N}.obj` | `mapdecrypt`. `version, mapNum, count, {Type i16, Pos[3] f32, Angle[3] f32, Scale f32}×count`. **Flat list; re-blocks by position on load.** | Engine `SaveObjects` **already encrypts** — call directly. |
 | Height | `TerrainHeight.OZB` | Plain **BMP**: 1080-byte header + 256×256 grayscale; `height = byte × 1.5`. Loader appends `OZB` to the `.bmp` name. | Engine `SaveTerrainHeight` (plain BMP) — call directly. |
 | Minimap | `mini_map.OZT` | 4-byte header `00 00 02 00` + 18-byte TGA header + BGRA pixels, **bottom-origin**, 32-bit, **no footer**. 1024×1024 for Arena. | Wrapped externally (strip 4 bytes → TGA to edit; prepend them back → OZT). |
@@ -164,6 +195,9 @@ model + its textures live in `Data\Object{N}\`.
    editor-owned globals while the editor owns the mode; release once on exit (edge-detect).
 6. **World off-by-one.** `Data\World{WorldActive+1}\`. Special maps remap (Blood Castle,
    Chaos Castle, Hellas, Cursed Temple…). The Texture tab exposes a manual world override.
+   **And the server disagrees with the client:** OpenMU keys maps by `"Number"` =
+   the raw world **enum** (Lorencia `0`, Arena `6`), while the client folder is
+   `enum + 1` (`World1`, `World7`). Mixing them up is the #1 way to write the wrong map.
 7. **MSVC comment trap.** A `//` comment ending in a backslash (`...Data\`) continues onto
    the next line and silently eats it. Bit us twice — don't end comments with `\`.
 8. **FBO functions aren't linked.** The engine never used framebuffer objects, so glew's
@@ -176,6 +210,27 @@ model + its textures live in `Data\Object{N}\`.
 10. **FBO thumbnail render** needs the global `BoneScale = 1` and the sequence
     `Animation → Transform → RenderBody`; display the texture with a **vertical UV flip**
     (FBO is bottom-up vs ImGui top-down).
+11. **`TerrainWall[]` is not pure map data — never persist it raw.** `MoveCharactersClient()`
+    clears and re-stamps `TW_CHARACTER` (`0x02`) **every frame** on every tile a live
+    character/NPC occupies. Saving verbatim bakes "an NPC stood here when I hit Save" into
+    the map (a safezone tile becomes `1|2 = 3`). The server then reads `3` as **blocked**
+    (see #12) while the client still reads it as walkable → **rubber-banding**. `MapAttributeSave`
+    masks the bit out (`StaticAttribute()`); any new attribute save must do the same.
+12. **Client and server interpret the attribute byte DIFFERENTLY.** Byte-identical is *not*
+    behaviour-identical:
+    - **Server** (`GameMapTerrain.cs`, exact value): `walkable = (v==0 || v==1)`,
+      `safezone = (v==1)`. So **water `16` blocks**, and *any* combination (`3`, `5`, …) blocks.
+    - **Client** (`_define.h`, bit test): `blocked = v & 4 || v & 8`, `safezone = v & 1`.
+      So `16` does **not** block and `3` is walkable.
+
+    Paint clean single values (`0`/`1`/`4`/`8`) and the two agree. `_upscale/server_att.py`
+    can dump the server's walk map, **diff** it against a client `.att`, and export a
+    behaviour-faithful `.att` (`--normalize`).
+13. **The `.att` loader has anti-tamper sentinels.** `OpenTerrainAttribute()` hard-checks one
+    magic tile per map and calls `ExitProgram()` ("data error", client closes) on mismatch:
+    Lorencia `(135,123)=5`, Dungeon `(227,120)=4`, Devias `(208,55)=5`, Noria `(186,119)=5`,
+    Lost Tower `(193,75)=5`. It also rejects any byte `>= 128`. Anything that rewrites a `.att`
+    must preserve these (`server_att.py` does, and validates before writing).
 
 ---
 
@@ -190,7 +245,10 @@ model + its textures live in `Data\Object{N}\`.
 4. Snapshot for undo at stroke start; add a Save that writes the correct (re-encrypted)
    file.
 
-**Not yet built:** the **Attribute / walkability painter** (`EDIT_WALL`, toggling
-`TerrainWall[]` bits `TW_SAFEZONE 0x01`, `TW_NOMOVE 0x04`, `TW_NOGROUND 0x08`, with an
-overlay tint, saving the re-encrypted `.att`). It's the natural next tab and fits this
-exact recipe.
+The **Attribute** tab is the cleanest end-to-end example of this recipe (edit mode +
+overlay + undo + two save targets).
+
+**Prior art:** `_upscale/terrain_editor.html` and `_upscale/terrain_tool.py` are the
+standalone (out-of-game) versions of the attribute editor — same crypto, same byte
+layout, same colours. Useful for bulk/scripted edits and for cross-checking the
+in-game tool.

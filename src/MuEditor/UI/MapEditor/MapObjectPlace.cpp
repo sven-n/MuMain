@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MapObjectPlace.h"
+#include "MapEditorFileUtil.h"
 
 #include "Engine/Object/ZzzObject.h"        // CreateObject / SaveObjects / ObjectBlock
 #include "Engine/Object/w_ObjectInfo.h"     // class OBJECT (fields)
@@ -67,6 +68,8 @@ bool Save(int world)
     const bool ok = SaveObjects(fileName, world);
     g_MuEditorConsoleUI.LogEditor(ok ? "[MapEditor] Saved objects (encrypted) to EncTerrain.obj"
                                      : "[MapEditor] SaveObjects FAILED");
+    if (ok)
+        Editor::Files::MirrorNextToExe(fileName, world);
     return ok;
 }
 
