@@ -9,7 +9,7 @@
 #include "ShopProduct.h"
 #include "StringToken.h"
 
-#include <cwchar>
+#include <iterator>
 
 // cppcheck-suppress uninitMemberVar
 CShopProduct::CShopProduct() {}
@@ -26,14 +26,10 @@ bool CShopProduct::SetProduct(std::wstring strdata)
         return false;
 
     this->ProductSeq = _wtoi(token.nextToken().c_str());
-    wcsncpy(this->ProductName, token.nextToken().c_str(), SHOPLIST_LENGTH_PRODUCTNAME - 1);
-    this->ProductName[SHOPLIST_LENGTH_PRODUCTNAME - 1] = L'\0';
-    wcsncpy(this->PropertyName, token.nextToken().c_str(), SHOPLIST_LENGTH_PRODUCTPROPERTYNAME - 1);
-    this->PropertyName[SHOPLIST_LENGTH_PRODUCTPROPERTYNAME - 1] = L'\0';
-    wcsncpy(this->Value, token.nextToken().c_str(), SHOPLIST_LENGTH_PRODUCTVALUE - 1);
-    this->Value[SHOPLIST_LENGTH_PRODUCTVALUE - 1] = L'\0';
-    wcsncpy(this->UnitName, token.nextToken().c_str(), SHOPLIST_LENGTH_PRODUCTUNITNAME - 1);
-    this->UnitName[SHOPLIST_LENGTH_PRODUCTUNITNAME - 1] = L'\0';
+    StringCchCopy(this->ProductName, std::size(this->ProductName), token.nextToken().c_str());
+    StringCchCopy(this->PropertyName, std::size(this->PropertyName), token.nextToken().c_str());
+    StringCchCopy(this->Value, std::size(this->Value), token.nextToken().c_str());
+    StringCchCopy(this->UnitName, std::size(this->UnitName), token.nextToken().c_str());
     this->Price = _wtoi(token.nextToken().c_str());
     this->PriceSeq = _wtoi(token.nextToken().c_str());
     this->PropertyType = _wtoi(token.nextToken().c_str());
@@ -42,8 +38,7 @@ bool CShopProduct::SetProduct(std::wstring strdata)
     this->DeleteFlag = _wtoi(token.nextToken().c_str());
     this->StorageGroup = _wtoi(token.nextToken().c_str());
     this->ShareFlag = _wtoi(token.nextToken().c_str());
-    wcsncpy(this->InGamePackageID, token.nextToken().c_str(), SHOPLIST_LENGTH_INGAMEPACKAGEID - 1);
-    this->InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID - 1] = L'\0';
+    StringCchCopy(this->InGamePackageID, std::size(this->InGamePackageID), token.nextToken().c_str());
     this->PropertySeq = _wtoi(token.nextToken().c_str());
     this->ProductType = _wtoi(token.nextToken().c_str());
     this->UnitType = _wtoi(token.nextToken().c_str());

@@ -24,6 +24,7 @@ namespace CfgKeys
 
     // Login
     inline constexpr wchar_t CfgKeyRememberMe[]        = L"RememberMe";
+    inline constexpr wchar_t CfgKeySavePassword[]      = L"SavePassword";
     inline constexpr wchar_t CfgKeyLanguage[]          = L"Language";
     inline constexpr wchar_t CfgKeyEncryptedUsername[] = L"EncryptedUsername";
     inline constexpr wchar_t CfgKeyEncryptedPassword[] = L"EncryptedPassword";
@@ -34,6 +35,7 @@ namespace CfgKeys
 
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
+    inline constexpr wchar_t CfgKeyFont[]     = L"Font";
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
@@ -49,6 +51,7 @@ namespace CfgDefaults
     inline constexpr int  CfgDefaultMusicVolume = 5;
 
     inline constexpr bool CfgDefaultRememberMe = false;
+    inline constexpr bool CfgDefaultSavePassword = false;
     inline constexpr wchar_t CfgDefaultLanguage[] = L"Eng";
     inline constexpr wchar_t CfgDefaultEncryptedUsername[] = L"";
     inline constexpr wchar_t CfgDefaultEncryptedPassword[] = L"";
@@ -60,4 +63,9 @@ namespace CfgDefaults
 
     // I18N locale code; "en" is the default the resx generator falls back to.
     inline constexpr wchar_t CfgDefaultUILocale[] = L"en";
+
+    // UI font family name. Empty = each platform's built-in default (Tahoma on
+    // Windows, fontconfig "sans-serif" on Linux), so the look is unchanged until
+    // the user picks a font. Any value is passed through as the GDI face name.
+    inline constexpr wchar_t CfgDefaultFont[] = L"";
 }

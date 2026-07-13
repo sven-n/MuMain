@@ -32,6 +32,16 @@ public:
     bool GetRememberMe() const { return m_rememberMe; }
     void SetRememberMe(bool remember);
 
+    // Whether the password (not just the username) may be persisted. Off by
+    // default: "remember me" saves only the username unless the player opts in
+    // on a machine they trust.
+    bool GetSavePassword() const { return m_savePassword; }
+    void SetSavePassword(bool save);
+
+    // Drops the saved username and password from config.ini and revokes the
+    // save-password consent. Used when the player edits the credentials.
+    void ClearCredentials();
+
     std::wstring GetLanguageSelection() const { return m_languageSelection; }
     void SetLanguageSelection(const std::wstring& lang);
 
@@ -53,6 +63,10 @@ public:
     // legacy "Eng"/"Por"/"Spn" data-dir prefix used by .bmd asset loaders.
     std::wstring GetUILocale() const { return m_uiLocale; }
     void SetUILocale(const std::wstring& locale);
+
+    // UI font family name (GDI face name). Empty = platform default.
+    std::wstring GetFontSelection() const { return m_fontSelection; }
+    void SetFontSelection(const std::wstring& font);
 
     // Camera
     int GetZoom() const { return m_zoom; }
@@ -80,6 +94,7 @@ private:
     int  m_musicVolume;
 
     bool m_rememberMe;
+    bool m_savePassword;
     std::wstring m_languageSelection;
     std::wstring m_encryptedUsername;
     std::wstring m_encryptedPassword;
@@ -88,6 +103,7 @@ private:
     int m_serverPort;
 
     std::wstring m_uiLocale;
+    std::wstring m_fontSelection;
 
     int m_zoom;
 

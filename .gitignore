@@ -15,6 +15,7 @@ _deps
 # CMake build directories
 /build/
 build-mingw/
+build-linux/
 /cmake-build-debug/
 /cmake-build-release/
 /CMakeFiles/
@@ -27,6 +28,9 @@ build-mingw/
 **/bin/**
 !**/bin/Translations/
 !**/bin/Translations/**
+# Bundled UI fonts (curated, shipped with the client) are source-controlled.
+!**/bin/fonts/
+!**/bin/fonts/**
 **/obj/
 *.user
 *.suo

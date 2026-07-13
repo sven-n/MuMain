@@ -9,10 +9,10 @@
 #include "ShopCategory.h"
 #include "StringToken.h"
 
-#include <cwchar>
+#include <iterator>
 
 // cppcheck-suppress uninitMemberVar
-CShopCategory::CShopCategory()
+CShopCategory::CShopCategory() // OK
 {
     this->CategoryList.clear();
     this->PackageList.clear();
@@ -31,8 +31,7 @@ bool CShopCategory::SetCategory(std::wstring strdata)
         return false;
 
     this->ProductDisplaySeq = _wtoi(token.nextToken().c_str());
-    wcsncpy(this->CategroyName, token.nextToken().c_str(), SHOPLIST_LENGTH_CATEGORYNAME - 1);
-    this->CategroyName[SHOPLIST_LENGTH_CATEGORYNAME - 1] = L'\0';
+    StringCchCopy(this->CategroyName, std::size(this->CategroyName), token.nextToken().c_str());
     this->EventFlag = _wtoi(token.nextToken().c_str());
     this->OpenFlag = _wtoi(token.nextToken().c_str());
     this->ParentProductDisplaySeq = _wtoi(token.nextToken().c_str());

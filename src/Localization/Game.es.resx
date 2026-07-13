@@ -12881,4 +12881,10 @@
     <value>Nivel: %u | Restablecimientos: %u</value>
     <comment>legacy_id=3810</comment>
   </data>
+  <data name="Font" xml:space="preserve">
+    <value>Fuente</value>
+  </data>
+  <data name="DefaultFont" xml:space="preserve">
+    <value>Predeterminado</value>
+  </data>
 </root>

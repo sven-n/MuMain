@@ -8,3 +8,30 @@
 *.cs text
 *.csproj text
 *.sln text
+
+# Binary game assets: never apply text detection or EOL normalization.
+# Some encrypted .bmd / .oz* files contain no NUL bytes, so `text=auto`
+# misdetects them as text; on a Windows clone (core.autocrlf=true) their lone
+# LF is rewritten to CRLF, corrupting the file by one byte (see issue #516).
+# Case-insensitive classes cover mixed-case extensions in the asset tree.
+*.[Bb][Mm][Dd]   binary
+*.[Oo][Zz][Bb]   binary
+*.[Oo][Zz][Jj]   binary
+*.[Oo][Zz][Jj]2  binary
+*.[Oo][Zz][Tt]   binary
+*.[Oo][Zz][Gg]   binary
+*.[Oo][Zz][Pp]   binary
+*.[Oo][Zz][Dd]   binary
+*.[Aa][Tt][Tt]   binary
+*.[Mm][Aa][Pp]   binary
+*.[Oo][Bb][Jj]   binary
+*.[Cc][Ww][Ss]   binary
+*.[Cc][Ss][Rr]   binary
+*.[Tt][Gg][Aa]   binary
+*.[Bb][Mm][Pp]   binary
+*.[Jj][Pp][Gg]   binary
+*.[Jj][Pp][Ee][Gg] binary
+*.[Pp][Nn][Gg]   binary
+*.[Ww][Aa][Vv]   binary
+*.[Oo][Gg][Gg]   binary
+*.[Mm][Pp]3      binary

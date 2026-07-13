@@ -1,30 +1,14 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
 
-#ifndef _WIN32
 #include <SDL3/SDL.h>
-#endif
 
 namespace Core::Input
 {
     namespace
     {
         bool g_leftMouseButtonPressEdge = false;
-    }
 
-    void RecordLeftMouseButtonPressEdge()
-    {
-        g_leftMouseButtonPressEdge = true;
-    }
-
-    void ClearLeftMouseButtonPressEdge()
-    {
-        g_leftMouseButtonPressEdge = false;
-    }
-
-#ifndef _WIN32
-    namespace
-    {
         // Map a Win32 virtual-key code (or ASCII letter/digit) to an SDL
         // scancode. Returns SDL_SCANCODE_UNKNOWN for keys we don't translate.
         SDL_Scancode VkToScancode(int vk)
@@ -68,24 +52,24 @@ namespace Core::Input
             }
         }
     }
-#endif // !_WIN32
+
+    void RecordLeftMouseButtonPressEdge()
+    {
+        g_leftMouseButtonPressEdge = true;
+    }
+
+    void ClearLeftMouseButtonPressEdge()
+    {
+        g_leftMouseButtonPressEdge = false;
+    }
 
     bool IsKeyDown(int virtualKey)
     {
-#ifdef _WIN32
-        // On Windows the legacy UI polls global key/mouse-button state that must
-        // keep working while a Win32 child EDIT control holds keyboard focus.
-        // SDL_GetKeyboardState only reflects keys delivered to the SDL window, so
-        // it goes blind whenever an EDIT box is focused (e.g. the login screen).
-        // Keep the global async query here; switch to the SDL path below once the
-        // EDIT controls are replaced (issue #447). GetAsyncKeyState reports the
-        // mouse buttons (VK_LBUTTON/...) and modifiers too, matching the original.
-        if (virtualKey == VK_LBUTTON && g_leftMouseButtonPressEdge)
-        {
-            return true;
-        }
-        return (GetAsyncKeyState(virtualKey) & 0x8000) != 0;
-#else
+        // Poll live input from SDL on every platform. The Win32 path used
+        // GetAsyncKeyState because the old child EDIT controls stole keyboard
+        // focus from the SDL window; they were replaced by the portable text
+        // field (#447), so SDL input state is authoritative here too. The main
+        // loop pumps SDL_PollEvent each frame, so this state stays current.
         // Mouse buttons and modifiers come from the SDL mouse / mod state.
         switch (virtualKey)
         {
@@ -105,6 +89,5 @@ namespace Core::Input
 
         const bool* state = SDL_GetKeyboardState(nullptr);
         return state != nullptr && state[sc];
-#endif // _WIN32
     }
 }

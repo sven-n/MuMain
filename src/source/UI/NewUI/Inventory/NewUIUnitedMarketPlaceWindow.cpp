@@ -225,7 +225,7 @@ void CNewUIUnitedMarketPlaceWindow::OpeningProcess()
 
 void CNewUIUnitedMarketPlaceWindow::ClosingProcess()
 {
-    // 	SocketClient->ToGameServer()->SendCloseNpcRequest();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
 float CNewUIUnitedMarketPlaceWindow::GetLayerDepth()

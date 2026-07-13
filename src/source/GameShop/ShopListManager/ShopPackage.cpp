@@ -10,10 +10,10 @@
 #include "StringToken.h"
 #include "StringMethod.h"
 
-#include <cwchar>
+#include <iterator>
 
 // cppcheck-suppress uninitMemberVar
-CShopPackage::CShopPackage()
+CShopPackage::CShopPackage() // OK
 {
     this->LeftCount = -1;
     this->ProductSeqList.clear();
@@ -34,30 +34,24 @@ bool CShopPackage::SetPackage(std::wstring strdata)
     this->ProductDisplaySeq = _wtoi(token.nextToken().c_str());
     this->ViewOrder = _wtoi(token.nextToken().c_str());
     this->PackageProductSeq = _wtoi(token.nextToken().c_str());
-    wcsncpy(this->PackageProductName, token.nextToken().c_str(), SHOPLIST_LENGTH_PACKAGENAME - 1);
-    this->PackageProductName[SHOPLIST_LENGTH_PACKAGENAME - 1] = L'\0';
+    StringCchCopy(this->PackageProductName, std::size(this->PackageProductName), token.nextToken().c_str());
     this->PackageProductType = _wtoi(token.nextToken().c_str());
     this->Price = _wtoi(token.nextToken().c_str());
-    wcsncpy(this->Description, token.nextToken().c_str(), SHOPLIST_LENGTH_PACKAGEDESC - 1);
-    this->Description[SHOPLIST_LENGTH_PACKAGEDESC - 1] = L'\0';
-    wcsncpy(this->Caution, token.nextToken().c_str(), SHOPLIST_LENGTH_PACKAGECAUTION - 1);
-    this->Caution[SHOPLIST_LENGTH_PACKAGECAUTION - 1] = L'\0';
+    StringCchCopy(this->Description, std::size(this->Description), token.nextToken().c_str());
+    StringCchCopy(this->Caution, std::size(this->Caution), token.nextToken().c_str());
     this->SalesFlag = _wtoi(token.nextToken().c_str());
     this->GiftFlag = _wtoi(token.nextToken().c_str());
     CStringMethod::ConvertStringToDateTime(this->StartDate, token.nextToken());
     CStringMethod::ConvertStringToDateTime(this->EndDate, token.nextToken());
     this->CapsuleFlag = _wtoi(token.nextToken().c_str());
     this->CapsuleCount = _wtoi(token.nextToken().c_str());
-    wcsncpy(this->ProductCashName, token.nextToken().c_str(), SHOPLIST_LENGTH_PACKAGECASHNAME - 1);
-    this->ProductCashName[SHOPLIST_LENGTH_PACKAGECASHNAME - 1] = L'\0';
-    wcsncpy(this->PricUnitName, token.nextToken().c_str(), SHOPLIST_LENGTH_PACKAGEPRICEUNIT - 1);
-    this->PricUnitName[SHOPLIST_LENGTH_PACKAGEPRICEUNIT - 1] = L'\0';
+    StringCchCopy(this->ProductCashName, std::size(this->ProductCashName), token.nextToken().c_str());
+    StringCchCopy(this->PricUnitName, std::size(this->PricUnitName), token.nextToken().c_str());
     this->DeleteFlag = _wtoi(token.nextToken().c_str());
     this->EventFlag = _wtoi(token.nextToken().c_str());
     this->ProductAmount = _wtoi(token.nextToken().c_str());
     this->SetProductSeqList(token.nextToken());
-    wcsncpy(this->InGamePackageID, token.nextToken().c_str(), SHOPLIST_LENGTH_INGAMEPACKAGEID - 1);
-    this->InGamePackageID[SHOPLIST_LENGTH_INGAMEPACKAGEID - 1] = L'\0';
+    StringCchCopy(this->InGamePackageID, std::size(this->InGamePackageID), token.nextToken().c_str());
     this->ProductCashSeq = _wtoi(token.nextToken().c_str());
     this->PriceCount = _wtoi(token.nextToken().c_str());
     this->SetPriceSeqList(token.nextToken());

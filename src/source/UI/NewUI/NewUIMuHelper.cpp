@@ -1047,6 +1047,11 @@ void CNewUIMuHelper::ApplyConfig()
 {
     g_MuHelper.Load(_TempConfig);
 
+    if (g_pNewUIMuHelperExt)
+    {
+        g_pNewUIMuHelperExt->ApplySavedConfig();
+    }
+
     m_aiSelectedSkills[0] = _TempConfig.aiSkill[0] ? _TempConfig.aiSkill[0] : -1;
     m_aiSelectedSkills[1] = _TempConfig.aiSkill[1] ? _TempConfig.aiSkill[1] : -1;
     m_aiSelectedSkills[2] = _TempConfig.aiSkill[2] ? _TempConfig.aiSkill[2] : -1;
@@ -2365,6 +2370,8 @@ bool CNewUIMuHelperExt::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     InitText();
 
+    ApplySavedConfig();
+
     Show(false);
 
     return true;
@@ -2737,7 +2744,6 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x + 33 - 8, m_Pos.y + 80, 124 + 8, 16))
     {
-        int iOldValue = m_iCurrentPotionThreshold;
         if (MouseWheel > 0)
         {
             MouseWheel = 0;
@@ -2775,7 +2781,6 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
     {
         if (CheckMouseIn(m_Pos.x + 33 - 8, m_Pos.y + 145, 124 + 8, 16))
         {
-            int iOldValue = m_iCurrentHealThreshold;
             if (MouseWheel > 0)
             {
                 MouseWheel = 0;
@@ -2813,7 +2818,6 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
     {
         if (CheckMouseIn(m_Pos.x + 32 - 8, m_Pos.y + 100, 124 + 8, 16))
         {
-            int iOldValue = m_iCurrentPartyHealThreshold;
             if (MouseWheel > 0)
             {
                 MouseWheel = 0;

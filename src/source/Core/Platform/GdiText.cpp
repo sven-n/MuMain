@@ -20,8 +20,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include <unistd.h>                    // readlink (executable path)
+#include "Core/Platform/WinNls.h"      // WideCharToMultiByte / CP_UTF8
+#include "Core/Platform/BundledFonts.h" // curated font list shared with Windows
 
 namespace
 {
@@ -81,13 +87,18 @@ namespace
 
     // Ask fontconfig for a font file via fc-match. This is the distro-agnostic
     // way to locate a system font (paths differ across Debian/Fedora/Arch/etc.),
-    // and works without linking libfontconfig. Empty if fc-match is unavailable.
-    std::string FontconfigMatch(bool bold)
+    // and works without linking libfontconfig. `family` is the requested UI font
+    // name; empty falls back to the generic "sans-serif". Empty result if
+    // fc-match is unavailable.
+    std::string FontconfigMatch(const std::string& family, bool bold)
     {
-        const char* cmd = bold
-            ? "fc-match -f '%{file}' 'sans-serif:bold' 2>/dev/null"
-            : "fc-match -f '%{file}' 'sans-serif' 2>/dev/null";
-        FILE* p = ::popen(cmd, "r");
+        std::string fam = family.empty() ? std::string("sans-serif") : family;
+        // Drop single quotes so the name can't break out of the shell-quoted
+        // pattern; real font family names never contain them.
+        fam.erase(std::remove(fam.begin(), fam.end(), '\''), fam.end());
+        const std::string cmd = "fc-match -f '%{file}' '" + fam + (bold ? ":bold" : "")
+                              + "' 2>/dev/null";
+        FILE* p = ::popen(cmd.c_str(), "r");
         if (!p) return {};
         std::string out;
         char buf[4096];
@@ -100,27 +111,74 @@ namespace
         return out;
     }
 
-    const MuGdiFace* LoadFace(bool bold)
+    // UTF-8 copy of a wide string via the WideCharToMultiByte shim - the same
+    // conversion the rest of the engine uses, rather than a hand-rolled encoder.
+    std::string ToUtf8(const wchar_t* ws)
     {
-        static MuGdiFace s_regular, s_bold;
-        static bool s_regularTried = false, s_boldTried = false;
-        MuGdiFace& face = bold ? s_bold : s_regular;
-        bool& tried = bold ? s_boldTried : s_regularTried;
-        if (face.valid)
-            return &face;
-        // Already scanned and failed: a bold request reuses the regular face,
-        // a regular request gives up. Avoids re-scanning the filesystem on
-        // every CreateFont call.
-        if (tried)
-            return bold ? LoadFace(false) : nullptr;
-        tried = true;
+        if (!ws) return {};
+        const int n = WideCharToMultiByte(CP_UTF8, 0, ws, -1, nullptr, 0, nullptr, nullptr);
+        if (n <= 0) return {};
+        std::vector<char> buf(static_cast<size_t>(n));
+        WideCharToMultiByte(CP_UTF8, 0, ws, -1, buf.data(), n, nullptr, nullptr);
+        return std::string(buf.data());   // stops at the trailing NUL
+    }
 
-        // Order: explicit override, then fontconfig, then well-known paths as a
-        // last resort if fontconfig is missing.
+    // Directory of the running executable (with a trailing '/'), so bundled fonts
+    // resolve regardless of the working directory. Read via /proc/self/exe, the
+    // same way Dotnet/Connection.h locates the client library. Empty on failure.
+    const std::string& ExeDir()
+    {
+        static const std::string dir = []() -> std::string {
+            char buf[4096];
+            const ssize_t n = ::readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+            if (n <= 0) return {};
+            buf[n] = '\0';
+            const std::string path(buf);
+            const auto slash = path.find_last_of('/');
+            return slash == std::string::npos ? std::string() : path.substr(0, slash + 1);
+        }();
+        return dir;
+    }
+
+    // Curated fonts shipped in the client's ./fonts directory. Resolving these by
+    // name lets a chosen font work even when it is not installed system-wide, so
+    // every option the UI offers is guaranteed present. Names match what the
+    // options UI lists and what config stores.
+    std::string BundledFontPath(const std::string& family, bool bold)
+    {
+        for (const auto& e : kBundledFonts)
+            if (family == e.family)
+                return ExeDir() + (bold ? e.bold : e.regular);
+        return {};
+    }
+
+    // Loads (and caches) the TTF face for a UI font family + weight. The cache is
+    // a std::map so node pointers stay stable: when the user switches fonts a new
+    // face loads under a new key, and MuGdiFont objects created earlier keep
+    // pointing at their still-alive face. `family` empty -> system sans-serif.
+    const MuGdiFace* LoadFace(const std::string& family, bool bold)
+    {
+        static std::map<std::pair<std::string, bool>, MuGdiFace> s_cache;
+        const auto key = std::make_pair(family, bold);
+        if (auto it = s_cache.find(key); it != s_cache.end())
+        {
+            if (it->second.valid)
+                return &it->second;
+            // Already scanned and failed: bold reuses regular, regular gives up.
+            return bold ? LoadFace(family, false) : nullptr;
+        }
+        MuGdiFace& face = s_cache[key];   // default-inserts the (empty) entry
+
+        // Order: explicit override, then fontconfig for the requested family,
+        // then well-known paths as a last resort if fontconfig is missing.
         std::vector<std::string> candidates;
         if (const char* envPath = std::getenv(bold ? "MU_FONT_BOLD" : "MU_FONT"))
             candidates.emplace_back(envPath);
-        if (std::string fc = FontconfigMatch(bold); !fc.empty())
+        // Prefer a bundled curated font (./fonts) so a chosen name always works,
+        // even without a system install. Falls through to fontconfig if absent.
+        if (std::string bundled = BundledFontPath(family, bold); !bundled.empty())
+            candidates.push_back(std::move(bundled));
+        if (std::string fc = FontconfigMatch(family, bold); !fc.empty())
             candidates.push_back(std::move(fc));
         const char* fallbacks[] = {
             bold ? "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -167,7 +225,7 @@ namespace
         if (bold)
         {
             RecordFontDiag("bold:    not found, using regular");
-            return LoadFace(false);
+            return LoadFace(family, false);
         }
 
         RecordFontDiag("regular: NOT FOUND (fontconfig and known paths failed)");
@@ -202,9 +260,18 @@ std::string MuFontDiagnostics()
 HFONT CreateFontW(int cHeight, int /*cWidth*/, int /*cEscapement*/, int /*cOrientation*/,
                   int cWeight, DWORD /*bItalic*/, DWORD /*bUnderline*/, DWORD /*bStrikeOut*/,
                   DWORD /*iCharSet*/, DWORD /*iOutPrecision*/, DWORD /*iClipPrecision*/,
-                  DWORD /*iQuality*/, DWORD /*iPitchAndFamily*/, LPCWSTR /*pszFaceName*/)
+                  DWORD /*iQuality*/, DWORD /*iPitchAndFamily*/, LPCWSTR pszFaceName)
 {
-    const MuGdiFace* face = LoadFace(cWeight >= FW_SEMIBOLD);
+    // The requested GDI face name is the font selector's channel: the shared font
+    // factory passes the configured UI font name here. "Tahoma" is the built-in
+    // default and has no Linux equivalent, so map it to the empty family and let
+    // fontconfig pick the system sans-serif (unchanged default look). Any other
+    // name is resolved as-is via fontconfig.
+    std::string family = ToUtf8(pszFaceName);
+    if (family == "Tahoma")
+        family.clear();
+
+    const MuGdiFace* face = LoadFace(family, cWeight >= FW_SEMIBOLD);
     if (!face)
         return nullptr;
 

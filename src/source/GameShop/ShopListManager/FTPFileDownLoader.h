@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "Include.h"
 
 class CFTPFileDownLoader
@@ -23,6 +25,6 @@ public:
 
 private:
     bool CreateFolder(std::wstring strFilePath);
-    bool m_Break;
+    std::atomic_bool m_Break;
     FileDownloader* m_pFileDownloader;
 };
