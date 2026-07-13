@@ -256,9 +256,22 @@ public:
         (void)width;
         (void)height;
     }
+    [[nodiscard]] virtual std::uint32_t CreateTexture(
+        std::uint32_t width, std::uint32_t height, const void* pixels)
+    {
+        (void)width;
+        (void)height;
+        (void)pixels;
+        return 0;
+    }
     virtual void ReleaseTexture(std::uint32_t textureId)
     {
         (void)textureId;
+    }
+    [[nodiscard]] virtual std::uint32_t CaptureFrameTexture(std::uint32_t textureId)
+    {
+        (void)textureId;
+        return 0;
     }
     [[nodiscard]] virtual bool IsTextureRegistered(std::uint32_t textureId) const
     {

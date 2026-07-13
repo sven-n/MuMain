@@ -266,6 +266,7 @@ static SDL_GPUTexture* s_swapchainTexture = nullptr;
 // Used for viewport calculations — distinct from logical window size on HiDPI/Retina.
 static Uint32 s_swapW = 0u;
 static Uint32 s_swapH = 0u;
+static std::uint32_t s_pendingFrameCaptureTextureId = 0u;
 static FrameReadbackState s_frameReadbackState;
 static SDL_GPUTexture* s_frameReadbackTexture = nullptr;
 
@@ -455,9 +456,15 @@ static Uint32 s_dbgTextureUploadsThisFrame = 0u;
 static Uint32 s_dbgTextureCreatesThisFrame = 0u;
 static Uint32 s_dbgTextureReleasesThisFrame = 0u;
 static Uint32 s_dbgRenderCmdsReplayedThisFrame = 0u;
+static Uint32 s_dbgMergedDrawsThisFrame = 0u;
 static Uint32 s_dbgWhiteTextureDrawsThisFrame = 0u;
 static Uint32 s_dbgRealTextureDrawsThisFrame = 0u;
 static bool s_dbgNullPipelineWarned = false;
+static bool s_frameTimingInitialized = false;
+static bool s_frameTimingEnabled = false;
+static std::chrono::steady_clock::time_point s_frameBeginTime;
+static std::chrono::steady_clock::time_point s_renderReplayBeginTime;
+static std::chrono::steady_clock::time_point s_submitTime;
 
 // Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
 // Story 7.9.7: Added DepthReadOnly variants (depth test ON, depth write OFF) for particles.
@@ -524,6 +531,28 @@ struct RenderCmd
 };
 
 static std::vector<RenderCmd> s_renderCmds;
+
+[[nodiscard]] static bool MergeAdjacentTriangleCommand(const RenderCmd& command)
+{
+    if (s_renderCmds.empty())
+    {
+        return false;
+    }
+
+    RenderCmd& previous = s_renderCmds.back();
+    const Uint32 previousEnd = previous.vtxOffset + previous.vtxCount * sizeof(Vertex3D);
+    if (previous.type != RenderCmdType::DrawTriangles || command.type != RenderCmdType::DrawTriangles ||
+        previous.pipeline != command.pipeline || previous.texture != command.texture ||
+        previous.sampler != command.sampler || previousEnd != command.vtxOffset ||
+        std::memcmp(&previous.vu, &command.vu, sizeof(VertexUniforms)) != 0 ||
+        std::memcmp(&previous.fogUniform, &command.fogUniform, sizeof(FogUniform)) != 0)
+    {
+        return false;
+    }
+
+    previous.vtxCount += command.vtxCount;
+    return true;
+}
 // True between BeginFrame/EndFrame — replaces s_renderPass as the "frame active" guard
 // during the collection phase (render pass is only opened in EndFrame now).
 static bool s_frameActive = false;
@@ -648,6 +677,30 @@ static int s_cachedWinH = 0;
 static std::unordered_map<std::uint32_t, void*> s_textureMap;
 static std::unordered_map<std::uint32_t, std::pair<std::uint32_t, std::uint32_t>> s_textureSizes;
 static std::unordered_set<std::uint32_t> s_ownedTextureIds;
+static std::uint32_t s_cachedTextureId = 0u;
+static void* s_cachedTexture = nullptr;
+static bool s_textureCacheValid = false;
+constexpr std::uint32_t kFirstOwnedDynamicTextureId = 0x60000000u;
+constexpr std::uint32_t kLastOwnedDynamicTextureId = 0x7FFFFFFFu;
+static std::uint32_t s_nextOwnedDynamicTextureId = kFirstOwnedDynamicTextureId;
+
+[[nodiscard]] static std::uint32_t AllocateOwnedDynamicTextureId()
+{
+    const std::uint32_t start = s_nextOwnedDynamicTextureId;
+    do
+    {
+        const std::uint32_t candidate = s_nextOwnedDynamicTextureId;
+        s_nextOwnedDynamicTextureId = candidate == kLastOwnedDynamicTextureId
+            ? kFirstOwnedDynamicTextureId
+            : candidate + 1u;
+        if (!s_textureMap.contains(candidate))
+        {
+            return candidate;
+        }
+    } while (s_nextOwnedDynamicTextureId != start);
+
+    return 0u;
+}
 
 // Flag: set when textures are replaced or unregistered mid-frame. EndFrame skips
 // render replay to avoid dangling GPU resource pointers. Reset at BeginFrame.
@@ -661,8 +714,21 @@ static bool s_texturesInvalidated = false;
 
 [[nodiscard]] void* LookupTexture(std::uint32_t id)
 {
+    if (s_textureCacheValid && s_cachedTextureId == id)
+    {
+        return s_cachedTexture;
+    }
+
     auto it = s_textureMap.find(id);
-    return it != s_textureMap.end() ? it->second : nullptr;
+    s_cachedTextureId = id;
+    s_cachedTexture = it != s_textureMap.end() ? it->second : nullptr;
+    s_textureCacheValid = true;
+    return s_cachedTexture;
+}
+
+static void InvalidateTextureLookupCache()
+{
+    s_textureCacheValid = false;
 }
 
 [[nodiscard]] static void* LookupTextureForDraw(std::uint32_t id)
@@ -714,6 +780,7 @@ static bool ReleaseOwnedTextureById(std::uint32_t id)
         }
 #endif
         s_textureMap.erase(texture);
+        InvalidateTextureLookupCache();
     }
 
     s_textureSizes.erase(id);
@@ -747,6 +814,7 @@ void RegisterTexture(std::uint32_t id, void* pTex)
     }
 
     s_textureMap[id] = pTex;
+    InvalidateTextureLookupCache();
     s_textureSizes.erase(id);
 }
 
@@ -763,6 +831,7 @@ void UnregisterTexture(std::uint32_t id)
         DiscardQueuedTextureUpdates(texture->second);
     }
     s_textureMap.erase(id);
+    InvalidateTextureLookupCache();
     s_textureSizes.erase(id);
     s_ownedTextureIds.erase(id);
     // Mark that GPU resources were freed — deferred commands may hold dangling pointers.
@@ -774,6 +843,7 @@ void ClearTextureRegistry()
     const bool hadTextures = !s_textureMap.empty();
     ReleaseOwnedTextures();
     s_textureMap.clear();
+    InvalidateTextureLookupCache();
     s_textureSizes.clear();
     if (hadTextures)
     {
@@ -788,34 +858,51 @@ void ClearTextureRegistry()
 // Sampler binding in draw calls uses LookupSampler(textureId) instead of the hardcoded s_defaultSampler.
 // ---------------------------------------------------------------------------
 static std::unordered_map<std::uint32_t, void*> s_samplerMap;
+static std::uint32_t s_cachedSamplerId = 0u;
+static void* s_cachedSampler = nullptr;
+static bool s_samplerCacheValid = false;
 
 [[nodiscard]] void* LookupSampler(std::uint32_t id)
 {
+    if (s_samplerCacheValid && s_cachedSamplerId == id)
+    {
+        return s_cachedSampler;
+    }
+
     auto it = s_samplerMap.find(id);
     if (it == s_samplerMap.end())
     {
 #ifdef MU_ENABLE_SDL3
-        return s_defaultSampler; // fallback to default sampler for unknown IDs
+        s_cachedSampler = s_defaultSampler; // fallback to default sampler for unknown IDs
 #else
-        return nullptr;
+        s_cachedSampler = nullptr;
 #endif
     }
-    return it->second;
+    else
+    {
+        s_cachedSampler = it->second;
+    }
+    s_cachedSamplerId = id;
+    s_samplerCacheValid = true;
+    return s_cachedSampler;
 }
 
 void RegisterSampler(std::uint32_t id, void* pSampler)
 {
     s_samplerMap[id] = pSampler;
+    s_samplerCacheValid = false;
 }
 
 void UnregisterSampler(std::uint32_t id)
 {
     s_samplerMap.erase(id);
+    s_samplerCacheValid = false;
 }
 
 void ClearSamplerRegistry()
 {
     s_samplerMap.clear();
+    s_samplerCacheValid = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -1226,6 +1313,16 @@ public:
             return;
         }
 
+        if (!s_frameTimingInitialized)
+        {
+            s_frameTimingEnabled = std::getenv("MU_RENDER_TIMING") != nullptr;
+            s_frameTimingInitialized = true;
+        }
+        if (s_frameTimingEnabled)
+        {
+            s_frameBeginTime = std::chrono::steady_clock::now();
+        }
+
         s_cmdBuf = SDL_AcquireGPUCommandBuffer(s_device);
         if (!s_cmdBuf)
         {
@@ -1251,6 +1348,7 @@ public:
         s_dbgTextureCreatesThisFrame = 0u;
         s_dbgTextureReleasesThisFrame = 0u;
         s_dbgRenderCmdsReplayedThisFrame = 0u;
+        s_dbgMergedDrawsThisFrame = 0u;
         s_dbgWhiteTextureDrawsThisFrame = 0u;
         s_dbgRealTextureDrawsThisFrame = 0u;
         ++s_dbgFrameCount;
@@ -1493,6 +1591,10 @@ public:
         SDL_GPUTexture* const frameColorTexture =
             s_frameReadbackTexture ? s_frameReadbackTexture : s_swapchainTexture;
         bool renderPassCompleted = false;
+        if (s_frameTimingEnabled)
+        {
+            s_renderReplayBeginTime = std::chrono::steady_clock::now();
+        }
         {
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = frameColorTexture;
@@ -1673,6 +1775,27 @@ public:
             renderPassCompleted = true;
         }
 
+        if (s_pendingFrameCaptureTextureId != 0u)
+        {
+            const auto texture = s_textureMap.find(s_pendingFrameCaptureTextureId);
+            const auto size = s_textureSizes.find(s_pendingFrameCaptureTextureId);
+            if (texture != s_textureMap.end() && size != s_textureSizes.end())
+            {
+                SDL_GPUBlitInfo blit{};
+                blit.source.texture = s_swapchainTexture;
+                blit.source.w = s_swapW;
+                blit.source.h = s_swapH;
+                blit.destination.texture = static_cast<SDL_GPUTexture*>(texture->second);
+                blit.destination.w = size->second.first;
+                blit.destination.h = size->second.second;
+                blit.load_op = SDL_GPU_LOADOP_DONT_CARE;
+                blit.flip_mode = SDL_FLIP_NONE;
+                blit.filter = SDL_GPU_FILTER_LINEAR;
+                SDL_BlitGPUTexture(s_cmdBuf, &blit);
+            }
+            s_pendingFrameCaptureTextureId = 0u;
+        }
+
         if (s_frameReadbackTexture)
         {
             if (!renderPassCompleted)
@@ -1697,17 +1820,35 @@ public:
             s_cmdBuf = nullptr;
         }
 
+        if (s_frameTimingEnabled)
+        {
+            s_submitTime = std::chrono::steady_clock::now();
+        }
+
         s_swapchainTexture = nullptr;
 
         // Emit per-frame diagnostic stats every 300 frames (~5s at 60fps).
-        if (s_dbgFrameCount % 300 == 0)
+        const bool emitTimingDiagnostics = s_frameTimingEnabled && s_dbgFrameCount % 60 == 0;
+        if (s_dbgFrameCount % 300 == 0 || emitTimingDiagnostics)
         {
-            SDL_Log("[RENDER diag] frame=%u  draw_calls=%u  replayed=%u  cmds=%zu  vtx_bytes=%u  tex=%zu  fallback=%u  white_draws=%u  real_draws=%u  uploads=%u  creates=%u  releases=%u  invalidated=%d  tex2d=%d  bound=%d",
-                    s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame, s_renderCmds.size(),
-                    s_dbgVtxBytesThisFrame, s_textureMap.size(), s_dbgFallbackTextureThisFrame,
+            SDL_Log("[RENDER diag] frame=%u  draw_calls=%u  replayed=%u  merged=%u  cmds=%zu  vtx_bytes=%u  tex=%zu  fallback=%u  white_draws=%u  real_draws=%u  uploads=%u  creates=%u  releases=%u  invalidated=%d  tex2d=%d  bound=%d",
+                    s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame,
+                    s_dbgMergedDrawsThisFrame, s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(),
+                    s_dbgFallbackTextureThisFrame,
                     s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame, s_dbgTextureUploadsThisFrame,
                     s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame, s_texturesInvalidated ? 1 : 0,
                     m_texture2DEnabled ? 1 : 0, m_boundTextureId);
+
+            if (s_frameTimingEnabled)
+            {
+                const auto ms = [](auto begin, auto end) {
+                    return std::chrono::duration<double, std::milli>(end - begin).count();
+                };
+                const auto now = std::chrono::steady_clock::now();
+                SDL_Log("[RENDER timing] total=%.2fms replay=%.2fms submit=%.2fms",
+                        ms(s_frameBeginTime, now), ms(s_renderReplayBeginTime, s_submitTime),
+                        ms(s_submitTime, now));
+            }
         }
         // Warn once if frames are rendering but producing no draw calls.
         if (s_dbgFrameCount == 10 && s_dbgDrawCallsThisFrame == 0)
@@ -1798,7 +1939,7 @@ public:
     // -----------------------------------------------------------------------
     // UI-embedded 3D previews (CUIPhotoViewer, CharMakeWin, NewUIInGameShop,
     // NewUIGoldBowmanLena, NewUIRegistrationLuckyCoin, NewUI3DRenderMng) call
-    // glViewport2(...) → mu::GetRenderer().SetViewport(...) to shrink the GPU
+    // SetRenderViewport(...) shrinks the GPU
     // viewport around the preview region, then set a narrow-FOV projection.
     // The classic OpenGL backend honored this via glViewport; without a real
     // override here the base-class no-op leaves the 2D-pass full-swapchain
@@ -2195,6 +2336,7 @@ public:
         }
 
         s_textureMap[textureId] = texture;
+        InvalidateTextureLookupCache();
         s_textureSizes[textureId] = {width, height};
         s_ownedTextureIds.insert(textureId);
         ++s_dbgTextureCreatesThisFrame;
@@ -2216,6 +2358,84 @@ public:
         ReleaseOwnedTextureById(textureId);
 #else
         (void)textureId;
+#endif
+    }
+
+    [[nodiscard]] std::uint32_t CreateTexture(
+        std::uint32_t width, std::uint32_t height, const void* pixels) override
+    {
+#ifdef MU_ENABLE_SDL3
+        const std::uint32_t textureId = AllocateOwnedDynamicTextureId();
+        if (textureId == 0u)
+        {
+            return 0u;
+        }
+
+        EnsureTexture(textureId, width, height);
+        if (!IsTextureRegistered(textureId))
+        {
+            return 0u;
+        }
+        QueueTextureUpdate(textureId, pixels, width, height);
+        return textureId;
+#else
+        (void)width;
+        (void)height;
+        (void)pixels;
+        return 0u;
+#endif
+    }
+
+    [[nodiscard]] std::uint32_t CaptureFrameTexture(std::uint32_t textureId) override
+    {
+#ifdef MU_ENABLE_SDL3
+        if (!s_frameActive || !s_device || !s_swapchainTexture || s_swapW == 0u || s_swapH == 0u)
+        {
+            return 0u;
+        }
+
+        if (textureId != 0u && !s_ownedTextureIds.contains(textureId))
+        {
+            return 0u;
+        }
+
+        if (textureId == 0u)
+        {
+            textureId = AllocateOwnedDynamicTextureId();
+            if (textureId == 0u)
+            {
+                return 0u;
+            }
+
+            SDL_GPUTextureCreateInfo textureInfo{};
+            textureInfo.type = SDL_GPU_TEXTURETYPE_2D;
+            textureInfo.format = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
+            textureInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+            textureInfo.width = s_swapW;
+            textureInfo.height = s_swapH;
+            textureInfo.layer_count_or_depth = 1;
+            textureInfo.num_levels = 1;
+            textureInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
+
+            SDL_GPUTexture* texture = SDL_CreateGPUTexture(s_device, &textureInfo);
+            if (!texture)
+            {
+                mu::log::Get("render")->warn("SDL_gpu -- frame capture texture creation failed: {}", SDL_GetError());
+                return 0u;
+            }
+
+            s_textureMap[textureId] = texture;
+            InvalidateTextureLookupCache();
+            s_textureSizes[textureId] = {s_swapW, s_swapH};
+            s_ownedTextureIds.insert(textureId);
+            ++s_dbgTextureCreatesThisFrame;
+        }
+
+        s_pendingFrameCaptureTextureId = textureId;
+        return textureId;
+#else
+        (void)textureId;
+        return 0u;
 #endif
     }
 
@@ -2392,7 +2612,14 @@ public:
         cmd.vu.fogStart = m_fogUniform.fogStart;
         cmd.vu.fogEnd = m_fogUniform.fogEnd;
         cmd.fogUniform = m_fogUniform;
-        s_renderCmds.push_back(cmd);
+        if (MergeAdjacentTriangleCommand(cmd))
+        {
+            ++s_dbgMergedDrawsThisFrame;
+        }
+        else
+        {
+            s_renderCmds.push_back(cmd);
+        }
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;

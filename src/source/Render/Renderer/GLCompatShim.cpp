@@ -50,6 +50,7 @@ struct ImmediateVertex
 
 MUCompatGLenum s_mode = 0;
 std::vector<ImmediateVertex> s_vertices;
+std::vector<mu::Vertex3D> s_renderVertices;
 float s_u = 0.0f;
 float s_v = 0.0f;
 std::uint32_t s_color = 0xFFFFFFFFu;
@@ -99,29 +100,30 @@ void PushVertex(float x, float y, float z)
 
 void SubmitTriangles(const std::vector<ImmediateVertex>& vertices)
 {
-    std::vector<mu::Vertex3D> out;
-    out.reserve(vertices.size());
-    for (const ImmediateVertex& v : vertices)
+    s_renderVertices.resize(vertices.size());
+    for (std::size_t i = 0; i < vertices.size(); ++i)
     {
-        out.push_back({v.x, v.y, v.z, 0.0f, 0.0f, 1.0f, v.u, v.v, v.color});
+        const ImmediateVertex& v = vertices[i];
+        s_renderVertices[i] = {v.x, v.y, v.z, 0.0f, 0.0f, 1.0f, v.u, v.v, v.color};
     }
-    mu::GetRenderer().RenderTriangles(out, s_texture2D ? s_boundTexture : 0u);
+    mu::GetRenderer().RenderTriangles(s_renderVertices, s_texture2D ? s_boundTexture : 0u);
 }
 
 void SubmitQuadsAsTriangles()
 {
-    std::vector<ImmediateVertex> tris;
-    tris.reserve((s_vertices.size() / 4) * 6);
+    s_renderVertices.resize((s_vertices.size() / 4) * 6);
+    std::size_t output = 0;
     for (std::size_t i = 0; i + 3 < s_vertices.size(); i += 4)
     {
-        tris.push_back(s_vertices[i + 0]);
-        tris.push_back(s_vertices[i + 1]);
-        tris.push_back(s_vertices[i + 2]);
-        tris.push_back(s_vertices[i + 0]);
-        tris.push_back(s_vertices[i + 2]);
-        tris.push_back(s_vertices[i + 3]);
+        const ImmediateVertex* quad = s_vertices.data() + i;
+        s_renderVertices[output++] = {quad[0].x, quad[0].y, quad[0].z, 0.f, 0.f, 1.f, quad[0].u, quad[0].v, quad[0].color};
+        s_renderVertices[output++] = {quad[1].x, quad[1].y, quad[1].z, 0.f, 0.f, 1.f, quad[1].u, quad[1].v, quad[1].color};
+        s_renderVertices[output++] = {quad[2].x, quad[2].y, quad[2].z, 0.f, 0.f, 1.f, quad[2].u, quad[2].v, quad[2].color};
+        s_renderVertices[output++] = {quad[0].x, quad[0].y, quad[0].z, 0.f, 0.f, 1.f, quad[0].u, quad[0].v, quad[0].color};
+        s_renderVertices[output++] = {quad[2].x, quad[2].y, quad[2].z, 0.f, 0.f, 1.f, quad[2].u, quad[2].v, quad[2].color};
+        s_renderVertices[output++] = {quad[3].x, quad[3].y, quad[3].z, 0.f, 0.f, 1.f, quad[3].u, quad[3].v, quad[3].color};
     }
-    SubmitTriangles(tris);
+    mu::GetRenderer().RenderTriangles(s_renderVertices, s_texture2D ? s_boundTexture : 0u);
 }
 
 void SubmitTriangleFan()
