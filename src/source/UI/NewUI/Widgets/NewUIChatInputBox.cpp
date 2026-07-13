@@ -679,7 +679,6 @@ bool SEASON3B::CNewUIChatInputBox::Update()
 bool SEASON3B::CNewUIChatInputBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderButtons();
@@ -695,9 +694,8 @@ bool SEASON3B::CNewUIChatInputBox::Render()
         g_pRenderText->RenderText(m_pWhsprIDInputBox->GetPosition_x(), m_pWhsprIDInputBox->GetPosition_y(), szWhisperID);
 
         EnableAlphaTest();
-        glColor4f(0.5f, 0.2f, 0.2f, 0.2f);
-        RenderColor(m_WndPos.x + 2, m_WndPos.y + 28, 61, 17);
-        EndRenderColor();
+        constexpr unsigned int BlockedWhisperColor = 0x33803333u;
+        RenderColorQuadARGB(m_WndPos.x + 2, m_WndPos.y + 28, 61, 17, BlockedWhisperColor);
     }
 
     DisableAlphaBlend();

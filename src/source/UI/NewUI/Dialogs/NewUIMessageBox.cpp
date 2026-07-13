@@ -124,14 +124,19 @@ void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
     float fPosX = 0.0f, fPosY = 0.0f;
     if (_bRender)
     {
-        glEnable(GL_ALPHA_TEST);
-        glColor4f(m_vColor[0], m_vColor[1], m_vColor[2], m_fOpacityAlpha);
-        RenderColor(fPosX, fPosY, fWidth, fHeight - 50.0f);
+        EnableAlphaTest();
+        const auto toByte = [](float value)
+        {
+            return static_cast<unsigned int>(std::clamp(value, 0.f, 1.f) * 255.f);
+        };
+        const unsigned int color = (toByte(m_fOpacityAlpha) << 24)
+            | (toByte(m_vColor[0]) << 16)
+            | (toByte(m_vColor[1]) << 8)
+            | toByte(m_vColor[2]);
+        RenderColorQuadARGB(fPosX, fPosY, fWidth, fHeight - 50.0f, color);
 
-        glEnable(GL_TEXTURE_2D);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glDisable(GL_BLEND);
-        glEnable(GL_ALPHA_TEST);
+        DisableAlphaBlend();
+        EnableAlphaTest();
     }
 }
 

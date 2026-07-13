@@ -6,6 +6,7 @@
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Quests/QuestMng.h"
 #include "Core/Time/Timer.h"
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -766,7 +767,6 @@ class CUIRenderTextOriginal : public IUIRenderText
     HBITMAP m_hBitmap;
     BYTE* m_pFontBuffer;
     DWORD m_dwTextColor, m_dwBackColor;
-    std::vector<BYTE> m_tightUploadBuffer;
 public:
     CUIRenderTextOriginal();
     virtual ~CUIRenderTextOriginal();
@@ -832,6 +832,29 @@ void SaveIMEStatus();
 void RestoreIMEStatus();
 void CheckTextInputBoxIME(int iMode);
 
+struct InputBoxConfig
+{
+    POINT pos = {std::numeric_limits<int>::min(), std::numeric_limits<int>::min()};
+    SIZE size = {0, 0};
+    int textLimit = MAX_TEXT_LENGTH;
+    DWORD options = UIOPTION_NULL;
+    bool password = false;
+    BYTE textAlpha = 255;
+    BYTE textR = 0;
+    BYTE textG = 0;
+    BYTE textB = 0;
+    BYTE backAlpha = 0;
+    BYTE backR = 0;
+    BYTE backG = 0;
+    BYTE backB = 0;
+    BYTE selectAlpha = 255;
+    BYTE selectR = 255;
+    BYTE selectG = 255;
+    BYTE selectB = 255;
+    HFONT font = nullptr;
+    int state = UISTATE_NORMAL;
+};
+
 class CUITextInputBox : public CUIControl
 {
 public:
@@ -854,6 +877,9 @@ public:
     virtual void SetSelectBackColor(BYTE a, BYTE r, BYTE g, BYTE b) { m_dwSelectBackColor = _ARGB(a, r, g, b); }
     virtual void SetText(const wchar_t* pszText);
     virtual void GetText(wchar_t* pszText, int iGetLength = MAX_TEXT_LENGTH);
+    virtual void Reset();
+    virtual void Configure(const InputBoxConfig& config);
+    virtual void SetIsPassword(bool isPassword) { m_bPasswordInput = isPassword ? TRUE : FALSE; }
 
     // There is no Win32 EDIT child; GetHandle() returns a stable per-instance
     // token used only as a focus identity by the NewUI "related window" routing
@@ -979,6 +1005,9 @@ protected:
     bool m_bUseScrollbarRender;
 #endif //PBG_ADD_INGAMESHOPMSGBOX
 };
+
+extern CUITextInputBox* g_pSingleTextInputBox;
+extern CUITextInputBox* g_pSinglePasswdInputBox;
 
 class CUIChatInputBox
 {

@@ -323,7 +323,6 @@ bool SEASON3B::CNewUITextInputMsgBox::Render()
     float x, y, width, height;
 
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
@@ -448,9 +447,7 @@ void SEASON3B::CNewUIKeyPadButton::Render()
     }
     else
     {
-        glColor3f(0.80f, 0.80f, 0.80f);
         RenderImage(BITMAP_INVENTORY + 17, GetPosX(), GetPosY(), GetWidth(), GetHeight());
-        glColor3f(1.f, 1.f, 1.f);
     }
 }
 
@@ -757,7 +754,6 @@ bool SEASON3B::CNewUIKeyPadMsgBox::Update()
 bool SEASON3B::CNewUIKeyPadMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderTexts();
@@ -792,14 +788,12 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderFrame()
 void SEASON3B::CNewUIKeyPadMsgBox::RenderKeyPadInput()
 {
     float x, y, width, height;
-    glColor3f(0.3f, 0.3f, 0.3f);
     width = 10.f * m_iInputLimit + 12.f;
     height = 18.f;
     x = GetPos().x + (MSGBOX_WIDTH / 2) - (width / 2);
     y = GetPos().y + 55;
 
     RenderBitmap(BITMAP_INTERFACE + 23, x, y, width, height, 0.f, 0.f, 40 / 64.f, 18 / 32.f);
-    glColor3f(1.0f, 1.0f, 1.0f);
 
     std::wstring strInput = L"";
     for (int i = 0; i < GetInputSize(); ++i)
@@ -977,7 +971,6 @@ bool SEASON3B::CUseFruitCheckMsgBox::Update()
 bool SEASON3B::CUseFruitCheckMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderTexts();
@@ -1217,7 +1210,6 @@ bool SEASON3B::CGemIntegrationMsgBox::Update()
 bool SEASON3B::CGemIntegrationMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -1479,7 +1471,6 @@ bool SEASON3B::CGemIntegrationUnityMsgBox::Update()
 bool SEASON3B::CGemIntegrationUnityMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
 
@@ -1924,7 +1915,6 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Update()
 bool SEASON3B::CGemIntegrationDisjointMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -2258,7 +2248,6 @@ bool SEASON3B::CSystemMenuMsgBox::Update()
 bool SEASON3B::CSystemMenuMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderButtons();
     DisableAlphaBlend();
@@ -2539,7 +2528,6 @@ bool SEASON3B::CBloodCastleResultMsgBox::Update()
 bool SEASON3B::CBloodCastleResultMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     m_BtnOk.Render();
     EnableAlphaBlend();
@@ -2635,7 +2623,6 @@ bool SEASON3B::CDevilSquareRankMsgBox::Update()
 bool SEASON3B::CDevilSquareRankMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     m_BtnOk.Render();
     EnableAlphaBlend();
@@ -2758,7 +2745,6 @@ bool SEASON3B::CChaosCastleResultMsgBox::Update()
 bool SEASON3B::CChaosCastleResultMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     m_BtnOk.Render();
     EnableAlphaBlend();
@@ -2857,7 +2843,6 @@ bool SEASON3B::CChaosMixMenuMsgBox::Update()
 bool SEASON3B::CChaosMixMenuMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -3130,7 +3115,6 @@ bool SEASON3B::CDialogMsgBox::Update()
 bool SEASON3B::CDialogMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -3473,7 +3457,6 @@ bool SEASON3B::CProgressMsgBox::Update()
 bool SEASON3B::CProgressMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderTexts();
@@ -3762,7 +3745,6 @@ CALLBACK_RESULT SEASON3B::CCursedTempleProgressMsgBox::CompleteProcess(class CNe
 bool SEASON3B::CCursedTempleProgressMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderProgress();
@@ -3948,7 +3930,6 @@ bool SEASON3B::CDuelMsgBox::Update()
 bool SEASON3B::CDuelMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButton();
@@ -4105,7 +4086,6 @@ bool SEASON3B::CDuelResultMsgBox::Update()
 bool SEASON3B::CDuelResultMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButton();
@@ -4241,7 +4221,6 @@ bool CCherryBlossomMsgBox::Update()
 bool CCherryBlossomMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -5779,7 +5758,6 @@ bool SEASON3B::CLuckyTradeMenuMsgBox::Create(float fPriority)
 bool SEASON3B::CLuckyTradeMenuMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -5971,7 +5949,6 @@ bool SEASON3B::CTrainerMenuMsgBox::Update()
 bool SEASON3B::CTrainerMenuMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -6161,7 +6138,6 @@ bool SEASON3B::CTrainerRecoverMsgBox::Update()
 bool SEASON3B::CTrainerRecoverMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -6360,7 +6336,6 @@ bool SEASON3B::CElpisMsgBox::Update()
 bool SEASON3B::CElpisMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -6606,7 +6581,6 @@ bool SEASON3B::CSeedMasterMenuMsgBox::Update()
 bool SEASON3B::CSeedMasterMenuMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -6797,7 +6771,6 @@ bool SEASON3B::CSeedInvestigatorMenuMsgBox::Update()
 bool SEASON3B::CSeedInvestigatorMenuMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -7037,7 +7010,6 @@ bool SEASON3B::CResetCharacterPointMsgBox::Update()
 bool SEASON3B::CResetCharacterPointMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -7253,7 +7225,6 @@ bool SEASON3B::CGuild_ToPerson_Position::Update()
 bool SEASON3B::CGuild_ToPerson_Position::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -7389,9 +7360,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
         mu_swprintf(strText, I18N::Game::SAsAS, GuildList[DeleteIndex].Name, I18N::Game::AssistM);
         AppointType = SUBGUILDMASTER;
         AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-        glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
         m_BtnBlessing.Render();
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
     else
     {
@@ -7403,9 +7372,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
         mu_swprintf(strText, I18N::Game::SAsAS, GuildList[DeleteIndex].Name, I18N::Game::BattleM);
         AppointType = BATTLEMASTER;
         AddMsg(strText, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-        glColor4f(1.0f, 1.0f, 0.2f, 1.0f);
         m_BtnSoul.Render();
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
     else
     {
@@ -7542,7 +7509,6 @@ bool SEASON3B::CDelgardoMainMenuMsgBox::Update()
 bool SEASON3B::CDelgardoMainMenuMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();

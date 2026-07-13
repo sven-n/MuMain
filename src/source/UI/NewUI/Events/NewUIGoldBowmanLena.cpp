@@ -8,6 +8,7 @@
 
 #include "GameLogic/Items/MixMgr.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Renderer/MuRenderer.h"
 
 namespace
 {
@@ -182,7 +183,6 @@ bool CNewUIGoldBowmanLena::Update()
 bool CNewUIGoldBowmanLena::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -260,15 +260,14 @@ void CNewUIGoldBowmanLena::Render3D()
 {
     EndBitmap();
 
-    glMatrixMode(GL_PROJECTION);
-    SaveCameraPerspective();
-    glPushMatrix();
-    glLoadIdentity();
-    glViewport2(0, 0, WindowWidth, WindowHeight);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
     gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
@@ -284,11 +283,10 @@ void CNewUIGoldBowmanLena::Render3D()
 
     UpdateMousePositionn();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
 
-    RestoreCameraPerspective();
     BeginBitmap();
 }

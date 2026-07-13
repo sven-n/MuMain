@@ -11,6 +11,7 @@
 #include <imagehlp.h>
 #endif
 #include "ErrorReport.h"
+#include "Render/Renderer/MuRenderer.h"
 
 // Max UTF-8 bytes for a single log line. Source buffer is wchar_t[1024]; UTF-8 needs
 // up to 3 bytes per BMP character (and 4 bytes per surrogate pair), so a 1024-wchar
@@ -218,15 +219,9 @@ void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
 
 void CErrorReport::WriteOpenGLInfo(void)
 {
-    Write(L"<OpenGL information>\r\n");
-    Write(L"Vendor\t\t: %ls\r\n", (wchar_t*)glGetString(GL_VENDOR));
-    Write(L"Render\t\t: %ls\r\n", (wchar_t*)glGetString(GL_RENDERER));
-    Write(L"OpenGL version\t: %ls\r\n", (wchar_t*)glGetString(GL_VERSION));
-    GLint iResult[2];
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, iResult);
-    Write(L"Max Texture size\t: %d x %d\r\n", iResult[0], iResult[0]);
-    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iResult);
-    Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
+    Write(L"<Renderer information>\r\n");
+    Write(L"API\t\t: SDL_gpu\r\n");
+    Write(L"Driver\t\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
 }
 
 void CErrorReport::WriteFontInfo(void)

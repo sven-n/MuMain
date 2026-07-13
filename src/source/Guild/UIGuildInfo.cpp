@@ -638,8 +638,6 @@ BOOL CUIGuildInfo::DoMouseAction()
 
 void CUIGuildInfo::Render()
 {
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-
     POINT ptOrigin = { GetPosition_x(), GetPosition_y() };
 
     DisableAlphaBlend();
@@ -680,7 +678,6 @@ void CUIGuildInfo::Render()
         g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::AndYouCanJoinTheGuild);
     }
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     ptOrigin.x = GetPosition_x() + 25;
     ptOrigin.y = GetPosition_y() + 395;
     RenderBitmap(BITMAP_INVENTORY_BUTTON, ptOrigin.x, ptOrigin.y, 24, 24, 0.f, 0.f, 24.f / 32.f, 24.f / 32.f);
@@ -697,13 +694,11 @@ void CUIGuildInfo::Render()
 
     ptOrigin.x = GetPosition_x() + 15;
     ptOrigin.y = GetPosition_y() + 91;
-    glColor4ub(146, 144, 141, 255);
-    if (m_nCurrentTab != 0) RenderColor(ptOrigin.x, ptOrigin.y, 54, 1);
+    if (m_nCurrentTab != 0) RenderColorQuadARGB(ptOrigin.x, ptOrigin.y, 54, 1, 0xFF92908Du);
     ptOrigin.x += 54;
-    if (m_nCurrentTab != 1) RenderColor(ptOrigin.x, ptOrigin.y, 54, 1);
+    if (m_nCurrentTab != 1) RenderColorQuadARGB(ptOrigin.x, ptOrigin.y, 54, 1, 0xFF92908Du);
     ptOrigin.x += 54;
-    if (m_nCurrentTab != 2) RenderColor(ptOrigin.x, ptOrigin.y, 54, 1);
-    EndRenderColor();
+    if (m_nCurrentTab != 2) RenderColorQuadARGB(ptOrigin.x, ptOrigin.y, 54, 1, 0xFF92908Du);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -711,27 +706,25 @@ void CUIGuildInfo::Render()
 
     ptOrigin.x = GetPosition_x() + 15;
     ptOrigin.y = GetPosition_y() + 75;
-    if (m_nCurrentTab == 0) glColor4f(1.f, 1.f, 1.f, 1.f);
-    else glColor4f(0.6f, 0.6f, 0.6f, 1.f);
-    RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 0 ? 2 : 0),
-        (float)52, (float)16 + (m_nCurrentTab == 0 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
+    const DWORD guildTabColor = m_nCurrentTab == 0 ? RGBA(255, 255, 255, 255) : RGBA(153, 153, 153, 255);
+    RenderColorBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 0 ? 2 : 0),
+        (float)52, (float)16 + (m_nCurrentTab == 0 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f,
+        guildTabColor);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 0 ? 1 : 0), I18N::Game::Guild, 52, 0, RT3_SORT_CENTER);
 
     ptOrigin.x += 54;
-    if (m_nCurrentTab == 1) glColor4f(1.f, 1.f, 1.f, 1.f);
-    else glColor4f(0.6f, 0.6f, 0.6f, 1.f);
-    RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 1 ? 2 : 0),
-        (float)52, (float)16 + (m_nCurrentTab == 1 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
+    const DWORD membersTabColor = m_nCurrentTab == 1 ? RGBA(255, 255, 255, 255) : RGBA(153, 153, 153, 255);
+    RenderColorBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 1 ? 2 : 0),
+        (float)52, (float)16 + (m_nCurrentTab == 1 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f,
+        membersTabColor);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 1 ? 1 : 0), I18N::Game::Members, 52, 0, RT3_SORT_CENTER);
 
     ptOrigin.x += 54;
-    if (m_nCurrentTab == 2) glColor4f(1.f, 1.f, 1.f, 1.f);
-    else glColor4f(0.6f, 0.6f, 0.6f, 1.f);
-    RenderBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 2 ? 2 : 0),
-        (float)52, (float)16 + (m_nCurrentTab == 2 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f);
+    const DWORD allianceTabColor = m_nCurrentTab == 2 ? RGBA(255, 255, 255, 255) : RGBA(153, 153, 153, 255);
+    RenderColorBitmap(BITMAP_INTERFACE_EX + 9, ptOrigin.x, ptOrigin.y - (m_nCurrentTab == 2 ? 2 : 0),
+        (float)52, (float)16 + (m_nCurrentTab == 2 ? 2 : 0), 0.f, 0.f, 48.f / 64.f, 15.f / 16.f,
+        allianceTabColor);
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y + 4 - (m_nCurrentTab == 2 ? 1 : 0), I18N::Game::Alliance, 52, 0, RT3_SORT_CENTER);
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     switch (m_nCurrentTab)
     {

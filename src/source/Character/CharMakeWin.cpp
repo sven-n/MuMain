@@ -133,7 +133,6 @@ namespace
 
 
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSingleTextInputBox;
 
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle);
 
@@ -258,10 +257,9 @@ void CCharMakeWin::Show(bool bShow)
         InputTextMax[0] = MAX_USERNAME_SIZE;
         if (g_iChatInputType == 1)
         {
-            g_pSingleTextInputBox->SetState(UISTATE_NORMAL);
-            g_pSingleTextInputBox->SetOption(UIOPTION_NULL);
-            g_pSingleTextInputBox->SetBackColor(0, 0, 0, 0);
-            g_pSingleTextInputBox->SetTextLimit(10);
+            g_pSingleTextInputBox->Configure({
+                .textLimit = 10,
+            });
             g_pSingleTextInputBox->GiveFocus();
         }
     }
@@ -269,7 +267,7 @@ void CCharMakeWin::Show(bool bShow)
     {
         if (g_iChatInputType == 1)
         {
-            g_pSingleTextInputBox->SetText(NULL);
+            g_pSingleTextInputBox->SetText(nullptr);
             g_pSingleTextInputBox->SetState(UISTATE_HIDE);
         }
     }
@@ -502,7 +500,7 @@ void CCharMakeWin::RenderCreateCharacter()
 
     RenderCharacter(&CharacterView, o);
 
-    glViewport2(0, 0, WindowWidth, WindowHeight);
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
 
     EndOpengl();
 }

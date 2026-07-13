@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "UI/NewUI/Widgets/NewUIComboBox.h"
 #include "UI/Legacy/UIControls.h"  // for g_pRenderText macro
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 
 // From ZzzOpenglUtil.cpp -- viewport scaling helpers.
 float ConvertX(float x);
@@ -34,7 +36,7 @@ namespace
     // Matches the raw-GL pattern used by NewUIOptionWindow.
     void DrawSolidRect(int x, int y, int w, int h, float brightness)
     {
-        glDisable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(false);
 
         float gx = ConvertX((float)x);
         float gy = ConvertY((float)y);
@@ -42,16 +44,15 @@ namespace
         float gh = ConvertY((float)h);
         gy = (float)WindowHeight - gy;
 
-        glColor4f(brightness, brightness, brightness, 1.0f);
-        glBegin(GL_QUADS);
-            glVertex2f(gx,      gy);
-            glVertex2f(gx + gw, gy);
-            glVertex2f(gx + gw, gy - gh);
-            glVertex2f(gx,      gy - gh);
-        glEnd();
-
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        const std::uint32_t color = mu::PackABGR(brightness, brightness, brightness, 1.f);
+        const mu::Vertex2D vertices[4] = {
+            {gx, gy, 0.f, 0.f, color},
+            {gx, gy - gh, 0.f, 0.f, color},
+            {gx + gw, gy - gh, 0.f, 0.f, color},
+            {gx + gw, gy, 0.f, 0.f, color},
+        };
+        mu::GetRenderer().RenderQuad2D(vertices, 0u);
+        mu::GetRenderer().SetTexture2D(true);
     }
 }
 

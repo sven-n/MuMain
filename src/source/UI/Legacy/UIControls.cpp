@@ -10,6 +10,7 @@
 #include "Render/Text/CUIRenderTextSDLTtf.h"
 #endif
 #include "UIWindows.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -442,7 +443,6 @@ void CUIButton::Render()
 
     if (GetState() == UISTATE_DISABLE)
     {
-        glColor4f(1.0f, 0.4f, 0.4f, 1.0f);
         RenderBitmap(BITMAP_INTERFACE_EX + 9, m_iPos_x, m_iPos_y, (float)m_iWidth, (float)m_iHeight, 0.f, 0.f, 49.f / 64.f, 16.f / 16.f);
 
         if (m_pszCaption != nullptr)
@@ -454,20 +454,7 @@ void CUIButton::Render()
             g_pRenderText->SetBgColor(0);
             g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
         }
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         return;
-    }
-
-    if (::CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == TRUE)
-    {
-        if (m_bMouseState == TRUE)
-            glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
-        else
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-    else
-    {
-        glColor4f(0.8f, 0.8f, 0.8f, 1.0f);
     }
 
     if (m_bMouseState == TRUE)
@@ -493,7 +480,6 @@ void CUIButton::Render()
             g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
         }
     }
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     DisableAlphaBlend();
 }
 
@@ -654,8 +640,6 @@ void CUITextListBox<T>::Render()
     RenderInterface();
 
     MoveRenderLine();
-
-    glColor3f(1.f, 1.f, 1.f);
 
     g_pRenderText->SetFont(g_hFont);
 
@@ -1361,7 +1345,6 @@ void CUISimpleChatListBox::Render()
     RenderInterface();
     MoveRenderLine();
 
-    glColor3f(1.f, 1.f, 1.f);
     g_pRenderText->SetFont(g_hFont);
 
     for (int i = 0; i < m_iNumRenderLine; ++i)
@@ -1752,13 +1735,8 @@ BOOL CUIChatPalListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        if (g_dwKeyFocusUIID == GetUIID())
-            glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
-        else
-            glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -1932,11 +1910,8 @@ BOOL CUIWindowListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        if (g_dwKeyFocusUIID == GetUIID()) glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
-        else glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -2148,11 +2123,8 @@ BOOL CUILetterListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        if (g_dwKeyFocusUIID == GetUIID()) glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
-        else glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -2248,7 +2220,6 @@ void CUILetterTextListBox::Render()
     RenderInterface();
     MoveRenderLine();
 
-    glColor3f(1.f, 1.f, 1.f);
     g_pRenderText->SetFont(g_hFont);
 
     for (int i = 0; i < m_iNumRenderLine; ++i)
@@ -2478,11 +2449,8 @@ BOOL CUISocketListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        if (g_dwKeyFocusUIID == GetUIID()) glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
-        else glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -2758,17 +2726,6 @@ void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
 void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
 {
     BITMAP_t* b = &Bitmaps[BITMAP_FONT];
-    int uploadWidth = Width;
-    int uploadHeight = Height;
-    if (uploadWidth > static_cast<int>(b->Width))
-    {
-        uploadWidth = static_cast<int>(b->Width);
-    }
-    if (uploadHeight > static_cast<int>(b->Height))
-    {
-        uploadHeight = static_cast<int>(b->Height);
-    }
-
     float TextureU = 0.f, TextureV = 0.f;
     if (sx < 0)
     {
@@ -2792,30 +2749,10 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
     }
     if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
     {
-        glBindTexture(GL_TEXTURE_2D, b->BitmapIndex);
-        if (uploadWidth > 0 && uploadHeight > 0)
-        {
-            if (uploadWidth == static_cast<int>(b->Width))
-            {
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, uploadWidth, uploadHeight, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
-            }
-            else
-            {
-                const size_t tightRowSize = static_cast<size_t>(uploadWidth) * 4;
-                const size_t sourceRowSize = static_cast<size_t>(b->Width) * 4;
-                m_tightUploadBuffer.resize(tightRowSize * uploadHeight);
-
-                for (int row = 0; row < uploadHeight; ++row)
-                {
-                    memcpy(
-                        m_tightUploadBuffer.data() + tightRowSize * row,
-                        b->Buffer + sourceRowSize * row,
-                        tightRowSize);
-                }
-
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, uploadWidth, uploadHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_tightUploadBuffer.data());
-            }
-        }
+        mu::GetRenderer().QueueTextureUpdate(
+            static_cast<std::uint32_t>(b->BitmapIndex), b->Buffer,
+            static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
+        mu::GetRenderer().BindTexture(static_cast<int>(b->BitmapIndex));
 
         float TextureUWidth = (Width + 0.01f) / b->Width;
         float TextureVHeight = (Height + 0.01f) / b->Height;
@@ -2920,10 +2857,8 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* ps
     if (m_dwBackColor != 0)
     {
         EnableAlphaTest();
-        glColor4ub(GetRed(m_dwBackColor), GetGreen(m_dwBackColor),
-            GetBlue(m_dwBackColor), GetAlpha(m_dwBackColor));
-        RenderColor(RealBoxPos.x / g_fScreenRate_x, RealBoxPos.y / g_fScreenRate_y,
-            RealBoxSize.cx / g_fScreenRate_x, RealBoxSize.cy / g_fScreenRate_y);
+        RenderColorQuadARGB(RealBoxPos.x / g_fScreenRate_x, RealBoxPos.y / g_fScreenRate_y,
+            RealBoxSize.cx / g_fScreenRate_x, RealBoxSize.cy / g_fScreenRate_y, m_dwBackColor);
         EndRenderColor();
     }
 
@@ -3098,6 +3033,42 @@ void CUITextInputBox::SetText(const wchar_t* pszText)
 void CUITextInputBox::SetTextLimit(int iLimit)
 {
     m_iMaxLength = iLimit;
+}
+
+void CUITextInputBox::Reset()
+{
+    SetState(UISTATE_HIDE);
+    SetText(nullptr);
+    SetOption(UIOPTION_NULL);
+    SetTextColor(255, 0, 0, 0);
+    SetBackColor(0, 0, 0, 0);
+    SetSelectBackColor(255, 255, 255, 255);
+    SetTextLimit(MAX_TEXT_LENGTH);
+    m_bLock = FALSE;
+}
+
+void CUITextInputBox::Configure(const InputBoxConfig& config)
+{
+    if (config.font != nullptr)
+    {
+        SetFont(config.font);
+    }
+    if (config.size.cx > 0 && config.size.cy > 0)
+    {
+        SetSize(config.size.cx, config.size.cy);
+    }
+    if (config.pos.x != std::numeric_limits<int>::min() || config.pos.y != std::numeric_limits<int>::min())
+    {
+        SetPosition(config.pos.x, config.pos.y);
+    }
+
+    SetIsPassword(config.password);
+    SetTextLimit(config.textLimit);
+    SetOption(config.options);
+    SetTextColor(config.textAlpha, config.textR, config.textG, config.textB);
+    SetBackColor(config.backAlpha, config.backR, config.backG, config.backB);
+    SetSelectBackColor(config.selectAlpha, config.selectR, config.selectG, config.selectB);
+    SetState(config.state);
 }
 
 void CUITextInputBox::SetSize(int iWidth, int iHeight)
@@ -3711,15 +3682,13 @@ void CUITextInputBox::RenderPortable()
     if (CheckOption(UIOPTION_PAINTBACK))
     {
         EnableAlphaTest();
-        glColor4f(0.f, 0.f, 0.f, 1.f);
-        RenderColor(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight);
+        RenderColorQuadARGB(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight, 0xFF000000u);
         EndRenderColor();
     }
     else if (GetAlpha(m_dwBackColor) > 0)
     {
         EnableAlphaTest();
-        glColor4ub(GetRed(m_dwBackColor), GetGreen(m_dwBackColor), GetBlue(m_dwBackColor), GetAlpha(m_dwBackColor));
-        RenderColor(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight);
+        RenderColorQuadARGB(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight, m_dwBackColor);
         EndRenderColor();
     }
 
@@ -3765,8 +3734,7 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
             if (x1 > x0)
             {
                 EnableAlphaTest();
-                glColor4ub(GetRed(m_dwSelectBackColor), GetGreen(m_dwSelectBackColor), GetBlue(m_dwSelectBackColor), GetAlpha(m_dwSelectBackColor));
-                RenderColor(m_iPos_x + x0, m_iPos_y, x1 - x0, iLineHeight);
+                RenderColorQuadARGB(m_iPos_x + x0, m_iPos_y, x1 - x0, iLineHeight, m_dwSelectBackColor);
                 EndRenderColor();
             }
         }
@@ -3791,8 +3759,8 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
         if (x1 > x0)
         {
             EnableAlphaTest();
-            glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
-            RenderColor(m_iPos_x + x0, m_iPos_y + iLineHeight - 1, x1 - x0, 1);
+            RenderColorQuadARGB(m_iPos_x + x0, m_iPos_y + iLineHeight - 1, x1 - x0, 1,
+                m_dwTextColor | 0xFF000000u);
             EndRenderColor();
         }
     }
@@ -3809,8 +3777,8 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
     if (bFocused && bBlinkOn)
     {
         EnableAlphaTest();
-        glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
-        RenderColor(m_iPos_x + iCaretX, m_iPos_y, CARET_WIDTH_PX, iLineHeight);
+        RenderColorQuadARGB(m_iPos_x + iCaretX, m_iPos_y, CARET_WIDTH_PX, iLineHeight,
+            m_dwTextColor | 0xFF000000u);
         EndRenderColor();
     }
 }
@@ -3861,8 +3829,7 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
                 if (x1 > x0)
                 {
                     EnableAlphaTest();
-                    glColor4ub(GetRed(m_dwSelectBackColor), GetGreen(m_dwSelectBackColor), GetBlue(m_dwSelectBackColor), GetAlpha(m_dwSelectBackColor));
-                    RenderColor(m_iPos_x + x0, y, x1 - x0, iLineHeight);
+                    RenderColorQuadARGB(m_iPos_x + x0, y, x1 - x0, iLineHeight, m_dwSelectBackColor);
                     EndRenderColor();
                 }
             }
@@ -3886,8 +3853,8 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
             if (x1 > x0)
             {
                 EnableAlphaTest();
-                glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
-                RenderColor(m_iPos_x + x0, y + iLineHeight - 1, x1 - x0, 1);
+                RenderColorQuadARGB(m_iPos_x + x0, y + iLineHeight - 1, x1 - x0, 1,
+                    m_dwTextColor | 0xFF000000u);
                 EndRenderColor();
             }
         }
@@ -3903,8 +3870,8 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
             if (bFocused && bBlinkOn)
             {
                 EnableAlphaTest();
-                glColor4ub(GetRed(m_dwTextColor), GetGreen(m_dwTextColor), GetBlue(m_dwTextColor), 255);
-                RenderColor(m_iPos_x + iCaretX, y, CARET_WIDTH_PX, iLineHeight);
+                RenderColorQuadARGB(m_iPos_x + iCaretX, y, CARET_WIDTH_PX, iLineHeight,
+                    m_dwTextColor | 0xFF000000u);
                 EndRenderColor();
             }
         }
@@ -4219,11 +4186,9 @@ void CUISlideHelp::Render(BOOL bForceFadeOut)
     }
 
     EnableAlphaTest();
-    glColor4ub(0, 0, 0, (m_iAlphaRate > 180 ? m_iAlphaRate : (m_iAlphaRate - 25 < 0 ? 0 : m_iAlphaRate - 25)));
 
     RenderColor(0, m_iPos_y - 3, WindowWidth, 1);
     RenderColor(0, m_iPos_y + m_iFontHeight + 2, WindowWidth, 1);
-    glColor4ub(0, 0, 0, (m_iAlphaRate - 25 < 0 ? 0 : m_iAlphaRate - 25));
     RenderColor(0, m_iPos_y - 2, WindowWidth, m_iFontHeight + 4);
 
     EndRenderColor();
@@ -4730,16 +4695,14 @@ BOOL CUIGuildNoticeListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
     {
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 4;
@@ -4910,35 +4873,27 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
 
     if (iCharacterLevel == 0)
     {
-        glColor4ub(255, 100, 50, 127);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(255, 255, 255, 255);
     }
     else if (iCharacterLevel == 1)
     {
-        glColor4ub(255, 150, 80, 127);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(255, 255, 255, 255);
     }
     else if (iCharacterLevel == 2)
     {
-        glColor4ub(255, 200, 100, 127);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(255, 255, 255, 255);
     }
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
     {
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 8;
@@ -5119,16 +5074,14 @@ BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
     {
         g_pRenderText->SetTextColor(230, 220, 220, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 4;
@@ -5293,16 +5246,14 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
     {
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetBgColor(0);
     int iPos_x = m_iPos_x + 4;
     int iPos_y = GetRenderLinePos_y(iLineNumber);
@@ -5474,16 +5425,14 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
     {
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 4;
@@ -5632,24 +5581,20 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
         if (m_TextListIter->byJoinSide == 1)
         {
-            glColor4f(1.0f, 1.0f, 1.0f, 0.2f);
             RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             g_pRenderText->SetTextColor(230, 220, 200, 255);
         }
         else
         {
             g_pRenderText->SetTextColor(230, 220, 200, 255);
         }
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 4;
@@ -5712,7 +5657,6 @@ void RenderGoldRect(float fPos_x, float fPos_y, float fWidth, float fHeight, int
     switch (iFillType)
     {
     case 1:
-        glColor4ub(146, 144, 141, 200);
         RenderColor(fPos_x, fPos_y, fWidth, fHeight);
         EndRenderColor();
         break;
@@ -5884,10 +5828,8 @@ BOOL CUICurQuestListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        ::glColor4f(0.5f, 0.7f, 0.3f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -6196,10 +6138,8 @@ BOOL CUIInGameShopListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        ::glColor4f(0.15f, 0.3f, 0.4f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 4, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -6342,10 +6282,8 @@ BOOL CUIBuyingListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1 && GetLineColorRender())
     {
-        ::glColor4f(0.15f, 0.3f, 0.4f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -6488,10 +6426,8 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + nLine + 1)
     {
-        ::glColor4f(0.07f, 0.31f, 0.31f, 0.5f);
         RenderColor(m_iPos_x + 3, GetRenderLinePos_y(nLine) + 1, m_iWidth - m_fScrollBarWidth + 1, TEXT_HEIGHTSIZE - 6);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -6748,9 +6684,7 @@ BOOL CUIExtraItemListBox::RenderDataLine(int iLineNumber)
 
     if (SLGetSelectLineNum() == m_iCurrentRenderEndLine + iLineNumber + 1)
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -6758,7 +6692,7 @@ BOOL CUIExtraItemListBox::RenderDataLine(int iLineNumber)
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
 
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 8;

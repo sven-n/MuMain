@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UIWindows.h"
 #include "Core/Time/FrameTimerScheduler.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -25,7 +26,6 @@
 extern int	 g_iChatInputType;
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
 extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached);
@@ -805,50 +805,8 @@ void CUIWindowMgr::SetServerEnable(BOOL bFlag)
 }
 void SetLineColor(int iType, float fAlphaRate = 1.0f)
 {
-    GLubyte ubWindowAlpha = 255 * fAlphaRate;
-
-    switch (iType)
-    {
-    case 0:
-        glColor4ub(146, 134, 121, ubWindowAlpha);	break;
-    case 1:
-        glColor4ub(37, 37, 37, ubWindowAlpha);		break;
-    case 2:
-        glColor4ub(106, 97, 88, ubWindowAlpha);		break;
-    case 3:
-        glColor4ub(0, 0, 0, 179 * fAlphaRate);		break;
-    case 4:
-        glColor4ub(173, 167, 150, ubWindowAlpha);	break;
-    case 5:
-        glColor4ub(53, 49, 48, ubWindowAlpha);		break;
-    case 6:
-        glColor4ub(26, 22, 21, ubWindowAlpha);		break;
-    case 7:
-        glColor4ub(0, 0, 0, 255 * fAlphaRate);		break;
-    case 8:
-        glColor4ub(153, 156, 166, ubWindowAlpha);	break;
-    case 9:
-        glColor4ub(136, 138, 147, ubWindowAlpha);	break;
-    case 10:
-        glColor4ub(83, 85, 93, ubWindowAlpha);		break;
-    case 11:
-        glColor4ub(102, 104, 112, ubWindowAlpha);	break;
-    case 12:
-        glColor4ub(0, 0, 8, ubWindowAlpha);			break;
-    case 13:
-        glColor4ub(0, 0, 0, ubWindowAlpha);			break;
-    case 14:
-        glColor4ub(185, 185, 185, ubWindowAlpha);	break;
-    case 15:
-        glColor4ub(194, 194, 194, ubWindowAlpha);	break;
-    case 16:
-        glColor4ub(194, 194, 194, ubWindowAlpha);	break;
-    case 17:
-        glColor4ub(209, 188, 134, ubWindowAlpha);	break;
-    case 18:
-        glColor4ub(205, 209, 133, ubWindowAlpha);	break;
-    default:	break;
-    }
+    (void)iType;
+    (void)fAlphaRate;
 }
 
 void RenderWindowVLine(float pos_x, float pos_y, float height)
@@ -948,17 +906,7 @@ void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 
 void CUIBaseWindow::SetControlButtonColor(int iSelect)
 {
-    if (m_iControlButtonClick == iSelect && CheckMouseIn(m_iPos_x + m_iWidth - 38, m_iPos_y + 8, 38, 9) == TRUE)
-    {
-        if (MouseLButtonPush == true)
-            glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
-        else
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-    else
-    {
-        glColor4f(0.8f, 0.8f, 0.8f, 1.0f);
-    }
+    (void)iSelect;
 }
 
 void CUIBaseWindow::Render()
@@ -994,8 +942,6 @@ void CUIBaseWindow::Render()
     {
         bBackWindow = TRUE;
     }
-    if (bBackWindow == TRUE)
-        glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
     if (CheckOption(UIWINDOWSTYLE_FRAME))
     {
         if (CheckOption(UIWINDOWSTYLE_TITLEBAR))
@@ -1058,7 +1004,6 @@ void CUIBaseWindow::Render()
         }
         SetControlButtonColor(3);
         RenderBitmap(BITMAP_INTERFACE_EX + 10, (float)m_iPos_x + m_iWidth - 16, (float)m_iPos_y + 8, (float)9, (float)9, 0.f, 9.f / 32.f, 9.f / 32.f, 9.f / 32.f);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetFont(g_hFont);
     }
     if (CheckOption(UIWINDOWSTYLE_RESIZEABLE))
@@ -1068,7 +1013,6 @@ void CUIBaseWindow::Render()
     }
     if (g_pWindowMgr->GetTopWindowUIID() != GetUIID() || !g_pUIManager->IsOpen(INTERFACE_FRIEND))
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         DisableAlphaBlend();
     }
 
@@ -1774,32 +1718,32 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     MoveMount(&m_PhotoHelper, TRUE);
     gMapManager.WorldActive = WorldBackup;
 
-    glMatrixMode(GL_PROJECTION);
-    SaveCameraPerspective();
-    glPushMatrix();
-    glLoadIdentity();
-    glViewport2(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y, m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y,
+        m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
     gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
-    glRotatef(-90.0f, 1.f, 0.f, 0.f);
-    glRotatef(-90.0f, 0.f, 0.f, 1.f);
-    glTranslatef(-10000.0f, 0.0f, -75.f);
+    mu::GetRenderer().Rotate(-90.0f, 1.f, 0.f, 0.f);
+    mu::GetRenderer().Rotate(-90.0f, 0.f, 0.f, 1.f);
+    mu::GetRenderer().Translate(-10000.0f, 0.0f, -75.f);
 
     if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
-        glTranslatef(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f);
+        mu::GetRenderer().Translate(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f);
     else
-        glTranslatef(-o->Position[0], -o->Position[1], -o->Position[2]);
+        mu::GetRenderer().Translate(-o->Position[0], -o->Position[1], -o->Position[2]);
 
     Vector(0.0f, 0.0f, m_fCurrentAngle, o->Angle);
 
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(true);
     EnableDepthTest();
     EnableCullFace();
     EnableDepthMask();
@@ -1809,10 +1753,10 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
-    glDepthFunc(GL_LEQUAL);
-    glAlphaFunc(GL_GREATER, 0.25f);
-    glDisable(GL_FOG);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
+    mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
+    mu::GetRenderer().SetFogEnabled(false);
+    mu::GetRenderer().ClearDepthBuffer();
     o->Scale = 0.7f * m_fCurrentZoom;
     m_PhotoHelper.Scale = m_fPhotoHelperScale * m_fCurrentZoom;
     Vector(1, 1, 1, o->Light);
@@ -1833,12 +1777,11 @@ void CUIPhotoViewer::RenderPhotoCharacter()
         m_PhotoHelper.Position[2] -= 25;
     RenderCharacter(c, o);
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glViewport2(0, 0, WindowWidth, WindowHeight);
-    RestoreCameraPerspective();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
@@ -2457,7 +2400,6 @@ void CUIPhotoViewer::Render()
 {
     if (m_bIsWebzenMail == TRUE)
     {
-        glColor4f(0.f, 0.f, 0.f, 1.0f);
         RenderColor(m_iPos_x, m_iPos_y, 119.f, 141.f);
         EndRenderColor();
         RenderBitmap(BITMAP_INTERFACE_EX + 22, m_iPos_x + 20, m_iPos_y + 38, 80.f, 62.f, 0.f, 0.f, 256.f / 256.f, 195.f / 256.f);
@@ -2495,7 +2437,6 @@ void CUIPhotoViewer::Render()
 
     if (CheckOption(UIPHOTOVIEWER_CANCONTROL))
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         DisableAlphaBlend();
         if (m_bHelpEnable == FALSE)
         {
@@ -2503,9 +2444,7 @@ void CUIPhotoViewer::Render()
         }
         else
         {
-            glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
             RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 2, m_iPos_y + m_iHeight - 16, 15.0f, 15.0f, 0.f, 0.f, 15.f / 16.f, 15.f / 16.f);
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
             TextNum = 0;
             mu_swprintf(TextList[TextNum], I18N::Game::WheelButtonZoomInOut); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
@@ -5533,9 +5472,7 @@ void CUIFriendMenu::RenderWindowList()
         auto* pWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(*m_WindowListIter);
         if (pWindow != NULL && pWindow->GetUserCount() > 2)
         {
-            glColor3f(255, 0, 0);
             RenderBitmap(BITMAP_INTERFACE_EX + 15, (float)m_iPos_x + m_iWidth - 7, (float)m_iFriendMenuPos_y - (m_fLineHeight + 4) * i + 5, (float)4, (float)6, 0.f, 0.f, 4.f / 8.f, 6.f / 8.f);
-            glColor3f(255, 255, 255);
         }
     }
 }

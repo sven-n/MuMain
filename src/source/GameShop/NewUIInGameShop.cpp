@@ -16,6 +16,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Renderer/MuRenderer.h"
 
 using namespace SEASON3B;
 
@@ -83,7 +84,6 @@ void CNewUIInGameShop::SetPos(int x, int y)
 bool CNewUIInGameShop::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderButtons();
     RenderTexts();
@@ -310,20 +310,19 @@ void CNewUIInGameShop::RenderDisplayItems()
 {
     EndBitmap();
 
-    glMatrixMode(GL_PROJECTION);
-    SaveCameraPerspective();
-    glPushMatrix();
-    glLoadIdentity();
-    glViewport2(0, 0, WindowWidth, WindowHeight);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
     gluPerspective2(2.0f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearDepthBuffer();
 
     for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
     {
@@ -334,12 +333,11 @@ void CNewUIInGameShop::RenderDisplayItems()
 
     UpdateMousePositionn();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
 
-    RestoreCameraPerspective();
     BeginBitmap();
 }
 

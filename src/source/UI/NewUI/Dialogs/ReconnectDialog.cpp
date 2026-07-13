@@ -9,6 +9,7 @@
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"// CNewUIMessageBoxMng::IMAGE_MSGBOX_*
 #include "App/Platform/Windows/Winmain.h"        // g_hFont, g_hFontBold
 #include "I18N/All.h"
+#include "Render/Renderer/MuRenderer.h"
 
 namespace UI::Reconnect
 {
@@ -17,7 +18,7 @@ namespace
     using MsgBox = SEASON3B::CNewUIMessageBoxMng;
 
     // Frozen game frame captured at disconnect, shown during the re-login phase.
-    GLuint s_backgroundTex = 0;
+    std::uint32_t s_backgroundTex = 0;
     bool s_hasBackground = false;
 
     // Native message-box frame slice sizes (match CNewUICommonMessageBox).
@@ -130,15 +131,12 @@ namespace
             return;
         }
 
-        // Re-login: the world is torn down. Show the frozen disconnect frame
-        // (BindTexture takes a negative id as a raw GL texture; the framebuffer
-        // is bottom-up so V is flipped) so the player doesn't see a black screen
-        // or the login world.
+        // Re-login: the world is torn down. Show the frozen disconnect frame so
+        // the player doesn't see a black screen or the login world.
         if (s_hasBackground && s_backgroundTex != 0)
         {
-            glEnable(GL_TEXTURE_2D);
-            RenderColorBitmap(-static_cast<int>(s_backgroundTex), 0.0f, 0.0f,
-                REFERENCE_WIDTH, REFERENCE_HEIGHT, 0.0f, 1.0f, 1.0f, -1.0f, 0xFFFFFFFF);
+            RenderColorBitmap(static_cast<int>(s_backgroundTex), 0.0f, 0.0f,
+                REFERENCE_WIDTH, REFERENCE_HEIGHT, 0.0f, 0.0f, 1.0f, 1.0f, 0xFFFFFFFF);
             FillBlack(0.0f, 0.0f, REFERENCE_WIDTH, REFERENCE_HEIGHT, DIM_ALPHA);
             return;
         }
@@ -177,8 +175,6 @@ namespace
 
     void DrawNative(bool cancelHovered)
     {
-        glEnable(GL_TEXTURE_2D);
-
         // Inner background, then the top/middle*n/bottom border frame on top.
         SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_BACK, PANEL_X, PANEL_Y + 2.0f,
             MSGBOX_WIDTH - BACK_BLANK_W, PANEL_H - BACK_BLANK_H);
@@ -238,25 +234,8 @@ void CaptureBackground()
         return;
     }
 
-    if (s_backgroundTex == 0)
-    {
-        glGenTextures(1, &s_backgroundTex);
-    }
-
-    glBindTexture(GL_TEXTURE_2D, s_backgroundTex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    // Read the displayed (front) buffer - this runs right after the frame was
-    // presented and before the dialog draws, so it's a clean game frame.
-    glReadBuffer(GL_FRONT);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0,
-        static_cast<GLsizei>(WindowWidth), static_cast<GLsizei>(WindowHeight), 0);
-    glReadBuffer(GL_BACK);
-
-    s_hasBackground = true;
+    s_backgroundTex = mu::GetRenderer().CaptureFrameTexture(s_backgroundTex);
+    s_hasBackground = s_backgroundTex != 0u;
 }
 
 void RenderDialog()

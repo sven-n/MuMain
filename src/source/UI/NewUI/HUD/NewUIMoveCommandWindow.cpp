@@ -729,15 +729,11 @@ void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
 
 void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 {
-    glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
+    RenderColorQuadARGB((float)m_Pos.x, (float)m_Pos.y, (float)m_MapNameUISize.x,
+        (float)m_MapNameUISize.y, 0xCC000000u);
+    RenderColorQuadARGB(m_StartMapNamePos.x, m_MapNameUISize.y - m_iRealFontHeight - 6,
+        m_MapNameUISize.x - 5, m_iRealFontHeight, 0xFF990000u);
 
-    RenderColor((float)m_Pos.x, (float)m_Pos.y, (float)m_MapNameUISize.x, (float)m_MapNameUISize.y);
-
-    glColor4f(0.6f, 0.f, 0.f, 1.f);
-
-    RenderColor(m_StartMapNamePos.x, m_MapNameUISize.y - m_iRealFontHeight - 6, m_MapNameUISize.x - 5, m_iRealFontHeight);
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     EnableAlphaTest();
 
     RenderImage(IMAGE_MOVECOMMAND_SCROLL_TOP, m_ScrollBarPos.x, m_ScrollBarPos.y, MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT);		// TOP
@@ -762,20 +758,17 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 
     if (m_bScrollBtnActive == true)
     {
-        if (m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED)
-        {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-        }
+        const DWORD color = m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED
+            ? 0xFFB3B3B3u
+            : 0xFFFFFFFFu;
         RenderImage(IMAGE_MOVECOMMAND_SCROLLBAR_ON, m_ScrollBtnPos.x, m_ScrollBtnPos.y,
-            MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT);
+            MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT, 0.f, 0.f, color);
     }
     else
     {
         RenderImage(IMAGE_MOVECOMMAND_SCROLLBAR_OFF, m_ScrollBtnPos.x, m_ScrollBtnPos.y,
             MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT);
     }
-
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -792,7 +785,6 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 bool SEASON3B::CNewUIMoveCommandWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -845,9 +837,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
 
             if ((*li)->_bSelected == true)
             {
-                glColor4f(0.8f, 0.8f, 0.1f, 0.6f);
-                RenderColor(iX, iY - 1, m_MapNameUISize.x - 22, m_iRealFontHeight);
-                glColor4f(1.f, 1.f, 1.f, 1.f);
+                RenderColorQuadARGB(iX, iY - 1, m_MapNameUISize.x - 22, m_iRealFontHeight, 0x99CCCC1Au);
                 EnableAlphaTest();
             }
         }

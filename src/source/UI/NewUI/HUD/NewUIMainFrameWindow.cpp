@@ -169,7 +169,6 @@ void SEASON3B::CNewUIMainFrameWindow::Release()
 bool SEASON3B::CNewUIMainFrameWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
 
@@ -489,9 +488,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
             {
                 x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                 RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                glColor4f(1.f, 1.f, 1.f, 0.6f);
-                RenderColor(x, y, width, height);
-                EndRenderColor();
+                RenderColorQuadARGB(x, y, width, height, 0x99FFFFFFu);
             }
             else
             {
@@ -507,9 +504,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                 {
                     x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                     RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    glColor4f(1.f, 1.f, 1.f, 0.6f);
-                    RenderColor(x, y, width, height);
-                    EndRenderColor();
+                    RenderColorQuadARGB(x, y, width, height, 0x99FFFFFFu);
                 }
                 else
                 {
@@ -520,9 +515,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
 
                     x += width; width = (double)fGapProgress * (double)629.f;
                     RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    glColor4f(1.f, 1.f, 1.f, 0.6f);
-                    RenderColor(x, y, width, height);
-                    EndRenderColor();
+                    RenderColorQuadARGB(x, y, width, height, 0x99FFFFFFu);
                 }
             }
         }
@@ -583,9 +576,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
             {
                 x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                 RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                glColor4f(1.f, 1.f, 1.f, 0.4f);
-                RenderColor(x, y, width, height);
-                EndRenderColor();
+                RenderColorQuadARGB(x, y, width, height, 0x66FFFFFFu);
             }
             else
             {
@@ -601,9 +592,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                 {
                     x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
                     RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    glColor4f(1.f, 1.f, 1.f, 0.4f);
-                    RenderColor(x, y, width, height);
-                    EndRenderColor();
+                    RenderColorQuadARGB(x, y, width, height, 0x66FFFFFFu);
                 }
                 else
                 {
@@ -613,9 +602,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
                     RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
                     x += width; width = fGapProgress * 629.f;
                     RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    glColor4f(1.f, 1.f, 1.f, 0.4f);
-                    RenderColor(x, y, width, height);
-                    EndRenderColor();
+                    RenderColorQuadARGB(x, y, width, height, 0x66FFFFFFu);
                 }
             }
         }
@@ -1244,8 +1231,6 @@ void SEASON3B::CNewUIItemHotKey::RenderItems()
 void SEASON3B::CNewUIItemHotKey::RenderItemCount()
 {
     float x, y, width, height;
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     for (int i = 0; i < HOTKEY_COUNT; ++i)
     {
@@ -2497,9 +2482,7 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
 
     if (iHotKey != -1)
     {
-        glColor3f(1.f, 0.9f, 0.8f);
         SEASON3B::RenderNumber(x + 20, y + 20, iHotKey);
-        glColor3f(1.f, 1.f, 1.f);
     }
 
     if ((bySkillType == AT_SKILL_CHAIN_DRIVE
@@ -2540,10 +2523,8 @@ void SEASON3B::CNewUISkillList::RenderSkillDelay(int iIndex, float x, float y, f
         auto fPersent = (float)(iSkillDelay / (float)iSkillMaxDelay);
 
         EnableAlphaTest();
-        glColor4f(1.f, 0.5f, 0.5f, 0.5f);
         float fdeltaH = height * fPersent;
-        RenderColor(x, y + height - fdeltaH, width, fdeltaH);
-        EndRenderColor();
+        RenderColorQuadARGB(x, y + height - fdeltaH, width, fdeltaH, 0x80FF8080u);
     }
 }
 

@@ -6,6 +6,7 @@
 #include "UI/NewUI/NewUI3DRenderMng.h"
 #include "UI/NewUI/NewUIManager.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Renderer/MuRenderer.h"
 
 using namespace SEASON3B;
 
@@ -114,19 +115,18 @@ bool SEASON3B::CNewUI3DCamera::Render()
         return true;
 
     EndBitmap();
-    glMatrixMode(GL_PROJECTION);
-    SaveCameraPerspective();
-    glPushMatrix();
-    glLoadIdentity();
-    glViewport2(0, 0, m_uiWidth, m_uiHeight);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(0, 0, m_uiWidth, m_uiHeight);
     gluPerspective2(1.f, (float)(m_uiWidth) / (float)(m_uiHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
     CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearDepthBuffer();
 
     auto li = m_list3DObjs.begin();
     for (; li != m_list3DObjs.end(); li++)
@@ -138,12 +138,11 @@ bool SEASON3B::CNewUI3DCamera::Render()
     }
     UpdateMousePositionn();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
     BeginBitmap();
-    RestoreCameraPerspective();
 
     while (!m_deque2DEffects.empty())
     {

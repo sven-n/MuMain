@@ -171,21 +171,15 @@ void SEASON3B::CNewUIMessageBoxButton::Update()
 
 void SEASON3B::CNewUIMessageBoxButton::Render()
 {
-    if (m_bEnable == false)
-    {
-        glColor4f(0.8f, 0.8f, 0.8f, 0.9f);
-    }
-    else
-    {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+    const DWORD buttonColor = m_bEnable
+        ? RGBA(255, 255, 255, 255)
+        : RGBA(204, 204, 204, 230);
     BITMAP_t* pImage = &Bitmaps[m_dwTexType];
-    RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height,
+    RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height,
         (0.5f / (float)pImage->Width), ((static_cast<float>(m_EventState) * m_fButtonHeight + 0.5f) / (float)pImage->Height),
         (m_fButtonWidth - 0.5f) / (float)pImage->Width - (0.5f / (float)pImage->Width),
-        (m_fButtonHeight - 0.5f) / (float)pImage->Height - (0.5f / (float)pImage->Height));
+        (m_fButtonHeight - 0.5f) / (float)pImage->Height - (0.5f / (float)pImage->Height), buttonColor);
 #else //KJH_ADD_INGAMESHOP_UI_SYSTEM
     float fv = 0.f;
     float fBtnOrigWidth = 0.f;
@@ -224,22 +218,24 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
         fv = 0.f;
     }
 
-    if (m_bEnable == false)
-    {
-        glColor4f(0.6f, 0.6f, 0.6f, 0.6f);
-    }
+    const DWORD buttonColor = m_bEnable
+        ? RGBA(255, 255, 255, 255)
+        : RGBA(153, 153, 153, 153);
 
     if (m_dwSizeType == MSGBOX_BTN_SIZE_OK || m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY_SMALL)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 64.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 64.f, fBtnOrigHeight / 128.f, buttonColor);
     }
     else if (m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 128.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 128.f, fBtnOrigHeight / 128.f, buttonColor);
     }
     else if (m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY_BIG)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 256.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 256.f, fBtnOrigHeight / 128.f, buttonColor);
     }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
@@ -572,7 +568,6 @@ bool SEASON3B::CNewUICommonMessageBox::Update()
 bool SEASON3B::CNewUICommonMessageBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -1025,7 +1020,6 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::AddButtonBlank(int iAddLine)
 bool SEASON3B::CNewUI3DItemCommonMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();

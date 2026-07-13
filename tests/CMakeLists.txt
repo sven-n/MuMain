@@ -52,6 +52,8 @@ endfunction()
 
 add_subdirectory(text)
 
+add_subdirectory(ui)
+
 add_subdirectory(editor)
 
 add_subdirectory(render)

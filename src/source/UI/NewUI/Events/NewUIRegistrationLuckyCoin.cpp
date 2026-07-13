@@ -5,6 +5,7 @@
 #include "UI/NewUI/Events/NewUIRegistrationLuckyCoin.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "I18N/All.h"
 
 
@@ -48,7 +49,6 @@ namespace SEASON3B
     bool CNewUIRegistrationLuckyCoin::Render()
     {
         EnableAlphaTest();
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderFrame();
         RenderTexts();
         RenderButtons();
@@ -109,20 +109,19 @@ namespace SEASON3B
 
         EndBitmap();
 
-        glMatrixMode(GL_PROJECTION);
-        SaveCameraPerspective();
-    glPushMatrix();
-        glLoadIdentity();
-        glViewport2(0, 0, WindowWidth, WindowHeight);
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
+        SetRenderViewport(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
         CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
 
-        glClear(GL_DEPTH_BUFFER_BIT);
+        mu::GetRenderer().ClearDepthBuffer();
 
         SetItemRotation(true);
         RenderItem3D(x, y, width, height, m_CoinItem->Type, m_CoinItem->Level, 0, 0, true);
@@ -130,12 +129,11 @@ namespace SEASON3B
 
         UpdateMousePositionn();
 
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PopMatrix();
 
-    RestoreCameraPerspective();
         BeginBitmap();
     }
 

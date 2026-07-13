@@ -17,7 +17,6 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern int				g_iChatInputType;
 
 static eCurrentMode		m_nCurrMode;
@@ -326,12 +325,11 @@ void CUIGuildMaster::RenderCreateGuild()
 
     if (g_iChatInputType == 1)
     {
-        g_pSingleTextInputBox->SetState(UISTATE_NORMAL);
-        g_pSingleTextInputBox->SetOption(UIOPTION_NULL);
-        g_pSingleTextInputBox->SetBackColor(0, 0, 0, 0);
-        g_pSingleTextInputBox->SetTextLimit(8);
-        g_pSingleTextInputBox->SetSize(70, 14);
-        g_pSingleTextInputBox->SetPosition(ptOrigin.x + 38, ptOrigin.y);
+        g_pSingleTextInputBox->Configure({
+            .pos = {ptOrigin.x + 38, ptOrigin.y},
+            .size = {70, 14},
+            .textLimit = 8,
+        });
         g_pSingleTextInputBox->GiveFocus();
         g_pSingleTextInputBox->DoAction();
         g_pSingleTextInputBox->Render();
@@ -516,7 +514,6 @@ void CUIGuildMaster::RenderGuildMasterMain()
     m_EditGuildMarkButton.SetPosition(ptOrigin.x, ptOrigin.y);
     m_EditGuildMarkButton.Render();
 
-    glColor3f(1.f, 1.f, 1.f);
     float Width = 24.f; float Height = 24.f; float x = (float)GetPosition_x() + 25; float y = (float)GetPosition_y() + 395;
     RenderBitmap(BITMAP_INVENTORY_BUTTON, x, y, Width, Height, 0.f, 0.f, Width / 32.f, Height / 32.f);
     if (CheckMouseIn(x, y, Width, Height))
@@ -615,8 +612,6 @@ BOOL CUIGuildMaster::DoMouseAction()
 
 void CUIGuildMaster::Render()
 {
-    glColor3f(1.f, 1.f, 1.f);
-
     POINT ptOrigin = { GetPosition_x(), GetPosition_y() };
 
     DisableAlphaBlend();

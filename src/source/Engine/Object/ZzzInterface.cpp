@@ -5,6 +5,8 @@
 #include "Core/Input/KeyState.h"
 #include "Core/Platform/Imm.h"
 #include "UI/Legacy/UIManager.h"
+#include "UI/Legacy/TextSearch.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -60,8 +62,6 @@
 #include "Camera/CameraProjection.h"
 #include "Scenes/SceneCommon.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;
@@ -338,16 +338,17 @@ void RenderTipText(int sx, int sy, const wchar_t* Text)
 
     int BackupAlphaBlendType = AlphaBlendType;
     EnableAlphaTest();
-    glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-    RenderColor((float)sx - 2, (float)sy - 3, (float)TextSize.cx / g_fScreenRate_x + 4, (float)1);	// 위
-    RenderColor((float)sx - 2, (float)sy - 3, (float)1, (float)TextSize.cy / g_fScreenRate_y + 4);	// 좌
-    RenderColor((float)sx - 2 + TextSize.cx / g_fScreenRate_x + 3, (float)sy - 3, (float)1, (float)TextSize.cy / g_fScreenRate_y + 4);
-    RenderColor((float)sx - 2, (float)sy - 3 + TextSize.cy / g_fScreenRate_y + 3, (float)TextSize.cx / g_fScreenRate_x + 4, (float)1);
-
-    glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-    RenderColor((float)sx - 1, (float)sy - 2, (float)TextSize.cx / g_fScreenRate_x + 2, (float)TextSize.cy / g_fScreenRate_y + 2);
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glEnable(GL_TEXTURE_2D);
+    constexpr unsigned int borderColor = 0xFF000000u;
+    constexpr unsigned int backgroundColor = 0xCC000000u;
+    const float textWidth = static_cast<float>(TextSize.cx) / g_fScreenRate_x;
+    const float textHeight = static_cast<float>(TextSize.cy) / g_fScreenRate_y;
+    RenderColorQuadARGB(static_cast<float>(sx) - 2, static_cast<float>(sy) - 3, textWidth + 4, 1.f, borderColor);
+    RenderColorQuadARGB(static_cast<float>(sx) - 2, static_cast<float>(sy) - 3, 1.f, textHeight + 4, borderColor);
+    RenderColorQuadARGB(static_cast<float>(sx) + textWidth + 1, static_cast<float>(sy) - 3, 1.f, textHeight + 4, borderColor);
+    RenderColorQuadARGB(static_cast<float>(sx) - 2, static_cast<float>(sy) + textHeight, textWidth + 4, 1.f, borderColor);
+    RenderColorQuadARGB(static_cast<float>(sx) - 1, static_cast<float>(sy) - 2, textWidth + 2, textHeight + 2,
+        backgroundColor);
+    mu::GetRenderer().SetTexture2D(true);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(sx, sy, Text);
@@ -395,7 +396,6 @@ int RenderDebugText(int y)
         int  SizeByte = 1;
         for (int j = 0; j < DebugTextLength[i]; j++)
         {
-            glColor3f(0.6f, 0.6f, 0.6f);
             if (j == 0)
             {
                 if (DebugText[i][j] == 0xc2) SizeByte = 2;
@@ -405,7 +405,6 @@ int RenderDebugText(int y)
                 if (SizeByte == 1)
                 {
                     Type = DebugText[i][j];
-                    glColor3f(1.f, 1.f, 1.f);
                     if (DebugText[i][j] == 0x00)
                     {
                         x = Width * 4;
@@ -417,7 +416,6 @@ int RenderDebugText(int y)
                 if (SizeByte == 2)
                 {
                     Type = DebugText[i][j];
-                    glColor3f(1.f, 1.f, 1.f);
                 }
             }
 
@@ -2499,56 +2497,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
 bool FindText(const wchar_t* Text, const wchar_t* Token, bool First)
 {
-    int LengthToken = (int)wcslen(Token);
-    int Length = (int)wcslen(Text) - LengthToken;
-    if (First)
-        Length = 0;
-    if (Length < 0)
-        return false;
-
-    auto* lpszCheck = (unsigned char*)Text;
-    for (int i = 0; i <= Length; i += _mbclen(lpszCheck + i))
-    {
-        bool Success = true;
-        for (int j = 0; j < LengthToken; j++)
-        {
-            if (Text[i + j] != Token[j])
-            {
-                Success = false;
-                break;
-            }
-        }
-        if (Success)
-            return true;
-    }
-    return false;
+    return UI::TextSearch::Contains(Text, Token, First);
 }
 
 bool FindTextABS(const wchar_t* Text, const wchar_t* Token, bool First)
 {
-    int LengthToken = (int)wcslen(Token);
-    int Length = (int)wcslen(Text) - LengthToken;
-    if (First)
-        Length = 0;
-    if (Length < 0)
-        return false;
-
-    auto* lpszCheck = (unsigned char*)Text;
-    for (int i = 0; i <= Length; i += _mbclen(lpszCheck + i))
-    {
-        bool Success = true;
-        for (int j = 0; j < LengthToken; j++)
-        {
-            if (Text[i + j] != Token[j])
-            {
-                Success = false;
-                break;
-            }
-        }
-        if (Success)
-            return true;
-    }
-    return false;
+    return UI::TextSearch::Contains(Text, Token, First);
 }
 
 void SetActionClass(CHARACTER* c, OBJECT* o, int Action, int ActionType)
@@ -3604,25 +3558,15 @@ void RenderBar(float x, float y, float Width, float Height, float Bar, bool Disa
     }
 
     EnableAlphaTest();
-    glColor4f(0.f, 0.f, 0.f, 0.5f);
-    RenderColor(x + 1, y + 1, Width + 4, Height + 4);
+    RenderColorQuadARGB(x + 1, y + 1, Width + 4, Height + 4, 0x80000000u);
 
     EnableAlphaBlend();
-    if (Disabled)
-        glColor3f(0.2f, 0.0f, 0.0f);
-    else
-        glColor3f(0.f, 0.2f, 0.2f);
-    RenderColor(x, y, Width + 4, Height + 4);
-    if (Disabled)
-        glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
-    else
-        glColor3f(0.f / 255.f, 50 / 255.f, 50.f / 255.f);
-    RenderColor(x + 2, y + 2, Width, Height);
-    if (Disabled)
-        glColor3f(200.f / 255.f, 50 / 255.f, 0.f);
-    else
-        glColor3f(0.f / 255.f, 200 / 255.f, 50.f / 255.f);
-    RenderColor(x + 2, y + 2, Bar, Height);
+    const unsigned int frameColor = Disabled ? 0xFF330000u : 0xFF003333u;
+    const unsigned int trackColor = Disabled ? 0xFF320A00u : 0xFF003232u;
+    const unsigned int barColor = Disabled ? 0xFFC83200u : 0xFF00C832u;
+    RenderColorQuadARGB(x, y, Width + 4, Height + 4, frameColor);
+    RenderColorQuadARGB(x + 2, y + 2, Width, Height, trackColor);
+    RenderColorQuadARGB(x + 2, y + 2, Bar, Height, barColor);
 
     DisableAlphaBlend();
 }
@@ -3678,9 +3622,7 @@ void RenderOutSides()
     if (gMapManager.WorldActive == WD_8TARKAN)
     {
         EnableAlphaTest();
-        glColor4f(1.f, 1.f, 1.f, 0.5f);
         EnableAlphaBlend();
-        glColor3f(0.3f, 0.3f, 0.25f);
         float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
         RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.001f;
@@ -3691,7 +3633,6 @@ void RenderOutSides()
     {
         EnableAlphaTest();
         EnableAlphaBlend();
-        glColor3f(0.3f, 0.3f, 0.25f);
         float fWindX = (float)((int)WorldTime % 100000) * 0.004f;
         RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, fWindX, 0.f, 3.f, 2.f);
     }
@@ -3718,7 +3659,6 @@ void RenderOutSides()
     }
     TheMapProcess().RenderFrontSideVisual();
 
-    glColor3f(1.f, 1.f, 1.f);
 }
 
 void MoveTournamentInterface()
@@ -3863,7 +3803,6 @@ void RenderTournamentInterface()
     RenderBitmap(BITMAP_INTERFACE + 22, (float)WindowX, (float)yPos, (float)Width, (float)5, 0.f, 0.f, Width / 512.f, 5.f / 8.f);
 
     EnableAlphaBlend();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     g_pRenderText->SetFont(g_hFontBig);
     g_pRenderText->SetTextColor(200, 240, 255, 255);
     mu_swprintf(t_Str, I18N::Game::TournamentResult);
@@ -3931,7 +3870,6 @@ void RenderTournamentInterface()
         RenderBitmap(BITMAP_INTERFACE + 11, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, Width / 128.f, Height / 32.f);
     }
 
-    glColor3f(1.f, 1.f, 1.f);
     DisableAlphaBlend();
 }
 
@@ -3965,27 +3903,24 @@ void RenderPartyHP()
         }
 
         EnableAlphaTest();
-        glColor4f(0.f, 0.f, 0.f, 0.5f);
-        RenderColor((float)(ScreenX + 1), (float)(ScreenY + 1), Width + 4.f, 5.f);
+        RenderColorQuadARGB(static_cast<float>(ScreenX + 1), static_cast<float>(ScreenY + 1), Width + 4.f, 5.f,
+            0x80000000u);
 
         EnableAlphaBlend();
-        glColor3f(0.2f, 0.0f, 0.0f);
-        RenderColor((float)ScreenX, (float)ScreenY, Width + 4.f, 5.f);
-
-        glColor3f(50.f / 255.f, 10 / 255.f, 0.f);
-        RenderColor((float)(ScreenX + 2), (float)(ScreenY + 2), Width, 1.f);
+        RenderColorQuadARGB(static_cast<float>(ScreenX), static_cast<float>(ScreenY), Width + 4.f, 5.f, 0xFF330000u);
+        RenderColorQuadARGB(static_cast<float>(ScreenX + 2), static_cast<float>(ScreenY + 2), Width, 1.f,
+            0xFF320A00u);
 
         int stepHP = std::min<int>(10, p->stepHP);
 
-        glColor3f(250.f / 255.f, 10 / 255.f, 0.f);
         for (int k = 0; k < stepHP; ++k)
         {
-            RenderColor((float)(ScreenX + 2 + (k * 4)), (float)(ScreenY + 2), 3.f, 2.f);
+            RenderColorQuadARGB(static_cast<float>(ScreenX + 2 + (k * 4)), static_cast<float>(ScreenY + 2), 3.f, 2.f,
+                0xFFFA0A00u);
         }
         DisableAlphaBlend();
     }
     DisableAlphaBlend();
-    glColor3f(1.f, 1.f, 1.f);
 }
 
 
@@ -4007,7 +3942,6 @@ void RenderTimes()
         RenderBar(x, y + 12, width, height, (float)progressValue);
     }
 
-    glColor3f(1.f, 1.f, 1.f);
 
     matchEvent::RenderTime();
 }
@@ -4020,7 +3954,6 @@ void RenderCursor()
         return;
 
     EnableAlphaTest();
-    glColor3f(1.f, 1.f, 1.f);
 
     float u = 0.f;
     float v = 0.f;
@@ -4184,10 +4117,6 @@ void RenderDebugWindow()
         int sy = 0;
         for (int i = 0; i < 14; i++)
         {
-            if (i == SelectMapping)
-                glColor3f(1.f, 1.f, 1.f);
-            else
-                glColor3f(0.8f, 0.8f, 0.8f);
             RenderBitmap(BITMAP_MAPTILE + i, (float)(sx), (float)(sy + i * 30), 30.f, 30.f);
         }
         if (CurrentLayer == 0)
@@ -4197,7 +4126,6 @@ void RenderDebugWindow()
         mu_swprintf(Text, L"Brush Size: %d", BrushSize * 2 + 1);
         g_pRenderText->RenderText(REFERENCE_WIDTH - 100, sy + 11, Text);
     }
-    glColor3f(1.f, 1.f, 1.f);
     if (EditFlag == EDIT_OBJECT)
     {
         g_pRenderText->RenderText(REFERENCE_WIDTH - 100, 0, L"Garbage");
@@ -4208,11 +4136,6 @@ void RenderDebugWindow()
     {
         for (int i = 0; i < EditMonsterNumber; i++)
         {
-            if (i == SelectMonster)
-                glColor3f(1.f, 0.8f, 0.f);
-            else
-                glColor3f(1.f, 1.f, 1.f);
-
             mu_swprintf(Text, L"%2d: %ls", MonsterScript[i].Type, MonsterScript[i].Name);
             g_pRenderText->RenderText(REFERENCE_WIDTH - 100, i * 10, Text);
         }
@@ -4221,11 +4144,6 @@ void RenderDebugWindow()
     {
         for (int i = 0; i < 8; i++)
         {
-            if (i == SelectColor)
-                glColor3f(1.f, 0.8f, 0.f);
-            else
-                glColor3f(1.f, 1.f, 1.f);
-
             g_pRenderText->RenderText(REFERENCE_WIDTH - 64, i * 10, ColorTable[i]);
         }
     }

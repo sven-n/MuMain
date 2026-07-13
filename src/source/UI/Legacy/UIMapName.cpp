@@ -209,16 +209,16 @@ void CUIMapName::Render()
         return;
 
     ::EnableAlphaTest();
-    ::glColor4f(1.0f, 1.0f, 1.0f, m_fAlpha);
 
 #ifdef ASG_ADD_GENS_SYSTEM
     if (m_bStrife)
         ::RenderBitmap(BITMAP_INTERFACE_EX + 47, UIMN_IMG_POS_X, UIMN_STRIFE_POS_Y,
-            UIMN_IMG_WIDTH, UIMN_STRIFE_HEIGHT, 0.0f, 0.0f, UIMN_IMG_WIDTH / 256.0f, UIMN_STRIFE_HEIGHT / 32.0f, false, false);
+            UIMN_IMG_WIDTH, UIMN_STRIFE_HEIGHT, 0.0f, 0.0f, UIMN_IMG_WIDTH / 256.0f,
+            UIMN_STRIFE_HEIGHT / 32.0f, false, false, m_fAlpha);
 #endif	// ASG_ADD_GENS_SYSTEM
     ::RenderBitmap(BITMAP_INTERFACE_EX + 45, UIMN_IMG_POS_X, UIMN_IMG_POS_Y,
-        UIMN_IMG_WIDTH, UIMN_IMG_HEIGHT, 0.0f, 0.0f, UIMN_IMG_WIDTH / 256.0f, UIMN_IMG_HEIGHT / 128.0f, false, false);
+        UIMN_IMG_WIDTH, UIMN_IMG_HEIGHT, 0.0f, 0.0f, UIMN_IMG_WIDTH / 256.0f,
+        UIMN_IMG_HEIGHT / 128.0f, false, false, m_fAlpha);
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     ::DisableAlphaBlend();
 }

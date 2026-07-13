@@ -136,7 +136,6 @@ bool SEASON3B::CNewUIMiniMap::Render()
     RenderColor(0, 0, REFERENCE_WIDTH, 430, 0.85f, 1);
     DisableAlphaBlend();
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     auto Ty = (float)(((float)Hero->PositionX / 256.f) * m_Lenth[m_MiniPos].y);
     auto Tx = (float)(((float)Hero->PositionY / 256.f) * m_Lenth[m_MiniPos].x);

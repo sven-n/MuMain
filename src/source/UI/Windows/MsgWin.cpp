@@ -28,7 +28,6 @@
 
 
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 
 CMsgWin::CMsgWin()
 {

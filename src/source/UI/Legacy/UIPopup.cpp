@@ -11,7 +11,6 @@
 #include "I18N/All.h"
 
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSingleTextInputBox;
 
 // cppcheck-suppress uninitMemberVar
 CUIPopup::CUIPopup()
@@ -506,9 +505,12 @@ void CUIPopup::Render()
             fPosY += 7;
             if (g_iChatInputType == 1)
             {
-                g_pSingleTextInputBox->SetPosition(320 - m_nInputSize / 2 + 5, static_cast<int>(fPosY) - 2);
-                g_pSingleTextInputBox->SetSize(m_nInputSize, 14);
-                g_pSingleTextInputBox->SetTextLimit(m_nInputTextLength);
+                g_pSingleTextInputBox->Configure({
+                    .pos = {320 - m_nInputSize / 2 + 5, static_cast<int>(fPosY) - 2},
+                    .size = {m_nInputSize, 14},
+                    .textLimit = m_nInputTextLength,
+                    .options = m_InputOptions,
+                });
                 g_pSingleTextInputBox->GiveFocus();
                 g_pSingleTextInputBox->DoAction();
                 g_pSingleTextInputBox->Render();

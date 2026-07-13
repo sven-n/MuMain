@@ -55,7 +55,6 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
 extern CUIGuildListBox* g_pGuildListBox;
 
@@ -234,36 +233,6 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
     {
         g_pRenderText->SetTextColor(0xffffffff);
 
-        switch (TextListColor[i])
-        {
-        case TEXT_COLOR_WHITE:
-        case TEXT_COLOR_DARKRED:
-        case TEXT_COLOR_DARKBLUE:
-        case TEXT_COLOR_DARKYELLOW:
-            glColor3f(1.f, 1.f, 1.f);
-            break;
-        case TEXT_COLOR_BLUE:
-            glColor3f(0.5f, 0.7f, 1.f);
-            break;
-        case TEXT_COLOR_GRAY:
-            glColor3f(0.4f, 0.4f, 0.4f);
-            break;
-        case TEXT_COLOR_GREEN_BLUE:
-            glColor3f(1.f, 1.f, 1.f);
-            break;
-        case TEXT_COLOR_RED:
-            glColor3f(1.f, 0.2f, 0.1f);
-            break;
-        case TEXT_COLOR_YELLOW:
-            glColor3f(1.f, 0.8f, 0.1f);
-            break;
-        case TEXT_COLOR_GREEN:
-            glColor3f(0.1f, 1.f, 0.5f);
-            break;
-        case TEXT_COLOR_PURPLE:
-            glColor3f(1.f, 0.1f, 1.f);
-            break;
-        }
         if (TEXT_COLOR_DARKRED == TextListColor[i])
         {
             g_pRenderText->SetBgColor(160, 0, 0, 255);
@@ -398,45 +367,6 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         else
         {
             g_pRenderText->SetTextColor(0xffffffff);
-            switch (TextListColor[i])
-            {
-            case TEXT_COLOR_WHITE:
-            case TEXT_COLOR_DARKRED:
-            case TEXT_COLOR_DARKBLUE:
-            case TEXT_COLOR_DARKYELLOW:
-                glColor3f(1.f, 1.f, 1.f);
-                break;
-            case TEXT_COLOR_BLUE:
-                glColor3f(0.5f, 0.7f, 1.f);
-                break;
-            case TEXT_COLOR_GRAY:
-                glColor3f(0.4f, 0.4f, 0.4f);
-                break;
-            case TEXT_COLOR_GREEN_BLUE:
-                glColor3f(1.f, 1.f, 1.f);
-                break;
-            case TEXT_COLOR_RED:
-                glColor3f(1.f, 0.2f, 0.1f);
-                break;
-            case TEXT_COLOR_YELLOW:
-                glColor3f(1.f, 0.8f, 0.1f);
-                break;
-            case TEXT_COLOR_GREEN:
-                glColor3f(0.1f, 1.f, 0.5f);
-                break;
-            case TEXT_COLOR_PURPLE:
-                glColor3f(1.f, 0.1f, 1.f);
-                break;
-            case TEXT_COLOR_REDPURPLE:
-                glColor3f(0.8f, 0.5f, 0.8f);
-                break;
-            case TEXT_COLOR_VIOLET:
-                glColor3f(0.7f, 0.4f, 1.0f);
-                break;
-            case TEXT_COLOR_ORANGE:
-                glColor3f(0.9f, 0.42f, 0.04f);
-                break;
-            }
             if (TEXT_COLOR_DARKRED == TextListColor[i])
             {
                 g_pRenderText->SetBgColor(160, 0, 0, 255);
@@ -465,7 +395,6 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         fsy += fHeight * 1.1f;
     }
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     DisableAlphaBlend();
 }
 
@@ -6046,7 +5975,6 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
 
 void SetTextColor(float r, float g, float b)
 {
-    glColor3f(r, g, b);
     g_pRenderText->SetTextColor(r * 255, g * 255, b * 255, 255);
 }
 
@@ -6429,7 +6357,7 @@ void DeleteGroundItemLabelTexture(GLuint textureId)
 {
     if (textureId != 0)
     {
-        glDeleteTextures(1, &textureId);
+        mu::GetRenderer().ReleaseTexture(textureId);
     }
 }
 
@@ -6926,19 +6854,12 @@ bool CreateGroundItemLabelTexture(const GroundItemLabelDescriptor& descriptor, G
         }
     }
 
-    GLuint textureId = 0;
-    glGenTextures(1, &textureId);
+    const std::uint32_t textureId = mu::GetRenderer().CreateTexture(
+        static_cast<std::uint32_t>(textureWidth), static_cast<std::uint32_t>(textureHeight), textureBuffer.data());
     if (textureId == 0)
     {
         return false;
     }
-
-    glBindTexture(GL_TEXTURE_2D, textureId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer.data());
 
     cacheEntry.TextureId = textureId;
     cacheEntry.TextWidth = textSize.cx;
@@ -6963,13 +6884,12 @@ void RenderGroundItemLabelTexture(OBJECT* o, const GroundItemLabelCacheEntry& ca
     if (cacheEntry.BgColor != 0)
     {
         EnableAlphaTest();
-        glColor4ub(GetRed(cacheEntry.BgColor), GetGreen(cacheEntry.BgColor), GetBlue(cacheEntry.BgColor), GetAlpha(cacheEntry.BgColor));
-        RenderColor(renderX / g_fScreenRate_x, renderY / g_fScreenRate_y,
-            static_cast<float>(cacheEntry.TextWidth) / g_fScreenRate_x, static_cast<float>(cacheEntry.TextHeight) / g_fScreenRate_y);
+        RenderColorQuadARGB(renderX / g_fScreenRate_x, renderY / g_fScreenRate_y,
+            static_cast<float>(cacheEntry.TextWidth) / g_fScreenRate_x,
+            static_cast<float>(cacheEntry.TextHeight) / g_fScreenRate_y, cacheEntry.BgColor);
         EndRenderColor();
     }
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     float textureUWidth = (cacheEntry.TextWidth + 0.01f) / static_cast<float>(cacheEntry.TextureWidth);
     float textureVHeight = (cacheEntry.TextHeight + 0.01f) / static_cast<float>(cacheEntry.TextureHeight);
     RenderBitmap(-static_cast<int>(cacheEntry.TextureId), renderX, renderY, static_cast<float>(cacheEntry.TextWidth),
@@ -10639,39 +10559,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
 
 void InventoryColor(ITEM* p)
 {
-    switch (p->Color)
-    {
-    case 0:
-        glColor3f(1.f, 1.f, 1.f);
-        break;
-    case 1:
-        glColor3f(0.8f, 0.8f, 0.8f);
-        break;
-    case 2:
-        glColor3f(0.6f, 0.7f, 1.f);
-        break;
-    case 3:
-        glColor3f(1.f, 0.2f, 0.1f);
-        break;
-    case 4:
-        glColor3f(0.5f, 1.f, 0.6f);
-        break;
-    case 5:
-        glColor4f(0.8f, 0.7f, 0.f, 1.f);
-        break;
-    case 6:
-        glColor4f(0.8f, 0.5f, 0.f, 1.f);
-        break;
-    case 7:
-        glColor4f(0.8f, 0.3f, 0.3f, 1.f);
-        break;
-    case 8:
-        glColor4f(1.0f, 0.f, 0.f, 1.f);
-        break;
-    case 99:
-        glColor3f(1.f, 0.2f, 0.1f);
-        break;
-    }
+    (void)p;
 }
 
 void RenderEqiupmentBox()
@@ -11307,9 +11195,9 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
             offset += 4;
         }
     }
-    glBindTexture(GL_TEXTURE_2D, b->BitmapIndex);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+    mu::GetRenderer().QueueTextureUpdate(
+        b->BitmapIndex, b->Buffer, static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
+    mu::GetRenderer().BindTexture(b->BitmapIndex);
 }
 
 void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
@@ -11338,8 +11226,6 @@ void RenderGuildList(int StartX, int StartY)
 {
     GuildListStartX = StartX;
     GuildListStartY = StartY;
-
-    glColor3f(1.f, 1.f, 1.f);
 
     DisableAlphaBlend();
     float x, y, Width, Height;
@@ -11393,7 +11279,6 @@ void RenderServerDivision()
 
     float Width, Height, x, y;
 
-    glColor3f(1.f, 1.f, 1.f);
     EnableAlphaTest();
 
     InventoryStartX = REFERENCE_WIDTH - 190;
@@ -11434,14 +11319,9 @@ void RenderServerDivision()
     g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), I18N::Game::Cancel, 0, 0, RT3_WRITE_CENTER);
 
     Width = 120; Height = 24; x = (float)InventoryStartX + 35; y = 320;//(Width/2.f); y = 231;
-    if (g_bServerDivisionAccept)
-        glColor3f(1.f, 1.f, 1.f);
-    else
-        glColor3f(0.5f, 0.5f, 0.5f);
     RenderBitmap(BITMAP_INTERFACE + 10, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, 213.f / 256.f);
     g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), I18N::Game::OK, 0, 0, RT3_WRITE_CENTER);
 
-    glColor3f(1.f, 1.f, 1.f);
 }
 
 BYTE CaculateFreeTicketLevel(int iType)
