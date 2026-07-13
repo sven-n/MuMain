@@ -8,6 +8,7 @@
 #include "Core/Input/Input.h"
 
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 
 #include "Core/Platform/CrtDbg.h"
 
@@ -286,44 +287,40 @@ void CSprite::Render()
     if (!m_bShow)
         return;
 
-    if (-1 < m_nTexID)
+    const std::uint32_t color = (static_cast<std::uint32_t>(m_byAlpha) << 24) |
+                                (static_cast<std::uint32_t>(m_byBlue) << 16) |
+                                (static_cast<std::uint32_t>(m_byGreen) << 8) |
+                                static_cast<std::uint32_t>(m_byRed);
+    mu::Vertex2D vertices[POS_MAX];
+    for (int i = LT; i < POS_MAX; ++i)
+    {
+        vertices[i] = {
+            m_aScrCoord[i].fX * m_fScaleX,
+            m_aScrCoord[i].fY * m_fScaleY,
+            m_nTexID >= 0 ? m_aTexCoord[i].fTU : 0.f,
+            m_nTexID >= 0 ? m_aTexCoord[i].fTV : 0.f,
+            color,
+        };
+    }
+
+    if (m_nTexID >= 0)
     {
         if (!TextureEnable)
         {
             TextureEnable = true;
-            ::glEnable(GL_TEXTURE_2D);
+            mu::GetRenderer().SetTexture2D(true);
         }
-
         BindTexture(m_nTexID);
-
-        ::glBegin(GL_TRIANGLE_FAN);
-
-        ::glColor4ub(m_byRed, m_byGreen, m_byBlue, m_byAlpha);
-
-        for (int i = LT; i < POS_MAX; ++i)
-        {
-            ::glTexCoord2f(m_aTexCoord[i].fTU, m_aTexCoord[i].fTV);
-            ::glVertex2f(m_aScrCoord[i].fX * m_fScaleX,
-                m_aScrCoord[i].fY * m_fScaleY);
-        }
-
-        ::glEnd();
     }
     else
     {
         if (TextureEnable)
         {
             TextureEnable = false;
-            ::glDisable(GL_TEXTURE_2D);
+            mu::GetRenderer().SetTexture2D(false);
         }
-
-        ::glBegin(GL_TRIANGLE_FAN);
-
-        ::glColor4ub(m_byRed, m_byGreen, m_byBlue, m_byAlpha);
-        for (int i = LT; i < POS_MAX; ++i)
-            ::glVertex2f(m_aScrCoord[i].fX * m_fScaleX,
-                m_aScrCoord[i].fY * m_fScaleY);
-
-        ::glEnd();
     }
+
+    const std::uint32_t texture = m_nTexID >= 0 ? static_cast<std::uint32_t>(m_nTexID) : 0u;
+    mu::GetRenderer().RenderQuad2D(vertices, texture);
 }

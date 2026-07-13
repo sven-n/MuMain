@@ -7,6 +7,7 @@
 #include "SceneCommon.h"
 #include "SceneCore.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Renderer/MuRenderer.h"
 
 //=============================================================================
 // Character Selection State Implementation
@@ -222,15 +223,14 @@ void RenderInfomation3D()
 
     if (Success)
     {
-        glMatrixMode(GL_PROJECTION);
-        SaveCameraPerspective();
-    glPushMatrix();
-        glLoadIdentity();
-        glViewport2(0, 0, WindowWidth, WindowHeight);
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
+        SetRenderViewport(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
         CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
@@ -264,12 +264,11 @@ void RenderInfomation3D()
             break;
         }
 
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PopMatrix();
         UpdateMousePositionn();
-    RestoreCameraPerspective();
     }
 }
 

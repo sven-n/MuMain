@@ -112,9 +112,9 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
         return false;
     }
 
-    // Read depth buffer
-    GLfloat depth;
-    glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+    // Backends without depth readback leave the far-depth fallback unchanged.
+    GLfloat depth = 1.f;
+    mu::GetRenderer().ReadPixels(x, y, 1, 1, &depth);
 
     // Expected window-space depth from a standard gluPerspective projection:
     //   z_window = (f / (f - n)) * (1 + n / z_eye)        with z_eye < 0
@@ -132,7 +132,7 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
 void CameraProjection::GetOpenGLMatrix(float outMatrix[3][4])
 {
     float openglMatrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, openglMatrix);
+    mu::GetRenderer().GetMatrix(GL_MODELVIEW_MATRIX, openglMatrix);
 
     // Convert from OpenGL 4×4 to our 3×4 format
     for (int i = 0; i < 3; i++)

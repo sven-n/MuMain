@@ -40,7 +40,7 @@ extern bool         GrabEnable;
 
 //  etc
 bool CheckID_HistoryDay(wchar_t* Name, WORD day);
-void glViewport2(int x, int y, int Width, int Height);
+void SetRenderViewport(int x, int y, int Width, int Height);
 void BeginSprite();
 void EndSprite();
 void EnableDepthTest();
@@ -93,19 +93,22 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4]);
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Angle = 0.f, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha = 1.f);
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha = 1.f, float Scale = 15.f);
-float RenderNumber2D(float x, float y, int Num, float Width, float Height);
+float RenderNumber2D(float x, float y, int Num, float Width, float Height,
+    unsigned int color = 0xFFFFFFFFu);
 void RenderColor(float x, float y, float Width, float Height, float Alpha = 0.f, int Flag = 0);
 void EndRenderColor();
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor);
 void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness, unsigned int argbColor);
 void RenderBitmap(int Texture, float x, float y, float Width, float Height, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, bool Scale = true, bool StartScale = true, float Alpha = 0.f);
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, unsigned int color = 0xffffffff);
-void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Angle, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
+void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Angle, float u = 0.f,
+    float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, unsigned int color = 0xFFFFFFFFu);
 void RenderBitRotate(int Texture, float x, float y, float Width, float Height, float Rotate);
 void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width, float Height, float Rotate, float Rotate_Loc, float uWidth, float vHeight, int Num = -1);
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Height);
-void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight);
+void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,
+    float vHeight, unsigned int color = 0xFFFFFFFFu);
 void BeginBitmap();
 void EndBitmap();
 float absf(float a);

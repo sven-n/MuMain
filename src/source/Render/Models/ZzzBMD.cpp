@@ -44,15 +44,14 @@ vec2_t RenderArrayTexCoords[MAX_VERTICES * 3];
 
 namespace
 {
-std::vector<mu::Vertex3D>& GetRendererVertexScratch(std::size_t requiredVertexCount)
+std::span<mu::Vertex3D> GetRendererVertexScratch(std::size_t requiredVertexCount)
 {
     static thread_local std::vector<mu::Vertex3D> vertices;
-    vertices.clear();
-    if (vertices.capacity() < requiredVertexCount)
+    if (vertices.size() < requiredVertexCount)
     {
-        vertices.reserve(requiredVertexCount);
+        vertices.resize(requiredVertexCount);
     }
-    return vertices;
+    return {vertices.data(), requiredVertexCount};
 }
 } // namespace
 
@@ -855,13 +854,12 @@ void BMD::BindLightMaps()
             SmoothBitmap(lmp->Width, lmp->Height, lmp->Buffer);
             SmoothBitmap(lmp->Width, lmp->Height, lmp->Buffer);
 
-            glBindTexture(GL_TEXTURE_2D, i + IndexLightMap);
-            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, lmp->Width, lmp->Height, 0, GL_RGB, GL_UNSIGNED_BYTE, lmp->Buffer);
+            mu::GetRenderer().BindTexture(i + IndexLightMap);
+            mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
     }
     LightMapEnable = true;
@@ -947,13 +945,13 @@ void BMD::EndRenderCoinHeap(int coinCount)
     Mesh_t* m = &Meshs[meshIndex];
 
     const int numVerts = m->NumTriangles * 3 * coinCount;
-    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
     for (int i = 0; i < numVerts; ++i)
     {
         const vec4_t& c = colors[i];
         const std::uint32_t color = PackABGR(c[0], c[1], c[2], c[3]);
-        muVerts.push_back(
-            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0], texCoords[i][1], color});
+        muVerts[static_cast<std::size_t>(i)] =
+            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0], texCoords[i][1], color};
     }
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
@@ -1279,9 +1277,11 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
     }
 
-    auto vertices = RenderArrayVertices;
-    auto colors = RenderArrayColors;
-    auto texCoords = RenderArrayTexCoords;
+    const std::size_t maxVertexCount = static_cast<std::size_t>(m->NumTriangles) * 3;
+    auto rendererVertices = GetRendererVertexScratch(maxVertexCount);
+    const bool shadowMap = (renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP;
+    const float colorScale = useBlendMeshColor ? blendMeshAlpha : 1.0f;
+    const float baseAlpha = (useBlendMeshColor || meshIndex == StreamMesh) ? 1.0f : alpha;
 
     int target_vertex_index = -1;
     for (int j = 0; j < m->NumTriangles; j++)
@@ -1292,20 +1292,19 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             const int source_vertex_index = triangle->VertexIndex[k];
             target_vertex_index++;
 
-            VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
-
-            const bool shadowMap = (renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP;
-            const float colorScale = useBlendMeshColor ? blendMeshAlpha : 1.0f;
-            const float baseAlpha = (useBlendMeshColor || meshIndex == StreamMesh) ? 1.0f : alpha;
+            vec3_t position;
+            vec4_t colorComponents;
+            vec2_t texCoord;
+            VectorCopy(VertexTransform[meshIndex][source_vertex_index], position);
             Vector4(shadowMap ? 0.0f : BodyLight[0] * colorScale,
                     shadowMap ? 0.0f : BodyLight[1] * colorScale,
                     shadowMap ? 0.0f : BodyLight[2] * colorScale,
                     baseAlpha,
-                    colors[target_vertex_index]);
+                    colorComponents);
 
             auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
-            texCoords[target_vertex_index][0] = texco.TexCoordU;
-            texCoords[target_vertex_index][1] = texco.TexCoordV;
+            texCoord[0] = texco.TexCoordU;
+            texCoord[1] = texco.TexCoordV;
 
             int normalIndex = triangle->NormalIndex[k];
             switch (finalRenderFlags)
@@ -1314,42 +1313,42 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                 {
                     if (EnableWave)
                     {
-                        texCoords[target_vertex_index][0] += blendMeshTextureCoordU;
-                        texCoords[target_vertex_index][1] += blendMeshTextureCoordV;
+                        texCoord[0] += blendMeshTextureCoordU;
+                        texCoord[1] += blendMeshTextureCoordV;
                     }
 
                     if (enableLight)
                     {
                         auto light = LightTransform[meshIndex][normalIndex];
-                        Vector4(light[0], light[1], light[2], alpha, colors[target_vertex_index]);
+                        Vector4(light[0], light[1], light[2], alpha, colorComponents);
                     }
 
                     break;
                 }
                 case RENDER_CHROME:
                 {
-                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0];
-                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1];
+                    texCoord[0] = g_chrome[normalIndex][0];
+                    texCoord[1] = g_chrome[normalIndex][1];
                     break;
                 }
                 case RENDER_CHROME4:
                 {
-                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0] + blendMeshTextureCoordU;
-                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1] + blendMeshTextureCoordV;
+                    texCoord[0] = g_chrome[normalIndex][0] + blendMeshTextureCoordU;
+                    texCoord[1] = g_chrome[normalIndex][1] + blendMeshTextureCoordV;
                     break;
                 }
                 case RENDER_OIL:
                 {
-                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0] * texCoords[target_vertex_index][0] + blendMeshTextureCoordU;
-                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1] * texCoords[target_vertex_index][1] + blendMeshTextureCoordV;
+                    texCoord[0] = g_chrome[normalIndex][0] * texCoord[0] + blendMeshTextureCoordU;
+                    texCoord[1] = g_chrome[normalIndex][1] * texCoord[1] + blendMeshTextureCoordV;
                     break;
                 }
             }
 
-            if ((renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP)
+            if (shadowMap)
             {
                 vec3_t pos;
-                VectorSubtract(vertices[target_vertex_index], BodyOrigin, pos);
+                VectorSubtract(position, BodyOrigin, pos);
 
                 pos[0] += pos[2] * (pos[0] + 2000.f) / (pos[2] - 4000.f);
                 pos[2] = 5.f;
@@ -1362,22 +1361,19 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                 float* normal = NormalTransform[meshIndex][normalIndex];
                 for (int iCoord = 0; iCoord < 3; ++iCoord)
                 {
-                    vertices[target_vertex_index][iCoord] += normal[iCoord] * time_sin;
+                    position[iCoord] += normal[iCoord] * time_sin;
                 }
             }
+
+            const std::uint32_t color = PackABGR(colorComponents[0], colorComponents[1], colorComponents[2],
+                                                  colorComponents[3]);
+            rendererVertices[static_cast<std::size_t>(target_vertex_index)] =
+                {position[0], position[1], position[2], 0.f, 0.f, 0.f, texCoord[0], texCoord[1], color};
         }
     }
 
-    const int numVerts = m->NumTriangles * 3;
-    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
-    for (int i = 0; i < numVerts; ++i)
-    {
-        const vec4_t& c = colors[i];
-        const std::uint32_t color = PackABGR(c[0], c[1], c[2], c[3]);
-        muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0],
-                           texCoords[i][1], color});
-    }
-    mu::GetRenderer().RenderTriangles(muVerts, 0u);
+    const std::size_t renderedVertexCount = static_cast<std::size_t>(target_vertex_index + 1);
+    mu::GetRenderer().RenderTriangles(rendererVertices.first(renderedVertexCount), 0u);
 }
 
 void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
@@ -1642,7 +1638,8 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
         Render = RENDER_TEXTURE;
     }
 
-    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(m->NumTriangles) * 3);
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(m->NumTriangles) * 3);
+    std::size_t vertexIndex = 0;
     for (int j = 0; j < m->NumTriangles; j++)
     {
         Triangle_t* tp = &m->Triangles[j];
@@ -1702,10 +1699,10 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             }
 
             float* n = NormalTransform[i][ni];
-            muVerts.push_back({px, py, pz, n[0], n[1], n[2], u, v, color});
+            muVerts[vertexIndex++] = {px, py, pz, n[0], n[1], n[2], u, v, color};
         }
     }
-    mu::GetRenderer().RenderTriangles(muVerts, 0u);
+    mu::GetRenderer().RenderTriangles(muVerts.first(vertexIndex), 0u);
 }
 
 void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* obj)
@@ -2106,7 +2103,8 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
         Render = RENDER_TEXTURE;
     }
 
-    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(m->NumTriangles) * 3);
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(m->NumTriangles) * 3);
+    std::size_t vertexIndex = 0;
     for (int j = 0; j < m->NumTriangles; j++)
     {
         vec3_t  pos;
@@ -2150,10 +2148,10 @@ void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh,
             VectorAdd(VertexTransform[i][vi], BodyOrigin, pos);
 
             float* n = NormalTransform[i][ni];
-            muVerts.push_back({pos[0], pos[1], pos[2], n[0], n[1], n[2], u, v, color});
+            muVerts[vertexIndex++] = {pos[0], pos[1], pos[2], n[0], n[1], n[2], u, v, color};
         }
     }
-    mu::GetRenderer().RenderTriangles(muVerts, 0u);
+    mu::GetRenderer().RenderTriangles(muVerts.first(vertexIndex), 0u);
 }
 
 void BMD::RenderBodyTranslate(int Flag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int HiddenMesh, int Texture)
@@ -2200,7 +2198,8 @@ __forceinline void GetClothShadowPosition(vec3_t* target, CPhysicsCloth* pCloth,
     CalcShadowPosition(target, origin, sx, sy);
 }
 
-void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float sx, const float sy) const
+void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float sx, const float sy,
+    const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
@@ -2254,15 +2253,17 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
     }
 
     const int numVerts = target_vertex_index + 1;
-    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
     for (int i = 0; i < numVerts; ++i)
     {
-        muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, 0xFF000000u});
+        muVerts[static_cast<std::size_t>(i)] =
+            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, color};
     }
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
-void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh, const float sx, const float sy) const
+void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh,
+    const int endMesh, const float sx, const float sy, const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
@@ -2301,15 +2302,17 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
     }
 
     const int numVerts = target_vertex_index + 1;
-    auto& muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
     for (int i = 0; i < numVerts; ++i)
     {
-        muVerts.push_back({vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, 0xFF000000u});
+        muVerts[static_cast<std::size_t>(i)] =
+            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, color};
     }
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
-void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber, const int endMeshNumber, void* pClothes, const int clothesCount)
+void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber,
+    const int endMeshNumber, void* pClothes, const int clothesCount, const float alpha)
 {
     if (!g_pOption->GetRenderAllEffects())
     {
@@ -2323,15 +2326,13 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
     EnableAlphaTest(false);
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.5f); // 50% opacity for shadows
-
     DisableTexture();
     DisableDepthMask();
     BeginRender(1.f);
 
     // enable stencil and continue draw
-    glEnable(GL_STENCIL_TEST);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    mu::GetRenderer().SetStencilTest(true);
+    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
     int startMesh = 0;
     int endMesh = NumMeshs;
@@ -2348,20 +2349,21 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
     const float sx = gMapManager.InBattleCastle() ? 2500.f : 2000.f;
     const float sy = 4000.f;
+    const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(alpha, 0.f, 1.f));
 
     if (clothesCount == 0)
     {
-        AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy);
+        AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor);
     }
     else
     {
-        AddClothesShadowTriangles(pClothes, clothesCount, sx, sy);
+        AddClothesShadowTriangles(pClothes, clothesCount, sx, sy, shadowColor);
     }
 
     EndRender();
     EnableDepthMask();
 
-    glDisable(GL_STENCIL_TEST);
+    mu::GetRenderer().SetStencilTest(false);
 }
 
 void BMD::RenderObjectBoundingBox()
@@ -2388,18 +2390,19 @@ void BMD::RenderObjectBoundingBox()
             constexpr std::uint32_t cMid = 0xFF999999u;
             constexpr std::uint32_t cLight = 0xFF666666u;
 
-            auto& verts = GetRendererVertexScratch(36);
+            auto verts = GetRendererVertexScratch(36);
+            std::size_t vertexIndex = 0;
 
             auto EmitQuad = [&](const vec3_t& q0, float u0, float v0, const vec3_t& q1, float u1, float v1,
                                 const vec3_t& q2, float u2, float v2, const vec3_t& q3, float u3, float v3,
                                 std::uint32_t col)
             {
-                verts.push_back(MakeVtx(q0, u0, v0, col));
-                verts.push_back(MakeVtx(q1, u1, v1, col));
-                verts.push_back(MakeVtx(q2, u2, v2, col));
-                verts.push_back(MakeVtx(q0, u0, v0, col));
-                verts.push_back(MakeVtx(q2, u2, v2, col));
-                verts.push_back(MakeVtx(q3, u3, v3, col));
+                verts[vertexIndex++] = MakeVtx(q0, u0, v0, col);
+                verts[vertexIndex++] = MakeVtx(q1, u1, v1, col);
+                verts[vertexIndex++] = MakeVtx(q2, u2, v2, col);
+                verts[vertexIndex++] = MakeVtx(q0, u0, v0, col);
+                verts[vertexIndex++] = MakeVtx(q2, u2, v2, col);
+                verts[vertexIndex++] = MakeVtx(q3, u3, v3, col);
             };
 
             EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[6], 1.f, 0.f, BoundingVertices[4], 0.f, 0.f,
@@ -2428,7 +2431,8 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
     mu::GetRenderer().SetDepthFunc(GL_ALWAYS);
 
     constexpr std::uint32_t boneColor = 0xFF33CCCCu;
-    auto& allLines = GetRendererVertexScratch(static_cast<std::size_t>(NumBones) * 6);
+    auto allLines = GetRendererVertexScratch(static_cast<std::size_t>(NumBones) * 6);
+    std::size_t vertexIndex = 0;
 
     for (int i = 0; i < NumBones; i++)
     {
@@ -2458,18 +2462,18 @@ void BMD::RenderBone(float(*BoneMatrix)[3][4])
                 }
                 auto MakeVtx = [&](const vec3_t& pos) -> mu::Vertex3D
                 { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, 0.f, 0.f, boneColor}; };
-                allLines.push_back(MakeVtx(BoneVertices[0]));
-                allLines.push_back(MakeVtx(BoneVertices[1]));
-                allLines.push_back(MakeVtx(BoneVertices[1]));
-                allLines.push_back(MakeVtx(BoneVertices[2]));
-                allLines.push_back(MakeVtx(BoneVertices[2]));
-                allLines.push_back(MakeVtx(BoneVertices[0]));
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[0]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[1]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[1]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[2]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[2]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[0]);
             }
         }
     }
-    if (!allLines.empty())
+    if (vertexIndex != 0)
     {
-        mu::GetRenderer().RenderLines(allLines, 0u);
+        mu::GetRenderer().RenderLines(allLines.first(vertexIndex), 0u);
     }
 
     mu::GetRenderer().SetDepthFunc(GL_LEQUAL);

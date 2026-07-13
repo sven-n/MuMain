@@ -182,7 +182,7 @@ void EnableDepthTest()
     if (!DepthTestEnable)
     {
         DepthTestEnable = true;
-        glEnable(GL_DEPTH_TEST);
+        mu::GetRenderer().SetDepthTest(true);
     }
 }
 
@@ -191,7 +191,7 @@ void DisableDepthTest()
     if (DepthTestEnable)
     {
         DepthTestEnable = false;
-        glDisable(GL_DEPTH_TEST);
+        mu::GetRenderer().SetDepthTest(false);
     }
 }
 
@@ -200,7 +200,7 @@ void EnableDepthMask()
     if (!DepthMaskEnable)
     {
         DepthMaskEnable = true;
-        glDepthMask(true);
+        mu::GetRenderer().SetDepthMask(true);
     }
 }
 
@@ -209,7 +209,7 @@ void DisableDepthMask()
     if (DepthMaskEnable)
     {
         DepthMaskEnable = false;
-        glDepthMask(false);
+        mu::GetRenderer().SetDepthMask(false);
     }
 }
 
@@ -218,7 +218,7 @@ void EnableCullFace()
     if (!CullFaceEnable)
     {
         CullFaceEnable = true;
-        glEnable(GL_CULL_FACE);
+        mu::GetRenderer().SetCullFace(true);
     }
 }
 
@@ -227,7 +227,7 @@ void DisableCullFace()
     if (CullFaceEnable)
     {
         CullFaceEnable = false;
-        glDisable(GL_CULL_FACE);
+        mu::GetRenderer().SetCullFace(false);
     }
 }
 
@@ -239,7 +239,7 @@ void DisableTexture(bool AlphaTest)
         if (!AlphaTestEnable)
         {
             AlphaTestEnable = true;
-            glEnable(GL_ALPHA_TEST);
+            mu::GetRenderer().SetAlphaTest(true);
         }
     }
     else
@@ -247,13 +247,13 @@ void DisableTexture(bool AlphaTest)
         if (AlphaTestEnable)
         {
             AlphaTestEnable = false;
-            glDisable(GL_ALPHA_TEST);
+            mu::GetRenderer().SetAlphaTest(false);
         }
     }
     if (TextureEnable)
     {
         TextureEnable = false;
-        glDisable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(false);
     }
 }
 
@@ -262,22 +262,22 @@ void DisableAlphaBlend()
     if (AlphaBlendType != 0)
     {
         AlphaBlendType = 0;
-        glDisable(GL_BLEND);
+        mu::GetRenderer().DisableBlend();
     }
     EnableCullFace();
     EnableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaTest(bool DepthMask)
@@ -285,8 +285,7 @@ void EnableAlphaTest(bool DepthMask)
     if (AlphaBlendType != 2)
     {
         AlphaBlendType = 2;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
     }
     DisableCullFace();
     if (DepthMask)
@@ -294,15 +293,15 @@ void EnableAlphaTest(bool DepthMask)
     if (!AlphaTestEnable)
     {
         AlphaTestEnable = true;
-        glEnable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(true);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend()
@@ -310,23 +309,22 @@ void EnableAlphaBlend()
     if (AlphaBlendType != 3)
     {
         AlphaBlendType = 3;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Glow);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glDisable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(false);
 }
 
 void EnableAlphaBlendMinus()
@@ -334,23 +332,22 @@ void EnableAlphaBlendMinus()
     if (AlphaBlendType != 4)
     {
         AlphaBlendType = 4;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Subtract);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend2()
@@ -358,23 +355,22 @@ void EnableAlphaBlend2()
     if (AlphaBlendType != 5)
     {
         AlphaBlendType = 5;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Luminance);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend3()
@@ -382,23 +378,22 @@ void EnableAlphaBlend3()
     if (AlphaBlendType != 6)
     {
         AlphaBlendType = 6;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend4()
@@ -406,23 +401,22 @@ void EnableAlphaBlend4()
     if (AlphaBlendType != 7)
     {
         AlphaBlendType = 7;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Mixed);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableLightMap()
@@ -430,26 +424,25 @@ void EnableLightMap()
     if (AlphaBlendType != 1)
     {
         AlphaBlendType = 1;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::LightMap);
     }
     EnableCullFace();
     EnableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-        glEnable(GL_FOG);
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
-void glViewport2(int x, int y, int Width, int Height)
+void SetRenderViewport(int x, int y, int Width, int Height)
 {
     OpenglWindowX = x;
     OpenglWindowY = y;
@@ -525,10 +518,10 @@ void BeginOpengl(int x, int y, int Width, int Height)
     Width = Width * WindowWidth / REFERENCE_WIDTH;
     Height = Height * WindowHeight / REFERENCE_HEIGHT;
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glViewport2(x, y, Width, Height);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(x, y, Width, Height);
 
     // Calculate aspect ratio dynamically from viewport dimensions
     // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)
@@ -538,20 +531,14 @@ void BeginOpengl(int x, int y, int Width, int Height)
     // Apply RENDER_DISTANCE_MULTIPLIER for consistent rendering distance across all systems
     CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
 
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glRotatef(g_Camera.Angle[1], 0.f, 1.f, 0.f);
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    mu::GetRenderer().Rotate(g_Camera.Angle[1], 0.f, 1.f, 0.f);
     if (g_Camera.TopViewEnable == false)
-        glRotatef(g_Camera.Angle[0], 1.f, 0.f, 0.f);
-    glRotatef(g_Camera.Angle[2], 0.f, 0.f, 1.f);
-    glTranslatef(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
-
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glDepthMask(true);
+        mu::GetRenderer().Rotate(g_Camera.Angle[0], 1.f, 0.f, 0.f);
+    mu::GetRenderer().Rotate(g_Camera.Angle[2], 0.f, 0.f, 1.f);
+    mu::GetRenderer().Translate(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
 
     mu::GetRenderer().SetAlphaTest(false);
     mu::GetRenderer().SetTexture2D(true);
@@ -564,8 +551,8 @@ void BeginOpengl(int x, int y, int Width, int Height)
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
-    glDepthFunc(GL_LEQUAL);
-    glAlphaFunc(GL_GREATER, 0.25f);
+    mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
+    mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
     if (FogEnable)
     {
         // Fog scales dynamically with view distance (g_Camera.ViewFar) so it
@@ -609,18 +596,18 @@ void BeginOpengl(int x, int y, int Width, int Height)
 
 void EndOpengl()
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
 }
 
 void UpdateMousePositionn()
 {
     vec3_t vPos;
 
-    glLoadIdentity();
-    glTranslatef(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
+    mu::GetRenderer().LoadIdentity();
+    mu::GetRenderer().Translate(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
     CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
 
     Vector(-g_Camera.Matrix[0][3], -g_Camera.Matrix[1][3], -g_Camera.Matrix[2][3], vPos);
@@ -630,35 +617,8 @@ void UpdateMousePositionn()
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL IsGLExtensionSupported(const wchar_t* extension)
 {
-    const size_t extlen = wcslen(extension);
-    const wchar_t* supported = NULL;
-
-    // Try To Use wglGetExtensionStringARB On Current DC, If Possible
-    auto wglGetExtString = wglGetProcAddress("wglGetExtensionsStringARB");
-
-    if (wglGetExtString)
-        supported = ((wchar_t* (__stdcall*)(HDC))wglGetExtString)(wglGetCurrentDC());
-
-    // If That Failed, Try Standard Opengl Extensions String
-    if (supported == NULL)
-        supported = (wchar_t*)glGetString(GL_EXTENSIONS);
-
-    // If That Failed Too, Must Be No Extensions Supported
-    if (supported == NULL)
-        return FALSE;
-
-    // Begin Examination At Start Of String, Increment By 1 On False Match
-    for (const wchar_t* p = supported; ; p++)
-    {
-        // Advance p Up To The Next Possible Match
-        p = wcsstr(p, extension);
-
-        if (p == NULL)
-            return FALSE;															// No Match
-
-        if ((p == supported || p[-1] == ' ') && (p[extlen] == '\0' || p[extlen] == ' '))
-            return TRUE;															// Match
-    }
+    (void)extension;
+    return FALSE;
 }
 
 #endif // LDS_ADD_MULTISAMPLEANTIALIASING
@@ -696,105 +656,19 @@ void DisableVSync()
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd, int iRequestMSAAValue, int& OutiPixelFormat)
 {
-    BOOL bIsGLMultisampleSupported = FALSE;
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // See If The String Exists In WGL!
-    if (!IsGLExtensionSupported(L"WGL_ARB_multisample"))
-    {
-        bIsGLMultisampleSupported = FALSE;
-        return FALSE;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-    // Get Our Pixel Format
-    PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress(L"wglChoosePixelFormatARB");
-    if (!wglChoosePixelFormatARB)
-    {
-        bIsGLMultisampleSupported = FALSE;
-        return FALSE;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Get Our Current Device Context
-    HDC hDC = GetDC(hWnd);
-
-    int		valid;
-    UINT	numFormats;
-    float	fAttributes[] = { 0,0 };
-
-    // These Attributes Are The Bits We Want To Test For In Our Sample
-    // Everything Is Pretty Standard, The Only One We Want To
-    // Really Focus On Is The SAMPLE BUFFERS ARB And WGL SAMPLES
-    // These Two Are Going To Do The Main Testing For Whether Or Not
-    // We Support Multisampling On This Hardware.
-    int iAttributes[] =
-    {
-        WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
-            WGL_SUPPORT_OPENGL_ARB,GL_TRUE,
-            WGL_ACCELERATION_ARB,WGL_FULL_ACCELERATION_ARB,
-            WGL_COLOR_BITS_ARB,24,
-            WGL_ALPHA_BITS_ARB,8,
-            WGL_DEPTH_BITS_ARB,16,
-            WGL_STENCIL_BITS_ARB,0,
-            WGL_DOUBLE_BUFFER_ARB,GL_TRUE,
-            WGL_SAMPLE_BUFFERS_ARB,GL_TRUE,
-            WGL_SAMPLES_ARB, iRequestMSAAValue,					// xN MultiSampling (N=4,2,1)
-            0,0
-    };
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // First We Check To See If We Can Get A Pixel Format For 4 Samples
-    valid = wglChoosePixelFormatARB(hDC, iAttributes, fAttributes, 1, &OutiPixelFormat, &numFormats);
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // If We Returned True, And Our Format Count Is Greater Than 1
-    if (valid && numFormats >= 1)
-    {
-        bIsGLMultisampleSupported = TRUE;
-        return bIsGLMultisampleSupported;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Our Pixel Format With 4 Samples Failed, Test For 2 Samples
-    iAttributes[19] = 2;
-    valid = wglChoosePixelFormatARB(hDC, iAttributes, fAttributes, 1, &OutiPixelFormat, &numFormats);
-    if (valid && numFormats >= 1)
-    {
-        bIsGLMultisampleSupported = TRUE;
-        return bIsGLMultisampleSupported;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Return The Valid Format
-    return  bIsGLMultisampleSupported;
+    (void)hInstance;
+    (void)hWnd;
+    (void)pfd;
+    (void)iRequestMSAAValue;
+    (void)OutiPixelFormat;
+    return FALSE;
 }
 
 void SetEnableMultisample()
 {
     if (TRUE == g_bSupportedMSAA)
     {
-        glEnable(GL_MULTISAMPLE_ARB);							// Enable Multisampling
+        mu::GetRenderer().SetMultisample(true);
     }
 
 #if defined(_DEBUG)
@@ -806,7 +680,7 @@ void SetDisableMultisample()
 {
     if (TRUE == g_bSupportedMSAA)
     {
-        glDisable(GL_MULTISAMPLE_ARB);							// Enable Multisampling
+        mu::GetRenderer().SetMultisample(false);
     }
 
 #if defined(_DEBUG)
@@ -843,44 +717,26 @@ void RenderBox(float Matrix[3][4])
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    glBegin(GL_QUADS);
-    //glBegin(GL_LINES);
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[5]);
-
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[1]);
-
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[6]);
-
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[4]);
-
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[3]);
-
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[2]);
-    glEnd();
+    const auto MakeVtx = [](const vec3_t& pos, float u, float v, std::uint32_t color) -> mu::Vertex3D
+    { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, u, v, color}; };
+    std::vector<mu::Vertex3D> verts;
+    verts.reserve(36);
+    const auto EmitQuad = [&](const vec3_t& a, const vec3_t& b, const vec3_t& c, const vec3_t& d, std::uint32_t color)
+    {
+        verts.push_back(MakeVtx(a, 1.f, 1.f, color));
+        verts.push_back(MakeVtx(b, 1.f, 0.f, color));
+        verts.push_back(MakeVtx(c, 0.f, 0.f, color));
+        verts.push_back(MakeVtx(a, 1.f, 1.f, color));
+        verts.push_back(MakeVtx(c, 0.f, 0.f, color));
+        verts.push_back(MakeVtx(d, 0.f, 1.f, color));
+    };
+    EmitQuad(TransformVertices[7], TransformVertices[6], TransformVertices[4], TransformVertices[5], mu::PackABGR(.2f, .2f, .2f, 1.f));
+    EmitQuad(TransformVertices[0], TransformVertices[2], TransformVertices[3], TransformVertices[1], mu::PackABGR(.2f, .2f, .2f, 1.f));
+    EmitQuad(TransformVertices[7], TransformVertices[3], TransformVertices[2], TransformVertices[6], mu::PackABGR(.6f, .6f, .6f, 1.f));
+    EmitQuad(TransformVertices[0], TransformVertices[1], TransformVertices[5], TransformVertices[4], mu::PackABGR(.6f, .6f, .6f, 1.f));
+    EmitQuad(TransformVertices[7], TransformVertices[5], TransformVertices[1], TransformVertices[3], mu::PackABGR(.4f, .4f, .4f, 1.f));
+    EmitQuad(TransformVertices[0], TransformVertices[4], TransformVertices[6], TransformVertices[2], mu::PackABGR(.4f, .4f, .4f, 1.f));
+    mu::GetRenderer().RenderTriangles(verts, 0u);
 }
 
 void RenderPlane3D(float Width, float Height, float Matrix[3][4])
@@ -897,23 +753,26 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4])
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.f, 1.f); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.f, 1.f); glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(1.f, 0.f); glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(0.f, 0.f); glVertex3fv(TransformVertices[3]);
-    glEnd();
+    const mu::Vertex3D verts[6] = {
+        {TransformVertices[0][0], TransformVertices[0][1], TransformVertices[0][2], 0.f, 0.f, 1.f, 0.f, 1.f, 0xFFFFFFFFu},
+        {TransformVertices[1][0], TransformVertices[1][1], TransformVertices[1][2], 0.f, 0.f, 1.f, 1.f, 1.f, 0xFFFFFFFFu},
+        {TransformVertices[2][0], TransformVertices[2][1], TransformVertices[2][2], 0.f, 0.f, 1.f, 1.f, 0.f, 0xFFFFFFFFu},
+        {TransformVertices[0][0], TransformVertices[0][1], TransformVertices[0][2], 0.f, 0.f, 1.f, 0.f, 1.f, 0xFFFFFFFFu},
+        {TransformVertices[2][0], TransformVertices[2][1], TransformVertices[2][2], 0.f, 0.f, 1.f, 1.f, 0.f, 0xFFFFFFFFu},
+        {TransformVertices[3][0], TransformVertices[3][1], TransformVertices[3][2], 0.f, 0.f, 1.f, 0.f, 0.f, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderTriangles(verts, 0u);
 }
 
 void BeginSprite()
 {
-    glPushMatrix();
-    glLoadIdentity();
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
 }
 
 void EndSprite()
 {
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
 }
 
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Rotation, float u, float v, float uWidth, float vHeight)
@@ -1075,7 +934,7 @@ void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Sca
     }
 }
 
-float RenderNumber2D(float x, float y, int Num, float Width, float Height)
+float RenderNumber2D(float x, float y, int Num, float Width, float Height, unsigned int color)
 {
     wchar_t Text[32];
     _itow(Num, Text, 10);
@@ -1084,8 +943,8 @@ float RenderNumber2D(float x, float y, int Num, float Width, float Height)
     for (int i = 0; i < Length; i++)
     {
         float u = (float)(Text[i] - 48) * 16.f / 256.f;
-        //glColor3fv(Color);
-        RenderBitmap(BITMAP_FONT + 1, x, y, Width, Height, u, 0.f, 16.f / 256.f, 16.f / 32.f);
+        RenderColorBitmap(BITMAP_FONT + 1, x, y, Width, Height, u, 0.f,
+            16.f / 256.f, 16.f / 32.f, color);
         x += Width * 0.7f;
     }
     return x;
@@ -1093,32 +952,13 @@ float RenderNumber2D(float x, float y, int Num, float Width, float Height)
 
 void BeginBitmap()
 {
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-
-    // Always use full window dimensions for UI/bitmap rendering
-    // UI bitmaps use ConvertX/Y to scale from 640×480 reference,
-    // so we need the full window size here (not the game viewport which may be smaller)
-    glViewport(0, 0, WindowWidth, WindowHeight);
-    gluPerspective(g_Camera.FOV, (WindowWidth) / ((float)WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
-
-    glLoadIdentity();
-    gluOrtho2D(0, WindowWidth, 0, WindowHeight);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
-    glLoadIdentity();
+    mu::GetRenderer().Begin2DPass();
     DisableDepthTest();
 }
 
 void EndBitmap()
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    mu::GetRenderer().End2DPass();
 }
 
 void RenderColor(float x, float y, float Width, float Height, float Alpha, int Flag)
@@ -1277,7 +1117,8 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
     mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
-void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v, float uWidth, float vHeight)
+void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v,
+    float uWidth, float vHeight, unsigned int color)
 {
     x = ConvertX(x);
     y = ConvertY(y);
@@ -1307,10 +1148,10 @@ void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height
     VectorRotate(p[3], Matrix, p2[3]);
 
     const mu::Vertex2D vertices[4] = {
-        {p2[0][0] + x, p2[0][1] + y, u, v, 0xFFFFFFFFu},
-        {p2[1][0] + x, p2[1][1] + y, u, v + vHeight, 0xFFFFFFFFu},
-        {p2[2][0] + x, p2[2][1] + y, u + uWidth, v + vHeight, 0xFFFFFFFFu},
-        {p2[3][0] + x, p2[3][1] + y, u + uWidth, v, 0xFFFFFFFFu},
+        {p2[0][0] + x, p2[0][1] + y, u, v, color},
+        {p2[1][0] + x, p2[1][1] + y, u, v + vHeight, color},
+        {p2[2][0] + x, p2[2][1] + y, u + uWidth, v + vHeight, color},
+        {p2[3][0] + x, p2[3][1] + y, u + uWidth, v, color},
     };
     mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
@@ -1507,7 +1348,8 @@ void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Heigh
     }
 }
 
-void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight)
+void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,
+    float vHeight, unsigned int color)
 {
     x = ConvertX(x);
     y = ConvertY(y);
@@ -1518,10 +1360,10 @@ void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, fl
     y = WindowHeight - y;
 
     const mu::Vertex2D vertices[4] = {
-        {x, y, u, v + vHeight * 0.25f, 0xFFFFFFFFu},
-        {x, y - Height, u, v + vHeight - vHeight * 0.25f, 0xFFFFFFFFu},
-        {x + Width, y - Height, u + uWidth, v + vHeight, 0xFFFFFFFFu},
-        {x + Width, y, u + uWidth, v, 0xFFFFFFFFu},
+        {x, y, u, v + vHeight * 0.25f, color},
+        {x, y - Height, u, v + vHeight - vHeight * 0.25f, color},
+        {x + Width, y - Height, u + uWidth, v + vHeight, color},
+        {x + Width, y, u + uWidth, v, color},
     };
     mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }

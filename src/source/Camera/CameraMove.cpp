@@ -11,11 +11,13 @@
 #include <cstdlib>
 #include <limits>
 #include <memory>
+#include <vector>
 
 #include "Camera/CameraMove.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/ZzzAI.h"
 #include "World/MapInfra/MapManager.h"
+#include "Render/Renderer/MuRenderer.h"
 
 // Forward declaration for LoginScene offset helper
 static void ApplyLoginSceneOffset(float& x, float& y, float& z);
@@ -525,40 +527,52 @@ DWORD CCameraMove::GetCameraWalkState() const
 
 void CCameraMove::RenderWayPoint()
 {
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_TEXTURE_2D);
+    DisableDepthTest();
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(false);
 
-    glBegin(GL_QUADS);
-    glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
+    static thread_local std::vector<mu::Vertex3D> vertices;
+    vertices.clear();
+    vertices.reserve(m_listWayPoint.size() * 6);
+    constexpr std::uint32_t waypointColor = 0xCC0000FFu;
     for (const auto& waypoint : m_listWayPoint)
     {
-        glNormal3f(0.0f, 0.0f, 1.0f);
         const float minX = waypoint->fCameraX + kWaypointRenderOffset - kWaypointRenderHalfSize;
         const float maxX = waypoint->fCameraX + kWaypointRenderOffset + kWaypointRenderHalfSize;
         const float minY = waypoint->fCameraY + kWaypointRenderOffset - kWaypointRenderHalfSize;
         const float maxY = waypoint->fCameraY + kWaypointRenderOffset + kWaypointRenderHalfSize;
-
-        glVertex3f(minX, minY, waypoint->fCameraZ);
-        glVertex3f(maxX, minY, waypoint->fCameraZ);
-        glVertex3f(maxX, maxY, waypoint->fCameraZ);
-        glVertex3f(minX, maxY, waypoint->fCameraZ);
+        const float z = waypoint->fCameraZ;
+        const mu::Vertex3D v0 = {minX, minY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
+        const mu::Vertex3D v1 = {maxX, minY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
+        const mu::Vertex3D v2 = {maxX, maxY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
+        const mu::Vertex3D v3 = {minX, maxY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
+        vertices.insert(vertices.end(), {v0, v1, v2, v0, v2, v3});
     }
-    glEnd();
+    mu::GetRenderer().RenderTriangles(vertices, 0u);
 
-    glBegin(GL_LINE_STRIP);
-
-    glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+    vertices.clear();
+    if (m_listWayPoint.size() >= 2)
+        vertices.reserve((m_listWayPoint.size() - 1) * 2);
+    constexpr std::uint32_t lineColor = 0x80FFFFFFu;
+    mu::Vertex3D previous{};
+    bool hasPrevious = false;
     for (const auto& waypoint : m_listWayPoint)
     {
-        glVertex3f(waypoint->fCameraX + 50.0f, waypoint->fCameraY + 50.0f, waypoint->fCameraZ);
+        const mu::Vertex3D current = {waypoint->fCameraX + 50.f, waypoint->fCameraY + 50.f, waypoint->fCameraZ,
+                                      0.f, 0.f, 1.f, 0.f, 0.f, lineColor};
+        if (hasPrevious)
+        {
+            vertices.push_back(previous);
+            vertices.push_back(current);
+        }
+        previous = current;
+        hasPrevious = true;
     }
+    mu::GetRenderer().RenderLines(vertices, 0u);
 
-    glEnd();
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
+    EnableDepthTest();
+    mu::GetRenderer().SetAlphaTest(true);
+    mu::GetRenderer().SetTexture2D(true);
 }
 void CCameraMove::SetSelectedTile(int iTileIndex)
 {

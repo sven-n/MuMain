@@ -30,6 +30,7 @@ FrameTimingState g_frameTiming;
 #include "ScreenshotCaptureState.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Core/Time/Timer.h"
@@ -397,7 +398,7 @@ static void UpdateCoreSystems()
 static void SetClearAndFogColor(float r, float g, float b)
 {
     extern GLfloat FogColor[4];
-    glClearColor(r, g, b, 1.f);
+    mu::GetRenderer().SetClearColor(r, g, b, 1.f);
     FogColor[0] = r;
     FogColor[1] = g;
     FogColor[2] = b;
@@ -442,7 +443,7 @@ static void SetWorldClearColor()
     else
         SetClearAndFogColor(0.f, 0.f, 0.f);            // Black (default)
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mu::GetRenderer().ClearScreen();
 }
 
 /**
@@ -493,33 +494,30 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
     float glBottom = (float)WindowHeight - gy - gh;
     float glTop = (float)WindowHeight - gy;
 
-    // Background
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    DisableTexture();
+    EnableAlphaBlend3();
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-    glBegin(GL_QUADS);
-    glVertex2f(gx, glBottom);
-    glVertex2f(gx + gw, glBottom);
-    glVertex2f(gx + gw, glTop);
-    glVertex2f(gx, glTop);
-    glEnd();
+    const auto RenderRect = [](float x, float bottom, float width, float height, std::uint32_t color)
+    {
+        const mu::Vertex2D vertices[4] = {
+            {x, bottom, 0.f, 0.f, color},
+            {x + width, bottom, 0.f, 0.f, color},
+            {x + width, bottom + height, 0.f, 0.f, color},
+            {x, bottom + height, 0.f, 0.f, color},
+        };
+        mu::GetRenderer().RenderQuad2D(vertices, 0u);
+    };
+    RenderRect(gx, glBottom, gw, gh, mu::PackABGR(0.f, 0.f, 0.f, 0.5f));
 
     // Target line at 16.67ms (60fps)
     float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
     float lineY = glBottom + target60 * gh;
-    glColor4f(0.3f, 0.8f, 0.3f, 0.5f);
-    glBegin(GL_LINES);
-    glVertex2f(gx, lineY);
-    glVertex2f(gx + gw, lineY);
-    glEnd();
+    RenderRect(gx, lineY, gw, 1.f, mu::PackABGR(0.3f, 0.8f, 0.3f, 0.5f));
 
     // Frame bars
     float barW = gw / FRAME_HISTORY_SIZE;
     int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
 
-    glBegin(GL_QUADS);
     for (int i = 0; i < s_frameCount; i++)
     {
         int idx = (oldest + i) % FRAME_HISTORY_SIZE;
@@ -528,22 +526,18 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
         float barH = norm * gh;
 
         // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
+        std::uint32_t color;
         if (ms < THRESHOLD_60FPS_MS)
-            glColor4f(0.2f, 0.9f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.2f, 0.9f, 0.2f, 0.8f);
         else if (ms < THRESHOLD_40FPS_MS)
-            glColor4f(0.9f, 0.9f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.9f, 0.9f, 0.2f, 0.8f);
         else
-            glColor4f(0.9f, 0.2f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.9f, 0.2f, 0.2f, 0.8f);
 
         float bx = gx + i * barW;
-        glVertex2f(bx, glBottom);
-        glVertex2f(bx + barW, glBottom);
-        glVertex2f(bx + barW, glBottom + barH);
-        glVertex2f(bx, glBottom + barH);
+        RenderRect(bx, glBottom, barW, barH, color);
     }
-    glEnd();
-
-    glEnable(GL_TEXTURE_2D);
+    mu::GetRenderer().SetTexture2D(true);
 }
 
 /**
@@ -637,6 +631,7 @@ static void RenderDebugInfo()
              FrameProfiler::AccumulatorMs(FP::Items),
              FrameProfiler::AccumulatorMs(FP::Effects));
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
     FrameProfiler::ResetFrame();
 
     // Frame time graph below text
@@ -1069,6 +1064,19 @@ void MainScene(HDC hDC)
     try
     {
         Success = RenderCurrentScene(hDC);
+
+        static bool s_frameTimingEnabled = std::getenv("MU_RENDER_TIMING") != nullptr;
+        static unsigned s_frameTimingLogCounter = 0;
+        if (s_frameTimingEnabled && ++s_frameTimingLogCounter % 60 == 0)
+        {
+            using FP = FrameProfiler::Pass;
+            std::fprintf(stderr, "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms effects=%.2fms render_objects=%.2fms\n",
+                         FrameProfiler::AccumulatorMs(FP::Terrain), FrameProfiler::AccumulatorMs(FP::Objects),
+                         FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
+                         FrameProfiler::AccumulatorMs(FP::Effects), FrameProfiler::AccumulatorMs(FP::Other));
+            if (!g_bShowDebugInfo)
+                FrameProfiler::ResetFrame();
+        }
         RenderDebugInfo();
         RenderFpsCounter();
         UI::Reconnect::RenderDialog();

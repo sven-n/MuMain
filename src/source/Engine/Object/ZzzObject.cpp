@@ -38,6 +38,7 @@
 #include "Camera/CameraProjection.h"
 #include "Camera/OrbitalCamera.h"
 #include "Engine/Object/CullingConstants.h"
+#include "Render/Renderer/MuRenderer.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -783,14 +784,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     {
                         EnableAlphaTest();
 
-                        if (gMapManager.WorldActive == WD_7ATLANSE)
-                        {
-                            glColor4f(0.f, 0.f, 0.f, 0.2f);
-                        }
-                        else
-                        {
-                            glColor4f(0.f, 0.f, 0.f, 0.7f);
-                        }
                         b->RenderBodyShadow(-1, -1, 8, 9);
                     }
                 }
@@ -857,15 +850,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     if (!g_Direction.m_CKanturu.IsMayaScene())
                     {
                         EnableAlphaTest();
-
-                        if (gMapManager.WorldActive == WD_7ATLANSE)
-                        {
-                            glColor4f(0.f, 0.f, 0.f, 0.2f);
-                        }
-                        else
-                        {
-                            glColor4f(0.f, 0.f, 0.f, 0.7f);
-                        }
 
                         b->RenderBodyShadow();
                     }
@@ -966,7 +950,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
             }
             else if (o->Type == MODEL_DARK_SPIRIT)
             {
-                glColor3f(1.f, 1.f, 1.f);
                 b->BeginRender(o->Alpha);
                 b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 if (o->WeaponLevel >= 40)
@@ -994,14 +977,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                         vec3_t Position;
                         EnableAlphaTest();
 
-                        if (gMapManager.WorldActive == WD_7ATLANSE)
-                        {
-                            glColor4f(0.f, 0.f, 0.f, 0.2f);
-                        }
-                        else
-                        {
-                            glColor4f(0.f, 0.f, 0.f, 1.f);
-                        }
                         VectorCopy(o->Position, Position);
                         Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                         VectorCopy(Position, b->BodyOrigin);
@@ -1067,7 +1042,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
                 vec3_t Position;
 
-                glColor4f(0.f, 0.f, 0.f, 1.f);
                 VectorCopy(o->Position, Position);
                 Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 VectorCopy(Position, b->BodyOrigin);
@@ -6945,7 +6919,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (Type == MODEL_WING_OF_STORM)
     {
         Vector(1.f, 0.7f, 0.5f, b->BodyLight);
-        glColor3fv(b->BodyLight);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
@@ -6966,7 +6939,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (Type == MODEL_WING_OF_RUIN)
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        glColor3fv(b->BodyLight);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         float Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.3f;
         Vector(0.1f + Luminosity, 0.1f + Luminosity, 0.1f + Luminosity, b->BodyLight);
@@ -6980,27 +6952,23 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         if (b->BodyLight[0] == 1 && b->BodyLight[1] == 1 && b->BodyLight[2] == 1)
         {
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            glColor3fv(b->BodyLight);
             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         }
         else
         {
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            glColor3fv(b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
     }
     else if (Type == MODEL_WINGS_OF_DESPAIR)
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        glColor3fv(b->BodyLight);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     else if (Type == MODEL_WING_OF_DIMENSION)
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        glColor3fv(b->BodyLight);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
@@ -7065,7 +7033,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
         b->BeginRender(1.f);
-        glColor3f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2]);
         b->RenderMesh(3, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, sinf(WorldTime * 0.01f), 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -7213,7 +7180,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     }
     else if (Type == MODEL_CROSS_SHIELD)
     {
-        glColor3f(1.f, 1.f, 1.f);
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->StreamMesh = 1;
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 2000 * 0.0005f);
@@ -7583,10 +7549,7 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderMesh(2, RENDER_TEXTURE, Alpha, 2, Luminosity, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         //. 날
-        glColor3f(0.43f, 0.14f, 0.6f);
-
         b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, Alpha, 3, o->BlendMeshLight, WorldTime * 0.0001f, WorldTime * 0.0005f);
-        glColor3f(1.f, 1.f, 1.f);
     }
     else if (Type == MODEL_DARK_REIGN_BLADE)
     {
@@ -7730,7 +7693,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin)
         {
-            ::glColor3fv(b->BodyLight);
             int anMesh[6] = { 2, 1, 0, 2, 1, 2 };
             b->RenderMesh(anMesh[Type - (MODEL_MISTERY_HELM)], RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
@@ -7741,7 +7703,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin)
         {
-            ::glColor3fv(b->BodyLight);
             int nTexture = Type - (MODEL_MISTERY_ARMOR);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_INVEN_ARMOR + nTexture);
             for (int i = 1; i < b->NumMeshs; ++i)
@@ -7754,7 +7715,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin)
         {
-            ::glColor3fv(b->BodyLight);
             int nTexture = Type - (MODEL_MISTERY_PANTS);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_INVEN_PANTS + nTexture);
             for (int i = 1; i < b->NumMeshs; ++i)
@@ -7767,7 +7727,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin)
         {
-            ::glColor3fv(b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
         else
@@ -7820,7 +7779,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         }
         if (b->HideSkin)
         {
-            ::glColor3fv(b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, nTexture);
             for (int i = 1; i < b->NumMeshs; ++i)
             {
@@ -7836,7 +7794,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin == true)
         {
-            ::glColor3fv(b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
         else
@@ -7848,7 +7805,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin == true)
         {
-            ::glColor3fv(b->BodyLight);
             b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
         else
@@ -7860,7 +7816,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin == true)
         {
-            ::glColor3fv(b->BodyLight);
             b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
         else
@@ -7872,7 +7827,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin == true)
         {
-            ::glColor3fv(b->BodyLight);
             b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
         else
@@ -7882,7 +7836,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     }
     else if (Type == MODEL_BEUROBA)
     {
-        ::glColor3fv(b->BodyLight);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -7892,7 +7845,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     }
     else if (Type == MODEL_STRYKER_SCEPTER)
     {
-        ::glColor3fv(b->BodyLight);
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -7905,21 +7857,18 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
         b->BeginRender(1.f);
-        glColor3f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2]);
         b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(6, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(3, RENDER_TEXTURE, 1.f, 3, Luminosity, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(4, RENDER_TEXTURE, 1.f, 4, Luminosity, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        glColor3f(1.f, 1.f, 1.f);
         b->RenderMesh(5, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
         b->EndRender();
     }
     else if (Type == MODEL_LOST_MAP)
     {
-        glColor3f(1.f, 1.f, 1.f);
         Models[o->Type].StreamMesh = 1;
         b->RenderMesh(1, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, WorldTime * 0.0005f);
         Models[o->Type].StreamMesh = -1;
@@ -7946,7 +7895,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderMesh(2, RENDER_TEXTURE, 1.0f, 2, fMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         fMeshLight += fAdd;
 
-        glColor3f(1.f, 1.f, 1.f);
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.3f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -7956,7 +7904,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, Alpha, 1, 0.2f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
-        glColor3f(1.f, 1.f, 1.f);
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, Alpha, 0, sinf(WorldTime * 0.005f), o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_CHROME4 | RENDER_BRIGHT, Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
@@ -7984,30 +7931,24 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
         Vector(Light[0] * 0.3f, Light[1] * 0.3f, Light[2] * 0.3f, b->BodyLight);
-        glColor3f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2]);
         b->RenderMesh(2, RENDER_COLOR, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
         VectorCopy(Light, b->BodyLight);
-        glColor3f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2]);
         b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, 1.f, 2, o->BlendMeshLight, o->BlendMeshTexCoordU, WorldTime * 0.01f, BITMAP_CHROME);
         b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(1, RENDER_TEXTURE, 1.f, 1, o->BlendMeshLight, (float)(rand() % 10) * 0.1f, (float)(rand() % 10) * 0.1f);
 
         float Luminosity = sinf(WorldTime * 0.001f) * 0.4f + 0.6f;
         Vector(Light[0] * Luminosity, Light[0] * Luminosity, Light[0] * Luminosity, b->BodyLight);
-        glColor3f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2]);
         b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, 1.f, 2, o->BlendMeshLight, WorldTime * 0.0001f, WorldTime * 0.0005f);
         b->EndRender();
     }
     else if (Type == MODEL_ELEMENTAL_SHIELD)
     {
         b->BeginRender(1.f);
-        glColor4f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2], 0.8f);
         b->RenderMesh(1, RENDER_TEXTURE, 0.8f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        glColor4f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2], 0.5f);
         b->RenderMesh(3, RENDER_TEXTURE, 0.5f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
-        glColor3f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2]);
         b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, 1.f, 2, o->BlendMeshLight, WorldTime * 0.0005f, o->BlendMeshTexCoordV);
         b->RenderMesh(3, RENDER_TEXTURE, 1.f, 3, o->BlendMeshLight, (float)(rand() % 10) * 0.1f, (float)(rand() % 10) * 0.1f);
@@ -8035,7 +7976,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->BeginRender(1.f);
         if (o->HiddenMesh == 1)
         {
-            glColor3f(1.f, 1.f, 1.f);
             Vector(1.f, 1.f, 1.f, b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, 1.f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
             Vector(0.1f, 0.5f, 1.f, b->BodyLight);
@@ -8044,7 +7984,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         }
         else if (o->HiddenMesh == 0)
         {
-            glColor3f(1.f, 1.f, 1.f);
             Vector(1.f, 1.f, 1.f, b->BodyLight);
             b->RenderMesh(1, RENDER_TEXTURE, 1.f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
             Vector(0.1f, 0.5f, 1.f, b->BodyLight);
@@ -8058,13 +7997,11 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->BeginRender(1.f);
         if (o->HiddenMesh == 1)
         {
-            glColor3f(1.f, 1.f, 1.f);
             Vector(1.f, 1.f, 1.f, b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, 1.f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
         else if (o->HiddenMesh == 0)
         {
-            glColor3f(1.f, 1.f, 1.f);
             Vector(1.f, 1.f, 1.f, b->BodyLight);
             b->RenderMesh(1, RENDER_TEXTURE, 1.f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
@@ -8073,7 +8010,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (Type == MODEL_LIFE_STONE_ITEM)
     {
         b->BeginRender(1.f);
-        glColor3f(1.f, 1.f, 1.f);
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->RenderMesh(0, RENDER_TEXTURE, 1.f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         Vector(0.f, 0.5f, 1.f, b->BodyLight);
@@ -8689,7 +8625,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         if (b->BodyLight[0] == 1 && b->BodyLight[1] == 1 && b->BodyLight[2] == 1)
         {
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            glColor3fv(b->BodyLight);
             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         }
     }
@@ -8785,7 +8720,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (Type >= MODEL_HELPER + 130 && Type <= MODEL_HELPER + 133)
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        glColor3fv(b->BodyLight);
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         float Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.3f;
         Vector(0.1f + Luminosity, 0.1f + Luminosity, 0.1f + Luminosity, b->BodyLight);
@@ -8821,7 +8755,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderMesh(0, RENDER_BRIGHT, o->Alpha * fLumi, 0, o->BlendMeshLight * fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PHOENIXSOULWING);
 
         Vector(.15f, 1.f, .25f, b->BodyLight);
-        glColor3fv(b->BodyLight);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME3, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -8835,7 +8768,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderMesh(0, RENDER_BRIGHT, o->Alpha * fLumi, 0, o->BlendMeshLight * fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PHOENIXSOULWING);
 
         Vector(.15f, 1.f, .25f, b->BodyLight);
-        glColor3fv(b->BodyLight);
         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->RenderMesh(1, RENDER_CHROME3 | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -8846,7 +8778,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
         if (b->HideSkin == true)
         {
-            glColor3fv(b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1);
             b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1);
             b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha * fLumi, 2, o->BlendMeshLight * fLumi, (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
@@ -8869,7 +8800,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
-        glColor3fv(b->BodyLight);
         float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
@@ -8878,7 +8808,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     }
     else if (Type == MODEL_PHOENIX_SOUL_BOOTS)
     {
-        glColor3fv(b->BodyLight);
         float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
@@ -8893,13 +8822,11 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         if (b->BodyLight[0] == 1 && b->BodyLight[1] == 1 && b->BodyLight[2] == 1)
         {
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            glColor3fv(b->BodyLight);
             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         }
         else
         {
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            glColor3fv(b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
     }
@@ -8907,7 +8834,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin)
         {
-            ::glColor3fv(b->BodyLight);
             b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
         else
@@ -8917,7 +8843,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         if (b->HideSkin)
         {
-            ::glColor3fv(b->BodyLight);
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
         else
@@ -9129,12 +9054,10 @@ void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int Ren
     }
     else if (Type == MODEL_SACRED_HELM || Type == MODEL_STORM_HARD_HELM)
     {
-        ::glColor3fv(b->BodyLight);
         b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     else if (Type == MODEL_PIERCING_HELM)
     {
-        ::glColor3fv(b->BodyLight);
         b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     else if (Type == MODEL_SACRED_ARMOR)
@@ -9240,12 +9163,10 @@ void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int Re
     }
     else if (Type == MODEL_SACRED_HELM || Type == MODEL_STORM_HARD_HELM)
     {
-        ::glColor3fv(b->BodyLight);
         b->RenderMesh(1, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     else if (Type == MODEL_PIERCING_HELM)
     {
-        ::glColor3fv(b->BodyLight);
         b->RenderMesh(0, RenderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     else if (Type == MODEL_SACRED_ARMOR)
@@ -9448,12 +9369,10 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         if (gMapManager.WorldActive == 7)
         {
             EnableAlphaTest();
-            glColor4f(0.f, 0.f, 0.f, 0.2f);
         }
         else
         {
             DisableAlphaBlend();
-            glColor3f(0.f, 0.f, 0.f);
         }
         bool bRenderShadow = true;
 
@@ -9713,7 +9632,6 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         )
     {
         b->BeginRender(o->Alpha);
-        glColor3f(1.f, 1.f, 1.f);
         o->BlendMeshLight = 1.f;
         b->RenderMesh(0, RENDER_TEXTURE, Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
@@ -10473,12 +10391,10 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         if (gMapManager.WorldActive == 7)
         {
             EnableAlphaTest();
-            glColor4f(0.f, 0.f, 0.f, 0.2f);
         }
         else
         {
             DisableAlphaBlend();
-            glColor3f(0.f, 0.f, 0.f);
         }
         bool bRenderShadow = true;
 
@@ -10533,32 +10449,21 @@ void RenderPartObjectEdge(BMD* b, OBJECT* o, int Flag, bool Translate, float Sca
     if (o->Type == MODEL_WARCRAFT)
     {
         b->BeginRender(o->Alpha);
-        if (o->Alpha >= 0.99f)
-        {
-            glColor3fv(b->BodyLight);
-        }
-        else
-        {
-            glColor4f(b->BodyLight[0], b->BodyLight[1], b->BodyLight[2], o->Alpha);
-        }
         b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->EndRender();
     }
     else if (o->Type == MODEL_PERSONA)
     {
-        glColor3fv(b->BodyLight);
         b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     else if (o->Type == MODEL_DREADFEAR)
     {
-        glColor3fv(b->BodyLight);
         b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     else if (o->Type == MODEL_DARK_SKULL_SOLDIER_5)
     {
-        glColor3fv(b->BodyLight);
         b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(2, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(3, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -10872,7 +10777,7 @@ bool isPartyMemberBuff(int partyindex)
 void RenderBoundingBox(OBJECT* pObj)
 {
     EnableAlphaBlend();
-    glPushMatrix();
+    mu::GetRenderer().PushMatrix();
 
     float Matrix[3][4];
     AngleMatrix(pObj->Angle, Matrix);
@@ -10896,45 +10801,30 @@ void RenderBoundingBox(OBJECT* pObj)
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    //glBegin(GL_QUADS);
-    glBegin(GL_LINES);
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[5]);
+    const auto MakeVertex = [](const vec3_t& position, std::uint32_t color) -> mu::Vertex3D
+    {
+        return {position[0], position[1], position[2], 0.f, 0.f, 1.f, 0.f, 0.f, color};
+    };
 
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[1]);
+    constexpr std::uint32_t darkColor = 0xFF333333u;
+    constexpr std::uint32_t midColor = 0xFF999999u;
+    constexpr std::uint32_t lightColor = 0xFF666666u;
+    const mu::Vertex3D lineVertices[] = {
+        MakeVertex(TransformVertices[7], darkColor), MakeVertex(TransformVertices[6], darkColor),
+        MakeVertex(TransformVertices[4], darkColor), MakeVertex(TransformVertices[5], darkColor),
+        MakeVertex(TransformVertices[0], darkColor), MakeVertex(TransformVertices[2], darkColor),
+        MakeVertex(TransformVertices[3], darkColor), MakeVertex(TransformVertices[1], darkColor),
+        MakeVertex(TransformVertices[7], midColor), MakeVertex(TransformVertices[3], midColor),
+        MakeVertex(TransformVertices[2], midColor), MakeVertex(TransformVertices[6], midColor),
+        MakeVertex(TransformVertices[0], midColor), MakeVertex(TransformVertices[1], midColor),
+        MakeVertex(TransformVertices[5], midColor), MakeVertex(TransformVertices[4], midColor),
+        MakeVertex(TransformVertices[7], lightColor), MakeVertex(TransformVertices[5], lightColor),
+        MakeVertex(TransformVertices[1], lightColor), MakeVertex(TransformVertices[3], lightColor),
+        MakeVertex(TransformVertices[0], lightColor), MakeVertex(TransformVertices[4], lightColor),
+        MakeVertex(TransformVertices[6], lightColor), MakeVertex(TransformVertices[2], lightColor),
+    };
+    mu::GetRenderer().RenderLines(lineVertices, 0u);
 
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[6]);
-
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[4]);
-
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[3]);
-
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[2]);
-    glEnd();
-
-    glPopMatrix();
+    mu::GetRenderer().PopMatrix();
 }
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX

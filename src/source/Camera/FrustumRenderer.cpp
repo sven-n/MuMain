@@ -6,8 +6,10 @@
 #include "CameraConfig.h"
 #include "Core/Globals/_types.h"
 #include "Core/Globals/_define.h"
+#include "Render/Renderer/MuRenderer.h"
 #include <cmath>
 #include <cstring>
+#include <vector>
 
 float RequestTerrainHeight(float xf, float yf);
 
@@ -28,41 +30,17 @@ namespace
     // Camera position marker is drawn as an axis-aligned cross with arms this long.
     constexpr float CAMERA_MARKER_HALF_LENGTH = 50.0f;
 
-    // Line widths used for the different visualization layers.
-    constexpr float WIREFRAME_LINE_WIDTH = 2.0f;
-    constexpr float GROUND_LINE_WIDTH    = 3.0f;
-
-    // RAII wrapper that snapshots GL state we touch and restores it on destruction.
-    struct GLStateScope
+    mu::Vertex3D MakeVertex(const vec3_t position, std::uint32_t color)
     {
-        GLboolean depthTest;
-        GLboolean texture2D;
-        GLboolean lighting;
-        GLboolean blend;
+        return {position[0], position[1], position[2], 0.f, 0.f, 1.f, 0.f, 0.f, color};
+    }
 
-        GLStateScope()
-        {
-            depthTest = glIsEnabled(GL_DEPTH_TEST);
-            texture2D = glIsEnabled(GL_TEXTURE_2D);
-            lighting  = glIsEnabled(GL_LIGHTING);
-            blend     = glIsEnabled(GL_BLEND);
-
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_TEXTURE_2D);
-            glDisable(GL_LIGHTING);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        }
-
-        ~GLStateScope()
-        {
-            glLineWidth(1.0f);
-            if (depthTest) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
-            if (texture2D) glEnable(GL_TEXTURE_2D); else glDisable(GL_TEXTURE_2D);
-            if (lighting)  glEnable(GL_LIGHTING);  else glDisable(GL_LIGHTING);
-            if (!blend) glDisable(GL_BLEND);
-        }
-    };
+    void AppendLine(std::vector<mu::Vertex3D>& vertices,
+        float x0, float y0, float z0, float x1, float y1, float z1, std::uint32_t color)
+    {
+        vertices.push_back({x0, y0, z0, 0.f, 0.f, 1.f, 0.f, 0.f, color});
+        vertices.push_back({x1, y1, z1, 0.f, 0.f, 1.f, 0.f, 0.f, color});
+    }
 
     // Average of 4 vec3_t points.
     inline void AverageQuad(const vec3_t a, const vec3_t b, const vec3_t c, const vec3_t d, vec3_t out)
@@ -129,47 +107,38 @@ namespace
 
     void RenderPyramidWireframe(const vec3_t v[8], const vec3_t apex)
     {
-        glLineWidth(WIREFRAME_LINE_WIDTH);
-        glBegin(GL_LINES);
-
-        // Near plane edges - green
-        glColor4f(0.0f, 1.0f, 0.0f, 0.8f);
-        glVertex3fv(v[0]); glVertex3fv(v[1]);
-        glVertex3fv(v[1]); glVertex3fv(v[2]);
-        glVertex3fv(v[2]); glVertex3fv(v[3]);
-        glVertex3fv(v[3]); glVertex3fv(v[0]);
-
-        // Far plane edges - red
-        glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
-        glVertex3fv(v[4]); glVertex3fv(v[5]);
-        glVertex3fv(v[5]); glVertex3fv(v[6]);
-        glVertex3fv(v[6]); glVertex3fv(v[7]);
-        glVertex3fv(v[7]); glVertex3fv(v[4]);
-
-        // Side edges from eye to far corners - yellow
-        glColor4f(1.0f, 1.0f, 0.0f, 0.8f);
-        glVertex3fv(apex); glVertex3fv(v[4]);
-        glVertex3fv(apex); glVertex3fv(v[5]);
-        glVertex3fv(apex); glVertex3fv(v[6]);
-        glVertex3fv(apex); glVertex3fv(v[7]);
-
-        glEnd();
+        const std::uint32_t nearColor = mu::PackABGR(0.f, 1.f, 0.f, 0.8f);
+        const std::uint32_t farColor = mu::PackABGR(1.f, 0.f, 0.f, 0.8f);
+        const std::uint32_t sideColor = mu::PackABGR(1.f, 1.f, 0.f, 0.8f);
+        const mu::Vertex3D lines[] = {
+            MakeVertex(v[0], nearColor), MakeVertex(v[1], nearColor),
+            MakeVertex(v[1], nearColor), MakeVertex(v[2], nearColor),
+            MakeVertex(v[2], nearColor), MakeVertex(v[3], nearColor),
+            MakeVertex(v[3], nearColor), MakeVertex(v[0], nearColor),
+            MakeVertex(v[4], farColor), MakeVertex(v[5], farColor),
+            MakeVertex(v[5], farColor), MakeVertex(v[6], farColor),
+            MakeVertex(v[6], farColor), MakeVertex(v[7], farColor),
+            MakeVertex(v[7], farColor), MakeVertex(v[4], farColor),
+            MakeVertex(apex, sideColor), MakeVertex(v[4], sideColor),
+            MakeVertex(apex, sideColor), MakeVertex(v[5], sideColor),
+            MakeVertex(apex, sideColor), MakeVertex(v[6], sideColor),
+            MakeVertex(apex, sideColor), MakeVertex(v[7], sideColor),
+        };
+        mu::GetRenderer().RenderLines(lines, 0);
     }
 
     void RenderPyramidFilled(const vec3_t v[8], const vec3_t apex)
     {
-        glColor4f(1.0f, 1.0f, 0.0f, 0.08f);
-        glBegin(GL_TRIANGLES);
-        // Left (apex, 4, 7), Right (apex, 5, 6), Top (apex, 4, 5), Bottom (apex, 7, 6)
-        glVertex3fv(apex); glVertex3fv(v[4]); glVertex3fv(v[7]);
-        glVertex3fv(apex); glVertex3fv(v[5]); glVertex3fv(v[6]);
-        glVertex3fv(apex); glVertex3fv(v[4]); glVertex3fv(v[5]);
-        glVertex3fv(apex); glVertex3fv(v[7]); glVertex3fv(v[6]);
-        glEnd();
-
-        glBegin(GL_QUADS);
-        glVertex3fv(v[4]); glVertex3fv(v[5]); glVertex3fv(v[6]); glVertex3fv(v[7]);
-        glEnd();
+        const std::uint32_t color = mu::PackABGR(1.f, 1.f, 0.f, 0.08f);
+        const mu::Vertex3D triangles[] = {
+            MakeVertex(apex, color), MakeVertex(v[4], color), MakeVertex(v[7], color),
+            MakeVertex(apex, color), MakeVertex(v[5], color), MakeVertex(v[6], color),
+            MakeVertex(apex, color), MakeVertex(v[4], color), MakeVertex(v[5], color),
+            MakeVertex(apex, color), MakeVertex(v[7], color), MakeVertex(v[6], color),
+            MakeVertex(v[4], color), MakeVertex(v[5], color), MakeVertex(v[6], color),
+            MakeVertex(v[4], color), MakeVertex(v[6], color), MakeVertex(v[7], color),
+        };
+        mu::GetRenderer().RenderTriangles(triangles, 0);
     }
 
     void RenderGroundProjection(const Frustum& frustum)
@@ -181,9 +150,10 @@ namespace
         const float* hullX = frustum.Get2DX();
         const float* hullY = frustum.Get2DY();
 
-        glLineWidth(GROUND_LINE_WIDTH);
-        glColor4f(0.0f, 1.0f, 0.0f, 0.7f);
-        glBegin(GL_LINES);
+        const std::uint32_t color = mu::PackABGR(0.f, 1.f, 0.f, 0.7f);
+        thread_local std::vector<mu::Vertex3D> lines;
+        lines.clear();
+        lines.reserve(static_cast<std::size_t>(hullCount) * MAX_EDGE_SEGMENTS * 2);
 
         for (int i = 0; i < hullCount; ++i)
         {
@@ -215,16 +185,15 @@ namespace
                 float z0 = RequestTerrainHeight(sx0, sy0) + GROUND_LINE_Z_OFFSET;
                 float z1 = RequestTerrainHeight(sx1, sy1) + GROUND_LINE_Z_OFFSET;
 
-                glVertex3f(sx0, sy0, z0);
-                glVertex3f(sx1, sy1, z1);
+                AppendLine(lines, sx0, sy0, z0, sx1, sy1, z1, color);
             }
         }
-
-        glEnd();
+        mu::GetRenderer().RenderLines(lines, 0);
     }
 
     // Draw a terrain-hugging horizontal line between two ground hit points.
-    void DrawGroundSegment(float x0, float y0, float x1, float y1)
+    void AppendGroundSegment(std::vector<mu::Vertex3D>& lines,
+        float x0, float y0, float x1, float y1, std::uint32_t color)
     {
         float dx = x1 - x0;
         float dy = y1 - y0;
@@ -243,8 +212,7 @@ namespace
             float sy1 = y0 + dy * t1;
             float z0 = RequestTerrainHeight(sx0, sy0) + GROUND_LINE_Z_OFFSET;
             float z1 = RequestTerrainHeight(sx1, sy1) + GROUND_LINE_Z_OFFSET;
-            glVertex3f(sx0, sy0, z0);
-            glVertex3f(sx1, sy1, z1);
+            AppendLine(lines, sx0, sy0, z0, sx1, sy1, z1, color);
         }
     }
 
@@ -271,36 +239,35 @@ namespace
         bool brOk = rayToGround(v[6], botRx, botRy);
         bool blOk = rayToGround(v[7], botLx, botLy);
 
-        glLineWidth(GROUND_LINE_WIDTH + 1.0f);
-        glBegin(GL_LINES);
+        thread_local std::vector<mu::Vertex3D> lines;
+        lines.clear();
+        lines.reserve(MAX_EDGE_SEGMENTS * 4);
 
         if (blOk && brOk)
         {
-            // Bottom of FOV → red (closest to camera)
-            glColor4f(1.0f, 0.0f, 0.0f, 0.9f);
-            DrawGroundSegment(botLx, botLy, botRx, botRy);
+            const std::uint32_t color = mu::PackABGR(1.f, 0.f, 0.f, 0.9f);
+            AppendGroundSegment(lines, botLx, botLy, botRx, botRy, color);
         }
         if (tlOk && trOk)
         {
-            // Top of FOV → yellow (visible far edge)
-            glColor4f(1.0f, 1.0f, 0.0f, 0.9f);
-            DrawGroundSegment(topLx, topLy, topRx, topRy);
+            const std::uint32_t color = mu::PackABGR(1.f, 1.f, 0.f, 0.9f);
+            AppendGroundSegment(lines, topLx, topLy, topRx, topRy, color);
         }
-
-        glEnd();
+        mu::GetRenderer().RenderLines(lines, 0);
     }
 
     void RenderCameraMarker(const vec3_t apex)
     {
-        glColor4f(0.0f, 1.0f, 1.0f, 0.9f);
-        glBegin(GL_LINES);
-        glVertex3f(apex[0] - CAMERA_MARKER_HALF_LENGTH, apex[1], apex[2]);
-        glVertex3f(apex[0] + CAMERA_MARKER_HALF_LENGTH, apex[1], apex[2]);
-        glVertex3f(apex[0], apex[1] - CAMERA_MARKER_HALF_LENGTH, apex[2]);
-        glVertex3f(apex[0], apex[1] + CAMERA_MARKER_HALF_LENGTH, apex[2]);
-        glVertex3f(apex[0], apex[1], apex[2] - CAMERA_MARKER_HALF_LENGTH);
-        glVertex3f(apex[0], apex[1], apex[2] + CAMERA_MARKER_HALF_LENGTH);
-        glEnd();
+        const std::uint32_t color = mu::PackABGR(0.f, 1.f, 1.f, 0.9f);
+        const mu::Vertex3D lines[] = {
+            {apex[0] - CAMERA_MARKER_HALF_LENGTH, apex[1], apex[2], 0.f, 0.f, 1.f, 0.f, 0.f, color},
+            {apex[0] + CAMERA_MARKER_HALF_LENGTH, apex[1], apex[2], 0.f, 0.f, 1.f, 0.f, 0.f, color},
+            {apex[0], apex[1] - CAMERA_MARKER_HALF_LENGTH, apex[2], 0.f, 0.f, 1.f, 0.f, 0.f, color},
+            {apex[0], apex[1] + CAMERA_MARKER_HALF_LENGTH, apex[2], 0.f, 0.f, 1.f, 0.f, 0.f, color},
+            {apex[0], apex[1], apex[2] - CAMERA_MARKER_HALF_LENGTH, 0.f, 0.f, 1.f, 0.f, 0.f, color},
+            {apex[0], apex[1], apex[2] + CAMERA_MARKER_HALF_LENGTH, 0.f, 0.f, 1.f, 0.f, 0.f, color},
+        };
+        mu::GetRenderer().RenderLines(lines, 0);
     }
 }
 
@@ -314,7 +281,9 @@ void RenderFrustumWireframe(const Frustum& frustum)
     ComputeFrustumApex(v, apex, nearCenter, farCenter);
     ScaleFarVerticesFromApex(v, apex);
 
-    GLStateScope stateScope;  // RAII: restores GL state on destruction
+    mu::GetRenderer().SetDepthTest(false);
+    mu::GetRenderer().SetTexture2D(false);
+    mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
     RenderPyramidWireframe(v, apex);
     RenderPyramidFilled(v, apex);
     RenderGroundProjection(frustum);
@@ -323,6 +292,8 @@ void RenderFrustumWireframe(const Frustum& frustum)
     // exactly where the visualization cone hits the ground.
     RenderFovGroundIntersect(apex, v);
     RenderCameraMarker(apex);
+    mu::GetRenderer().SetDepthTest(true);
+    mu::GetRenderer().SetTexture2D(true);
 }
 
 #endif // _EDITOR

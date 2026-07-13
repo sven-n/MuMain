@@ -10,6 +10,7 @@
 #include "Render/Models/ShadowVolume.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "SideHair.h"
 #include "Engine/Object/ZzzCharacter.h"
 
@@ -96,7 +97,6 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
 {
     vec3_t p1, p2, d;
 
-    glColor3f(1.f, 1.f, 1.f);
     VectorSubtract(v2, v1, d);
     const float fLength = VectorLength(d);
     float fTextureMove = 0.0f;
@@ -110,42 +110,22 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
     VectorAdd(p2, d, p2);
 
     float fTextureV = (float)(rand() % 100) * 0.01f;
-    glColor3f(1.f, 1.f, 1.f);
     BindTexture(BITMAP_ROBE + 4);
     EnableAlphaBlendMinus();
-    //EnableAlphaTest();
-    //g_OpenglLib.DisableTexture();
-    //g_OpenglLib.Disable(GL_CULL_FACE);
-    /*glBegin(GL_QUADS);
-    glTexCoord2f(0.f,0.f+fTextureMove);glVertex3f(p1[0]-Scale,p1[1],p1[2]);
-    glTexCoord2f(0.f,1.f-fTextureMove);glVertex3f(p2[0]-Scale,p2[1],p2[2]);
-    glTexCoord2f(1.f,1.f-fTextureMove);glVertex3f(p2[0]+Scale,p2[1],p2[2]);
-    glTexCoord2f(1.f,0.f+fTextureMove);glVertex3f(p1[0]+Scale,p1[1],p1[2]);
-    glEnd();
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1]-Scale,p1[2]);
-    glTexCoord2f(0.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1]-Scale,p2[2]);
-    glTexCoord2f(1.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1]+Scale,p2[2]);
-    glTexCoord2f(1.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1]+Scale,p1[2]);
-    glEnd();
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1],p1[2]-Scale);
-    glTexCoord2f(0.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1],p2[2]-Scale);
-    glTexCoord2f(1.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1],p2[2]+Scale);
-    glTexCoord2f(1.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1],p1[2]+Scale);
-    glEnd();*/
     vec3_t vOrtho;
     CrossProduct(m_vLight, d, vOrtho);
     VectorNormalize(vOrtho);
     VectorScale(vOrtho, 10.f, vOrtho);
-    glBegin(GL_QUADS);
-    //glColor3fv( c1);
-    glTexCoord2f(0.f, 0.f + fTextureMove + fTextureV); glVertex3f(p1[0] - vOrtho[0], p1[1] - vOrtho[1], p1[2] - vOrtho[2]);
-    //glColor3fv( c2);
-    glTexCoord2f(0.f, 1.f - fTextureMove + fTextureV); glVertex3f(p2[0] - vOrtho[0], p2[1] - vOrtho[1], p2[2] - vOrtho[2]);
-    glTexCoord2f(1.f, 1.f - fTextureMove + fTextureV); glVertex3f(p2[0] + vOrtho[0], p2[1] + vOrtho[1], p2[2] + vOrtho[2]);
-    //glColor3fv( c1);
-    glTexCoord2f(1.f, 0.f + fTextureMove + fTextureV); glVertex3f(p1[0] + vOrtho[0], p1[1] + vOrtho[1], p1[2] + vOrtho[2]);
-    glEnd();
-    //g_OpenglLib.Enable(GL_CULL_FACE);
+    const mu::Vertex3D quad[4] = {
+        {p1[0] - vOrtho[0], p1[1] - vOrtho[1], p1[2] - vOrtho[2], 0.f, 0.f, 1.f,
+         0.f, fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p2[0] - vOrtho[0], p2[1] - vOrtho[1], p2[2] - vOrtho[2], 0.f, 0.f, 1.f,
+         0.f, 1.f - fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p2[0] + vOrtho[0], p2[1] + vOrtho[1], p2[2] + vOrtho[2], 0.f, 0.f, 1.f,
+         1.f, 1.f - fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p1[0] + vOrtho[0], p1[1] + vOrtho[1], p1[2] + vOrtho[2], 0.f, 0.f, 1.f,
+         1.f, fTextureMove + fTextureV, 0xFFFFFFFFu},
+    };
+    const mu::Vertex3D triangles[6] = {quad[0], quad[1], quad[2], quad[0], quad[2], quad[3]};
+    mu::GetRenderer().RenderTriangles(triangles, 0u);
 }

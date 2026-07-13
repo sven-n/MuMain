@@ -6957,54 +6957,18 @@ void RenderJoints(BYTE bRenderOneMore)
 
             if (o->Type == MODEL_SPEARSKILL)
             {
-                float fAlpha;
-                switch (o->SubType)
-                {
-                case 0:
-                case 1:
-                case 2:
-                case 4:
-                case 9:
-                case 10:
-                    fAlpha = (float)std::min<int>(o->LifeTime, 20) * 0.05f;
-                    glColor3f(fAlpha * o->Light[0], fAlpha * o->Light[1], fAlpha * o->Light[2]);
-                    break;
-                case 3:
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 16:
-                case 14:
-                case 17:
-                    glColor3f(o->Light[0], o->Light[1], o->Light[2]);
-                    break;
-                case 15:
-                    glColor3f(o->Light[0], o->Light[1], o->Light[2]);
+                if (o->SubType == 15)
                     EnableAlphaBlendMinus();
-                    break;
-                }
             }
             else if (o->Type == BITMAP_FLARE_BLUE && o->SubType == 20)
             {
                 EnableAlphaBlend2();
-                glColor3fv(o->Light);
-            }
-            else if (o->Type == BITMAP_SMOKE && o->SubType == 0)
-            {
-                float fAlpha = (float)std::min<int>(o->LifeTime, 20) * 0.1f;
-                glColor3f(fAlpha * o->Light[0], fAlpha * o->Light[1], fAlpha * o->Light[2]);
             }
             else if (o->Type == BITMAP_JOINT_SPARK)
             {
                 if (o->SubType == 5)
                     BindTexture(o->TexType);
             }
-            else
-            {
-                glColor3fv(o->Light);
-            }
-
             BindTexture(o->TexType);
 
             for (int j = 0; j < (int)o->NumTails; j++)
@@ -7100,17 +7064,14 @@ void RenderJoints(BYTE bRenderOneMore)
                             if (fJointHeight > 0)
                             {
                                 Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight, Light);
-                                glColor3fv(Light);
                             }
                             else
                             {
                                 VectorCopy(o->Light, Light);
-                                glColor3fv(o->Light);//1.f,1.f,1.f);
                             }
                         }
                         else
                         {
-                            glColor3f(1.f, 1.f, 1.f);
                         }
 
                         if (j == ((int)o->NumTails / 2))
@@ -7136,7 +7097,6 @@ void RenderJoints(BYTE bRenderOneMore)
                             float  fJointHeight = (j) * 0.01f;
                             VectorScale(o->Light, powf(0.9978f, FPS_ANIMATION_FACTOR), o->Light);
                             Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight, Light);
-                            glColor3fv(Light);
 
                             vec3_t  Position;
 

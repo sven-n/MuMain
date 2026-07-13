@@ -7,10 +7,8 @@
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Core/Platform/PathResolve.h"
 
-#ifdef MU_ENABLE_SDL3
 #include <SDL3/SDL_gpu.h>
 #include "Render/Renderer/MuRenderer.h"
-#endif
 
 #include <algorithm>
 #include <array>
@@ -25,7 +23,6 @@
 #include <string>
 #include <vector>
 
-#ifdef MU_ENABLE_SDL3
 namespace mu
 {
 void RegisterTexture(std::uint32_t id, void* pTex);
@@ -35,7 +32,6 @@ void UnregisterSampler(std::uint32_t id);
 void ClearTextureRegistry();
 void ClearSamplerRegistry();
 } // namespace mu
-#endif
 
 
 
@@ -100,7 +96,6 @@ namespace
 #endif
     }
 
-#ifdef MU_ENABLE_SDL3
     SDL_GPUFilter MapGLFilterToSDL(GLuint filter)
     {
         return filter == GL_NEAREST ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
@@ -225,7 +220,6 @@ namespace
         bitmap->sdlSampler = sampler;
         return true;
     }
-#endif
 }
 
 bool CBitmapCache::Create()
@@ -583,7 +577,6 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 
         if (--pBitmap->Ref == 0 || bForce)
         {
-#ifdef MU_ENABLE_SDL3
             mu::UnregisterTexture(uiBitmapIndex);
             mu::UnregisterSampler(uiBitmapIndex);
             SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
@@ -600,9 +593,6 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
                     pBitmap->sdlTexture = nullptr;
                 }
             }
-#else
-            glDeleteTextures(1, &(pBitmap->TextureNumber));
-#endif
 
             const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->Width * pBitmap->Height * pBitmap->Components);
             m_dwUsedTextureMemory -= memoryUsed;
@@ -624,7 +614,6 @@ void CGlobalBitmap::UnloadAllImages()
         g_ErrorReport.Write(L"Unload Images\r\n");
 #endif // _DEBUG
 
-#ifdef MU_ENABLE_SDL3
     SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
     if (device)
     {
@@ -650,7 +639,6 @@ void CGlobalBitmap::UnloadAllImages()
         mu::ClearTextureRegistry();
         mu::ClearSamplerRegistry();
     }
-#endif
 
     for ([[maybe_unused]] auto& pair : m_mapBitmap)
     {
@@ -696,8 +684,9 @@ BITMAP_t* CGlobalBitmap::FindTexture(GLuint uiBitmapIndex)
         auto mi = m_mapBitmap.find(uiBitmapIndex);
         if (mi != m_mapBitmap.end())
             pBitmap = mi->second.get();
-        if (pBitmap != nullptr)
-            m_BitmapCache.Add(uiBitmapIndex, pBitmap);
+        // Quick-cache ranges also retain misses. A later LoadImage call replaces
+        // the sentinel, while repeated terrain probes avoid a map lookup per tile.
+        m_BitmapCache.Add(uiBitmapIndex, pBitmap);
     }
     return pBitmap;
 }
@@ -865,7 +854,6 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         memcpy(pNewBitmap->Buffer, decompressedBuffer.data(), static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
     }
 
-#ifdef MU_ENABLE_SDL3
     pNewBitmap->TextureNumber = uiBitmapIndex;
     std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, textureWidth, textureHeight);
     if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData.data(), textureWidth, textureHeight,
@@ -880,23 +868,6 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
     mu::RegisterTexture(uiBitmapIndex, rawTexture);
     mu::RegisterSampler(uiBitmapIndex, rawSampler);
-#else
-    glGenTextures(1, &(pNewBitmap->TextureNumber));
-
-    glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
-
-    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
-#endif
 
     return true;
 }
@@ -971,7 +942,6 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
         }
     }
 
-#ifdef MU_ENABLE_SDL3
     pNewBitmap->TextureNumber = uiBitmapIndex;
     if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, Width, Height,
                              MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode)))
@@ -985,25 +955,6 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
     mu::RegisterTexture(uiBitmapIndex, rawTexture);
     mu::RegisterSampler(uiBitmapIndex, rawSampler);
-#else
-    glGenTextures(1, &(pNewBitmap->TextureNumber));
-
-    glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
-
-    m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
-
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
-#endif
 
     return true;
 }

@@ -16,6 +16,7 @@
 #include "ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
@@ -544,7 +545,6 @@ void RenderLeaves()
         EnableAlphaTest();
     }
 
-    glColor3f(1.f, 1.f, 1.f);
 #ifdef DEVIAS_XMAS_EVENT
     int iMaxLeaves;
     if (World == WD_2DEVIAS)
@@ -569,8 +569,8 @@ void RenderLeaves()
             }
             else
             {
-                glPushMatrix();
-                glTranslatef(o->Position[0], o->Position[1], o->Position[2]);
+                mu::GetRenderer().PushMatrix();
+                mu::GetRenderer().Translate(o->Position[0], o->Position[1], o->Position[2]);
                 float Matrix[3][4];
                 AngleMatrix(o->Angle, Matrix);
 
@@ -595,7 +595,7 @@ void RenderLeaves()
                         RenderPlane3D(3.f, 3.f, Matrix);
                     }
                 }
-                glPopMatrix();
+                mu::GetRenderer().PopMatrix();
             }
         }
     }

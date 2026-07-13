@@ -15,6 +15,7 @@
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -844,12 +845,14 @@ void DefaultCamera::HandleEditorMode()
         if (IsHeroValid())
         {
             // Apply rotation and movement
-            glPushMatrix();
-            glLoadIdentity();
-            glRotatef(-m_State.Angle[2], 0.f, 0.f, 1.f);
+            auto& renderer = mu::GetRenderer();
+            renderer.SetMatrixMode(GL_MODELVIEW);
+            renderer.PushMatrix();
+            renderer.LoadIdentity();
+            renderer.Rotate(-m_State.Angle[2], 0.f, 0.f, 1.f);
             float Matrix[3][4];
             CameraProjection::GetOpenGLMatrix(Matrix);
-            glPopMatrix();
+            renderer.PopMatrix();
             VectorRotate(p1, Matrix, p2);
             VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
         }
