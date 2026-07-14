@@ -7259,6 +7259,12 @@ void ReceivePartyList(const BYTE* ReceiveBuffer)
         Offset += sizeof(PRECEIVE_PARTY_LIST);
     }
 
+    for (int i = Data->Count; i < MAX_PARTYS; i++)
+    {
+        memset(&Party[i], 0, sizeof(PARTY_t));
+        Party[i].index = -1;
+    }
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
 }
 
@@ -7282,6 +7288,11 @@ void ReceivePartyInfo(const BYTE* ReceiveBuffer)
 void ReceivePartyLeave(const BYTE* ReceiveBuffer)
 {
     PartyNumber = 0;
+    memset(Party, 0, sizeof(Party));
+    for (int i = 0; i < MAX_PARTYS; i++)
+    {
+        Party[i].index = -1;
+    }
     g_pSystemLogBox->AddText(I18N::Game::YouHaveJustLeftTheParty, SEASON3B::TYPE_ERROR_MESSAGE);
 
     if (g_iFollowCharacter >= 0)
