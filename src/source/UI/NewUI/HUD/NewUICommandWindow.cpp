@@ -465,7 +465,7 @@ bool SEASON3B::CNewUICommandWindow::CommandPurchase(CHARACTER* pSelectedCha)
     if (pSelectedCha == nullptr)
         return false;
 
-    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(pSelectedCha->Key, pSelectedCha->ID);
+    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(pSelectedCha->Key, MU_C16(pSelectedCha->ID));
 
     return true;
 }
@@ -576,7 +576,7 @@ bool SEASON3B::CNewUICommandWindow::CommandAddFriend(CHARACTER* pSelectedCha)
 {
     if (g_pWindowMgr->IsServerEnable() == TRUE && pSelectedCha != nullptr)
     {
-        SocketClient->ToGameServer()->SendFriendAddRequest(pSelectedCha->ID);
+        SocketClient->ToGameServer()->SendFriendAddRequest(MU_C16(pSelectedCha->ID));
         return true;
     }
 
@@ -617,7 +617,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     }
     else if (!g_DuelMgr.IsDuelEnabled())
     {
-        SocketClient->ToGameServer()->SendDuelStartRequest(pSelectedCha->Key, pSelectedCha->ID);
+        SocketClient->ToGameServer()->SendDuelStartRequest(pSelectedCha->Key, MU_C16(pSelectedCha->ID));
         return 1;
     }
     else if (g_DuelMgr.IsDuelEnabled() && g_DuelMgr.IsDuelPlayer(pSelectedCha, DUEL_ENEMY))

@@ -48,7 +48,7 @@ int DoDisbandAction(POPUP_RESULT Result)
 {
     if (Result == POPUP_RESULT_YES)
     {
-        SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, s_szTargetID, 0x03);
+        SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, MU_C16(s_szTargetID), 0x03);
         SocketClient->ToGameServer()->SendGuildListRequest();
     }
     return 1;
@@ -86,7 +86,7 @@ void DoAppointAction()
 
     if (s_PopupAppointOkButton.DoMouseAction())
     {
-        SocketClient->ToGameServer()->SendGuildRoleAssignRequest(s_eAppointStatus, s_szTargetID, s_eAppointStatus == G_PERSON ? 0x01 : 0x02);
+        SocketClient->ToGameServer()->SendGuildRoleAssignRequest(s_eAppointStatus, MU_C16(s_szTargetID), s_eAppointStatus == G_PERSON ? 0x01 : 0x02);
 
         SocketClient->ToGameServer()->SendGuildListRequest();
 
@@ -419,7 +419,7 @@ int DoBanUnionGuildAction(POPUP_RESULT Result)
 {
     if (Result == POPUP_RESULT_YES)
     {
-        SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(s_szTargetID);
+        SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(MU_C16(s_szTargetID));
     }
     return 1;
 }

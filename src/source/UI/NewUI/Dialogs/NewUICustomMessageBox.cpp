@@ -5117,7 +5117,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::ProcessOk(class CNewUIMessag
 
     if (iInputTextSize > 0)
     {
-        SocketClient->ToGameServer()->SendSetVaultPin(pMsgBox->GetPassword(), strText);
+        SocketClient->ToGameServer()->SendSetVaultPin(pMsgBox->GetPassword(), MU_C16(strText));
     }
     else
     {
@@ -5170,7 +5170,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class C
     {
         if (pMsgBox->GetStoragePassword() != 0)
         {
-            SocketClient->ToGameServer()->SendSetVaultPin(pMsgBox->GetStoragePassword(), pMsgBox->GetInputText());
+            SocketClient->ToGameServer()->SendSetVaultPin(pMsgBox->GetStoragePassword(), MU_C16(pMsgBox->GetInputText()));
         }
         g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -5231,7 +5231,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNewUIMess
 
     if (iInputTextSize > 0)
     {
-        SocketClient->ToGameServer()->SendRemoveVaultPin(strText);
+        SocketClient->ToGameServer()->SendRemoveVaultPin(MU_C16(strText));
     }
     else
     {
@@ -5280,7 +5280,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CNew
 
     if (pMsgBox->GetInputSize() == pMsgBox->GetInputLimit())
     {
-        SocketClient->ToGameServer()->SendRemoveVaultPin(pMsgBox->GetInputText());
+        SocketClient->ToGameServer()->SendRemoveVaultPin(MU_C16(pMsgBox->GetInputText()));
     }
     else
     {
@@ -7150,7 +7150,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
 
     if (iInputTextSize > 0)
     {
-        SocketClient->ToGameServer()->SendGuildKickPlayerRequest(GuildList[DeleteIndex].Name, strText);
+        SocketClient->ToGameServer()->SendGuildKickPlayerRequest(MU_C16(GuildList[DeleteIndex].Name), MU_C16(strText));
     }
     else
     {
@@ -7433,7 +7433,7 @@ CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::OkBtnDown(class CNewUIMessag
     COMGEM::Exit();
     SocketClient->ToGameServer()->SendGuildRoleAssignRequest(
         AppointType,
-        GuildList[DeleteIndex].Name,
+        MU_C16(GuildList[DeleteIndex].Name),
         AppointType == G_PERSON ? 0x01 : 0x02);
 
     SocketClient->ToGameServer()->SendGuildListRequest();

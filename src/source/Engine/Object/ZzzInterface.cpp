@@ -2101,7 +2101,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 OBJECT* o = &c->Object;
                 if (o->Kind == KIND_PLAYER && c != Hero && (o->Type == MODEL_PLAYER || c->Change))
                 {
-                    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
+                    SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, MU_C16(c->ID));
                 }
             }
             else
@@ -2113,7 +2113,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (wcscmp(c->ID, szId) == 0)
                         {
-                            SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
+                            SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, MU_C16(c->ID));
                         }
                     }
                     else
@@ -2125,7 +2125,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                             if (abs(Dir1 - Dir2) == 4)
                             {
-                                SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, c->ID);
+                                SocketClient->ToGameServer()->SendPlayerShopItemListRequest(c->Key, MU_C16(c->ID));
                                 break;
                             }
                         }
@@ -2174,7 +2174,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         if (o->Kind == KIND_PLAYER && c != Hero && (o->Type == MODEL_PLAYER || c->Change) &&
                             abs((c->PositionX) - (Hero->PositionX)) <= 1 &&
                             abs((c->PositionY) - (Hero->PositionY)) <= 1) {
-                            SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, c->ID);
+                            SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, MU_C16(c->ID));
                         }
                     }
                     else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -2190,7 +2190,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             BYTE Dir2 = (BYTE)((Hero->Object.Angle[2] + 22.5f) / 360.f * 8.f + 1.f) % 8;
                             if (abs(Dir1 - Dir2) == 4)
                             {
-                                SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, c->ID);
+                                SocketClient->ToGameServer()->SendDuelStartRequest(c->Key, MU_C16(c->ID));
                                 break;
                             }
                         }
@@ -3358,7 +3358,7 @@ void SendMacroChat(wchar_t* Text)
         //    SendChat(Text);
         //}
 
-        SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, Text);
+        SocketClient->ToGameServer()->SendPublicChatMessage(MU_C16(Hero->ID), MU_C16(Text));
 
         LastMacroTime = GetTickCount64();
     }

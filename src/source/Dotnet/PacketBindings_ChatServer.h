@@ -12,7 +12,6 @@
 //------------------------------------------------------------------------------
 
 #pragma once
-#include "Core/Platform/PlatformLibrary.h"
 
 #include "stdafx.h"
 #include "Connection.h"

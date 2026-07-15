@@ -2308,52 +2308,12 @@ public:
         return textureId;
     }
 
-    [[nodiscard]] std::uint32_t CaptureFrameTexture(std::uint32_t textureId) override
+    [[nodiscard]] std::uint32_t CaptureFrameTexture(std::uint32_t /*textureId*/) override
     {
-        if (!s_frameActive || !s_device || !s_swapchainTexture || s_swapW == 0u || s_swapH == 0u)
-        {
-            return 0u;
-        }
-
-        if (textureId != 0u && !s_ownedTextureIds.contains(textureId))
-        {
-            return 0u;
-        }
-
-        if (textureId == 0u)
-        {
-            textureId = AllocateOwnedDynamicTextureId();
-            if (textureId == 0u)
-            {
-                return 0u;
-            }
-
-            SDL_GPUTextureCreateInfo textureInfo{};
-            textureInfo.type = SDL_GPU_TEXTURETYPE_2D;
-            textureInfo.format = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
-            textureInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
-            textureInfo.width = s_swapW;
-            textureInfo.height = s_swapH;
-            textureInfo.layer_count_or_depth = 1;
-            textureInfo.num_levels = 1;
-            textureInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
-
-            SDL_GPUTexture* texture = SDL_CreateGPUTexture(s_device, &textureInfo);
-            if (!texture)
-            {
-                mu::log::Get("render")->warn("SDL_gpu -- frame capture texture creation failed: {}", SDL_GetError());
-                return 0u;
-            }
-
-            s_textureMap[textureId] = texture;
-            InvalidateTextureLookupCache();
-            s_textureSizes[textureId] = {s_swapW, s_swapH};
-            s_ownedTextureIds.insert(textureId);
-            ++s_dbgTextureCreatesThisFrame;
-        }
-
-        s_pendingFrameCaptureTextureId = textureId;
-        return textureId;
+        // ponytail: SDL swapchain textures lack SAMPLER usage, so SDL_GPU cannot
+        // blit them into a sampled reconnect backdrop. Return no capture until
+        // the renderer owns an offscreen scene target that supports sampling.
+        return 0u;
     }
 
     [[nodiscard]] bool IsTextureRegistered(std::uint32_t textureId) const override

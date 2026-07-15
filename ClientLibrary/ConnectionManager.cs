@@ -7,6 +7,7 @@ namespace MUnique.Client.Library;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -60,6 +61,7 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             Debug.WriteLine($"Error establishing connection: {ex}");
+            WriteNetworkDiagnostic($"Connection failed: {ex}");
             return -1;
         }
     }
@@ -221,5 +223,12 @@ public unsafe partial class ConnectionManager
         {
             Debug.WriteLine($"Failed to set socket option {option}: {ex}");
         }
+    }
+
+    private static void WriteNetworkDiagnostic(string message)
+    {
+        var logLine = $"{DateTimeOffset.Now:O} [NET] {message}{Environment.NewLine}";
+        File.AppendAllText(Path.Combine(Path.GetTempPath(), "MuNetwork.log"), logLine);
+        Console.Error.Write(logLine);
     }
 }

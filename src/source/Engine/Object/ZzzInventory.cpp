@@ -10871,7 +10871,7 @@ void MovePersonalShop()
             {
                 if (g_bEnablePersonalShop)
                 {
-                    SocketClient->ToGameServer()->SendPlayerShopOpen(g_szPersonalShopTitle);
+                    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(g_szPersonalShopTitle));
                     g_pUIManager->Close(INTERFACE_INVENTORY);
                 }
                 else
@@ -10922,7 +10922,7 @@ void ClosePersonalShop()
         }
         if (g_PersonalShopSeller.Key)
         {
-            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
+            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, MU_C16(g_PersonalShopSeller.ID));
         }
     }
 

@@ -700,6 +700,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 #endif // _WIN32 (WndProc)
 
+#ifndef _WIN32
+static std::wstring BuildPortableCommandLine(const PSTR commandLine)
+{
+    std::wstring result;
+    if (commandLine == nullptr)
+    {
+        return result;
+    }
+
+    for (const unsigned char* character = reinterpret_cast<const unsigned char*>(commandLine); *character != '\0'; ++character)
+    {
+        result.push_back(*character);
+    }
+
+    return result;
+}
+#endif
+
 wchar_t m_Username[11];
 wchar_t m_Password[21];
 wchar_t m_Version[11];
@@ -1579,7 +1597,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 {
     wchar_t lpszExeVersion[256] = L"unknown";
 
+#ifdef _WIN32
     wchar_t* lpszCommandLine = GetCommandLine();
+#else
+    std::wstring portableCommandLine = BuildPortableCommandLine(szCmdLine);
+    wchar_t* lpszCommandLine = portableCommandLine.data();
+#endif
     wchar_t lpszFile[MAX_PATH];
     WORD wVersion[4] = { 0, };
     if (GetFileNameOfFilePath(lpszFile, lpszCommandLine))
@@ -1606,7 +1629,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     // Check for command line server override
     WORD wPortNumber;
-    if (GetConnectServerInfo(GetCommandLine(), g_lpszCmdURL, &wPortNumber))
+    if (GetConnectServerInfo(lpszCommandLine, g_lpszCmdURL, &wPortNumber))
     {
         szServerIpAddress = g_lpszCmdURL;
         g_ServerPort = wPortNumber;

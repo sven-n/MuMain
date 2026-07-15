@@ -7,6 +7,7 @@ namespace MUnique.Client.Library;
 using System;
 using System.Buffers;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Pipelines;
 using System.Threading.Tasks;
 using MUnique.OpenMU.Network;
@@ -70,7 +71,7 @@ public sealed class ConnectionWrapper : IDisposable
     public void BeginReceive()
     {
         // we never want it on the main thread, so we do a Task.Run.
-        _ = Task.Run(this._connection.BeginReceiveAsync);
+        _ = Task.Run(this.RunReceiveLoopAsync);
     }
 
     /// <inheritdoc />
@@ -157,6 +158,27 @@ public sealed class ConnectionWrapper : IDisposable
         Console.Error.WriteLine($"[NET] CreateAndSend: sent {length} bytes, handle={this._handle}");
     }
 
+    private async Task RunReceiveLoopAsync()
+    {
+        try
+        {
+            await this.WriteNetworkDiagnosticAsync($"Receive loop started, handle={this._handle}").ConfigureAwait(false);
+            await this._connection.BeginReceiveAsync().ConfigureAwait(false);
+            await this.WriteNetworkDiagnosticAsync($"Receive loop ended, handle={this._handle}; remote peer closed the connection").ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            await this.WriteNetworkDiagnosticAsync($"Receive loop failed, handle={this._handle}: {ex}").ConfigureAwait(false);
+        }
+    }
+
+    private async Task WriteNetworkDiagnosticAsync(string message)
+    {
+        var logLine = $"{DateTimeOffset.Now:O} [NET] {message}{Environment.NewLine}";
+        await File.AppendAllTextAsync(Path.Combine(Path.GetTempPath(), "MuNetwork.log"), logLine).ConfigureAwait(false);
+        await Console.Error.WriteAsync(logLine).ConfigureAwait(false);
+    }
+
     private unsafe ValueTask OnPacketReceivedAsync(ReadOnlySequence<byte> args)
     {
         if (this._isDisposed)
@@ -184,19 +206,23 @@ public sealed class ConnectionWrapper : IDisposable
         return ValueTask.CompletedTask;
     }
 
-    private unsafe ValueTask OnDisconnectedAsync()
+    private async ValueTask OnDisconnectedAsync()
     {
         try
         {
             Trace.WriteLine($"[NET] Connection disconnected, handle={this._handle}");
-            this._onDisconnected(this._handle);
+            await this.WriteNetworkDiagnosticAsync($"Disconnected event, handle={this._handle}").ConfigureAwait(false);
+            this.NotifyDisconnected();
             this.Dispose();
         }
         catch (Exception ex)
         {
             Trace.WriteLine($"[NET] Error in OnDisconnectedAsync handle={this._handle}: {ex}");
         }
+    }
 
-        return ValueTask.CompletedTask;
+    private unsafe void NotifyDisconnected()
+    {
+        this._onDisconnected(this._handle);
     }
 }

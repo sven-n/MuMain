@@ -1360,6 +1360,7 @@ void CUIChatWindow::DisconnectToChatServer()
             _connection->Close();
         }
 
+        delete _connection;
         _connection = nullptr;
     }
 }
@@ -1607,7 +1608,7 @@ BOOL CUIChatWindow::HandleMessage()
                 else
                 {
                     SocketClient->ToGameServer()->SendChatRoomInvitationRequest(
-                        m_InvitePalListBox.GetSelectedText()->m_szID,
+                        MU_C16(m_InvitePalListBox.GetSelectedText()->m_szID),
                         m_dwRoomNumber,
                         GetUIID());
                 }
@@ -2774,7 +2775,7 @@ BOOL CUILetterWriteWindow::HandleMessage()
                 int iZoom = (m_Photo.GetCurrentZoom() * 100.0f - 80 + 5) / 10;
                 BYTE Data1 = (iZoom << 6) & 0xC0 | iAngle & 0x3F;
                 BYTE Data2 = m_Photo.GetCurrentAction() - AT_ATTACK1;
-                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), szMailto, szTitle, Data1, Data2, len, szText);
+                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), MU_C16(szMailto), MU_C16(szTitle), Data1, Data2, len, MU_C16(szText));
             }
             break;
         case 2:
@@ -3437,7 +3438,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
                     if (g_pWindowMgr->GetChatReject() == FALSE && g_pFriendMenu->IsRequestWindow(pszName) == FALSE)
                     {
                         g_pFriendMenu->AddRequestWindow(pszName);
-                        SocketClient->ToGameServer()->SendChatRoomCreateRequest(pszName);
+                        SocketClient->ToGameServer()->SendChatRoomCreateRequest(MU_C16(pszName));
                     }
                 }
                 else if (dwDuplicationCheck == -1);
@@ -3482,7 +3483,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
             {
                 break;
             }
-            SocketClient->ToGameServer()->SendFriendAddRequest(pText);
+            SocketClient->ToGameServer()->SendFriendAddRequest(MU_C16(pText));
             delete[] pText;
         }
         break;
@@ -3490,7 +3491,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
         if (m_WorkMessage.m_iParam2 == 1)
         {
             if (GetCurrentSelectedFriend() == NULL) break;
-            SocketClient->ToGameServer()->SendFriendDelete(GetCurrentSelectedFriend());
+            SocketClient->ToGameServer()->SendFriendDelete(MU_C16(GetCurrentSelectedFriend()));
         }
         break;
     default:
@@ -5079,7 +5080,7 @@ BOOL CUIQuestionWindow::HandleMessage()
         case 1:
             if (m_dwReturnWindowUIID == -1)
             {
-                SocketClient->ToGameServer()->SendFriendAddResponse(0x01, m_szSaveID);
+                SocketClient->ToGameServer()->SendFriendAddResponse(0x01, MU_C16(m_szSaveID));
             }
             else if (m_dwReturnWindowUIID != 0)
             {
@@ -5091,7 +5092,7 @@ BOOL CUIQuestionWindow::HandleMessage()
             if (m_iDialogType != 0) break;
             if (m_dwReturnWindowUIID == -1)
             {
-                SocketClient->ToGameServer()->SendFriendAddResponse(0x00, m_szSaveID);
+                SocketClient->ToGameServer()->SendFriendAddResponse(0x00, MU_C16(m_szSaveID));
             }
             else if (m_dwReturnWindowUIID != 0)
             {

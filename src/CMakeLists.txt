@@ -654,21 +654,19 @@ if (DOTNET_EXECUTABLE)
             VERBATIM
     )
 
-    # 4. Create a target for the DLL and link it to Main
-    add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
-    add_dependencies(Main ClientLibrary)
-    set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
-
-    # Copy ClientLibrary DLL to the executable's output directory
-    add_custom_command(TARGET Main POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL from: ${DOTNET_DLL_PATH}"
-      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying ClientLibrary DLL to: $<TARGET_FILE_DIR:Main>"
+    # 4. Build and stage the library whenever Main's dependency is evaluated.
+    # Main may not relink after a C#-only change, so TARGET Main POST_BUILD is
+    # not sufficient to keep the runtime copy current.
+    add_custom_target(ClientLibrary
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${DOTNET_DLL_PATH}"
-        $<TARGET_FILE_DIR:Main>
-      COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: ClientLibrary DLL copy complete"
-      COMMENT "Copying ClientLibrary DLL to build directory"
+        "$<TARGET_FILE_DIR:Main>/${DOTNET_LIB_NAME}"
+      DEPENDS "${DOTNET_DLL_PATH}"
+      COMMENT "Staging ClientLibrary in the Main runtime directory"
+      VERBATIM
     )
+    add_dependencies(Main ClientLibrary)
+    set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
   endif()
 
   # ConstantsReplacer build target
