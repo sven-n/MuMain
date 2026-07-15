@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef MU_ENABLE_SDL3
 
 #include "UI/Legacy/UIControls.h"
 
@@ -39,5 +38,3 @@ private:
     TTF_Text* m_ttfText = nullptr;
     std::string m_utf8Scratch;
 };
-
-#endif // MU_ENABLE_SDL3

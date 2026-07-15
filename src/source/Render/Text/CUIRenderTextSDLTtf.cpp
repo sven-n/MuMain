@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#ifdef MU_ENABLE_SDL3
 
 #include "CUIRenderTextSDLTtf.h"
 
@@ -246,5 +245,3 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
     SubmitTextDrawData(renderer, TTF_GetGPUTextDrawData(m_ttfText), layout.renderX + layout.alignmentOffset,
                        static_cast<float>(windowHeight) - layout.screenY, m_textColor);
 }
-
-#endif // MU_ENABLE_SDL3

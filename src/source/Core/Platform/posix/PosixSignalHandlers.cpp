@@ -167,7 +167,7 @@ void InstallSignalHandlers()
     // with .NET's signal handling — our handler fires first, prints diagnostics, and
     // interferes with .NET's context modification needed to resume execution.
     // Skip SIGSEGV when .NET is present; .NET handles it via its own SIGSEGVHandler.
-#ifndef MU_ENABLE_SDL3
+#ifndef MU_HAS_DOTNET_AOT
     sigaction(SIGSEGV, &act, &s_oldSIGSEGV);
 #endif
     sigaction(SIGABRT, &act, &s_oldSIGABRT);
@@ -175,7 +175,7 @@ void InstallSignalHandlers()
 
     // Log install confirmation at install time (safe — not inside the handler)
     // AC-STD-5: PLAT: prefix for platform diagnostic messages
-#ifdef MU_ENABLE_SDL3
+#ifdef MU_HAS_DOTNET_AOT
     mu::log::Get("platform")->info("PLAT: signal handler -- installed for SIGABRT, SIGBUS (SIGSEGV left to .NET AOT)");
 #else
     mu::log::Get("platform")->info("PLAT: signal handler -- installed for SIGSEGV, SIGABRT, SIGBUS");

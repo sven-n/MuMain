@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef MU_ENABLE_SDL3
-
 #include "../IPlatformWindow.h"
 
 struct SDL_Window;
@@ -29,5 +27,3 @@ private:
 };
 
 } // namespace mu
-
-#endif // MU_ENABLE_SDL3

@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef MU_ENABLE_SDL3
 
 #include "../IPlatformEventLoop.h"
 
@@ -17,5 +16,3 @@ public:
 };
 
 } // namespace mu
-
-#endif // MU_ENABLE_SDL3

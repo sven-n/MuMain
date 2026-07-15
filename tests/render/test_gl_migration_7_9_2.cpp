@@ -726,8 +726,8 @@ TEST_CASE("AC-3 [7-9-2]: CSprite coordinate conversion — 640x480 to screen pix
 // AC-STD-1 [7-9-2]: No #ifdef rendering guards in game code
 //
 // This test documents the design contract: all rendering must go through
-// IMuRenderer unconditionally. No #ifdef _WIN32 or #ifdef MU_ENABLE_SDL3
-// may appear at call sites.
+// IMuRenderer unconditionally. Platform-specific rendering guards may not
+// appear at call sites.
 //
 // Verification method: python3 MuMain/scripts/check-win32-guards.py (AC-9)
 // This test serves as a companion regression check for the interface contract.

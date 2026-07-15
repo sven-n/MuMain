@@ -1,4 +1,3 @@
-#ifdef MU_ENABLE_SDL3
 
 #include "SDLWindow.h"
 #include "../IPlatformWindow.h"
@@ -113,5 +112,3 @@ bool SDLWindow::GetDisplaySize(int& outWidth, int& outHeight) const
 }
 
 } // namespace mu
-
-#endif // MU_ENABLE_SDL3

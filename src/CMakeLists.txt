@@ -159,7 +159,7 @@ endif()
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
-target_compile_definitions(MuClient PUBLIC MU_ENABLE_SDL3 GLM_FORCE_DEPTH_ZERO_TO_ONE)
+target_compile_definitions(MuClient PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_link_libraries(MuClient PUBLIC SDL3::SDL3 glm::glm)
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
@@ -465,7 +465,6 @@ target_compile_definitions(MuClient PUBLIC
   _LANGUAGE_ENG
   UNICODE
   "MU_DOTNET_LIB_EXT=\"${CMAKE_SHARED_LIBRARY_SUFFIX}\""
-  MU_ENABLE_SDL3
   $<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:_USE_32BIT_TIME_T>  # Use 32-bit time_t only for 32-bit builds
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
@@ -616,6 +615,8 @@ if (DOTNET_EXECUTABLE)
   endif()
 
   if (DOTNET_CAN_BUILD_CLIENT_LIBRARY)
+    target_compile_definitions(MuClient PRIVATE MU_HAS_DOTNET_AOT)
+
     set(DOTNET_PUBLISH_ENV
       "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
       "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
@@ -810,12 +811,6 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
     ${MU_TURBOJPEG_STATIC_LIB}
   )
 endif()
-
-# SDL provides the window and event layer. Audio is handled by the vendored
-# miniaudio implementation in Core/Platform/Audio on every platform.
-target_link_libraries(MuClient PUBLIC
-  SDL3::SDL3
-)
 
 if(APPLE)
   target_link_libraries(MuClient PUBLIC

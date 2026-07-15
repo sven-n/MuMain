@@ -5,10 +5,6 @@
 //
 // Framework: Catch2 v3.7.1
 // Location:  MuMain/tests/platform/test_platform_mouse.cpp
-// Guard:     #ifdef MU_ENABLE_SDL3 — tests only compile when SDL3 is enabled
-
-#ifdef MU_ENABLE_SDL3
-
 #include "PlatformCompat.h"
 #include "PlatformKeys.h"
 #include "PlatformTypes.h"
@@ -702,7 +698,7 @@ TEST_CASE("AC-5 [VS1-SDL-INPUT-MOUSE]: POINT struct shim is defined in PlatformT
 // ShowCursor(TRUE/FALSE) must not crash in non-SDL context (no window required).
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-4 [VS1-SDL-INPUT-MOUSE]: ShowCursor shim is callable under MU_ENABLE_SDL3",
+TEST_CASE("AC-4 [VS1-SDL-INPUT-MOUSE]: ShowCursor shim is callable with the SDL3 runtime",
           "[platform][mouse][ac4][compat]")
 {
     SECTION("ShowCursor(true) compiles and runs without crashing")
@@ -722,5 +718,3 @@ TEST_CASE("AC-4 [VS1-SDL-INPUT-MOUSE]: ShowCursor shim is callable under MU_ENAB
         ShowCursor(true);
     }
 }
-
-#endif // MU_ENABLE_SDL3

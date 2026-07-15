@@ -1,4 +1,3 @@
-#ifdef MU_ENABLE_SDL3
 
 #include "Core/Input/KeyState.h"
 #include "Core/Platform/sdl3/SDLEventLoop.h"
@@ -343,5 +342,3 @@ bool SDLEventLoop::PollEvents()
 }
 
 } // namespace mu
-
-#endif // MU_ENABLE_SDL3

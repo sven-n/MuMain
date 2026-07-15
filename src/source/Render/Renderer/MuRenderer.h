@@ -22,11 +22,9 @@
 // can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
 // The returned pointer is opaque — callers cast to SDL_GPUDevice* after including SDL3 headers.
 // Story 7.9.8: Forward declarations for SDL_ttf text engine and font handles.
-#ifdef MU_ENABLE_SDL3
 struct SDL_GPUDevice;
 struct TTF_TextEngine;
 struct TTF_Font;
-#endif
 
 namespace mu
 {
@@ -186,7 +184,6 @@ public:
     // MuRendererSDLGpu overrides to return s_device.
     // Used by GlobalBitmap.cpp to upload textures via SDL_gpu without a layering violation.
     // [[nodiscard]]: callers must check for nullptr before using the device.
-#ifdef MU_ENABLE_SDL3
     [[nodiscard]] virtual void* GetDevice()
     {
         return nullptr;
@@ -236,7 +233,6 @@ public:
         (void)atlasTexture;
         (void)sampler;
     }
-#endif
 
     // Queue a CPU→GPU texture update for the current frame's copy pass.
     // Used by GDI text rendering (CUIRenderTextOriginal, CUITextInputBox) to upload

@@ -6,9 +6,7 @@
 #include "Core/Time/FrameTimerScheduler.h"
 #include "GameLogic/Items/CComGem.h"
 #include "UIControls.h"
-#ifdef MU_ENABLE_SDL3
 #include "Render/Text/CUIRenderTextSDLTtf.h"
-#endif
 #include "UIWindows.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -2526,11 +2524,7 @@ bool CUIRenderText::Create(HDC hDC)
         return true;
     }
 
-#ifdef MU_ENABLE_SDL3
     m_pRenderText = std::make_unique<CUIRenderTextSDLTtf>();
-#else
-    m_pRenderText = std::make_unique<CUIRenderTextOriginal>();
-#endif
     if (!m_pRenderText->Create(hDC))
     {
         m_pRenderText.reset();

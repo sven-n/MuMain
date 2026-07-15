@@ -8,7 +8,6 @@
 // out of every translation unit that includes PlatformCompat.h.
 // Compiled with the project PCH (stdafx.h) via MUPlatform REUSE_FROM MUCore.
 
-#ifdef MU_ENABLE_SDL3
 
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/MuPlatform.h"
@@ -68,5 +67,3 @@ void MuStopTextInput()
         SDL_StopTextInput(pWnd);
     }
 }
-
-#endif // MU_ENABLE_SDL3

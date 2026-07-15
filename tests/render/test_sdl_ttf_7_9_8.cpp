@@ -34,7 +34,6 @@
 
 #include <cstdint>
 
-#ifdef MU_ENABLE_SDL3
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <chrono>
@@ -116,7 +115,6 @@ TTF_Font* OpenSystemFont(float ptSize)
 }
 
 } // anonymous namespace
-#endif // MU_ENABLE_SDL3
 
 // GREEN PHASE: Include the constexpr header directly (replaces RED-phase forward declaration).
 #include "Render/Text/SDLTtfColorPack.h"
@@ -190,9 +188,6 @@ TEST_CASE("AC-3 [7-9-8]: SetTextColor alpha controls transparency", "[render][sd
 TEST_CASE("AC-2 [7-9-8]: GPU text engine creates and destroys without crash",
           "[render][sdlttf][gpu][7-9-8]")
 {
-#ifndef MU_ENABLE_SDL3
-    SKIP("AC-2 requires SDL3 build (MU_ENABLE_SDL3 not defined)");
-#else
     GpuTestEnv env;
     if (!env.ok)
     {
@@ -222,14 +217,13 @@ TEST_CASE("AC-2 [7-9-8]: GPU text engine creates and destroys without crash",
     // AND: destruction does not crash
     TTF_DestroyGPUTextEngine(engine);
     TTF_Quit();
-#endif
 }
 
 // ---------------------------------------------------------------------------
 // AC-4: Factory type selection
 //
-// CUIRenderText::Create(renderType, hDC) selects CUIRenderTextSDLTtf on SDL3
-// builds via the MU_ENABLE_SDL3 path. Testing this in isolation requires a
+// CUIRenderText::Create(renderType, hDC) selects CUIRenderTextSDLTtf.
+// Testing this in isolation requires a
 // valid HDC (Win32 type) which is not available in headless test environments.
 // SKIP so the test compiles clean without Win32 dependency.
 // ---------------------------------------------------------------------------
@@ -238,11 +232,10 @@ TEST_CASE("AC-4 [7-9-8]: factory selects CUIRenderTextSDLTtf on SDL3 builds",
           "[render][sdlttf][factory][7-9-8]")
 {
     SKIP("AC-4 factory test requires Win32 HDC — verified by integration in renderer init");
-    // GIVEN: MU_ENABLE_SDL3 is defined (SDL3 build)
+    // GIVEN: SDL3 is the required runtime
     // WHEN:  CUIRenderText::Create(RENDER_TEXT_SDL_TTF, NULL) is called
     // THEN:  m_pRenderText is a CUIRenderTextSDLTtf instance
     //        GetRenderTextType() returns RENDER_TEXT_SDL_TTF
-    //        Falls back to CUIRenderTextOriginal when MU_ENABLE_SDL3 is not defined
 }
 
 // ---------------------------------------------------------------------------
@@ -294,9 +287,6 @@ TEST_CASE("AC-6 [7-9-8]: text atlas updates execute in copy pass before render p
 TEST_CASE("AC-STD-NFR-1 [7-9-8]: font atlas caching keeps per-frame cost under 0.5ms",
           "[render][sdlttf][perf][7-9-8]")
 {
-#ifndef MU_ENABLE_SDL3
-    SKIP("AC-STD-NFR-1 requires SDL3 build (MU_ENABLE_SDL3 not defined)");
-#else
     GpuTestEnv env;
     if (!env.ok)
     {
@@ -364,5 +354,4 @@ TEST_CASE("AC-STD-NFR-1 [7-9-8]: font atlas caching keeps per-frame cost under 0
     TTF_CloseFont(font);
     TTF_DestroyGPUTextEngine(engine);
     TTF_Quit();
-#endif
 }

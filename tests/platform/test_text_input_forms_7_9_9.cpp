@@ -7,8 +7,6 @@
 //
 // Framework: Catch2 v3.7.1
 // Location:  MuMain/tests/platform/test_text_input_forms_7_9_9.cpp
-// Guard:     #ifdef MU_ENABLE_SDL3
-//
 // AC Coverage:
 //   AC-1  (GiveFocus idempotent — only one input box holds focus at a time)
 //   AC-2  (SetFont selects font into memory DC regardless of m_hEditWnd) [SKIP — Win32 GDI]
@@ -24,7 +22,6 @@
 
 #include <cstring>
 
-#ifdef MU_ENABLE_SDL3
 
 // ---------------------------------------------------------------------------
 // SDL text input globals — defined in SDLKeyboardState.cpp, declared extern
@@ -390,5 +387,3 @@ TEST_CASE("AC-6 [7-9-9]: Chat input box accepts keyboard input via DoActionSub",
     // WHEN:  Player types in chat box
     // THEN:  DoActionSub appends to m_szSDLText, Render() displays typed text
 }
-
-#endif // MU_ENABLE_SDL3

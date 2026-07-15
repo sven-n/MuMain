@@ -4,10 +4,6 @@
 //
 // Framework: Catch2 v3.7.1
 // Location:  MuMain/tests/platform/test_platform_input.cpp
-// Guard:     #ifdef MU_ENABLE_SDL3 — tests only compile when SDL3 is enabled
-
-#ifdef MU_ENABLE_SDL3
-
 #include "PlatformCompat.h"
 #include "PlatformKeys.h"
 #include <SDL3/SDL_scancode.h>
@@ -471,5 +467,3 @@ TEST_CASE("AC-STD-2 [VS1-SDL-INPUT-KEYBOARD]: g_sdl3KeyboardState array size is 
         g_sdl3KeyboardState[511] = false;
     }
 }
-
-#endif // MU_ENABLE_SDL3

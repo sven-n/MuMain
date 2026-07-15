@@ -61,22 +61,6 @@ add_test(
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac1_platform_interfaces.cmake
 )
 
-# AC-7: SDL3 sources guarded by MU_ENABLE_SDL3 in CMakeLists.txt
-add_test(
-    NAME "2.1.1-AC-7:cmake-sdl3-guard"
-    COMMAND ${CMAKE_COMMAND}
-        -DCMAKELISTS_FILE=${CMAKE_CURRENT_SOURCE_DIR}/../../src/CMakeLists.txt
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac7_cmake_sdl3_guard.cmake
-)
-
-# AC-7: All SDL3 source files contain MU_ENABLE_SDL3 ifdef guard
-add_test(
-    NAME "2.1.1-AC-7:sdl3-ifdef-guard"
-    COMMAND ${CMAKE_COMMAND}
-        -DPLATFORM_DIR=${PLATFORM_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac7_sdl3_ifdef_guard.cmake
-)
-
 # AC-STD-11: Flow code and story references in test files
 add_test(
     NAME "2.1.1-AC-STD-11:flow-code"

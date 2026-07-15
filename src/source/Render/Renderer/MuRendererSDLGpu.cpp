@@ -21,8 +21,7 @@
 //   Story 7.9.3: SDL_gpu is the only renderer backend (MuRenderer.cpp deleted).
 
 // Include SDL3 GPU header only in this file — not exposed to game logic.
-// MU_ENABLE_SDL3 is defined at CMake project scope; the preprocessor guard
-// around these includes was redundant and has been removed (Story 7.6.2, AC-7).
+// SDL3 is a required project dependency, so these includes are unconditional.
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL.h>
 #if __has_include(<SDL3_ttf/SDL_ttf.h>)
@@ -166,7 +165,6 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (std140 HLS
 // Returns the SDL_GPUShaderFormat constant name for the given driver.
 // Only used internally — returns the correct enum value for SDL_CreateGPUShader.
 // ---------------------------------------------------------------------------
-#ifdef MU_ENABLE_SDL3
 [[nodiscard]] static SDL_GPUShaderFormat GetShaderFormat(const char* driver)
 {
     if (driver && std::string(driver) == "direct3d12")
@@ -179,7 +177,6 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (std140 HLS
     }
     return SDL_GPU_SHADERFORMAT_SPIRV;
 }
-#endif
 
 // ---------------------------------------------------------------------------
 // Story 4.3.2 (AC-8): GetPipelineSetFor
@@ -220,7 +217,6 @@ PipelineSet GetPipelineSetFor(DrawMode mode)
 // Loads a compiled shader blob from disk into a byte vector.
 // Returns empty vector on failure (caller logs via mu::log).
 // ---------------------------------------------------------------------------
-#ifdef MU_ENABLE_SDL3
 [[nodiscard]] static std::vector<Uint8> LoadShaderBlob(const char* name, const char* stage, const char* driver)
 {
     const std::string path = GetShaderBlobPath(driver, stage, name);
@@ -246,13 +242,11 @@ PipelineSet GetPipelineSetFor(DrawMode mode)
     }
     return blob;
 }
-#endif
 
 // ---------------------------------------------------------------------------
 // Static device and resource state for MuRendererSDLGpu.
 // ---------------------------------------------------------------------------
 
-#ifdef MU_ENABLE_SDL3
 
 static SDL_GPUDevice* s_device = nullptr;
 static SDL_Window* s_window = nullptr;
@@ -668,7 +662,6 @@ static int s_cachedWinH = 0;
     return {};
 }
 
-#endif // MU_ENABLE_SDL3
 
 // ---------------------------------------------------------------------------
 // TextureRegistry: maps caller-provided uint32_t ids to SDL_GPUTexture*.
@@ -739,12 +732,8 @@ static void InvalidateTextureLookupCache()
         return texture;
     }
 
-#ifdef MU_ENABLE_SDL3
     ++s_dbgFallbackTextureThisFrame;
     return s_whiteTexture;
-#else
-    return nullptr;
-#endif
 }
 
 static void DiscardQueuedTextureUpdates(void* texture)
@@ -772,13 +761,11 @@ static bool ReleaseOwnedTextureById(std::uint32_t id)
     if (texture != s_textureMap.end())
     {
         DiscardQueuedTextureUpdates(texture->second);
-#ifdef MU_ENABLE_SDL3
         if (s_device && texture->second)
         {
             SDL_ReleaseGPUTexture(s_device, static_cast<SDL_GPUTexture*>(texture->second));
             ++s_dbgTextureReleasesThisFrame;
         }
-#endif
         s_textureMap.erase(texture);
         InvalidateTextureLookupCache();
     }
@@ -872,11 +859,7 @@ static bool s_samplerCacheValid = false;
     auto it = s_samplerMap.find(id);
     if (it == s_samplerMap.end())
     {
-#ifdef MU_ENABLE_SDL3
         s_cachedSampler = s_defaultSampler; // fallback to default sampler for unknown IDs
-#else
-        s_cachedSampler = nullptr;
-#endif
     }
     else
     {
@@ -966,7 +949,6 @@ public:
     // -----------------------------------------------------------------------
     [[nodiscard]] static bool Init(void* pNativeWindow)
     {
-#ifdef MU_ENABLE_SDL3
         s_window = static_cast<SDL_Window*>(pNativeWindow);
         if (!s_window)
         {
@@ -1193,11 +1175,6 @@ public:
 
         mu::log::Get("render")->info("SDL_gpu -- Init complete");
         return true;
-#else
-        (void)pNativeWindow;
-        mu::log::Get("render")->error("SDL_gpu -- Init called but MU_ENABLE_SDL3 is not defined");
-        return false;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -1206,7 +1183,6 @@ public:
     // -----------------------------------------------------------------------
     static void Shutdown()
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_device)
         {
             s_frameReadbackState.Reset();
@@ -1297,7 +1273,6 @@ public:
         s_window = nullptr;
 
         mu::log::Get("render")->info("SDL_gpu -- Shutdown complete");
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -1306,7 +1281,6 @@ public:
     // -----------------------------------------------------------------------
     void BeginFrame() override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_device || !s_window)
         {
             FailPendingFrameReadback();
@@ -1405,7 +1379,6 @@ public:
         // Draw calls record RenderCmds into s_renderCmds during the frame.
         // EndFrame will: copy vertex data → begin render pass → replay → end → submit.
         s_frameActive = true;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -1420,7 +1393,6 @@ public:
     // -----------------------------------------------------------------------
     void EndFrame() override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_frameActive)
         {
             // Frame was not started (minimized window or error).
@@ -1856,7 +1828,6 @@ public:
             SDL_Log("[RENDER diag] WARNING: 10 frames elapsed with zero draw calls — "
                     "game may not be calling RenderQuad2D/RenderTriangles");
         }
-#endif
     }
 
     [[nodiscard]] bool RequestFramePixels() override
@@ -1884,7 +1855,6 @@ public:
     // -----------------------------------------------------------------------
     void BeginScene(int x, int y, int w, int h) override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_frameActive || !s_window)
         {
             return;
@@ -1903,12 +1873,6 @@ public:
         cmd.viewport.min_depth = 0.0f;
         cmd.viewport.max_depth = 1.0f;
         s_renderCmds.push_back(cmd);
-#else
-        (void)x;
-        (void)y;
-        (void)w;
-        (void)h;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -1917,7 +1881,6 @@ public:
     // -----------------------------------------------------------------------
     void EndScene() override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_frameActive)
         {
             return;
@@ -1933,7 +1896,6 @@ public:
         cmd.viewport.min_depth = 0.0f;
         cmd.viewport.max_depth = 1.0f;
         s_renderCmds.push_back(cmd);
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -1952,7 +1914,6 @@ public:
     // -----------------------------------------------------------------------
     void SetViewport(int x, int y, int w, int h) override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_frameActive)
         {
             return;
@@ -1970,12 +1931,6 @@ public:
         cmd.viewport.min_depth = 0.0f;
         cmd.viewport.max_depth = 1.0f;
         s_renderCmds.push_back(cmd);
-#else
-        (void)x;
-        (void)y;
-        (void)w;
-        (void)h;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -1996,7 +1951,6 @@ public:
     // -----------------------------------------------------------------------
     void SetScissor(int x, int y, int w, int h) override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_frameActive)
         {
             return;
@@ -2012,12 +1966,6 @@ public:
         cmd.scissor.w = static_cast<int>(static_cast<float>(w) * xScale);
         cmd.scissor.h = static_cast<int>(static_cast<float>(h) * yScale);
         s_renderCmds.push_back(cmd);
-#else
-        (void)x;
-        (void)y;
-        (void)w;
-        (void)h;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -2066,7 +2014,6 @@ public:
     // -----------------------------------------------------------------------
     void RenderLines(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
-#ifdef MU_ENABLE_SDL3
         if (vertices.empty() || !s_frameActive)
         {
             return;
@@ -2151,10 +2098,6 @@ public:
 
             RenderTriangles(std::span<const Vertex3D>(verts, 6), textureId);
         }
-#else
-        (void)vertices;
-        (void)textureId;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -2171,7 +2114,6 @@ public:
     // without a direct dependency on MuRendererSDLGpu.cpp internals.
     // Logs a warning via mu::log if s_device is nullptr (renderer not initialized).
     // -----------------------------------------------------------------------
-#ifdef MU_ENABLE_SDL3
     [[nodiscard]] void* GetDevice() override
     {
         if (!s_device)
@@ -2180,7 +2122,6 @@ public:
         }
         return s_device;
     }
-#endif
 
     // Story 7.9.8 (AC-2): SDL_ttf text engine accessor.
     [[nodiscard]] TTF_TextEngine* GetTextEngine() override
@@ -2266,7 +2207,6 @@ public:
     void QueueTextureUpdate(std::uint32_t textureId, const void* pixels, std::uint32_t width,
                             std::uint32_t height) override
     {
-#ifdef MU_ENABLE_SDL3
         if (!pixels || width == 0 || height == 0)
         {
             return;
@@ -2289,12 +2229,10 @@ public:
         cmd.bytesPerRow = width * 4; // RGBA8
         s_textureUpdates.push_back(std::move(cmd));
         ++s_dbgTextureUploadsThisFrame;
-#endif
     }
 
     void EnsureTexture(std::uint32_t textureId, std::uint32_t width, std::uint32_t height) override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_device || textureId == 0 || width == 0 || height == 0)
         {
             return;
@@ -2340,31 +2278,21 @@ public:
         s_textureSizes[textureId] = {width, height};
         s_ownedTextureIds.insert(textureId);
         ++s_dbgTextureCreatesThisFrame;
-#else
-        (void)textureId;
-        (void)width;
-        (void)height;
-#endif
     }
 
     void ReleaseTexture(std::uint32_t textureId) override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_device || textureId == 0)
         {
             return;
         }
 
         ReleaseOwnedTextureById(textureId);
-#else
-        (void)textureId;
-#endif
     }
 
     [[nodiscard]] std::uint32_t CreateTexture(
         std::uint32_t width, std::uint32_t height, const void* pixels) override
     {
-#ifdef MU_ENABLE_SDL3
         const std::uint32_t textureId = AllocateOwnedDynamicTextureId();
         if (textureId == 0u)
         {
@@ -2378,17 +2306,10 @@ public:
         }
         QueueTextureUpdate(textureId, pixels, width, height);
         return textureId;
-#else
-        (void)width;
-        (void)height;
-        (void)pixels;
-        return 0u;
-#endif
     }
 
     [[nodiscard]] std::uint32_t CaptureFrameTexture(std::uint32_t textureId) override
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_frameActive || !s_device || !s_swapchainTexture || s_swapW == 0u || s_swapH == 0u)
         {
             return 0u;
@@ -2433,10 +2354,6 @@ public:
 
         s_pendingFrameCaptureTextureId = textureId;
         return textureId;
-#else
-        (void)textureId;
-        return 0u;
-#endif
     }
 
     [[nodiscard]] bool IsTextureRegistered(std::uint32_t textureId) const override
@@ -2456,7 +2373,6 @@ public:
     // -----------------------------------------------------------------------
     void RenderQuad2D(std::span<const Vertex2D> vertices, std::uint32_t textureId) override
     {
-#ifdef MU_ENABLE_SDL3
         if (vertices.empty() || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
@@ -2535,10 +2451,6 @@ public:
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
-#else
-        (void)vertices;
-        (void)textureId;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -2546,7 +2458,6 @@ public:
     // -----------------------------------------------------------------------
     void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
-#ifdef MU_ENABLE_SDL3
         if (vertices.empty() || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
@@ -2623,10 +2534,6 @@ public:
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
-#else
-        (void)vertices;
-        (void)textureId;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -2636,7 +2543,6 @@ public:
     // -----------------------------------------------------------------------
     void RenderQuadStrip(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
-#ifdef MU_ENABLE_SDL3
         if (vertices.size() < 2 || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
@@ -2722,10 +2628,6 @@ public:
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
-#else
-        (void)vertices;
-        (void)textureId;
-#endif
     }
 
     // -----------------------------------------------------------------------
@@ -3017,7 +2919,6 @@ private:
     // -----------------------------------------------------------------------
     [[nodiscard]] static Uint32 UploadVertices(const void* pData, Uint32 byteSize)
     {
-#ifdef MU_ENABLE_SDL3
         if (!s_vtxMappedPtr || !s_vtxGpuBuf)
         {
             return ~0u;
@@ -3037,18 +2938,12 @@ private:
 
         s_vtxOffset = alignedOffset + byteSize;
         return alignedOffset;
-#else
-        (void)pData;
-        (void)byteSize;
-        return ~0u;
-#endif
     }
 
     // -----------------------------------------------------------------------
     // Static resource creation/destruction helpers.
     // -----------------------------------------------------------------------
 
-#ifdef MU_ENABLE_SDL3
     // -----------------------------------------------------------------------
     // Story 4.3.2 (AC-2, AC-5): LoadShaders
     // Loads all 5 HLSL shader blobs from MU_SHADER_DIR and creates
@@ -3838,7 +3733,6 @@ private:
         return true;
     }
 
-#endif // MU_ENABLE_SDL3
 };
 
 // ---------------------------------------------------------------------------
@@ -3860,13 +3754,11 @@ private:
 
 void WaitForSDLGpuIdle()
 {
-#ifdef MU_ENABLE_SDL3
     if (s_device && !SDL_WaitForGPUIdle(s_device))
     {
         mu::log::Get("render")->error("SDL_gpu -- failed to wait for idle before resource teardown: {}",
                                       SDL_GetError());
     }
-#endif
 }
 
 void ShutdownSDLGpuRenderer()

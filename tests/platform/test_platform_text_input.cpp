@@ -5,8 +5,6 @@
 //
 // Framework: Catch2 v3.7.1
 // Location:  MuMain/tests/platform/test_platform_text_input.cpp
-// Guard:     #ifdef MU_ENABLE_SDL3 — tests only compile when SDL3 is enabled
-//
 // AC Coverage:
 //   AC-1  (SDL_EVENT_TEXT_INPUT replaces WM_CHAR as character source)
 //   AC-2  (typed characters appear in text buffer)
@@ -16,7 +14,6 @@
 //
 // Flow code: VS1-SDL-INPUT-TEXT
 
-#ifdef MU_ENABLE_SDL3
 
 #include "PlatformCompat.h"
 #include <catch2/catch_test_macros.hpp>
@@ -708,5 +705,3 @@ TEST_CASE("AC-STD-11 [VS1-SDL-INPUT-TEXT]: Flow code appears in test file",
         // No runtime assertion needed — compilation reaching this point is the verification.
     }
 }
-
-#endif // MU_ENABLE_SDL3

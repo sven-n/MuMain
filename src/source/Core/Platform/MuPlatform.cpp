@@ -9,16 +9,9 @@
 #include "Core/Platform/posix/PosixSignalHandlers.h"
 #endif
 
-#ifdef MU_ENABLE_SDL3
 #include "Core/Platform/sdl3/SDLWindow.h"
 #include "Core/Platform/sdl3/SDLEventLoop.h"
 #include <SDL3/SDL.h>
-#else
-#ifdef _WIN32
-#include "Core/Platform/win32/Win32Window.h"
-#include "Core/Platform/win32/Win32EventLoop.h"
-#endif
-#endif
 
 namespace mu
 {
@@ -29,13 +22,11 @@ static bool s_bInitialized = false;
 
 bool MuPlatform::Initialize()
 {
-#ifdef MU_ENABLE_SDL3
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
         mu::log::Get("platform")->error("MU_ERR_SDL_INIT_FAILED: SDL3 initialization failed: {}", SDL_GetError());
         return false;
     }
-#endif
 
 #ifndef _WIN32
     // Story 7.1.2: Install POSIX signal handlers for crash diagnostics.
@@ -58,9 +49,7 @@ void MuPlatform::Shutdown()
         s_pWindow.reset();
     }
 
-#ifdef MU_ENABLE_SDL3
     SDL_Quit();
-#endif
     s_bInitialized = false;
 }
 
@@ -76,7 +65,6 @@ bool MuPlatform::CreateWindow(const char* title, int width, int height, uint32_t
         return false;
     }
 
-#ifdef MU_ENABLE_SDL3
     auto window = std::make_unique<SDLWindow>();
     if (!window->Create(title, width, height, flags))
     {
@@ -85,17 +73,6 @@ bool MuPlatform::CreateWindow(const char* title, int width, int height, uint32_t
     }
     s_pWindow = std::move(window);
     s_pEventLoop = std::make_unique<SDLEventLoop>();
-#elif defined(_WIN32)
-    auto window = std::make_unique<Win32Window>();
-    if (!window->Create(title, width, height, flags))
-    {
-        return false;
-    }
-    s_pWindow = std::move(window);
-    s_pEventLoop = std::make_unique<Win32EventLoop>();
-#else
-    return false;
-#endif
     return true;
 }
 
