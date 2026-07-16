@@ -7009,7 +7009,13 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else
     {
-        RenderGroundItemLabelCached(o, ip);
+        if (!RenderGroundItemLabelCached(o, ip))
+        {
+            GroundItemLabelDescriptor descriptor;
+            BuildGroundItemLabelDescriptor(o, ip, descriptor);
+            ApplyGroundItemLabelDescriptor(descriptor);
+            g_pRenderText->RenderText(o->ScreenX, o->ScreenY - 15, descriptor.Name, 0, 0, RT3_WRITE_CENTER);
+        }
     }
 
     g_pRenderText->SetTextColor(255, 230, 200, 255);
