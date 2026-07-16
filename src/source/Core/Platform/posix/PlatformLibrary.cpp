@@ -30,9 +30,16 @@ LibraryHandle Load(const char* path)
 
 void* GetSymbol(LibraryHandle handle, const char* name)
 {
-    if (handle == nullptr || name == nullptr)
+    if (handle == nullptr)
     {
-        mu::log::Get("platform")->error("PLAT: PlatformLibrary::GetSymbol() failed -- handle or name is null");
+        // Packet binding globals can run before the managed-library handle is
+        // initialized. ResolvePacketBindings() retries them after startup.
+        return nullptr;
+    }
+
+    if (name == nullptr)
+    {
+        mu::log::Get("platform")->error("PLAT: PlatformLibrary::GetSymbol() failed -- name is null");
         return nullptr;
     }
 

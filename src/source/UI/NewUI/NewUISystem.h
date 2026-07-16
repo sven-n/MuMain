@@ -90,6 +90,7 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         CNewUI3DRenderMng* m_pNewUI3DRenderMng;
         CNewUIHotKey* m_pNewUIHotKey;
+        bool m_mouseInputCaptured = false;
 
     public:
         ~CNewUISystem();

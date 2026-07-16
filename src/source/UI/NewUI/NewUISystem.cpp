@@ -1795,6 +1795,11 @@ void CNewUISystem::Disable(DWORD dwKey)
 
 bool CNewUISystem::CheckMouseUse()
 {
+    if (m_mouseInputCaptured)
+    {
+        return true;
+    }
+
     if (m_pNewUIMng)
     {
         if (m_pNewUIMng->GetActiveMouseUIObj())
@@ -1845,7 +1850,22 @@ bool CNewUISystem::Update()
 
     if (m_pNewUIMng)
     {
+        if (!MouseLButton)
+        {
+            m_mouseInputCaptured = false;
+        }
+        else if (m_pNewUIMng->GetActiveMouseUIObj())
+        {
+            m_mouseInputCaptured = true;
+        }
+
         m_pNewUIMng->UpdateMouseEvent();
+
+        if (MouseLButton && m_pNewUIMng->GetActiveMouseUIObj())
+        {
+            m_mouseInputCaptured = true;
+        }
+
         m_pNewUIMng->UpdateKeyEvent();
         return m_pNewUIMng->Update();
     }

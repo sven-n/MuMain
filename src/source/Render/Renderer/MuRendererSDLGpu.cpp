@@ -1987,6 +1987,11 @@ public:
         cmd.viewport.min_depth = 0.0f;
         cmd.viewport.max_depth = 1.0f;
         s_renderCmds.push_back(cmd);
+
+        RenderCmd scissorCmd{};
+        scissorCmd.type = RenderCmdType::SetScissor;
+        scissorCmd.scissor = {0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
+        s_renderCmds.push_back(scissorCmd);
     }
 
     // -----------------------------------------------------------------------
@@ -2450,13 +2455,10 @@ public:
         }
 
         // Story 4.3.2 (AC-8): RenderTriangles uses the 3D pipeline set (Vertex3D layout).
-        // Force depth-read-only for additive/subtract blends — these produce transparent output
-        // and must not write to the depth buffer (would occlude geometry behind them).
         const int pipelineIdx = GetActivePipelineIndex();
-        const bool wantsDepthWrite = m_depthMaskEnabled && m_activeBlendMode == BlendMode::Alpha;
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled
-                ? (wantsDepthWrite ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthReadOnly[pipelineIdx])
+                ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthReadOnly[pipelineIdx])
                 : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
@@ -2538,10 +2540,9 @@ public:
 
         // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
-        const bool wantsDepthWrite = m_depthMaskEnabled && m_activeBlendMode == BlendMode::Alpha;
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled
-                ? (wantsDepthWrite ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthReadOnly[pipelineIdx])
+                ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthReadOnly[pipelineIdx])
                 : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {

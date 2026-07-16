@@ -1384,6 +1384,11 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
     }
 
     x = 385.f; y = 431.f; width = 32.f; height = 38.f;
+    if (SEASON3B::CheckMouseIn(x, y, width, height))
+    {
+        MouseOnWindow = true;
+    }
+
     if (m_EventState == EVENT_NONE && MouseLButtonPush == false
         && SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
@@ -1433,6 +1438,11 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
     }
 
     x = 222.f; y = 431.f; width = 32.f * 5.f; height = 38.f;
+    if (SEASON3B::CheckMouseIn(x, y, width, height))
+    {
+        MouseOnWindow = true;
+    }
+
     if (m_EventState == EVENT_NONE && MouseLButtonPush == false
         && SEASON3B::CheckMouseIn(x, y, width, height) == true)
     {
@@ -1590,6 +1600,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
         if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
         {
             bMouseOnSkillList = true;
+            MouseOnWindow = true;
             if (m_EventState == EVENT_NONE && MouseLButtonPush == false)
             {
                 m_EventState = EVENT_BTN_HOVER_SKILLLIST;
@@ -1643,6 +1654,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
             if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
             {
                 bMouseOnSkillList = true;
+                MouseOnWindow = true;
 
                 if (m_EventState == EVENT_NONE && MouseLButtonPush == false)
                 {

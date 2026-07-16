@@ -140,12 +140,10 @@ bool SEASON3B::CNewUIWindowMenu::UpdateMouseEvent()
     {
         m_iSelectedIndex = -1;
     }
-    else
-    {
-        return false;
-    }
 
-    return true;
+    // System menu is modal. Consume every mouse event while visible so world
+    // movement, attacks, and item interaction cannot fire behind it.
+    return false;
 }
 
 bool SEASON3B::CNewUIWindowMenu::UpdateKeyEvent()

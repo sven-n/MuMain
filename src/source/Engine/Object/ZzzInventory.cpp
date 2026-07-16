@@ -231,7 +231,16 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
 
     for (int i = 0; i < TextNum; i++)
     {
-        g_pRenderText->SetTextColor(0xffffffff);
+        switch (TextListColor[i])
+        {
+        case TEXT_COLOR_BLUE: g_pRenderText->SetTextColor(128, 179, 255, 255); break;
+        case TEXT_COLOR_GRAY: g_pRenderText->SetTextColor(102, 102, 102, 255); break;
+        case TEXT_COLOR_RED: g_pRenderText->SetTextColor(255, 51, 26, 255); break;
+        case TEXT_COLOR_YELLOW: g_pRenderText->SetTextColor(255, 204, 26, 255); break;
+        case TEXT_COLOR_GREEN: g_pRenderText->SetTextColor(26, 255, 128, 255); break;
+        case TEXT_COLOR_PURPLE: g_pRenderText->SetTextColor(255, 26, 255, 255); break;
+        default: g_pRenderText->SetTextColor(255, 255, 255, 255); break;
+        }
 
         if (TEXT_COLOR_DARKRED == TextListColor[i])
         {
@@ -366,7 +375,19 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         }
         else
         {
-            g_pRenderText->SetTextColor(0xffffffff);
+            switch (TextListColor[i])
+            {
+            case TEXT_COLOR_BLUE: g_pRenderText->SetTextColor(128, 179, 255, 255); break;
+            case TEXT_COLOR_GRAY: g_pRenderText->SetTextColor(102, 102, 102, 255); break;
+            case TEXT_COLOR_RED: g_pRenderText->SetTextColor(255, 51, 26, 255); break;
+            case TEXT_COLOR_YELLOW: g_pRenderText->SetTextColor(255, 204, 26, 255); break;
+            case TEXT_COLOR_GREEN: g_pRenderText->SetTextColor(26, 255, 128, 255); break;
+            case TEXT_COLOR_PURPLE: g_pRenderText->SetTextColor(255, 26, 255, 255); break;
+            case TEXT_COLOR_REDPURPLE: g_pRenderText->SetTextColor(204, 128, 204, 255); break;
+            case TEXT_COLOR_VIOLET: g_pRenderText->SetTextColor(179, 102, 255, 255); break;
+            case TEXT_COLOR_ORANGE: g_pRenderText->SetTextColor(230, 107, 10, 255); break;
+            default: g_pRenderText->SetTextColor(255, 255, 255, 255); break;
+            }
             if (TEXT_COLOR_DARKRED == TextListColor[i])
             {
                 g_pRenderText->SetBgColor(160, 0, 0, 255);
