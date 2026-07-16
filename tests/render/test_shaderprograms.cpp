@@ -51,8 +51,8 @@ struct FogUniform
     float pad0;
     float fogStart;
     float fogEnd;
+    float fogPadding[2];
     std::array<float, 4> fogColor;
-    float pad1[2];
 };
 
 } // namespace mu
@@ -126,8 +126,8 @@ TEST_CASE("AC-6: ShaderBlobPath — driver-to-extension mapping", "[render][shad
 //   offset 12: pad0              (float, 4 bytes)
 //   offset 16: fogStart          (float, 4 bytes)
 //   offset 20: fogEnd            (float, 4 bytes)
-//   offset 24: fogColor[4]       (float4, 16 bytes)
-//   offset 40: pad1[2]           (float2, 8 bytes)
+//   offset 24: fogPadding[2]     (float2, completes second 16-byte register)
+//   offset 32: fogColor[4]       (float4, 16-byte register alignment)
 //   total: 48 bytes
 TEST_CASE("AC-10: FogUniform — struct layout static_assert", "[render][shader][ac10]")
 {
@@ -140,9 +140,10 @@ TEST_CASE("AC-10: FogUniform — struct layout static_assert", "[render][shader]
     static_assert(offsetof(mu::FogUniform, pad0) == 12, "FogUniform.pad0 must be at offset 12 (std140)");
     static_assert(offsetof(mu::FogUniform, fogStart) == 16, "FogUniform.fogStart must be at offset 16 (std140)");
     static_assert(offsetof(mu::FogUniform, fogEnd) == 20, "FogUniform.fogEnd must be at offset 20 (std140)");
-    static_assert(offsetof(mu::FogUniform, fogColor) == 24,
-                  "FogUniform.fogColor must be at offset 24 (std140 — float4 alignment)");
-    static_assert(offsetof(mu::FogUniform, pad1) == 40, "FogUniform.pad1 must be at offset 40 (std140)");
+    static_assert(offsetof(mu::FogUniform, fogPadding) == 24,
+                  "FogUniform.fogPadding must be at offset 24");
+    static_assert(offsetof(mu::FogUniform, fogColor) == 32,
+                  "FogUniform.fogColor must be at offset 32 (HLSL float4 register alignment)");
     static_assert(sizeof(mu::FogUniform) == 48, "FogUniform must be exactly 48 bytes (std140 — matches HLSL cbuffer)");
 
     SECTION("sizeof FogUniform is 48 bytes")

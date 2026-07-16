@@ -95,7 +95,7 @@ namespace mu
 // Story 4.3.2 (AC-10): Fog uniform buffer struct — in mu:: namespace so that
 // test_shaderprograms.cpp can forward-declare and verify layout via static_assert.
 // Mirrors the FogUniforms cbuffer declared in basic_textured.frag.hlsl (std140).
-// std140 layout: uint(4), uint(4), float(4), float(4), float(4), float(4), float4(16), float2(8)
+// HLSL cbuffer layout: uint4 register, float2 + padding register, float4 register.
 // Total: 48 bytes.
 // ---------------------------------------------------------------------------
 struct FogUniform
@@ -106,8 +106,8 @@ struct FogUniform
     float pad0;                    // offset 12
     float fogStart;                // offset 16
     float fogEnd;                  // offset 20
-    std::array<float, 4> fogColor; // offset 24 (float4, 16 bytes)
-    float pad1[2];                 // offset 40 (8 bytes)
+    float fogPadding[2];           // offset 24
+    std::array<float, 4> fogColor; // offset 32 (float4 register alignment)
 }; // total: 48 bytes
 
 static_assert(offsetof(FogUniform, fogEnabled) == 0, "FogUniform std140 layout");
@@ -116,10 +116,9 @@ static_assert(offsetof(FogUniform, alphaThreshold) == 8, "FogUniform std140 layo
 static_assert(offsetof(FogUniform, pad0) == 12, "FogUniform std140 layout");
 static_assert(offsetof(FogUniform, fogStart) == 16, "FogUniform std140 layout");
 static_assert(offsetof(FogUniform, fogEnd) == 20, "FogUniform std140 layout");
-static_assert(offsetof(FogUniform, fogColor) == 24,
-              "FogUniform std140 float4 alignment (std::array<float,4> == float[4])");
-static_assert(offsetof(FogUniform, pad1) == 40, "FogUniform std140 layout");
-static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (std140 HLSL cbuffer)");
+static_assert(offsetof(FogUniform, fogPadding) == 24, "FogUniform HLSL cbuffer layout");
+static_assert(offsetof(FogUniform, fogColor) == 32, "FogUniform HLSL float4 register alignment");
+static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuffer)");
 
 // ---------------------------------------------------------------------------
 // Story 4.3.2 (AC-6): GetShaderBlobPath
@@ -2313,12 +2312,54 @@ public:
         return textureId;
     }
 
-    [[nodiscard]] std::uint32_t CaptureFrameTexture(std::uint32_t /*textureId*/) override
+    [[nodiscard]] std::uint32_t CaptureFrameTexture(std::uint32_t textureId) override
     {
-        // ponytail: SDL swapchain textures lack SAMPLER usage, so SDL_GPU cannot
-        // blit them into a sampled reconnect backdrop. Return no capture until
-        // the renderer owns an offscreen scene target that supports sampling.
-        return 0u;
+        if (!s_device || !s_window || !s_frameActive || s_swapW == 0u || s_swapH == 0u)
+        {
+            return 0u;
+        }
+
+        if (textureId != 0u)
+        {
+            const auto size = s_textureSizes.find(textureId);
+            if (!s_ownedTextureIds.contains(textureId) || size == s_textureSizes.end())
+            {
+                textureId = 0u;
+            }
+            else if (size->second.first != s_swapW || size->second.second != s_swapH)
+            {
+                ReleaseOwnedTextureById(textureId);
+                textureId = 0u;
+            }
+        }
+
+        if (textureId == 0u)
+        {
+            textureId = AllocateOwnedDynamicTextureId();
+            const auto textureInfo = GetSdlGpuFrameCaptureTextureInfo(
+                SDL_GetGPUSwapchainTextureFormat(s_device, s_window), s_swapW, s_swapH);
+            if (textureId == 0u || !textureInfo)
+            {
+                return 0u;
+            }
+
+            SDL_GPUTexture* texture = SDL_CreateGPUTexture(s_device, &*textureInfo);
+            if (!texture)
+            {
+                mu::log::Get("render")->warn("SDL_gpu -- reconnect capture texture creation failed: {}",
+                                              SDL_GetError());
+                return 0u;
+            }
+
+            s_textureMap[textureId] = texture;
+            InvalidateTextureLookupCache();
+            s_textureSizes[textureId] = {s_swapW, s_swapH};
+            s_ownedTextureIds.insert(textureId);
+            ++s_dbgTextureCreatesThisFrame;
+        }
+
+        s_pendingFrameCaptureTextureId = textureId;
+        return textureId;
     }
 
     [[nodiscard]] bool IsTextureRegistered(std::uint32_t textureId) const override
@@ -2695,13 +2736,12 @@ public:
         m_fogUniform.pad0 = 0.0f;
         m_fogUniform.fogStart = params.start;
         m_fogUniform.fogEnd = params.end;
+        m_fogUniform.fogPadding[0] = 0.0f;
+        m_fogUniform.fogPadding[1] = 0.0f;
         m_fogUniform.fogColor[0] = params.color[0];
         m_fogUniform.fogColor[1] = params.color[1];
         m_fogUniform.fogColor[2] = params.color[2];
         m_fogUniform.fogColor[3] = params.color[3];
-        m_fogUniform.pad1[0] = 0.0f;
-        m_fogUniform.pad1[1] = 0.0f;
-
         s_fogDirty = true;
     }
 
