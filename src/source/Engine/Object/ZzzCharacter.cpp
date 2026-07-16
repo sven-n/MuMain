@@ -6083,7 +6083,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
                 break;
             if (o->CurrentAction == 0 && o->AnimationFrame >= 5.f && o->AnimationFrame <= 10.f)
-                PlayBuffer(SOUND_NPC_BLACK_SMITH);
+                PlayBuffer(SOUND_NPC_BLACK_SMITH, o);
             o->BlendMesh = 4;
             o->BlendMeshLight = Luminosity;
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
