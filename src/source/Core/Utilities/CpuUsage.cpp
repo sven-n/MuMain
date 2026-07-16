@@ -12,7 +12,7 @@ public:
     Impl()
     {
         SYSTEM_INFO sysInfo;
-        GetSystemInfo(&sysInfo);
+    MuGetSystemInfo(&sysInfo);
         m_numProcessors = sysInfo.dwNumberOfProcessors;
         m_lastCheckTime = std::chrono::steady_clock::now();
         m_lastProcessTime = 0;
@@ -60,7 +60,7 @@ public:
             return 0.0;
 
         // Calculate CPU usage as a percentage
-        return std::max<double>(0.0, (100.0 * processTimeElapsed) / (systemTimeElapsed * m_numProcessors));
+        return std::max<double>(0.0, processTimeElapsed / (static_cast<double>(systemTimeElapsed) * m_numProcessors));
     }
 
 private:
@@ -125,7 +125,7 @@ public:
         if (elapsedWallTime <= 0 || m_numProcessors == 0)
             return 0.0;
 
-        return std::max<double>(0.0, (100.0 * processTimeElapsed) /
+        return std::max<double>(0.0, processTimeElapsed /
                                      (static_cast<double>(elapsedWallTime) * m_numProcessors));
     }
 

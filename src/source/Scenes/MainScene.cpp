@@ -22,6 +22,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Reconnect/ReconnectManager.h"
@@ -127,12 +128,11 @@ static void InitializeMainScene()
 {
     g_pMainFrame->ResetSkillHotKey();
 
-    g_ConsoleDebug->Write(MCD_NORMAL, L"Join the game with the following character: %ls", CharactersClient[SelectedHero].ID);
-    g_ErrorReport.Write(L"> Character selected <%d> \"%ls\"\r\n", SelectedHero + 1, CharactersClient[SelectedHero].ID);
+    MU_LOG_INFO(mu::log::Get("scenes"), "Character selected: slot {}", SelectedHero + 1);
 
     InitMainScene = true;
 
-    g_ConsoleDebug->Write(MCD_SEND, L"SendRequestJoinMapServer");
+    MU_LOG_DEBUG(mu::log::Get("network"), "SendRequestJoinMapServer");
 
     CurrentProtocolState = REQUEST_JOIN_MAP_SERVER;
     SocketClient->ToGameServer()->SendSelectCharacter(MU_C16(CharactersClient[SelectedHero].ID));

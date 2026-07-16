@@ -173,26 +173,14 @@ bool			Path::ReadFileLastLine(TCHAR* szFile, TCHAR* szLastLine)
 
     if (szFile && szLastLine && *szFile && ifs.is_open())
     {
-        std::size_t len = 0;
-
-        while (!ifs.eof())
+        while (ifs.getline(buff, sizeof(buff)))
         {
-            ifs.getline(buff, sizeof(buff));
-
-            len = 0;
-            StringCchLengthA(buff, sizeof(buff), &len);
-
-            // TODO convert buff to utf8
-            //if (len > 1)
-            //    StringCchCopy(szLastLine, sizeof(buff), buff);
         }
 
         ifs.close();
 
-        len = 0;
-        StringCchLength(szLastLine, 1024, &len);
-
-        if (len > 1)
+        const int length = MultiByteToWideChar(CP_UTF8, 0, buff, -1, szLastLine, 1024);
+        if (length > 1)
         {
             return 1;
         }
@@ -205,7 +193,7 @@ bool			Path::WriteNewFile(TCHAR* szFile, TCHAR* szText, INT nTextSize)
 {
     if (!szFile || !szText) return 0;
 
-    std::wfstream ofs(std::filesystem::path(szFile), std::wfstream::out | std::wfstream::trunc | std::wfstream::binary);
+    std::wfstream ofs(mu_narrow_path(szFile), std::wfstream::out | std::wfstream::trunc | std::wfstream::binary);
 
     if (ofs.is_open())
     {

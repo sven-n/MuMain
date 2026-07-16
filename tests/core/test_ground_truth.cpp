@@ -8,20 +8,19 @@
 //
 // Run with: ctest --test-dir MuMain/build -R ground_truth
 
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include "doctest.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
 
-#include "GroundTruthCapture.h"
+#include "Core/Platform/GroundTruthCapture.h"
 
-using Catch::Matchers::WithinAbs;
+#define SECTION SUBCASE
 
 // ---------------------------------------------------------------------------
 // AC-STD-2 (AC-5): SSIM on identical buffers — expects score >= 0.99 (PASS)
 // ---------------------------------------------------------------------------
-TEST_CASE("AC-5: SSIM on identical buffers returns score >= 0.99", "[core][ground_truth][ac-5]")
+TEST_CASE("AC-5: SSIM on identical buffers returns score >= 0.99 [core][ground_truth][ac-5]")
 {
     SECTION("8x8 identical solid-gray buffers produce SSIM = 1.0")
     {
@@ -80,7 +79,7 @@ TEST_CASE("AC-5: SSIM on identical buffers returns score >= 0.99", "[core][groun
 // ---------------------------------------------------------------------------
 // AC-STD-2 (AC-5): SSIM on randomized / dissimilar buffers — expects score < 0.99 (FAIL)
 // ---------------------------------------------------------------------------
-TEST_CASE("AC-5: SSIM on dissimilar buffers returns score < 0.99", "[core][ground_truth][ac-5]")
+TEST_CASE("AC-5: SSIM on dissimilar buffers returns score < 0.99 [core][ground_truth][ac-5]")
 {
     SECTION("8x8 inverted buffers produce SSIM well below 0.99")
     {
@@ -156,7 +155,7 @@ TEST_CASE("AC-5: SSIM on dissimilar buffers returns score < 0.99", "[core][groun
 // ---------------------------------------------------------------------------
 // AC-5 (edge cases): SSIM result is bounded and stable
 // ---------------------------------------------------------------------------
-TEST_CASE("AC-5: SSIM score is bounded in [0.0, 1.0]", "[core][ground_truth][ac-5]")
+TEST_CASE("AC-5: SSIM score is bounded in [0.0, 1.0] [core][ground_truth][ac-5]")
 {
     SECTION("All-zero buffers produce a valid bounded score")
     {
@@ -202,8 +201,7 @@ TEST_CASE("AC-5: SSIM score is bounded in [0.0, 1.0]", "[core][ground_truth][ac-
 // Guard matches GroundTruthCapture.cpp — CompareTo is only compiled under the flag.
 // ---------------------------------------------------------------------------
 #ifdef ENABLE_GROUND_TRUTH_CAPTURE
-TEST_CASE("AC-6 (deferred): CompareTo returns negative for deferred stub",
-          "[core][ground_truth][ac-6][deferred]")
+TEST_CASE("AC-6 (deferred): CompareTo returns negative for deferred stub [core][ground_truth][ac-6][deferred]")
 {
     SECTION("CompareTo returns < 0 indicating not-yet-implemented")
     {
@@ -220,8 +218,7 @@ TEST_CASE("AC-6 (deferred): CompareTo returns negative for deferred stub",
 // AC-VAL-2: SSIM correctly identifies identical vs known-different
 // (Explicit regression guard that the SSIM function works end-to-end)
 // ---------------------------------------------------------------------------
-TEST_CASE("AC-VAL-2: SSIM correctly distinguishes identical from different images",
-          "[core][ground_truth][ac-val-2]")
+TEST_CASE("AC-VAL-2: SSIM correctly distinguishes identical from different images [core][ground_truth][ac-val-2]")
 {
     constexpr int width = 16;
     constexpr int height = 16;

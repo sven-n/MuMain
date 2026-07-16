@@ -88,15 +88,9 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\][Ww]in[Mm]ain\\.[Cc]pp$")
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Platform[/\\][^/\\]+[/\\]main\\.(cpp|mm)$")
 
-# The in-game shop's catalog downloader is a WinINet/urlmon HTTP+FTP stack on
-# Windows (FileDownloader/FTPConnecter/HTTPConnecter/DownloadInfo). Off Windows
-# it is replaced by a libcurl implementation (CurlFileDownloader, issue #462).
-# Keep only the transport that fits the platform in the build.
-if(WIN32)
-  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\]CurlFileDownloader\\.cpp$")
-else()
-  list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\](FileDownloader|FTPConnecter|HTTPConnecter|DownloadInfo)\\.cpp$")
-endif()
+# The in-game shop uses one libcurl transport on every platform. Keep the
+# legacy WinINet implementation out of the build.
+list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]GameShop[/\\]FileDownloader[/\\](FileDownloader|FTPConnecter|HTTPConnecter|DownloadInfo)\\.cpp$")
 
 if(WIN32)
   list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Core[/\\]Platform[/\\]posix[/\\]")
@@ -160,17 +154,16 @@ endif()
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
 target_compile_definitions(MuClient PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
-target_link_libraries(MuClient PUBLIC SDL3::SDL3 glm::glm)
+target_link_libraries(MuClient PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
+find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
 endif()
 
-# The in-game shop downloader uses libcurl off Windows (issue #462); on Windows
-# it uses the OS WinINet/urlmon stack and needs no extra dependency here.
-if(NOT WIN32)
-  find_package(CURL REQUIRED)
-  target_link_libraries(MuClient PUBLIC CURL::libcurl)
-endif()
+# The in-game shop downloader uses libcurl on every platform.
+find_package(CURL REQUIRED)
+target_link_libraries(MuClient PUBLIC CURL::libcurl)
 
 # The engine relies on self-registering globals whose constructors get
 # silently dropped if the linker only pulls archive members on demand, so
@@ -471,6 +464,12 @@ target_compile_definitions(MuClient PUBLIC
   $<$<BOOL:${ENABLE_EDITOR}>:_EDITOR>  # Editor features for admin builds
 )
 
+if(UNIX)
+  target_compile_definitions(MuClient PUBLIC
+    "MU_DOTNET_LIB_DIR=\"$<TARGET_FILE_DIR:Main>\""
+  )
+endif()
+
 if (MSVC)
   target_compile_definitions(MuClient PUBLIC
     WIN32
@@ -624,22 +623,12 @@ if (DOTNET_EXECUTABLE)
       "TMP=${DOTNET_TEMP_DIR_NATIVE}"
     )
 
-    if (APPLE)
-      set(MU_OPENSSL_LIBRARY_PATHS "")
-      foreach(_mu_openssl_prefix IN ITEMS "/opt/homebrew/opt/openssl@3" "/usr/local/opt/openssl@3" "/opt/homebrew" "/usr/local")
-        if (EXISTS "${_mu_openssl_prefix}/lib/libssl.dylib")
-          list(APPEND MU_OPENSSL_LIBRARY_PATHS "${_mu_openssl_prefix}/lib")
-        endif()
-      endforeach()
-
-      if (MU_OPENSSL_LIBRARY_PATHS)
-        list(REMOVE_DUPLICATES MU_OPENSSL_LIBRARY_PATHS)
-        list(JOIN MU_OPENSSL_LIBRARY_PATHS ":" MU_OPENSSL_LIBRARY_PATH)
-        if (DEFINED ENV{LIBRARY_PATH} AND NOT "$ENV{LIBRARY_PATH}" STREQUAL "")
-          string(APPEND MU_OPENSSL_LIBRARY_PATH ":$ENV{LIBRARY_PATH}")
-        endif()
-        list(APPEND DOTNET_PUBLISH_ENV "LIBRARY_PATH=${MU_OPENSSL_LIBRARY_PATH}")
+    if (UNIX AND OPENSSL_CRYPTO_LIBRARY)
+      get_filename_component(MU_OPENSSL_LIBRARY_PATH "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
+      if (DEFINED ENV{LIBRARY_PATH} AND NOT "$ENV{LIBRARY_PATH}" STREQUAL "")
+        string(APPEND MU_OPENSSL_LIBRARY_PATH ":$ENV{LIBRARY_PATH}")
       endif()
+      list(APPEND DOTNET_PUBLISH_ENV "LIBRARY_PATH=${MU_OPENSSL_LIBRARY_PATH}")
     endif()
 
     add_custom_command(

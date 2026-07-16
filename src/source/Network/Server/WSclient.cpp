@@ -362,7 +362,9 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
     if (!SocketClient->IsConnected())
     {
         bResult = FALSE;
-        g_ErrorReport.Write(L"Failed to connect. ");
+        wchar_t connectError[256];
+        mu_swprintf_s(connectError, L"Cannot connect to %ls:%d. Server may be offline.", IpAddr, Port);
+        g_ErrorReport.Write(L"NET: %ls\r\n", connectError);
         g_ErrorReport.WriteCurrentTime();
         delete SocketClient;
         SocketClient = nullptr;
@@ -371,7 +373,12 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
         // dialog already shows the status, so don't stack "server lost" popups.
         if (!ReconnectManager::Instance().IsActive())
         {
-            CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+            static bool connectErrorDisplayed = false;
+            if (!connectErrorDisplayed)
+            {
+                connectErrorDisplayed = true;
+                MessageBoxW(nullptr, connectError, L"Connection Error", MB_ICONERROR | MB_OK);
+            }
         }
     }
     else if (isEncrypted)

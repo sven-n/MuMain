@@ -5,7 +5,7 @@
 namespace MUnique.Client.Library;
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
@@ -27,7 +27,7 @@ public unsafe partial class ConnectionManager
     /// <summary>
     /// The currently active connections, with their handle as key.
     /// </summary>
-    private static readonly Dictionary<int, ConnectionWrapper> Connections = new();
+    private static readonly ConcurrentDictionary<int, ConnectionWrapper> Connections = new();
 
     /// <summary>
     /// The currently used maximum handle number.
@@ -139,11 +139,15 @@ public unsafe partial class ConnectionManager
 
         var handle = Interlocked.Increment(ref _maxHandle);
         var wrapper = new ConnectionWrapper(handle, connection, onPacketReceived, onDisconnected);
-        Connections.Add(handle, wrapper);
+        if (!Connections.TryAdd(handle, wrapper))
+        {
+            wrapper.Dispose();
+            throw new InvalidOperationException($"Connection handle {handle} already exists.");
+        }
 
         connection.Disconnected += () =>
         {
-            Connections.Remove(handle);
+            Connections.TryRemove(handle, out _);
             return ValueTask.CompletedTask;
         };
 

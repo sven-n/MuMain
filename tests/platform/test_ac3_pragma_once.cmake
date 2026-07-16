@@ -7,7 +7,7 @@ if(NOT DEFINED PLATFORM_DIR)
     message(FATAL_ERROR "PLATFORM_DIR must be defined")
 endif()
 
-foreach(header PlatformTypes.h PlatformKeys.h PlatformCompat.h)
+foreach(header WinCompat.h WinApiShims.h PlatformLibrary.h)
     set(header_path "${PLATFORM_DIR}/${header}")
 
     if(NOT EXISTS "${header_path}")

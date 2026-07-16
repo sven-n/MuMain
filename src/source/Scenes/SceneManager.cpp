@@ -369,13 +369,13 @@ static void UpdateWaterAnimation()
 {
     constexpr int NumberOfWaterTextures = 32;
     const double timePerFrame = 1000 / REFERENCE_FPS;
-    auto time_since_last_render = g_frameTiming.currentTickCount - g_frameTiming.lastWaterChange;
+    auto time_since_last_render = g_frameTiming.GetCurrentTickCount() - g_frameTiming.GetLastWaterChange();
     while (time_since_last_render > timePerFrame)
     {
         WaterTextureNumber++;
         WaterTextureNumber %= NumberOfWaterTextures;
         time_since_last_render -= timePerFrame;
-        g_frameTiming.lastWaterChange = g_frameTiming.currentTickCount;
+        g_frameTiming.SetLastWaterChange(g_frameTiming.GetCurrentTickCount());
     }
 }
 

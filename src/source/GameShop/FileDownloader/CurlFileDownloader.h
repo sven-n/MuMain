@@ -1,10 +1,6 @@
 // libcurl-backed shop file downloader (issue #462).
 //
-// The in-game shop's catalog/script downloader is a WinINet + urlmon stack on
-// Windows (FileDownloader/FTPConnecter/HTTPConnecter). Those have no portable
-// equivalent, so off Windows this class downloads a single remote file (FTP or
-// HTTP) to a local path with libcurl instead. It is compiled only on
-// non-Windows; the WinINet path stays in use on Windows unchanged.
+// Downloads one shop catalog, script, or banner file through libcurl.
 #pragma once
 
 #include <atomic>

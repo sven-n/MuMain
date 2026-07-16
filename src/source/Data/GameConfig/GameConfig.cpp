@@ -6,9 +6,11 @@
 #endif
 
 #include "GameConfigConstants.h"
+#include "GameConfigValidation.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/WinIni.h"  // private-profile (.ini) API
-#include "Core/Platform/Dpapi.h"   // DPAPI credential crypto (no-op off Windows)
+#include "Core/Platform/Dpapi.h"   // Legacy credential format migration
+#include "Core/Platform/PlatformCrypto.h"
 
 GameConfig& GameConfig::GetInstance()
 {
@@ -67,8 +69,10 @@ void GameConfig::Load()
     m_encryptedUsername = ReadString(CfgSectionLogin, CfgKeyEncryptedUsername, CfgDefaultEncryptedUsername);
     m_encryptedPassword = ReadString(CfgSectionLogin, CfgKeyEncryptedPassword, CfgDefaultEncryptedPassword);
 
-    m_serverIP   = ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP);
-    m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
+    m_serverIP = GameConfigValidation::ValidateServerIP(
+        ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP), CfgDefaultServerIP);
+    m_serverPort = GameConfigValidation::ValidateServerPort(
+        ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort), CfgDefaultServerPort);
 
     m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
     m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
@@ -182,12 +186,12 @@ void GameConfig::SetEncryptedPassword(const std::wstring& encryptedPassword)
 
 void GameConfig::SetServerIP(const std::wstring& ip)
 {
-    m_serverIP = ip;
+    m_serverIP = GameConfigValidation::ValidateServerIP(ip, CfgDefaults::CfgDefaultServerIP);
 }
 
 void GameConfig::SetServerPort(int port)
 {
-    m_serverPort = port;
+    m_serverPort = GameConfigValidation::ValidateServerPort(port, CfgDefaults::CfgDefaultServerPort);
 }
 
 void GameConfig::SetZoom(int zoom)
@@ -329,19 +333,23 @@ std::wstring GameConfig::DecryptSetting(const std::wstring& hexInput)
     std::vector<BYTE> encryptedData = HexToBinary(hexInput);
     if (encryptedData.empty()) return L"";
 
-    DATA_BLOB dataIn, dataOut;
-    dataIn.pbData = encryptedData.data();
-    dataIn.cbData = static_cast<DWORD>(encryptedData.size());
-
-    // Decrypt using Windows DPAPI
-    if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
+    std::vector<std::uint8_t> decryptedData;
+    if (mu_decrypt_blob(encryptedData.data(), encryptedData.size(), decryptedData))
     {
-        std::wstring result(reinterpret_cast<wchar_t*>(dataOut.pbData), dataOut.cbData / sizeof(wchar_t));
-        LocalFree(dataOut.pbData); // Safety: Windows allocated this, we free it
-        // The decrypted string might contain the null terminator, let's remove it if it exists.
+        std::wstring result(reinterpret_cast<const wchar_t*>(decryptedData.data()), decryptedData.size() / sizeof(wchar_t));
         if (!result.empty() && result.back() == L'\0') {
             result.pop_back();
         }
+        return result;
+    }
+
+    DATA_BLOB dataIn = { static_cast<DWORD>(encryptedData.size()), encryptedData.data() };
+    DATA_BLOB dataOut = {};
+    if (CryptUnprotectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
+    {
+        std::wstring result(reinterpret_cast<wchar_t*>(dataOut.pbData), dataOut.cbData / sizeof(wchar_t));
+        LocalFree(dataOut.pbData);
+        if (!result.empty() && result.back() == L'\0') result.pop_back();
         return result;
     }
 
@@ -352,15 +360,11 @@ std::wstring GameConfig::EncryptSetting(const wchar_t* input)
 {
     if (!input || wcslen(input) == 0) return L"";
 
-    DATA_BLOB dataIn, dataOut;
-    dataIn.cbData = static_cast<DWORD>((wcslen(input) + 1) * sizeof(wchar_t));
-    dataIn.pbData = reinterpret_cast<BYTE*>(const_cast<wchar_t*>(input));
-
-    if (CryptProtectData(&dataIn, nullptr, nullptr, nullptr, nullptr, 0, &dataOut))
+    const std::size_t inputSize = (wcslen(input) + 1) * sizeof(wchar_t);
+    std::vector<std::uint8_t> encryptedData;
+    if (mu_encrypt_blob(input, inputSize, encryptedData))
     {
-        std::wstring hexResult = BinaryToHex(dataOut.pbData, dataOut.cbData);
-        LocalFree(dataOut.pbData);
-        return hexResult;
+        return BinaryToHex(encryptedData.data(), static_cast<DWORD>(encryptedData.size()));
     }
     return L"";
 }
@@ -380,7 +384,13 @@ void GameConfig::EncryptAndSaveCredentials(const wchar_t* user, const wchar_t* p
     // any previously stored password so it never lingers in config.ini.
     if (m_savePassword)
     {
-        SetEncryptedPassword(EncryptSetting(pass));
+        std::wstring encryptedPassword = EncryptSetting(pass);
+        if (encryptedPassword.empty())
+        {
+            g_ErrorReport.Write(L"Failed to encrypt saved credentials.\r\n");
+            return;
+        }
+        SetEncryptedPassword(encryptedPassword);
     }
     else
     {

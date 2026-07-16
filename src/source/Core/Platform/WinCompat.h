@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <cstring>       // memset for ZeroMemory
+#include <algorithm>
 #include <string>
 #include <type_traits>   // underlying_type for DEFINE_ENUM_FLAG_OPERATORS
 
@@ -117,6 +118,25 @@ inline std::string mu_wchar_to_utf8(const wchar_t* text)
 {
     std::string result;
     mu_wchar_to_utf8(text, result);
+    return result;
+}
+
+inline std::string mu_narrow_path(const wchar_t* path)
+{
+    std::string result = mu_wchar_to_utf8(path);
+    std::replace(result.begin(), result.end(), '\\', '/');
+    return result;
+}
+
+inline std::string mu_narrow_path(const std::wstring& path)
+{
+    return mu_narrow_path(path.c_str());
+}
+
+inline std::string mu_narrow_path(const char* path)
+{
+    std::string result = path == nullptr ? "" : path;
+    std::replace(result.begin(), result.end(), '\\', '/');
     return result;
 }
 

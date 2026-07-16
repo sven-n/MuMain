@@ -13,14 +13,11 @@
 //   AC-STD-NFR-1 — 1000-frame tight loop overhead < 0.1ms per frame
 //   AC-STD-NFR-2 — FrameEnd() does NOT call g_ErrorReport.Write() on every frame (periodic only)
 
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include "doctest.h"
 #include <chrono>
 #include <thread>
 
-#include "MuTimer.h"
-
-using Catch::Matchers::WithinAbs;
+#include "Core/Time/MuTimer.h"
 
 // ---------------------------------------------------------------------------
 // AC-1 / AC-STD-2: Frame time accuracy
@@ -28,8 +25,7 @@ using Catch::Matchers::WithinAbs;
 // GetFrameTimeMs() returns a value in the expected range.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-1/AC-STD-2 [7-2-1]: MuTimer measures frame time accurately",
-          "[core][mu_timer][7-2-1]")
+TEST_CASE("AC-1/AC-STD-2 [7-2-1]: MuTimer measures frame time accurately [core][mu_timer][7-2-1]")
 {
     // VS0-QUAL-FRAMETIMER
     mu::MuTimer timer;
@@ -50,8 +46,7 @@ TEST_CASE("AC-1/AC-STD-2 [7-2-1]: MuTimer measures frame time accurately",
 // GetHitchCount() increments.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-STD-2/AC-3 [7-2-1]: MuTimer detects hitches above 50ms",
-          "[core][mu_timer][7-2-1]")
+TEST_CASE("AC-STD-2/AC-3 [7-2-1]: MuTimer detects hitches above 50ms [core][mu_timer][7-2-1]")
 {
     // VS0-QUAL-FRAMETIMER
     mu::MuTimer timer;
@@ -80,8 +75,7 @@ TEST_CASE("AC-STD-2/AC-3 [7-2-1]: MuTimer detects hitches above 50ms",
 // Run 10 rapid FrameStart/FrameEnd cycles and verify GetFPS() is positive.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-4/AC-STD-2 [7-2-1]: MuTimer GetFPS returns positive value after frames",
-          "[core][mu_timer][7-2-1]")
+TEST_CASE("AC-4/AC-STD-2 [7-2-1]: MuTimer GetFPS returns positive value after frames [core][mu_timer][7-2-1]")
 {
     // VS0-QUAL-FRAMETIMER
     mu::MuTimer timer;
@@ -102,8 +96,7 @@ TEST_CASE("AC-4/AC-STD-2 [7-2-1]: MuTimer GetFPS returns positive value after fr
 // After running several frames, Reset() must zero all stats.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-STD-2/AC-1 [7-2-1]: MuTimer Reset clears all state",
-          "[core][mu_timer][7-2-1]")
+TEST_CASE("AC-STD-2/AC-1 [7-2-1]: MuTimer Reset clears all state [core][mu_timer][7-2-1]")
 {
     // VS0-QUAL-FRAMETIMER
     mu::MuTimer timer;
@@ -133,8 +126,7 @@ TEST_CASE("AC-STD-2/AC-1 [7-2-1]: MuTimer Reset clears all state",
 // It validates AC-5 (stack-only steady_clock calls, no heap/I/O per frame).
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-5/AC-STD-NFR-1 [7-2-1]: MuTimer per-frame overhead is under 0.1ms",
-          "[core][mu_timer][7-2-1]")
+TEST_CASE("AC-5/AC-STD-NFR-1 [7-2-1]: MuTimer per-frame overhead is under 0.1ms [core][mu_timer][7-2-1]")
 {
     // VS0-QUAL-FRAMETIMER
     mu::MuTimer timer;
@@ -169,8 +161,7 @@ TEST_CASE("AC-5/AC-STD-NFR-1 [7-2-1]: MuTimer per-frame overhead is under 0.1ms"
 // any issues, confirming the periodic guard is in place.
 // ---------------------------------------------------------------------------
 
-TEST_CASE("AC-STD-NFR-2 [7-2-1]: MuTimer FrameEnd does not log on every frame",
-          "[core][mu_timer][7-2-1]")
+TEST_CASE("AC-STD-NFR-2 [7-2-1]: MuTimer FrameEnd does not log on every frame [core][mu_timer][7-2-1]")
 {
     // VS0-QUAL-FRAMETIMER
     // Rapid frames — far less than 60-second log interval.

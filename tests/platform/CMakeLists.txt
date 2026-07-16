@@ -1,7 +1,7 @@
 # Story 1.2.1: Platform Abstraction Headers — Test Registration
 # GREEN PHASE: All platform headers implemented and tests passing.
 
-set(PLATFORM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../src/source/Platform")
+set(PLATFORM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../src/source/Core/Platform")
 
 # ---- Catch2 unit tests (linked into MuTests in parent) ----
 # NOTE: test_platform_types.cpp, test_platform_compat.cpp, and

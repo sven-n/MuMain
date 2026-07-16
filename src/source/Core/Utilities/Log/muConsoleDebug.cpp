@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Log/MuLogger.h"
 
 #include "muConsoleDebug.h"	// self
 
@@ -235,21 +236,19 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 
 void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
 {
-    // MCD_ERROR is always logged to MuError.log, regardless of CONSOLE_DEBUG.
-    // Other log levels remain debug-only so they don't spam production logs.
+    wchar_t szBuffer[256] = L"";
+    va_list arguments;
+    va_start(arguments, pStr);
+    _vsnwprintf(szBuffer, std::size(szBuffer), pStr, arguments);
+    va_end(arguments);
+
+    char utf8Buffer[1024] = { 0 };
+    WideCharToMultiByte(CP_UTF8, 0, szBuffer, -1, utf8Buffer, sizeof(utf8Buffer), nullptr, nullptr);
+    const auto logger = mu::log::Get("core");
     if (iType == MCD_ERROR)
-    {
-        wchar_t szErrorBuffer[256] = L"";
-        va_list pArgsForFile;
-        va_start(pArgsForFile, pStr);
-        // C99 4-arg vswprintf -- explicit buffer size, bounded write. The
-        // 3-arg MS-extension form is unsafe (no size param, can overflow).
-        _vsnwprintf(szErrorBuffer,
-                  sizeof(szErrorBuffer) / sizeof(szErrorBuffer[0]),
-                  pStr, pArgsForFile);
-        va_end(pArgsForFile);
-        g_ErrorReport.Write(L"[MCD_ERROR] %ls\r\n", szErrorBuffer);
-    }
+        MU_LOG_ERROR(logger, "{}", utf8Buffer);
+    else
+        MU_LOG_DEBUG(logger, "{}", utf8Buffer);
 
 #ifdef CONSOLE_DEBUG
     if (m_bInit)
@@ -270,20 +269,11 @@ void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
             break;
         }
 
-        wchar_t szBuffer[256] = L"";
-        va_list	pArguments;
-
-        va_start(pArguments, pStr);
-        vswprintf(szBuffer, sizeof(szBuffer) / sizeof(wchar_t), pStr, pArguments);
-        va_end(pArguments);
-
         std::wcout << szBuffer << std::endl;
 
 #ifdef _EDITOR
         // Also log to ImGui console
-        char szUtf8Buffer[512];
-        WideCharToMultiByte(CP_UTF8, 0, szBuffer, -1, szUtf8Buffer, sizeof(szUtf8Buffer), NULL, NULL);
-        g_MuEditorConsoleUI.LogGame(szUtf8Buffer);
+        g_MuEditorConsoleUI.LogGame(utf8Buffer);
 #endif
     }
 #endif

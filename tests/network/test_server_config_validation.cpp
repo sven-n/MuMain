@@ -9,18 +9,18 @@
 //
 // Run: ctest --test-dir build -R "3.4.2"
 
-#include <catch2/catch_test_macros.hpp>
+#include "doctest.h"
 #include <string>
 
-#include "GameConfigValidation.h"
+#include "Data/GameConfig/GameConfigValidation.h"
 
 // =============================================================================
 // AC-4: ValidateServerPort — boundary and invalid-value behaviour
 // =============================================================================
 
-TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][server-config][ac-4]")
+TEST_CASE("AC-4: ValidateServerPort rejects invalid port values [network][server-config][ac-4]")
 {
-    SECTION("AC-4: Port 0 is invalid — returns default 44405")
+    SUBCASE("AC-4: Port 0 is invalid — returns default 44405")
     {
         // GIVEN: port value of 0 (at or below valid range)
         int value = 0;
@@ -33,7 +33,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         REQUIRE(result == 44405);
     }
 
-    SECTION("AC-4: Port 65536 is invalid — returns default 44405")
+    SUBCASE("AC-4: Port 65536 is invalid — returns default 44405")
     {
         // GIVEN: port value above valid range
         int value = 65536;
@@ -46,7 +46,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         REQUIRE(result == 44405);
     }
 
-    SECTION("AC-4: Port 65535 is valid — returns 65535")
+    SUBCASE("AC-4: Port 65535 is valid — returns 65535")
     {
         // GIVEN: maximum valid port
         int value = 65535;
@@ -59,7 +59,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         REQUIRE(result == 65535);
     }
 
-    SECTION("AC-4: Port 44405 (normal OpenMU default) is valid — returns 44405")
+    SUBCASE("AC-4: Port 44405 (normal OpenMU default) is valid — returns 44405")
     {
         // GIVEN: the OpenMU default port
         int value = 44405;
@@ -72,7 +72,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         REQUIRE(result == 44405);
     }
 
-    SECTION("AC-4: Port 1 is valid (minimum valid port) — returns 1")
+    SUBCASE("AC-4: Port 1 is valid (minimum valid port) — returns 1")
     {
         // GIVEN: the minimum valid port (immediately above the 0 boundary)
         int value = 1;
@@ -85,7 +85,7 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
         REQUIRE(result == 1);
     }
 
-    SECTION("AC-4: Negative port is invalid — returns default")
+    SUBCASE("AC-4: Negative port is invalid — returns default")
     {
         // GIVEN: a negative port value
         int value = -1;
@@ -103,9 +103,9 @@ TEST_CASE("AC-4: ValidateServerPort rejects invalid port values", "[network][ser
 // AC-5: ValidateServerIP — empty / whitespace-only / valid-value behaviour
 // =============================================================================
 
-TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[network][server-config][ac-5]")
+TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values [network][server-config][ac-5]")
 {
-    SECTION("AC-5: Empty string — returns default 'localhost'")
+    SUBCASE("AC-5: Empty string — returns default 'localhost'")
     {
         // GIVEN: an empty ServerIP string
         std::wstring value = L"";
@@ -118,7 +118,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         REQUIRE(result == L"localhost");
     }
 
-    SECTION("AC-5: Whitespace-only string — returns default 'localhost'")
+    SUBCASE("AC-5: Whitespace-only string — returns default 'localhost'")
     {
         // GIVEN: a whitespace-only ServerIP string
         std::wstring value = L"   ";
@@ -131,7 +131,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         REQUIRE(result == L"localhost");
     }
 
-    SECTION("AC-5: Mixed whitespace (tabs and spaces) — returns default")
+    SUBCASE("AC-5: Mixed whitespace (tabs and spaces) — returns default")
     {
         // GIVEN: a tab+space-only string
         std::wstring value = L"\t  \t";
@@ -144,7 +144,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         REQUIRE(result == L"localhost");
     }
 
-    SECTION("AC-5: Valid IP address — returns trimmed value unchanged")
+    SUBCASE("AC-5: Valid IP address — returns trimmed value unchanged")
     {
         // GIVEN: a valid IPv4 address
         std::wstring value = L"192.168.1.1";
@@ -157,7 +157,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         REQUIRE(result == L"192.168.1.1");
     }
 
-    SECTION("AC-5: Hostname with surrounding whitespace — returns trimmed hostname")
+    SUBCASE("AC-5: Hostname with surrounding whitespace — returns trimmed hostname")
     {
         // GIVEN: a hostname with leading/trailing whitespace
         std::wstring value = L"  game.server.example.com  ";
@@ -170,7 +170,7 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values", "[n
         REQUIRE(result == L"game.server.example.com");
     }
 
-    SECTION("AC-5: 'localhost' value — returns 'localhost' unchanged")
+    SUBCASE("AC-5: 'localhost' value — returns 'localhost' unchanged")
     {
         // GIVEN: the literal default hostname
         std::wstring value = L"localhost";

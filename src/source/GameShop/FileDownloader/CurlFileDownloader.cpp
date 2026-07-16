@@ -1,9 +1,8 @@
-// libcurl implementation of the shop file downloader (issue #462). Compiled
-// only on non-Windows; on Windows the WinINet FileDownloader is used instead.
+// libcurl implementation of the shop file downloader (issue #462).
 
 #include "stdafx.h"
 
-#if !defined(_WIN32) && defined(KJH_ADD_INGAMESHOP_UI_SYSTEM)
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "CurlFileDownloader.h"
 
@@ -167,4 +166,4 @@ WZResult CurlFileDownloader::DownloadFile(const std::wstring& url,
     return result;
 }
 
-#endif // !_WIN32 && KJH_ADD_INGAMESHOP_UI_SYSTEM
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM

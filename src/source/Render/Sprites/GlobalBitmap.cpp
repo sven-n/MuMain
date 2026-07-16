@@ -13,11 +13,9 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <codecvt>
 #include <cstring>
 #include <fstream>
 #include <iterator>
-#include <locale>
 #include <limits>
 #include <memory>
 #include <string>
@@ -86,13 +84,13 @@ namespace
 
     std::string NarrowPath(const std::wstring& wide)
     {
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+        const std::string utf8 = mu_wchar_to_utf8(wide.c_str());
 #ifdef _WIN32
-        return conv.to_bytes(wide);
+        return utf8;
 #else
         // Asset paths are Windows-spelled (backslashes, mixed case); resolve
         // them against the case-sensitive filesystem.
-        return MuResolvePath(conv.to_bytes(wide).c_str());
+        return MuResolvePath(utf8.c_str());
 #endif
     }
 
@@ -766,6 +764,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     std::ifstream compressedFile(NarrowPath(filename_ozj), std::ios::binary);
     if (!compressedFile)
     {
+        g_ErrorReport.Write(L"OpenJpegTurbo: file not found %ls\r\n", filename_ozj.c_str());
         return false;
     }
 
@@ -774,6 +773,7 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
 
     if (jpegBuf.size() <= 24)
     {
+        g_ErrorReport.Write(L"OpenJpegTurbo: file too small %ls (%zu bytes)\r\n", filename_ozj.c_str(), jpegBuf.size());
         return false;
     }
 
@@ -880,6 +880,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::ifstream input(NarrowPath(filename_ozt), std::ios::binary);
     if (!input)
     {
+        g_ErrorReport.Write(L"OpenTga: file not found %ls\r\n", filename_ozt.c_str());
         return false;
     }
 
@@ -888,6 +889,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
     if (pakBuffer.size() < 18) // minimal TGA header length check for OZT payload
     {
+        g_ErrorReport.Write(L"OpenTga: file too small %ls (%zu bytes)\r\n", filename_ozt.c_str(), pakBuffer.size());
         return false;
     }
 
@@ -901,6 +903,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
     if (bit != 32 || nx <= 0 || ny <= 0 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
     {
+        g_ErrorReport.Write(L"OpenTga: invalid format %ls (bit=%d, %dx%d)\r\n", filename_ozt.c_str(), bit, nx, ny);
         return false;
     }
 

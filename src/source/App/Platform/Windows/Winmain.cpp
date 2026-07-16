@@ -34,6 +34,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "Core/Platform/Imm.h"
+#include "Core/Platform/ServerPort.h"
 #include "Core/Platform/BundledFonts.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "App/Platform/Windows/Local.h"
@@ -118,8 +119,6 @@ ITEM_ATTRIBUTE* ItemAttRibuteMemoryDump;
 CHARACTER* CharacterMemoryDump;
 
 int       RandomTable[100];
-
-CErrorReport g_ErrorReport;
 
 BOOL g_bMinimizedEnabled = FALSE;
 int g_iScreenSaverOldValue = 60 * 15;
@@ -782,7 +781,10 @@ BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
         return FALSE;
     }
 
-    *pwPort = static_cast<WORD>(std::stoi(lpszTemp));
+    if (!Core::Platform::ParseServerPort(lpszTemp, *pwPort))
+    {
+        return FALSE;
+    }
 
     return TRUE;
 }
@@ -813,9 +815,9 @@ void RecordCpuUsage()
 
     while (!Destroy) 
     {
-        double currentUsage = CpuUsage::Instance()->GetUsage();
+        double currentUsage = CpuUsage::Instance()->GetUsage() * 100.0;
 
-        currentUsage = std::max<double>(0.0, std::min<double>(100.0, currentUsage));
+        currentUsage = std::clamp(currentUsage, 0.0, 100.0);
 
         // Subtract the old value to maintain the sum
         sum -= CPU_Recordings[count];
@@ -1567,6 +1569,7 @@ static void ShutdownRuntime(std::thread& cpuUsageRecorder)
     DestroyWindow();
     ShutdownRendererWindow();
     SDL_Quit();
+    mu::log::Shutdown();
 }
 
 static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD (&fileVersion)[4])
@@ -1582,10 +1585,21 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.WriteCurrentTime();
     ER_SystemInfo systemInfo;
     ZeroMemory(&systemInfo, sizeof(systemInfo));
-    GetSystemInfo(&systemInfo);
+    MuGetSystemInfo(&systemInfo);
     g_ErrorReport.AddSeparator();
     g_ErrorReport.WriteSystemInfo(&systemInfo);
     g_ErrorReport.AddSeparator();
+}
+
+static void InitializeWorkingDirectoryAndLog()
+{
+    if (const char* basePath = SDL_GetBasePath(); basePath != nullptr)
+    {
+        std::error_code error;
+        std::filesystem::current_path(basePath, error);
+    }
+    mu::log::Init();
+    g_ErrorReport.Create(L"MuError.log");
 }
 
 #ifdef _WIN32
@@ -1595,6 +1609,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLin
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 #endif
 {
+    InitializeWorkingDirectoryAndLog();
+
     wchar_t lpszExeVersion[256] = L"unknown";
 
 #ifdef _WIN32
@@ -1774,7 +1790,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 #endif
 
-    g_ErrorReport.WriteImeInfo( g_hWnd);
+    g_ErrorReport.WriteImeInfo(nullptr);
     g_ErrorReport.AddSeparator();
 
     InitVSync();
@@ -1795,11 +1811,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.WriteFontInfo();
     g_ErrorReport.AddSeparator();
 
-    setlocale(LC_ALL, "english");
+    setlocale(LC_ALL, "");
 
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
 
-    g_pNewUISystem->Create();
+    if (g_pNewUISystem != nullptr)
+    {
+        g_pNewUISystem->Create();
+    }
+    else
+    {
+        g_ErrorReport.Write(L"WARNING: g_pNewUISystem is null, skipping Create()\r\n");
+    }
 
     // One miniaudio backend owns both music and sound effects on every platform.
     if (g_platformAudio == nullptr)
@@ -1814,7 +1837,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     {
         int value = AudioPlayer::ClampVolume(GameConfig::GetInstance().GetSoundVolume());
-        g_pOption->SetVolumeLevel(value);
+        if (g_pOption != nullptr)
+        {
+            g_pOption->SetVolumeLevel(value);
+        }
         SetEffectVolumeLevel(value);
     }
 

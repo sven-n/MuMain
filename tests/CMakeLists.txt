@@ -58,4 +58,10 @@ add_subdirectory(editor)
 
 add_subdirectory(render)
 
+add_subdirectory(network)
+
+add_subdirectory(platform)
+
+add_subdirectory(core)
+
 add_subdirectory(build)

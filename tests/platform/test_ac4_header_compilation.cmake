@@ -10,7 +10,7 @@ if(NOT DEFINED PLATFORM_DIR)
 endif()
 
 # Check that the header files exist
-foreach(header PlatformTypes.h PlatformKeys.h PlatformCompat.h)
+foreach(header WinCompat.h WinApiShims.h PlatformLibrary.h)
     if(NOT EXISTS "${PLATFORM_DIR}/${header}")
         message(FATAL_ERROR "AC-4 FAIL: ${header} does not exist at ${PLATFORM_DIR}/${header}")
     endif()
