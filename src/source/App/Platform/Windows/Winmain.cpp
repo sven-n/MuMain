@@ -9,6 +9,8 @@
 
 #ifdef _WIN32
 #include <dpapi.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
 #endif
 #include <clocale>
 #include "Data/GameConfig/GameConfig.h"
@@ -1591,13 +1593,29 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.AddSeparator();
 }
 
-static void InitializeWorkingDirectoryAndLog()
+static void SetWorkingDirectoryToBasePath()
 {
+#if defined(__APPLE__)
+    std::uint32_t pathSize = 0;
+    _NSGetExecutablePath(nullptr, &pathSize);
+    std::string executablePath(pathSize, '\0');
+    if (_NSGetExecutablePath(executablePath.data(), &pathSize) == 0)
+    {
+        std::error_code error;
+        std::filesystem::current_path(std::filesystem::path(executablePath).parent_path(), error);
+    }
+#else
     if (const char* basePath = SDL_GetBasePath(); basePath != nullptr)
     {
         std::error_code error;
         std::filesystem::current_path(basePath, error);
     }
+#endif
+}
+
+static void InitializeWorkingDirectoryAndLog()
+{
+    SetWorkingDirectoryToBasePath();
     mu::log::Init();
     g_ErrorReport.Create(L"MuError.log");
 }
@@ -1713,6 +1731,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         return 0;
     }
 
+#if defined(__APPLE__)
+    SetWorkingDirectoryToBasePath();
+#endif
+
     SDL_WindowFlags windowFlags = 0;
     if (g_bUseWindowMode != TRUE)
         windowFlags |= SDL_WINDOW_FULLSCREEN;
@@ -1724,6 +1746,19 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }
+
+#if defined(__linux__)
+    SDL_Surface* applicationIcon = SDL_LoadPNG("MuMainIcon.png");
+    if (applicationIcon != nullptr)
+    {
+        SDL_SetWindowIcon(g_sdlWindow, applicationIcon);
+        SDL_DestroySurface(applicationIcon);
+    }
+    else
+    {
+        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "SDL window icon unavailable: %s", SDL_GetError());
+    }
+#endif
 
     g_ErrorReport.Write(L"> Start window success.\r\n");
 

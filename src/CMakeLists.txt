@@ -217,9 +217,25 @@ else()
     "and a branch above.")
 endif()
 
-add_executable(Main
-  "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
-)
+if (APPLE)
+  set(MU_MACOS_ICON "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Platform/macOS/MuMain.icns")
+  add_executable(Main MACOSX_BUNDLE
+    "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
+    "${MU_MACOS_ICON}"
+  )
+  set_source_files_properties("${MU_MACOS_ICON}" PROPERTIES
+    MACOSX_PACKAGE_LOCATION Resources
+  )
+  set_target_properties(Main PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_NAME "MU Online"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmu.mumain"
+    MACOSX_BUNDLE_ICON_FILE "MuMain.icns"
+  )
+else()
+  add_executable(Main
+    "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
+  )
+endif()
 target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)
 

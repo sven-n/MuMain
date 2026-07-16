@@ -3,6 +3,13 @@
 
 set(PLATFORM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../src/source/Core/Platform")
 
+add_test(
+    NAME "platform-application-icon"
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../../src
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_application_icon.cmake
+)
+
 # ---- Catch2 unit tests (linked into MuTests in parent) ----
 # NOTE: test_platform_types.cpp, test_platform_compat.cpp, and
 # test_platform_keys.cpp are added to the MuTests target in the
