@@ -72,6 +72,7 @@ void FreeFlyCamera::Reset()
     m_Yaw = 0.0f;
     m_Pitch = 0.0f;
     m_bLooking = false;
+    m_bTopDownPan = false;
 }
 
 void FreeFlyCamera::OnActivate(const CameraState& previousState)
@@ -101,6 +102,7 @@ void FreeFlyCamera::SnapToPosition(const vec3_t pos, float yaw, float pitch)
     VectorCopy(pos, m_Position);
     m_Yaw = yaw;
     m_Pitch = std::clamp(pitch, MIN_PITCH, MAX_PITCH);
+    m_bTopDownPan = false;
 }
 
 void FreeFlyCamera::SnapTopDown()
@@ -120,6 +122,8 @@ void FreeFlyCamera::SnapTopDown()
     m_Config.objectCullRange = 60000.0f;
     m_Config.fogStart = 55000.0f;
     m_Config.fogEnd = 60000.0f;
+
+    m_bTopDownPan = true;   // arrows pan the map, mouse wheel zooms
 
     UpdateFrustum();
 }
@@ -205,6 +209,15 @@ void FreeFlyCamera::ReadMovementInput(float& outForward, float& outStrafe, float
 
 void FreeFlyCamera::HandleMovement()
 {
+    // Top-down minimap mode has its own scheme: all four arrows pan across the map
+    // (looking straight down, "fly forward" would just dive into the terrain), the
+    // mouse wheel zooms, and PageUp/PageDown still nudge the height.
+    if (m_bTopDownPan)
+    {
+        HandleTopDownMovement();
+        return;
+    }
+
     float forward, strafe, vertical;
     ReadMovementInput(forward, strafe, vertical);
 
@@ -232,6 +245,118 @@ void FreeFlyCamera::HandleMovement()
     m_Position[0] += (forwardVec[0] * forward + rightX * strafe) * speed;
     m_Position[1] += (forwardVec[1] * forward + rightY * strafe) * speed;
     m_Position[2] += (forwardVec[2] * forward + vertical) * speed;
+}
+
+void FreeFlyCamera::ZoomTopDown(float wheelTicks)
+{
+    // Wheel up (positive) zooms in = lower the camera. Driven by the editor from
+    // ImGui's wheel, because the game HUD consumes the global MouseWheel earlier in
+    // the frame than the camera update runs.
+    if (!m_bTopDownPan || wheelTicks == 0.0f)
+        return;
+    m_Position[2] = std::clamp(m_Position[2] - wheelTicks * TOPDOWN_WHEEL_STEP,
+                               TOPDOWN_MIN_HEIGHT, TOPDOWN_MAX_HEIGHT);
+}
+
+bool FreeFlyCamera::ComputeMapScreenRect(int& outX, int& outY, int& outSize) const
+{
+    extern unsigned int WindowWidth, WindowHeight;
+    const float winW = static_cast<float>(WindowWidth);
+    const float winH = static_cast<float>(WindowHeight);
+    if (winW < 1.0f || winH < 1.0f)
+        return false;
+
+    // Camera basis.
+    vec3_t F;
+    ComputeForwardVector(m_Yaw, m_Pitch, F);
+    VectorNormalize(F);
+    vec3_t worldUp = { 0.0f, 0.0f, 1.0f };
+    vec3_t R;
+    CrossProduct(F, worldUp, R);
+    VectorNormalize(R);
+    vec3_t U;
+    CrossProduct(R, F, U);
+    VectorNormalize(U);
+
+    const float aspect = winW / winH;
+    const float hFovRad = m_Config.hFov * (Q_PI / 180.0f);
+    const float vFovRad = HFovToVFov(m_Config.hFov, aspect) * (Q_PI / 180.0f);
+    const float tanH = tanf(hFovRad * 0.5f);
+    const float tanV = tanf(vFovRad * 0.5f);
+
+    // The map spans [0, extent] in X and Y at z=0.
+    const float extent = TERRAIN_SIZE * TERRAIN_SCALE;
+
+    // Project a world point (z=0) to a bottom-origin screen pixel.
+    auto project = [&](float wx, float wy, float& sx, float& sy) -> bool
+    {
+        vec3_t d = { wx - m_Position[0], wy - m_Position[1], -m_Position[2] };
+        const float vz = DotProduct(d, F);
+        if (vz <= 1.0f)
+            return false;
+        sx = ((DotProduct(d, R) / vz) / tanH * 0.5f + 0.5f) * winW;
+        sy = ((DotProduct(d, U) / vz) / tanV * 0.5f + 0.5f) * winH;
+        return true;
+    };
+
+    // Centre the crop on the projected MAP CENTRE (not the bounding box of the
+    // corners): under the small camera tilt the projection is slightly asymmetric,
+    // and centring on the true centre is what keeps the in-game position marker
+    // aligned. Size it from the horizontal half-extent, which is the tilt-free axis
+    // (the tilt is along Y only), so the square scale is correct.
+    float cx, cy, ex, ey;
+    if (!project(extent * 0.5f, extent * 0.5f, cx, cy))
+        return false;                                   // map centre behind camera
+    if (!project(extent, extent * 0.5f, ex, ey))
+        return false;                                   // right-edge midpoint
+    const float radius = fabsf(ex - cx);
+    float size = 2.0f * radius;
+    size = std::min(size, std::min(winW, winH));   // never read outside the window
+
+    int x = static_cast<int>(cx - size * 0.5f);
+    int y = static_cast<int>(cy - size * 0.5f);
+    int s = static_cast<int>(size);
+    if (s < 8)
+        return false;
+    x = std::clamp(x, 0, static_cast<int>(winW) - s);
+    y = std::clamp(y, 0, static_cast<int>(winH) - s);
+
+    outX = x; outY = y; outSize = s;
+    return true;
+}
+
+void FreeFlyCamera::HandleTopDownMovement()
+{
+    float forward, strafe, vertical;
+    ReadMovementInput(forward, strafe, vertical);
+
+    float inputLength = sqrtf(forward * forward + strafe * strafe + vertical * vertical);
+    if (inputLength == 0.0f)
+        return;
+
+    forward /= inputLength;
+    strafe /= inputLength;
+    vertical /= inputLength;
+
+    float speed = BASE_SPEED;
+    if (Core::Input::IsKeyDown(VK_SHIFT))
+        speed *= SPRINT_MULTIPLIER;
+    speed *= FPS_ANIMATION_FACTOR;
+
+    // Pan in the ground plane. "forward" here is the screen-up direction projected
+    // onto the map (perpendicular to the strafe/right vector), so Up/Down and
+    // Left/Right all slide the map and rotate together with the view yaw.
+    float yawRad = m_Yaw * (Q_PI / 180.0f);
+    float panFwdX = sinf(yawRad);
+    float panFwdY = cosf(yawRad);
+    float rightX, rightY;
+    ComputeRightVectorXY(m_Yaw, rightX, rightY);
+
+    m_Position[0] += (panFwdX * forward + rightX * strafe) * speed;
+    m_Position[1] += (panFwdY * forward + rightY * strafe) * speed;
+    // PageUp/PageDown remain a fine keyboard zoom.
+    m_Position[2] = std::clamp(m_Position[2] + vertical * speed,
+                               TOPDOWN_MIN_HEIGHT, TOPDOWN_MAX_HEIGHT);
 }
 
 void FreeFlyCamera::ComputeCameraTransform()

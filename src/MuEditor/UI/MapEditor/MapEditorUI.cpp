@@ -17,6 +17,7 @@
 #include "Camera/CameraMode.h"
 #include "Camera/CameraState.h"
 #include "Camera/FreeFlyCamera.h"
+#include "MapMinimapCapture.h"
 
 #include "imgui.h"
 #include "Core/Globals/_define.h"          // EDIT_MAPPING / EDIT_NONE
@@ -146,6 +147,19 @@ void CMapEditorUI::Render(bool* p_open)
         {
             g_bMapEditorFullTerrain = true;
             g_Camera.TopViewEnable = true;
+
+            // Zoom with the mouse wheel. We read ImGui's wheel (valid for the whole
+            // frame after NewFrame) rather than the game's MouseWheel global, which
+            // the HUD consumes earlier in the frame than the camera update runs.
+            // Skip it when the pointer is over an editor window so scrolling the
+            // panel doesn't also zoom.
+            const float wheel = ImGui::GetIO().MouseWheel;
+            if (wheel != 0.0f && !ImGui::GetIO().WantCaptureMouse)
+            {
+                ICamera* cam = CameraManager::Instance().GetActiveCamera();
+                if (cam && strcmp(cam->GetName(), "FreeFly") == 0)
+                    static_cast<FreeFlyCamera*>(cam)->ZoomTopDown(wheel);
+            }
         }
         else if (m_topdownWasActive)
         {
@@ -652,6 +666,9 @@ void CMapEditorUI::RenderAttributeTab()
     const int world = ResolveWorldNumber();
     const int serverMap = (m_serverMapOverride >= 0) ? m_serverMapOverride : gMapManager.WorldActive;
 
+    // Must run before anything reads m_attrBaseline / m_attrEdited below.
+    EnsureAttrBaseline(world);
+
     ImGui::Checkbox("Enable attribute editing", &m_bAttrEnabled);
     if (m_bAttrEnabled)
     {
@@ -728,24 +745,70 @@ void CMapEditorUI::RenderAttributeTab()
     }
     ImGui::Text("Server \"Number\" = %d   (client folder = World%d)", serverMap, world);
 
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.8f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.6f, 0.9f, 1.0f));
-    if (ImGui::Button("Save server .sql", ImVec2(-1.0f, 0.0f)))
+    // The server file is a MERGE onto the server's own map, not a dump of the client's:
+    // the two legitimately disagree (the client blocks object footprints, the server
+    // does not - 1084 tiles on Tarkan). So we need the server's current TerrainData as
+    // a base, and we write only the tiles edited this session.
+    int editedCount = 0;
+    for (int i = 0; i < CELLS; ++i)
+        if (m_attrEdited[i] && Editor::AttrSave::StaticAttribute(TerrainWall[i]) != m_attrBaseline[i])
+            ++editedCount;
+
+    ImGui::Text("Step 1: download this map's \"Terrain Data\" from the Admin Panel, then:");
+    if (ImGui::Button("Load server base .att...", ImVec2(-1.0f, 0.0f)))
     {
         std::wstring path;
-        if (Editor::AttrSave::SaveServerSql(serverMap, path))
+        if (Editor::AttrSave::PickServerBaseAtt(path))
         {
-            char buf[128];
-            snprintf(buf, sizeof(buf), "Wrote %ls (next to Main.exe) - run it on the DB, then restart the server.",
-                     path.c_str());
+            std::string err;
+            if (Editor::AttrSave::LoadServerBaseAtt(path, m_serverBase, err))
+            {
+                const size_t slash = path.find_last_of(L"\\/");
+                const std::wstring leaf = (slash == std::wstring::npos) ? path : path.substr(slash + 1);
+                m_serverBaseName.assign(leaf.begin(), leaf.end());
+                m_attrStatus = "Server base loaded. Your edits will be merged onto it.";
+            }
+            else
+            {
+                m_serverBase.clear();
+                m_serverBaseName.clear();
+                m_attrStatus = err;
+            }
+        }
+    }
+
+    const bool haveBase = !m_serverBase.empty();
+    if (haveBase)
+        ImGui::TextColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "Base: %s   |   %d tile(s) edited this session",
+                           m_serverBaseName.c_str(), editedCount);
+    else
+        ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.4f, 1.0f),
+                           "No server base loaded. It is needed so we only change the tiles you edited\n"
+                           "and leave the rest of the server's map exactly as it is.");
+
+    ImGui::BeginDisabled(!haveBase);
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.8f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.6f, 0.9f, 1.0f));
+    if (ImGui::Button("Step 2: Save server .att", ImVec2(-1.0f, 0.0f)))
+    {
+        std::wstring path;
+        int changed = 0;
+        if (Editor::AttrSave::SaveServerAtt(serverMap, m_serverBase, m_attrBaseline, m_attrEdited, path, changed))
+        {
+            char buf[192];
+            snprintf(buf, sizeof(buf),
+                     "Wrote %ls (+ HOWTO) next to Main.exe - %d tile(s) changed, the rest of the server's map is untouched. Upload it in the Admin Panel, then restart the server.",
+                     path.c_str(), changed);
             m_attrStatus = buf;
         }
         else
         {
-            m_attrStatus = "Server SQL save failed.";
+            m_attrStatus = "Server .att save failed.";
         }
     }
     ImGui::PopStyleColor(2);
+    ImGui::EndDisabled();
+    ImGui::TextDisabled("Upload the result in the Admin Panel's \"Terrain Data\" field.\nNever upload the client .att there - it is encrypted and would corrupt the map.");
 
     ImGui::TextColored(ImVec4(0.9f, 0.7f, 0.3f, 1.0f),
                        "Client + server must match, or players will desync (walk through walls / get pushed back).");
@@ -753,6 +816,23 @@ void CMapEditorUI::RenderAttributeTab()
         ImGui::TextColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "%s", m_attrStatus.c_str());
 
     PaintAttribute();
+}
+
+void CMapEditorUI::EnsureAttrBaseline(int world)
+{
+    if (m_attrBaselineWorld == world && m_attrBaseline.size() == CELLS)
+        return;
+
+    // New map: snapshot what the client's walk map looked like before we touched it,
+    // and forget both the edit set and any server base loaded for the previous map.
+    m_attrBaseline.resize(CELLS);
+    for (int i = 0; i < CELLS; ++i)
+        m_attrBaseline[i] = Editor::AttrSave::StaticAttribute(TerrainWall[i]);
+
+    m_attrEdited.assign(CELLS, false);
+    m_attrBaselineWorld = world;
+    m_serverBase.clear();
+    m_serverBaseName.clear();
 }
 
 void CMapEditorUI::PaintAttribute()
@@ -783,8 +863,19 @@ void CMapEditorUI::PaintAttribute()
     const int y = (int)SelectYF;
     const int r = m_attrBrush - 1;
     for (int i = y - r; i <= y + r; ++i)
+    {
         for (int j = x - r; j <= x + r; ++j)
-            TerrainWall[TERRAIN_INDEX_REPEAT(j, i)] = value;
+        {
+            const int idx = TERRAIN_INDEX_REPEAT(j, i);
+            TerrainWall[idx] = value;
+
+            // Remember that we touched this tile: the server export merges only these
+            // onto the server's own map, so the client/server difference on every other
+            // tile survives untouched.
+            if (idx >= 0 && idx < CELLS && !m_attrEdited.empty())
+                m_attrEdited[idx] = true;
+        }
+    }
 }
 
 void CMapEditorUI::TakeAttrUndoSnapshot()
@@ -834,20 +925,40 @@ void CMapEditorUI::RenderMinimapTab()
     if (ImGui::Button("Rotate 90 CCW"))
         rotateTopDown(-90.0f);
 
+    // Generate the minimap straight from the map's terrain tiles. This is not a
+    // screenshot: it composes pixel (x,y) = tile (x,y), the same mapping the game
+    // uses for the position marker, so the marker lands on the player exactly. Works
+    // from anywhere - no need for the top-down view.
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.3f, 1.0f));
+    if (ImGui::Button("Generate minimap from tiles", ImVec2(-1.0f, 0.0f)))
+        Editor::Minimap::GenerateFromTiles(ResolveWorldNumber(), m_minimapStatus);
+    ImGui::PopStyleColor(2);
+
+    // Wrap an externally-edited .tga (e.g. the generated one with a screenshot painted
+    // over it) into the game's mini_map.OZT.
+    if (ImGui::Button("Convert a .tga to mini_map.OZT...", ImVec2(-1.0f, 0.0f)))
+        Editor::Minimap::WrapTgaToOzt(ResolveWorldNumber(), m_minimapStatus);
+    ImGui::TextDisabled("Use this after editing the .tga in an image editor.");
+
+    if (!m_minimapStatus.empty())
+        ImGui::TextColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "%s", m_minimapStatus.c_str());
+
     if (ImGui::Button("Back to game camera", ImVec2(-1.0f, 0.0f)))
     {
         m_bMinimapMode = false;
+        ICamera* cam = mgr.GetActiveCamera();
+        if (cam && strcmp(cam->GetName(), "FreeFly") == 0)
+            static_cast<FreeFlyCamera*>(cam)->ClearTopDown();
         mgr.SetCameraMode(CameraMode::Default);
     }
 
     ImGui::Separator();
     ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "Tips:");
-    ImGui::BulletText("Arrow keys pan, PageUp/PageDown change height,");
-    ImGui::BulletText("hold right-mouse to tilt, Shift to move faster.");
-    ImGui::BulletText("Press F12 to hide the editor UI for a clean shot,");
-    ImGui::BulletText("then screenshot and crop to the map square.");
-    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
-                       "The map is captured north-up; the in-game minimap applies its own 45-deg spin.");
+    ImGui::BulletText("\"Generate minimap from tiles\" builds mini_map.OZT (+ an");
+    ImGui::BulletText("editable .tga) from the terrain - the position marker will");
+    ImGui::BulletText("line up exactly. It works from anywhere; no top-down needed.");
+    ImGui::BulletText("The top-down view + arrows/wheel are just for looking around.");
 }
 
 void CMapEditorUI::RenderHeightTab()
@@ -924,6 +1035,17 @@ void CMapEditorUI::SculptHeight()
 
     const float delta = raise ? m_heightStrength : -m_heightStrength;
     AddTerrainHeight(CollisionPosition[0], CollisionPosition[1], delta, m_heightBrush, BackTerrainHeight);
+
+    // Clamp to what actually survives a save. TerrainHeight.OZB stores one byte per
+    // cell as (height / factor), so the max representable height is 255 * factor.
+    // Without this the editor happily sculpts higher, but on the next login every
+    // cell past the cap collapses to a flat plateau. Clamping here keeps what you see
+    // equal to what you get. (factor matches SaveTerrainHeight/OpenTerrainHeight.)
+    const float factor = (gMapManager.WorldActive == WD_55LOGINSCENE) ? 3.0f : 1.5f;
+    const float maxHeight = 255.0f * factor;
+    for (int i = 0; i < CELLS; ++i)
+        BackTerrainHeight[i] = std::clamp(BackTerrainHeight[i], 0.0f, maxHeight);
+
     // Rebuild lighting/normals so the change is visible immediately.
     CreateTerrainNormal();
     CreateTerrainLight();

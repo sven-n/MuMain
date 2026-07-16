@@ -134,6 +134,7 @@ private:
     // terrain to render for a full-map screenshot.
     bool m_bMinimapMode = false;
     bool m_topdownWasActive = false;  // edge-detect so we only own TopViewEnable while active
+    std::string m_minimapStatus;      // result text for the generate button
 
     // --- Attribute (walkability) tab state ---
     bool m_bAttrEnabled = false;      // master: take EDIT_WALL (else walk freely)
@@ -145,6 +146,19 @@ private:
     std::vector<unsigned short> m_attrUndo;   // TerrainWall snapshot before a stroke
     int  m_serverMapOverride = -1;    // -1 = auto (gMapManager.WorldActive)
     std::string m_attrStatus;
+
+    // Server export is a MERGE onto the server's current TerrainData, because the two
+    // walk maps legitimately differ (the client blocks object footprints, the server
+    // does not - 1084 tiles on Tarkan). We therefore need to know exactly which tiles
+    // the user touched, and write only those. See MapAttributeSave.h.
+    std::vector<BYTE>  m_attrBaseline;      // client attr bytes at session start (65536)
+    std::vector<bool>  m_attrEdited;        // which tiles the user painted (65536)
+    int  m_attrBaselineWorld = -1;          // world the baseline was taken on
+    std::vector<BYTE>  m_serverBase;        // server's current TerrainData (65539)
+    std::string m_serverBaseName;           // shown in the UI ("" = none loaded)
+
+    // Snapshots the baseline / clears the edit set when the map changes.
+    void EnsureAttrBaseline(int world);
 };
 
 #define g_MapEditorUI CMapEditorUI::GetInstance()

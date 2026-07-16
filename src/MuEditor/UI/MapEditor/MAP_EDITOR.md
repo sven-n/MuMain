@@ -43,7 +43,7 @@ All under `src/MuEditor/UI/MapEditor/`:
 |---|---|
 | `MapEditorUI.h/.cpp` | The panel + all tabs (Texture, Objects, Height, T. Browse, Minimap, O. Browse). Owns UI state, edit-mode selection, input capture, and undo. |
 | `MapEditorSave.h/.cpp` | `Editor::MapSave` — **encrypting** save of the terrain mapping (`.map`). |
-| `MapAttributeSave.h/.cpp` | `Editor::AttrSave` — **encrypting** save of the walkability `.att` (client) **and** the OpenMU `.sql` + a HOWTO text file (server). |
+| `MapAttributeSave.h/.cpp` | `Editor::AttrSave` — **encrypting** save of the walkability `.att` (client) **and** the plain `.att` for OpenMU's Admin Panel + a HOWTO text file (server). |
 | `MapTextureBrowser.h/.cpp` | **T. Browse** tab — preview a chosen world's tile textures; "Use"/"Upload" a texture onto the current map. |
 | `MapTextureImport.h/.cpp` | `Editor::TextureImport` — put a `.jpg`/`.ozj` into a free `ExtTile` slot and load it live; Windows file dialog. |
 | `MapObjectPlace.h/.cpp` | `Editor::ObjectPlace` — enumerate loaded models, place/reposition/remove objects, save `.obj`, undo snapshot/restore. |
@@ -105,6 +105,10 @@ All under `src/MuEditor/UI/MapEditor/`:
   to update visuals. One-level **undo**.
 - **Save** → engine `SaveTerrainHeight` → `Data\World{N}\TerrainHeight.OZB` (a plain
   BMP the game reads directly).
+- **Height is capped at `255 * factor`** (factor 1.5 normally, 3.0 on the login scene):
+  the file stores one byte per cell as `height / factor`, so anything higher can't be
+  saved and collapses to a flat plateau on reload. The sculpt clamps `BackTerrainHeight`
+  to that ceiling each stroke, so the editor never shows a height that won't persist.
 
 ### Attribute (`EDIT_WALL`) — walkability
 - Paints `TerrainWall[]` (**sets**, not ORs, the value — same as the standalone
@@ -120,20 +124,21 @@ All under `src/MuEditor/UI/MapEditor/`:
   green = safezone, black = void, blue = water, faint grey = walkable.
 - **Two saves are needed — the client and the server each keep their own walk map:**
   1. **Save client .att** → `Data\World{N}\EncTerrain{N}.att` (see the format table).
-  2. **Save server .sql** → `terrain_map{E}_server.sql` **+ a `_HOWTO.txt`** next to
-     `Main.exe`. Run it against the OpenMU database, then restart the game server.
+  2. **Save server .att** → `terrain_map{E}_server.att` **+ a `_HOWTO.txt`** next to
+     `Main.exe`. Upload it in the Admin Panel's **"Terrain Data"** field for that map,
+     then **restart the game server**.
 - ⚠️ **The two map numbers are different.** The server keys maps by `"Number"` = the
   **world enum** (Lorencia `0`, Arena `6`); the client folder is `World{enum + 1}`
-  (`World1`, `World7`). The tab prints both side by side. `UPDATE 0` instead of
-  `UPDATE 1` means you used the wrong one.
+  (`World1`, `World7`). The tab prints both side by side — edit the Admin Panel map
+  whose `Number` matches the one shown, not the client folder number.
 - If client and server disagree, players walk through walls and get rubber-banded
   back. Always ship both.
 
-**Applying the server file** (containers are named in OpenMU's all-in-one compose):
-```bash
-docker exec -i -e PGPASSWORD=admin database psql -U postgres -d openmu < terrain_map0_server.sql
-docker restart openmu-startup
-```
+**Applying the server file**: Admin Panel → map list → edit the map with that
+`Number` → **"Terrain Data"** → upload `terrain_map{E}_server.att` → Save → restart
+the game server.
+
+> ⚠️ **Never upload the client's `EncTerrain{N}.att` to the Admin Panel.** See gotcha 14.
 
 ### Minimap (top-down capture)
 - **Top-down view** switches to the FreeFly camera, snaps it above the map centre
@@ -141,9 +146,22 @@ docker restart openmu-startup
   `g_bMapEditorFullTerrain` (full terrain bounds) **and** `g_Camera.TopViewEnable`
   (the engine's own minimap-capture flag that bypasses per-tile terrain **and**
   object culling).
-- **Rotate 90 CW/CCW** to orient. Arrows pan, PgUp/PgDn height, RMB tilt, Shift fast.
-- F12 to hide the editor, screenshot, crop, save as the map's `mini_map.OZT`.
-- **Important:** these flags are only written while the mode is active and released
+- **Controls (top-down):** all four **arrows pan** the map in the ground plane, the
+  **mouse wheel zooms** (PgUp/PgDn also zoom), Shift pans faster. A dedicated
+  `m_bTopDownPan` branch in `FreeFlyCamera` handles this — the normal fly-along-forward
+  would just dive into the terrain when looking straight down. The wheel is read from
+  **ImGui's** wheel in the editor (the game HUD consumes the global `MouseWheel` earlier
+  in the frame than the camera update runs).
+- **Rotate 90 CW/CCW** to orient the shot.
+- **Capture minimap to file** writes the map's `mini_map.OZT` (drop-in) **and** an
+  editable `mini_map.tga`, both 1024×1024, to `Data\World{N}\` and next to `Main.exe`.
+  No F12 needed: the read happens inside the editor's per-frame `Render`, *before* ImGui
+  draws (`ImGui::Render` is the last thing `CMuEditorCore::Render` does), so the back
+  buffer still holds the clean top-down scene. `FreeFlyCamera::ComputeMapScreenRect`
+  projects the four map corners to find the square to `glReadPixels`; it's resampled to
+  1024² and wrapped (see the Minimap format row). Aspect-correct projection makes the map
+  square on screen, so no stretching.
+- **Important:** the render flags are only written while the mode is active and released
   **once** on exit — never every frame — because the game's own minimap uses
   `TopViewEnable` too (see gotcha #5).
 
@@ -159,7 +177,7 @@ Files live in `Data\World{N}\`. **World folder = world enum value + 1**
 |---|---|---|---|
 | Tile mapping | `EncTerrain{N}.map` | `mapdecrypt` only. `version, mapNum, Layer1[256²], Layer2[256²], Alpha[256²]` | **We re-encrypt** (`MapEditorSave`) — the engine `SaveTerrainMapping` writes **plaintext**. |
 | Walkability (client) | `EncTerrain{N}.att` | Decode = `bux(mapdecrypt(f))` → `[version, mapId, 255, 255] + attr[256²]`, **1 byte/cell**, index `y*256+x` (same order as `TerrainWall[]`). | **We re-encrypt**: `MapFileEncrypt(BuxConvert(plain))` (`MapAttributeSave`). The engine `SaveTerrainAttribute` writes **plaintext AND 2 bytes/cell** — unusable. |
-| Walkability (server) | `terrain_map{E}_server.sql` | OpenMU `config."GameMapDefinition"."TerrainData"` (bytea): a **3-byte header** then the 65536 attr bytes (attr `i` at offset `3+i`). Row keyed by `"Number"` = world **enum**. | One `UPDATE` that preserves the header and replaces the block: `substring("TerrainData" from 1 for 3) \|\| decode('<hex>','hex')`. Total must stay **65539** bytes. |
+| Walkability (server) | `terrain_map{E}_server.att` | The **exact bytes** of OpenMU's `config."GameMapDefinition"."TerrainData"` (bytea): `[0, 255, 255] + attr[256²]` = **65539 bytes, NOT encrypted** (attr `i` at offset `3+i`). Same layout as OpenMU's own `Resources\Terrain{N}.att` seed files. Row keyed by `"Number"` = world **enum**. | Written verbatim (`SaveServerAtt`) — no `BuxConvert`, no `MapFileEncrypt`, and **no `mapId` byte** in the header. Upload via the Admin Panel's **"Terrain Data"** field. |
 | Objects | `EncTerrain{N}.obj` | `mapdecrypt`. `version, mapNum, count, {Type i16, Pos[3] f32, Angle[3] f32, Scale f32}×count`. **Flat list; re-blocks by position on load.** | Engine `SaveObjects` **already encrypts** — call directly. |
 | Height | `TerrainHeight.OZB` | Plain **BMP**: 1080-byte header + 256×256 grayscale; `height = byte × 1.5`. Loader appends `OZB` to the `.bmp` name. | Engine `SaveTerrainHeight` (plain BMP) — call directly. |
 | Minimap | `mini_map.OZT` | 4-byte header `00 00 02 00` + 18-byte TGA header + BGRA pixels, **bottom-origin**, 32-bit, **no footer**. 1024×1024 for Arena. | Wrapped externally (strip 4 bytes → TGA to edit; prepend them back → OZT). |
@@ -231,6 +249,16 @@ model + its textures live in `Data\Object{N}\`.
     Lorencia `(135,123)=5`, Dungeon `(227,120)=4`, Devias `(208,55)=5`, Noria `(186,119)=5`,
     Lost Tower `(193,75)=5`. It also rejects any byte `>= 128`. Anything that rewrites a `.att`
     must preserve these (`server_att.py` does, and validates before writing).
+14. **The Admin Panel's "Terrain Data" upload stores the file VERBATIM.** It is
+    `ByteArrayField.razor`, a *generic* `byte[]` widget — it does **not** decrypt and it does
+    **not** fix up the header (`CurrentValue = memoryStream.ToArray()`, that's the whole
+    handler). So **never** upload the client's `EncTerrain{N}.att` to it. That file breaks it
+    two ways: it is **encrypted** (the server would read ciphertext as walkability flags), and
+    its plaintext header is **4 bytes** (`version, mapId, w, h`) against the server's **3**
+    (`version, w, h`) — which alone would shift the entire map by one tile, since
+    `GameMapTerrain` does `ReadTerrainData(terrainData.AsSpan(3))`. Upload
+    `terrain_map{E}_server.att` (from **Save server .att**) instead: it is written in exactly
+    the server's layout.
 
 ---
 

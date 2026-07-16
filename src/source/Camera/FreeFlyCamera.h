@@ -36,8 +36,21 @@ public:
     // down, framing the whole 256x256 terrain, with far/cull/fog pushed out - for
     // capturing a top-down minimap screenshot.
     void SnapTopDown();
+    // Leaves top-down pan/zoom mode (arrows go back to fly-along-forward).
+    void ClearTopDown() { m_bTopDownPan = false; }
+    // Zooms the top-down view by mouse-wheel ticks (positive = zoom in). Driven by
+    // the editor from ImGui's wheel; no-op unless in top-down mode.
+    void ZoomTopDown(float wheelTicks);
+
+    // Projects the four map corners (z=0) through the current view and returns the
+    // bottom-origin pixel rect (glReadPixels convention) that bounds the map, made
+    // square and clamped to the window. Used to auto-crop a minimap capture.
+    // Returns false if the map isn't sensibly in front of the camera.
+    bool ComputeMapScreenRect(int& outX, int& outY, int& outSize) const;
     // Rotates the view around the vertical axis (for orienting a top-down shot).
     void RotateYaw(float deltaDeg) { m_Yaw += deltaDeg; }
+    // Faces the view north (yaw 0) - the orientation a minimap capture must use.
+    void FaceNorth() { m_Yaw = 0.0f; }
 
     // Configuration & Frustum Management
     const CameraConfig& GetConfig() const override { return m_Config; }
@@ -84,19 +97,31 @@ private:
     int m_LastMouseX;
     int m_LastMouseY;
 
+    // Top-down minimap mode: arrows pan across the map (XY) instead of flying along
+    // the near-straight-down forward vector, and the mouse wheel zooms (height).
+    bool m_bTopDownPan = false;
+
+    // Zoom (height) limits and per-tick step for the top-down mouse-wheel zoom.
+    static constexpr float TOPDOWN_MIN_HEIGHT = 4000.0f;
+    static constexpr float TOPDOWN_MAX_HEIGHT = 58000.0f;
+    static constexpr float TOPDOWN_WHEEL_STEP = 1800.0f;
+
     // State preservation across toggles
     bool m_bHasSavedState = false;
 
     // Constraints
     // Engine convention: Angle[0]=-90 = horizontal, more negative = looking up
     static constexpr float MIN_PITCH = -160.0f;  // Looking steeply upward
-    static constexpr float MAX_PITCH = -2.0f;    // Near straight-down (pitch 0 =
-                                                 // exactly down but gimbal-locks;
-                                                 // -2 allows top-down minimap views)
+    static constexpr float MAX_PITCH = -0.3f;    // Near straight-down (pitch 0 =
+                                                 // exactly down but gimbal-locks; a
+                                                 // tiny tilt keeps the up-vector well
+                                                 // defined while minimising the
+                                                 // perspective skew in minimap capture)
 
     // Helper methods
     void HandleInput();
     void HandleMovement();
+    void HandleTopDownMovement();
     void ReadMovementInput(float& outForward, float& outStrafe, float& outVertical);
     void ComputeCameraTransform();
     void UpdateFrustum();

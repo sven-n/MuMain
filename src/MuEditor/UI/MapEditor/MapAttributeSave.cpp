@@ -9,6 +9,8 @@
 #include "Core/Globals/_crypt.h"            // BuxConvert
 #include "UI/Console/MuEditorConsoleUI.h"
 
+#include <commdlg.h>   // GetOpenFileNameW (server base picker)
+
 #include <cstdio>
 #include <memory>
 #include <vector>
@@ -27,23 +29,7 @@ namespace
     // The server's TerrainData keeps a 3-byte header before the attribute block.
     constexpr int SERVER_HEADER_BYTES = 3;
 
-    // The attribute byte of a tile as it should be PERSISTED.
-    //
-    // TerrainWall[] is not purely map data at runtime: MoveCharactersClient()
-    // clears and re-stamps TW_CHARACTER (0x02) every frame on every tile a live
-    // character/NPC stands on. Saving it verbatim bakes "an NPC was standing here
-    // when I hit Save" into the map, e.g. a safezone tile becomes 1|2 = 3.
-    //
-    // That byte is poison for the server: OpenMU decides walkability with an EXACT
-    // value test (walkable = v==0 || v==1), so 3 reads as BLOCKED - while the
-    // client's bit test still reads it as walkable. Result: players walk onto the
-    // tile and get rubber-banded back. Strip the transient bit on save.
-    BYTE StaticAttribute(WORD wall)
-    {
-        return static_cast<BYTE>((wall & 0xFF) & ~TW_CHARACTER);
-    }
-
-    // Writes a dead-simple instructions file next to the .sql.
+    // Writes a dead-simple instructions file next to the server .att.
     void WriteHowTo(int mapNumber)
     {
         wchar_t howToName[128];
@@ -56,65 +42,74 @@ namespace
         fprintf(fp,
 "HOW TO APPLY THIS TERRAIN FILE TO YOUR SERVER\r\n"
 "=============================================\r\n"
-"File: terrain_map%d_server.sql   (server map Number = %d)\r\n"
+"File: terrain_map%d_server.att   (server map Number = %d)\r\n"
 "\r\n"
-"Two commands. That's it.\r\n"
+"Four steps, no command line.\r\n"
 "\r\n"
-"  docker exec -i -e PGPASSWORD={DB_PASSWORD} {DB_CONTAINER} psql -U {DB_USER} -d {DB_NAME} < {SQL_FILE}\r\n"
-"  docker restart {GAMESERVER_CONTAINER}\r\n"
+"  1. Open the OpenMU Admin Panel in your browser.\r\n"
+"  2. Go to the map list and edit the map with Number = %d.\r\n"
+"  3. Find the \"Terrain Data\" field and upload terrain_map%d_server.att\r\n"
+"     (the file in THIS folder).\r\n"
+"  4. Save, then restart the game server.\r\n"
 "\r\n"
-"By default (OpenMU 'all-in-one' docker compose):\r\n"
-"\r\n"
-"  docker exec -i -e PGPASSWORD=admin database psql -U postgres -d openmu < terrain_map%d_server.sql\r\n"
-"  docker restart openmu-startup\r\n"
-"\r\n"
-"It should print \"UPDATE 1\". Then relog in the game. Done.\r\n"
+"Then relog in the game. Done.\r\n"
 "\r\n"
 "\r\n"
-"IF YOUR SERVER IS REMOTE (cloud / VPS)\r\n"
-"--------------------------------------\r\n"
-"Copy the file up first, then run the same two commands over SSH:\r\n"
-"\r\n"
-"  scp terrain_map%d_server.sql youruser@yourserver:/tmp/\r\n"
-"  ssh youruser@yourserver\r\n"
-"  docker exec -i -e PGPASSWORD=admin database psql -U postgres -d openmu < /tmp/terrain_map%d_server.sql\r\n"
-"  docker restart openmu-startup\r\n"
-"\r\n"
-"\r\n"
-"IF YOUR SERVER IS LOCAL (Docker on this PC)\r\n"
-"-------------------------------------------\r\n"
-"No copying needed - just run the two commands here, in this folder.\r\n"
-"\r\n"
-"WATCH OUT: PowerShell does NOT support the \"<\" redirect. Use one of:\r\n"
-"\r\n"
-"  cmd.exe    :  docker exec -i -e PGPASSWORD=admin database psql -U postgres -d openmu < terrain_map%d_server.sql\r\n"
-"  PowerShell :  Get-Content terrain_map%d_server.sql | docker exec -i -e PGPASSWORD=admin database psql -U postgres -d openmu\r\n"
-"\r\n"
-"\r\n"
-"DON'T KNOW YOUR CONTAINER NAMES?\r\n"
+"IMPORTANT: UPLOAD THE RIGHT FILE\r\n"
 "--------------------------------\r\n"
-"  docker ps\r\n"
+"Upload terrain_map%d_server.att from this folder.\r\n"
 "\r\n"
-"Look for the postgres one (that's {DB_CONTAINER}) and the OpenMU one\r\n"
-"(that's {GAMESERVER_CONTAINER}).\r\n"
+"Do NOT upload the client's Data\\World*\\EncTerrain*.att. The Admin Panel stores\r\n"
+"whatever bytes you give it, as-is - it does not decrypt anything. The client's\r\n"
+"file is encrypted and has a different header, so uploading it would corrupt the\r\n"
+"map completely.\r\n"
+"\r\n"
+"\r\n"
+"WHAT THIS FILE CONTAINS\r\n"
+"-----------------------\r\n"
+"It is the server's OWN terrain data (the one you downloaded), with ONLY the tiles\r\n"
+"you edited changed. Every other tile is byte-for-byte identical to what the server\r\n"
+"already had.\r\n"
+"\r\n"
+"That matters: the client and the server do not agree on the whole map. The client\r\n"
+"blocks every tree/rock footprint; the server does not (over 1000 such tiles on some\r\n"
+"maps). Uploading the client's map wholesale would block all of them server-side and\r\n"
+"could break monster spawns and pathing. This file does not do that.\r\n"
 "\r\n"
 "\r\n"
 "TROUBLESHOOTING\r\n"
 "---------------\r\n"
-"\"UPDATE 0\" instead of \"UPDATE 1\"\r\n"
-"    -> Wrong map number. The SERVER keys maps by the world ENUM\r\n"
-"       (Lorencia = 0, Arena = 6), NOT the client folder number\r\n"
-"       (World1, World7). This file targets Number = %d.\r\n"
+"Can't find the map / edited the wrong one\r\n"
+"    -> The SERVER keys maps by the world ENUM (Lorencia = 0, Arena = 6), NOT the\r\n"
+"       client folder number (World1, World7). This file targets Number = %d.\r\n"
+"\r\n"
+"Nothing changed in game\r\n"
+"    -> The game server caches the map. Restart it after saving.\r\n"
 "\r\n"
 "Players walk through walls, then get snapped back\r\n"
 "    -> The client and server disagree. Save the CLIENT file too:\r\n"
 "       Map Editor -> Attribute -> \"Save client .att\", and ship it.\r\n"
 "       Both sides must match.\r\n",
-            mapNumber, mapNumber, mapNumber, mapNumber, mapNumber,
-            mapNumber, mapNumber, mapNumber);
+            mapNumber, mapNumber, mapNumber, mapNumber, mapNumber, mapNumber);
 
         fclose(fp);
     }
+}
+
+// The attribute byte of a tile as it should be PERSISTED.
+//
+// TerrainWall[] is not purely map data at runtime: MoveCharactersClient() clears and
+// re-stamps TW_CHARACTER (0x02) every frame on every tile a live character/NPC stands
+// on. Saving it verbatim bakes "an NPC was standing here when I hit Save" into the
+// map, e.g. a safezone tile becomes 1|2 = 3.
+//
+// That byte is poison for the server: OpenMU decides walkability with an EXACT value
+// test (walkable = v==0 || v==1), so 3 reads as BLOCKED - while the client's bit test
+// still reads it as walkable. Result: players walk onto the tile and get rubber-banded
+// back. Strip the transient bit on save.
+BYTE StaticAttribute(WORD wall)
+{
+    return static_cast<BYTE>((wall & 0xFF) & ~TW_CHARACTER);
 }
 
 bool SaveClientAtt(int world, int mapNumber)
@@ -154,49 +149,135 @@ bool SaveClientAtt(int world, int mapNumber)
     return true;
 }
 
-bool SaveServerSql(int serverMapNumber, std::wstring& outPath)
+bool PickServerBaseAtt(std::wstring& outPath)
 {
-    // Hex-encode the raw attribute block (unencrypted - the DB stores it plain).
-    static const char* kHex = "0123456789abcdef";
-    std::string hex;
-    hex.reserve(static_cast<size_t>(CELLS) * 2);
+    wchar_t file[MAX_PATH] = { 0 };
+    OPENFILENAMEW ofn = { 0 };
+    ofn.lStructSize = sizeof(ofn);
+    ofn.lpstrFilter = L"Server TerrainData (*.att)\0*.att\0All Files\0*.*\0";
+    ofn.lpstrFile = file;
+    ofn.nMaxFile = MAX_PATH;
+    ofn.lpstrTitle = L"Select the server's current TerrainData (downloaded from the Admin Panel)";
+    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
+    if (!GetOpenFileNameW(&ofn))
+        return false;
+    outPath = file;
+    return true;
+}
+
+bool LoadServerBaseAtt(const std::wstring& path, std::vector<BYTE>& outBase, std::string& outError)
+{
+    outBase.clear();
+
+    FILE* fp = _wfopen(path.c_str(), L"rb");
+    if (fp == nullptr)
+    {
+        outError = "Could not open that file.";
+        return false;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    const long size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    if (size != SERVER_HEADER_BYTES + CELLS)
+    {
+        fclose(fp);
+        // The overwhelmingly likely mistake is grabbing the client's .att, which is
+        // encrypted and 65540 bytes - say so instead of just "wrong size".
+        char buf[192];
+        snprintf(buf, sizeof(buf),
+                 "Wrong size: %ld bytes, expected 65539. This must be the server's TerrainData "
+                 "(downloaded from the Admin Panel) - NOT the client's EncTerrain*.att.",
+                 size);
+        outError = buf;
+        return false;
+    }
+
+    outBase.resize(static_cast<size_t>(size));
+    const size_t read = fread(outBase.data(), 1, outBase.size(), fp);
+    fclose(fp);
+    if (read != outBase.size())
+    {
+        outBase.clear();
+        outError = "Could not read the whole file.";
+        return false;
+    }
+
+    // The client's .att is encrypted, so its bytes look like noise; the server's is
+    // plain, and every attribute byte is a small flag combination (< 128 - the client
+    // loader rejects anything above that too). A single high byte means it is not
+    // plain server data, which is worth catching before it corrupts the map.
     for (int i = 0; i < CELLS; ++i)
     {
-        const BYTE v = StaticAttribute(TerrainWall[i]);   // never persist TW_CHARACTER
-        hex.push_back(kHex[v >> 4]);
-        hex.push_back(kHex[v & 0x0F]);
+        if (outBase[SERVER_HEADER_BYTES + i] >= 128)
+        {
+            outBase.clear();
+            outError = "That file is not plain server TerrainData (it looks encrypted). "
+                       "Download it from the Admin Panel's \"Terrain Data\" field.";
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool SaveServerAtt(int serverMapNumber,
+                   const std::vector<BYTE>& serverBase,
+                   const std::vector<BYTE>& baseline,
+                   const std::vector<bool>& edited,
+                   std::wstring& outPath,
+                   int& outChanged)
+{
+    outChanged = 0;
+
+    if (serverBase.size() != static_cast<size_t>(SERVER_HEADER_BYTES + CELLS)
+        || baseline.size() != static_cast<size_t>(CELLS)
+        || edited.size()   != static_cast<size_t>(CELLS))
+    {
+        g_MuEditorConsoleUI.LogEditor("[MapEditor] SaveServerAtt FAILED: server base not loaded");
+        return false;
+    }
+
+    // Start from the server's own bytes - header included, so whatever it had is kept.
+    std::vector<BYTE> data = serverBase;
+
+    // ...and touch ONLY the tiles the user actually changed. "Painted" is not enough:
+    // a stroke that was undone leaves the tile back at its baseline value, and writing
+    // the client's value there would push a client-only object block onto the server.
+    for (int i = 0; i < CELLS; ++i)
+    {
+        if (!edited[i])
+            continue;
+
+        const BYTE now = StaticAttribute(TerrainWall[i]);
+        if (now == baseline[i])
+            continue;
+
+        data[SERVER_HEADER_BYTES + i] = now;
+        ++outChanged;
     }
 
     wchar_t fileName[128];
-    swprintf_s(fileName, L"terrain_map%d_server.sql", serverMapNumber);
+    swprintf_s(fileName, L"terrain_map%d_server.att", serverMapNumber);
 
     FILE* fp = _wfopen(fileName, L"wb");
     if (fp == nullptr)
     {
-        g_MuEditorConsoleUI.LogEditor("[MapEditor] SaveServerSql FAILED: could not open the .sql for write");
+        g_MuEditorConsoleUI.LogEditor("[MapEditor] SaveServerAtt FAILED: could not open the .att for write");
         return false;
     }
-
-    // Preserve whatever the existing 3-byte TerrainData header is by slicing it off
-    // the current row, then append our full attribute block. One statement, no
-    // dependence on knowing the header bytes.
-    fprintf(fp,
-        "-- Terrain attributes (walk map) for map Number=%d\n"
-        "-- Generated by the in-game Map Editor. Run against the OpenMU database,\n"
-        "-- then restart the game server so it reloads the map.\n"
-        "UPDATE config.\"GameMapDefinition\"\n"
-        "SET \"TerrainData\" = substring(\"TerrainData\" from 1 for %d) || decode('%s', 'hex')\n"
-        "WHERE \"Number\" = %d;\n",
-        serverMapNumber, SERVER_HEADER_BYTES, hex.c_str(), serverMapNumber);
+    fwrite(data.data(), 1, data.size(), fp);
     fclose(fp);
 
     outPath = fileName;
 
-    // Drop a plain-English HOWTO next to the .sql so anyone can apply it without
-    // digging through docs.
+    // Drop a plain-English HOWTO next to it so anyone can apply it without docs.
     WriteHowTo(serverMapNumber);
 
-    g_MuEditorConsoleUI.LogEditor("[MapEditor] Wrote server SQL + HOWTO next to Main.exe");
+    char msg[128];
+    snprintf(msg, sizeof(msg), "[MapEditor] Wrote server .att + HOWTO next to Main.exe (%d tile(s) changed)", outChanged);
+    g_MuEditorConsoleUI.LogEditor(msg);
     return true;
 }
 

@@ -612,6 +612,12 @@ void CreateTerrain(wchar_t* FileName, bool bNew)
 
 unsigned char BMPHeader[1080];
 
+// An .OZB is a BMP with a 4-byte prefix in front of it.
+// In every stock map the prefix is just a copy of the BMP header's first 4 bytes
+// ("BM" + 0x0438 = 1080), which is also a sane default for a save that never loaded
+// one (the OpenTerrainHeightNew path).
+unsigned char OZBPrefix[4] = { 0x42, 0x4D, 0x38, 0x04 };
+
 bool IsTerrainHeightExtMap(int iWorld)
 {
     return (iWorld == WD_42CHANGEUP3RD_2ND || gMapManager.IsPKField() || iWorld == WD_66DOPPLEGANGER2);
@@ -676,7 +682,7 @@ bool OpenTerrainHeight(wchar_t* filename)
         return false;
     }
 
-    if (fseek(fp, 4, SEEK_SET) != 0)
+    if (fseek(fp, 0, SEEK_SET) != 0 || fread(OZBPrefix, 1, 4, fp) != 4)
     {
         fclose(fp);
         wchar_t Text[256];
@@ -742,6 +748,16 @@ void SaveTerrainHeight(wchar_t* name)
         }
     }
     FILE* fp = _wfopen(name, L"wb");
+    if (fp == NULL)
+    {
+        SAFE_DELETE_ARRAY(Buffer);
+        return;
+    }
+
+    // The 4-byte .OZB prefix first - OpenTerrainHeight seeks past it and sizes the
+    // file as 4 + 1080 + 256*256. Without it the file is 4 bytes short and the map
+    // fails to load on the next login.
+    fwrite(OZBPrefix, 4, 1, fp);
     fwrite(BMPHeader, 1080, 1, fp);
 
     for (int i = 0; i < 256; i++) fwrite(Buffer + (255 - i) * 256, 256, 1, fp);
