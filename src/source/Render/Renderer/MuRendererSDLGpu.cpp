@@ -470,6 +470,7 @@ static std::chrono::steady_clock::time_point s_submitTime;
 static SDL_GPUGraphicsPipeline* s_pipelines2D[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines2DDepthOff[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3D[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelines3DNoCull[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3DDepthOff[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3DDepthReadOnly[k_PipelineCount] = {};
 
@@ -2499,7 +2500,7 @@ public:
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled
-                ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthReadOnly[pipelineIdx])
+                ? (m_depthMaskEnabled ? (m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx]) : s_pipelines3DDepthReadOnly[pipelineIdx])
                 : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
@@ -2583,7 +2584,7 @@ public:
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled
-                ? (m_depthMaskEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DDepthReadOnly[pipelineIdx])
+                ? (m_depthMaskEnabled ? (m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx]) : s_pipelines3DDepthReadOnly[pipelineIdx])
                 : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
@@ -3093,7 +3094,7 @@ private:
     // -----------------------------------------------------------------------
     [[nodiscard]] static SDL_GPUGraphicsPipeline* BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
                                                                      bool depthTestEnabled, bool depthWriteEnabled,
-                                                                     bool bUse3DLayout)
+                                                                     bool bUse3DLayout, bool cullFaceEnabled = false)
     {
         // Get swapchain texture format for pipeline target.
         const SDL_GPUTextureFormat swapchainFmt = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
@@ -3196,7 +3197,7 @@ private:
         // Disable for transparent/glow passes (depth write OFF) and all 2D.
         SDL_GPURasterizerState rasterState{};
         rasterState.fill_mode = SDL_GPU_FILLMODE_FILL;
-        rasterState.cull_mode = (bUse3DLayout && depthWriteEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
+        rasterState.cull_mode = (bUse3DLayout && cullFaceEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
@@ -3295,10 +3296,16 @@ private:
             }
 
             // 3D depth ON (test+write) — opaque geometry.
-            s_pipelines3D[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true);
+            s_pipelines3D[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true, /*cullFaceEnabled=*/true);
             if (!s_pipelines3D[i])
             {
                 mu::log::Get("render")->error("SDL_gpu -- 3D pipeline[{}] creation failed: {}", i, SDL_GetError());
+            }
+
+            s_pipelines3DNoCull[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true);
+            if (!s_pipelines3DNoCull[i])
+            {
+                mu::log::Get("render")->error("SDL_gpu -- 3D no-cull pipeline[{}] creation failed: {}", i, SDL_GetError());
             }
 
             // 3D depth OFF.
@@ -3341,6 +3348,11 @@ private:
             {
                 SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3D[i]);
                 s_pipelines3D[i] = nullptr;
+            }
+            if (s_pipelines3DNoCull[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DNoCull[i]);
+                s_pipelines3DNoCull[i] = nullptr;
             }
             if (s_pipelines3DDepthOff[i])
             {

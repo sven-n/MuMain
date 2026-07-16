@@ -9,3 +9,10 @@ mu_add_test(
     LINK_LIBS
         SDL3::SDL3
 )
+
+add_test(
+    NAME sdl_gpu_cull_face_pipeline
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_cull_face_pipeline.cmake
+)
