@@ -16,3 +16,10 @@ add_test(
         -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_cull_face_pipeline.cmake
 )
+
+add_test(
+    NAME sdl_gpu_reconnect_capture_target
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_reconnect_capture_target.cmake
+)

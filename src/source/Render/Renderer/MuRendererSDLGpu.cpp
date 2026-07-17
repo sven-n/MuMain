@@ -310,10 +310,10 @@ static void FailPendingFrameReadback()
     return true;
 }
 
-static void BlitFrameReadbackToSwapchain(SDL_GPUCommandBuffer* commandBuffer)
+static void BlitTextureToSwapchain(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUTexture* sourceTexture)
 {
     SDL_GPUBlitInfo blit{};
-    blit.source.texture = s_frameReadbackTexture;
+    blit.source.texture = sourceTexture;
     blit.source.w = s_swapW;
     blit.source.h = s_swapH;
     blit.destination.texture = s_swapchainTexture;
@@ -1560,8 +1560,20 @@ public:
             }
         }
 
-        SDL_GPUTexture* const frameColorTexture =
-            s_frameReadbackTexture ? s_frameReadbackTexture : s_swapchainTexture;
+        SDL_GPUTexture* reconnectCaptureTexture = nullptr;
+        if (s_pendingFrameCaptureTextureId != 0u)
+        {
+            const auto texture = s_textureMap.find(s_pendingFrameCaptureTextureId);
+            const auto size = s_textureSizes.find(s_pendingFrameCaptureTextureId);
+            if (texture != s_textureMap.end() && size != s_textureSizes.end()
+                && size->second.first == s_swapW && size->second.second == s_swapH)
+            {
+                reconnectCaptureTexture = static_cast<SDL_GPUTexture*>(texture->second);
+            }
+            s_pendingFrameCaptureTextureId = 0u;
+        }
+
+        SDL_GPUTexture* const frameColorTexture = s_frameReadbackTexture ? s_frameReadbackTexture : reconnectCaptureTexture ? reconnectCaptureTexture : s_swapchainTexture;
         bool renderPassCompleted = false;
         if (s_frameTimingEnabled)
         {
@@ -1747,25 +1759,24 @@ public:
             renderPassCompleted = true;
         }
 
-        if (s_pendingFrameCaptureTextureId != 0u)
+        if (reconnectCaptureTexture && frameColorTexture != reconnectCaptureTexture)
         {
-            const auto texture = s_textureMap.find(s_pendingFrameCaptureTextureId);
-            const auto size = s_textureSizes.find(s_pendingFrameCaptureTextureId);
-            if (texture != s_textureMap.end() && size != s_textureSizes.end())
-            {
-                SDL_GPUBlitInfo blit{};
-                blit.source.texture = s_swapchainTexture;
-                blit.source.w = s_swapW;
-                blit.source.h = s_swapH;
-                blit.destination.texture = static_cast<SDL_GPUTexture*>(texture->second);
-                blit.destination.w = size->second.first;
-                blit.destination.h = size->second.second;
-                blit.load_op = SDL_GPU_LOADOP_DONT_CARE;
-                blit.flip_mode = SDL_FLIP_NONE;
-                blit.filter = SDL_GPU_FILTER_LINEAR;
-                SDL_BlitGPUTexture(s_cmdBuf, &blit);
-            }
-            s_pendingFrameCaptureTextureId = 0u;
+            SDL_GPUBlitInfo blit{};
+            blit.source.texture = frameColorTexture;
+            blit.source.w = s_swapW;
+            blit.source.h = s_swapH;
+            blit.destination.texture = reconnectCaptureTexture;
+            blit.destination.w = s_swapW;
+            blit.destination.h = s_swapH;
+            blit.load_op = SDL_GPU_LOADOP_DONT_CARE;
+            blit.flip_mode = SDL_FLIP_NONE;
+            blit.filter = SDL_GPU_FILTER_LINEAR;
+            SDL_BlitGPUTexture(s_cmdBuf, &blit);
+        }
+
+        if (frameColorTexture != s_swapchainTexture)
+        {
+            BlitTextureToSwapchain(s_cmdBuf, frameColorTexture);
         }
 
         if (s_frameReadbackTexture)
@@ -1777,7 +1788,6 @@ public:
             }
             else
             {
-                BlitFrameReadbackToSwapchain(s_cmdBuf);
                 if (SubmitFramePixelDownload(s_cmdBuf, s_frameReadbackTexture, frameReadbackFormat))
                 {
                     s_cmdBuf = nullptr;
