@@ -2551,7 +2551,7 @@ static const wchar_t* GetMonsterModelName(EMonsterModelType Type)
 
 void OpenMonsterModel(EMonsterModelType Type)
 {
-    g_ErrorReport.Write(L"OpenMonsterModel(%ls = %d)\r\n", GetMonsterModelName(Type), Type);
+    g_ConsoleDebug->Write(MCD_RECEIVE, L"OpenMonsterModel(%ls = %d)", GetMonsterModelName(Type), Type);
 
     if (Type < 0 || Type >= MONSTER_MODEL_COUNT)   // guard the Models[] indexing below
         return;

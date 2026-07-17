@@ -2,6 +2,10 @@
 .vs/
 .nuget/
 
+graphify-out
+.superpowers
+
+
 src/source/Global Debug/
 src/Global Debug/
 src/Global Debug/Main

@@ -23,3 +23,10 @@ add_test(
         -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_reconnect_capture_target.cmake
 )
+
+add_test(
+    NAME sdl_gpu_vertex_overflow_guard
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_vertex_overflow_guard.cmake
+)

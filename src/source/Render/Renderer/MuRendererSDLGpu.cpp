@@ -66,10 +66,8 @@ namespace
 
 // Maximum number of quads supported by the static quad index buffer.
 constexpr int k_MaxQuads = 4096;
-// Scratch vertex transfer buffer size (16 MB).
-// Character selection scene with 4 detailed characters + wings + weapons + castle
-// exceeds 4 MB, causing 2D UI draw commands to be silently dropped.
-constexpr Uint32 k_VertexBufferSize = 16u * 1024u * 1024u;
+// Initial vertex capacity. CPU staging grows so stress frames keep late UI draws.
+constexpr Uint32 k_InitialVertexBufferSize = 64u * 1024u * 1024u;
 // Number of blend pipelines: 8 blend modes + 1 disabled.
 constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
@@ -475,12 +473,12 @@ static SDL_GPUGraphicsPipeline* s_pipelines3DDepthOff[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3DDepthReadOnly[k_PipelineCount] = {};
 
 // Story 4.3.2 (AC-7): Single pre-frame vertex upload.
-// s_vtxMappedPtr: mapped pointer into s_vtxTransferBuf, valid between BeginFrame/EndFrame.
-// s_vtxOffset: current write offset within the mapped transfer buffer.
+// Draws accumulate in growable CPU memory before one GPU upload.
 static SDL_GPUTransferBuffer* s_vtxTransferBuf = nullptr;
 static SDL_GPUBuffer* s_vtxGpuBuf = nullptr;
+static Uint32 s_vtxCapacity = 0u;
 static Uint32 s_vtxOffset = 0u;
-static void* s_vtxMappedPtr = nullptr; // mapped in BeginFrame, unmapped before render pass
+static std::vector<Uint8> s_vtxScratch;
 
 // Static quad index buffer (pre-generated [0,1,2, 0,2,3] pattern × k_MaxQuads).
 static SDL_GPUBuffer* s_quadIdxBuf = nullptr;
@@ -1326,20 +1324,7 @@ public:
         s_dbgWhiteTextureDrawsThisFrame = 0u;
         s_dbgRealTextureDrawsThisFrame = 0u;
         ++s_dbgFrameCount;
-
-        // Story 4.3.2 (AC-7): Map vertex transfer buffer once for the whole frame.
-        // Draw calls write into s_vtxMappedPtr; we copy to the GPU buffer once
-        // via a single copy pass before SDL_BeginGPURenderPass.
-        s_vtxMappedPtr = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, false);
-        if (!s_vtxMappedPtr)
-        {
-            mu::log::Get("render")->error("SDL_gpu -- BeginFrame: failed to map vertex transfer buffer: {}",
-                                          SDL_GetError());
-            SDL_CancelGPUCommandBuffer(s_cmdBuf);
-            s_cmdBuf = nullptr;
-            FailPendingFrameReadback();
-            return;
-        }
+        s_vtxScratch.clear();
 
         s_swapW = 0u;
         s_swapH = 0u;
@@ -1348,8 +1333,6 @@ public:
         if (!SDL_AcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
         {
             mu::log::Get("render")->error("SDL_gpu -- SDL_AcquireGPUSwapchainTexture failed: {}", SDL_GetError());
-            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-            s_vtxMappedPtr = nullptr;
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             FailPendingFrameReadback();
@@ -1360,8 +1343,6 @@ public:
         if (!s_swapchainTexture)
         {
             // Debug-level only — this happens normally when window is minimized.
-            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-            s_vtxMappedPtr = nullptr;
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             FailPendingFrameReadback();
@@ -1396,11 +1377,6 @@ public:
         if (!s_frameActive)
         {
             // Frame was not started (minimized window or error).
-            if (s_vtxMappedPtr)
-            {
-                SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-                s_vtxMappedPtr = nullptr;
-            }
             if (s_cmdBuf)
             {
                 SDL_CancelGPUCommandBuffer(s_cmdBuf);
@@ -1412,20 +1388,29 @@ public:
         s_frameActive = false;
 
         // ---------------------------------------------------------------
-        // Phase 1: Unmap the vertex transfer buffer (done writing vertices).
+        // Phase 1: Grow GPU buffers if needed, then stage recorded CPU vertices.
         // ---------------------------------------------------------------
-        if (s_vtxMappedPtr)
-        {
-            SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-            s_vtxMappedPtr = nullptr;
-        }
-
         // ---------------------------------------------------------------
-        // Phase 2: Copy pass — upload vertex + strip index data to GPU.
         // This happens BEFORE the render pass so the GPU reads current-
         // frame data, eliminating the 1-frame vertex delay that caused
         // streak artifacts when vertex counts varied between frames.
         // ---------------------------------------------------------------
+        bool vertexDataReady = s_vtxOffset == 0u;
+        if (s_vtxOffset > 0u && EnsureVertexBufferCapacity(s_vtxOffset))
+        {
+            void* mapped = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, false);
+            if (mapped)
+            {
+                std::memcpy(mapped, s_vtxScratch.data(), s_vtxOffset);
+                SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+                vertexDataReady = true;
+            }
+            else
+            {
+                mu::log::Get("render")->error("SDL_gpu -- failed to map vertex transfer buffer: {}", SDL_GetError());
+            }
+        }
+
         bool stripIdxReady = false;
         if (!s_stripIdxScratch.empty())
         {
@@ -1486,7 +1471,7 @@ public:
             if (copyPass)
             {
                 // Copy vertex data.
-                if (s_vtxOffset > 0u)
+                if (s_vtxOffset > 0u && vertexDataReady)
                 {
                     SDL_GPUTransferBufferLocation vtxSrc{};
                     vtxSrc.transfer_buffer = s_vtxTransferBuf;
@@ -2920,35 +2905,34 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // UploadVertices: Write vertex data into the per-frame mapped transfer buffer.
+    // UploadVertices: Append vertex data to per-frame CPU staging memory.
     // Returns the byte offset in the GPU vertex buffer, or ~0u on failure.
     //
-    // Story 4.3.2 (AC-7): s_vtxMappedPtr is held mapped for the entire frame.
-    // This function only writes to CPU-side mapped memory — no copy pass here.
+    // CPU staging grows as needed, preventing world geometry from consuming fixed
+    // transfer capacity and dropping UI commands recorded later in the frame.
     // EndFrame() copies all accumulated vertex data to the GPU buffer in a
     // single copy pass BEFORE beginning the render pass, so draw commands
     // always read current-frame vertex data (no 1-frame latency).
     // -----------------------------------------------------------------------
     [[nodiscard]] static Uint32 UploadVertices(const void* pData, Uint32 byteSize)
     {
-        if (!s_vtxMappedPtr || !s_vtxGpuBuf)
+        if (!pData || byteSize == 0u)
         {
             return ~0u;
         }
 
         const Uint32 alignedOffset = (s_vtxOffset + 3u) & ~3u; // 4-byte alignment
-        if (alignedOffset + byteSize > k_VertexBufferSize)
+        if (byteSize > std::numeric_limits<Uint32>::max() - alignedOffset)
         {
-            mu::log::Get("render")->error(
-                "SDL_gpu -- vertex scratch buffer overflow (offset {} + size {} > capacity {})", alignedOffset,
-                byteSize, k_VertexBufferSize);
+            mu::log::Get("render")->error("SDL_gpu -- vertex staging size exceeds Uint32 range");
             return ~0u;
         }
 
-        // Write vertex data directly into the persistently-mapped transfer buffer.
-        std::memcpy(static_cast<Uint8*>(s_vtxMappedPtr) + alignedOffset, pData, byteSize);
+        const Uint32 requiredSize = alignedOffset + byteSize;
+        s_vtxScratch.resize(requiredSize);
+        std::memcpy(s_vtxScratch.data() + alignedOffset, pData, byteSize);
 
-        s_vtxOffset = alignedOffset + byteSize;
+        s_vtxOffset = requiredSize;
         return alignedOffset;
     }
 
@@ -3465,11 +3449,32 @@ private:
 
     [[nodiscard]] static bool CreateVertexBuffers()
     {
+        return EnsureVertexBufferCapacity(k_InitialVertexBufferSize);
+    }
+
+    [[nodiscard]] static bool EnsureVertexBufferCapacity(Uint32 requiredSize)
+    {
+        if (s_vtxCapacity >= requiredSize)
+        {
+            return true;
+        }
+
+        Uint32 newCapacity = s_vtxCapacity > 0u ? s_vtxCapacity : k_InitialVertexBufferSize;
+        while (newCapacity < requiredSize)
+        {
+            if (newCapacity > std::numeric_limits<Uint32>::max() / 2u)
+            {
+                newCapacity = requiredSize;
+                break;
+            }
+            newCapacity *= 2u;
+        }
+
         SDL_GPUTransferBufferCreateInfo tbInfo{};
         tbInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-        tbInfo.size = k_VertexBufferSize;
-        s_vtxTransferBuf = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
-        if (!s_vtxTransferBuf)
+        tbInfo.size = newCapacity;
+        SDL_GPUTransferBuffer* newTransferBuffer = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
+        if (!newTransferBuffer)
         {
             mu::log::Get("render")->error("SDL_gpu -- vertex transfer buffer creation failed: {}", SDL_GetError());
             return false;
@@ -3477,16 +3482,24 @@ private:
 
         SDL_GPUBufferCreateInfo bufInfo{};
         bufInfo.usage = SDL_GPU_BUFFERUSAGE_VERTEX;
-        bufInfo.size = k_VertexBufferSize;
-        s_vtxGpuBuf = SDL_CreateGPUBuffer(s_device, &bufInfo);
-        if (!s_vtxGpuBuf)
+        bufInfo.size = newCapacity;
+        SDL_GPUBuffer* newGpuBuffer = SDL_CreateGPUBuffer(s_device, &bufInfo);
+        if (!newGpuBuffer)
         {
             mu::log::Get("render")->error("SDL_gpu -- vertex GPU buffer creation failed: {}", SDL_GetError());
-            SDL_ReleaseGPUTransferBuffer(s_device, s_vtxTransferBuf);
-            s_vtxTransferBuf = nullptr;
+            SDL_ReleaseGPUTransferBuffer(s_device, newTransferBuffer);
             return false;
         }
 
+        if (s_vtxGpuBuf)
+            SDL_ReleaseGPUBuffer(s_device, s_vtxGpuBuf);
+        if (s_vtxTransferBuf)
+            SDL_ReleaseGPUTransferBuffer(s_device, s_vtxTransferBuf);
+
+        s_vtxGpuBuf = newGpuBuffer;
+        s_vtxTransferBuf = newTransferBuffer;
+        s_vtxCapacity = newCapacity;
+        mu::log::Get("render")->info("SDL_gpu -- vertex buffers resized to {} bytes", newCapacity);
         return true;
     }
 
@@ -3502,6 +3515,8 @@ private:
             SDL_ReleaseGPUTransferBuffer(s_device, s_vtxTransferBuf);
             s_vtxTransferBuf = nullptr;
         }
+        s_vtxCapacity = 0u;
+        s_vtxScratch.clear();
         if (s_stripIdxBuf)
         {
             SDL_ReleaseGPUBuffer(s_device, s_stripIdxBuf);
