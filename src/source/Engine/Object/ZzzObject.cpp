@@ -6325,6 +6325,7 @@ void ItemHeight(int Type, BMD* b)
 
 void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 {
+    constexpr int MaxRenderedZenCoins = 12;
     auto o = &item->Object;
     auto k = itemIndex;
     vec3_t tempPosition;
@@ -6332,7 +6333,7 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 
     int coinCount = static_cast<int>(sqrtf(static_cast<float>(Items[k].Item.Level))) / 2;
 
-    coinCount = std::max<int>(std::min<int>(coinCount, 80), 3);
+    coinCount = std::max<int>(std::min<int>(coinCount, MaxRenderedZenCoins), 3);
 
     vec3_t randomRadius;
     vec3_t randomAngle;
