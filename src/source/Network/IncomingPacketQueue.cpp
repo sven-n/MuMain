@@ -3,11 +3,15 @@
 #include "Network/Server/WSclient.h" // PacketInfo (complete type for the queued unique_ptr)
 
 #include <array>
+#include <cstdio>
+#include <cstdlib>
 
 namespace
 {
-    constexpr double PresentationOverloadAgeMs = 250.0;
+    constexpr double CombatBacklogAgeMs = 250.0;
+    constexpr std::size_t CombatBacklogDepth = 512;
     constexpr std::size_t EntityKeyCount = 1U << 16;
+    constexpr BYTE OpenMuBasicMonsterAttackAnimation = 120;
 
     int GetActionEntityKey(const PacketInfo& packet)
     {
@@ -24,6 +28,11 @@ namespace
         }
 
         const auto action = reinterpret_cast<const PRECEIVE_ACTION*>(receiveBuffer);
+        if (action->Action != OpenMuBasicMonsterAttackAnimation)
+        {
+            return -1;
+        }
+
         return (static_cast<int>(action->KeyH) << 8) + action->KeyL;
     }
 
@@ -56,6 +65,24 @@ namespace
             seenGenerations[entityKey] = generation;
         }
         return coalescedCount;
+    }
+
+    void LogQueueStats(const Network::IncomingPacketQueue::Stats& stats)
+    {
+        static const bool enabled = std::getenv("MU_NETWORK_DIAGNOSTICS") != nullptr;
+        static auto nextLogTime = std::chrono::steady_clock::now();
+        const auto now = std::chrono::steady_clock::now();
+        if (!enabled || now < nextLogTime)
+        {
+            return;
+        }
+
+        nextLogTime = now + std::chrono::seconds(1);
+        std::fprintf(stderr,
+            "[PacketQueue] depth=%zu high=%zu drained=%zu coalesced=%llu oldest=%.1fms drain=%.1fms\n",
+            stats.depth, stats.highWaterMark, stats.lastDrainedCount,
+            static_cast<unsigned long long>(stats.coalescedActionCount),
+            stats.oldestPacketAgeMs, stats.lastDrainDurationMs);
     }
 }
 
@@ -97,19 +124,23 @@ namespace Network
         // per-packet guard is needed.
         std::deque<std::unique_ptr<PacketInfo>> pending;
         double oldestPacketAgeMs = 0.0;
+        std::size_t capturedDepth = 0;
+        const auto captureTime = std::chrono::steady_clock::now();
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             std::swap(pending, m_queue);
+            capturedDepth = pending.size();
             m_stats.depth = 0;
             if (!pending.empty())
             {
                 oldestPacketAgeMs = std::chrono::duration<double, std::milli>(
-                    std::chrono::steady_clock::now() - pending.front()->EnqueuedAt).count();
+                    captureTime - pending.front()->EnqueuedAt).count();
             }
         }
 
         const std::size_t coalescedCount = MarkSupersededActions(pending);
-        const bool suppressOptionalPresentation = oldestPacketAgeMs > PresentationOverloadAgeMs;
+        const bool suppressOptionalPresentation = oldestPacketAgeMs > CombatBacklogAgeMs
+            || capturedDepth > CombatBacklogDepth;
         for (auto& packet : pending)
         {
             packet->SuppressOptionalPresentation = suppressOptionalPresentation;
@@ -129,6 +160,7 @@ namespace Network
 
         const double drainDurationMs = std::chrono::duration<double, std::milli>(
             std::chrono::steady_clock::now() - drainStart).count();
+        Stats stats;
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             m_stats.lastDrainedCount = drainedCount;
@@ -136,7 +168,9 @@ namespace Network
             m_stats.lastDrainDurationMs = drainDurationMs;
             m_stats.coalescedActionCount += coalescedCount;
             m_stats.depth = m_queue.size();
+            stats = m_stats;
         }
+        LogQueueStats(stats);
     }
 
     void IncomingPacketQueue::Clear()
