@@ -3122,6 +3122,7 @@ void ReceiveDeleteCharacterViewport(const BYTE* ReceiveBuffer)
     }
 }
 int AttackPlayer = 0;
+static bool SuppressOptionalPresentation = false;
 
 void ReceiveDamage(const BYTE* ReceiveBuffer)
 {
@@ -3252,7 +3253,8 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
         SetPlayerShock(c, damage);
         Vector(1.f, 0.f, 0.f, Light);
 
-        CreatePoint(o->Position, damage, Light);
+        if (!SuppressOptionalPresentation)
+            CreatePoint(o->Position, damage, Light);
 
         if (shieldDamage > 0)
         {
@@ -3260,7 +3262,8 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
             Vector(0.8f, 1.f, 0.f, Light);
             nPosShieldDamage[0] = o->Position[0]; nPosShieldDamage[1] = o->Position[1];
             nPosShieldDamage[2] = o->Position[2] + 25.f;
-            CreatePoint(nPosShieldDamage, shieldDamage, Light);
+            if (!SuppressOptionalPresentation)
+                CreatePoint(nPosShieldDamage, shieldDamage, Light);
         }
 
         if (key == HeroKey)
@@ -3376,9 +3379,9 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
                 g_CMonkSystem.RenderRepeatedly(key, o);
             }
         }
-        else if (damage == 0)
+        else if (damage == 0 && !SuppressOptionalPresentation)
             CreatePoint(o->Position, -1, Light);
-        else
+        else if (!SuppressOptionalPresentation)
         {
             if (bComboEnable)
             {
@@ -3406,7 +3409,7 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
             CreatePoint(o->Position, damage, Light, scale);
         }
 
-        if (shieldDamage > 0)
+        if (shieldDamage > 0 && !SuppressOptionalPresentation)
         {
             vec3_t nPosShieldDamage;
             Vector(0.8f, 1.f, 0.f, Light);
@@ -14646,6 +14649,7 @@ void ProcessPacketCallback(const PacketInfo* Packet)
 {
     try
     {
+        SuppressOptionalPresentation = Packet->SuppressOptionalPresentation;
         ProcessPacket(Packet->ReceiveBuffer.get(), Packet->Size);
     }
     catch (const std::exception&)

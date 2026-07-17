@@ -3596,6 +3596,9 @@ struct PacketInfo
 {
     std::unique_ptr<BYTE[]> ReceiveBuffer;
     int32_t Size;
+    std::chrono::steady_clock::time_point EnqueuedAt;
+    bool Superseded = false;
+    bool SuppressOptionalPresentation = false;
 };
 void ProcessPacketCallback(const PacketInfo* Packet);
 
