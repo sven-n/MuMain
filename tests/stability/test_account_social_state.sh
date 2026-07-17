@@ -4,6 +4,7 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 ui="$root/src/source/UI/Legacy/UIWindows.cpp"
 network="$root/src/source/Network/Server/WSclient.cpp"
+selection="$root/src/source/Input/Selection.cpp"
 
 if grep -q 'new wchar_t\[MAX_TEXT_LENGTH + 1\]' "$ui"; then
     echo "friend invite still transports manually allocated text" >&2
@@ -14,3 +15,8 @@ character_list=$(sed -n '/void ReceiveCharacterListExtended/,/CurrentProtocolSta
 printf '%s\n' "$character_list" | grep -q 'ClearCharacters();'
 printf '%s\n' "$character_list" | grep -q 'SelectedCharacter = -1;'
 printf '%s\n' "$character_list" | grep -q 'SelectedHero = -1;'
+
+character_selection=$(sed -n '/void SelectObjects()/,/if (g_pOption->IsAutoAttack()/p' "$selection")
+printf '%s\n' "$character_selection" | grep -q 'if (SceneFlag == CHARACTER_SCENE)'
+printf '%s\n' "$character_selection" | grep -q 'SelectedCharacter = SelectCharacter(KIND_PLAYER);'
+printf '%s\n' "$character_selection" | grep -q 'return;'
