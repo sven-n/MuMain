@@ -71,6 +71,8 @@ public:
         m_iMaxHeight = iMaxHeight;
     }
     virtual void SetTitle(const wchar_t* pszTitle);
+    void SetReturnText(const wchar_t* text);
+    std::wstring TakeReturnText();
     const wchar_t* GetTitle()
     {
         return m_strTitle.c_str();
@@ -134,6 +136,7 @@ protected:
     int m_iMinWidth, m_iMinHeight;
     int m_iMaxWidth, m_iMaxHeight;
     std::wstring m_strTitle;
+    std::wstring m_returnText;
     BOOL m_bHaveTextBox;
     int m_iControlButtonClick;
     BOOL m_bIsMaximize;

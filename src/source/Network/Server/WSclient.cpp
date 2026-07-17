@@ -677,6 +677,10 @@ void ReceiveCharacterListExtended(const BYTE* ReceiveBuffer)
 {
     InitGuildWar();
 
+    ClearCharacters();
+    SelectedCharacter = -1;
+    SelectedHero = -1;
+
     auto Data = (LPPHEADER_DEFAULT_CHARACTER_LIST)ReceiveBuffer;
 
     int Offset = sizeof(PHEADER_DEFAULT_CHARACTER_LIST);
