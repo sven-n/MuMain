@@ -961,6 +961,19 @@ void EndBitmap()
     mu::GetRenderer().End2DPass();
 }
 
+namespace
+{
+std::uint32_t g_renderColor = 0xFFFFFFFFu;
+}
+
+void SetRenderColor(BYTE red, BYTE green, BYTE blue, BYTE alpha)
+{
+    g_renderColor = (static_cast<std::uint32_t>(alpha) << 24) |
+                    (static_cast<std::uint32_t>(blue) << 16) |
+                    (static_cast<std::uint32_t>(green) << 8) |
+                    static_cast<std::uint32_t>(red);
+}
+
 void RenderColor(float x, float y, float Width, float Height, float Alpha, int Flag)
 {
     DisableTexture();
@@ -988,7 +1001,7 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
     }
     else
     {
-        color = 0xCC000000u;
+        color = g_renderColor;
     }
 
     const mu::Vertex2D vertices[4] = {

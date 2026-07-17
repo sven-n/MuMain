@@ -805,8 +805,30 @@ void CUIWindowMgr::SetServerEnable(BOOL bFlag)
 }
 void SetLineColor(int iType, float fAlphaRate = 1.0f)
 {
-    (void)iType;
-    (void)fAlphaRate;
+    const BYTE windowAlpha = static_cast<BYTE>(255.f * fAlphaRate);
+    switch (iType)
+    {
+    case 0: SetRenderColor(146, 134, 121, windowAlpha); break;
+    case 1: SetRenderColor(37, 37, 37, windowAlpha); break;
+    case 2: SetRenderColor(106, 97, 88, windowAlpha); break;
+    case 3: SetRenderColor(0, 0, 0, static_cast<BYTE>(179.f * fAlphaRate)); break;
+    case 4: SetRenderColor(173, 167, 150, windowAlpha); break;
+    case 5: SetRenderColor(53, 49, 48, windowAlpha); break;
+    case 6: SetRenderColor(26, 22, 21, windowAlpha); break;
+    case 7: SetRenderColor(0, 0, 0, static_cast<BYTE>(255.f * fAlphaRate)); break;
+    case 8: SetRenderColor(153, 156, 166, windowAlpha); break;
+    case 9: SetRenderColor(136, 138, 147, windowAlpha); break;
+    case 10: SetRenderColor(83, 85, 93, windowAlpha); break;
+    case 11: SetRenderColor(102, 104, 112, windowAlpha); break;
+    case 12: SetRenderColor(0, 0, 8, windowAlpha); break;
+    case 13: SetRenderColor(0, 0, 0, windowAlpha); break;
+    case 14: SetRenderColor(185, 185, 185, windowAlpha); break;
+    case 15: SetRenderColor(194, 194, 194, windowAlpha); break;
+    case 16: SetRenderColor(194, 194, 194, windowAlpha); break;
+    case 17: SetRenderColor(209, 188, 134, windowAlpha); break;
+    case 18: SetRenderColor(205, 209, 133, windowAlpha); break;
+    default: break;
+    }
 }
 
 void RenderWindowVLine(float pos_x, float pos_y, float height)

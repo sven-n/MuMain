@@ -95,6 +95,7 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha = 1.f, float Scale = 15.f);
 float RenderNumber2D(float x, float y, int Num, float Width, float Height,
     unsigned int color = 0xFFFFFFFFu);
+void SetRenderColor(BYTE red, BYTE green, BYTE blue, BYTE alpha);
 void RenderColor(float x, float y, float Width, float Height, float Alpha = 0.f, int Flag = 0);
 void EndRenderColor();
 void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor);

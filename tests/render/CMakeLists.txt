@@ -30,3 +30,11 @@ add_test(
         -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_vertex_overflow_guard.cmake
 )
+
+add_test(
+    NAME legacy_ui_line_color_state
+    COMMAND ${CMAKE_COMMAND}
+        -DUI_SOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/UI/Legacy/UIWindows.cpp
+        -DRENDER_SOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Textures/ZzzOpenglUtil.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_legacy_ui_line_color_state.cmake
+)
