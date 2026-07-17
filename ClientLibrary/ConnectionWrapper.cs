@@ -231,6 +231,11 @@ public sealed class ConnectionWrapper : IDisposable
 
     private async Task WriteNetworkDiagnosticAsync(string message)
     {
+        if (!this._networkDiagnosticsEnabled)
+        {
+            return;
+        }
+
         var logLine = $"{DateTimeOffset.Now:O} [NET] {message}{Environment.NewLine}";
         await File.AppendAllTextAsync(Path.Combine(Path.GetTempPath(), "MuNetwork.log"), logLine).ConfigureAwait(false);
         await Console.Error.WriteAsync(logLine).ConfigureAwait(false);

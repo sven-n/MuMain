@@ -1794,34 +1794,28 @@ public:
 
         s_swapchainTexture = nullptr;
 
-        // Emit per-frame diagnostic stats every 300 frames (~5s at 60fps).
         const bool emitTimingDiagnostics = s_frameTimingEnabled && s_dbgFrameCount % 60 == 0;
-        if (s_dbgFrameCount % 300 == 0 || emitTimingDiagnostics)
+        if (emitTimingDiagnostics)
         {
-            SDL_Log("[RENDER diag] frame=%u  draw_calls=%u  replayed=%u  merged=%u  cmds=%zu  vtx_bytes=%u  tex=%zu  fallback=%u  white_draws=%u  real_draws=%u  uploads=%u  creates=%u  releases=%u  invalidated=%d  tex2d=%d  bound=%d",
-                    s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame,
-                    s_dbgMergedDrawsThisFrame, s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(),
-                    s_dbgFallbackTextureThisFrame,
-                    s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame, s_dbgTextureUploadsThisFrame,
-                    s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame, s_texturesInvalidated ? 1 : 0,
-                    m_texture2DEnabled ? 1 : 0, m_boundTextureId);
+            const auto logger = mu::log::Get("render");
+            logger->debug("[RENDER diag] frame={} draw_calls={} replayed={} merged={} cmds={} vtx_bytes={} tex={} fallback={} white_draws={} real_draws={} uploads={} creates={} releases={} invalidated={} tex2d={} bound={}",
+                s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame,
+                s_dbgMergedDrawsThisFrame, s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(),
+                s_dbgFallbackTextureThisFrame, s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame,
+                s_dbgTextureUploadsThisFrame, s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame,
+                s_texturesInvalidated, m_texture2DEnabled, m_boundTextureId);
 
-            if (s_frameTimingEnabled)
-            {
-                const auto ms = [](auto begin, auto end) {
-                    return std::chrono::duration<double, std::milli>(end - begin).count();
-                };
-                const auto now = std::chrono::steady_clock::now();
-                SDL_Log("[RENDER timing] total=%.2fms replay=%.2fms submit=%.2fms",
-                        ms(s_frameBeginTime, now), ms(s_renderReplayBeginTime, s_submitTime),
-                        ms(s_submitTime, now));
-            }
+            const auto ms = [](auto begin, auto end) {
+                return std::chrono::duration<double, std::milli>(end - begin).count();
+            };
+            const auto now = std::chrono::steady_clock::now();
+            logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms",
+                ms(s_frameBeginTime, now), ms(s_renderReplayBeginTime, s_submitTime), ms(s_submitTime, now));
         }
-        // Warn once if frames are rendering but producing no draw calls.
         if (s_dbgFrameCount == 10 && s_dbgDrawCallsThisFrame == 0)
         {
-            SDL_Log("[RENDER diag] WARNING: 10 frames elapsed with zero draw calls — "
-                    "game may not be calling RenderQuad2D/RenderTriangles");
+            mu::log::Get("render")->warn(
+                "10 frames elapsed with zero draw calls; game may not be calling RenderQuad2D/RenderTriangles");
         }
     }
 

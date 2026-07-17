@@ -1,9 +1,10 @@
 #include "stdafx.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Network/IncomingPacketQueue.h"
 #include "Network/Server/WSclient.h" // PacketInfo (complete type for the queued unique_ptr)
 
 #include <array>
-#include <cstdio>
+#include <cstring>
 #include <cstdlib>
 
 namespace
@@ -69,7 +70,10 @@ namespace
 
     void LogQueueStats(const Network::IncomingPacketQueue::Stats& stats)
     {
-        static const bool enabled = std::getenv("MU_NETWORK_DIAGNOSTICS") != nullptr;
+        static const bool enabled = [] {
+            const char* value = std::getenv("MU_NETWORK_DIAGNOSTICS");
+            return value != nullptr && std::strcmp(value, "1") == 0;
+        }();
         static auto nextLogTime = std::chrono::steady_clock::now();
         const auto now = std::chrono::steady_clock::now();
         if (!enabled || now < nextLogTime)
@@ -78,10 +82,10 @@ namespace
         }
 
         nextLogTime = now + std::chrono::seconds(1);
-        std::fprintf(stderr,
-            "[PacketQueue] depth=%zu high=%zu drained=%zu coalesced=%llu oldest=%.1fms drain=%.1fms\n",
+        mu::log::Get("network")->debug(
+            "[PacketQueue] depth={} high={} drained={} coalesced={} oldest={:.1f}ms drain={:.1f}ms",
             stats.depth, stats.highWaterMark, stats.lastDrainedCount,
-            static_cast<unsigned long long>(stats.coalescedActionCount),
+            stats.coalescedActionCount,
             stats.oldestPacketAgeMs, stats.lastDrainDurationMs);
     }
 }
