@@ -780,22 +780,4 @@ void Set3DSoundPosition()
     Manager().Update3DPositions();
 }
 
-#else  // ---- non-Windows: DirectSound is unavailable ------------------------
-
-// Sound effects run on DirectSound, which has no portable equivalent yet
-// (issue #462). Until an SDL_mixer port, the public API is a silent no-op so
-// every caller still builds and runs. Music already plays through SDL_mixer.
-HRESULT InitDirectSound(HWND) { return S_OK; }
-void    SetEnableSound(bool) {}
-void    FreeDirectSound() {}
-void    LoadWaveFile(ESound, const wchar_t*, int, bool) {}
-HRESULT PlayBuffer(ESound, OBJECT*, BOOL) { return S_OK; }
-void    StopBuffer(ESound, BOOL) {}
-void    AllStopSound(void) {}
-void    Set3DSoundPosition() {}
-HRESULT ReleaseBuffer(int) { return S_OK; }
-HRESULT RestoreBuffers(int, int) { return S_OK; }
-void    SetVolume(int, long) {}
-void    SetMasterVolume(long) {}
-
-#endif // _WIN32
+#endif // _WIN32 (the non-Windows backend lives in SdlSfxPlayer.cpp)
