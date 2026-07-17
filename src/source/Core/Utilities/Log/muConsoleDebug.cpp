@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <cstdlib>
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include "muConsoleDebug.h"	// self
@@ -236,6 +237,10 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 
 void CmuConsoleDebug::Write(int iType, const wchar_t* pStr, ...)
 {
+    static const bool networkDiagnosticsEnabled = std::getenv("MU_NETWORK_DIAGNOSTICS") != nullptr;
+    if ((iType == MCD_SEND || iType == MCD_RECEIVE) && !networkDiagnosticsEnabled)
+        return;
+
     wchar_t szBuffer[256] = L"";
     va_list arguments;
     va_start(arguments, pStr);
