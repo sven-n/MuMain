@@ -754,6 +754,7 @@ public:
     virtual void SetBgColor(DWORD dwColor) = 0;
 
     virtual void SetFont(HFONT hFont) = 0;
+    virtual SIZE MeasureText(const wchar_t* pszText, int iLength) const = 0;
 
     virtual void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
         int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL) = 0;
@@ -786,6 +787,7 @@ public:
     void SetBgColor(DWORD dwColor);
 
     void SetFont(HFONT hFont);
+    SIZE MeasureText(const wchar_t* pszText, int iLength) const;
 
     void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
         int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);
@@ -820,6 +822,7 @@ public:
     void SetBgColor(DWORD dwColor);
 
     void SetFont(HFONT hFont);
+    SIZE MeasureText(const wchar_t* pszText, int iLength) const;
 
     void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
         int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);

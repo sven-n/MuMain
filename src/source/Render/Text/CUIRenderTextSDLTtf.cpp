@@ -193,6 +193,33 @@ void CUIRenderTextSDLTtf::SetFont(HFONT font)
     }
 }
 
+SIZE CUIRenderTextSDLTtf::MeasureText(const wchar_t* text, int length) const
+{
+    SIZE size = {0, 0};
+    if (text == nullptr || length <= 0)
+    {
+        return size;
+    }
+
+    auto& renderer = mu::GetRenderer();
+    TTF_Font* font = m_activeFont != nullptr ? m_activeFont : renderer.GetTtfFont();
+    if (font == nullptr)
+    {
+        return size;
+    }
+
+    m_measureWideScratch.assign(text, length);
+    mu_wchar_to_utf8(m_measureWideScratch.c_str(), m_measureUtf8Scratch);
+    int width = 0;
+    int height = 0;
+    if (TTF_GetStringSize(font, m_measureUtf8Scratch.c_str(), m_measureUtf8Scratch.size(), &width, &height))
+    {
+        size.cx = static_cast<LONG>(static_cast<float>(width) / g_fScreenRate_x);
+        size.cy = static_cast<LONG>(static_cast<float>(height) / g_fScreenRate_y);
+    }
+    return size;
+}
+
 void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxWidth, int boxHeight, int sort,
                                      OUT SIZE* textSize)
 {

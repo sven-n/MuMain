@@ -2590,6 +2590,11 @@ void CUIRenderText::SetFont(HFONT hFont)
         m_pRenderText->SetFont(hFont);
 }
 
+SIZE CUIRenderText::MeasureText(const wchar_t* pszText, int iLength) const
+{
+    return m_pRenderText ? m_pRenderText->MeasureText(pszText, iLength) : SIZE{0, 0};
+}
+
 void CUIRenderText::RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth /* = 0 */, int iBoxHeight /* = 0 */, int iSort /* = RT3_SORT_LEFT */, OUT SIZE* lpTextSize /* = NULL */)
 {
     if (m_pRenderText)
@@ -2605,6 +2610,17 @@ CUIRenderTextOriginal::CUIRenderTextOriginal()
     m_dwTextColor = m_dwBackColor = 0;
 }
 CUIRenderTextOriginal::~CUIRenderTextOriginal() { Release(); }
+
+SIZE CUIRenderTextOriginal::MeasureText(const wchar_t* pszText, int iLength) const
+{
+    SIZE size = {0, 0};
+    if (pszText != nullptr && iLength > 0 && GetTextExtentPoint32(m_hFontDC, pszText, iLength, &size))
+    {
+        size.cx = static_cast<LONG>(static_cast<float>(size.cx) / g_fScreenRate_x);
+        size.cy = static_cast<LONG>(static_cast<float>(size.cy) / g_fScreenRate_y);
+    }
+    return size;
+}
 
 bool CUIRenderTextOriginal::Create(HDC hDC)
 {
@@ -3200,12 +3216,6 @@ void CUITextInputBox::SetFont(HFONT hFont)
 
 BOOL CUITextInputBox::DoPortableMouse()
 {
-    static bool s_mousePressHandled = false;
-    if (!MouseLButtonPush)
-    {
-        s_mousePressHandled = false;
-    }
-
     g_pRenderText->SetFont(CurrentFont());
     const int iLineHeight = LineHeightPx();
 
@@ -3233,7 +3243,7 @@ BOOL CUITextInputBox::DoPortableMouse()
         return TRUE;
     }
 
-    if (::CheckMouseIn(m_iPos_x, m_iPos_y - 4, m_iWidth, m_iHeight + 8) == FALSE)
+    if (::CheckMouseIn(m_iPos_x, m_iPos_y, m_iWidth, m_iHeight) == FALSE)
         return FALSE;
 
     MouseOnWindow = true;
@@ -3249,11 +3259,6 @@ BOOL CUITextInputBox::DoPortableMouse()
 
     if (!MouseLButtonPush)
         return TRUE;
-
-    if (s_mousePressHandled)
-        return TRUE;
-
-    s_mousePressHandled = true;
 
     // Scrollbar hit testing (multiline only; geometry set during render).
     if (m_bUseMultiLine)
@@ -3334,10 +3339,7 @@ int CUITextInputBox::MeasureWidth(const wchar_t* pszText, int iLength) const
 {
     if (pszText == nullptr || iLength <= 0) return 0;
     g_pRenderText->SetFont(CurrentFont());
-
-    SIZE sz = { 0, 0 };
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszText, iLength, &sz);
-    return (g_fScreenRate_x > 0.f) ? static_cast<int>(sz.cx / g_fScreenRate_x) : sz.cx;
+    return g_pRenderText->MeasureText(pszText, iLength).cx;
 }
 
 void CUITextInputBox::MoveCaret(int iNewCaret, bool bExtendSelection)

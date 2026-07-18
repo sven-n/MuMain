@@ -897,6 +897,7 @@ namespace
 
     void HandleMouseButton(const SDL_Event& e)
     {
+        HandleMouseMotion(e.button.x, e.button.y);
         const bool down = (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
         g_iNoMouseTime = 0;
         switch (e.button.button)
