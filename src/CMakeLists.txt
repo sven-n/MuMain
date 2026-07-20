@@ -141,6 +141,9 @@ if(ENABLE_EDITOR)
   # them elsewhere and ignores order anyway.
   if (WIN32 AND NOT MSVC)
     target_link_libraries(imgui PUBLIC opengl32 dwmapi)
+  elseif (UNIX AND NOT APPLE)
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(imgui PUBLIC OpenGL::GL)
   endif()
 
   # <-- Force C++20 for ImGui here

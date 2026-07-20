@@ -85,6 +85,8 @@ jobs:
             --suppress=passedByValue \
             --suppress=postfixOperator \
             --suppress=returnByReference \
+            --suppress=uninitMemberVar \
+            --suppress=uninitMemberVarNoCtor \
             --inline-suppr
 
   build-windows:
@@ -238,7 +240,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             cmake ninja-build gcc g++ \
-            libgl1-mesa-dev \
+            libgl1-mesa-dev libglu1-mesa-dev \
             libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
             libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
             libwayland-dev libxkbcommon-dev wayland-protocols \

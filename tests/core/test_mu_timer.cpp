@@ -30,14 +30,19 @@ TEST_CASE("AC-1/AC-STD-2 [7-2-1]: MuTimer measures frame time accurately [core][
     // VS0-QUAL-FRAMETIMER
     mu::MuTimer timer;
 
+    auto start = std::chrono::steady_clock::now();
     timer.FrameStart();
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     timer.FrameEnd();
+    auto elapsed = std::chrono::steady_clock::now() - start;
 
-    // Allow scheduling jitter: must be in [40ms, 100ms]
+    // Scheduler delays affect both measurements, so compare against the same
+    // steady-clock interval instead of imposing a runner-sensitive upper cap.
     double frameMs = timer.GetFrameTimeMs();
+    double elapsedMs = std::chrono::duration<double, std::milli>(elapsed).count();
     REQUIRE(frameMs >= 40.0);
-    REQUIRE(frameMs <= 100.0);
+    REQUIRE(frameMs <= elapsedMs);
+    REQUIRE(elapsedMs - frameMs < 5.0);
 }
 
 // ---------------------------------------------------------------------------

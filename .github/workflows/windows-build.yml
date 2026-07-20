@@ -113,6 +113,8 @@ jobs:
             -DBUILD_TESTING=ON \
             -DENABLE_EDITOR=${{ matrix.editor }} \
             -DOPENSSL_ROOT_DIR="${GITHUB_WORKSPACE}/_deps/vcpkg-installed/${{ matrix.vcpkg_triplet }}" \
+            -DOPENSSL_INCLUDE_DIR="${GITHUB_WORKSPACE}/_deps/vcpkg-installed/${{ matrix.vcpkg_triplet }}/include" \
+            -DOPENSSL_CRYPTO_LIBRARY="${GITHUB_WORKSPACE}/_deps/vcpkg-installed/${{ matrix.vcpkg_triplet }}/lib/libcrypto.a" \
             -DOPENSSL_USE_STATIC_LIBS=TRUE \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-${{ matrix.arch }}/lib/libturbojpeg.a"
 
