@@ -24,9 +24,11 @@ jobs:
           - arch: x86_64
             triple: x86_64-w64-mingw32
             mingw_pkg: g++-mingw-w64-x86-64
+            vcpkg_triplet: x64-mingw-static
           - arch: i686
             triple: i686-w64-mingw32
             mingw_pkg: g++-mingw-w64-i686
+            vcpkg_triplet: x86-mingw-static
     env:
       WINEDEBUG: -all
       WINEPREFIX: ${{ github.workspace }}/.wineprefix
@@ -90,6 +92,17 @@ jobs:
           fi
           test -f "${prefix}/lib/libturbojpeg.a"
 
+      - name: Cache OpenSSL (MinGW ${{ matrix.arch }})
+        uses: actions/cache@v4
+        with:
+          path: _deps/vcpkg-installed
+          key: openssl-mingw-${{ matrix.arch }}-${{ hashFiles('vcpkg.json') }}
+
+      - name: Install OpenSSL (MinGW ${{ matrix.arch }} static)
+        run: |
+          "${VCPKG_INSTALLATION_ROOT}/vcpkg" install "openssl:${{ matrix.vcpkg_triplet }}" \
+            --x-install-root="${GITHUB_WORKSPACE}/_deps/vcpkg-installed"
+
       - name: Configure CMake
         run: |
           cmake -S . -B build-mingw \
@@ -98,6 +111,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=ON \
             -DENABLE_EDITOR=${{ matrix.editor }} \
+            -DOPENSSL_ROOT_DIR="${GITHUB_WORKSPACE}/_deps/vcpkg-installed/${{ matrix.vcpkg_triplet }}" \
+            -DOPENSSL_USE_STATIC_LIBS=TRUE \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-${{ matrix.arch }}/lib/libturbojpeg.a"
 
       - name: Build

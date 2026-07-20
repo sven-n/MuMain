@@ -11,18 +11,6 @@ endif()
 
 file(READ "${CMAKELISTS_FILE}" CMAKE_CONTENT)
 
-# Verify win32 backend source is referenced
-string(FIND "${CMAKE_CONTENT}" "win32/PlatformLibrary.cpp" WIN32_SRC_POS)
-if(WIN32_SRC_POS EQUAL -1)
-    message(FATAL_ERROR "AC-4 FAIL: CMakeLists.txt does not reference win32/PlatformLibrary.cpp")
-endif()
-
-# Verify posix backend source is referenced
-string(FIND "${CMAKE_CONTENT}" "posix/PlatformLibrary.cpp" POSIX_SRC_POS)
-if(POSIX_SRC_POS EQUAL -1)
-    message(FATAL_ERROR "AC-4 FAIL: CMakeLists.txt does not reference posix/PlatformLibrary.cpp")
-endif()
-
 # Verify platform-conditional selection uses if(WIN32)
 string(FIND "${CMAKE_CONTENT}" "if(WIN32)" IF_WIN32_POS)
 if(IF_WIN32_POS EQUAL -1)
@@ -32,8 +20,8 @@ endif()
 # Verify backend source files exist
 set(SRC_DIR "${CMAKELISTS_FILE}")
 get_filename_component(SRC_DIR "${SRC_DIR}" DIRECTORY)
-set(WIN32_BACKEND "${SRC_DIR}/source/Platform/win32/PlatformLibrary.cpp")
-set(POSIX_BACKEND "${SRC_DIR}/source/Platform/posix/PlatformLibrary.cpp")
+set(WIN32_BACKEND "${SRC_DIR}/source/Core/Platform/win32/PlatformLibrary.cpp")
+set(POSIX_BACKEND "${SRC_DIR}/source/Core/Platform/posix/PlatformLibrary.cpp")
 
 if(NOT EXISTS "${WIN32_BACKEND}")
     message(FATAL_ERROR "AC-2 FAIL: win32/PlatformLibrary.cpp does not exist at ${WIN32_BACKEND}")

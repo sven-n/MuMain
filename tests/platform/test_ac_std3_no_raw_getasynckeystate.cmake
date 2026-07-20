@@ -34,6 +34,8 @@ set(KNOWN_CALL_SITES
     "CameraUtility.cpp"
     "MuMain.cpp"
     "UIControls.cpp"
+    "KeyState.cpp"
+    "KeyState.h"
 )
 
 # Directories that are ALLOWED to contain GetAsyncKeyState

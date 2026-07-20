@@ -244,7 +244,6 @@ PipelineSet GetPipelineSetFor(DrawMode mode)
 // Static device and resource state for MuRendererSDLGpu.
 // ---------------------------------------------------------------------------
 
-
 static SDL_GPUDevice* s_device = nullptr;
 static SDL_Window* s_window = nullptr;
 
@@ -323,8 +322,9 @@ static void BlitTextureToSwapchain(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUT
     SDL_BlitGPUTexture(commandBuffer, &blit);
 }
 
-[[nodiscard]] static std::optional<FramePixelDownload> EncodeFramePixelDownload(
-    SDL_GPUCommandBuffer* commandBuffer, SDL_GPUTexture* sourceTexture, SDL_GPUTextureFormat format)
+[[nodiscard]] static std::optional<FramePixelDownload> EncodeFramePixelDownload(SDL_GPUCommandBuffer* commandBuffer,
+                                                                                SDL_GPUTexture* sourceTexture,
+                                                                                SDL_GPUTextureFormat format)
 {
     const auto channelOrder = GetSdlGpuPixelChannelOrder(format);
     if (!channelOrder)
@@ -376,12 +376,12 @@ static void BlitTextureToSwapchain(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUT
     SDL_DownloadFromGPUTexture(copyPass, &source, &destination);
     SDL_EndGPUCopyPass(copyPass);
 
-    return FramePixelDownload{transferBuffer, static_cast<Uint32>(alignedRowPitch),
-                              static_cast<Uint32>(byteCount), *channelOrder};
+    return FramePixelDownload{transferBuffer, static_cast<Uint32>(alignedRowPitch), static_cast<Uint32>(byteCount),
+                              *channelOrder};
 }
 
-[[nodiscard]] static bool SubmitFramePixelDownload(
-    SDL_GPUCommandBuffer* commandBuffer, SDL_GPUTexture* sourceTexture, SDL_GPUTextureFormat format)
+[[nodiscard]] static bool SubmitFramePixelDownload(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUTexture* sourceTexture,
+                                                   SDL_GPUTextureFormat format)
 {
     const auto download = EncodeFramePixelDownload(commandBuffer, sourceTexture, format);
     if (!download)
@@ -660,7 +660,6 @@ static int s_cachedWinH = 0;
     return {};
 }
 
-
 // ---------------------------------------------------------------------------
 // TextureRegistry: maps caller-provided uint32_t ids to SDL_GPUTexture*.
 // Accessible from test TU via forward declarations in mu namespace.
@@ -681,9 +680,8 @@ static std::uint32_t s_nextOwnedDynamicTextureId = kFirstOwnedDynamicTextureId;
     do
     {
         const std::uint32_t candidate = s_nextOwnedDynamicTextureId;
-        s_nextOwnedDynamicTextureId = candidate == kLastOwnedDynamicTextureId
-            ? kFirstOwnedDynamicTextureId
-            : candidate + 1u;
+        s_nextOwnedDynamicTextureId =
+            candidate == kLastOwnedDynamicTextureId ? kFirstOwnedDynamicTextureId : candidate + 1u;
         if (!s_textureMap.contains(candidate))
         {
             return candidate;
@@ -741,9 +739,8 @@ static void DiscardQueuedTextureUpdates(void* texture)
         return;
     }
 
-    const auto newEnd = std::remove_if(s_textureUpdates.begin(), s_textureUpdates.end(), [texture](const auto& update) {
-        return update.gpuTexture == texture;
-    });
+    const auto newEnd = std::remove_if(s_textureUpdates.begin(), s_textureUpdates.end(),
+                                       [texture](const auto& update) { return update.gpuTexture == texture; });
     s_textureUpdates.erase(newEnd, s_textureUpdates.end());
 }
 
@@ -1550,15 +1547,17 @@ public:
         {
             const auto texture = s_textureMap.find(s_pendingFrameCaptureTextureId);
             const auto size = s_textureSizes.find(s_pendingFrameCaptureTextureId);
-            if (texture != s_textureMap.end() && size != s_textureSizes.end()
-                && size->second.first == s_swapW && size->second.second == s_swapH)
+            if (texture != s_textureMap.end() && size != s_textureSizes.end() && size->second.first == s_swapW &&
+                size->second.second == s_swapH)
             {
                 reconnectCaptureTexture = static_cast<SDL_GPUTexture*>(texture->second);
             }
             s_pendingFrameCaptureTextureId = 0u;
         }
 
-        SDL_GPUTexture* const frameColorTexture = s_frameReadbackTexture ? s_frameReadbackTexture : reconnectCaptureTexture ? reconnectCaptureTexture : s_swapchainTexture;
+        SDL_GPUTexture* const frameColorTexture = s_frameReadbackTexture    ? s_frameReadbackTexture
+                                                  : reconnectCaptureTexture ? reconnectCaptureTexture
+                                                                            : s_swapchainTexture;
         bool renderPassCompleted = false;
         if (s_frameTimingEnabled)
         {
@@ -1798,19 +1797,20 @@ public:
         if (emitTimingDiagnostics)
         {
             const auto logger = mu::log::Get("render");
-            logger->debug("[RENDER diag] frame={} draw_calls={} replayed={} merged={} cmds={} vtx_bytes={} tex={} fallback={} white_draws={} real_draws={} uploads={} creates={} releases={} invalidated={} tex2d={} bound={}",
-                s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame,
-                s_dbgMergedDrawsThisFrame, s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(),
-                s_dbgFallbackTextureThisFrame, s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame,
-                s_dbgTextureUploadsThisFrame, s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame,
-                s_texturesInvalidated, m_texture2DEnabled, m_boundTextureId);
+            logger->debug(
+                "[RENDER diag] frame={} draw_calls={} replayed={} merged={} cmds={} vtx_bytes={} tex={} fallback={} "
+                "white_draws={} real_draws={} uploads={} creates={} releases={} invalidated={} tex2d={} bound={}",
+                s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame, s_dbgMergedDrawsThisFrame,
+                s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(), s_dbgFallbackTextureThisFrame,
+                s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame, s_dbgTextureUploadsThisFrame,
+                s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame, s_texturesInvalidated, m_texture2DEnabled,
+                m_boundTextureId);
 
-            const auto ms = [](auto begin, auto end) {
-                return std::chrono::duration<double, std::milli>(end - begin).count();
-            };
+            const auto ms = [](auto begin, auto end)
+            { return std::chrono::duration<double, std::milli>(end - begin).count(); };
             const auto now = std::chrono::steady_clock::now();
-            logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms",
-                ms(s_frameBeginTime, now), ms(s_renderReplayBeginTime, s_submitTime), ms(s_submitTime, now));
+            logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms", ms(s_frameBeginTime, now),
+                          ms(s_renderReplayBeginTime, s_submitTime), ms(s_submitTime, now));
         }
         if (s_dbgFrameCount == 10 && s_dbgDrawCallsThisFrame == 0)
         {
@@ -2262,8 +2262,8 @@ public:
         SDL_GPUTexture* texture = SDL_CreateGPUTexture(s_device, &texInfo);
         if (!texture)
         {
-            mu::log::Get("render")->warn("SDL_gpu -- texture {} creation failed ({}x{}): {}", textureId, width,
-                                         height, SDL_GetError());
+            mu::log::Get("render")->warn("SDL_gpu -- texture {} creation failed ({}x{}): {}", textureId, width, height,
+                                         SDL_GetError());
             return;
         }
 
@@ -2284,8 +2284,7 @@ public:
         ReleaseOwnedTextureById(textureId);
     }
 
-    [[nodiscard]] std::uint32_t CreateTexture(
-        std::uint32_t width, std::uint32_t height, const void* pixels) override
+    [[nodiscard]] std::uint32_t CreateTexture(std::uint32_t width, std::uint32_t height, const void* pixels) override
     {
         const std::uint32_t textureId = AllocateOwnedDynamicTextureId();
         if (textureId == 0u)
@@ -2337,7 +2336,7 @@ public:
             if (!texture)
             {
                 mu::log::Get("render")->warn("SDL_gpu -- reconnect capture texture creation failed: {}",
-                                              SDL_GetError());
+                                             SDL_GetError());
                 return 0u;
             }
 
@@ -2489,7 +2488,9 @@ public:
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled
-                ? (m_depthMaskEnabled ? (m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx]) : s_pipelines3DDepthReadOnly[pipelineIdx])
+                ? (m_depthMaskEnabled
+                       ? (m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx])
+                       : s_pipelines3DDepthReadOnly[pipelineIdx])
                 : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
@@ -2573,7 +2574,9 @@ public:
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled
-                ? (m_depthMaskEnabled ? (m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx]) : s_pipelines3DDepthReadOnly[pipelineIdx])
+                ? (m_depthMaskEnabled
+                       ? (m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx])
+                       : s_pipelines3DDepthReadOnly[pipelineIdx])
                 : s_pipelines3DDepthOff[pipelineIdx];
         if (!pipeline)
         {
@@ -3284,7 +3287,8 @@ private:
             }
 
             // 3D depth ON (test+write) — opaque geometry.
-            s_pipelines3D[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true, /*cullFaceEnabled=*/true);
+            s_pipelines3D[i] =
+                BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true, /*cullFaceEnabled=*/true);
             if (!s_pipelines3D[i])
             {
                 mu::log::Get("render")->error("SDL_gpu -- 3D pipeline[{}] creation failed: {}", i, SDL_GetError());
@@ -3293,7 +3297,8 @@ private:
             s_pipelines3DNoCull[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true);
             if (!s_pipelines3DNoCull[i])
             {
-                mu::log::Get("render")->error("SDL_gpu -- 3D no-cull pipeline[{}] creation failed: {}", i, SDL_GetError());
+                mu::log::Get("render")->error("SDL_gpu -- 3D no-cull pipeline[{}] creation failed: {}", i,
+                                              SDL_GetError());
             }
 
             // 3D depth OFF.
@@ -3764,7 +3769,6 @@ private:
 
         return true;
     }
-
 };
 
 // ---------------------------------------------------------------------------

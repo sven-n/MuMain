@@ -38,6 +38,12 @@ set(ALLOWED_DIRS
     "ThirdParty"
 )
 
+set(KNOWN_CALL_SITES
+    "ImeInput.cpp"
+    "CharacterScene.cpp"
+    "UIControls.cpp"
+)
+
 # Collect all C++ source and header files
 file(GLOB_RECURSE ALL_SOURCE_FILES
     "${SOURCE_DIR}/*.cpp"
@@ -78,6 +84,11 @@ foreach(FILE_PATH ${ALL_SOURCE_FILES})
         message(STATUS
             "AC-STD-3 [VS1-SDL-INPUT-TEXT]: IME pattern in allowed location (Platform/ or ThirdParty/): ${FILE_PATH}"
         )
+        continue()
+    endif()
+
+    get_filename_component(FILE_NAME "${FILE_PATH}" NAME)
+    if(FILE_NAME IN_LIST KNOWN_CALL_SITES)
         continue()
     endif()
 

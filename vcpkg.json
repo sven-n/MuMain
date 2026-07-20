@@ -8,6 +8,7 @@
       "name": "curl",
       "features": ["ssl"]
     },
+    "openssl",
     "glslang",
     "spirv-cross"
   ]
