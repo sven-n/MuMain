@@ -241,6 +241,16 @@ HRESULT SdlSfxManager::PlayBuffer(ESound bufferId, bool looped)
         return E_FAIL;
     }
 
+    // DirectSound treats Play() on an already-playing buffer as a no-op, and
+    // callers depend on that: the ambient world loops and the blacksmith's
+    // hammer are re-requested on every frame.  MIX_PlayTrack restarts the track
+    // instead, which would cut the sample a few milliseconds in, sixty times a
+    // second, and turn it into a buzz.  Let a running track finish.
+    if (MIX_TrackPlaying(track))
+    {
+        return S_OK;
+    }
+
     // Looping must be requested at play time: starting a stopped track resets
     // the loop count to the MIX_PROP_PLAY_LOOPS_NUMBER option (default 0), so
     // a prior MIX_SetTrackLoops would be overwritten here.
