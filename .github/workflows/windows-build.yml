@@ -104,6 +104,16 @@ jobs:
             --classic \
             --x-install-root="${GITHUB_WORKSPACE}/_deps/vcpkg-installed"
 
+      - name: Locate OpenSSL (MinGW ${{ matrix.arch }})
+        id: openssl
+        run: |
+          crypto=$(find "${GITHUB_WORKSPACE}/_deps/vcpkg-installed" -path '*/lib/libcrypto.a' -print -quit)
+          header=$(find "${GITHUB_WORKSPACE}/_deps/vcpkg-installed" -path '*/include/openssl/crypto.h' -print -quit)
+          test -n "$crypto"
+          test -n "$header"
+          echo "crypto=$crypto" >> "$GITHUB_OUTPUT"
+          echo "include=$(dirname "$(dirname "$header")")" >> "$GITHUB_OUTPUT"
+
       - name: Configure CMake
         run: |
           cmake -S . -B build-mingw \
@@ -112,9 +122,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=ON \
             -DENABLE_EDITOR=${{ matrix.editor }} \
-            -DOPENSSL_ROOT_DIR="${GITHUB_WORKSPACE}/_deps/vcpkg-installed/${{ matrix.vcpkg_triplet }}" \
-            -DOPENSSL_INCLUDE_DIR="${GITHUB_WORKSPACE}/_deps/vcpkg-installed/${{ matrix.vcpkg_triplet }}/include" \
-            -DOPENSSL_CRYPTO_LIBRARY="${GITHUB_WORKSPACE}/_deps/vcpkg-installed/${{ matrix.vcpkg_triplet }}/lib/libcrypto.a" \
+            -DOPENSSL_INCLUDE_DIR="${{ steps.openssl.outputs.include }}" \
+            -DOPENSSL_CRYPTO_LIBRARY="${{ steps.openssl.outputs.crypto }}" \
             -DOPENSSL_USE_STATIC_LIBS=TRUE \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-${{ matrix.arch }}/lib/libturbojpeg.a"
 

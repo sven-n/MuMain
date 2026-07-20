@@ -18,6 +18,32 @@
 #define E_INVALIDARG 0x80070057L
 #endif
 
+namespace
+{
+std::string AudioPathToUtf8(const wchar_t* text)
+{
+#ifdef _WIN32
+    if (text == nullptr)
+    {
+        return {};
+    }
+
+    const int size = WideCharToMultiByte(CP_UTF8, 0, text, -1, nullptr, 0, nullptr, nullptr);
+    if (size <= 1)
+    {
+        return {};
+    }
+
+    std::string result(static_cast<size_t>(size), '\0');
+    WideCharToMultiByte(CP_UTF8, 0, text, -1, result.data(), size, nullptr, nullptr);
+    result.pop_back();
+    return result;
+#else
+    return mu_wchar_to_utf8(text);
+#endif
+}
+} // namespace
+
 // ---------------------------------------------------------------------------
 // Global backend pointer — nullptr until the game initialises audio.
 // Story 5.1.1: defined here (nullptr). Story 5.2.1: set to new mu::MiniAudioBackend()
@@ -142,7 +168,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     }
 
     // Convert wchar_t filename to UTF-8 for miniaudio (which uses narrow char*)
-    std::string utf8Path = mu_wchar_to_utf8(filename);
+    std::string utf8Path = AudioPathToUtf8(filename);
 
     // Story 5.2.2 (Task 5.1): Normalize path separators for Linux/macOS.
     // SFX file paths use Windows backslashes (e.g., L"Data\\Sound\\nBlackSmith.wav").
@@ -166,7 +192,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
             mu::log::Get("audio")->error(
                 "AUDIO: MiniAudioBackend::LoadSound -- ma_sound_init_from_file failed for '{}' "
                 "channel {} ({})",
-                mu_wchar_to_utf8(filename), ch, static_cast<int>(result));
+                AudioPathToUtf8(filename), ch, static_cast<int>(result));
             // Uninit any channels already loaded for this slot
             for (int prev = 0; prev < ch; ++prev)
             {

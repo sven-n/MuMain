@@ -308,6 +308,9 @@ add_custom_command(TARGET Main POST_BUILD
     "-DINPUT=${ASSETS_DIR}/config.ini.template"
     "-DOUTPUT=$<TARGET_FILE_DIR:Main>/config.ini"
     "-P" "${REPO_ROOT}/cmake/SeedConfigIfMissing.cmake"
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory
+    "${MU_SHADER_OUTPUT_DIR}"
+    "$<TARGET_FILE_DIR:Main>/shaders"
   VERBATIM
 )
 

@@ -141,7 +141,6 @@ jobs:
             "$ExeDir/Main.exe",
             "$ExeDir/MUnique.Client.Library.dll",
             "$ExeDir/config.ini",
-            "$ExeDir/Translations",
             "$ExeDir/shaders"
           )) {
             if (Test-Path $f) {
@@ -161,7 +160,6 @@ jobs:
           path: |
             out/build/windows-x64/src/Debug/Main.exe
             out/build/windows-x64/src/Debug/MUnique.Client.Library.dll
-            out/build/windows-x64/src/Debug/Translations
             out/build/windows-x64/src/Debug/shaders
             out/build/windows-x64/src/Debug/config.ini
           if-no-files-found: warn
@@ -206,7 +204,6 @@ jobs:
             "$EXE_DIR/Main" \
             "$EXE_DIR/MUnique.Client.Library.dylib" \
             "$EXE_DIR/config.ini" \
-            "$EXE_DIR/Translations" \
             "$EXE_DIR/shaders"
           do
             if [ -e "$f" ]; then
@@ -272,7 +269,6 @@ jobs:
           for f in \
             "$EXE_DIR/Main" \
             "$EXE_DIR/config.ini" \
-            "$EXE_DIR/Translations" \
             "$EXE_DIR/shaders"
           do
             if [ -e "$f" ]; then
@@ -291,7 +287,6 @@ jobs:
           name: main-linux-x64-${{ github.ref_name }}
           path: |
             out/build/linux-x64/src/Debug/Main
-            out/build/linux-x64/src/Debug/Translations
             out/build/linux-x64/src/Debug/shaders
             out/build/linux-x64/src/Debug/config.ini
           if-no-files-found: warn
