@@ -25,9 +25,7 @@ void ReinitializeFonts();
 void UpdateResolutionDependentSystems();
 void UpdateCursorClip();
 DWORD GetDesktopBitsPerPel();
-#ifndef _WIN32
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
-#endif
 float ConvertX(float x);
 float ConvertY(float y);
 
@@ -1029,72 +1027,16 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
     const unsigned int newWidth  = s_Resolutions[m_iResolutionIndex].width;
     const unsigned int newHeight = s_Resolutions[m_iResolutionIndex].height;
 
-#ifndef _WIN32
-    // SDL owns the window off Windows; the Win32 SetWindowPos/ChangeDisplaySettings
-    // path below is all g_hWnd-gated and never runs here. Resize through SDL,
-    // which updates WindowWidth/Height before we persist them. #462.
+    // SDL owns the window on every platform, so resize through SDL. The old
+    // Windows path drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
+    // which SDL clamped straight back to the current size for a non-resizable
+    // window — the resolution only "took" when a windowed/fullscreen toggle
+    // reset the window style first (issue #462). MuApplyWindowResolution
+    // resizes via SDL regardless of the resizable flag and updates
+    // WindowWidth/Height synchronously through HandleWindowResize, so the
+    // Save() below records the size the user actually got.
     MuApplyWindowResolution(newWidth, newHeight, g_bUseWindowMode != FALSE);
+
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
-    return;
-#endif
-
-    // Change display mode FIRST (for fullscreen) before recreating fonts and
-    // the GL text buffer. ReinitializeTextRenderer allocates a DIB sized off
-    // g_hDC/WindowWidth/g_fScreenRate, so it must run after the window and
-    // display already sit at the new dimensions — otherwise the text-buffer
-    // bitmap ends up at a stale size and rendered text vanishes until you
-    // bump the resolution again.
-    if (g_hWnd && !g_bUseWindowMode)
-    {
-        DEVMODE dmScreenSettings = {};
-        dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
-        dmScreenSettings.dmPelsWidth  = newWidth;
-        dmScreenSettings.dmPelsHeight = newHeight;
-        dmScreenSettings.dmBitsPerPel = GetDesktopBitsPerPel();
-        dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-        if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-        {
-            // Monitor rejected this mode at 32bpp fullscreen — keep the old
-            // resolution and snap the combo selection back so the UI doesn't lie.
-            m_iResolutionIndex = FindCurrentResolutionIndex();
-            m_ResolutionCombo.SetSelectedIndex(m_iResolutionIndex);
-            return;
-        }
-    }
-
-    // Resize the window to the new dimensions.
-    if (g_hWnd && g_bUseWindowMode)
-    {
-        RECT windowRect = { 0, 0, (LONG)newWidth, (LONG)newHeight };
-        AdjustWindowRect(&windowRect, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_BORDER | WS_CLIPCHILDREN, FALSE);
-        SetWindowPos(g_hWnd, HWND_TOP, 0, 0,
-                     windowRect.right - windowRect.left,
-                     windowRect.bottom - windowRect.top,
-                     SWP_NOMOVE | SWP_NOZORDER);
-    }
-    else if (g_hWnd)
-    {
-        SetWindowPos(g_hWnd, HWND_TOPMOST, 0, 0,
-                     (int)newWidth, (int)newHeight,
-                     SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-    }
-
-    // SetWindowPos above triggered WM_SIZE synchronously, which already set
-    // WindowWidth/Height/screen rates and called ReinitializeFonts() and
-    // UpdateResolutionDependentSystems(). Don't repeat that work here — just
-    // persist the new size in config.
-    GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
-    GameConfig::GetInstance().Save();
-
-    // Fullscreen SetWindowPos with SWP_FRAMECHANGED deactivated the window;
-    // re-assert focus and activation so subsequent clicks aren't dropped.
-    if (g_hWnd && !g_bUseWindowMode)
-    {
-        SetForegroundWindow(g_hWnd);
-        SetFocus(g_hWnd);
-        g_bWndActive = true;
-    }
-    UpdateCursorClip();  // rebind cursor to new client rect (or release in windowed)
 }
