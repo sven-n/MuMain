@@ -885,6 +885,12 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
 // the SDL event loop instead of WndProc, feeding the same global input state.
 namespace
 {
+    bool InputDiagnosticsEnabled()
+    {
+        static const bool enabled = std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr;
+        return enabled;
+    }
+
     void HandleMouseMotion(float winX, float winY)
     {
         MouseX = static_cast<int>(winX / g_fScreenRate_x);
@@ -893,12 +899,25 @@ namespace
         if (MouseX > REFERENCE_WIDTH) MouseX = REFERENCE_WIDTH;
         if (MouseY < 0) MouseY = 0;
         if (MouseY > REFERENCE_HEIGHT) MouseY = REFERENCE_HEIGHT;
+
+        static bool firstMotionLogged = false;
+        if (InputDiagnosticsEnabled() && !firstMotionLogged)
+        {
+            mu::log::Get("input")->info("[InputDiag] first mouse motion window=({:.1f},{:.1f}) logical=({},{}) active={}",
+                winX, winY, MouseX, MouseY, g_bWndActive);
+            firstMotionLogged = true;
+        }
     }
 
     void HandleMouseButton(const SDL_Event& e)
     {
         HandleMouseMotion(e.button.x, e.button.y);
         const bool down = (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
+        if (InputDiagnosticsEnabled())
+        {
+            mu::log::Get("input")->info("[InputDiag] mouse button={} down={} window=({:.1f},{:.1f}) logical=({},{}) active={}",
+                e.button.button, down, e.button.x, e.button.y, MouseX, MouseY, g_bWndActive);
+        }
         g_iNoMouseTime = 0;
         switch (e.button.button)
         {
@@ -970,6 +989,10 @@ namespace
 
     void HandleFocusChange(bool active)
     {
+        if (InputDiagnosticsEnabled())
+        {
+            mu::log::Get("input")->info("[InputDiag] focus active={} previous={}", active, g_bWndActive);
+        }
         if (!active)
         {
 #ifdef ACTIVE_FOCUS_OUT

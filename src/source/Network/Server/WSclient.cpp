@@ -503,6 +503,15 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
     }
 
     CUIMng& rUIMng = CUIMng::Instance();
+    if (std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr)
+    {
+        mu::log::Get("input")->info(
+            "[InputDiag] server-list groups={} selector(show={},active={}) login-main(show={},active={}) credits={}",
+            g_ServerListManager->GetServerGroupSize(),
+            rUIMng.m_ServerSelWin.IsShow(), rUIMng.m_ServerSelWin.IsActive(),
+            rUIMng.m_LoginMainWin.IsShow(), rUIMng.m_LoginMainWin.IsActive(),
+            rUIMng.m_CreditWin.IsShow());
+    }
     if (!rUIMng.m_CreditWin.IsShow())
     {
         rUIMng.ShowWin(&rUIMng.m_ServerSelWin);

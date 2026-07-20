@@ -18,6 +18,7 @@
 
 #include "UIControls.h"
 #include "Network/Server/ServerListManager.h"
+#include "Core/Utilities/Log/MuLogger.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -38,6 +39,30 @@
 #define UIM_TS_BACK8		11
 #define UIM_TS_BACK9		12
 #define	UIM_TS_MAX			13
+
+namespace
+{
+bool InputDiagnosticsEnabled()
+{
+    static const bool enabled = std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr;
+    return enabled;
+}
+
+const char* WindowName(const CUIMng& manager, const CWin* window)
+{
+    if (window == &manager.m_MsgWin) return "message";
+    if (window == &manager.m_SysMenuWin) return "system-menu";
+    if (window == &manager.m_OptionWin) return "options";
+    if (window == &manager.m_LoginMainWin) return "login-main";
+    if (window == &manager.m_ServerSelWin) return "server-select";
+    if (window == &manager.m_LoginWin) return "login";
+    if (window == &manager.m_CreditWin) return "credits";
+    if (window == &manager.m_CharSelMainWin) return "character-select";
+    if (window == &manager.m_CharMakeWin) return "character-create";
+    if (window == &manager.m_ServerMsgWin) return "server-message";
+    return window == nullptr ? "none" : "unknown";
+}
+}
 
 CUIMng::CUIMng()
 {
@@ -377,6 +402,12 @@ CWin* CUIMng::SetActiveWin(CWin* pWin)
 
         m_bWinActive = true;
         m_WinList.AddHead(pWin);
+
+        if (InputDiagnosticsEnabled())
+        {
+            mu::log::Get("input")->info("[InputDiag] active window={} previous={}",
+                WindowName(*this, pWin), WindowName(*this, pBeforeActWin));
+        }
     }
 
     return pBeforeActWin;
@@ -726,13 +757,26 @@ void CUIMng::Update(double dDeltaTick)
     }
 
     position = m_WinList.GetHeadPosition();
+    CWin* hoveredWindow = nullptr;
     while (position)
     {
         pWin = (CWin*)m_WinList.GetNext(position);
         if (pWin->CursorInWin(WA_ALL))
         {
             pWin->ActiveBtns(true);
+            hoveredWindow = pWin;
             break;
+        }
+    }
+
+    if (InputDiagnosticsEnabled())
+    {
+        static CWin* previousHoveredWindow = nullptr;
+        if (hoveredWindow != previousHoveredWindow)
+        {
+            mu::log::Get("input")->info("[InputDiag] hover window={} cursor=({},{})",
+                WindowName(*this, hoveredWindow), rInput.GetCursorX(), rInput.GetCursorY());
+            previousHoveredWindow = hoveredWindow;
         }
     }
 
