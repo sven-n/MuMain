@@ -90,24 +90,7 @@ void CPartyManager::SearchPartyMember()
 
 bool CPartyManager::IsPartyActive()
 {
-    int iMemberCount = 0;
-
-    for (int i = 0; i < ((sizeof(Party) / sizeof(Party[0])) - 1); i++)
-    {
-        PARTY_t* pMember = &Party[i];
-        if (pMember->Name[0] == L'\0')
-        {
-            continue;
-        }
-
-        CHARACTER* pChar = FindCharacterByID(pMember->Name);
-        if (pChar != NULL)
-        {
-            iMemberCount++;
-        }
-    }
-
-    return iMemberCount > 1;
+    return PartyNumber > 1;
 }
 
 bool CPartyManager::IsPartyMember(int index)
