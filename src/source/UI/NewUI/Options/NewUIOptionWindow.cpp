@@ -16,15 +16,9 @@
 extern int m_MusicOnOff;
 extern int m_SoundOnOff;
 extern unsigned int WindowWidth, WindowHeight;
-extern float g_fScreenRate_x, g_fScreenRate_y;
-extern int OpenglWindowWidth, OpenglWindowHeight;
 extern BOOL g_bUseWindowMode;
 extern HWND g_hWnd;
-extern bool g_bWndActive;
 void ReinitializeFonts();
-void UpdateResolutionDependentSystems();
-void UpdateCursorClip();
-DWORD GetDesktopBitsPerPel();
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
 float ConvertX(float x);
 float ConvertY(float y);
