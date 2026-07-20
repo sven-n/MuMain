@@ -101,6 +101,7 @@ jobs:
       - name: Install OpenSSL (MinGW ${{ matrix.arch }} static)
         run: |
           "${VCPKG_INSTALLATION_ROOT}/vcpkg" install "openssl:${{ matrix.vcpkg_triplet }}" \
+            --classic \
             --x-install-root="${GITHUB_WORKSPACE}/_deps/vcpkg-installed"
 
       - name: Configure CMake

@@ -198,7 +198,7 @@ jobs:
 
       - name: Validate artifacts
         run: |
-          EXE_DIR="out/build/macos-arm64/src/Debug"
+          EXE_DIR="out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS"
           FAIL=0
           for f in \
             "$EXE_DIR/Main" \
@@ -222,11 +222,7 @@ jobs:
         with:
           name: main-macos-arm64-${{ github.ref_name }}
           path: |
-            out/build/macos-arm64/src/Debug/Main
-            out/build/macos-arm64/src/Debug/MUnique.Client.Library.dylib
-            out/build/macos-arm64/src/Debug/Translations
-            out/build/macos-arm64/src/Debug/shaders
-            out/build/macos-arm64/src/Debug/config.ini
+            out/build/macos-arm64/src/Debug/Main.app
           if-no-files-found: warn
 
   build-linux:
@@ -247,7 +243,7 @@ jobs:
             libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libasound2-dev libpulse-dev \
-            libssl-dev libcurl4-openssl-dev \
+            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev \
             glslang-tools spirv-cross \
             pkg-config
 

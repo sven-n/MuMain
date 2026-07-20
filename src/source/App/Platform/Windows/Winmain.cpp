@@ -42,7 +42,7 @@
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
-#include "UI/Legacy/UIMapName.h"		// rozy
+#include "UI/Legacy/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
 
 #include "MUHelper/MuHelper.h"
@@ -61,12 +61,9 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Legacy/UIMng.h"
 
-
 #include "World/MapInfra/w_MapHeaders.h"
 
 #include "GameLogic/Pets/w_PetProcess.h"
-
-
 
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraConfig.h"
@@ -91,48 +88,46 @@ CMultiLanguage* pMultiLanguage = nullptr;
 extern DWORD g_dwTopWindow;
 
 CUIManager* g_pUIManager = nullptr;
-CUIMapName* g_pUIMapName = nullptr;		// rozy
+CUIMapName* g_pUIMapName = nullptr; // rozy
 
 float Time_Effect = 0;
 bool ashies = false;
 int weather = rand() % 3;
 
-HWND      g_hWnd = nullptr;
+HWND g_hWnd = nullptr;
 HINSTANCE g_hInst = nullptr;
-HDC       g_hDC = nullptr;
-HGLRC     g_hRC = nullptr;
+HDC g_hDC = nullptr;
+HGLRC g_hRC = nullptr;
 
 // SDL owns the window (issue #442). The native HWND is bridged
 // into g_hWnd so the remaining Win32 code (IME, DirectSound, cursor, the legacy
 // EDIT-control text boxes) keeps working until those are migrated.
-static SDL_Window*   g_sdlWindow = nullptr;
+static SDL_Window* g_sdlWindow = nullptr;
 static SDL_GLContext g_sdlGLContext = nullptr;
-HFONT     g_hFont = nullptr;
-HFONT     g_hFontBold = nullptr;
-HFONT     g_hFontBig = nullptr;
-HFONT     g_hFixFont = nullptr;
+HFONT g_hFont = nullptr;
+HFONT g_hFontBold = nullptr;
+HFONT g_hFontBig = nullptr;
+HFONT g_hFixFont = nullptr;
 
-CTimer* g_pTimer = new CTimer();    // performance counter.
-bool      Destroy = false;
-bool      ActiveIME = false;
+CTimer* g_pTimer = new CTimer(); // performance counter.
+bool Destroy = false;
+bool ActiveIME = false;
 
 BYTE* RendomMemoryDump;
 ITEM_ATTRIBUTE* ItemAttRibuteMemoryDump;
 CHARACTER* CharacterMemoryDump;
 
-int       RandomTable[100];
+int RandomTable[100];
 
 BOOL g_bMinimizedEnabled = FALSE;
 int g_iScreenSaverOldValue = 60 * 15;
-
-
 
 BOOL g_bUseWindowMode = TRUE;
 BOOL g_bUseFullscreenMode = FALSE;
 
 #include "Audio/AudioPlayer.h"
 
-extern int  LogIn;
+extern int LogIn;
 extern wchar_t LogInID[];
 extern bool First;
 extern int FirstTime;
@@ -149,8 +144,8 @@ void CheckHack()
 
     auto attackSpeed = CharacterAttribute->AttackSpeed;
     auto magicSpeed = CharacterAttribute->MagicSpeed;
-    if (CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED
-        || CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED2)
+    if (CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED ||
+        CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED2)
     {
         attackSpeed -= 20;
         magicSpeed -= 20;
@@ -241,7 +236,8 @@ struct DiagnosticFrameCapture
 
 static DiagnosticFrameCapture& GetDiagnosticFrameCapture()
 {
-    static DiagnosticFrameCapture capture = [] {
+    static DiagnosticFrameCapture capture = []
+    {
         const char* target = std::getenv("MU_CAPTURE_FRAME");
         const std::uint64_t targetFrame = target ? std::strtoull(target, nullptr, 10) : 0;
         return DiagnosticFrameCapture{targetFrame, mu::DiagnosticFrameCaptureSchedule(targetFrame)};
@@ -405,7 +401,8 @@ DWORD GetCheckSum(WORD wKey)
 
     wcscpy(lpszFile, L"data\\local\\Gameguard.csr");
 
-    HANDLE hFile = CreateFile(lpszFile, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    HANDLE hFile =
+        CreateFile(lpszFile, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (INVALID_HANDLE_VALUE == hFile)
     {
         return (0);
@@ -427,7 +424,8 @@ BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion)
 {
 #ifndef _WIN32
     // File version-info is a Win32 crash-report detail; report "unknown".
-    (void)lpszFileName; (void)pwVersion;
+    (void)lpszFileName;
+    (void)pwVersion;
     return FALSE;
 #else
     DWORD dwHandle;
@@ -525,13 +523,13 @@ void DestroyWindow()
 
 #ifdef DYNAMIC_FRUSTRUM
     DeleteAllFrustrum();
-#endif //DYNAMIC_FRUSTRUM
+#endif // DYNAMIC_FRUSTRUM
 
     SAFE_DELETE(g_pMercenaryInputBox);
     SAFE_DELETE(g_pSingleTextInputBox);
     SAFE_DELETE(g_pSinglePasswdInputBox);
 
-    SAFE_DELETE(g_pUIMapName);	// rozy
+    SAFE_DELETE(g_pUIMapName); // rozy
     SAFE_DELETE(g_pTimer);
     SAFE_DELETE(g_pUIManager);
 
@@ -621,8 +619,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         HDC hDC = BeginPaint(hwnd, &ps);
         EndPaint(hwnd, &ps);
     }
-    return 0;
-    break;
+        return 0;
+        break;
     case WM_DESTROY:
     {
         // Just request shutdown; the main loop exits on Destroy and the teardown
@@ -710,7 +708,8 @@ static std::wstring BuildPortableCommandLine(const PSTR commandLine)
         return result;
     }
 
-    for (const unsigned char* character = reinterpret_cast<const unsigned char*>(commandLine); *character != '\0'; ++character)
+    for (const unsigned char* character = reinterpret_cast<const unsigned char*>(commandLine); *character != '\0';
+         ++character)
     {
         result.push_back(*character);
     }
@@ -723,17 +722,17 @@ wchar_t m_Username[11];
 wchar_t m_Password[21];
 wchar_t m_Version[11];
 wchar_t m_ExeVersion[11];
-int  m_SoundOnOff;
-int  m_MusicOnOff;
-int  m_Resolution;
+int m_SoundOnOff;
+int m_MusicOnOff;
+int m_Resolution;
 int m_RememberMe;
 
-wchar_t g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = { '\0' };
-
+wchar_t g_aszMLSelection[MAX_LANGUAGE_NAME_LENGTH] = {'\0'};
 
 BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstring& lpszString)
 {
-    if (lpszCommandLine.empty()) {
+    if (lpszCommandLine.empty())
+    {
         return FALSE;
     }
 
@@ -770,7 +769,9 @@ BOOL Util_CheckOption(std::wstring lpszCommandLine, wchar_t cOption, std::wstrin
 wchar_t g_lpszCmdURL[50];
 BOOL GetConnectServerInfo(wchar_t* szCmdLine, wchar_t* lpszURL, WORD* pwPort)
 {
-    std::wstring lpszTemp = { 0, };
+    std::wstring lpszTemp = {
+        0,
+    };
 
     if (!Util_CheckOption(szCmdLine, L'u', lpszTemp))
     {
@@ -805,17 +806,17 @@ bool ExceptionCallback(_EXCEPTION_POINTERS* pExceptionInfo)
 }
 
 double CPU_AVG = 0.0;
-void RecordCpuUsage() 
+void RecordCpuUsage()
 {
     constexpr int max_recordings = 60;
-    double CPU_Recordings[max_recordings] = { 0.0 };
+    double CPU_Recordings[max_recordings] = {0.0};
     double currentAvg = 0.0;
     double sum = 0.0;
     int count = 0;
     int numFilled = 0;
     auto lastUpdateTime = std::chrono::steady_clock::now();
 
-    while (!Destroy) 
+    while (!Destroy)
     {
         double currentUsage = CpuUsage::Instance()->GetUsage() * 100.0;
 
@@ -853,7 +854,7 @@ void RecordCpuUsage()
 }
 
 // unlimited as default (same behavior as original)
-int g_MaxMessagePerCycle = -1; 
+int g_MaxMessagePerCycle = -1;
 
 void SetMaxMessagePerCycle(int messages)
 {
@@ -885,267 +886,296 @@ static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
 // the SDL event loop instead of WndProc, feeding the same global input state.
 namespace
 {
-    bool InputDiagnosticsEnabled()
+bool InputDiagnosticsEnabled()
+{
+    static const bool enabled = std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr;
+    return enabled;
+}
+
+void HandleMouseMotion(float winX, float winY)
+{
+    MouseX = static_cast<int>(winX / g_fScreenRate_x);
+    MouseY = static_cast<int>(winY / g_fScreenRate_y);
+    if (MouseX < 0)
+        MouseX = 0;
+    if (MouseX > REFERENCE_WIDTH)
+        MouseX = REFERENCE_WIDTH;
+    if (MouseY < 0)
+        MouseY = 0;
+    if (MouseY > REFERENCE_HEIGHT)
+        MouseY = REFERENCE_HEIGHT;
+
+    static bool firstMotionLogged = false;
+    if (InputDiagnosticsEnabled() && !firstMotionLogged)
     {
-        static const bool enabled = std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr;
-        return enabled;
+        mu::log::Get("input")->info("[InputDiag] first mouse motion window=({:.1f},{:.1f}) logical=({},{}) active={}",
+                                    winX, winY, MouseX, MouseY, g_bWndActive);
+        firstMotionLogged = true;
     }
+}
 
-    void HandleMouseMotion(float winX, float winY)
+void HandleMouseButton(const SDL_Event& e)
+{
+    HandleMouseMotion(e.button.x, e.button.y);
+    const bool down = (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
+    if (InputDiagnosticsEnabled())
     {
-        MouseX = static_cast<int>(winX / g_fScreenRate_x);
-        MouseY = static_cast<int>(winY / g_fScreenRate_y);
-        if (MouseX < 0) MouseX = 0;
-        if (MouseX > REFERENCE_WIDTH) MouseX = REFERENCE_WIDTH;
-        if (MouseY < 0) MouseY = 0;
-        if (MouseY > REFERENCE_HEIGHT) MouseY = REFERENCE_HEIGHT;
-
-        static bool firstMotionLogged = false;
-        if (InputDiagnosticsEnabled() && !firstMotionLogged)
-        {
-            mu::log::Get("input")->info("[InputDiag] first mouse motion window=({:.1f},{:.1f}) logical=({},{}) active={}",
-                winX, winY, MouseX, MouseY, g_bWndActive);
-            firstMotionLogged = true;
-        }
+        mu::log::Get("input")->info(
+            "[InputDiag] mouse button={} down={} window=({:.1f},{:.1f}) logical=({},{}) active={}", e.button.button,
+            down, e.button.x, e.button.y, MouseX, MouseY, g_bWndActive);
     }
-
-    void HandleMouseButton(const SDL_Event& e)
+    g_iNoMouseTime = 0;
+    switch (e.button.button)
     {
-        HandleMouseMotion(e.button.x, e.button.y);
-        const bool down = (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
-        if (InputDiagnosticsEnabled())
+    case SDL_BUTTON_LEFT:
+        if (down)
         {
-            mu::log::Get("input")->info("[InputDiag] mouse button={} down={} window=({:.1f},{:.1f}) logical=({},{}) active={}",
-                e.button.button, down, e.button.x, e.button.y, MouseX, MouseY, g_bWndActive);
-        }
-        g_iNoMouseTime = 0;
-        switch (e.button.button)
-        {
-        case SDL_BUTTON_LEFT:
-            if (down)
-            {
-                MouseLButtonPop = false;
-                if (!MouseLButton) MouseLButtonPush = true;
-                MouseLButton = true;
-                Core::Input::RecordLeftMouseButtonPressEdge();
-                if (e.button.clicks >= 2) MouseLButtonDBClick = true;
-                SetCapture(g_hWnd);
-            }
-            else
-            {
-                if (MouseLButton) MouseLButtonPop = true;
-                MouseLButton = false;
-                g_iMousePopPosition_x = MouseX;
-                g_iMousePopPosition_y = MouseY;
-                ReleaseCapture();
-            }
-            break;
-        case SDL_BUTTON_RIGHT:
-            if (down)
-            {
-                MouseRButtonPop = false;
-                if (!MouseRButton) MouseRButtonPush = true;
-                MouseRButton = true;
-                SetCapture(g_hWnd);
-            }
-            else
-            {
-                if (MouseRButton) MouseRButtonPop = true;
-                MouseRButton = false;
-                ReleaseCapture();
-            }
-            break;
-        case SDL_BUTTON_MIDDLE:
-            if (down)
-            {
-                MouseMButtonPop = false;
-                if (!MouseMButton) MouseMButtonPush = true;
-                MouseMButton = true;
-                SetCapture(g_hWnd);
-            }
-            else
-            {
-                if (MouseMButton) MouseMButtonPop = true;
-                MouseMButton = false;
-                ReleaseCapture();
-            }
-            break;
-        }
-    }
-
-    void HandleWindowResize(int width, int height)
-    {
-        if (width <= 0 || height <= 0) return;
-        WindowWidth = width;
-        WindowHeight = height;
-        g_fScreenRate_x = static_cast<float>(WindowWidth) / static_cast<float>(REFERENCE_WIDTH);
-        g_fScreenRate_y = static_cast<float>(WindowHeight) / static_cast<float>(REFERENCE_HEIGHT);
-        OpenglWindowWidth = WindowWidth;
-        OpenglWindowHeight = WindowHeight;
-        ReinitializeFonts();
-        UpdateResolutionDependentSystems();
-        UpdateCursorClip();
-    }
-
-    void HandleFocusChange(bool active)
-    {
-        if (InputDiagnosticsEnabled())
-        {
-            mu::log::Get("input")->info("[InputDiag] focus active={} previous={}", active, g_bWndActive);
-        }
-        if (!active)
-        {
-#ifdef ACTIVE_FOCUS_OUT
-            if (g_bUseWindowMode == FALSE)
-#endif
-                g_bWndActive = false;
-            // Release the cursor when losing focus so input can route elsewhere.
-            ClipCursor(nullptr);
-
-            if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
-            {
-                g_TargetFpsBeforeInactive = GetTargetFps();
-                SetTargetFps(REFERENCE_FPS);
-                g_HasInactiveFpsOverride = true;
-            }
-            if (g_bUseWindowMode == TRUE)
-            {
-                MouseLButton = false;
-                MouseLButtonPop = false;
-                MouseLButtonPush = false;
-                MouseRButton = false;
-                MouseRButtonPop = false;
-                MouseRButtonPush = false;
-                MouseLButtonDBClick = false;
-                MouseMButton = false;
-                MouseMButtonPop = false;
-                MouseMButtonPush = false;
-                MouseWheel = 0;
-                Core::Input::ClearLeftMouseButtonPressEdge();
-            }
+            MouseLButtonPop = false;
+            if (!MouseLButton)
+                MouseLButtonPush = true;
+            MouseLButton = true;
+            Core::Input::RecordLeftMouseButtonPressEdge();
+            if (e.button.clicks >= 2)
+                MouseLButtonDBClick = true;
+            SetCapture(g_hWnd);
         }
         else
         {
-            g_bWndActive = true;
-            if (g_HasInactiveFpsOverride)
-            {
-                SetTargetFps(g_TargetFpsBeforeInactive);
-                g_HasInactiveFpsOverride = false;
-            }
-            UpdateCursorClip();
+            if (MouseLButton)
+                MouseLButtonPop = true;
+            MouseLButton = false;
+            g_iMousePopPosition_x = MouseX;
+            g_iMousePopPosition_y = MouseY;
+            ReleaseCapture();
         }
-    }
-
-    // --- Portable text field input routing (issue #447) -------------------
-    // Map the SDL keys a single-line text field reacts to onto the Win32 VK
-    // codes the field already understands. Returns 0 for keys it ignores.
-    int MapScancodeToEditVk(SDL_Scancode sc)
-    {
-        switch (sc)
+        break;
+    case SDL_BUTTON_RIGHT:
+        if (down)
         {
-        case SDL_SCANCODE_LEFT:      return VK_LEFT;
-        case SDL_SCANCODE_RIGHT:     return VK_RIGHT;
-        case SDL_SCANCODE_HOME:      return VK_HOME;
-        case SDL_SCANCODE_END:       return VK_END;
-        case SDL_SCANCODE_BACKSPACE: return VK_BACK;
-        case SDL_SCANCODE_DELETE:    return VK_DELETE;
-        case SDL_SCANCODE_RETURN:
-        case SDL_SCANCODE_KP_ENTER:  return VK_RETURN;
-        case SDL_SCANCODE_TAB:       return VK_TAB;
-        default:                     return 0;
+            MouseRButtonPop = false;
+            if (!MouseRButton)
+                MouseRButtonPush = true;
+            MouseRButton = true;
+            SetCapture(g_hWnd);
         }
-    }
-
-    // UTF-8 <-> UTF-16 conversions sized to the input, so text of any length
-    // (typed, copied or pasted) round-trips without truncation (issue #447).
-    std::wstring Utf8ToWide(const char* utf8)
-    {
-        if (utf8 == nullptr) return std::wstring();
-        const int needed = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, nullptr, 0);
-        if (needed <= 1) return std::wstring();  // <=1 means empty or error
-        std::wstring wide(needed - 1, L'\0');  // needed includes the null terminator
-        MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wide.data(), needed);
-        return wide;
-    }
-
-    std::string WideToUtf8(const std::wstring& wide)
-    {
-        if (wide.empty()) return std::string();
-        const int needed = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr);
-        if (needed <= 1) return std::string();  // <=1 means empty or error
-        std::string utf8(needed - 1, '\0');
-        WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), needed, nullptr, nullptr);
-        return utf8;
-    }
-
-    void FeedPortableTextInput(const char* utf8)
-    {
-        auto* box = CUITextInputBox::GetFocusedPortable();
-        if (box == nullptr || utf8 == nullptr) return;
-
-        const std::wstring wide = Utf8ToWide(utf8);
-        if (!wide.empty())
-            box->OnTextInput(wide.c_str());
-    }
-
-    // Handle a key for the focused portable field. Returns true if consumed.
-    bool FeedPortableKey(const SDL_KeyboardEvent& key)
-    {
-        auto* box = CUITextInputBox::GetFocusedPortable();
-        if (box == nullptr) return false;
-
-        const bool ctrl = (key.mod & SDL_KMOD_CTRL) != 0;
-        const bool shift = (key.mod & SDL_KMOD_SHIFT) != 0;
-
-        // Clipboard lives in SDL on this side of the boundary, keeping the text
-        // field itself free of SDL; the field only exposes selection helpers.
-        if (ctrl)
+        else
         {
-            switch (key.scancode)
-            {
-            case SDL_SCANCODE_A:
-                box->SelectAll();
-                return true;
-            case SDL_SCANCODE_C:
-            case SDL_SCANCODE_X:
-            {
-                const std::wstring selection = box->GetSelectedText();
-                if (!selection.empty())
-                {
-                    const std::string utf8 = WideToUtf8(selection);
-                    if (!utf8.empty())
-                    {
-                        SDL_SetClipboardText(utf8.c_str());
-                        if (key.scancode == SDL_SCANCODE_X)
-                            box->DeleteSelection();
-                    }
-                }
-                return true;
-            }
-            case SDL_SCANCODE_V:
-            {
-                char* clip = SDL_GetClipboardText();
-                if (clip != nullptr)
-                {
-                    const std::wstring wide = Utf8ToWide(clip);
-                    if (!wide.empty())
-                        box->OnTextInput(wide.c_str());
-                    SDL_free(clip);
-                }
-                return true;
-            }
-            default:
-                break;
-            }
+            if (MouseRButton)
+                MouseRButtonPop = true;
+            MouseRButton = false;
+            ReleaseCapture();
         }
-
-        const int vk = MapScancodeToEditVk(key.scancode);
-        if (vk == 0) return false;
-
-        box->OnEditKey(vk, ctrl, shift);
-        return true;
+        break;
+    case SDL_BUTTON_MIDDLE:
+        if (down)
+        {
+            MouseMButtonPop = false;
+            if (!MouseMButton)
+                MouseMButtonPush = true;
+            MouseMButton = true;
+            SetCapture(g_hWnd);
+        }
+        else
+        {
+            if (MouseMButton)
+                MouseMButtonPop = true;
+            MouseMButton = false;
+            ReleaseCapture();
+        }
+        break;
     }
 }
+
+void HandleWindowResize(int width, int height)
+{
+    if (width <= 0 || height <= 0)
+        return;
+    WindowWidth = width;
+    WindowHeight = height;
+    g_fScreenRate_x = static_cast<float>(WindowWidth) / static_cast<float>(REFERENCE_WIDTH);
+    g_fScreenRate_y = static_cast<float>(WindowHeight) / static_cast<float>(REFERENCE_HEIGHT);
+    OpenglWindowWidth = WindowWidth;
+    OpenglWindowHeight = WindowHeight;
+    ReinitializeFonts();
+    UpdateResolutionDependentSystems();
+    UpdateCursorClip();
+}
+
+void HandleFocusChange(bool active)
+{
+    if (InputDiagnosticsEnabled())
+    {
+        mu::log::Get("input")->info("[InputDiag] focus active={} previous={}", active, g_bWndActive);
+    }
+    if (!active)
+    {
+#ifdef ACTIVE_FOCUS_OUT
+        if (g_bUseWindowMode == FALSE)
+#endif
+            g_bWndActive = false;
+        // Release the cursor when losing focus so input can route elsewhere.
+        ClipCursor(nullptr);
+
+        if (g_bUseWindowMode == FALSE && !g_HasInactiveFpsOverride)
+        {
+            g_TargetFpsBeforeInactive = GetTargetFps();
+            SetTargetFps(REFERENCE_FPS);
+            g_HasInactiveFpsOverride = true;
+        }
+        if (g_bUseWindowMode == TRUE)
+        {
+            MouseLButton = false;
+            MouseLButtonPop = false;
+            MouseLButtonPush = false;
+            MouseRButton = false;
+            MouseRButtonPop = false;
+            MouseRButtonPush = false;
+            MouseLButtonDBClick = false;
+            MouseMButton = false;
+            MouseMButtonPop = false;
+            MouseMButtonPush = false;
+            MouseWheel = 0;
+            Core::Input::ClearLeftMouseButtonPressEdge();
+        }
+    }
+    else
+    {
+        g_bWndActive = true;
+        if (g_HasInactiveFpsOverride)
+        {
+            SetTargetFps(g_TargetFpsBeforeInactive);
+            g_HasInactiveFpsOverride = false;
+        }
+        UpdateCursorClip();
+    }
+}
+
+// --- Portable text field input routing (issue #447) -------------------
+// Map the SDL keys a single-line text field reacts to onto the Win32 VK
+// codes the field already understands. Returns 0 for keys it ignores.
+int MapScancodeToEditVk(SDL_Scancode sc)
+{
+    switch (sc)
+    {
+    case SDL_SCANCODE_LEFT:
+        return VK_LEFT;
+    case SDL_SCANCODE_RIGHT:
+        return VK_RIGHT;
+    case SDL_SCANCODE_HOME:
+        return VK_HOME;
+    case SDL_SCANCODE_END:
+        return VK_END;
+    case SDL_SCANCODE_BACKSPACE:
+        return VK_BACK;
+    case SDL_SCANCODE_DELETE:
+        return VK_DELETE;
+    case SDL_SCANCODE_RETURN:
+    case SDL_SCANCODE_KP_ENTER:
+        return VK_RETURN;
+    case SDL_SCANCODE_TAB:
+        return VK_TAB;
+    default:
+        return 0;
+    }
+}
+
+// UTF-8 <-> UTF-16 conversions sized to the input, so text of any length
+// (typed, copied or pasted) round-trips without truncation (issue #447).
+std::wstring Utf8ToWide(const char* utf8)
+{
+    if (utf8 == nullptr)
+        return std::wstring();
+    const int needed = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, nullptr, 0);
+    if (needed <= 1)
+        return std::wstring();            // <=1 means empty or error
+    std::wstring wide(needed - 1, L'\0'); // needed includes the null terminator
+    MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wide.data(), needed);
+    return wide;
+}
+
+std::string WideToUtf8(const std::wstring& wide)
+{
+    if (wide.empty())
+        return std::string();
+    const int needed = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (needed <= 1)
+        return std::string(); // <=1 means empty or error
+    std::string utf8(needed - 1, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), needed, nullptr, nullptr);
+    return utf8;
+}
+
+void FeedPortableTextInput(const char* utf8)
+{
+    auto* box = CUITextInputBox::GetFocusedPortable();
+    if (box == nullptr || utf8 == nullptr)
+        return;
+
+    const std::wstring wide = Utf8ToWide(utf8);
+    if (!wide.empty())
+        box->OnTextInput(wide.c_str());
+}
+
+// Handle a key for the focused portable field. Returns true if consumed.
+bool FeedPortableKey(const SDL_KeyboardEvent& key)
+{
+    auto* box = CUITextInputBox::GetFocusedPortable();
+    if (box == nullptr)
+        return false;
+
+    const bool ctrl = (key.mod & SDL_KMOD_CTRL) != 0;
+    const bool shift = (key.mod & SDL_KMOD_SHIFT) != 0;
+
+    // Clipboard lives in SDL on this side of the boundary, keeping the text
+    // field itself free of SDL; the field only exposes selection helpers.
+    if (ctrl)
+    {
+        switch (key.scancode)
+        {
+        case SDL_SCANCODE_A:
+            box->SelectAll();
+            return true;
+        case SDL_SCANCODE_C:
+        case SDL_SCANCODE_X:
+        {
+            const std::wstring selection = box->GetSelectedText();
+            if (!selection.empty())
+            {
+                const std::string utf8 = WideToUtf8(selection);
+                if (!utf8.empty())
+                {
+                    SDL_SetClipboardText(utf8.c_str());
+                    if (key.scancode == SDL_SCANCODE_X)
+                        box->DeleteSelection();
+                }
+            }
+            return true;
+        }
+        case SDL_SCANCODE_V:
+        {
+            char* clip = SDL_GetClipboardText();
+            if (clip != nullptr)
+            {
+                const std::wstring wide = Utf8ToWide(clip);
+                if (!wide.empty())
+                    box->OnTextInput(wide.c_str());
+                SDL_free(clip);
+            }
+            return true;
+        }
+        default:
+            break;
+        }
+    }
+
+    const int vk = MapScancodeToEditVk(key.scancode);
+    if (vk == 0)
+        return false;
+
+    box->OnEditKey(vk, ctrl, shift);
+    return true;
+}
+} // namespace
 
 #ifndef _WIN32
 // Portable resolution change (issue #462). The Win32 path in ApplyResolution()
@@ -1155,7 +1185,8 @@ namespace
 // event, but callers Save() config right after and must see the new size).
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed)
 {
-    if (!g_sdlWindow || width == 0 || height == 0) return;
+    if (!g_sdlWindow || width == 0 || height == 0)
+        return;
     const int w = static_cast<int>(width);
     const int h = static_cast<int>(height);
 
@@ -1224,9 +1255,8 @@ MSG MainLoop()
                 break;
             case SDL_EVENT_MOUSE_WHEEL:
                 // SDL does not pre-correct flipped (natural) scrolling; invert.
-                MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
-                    ? -static_cast<int>(event.wheel.y)
-                    : static_cast<int>(event.wheel.y);
+                MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
+                                                                               : static_cast<int>(event.wheel.y);
                 break;
             case SDL_EVENT_WINDOW_RESIZED:
                 HandleWindowResize(event.window.data1, event.window.data2);
@@ -1265,8 +1295,7 @@ MSG MainLoop()
                 // suppresses a VK_RETURN press unless this fired that frame
                 // (WM_CHAR does it on Windows). Without it Enter never reaches
                 // the game (login submit, chat open).
-                if (event.key.scancode == SDL_SCANCODE_RETURN ||
-                    event.key.scancode == SDL_SCANCODE_KP_ENTER)
+                if (event.key.scancode == SDL_SCANCODE_RETURN || event.key.scancode == SDL_SCANCODE_KP_ENTER)
                 {
                     SetEnterPressed(true);
                 }
@@ -1312,16 +1341,13 @@ MSG MainLoop()
             int cx, cy, cw, ch;
             if (wantTextInput && g_sdlWindow != nullptr && focusedField->GetCaretArea(cx, cy, cw, ch))
             {
-                const SDL_Rect area = {
-                    static_cast<int>(cx * g_fScreenRate_x),
-                    static_cast<int>(cy * g_fScreenRate_y),
-                    static_cast<int>(cw * g_fScreenRate_x),
-                    static_cast<int>(ch * g_fScreenRate_y) };
+                const SDL_Rect area = {static_cast<int>(cx * g_fScreenRate_x), static_cast<int>(cy * g_fScreenRate_y),
+                                       static_cast<int>(cw * g_fScreenRate_x), static_cast<int>(ch * g_fScreenRate_y)};
                 // Only push when the caret rect actually moves; resending every
                 // frame is wasteful and can flicker the candidate window.
-                static SDL_Rect s_lastArea = { 0, 0, 0, 0 };
-                if (area.x != s_lastArea.x || area.y != s_lastArea.y ||
-                    area.w != s_lastArea.w || area.h != s_lastArea.h)
+                static SDL_Rect s_lastArea = {0, 0, 0, 0};
+                if (area.x != s_lastArea.x || area.y != s_lastArea.y || area.w != s_lastArea.w ||
+                    area.h != s_lastArea.h)
                 {
                     SDL_SetTextInputArea(g_sdlWindow, &area, 0);
                     s_lastArea = area;
@@ -1352,8 +1378,7 @@ MSG MainLoop()
                     if (!wasF12Pressed)
                     {
                         g_MuEditorCore.ToggleEditor();
-                        fwprintf(stderr, L"[Editor] Toggled: %s\n",
-                            g_MuEditorCore.IsEnabled() ? L"ON" : L"OFF");
+                        fwprintf(stderr, L"[Editor] Toggled: %s\n", g_MuEditorCore.IsEnabled() ? L"ON" : L"OFF");
                         fflush(stderr);
                         wasF12Pressed = true;
                     }
@@ -1397,125 +1422,131 @@ MSG MainLoop()
 
 namespace
 {
-    // Tahoma font size scales with window height; these are the tuned base values.
-    constexpr int BASE_FONT_HEIGHT = 12;
-    constexpr float FONT_HEIGHT_GROWTH_PER_PIXEL = 1.f / 200.f;
-    constexpr int FIX_FONT_HEIGHT_SMALL = 14;  // used when WindowHeight <= 600
-    constexpr int FIX_FONT_HEIGHT_LARGE = 15;
-    constexpr int SMALL_WINDOW_HEIGHT_THRESHOLD = 600;
+// Tahoma font size scales with window height; these are the tuned base values.
+constexpr int BASE_FONT_HEIGHT = 12;
+constexpr float FONT_HEIGHT_GROWTH_PER_PIXEL = 1.f / 200.f;
+constexpr int FIX_FONT_HEIGHT_SMALL = 14; // used when WindowHeight <= 600
+constexpr int FIX_FONT_HEIGHT_LARGE = 15;
+constexpr int SMALL_WINDOW_HEIGHT_THRESHOLD = 600;
 
-    struct FontSizes { int uiFontSize; int fixFontSize; };
+struct FontSizes
+{
+    int uiFontSize;
+    int fixFontSize;
+};
 
-    FontSizes CalculateFontSizes()
-    {
-        FontHeight = static_cast<int>(std::ceil(
-            BASE_FONT_HEIGHT + (WindowHeight - REFERENCE_HEIGHT) * FONT_HEIGHT_GROWTH_PER_PIXEL));
-        int fixFontHeight = (WindowHeight <= SMALL_WINDOW_HEIGHT_THRESHOLD)
-            ? FIX_FONT_HEIGHT_SMALL : FIX_FONT_HEIGHT_LARGE;
-        return { FontHeight - 1, fixFontHeight - 1 };
-    }
-
-#ifdef _WIN32
-    // Absolute path of a bundled font file (relative to ./fonts) next to the exe.
-    // The curated names in kBundledFonts are ASCII, so the byte-wise widen is safe.
-    std::wstring BundledFontFullPath(const char* relative)
-    {
-        wchar_t exePath[MAX_PATH] = {};
-        GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-        std::wstring path(exePath);
-        path.resize(path.find_last_of(L"\\/") + 1);   // keep the directory + separator
-        while (*relative)
-            path.push_back(static_cast<wchar_t>(static_cast<unsigned char>(*relative++)));
-        return path;
-    }
-#endif
-
-    // Privately register the TTFs bundled in ./fonts so GDI resolves their face
-    // names even when they are not installed system-wide — parity with the Linux
-    // GdiText shim, which reads ./fonts directly. FR_PRIVATE scopes the faces to
-    // this process, leaving the system font list untouched. No-op off Windows,
-    // where bundled fonts are resolved by GdiText. Shares the kBundledFonts table.
-    void RegisterBundledFonts()
-    {
-#ifdef _WIN32
-        for (const auto& font : kBundledFonts)
-        {
-            AddFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
-            AddFontResourceExW(BundledFontFullPath(font.bold).c_str(),    FR_PRIVATE, nullptr);
-        }
-#endif
-    }
-
-    // Mirrors RegisterBundledFonts so the process leaves no private faces behind.
-    void UnregisterBundledFonts()
-    {
-#ifdef _WIN32
-        for (const auto& font : kBundledFonts)
-        {
-            RemoveFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
-            RemoveFontResourceExW(BundledFontFullPath(font.bold).c_str(),    FR_PRIVATE, nullptr);
-        }
-#endif
-    }
-
-    HFONT CreateUIFont(int size, int weight)
-    {
-        // UI font family from config ([UI] Font); empty keeps the built-in
-        // "Tahoma" default. On Windows GDI honors this face name directly; on
-        // Linux the GdiText shim resolves it via fontconfig (Core/Platform/GdiText.cpp).
-        std::wstring sel = GameConfig::GetInstance().GetFontSelection();
-        const wchar_t* face = sel.empty() ? L"Tahoma" : sel.c_str();
-        return CreateFont(size, 0, 0, 0, weight, 0, 0, 0, DEFAULT_CHARSET,
-                          OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY,
-                          DEFAULT_PITCH | FF_DONTCARE, face);
-    }
-
-    void CreateNewFonts(FontSizes sizes)
-    {
-        g_hFont     = CreateUIFont(sizes.uiFontSize, FW_NORMAL);
-        g_hFontBold = CreateUIFont(sizes.uiFontSize, FW_SEMIBOLD);
-        g_hFontBig  = CreateUIFont(sizes.uiFontSize * 2, FW_SEMIBOLD);
-        g_hFixFont  = CreateUIFont(sizes.fixFontSize, FW_NORMAL);
-    }
-
-    void ReinitializeTextRenderer()
-    {
-        // Recreates the font buffer bitmap with new g_fScreenRate values
-        g_pRenderText->Release();
-        g_pRenderText->Create(g_hDC);
-        g_pRenderText->SetFont(g_hFont);
-    }
-
-    void RefreshInventoryEquipmentSlots()
-    {
-        // Inventory slot positions depend on the text buffer size; MUST run after
-        // ReinitializeTextRenderer().
-        if (!g_pNewUISystem)
-            return;
-        auto* pInventory = g_pNewUISystem->GetUI_NewMyInventory();
-        if (pInventory)
-            pInventory->SetEquipmentSlotInfo();
-    }
-
+FontSizes CalculateFontSizes()
+{
+    FontHeight = static_cast<int>(
+        std::ceil(BASE_FONT_HEIGHT + (WindowHeight - REFERENCE_HEIGHT) * FONT_HEIGHT_GROWTH_PER_PIXEL));
+    int fixFontHeight = (WindowHeight <= SMALL_WINDOW_HEIGHT_THRESHOLD) ? FIX_FONT_HEIGHT_SMALL : FIX_FONT_HEIGHT_LARGE;
+    return {FontHeight - 1, fixFontHeight - 1};
 }
+
+#ifdef _WIN32
+// Absolute path of a bundled font file (relative to ./fonts) next to the exe.
+// The curated names in kBundledFonts are ASCII, so the byte-wise widen is safe.
+std::wstring BundledFontFullPath(const char* relative)
+{
+    wchar_t exePath[MAX_PATH] = {};
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    std::wstring path(exePath);
+    path.resize(path.find_last_of(L"\\/") + 1); // keep the directory + separator
+    while (*relative)
+        path.push_back(static_cast<wchar_t>(static_cast<unsigned char>(*relative++)));
+    return path;
+}
+#endif
+
+// Privately register the TTFs bundled in ./fonts so GDI resolves their face
+// names even when they are not installed system-wide — parity with the Linux
+// GdiText shim, which reads ./fonts directly. FR_PRIVATE scopes the faces to
+// this process, leaving the system font list untouched. No-op off Windows,
+// where bundled fonts are resolved by GdiText. Shares the kBundledFonts table.
+void RegisterBundledFonts()
+{
+#ifdef _WIN32
+    for (const auto& font : kBundledFonts)
+    {
+        AddFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
+        AddFontResourceExW(BundledFontFullPath(font.bold).c_str(), FR_PRIVATE, nullptr);
+    }
+#endif
+}
+
+// Mirrors RegisterBundledFonts so the process leaves no private faces behind.
+void UnregisterBundledFonts()
+{
+#ifdef _WIN32
+    for (const auto& font : kBundledFonts)
+    {
+        RemoveFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
+        RemoveFontResourceExW(BundledFontFullPath(font.bold).c_str(), FR_PRIVATE, nullptr);
+    }
+#endif
+}
+
+HFONT CreateUIFont(int size, int weight)
+{
+    // UI font family from config ([UI] Font); empty keeps the built-in
+    // "Tahoma" default. On Windows GDI honors this face name directly; on
+    // Linux the GdiText shim resolves it via fontconfig (Core/Platform/GdiText.cpp).
+    std::wstring sel = GameConfig::GetInstance().GetFontSelection();
+    const wchar_t* face = sel.empty() ? L"Tahoma" : sel.c_str();
+    return CreateFont(size, 0, 0, 0, weight, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, face);
+}
+
+void CreateNewFonts(FontSizes sizes)
+{
+    g_hFont = CreateUIFont(sizes.uiFontSize, FW_NORMAL);
+    g_hFontBold = CreateUIFont(sizes.uiFontSize, FW_SEMIBOLD);
+    g_hFontBig = CreateUIFont(sizes.uiFontSize * 2, FW_SEMIBOLD);
+    g_hFixFont = CreateUIFont(sizes.fixFontSize, FW_NORMAL);
+}
+
+void ReinitializeTextRenderer()
+{
+    // Recreates the font buffer bitmap with new g_fScreenRate values
+    g_pRenderText->Release();
+    g_pRenderText->Create(g_hDC);
+    g_pRenderText->SetFont(g_hFont);
+}
+
+void RefreshInventoryEquipmentSlots()
+{
+    // Inventory slot positions depend on the text buffer size; MUST run after
+    // ReinitializeTextRenderer().
+    if (!g_pNewUISystem)
+        return;
+    auto* pInventory = g_pNewUISystem->GetUI_NewMyInventory();
+    if (pInventory)
+        pInventory->SetEquipmentSlotInfo();
+}
+
+} // namespace
 
 // Reinitialize fonts when window resolution changes
 void ReinitializeFonts()
 {
     // Save old font handles so we can delete them after the renderer has switched over
-    HFONT hOldFont     = g_hFont;
+    HFONT hOldFont = g_hFont;
     HFONT hOldFontBold = g_hFontBold;
-    HFONT hOldFontBig  = g_hFontBig;
-    HFONT hOldFixFont  = g_hFixFont;
+    HFONT hOldFontBig = g_hFontBig;
+    HFONT hOldFixFont = g_hFixFont;
 
     FontSizes sizes = CalculateFontSizes();
     CreateNewFonts(sizes);
     ReinitializeTextRenderer();
 
-    if (hOldFont)     DeleteObject(hOldFont);
-    if (hOldFontBold) DeleteObject(hOldFontBold);
-    if (hOldFontBig)  DeleteObject(hOldFontBig);
-    if (hOldFixFont)  DeleteObject(hOldFixFont);
+    if (hOldFont)
+        DeleteObject(hOldFont);
+    if (hOldFontBold)
+        DeleteObject(hOldFontBold);
+    if (hOldFontBig)
+        DeleteObject(hOldFontBig);
+    if (hOldFixFont)
+        DeleteObject(hOldFixFont);
 
     CInput::Instance().Create(g_hWnd, WindowWidth, WindowHeight);
     RefreshInventoryEquipmentSlots();
@@ -1543,12 +1574,13 @@ void UpdateCursorClip()
         return;
     }
     RECT client;
-    if (!GetClientRect(g_hWnd, &client)) return;
-    POINT tl = { client.left, client.top };
-    POINT br = { client.right, client.bottom };
+    if (!GetClientRect(g_hWnd, &client))
+        return;
+    POINT tl = {client.left, client.top};
+    POINT br = {client.right, client.bottom};
     ClientToScreen(g_hWnd, &tl);
     ClientToScreen(g_hWnd, &br);
-    RECT clip = { tl.x, tl.y, br.x, br.y };
+    RECT clip = {tl.x, tl.y, br.x, br.y};
     ClipCursor(&clip);
 }
 
@@ -1559,8 +1591,8 @@ void UpdateResolutionDependentSystems()
     // This updates ScreenCenterX/Y and PerspectiveX/Y used for 3D item positioning
     extern CameraState g_Camera;
     float aspectRatio = (float)WindowWidth / (float)WindowHeight;
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio,
-                                       g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
+    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear,
+                                       g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
 
     // Update all 3D UI camera dimensions for proper item rendering
     if (g_pNewUI3DRenderMng)
@@ -1603,8 +1635,8 @@ static void WriteStartupDiagnostics(const wchar_t* executableVersion, const WORD
     g_ErrorReport.Write(L"\r\n");
     g_ErrorReport.WriteLogBegin();
     g_ErrorReport.AddSeparator();
-    g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", executableVersion, L"Eng",
-                        fileVersion[0], fileVersion[1], fileVersion[2], fileVersion[3]);
+    g_ErrorReport.Write(L"Mu online %ls (%ls) executed. (%d.%d.%d.%d)\r\n", executableVersion, L"Eng", fileVersion[0],
+                        fileVersion[1], fileVersion[2], fileVersion[3]);
     g_ConsoleDebug->Write(MCD_NORMAL, L"Mu Online (Version: %d.%d.%d.%d)", fileVersion[0], fileVersion[1],
                           fileVersion[2], fileVersion[3]);
 
@@ -1662,7 +1694,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     wchar_t* lpszCommandLine = portableCommandLine.data();
 #endif
     wchar_t lpszFile[MAX_PATH];
-    WORD wVersion[4] = { 0, };
+    WORD wVersion[4] = {
+        0,
+    };
     if (GetFileNameOfFilePath(lpszFile, lpszCommandLine))
     {
         if (GetFileVersion(lpszFile, wVersion))
@@ -1700,7 +1734,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         g_ServerPort = GameConfig::GetInstance().GetServerPort();
     }
 
-    //#ifdef _DEBUG
+    // #ifdef _DEBUG
 
     m_Username[0] = '\0';
     m_Password[0] = '\0';
@@ -1729,12 +1763,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     if (m_RememberMe)
     {
-        GameConfig::GetInstance().DecryptCredentials(m_Username, m_Password, _countof(m_Username), _countof(m_Password));
+        GameConfig::GetInstance().DecryptCredentials(m_Username, m_Password, _countof(m_Username),
+                                                     _countof(m_Password));
     }
 
     g_fScreenRate_x = (float)WindowWidth / (float)REFERENCE_WIDTH;
     g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
-
 
     pMultiLanguage = new CMultiLanguage(g_strSelectedML);
 
@@ -1763,7 +1797,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     if (g_bUseWindowMode != TRUE)
         windowFlags |= SDL_WINDOW_FULLSCREEN;
 
-    g_sdlWindow = SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
+    g_sdlWindow =
+        SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
     if (!g_sdlWindow)
     {
         g_ErrorReport.Write(L"> SDL_CreateWindow failed.\r\n");
@@ -1793,15 +1828,16 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     {
         g_ErrorReport.Write(L"SDL_gpu renderer init failed.\r\n");
         ShutdownRendererWindow();
-        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"SDL_gpu Renderer Error.", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, I18N::Game::InstallTheLatestGraphicsCardDriver, L"SDL_gpu Renderer Error.",
+                   MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
 #ifdef _WIN32
     // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,
     // cursor, the legacy EDIT-control text boxes) keeps working.
-    g_hWnd = static_cast<HWND>(SDL_GetPointerProperty(
-        SDL_GetWindowProperties(g_sdlWindow), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
+    g_hWnd = static_cast<HWND>(
+        SDL_GetPointerProperty(SDL_GetWindowProperties(g_sdlWindow), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
     g_hDC = GetDC(g_hWnd);
     g_hRC = nullptr;
 
@@ -1906,19 +1942,19 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     auto& timers = Core::Time::FrameTimerScheduler::Instance();
     timers.SetRepeating(HACK_TIMER, 20 * 1000, [] { CheckHack(); });
     timers.SetRepeating(MUHELPER_TIMER, 250 /* ms */,
-        [] { MUHelper::CMuHelper::TimerProc(nullptr, 0, MUHELPER_TIMER, 0); });
+                        [] { MUHelper::CMuHelper::TimerProc(nullptr, 0, MUHELPER_TIMER, 0); });
 
     srand((unsigned)time(nullptr));
 
-    for (int & i : RandomTable)
+    for (int& i : RandomTable)
         i = rand() % 360;
 
     RendomMemoryDump = new BYTE[rand() % 100 + 1];
-    GateAttribute = new GATE_ATTRIBUTE[MAX_GATES] { };
-    SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS] { };
-    ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024] { };
+    GateAttribute = new GATE_ATTRIBUTE[MAX_GATES]{};
+    SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
+    ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024]{};
     ItemAttribute = ((ITEM_ATTRIBUTE*)ItemAttRibuteMemoryDump) + rand() % 1024;
-    CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128] { };
+    CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128]{};
     CharactersClient = ((CHARACTER*)CharacterMemoryDump) + rand() % 128;
     CharacterMachine = new CHARACTER_MACHINE;
 
@@ -1939,7 +1975,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 
     g_pUIManager = new CUIManager;
-    g_pUIMapName = new CUIMapName;	// rozy
+    g_pUIMapName = new CUIMapName; // rozy
 
     g_BuffSystem = BuffStateSystem::Make();
 
@@ -1962,7 +1998,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         g_pSinglePasswdInputBox->SetFont(g_hFont);
 
         g_bIMEBlock = FALSE;
-        HIMC  hIMC = ImmGetContext(g_hWnd);
+        HIMC hIMC = ImmGetContext(g_hWnd);
         ImmSetConversionStatus(hIMC, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
         ImmReleaseContext(g_hWnd, hIMC);
         SaveIMEStatus();

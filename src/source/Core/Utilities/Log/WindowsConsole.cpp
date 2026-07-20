@@ -4,6 +4,10 @@
 
 #include <cstdio>
 
+#ifdef fwprintf
+#undef fwprintf
+#endif
+
 #ifdef _WIN32
 #include <io.h>
 #else
@@ -23,28 +27,73 @@ bool IsTerminal()
 
 int ToAnsiForeground(WORD color)
 {
-    static constexpr int codes[] = { 30, 34, 32, 36, 31, 35, 33, 37, 90, 94, 92, 96, 91, 95, 93, 97 };
+    static constexpr int codes[] = {30, 34, 32, 36, 31, 35, 33, 37, 90, 94, 92, 96, 91, 95, 93, 97};
     return color < 16 ? codes[color] : 37;
 }
 
-int ToAnsiBackground(WORD color) { return ToAnsiForeground(color) + 10; }
+int ToAnsiBackground(WORD color)
+{
+    return ToAnsiForeground(color) + 10;
+}
+} // namespace
+
+bool leaf::OpenConsoleWindow(const std::wstring& title)
+{
+    return CConsoleWindow::GetInstance()->Open(title);
+}
+void leaf::CloseConsoleWindow()
+{
+    CConsoleWindow::GetInstance()->Close();
+}
+bool leaf::SetConsoleTitle(const std::wstring& title)
+{
+    return CConsoleWindow::GetInstance()->SetTitle(title);
+}
+const std::wstring& leaf::GetConsoleTitle()
+{
+    return CConsoleWindow::GetInstance()->GetTitle();
+}
+HWND leaf::GetConsoleWndHandle()
+{
+    return nullptr;
+}
+bool leaf::IsConsoleVisible()
+{
+    return CConsoleWindow::GetInstance()->IsVisible();
+}
+void leaf::ShowConsole(bool show)
+{
+    CConsoleWindow::GetInstance()->Show(show);
+}
+void leaf::ClearConsoleScreen()
+{
+    CConsoleWindow::GetInstance()->ClearScreen();
+}
+WORD leaf::GetConsoleTextColorIndex(WORD* background)
+{
+    return CConsoleWindow::GetInstance()->GetTextColorIndex(background);
+}
+void leaf::SetConsoleTextColor(WORD text, WORD background)
+{
+    CConsoleWindow::GetInstance()->SetTextColor(text, background);
+}
+void leaf::ActivateCloseButton(bool active)
+{
+    CConsoleWindow::GetInstance()->ActivateCloseButton(active);
+}
+bool leaf::IsActiveCloseButton()
+{
+    return CConsoleWindow::GetInstance()->IsActiveCloseButton();
+}
+bool leaf::SaveConsoleScreenBuffer(const std::wstring& filename)
+{
+    return CConsoleWindow::GetInstance()->SaveScreenBuffer(filename);
 }
 
-bool leaf::OpenConsoleWindow(const std::wstring& title) { return CConsoleWindow::GetInstance()->Open(title); }
-void leaf::CloseConsoleWindow() { CConsoleWindow::GetInstance()->Close(); }
-bool leaf::SetConsoleTitle(const std::wstring& title) { return CConsoleWindow::GetInstance()->SetTitle(title); }
-const std::wstring& leaf::GetConsoleTitle() { return CConsoleWindow::GetInstance()->GetTitle(); }
-HWND leaf::GetConsoleWndHandle() { return nullptr; }
-bool leaf::IsConsoleVisible() { return CConsoleWindow::GetInstance()->IsVisible(); }
-void leaf::ShowConsole(bool show) { CConsoleWindow::GetInstance()->Show(show); }
-void leaf::ClearConsoleScreen() { CConsoleWindow::GetInstance()->ClearScreen(); }
-WORD leaf::GetConsoleTextColorIndex(WORD* background) { return CConsoleWindow::GetInstance()->GetTextColorIndex(background); }
-void leaf::SetConsoleTextColor(WORD text, WORD background) { CConsoleWindow::GetInstance()->SetTextColor(text, background); }
-void leaf::ActivateCloseButton(bool active) { CConsoleWindow::GetInstance()->ActivateCloseButton(active); }
-bool leaf::IsActiveCloseButton() { return CConsoleWindow::GetInstance()->IsActiveCloseButton(); }
-bool leaf::SaveConsoleScreenBuffer(const std::wstring& filename) { return CConsoleWindow::GetInstance()->SaveScreenBuffer(filename); }
-
-leaf::CConsoleWindow::CConsoleWindow() { m_LimitTimer.SetTimer(12000); }
+leaf::CConsoleWindow::CConsoleWindow()
+{
+    m_LimitTimer.SetTimer(12000);
+}
 leaf::CConsoleWindow::~CConsoleWindow() = default;
 
 bool leaf::CConsoleWindow::Open(const std::wstring& title)
@@ -83,10 +132,22 @@ bool leaf::CConsoleWindow::SetTitle(const std::wstring& title)
     return true;
 }
 
-const std::wstring& leaf::CConsoleWindow::GetTitle() { return m_title; }
-HWND leaf::CConsoleWindow::GetWndHandle() { return nullptr; }
-bool leaf::CConsoleWindow::IsVisible() { return m_visible; }
-void leaf::CConsoleWindow::Show(bool show) { m_visible = show; }
+const std::wstring& leaf::CConsoleWindow::GetTitle()
+{
+    return m_title;
+}
+HWND leaf::CConsoleWindow::GetWndHandle()
+{
+    return nullptr;
+}
+bool leaf::CConsoleWindow::IsVisible()
+{
+    return m_visible;
+}
+void leaf::CConsoleWindow::Show(bool show)
+{
+    m_visible = show;
+}
 
 void leaf::CConsoleWindow::ClearScreen()
 {
@@ -117,9 +178,18 @@ void leaf::CConsoleWindow::SetTextColor(WORD text, WORD background)
     }
 }
 
-void leaf::CConsoleWindow::ActivateCloseButton(bool active) { m_bActiveCloseButton = active; }
-bool leaf::CConsoleWindow::IsActiveCloseButton() const { return m_bActiveCloseButton; }
-bool leaf::CConsoleWindow::SaveScreenBuffer(const std::wstring&) { return false; }
+void leaf::CConsoleWindow::ActivateCloseButton(bool active)
+{
+    m_bActiveCloseButton = active;
+}
+bool leaf::CConsoleWindow::IsActiveCloseButton() const
+{
+    return m_bActiveCloseButton;
+}
+bool leaf::CConsoleWindow::SaveScreenBuffer(const std::wstring&)
+{
+    return false;
+}
 
 leaf::CConsoleWindow* leaf::CConsoleWindow::GetInstance()
 {
