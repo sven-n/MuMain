@@ -77,6 +77,7 @@ public:
 private:
     void ReleaseAllBuffers();
     void ResetEntry(SfxEntry& entry);
+    void StopEntryTracks(SfxEntry& entry);
     void SetGainInternal(SfxEntry& entry, float gain);
     bool IsValidBufferIndex(int bufferId) const noexcept;
 
@@ -126,7 +127,9 @@ void SdlSfxManager::SetEnabled(bool enabled)
 
 bool SdlSfxManager::IsEnabled() const noexcept
 {
-    return enableSound_;
+    // Without a mixer there is nothing to play on, and SetEnabled() cannot know
+    // that: it may be turned on after a failed Initialize().
+    return enableSound_ && mixer_ != nullptr;
 }
 
 HRESULT SdlSfxManager::LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel)
@@ -284,21 +287,17 @@ void SdlSfxManager::StopBuffer(ESound bufferId)
     }
 
     std::lock_guard lock(mutex_);
-    auto& entry = entries_[bufferId];
-    for (int channel = 0; channel < entry.maxChannels; ++channel)
-    {
-        if (entry.tracks[channel] != nullptr)
-        {
-            MIX_StopTrack(entry.tracks[channel], 0);
-        }
-    }
+    StopEntryTracks(entries_[bufferId]);
 }
 
 void SdlSfxManager::StopAll()
 {
-    for (int i = 0; i < MAX_BUFFER; ++i)
+    // One lock for the whole sweep: taking it per buffer would mean a thousand
+    // lock/unlock pairs for a single map change.
+    std::lock_guard lock(mutex_);
+    for (auto& entry : entries_)
     {
-        StopBuffer(static_cast<ESound>(i));
+        StopEntryTracks(entry);
     }
 }
 
@@ -345,6 +344,18 @@ void SdlSfxManager::ResetEntry(SfxEntry& entry)
 
     entry.activeChannel = 0;
     entry.maxChannels = 0;
+}
+
+void SdlSfxManager::StopEntryTracks(SfxEntry& entry)
+{
+    // NOTE: Assumes caller holds the mutex.
+    for (int channel = 0; channel < entry.maxChannels; ++channel)
+    {
+        if (entry.tracks[channel] != nullptr)
+        {
+            MIX_StopTrack(entry.tracks[channel], 0);
+        }
+    }
 }
 
 void SdlSfxManager::SetGainInternal(SfxEntry& entry, float gain)
