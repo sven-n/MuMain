@@ -99,6 +99,7 @@ extern "C" {
     void AngleQuaternion(const vec3_t angles, vec4_t quaternion);
     void QuaternionMatrix(const vec4_t quaternion, float(*matrix)[4]);
     void QuaternionSlerp(const vec4_t p, vec4_t q, float t, vec4_t qt);
+    void QuaternionNLERP(const vec4_t p, const vec4_t q, float t, vec4_t qt);
 
     void FaceNormalize(vec3_t v1, vec3_t v2, vec3_t v3, vec3_t Normal);
 

@@ -26,6 +26,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/AnimationTaskPool.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -1734,6 +1735,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_pUIMapName = new CUIMapName;	// rozy
 
     g_BuffSystem = BuffStateSystem::Make();
+	AnimationTaskPool::Instance().Initialize();
 
     g_MapProcess = MapProcess::Make();
 
@@ -1792,6 +1794,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     if (cpuUsageRecorder.joinable())
         cpuUsageRecorder.join();
 
+	AnimationTaskPool::Instance().Shutdown();
     SDL_Quit();
 
     return msg.wParam;

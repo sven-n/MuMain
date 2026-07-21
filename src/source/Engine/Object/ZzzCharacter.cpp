@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // 케릭터 관련 함수
 // 케릭터 랜더링, 움직임등을 처리
 //
@@ -6,6 +6,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <execution>
+#include <algorithm>
+#include <span>
 #include "UI/Chat/Chat.h"
 #include "Core/Globals/_enum.h"
 #ifdef _WIN32
@@ -18,6 +21,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/AnimationTaskPool.h"
 #include "Engine/Object/PlayerActionState.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -6489,10 +6493,63 @@ void MoveCharactersClient()
     {
         MoveCharacterClient(&CharactersClient[i]);
     }
+    UpdateCharactersAnimationParallel(std::span<CHARACTER>(CharactersClient, MAX_CHARACTERS_CLIENT));
     MoveBlurs();
 }
 
-extern float  ParentMatrix[3][4];
+void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
+{
+    static thread_local std::vector<CHARACTER*> activeChars;
+    activeChars.clear();
+    activeChars.reserve(characters.size());
+
+    for (CHARACTER& c : characters)
+    {
+        c.Object.EnableBoneMatrix = false;
+        if (c.Object.Live && c.Object.Visible)
+        {
+            activeChars.push_back(&c);
+        }
+    }
+
+    if (activeChars.empty()) return;
+
+    constexpr size_t PARALLEL_ANIMATION_THRESHOLD = 20;
+    if (activeChars.size() >= PARALLEL_ANIMATION_THRESHOLD)
+    {
+        AnimationTaskPool::Instance().DispatchCharacters(activeChars);
+    }
+    else
+    {
+        for (CHARACTER* c : activeChars)
+        {
+            OBJECT* o = &c->Object;
+            BMD* model = &Models[o->Type];
+            if (!model || model->NumBones <= 0) continue;
+
+            model->Animation(
+                o->BoneTransform,
+                o->AnimationFrame,
+                o->PriorAnimationFrame,
+                o->PriorAction,
+                o->Angle,
+                o->HeadAngle,
+                false,
+                true,
+                nullptr,
+                o->CurrentAction
+            );
+            o->EnableBoneMatrix = true;
+        }
+    }
+}
+
+void WaitCharactersAnimation()
+{
+    AnimationTaskPool::Instance().Wait();
+}
+
+extern thread_local float  ParentMatrix[3][4];
 
 void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
 {
@@ -6909,7 +6966,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     VectorCopy(b->BodyOrigin, Object->Position);
 
     vec3_t Temp;
-    b->Animation(BoneTransform, f->AnimationFrame, f->PriorAnimationFrame, f->PriorAction, Object->Angle, Object->Angle, true);
+    b->Animation(BoneTransform, f->AnimationFrame, f->PriorAnimationFrame, f->PriorAction, Object->Angle, Object->Angle, true, true, ParentMatrix);
     if (g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link)
     {
         float _KnightScale = 0.9f;
@@ -11319,6 +11376,8 @@ void RenderCharactersClient()
 #ifdef _EDITOR
     s_bShowCharacterPickBoxes = DevEditor_ShouldShowCharacterPickBoxes();
 #endif
+
+    WaitCharactersAnimation();
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
