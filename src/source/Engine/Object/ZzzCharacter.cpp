@@ -6499,23 +6499,31 @@ void MoveCharactersClient()
 
 void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
 {
-    constexpr size_t PARALLEL_ANIMATION_THRESHOLD = 20;
-    const size_t activeCount = std::count_if(characters.begin(), characters.end(), [](const CHARACTER& c) {
-        return c.Object.Live && c.Object.Visible;
-    });
+    static thread_local std::vector<CHARACTER*> activeChars;
+    activeChars.clear();
+    activeChars.reserve(characters.size());
 
-    if (activeCount >= PARALLEL_ANIMATION_THRESHOLD)
+    for (CHARACTER& c : characters)
     {
-        AnimationTaskPool::Instance().DispatchCharacters(characters);
+        c.Object.EnableBoneMatrix = false;
+        if (c.Object.Live && c.Object.Visible)
+        {
+            activeChars.push_back(&c);
+        }
+    }
+
+    if (activeChars.empty()) return;
+
+    constexpr size_t PARALLEL_ANIMATION_THRESHOLD = 20;
+    if (activeChars.size() >= PARALLEL_ANIMATION_THRESHOLD)
+    {
+        AnimationTaskPool::Instance().DispatchCharacters(activeChars);
     }
     else
     {
-        for (CHARACTER& c : characters)
+        for (CHARACTER* c : activeChars)
         {
-            c.Object.EnableBoneMatrix = false;
-            OBJECT* o = &c.Object;
-            if (!o->Live || !o->Visible) continue;
-
+            OBJECT* o = &c->Object;
             BMD* model = &Models[o->Type];
             if (!model || model->NumBones <= 0) continue;
 

@@ -104,6 +104,13 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
             localParentMatrix[1][3] = BodyOrigin[1];
             localParentMatrix[2][3] = BodyOrigin[2];
         }
+        for (int r = 0; r < 3; ++r)
+        {
+            for (int c = 0; c < 4; ++c)
+            {
+                ParentMatrix[r][c] = localParentMatrix[r][c];
+            }
+        }
     }
 
     // Pre-calculate Head bone quaternions ONCE outside loop

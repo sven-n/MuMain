@@ -428,7 +428,7 @@ void QuaternionNLERP(const vec4_t p, const vec4_t q, float t, vec4_t qt)
     float rw = scaleP * p[3] + scaleQ * q[3];
 
     float lenSq = rx * rx + ry * ry + rz * rz + rw * rw;
-    if (lenSq > 0.0f)
+    if (lenSq > 1e-6f)
     {
         float invLen = 1.0f / sqrtf(lenSq);
         qt[0] = rx * invLen;

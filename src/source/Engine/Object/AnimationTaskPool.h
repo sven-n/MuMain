@@ -8,6 +8,7 @@
 #include <atomic>
 #include <functional>
 #include <span>
+#include <array>
 #include <memory>
 
 struct CHARACTER;
@@ -36,7 +37,7 @@ public:
     /**
      * @brief Non-blocking dispatch of character animation tasks across worker queues.
      */
-    void DispatchCharacters(std::span<CHARACTER> characters);
+    void DispatchCharacters(std::span<CHARACTER* const> activeChars);
 
     /**
      * @brief Hard synchronization barrier blocking until all dispatched tasks finish.

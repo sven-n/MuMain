@@ -124,23 +124,9 @@ void AnimationTaskPool::WorkerLoop(size_t workerIndex)
     }
 }
 
-void AnimationTaskPool::DispatchCharacters(std::span<CHARACTER> characters)
+void AnimationTaskPool::DispatchCharacters(std::span<CHARACTER* const> activeChars)
 {
-    if (!m_running || m_workerCount == 0) return;
-
-    std::vector<CHARACTER*> activeChars;
-    activeChars.reserve(characters.size());
-
-    for (CHARACTER& c : characters)
-    {
-        c.Object.EnableBoneMatrix = false;
-        if (c.Object.Live && c.Object.Visible)
-        {
-            activeChars.push_back(&c);
-        }
-    }
-
-    if (activeChars.empty()) return;
+    if (!m_running || m_workerCount == 0 || activeChars.empty()) return;
 
     // Chunk size of 5 characters per task for optimal CPU cache locality
     constexpr size_t CHUNK_SIZE = 5;
@@ -153,10 +139,19 @@ void AnimationTaskPool::DispatchCharacters(std::span<CHARACTER> characters)
         size_t startIdx = t * CHUNK_SIZE;
         size_t endIdx = std::min(startIdx + CHUNK_SIZE, activeChars.size());
 
-        auto chunkTask = [activeChars, startIdx, endIdx]() {
-            for (size_t i = startIdx; i < endIdx; ++i)
+        struct Chunk {
+            std::array<CHARACTER*, CHUNK_SIZE> chars;
+            size_t count;
+        } chunk{};
+        chunk.count = endIdx - startIdx;
+        for (size_t i = 0; i < chunk.count; ++i) {
+            chunk.chars[i] = activeChars[startIdx + i];
+        }
+
+        auto chunkTask = [chunk]() {
+            for (size_t i = 0; i < chunk.count; ++i)
             {
-                CHARACTER* c = activeChars[i];
+                CHARACTER* c = chunk.chars[i];
                 OBJECT* o = &c->Object;
                 if (!o->Live || !o->Visible) continue;
 
