@@ -105,3 +105,11 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build-mingw --output-on-failure
+
+      - name: Upload client binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-windows-${{ matrix.arch }}-editor-${{ matrix.editor }}
+          path: |
+            build-mingw/src/Main.exe
+          if-no-files-found: error
