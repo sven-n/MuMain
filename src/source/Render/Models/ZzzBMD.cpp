@@ -1,9 +1,23 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include <cstdint>
+#include <cmath>
+#include <cassert>
 #include "Render/Textures/ZzzOpenglUtil.h"
+
+#define CHECK_FINITE_MATRIX(mat, boneIdx, label) \
+    do { \
+        for (int r = 0; r < 3; ++r) { \
+            for (int c = 0; c < 4; ++c) { \
+                float val = (mat)[r][c]; \
+                if (std::isnan(val) || std::isinf(val) || std::abs(val) > 1e6f) { \
+                    assert(false && "Vertex explosion: Invalid float in BoneMatrix!"); \
+                } \
+            } \
+        } \
+    } while(0)
 #include "Engine/Object/ZzzInfomation.h" 
 #include "ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -39,83 +53,127 @@ vec4_t RenderArrayColors[MAX_VERTICES * 3];
 vec2_t RenderArrayTexCoords[MAX_VERTICES * 3];
 
 bool  StopMotion = false;
-float ParentMatrix[3][4];
+thread_local float ParentMatrix[3][4];
 
 static vec3_t LightVector = { 0.f, -0.1f, -0.8f };
 static vec3_t LightVector2 = { 0.f, -0.5f, -0.8f };
 
-void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate)
+void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4], short CurrentActionArg)
 {
     if (NumActions <= 0) return;
 
+    unsigned short currentAction = (CurrentActionArg < 0) ? CurrentAction : (unsigned short)CurrentActionArg;
     if (PriorAction >= NumActions) PriorAction = 0;
-    if (CurrentAction >= NumActions)CurrentAction = 0;
-    VectorCopy(Angle, BodyAngle);
+    if (currentAction >= NumActions) currentAction = 0;
 
-    CurrentAnimation = AnimationFrame;
-    CurrentAnimationFrame = (int)AnimationFrame;
-    float s1 = (CurrentAnimation - CurrentAnimationFrame);
+    vec4_t boneQuaternion[MAX_BONES] = {};
+
+    float currentAnimation = AnimationFrame;
+    int currentAnimationFrame = (int)AnimationFrame;
+    float s1 = (currentAnimation - currentAnimationFrame);
     float s2 = 1.f - s1;
     auto PriorAnimationFrame = (int)PriorFrame;
     if (NumActions > 0)
     {
         if (PriorAnimationFrame < 0)
             PriorAnimationFrame = 0;
-        if (CurrentAnimationFrame < 0)
-            CurrentAnimationFrame = 0;
+        if (currentAnimationFrame < 0)
+            currentAnimationFrame = 0;
         if (PriorAnimationFrame >= Actions[PriorAction].NumAnimationKeys)
             PriorAnimationFrame = 0;
-        if (CurrentAnimationFrame >= Actions[CurrentAction].NumAnimationKeys)
-            CurrentAnimationFrame = 0;
+        if (currentAnimationFrame >= Actions[currentAction].NumAnimationKeys)
+            currentAnimationFrame = 0;
     }
 
-    // bones
+    // Pre-calculate localParentMatrix ONCE outside bone loop for thread-safe root transforms
+    float localParentMatrix[3][4];
+    if (!Parent)
+    {
+        AngleMatrix(Angle, localParentMatrix);
+        if (Translate)
+        {
+            for (auto & y : localParentMatrix)
+            {
+                for (int x = 0; x < 3; ++x)
+                {
+                    y[x] *= BodyScale;
+                }
+            }
+
+            localParentMatrix[0][3] = BodyOrigin[0];
+            localParentMatrix[1][3] = BodyOrigin[1];
+            localParentMatrix[2][3] = BodyOrigin[2];
+        }
+    }
+
+    // Pre-calculate Head bone quaternions ONCE outside loop
+    vec4_t headQ1, headQ2;
+    const bool hasHeadBone = (BoneHead >= 0 && BoneHead < NumBones && !Bones[BoneHead].Dummy);
+    if (hasHeadBone)
+    {
+        const Bone_t* hb = &Bones[BoneHead];
+        const BoneMatrix_t* hbm1 = &hb->BoneMatrixes[PriorAction];
+        const BoneMatrix_t* hbm2 = &hb->BoneMatrixes[currentAction];
+
+        vec3_t Angle1, Angle2;
+        VectorCopy(hbm1->Rotation[PriorAnimationFrame], Angle1);
+        VectorCopy(hbm2->Rotation[currentAnimationFrame], Angle2);
+
+        constexpr float radFactor = 1.0f / (180.f / Q_PI);
+        const float HeadAngleX = HeadAngle[0] * radFactor;
+        const float HeadAngleY = HeadAngle[1] * radFactor;
+
+        Angle1[0] -= HeadAngleX;
+        Angle2[0] -= HeadAngleX;
+        Angle1[2] -= HeadAngleY;
+        Angle2[2] -= HeadAngleY;
+
+        AngleQuaternion(Angle1, headQ1);
+        AngleQuaternion(Angle2, headQ2);
+    }
+
+    const bool bLockPositions = (Actions[PriorAction].LockPositions || Actions[currentAction].LockPositions);
+
+    // bones loop
     for (int i = 0; i < NumBones; i++)
     {
-        Bone_t* b = &Bones[i];
+        const Bone_t* b = &Bones[i];
         if (b->Dummy)
         {
             continue;
         }
-        BoneMatrix_t* bm1 = &b->BoneMatrixes[PriorAction];
-        BoneMatrix_t* bm2 = &b->BoneMatrixes[CurrentAction];
-        vec4_t q1, q2;
+        const BoneMatrix_t* bm1 = &b->BoneMatrixes[PriorAction];
+        const BoneMatrix_t* bm2 = &b->BoneMatrixes[currentAction];
+
+        const float* q1;
+        const float* q2;
 
         if (i == BoneHead)
         {
-            vec3_t Angle1, Angle2;
-            VectorCopy(bm1->Rotation[PriorAnimationFrame], Angle1);
-            VectorCopy(bm2->Rotation[CurrentAnimationFrame], Angle2);
-
-            float HeadAngleX = HeadAngle[0] / (180.f / Q_PI);
-            float HeadAngleY = HeadAngle[1] / (180.f / Q_PI);
-            Angle1[0] -= HeadAngleX;
-            Angle2[0] -= HeadAngleX;
-            Angle1[2] -= HeadAngleY;
-            Angle2[2] -= HeadAngleY;
-            AngleQuaternion(Angle1, q1);
-            AngleQuaternion(Angle2, q2);
+            q1 = headQ1;
+            q2 = headQ2;
         }
         else
         {
-            QuaternionCopy(bm1->Quaternion[PriorAnimationFrame], q1);
-            QuaternionCopy(bm2->Quaternion[CurrentAnimationFrame], q2);
+            q1 = bm1->Quaternion[PriorAnimationFrame];
+            q2 = bm2->Quaternion[currentAnimationFrame];
         }
+
         if (!QuaternionCompare(q1, q2))
         {
-            QuaternionSlerp(q1, q2, s1, BoneQuaternion[i]);
+            QuaternionNLERP(q1, q2, s1, boneQuaternion[i]);
         }
         else
         {
-            QuaternionCopy(q1, BoneQuaternion[i]);
+            QuaternionCopy(q1, boneQuaternion[i]);
         }
 
         float Matrix[3][4];
-        QuaternionMatrix(BoneQuaternion[i], Matrix);
-        float* Position1 = bm1->Position[PriorAnimationFrame];
-        float* Position2 = bm2->Position[CurrentAnimationFrame];
+        QuaternionMatrix(boneQuaternion[i], Matrix);
+        const float* Position1 = bm1->Position[PriorAnimationFrame];
+        const float* Position2 = bm2->Position[currentAnimationFrame];
 
-        if (i == 0 && (Actions[PriorAction].LockPositions || Actions[CurrentAction].LockPositions))
+        if (i == 0 && bLockPositions)
         {
             Matrix[0][3] = bm2->Position[0][0];
             Matrix[1][3] = bm2->Position[0][1];
@@ -130,30 +188,26 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
 
         if (b->Parent == -1)
         {
-            if (!Parent)
+            if (Parent && ExtParentMatrix)
             {
-                AngleMatrix(BodyAngle, ParentMatrix);
-                if (Translate)
-                {
-                    for (auto & y : ParentMatrix)
-                    {
-                        for (int x = 0; x < 3; ++x)
-                        {
-                            y[x] *= BodyScale;
-                        }
-                    }
-
-                    ParentMatrix[0][3] = BodyOrigin[0];
-                    ParentMatrix[1][3] = BodyOrigin[1];
-                    ParentMatrix[2][3] = BodyOrigin[2];
-                }
+                R_ConcatTransforms(ExtParentMatrix, Matrix, BoneMatrix[i]);
             }
-            R_ConcatTransforms(ParentMatrix, Matrix, BoneMatrix[i]);
+            else if (!Parent)
+            {
+                R_ConcatTransforms(localParentMatrix, Matrix, BoneMatrix[i]);
+            }
+            else
+            {
+                R_ConcatTransforms(ParentMatrix, Matrix, BoneMatrix[i]);
+            }
         }
         else
         {
             R_ConcatTransforms(BoneMatrix[b->Parent], Matrix, BoneMatrix[i]);
         }
+#ifdef _DEBUG
+        CHECK_FINITE_MATRIX(BoneMatrix[i], i, "BoneMatrix");
+#endif
     }
 }
 

@@ -414,3 +414,33 @@ float VectorDistance2D(vec3_t va, vec3_t vb)
     float dy = va[1] - vb[1];
     return sqrtf(dx * dx + dy * dy);
 }
+
+void QuaternionNLERP(const vec4_t p, const vec4_t q, float t, vec4_t qt)
+{
+    // Ensure shortest path around 4D sphere
+    float cosom = p[0] * q[0] + p[1] * q[1] + p[2] * q[2] + p[3] * q[3];
+    float scaleP = 1.0f - t;
+    float scaleQ = (cosom < 0.0f) ? -t : t;
+
+    float rx = scaleP * p[0] + scaleQ * q[0];
+    float ry = scaleP * p[1] + scaleQ * q[1];
+    float rz = scaleP * p[2] + scaleQ * q[2];
+    float rw = scaleP * p[3] + scaleQ * q[3];
+
+    float lenSq = rx * rx + ry * ry + rz * rz + rw * rw;
+    if (lenSq > 0.0f)
+    {
+        float invLen = 1.0f / sqrtf(lenSq);
+        qt[0] = rx * invLen;
+        qt[1] = ry * invLen;
+        qt[2] = rz * invLen;
+        qt[3] = rw * invLen;
+    }
+    else
+    {
+        qt[0] = p[0];
+        qt[1] = p[1];
+        qt[2] = p[2];
+        qt[3] = p[3];
+    }
+}
