@@ -32,6 +32,13 @@ add_test(
 )
 
 add_test(
+    NAME global_bitmap_empty_shutdown_guard
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmap.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_global_bitmap_empty_shutdown_guard.cmake
+)
+
+add_test(
     NAME legacy_ui_line_color_state
     COMMAND ${CMAKE_COMMAND}
         -DUI_SOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/UI/Legacy/UIWindows.cpp

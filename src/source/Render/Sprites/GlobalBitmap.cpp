@@ -607,6 +607,11 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 }
 void CGlobalBitmap::UnloadAllImages()
 {
+    if (m_mapBitmap.empty())
+    {
+        return;
+    }
+
 #ifdef _DEBUG
     if (!m_mapBitmap.empty())
         g_ErrorReport.Write(L"Unload Images\r\n");
