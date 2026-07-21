@@ -31,194 +31,201 @@ void ClearTextureRegistry();
 void ClearSamplerRegistry();
 } // namespace mu
 
-
-
 CBitmapCache::CBitmapCache() = default;
-CBitmapCache::~CBitmapCache() { Release(); }
+CBitmapCache::~CBitmapCache()
+{
+    Release();
+}
 
 namespace
 {
-    constexpr std::uint32_t RangeFor(std::uint32_t begin, std::uint32_t end)
+constexpr std::uint32_t RangeFor(std::uint32_t begin, std::uint32_t end)
+{
+    return (end > begin) ? (end - begin) : 0;
+}
+
+class TurboJpegHandle
+{
+public:
+    TurboJpegHandle() : handle(tjInitDecompress()) {}
+    ~TurboJpegHandle()
     {
-        return (end > begin) ? (end - begin) : 0;
+        if (handle != nullptr)
+        {
+            tjDestroy(handle);
+        }
     }
 
-    class TurboJpegHandle
+    tjhandle get() const
     {
-    public:
-        TurboJpegHandle() : handle(tjInitDecompress()) {}
-        ~TurboJpegHandle()
-        {
-            if (handle != nullptr)
-            {
-                tjDestroy(handle);
-            }
-        }
-
-        tjhandle get() const { return handle; }
-        bool valid() const { return handle != nullptr; }
-
-    private:
-        tjhandle handle;
-    };
-
-    void ReportTurboError(const wchar_t* context)
+        return handle;
+    }
+    bool valid() const
     {
-        const char* message = tjGetErrorStr();
-        if (message == nullptr)
-        {
-            message = "Unknown TurboJPEG error";
-        }
-        g_ErrorReport.Write(L"[TurboJPEG] %ls: %hs", context, message);
+        return handle != nullptr;
     }
 
-    int NextPowerOfTwo(int value, int maxValue)
-    {
-        int result = 1;
-        while (result < value && result < maxValue)
-        {
-            result <<= 1;
-        }
-        return std::min<int>(result, maxValue);
-    }
+private:
+    tjhandle handle;
+};
 
-    std::string NarrowPath(const std::wstring& wide)
+void ReportTurboError(const wchar_t* context)
+{
+    const char* message = tjGetErrorStr();
+    if (message == nullptr)
     {
-        const std::string utf8 = mu_wchar_to_utf8(wide.c_str());
+        message = "Unknown TurboJPEG error";
+    }
+    g_ErrorReport.Write(L"[TurboJPEG] %ls: %hs", context, message);
+}
+
+int NextPowerOfTwo(int value, int maxValue)
+{
+    int result = 1;
+    while (result < value && result < maxValue)
+    {
+        result <<= 1;
+    }
+    return std::min<int>(result, maxValue);
+}
+
+std::string NarrowPath(const std::wstring& wide)
+{
+    const std::string utf8 = mu_wchar_to_utf8(wide.c_str());
 #ifdef _WIN32
-        return utf8;
+    return utf8;
 #else
-        // Asset paths are Windows-spelled (backslashes, mixed case); resolve
-        // them against the case-sensitive filesystem.
-        return MuResolvePath(utf8.c_str());
+    // Asset paths are Windows-spelled (backslashes, mixed case); resolve
+    // them against the case-sensitive filesystem.
+    return MuResolvePath(utf8.c_str());
 #endif
+}
+
+SDL_GPUFilter MapGLFilterToSDL(GLuint filter)
+{
+    return filter == GL_NEAREST ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
+}
+
+SDL_GPUSamplerAddressMode MapGLWrapToSDL(GLuint wrapMode)
+{
+    return wrapMode == GL_REPEAT ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+}
+
+std::vector<std::uint8_t> PadRGBToRGBA(const BYTE* rgbData, int width, int height)
+{
+    const auto pixelCount = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
+    std::vector<std::uint8_t> rgba(pixelCount * 4u);
+    for (std::size_t i = 0; i < pixelCount; ++i)
+    {
+        rgba[i * 4u + 0u] = rgbData[i * 3u + 0u];
+        rgba[i * 4u + 1u] = rgbData[i * 3u + 1u];
+        rgba[i * 4u + 2u] = rgbData[i * 3u + 2u];
+        rgba[i * 4u + 3u] = 255u;
+    }
+    return rgba;
+}
+
+bool UploadTextureSDLGpu(BITMAP_t* bitmap, const std::uint8_t* pixelData, int width, int height, SDL_GPUFilter filter,
+                         SDL_GPUSamplerAddressMode wrapMode)
+{
+    SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+    if (!device || !bitmap || !pixelData || width <= 0 || height <= 0)
+    {
+        return false;
     }
 
-    SDL_GPUFilter MapGLFilterToSDL(GLuint filter)
+    SDL_GPUTextureCreateInfo texInfo{};
+    texInfo.type = SDL_GPU_TEXTURETYPE_2D;
+    texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+    texInfo.width = static_cast<Uint32>(width);
+    texInfo.height = static_cast<Uint32>(height);
+    texInfo.layer_count_or_depth = 1;
+    texInfo.num_levels = 1;
+    texInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+
+    SDL_GPUTexture* gpuTexture = SDL_CreateGPUTexture(device, &texInfo);
+    if (!gpuTexture)
     {
-        return filter == GL_NEAREST ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
+        return false;
     }
 
-    SDL_GPUSamplerAddressMode MapGLWrapToSDL(GLuint wrapMode)
+    constexpr Uint32 bytesPerPixel = 4u;
+    const Uint32 dataSize = static_cast<Uint32>(width) * static_cast<Uint32>(height) * bytesPerPixel;
+
+    SDL_GPUTransferBufferCreateInfo transferInfo{};
+    transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+    transferInfo.size = dataSize;
+    SDL_GPUTransferBuffer* transfer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
+    if (!transfer)
     {
-        return wrapMode == GL_REPEAT ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+        SDL_ReleaseGPUTexture(device, gpuTexture);
+        return false;
     }
 
-    std::vector<std::uint8_t> PadRGBToRGBA(const BYTE* rgbData, int width, int height)
+    void* mapped = SDL_MapGPUTransferBuffer(device, transfer, false);
+    if (!mapped)
     {
-        const auto pixelCount = static_cast<std::size_t>(width) * static_cast<std::size_t>(height);
-        std::vector<std::uint8_t> rgba(pixelCount * 4u);
-        for (std::size_t i = 0; i < pixelCount; ++i)
-        {
-            rgba[i * 4u + 0u] = rgbData[i * 3u + 0u];
-            rgba[i * 4u + 1u] = rgbData[i * 3u + 1u];
-            rgba[i * 4u + 2u] = rgbData[i * 3u + 2u];
-            rgba[i * 4u + 3u] = 255u;
-        }
-        return rgba;
+        SDL_ReleaseGPUTransferBuffer(device, transfer);
+        SDL_ReleaseGPUTexture(device, gpuTexture);
+        return false;
+    }
+    std::memcpy(mapped, pixelData, dataSize);
+    SDL_UnmapGPUTransferBuffer(device, transfer);
+
+    SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(device);
+    if (!commandBuffer)
+    {
+        SDL_ReleaseGPUTransferBuffer(device, transfer);
+        SDL_ReleaseGPUTexture(device, gpuTexture);
+        return false;
     }
 
-    bool UploadTextureSDLGpu(BITMAP_t* bitmap, const std::uint8_t* pixelData, int width, int height,
-                             SDL_GPUFilter filter, SDL_GPUSamplerAddressMode wrapMode)
+    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+    if (!copyPass)
     {
-        SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
-        if (!device || !bitmap || !pixelData || width <= 0 || height <= 0)
-        {
-            return false;
-        }
-
-        SDL_GPUTextureCreateInfo texInfo{};
-        texInfo.type = SDL_GPU_TEXTURETYPE_2D;
-        texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-        texInfo.width = static_cast<Uint32>(width);
-        texInfo.height = static_cast<Uint32>(height);
-        texInfo.layer_count_or_depth = 1;
-        texInfo.num_levels = 1;
-        texInfo.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
-
-        SDL_GPUTexture* gpuTexture = SDL_CreateGPUTexture(device, &texInfo);
-        if (!gpuTexture)
-        {
-            return false;
-        }
-
-        constexpr Uint32 bytesPerPixel = 4u;
-        const Uint32 dataSize = static_cast<Uint32>(width) * static_cast<Uint32>(height) * bytesPerPixel;
-
-        SDL_GPUTransferBufferCreateInfo transferInfo{};
-        transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-        transferInfo.size = dataSize;
-        SDL_GPUTransferBuffer* transfer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
-        if (!transfer)
-        {
-            SDL_ReleaseGPUTexture(device, gpuTexture);
-            return false;
-        }
-
-        void* mapped = SDL_MapGPUTransferBuffer(device, transfer, false);
-        if (!mapped)
-        {
-            SDL_ReleaseGPUTransferBuffer(device, transfer);
-            SDL_ReleaseGPUTexture(device, gpuTexture);
-            return false;
-        }
-        std::memcpy(mapped, pixelData, dataSize);
-        SDL_UnmapGPUTransferBuffer(device, transfer);
-
-        SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(device);
-        if (!commandBuffer)
-        {
-            SDL_ReleaseGPUTransferBuffer(device, transfer);
-            SDL_ReleaseGPUTexture(device, gpuTexture);
-            return false;
-        }
-
-        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
-        if (!copyPass)
-        {
-            SDL_SubmitGPUCommandBuffer(commandBuffer);
-            SDL_ReleaseGPUTransferBuffer(device, transfer);
-            SDL_ReleaseGPUTexture(device, gpuTexture);
-            return false;
-        }
-
-        SDL_GPUTextureTransferInfo src{};
-        src.transfer_buffer = transfer;
-        src.offset = 0;
-        src.pixels_per_row = static_cast<Uint32>(width);
-        src.rows_per_layer = static_cast<Uint32>(height);
-
-        SDL_GPUTextureRegion dst{};
-        dst.texture = gpuTexture;
-        dst.w = static_cast<Uint32>(width);
-        dst.h = static_cast<Uint32>(height);
-        dst.d = 1;
-
-        SDL_UploadToGPUTexture(copyPass, &src, &dst, false);
-        SDL_EndGPUCopyPass(copyPass);
         SDL_SubmitGPUCommandBuffer(commandBuffer);
         SDL_ReleaseGPUTransferBuffer(device, transfer);
-
-        SDL_GPUSamplerCreateInfo samplerInfo{};
-        samplerInfo.min_filter = filter;
-        samplerInfo.mag_filter = filter;
-        samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
-        samplerInfo.address_mode_u = wrapMode;
-        samplerInfo.address_mode_v = wrapMode;
-        samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-
-        SDL_GPUSampler* sampler = SDL_CreateGPUSampler(device, &samplerInfo);
-        if (!sampler)
-        {
-            SDL_ReleaseGPUTexture(device, gpuTexture);
-            return false;
-        }
-
-        bitmap->sdlTexture = gpuTexture;
-        bitmap->sdlSampler = sampler;
-        return true;
+        SDL_ReleaseGPUTexture(device, gpuTexture);
+        return false;
     }
+
+    SDL_GPUTextureTransferInfo src{};
+    src.transfer_buffer = transfer;
+    src.offset = 0;
+    src.pixels_per_row = static_cast<Uint32>(width);
+    src.rows_per_layer = static_cast<Uint32>(height);
+
+    SDL_GPUTextureRegion dst{};
+    dst.texture = gpuTexture;
+    dst.w = static_cast<Uint32>(width);
+    dst.h = static_cast<Uint32>(height);
+    dst.d = 1;
+
+    SDL_UploadToGPUTexture(copyPass, &src, &dst, false);
+    SDL_EndGPUCopyPass(copyPass);
+    SDL_SubmitGPUCommandBuffer(commandBuffer);
+    SDL_ReleaseGPUTransferBuffer(device, transfer);
+
+    SDL_GPUSamplerCreateInfo samplerInfo{};
+    samplerInfo.min_filter = filter;
+    samplerInfo.mag_filter = filter;
+    samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_NEAREST;
+    samplerInfo.address_mode_u = wrapMode;
+    samplerInfo.address_mode_v = wrapMode;
+    samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+
+    SDL_GPUSampler* sampler = SDL_CreateGPUSampler(device, &samplerInfo);
+    if (!sampler)
+    {
+        SDL_ReleaseGPUTexture(device, gpuTexture);
+        return false;
+    }
+
+    bitmap->sdlTexture = gpuTexture;
+    bitmap->sdlSampler = sampler;
+    return true;
 }
+} // namespace
 
 bool CBitmapCache::Create()
 {
@@ -236,8 +243,10 @@ bool CBitmapCache::Create()
     configureCache(m_QuickCache[QUICK_CACHE_WATER], BITMAP_WATER_BEGIN, BITMAP_WATER_END);
     configureCache(m_QuickCache[QUICK_CACHE_CURSOR], BITMAP_CURSOR_BEGIN, BITMAP_CURSOR_END);
     configureCache(m_QuickCache[QUICK_CACHE_FONT], BITMAP_FONT_BEGIN, BITMAP_FONT_END);
-    configureCache(m_QuickCache[QUICK_CACHE_MAINFRAME], BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN, BITMAP_INTERFACE_NEW_MAINFRAME_END);
-    configureCache(m_QuickCache[QUICK_CACHE_SKILLICON], BITMAP_INTERFACE_NEW_SKILLICON_BEGIN, BITMAP_INTERFACE_NEW_SKILLICON_END);
+    configureCache(m_QuickCache[QUICK_CACHE_MAINFRAME], BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN,
+                   BITMAP_INTERFACE_NEW_MAINFRAME_END);
+    configureCache(m_QuickCache[QUICK_CACHE_SKILLICON], BITMAP_INTERFACE_NEW_SKILLICON_BEGIN,
+                   BITMAP_INTERFACE_NEW_SKILLICON_END);
     configureCache(m_QuickCache[QUICK_CACHE_PLAYER], BITMAP_PLAYER_TEXTURE_BEGIN, BITMAP_PLAYER_TEXTURE_END);
 
     m_pNullBitmap = new BITMAP_t;
@@ -333,8 +342,7 @@ void CBitmapCache::RemoveAll()
 
 size_t CBitmapCache::GetCacheSize()
 {
-    return m_mapCacheMain.size() + m_mapCachePlayer.size() +
-        m_mapCacheInterface.size() + m_mapCacheEffect.size();
+    return m_mapCacheMain.size() + m_mapCachePlayer.size() + m_mapCacheInterface.size() + m_mapCacheEffect.size();
 }
 
 void CBitmapCache::Update()
@@ -344,7 +352,7 @@ void CBitmapCache::Update()
     if (m_ManageTimer.IsTime())
     {
         auto mi = m_mapCacheMain.begin();
-        for (; mi != m_mapCacheMain.end(); )
+        for (; mi != m_mapCacheMain.end();)
         {
             BITMAP_t* pBitmap = (*mi).second;
             if (pBitmap->dwCallCount > 0)
@@ -359,7 +367,7 @@ void CBitmapCache::Update()
         }
 
         mi = m_mapCachePlayer.begin();
-        for (; mi != m_mapCachePlayer.end(); )
+        for (; mi != m_mapCachePlayer.end();)
         {
             BITMAP_t* pBitmap = (*mi).second;
 
@@ -375,7 +383,7 @@ void CBitmapCache::Update()
         }
 
         mi = m_mapCacheInterface.begin();
-        for (; mi != m_mapCacheInterface.end(); )
+        for (; mi != m_mapCacheInterface.end();)
         {
             BITMAP_t* pBitmap = (*mi).second;
             if (pBitmap->dwCallCount > 0)
@@ -390,7 +398,7 @@ void CBitmapCache::Update()
         }
 
         mi = m_mapCacheEffect.begin();
-        for (; mi != m_mapCacheEffect.end(); )
+        for (; mi != m_mapCacheEffect.end();)
         {
             BITMAP_t* pBitmap = (*mi).second;
             if (pBitmap->dwCallCount > 0)
@@ -405,8 +413,8 @@ void CBitmapCache::Update()
         }
 
 #ifdef DEBUG_BITMAP_CACHE
-        g_ConsoleDebug->Write(MCD_NORMAL, L"M,P,I,E : (%d, %d, %d, %d)", m_mapCacheMain.size(),
-            m_mapCachePlayer.size(), m_mapCacheInterface.size(), m_mapCacheEffect.size());
+        g_ConsoleDebug->Write(MCD_NORMAL, L"M,P,I,E : (%d, %d, %d, %d)", m_mapCacheMain.size(), m_mapCachePlayer.size(),
+                              m_mapCacheInterface.size(), m_mapCacheEffect.size());
 #endif // DEBUG_BITMAP_CACHE
     }
 }
@@ -415,8 +423,7 @@ bool CBitmapCache::Find(GLuint uiBitmapIndex, BITMAP_t** ppBitmap)
 {
     for (int i = 0; i < NUMBER_OF_QUICK_CACHE; i++)
     {
-        if (uiBitmapIndex >= m_QuickCache[i].dwBitmapIndexMin &&
-            uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
+        if (uiBitmapIndex >= m_QuickCache[i].dwBitmapIndexMin && uiBitmapIndex < m_QuickCache[i].dwBitmapIndexMax)
         {
             const auto dwVI = static_cast<std::size_t>(uiBitmapIndex - m_QuickCache[i].dwBitmapIndexMin);
             BITMAP_t* cached = m_QuickCache[i].bitmaps[dwVI];
@@ -527,10 +534,11 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
     if (uiWrapMode != UICLAMP && uiWrapMode != UIREPEAT)
     {
 #ifdef _DEBUG
-        static unsigned int	uiCnt2 = 0;
-        int			iBuff;	iBuff = 0;
+        static unsigned int uiCnt2 = 0;
+        int iBuff;
+        iBuff = 0;
 
-        wchar_t		szDebugOutput[256];
+        wchar_t szDebugOutput[256];
 
         iBuff = iBuff + mu_swprintf(iBuff + szDebugOutput, L"%d. Call No CLAMP & No REPEAT. \n", uiCnt2++);
         OutputDebugString(szDebugOutput);
@@ -550,7 +558,8 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
             }
             else
             {
-                g_ErrorReport.Write(L"File not found %ls (%d)->%ls\r\n", pBitmap->FileName, uiBitmapIndex, filename.c_str());
+                g_ErrorReport.Write(L"File not found %ls (%d)->%ls\r\n", pBitmap->FileName, uiBitmapIndex,
+                                    filename.c_str());
                 UnloadImage(uiBitmapIndex, true);
             }
         }
@@ -733,7 +742,8 @@ void CGlobalBitmap::Manage()
     m_DebugOutputTimer.UpdateTime();
     if (m_DebugOutputTimer.IsTime())
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"CacheSize=%d(NumberOfTexture=%d)", m_BitmapCache.GetCacheSize(), GetNumberOfTexture());
+        g_ConsoleDebug->Write(MCD_NORMAL, L"CacheSize=%d(NumberOfTexture=%d)", m_BitmapCache.GetCacheSize(),
+                              GetNumberOfTexture());
     }
 #endif // DEBUG_BITMAP_CACHE
     m_BitmapCache.Update();
@@ -761,7 +771,8 @@ GLuint CGlobalBitmap::FindAvailableTextureIndex(GLuint uiSeed)
     return uiSeed + 1;
 }
 
-bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
+bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter,
+                                  GLuint uiWrapMode)
 {
     std::wstring filename_ozj;
     ExchangeExt(filename, L"OZJ", filename_ozj);
@@ -773,7 +784,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         return false;
     }
 
-    std::vector<unsigned char> jpegBuf((std::istreambuf_iterator<char>(compressedFile)), std::istreambuf_iterator<char>());
+    std::vector<unsigned char> jpegBuf((std::istreambuf_iterator<char>(compressedFile)),
+                                       std::istreambuf_iterator<char>());
     compressedFile.close();
 
     if (jpegBuf.size() <= 24)
@@ -797,24 +809,18 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
         return false;
     }
 
-    auto headerResult = tjDecompressHeader3(tjHandle.get(), jpegData, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
+    auto headerResult =
+        tjDecompressHeader3(tjHandle.get(), jpegData, jpegSize, &jpegWidth, &jpegHeight, &jpegSubsamp, &jpegColorspace);
     if (headerResult != 0 || jpegWidth <= 0 || jpegHeight <= 0 || jpegWidth > MAX_WIDTH || jpegHeight > MAX_HEIGHT)
     {
         ReportTurboError(L"tjDecompressHeader3");
         return false;
     }
 
-    std::vector<unsigned char> decompressedBuffer(static_cast<std::size_t>(jpegWidth) * static_cast<std::size_t>(jpegHeight) * 3u);
-    auto decompressResult = tjDecompress2(
-        tjHandle.get(),
-        jpegData,
-        jpegSize,
-        decompressedBuffer.data(),
-        jpegWidth,
-        0,
-        jpegHeight,
-        TJPF_RGB,
-        TJFLAG_FASTDCT);
+    std::vector<unsigned char> decompressedBuffer(static_cast<std::size_t>(jpegWidth) *
+                                                  static_cast<std::size_t>(jpegHeight) * 3u);
+    auto decompressResult = tjDecompress2(tjHandle.get(), jpegData, jpegSize, decompressedBuffer.data(), jpegWidth, 0,
+                                          jpegHeight, TJPF_RGB, TJFLAG_FASTDCT);
     if (decompressResult != 0)
     {
         ReportTurboError(L"tjDecompress2");
@@ -836,7 +842,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     pNewBitmap->Components = 3;
     pNewBitmap->Ref = 1;
 
-    const auto textureBufferSize = static_cast<std::size_t>(textureWidth) * static_cast<std::size_t>(textureHeight) * 3u;
+    const auto textureBufferSize =
+        static_cast<std::size_t>(textureWidth) * static_cast<std::size_t>(textureHeight) * 3u;
     pNewBitmap->BufferStorage.resize(textureBufferSize);
     pNewBitmap->Buffer = pNewBitmap->BufferStorage.data();
     m_dwUsedTextureMemory += static_cast<std::uint32_t>(textureBufferSize);
@@ -850,19 +857,21 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     {
         for (int row = 0; row < rows; ++row)
         {
-            memcpy(&pNewBitmap->Buffer[offset], &decompressedBuffer[static_cast<std::size_t>(row) * jpegRowSize], static_cast<std::size_t>(jpegRowSize));
+            memcpy(&pNewBitmap->Buffer[offset], &decompressedBuffer[static_cast<std::size_t>(row) * jpegRowSize],
+                   static_cast<std::size_t>(jpegRowSize));
             offset += static_cast<std::size_t>(textureRowSize);
         }
     }
     else
     {
-        memcpy(pNewBitmap->Buffer, decompressedBuffer.data(), static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
+        memcpy(pNewBitmap->Buffer, decompressedBuffer.data(),
+               static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
     }
 
     pNewBitmap->TextureNumber = uiBitmapIndex;
     std::vector<std::uint8_t> rgbaData = PadRGBToRGBA(pNewBitmap->Buffer, textureWidth, textureHeight);
-    if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData.data(), textureWidth, textureHeight,
-                             MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode)))
+    if (!UploadTextureSDLGpu(pNewBitmap.get(), rgbaData.data(), textureWidth, textureHeight, MapGLFilterToSDL(uiFilter),
+                             MapGLWrapToSDL(uiWrapMode)))
     {
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
@@ -901,9 +910,12 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     int index = 12;
     index += 4;
     std::int16_t nx, ny;
-    std::memcpy(&nx, &pakBuffer[index], sizeof(nx)); index += 2;
-    std::memcpy(&ny, &pakBuffer[index], sizeof(ny)); index += 2;
-    const char bit = pakBuffer[index]; index += 1;
+    std::memcpy(&nx, &pakBuffer[index], sizeof(nx));
+    index += 2;
+    std::memcpy(&ny, &pakBuffer[index], sizeof(ny));
+    index += 2;
+    const char bit = pakBuffer[index];
+    index += 1;
     index += 1;
 
     if (bit != 32 || nx <= 0 || ny <= 0 || nx > MAX_WIDTH || ny > MAX_HEIGHT)
@@ -951,8 +963,8 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     }
 
     pNewBitmap->TextureNumber = uiBitmapIndex;
-    if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, Width, Height,
-                             MapGLFilterToSDL(uiFilter), MapGLWrapToSDL(uiWrapMode)))
+    if (!UploadTextureSDLGpu(pNewBitmap.get(), pNewBitmap->Buffer, Width, Height, MapGLFilterToSDL(uiFilter),
+                             MapGLWrapToSDL(uiWrapMode)))
     {
         g_ErrorReport.Write(L"SDL texture upload failed %ls (%d)\r\n", filename.c_str(), uiBitmapIndex);
         return false;
@@ -969,8 +981,12 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
 
 void CGlobalBitmap::SplitFileName(IN const std::wstring& filepath, OUT std::wstring& filename, bool bIncludeExt)
 {
-    wchar_t __fname[_MAX_FNAME] = { 0, };
-    wchar_t __ext[_MAX_EXT] = { 0, };
+    wchar_t __fname[_MAX_FNAME] = {
+        0,
+    };
+    wchar_t __ext[_MAX_EXT] = {
+        0,
+    };
     _wsplitpath(filepath.c_str(), NULL, NULL, __fname, __ext);
     filename = __fname;
     if (bIncludeExt)
@@ -978,21 +994,32 @@ void CGlobalBitmap::SplitFileName(IN const std::wstring& filepath, OUT std::wstr
 }
 void CGlobalBitmap::SplitExt(IN const std::wstring& filepath, OUT std::wstring& ext, bool bIncludeDot)
 {
-    wchar_t __ext[_MAX_EXT] = { 0, };
+    wchar_t __ext[_MAX_EXT] = {
+        0,
+    };
     _wsplitpath(filepath.c_str(), NULL, NULL, NULL, __ext);
-    if (bIncludeDot) {
+    if (bIncludeDot)
+    {
         ext = __ext;
     }
-    else {
+    else
+    {
         if ((__ext[0] == '.') && __ext[1])
             ext = __ext + 1;
     }
 }
-void CGlobalBitmap::ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext, OUT std::wstring& out_filepath)
+void CGlobalBitmap::ExchangeExt(IN const std::wstring& in_filepath, IN const std::wstring& ext,
+                                OUT std::wstring& out_filepath)
 {
-    wchar_t __drive[_MAX_DRIVE] = { 0, };
-    wchar_t __dir[_MAX_DIR] = { 0, };
-    wchar_t __fname[_MAX_FNAME] = { 0, };
+    wchar_t __drive[_MAX_DRIVE] = {
+        0,
+    };
+    wchar_t __dir[_MAX_DIR] = {
+        0,
+    };
+    wchar_t __fname[_MAX_FNAME] = {
+        0,
+    };
     _wsplitpath(in_filepath.c_str(), __drive, __dir, __fname, NULL);
 
     out_filepath = __drive;
@@ -1011,7 +1038,8 @@ bool CGlobalBitmap::Convert_Format(const std::wstring& filename)
 
     ::_wsplitpath(filename.c_str(), drive, dir, fname, ext);
 
-    std::wstring strPath = drive; strPath += dir;
+    std::wstring strPath = drive;
+    strPath += dir;
     std::wstring strName = fname;
 
     if (_wcsicmp(ext, L".jpg") == 0)
