@@ -5,6 +5,7 @@
 // See IPlatformAudio.h for the interface contract.
 
 #include "MiniAudioBackend.h"
+#include "Core/Platform/PathResolve.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_struct.h" // OBJECT forward decl — needed for void* → OBJECT* casts (Story 7.8.1)
@@ -262,7 +263,7 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
     // Event-driven SFX (UI clicks, attack swings, item pickups, repair)
     // pass pObject == nullptr and continue to overlap freely on the
     // round-robin slots, so rapid swings still layer correctly.
-    if (pObject != nullptr)
+    if (pObject != nullptr || looped)
     {
         for (int existingCh = 0; existingCh < m_loadedChannels[bufIdx]; ++existingCh)
         {
@@ -520,6 +521,9 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     // Normalize path separators: MUSIC_* constants use Windows-style backslashes
     std::string normalizedName(name);
     std::replace(normalizedName.begin(), normalizedName.end(), '\\', '/');
+#ifndef _WIN32
+    normalizedName = MuResolvePath(normalizedName.c_str());
+#endif
 
     // If not enforced and same track is already playing, do nothing
     if (!enforce && !m_currentMusicName.empty() && m_currentMusicName == normalizedName)
