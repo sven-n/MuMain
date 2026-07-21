@@ -584,6 +584,7 @@ static SDL_GPUShader* s_vertShaderShadow = nullptr; // shadow_volume.vert
 static SDL_GPUTexture* s_depthTexture = nullptr;
 static Uint32 s_depthW = 0u;
 static Uint32 s_depthH = 0u;
+static SDL_FColor s_clearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
 // Story 4.3.2 (AC-10): Fog uniform buffer and transfer buffer.
 static SDL_GPUBuffer* s_fogUniformBuf = nullptr;
@@ -1566,7 +1567,7 @@ public:
         {
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = frameColorTexture;
-            colorTarget.clear_color = {0.0f, 0.0f, 0.0f, 1.0f};
+            colorTarget.clear_color = s_clearColor;
             colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
             colorTarget.store_op = SDL_GPU_STOREOP_STORE;
 
@@ -1999,6 +2000,11 @@ public:
     void ClearScreen() override
     {
         // No-op: SDL_gpu clears in BeginFrame via SDL_GPU_LOADOP_CLEAR.
+    }
+
+    void SetClearColor(float r, float g, float b, float a) override
+    {
+        s_clearColor = {r, g, b, a};
     }
 
     // -----------------------------------------------------------------------
