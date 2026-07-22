@@ -86,33 +86,32 @@ void SEASON3B::CNewUIBuffWindow::SetPos(int iScreenWidth)
     }
 }
 
-static eBuffState NormalizeBuffState(eBuffState raw)
+static int BuffTier(eBuffState buf)
 {
-    switch (raw)
+    switch (buf)
     {
-    case EFFECT_GREATER_LIFE_ENHANCED:
-    case EFFECT_GREATER_LIFE_MASTERED:
-        return eBuff_Life;
-    case EFFECT_MAGIC_CIRCLE_IMPROVED:
-    case EFFECT_MAGIC_CIRCLE_ENHANCED:
-        return eBuff_SwellOfMagicPower;
-    case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED:
-    case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED:
-        return eBuff_AddCriticalDamage;
-    case EFFECT_INFINITY_ARROW_IMPROVED:
-        return eBuff_InfinityArrow;
-    case EFFECT_BLIND_IMPROVED:
-        return eDeBuff_Blind;
-    case EFFECT_POISON_ARROW_IMPROVED:
-        return EFFECT_POISON_ARROW;
-    case EFFECT_BLESS_IMPROVED:
-        return EFFECT_BLESS;
-    case EFFECT_IRON_DEFENSE_IMPROVED:
-        return EFFECT_IRON_DEFENSE;
-    case EFFECT_BLOOD_HOWLING_IMPROVED:
-        return EFFECT_BLOOD_HOWLING;
-    default:
-        return raw;
+    case eBuff_Life: return 0;
+    case EFFECT_GREATER_LIFE_ENHANCED: return 1;
+    case EFFECT_GREATER_LIFE_MASTERED: return 2;
+    case eBuff_SwellOfMagicPower: return 0;
+    case EFFECT_MAGIC_CIRCLE_IMPROVED: return 1;
+    case EFFECT_MAGIC_CIRCLE_ENHANCED: return 2;
+    case eBuff_AddCriticalDamage: return 0;
+    case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED: return 1;
+    case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED: return 2;
+    case eBuff_InfinityArrow: return 0;
+    case EFFECT_INFINITY_ARROW_IMPROVED: return 1;
+    case eDeBuff_Blind: return 0;
+    case EFFECT_BLIND_IMPROVED: return 1;
+    case EFFECT_POISON_ARROW: return 0;
+    case EFFECT_POISON_ARROW_IMPROVED: return 1;
+    case EFFECT_BLESS: return 0;
+    case EFFECT_BLESS_IMPROVED: return 1;
+    case EFFECT_IRON_DEFENSE: return 0;
+    case EFFECT_IRON_DEFENSE_IMPROVED: return 1;
+    case EFFECT_BLOOD_HOWLING: return 0;
+    case EFFECT_BLOOD_HOWLING_IMPROVED: return 1;
+    default: return 0;
     }
 }
 
@@ -122,7 +121,6 @@ void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate)
     int iBuffSize = g_CharacterBuffSize(pHeroObject);
 
     eBuffState top[eBuff_Count] = {};
-    bool present[eBuff_Count] = {};
 
     for (int i = 0; i < iBuffSize; ++i)
     {
@@ -131,13 +129,16 @@ void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate)
         {
             continue;
         }
+        if (SetDisableRenderBuff(buf))
+        {
+            continue;
+        }
 
         eBuffState base = NormalizeBuffState(buf);
-        if (static_cast<int>(buf) > static_cast<int>(top[base]))
+        if (BuffTier(buf) > BuffTier(top[base]))
         {
             top[base] = buf;
         }
-        present[base] = true;
     }
 
     for (int i = 0; i < iBuffSize; ++i)
@@ -153,7 +154,7 @@ void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate)
         }
 
         eBuffState base = NormalizeBuffState(buf);
-        if (present[base] && buf != top[base])
+        if (buf != top[base])
         {
             continue;
         }
@@ -169,7 +170,7 @@ void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate)
         }
         else
         {
-            assert(!"SetDisableRenderBuff");
+            continue;
         }
     }
 }
