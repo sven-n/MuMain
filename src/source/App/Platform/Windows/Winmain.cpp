@@ -22,6 +22,7 @@
 #include "Core/Time/FrameTimerScheduler.h"
 #include <SDL3/SDL.h>
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Shaders/ItemSpecularShader.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/AI/ZzzAI.h"
@@ -1604,6 +1605,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 
     SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
+    CItemSpecularShader::Instance().Init();
 
 #ifdef _WIN32
     // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,
