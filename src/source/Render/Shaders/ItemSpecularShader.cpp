@@ -4,6 +4,10 @@
 // ===========================================================================
 // OpenGL 2.0 function pointers (loaded at runtime via SDL_GL_GetProcAddress)
 // ===========================================================================
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 typedef GLuint (APIENTRY* PFNGLCREATESHADERPROC)(GLenum);
 typedef void   (APIENTRY* PFNGLSHADERSOURCEPROC)(GLuint, GLsizei, const GLchar* const*, const GLint*);
 typedef void   (APIENTRY* PFNGLCOMPILESHADERPROC)(GLuint);
