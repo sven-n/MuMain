@@ -3858,7 +3858,6 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_ICE_STORM:
         UnRegisterBuff(eDeBuff_Freeze, o);
         break;
-        //  몬스터.
     case AT_SKILL_MONSTER_MAGIC_DEF:
         SetActionDestroy_Def(o);
         UnRegisterBuff(eBuff_Defense, o);
@@ -3881,6 +3880,11 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
         break;
     case AT_SKILL_ALICE_THORNS:
         UnRegisterBuff(eBuff_Thorns, o);
+        break;
+    case AT_SKILL_EXPANSION_OF_WIZARDRY:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY_STR:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY:
+        UnRegisterBuff(eBuff_SwellOfMagicPower, o);
         break;
     case AT_SKILL_ALICE_BERSERKER:
     case AT_SKILL_ALICE_BERSERKER_STR:
@@ -4864,6 +4868,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     {
         SetAttackSpeed();
         SetAction(so, PLAYER_SKILL_SWELL_OF_MP);
+
+        g_CharacterRegisterBuff(to, eBuff_SwellOfMagicPower);
 
         vec3_t vLight;
         Vector(0.3f, 0.2f, 0.9f, vLight);
@@ -15520,10 +15526,6 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
 
 void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime)
 {
-    eBuffClass buffclasstype = g_IsBuffClass(buff);
-
-    if (buffclasstype == eBuffClass_Count) return;
-
     if (!o)
     {
         return;
@@ -15534,12 +15536,21 @@ void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime)
         return;
     }
 
-    InsertBuffPhysicalEffect(buff, o);
+    eBuffClass buffclasstype = g_IsBuffClass(buff);
+
+    if (buffclasstype != eBuffClass_Count)
+    {
+        InsertBuffPhysicalEffect(buff, o);
+    }
 
     if (CheckExceptionBuff(buff, o, false))
     {
         g_CharacterRegisterBuff(o, buff);
-        InsertBuffLogicalEffect(buff, o, bufftime);
+
+        if (buffclasstype != eBuffClass_Count)
+        {
+            InsertBuffLogicalEffect(buff, o, bufftime);
+        }
     }
 }
 
@@ -15547,13 +15558,18 @@ void UnRegisterBuff(eBuffState buff, OBJECT* o)
 {
     eBuffClass buffclasstype = g_IsBuffClass(buff);
 
-    if (buffclasstype == eBuffClass_Count) return;
-
-    ClearBuffPhysicalEffect(buff, o);
+    if (buffclasstype != eBuffClass_Count)
+    {
+        ClearBuffPhysicalEffect(buff, o);
+    }
 
     if (CheckExceptionBuff(buff, o, true))
     {
         g_CharacterUnRegisterBuff(o, buff);
-        ClearBuffLogicalEffect(buff, o);
+
+        if (buffclasstype != eBuffClass_Count)
+        {
+            ClearBuffLogicalEffect(buff, o);
+        }
     }
 }
