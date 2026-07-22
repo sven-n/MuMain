@@ -1034,12 +1034,15 @@ namespace
     }
 }
 
-#ifndef _WIN32
-// Portable resolution change (issue #462). The Win32 path in ApplyResolution()
-// is entirely g_hWnd-gated and drives a synchronous WM_SIZE, neither of which
-// exists here, so the option window calls this instead. SDL owns the window;
-// resize it and apply the new dimensions immediately (SDL also posts a resize
-// event, but callers Save() config right after and must see the new size).
+// Resolution change through SDL (issue #462). SDL owns the window on every
+// platform, so resize it via SDL rather than the OS. The old Windows path in
+// ApplyResolution() drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
+// which fought SDL: it pins the min/max tracking size of a non-resizable
+// window, so a raw SetWindowPos was clamped back and the resolution never
+// changed unless a windowed/fullscreen toggle reset the style first.
+// SDL_SetWindowSize resizes regardless of the resizable flag and drives the
+// same HandleWindowResize update synchronously, so callers can Save() config
+// right after and see the size the window actually ended up with.
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed)
 {
     if (!g_sdlWindow || width == 0 || height == 0) return;
@@ -1066,9 +1069,17 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
         SDL_SetWindowFullscreen(g_sdlWindow, true);
     }
 
-    HandleWindowResize(w, h);
+    // The request is not a guarantee: the closest fullscreen mode can differ
+    // from what was asked, the borderless fallback is desktop-sized, and mode
+    // switches are asynchronous on some window managers. Settle the request,
+    // then resize the game to the size the window really got - callers persist
+    // WindowWidth/Height, and config must record what happened, not what was
+    // asked for. Logical size, matching what SDL_EVENT_WINDOW_RESIZED carries.
+    SDL_SyncWindow(g_sdlWindow);
+    int actualW = w, actualH = h;
+    SDL_GetWindowSize(g_sdlWindow, &actualW, &actualH);
+    HandleWindowResize(actualW, actualH);
 }
-#endif // !_WIN32
 
 MSG MainLoop()
 {
