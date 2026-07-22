@@ -17,7 +17,6 @@ extern int m_MusicOnOff;
 extern int m_SoundOnOff;
 extern unsigned int WindowWidth, WindowHeight;
 extern BOOL g_bUseWindowMode;
-extern HWND g_hWnd;
 void ReinitializeFonts();
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
 float ConvertX(float x);
