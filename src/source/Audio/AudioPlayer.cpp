@@ -41,6 +41,7 @@ namespace AudioPlayer
         const float gain = static_cast<float>(ClampVolume(level)) / static_cast<float>(MaxVolumeLevel);
         g_platformAudio->SetBGMVolume(gain);
     }
+
 }
 
 void StopMusic()

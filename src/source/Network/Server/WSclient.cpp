@@ -3945,7 +3945,6 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
     case AT_SKILL_ICE_STORM:
         UnRegisterBuff(eDeBuff_Freeze, o);
         break;
-        //  몬스터.
     case AT_SKILL_MONSTER_MAGIC_DEF:
         SetActionDestroy_Def(o);
         UnRegisterBuff(eBuff_Defense, o);
@@ -3968,6 +3967,11 @@ void ReceiveMagicFinish(const BYTE* ReceiveBuffer)
         break;
     case AT_SKILL_ALICE_THORNS:
         UnRegisterBuff(eBuff_Thorns, o);
+        break;
+    case AT_SKILL_EXPANSION_OF_WIZARDRY:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY_STR:
+    case AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY:
+        UnRegisterBuff(eBuff_SwellOfMagicPower, o);
         break;
     case AT_SKILL_ALICE_BERSERKER:
     case AT_SKILL_ALICE_BERSERKER_STR:
@@ -4942,6 +4946,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
     {
         SetAttackSpeed();
         SetAction(so, PLAYER_SKILL_SWELL_OF_MP);
+
+        g_CharacterRegisterBuff(to, eBuff_SwellOfMagicPower);
 
         vec3_t vLight;
         Vector(0.3f, 0.2f, 0.9f, vLight);
@@ -7354,6 +7360,10 @@ void ReceivePartyResult(const BYTE* ReceiveBuffer)
 void ReceivePartyList(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_PARTY_LISTS)ReceiveBuffer;
+    if (Data->Count > MAX_PARTYS)
+    {
+        Data->Count = MAX_PARTYS;
+    }
     int Offset = sizeof(PRECEIVE_PARTY_LISTS);
     PartyNumber = Data->Count;
     for (int i = 0; i < Data->Count; i++)
@@ -7369,6 +7379,12 @@ void ReceivePartyList(const BYTE* ReceiveBuffer)
         p->currHP = Data2->currHP;
         p->maxHP = Data2->maxHP;
         Offset += sizeof(PRECEIVE_PARTY_LIST);
+    }
+
+    for (int i = Data->Count; i < MAX_PARTYS; i++)
+    {
+        memset(&Party[i], 0, sizeof(PARTY_t));
+        Party[i].index = -1;
     }
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
@@ -7394,6 +7410,11 @@ void ReceivePartyInfo(const BYTE* ReceiveBuffer)
 void ReceivePartyLeave(const BYTE* ReceiveBuffer)
 {
     PartyNumber = 0;
+    memset(Party, 0, sizeof(Party));
+    for (int i = 0; i < MAX_PARTYS; i++)
+    {
+        Party[i].index = -1;
+    }
     g_pSystemLogBox->AddText(I18N::Game::YouHaveJustLeftTheParty, SEASON3B::TYPE_ERROR_MESSAGE);
 
     if (g_iFollowCharacter >= 0)
@@ -15812,11 +15833,6 @@ void ClearBuffPhysicalEffect(eBuffState buff, OBJECT* o)
 
 void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime)
 {
-    eBuffClass buffclasstype = g_IsBuffClass(buff);
-
-    if (buffclasstype == eBuffClass_Count)
-        return;
-
     if (!o)
     {
         return;
@@ -15827,12 +15843,21 @@ void RegisterBuff(eBuffState buff, OBJECT* o, const int bufftime)
         return;
     }
 
-    InsertBuffPhysicalEffect(buff, o);
+    eBuffClass buffclasstype = g_IsBuffClass(buff);
+
+    if (buffclasstype != eBuffClass_Count)
+    {
+        InsertBuffPhysicalEffect(buff, o);
+    }
 
     if (CheckExceptionBuff(buff, o, false))
     {
         g_CharacterRegisterBuff(o, buff);
-        InsertBuffLogicalEffect(buff, o, bufftime);
+
+        if (buffclasstype != eBuffClass_Count)
+        {
+            InsertBuffLogicalEffect(buff, o, bufftime);
+        }
     }
 }
 
@@ -15840,14 +15865,18 @@ void UnRegisterBuff(eBuffState buff, OBJECT* o)
 {
     eBuffClass buffclasstype = g_IsBuffClass(buff);
 
-    if (buffclasstype == eBuffClass_Count)
-        return;
-
-    ClearBuffPhysicalEffect(buff, o);
+    if (buffclasstype != eBuffClass_Count)
+    {
+        ClearBuffPhysicalEffect(buff, o);
+    }
 
     if (CheckExceptionBuff(buff, o, true))
     {
         g_CharacterUnRegisterBuff(o, buff);
-        ClearBuffLogicalEffect(buff, o);
+
+        if (buffclasstype != eBuffClass_Count)
+        {
+            ClearBuffLogicalEffect(buff, o);
+        }
     }
 }

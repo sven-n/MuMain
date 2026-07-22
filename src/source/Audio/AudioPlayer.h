@@ -24,4 +24,5 @@ namespace AudioPlayer
     void SetMusicVolume(int level);
 
     int ClampVolume(int level);
+
 }

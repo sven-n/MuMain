@@ -86,30 +86,115 @@ void SEASON3B::CNewUIBuffWindow::SetPos(int iScreenWidth)
     }
 }
 
+static eBuffState NormalizeBuffState(eBuffState raw)
+{
+    switch (raw)
+    {
+    case EFFECT_GREATER_LIFE_ENHANCED:
+    case EFFECT_GREATER_LIFE_MASTERED:
+        return eBuff_Life;
+    case EFFECT_MAGIC_CIRCLE_IMPROVED:
+    case EFFECT_MAGIC_CIRCLE_ENHANCED:
+        return eBuff_SwellOfMagicPower;
+    case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED:
+    case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED:
+        return eBuff_AddCriticalDamage;
+    case EFFECT_INFINITY_ARROW_IMPROVED:
+        return eBuff_InfinityArrow;
+    case EFFECT_BLIND_IMPROVED:
+        return eDeBuff_Blind;
+    case EFFECT_POISON_ARROW_IMPROVED:
+        return EFFECT_POISON_ARROW;
+    case EFFECT_BLESS_IMPROVED:
+        return EFFECT_BLESS;
+    case EFFECT_IRON_DEFENSE_IMPROVED:
+        return EFFECT_IRON_DEFENSE;
+    case EFFECT_BLOOD_HOWLING_IMPROVED:
+        return EFFECT_BLOOD_HOWLING;
+    default:
+        return raw;
+    }
+}
+
+static int BuffTier(eBuffState buf)
+{
+    switch (buf)
+    {
+    case EFFECT_GREATER_LIFE_ENHANCED:
+    case EFFECT_MAGIC_CIRCLE_IMPROVED:
+    case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED:
+    case EFFECT_INFINITY_ARROW_IMPROVED:
+    case EFFECT_BLIND_IMPROVED:
+    case EFFECT_POISON_ARROW_IMPROVED:
+    case EFFECT_BLESS_IMPROVED:
+    case EFFECT_IRON_DEFENSE_IMPROVED:
+    case EFFECT_BLOOD_HOWLING_IMPROVED:
+        return 1;
+    case EFFECT_GREATER_LIFE_MASTERED:
+    case EFFECT_MAGIC_CIRCLE_ENHANCED:
+    case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED:
+        return 2;
+    default:
+        return 0;
+    }
+}
+
 void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate)
 {
     OBJECT* pHeroObject = &Hero->Object;
-
     int iBuffSize = g_CharacterBuffSize(pHeroObject);
+
+    eBuffState top[eBuff_Count] = {};
 
     for (int i = 0; i < iBuffSize; ++i)
     {
-        eBuffState eBuffType = g_CharacterBuff(pHeroObject, i);
+        eBuffState buf = g_CharacterBuff(pHeroObject, i);
+        if (buf == eBuffNone)
+        {
+            continue;
+        }
+        if (SetDisableRenderBuff(buf))
+        {
+            continue;
+        }
 
-        if (SetDisableRenderBuff(eBuffType))	continue;
+        eBuffState base = NormalizeBuffState(buf);
+        if (top[base] == eBuffNone || BuffTier(buf) > BuffTier(top[base]))
+        {
+            top[base] = buf;
+        }
+    }
 
-        if (eBuffType != eBuffNone) {
-            eBuffClass eBuffClassType = g_IsBuffClass(eBuffType);
+    for (int i = 0; i < iBuffSize; ++i)
+    {
+        eBuffState buf = g_CharacterBuff(pHeroObject, i);
+        if (buf == eBuffNone)
+        {
+            continue;
+        }
+        if (SetDisableRenderBuff(buf))
+        {
+            continue;
+        }
 
-            if (eBuffClassType == eBuffClass_Buff) {
-                buffstate.push_front(eBuffType);
-            }
-            else if (eBuffClassType == eBuffClass_DeBuff) {
-                buffstate.push_back(eBuffType);
-            }
-            else {
-                assert(!"SetDisableRenderBuff");
-            }
+        eBuffState base = NormalizeBuffState(buf);
+        if (buf != top[base])
+        {
+            continue;
+        }
+
+        eBuffClass eBuffClassType = g_IsBuffClass(buf);
+        if (eBuffClassType == eBuffClass_Buff)
+        {
+            buffstate.push_front(buf);
+        }
+        else if (eBuffClassType == eBuffClass_DeBuff)
+        {
+            buffstate.push_back(buf);
+        }
+        else
+        {
+            continue;
         }
     }
 }
