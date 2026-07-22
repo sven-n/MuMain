@@ -23,6 +23,12 @@ What was added on top of that:
   configured maximum.
 - **Resolution combo-box clicks no longer leak through** to the checkboxes
   behind the dropdown.
+- **Resolution changes go through SDL** (PR
+  [#530](https://github.com/sven-n/MuMain/pull/530)), which makes the live
+  apply actually work in windowed mode on Windows. Windowed resizes re-center
+  the window on the display. Fullscreen picks the closest real display mode
+  (or borderless desktop when nothing matches), and the combo and
+  `config.ini` record the mode that actually resulted, not the one requested.
 
 ## What it stores in `config.ini`
 

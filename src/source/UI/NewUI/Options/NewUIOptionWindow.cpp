@@ -38,6 +38,19 @@ static const struct { int width; int height; const wchar_t* label; } s_Resolutio
     { 2560, 1440, L"2560 x 1440" },
 };
 static const int s_NumResolutions = sizeof(s_Resolutions) / sizeof(s_Resolutions[0]);
+static const int s_DefaultResolutionIndex = 8;  // the 1920 x 1080 entry above
+
+// Index into s_Resolutions of an exact size match, or -1 when the size is not
+// a listed mode (e.g. borderless desktop on an unlisted display size).
+static int FindListedResolutionIndex(int width, int height)
+{
+    for (int i = 0; i < s_NumResolutions; ++i)
+    {
+        if (s_Resolutions[i].width == width && s_Resolutions[i].height == height)
+            return i;
+    }
+    return -1;
+}
 
 // I18N locale codes (ASCII) paired with the language's display name in that
 // language. The set mirrors what ResxGen emits and what I18N::GetAvailableLocales()
@@ -346,25 +359,8 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     bool oldWindowedMode = m_bWindowedMode;
     HandleCheckboxInputs();
 
-    // Apply windowed/fullscreen toggle. SDL owns the window, so switch modes
-    // through it (MuApplyWindowResolution -> SDL_SetWindowFullscreen /
-    // SDL_SetWindowSize) rather than driving the OS directly: the old Win32
-    // ChangeDisplaySettings / SetWindowLongPtr path fought SDL and left its
-    // state inconsistent with a later resolution change. Keep the current
-    // size, apply the new mode, and let MuApplyWindowResolution drive
-    // HandleWindowResize.
     if (m_bWindowedMode != oldWindowedMode)
-    {
-        g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
-        GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);
-        GameConfig::GetInstance().Save();
-
-        MuApplyWindowResolution(WindowWidth, WindowHeight, m_bWindowedMode);
-
-        // Consume the in-flight VK_LBUTTON press so the same click doesn't
-        // toggle again next frame; the user must release and click again.
-        g_pNewKeyInput->SetKeyState(VK_LBUTTON, SEASON3B::CNewKeyInput::KEY_NONE);
-    }
+        ApplyWindowModeToggle();
 
     if (HandleVolumeSlider(m_iVolumeLevel, 104))
         OnSoundVolumeChanged();
@@ -816,12 +812,8 @@ bool SEASON3B::CNewUIOptionWindow::GetRenderAllEffects()
 
 int SEASON3B::CNewUIOptionWindow::FindCurrentResolutionIndex()
 {
-    for (int i = 0; i < s_NumResolutions; ++i)
-    {
-        if (s_Resolutions[i].width == (int)WindowWidth && s_Resolutions[i].height == (int)WindowHeight)
-            return i;
-    }
-    return 8; // default to 1920x1080
+    const int listed = FindListedResolutionIndex((int)WindowWidth, (int)WindowHeight);
+    return listed >= 0 ? listed : s_DefaultResolutionIndex;
 }
 
 int SEASON3B::CNewUIOptionWindow::FindCurrentLanguageIndex()
@@ -891,6 +883,47 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
     // Save() below records the size the user actually got.
     MuApplyWindowResolution(newWidth, newHeight, g_bUseWindowMode != FALSE);
 
+    // SDL may have coerced the request (closest fullscreen mode, borderless
+    // desktop fallback): WindowWidth/Height now hold the size that actually
+    // resulted. Persist that, and snap the combo to it so the UI never claims
+    // a resolution the display did not adopt.
+    SyncResolutionComboToWindow();
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
+}
+
+// Point the resolution combo at the mode the window really has. If the actual
+// size is not a listed mode, keep the current selection - config still
+// records the real size.
+void SEASON3B::CNewUIOptionWindow::SyncResolutionComboToWindow()
+{
+    const int listed = FindListedResolutionIndex((int)WindowWidth, (int)WindowHeight);
+    if (listed < 0)
+        return;
+    m_iResolutionIndex = listed;
+    m_ResolutionCombo.SetSelectedIndex(listed);
+}
+
+// Windowed/fullscreen toggle. SDL owns the window, so switch modes through it
+// (MuApplyWindowResolution -> SDL_SetWindowFullscreen / SDL_SetWindowSize)
+// rather than driving the OS directly: the old Win32 ChangeDisplaySettings /
+// SetWindowLongPtr path fought SDL and left its state inconsistent with a
+// later resolution change. Keeps the current size and applies the new mode.
+void SEASON3B::CNewUIOptionWindow::ApplyWindowModeToggle()
+{
+    g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
+    GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);
+
+    MuApplyWindowResolution(WindowWidth, WindowHeight, m_bWindowedMode);
+
+    // The mode switch may have coerced the size (closest fullscreen mode,
+    // borderless desktop fallback), so save AFTER the apply and persist the
+    // size that actually resulted along with the new mode.
+    SyncResolutionComboToWindow();
+    GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
+    GameConfig::GetInstance().Save();
+
+    // Consume the in-flight VK_LBUTTON press so the same click doesn't
+    // toggle again next frame; the user must release and click again.
+    g_pNewKeyInput->SetKeyState(VK_LBUTTON, SEASON3B::CNewKeyInput::KEY_NONE);
 }

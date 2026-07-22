@@ -115,6 +115,8 @@ namespace SEASON3B
         void ApplyResolution();
         int FindCurrentResolutionIndex();
         void InitResolutionCombo();
+        void SyncResolutionComboToWindow();
+        void ApplyWindowModeToggle();
 
         void ApplyLanguage();
         int FindCurrentLanguageIndex();

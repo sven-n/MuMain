@@ -1041,7 +1041,7 @@ namespace
 // changed unless a windowed/fullscreen toggle reset the style first.
 // SDL_SetWindowSize resizes regardless of the resizable flag and drives the
 // same HandleWindowResize update synchronously, so callers can Save() config
-// right after and see the new size.
+// right after and see the size the window actually ended up with.
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed)
 {
     if (!g_sdlWindow || width == 0 || height == 0) return;
@@ -1068,7 +1068,16 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
         SDL_SetWindowFullscreen(g_sdlWindow, true);
     }
 
-    HandleWindowResize(w, h);
+    // The request is not a guarantee: the closest fullscreen mode can differ
+    // from what was asked, the borderless fallback is desktop-sized, and mode
+    // switches are asynchronous on some window managers. Settle the request,
+    // then resize the game to the size the window really got - callers persist
+    // WindowWidth/Height, and config must record what happened, not what was
+    // asked for. Logical size, matching what SDL_EVENT_WINDOW_RESIZED carries.
+    SDL_SyncWindow(g_sdlWindow);
+    int actualW = w, actualH = h;
+    SDL_GetWindowSize(g_sdlWindow, &actualW, &actualH);
+    HandleWindowResize(actualW, actualH);
 }
 
 MSG MainLoop()
