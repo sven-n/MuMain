@@ -420,11 +420,13 @@ namespace MUHelper
 
         if (m_config.bSupportParty && g_pPartyManager->IsPartyActive())
         {
+            m_iCurrentBuffPartyIndex %= PartyNumber;
+
             PARTY_t* pMember = &Party[m_iCurrentBuffPartyIndex];
             CHARACTER* pChar = g_pPartyManager->GetPartyMemberChar(pMember);
+            int iBuffResult = 1;
 
             if (pChar != NULL
-                && pMember->Map == gMapManager.WorldActive
                 && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
             {
                 if (!m_config.bBuffDurationParty
@@ -434,16 +436,29 @@ namespace MUHelper
                     m_bTimerActivatedBuffOngoing = true;
                 }
 
-                if (!BuffTarget(pChar, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]))
+                iBuffResult = BuffTarget(pChar, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]);
+            }
+
+            m_iCurrentBuffPartyIndex = (m_iCurrentBuffPartyIndex + 1) % PartyNumber;
+
+            if (m_iCurrentBuffPartyIndex == 0)
+            {
+                m_iCurrentBuffIndex = (m_iCurrentBuffIndex + 1) % m_config.aiBuff.size();
+
+                // Reaching this branch means everyone's been buffed, 
+                // so we're resetting the timer activated buff flag
+                if (m_iCurrentBuffIndex == 0)
                 {
-                    return 0;
+                    m_bTimerActivatedBuffOngoing = false;
                 }
             }
 
-            m_iCurrentBuffPartyIndex = (m_iCurrentBuffPartyIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
+            return iBuffResult;
         }
         else
         {
+            m_iCurrentBuffPartyIndex = 0;
+
             if (!m_config.bBuffDuration
                 && m_config.iBuffCastInterval != 0
                 && m_iSecondsElapsed % m_config.iBuffCastInterval == 0)
@@ -605,6 +620,8 @@ namespace MUHelper
 
         if (m_config.bAutoHealParty && g_pPartyManager->IsPartyActive())
         {
+            m_iCurrentHealPartyIndex %= PartyNumber;
+
             PARTY_t* pMember = &Party[m_iCurrentHealPartyIndex];
             CHARACTER* pChar = g_pPartyManager->GetPartyMemberChar(pMember);
             int iHealResult = 1;
@@ -615,20 +632,20 @@ namespace MUHelper
                 {
                     iHealResult = HealSelf(iHealingSkill);
                 }
-                else if (pMember->Map == gMapManager.WorldActive
-                    && pMember->stepHP * 10 <= m_config.iHealPartyThreshold
+                else if (pMember->stepHP * 10 <= m_config.iHealPartyThreshold
                     && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
                 {
                     iHealResult = SimulateSkill(iHealingSkill, true, pChar->Key);
                 }
             }
 
-            m_iCurrentHealPartyIndex = (m_iCurrentHealPartyIndex + 1) % (sizeof(Party) / sizeof(Party[0]));
+            m_iCurrentHealPartyIndex = (m_iCurrentHealPartyIndex + 1) % PartyNumber;
 
             return iHealResult;
         }
         else
         {
+            m_iCurrentHealPartyIndex = 0;
             return HealSelf(iHealingSkill);
         }
 
