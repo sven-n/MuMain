@@ -10359,16 +10359,21 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 if (optionLvl < 1 || lvl < 7)
                     return &TIER_BASE;
 
-                if (lvl < 9)
-                    return &TIER_CHROME_1;
+                int nativeLvl = 0;
+                if (lvl < 9) nativeLvl = 1;
+                else if (lvl < 11) nativeLvl = 2;
+                else if (lvl < 13) nativeLvl = 3;
+                else nativeLvl = 4;
 
-                if (lvl < 11)
-                    return (optionLvl >= 2) ? &TIER_CHROME_METAL : &TIER_CHROME_1;
+                int allowedLvl = optionLvl;
+                int targetLvl = (nativeLvl < allowedLvl) ? nativeLvl : allowedLvl;
 
-                if (lvl < 13)
-                    return (optionLvl >= 3) ? &TIER_FULL_SPECULAR_V1 : &TIER_CHROME_METAL;
+                if (targetLvl == 1) return &TIER_CHROME_1;
+                if (targetLvl == 2) return &TIER_CHROME_METAL;
+                if (targetLvl == 3) return &TIER_FULL_SPECULAR_V1;
+                if (targetLvl >= 4) return &TIER_FULL_SPECULAR_V2;
 
-                return (optionLvl >= 4) ? &TIER_FULL_SPECULAR_V2 : &TIER_FULL_SPECULAR_V1;
+                return &TIER_BASE;
             };
 
             const ItemPassPipeline *pipeline =
@@ -10378,13 +10383,13 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 bool bUsedShader = false;
                 if (CItemSpecularShader::Instance().IsSupported() && b->NumMeshs > 0) {
                     EShaderVariant variant = SHADER_VARIANT_CHROME_1;
-                    if      (Level >= 13) variant = SHADER_VARIANT_FULL_SPECULAR_V2;
-                    else if (Level >= 11) variant = SHADER_VARIANT_FULL_SPECULAR_V1;
-                    else if (Level >= 9)  variant = SHADER_VARIANT_CHROME_METAL;
+                    if      (pipeline == &TIER_FULL_SPECULAR_V2) variant = SHADER_VARIANT_FULL_SPECULAR_V2;
+                    else if (pipeline == &TIER_FULL_SPECULAR_V1) variant = SHADER_VARIANT_FULL_SPECULAR_V1;
+                    else if (pipeline == &TIER_CHROME_METAL)     variant = SHADER_VARIANT_CHROME_METAL;
 
                     GLuint baseTex       = Bitmaps[b->IndexTexture[0]].TextureNumber;
-                    GLuint animChromeTex = (Level >= 11) ? Bitmaps[BITMAP_CHROME2].TextureNumber : 0;
-                    GLuint metalTex      = (Level >= 9)  ? Bitmaps[BITMAP_SHINY].TextureNumber  : 0;
+                    GLuint animChromeTex = (variant == SHADER_VARIANT_FULL_SPECULAR_V1 || variant == SHADER_VARIANT_FULL_SPECULAR_V2) ? Bitmaps[BITMAP_CHROME2].TextureNumber : 0;
+                    GLuint metalTex      = (variant == SHADER_VARIANT_CHROME_METAL || variant == SHADER_VARIANT_FULL_SPECULAR_V1 || variant == SHADER_VARIANT_FULL_SPECULAR_V2) ? Bitmaps[BITMAP_SHINY].TextureNumber  : 0;
                     GLuint chrome1Tex    = Bitmaps[BITMAP_CHROME].TextureNumber;
 
                     Vector(Light[0] * pipeline->bodyLightScale,
