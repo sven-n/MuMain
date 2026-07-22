@@ -976,14 +976,30 @@ void CMapEditorUI::RenderHeightTab()
         ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "off (walk freely)");
     }
 
-    ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f),
-                       "Left-click raises the ground, right-click lowers it.");
+    ImGui::Checkbox("Fixed height (flatten to a value)", &m_bHeightFixedMode);
+    if (m_bHeightFixedMode)
+        ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f),
+                           "Left-click flattens tiles to the value below.\nRight-click samples the height under the cursor into it.");
+    else
+        ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f),
+                           "Left-click raises the ground, right-click lowers it.");
     ImGui::Separator();
 
     ImGui::SetNextItemWidth(200.0f);
     ImGui::SliderInt("Brush radius", &m_heightBrush, 1, 12, "%d tiles");
-    ImGui::SetNextItemWidth(200.0f);
-    ImGui::SliderFloat("Strength", &m_heightStrength, 1.0f, 40.0f, "%.0f");
+    if (m_bHeightFixedMode)
+    {
+        // Height is stored as one byte * factor on save, so the ceiling is 255*factor.
+        const float factor = (gMapManager.WorldActive == WD_55LOGINSCENE) ? 3.0f : 1.5f;
+        ImGui::SetNextItemWidth(200.0f);
+        ImGui::SliderFloat("Target height", &m_heightFixedValue, 0.0f, 255.0f * factor, "%.0f");
+        ImGui::TextDisabled("Tip: right-click a tile to copy its height here.");
+    }
+    else
+    {
+        ImGui::SetNextItemWidth(200.0f);
+        ImGui::SliderFloat("Strength", &m_heightStrength, 1.0f, 40.0f, "%.0f");
+    }
 
     ImGui::Separator();
     ImGui::BeginDisabled(!m_bHeightHasUndo);
@@ -1018,10 +1034,24 @@ void CMapEditorUI::SculptHeight()
         return;
     }
 
-    const bool raise = m_PaintLDown;
-    const bool lower = m_PaintRDown;
-    if (!raise && !lower)
+    const bool leftDown  = m_PaintLDown;
+    const bool rightDown = m_PaintRDown;
+    if (!leftDown && !rightDown)
     {
+        m_heightStrokeActive = false;
+        return;
+    }
+
+    // Tile under the cursor (CollisionPosition is world units).
+    const int cx = (int)(CollisionPosition[0] / TERRAIN_SCALE);
+    const int cy = (int)(CollisionPosition[1] / TERRAIN_SCALE);
+
+    // Fixed mode, right-click: sample the height under the cursor into the target.
+    // This is a read, not an edit - no undo snapshot, and it doesn't start a stroke.
+    if (m_bHeightFixedMode && rightDown && !leftDown)
+    {
+        if (cx >= 0 && cx < TERRAIN_SIZE && cy >= 0 && cy < TERRAIN_SIZE)
+            m_heightFixedValue = BackTerrainHeight[TERRAIN_INDEX(cx, cy)];
         m_heightStrokeActive = false;
         return;
     }
@@ -1033,8 +1063,23 @@ void CMapEditorUI::SculptHeight()
         m_heightStrokeActive = true;
     }
 
-    const float delta = raise ? m_heightStrength : -m_heightStrength;
-    AddTerrainHeight(CollisionPosition[0], CollisionPosition[1], delta, m_heightBrush, BackTerrainHeight);
+    if (m_bHeightFixedMode)
+    {
+        // Flatten: SET every tile in the (circular) brush to the target height.
+        const int r = m_heightBrush;
+        for (int iy = cy - r; iy <= cy + r; ++iy)
+            for (int ix = cx - r; ix <= cx + r; ++ix)
+            {
+                const float dx = (float)(ix - cx), dy = (float)(iy - cy);
+                if (dx * dx + dy * dy <= (float)(r * r))
+                    BackTerrainHeight[TERRAIN_INDEX_REPEAT(ix, iy)] = m_heightFixedValue;
+            }
+    }
+    else
+    {
+        const float delta = leftDown ? m_heightStrength : -m_heightStrength;
+        AddTerrainHeight(CollisionPosition[0], CollisionPosition[1], delta, m_heightBrush, BackTerrainHeight);
+    }
 
     // Clamp to what actually survives a save. TerrainHeight.OZB stores one byte per
     // cell as (height / factor), so the max representable height is 255 * factor.

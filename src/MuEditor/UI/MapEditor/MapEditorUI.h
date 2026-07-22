@@ -126,6 +126,8 @@ private:
     bool  m_bHeightEnabled = false;   // master: take EDIT_HEIGHT (else walk freely)
     int   m_heightBrush = 2;          // brush radius (tiles)
     float m_heightStrength = 8.0f;    // world units added per application
+    bool  m_bHeightFixedMode = false; // flatten to a target height instead of raise/lower
+    float m_heightFixedValue = 100.0f;// target height for fixed mode (world units)
     bool  m_heightStrokeActive = false;
     bool  m_bHeightHasUndo = false;
     std::vector<float> m_heightUndo;  // BackTerrainHeight snapshot before a stroke
