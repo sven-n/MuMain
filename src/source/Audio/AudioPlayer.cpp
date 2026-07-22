@@ -145,6 +145,11 @@ namespace AudioPlayer
         const float gain = static_cast<float>(ClampVolume(level)) / static_cast<float>(MaxVolumeLevel);
         MIX_SetTrackGain(g_MusicTrack, gain);
     }
+
+    MIX_Mixer* GetMixer()
+    {
+        return g_Mixer;
+    }
 }
 
 // ---------------------------------------------------------------------------
