@@ -86,32 +86,56 @@ void SEASON3B::CNewUIBuffWindow::SetPos(int iScreenWidth)
     }
 }
 
+static eBuffState NormalizeBuffState(eBuffState raw)
+{
+    switch (raw)
+    {
+    case EFFECT_GREATER_LIFE_ENHANCED:
+    case EFFECT_GREATER_LIFE_MASTERED:
+        return eBuff_Life;
+    case EFFECT_MAGIC_CIRCLE_IMPROVED:
+    case EFFECT_MAGIC_CIRCLE_ENHANCED:
+        return eBuff_SwellOfMagicPower;
+    case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED:
+    case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED:
+        return eBuff_AddCriticalDamage;
+    case EFFECT_INFINITY_ARROW_IMPROVED:
+        return eBuff_InfinityArrow;
+    case EFFECT_BLIND_IMPROVED:
+        return eDeBuff_Blind;
+    case EFFECT_POISON_ARROW_IMPROVED:
+        return EFFECT_POISON_ARROW;
+    case EFFECT_BLESS_IMPROVED:
+        return EFFECT_BLESS;
+    case EFFECT_IRON_DEFENSE_IMPROVED:
+        return EFFECT_IRON_DEFENSE;
+    case EFFECT_BLOOD_HOWLING_IMPROVED:
+        return EFFECT_BLOOD_HOWLING;
+    default:
+        return raw;
+    }
+}
+
 static int BuffTier(eBuffState buf)
 {
     switch (buf)
     {
-    case eBuff_Life: return 0;
-    case EFFECT_GREATER_LIFE_ENHANCED: return 1;
-    case EFFECT_GREATER_LIFE_MASTERED: return 2;
-    case eBuff_SwellOfMagicPower: return 0;
-    case EFFECT_MAGIC_CIRCLE_IMPROVED: return 1;
-    case EFFECT_MAGIC_CIRCLE_ENHANCED: return 2;
-    case eBuff_AddCriticalDamage: return 0;
-    case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED: return 1;
-    case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED: return 2;
-    case eBuff_InfinityArrow: return 0;
-    case EFFECT_INFINITY_ARROW_IMPROVED: return 1;
-    case eDeBuff_Blind: return 0;
-    case EFFECT_BLIND_IMPROVED: return 1;
-    case EFFECT_POISON_ARROW: return 0;
-    case EFFECT_POISON_ARROW_IMPROVED: return 1;
-    case EFFECT_BLESS: return 0;
-    case EFFECT_BLESS_IMPROVED: return 1;
-    case EFFECT_IRON_DEFENSE: return 0;
-    case EFFECT_IRON_DEFENSE_IMPROVED: return 1;
-    case EFFECT_BLOOD_HOWLING: return 0;
-    case EFFECT_BLOOD_HOWLING_IMPROVED: return 1;
-    default: return 0;
+    case EFFECT_GREATER_LIFE_ENHANCED:
+    case EFFECT_MAGIC_CIRCLE_IMPROVED:
+    case EFFECT_GREATER_CRITICAL_DAMAGE_EXTENDED:
+    case EFFECT_INFINITY_ARROW_IMPROVED:
+    case EFFECT_BLIND_IMPROVED:
+    case EFFECT_POISON_ARROW_IMPROVED:
+    case EFFECT_BLESS_IMPROVED:
+    case EFFECT_IRON_DEFENSE_IMPROVED:
+    case EFFECT_BLOOD_HOWLING_IMPROVED:
+        return 1;
+    case EFFECT_GREATER_LIFE_MASTERED:
+    case EFFECT_MAGIC_CIRCLE_ENHANCED:
+    case EFFECT_GREATER_CRITICAL_DAMAGE_MASTERED:
+        return 2;
+    default:
+        return 0;
     }
 }
 
@@ -135,7 +159,7 @@ void SEASON3B::CNewUIBuffWindow::BuffSort(std::list<eBuffState>& buffstate)
         }
 
         eBuffState base = NormalizeBuffState(buf);
-        if (BuffTier(buf) > BuffTier(top[base]))
+        if (top[base] == eBuffNone || BuffTier(buf) > BuffTier(top[base]))
         {
             top[base] = buf;
         }
