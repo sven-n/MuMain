@@ -13,12 +13,16 @@
 #include <cstring>
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 
-// UI Layout constants
+// UI Layout constants. The pixel sizes are multiplied by the editor UI scale so
+// the toolbar grows with the -/+ buttons instead of clipping its own contents.
 constexpr float TOOLBAR_HEIGHT = 40.0f;
 constexpr float TOOLBAR_PADDING = 8.0f;
 constexpr float TOOLBAR_INDENT = 10.0f;
 constexpr float BUTTON_WIDTH_OFFSET = 110.0f;
 constexpr int MOUSE_BUTTON_LEFT = 0;
+
+// Step used by the toolbar's -/+ editor-UI-scale buttons.
+constexpr float UI_SCALE_STEP = 0.1f;
 
 CMuEditorUI& CMuEditorUI::GetInstance()
 {
@@ -26,11 +30,11 @@ CMuEditorUI& CMuEditorUI::GetInstance()
     return instance;
 }
 
-void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showConsole)
+void CMuEditorUI::RenderToolbar(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor, bool& showConsole)
 {
     if (editorEnabled)
     {
-        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showConsole);
+        RenderToolbarFull(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showMapEditor, showConsole);
     }
     else
     {
@@ -48,7 +52,8 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     io.WantCaptureMouse = false;
     io.WantCaptureKeyboard = false;
 
-    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, TOOLBAR_HEIGHT), ImGuiCond_Always);
+    const float uiScale = g_MuEditorCore.GetUIScale();
+    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, TOOLBAR_HEIGHT * uiScale), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 
     // NoInputs prevents ImGui from capturing mouse/keyboard, allowing game cursor to work
@@ -67,7 +72,7 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
         ImGui::Indent(TOOLBAR_INDENT);
 
         // Open button on the far right (same position as Close button)
-        ImGui::SameLine(ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET);
+        ImGui::SameLine(ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET * uiScale);
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.3f, 1.0f));
 
@@ -112,9 +117,10 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     ImGui::PopStyleColor(2);
 }
 
-void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showConsole)
+void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor, bool& showMapEditor, bool& showConsole)
 {
-    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, TOOLBAR_HEIGHT), ImGuiCond_Always);
+    const float uiScale = g_MuEditorCore.GetUIScale();
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x, TOOLBAR_HEIGHT * uiScale), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
@@ -152,6 +158,26 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, b
         {
             showDevEditor = !showDevEditor;
         }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Map Editor"))
+        {
+            showMapEditor = !showMapEditor;
+        }
+
+        // Global editor UI scale (affects every MuEditor window, not just this one).
+        ImGui::SameLine();
+        if (ImGui::Button("-##uiscale"))
+            g_MuEditorCore.SetUIScale(g_MuEditorCore.GetUIScale() - UI_SCALE_STEP);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Smaller editor UI");
+        ImGui::SameLine();
+        ImGui::Text("%d%%", (int)(g_MuEditorCore.GetUIScale() * 100.0f + 0.5f));
+        ImGui::SameLine();
+        if (ImGui::Button("+##uiscale"))
+            g_MuEditorCore.SetUIScale(g_MuEditorCore.GetUIScale() + UI_SCALE_STEP);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Bigger editor UI");
 
         // Console toggle
         ImGui::SameLine();
@@ -197,7 +223,7 @@ void CMuEditorUI::RenderToolbarFull(bool& editorEnabled, bool& showItemEditor, b
         }
 
         // Close button on the far right
-        ImGui::SameLine(ImGui::GetWindowWidth() - 110);
+        ImGui::SameLine(ImGui::GetWindowWidth() - BUTTON_WIDTH_OFFSET * uiScale);
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
         if (ImGui::Button("Close Editor"))
