@@ -4,6 +4,7 @@
 #include "Camera/CameraMove.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Shaders/ItemSpecularShader.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -10313,74 +10314,120 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         }
         else if (g_pOption->GetRenderLevel())
         {
-            if (Level < 8 && g_pOption->GetRenderLevel() >= 1)  //  +7
-            {
-                Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
-            }
-            else if (Level < 9 && g_pOption->GetRenderLevel() >= 1)  //  +8
-            {
-                Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
-            }
-            else if (Level < 10 && g_pOption->GetRenderLevel() >= 2) //  +9
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 11 && g_pOption->GetRenderLevel() >= 2) //  +10
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 12 && g_pOption->GetRenderLevel() >= 3) //  +11
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 13 && g_pOption->GetRenderLevel() >= 3) //  +12
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 14 && g_pOption->GetRenderLevel() >= 4) //  +13
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 15 && g_pOption->GetRenderLevel() >= 4) //  +14
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 16 && g_pOption->GetRenderLevel() >= 4) //  +15
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else
-            {
+            struct RenderPassSpec {
+                int renderTypeFlags;
+                float alphaScale;
+                float bright;
+                bool useColor2;
+            };
+
+            struct ItemPassPipeline {
+                float bodyLightScale;
+                size_t passCount;
+                std::array<RenderPassSpec, 3> extraPasses;
+            };
+
+            static constexpr ItemPassPipeline TIER_BASE = {1.0f, 0, {}};
+
+            static constexpr ItemPassPipeline TIER_CHROME_1 = {
+                0.8f, 1, {{{RENDER_CHROME | RENDER_BRIGHT, 1.0f, 1.0f, false}}}};
+
+            static constexpr ItemPassPipeline TIER_CHROME_METAL = {
+                0.9f,
+                2,
+                {{{RENDER_CHROME | RENDER_BRIGHT, 1.0f, 1.0f, false},
+                  {RENDER_METAL | RENDER_BRIGHT, 1.0f, 1.0f, false}}}};
+
+            static constexpr ItemPassPipeline TIER_FULL_SPECULAR_V1 = {
+                0.9f,
+                3,
+                {{{RENDER_CHROME2 | RENDER_BRIGHT, 1.0f, 1.0f, true},
+                  {RENDER_METAL | RENDER_BRIGHT, 1.0f, 1.0f, false},
+                  {RENDER_CHROME | RENDER_BRIGHT, 1.0f, 1.0f, false}}}};
+
+            static constexpr ItemPassPipeline TIER_FULL_SPECULAR_V2 = {
+                0.9f,
+                3,
+                {{{RENDER_CHROME4 | RENDER_BRIGHT, 1.0f, 1.0f, true},
+                  {RENDER_METAL | RENDER_BRIGHT, 1.0f, 1.0f, false},
+                  {RENDER_CHROME | RENDER_BRIGHT, 1.0f, 1.0f, false}}}};
+
+            auto GetPipeline = [](int lvl, int optionLvl, const OBJECT* obj) -> const ItemPassPipeline * {
+                if (obj && obj->Distance > 1200.0f)
+                    return &TIER_BASE;
+
+                if (optionLvl < 1 || lvl < 7)
+                    return &TIER_BASE;
+
+                int nativeLvl = 0;
+                if (lvl < 9) nativeLvl = 1;
+                else if (lvl < 11) nativeLvl = 2;
+                else if (lvl < 13) nativeLvl = 3;
+                else nativeLvl = 4;
+
+                int allowedLvl = optionLvl;
+                int targetLvl = (nativeLvl < allowedLvl) ? nativeLvl : allowedLvl;
+
+                if (targetLvl == 1) return &TIER_CHROME_1;
+                if (targetLvl == 2) return &TIER_CHROME_METAL;
+                if (targetLvl == 3) return &TIER_FULL_SPECULAR_V1;
+                if (targetLvl >= 4) return &TIER_FULL_SPECULAR_V2;
+
+                return &TIER_BASE;
+            };
+
+            const ItemPassPipeline *pipeline =
+                GetPipeline(Level, g_pOption->GetRenderLevel(), o);
+
+            if (pipeline->passCount > 0) {
+                bool bUsedShader = false;
+                if (CItemSpecularShader::Instance().IsSupported() && b->NumMeshs > 0) {
+                    EShaderVariant variant = SHADER_VARIANT_CHROME_1;
+                    if      (pipeline == &TIER_FULL_SPECULAR_V2) variant = SHADER_VARIANT_FULL_SPECULAR_V2;
+                    else if (pipeline == &TIER_FULL_SPECULAR_V1) variant = SHADER_VARIANT_FULL_SPECULAR_V1;
+                    else if (pipeline == &TIER_CHROME_METAL)     variant = SHADER_VARIANT_CHROME_METAL;
+
+                    GLuint baseTex       = Bitmaps[b->IndexTexture[0]].TextureNumber;
+                    GLuint animChromeTex = (variant == SHADER_VARIANT_FULL_SPECULAR_V1 || variant == SHADER_VARIANT_FULL_SPECULAR_V2) ? Bitmaps[BITMAP_CHROME2].TextureNumber : 0;
+                    GLuint metalTex      = (variant == SHADER_VARIANT_CHROME_METAL || variant == SHADER_VARIANT_FULL_SPECULAR_V1 || variant == SHADER_VARIANT_FULL_SPECULAR_V2) ? Bitmaps[BITMAP_SHINY].TextureNumber  : 0;
+                    GLuint chrome1Tex    = Bitmaps[BITMAP_CHROME].TextureNumber;
+
+                    Vector(Light[0] * pipeline->bodyLightScale,
+                           Light[1] * pipeline->bodyLightScale,
+                           Light[2] * pipeline->bodyLightScale, b->BodyLight);
+
+                    int prepassFlags = RENDER_CHROME;
+                    if (variant == SHADER_VARIANT_FULL_SPECULAR_V1) prepassFlags = RENDER_CHROME2;
+                    else if (variant == SHADER_VARIANT_FULL_SPECULAR_V2) prepassFlags = RENDER_CHROME4;
+                    CItemSpecularShader::Instance().SetChromePrepassFlags(prepassFlags);
+
+                    bUsedShader = CItemSpecularShader::Instance().Begin(
+                        variant, baseTex, animChromeTex, metalTex, chrome1Tex, b->BodyLight);
+                    if (bUsedShader) {
+                        RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+                        CItemSpecularShader::Instance().End();
+                        CItemSpecularShader::Instance().SetChromePrepassFlags(0);
+                    } else {
+                        CItemSpecularShader::Instance().SetChromePrepassFlags(0);
+                    }
+                }
+
+                if (!bUsedShader) {
+                    Vector(Light[0] * pipeline->bodyLightScale,
+                           Light[1] * pipeline->bodyLightScale,
+                           Light[2] * pipeline->bodyLightScale, b->BodyLight);
+                    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+
+                    for (size_t i = 0; i < pipeline->passCount; ++i) {
+                        const auto &pass = pipeline->extraPasses[i];
+                        int passFlags = pass.renderTypeFlags | (RenderType & RENDER_EXTRA);
+                        if (pass.useColor2)
+                            RenderPartObjectBodyColor2(b, o, Type, pass.alphaScale, passFlags, pass.bright);
+                        else
+                            RenderPartObjectBodyColor(b, o, Type, Alpha * pass.alphaScale, passFlags, pass.bright);
+                    }
+                }
+            } else {
                 VectorCopy(Light, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
             }

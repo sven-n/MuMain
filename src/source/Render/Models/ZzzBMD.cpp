@@ -27,6 +27,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "SMD.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Shaders/ItemSpecularShader.h"
 
 #include "UI/Legacy/UIMng.h"
 #include "Camera/CameraMove.h"
@@ -51,6 +52,8 @@ vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
 vec3_t RenderArrayVertices[MAX_VERTICES * 3];
 vec4_t RenderArrayColors[MAX_VERTICES * 3];
 vec2_t RenderArrayTexCoords[MAX_VERTICES * 3];
+vec2_t RenderArrayTexCoords1[MAX_VERTICES * 3];
+vec2_t RenderArrayTexCoords2[MAX_VERTICES * 3];
 
 bool  StopMotion = false;
 thread_local float ParentMatrix[3][4];
@@ -1337,9 +1340,43 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         || finalRenderFlags == RENDER_CHROME4
         || finalRenderFlags == RENDER_OIL;
 
+    bool bShaderActive = CItemSpecularShader::Instance().GetActiveVariant() != SHADER_VARIANT_NONE;
+
+    static float g_chrome_static[MAX_VERTICES + 1][2];
+    if (bShaderActive)
+    {
+        const int prepassFlags = CItemSpecularShader::Instance().GetChromePrepassFlags();
+        const float Wave2s  = (int)WorldTime % 5000 * 0.00024f - 0.4f;
+        const float waveLoc = static_cast<long>(WorldTime) % 10000 * 0.0001f;
+        const vec3_t Lp = { (float)cos(WorldTime * 0.001f), (float)sin(WorldTime * 0.002f), 1.f };
+        for (int j = 0; j < m->NumNormals; j++)
+        {
+            if (j > MAX_VERTICES) break;
+            const auto n = NormalTransform[meshIndex][j];
+            g_chrome_static[j][0] = n[0] * 0.5f + 0.5f;
+            g_chrome_static[j][1] = n[1] * 0.5f + 0.5f;
+            if ((prepassFlags & RENDER_CHROME4) == RENDER_CHROME4)
+            {
+                g_chrome[j][0] = DotProduct(n, Lp);
+                g_chrome[j][1] = 1.f - DotProduct(n, Lp);
+                g_chrome[j][1] -= n[2] * 0.5f + waveLoc * 3.f;
+                g_chrome[j][0] += n[1] * 0.5f + Lp[1] * 3.f;
+            }
+            else if ((prepassFlags & RENDER_CHROME2) == RENDER_CHROME2)
+            {
+                g_chrome[j][0] = (n[2] + n[0]) * 0.8f + Wave2s * 2.f;
+                g_chrome[j][1] = (n[1] + n[0]) * 1.0f + Wave2s * 3.f;
+            }
+            else
+            {
+                g_chrome[j][0] = n[2] * 0.5f + waveLoc;
+                g_chrome[j][1] = n[1] * 0.5f + waveLoc * 2.f;
+            }
+        }
+    }
+
     glEnableClientState(GL_VERTEX_ARRAY);
     if (enableColor) glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     auto vertices = RenderArrayVertices;
     auto colors = RenderArrayColors;
@@ -1363,6 +1400,14 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             texCoords[target_vertex_index][1] = texco.TexCoordV;
 
             int normalIndex = triangle->NormalIndex[k];
+            if (bShaderActive)
+            {
+                RenderArrayTexCoords1[target_vertex_index][0] = g_chrome[normalIndex][0];
+                RenderArrayTexCoords1[target_vertex_index][1] = g_chrome[normalIndex][1];
+                RenderArrayTexCoords2[target_vertex_index][0] = g_chrome_static[normalIndex][0];
+                RenderArrayTexCoords2[target_vertex_index][1] = g_chrome_static[normalIndex][1];
+            }
+
             switch (finalRenderFlags)
             {
                 case RENDER_TEXTURE:
@@ -1425,11 +1470,28 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
     glVertexPointer(3, GL_FLOAT, 0, vertices);
     if (enableColor) glColorPointer(4, GL_FLOAT, 0, colors);
-    glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+
+    if (bShaderActive)
+    {
+        CItemSpecularShader::Instance().SubmitTexCoords(texCoords, RenderArrayTexCoords1, RenderArrayTexCoords2);
+    }
+    else
+    {
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+    }
 
     glDrawArrays(GL_TRIANGLES, 0, m->NumTriangles * 3);
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (bShaderActive)
+    {
+        CItemSpecularShader::Instance().DisableTexCoords();
+    }
+    else
+    {
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
+
     if (enableColor) glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 }
