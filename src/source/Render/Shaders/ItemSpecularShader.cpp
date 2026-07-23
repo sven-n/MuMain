@@ -60,7 +60,7 @@ void main()
 )";
 
 // ===========================================================================
-// Variant 1 (+7/+8): Base*light  +  Chrome1(static)
+// Variant 1 (+7/+8): Base*light  +  Chrome1(water ripple anim UV)
 // ===========================================================================
 static const char* g_szFrag_V1 = R"(
 #version 120
@@ -68,17 +68,17 @@ uniform sampler2D u_BaseTex;
 uniform sampler2D u_Chrome1Tex;
 uniform vec3 u_BodyLight;
 varying vec2 v_TexCoord0;
-varying vec2 v_TexCoord2;
+varying vec2 v_TexCoord1;
 void main()
 {
     vec4 base    = texture2D(u_BaseTex,    v_TexCoord0);
-    vec4 chrome1 = texture2D(u_Chrome1Tex, v_TexCoord2);
+    vec4 chrome1 = texture2D(u_Chrome1Tex, v_TexCoord1);
     gl_FragColor = vec4(base.rgb * u_BodyLight + chrome1.rgb, base.a);
 }
 )";
 
 // ===========================================================================
-// Variant 2 (+9/+10): Base*light  +  Chrome1(static)  +  Metal(static)
+// Variant 2 (+9/+10): Base*light  +  Chrome1(water ripple anim UV)  +  Metal(1.8x boosted MatCap reflection)
 // ===========================================================================
 static const char* g_szFrag_V2 = R"(
 #version 120
@@ -87,18 +87,19 @@ uniform sampler2D u_Chrome1Tex;
 uniform sampler2D u_MetalTex;
 uniform vec3 u_BodyLight;
 varying vec2 v_TexCoord0;
+varying vec2 v_TexCoord1;
 varying vec2 v_TexCoord2;
 void main()
 {
     vec4 base    = texture2D(u_BaseTex,    v_TexCoord0);
-    vec4 chrome1 = texture2D(u_Chrome1Tex, v_TexCoord2);
+    vec4 chrome1 = texture2D(u_Chrome1Tex, v_TexCoord1);
     vec4 metal   = texture2D(u_MetalTex,   v_TexCoord2);
-    gl_FragColor = vec4(base.rgb * u_BodyLight + chrome1.rgb + metal.rgb, base.a);
+    gl_FragColor = vec4(base.rgb * u_BodyLight + chrome1.rgb + metal.rgb * 1.8, base.a);
 }
 )";
 
 // ===========================================================================
-// Variant 3 (+11/+12): Base*light  +  Chrome2(CHROME2-mode UV)  +  Metal(static)  +  Chrome1(static)
+// Variant 3 (+11/+12): Base*light  +  Chrome2(CHROME2-mode UV)  +  Metal(MatCap reflection)  +  Chrome1(static)
 // ===========================================================================
 static const char* g_szFrag_V3 = R"(
 #version 120
@@ -121,7 +122,7 @@ void main()
 )";
 
 // ===========================================================================
-// Variant 4 (+13/+15): Base*light  +  Chrome2(CHROME4-mode UV)  +  Metal(static)  +  Chrome1(static)
+// Variant 4 (+13/+15): Base*light  +  Chrome2(CHROME4-mode UV)  +  Metal(MatCap reflection)  +  Chrome1(static)
 // ===========================================================================
 static const char* g_szFrag_V4 = R"(
 #version 120
@@ -271,16 +272,16 @@ bool CItemSpecularShader::Begin(EShaderVariant variant,
 
     if (variant == SHADER_VARIANT_CHROME_1)
     {
-        fn_glActiveTexture(GL_TEXTURE2);
+        fn_glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, chrome1Tex);
     }
     else if (variant == SHADER_VARIANT_CHROME_METAL)
     {
         fn_glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, chrome1Tex);
+        glBindTexture(GL_TEXTURE_2D, metalTex);
 
         fn_glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, metalTex);
+        glBindTexture(GL_TEXTURE_2D, chrome1Tex);
     }
     else
     {
@@ -339,6 +340,7 @@ void CItemSpecularShader::DisableTexCoords()
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
     fn_glClientActiveTexture(GL_TEXTURE0);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void CItemSpecularShader::End()
@@ -346,6 +348,21 @@ void CItemSpecularShader::End()
     if (!IsSupported() || m_activeVariant == SHADER_VARIANT_NONE) return;
 
     DisableTexCoords();
+
+    if (fn_glActiveTexture)
+    {
+        fn_glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        fn_glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        fn_glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        fn_glActiveTexture(GL_TEXTURE0);
+    }
+
     fn_glUseProgram(0);
     m_activeVariant = SHADER_VARIANT_NONE;
 }

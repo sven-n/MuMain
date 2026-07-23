@@ -1353,8 +1353,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         {
             if (j > MAX_VERTICES) break;
             const auto n = NormalTransform[meshIndex][j];
-            g_chrome_static[j][0] = n[2] * 0.5f + waveLoc;
-            g_chrome_static[j][1] = n[1] * 0.5f + waveLoc * 2.f;
+            g_chrome_static[j][0] = n[0] * 0.5f + 0.5f;
+            g_chrome_static[j][1] = n[1] * 0.5f + 0.5f;
             if ((prepassFlags & RENDER_CHROME4) == RENDER_CHROME4)
             {
                 g_chrome[j][0] = DotProduct(n, Lp);
@@ -1369,8 +1369,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             }
             else
             {
-                g_chrome[j][0] = g_chrome_static[j][0];
-                g_chrome[j][1] = g_chrome_static[j][1];
+                g_chrome[j][0] = n[2] * 0.5f + waveLoc;
+                g_chrome[j][1] = n[1] * 0.5f + waveLoc * 2.f;
             }
         }
     }
