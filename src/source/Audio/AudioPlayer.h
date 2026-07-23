@@ -5,6 +5,8 @@
 // are declared in Winmain.h to preserve existing call sites; their
 // definitions live in AudioPlayer.cpp.
 
+typedef struct MIX_Mixer MIX_Mixer;
+
 namespace AudioPlayer
 {
     // Music volume levels are stored as a 0..MaxVolumeLevel scale in
@@ -25,4 +27,9 @@ namespace AudioPlayer
     void SetMusicVolume(int level);
 
     int ClampVolume(int level);
+
+    // The shared SDL mixer device, so other audio consumers (the sound-effect
+    // backend) reuse it instead of opening a second device.  Null before
+    // Initialize(), after Shutdown(), or when initialization failed.
+    MIX_Mixer* GetMixer();
 }

@@ -359,6 +359,9 @@ typedef int64_t  INT64;
 #ifndef S_OK
 #define S_OK          (static_cast<HRESULT>(0))
 #endif
+#ifndef S_FALSE
+#define S_FALSE       (static_cast<HRESULT>(1))
+#endif
 #ifndef E_FAIL
 #define E_FAIL        (static_cast<HRESULT>(0x80004005))
 #endif
