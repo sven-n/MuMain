@@ -19,6 +19,8 @@ SEASON3B::CNewUIChatCommandWindow::CNewUIChatCommandWindow()
     m_Pos.y = 0;
     m_selectedIndex = -1;
     m_scrollOffset = 0;
+    m_pValueInput = NULL;
+    m_editedParameter = -1;
 }
 
 SEASON3B::CNewUIChatCommandWindow::~CNewUIChatCommandWindow()
@@ -34,6 +36,13 @@ bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_COMMAND_LIST, this);
 
+    m_pValueInput = new CUITextInputBox;
+    m_pValueInput->Init(g_hWnd, 150, 14, 60);
+    m_pValueInput->SetTextColor(255, 255, 230, 210);
+    m_pValueInput->SetBackColor(128, 0, 0, 25);
+    m_pValueInput->SetFont(g_hFont);
+    m_pValueInput->SetState(UISTATE_HIDE);
+
     SetPos(x, y);
     Show(false);
 
@@ -42,6 +51,8 @@ bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, 
 
 void SEASON3B::CNewUIChatCommandWindow::Release()
 {
+    SAFE_DELETE(m_pValueInput);
+
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
@@ -74,6 +85,7 @@ void SEASON3B::CNewUIChatCommandWindow::OpenningProcess()
 
 void SEASON3B::CNewUIChatCommandWindow::ClosingProcess()
 {
+    StopEditing();
 }
 
 const ChatCommand* SEASON3B::CNewUIChatCommandWindow::GetSelectedCommand() const
@@ -89,6 +101,7 @@ const ChatCommand* SEASON3B::CNewUIChatCommandWindow::GetSelectedCommand() const
 
 void SEASON3B::CNewUIChatCommandWindow::SelectCommand(int index)
 {
+    StopEditing();
     m_selectedIndex = index;
     m_parameterValues.clear();
 
@@ -116,6 +129,53 @@ std::vector<std::wstring> SEASON3B::CNewUIChatCommandWindow::SplitValidValues(co
     }
 
     return result;
+}
+
+bool SEASON3B::CNewUIChatCommandWindow::HasFixedValues(const GameLogic::Commands::ChatCommandParameter& parameter)
+{
+    return !parameter.ValidValues.empty();
+}
+
+void SEASON3B::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIndex)
+{
+    CommitEditedValue();
+
+    const auto* command = GetSelectedCommand();
+    if (command == NULL || parameterIndex >= command->Parameters.size() || m_pValueInput == NULL)
+    {
+        return;
+    }
+
+    m_editedParameter = static_cast<int>(parameterIndex);
+    const auto rowY = m_Pos.y + 30 + VISIBLE_ROWS * static_cast<int>(ROW_HEIGHT) + 40
+        + static_cast<int>(parameterIndex) * static_cast<int>(ROW_HEIGHT);
+    m_pValueInput->SetPosition(m_Pos.x + 155, rowY);
+    m_pValueInput->SetText(m_parameterValues[parameterIndex].c_str());
+    m_pValueInput->SetState(UISTATE_NORMAL);
+    m_pValueInput->GiveFocus();
+}
+
+void SEASON3B::CNewUIChatCommandWindow::CommitEditedValue()
+{
+    if (m_editedParameter < 0 || m_pValueInput == NULL
+        || static_cast<size_t>(m_editedParameter) >= m_parameterValues.size())
+    {
+        return;
+    }
+
+    wchar_t text[64] = { 0 };
+    m_pValueInput->GetText(text, 64);
+    m_parameterValues[m_editedParameter] = text;
+}
+
+void SEASON3B::CNewUIChatCommandWindow::StopEditing()
+{
+    CommitEditedValue();
+    m_editedParameter = -1;
+    if (m_pValueInput != NULL)
+    {
+        m_pValueInput->SetState(UISTATE_HIDE);
+    }
 }
 
 void SEASON3B::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterIndex)
@@ -151,6 +211,8 @@ void SEASON3B::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterInde
 
 void SEASON3B::CNewUIChatCommandWindow::ExecuteSelectedCommand()
 {
+    CommitEditedValue();
+
     const auto* command = GetSelectedCommand();
     if (command == NULL)
     {
@@ -203,7 +265,16 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
             if (CheckMouseIn(m_Pos.x + 10, rowY, static_cast<int>(WINDOW_WIDTH) - 20, static_cast<int>(ROW_HEIGHT))
                 && IsRelease(VK_LBUTTON))
             {
-                CycleParameterValue(i);
+                if (HasFixedValues(command->Parameters[i]))
+                {
+                    StopEditing();
+                    CycleParameterValue(i);
+                }
+                else
+                {
+                    BeginEditingParameter(i);
+                }
+
                 PlayBuffer(SOUND_CLICK01);
                 return false;
             }
@@ -234,9 +305,24 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateKeyEvent()
 
     if (IsPress(VK_ESCAPE) == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND_LIST);
+        // The first escape leaves the field, the next one closes the window.
+        if (m_editedParameter >= 0)
+        {
+            StopEditing();
+        }
+        else
+        {
+            g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND_LIST);
+        }
+
         PlayBuffer(SOUND_CLICK01);
         return false;
+    }
+
+    if (m_pValueInput != NULL && m_pValueInput->HaveFocus())
+    {
+        // Everything else is typed into the field.
+        return true;
     }
 
     const auto commandCount = static_cast<int>(Catalog().GetCommands().size());
@@ -278,6 +364,11 @@ bool SEASON3B::CNewUIChatCommandWindow::Render()
     RenderFrame();
     RenderCommandList();
     RenderSelectedCommand();
+
+    if (m_editedParameter >= 0 && m_pValueInput != NULL)
+    {
+        m_pValueInput->Render();
+    }
 
     DisableAlphaBlend();
     return true;
@@ -362,7 +453,10 @@ void SEASON3B::CNewUIChatCommandWindow::RenderSelectedCommand()
         }
 
         g_pRenderText->RenderText(m_Pos.x + 10, y, parameter.Name.c_str(), 140, 0);
-        g_pRenderText->RenderText(m_Pos.x + 155, y, value.empty() ? parameter.ValidValues.c_str() : value.c_str(), static_cast<int>(WINDOW_WIDTH) - 165, 0);
+        if (m_editedParameter != static_cast<int>(i))
+        {
+            g_pRenderText->RenderText(m_Pos.x + 155, y, value.empty() ? parameter.ValidValues.c_str() : value.c_str(), static_cast<int>(WINDOW_WIDTH) - 165, 0);
+        }
         y += static_cast<int>(ROW_HEIGHT);
     }
 

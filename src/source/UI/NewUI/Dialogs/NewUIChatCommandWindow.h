@@ -5,6 +5,7 @@
 
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/Legacy/UIControls.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
 
 namespace SEASON3B
@@ -55,6 +56,12 @@ namespace SEASON3B
         // Steps to the next accepted value of a parameter which has a limited
         // set of them, so that no text has to be entered for it.
         void CycleParameterValue(size_t parameterIndex);
+        // Moves the text box onto a parameter which takes a free value.
+        void BeginEditingParameter(size_t parameterIndex);
+        // Takes what was typed over into the value of the edited parameter.
+        void CommitEditedValue();
+        void StopEditing();
+        static bool HasFixedValues(const GameLogic::Commands::ChatCommandParameter& parameter);
         static std::vector<std::wstring> SplitValidValues(const std::wstring& validValues);
 
         void RenderFrame();
@@ -69,5 +76,8 @@ namespace SEASON3B
         int m_scrollOffset;
         // The value of each parameter of the selected command, in its order.
         std::vector<std::wstring> m_parameterValues;
+        // One box is enough: it's moved to whichever parameter is being edited.
+        CUITextInputBox* m_pValueInput;
+        int m_editedParameter;
     };
 }
