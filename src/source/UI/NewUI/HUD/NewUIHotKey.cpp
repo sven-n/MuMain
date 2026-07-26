@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "I18N/All.h"
 
 #include "UI/NewUI/HUD/NewUIHotKey.h"
@@ -262,6 +263,17 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
     {
         g_pNewUISystem->Toggle(SEASON3B::INTERFACE_HELP);
         PlayBuffer(SOUND_CLICK01);
+        return false;
+    }
+    else if (SEASON3B::IsPress(VK_F2) == true)
+    {
+        // Only servers which offer their chat commands have something to show.
+        if (GameLogic::Commands::Catalog().IsAvailable())
+        {
+            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_COMMAND_LIST);
+            PlayBuffer(SOUND_CLICK01);
+        }
+
         return false;
     }
     else if (SEASON3B::IsPress('M') == true)

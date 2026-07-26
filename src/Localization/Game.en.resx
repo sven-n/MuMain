@@ -12931,4 +12931,13 @@
   <data name="DefaultFont" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="ChatCommandsTitle" xml:space="preserve">
+    <value>Commands</value>
+  </data>
+  <data name="ChatCommandsNotSupported" xml:space="preserve">
+    <value>This server does not offer a command list.</value>
+  </data>
+  <data name="ChatCommandsExecute" xml:space="preserve">
+    <value>Execute</value>
+  </data>
 </root>

@@ -82,6 +82,7 @@ CNewUISystem::CNewUISystem()
     m_pNewOptionWindow = nullptr;
     m_pNewHeroPositionInfo = nullptr;
     m_pNewHelpWindow = nullptr;
+    m_pNewChatCommandWindow = nullptr;
     m_pNewItemExplanationWindow = nullptr;
     m_pNewSetItemExplanation = nullptr;
     m_pNewQuickCommandWindow = nullptr;
@@ -347,6 +348,12 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
     }
 
+    m_pNewChatCommandWindow = new CNewUIChatCommandWindow;
+    if (m_pNewChatCommandWindow->Create(m_pNewUIMng, 180, 80) == false)
+    {
+        return false;
+    }
+
     m_pNewHelpWindow = new CNewUIHelpWindow;
     if (m_pNewHelpWindow->Create(m_pNewUIMng, 0, 0) == false)
     {
@@ -535,6 +542,7 @@ void CNewUISystem::UnloadMainSceneInterface()
     }
 
     SAFE_DELETE(m_pNewHelpWindow);
+    SAFE_DELETE(m_pNewChatCommandWindow);
     SAFE_DELETE(m_pNewItemExplanationWindow);
     SAFE_DELETE(m_pNewSetItemExplanation);
     SAFE_DELETE(m_pNewQuickCommandWindow);
@@ -2279,6 +2287,11 @@ CNewUIHeroPositionInfo* CNewUISystem::GetUI_NewHeroPositionInfo() const
 CNewUIHelpWindow* CNewUISystem::GetUI_NewHelpWindow() const
 {
     return m_pNewHelpWindow;
+}
+
+CNewUIChatCommandWindow* CNewUISystem::GetUI_NewChatCommandWindow() const
+{
+    return m_pNewChatCommandWindow;
 }
 
 CNewUIItemExplanationWindow* CNewUISystem::GetUI_NewItemExplanationWindow() const

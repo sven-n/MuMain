@@ -1,0 +1,373 @@
+// NewUIChatCommandWindow.cpp: implementation of the CNewUIChatCommandWindow class.
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "UI/NewUI/Dialogs/NewUIChatCommandWindow.h"
+#include "UI/NewUI/NewUISystem.h"
+#include "Audio/DSPlaySound.h"
+#include "I18N/All.h"
+
+using namespace SEASON3B;
+using GameLogic::Commands::ChatCommand;
+using GameLogic::Commands::ChatCommandParameterType;
+using GameLogic::Commands::Catalog;
+
+SEASON3B::CNewUIChatCommandWindow::CNewUIChatCommandWindow()
+{
+    m_pNewUIMng = NULL;
+    m_Pos.x = 0;
+    m_Pos.y = 0;
+    m_selectedIndex = -1;
+    m_scrollOffset = 0;
+}
+
+SEASON3B::CNewUIChatCommandWindow::~CNewUIChatCommandWindow()
+{
+    Release();
+}
+
+bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+{
+    if (NULL == pNewUIMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_COMMAND_LIST, this);
+
+    SetPos(x, y);
+    Show(false);
+
+    return true;
+}
+
+void SEASON3B::CNewUIChatCommandWindow::Release()
+{
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+void SEASON3B::CNewUIChatCommandWindow::SetPos(int x, int y)
+{
+    m_Pos.x = x;
+    m_Pos.y = y;
+}
+
+float SEASON3B::CNewUIChatCommandWindow::GetLayerDepth()
+{
+    return 3.f;
+}
+
+float SEASON3B::CNewUIChatCommandWindow::GetKeyEventOrder()
+{
+    return 10.f;
+}
+
+void SEASON3B::CNewUIChatCommandWindow::OpenningProcess()
+{
+    // A player may have gained or lost commands, so start from the top.
+    m_scrollOffset = 0;
+    SelectCommand(Catalog().GetCommands().empty() ? -1 : 0);
+}
+
+void SEASON3B::CNewUIChatCommandWindow::ClosingProcess()
+{
+}
+
+const ChatCommand* SEASON3B::CNewUIChatCommandWindow::GetSelectedCommand() const
+{
+    const auto& commands = Catalog().GetCommands();
+    if (m_selectedIndex < 0 || static_cast<size_t>(m_selectedIndex) >= commands.size())
+    {
+        return NULL;
+    }
+
+    return &commands[m_selectedIndex];
+}
+
+void SEASON3B::CNewUIChatCommandWindow::SelectCommand(int index)
+{
+    m_selectedIndex = index;
+    m_parameterValues.clear();
+
+    if (const auto* command = GetSelectedCommand())
+    {
+        m_parameterValues.resize(command->Parameters.size());
+    }
+}
+
+std::vector<std::wstring> SEASON3B::CNewUIChatCommandWindow::SplitValidValues(const std::wstring& validValues)
+{
+    std::vector<std::wstring> result;
+    size_t start = 0;
+    while (start <= validValues.size())
+    {
+        const auto separator = validValues.find(L'|', start);
+        const auto end = (separator == std::wstring::npos) ? validValues.size() : separator;
+        result.push_back(validValues.substr(start, end - start));
+        if (separator == std::wstring::npos)
+        {
+            break;
+        }
+
+        start = separator + 1;
+    }
+
+    return result;
+}
+
+void SEASON3B::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterIndex)
+{
+    const auto* command = GetSelectedCommand();
+    if (command == NULL || parameterIndex >= command->Parameters.size())
+    {
+        return;
+    }
+
+    const auto& parameter = command->Parameters[parameterIndex];
+    auto values = SplitValidValues(parameter.ValidValues);
+    if (values.empty())
+    {
+        return;
+    }
+
+    const auto& current = m_parameterValues[parameterIndex];
+    size_t next = 0;
+    for (size_t i = 0; i < values.size(); ++i)
+    {
+        if (values[i] == current)
+        {
+            next = i + 1;
+            break;
+        }
+    }
+
+    // One step past the last value clears it again, which is how an optional
+    // parameter is left out.
+    m_parameterValues[parameterIndex] = (next >= values.size()) ? std::wstring() : values[next];
+}
+
+void SEASON3B::CNewUIChatCommandWindow::ExecuteSelectedCommand()
+{
+    const auto* command = GetSelectedCommand();
+    if (command == NULL)
+    {
+        return;
+    }
+
+    // A required parameter without a value would only produce an error message
+    // from the server, so don't send anything.
+    for (size_t i = 0; i < command->Parameters.size(); ++i)
+    {
+        if (command->Parameters[i].IsRequired && m_parameterValues[i].empty())
+        {
+            return;
+        }
+    }
+
+    GameLogic::Commands::ChatCommandCatalog::Execute(
+        GameLogic::Commands::ChatCommandCatalog::BuildCommandLine(*command, m_parameterValues));
+    PlayBuffer(SOUND_CLICK01);
+}
+
+bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
+{
+    const auto& commands = Catalog().GetCommands();
+    const auto listTop = m_Pos.y + 30;
+
+    for (int row = 0; row < VISIBLE_ROWS; ++row)
+    {
+        const auto index = m_scrollOffset + row;
+        if (static_cast<size_t>(index) >= commands.size())
+        {
+            break;
+        }
+
+        if (CheckMouseIn(m_Pos.x + 10, listTop + row * static_cast<int>(ROW_HEIGHT), static_cast<int>(WINDOW_WIDTH) - 20, static_cast<int>(ROW_HEIGHT))
+            && IsRelease(VK_LBUTTON))
+        {
+            SelectCommand(index);
+            PlayBuffer(SOUND_CLICK01);
+            return false;
+        }
+    }
+
+    if (const auto* command = GetSelectedCommand())
+    {
+        const auto detailTop = listTop + VISIBLE_ROWS * static_cast<int>(ROW_HEIGHT) + 40;
+        for (size_t i = 0; i < command->Parameters.size(); ++i)
+        {
+            const auto rowY = detailTop + static_cast<int>(i) * static_cast<int>(ROW_HEIGHT);
+            if (CheckMouseIn(m_Pos.x + 10, rowY, static_cast<int>(WINDOW_WIDTH) - 20, static_cast<int>(ROW_HEIGHT))
+                && IsRelease(VK_LBUTTON))
+            {
+                CycleParameterValue(i);
+                PlayBuffer(SOUND_CLICK01);
+                return false;
+            }
+        }
+
+        const auto buttonY = m_Pos.y + static_cast<int>(WINDOW_HEIGHT) - 30;
+        if (CheckMouseIn(m_Pos.x + static_cast<int>(WINDOW_WIDTH) - 90, buttonY, 80, 20) && IsRelease(VK_LBUTTON))
+        {
+            ExecuteSelectedCommand();
+            return false;
+        }
+    }
+
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, static_cast<int>(WINDOW_WIDTH), static_cast<int>(WINDOW_HEIGHT)))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool SEASON3B::CNewUIChatCommandWindow::UpdateKeyEvent()
+{
+    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND_LIST) == false)
+    {
+        return true;
+    }
+
+    if (IsPress(VK_ESCAPE) == true)
+    {
+        g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND_LIST);
+        PlayBuffer(SOUND_CLICK01);
+        return false;
+    }
+
+    const auto commandCount = static_cast<int>(Catalog().GetCommands().size());
+    if (IsPress(VK_DOWN) && m_selectedIndex + 1 < commandCount)
+    {
+        SelectCommand(m_selectedIndex + 1);
+        if (m_selectedIndex >= m_scrollOffset + VISIBLE_ROWS)
+        {
+            ++m_scrollOffset;
+        }
+
+        return false;
+    }
+
+    if (IsPress(VK_UP) && m_selectedIndex > 0)
+    {
+        SelectCommand(m_selectedIndex - 1);
+        if (m_selectedIndex < m_scrollOffset)
+        {
+            --m_scrollOffset;
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+bool SEASON3B::CNewUIChatCommandWindow::Update()
+{
+    return true;
+}
+
+bool SEASON3B::CNewUIChatCommandWindow::Render()
+{
+    EnableAlphaTest();
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    RenderFrame();
+    RenderCommandList();
+    RenderSelectedCommand();
+
+    DisableAlphaBlend();
+    return true;
+}
+
+void SEASON3B::CNewUIChatCommandWindow::RenderFrame()
+{
+    RenderImage(IMAGE_COMMAND_BACK, static_cast<float>(m_Pos.x), static_cast<float>(m_Pos.y), WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetTextColor(255, 230, 210, 100);
+    g_pRenderText->SetBgColor(0);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 8, I18N::Game::ChatCommandsTitle, static_cast<int>(WINDOW_WIDTH), 0, RT3_SORT_CENTER);
+}
+
+void SEASON3B::CNewUIChatCommandWindow::RenderCommandList()
+{
+    const auto& commands = Catalog().GetCommands();
+    g_pRenderText->SetFont(g_hFont);
+    g_pRenderText->SetBgColor(0);
+
+    if (commands.empty())
+    {
+        g_pRenderText->SetTextColor(200, 200, 200, 255);
+        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 30, I18N::Game::ChatCommandsNotSupported, static_cast<int>(WINDOW_WIDTH) - 20, 0);
+        return;
+    }
+
+    auto y = m_Pos.y + 30;
+    for (int row = 0; row < VISIBLE_ROWS; ++row)
+    {
+        const auto index = m_scrollOffset + row;
+        if (static_cast<size_t>(index) >= commands.size())
+        {
+            break;
+        }
+
+        if (index == m_selectedIndex)
+        {
+            g_pRenderText->SetTextColor(255, 255, 100, 255);
+        }
+        else
+        {
+            g_pRenderText->SetTextColor(220, 220, 220, 255);
+        }
+
+        g_pRenderText->RenderText(m_Pos.x + 10, y, commands[index].Command.c_str(), 100, 0);
+        g_pRenderText->RenderText(m_Pos.x + 115, y, commands[index].Name.c_str(), static_cast<int>(WINDOW_WIDTH) - 125, 0);
+        y += static_cast<int>(ROW_HEIGHT);
+    }
+}
+
+void SEASON3B::CNewUIChatCommandWindow::RenderSelectedCommand()
+{
+    const auto* command = GetSelectedCommand();
+    if (command == NULL)
+    {
+        return;
+    }
+
+    auto y = m_Pos.y + 30 + VISIBLE_ROWS * static_cast<int>(ROW_HEIGHT) + 8;
+
+    g_pRenderText->SetFont(g_hFont);
+    g_pRenderText->SetTextColor(200, 220, 255, 255);
+    g_pRenderText->RenderText(m_Pos.x + 10, y, command->Description.c_str(), static_cast<int>(WINDOW_WIDTH) - 20, 30);
+    y += 32;
+
+    for (size_t i = 0; i < command->Parameters.size(); ++i)
+    {
+        const auto& parameter = command->Parameters[i];
+        const auto& value = m_parameterValues[i];
+
+        // A required parameter without a value is what keeps the command from
+        // being sent, so it's the one to point at.
+        if (parameter.IsRequired && value.empty())
+        {
+            g_pRenderText->SetTextColor(255, 150, 150, 255);
+        }
+        else
+        {
+            g_pRenderText->SetTextColor(220, 220, 220, 255);
+        }
+
+        g_pRenderText->RenderText(m_Pos.x + 10, y, parameter.Name.c_str(), 140, 0);
+        g_pRenderText->RenderText(m_Pos.x + 155, y, value.empty() ? parameter.ValidValues.c_str() : value.c_str(), static_cast<int>(WINDOW_WIDTH) - 165, 0);
+        y += static_cast<int>(ROW_HEIGHT);
+    }
+
+    const auto buttonY = m_Pos.y + static_cast<int>(WINDOW_HEIGHT) - 30;
+    RenderImage(IMAGE_COMMAND_BUTTON, static_cast<float>(m_Pos.x + static_cast<int>(WINDOW_WIDTH) - 90), static_cast<float>(buttonY), 80.f, 20.f);
+    g_pRenderText->SetTextColor(255, 255, 255, 255);
+    g_pRenderText->RenderText(m_Pos.x + static_cast<int>(WINDOW_WIDTH) - 90, buttonY + 4, I18N::Game::ChatCommandsExecute, 80, 0, RT3_SORT_CENTER);
+}
