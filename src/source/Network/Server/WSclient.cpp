@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "UI/Chat/Chat.h"
 #include <memory>
 #include "UI/Legacy/UIManager.h"
@@ -38,6 +38,7 @@
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/Legacy/UIMapName.h" // rozy
+#include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "UI/Legacy/UIMng.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Character/CSParts.h"
@@ -2190,6 +2191,9 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         }
 
         SocketClient->ToGameServer()->SendClientReadyAfterMapChange();
+
+        // Servers which support it answer with the commands this player may use.
+        GameLogic::Commands::Catalog().RequestOnce();
 
         g_dwLatestZoneMoving = GetTickCount();
         g_bWhileMovingZone = FALSE;
@@ -13826,6 +13830,21 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
     case 0xA4:
         ReceiveQuestMonKillInfo(ReceiveBuffer);
         break;
+    case 0xF5:
+    {
+        // The chat commands which are available to this player. It's only sent
+        // by servers which know the request, so an unknown sub code is no error.
+        const auto subcode = bIsC1C3 ? ReceiveBuffer[3] : ReceiveBuffer[4];
+        if (subcode == 0x01)
+        {
+            GameLogic::Commands::Catalog().AddFromPacket(ReceiveBuffer, Size);
+        }
+        else
+        {
+            g_ConsoleDebug->Write(MCD_RECEIVE, L"Recv [0xF5][0x%02x] (unknown)", subcode);
+        }
+    }
+    break;
     case 0xF6:
     {
         BYTE bySubcode;
