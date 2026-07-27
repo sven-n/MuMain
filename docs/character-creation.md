@@ -7,4 +7,4 @@ The character creation screen allows new characters from the following classes:
 - Fairy Elf
 - Magic Gladiator
 
-Dark Lord, Summoner, and Rage Fighter remain visible but disabled and cannot be submitted for creation from the client.
+Dark Lord, Summoner, and Rage Fighter are hidden from the character creation screen and cannot be submitted for creation from the client.

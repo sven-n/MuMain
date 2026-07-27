@@ -252,7 +252,7 @@ void CCharMakeWin::Show(bool bShow)
         m_asprBack[i].Show(bShow);
 
     for (i = 0; i < MAX_CLASS; ++i)
-        m_abtnJob[i].Show(bShow);
+        m_abtnJob[i].Show(bShow && IsCharacterCreationAllowed(static_cast<CLASS_TYPE>(i)));
     for (i = 0; i < 2; ++i)
         m_aBtn[i].Show(bShow);
 
