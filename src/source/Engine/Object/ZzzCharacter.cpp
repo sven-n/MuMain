@@ -6934,6 +6934,11 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Owner->RotationPosition(o->BoneTransform[f->LinkBone], p, Position);
         VectorAdd(c->Object.Position, Position, b->BodyOrigin);
         Vector(0.f, 0.f, 0.f, Object->Angle);
+        // For unlinked items (e.g. Wings), explicitly populate main-thread ParentMatrix
+        // with the character's link bone transform to prevent uninitialized thread_local garbage.
+        for (int r = 0; r < 3; ++r)
+            for (int c = 0; c < 4; ++c)
+                ParentMatrix[r][c] = o->BoneTransform[f->LinkBone][r][c];
     }
     if (Type == MODEL_BOSS_HEAD)
     {
@@ -15220,10 +15225,8 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
     if (gMapManager.InBloodCastle() == true)
     {
         bBindBack = false;
-        if (IsGMCharacter() == true)
-        {
-            return bBindBack;
-        }
+        // Note: Removed legacy 'if (IsGMCharacter()) return bBindBack;' early exit
+        // so GM characters display wings, pets, and quest items in Blood Castle.
     }
     if (gMapManager.InChaosCastle() == true)
     {
@@ -15329,7 +15332,9 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             iBackupType = iType;
         }
 
-        if (gMapManager.InBloodCastle() && c->EtcPart != 0)
+        // Blood Castle Archangel Quest Item Check: Bounded to 1..3 to prevent default iType=0
+        // from rendering Models[0] (Blood Castle stone wall map object) on character back.
+        if (gMapManager.InBloodCastle() && (c->EtcPart >= 1 && c->EtcPart <= 3))
         {
             PART_t* w = &c->Wing;
 
@@ -15350,7 +15355,10 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             case 3: iType = MODEL_DIVINE_CB_OF_ARCHANGEL; break;
             }
 
-            RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate);
+            if (iType != 0)
+            {
+                RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate);
+            }
         }
 
         CreatePartsFactory(c);
