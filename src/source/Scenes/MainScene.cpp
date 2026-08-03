@@ -624,9 +624,11 @@ bool RenderMainScene()
     RenderGameWorld(byWaterMap, width, height);
 
 #ifdef _EDITOR
-    // Render spectated camera frustum wireframe when in FreeFly mode
+    // Render spectated camera frustum wireframe when in FreeFly mode - but not
+    // during the map editor's top-down minimap capture, which wants a clean shot.
+    extern bool g_bMapEditorFullTerrain;
     CameraMode cameraMode = CameraManager::Instance().GetCurrentMode();
-    if (cameraMode == CameraMode::FreeFly)
+    if (cameraMode == CameraMode::FreeFly && !g_bMapEditorFullTerrain)
     {
         ICamera* spectated = CameraManager::Instance().GetSpectatedCamera();
         if (spectated)

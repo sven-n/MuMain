@@ -138,6 +138,13 @@ public:
 
     inline BITMAP_t& operator [] (GLuint uiBitmapIndex) { return *GetTexture(uiBitmapIndex); }
 
+    // Drops the quick-cache entry for this index (including a cached "empty" one)
+    // so the next lookup re-resolves from the live bitmap map. Needed when a slot
+    // that was polled while empty (and cached as empty) is later filled via
+    // LoadImage at runtime - e.g. the in-editor texture import. Does not free the
+    // bitmap itself.
+    inline void RefreshCacheEntry(GLuint uiBitmapIndex) { m_BitmapCache.Remove(uiBitmapIndex); }
+
 protected:
     GLuint GenerateTextureIndex();
     GLuint FindAvailableTextureIndex(GLuint uiSeed);

@@ -50,6 +50,11 @@
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern int SelectedCharacter, SelectedNpc, SelectedItem, SelectedOperate;
+
+#ifdef _EDITOR
+// True while the MuEditor UI is open (implemented in MuEditor/Core/MuEditorCore.cpp).
+extern "C" bool MuEditor_IsOpen();
+#endif
 extern int Attacking;
 
 namespace Input::Selection
@@ -403,6 +408,19 @@ void SelectObjects()
     {
         g_pPartyManager->SearchPartyMember();
     }
+
+#ifdef _EDITOR
+    // While the editor UI is up it consumes world clicks (painting, placing...).
+    // If the "interactable" pick (pose box / chair / lever) stays alive, the game
+    // shows the sit-down cursor and reroutes clicks into "walk to that object"
+    // instead of normal movement - and because the editor eats those clicks, the
+    // state can never be worked off, so it sticks until you relog.
+    // Suppress the pick while the editor is open; normal play is unaffected.
+    if (MuEditor_IsOpen())
+    {
+        SelectedOperate = -1;
+    }
+#endif
 
     if (SelectedCharacter == -1)
     {
