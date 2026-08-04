@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -12,6 +12,8 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/AI/GOBoid.h"
 #include "UIManager.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
 #include "Character/CSParts.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "World/MapInfra/MapManager.h"
@@ -19,6 +21,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
+#include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
 
 
@@ -1760,6 +1763,75 @@ extern int gix, giy;
 extern void MoveCharacter(CHARACTER* c, OBJECT* o);
 extern void MoveCharacterVisual(CHARACTER* c, OBJECT* o);
 
+// DXP-07d increment 6's shadow-compare diagnostic validated RenderPhotoCharacter()'s full camera
+// transform (proj + the glRotatef/glRotatef/glTranslatef/glTranslatef sequence that builds this
+// panel's hand-rolled "photo camera") against a CPU closed form across multiple soaks — the matrix
+// formulas (MakeRotationX/Z, MakeTranslation, Mat4Multiply) are copied verbatim from DXP-07b's
+// already-validated versions, not re-derived, since a sign/order error here reproduces exactly the
+// "mirrored/upside-down character" failure mode this panel is flagged for. DXP-08a deleted the
+// diagnostic and the real glMatrixMode/glPushMatrix/glLoadIdentity/glRotatef/glTranslatef/glPopMatrix
+// calls it was validating (see RenderPhotoCharacter()'s own comments below) — this is the one panel
+// of the "6 UI item-preview panels" population with a real (non-identity) camera, and the one
+// without a BeginBitmap()-delegated or EndBitmap()-preceded restore, hence its own pre-panel
+// snapshot below instead of a fresh GL read.
+static float s_PrePhotoProj[16];
+static float s_PrePhotoView[16];
+
+// Column-major float[16], matching glGetFloatv layout. out = a * b (GL right-multiply composition,
+// applying b first, then a) — same formulas as ZzzOpenglUtil.cpp's DXP-07b helpers, copied verbatim.
+static void PhotoMat4Multiply(float* out, const float* a, const float* b)
+{
+    float result[16];
+    for (int col = 0; col < 4; ++col)
+    {
+        for (int row = 0; row < 4; ++row)
+        {
+            double sum = 0.0;
+            for (int k = 0; k < 4; ++k)
+                sum += (double)a[k * 4 + row] * (double)b[col * 4 + k];
+            result[col * 4 + row] = (float)sum;
+        }
+    }
+    memcpy(out, result, sizeof(result));
+}
+
+static void PhotoMakeRotationX(float degrees, float* out)
+{
+    float rad = degrees * Q_PI / 180.0f;
+    float c = cosf(rad), s = sinf(rad);
+    float m[16] = {
+        1.f, 0.f, 0.f, 0.f,
+        0.f, c,   s,   0.f,
+        0.f, -s,  c,   0.f,
+        0.f, 0.f, 0.f, 1.f
+    };
+    memcpy(out, m, sizeof(m));
+}
+
+static void PhotoMakeRotationZ(float degrees, float* out)
+{
+    float rad = degrees * Q_PI / 180.0f;
+    float c = cosf(rad), s = sinf(rad);
+    float m[16] = {
+        c,   s,   0.f, 0.f,
+        -s,  c,   0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        0.f, 0.f, 0.f, 1.f
+    };
+    memcpy(out, m, sizeof(m));
+}
+
+static void PhotoMakeTranslation(float x, float y, float z, float* out)
+{
+    float m[16] = {
+        1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        x,   y,   z,   1.f
+    };
+    memcpy(out, m, sizeof(m));
+}
+
 void CUIPhotoViewer::RenderPhotoCharacter()
 {
     float fPos_x = m_iPos_x * 1.2f + m_iWidth / 2 - 50;
@@ -1774,32 +1846,67 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     MoveMount(&m_PhotoHelper, TRUE);
     gMapManager.WorldActive = WorldBackup;
 
-    glMatrixMode(GL_PROJECTION);
+    // Snapshot the CPU source of truth before this panel overwrites GlobalUBO — this panel has no
+    // EndBitmap()/BeginBitmap() bracket of its own (unlike every other DXP-07d panel), so its
+    // restore below needs this snapshot instead of either of those idioms.
+    memcpy(s_PrePhotoProj, GlobalUBO::Instance().GetProj(), sizeof(s_PrePhotoProj));
+    memcpy(s_PrePhotoView, GlobalUBO::Instance().GetView(), sizeof(s_PrePhotoView));
+
     SaveCameraPerspective();
-    glPushMatrix();
-    glLoadIdentity();
     glViewport2(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y, m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
     gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
+
+    // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity(x2) bracket and
+    // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read are deleted — g_Camera.Matrix is
+    // identity here (matching the original glLoadIdentity()-before-rotate capture; the real photo
+    // camera below feeds GlobalUBO directly, not g_Camera.Matrix, same as every other panel).
+    static const float s_IdentityCameraMatrix[3][4] = {
+        {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
+    };
+    memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
+
     EnableDepthTest();
     EnableDepthMask();
 
-    glRotatef(-90.0f, 1.f, 0.f, 0.f);
-    glRotatef(-90.0f, 0.f, 0.f, 1.f);
-    glTranslatef(-10000.0f, 0.0f, -75.f);
+    // DXP-08a: the real glRotatef/glRotatef/glTranslatef/glTranslatef sequence that used to build
+    // this panel's "photo camera" is deleted — DXP-07d increment 6 already proved the CPU closed
+    // form below matches bit-for-bit across multiple soaks, and GlobalUBO (fed from that closed
+    // form just below) is the only consumer (same finding used for every other
+    // panel and for BeginOpengl/BeginBitmap in Category 3).
+    // CPU closed form for the same camera — proj = gluPerspective(1.f deg, aspect, 2000, 20000)
+    // closed form (this panel's own literal near/far, unlike RENDER_ITEMVIEW_NEAR/FAR
+    // elsewhere); view = Rx(-90) * Rz(-90) * T(-10000,0,-75) * T(-o->Position...) composed in
+    // GL's right-multiply order (translate applied first, closest to the vertex — matches the
+    // glRotatef/glRotatef/glTranslatef/glTranslatef call order above exactly).
+    {
+        float aspect = (m_iWidth * g_fScreenRate_x) / (141.f * g_fScreenRate_y);
+        float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
+        float f = 1.0f / tanf(fovRad);
+        float zNear = 2000.f, zFar = 20000.f;
+        float cpuProj[16];
+        BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
 
-    if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
-        glTranslatef(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f);
-    else
-        glTranslatef(-o->Position[0], -o->Position[1], -o->Position[2]);
+        float rx[16]; PhotoMakeRotationX(-90.0f, rx);
+        float rz[16]; PhotoMakeRotationZ(-90.0f, rz);
+        float t1[16]; PhotoMakeTranslation(-10000.0f, 0.0f, -75.f, t1);
+        float t2[16];
+        if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
+            PhotoMakeTranslation(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f, t2);
+        else
+            PhotoMakeTranslation(-o->Position[0], -o->Position[1], -o->Position[2], t2);
+
+        float m1[16]; PhotoMat4Multiply(m1, rx, rz);
+        float m2[16]; PhotoMat4Multiply(m2, m1, t1);
+        float cpuView[16]; PhotoMat4Multiply(cpuView, m2, t2);
+
+        GlobalUBO::Instance().SetProj(cpuProj);
+        GlobalUBO::Instance().SetView(cpuView);
+    }
 
     Vector(0.0f, 0.0f, m_fCurrentAngle, o->Angle);
 
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
+    DisableAlphaTestRaw();
+    EnableTexture2D();
     EnableDepthTest();
     EnableCullFace();
     EnableDepthMask();
@@ -1809,10 +1916,10 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
-    glDepthFunc(GL_LEQUAL);
-    glAlphaFunc(GL_GREATER, 0.25f);
-    glDisable(GL_FOG);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    SetDepthFuncLEqual();
+    SetAlphaFuncRef(0.25f);
+    DisableFog();
+    ClearDepthBuffer();
     o->Scale = 0.7f * m_fCurrentZoom;
     m_PhotoHelper.Scale = m_fPhotoHelperScale * m_fCurrentZoom;
     Vector(1, 1, 1, o->Light);
@@ -1833,12 +1940,12 @@ void CUIPhotoViewer::RenderPhotoCharacter()
         m_PhotoHelper.Position[2] -= 25;
     RenderCharacter(c, o);
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    // DXP-08a: the matching glMatrixMode/glPopMatrix pops are deleted — GlobalUBO is restored
+    // directly from the pre-panel snapshot taken at entry instead of a fresh GL read.
     glViewport2(0, 0, WindowWidth, WindowHeight);
     RestoreCameraPerspective();
+    GlobalUBO::Instance().SetProj(s_PrePhotoProj);
+    GlobalUBO::Instance().SetView(s_PrePhotoView);
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)

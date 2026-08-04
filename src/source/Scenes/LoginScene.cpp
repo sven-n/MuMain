@@ -9,6 +9,7 @@
 #include "Camera/CameraMove.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Core/RenderConfig.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -388,7 +389,7 @@ bool NewRenderLogInScene(HDC hDC)
 
     Height = REFERENCE_HEIGHT;
     Width = GetScreenWidth();
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    SetClearColor(0.f, 0.f, 0.f, 1.f);
 
     // Set ViewFar BEFORE BeginOpengl so the projection matrix covers the full render distance
 #ifdef _EDITOR
@@ -406,19 +407,43 @@ bool NewRenderLogInScene(HDC hDC)
     // don't restrict the render loop.
     ResetFrustrumBoundsFullTerrain();
 
+    // DXP-15 increment 3: world rendering stays stubbed under D3D11 (accepted scope per that
+    // task's spec) -- not because it draws black/wrong, but because RenderCharactersClient/
+    // RenderObjects/etc. are genuinely unported legacy code (raw glBegin/glDrawElements
+    // throughout, confirmed by grep -- DXP-16+'s job), reached unconditionally here even on the
+    // very first login frame. Guarding the whole block was the difference between "black world,
+    // login screen renders" and "access violation before the first frame completes" (confirmed
+    // by runtime test: both Debug and Release crashed here, log cutting off right after "Login
+    // Scene init success").
+    // DXP-16 increment 1: RenderTerrain is no longer part of that unported set -- terrain now
+    // has a real D3D11 path (ZzzLodTerrain.cpp/TerrainShader.cpp) -- so it moves outside the
+    // gate and runs on both backends.
+    // DXP-16 increment 2: RenderObjects() (BMD static world meshes) joins it -- ZzzBMD.cpp's
+    // static-mesh draw paths are real on D3D11 now too.
+    // DXP-16 increment 3: RenderCharactersClient()/RenderMount() join it too -- both funnel
+    // through BMD::RenderMesh()'s already-D3D11-capable GPU-skin/CPU-fallback paths (RenderMount
+    // -> RenderObject(), the same function RenderObjects() already uses). The scattered raw
+    // glColor*() calls in ZzzObject.cpp's item/wing/cape special-casing are now routed safely
+    // through GLColorIntercept.h's D3D11 check instead of firing real GL with no context.
+    // Everything else stays gated, unchanged (RenderJoints/RenderEffects/etc. still genuinely
+    // unported legacy GL).
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
         RenderTerrain(false);
+        RenderObjects();
         RenderCharactersClient();
         RenderMount();
-        RenderObjects();
-        RenderJoints();
-        RenderEffects();
-        CheckSprites();
-        RenderLeaves();
-        RenderBoids();
-        RenderObjects_AfterCharacter();
-        ThePetProcess().RenderPets();
+
+        if (g_RenderBackend != RenderBackend::D3D11)
+        {
+            RenderJoints();
+            RenderEffects();
+            CheckSprites();
+            RenderLeaves();
+            RenderBoids();
+            RenderObjects_AfterCharacter();
+            ThePetProcess().RenderPets();
+        }
     }
 
     BeginSprite();

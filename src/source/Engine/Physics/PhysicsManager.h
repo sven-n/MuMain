@@ -200,9 +200,7 @@ protected:
 public:
     virtual void Render(vec3_t* pvColor = NULL, int iLevel = 0);
 protected:
-    void RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos);
-    void RenderVertex(vec3_t* pvRenderPos, int xVertex, int yVertex);
-    void RenderCollisions(void);
+    void RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, const float* color);
 
 protected:
     CList<CPhysicsCollision*> m_lstCollision;

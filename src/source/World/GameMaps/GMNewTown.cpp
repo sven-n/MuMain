@@ -733,6 +733,10 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
     // ���
     if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
     {
+        // DXP-20 inc4: flat IntensityTransform override -- must materialize before overwriting, or
+        // a later lazy EnsureCpuNormals() (e.g. from RenderMesh()'s CPU fallback) would clobber this
+        // flat value with freshly computed per-vertex lighting.
+        pModel->EnsureCpuNormals(-1);
         Mesh_t* m = NULL;
         for (int i = 0; i < pModel->NumMeshs; i++)
         {

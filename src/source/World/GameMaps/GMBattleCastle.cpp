@@ -8,6 +8,8 @@
 #include "Audio/DSPlaySound.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/SceneUBO.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
@@ -572,17 +574,30 @@ namespace battleCastle
 
     void    StartFog(vec3_t Color)
     {
-        glEnable(GL_FOG);
+        if (!g_CoreProfile)
+        {
+            EnableFog();
 
-        glFogfv(GL_FOG_COLOR, Color);
-        glFogf(GL_FOG_MODE, GL_LINEAR);
-        glFogf(GL_FOG_START, 2000.f);
-        glFogf(GL_FOG_END, 2700.f);
+            glFogfv(GL_FOG_COLOR, Color);
+            glFogf(GL_FOG_MODE, GL_LINEAR);
+            glFogf(GL_FOG_START, 2000.f);
+            glFogf(GL_FOG_END, 2700.f);
+        }
+
+        // Shaders read fog from SceneUBO, not GL fixed-function state — mirror the legacy
+        // glFog* values so this event's close fog is visible on shader-rendered geometry.
+        // Called every frame after BeginOpengl() (MainScene.cpp), so this
+        // override only needs to last for the rest of the current frame.
+        SceneUBO::Instance().SetFog(2000.f, 2700.f, Color, true);
     }
 
     void    EndFog(void)
     {
-        glDisable(GL_FOG);
+        DisableFog();
+
+        // Mirrors the GL disable 1:1 — BeginOpengl() re-syncs SceneUBO fog from FogEnable/
+        // FogColor at the start of next frame, same as it does for GL_FOG.
+        SceneUBO::Instance().SetFogEnabled(false);
     }
 
     void    RenderBaseSmoke(void)

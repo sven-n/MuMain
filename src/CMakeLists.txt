@@ -410,7 +410,7 @@ if (NOT EXISTS "${OPENMU_PACKETS_XML}")
   endif()
 endif()
 
-set(WIRE_SIZES_GEN_SCRIPT "${CMAKE_SOURCE_DIR}/tools/gen_wire_sizes.py")
+set(WIRE_SIZES_GEN_SCRIPT "${REPO_ROOT}/tools/gen_wire_sizes.py")
 set(WIRE_SIZES_GEN_HEADER "${CMAKE_BINARY_DIR}/generated/Network/Server/wire_sizes.generated.h")
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_custom_command(
@@ -492,6 +492,9 @@ if (MSVC)
     wininet
     urlmon
     turbojpeg-static
+    d3d11
+    dxgi
+    d3dcompiler
   )
 
   # Locate required DLLs in bin directory
@@ -547,7 +550,19 @@ if (DOTNET_EXECUTABLE)
   else()
     set(DOTNET_LIB_NAME "MUnique.Client.Library.dll")
   endif()
-  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/${DOTNET_LIB_NAME}")
+  # DXP: $<CONFIG>-suffixed, not shared between Debug/Release. It used to be one shared path
+  # with -c $<CONFIG> in the publish command below -- same bug class as ResxGen's fix just above
+  # (Ninja Multi-Config generates a separate rule per config for whatever command produces a given
+  # OUTPUT; a shared path with a config-dependent command makes every config flip look like "the
+  # command that produced this output changed," forcing a full ClientLibrary republish on every
+  # single Debug<->Release switch). Here it's worse than ResxGen's case: Debug and Release
+  # legitimately SHOULD produce different DLLs (different optimization/debug info), so the fix is
+  # to give each config its own path end-to-end, not pin to one fixed config. The republish
+  # ping-pong was also the proximate cause of a real build failure (2026-08-03): it kept
+  # re-triggering ClientLibrary's own XSLT-based PacketFunctions_ClientToServer.cpp regeneration
+  # step in parallel with the main C++ build's compile of that same (checked-in source) file,
+  # racing on Windows' exclusive file lock.
+  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${DOTNET_LIB_NAME}")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
   # Create temp directories for Native AOT build.
@@ -594,6 +609,7 @@ if (DOTNET_EXECUTABLE)
     add_custom_command(
             OUTPUT "${DOTNET_DLL_PATH}"
             COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
             COMMAND ${CMAKE_COMMAND} -E env
                     "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
                     "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
@@ -609,6 +625,14 @@ if (DOTNET_EXECUTABLE)
     # 4. Create a target for the DLL and link it to Main
     add_custom_target(ClientLibrary DEPENDS "${DOTNET_DLL_PATH}")
     add_dependencies(Main ClientLibrary)
+    # MuClient too, not just Main: MUnique.Client.Library.csproj's PreBuild target regenerates
+    # ..\src\source\Dotnet\PacketFunctions_*.cpp/.h (checked-in C++ sources MuClient compiles) as
+    # a side effect of `dotnet publish`. Without this, Ninja has no edge between "ClientLibrary
+    # publish" and "compile PacketFunctions_ClientToServer.cpp" -- both are prerequisites of Main
+    # but siblings to each other, so they can run concurrently and race on Windows' exclusive file
+    # lock (confirmed 2026-08-03, MSB3703 IOException). Main-only ordering wasn't enough: MuClient's
+    # objects compile before Main links, not after ClientLibrary finishes.
+    add_dependencies(MuClient ClientLibrary)
     set_target_properties(ClientLibrary PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
     # Copy ClientLibrary DLL to the executable's output directory
@@ -676,10 +700,21 @@ if (DOTNET_EXECUTABLE)
 
     add_custom_command(
       OUTPUT ${RESX_GEN_HEADERS} ${RESX_GEN_SOURCES}
+      # -c Release (NOT $<CONFIG>) is deliberate: RESX_OUTPUT_DIR is shared between the Debug and
+      # Release C++ builds (not config-suffixed), but Ninja Multi-Config generates a separate rule
+      # per config for whatever command produces a given OUTPUT. With $<CONFIG> here, building
+      # Debug then Release (build-all.ps1's default) recorded two different command lines for the
+      # same output paths -- Ninja saw each config's rule as "the command that produced this
+      # output changed" and reran ResxGen every single invocation, and CppEmitter.cs's unconditional
+      # File.WriteAllText bumped every generated I18N file's mtime, cascading into a near-full
+      # rebuild of every TU that includes an I18N header (most of the tree). The generated I18N
+      # C++ source content never actually depended on which .NET config built the *generator*, so
+      # pinning it to one fixed config removes the config-dependence entirely instead of fixing it
+      # per-config (which would just duplicate identical output under Debug/Release subdirs).
       COMMAND ${CMAKE_COMMAND} -E env
               "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
               "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
-              "${DOTNET_EXECUTABLE}" run --project "${RESXGEN_PROJ_NATIVE}" -c $<CONFIG>
+              "${DOTNET_EXECUTABLE}" run --project "${RESXGEN_PROJ_NATIVE}" -c Release
               -- --input "${RESX_INPUT_DIR_NATIVE}" --output "${RESX_OUTPUT_DIR_NATIVE}"
               --wide-groups Game,Dialog
       DEPENDS ${RESX_FILES} ${RESXGEN_SOURCES} "${RESXGEN_PROJ}"
@@ -696,6 +731,19 @@ else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
     "The game will run but cannot connect to the server. Install .NET SDK 10.0+ to enable.")
 endif()
+
+# DXP-10 step 4: state-wrapper monopoly guard. Fails the build if a raw gl*()
+# call appears outside Render/ that isn't on tools/check_gl_wrapper_monopoly.py's
+# allowlist (which mirrors DXP-10-state-wrapper-monopoly.md's documented, deliberate
+# deferrals -- DXP-12 texture territory, DXP-14 fog params, debug/editor files).
+# No OUTPUT means this target is always considered out-of-date and re-runs every build.
+add_custom_target(CheckGLWrapperMonopoly ALL
+  COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_gl_wrapper_monopoly.py"
+          --source-root "${CMAKE_CURRENT_SOURCE_DIR}/source"
+  COMMENT "DXP-10: checking for raw gl* calls outside Render/ (state-wrapper monopoly guard)"
+  VERBATIM
+)
+add_dependencies(MuClient CheckGLWrapperMonopoly)
 
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
 # system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.

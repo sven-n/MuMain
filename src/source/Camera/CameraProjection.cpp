@@ -2,6 +2,8 @@
 #include "CameraProjection.h"
 #include "CameraState.h"
 #include "CameraConfig.h"
+#include "Render/RHI/RHI.h"
+#include "Render/Core/RenderConfig.h"
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -18,8 +20,8 @@ static int s_ViewportHeight = 0;
 void CameraProjection::SetupPerspective(CameraState& state, float fov, float aspect,
                                           float zNear, float zFar)
 {
-    // Set up OpenGL perspective
-    gluPerspective(fov, aspect, zNear, zFar);
+    // GL perspective is fed to GlobalUBO from a CPU closed form by BeginOpengl() (DXP-07b) --
+    // this function only maintains the CPU screen-center/perspective-factor cache below.
 
     // Use actual viewport dimensions (set by SetViewport) for screen center and
     // perspective. This accounts for the game viewport being narrower/shorter than
@@ -43,8 +45,24 @@ void CameraProjection::SetViewport(int x, int y, int width, int height)
     s_ViewportWidth = width;
     s_ViewportHeight = height;
 
-    // Set OpenGL viewport (Y coordinate is flipped)
-    glViewport(x, WindowHeight - (y + height), width, height);
+    // DXP-16 fix: GL's viewport origin is bottom-left, so glViewport needs y flipped to
+    // WindowHeight-(y+height). D3D11_VIEWPORT is top-left-origin -- RHI_D3D11::SetViewport
+    // (RHI_D3D11.cpp) writes `y` straight into TopLeftY with no counter-flip, i.e. it expects
+    // the SAME top-down convention the caller's own x/y/width/height already use. Applying GL's
+    // flip before calling RHI::SetViewport (the previous code, on the mistaken belief that
+    // RHI_D3D11::SetViewport re-flips internally) fed it a bottom-up value as if it were
+    // top-down: for any height-reduced viewport (e.g. the main game view, shortened to leave
+    // room for the bottom HUD bar) this misplaced the visible area near the bottom of the
+    // window, leaving a black gap at the top the same size as the reserved HUD margin.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        RHI::SetViewport(x, y, width, height);
+    }
+    else
+    {
+        const int flippedY = WindowHeight - (y + height);
+        glViewport(x, flippedY, width, height);
+    }
 }
 
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,
@@ -113,7 +131,7 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
 
     // Read depth buffer
     GLfloat depth;
-    glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+    RHI::ReadDepthPixel(x, y, &depth);
 
     // Expected window-space depth from a standard gluPerspective projection:
     //   z_window = (f / (f - n)) * (1 + n / z_eye)        with z_eye < 0
