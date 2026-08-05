@@ -7,6 +7,10 @@
 #include "SceneCommon.h"
 #include "SceneCore.h"
 #include "Camera/CameraProjection.h"
+#include "Camera/CameraState.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
+#include "Core/Utilities/Log/ErrorReport.h"
 
 //=============================================================================
 // Character Selection State Implementation
@@ -200,6 +204,12 @@ void SetEffectVolumeLevel(int level)
 // Rendering Functions
 ///////////////////////////////////////////////////////////////////////////////
 
+// DXP-07d increment 1's shadow-compare diagnostic validated RenderInfomation3D()'s proj/view closed
+// form and post-pop GlobalUBO restore across multiple soaks; DXP-08a deleted the diagnostic and the
+// FFP matrix-stack calls it was validating (see RenderInfomation3D()'s own comments below).
+static float s_PreInfo3DProj[16];
+static float s_PreInfo3DView[16];
+
 void RenderInfomation3D()
 {
     bool Success = false;
@@ -222,16 +232,43 @@ void RenderInfomation3D()
 
     if (Success)
     {
-        glMatrixMode(GL_PROJECTION);
+        // DXP-07d increment 1, stage 1: snapshot the pre-panel GlobalUBO proj/view (already the
+        // CPU source of truth per DXP-07a/b) so the post-pop restore below can be checked for
+        // symmetry, before this panel overwrites them.
+        memcpy(s_PreInfo3DProj, GlobalUBO::Instance().GetProj(), sizeof(s_PreInfo3DProj));
+        memcpy(s_PreInfo3DView, GlobalUBO::Instance().GetView(), sizeof(s_PreInfo3DView));
+
         SaveCameraPerspective();
-    glPushMatrix();
-        glLoadIdentity();
         glViewport2(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
-        CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
+        // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket,
+        // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, and shadow-compare diagnostic
+        // are deleted — DXP-07d already proved this closed form matches bit-for-bit, and
+        // GlobalUBO is the only consumer. This panel's projection is a plain
+        // gluPerspective(1.f deg, aspect, ViewNear, ViewFar) closed form (same formula DXP-07b
+        // already validated for the main camera, different args), and its view is identity.
+        {
+            float aspect = (float)WindowWidth / (float)WindowHeight;
+            float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
+            float f = 1.0f / tanf(fovRad);
+            float zNear = g_Camera.ViewNear;
+            float zFar  = g_Camera.ViewFar;
+            float cpuProj[16];
+            BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
+            float cpuView[16] = {
+                1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
+            };
+
+            GlobalUBO::Instance().SetProj(cpuProj);
+            GlobalUBO::Instance().SetView(cpuView);
+
+            // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used
+            // to produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
+            static const float s_IdentityCameraMatrix[3][4] = {
+                {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
+            };
+            memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
+        }
         EnableDepthTest();
         EnableDepthMask();
 
@@ -264,12 +301,14 @@ void RenderInfomation3D()
             break;
         }
 
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
         UpdateMousePositionn();
-    RestoreCameraPerspective();
+
+        // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the restore-symmetry
+        // shadow-compare are deleted — GlobalUBO is restored directly from the pre-panel snapshot
+        // taken at entry (same shape as DXP-07a's EndBitmap() restore).
+        RestoreCameraPerspective();
+        GlobalUBO::Instance().SetProj(s_PreInfo3DProj);
+        GlobalUBO::Instance().SetView(s_PreInfo3DView);
     }
 }
 

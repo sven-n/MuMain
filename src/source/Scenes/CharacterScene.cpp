@@ -8,6 +8,7 @@
 #include "Character/CharacterManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Core/RenderConfig.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -247,7 +248,7 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     outHeight = REFERENCE_HEIGHT;
     outWidth = GetScreenWidth();
 
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    SetClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
 
     // Build global frustum arrays for TestFrustrum/TestFrustrum2D
@@ -293,14 +294,17 @@ static void ApplySelectedCharacterLighting()
  */
 static void RenderCharacterScene3D()
 {
+    // DXP-16 increment 1: terrain has a real D3D11 path now -- call unconditionally.
+    // DXP-16 increment 2: RenderObjects() (BMD static world meshes) joins it.
+    // DXP-16 increment 3: RenderCharactersClient()/RenderMount() join it too (see LoginScene.cpp's
     RenderTerrain(false);
     RenderObjects();
     RenderCharactersClient();
+    RenderMount();
 
     if (!CUIMng::Instance().IsCursorOnUI())
         Input::Selection::SelectObjects();
 
-    RenderMount();
     RenderBlurs();
     RenderJoints();
     RenderEffects();

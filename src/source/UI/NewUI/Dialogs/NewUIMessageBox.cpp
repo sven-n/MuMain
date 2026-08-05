@@ -6,6 +6,8 @@
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"	// self
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/Legacy/UIControls.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 using namespace SEASON3B;
 
@@ -124,14 +126,14 @@ void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
     float fPosX = 0.0f, fPosY = 0.0f;
     if (_bRender)
     {
-        glEnable(GL_ALPHA_TEST);
+        EnableAlphaTestRaw();
         glColor4f(m_vColor[0], m_vColor[1], m_vColor[2], m_fOpacityAlpha);
         RenderColor(fPosX, fPosY, fWidth, fHeight - 50.0f);
 
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glDisable(GL_BLEND);
-        glEnable(GL_ALPHA_TEST);
+        DisableBlend();
+        EnableAlphaTestRaw();
     }
 }
 

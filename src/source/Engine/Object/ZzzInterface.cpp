@@ -6,6 +6,7 @@
 #include "Core/Platform/Imm.h"
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Core/RenderConfig.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -347,7 +348,7 @@ void RenderTipText(int sx, int sy, const wchar_t* Text)
     glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
     RenderColor((float)sx - 1, (float)sy - 2, (float)TextSize.cx / g_fScreenRate_x + 2, (float)TextSize.cy / g_fScreenRate_y + 2);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(sx, sy, Text);

@@ -8,6 +8,9 @@
 #include "Core/Globals/_define.h"
 #include <cmath>
 #include <cstring>
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Core/RenderConfig.h"
 
 float RequestTerrainHeight(float xf, float yf);
 
@@ -43,13 +46,18 @@ namespace
         GLStateScope()
         {
             depthTest = glIsEnabled(GL_DEPTH_TEST);
-            texture2D = glIsEnabled(GL_TEXTURE_2D);
-            lighting  = glIsEnabled(GL_LIGHTING);
+            texture2D = GL_FALSE;
+            lighting  = GL_FALSE;
             blend     = glIsEnabled(GL_BLEND);
 
+            if (!g_CoreProfile)
+            {
+                texture2D = glIsEnabled(GL_TEXTURE_2D);
+                lighting  = glIsEnabled(GL_LIGHTING);
+            }
+
             glDisable(GL_DEPTH_TEST);
-            glDisable(GL_TEXTURE_2D);
-            glDisable(GL_LIGHTING);
+            if (!g_CoreProfile) { glDisable(GL_TEXTURE_2D); glDisable(GL_LIGHTING); }
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
@@ -58,8 +66,11 @@ namespace
         {
             glLineWidth(1.0f);
             if (depthTest) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
-            if (texture2D) glEnable(GL_TEXTURE_2D); else glDisable(GL_TEXTURE_2D);
-            if (lighting)  glEnable(GL_LIGHTING);  else glDisable(GL_LIGHTING);
+            if (!g_CoreProfile)
+            {
+                if (texture2D) glEnable(GL_TEXTURE_2D); else glDisable(GL_TEXTURE_2D);
+                if (lighting)  glEnable(GL_LIGHTING);  else glDisable(GL_LIGHTING);
+            }
             if (!blend) glDisable(GL_BLEND);
         }
     };
@@ -130,46 +141,48 @@ namespace
     void RenderPyramidWireframe(const vec3_t v[8], const vec3_t apex)
     {
         glLineWidth(WIREFRAME_LINE_WIDTH);
-        glBegin(GL_LINES);
 
+        IR::Begin(GL_LINES);
+        PassthroughShader::Instance().SetUseTexture(false);
         // Near plane edges - green
-        glColor4f(0.0f, 1.0f, 0.0f, 0.8f);
-        glVertex3fv(v[0]); glVertex3fv(v[1]);
-        glVertex3fv(v[1]); glVertex3fv(v[2]);
-        glVertex3fv(v[2]); glVertex3fv(v[3]);
-        glVertex3fv(v[3]); glVertex3fv(v[0]);
+        IR::Color4f(0.0f, 1.0f, 0.0f, 0.8f);
+        IR::Vertex3fv(v[0]); IR::Vertex3fv(v[1]);
+        IR::Vertex3fv(v[1]); IR::Vertex3fv(v[2]);
+        IR::Vertex3fv(v[2]); IR::Vertex3fv(v[3]);
+        IR::Vertex3fv(v[3]); IR::Vertex3fv(v[0]);
 
         // Far plane edges - red
-        glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
-        glVertex3fv(v[4]); glVertex3fv(v[5]);
-        glVertex3fv(v[5]); glVertex3fv(v[6]);
-        glVertex3fv(v[6]); glVertex3fv(v[7]);
-        glVertex3fv(v[7]); glVertex3fv(v[4]);
+        IR::Color4f(1.0f, 0.0f, 0.0f, 0.8f);
+        IR::Vertex3fv(v[4]); IR::Vertex3fv(v[5]);
+        IR::Vertex3fv(v[5]); IR::Vertex3fv(v[6]);
+        IR::Vertex3fv(v[6]); IR::Vertex3fv(v[7]);
+        IR::Vertex3fv(v[7]); IR::Vertex3fv(v[4]);
 
         // Side edges from eye to far corners - yellow
-        glColor4f(1.0f, 1.0f, 0.0f, 0.8f);
-        glVertex3fv(apex); glVertex3fv(v[4]);
-        glVertex3fv(apex); glVertex3fv(v[5]);
-        glVertex3fv(apex); glVertex3fv(v[6]);
-        glVertex3fv(apex); glVertex3fv(v[7]);
-
-        glEnd();
+        IR::Color4f(1.0f, 1.0f, 0.0f, 0.8f);
+        IR::Vertex3fv(apex); IR::Vertex3fv(v[4]);
+        IR::Vertex3fv(apex); IR::Vertex3fv(v[5]);
+        IR::Vertex3fv(apex); IR::Vertex3fv(v[6]);
+        IR::Vertex3fv(apex); IR::Vertex3fv(v[7]);
+        IR::End();
     }
 
     void RenderPyramidFilled(const vec3_t v[8], const vec3_t apex)
     {
-        glColor4f(1.0f, 1.0f, 0.0f, 0.08f);
-        glBegin(GL_TRIANGLES);
-        // Left (apex, 4, 7), Right (apex, 5, 6), Top (apex, 4, 5), Bottom (apex, 7, 6)
-        glVertex3fv(apex); glVertex3fv(v[4]); glVertex3fv(v[7]);
-        glVertex3fv(apex); glVertex3fv(v[5]); glVertex3fv(v[6]);
-        glVertex3fv(apex); glVertex3fv(v[4]); glVertex3fv(v[5]);
-        glVertex3fv(apex); glVertex3fv(v[7]); glVertex3fv(v[6]);
-        glEnd();
+        IR::Begin(GL_TRIANGLES);
+        PassthroughShader::Instance().SetUseTexture(false);
+        IR::Color4f(1.0f, 1.0f, 0.0f, 0.08f);
+        IR::Vertex3fv(apex); IR::Vertex3fv(v[4]); IR::Vertex3fv(v[7]);
+        IR::Vertex3fv(apex); IR::Vertex3fv(v[5]); IR::Vertex3fv(v[6]);
+        IR::Vertex3fv(apex); IR::Vertex3fv(v[4]); IR::Vertex3fv(v[5]);
+        IR::Vertex3fv(apex); IR::Vertex3fv(v[7]); IR::Vertex3fv(v[6]);
+        IR::End();
 
-        glBegin(GL_QUADS);
-        glVertex3fv(v[4]); glVertex3fv(v[5]); glVertex3fv(v[6]); glVertex3fv(v[7]);
-        glEnd();
+        IR::Begin(GL_QUADS);
+        PassthroughShader::Instance().SetUseTexture(false);
+        IR::Color4f(1.0f, 1.0f, 0.0f, 0.08f);
+        IR::Vertex3fv(v[4]); IR::Vertex3fv(v[5]); IR::Vertex3fv(v[6]); IR::Vertex3fv(v[7]);
+        IR::End();
     }
 
     void RenderGroundProjection(const Frustum& frustum)
@@ -182,8 +195,10 @@ namespace
         const float* hullY = frustum.Get2DY();
 
         glLineWidth(GROUND_LINE_WIDTH);
-        glColor4f(0.0f, 1.0f, 0.0f, 0.7f);
-        glBegin(GL_LINES);
+
+        IR::Begin(GL_LINES);
+        PassthroughShader::Instance().SetUseTexture(false);
+        IR::Color4f(0.0f, 1.0f, 0.0f, 0.7f);
 
         for (int i = 0; i < hullCount; ++i)
         {
@@ -194,33 +209,32 @@ namespace
             float x1 = hullX[next] * TERRAIN_SCALE;
             float y1 = hullY[next] * TERRAIN_SCALE;
 
-            // Subdivide edge so each segment tracks terrain elevation
             float dx = x1 - x0;
             float dy = y1 - y0;
             float edgeLen = std::sqrt(dx * dx + dy * dy);
-            int segments = (int)(edgeLen / (SUBDIVISIONS_PER_TILE * TERRAIN_SCALE)) + 1;
-            if (segments < 1) segments = 1;
-            if (segments > MAX_EDGE_SEGMENTS) segments = MAX_EDGE_SEGMENTS;
+
+            int segments = static_cast<int>(std::ceil(edgeLen / (SUBDIVISIONS_PER_TILE * TERRAIN_SCALE)));
+            segments = std::max(1, std::min(segments, MAX_EDGE_SEGMENTS));
 
             for (int s = 0; s < segments; ++s)
             {
-                float t0 = (float)s / (float)segments;
-                float t1 = (float)(s + 1) / (float)segments;
+                float tA = static_cast<float>(s) / static_cast<float>(segments);
+                float tB = static_cast<float>(s + 1) / static_cast<float>(segments);
 
-                float sx0 = x0 + dx * t0;
-                float sy0 = y0 + dy * t0;
-                float sx1 = x0 + dx * t1;
-                float sy1 = y0 + dy * t1;
+                float px0 = x0 + tA * dx;
+                float py0 = y0 + tA * dy;
+                float pz0 = RequestTerrainHeight(px0, py0) + GROUND_LINE_Z_OFFSET;
 
-                float z0 = RequestTerrainHeight(sx0, sy0) + GROUND_LINE_Z_OFFSET;
-                float z1 = RequestTerrainHeight(sx1, sy1) + GROUND_LINE_Z_OFFSET;
+                float px1 = x0 + tB * dx;
+                float py1 = y0 + tB * dy;
+                float pz1 = RequestTerrainHeight(px1, py1) + GROUND_LINE_Z_OFFSET;
 
-                glVertex3f(sx0, sy0, z0);
-                glVertex3f(sx1, sy1, z1);
+                IR::Vertex3f(px0, py0, pz0);
+                IR::Vertex3f(px1, py1, pz1);
             }
         }
 
-        glEnd();
+        IR::End();
     }
 
     // Draw a terrain-hugging horizontal line between two ground hit points.
@@ -229,22 +243,25 @@ namespace
         float dx = x1 - x0;
         float dy = y1 - y0;
         float edgeLen = std::sqrt(dx * dx + dy * dy);
-        int segments = (int)(edgeLen / (SUBDIVISIONS_PER_TILE * TERRAIN_SCALE)) + 1;
-        if (segments < 1) segments = 1;
-        if (segments > MAX_EDGE_SEGMENTS) segments = MAX_EDGE_SEGMENTS;
+
+        int segments = static_cast<int>(std::ceil(edgeLen / (SUBDIVISIONS_PER_TILE * TERRAIN_SCALE)));
+        segments = std::max(1, std::min(segments, MAX_EDGE_SEGMENTS));
 
         for (int s = 0; s < segments; ++s)
         {
-            float t0 = (float)s / (float)segments;
-            float t1 = (float)(s + 1) / (float)segments;
-            float sx0 = x0 + dx * t0;
-            float sy0 = y0 + dy * t0;
-            float sx1 = x0 + dx * t1;
-            float sy1 = y0 + dy * t1;
-            float z0 = RequestTerrainHeight(sx0, sy0) + GROUND_LINE_Z_OFFSET;
-            float z1 = RequestTerrainHeight(sx1, sy1) + GROUND_LINE_Z_OFFSET;
-            glVertex3f(sx0, sy0, z0);
-            glVertex3f(sx1, sy1, z1);
+            float tA = static_cast<float>(s) / static_cast<float>(segments);
+            float tB = static_cast<float>(s + 1) / static_cast<float>(segments);
+
+            float px0 = x0 + tA * dx;
+            float py0 = y0 + tA * dy;
+            float pz0 = RequestTerrainHeight(px0, py0) + GROUND_LINE_Z_OFFSET;
+
+            float px1 = x0 + tB * dx;
+            float py1 = y0 + tB * dy;
+            float pz1 = RequestTerrainHeight(px1, py1) + GROUND_LINE_Z_OFFSET;
+
+            IR::Vertex3f(px0, py0, pz0);
+            IR::Vertex3f(px1, py1, pz1);
         }
     }
 
@@ -272,35 +289,36 @@ namespace
         bool blOk = rayToGround(v[7], botLx, botLy);
 
         glLineWidth(GROUND_LINE_WIDTH + 1.0f);
-        glBegin(GL_LINES);
+
+        IR::Begin(GL_LINES);
+        PassthroughShader::Instance().SetUseTexture(false);
 
         if (blOk && brOk)
         {
-            // Bottom of FOV → red (closest to camera)
-            glColor4f(1.0f, 0.0f, 0.0f, 0.9f);
+            IR::Color4f(1.0f, 0.0f, 0.0f, 0.9f);
             DrawGroundSegment(botLx, botLy, botRx, botRy);
         }
         if (tlOk && trOk)
         {
-            // Top of FOV → yellow (visible far edge)
-            glColor4f(1.0f, 1.0f, 0.0f, 0.9f);
+            IR::Color4f(1.0f, 1.0f, 0.0f, 0.9f);
             DrawGroundSegment(topLx, topLy, topRx, topRy);
         }
 
-        glEnd();
+        IR::End();
     }
 
     void RenderCameraMarker(const vec3_t apex)
     {
-        glColor4f(0.0f, 1.0f, 1.0f, 0.9f);
-        glBegin(GL_LINES);
-        glVertex3f(apex[0] - CAMERA_MARKER_HALF_LENGTH, apex[1], apex[2]);
-        glVertex3f(apex[0] + CAMERA_MARKER_HALF_LENGTH, apex[1], apex[2]);
-        glVertex3f(apex[0], apex[1] - CAMERA_MARKER_HALF_LENGTH, apex[2]);
-        glVertex3f(apex[0], apex[1] + CAMERA_MARKER_HALF_LENGTH, apex[2]);
-        glVertex3f(apex[0], apex[1], apex[2] - CAMERA_MARKER_HALF_LENGTH);
-        glVertex3f(apex[0], apex[1], apex[2] + CAMERA_MARKER_HALF_LENGTH);
-        glEnd();
+        IR::Begin(GL_LINES);
+        PassthroughShader::Instance().SetUseTexture(false);
+        IR::Color4f(0.0f, 1.0f, 1.0f, 0.9f);
+        IR::Vertex3f(apex[0] - CAMERA_MARKER_HALF_LENGTH, apex[1], apex[2]);
+        IR::Vertex3f(apex[0] + CAMERA_MARKER_HALF_LENGTH, apex[1], apex[2]);
+        IR::Vertex3f(apex[0], apex[1] - CAMERA_MARKER_HALF_LENGTH, apex[2]);
+        IR::Vertex3f(apex[0], apex[1] + CAMERA_MARKER_HALF_LENGTH, apex[2]);
+        IR::Vertex3f(apex[0], apex[1], apex[2] - CAMERA_MARKER_HALF_LENGTH);
+        IR::Vertex3f(apex[0], apex[1], apex[2] + CAMERA_MARKER_HALF_LENGTH);
+        IR::End();
     }
 }
 

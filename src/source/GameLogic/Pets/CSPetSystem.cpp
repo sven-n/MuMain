@@ -1,4 +1,4 @@
-﻿//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 //  CSPetSystem.
 //////////////////////////////////////////////////////////////////////////
 
@@ -155,7 +155,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
     const int boneCount = Models[Type].NumBones;
     if (boneCount > 0)
     {
-        m_BoneTransforms = std::make_unique<vec34_t[]>(boneCount);
+        m_BoneTransforms = std::make_unique<vec34_t[]>(MAX_BONES);
         o->BoneTransform = m_BoneTransforms.get();
     }
     else

@@ -2,6 +2,8 @@
 #include "CameraProjection.h"
 #include "CameraState.h"
 #include "CameraConfig.h"
+#include "Render/RHI/RHI.h"
+#include "Render/Core/RenderConfig.h"
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -18,8 +20,8 @@ static int s_ViewportHeight = 0;
 void CameraProjection::SetupPerspective(CameraState& state, float fov, float aspect,
                                           float zNear, float zFar)
 {
-    // Set up OpenGL perspective
-    gluPerspective(fov, aspect, zNear, zFar);
+    // GL perspective is fed to GlobalUBO from a CPU closed form by BeginOpengl() (DXP-07b) --
+    // this function only maintains the CPU screen-center/perspective-factor cache below.
 
     // Use actual viewport dimensions (set by SetViewport) for screen center and
     // perspective. This accounts for the game viewport being narrower/shorter than
@@ -43,8 +45,10 @@ void CameraProjection::SetViewport(int x, int y, int width, int height)
     s_ViewportWidth = width;
     s_ViewportHeight = height;
 
-    // Set OpenGL viewport (Y coordinate is flipped)
-    glViewport(x, WindowHeight - (y + height), width, height);
+    // GL's viewport origin is bottom-left, so glViewport needs y flipped to
+    // WindowHeight-(y+height).
+    const int flippedY = WindowHeight - (y + height);
+    glViewport(x, flippedY, width, height);
 }
 
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,
@@ -113,7 +117,7 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
 
     // Read depth buffer
     GLfloat depth;
-    glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+    RHI::ReadDepthPixel(x, y, &depth);
 
     // Expected window-space depth from a standard gluPerspective projection:
     //   z_window = (f / (f - n)) * (1 + n / z_eye)        with z_eye < 0

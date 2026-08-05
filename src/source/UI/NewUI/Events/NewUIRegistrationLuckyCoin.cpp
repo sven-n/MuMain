@@ -1,10 +1,13 @@
-﻿// NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
+// NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/NewUI/Events/NewUIRegistrationLuckyCoin.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
+#include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
 
 
@@ -97,6 +100,18 @@ namespace SEASON3B
         g_pRenderText->RenderText(_x + 24, _y + 150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
     }
 
+    // DXP-07d increment 5, stage 1+2 (implemented together, on trust — see task doc/2026-08-01 note:
+    // this panel, like increment 4, is unreachable via normal play until the server implements the
+    // corresponding NPC/event, so no runtime soak was possible before this swap). Own copies of the
+    // compare/log helpers. Identical shape to increment 4 (CNewUIGoldBowmanLena::Render3D): EndBitmap()
+    // at entry, restore mirror runs BEFORE BeginBitmap() at the end (own pre-panel snapshot needed).
+    // The only per-item call is RenderItem3D() (line 138 below) — same shared path increments 0-4
+    // already proved carries no GL model transform; SetItemRotation() (lines 137/139) is a plain
+    // bool-field setter (m_ItemAngle), not a GL call, consumed later inside RenderObjectScreen's
+    // angle table — verified by reading NewUIRegistrationLuckyCoin.h.
+    static float s_PreLuckyCoinProj[16];
+    static float s_PreLuckyCoinView[16];
+
     void CNewUIRegistrationLuckyCoin::RenderLuckyCoin()
     {
         float x, y, width, height;
@@ -109,20 +124,46 @@ namespace SEASON3B
 
         EndBitmap();
 
-        glMatrixMode(GL_PROJECTION);
+        // Snapshot the CPU source of truth right after EndBitmap() restores it (DXP-07a), before
+        // this panel overwrites GlobalUBO — used to check the post-pop restore below for symmetry.
+        memcpy(s_PreLuckyCoinProj, GlobalUBO::Instance().GetProj(), sizeof(s_PreLuckyCoinProj));
+        memcpy(s_PreLuckyCoinView, GlobalUBO::Instance().GetView(), sizeof(s_PreLuckyCoinView));
+
         SaveCameraPerspective();
-    glPushMatrix();
-        glLoadIdentity();
         glViewport2(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
-        CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
+        // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket,
+        // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, and shadow-compare diagnostic
+        // are deleted — DXP-07d already proved this closed form matches bit-for-bit, and
+        // GlobalUBO is the only consumer. This panel's projection is a plain
+        // gluPerspective(1.f deg, aspect, RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR) closed
+        // form, and its view is identity.
+        {
+            float aspect = (float)WindowWidth / (float)WindowHeight;
+            float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
+            float f = 1.0f / tanf(fovRad);
+            float zNear = RENDER_ITEMVIEW_NEAR;
+            float zFar  = RENDER_ITEMVIEW_FAR;
+            float cpuProj[16];
+            BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
+            float cpuView[16] = {
+                1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
+            };
+
+            GlobalUBO::Instance().SetProj(cpuProj);
+            GlobalUBO::Instance().SetView(cpuView);
+
+            // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used
+            // to produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
+            static const float s_IdentityCameraMatrix[3][4] = {
+                {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
+            };
+            memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
+        }
         EnableDepthTest();
         EnableDepthMask();
 
-        glClear(GL_DEPTH_BUFFER_BIT);
+        ClearDepthBuffer();
 
         SetItemRotation(true);
         RenderItem3D(x, y, width, height, m_CoinItem->Type, m_CoinItem->Level, 0, 0, true);
@@ -130,12 +171,12 @@ namespace SEASON3B
 
         UpdateMousePositionn();
 
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-
-    RestoreCameraPerspective();
+        // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the restore-symmetry
+        // shadow-compare are deleted — GlobalUBO is restored directly from the pre-panel snapshot
+        // taken at entry.
+        RestoreCameraPerspective();
+        GlobalUBO::Instance().SetProj(s_PreLuckyCoinProj);
+        GlobalUBO::Instance().SetView(s_PreLuckyCoinView);
         BeginBitmap();
     }
 

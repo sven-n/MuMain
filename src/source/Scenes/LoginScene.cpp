@@ -9,6 +9,7 @@
 #include "Camera/CameraMove.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Core/RenderConfig.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -388,7 +389,7 @@ bool NewRenderLogInScene(HDC hDC)
 
     Height = REFERENCE_HEIGHT;
     Width = GetScreenWidth();
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    SetClearColor(0.f, 0.f, 0.f, 1.f);
 
     // Set ViewFar BEFORE BeginOpengl so the projection matrix covers the full render distance
 #ifdef _EDITOR
@@ -409,9 +410,10 @@ bool NewRenderLogInScene(HDC hDC)
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
         RenderTerrain(false);
+        RenderObjects();
         RenderCharactersClient();
         RenderMount();
-        RenderObjects();
+
         RenderJoints();
         RenderEffects();
         CheckSprites();

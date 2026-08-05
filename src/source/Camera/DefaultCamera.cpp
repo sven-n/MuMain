@@ -844,12 +844,9 @@ void DefaultCamera::HandleEditorMode()
         if (IsHeroValid())
         {
             // Apply rotation and movement
-            glPushMatrix();
-            glLoadIdentity();
-            glRotatef(-m_State.Angle[2], 0.f, 0.f, 1.f);
+            vec3_t z_angle = { 0.f, 0.f, -m_State.Angle[2] };
             float Matrix[3][4];
-            CameraProjection::GetOpenGLMatrix(Matrix);
-            glPopMatrix();
+            AngleMatrix(z_angle, Matrix);
             VectorRotate(p1, Matrix, p2);
             VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
         }

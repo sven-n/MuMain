@@ -8,6 +8,7 @@
 #include <math.h>
 #include <iterator>
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Core/BindState.h"
 #include "Render/Models/ZzzBMD.h"
 #include "ZzzLodTerrain.h"
 #include "Engine/Pathing/ZzzPath.h"
@@ -44,7 +45,19 @@ extern "C" bool DevEditor_GetOrbitalHullTrapezoid(float* outFarDist, float* outF
 static bool s_bShowTileGrid = false;
 #endif
 
+#include "Render/Core/RenderConfig.h"
+#include "Render/Shaders/TerrainShader.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+
 //-------------------------------------------------------------------------------------------------------------
+
+GLuint g_VBO_TerrainPosition = 0;
+GLuint g_EBO_Terrain = 0;
+GLuint g_VAO_Terrain = 0;
+GLuint g_VBO_TerrainLight[2] = { 0, 0 };
+GLuint g_VBO_TerrainAlpha = 0;
+int g_TerrainLightBufIdx = 0;
 
 int  TerrainFlag;
 bool ActiveTerrain = false;
@@ -1030,6 +1043,143 @@ void RequestTerrainLight(float xf, float yf, vec3_t Light)
     }
 }
 
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_opengl.h>
+
+typedef void (APIENTRY* PFNGLGENBUFFERSPROC)(GLsizei, GLuint*);
+typedef void (APIENTRY* PFNGLDELETEBUFFERSPROC)(GLsizei, const GLuint*);
+typedef void (APIENTRY* PFNGLBINDBUFFERPROC)(GLenum, GLuint);
+typedef void (APIENTRY* PFNGLBUFFERDATAPROC)(GLenum, GLsizeiptr, const void*, GLenum);
+typedef void (APIENTRY* PFNGLGENVERTEXARRAYSPROC)(GLsizei, GLuint*);
+typedef void (APIENTRY* PFNGLDELETEVERTEXARRAYSPROC)(GLsizei, const GLuint*);
+typedef void (APIENTRY* PFNGLBINDVERTEXARRAYPROC)(GLuint);
+typedef void (APIENTRY* PFNGLVERTEXATTRIBPOINTERPROC)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void*);
+typedef void (APIENTRY* PFNGLENABLEVERTEXATTRIBARRAYPROC)(GLuint);
+
+static PFNGLGENBUFFERSPROC             fn_glGenBuffers             = nullptr;
+static PFNGLDELETEBUFFERSPROC          fn_glDeleteBuffers          = nullptr;
+static PFNGLBINDBUFFERPROC             fn_glBindBuffer             = nullptr;
+static PFNGLBUFFERDATAPROC             fn_glBufferData             = nullptr;
+static PFNGLGENVERTEXARRAYSPROC        fn_glGenVertexArrays        = nullptr;
+static PFNGLDELETEVERTEXARRAYSPROC     fn_glDeleteVertexArrays     = nullptr;
+static PFNGLVERTEXATTRIBPOINTERPROC    fn_glVertexAttribPointer    = nullptr;
+static PFNGLENABLEVERTEXATTRIBARRAYPROC fn_glEnableVertexAttribArray = nullptr;
+
+static bool LoadTerrainGLFunctions()
+{
+    static bool loaded = false;
+    if (loaded) return true;
+
+    fn_glGenBuffers              = (PFNGLGENBUFFERSPROC)SDL_GL_GetProcAddress("glGenBuffers");
+    fn_glDeleteBuffers           = (PFNGLDELETEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteBuffers");
+    fn_glBindBuffer              = (PFNGLBINDBUFFERPROC)SDL_GL_GetProcAddress("glBindBuffer");
+    fn_glBufferData              = (PFNGLBUFFERDATAPROC)SDL_GL_GetProcAddress("glBufferData");
+    fn_glGenVertexArrays         = (PFNGLGENVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glGenVertexArrays");
+    fn_glDeleteVertexArrays      = (PFNGLDELETEVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glDeleteVertexArrays");
+    fn_glVertexAttribPointer     = (PFNGLVERTEXATTRIBPOINTERPROC)SDL_GL_GetProcAddress("glVertexAttribPointer");
+    fn_glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)SDL_GL_GetProcAddress("glEnableVertexAttribArray");
+
+    loaded = (fn_glGenBuffers && fn_glBindBuffer && fn_glBufferData && fn_glGenVertexArrays);
+    return loaded;
+}
+
+void DestroyTerrainVBO()
+{
+    if (!LoadTerrainGLFunctions()) return;
+    if (g_VAO_Terrain) { fn_glDeleteVertexArrays(1, &g_VAO_Terrain); g_VAO_Terrain = 0; InvalidateVAOCache(); }
+    if (g_VBO_TerrainPosition) { fn_glDeleteBuffers(1, &g_VBO_TerrainPosition); g_VBO_TerrainPosition = 0; }
+    if (g_EBO_Terrain) { fn_glDeleteBuffers(1, &g_EBO_Terrain); g_EBO_Terrain = 0; }
+    if (g_VBO_TerrainLight[0]) { fn_glDeleteBuffers(2, g_VBO_TerrainLight); g_VBO_TerrainLight[0] = 0; g_VBO_TerrainLight[1] = 0; }
+    if (g_VBO_TerrainAlpha) { fn_glDeleteBuffers(1, &g_VBO_TerrainAlpha); g_VBO_TerrainAlpha = 0; }
+    g_TerrainLightBufIdx = 0;
+}
+
+void CreateTerrainVBO()
+{
+    DestroyTerrainVBO();
+
+    std::vector<float> positions(TERRAIN_SIZE * TERRAIN_SIZE * 3);
+    for (int y = 0; y < TERRAIN_SIZE; ++y)
+    {
+        for (int x = 0; x < TERRAIN_SIZE; ++x)
+        {
+            int idx = TERRAIN_INDEX(x, y);
+            positions[idx * 3 + 0] = (float)x * TERRAIN_SCALE;
+            positions[idx * 3 + 1] = (float)y * TERRAIN_SCALE;
+            positions[idx * 3 + 2] = BackTerrainHeight[idx];
+        }
+    }
+
+    std::vector<GLuint> indices;
+    indices.reserve((TERRAIN_SIZE - 1) * (TERRAIN_SIZE - 1) * 6);
+    for (int y = 0; y < TERRAIN_SIZE - 1; ++y)
+    {
+        for (int x = 0; x < TERRAIN_SIZE - 1; ++x)
+        {
+            GLuint idx0 = TERRAIN_INDEX(x, y);
+            GLuint idx1 = TERRAIN_INDEX(x + 1, y);
+            GLuint idx2 = TERRAIN_INDEX(x + 1, y + 1);
+            GLuint idx3 = TERRAIN_INDEX(x, y + 1);
+
+            // Triangle 1
+            indices.push_back(idx0);
+            indices.push_back(idx1);
+            indices.push_back(idx2);
+
+            // Triangle 2
+            indices.push_back(idx0);
+            indices.push_back(idx2);
+            indices.push_back(idx3);
+        }
+    }
+
+    if (!LoadTerrainGLFunctions()) return;
+
+    fn_glGenVertexArrays(1, &g_VAO_Terrain);
+    BindVAO(g_VAO_Terrain);
+
+    // Attribute 0: Position
+    fn_glGenBuffers(1, &g_VBO_TerrainPosition);
+    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainPosition);
+    fn_glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STATIC_DRAW);
+    fn_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    fn_glEnableVertexAttribArray(0);
+
+    // Attribute 2: Static Multi-texture Blend Alpha
+    fn_glGenBuffers(1, &g_VBO_TerrainAlpha);
+    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainAlpha);
+    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(TerrainMappingAlpha), TerrainMappingAlpha, GL_STATIC_DRAW);
+    fn_glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)0);
+    fn_glEnableVertexAttribArray(2);
+
+    // Double-buffered Dynamic Light VBO
+    fn_glGenBuffers(2, g_VBO_TerrainLight);
+    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[0]);
+    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(PrimaryTerrainLight), nullptr, GL_STREAM_DRAW);
+    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[1]);
+    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(PrimaryTerrainLight), nullptr, GL_STREAM_DRAW);
+
+    // Element Index Buffer
+    fn_glGenBuffers(1, &g_EBO_Terrain);
+    fn_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_EBO_Terrain);
+    fn_glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+    BindVAO(0);
+    fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
+    fn_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void UploadTerrainLightVBO()
+{
+    if (g_VBO_TerrainLight[0] == 0) return;
+    if (!LoadTerrainGLFunctions()) return;
+
+    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[g_TerrainLightBufIdx]);
+    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(PrimaryTerrainLight), PrimaryTerrainLight, GL_STREAM_DRAW);
+    fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
+    g_TerrainLightBufIdx ^= 1;
+}
+
 void CreateLodBuffer()
 {
     for (int y = 0; y < TERRAIN_SIZE; y += 4)
@@ -1472,12 +1622,22 @@ void RenderFace_After(int Texture, int mx, int my)
 
     BindTexture(BITMAP_MAPTILE + Texture);
 
-    glBegin(GL_TRIANGLE_FAN);
-    Vertex0();
-    Vertex1();
-    Vertex2();
-    Vertex3();
-    glEnd();
+    // Per-tile hot path (Kanturu 3rd after-pass) — no redundant SetUseTexture(true)
+    // after IR::Begin(), same lesson as the TASK-24 grass/terrain-tile fix.
+    IR::Begin(GL_TRIANGLE_FAN);
+    IR::TexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
+    IR::Color3fv(PrimaryTerrainLight[TerrainIndex1]);
+    IR::Vertex3fv(TerrainVertex[0]);
+    IR::TexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
+    IR::Color3fv(PrimaryTerrainLight[TerrainIndex2]);
+    IR::Vertex3fv(TerrainVertex[1]);
+    IR::TexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
+    IR::Color3fv(PrimaryTerrainLight[TerrainIndex3]);
+    IR::Vertex3fv(TerrainVertex[2]);
+    IR::TexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
+    IR::Color3fv(PrimaryTerrainLight[TerrainIndex4]);
+    IR::Vertex3fv(TerrainVertex[3]);
+    IR::End();
 }
 
 void RenderFaceAlpha(int Texture, int mx, int my)
@@ -1577,6 +1737,85 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 
     if (TerrainFlag != TERRAIN_MAP_GRASS)
     {
+        if (TerrainShader::Instance().IsCreated())
+        {
+            if (xi >= 0 && xi < TERRAIN_SIZE - 1 && yi >= 0 && yi < TERRAIN_SIZE - 1)
+            {
+                int tex1 = TerrainMappingLayer1[TerrainIndex1];
+                int tex2 = TerrainMappingLayer2[TerrainIndex1];
+                const int originalTex1 = tex1;
+                const int originalTex2 = tex2;
+                const bool allCornersOpaque =
+                    TerrainMappingAlpha[TerrainIndex1] >= 1.f && TerrainMappingAlpha[TerrainIndex2] >= 1.f &&
+                    TerrainMappingAlpha[TerrainIndex3] >= 1.f && TerrainMappingAlpha[TerrainIndex4] >= 1.f;
+
+                // TASK-30 phase 1/2: base-layer "Water" flag, ported from FaceTexture()'s condition —
+                // only meaningful when this tile isn't the "fully Layer2" case (Water is only ever set
+                // on the Layer1/else branch in the legacy code, matches !allCornersOpaque here).
+                const bool baseIsWater = !allCornersOpaque && (originalTex1 == 5 ||
+                    (originalTex1 == 11 && (gMapManager.IsPKField() || IsDoppelGanger2())));
+
+                // TASK-30 phase 1: Crywolf-1st base-layer water splash particles (FaceTexture's
+                // WD_34CRYWOLF_1ST && Texture==5 check specifically, not the broader baseIsWater).
+                if (!allCornersOpaque && gMapManager.WorldActive == WD_34CRYWOLF_1ST && originalTex1 == 5 && rand_fps_check(50))
+                {
+                    vec3_t Pos, Light;
+                    Vector(0.30f, 0.40f, 0.20f, Light);
+                    float sx = xf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
+                    float sy = yf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
+                    Vector(sx, sy, Hero->Object.Position[2] + 10.f, Pos);
+                    CreateParticle(BITMAP_SPOT_WATER, Pos, Hero->Object.Angle, Light, 0);
+                }
+
+                // TASK-30 phase 1: Atlans/Doppelganger3 substitute the overlay with animated water
+                // whenever this tile's Layer2 is water — ported from the legacy overlay-blend special
+                // case (RenderTerrainFace, non-VBO branch). Applied before the alpha collapse below so
+                // both a full-Layer2 tile and a partially-blended tile correctly show animated water.
+                // Legacy passes Water=false explicitly for this case — the animation comes from
+                // WaterTextureNumber cycling which static bitmap is bound, not UV scroll — so
+                // overlayIsWater stays false here (no phase-2 scroll needed on top).
+                bool overlayIsWater;
+                if ((gMapManager.WorldActive == WD_7ATLANSE || IsDoppelGanger3()) && originalTex2 == 5)
+                {
+                    tex2 = BITMAP_WATER - BITMAP_MAPTILE + WaterTextureNumber;
+                    overlayIsWater = false;
+                }
+                else
+                {
+                    // TASK-30 phase 2: generic alpha-blend overlay path. Legacy's Water flag for this
+                    // pass carries over from the base's value and is only cleared if the overlay's own
+                    // texture isn't water (ZzzLodTerrain.cpp ~1794-1798) — i.e. both layers must be
+                    // water for the overlay pass to animate.
+                    overlayIsWater = baseIsWater && (originalTex2 == 5);
+                }
+
+                if (allCornersOpaque)
+                {
+                    tex1 = tex2;
+                }
+                else if (TerrainMappingAlpha[TerrainIndex1] <= 0.f && TerrainMappingAlpha[TerrainIndex2] <= 0.f &&
+                         TerrainMappingAlpha[TerrainIndex3] <= 0.f && TerrainMappingAlpha[TerrainIndex4] <= 0.f)
+                {
+                    tex2 = tex1;
+                }
+
+                BITMAP_t* b1 = &Bitmaps[BITMAP_MAPTILE + tex1];
+                BITMAP_t* b2 = &Bitmaps[BITMAP_MAPTILE + tex2];
+
+                TerrainShader::Instance().SetBaseTexture(b1->TextureNumber);
+                TerrainShader::Instance().SetOverlayTexture(b2->TextureNumber);
+                TerrainShader::Instance().SetWaterFlags(baseIsWater, overlayIsWater);
+                // DXP-01: synced per-tile (not once per frustrum pass like SetWaterMove) because
+                // alpha-test state can change between tile draws via the wrapper family; dirty-checked
+                // internally so this is a no-op glUniform-wise almost always.
+                TerrainShader::Instance().SyncAlphaRef();
+
+                uintptr_t indexOffset = static_cast<uintptr_t>((yi * (TERRAIN_SIZE - 1) + xi) * 6);
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*)(indexOffset * sizeof(GLuint)));
+            }
+            return;
+        }
+
         int Texture;
         bool Alpha;
         bool Water = false;
@@ -1671,20 +1910,24 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 #ifdef ASG_ADD_MAP_KARUTAN
                 }
 #endif	// ASG_ADD_MAP_KARUTAN
-                glBegin(GL_QUADS);
-                glTexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
-                glColor3fv(PrimaryTerrainLight[TerrainIndex1]);
-                glVertex3fv(TerrainVertex[0]);
-                glTexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
-                glColor3fv(PrimaryTerrainLight[TerrainIndex2]);
-                glVertex3fv(TerrainVertex[1]);
-                glTexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
-                glColor3fv(PrimaryTerrainLight[TerrainIndex3]);
-                glVertex3fv(TerrainVertex[2]);
-                glTexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
-                glColor3fv(PrimaryTerrainLight[TerrainIndex4]);
-                glVertex3fv(TerrainVertex[3]);
-                glEnd();
+                // IR::Begin() already binds PassthroughShader with SetUseTexture(true) internally —
+                // this is a hot per-tile call (every visible grass tile, every frame), so avoid the
+                // redundant second glUseProgram/glUniform1i that a duplicate SetUseTexture(true) here
+                // would cost.
+                IR::Begin(GL_QUADS);
+                IR::TexCoord2f(TerrainTextureCoord[0][0], TerrainTextureCoord[0][1]);
+                IR::Color3fv(PrimaryTerrainLight[TerrainIndex1]);
+                IR::Vertex3fv(TerrainVertex[0]);
+                IR::TexCoord2f(TerrainTextureCoord[1][0], TerrainTextureCoord[1][1]);
+                IR::Color3fv(PrimaryTerrainLight[TerrainIndex2]);
+                IR::Vertex3fv(TerrainVertex[1]);
+                IR::TexCoord2f(TerrainTextureCoord[2][0], TerrainTextureCoord[2][1]);
+                IR::Color3fv(PrimaryTerrainLight[TerrainIndex3]);
+                IR::Vertex3fv(TerrainVertex[2]);
+                IR::TexCoord2f(TerrainTextureCoord[3][0], TerrainTextureCoord[3][1]);
+                IR::Color3fv(PrimaryTerrainLight[TerrainIndex4]);
+                IR::Vertex3fv(TerrainVertex[3]);
+                IR::End();
 
                 if (gMapManager.IsPKField() || IsDoppelGanger2())
                     DisableAlphaBlend();
@@ -1753,20 +1996,15 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
             {
                 EnableAlphaTest();
                 DisableTexture();
-                glBegin(GL_TRIANGLE_FAN);
+                IR::Begin(GL_TRIANGLE_FAN);
+                PassthroughShader::Instance().SetUseTexture(false);
                 if (4 <= path->GetClosedStatus(TerrainIndex1))
-                {
-                    glColor4f(0.3f, 0.3f, 1.0f, 0.5f);
-                }
+                    IR::Color4f(0.3f, 0.3f, 1.0f, 0.5f);
                 else
-                {
-                    glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
-                }
+                    IR::Color4f(1.0f, 1.0f, 1.0f, 0.3f);
                 for (int i = 0; i < 4; i++)
-                {
-                    glVertex3fv(TerrainVertex[i]);
-                }
-                glEnd();
+                    IR::Vertex3fv(TerrainVertex[i]);
+                IR::End();
                 DisableAlphaBlend();
             }
         }
@@ -1778,13 +2016,12 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
         if (EditFlag != EDIT_LIGHT)
         {
             DisableTexture();
-            glColor3f(0.5f, 0.5f, 0.5f);
-            glBegin(GL_LINE_STRIP);
+            IR::Begin(GL_LINE_STRIP);
+            PassthroughShader::Instance().SetUseTexture(false);
+            IR::Color3f(0.5f, 0.5f, 0.5f);
             for (int i = 0; i < 4; i++)
-            {
-                glVertex3fv(TerrainVertex[i]);
-            }
-            glEnd();
+                IR::Vertex3fv(TerrainVertex[i]);
+            IR::End();
             DisableAlphaBlend();
         }
 #endif// _DEBUG
@@ -1866,7 +2103,7 @@ void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int
     }
 }
 
-void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha, float Height = 0.f)
+void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha, float Height = 0.f, const float* FixedColor = nullptr)
 {
     int xi = (int)xf;
     int yi = (int)yf;
@@ -1892,20 +2129,29 @@ void RenderTerrainBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[
         VectorCopy(PrimaryTerrainLight[TerrainIndex4], Light[3]);
     }
 
-    glBegin(GL_TRIANGLE_FAN);
+    // IR::Begin() already binds PassthroughShader with SetUseTexture(true) internally — this is a
+    // hot per-tile call (ground-decal effects, grass-adjacent tiling), avoid the redundant rebind.
+    IR::Begin(GL_TRIANGLE_FAN);
     for (int i = 0; i < 4; i++)
     {
         if (LightEnable)
         {
             if (Alpha == 1.f)
-                glColor3fv(Light[i]);
+                IR::Color3fv(Light[i]);
             else
-                glColor4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
+                IR::Color4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
         }
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex3fv(TerrainVertex[i]);
+        else if (FixedColor)
+        {
+            // Legacy path relies on ambient glColor state set once by the caller before this
+            // tile loop (RenderTerrainAlphaBitmap). IR::Begin() resets color to white each
+            // call, so the caller must pass its intended tint through explicitly.
+            IR::Color4f(FixedColor[0], FixedColor[1], FixedColor[2], Alpha);
+        }
+        IR::TexCoord2f(c[i][0], c[i][1]);
+        IR::Vertex3fv(TerrainVertex[i]);
     }
-    glEnd();
+    IR::End();
 }
 
 void RenderTerrainBitmap(int Texture, int mxi, int myi, float Rotation)
@@ -1991,7 +2237,7 @@ void RenderTerrainAlphaBitmap(int Texture, float xf, float yf, float SizeX, floa
                 p2[i][1] += 0.5f;
                 //if((p2[i][0]>=0.f && p2[i][0]<=1.f) || (p2[i][1]>=0.f && p2[i][1]<=1.f)) Clip = true;
             }
-            RenderTerrainBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height);
+            RenderTerrainBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height, Light);
         }
     }
 }
@@ -2416,12 +2662,12 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     float FrustrumMinY = (float)TERRAIN_SIZE * TERRAIN_SCALE;
     float FrustrumMaxX = 0.f;
     float FrustrumMaxY = 0.f;
-    float OGLMatrix[3][4];
-    CameraProjection::GetOpenGLMatrix(OGLMatrix);
+    // g_Camera.Matrix is CPU-sourced by BeginOpengl() (DXP-07c) and always fresh here -- every
+    // caller of CreateFrustrum() runs it immediately after BeginOpengl() in the same frame.
     for (int i = 0; i < 5; i++)
     {
         vec3_t t;
-        VectorIRotate(Temp[i], OGLMatrix, t);
+        VectorIRotate(Temp[i], g_Camera.Matrix, t);
         VectorAdd(t, g_Camera.Position, FrustrumVertex[i]);
         if (FrustrumMinX > FrustrumVertex[i][0]) FrustrumMinX = FrustrumVertex[i][0];
         if (FrustrumMinY > FrustrumVertex[i][1]) FrustrumMinY = FrustrumVertex[i][1];
@@ -2501,12 +2747,17 @@ void RenderDebugSphere(const vec3_t center, float radius, float r, float g, floa
 {
     // Save OpenGL state
     GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean texture2D = glIsEnabled(GL_TEXTURE_2D);
-    GLboolean lighting = glIsEnabled(GL_LIGHTING);
+    GLboolean texture2D = GL_FALSE;
+    GLboolean lighting = GL_FALSE;
+    if (!g_CoreProfile)
+    {
+        texture2D = glIsEnabled(GL_TEXTURE_2D);
+        lighting = glIsEnabled(GL_LIGHTING);
 
-    // Disable unnecessary features
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
+        // Disable unnecessary features
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
+    }
     glEnable(GL_DEPTH_TEST);  // Keep depth test for proper 3D rendering
 
     glColor3f(r, g, b);
@@ -2551,18 +2802,26 @@ void RenderDebugSphere(const vec3_t center, float radius, float r, float g, floa
 
     // Restore OpenGL state
     if (!depthTest) glDisable(GL_DEPTH_TEST);
-    if (texture2D) glEnable(GL_TEXTURE_2D);
-    if (lighting) glEnable(GL_LIGHTING);
+    if (!g_CoreProfile)
+    {
+        if (texture2D) glEnable(GL_TEXTURE_2D);
+        if (lighting) glEnable(GL_LIGHTING);
+    }
 }
 
 void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, float r, float g, float b)
 {
     GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean texture2D = glIsEnabled(GL_TEXTURE_2D);
-    GLboolean lighting = glIsEnabled(GL_LIGHTING);
+    GLboolean texture2D = GL_FALSE;
+    GLboolean lighting = GL_FALSE;
+    if (!g_CoreProfile)
+    {
+        texture2D = glIsEnabled(GL_TEXTURE_2D);
+        lighting = glIsEnabled(GL_LIGHTING);
 
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
+    }
     glEnable(GL_DEPTH_TEST);
 
     glColor3f(r, g, b);
@@ -2592,8 +2851,11 @@ void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, 
     glEnd();
 
     if (!depthTest) glDisable(GL_DEPTH_TEST);
-    if (texture2D) glEnable(GL_TEXTURE_2D);
-    if (lighting) glEnable(GL_LIGHTING);
+    if (!g_CoreProfile)
+    {
+        if (texture2D) glEnable(GL_TEXTURE_2D);
+        if (lighting) glEnable(GL_LIGHTING);
+    }
 }
 
 void CacheActiveFrustum()
@@ -2936,6 +3198,33 @@ void RenderTerrainBlock(float xf, float yf, int xi, int yi, bool EditFlag)
 
 void RenderTerrainFrustrum(bool EditFlag)
 {
+    bool useShader = (TerrainShader::Instance().IsCreated() && TerrainFlag != TERRAIN_MAP_GRASS && !EditFlag);
+    if (useShader)
+    {
+        TerrainShader::Instance().Bind();
+        // TASK-30 phase 2: WaterMove is recomputed once per frame in RenderTerrain() (map-dependent
+        // rate); set it once here rather than per-tile, matching how often the CPU value actually changes.
+        TerrainShader::Instance().SetWaterMove(WaterMove);
+        BindVAO(g_VAO_Terrain);
+        fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[g_TerrainLightBufIdx ^ 1]);
+        fn_glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        fn_glEnableVertexAttribArray(1);
+    }
+    else
+    {
+        // DXP-22 step 4: the tile loop below falls through to RenderFace/RenderFaceAlpha/
+        // RenderFaceBlend's raw glBegin/glEnd fixed-function fallback whenever TerrainFlag ==
+        // TERRAIN_MAP_GRASS (grass maps never take the shader branch). Previously BMD::RenderMesh()
+        // reflexively unbound its program after every single mesh, which is what happened to keep
+        // program 0 in effect here too. Now that that reflexive reset is gone (see ZzzBMD.cpp), a
+        // shader program left bound from a prior draw would silently render these FFP tiles through
+        // it instead of true fixed-function -- so force it back to 0 explicitly, once per pass
+        // (not per-tile, which would reintroduce the TASK-24-style churn this whole task exists to
+        // remove). Safe to do unconditionally here even outside the grass case: at pass entry, once
+        // per frame, ordinary cache-miss cost either way. See DXP-22-bind-state-monopoly-perf.md.
+        UnbindAllShaders();
+    }
+
     int     xi;
     int     yi = FrustrumBoundMinY;
     float   xf;
@@ -2955,6 +3244,12 @@ void RenderTerrainFrustrum(bool EditFlag)
 
             }
         }
+    }
+
+    if (useShader)
+    {
+        BindVAO(0);
+        TerrainShader::Instance().Unbind();
     }
 }
 
@@ -3064,6 +3359,8 @@ static void RenderTileGridDebug()
 
 void RenderTerrain(bool EditFlag)
 {
+    UploadTerrainLightVBO();
+
     if (!EditFlag)
     {
         if (gMapManager.WorldActive == WD_8TARKAN)

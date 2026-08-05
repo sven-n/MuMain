@@ -1,7 +1,9 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Core/RenderConfig.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -61,14 +63,14 @@ void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float Scal
         VectorRotate(p, Matrix1, Position[3]);
         VectorAdd(ObjectPosition, Position[3], Position[3]);
 
-        glBegin(GL_QUADS);
+        IR::Begin(GL_QUADS);
         for (int i = 0; i < 4; i++)
         {
-            glTexCoord2f(UV[i][0], UV[i][1] + TextureV);
-            glColor3fv(Light[i]);
-            glVertex3fv(Position[i]);
+            IR::TexCoord2f(UV[i][0], UV[i][1] + TextureV);
+            IR::Color3fv(Light[i]);
+            IR::Vertex3fv(Position[i]);
         }
-        glEnd();
+        IR::End();
     }
 }
 
@@ -117,15 +119,15 @@ void RenderCircle2D(int Type, vec3_t ScreenPosition, float ScaleBottom, float Sc
         Vector(0.f, ScaleTop, Height, p);
         VectorRotate(p, Matrix1, Position[3]);
 
-        glBegin(GL_QUADS);
+        IR::Begin(GL_QUADS);
         for (int i = 0; i < 4; i++)
         {
-            glTexCoord2f(UV[i][0], UV[i][1] + TextureV);
-            glColor3fv(Light[i]);
+            IR::TexCoord2f(UV[i][0], UV[i][1] + TextureV);
+            IR::Color3fv(Light[i]);
             VectorAdd(ObjectPosition, Position[i], Position[i]);
-            glVertex2f(Position[i][0], Position[i][1]);
+            IR::Vertex2f(Position[i][0], Position[i][1]);
         }
-        glEnd();
+        IR::End();
     }
 }
 

@@ -163,6 +163,10 @@
 #include <gl/glew.h>
 #include <gl/GL.h>
 
+// DXP-08a Category 1: intercepts glColor3f/3fv/3ub/4f/4ub project-wide so every call site
+// keeps working under both GL profiles without a per-site rewrite -- see GLColorIntercept.h.
+#include "Render/Core/GLColorIntercept.h"
+
 //patch
 //winmain
 #include "App/Platform/Windows/Winmain.h"

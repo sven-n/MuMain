@@ -4,6 +4,7 @@
 #include "Camera/CameraMove.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Shaders/ItemSpecularShader.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -22,8 +23,12 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "Engine/AI/GOBoid.h"
 #include "Character/CSParts.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Core/RenderConfig.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
+#include "Scenes/MainScene.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Legacy/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
@@ -288,10 +293,12 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
     if (o->EnableBoneMatrix)
     {
         b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
+        SetActiveBoneTransform(o->BoneTransform);
     }
     else
     {
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
+        SetActiveBoneTransform(BoneTransform);
     }
 
     BoneScale = 1.f;
@@ -361,6 +368,13 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         BoneScale = 1.f;
     }
 
+    // DXP-20 increment 2: NOT converted to TransformCheap() here. RenderMesh()'s CPU dynamic-VBO
+    // fallback path (UploadDynamicBuffers(), used below the GPU-VBO size threshold or for chrome/
+    // metal render flags -- e.g. MODEL_STATUE_OF_SAINT's own RENDER_CHROME/RENDER_METAL branch
+    // right below this) reads VertexTransform/LightTransform directly (ZzzBMD.cpp ~2502-2532),
+    // which only the full Transform() populates. Determining per-object-type whether every mesh a
+    // Draw_RenderObject() branch might draw is GPU-eligible is a much bigger verification task than
+    // this increment covers -- deferred.
     if (o->EnableBoneMatrix)
     {
         b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
@@ -1243,6 +1257,11 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                         b->BeginRender(o->Alpha);
                                                         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                                                         b->EndRender();
+                                                        // DXP-20 inc4: CSideHair reads VertexTransform[1] directly (mesh 1, the hair
+                                                        // silhouette -- see CSideHair::Create()'s `for (int i = 1; i < 2; ++i)`), but mesh 1
+                                                        // is never passed to RenderMesh()/RenderBody() for this object, so nothing else
+                                                        // here would trigger its materialization under the lazy gate.
+                                                        b->EnsureCpuVertices(1);
                                                         auto* pSideHair = new CSideHair;
                                                         pSideHair->Create(VertexTransform, b, o);
                                                         pSideHair->Render(VertexTransform, LightTransform);
@@ -6390,7 +6409,20 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 
         VectorAdd(tempPosition, randomPosition, o->Position);
         VectorCopy(o->Position, b->BodyOrigin);
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, true);
+        // DXP-20 increment 2: this used to call the full Transform() (all meshes, normals,
+        // lighting) once per coin, purely to feed AddToCoinHeap()'s read of mesh 0's positions --
+        // a genuine standalone win to convert, since nothing else here needs the other meshes/
+        // normals/OBB precision. Map editor keeps the full path for OBB accuracy consistency with
+        // Calc_RenderObject()'s own guard, though coin heaps aren't expected there.
+        if (EditFlag == 2)
+        {
+            b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, true);
+        }
+        else
+        {
+            b->TransformCheap(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, true);
+            b->SkinVertices(0, BoneTransform, true, 0.f);
+        }
 
         target_vertex_index = b->AddToCoinHeap(i, target_vertex_index);
     }
@@ -6968,12 +7000,15 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         glColor3fv(b->BodyLight);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        float Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.3f;
-        Vector(0.1f + Luminosity, 0.1f + Luminosity, 0.1f + Luminosity, b->BodyLight);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.8f;
-        Vector(0.0f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, b->BodyLight);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_3RDWING_LAYER);
+        if (!IsWingExtraLayersDisabledDebug()) // DXP-23 diagnostic
+        {
+            float Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.3f;
+            Vector(0.1f + Luminosity, 0.1f + Luminosity, 0.1f + Luminosity, b->BodyLight);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.8f;
+            Vector(0.0f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, b->BodyLight);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_3RDWING_LAYER);
+        }
     }
     else if (Type == MODEL_CAPE_OF_EMPEROR)
     {
@@ -10313,74 +10348,128 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         }
         else if (g_pOption->GetRenderLevel())
         {
-            if (Level < 8 && g_pOption->GetRenderLevel() >= 1)  //  +7
-            {
-                Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
-            }
-            else if (Level < 9 && g_pOption->GetRenderLevel() >= 1)  //  +8
-            {
-                Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
-            }
-            else if (Level < 10 && g_pOption->GetRenderLevel() >= 2) //  +9
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 11 && g_pOption->GetRenderLevel() >= 2) //  +10
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 12 && g_pOption->GetRenderLevel() >= 3) //  +11
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 13 && g_pOption->GetRenderLevel() >= 3) //  +12
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 14 && g_pOption->GetRenderLevel() >= 4) //  +13
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 15 && g_pOption->GetRenderLevel() >= 4) //  +14
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else if (Level < 16 && g_pOption->GetRenderLevel() >= 4) //  +15
-            {
-                Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-            }
-            else
-            {
+            struct RenderPassSpec {
+                int renderTypeFlags;
+                float alphaScale;
+                float bright;
+                bool useColor2;
+            };
+
+            struct ItemPassPipeline {
+                float bodyLightScale;
+                size_t passCount;
+                std::array<RenderPassSpec, 3> extraPasses;
+            };
+
+            static constexpr ItemPassPipeline TIER_BASE = {1.0f, 0, {}};
+
+            static constexpr ItemPassPipeline TIER_CHROME_1 = {
+                0.8f, 1, {{{RENDER_CHROME | RENDER_BRIGHT, 1.0f, 1.0f, false}}}};
+
+            static constexpr ItemPassPipeline TIER_CHROME_METAL = {
+                0.9f,
+                2,
+                {{{RENDER_CHROME | RENDER_BRIGHT, 1.0f, 1.0f, false},
+                  {RENDER_METAL | RENDER_BRIGHT, 1.0f, 1.0f, false}}}};
+
+            static constexpr ItemPassPipeline TIER_FULL_SPECULAR_V1 = {
+                0.9f,
+                3,
+                {{{RENDER_CHROME2 | RENDER_BRIGHT, 1.0f, 1.0f, true},
+                  {RENDER_METAL | RENDER_BRIGHT, 1.0f, 1.0f, false},
+                  {RENDER_CHROME | RENDER_BRIGHT, 1.0f, 1.0f, false}}}};
+
+            static constexpr ItemPassPipeline TIER_FULL_SPECULAR_V2 = {
+                0.9f,
+                3,
+                {{{RENDER_CHROME4 | RENDER_BRIGHT, 1.0f, 1.0f, true},
+                  {RENDER_METAL | RENDER_BRIGHT, 1.0f, 1.0f, false},
+                  {RENDER_CHROME | RENDER_BRIGHT, 1.0f, 1.0f, false}}}};
+
+            auto GetPipeline = [](int lvl, int optionLvl, const OBJECT* obj) -> const ItemPassPipeline * {
+                if (obj && obj->Distance > 1200.0f)
+                    return &TIER_BASE;
+
+                if (optionLvl < 1 || lvl < 7)
+                    return &TIER_BASE;
+
+                int nativeLvl = 0;
+                if (lvl < 9) nativeLvl = 1;
+                else if (lvl < 11) nativeLvl = 2;
+                else if (lvl < 13) nativeLvl = 3;
+                else nativeLvl = 4;
+
+                int allowedLvl = optionLvl;
+                int targetLvl = (nativeLvl < allowedLvl) ? nativeLvl : allowedLvl;
+
+                if (targetLvl == 1) return &TIER_CHROME_1;
+                if (targetLvl == 2) return &TIER_CHROME_METAL;
+                if (targetLvl == 3) return &TIER_FULL_SPECULAR_V1;
+                if (targetLvl >= 4) return &TIER_FULL_SPECULAR_V2;
+
+                return &TIER_BASE;
+            };
+
+            const ItemPassPipeline *pipeline =
+                GetPipeline(Level, g_pOption->GetRenderLevel(), o);
+
+            if (pipeline->passCount > 0) {
+                bool bUsedShader = false;
+                if (CItemSpecularShader::Instance().IsSupported() && b->NumMeshs > 0) {
+                    EShaderVariant variant = SHADER_VARIANT_CHROME_1;
+                    if      (pipeline == &TIER_FULL_SPECULAR_V2) variant = SHADER_VARIANT_FULL_SPECULAR_V2;
+                    else if (pipeline == &TIER_FULL_SPECULAR_V1) variant = SHADER_VARIANT_FULL_SPECULAR_V1;
+                    else if (pipeline == &TIER_CHROME_METAL)     variant = SHADER_VARIANT_CHROME_METAL;
+
+                    GLuint baseTex       = Bitmaps[b->IndexTexture[0]].TextureNumber;
+                    GLuint animChromeTex = (variant == SHADER_VARIANT_FULL_SPECULAR_V1 || variant == SHADER_VARIANT_FULL_SPECULAR_V2) ? Bitmaps[BITMAP_CHROME2].TextureNumber : 0;
+                    GLuint metalTex      = (variant == SHADER_VARIANT_CHROME_METAL || variant == SHADER_VARIANT_FULL_SPECULAR_V1 || variant == SHADER_VARIANT_FULL_SPECULAR_V2) ? Bitmaps[BITMAP_SHINY].TextureNumber  : 0;
+                    GLuint chrome1Tex    = Bitmaps[BITMAP_CHROME].TextureNumber;
+
+                    Vector(Light[0] * pipeline->bodyLightScale,
+                           Light[1] * pipeline->bodyLightScale,
+                           Light[2] * pipeline->bodyLightScale, b->BodyLight);
+
+                    int prepassFlags = RENDER_CHROME;
+                    if (variant == SHADER_VARIANT_FULL_SPECULAR_V1) prepassFlags = RENDER_CHROME2;
+                    else if (variant == SHADER_VARIANT_FULL_SPECULAR_V2) prepassFlags = RENDER_CHROME4;
+                    CItemSpecularShader::Instance().SetChromePrepassFlags(prepassFlags);
+
+                    // Compute the per-item specular tint: dry-run PartObjectColor with
+                    // Alpha=1, Bright=1 to get the item's characteristic fixed color (e.g.
+                    // (0.35, 0.35, 0.6) for blue armor). This matches what the legacy
+                    // metal/chrome additive passes used via RenderPartObjectBodyColor.
+                    vec3_t specularTint = { 1.f, 1.f, 1.f };
+                    PartObjectColor(Type, 1.0f, 1.0f, specularTint, false);
+
+                    bUsedShader = CItemSpecularShader::Instance().Begin(
+                        variant, baseTex, animChromeTex, metalTex, chrome1Tex, b->BodyLight, specularTint);
+
+                    if (bUsedShader) {
+                        RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+                        CItemSpecularShader::Instance().End();
+                        CItemSpecularShader::Instance().SetChromePrepassFlags(0);
+                    } else {
+                        CItemSpecularShader::Instance().SetChromePrepassFlags(0);
+                    }
+                }
+
+                if (!bUsedShader) {
+                    Vector(Light[0] * pipeline->bodyLightScale,
+                           Light[1] * pipeline->bodyLightScale,
+                           Light[2] * pipeline->bodyLightScale, b->BodyLight);
+                    RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+
+                    for (size_t i = 0; i < pipeline->passCount; ++i) {
+                        const auto &pass = pipeline->extraPasses[i];
+                        int passFlags = pass.renderTypeFlags | (RenderType & RENDER_EXTRA);
+                        if (pass.useColor2)
+                            RenderPartObjectBodyColor2(b, o, Type, pass.alphaScale, passFlags, pass.bright);
+                        else
+                            RenderPartObjectBodyColor(b, o, Type, Alpha * pass.alphaScale, passFlags, pass.bright);
+                    }
+                }
+            } else {
                 VectorCopy(Light, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
             }
@@ -10872,7 +10961,6 @@ bool isPartyMemberBuff(int partyindex)
 void RenderBoundingBox(OBJECT* pObj)
 {
     EnableAlphaBlend();
-    glPushMatrix();
 
     float Matrix[3][4];
     AngleMatrix(pObj->Angle, Matrix);
@@ -10896,45 +10984,43 @@ void RenderBoundingBox(OBJECT* pObj)
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    //glBegin(GL_QUADS);
-    glBegin(GL_LINES);
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[5]);
+    IR::Begin(GL_LINES);
+    PassthroughShader::Instance().SetUseTexture(false);
+    IR::Color3f(0.2f, 0.2f, 0.2f);
+    IR::TexCoord2f(1.0F, 1.0F); IR::Vertex3fv(TransformVertices[7]);
+    IR::TexCoord2f(1.0F, 0.0F); IR::Vertex3fv(TransformVertices[6]);
+    IR::TexCoord2f(0.0F, 0.0F); IR::Vertex3fv(TransformVertices[4]);
+    IR::TexCoord2f(0.0F, 1.0F); IR::Vertex3fv(TransformVertices[5]);
 
-    glColor3f(0.2f, 0.2f, 0.2f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[1]);
+    IR::Color3f(0.2f, 0.2f, 0.2f);
+    IR::TexCoord2f(0.0F, 1.0F); IR::Vertex3fv(TransformVertices[0]);
+    IR::TexCoord2f(1.0F, 1.0F); IR::Vertex3fv(TransformVertices[2]);
+    IR::TexCoord2f(1.0F, 0.0F); IR::Vertex3fv(TransformVertices[3]);
+    IR::TexCoord2f(0.0F, 0.0F); IR::Vertex3fv(TransformVertices[1]);
 
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[3]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[2]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[6]);
+    IR::Color3f(0.6f, 0.6f, 0.6f);
+    IR::TexCoord2f(1.0F, 1.0F); IR::Vertex3fv(TransformVertices[7]);
+    IR::TexCoord2f(1.0F, 0.0F); IR::Vertex3fv(TransformVertices[3]);
+    IR::TexCoord2f(0.0F, 0.0F); IR::Vertex3fv(TransformVertices[2]);
+    IR::TexCoord2f(0.0F, 1.0F); IR::Vertex3fv(TransformVertices[6]);
 
-    glColor3f(0.6f, 0.6f, 0.6f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[4]);
+    IR::Color3f(0.6f, 0.6f, 0.6f);
+    IR::TexCoord2f(0.0F, 1.0F); IR::Vertex3fv(TransformVertices[0]);
+    IR::TexCoord2f(1.0F, 1.0F); IR::Vertex3fv(TransformVertices[1]);
+    IR::TexCoord2f(1.0F, 0.0F); IR::Vertex3fv(TransformVertices[5]);
+    IR::TexCoord2f(0.0F, 0.0F); IR::Vertex3fv(TransformVertices[4]);
 
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[7]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[5]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[1]);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[3]);
+    IR::Color3f(0.4f, 0.4f, 0.4f);
+    IR::TexCoord2f(1.0F, 1.0F); IR::Vertex3fv(TransformVertices[7]);
+    IR::TexCoord2f(1.0F, 0.0F); IR::Vertex3fv(TransformVertices[5]);
+    IR::TexCoord2f(0.0F, 0.0F); IR::Vertex3fv(TransformVertices[1]);
+    IR::TexCoord2f(0.0F, 1.0F); IR::Vertex3fv(TransformVertices[3]);
 
-    glColor3f(0.4f, 0.4f, 0.4f);
-    glTexCoord2f(0.0F, 1.0F); glVertex3fv(TransformVertices[0]);
-    glTexCoord2f(1.0F, 1.0F); glVertex3fv(TransformVertices[4]);
-    glTexCoord2f(1.0F, 0.0F); glVertex3fv(TransformVertices[6]);
-    glTexCoord2f(0.0F, 0.0F); glVertex3fv(TransformVertices[2]);
-    glEnd();
-
-    glPopMatrix();
+    IR::Color3f(0.4f, 0.4f, 0.4f);
+    IR::TexCoord2f(0.0F, 1.0F); IR::Vertex3fv(TransformVertices[0]);
+    IR::TexCoord2f(1.0F, 1.0F); IR::Vertex3fv(TransformVertices[4]);
+    IR::TexCoord2f(1.0F, 0.0F); IR::Vertex3fv(TransformVertices[6]);
+    IR::TexCoord2f(0.0F, 0.0F); IR::Vertex3fv(TransformVertices[2]);
+    IR::End();
 }
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
