@@ -1046,6 +1046,10 @@ void RequestTerrainLight(float xf, float yf, vec3_t Light)
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
 
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 typedef void (APIENTRY* PFNGLGENBUFFERSPROC)(GLsizei, GLuint*);
 typedef void (APIENTRY* PFNGLDELETEBUFFERSPROC)(GLsizei, const GLuint*);
 typedef void (APIENTRY* PFNGLBINDBUFFERPROC)(GLenum, GLuint);

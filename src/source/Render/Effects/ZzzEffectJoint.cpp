@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <cstring>
 #include <SDL3/SDL.h>
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
