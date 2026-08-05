@@ -10,6 +10,7 @@
 #include <dpapi.h>
 #endif
 #include <clocale>
+#include "Core/Platform/WinIni.h"  // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Legacy/UIWindows.h"
 #include "UI/Legacy/UIManager.h"
