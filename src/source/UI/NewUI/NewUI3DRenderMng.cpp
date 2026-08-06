@@ -6,6 +6,9 @@
 #include "UI/NewUI/NewUI3DRenderMng.h"
 #include "UI/NewUI/NewUIManager.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
+#include "Core/Utilities/Log/ErrorReport.h"
 
 using namespace SEASON3B;
 
@@ -108,25 +111,60 @@ float SEASON3B::CNewUI3DCamera::GetLayerDepth()
     return m_fZOrder;
 }
 
+// DXP-07d increment 2's shadow-compare diagnostic (proj/view vs. CPU closed form) validated this
+// camera's projection formula across multiple soaks; DXP-08a deleted the diagnostic and the FFP
+// matrix-stack calls it was validating once GlobalUBO was confirmed the only consumer
+// — see Render()'s own comments below. Pre-implementation read of every
+// INewUI3DRenderObj::Render3D() implementer registered with this camera (12 call sites across
+// NewUIMyInventory, NewUIInventoryCtrl, NewUIEmpireGuardianNPC, NewUINPCQuest,
+// NewUIDoppelGangerWindow, NewUICustomMessageBox, NewUICommonMessageBox, and 4 GameShop MsgBoxIGS*
+// dialogs) found none touch the GL matrix stack — they all just call RenderItem3D(), which carries no
+// GL model transform. (NewUIGoldBowmanLena/NewUIRegistrationLuckyCoin's own Render3D() methods are
+// NOT reached through this camera — they call EndBitmap()/gluPerspective2 directly themselves,
+// independent of CNewUI3DCamera.)
+
 bool SEASON3B::CNewUI3DCamera::Render()
 {
     if (m_list3DObjs.empty())
         return true;
 
     EndBitmap();
-    glMatrixMode(GL_PROJECTION);
     SaveCameraPerspective();
-    glPushMatrix();
-    glLoadIdentity();
     glViewport2(0, 0, m_uiWidth, m_uiHeight);
     gluPerspective2(1.f, (float)(m_uiWidth) / (float)(m_uiHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
+    // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket and
+    // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, plus the shadow-compare diagnostic
+    // that used to validate this closed form, are deleted — DXP-07d already proved this exact
+    // formula matches bit-for-bit across multiple soaks, and GlobalUBO is the only consumer
+    // (same finding Category 3 already used to delete BeginOpengl/BeginBitmap's own
+    // matrix-stack calls). Same closed-form shape as increment 1 (RenderInfomation3D) — plain
+    // gluPerspective(1.f deg, aspect, near, far) and identity view, just with this camera's own
+    // m_uiWidth/m_uiHeight and RENDER_ITEMVIEW_NEAR/FAR args.
+    {
+        float aspect = (float)m_uiWidth / (float)m_uiHeight;
+        float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
+        float f = 1.0f / tanf(fovRad);
+        float zNear = RENDER_ITEMVIEW_NEAR;
+        float zFar  = RENDER_ITEMVIEW_FAR;
+        float cpuProj[16];
+        BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
+        float cpuView[16] = {
+            1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
+        };
+
+        GlobalUBO::Instance().SetProj(cpuProj);
+        GlobalUBO::Instance().SetView(cpuView);
+
+        // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used to
+        // produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
+        static const float s_IdentityCameraMatrix[3][4] = {
+            {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
+        };
+        memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
+    }
     EnableDepthTest();
     EnableDepthMask();
-    glClear(GL_DEPTH_BUFFER_BIT);
+    ClearDepthBuffer();
 
     auto li = m_list3DObjs.begin();
     for (; li != m_list3DObjs.end(); li++)
@@ -138,10 +176,9 @@ bool SEASON3B::CNewUI3DCamera::Render()
     }
     UpdateMousePositionn();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
+    // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the post-restore shadow-compare are
+    // deleted — BeginBitmap() (already fully CPU-sourced per DXP-07a) is GlobalUBO's real restore;
+    // the deleted block only re-set GlobalUBO to its own just-restored value, a no-op.
     BeginBitmap();
     RestoreCameraPerspective();
 

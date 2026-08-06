@@ -18,6 +18,8 @@
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Core/Utilities/Random.h"
@@ -569,8 +571,9 @@ void RenderLeaves()
             }
             else
             {
-                glPushMatrix();
-                glTranslatef(o->Position[0], o->Position[1], o->Position[2]);
+                GlobalUBO::Instance().PushModel();
+                GlobalUBO::Instance().SetModel(o->Position, 1.0f);
+
                 float Matrix[3][4];
                 AngleMatrix(o->Angle, Matrix);
 
@@ -595,7 +598,8 @@ void RenderLeaves()
                         RenderPlane3D(3.f, 3.f, Matrix);
                     }
                 }
-                glPopMatrix();
+
+                GlobalUBO::Instance().PopModel();
             }
         }
     }

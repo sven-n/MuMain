@@ -10,11 +10,13 @@
 #include <dpapi.h>
 #endif
 #include <clocale>
+#include "Core/Platform/WinIni.h"  // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Legacy/UIWindows.h"
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/RHI/RHI.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
@@ -22,6 +24,17 @@
 #include "Core/Time/FrameTimerScheduler.h"
 #include <SDL3/SDL.h>
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Shaders/ItemSpecularShader.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
+#include "Render/Core/SceneUBO.h"
+#include "Render/Core/BoneUBO.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Shaders/TerrainShader.h"
+#include "Render/Shaders/BMDMeshShader.h"
+#include "Render/Shaders/PlanarShadowShader.h"
+#include "Render/Shaders/TerrainShader.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/AI/ZzzAI.h"
@@ -125,6 +138,7 @@ int g_iScreenSaverOldValue = 60 * 15;
 
 BOOL g_bUseWindowMode = TRUE;
 BOOL g_bUseFullscreenMode = FALSE;
+bool g_bDisableAnimationTaskPool = true;
 
 #include "Audio/AudioPlayer.h"
 
@@ -206,25 +220,28 @@ static void MaybeCaptureFrame()
     if (w <= 0 || h <= 0) return;
 
     std::vector<unsigned char> pixels(static_cast<size_t>(w) * h * 3);
+    // RHI doesn't manage pixel-store state; keep the explicit alignment (RGB rows
+    // aren't guaranteed 4-byte aligned for arbitrary widths).
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+    RHI::ReadColorFramebuffer(0, 0, w, h, pixels.data());
 
     const char* path = std::getenv("MU_CAPTURE_PATH");
     if (!path) path = "/tmp/mu-frame.ppm";
     if (FILE* fp = std::fopen(path, "wb"))
     {
         std::fprintf(fp, "P6\n%d %d\n255\n", w, h);
-        // glReadPixels origin is bottom-left; write rows top-down for a PPM.
-        for (int y = h - 1; y >= 0; --y)
-            std::fwrite(pixels.data() + static_cast<size_t>(y) * w * 3, 1, static_cast<size_t>(w) * 3, fp);
+        // RHI::ReadColorFramebuffer's contract is top-down, matching PPM's row order directly.
+        std::fwrite(pixels.data(), 1, static_cast<size_t>(w) * h * 3, fp);
         std::fclose(fp);
         std::fprintf(stderr, "[capture] wrote frame %ld (%dx%d) to %s\n", target, w, h, path);
     }
 }
 #endif
 
-// Present the current GL frame. SDL owns the window/context, so swapping goes
-// through SDL_GL_SwapWindow instead of the Win32 ::SwapBuffers (issue #442).
+// Present the current frame. SDL owns the window/GL context, so GL swapping goes through
+// SDL_GL_SwapWindow instead of the Win32 ::SwapBuffers (issue #442). This is the one place all
+// of this file's/LoadingScene.cpp's/SceneManager.cpp's/UIMng.cpp's present call sites funnel
+// through, so branching here (rather than at each call site) covers all of them uniformly.
 void PlatformSwapBuffers()
 {
     if (g_sdlWindow)
@@ -875,6 +892,7 @@ namespace
         g_fScreenRate_y = static_cast<float>(WindowHeight) / static_cast<float>(REFERENCE_HEIGHT);
         OpenglWindowWidth = WindowWidth;
         OpenglWindowHeight = WindowHeight;
+        RHI::OnResize(WindowWidth, WindowHeight); // no-op on GL
         ReinitializeFonts();
         UpdateResolutionDependentSystems();
         UpdateCursorClip();
@@ -1465,6 +1483,83 @@ void UpdateResolutionDependentSystems()
     CUIMng::Instance().RepositionSceneUI();
 }
 
+#ifdef _DEBUG
+// DXP-08 pre-flip diagnostic: logs every GL_KHR_debug message (Core-profile violations
+// included) to MuError.log instead of the driver silently no-oping or hard-failing.
+// Registered only when the debug context flag (set alongside SDL_GL_CreateContext, see
+// below) is honored by the driver — see the SDL_GL_GetProcAddress null-check at the
+// call site, which is the "extension unsupported" fallback.
+#include <dbghelp.h>
+#pragma comment(lib, "dbghelp.lib")
+#include <set>
+#include <string>
+
+// DXP-08a attribution pass (temporary): the raw Stage-2 soak logged 1.25M message lines
+// with no way to map a message to the call site that produced it. This symbolizes one
+// call stack per distinct violation the first time it's seen, then goes quiet on repeats,
+// so a single soak yields an actual stack per violation type instead of a guess from
+// message text. Remove (or re-gate) once every DXP-08a category is attributed — this is a
+// diagnostic aid, not meant to run permanently.
+//
+// Dedup key is the message TEXT, not (source,type,id): a first attempt keyed on the triple
+// and only captured 3 stacks total for a soak with ~24 distinct violation texts, because the
+// driver assigns the same id to many unrelated violations (id=1282 alone covers glPushMatrix,
+// glColor3f, glBegin, glVertexPointer, and a dozen others) — the id is a coarse GL error
+// category, not a per-call-site identifier. The message text is what's actually distinct
+// per call site here (confirmed by inspecting the log), so that's the right key.
+static void LogSymbolizedStack()
+{
+    void* frames[32] = {};
+    USHORT count = CaptureStackBackTrace(2, 32, frames, nullptr); // skip this fn + GLDebugCallback
+
+    static bool symInitialized = false;
+    if (!symInitialized)
+    {
+        SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME);
+        SymInitialize(GetCurrentProcess(), nullptr, TRUE);
+        symInitialized = true;
+    }
+
+    char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(char)] = {};
+    SYMBOL_INFO* symbol = reinterpret_cast<SYMBOL_INFO*>(symbolBuffer);
+    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    symbol->MaxNameLen = MAX_SYM_NAME;
+
+    for (USHORT i = 0; i < count; ++i)
+    {
+        DWORD64 address = reinterpret_cast<DWORD64>(frames[i]);
+        DWORD64 symDisplacement = 0;
+        BOOL hasSymbol = SymFromAddr(GetCurrentProcess(), address, &symDisplacement, symbol);
+
+        DWORD lineDisplacement = 0;
+        IMAGEHLP_LINE64 line = {};
+        line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+        BOOL hasLine = SymGetLineFromAddr64(GetCurrentProcess(), address, &lineDisplacement, &line);
+
+        if (hasSymbol && hasLine)
+            g_ErrorReport.Write(L"    #%u %hs (%hs:%lu)\r\n", i, symbol->Name, line.FileName, line.LineNumber);
+        else if (hasSymbol)
+            g_ErrorReport.Write(L"    #%u %hs\r\n", i, symbol->Name);
+        else
+            g_ErrorReport.Write(L"    #%u 0x%p\r\n", i, frames[i]);
+    }
+}
+
+static void APIENTRY GLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+                                      GLsizei /*length*/, const GLchar* message, const void* /*userParam*/)
+{
+    g_ErrorReport.Write(L"[GL_DEBUG] source=0x%04X type=0x%04X id=%u severity=0x%04X: %hs\r\n",
+                         source, type, id, severity, message);
+
+    static std::set<std::string> seenMessages;
+    if (seenMessages.insert(std::string(message)).second)
+    {
+        g_ErrorReport.Write(L"  ^ first occurrence of this message -- call stack:\r\n");
+        LogSymbolizedStack();
+    }
+}
+#endif // _DEBUG
+
 #ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 #else
@@ -1510,6 +1605,21 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     // Load game settings from INI file first
     GameConfig::GetInstance().Load();
+    InitRenderConfig();
+
+  // Check if animation task pool should be enabled (disabled by default)
+  {
+      wchar_t configPath[MAX_PATH];
+      GetModuleFileNameW(nullptr, configPath, MAX_PATH);
+      wchar_t* lastSlash = wcsrchr(configPath, L'\\');
+      if (!lastSlash) lastSlash = wcsrchr(configPath, L'/');
+      if (lastSlash) *(lastSlash + 1) = L'\0';
+      wcscat(configPath, L"config.ini");
+      int enableTaskPool = GetPrivateProfileIntW(L"UI", L"EnableAnimationTaskPool", 0, configPath);
+      if (enableTaskPool != 0 || wcsstr(GetCommandLineW(), L"--enable-taskpool")) {
+          g_bDisableAnimationTaskPool = false;
+      }
+  }
 
     // Check for command line server override
     WORD wPortNumber;
@@ -1581,8 +1691,23 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         return 0;
     }
 
-    // The fixed-function renderer needs a compatibility-profile GL context.
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    // DXP-08 Stage G: g_CoreProfile (config.ini [Render] CoreProfile, default 1 as of
+    // Stage G) selects the context profile. Core became the default after the DXP-08a/
+    // DXP-09 prerequisites were fixed and the debug-callback soak came back clean across
+    // every map/panel; compatibility (CoreProfile=0) remains available as a rollback.
+    // Core additionally needs an explicit 3.3 version request (compatibility takes the
+    // driver's highest).
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, g_CoreProfile ? SDL_GL_CONTEXT_PROFILE_CORE : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    if (g_CoreProfile)
+    {
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    }
+#ifdef _DEBUG
+    // KHR_debug callback (registered below, after context creation) needs the context
+    // created with the debug flag to get synchronous, precisely-attributed messages.
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 
@@ -1615,6 +1740,52 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 
     SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
+    RHI::Init(nullptr, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+
+#ifdef _DEBUG
+    // DXP-08: register the KHR_debug callback now that a current context exists.
+    // glew.h (included via stdafx.h) supplies the PFNGLDEBUGMESSAGECALLBACKPROC
+    // typedef and GL_DEBUG_* enums, but glewInit() is never called in this codebase
+    // (every other GL entry point is loaded the same manual way, see
+    // BMDMeshShader::Init()), so the function pointer is fetched directly.
+    {
+        PFNGLDEBUGMESSAGECALLBACKPROC fn_glDebugMessageCallback =
+            (PFNGLDEBUGMESSAGECALLBACKPROC)SDL_GL_GetProcAddress("glDebugMessageCallback");
+        if (fn_glDebugMessageCallback)
+        {
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            fn_glDebugMessageCallback(GLDebugCallback, nullptr);
+
+            // NVIDIA's GL_DEBUG_SEVERITY_NOTIFICATION chatter (routine "buffer will use
+            // VIDEO memory" info per alloc/rebind) runs into the thousands of lines per
+            // session and buries real LOW/MEDIUM/HIGH violations — the entire point of
+            // this callback during the Core-profile soak. Silence NOTIFICATION only.
+            PFNGLDEBUGMESSAGECONTROLPROC fn_glDebugMessageControl =
+                (PFNGLDEBUGMESSAGECONTROLPROC)SDL_GL_GetProcAddress("glDebugMessageControl");
+            if (fn_glDebugMessageControl)
+            {
+                fn_glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+            }
+
+            g_ErrorReport.Write(L"> GL_KHR_debug callback registered.\r\n");
+        }
+        else
+        {
+            g_ErrorReport.Write(L"> GL_KHR_debug unavailable (glDebugMessageCallback not found).\r\n");
+        }
+    }
+#endif // _DEBUG
+
+    // Initialize single-pass GLSL engines (Item Specular & Planar Ground Shadows)
+    CItemSpecularShader::Instance().Init();
+    CPlanarShadowShader::Instance().Init();
+    GlobalUBO::Instance().Create();
+    SceneUBO::Instance().Create();
+    PassthroughShader::Instance().Create();
+    BMDMeshShader::Instance().Create();
+    TerrainShader::Instance().Create();
+    IR::Create();
 
 #ifdef _WIN32
     // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,
@@ -1796,6 +1967,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_MuEditorCore.Shutdown();
 #endif
     UnregisterBundledFonts();   // mirror the startup registration
+    RHI::Shutdown();
     KillGLWindow();
     DestroyWindow();
 

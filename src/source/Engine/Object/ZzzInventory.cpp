@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/BindState.h"
+#include "Render/RHI/RHI.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -375,7 +378,7 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 
         glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
         RenderColor((float)iPos_x, fsy, (float)fWidth, (float)fHeight);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
     }
 
     for (int i = 0; i < TextNum; i++)
@@ -6429,7 +6432,8 @@ void DeleteGroundItemLabelTexture(GLuint textureId)
 {
     if (textureId != 0)
     {
-        glDeleteTextures(1, &textureId);
+        // DXP-12: RHI::DestroyTexture invalidates BindState's texture cache internally.
+        RHI::DestroyTexture(RHI::TextureHandle{ textureId });
     }
 }
 
@@ -6937,19 +6941,18 @@ bool CreateGroundItemLabelTexture(const GroundItemLabelDescriptor& descriptor, G
         }
     }
 
-    GLuint textureId = 0;
-    glGenTextures(1, &textureId);
+    // DXP-12: textureBuffer is already RGBA8 (DWORD-packed pixelColor, alpha from font AA) --
+    // no format conversion needed here, unlike GlobalBitmap.cpp's JPEG path.
+    RHI::TextureDesc desc;
+    desc.width = textureWidth;
+    desc.height = textureHeight;
+    desc.filter = RHI::TexFilter::Nearest;
+    desc.wrap = RHI::TexWrap::Clamp;
+    GLuint textureId = RHI::CreateTexture(desc, textureBuffer.data()).id;
     if (textureId == 0)
     {
         return false;
     }
-
-    glBindTexture(GL_TEXTURE_2D, textureId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureBuffer.data());
 
     cacheEntry.TextureId = textureId;
     cacheEntry.TextWidth = textSize.cx;
@@ -11232,9 +11235,9 @@ void CreateGuildMark(int nMarkIndex, bool blend)
         }
     }
 
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, b->Components, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+    // DXP-12: repaints an already-created, fixed-size texture in place -- RHI::UpdateTexture's
+    // full-rect form is the sub-image equivalent of the old full glTexImage2D re-specify.
+    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
 }
 
 void CreateCastleMark(int Type, BYTE* buffer, bool blend)
@@ -11313,9 +11316,8 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
             offset += 4;
         }
     }
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+    // DXP-12: same in-place repaint pattern as CreateGuildMark, see its comment.
+    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
 }
 
 void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
@@ -11367,9 +11369,8 @@ void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
         }
     }
 
-    glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, b->Components, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+    // DXP-12: same in-place repaint pattern as CreateGuildMark, see its comment.
+    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
     RenderBitmap(BITMAP_GUILD, x, y, (float)SizeX, (float)SizeY);
 }
 

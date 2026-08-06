@@ -93,7 +93,6 @@ public:
     void SetCameraWalkState(DWORD dwCameraWalkState);
     DWORD GetCameraWalkState() const;
 
-    void RenderWayPoint();
     void SetSelectedTile(int iTileIndex);
     DWORD GetSelectedTile() const;
 

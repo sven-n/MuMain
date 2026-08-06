@@ -22,6 +22,9 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "CSWaterTerrain.h"
 #include "World/MapInfra/MapManager.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Core/RenderConfig.h"
 
 extern  double   WorldTime;
 extern  float   TerrainMappingAlpha[TERRAIN_SIZE * TERRAIN_SIZE];
@@ -54,14 +57,15 @@ void CSWaterTerrain::Update(void)
     calcBaseWave();
 }
 
-void    CSWaterTerrain::Render(void)
+void CSWaterTerrain::Render(void)
 {
     if (!gMapManager.InHellas(m_iMapIndex)) return;
 
     CreateTerrain((Hero->PositionX) * 2, (Hero->PositionY) * 2);
 
-    float alpha;
+    float g_chrome[MAX_WATER_GRID * MAX_WATER_GRID][2];
     int   offset;
+    float alpha;
     int   i, j;
     for (i = 0; i < MAX_WATER_GRID * MAX_WATER_GRID; i++)
     {
@@ -72,27 +76,30 @@ void    CSWaterTerrain::Render(void)
 
     EnableAlphaTest();
     BindTexture(BITMAP_MAPTILE);
-    glBegin(GL_TRIANGLES);
-    glColor3f(0.2f, 0.5f, 0.65f);
+    IR::Begin(GL_TRIANGLES);
+    PassthroughShader::Instance().SetUseTexture(true);
+    IR::Color3f(0.2f, 0.5f, 0.65f);
     for (j = 0; j < m_iTriangleListNum; j++)
     {
         offset = m_iTriangleList[j];
-        glTexCoord2f(g_chrome[offset][1], g_chrome[offset][0]);
-        glVertex3fv(m_Vertices[offset]);
+        IR::TexCoord2f(g_chrome[offset][1], g_chrome[offset][0]);
+        IR::Vertex3fv(m_Vertices[offset]);
     }
-    glEnd();
+    IR::End();
+
     EnableAlphaBlend();
     BindTexture(BITMAP_MAPTILE + 1);
-    glBegin(GL_TRIANGLES);
+    IR::Begin(GL_TRIANGLES);
+    PassthroughShader::Instance().SetUseTexture(true);
     for (j = 0; j < m_iTriangleListNum; j++)
     {
         offset = m_iTriangleList[j];
         alpha = 1.f - DotProduct(m_Normals[offset], m_vLightVector);
-        glColor3f(alpha, alpha * 2.5f, alpha * 3.f);//, alpha );
-        glTexCoord2f(g_chrome[offset][1], g_chrome[offset][0]);
-        glVertex3fv(m_Vertices[offset]);
+        IR::Color3f(alpha, alpha * 2.5f, alpha * 3.f);
+        IR::TexCoord2f(g_chrome[offset][1], g_chrome[offset][0]);
+        IR::Vertex3fv(m_Vertices[offset]);
     }
-    glEnd();
+    IR::End();
 }
 
 void CSWaterTerrain::SpawnAmbientWave(double currentTimeMs)
@@ -423,18 +430,19 @@ void    CSWaterTerrain::RenderWaterBitmapTile(float xf, float yf, float lodf, in
         VectorCopy(PrimaryTerrainLight[TerrainIndex4], Light[3]);
     }
 
-    glBegin(GL_TRIANGLE_FAN);
+    IR::Begin(GL_TRIANGLE_FAN);
+    PassthroughShader::Instance().SetUseTexture(true);
     for (int i = 0; i < 4; i++)
     {
         if (LightEnable)
         {
             if (Alpha == 1.f)
-                glColor3fv(Light[i]);
+                IR::Color3fv(Light[i]);
             else
-                glColor4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
+                IR::Color4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
         }
-        glTexCoord2f(c[i][0], c[i][1]);
-        glVertex3fv(TerrainVertex[i]);
+        IR::TexCoord2f(c[i][0], c[i][1]);
+        IR::Vertex3fv(TerrainVertex[i]);
     }
-    glEnd();
+    IR::End();
 }

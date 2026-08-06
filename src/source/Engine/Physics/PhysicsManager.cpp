@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include "PhysicsManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
+#include "Render/Core/ImmediateRenderer.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -780,13 +783,16 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
         break;
     }
 
+    vec3_t vFaceColor;
     if (pvColor)
     {
         glColor3fv(*pvColor);
+        VectorCopy(*pvColor, vFaceColor);
     }
     else
     {
         glColor3f(1.f, 1.f, 1.f);
+        Vector(1.f, 1.f, 1.f, vFaceColor);
     }
 
     if (PCT_MASK_LIGHT & m_dwType)
@@ -809,14 +815,15 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
             }
         }
         glColor3f(Lum, Lum, Lum);
+        Vector(Lum, Lum, Lum, vFaceColor);
         EnableAlphaBlend();
     }
 #ifdef RENDER_CLOTH
     {
-        RenderFace(TRUE, m_iTexFront, pvRenderPos);
+        RenderFace(TRUE, m_iTexFront, pvRenderPos, vFaceColor);
         if ((PCT_MASK_DRAW & m_dwType) != PCT_MASK_BLEND || !(PCT_MASK_LIGHT & m_dwType))
         {
-            RenderFace(FALSE, m_iTexBack, pvRenderPos);
+            RenderFace(FALSE, m_iTexBack, pvRenderPos, vFaceColor);
         }
     }
 #endif
@@ -824,11 +831,24 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
     delete[] pvRenderPos;
 }
 
-void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos)
+void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, const float* color)
 {
     BindTexture(iTexture);	//BITMAP_ROBE
 
-    glBegin(GL_QUADS);
+    // Cloth vertices are rebuilt by physics simulation every frame, so IR:: (CPU submit
+    // per frame) is the right tool here — no VBO needed. Color is threaded through
+    // explicitly (set once, right after Begin()) since the legacy path relies on ambient
+    // glColor state that IR:: doesn't share.
+    auto EmitVertex = [&](int xVertex, int yVertex)
+    {
+        int iVertex = m_iNumHor * yVertex + xVertex;
+        vec3_t* pvPos = &pvRenderPos[iVertex];
+        IR::TexCoord2f((float)xVertex / (float)(m_iNumHor - 1), std::min<float>(0.99f, (float)yVertex / (float)(m_iNumVer - 1)));
+        IR::Vertex3f((*pvPos)[0], (*pvPos)[1], (*pvPos)[2]);
+    };
+
+    IR::Begin(GL_QUADS);
+    IR::Color3fv(color);
 
     if (bFront)
     {
@@ -836,10 +856,10 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos)
         {
             for (int i = 0; i < m_iNumHor - 1; ++i)
             {
-                RenderVertex(pvRenderPos, i, j);
-                RenderVertex(pvRenderPos, i + 1, j);
-                RenderVertex(pvRenderPos, i + 1, j + 1);
-                RenderVertex(pvRenderPos, i, j + 1);
+                EmitVertex(i, j);
+                EmitVertex(i + 1, j);
+                EmitVertex(i + 1, j + 1);
+                EmitVertex(i, j + 1);
             }
         }
     }
@@ -849,52 +869,15 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos)
         {
             for (int i = 0; i < m_iNumHor - 1; ++i)
             {
-                RenderVertex(pvRenderPos, i, j);
-                RenderVertex(pvRenderPos, i, j + 1);
-                RenderVertex(pvRenderPos, i + 1, j + 1);
-                RenderVertex(pvRenderPos, i + 1, j);
+                EmitVertex(i, j);
+                EmitVertex(i, j + 1);
+                EmitVertex(i + 1, j + 1);
+                EmitVertex(i + 1, j);
             }
         }
     }
 
-    glEnd();
-}
-
-void CPhysicsCloth::RenderVertex(vec3_t* pvRenderPos, int xVertex, int yVertex)
-{
-    int iVertex = m_iNumHor * yVertex + xVertex;
-    vec3_t* pvPos = &pvRenderPos[iVertex];
-    glTexCoord2f((float)xVertex / (float)(m_iNumHor - 1), std::min<float>(0.99f, (float)yVertex / (float)(m_iNumVer - 1)));
-    glVertex3f((*pvPos)[0], (*pvPos)[1], (*pvPos)[2]);
-}
-
-void CPhysicsCloth::RenderCollisions(void)
-{
-#ifdef RENDER_COLLISION
-    glColor3f(1.0f, 1.0f, 0.6f);
-    BindTexture(BITMAP_CLOUD);
-    CNode<CPhysicsCollision*>* pHead = m_lstCollision.FindHead();
-    for (; pHead; pHead = m_lstCollision.GetNext(pHead))
-    {
-        CPhysicsCollision* pCol = pHead->GetData();
-        if (CLT_SPHERE == pCol->GetType())
-        {
-            CPhysicsColSphere* pColSph = (CPhysicsColSphere*)pCol;
-
-            static GLUquadricObj* pQuad = NULL;
-            if (NULL == pQuad)
-            {
-                pQuad = gluNewQuadric();
-            }
-            glPushMatrix();
-            vec3_t vCenter;
-            pColSph->GetCenter(vCenter);
-            glTranslatef(vCenter[0], vCenter[1], vCenter[2]);
-            gluSphere(pQuad, pColSph->GetRadius() - 2.0f, 20, 20);
-            glPopMatrix();
-        }
-    }
-#endif
+    IR::End();
 }
 
 void CPhysicsCloth::AddCollisionSphere(float fXPos, float fYPos, float fZPos, float fRadius, int iBone)
@@ -976,6 +959,8 @@ BOOL CPhysicsClothMesh::Create(OBJECT* o, int iMesh, int iBone, DWORD dwType, in
     m_pLink = new St_PhysicsLink[m_iNumLink];
 
     float(*BoneMatrix)[3][4] = m_oOwner->BoneTransform;
+
+    b->EnsureCpuVertices(m_iMesh); // DXP-20 inc4: creation-time full-mesh read, not a per-frame consumer
 
     for (int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
     {
@@ -1120,6 +1105,12 @@ void CPhysicsClothMesh::SetFixedVertices(float Matrix[3][4])
 
     BMD* b = &Models[m_iBMDType];
     Mesh_t* pMesh = &b->Meshs[m_iMesh];
+
+    // DXP-20 inc4: the only per-frame skinned-data read on the cloth path -- touches just the
+    // pinned vertices, but Ensure materializes the whole mesh (cape BMDs are small standalone
+    // models; a per-vertex SkinVertex() refinement isn't worth the complexity here).
+    b->EnsureCpuVertices(m_iMesh);
+
     for (int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
     {
         Vertex_t* v = &pMesh->Vertices[iVertex];
@@ -1176,6 +1167,12 @@ void CPhysicsClothMesh::Render(vec3_t* pvColor, int iLevel)
         m_pVertices[iVertex].GetPosition(&vPos);
         VectorCopy(vPos, VertexTransform[m_iMesh][iVertex]);
     }
+
+    // DXP-20 inc4: the cape draw reads pure sim output, never skinned data -- mark the mesh ready
+    // so a later EnsureCpuVertices() (e.g. from the draw path) doesn't re-skin and clobber this
+    // write-back. SetFixedVertices() already runs materialize->sim->write-back in that order each
+    // frame, so this is normally a no-op; it makes the invariant explicit instead of incidental.
+    Models[m_iBMDType].MarkCpuVerticesExternallyWritten(m_iMesh);
 }
 
 float CPhysicsManager::s_fWind = 0.0f;

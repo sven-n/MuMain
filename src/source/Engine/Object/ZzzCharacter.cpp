@@ -17,7 +17,10 @@
 #include "UI/Legacy/UIManager.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -31,6 +34,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Scenes/MainScene.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
@@ -6497,6 +6501,11 @@ void MoveCharactersClient()
     MoveBlurs();
 }
 
+// TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — active-character count and
+// which animation path was taken this tick, read by the debug HUD (SceneManager.cpp).
+size_t g_LastActiveCharacterCount = 0;
+bool   g_LastAnimationWasParallel = false;
+
 void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
 {
     static thread_local std::vector<CHARACTER*> activeChars;
@@ -6512,10 +6521,14 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
         }
     }
 
+    g_LastActiveCharacterCount = activeChars.size();
+
     if (activeChars.empty()) return;
 
+    extern bool g_bDisableAnimationTaskPool;
     constexpr size_t PARALLEL_ANIMATION_THRESHOLD = 20;
-    if (activeChars.size() >= PARALLEL_ANIMATION_THRESHOLD)
+    g_LastAnimationWasParallel = (!g_bDisableAnimationTaskPool && activeChars.size() >= PARALLEL_ANIMATION_THRESHOLD);
+    if (g_LastAnimationWasParallel)
     {
         AnimationTaskPool::Instance().DispatchCharacters(activeChars);
     }
@@ -6546,6 +6559,7 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
 
 void WaitCharactersAnimation()
 {
+    FRAME_PROFILE(CharWait);
     AnimationTaskPool::Instance().Wait();
 }
 
@@ -6557,7 +6571,8 @@ void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
     EnableCullFace();
     glColor3f(1.f, 1.f, 1.f);
     BindTexture(BITMAP_GUILD);
-    glPushMatrix();
+    GlobalUBO::Instance().PushModel();
+    GlobalUBO::Instance().SetModel(o->Position, 1.0f);
 
     float Matrix[3][4];
     vec3_t Angle;
@@ -6585,10 +6600,9 @@ void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
     }
 
     R_ConcatTransforms(o->BoneTransform[26], Matrix, ParentMatrix);
-    glTranslatef(o->Position[0], o->Position[1], o->Position[2]);
     RenderPlane3D(5.f, 7.f, ParentMatrix);
 
-    glPopMatrix();
+    GlobalUBO::Instance().PopModel();
     DisableCullFace();
 }
 
@@ -6970,6 +6984,13 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
     VectorCopy(b->BodyOrigin, Object->Position);
 
+    // Save the caller's active bone transform pointer. Animation() and Transform() on the
+    // linked item's BMD will overwrite g_pActiveBoneTransform with BoneTransform (the local
+    // stack array used for this linked item). Restoring it afterwards prevents the caller's
+    // subsequent GPU skinning draws (characters, world objects) from reading stale/dangling data.
+    // This fixes Elf and Dark Lord rendering corruption in the character selection screen.
+    const float (*savedActiveBones)[3][4] = g_pActiveBoneTransform;
+
     vec3_t Temp;
     b->Animation(BoneTransform, f->AnimationFrame, f->PriorAnimationFrame, f->PriorAction, Object->Angle, Object->Angle, true, true, ParentMatrix);
     if (g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link)
@@ -6990,6 +7011,15 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     {
         RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level, Option1, false, 0, RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
     }
+
+    // Restore the caller's active bone transform — the linked item render above overwrote
+    // g_pActiveBoneTransform with the linked item's local BoneTransform stack array.
+    // Without this restore, world objects and terrain rendered afterward use the wrong (now
+    // dangling) bone pointer, causing GPU skinning corruption (visible as spikes / missing meshes).
+    // Goes through SetActiveBoneTransform() (not a raw assignment) so BoneUBO's upload-dedup
+    // cache also sees this as a change — the restored pointer may be the same address the
+    // linked item's stack-local BoneTransform just occupied, but with stale/different content.
+    SetActiveBoneTransform(savedActiveBones);
 
     if (Object->EnableShadow)
     {
@@ -8373,7 +8403,8 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         break;
     }
 
-    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE && !g_Direction.m_CKanturu.IsMayaScene())
+    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE && !g_Direction.m_CKanturu.IsMayaScene()
+        && !IsWingShadowDisabledDebug()) // DXP-23 diagnostic
     {
         switch (Type)        // 날개인지 검사
         {
@@ -11873,7 +11904,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         delete[] o->BoneTransform;
         o->BoneTransform = NULL;
     }
-    o->BoneTransform = new vec34_t[Models[Type].NumBones];
+    o->BoneTransform = new vec34_t[MAX_BONES];
 
     for (int i = 0; i < 2; i++)
     {

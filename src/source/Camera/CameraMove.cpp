@@ -16,6 +16,9 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/ZzzAI.h"
 #include "World/MapInfra/MapManager.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Core/RenderConfig.h"
 
 // Forward declaration for LoginScene offset helper
 static void ApplyLoginSceneOffset(float& x, float& y, float& z);
@@ -44,8 +47,6 @@ namespace
     constexpr float kMinTourAccel = 0.1f;
     constexpr float kMaxTourAccel = 100.0f;
     constexpr float kFullCircleDegrees = 360.0f;
-    constexpr float kWaypointRenderOffset = 50.0f;
-    constexpr float kWaypointRenderHalfSize = 10.0f;
     constexpr float kTourCameraZPosition = -300.0f;
 
     template <typename T>
@@ -523,43 +524,6 @@ DWORD CCameraMove::GetCameraWalkState() const
     return m_dwCameraWalkState;
 }
 
-void CCameraMove::RenderWayPoint()
-{
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_TEXTURE_2D);
-
-    glBegin(GL_QUADS);
-    glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
-    for (const auto& waypoint : m_listWayPoint)
-    {
-        glNormal3f(0.0f, 0.0f, 1.0f);
-        const float minX = waypoint->fCameraX + kWaypointRenderOffset - kWaypointRenderHalfSize;
-        const float maxX = waypoint->fCameraX + kWaypointRenderOffset + kWaypointRenderHalfSize;
-        const float minY = waypoint->fCameraY + kWaypointRenderOffset - kWaypointRenderHalfSize;
-        const float maxY = waypoint->fCameraY + kWaypointRenderOffset + kWaypointRenderHalfSize;
-
-        glVertex3f(minX, minY, waypoint->fCameraZ);
-        glVertex3f(maxX, minY, waypoint->fCameraZ);
-        glVertex3f(maxX, maxY, waypoint->fCameraZ);
-        glVertex3f(minX, maxY, waypoint->fCameraZ);
-    }
-    glEnd();
-
-    glBegin(GL_LINE_STRIP);
-
-    glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-    for (const auto& waypoint : m_listWayPoint)
-    {
-        glVertex3f(waypoint->fCameraX + 50.0f, waypoint->fCameraY + 50.0f, waypoint->fCameraZ);
-    }
-
-    glEnd();
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
-}
 void CCameraMove::SetSelectedTile(int iTileIndex)
 {
     m_iSelectedTile = -1;

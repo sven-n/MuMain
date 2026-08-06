@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "UI/Windows/CreditWin.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -217,7 +219,7 @@ void CCreditWin::UpdateWhileActive(double deltaMilliseconds)
 
 void CCreditWin::RenderControls()
 {
-	::glDisable(GL_ALPHA_TEST);
+	::DisableAlphaTestRaw();
 
 	for (int i = 0; i <= CRW_SPR_LOGO; ++i)
 		m_aSpr[i].Render();
@@ -271,7 +273,7 @@ void CCreditWin::RenderControls()
 	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
 		m_aSpr[i].Render();
 
-	glEnable(GL_ALPHA_TEST);
+	EnableAlphaTestRaw();
 
 	CWin::RenderButtons();
 }

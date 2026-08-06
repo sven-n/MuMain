@@ -9,6 +9,9 @@
 #include "UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/BindState.h"
+#include "Render/RHI/RHI.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -1755,7 +1758,7 @@ BOOL CUIChatPalListBox::RenderDataLine(int iLineNumber)
             glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -1933,7 +1936,7 @@ BOOL CUIWindowListBox::RenderDataLine(int iLineNumber)
         else glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -2149,7 +2152,7 @@ BOOL CUILetterListBox::RenderDataLine(int iLineNumber)
         else glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -2479,7 +2482,7 @@ BOOL CUISocketListBox::RenderDataLine(int iLineNumber)
         else glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
         g_pRenderText->SetTextColor(0, 0, 0, 255);
     }
     else
@@ -2785,12 +2788,15 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
     }
     if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
     {
-        glBindTexture(GL_TEXTURE_2D, b->TextureNumber);
+        // DXP-12: RHI::UpdateTexture binds internally -- the old explicit BindTexture2D here
+        // only existed to set up state for the raw glTexSubImage2D calls below, now redundant.
         if (uploadWidth > 0 && uploadHeight > 0)
         {
             if (uploadWidth == static_cast<int>(b->Width))
             {
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, uploadWidth, uploadHeight, GL_RGBA, GL_UNSIGNED_BYTE, b->Buffer);
+                // DXP-12: font atlas is already RGBA8 (BuildFontBitmap's RGB->RGBA expansion),
+                // straight sub-rect repaint -- no format conversion needed.
+                RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, uploadWidth, uploadHeight, b->Buffer);
             }
             else
             {
@@ -2806,12 +2812,21 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
                         tightRowSize);
                 }
 
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, uploadWidth, uploadHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_tightUploadBuffer.data());
+                RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, uploadWidth, uploadHeight, m_tightUploadBuffer.data());
             }
         }
 
         float TextureUWidth = (Width + 0.01f) / b->Width;
         float TextureVHeight = (Height + 0.01f) / b->Height;
+        // DXP-16 fix: the glyph atlas is mostly-transparent (background pixels are alpha=0,
+        // only the glyph strokes themselves are opaque) and RELIES on alpha blending to show
+        // through to whatever is underneath (panel art, other text). RenderBitmap itself never
+        // sets a blend mode -- it draws with whatever's currently active. Setting it here,
+        // immediately before this specific draw, survives whatever earlier UI code (buttons,
+        // checkboxes, etc.) left the blend state as -- a default set once at the top of
+        // BeginBitmap() didn't survive that gauntlet (confirmed: had zero effect on the
+        // reported flicker), so pin it right at the point of use instead.
+        EnableAlphaTest();
         RenderBitmap(BITMAP_FONT, (float)sx, (float)sy, (float)Width, (float)Height,
             TextureU, TextureV, TextureUWidth, TextureVHeight, false, false);
     }
@@ -4707,7 +4722,7 @@ BOOL CUIGuildNoticeListBox::RenderDataLine(int iLineNumber)
     {
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 4;
@@ -4906,7 +4921,7 @@ BOOL CUINewGuildMemberListBox::RenderDataLine(int iLineNumber)
     {
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 8;
@@ -5096,7 +5111,7 @@ BOOL CUIUnionGuildListBox::RenderDataLine(int iLineNumber)
     {
         g_pRenderText->SetTextColor(230, 220, 220, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 4;
@@ -5270,7 +5285,7 @@ BOOL CUIUnmixgemList::RenderDataLine(int iLineNumber)
     {
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
     g_pRenderText->SetBgColor(0);
     int iPos_x = m_iPos_x + 4;
     int iPos_y = GetRenderLinePos_y(iLineNumber);
@@ -5451,7 +5466,7 @@ BOOL CUIBCDeclareGuildListBox::RenderDataLine(int iLineNumber)
     {
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 4;
@@ -5617,7 +5632,7 @@ BOOL CUIBCGuildListBox::RenderDataLine(int iLineNumber)
         {
             g_pRenderText->SetTextColor(230, 220, 200, 255);
         }
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 4;
@@ -5855,7 +5870,7 @@ BOOL CUICurQuestListBox::RenderDataLine(int iLineNumber)
         ::glColor4f(0.5f, 0.7f, 0.3f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -6167,7 +6182,7 @@ BOOL CUIInGameShopListBox::RenderDataLine(int iLineNumber)
         ::glColor4f(0.15f, 0.3f, 0.4f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 4, 13);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -6313,7 +6328,7 @@ BOOL CUIBuyingListBox::RenderDataLine(int iLineNumber)
         ::glColor4f(0.15f, 0.3f, 0.4f, 0.5f);
         RenderColor(m_iPos_x, GetRenderLinePos_y(iLineNumber) - 3, m_iWidth - m_fScrollBarWidth + 1, 13);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -6459,7 +6474,7 @@ BOOL CUIPackCheckBuyingListBox::RenderDataLine(int nLine)
         ::glColor4f(0.07f, 0.31f, 0.31f, 0.5f);
         RenderColor(m_iPos_x + 3, GetRenderLinePos_y(nLine) + 1, m_iWidth - m_fScrollBarWidth + 1, TEXT_HEIGHTSIZE - 6);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
     }
 
     g_pRenderText->SetTextColor(255, 230, 210, 255);
@@ -6726,7 +6741,7 @@ BOOL CUIExtraItemListBox::RenderDataLine(int iLineNumber)
         g_pRenderText->SetTextColor(230, 220, 200, 255);
     }
 
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
     g_pRenderText->SetBgColor(0);
 
     int iPos_x = m_iPos_x + 8;

@@ -6,6 +6,11 @@
 #include "UI/NewUI/Widgets/NewUIComboBox.h"
 #include "UI/Legacy/UIControls.h"  // for g_pRenderText macro
 
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+
 // From ZzzOpenglUtil.cpp -- viewport scaling helpers.
 float ConvertX(float x);
 float ConvertY(float y);
@@ -34,7 +39,7 @@ namespace
     // Matches the raw-GL pattern used by NewUIOptionWindow.
     void DrawSolidRect(int x, int y, int w, int h, float brightness)
     {
-        glDisable(GL_TEXTURE_2D);
+        DisableTexture2D();
 
         float gx = ConvertX((float)x);
         float gy = ConvertY((float)y);
@@ -42,16 +47,17 @@ namespace
         float gh = ConvertY((float)h);
         gy = (float)WindowHeight - gy;
 
-        glColor4f(brightness, brightness, brightness, 1.0f);
-        glBegin(GL_QUADS);
-            glVertex2f(gx,      gy);
-            glVertex2f(gx + gw, gy);
-            glVertex2f(gx + gw, gy - gh);
-            glVertex2f(gx,      gy - gh);
-        glEnd();
+        IR::Begin(GL_QUADS);
+        PassthroughShader::Instance().SetUseTexture(false);
+        IR::Color4f(brightness, brightness, brightness, 1.0f);
+        IR::Vertex2f(gx,      gy);
+        IR::Vertex2f(gx + gw, gy);
+        IR::Vertex2f(gx + gw, gy - gh);
+        IR::Vertex2f(gx,      gy - gh);
+        IR::End();
 
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        glEnable(GL_TEXTURE_2D);
+        EnableTexture2D();
     }
 }
 

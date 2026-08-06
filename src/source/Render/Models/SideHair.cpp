@@ -12,6 +12,9 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "SideHair.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Core/RenderConfig.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -113,39 +116,17 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
     glColor3f(1.f, 1.f, 1.f);
     BindTexture(BITMAP_ROBE + 4);
     EnableAlphaBlendMinus();
-    //EnableAlphaTest();
-    //g_OpenglLib.DisableTexture();
-    //g_OpenglLib.Disable(GL_CULL_FACE);
-    /*glBegin(GL_QUADS);
-    glTexCoord2f(0.f,0.f+fTextureMove);glVertex3f(p1[0]-Scale,p1[1],p1[2]);
-    glTexCoord2f(0.f,1.f-fTextureMove);glVertex3f(p2[0]-Scale,p2[1],p2[2]);
-    glTexCoord2f(1.f,1.f-fTextureMove);glVertex3f(p2[0]+Scale,p2[1],p2[2]);
-    glTexCoord2f(1.f,0.f+fTextureMove);glVertex3f(p1[0]+Scale,p1[1],p1[2]);
-    glEnd();
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1]-Scale,p1[2]);
-    glTexCoord2f(0.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1]-Scale,p2[2]);
-    glTexCoord2f(1.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1]+Scale,p2[2]);
-    glTexCoord2f(1.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1]+Scale,p1[2]);
-    glEnd();
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1],p1[2]-Scale);
-    glTexCoord2f(0.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1],p2[2]-Scale);
-    glTexCoord2f(1.f,1.f-fTextureMove);glVertex3f(p2[0],p2[1],p2[2]+Scale);
-    glTexCoord2f(1.f,0.f+fTextureMove);glVertex3f(p1[0],p1[1],p1[2]+Scale);
-    glEnd();*/
     vec3_t vOrtho;
     CrossProduct(m_vLight, d, vOrtho);
     VectorNormalize(vOrtho);
     VectorScale(vOrtho, 10.f, vOrtho);
-    glBegin(GL_QUADS);
-    //glColor3fv( c1);
-    glTexCoord2f(0.f, 0.f + fTextureMove + fTextureV); glVertex3f(p1[0] - vOrtho[0], p1[1] - vOrtho[1], p1[2] - vOrtho[2]);
-    //glColor3fv( c2);
-    glTexCoord2f(0.f, 1.f - fTextureMove + fTextureV); glVertex3f(p2[0] - vOrtho[0], p2[1] - vOrtho[1], p2[2] - vOrtho[2]);
-    glTexCoord2f(1.f, 1.f - fTextureMove + fTextureV); glVertex3f(p2[0] + vOrtho[0], p2[1] + vOrtho[1], p2[2] + vOrtho[2]);
-    //glColor3fv( c1);
-    glTexCoord2f(1.f, 0.f + fTextureMove + fTextureV); glVertex3f(p1[0] + vOrtho[0], p1[1] + vOrtho[1], p1[2] + vOrtho[2]);
-    glEnd();
-    //g_OpenglLib.Enable(GL_CULL_FACE);
+
+    IR::Begin(GL_QUADS);
+    PassthroughShader::Instance().SetUseTexture(true);
+    IR::Color3f(1.f, 1.f, 1.f);
+    IR::TexCoord2f(0.f, 0.f + fTextureMove + fTextureV); IR::Vertex3f(p1[0] - vOrtho[0], p1[1] - vOrtho[1], p1[2] - vOrtho[2]);
+    IR::TexCoord2f(0.f, 1.f - fTextureMove + fTextureV); IR::Vertex3f(p2[0] - vOrtho[0], p2[1] - vOrtho[1], p2[2] - vOrtho[2]);
+    IR::TexCoord2f(1.f, 1.f - fTextureMove + fTextureV); IR::Vertex3f(p2[0] + vOrtho[0], p2[1] + vOrtho[1], p2[2] + vOrtho[2]);
+    IR::TexCoord2f(1.f, 0.f + fTextureMove + fTextureV); IR::Vertex3f(p1[0] + vOrtho[0], p1[1] + vOrtho[1], p1[2] + vOrtho[2]);
+    IR::End();
 }
