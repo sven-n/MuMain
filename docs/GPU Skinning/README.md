@@ -17,7 +17,10 @@ This documentation details the architecture, design decisions, milestone catalog
 3. **[Core Profile & Pipeline Migration](core-profile-migration.md)**  
    *Guide to modern shader pipeline migration and legacy FFP retirement.* Covers the removal of the fixed-function matrix stack, `ImmediateRenderer` (`IR::`) topology decomposition, RHI state encapsulation, and automated build-time wrapper enforcement.
 
-4. **[Gotchas & Invariants Catalog](gotchas-and-patterns.md)**  
+4. **[ImmediateRenderer (IR::) Architecture](immediate-renderer-architecture.md)**  
+   *Detailed technical specification of the ImmediateRenderer subsystem.* Covers Quad and Triangle Fan primitive decomposition math, interleaved dynamic vertex stream layouts, streaming ring-buffer orphan-on-wrap mechanics, RHI integration, and complete IR milestone task history.
+
+5. **[Gotchas & Invariants Catalog](gotchas-and-patterns.md)**  
    *Comprehensive catalog of known gotchas, threading synchronization rules, cache invalidation pitfalls, and performance invariants.*
 
 ---
