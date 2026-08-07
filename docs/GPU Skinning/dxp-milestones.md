@@ -189,7 +189,8 @@ The milestones below are organized **chronologically in the exact order of imple
 
 #### DXP-17 — Depth & Projection Matrix Clip Space Alignment
 - **Scope**: `Render/Core/RenderConfig.h/.cpp` & `UI/NewUI/NewUI3DRenderMng.cpp`.
-- **Purpose**: Unified 3D perspective projection construction (`BuildPerspectiveProjection`) across world and 3D UI item preview cameras to handle backend clip-space depth conventions cleanly. Item 1 (projection builders) is complete and user-confirmed. Items 2/3/5/6 (fog formulas, depth readback, gamma, viewport depth range) were explicitly closed as accepted low-priority risk without full verification.
+- **Purpose**: Unified 3D perspective projection construction (`BuildPerspectiveProjection`) across world and 3D UI item preview cameras to handle backend clip-space depth conventions cleanly. 
+- **Status Note (Partially Completed)**: Item 1 (projection builders) is complete and fixed the underwater geometry bleed bug. Items 2/3/5/6 (fog formulas, depth readback, gamma, viewport depth range) were explicitly closed by owner decision as accepted low-priority risk. These remain unaudited because they are harmless under OpenGL's `[-1, 1]` matrix. They will be reopened as micro-tasks during Phase C only if a concrete visual symptom (like fog-distance mismatch) appears when the D3D11 `[0, 1]` matrix is active.
 
 #### DXP-21 — Cloth Mesh Compute Decoupling
 - **Scope**: `Engine/Physics/PhysicsManager.cpp`.
