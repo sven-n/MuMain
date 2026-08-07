@@ -16,7 +16,7 @@ The **ImmediateRenderer (`IR::`)** acts as a high-performance CPU-to-GPU dynamic
 graph TD
     A["Immediate-Style Calls<br>IR::Begin(GL_QUADS)<br>IR::TexCoord2f(), IR::Vertex3f()"] --> B["Vertex Assembly<br>[Pos(3f) | UV(2f) | Color(4ub)]"]
     B --> C["IR::End() Topology Decomposition<br>QUADS -> Triangles [v0,v1,v2], [v0,v2,v3]<br>FAN -> Triangles [v0,vi,vi+1]"]
-    C --> D["Streaming Ring-Buffer Upload<br>RHI::AppendBuffer(VertexStream)"]
+    C --> D["Streaming Ring-Buffer Upload<br>RHI::AppendBuffer(IRVertex)"]
     D --> E["Draw Call Dispatch<br>RHI::DrawIndexed(GL_TRIANGLES)"]
 ```
 
@@ -80,22 +80,22 @@ $$\text{Triangle } i: [v_0, v_{i}, v_{i+1}] \quad \text{for } 1 \le i \le N-2$$
 
 Dynamic 2D rendering submits thousands of temporary vertices per frame. To eliminate heap allocations and GPU stalls, `IR::` uses a streaming ring-buffer architecture (`DXP-26`):
 
-### 4.1 Memory Interleaving (`VertexStream`)
-Vertices are stored in a contiguous 32-byte interleaved structure optimized for cache locality and vertex attribute fetch performance:
+### 4.1 Memory Interleaving (`IRVertex`)
+Vertices are stored in a contiguous 36-byte interleaved structure optimized for cache locality and vertex attribute fetch performance:
 
 | Offset | Attribute | Type | Size |
 |---|---|---|---|
 | `0` | Position (`a_Pos`) | `float[3]` | 12 bytes |
 | `12` | TexCoord (`a_UV`) | `float[2]` | 8 bytes |
-| `20` | Color (`a_Color`) | `uint8_t[4]` | 4 bytes |
-| `24` | Padding / Alignment | `uint8_t[8]` | 8 bytes |
+| `20` | Color (`a_Color`) | `float[4]` (r, g, b, a) | 16 bytes |
+| | **Total stride** | | **36 bytes** |
 
 ### 4.2 Orphan-on-Wrap Semantics
 - Vertices append sequentially into a pre-allocated dynamic VBO.
 - When remaining buffer capacity is insufficient for a draw call, `IR::` issues an **orphan-on-wrap** call (`glBufferData(..., NULL, GL_STREAM_DRAW)`), returning a fresh memory region from the driver without stalling currently executing GPU pipelines.
 
 ### 4.3 Program Bind Caching
-`IR::End()` checks the currently bound shader program ID. If consecutive draw calls share the same active shader program (e.g., batch rendering UI buttons or health bars), program re-binding is skipped, maximizing driver throughput.
+`IR::Begin()` calls `PassthroughShader::Bind()`, which routes through `BindState::BindProgram()` — a dirty-check cache that skips `glUseProgram` if the same program is already active. If consecutive draw calls share the same shader program (e.g., batch rendering UI buttons or health bars), the bind is a no-op. `IR::End()` does **not** contain a bind cache — it calls `PassthroughShader::Unbind()` which unconditionally issues `BindProgram(0)`, resetting the bound program after every draw.
 
 ---
 
