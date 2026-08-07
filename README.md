@@ -268,7 +268,7 @@ The client reads options from `config.ini` in the executable directory:
 
 | Section | Key | Default Value | Description |
 | :--- | :--- | :--- | :--- |
-| **`[Render]`** | `CoreProfile` | `1` | **Graphics Pipeline Engine**<br>`1` = Enforces **OpenGL 3.3 Core Profile** (UBO matrices, GLSL 3.3 shaders, hardware skeletal skinning, no FFP calls).<br>`0` = Fallback rollback path to OpenGL Compatibility Profile. |
+| **`[Render]`** | `CoreProfile` | `1` | **OpenGL Context Profile Switch**<br>`1` = Enforces **OpenGL 3.3 Core Profile** (Default). All rendering runs via UBO matrices, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).<br>`0` = Requests **OpenGL Compatibility Profile** context (Re-enables legacy FFP driver state toggles like `glAlphaTest`/`glEnable(GL_TEXTURE_2D)` for legacy driver hooks; shader & UBO pipelines remain active). |
 | **`[UI]`** | `EnableAnimationTaskPool` | `0` | **Parallel Animation Processing**<br>`1` = Enables multi-threaded character animation tick pool (`AnimationTaskPool`) for crowded scenes ($\ge 20$ active characters).<br>`0` = Sequential single-threaded animation calculation. |
 | **`[UI]`** | `Locale` | `"en"` | **UI Language Locale** (`en`, `es`, `pt`, `ru`, `ko`). |
 | **`[Camera]`** | `Zoom` | `1735` | **3D Camera Default Distance**. |

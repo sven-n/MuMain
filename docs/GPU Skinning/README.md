@@ -53,8 +53,8 @@ The graphics and performance engine exposes runtime switches via `config.ini` an
 
 ### 1. `config.ini` Switches
 - **`[Render] CoreProfile`** (Default: `1`):
-  - `1`: Enforces **OpenGL 3.3 Core Profile** (`SDL_GL_CONTEXT_PROFILE_CORE`). All rendering runs via UBOs, GLSL 3.3 shaders, and hardware vertex skinning, completely bypassing legacy FFP state.
-  - `0`: Fallback rollback path to **OpenGL Compatibility Profile** (`SDL_GL_CONTEXT_PROFILE_COMPATIBILITY`).
+  - `1`: Enforces **OpenGL 3.3 Core Profile** (`SDL_GL_CONTEXT_PROFILE_CORE`). All rendering runs via UBOs, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).
+  - `0`: Requests **OpenGL Compatibility Profile** (`SDL_GL_CONTEXT_PROFILE_COMPATIBILITY`). Re-enables legacy FFP driver state toggles (e.g. `glAlphaTest`, `glEnable(GL_TEXTURE_2D)`) for legacy driver hook compatibility; all primary rendering remains shader and UBO driven.
 - **`[UI] EnableAnimationTaskPool`** (Default: `0`):
   - `1`: Enables the multi-threaded character animation task pool (`AnimationTaskPool`) when $\ge 20$ active characters are present.
   - `0`: Runs character skeletal animation updates sequentially on the main thread.
