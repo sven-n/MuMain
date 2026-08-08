@@ -1483,7 +1483,7 @@ void UpdateResolutionDependentSystems()
     CUIMng::Instance().RepositionSceneUI();
 }
 
-#ifdef _DEBUG
+#if 0 // Disabled KHR_debug callback due to severe Debug mode performance degradation (GL_DEBUG_OUTPUT_SYNCHRONOUS stalling)
 // DXP-08 pre-flip diagnostic: logs every GL_KHR_debug message (Core-profile violations
 // included) to MuError.log instead of the driver silently no-oping or hard-failing.
 // Registered only when the debug context flag (set alongside SDL_GL_CreateContext, see
@@ -1558,7 +1558,7 @@ static void APIENTRY GLDebugCallback(GLenum source, GLenum type, GLuint id, GLen
         LogSymbolizedStack();
     }
 }
-#endif // _DEBUG
+#endif // 0
 
 #ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
@@ -1742,7 +1742,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
     RHI::Init(nullptr, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
 
-#ifdef _DEBUG
+#if 0 // Disabled KHR_debug callback due to severe Debug mode performance degradation (GL_DEBUG_OUTPUT_SYNCHRONOUS stalling)
     // DXP-08: register the KHR_debug callback now that a current context exists.
     // glew.h (included via stdafx.h) supplies the PFNGLDEBUGMESSAGECALLBACKPROC
     // typedef and GL_DEBUG_* enums, but glewInit() is never called in this codebase
@@ -1775,7 +1775,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
             g_ErrorReport.Write(L"> GL_KHR_debug unavailable (glDebugMessageCallback not found).\r\n");
         }
     }
-#endif // _DEBUG
+#endif // 0
 
     // Initialize single-pass GLSL engines (Item Specular & Planar Ground Shadows)
     CItemSpecularShader::Instance().Init();
