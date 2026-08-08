@@ -1484,6 +1484,12 @@ void UpdateResolutionDependentSystems()
 }
 
 #ifdef _DEBUG
+// Set to 1 to enable GL_KHR_debug callback logging (DXP-08 diagnostic soak mode).
+// Disabled (0) by default because GL_DEBUG_OUTPUT_SYNCHRONOUS and stack symbolization cause
+// severe CPU/GPU stalls during normal development iteration.
+#define ENABLE_GL_KHR_DEBUG_CALLBACK 0
+
+#if ENABLE_GL_KHR_DEBUG_CALLBACK
 // DXP-08 pre-flip diagnostic: logs every GL_KHR_debug message (Core-profile violations
 // included) to MuError.log instead of the driver silently no-oping or hard-failing.
 // Registered only when the debug context flag (set alongside SDL_GL_CreateContext, see
@@ -1557,7 +1563,7 @@ static void APIENTRY GLDebugCallback(GLenum source, GLenum type, GLuint id, GLen
         g_ErrorReport.Write(L"  ^ first occurrence of this message -- call stack:\r\n");
         LogSymbolizedStack();
     }
-}
+#endif // ENABLE_GL_KHR_DEBUG_CALLBACK
 #endif // _DEBUG
 
 #ifdef _WIN32
@@ -1703,7 +1709,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     }
-#ifdef _DEBUG
+#if defined(_DEBUG) && ENABLE_GL_KHR_DEBUG_CALLBACK
     // KHR_debug callback (registered below, after context creation) needs the context
     // created with the debug flag to get synchronous, precisely-attributed messages.
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
@@ -1742,7 +1748,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
     RHI::Init(nullptr, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && ENABLE_GL_KHR_DEBUG_CALLBACK
     // DXP-08: register the KHR_debug callback now that a current context exists.
     // glew.h (included via stdafx.h) supplies the PFNGLDEBUGMESSAGECALLBACKPROC
     // typedef and GL_DEBUG_* enums, but glewInit() is never called in this codebase
@@ -1775,7 +1781,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
             g_ErrorReport.Write(L"> GL_KHR_debug unavailable (glDebugMessageCallback not found).\r\n");
         }
     }
-#endif // _DEBUG
+#endif // defined(_DEBUG) && ENABLE_GL_KHR_DEBUG_CALLBACK
 
     // Initialize single-pass GLSL engines (Item Specular & Planar Ground Shadows)
     CItemSpecularShader::Instance().Init();
