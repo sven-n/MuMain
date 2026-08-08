@@ -14,7 +14,7 @@ The **GPU Skeletal Skinning Engine** (introduced in `DXP-20`) offloads vertex tr
 graph TD
     A["Character Animation Tick"] --> B["Calculate Matrix Palette<br>BoneTransform[200]"]
     B --> C["BoneUBO::UploadBones()"]
-    C --> D["Uniform Buffer<br>(Slot 1: u_Bones[200])"]
+    C --> D["Uniform Buffer<br>(Slot 2: u_Bones[200])"]
     D --> E["GPU Hardware Vertex Shader<br>(bmd_mesh.vert)"]
     E --> F["GPU Skinning:<br>u_Bones[a_BoneIndex] * a_Pos"]
     E --> G["World Placement:<br>u_BodyOrigin + u_BodyScale * localPos"]
@@ -30,20 +30,23 @@ The client allocates three primary Uniform Buffer Object slots reserved for rend
 graph TD
     subgraph UBO["Uniform Buffer Memory Slots"]
         UBO0["Slot 0: GlobalMatrices UBO<br>(u_View, u_Proj, u_MVP, u_Time)"]
-        UBO1["Slot 1: BoneMatrices UBO<br>(u_Bones[200])"]
-        UBO2["Slot 2: SceneData UBO<br>(u_Fog, u_Light, u_Time)"]
+        UBO1["Slot 1: SceneData UBO<br>(u_Fog, u_Light, u_Time)"]
+        UBO2["Slot 2: BoneMatrices UBO<br>(u_Bones[200])"]
     end
 ```
 
-### Bone UBO Layout (`Slot 1`)
+### Bone UBO Layout (`Slot 2`)
 
 The bone UBO stores an array of 200 4x4 bone matrices in `std140` layout:
 
 ```glsl
-layout(std140, binding = 1) uniform BoneMatrices {
+layout(std140, binding = 1) uniform BoneMatrices {  // shader-side comment; runtime binding is slot 2
     mat4 u_Bones[200];
 };
 ```
+
+> [!NOTE]
+> **Pre-existing binding inconsistency**: The GLSL source comment says `binding = 1`, but at runtime `BoneUBO::Create()` binds to **slot 2**. This mismatch exists in the codebase itself (not introduced by documentation). The runtime binding (slot 2) is authoritative — it is what the GPU actually uses.
 
 #### The `MAX_BONES = 200` Invariant
 
@@ -78,17 +81,16 @@ To avoid redundant GPU buffer uploads (`glBufferSubData`) when consecutive meshe
 
 ```cpp
 void SetActiveBoneTransform(vec34_t* pTransform) {
-    if (g_pActiveBoneTransform != pTransform) {
-        g_pActiveBoneTransform = pTransform;
-        g_BoneTransformVersion++; // Bumps global version stamp
-    }
+    g_pActiveBoneTransform = pTransform;
+    g_BoneTransformVersion++; // Unconditionally bumps global version stamp every call
 }
 ```
 
-`BoneUBO::UploadBones(ptr, count, version)` skips uploading to the GPU **only if both** the pointer `ptr` AND the `version` stamp match the previous upload.
+> [!NOTE]
+> `SetActiveBoneTransform()` **does not** guard on pointer comparison. It unconditionally sets the pointer and bumps the version stamp every call. The deduplication logic lives entirely in `BoneUBO::UploadBones(ptr, count, version)`, which skips a GPU buffer upload **only if both** the pointer `ptr` AND the `version` stamp match the values from the previous upload.
 
 > [!CAUTION]
-> **Pointer-Only Caching Hazard**: Pointer-only caching is unsafe because sub-item rendering (e.g., wings) uses **stack-local** matrix arrays allocated at the same stack depth across calls. Two distinct calls receive the *same memory address* with *different matrix content*. Version stamping prevents stale matrix uploads.
+> **Pointer-Only Caching Hazard**: Pointer-only caching in `UploadBones` would be unsafe because sub-item rendering (e.g., wings) uses **stack-local** matrix arrays allocated at the same stack depth across calls. Two distinct calls could receive the *same memory address* with *different matrix content*. The `version` stamp prevents stale matrix uploads by ensuring identity requires both address AND generation match.
 
 ---
 
@@ -119,11 +121,13 @@ For lit or reflective meshes:
 
 $$\text{skinnedNormal} = \text{normalize}(\text{mat3}(\text{u\_Bones}[\text{a\_BoneIndex}]) \cdot \text{a\_Normal})$$
 
-For chrome reflection shader modes (`u_RenderMode == 3` or `4`), animated chrome UV coordinates are calculated directly on the GPU from the skinned normal:
+For chrome reflection (`u_RenderMode == 3`), animated chrome UV coordinates are calculated on the GPU from the skinned normal. RenderMode 3 covers both plain `RENDER_CHROME` and the CHROME2/3/5/6/7/METAL variants — the variant is selected via the `u_ChromeVariant` uniform (introduced in DXP-20-inc5). The base formula (plain chrome fallback):
 
 $$\text{v\_ChromeUV.x} = \text{skinnedNormal.z} \cdot 0.5 + \text{u\_ChromeWave}$$
 
 $$\text{v\_ChromeUV.y} = \text{skinnedNormal.y} \cdot 0.5 + \text{u\_ChromeWave} \cdot 2.0$$
+
+CHROME2/3/5/6/7/METAL variants use separate per-variant UV formulas dispatched via `u_ChromeVariant`; CHROME4/OIL take a CPU dynamic-VBO path and are never GPU-eligible.
 
 ### Matrix Translate Flag (`m_LastTranslate`)
 
@@ -139,10 +143,10 @@ High-level equipment (+7 through +15 armor and weapons) displays dynamic animate
 
 ```mermaid
 graph LR
-    RM4["Render Mode 4"] --> V1["SHADER_VARIANT_CHROME_1<br>(Base + Animated Chrome 1)"]
-    RM5["Render Mode 5"] --> V2["SHADER_VARIANT_CHROME_2<br>(Base + Animated Chrome 2)"]
-    RM6["Render Mode 6"] --> VM["SHADER_VARIANT_CHROME_METAL<br>(Base + Static Metal Specular)"]
-    RM7["Render Mode 7"] --> VF["SHADER_VARIANT_FULL_SPECULAR<br>(Base + Chrome1 + Metal Specular)"]
+    RM4["Render Mode 4"] --> V1["CHROME_1<br>(Base + Animated Chrome 1)"]
+    RM5["Render Mode 5"] --> VM["CHROME_METAL<br>(Base + Static Metal Specular)"]
+    RM6["Render Mode 6"] --> VF1["FULL_SPECULAR_V1<br>(Base + Chrome + Specular Tier 1)"]
+    RM7["Render Mode 7"] --> VF2["FULL_SPECULAR_V2<br>(Base + Chrome + Specular Tier 2)"]
 ```
 
 ### Two-Tier Tint Modulation

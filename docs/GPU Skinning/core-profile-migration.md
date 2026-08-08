@@ -95,7 +95,7 @@ graph TD
 
 1. **Sequential Append**: New draw calls append vertices sequentially into the buffer using `RHI::AppendBuffer`.
 2. **Orphan-on-Wrap**: When the ring-buffer reaches capacity, it re-allocates or orphans the buffer, starting fresh at offset 0 without stalling the GPU pipeline.
-3. **Persistent Program Binding**: Modern `IR::End()` retains shader program bindings across consecutive draw calls, enabling program-bind cache hits when drawing sequences of UI elements or particles.
+3. **Persistent Program Binding**: Modern `IR::Begin()` binds the `PassthroughShader` through `BindState`'s dirty-check cache. If the same program is already bound from a prior draw, the `glUseProgram` call is skipped. `IR::End()` does not participate in bind caching.
 
 ---
 
@@ -107,7 +107,7 @@ To prevent technical debt and ensure cross-platform driver compatibility, the cl
 
 ### Automated Build-Time Verification Guard
 
-The build system executes [`CLIENT/tools/check_gl_wrapper_monopoly.py`](../../tools/check_gl_wrapper_monopoly.py) as an automatic custom target before compiling `MuClient`.
+The build system executes [`CLIENT/Tools/check_gl_wrapper_monopoly.py`](../../Tools/check_gl_wrapper_monopoly.py) as an automatic custom target before compiling `MuClient`.
 
 ```mermaid
 flowchart TD
@@ -124,6 +124,8 @@ If developer code outside `Render/` attempts to invoke raw driver functions, the
 
 All texture operations are encapsulated behind the RHI layer:
 
-- **Creation & Upload**: [`GlobalBitmap.cpp`](../../src/source/Render/Textures/GlobalBitmap.cpp) creates textures via `RHI::CreateTexture` with explicit mipmap generation and format specifications (`RHI_FORMAT_R8G8B8A8_UNORM`).
+- **Creation & Upload**: [`GlobalBitmap.cpp`](../../src/source/Render/Sprites/GlobalBitmap.cpp) creates textures via `RHI::CreateTexture`. The format is RGBA8 (hardcoded — no named RHI format constant exists; `DXGI_FORMAT_R8G8B8A8_UNORM`-style named constants are D3D11-side only; the GL backend hardwires `GL_RGBA8`). No automatic mipmap generation occurs — textures are single-level unless explicitly updated.
 - **Dynamic Streaming**: UI fonts, dynamic minimaps, and reconnect dialogs update sub-regions of textures using `RHI::UpdateTexture`.
-- **Pixel Readback**: Screen capture, screenshot export, and UI background blur effects use `RHI::ReadPixels` to extract frame buffer pixels safely into host memory.
+- **Pixel Readback**: Two separate readback functions exist behind the RHI:
+  - `RHI::ReadColorFramebuffer` — used by screenshot export and the reconnect-dialog background blur. Returns top-down row order regardless of backend.
+  - `RHI::ReadDepthPixel` — used by `CameraProjection::TestDepthBuffer` for depth-buffer sampling. Note: `RHI::ReadPixels` does **not** exist as a function.

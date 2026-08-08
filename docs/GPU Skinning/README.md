@@ -44,3 +44,21 @@ This documentation details the architecture, design decisions, milestone catalog
 | **Uniform Buffers** | [`Render/Core/GlobalUBO.h`](../../src/source/Render/Core/GlobalUBO.h)<br>[`Render/Core/BoneUBO.h`](../../src/source/Render/Core/BoneUBO.h) | Uniform Buffer Objects for Camera/Model matrices (`Slot 0`) and Skeletal Bones (`Slot 1`). |
 | **Immediate Renderer** | [`Render/Core/ImmediateRenderer.cpp`](../../src/source/Render/Core/ImmediateRenderer.cpp) | Dynamic quad/fan topology decomposition and 2D/3D immediate-mode submission. |
 | **Item Specular Shader** | [`Render/Shaders/ItemSpecularShader.cpp`](../../src/source/Render/Shaders/ItemSpecularShader.cpp) | Modern single-pass GPU shader for +7 through +15 equipment shine & chrome effects. |
+
+---
+
+## Graphics & Performance Configuration Switches
+
+The graphics and performance engine exposes runtime switches via `config.ini` and command-line flags:
+
+### 1. `config.ini` Switches
+- **`[Render] CoreProfile`** (Default: `1`):
+  - `1`: Enforces **OpenGL 3.3 Core Profile** (`SDL_GL_CONTEXT_PROFILE_CORE`). All rendering runs via UBOs, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).
+  - `0`: Requests **OpenGL Compatibility Profile** (`SDL_GL_CONTEXT_PROFILE_COMPATIBILITY`). Re-enables legacy FFP driver state toggles (e.g. `glAlphaTest`, `glEnable(GL_TEXTURE_2D)`) for legacy driver hook compatibility; all primary rendering remains shader and UBO driven.
+- **`[UI] EnableAnimationTaskPool`** (Default: `0`):
+  - `1`: Enables the multi-threaded character animation task pool (`AnimationTaskPool`) when $\ge 20$ active characters are present.
+  - `0`: Runs character skeletal animation updates sequentially on the main thread.
+
+### 2. Command Line Flags
+- **`--enable-taskpool`**: Forces `AnimationTaskPool` on at launch regardless of `config.ini`.
+- **`--editor`**: Enables the in-game ImGui editor overlay (**F12**) on `*_mueditor` builds.

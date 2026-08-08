@@ -1,4 +1,4 @@
-﻿# MU Online Client Sources
+# MU Online Client Sources
 
 [![MinGW Build](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml/badge.svg?branch=main)](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sven-n/MuMain)
@@ -263,8 +263,24 @@ The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.1
 will work as well. By default, it connects to localhost and port `44406`.
 The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 
+#### Client Configuration (`config.ini`)
+The client reads options from `config.ini` in the executable directory:
+
+| Section | Key | Default Value | Description |
+| :--- | :--- | :--- | :--- |
+| **`[Render]`** | `CoreProfile` | `1` | **OpenGL Context Profile Switch**<br>`1` = Enforces **OpenGL 3.3 Core Profile** (Default). All rendering runs via UBO matrices, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).<br>`0` = Requests **OpenGL Compatibility Profile** context (Re-enables legacy FFP driver state toggles like `glAlphaTest`/`glEnable(GL_TEXTURE_2D)` for legacy driver hooks; shader & UBO pipelines remain active). |
+| **`[UI]`** | `EnableAnimationTaskPool` | `0` | **Parallel Animation Processing**<br>`1` = Enables multi-threaded character animation tick pool (`AnimationTaskPool`) for crowded scenes ($\ge 20$ active characters).<br>`0` = Sequential single-threaded animation calculation. |
+| **`[UI]`** | `Locale` | `"en"` | **UI Language Locale** (`en`, `es`, `pt`, `ru`, `ko`). |
+| **`[Camera]`** | `Zoom` | `1735` | **3D Camera Default Distance**. |
+
+#### Command Line Flags & Options
+- **Connection string**: `main.exe connect /u<IP> /p<PORT>`
+- **`--enable-taskpool`**: Forces `AnimationTaskPool` multi-threaded character animation updates on at launch.
+- **`--editor`**: Enables the ImGui in-game editor (toggle with **F12** on `*_mueditor` builds).
+
 ## Documentation
 
+- [GPU Skinning & Core Profile](docs/GPU%20Skinning/README.md) - architecture, UBO layouts, ImmediateRenderer (`IR::`), and milestone catalog (`DXP-01` to `DXP-27`).
 - [Camera system](docs/camera-system.md) - modes, switching (F9), config,
   frustum culling, `$details` overlay, and the gameplay behaviour changes
   from the 3D camera rework.
