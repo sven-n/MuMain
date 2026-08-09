@@ -6,6 +6,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
+#include <algorithm>
 
 using namespace SEASON3B;
 using GameLogic::Commands::ChatCommand;
@@ -147,9 +148,8 @@ void SEASON3B::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIn
     }
 
     m_editedParameter = static_cast<int>(parameterIndex);
-    const auto rowY = m_Pos.y + 30 + VISIBLE_ROWS * static_cast<int>(ROW_HEIGHT) + 40
-        + static_cast<int>(parameterIndex) * static_cast<int>(ROW_HEIGHT);
-    m_pValueInput->SetPosition(m_Pos.x + 155, rowY);
+    const auto rowY = GetDetailTop() + 52 + static_cast<int>(parameterIndex) * static_cast<int>(ROW_HEIGHT);
+    m_pValueInput->SetPosition(m_Pos.x + 160, rowY);
     m_pValueInput->SetText(m_parameterValues[parameterIndex].c_str());
     m_pValueInput->SetState(UISTATE_NORMAL);
     m_pValueInput->GiveFocus();
@@ -237,7 +237,7 @@ void SEASON3B::CNewUIChatCommandWindow::ExecuteSelectedCommand()
 bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
 {
     const auto& commands = Catalog().GetCommands();
-    const auto listTop = m_Pos.y + 30;
+    const auto listTop = GetListTop();
 
     for (int row = 0; row < VISIBLE_ROWS; ++row)
     {
@@ -247,7 +247,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
             break;
         }
 
-        if (CheckMouseIn(m_Pos.x + 10, listTop + row * static_cast<int>(ROW_HEIGHT), static_cast<int>(WINDOW_WIDTH) - 20, static_cast<int>(ROW_HEIGHT))
+        if (CheckMouseIn(m_Pos.x + 25, listTop + row * static_cast<int>(ROW_HEIGHT), static_cast<int>(WINDOW_WIDTH - 2 * FRAME_SIDE - SCROLLBAR_WIDTH), static_cast<int>(ROW_HEIGHT))
             && IsRelease(VK_LBUTTON))
         {
             SelectCommand(index);
@@ -258,7 +258,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
 
     if (const auto* command = GetSelectedCommand())
     {
-        const auto detailTop = listTop + VISIBLE_ROWS * static_cast<int>(ROW_HEIGHT) + 40;
+        const auto detailTop = GetDetailTop() + 52;
         for (size_t i = 0; i < command->Parameters.size(); ++i)
         {
             const auto rowY = detailTop + static_cast<int>(i) * static_cast<int>(ROW_HEIGHT);
@@ -280,8 +280,8 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
             }
         }
 
-        const auto buttonY = m_Pos.y + static_cast<int>(WINDOW_HEIGHT) - 30;
-        if (CheckMouseIn(m_Pos.x + static_cast<int>(WINDOW_WIDTH) - 90, buttonY, 80, 20) && IsRelease(VK_LBUTTON))
+        const auto buttonY = m_Pos.y + static_cast<int>(WINDOW_HEIGHT - FRAME_BOTTOM) + 12;
+        if (CheckMouseIn(m_Pos.x + static_cast<int>(WINDOW_WIDTH - FRAME_SIDE) - 85, buttonY, 80, 20) && IsRelease(VK_LBUTTON))
         {
             ExecuteSelectedCommand();
             return false;
@@ -290,6 +290,14 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, static_cast<int>(WINDOW_WIDTH), static_cast<int>(WINDOW_HEIGHT)))
     {
+        if (MouseWheel != 0)
+        {
+            const auto maxOffset = static_cast<int>(commands.size()) - VISIBLE_ROWS;
+            m_scrollOffset -= MouseWheel / 120;
+            m_scrollOffset = std::max(0, std::min(m_scrollOffset, std::max(0, maxOffset)));
+            MouseWheel = 0;
+        }
+
         return false;
     }
 
@@ -374,14 +382,30 @@ bool SEASON3B::CNewUIChatCommandWindow::Render()
     return true;
 }
 
+int SEASON3B::CNewUIChatCommandWindow::GetListTop() const
+{
+    return m_Pos.y + static_cast<int>(FRAME_TOP) - 20;
+}
+
+int SEASON3B::CNewUIChatCommandWindow::GetDetailTop() const
+{
+    return GetListTop() + VISIBLE_ROWS * static_cast<int>(ROW_HEIGHT) + 8;
+}
+
 void SEASON3B::CNewUIChatCommandWindow::RenderFrame()
 {
+    // Back first, then the frame pieces over its edges - a stretched back alone
+    // leaves the borders of the window bare.
     RenderImage(IMAGE_COMMAND_BACK, static_cast<float>(m_Pos.x), static_cast<float>(m_Pos.y), WINDOW_WIDTH, WINDOW_HEIGHT);
+    RenderImage(IMAGE_COMMAND_TOP, static_cast<float>(m_Pos.x), static_cast<float>(m_Pos.y), WINDOW_WIDTH, FRAME_TOP);
+    RenderImage(IMAGE_COMMAND_LEFT, static_cast<float>(m_Pos.x), m_Pos.y + FRAME_TOP, FRAME_SIDE, WINDOW_HEIGHT - FRAME_TOP - FRAME_BOTTOM);
+    RenderImage(IMAGE_COMMAND_RIGHT, m_Pos.x + WINDOW_WIDTH - FRAME_SIDE, m_Pos.y + FRAME_TOP, FRAME_SIDE, WINDOW_HEIGHT - FRAME_TOP - FRAME_BOTTOM);
+    RenderImage(IMAGE_COMMAND_BOTTOM, static_cast<float>(m_Pos.x), m_Pos.y + WINDOW_HEIGHT - FRAME_BOTTOM, WINDOW_WIDTH, FRAME_BOTTOM);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 230, 210, 100);
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 8, I18N::Game::ChatCommandsTitle, static_cast<int>(WINDOW_WIDTH), 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 14, I18N::Game::ChatCommandsTitle, static_cast<int>(WINDOW_WIDTH), 0, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CNewUIChatCommandWindow::RenderCommandList()
@@ -393,11 +417,11 @@ void SEASON3B::CNewUIChatCommandWindow::RenderCommandList()
     if (commands.empty())
     {
         g_pRenderText->SetTextColor(200, 200, 200, 255);
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 30, I18N::Game::ChatCommandsNotSupported, static_cast<int>(WINDOW_WIDTH) - 20, 0);
+        g_pRenderText->RenderText(m_Pos.x + 25, GetListTop(), I18N::Game::ChatCommandsNotSupported, static_cast<int>(WINDOW_WIDTH) - 20, 0);
         return;
     }
 
-    auto y = m_Pos.y + 30;
+    auto y = GetListTop();
     for (int row = 0; row < VISIBLE_ROWS; ++row)
     {
         const auto index = m_scrollOffset + row;
@@ -415,8 +439,8 @@ void SEASON3B::CNewUIChatCommandWindow::RenderCommandList()
             g_pRenderText->SetTextColor(220, 220, 220, 255);
         }
 
-        g_pRenderText->RenderText(m_Pos.x + 10, y, commands[index].Command.c_str(), 100, 0);
-        g_pRenderText->RenderText(m_Pos.x + 115, y, commands[index].Name.c_str(), static_cast<int>(WINDOW_WIDTH) - 125, 0);
+        g_pRenderText->RenderText(m_Pos.x + 25, y, commands[index].Command.c_str(), 110, 0);
+        g_pRenderText->RenderText(m_Pos.x + 140, y, commands[index].Name.c_str(), static_cast<int>(WINDOW_WIDTH - 140 - FRAME_SIDE - SCROLLBAR_WIDTH), 0);
         y += static_cast<int>(ROW_HEIGHT);
     }
 }
@@ -429,12 +453,12 @@ void SEASON3B::CNewUIChatCommandWindow::RenderSelectedCommand()
         return;
     }
 
-    auto y = m_Pos.y + 30 + VISIBLE_ROWS * static_cast<int>(ROW_HEIGHT) + 8;
+    auto y = GetDetailTop();
 
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(200, 220, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x + 10, y, command->Description.c_str(), static_cast<int>(WINDOW_WIDTH) - 20, 30);
-    y += 32;
+    g_pRenderText->RenderText(m_Pos.x + 25, y, command->Description.c_str(), static_cast<int>(WINDOW_WIDTH - 2 * FRAME_SIDE), 48);
+    y += 50;
 
     for (size_t i = 0; i < command->Parameters.size(); ++i)
     {
@@ -452,16 +476,16 @@ void SEASON3B::CNewUIChatCommandWindow::RenderSelectedCommand()
             g_pRenderText->SetTextColor(220, 220, 220, 255);
         }
 
-        g_pRenderText->RenderText(m_Pos.x + 10, y, parameter.Name.c_str(), 140, 0);
+        g_pRenderText->RenderText(m_Pos.x + 25, y, parameter.Name.c_str(), 130, 0);
         if (m_editedParameter != static_cast<int>(i))
         {
-            g_pRenderText->RenderText(m_Pos.x + 155, y, value.empty() ? parameter.ValidValues.c_str() : value.c_str(), static_cast<int>(WINDOW_WIDTH) - 165, 0);
+            g_pRenderText->RenderText(m_Pos.x + 160, y, value.empty() ? parameter.ValidValues.c_str() : value.c_str(), static_cast<int>(WINDOW_WIDTH) - 165, 0);
         }
         y += static_cast<int>(ROW_HEIGHT);
     }
 
-    const auto buttonY = m_Pos.y + static_cast<int>(WINDOW_HEIGHT) - 30;
-    RenderImage(IMAGE_COMMAND_BUTTON, static_cast<float>(m_Pos.x + static_cast<int>(WINDOW_WIDTH) - 90), static_cast<float>(buttonY), 80.f, 20.f);
+    const auto buttonY = m_Pos.y + static_cast<int>(WINDOW_HEIGHT - FRAME_BOTTOM) + 12;
+    RenderImage(IMAGE_COMMAND_BUTTON, static_cast<float>(m_Pos.x + static_cast<int>(WINDOW_WIDTH - FRAME_SIDE) - 85), static_cast<float>(buttonY), 80.f, 20.f);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x + static_cast<int>(WINDOW_WIDTH) - 90, buttonY + 4, I18N::Game::ChatCommandsExecute, 80, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + static_cast<int>(WINDOW_WIDTH - FRAME_SIDE) - 85, buttonY + 4, I18N::Game::ChatCommandsExecute, 80, 0, RT3_SORT_CENTER);
 }
