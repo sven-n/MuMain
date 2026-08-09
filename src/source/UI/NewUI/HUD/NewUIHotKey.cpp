@@ -265,7 +265,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress(VK_F2) == true)
+    else if (SEASON3B::IsPress('J') == true)
     {
         // Only servers which offer their chat commands have something to show.
         if (GameLogic::Commands::Catalog().IsAvailable())
