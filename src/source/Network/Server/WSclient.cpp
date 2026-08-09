@@ -1179,6 +1179,11 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     // Initialize skill requirements cache on character login
     gSkillManager.InitializeSkillAttributeRequirementsCache();
 
+    // The commands belong to the character which just entered, so forget the
+    // ones of a previous character before asking for them again.
+    GameLogic::Commands::Catalog().Reset();
+    GameLogic::Commands::Catalog().RequestOnce();
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x03 [ReceiveJoinMapServer]");
 
     return (TRUE);
@@ -2191,9 +2196,6 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         }
 
         SocketClient->ToGameServer()->SendClientReadyAfterMapChange();
-
-        // Servers which support it answer with the commands this player may use.
-        GameLogic::Commands::Catalog().RequestOnce();
 
         g_dwLatestZoneMoving = GetTickCount();
         g_bWhileMovingZone = FALSE;

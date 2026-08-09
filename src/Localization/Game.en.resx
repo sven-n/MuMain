@@ -12940,4 +12940,7 @@
   <data name="ChatCommandsExecute" xml:space="preserve">
     <value>Execute</value>
   </data>
+  <data name="JToggleChatCommands" xml:space="preserve">
+    <value>J : Chat Commands On/Off</value>
+  </data>
 </root>
