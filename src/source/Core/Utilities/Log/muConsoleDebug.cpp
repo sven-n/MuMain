@@ -114,8 +114,10 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     }
     else if (strCommand.compare(L"$vsync on") == 0)
     {
-        EnableVSync();
-        SetTargetFps(-1); // unlimited
+        if (EnableVSync())
+            SetTargetFps(-1);
+        else
+            SetTargetFps(GetFPSLimit());
         ResetFrameStats();
         return true;
     }

@@ -100,8 +100,8 @@ void RestoreCameraPerspective();
 void InitVSync();
 bool IsVSyncAvailable();
 bool IsVSyncEnabled();
-void EnableVSync();
-void DisableVSync();
+bool EnableVSync();
+bool DisableVSync();
 int GetFPSLimit();
 
 // Present the current GL frame via SDL (replaces the Win32 ::SwapBuffers, #442).
