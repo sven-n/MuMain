@@ -124,6 +124,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     else if (strCommand.compare(L"$vsync off") == 0)
     {
         DisableVSync();
+        SetTargetFps(-1); // explicit request for uncapped - let hardware run at its max
         ResetFrameStats();
         return true;
     }
