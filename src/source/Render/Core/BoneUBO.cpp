@@ -47,22 +47,29 @@ void BoneUBO::Bind()
     // anything else that could bind in between -- nothing left to (re)do here.
 }
 
-void BoneUBO::UploadBones(const void* boneTransforms, int numBones, unsigned int version)
+void BoneUBO::UploadBones(const void* boneTransforms, int numBones)
 {
     if (!m_UBOHandle.IsValid()) Create();
     if (!m_UBOHandle.IsValid() || !boneTransforms || numBones <= 0) return;
-
-    // Same object's palette as last call (e.g. the next equipped armor piece on the same
-    // character) — already uploaded, skip the repack + GPU upload.
-    if (boneTransforms == m_LastUploadedPtr && version == m_LastUploadedVersion) return;
-    m_LastUploadedPtr = boneTransforms;
-    m_LastUploadedVersion = version;
 
     if (numBones > GPU_MAX_BONES) numBones = GPU_MAX_BONES;
 
     // MU Online BoneTransform is float[MAX_BONES][3][4] (a 3x4 matrix per bone)
     // We convert 3x4 affine matrices into std140 column-major 4x4 mat4 arrays.
     const float* src = static_cast<const float*>(boneTransforms);
+    const size_t srcBytes = static_cast<size_t>(numBones) * 12 * sizeof(float);
+
+    // Same object's palette as last call (e.g. the next equipped armor piece on the same
+    // character) — already uploaded, skip the repack + GPU upload. Compared by content, not
+    // by pointer: several callers (weapons, wings, effects) share one fixed-address scratch
+    // buffer across genuinely different objects, so pointer identity alone can't tell "same
+    // data" apart from "different object, same address, different data".
+    if (m_HasSnapshot && srcBytes == m_LastSourceBytes && std::memcmp(src, m_LastSourceSnapshot, srcBytes) == 0)
+        return;
+
+    std::memcpy(m_LastSourceSnapshot, src, srcBytes);
+    m_LastSourceBytes = srcBytes;
+    m_HasSnapshot = true;
 
     for (int b = 0; b < numBones; b++) {
         const float* m3x4 = src + b * 12; // 3 rows, 4 columns

@@ -10,9 +10,9 @@ This document catalogues critical technical gotchas, thread safety rules, cache 
 - **Gotcha**: Equipped armor models (`bmdArmor`) store small internal `NumBones` counts (e.g. 12 to 15), but armor vertices reference bone indices across the entire character skeleton (0 to 199).
 - **Rule**: `BoneUBO::UploadBones()` must upload all `MAX_BONES` (200) matrices. Heap allocations for `BoneTransform` across all character, pet, and object structures must allocate `new vec34_t[MAX_BONES]` to prevent out-of-bounds heap reads during upload.
 
-### 1.2 Version-Stamped Palette Deduplication vs. Stack-Local Pointer Hazard
-- **Gotcha**: Sub-item rendering (e.g., wings, attached effect meshes) allocates `BoneTransform` arrays on the CPU execution stack. Consecutive rendering calls frequently receive the *exact same stack memory address* populated with *different matrix data*.
-- **Rule**: Never use pointer-only comparison (`pTransform == g_pLastTransform`) to skip uploading bone matrix uniform buffers. Updates MUST bump a version stamp (`g_BoneTransformVersion++`), and cache checks must validate both `(ptr, version)` pairs.
+### 1.2 Bone Palette Deduplication Must Compare Content, Not Identity
+- **Gotcha**: Sub-item rendering (weapons, wings, attached effect meshes) shares a single fixed-address scratch buffer (`BoneTransform[MAX_BONES][3][4]` in `ZzzBMD.cpp`) across genuinely different objects. Consecutive rendering calls frequently receive the *exact same memory address* populated with *different matrix data* one call apart.
+- **Rule**: Never use pointer-only comparison (`pTransform == g_pLastTransform`) to skip uploading bone matrix uniform buffers — the same address legitimately carries different content from one call to the next. A version-stamp-plus-pointer scheme doesn't reliably fix this either unless the stamp is *only* bumped when the content actually changes — a stamp bumped unconditionally on every call defeats its own purpose (never dedups, even for genuinely identical consecutive uploads). `BoneUBO::UploadBones()` instead compares the incoming bone-matrix **bytes** directly against a cached snapshot of the last upload: unconditionally correct (no identity/aliasing hazard possible) and still cheap, since the comparison is far smaller than the GPU upload it's deciding whether to skip.
 
 ### 1.3 `TransformCheap` Lazy Materialization & Ambient Global State Snapshotting
 - **Pattern**: `BMD::TransformCheap()` defers CPU vertex skinning calculations until a consumer explicitly requests CPU vertex/normal positions via `EnsureCpuVertices()`.

@@ -68,29 +68,29 @@ In the engine's animation data model, equipped armor items do not run independen
 ```cpp
 // In ZzzBMD.cpp / ZzzCharacter.cpp:
 vec34_t* activeBones = g_pActiveBoneTransform ? g_pActiveBoneTransform : pObject->BoneTransform;
-BoneUBO::Instance().UploadBones(activeBones, MAX_BONES, g_BoneTransformVersion);
+BoneUBO::Instance().UploadBones(activeBones, MAX_BONES);
 ```
 
 1. Before rendering an equipped armor mesh (`bmdArmor`), the character pipeline sets `g_pActiveBoneTransform = characterObject->BoneTransform`.
 2. When `bmdArmor->RenderMesh()` executes, it detects `g_pActiveBoneTransform != nullptr` and uploads the character's active bone matrix palette to `u_Bones`.
 3. Equipped weapons, wings, and mounts (Fenrir, Dark Horse) similarly bind into the active skeleton palette pointer.
 
-### Version-Stamped Deduplication
+### Content-Comparison Deduplication
 
-To avoid redundant GPU buffer uploads (`glBufferSubData`) when consecutive meshes share the identical skeleton:
+To avoid redundant GPU buffer uploads (`glBufferSubData`) when consecutive meshes share the identical skeleton, `BoneUBO::UploadBones()` compares the incoming bone-matrix **bytes** against a cached snapshot of the last upload, and skips the repack + GPU upload entirely when they match:
 
 ```cpp
-void SetActiveBoneTransform(vec34_t* pTransform) {
-    g_pActiveBoneTransform = pTransform;
-    g_BoneTransformVersion++; // Unconditionally bumps global version stamp every call
+void BoneUBO::UploadBones(const void* boneTransforms, int numBones) {
+    // ... clamp numBones, compute srcBytes ...
+    if (m_HasSnapshot && srcBytes == m_LastSourceBytes &&
+        std::memcmp(src, m_LastSourceSnapshot, srcBytes) == 0)
+        return;
+    // ... snapshot + repack + RHI::UpdateUniformBlock ...
 }
 ```
 
-> [!NOTE]
-> `SetActiveBoneTransform()` **does not** guard on pointer comparison. It unconditionally sets the pointer and bumps the version stamp every call. The deduplication logic lives entirely in `BoneUBO::UploadBones(ptr, count, version)`, which skips a GPU buffer upload **only if both** the pointer `ptr` AND the `version` stamp match the values from the previous upload.
-
 > [!CAUTION]
-> **Pointer-Only Caching Hazard**: Pointer-only caching in `UploadBones` would be unsafe because sub-item rendering (e.g., wings) uses **stack-local** matrix arrays allocated at the same stack depth across calls. Two distinct calls could receive the *same memory address* with *different matrix content*. The `version` stamp prevents stale matrix uploads by ensuring identity requires both address AND generation match.
+> **Pointer-Only Caching Hazard**: an earlier version of this dedup compared `(pointer, version)` instead of content, bumping a global version stamp on every `SetActiveBoneTransform()` call. That version stamp turned out to defeat itself — it incremented on every call regardless of whether the pointer changed, so it never matched across a character's own body + equipped armor pieces, and every equipped mesh re-uploaded the full palette redundantly. Switching to a pointer-only check (no version stamp) would have been actively unsafe in the other direction: weapons, wings, and effects all render through a single shared, fixed-address scratch buffer (`BoneTransform[MAX_BONES][3][4]` in `ZzzBMD.cpp`) — the **same pointer** carries genuinely different content from one call to the next (weapon, then wings). Comparing the actual bytes sidesteps both failure modes: it's always correct (no aliasing possible when comparing real data) and correctly skips only the genuinely-redundant case.
 
 ---
 

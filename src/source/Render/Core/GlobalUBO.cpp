@@ -177,5 +177,13 @@ void GlobalUBO::Upload()
     std::memcpy(packed + 192, m_MVP,   64);
     std::memcpy(packed + 256, m_Time,  16);
 
+    // Every setter (SetView/SetProj/SetModel/Push*/Pop*/SetTime) routes through here
+    // unconditionally, including restores (PopModel/PopView) that put back a value already
+    // uploaded moments earlier -- skip the GPU upload when nothing actually changed.
+    if (m_HasUploaded && std::memcmp(packed, m_LastUploaded, sizeof(packed)) == 0)
+        return;
+    std::memcpy(m_LastUploaded, packed, sizeof(packed));
+    m_HasUploaded = true;
+
     RHI::UpdateUniformBlock(m_UBOHandle, packed, sizeof(packed));
 }

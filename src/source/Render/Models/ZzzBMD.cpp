@@ -101,12 +101,10 @@ vec3_t BoundingMax[MAX_BONES];
 
 float  BoneTransform[MAX_BONES][3][4];
 const float (*g_pActiveBoneTransform)[3][4] = nullptr;
-unsigned int g_BoneTransformVersion = 0;
 
 void SetActiveBoneTransform(const float (*ptr)[3][4])
 {
     g_pActiveBoneTransform = ptr;
-    ++g_BoneTransformVersion;
 }
 
 vec3_t VertexTransform[MAX_MESH][MAX_VERTICES];
@@ -1719,11 +1717,11 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
             // Upload active object's bone transformation palette to BoneUBO (Slot 2).
             // Always upload all MAX_BONES (200) matrices because armor items reference character bones > NumBones.
-            // UploadBones() dedups against (pointer, g_BoneTransformVersion) — body + every
-            // equipped armor piece of one character share the same palette and version, so
-            // only the first RenderMesh() call of that group actually re-uploads.
+            // UploadBones() dedups by comparing the actual bone-matrix bytes against the last
+            // upload — body + every equipped armor piece of one character share the same
+            // content, so only the first RenderMesh() call of that group actually re-uploads.
             const void* activeBones = g_pActiveBoneTransform ? (const void*)g_pActiveBoneTransform : (m_pCurrentBoneTransform ? (const void*)m_pCurrentBoneTransform : (const void*)BoneTransform);
-            BoneUBO::Instance().UploadBones(activeBones, MAX_BONES, g_BoneTransformVersion);
+            BoneUBO::Instance().UploadBones(activeBones, MAX_BONES);
 
             GLuint activeTexID = texture ? texture->TextureNumber : 0;
             // GPU skinning world-space placement:
@@ -2393,10 +2391,10 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
         gpuBodyScale  = m_LastTranslate ? BodyScale  : 1.0f;
 
         // Mirrors RenderMesh()'s active-bone-palette resolution (ZzzBMD.cpp ~1498-1500);
-        // UploadBones() dedups on (pointer, g_BoneTransformVersion), so this is cheap even when
-        // RenderMesh() already uploaded the same palette earlier this frame.
+        // UploadBones() dedups by content comparison, so this is cheap even when RenderMesh()
+        // already uploaded the same palette earlier this frame.
         const void* activeBones = g_pActiveBoneTransform ? (const void*)g_pActiveBoneTransform : (m_pCurrentBoneTransform ? (const void*)m_pCurrentBoneTransform : (const void*)BoneTransform);
-        BoneUBO::Instance().UploadBones(activeBones, MAX_BONES, g_BoneTransformVersion);
+        BoneUBO::Instance().UploadBones(activeBones, MAX_BONES);
     }
 
     for (int i = startMesh; i < endMesh; i++)

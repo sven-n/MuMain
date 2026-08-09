@@ -6,12 +6,6 @@
 #include "Render/Sprites/TextureScript.h"
 
 extern const float (*g_pActiveBoneTransform)[3][4];
-// Bumped by every SetActiveBoneTransform() call — lets BoneUBO detect "the pointer is
-// the same address as last upload, but the content underneath it has changed" (e.g. a
-// stack-local BoneTransform array reused at the same call depth for a different linked
-// item, or the shared global BoneTransform[] array reused across different objects).
-// Pointer identity alone is NOT safe to cache on in this codebase — see the call sites.
-extern unsigned int g_BoneTransformVersion;
 void SetActiveBoneTransform(const float (*ptr)[3][4]);
 
 #define MAX_BONES    200

@@ -18,12 +18,14 @@ public:
 
     // Upload bone matrix palette for current character (numBones <= GPU_MAX_BONES).
     // boneTransforms is vec3_t[MAX_BONES][3][4] or vec3_t BoneTransform[MAX_BONES][4].
-    // `version` is g_BoneTransformVersion (ZzzBMD.h) at the time of the call — combined
-    // with the pointer, it lets repeated calls with the same (pointer, version) pair
-    // (e.g. body + every equipped armor piece of one character, all sharing the same
-    // active bone palette) skip the repack + glBufferSubData entirely. Pointer identity
-    // alone is NOT safe here — see SetActiveBoneTransform()'s callers for why.
-    void UploadBones(const void* boneTransforms, int numBones, unsigned int version);
+    // Dedups by comparing the incoming bone-matrix bytes against the last upload, so
+    // repeated calls with identical content (e.g. body + every equipped armor piece of
+    // one character, all sharing the same active bone palette) skip the repack +
+    // glBufferSubData entirely. This is content comparison, not pointer comparison:
+    // several callers (weapons, wings, effects) share a single fixed-address scratch
+    // buffer across genuinely different objects, so the same pointer can carry different
+    // content from one call to the next — only comparing the actual bytes is safe here.
+    void UploadBones(const void* boneTransforms, int numBones);
 
     bool IsCreated() const { return m_UBOHandle.IsValid(); }
 
@@ -37,6 +39,7 @@ private:
     RHI::BufferHandle m_UBOHandle;
     float  m_MatrixBuffer[GPU_MAX_BONES * 16]; // std140 mat4 array (column-major)
 
-    const void*  m_LastUploadedPtr     = nullptr;
-    unsigned int m_LastUploadedVersion = 0xFFFFFFFFu; // sentinel: never matches a real version
+    float  m_LastSourceSnapshot[GPU_MAX_BONES * 12]; // raw source bytes from the last upload
+    size_t m_LastSourceBytes = 0;
+    bool   m_HasSnapshot     = false;
 };

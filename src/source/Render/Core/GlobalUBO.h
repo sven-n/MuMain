@@ -60,6 +60,9 @@ private:
     float m_ViewStack[8][16];
     int   m_ViewStackDepth = 0;
 
+    unsigned char m_LastUploaded[272]; // must match Upload()'s packed buffer size
+    bool m_HasUploaded = false;
+
     void RecomputeMVP();
     void Upload();
 };
