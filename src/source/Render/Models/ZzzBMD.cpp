@@ -1357,6 +1357,11 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     }
 
     bool enableLight = LightEnable;
+    // FIX-549: modulates the bodyLight value fed to BMDMeshShader::Bind() below for the
+    // blendMeshIndex<=-2 branch (Force Wave / MODEL_WAVES-style fade effects). Under Core
+    // Profile, glColor3f() (used further down for this same branch) is intercepted into a
+    // no-op -- the shader never sees the fade, so it must be carried through explicitly here.
+    float blendTintAlpha = 1.0f;
     if (meshIndex == StreamMesh)
     {
         glColor3fv(BodyLight);
@@ -1515,11 +1520,12 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             DisableDepthTest();
         }
 
-        glColor3f(BodyLight[0] * blendMeshAlpha, 
+        glColor3f(BodyLight[0] * blendMeshAlpha,
             BodyLight[1] * blendMeshAlpha,
             BodyLight[2] * blendMeshAlpha);
         //glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
         enableLight = false;
+        blendTintAlpha = blendMeshAlpha;
     }
     else if ((renderFlags & RENDER_TEXTURE) == RENDER_TEXTURE)
     {
@@ -1812,7 +1818,16 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             bool isBright = (renderFlags & RENDER_BRIGHT) != 0;
             bool useLight = !isBright && (LightEnable && meshIndex != StreamMesh);
 
-            BMDMeshShader::Instance().Bind(shaderRenderMode, EnableWave ? blendMeshTextureCoordU : 0.0f, EnableWave ? blendMeshTextureCoordV : 0.0f, activeTexID, mvp, 1, gpuBodyOrigin, gpuBodyScale, wave, chromeTex1ID, specularTint, metalTexID, chromeTex2ID, chromeWave2, chromeLightVecX, chromeLightVecY, m_LastLightPosition, BodyLight, useLight ? 1 : 0, alpha, chromeVariant, chromeTimeTerm);
+            // FIX-549: blendTintAlpha is 1.0 outside the blendMeshIndex<=-2 branch (no-op here),
+            // and blendMeshAlpha inside it -- carries that branch's fade into the shader uniform
+            // since glColor3f() above is a no-op under Core Profile.
+            const float shaderBodyLight[3] = {
+                BodyLight[0] * blendTintAlpha,
+                BodyLight[1] * blendTintAlpha,
+                BodyLight[2] * blendTintAlpha
+            };
+
+            BMDMeshShader::Instance().Bind(shaderRenderMode, EnableWave ? blendMeshTextureCoordU : 0.0f, EnableWave ? blendMeshTextureCoordV : 0.0f, activeTexID, mvp, 1, gpuBodyOrigin, gpuBodyScale, wave, chromeTex1ID, specularTint, metalTexID, chromeTex2ID, chromeWave2, chromeLightVecX, chromeLightVecY, m_LastLightPosition, shaderBodyLight, useLight ? 1 : 0, alpha, chromeVariant, chromeTimeTerm);
 
             const int flatCount  = m_MeshIndexCount[meshIndex];
             const int baseCorner = m_MeshIndexOffset[meshIndex];
