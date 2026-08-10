@@ -120,31 +120,40 @@ layout(location = 2) in vec4 a_Color;
 layout(location = 3) in vec3 a_Normal;
 layout(location = 4) in int  a_BoneIndex;
 
-uniform mat4  u_MVPDraw;     // per-draw MVP from current GL matrix state
-uniform int   u_UseGPUSkin;  // 1 = skin via u_Bones[a_BoneIndex], 0 = pass-through (dynamic VBO)
-uniform int   u_RenderMode;
-uniform float u_WaveOffsetU;
-uniform float u_WaveOffsetV;
-uniform vec3  u_BodyOrigin;  // world-space placement of model root (applied after bone transform)
-uniform float u_BodyScale;   // uniform body scale (applied after bone transform)
-uniform float u_ChromeWave;  // RenderMode 3/4/5: CPU-computed wave term (see BMD::RenderMesh's `wave`)
-uniform float u_ChromeWave2; // RenderMode 3 (variant 1/4) / 6: CPU-computed wave term for the RENDER_CHROME2/6 UV formulas (Wave2s)
-uniform vec2  u_ChromeLightVec; // RenderMode 3 (variant 3) / 7: CPU-computed light vector xy for the RENDER_CHROME5/CHROME4 UV formulas (Lp; z is always 1.0)
-// DXP-20 increment 5: RenderMode 3 covers plain RENDER_CHROME *and* CHROME2/3/5/6/7/METAL — ZzzBMD.cpp's
-// `finalRenderFlags` collapses all of them to RENDER_CHROME, so BMD::RenderMesh's chromeGpuEligible
-// GPU-skinned draw path was already silently taking these variants before this uniform existed, always
-// using the plain-chrome UV formula. u_ChromeVariant selects the CPU-verified per-variant formula
-// (ZzzBMD.cpp's g_chrome[] loop) to match: 0=plain CHROME, 1=CHROME2, 2=CHROME3, 3=CHROME5, 4=CHROME6,
-// 5=CHROME7, 6=METAL/unmatched (same "else" formula the CPU loop falls back to).
-uniform int   u_ChromeVariant;
-uniform float u_ChromeTimeTerm; // RenderMode 3, variant 5 (CHROME7): CPU-computed WorldTime*0.00006 term
-// DXP-20 increment 1: per-vertex lighting moved from BMD::Transform()'s CPU IntensityTransform loop
-// into the u_UseGPUSkin==1 path here. u_LightDir is Transform()'s per-body LightPosition vector;
-// u_BodyLight/u_LightEnable/u_Alpha replicate RenderMesh()'s useLight/BodyLight/alpha exactly.
-uniform vec3  u_LightDir;
-uniform vec3  u_BodyLight;
-uniform int   u_LightEnable;
-uniform float u_Alpha;
+// GLS-09: all non-sampler uniforms consolidated into one std140 UBO (binding slot 6).
+// Field order/offsets match BMDMeshShader.h's BMDFlagsCB byte-for-byte (176 bytes) —
+// don't reorder without updating that struct too.
+layout(std140) uniform BMDFlags {
+    mat4  u_MVPDraw;     // per-draw MVP from current GL matrix state
+    int   u_UseGPUSkin;  // 1 = skin via u_Bones[a_BoneIndex], 0 = pass-through (dynamic VBO)
+    int   u_RenderMode;
+    float u_WaveOffsetU;
+    float u_WaveOffsetV;
+    vec3  u_BodyOrigin;  // world-space placement of model root (applied after bone transform)
+    float u_BodyScale;   // uniform body scale (applied after bone transform)
+    float u_ChromeWave;  // RenderMode 3/4/5: CPU-computed wave term (see BMD::RenderMesh's `wave`)
+    float u_ChromeWave2; // RenderMode 3 (variant 1/4) / 6: CPU-computed wave term for the RENDER_CHROME2/6 UV formulas (Wave2s)
+    vec2  u_ChromeLightVec; // RenderMode 3 (variant 3) / 7: CPU-computed light vector xy for the RENDER_CHROME5/CHROME4 UV formulas (Lp; z is always 1.0)
+    // DXP-20 increment 5: RenderMode 3 covers plain RENDER_CHROME *and* CHROME2/3/5/6/7/METAL — ZzzBMD.cpp's
+    // `finalRenderFlags` collapses all of them to RENDER_CHROME, so BMD::RenderMesh's chromeGpuEligible
+    // GPU-skinned draw path was already silently taking these variants before this uniform existed, always
+    // using the plain-chrome UV formula. u_ChromeVariant selects the CPU-verified per-variant formula
+    // (ZzzBMD.cpp's g_chrome[] loop) to match: 0=plain CHROME, 1=CHROME2, 2=CHROME3, 3=CHROME5, 4=CHROME6,
+    // 5=CHROME7, 6=METAL/unmatched (same "else" formula the CPU loop falls back to).
+    int   u_ChromeVariant;
+    float u_ChromeTimeTerm; // RenderMode 3, variant 5 (CHROME7): CPU-computed WorldTime*0.00006 term
+    float u_Alpha;
+    float u_AlphaRef; // fragment-only; occupies the slot between u_Alpha and u_LightDir per BMDFlagsCB
+    // DXP-20 increment 1: per-vertex lighting moved from BMD::Transform()'s CPU IntensityTransform loop
+    // into the u_UseGPUSkin==1 path here. u_LightDir is Transform()'s per-body LightPosition vector;
+    // u_BodyLight/u_LightEnable replicate RenderMesh()'s useLight/BodyLight exactly.
+    vec3  u_LightDir;
+    int   u_LightEnable;
+    vec3  u_BodyLight;
+    float _pad0;
+    vec3  u_SpecularTint; // RenderMode 4+ only
+    float _pad1;
+};
 
 out vec2 v_UV;
 out vec4 v_Color;
@@ -267,11 +276,34 @@ uniform sampler2D u_Tex;
 uniform sampler2D u_ChromeTex1;   // RenderMode 4+ only
 uniform sampler2D u_MetalTex;     // RenderMode 5+ only
 uniform sampler2D u_ChromeTex2;   // RenderMode 6 only
-uniform vec3      u_SpecularTint; // RenderMode 4+ only
-uniform int       u_RenderMode;
-// Fixed-function alpha test threshold (DXP-01), mirrored from glAlphaFunc/GL_ALPHA_TEST state.
-// -1.0 means alpha test is disabled (no discard); otherwise the GL_GREATER reference value.
-uniform float     u_AlphaRef;
+
+// GLS-09: same BMDFlags block as the vertex shader (identical layout required in every
+// stage that uses it). Only u_RenderMode, u_AlphaRef, and u_SpecularTint are read here;
+// the rest are simply unused in this stage.
+layout(std140) uniform BMDFlags {
+    mat4  u_MVPDraw;
+    int   u_UseGPUSkin;
+    int   u_RenderMode;
+    float u_WaveOffsetU;
+    float u_WaveOffsetV;
+    vec3  u_BodyOrigin;
+    float u_BodyScale;
+    float u_ChromeWave;
+    float u_ChromeWave2;
+    vec2  u_ChromeLightVec;
+    int   u_ChromeVariant;
+    float u_ChromeTimeTerm;
+    float u_Alpha;
+    // Fixed-function alpha test threshold (DXP-01), mirrored from glAlphaFunc/GL_ALPHA_TEST state.
+    // -1.0 means alpha test is disabled (no discard); otherwise the GL_GREATER reference value.
+    float u_AlphaRef;
+    vec3  u_LightDir;
+    int   u_LightEnable;
+    vec3  u_BodyLight;
+    float _pad0;
+    vec3  u_SpecularTint; // RenderMode 4+ only
+    float _pad1;
+};
 
 in vec2 v_UV;
 in vec4 v_Color;
@@ -432,7 +464,8 @@ void BMDMeshShader::CreateGL()
         return;
     }
 
-    // Bind GlobalMatrices uniform block to binding point 0 and BoneMatrices to binding point 1
+    // Bind GlobalMatrices uniform block to binding point 0, BoneMatrices to binding point 2,
+    // and BMDFlags (GLS-09) to binding point 6.
     if (fn_glGetUniformBlockIndex != nullptr && fn_glUniformBlockBinding != nullptr) {
         GLuint globalBlockIdx = fn_glGetUniformBlockIndex(m_Program, "GlobalMatrices");
         if (globalBlockIdx != GL_INVALID_INDEX) {
@@ -442,62 +475,30 @@ void BMDMeshShader::CreateGL()
         if (boneBlockIdx != GL_INVALID_INDEX) {
             fn_glUniformBlockBinding(m_Program, boneBlockIdx, 2);
         }
+        GLuint bmdFlagsBlockIdx = fn_glGetUniformBlockIndex(m_Program, "BMDFlags");
+        if (bmdFlagsBlockIdx != GL_INVALID_INDEX) {
+            fn_glUniformBlockBinding(m_Program, bmdFlagsBlockIdx, 6);
+        }
+    }
+    if (!m_BMDFlagsUBO.IsValid()) {
+        m_BMDFlagsUBO = RHI::CreateUniformBlock(sizeof(BMDFlagsCB), 6);
     }
 
-    // Resolve uniform locations
-    m_LocTex         = fn_glGetUniformLocation(m_Program, "u_Tex");
-    m_LocRenderMode  = fn_glGetUniformLocation(m_Program, "u_RenderMode");
-    m_LocWaveOffsetU = fn_glGetUniformLocation(m_Program, "u_WaveOffsetU");
-    m_LocWaveOffsetV = fn_glGetUniformLocation(m_Program, "u_WaveOffsetV");
-    m_LocMVPDraw     = fn_glGetUniformLocation(m_Program, "u_MVPDraw");
-    m_LocUseGPUSkin  = fn_glGetUniformLocation(m_Program, "u_UseGPUSkin");
-    m_LocBodyOrigin  = fn_glGetUniformLocation(m_Program, "u_BodyOrigin");
-    m_LocBodyScale   = fn_glGetUniformLocation(m_Program, "u_BodyScale");
-    m_LocChromeWave  = fn_glGetUniformLocation(m_Program, "u_ChromeWave");
-    m_LocChromeTex1  = fn_glGetUniformLocation(m_Program, "u_ChromeTex1");
-    m_LocSpecularTint = fn_glGetUniformLocation(m_Program, "u_SpecularTint");
-    m_LocAlphaRef    = fn_glGetUniformLocation(m_Program, "u_AlphaRef");
-    m_LocMetalTex    = fn_glGetUniformLocation(m_Program, "u_MetalTex");
-    m_LocChromeTex2  = fn_glGetUniformLocation(m_Program, "u_ChromeTex2");
-    m_LocChromeWave2 = fn_glGetUniformLocation(m_Program, "u_ChromeWave2");
-    m_LocChromeLightVec = fn_glGetUniformLocation(m_Program, "u_ChromeLightVec");
-    m_LocChromeVariant  = fn_glGetUniformLocation(m_Program, "u_ChromeVariant");
-    m_LocChromeTimeTerm = fn_glGetUniformLocation(m_Program, "u_ChromeTimeTerm");
-    m_LocLightDir    = fn_glGetUniformLocation(m_Program, "u_LightDir");
-    m_LocBodyLight   = fn_glGetUniformLocation(m_Program, "u_BodyLight");
-    m_LocLightEnable = fn_glGetUniformLocation(m_Program, "u_LightEnable");
-    m_LocAlpha       = fn_glGetUniformLocation(m_Program, "u_Alpha");
+    // Resolve sampler uniform locations (the only uniforms left outside the BMDFlags UBO —
+    // GLSL forbids samplers inside uniform blocks).
+    m_LocTex        = fn_glGetUniformLocation(m_Program, "u_Tex");
+    m_LocChromeTex1 = fn_glGetUniformLocation(m_Program, "u_ChromeTex1");
+    m_LocMetalTex   = fn_glGetUniformLocation(m_Program, "u_MetalTex");
+    m_LocChromeTex2 = fn_glGetUniformLocation(m_Program, "u_ChromeTex2");
 
     BindProgram(m_Program);
     if (m_LocTex != -1) fn_glUniform1i(m_LocTex, 0);
-    if (m_LocRenderMode != -1) fn_glUniform1i(m_LocRenderMode, 0);
-    if (m_LocWaveOffsetU != -1) fn_glUniform1f(m_LocWaveOffsetU, 0.0f);
-    if (m_LocWaveOffsetV != -1) fn_glUniform1f(m_LocWaveOffsetV, 0.0f);
-    if (m_LocUseGPUSkin != -1) fn_glUniform1i(m_LocUseGPUSkin, 0);
-    // Default BodyOrigin = (0,0,0), BodyScale = 1.0 (identity, no world transform)
-    const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
-    if (m_LocBodyOrigin != -1 && fn_glUniform3fv) fn_glUniform3fv(m_LocBodyOrigin, 1, zeroOrigin);
-    if (m_LocBodyScale  != -1 && fn_glUniform1f)  fn_glUniform1f(m_LocBodyScale, 1.0f);
-    if (m_LocChromeWave != -1 && fn_glUniform1f)  fn_glUniform1f(m_LocChromeWave, 0.0f);
     if (m_LocChromeTex1 != -1) fn_glUniform1i(m_LocChromeTex1, 1);
     if (m_LocMetalTex != -1) fn_glUniform1i(m_LocMetalTex, 2);
     if (m_LocChromeTex2 != -1) fn_glUniform1i(m_LocChromeTex2, 3);
-    if (m_LocChromeWave2 != -1 && fn_glUniform1f) fn_glUniform1f(m_LocChromeWave2, 0.0f);
-    if (m_LocChromeLightVec != -1 && fn_glUniform2f) fn_glUniform2f(m_LocChromeLightVec, 0.0f, 0.0f);
-    if (m_LocChromeVariant != -1) fn_glUniform1i(m_LocChromeVariant, 0);
-    if (m_LocChromeTimeTerm != -1 && fn_glUniform1f) fn_glUniform1f(m_LocChromeTimeTerm, 0.0f);
-    const float whiteTint[3] = { 1.f, 1.f, 1.f };
-    if (m_LocSpecularTint != -1 && fn_glUniform3fv) fn_glUniform3fv(m_LocSpecularTint, 1, whiteTint);
-    if (m_LocAlphaRef != -1 && fn_glUniform1f) fn_glUniform1f(m_LocAlphaRef, -1.0f);
-    if (m_LocLightDir != -1 && fn_glUniform3fv) fn_glUniform3fv(m_LocLightDir, 1, zeroOrigin);
-    const float whiteLight[3] = { 1.f, 1.f, 1.f };
-    if (m_LocBodyLight != -1 && fn_glUniform3fv) fn_glUniform3fv(m_LocBodyLight, 1, whiteLight);
-    if (m_LocLightEnable != -1) fn_glUniform1i(m_LocLightEnable, 0);
-    if (m_LocAlpha != -1 && fn_glUniform1f) fn_glUniform1f(m_LocAlpha, 1.0f);
     BindProgram(0);
 
-    g_ErrorReport.Write(L"[BMDMeshShader] Created program ID %d (RenderMode loc %d, WaveU loc %d, WaveV loc %d)\r\n",
-                        m_Program, m_LocRenderMode, m_LocWaveOffsetU, m_LocWaveOffsetV);
+    g_ErrorReport.Write(L"[BMDMeshShader] Created program ID %d\r\n", m_Program);
 }
 
 void BMDMeshShader::DestroyGL()
@@ -509,6 +510,10 @@ void BMDMeshShader::DestroyGL()
         if (fn_glDeleteProgram) { fn_glDeleteProgram(m_Program); InvalidateProgramCache(); }
         m_Program = m_VertShader = m_FragShader = 0;
     }
+    if (m_BMDFlagsUBO.IsValid()) {
+        RHI::DestroyUniformBlock(m_BMDFlagsUBO);
+        m_BMDFlagsUBO = {};
+    }
 }
 
 void BMDMeshShader::BindGL(int renderMode, float waveOffsetU, float waveOffsetV, GLuint texID, const float mvp[16], int useGPUSkin, const float bodyOrigin[3], float bodyScale, float chromeWave, GLuint chromeTex1ID, const float specularTint[3], GLuint metalTexID, GLuint chromeTex2ID, float chromeWave2, float chromeLightVecX, float chromeLightVecY, const float lightDir[3], const float bodyLight[3], int lightEnable, float alpha, int chromeVariant, float chromeTimeTerm)
@@ -516,85 +521,78 @@ void BMDMeshShader::BindGL(int renderMode, float waveOffsetU, float waveOffsetV,
     if (m_Program == 0) {
         CreateGL();
     }
-    if (m_Program != 0) {
-        BindProgram(m_Program);
-        SetRenderMode(renderMode);
-        SetWaveOffset(waveOffsetU, waveOffsetV);
-        if (m_LocAlphaRef != -1 && fn_glUniform1f) {
-            fn_glUniform1f(m_LocAlphaRef, g_AlphaRef);
-        }
-        if (m_LocUseGPUSkin != -1) {
-            fn_glUniform1i(m_LocUseGPUSkin, useGPUSkin);
-        }
-        if ((renderMode == 3 || renderMode == 4 || renderMode == 5 || renderMode == 7) && m_LocChromeWave != -1 && fn_glUniform1f) {
-            fn_glUniform1f(m_LocChromeWave, chromeWave);
-        }
-        if ((renderMode == 3 || renderMode == 6) && m_LocChromeWave2 != -1 && fn_glUniform1f) {
-            fn_glUniform1f(m_LocChromeWave2, chromeWave2);
-        }
-        if ((renderMode == 3 || renderMode == 7) && m_LocChromeLightVec != -1 && fn_glUniform2f) {
-            fn_glUniform2f(m_LocChromeLightVec, chromeLightVecX, chromeLightVecY);
-        }
-        if (renderMode == 3 && m_LocChromeVariant != -1) {
-            fn_glUniform1i(m_LocChromeVariant, chromeVariant);
-        }
-        if (renderMode == 3 && m_LocChromeTimeTerm != -1 && fn_glUniform1f) {
-            fn_glUniform1f(m_LocChromeTimeTerm, chromeTimeTerm);
-        }
-        // NOTE: SetTexture() also reassigns the u_Tex sampler uniform to whatever slot it's given
-        // (it's shared/reused for every texture bind, not just u_Tex's own slot 0) — every auxiliary
-        // texture bind below must run BEFORE the base-texture SetTexture(texID, 0) further down, so
-        // u_Tex ends up pointing at slot 0 again. u_ChromeTex1/u_MetalTex/u_ChromeTex2 themselves are
-        // set once, permanently, at Create() time and aren't touched here.
-        if (renderMode == 4 || renderMode == 5 || renderMode == 6 || renderMode == 7) {
-            SetTexture(chromeTex1ID, 1);
-            if (m_LocSpecularTint != -1 && fn_glUniform3fv) {
-                const float whiteTint[3] = { 1.f, 1.f, 1.f };
-                fn_glUniform3fv(m_LocSpecularTint, 1, specularTint ? specularTint : whiteTint);
-            }
-        }
-        if (renderMode == 5 || renderMode == 6 || renderMode == 7) {
-            SetTexture(metalTexID, 2);
-        }
-        if (renderMode == 6 || renderMode == 7) {
-            SetTexture(chromeTex2ID, 3);
-        }
-        if (texID != 0) {
-            SetTexture(texID, 0);
-        }
+    if (m_Program == 0) {
+        return;
+    }
 
-        if (m_LocMVPDraw != -1 && fn_glUniformMatrix4fv) {
-            if (mvp != nullptr) {
-                fn_glUniformMatrix4fv(m_LocMVPDraw, 1, GL_FALSE, mvp);
-            } else {
-                // DXP-07d increment 0, stage 2: no caller currently passes mvp==nullptr (both
-                // ZzzBMD.cpp call sites always supply GetCurrentMVP()'s result), so this branch is
-                // presently unreachable — kept correct and consistent with the primary path's source
-                // (GlobalUBO) rather than left on the old glGetFloatv fallback it can no longer share
-                // a soak history with.
-                fn_glUniformMatrix4fv(m_LocMVPDraw, 1, GL_FALSE, GlobalUBO::Instance().GetMVP());
-            }
-        }
+    BindProgram(m_Program);
 
-        // GPU skinning: apply BodyOrigin/BodyScale so vertices land at world position.
-        // Mirrors BMD::Transform VectorMA(BodyOrigin, BodyScale, bonePos, vertexTransform).
-        if (useGPUSkin) {
-            const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
-            const float* origin = bodyOrigin ? bodyOrigin : zeroOrigin;
-            if (m_LocBodyOrigin != -1 && fn_glUniform3fv) fn_glUniform3fv(m_LocBodyOrigin, 1, origin);
-            if (m_LocBodyScale  != -1 && fn_glUniform1f)  fn_glUniform1f(m_LocBodyScale, bodyScale);
+    // GLS-09: populate the whole BMDFlags UBO unconditionally every call, mirroring
+    // dx-only-port's proven BindD3D11() rather than this function's old per-renderMode/
+    // per-useGPUSkin conditional glUniform* calls. Safe because the shader only ever reads
+    // the fields relevant to the active u_RenderMode/u_UseGPUSkin branch (confirmed against
+    // g_szBMDMeshVert/g_szBMDMeshFrag above) -- whatever an irrelevant field holds doesn't
+    // matter, so there's no need to preserve "previous call's leftover value" semantics.
+    BMDFlagsCB cb = {};
+    if (mvp != nullptr) {
+        memcpy(cb.mvpDraw, mvp, sizeof(cb.mvpDraw));
+    } else {
+        // DXP-07d increment 0, stage 2: no caller currently passes mvp==nullptr (both
+        // ZzzBMD.cpp call sites always supply GetCurrentMVP()'s result), so this branch is
+        // presently unreachable -- kept correct and consistent with the primary path's source
+        // (GlobalUBO) rather than left on the old glGetFloatv fallback it can no longer share
+        // a soak history with.
+        memcpy(cb.mvpDraw, GlobalUBO::Instance().GetMVP(), sizeof(cb.mvpDraw));
+    }
+    cb.useGPUSkin = useGPUSkin;
+    cb.renderMode = renderMode;
+    cb.waveOffsetU = waveOffsetU;
+    cb.waveOffsetV = waveOffsetV;
 
-            // DXP-20: in-shader per-vertex lighting (replaces the CPU LightTransform per-corner
-            // color VBO upload for the GPU-skinned draw path — see BMD::Transform's IntensityTransform
-            // loop and RenderMesh's useLight logic for the CPU-side formulas this mirrors).
-            const float* dir = lightDir ? lightDir : zeroOrigin;
-            const float whiteLight[3] = { 1.f, 1.f, 1.f };
-            const float* light = bodyLight ? bodyLight : whiteLight;
-            if (m_LocLightDir    != -1 && fn_glUniform3fv) fn_glUniform3fv(m_LocLightDir, 1, dir);
-            if (m_LocBodyLight   != -1 && fn_glUniform3fv) fn_glUniform3fv(m_LocBodyLight, 1, light);
-            if (m_LocLightEnable != -1) fn_glUniform1i(m_LocLightEnable, lightEnable);
-            if (m_LocAlpha       != -1 && fn_glUniform1f) fn_glUniform1f(m_LocAlpha, alpha);
-        }
+    static const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
+    static const float whiteLight[3] = { 1.f, 1.f, 1.f };
+    static const float whiteTint[3]  = { 1.f, 1.f, 1.f };
+
+    // GPU skinning: BodyOrigin/BodyScale so vertices land at world position (mirrors
+    // BMD::Transform VectorMA(BodyOrigin, BodyScale, bonePos, vertexTransform)), plus
+    // DXP-20's in-shader per-vertex lighting (BMD::Transform's IntensityTransform /
+    // RenderMesh's useLight, ported to GLSL -- see the vertex shader above).
+    memcpy(cb.bodyOrigin, bodyOrigin ? bodyOrigin : zeroOrigin, sizeof(cb.bodyOrigin));
+    cb.bodyScale = bodyScale;
+    cb.chromeWave = chromeWave;
+    cb.chromeWave2 = chromeWave2;
+    cb.chromeLightVec[0] = chromeLightVecX;
+    cb.chromeLightVec[1] = chromeLightVecY;
+    cb.chromeVariant = chromeVariant;
+    cb.chromeTimeTerm = chromeTimeTerm;
+    cb.alpha = alpha;
+    cb.alphaRef = g_AlphaRef; // was always set unconditionally in the old code too
+    memcpy(cb.lightDir, lightDir ? lightDir : zeroOrigin, sizeof(cb.lightDir));
+    cb.lightEnable = lightEnable;
+    memcpy(cb.bodyLight, bodyLight ? bodyLight : whiteLight, sizeof(cb.bodyLight));
+    memcpy(cb.specularTint, specularTint ? specularTint : whiteTint, sizeof(cb.specularTint));
+
+    if (m_BMDFlagsUBO.IsValid()) {
+        RHI::UpdateUniformBlock(m_BMDFlagsUBO, &cb, sizeof(cb));
+    }
+
+    // Sampler binds -- unchanged, samplers can't live in a UBO. NOTE: SetTexture() also
+    // reassigns the u_Tex sampler uniform to whatever slot it's given (it's shared/reused
+    // for every texture bind, not just u_Tex's own slot 0) -- every auxiliary texture bind
+    // below must run BEFORE the base-texture SetTexture(texID, 0) further down, so u_Tex
+    // ends up pointing at slot 0 again. u_ChromeTex1/u_MetalTex/u_ChromeTex2 themselves are
+    // set once, permanently, at Create() time and aren't touched here.
+    if (renderMode == 4 || renderMode == 5 || renderMode == 6 || renderMode == 7) {
+        SetTexture(chromeTex1ID, 1);
+    }
+    if (renderMode == 5 || renderMode == 6 || renderMode == 7) {
+        SetTexture(metalTexID, 2);
+    }
+    if (renderMode == 6 || renderMode == 7) {
+        SetTexture(chromeTex2ID, 3);
+    }
+    if (texID != 0) {
+        SetTexture(texID, 0);
     }
 }
 
@@ -603,23 +601,6 @@ void BMDMeshShader::SetTexture(GLuint texID, int slot)
     BindTexture2D(slot, texID);
     if (m_LocTex != -1 && fn_glUniform1i) {
         fn_glUniform1i(m_LocTex, slot);
-    }
-}
-
-void BMDMeshShader::SetRenderMode(int mode)
-{
-    if (m_LocRenderMode != -1 && fn_glUniform1i) {
-        fn_glUniform1i(m_LocRenderMode, mode);
-    }
-}
-
-void BMDMeshShader::SetWaveOffset(float offsetU, float offsetV)
-{
-    if (m_LocWaveOffsetU != -1 && fn_glUniform1f) {
-        fn_glUniform1f(m_LocWaveOffsetU, offsetU);
-    }
-    if (m_LocWaveOffsetV != -1 && fn_glUniform1f) {
-        fn_glUniform1f(m_LocWaveOffsetV, offsetV);
     }
 }
 

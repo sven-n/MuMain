@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "Render/RHI/RHI.h"
 
 // BMDMeshShader handles 3D character, monster, item, and map meshes
 class BMDMeshShader {
@@ -14,8 +15,6 @@ public:
     void Unbind();
 
     void SetTexture(GLuint texID, int slot = 0);
-    void SetRenderMode(int mode);
-    void SetWaveOffset(float offsetU, float offsetV);
 
     GLuint GetProgram() const { return m_Program; }
     bool IsCreated() const { return m_Program != 0; }
@@ -35,26 +34,39 @@ private:
     GLuint m_VertShader = 0;
     GLuint m_FragShader = 0;
 
-    GLint m_LocTex         = -1;
-    GLint m_LocRenderMode  = -1;
-    GLint m_LocWaveOffsetU = -1;
-    GLint m_LocWaveOffsetV = -1;
-    GLint m_LocMVPDraw     = -1;  // per-draw MVP from GL matrix state (overrides UBO for inventory)
-    GLint m_LocUseGPUSkin  = -1;  // 1 = skin via u_Bones[a_BoneIndex], 0 = pass-through
-    GLint m_LocBodyOrigin  = -1;  // GPU skinning: world-space placement origin
-    GLint m_LocBodyScale   = -1;  // GPU skinning: uniform body scale
-    GLint m_LocChromeWave  = -1;  // RenderMode 3 (chrome): CPU-computed wave term, see BMD::RenderMesh's `wave`
-    GLint m_LocChromeTex1  = -1;  // RenderMode 4+ (item specular): sampler, "Chrome1" texture (BITMAP_CHROME)
-    GLint m_LocSpecularTint = -1; // RenderMode 4+: per-item tint (CItemSpecularShader::GetSpecularTint())
-    GLint m_LocAlphaRef    = -1;  // DXP-01: fixed-function alpha test threshold mirror
-    GLint m_LocMetalTex    = -1;  // RenderMode 5+ (item specular tier 2+, CHROME_METAL/FULL_SPECULAR): static MatCap sampler (BITMAP_SHINY)
-    GLint m_LocChromeTex2  = -1;  // RenderMode 6/7 (item specular tier 3/4): animated sampler (BITMAP_CHROME2)
-    GLint m_LocChromeWave2 = -1;  // RenderMode 6: CPU-computed wave term for the RENDER_CHROME2 UV formula (see ZzzBMD.cpp's Wave2s)
-    GLint m_LocChromeLightVec = -1; // RenderMode 7: CPU-computed light vector for the RENDER_CHROME4 UV formula (see ZzzBMD.cpp's Lp)
-    GLint m_LocChromeVariant  = -1; // DXP-20 inc5: RenderMode 3 sub-select for CHROME2/3/5/6/7/METAL formulas
-    GLint m_LocChromeTimeTerm = -1; // DXP-20 inc5: RenderMode 3 variant 5 (CHROME7) WorldTime*0.00006 term
-    GLint m_LocLightDir    = -1;  // DXP-20: GPU skinning in-shader lighting — BMD::Transform's per-body LightPosition
-    GLint m_LocBodyLight   = -1;  // DXP-20: flat/base lighting color (BMD::BodyLight)
-    GLint m_LocLightEnable = -1;  // DXP-20: 1 = apply per-vertex lighting, 0 = flat u_BodyLight (mirrors RenderMesh's useLight)
-    GLint m_LocAlpha       = -1;  // DXP-20: replaces the per-corner alpha the color VBO used to carry
+    GLint m_LocTex        = -1;
+    GLint m_LocChromeTex1 = -1; // RenderMode 4+ (item specular): sampler, "Chrome1" texture (BITMAP_CHROME)
+    GLint m_LocMetalTex   = -1; // RenderMode 5+ (item specular tier 2+, CHROME_METAL/FULL_SPECULAR): static MatCap sampler (BITMAP_SHINY)
+    GLint m_LocChromeTex2 = -1; // RenderMode 6/7 (item specular tier 3/4): animated sampler (BITMAP_CHROME2)
+
+    // GLS-09: all non-sampler BMDMeshShader uniforms, consolidated into one std140 UBO
+    // (binding slot 6) instead of ~18 discrete glUniform* calls per draw. Field order/
+    // offsets copied verbatim from dx-only-port's already-shipped, static_assert-verified
+    // D3D11 BMDFlagsCB (BMDMeshShader.cpp:673-696 on that branch) so a future merge of that
+    // branch's D3D11 backend can share this exact layout instead of reconciling two.
+    struct BMDFlagsCB {
+        float   mvpDraw[16];
+        int32_t useGPUSkin;
+        int32_t renderMode;
+        float   waveOffsetU;
+        float   waveOffsetV;
+        float   bodyOrigin[3];
+        float   bodyScale;
+        float   chromeWave;
+        float   chromeWave2;
+        float   chromeLightVec[2];
+        int32_t chromeVariant;
+        float   chromeTimeTerm;
+        float   alpha;
+        float   alphaRef;
+        float   lightDir[3];
+        int32_t lightEnable;
+        float   bodyLight[3];
+        float   _pad0;
+        float   specularTint[3];
+        float   _pad1;
+    };
+    static_assert(sizeof(BMDFlagsCB) == 176, "BMDFlagsCB must match the GLSL BMDFlags block layout byte-for-byte");
+
+    RHI::BufferHandle m_BMDFlagsUBO;
 };
