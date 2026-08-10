@@ -235,6 +235,14 @@ void UpdateUniformBlock(BufferHandle handle, const void* data, size_t sizeBytes)
     // Whole-block update, per the header contract -- callers keep their own dirty-checking.
     if (!handle.IsValid() || !LoadBufferGLFunctions()) return;
     fn_glBindBuffer(GL_UNIFORM_BUFFER, handle.id);
+    // GLS-08: orphan the previous GPU allocation before writing, so the driver hands back a
+    // fresh, un-synchronized memory block instead of possibly stalling the CPU until the GPU
+    // finishes reading the old contents from a draw call still in flight -- matches the D3D11
+    // backend's Map(WRITE_DISCARD) semantics that BoneUBO::UploadBones()'s comment already
+    // documents as this function's implicit contract. Safe because every caller (GlobalUBO/
+    // SceneUBO/BoneUBO/BMDMeshShader's BMDFlagsCB) fully repacks and uploads its whole buffer
+    // every call -- no partial-write caller exists that this could break.
+    fn_glBufferData(GL_UNIFORM_BUFFER, (GLsizeiptr)sizeBytes, nullptr, GL_DYNAMIC_DRAW);
     fn_glBufferSubData(GL_UNIFORM_BUFFER, 0, (GLsizeiptr)sizeBytes, data);
     fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
