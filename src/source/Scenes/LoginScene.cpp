@@ -29,6 +29,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "Core/Utilities/FrameProfiler.h"
 
 // External declarations
 extern int DeleteGuildIndex;
@@ -407,21 +408,51 @@ bool NewRenderLogInScene(HDC hDC)
     // don't restrict the render loop.
     ResetFrustrumBoundsFullTerrain();
 
+    // DXP-15 increment 3: world rendering stays stubbed under D3D11 (accepted scope per that
+    // task's spec) -- not because it draws black/wrong, but because RenderCharactersClient/
+    // RenderObjects/etc. are genuinely unported legacy code (raw glBegin/glDrawElements
+    // throughout, confirmed by grep -- DXP-16+'s job), reached unconditionally here even on the
+    // very first login frame. Guarding the whole block was the difference between "black world,
+    // login screen renders" and "access violation before the first frame completes" (confirmed
+    // by runtime test: both Debug and Release crashed here, log cutting off right after "Login
+    // Scene init success").
+    // DXP-16 increment 1: RenderTerrain is no longer part of that unported set -- terrain now
+    // has a real D3D11 path (ZzzLodTerrain.cpp/TerrainShader.cpp) -- so it moves outside the
+    // gate and runs on both backends.
+    // DXP-16 increment 2: RenderObjects() (BMD static world meshes) joins it -- ZzzBMD.cpp's
+    // static-mesh draw paths are real on D3D11 now too.
+    // DXP-16 increment 3: RenderCharactersClient()/RenderMount() join it too -- both funnel
+    // through BMD::RenderMesh()'s already-D3D11-capable GPU-skin/CPU-fallback paths (RenderMount
+    // -> RenderObject(), the same function RenderObjects() already uses). The scattered raw
+    // glColor*() calls in ZzzObject.cpp's item/wing/cape special-casing are now routed safely
+    // through GLColorIntercept.h's D3D11 check instead of firing real GL with no context.
+    // Everything else stays gated, unchanged (RenderJoints/RenderEffects/etc. still genuinely
+    // unported legacy GL).
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
-        RenderTerrain(false);
-        RenderObjects();
-        RenderCharactersClient();
-        RenderMount();
+        // Login/character-select tour scene reuses MainScene's render passes but previously ran
+        // them unwrapped, so the debug overlay's per-pass breakdown (MainScene.cpp) read all-zero
+        // here regardless of actual cost -- wrapping them the same way surfaces where frame time
+        // actually goes on this screen too (D3D11 Debug intro-scene fps investigation).
+        { FRAME_PROFILE(Terrain);    RenderTerrain(false); }
+        { FRAME_PROFILE(Objects);    RenderObjects(); }
+        { FRAME_PROFILE(Characters); RenderCharactersClient(); }
+        { FRAME_PROFILE(Objects);    RenderMount(); }
 
-        RenderJoints();
-        RenderEffects();
-        CheckSprites();
-        RenderLeaves();
-        RenderBoids();
-        RenderObjects_AfterCharacter();
-        ThePetProcess().RenderPets();
+        if (g_RenderBackend != RenderBackend::D3D11)
+        {
+            FRAME_PROFILE(Effects);
+            RenderJoints();
+            RenderEffects();
+            CheckSprites();
+            RenderLeaves();
+            RenderBoids();
+            RenderObjects_AfterCharacter();
+            ThePetProcess().RenderPets();
+        }
     }
+
+    FrameProfiler::Scope _uiProf(FrameProfiler::Pass::UI);
 
     BeginSprite();
     RenderSprites();

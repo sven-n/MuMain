@@ -3,6 +3,10 @@
 #include "Render/Core/BindState.h"
 #include "Render/Core/RenderConfig.h"
 #include "Core/Utilities/Log/ErrorReport.h"
+#ifdef RHI_D3D11_AVAILABLE
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#endif
 #include <cstdint>
 #include <cstring>
 
@@ -133,6 +137,221 @@ void main()
 }
 )";
 
+// DXP-14 increment 4 -- HLSL port, same column_major + mul(M,v) convention as the other 3
+// shaders. Only the CPU-path (a_Pos already world-space) is ported -- see this file's header
+// comment for why the GLSL's a_BoneIndex/bone-skinning branch isn't part of the D3D11 twin yet.
+static const char* g_szPlanarVertHLSL = R"(
+// The GLSL shader's loose uniforms have no HLSL non-block-uniform equivalent -- packed into one
+// cbuffer instead (RHI slot 7: 0=GlobalMatrices, 1=SceneData, 2=BoneUBO, 3=DynamicLights
+// reserved, 4=Passthrough's PassFlags, 5=Terrain's TerrainFlags, 6=BMDMesh's BMDFlags).
+// u_UseGPUSkin/u_SkinOrigin/u_SkinScale are carried for cbuffer-layout parity with the GLSL twin
+// (and so a future DrawGPUSkinned D3D11 path can reuse this same cbuffer) but always read as
+// 0/unused this increment -- DrawGPUSkinned stays GL-only, see the .cpp's D3D11 Draw().
+cbuffer ShadowFlags : register(b7)
+{
+    column_major matrix u_MVP;
+    float3 u_BodyOrigin;
+    float  u_Sx;
+    float  u_Sy;
+    float  u_ShadowAlpha;
+    int    u_UseGPUSkin;
+    float  _shadowPad0;
+    float3 u_SkinOrigin;
+    float  u_SkinScale;
+};
+
+struct VSInput
+{
+    float3 a_Pos : POSITION;
+};
+
+struct VSOutput
+{
+    float4 pos : SV_POSITION;
+};
+
+VSOutput main(VSInput input)
+{
+    VSOutput o;
+
+    // D3D11 CPU-path only this increment: a_Pos is already a fully world-space
+    // VertexTransform position (see the GLSL twin's else branch).
+    float3 worldPos = input.a_Pos;
+
+    float3 rel = worldPos - u_BodyOrigin;
+
+    float denom = rel.z - u_Sy;
+    float skewX = (abs(denom) > 0.001) ? (rel.z * (rel.x + u_Sx) / denom) : 0.0;
+
+    float4 projPos;
+    projPos.x = u_BodyOrigin.x + rel.x + skewX;
+    projPos.y = u_BodyOrigin.y + rel.y;
+    projPos.z = u_BodyOrigin.z + 5.0;
+    projPos.w = 1.0;
+
+    o.pos = mul(u_MVP, projPos);
+    return o;
+}
+)";
+
+// DXP-21 part 2: GPU-skinned twin of g_szPlanarVertHLSL, a separate VS entry point rather than a
+// branch inside the CPU-path one (see PlanarShadowShader.h class comment for why: this VS's
+// input signature declares a_BoneIndex, which has no matching element in the CPU path's
+// PosOnly-layout descriptor array). Bound with RHI::VertexLayout::BMDMesh -- BMDMeshShader is
+// that layout's bytecode producer, this VS's inputs are a strict subset of what BMDMesh already
+// provides, so no RegisterVertexShaderBytecode call is needed here. Reads the same slot-7
+// ShadowFlags cbuffer and slot-2 BoneMatrices cbuffer as the CPU-path VS / BMDMeshShader.
+static const char* g_szPlanarVertGPUSkinHLSL = R"(
+cbuffer ShadowFlags : register(b7)
+{
+    column_major matrix u_MVP;
+    float3 u_BodyOrigin;
+    float  u_Sx;
+    float  u_Sy;
+    float  u_ShadowAlpha;
+    int    u_UseGPUSkin;
+    float  _shadowPad0;
+    float3 u_SkinOrigin;
+    float  u_SkinScale;
+};
+
+cbuffer BoneMatrices : register(b2)
+{
+    column_major matrix u_Bones[200];
+};
+
+// DXP-21 part 2 fix (2026-08-05): must declare the SAME fields in the SAME order as
+// BMDMeshShader's VSInput (POSITION, TEXCOORD0, COLOR0, NORMAL, BLENDINDICES0), even though this
+// VS only reads a_Pos/a_BoneIndex -- CreateInputLayout (RHI_D3D11.cpp's EnsureInputLayout) builds
+// VertexLayout::BMDMesh's ID3D11InputLayout from BMDMeshShader's bytecode, which locks in ITS
+// compiler-assigned hardware input registers per semantic (POSITION->v0, TEXCOORD0->v1,
+// COLOR0->v2, NORMAL->v3, BLENDINDICES0->v4). A VS declaring only a subset in a different order
+// gets its OWN independent register assignment from the HLSL compiler (here: POSITION->v0,
+// BLENDINDICES0->v1) -- IASetInputLayout doesn't re-validate against whichever VS is bound, so at
+// Draw() time the layout keeps feeding BLENDINDICES data into v4 while this shader reads v1,
+// silently pulling garbage. Root cause of both the original "shadow to infinity" corruption and
+// the heap-corruption crash this task hit previously (confirmed via the D3D11 debug layer:
+// "Semantic 'BLENDINDICES' is defined for mismatched hardware registers between the output stage
+// and input stage" -- a graceful, well-defined validation error on real hardware, not something
+// that should have crashed at all with the debug layer off; the unused fields below cost nothing
+// at runtime, they just need to exist so the compiler's register numbering lines up).
+struct VSInput
+{
+    float3 a_Pos       : POSITION;
+    float2 a_UV        : TEXCOORD0;   // unused, present only to match BMDMeshShader's register layout
+    float4 a_Color     : COLOR0;      // unused, present only to match BMDMeshShader's register layout
+    float3 a_Normal    : NORMAL;      // unused, present only to match BMDMeshShader's register layout
+    int    a_BoneIndex : BLENDINDICES0;
+};
+
+struct VSOutput
+{
+    float4 pos : SV_POSITION;
+};
+
+VSOutput main(VSInput input)
+{
+    VSOutput o;
+
+    // Ported 1:1 from the GLSL twin's u_UseGPUSkin branch -- mirrors BMDMeshShader's own
+    // GPU-skin math (u_Bones[a_BoneIndex] * restPos, then u_SkinOrigin + u_SkinScale * that).
+    float3 worldPos;
+    if (input.a_BoneIndex >= 0 && input.a_BoneIndex < 200)
+    {
+        float4 bonePos = mul(u_Bones[input.a_BoneIndex], float4(input.a_Pos, 1.0));
+        worldPos = u_SkinOrigin + u_SkinScale * bonePos.xyz;
+    }
+    else
+    {
+        worldPos = input.a_Pos;
+    }
+
+    float3 rel = worldPos - u_BodyOrigin;
+
+    float denom = rel.z - u_Sy;
+    float skewX = (abs(denom) > 0.001) ? (rel.z * (rel.x + u_Sx) / denom) : 0.0;
+
+    float4 projPos;
+    projPos.x = u_BodyOrigin.x + rel.x + skewX;
+    projPos.y = u_BodyOrigin.y + rel.y;
+    projPos.z = u_BodyOrigin.z + 5.0;
+    projPos.w = 1.0;
+
+    o.pos = mul(u_MVP, projPos);
+    return o;
+}
+)";
+
+static const char* g_szPlanarFragHLSL = R"(
+cbuffer ShadowFlags : register(b7)
+{
+    column_major matrix u_MVP;
+    float3 u_BodyOrigin;
+    float  u_Sx;
+    float  u_Sy;
+    float  u_ShadowAlpha;
+    int    u_UseGPUSkin;
+    float  _shadowPad0;
+    float3 u_SkinOrigin;
+    float  u_SkinScale;
+};
+
+float4 main() : SV_TARGET
+{
+    return float4(0.0, 0.0, 0.0, u_ShadowAlpha);
+}
+)";
+
+#ifdef RHI_D3D11_AVAILABLE
+namespace {
+    bool CompileHLSL(const char* source, const char* entryPoint, const char* target, ID3DBlob** outBlob)
+    {
+        ID3DBlob* errorBlob = nullptr;
+        UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+        flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+        const HRESULT hr = D3DCompile(source, strlen(source), nullptr, nullptr, nullptr,
+            entryPoint, target, flags, 0, outBlob, &errorBlob);
+        if (FAILED(hr))
+        {
+            if (errorBlob)
+            {
+                g_ErrorReport.Write(L"[PlanarShadowShader][D3D11] %hs compile error: %hs\r\n",
+                    entryPoint, static_cast<const char*>(errorBlob->GetBufferPointer()));
+                errorBlob->Release();
+            }
+            else
+            {
+                g_ErrorReport.Write(L"[PlanarShadowShader][D3D11] %hs compile failed, hr=0x%08lX\r\n",
+                    entryPoint, static_cast<unsigned long>(hr));
+            }
+            return false;
+        }
+        if (errorBlob) errorBlob->Release(); // warnings only
+        return true;
+    }
+
+    // Field order matches the ShadowFlags cbuffer above byte-for-byte (same hand-laid-out
+    // 16-byte-row convention as BMDFlagsCB in BMDMeshShader.cpp).
+    struct ShadowFlagsCB
+    {
+        float   mvp[16];
+        float   bodyOrigin[3];
+        float   sx;
+        float   sy;
+        float   shadowAlpha;
+        int32_t useGPUSkin;
+        float   _pad0;
+        float   skinOrigin[3];
+        float   skinScale;
+    };
+    static_assert(sizeof(ShadowFlagsCB) == 112, "ShadowFlagsCB must match the HLSL ShadowFlags cbuffer layout byte-for-byte");
+}
+#endif // RHI_D3D11_AVAILABLE -- ID3DBlob/D3DCompile aren't declared without <d3dcompiler.h>
+       // (guarded above with the same macro); this block would fail to compile on non-Windows
+       // otherwise. (Upstream's own retrofit missed this spot -- fixed here instead of copied.)
+
 CPlanarShadowShader& CPlanarShadowShader::Instance()
 {
     static CPlanarShadowShader s_instance;
@@ -262,31 +481,70 @@ void CPlanarShadowShader::DestroyBuffers()
 
 bool CPlanarShadowShader::Init()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) return InitD3D11();
     return InitGL();
 }
 
 void CPlanarShadowShader::Shutdown()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { ShutdownD3D11(); return; }
     ShutdownGL();
 }
 
 bool CPlanarShadowShader::Begin(const float* bodyOrigin, const float mvp[16], float sx, float sy, float alpha)
 {
+    if (g_RenderBackend == RenderBackend::D3D11) return BeginD3D11(bodyOrigin, mvp, sx, sy, alpha);
     return BeginGL(bodyOrigin, mvp, sx, sy, alpha);
 }
 
 void CPlanarShadowShader::End()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { EndD3D11(); return; }
     EndGL();
 }
 
 void CPlanarShadowShader::Draw(const float* vertices, int vertexCount)
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { DrawD3D11(vertices, vertexCount); return; }
     DrawGL(vertices, vertexCount);
 }
 
-void CPlanarShadowShader::DrawGPUSkinned(GLuint vao, int baseCorner, int vertexCount, const float* skinOrigin, float skinScale)
+void CPlanarShadowShader::DrawGPUSkinned(GLuint vao, RHI::BufferHandle d3dVB, int baseCorner, int vertexCount, const float* skinOrigin, float skinScale)
 {
+    // DXP-21 part 2 retry (2026-08-05): real D3D11 draw. See ZzzBMD.cpp's call-site comment for
+    // the pattern this mirrors. Swaps VSSetShader to the GPU-skin VS for this one draw, then
+    // restores the CPU-path VS so any subsequent Draw() call in the same Begin/End session (mixed
+    // GPU-skin/CPU-fallback meshes within one shadow batch) still uses the right shader.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        if (!m_bActive || !d3dVB.IsValid() || vertexCount <= 0 || !m_D3DVertexShaderGPUSkin) return;
+
+        ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+        if (!ctx) return;
+
+        const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
+        const float* origin = skinOrigin ? skinOrigin : zeroOrigin;
+
+        ShadowFlagsCB cb = {};
+        memcpy(cb.mvp, m_D3DCachedMVP, sizeof(cb.mvp));
+        memcpy(cb.bodyOrigin, m_D3DCachedBodyOrigin, sizeof(cb.bodyOrigin));
+        cb.sx = m_D3DCachedSx;
+        cb.sy = m_D3DCachedSy;
+        cb.shadowAlpha = m_D3DCachedAlpha;
+        cb.useGPUSkin = 1;
+        memcpy(cb.skinOrigin, origin, sizeof(cb.skinOrigin));
+        cb.skinScale = skinScale;
+        RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
+
+        ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShaderGPUSkin), nullptr, 0);
+
+        RHI::BindVertexBuffer(d3dVB, RHI::VertexLayout::BMDMesh);
+        RHI::Draw(RHI::Topology::TriangleList, static_cast<uint32_t>(vertexCount), static_cast<uint32_t>(baseCorner));
+
+        ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShader), nullptr, 0);
+        return;
+    }
+
     if (!m_bActive || vao == 0 || vertexCount <= 0) return;
 
     const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
@@ -382,3 +640,161 @@ void CPlanarShadowShader::DrawGL(const float* vertices, int vertexCount)
     BindVAO(0);
 }
 
+#ifdef RHI_D3D11_AVAILABLE
+bool CPlanarShadowShader::InitD3D11()
+{
+    if (m_bInitialized) return m_bSupported;
+    m_bInitialized = true;
+    m_bSupported   = false;
+
+    ID3D11Device* device = static_cast<ID3D11Device*>(RHI::GetD3D11Device());
+    if (!device) return false;
+
+    ID3DBlob* vsBlob = nullptr;
+    ID3DBlob* psBlob = nullptr;
+    if (!CompileHLSL(g_szPlanarVertHLSL, "main", "vs_5_0", &vsBlob)) return false;
+    if (!CompileHLSL(g_szPlanarFragHLSL, "main", "ps_5_0", &psBlob)) { vsBlob->Release(); return false; }
+
+    ID3D11VertexShader* vs = nullptr;
+    if (FAILED(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vs)))
+    {
+        g_ErrorReport.Write(L"[PlanarShadowShader][D3D11] CreateVertexShader failed\r\n");
+        vsBlob->Release(); psBlob->Release();
+        return false;
+    }
+    ID3D11PixelShader* ps = nullptr;
+    if (FAILED(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &ps)))
+    {
+        g_ErrorReport.Write(L"[PlanarShadowShader][D3D11] CreatePixelShader failed\r\n");
+        vs->Release(); vsBlob->Release(); psBlob->Release();
+        return false;
+    }
+
+    // Registers this shader's bytecode as the PosOnly layout's signature source -- RHI_D3D11
+    // needs real VS bytecode to build the matching ID3D11InputLayout. PlanarShadowShader is
+    // PosOnly's only producer today (matches RHI.h's design intent for this layout).
+    RHI::RegisterVertexShaderBytecode(RHI::VertexLayout::PosOnly, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize());
+    vsBlob->Release();
+    psBlob->Release();
+
+    // DXP-21 part 2: DrawGPUSkinned's D3D11 VS. Bound with VertexLayout::BMDMesh, whose input
+    // layout is registered by BMDMeshShader -- deliberately NOT re-registered here (see class
+    // comment): this VS's a_Pos/a_BoneIndex inputs are a strict subset of what that layout
+    // already provides, and re-registering would just churn RHI_D3D11's cached ID3D11InputLayout
+    // for no behavior change.
+    ID3DBlob* vsGpuSkinBlob = nullptr;
+    if (!CompileHLSL(g_szPlanarVertGPUSkinHLSL, "main", "vs_5_0", &vsGpuSkinBlob))
+    {
+        vs->Release(); ps->Release();
+        return false;
+    }
+    ID3D11VertexShader* vsGpuSkin = nullptr;
+    if (FAILED(device->CreateVertexShader(vsGpuSkinBlob->GetBufferPointer(), vsGpuSkinBlob->GetBufferSize(), nullptr, &vsGpuSkin)))
+    {
+        g_ErrorReport.Write(L"[PlanarShadowShader][D3D11] CreateVertexShader (GPU-skin) failed\r\n");
+        vsGpuSkinBlob->Release();
+        vs->Release(); ps->Release();
+        return false;
+    }
+    vsGpuSkinBlob->Release();
+
+    m_D3DVertexShader = vs;
+    m_D3DPixelShader = ps;
+    m_D3DVertexShaderGPUSkin = vsGpuSkin;
+    m_D3DFlagsCBuffer = RHI::CreateUniformBlock(sizeof(ShadowFlagsCB), 7);
+
+    // Sized for a reasonably busy shadow batch, same capacity as the GL path's m_VBOCapacity;
+    // DrawD3D11 grows it on demand via RHI::UpdateBuffer's own grow-and-recreate policy.
+    m_D3DVBOCapacity = 4096 * 3 * sizeof(float);
+    m_D3DVBO = RHI::CreateVertexBuffer(nullptr, m_D3DVBOCapacity, RHI::BufferUsage::Dynamic);
+
+    m_bSupported = true;
+    g_ErrorReport.Write(L"[PlanarShadowShader][D3D11] Compiled + linked, ShadowFlags cbuffer at slot 7\r\n");
+    return true;
+}
+
+void CPlanarShadowShader::ShutdownD3D11()
+{
+    if (m_D3DVBO.IsValid()) { RHI::DestroyBuffer(m_D3DVBO); m_D3DVBO = {}; }
+    if (m_D3DFlagsCBuffer.IsValid()) { RHI::DestroyUniformBlock(m_D3DFlagsCBuffer); m_D3DFlagsCBuffer = {}; }
+    if (m_D3DPixelShader)  { static_cast<ID3D11PixelShader*>(m_D3DPixelShader)->Release();   m_D3DPixelShader = nullptr; }
+    if (m_D3DVertexShader) { static_cast<ID3D11VertexShader*>(m_D3DVertexShader)->Release(); m_D3DVertexShader = nullptr; }
+    if (m_D3DVertexShaderGPUSkin) { static_cast<ID3D11VertexShader*>(m_D3DVertexShaderGPUSkin)->Release(); m_D3DVertexShaderGPUSkin = nullptr; }
+    m_D3DVBOCapacity = 0;
+    m_bSupported = false;
+    m_bActive = false;
+}
+
+bool CPlanarShadowShader::BeginD3D11(const float* bodyOrigin, const float mvp[16], float sx, float sy, float alpha)
+{
+    if (!IsSupported() || !m_D3DVertexShader || !m_D3DPixelShader) return false;
+
+    ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+    if (!ctx) return false;
+
+    m_bActive = true;
+    ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShader), nullptr, 0);
+    ctx->PSSetShader(static_cast<ID3D11PixelShader*>(m_D3DPixelShader), nullptr, 0);
+
+    ShadowFlagsCB cb = {};
+    memcpy(cb.mvp, mvp, sizeof(cb.mvp));
+    const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
+    memcpy(cb.bodyOrigin, bodyOrigin ? bodyOrigin : zeroOrigin, sizeof(cb.bodyOrigin));
+    cb.sx = sx;
+    cb.sy = sy;
+    cb.shadowAlpha = alpha;
+    cb.useGPUSkin = 0; // CPU-path VS ignores this field entirely -- see g_szPlanarVertHLSL
+    memcpy(cb.skinOrigin, zeroOrigin, sizeof(cb.skinOrigin));
+    cb.skinScale = 1.0f;
+    RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
+
+    // DXP-21 part 2: cached so DrawGPUSkinned can rebuild the full ShadowFlagsCB (mvp/bodyOrigin/
+    // sx/sy/alpha stay constant for this whole Begin/End session) without a full-cbuffer thread
+    // through its own signature.
+    memcpy(m_D3DCachedMVP, mvp, sizeof(m_D3DCachedMVP));
+    memcpy(m_D3DCachedBodyOrigin, bodyOrigin ? bodyOrigin : zeroOrigin, sizeof(m_D3DCachedBodyOrigin));
+    m_D3DCachedSx = sx;
+    m_D3DCachedSy = sy;
+    m_D3DCachedAlpha = alpha;
+
+    // DXP-16 increment 4: RHI::SetBlendMode/SetPolygonOffset both have real D3D11
+    // implementations now (SetBlendMode since DXP-15 increment 2; SetPolygonOffset just gained
+    // one this increment, was a fail-loud stub) -- mirrors BeginGL's glEnable(GL_BLEND) +
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) + glPolygonOffset(-1,-1) exactly.
+    // BlendMode::Blend3 is the RHI table entry matching those exact blend factors without
+    // AlphaTest's unwanted alpha-test-discard side effect.
+    RHI::SetBlendMode(RHI::BlendMode::Blend3);
+    RHI::SetPolygonOffset(true, -1.0f, -1.0f);
+    return true;
+}
+
+void CPlanarShadowShader::EndD3D11()
+{
+    if (!IsSupported() || !m_bActive) return;
+    RHI::SetPolygonOffset(false, 0.0f, 0.0f); // mirrors EndGL's glDisable(GL_POLYGON_OFFSET_FILL)
+    m_bActive = false;
+}
+
+void CPlanarShadowShader::DrawD3D11(const float* vertices, int vertexCount)
+{
+    if (!m_bActive || !m_D3DVBO.IsValid() || vertexCount <= 0) return;
+
+    // RHI::UpdateBuffer grows-and-recreates internally when sizeBytes exceeds the buffer's
+    // current capacity (RHI_D3D11.cpp's own policy) -- no manual capacity bookkeeping needed
+    // here, unlike the GL path's hand-rolled m_VBOCapacity (RHI_GL wasn't in the picture when
+    // that code was written).
+    const size_t neededSize = static_cast<size_t>(vertexCount) * 3 * sizeof(float);
+    RHI::UpdateBuffer(m_D3DVBO, vertices, neededSize);
+
+    RHI::BindVertexBuffer(m_D3DVBO, RHI::VertexLayout::PosOnly);
+    RHI::Draw(RHI::Topology::TriangleList, static_cast<uint32_t>(vertexCount), 0);
+}
+#else // !RHI_D3D11_AVAILABLE -- keep these symbols linkable as no-ops since the public Init()/
+      // Shutdown()/Begin()/End()/Draw() call them behind a runtime g_RenderBackend check, which
+      // itself compiles on every platform (see RHI_D3D11.cpp's own #else for the same rationale).
+bool CPlanarShadowShader::InitD3D11() { return false; }
+void CPlanarShadowShader::ShutdownD3D11() {}
+bool CPlanarShadowShader::BeginD3D11(const float*, const float[16], float, float, float) { return false; }
+void CPlanarShadowShader::EndD3D11() {}
+void CPlanarShadowShader::DrawD3D11(const float*, int) {}
+#endif // RHI_D3D11_AVAILABLE

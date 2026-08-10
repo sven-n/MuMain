@@ -35,6 +35,7 @@
 #include "Render/Shaders/BMDMeshShader.h"
 #include "Render/Shaders/PlanarShadowShader.h"
 #include "Render/Shaders/TerrainShader.h"
+#include "Render/Shaders/ClothComputeShader.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/AI/ZzzAI.h"
@@ -239,11 +240,19 @@ static void MaybeCaptureFrame()
 #endif
 
 // Present the current frame. SDL owns the window/GL context, so GL swapping goes through
-// SDL_GL_SwapWindow instead of the Win32 ::SwapBuffers (issue #442). This is the one place all
-// of this file's/LoadingScene.cpp's/SceneManager.cpp's/UIMng.cpp's present call sites funnel
-// through, so branching here (rather than at each call site) covers all of them uniformly.
+// SDL_GL_SwapWindow instead of the Win32 ::SwapBuffers (issue #442). DXP-13: under
+// Backend=D3D11 there is no GL context/SDL swap to do at all -- RHI::EndFrame() drives the
+// DXGI swapchain's Present() instead. This is the one place all of this file's/
+// LoadingScene.cpp's/SceneManager.cpp's/UIMng.cpp's present call sites funnel through, so
+// branching here (rather than at each call site) covers all of them uniformly.
 void PlatformSwapBuffers()
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        RHI::EndFrame();
+        return;
+    }
+
     if (g_sdlWindow)
     {
 #ifndef _WIN32
@@ -892,7 +901,7 @@ namespace
         g_fScreenRate_y = static_cast<float>(WindowHeight) / static_cast<float>(REFERENCE_HEIGHT);
         OpenglWindowWidth = WindowWidth;
         OpenglWindowHeight = WindowHeight;
-        RHI::OnResize(WindowWidth, WindowHeight); // no-op on GL
+        RHI::OnResize(WindowWidth, WindowHeight); // no-op on GL; D3D11 rebuilds swapchain buffers/views
         ReinitializeFonts();
         UpdateResolutionDependentSystems();
         UpdateCursorClip();
@@ -1697,6 +1706,84 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         return 0;
     }
 
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        // ---- D3D11 device+swapchain, then the same real game-boot sequence the GL branch
+        // below runs (DXP-15 increment 3 -- this if-block used to stop here and run its own
+        // smoke-test loop; it now falls through past the if/else into the shared
+        // RegisterBundledFonts()/CInput/g_pNewUISystem/CUIManager/MainLoop() code, same as GL).
+        // Still GL-only, deliberately skipped: KHR_debug registration, wglGetCurrentContext(),
+        // WriteOpenGLInfo(), the editor's ImGui-GL backend init -- none of it has a D3D11
+        // equivalent this path needs.
+        SDL_WindowFlags windowFlags = 0; // no SDL_WINDOW_OPENGL -- RHI_D3D11 owns the swapchain
+        if (g_bUseWindowMode != TRUE)
+            windowFlags |= SDL_WINDOW_FULLSCREEN;
+
+        g_sdlWindow = SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
+        if (!g_sdlWindow)
+        {
+            g_ErrorReport.Write(L"> SDL_CreateWindow failed.\r\n");
+            MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
+            return 0;
+        }
+        g_ErrorReport.Write(L"> Start window success.\r\n");
+
+        OpenglWindowWidth = WindowWidth;
+        OpenglWindowHeight = WindowHeight;
+
+        g_hWnd = static_cast<HWND>(SDL_GetPointerProperty(
+            SDL_GetWindowProperties(g_sdlWindow), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
+
+        if (!RHI::Init(g_hWnd, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight)))
+        {
+            g_ErrorReport.Write(L"> RHI_D3D11 device/swapchain init failed.\r\n");
+            MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
+            return 0;
+        }
+        g_ErrorReport.Write(L"> D3D11 device init success.\r\n");
+        g_ErrorReport.AddSeparator();
+
+        // Bridge SDL's native handle + drive the existing WndProc from SDL's Win32 messages,
+        // same as the GL branch does below (#442) -- needed for IME and the legacy EDIT-control
+        // text boxes the login screen's username/password fields use. g_hRC stays null (no GL
+        // context exists under this backend) -- nothing in the tree reads it.
+        g_hDC = GetDC(g_hWnd);
+        SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
+
+        // DXP-15 increment 3: the single-pass shader/UBO/IR subsystems, mirrored from the GL
+        // branch's own Create() calls below -- DXP-14/15 already proved each is backend-agnostic
+        // via the smoke tests this replaces, so this now creates them for real (persistent, not
+        // torn down until app exit) instead of inside a doomed smoke-test-only loop.
+        CItemSpecularShader::Instance().Init();
+        CPlanarShadowShader::Instance().Init();
+        GlobalUBO::Instance().Create();
+        SceneUBO::Instance().Create();
+        PassthroughShader::Instance().Create();
+        BMDMeshShader::Instance().Create();
+        TerrainShader::Instance().Create();
+        IR::Create();
+
+        // DXP-21 part 1 phase 1: opt-in one-shot GPU-vs-CPU correctness check for the new cloth
+        // compute Passes A/B, logged to MuError.log. Off by default (config.ini [Render]
+        // ClothComputeSelfTest=1) -- diagnostic only, not part of the real per-frame path.
+        if (g_ClothComputeSelfTestEnabled)
+        {
+            CClothComputeShader::Instance().RunSelfTestAndLog();
+        }
+
+        SDL_RaiseWindow(g_sdlWindow);
+        SetFocus(g_hWnd);
+
+        // Initialize translations with the saved UI locale (defaults to "en").
+        std::wstring uiLocaleW = GameConfig::GetInstance().GetUILocale();
+        std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
+        I18N::SetLocale(uiLocale.c_str());
+
+        g_ErrorReport.WriteImeInfo(g_hWnd);
+        g_ErrorReport.AddSeparator();
+    }
+    else
+    {
     // DXP-08 Stage G: g_CoreProfile (config.ini [Render] CoreProfile, default 1 as of
     // Stage G) selects the context profile. Core became the default after the DXP-08a/
     // DXP-09 prerequisites were fixed and the debug-callback soak came back clean across
@@ -1854,6 +1941,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         EnableVSync();
         SetTargetFps(-1); // unlimited
     }
+    } // else (GL path)
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.
@@ -1973,6 +2061,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_MuEditorCore.Shutdown();
 #endif
     UnregisterBundledFonts();   // mirror the startup registration
+    // DXP-15 increment 3: RHI::Shutdown() releases the D3D11 device/swapchain/pipeline-state
+    // objects (RHI_GL's Shutdown() is just a bookkeeping flag flip, safe to call unconditionally
+    // here too -- GL's own context teardown stays in KillGLWindow() below, unchanged).
     RHI::Shutdown();
     KillGLWindow();
     DestroyWindow();

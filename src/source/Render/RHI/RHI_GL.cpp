@@ -1,6 +1,11 @@
-// RHI_GL: the OpenGL backend for Render/RHI/RHI.h. This file's functions sit in
-// `RHI_GL_Impl`, forwarded to by `RHI.cpp`'s `namespace RHI` dispatch layer -- the only
-// backend implementation today.
+// DXP-11 -- RHI_GL: the OpenGL backend for Render/RHI/RHI.h.
+//
+// DXP-13: this file's functions no longer sit directly in `namespace RHI` -- a runtime
+// GL/D3D11 backend switch means two implementations of each RHI.h function must coexist in
+// the same binary, so `RHI.cpp` is now the dispatch layer that owns `namespace RHI` and
+// forwards to either `RHI_GL_Impl` (this file) or `RHI_D3D11_Impl`. This file's own function
+// bodies are unchanged from the DXP-11/DXP-12 GL implementation -- only the enclosing
+// namespace name changed.
 //
 // The GL context itself is created and owned by Winmain.cpp (SDL_GL_CreateContext,
 // SDL_GL_MakeCurrent) -- RHI_GL_Impl::Init() does not duplicate that; it assumes a
@@ -412,6 +417,16 @@ void BindIndexBuffer(BufferHandle /*handle*/)
 {
     // Not yet implemented -- no caller in the tree yet (lands with terrain's indexed draw).
 }
+
+void RegisterVertexShaderBytecode(VertexLayout, const void*, size_t)
+{
+    // No-op on GL -- ID3D11InputLayout has no GL equivalent; ConfigurePosUvColorVAO above
+    // binds attrib pointers directly against a VBO, no shader-signature validation needed.
+}
+
+void* GetD3D11Device() { return nullptr; }
+void* GetD3D11DeviceContext() { return nullptr; }
+BufferHandle RegisterExternalD3D11VertexBuffer(void*, size_t) { return {}; } // D3D11 only
 
 // ---- Draw ----
 void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)

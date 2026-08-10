@@ -46,6 +46,7 @@ static bool s_bShowTileGrid = false;
 #endif
 
 #include "Render/Core/RenderConfig.h"
+#include "Render/RHI/RHI.h"
 #include "Render/Shaders/TerrainShader.h"
 #include "Render/Core/ImmediateRenderer.h"
 #include "Render/Shaders/PassthroughShader.h"
@@ -58,6 +59,18 @@ GLuint g_VAO_Terrain = 0;
 GLuint g_VBO_TerrainLight[2] = { 0, 0 };
 GLuint g_VBO_TerrainAlpha = 0;
 int g_TerrainLightBufIdx = 0;
+
+// DXP-16 increment 1: D3D11's terrain vertex data, kept separate from the GL buffers above
+// rather than replacing them -- GL's real 3-VBO upload path (position/alpha static, light
+// double-buffered dynamic) stays completely untouched. D3D11 has no equivalent of RHI's
+// VertexLayout::Terrain accepting multiple bound buffers, so this backend instead maintains
+// one CPU-side interleaved scratch array (pos3+light3+alpha1, matching kTerrainLayout in
+// RHI_D3D11.cpp exactly) and re-uploads it whole every frame via RHI::UpdateBuffer's discard
+// semantics -- position/alpha are filled once at map load, only the light fields actually
+// change per call in UploadTerrainLightVBO().
+RHI::BufferHandle g_D3D11TerrainVB;
+RHI::BufferHandle g_D3D11TerrainIB;
+std::vector<float> g_TerrainVertexD3D11;
 
 int  TerrainFlag;
 bool ActiveTerrain = false;
@@ -1089,6 +1102,12 @@ static bool LoadTerrainGLFunctions()
 
 void DestroyTerrainVBO()
 {
+    // DXP-16 increment 1: D3D11 side first, gated purely on handle validity (only ever set by
+    // the D3D11 branch below) -- independent of the GL teardown beneath, which stays untouched.
+    if (g_D3D11TerrainVB.IsValid()) { RHI::DestroyBuffer(g_D3D11TerrainVB); g_D3D11TerrainVB = {}; }
+    if (g_D3D11TerrainIB.IsValid()) { RHI::DestroyBuffer(g_D3D11TerrainIB); g_D3D11TerrainIB = {}; }
+    g_TerrainVertexD3D11.clear();
+
     if (!LoadTerrainGLFunctions()) return;
     if (g_VAO_Terrain) { fn_glDeleteVertexArrays(1, &g_VAO_Terrain); g_VAO_Terrain = 0; InvalidateVAOCache(); }
     if (g_VBO_TerrainPosition) { fn_glDeleteBuffers(1, &g_VBO_TerrainPosition); g_VBO_TerrainPosition = 0; }
@@ -1137,6 +1156,30 @@ void CreateTerrainVBO()
         }
     }
 
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        // DXP-16 increment 1: interleave pos3+alpha1 now (unchanging until the next map load);
+        // light3 stays zeroed here, filled every frame by UploadTerrainLightVBO() below.
+        g_TerrainVertexD3D11.assign((size_t)TERRAIN_SIZE * TERRAIN_SIZE * 7, 0.f);
+        for (int y = 0; y < TERRAIN_SIZE; ++y)
+        {
+            for (int x = 0; x < TERRAIN_SIZE; ++x)
+            {
+                int idx = TERRAIN_INDEX(x, y);
+                float* v = &g_TerrainVertexD3D11[(size_t)idx * 7];
+                v[0] = positions[(size_t)idx * 3 + 0];
+                v[1] = positions[(size_t)idx * 3 + 1];
+                v[2] = positions[(size_t)idx * 3 + 2];
+                v[6] = TerrainMappingAlpha[idx];
+            }
+        }
+        g_D3D11TerrainVB = RHI::CreateVertexBuffer(g_TerrainVertexD3D11.data(),
+            g_TerrainVertexD3D11.size() * sizeof(float), RHI::BufferUsage::Dynamic);
+        g_D3D11TerrainIB = RHI::CreateIndexBuffer(indices.data(),
+            indices.size() * sizeof(GLuint), RHI::BufferUsage::Static);
+        return;
+    }
+
     if (!LoadTerrainGLFunctions()) return;
 
     fn_glGenVertexArrays(1, &g_VAO_Terrain);
@@ -1175,6 +1218,20 @@ void CreateTerrainVBO()
 
 void UploadTerrainLightVBO()
 {
+    if (g_D3D11TerrainVB.IsValid())
+    {
+        for (int i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; ++i)
+        {
+            float* v = &g_TerrainVertexD3D11[(size_t)i * 7];
+            v[3] = PrimaryTerrainLight[i][0];
+            v[4] = PrimaryTerrainLight[i][1];
+            v[5] = PrimaryTerrainLight[i][2];
+        }
+        RHI::UpdateBuffer(g_D3D11TerrainVB, g_TerrainVertexD3D11.data(),
+            g_TerrainVertexD3D11.size() * sizeof(float));
+        return;
+    }
+
     if (g_VBO_TerrainLight[0] == 0) return;
     if (!LoadTerrainGLFunctions()) return;
 
@@ -1815,7 +1872,10 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
                 TerrainShader::Instance().SyncAlphaRef();
 
                 uintptr_t indexOffset = static_cast<uintptr_t>((yi * (TERRAIN_SIZE - 1) + xi) * 6);
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*)(indexOffset * sizeof(GLuint)));
+                if (g_RenderBackend == RenderBackend::D3D11)
+                    RHI::DrawIndexed(RHI::Topology::TriangleList, 6, static_cast<uint32_t>(indexOffset));
+                else
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*)(indexOffset * sizeof(GLuint)));
             }
             return;
         }
@@ -3209,12 +3269,23 @@ void RenderTerrainFrustrum(bool EditFlag)
         // TASK-30 phase 2: WaterMove is recomputed once per frame in RenderTerrain() (map-dependent
         // rate); set it once here rather than per-tile, matching how often the CPU value actually changes.
         TerrainShader::Instance().SetWaterMove(WaterMove);
-        BindVAO(g_VAO_Terrain);
-        fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[g_TerrainLightBufIdx ^ 1]);
-        fn_glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        fn_glEnableVertexAttribArray(1);
+        if (g_RenderBackend == RenderBackend::D3D11)
+        {
+            // DXP-16 increment 1: one interleaved buffer, no separate light-attribute rebind --
+            // UploadTerrainLightVBO() already wrote this frame's light values into it (RenderTerrain()
+            // calls it before this function every frame, same call order the GL path relies on).
+            RHI::BindVertexBuffer(g_D3D11TerrainVB, RHI::VertexLayout::Terrain);
+            RHI::BindIndexBuffer(g_D3D11TerrainIB);
+        }
+        else
+        {
+            BindVAO(g_VAO_Terrain);
+            fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[g_TerrainLightBufIdx ^ 1]);
+            fn_glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            fn_glEnableVertexAttribArray(1);
+        }
     }
-    else
+    else if (g_RenderBackend != RenderBackend::D3D11)
     {
         // DXP-22 step 4: the tile loop below falls through to RenderFace/RenderFaceAlpha/
         // RenderFaceBlend's raw glBegin/glEnd fixed-function fallback whenever TerrainFlag ==
@@ -3226,6 +3297,9 @@ void RenderTerrainFrustrum(bool EditFlag)
         // (not per-tile, which would reintroduce the TASK-24-style churn this whole task exists to
         // remove). Safe to do unconditionally here even outside the grass case: at pass entry, once
         // per frame, ordinary cache-miss cost either way. See DXP-22-bind-state-monopoly-perf.md.
+        // D3D11: the grass pass (TerrainFlag==TERRAIN_MAP_GRASS) renders via IR:: (already
+        // backend-agnostic, DXP-05/DXP-15), which binds its own shader per draw -- nothing here
+        // was ever bound to unbind under D3D11, so this whole branch is GL-only.
         UnbindAllShaders();
     }
 
@@ -3252,7 +3326,7 @@ void RenderTerrainFrustrum(bool EditFlag)
 
     if (useShader)
     {
-        BindVAO(0);
+        if (g_RenderBackend != RenderBackend::D3D11) BindVAO(0);
         TerrainShader::Instance().Unbind();
     }
 }

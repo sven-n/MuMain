@@ -297,6 +297,14 @@ static void RenderCharacterScene3D()
     // DXP-16 increment 1: terrain has a real D3D11 path now -- call unconditionally.
     // DXP-16 increment 2: RenderObjects() (BMD static world meshes) joins it.
     // DXP-16 increment 3: RenderCharactersClient()/RenderMount() join it too (see LoginScene.cpp's
+    // NewRenderLogInScene for the detailed rationale -- same reasoning applies here).
+    // Input::Selection::SelectObjects() joins it too -- confirmed pure CPU math (screen-space ray
+    // via CameraProjection::ScreenToWorldRay, already backend-agnostic and called unconditionally
+    // above in SetupCharacterSceneViewport, + CollisionDetectLineToOBB), no GL dependency at all.
+    // Leaving it gated was this increment's own mistake, not a real unported-code gap (found via
+    // user report: character select was unusable under D3D11 -- couldn't pick a character to
+    // enter the game). Everything else below is still genuinely unported legacy GL, so it stays
+    // gated the same way it was under DXP-15 increment 3.
     RenderTerrain(false);
     RenderObjects();
     RenderCharactersClient();
@@ -305,13 +313,16 @@ static void RenderCharacterScene3D()
     if (!CUIMng::Instance().IsCursorOnUI())
         Input::Selection::SelectObjects();
 
-    RenderBlurs();
-    RenderJoints();
-    RenderEffects();
-    ThePetProcess().RenderPets();
-    RenderBoids();
-    RenderObjects_AfterCharacter();
-    CheckSprites();
+    if (g_RenderBackend != RenderBackend::D3D11)
+    {
+        RenderBlurs();
+        RenderJoints();
+        RenderEffects();
+        ThePetProcess().RenderPets();
+        RenderBoids();
+        RenderObjects_AfterCharacter();
+        CheckSprites();
+    }
 }
 
 /**
@@ -401,8 +412,19 @@ bool NewRenderCharacterScene(HDC hDC)
     int width, height;
     SetupCharacterSceneViewport(width, height);
     ApplySelectedCharacterLighting();
+    // DXP-15 increment 3: same guard as LoginScene.cpp's NewRenderLogInScene() -- world
+    // rendering (RenderObjects/RenderCharactersClient/etc., and RenderSelectedCharacterEffects'
+    // particle/terrain-bitmap calls) is genuinely unported legacy GL, confirmed to crash the same
+    // way login's did before that guard landed. Stays stubbed under D3D11 until a DXP-16+
+    // world-render port; UI (RenderCharacterSceneUI below) is unaffected and stays active.
+    // DXP-16 increment 1: RenderCharacterScene3D() now always runs -- it gates its own remaining
+    // unported calls internally and only lets RenderTerrain() (real on D3D11 now) through
+    // unconditionally. RenderSelectedCharacterEffects stays fully gated, still unported.
     RenderCharacterScene3D();
-    RenderSelectedCharacterEffects();
+    if (g_RenderBackend != RenderBackend::D3D11)
+    {
+        RenderSelectedCharacterEffects();
+    }
 
 #ifdef _EDITOR
     if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)

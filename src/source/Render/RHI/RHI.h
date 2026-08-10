@@ -11,6 +11,13 @@
 // the original design sketch but not yet defined; do not call it until its
 // implementing commit lands.
 
+// DXVK/vkd3d-proton on Linux -- is a one-line change instead of hunting down every guard.
+// Every RHI_D3D11.cpp/BMDMeshShader.cpp/PassthroughShader.cpp/PlanarShadowShader.cpp/
+// TerrainShader.cpp D3D11 code path is gated on this macro, never on _WIN32 directly.
+#ifdef _WIN32
+#define RHI_D3D11_AVAILABLE 1
+#endif
+
 #include <cstddef>
 #include <cstdint>
 
@@ -35,8 +42,10 @@ void BeginFrame();
 void EndFrame();                          // Present() -- wraps PlatformSwapBuffers()
 void SetViewport(int x, int y, int w, int h);
 void Clear(bool color, bool depth, float r = 0, float g = 0, float b = 0, float a = 1);
-// Window resize/alt-tab hook. GL is a no-op today (nothing GL-specific happens at resize
-// time); kept as a real entry point for a future backend that needs to react to it.
+// DXP-13: window resize/alt-tab hook. GL is a no-op (matches its pre-DXP-13 behavior --
+// nothing GL-specific happened at resize time either). D3D11 releases and recreates its
+// swapchain buffers/views (IDXGISwapChain::ResizeBuffers) -- required there or Present()
+// either stretches the old-sized backbuffer or errors outright.
 void OnResize(int width, int height);
 
 // ---- Buffers ----
@@ -70,12 +79,16 @@ BufferHandle CreateUniformBlock(size_t sizeBytes, int bindingSlot);
 void UpdateUniformBlock(BufferHandle, const void* data, size_t sizeBytes);  // whole-block; callers keep their own dirty-checking (e.g. BoneUBO's ptr+version check)
 void DestroyUniformBlock(BufferHandle);
 
-// ---- Textures ----
+// ---- Textures (DXP-12 GL; DXP-15 increment 1 D3D11) ----
 // Format is fixed at RGBA8 -- no other internal format exists anywhere in the tree today.
 // CORRECTION (DXP-12 census, 2026-08-03): one call site was missed by the DXP-09 audit this
-// claim originally rested on -- ZzzBMD.cpp's BindLightMaps() still uploads GL_RGB, fixed via
-// the same CPU-side 3->4 expansion already planned for GlobalBitmap.cpp's JPEG path
-// (alpha=255), not a second RHI format. This "RGBA8 always" contract is true tree-wide.
+// claim originally rested on -- ZzzBMD.cpp's BindLightMaps() still uploads GL_RGB. DXGI has no
+// 24-bit RGB format either, so the fix is the same CPU-side 3->4 expansion already planned for
+// GlobalBitmap.cpp's JPEG path (alpha=255), not a second RHI format. Once that lands, this
+// "RGBA8 always" contract is actually true tree-wide, not just assumed.
+// D3D11: TexFilter/TexWrap are not applied per-texture (no per-texture sampler object in this
+// backend's design) -- see RHI_D3D11.cpp's CreateTexture comment. Every D3D11 texture samples
+// through its binding shader's own shared linear/clamp sampler instead.
 enum class TexFilter { Nearest, Linear };
 enum class TexWrap   { Clamp, Repeat };        // no Mirror in use
 struct TextureDesc { int width, height; TexFilter filter = TexFilter::Nearest; TexWrap wrap = TexWrap::Clamp; };
@@ -137,6 +150,36 @@ enum class VertexLayout {
 };
 void BindVertexBuffer(BufferHandle, VertexLayout);
 void BindIndexBuffer(BufferHandle);   // GL_UNSIGNED_INT only -- not yet implemented, no caller yet
+
+// DXP-14: D3D11's ID3D11InputLayout is validated against a specific vertex shader's input
+// signature at creation time -- GL has no equivalent (attrib pointers bind directly to a VBO
+// in BindVertexBuffer, no shader involved), so RHI_GL no-ops this. Shader classes call it once,
+// right after compiling the vertex shader that owns `layout`, before any BindVertexBuffer(...,
+// layout) call for it. PassthroughShader/PosUvColor is the first caller (DXP-14 increment 1).
+void RegisterVertexShaderBytecode(VertexLayout layout, const void* bytecode, size_t bytecodeSize);
+
+// ---- Backend-native device access (D3D11 only) ----
+// The 5 shader classes own their own GL-vs-D3D11 plumbing inside each class's .cpp (see the
+// Shaders section above) -- for GL that means SDL_GL_GetProcAddress as today; for D3D11 it
+// means compiling HLSL and creating ID3D11VertexShader/PixelShader objects (needs the device)
+// and binding them each Bind() call (needs the context). Returned as void* so this header
+// stays platform-generic (no <d3d11.h> include here) -- callers cast to ID3D11Device*/
+// ID3D11DeviceContext* under their own #ifdef _WIN32 block. Both return nullptr under
+// Backend=GL or off Windows; callers must guard on g_RenderBackend first.
+void* GetD3D11Device();
+void* GetD3D11DeviceContext();
+
+// DXP-21 phase 3b: registers an externally-created D3D11 buffer (e.g. ClothComputeShader's Pass E
+// output -- a compute-shader UAV target also flagged D3D11_BIND_VERTEX_BUFFER at creation) into
+// RHI's own buffer table, so BindVertexBuffer/DestroyBuffer can address it exactly like any
+// RHI::CreateVertexBuffer-made buffer. AddRefs the buffer once on registration (COM refcounting)
+// so the returned handle's eventual RHI::DestroyBuffer and the caller's own Release() are two
+// independent, order-independent releases -- caller keeps owning/creating/destroying the
+// underlying buffer exactly as before, this only gives RHI a second reference to track. D3D11
+// only (no GL equivalent -- GL has no compute-writable vertex buffer on this codepath); the
+// pointer is void* for the same reason GetD3D11Device() is -- callers reinterpret under their own
+// #ifdef _WIN32/RHI_D3D11_AVAILABLE block. Returns an invalid handle under Backend=GL.
+BufferHandle RegisterExternalD3D11VertexBuffer(void* d3d11Buffer, size_t capacityBytes);
 
 // ---- Draw ----
 // No strips/fans/points anywhere post-DXP-09; no instancing anywhere in the tree.

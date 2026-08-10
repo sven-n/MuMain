@@ -2,8 +2,13 @@
 #include "TerrainShader.h"
 #include "Render/Core/RenderConfig.h"
 #include "Render/Core/BindState.h"
+#include "Render/RHI/RHI.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <SDL3/SDL.h>
+#ifdef RHI_D3D11_AVAILABLE
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#endif
 #include <cstdint>
 #include <cstring>
 
@@ -155,6 +160,130 @@ void main() {
 }
 )";
 
+// DXP-14 -- HLSL twin, kept semantically line-for-line with the GLSL above. The three loose
+// GLSL uniforms (u_WaterMove/u_BaseIsWater/u_OverlayIsWater, referenced from the vertex stage,
+// and u_AlphaRef, referenced from the pixel stage) pack into one TerrainFlags cbuffer at slot 5
+// (see TerrainShader.h's field comment for why each shader gets its own slot number).
+static const char* g_szTerrainVertHLSL = R"(
+cbuffer GlobalMatrices : register(b0)
+{
+    column_major matrix u_View;
+    column_major matrix u_Proj;
+    column_major matrix u_Model;
+    column_major matrix u_MVP;
+    float4 u_Time;
+};
+
+cbuffer TerrainFlags : register(b5)
+{
+    float u_WaterMove;
+    int   u_BaseIsWater;
+    int   u_OverlayIsWater;
+    float u_AlphaRef;
+};
+
+struct VSInput
+{
+    float3 a_Pos   : POSITION;
+    float3 a_Light : COLOR0;
+    float  a_Alpha : TEXCOORD0;
+};
+
+struct VSOutput
+{
+    float4 pos       : SV_POSITION;
+    float2 uvBase    : TEXCOORD0;
+    float2 uvOverlay : TEXCOORD1;
+    float3 light     : COLOR0;
+    float  alpha     : TEXCOORD2;
+};
+
+VSOutput main(VSInput input)
+{
+    VSOutput o;
+    float2 baseUV = input.a_Pos.xy * 0.0025;
+    o.uvBase    = (u_BaseIsWater    != 0) ? baseUV + float2(u_WaterMove, 0.0) : baseUV;
+    o.uvOverlay = (u_OverlayIsWater != 0) ? baseUV + float2(u_WaterMove, 0.0) : baseUV;
+    o.light = input.a_Light;
+    o.alpha = input.a_Alpha;
+    o.pos   = mul(u_MVP, float4(input.a_Pos, 1.0));
+    return o;
+}
+)";
+
+static const char* g_szTerrainFragHLSL = R"(
+cbuffer TerrainFlags : register(b5)
+{
+    float u_WaterMove;
+    int   u_BaseIsWater;
+    int   u_OverlayIsWater;
+    float u_AlphaRef;
+};
+
+Texture2D    u_BaseTex     : register(t0);
+SamplerState u_BaseSamp    : register(s0);
+Texture2D    u_OverlayTex  : register(t1);
+SamplerState u_OverlaySamp : register(s1);
+
+struct PSInput
+{
+    float4 pos       : SV_POSITION;
+    float2 uvBase    : TEXCOORD0;
+    float2 uvOverlay : TEXCOORD1;
+    float3 light     : COLOR0;
+    float  alpha     : TEXCOORD2;
+};
+
+float4 main(PSInput input) : SV_TARGET
+{
+    float4 texBase    = u_BaseTex.Sample(u_BaseSamp, input.uvBase);
+    float4 texOverlay = u_OverlayTex.Sample(u_OverlaySamp, input.uvOverlay);
+    float4 blendedTex = lerp(texBase, texOverlay, saturate(input.alpha));
+
+    // <= matches GL_GREATER exactly (fixed-function alpha test passes when a > ref).
+    if (u_AlphaRef >= 0.0 && blendedTex.a <= u_AlphaRef)
+        discard;
+
+    return float4(blendedTex.rgb * input.light, blendedTex.a);
+}
+)";
+
+#ifdef RHI_D3D11_AVAILABLE
+namespace {
+    bool CompileHLSL(const char* source, const char* entryPoint, const char* target, ID3DBlob** outBlob)
+    {
+        ID3DBlob* errorBlob = nullptr;
+        UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+        flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+        const HRESULT hr = D3DCompile(source, strlen(source), nullptr, nullptr, nullptr,
+            entryPoint, target, flags, 0, outBlob, &errorBlob);
+        if (FAILED(hr))
+        {
+            if (errorBlob)
+            {
+                g_ErrorReport.Write(L"[TerrainShader][D3D11] %hs compile error: %hs\r\n",
+                    entryPoint, static_cast<const char*>(errorBlob->GetBufferPointer()));
+                errorBlob->Release();
+            }
+            else
+            {
+                g_ErrorReport.Write(L"[TerrainShader][D3D11] %hs compile failed, hr=0x%08lX\r\n",
+                    entryPoint, static_cast<unsigned long>(hr));
+            }
+            return false;
+        }
+        if (errorBlob) errorBlob->Release(); // warnings only
+        return true;
+    }
+
+    struct TerrainFlagsCB { float waterMove; int32_t baseIsWater; int32_t overlayIsWater; float alphaRef; };
+}
+#endif // RHI_D3D11_AVAILABLE -- ID3DBlob/D3DCompile aren't declared without <d3dcompiler.h>
+       // (guarded above with the same macro); this block would fail to compile on non-Windows
+       // otherwise.
+
 TerrainShader& TerrainShader::Instance()
 {
     static TerrainShader instance;
@@ -168,21 +297,34 @@ TerrainShader::~TerrainShader()
 
 void TerrainShader::Create()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { CreateD3D11(); return; }
     CreateGL();
 }
 
 void TerrainShader::Destroy()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { DestroyD3D11(); return; }
     DestroyGL();
 }
 
 void TerrainShader::Bind()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { BindD3D11(); return; }
     BindGL();
 }
 
 void TerrainShader::Unbind()
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+        if (ctx)
+        {
+            ctx->VSSetShader(nullptr, nullptr, 0);
+            ctx->PSSetShader(nullptr, nullptr, 0);
+        }
+        return;
+    }
     BindProgram(0);
 }
 
@@ -285,22 +427,142 @@ void TerrainShader::BindGL()
     }
 }
 
+#ifdef RHI_D3D11_AVAILABLE
+void TerrainShader::CreateD3D11()
+{
+    if (m_D3DVertexShader) return;
+    ID3D11Device* device = static_cast<ID3D11Device*>(RHI::GetD3D11Device());
+    if (!device) return;
+
+    ID3DBlob* vsBlob = nullptr;
+    ID3DBlob* psBlob = nullptr;
+    if (!CompileHLSL(g_szTerrainVertHLSL, "main", "vs_5_0", &vsBlob)) return;
+    if (!CompileHLSL(g_szTerrainFragHLSL, "main", "ps_5_0", &psBlob)) { vsBlob->Release(); return; }
+
+    ID3D11VertexShader* vs = nullptr;
+    if (FAILED(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vs)))
+    {
+        g_ErrorReport.Write(L"[TerrainShader][D3D11] CreateVertexShader failed\r\n");
+        vsBlob->Release(); psBlob->Release();
+        return;
+    }
+    ID3D11PixelShader* ps = nullptr;
+    if (FAILED(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &ps)))
+    {
+        g_ErrorReport.Write(L"[TerrainShader][D3D11] CreatePixelShader failed\r\n");
+        vs->Release(); vsBlob->Release(); psBlob->Release();
+        return;
+    }
+
+    // Registers this shader's bytecode as the Terrain layout's signature source (D3D11
+    // requirement -- see RHI.h's RegisterVertexShaderBytecode comment).
+    RHI::RegisterVertexShaderBytecode(RHI::VertexLayout::Terrain, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize());
+    vsBlob->Release();
+    psBlob->Release();
+
+    m_D3DVertexShader = vs;
+    m_D3DPixelShader = ps;
+
+    m_D3DFlagsCBuffer = RHI::CreateUniformBlock(sizeof(TerrainFlagsCB), 5);
+    m_D3DWaterMove = 0.0f;
+    m_D3DBaseIsWater = 0;
+    m_D3DOverlayIsWater = 0;
+    m_LastAlphaRef = -1.0f;
+    UploadD3D11Flags();
+
+    // DXP-16 increment 2 fix (superseded by increment 3, see below): this shader used to own a
+    // single fixed sampler (WRAP, for the `a_Pos.xy * 0.0025` tiling UV) bound to both s0/s1.
+    // DXP-16 increment 3: replaced by RHI::BindTexture() binding each texture's OWN recorded
+    // filter/wrap sampler at bind time (RHI_D3D11.cpp's GetOrCreateSampler) -- a fixed WRAP
+    // sampler for every texture bound through this shader was itself the bug behind a reported
+    // "rice terrace" banding artifact on ordinary grass terrain (non-power-of-two source textures
+    // padded up to storage size by GlobalBitmap.cpp wrap right into their own padding under WRAP,
+    // where GL would have used that texture's own correct wrap mode instead). This shader no
+    // longer creates/binds a sampler of its own; SetBaseTexture()/SetOverlayTexture()'s
+    // RHI::BindTexture() calls (below) now do it correctly, per texture, every draw.
+
+    g_ErrorReport.Write(L"[TerrainShader][D3D11] Compiled + linked, TerrainFlags cbuffer at slot 5\r\n");
+}
+
+void TerrainShader::DestroyD3D11()
+{
+    if (m_D3DFlagsCBuffer.IsValid()) { RHI::DestroyUniformBlock(m_D3DFlagsCBuffer); m_D3DFlagsCBuffer = {}; }
+    if (m_D3DPixelShader)  { static_cast<ID3D11PixelShader*>(m_D3DPixelShader)->Release();   m_D3DPixelShader = nullptr; }
+    if (m_D3DVertexShader) { static_cast<ID3D11VertexShader*>(m_D3DVertexShader)->Release(); m_D3DVertexShader = nullptr; }
+}
+
+void TerrainShader::BindD3D11()
+{
+    ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+    if (!ctx || !m_D3DVertexShader || !m_D3DPixelShader) return;
+
+    ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShader), nullptr, 0);
+    ctx->PSSetShader(static_cast<ID3D11PixelShader*>(m_D3DPixelShader), nullptr, 0);
+}
+
+void TerrainShader::UploadD3D11Flags()
+{
+    if (!m_D3DFlagsCBuffer.IsValid()) return;
+    TerrainFlagsCB cb;
+    cb.waterMove      = m_D3DWaterMove;
+    cb.baseIsWater    = m_D3DBaseIsWater;
+    cb.overlayIsWater = m_D3DOverlayIsWater;
+    cb.alphaRef       = m_LastAlphaRef;
+    RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
+}
+#else // !RHI_D3D11_AVAILABLE -- keep these symbols linkable as no-ops since Create()/Destroy()/
+      // Bind() call them behind a runtime g_RenderBackend check, which itself compiles on every
+      // platform (see RHI_D3D11.cpp's own #else for the same rationale).
+void TerrainShader::CreateD3D11() {}
+void TerrainShader::DestroyD3D11() {}
+void TerrainShader::BindD3D11() {}
+void TerrainShader::UploadD3D11Flags() {}
+#endif // RHI_D3D11_AVAILABLE
+
 extern int CachTexture;
 
 void TerrainShader::SetBaseTexture(GLuint texID)
 {
+    // DXP-16 increment 1: texID is already an RHI::TextureHandle id here regardless of backend
+    // (BITMAP_t::TextureNumber is set from RHI::CreateTexture(...).id since DXP-12's texture
+    // unification) -- same "reuse the GLuint param as the RHI handle id" pattern already used by
+    // ZzzOpenglUtil.cpp's BindTexture(int).
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        RHI::BindTexture(RHI::TextureHandle{ texID }, 0);
+        // DXP-16 fix: this direct RHI::BindTexture bypasses ZzzOpenglUtil.cpp's BindTexture(int)
+        // wrapper, which UI 2D sprite rendering (Sprite::Render) relies on via a global CachTexture
+        // cache to skip redundant slot-0 rebinds. Without invalidating it here, the UI's next
+        // BindTexture(uiTexID) call sees CachTexture still equal to uiTexID (from a previous UI
+        // frame) and skips the real rebind, leaving slot 0 bound to whatever this terrain draw just
+        // set -- causing UI bitmaps (e.g. the login window background) to intermittently render with
+        // the wrong texture. The GL branch above already does this; D3D11 needs the same.
+        CachTexture = -1;
+        return;
+    }
     BindTexture2D(0, texID);
     CachTexture = -1; // Invalidate engine texture cache
 }
 
 void TerrainShader::SetOverlayTexture(GLuint texID)
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        RHI::BindTexture(RHI::TextureHandle{ texID }, 1);
+        return;
+    }
     BindTexture2D(1, texID);
     if (fn_glActiveTexture) fn_glActiveTexture(GL_TEXTURE0); // Restore default active texture
 }
 
 void TerrainShader::SetWaterMove(float waterMove)
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        m_D3DWaterMove = waterMove;
+        UploadD3D11Flags();
+        return;
+    }
     if (m_LocWaterMove != -1 && fn_glUniform1f) {
         fn_glUniform1f(m_LocWaterMove, waterMove);
     }
@@ -308,6 +570,18 @@ void TerrainShader::SetWaterMove(float waterMove)
 
 void TerrainShader::SetWaterFlags(bool baseIsWater, bool overlayIsWater)
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        const int newBase = baseIsWater ? 1 : 0;
+        const int newOverlay = overlayIsWater ? 1 : 0;
+        if (newBase != m_LastBaseIsWater || newOverlay != m_LastOverlayIsWater)
+        {
+            m_D3DBaseIsWater = m_LastBaseIsWater = newBase;
+            m_D3DOverlayIsWater = m_LastOverlayIsWater = newOverlay;
+            UploadD3D11Flags();
+        }
+        return;
+    }
     if (m_LocBaseIsWater != -1 && fn_glUniform1i) {
         fn_glUniform1i(m_LocBaseIsWater, baseIsWater ? 1 : 0);
     }
@@ -318,6 +592,15 @@ void TerrainShader::SetWaterFlags(bool baseIsWater, bool overlayIsWater)
 
 void TerrainShader::SyncAlphaRef()
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        if (g_AlphaRef != m_LastAlphaRef)
+        {
+            m_LastAlphaRef = g_AlphaRef;
+            UploadD3D11Flags();
+        }
+        return;
+    }
     // Dirty-checked plain float compare — TerrainShader stays bound across many tile draws per
     // frustrum pass, so this must not cost a glUniform1f per tile (per the TASK-24 Lorencia FPS
     // lesson: per-tile GL calls are the enemy).

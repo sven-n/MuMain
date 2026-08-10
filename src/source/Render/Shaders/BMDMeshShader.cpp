@@ -5,6 +5,10 @@
 #include "Render/Core/BindState.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <SDL3/SDL.h>
+#ifdef RHI_D3D11_AVAILABLE
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#endif
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -342,6 +346,359 @@ void main() {
 }
 )";
 
+// DXP-14 increment 3 -- HLSL port, kept semantically line-for-line with the GLSL above (same
+// convention as Passthrough/Terrain: column_major matrices + mul(M,v), one shared BMDFlags
+// cbuffer for every loose GLSL uniform since HLSL has no non-block uniform storage).
+static const char* g_szBMDMeshVertHLSL = R"(
+cbuffer GlobalMatrices : register(b0)
+{
+    column_major matrix u_View;
+    column_major matrix u_Proj;
+    column_major matrix u_Model;
+    column_major matrix u_MVP;
+    float4 u_Time;
+};
+
+cbuffer BoneMatrices : register(b2)
+{
+    column_major matrix u_Bones[200];
+};
+
+// The GLSL vertex+fragment shaders' ~20 loose uniforms have no HLSL "non-block uniform"
+// equivalent -- packed into one cbuffer instead (RHI slot 6: 0=GlobalMatrices, 1=SceneData,
+// 2=BoneUBO, 3=DynamicLights reserved, 4=Passthrough's PassFlags, 5=Terrain's TerrainFlags).
+// Field order matches BMDMeshShader.cpp's BMDFlagsCB C++ struct byte-for-byte (both hand-laid
+// out to the same 16-byte-row boundaries HLSL's automatic cbuffer packing would produce anyway
+// -- explicit here so the two sides never drift out of sync silently).
+cbuffer BMDFlags : register(b6)
+{
+    column_major matrix u_MVPDraw;
+    int    u_UseGPUSkin;
+    int    u_RenderMode;
+    float  u_WaveOffsetU;
+    float  u_WaveOffsetV;
+    float3 u_BodyOrigin;
+    float  u_BodyScale;
+    float  u_ChromeWave;
+    float  u_ChromeWave2;
+    float2 u_ChromeLightVec;
+    int    u_ChromeVariant;
+    float  u_ChromeTimeTerm;
+    float  u_Alpha;
+    float  u_AlphaRef;
+    float3 u_LightDir;
+    int    u_LightEnable;
+    float3 u_BodyLight;
+    float  _bmdPad0;
+    float3 u_SpecularTint;
+    float  _bmdPad1;
+};
+
+struct VSInput
+{
+    float3 a_Pos       : POSITION;
+    float2 a_UV        : TEXCOORD0;
+    float4 a_Color     : COLOR0;
+    float3 a_Normal    : NORMAL;
+    int    a_BoneIndex : BLENDINDICES0;
+};
+
+struct VSOutput
+{
+    float4 pos           : SV_POSITION;
+    float2 uv            : TEXCOORD0;
+    float4 color         : COLOR0;
+    float2 chromeUV      : TEXCOORD1;
+    float2 chromeUVStatic: TEXCOORD2;
+    float2 chromeUV2     : TEXCOORD3;
+};
+
+VSOutput main(VSInput input)
+{
+    VSOutput o;
+    float3 skinnedNormal = input.a_Normal;
+    float2 chromeUV = input.a_UV;
+    float4 gpuSkinColor = input.a_Color;
+    o.chromeUVStatic = float2(0.5, 0.5);
+    o.chromeUV2 = float2(0.0, 0.0);
+
+    if (u_UseGPUSkin == 1 && input.a_BoneIndex >= 0 && input.a_BoneIndex < 200)
+    {
+        // u_Bones[a_BoneIndex] transforms rest-pose position to skeleton-local space;
+        // u_BodyOrigin + u_BodyScale*bonePos replicates BMD::Transform's VectorMA.
+        float4 bonePos = mul(u_Bones[input.a_BoneIndex], float4(input.a_Pos, 1.0));
+        float3 worldPos = u_BodyOrigin + u_BodyScale * bonePos.xyz;
+        o.pos = mul(u_MVPDraw, float4(worldPos, 1.0));
+
+        // Rotation-only skin of the rest normal -- (float3x3) cast drops the translation
+        // column/bottom row, same as GLSL's mat3(mat4).
+        skinnedNormal = normalize(mul((float3x3)u_Bones[input.a_BoneIndex], input.a_Normal));
+
+        // Per-vertex lighting, ported 1:1 from BMD::Transform's CPU loop (see the GLSL twin's
+        // comment for the exact formula reference).
+        if (u_LightEnable == 1)
+        {
+            float lum = max(dot(skinnedNormal, u_LightDir) * 0.8 + 0.4, 0.2);
+            gpuSkinColor = float4(u_BodyLight * lum, u_Alpha);
+        }
+        else
+        {
+            gpuSkinColor = float4(u_BodyLight, u_Alpha);
+        }
+
+        // Plain RENDER_CHROME UV + static MatCap UV, ported 1:1 (see GLSL twin).
+        chromeUV = float2(skinnedNormal.z * 0.5 + u_ChromeWave, skinnedNormal.y * 0.5 + u_ChromeWave * 2.0);
+        o.chromeUVStatic = skinnedNormal.xy * 0.5 + 0.5;
+
+        if (u_RenderMode == 7)
+        {
+            float3 Lp = float3(u_ChromeLightVec, 1.0);
+            float d = dot(skinnedNormal, Lp);
+            o.chromeUV2 = float2(d + skinnedNormal.y * 0.5 + u_ChromeLightVec.y * 3.0,
+                                  (1.0 - d) - skinnedNormal.z * 0.5 - u_ChromeWave * 3.0);
+        }
+        else
+        {
+            o.chromeUV2 = float2((skinnedNormal.z + skinnedNormal.x) * 0.8 + u_ChromeWave2 * 2.0,
+                                  (skinnedNormal.y + skinnedNormal.x) * 1.0 + u_ChromeWave2 * 3.0);
+        }
+    }
+    else
+    {
+        // CPU pre-transformed position (dynamic VBO fallback / stream mesh)
+        o.pos = mul(u_MVPDraw, float4(input.a_Pos, 1.0));
+    }
+
+    o.color = gpuSkinColor;
+    o.chromeUV = chromeUV;
+
+    if (u_RenderMode == 0)
+    {
+        o.uv = input.a_UV + float2(u_WaveOffsetU, u_WaveOffsetV);
+    }
+    else if (u_RenderMode == 3)
+    {
+        // Chrome-family meshes: chrome UV replaces the base UV entirely, selected per
+        // u_ChromeVariant (see the GLSL twin's per-branch formula references).
+        if (u_ChromeVariant == 1)
+        {
+            o.uv = float2((skinnedNormal.z + skinnedNormal.x) * 0.8 + u_ChromeWave2 * 2.0,
+                          (skinnedNormal.y + skinnedNormal.x) * 1.0 + u_ChromeWave2 * 3.0);
+        }
+        else if (u_ChromeVariant == 2)
+        {
+            float d = dot(skinnedNormal, float3(0.0, -0.1, -0.8));
+            o.uv = float2(d, 1.0 - d);
+        }
+        else if (u_ChromeVariant == 3)
+        {
+            float3 L = float3(u_ChromeLightVec, 1.0);
+            float d = dot(skinnedNormal, L);
+            o.uv = float2(d + skinnedNormal.y * 3.0 + u_ChromeLightVec.y * 5.0,
+                          (1.0 - d) - skinnedNormal.z * 2.5 - u_ChromeWave * 1.0);
+        }
+        else if (u_ChromeVariant == 4)
+        {
+            float t = (skinnedNormal.z + skinnedNormal.x) * 0.8 + u_ChromeWave2 * 2.0;
+            o.uv = float2(t, t);
+        }
+        else if (u_ChromeVariant == 5)
+        {
+            float t = (skinnedNormal.z + skinnedNormal.x) * 0.8 + u_ChromeTimeTerm;
+            o.uv = float2(t, t);
+        }
+        else if (u_ChromeVariant == 6)
+        {
+            o.uv = float2(skinnedNormal.z * 0.5 + 0.2, skinnedNormal.y * 0.5 + 0.5);
+        }
+        else
+        {
+            o.uv = chromeUV;
+        }
+    }
+    else
+    {
+        o.uv = input.a_UV;
+    }
+
+    return o;
+}
+)";
+
+static const char* g_szBMDMeshFragHLSL = R"(
+cbuffer BMDFlags : register(b6)
+{
+    column_major matrix u_MVPDraw;
+    int    u_UseGPUSkin;
+    int    u_RenderMode;
+    float  u_WaveOffsetU;
+    float  u_WaveOffsetV;
+    float3 u_BodyOrigin;
+    float  u_BodyScale;
+    float  u_ChromeWave;
+    float  u_ChromeWave2;
+    float2 u_ChromeLightVec;
+    int    u_ChromeVariant;
+    float  u_ChromeTimeTerm;
+    float  u_Alpha;
+    float  u_AlphaRef;
+    float3 u_LightDir;
+    int    u_LightEnable;
+    float3 u_BodyLight;
+    float  _bmdPad0;
+    float3 u_SpecularTint;
+    float  _bmdPad1;
+};
+
+Texture2D    u_Tex        : register(t0);
+Texture2D    u_ChromeTex1 : register(t1); // RenderMode 4+ only
+Texture2D    u_MetalTex   : register(t2); // RenderMode 5+ only
+Texture2D    u_ChromeTex2 : register(t3); // RenderMode 6/7 only
+// One sampler register per slot, not one shared s0 -- RHI_D3D11::BindTexture() already binds each
+// slot's OWN recorded filter/wrap sampler via PSSetSamplers(slot, ...) (each texture's wrap mode
+// was set correctly at load time, e.g. BITMAP_CHROME2 is GL_CLAMP_TO_EDGE in GL), but a single
+// shared SamplerState register only ever reads whatever sampler is bound at s0 regardless of which
+// texture's .Sample() call uses it -- so u_ChromeTex1/u_MetalTex/u_ChromeTex2 were all silently
+// sampled with slot 0's (the base armor texture's, often GL_REPEAT for tiling cloth) sampler
+// instead of their own. Mode 6/7's chromeUV2 goes well outside [0,1] (chromeWave2 term), so this
+// showed up as u_ChromeTex2 tiling/wrapping across a wide UV range instead of clamping -- the
+// reported "+11 and up swipe is too fast and too bright" regression (GL is unaffected: each GL
+// texture unit carries its own wrap state, no shared-sampler concept).
+SamplerState u_Samp0 : register(s0);
+SamplerState u_Samp1 : register(s1);
+SamplerState u_Samp2 : register(s2);
+SamplerState u_Samp3 : register(s3);
+
+struct PSInput
+{
+    float4 pos           : SV_POSITION;
+    float2 uv            : TEXCOORD0;
+    float4 color         : COLOR0;
+    float2 chromeUV      : TEXCOORD1;
+    float2 chromeUVStatic: TEXCOORD2;
+    float2 chromeUV2     : TEXCOORD3;
+};
+
+float4 main(PSInput input) : SV_TARGET
+{
+    // Clamp to [0,1] to match FFP vertex color clamping (see the GLSL twin's comment).
+    float4 c = saturate(input.color);
+
+    float4 fragColor;
+    if (u_RenderMode == 2)
+    {
+        // RENDER_BRIGHT: solid vertex color, no texture.
+        fragColor = c;
+    }
+    else if (u_RenderMode == 4)
+    {
+        float4 base    = u_Tex.Sample(u_Samp0, input.uv);
+        float4 chrome1 = u_ChromeTex1.Sample(u_Samp1, input.chromeUV);
+        fragColor = float4(base.rgb * c.rgb + chrome1.rgb * u_SpecularTint, base.a);
+    }
+    else if (u_RenderMode == 5)
+    {
+        float4 base    = u_Tex.Sample(u_Samp0, input.uv);
+        float4 chrome1 = u_ChromeTex1.Sample(u_Samp1, input.chromeUV);
+        float4 metal   = u_MetalTex.Sample(u_Samp2, input.chromeUVStatic);
+        fragColor = float4(base.rgb * c.rgb + (chrome1.rgb + metal.rgb * 1.8) * u_SpecularTint, base.a);
+    }
+    else if (u_RenderMode == 6)
+    {
+        float4 base    = u_Tex.Sample(u_Samp0, input.uv);
+        float4 chrome2 = u_ChromeTex2.Sample(u_Samp3, input.chromeUV2);
+        float4 metal   = u_MetalTex.Sample(u_Samp2, input.chromeUVStatic);
+        float4 chrome1 = u_ChromeTex1.Sample(u_Samp1, input.chromeUVStatic);
+        fragColor = float4((base.rgb + chrome2.rgb) * c.rgb + (metal.rgb + chrome1.rgb) * u_SpecularTint, base.a);
+    }
+    else if (u_RenderMode == 7)
+    {
+        // Textually identical blend formula to mode 6 -- only the animated chromeUV2 formula
+        // differs, already selected by the vertex shader based on u_RenderMode.
+        float4 base    = u_Tex.Sample(u_Samp0, input.uv);
+        float4 chrome2 = u_ChromeTex2.Sample(u_Samp3, input.chromeUV2);
+        float4 metal   = u_MetalTex.Sample(u_Samp2, input.chromeUVStatic);
+        float4 chrome1 = u_ChromeTex1.Sample(u_Samp1, input.chromeUVStatic);
+        fragColor = float4((base.rgb + chrome2.rgb) * c.rgb + (metal.rgb + chrome1.rgb) * u_SpecularTint, base.a);
+    }
+    else
+    {
+        // RENDER_TEXTURE / RENDER_CHROME: texture modulated by clamped vertex color.
+        fragColor = u_Tex.Sample(u_Samp0, input.uv) * c;
+    }
+
+    if (fragColor.a < 0.01) discard;
+    // <= matches GL_GREATER exactly (fixed-function alpha test passes when a > ref).
+    if (u_AlphaRef >= 0.0 && fragColor.a <= u_AlphaRef) discard;
+
+    return fragColor;
+}
+)";
+
+#ifdef RHI_D3D11_AVAILABLE
+namespace {
+    bool CompileHLSL(const char* source, const char* entryPoint, const char* target, ID3DBlob** outBlob)
+    {
+        ID3DBlob* errorBlob = nullptr;
+        UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+        flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+        const HRESULT hr = D3DCompile(source, strlen(source), nullptr, nullptr, nullptr,
+            entryPoint, target, flags, 0, outBlob, &errorBlob);
+        if (FAILED(hr))
+        {
+            if (errorBlob)
+            {
+                g_ErrorReport.Write(L"[BMDMeshShader][D3D11] %hs compile error: %hs\r\n",
+                    entryPoint, static_cast<const char*>(errorBlob->GetBufferPointer()));
+                errorBlob->Release();
+            }
+            else
+            {
+                g_ErrorReport.Write(L"[BMDMeshShader][D3D11] %hs compile failed, hr=0x%08lX\r\n",
+                    entryPoint, static_cast<unsigned long>(hr));
+            }
+            return false;
+        }
+        if (errorBlob) errorBlob->Release(); // warnings only
+        return true;
+    }
+
+    // Field order matches the BMDFlags cbuffer declared above byte-for-byte -- both hand-laid
+    // out to the same 16-byte-row boundaries, verified against HLSL's automatic cbuffer packing
+    // rules at design time (see the cbuffer's own comment). All members are 4-byte-aligned
+    // scalars/arrays so this struct has no compiler-inserted padding; the static_assert below
+    // catches any future edit that breaks that assumption.
+    struct BMDFlagsCB
+    {
+        float   mvpDraw[16];
+        int32_t useGPUSkin;
+        int32_t renderMode;
+        float   waveOffsetU;
+        float   waveOffsetV;
+        float   bodyOrigin[3];
+        float   bodyScale;
+        float   chromeWave;
+        float   chromeWave2;
+        float   chromeLightVec[2];
+        int32_t chromeVariant;
+        float   chromeTimeTerm;
+        float   alpha;
+        float   alphaRef;
+        float   lightDir[3];
+        int32_t lightEnable;
+        float   bodyLight[3];
+        float   _pad0;
+        float   specularTint[3];
+        float   _pad1;
+    };
+    static_assert(sizeof(BMDFlagsCB) == 176, "BMDFlagsCB must match the HLSL BMDFlags cbuffer layout byte-for-byte");
+}
+#endif // RHI_D3D11_AVAILABLE -- ID3DBlob/D3DCompile aren't declared without <d3dcompiler.h>
+       // (guarded above with the same macro); this block would fail to compile on non-Windows
+       // otherwise.
+
 BMDMeshShader& BMDMeshShader::Instance()
 {
     static BMDMeshShader instance;
@@ -355,16 +712,26 @@ BMDMeshShader::~BMDMeshShader()
 
 void BMDMeshShader::Create()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { CreateD3D11(); return; }
     CreateGL();
 }
 
 void BMDMeshShader::Destroy()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { DestroyD3D11(); return; }
     DestroyGL();
 }
 
 void BMDMeshShader::Bind(int renderMode, float waveOffsetU, float waveOffsetV, GLuint texID, const float mvp[16], int useGPUSkin, const float bodyOrigin[3], float bodyScale, float chromeWave, GLuint chromeTex1ID, const float specularTint[3], GLuint metalTexID, GLuint chromeTex2ID, float chromeWave2, float chromeLightVecX, float chromeLightVecY, const float lightDir[3], const float bodyLight[3], int lightEnable, float alpha, int chromeVariant, float chromeTimeTerm)
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        if (!m_D3DVertexShader) Create();
+        BindD3D11(renderMode, waveOffsetU, waveOffsetV, texID, useGPUSkin, bodyOrigin, bodyScale, chromeWave,
+            chromeTex1ID, specularTint, metalTexID, chromeTex2ID, chromeWave2, chromeLightVecX, chromeLightVecY,
+            lightDir, bodyLight, lightEnable, alpha, chromeVariant, chromeTimeTerm, mvp);
+        return;
+    }
     BindGL(renderMode, waveOffsetU, waveOffsetV, texID, mvp, useGPUSkin, bodyOrigin, bodyScale, chromeWave,
         chromeTex1ID, specularTint, metalTexID, chromeTex2ID, chromeWave2, chromeLightVecX, chromeLightVecY,
         lightDir, bodyLight, lightEnable, alpha, chromeVariant, chromeTimeTerm);
@@ -372,6 +739,16 @@ void BMDMeshShader::Bind(int renderMode, float waveOffsetU, float waveOffsetV, G
 
 void BMDMeshShader::Unbind()
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+        if (ctx)
+        {
+            ctx->VSSetShader(nullptr, nullptr, 0);
+            ctx->PSSetShader(nullptr, nullptr, 0);
+        }
+        return;
+    }
     BindProgram(0);
 }
 
@@ -600,6 +977,8 @@ void BMDMeshShader::BindGL(int renderMode, float waveOffsetU, float waveOffsetV,
 
 void BMDMeshShader::SetTexture(GLuint texID, int slot)
 {
+    if (g_RenderBackend == RenderBackend::D3D11) return; // DXP-15/16: D3D11 texture binding, not yet wired
+
     BindTexture2D(slot, texID);
     if (m_LocTex != -1 && fn_glUniform1i) {
         fn_glUniform1i(m_LocTex, slot);
@@ -623,3 +1002,150 @@ void BMDMeshShader::SetWaveOffset(float offsetU, float offsetV)
     }
 }
 
+#ifdef RHI_D3D11_AVAILABLE
+void BMDMeshShader::CreateD3D11()
+{
+    if (m_D3DVertexShader) return;
+    ID3D11Device* device = static_cast<ID3D11Device*>(RHI::GetD3D11Device());
+    if (!device) return;
+
+    ID3DBlob* vsBlob = nullptr;
+    ID3DBlob* psBlob = nullptr;
+    if (!CompileHLSL(g_szBMDMeshVertHLSL, "main", "vs_5_0", &vsBlob)) return;
+    if (!CompileHLSL(g_szBMDMeshFragHLSL, "main", "ps_5_0", &psBlob)) { vsBlob->Release(); return; }
+
+    ID3D11VertexShader* vs = nullptr;
+    if (FAILED(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vs)))
+    {
+        g_ErrorReport.Write(L"[BMDMeshShader][D3D11] CreateVertexShader failed\r\n");
+        vsBlob->Release(); psBlob->Release();
+        return;
+    }
+    ID3D11PixelShader* ps = nullptr;
+    if (FAILED(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &ps)))
+    {
+        g_ErrorReport.Write(L"[BMDMeshShader][D3D11] CreatePixelShader failed\r\n");
+        vs->Release(); vsBlob->Release(); psBlob->Release();
+        return;
+    }
+
+    // Registers this shader's bytecode as the BMDMesh layout's signature source -- RHI_D3D11
+    // needs real VS bytecode to build the matching ID3D11InputLayout (D3D11 requirement, no GL
+    // equivalent). BMDMeshShader is BMDMesh's only producer today.
+    RHI::RegisterVertexShaderBytecode(RHI::VertexLayout::BMDMesh, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize());
+    vsBlob->Release();
+    psBlob->Release();
+
+    m_D3DVertexShader = vs;
+    m_D3DPixelShader = ps;
+
+    m_D3DFlagsCBuffer = RHI::CreateUniformBlock(sizeof(BMDFlagsCB), 6);
+
+    // DXP-16 increment 2 (superseded by increment 3, see below): u_Samp (s0) used to be one fixed
+    // linear/clamp sampler shared by all 4 texture slots (t0-t3).
+    // DXP-16 increment 3: replaced by RHI::BindTexture() binding each texture's own recorded
+    // filter/wrap sampler at bind time (RHI_D3D11.cpp's GetOrCreateSampler) -- see
+    // TerrainShader.cpp's CreateD3D11 comment for the bug a fixed shared sampler caused elsewhere.
+    // This shader's textures are all CLAMP-wrapped model UVs so it never hit that bug directly,
+    // but there's no longer a per-shader sampler to create here either way.
+
+    g_ErrorReport.Write(L"[BMDMeshShader][D3D11] Compiled + linked, BMDFlags cbuffer at slot 6\r\n");
+}
+
+void BMDMeshShader::DestroyD3D11()
+{
+    if (m_D3DFlagsCBuffer.IsValid()) { RHI::DestroyUniformBlock(m_D3DFlagsCBuffer); m_D3DFlagsCBuffer = {}; }
+    if (m_D3DPixelShader)  { static_cast<ID3D11PixelShader*>(m_D3DPixelShader)->Release();   m_D3DPixelShader = nullptr; }
+    if (m_D3DVertexShader) { static_cast<ID3D11VertexShader*>(m_D3DVertexShader)->Release(); m_D3DVertexShader = nullptr; }
+}
+
+extern int CachTexture;
+
+void BMDMeshShader::BindD3D11(int renderMode, float waveOffsetU, float waveOffsetV, GLuint texID, int useGPUSkin,
+    const float bodyOrigin[3], float bodyScale, float chromeWave, GLuint chromeTex1ID, const float specularTint[3],
+    GLuint metalTexID, GLuint chromeTex2ID, float chromeWave2, float chromeLightVecX, float chromeLightVecY,
+    const float lightDir[3], const float bodyLight[3], int lightEnable, float alpha, int chromeVariant,
+    float chromeTimeTerm, const float mvp[16])
+{
+    ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+    if (!ctx || !m_D3DVertexShader || !m_D3DPixelShader || !m_D3DFlagsCBuffer.IsValid()) return;
+
+    ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShader), nullptr, 0);
+    ctx->PSSetShader(static_cast<ID3D11PixelShader*>(m_D3DPixelShader), nullptr, 0);
+
+    // Mirrors BindGL's renderMode-gated texture binds (t0=base, t1=chrome1, t2=metal, t3=chrome2).
+    // Always call BindTexture for slots 1-3, not just when the renderMode condition is met: an
+    // invalid handle still clears that slot's SRV (previously left stale from whatever draw last
+    // used it) and binds a default sampler (RHI_D3D11.cpp's BindTexture) -- skipping the call
+    // entirely left both the SRV and sampler wholly unset for the common case (plain-textured
+    // items, renderMode outside 4-7), which is what the D3D11 debug layer's per-draw "Sampler not
+    // set at Slot 2/3" warning was actually flagging.
+    RHI::BindTexture(RHI::TextureHandle{ (renderMode == 4 || renderMode == 5 || renderMode == 6 || renderMode == 7) ? chromeTex1ID : 0 }, 1);
+    RHI::BindTexture(RHI::TextureHandle{ (renderMode == 5 || renderMode == 6 || renderMode == 7) ? metalTexID : 0 }, 2);
+    RHI::BindTexture(RHI::TextureHandle{ (renderMode == 6 || renderMode == 7) ? chromeTex2ID : 0 }, 3);
+    if (texID != 0)
+    {
+        RHI::BindTexture(RHI::TextureHandle{ texID }, 0);
+        // DXP-16 fix: same class of bug as TerrainShader::SetBaseTexture/PassthroughShader::SetTexture's
+        // D3D11 branches -- this direct RHI::BindTexture(slot 0) bypasses the CachTexture cache the
+        // UI's BindTexture(int) wrapper (ZzzOpenglUtil.cpp) trusts, so it must invalidate it too, or a
+        // later UI sprite bind for the same texture ID gets silently skipped while slot 0 still holds
+        // whichever character/model texture this draw call just bound (the reported login-window
+        // background flicker: RenderCharactersClient()/RenderMount() run before BeginBitmap() every
+        // login-scene frame).
+        CachTexture = -1;
+    }
+
+    BMDFlagsCB cb = {};
+    if (mvp != nullptr)
+    {
+        memcpy(cb.mvpDraw, mvp, sizeof(cb.mvpDraw));
+    }
+    else
+    {
+        // Mirrors BindGL's mvp==nullptr fallback (presently unreachable -- both ZzzBMD.cpp call
+        // sites always supply GetCurrentMVP()'s result -- kept for parity with the GL path).
+        memcpy(cb.mvpDraw, GlobalUBO::Instance().GetMVP(), sizeof(cb.mvpDraw));
+    }
+    cb.useGPUSkin = useGPUSkin;
+    cb.renderMode = renderMode;
+    cb.waveOffsetU = waveOffsetU;
+    cb.waveOffsetV = waveOffsetV;
+
+    const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
+    const float whiteLight[3] = { 1.f, 1.f, 1.f };
+    const float whiteTint[3]  = { 1.f, 1.f, 1.f };
+
+    const float* origin = bodyOrigin ? bodyOrigin : zeroOrigin;
+    memcpy(cb.bodyOrigin, origin, sizeof(cb.bodyOrigin));
+    cb.bodyScale = bodyScale;
+    cb.chromeWave = chromeWave;
+    cb.chromeWave2 = chromeWave2;
+    cb.chromeLightVec[0] = chromeLightVecX;
+    cb.chromeLightVec[1] = chromeLightVecY;
+    cb.chromeVariant = chromeVariant;
+    cb.chromeTimeTerm = chromeTimeTerm;
+    cb.alpha = alpha;
+    cb.alphaRef = g_AlphaRef;
+
+    const float* dir = lightDir ? lightDir : zeroOrigin;
+    memcpy(cb.lightDir, dir, sizeof(cb.lightDir));
+    cb.lightEnable = lightEnable;
+
+    const float* light = bodyLight ? bodyLight : whiteLight;
+    memcpy(cb.bodyLight, light, sizeof(cb.bodyLight));
+
+    const float* tint = specularTint ? specularTint : whiteTint;
+    memcpy(cb.specularTint, tint, sizeof(cb.specularTint));
+
+    RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
+}
+#else // !RHI_D3D11_AVAILABLE -- keep these symbols linkable as no-ops since Create()/Destroy()/
+      // Bind() call them behind a runtime g_RenderBackend check, which itself compiles on every
+      // platform (see RHI_D3D11.cpp's own #else for the same rationale).
+void BMDMeshShader::CreateD3D11() {}
+void BMDMeshShader::DestroyD3D11() {}
+void BMDMeshShader::BindD3D11(int, float, float, GLuint, int, const float[3], float, float, GLuint,
+    const float[3], GLuint, GLuint, float, float, float, const float[3], const float[3], int, float,
+    int, float, const float[16]) {}
+#endif // RHI_D3D11_AVAILABLE

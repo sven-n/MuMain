@@ -44,6 +44,27 @@ namespace CfgKeys
     // Render
     // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
+
+    // DXP-13: render backend selection. "GL" (default) or "D3D11".
+    inline constexpr wchar_t CfgKeyBackend[] = L"Backend";
+
+    // D3D11 debug device (D3D11_CREATE_DEVICE_DEBUG) opt-in. Off by default even in Debug
+    // builds -- the validation layer's per-Draw-call cost, stacked on Debug's unoptimized
+    // code, turns draw-call-heavy scenes (e.g. the login screen's ~14K terrain tile draws)
+    // unplayably slow. Flip to 1 in config.ini only when actively investigating a D3D11
+    // correctness bug (it's what catches missing state binds, resource mismatches, etc.).
+    inline constexpr wchar_t CfgKeyD3D11DebugLayer[] = L"D3D11DebugLayer";
+
+    // DXP-21 part 1 phase 1: one-shot ClothComputeShader GPU-vs-CPU self-test, run once at
+    // startup (D3D11 only) and logged to MuError.log. Off by default -- diagnostic only, not
+    // part of the real cloth path yet (Passes A/B aren't wired to any render-loop caller).
+    inline constexpr wchar_t CfgKeyClothComputeSelfTest[] = L"ClothComputeSelfTest";
+
+    // DXP-21 part 1 phase 3c: opt-in GPU cloth simulation+draw for CPhysicsCloth::Move()/Render()
+    // (D3D11 only; CPhysicsClothMesh -- the one mesh-topology exception -- still always uses CPU,
+    // see the DXP-21 task memory's Phase 0 scope note). Off by default -- CPU remains the default
+    // simulation/draw path for every cloth instance until this soaks (Phase 4/5).
+    inline constexpr wchar_t CfgKeyGpuCloth[] = L"GpuCloth";
 }
 
 namespace CfgDefaults
@@ -78,4 +99,17 @@ namespace CfgDefaults
     // soak-confirmed clean under CoreProfile=1 (2026-08-01). Set CoreProfile=0 in config.ini to
     // opt back into the compatibility-profile rollback path.
     inline constexpr bool CfgDefaultCoreProfile = true;
+
+    // DXP-13: default render backend. Anything other than "D3D11" (case-insensitive) falls
+    // back to GL -- an unrecognized value must never silently select the unfinished backend.
+    inline constexpr wchar_t CfgDefaultBackend[] = L"GL";
+
+    // Off by default -- see CfgKeyD3D11DebugLayer's comment.
+    inline constexpr bool CfgDefaultD3D11DebugLayer = false;
+
+    // Off by default -- see CfgKeyClothComputeSelfTest's comment.
+    inline constexpr bool CfgDefaultClothComputeSelfTest = false;
+
+    // Off by default -- see CfgKeyGpuCloth's comment.
+    inline constexpr bool CfgDefaultGpuCloth = false;
 }

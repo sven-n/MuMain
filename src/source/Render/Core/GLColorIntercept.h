@@ -19,9 +19,16 @@
 // Ordering matters: the real ::glColor*() calls below must be written before the #define
 // lines at the bottom of this file, or the preprocessor would recursively expand them too.
 //
+// DXP-16 increment 3: under Backend=D3D11 there is no GL context at all (Winmain never creates
+// one -- see PlatformSwapBuffers()'s comment in Winmain.cpp), so firing the real ::glColor*()
+// call would hit an uninitialized/context-less GL entry point. g_CoreProfile alone doesn't catch
+// this -- it defaults false and is only ever set from the GL-specific CoreProfile config key, so
+// a D3D11 run with default config left these ~70+ call sites (scattered across ZzzObject.cpp's
+// item/wing/cape special-casing, reachable once character rendering is un-gated) calling real GL
+// with no context. One flag added here instead of gating every call site individually.
 inline bool DXP_GLColorShouldSkipRealCall()
 {
-    return g_CoreProfile;
+    return g_CoreProfile || g_RenderBackend == RenderBackend::D3D11;
 }
 
 inline void DXP_GLColor3f(GLfloat r, GLfloat g, GLfloat b)

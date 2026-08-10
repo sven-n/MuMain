@@ -5,6 +5,10 @@
 #include "Core/Platform/WinIni.h"
 
 bool g_CoreProfile = false;
+RenderBackend g_RenderBackend = RenderBackend::GL;
+bool g_D3D11DebugLayerEnabled = false;
+bool g_ClothComputeSelfTestEnabled = false;
+bool g_GpuClothEnabled = false;
 
 // -1.0f = alpha test disabled; matches AlphaTestEnable's initial false state in ZzzOpenglUtil.cpp.
 float g_AlphaRef = -1.0f;
@@ -38,6 +42,19 @@ void InitRenderConfig()
 
     int coreProfile = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyCoreProfile, CfgDefaults::CfgDefaultCoreProfile ? 1 : 0, configPath);
     g_CoreProfile = (coreProfile != 0);
+
+    wchar_t backendBuf[16];
+    GetPrivateProfileStringW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyBackend, CfgDefaults::CfgDefaultBackend, backendBuf, _countof(backendBuf), configPath);
+    g_RenderBackend = (_wcsicmp(backendBuf, L"D3D11") == 0) ? RenderBackend::D3D11 : RenderBackend::GL;
+
+    const int d3d11DebugLayer = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyD3D11DebugLayer, CfgDefaults::CfgDefaultD3D11DebugLayer ? 1 : 0, configPath);
+    g_D3D11DebugLayerEnabled = (d3d11DebugLayer != 0);
+
+    const int clothComputeSelfTest = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyClothComputeSelfTest, CfgDefaults::CfgDefaultClothComputeSelfTest ? 1 : 0, configPath);
+    g_ClothComputeSelfTestEnabled = (clothComputeSelfTest != 0);
+
+    const int gpuCloth = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyGpuCloth, CfgDefaults::CfgDefaultGpuCloth ? 1 : 0, configPath);
+    g_GpuClothEnabled = (gpuCloth != 0);
 }
 
 void BuildPerspectiveProjection(float f, float aspect, float zNear, float zFar, float out[16])
@@ -47,6 +64,14 @@ void BuildPerspectiveProjection(float f, float aspect, float zNear, float zFar, 
     out[8] = 0.f; out[9] = 0.f; out[11] = -1.f;
     out[12] = 0.f; out[13] = 0.f; out[15] = 0.f;
 
-    out[10] = (zFar + zNear) / (zNear - zFar);
-    out[14] = (2.f * zFar * zNear) / (zNear - zFar);
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        out[10] = zFar / (zNear - zFar);
+        out[14] = (zNear * zFar) / (zNear - zFar);
+    }
+    else
+    {
+        out[10] = (zFar + zNear) / (zNear - zFar);
+        out[14] = (2.f * zFar * zNear) / (zNear - zFar);
+    }
 }

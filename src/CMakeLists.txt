@@ -492,6 +492,9 @@ if (MSVC)
     wininet
     urlmon
     turbojpeg-static
+    d3d11
+    dxgi
+    d3dcompiler
   )
 
   # Locate required DLLs in bin directory

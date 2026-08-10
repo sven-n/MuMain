@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include "Render/Sprites/TextureScript.h"
+#include "Render/RHI/RHI.h"
 
 extern const float (*g_pActiveBoneTransform)[3][4];
 // Bumped by every SetActiveBoneTransform() call — lets BoneUBO detect "the pointer is
@@ -228,9 +229,21 @@ public:
     GLuint m_VBO_Color;       // Pre-allocated dynamic color buffer for GPU skinning path
     bool   m_HasStaticGPUVBO;
 
-    // True once UploadStaticVBOs() has built the per-corner geometry arrays for this model
-    // (both m_VAO_StaticGPU's GPU-skin buffer AND the CPU dynamic-VBO fallback's
-    // m_MeshIndexCount/m_MeshIndexOffset bookkeeping are ready).
+    // DXP-16 increment 2: D3D11 has no equivalent of GL's split geometry+color VAO -- one
+    // interleaved buffer per RHI::VertexLayout::BMDMesh (pos3+uv2+color4+normal3+boneIndex1,
+    // 52B stride) instead. GPU-skin path: built once at load (color left zeroed -- the shader
+    // ignores a_Color whenever u_UseGPUSkin==1, see BMDMeshShader's HLSL). CPU dynamic-VBO
+    // fallback (chrome2/3/5/6/7, oil, metal): re-uploaded every frame like m_VBO_Dynamic, normal/
+    // boneIndex left zeroed (shader's u_UseGPUSkin==0 branch never reads a_BoneIndex; RenderMode 3's
+    // skinnedNormal falls back to a_Normal same as GL leaving that attribute location disabled).
+    RHI::BufferHandle m_D3D11StaticVB;
+    RHI::BufferHandle m_D3D11DynamicVB;
+    std::vector<float> m_D3D11DynStaging; // scratch for the 9-float(GL)->13-float(D3D11) per-corner expansion
+
+    // Backend-agnostic replacement for GL's "m_VAO_Static != 0" readiness check (D3D11 has no VAO
+    // to test) -- true once UploadStaticVBOs() has built the per-corner geometry arrays for this
+    // model (both m_VAO_StaticGPU/m_D3D11StaticVB's GPU-skin buffer AND the CPU dynamic-VBO
+    // fallback's m_MeshIndexCount/m_MeshIndexOffset bookkeeping are ready).
     bool m_StaticGeomReady;
 
     float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()

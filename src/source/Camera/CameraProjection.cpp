@@ -45,10 +45,24 @@ void CameraProjection::SetViewport(int x, int y, int width, int height)
     s_ViewportWidth = width;
     s_ViewportHeight = height;
 
-    // GL's viewport origin is bottom-left, so glViewport needs y flipped to
-    // WindowHeight-(y+height).
-    const int flippedY = WindowHeight - (y + height);
-    glViewport(x, flippedY, width, height);
+    // DXP-16 fix: GL's viewport origin is bottom-left, so glViewport needs y flipped to
+    // WindowHeight-(y+height). D3D11_VIEWPORT is top-left-origin -- RHI_D3D11::SetViewport
+    // (RHI_D3D11.cpp) writes `y` straight into TopLeftY with no counter-flip, i.e. it expects
+    // the SAME top-down convention the caller's own x/y/width/height already use. Applying GL's
+    // flip before calling RHI::SetViewport (the previous code, on the mistaken belief that
+    // RHI_D3D11::SetViewport re-flips internally) fed it a bottom-up value as if it were
+    // top-down: for any height-reduced viewport (e.g. the main game view, shortened to leave
+    // room for the bottom HUD bar) this misplaced the visible area near the bottom of the
+    // window, leaving a black gap at the top the same size as the reserved HUD margin.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        RHI::SetViewport(x, y, width, height);
+    }
+    else
+    {
+        const int flippedY = WindowHeight - (y + height);
+        glViewport(x, flippedY, width, height);
+    }
 }
 
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,

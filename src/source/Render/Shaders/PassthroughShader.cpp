@@ -2,8 +2,13 @@
 #include "PassthroughShader.h"
 #include "Render/Core/RenderConfig.h"
 #include "Render/Core/BindState.h"
+#include "Render/RHI/RHI.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <SDL3/SDL.h>
+#ifdef RHI_D3D11_AVAILABLE
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#endif
 #include <cstdint>
 #include <cstring>
 #include <iostream>
@@ -168,6 +173,141 @@ void main() {
 }
 )";
 
+// DXP-14 -- HLSL port, kept semantically line-for-line with the GLSL above (per the task's
+// "Rules" section) so the two are easy to diff by eye. Two structural differences forced by
+// HLSL, both noted at the site: (1) the four loose GLSL uniforms become one PassFlags cbuffer
+// (HLSL has no non-block uniform storage); (2) matrices are declared column_major explicitly
+// and multiplied via mul(M, v), matching GLSL's M*v convention (see the task doc's "What could
+// go wrong" section) instead of HLSL's other common mul(v, M) style.
+static const char* g_szPassthroughVertHLSL = R"(
+cbuffer GlobalMatrices : register(b0)
+{
+    column_major matrix u_View;
+    column_major matrix u_Proj;
+    column_major matrix u_Model;
+    column_major matrix u_MVP;
+    float4 u_Time;
+};
+
+struct VSInput
+{
+    float3 a_Pos   : POSITION;
+    float2 a_UV    : TEXCOORD0;
+    float4 a_Color : COLOR0;
+};
+
+struct VSOutput
+{
+    float4 pos   : SV_POSITION;
+    float2 uv    : TEXCOORD0;
+    float4 color : COLOR0;
+};
+
+VSOutput main(VSInput input)
+{
+    VSOutput o;
+    o.pos   = mul(u_MVP, float4(input.a_Pos, 1.0));
+    o.uv    = input.a_UV;
+    o.color = input.a_Color;
+    return o;
+}
+)";
+
+static const char* g_szPassthroughFragHLSL = R"(
+cbuffer SceneData : register(b1)
+{
+    float4 u_FogColor;
+    float  u_FogStart;
+    float  u_FogEnd;
+    float  u_FogEnabled;
+    float  u_ScenePadding;
+};
+
+// The GLSL fragment shader's four loose uniforms (u_UseTexture/u_UseFog/u_AlphaRef/
+// u_TexCombineAdd) have no HLSL "non-block uniform" equivalent -- packed into one cbuffer
+// instead (RHI slot 4: 0=GlobalMatrices, 1=SceneData, 2=BoneUBO, 3=DynamicLights reserved).
+cbuffer PassFlags : register(b4)
+{
+    int   u_UseTexture;
+    int   u_UseFog;
+    float u_AlphaRef;
+    int   u_TexCombineAdd;
+};
+
+Texture2D    u_Tex     : register(t0);
+SamplerState u_Sampler : register(s0);
+
+struct PSInput
+{
+    float4 pos   : SV_POSITION;
+    float2 uv    : TEXCOORD0;
+    float4 color : COLOR0;
+};
+
+float4 main(PSInput input) : SV_TARGET
+{
+    // See the GLSL twin's comment -- clamp to [0,1] to match FFP vertex color clamping.
+    float4 c = saturate(input.color);
+    float4 texSample = (u_UseTexture != 0) ? u_Tex.Sample(u_Sampler, input.uv) : float4(1.0, 1.0, 1.0, 1.0);
+
+    float4 fragColor;
+    if (u_TexCombineAdd != 0)
+        fragColor = float4(texSample.rgb + c.rgb, texSample.a * c.a);
+    else
+        fragColor = texSample * c;
+
+    // <= matches GL_GREATER exactly (fixed-function alpha test passes when a > ref).
+    if (u_AlphaRef >= 0.0 && fragColor.a <= u_AlphaRef)
+        discard;
+
+    if (u_UseFog != 0 && u_FogEnabled > 0.5)
+    {
+        // input.pos (SV_POSITION) carries the same z/w semantics as GLSL's gl_FragCoord.
+        float depth = input.pos.z / input.pos.w;
+        float fogFactor = saturate((u_FogEnd - depth) / (u_FogEnd - u_FogStart));
+        fragColor.rgb = lerp(u_FogColor.rgb, fragColor.rgb, fogFactor);
+    }
+
+    return fragColor;
+}
+)";
+
+#ifdef RHI_D3D11_AVAILABLE
+namespace {
+    bool CompileHLSL(const char* source, const char* entryPoint, const char* target, ID3DBlob** outBlob)
+    {
+        ID3DBlob* errorBlob = nullptr;
+        UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+        flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+        const HRESULT hr = D3DCompile(source, strlen(source), nullptr, nullptr, nullptr,
+            entryPoint, target, flags, 0, outBlob, &errorBlob);
+        if (FAILED(hr))
+        {
+            if (errorBlob)
+            {
+                g_ErrorReport.Write(L"[PassthroughShader][D3D11] %hs compile error: %hs\r\n",
+                    entryPoint, static_cast<const char*>(errorBlob->GetBufferPointer()));
+                errorBlob->Release();
+            }
+            else
+            {
+                g_ErrorReport.Write(L"[PassthroughShader][D3D11] %hs compile failed, hr=0x%08lX\r\n",
+                    entryPoint, static_cast<unsigned long>(hr));
+            }
+            return false;
+        }
+        if (errorBlob) errorBlob->Release(); // warnings only
+        return true;
+    }
+
+    struct PassFlagsCB { int32_t useTexture; int32_t useFog; float alphaRef; int32_t texCombineAdd; };
+}
+#endif // RHI_D3D11_AVAILABLE -- ID3DBlob/D3DCompile aren't declared without <d3dcompiler.h>
+       // (guarded above with the same macro); this block would fail to compile on non-Windows
+       // otherwise.
+
 PassthroughShader& PassthroughShader::Instance()
 {
     static PassthroughShader instance;
@@ -181,21 +321,34 @@ PassthroughShader::~PassthroughShader()
 
 void PassthroughShader::Create()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { CreateD3D11(); return; }
     CreateGL();
 }
 
 void PassthroughShader::Destroy()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { DestroyD3D11(); return; }
     DestroyGL();
 }
 
 void PassthroughShader::Bind()
 {
+    if (g_RenderBackend == RenderBackend::D3D11) { BindD3D11(); return; }
     BindGL();
 }
 
 void PassthroughShader::Unbind()
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+        if (ctx)
+        {
+            ctx->VSSetShader(nullptr, nullptr, 0);
+            ctx->PSSetShader(nullptr, nullptr, 0);
+        }
+        return;
+    }
     BindProgram(0);
 }
 
@@ -323,10 +476,125 @@ void PassthroughShader::BindGL()
     }
 }
 
+#ifdef RHI_D3D11_AVAILABLE
+void PassthroughShader::CreateD3D11()
+{
+    if (m_D3DVertexShader) return;
+    ID3D11Device* device = static_cast<ID3D11Device*>(RHI::GetD3D11Device());
+    if (!device) return;
+
+    ID3DBlob* vsBlob = nullptr;
+    ID3DBlob* psBlob = nullptr;
+    if (!CompileHLSL(g_szPassthroughVertHLSL, "main", "vs_5_0", &vsBlob)) return;
+    if (!CompileHLSL(g_szPassthroughFragHLSL, "main", "ps_5_0", &psBlob)) { vsBlob->Release(); return; }
+
+    ID3D11VertexShader* vs = nullptr;
+    if (FAILED(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &vs)))
+    {
+        g_ErrorReport.Write(L"[PassthroughShader][D3D11] CreateVertexShader failed\r\n");
+        vsBlob->Release(); psBlob->Release();
+        return;
+    }
+    ID3D11PixelShader* ps = nullptr;
+    if (FAILED(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &ps)))
+    {
+        g_ErrorReport.Write(L"[PassthroughShader][D3D11] CreatePixelShader failed\r\n");
+        vs->Release(); vsBlob->Release(); psBlob->Release();
+        return;
+    }
+
+    // Registers this shader's bytecode as the PosUvColor layout's signature source -- RHI_D3D11
+    // needs real VS bytecode to build the matching ID3D11InputLayout (D3D11 requirement, no GL
+    // equivalent). PassthroughShader is PosUvColor's only producer today.
+    RHI::RegisterVertexShaderBytecode(RHI::VertexLayout::PosUvColor, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize());
+    vsBlob->Release();
+    psBlob->Release();
+
+    m_D3DVertexShader = vs;
+    m_D3DPixelShader = ps;
+
+    // DXP-16 increment 3: no longer creates its own sampler here -- SetTexture()'s
+    // RHI::BindTexture() call binds each texture's own recorded filter/wrap sampler at bind time
+    // (RHI_D3D11.cpp's GetOrCreateSampler). See TerrainShader.cpp's CreateD3D11 comment for the
+    // bug a fixed shared-per-shader sampler caused elsewhere.
+
+    m_D3DFlagsCBuffer = RHI::CreateUniformBlock(sizeof(PassFlagsCB), 4);
+    m_D3DUseTexture = 1;
+    m_D3DUseFog = 0;
+    m_D3DTexCombineAdd = 0;
+    m_LastAlphaRef = -1.0f;
+    UploadD3D11Flags();
+    // Tri-state sentinels reset to "unset" for parity with the GL path (see CreateGL's
+    // comment) -- the D3D11 branch itself doesn't consult them, m_D3DUseTexture/m_D3DUseFog/
+    // m_D3DTexCombineAdd are the real current values it packs into the cbuffer.
+    m_LastUseTexture = -1;
+    m_LastUseFog = -1;
+    m_LastTexCombineAdd = -1;
+
+    g_ErrorReport.Write(L"[PassthroughShader][D3D11] Compiled + linked, PassFlags cbuffer at slot 4\r\n");
+}
+
+void PassthroughShader::DestroyD3D11()
+{
+    if (m_D3DFlagsCBuffer.IsValid()) { RHI::DestroyUniformBlock(m_D3DFlagsCBuffer); m_D3DFlagsCBuffer = {}; }
+    if (m_D3DPixelShader)  { static_cast<ID3D11PixelShader*>(m_D3DPixelShader)->Release();   m_D3DPixelShader = nullptr; }
+    if (m_D3DVertexShader) { static_cast<ID3D11VertexShader*>(m_D3DVertexShader)->Release(); m_D3DVertexShader = nullptr; }
+}
+
+void PassthroughShader::BindD3D11()
+{
+    ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+    if (!ctx || !m_D3DVertexShader || !m_D3DPixelShader) return;
+
+    ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShader), nullptr, 0);
+    ctx->PSSetShader(static_cast<ID3D11PixelShader*>(m_D3DPixelShader), nullptr, 0);
+
+    // Mirrors BindGL()'s per-draw alpha-ref dirty check (IR::Begin() calls Bind() every draw).
+    if (g_AlphaRef != m_LastAlphaRef)
+    {
+        m_LastAlphaRef = g_AlphaRef;
+        UploadD3D11Flags();
+    }
+}
+
+void PassthroughShader::UploadD3D11Flags()
+{
+    if (!m_D3DFlagsCBuffer.IsValid()) return;
+    PassFlagsCB cb;
+    cb.useTexture    = m_D3DUseTexture;
+    cb.useFog        = m_D3DUseFog;
+    cb.alphaRef      = m_LastAlphaRef;
+    cb.texCombineAdd = m_D3DTexCombineAdd;
+    RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
+}
+#else // !RHI_D3D11_AVAILABLE -- keep these symbols linkable as no-ops since Create()/Destroy()/
+      // Bind() call them behind a runtime g_RenderBackend check, which itself compiles on every
+      // platform (see RHI_D3D11.cpp's own #else for the same rationale).
+void PassthroughShader::CreateD3D11() {}
+void PassthroughShader::DestroyD3D11() {}
+void PassthroughShader::BindD3D11() {}
+void PassthroughShader::UploadD3D11Flags() {}
+#endif // RHI_D3D11_AVAILABLE
+
 extern int CachTexture;
 
 void PassthroughShader::SetTexture(GLuint texID, int slot)
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        // texID is the same RHI::TextureHandle::id both backends already share -- DXP-12
+        // migrated texture creation (GlobalBitmap.cpp/ZzzInventory.cpp/UIControls.cpp) behind
+        // RHI::CreateTexture on both backends, and BITMAP_t::TextureNumber just stores
+        // handle.id regardless of which backend produced it. No GLuint<->TextureHandle bridge
+        // needed.
+        RHI::BindTexture(RHI::TextureHandle{ static_cast<uint32_t>(texID) }, slot);
+        // DXP-16 fix: mirrors TerrainShader::SetBaseTexture's D3D11-branch fix -- this direct
+        // RHI::BindTexture bypasses the CachTexture cache the UI's BindTexture(int) wrapper trusts
+        // for slot 0, so it must be invalidated here too (the GL branch below already does it).
+        CachTexture = -1;
+        return;
+    }
+
     BindTexture2D(slot, texID);
     CachTexture = -1; // Invalidate engine texture cache
     if (slot != 0 && fn_glActiveTexture != nullptr) {
@@ -341,6 +609,12 @@ void PassthroughShader::SetUseTexture(bool use)
 {
     Bind();
     const int v = use ? 1 : 0;
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        m_D3DUseTexture = v;
+        UploadD3D11Flags();
+        return;
+    }
     if (m_LocUseTexture != -1 && fn_glUniform1i != nullptr && v != m_LastUseTexture) {
         fn_glUniform1i(m_LocUseTexture, v);
         m_LastUseTexture = v;
@@ -351,6 +625,12 @@ void PassthroughShader::SetUseFog(bool use)
 {
     Bind();
     const int v = use ? 1 : 0;
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        m_D3DUseFog = v;
+        UploadD3D11Flags();
+        return;
+    }
     if (m_LocUseFog != -1 && fn_glUniform1i != nullptr && v != m_LastUseFog) {
         fn_glUniform1i(m_LocUseFog, v);
         m_LastUseFog = v;
@@ -361,6 +641,12 @@ void PassthroughShader::SetTexCombineAdd(bool add)
 {
     Bind();
     const int v = add ? 1 : 0;
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        m_D3DTexCombineAdd = v;
+        UploadD3D11Flags();
+        return;
+    }
     if (m_LocTexCombineAdd != -1 && fn_glUniform1i != nullptr && v != m_LastTexCombineAdd) {
         fn_glUniform1i(m_LocTexCombineAdd, v);
         m_LastTexCombineAdd = v;

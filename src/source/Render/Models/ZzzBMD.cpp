@@ -1682,6 +1682,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
     };
 
+    const bool isD3D11 = (g_RenderBackend == RenderBackend::D3D11);
+
     if ((!bShaderActive || itemSpecularGpuEligible) && !(renderFlags & (RENDER_SHADOWMAP | RENDER_WAVE)))
     {
         // Only attempt upload if not yet tried. m_MeshIndexCount is allocated at the TOP
@@ -1697,7 +1699,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         // the GPU-skinned normal instead of requiring the CPU dynamic-VBO rebuild below. Other
         // chrome variants (CHROME2..7/OIL/METAL) are unchanged and still fall through to that path.
         const bool chromeGpuEligible = (finalRenderFlags == RENDER_CHROME) && !bShaderActive;
-        const bool staticGpuBufferReady = (m_VAO_StaticGPU != 0);
+        const bool staticGpuBufferReady = isD3D11 ? m_D3D11StaticVB.IsValid() : (m_VAO_StaticGPU != 0);
         if (m_HasStaticGPUVBO && staticGpuBufferReady && (!useChrome || chromeGpuEligible) &&
             m_MeshIndexCount && m_MeshIndexOffset && m_MeshIndexCount[meshIndex] > 0)
         {
@@ -1817,6 +1819,13 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             const int flatCount  = m_MeshIndexCount[meshIndex];
             const int baseCorner = m_MeshIndexOffset[meshIndex];
 
+            if (isD3D11)
+            {
+                RHI::BindVertexBuffer(m_D3D11StaticVB, RHI::VertexLayout::BMDMesh);
+                RHI::Draw(RHI::Topology::TriangleList, static_cast<uint32_t>(flatCount), static_cast<uint32_t>(baseCorner));
+                return;
+            }
+
             BindVAO(m_VAO_StaticGPU);
 
             glDrawArrays(GL_TRIANGLES, baseCorner, flatCount);
@@ -1843,7 +1852,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             UploadDynamicBuffers(meshIndex, alpha, renderFlags);
 
             // Only draw via VBO path if dynamic buffers were successfully uploaded this frame
-            const bool dynVBReady = (m_VBO_Dynamic != 0);
+            const bool dynVBReady = isD3D11 ? m_D3D11DynamicVB.IsValid() : (m_VBO_Dynamic != 0);
             if (m_DynBufsReady && dynVBReady)
             {
                 int shaderRenderMode = 0;
@@ -1863,6 +1872,13 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
                 GLuint activeTexID = texture ? texture->TextureNumber : 0;
                 BMDMeshShader::Instance().Bind(shaderRenderMode, EnableWave ? blendMeshTextureCoordU : 0.0f, EnableWave ? blendMeshTextureCoordV : 0.0f, activeTexID, mvp, 0);
+
+                if (isD3D11)
+                {
+                    RHI::BindVertexBuffer(m_D3D11DynamicVB, RHI::VertexLayout::BMDMesh);
+                    RHI::Draw(RHI::Topology::TriangleList, static_cast<uint32_t>(m_MeshIndexCount[meshIndex]));
+                    return;
+                }
 
                 BindVAO(m_VAO_Static);
 
@@ -1893,25 +1909,6 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             }
         }
     }
-
-#ifdef _DEBUG
-    // DXP-08a Category 4 investigation (temporary): one-shot log of why this (model,mesh)
-    // fell through to the legacy client-array path instead of a GPU VBO path, keyed on
-    // (this, meshIndex) so repeats across frames don't spam. Remove once the trigger
-    // condition is understood and the fallback itself is ported.
-    {
-        static std::set<std::pair<void*, int>> s_seenFallback;
-        if (s_seenFallback.insert({ (void*)this, meshIndex }).second)
-        {
-            g_ErrorReport.Write(L"[DXP-08a-CAT4] RenderMesh fallback: this=%p meshIndex=%d NumMeshs=%d "
-                L"bShaderActive=%d m_VAO_Static=%u m_MeshIndexCount=%p m_HasStaticGPUVBO=%d "
-                L"m_VAO_StaticGPU=%u m_DynBufsReady=%d m_VBO_Dynamic=%u renderFlags=0x%X\r\n",
-                (void*)this, meshIndex, NumMeshs, bShaderActive ? 1 : 0,
-                m_VAO_Static, (void*)m_MeshIndexCount, m_HasStaticGPUVBO ? 1 : 0,
-                m_VAO_StaticGPU, m_DynBufsReady ? 1 : 0, m_VBO_Dynamic, renderFlags);
-        }
-    }
-#endif // _DEBUG
 
     // DXP-20 inc4: legacy client-array path -- reads VertexTransform/NormalTransform (RENDER_WAVE)
     // directly below, plus LightTransform/g_chrome via materializeCpuLightingAndChrome() (the
@@ -2004,27 +2001,6 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     }
 
     const int vertexCount = target_vertex_index + 1;
-
-#ifdef _DEBUG
-    // DXP-08a Category 4 investigation part 2 (temporary): the port didn't fix visibility on
-    // first soak -- log what's actually about to be submitted, in case vertexCount is 0/bogus
-    // or alpha is fully transparent, before assuming the IR:: submission itself is broken.
-    {
-        static std::set<std::pair<void*, int>> s_seenSubmit;
-        if (s_seenSubmit.insert({ (void*)this, meshIndex }).second)
-        {
-            g_ErrorReport.Write(L"[DXP-08a-CAT4-SUBMIT] this=%p meshIndex=%d vertexCount=%d "
-                L"NumTriangles=%d alpha=%.3f color0=(%.2f,%.2f,%.2f,%.2f) vertex0=(%.2f,%.2f,%.2f) "
-                L"finalRenderFlags=0x%X enableColor=%d enableLight=%d\r\n",
-                (void*)this, meshIndex, vertexCount, m->NumTriangles, alpha,
-                vertexCount > 0 ? colors[0][0] : -1.f, vertexCount > 0 ? colors[0][1] : -1.f,
-                vertexCount > 0 ? colors[0][2] : -1.f, vertexCount > 0 ? colors[0][3] : -1.f,
-                vertexCount > 0 ? vertices[0][0] : 0.f, vertexCount > 0 ? vertices[0][1] : 0.f,
-                vertexCount > 0 ? vertices[0][2] : 0.f, finalRenderFlags, enableColor ? 1 : 0,
-                enableLight ? 1 : 0);
-        }
-    }
-#endif // _DEBUG
 
     // DXP-08a Category 4: legacy client-array submit replaced with IR:: — the per-vertex
     // computation above (position/color/texcoord, including the CHROME/OIL/WAVE variants)
@@ -2412,10 +2388,19 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
             continue;
         }
 
-        if (bShaderActive && m_HasStaticGPUVBO && m_VAO_StaticGPU != 0 &&
+        // DXP-21 part 2 retry (2026-08-05): re-enabling the D3D11 branch, this time testing with
+        // config.ini's D3D11DebugLayer=1 so the validation layer can catch whatever the previous
+        // attempt's heap corruption actually was, instead of it surfacing three frames later in
+        // unrelated code. Mirrors RenderMesh()'s own already-soaked D3D11 GPU-skin draw pattern
+        // (BindVertexBuffer(m_D3D11StaticVB, BMDMesh) + RHI::Draw, ~line 1821 above) as closely as
+        // possible -- same buffer, same VertexLayout, same baseCorner/flatCount source arrays.
+        const bool staticGpuReady = (g_RenderBackend == RenderBackend::D3D11)
+            ? m_D3D11StaticVB.IsValid()
+            : (m_VAO_StaticGPU != 0);
+        if (bShaderActive && m_HasStaticGPUVBO && staticGpuReady &&
             m_MeshIndexCount && m_MeshIndexOffset && m_MeshIndexCount[i] > 0)
         {
-            CPlanarShadowShader::Instance().DrawGPUSkinned(m_VAO_StaticGPU, m_MeshIndexOffset[i], m_MeshIndexCount[i], gpuBodyOrigin, gpuBodyScale);
+            CPlanarShadowShader::Instance().DrawGPUSkinned(m_VAO_StaticGPU, m_D3D11StaticVB, m_MeshIndexOffset[i], m_MeshIndexCount[i], gpuBodyOrigin, gpuBodyScale);
             continue;
         }
 
@@ -2523,13 +2508,14 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 void BMD::UploadStaticVBOs()
 {
     if (!Meshs || NumMeshs <= 0) return;
-    if (m_VAO_Static != 0) return;
+    if (m_VAO_Static != 0 || m_D3D11StaticVB.IsValid()) return;
 
-    if (!LoadBMDGLFunctions() ||
+    const bool isD3D11 = (g_RenderBackend == RenderBackend::D3D11);
+    if (!isD3D11 && (!LoadBMDGLFunctions() ||
         !fn_glGenVertexArrays ||
         !fn_glGenBuffers || !fn_glBindBuffer ||
         !fn_glBufferData || !fn_glVertexAttribPointer ||
-        !fn_glEnableVertexAttribArray) return;
+        !fn_glEnableVertexAttribArray)) return;
 
     ReleaseStaticVBOs();
 
@@ -2569,10 +2555,13 @@ void BMD::UploadStaticVBOs()
     // This eliminates per-frame std::vector heap allocations during dynamic upload.
     m_Staging.assign(flatOffset * 9, 0.0f);
 
-    // Create VAO for OpenGL core profile (dynamic VBO fallback path)
-    fn_glGenVertexArrays(1, &m_VAO_Static);
-    BindVAO(m_VAO_Static);
-    BindVAO(0);
+    if (!isD3D11)
+    {
+        // Create VAO for OpenGL core profile (dynamic VBO fallback path)
+        fn_glGenVertexArrays(1, &m_VAO_Static);
+        BindVAO(m_VAO_Static);
+        BindVAO(0);
+    }
 
     // Build Static Geometry VBO (GL_STATIC_DRAW) for GPU Bone Skinning path
     // Interleaved layout per corner: RestPos (3 floats) | static UV (2 floats) | RestNormal (3 floats) | BoneIndex (1 int)
@@ -2631,6 +2620,28 @@ void BMD::UploadStaticVBOs()
     if (!gpuGeomBuffer.empty()) {
         m_StaticGeomReady = true;
 
+        if (isD3D11)
+        {
+            // Expand 9-float(pos3,uv2,normal3,boneIdx1)/corner to kBMDMeshLayout's 13-float
+            // (pos3,uv2,color4,normal3,boneIdx1) -- color left zeroed, the GPU-skin shader path
+            // (u_UseGPUSkin==1) always overwrites a_Color in-shader, never reads it.
+            std::vector<float> interleaved(static_cast<size_t>(flatOffset) * 13, 0.0f);
+            for (int c = 0; c < flatOffset; ++c)
+            {
+                const float* src = &gpuGeomBuffer[static_cast<size_t>(c) * 9];
+                float* dst = &interleaved[static_cast<size_t>(c) * 13];
+                dst[0] = src[0]; dst[1] = src[1]; dst[2] = src[2];    // pos
+                dst[3] = src[3]; dst[4] = src[4];                     // uv
+                // dst[5..8] color: left zeroed
+                dst[9]  = src[5]; dst[10] = src[6]; dst[11] = src[7]; // normal
+                dst[12] = src[8];                                     // boneIndex (already int-bitcast-to-float)
+            }
+            m_D3D11StaticVB = RHI::CreateVertexBuffer(interleaved.data(),
+                interleaved.size() * sizeof(float), RHI::BufferUsage::Static);
+            m_HasStaticGPUVBO = m_D3D11StaticVB.IsValid();
+            return;
+        }
+
         fn_glGenVertexArrays(1, &m_VAO_StaticGPU);
         fn_glGenBuffers(1, &m_VBO_StaticGeom);
 
@@ -2687,7 +2698,8 @@ void BMD::UploadDynamicBuffers(int meshIndex, float alpha, int renderFlags)
     // VertexTransform, LightTransform, g_chrome are GLOBAL STATIC ARRAYS — never null.
     if (!m_MeshIndexCount || m_MeshIndexCount[meshIndex] == 0) return;
 
-    if (!LoadBMDGLFunctions() || !fn_glGenBuffers || !fn_glBindBuffer || !fn_glBufferData) return;
+    const bool isD3D11 = (g_RenderBackend == RenderBackend::D3D11);
+    if (!isD3D11 && (!LoadBMDGLFunctions() || !fn_glGenBuffers || !fn_glBindBuffer || !fn_glBufferData)) return;
 
     // DXP-20 inc4: only called from RenderMesh()'s CPU dynamic-VBO fallback branch (never the
     // GPU-skinned path), so an unconditional Ensure here can't defeat the gate for GPU-eligible
@@ -2696,7 +2708,7 @@ void BMD::UploadDynamicBuffers(int meshIndex, float alpha, int renderFlags)
     EnsureCpuVertices(meshIndex);
 
     // Lazy-create single dynamic interleaved VBO on first use
-    if (m_VBO_Dynamic == 0) fn_glGenBuffers(1, &m_VBO_Dynamic);
+    if (!isD3D11 && m_VBO_Dynamic == 0) fn_glGenBuffers(1, &m_VBO_Dynamic);
 
     const int flatCount  = m_MeshIndexCount[meshIndex];
     const int baseCorner = m_MeshIndexOffset[meshIndex];
@@ -2791,7 +2803,36 @@ void BMD::UploadDynamicBuffers(int meshIndex, float alpha, int renderFlags)
         }
     }
 
-    // Single 1x interleaved VBO orphan-upload per mesh (map-discard semantics)
+    if (isD3D11)
+    {
+        // Expand 9-float(pos3,uv2,color4)/corner to kBMDMeshLayout's 13-float (pos3,uv2,color4,
+        // normal3,boneIdx1) -- normal/boneIndex left zeroed: this CPU pre-skinned path always
+        // binds with u_UseGPUSkin==0 (BMDMeshShader's VSInput never reads a_BoneIndex in that
+        // branch), and RenderMode 3's skinnedNormal falls back to a_Normal exactly like GL
+        // leaves this attribute location disabled (default zero) for this same fallback path.
+        const size_t needed = static_cast<size_t>(flatCount) * 13;
+        if (m_D3D11DynStaging.size() < needed) m_D3D11DynStaging.resize(needed);
+        const float* src = m_Staging.data() + baseCorner * 9;
+        for (int c = 0; c < flatCount; ++c)
+        {
+            const float* s = src + c * 9;
+            float* d = &m_D3D11DynStaging[static_cast<size_t>(c) * 13];
+            d[0] = s[0]; d[1] = s[1]; d[2] = s[2];
+            d[3] = s[3]; d[4] = s[4];
+            d[5] = s[5]; d[6] = s[6]; d[7] = s[7]; d[8] = s[8];
+            d[9] = d[10] = d[11] = d[12] = 0.0f;
+        }
+        const size_t bytes = needed * sizeof(float);
+        if (!m_D3D11DynamicVB.IsValid())
+            m_D3D11DynamicVB = RHI::CreateVertexBuffer(m_D3D11DynStaging.data(), bytes, RHI::BufferUsage::Dynamic);
+        else
+            RHI::UpdateBuffer(m_D3D11DynamicVB, m_D3D11DynStaging.data(), bytes);
+
+        m_DynBufsReady = m_D3D11DynamicVB.IsValid();
+        return;
+    }
+
+    // Single 1x interleaved VBO orphan-upload per mesh (maps to D3D11 Map(DISCARD))
     fn_glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Dynamic);
     fn_glBufferData(GL_ARRAY_BUFFER, flatCount * 9 * sizeof(float), m_Staging.data() + baseCorner * 9, GL_STREAM_DRAW);
     fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -2803,6 +2844,10 @@ void BMD::UploadDynamicBuffers(int meshIndex, float alpha, int renderFlags)
 
 void BMD::ReleaseDynamicVBOs()
 {
+    if (m_D3D11DynamicVB.IsValid()) { RHI::DestroyBuffer(m_D3D11DynamicVB); m_D3D11DynamicVB = {}; }
+    m_D3D11DynStaging.clear();
+    m_D3D11DynStaging.shrink_to_fit();
+
     LoadBMDGLFunctions();
     if (m_VBO_Dynamic != 0 && fn_glDeleteBuffers) {
         fn_glDeleteBuffers(1, &m_VBO_Dynamic);
@@ -2815,6 +2860,7 @@ void BMD::ReleaseDynamicVBOs()
 
 void BMD::ReleaseStaticVBOs()
 {
+    if (m_D3D11StaticVB.IsValid()) { RHI::DestroyBuffer(m_D3D11StaticVB); m_D3D11StaticVB = {}; }
     m_StaticGeomReady = false;
 
     LoadBMDGLFunctions();

@@ -7,6 +7,33 @@
 // compatibility.
 extern bool g_CoreProfile;
 
+// DXP-13: render backend, read once at startup (same timing guarantee as g_CoreProfile --
+// Winmain branches window/context creation on this before either backend's device exists).
+// Only GL is soaked and default; D3D11 is the DXP-13+ skeleton (device/swapchain + clear/
+// present only, no game rendering yet -- see dxp/DXP-13-d3d11-device-swapchain.md).
+enum class RenderBackend { GL, D3D11 };
+extern RenderBackend g_RenderBackend;
+
+// D3D11 debug device (D3D11_CREATE_DEVICE_DEBUG) opt-in, read once at startup like the flags
+// above -- RHI_D3D11.cpp's Init() branches device-creation flags on this before the device
+// exists. Off by default (config.ini [Render] D3D11DebugLayer=1 to opt in): the validation
+// layer's per-Draw-call cost stacks with Debug's unoptimized code, making draw-call-heavy
+// scenes (e.g. the login screen's ~14K terrain tile draws/frame) unplayably slow in ordinary
+// Debug sessions. Turn it on only when actively chasing a D3D11 correctness bug.
+extern bool g_D3D11DebugLayerEnabled;
+
+// DXP-21 part 1 phase 1: ClothComputeShader one-shot GPU-vs-CPU self-test opt-in (config.ini
+// [Render] ClothComputeSelfTest=1). Off by default -- diagnostic only, checked once at startup
+// under D3D11 to log a pass/fail delta to MuError.log; not part of the real per-frame cloth path.
+extern bool g_ClothComputeSelfTestEnabled;
+
+// DXP-21 part 1 phase 3c: opt-in GPU simulation+draw for CPhysicsCloth::Move()/Render() (config.ini
+// [Render] GpuCloth=1). Off by default -- CPU stays the real path for every cloth instance
+// (capes/wings/hair) until this soaks; toggling it flips ALL CPhysicsCloth instances at once
+// (CPhysicsClothMesh, the one mesh-topology exception, is unaffected -- always CPU, see the
+// DXP-21 task memory).
+extern bool g_GpuClothEnabled;
+
 // Fixed-function alpha test (GL_ALPHA_TEST/glAlphaFunc) state, mirrored for shader-side
 // `discard` (DXP-01). g_AlphaRef is what shaders should test against: -1.0f means alpha
 // test is currently disabled (no discard), otherwise it's the active GL_GREATER threshold.
@@ -15,9 +42,11 @@ extern bool g_CoreProfile;
 extern float g_AlphaRef;
 extern float g_AlphaFuncRef;
 
-// Vsync flag mirroring SDL's actual swap interval (ZzzOpenglUtil.cpp's EnableVSync/
-// DisableVSync call SDL_GL_SetSwapInterval). Default true matches EnableVSync()'s
-// unconditional call at boot (Winmain.cpp).
+// Cross-backend vsync flag. GL's actual swap interval lives with SDL (ZzzOpenglUtil.cpp's
+// EnableVSync/DisableVSync call SDL_GL_SetSwapInterval); this mirror is what RHI_D3D11's
+// Present() reads, since D3D11 has no GL context/SDL swap-interval to toggle -- its swap
+// chain's own sync-interval param is the only lever. Default true matches EnableVSync()'s
+// unconditional call at boot (Winmain.cpp, both backends).
 extern bool g_VSyncEnabled;
 
 // DXP-08a Category 1: CPU-tracked mirror of the FFP "current color" any glColor* call used
@@ -28,7 +57,11 @@ extern float g_CurrentColor[4];
 
 void InitRenderConfig();
 
-// Shared closed-form perspective projection builder (GL's post-divide NDC z convention,
-// [-1,1]). `f` is the caller's precomputed `1/tan(fovY/2)`; `out` is row-major matching this
-// codebase's existing GlobalUBO layout (same layout the old glGetFloatv-derived matrices used).
+// DXP-17: shared closed-form perspective projection builder, branching on g_RenderBackend for
+// the clip-space z convention -- GL's post-divide NDC z is [-1,1], D3D's is [0,1]. Every 3D
+// camera/item-preview projection in the codebase used the GL-only formula for both backends,
+// which clips/depth-tests roughly half the frustum against the wrong range under D3D11 (visible
+// as underwater/under-surface geometry bleeding through from above, z-fighting, or near-plane
+// objects vanishing). `f` is the caller's precomputed `1/tan(fovY/2)`; `out` is row-major matching
+// this codebase's existing GlobalUBO layout (same layout the old glGetFloatv-derived matrices used).
 void BuildPerspectiveProjection(float f, float aspect, float zNear, float zFar, float out[16]);

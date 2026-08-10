@@ -18,6 +18,7 @@
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
 #include "Render/Core/RenderConfig.h"
+#include "Render/RHI/RHI.h"
 #include "Render/Core/GlobalUBO.h"
 #include "Render/Core/SceneUBO.h"
 #include "Render/Core/ImmediateRenderer.h"
@@ -180,7 +181,8 @@ void BindTexture(int tex)
         CachTexture = tex;
         const uint32_t textureID = (tex >= 0) ? static_cast<uint32_t>(Bitmaps[tex].TextureNumber)
                                                : static_cast<uint32_t>(-1 * tex);
-        BindTexture2D(0, textureID);
+        if (g_RenderBackend == RenderBackend::D3D11) RHI::BindTexture(RHI::TextureHandle{ textureID }, 0);
+        else BindTexture2D(0, textureID);
     }
 }
 
@@ -213,23 +215,31 @@ void DisableBlend() { glDisable(GL_BLEND); }
 void SetBlendFuncAlpha() { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); }
 void SetDepthFuncLEqual() { glDepthFunc(GL_LEQUAL); }
 
+// DXP-15 increment 3: D3D11's ClearRenderTargetView bundles the clear color into the clear
+// call itself, unlike GL's separate glClearColor (state-set) + glClear (action) pair -- so
+// unlike the dumb wrappers above, these four need a small color cache to bridge the two APIs'
+// shapes. SetClearColor still writes the cache unconditionally (SetWorldClearColor/etc. call it
+// before every ClearColorAndDepthBuffers) but only actually calls glClearColor on GL.
 namespace { float g_ClearColor[4] = { 0.f, 0.f, 0.f, 1.f }; }
 void ClearColorBuffer()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    if (g_RenderBackend == RenderBackend::D3D11) RHI::Clear(true, false, g_ClearColor[0], g_ClearColor[1], g_ClearColor[2], g_ClearColor[3]);
+    else glClear(GL_COLOR_BUFFER_BIT);
 }
 void ClearDepthBuffer()
 {
-    glClear(GL_DEPTH_BUFFER_BIT);
+    if (g_RenderBackend == RenderBackend::D3D11) RHI::Clear(false, true, 0.f, 0.f, 0.f, 1.f);
+    else glClear(GL_DEPTH_BUFFER_BIT);
 }
 void ClearColorAndDepthBuffers()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (g_RenderBackend == RenderBackend::D3D11) RHI::Clear(true, true, g_ClearColor[0], g_ClearColor[1], g_ClearColor[2], g_ClearColor[3]);
+    else glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void SetClearColor(float r, float g, float b, float a)
 {
     g_ClearColor[0] = r; g_ClearColor[1] = g; g_ClearColor[2] = b; g_ClearColor[3] = a;
-    glClearColor(r, g, b, a);
+    if (g_RenderBackend != RenderBackend::D3D11) glClearColor(r, g, b, a);
 }
 void FlushGL() { glFlush(); }
 
@@ -238,7 +248,8 @@ void EnableDepthTest()
     if (!DepthTestEnable)
     {
         DepthTestEnable = true;
-        glEnable(GL_DEPTH_TEST);
+        if (g_RenderBackend == RenderBackend::D3D11) RHI::SetDepthTestEnabled(true);
+        else glEnable(GL_DEPTH_TEST);
     }
 }
 
@@ -247,7 +258,8 @@ void DisableDepthTest()
     if (DepthTestEnable)
     {
         DepthTestEnable = false;
-        glDisable(GL_DEPTH_TEST);
+        if (g_RenderBackend == RenderBackend::D3D11) RHI::SetDepthTestEnabled(false);
+        else glDisable(GL_DEPTH_TEST);
     }
 }
 
@@ -256,7 +268,8 @@ void EnableDepthMask()
     if (!DepthMaskEnable)
     {
         DepthMaskEnable = true;
-        glDepthMask(true);
+        if (g_RenderBackend == RenderBackend::D3D11) RHI::SetDepthWriteEnabled(true);
+        else glDepthMask(true);
     }
 }
 
@@ -265,7 +278,8 @@ void DisableDepthMask()
     if (DepthMaskEnable)
     {
         DepthMaskEnable = false;
-        glDepthMask(false);
+        if (g_RenderBackend == RenderBackend::D3D11) RHI::SetDepthWriteEnabled(false);
+        else glDepthMask(false);
     }
 }
 
@@ -274,7 +288,8 @@ void EnableCullFace()
     if (!CullFaceEnable)
     {
         CullFaceEnable = true;
-        glEnable(GL_CULL_FACE);
+        if (g_RenderBackend == RenderBackend::D3D11) RHI::SetCullEnabled(true);
+        else glEnable(GL_CULL_FACE);
     }
 }
 
@@ -283,13 +298,51 @@ void DisableCullFace()
     if (CullFaceEnable)
     {
         CullFaceEnable = false;
-        glDisable(GL_CULL_FACE);
+        if (g_RenderBackend == RenderBackend::D3D11) RHI::SetCullEnabled(false);
+        else glDisable(GL_CULL_FACE);
     }
 }
 
 void DisableTexture(bool AlphaTest)
 {
     EnableDepthMask();
+
+    // DXP-16 increment 3: this function was the one sibling in this file's Enable*/Disable*
+    // family without a g_RenderBackend==D3D11 branch (see EnableAlphaTest's comment above for the
+    // pattern/history) -- its only call sites (BMD::RenderBodyShadow, RenderPartObjectEffect's
+    // shadow branch) were unreachable under D3D11 while RenderCharactersClient() stayed gated.
+    // Now reachable. AlphaTest/Opaque are the closest existing RHI::BlendMode entries; CullFace
+    // bookkeeping isn't touched here on GL either, so leaving it alone under D3D11 too.
+    //
+    // DXP-16 fix: the two RHI::SetBlendMode calls this branch used to make were WRONG -- GL's
+    // own DisableTexture (below) never touches GL_BLEND at all, only GL_ALPHA_TEST/GL_TEXTURE_2D
+    // (alpha-test and blending are independent GL state bits). D3D11's RHI::BlendMode couples
+    // blend+alpha-test+cull+depthwrite into one state object, so calling SetBlendMode here to
+    // update alpha-test also silently reset blending to Opaque -- and RenderColor() (the mostly
+    // solid-color quad drawn for text/panel background boxes) calls this with the default
+    // AlphaTest=false on EVERY call, right after its caller had often JUST enabled real alpha
+    // blending (e.g. RenderText's EnableAlphaTest() before drawing a semi-transparent bg box).
+    // Net effect: every such background box rendered fully opaque instead of blended under
+    // D3D11 only -- confirmed via RenderDoc (shader output written with no blending applied) and
+    // by comparing GL (correctly semi-transparent) vs D3D11 (solid black) screenshots of the
+    // same chat-log/system-message box. Dropping the SetBlendMode calls here, keeping only the
+    // alpha-test bookkeeping (g_AlphaRef/AlphaTestEnable, which drive the shader-side discard
+    // uniform independently of the blend state object), matches GL's actual scope exactly.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        if (AlphaTest)
+        {
+            AlphaTestEnable = true;
+            g_AlphaRef = g_AlphaFuncRef;
+        }
+        else
+        {
+            AlphaTestEnable = false;
+            g_AlphaRef = -1.0f;
+        }
+        TextureEnable = false;
+        return;
+    }
 
     if (AlphaTest == true)
     {
@@ -318,6 +371,25 @@ void DisableTexture(bool AlphaTest)
 
 void DisableAlphaBlend()
 {
+    // DXP-15 increment 2: D3D11 branch replaces the raw glBlendFunc/glEnable/EnableCullFace/
+    // EnableDepthMask sequence below with one RHI::SetBlendMode call (blend+cull+depthwrite as
+    // one atomic state-object swap, RHI.h's design) -- bookkeeping vars mirrored directly since
+    // other backend-agnostic code (TerrainShader::SyncAlphaRef etc.) reads them regardless of
+    // backend. GL_ALPHA_TEST/GL_TEXTURE_2D/GL_FOG raw toggles below are FFP leftovers already
+    // superseded by the shader-side g_AlphaRef discard / SceneUBO fogEnabled uniform -- correct
+    // to skip entirely under D3D11, not just deferred.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        AlphaBlendType = 0;
+        CullFaceEnable = true;
+        DepthMaskEnable = true;
+        AlphaTestEnable = false;
+        g_AlphaRef = -1.0f;
+        TextureEnable = true;
+        RHI::SetBlendMode(RHI::BlendMode::Opaque);
+        return;
+    }
+
     if (AlphaBlendType != 0)
     {
         AlphaBlendType = 0;
@@ -344,6 +416,26 @@ void DisableAlphaBlend()
 
 void EnableAlphaTest(bool DepthMask)
 {
+    // DXP-15 increment 2 D3D11 branch. Wrinkle: GL only forces depthmask ON when DepthMask==true,
+    // else leaves whatever was set before untouched; RHI::SetBlendMode(AlphaTest) has no such
+    // param (RHI.h's table has one fixed depthmask-on entry for this combo) and always forces
+    // depth-write ON. Not a behavior gap for any D3D11-reachable caller today -- grepped every
+    // EnableAlphaTest(false) call site (ZzzBMD.cpp:2473, CSEventMatch.cpp:121) and both are
+    // non-UI, gameplay/model code unreachable under D3D11 while world rendering stays stubbed
+    // (DXP-15 increment 3+ only boots the login screen). Revisit if a later increment reaches
+    // one of those call sites under D3D11.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        AlphaBlendType = 2;
+        CullFaceEnable = false;
+        DepthMaskEnable = true;
+        AlphaTestEnable = true;
+        g_AlphaRef = g_AlphaFuncRef;
+        TextureEnable = true;
+        RHI::SetBlendMode(RHI::BlendMode::AlphaTest);
+        return;
+    }
+
     if (AlphaBlendType != 2)
     {
         AlphaBlendType = 2;
@@ -372,6 +464,19 @@ void EnableAlphaTest(bool DepthMask)
 
 void EnableAlphaBlend()
 {
+    // DXP-15 increment 2 D3D11 branch -- see DisableAlphaBlend's comment for the general pattern.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        AlphaBlendType = 3;
+        CullFaceEnable = false;
+        DepthMaskEnable = false;
+        AlphaTestEnable = false;
+        g_AlphaRef = -1.0f;
+        TextureEnable = true;
+        RHI::SetBlendMode(RHI::BlendMode::Additive);
+        return;
+    }
+
     if (AlphaBlendType != 3)
     {
         AlphaBlendType = 3;
@@ -453,6 +558,19 @@ void EnableAlphaBlend2()
 
 void EnableAlphaBlend3()
 {
+    // DXP-15 increment 2 D3D11 branch -- see DisableAlphaBlend's comment for the general pattern.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        AlphaBlendType = 6;
+        CullFaceEnable = false;
+        DepthMaskEnable = false;
+        AlphaTestEnable = false;
+        g_AlphaRef = -1.0f;
+        TextureEnable = true;
+        RHI::SetBlendMode(RHI::BlendMode::Blend3);
+        return;
+    }
+
     if (AlphaBlendType != 6)
     {
         AlphaBlendType = 6;
@@ -702,15 +820,25 @@ void BeginOpengl(int x, int y, int Width, int Height)
     // This per-frame reset must actually reach the GPU, not just the DepthTestEnable/CullFaceEnable/
     // DepthMaskEnable bookkeeping bools below -- EnableCullFace()/EnableDepthTest()/EnableDepthMask()
     // (this file) all gate on those bools ("if already true, skip") to avoid redundant driver calls,
-    // so blindly setting them true here without telling the GPU leaves stale state (e.g. the
+    // so blindly setting them true here without telling the GPU leaves a stale D3D11 state (e.g. the
     // previous frame's last alpha-tested/double-sided mesh left cull off) silently in effect for
     // every draw this frame until something happens to force it back -- surfaced as back-facing/
-    // "underground" geometry bleeding through on the next frame's opaque meshes.
-    if (!g_CoreProfile) { glDisable(GL_ALPHA_TEST); glEnable(GL_TEXTURE_2D); }
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glDepthMask(true);
-    glDepthFunc(GL_LEQUAL);
+    // "underground" geometry bleeding through on the next frame's opaque meshes. The raw GL calls
+    // below don't have this problem: they hit real GL state unconditionally regardless of the cache.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        RHI::SetDepthTestEnabled(true);
+        RHI::SetCullEnabled(true);
+        RHI::SetDepthWriteEnabled(true);
+    }
+    else
+    {
+        if (!g_CoreProfile) { glDisable(GL_ALPHA_TEST); glEnable(GL_TEXTURE_2D); }
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glDepthMask(true);
+        glDepthFunc(GL_LEQUAL);
+    }
     AlphaTestEnable = false;
     g_AlphaRef = -1.0f; // per-frame reset must clear the shader ref too, or draws before the first EnableAlphaTest() this frame inherit last frame's discard threshold
     TextureEnable = true;
@@ -874,12 +1002,26 @@ bool IsVSyncEnabled()
 
 void EnableVSync()
 {
+    // D3D11 has no GL context/SDL swap interval to toggle -- RHI_D3D11::EndFrame() reads
+    // g_VSyncEnabled directly and drives the swap chain's own Present() sync-interval param.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        g_VSyncEnabled = true;
+        return;
+    }
+
     if (SDL_GL_SetSwapInterval(1))
         g_VSyncEnabled = true;
 }
 
 void DisableVSync()
 {
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        g_VSyncEnabled = false;
+        return;
+    }
+
     if (SDL_GL_SetSwapInterval(0))
         g_VSyncEnabled = false;
 }
@@ -1225,7 +1367,15 @@ void BeginBitmap()
     // UI bitmaps use ConvertX/Y to scale from 640×480 reference,
     // so we need the full window size here (not the game viewport which may be smaller)
     //
-    glViewport(0, 0, WindowWidth, WindowHeight);
+    // DXP-16 fix: this raw glViewport call was a no-op under D3D11 (no GL context exists), so
+    // the D3D11 viewport stayed whatever the last real 3D pass (world render, item-preview
+    // camera, etc.) set it to via RHI::SetViewport -- typically narrower than the full window,
+    // e.g. the main game view shrinks via GetScreenWidth() whenever a UI panel is open. Every 2D
+    // UI element (RenderImage/RenderBitmap/RenderColor, all ConvertX/Y-scaled against the FULL
+    // window) then rasterized into that leftover, too-small viewport rect, which is exactly why
+    // panels appeared shrunk and shifted left/up relative to their correctly-computed positions.
+    if (g_RenderBackend == RenderBackend::D3D11) RHI::SetViewport(0, 0, WindowWidth, WindowHeight);
+    else                                          glViewport(0, 0, WindowWidth, WindowHeight);
     DisableDepthTest();
 
     // DXP-16: tried an explicit EnableAlphaTest() here to give the whole 2D pass a known blend
