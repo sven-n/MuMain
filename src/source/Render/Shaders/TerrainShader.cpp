@@ -28,6 +28,7 @@ typedef GLuint (APIENTRY* PFNGLGETUNIFORMBLOCKINDEXPROC)(GLuint, const GLchar*);
 typedef void   (APIENTRY* PFNGLUNIFORMBLOCKBINDINGPROC)(GLuint, GLuint, GLuint);
 typedef void   (APIENTRY* PFNGLUNIFORM1IPROC)(GLint, GLint);
 typedef void   (APIENTRY* PFNGLUNIFORM1FPROC)(GLint, GLfloat);
+typedef void   (APIENTRY* PFNGLUNIFORM2FPROC)(GLint, GLfloat, GLfloat);
 typedef void   (APIENTRY* PFNGLACTIVETEXTUREPROC)(GLenum);
 
 static PFNGLCREATESHADERPROC       fn_glCreateShader       = nullptr;
@@ -47,6 +48,7 @@ static PFNGLGETUNIFORMBLOCKINDEXPROC fn_glGetUniformBlockIndex = nullptr;
 static PFNGLUNIFORMBLOCKBINDINGPROC fn_glUniformBlockBinding = nullptr;
 static PFNGLUNIFORM1IPROC          fn_glUniform1i           = nullptr;
 static PFNGLUNIFORM1FPROC          fn_glUniform1f           = nullptr;
+static PFNGLUNIFORM2FPROC          fn_glUniform2f           = nullptr;
 static PFNGLACTIVETEXTUREPROC      fn_glActiveTexture       = nullptr;
 
 static bool LoadGLShaderFunctions()
@@ -71,6 +73,7 @@ static bool LoadGLShaderFunctions()
     fn_glUniformBlockBinding = (PFNGLUNIFORMBLOCKBINDINGPROC)SDL_GL_GetProcAddress("glUniformBlockBinding");
     fn_glUniform1i           = (PFNGLUNIFORM1IPROC)SDL_GL_GetProcAddress("glUniform1i");
     fn_glUniform1f           = (PFNGLUNIFORM1FPROC)SDL_GL_GetProcAddress("glUniform1f");
+    fn_glUniform2f           = (PFNGLUNIFORM2FPROC)SDL_GL_GetProcAddress("glUniform2f");
     fn_glActiveTexture       = (PFNGLACTIVETEXTUREPROC)SDL_GL_GetProcAddress("glActiveTexture");
 
     loaded = (fn_glCreateShader != nullptr &&
@@ -86,6 +89,7 @@ static bool LoadGLShaderFunctions()
               fn_glGetUniformLocation != nullptr &&
               fn_glUniform1i != nullptr &&
               fn_glUniform1f != nullptr &&
+              fn_glUniform2f != nullptr &&
               fn_glActiveTexture != nullptr);
     return loaded;
 }
@@ -112,15 +116,24 @@ uniform float u_WaterMove;
 uniform int   u_BaseIsWater;
 uniform int   u_OverlayIsWater;
 
+// Per-tile UV scale mirroring legacy FaceTexture()'s `Width = 64.f/b->Width` (pre-divided by
+// TERRAIN_SCALE on the CPU side, see TerrainShader::SetUVScale / RenderTerrainFace's caller) --
+// different terrain tile bitmaps are packed at different pixel resolutions (64/128/256px seen in
+// this tree's assets), so a single fixed constant here can only ever match one of them. Base and
+// overlay are independent because tex1/tex2 can be differently-sized bitmaps on the same tile.
+uniform vec2 u_BaseUVScale;
+uniform vec2 u_OverlayUVScale;
+
 out vec2 v_UVBase;
 out vec2 v_UVOverlay;
 out vec3 v_Light;
 out float v_Alpha;
 
 void main() {
-    vec2 baseUV = a_Pos.xy * 0.0025;
-    v_UVBase    = (u_BaseIsWater    == 1) ? baseUV + vec2(u_WaterMove, 0.0) : baseUV;
-    v_UVOverlay = (u_OverlayIsWater == 1) ? baseUV + vec2(u_WaterMove, 0.0) : baseUV;
+    vec2 uvBase    = a_Pos.xy * u_BaseUVScale;
+    vec2 uvOverlay = a_Pos.xy * u_OverlayUVScale;
+    v_UVBase    = (u_BaseIsWater    == 1) ? uvBase    + vec2(u_WaterMove, 0.0) : uvBase;
+    v_UVOverlay = (u_OverlayIsWater == 1) ? uvOverlay + vec2(u_WaterMove, 0.0) : uvOverlay;
     v_Light = a_Light;
     v_Alpha = a_Alpha;
     gl_Position = u_MVP * vec4(a_Pos, 1.0);
@@ -250,6 +263,8 @@ void TerrainShader::CreateGL()
     m_LocBaseIsWater    = fn_glGetUniformLocation(m_Program, "u_BaseIsWater");
     m_LocOverlayIsWater = fn_glGetUniformLocation(m_Program, "u_OverlayIsWater");
     m_LocAlphaRef       = fn_glGetUniformLocation(m_Program, "u_AlphaRef");
+    m_LocBaseUVScale    = fn_glGetUniformLocation(m_Program, "u_BaseUVScale");
+    m_LocOverlayUVScale = fn_glGetUniformLocation(m_Program, "u_OverlayUVScale");
 
     // Assign default texture unit slots (u_BaseTex = 0, u_OverlayTex = 1)
     BindProgram(m_Program);
@@ -260,6 +275,12 @@ void TerrainShader::CreateGL()
     if (m_LocOverlayIsWater != -1) fn_glUniform1i(m_LocOverlayIsWater, 0);
     if (m_LocAlphaRef != -1) fn_glUniform1f(m_LocAlphaRef, -1.0f);
     m_LastAlphaRef = -1.0f;
+    // Standard 64px-tile scale (64/64/TERRAIN_SCALE = 0.01) as a sane pre-first-draw default;
+    // every real tile draw overwrites this via SetUVScale() before use.
+    if (m_LocBaseUVScale != -1) fn_glUniform2f(m_LocBaseUVScale, 0.01f, 0.01f);
+    if (m_LocOverlayUVScale != -1) fn_glUniform2f(m_LocOverlayUVScale, 0.01f, 0.01f);
+    m_LastBaseUVScale[0] = m_LastBaseUVScale[1] = 0.01f;
+    m_LastOverlayUVScale[0] = m_LastOverlayUVScale[1] = 0.01f;
     BindProgram(0);
 
     g_ErrorReport.Write(L"[TerrainShader] Created program ID %d, u_BaseTex loc %d, u_OverlayTex loc %d\r\n", m_Program, m_LocBaseTex, m_LocOverlayTex);
@@ -297,6 +318,24 @@ void TerrainShader::SetOverlayTexture(GLuint texID)
 {
     BindTexture2D(1, texID);
     if (fn_glActiveTexture) fn_glActiveTexture(GL_TEXTURE0); // Restore default active texture
+}
+
+void TerrainShader::SetUVScale(float baseScaleX, float baseScaleY, float overlayScaleX, float overlayScaleY)
+{
+    // Dirty-checked like SyncAlphaRef -- adjacent tiles on the same map very often share both
+    // textures, so this is usually a no-op glUniform-wise.
+    if (m_LocBaseUVScale != -1 && fn_glUniform2f &&
+        (baseScaleX != m_LastBaseUVScale[0] || baseScaleY != m_LastBaseUVScale[1])) {
+        fn_glUniform2f(m_LocBaseUVScale, baseScaleX, baseScaleY);
+        m_LastBaseUVScale[0] = baseScaleX;
+        m_LastBaseUVScale[1] = baseScaleY;
+    }
+    if (m_LocOverlayUVScale != -1 && fn_glUniform2f &&
+        (overlayScaleX != m_LastOverlayUVScale[0] || overlayScaleY != m_LastOverlayUVScale[1])) {
+        fn_glUniform2f(m_LocOverlayUVScale, overlayScaleX, overlayScaleY);
+        m_LastOverlayUVScale[0] = overlayScaleX;
+        m_LastOverlayUVScale[1] = overlayScaleY;
+    }
 }
 
 void TerrainShader::SetWaterMove(float waterMove)
