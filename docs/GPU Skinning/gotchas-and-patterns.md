@@ -54,3 +54,11 @@ This document catalogues critical technical gotchas, thread safety rules, cache 
 ### 3.3 One-Shot UI Render Flags
 - **Gotcha**: UI flags that are set by logic ticks and immediately cleared on the first render frame (e.g., `m_bRenderSkillInfo`) cause visual flickering/strobing when rendering uncapped above the 50 Hz/60 Hz logic tick rate.
 - **Rule**: Render pass code must only **read** UI state flags; logic tick handlers remain the sole authority responsible for clearing interaction flags.
+
+---
+
+## 4. Profiling & Instrumentation Gotchas
+
+### 4.1 GPU Timer Scope Must Not Exceed the Real Draw Submission
+- **Gotcha**: `FrameProfiler::Scope`'s default `GL_TIMESTAMP` pair brackets the *entire* CPU-scope lifetime (`FRAME_PROFILE(Pass)`), not just the GL draw calls inside it. `GL_TIMESTAMP` measures wall-clock time between two points in the GPU's command stream — if the CPU does real work (gather, sort, culling) between pushing the begin-marker and submitting the actual draw, and the GPU finishes the begin-marker before the CPU finishes that work, the resulting "GPU time" reading includes that CPU-bound idle wait. This produced a false ~3-5ms "GPU regression" for [GLP-16](glperf/README.md#glp-16--bucket-terrain-tiles-by-texture-pair)'s terrain bucketing, when the terrain draws themselves cost <0.01ms (confirmed via Nsight Graphics GPU Trace) — three code-change attempts chased a cost that didn't exist before the measurement bug itself was found.
+- **Rule**: For any pass whose `FRAME_PROFILE` scope spans non-trivial CPU work *before* its GL draw calls, use `FRAME_PROFILE_CPU_ONLY(Pass)` instead of `FRAME_PROFILE(Pass)`, and call `FrameProfiler::GpuTimerBegin(Pass)` / `GpuTimerEnd(Pass)` manually, tightly around just the real draw submission. CPU-ms accounting (`AccumulatorMs`) is unaffected either way — the CPU scope should still cover the whole pass; only the GPU timer's bracket needs narrowing. Trust an outlier GPU-ms reading only as far as the code that produced it — cross-check with an external GPU profiler (Nsight Graphics, RenderDoc) before spending implementation effort chasing it.

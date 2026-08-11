@@ -18,8 +18,14 @@ What I have done so far:
       * V-Sync: `$vsync on` / `$vsync off`
       * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
       * Show detailed performance overlay (FPS stats, percentiles, frame graph): `$details on` / `$details off`
+      * Show GL call/draw/buffer counters and per-pass GPU timers: `$glstats on` / `$glstats off`
   * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
     a better frame rate when many players and objects are visible.
+  * 🔥 Core Profile GL performance series (see [docs/GPU Skinning/glperf](docs/GPU%20Skinning/glperf/README.md)):
+    ring-buffer UBO streaming instead of per-update buffer orphaning, terrain draw calls
+    collapsed via texture-pair bucketing (~25x fewer draws), and redundant per-draw GL state
+    changes removed. Measured net win on dev hardware: avg FPS +4.4%, 1% Low +28.0%, frame
+    time -4.1%.
   * 🔥 Added inventory and vault extensions.
   * 🔥 The master skill tree system was upgraded to Season 6
   * 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.
@@ -280,7 +286,7 @@ The client reads options from `config.ini` in the executable directory:
 
 ## Documentation
 
-- [GPU Skinning & Core Profile](docs/GPU%20Skinning/README.md) - architecture, UBO layouts, ImmediateRenderer (`IR::`), and milestone catalog (`DXP-01` to `DXP-27`).
+- [GPU Skinning & Core Profile](docs/GPU%20Skinning/README.md) - architecture, UBO layouts, ImmediateRenderer (`IR::`), the FFP-retirement milestone catalog (`DXP-01` to `DXP-27`), and the Core Profile GL performance regression series (`GLP-xx`, `$glstats`).
 - [Camera system](docs/camera-system.md) - modes, switching (F9), config,
   frustum culling, `$details` overlay, and the gameplay behaviour changes
   from the 3D camera rework.
