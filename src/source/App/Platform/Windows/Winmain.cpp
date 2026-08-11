@@ -1563,6 +1563,11 @@ static void APIENTRY GLDebugCallback(GLenum source, GLenum type, GLuint id, GLen
         g_ErrorReport.Write(L"  ^ first occurrence of this message -- call stack:\r\n");
         LogSymbolizedStack();
     }
+}
+// GLP-08: GLDebugCallback's closing brace above was missing -- this whole block has been
+// uncompiled dead code since ENABLE_GL_KHR_DEBUG_CALLBACK has always defaulted to 0, so the
+// preprocessor skipped it before the compiler could ever see the mismatch. Found while
+// temporarily flipping the flag on for a GLP-08 soak test.
 #endif // ENABLE_GL_KHR_DEBUG_CALLBACK
 #endif // _DEBUG
 
