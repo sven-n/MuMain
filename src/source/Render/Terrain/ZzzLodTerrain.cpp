@@ -50,6 +50,7 @@ static bool s_bShowTileGrid = false;
 #include "Render/Shaders/TerrainShader.h"
 #include "Render/Core/ImmediateRenderer.h"
 #include "Render/Shaders/PassthroughShader.h"
+#include "Render/RHI/RHI.h"
 
 //-------------------------------------------------------------------------------------------------------------
 
@@ -59,6 +60,11 @@ GLuint g_VAO_Terrain = 0;
 GLuint g_VBO_TerrainLight[2] = { 0, 0 };
 GLuint g_VBO_TerrainAlpha = 0;
 int g_TerrainLightBufIdx = 0;
+
+// GLP-16: dynamic index buffer for texture-pair-bucketed terrain draws. Declared here (rather
+// than alongside the rest of the bucketing machinery near RenderTerrainFace) so DestroyTerrainVBO
+// -- defined earlier in this file -- can release it.
+static RHI::BufferHandle g_TerrainDynamicEBO;
 
 int  TerrainFlag;
 bool ActiveTerrain = false;
@@ -1097,6 +1103,13 @@ void DestroyTerrainVBO()
     if (g_VBO_TerrainLight[0]) { fn_glDeleteBuffers(2, g_VBO_TerrainLight); g_VBO_TerrainLight[0] = 0; g_VBO_TerrainLight[1] = 0; }
     if (g_VBO_TerrainAlpha) { fn_glDeleteBuffers(1, &g_VBO_TerrainAlpha); g_VBO_TerrainAlpha = 0; }
     g_TerrainLightBufIdx = 0;
+
+    // GLP-16: the dynamic bucketed-draw index buffer, if it was ever created.
+    if (g_TerrainDynamicEBO.IsValid())
+    {
+        RHI::DestroyBuffer(g_TerrainDynamicEBO);
+        g_TerrainDynamicEBO = {};
+    }
 }
 
 void CreateTerrainVBO()
@@ -1736,6 +1749,95 @@ void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
 
 int WaterTextureNumber = 0;
 
+// ---- GLP-16: texture-pair tile bucketing ----
+// RenderTerrainFace's shader branch used to issue one glDrawElements per visible tile (~8 GL
+// calls to draw two triangles, per the task file's own audit) -- roughly 1,000-3,000 times per
+// frame for a normal view. Gathering by (baseTex, overlayTex, waterFlags) and drawing once per
+// bucket collapses that to the number of distinct texture pairs on screen, typically 5-20.
+//
+// Verified before writing this: the terrain shader pass runs with DisableAlphaBlend() (see
+// RenderTerrain(), just before RenderTerrainFrustrum(EditFlag) for TerrainFlag ==
+// TERRAIN_MAP_NORMAL) -- opaque, depth-tested, alpha-TESTED only (SyncAlphaRef's discard, which
+// is order-independent) -- so reordering draws by texture pair instead of frustum-walk order is
+// safe. The grass (TERRAIN_MAP_GRASS) and dev-editor (EditFlag) fallback paths never reach this
+// branch at all (RenderTerrainFace's own `if (TerrainFlag != TERRAIN_MAP_GRASS)` / the shader
+// branch's `TerrainShader::Instance().IsCreated()` guard) -- untouched by this change.
+struct TerrainDrawBucket
+{
+    GLuint texBase = 0;
+    GLuint texOverlay = 0;
+    bool baseIsWater = false;
+    bool overlayIsWater = false;
+    std::vector<GLuint> indices; // 2 triangles (6 indices) appended per gathered tile
+};
+
+// Reused across frames -- .clear()'d via g_TerrainBucketCount, never reallocated, matching
+// ImmediateRenderer.cpp's g_VertexBuffer pattern. Distinct texture pairs are few (5-20 typical)
+// so a linear scan per tile is cheap and avoids writing a custom hash for the bucket key.
+static std::vector<TerrainDrawBucket> g_TerrainBuckets;
+static int g_TerrainBucketCount = 0;
+
+// g_TerrainDynamicEBO is declared near the top of this file (with the other terrain GL
+// resources) so DestroyTerrainVBO() can release it. The draw phase below appends each bucket's
+// gathered indices into it one bucket at a time, drawing immediately after each append -- not
+// appending all buckets then drawing all, which would be unsafe if a later append wraps the ring
+// (AppendBuffer's orphan-on-wrap is only safe for draws already issued against the pre-wrap
+// backing store, per its own contract).
+
+static TerrainDrawBucket& GetTerrainBucket(GLuint texBase, GLuint texOverlay, bool baseIsWater, bool overlayIsWater)
+{
+    for (int i = 0; i < g_TerrainBucketCount; i++)
+    {
+        TerrainDrawBucket& b = g_TerrainBuckets[i];
+        if (b.texBase == texBase && b.texOverlay == texOverlay &&
+            b.baseIsWater == baseIsWater && b.overlayIsWater == overlayIsWater)
+            return b;
+    }
+    if (g_TerrainBucketCount >= (int)g_TerrainBuckets.size())
+        g_TerrainBuckets.emplace_back();
+    TerrainDrawBucket& b = g_TerrainBuckets[g_TerrainBucketCount++];
+    b.texBase = texBase;
+    b.texOverlay = texOverlay;
+    b.baseIsWater = baseIsWater;
+    b.overlayIsWater = overlayIsWater;
+    b.indices.clear();
+    return b;
+}
+
+// Called once, after RenderTerrainFrustrum's whole tile walk has gathered every visible tile
+// into a bucket -- draws each non-empty bucket with one glDrawElements. Must run with
+// g_VAO_Terrain still bound (TerrainShader's sampler/uniform state is already bound by the
+// caller too). Resets the bucket count for next frame; capacity is kept.
+static void FlushTerrainBuckets()
+{
+    if (g_TerrainBucketCount == 0) return;
+
+    if (!g_TerrainDynamicEBO.IsValid())
+    {
+        // Sized for a reasonably wide view (2000 tiles); RHI::AppendBuffer grows it on demand
+        // for wider ones, same policy PlanarShadowShader's own dynamic VBO uses.
+        g_TerrainDynamicEBO = RHI::CreateIndexBuffer(nullptr, 2000 * 6 * sizeof(GLuint), RHI::BufferUsage::Dynamic);
+    }
+
+    for (int i = 0; i < g_TerrainBucketCount; i++)
+    {
+        TerrainDrawBucket& b = g_TerrainBuckets[i];
+        if (b.indices.empty()) continue;
+
+        const size_t byteOffset = RHI::AppendBuffer(g_TerrainDynamicEBO, b.indices.data(), b.indices.size() * sizeof(GLuint));
+
+        TerrainShader::Instance().SetBaseTexture(b.texBase);
+        TerrainShader::Instance().SetOverlayTexture(b.texOverlay);
+        TerrainShader::Instance().SetWaterFlags(b.baseIsWater, b.overlayIsWater);
+        TerrainShader::Instance().SyncAlphaRef();
+
+        RHI::BindIndexBuffer(g_TerrainDynamicEBO);
+        RHI::DrawIndexed(RHI::Topology::TriangleList, (uint32_t)b.indices.size(), (uint32_t)(byteOffset / sizeof(GLuint)));
+    }
+
+    g_TerrainBucketCount = 0;
+}
+
 void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 {
     RenderTerrainVisual(xi, yi);
@@ -1807,17 +1909,20 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
                 BITMAP_t* b1 = &Bitmaps[BITMAP_MAPTILE + tex1];
                 BITMAP_t* b2 = &Bitmaps[BITMAP_MAPTILE + tex2];
 
-                TerrainShader::Instance().SetBaseTexture(b1->TextureNumber);
-                TerrainShader::Instance().SetOverlayTexture(b2->TextureNumber);
-                TerrainShader::Instance().SetWaterFlags(baseIsWater, overlayIsWater);
-                // DXP-01: synced per-tile (not once per frustrum pass like SetWaterMove) because
-                // alpha-test state can change between tile draws via the wrapper family; dirty-checked
-                // internally so this is a no-op glUniform-wise almost always.
-                TerrainShader::Instance().SyncAlphaRef();
-
-                uintptr_t indexOffset = static_cast<uintptr_t>((yi * (TERRAIN_SIZE - 1) + xi) * 6);
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*)(indexOffset * sizeof(GLuint)));
-                FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
+                // GLP-16: gather into a texture-pair bucket instead of drawing immediately -- the
+                // actual glDrawElements calls happen once per bucket in FlushTerrainBuckets(),
+                // called after RenderTerrainFrustrum's whole tile walk completes. TerrainIndex1-4
+                // are exactly the same 4 corner indices CreateTerrainVBO() baked into the (now
+                // superseded for this pass) static index buffer -- lodi is always 1 in the live
+                // render path (RenderTerrainBlock), so no recomputation needed, just reuse them
+                // in the same two-triangle winding (idx0,idx1,idx2 / idx0,idx2,idx3).
+                TerrainDrawBucket& bucket = GetTerrainBucket(b1->TextureNumber, b2->TextureNumber, baseIsWater, overlayIsWater);
+                bucket.indices.push_back((GLuint)TerrainIndex1);
+                bucket.indices.push_back((GLuint)TerrainIndex2);
+                bucket.indices.push_back((GLuint)TerrainIndex3);
+                bucket.indices.push_back((GLuint)TerrainIndex1);
+                bucket.indices.push_back((GLuint)TerrainIndex3);
+                bucket.indices.push_back((GLuint)TerrainIndex4);
             }
             return;
         }
@@ -3254,6 +3359,13 @@ void RenderTerrainFrustrum(bool EditFlag)
 
     if (useShader)
     {
+        // GLP-16: every tile visited above was gathered into a bucket, not drawn -- draw them
+        // all now, once per distinct texture pair, while g_VAO_Terrain and TerrainShader are
+        // still bound (FlushTerrainBuckets() rebinds GL_ELEMENT_ARRAY_BUFFER to its own dynamic
+        // buffer, which is captured into g_VAO_Terrain's VAO state -- safe, since g_VAO_Terrain's
+        // static g_EBO_Terrain binding has no other consumer left after this change; verified via
+        // a tree-wide grep for g_VAO_Terrain/g_EBO_Terrain before making this change).
+        FlushTerrainBuckets();
         BindVAO(0);
         TerrainShader::Instance().Unbind();
     }
