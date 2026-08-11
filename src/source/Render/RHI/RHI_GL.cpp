@@ -118,6 +118,18 @@ namespace {
 namespace {
     void AdvanceUboRings();
     void DestroyAllUboRings();
+
+    // Ring-path uniform-block handles are slot RESERVATIONS, not GL object names -- but they ride
+    // in the same BufferHandle type as real vertex/index buffers, whose GL names also start at 1.
+    // Without a tag the two id spaces overlap, and DestroyBuffer(uboHandle) would glDeleteBuffers
+    // an unrelated live buffer that happens to share the number. Tagging the high bit keeps them
+    // disjoint (no driver hands out names anywhere near 2^31) and lets the vertex/index-buffer
+    // entry points below reject a misrouted uniform-block handle outright instead of silently
+    // corrupting an unrelated buffer.
+    // NOTE: the legacy rung is deliberately NOT tagged -- LegacyCreateUniformBlock returns a real
+    // GL buffer name, and its Update/Destroy paths use it as one.
+    constexpr uint32_t kUboReservationTag = 0x80000000u;
+    inline bool IsUboReservation(BufferHandle h) { return (h.id & kUboReservationTag) != 0; }
 }
 
 const Caps& GetCaps()
@@ -270,6 +282,7 @@ void UpdateBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
     // binding as GL_ARRAY_BUFFER here is valid regardless of whether this handle was created
     // via CreateVertexBuffer or CreateIndexBuffer.
     if (!handle.IsValid() || !LoadBufferGLFunctions()) return;
+    if (IsUboReservation(handle)) return; // uniform-block handle misrouted here -- see UpdateUniformBlock
     GLsizeiptr& capacity = g_BufferCapacity[handle.id];
     fn_glBindBuffer(GL_ARRAY_BUFFER, handle.id);
     if ((GLsizeiptr)sizeBytes > capacity)
@@ -292,6 +305,7 @@ size_t AppendBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
     // in an empty buffer) or wrap (fits, but not from the current write position -- a same-size
     // respecify hands back a fresh backing allocation) and restart at 0 when needed.
     if (!handle.IsValid() || !LoadBufferGLFunctions()) return 0;
+    if (IsUboReservation(handle)) return 0; // uniform-block handle misrouted here -- see UpdateUniformBlock
 
     GLsizeiptr& capacity = g_BufferCapacity[handle.id];
     GLsizeiptr& writeOffset = g_BufferWriteOffset[handle.id];
@@ -327,6 +341,10 @@ size_t AppendBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
 void DestroyBuffer(BufferHandle handle)
 {
     if (!handle.IsValid() || !LoadBufferGLFunctions()) return;
+    // A ring-path uniform-block handle is a slot reservation, not a GL name -- deleting by its
+    // raw value would destroy whatever real buffer shares that number. Route to
+    // DestroyUniformBlock() instead; rejecting here keeps the mistake inert.
+    if (IsUboReservation(handle)) return;
     GLuint id = handle.id;
     fn_glDeleteBuffers(1, &id);
     g_BufferCapacity.erase(handle.id);
@@ -439,6 +457,7 @@ namespace {
     std::unordered_map<int, UboRing> g_UboRings;
     std::unordered_map<uint32_t, int> g_UboHandleSlot;
     uint32_t g_NextUboHandleId = 1; // handles here are slot reservations, not real GL object ids
+                                    // (tagged with kUboReservationTag on return -- see above)
 
     // GLP-10: incremented once per frame in AdvanceUboRings() (itself called from BeginFrame(),
     // confirmed GLP-09 to run exactly once per frame -- SceneManager.cpp's RenderScene). Every
@@ -532,6 +551,19 @@ namespace {
         ring.writeOffset = 0;
         ring.currentSegment = 0;
         for (int s = 0; s < kUboRingSegments; s++) ring.fence[s] = nullptr;
+
+        // GLP-10 shadow state describes a range inside the buffer we just destroyed, so it must
+        // NOT survive a growth. UpdateUniformBlock calls EnsureRingCapacity() (which lands here)
+        // BEFORE its content dirty-check -- without this reset, a same-frame byte-identical
+        // update immediately after a growth would take the skip path and return early, skipping
+        // both the write and the glBindBufferRange. The new buffer has never been written and
+        // deleting the old one unbound it, so that slot would read an unbound/stale UBO for the
+        // rest of the frame. Both halves of that sequence are ordinary: warm-up growth is
+        // expected (see EnsureRingCapacity), and byte-identical successive uploads are exactly
+        // what GLP-10 exists to skip (BMDFlagsCB, body + armor pieces).
+        ring.lastBytes.clear();
+        ring.lastOffset = -1;
+        ring.lastFrameIndex = UINT64_MAX;
     }
 
     // Ensures the ring for `bindingSlot` exists and its current segment can hold one more
@@ -635,7 +667,7 @@ BufferHandle CreateUniformBlock(size_t sizeBytes, int bindingSlot)
     const GLsizeiptr alignedSize = AlignUp((GLsizeiptr)sizeBytes, (GLsizeiptr)g_Caps.uboOffsetAlignment);
     EnsureRingCapacity(bindingSlot, alignedSize);
 
-    const uint32_t id = g_NextUboHandleId++;
+    const uint32_t id = kUboReservationTag | (g_NextUboHandleId++);
     g_UboHandleSlot[id] = bindingSlot;
     return BufferHandle{ id };
 }
