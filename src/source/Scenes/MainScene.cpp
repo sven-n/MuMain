@@ -453,7 +453,11 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
-                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+                // GLP-16 GPU-ms investigation: CPU-only scope -- GpuTimerBegin/End for this pass
+                // are now called manually, tightly around the real draw submission inside
+                // ZzzLodTerrain.cpp's FlushTerrainBuckets(), not around this whole CPU-heavy
+                // gather+sort+flush call. See FrameProfiler.h's Scope class comment for why.
+                { FRAME_PROFILE_CPU_ONLY(Terrain); RenderTerrain(false); }
         }
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
@@ -462,7 +466,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
                 {
                     FRAME_PROFILE(Objects); RenderObjects();
                 }
-                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+                { FRAME_PROFILE_CPU_ONLY(Terrain); RenderTerrain(false); }
             }
     }
 
@@ -479,7 +483,10 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 
     if (EditFlag != EDIT_NONE && renderTerrain)
     {
-        FRAME_PROFILE(Terrain); RenderTerrain(true);
+        // Dev-editor path: takes the non-shader (IR-based) fallback, which never reaches
+        // FlushTerrainBuckets()'s manual GpuTimerBegin/End -- Terrain GPU ms will read stale/0 in
+        // this mode, CPU ms is unaffected. Not worth instrumenting a debug-only path for.
+        FRAME_PROFILE_CPU_ONLY(Terrain); RenderTerrain(true);
     }
     if (!g_Camera.TopViewEnable && renderDroppedItems)
         { FRAME_PROFILE(Items); RenderItems(); }

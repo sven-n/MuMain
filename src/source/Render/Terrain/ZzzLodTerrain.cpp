@@ -1066,6 +1066,8 @@ typedef void (APIENTRY* PFNGLDELETEVERTEXARRAYSPROC)(GLsizei, const GLuint*);
 typedef void (APIENTRY* PFNGLBINDVERTEXARRAYPROC)(GLuint);
 typedef void (APIENTRY* PFNGLVERTEXATTRIBPOINTERPROC)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void*);
 typedef void (APIENTRY* PFNGLENABLEVERTEXATTRIBARRAYPROC)(GLuint);
+typedef void (APIENTRY* PFNGLPUSHDEBUGGROUPPROC)(GLenum, GLuint, GLsizei, const GLchar*);
+typedef void (APIENTRY* PFNGLPOPDEBUGGROUPPROC)(void);
 
 static PFNGLGENBUFFERSPROC             fn_glGenBuffers             = nullptr;
 static PFNGLDELETEBUFFERSPROC          fn_glDeleteBuffers          = nullptr;
@@ -1075,6 +1077,11 @@ static PFNGLGENVERTEXARRAYSPROC        fn_glGenVertexArrays        = nullptr;
 static PFNGLDELETEVERTEXARRAYSPROC     fn_glDeleteVertexArrays     = nullptr;
 static PFNGLVERTEXATTRIBPOINTERPROC    fn_glVertexAttribPointer    = nullptr;
 static PFNGLENABLEVERTEXATTRIBARRAYPROC fn_glEnableVertexAttribArray = nullptr;
+// GLP-16 GPU-ms investigation: profiler-only annotation, not load-bearing for anything else in
+// this file -- deliberately excluded from LoadTerrainGLFunctions()'s `loaded` gate below, so an
+// old driver/GL version missing KHR_debug still renders terrain fine, just without named groups.
+static PFNGLPUSHDEBUGGROUPPROC         fn_glPushDebugGroup         = nullptr;
+static PFNGLPOPDEBUGGROUPPROC          fn_glPopDebugGroup          = nullptr;
 
 static bool LoadTerrainGLFunctions()
 {
@@ -1089,9 +1096,26 @@ static bool LoadTerrainGLFunctions()
     fn_glDeleteVertexArrays      = (PFNGLDELETEVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glDeleteVertexArrays");
     fn_glVertexAttribPointer     = (PFNGLVERTEXATTRIBPOINTERPROC)SDL_GL_GetProcAddress("glVertexAttribPointer");
     fn_glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)SDL_GL_GetProcAddress("glEnableVertexAttribArray");
+    fn_glPushDebugGroup          = (PFNGLPUSHDEBUGGROUPPROC)SDL_GL_GetProcAddress("glPushDebugGroup");
+    fn_glPopDebugGroup           = (PFNGLPOPDEBUGGROUPPROC)SDL_GL_GetProcAddress("glPopDebugGroup");
 
     loaded = (fn_glGenBuffers && fn_glBindBuffer && fn_glBufferData && fn_glGenVertexArrays);
     return loaded;
+}
+
+// Wraps a block of terrain draws with a named group so a GPU capture tool (RenderDoc/Nsight)
+// shows it as one filterable, labeled entry instead of requiring a manual hunt through hundreds
+// of unlabeled draw calls -- see GLP-16's task file for why this got added (three fix attempts
+// in, still couldn't cleanly isolate the terrain draws in a capture). No-ops safely if
+// glPushDebugGroup/glPopDebugGroup didn't resolve (pre-KHR_debug driver).
+static void PushTerrainDebugGroup(const char* label)
+{
+    if (fn_glPushDebugGroup) fn_glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, label);
+}
+
+static void PopTerrainDebugGroup()
+{
+    if (fn_glPopDebugGroup) fn_glPopDebugGroup();
 }
 
 void DestroyTerrainVBO()
@@ -1777,12 +1801,26 @@ struct TerrainDrawBucket
 static std::vector<TerrainDrawBucket> g_TerrainBuckets;
 static int g_TerrainBucketCount = 0;
 
+// GLP-16 GPU-ms investigation: batches every bucket's indices into one shared upload per frame
+// instead of one RHI::AppendBuffer call per bucket (was ~50-70 calls/frame) -- a real reduction
+// in per-frame buffer-upload call count on its own merits. (Two earlier ideas tried alongside
+// this -- sorting tiles within a bucket for vertex-cache locality, and sorting bucket draw order
+// by texture for bind-cache locality -- were reverted after the actual GPU-ms cost this whole
+// investigation was chasing turned out to be a measurement artifact, not a real cost; see this
+// task's file for the full story. This batching step stayed because it's independently
+// worthwhile, not because it fixed anything.)
+static std::vector<GLuint> g_TerrainFlushScratch;
+
+struct TerrainFlushRange
+{
+    size_t indexOffset; // element offset into g_TerrainFlushScratch/the frame's single upload
+    size_t indexCount;
+    int bucketIndex; // index into g_TerrainBuckets, to read texBase/texOverlay/water flags back
+};
+static std::vector<TerrainFlushRange> g_TerrainFlushRanges;
+
 // g_TerrainDynamicEBO is declared near the top of this file (with the other terrain GL
-// resources) so DestroyTerrainVBO() can release it. The draw phase below appends each bucket's
-// gathered indices into it one bucket at a time, drawing immediately after each append -- not
-// appending all buckets then drawing all, which would be unsafe if a later append wraps the ring
-// (AppendBuffer's orphan-on-wrap is only safe for draws already issued against the pre-wrap
-// backing store, per its own contract).
+// resources) so DestroyTerrainVBO() can release it.
 
 static TerrainDrawBucket& GetTerrainBucket(GLuint texBase, GLuint texOverlay, bool baseIsWater, bool overlayIsWater)
 {
@@ -1819,21 +1857,56 @@ static void FlushTerrainBuckets()
         g_TerrainDynamicEBO = RHI::CreateIndexBuffer(nullptr, 2000 * 6 * sizeof(GLuint), RHI::BufferUsage::Dynamic);
     }
 
+    // Concatenate every bucket's indices into ONE flat upload instead of one AppendBuffer call
+    // per bucket.
+    g_TerrainFlushScratch.clear();
+    g_TerrainFlushRanges.clear();
     for (int i = 0; i < g_TerrainBucketCount; i++)
     {
         TerrainDrawBucket& b = g_TerrainBuckets[i];
         if (b.indices.empty()) continue;
 
-        const size_t byteOffset = RHI::AppendBuffer(g_TerrainDynamicEBO, b.indices.data(), b.indices.size() * sizeof(GLuint));
+        const size_t indexOffset = g_TerrainFlushScratch.size();
+        g_TerrainFlushScratch.insert(g_TerrainFlushScratch.end(), b.indices.begin(), b.indices.end());
+        g_TerrainFlushRanges.push_back({ indexOffset, b.indices.size(), i });
+    }
+
+    if (g_TerrainFlushRanges.empty())
+    {
+        g_TerrainBucketCount = 0;
+        return;
+    }
+
+    // One upload for the whole frame's terrain geometry, then one draw per bucket out of it via
+    // DrawIndexed's firstIndex offset -- no repeated glBufferSubData+draw handoff on the same
+    // buffer within a frame.
+    const size_t byteOffset = RHI::AppendBuffer(g_TerrainDynamicEBO, g_TerrainFlushScratch.data(), g_TerrainFlushScratch.size() * sizeof(GLuint));
+    const uint32_t baseIndex = (uint32_t)(byteOffset / sizeof(GLuint));
+
+    // GLP-16 GPU-ms investigation: named group so this block shows up as one filterable "Terrain"
+    // entry in RenderDoc/Nsight instead of ~50-70 unlabeled glDrawElements calls buried among the
+    // frame's ~1,400 other draws. GpuTimerBegin/End moved here too (tightly around the real GPU
+    // submission) -- MainScene.cpp's call site now uses FRAME_PROFILE_CPU_ONLY(Terrain), which
+    // does NOT auto-time the GPU, specifically so this pair is the only one that fires. A clean
+    // Nsight capture of just this block measured <0.01ms of real GPU time; the ~3-5ms $glstats
+    // had been reporting was CPU gather/sort/flush time (before this point in the frame) leaking
+    // into the old whole-scope timer window, not real draw cost. See GLP-16's task file.
+    PushTerrainDebugGroup("Terrain");
+    FrameProfiler::GpuTimerBegin(FrameProfiler::Pass::Terrain);
+    RHI::BindIndexBuffer(g_TerrainDynamicEBO);
+    for (const TerrainFlushRange& range : g_TerrainFlushRanges)
+    {
+        TerrainDrawBucket& b = g_TerrainBuckets[range.bucketIndex];
 
         TerrainShader::Instance().SetBaseTexture(b.texBase);
         TerrainShader::Instance().SetOverlayTexture(b.texOverlay);
         TerrainShader::Instance().SetWaterFlags(b.baseIsWater, b.overlayIsWater);
         TerrainShader::Instance().SyncAlphaRef();
 
-        RHI::BindIndexBuffer(g_TerrainDynamicEBO);
-        RHI::DrawIndexed(RHI::Topology::TriangleList, (uint32_t)b.indices.size(), (uint32_t)(byteOffset / sizeof(GLuint)));
+        RHI::DrawIndexed(RHI::Topology::TriangleList, (uint32_t)range.indexCount, baseIndex + (uint32_t)range.indexOffset);
     }
+    FrameProfiler::GpuTimerEnd(FrameProfiler::Pass::Terrain);
+    PopTerrainDebugGroup();
 
     g_TerrainBucketCount = 0;
 }

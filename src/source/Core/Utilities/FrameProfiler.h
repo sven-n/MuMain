@@ -361,19 +361,30 @@ namespace FrameProfiler
     // RAII timer. Constructor stamps the start, destructor accumulates elapsed
     // ms into the named pass. Multiple Scopes for the same Pass within a frame
     // accumulate (so calling RenderObjects twice per frame sums correctly).
+    //
+    // autoGpuTimer (default true): also brackets a GL_TIMESTAMP pair around the whole scope.
+    // GLP-16 GPU-ms investigation found this default placement misattributes CPU-only work to
+    // "GPU time" for any pass whose scope spans real CPU work (gather/sort/etc.) BEFORE its GPU
+    // commands are submitted -- GL_TIMESTAMP measures wall-clock time between two points in the
+    // GPU's command stream, so if the GPU finishes the begin-marker and then has nothing queued
+    // while the CPU keeps working, that idle wait reads as "GPU time" too. Pass false here and
+    // call FrameProfiler::GpuTimerBegin/GpuTimerEnd manually, tightly around just the real draw
+    // submission, for any pass where this matters (Terrain does this now -- see
+    // ZzzLodTerrain.cpp's FlushTerrainBuckets()). CPU ms (AccumulatorMs) is unaffected either
+    // way -- it always covers the whole scope, which is correct for CPU self-time.
     class Scope
     {
     public:
-        explicit Scope(Pass p)
-            : m_pass(p), m_t0(std::chrono::steady_clock::now())
+        explicit Scope(Pass p, bool autoGpuTimer = true)
+            : m_pass(p), m_t0(std::chrono::steady_clock::now()), m_autoGpuTimer(autoGpuTimer)
         {
             PushPass(p);
-            GpuTimerBegin(p);
+            if (m_autoGpuTimer) GpuTimerBegin(p);
         }
 
         ~Scope()
         {
-            GpuTimerEnd(m_pass);
+            if (m_autoGpuTimer) GpuTimerEnd(m_pass);
             const auto t1 = std::chrono::steady_clock::now();
             const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - m_t0).count();
             AccumulatorMs(m_pass) += (float)ns / 1.0e6f;
@@ -383,9 +394,14 @@ namespace FrameProfiler
     private:
         Pass m_pass;
         std::chrono::steady_clock::time_point m_t0;
+        bool m_autoGpuTimer;
     };
 }
 
 #define FRAME_PROFILE_CAT_(a, b) a##b
 #define FRAME_PROFILE_CAT(a, b) FRAME_PROFILE_CAT_(a, b)
 #define FRAME_PROFILE(passName) FrameProfiler::Scope FRAME_PROFILE_CAT(_frameProf_, __LINE__)(FrameProfiler::Pass::passName)
+// Same as FRAME_PROFILE, but skips the automatic GL_TIMESTAMP pair -- use when the caller places
+// FrameProfiler::GpuTimerBegin/GpuTimerEnd manually, tightly around the real GPU submission
+// instead of the whole scope. CPU ms tracking (AccumulatorMs) is identical to FRAME_PROFILE.
+#define FRAME_PROFILE_CPU_ONLY(passName) FrameProfiler::Scope FRAME_PROFILE_CAT(_frameProf_, __LINE__)(FrameProfiler::Pass::passName, false)

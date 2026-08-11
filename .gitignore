@@ -23,6 +23,7 @@ build-linux/
 **/cmake-build-release/
 **/CMakeFiles/
 /Win32/
+/out/
 
 # .NET build outputs
 **/bin/**
