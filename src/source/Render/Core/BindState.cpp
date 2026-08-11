@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "BindState.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include <SDL3/SDL.h>
 
 #ifndef APIENTRY
@@ -50,6 +51,7 @@ void BindProgram(GLuint program)
     if (!LoadBindStateFunctions()) return;
     fn_glUseProgram(program);
     s_lastProgram = program;
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::ProgramBinds);
 }
 
 void UnbindAllShaders()
@@ -75,6 +77,7 @@ void BindTexture2D(int slot, GLuint texture)
     if (slot >= 0 && slot < kMaxCachedTextureSlots && s_lastTexture[slot] == texture) return;
     glBindTexture(GL_TEXTURE_2D, texture);
     if (slot >= 0 && slot < kMaxCachedTextureSlots) s_lastTexture[slot] = texture;
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::TextureBinds);
 }
 
 void BindVAO(GLuint vao)
@@ -83,6 +86,7 @@ void BindVAO(GLuint vao)
     if (!LoadBindStateFunctions()) return;
     fn_glBindVertexArray(vao);
     s_lastVAO = vao;
+    FrameProfiler::CountGLCall();
 }
 
 // Sentinel that can never be a real GL object name (0 is reserved for "no object"; real generated

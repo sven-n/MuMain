@@ -2,6 +2,7 @@
 #include "PassthroughShader.h"
 #include "Render/Core/RenderConfig.h"
 #include "Render/Core/BindState.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <SDL3/SDL.h>
 #include <cstdint>
@@ -281,12 +282,12 @@ void PassthroughShader::CreateGL()
 
     // Default sampler to texture unit 0, texture enabled, fog disabled, alpha test disabled for 2D UI
     BindProgram(m_Program);
-    if (m_LocTex != -1) fn_glUniform1i(m_LocTex, 0);
-    if (m_LocUseTexture != -1) fn_glUniform1i(m_LocUseTexture, 1);
-    if (m_LocUseFog != -1) fn_glUniform1i(m_LocUseFog, 0);
-    if (m_LocAlphaRef != -1) fn_glUniform1f(m_LocAlphaRef, -1.0f);
+    if (m_LocTex != -1) { fn_glUniform1i(m_LocTex, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocUseTexture != -1) { fn_glUniform1i(m_LocUseTexture, 1); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocUseFog != -1) { fn_glUniform1i(m_LocUseFog, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocAlphaRef != -1) { fn_glUniform1f(m_LocAlphaRef, -1.0f); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
     m_LastAlphaRef = -1.0f;
-    if (m_LocTexCombineAdd != -1) fn_glUniform1i(m_LocTexCombineAdd, 0);
+    if (m_LocTexCombineAdd != -1) { fn_glUniform1i(m_LocTexCombineAdd, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
     // Tri-state sentinels reset to "unset" (not matched to the values just uploaded above) so the
     // first SetUseTexture/SetUseFog/SetTexCombineAdd call after (re)creation always re-uploads,
     // regardless of what the caller happens to request first.
@@ -318,6 +319,7 @@ void PassthroughShader::BindGL()
         // so unchanged alpha-test state (the common case) costs one float compare, not a glUniform1f.
         if (m_LocAlphaRef != -1 && fn_glUniform1f != nullptr && g_AlphaRef != m_LastAlphaRef) {
             fn_glUniform1f(m_LocAlphaRef, g_AlphaRef);
+            FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
             m_LastAlphaRef = g_AlphaRef;
         }
     }
@@ -332,9 +334,6 @@ void PassthroughShader::SetTexture(GLuint texID, int slot)
     if (slot != 0 && fn_glActiveTexture != nullptr) {
         fn_glActiveTexture(GL_TEXTURE0);
     }
-    if (m_LocTex != -1 && fn_glUniform1i != nullptr) {
-        fn_glUniform1i(m_LocTex, slot);
-    }
 }
 
 void PassthroughShader::SetUseTexture(bool use)
@@ -343,6 +342,7 @@ void PassthroughShader::SetUseTexture(bool use)
     const int v = use ? 1 : 0;
     if (m_LocUseTexture != -1 && fn_glUniform1i != nullptr && v != m_LastUseTexture) {
         fn_glUniform1i(m_LocUseTexture, v);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
         m_LastUseTexture = v;
     }
 }
@@ -353,6 +353,7 @@ void PassthroughShader::SetUseFog(bool use)
     const int v = use ? 1 : 0;
     if (m_LocUseFog != -1 && fn_glUniform1i != nullptr && v != m_LastUseFog) {
         fn_glUniform1i(m_LocUseFog, v);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
         m_LastUseFog = v;
     }
 }
@@ -363,6 +364,7 @@ void PassthroughShader::SetTexCombineAdd(bool add)
     const int v = add ? 1 : 0;
     if (m_LocTexCombineAdd != -1 && fn_glUniform1i != nullptr && v != m_LastTexCombineAdd) {
         fn_glUniform1i(m_LocTexCombineAdd, v);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
         m_LastTexCombineAdd = v;
     }
 }

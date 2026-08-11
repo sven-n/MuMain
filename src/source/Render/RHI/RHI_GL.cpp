@@ -10,6 +10,7 @@
 #include "Render/RHI/RHI.h"
 #include "Render/Textures/ZzzOpenglUtil.h"  // PlatformSwapBuffers()
 #include "Render/Core/BindState.h"          // BindVAO() / InvalidateVAOCache()
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <SDL3/SDL.h>
 #include <unordered_map>
@@ -141,6 +142,7 @@ namespace {
         fn_glBindBuffer(target, id);
         fn_glBufferData(target, (GLsizeiptr)sizeBytes, initialData,
                          usage == BufferUsage::Static ? GL_STATIC_DRAW : GL_STREAM_DRAW);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
         fn_glBindBuffer(target, 0);
         g_BufferCapacity[id] = (GLsizeiptr)sizeBytes;
         return BufferHandle{ id };
@@ -169,8 +171,11 @@ void UpdateBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
     {
         capacity = (GLsizeiptr)sizeBytes * 2;
         fn_glBufferData(GL_ARRAY_BUFFER, capacity, nullptr, GL_STREAM_DRAW);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+        FrameProfiler::TagBufferOrphan();
     }
     fn_glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)sizeBytes, data);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
     fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -193,15 +198,20 @@ size_t AppendBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
     {
         capacity = neededSize * 2;
         fn_glBufferData(GL_ARRAY_BUFFER, capacity, nullptr, GL_STREAM_DRAW);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+        FrameProfiler::TagBufferOrphan();
         writeOffset = 0;
     }
     else if (writeOffset + neededSize > capacity)
     {
         fn_glBufferData(GL_ARRAY_BUFFER, capacity, nullptr, GL_STREAM_DRAW);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+        FrameProfiler::TagBufferOrphan();
         writeOffset = 0;
     }
 
     fn_glBufferSubData(GL_ARRAY_BUFFER, writeOffset, neededSize, data);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
     fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     const GLsizeiptr offsetWritten = writeOffset;
@@ -243,7 +253,10 @@ void UpdateUniformBlock(BufferHandle handle, const void* data, size_t sizeBytes)
     // SceneUBO/BoneUBO/BMDMeshShader's BMDFlagsCB) fully repacks and uploads its whole buffer
     // every call -- no partial-write caller exists that this could break.
     fn_glBufferData(GL_UNIFORM_BUFFER, (GLsizeiptr)sizeBytes, nullptr, GL_DYNAMIC_DRAW);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+    FrameProfiler::TagBufferOrphan();
     fn_glBufferSubData(GL_UNIFORM_BUFFER, 0, (GLsizeiptr)sizeBytes, data);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
     fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -433,6 +446,7 @@ void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)
     default: return;
     }
     glDrawArrays(mode, (GLint)firstVertex, (GLsizei)vertexCount);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
 }
 
 void DrawIndexed(Topology /*topology*/, uint32_t /*indexCount*/, uint32_t /*firstIndex*/)

@@ -3,6 +3,7 @@
 #include "Render/Core/RenderConfig.h"
 #include "Render/Core/GlobalUBO.h"
 #include "Render/Core/BindState.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <SDL3/SDL.h>
 #include <cstdint>
@@ -492,10 +493,10 @@ void BMDMeshShader::CreateGL()
     m_LocChromeTex2 = fn_glGetUniformLocation(m_Program, "u_ChromeTex2");
 
     BindProgram(m_Program);
-    if (m_LocTex != -1) fn_glUniform1i(m_LocTex, 0);
-    if (m_LocChromeTex1 != -1) fn_glUniform1i(m_LocChromeTex1, 1);
-    if (m_LocMetalTex != -1) fn_glUniform1i(m_LocMetalTex, 2);
-    if (m_LocChromeTex2 != -1) fn_glUniform1i(m_LocChromeTex2, 3);
+    if (m_LocTex != -1) { fn_glUniform1i(m_LocTex, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocChromeTex1 != -1) { fn_glUniform1i(m_LocChromeTex1, 1); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocMetalTex != -1) { fn_glUniform1i(m_LocMetalTex, 2); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocChromeTex2 != -1) { fn_glUniform1i(m_LocChromeTex2, 3); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
     BindProgram(0);
 
     g_ErrorReport.Write(L"[BMDMeshShader] Created program ID %d\r\n", m_Program);
@@ -576,12 +577,10 @@ void BMDMeshShader::BindGL(int renderMode, float waveOffsetU, float waveOffsetV,
         RHI::UpdateUniformBlock(m_BMDFlagsUBO, &cb, sizeof(cb));
     }
 
-    // Sampler binds -- unchanged, samplers can't live in a UBO. NOTE: SetTexture() also
-    // reassigns the u_Tex sampler uniform to whatever slot it's given (it's shared/reused
-    // for every texture bind, not just u_Tex's own slot 0) -- every auxiliary texture bind
-    // below must run BEFORE the base-texture SetTexture(texID, 0) further down, so u_Tex
-    // ends up pointing at slot 0 again. u_ChromeTex1/u_MetalTex/u_ChromeTex2 themselves are
-    // set once, permanently, at Create() time and aren't touched here.
+    // Sampler binds -- unchanged, samplers can't live in a UBO. GLP-03: u_Tex/u_ChromeTex1/
+    // u_MetalTex/u_ChromeTex2 are all assigned once, permanently, at CreateGL() time (:494-499)
+    // and SetTexture() no longer rewrites u_Tex per call -- so unlike before, these four calls
+    // can run in any order.
     if (renderMode == 4 || renderMode == 5 || renderMode == 6 || renderMode == 7) {
         SetTexture(chromeTex1ID, 1);
     }
@@ -599,8 +598,5 @@ void BMDMeshShader::BindGL(int renderMode, float waveOffsetU, float waveOffsetV,
 void BMDMeshShader::SetTexture(GLuint texID, int slot)
 {
     BindTexture2D(slot, texID);
-    if (m_LocTex != -1 && fn_glUniform1i) {
-        fn_glUniform1i(m_LocTex, slot);
-    }
 }
 

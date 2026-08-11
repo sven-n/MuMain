@@ -2,6 +2,7 @@
 #include "Render/Shaders/PlanarShadowShader.h"
 #include "Render/Core/BindState.h"
 #include "Render/Core/RenderConfig.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <cstdint>
 #include <cstring>
@@ -292,12 +293,13 @@ void CPlanarShadowShader::DrawGPUSkinned(GLuint vao, int baseCorner, int vertexC
     const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
     const float* origin = skinOrigin ? skinOrigin : zeroOrigin;
 
-    if (m_locUseGPUSkin != -1) fn_glUniform1i(m_locUseGPUSkin, 1);
-    if (m_locSkinOrigin != -1) fn_glUniform3fv(m_locSkinOrigin, 1, origin);
-    if (m_locSkinScale  != -1) fn_glUniform1f(m_locSkinScale, skinScale);
+    if (m_locUseGPUSkin != -1) { fn_glUniform1i(m_locUseGPUSkin, 1); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locSkinOrigin != -1) { fn_glUniform3fv(m_locSkinOrigin, 1, origin); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locSkinScale  != -1) { fn_glUniform1f(m_locSkinScale, skinScale); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
 
     BindVAO(vao);
     glDrawArrays(GL_TRIANGLES, baseCorner, vertexCount);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
     BindVAO(0);
 }
 
@@ -333,12 +335,12 @@ bool CPlanarShadowShader::BeginGL(const float* bodyOrigin, const float mvp[16], 
     m_bActive = true;
     BindProgram(m_hProgram);
 
-    if (m_locBodyOrigin  != -1) fn_glUniform3fv(m_locBodyOrigin, 1, bodyOrigin);
-    if (m_locSx          != -1) fn_glUniform1f(m_locSx, sx);
-    if (m_locSy          != -1) fn_glUniform1f(m_locSy, sy);
-    if (m_locShadowAlpha != -1) fn_glUniform1f(m_locShadowAlpha, alpha);
-    if (m_locMVP         != -1) fn_glUniformMatrix4fv(m_locMVP, 1, GL_FALSE, mvp);
-    if (m_locUseGPUSkin  != -1) fn_glUniform1i(m_locUseGPUSkin, 0);
+    if (m_locBodyOrigin  != -1) { fn_glUniform3fv(m_locBodyOrigin, 1, bodyOrigin); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locSx          != -1) { fn_glUniform1f(m_locSx, sx); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locSy          != -1) { fn_glUniform1f(m_locSy, sy); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locShadowAlpha != -1) { fn_glUniform1f(m_locShadowAlpha, alpha); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locMVP         != -1) { fn_glUniformMatrix4fv(m_locMVP, 1, GL_FALSE, mvp); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locUseGPUSkin  != -1) { fn_glUniform1i(m_locUseGPUSkin, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -361,7 +363,7 @@ void CPlanarShadowShader::DrawGL(const float* vertices, int vertexCount)
 {
     if (!m_bActive || m_VAO == 0 || m_VBO == 0 || vertexCount <= 0) return;
 
-    if (m_locUseGPUSkin != -1) fn_glUniform1i(m_locUseGPUSkin, 0);
+    if (m_locUseGPUSkin != -1) { fn_glUniform1i(m_locUseGPUSkin, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
 
     const size_t neededSize = (size_t)vertexCount * 3 * sizeof(float);
 
@@ -372,13 +374,17 @@ void CPlanarShadowShader::DrawGL(const float* vertices, int vertexCount)
     if (neededSize > m_VBOCapacity) {
         m_VBOCapacity = neededSize * 2;
         fn_glBufferData(GL_ARRAY_BUFFER, m_VBOCapacity, nullptr, GL_STREAM_DRAW);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+        FrameProfiler::TagBufferOrphan();
     }
 
     fn_glBufferSubData(GL_ARRAY_BUFFER, 0, neededSize, vertices);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
     fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     BindVAO(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
     BindVAO(0);
 }
 

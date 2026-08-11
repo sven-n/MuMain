@@ -93,6 +93,15 @@ void SetShowFpsCounter(bool enabled)
     if (enabled) g_bShowDebugInfo = false;
 }
 
+// GLP-01: independent of the two flags above -- $glstats can be shown alongside $details or
+// $fpscounter, not just standalone. Also the single switch that gates FrameProfiler's counter/
+// GPU-timer increments themselves (FrameProfiler::g_CountersEnabled), so turning the overlay
+// off also stops paying for the instrumentation.
+void SetShowGLStats(bool enabled)
+{
+    FrameProfiler::g_CountersEnabled = enabled;
+}
+
 //=============================================================================
 // Frame Statistics Tracker
 //=============================================================================
@@ -627,10 +636,78 @@ static void RenderDebugInfo()
         g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
     }
 
-    FrameProfiler::ResetFrame();
-
     // Frame time graph below text
     RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
+
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
+
+    // FrameProfiler::ResetFrame() used to live here, which meant AccumulatorMs only ever reset
+    // when $details itself was on -- with $glstats added as an independent overlay reading the
+    // same accumulators, that would show a running session total instead of a per-frame value
+    // whenever $details was off. Reset now happens once per frame unconditionally, after every
+    // reader (this function and RenderGLStats() below) has had a chance to read -- see the
+    // FrameProfiler::ResetFrame()/ResetCounters()/AdvanceGpuTimers() call in MainScene().
+}
+
+/**
+ * @brief Renders the $glstats overlay: per-pass GL call/draw/buffer counters and GPU pass
+ * timers (GLP-01). Independent of $details -- reads the same FrameProfiler accumulators but
+ * is gated by its own flag (FrameProfiler::g_CountersEnabled, set via SetShowGLStats()).
+ */
+static void RenderGLStats()
+{
+    if (!FrameProfiler::g_CountersEnabled)
+        return;
+
+    BeginBitmap();
+
+    wchar_t szLine[128];
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+
+    // Right-hand column so this can be shown alongside $details' left-aligned overlay without
+    // the two overlapping.
+    const float x = DEBUG_TEXT_X + 260.0f;
+    int y = DEBUG_TEXT_Y_START;
+
+    using FP = FrameProfiler::Pass;
+    using FC = FrameProfiler::Counter;
+
+    mu_swprintf(szLine, L"GLStats  Pass       CPUms  GPUms   GL  Draw  BufUpd(Orph)");
+    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // One row per GL-call-bearing pass -- the update/move-phase/CPU-only passes (MoveEffects,
+    // MoveParticles, Skinning, CharWait, Present) never issue GL calls themselves, so a row for
+    // them here would just be zeroes; $details already covers their CPU cost.
+    static constexpr FP kRows[] = { FP::Terrain, FP::Objects, FP::Characters, FP::Items, FP::Effects, FP::UI };
+    for (FP pass : kRows)
+    {
+        const int gpuIdx = FrameProfiler::GpuTimedIndex(pass);
+        const float gpuMs = (gpuIdx >= 0) ? FrameProfiler::GpuMs(pass) : 0.0f;
+        mu_swprintf(szLine, L"%-10hs %6.2f %6.2f  %4u  %4u  %4u(%u)",
+            FrameProfiler::kPassNames[(int)pass],
+            FrameProfiler::AccumulatorMs(pass),
+            gpuMs,
+            FrameProfiler::CounterValue(pass, FC::GLCalls),
+            FrameProfiler::CounterValue(pass, FC::DrawCalls),
+            FrameProfiler::CounterValue(pass, FC::BufferUpdates),
+            FrameProfiler::CounterValue(pass, FC::BufferOrphans));
+        g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    }
+
+    // Frame totals -- includes binds/uniform writes, which aren't broken out per-row above
+    // (would make the table too wide to read at a glance).
+    mu_swprintf(szLine, L"Total  GL:%u  Draw:%u  BufUpd:%u(%u)  ProgBind:%u  TexBind:%u  UniWr:%u",
+        FrameProfiler::CounterValue(FC::GLCalls),
+        FrameProfiler::CounterValue(FC::DrawCalls),
+        FrameProfiler::CounterValue(FC::BufferUpdates),
+        FrameProfiler::CounterValue(FC::BufferOrphans),
+        FrameProfiler::CounterValue(FC::ProgramBinds),
+        FrameProfiler::CounterValue(FC::TextureBinds),
+        FrameProfiler::CounterValue(FC::UniformWrites));
+    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
@@ -1062,8 +1139,17 @@ void MainScene(HDC hDC)
         {
             FRAME_PROFILE(Other);
             RenderDebugInfo();
+            RenderGLStats();
             RenderFpsCounter();
             UI::Reconnect::RenderDialog();
+
+            // Once per frame, unconditionally -- see the comment at the end of RenderDebugInfo()
+            // for why this can't live inside either overlay function. AdvanceGpuTimers() must run
+            // after this frame's Terrain/Objects/Characters/Items/Effects/UI passes have all
+            // issued their GpuTimerBegin/End calls, which RenderCurrentScene() above guarantees.
+            FrameProfiler::ResetFrame();
+            FrameProfiler::ResetCounters();
+            FrameProfiler::AdvanceGpuTimers();
         }
 
         if (Success)

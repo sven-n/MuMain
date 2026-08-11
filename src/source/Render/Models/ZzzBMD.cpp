@@ -1835,6 +1835,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             BindVAO(m_VAO_StaticGPU);
 
             glDrawArrays(GL_TRIANGLES, baseCorner, flatCount);
+            FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
 
             // DXP-22 step 4: no reflexive BindVAO(0)/Unbind() here -- the next draw's own Bind()/
             // BindVAO() call (any of the 4 shader classes, or this same one) self-corrects via the
@@ -1900,6 +1901,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
 
                 // Flat expansion — glDrawArrays starting at index 0.
                 glDrawArrays(GL_TRIANGLES, 0, m_MeshIndexCount[meshIndex]);
+                FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
 
                 // DXP-22 step 4: no reflexive BindVAO(0)/Unbind() here -- see the GPU-skinned path
                 // above for the full reasoning (self-corrects via the wrapper cache).
@@ -2382,6 +2384,7 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(3, GL_FLOAT, 0, vertices);
         glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 }
@@ -2469,6 +2472,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(3, GL_FLOAT, 0, vertices);
         glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 }

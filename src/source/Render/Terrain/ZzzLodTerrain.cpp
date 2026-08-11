@@ -9,6 +9,7 @@
 #include <iterator>
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Core/BindState.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Render/Models/ZzzBMD.h"
 #include "ZzzLodTerrain.h"
 #include "Engine/Pathing/ZzzPath.h"
@@ -1816,6 +1817,7 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 
                 uintptr_t indexOffset = static_cast<uintptr_t>((yi * (TERRAIN_SIZE - 1) + xi) * 6);
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*)(indexOffset * sizeof(GLuint)));
+                FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
             }
             return;
         }

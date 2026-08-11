@@ -55,4 +55,11 @@ private:
     // Sentinel guaranteed to differ from any real g_AlphaRef value, forcing the first
     // SyncAlphaRef() call after Create() to upload u_AlphaRef.
     float m_LastAlphaRef = -12345.0f;
+
+    // GLP-04: tri-state sentinels for SetWaterFlags -- -1 = unset, 0/1 = last value sent. Must
+    // stay -1 after CreateGL() (not 0, even though CreateGL() uploads a 0/0 default) so the
+    // first real SetWaterFlags() call always uploads regardless of what value it happens to
+    // request first, matching PassthroughShader's tri-state setters (DXP-26).
+    int m_LastBaseIsWater    = -1;
+    int m_LastOverlayIsWater = -1;
 };
