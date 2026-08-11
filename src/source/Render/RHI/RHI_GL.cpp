@@ -492,6 +492,7 @@ void DestroyTexture(TextureHandle handle)
     // invalidate the cache, or a later Gen reusing this numeric id would be wrongly treated as
     // already-bound (the exact bug class that produced DXP-22's "infinity shadow").
     InvalidateTextureCache();
+    InvalidateActiveTextureUnitCache();
 }
 
 void BindTexture(TextureHandle handle, int slot)

@@ -300,8 +300,9 @@ void TerrainShader::SetBaseTexture(GLuint texID)
 
 void TerrainShader::SetOverlayTexture(GLuint texID)
 {
+    // GLP-05: no raw glActiveTexture(GL_TEXTURE0) restore anymore -- BindState now owns the
+    // active texture unit as part of its bind-state monopoly (see BindState.cpp's BindTexture2D).
     BindTexture2D(1, texID);
-    if (fn_glActiveTexture) fn_glActiveTexture(GL_TEXTURE0); // Restore default active texture
 }
 
 void TerrainShader::SetWaterMove(float waterMove)

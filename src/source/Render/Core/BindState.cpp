@@ -45,6 +45,9 @@ static GLuint s_lastVAO     = 0;
 static const int kMaxCachedTextureSlots = 8;
 static GLuint    s_lastTexture[kMaxCachedTextureSlots] = { 0 };
 
+// GLP-05: matches GL's post-context-creation default (GL_TEXTURE0, i.e. slot 0).
+static GLint s_lastActiveSlot = 0;
+
 void BindProgram(GLuint program)
 {
     if (program == s_lastProgram) return;
@@ -63,16 +66,18 @@ void BindTexture2D(int slot, GLuint texture)
 {
     if (!LoadBindStateFunctions()) return;
 
-    // glActiveTexture is deliberately NEVER cached/skipped here, only the per-slot bound texture id
-    // is. TerrainShader::SetOverlayTexture and PassthroughShader::SetTexture both still call a raw
-    // (uncached) fn_glActiveTexture(GL_TEXTURE0) restore after binding a non-zero slot -- if this
-    // function also cached "current active unit" and skipped re-issuing it on a match, those raw
-    // restores would silently desync the cache from real GL state, causing a later same-slot bind to
-    // wrongly skip the unit switch and bind the wrong texture to the wrong unit. glActiveTexture
-    // itself is a cheap state-pointer flip (unlike glBindTexture, which is the call actually measured
-    // as redundant in the DXP-22 RenderDoc capture), so unconditionally reissuing it costs little and
-    // avoids this whole class of bug.
-    fn_glActiveTexture(GL_TEXTURE0 + slot);
+    // GLP-05: BindState is now the complete monopoly on the active texture unit, not just
+    // program/VAO/per-slot-texture-id. This is only sound because TerrainShader::SetOverlayTexture
+    // and PassthroughShader::SetTexture's raw (uncached) fn_glActiveTexture(GL_TEXTURE0) restores
+    // were deleted in the same commit that added this cache -- a raw glActiveTexture anywhere in
+    // the tree desyncs s_lastActiveSlot from real GL state, causing a later same-slot bind to
+    // wrongly skip the unit switch and bind the wrong texture to the wrong unit (see DXP-22's
+    // "infinity shadow" for what that class of bug looks like in practice). If you are adding a
+    // texture bind anywhere, route it through BindTexture2D -- do not call glActiveTexture directly.
+    if (slot != s_lastActiveSlot) {
+        fn_glActiveTexture(GL_TEXTURE0 + slot);
+        s_lastActiveSlot = slot;
+    }
 
     if (slot >= 0 && slot < kMaxCachedTextureSlots && s_lastTexture[slot] == texture) return;
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -107,4 +112,12 @@ void InvalidateTextureCache()
 void InvalidateVAOCache()
 {
     s_lastVAO = kInvalidCacheSentinel;
+}
+
+void InvalidateActiveTextureUnitCache()
+{
+    // -1 rather than kInvalidCacheSentinel (that constant is sized for GLuint object names, not
+    // a small non-negative slot index) -- no real slot argument is ever negative, so this can
+    // never accidentally match and skip the next real glActiveTexture call.
+    s_lastActiveSlot = -1;
 }

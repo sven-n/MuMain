@@ -329,11 +329,10 @@ extern int CachTexture;
 
 void PassthroughShader::SetTexture(GLuint texID, int slot)
 {
+    // GLP-05: no raw glActiveTexture(GL_TEXTURE0) restore anymore -- BindState now owns the
+    // active texture unit as part of its bind-state monopoly (see BindState.cpp's BindTexture2D).
     BindTexture2D(slot, texID);
     CachTexture = -1; // Invalidate engine texture cache
-    if (slot != 0 && fn_glActiveTexture != nullptr) {
-        fn_glActiveTexture(GL_TEXTURE0);
-    }
 }
 
 void PassthroughShader::SetUseTexture(bool use)
