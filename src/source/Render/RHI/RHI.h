@@ -28,6 +28,24 @@ struct Handle {
 using BufferHandle  = Handle<struct BufferTag>;
 using TextureHandle = Handle<struct TextureTag>;
 
+// ---- Capabilities (GLP-08) ----
+// Populated once, in Init(), by probing the actual context/driver -- never hardcoded to "assume
+// the latest". Nothing in the tree consumes this yet; it exists so GLP-09/15/22 can be written
+// as "use the fast path if Caps says so, keep today's path otherwise" instead of guessing.
+// Each bool requires BOTH the version/extension being present AND the entry points that
+// capability needs actually resolving via SDL_GL_GetProcAddress -- a driver can report a high
+// version and still hand back null for a symbol on a bad install.
+struct Caps {
+    int  glMajor = 0, glMinor = 0;
+    bool bufferStorage        = false;  // ARB_buffer_storage / core 4.4       -> GLP-09
+    bool vertexAttribBinding  = false;  // ARB_vertex_attrib_binding / core 4.3 -> GLP-22
+    bool programBinary        = false;  // ARB_get_program_binary / core 4.1   -> GLP-15
+    bool timerQuery           = false;  // ARB_timer_query / core 3.3          -> GLP-01
+    int  uboOffsetAlignment   = 256;    // GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT -- GLP-09 ring stride, do not hardcode 256 elsewhere
+    int  maxUniformBlockSize  = 16384;  // GL_MAX_UNIFORM_BLOCK_SIZE
+};
+const Caps& GetCaps();
+
 // ---- Device/frame (implemented in RHI_GL) ----
 bool Init(void* nativeWindowHandle, int width, int height);
 void Shutdown();

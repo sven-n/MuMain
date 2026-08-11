@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <vector>
 #include <cstring>
+#include <cstdio>
 
 using namespace RHI;
 
@@ -25,6 +26,94 @@ namespace {
     int g_Width = 0;
     int g_Height = 0;
     bool g_Initialized = false;
+
+    // ---- GLP-08: capability probe ----
+    Caps g_Caps;
+
+    #ifndef APIENTRY
+    #define APIENTRY
+    #endif
+    typedef const GLubyte* (APIENTRY* PFNGLGETSTRINGIPROC)(GLenum name, GLuint index);
+
+    bool HasGLExtension(const char* name, PFNGLGETSTRINGIPROC fn_glGetStringi, GLint numExtensions)
+    {
+        if (!fn_glGetStringi) return false;
+        for (GLint i = 0; i < numExtensions; i++)
+        {
+            const GLubyte* ext = fn_glGetStringi(GL_EXTENSIONS, (GLuint)i);
+            if (ext && strcmp((const char*)ext, name) == 0) return true;
+        }
+        return false;
+    }
+
+    bool AtLeastGLVersion(int major, int minor, int reqMajor, int reqMinor)
+    {
+        if (major != reqMajor) return major > reqMajor;
+        return minor >= reqMinor;
+    }
+
+    // Both the version/extension AND every listed entry point must resolve, or the flag stays
+    // false -- a driver can report a high version and still hand back null for a symbol on a
+    // bad install (RHI.h's Caps contract). Logs which half failed, since "false" alone doesn't
+    // say whether it's a genuinely old driver or a broken one.
+    bool ProbeOneCap(const wchar_t* label, bool versionOrExtPresent,
+                      const char* fn1, const char* fn2 = nullptr)
+    {
+        const bool fn1Resolved = fn1 ? (SDL_GL_GetProcAddress(fn1) != nullptr) : true;
+        const bool fn2Resolved = fn2 ? (SDL_GL_GetProcAddress(fn2) != nullptr) : true;
+        const bool fnsResolved = fn1Resolved && fn2Resolved;
+
+        if (versionOrExtPresent && !fnsResolved)
+        {
+            g_ErrorReport.Write(L"[RHI_GL Caps] %ls: version/extension present but an entry point "
+                                 L"did not resolve (bad driver install?)\r\n", label);
+        }
+        return versionOrExtPresent && fnsResolved;
+    }
+
+    void ProbeCaps()
+    {
+        g_Caps = Caps{};
+
+        const char* versionStr = (const char*)glGetString(GL_VERSION);
+        int major = 0, minor = 0;
+        if (versionStr) sscanf(versionStr, "%d.%d", &major, &minor);
+        g_Caps.glMajor = major;
+        g_Caps.glMinor = minor;
+
+        PFNGLGETSTRINGIPROC fn_glGetStringi = (PFNGLGETSTRINGIPROC)SDL_GL_GetProcAddress("glGetStringi");
+        GLint numExtensions = 0;
+        glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+
+        g_Caps.bufferStorage = ProbeOneCap(L"bufferStorage",
+            AtLeastGLVersion(major, minor, 4, 4) || HasGLExtension("GL_ARB_buffer_storage", fn_glGetStringi, numExtensions),
+            "glBufferStorage");
+
+        g_Caps.vertexAttribBinding = ProbeOneCap(L"vertexAttribBinding",
+            AtLeastGLVersion(major, minor, 4, 3) || HasGLExtension("GL_ARB_vertex_attrib_binding", fn_glGetStringi, numExtensions),
+            "glBindVertexBuffer", "glVertexAttribFormat");
+
+        g_Caps.programBinary = ProbeOneCap(L"programBinary",
+            AtLeastGLVersion(major, minor, 4, 1) || HasGLExtension("GL_ARB_get_program_binary", fn_glGetStringi, numExtensions),
+            "glGetProgramBinary", "glProgramBinary");
+
+        g_Caps.timerQuery = ProbeOneCap(L"timerQuery",
+            AtLeastGLVersion(major, minor, 3, 3) || HasGLExtension("GL_ARB_timer_query", fn_glGetStringi, numExtensions),
+            "glQueryCounter", "glGetQueryObjectui64v");
+
+        GLint uboAlign = 0;
+        glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uboAlign);
+        if (uboAlign > 0) g_Caps.uboOffsetAlignment = uboAlign;
+
+        GLint maxBlockSize = 0;
+        glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxBlockSize);
+        if (maxBlockSize > 0) g_Caps.maxUniformBlockSize = maxBlockSize;
+    }
+}
+
+const Caps& GetCaps()
+{
+    return g_Caps;
 }
 
 bool Init(void* /*nativeWindowHandle*/, int width, int height)
@@ -34,6 +123,9 @@ bool Init(void* /*nativeWindowHandle*/, int width, int height)
     g_Width = width;
     g_Height = height;
     g_Initialized = true;
+
+    ProbeCaps(); // GLP-08 -- nothing consumes g_Caps yet; ErrorReport::WriteOpenGLInfo() logs it.
+
     return true;
 }
 
