@@ -699,14 +699,15 @@ static void RenderGLStats()
 
     // Frame totals -- includes binds/uniform writes, which aren't broken out per-row above
     // (would make the table too wide to read at a glance).
-    mu_swprintf(szLine, L"Total  GL:%u  Draw:%u  BufUpd:%u(%u)  ProgBind:%u  TexBind:%u  UniWr:%u",
+    mu_swprintf(szLine, L"Total  GL:%u  Draw:%u  BufUpd:%u(%u)  ProgBind:%u  TexBind:%u  UniWr:%u  UboSkip:%u",
         FrameProfiler::CounterValue(FC::GLCalls),
         FrameProfiler::CounterValue(FC::DrawCalls),
         FrameProfiler::CounterValue(FC::BufferUpdates),
         FrameProfiler::CounterValue(FC::BufferOrphans),
         FrameProfiler::CounterValue(FC::ProgramBinds),
         FrameProfiler::CounterValue(FC::TextureBinds),
-        FrameProfiler::CounterValue(FC::UniformWrites));
+        FrameProfiler::CounterValue(FC::UniformWrites),
+        FrameProfiler::CounterValue(FC::UboSkips)); // GLP-10
     g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     g_pRenderText->SetFont(g_hFont);

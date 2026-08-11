@@ -76,6 +76,9 @@ namespace FrameProfiler
         ProgramBinds,   // glUseProgram calls that actually reached the driver
         TextureBinds,   // glBindTexture calls that actually reached the driver
         UniformWrites,  // glUniform* calls that actually reached the driver
+        UboSkips,       // GLP-10: UpdateUniformBlock calls short-circuited because the content
+                         // was byte-identical to that slot's last same-frame upload -- NOT
+                         // included in GLCalls (no GL call happened), unlike every counter above
         Count_
     };
 
@@ -179,6 +182,16 @@ namespace FrameProfiler
         if (!g_CountersEnabled) return;
         CounterValue(CurrentPass(), Counter::BufferOrphans) += amount;
         CounterValue(Counter::BufferOrphans) += amount;
+    }
+
+    // GLP-10: a call that was skipped entirely (no GL call issued) -- unlike CountGLCall(), does
+    // NOT bump GLCalls, since nothing reached the driver. Currently only UboSkips uses this, kept
+    // generic in case a future dirty-check needs the same "skipped, not just orphaned" shape.
+    inline void CountSkip(Counter specific, uint32_t amount = 1)
+    {
+        if (!g_CountersEnabled) return;
+        CounterValue(CurrentPass(), specific) += amount;
+        CounterValue(specific) += amount;
     }
 
     // ---- GPU-side pass timers ----

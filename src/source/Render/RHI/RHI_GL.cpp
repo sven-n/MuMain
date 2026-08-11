@@ -422,6 +422,15 @@ namespace {
         int        currentSegment = 0;
         GLsync     fence[kUboRingSegments] = {};
         int        bindingSlot   = -1;
+
+        // GLP-10: content dirty-check shadow state. `lastFrameIndex == g_UboFrameIndex` is what
+        // makes a skip safe with a ring buffer -- within a frame the ring only moves forward, so
+        // a same-frame previous write is guaranteed not to have been wrapped over or reused by
+        // this slot's own later traffic. Across frames the first update always re-uploads (cheap
+        // insurance that removes the wrap/fence-reuse reasoning entirely -- see the task file).
+        std::vector<uint8_t> lastBytes;
+        GLsizeiptr lastOffset     = -1;
+        uint64_t   lastFrameIndex = UINT64_MAX;
     };
 
     // One ring per binding slot (not one global ring) -- keyed by bindingSlot so each block's
@@ -430,6 +439,12 @@ namespace {
     std::unordered_map<int, UboRing> g_UboRings;
     std::unordered_map<uint32_t, int> g_UboHandleSlot;
     uint32_t g_NextUboHandleId = 1; // handles here are slot reservations, not real GL object ids
+
+    // GLP-10: incremented once per frame in AdvanceUboRings() (itself called from BeginFrame(),
+    // confirmed GLP-09 to run exactly once per frame -- SceneManager.cpp's RenderScene). Every
+    // ring's dirty-check compares against this, not a per-ring counter, so "same frame" always
+    // means the same thing across every slot.
+    uint64_t g_UboFrameIndex = 0;
 
     GLsizeiptr AlignUp(GLsizeiptr value, GLsizeiptr alignment)
     {
@@ -552,6 +567,7 @@ namespace {
         // right before that frame's draws are submitted, so fencing "the segment just finished"
         // here means "everything submitted last frame" -- functionally identical to fencing at
         // end-of-frame, without depending on wiring up a currently-dead entry point.
+        g_UboFrameIndex++; // GLP-10: drives every ring's same-frame dirty-check window.
         for (auto& kv : g_UboRings)
         {
             UboRing& ring = kv.second;
@@ -649,6 +665,19 @@ void UpdateUniformBlock(BufferHandle handle, const void* data, size_t sizeBytes)
     const GLsizeiptr alignedSize = AlignUp((GLsizeiptr)sizeBytes, (GLsizeiptr)g_Caps.uboOffsetAlignment);
     UboRing& ring = EnsureRingCapacity(bindingSlot, alignedSize);
 
+    // GLP-10: content dirty-check. Skip the write AND the bind entirely when this slot's last
+    // upload happened THIS SAME FRAME and had byte-identical contents -- the binding point still
+    // points at that upload's range, and same-frame is what guarantees the ring hasn't wrapped
+    // back over it since (see the UboRing::lastFrameIndex comment). Any other outcome (different
+    // frame, different size, different bytes) falls through to a real write, unconditionally.
+    if (ring.lastFrameIndex == g_UboFrameIndex &&
+        ring.lastBytes.size() == sizeBytes &&
+        memcmp(ring.lastBytes.data(), data, sizeBytes) == 0)
+    {
+        FrameProfiler::CountSkip(FrameProfiler::Counter::UboSkips);
+        return;
+    }
+
     const GLsizeiptr writeOffset = ring.currentSegment * ring.segmentSize + ring.writeOffset;
     assert(writeOffset % g_Caps.uboOffsetAlignment == 0 && "GLP-09: UBO ring offset misaligned");
 
@@ -674,6 +703,13 @@ void UpdateUniformBlock(BufferHandle handle, const void* data, size_t sizeBytes)
     FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
 
     ring.writeOffset += alignedSize;
+
+    // GLP-10: shadow state for next call's dirty-check. Copies the caller's bytes, not a
+    // pointer -- `data` is the caller's own packed-uniform local (e.g. BMDMeshShader::BindGL's
+    // stack `cb`), not guaranteed to outlive this call.
+    ring.lastBytes.assign(static_cast<const uint8_t*>(data), static_cast<const uint8_t*>(data) + sizeBytes);
+    ring.lastOffset = writeOffset;
+    ring.lastFrameIndex = g_UboFrameIndex;
 }
 
 void DestroyUniformBlock(BufferHandle handle)
