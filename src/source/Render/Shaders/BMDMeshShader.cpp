@@ -110,9 +110,12 @@ layout(std140) uniform GlobalMatrices {
     vec4 u_Time;
 };
 
-// Bone matrix palette UBO at binding slot 2
+// Bone matrix palette UBO at binding slot 2. GLP-11: 3x vec4 affine rows per bone, not mat4 --
+// std140 pads a vec4 array to 16-byte stride, which vec4 already is, so this array is tight.
+// Row i of bone b is u_Bones[b*3+i]; reconstructed via dot products in main(), not a mat3/mat4
+// constructor (see the comment at the reconstruction site for why).
 layout(std140) uniform BoneMatrices {
-    mat4 u_Bones[200];
+    vec4 u_Bones[600]; // 3 rows per bone, 200 bones
 };
 
 layout(location = 0) in vec3 a_Pos;
@@ -176,17 +179,28 @@ void main() {
     v_ChromeUVStatic = vec2(0.5);
     v_ChromeUV2 = vec2(0.0);
     if (u_UseGPUSkin == 1 && a_BoneIndex >= 0 && a_BoneIndex < 200) {
-        // u_Bones[a_BoneIndex] transforms rest-pose position to skeleton-local space.
+        // GLP-11: reconstruct bonePos/skinnedNormal from the 3 affine rows via dot products,
+        // NOT mat3(...)/mat4(...) constructors -- those take COLUMNS, and r0/r1/r2 are ROWS, so
+        // a naive mat3(r0.xyz, r1.xyz, r2.xyz) would silently be the transpose of the rotation
+        // wanted. Dot products sidestep the trap entirely and match the old column-major mat4
+        // math exactly (verified by hand: old M*p had M[col][row], so (M*p).x/y/z were
+        // row0/1/2 dot p under GLSL's column-major multiply -- the same rows this palette now
+        // stores directly).
+        // u_Bones[a_BoneIndex*3 + i] transforms rest-pose position to skeleton-local space.
         // u_BodyOrigin + u_BodyScale * bonePos replicates BMD::Transform VectorMA:
         //   VectorMA(BodyOrigin, BodyScale, bonePos, VertexTransform)
         // This produces the correct world-space position that u_MVPDraw (camera VP) expects.
-        vec4 bonePos = u_Bones[a_BoneIndex] * vec4(a_Pos, 1.0);
-        vec3 worldPos = u_BodyOrigin + u_BodyScale * bonePos.xyz;
+        vec4 r0 = u_Bones[a_BoneIndex * 3 + 0];
+        vec4 r1 = u_Bones[a_BoneIndex * 3 + 1];
+        vec4 r2 = u_Bones[a_BoneIndex * 3 + 2];
+        vec4 p = vec4(a_Pos, 1.0);
+        vec3 bonePos = vec3(dot(r0, p), dot(r1, p), dot(r2, p));
+        vec3 worldPos = u_BodyOrigin + u_BodyScale * bonePos;
         gl_Position = u_MVPDraw * vec4(worldPos, 1.0);
         // Rotation-only skin of the rest normal, matching BMD::Transform's CPU
-        // VectorRotate(sn->Normal, BoneMatrix[sn->Node], tn) — same bone matrix as position,
-        // no translation component (mat3 drops it).
-        skinnedNormal = normalize(mat3(u_Bones[a_BoneIndex]) * a_Normal);
+        // VectorRotate(sn->Normal, BoneMatrix[sn->Node], tn) — same rows as position, dropping
+        // the translation component (row.xyz only, no homogeneous term).
+        skinnedNormal = normalize(vec3(dot(r0.xyz, a_Normal), dot(r1.xyz, a_Normal), dot(r2.xyz, a_Normal)));
         // Per-vertex lighting, ported 1:1 from BMD::Transform's CPU loop:
         //   Luminosity = DotProduct(tn, LightPosition) * 0.8f + 0.4f; clamp to >= 0.2f (no upper bound)
         //   LightTransform = BodyLight * Luminosity

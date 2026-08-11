@@ -80,8 +80,11 @@ layout(location = 4) in int  a_BoneIndex; // DXP-20: only used when u_UseGPUSkin
 
 // Bone matrix palette UBO at binding slot 2 — same binding BMDMeshShader/BoneUBO use, so
 // BoneUBO::UploadBones() (called once per body by the CPU caller) feeds both shaders.
+// GLP-11: 3x vec4 affine rows per bone, not mat4 -- must match BMDMeshShader.cpp's declaration
+// exactly (a std140 mismatch across programs sharing one binding point is undefined behavior,
+// not a compile error).
 layout(std140) uniform BoneMatrices {
-    mat4 u_Bones[200];
+    vec4 u_Bones[600]; // 3 rows per bone, 200 bones
 };
 
 uniform mat4  u_MVP;
@@ -98,8 +101,14 @@ void main()
     if (u_UseGPUSkin == 1 && a_BoneIndex >= 0 && a_BoneIndex < 200) {
         // Ported 1:1 from BMDMeshShader's GPU skinning branch, which itself mirrors
         // BMD::Transform's VectorMA(BodyOrigin, BodyScale, bonePos, VertexTransform).
-        vec4 bonePos = u_Bones[a_BoneIndex] * vec4(a_Pos, 1.0);
-        worldPos = u_SkinOrigin + u_SkinScale * bonePos.xyz;
+        // GLP-11: dot-product reconstruction from the 3 affine rows -- see BMDMeshShader.cpp's
+        // equivalent site for the full row/column transpose reasoning.
+        vec4 r0 = u_Bones[a_BoneIndex * 3 + 0];
+        vec4 r1 = u_Bones[a_BoneIndex * 3 + 1];
+        vec4 r2 = u_Bones[a_BoneIndex * 3 + 2];
+        vec4 p = vec4(a_Pos, 1.0);
+        vec3 bonePos = vec3(dot(r0, p), dot(r1, p), dot(r2, p));
+        worldPos = u_SkinOrigin + u_SkinScale * bonePos;
     } else {
         // CPU path: a_Pos is already a fully world-space VertexTransform position.
         worldPos = a_Pos;
@@ -190,20 +199,34 @@ bool CPlanarShadowShader::CompileShaders()
     fn_glShaderSource(m_hVertexShader, 1, &g_szPlanarVert, nullptr);
     fn_glCompileShader(m_hVertexShader);
     fn_glGetShaderiv(m_hVertexShader, GL_COMPILE_STATUS, &ok);
-    if (!ok) return false;
+    if (!ok) {
+        // GLP-11: this class previously failed silently here -- every other shader class
+        // (BMDMeshShader/TerrainShader/PassthroughShader) logs a compile failure via SDL_Log;
+        // this one had neither that nor a success log, making "did the shader actually
+        // compile" unverifiable short of a GPU debugger. Matches this task's own Verification
+        // requirement, not just a GLP-11-specific concern.
+        g_ErrorReport.Write(L"[PlanarShadowShader] Vertex shader compilation failed\r\n");
+        return false;
+    }
 
     m_hFragmentShader = fn_glCreateShader(GL_FRAGMENT_SHADER);
     fn_glShaderSource(m_hFragmentShader, 1, &g_szPlanarFrag, nullptr);
     fn_glCompileShader(m_hFragmentShader);
     fn_glGetShaderiv(m_hFragmentShader, GL_COMPILE_STATUS, &ok);
-    if (!ok) return false;
+    if (!ok) {
+        g_ErrorReport.Write(L"[PlanarShadowShader] Fragment shader compilation failed\r\n");
+        return false;
+    }
 
     m_hProgram = fn_glCreateProgram();
     fn_glAttachShader(m_hProgram, m_hVertexShader);
     fn_glAttachShader(m_hProgram, m_hFragmentShader);
     fn_glLinkProgram(m_hProgram);
     fn_glGetProgramiv(m_hProgram, GL_LINK_STATUS, &ok);
-    if (!ok) return false;
+    if (!ok) {
+        g_ErrorReport.Write(L"[PlanarShadowShader] Program link failed\r\n");
+        return false;
+    }
 
     m_locBodyOrigin  = fn_glGetUniformLocation(m_hProgram, "u_BodyOrigin");
     m_locSx          = fn_glGetUniformLocation(m_hProgram, "u_Sx");
@@ -223,6 +246,7 @@ bool CPlanarShadowShader::CompileShaders()
         }
     }
 
+    g_ErrorReport.Write(L"[PlanarShadowShader] Created program ID %d\r\n", m_hProgram);
     return true;
 }
 
