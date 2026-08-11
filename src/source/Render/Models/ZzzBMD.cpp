@@ -2589,6 +2589,14 @@ void BMD::UploadStaticVBOs()
     std::vector<float> gpuGeomBuffer(flatOffset * 9, 0.0f);
     int gpuIdx = 0;
 
+#ifdef _DEBUG
+    // GLP-12 investigation: what is the actual highest bone Node index any model's vertices
+    // reference, versus GPU_MAX_BONES (200)? Debug-only, additive -- doesn't change uploaded
+    // data or runtime behavior. Logs only when a NEW session-wide maximum is found, so this
+    // stays quiet across a normal session instead of spamming once per model.
+    int debugMaxNodeThisModel = -1;
+#endif
+
     for (int i = 0; i < NumMeshs; i++) {
         Mesh_t* m = &Meshs[i];
         if (!m || !m->Triangles || !m->Vertices || m->NumTriangles <= 0 || m->NumVertices <= 0) continue;
@@ -2607,6 +2615,9 @@ void BMD::UploadStaticVBOs()
                     gpuGeomBuffer[gpuIdx * 9 + 1] = m->Vertices[vi].Position[1];
                     gpuGeomBuffer[gpuIdx * 9 + 2] = m->Vertices[vi].Position[2];
                     boneNode = m->Vertices[vi].Node;
+#ifdef _DEBUG
+                    if (boneNode > debugMaxNodeThisModel) debugMaxNodeThisModel = boneNode;
+#endif
                 }
                 // Static UV (2 floats)
                 if (m->TexCoords && tci >= 0 && tci < m->NumTexCoords) {
@@ -2636,6 +2647,17 @@ void BMD::UploadStaticVBOs()
             }
         }
     }
+
+#ifdef _DEBUG
+    if (debugMaxNodeThisModel >= 0) {
+        static int s_debugSessionMaxNode = -1;
+        if (debugMaxNodeThisModel > s_debugSessionMaxNode) {
+            s_debugSessionMaxNode = debugMaxNodeThisModel;
+            g_ErrorReport.Write(L"[GLP-12] New session-max bone Node: %d (model \"%hs\", this model's own NumBones=%d)\r\n",
+                s_debugSessionMaxNode, Name, NumBones);
+        }
+    }
+#endif
 
     if (!gpuGeomBuffer.empty()) {
         m_StaticGeomReady = true;
