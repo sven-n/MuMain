@@ -5,11 +5,10 @@
 // RHI_GL (Render/RHI/RHI_GL.h/.cpp) is the only backend implementation today.
 //
 // Implementation status: Device/frame, Buffers+Uniform blocks, Pipeline/blend,
-// VertexLayout/BindVertexBuffer + Draw, and Textures + ReadColorFramebuffer/
-// ReadDepthPixel are implemented in RHI_GL. IR:: (ImmediateRenderer.cpp) is the
-// first real caller of the buffer/draw half. DrawIndexed is still declared per
-// the original design sketch but not yet defined; do not call it until its
-// implementing commit lands.
+// VertexLayout/BindVertexBuffer + Draw, BindIndexBuffer + DrawIndexed, and Textures +
+// ReadColorFramebuffer/ReadDepthPixel are implemented in RHI_GL. IR:: (ImmediateRenderer.cpp)
+// is the first caller of the buffer/draw half; terrain tile bucketing (GLP-16) is the first
+// caller of BindIndexBuffer/DrawIndexed.
 
 #include <cstddef>
 #include <cstdint>
@@ -163,13 +162,13 @@ enum class VertexLayout {
     PosOnly,      // PlanarShadowShader -- position-only
 };
 void BindVertexBuffer(BufferHandle, VertexLayout);
-void BindIndexBuffer(BufferHandle);   // GL_UNSIGNED_INT only -- not yet implemented, no caller yet
+void BindIndexBuffer(BufferHandle);   // GL_UNSIGNED_INT only -- GLP-16: implemented, binds GL_ELEMENT_ARRAY_BUFFER (captured into the currently-bound VAO's state)
 
 // ---- Draw ----
 // No strips/fans/points anywhere post-DXP-09; no instancing anywhere in the tree.
 enum class Topology { TriangleList, LineList, LineStrip };
 void Draw(Topology, uint32_t vertexCount, uint32_t firstVertex = 0);
-void DrawIndexed(Topology, uint32_t indexCount, uint32_t firstIndex = 0); // not yet implemented -- lands with a subsystem that needs indexed draws (terrain)
+void DrawIndexed(Topology, uint32_t indexCount, uint32_t firstIndex = 0); // GLP-16: implemented. firstIndex is an element offset, not bytes; requires a prior BindIndexBuffer call, same two-call shape as BindVertexBuffer+Draw
 
 // ---- Readback (DXP-12) ----
 bool ReadDepthPixel(int x, int y, float* outDepth);                   // CameraProjection::TestDepthBuffer, until DXP-16

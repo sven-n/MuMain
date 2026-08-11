@@ -890,9 +890,15 @@ void BindVertexBuffer(BufferHandle handle, VertexLayout layout)
     BindVAO(g_LayoutVAO[idx]);
 }
 
-void BindIndexBuffer(BufferHandle /*handle*/)
+void BindIndexBuffer(BufferHandle handle)
 {
-    // Not yet implemented -- no caller in the tree yet (lands with terrain's indexed draw).
+    // GL_UNSIGNED_INT only, per the header contract -- the one indexed-draw caller in the tree
+    // (GLP-16's terrain tile bucketing) uses no other type. Binding GL_ELEMENT_ARRAY_BUFFER here
+    // is captured into whichever VAO is currently bound (core-profile VAO state includes the
+    // element buffer binding) -- callers issuing this mid-pass are intentionally repointing that
+    // VAO's index source, not just setting transient state.
+    if (!handle.IsValid() || !LoadBufferGLFunctions()) return;
+    fn_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle.id);
 }
 
 // ---- Draw ----
@@ -910,9 +916,22 @@ void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)
     FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
 }
 
-void DrawIndexed(Topology /*topology*/, uint32_t /*indexCount*/, uint32_t /*firstIndex*/)
+void DrawIndexed(Topology topology, uint32_t indexCount, uint32_t firstIndex)
 {
-    // Not yet implemented -- lands with a subsystem that needs indexed draws (terrain).
+    GLenum mode;
+    switch (topology)
+    {
+    case Topology::TriangleList: mode = GL_TRIANGLES;  break;
+    case Topology::LineList:     mode = GL_LINES;      break;
+    case Topology::LineStrip:    mode = GL_LINE_STRIP; break;
+    default: return;
+    }
+    // firstIndex is an ELEMENT offset (matches Draw()'s firstVertex convention), converted to
+    // the byte offset glDrawElements wants. Relies on the currently-bound GL_ELEMENT_ARRAY_BUFFER
+    // (set via a prior BindIndexBuffer call), same two-call shape as BindVertexBuffer + Draw.
+    const uintptr_t byteOffset = (uintptr_t)firstIndex * sizeof(GLuint);
+    glDrawElements(mode, (GLsizei)indexCount, GL_UNSIGNED_INT, (const void*)byteOffset);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
 }
 
 // ---- Textures ----
