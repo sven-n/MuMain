@@ -23,6 +23,9 @@ This documentation details the architecture, design decisions, milestone catalog
 5. **[Gotchas & Invariants Catalog](gotchas-and-patterns.md)**  
    *Comprehensive catalog of known gotchas, threading synchronization rules, cache invalidation pitfalls, and performance invariants.*
 
+6. **[GLP Milestone Catalog](glperf/README.md)**  
+   *Reference catalog for the `GLP-xx` Core Profile FPS regression fix series.* Covers milestones with a landed implementation (build-verified at minimum, some still pending target-hardware confirmation) — not-yet-started and paused-investigation tickets are tracked separately, not here.
+
 ---
 
 ## Architectural Highlights
