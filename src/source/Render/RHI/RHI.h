@@ -30,8 +30,9 @@ using TextureHandle = Handle<struct TextureTag>;
 
 // ---- Capabilities (GLP-08) ----
 // Populated once, in Init(), by probing the actual context/driver -- never hardcoded to "assume
-// the latest". Nothing in the tree consumes this yet; it exists so GLP-09/15/22 can be written
-// as "use the fast path if Caps says so, keep today's path otherwise" instead of guessing.
+// the latest". bufferStorage/uboOffsetAlignment are consumed by GLP-09's UBO ring allocator
+// (RHI_GL.cpp); the rest exist so GLP-15/22 can be written as "use the fast path if Caps says
+// so, keep today's path otherwise" instead of guessing.
 // Each bool requires BOTH the version/extension being present AND the entry points that
 // capability needs actually resolving via SDL_GL_GetProcAddress -- a driver can report a high
 // version and still hand back null for a symbol on a bad install.
@@ -84,9 +85,17 @@ void DestroyBuffer(BufferHandle);
 
 // ---- Uniform blocks (the 3 existing UBOs become opaque handles; std140 layout stays the
 // caller's contract -- RHI does not know or care about field layout, just byte size) ----
+// GLP-09: RHI_GL sub-allocates every binding slot from a persistently-mapped per-slot ring
+// buffer instead of giving each handle its own dedicated GL buffer object -- purely a backend
+// implementation detail, this whole-block-update contract is unchanged. One consequence IS
+// caller-visible though: UpdateUniformBlock is what establishes the binding now (a
+// glBindBufferRange per update), not CreateUniformBlock (which used to glBindBufferBase once,
+// at creation). A block that is created and never updated has no binding. Every caller in the
+// tree today updates immediately after creating (GlobalUBO/SceneUBO/BoneUBO/BMDMeshShader) --
+// keep that invariant for any future caller.
 BufferHandle CreateUniformBlock(size_t sizeBytes, int bindingSlot);
 void UpdateUniformBlock(BufferHandle, const void* data, size_t sizeBytes);  // whole-block; callers keep their own dirty-checking (e.g. BoneUBO's ptr+version check)
-void DestroyUniformBlock(BufferHandle);
+void DestroyUniformBlock(BufferHandle);  // GLP-09: frees a slot reservation, not the shared ring -- the ring itself is torn down at Shutdown()
 
 // ---- Textures ----
 // Format is fixed at RGBA8 -- no other internal format exists anywhere in the tree today.

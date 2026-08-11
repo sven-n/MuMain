@@ -17,6 +17,7 @@
 #include <vector>
 #include <cstring>
 #include <cstdio>
+#include <cassert>
 
 using namespace RHI;
 
@@ -111,6 +112,14 @@ namespace {
     }
 }
 
+// GLP-09 -- forward declarations. Implementations live alongside the rest of the UBO ring
+// machinery, further down this file next to CreateUniformBlock (needs the UboRing type defined
+// there); BeginFrame()/Shutdown() stay up here to match RHI.h's Device/frame section ordering.
+namespace {
+    void AdvanceUboRings();
+    void DestroyAllUboRings();
+}
+
 const Caps& GetCaps()
 {
     return g_Caps;
@@ -131,6 +140,7 @@ bool Init(void* /*nativeWindowHandle*/, int width, int height)
 
 void Shutdown()
 {
+    DestroyAllUboRings(); // GLP-09 -- release the persistent-mapped ring buffers, if any exist.
     // GL context teardown stays in Winmain.cpp (SDL_GL_DeleteContext) until
     // device ownership itself moves behind RHI -- nothing owned here to release.
     g_Initialized = false;
@@ -138,8 +148,11 @@ void Shutdown()
 
 void BeginFrame()
 {
-    // Reserved for per-frame backend prep once a caller migrates to it
-    // (e.g. GL has none today; D3D11 will need its per-frame context reset).
+    // GLP-09: advance each active UBO ring's segment once per frame, fencing the segment just
+    // finished and waiting on the segment about to be reused (see AdvanceUboRings() below for
+    // why this is anchored to BeginFrame() rather than EndFrame() -- the short version is that
+    // EndFrame() has no call site in the game loop today).
+    AdvanceUboRings();
 }
 
 void EndFrame()
@@ -320,43 +333,363 @@ void DestroyBuffer(BufferHandle handle)
     g_BufferWriteOffset.erase(handle.id);
 }
 
+// ---- Uniform blocks: GLP-09 per-slot ring allocator ----
+// Replaces GLS-08's per-update orphan-then-glBufferSubData (a driver-side allocation plus a
+// binding-point re-emit on EVERY call -- for BMDFlagsCB, once per BMD mesh draw, hundreds of
+// times per frame per client) with a persistently-mapped ring buffer PER BINDING SLOT,
+// sub-allocated with glBindBufferRange: a memcpy and one GL call per update instead of four.
+// See GLP-09-ubo-ring-allocator.md for the full design rationale and risk notes.
+typedef GLsync    (APIENTRY* PFNGLFENCESYNCPROC)(GLenum condition, GLbitfield flags);
+typedef GLenum    (APIENTRY* PFNGLCLIENTWAITSYNCPROC)(GLsync sync, GLbitfield flags, GLuint64 timeout);
+typedef void      (APIENTRY* PFNGLDELETESYNCPROC)(GLsync sync);
+typedef void      (APIENTRY* PFNGLBUFFERSTORAGEPROC)(GLenum target, GLsizeiptr size, const void* data, GLbitfield flags);
+typedef void*     (APIENTRY* PFNGLMAPBUFFERRANGEPROC)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
+typedef GLboolean (APIENTRY* PFNGLUNMAPBUFFERPROC)(GLenum target);
+typedef void      (APIENTRY* PFNGLBINDBUFFERRANGEPROC)(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size);
+
+namespace {
+    PFNGLFENCESYNCPROC       fn_glFenceSync       = nullptr;
+    PFNGLCLIENTWAITSYNCPROC  fn_glClientWaitSync  = nullptr;
+    PFNGLDELETESYNCPROC      fn_glDeleteSync      = nullptr;
+    PFNGLBUFFERSTORAGEPROC   fn_glBufferStorage   = nullptr;
+    PFNGLMAPBUFFERRANGEPROC  fn_glMapBufferRange  = nullptr;
+    PFNGLUNMAPBUFFERPROC     fn_glUnmapBuffer     = nullptr;
+    PFNGLBINDBUFFERRANGEPROC fn_glBindBufferRange = nullptr;
+
+    // Sync objects + glMapBufferRange/glBindBufferRange are core since GL 3.0/3.2, always
+    // present given GLP-08's GL >= 3.3 floor -- loaded once, like every other entry-point group
+    // in this file.
+    bool LoadUboRingSyncFunctions()
+    {
+        static bool loaded = false;
+        if (loaded) return true;
+        fn_glFenceSync       = (PFNGLFENCESYNCPROC)SDL_GL_GetProcAddress("glFenceSync");
+        fn_glClientWaitSync  = (PFNGLCLIENTWAITSYNCPROC)SDL_GL_GetProcAddress("glClientWaitSync");
+        fn_glDeleteSync      = (PFNGLDELETESYNCPROC)SDL_GL_GetProcAddress("glDeleteSync");
+        fn_glMapBufferRange  = (PFNGLMAPBUFFERRANGEPROC)SDL_GL_GetProcAddress("glMapBufferRange");
+        fn_glUnmapBuffer     = (PFNGLUNMAPBUFFERPROC)SDL_GL_GetProcAddress("glUnmapBuffer");
+        fn_glBindBufferRange = (PFNGLBINDBUFFERRANGEPROC)SDL_GL_GetProcAddress("glBindBufferRange");
+        loaded = (fn_glFenceSync != nullptr && fn_glClientWaitSync != nullptr &&
+                  fn_glDeleteSync != nullptr && fn_glMapBufferRange != nullptr &&
+                  fn_glUnmapBuffer != nullptr && fn_glBindBufferRange != nullptr);
+        return loaded;
+    }
+
+    // Only resolved when Caps::bufferStorage is true (GLP-08 already verified this exact entry
+    // point resolves before setting that flag) -- its own loader so the fallback rung never
+    // pays for a lookup it can't use.
+    bool LoadBufferStorageFunction()
+    {
+        static bool loaded = false;
+        if (loaded) return true;
+        fn_glBufferStorage = (PFNGLBUFFERSTORAGEPROC)SDL_GL_GetProcAddress("glBufferStorage");
+        loaded = (fn_glBufferStorage != nullptr);
+        return loaded;
+    }
+
+    // Decided once, globally, at first use -- the capability probe (GLP-08) is fixed for the
+    // process lifetime, so there's no scenario where some uniform blocks use the ring and
+    // others use the legacy rung. Keeps CreateUniformBlock/UpdateUniformBlock/
+    // DestroyUniformBlock from ever having to branch per-handle.
+    bool g_UboRingSyncChecked = false;
+    bool g_UboRingSyncAvailable = false;
+
+    bool UboRingAvailable()
+    {
+        if (!g_UboRingSyncChecked)
+        {
+            g_UboRingSyncAvailable = LoadUboRingSyncFunctions();
+            g_UboRingSyncChecked = true;
+            if (!g_UboRingSyncAvailable)
+            {
+                g_ErrorReport.Write(L"[RHI_GL] GLP-09: UBO ring allocator unavailable "
+                                     L"(glMapBufferRange/glFenceSync/glBindBufferRange failed to "
+                                     L"resolve) -- falling back to GLS-08 per-update orphaning.\r\n");
+            }
+        }
+        return g_UboRingSyncAvailable;
+    }
+
+    constexpr int kUboRingSegments = 3;
+
+    struct UboRing
+    {
+        GLuint     bufferId       = 0;
+        bool       persistent     = false;  // fast path: glBufferStorage + persistent-coherent map
+        void*      mappedPtr      = nullptr; // fast path only; null on the fallback (map-per-update) path
+        GLsizeiptr segmentSize    = 0;       // bytes per segment, already a multiple of uboOffsetAlignment
+        GLsizeiptr writeOffset    = 0;       // offset within the CURRENT segment
+        int        currentSegment = 0;
+        GLsync     fence[kUboRingSegments] = {};
+        int        bindingSlot   = -1;
+    };
+
+    // One ring per binding slot (not one global ring) -- keyed by bindingSlot so each block's
+    // alignment and lifetime stay independent (GLP-09's design). Handle id -> binding slot is a
+    // separate map below, since UpdateUniformBlock/DestroyUniformBlock only see a handle.
+    std::unordered_map<int, UboRing> g_UboRings;
+    std::unordered_map<uint32_t, int> g_UboHandleSlot;
+    uint32_t g_NextUboHandleId = 1; // handles here are slot reservations, not real GL object ids
+
+    GLsizeiptr AlignUp(GLsizeiptr value, GLsizeiptr alignment)
+    {
+        if (alignment <= 0) return value;
+        return ((value + alignment - 1) / alignment) * alignment;
+    }
+
+    void DeleteRingFence(UboRing& ring, int segment)
+    {
+        if (ring.fence[segment] != nullptr)
+        {
+            fn_glDeleteSync(ring.fence[segment]);
+            ring.fence[segment] = nullptr;
+        }
+    }
+
+    // Zero-timeout wait first (the expected case with 3 segments -- see GLP-09's risk note: if
+    // this ever genuinely blocks, the fix is a bigger ring, not more segments), falling through
+    // to a real blocking wait only if the segment's last writer truly hasn't finished yet.
+    void WaitRingSegment(UboRing& ring, int segment)
+    {
+        GLsync fence = ring.fence[segment];
+        if (fence == nullptr) return;
+        GLenum result = fn_glClientWaitSync(fence, 0, 0);
+        if (result == GL_TIMEOUT_EXPIRED)
+        {
+            fn_glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, 1000000000ULL /* 1s */);
+        }
+        DeleteRingFence(ring, segment);
+    }
+
+    void DestroyRingBuffer(UboRing& ring)
+    {
+        if (ring.bufferId == 0) return;
+        if (ring.mappedPtr != nullptr)
+        {
+            fn_glBindBuffer(GL_UNIFORM_BUFFER, ring.bufferId);
+            fn_glUnmapBuffer(GL_UNIFORM_BUFFER);
+            fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            ring.mappedPtr = nullptr;
+        }
+        for (int s = 0; s < kUboRingSegments; s++) DeleteRingFence(ring, s);
+        GLuint id = ring.bufferId;
+        fn_glDeleteBuffers(1, &id);
+        ring.bufferId = 0;
+    }
+
+    // (Re)allocates the ring's backing buffer at `newSegmentSize` per segment, abandoning any
+    // previous buffer -- the driver keeps an abandoned-but-still-referenced buffer alive under
+    // the hood until commands that already bound a range of it have retired, the same deferred-
+    // delete guarantee DestroyTexture() above already relies on for in-flight draws. Called at
+    // first use for a slot and again whenever a segment overflows.
+    void GrowRing(UboRing& ring, GLsizeiptr newSegmentSize)
+    {
+        DestroyRingBuffer(ring);
+
+        ring.segmentSize = newSegmentSize;
+        const GLsizeiptr totalSize = newSegmentSize * kUboRingSegments;
+
+        GLuint id = 0;
+        fn_glGenBuffers(1, &id);
+        fn_glBindBuffer(GL_UNIFORM_BUFFER, id);
+
+        if (g_Caps.bufferStorage && LoadBufferStorageFunction())
+        {
+            const GLbitfield storageFlags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+            fn_glBufferStorage(GL_UNIFORM_BUFFER, totalSize, nullptr, storageFlags);
+            ring.mappedPtr = fn_glMapBufferRange(GL_UNIFORM_BUFFER, 0, totalSize, storageFlags);
+            ring.persistent = (ring.mappedPtr != nullptr);
+        }
+
+        if (!ring.persistent)
+        {
+            // Fallback rung (Caps::bufferStorage == false, or the persistent map itself failed):
+            // ordinary mutable storage, mapped per update in UpdateUniformBlock with
+            // UNSYNCHRONIZED|INVALIDATE_RANGE instead of held persistently mapped. Still no
+            // per-update allocation -- the buffer itself is sized once, here.
+            fn_glBufferData(GL_UNIFORM_BUFFER, totalSize, nullptr, GL_DYNAMIC_DRAW);
+            ring.mappedPtr = nullptr;
+        }
+
+        fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        ring.bufferId = id;
+        ring.writeOffset = 0;
+        ring.currentSegment = 0;
+        for (int s = 0; s < kUboRingSegments; s++) ring.fence[s] = nullptr;
+    }
+
+    // Ensures the ring for `bindingSlot` exists and its current segment can hold one more
+    // `alignedSize` block -- grows 2x-until-it-fits on overflow, matching AppendBuffer's policy.
+    UboRing& EnsureRingCapacity(int bindingSlot, GLsizeiptr alignedSize)
+    {
+        UboRing& ring = g_UboRings[bindingSlot];
+        ring.bindingSlot = bindingSlot;
+
+        if (ring.bufferId == 0)
+        {
+            // First use: size for a handful of updates per frame. BMDFlags-heavy slots outgrow
+            // this within their first few frames and settle -- the same curve AppendBuffer's
+            // streaming VBO ring already exhibits.
+            GrowRing(ring, alignedSize * 8);
+        }
+        else if (ring.writeOffset + alignedSize > ring.segmentSize)
+        {
+            GLsizeiptr newSegment = ring.segmentSize;
+            while (newSegment < ring.writeOffset + alignedSize) newSegment *= 2;
+            GrowRing(ring, newSegment);
+        }
+
+        return ring;
+    }
+
+    void AdvanceUboRings()
+    {
+        // Anchored to BeginFrame() rather than EndFrame(): RHI::EndFrame() (which wraps
+        // PlatformSwapBuffers()) has no call site in the game loop today -- SceneManager.cpp,
+        // LoadingScene.cpp and UIMng.cpp all call PlatformSwapBuffers() directly instead.
+        // RHI::BeginFrame() IS called exactly once per frame (SceneManager.cpp's RenderScene),
+        // right before that frame's draws are submitted, so fencing "the segment just finished"
+        // here means "everything submitted last frame" -- functionally identical to fencing at
+        // end-of-frame, without depending on wiring up a currently-dead entry point.
+        for (auto& kv : g_UboRings)
+        {
+            UboRing& ring = kv.second;
+            if (ring.bufferId == 0) continue;
+
+            DeleteRingFence(ring, ring.currentSegment);
+            ring.fence[ring.currentSegment] = fn_glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+            ring.currentSegment = (ring.currentSegment + 1) % kUboRingSegments;
+            WaitRingSegment(ring, ring.currentSegment);
+            ring.writeOffset = 0;
+        }
+    }
+
+    void DestroyAllUboRings()
+    {
+        for (auto& kv : g_UboRings) DestroyRingBuffer(kv.second);
+        g_UboRings.clear();
+        g_UboHandleSlot.clear();
+    }
+
+    // ---- Legacy rung (GLS-08, byte-identical) ----
+    // Used only if UboRingAvailable() is false, i.e. glMapBufferRange/glFenceSync/
+    // glBindBufferRange themselves fail to resolve -- effectively unreachable on any GL 3.3+
+    // driver (GLP-08's floor), kept so a broken/ancient driver install still runs instead of
+    // silently rendering nothing.
+    BufferHandle LegacyCreateUniformBlock(size_t sizeBytes, int bindingSlot)
+    {
+        GLuint id = 0;
+        fn_glGenBuffers(1, &id);
+        fn_glBindBuffer(GL_UNIFORM_BUFFER, id);
+        fn_glBufferData(GL_UNIFORM_BUFFER, (GLsizeiptr)sizeBytes, nullptr, GL_DYNAMIC_DRAW);
+        fn_glBindBufferBase(GL_UNIFORM_BUFFER, (GLuint)bindingSlot, id);
+        fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        return BufferHandle{ id };
+    }
+
+    void LegacyUpdateUniformBlock(BufferHandle handle, const void* data, size_t sizeBytes)
+    {
+        fn_glBindBuffer(GL_UNIFORM_BUFFER, handle.id);
+        fn_glBufferData(GL_UNIFORM_BUFFER, (GLsizeiptr)sizeBytes, nullptr, GL_DYNAMIC_DRAW);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+        FrameProfiler::TagBufferOrphan();
+        fn_glBufferSubData(GL_UNIFORM_BUFFER, 0, (GLsizeiptr)sizeBytes, data);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+        fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    void LegacyDestroyUniformBlock(BufferHandle handle)
+    {
+        GLuint id = handle.id;
+        fn_glDeleteBuffers(1, &id);
+    }
+}
+
 BufferHandle CreateUniformBlock(size_t sizeBytes, int bindingSlot)
 {
     if (!LoadBufferGLFunctions()) return {};
-    GLuint id = 0;
-    fn_glGenBuffers(1, &id);
-    fn_glBindBuffer(GL_UNIFORM_BUFFER, id);
-    fn_glBufferData(GL_UNIFORM_BUFFER, (GLsizeiptr)sizeBytes, nullptr, GL_DYNAMIC_DRAW);
-    fn_glBindBufferBase(GL_UNIFORM_BUFFER, (GLuint)bindingSlot, id);
-    fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    if (!UboRingAvailable())
+    {
+        return LegacyCreateUniformBlock(sizeBytes, bindingSlot);
+    }
+
+    const GLsizeiptr alignedSize = AlignUp((GLsizeiptr)sizeBytes, (GLsizeiptr)g_Caps.uboOffsetAlignment);
+    EnsureRingCapacity(bindingSlot, alignedSize);
+
+    const uint32_t id = g_NextUboHandleId++;
+    g_UboHandleSlot[id] = bindingSlot;
     return BufferHandle{ id };
 }
 
 void UpdateUniformBlock(BufferHandle handle, const void* data, size_t sizeBytes)
 {
     // Whole-block update, per the header contract -- callers keep their own dirty-checking.
+    // GLP-09: sub-allocates from the handle's binding-slot ring instead of respecifying a
+    // dedicated buffer. This call is what ESTABLISHES the binding now (glBindBufferRange, moved
+    // here from CreateUniformBlock's old glBindBufferBase-at-creation-time) -- verified every
+    // current caller updates immediately after creating (GlobalUBO::Create, SceneUBO::Create,
+    // BoneUBO::Create, BMDMeshShader::CreateGL all do), so this is not a behavior change for any
+    // caller in the tree today. A future caller that creates a block and never updates it would
+    // have no binding -- keep that in mind before adding one.
     if (!handle.IsValid() || !LoadBufferGLFunctions()) return;
-    fn_glBindBuffer(GL_UNIFORM_BUFFER, handle.id);
-    // GLS-08: orphan the previous GPU allocation before writing, so the driver hands back a
-    // fresh, un-synchronized memory block instead of possibly stalling the CPU until the GPU
-    // finishes reading the old contents from a draw call still in flight -- matches the D3D11
-    // backend's Map(WRITE_DISCARD) semantics that BoneUBO::UploadBones()'s comment already
-    // documents as this function's implicit contract. Safe because every caller (GlobalUBO/
-    // SceneUBO/BoneUBO/BMDMeshShader's BMDFlagsCB) fully repacks and uploads its whole buffer
-    // every call -- no partial-write caller exists that this could break.
-    fn_glBufferData(GL_UNIFORM_BUFFER, (GLsizeiptr)sizeBytes, nullptr, GL_DYNAMIC_DRAW);
+
+    if (!UboRingAvailable())
+    {
+        LegacyUpdateUniformBlock(handle, data, sizeBytes);
+        return;
+    }
+
+    auto it = g_UboHandleSlot.find(handle.id);
+    if (it == g_UboHandleSlot.end()) return;
+    const int bindingSlot = it->second;
+
+    const GLsizeiptr alignedSize = AlignUp((GLsizeiptr)sizeBytes, (GLsizeiptr)g_Caps.uboOffsetAlignment);
+    UboRing& ring = EnsureRingCapacity(bindingSlot, alignedSize);
+
+    const GLsizeiptr writeOffset = ring.currentSegment * ring.segmentSize + ring.writeOffset;
+    assert(writeOffset % g_Caps.uboOffsetAlignment == 0 && "GLP-09: UBO ring offset misaligned");
+
+    if (ring.persistent)
+    {
+        memcpy(static_cast<unsigned char*>(ring.mappedPtr) + writeOffset, data, sizeBytes);
+    }
+    else
+    {
+        fn_glBindBuffer(GL_UNIFORM_BUFFER, ring.bufferId);
+        void* dst = fn_glMapBufferRange(GL_UNIFORM_BUFFER, writeOffset, (GLsizeiptr)sizeBytes,
+            GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+        if (dst != nullptr)
+        {
+            memcpy(dst, data, sizeBytes);
+            fn_glUnmapBuffer(GL_UNIFORM_BUFFER);
+        }
+        fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+    }
+
+    fn_glBindBufferRange(GL_UNIFORM_BUFFER, (GLuint)bindingSlot, ring.bufferId, writeOffset, (GLsizeiptr)sizeBytes);
     FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
-    FrameProfiler::TagBufferOrphan();
-    fn_glBufferSubData(GL_UNIFORM_BUFFER, 0, (GLsizeiptr)sizeBytes, data);
-    FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
-    fn_glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    ring.writeOffset += alignedSize;
 }
 
 void DestroyUniformBlock(BufferHandle handle)
 {
+    // Frees a SLOT RESERVATION, not the shared ring -- the ring itself is only torn down at
+    // RHI_GL_Impl::Shutdown(). The four current callers only reach this from their own
+    // destructors at process teardown, by which point Shutdown() runs next anyway.
     if (!handle.IsValid() || !LoadBufferGLFunctions()) return;
-    GLuint id = handle.id;
-    fn_glDeleteBuffers(1, &id);
+
+    if (!UboRingAvailable())
+    {
+        LegacyDestroyUniformBlock(handle);
+        return;
+    }
+
+    g_UboHandleSlot.erase(handle.id);
 }
 
 // ---- Pipeline / blend-mode state ----
