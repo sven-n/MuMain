@@ -36,7 +36,13 @@ void Create()
 {
     if (g_VBO.IsValid()) return;
 
-    const size_t initialCapacity = 4096 * sizeof(IRVertex);
+    // GLP-25: 4096 vertices (~144 KB) was far too small for a frame's streaming volume -- one
+    // decomposed quad is 6 vertices, so it held ~680 quads, while an effect-dense frame on Intel
+    // HD 530 submitted ~4,400 IR appends and wrapped the ring ~23 times. RHI::AppendBuffer only
+    // ever grew when a SINGLE append exceeded the whole buffer, so it never grew out of that.
+    // 65536 vertices (~2.25 MB) covers ~10,900 quads per wrap -- comfortably a busy cast frame,
+    // and a rounding error against this client's texture budget.
+    const size_t initialCapacity = 65536 * sizeof(IRVertex);
     g_VBO = RHI::CreateVertexBuffer(nullptr, initialCapacity, RHI::BufferUsage::Dynamic);
 
     g_ErrorReport.Write(L"[ImmediateRenderer] Created RHI streaming vertex buffer, Initial Capacity %zu bytes\r\n", initialCapacity);

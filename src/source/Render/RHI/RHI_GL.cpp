@@ -118,6 +118,7 @@ namespace {
 namespace {
     void AdvanceUboRings();
     void DestroyAllUboRings();
+    void ResetAppendWrapCounters(); // GLP-25 -- defined next to AppendBuffer's bookkeeping maps
 
     // Ring-path uniform-block handles are slot RESERVATIONS, not GL object names -- but they ride
     // in the same BufferHandle type as real vertex/index buffers, whose GL names also start at 1.
@@ -165,6 +166,11 @@ void BeginFrame()
     // why this is anchored to BeginFrame() rather than EndFrame() -- the short version is that
     // EndFrame() has no call site in the game loop today).
     AdvanceUboRings();
+
+    // GLP-25: clear the per-frame wrap tally that drives AppendBuffer's grow-on-repeated-wrap
+    // policy. Deliberately NOT hung off FrameProfiler::ResetCounters() -- that is instrumentation
+    // and the growth policy has to work identically with $glstats off.
+    ResetAppendWrapCounters();
 }
 
 void EndFrame()
@@ -251,6 +257,22 @@ namespace {
     // by ImmediateRenderer.cpp's g_VBOWriteOffset, DXP-26). Not touched by UpdateBuffer.
     std::unordered_map<uint32_t, GLsizeiptr> g_BufferWriteOffset;
 
+    // GLP-25: how many times each buffer has wrapped so far THIS frame. Reset from BeginFrame().
+    std::unordered_map<uint32_t, uint32_t> g_BufferWrapCount;
+
+    // Wrap this many times in one frame and the buffer is undersized for the frame's streaming
+    // volume (as opposed to for one large append) -- grow instead of respecifying at the same size.
+    // 2 rather than 1: a single wrap is the normal steady state for a correctly-sized ring.
+    constexpr uint32_t kWrapsBeforeGrow = 2;
+    // Ceiling on wrap-driven growth only. A single append larger than this still grows past it --
+    // that path is a correctness requirement (the data must fit), not a tuning knob.
+    constexpr GLsizeiptr kMaxWrapGrowthCapacity = 16 * 1024 * 1024;
+
+    void ResetAppendWrapCounters()
+    {
+        for (auto& kv : g_BufferWrapCount) kv.second = 0;
+    }
+
     BufferHandle CreateBufferImpl(GLenum target, const void* initialData, size_t sizeBytes, BufferUsage usage)
     {
         if (!LoadBufferGLFunctions()) return {};
@@ -315,6 +337,7 @@ size_t AppendBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
 
     if (neededSize > capacity)
     {
+        // Doesn't fit even in an empty buffer. Uncapped by design -- the append has to fit.
         capacity = neededSize * 2;
         fn_glBufferData(GL_ARRAY_BUFFER, capacity, nullptr, GL_STREAM_DRAW);
         FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
@@ -323,6 +346,27 @@ size_t AppendBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
     }
     else if (writeOffset + neededSize > capacity)
     {
+        // GLP-25: this branch used to respecify at the SAME capacity, so a buffer that wrapped
+        // every frame could never grow out of it -- capacity was set only by the largest single
+        // append and never by how much a frame actually streams. Those are different quantities:
+        // writeOffset is deliberately never reset per frame (that is what keeps an append from
+        // overwriting data an in-flight draw may still be reading), so capacity has to cover a
+        // whole frame's appends. On Intel HD 530 the IR VBO wrapped ~23 times in a single
+        // skill-cast frame at its 144 KB startup size.
+        uint32_t& wraps = g_BufferWrapCount[handle.id];
+        wraps++;
+        // `==`, not `>=`: grow at most once per frame. With `>=`, a single pathological frame (the
+        // HD 530 capture wrapped 23 times) would double on every wrap after the first and slam
+        // straight into the cap. Growing once per frame still converges in a handful of frames and
+        // settles at a size the workload actually justifies.
+        if (wraps == kWrapsBeforeGrow && capacity < kMaxWrapGrowthCapacity)
+        {
+            const GLsizeiptr grown = capacity * 2;
+            capacity = (grown > kMaxWrapGrowthCapacity) ? kMaxWrapGrowthCapacity : grown;
+        }
+        // The orphaning respecify stays either way -- it is what lets the driver hand back fresh
+        // storage instead of stalling until in-flight draws finish reading the old range. Growing
+        // reduces how OFTEN this happens; it must never remove the call.
         fn_glBufferData(GL_ARRAY_BUFFER, capacity, nullptr, GL_STREAM_DRAW);
         FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
         FrameProfiler::TagBufferOrphan();
@@ -349,6 +393,7 @@ void DestroyBuffer(BufferHandle handle)
     fn_glDeleteBuffers(1, &id);
     g_BufferCapacity.erase(handle.id);
     g_BufferWriteOffset.erase(handle.id);
+    g_BufferWrapCount.erase(handle.id); // GLP-25 -- same lifetime as the two maps above
 }
 
 // ---- Uniform blocks: GLP-09 per-slot ring allocator ----
