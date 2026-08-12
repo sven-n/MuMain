@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ImmediateRenderer.h"
 #include "Render/Shaders/PassthroughShader.h"
+#include "Render/Textures/ZzzOpenglUtil.h" // GLP-19 -- GetRenderStateSnapshot()
 #include "Render/RHI/RHI.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <vector>
@@ -29,6 +30,66 @@ static std::vector<IRVertex> g_QuadTemp;
 static IRVertex g_FanFirst;
 static IRVertex g_FanPrev;
 static int      g_FanCount = 0;
+
+// ---- GLP-19: cross-Begin/End batching ----
+// DXP-26 removed the redundant GL calls *around* each per-quad draw but left the draw count alone:
+// one AppendBuffer + one RHI::Draw per Begin/End pair. On Intel HD 530 that was 2,901 draws and
+// 4.73 ms CPU in a single skill-cast frame, against a frame where TexBind moved by 22 and ProgBind
+// by 3 -- i.e. the state was already near-constant across the burst and only the draw boundary was
+// artificial.
+//
+// So: End() defers, and Begin() merges into the pending batch when nothing that affects the pixels
+// has changed. Compatibility is decided by reading the CURRENT cached render state, not by
+// intercepting every writer of it -- the wrapper family in ZzzOpenglUtil.cpp mutates four or five
+// independently-cached sub-states per call and is invoked per particle, so hooking its entry points
+// would flush on every quad and win nothing.
+namespace {
+    struct IRBatchKey
+    {
+        GLRenderStateSnapshot            gl{};
+        PassthroughShader::StateSnapshot ps{};
+
+        bool operator==(const IRBatchKey& o) const
+        {
+            return gl.alphaBlendType  == o.gl.alphaBlendType
+                && gl.alphaTestEnable == o.gl.alphaTestEnable
+                && gl.alphaRef        == o.gl.alphaRef
+                && gl.depthTestEnable == o.gl.depthTestEnable
+                && gl.depthMaskEnable == o.gl.depthMaskEnable
+                && gl.cullFaceEnable  == o.gl.cullFaceEnable
+                && gl.textureEnable   == o.gl.textureEnable
+                && gl.fogEnable       == o.gl.fogEnable
+                && gl.cachTexture     == o.gl.cachTexture
+                && ps.useTexture      == o.ps.useTexture
+                && ps.useFog          == o.ps.useFog
+                && ps.texCombineAdd   == o.ps.texCombineAdd;
+        }
+        bool operator!=(const IRBatchKey& o) const { return !(*this == o); }
+    };
+
+    // Field-wise, never hashed: a hash collision here draws a quad with the wrong texture or blend
+    // mode, scene-dependent and near-impossible to reproduce. The struct is small; compare it.
+    IRBatchKey CaptureKey()
+    {
+        IRBatchKey k;
+        k.gl = GetRenderStateSnapshot();
+        k.ps = PassthroughShader::Instance().GetStateSnapshot();
+        return k;
+    }
+
+    RHI::Topology TopologyFor(GLenum mode)
+    {
+        if (mode == GL_LINES)      return RHI::Topology::LineList;
+        if (mode == GL_LINE_STRIP) return RHI::Topology::LineStrip;
+        // GL_TRIANGLES, plus GL_QUADS and GL_TRIANGLE_FAN, both decomposed to a triangle list in
+        // Vertex3f() -- which is what makes most consecutive batches mergeable at all.
+        return RHI::Topology::TriangleList;
+    }
+}
+
+static bool          g_BatchPending    = false;
+static IRBatchKey    g_PendingKey;
+static RHI::Topology g_PendingTopology = RHI::Topology::TriangleList;
 
 namespace IR {
 
@@ -61,13 +122,34 @@ void Destroy()
 
 void Begin(GLenum mode)
 {
-    g_CurrentMode = mode;
-    g_VertexBuffer.clear();
-    g_QuadTemp.clear();
-    g_FanCount = 0;
-
+    // Bind FIRST, then read the key: it has to describe the state this batch will actually draw
+    // with, not whatever preceded it. Both calls can themselves flush a pending batch via their
+    // own dirty-check hooks (Bind() on a changed u_AlphaRef, SetUseTexture on a changed value) --
+    // which is correct, that batch was submitted under the old value.
+    // Neither call may be removed: DXP-26 step 5 documents 17 sites that override SetUseTexture
+    // right after Begin(), and that pattern is load-bearing.
     PassthroughShader::Instance().Bind();
     PassthroughShader::Instance().SetUseTexture(true);
+
+    const RHI::Topology topology = TopologyFor(mode);
+    const IRBatchKey    key      = CaptureKey();
+
+    if (g_BatchPending && topology == g_PendingTopology && key == g_PendingKey)
+    {
+        // Mergeable: keep the accumulated vertices and append this batch onto them. Deliberately
+        // does NOT clear g_VertexBuffer -- that is the whole optimisation.
+    }
+    else
+    {
+        Flush();
+        g_VertexBuffer.clear();
+    }
+
+    g_CurrentMode = mode;
+    g_QuadTemp.clear();
+    g_FanCount = 0;
+    // g_CurrentVertex is deliberately NOT reset, unchanged from before: RenderJoints() sets colors
+    // BEFORE Begin() and relies on them surviving (ZzzEffectJoint.cpp:7025-7061 -> :7066).
 }
 
 void Color4f(float r, float g, float b, float a)
@@ -161,12 +243,35 @@ void Vertex2f(float x, float y)
 
 void End()
 {
+    if (!g_VBO.IsValid() || g_VertexBuffer.empty()) return;
+
+    // GLP-19: mark pending instead of drawing. The key is captured HERE rather than at Begin() so
+    // it reflects any state the caller set BETWEEN Begin() and End() -- the SetUseTexture(false)
+    // pattern at 17 sites in the tree. The next Begin() compares live state against this snapshot.
+    g_BatchPending    = true;
+    g_PendingTopology = TopologyFor(g_CurrentMode);
+    g_PendingKey      = CaptureKey();
+
+    // DXP-26 step 3: don't force-unbind the program here (mirrors ZzzBMD.cpp's BeginRender/
+    // EndRender reflexive-unbind removal, DXP-22). Begin() re-binds PassthroughShader every call
+    // regardless, so leaving it bound just lets BindProgram's cache skip the glUseProgram
+    // round-trip on consecutive IR draws -- the overwhelming common case. The one fixed-function
+    // fallback that needs a real unbind (RenderTerrainFrustrum's grass-tile glBegin path) already
+    // calls UnbindAllShaders() once per pass.
+}
+
+void Flush()
+{
+    if (!g_BatchPending) return;
+    // Cleared before the draw, not after, so a re-entrant call can never see a batch that is
+    // already being submitted.
+    g_BatchPending = false;
+
     if (g_VBO.IsValid() && !g_VertexBuffer.empty())
     {
-        RHI::Topology topology;
-        if (g_CurrentMode == GL_LINES)           topology = RHI::Topology::LineList;
-        else if (g_CurrentMode == GL_LINE_STRIP) topology = RHI::Topology::LineStrip;
-        else                                      topology = RHI::Topology::TriangleList; // GL_TRIANGLES, and decomposed GL_QUADS/GL_TRIANGLE_FAN
+        // Topology comes from the pending batch, NOT from g_CurrentMode -- by the time a flush
+        // fires (a state hook, or end of frame) g_CurrentMode may belong to a later Begin().
+        const RHI::Topology topology = g_PendingTopology;
 
         const size_t neededSize = g_VertexBuffer.size() * sizeof(IRVertex);
 
@@ -182,12 +287,7 @@ void End()
         RHI::Draw(topology, (uint32_t)g_VertexBuffer.size(), (uint32_t)(byteOffset / sizeof(IRVertex)));
     }
 
-    // DXP-26 step 3: don't force-unbind the program here (mirrors ZzzBMD.cpp's BeginRender/
-    // EndRender reflexive-unbind removal, DXP-22). Begin() re-binds PassthroughShader every call
-    // regardless, so leaving it bound just lets BindProgram's cache skip the glUseProgram
-    // round-trip on consecutive IR draws -- the overwhelming common case. The one fixed-function
-    // fallback that needs a real unbind (RenderTerrainFrustrum's grass-tile glBegin path) already
-    // calls UnbindAllShaders() once per pass before it runs.
+    g_VertexBuffer.clear();
 }
 
 } // namespace IR

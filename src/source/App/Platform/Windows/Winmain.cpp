@@ -246,6 +246,11 @@ void PlatformSwapBuffers()
 {
     if (g_sdlWindow)
     {
+        // GLP-19: IR defers its draw until the next incompatible Begin() or an explicit flush, so
+        // the frame's last batch would otherwise sit unsubmitted until some later frame. Every
+        // swap path in the tree funnels through here (SceneManager, LoadingScene, UIMng), which
+        // makes this the one place that cannot be missed.
+        IR::Flush();
 #ifndef _WIN32
         MaybeCaptureFrame();
 #endif

@@ -9,7 +9,8 @@
 #include "stdafx.h"
 #include "Render/RHI/RHI.h"
 #include "Render/Textures/ZzzOpenglUtil.h"  // PlatformSwapBuffers()
-#include "Render/Core/BindState.h"          // BindVAO() / InvalidateVAOCache()
+#include "Render/Core/BindState.h"
+#include "Render/Core/ImmediateRenderer.h" // GLP-19 -- IR::Flush() before texture content changes          // BindVAO() / InvalidateVAOCache()
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <SDL3/SDL.h>
@@ -981,6 +982,15 @@ void BindIndexBuffer(BufferHandle handle)
 // ---- Draw ----
 void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)
 {
+    // GLP-19: bound the pending batch's LIFETIME instead of trying to enumerate every piece of
+    // state that could move under it. Enumerating failed three times (matrices in GlobalUBO, binds
+    // in BindState, texture content in UpdateTexture) because the surface is genuinely open-ended.
+    // This is the closed form: a deferred IR batch may never survive another draw. Re-entrancy is
+    // free -- IR::Flush() calls straight back into here, but it clears its pending flag before
+    // submitting, so the inner call is a no-op. Consecutive IR quads (particles, text runs) still
+    // merge, because nothing else draws between them -- which is exactly the hot path.
+    IR::Flush();
+
     GLenum mode;
     switch (topology)
     {
@@ -995,6 +1005,8 @@ void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)
 
 void DrawIndexed(Topology topology, uint32_t indexCount, uint32_t firstIndex)
 {
+    IR::Flush(); // GLP-19 -- see Draw()
+
     GLenum mode;
     switch (topology)
     {
@@ -1036,6 +1048,13 @@ TextureHandle CreateTexture(const TextureDesc& desc, const void* initialPixelsRG
 void UpdateTexture(TextureHandle handle, int x, int y, int w, int h, const void* pixelsRGBA)
 {
     if (!handle.IsValid()) return;
+    // GLP-19: texture CONTENT changing is batch state just as much as texture identity, and
+    // BindState's hook cannot see it -- the bind below is a no-op whenever the same texture is
+    // re-uploaded, which is exactly what the text renderer does (one dynamic texture, new pixels
+    // per string). A pending IR batch still references the old content, so it must be drawn first;
+    // otherwise every merged quad samples whatever was uploaded last, which showed up as UI text
+    // where each line displayed a later line's glyphs.
+    IR::Flush();
     BindTexture2D(0, handle.id);
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixelsRGBA);
 }

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "BindState.h"
+#include "Render/Core/ImmediateRenderer.h" // GLP-19 -- IR::Flush() before any bind changes
 #include "Core/Utilities/FrameProfiler.h"
 #include <SDL3/SDL.h>
 
@@ -48,10 +49,19 @@ static GLuint    s_lastTexture[kMaxCachedTextureSlots] = { 0 };
 // GLP-05: matches GL's post-context-creation default (GL_TEXTURE0, i.e. slot 0).
 static GLint s_lastActiveSlot = 0;
 
+// GLP-19: BindState is the documented monopoly on program/VAO/texture binds, so it is the only
+// place that sees EVERY state change from every path -- BMD, terrain, UI, IR alike. IR defers its
+// draw across Begin/End pairs, so a pending batch must be submitted before any of these change
+// under it; hooking here rather than at individual call sites is what makes that exhaustive.
+// Each hook sits on the branch where the bind ACTUALLY changes, so consecutive IR draws that
+// re-request the same program/texture/VAO still merge for free.
+// Re-entrancy: IR::Flush() itself calls BindVAO via RHI::BindVertexBuffer, but Flush() clears its
+// pending flag before submitting, so the inner call returns immediately.
 void BindProgram(GLuint program)
 {
     if (program == s_lastProgram) return;
     if (!LoadBindStateFunctions()) return;
+    IR::Flush();
     fn_glUseProgram(program);
     s_lastProgram = program;
     FrameProfiler::CountGLCall(FrameProfiler::Counter::ProgramBinds);
@@ -65,6 +75,14 @@ void UnbindAllShaders()
 void BindTexture2D(int slot, GLuint texture)
 {
     if (!LoadBindStateFunctions()) return;
+
+    // GLP-19 -- see BindProgram(). Computed up front because the real texture comparison below
+    // sits after the active-slot switch, and both change what a pending IR batch would sample.
+    {
+        const bool slotChanges = (slot != s_lastActiveSlot);
+        const bool texChanges  = !(slot >= 0 && slot < kMaxCachedTextureSlots && s_lastTexture[slot] == texture);
+        if (slotChanges || texChanges) IR::Flush();
+    }
 
     // GLP-05: BindState is now the complete monopoly on the active texture unit, not just
     // program/VAO/per-slot-texture-id. This is only sound because TerrainShader::SetOverlayTexture
@@ -89,6 +107,7 @@ void BindVAO(GLuint vao)
 {
     if (vao == s_lastVAO) return;
     if (!LoadBindStateFunctions()) return;
+    IR::Flush(); // GLP-19 -- see BindProgram(); safe to re-enter, Flush() clears its flag first
     fn_glBindVertexArray(vao);
     s_lastVAO = vao;
     FrameProfiler::CountGLCall();
