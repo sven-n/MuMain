@@ -143,19 +143,22 @@ void Begin(GLenum mode)
     PassthroughShader::Instance().Bind();
     PassthroughShader::Instance().SetUseTexture(true);
 
-    const RHI::Topology topology = TopologyFor(mode);
-    const IRBatchKey    key      = CaptureKey();
+    // GLP-29: build the comparison key only when there is actually a pending batch to compare it
+    // against, and only after the cheap topology check has passed. In the particle path a
+    // blend-mode change flushes on nearly every quad, so g_BatchPending is usually false by the
+    // time we get here and the snapshot was pure waste -- two CaptureKey() calls per quad (this
+    // one and End()'s) of which this one is never read.
+    bool mergeable = false;
+    if (g_BatchPending && TopologyFor(mode) == g_PendingTopology)
+        mergeable = (CaptureKey() == g_PendingKey);
 
-    if (g_BatchPending && topology == g_PendingTopology && key == g_PendingKey)
-    {
-        // Mergeable: keep the accumulated vertices and append this batch onto them. Deliberately
-        // does NOT clear g_VertexBuffer -- that is the whole optimisation.
-    }
-    else
+    if (!mergeable)
     {
         Flush();
         g_VertexBuffer.clear();
     }
+    // Mergeable: keep the accumulated vertices and append this batch onto them. Deliberately does
+    // NOT clear g_VertexBuffer -- that is the whole optimisation.
 
     g_CurrentMode = mode;
     g_QuadCount = 0; // GLP-29 2a

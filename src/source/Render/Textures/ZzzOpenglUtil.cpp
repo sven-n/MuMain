@@ -1121,20 +1121,24 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     }
     else
     {
-        vec3_t p2[4];
-        Vector(-Width, -Height, z, p2[0]);
-        Vector(Width, -Height, z, p2[1]);
-        Vector(Width, Height, z, p2[2]);
-        Vector(-Width, Height, z, p2[3]);
-        vec3_t Angle;
-        Vector(0.f, 0.f, Rotation, Angle);
-        float Matrix[3][4];
-        AngleMatrix(Angle, Matrix);
+        // GLP-29 2c: AngleMatrix() + VectorRotate() with a Z-only angle reduces exactly to a 2D
+        // rotation -- this is an algebraic identity, not an approximation. With
+        // angles = (0, 0, Rotation), AngleMatrix (ZzzMathLib.cpp:194) has sp=0, cp=1, sr=0, cr=1,
+        // so the matrix is [cy -sy 0; sy cy 0; 0 0 1] and VectorRotate's three dot products give
+        //   out.x = in.x*cy - in.y*sy      out.y = in.x*sy + in.y*cy      out.z = in.z
+        // Same arithmetic and the same degrees->radians constant, minus three sinf/cosf pairs
+        // (two of them on a constant 0) and ~20 multiplies for every rotated sprite. This is a hot
+        // per-particle path: smoke, clouds and explosions all pass a non-zero Rotation.
+        const float rad = Rotation * (Q_PI * 2 / 360);
+        const float sy  = sinf(rad);
+        const float cy  = cosf(rad);
+        const float dx[4] = { -Width,   Width,  Width, -Width  };
+        const float dy[4] = { -Height, -Height, Height, Height };
         for (int i = 0; i < 4; i++)
         {
-            VectorRotate(p2[i], Matrix, p[i]);
-            p[i][0] += x;
-            p[i][1] += y;
+            p[i][0] = x + dx[i] * cy - dy[i] * sy;
+            p[i][1] = y + dx[i] * sy + dy[i] * cy;
+            p[i][2] = z;
         }
     }
 
