@@ -1808,6 +1808,14 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 
                 TerrainShader::Instance().SetBaseTexture(b1->TextureNumber);
                 TerrainShader::Instance().SetOverlayTexture(b2->TextureNumber);
+                // Matches legacy FaceTexture()'s `Width = 64.f/b->Width` exactly (see that function,
+                // ~10 lines below where the non-shader fallback still runs) -- terrain tile bitmaps in
+                // this tree are not all the same resolution (64/128/256px observed), so the UV scale
+                // must be derived per-texture, not a single shared constant. Pre-divided by
+                // TERRAIN_SCALE here since a_Pos in the vertex shader is world-space, not grid-index.
+                TerrainShader::Instance().SetUVScale(
+                    (64.f / b1->Width) / TERRAIN_SCALE, (64.f / b1->Height) / TERRAIN_SCALE,
+                    (64.f / b2->Width) / TERRAIN_SCALE, (64.f / b2->Height) / TERRAIN_SCALE);
                 TerrainShader::Instance().SetWaterFlags(baseIsWater, overlayIsWater);
                 // DXP-01: synced per-tile (not once per frustrum pass like SetWaterMove) because
                 // alpha-test state can change between tile draws via the wrapper family; dirty-checked
