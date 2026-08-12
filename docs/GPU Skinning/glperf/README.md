@@ -77,6 +77,18 @@ not to be justified as such.
 | Milestone | Subsystem | Focus / Objective | Status |
 |---|---|---|---|
 | **[GLP-16](#glp-16--bucket-terrain-tiles-by-texture-pair)** | Terrain | Bucket visible terrain tiles by `(baseTexture, overlayTexture, waterFlags)` into one draw per bucket. | Implemented, GPU-ms finding root-caused and fixed, re-confirmed Debug+Release — visual identity checklist and Intel HD 530 numbers still outstanding |
+| **[GLP-19](#glp-19--batch-ir-draws-across-beginend-pairs)** | ImmediateRenderer | Defer `IR::End()`; merge consecutive `Begin`/`End` pairs into one draw when render state is unchanged. | Implemented and correct — **measured to deliver nothing for particles** (see status), real win for UI/joints |
+
+### Phase 5 — Skill-Cast Cost (August 12, 2026)
+
+Opened after the first target-hardware report: static maps improved, but casting Chaotic Diseier
+dropped framerate roughly 50%. These milestones came out of that investigation.
+
+| Milestone | Subsystem | Focus / Objective | Status |
+|---|---|---|---|
+| **[GLP-24](#glp-24--glstats-pass-attribution)** | Profiling | Make `$glstats` account for the whole frame; fix the GPU query ring read. | Completed — was blocking; every earlier reading in the series had this blind spot |
+| **[GLP-25](#glp-25--ir-streaming-ring-growth-policy)** | ImmediateRenderer | Grow the IR streaming ring when it wraps repeatedly instead of only on oversized appends. | Completed — orphans 21 → 1 in a like-for-like capture |
+| **[GLP-29](#glp-29--particle--joint-vertex-generation-cpu)** | Effects | Cut per-particle CPU vertex-generation cost (2D rotation collapse, heap-free quad scratch). | Implemented, paused — −35% Debug frame CPU, **no measurable Release win** |
 
 ---
 
@@ -145,6 +157,60 @@ not to be justified as such.
 - **Scope**: `Render/Terrain/ZzzLodTerrain.cpp`, `Core/Utilities/FrameProfiler.h`, `Scenes/MainScene.cpp`.
 - **Purpose**: Splits `RenderTerrainFace` into a gather phase (unchanged per-tile logic: alpha collapse, water-flag derivation, overlay substitution, side-effect calls) and a draw phase that groups visible tiles into buckets keyed by `(baseTexture, overlayTexture, waterFlags)` and issues one `glDrawElements` per bucket instead of per tile — roughly eight GL calls per two-triangle tile down to one draw per distinct texture pair. No asset changes.
 - **Status**: Implemented and confirmed. A dev-machine capture showed terrain draw calls dropping 1,226 → 48 (25.5×) at the same test spot with no reported corruption in a general pass. An independent re-verification then found `$glstats` reporting terrain GPU ms *elevated* (3–5ms) despite the collapsed draw count — a real "regression" by the numbers, contradicting the draw-call win. Three code-change attempts targeting plausible GPU-side causes (index-order locality, single-upload batching, texture-bind-order sort) produced only small, inconclusive improvements. An Nsight Graphics GPU Trace capture then isolated terrain's real draw cost at **<0.01ms**, meaning the elevated `$glstats` reading was not describing terrain's actual GPU work at all. Root cause: `FrameProfiler::Scope`'s `GL_TIMESTAMP` pair was bracketing the *entire* CPU-side gather/sort scope, not just the real draw submission — any CPU-bound gap between the GPU finishing its begin-marker and the CPU submitting the next draw reads as "GPU time." Fixed by decoupling the GPU timer from the CPU-scope RAII lifetime (`autoGpuTimer` flag + `FRAME_PROFILE_CPU_ONLY` macro on `FrameProfiler::Scope`), with Terrain's three call sites switched to place `GpuTimerBegin`/`GpuTimerEnd` manually around just the draw loop. Re-measured at 0.01ms, matching the Nsight finding almost exactly — confirmed in **both Debug and Release** builds. The two now-unnecessary fix attempts (index-order sort, texture-bind-order sort) were reverted, keeping only the single-upload batching change (independently justified) and the real instrumentation fix. Net result across the whole branch (GLP-01 through GLP-16), clean re-capture: **avg FPS +4.4%, 1% Low +28.0%, frame time −4.1%**, plus the 25.5× terrain draw-call reduction itself. Still outstanding: the task's own before/after visual checklist (multi-layer blending at bucket-crossing tile boundaries, water scroll/shoreline behavior, the Atlans/Doppelganger3 overlay substitution, Crywolf splash-particle rate, grass maps, dev editor mode) and Intel HD 530 hardware numbers — all measurement in this task was done on dev hardware (NVIDIA RTX 5070 Ti).
+
+#### GLP-19 — Batch IR Draws Across Begin/End Pairs
+- **Scope**: `Render/Core/ImmediateRenderer.cpp`, plus `IR::Flush()` hooks at every state-mutation site that can invalidate an accumulated batch (`Render/Textures/ZzzOpenglUtil.cpp`, `Render/Core/BindState.cpp`, `Render/Core/GlobalUBO.cpp`, `Render/Shaders/PassthroughShader.cpp`, `Render/RHI/RHI_GL.cpp`, `App/Platform/Windows/Winmain.cpp`).
+- **Purpose**: `IR::End()` used to issue one buffer append and one draw per `Begin`/`End` pair — one draw per quad. `End()` now only marks a batch pending; the next `Begin()` compares live render state against a field-wise `IRBatchKey` snapshot and appends to the existing vertex run when nothing that affects the pixels has changed. Any state writer that *would* change the result flushes first, so a batch is never submitted under state it was not built with.
+- **Status**: Implemented and correct, and it works — for UI, text and joints. **It does not help particles at all, and that is measured, not assumed.** A Release capture during a Chaotic Diseier cast shows the `Particles` pass at **2,918 quads → 2,918 draws (quads-per-draw 1.0)** while `Joints` in the same frame reaches **1904.9** (≈26,700 quads in 14 draws). The cause is that `RenderParticles()` changes blend mode roughly once per particle, and the `AlphaBlendType` guards in `ZzzOpenglUtil.cpp` correctly flush the pending batch *before* mutating state. Two visual regressions found and fixed during implementation (a stray black polygon from unhooked `Enable*`/`Disable*` state, and UI text corruption because `RHI::UpdateTexture` re-uploads into an existing texture id and so never tripped the bind hook) — both were cases of batch state changing through a path with no flush hook. See [GLP-20](#see-also) for the unfinished half.
+
+---
+
+### Phase 5 — Skill-Cast Cost
+
+#### GLP-24 — `$glstats` Pass Attribution
+- **Scope**: `Core/Utilities/FrameProfiler.h`, `Scenes/SceneManager.cpp`, `Scenes/MainScene.cpp`.
+- **Purpose**: The overlay's per-pass table omitted `Pass::Other`, and `RenderSprites()`/`RenderParticles()`/`RenderJoints()` sat outside every `FRAME_PROFILE` scope — so all three landed in a bucket the overlay never printed. On the capture that motivated this series they accounted for ~94% of the frame's draw-call increase while being completely invisible. Adds `Sprites`/`Particles`/`Joints`/`Overlay` passes, prints `Other`, tags the overlay's own cost so it stops contaminating the bucket under investigation, and allows multiple GPU query entries per pass (a pass entered twice per frame previously reported only its last entry against a CPU figure that summed both).
+- **Status**: Completed, and it was blocking — **every measurement taken earlier in this series carries the blind spot it fixes.** A second defect was found and fixed separately (`e15814af`): `AdvanceGpuTimers()` read the ring slot the current frame had just written, giving the GPU zero frames to retire the queries, so late-submitted passes were discarded rather than retried and their GPU ms stayed at 0.00 permanently. That is why `Particles` reported 0.00 ms against ~2,970 draws. Now reads the oldest slot.
+
+#### GLP-25 — IR Streaming Ring Growth Policy
+- **Scope**: `Render/RHI/RHI_GL.cpp`, `Render/Core/ImmediateRenderer.cpp`.
+- **Purpose**: `RHI::AppendBuffer` only grew the streaming buffer when a *single* append exceeded the whole buffer, so a ring that was merely too small for a frame's total volume wrapped repeatedly forever instead of growing out of it. An effect-dense frame wrapped ~23 times. Adds a wrap counter per buffer that doubles capacity after repeated same-frame wraps, up to a cap, and raises IR's initial reservation to 65,536 vertices (~2.25 MB, ~10,900 quads per wrap).
+- **Status**: Completed and verified by counter: `BufferOrphans` dropped from 21 to 1 in a like-for-like capture at the same spot.
+
+#### GLP-29 — Particle + Joint Vertex-Generation CPU
+- **Scope**: `Render/Textures/ZzzOpenglUtil.cpp`, `Render/Core/ImmediateRenderer.cpp`.
+- **Purpose**: Once GLP-19 showed submission was not the particle bottleneck, this targeted the CPU cost of *generating* the vertices. Two changes landed: `RenderSprite`'s rotated path built a full 3×4 `AngleMatrix` and ran four `VectorRotate` calls per sprite, which for a Z-only angle reduces exactly to a 2D rotation (an algebraic identity, not an approximation); and IR's 4-element quad scratch was a `std::vector` doing a `push_back` per vertex and a `clear` per quad — ~11,900 vector operations per frame at 2,975 particles. Also fixed a GLP-19 regression found in passing: `Begin()` built a state snapshot unconditionally, charging two `CaptureKey()` calls per quad in a pass that never batches.
+- **Status**: Implemented, then **paused rather than continued down its candidate list**. Debug frame CPU 21.47 → 13.91 ms (−35%); Release frame 5.99 → 5.92 ms, which at the frame level is nothing — `Joints` moved +0.33 ms in the same pair despite being untouched, so run-to-run variance on the test machine exceeds the effect. The removed overhead is overwhelmingly MSVC Debug instrumentation, not real work. Kept because the code is strictly better and a 35% Debug win buys real iteration speed, **not because it improves the shipped frame.** Rotating smoke, clouds and explosions visually confirmed correct.
+
+---
+
+## Where the skill-cast cost actually is (measured 2026-08-12, Release, RTX 5070 Ti)
+
+A `$glstats` capture during a Chaotic Diseier cast in Noria, frame 6.03 ms / 161 FPS:
+
+| Pass | CPU ms | GPU ms | Draws | Quads/draw |
+|---|---|---|---|---|
+| Particles | 1.59 | 1.88 | 2,918 | **1.0** |
+| Joints | 1.10 | 0.01 | 14 | 1904.9 |
+| Chars | 0.24 | **1.51** | 69 | 3.6 |
+| Overlay | 1.03 | 0.00 | 62 | 4.9 |
+
+Three conclusions, each of which contradicts something previously assumed:
+
+1. **Particles is submission-bound and GLP-19 does not fix it.** Blend mode changes ~once per
+   particle; each change correctly flushes the pending batch. Fixing this requires grouping
+   particles by blend state ([GLP-20](#see-also)), not more batching machinery. An attempt to do
+   this by reordering the draw loop was built, measured to change nothing, and reverted.
+2. **Joints is *not* submission cost.** 14 draws cannot cost 1.10 ms. It is CPU geometry
+   generation, and it is untouched and unexplained — the largest single unclaimed item.
+3. **Chars is genuinely GPU-bound** (GPU 6× CPU). This is the one shape the GPU-timer
+   scope-bracketing artifact cannot manufacture — the artifact inflates GPU toward CPU, it cannot
+   invent 6× more. The standing lead is the unconditional `discard` in `BMDMeshShader` defeating
+   early-Z, which is Phase 3's subject and has no landed work.
+
+**Reading the overlay honestly**: `Overlay` costs 1.03 ms of that 6.03 ms frame. That is the
+instrument, not the game. Judge fixes on the per-pass figures, not on the FPS number shown while
+the overlay is up.
 
 ---
 
