@@ -675,21 +675,34 @@ static void RenderGLStats()
     using FP = FrameProfiler::Pass;
     using FC = FrameProfiler::Counter;
 
-    mu_swprintf(szLine, L"GLStats  Pass       CPUms  GPUms   GL  Draw  BufUpd(Orph)");
+    mu_swprintf(szLine, L"GLStats  Pass       CPUms  GPUms     GL   Draw BufUpd(Orph)");
     g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    // One row per GL-call-bearing pass -- the update/move-phase/CPU-only passes (MoveEffects,
-    // MoveParticles, Skinning, CharWait, Present) never issue GL calls themselves, so a row for
-    // them here would just be zeroes; $details already covers their CPU cost.
-    static constexpr FP kRows[] = { FP::Terrain, FP::Objects, FP::Characters, FP::Items, FP::Effects, FP::UI };
+    // One row per GL-call-bearing pass. The passes left out are the ones that genuinely issue no
+    // GL calls of their own -- MoveEffects, MoveParticles (update-phase simulation), Skinning and
+    // CharWait (CPU work) and Present (buffer swap); $details already covers their CPU cost.
+    //
+    // GLP-24: `Other` used to be left out too, on the same justification, and that was wrong -- it
+    // is the remainder bucket, not a CPU-only pass, and it was the frame's largest GL producer.
+    // The list had been copied from kGpuTimedPasses, where excluding Other IS correct (it has no
+    // timestamp pair). Rows must sum to the printed totals below; if they don't, a pass is missing
+    // from this list. Other's GPU-ms column reads 0 by design -- it is untimed, not free.
+    static constexpr FP kRows[] = {
+        FP::Terrain, FP::Objects, FP::Characters, FP::Items, FP::Effects,
+        FP::Sprites, FP::Particles, FP::Joints, FP::UI, FP::Overlay, FP::Other
+    };
     for (FP pass : kRows)
     {
         const int gpuIdx = FrameProfiler::GpuTimedIndex(pass);
         const float gpuMs = (gpuIdx >= 0) ? FrameProfiler::GpuMs(pass) : 0.0f;
-        mu_swprintf(szLine, L"%-10hs %6.2f %6.2f  %4u  %4u  %4u(%u)",
+        // '!' marks a GPU reading that dropped entries at kMaxEntriesPerPass -- a truncated sum
+        // must never be mistaken for a complete one.
+        const char* truncFlag = (gpuIdx >= 0 && FrameProfiler::GpuMsTruncated(pass)) ? "!" : " ";
+        mu_swprintf(szLine, L"%-10hs %6.2f %6.2f%hs %5u %5u %5u(%u)",
             FrameProfiler::kPassNames[(int)pass],
             FrameProfiler::AccumulatorMs(pass),
             gpuMs,
+            truncFlag,
             FrameProfiler::CounterValue(pass, FC::GLCalls),
             FrameProfiler::CounterValue(pass, FC::DrawCalls),
             FrameProfiler::CounterValue(pass, FC::BufferUpdates),
@@ -1138,7 +1151,11 @@ void MainScene(HDC hDC)
     {
         Success = RenderCurrentScene(hDC);
         {
-            FRAME_PROFILE(Other);
+            // GLP-24: tagged Overlay, not Other. These three render text as roughly one IR quad per
+            // glyph, so with $glstats on they were adding hundreds of draw calls to the very bucket
+            // the overlay exists to investigate -- an observer effect big enough to mislead. Keep
+            // the Reset/Advance calls inside this scope; see the comment below for the ordering.
+            FRAME_PROFILE(Overlay);
             RenderDebugInfo();
             RenderGLStats();
             RenderFpsCounter();

@@ -41,12 +41,23 @@ namespace FrameProfiler
             // FRAME_PROFILE scope), interface panels/party window/NewUI system/cursor
         Present, // DXP-23: PlatformSwapBuffers() self-time, split out of Other so a large reading
                  // unambiguously means "CPU stalling on the GPU command queue", not HUD render cost
+        // GLP-24: split out of Other. RenderSprites()/RenderParticles()/RenderJoints() sit outside
+        // the Effects scope (MainScene.cpp:509/525/526, and again in the water-map second pass at
+        // :544/553/554), so all three landed in Other -- which the $glstats overlay never printed.
+        // On the Intel HD 530 skill-cast capture they accounted for ~94% of the frame's draw-call
+        // increase while being completely invisible.
+        Sprites,   // RenderSprites() -- IR per-quad path
+        Particles, // RenderParticles() -- IR per-quad path, the heaviest in effect-dense frames
+        Joints,    // RenderJoints() -- beam/tail-trail effects (Wing of Ruin tail, lightning beams)
+        Overlay,   // $details/$glstats/FPS-counter self-cost. These render text as roughly one IR
+                   // quad per glyph and used to be tagged Other, contaminating the exact bucket
+                   // under investigation -- an observer effect large enough to mislead.
         Count_
     };
 
     inline constexpr const char* kPassNames[(int)Pass::Count_] = {
         "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
-        "Skinning", "UI", "Present"
+        "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay"
     };
 
     inline float& AccumulatorMs(Pass p)
@@ -206,8 +217,13 @@ namespace FrameProfiler
     // phase simulation, not render) and Present (SDL buffer swap, not a queued GL command) never
     // submit GL work themselves -- a GPU timestamp pair around them would just read whatever was
     // already in the command stream, not their own cost.
+    // GLP-24 adds Sprites/Particles/Joints: each is one contiguous submission region, so a
+    // timestamp pair around it is meaningful. Overlay and Other stay untimed -- Other is a
+    // remainder bucket scattered across the whole frame, so a single pair around it would bracket
+    // unrelated work, and Overlay's cost is an artifact of measuring rather than something to fix.
     inline constexpr Pass kGpuTimedPasses[] = {
-        Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::UI
+        Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::UI,
+        Pass::Sprites, Pass::Particles, Pass::Joints
     };
     inline constexpr int kGpuTimedPassCount = sizeof(kGpuTimedPasses) / sizeof(kGpuTimedPasses[0]);
 
@@ -222,6 +238,15 @@ namespace FrameProfiler
     {
         static float s_gpuMs[(int)Pass::Count_] = {};
         return s_gpuMs[(int)p];
+    }
+
+    // GLP-24: true when the last completed reading for this pass had to drop entries because the
+    // pass was entered more times in one frame than kMaxEntriesPerPass allows. The overlay flags
+    // it, so a truncated sum is never read as a complete one.
+    inline bool& GpuMsTruncated(Pass p)
+    {
+        static bool s_truncated[(int)Pass::Count_] = {};
+        return s_truncated[(int)p];
     }
 
     namespace detail
@@ -270,11 +295,25 @@ namespace FrameProfiler
         // block" requirement -- the stale previous reading just stays on screen one extra frame.
         inline constexpr int kGpuRingSize = 3;
 
+        // GLP-24: a pass can be entered more than once per frame. Objects is entered twice
+        // (RenderObjects() and RenderObjects_AfterCharacter()); Sprites/Particles/Joints are each
+        // entered twice on water maps (MainScene.cpp's byWaterMap == 2 second pass). With one query
+        // pair per pass, each new entry overwrote the previous entry's begin stamp, so GPU ms
+        // reported only the last entry while CPU ms (AccumulatorMs) summed them all -- the two
+        // columns on such a row were not measuring the same work. N pairs per pass, summed, fixes it.
+        inline constexpr int kMaxEntriesPerPass = 4;
+
         struct GpuQuerySlot
         {
-            GLuint begin[kGpuTimedPassCount]  = {};
-            GLuint end[kGpuTimedPassCount]    = {};
-            bool   issued[kGpuTimedPassCount] = {};
+            GLuint begin[kGpuTimedPassCount][kMaxEntriesPerPass] = {};
+            GLuint end[kGpuTimedPassCount][kMaxEntriesPerPass]   = {};
+            // Completed pairs so far this frame. `open` marks a begin awaiting its end, so
+            // GpuTimerEnd stamps the same index GpuTimerBegin used.
+            int    count[kGpuTimedPassCount]     = {};
+            bool   open[kGpuTimedPassCount]      = {};
+            // An entry past the cap is dropped whole, never wrapped -- wrapping would pair a late
+            // begin with an early end and yield a plausible-looking garbage delta.
+            bool   truncated[kGpuTimedPassCount] = {};
         };
 
         inline GpuQuerySlot& GpuRing(int slot)
@@ -296,8 +335,9 @@ namespace FrameProfiler
             for (int s = 0; s < kGpuRingSize; s++)
             {
                 GpuQuerySlot& slot = GpuRing(s);
-                QueryFns().GenQueries(kGpuTimedPassCount, slot.begin);
-                QueryFns().GenQueries(kGpuTimedPassCount, slot.end);
+                // 2D arrays are contiguous, so one GenQueries call fills the whole block.
+                QueryFns().GenQueries(kGpuTimedPassCount * kMaxEntriesPerPass, &slot.begin[0][0]);
+                QueryFns().GenQueries(kGpuTimedPassCount * kMaxEntriesPerPass, &slot.end[0][0]);
             }
             GpuQueriesGenerated() = true;
         }
@@ -317,8 +357,14 @@ namespace FrameProfiler
         detail::EnsureGpuQueriesGenerated();
         if (!detail::GpuQueriesGenerated()) return;
         detail::GpuQuerySlot& slot = detail::GpuRing(detail::GpuFrameIndex() % detail::kGpuRingSize);
-        detail::QueryFns().QueryCounter(slot.begin[idx], GL_TIMESTAMP);
-        slot.issued[idx] = true;
+        if (slot.open[idx]) return; // unbalanced Begin without an End -- keep the first, ignore this
+        if (slot.count[idx] >= detail::kMaxEntriesPerPass)
+        {
+            slot.truncated[idx] = true;
+            return;
+        }
+        detail::QueryFns().QueryCounter(slot.begin[idx][slot.count[idx]], GL_TIMESTAMP);
+        slot.open[idx] = true;
     }
 
     inline void GpuTimerEnd(Pass p)
@@ -327,7 +373,12 @@ namespace FrameProfiler
         const int idx = GpuTimedIndex(p);
         if (idx < 0) return;
         detail::GpuQuerySlot& slot = detail::GpuRing(detail::GpuFrameIndex() % detail::kGpuRingSize);
-        detail::QueryFns().QueryCounter(slot.end[idx], GL_TIMESTAMP);
+        // No open begin means its pair was dropped at the cap (or never issued) -- drop this end
+        // too rather than stamping a query object nothing will read.
+        if (!slot.open[idx]) return;
+        detail::QueryFns().QueryCounter(slot.end[idx][slot.count[idx]], GL_TIMESTAMP);
+        slot.count[idx]++;
+        slot.open[idx] = false;
     }
 
     // Reads the ring slot about to be reused, then advances the ring. Call exactly once per
@@ -340,18 +391,35 @@ namespace FrameProfiler
             detail::GpuQuerySlot& slot = detail::GpuRing(detail::GpuFrameIndex() % detail::kGpuRingSize);
             for (int i = 0; i < kGpuTimedPassCount; i++)
             {
-                if (!slot.issued[i]) continue;
+                const int pairs = slot.count[i];
+                if (pairs > 0)
+                {
+                    // Timestamps retire in submission order, so if the last pair's end is ready
+                    // every earlier one is too -- one availability poll covers the whole set.
+                    GLint available = 0;
+                    detail::QueryFns().GetQueryObjectiv(slot.end[i][pairs - 1], GL_QUERY_RESULT_AVAILABLE, &available);
+                    if (available)
+                    {
+                        double totalNs = 0.0;
+                        for (int e = 0; e < pairs; e++)
+                        {
+                            GLuint64 beginNs = 0, endNs = 0;
+                            detail::QueryFns().GetQueryObjectui64v(slot.begin[i][e], GL_QUERY_RESULT, &beginNs);
+                            detail::QueryFns().GetQueryObjectui64v(slot.end[i][e], GL_QUERY_RESULT, &endNs);
+                            totalNs += (double)(endNs - beginNs);
+                        }
+                        GpuMs(kGpuTimedPasses[i]) = (float)(totalNs / 1.0e6);
+                        GpuMsTruncated(kGpuTimedPasses[i]) = slot.truncated[i];
+                    }
+                    // Not ready: leave the previous reading on screen one more frame, as before.
+                }
 
-                GLint available = 0;
-                detail::QueryFns().GetQueryObjectiv(slot.end[i], GL_QUERY_RESULT_AVAILABLE, &available);
-                if (!available) continue;
-
-                GLuint64 beginNs = 0, endNs = 0;
-                detail::QueryFns().GetQueryObjectui64v(slot.begin[i], GL_QUERY_RESULT, &beginNs);
-                detail::QueryFns().GetQueryObjectui64v(slot.end[i], GL_QUERY_RESULT, &endNs);
-                GpuMs(kGpuTimedPasses[i]) = (float)(endNs - beginNs) / 1.0e6f;
-
-                slot.issued[i] = false;
+                // Reset unconditionally, including the not-ready case. A slot must start every
+                // frame at zero pairs -- otherwise a frame whose results weren't ready would leave
+                // stale pairs behind to be summed together with the next frame's.
+                slot.count[i]     = 0;
+                slot.open[i]      = false;
+                slot.truncated[i] = false;
             }
         }
 
