@@ -293,6 +293,15 @@ namespace FrameProfiler
         // GetQueryObjectui64v(GL_QUERY_RESULT) never blocks. GL_QUERY_RESULT_AVAILABLE is still
         // polled and the update skipped if it isn't ready (a slow/busy driver), per the "never
         // block" requirement -- the stale previous reading just stays on screen one extra frame.
+        //
+        // GLP-29: the paragraph above describes the design; AdvanceGpuTimers() did not implement
+        // it. It read ring[frame % kGpuRingSize] -- the slot THIS frame had just written -- giving
+        // the GPU zero frames to retire the queries, and then reset the slot regardless. Passes
+        // submitted late in the frame therefore almost never had results ready, were discarded
+        // rather than retried, and their GpuMs stayed at its initial 0.00 forever. That is why
+        // `Particles`, the last GPU-timed pass, reported 0.00 ms against ~2,970 draw calls while
+        // earlier passes read plausibly. Now reads ring[(frame + 1) % kGpuRingSize] -- the slot
+        // about to be overwritten next frame, holding results submitted two frames ago.
         inline constexpr int kGpuRingSize = 3;
 
         // GLP-24: a pass can be entered more than once per frame. Objects is entered twice
@@ -388,7 +397,11 @@ namespace FrameProfiler
     {
         if (detail::GpuQueriesGenerated())
         {
-            detail::GpuQuerySlot& slot = detail::GpuRing(detail::GpuFrameIndex() % detail::kGpuRingSize);
+            // GLP-29: read the OLDEST slot -- the one next frame is about to overwrite -- not the
+            // one this frame just wrote. Its queries were submitted two frames ago, so the GPU has
+            // long since retired them and the results are actually available. Reading the current
+            // slot gave the GPU no time at all, which stranded every late-submitted pass at 0.00.
+            detail::GpuQuerySlot& slot = detail::GpuRing((detail::GpuFrameIndex() + 1) % detail::kGpuRingSize);
             for (int i = 0; i < kGpuTimedPassCount; i++)
             {
                 const int pairs = slot.count[i];
@@ -414,9 +427,11 @@ namespace FrameProfiler
                     // Not ready: leave the previous reading on screen one more frame, as before.
                 }
 
-                // Reset unconditionally, including the not-ready case. A slot must start every
-                // frame at zero pairs -- otherwise a frame whose results weren't ready would leave
-                // stale pairs behind to be summed together with the next frame's.
+                // Reset unconditionally, including the not-ready case. This slot is the one the
+                // NEXT frame writes into, so it must start at zero pairs; leaving stale pairs here
+                // would get them summed with that frame's. Discarding an unready reading is safe
+                // now that the slot is two frames old -- if it still isn't ready the GPU is more
+                // than two frames behind, and one stale row on the overlay is the right outcome.
                 slot.count[i]     = 0;
                 slot.open[i]      = false;
                 slot.truncated[i] = false;
