@@ -1792,6 +1792,14 @@ struct TerrainDrawBucket
     GLuint texOverlay = 0;
     bool baseIsWater = false;
     bool overlayIsWater = false;
+    // Per-texture UV scale (upstream c6603879, merged 2026-08-12). Carried on the bucket rather
+    // than applied per tile because GLP-16 moved the draw out of the tile walk. This is safe
+    // without widening the bucket key: the scale is derived purely from the two bound textures'
+    // dimensions, so it is a pure function of (texBase, texOverlay) -- every tile landing in a
+    // given bucket necessarily computes the identical value. If a future change ever derives it
+    // from anything tile-local, it must become part of the key instead.
+    float baseUVScale[2] = { 0.01f, 0.01f };
+    float overlayUVScale[2] = { 0.01f, 0.01f };
     std::vector<GLuint> indices; // 2 triangles (6 indices) appended per gathered tile
 };
 
@@ -1900,6 +1908,11 @@ static void FlushTerrainBuckets()
 
         TerrainShader::Instance().SetBaseTexture(b.texBase);
         TerrainShader::Instance().SetOverlayTexture(b.texOverlay);
+        // Upstream c6603879's per-texture UV scale, applied once per bucket instead of once per
+        // tile -- see the gather site and TerrainDrawBucket for why bucket granularity is exact
+        // here rather than an approximation. Dirty-checked inside SetUVScale().
+        TerrainShader::Instance().SetUVScale(
+            b.baseUVScale[0], b.baseUVScale[1], b.overlayUVScale[0], b.overlayUVScale[1]);
         TerrainShader::Instance().SetWaterFlags(b.baseIsWater, b.overlayIsWater);
         TerrainShader::Instance().SyncAlphaRef();
 
@@ -1996,6 +2009,19 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
                 bucket.indices.push_back((GLuint)TerrainIndex1);
                 bucket.indices.push_back((GLuint)TerrainIndex3);
                 bucket.indices.push_back((GLuint)TerrainIndex4);
+
+                // Upstream c6603879, adapted to GLP-16's bucketing. Matches legacy FaceTexture()'s
+                // `Width = 64.f/b->Width` exactly -- terrain tile bitmaps in this tree are not all
+                // the same resolution (64/128/256px observed), so the UV scale must be derived
+                // per-texture, not from a single shared constant. Pre-divided by TERRAIN_SCALE since
+                // a_Pos in the vertex shader is world-space, not grid-index. Recorded on the bucket
+                // and applied once per draw in FlushTerrainBuckets(); upstream applied it per tile,
+                // which this pass no longer has a draw for. Idempotent across tiles sharing a bucket
+                // -- see the note on TerrainDrawBucket for why that holds.
+                bucket.baseUVScale[0]    = (64.f / b1->Width)  / TERRAIN_SCALE;
+                bucket.baseUVScale[1]    = (64.f / b1->Height) / TERRAIN_SCALE;
+                bucket.overlayUVScale[0] = (64.f / b2->Width)  / TERRAIN_SCALE;
+                bucket.overlayUVScale[1] = (64.f / b2->Height) / TERRAIN_SCALE;
             }
             return;
         }

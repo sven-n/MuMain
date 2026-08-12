@@ -16,6 +16,11 @@ public:
     void SetBaseTexture(GLuint texID);
     void SetOverlayTexture(GLuint texID);
 
+    // Per-tile UV scale, mirroring legacy FaceTexture()'s `Width = 64.f/b->Width` (already divided
+    // by TERRAIN_SCALE by the caller so it's ready to multiply world-space a_Pos.xy directly).
+    // Base and overlay get independent scales because tex1/tex2 can be differently-sized bitmaps.
+    void SetUVScale(float baseScaleX, float baseScaleY, float overlayScaleX, float overlayScaleY);
+
     // TASK-30 phase 2: water UV scroll. `waterMove` set once per frame (matches the CPU `WaterMove`
     // global, itself recomputed once per frame in RenderTerrain()); the base/overlay water flags are
     // set once per tile draw, alongside SetBaseTexture()/SetOverlayTexture().
@@ -51,6 +56,8 @@ private:
     GLint m_LocBaseIsWater = -1;
     GLint m_LocOverlayIsWater = -1;
     GLint m_LocAlphaRef = -1;
+    GLint m_LocBaseUVScale = -1;
+    GLint m_LocOverlayUVScale = -1;
 
     // Sentinel guaranteed to differ from any real g_AlphaRef value, forcing the first
     // SyncAlphaRef() call after Create() to upload u_AlphaRef.
@@ -62,4 +69,9 @@ private:
     // request first, matching PassthroughShader's tri-state setters (DXP-26).
     int m_LastBaseIsWater    = -1;
     int m_LastOverlayIsWater = -1;
+
+    // Dirty-check cache for SetUVScale, same reasoning as m_LastAlphaRef -- avoid a redundant
+    // glUniform2f pair on the (common) case of consecutive tiles sharing both textures.
+    float m_LastBaseUVScale[2] = { -12345.0f, -12345.0f };
+    float m_LastOverlayUVScale[2] = { -12345.0f, -12345.0f };
 };
