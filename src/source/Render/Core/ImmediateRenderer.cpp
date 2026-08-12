@@ -23,7 +23,12 @@ static RHI::BufferHandle g_VBO;
 static IRVertex g_CurrentVertex = { 0.f, 0.f, 0.f,  0.f, 0.f,  1.f, 1.f, 1.f, 1.f };
 static GLenum   g_CurrentMode   = 0;
 static std::vector<IRVertex> g_VertexBuffer;
-static std::vector<IRVertex> g_QuadTemp;
+
+// GLP-29 2a: a fixed array, not a std::vector. This is a 4-element scratch buffer that never grows,
+// yet it was doing a push_back per vertex and a clear per quad -- ~11,900 vector operations a frame
+// at 2,975 particles, each carrying a capacity check (and, in Debug, checked-iterator bookkeeping).
+static IRVertex g_QuadTemp[4];
+static int      g_QuadCount = 0;
 
 // GL_TRIANGLE_FAN state (DXP-09 9.2): D3D11 has no fan topology, so fans are decomposed to a
 // triangle list here exactly like GL_QUADS is above. Fan vertex i>=2 emits [first, prev, current].
@@ -33,10 +38,11 @@ static int      g_FanCount = 0;
 
 // ---- GLP-19: cross-Begin/End batching ----
 // DXP-26 removed the redundant GL calls *around* each per-quad draw but left the draw count alone:
-// one AppendBuffer + one RHI::Draw per Begin/End pair. On Intel HD 530 that was 2,901 draws and
-// 4.73 ms CPU in a single skill-cast frame, against a frame where TexBind moved by 22 and ProgBind
-// by 3 -- i.e. the state was already near-constant across the burst and only the draw boundary was
-// artificial.
+// one AppendBuffer + one RHI::Draw per Begin/End pair. On the dev box that was 2,901 draws in a
+// single skill-cast frame, against a frame where TexBind moved by 22 and ProgBind by 3 -- i.e. the
+// state was already near-constant across the burst and only the draw boundary was artificial.
+// (Measured on RTX 5070 Ti, not Intel HD 530 -- an earlier revision of this comment mis-attributed
+// it. Target-hardware verification for the whole GLP series is still outstanding.)
 //
 // So: End() defers, and Begin() merges into the pending batch when nothing that affects the pixels
 // has changed. Compatibility is decided by reading the CURRENT cached render state, not by
@@ -106,6 +112,12 @@ void Create()
     const size_t initialCapacity = 65536 * sizeof(IRVertex);
     g_VBO = RHI::CreateVertexBuffer(nullptr, initialCapacity, RHI::BufferUsage::Dynamic);
 
+    // GLP-29 2b: reserve the CPU-side accumulation buffer once, to the same high-water mark as the
+    // GPU ring above. Flush() clears it every batch, so without this it regrows from nothing and
+    // reallocates repeatedly through a busy frame -- 2,975 particles is ~17,850 vertices.
+    // clear() keeps capacity, so this reserve survives for the process lifetime.
+    g_VertexBuffer.reserve(65536);
+
     g_ErrorReport.Write(L"[ImmediateRenderer] Created RHI streaming vertex buffer, Initial Capacity %zu bytes\r\n", initialCapacity);
 }
 
@@ -146,7 +158,7 @@ void Begin(GLenum mode)
     }
 
     g_CurrentMode = mode;
-    g_QuadTemp.clear();
+    g_QuadCount = 0; // GLP-29 2a
     g_FanCount = 0;
     // g_CurrentVertex is deliberately NOT reset, unchanged from before: RenderJoints() sets colors
     // BEFORE Begin() and relies on them surviving (ZzzEffectJoint.cpp:7025-7061 -> :7066).
@@ -198,8 +210,8 @@ void Vertex3f(float x, float y, float z)
     g_CurrentVertex.z = z;
 
     if (g_CurrentMode == GL_QUADS) {
-        g_QuadTemp.push_back(g_CurrentVertex);
-        if (g_QuadTemp.size() == 4) {
+        g_QuadTemp[g_QuadCount++] = g_CurrentVertex;
+        if (g_QuadCount == 4) {
             // Decompose quad to 2 triangles: 0,1,2 and 0,2,3
             g_VertexBuffer.push_back(g_QuadTemp[0]);
             g_VertexBuffer.push_back(g_QuadTemp[1]);
@@ -209,7 +221,7 @@ void Vertex3f(float x, float y, float z)
             g_VertexBuffer.push_back(g_QuadTemp[2]);
             g_VertexBuffer.push_back(g_QuadTemp[3]);
 
-            g_QuadTemp.clear();
+            g_QuadCount = 0; // GLP-29 2a -- index reset, was g_QuadTemp.clear()
         }
     } else if (g_CurrentMode == GL_TRIANGLE_FAN) {
         // Decompose fan to a triangle list: vertex i>=2 emits [first, prev, current] -- the
