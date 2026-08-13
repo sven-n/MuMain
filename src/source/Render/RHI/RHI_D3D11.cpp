@@ -24,6 +24,7 @@
 #include "stdafx.h"
 #include "Render/RHI/RHI.h"
 #include "Render/Core/RenderConfig.h"
+#include "Render/Core/ImmediateRenderer.h" // GLP-19 -- IR::Flush() before texture content changes
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <cassert>
 
@@ -933,6 +934,12 @@ void SetTopologyIfChanged(D3D11_PRIMITIVE_TOPOLOGY topo)
 
 void Draw(RHI::Topology topology, uint32_t vertexCount, uint32_t firstVertex)
 {
+    // GLP-19 (ported from RHI_GL.cpp's Draw() -- see that comment for the full rationale): a
+    // deferred IR batch may never survive another draw. Re-entrancy is safe -- IR::Flush()
+    // clears its pending flag before calling back into RHI::Draw(), so the inner call here is
+    // a no-op.
+    IR::Flush();
+
     if (!g_Context) return;
     D3D11_PRIMITIVE_TOPOLOGY topo;
     if (!ResolveTopology(topology, topo)) return;
@@ -942,6 +949,8 @@ void Draw(RHI::Topology topology, uint32_t vertexCount, uint32_t firstVertex)
 
 void DrawIndexed(RHI::Topology topology, uint32_t indexCount, uint32_t firstIndex)
 {
+    IR::Flush(); // GLP-19 -- see Draw()
+
     if (!g_Context) return;
     D3D11_PRIMITIVE_TOPOLOGY topo;
     if (!ResolveTopology(topology, topo)) return;
@@ -1017,6 +1026,14 @@ void UpdateTexture(RHI::TextureHandle handle, int x, int y, int w, int h, const 
 {
     auto it = g_Textures.find(handle.id);
     if (it == g_Textures.end() || !g_Context || !pixelsRGBA || w <= 0 || h <= 0) return;
+
+    // GLP-19 (ported from RHI_GL.cpp's UpdateTexture -- see that comment for the full
+    // rationale): texture CONTENT changing is batch state just as much as texture identity,
+    // and BindState's hook cannot see it. A pending IR batch still references the old
+    // content, so it must be drawn first; otherwise every merged quad samples whatever was
+    // uploaded last -- which is exactly the "each line displays a later line's glyphs" bug
+    // this fixes.
+    IR::Flush();
 
     D3D11_BOX box = {};
     box.left   = static_cast<UINT>(x);

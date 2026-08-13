@@ -400,13 +400,21 @@ void DisableAlphaBlend()
     // to skip entirely under D3D11, not just deferred.
     if (g_RenderBackend == RenderBackend::D3D11)
     {
-        AlphaBlendType = 0;
-        CullFaceEnable = true;
-        DepthMaskEnable = true;
-        AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        TextureEnable = true;
-        RHI::SetBlendMode(RHI::BlendMode::Opaque);
+        // GLP-19: RHI::SetBlendMode is an immediate GPU state-object bind, not a deferred
+        // write -- a pending IR batch queued under the OLD blend mode must be drawn before
+        // this changes, or it gets submitted under the NEW mode instead (dirty-checked, same
+        // as GL below, so same-mode consecutive particles -- the common case -- don't flush).
+        if (AlphaBlendType != 0)
+        {
+            IR::Flush();
+            AlphaBlendType = 0;
+            CullFaceEnable = true;
+            DepthMaskEnable = true;
+            AlphaTestEnable = false;
+            g_AlphaRef = -1.0f;
+            TextureEnable = true;
+            RHI::SetBlendMode(RHI::BlendMode::Opaque);
+        }
         return;
     }
 
@@ -447,13 +455,18 @@ void EnableAlphaTest(bool DepthMask)
     // one of those call sites under D3D11.
     if (g_RenderBackend == RenderBackend::D3D11)
     {
-        AlphaBlendType = 2;
-        CullFaceEnable = false;
-        DepthMaskEnable = true;
-        AlphaTestEnable = true;
-        g_AlphaRef = g_AlphaFuncRef;
-        TextureEnable = true;
-        RHI::SetBlendMode(RHI::BlendMode::AlphaTest);
+        // GLP-19 -- see DisableAlphaBlend's D3D11 branch for why this must flush first.
+        if (AlphaBlendType != 2)
+        {
+            IR::Flush();
+            AlphaBlendType = 2;
+            CullFaceEnable = false;
+            DepthMaskEnable = true;
+            AlphaTestEnable = true;
+            g_AlphaRef = g_AlphaFuncRef;
+            TextureEnable = true;
+            RHI::SetBlendMode(RHI::BlendMode::AlphaTest);
+        }
         return;
     }
 
@@ -489,13 +502,18 @@ void EnableAlphaBlend()
     // DXP-15 increment 2 D3D11 branch -- see DisableAlphaBlend's comment for the general pattern.
     if (g_RenderBackend == RenderBackend::D3D11)
     {
-        AlphaBlendType = 3;
-        CullFaceEnable = false;
-        DepthMaskEnable = false;
-        AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        TextureEnable = true;
-        RHI::SetBlendMode(RHI::BlendMode::Additive);
+        // GLP-19 -- see DisableAlphaBlend's D3D11 branch for why this must flush first.
+        if (AlphaBlendType != 3)
+        {
+            IR::Flush();
+            AlphaBlendType = 3;
+            CullFaceEnable = false;
+            DepthMaskEnable = false;
+            AlphaTestEnable = false;
+            g_AlphaRef = -1.0f;
+            TextureEnable = true;
+            RHI::SetBlendMode(RHI::BlendMode::Additive);
+        }
         return;
     }
 
@@ -527,6 +545,27 @@ void EnableAlphaBlend()
 
 void EnableAlphaBlendMinus()
 {
+    // DXP-15 increment 2 D3D11 branch -- see DisableAlphaBlend's comment for the general pattern.
+    // This mode was missing its D3D11 branch entirely (fell through to raw, GL-context-less
+    // glBlendFunc calls that did nothing) -- one root cause of the black-rectangle-on-particles
+    // artifact under D3D11: this is subtractive blend (ZERO, ONE_MINUS_SRC_COLOR), named in
+    // GLP-19's own investigation as "exactly the black-polygon artifact" when a batch leaks into
+    // it. GLP-19 fixed the GL-side IR::Flush ordering bug with the same symptom; this branch
+    // needs the identical flush -- see DisableAlphaBlend's D3D11 branch comment.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        if (AlphaBlendType == 4) return;
+        IR::Flush();
+        AlphaBlendType = 4;
+        CullFaceEnable = false;
+        DepthMaskEnable = false;
+        AlphaTestEnable = false;
+        g_AlphaRef = -1.0f;
+        TextureEnable = true;
+        RHI::SetBlendMode(RHI::BlendMode::Minus);
+        return;
+    }
+
     if (AlphaBlendType != 4)
     {
         IR::Flush(); // GLP-19 -- subtractive blend (ZERO, ONE_MINUS_SRC_COLOR); a batch leaking
@@ -556,6 +595,23 @@ void EnableAlphaBlendMinus()
 
 void EnableAlphaBlend2()
 {
+    // DXP-15 increment 2 D3D11 branch -- see DisableAlphaBlend's comment for the general pattern
+    // and EnableAlphaBlendMinus's comment for why this branch was missing entirely, plus its
+    // GLP-19 comment for why the flush below is required.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        if (AlphaBlendType == 5) return;
+        IR::Flush();
+        AlphaBlendType = 5;
+        CullFaceEnable = false;
+        DepthMaskEnable = false;
+        AlphaTestEnable = false;
+        g_AlphaRef = -1.0f;
+        TextureEnable = true;
+        RHI::SetBlendMode(RHI::BlendMode::Blend2);
+        return;
+    }
+
     if (AlphaBlendType != 5)
     {
         IR::Flush(); // GLP-19 -- see AlphaBlendType 0
@@ -587,13 +643,18 @@ void EnableAlphaBlend3()
     // DXP-15 increment 2 D3D11 branch -- see DisableAlphaBlend's comment for the general pattern.
     if (g_RenderBackend == RenderBackend::D3D11)
     {
-        AlphaBlendType = 6;
-        CullFaceEnable = false;
-        DepthMaskEnable = false;
-        AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        TextureEnable = true;
-        RHI::SetBlendMode(RHI::BlendMode::Blend3);
+        // GLP-19 -- see DisableAlphaBlend's D3D11 branch for why this must flush first.
+        if (AlphaBlendType != 6)
+        {
+            IR::Flush();
+            AlphaBlendType = 6;
+            CullFaceEnable = false;
+            DepthMaskEnable = false;
+            AlphaTestEnable = false;
+            g_AlphaRef = -1.0f;
+            TextureEnable = true;
+            RHI::SetBlendMode(RHI::BlendMode::Blend3);
+        }
         return;
     }
 
@@ -625,6 +686,23 @@ void EnableAlphaBlend3()
 
 void EnableAlphaBlend4()
 {
+    // DXP-15 increment 2 D3D11 branch -- see DisableAlphaBlend's comment for the general pattern
+    // and EnableAlphaBlendMinus's comment for why this branch was missing entirely, plus its
+    // GLP-19 comment for why the flush below is required.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        if (AlphaBlendType == 7) return;
+        IR::Flush();
+        AlphaBlendType = 7;
+        CullFaceEnable = false;
+        DepthMaskEnable = false;
+        AlphaTestEnable = false;
+        g_AlphaRef = -1.0f;
+        TextureEnable = true;
+        RHI::SetBlendMode(RHI::BlendMode::Blend4);
+        return;
+    }
+
     if (AlphaBlendType != 7)
     {
         IR::Flush(); // GLP-19 -- see AlphaBlendType 0
@@ -653,6 +731,23 @@ void EnableAlphaBlend4()
 
 void EnableLightMap()
 {
+    // DXP-15 increment 2 D3D11 branch -- see DisableAlphaBlend's comment for the general pattern
+    // and EnableAlphaBlendMinus's comment for why this branch was missing entirely, plus its
+    // GLP-19 comment for why the flush below is required.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        if (AlphaBlendType == 1) return;
+        IR::Flush();
+        AlphaBlendType = 1;
+        CullFaceEnable = true;
+        DepthMaskEnable = true;
+        AlphaTestEnable = false;
+        g_AlphaRef = -1.0f;
+        TextureEnable = true;
+        RHI::SetBlendMode(RHI::BlendMode::LightMap);
+        return;
+    }
+
     if (AlphaBlendType != 1)
     {
         IR::Flush(); // GLP-19 -- see AlphaBlendType 0

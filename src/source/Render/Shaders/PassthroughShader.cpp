@@ -556,6 +556,7 @@ void PassthroughShader::BindD3D11()
     // Mirrors BindGL()'s per-draw alpha-ref dirty check (IR::Begin() calls Bind() every draw).
     if (g_AlphaRef != m_LastAlphaRef)
     {
+        IR::Flush(); // GLP-19 -- see BindGL()'s matching flush
         m_LastAlphaRef = g_AlphaRef;
         UploadD3D11Flags();
     }
@@ -611,8 +612,15 @@ void PassthroughShader::SetUseTexture(bool use)
     const int v = use ? 1 : 0;
     if (g_RenderBackend == RenderBackend::D3D11)
     {
-        m_D3DUseTexture = v;
-        UploadD3D11Flags();
+        // Dirty-checked against the same m_LastUseTexture sentinel GL uses (already reset to
+        // -1 by CreateD3D11 for exactly this) -- an unconditional upload+flush here would defeat
+        // GLP-19's batching on every single RenderBitmap call (SetUseTexture(true) every draw).
+        if (v != m_LastUseTexture) {
+            IR::Flush(); // GLP-19 -- see the GL branch below
+            m_D3DUseTexture = v;
+            m_LastUseTexture = v;
+            UploadD3D11Flags();
+        }
         return;
     }
     if (m_LocUseTexture != -1 && fn_glUniform1i != nullptr && v != m_LastUseTexture) {
@@ -632,8 +640,13 @@ void PassthroughShader::SetUseFog(bool use)
     const int v = use ? 1 : 0;
     if (g_RenderBackend == RenderBackend::D3D11)
     {
-        m_D3DUseFog = v;
-        UploadD3D11Flags();
+        // See SetUseTexture -- same dirty-check-then-flush reasoning.
+        if (v != m_LastUseFog) {
+            IR::Flush(); // GLP-19 -- see SetUseTexture
+            m_D3DUseFog = v;
+            m_LastUseFog = v;
+            UploadD3D11Flags();
+        }
         return;
     }
     if (m_LocUseFog != -1 && fn_glUniform1i != nullptr && v != m_LastUseFog) {
