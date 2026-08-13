@@ -26,6 +26,79 @@ float g_CurrentColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 // See RenderConfig.h -- matches EnableVSync()'s unconditional call at boot.
 bool g_VSyncEnabled = true;
 
+namespace
+{
+    // The private-profile API cannot distinguish "key absent" from "key present but empty"
+    // through a single call -- both return the supplied default. Probing with a sentinel that
+    // can never be a real config value is the standard way to tell them apart, and the
+    // migration below needs that distinction: a legacy key the user never set must not be
+    // copied forward as an explicit value.
+    bool ProfileKeyExists(const wchar_t* section, const wchar_t* key, const wchar_t* path)
+    {
+        wchar_t probe[8] = {};
+        GetPrivateProfileStringW(section, key, L"\x01", probe, _countof(probe), path);
+        return probe[0] != L'\x01';
+    }
+
+    // Copies one key from the legacy [Render] section into its new per-backend home, but only
+    // if it was actually present -- an absent key stays absent so it keeps picking up its
+    // compiled-in default rather than being frozen at whatever that default happens to be today.
+    void CarryLegacyKey(const wchar_t* key, const wchar_t* newSection, const wchar_t* path)
+    {
+        if (!ProfileKeyExists(CfgSections::CfgSectionRenderLegacy, key, path)) return;
+        wchar_t value[64] = {};
+        GetPrivateProfileStringW(CfgSections::CfgSectionRenderLegacy, key, L"", value, _countof(value), path);
+        WritePrivateProfileStringW(newSection, key, value, path);
+    }
+
+    // One-time migration of the flat [Render] section to [graphics] + [graphics.<renderer>].
+    // Runs before any read below, so the rest of InitRenderConfig() only ever sees the new
+    // schema and needs no fallback path of its own. A no-op once [Render] is gone, which is
+    // the case from the second launch onward.
+    void MigrateLegacyRenderSection(const wchar_t* path)
+    {
+        using namespace CfgSections;
+        using namespace CfgKeys;
+
+        // Presence of the whole legacy section is keyed off Backend specifically: it is the
+        // one key the old schema always wrote, and the only one whose meaning moved rather
+        // than merely relocating.
+        if (!ProfileKeyExists(CfgSectionRenderLegacy, CfgKeyBackendLegacy, path)) return;
+
+        // Match the legacy parse exactly ("D3D11" case-insensitively, everything else GL) so a
+        // migrated file selects the same backend it selected before the migration.
+        wchar_t legacyBackend[16] = {};
+        GetPrivateProfileStringW(CfgSectionRenderLegacy, CfgKeyBackendLegacy, L"GL",
+                                 legacyBackend, _countof(legacyBackend), path);
+        const bool wasD3D11 = (_wcsicmp(legacyBackend, L"D3D11") == 0);
+        WritePrivateProfileStringW(CfgSectionGraphics, CfgKeyRenderer,
+                                   wasD3D11 ? CfgRendererValues::DirectX : CfgRendererValues::OpenGL, path);
+
+        CarryLegacyKey(CfgKeyCoreProfile,         CfgSectionGraphicsOpenGL,  path);
+        CarryLegacyKey(CfgKeyMaxGLVersion,        CfgSectionGraphicsOpenGL,  path);
+        CarryLegacyKey(CfgKeyD3D11DebugLayer,     CfgSectionGraphicsDirectX, path);
+        CarryLegacyKey(CfgKeyClothComputeSelfTest, CfgSectionGraphicsDirectX, path);
+        CarryLegacyKey(CfgKeyGpuCloth,            CfgSectionGraphicsDirectX, path);
+
+        // Null key name deletes the whole section -- same contract WinIni.cpp's portable shim
+        // implements, and what GameConfig::RemoveObsoleteSection relies on.
+        WritePrivateProfileStringW(CfgSectionRenderLegacy, nullptr, nullptr, path);
+    }
+
+    RenderBackend ParseRenderer(const wchar_t* value)
+    {
+        if (_wcsicmp(value, CfgRendererValues::DirectX)      == 0 ||
+            _wcsicmp(value, CfgRendererValues::DirectXAltD3D) == 0 ||
+            _wcsicmp(value, CfgRendererValues::DirectXAltDX)  == 0)
+        {
+            return RenderBackend::D3D11;
+        }
+        // Includes the explicit OpenGL spellings and every unrecognized value -- see
+        // CfgDefaultRenderer's comment for why the fallback direction matters.
+        return RenderBackend::GL;
+    }
+}
+
 void InitRenderConfig()
 {
     wchar_t configPath[MAX_PATH];
@@ -45,32 +118,46 @@ void InitRenderConfig()
 
     wcscat_s(configPath, MAX_PATH, L"config.ini");
 
-    int coreProfile = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyCoreProfile, CfgDefaults::CfgDefaultCoreProfile ? 1 : 0, configPath);
+    MigrateLegacyRenderSection(configPath);
+
+    // ---- [graphics] ----
+    wchar_t renderer[16] = {};
+    GetPrivateProfileStringW(CfgSections::CfgSectionGraphics, CfgKeys::CfgKeyRenderer,
+        CfgDefaults::CfgDefaultRenderer, renderer, _countof(renderer), configPath);
+    g_RenderBackend = ParseRenderer(renderer);
+
+    // ---- [graphics.opengl] ----
+    // Both backends' settings are read unconditionally regardless of which renderer won above.
+    // The inactive set simply goes unconsulted, and g_CoreProfile in particular is still read
+    // by backend-shared code paths (the `if (!g_CoreProfile)` FFP guards in ZzzOpenglUtil.cpp),
+    // so it must hold its configured value even under DirectX.
+    const int coreProfile = GetPrivateProfileIntW(CfgSections::CfgSectionGraphicsOpenGL, CfgKeys::CfgKeyCoreProfile,
+        CfgDefaults::CfgDefaultCoreProfile ? 1 : 0, configPath);
     g_CoreProfile = (coreProfile != 0);
-
-    wchar_t backendBuf[16];
-    GetPrivateProfileStringW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyBackend, CfgDefaults::CfgDefaultBackend, backendBuf, _countof(backendBuf), configPath);
-    g_RenderBackend = (_wcsicmp(backendBuf, L"D3D11") == 0) ? RenderBackend::D3D11 : RenderBackend::GL;
-
-    const int d3d11DebugLayer = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyD3D11DebugLayer, CfgDefaults::CfgDefaultD3D11DebugLayer ? 1 : 0, configPath);
-    g_D3D11DebugLayerEnabled = (d3d11DebugLayer != 0);
-
-    const int clothComputeSelfTest = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyClothComputeSelfTest, CfgDefaults::CfgDefaultClothComputeSelfTest ? 1 : 0, configPath);
-    g_ClothComputeSelfTestEnabled = (clothComputeSelfTest != 0);
-
-    const int gpuCloth = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyGpuCloth, CfgDefaults::CfgDefaultGpuCloth ? 1 : 0, configPath);
-    g_GpuClothEnabled = (gpuCloth != 0);
 
     // GLP-08: "major.minor" (e.g. "4.3"), or empty/unparseable = no cap.
     wchar_t maxGLVersion[16] = {};
-    GetPrivateProfileStringW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyMaxGLVersion,
-        CfgDefaults::CfgDefaultMaxGLVersion, maxGLVersion, (DWORD)(sizeof(maxGLVersion) / sizeof(maxGLVersion[0])), configPath);
+    GetPrivateProfileStringW(CfgSections::CfgSectionGraphicsOpenGL, CfgKeys::CfgKeyMaxGLVersion,
+        CfgDefaults::CfgDefaultMaxGLVersion, maxGLVersion, _countof(maxGLVersion), configPath);
     int maxMajor = 0, maxMinor = 0;
     if (swscanf(maxGLVersion, L"%d.%d", &maxMajor, &maxMinor) == 2 && maxMajor > 0)
     {
         g_MaxGLVersionMajor = maxMajor;
         g_MaxGLVersionMinor = maxMinor;
     }
+
+    // ---- [graphics.directx] ----
+    const int d3d11DebugLayer = GetPrivateProfileIntW(CfgSections::CfgSectionGraphicsDirectX, CfgKeys::CfgKeyD3D11DebugLayer,
+        CfgDefaults::CfgDefaultD3D11DebugLayer ? 1 : 0, configPath);
+    g_D3D11DebugLayerEnabled = (d3d11DebugLayer != 0);
+
+    const int clothComputeSelfTest = GetPrivateProfileIntW(CfgSections::CfgSectionGraphicsDirectX, CfgKeys::CfgKeyClothComputeSelfTest,
+        CfgDefaults::CfgDefaultClothComputeSelfTest ? 1 : 0, configPath);
+    g_ClothComputeSelfTestEnabled = (clothComputeSelfTest != 0);
+
+    const int gpuCloth = GetPrivateProfileIntW(CfgSections::CfgSectionGraphicsDirectX, CfgKeys::CfgKeyGpuCloth,
+        CfgDefaults::CfgDefaultGpuCloth ? 1 : 0, configPath);
+    g_GpuClothEnabled = (gpuCloth != 0);
 }
 
 void BuildPerspectiveProjection(float f, float aspect, float zNear, float zFar, float out[16])

@@ -85,8 +85,12 @@ void GameConfig::Load()
     RemoveObsoleteKey(CfgSectionAudio,    L"VolumeLevel");    // legacy single-volume key
     RemoveObsoleteKey(CfgSectionLogin,    L"Version");        // launcher metadata, never read by client
     RemoveObsoleteKey(CfgSectionLogin,    L"TestVersion");    // launcher metadata, never read by client
-    RemoveObsoleteSection(CfgSectionGraphics);                // empty after RenderTextType + ColorDepth removal
     RemoveObsoleteSection(L"PARTITION");                      // launcher metadata, never read by client
+    // NOTE: [graphics] must NOT be removed here. It used to be dead (emptied by the
+    // RenderTextType + ColorDepth removals above) and was deleted outright, but it is now the
+    // live renderer-selection section owned by InitRenderConfig(), which runs immediately after
+    // this function. Deleting it here would wipe the user's renderer choice on every launch.
+    // The two RemoveObsoleteKey calls above stay -- those keys are still dead.
 }
 
 void GameConfig::Save()

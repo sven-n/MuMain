@@ -4,14 +4,15 @@
 
 #include "stdafx.h"
 #ifdef _WIN32
-#include <ddraw.h>
-#include <dinput.h>
+// <ddraw.h>/<dinput.h> were only ever needed by the legacy GetDXVersion() runtime probe,
+// removed along with it -- nothing else in this file touches DirectDraw or DirectInput.
 #include <dmusicc.h>
 #include <eh.h>
 #include <imagehlp.h>
 #endif
 #include "ErrorReport.h"
-#include "Render/RHI/RHI.h"  // GLP-08: RHI::GetCaps() for WriteOpenGLInfo()'s boot log
+#include "Render/RHI/RHI.h"           // GLP-08: RHI::GetCaps() for WriteOpenGLInfo()'s boot log
+#include "Render/Core/RenderConfig.h" // g_RenderBackend / g_CoreProfile for WriteRendererInfo()
 
 // Max UTF-8 bytes for a single log line. Source buffer is wchar_t[1024]; UTF-8 needs
 // up to 3 bytes per BMP character (and 4 bytes per surrogate pair), so a 1024-wchar
@@ -213,8 +214,24 @@ void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
     Write(L"OS \t\t\t: %ls\r\n", si->m_lpszOS);
     Write(L"CPU \t\t\t: %ls\r\n", si->m_lpszCPU);
     Write(L"RAM \t\t\t: %dMB\r\n", 1 + (si->m_iMemorySize / 1024 / 1024));
+}
+
+// Logged separately from WriteSystemInfo() rather than folded into it: the renderer is not
+// known until InitRenderConfig() has parsed config.ini, which happens AFTER the system-info
+// block is written. Calling this before that point would always report the compiled-in
+// default (OpenGL) regardless of what the user actually selected.
+void CErrorReport::WriteRendererInfo(void)
+{
     AddSeparator();
-    Write(L"Direct-X \t\t: %ls\r\n", si->m_lpszDxVersion);
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        Write(L"Renderer \t\t: DirectX 11 (RHI_D3D11)\r\n");
+    }
+    else
+    {
+        Write(L"Renderer \t\t: OpenGL (%ls Profile) (RHI_GL)\r\n",
+              g_CoreProfile ? L"Core" : L"Compatibility");
+    }
 }
 
 void CErrorReport::WriteOpenGLInfo(void)
@@ -504,254 +521,6 @@ void GetCPUInfo(ER_SystemInfo* si)
     wcscpy(si->m_lpszCPU, L"Unknown CPU");
 }
 
-typedef HRESULT(WINAPI* DIRECTDRAWCREATE)(GUID*, LPDIRECTDRAW*, IUnknown*);
-typedef HRESULT(WINAPI* DIRECTDRAWCREATEEX)(GUID*, VOID**, REFIID, IUnknown*);
-typedef HRESULT(WINAPI* DIRECTINPUTCREATE)(HINSTANCE, DWORD, LPDIRECTINPUT*,
-    IUnknown*);
-
-DWORD GetDXVersion()
-{
-    DIRECTDRAWCREATE     DirectDrawCreate = NULL;
-    DIRECTDRAWCREATEEX   DirectDrawCreateEx = NULL;
-    DIRECTINPUTCREATE    DirectInputCreate = NULL;
-    HINSTANCE            hDDrawDLL = NULL;
-    HINSTANCE            hDInputDLL = NULL;
-    HINSTANCE            hD3D8DLL = NULL;
-    HINSTANCE			 hD3D9DLL = NULL;
-    LPDIRECTDRAW         pDDraw = NULL;
-    LPDIRECTDRAW2        pDDraw2 = NULL;
-    LPDIRECTDRAWSURFACE  pSurf = NULL;
-    LPDIRECTDRAWSURFACE3 pSurf3 = NULL;
-    LPDIRECTDRAWSURFACE4 pSurf4 = NULL;
-    DWORD                dwDXVersion = 0;
-    HRESULT              hr;
-
-    // First see if DDRAW.DLL even exists.
-    hDDrawDLL = LoadLibrary(L"DDRAW.DLL");
-    if (hDDrawDLL == NULL)
-    {
-        dwDXVersion = 0;
-        return dwDXVersion;
-    }
-
-    // See if we can create the DirectDraw object.
-    DirectDrawCreate = (DIRECTDRAWCREATE)GetProcAddress(hDDrawDLL, "DirectDrawCreate");
-    if (DirectDrawCreate == NULL)
-    {
-        dwDXVersion = 0;
-        FreeLibrary(hDDrawDLL);
-
-        __TraceF(TEXT("===> Couldn't LoadLibrary DDraw\r\n"));
-        return dwDXVersion;
-    }
-
-    hr = DirectDrawCreate(NULL, &pDDraw, NULL);
-    if (FAILED(hr))
-    {
-        dwDXVersion = 0;
-        FreeLibrary(hDDrawDLL);
-        __TraceF(TEXT("===> Couldn't create DDraw\r\n"));
-        return dwDXVersion;
-    }
-
-    // So DirectDraw exists.  We are at least DX1.
-    dwDXVersion = 0x100;
-
-    // Let's see if IID_IDirectDraw2 exists.
-    hr = pDDraw->QueryInterface(IID_IDirectDraw2, (VOID**)&pDDraw2);
-    if (FAILED(hr))
-    {
-        // No IDirectDraw2 exists... must be DX1
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        __TraceF(TEXT("===> Couldn't QI DDraw2\r\n"));
-        return dwDXVersion;
-    }
-
-    // IDirectDraw2 exists. We must be at least DX2
-    pDDraw2->Release();
-    dwDXVersion = 0x200;
-
-    //-------------------------------------------------------------------------
-    // DirectX 3.0 Checks
-    //-------------------------------------------------------------------------
-
-    // DirectInput was added for DX3
-    hDInputDLL = LoadLibrary(L"DINPUT.DLL");
-    if (hDInputDLL == NULL)
-    {
-        // No DInput... must not be DX3
-        __TraceF(TEXT("===> Couldn't LoadLibrary DInput\r\n"));
-        pDDraw->Release();
-        return dwDXVersion;
-    }
-
-    DirectInputCreate = (DIRECTINPUTCREATE)GetProcAddress(hDInputDLL,
-        "DirectInputCreateA");
-    if (DirectInputCreate == NULL)
-    {
-        // No DInput... must be DX2
-        FreeLibrary(hDInputDLL);
-        FreeLibrary(hDDrawDLL);
-        pDDraw->Release();
-        __TraceF(TEXT("===> Couldn't GetProcAddress DInputCreate\r\n"));
-        return dwDXVersion;
-    }
-
-    // DirectInputCreate exists. We are at least DX3
-    dwDXVersion = 0x300;
-    FreeLibrary(hDInputDLL);
-
-    // Can do checks for 3a vs 3b here
-
-    //-------------------------------------------------------------------------
-    // DirectX 5.0 Checks
-    //-------------------------------------------------------------------------
-
-    // We can tell if DX5 is present by checking for the existence of
-    // IDirectDrawSurface3. First, we need a surface to QI off of.
-    DDSURFACEDESC ddsd;
-    ZeroMemory(&ddsd, sizeof(ddsd));
-    ddsd.dwSize = sizeof(ddsd);
-    ddsd.dwFlags = DDSD_CAPS;
-    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-
-    hr = pDDraw->SetCooperativeLevel(NULL, DDSCL_NORMAL);
-    if (FAILED(hr))
-    {
-        // Failure. This means DDraw isn't properly installed.
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        dwDXVersion = 0;
-        __TraceF(TEXT("===> Couldn't Set coop level\r\n"));
-        return dwDXVersion;
-    }
-
-    hr = pDDraw->CreateSurface(&ddsd, &pSurf, NULL);
-    if (FAILED(hr))
-    {
-        // Failure. This means DDraw isn't properly installed.
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        dwDXVersion = 0;
-        __TraceF(TEXT("===> Couldn't CreateSurface\r\n"));
-        return dwDXVersion;
-    }
-
-    // Query for the IDirectDrawSurface3 interface
-    if (FAILED(pSurf->QueryInterface(IID_IDirectDrawSurface3,
-        (VOID**)&pSurf3)))
-    {
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // QI for IDirectDrawSurface3 succeeded. We must be at least DX5
-    dwDXVersion = 0x500;
-
-    //-------------------------------------------------------------------------
-    // DirectX 6.0 Checks
-    //-------------------------------------------------------------------------
-
-    // The IDirectDrawSurface4 interface was introduced with DX 6.0
-    if (FAILED(pSurf->QueryInterface(IID_IDirectDrawSurface4,
-        (VOID**)&pSurf4)))
-    {
-        pDDraw->Release();
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // IDirectDrawSurface4 was create successfully. We must be at least DX6
-    dwDXVersion = 0x600;
-    pSurf->Release();
-    pDDraw->Release();
-
-    //-------------------------------------------------------------------------
-    // DirectX 6.1 Checks
-    //-------------------------------------------------------------------------
-
-    // Check for DMusic, which was introduced with DX6.1
-    LPDIRECTMUSIC pDMusic = NULL;
-    CoInitialize(NULL);
-    hr = CoCreateInstance(CLSID_DirectMusic, NULL, CLSCTX_INPROC_SERVER,
-        IID_IDirectMusic, (VOID**)&pDMusic);
-    if (FAILED(hr))
-    {
-        __TraceF(TEXT("===> Couldn't create CLSID_DirectMusic\r\n"));
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // DirectMusic was created successfully. We must be at least DX6.1
-    dwDXVersion = 0x601;
-    pDMusic->Release();
-    CoUninitialize();
-
-    //-------------------------------------------------------------------------
-    // DirectX 7.0 Checks
-    //-------------------------------------------------------------------------
-
-    // Check for DirectX 7 by creating a DDraw7 object
-    LPDIRECTDRAW7 pDD7;
-    DirectDrawCreateEx = (DIRECTDRAWCREATEEX)GetProcAddress(hDDrawDLL,
-        "DirectDrawCreateEx");
-    if (NULL == DirectDrawCreateEx)
-    {
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    if (FAILED(DirectDrawCreateEx(NULL, (VOID**)&pDD7, IID_IDirectDraw7,
-        NULL)))
-    {
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // DDraw7 was created successfully. We must be at least DX7.0
-    dwDXVersion = 0x700;
-    pDD7->Release();
-
-    //-------------------------------------------------------------------------
-    // DirectX 8.0 Checks
-    //-------------------------------------------------------------------------
-
-    // Simply see if D3D8.dll exists.
-    hD3D8DLL = LoadLibrary(L"D3D8.DLL");
-    if (hD3D8DLL == NULL)
-    {
-        FreeLibrary(hDDrawDLL);
-        return dwDXVersion;
-    }
-
-    // D3D8.dll exists. We must be at least DX8.0
-    dwDXVersion = 0x800;
-
-    //-------------------------------------------------------------------------
-    // DirectX 9.0 Checks
-    //-------------------------------------------------------------------------
-    hD3D9DLL = LoadLibrary(L"D3D9.DLL");
-    if (hD3D9DLL == NULL)
-    {
-        FreeLibrary(hDDrawDLL);
-        FreeLibrary(hD3D8DLL);
-        return dwDXVersion;
-    }
-    dwDXVersion = 0x900;
-
-    //-------------------------------------------------------------------------
-    // End of checking for versions of DirectX
-    //-------------------------------------------------------------------------
-
-    // Close open libraries and return
-    FreeLibrary(hDDrawDLL);
-    FreeLibrary(hD3D8DLL);
-    FreeLibrary(hD3D9DLL);
-
-    return dwDXVersion;
-}
 
 void GetSystemInfo(ER_SystemInfo* si)
 {
@@ -769,9 +538,12 @@ void GetSystemInfo(ER_SystemInfo* si)
     // OS
     GetOSVersion(si);
 
-    // DX
-    DWORD dwDX = GetDXVersion();
-    mu_swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
+    // The DirectX-runtime probe that used to live here was removed: it walked DirectDraw-era
+    // interfaces (DDRAW.DLL -> IDirectDraw7 -> D3D8.DLL -> D3D9.DLL) and so capped at "9.0",
+    // with no knowledge of D3D10/11/12 at all. On any modern Windows it dead-ended at "7.0"
+    // because d3d8.dll no longer ships -- which read as "this client renders with Direct3D 7"
+    // and had nothing to do with the active backend. CErrorReport::WriteRendererInfo() logs
+    // the renderer actually in use instead; see its comment for the ordering constraint.
 }
 
 #else  // ---- non-Windows ----------------------------------------------------
@@ -857,7 +629,8 @@ void GetSystemInfo(ER_SystemInfo* si)
         mu_swprintf(si->m_lpszOS, L"Unknown");
     }
 
-    // No DirectX off Windows; rendering is OpenGL.
-    mu_swprintf(si->m_lpszDxVersion, L"none (OpenGL)");
+    // The renderer is reported by CErrorReport::WriteRendererInfo(), which is backend-aware
+    // and platform-neutral -- off Windows it always resolves to OpenGL, since the D3D11
+    // backend fails loud at Init() there (see RHI_D3D11.cpp's non-Windows #else).
 }
 #endif // _WIN32 (Win32 crash-report system info)

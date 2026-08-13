@@ -3,13 +3,24 @@
 namespace CfgSections
 {
     inline constexpr wchar_t CfgSectionWindow[]     = L"Window";
-    inline constexpr wchar_t CfgSectionGraphics[]   = L"Graphics";
     inline constexpr wchar_t CfgSectionAudio[]      = L"Audio";
     inline constexpr wchar_t CfgSectionUI[]         = L"UI";
     inline constexpr wchar_t CfgSectionLogin[]      = L"LOGIN";
     inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
     inline constexpr wchar_t CfgSectionCamera[] = L"Camera";
-    inline constexpr wchar_t CfgSectionRender[] = L"Render";
+
+    // Renderer selection lives in [graphics]; each backend's own settings live in a
+    // dedicated [graphics.<renderer>] subsection, so a key can never be ambiguous about
+    // which backend it applies to. Section names are matched case-insensitively by the
+    // private-profile API (and by WinIni.cpp's portable shim), and a '.' is an ordinary
+    // character in a section name -- no escaping needed.
+    inline constexpr wchar_t CfgSectionGraphics[]        = L"graphics";
+    inline constexpr wchar_t CfgSectionGraphicsOpenGL[]  = L"graphics.opengl";
+    inline constexpr wchar_t CfgSectionGraphicsDirectX[] = L"graphics.directx";
+
+    // Superseded by the [graphics*] sections above. Read exactly once, by
+    // InitRenderConfig()'s one-time migration, then deleted -- see MigrateLegacyRenderSection().
+    inline constexpr wchar_t CfgSectionRenderLegacy[] = L"Render";
 }
 
 namespace CfgKeys
@@ -41,12 +52,19 @@ namespace CfgKeys
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
 
-    // Render
+    // [graphics] -- renderer selection. See CfgRendererValues below for accepted values.
+    inline constexpr wchar_t CfgKeyRenderer[] = L"renderer";
+
+    // ---- [graphics.opengl] ----
     // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
-    // DXP-13: render backend selection. "GL" (default) or "D3D11".
-    inline constexpr wchar_t CfgKeyBackend[] = L"Backend";
 
+    // GLP-08: ceiling on the requested core-profile GL context version, e.g. "4.3". Empty
+    // (default) tries the highest of {4.5, 4.3, 3.3} the driver will grant. Rollback path for a
+    // driver that mishandles the descending attempt loop.
+    inline constexpr wchar_t CfgKeyMaxGLVersion[] = L"MaxGLVersion";
+
+    // ---- [graphics.directx] ----
     // D3D11 debug device (D3D11_CREATE_DEVICE_DEBUG) opt-in. Off by default even in Debug
     // builds -- the validation layer's per-Draw-call cost, stacked on Debug's unoptimized
     // code, turns draw-call-heavy scenes (e.g. the login screen's ~14K terrain tile draws)
@@ -65,10 +83,22 @@ namespace CfgKeys
     // simulation/draw path for every cloth instance until this soaks (Phase 4/5).
     inline constexpr wchar_t CfgKeyGpuCloth[] = L"GpuCloth";
 
-    // GLP-08: ceiling on the requested core-profile GL context version, e.g. "4.3". Empty
-    // (default) tries the highest of {4.5, 4.3, 3.3} the driver will grant. Rollback path for a
-    // driver that mishandles the descending attempt loop.
-    inline constexpr wchar_t CfgKeyMaxGLVersion[] = L"MaxGLVersion";
+    // Superseded by CfgKeyRenderer. Read only by InitRenderConfig()'s one-time migration.
+    inline constexpr wchar_t CfgKeyBackendLegacy[] = L"Backend";
+}
+
+// Accepted values for [graphics] renderer. Compared case-insensitively; anything not listed
+// here selects OpenGL, so a typo can never silently hand the frame to the other backend.
+namespace CfgRendererValues
+{
+    inline constexpr wchar_t OpenGL[]  = L"opengl";
+    inline constexpr wchar_t DirectX[] = L"directx";
+
+    // Tolerated spellings, so a hand-edited config and the pre-[graphics] value both work.
+    // "gl"/"d3d11" are what the legacy [Render] Backend key used.
+    inline constexpr wchar_t OpenGLAlt[]     = L"gl";
+    inline constexpr wchar_t DirectXAltD3D[] = L"d3d11";
+    inline constexpr wchar_t DirectXAltDX[]  = L"dx11";
 }
 
 namespace CfgDefaults
@@ -100,13 +130,13 @@ namespace CfgDefaults
     inline constexpr wchar_t CfgDefaultFont[] = L"";
 
     // DXP-08 Stage G: flipped to default-on after DXP-08a/DXP-09 prerequisites were fixed and
-    // soak-confirmed clean under CoreProfile=1 (2026-08-01). Set CoreProfile=0 in config.ini to
-    // opt back into the compatibility-profile rollback path.
+    // soak-confirmed clean under CoreProfile=1 (2026-08-01). Set CoreProfile=0 in
+    // [graphics.opengl] to opt back into the compatibility-profile rollback path.
     inline constexpr bool CfgDefaultCoreProfile = true;
 
-    // DXP-13: default render backend. Anything other than "D3D11" (case-insensitive) falls
-    // back to GL -- an unrecognized value must never silently select the unfinished backend.
-    inline constexpr wchar_t CfgDefaultBackend[] = L"GL";
+    // DXP-13: default renderer. Anything other than a recognized DirectX spelling falls back
+    // to OpenGL -- an unrecognized value must never silently select the other backend.
+    inline constexpr wchar_t CfgDefaultRenderer[] = L"opengl";
 
     // Off by default -- see CfgKeyD3D11DebugLayer's comment.
     inline constexpr bool CfgDefaultD3D11DebugLayer = false;

@@ -16,3 +16,20 @@ ServerPort=44406
 [UI]
 Locale=en
 Font=
+
+; Rendering backend. "opengl" (default) or "directx".
+; Also accepted: "gl", "d3d11", "dx11". Matched case-insensitively; any
+; unrecognized value falls back to opengl.
+[graphics]
+renderer=opengl
+
+; Backend-specific settings. Every key below is optional -- commented out here so
+; it keeps tracking the built-in default; uncomment only to override.
+[graphics.opengl]
+; CoreProfile=1     ; 1 = GL Core Profile (default), 0 = Compatibility rollback
+; MaxGLVersion=     ; empty = highest available; e.g. 4.3 to cap the requested version
+
+[graphics.directx]
+; D3D11DebugLayer=0      ; 1 = D3D11 validation layer (slow; correctness debugging only)
+; ClothComputeSelfTest=0 ; 1 = one-shot GPU-vs-CPU cloth self-test at startup
+; GpuCloth=0             ; 1 = GPU cloth simulation/draw (opt-in, still soaking)

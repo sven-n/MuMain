@@ -1632,6 +1632,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     GameConfig::GetInstance().Load();
     InitRenderConfig();
 
+    // Only correct once InitRenderConfig() has parsed [graphics] renderer -- before that
+    // g_RenderBackend still holds its compiled-in default. Logged for both backends, unlike
+    // WriteOpenGLInfo() further down, which sits inside the GL-only boot branch.
+    g_ErrorReport.WriteRendererInfo();
+
   // Check if animation task pool should be enabled (disabled by default)
   {
       wchar_t configPath[MAX_PATH];
@@ -1774,7 +1779,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         IR::Create();
 
         // DXP-21 part 1 phase 1: opt-in one-shot GPU-vs-CPU correctness check for the new cloth
-        // compute Passes A/B, logged to MuError.log. Off by default (config.ini [Render]
+        // compute Passes A/B, logged to MuError.log. Off by default (config.ini [graphics.directx]
         // ClothComputeSelfTest=1) -- diagnostic only, not part of the real per-frame path.
         if (g_ClothComputeSelfTestEnabled)
         {
@@ -1794,7 +1799,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
     else
     {
-    // DXP-08 Stage G: g_CoreProfile (config.ini [Render] CoreProfile, default 1 as of
+    // DXP-08 Stage G: g_CoreProfile (config.ini [graphics.opengl] CoreProfile, default 1 as of
     // Stage G) selects the context profile. Core became the default after the DXP-08a/
     // DXP-09 prerequisites were fixed and the debug-callback soak came back clean across
     // every map/panel; compatibility (CoreProfile=0) remains available as a rollback.
@@ -1824,7 +1829,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         static constexpr struct { int major, minor; } kCoreVersionAttempts[] = { {4, 5}, {4, 3}, {3, 3} };
         constexpr int kAttemptCount = sizeof(kCoreVersionAttempts) / sizeof(kCoreVersionAttempts[0]);
 
-        // config.ini [Render] MaxGLVersion caps which rung the loop starts at -- rollback path
+        // config.ini [graphics.opengl] MaxGLVersion caps which rung the loop starts at -- rollback path
         // for a driver that mishandles the descending loop itself. Empty/default tries highest.
         int startIndex = 0;
         if (g_MaxGLVersionMajor > 0)
