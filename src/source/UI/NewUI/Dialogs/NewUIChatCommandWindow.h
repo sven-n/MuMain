@@ -82,6 +82,9 @@ namespace SEASON3B
         static bool HasFixedValues(const GameLogic::Commands::ChatCommandParameter& parameter);
         static std::vector<std::wstring> SplitValidValues(const std::wstring& validValues);
 
+        void LoadImages();
+        void UnloadImages();
+
         void RenderFrame();
         // The list starts here, and the detail area below it.
         int GetListTop() const;

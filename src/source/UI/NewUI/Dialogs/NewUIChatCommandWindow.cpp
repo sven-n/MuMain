@@ -37,6 +37,8 @@ bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_COMMAND_LIST, this);
 
+    LoadImages();
+
     m_pValueInput = new CUITextInputBox;
     m_pValueInput->Init(g_hWnd, 150, 14, 60);
     m_pValueInput->SetTextColor(255, 255, 230, 210);
@@ -52,6 +54,7 @@ bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, 
 
 void SEASON3B::CNewUIChatCommandWindow::Release()
 {
+    UnloadImages();
     SAFE_DELETE(m_pValueInput);
 
     if (m_pNewUIMng)
@@ -382,6 +385,38 @@ bool SEASON3B::CNewUIChatCommandWindow::Render()
     return true;
 }
 
+void SEASON3B::CNewUIChatCommandWindow::LoadImages()
+{
+    // The ids are shared with the other windows, but every window loads what it
+    // draws - relying on another one having done it means an empty frame when
+    // that window wasn't opened yet.
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_COMMAND_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_COMMAND_BUTTON, GL_LINEAR);
+
+    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_COMMAND_TOP_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_COMMAND_TOP_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_COMMAND_BOTTOM_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_COMMAND_BOTTOM_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_COMMAND_TOP_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_COMMAND_BOTTOM_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_COMMAND_LEFT_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_COMMAND_RIGHT_PIXEL, GL_LINEAR);
+}
+
+void SEASON3B::CNewUIChatCommandWindow::UnloadImages()
+{
+    DeleteBitmap(IMAGE_COMMAND_BACK);
+    DeleteBitmap(IMAGE_COMMAND_BUTTON);
+    DeleteBitmap(IMAGE_COMMAND_TOP_LEFT);
+    DeleteBitmap(IMAGE_COMMAND_TOP_RIGHT);
+    DeleteBitmap(IMAGE_COMMAND_BOTTOM_LEFT);
+    DeleteBitmap(IMAGE_COMMAND_BOTTOM_RIGHT);
+    DeleteBitmap(IMAGE_COMMAND_TOP_PIXEL);
+    DeleteBitmap(IMAGE_COMMAND_BOTTOM_PIXEL);
+    DeleteBitmap(IMAGE_COMMAND_LEFT_PIXEL);
+    DeleteBitmap(IMAGE_COMMAND_RIGHT_PIXEL);
+}
+
 int SEASON3B::CNewUIChatCommandWindow::GetListTop() const
 {
     return m_Pos.y + static_cast<int>(FRAME_TOP) - 20;
@@ -411,7 +446,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderFrame()
     RenderImage(IMAGE_COMMAND_RIGHT_PIXEL, x + WINDOW_WIDTH - BORDER, y + BORDER, BORDER, WINDOW_HEIGHT - 2 * BORDER);
 
     g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 230, 210, 100);
+    g_pRenderText->SetTextColor(255, 255, 220, 120);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 10, I18N::Game::ChatCommandsTitle, static_cast<int>(WINDOW_WIDTH), 0, RT3_SORT_CENTER);
 }
