@@ -406,9 +406,12 @@ cbuffer GlobalMatrices : register(b0)
     float4 u_Time;
 };
 
+// GLP-11: 3x float4 affine rows per bone, not a full matrix -- matches the GLSL twin's
+// std140 vec4[600] layout and BoneUBO's actual upload (200 bones * 12 floats). Row i of
+// bone b is u_Bones[b*3+i], reconstructed via dot products in main() below, same as GLSL.
 cbuffer BoneMatrices : register(b2)
 {
-    column_major matrix u_Bones[200];
+    float4 u_Bones[600]; // 3 rows per bone, 200 bones
 };
 
 // The GLSL vertex+fragment shaders' ~20 loose uniforms have no HLSL "non-block uniform"
@@ -471,15 +474,22 @@ VSOutput main(VSInput input)
 
     if (u_UseGPUSkin == 1 && input.a_BoneIndex >= 0 && input.a_BoneIndex < 200)
     {
-        // u_Bones[a_BoneIndex] transforms rest-pose position to skeleton-local space;
-        // u_BodyOrigin + u_BodyScale*bonePos replicates BMD::Transform's VectorMA.
-        float4 bonePos = mul(u_Bones[input.a_BoneIndex], float4(input.a_Pos, 1.0));
-        float3 worldPos = u_BodyOrigin + u_BodyScale * bonePos.xyz;
+        // GLP-11 row layout (matches the GLSL twin exactly, see its comment for the full
+        // derivation): u_Bones[a_BoneIndex*3 + i] transforms rest-pose position to
+        // skeleton-local space. u_BodyOrigin + u_BodyScale*bonePos replicates BMD::Transform's
+        // VectorMA. dot() reconstruction (not a matrix cast) because r0/r1/r2 are rows, not
+        // columns -- same trap the GLSL comment calls out.
+        float4 r0 = u_Bones[input.a_BoneIndex * 3 + 0];
+        float4 r1 = u_Bones[input.a_BoneIndex * 3 + 1];
+        float4 r2 = u_Bones[input.a_BoneIndex * 3 + 2];
+        float4 p = float4(input.a_Pos, 1.0);
+        float3 bonePos = float3(dot(r0, p), dot(r1, p), dot(r2, p));
+        float3 worldPos = u_BodyOrigin + u_BodyScale * bonePos;
         o.pos = mul(u_MVPDraw, float4(worldPos, 1.0));
 
-        // Rotation-only skin of the rest normal -- (float3x3) cast drops the translation
-        // column/bottom row, same as GLSL's mat3(mat4).
-        skinnedNormal = normalize(mul((float3x3)u_Bones[input.a_BoneIndex], input.a_Normal));
+        // Rotation-only skin of the rest normal -- .xyz drops the translation term, same as
+        // GLSL's row.xyz-only dot products.
+        skinnedNormal = normalize(float3(dot(r0.xyz, input.a_Normal), dot(r1.xyz, input.a_Normal), dot(r2.xyz, input.a_Normal)));
 
         // Per-vertex lighting, ported 1:1 from BMD::Transform's CPU loop (see the GLSL twin's
         // comment for the exact formula reference).

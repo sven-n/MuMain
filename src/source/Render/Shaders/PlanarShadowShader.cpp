@@ -225,9 +225,11 @@ cbuffer ShadowFlags : register(b7)
     float  u_SkinScale;
 };
 
+// GLP-11: 3x float4 affine rows per bone, not a full matrix -- matches BMDMeshShader's HLSL
+// twin and BoneUBO's actual upload layout (both shaders read the same slot-2 cbuffer).
 cbuffer BoneMatrices : register(b2)
 {
-    column_major matrix u_Bones[200];
+    float4 u_Bones[600]; // 3 rows per bone, 200 bones
 };
 
 // DXP-21 part 2 fix (2026-08-05): must declare the SAME fields in the SAME order as
@@ -264,12 +266,18 @@ VSOutput main(VSInput input)
     VSOutput o;
 
     // Ported 1:1 from the GLSL twin's u_UseGPUSkin branch -- mirrors BMDMeshShader's own
-    // GPU-skin math (u_Bones[a_BoneIndex] * restPos, then u_SkinOrigin + u_SkinScale * that).
+    // GPU-skin math. GLP-11 row layout: u_Bones[a_BoneIndex*3 + i], reconstructed via dot
+    // products (r0/r1/r2 are rows, not columns -- see BMDMeshShader.cpp's HLSL twin for the
+    // full derivation this is copied from).
     float3 worldPos;
     if (input.a_BoneIndex >= 0 && input.a_BoneIndex < 200)
     {
-        float4 bonePos = mul(u_Bones[input.a_BoneIndex], float4(input.a_Pos, 1.0));
-        worldPos = u_SkinOrigin + u_SkinScale * bonePos.xyz;
+        float4 r0 = u_Bones[input.a_BoneIndex * 3 + 0];
+        float4 r1 = u_Bones[input.a_BoneIndex * 3 + 1];
+        float4 r2 = u_Bones[input.a_BoneIndex * 3 + 2];
+        float4 p = float4(input.a_Pos, 1.0);
+        float3 bonePos = float3(dot(r0, p), dot(r1, p), dot(r2, p));
+        worldPos = u_SkinOrigin + u_SkinScale * bonePos;
     }
     else
     {
