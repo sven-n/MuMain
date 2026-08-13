@@ -105,6 +105,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetShowDebugInfo(false);
         return true;
     }
+    else if (strCommand.compare(L"$glstats on") == 0)
+    {
+        SetShowGLStats(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$glstats off") == 0)
+    {
+        SetShowGLStats(false);
+        return true;
+    }
     else if (strCommand.compare(0, 4, L"$fps") == 0)
     {
         auto fps_str = strCommand.substr(5);
@@ -114,14 +124,17 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     }
     else if (strCommand.compare(L"$vsync on") == 0)
     {
-        EnableVSync();
-        SetTargetFps(-1); // unlimited
+        if (EnableVSync())
+            SetTargetFps(-1);
+        else
+            SetTargetFps(GetFPSLimit());
         ResetFrameStats();
         return true;
     }
     else if (strCommand.compare(L"$vsync off") == 0)
     {
         DisableVSync();
+        SetTargetFps(-1); // explicit request for uncapped - let hardware run at its max
         ResetFrameStats();
         return true;
     }

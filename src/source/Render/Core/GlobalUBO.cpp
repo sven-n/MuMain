@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GlobalUBO.h"
+#include "Render/Core/ImmediateRenderer.h" // GLP-19 -- IR::Flush() before matrices change
 #include <cstring>
 #include <cassert>
 
@@ -162,6 +163,15 @@ void GlobalUBO::RecomputeMVP()
 
 void GlobalUBO::Upload()
 {
+    // GLP-19: the view/proj/model matrices are batch state for IR, and they live here rather than
+    // in any PassthroughShader uniform -- so IR's state key cannot see them. Every mutator
+    // (SetView/SetProj/SetModel/SetOrtho/PopView) funnels through this one function, which makes it
+    // the only hook that cannot be missed. Flush BEFORE the new matrices reach the GPU, so a batch
+    // accumulated under the old ones is drawn under the old ones.
+    // Without this, BeginSprite/EndSprite (view push/pop) and BeginBitmap/EndBitmap (proj+view
+    // swap) let UI text quads accumulate across a projection change -- observed as garbled glyphs.
+    IR::Flush();
+
     if (!m_UBOHandle.IsValid()) return;
 
     // layout(std140, binding=0) -- contiguous, matches the HLSL cbuffer mirror byte-for-byte:

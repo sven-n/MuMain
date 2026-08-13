@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "BindState.h"
+#include "Render/Core/ImmediateRenderer.h" // GLP-19 -- IR::Flush() before any bind changes
+#include "Core/Utilities/FrameProfiler.h"
 #include <SDL3/SDL.h>
 
 #ifndef APIENTRY
@@ -44,12 +46,25 @@ static GLuint s_lastVAO     = 0;
 static const int kMaxCachedTextureSlots = 8;
 static GLuint    s_lastTexture[kMaxCachedTextureSlots] = { 0 };
 
+// GLP-05: matches GL's post-context-creation default (GL_TEXTURE0, i.e. slot 0).
+static GLint s_lastActiveSlot = 0;
+
+// GLP-19: BindState is the documented monopoly on program/VAO/texture binds, so it is the only
+// place that sees EVERY state change from every path -- BMD, terrain, UI, IR alike. IR defers its
+// draw across Begin/End pairs, so a pending batch must be submitted before any of these change
+// under it; hooking here rather than at individual call sites is what makes that exhaustive.
+// Each hook sits on the branch where the bind ACTUALLY changes, so consecutive IR draws that
+// re-request the same program/texture/VAO still merge for free.
+// Re-entrancy: IR::Flush() itself calls BindVAO via RHI::BindVertexBuffer, but Flush() clears its
+// pending flag before submitting, so the inner call returns immediately.
 void BindProgram(GLuint program)
 {
     if (program == s_lastProgram) return;
     if (!LoadBindStateFunctions()) return;
+    IR::Flush();
     fn_glUseProgram(program);
     s_lastProgram = program;
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::ProgramBinds);
 }
 
 void UnbindAllShaders()
@@ -61,28 +76,41 @@ void BindTexture2D(int slot, GLuint texture)
 {
     if (!LoadBindStateFunctions()) return;
 
-    // glActiveTexture is deliberately NEVER cached/skipped here, only the per-slot bound texture id
-    // is. TerrainShader::SetOverlayTexture and PassthroughShader::SetTexture both still call a raw
-    // (uncached) fn_glActiveTexture(GL_TEXTURE0) restore after binding a non-zero slot -- if this
-    // function also cached "current active unit" and skipped re-issuing it on a match, those raw
-    // restores would silently desync the cache from real GL state, causing a later same-slot bind to
-    // wrongly skip the unit switch and bind the wrong texture to the wrong unit. glActiveTexture
-    // itself is a cheap state-pointer flip (unlike glBindTexture, which is the call actually measured
-    // as redundant in the DXP-22 RenderDoc capture), so unconditionally reissuing it costs little and
-    // avoids this whole class of bug.
-    fn_glActiveTexture(GL_TEXTURE0 + slot);
+    // GLP-19 -- see BindProgram(). Computed up front because the real texture comparison below
+    // sits after the active-slot switch, and both change what a pending IR batch would sample.
+    {
+        const bool slotChanges = (slot != s_lastActiveSlot);
+        const bool texChanges  = !(slot >= 0 && slot < kMaxCachedTextureSlots && s_lastTexture[slot] == texture);
+        if (slotChanges || texChanges) IR::Flush();
+    }
+
+    // GLP-05: BindState is now the complete monopoly on the active texture unit, not just
+    // program/VAO/per-slot-texture-id. This is only sound because TerrainShader::SetOverlayTexture
+    // and PassthroughShader::SetTexture's raw (uncached) fn_glActiveTexture(GL_TEXTURE0) restores
+    // were deleted in the same commit that added this cache -- a raw glActiveTexture anywhere in
+    // the tree desyncs s_lastActiveSlot from real GL state, causing a later same-slot bind to
+    // wrongly skip the unit switch and bind the wrong texture to the wrong unit (see DXP-22's
+    // "infinity shadow" for what that class of bug looks like in practice). If you are adding a
+    // texture bind anywhere, route it through BindTexture2D -- do not call glActiveTexture directly.
+    if (slot != s_lastActiveSlot) {
+        fn_glActiveTexture(GL_TEXTURE0 + slot);
+        s_lastActiveSlot = slot;
+    }
 
     if (slot >= 0 && slot < kMaxCachedTextureSlots && s_lastTexture[slot] == texture) return;
     glBindTexture(GL_TEXTURE_2D, texture);
     if (slot >= 0 && slot < kMaxCachedTextureSlots) s_lastTexture[slot] = texture;
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::TextureBinds);
 }
 
 void BindVAO(GLuint vao)
 {
     if (vao == s_lastVAO) return;
     if (!LoadBindStateFunctions()) return;
+    IR::Flush(); // GLP-19 -- see BindProgram(); safe to re-enter, Flush() clears its flag first
     fn_glBindVertexArray(vao);
     s_lastVAO = vao;
+    FrameProfiler::CountGLCall();
 }
 
 // Sentinel that can never be a real GL object name (0 is reserved for "no object"; real generated
@@ -103,4 +131,12 @@ void InvalidateTextureCache()
 void InvalidateVAOCache()
 {
     s_lastVAO = kInvalidCacheSentinel;
+}
+
+void InvalidateActiveTextureUnitCache()
+{
+    // -1 rather than kInvalidCacheSentinel (that constant is sized for GLuint object names, not
+    // a small non-negative slot index) -- no real slot argument is ever negative, so this can
+    // never accidentally match and skip the next real glActiveTexture call.
+    s_lastActiveSlot = -1;
 }

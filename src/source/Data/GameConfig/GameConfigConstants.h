@@ -44,7 +44,6 @@ namespace CfgKeys
     // Render
     // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
-
     // DXP-13: render backend selection. "GL" (default) or "D3D11".
     inline constexpr wchar_t CfgKeyBackend[] = L"Backend";
 
@@ -65,6 +64,11 @@ namespace CfgKeys
     // see the DXP-21 task memory's Phase 0 scope note). Off by default -- CPU remains the default
     // simulation/draw path for every cloth instance until this soaks (Phase 4/5).
     inline constexpr wchar_t CfgKeyGpuCloth[] = L"GpuCloth";
+
+    // GLP-08: ceiling on the requested core-profile GL context version, e.g. "4.3". Empty
+    // (default) tries the highest of {4.5, 4.3, 3.3} the driver will grant. Rollback path for a
+    // driver that mishandles the descending attempt loop.
+    inline constexpr wchar_t CfgKeyMaxGLVersion[] = L"MaxGLVersion";
 }
 
 namespace CfgDefaults
@@ -112,4 +116,7 @@ namespace CfgDefaults
 
     // Off by default -- see CfgKeyGpuCloth's comment.
     inline constexpr bool CfgDefaultGpuCloth = false;
+
+    // GLP-08: empty = no cap, try the highest core context available.
+    inline constexpr wchar_t CfgDefaultMaxGLVersion[] = L"";
 }

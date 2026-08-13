@@ -34,6 +34,13 @@ extern bool g_ClothComputeSelfTestEnabled;
 // DXP-21 task memory).
 extern bool g_GpuClothEnabled;
 
+// GLP-08: optional ceiling on the requested core-profile GL context version, read from
+// config.ini [Render] MaxGLVersion (e.g. "4.3"). 0 = no cap (try the highest core context
+// available -- Winmain.cpp's descending {4,5}->{4,3}->{3,3} attempt loop starts at the top).
+// Rollback path for a driver that mishandles that loop. Ignored when g_CoreProfile is false.
+extern int g_MaxGLVersionMajor;
+extern int g_MaxGLVersionMinor;
+
 // Fixed-function alpha test (GL_ALPHA_TEST/glAlphaFunc) state, mirrored for shader-side
 // `discard` (DXP-01). g_AlphaRef is what shaders should test against: -1.0f means alpha
 // test is currently disabled (no discard), otherwise it's the active GL_GREATER threshold.

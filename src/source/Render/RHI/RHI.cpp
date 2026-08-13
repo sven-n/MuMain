@@ -8,6 +8,8 @@
 #include "Render/Core/RenderConfig.h"
 
 namespace RHI_GL_Impl {
+    const RHI::Caps& GetCaps();
+
     bool Init(void* nativeWindowHandle, int width, int height);
     void Shutdown();
     void BeginFrame();
@@ -104,6 +106,11 @@ namespace {
 }
 
 namespace RHI {
+
+const Caps& GetCaps()
+{
+    return RHI_GL_Impl::GetCaps();
+}
 
 bool Init(void* nativeWindowHandle, int width, int height)
 {

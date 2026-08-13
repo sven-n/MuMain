@@ -30,6 +30,15 @@ public:
     GLuint GetProgram() const { return m_Program; }
     bool IsCreated() const { return m_Program != 0 || m_D3DVertexShader != nullptr; }
 
+    // GLP-19: IR merges consecutive Begin/End pairs into one draw and needs to know whether they
+    // share shader state. Exposes the dirty-check sentinels rather than the requested values --
+    // the sentinels are what actually reached the GPU, which is what the batch was drawn with.
+    struct StateSnapshot { int useTexture; int useFog; int texCombineAdd; };
+    StateSnapshot GetStateSnapshot() const
+    {
+        return StateSnapshot{ m_LastUseTexture, m_LastUseFog, m_LastTexCombineAdd };
+    }
+
 private:
     PassthroughShader() = default;
     ~PassthroughShader();

@@ -35,7 +35,9 @@ private:
     BoneUBO& operator=(const BoneUBO&) = delete;
 
     RHI::BufferHandle m_UBOHandle;
-    float  m_MatrixBuffer[GPU_MAX_BONES * 16]; // std140 mat4 array (column-major)
+    // GLP-11: 3x vec4 affine rows per bone (row-major, straight from BoneTransform), not a
+    // column-major mat4 -- the GPU no longer needs the constant (0,0,0,1) 4th row shipped to it.
+    float  m_BoneRows[GPU_MAX_BONES * 12]; // std140 vec4[3*GPU_MAX_BONES]
 
     const void*  m_LastUploadedPtr     = nullptr;
     unsigned int m_LastUploadedVersion = 0xFFFFFFFFu; // sentinel: never matches a real version

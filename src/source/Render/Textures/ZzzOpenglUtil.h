@@ -100,8 +100,8 @@ void RestoreCameraPerspective();
 void InitVSync();
 bool IsVSyncAvailable();
 bool IsVSyncEnabled();
-void EnableVSync();
-void DisableVSync();
+bool EnableVSync();
+bool DisableVSync();
 int GetFPSLimit();
 
 // Present the current GL frame via SDL (replaces the Win32 ::SwapBuffers, #442).
@@ -113,6 +113,25 @@ inline void TEXCOORD(float* c, float u, float v)
     c[0] = u;
     c[1] = v;
 }
+// GLP-19: the cached render state IR must key a batch on. These all live as file-scope globals in
+// ZzzOpenglUtil.cpp; exposing a snapshot accessor keeps them encapsulated there rather than
+// scattering `extern` declarations, and matches the DXP-10 state-wrapper monopoly convention.
+// Read by ImmediateRenderer to decide whether two consecutive Begin/End pairs can be merged into
+// one draw -- so it must cover every piece of state that changes what a quad looks like.
+struct GLRenderStateSnapshot
+{
+    int   alphaBlendType;
+    bool  alphaTestEnable;
+    float alphaRef;
+    bool  depthTestEnable;
+    bool  depthMaskEnable;
+    bool  cullFaceEnable;
+    bool  textureEnable;
+    bool  fogEnable;
+    int   cachTexture;
+};
+GLRenderStateSnapshot GetRenderStateSnapshot();
+
 void RenderPlane3D(float Width, float Height, float Matrix[3][4]);
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Angle = 0.f, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha = 1.f);

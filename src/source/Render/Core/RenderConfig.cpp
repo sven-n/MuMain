@@ -3,12 +3,17 @@
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/WinIni.h"
+#include <cwchar>
 
 bool g_CoreProfile = false;
 RenderBackend g_RenderBackend = RenderBackend::GL;
 bool g_D3D11DebugLayerEnabled = false;
 bool g_ClothComputeSelfTestEnabled = false;
 bool g_GpuClothEnabled = false;
+
+// See RenderConfig.h -- 0 = no cap.
+int g_MaxGLVersionMajor = 0;
+int g_MaxGLVersionMinor = 0;
 
 // -1.0f = alpha test disabled; matches AlphaTestEnable's initial false state in ZzzOpenglUtil.cpp.
 float g_AlphaRef = -1.0f;
@@ -55,6 +60,17 @@ void InitRenderConfig()
 
     const int gpuCloth = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyGpuCloth, CfgDefaults::CfgDefaultGpuCloth ? 1 : 0, configPath);
     g_GpuClothEnabled = (gpuCloth != 0);
+
+    // GLP-08: "major.minor" (e.g. "4.3"), or empty/unparseable = no cap.
+    wchar_t maxGLVersion[16] = {};
+    GetPrivateProfileStringW(CfgSections::CfgSectionRender, CfgKeys::CfgKeyMaxGLVersion,
+        CfgDefaults::CfgDefaultMaxGLVersion, maxGLVersion, (DWORD)(sizeof(maxGLVersion) / sizeof(maxGLVersion[0])), configPath);
+    int maxMajor = 0, maxMinor = 0;
+    if (swscanf(maxGLVersion, L"%d.%d", &maxMajor, &maxMinor) == 2 && maxMajor > 0)
+    {
+        g_MaxGLVersionMajor = maxMajor;
+        g_MaxGLVersionMinor = maxMinor;
+    }
 }
 
 void BuildPerspectiveProjection(float f, float aspect, float zNear, float zFar, float out[16])

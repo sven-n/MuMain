@@ -59,8 +59,16 @@ public:
         if (systemTimeElapsed == 0 || m_numProcessors == 0)
             return 0.0;
 
+        // FILETIME's native unit is 100ns, but systemTimeElapsed (elapsedWallTime) is in
+        // microseconds (1us = 10 x 100ns ticks) -- dividing the two directly without converting
+        // to a shared unit inflated every reading by exactly 10x. Confirmed against real
+        // captures: a mostly single-core-bound ~5-6ms/frame render workload was reporting
+        // 51-72% of total logical-core capacity instead of the correct ~5-7%.
+        constexpr double kFileTimeTicksPerMicrosecond = 10.0;
+        double processTimeElapsedUs = static_cast<double>(processTimeElapsed) / kFileTimeTicksPerMicrosecond;
+
         // Calculate CPU usage as a percentage
-        return std::max<double>(0.0, (100.0 * processTimeElapsed) / (systemTimeElapsed * m_numProcessors));
+        return std::max<double>(0.0, (100.0 * processTimeElapsedUs) / (systemTimeElapsed * m_numProcessors));
     }
 
 private:

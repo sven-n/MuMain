@@ -5,11 +5,10 @@
 // RHI_GL (Render/RHI/RHI_GL.h/.cpp) is the only backend implementation today.
 //
 // Implementation status: Device/frame, Buffers+Uniform blocks, Pipeline/blend,
-// VertexLayout/BindVertexBuffer + Draw, and Textures + ReadColorFramebuffer/
-// ReadDepthPixel are implemented in RHI_GL. IR:: (ImmediateRenderer.cpp) is the
-// first real caller of the buffer/draw half. DrawIndexed is still declared per
-// the original design sketch but not yet defined; do not call it until its
-// implementing commit lands.
+// VertexLayout/BindVertexBuffer + Draw, BindIndexBuffer + DrawIndexed, and Textures +
+// ReadColorFramebuffer/ReadDepthPixel are implemented in RHI_GL. IR:: (ImmediateRenderer.cpp)
+// is the first caller of the buffer/draw half; terrain tile bucketing (GLP-16) is the first
+// caller of BindIndexBuffer/DrawIndexed.
 
 // DXVK/vkd3d-proton on Linux -- is a one-line change instead of hunting down every guard.
 // Every RHI_D3D11.cpp/BMDMeshShader.cpp/PassthroughShader.cpp/PlanarShadowShader.cpp/
@@ -34,6 +33,25 @@ struct Handle {
 };
 using BufferHandle  = Handle<struct BufferTag>;
 using TextureHandle = Handle<struct TextureTag>;
+
+// ---- Capabilities (GLP-08) ----
+// Populated once, in Init(), by probing the actual context/driver -- never hardcoded to "assume
+// the latest". bufferStorage/uboOffsetAlignment are consumed by GLP-09's UBO ring allocator
+// (RHI_GL.cpp); the rest exist so GLP-15/22 can be written as "use the fast path if Caps says
+// so, keep today's path otherwise" instead of guessing.
+// Each bool requires BOTH the version/extension being present AND the entry points that
+// capability needs actually resolving via SDL_GL_GetProcAddress -- a driver can report a high
+// version and still hand back null for a symbol on a bad install.
+struct Caps {
+    int  glMajor = 0, glMinor = 0;
+    bool bufferStorage        = false;  // ARB_buffer_storage / core 4.4       -> GLP-09
+    bool vertexAttribBinding  = false;  // ARB_vertex_attrib_binding / core 4.3 -> GLP-22
+    bool programBinary        = false;  // ARB_get_program_binary / core 4.1   -> GLP-15
+    bool timerQuery           = false;  // ARB_timer_query / core 3.3          -> GLP-01
+    int  uboOffsetAlignment   = 256;    // GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT -- GLP-09 ring stride, do not hardcode 256 elsewhere
+    int  maxUniformBlockSize  = 16384;  // GL_MAX_UNIFORM_BLOCK_SIZE
+};
+const Caps& GetCaps();
 
 // ---- Device/frame (implemented in RHI_GL) ----
 bool Init(void* nativeWindowHandle, int width, int height);
@@ -75,9 +93,17 @@ void DestroyBuffer(BufferHandle);
 
 // ---- Uniform blocks (the 3 existing UBOs become opaque handles; std140 layout stays the
 // caller's contract -- RHI does not know or care about field layout, just byte size) ----
+// GLP-09: RHI_GL sub-allocates every binding slot from a persistently-mapped per-slot ring
+// buffer instead of giving each handle its own dedicated GL buffer object -- purely a backend
+// implementation detail, this whole-block-update contract is unchanged. One consequence IS
+// caller-visible though: UpdateUniformBlock is what establishes the binding now (a
+// glBindBufferRange per update), not CreateUniformBlock (which used to glBindBufferBase once,
+// at creation). A block that is created and never updated has no binding. Every caller in the
+// tree today updates immediately after creating (GlobalUBO/SceneUBO/BoneUBO/BMDMeshShader) --
+// keep that invariant for any future caller.
 BufferHandle CreateUniformBlock(size_t sizeBytes, int bindingSlot);
 void UpdateUniformBlock(BufferHandle, const void* data, size_t sizeBytes);  // whole-block; callers keep their own dirty-checking (e.g. BoneUBO's ptr+version check)
-void DestroyUniformBlock(BufferHandle);
+void DestroyUniformBlock(BufferHandle);  // GLP-09: frees a slot reservation, not the shared ring -- the ring itself is torn down at Shutdown()
 
 // ---- Textures (DXP-12 GL; DXP-15 increment 1 D3D11) ----
 // Format is fixed at RGBA8 -- no other internal format exists anywhere in the tree today.
@@ -149,7 +175,7 @@ enum class VertexLayout {
     PosOnly,      // PlanarShadowShader -- position-only
 };
 void BindVertexBuffer(BufferHandle, VertexLayout);
-void BindIndexBuffer(BufferHandle);   // GL_UNSIGNED_INT only -- not yet implemented, no caller yet
+void BindIndexBuffer(BufferHandle);   // GL_UNSIGNED_INT only -- GLP-16: implemented, binds GL_ELEMENT_ARRAY_BUFFER (captured into the currently-bound VAO's state)
 
 // DXP-14: D3D11's ID3D11InputLayout is validated against a specific vertex shader's input
 // signature at creation time -- GL has no equivalent (attrib pointers bind directly to a VBO
@@ -185,7 +211,7 @@ BufferHandle RegisterExternalD3D11VertexBuffer(void* d3d11Buffer, size_t capacit
 // No strips/fans/points anywhere post-DXP-09; no instancing anywhere in the tree.
 enum class Topology { TriangleList, LineList, LineStrip };
 void Draw(Topology, uint32_t vertexCount, uint32_t firstVertex = 0);
-void DrawIndexed(Topology, uint32_t indexCount, uint32_t firstIndex = 0); // not yet implemented -- lands with a subsystem that needs indexed draws (terrain)
+void DrawIndexed(Topology, uint32_t indexCount, uint32_t firstIndex = 0); // GLP-16: implemented. firstIndex is an element offset, not bytes; requires a prior BindIndexBuffer call, same two-call shape as BindVertexBuffer+Draw
 
 // ---- Readback (DXP-12) ----
 bool ReadDepthPixel(int x, int y, float* outDepth);                   // CameraProjection::TestDepthBuffer, until DXP-16

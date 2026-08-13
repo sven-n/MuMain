@@ -34,3 +34,11 @@ void UnbindAllShaders();
 void InvalidateProgramCache();
 void InvalidateTextureCache();
 void InvalidateVAOCache();
+
+// GLP-05: resets the cached active texture unit to "unknown", forcing the next BindTexture2D
+// call to reissue glActiveTexture regardless of what slot it requests. Called alongside
+// InvalidateTextureCache() (RHI_GL_Impl::DestroyTexture) and on context recreation, as defensive
+// belt-and-suspenders for the bind-state monopoly rather than because texture deletion itself
+// changes the active unit -- it doesn't; glDeleteTextures affects binding, not glActiveTexture
+// state.
+void InvalidateActiveTextureUnitCache();

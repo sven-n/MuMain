@@ -118,3 +118,8 @@ double GetTargetFps();
 void SetShowDebugInfo(bool enabled);
 void SetShowFpsCounter(bool enabled);
 void ResetFrameStats();
+
+// GLP-01: GL call/draw/buffer counters + GPU pass timers overlay, console-toggled via
+// `$glstats on/off` (muConsoleDebug.cpp). Independent of $details/$fpscounter -- can be
+// shown alongside either.
+void SetShowGLStats(bool enabled);
