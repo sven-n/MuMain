@@ -19,13 +19,16 @@ What I have done so far:
       * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
       * Show detailed performance overlay (FPS stats, percentiles, frame graph): `$details on` / `$details off`
       * Show GL call/draw/buffer counters and per-pass GPU timers: `$glstats on` / `$glstats off`
-  * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
-    a better frame rate when many players and objects are visible.
-  * 🔥 Core Profile GL performance series (see [docs/GPU Skinning/glperf](docs/GPU%20Skinning/glperf/README.md)):
-    ring-buffer UBO streaming instead of per-update buffer orphaning, terrain draw calls
-    collapsed via texture-pair bucketing (~25x fewer draws), and redundant per-draw GL state
-    changes removed. Measured net win on dev hardware: avg FPS +4.4%, 1% Low +28.0%, frame
-    time -4.1%.
+  * 🔥 Retired the legacy fixed-function pipeline — rendering now runs on Core Profile shaders,
+    GPU skeletal skinning, VBO/VAO geometry and UBOs
+    (see [docs/GPU Skinning](docs/GPU%20Skinning/README.md)).
+  * 🔥 GL optimization pass on top ([glperf](docs/GPU%20Skinning/glperf/README.md)): UBO ring
+    streaming, terrain draws collapsed ~25x by texture-pair bucketing, redundant per-draw state
+    removed — avg FPS +4.4%, 1% Low +28.0%, frame time -4.1% on dev hardware.
+  * 🔥 A **DirectX 11 rendering backend** alongside OpenGL, selected with `renderer=directx`
+    under `[graphics]` in `config.ini` (see [docs/DirectX11](docs/DirectX11/README.md)).
+    OpenGL stays the default and better-soaked path; D3D11 is playable but much newer and
+    still stabilising, so expect rough edges.
   * 🔥 Added inventory and vault extensions.
   * 🔥 The master skill tree system was upgraded to Season 6
   * 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.
@@ -274,7 +277,10 @@ The client reads options from `config.ini` in the executable directory:
 
 | Section | Key | Default Value | Description |
 | :--- | :--- | :--- | :--- |
-| **`[Render]`** | `CoreProfile` | `1` | **OpenGL Context Profile Switch**<br>`1` = Enforces **OpenGL 3.3 Core Profile** (Default). All rendering runs via UBO matrices, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).<br>`0` = Requests **OpenGL Compatibility Profile** context (Re-enables legacy FFP driver state toggles like `glAlphaTest`/`glEnable(GL_TEXTURE_2D)` for legacy driver hooks; shader & UBO pipelines remain active). |
+| **`[graphics]`** | `renderer` | `"opengl"` | **Rendering Backend Selection**<br>`opengl` (or `gl`) = OpenGL backend.<br>`directx` (or `d3d11`/`dx11`) = DirectX 11 backend.<br>Matched case-insensitively; any unrecognized value falls back to OpenGL. Each backend's own settings live in `[graphics.opengl]` / `[graphics.directx]` — see [DirectX 11 docs](docs/DirectX11/README.md#configuration). |
+| **`[graphics.opengl]`** | `CoreProfile` | `1` | **OpenGL Context Profile Switch**<br>`1` = Enforces **OpenGL 3.3 Core Profile** (Default). All rendering runs via UBO matrices, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).<br>`0` = Requests **OpenGL Compatibility Profile** context (Re-enables legacy FFP driver state toggles like `glAlphaTest`/`glEnable(GL_TEXTURE_2D)` for legacy driver hooks; shader & UBO pipelines remain active). |
+| **`[graphics.opengl]`** | `MaxGLVersion` | `""` | **GL Context Version Ceiling** (`GLP-08`). Empty = request the highest of `{4.5, 4.3, 3.3}` the driver grants. Set e.g. `4.3` as a rollback path if a driver mishandles the descending attempt chain. |
+| **`[graphics.directx]`** | `D3D11DebugLayer` | `0` | **D3D11 Validation Layer** (`D3D11_CREATE_DEVICE_DEBUG`). Off even in Debug builds — its per-draw cost makes draw-heavy scenes unplayable. Enable only when chasing a D3D11 correctness bug. |
 | **`[UI]`** | `EnableAnimationTaskPool` | `0` | **Parallel Animation Processing**<br>`1` = Enables multi-threaded character animation tick pool (`AnimationTaskPool`) for crowded scenes ($\ge 20$ active characters).<br>`0` = Sequential single-threaded animation calculation. |
 | **`[UI]`** | `Locale` | `"en"` | **UI Language Locale** (`en`, `es`, `pt`, `ru`, `ko`). |
 | **`[Camera]`** | `Zoom` | `1735` | **3D Camera Default Distance**. |

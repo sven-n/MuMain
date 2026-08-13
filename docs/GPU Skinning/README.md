@@ -55,10 +55,11 @@ This documentation details the architecture, design decisions, milestone catalog
 The graphics and performance engine exposes runtime switches via `config.ini` and command-line flags:
 
 ### 1. `config.ini` Switches
-- **`[Render] CoreProfile`** (Default: `1`):
+- **`[graphics] renderer`** (Default: `opengl`): selects the rendering backend — `opengl` (or `gl`) vs `directx` (or `d3d11`/`dx11`), matched case-insensitively. Any unrecognized value falls back to OpenGL. **Everything documented in this file is the OpenGL path**; the DirectX 11 backend has its own settings under `[graphics.directx]` and its own docs in [docs/DirectX11](../DirectX11/README.md#configuration).
+- **`[graphics.opengl] CoreProfile`** (Default: `1`):
   - `1`: Enforces **OpenGL 3.3 Core Profile** (`SDL_GL_CONTEXT_PROFILE_CORE`). All rendering runs via UBOs, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).
   - `0`: Requests **OpenGL Compatibility Profile** (`SDL_GL_CONTEXT_PROFILE_COMPATIBILITY`). Re-enables legacy FFP driver state toggles (e.g. `glAlphaTest`, `glEnable(GL_TEXTURE_2D)`) for legacy driver hook compatibility; all primary rendering remains shader and UBO driven.
-- **`[Render] MaxGLVersion`** (`GLP-08`): caps the GL context version the client will request. Without it the client walks a descending `{4,5} → {4,3} → {3,3}` chain and takes the highest that succeeds; set this to force a lower ceiling as a rollback path if a driver misbehaves on the newer context.
+- **`[graphics.opengl] MaxGLVersion`** (`GLP-08`): caps the GL context version the client will request. Without it the client walks a descending `{4,5} → {4,3} → {3,3}` chain and takes the highest that succeeds; set this to force a lower ceiling as a rollback path if a driver misbehaves on the newer context.
 - **`[UI] EnableAnimationTaskPool`** (Default: `0`):
   - `1`: Enables the multi-threaded character animation task pool (`AnimationTaskPool`) when $\ge 20$ active characters are present.
   - `0`: Runs character skeletal animation updates sequentially on the main thread.

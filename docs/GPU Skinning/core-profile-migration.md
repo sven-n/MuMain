@@ -12,7 +12,7 @@ The migration from legacy OpenGL compatibility profile to **OpenGL 3.3 Core Prof
 > **3.3 is now the floor, not the target.** [`GLP-08`](glperf/README.md#glp-08--gl-context-version-chain--capability-probe)
 > replaced the fixed request for exactly GL 3.3 core with a descending `{4,5} → {4,3} → {3,3}`
 > attempt chain plus an `RHI::Caps` capability probe, so later work can branch on real hardware
-> capability instead of assuming a version. `config.ini [Render] MaxGLVersion` forces a ceiling as
+> capability instead of assuming a version. `config.ini [graphics.opengl] MaxGLVersion` forces a ceiling as
 > a rollback path. Shaders are still authored to `#version 330 core`.
 
 ```mermaid

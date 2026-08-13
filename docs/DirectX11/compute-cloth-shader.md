@@ -13,7 +13,24 @@ Offloading the physics integration to a GPU compute shader provides:
 
 ## 2. Integration Pipeline
 
-The simulation runs tightly coupled with `CPhysicsManager`. If the D3D11 backend is active and GPU cloth is enabled (`g_GpuCloth`), `CPhysicsManager` delegates ticking to the compute pipeline.
+The simulation runs tightly coupled with `CPhysicsManager`. If the D3D11 backend is active and GPU cloth is enabled (`g_GpuClothEnabled`), `CPhysicsManager` delegates ticking to the compute pipeline.
+
+### Enabling it
+
+GPU cloth is **opt-in and off by default** — the CPU solver remains the real path for every cloth instance until this soaks. Both switches live in the DirectX subsection of `config.ini`:
+
+```ini
+[graphics]
+renderer=directx        ; required -- these are D3D11-only
+
+[graphics.directx]
+GpuCloth=1              ; g_GpuClothEnabled -- GPU simulation + draw for CPhysicsCloth
+ClothComputeSelfTest=1  ; g_ClothComputeSelfTestEnabled -- one-shot GPU-vs-CPU delta check
+```
+
+`ClothComputeSelfTest` is diagnostic only: it runs a single GPU-vs-CPU comparison at startup and logs the delta to `MuError.log`. It is not part of the per-frame cloth path.
+
+Note that `GpuCloth=1` flips **all** `CPhysicsCloth` instances at once (capes, wings, hair). `CPhysicsClothMesh` — the one mesh-topology exception — is unaffected and always uses the CPU solver.
 
 ### GPU Buffers
 

@@ -1,8 +1,14 @@
 # DXP Port Milestones Reference
 
-This document serves as the authoritative technical reference catalog for all **`DXP-xx`** milestone tags used in source code comments, commit logs, and architectural document cross-references specifically related to the DirectX 11 Port.
+This document is the technical reference catalog for **`DXP-xx`** milestone tags used in source code comments, commit logs, and architectural document cross-references specifically related to the DirectX 11 Port.
 
 The milestones below are organized **chronologically in the exact order of implementation**, grouped by development phase.
+
+> **Coverage caveat (verified 2026-08-14).** This catalog documents the Phase C milestones below, but the source tree currently references **25 distinct `DXP-xx` tags**. Undocumented here: `DXP-01`, `DXP-02`, `DXP-05`, `DXP-06`, `DXP-07a`–`DXP-07d`, `DXP-08`, `DXP-08a`, `DXP-09`, `DXP-10`, `DXP-11`, `DXP-20`, `DXP-22`, `DXP-23`, `DXP-24`, `DXP-26`. These are predominantly the earlier FFP-retirement and Core-Profile groundwork phases that preceded the D3D11 backend proper. Reproduce the current list with:
+> ```bash
+> grep -rhoE "DXP-[0-9]+[a-z]?" src/source/ | sort -u -V
+> ```
+> Treat a tag's absence from this file as "not yet written up," **not** as "not a real milestone."
 
 ---
 
@@ -55,5 +61,30 @@ The milestones below are organized **chronologically in the exact order of imple
 #### DXP-21 — Cloth Mesh Compute Shader
 - **Scope**: `Engine/Physics/PhysicsManager.cpp`, `ClothComputeShader.cpp`.
 - **Purpose**: Replaced legacy CPU spring-mass solver with DirectCompute GPU simulation for wings and capes, eliminating CPU bottlenecks during dense character events.
+
+---
+
+## Phase D: GLP Performance Series Integration (2026-08-14)
+
+The `perf/gl-uniforms-into-ubo` branch (GLP-01 → GLP-29, upstream PR #560) was merged into the D3D11 port branch, which had diverged 38 commits earlier at `39107a81`. This is not a DXP milestone in itself, but it materially changed the D3D11 backend and is the origin of the cross-backend invariants now documented in [Gotchas §4.3 and §5](gotchas-and-patterns.md).
+
+### What D3D11 gained
+| GLP task | Effect on D3D11 |
+|---|---|
+| **GLP-16** — terrain texture-pair bucketing | **Direct win.** `FlushTerrainBuckets()` draws via the backend-agnostic `RHI::DrawIndexed`, so D3D11 inherits the same ~25× terrain draw-call reduction (1,226 → 48). The port branch had still been issuing an immediate per-tile draw; keeping both would have double-rendered every tile. |
+| **GLP-19** — IR cross-`Begin`/`End` batching | Applies (`ImmediateRenderer` is backend-agnostic per DXP-05/DXP-15), **but** introduced the deferred-batch invariant that D3D11 initially violated in eight places. |
+| **GLS-09** — uniform consolidation into one UBO | No port needed; D3D11 already used a single `BMDFlags` cbuffer. The GLSL UBO layout was deliberately authored to match the existing D3D11 `BMDFlagsCB` byte-for-byte so the two could be reconciled rather than duplicated. |
+| **GLP-04** — dirty-checked water-flag writes | Merged with D3D11's pre-existing `UploadD3D11Flags()` dirty-check into one shared sentinel pair. |
+| **GLP-05 / 06 / 08 / 09 / 10 / 25** | Not applicable — GL-only concepts (see [Gotchas §5.3](gotchas-and-patterns.md)). |
+
+### Regressions this exposed, and their fixes
+All four were D3D11-only, invisible on GL, and none produced a merge conflict:
+
+1. **All BMD objects invisible** — GLP-11's compacted bone-palette layout was never ported to the HLSL twins. → [Gotchas §5.1](gotchas-and-patterns.md)
+2. **UI text showing later lines' glyphs** — `RHI_D3D11::UpdateTexture()` lacked GLP-19's flush; the GL twin had carried it since the original fix. → [Gotchas §4.3](gotchas-and-patterns.md)
+3. **Black rectangles on smoke/dust particles** — four blend-mode wrappers had no D3D11 branch at all (pre-existing gap, exposed once GPU-skinned geometry began rendering). → [Gotchas §4.1](gotchas-and-patterns.md)
+4. **Two compile-breaking semantic merges** — duplicate member declarations and a stale `return;` after a return-type change. → [Gotchas §5.2](gotchas-and-patterns.md)
+
+> **Verification status**: all fixes build clean in Debug and Release; items 1 and 2 are owner-confirmed in-game. Item 3's fix is built but **not yet visually re-confirmed** at the time of writing.
 
 

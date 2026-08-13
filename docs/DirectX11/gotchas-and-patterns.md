@@ -47,9 +47,52 @@ This document catalogues critical technical gotchas, state invariants, and rende
 ## 4. State Management & Abstraction
 
 ### 4.1 Fixed-Function State Guarding (`ZzzOpenglUtil.cpp`)
-- **Gotcha**: Calling legacy functions like `glEnable(GL_BLEND)` or `glDisable(GL_DEPTH_TEST)` while the D3D11 backend is active will result in access violations or silent OpenGL context corruption (as the SDL GL context is not active).
-- **Rule**: All global state mutators in `ZzzOpenglUtil.cpp` MUST guard their legacy GL execution behind `if (g_RenderBackend == RenderBackend::OpenGL)` or route to `RHI::SetBlendMode()` to abstract the call safely.
+- **Gotcha**: Calling legacy functions like `glEnable(GL_BLEND)` or `glDisable(GL_DEPTH_TEST)` while the D3D11 backend is active does **not** crash — it silently does nothing, because there is no current GL context for the driver to act on. The GPU simply retains whatever state was last set through a path that *did* have a D3D11 branch. This is far more dangerous than an access violation: it fails invisibly and only manifests as a scene-dependent visual artifact much later.
+- **Rule**: All global state mutators in `ZzzOpenglUtil.cpp` MUST guard their legacy GL execution behind `if (g_RenderBackend == RenderBackend::D3D11) { ...RHI call...; return; }` (note: the enum is `RenderBackend::GL` / `RenderBackend::D3D11` — there is no `RenderBackend::OpenGL`) or route to `RHI::SetBlendMode()` to abstract the call safely.
+- **Real occurrence (2026-08-14)**: Four of the eight blend-mode wrappers — `EnableLightMap()`, `EnableAlphaBlendMinus()`, `EnableAlphaBlend2()`, `EnableAlphaBlend4()` — shipped with **no D3D11 branch at all**, falling through to raw `glBlendFunc` no-ops. `RHI::BlendMode` and `RHI_D3D11.cpp`'s blend-state table implemented all eight correctly the whole time; only the wrappers were incomplete. Symptom: smoke/dust particles rendered as opaque black rectangles, because `EnableAlphaBlendMinus()`'s subtractive blend (`ZERO, ONE_MINUS_SRC_COLOR`) was never actually applied to the D3D11 pipeline. **When auditing this family, check every member — a partial port looks identical to a complete one at the call site.**
+
+### 4.3 `RHI::SetBlendMode()` Is Immediate — Flush Deferred Batches First
+- **Gotcha**: `RHI::SetBlendMode()` binds an `ID3D11BlendState` on the device context *immediately*. `IR::` (`ImmediateRenderer`), since GLP-19, **defers** its draw: `IR::End()` only marks a batch pending, and the actual `RHI::Draw` happens at the next `IR::Flush()`. A blend-mode change between a batch's `End()` and its eventual flush therefore submits those quads under the **new** blend state.
+- **Rule**: Every D3D11 branch that changes pipeline state must call `IR::Flush()` *before* the state change — and must dirty-check first, or it flushes on every particle and destroys the batching win entirely:
+  ```cpp
+  if (g_RenderBackend == RenderBackend::D3D11)
+  {
+      if (AlphaBlendType == 4) return;   // dirty-check FIRST
+      IR::Flush();                       // then flush the pending batch
+      AlphaBlendType = 4;
+      RHI::SetBlendMode(RHI::BlendMode::Minus);
+      return;
+  }
+  ```
+- **Scope of the invariant** (GLP-19's own phrasing: *"a deferred IR batch may never survive another draw"*): this applies to `RHI_D3D11.cpp`'s `Draw()`, `DrawIndexed()` and `UpdateTexture()`; `PassthroughShader`'s `BindD3D11()` / `SetUseTexture()` / `SetUseFog()` D3D11 branches; and all eight `ZzzOpenglUtil.cpp` blend-mode wrappers. `BindState.cpp` and `GlobalUBO.cpp` are backend-shared, so their existing flush hooks already cover D3D11.
+- **Note on texture content**: `UpdateTexture()` needs a flush even though it never changes texture *identity* — the font atlas is a single texture whose pixels are rewritten per string, so a merged batch would sample whatever was uploaded last. Symptom: each line of UI text displays a later line's glyphs. **Texture content is batch state, not just texture identity.**
 
 ### 4.2 EndFrame vs PlatformSwapBuffers
 - **Gotcha**: Pacing and buffer swapping happen via `SDL_GL_SwapWindow` natively. D3D11 requires `IDXGISwapChain::Present`.
 - **Rule**: Both backends are synchronized by hooking `PlatformSwapBuffers()`. It unconditionally calls `RHI::EndFrame()`, allowing the active backend to handle its specific present mechanics without littering `#ifdef` logic across the main game loop.
+
+---
+
+## 5. Cross-Backend Lockstep (GL ↔ D3D11 Drift)
+
+The single largest source of D3D11-only bugs is not D3D11 itself — it is **GL-side work landing without its HLSL/D3D11 counterpart**. Optimization work is authored and measured against GL, so a change that is correct-by-construction there can silently invalidate an assumption the D3D11 path depends on. Every bug in §4.1, §4.3 and §5.1 below came from this pattern.
+
+### 5.1 Shared Resources Bind Both Backends to One Layout
+- **Gotcha**: `BoneUBO`, `GlobalUBO` and `SceneUBO` are backend-agnostic — one CPU-side upload feeds both the GLSL UBO and the HLSL cbuffer. Changing the *layout* of that upload is therefore a change to both shaders, even when only the GLSL twin is edited.
+- **Real occurrence (GLP-11)**: The bone palette was compacted from a full 4×4 matrix per bone to **3 packed `float4` affine rows** (`u_Bones[600]`, 200 bones × 3 rows). The GLSL shader was updated to reconstruct via dot products; the HLSL twins in `BMDMeshShader.cpp` and `PlanarShadowShader.cpp` still declared `column_major matrix u_Bones[200]` and read via `mul(u_Bones[i], pos)`. Both backends kept reading the *same* buffer, so D3D11 was indexing the palette at wrong byte offsets — every GPU-skinned mesh received garbage transforms and collapsed to degenerate geometry. Symptom: **all BMD objects invisible under D3D11; terrain and particles (no bones) unaffected.**
+- **Rule**: When changing any shared UBO/cbuffer layout, update **all** shader twins in the same commit, and grep for the uniform name across `Render/Shaders/` before assuming a single file is the only consumer. `PlanarShadowShader` reads the same slot-2 bone cbuffer as `BMDMeshShader` and is easy to miss.
+
+### 5.2 Git Merges Do Not Flag Semantic Conflicts
+- **Gotcha**: A GLSL edit and its HLSL twin live in different string literals in the *same* `.cpp` file. Non-overlapping line ranges merge cleanly with **no conflict markers**, so a lockstep break survives the merge silently and the build still succeeds.
+- **Real occurrences (2026-08-14 merge)**: `TerrainShader.h` ended up declaring `m_LastBaseIsWater` / `m_LastOverlayIsWater` **twice** (each branch added its own copy for the same dirty-check purpose, at different line ranges) → `C2086: redefinition`. `ZzzOpenglUtil.cpp`'s `EnableVSync()` / `DisableVSync()` kept bare `return;` statements in their D3D11 branches after the other branch changed the return type to `bool` → `C2561`. Both were caught only by compiling, not by the merge.
+- **Rule**: After any merge touching `Render/`, **build both configs before trusting a clean `git status`** — and treat a compile error in a file you did not consciously resolve as evidence of a semantic conflict, not a trivial typo. A merge that reports zero conflicts is not the same as a merge that is correct.
+
+### 5.3 Which GL Optimizations Actually Reach D3D11
+Not every GL-side optimization implies a D3D11 gap. Classifying the change first avoids both missed ports and pointless ones:
+
+| Category | Examples | D3D11 action |
+|---|---|---|
+| **Backend-agnostic — applies for free** | GLP-16 terrain texture-pair bucketing, GLP-19 IR batching (draws via `RHI::DrawIndexed` / `RHI::Draw`) | None; D3D11 inherits the win. **But** verify any new invariant it introduces holds on the D3D11 path (GLP-19's flush rule did not — see §4.3). |
+| **D3D11 already had an equivalent** | GLS-09 uniform consolidation (D3D11 used a cbuffer from day one), GLP-04 dirty-checked uniform writes (`UploadD3D11Flags()` had its own) | Reconcile into one shared implementation rather than porting. |
+| **GL-only concept** | GLP-05 `glActiveTexture` monopoly, GLP-06 VAO attribute baking, GLP-08 GL context version probing, GLP-09/10/25 UBO ring allocator | None. D3D11 uses static input layouts and per-buffer `Map`/`WRITE_DISCARD`; there is no ring to grow and no VAO to bake. |
+| **Instrumentation, soft-fails** | GLP-01 GPU pass timers (`SDL_GL_GetProcAddress` returns null with no GL context) | None; reads 0 ms under D3D11 by design. |
