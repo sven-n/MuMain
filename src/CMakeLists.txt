@@ -809,6 +809,13 @@ if (CMAKE_CXX_COMPILER MATCHES "mingw32" OR CMAKE_CXX_COMPILER MATCHES "w64-ming
     uuid
     comdlg32
     advapi32
+    # RHI_D3D11_AVAILABLE is gated on _WIN32 (RHI.h), which MinGW satisfies -- so the D3D11
+    # backend compiles here just as it does under MSVC and needs the same import libraries.
+    # Without these the build compiles clean and then fails at link with undefined references
+    # to D3D11CreateDeviceAndSwapChain and D3DCompile. mingw-w64 ships all three.
+    d3d11
+    dxgi
+    d3dcompiler
     ${MU_TURBOJPEG_STATIC_LIB}
   )
 endif()

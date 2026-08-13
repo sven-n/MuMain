@@ -53,6 +53,7 @@ private:
     void CreateD3D11();
     void DestroyD3D11();
     void BindD3D11();
+    void UnbindD3D11();
     void UploadD3D11Flags();
 
     // ---- GL state ----

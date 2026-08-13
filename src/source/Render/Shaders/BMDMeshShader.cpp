@@ -796,16 +796,7 @@ void BMDMeshShader::Bind(int renderMode, float waveOffsetU, float waveOffsetV, G
 
 void BMDMeshShader::Unbind()
 {
-    if (g_RenderBackend == RenderBackend::D3D11)
-    {
-        ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
-        if (ctx)
-        {
-            ctx->VSSetShader(nullptr, nullptr, 0);
-            ctx->PSSetShader(nullptr, nullptr, 0);
-        }
-        return;
-    }
+    if (g_RenderBackend == RenderBackend::D3D11) { UnbindD3D11(); return; }
     BindProgram(0);
 }
 
@@ -1141,9 +1132,18 @@ void BMDMeshShader::BindD3D11(int renderMode, float waveOffsetU, float waveOffse
 
     RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
 }
+void BMDMeshShader::UnbindD3D11()
+{
+    ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+    if (!ctx) return;
+    ctx->VSSetShader(nullptr, nullptr, 0);
+    ctx->PSSetShader(nullptr, nullptr, 0);
+}
+
 #else // !RHI_D3D11_AVAILABLE -- keep these symbols linkable as no-ops since Create()/Destroy()/
       // Bind() call them behind a runtime g_RenderBackend check, which itself compiles on every
       // platform (see RHI_D3D11.cpp's own #else for the same rationale).
+void BMDMeshShader::UnbindD3D11() {}
 void BMDMeshShader::CreateD3D11() {}
 void BMDMeshShader::DestroyD3D11() {}
 void BMDMeshShader::BindD3D11(int, float, float, GLuint, int, const float[3], float, float, GLuint,

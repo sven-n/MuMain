@@ -329,16 +329,7 @@ void TerrainShader::Bind()
 
 void TerrainShader::Unbind()
 {
-    if (g_RenderBackend == RenderBackend::D3D11)
-    {
-        ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
-        if (ctx)
-        {
-            ctx->VSSetShader(nullptr, nullptr, 0);
-            ctx->PSSetShader(nullptr, nullptr, 0);
-        }
-        return;
-    }
+    if (g_RenderBackend == RenderBackend::D3D11) { UnbindD3D11(); return; }
     BindProgram(0);
 }
 
@@ -537,9 +528,18 @@ void TerrainShader::UploadD3D11Flags()
     cb.alphaRef       = m_LastAlphaRef;
     RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
 }
+void TerrainShader::UnbindD3D11()
+{
+    ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+    if (!ctx) return;
+    ctx->VSSetShader(nullptr, nullptr, 0);
+    ctx->PSSetShader(nullptr, nullptr, 0);
+}
+
 #else // !RHI_D3D11_AVAILABLE -- keep these symbols linkable as no-ops since Create()/Destroy()/
       // Bind() call them behind a runtime g_RenderBackend check, which itself compiles on every
       // platform (see RHI_D3D11.cpp's own #else for the same rationale).
+void TerrainShader::UnbindD3D11() {}
 void TerrainShader::CreateD3D11() {}
 void TerrainShader::DestroyD3D11() {}
 void TerrainShader::BindD3D11() {}

@@ -80,6 +80,7 @@ private:
     bool BeginD3D11(const float* bodyOrigin, const float mvp[16], float sx, float sy, float alpha);
     void EndD3D11();
     void DrawD3D11(const float* vertices, int vertexCount);
+    void DrawGPUSkinnedD3D11(RHI::BufferHandle d3dVB, int baseCorner, int vertexCount, const float* skinOrigin, float skinScale);
 
     bool   m_bInitialized = false;
     bool   m_bSupported   = false;

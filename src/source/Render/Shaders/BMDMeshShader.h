@@ -40,6 +40,7 @@ private:
 
     void CreateD3D11();
     void DestroyD3D11();
+    void UnbindD3D11();
     void BindD3D11(int renderMode, float waveOffsetU, float waveOffsetV, GLuint texID, int useGPUSkin, const float bodyOrigin[3], float bodyScale, float chromeWave, GLuint chromeTex1ID, const float specularTint[3], GLuint metalTexID, GLuint chromeTex2ID, float chromeWave2, float chromeLightVecX, float chromeLightVecY, const float lightDir[3], const float bodyLight[3], int lightEnable, float alpha, int chromeVariant, float chromeTimeTerm, const float mvp[16]);
 
     GLuint m_Program = 0;

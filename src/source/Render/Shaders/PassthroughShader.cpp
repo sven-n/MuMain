@@ -341,16 +341,7 @@ void PassthroughShader::Bind()
 
 void PassthroughShader::Unbind()
 {
-    if (g_RenderBackend == RenderBackend::D3D11)
-    {
-        ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
-        if (ctx)
-        {
-            ctx->VSSetShader(nullptr, nullptr, 0);
-            ctx->PSSetShader(nullptr, nullptr, 0);
-        }
-        return;
-    }
+    if (g_RenderBackend == RenderBackend::D3D11) { UnbindD3D11(); return; }
     BindProgram(0);
 }
 
@@ -562,6 +553,14 @@ void PassthroughShader::BindD3D11()
     }
 }
 
+void PassthroughShader::UnbindD3D11()
+{
+    ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+    if (!ctx) return;
+    ctx->VSSetShader(nullptr, nullptr, 0);
+    ctx->PSSetShader(nullptr, nullptr, 0);
+}
+
 void PassthroughShader::UploadD3D11Flags()
 {
     if (!m_D3DFlagsCBuffer.IsValid()) return;
@@ -578,6 +577,7 @@ void PassthroughShader::UploadD3D11Flags()
 void PassthroughShader::CreateD3D11() {}
 void PassthroughShader::DestroyD3D11() {}
 void PassthroughShader::BindD3D11() {}
+void PassthroughShader::UnbindD3D11() {}
 void PassthroughShader::UploadD3D11Flags() {}
 #endif // RHI_D3D11_AVAILABLE
 

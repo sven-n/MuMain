@@ -550,31 +550,7 @@ void CPlanarShadowShader::DrawGPUSkinned(GLuint vao, RHI::BufferHandle d3dVB, in
     // GPU-skin/CPU-fallback meshes within one shadow batch) still uses the right shader.
     if (g_RenderBackend == RenderBackend::D3D11)
     {
-        if (!m_bActive || !d3dVB.IsValid() || vertexCount <= 0 || !m_D3DVertexShaderGPUSkin) return;
-
-        ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
-        if (!ctx) return;
-
-        const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
-        const float* origin = skinOrigin ? skinOrigin : zeroOrigin;
-
-        ShadowFlagsCB cb = {};
-        memcpy(cb.mvp, m_D3DCachedMVP, sizeof(cb.mvp));
-        memcpy(cb.bodyOrigin, m_D3DCachedBodyOrigin, sizeof(cb.bodyOrigin));
-        cb.sx = m_D3DCachedSx;
-        cb.sy = m_D3DCachedSy;
-        cb.shadowAlpha = m_D3DCachedAlpha;
-        cb.useGPUSkin = 1;
-        memcpy(cb.skinOrigin, origin, sizeof(cb.skinOrigin));
-        cb.skinScale = skinScale;
-        RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
-
-        ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShaderGPUSkin), nullptr, 0);
-
-        RHI::BindVertexBuffer(d3dVB, RHI::VertexLayout::BMDMesh);
-        RHI::Draw(RHI::Topology::TriangleList, static_cast<uint32_t>(vertexCount), static_cast<uint32_t>(baseCorner));
-
-        ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShader), nullptr, 0);
+        DrawGPUSkinnedD3D11(d3dVB, baseCorner, vertexCount, skinOrigin, skinScale);
         return;
     }
 
@@ -827,6 +803,38 @@ void CPlanarShadowShader::DrawD3D11(const float* vertices, int vertexCount)
     RHI::BindVertexBuffer(m_D3DVBO, RHI::VertexLayout::PosOnly);
     RHI::Draw(RHI::Topology::TriangleList, static_cast<uint32_t>(vertexCount), 0);
 }
+
+// DXP-21 part 2 retry (2026-08-05): swaps VSSetShader to the GPU-skin VS for this one draw, then
+// restores the CPU-path VS so any subsequent Draw() call in the same Begin/End session (mixed
+// GPU-skin/CPU-fallback meshes within one shadow batch) still uses the right shader.
+void CPlanarShadowShader::DrawGPUSkinnedD3D11(RHI::BufferHandle d3dVB, int baseCorner, int vertexCount, const float* skinOrigin, float skinScale)
+{
+    if (!m_bActive || !d3dVB.IsValid() || vertexCount <= 0 || !m_D3DVertexShaderGPUSkin) return;
+
+    ID3D11DeviceContext* ctx = static_cast<ID3D11DeviceContext*>(RHI::GetD3D11DeviceContext());
+    if (!ctx) return;
+
+    const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
+    const float* origin = skinOrigin ? skinOrigin : zeroOrigin;
+
+    ShadowFlagsCB cb = {};
+    memcpy(cb.mvp, m_D3DCachedMVP, sizeof(cb.mvp));
+    memcpy(cb.bodyOrigin, m_D3DCachedBodyOrigin, sizeof(cb.bodyOrigin));
+    cb.sx = m_D3DCachedSx;
+    cb.sy = m_D3DCachedSy;
+    cb.shadowAlpha = m_D3DCachedAlpha;
+    cb.useGPUSkin = 1;
+    memcpy(cb.skinOrigin, origin, sizeof(cb.skinOrigin));
+    cb.skinScale = skinScale;
+    RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
+
+    ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShaderGPUSkin), nullptr, 0);
+
+    RHI::BindVertexBuffer(d3dVB, RHI::VertexLayout::BMDMesh);
+    RHI::Draw(RHI::Topology::TriangleList, static_cast<uint32_t>(vertexCount), static_cast<uint32_t>(baseCorner));
+
+    ctx->VSSetShader(static_cast<ID3D11VertexShader*>(m_D3DVertexShader), nullptr, 0);
+}
 #else // !RHI_D3D11_AVAILABLE -- keep these symbols linkable as no-ops since the public Init()/
       // Shutdown()/Begin()/End()/Draw() call them behind a runtime g_RenderBackend check, which
       // itself compiles on every platform (see RHI_D3D11.cpp's own #else for the same rationale).
@@ -835,4 +843,5 @@ void CPlanarShadowShader::ShutdownD3D11() {}
 bool CPlanarShadowShader::BeginD3D11(const float*, const float[16], float, float, float) { return false; }
 void CPlanarShadowShader::EndD3D11() {}
 void CPlanarShadowShader::DrawD3D11(const float*, int) {}
+void CPlanarShadowShader::DrawGPUSkinnedD3D11(RHI::BufferHandle, int, int, const float*, float) {}
 #endif // RHI_D3D11_AVAILABLE
