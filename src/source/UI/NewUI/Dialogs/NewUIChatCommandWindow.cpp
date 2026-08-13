@@ -394,18 +394,26 @@ int SEASON3B::CNewUIChatCommandWindow::GetDetailTop() const
 
 void SEASON3B::CNewUIChatCommandWindow::RenderFrame()
 {
-    // Back first, then the frame pieces over its edges - a stretched back alone
-    // leaves the borders of the window bare.
-    RenderImage(IMAGE_COMMAND_BACK, static_cast<float>(m_Pos.x), static_cast<float>(m_Pos.y), WINDOW_WIDTH, WINDOW_HEIGHT);
-    RenderImage(IMAGE_COMMAND_TOP, static_cast<float>(m_Pos.x), static_cast<float>(m_Pos.y), WINDOW_WIDTH, FRAME_TOP);
-    RenderImage(IMAGE_COMMAND_LEFT, static_cast<float>(m_Pos.x), m_Pos.y + FRAME_TOP, FRAME_SIDE, WINDOW_HEIGHT - FRAME_TOP - FRAME_BOTTOM);
-    RenderImage(IMAGE_COMMAND_RIGHT, m_Pos.x + WINDOW_WIDTH - FRAME_SIDE, m_Pos.y + FRAME_TOP, FRAME_SIDE, WINDOW_HEIGHT - FRAME_TOP - FRAME_BOTTOM);
-    RenderImage(IMAGE_COMMAND_BOTTOM, static_cast<float>(m_Pos.x), m_Pos.y + WINDOW_HEIGHT - FRAME_BOTTOM, WINDOW_WIDTH, FRAME_BOTTOM);
+    const auto x = static_cast<float>(m_Pos.x);
+    const auto y = static_cast<float>(m_Pos.y);
+
+    RenderImage(IMAGE_COMMAND_BACK, x, y, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    // Corners first, then the edges repeated between them.
+    RenderImage(IMAGE_COMMAND_TOP_LEFT, x, y, BORDER, BORDER);
+    RenderImage(IMAGE_COMMAND_TOP_RIGHT, x + WINDOW_WIDTH - BORDER, y, BORDER, BORDER);
+    RenderImage(IMAGE_COMMAND_BOTTOM_LEFT, x, y + WINDOW_HEIGHT - BORDER, BORDER, BORDER);
+    RenderImage(IMAGE_COMMAND_BOTTOM_RIGHT, x + WINDOW_WIDTH - BORDER, y + WINDOW_HEIGHT - BORDER, BORDER, BORDER);
+
+    RenderImage(IMAGE_COMMAND_TOP_PIXEL, x + BORDER, y, WINDOW_WIDTH - 2 * BORDER, BORDER);
+    RenderImage(IMAGE_COMMAND_BOTTOM_PIXEL, x + BORDER, y + WINDOW_HEIGHT - BORDER, WINDOW_WIDTH - 2 * BORDER, BORDER);
+    RenderImage(IMAGE_COMMAND_LEFT_PIXEL, x, y + BORDER, BORDER, WINDOW_HEIGHT - 2 * BORDER);
+    RenderImage(IMAGE_COMMAND_RIGHT_PIXEL, x + WINDOW_WIDTH - BORDER, y + BORDER, BORDER, WINDOW_HEIGHT - 2 * BORDER);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 230, 210, 100);
     g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 14, I18N::Game::ChatCommandsTitle, static_cast<int>(WINDOW_WIDTH), 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 10, I18N::Game::ChatCommandsTitle, static_cast<int>(WINDOW_WIDTH), 0, RT3_SORT_CENTER);
 }
 
 void SEASON3B::CNewUIChatCommandWindow::RenderCommandList()
