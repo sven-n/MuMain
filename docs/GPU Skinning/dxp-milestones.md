@@ -4,6 +4,18 @@ This document serves as the authoritative technical reference catalog for all **
 
 The milestones below are organized **chronologically in the exact order of implementation**, grouped by development phase.
 
+> [!NOTE]
+> **This is a historical record, not a description of current behaviour.** Each entry states what
+> that milestone did when it landed; later work has since modified several of these subsystems.
+> Where an entry's mechanism has changed, the current behaviour lives in the architecture documents
+> ([GPU skinning](gpu-skinning-architecture.md), [ImmediateRenderer](immediate-renderer-architecture.md),
+> [Core Profile migration](core-profile-migration.md)) — those are authoritative for *how the code
+> works today*, this file for *when and why it got that way*.
+>
+> The DXP series is followed by [**GLP**](glperf/README.md), which investigates a Core Profile FPS
+> regression on weak hardware and continues several DXP threads — notably `DXP-26`'s recorded
+> "Stage 2 — cross-quad batching", which became `GLP-19` and `GLP-20`.
+
 ---
 
 ## Milestone Execution Chronology Table

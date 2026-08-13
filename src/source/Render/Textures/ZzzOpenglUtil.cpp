@@ -173,10 +173,24 @@ void SetAlphaFuncRef(float ref)
         g_AlphaRef = ref;
 }
 
+GLRenderStateSnapshot GetRenderStateSnapshot()
+{
+    // GLP-19 -- see ZzzOpenglUtil.h. Plain reads of already-cached values; no GL calls.
+    return GLRenderStateSnapshot{
+        AlphaBlendType, AlphaTestEnable, g_AlphaRef,
+        DepthTestEnable, DepthMaskEnable, CullFaceEnable,
+        TextureEnable, FogEnable, CachTexture
+    };
+}
+
 void BindTexture(int tex)
 {
     if (CachTexture != tex)
     {
+        // GLP-19: a texture change invalidates any batch IR has accumulated but not yet drawn --
+        // those quads were submitted against the OLD texture. Only fires inside this dirty-check,
+        // so the common case (consecutive same-texture particles) costs nothing and still merges.
+        IR::Flush();
         CachTexture = tex;
         const uint32_t textureID = (tex >= 0) ? static_cast<uint32_t>(Bitmaps[tex].TextureNumber)
                                                : static_cast<uint32_t>(-1 * tex);
@@ -237,6 +251,7 @@ void EnableDepthTest()
 {
     if (!DepthTestEnable)
     {
+        IR::Flush(); // GLP-19 -- depth state is batch state; flush before it changes
         DepthTestEnable = true;
         glEnable(GL_DEPTH_TEST);
     }
@@ -246,6 +261,7 @@ void DisableDepthTest()
 {
     if (DepthTestEnable)
     {
+        IR::Flush(); // GLP-19 -- see EnableDepthTest
         DepthTestEnable = false;
         glDisable(GL_DEPTH_TEST);
     }
@@ -255,6 +271,7 @@ void EnableDepthMask()
 {
     if (!DepthMaskEnable)
     {
+        IR::Flush(); // GLP-19 -- see EnableDepthTest
         DepthMaskEnable = true;
         glDepthMask(true);
     }
@@ -264,6 +281,7 @@ void DisableDepthMask()
 {
     if (DepthMaskEnable)
     {
+        IR::Flush(); // GLP-19 -- see EnableDepthTest
         DepthMaskEnable = false;
         glDepthMask(false);
     }
@@ -273,6 +291,7 @@ void EnableCullFace()
 {
     if (!CullFaceEnable)
     {
+        IR::Flush(); // GLP-19 -- see EnableDepthTest
         CullFaceEnable = true;
         glEnable(GL_CULL_FACE);
     }
@@ -282,6 +301,7 @@ void DisableCullFace()
 {
     if (CullFaceEnable)
     {
+        IR::Flush(); // GLP-19 -- see EnableDepthTest
         CullFaceEnable = false;
         glDisable(GL_CULL_FACE);
     }
@@ -320,6 +340,7 @@ void DisableAlphaBlend()
 {
     if (AlphaBlendType != 0)
     {
+        IR::Flush(); // GLP-19 -- blend func is batch state; flush BEFORE it changes
         AlphaBlendType = 0;
         glDisable(GL_BLEND);
     }
@@ -346,6 +367,7 @@ void EnableAlphaTest(bool DepthMask)
 {
     if (AlphaBlendType != 2)
     {
+        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 2;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -374,6 +396,7 @@ void EnableAlphaBlend()
 {
     if (AlphaBlendType != 3)
     {
+        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 3;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -401,6 +424,8 @@ void EnableAlphaBlendMinus()
 {
     if (AlphaBlendType != 4)
     {
+        IR::Flush(); // GLP-19 -- subtractive blend (ZERO, ONE_MINUS_SRC_COLOR); a batch leaking
+                      // into this is exactly the black-polygon artifact
         AlphaBlendType = 4;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
@@ -428,6 +453,7 @@ void EnableAlphaBlend2()
 {
     if (AlphaBlendType != 5)
     {
+        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 5;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE);
@@ -455,6 +481,7 @@ void EnableAlphaBlend3()
 {
     if (AlphaBlendType != 6)
     {
+        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 6;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -482,6 +509,7 @@ void EnableAlphaBlend4()
 {
     if (AlphaBlendType != 7)
     {
+        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 7;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
@@ -509,6 +537,7 @@ void EnableLightMap()
 {
     if (AlphaBlendType != 1)
     {
+        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 1;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
@@ -684,6 +713,8 @@ static void MakeTranslation(float x, float y, float z, float* out)
 
 void BeginOpengl(int x, int y, int Width, int Height)
 {
+    IR::Flush(); // GLP-19 -- viewport + perspective change below; see BeginBitmap()
+
     x = x * WindowWidth / REFERENCE_WIDTH;
     y = y * WindowHeight / REFERENCE_HEIGHT;
     Width = Width * WindowWidth / REFERENCE_WIDTH;
@@ -1090,20 +1121,24 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     }
     else
     {
-        vec3_t p2[4];
-        Vector(-Width, -Height, z, p2[0]);
-        Vector(Width, -Height, z, p2[1]);
-        Vector(Width, Height, z, p2[2]);
-        Vector(-Width, Height, z, p2[3]);
-        vec3_t Angle;
-        Vector(0.f, 0.f, Rotation, Angle);
-        float Matrix[3][4];
-        AngleMatrix(Angle, Matrix);
+        // GLP-29 2c: AngleMatrix() + VectorRotate() with a Z-only angle reduces exactly to a 2D
+        // rotation -- this is an algebraic identity, not an approximation. With
+        // angles = (0, 0, Rotation), AngleMatrix (ZzzMathLib.cpp:194) has sp=0, cp=1, sr=0, cr=1,
+        // so the matrix is [cy -sy 0; sy cy 0; 0 0 1] and VectorRotate's three dot products give
+        //   out.x = in.x*cy - in.y*sy      out.y = in.x*sy + in.y*cy      out.z = in.z
+        // Same arithmetic and the same degrees->radians constant, minus three sinf/cosf pairs
+        // (two of them on a constant 0) and ~20 multiplies for every rotated sprite. This is a hot
+        // per-particle path: smoke, clouds and explosions all pass a non-zero Rotation.
+        const float rad = Rotation * (Q_PI * 2 / 360);
+        const float sy  = sinf(rad);
+        const float cy  = cosf(rad);
+        const float dx[4] = { -Width,   Width,  Width, -Width  };
+        const float dy[4] = { -Height, -Height, Height, Height };
         for (int i = 0; i < 4; i++)
         {
-            VectorRotate(p2[i], Matrix, p[i]);
-            p[i][0] += x;
-            p[i][1] += y;
+            p[i][0] = x + dx[i] * cy - dy[i] * sy;
+            p[i][1] = y + dx[i] * sy + dy[i] * cy;
+            p[i][2] = z;
         }
     }
 
@@ -1231,6 +1266,11 @@ static float s_PreBitmapView[16];
 
 void BeginBitmap()
 {
+    // GLP-19: flush before glViewport changes. The GlobalUBO::Upload() hook covers the matrix
+    // swap below, but the viewport change happens first and also affects rasterization, so a
+    // batch left pending here would be drawn into the new viewport.
+    IR::Flush();
+
     // Always use full window dimensions for UI/bitmap rendering
     // UI bitmaps use ConvertX/Y to scale from 640×480 reference,
     // so we need the full window size here (not the game viewport which may be smaller)

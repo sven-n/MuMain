@@ -2,6 +2,7 @@
 #include "Render/Shaders/PlanarShadowShader.h"
 #include "Render/Core/BindState.h"
 #include "Render/Core/RenderConfig.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <cstdint>
 #include <cstring>
@@ -79,8 +80,11 @@ layout(location = 4) in int  a_BoneIndex; // DXP-20: only used when u_UseGPUSkin
 
 // Bone matrix palette UBO at binding slot 2 — same binding BMDMeshShader/BoneUBO use, so
 // BoneUBO::UploadBones() (called once per body by the CPU caller) feeds both shaders.
+// GLP-11: 3x vec4 affine rows per bone, not mat4 -- must match BMDMeshShader.cpp's declaration
+// exactly (a std140 mismatch across programs sharing one binding point is undefined behavior,
+// not a compile error).
 layout(std140) uniform BoneMatrices {
-    mat4 u_Bones[200];
+    vec4 u_Bones[600]; // 3 rows per bone, 200 bones
 };
 
 uniform mat4  u_MVP;
@@ -97,8 +101,14 @@ void main()
     if (u_UseGPUSkin == 1 && a_BoneIndex >= 0 && a_BoneIndex < 200) {
         // Ported 1:1 from BMDMeshShader's GPU skinning branch, which itself mirrors
         // BMD::Transform's VectorMA(BodyOrigin, BodyScale, bonePos, VertexTransform).
-        vec4 bonePos = u_Bones[a_BoneIndex] * vec4(a_Pos, 1.0);
-        worldPos = u_SkinOrigin + u_SkinScale * bonePos.xyz;
+        // GLP-11: dot-product reconstruction from the 3 affine rows -- see BMDMeshShader.cpp's
+        // equivalent site for the full row/column transpose reasoning.
+        vec4 r0 = u_Bones[a_BoneIndex * 3 + 0];
+        vec4 r1 = u_Bones[a_BoneIndex * 3 + 1];
+        vec4 r2 = u_Bones[a_BoneIndex * 3 + 2];
+        vec4 p = vec4(a_Pos, 1.0);
+        vec3 bonePos = vec3(dot(r0, p), dot(r1, p), dot(r2, p));
+        worldPos = u_SkinOrigin + u_SkinScale * bonePos;
     } else {
         // CPU path: a_Pos is already a fully world-space VertexTransform position.
         worldPos = a_Pos;
@@ -189,20 +199,34 @@ bool CPlanarShadowShader::CompileShaders()
     fn_glShaderSource(m_hVertexShader, 1, &g_szPlanarVert, nullptr);
     fn_glCompileShader(m_hVertexShader);
     fn_glGetShaderiv(m_hVertexShader, GL_COMPILE_STATUS, &ok);
-    if (!ok) return false;
+    if (!ok) {
+        // GLP-11: this class previously failed silently here -- every other shader class
+        // (BMDMeshShader/TerrainShader/PassthroughShader) logs a compile failure via SDL_Log;
+        // this one had neither that nor a success log, making "did the shader actually
+        // compile" unverifiable short of a GPU debugger. Matches this task's own Verification
+        // requirement, not just a GLP-11-specific concern.
+        g_ErrorReport.Write(L"[PlanarShadowShader] Vertex shader compilation failed\r\n");
+        return false;
+    }
 
     m_hFragmentShader = fn_glCreateShader(GL_FRAGMENT_SHADER);
     fn_glShaderSource(m_hFragmentShader, 1, &g_szPlanarFrag, nullptr);
     fn_glCompileShader(m_hFragmentShader);
     fn_glGetShaderiv(m_hFragmentShader, GL_COMPILE_STATUS, &ok);
-    if (!ok) return false;
+    if (!ok) {
+        g_ErrorReport.Write(L"[PlanarShadowShader] Fragment shader compilation failed\r\n");
+        return false;
+    }
 
     m_hProgram = fn_glCreateProgram();
     fn_glAttachShader(m_hProgram, m_hVertexShader);
     fn_glAttachShader(m_hProgram, m_hFragmentShader);
     fn_glLinkProgram(m_hProgram);
     fn_glGetProgramiv(m_hProgram, GL_LINK_STATUS, &ok);
-    if (!ok) return false;
+    if (!ok) {
+        g_ErrorReport.Write(L"[PlanarShadowShader] Program link failed\r\n");
+        return false;
+    }
 
     m_locBodyOrigin  = fn_glGetUniformLocation(m_hProgram, "u_BodyOrigin");
     m_locSx          = fn_glGetUniformLocation(m_hProgram, "u_Sx");
@@ -222,6 +246,7 @@ bool CPlanarShadowShader::CompileShaders()
         }
     }
 
+    g_ErrorReport.Write(L"[PlanarShadowShader] Created program ID %d\r\n", m_hProgram);
     return true;
 }
 
@@ -292,12 +317,13 @@ void CPlanarShadowShader::DrawGPUSkinned(GLuint vao, int baseCorner, int vertexC
     const float zeroOrigin[3] = { 0.f, 0.f, 0.f };
     const float* origin = skinOrigin ? skinOrigin : zeroOrigin;
 
-    if (m_locUseGPUSkin != -1) fn_glUniform1i(m_locUseGPUSkin, 1);
-    if (m_locSkinOrigin != -1) fn_glUniform3fv(m_locSkinOrigin, 1, origin);
-    if (m_locSkinScale  != -1) fn_glUniform1f(m_locSkinScale, skinScale);
+    if (m_locUseGPUSkin != -1) { fn_glUniform1i(m_locUseGPUSkin, 1); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locSkinOrigin != -1) { fn_glUniform3fv(m_locSkinOrigin, 1, origin); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locSkinScale  != -1) { fn_glUniform1f(m_locSkinScale, skinScale); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
 
     BindVAO(vao);
     glDrawArrays(GL_TRIANGLES, baseCorner, vertexCount);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
     BindVAO(0);
 }
 
@@ -333,12 +359,12 @@ bool CPlanarShadowShader::BeginGL(const float* bodyOrigin, const float mvp[16], 
     m_bActive = true;
     BindProgram(m_hProgram);
 
-    if (m_locBodyOrigin  != -1) fn_glUniform3fv(m_locBodyOrigin, 1, bodyOrigin);
-    if (m_locSx          != -1) fn_glUniform1f(m_locSx, sx);
-    if (m_locSy          != -1) fn_glUniform1f(m_locSy, sy);
-    if (m_locShadowAlpha != -1) fn_glUniform1f(m_locShadowAlpha, alpha);
-    if (m_locMVP         != -1) fn_glUniformMatrix4fv(m_locMVP, 1, GL_FALSE, mvp);
-    if (m_locUseGPUSkin  != -1) fn_glUniform1i(m_locUseGPUSkin, 0);
+    if (m_locBodyOrigin  != -1) { fn_glUniform3fv(m_locBodyOrigin, 1, bodyOrigin); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locSx          != -1) { fn_glUniform1f(m_locSx, sx); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locSy          != -1) { fn_glUniform1f(m_locSy, sy); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locShadowAlpha != -1) { fn_glUniform1f(m_locShadowAlpha, alpha); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locMVP         != -1) { fn_glUniformMatrix4fv(m_locMVP, 1, GL_FALSE, mvp); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_locUseGPUSkin  != -1) { fn_glUniform1i(m_locUseGPUSkin, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -361,7 +387,7 @@ void CPlanarShadowShader::DrawGL(const float* vertices, int vertexCount)
 {
     if (!m_bActive || m_VAO == 0 || m_VBO == 0 || vertexCount <= 0) return;
 
-    if (m_locUseGPUSkin != -1) fn_glUniform1i(m_locUseGPUSkin, 0);
+    if (m_locUseGPUSkin != -1) { fn_glUniform1i(m_locUseGPUSkin, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
 
     const size_t neededSize = (size_t)vertexCount * 3 * sizeof(float);
 
@@ -372,13 +398,17 @@ void CPlanarShadowShader::DrawGL(const float* vertices, int vertexCount)
     if (neededSize > m_VBOCapacity) {
         m_VBOCapacity = neededSize * 2;
         fn_glBufferData(GL_ARRAY_BUFFER, m_VBOCapacity, nullptr, GL_STREAM_DRAW);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
+        FrameProfiler::TagBufferOrphan();
     }
 
     fn_glBufferSubData(GL_ARRAY_BUFFER, 0, neededSize, vertices);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
     fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     BindVAO(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
     BindVAO(0);
 }
 

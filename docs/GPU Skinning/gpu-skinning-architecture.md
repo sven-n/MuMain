@@ -2,6 +2,15 @@
 
 This document provides a comprehensive technical specification of the **GPU Skeletal Skinning Engine** implemented in the MU Online client (`Render/Models/ZzzBMD.cpp`, `Render/Core/BoneUBO.h`, and `Render/Shaders/BMDMeshShader.cpp`).
 
+> [!CAUTION]
+> **The authoritative vertex shader is the embedded `g_szBMDMeshVert` string in
+> `Render/Shaders/BMDMeshShader.cpp` — not `Render/Shaders/glsl/bmd_mesh.vert`.**
+> Nothing in the tree loads the `.glsl` file at runtime (grep confirms no loader references
+> `bmd_mesh.vert`); it is a rough historical snapshot and is already stale against the real shader
+> in several ways — it has no `BMDFlags` block and no normal/chrome-UV skinning at all. Reading it
+> and concluding those features do not exist is a live trap. Verify against
+> `BMDMeshShader.cpp` before believing anything about shader behaviour.
+
 ---
 
 ## 1. Overview & High-Level Pipeline
@@ -29,24 +38,43 @@ The client allocates three primary Uniform Buffer Object slots reserved for rend
 ```mermaid
 graph TD
     subgraph UBO["Uniform Buffer Memory Slots"]
-        UBO0["Slot 0: GlobalMatrices UBO<br>(u_View, u_Proj, u_MVP, u_Time)"]
+        UBO0["Slot 0: GlobalMatrices UBO<br>(u_View, u_Proj, u_Model, u_MVP, u_Time)"]
         UBO1["Slot 1: SceneData UBO<br>(u_Fog, u_Light, u_Time)"]
-        UBO2["Slot 2: BoneMatrices UBO<br>(u_Bones[200])"]
+        UBO2["Slot 2: BoneMatrices UBO<br>(u_Bones[600] — 3 rows/bone)"]
+        UBO6["Slot 6: BMDFlags UBO<br>(per-draw render mode / chrome / specular)"]
     end
 ```
 
-### Bone UBO Layout (`Slot 2`)
+### Bone UBO Layout (`Slot 2`) — 3×vec4 affine rows (`GLP-11`)
 
-The bone UBO stores an array of 200 4x4 bone matrices in `std140` layout:
+The bone UBO stores **600 `vec4` affine rows — three per bone, 200 bones** — in `std140` layout:
 
 ```glsl
-layout(std140, binding = 1) uniform BoneMatrices {  // shader-side comment; runtime binding is slot 2
-    mat4 u_Bones[200];
+layout(std140) uniform BoneMatrices {
+    vec4 u_Bones[600]; // 3 rows per bone, 200 bones
 };
 ```
 
+Row *i* of bone *b* is `u_Bones[b*3 + i]`. The engine's native bone format is already 3×4 affine
+(`vec34_t`), so `BoneUBO` now `memcpy`s it straight across; it previously expanded each bone to a
+column-major `mat4` on the CPU purely to ship a constant `(0,0,0,1)` fourth row the shader never
+read. This cut the largest single per-object upload in the renderer by 25% (12,800 → 9,600 bytes
+per skeleton) and replaced a 26-line repack loop with one `memcpy`.
+
 > [!NOTE]
-> **Pre-existing binding inconsistency**: The GLSL source comment says `binding = 1`, but at runtime `BoneUBO::Create()` binds to **slot 2**. This mismatch exists in the codebase itself (not introduced by documentation). The runtime binding (slot 2) is authoritative — it is what the GPU actually uses.
+> **Corrected 2026-08-12.** Earlier revisions of this document described `mat4 u_Bones[200]` and
+> a "pre-existing binding inconsistency" where the GLSL said `binding = 1` while the runtime bound
+> slot 2. Both are gone: the layout is `vec4[600]`, and no `binding = 1` qualifier remains anywhere
+> under `Render/Shaders/`. The runtime binding (slot 2) is still what the GPU uses.
+
+### `BMDFlags` UBO (`Slot 6`)
+
+Per-draw render-mode/chrome/specular state, created via `RHI::CreateUniformBlock(sizeof(BMDFlagsCB), 6)`
+and consumed by both the vertex and fragment stages. Omitted from earlier revisions of this
+document. It is the block [GLP-09](glperf/README.md#glp-09--ring-buffer-ubo-allocator)'s ring
+allocator and [GLP-10](glperf/README.md#glp-10--content-dirty-check-on-uniform-block-updates)'s
+content dirty-check specifically target — it previously allocated once per BMD mesh draw with no
+deduplication, hundreds of times per frame.
 
 #### The `MAX_BONES = 200` Invariant
 
@@ -109,17 +137,24 @@ The GPU vertex shader converts rest-pose model vertices `a_Pos` into final scree
 
 ### World Placement Equations
 
-$$\text{localPos} = \text{u\_Bones}[\text{a\_BoneIndex}] \cdot \text{vec4}(\text{a\_Pos}, 1.0)$$
+With $r_i = \text{u\_Bones}[\text{a\_BoneIndex} \cdot 3 + i]$ (the bone's three affine rows) and
+$p = \text{vec4}(\text{a\_Pos}, 1.0)$, the transform is three dot products rather than a matrix
+multiply — there is no `mat4` to multiply by (`GLP-11`):
 
-$$\text{worldPos} = \text{u\_BodyOrigin} + \text{u\_BodyScale} \cdot \text{localPos.xyz}$$
+$$\text{bonePos} = \big(\,r_0 \cdot p,\; r_1 \cdot p,\; r_2 \cdot p\,\big)$$
+
+$$\text{worldPos} = \text{u\_BodyOrigin} + \text{u\_BodyScale} \cdot \text{bonePos}$$
 
 $$\text{gl\_Position} = \text{u\_MVPDraw} \cdot \text{vec4}(\text{worldPos}, 1.0)$$
 
+This replicates `BMD::Transform`'s `VectorMA(BodyOrigin, BodyScale, bonePos, VertexTransform)`
+exactly.
+
 ### Normal Skinning & Chrome Generation
 
-For lit or reflective meshes:
+For lit or reflective meshes, using only the rotational part (`.xyz`) of each row:
 
-$$\text{skinnedNormal} = \text{normalize}(\text{mat3}(\text{u\_Bones}[\text{a\_BoneIndex}]) \cdot \text{a\_Normal})$$
+$$\text{skinnedNormal} = \text{normalize}\big(\,r_{0.xyz} \cdot \text{a\_Normal},\; r_{1.xyz} \cdot \text{a\_Normal},\; r_{2.xyz} \cdot \text{a\_Normal}\,\big)$$
 
 For chrome reflection (`u_RenderMode == 3`), animated chrome UV coordinates are calculated on the GPU from the skinned normal. RenderMode 3 covers both plain `RENDER_CHROME` and the CHROME2/3/5/6/7/METAL variants — the variant is selected via the `u_ChromeVariant` uniform (introduced in DXP-20-inc5). The base formula (plain chrome fallback):
 

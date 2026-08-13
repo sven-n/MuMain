@@ -246,6 +246,11 @@ void PlatformSwapBuffers()
 {
     if (g_sdlWindow)
     {
+        // GLP-19: IR defers its draw until the next incompatible Begin() or an explicit flush, so
+        // the frame's last batch would otherwise sit unsubmitted until some later frame. Every
+        // swap path in the tree funnels through here (SceneManager, LoadingScene, UIMng), which
+        // makes this the one place that cannot be missed.
+        IR::Flush();
 #ifndef _WIN32
         MaybeCaptureFrame();
 #endif
@@ -1563,6 +1568,11 @@ static void APIENTRY GLDebugCallback(GLenum source, GLenum type, GLuint id, GLen
         g_ErrorReport.Write(L"  ^ first occurrence of this message -- call stack:\r\n");
         LogSymbolizedStack();
     }
+}
+// GLP-08: GLDebugCallback's closing brace above was missing -- this whole block has been
+// uncompiled dead code since ENABLE_GL_KHR_DEBUG_CALLBACK has always defaulted to 0, so the
+// preprocessor skipped it before the compiler could ever see the mismatch. Found while
+// temporarily flipping the flag on for a GLP-08 soak test.
 #endif // ENABLE_GL_KHR_DEBUG_CALLBACK
 #endif // _DEBUG
 
@@ -1701,14 +1711,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Stage G) selects the context profile. Core became the default after the DXP-08a/
     // DXP-09 prerequisites were fixed and the debug-callback soak came back clean across
     // every map/panel; compatibility (CoreProfile=0) remains available as a rollback.
-    // Core additionally needs an explicit 3.3 version request (compatibility takes the
-    // driver's highest).
+    // Core additionally needs an explicit version request (compatibility takes the
+    // driver's highest, and must keep doing so -- see the else branch below).
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, g_CoreProfile ? SDL_GL_CONTEXT_PROFILE_CORE : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-    if (g_CoreProfile)
-    {
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    }
 #if defined(_DEBUG) && ENABLE_GL_KHR_DEBUG_CALLBACK
     // KHR_debug callback (registered below, after context creation) needs the context
     // created with the debug flag to get synchronous, precisely-attributed messages.
@@ -1721,7 +1726,68 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     if (g_bUseWindowMode != TRUE)
         windowFlags |= SDL_WINDOW_FULLSCREEN;
 
-    g_sdlWindow = SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
+    if (g_CoreProfile)
+    {
+        // GLP-08: request the highest core context the driver will give -- a driver is
+        // permitted to hand back a higher version than requested for a core-profile context,
+        // but not guaranteed to, and Phase 2/4 need features not in 3.3 (see GLP-08 task notes).
+        // Descend only on failure; the {3,3} rung is byte-identical to the pre-GLP-08 fixed
+        // request, so a machine where the whole loop somehow misbehaves still ends up exactly
+        // where it was before this change.
+        static constexpr struct { int major, minor; } kCoreVersionAttempts[] = { {4, 5}, {4, 3}, {3, 3} };
+        constexpr int kAttemptCount = sizeof(kCoreVersionAttempts) / sizeof(kCoreVersionAttempts[0]);
+
+        // config.ini [Render] MaxGLVersion caps which rung the loop starts at -- rollback path
+        // for a driver that mishandles the descending loop itself. Empty/default tries highest.
+        int startIndex = 0;
+        if (g_MaxGLVersionMajor > 0)
+        {
+            while (startIndex < kAttemptCount - 1 &&
+                   (kCoreVersionAttempts[startIndex].major > g_MaxGLVersionMajor ||
+                    (kCoreVersionAttempts[startIndex].major == g_MaxGLVersionMajor &&
+                     kCoreVersionAttempts[startIndex].minor > g_MaxGLVersionMinor)))
+            {
+                startIndex++;
+            }
+        }
+
+        for (int i = startIndex; i < kAttemptCount; i++)
+        {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, kCoreVersionAttempts[i].major);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, kCoreVersionAttempts[i].minor);
+
+            g_sdlWindow = SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
+            if (g_sdlWindow)
+            {
+                g_sdlGLContext = SDL_GL_CreateContext(g_sdlWindow);
+                if (g_sdlGLContext)
+                {
+                    g_ErrorReport.Write(L"> GL %d.%d core context created.\r\n", kCoreVersionAttempts[i].major, kCoreVersionAttempts[i].minor);
+                    break;
+                }
+                g_ErrorReport.Write(L"> GL %d.%d core context failed, trying next.\r\n", kCoreVersionAttempts[i].major, kCoreVersionAttempts[i].minor);
+                // SDL will not let a context-creation retry reuse a window whose pixel format is
+                // already set -- destroy and recreate between attempts.
+                SDL_DestroyWindow(g_sdlWindow);
+                g_sdlWindow = nullptr;
+            }
+            else
+            {
+                g_ErrorReport.Write(L"> SDL_CreateWindow failed for GL %d.%d core, trying next.\r\n", kCoreVersionAttempts[i].major, kCoreVersionAttempts[i].minor);
+            }
+        }
+    }
+    else
+    {
+        // Compatibility profile: unchanged from pre-GLP-08 behavior -- no explicit version
+        // request, takes the driver's highest.
+        g_sdlWindow = SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);
+        if (g_sdlWindow)
+        {
+            g_sdlGLContext = SDL_GL_CreateContext(g_sdlWindow);
+        }
+    }
+
     if (!g_sdlWindow)
     {
         g_ErrorReport.Write(L"> SDL_CreateWindow failed.\r\n");
@@ -1736,7 +1802,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;
 
-    g_sdlGLContext = SDL_GL_CreateContext(g_sdlWindow);
     if (!g_sdlGLContext)
     {
         g_ErrorReport.Write(L"OpenGL Create Context Error.\r\n");

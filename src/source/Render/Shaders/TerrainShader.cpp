@@ -2,6 +2,7 @@
 #include "TerrainShader.h"
 #include "Render/Core/RenderConfig.h"
 #include "Render/Core/BindState.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include <SDL3/SDL.h>
 #include <cstdint>
@@ -268,13 +269,18 @@ void TerrainShader::CreateGL()
 
     // Assign default texture unit slots (u_BaseTex = 0, u_OverlayTex = 1)
     BindProgram(m_Program);
-    if (m_LocBaseTex != -1) fn_glUniform1i(m_LocBaseTex, 0);
-    if (m_LocOverlayTex != -1) fn_glUniform1i(m_LocOverlayTex, 1);
-    if (m_LocWaterMove != -1) fn_glUniform1f(m_LocWaterMove, 0.0f);
-    if (m_LocBaseIsWater != -1) fn_glUniform1i(m_LocBaseIsWater, 0);
-    if (m_LocOverlayIsWater != -1) fn_glUniform1i(m_LocOverlayIsWater, 0);
-    if (m_LocAlphaRef != -1) fn_glUniform1f(m_LocAlphaRef, -1.0f);
+    if (m_LocBaseTex != -1) { fn_glUniform1i(m_LocBaseTex, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocOverlayTex != -1) { fn_glUniform1i(m_LocOverlayTex, 1); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocWaterMove != -1) { fn_glUniform1f(m_LocWaterMove, 0.0f); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocBaseIsWater != -1) { fn_glUniform1i(m_LocBaseIsWater, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocOverlayIsWater != -1) { fn_glUniform1i(m_LocOverlayIsWater, 0); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
+    if (m_LocAlphaRef != -1) { fn_glUniform1f(m_LocAlphaRef, -1.0f); FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites); }
     m_LastAlphaRef = -1.0f;
+    // GLP-04: reset to "unset", not 0 -- even though the default upload above sends 0/0, the
+    // sentinel must not assume it always precedes the first real SetWaterFlags() call.
+    m_LastBaseIsWater = -1;
+    m_LastOverlayIsWater = -1;
+
     // Standard 64px-tile scale (64/64/TERRAIN_SCALE = 0.01) as a sane pre-first-draw default;
     // every real tile draw overwrites this via SetUVScale() before use.
     if (m_LocBaseUVScale != -1) fn_glUniform2f(m_LocBaseUVScale, 0.01f, 0.01f);
@@ -316,8 +322,9 @@ void TerrainShader::SetBaseTexture(GLuint texID)
 
 void TerrainShader::SetOverlayTexture(GLuint texID)
 {
+    // GLP-05: no raw glActiveTexture(GL_TEXTURE0) restore anymore -- BindState now owns the
+    // active texture unit as part of its bind-state monopoly (see BindState.cpp's BindTexture2D).
     BindTexture2D(1, texID);
-    if (fn_glActiveTexture) fn_glActiveTexture(GL_TEXTURE0); // Restore default active texture
 }
 
 void TerrainShader::SetUVScale(float baseScaleX, float baseScaleY, float overlayScaleX, float overlayScaleY)
@@ -342,16 +349,26 @@ void TerrainShader::SetWaterMove(float waterMove)
 {
     if (m_LocWaterMove != -1 && fn_glUniform1f) {
         fn_glUniform1f(m_LocWaterMove, waterMove);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
     }
 }
 
 void TerrainShader::SetWaterFlags(bool baseIsWater, bool overlayIsWater)
 {
-    if (m_LocBaseIsWater != -1 && fn_glUniform1i) {
-        fn_glUniform1i(m_LocBaseIsWater, baseIsWater ? 1 : 0);
+    // GLP-04: dirty-checked, matching SyncAlphaRef/PassthroughShader's tri-state setters --
+    // called once per visible terrain tile and almost always 0/0, so an unconditional write
+    // here was two redundant glUniform1i per tile for the overwhelming majority of tiles.
+    const int base = baseIsWater ? 1 : 0;
+    if (m_LocBaseIsWater != -1 && fn_glUniform1i && base != m_LastBaseIsWater) {
+        fn_glUniform1i(m_LocBaseIsWater, base);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
+        m_LastBaseIsWater = base;
     }
-    if (m_LocOverlayIsWater != -1 && fn_glUniform1i) {
-        fn_glUniform1i(m_LocOverlayIsWater, overlayIsWater ? 1 : 0);
+    const int overlay = overlayIsWater ? 1 : 0;
+    if (m_LocOverlayIsWater != -1 && fn_glUniform1i && overlay != m_LastOverlayIsWater) {
+        fn_glUniform1i(m_LocOverlayIsWater, overlay);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
+        m_LastOverlayIsWater = overlay;
     }
 }
 
@@ -362,6 +379,7 @@ void TerrainShader::SyncAlphaRef()
     // lesson: per-tile GL calls are the enemy).
     if (m_LocAlphaRef != -1 && fn_glUniform1f && g_AlphaRef != m_LastAlphaRef) {
         fn_glUniform1f(m_LocAlphaRef, g_AlphaRef);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
         m_LastAlphaRef = g_AlphaRef;
     }
 }

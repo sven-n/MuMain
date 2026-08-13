@@ -1835,6 +1835,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             BindVAO(m_VAO_StaticGPU);
 
             glDrawArrays(GL_TRIANGLES, baseCorner, flatCount);
+            FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
 
             // DXP-22 step 4: no reflexive BindVAO(0)/Unbind() here -- the next draw's own Bind()/
             // BindVAO() call (any of the 4 shader classes, or this same one) self-corrects via the
@@ -1842,7 +1843,9 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             // 0 is immediately before raw fixed-function glBegin/glEnd draws (ZzzLodTerrain.cpp's
             // grass-pass sites), which now call UnbindAllShaders() explicitly at pass level instead
             // of relying on this per-mesh reset. See DXP-22-bind-state-monopoly-perf.md.
-            fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
+            // GLP-06: no trailing glBindBuffer(GL_ARRAY_BUFFER, 0) either -- a VAO doesn't consult
+            // the generic GL_ARRAY_BUFFER binding point at draw time, only what was bound when each
+            // glVertexAttribPointer call captured it, so this unbind affected nothing.
             return;
         }
 
@@ -1879,31 +1882,20 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                 GLuint activeTexID = texture ? texture->TextureNumber : 0;
                 BMDMeshShader::Instance().Bind(shaderRenderMode, EnableWave ? blendMeshTextureCoordU : 0.0f, EnableWave ? blendMeshTextureCoordV : 0.0f, activeTexID, mvp, 0);
 
+                // GLP-06: single interleaved VBO (Pos vec3 | UV vec2 | Color vec4, 9 floats/36 bytes
+                // stride) whose attribute format is baked into m_VAO_Static once, the first time
+                // UploadDynamicBuffers() creates m_VBO_Dynamic (see that function) -- not
+                // re-specified here on every draw. BindVAO alone is enough; the VAO already knows
+                // which buffer and layout to read.
                 BindVAO(m_VAO_Static);
-
-                // Single interleaved VBO: Pos (vec3) | UV (vec2) | Color (vec4) = 9 floats (36 bytes stride)
-                fn_glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Dynamic);
-
-                constexpr GLsizei stride = 9 * sizeof(float);
-
-                // Location 0: Position (3 floats) at offset 0
-                fn_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-                fn_glEnableVertexAttribArray(0);
-
-                // Location 1: UV (2 floats) at offset 12 bytes (3 * sizeof(float))
-                fn_glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-                fn_glEnableVertexAttribArray(1);
-
-                // Location 2: Color (4 floats) at offset 20 bytes (5 * sizeof(float))
-                fn_glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void*)(5 * sizeof(float)));
-                fn_glEnableVertexAttribArray(2);
 
                 // Flat expansion — glDrawArrays starting at index 0.
                 glDrawArrays(GL_TRIANGLES, 0, m_MeshIndexCount[meshIndex]);
+                FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
 
                 // DXP-22 step 4: no reflexive BindVAO(0)/Unbind() here -- see the GPU-skinned path
-                // above for the full reasoning (self-corrects via the wrapper cache).
-                fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
+                // above for the full reasoning (self-corrects via the wrapper cache). GLP-06: no
+                // trailing glBindBuffer(GL_ARRAY_BUFFER, 0) either, same reasoning as that path.
                 return;
             }
         }
@@ -2382,6 +2374,7 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(3, GL_FLOAT, 0, vertices);
         glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 }
@@ -2469,6 +2462,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(3, GL_FLOAT, 0, vertices);
         glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
+        FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 }
@@ -2595,6 +2589,14 @@ void BMD::UploadStaticVBOs()
     std::vector<float> gpuGeomBuffer(flatOffset * 9, 0.0f);
     int gpuIdx = 0;
 
+#ifdef _DEBUG
+    // GLP-12 investigation: what is the actual highest bone Node index any model's vertices
+    // reference, versus GPU_MAX_BONES (200)? Debug-only, additive -- doesn't change uploaded
+    // data or runtime behavior. Logs only when a NEW session-wide maximum is found, so this
+    // stays quiet across a normal session instead of spamming once per model.
+    int debugMaxNodeThisModel = -1;
+#endif
+
     for (int i = 0; i < NumMeshs; i++) {
         Mesh_t* m = &Meshs[i];
         if (!m || !m->Triangles || !m->Vertices || m->NumTriangles <= 0 || m->NumVertices <= 0) continue;
@@ -2613,6 +2615,9 @@ void BMD::UploadStaticVBOs()
                     gpuGeomBuffer[gpuIdx * 9 + 1] = m->Vertices[vi].Position[1];
                     gpuGeomBuffer[gpuIdx * 9 + 2] = m->Vertices[vi].Position[2];
                     boneNode = m->Vertices[vi].Node;
+#ifdef _DEBUG
+                    if (boneNode > debugMaxNodeThisModel) debugMaxNodeThisModel = boneNode;
+#endif
                 }
                 // Static UV (2 floats)
                 if (m->TexCoords && tci >= 0 && tci < m->NumTexCoords) {
@@ -2642,6 +2647,17 @@ void BMD::UploadStaticVBOs()
             }
         }
     }
+
+#ifdef _DEBUG
+    if (debugMaxNodeThisModel >= 0) {
+        static int s_debugSessionMaxNode = -1;
+        if (debugMaxNodeThisModel > s_debugSessionMaxNode) {
+            s_debugSessionMaxNode = debugMaxNodeThisModel;
+            g_ErrorReport.Write(L"[GLP-12] New session-max bone Node: %d (model \"%hs\", this model's own NumBones=%d)\r\n",
+                s_debugSessionMaxNode, Name, NumBones);
+        }
+    }
+#endif
 
     if (!gpuGeomBuffer.empty()) {
         m_StaticGeomReady = true;
@@ -2711,7 +2727,38 @@ void BMD::UploadDynamicBuffers(int meshIndex, float alpha, int renderFlags)
     EnsureCpuVertices(meshIndex);
 
     // Lazy-create single dynamic interleaved VBO on first use
-    if (m_VBO_Dynamic == 0) fn_glGenBuffers(1, &m_VBO_Dynamic);
+    if (m_VBO_Dynamic == 0)
+    {
+        fn_glGenBuffers(1, &m_VBO_Dynamic);
+
+        // GLP-06: bake the vertex attribute format into m_VAO_Static here, once, instead of
+        // RenderMesh()'s draw path re-issuing all six calls on every mesh draw. This is the one
+        // point both m_VAO_Static (created earlier in UploadStaticVBOs() -- guaranteed to already
+        // exist, since reaching this line means m_MeshIndexCount[meshIndex] > 0, which is the
+        // same condition that gates m_VAO_Static's creation there) and this buffer are known to
+        // exist together. glVertexAttribPointer captures whatever is bound to GL_ARRAY_BUFFER at
+        // call time, so the bind below must happen before these calls and nothing else may bind
+        // GL_ARRAY_BUFFER in between.
+        BindVAO(m_VAO_Static);
+        fn_glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Dynamic);
+
+        constexpr GLsizei stride = 9 * sizeof(float);
+
+        // Location 0: Position (3 floats) at offset 0
+        fn_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+        fn_glEnableVertexAttribArray(0);
+
+        // Location 1: UV (2 floats) at offset 12 bytes (3 * sizeof(float))
+        fn_glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+        fn_glEnableVertexAttribArray(1);
+
+        // Location 2: Color (4 floats) at offset 20 bytes (5 * sizeof(float))
+        fn_glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void*)(5 * sizeof(float)));
+        fn_glEnableVertexAttribArray(2);
+
+        BindVAO(0);
+        fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 
     const int flatCount  = m_MeshIndexCount[meshIndex];
     const int baseCorner = m_MeshIndexOffset[meshIndex];
@@ -2831,6 +2878,17 @@ void BMD::ReleaseDynamicVBOs()
 void BMD::ReleaseStaticVBOs()
 {
     m_StaticGeomReady = false;
+
+    // GLP-06: m_VAO_Static's baked vertex attribute format (UploadDynamicBuffers(), first use)
+    // is tied to m_VBO_Dynamic's specific GL buffer name. Deleting m_VAO_Static below without
+    // also resetting m_VBO_Dynamic would let a later UploadStaticVBOs() rebuild create a *new*,
+    // unconfigured VAO that UploadDynamicBuffers()'s lazy-init check (`if (m_VBO_Dynamic == 0)`)
+    // would then never re-configure, since the old buffer name would still be non-zero -- same
+    // class of bug RHI_GL::DestroyTexture's InvalidateTextureCache() call guards against. Both
+    // current call sites (Release(), and this function's own re-entry from UploadStaticVBOs())
+    // already happen to be safe, but tying the lifecycles together here makes that true by
+    // construction instead of by audit.
+    ReleaseDynamicVBOs();
 
     LoadBMDGLFunctions();
     if (m_EBO != 0 && fn_glDeleteBuffers) {

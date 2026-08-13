@@ -105,6 +105,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetShowDebugInfo(false);
         return true;
     }
+    else if (strCommand.compare(L"$glstats on") == 0)
+    {
+        SetShowGLStats(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$glstats off") == 0)
+    {
+        SetShowGLStats(false);
+        return true;
+    }
     else if (strCommand.compare(0, 4, L"$fps") == 0)
     {
         auto fps_str = strCommand.substr(5);
