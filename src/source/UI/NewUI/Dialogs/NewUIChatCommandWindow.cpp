@@ -520,6 +520,17 @@ void SEASON3B::CNewUIChatCommandWindow::RenderSelectedCommand()
         }
 
         g_pRenderText->RenderText(m_Pos.x + 25, y, parameter.Name.c_str(), 130, 0);
+
+        // A field which is only visible once it's clicked can't be found, so
+        // every parameter which is typed shows where its value goes.
+        if (!HasFixedValues(parameter))
+        {
+            glColor4ub(0, 0, 0, 160);
+            RenderColor(static_cast<float>(m_Pos.x + 158), static_cast<float>(y - 1), 152.f, ROW_HEIGHT);
+            EndRenderColor();
+            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+
         if (m_editedParameter != static_cast<int>(i))
         {
             g_pRenderText->RenderText(m_Pos.x + 160, y, value.empty() ? parameter.ValidValues.c_str() : value.c_str(), static_cast<int>(WINDOW_WIDTH) - 165, 0);
