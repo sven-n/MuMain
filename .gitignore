@@ -32,6 +32,12 @@ build-linux/
 # Bundled UI fonts (curated, shipped with the client) are source-controlled.
 !**/bin/fonts/
 !**/bin/fonts/**
+# RmlUi RML/RCSS documents (hand-authored UI markup, not generated/proprietary game assets like
+# the rest of bin/Data/) are source-controlled, same rationale as bin/fonts/ above.
+!**/bin/Data/
+!**/bin/Data/Interface/
+!**/bin/Data/Interface/RmlUi/
+!**/bin/Data/Interface/RmlUi/**
 **/obj/
 *.user
 *.suo

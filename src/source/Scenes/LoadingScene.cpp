@@ -14,6 +14,8 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "SceneCommon.h"
 #include "UI/NewUI/Dialogs/ReconnectDialog.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include <RmlUi/Core/ElementDocument.h>
 
 
 #ifdef _EDITOR
@@ -70,31 +72,43 @@ void LoadingScene(HDC hDC)
 {
     g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_Start");
 
-    CUIMng& rUIMng = CUIMng::Instance();
+    // RmlUi migration plan Phase 1 pilot: replaces CLoadingScene's 4-tile CSprite rendering
+    // (the class above is left completely untouched -- not deleted, per the plan's retirement
+    // criteria: don't remove legacy code until parity is confirmed against a real build, which
+    // this environment doesn't have) with an equivalent RmlUi document, Data/Interface/RmlUi/
+    // loading.rml + loading.rcss. Loaded and closed within this single call, matching this
+    // function's own one-shot-per-flash lifecycle (renders exactly one frame, then flips
+    // SceneFlag away below).
+    Rml::ElementDocument* rmlLoadingDoc = nullptr;
+
     if (!InitLoading)
     {
         LoadingWorld = 9999999;
-
         InitLoading = true;
-        LoadBitmap(L"Interface\\LSBg01.JPG", BITMAP_TITLE, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg02.JPG", BITMAP_TITLE + 1, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg03.JPG", BITMAP_TITLE + 2, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg04.JPG", BITMAP_TITLE + 3, GL_LINEAR);
 
         ::StopMp3(MUSIC_LOGIN_THEME);
 
-        rUIMng.m_pLoadingScene = new CLoadingScene;
-        rUIMng.m_pLoadingScene->Create();
+        if (RmlUiRuntime::Instance().IsCreated())
+        {
+            rmlLoadingDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/loading.rml");
+            if (rmlLoadingDoc)
+                rmlLoadingDoc->Show();
+        }
     }
 
     FogEnable = true;
     ::BeginOpengl();
     ::ClearColorAndDepthBuffers();
-    ::BeginBitmap();
 
-    rUIMng.m_pLoadingScene->Render();
+    // No explicit BeginBitmap()/EndBitmap() bracket needed here -- RmlUiRuntime::Render() opens
+    // and restores its own equivalent bracket internally (see its Phase 0.4 implementation),
+    // the same way RenderCursor()/UI::Reconnect::RenderDialog() below manage their own.
+    if (RmlUiRuntime::Instance().IsCreated())
+    {
+        RmlUiRuntime::Instance().Update();
+        RmlUiRuntime::Instance().Render();
+    }
 
-    ::EndBitmap();
     ::EndOpengl();
     ::FlushGL();
 #ifdef _EDITOR
@@ -113,11 +127,10 @@ void LoadingScene(HDC hDC)
     UI::Reconnect::RenderDialog();
     PlatformSwapBuffers();
 
-    SAFE_DELETE(rUIMng.m_pLoadingScene);
+    if (rmlLoadingDoc)
+        rmlLoadingDoc->Close();
 
     SceneFlag = MAIN_SCENE;
-    for (int i = 0; i < 4; ++i)
-        ::DeleteBitmap(BITMAP_TITLE + i);
 
     ::ClearInput();
 

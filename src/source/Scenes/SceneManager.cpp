@@ -1174,13 +1174,16 @@ void MainScene(HDC hDC)
 
         if (Success)
         {
-            // RmlUi migration plan Phase 0.4: single per-frame choke point, regardless of which
-            // scene is active or which legacy windows have migrated -- fires unconditionally
-            // once real 2D UI/scene rendering for this frame has already happened, before the
-            // editor overlay/cursor and the swap below. Where RmlUi's output should land in
-            // z-order relative to CUIMng::Render()/g_pNewUISystem->Render() is a separate,
-            // later decision (Phase 0.8) -- this only establishes the mechanical "runs once,
-            // after scene rendering, before swap" contract.
+            // RmlUi migration plan Phase 0.4. CORRECTION (2026-08-15): this is NOT actually a
+            // single per-frame choke point regardless of scene, despite the original comment
+            // here claiming so -- this whole block lives inside the static, unnamed function
+            // that only LOG_IN_SCENE/CHARACTER_SCENE/MAIN_SCENE route through (via MainScene(hDC)
+            // in RenderScene()'s switch below). LOADING_SCENE and WEBZEN_SCENE call LoadingScene()/
+            // WebzenScene() directly instead and never reach this block, each running its own
+            // independent BeginOpengl->render->EndOpengl->PlatformSwapBuffers() cycle. LoadingScene()
+            // now has its own matching Update()/Render() call for exactly this reason -- see
+            // LoadingScene.cpp. WebzenScene() does not yet; add one there the same way if/when
+            // RmlUi content needs to appear during that scene.
             if (RmlUiRuntime::Instance().IsCreated())
             {
                 RmlUiRuntime::Instance().Update();

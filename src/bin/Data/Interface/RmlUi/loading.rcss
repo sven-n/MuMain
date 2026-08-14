@@ -1,0 +1,29 @@
+/* Reproduces CLoadingScene's 4-tile 800x600 reference-canvas layout
+   (LoadingScene.cpp's m_asprBack[0..3] positions/sizes) using percentage
+   sizing instead of the old fScaleX/fScaleY sprite scaling -- RmlUi scales
+   the whole document to the real Context/window size the same way. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background-color: #000000;
+}
+
+#bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.tile {
+	position: absolute;
+}
+
+/* 400/800 = 50%, 512/600 = 85.3333%, 88/600 = 14.6667% */
+.tile-top-left     { left: 0%;  top: 0%;       width: 50%; height: 85.3333%; }
+.tile-top-right    { left: 50%; top: 0%;       width: 50%; height: 85.3333%; }
+.tile-bottom-left  { left: 0%;  top: 85.3333%; width: 50%; height: 14.6667%; }
+.tile-bottom-right { left: 50%; top: 85.3333%; width: 50%; height: 14.6667%; }

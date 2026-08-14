@@ -5,6 +5,7 @@
 #include "Render/Shaders/PassthroughShader.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Core/Globals/_TextureIndex.h"
+#include <algorithm>
 
 namespace
 {
@@ -137,7 +138,13 @@ Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dime
     // texture in the game uses -- GlobalBitmap.cpp) rather than loading the file directly, so
     // RmlUi-referenced images (RML/RCSS <img>/background-image) share its cache/eviction/ref-
     // counting instead of bypassing it. See the RmlUi migration plan's Phase 0.3.
-    const std::wstring wpath = Utf8ToWide(source); // Rml::String is std::string (RmlUi/Config/Config.h)
+    // RML/RCSS conventionally author asset paths with forward slashes; every existing in-tree
+    // caller of Bitmaps.LoadImage passes backslash-separated paths (e.g. "Interface\\Foo.jpg"),
+    // matching this codebase's own path-handling convention -- normalize rather than assume GL's
+    // (and this engine's Linux port's) forward-slash tolerance extends to this legacy loader too.
+    std::string normalized = source;
+    std::replace(normalized.begin(), normalized.end(), '/', '\\');
+    const std::wstring wpath = Utf8ToWide(normalized); // Rml::String is std::string (RmlUi/Config/Config.h)
     const GLuint bitmapIndex = Bitmaps.LoadImage(wpath, GL_LINEAR, GL_CLAMP_TO_EDGE);
     if (bitmapIndex == BITMAP_UNKNOWN) return 0;
 
