@@ -888,6 +888,20 @@ void BindVertexBuffer(RHI::BufferHandle handle, RHI::VertexLayout layout)
     auto it = g_Buffers.find(handle.id);
     if (it == g_Buffers.end()) return;
 
+    // GLP-19: this is the D3D11 counterpart of BindState.cpp's BindVAO() hook. That hook does
+    // NOT cover this backend despite being in backend-shared code -- it sits after
+    // LoadBindStateFunctions()'s early return, which fails without a GL context, so under D3D11
+    // it never runs. Changing the geometry source under a pending batch would submit it reading
+    // the wrong buffer/stride. Dirty-checked (below) so consecutive IR draws still merge.
+    //
+    // Re-entrancy is safe and load-bearing: IR::Flush() calls back into this function to bind its
+    // own VBO, but it clears its pending flag before submitting, so the inner call's flush is a
+    // no-op. Because the flush runs BEFORE the bind, the outer caller's buffer wins -- which is
+    // what keeps a caller that binds its IA state once and then draws in a loop (see
+    // ZzzLodTerrain.cpp's FlushTerrainBuckets) from having that binding silently replaced by
+    // IR's when a flush fires mid-loop.
+    if (g_CurrentSlot0BufferId != handle.id) IR::Flush();
+
     g_Context->IASetInputLayout(g_InputLayout[idx]);
     if (g_CurrentSlot0BufferId != handle.id)
     {
@@ -1078,6 +1092,15 @@ void BindTexture(RHI::TextureHandle handle, int slot)
     // terrain's per-tile draw loop calls this twice per tile (base+overlay) for potentially
     // thousands of tiles a frame, almost always with the same texture as the previous tile.
     if (g_CurrentTextureBound[slot] && g_CurrentTextureId[slot] == handle.id) return;
+
+    // GLP-19: the D3D11 counterpart of BindState.cpp's BindTexture2D() hook, which does not cover
+    // this backend for the same reason BindVAO()'s doesn't (see BindVertexBuffer above). A pending
+    // batch still references the previous texture, so it must be drawn before this slot changes --
+    // otherwise merged quads sample whichever texture was bound last. Placed after the dirty-check
+    // above so consecutive same-texture binds (terrain's per-bucket base+overlay pair, almost
+    // always unchanged from the previous bucket) still merge rather than flushing per call.
+    IR::Flush();
+
     g_CurrentTextureBound[slot] = true;
     g_CurrentTextureId[slot]    = handle.id;
 

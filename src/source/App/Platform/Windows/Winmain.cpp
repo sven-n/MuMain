@@ -247,6 +247,21 @@ static void MaybeCaptureFrame()
 // branching here (rather than at each call site) covers all of them uniformly.
 void PlatformSwapBuffers()
 {
+    // GLP-19: IR defers its draw until the next incompatible Begin() or an explicit flush, so
+    // the frame's last batch would otherwise sit unsubmitted until some later frame. Every
+    // swap path in the tree funnels through here (SceneManager, LoadingScene, UIMng), which
+    // makes this the one place that cannot be missed.
+    //
+    // This MUST stay above the backend branch. It used to sit inside the GL-only block below,
+    // so the D3D11 path returned past it and never flushed at all -- the frame's last batch
+    // survived into the next frame and was submitted by whatever called IR::Flush() first there
+    // (GlobalUBO::Upload at camera setup, or the first RHI::Draw). Flush() restores no state --
+    // the key it captures at End() only decides mergeability for the next Begin() -- so those
+    // stale quads drew under the NEXT frame's matrices and whatever blend/depth state happened
+    // to be live, surfacing as large dark/black rectangles over the world. Intermittent by
+    // nature: it only fires on frames that actually end with a batch still pending.
+    IR::Flush();
+
     if (g_RenderBackend == RenderBackend::D3D11)
     {
         RHI::EndFrame();
@@ -255,11 +270,6 @@ void PlatformSwapBuffers()
 
     if (g_sdlWindow)
     {
-        // GLP-19: IR defers its draw until the next incompatible Begin() or an explicit flush, so
-        // the frame's last batch would otherwise sit unsubmitted until some later frame. Every
-        // swap path in the tree funnels through here (SceneManager, LoadingScene, UIMng), which
-        // makes this the one place that cannot be missed.
-        IR::Flush();
 #ifndef _WIN32
         MaybeCaptureFrame();
 #endif
