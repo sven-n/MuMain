@@ -1763,7 +1763,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         // text boxes the login screen's username/password fields use. g_hRC stays null (no GL
         // context exists under this backend) -- nothing in the tree reads it.
         g_hDC = GetDC(g_hWnd);
+        // #ifdef _WIN32, not the enclosing runtime backend check: SDL_SetWindowsMessageHook and
+        // Win32MessageHook (defined under _WIN32 above) don't exist off Windows, and this whole
+        // block is still *compiled* on every platform even though it can only *run* on Windows.
+        // Mirrors the GL branch's own guarded call further down.
+#ifdef _WIN32
         SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
+#endif
 
         // DXP-15 increment 3: the single-pass shader/UBO/IR subsystems, mirrored from the GL
         // branch's own Create() calls below -- DXP-14/15 already proved each is backend-agnostic
