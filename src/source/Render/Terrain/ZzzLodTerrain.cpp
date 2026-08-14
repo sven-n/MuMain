@@ -12,6 +12,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Render/Models/ZzzBMD.h"
 #include "ZzzLodTerrain.h"
+#include "TerrainLightRows.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -914,6 +915,24 @@ void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer
     }
 }
 
+// TerrainLightRows keeps its own grid size so it stays free of the precompiled-header
+// chain; this is the one place both are visible, so it is where they get tied together.
+static_assert(Render::Terrain::LightRows::RowCount == TERRAIN_SIZE,
+    "TerrainLightRows::RowCount must match TERRAIN_SIZE");
+
+namespace
+{
+    // The light writers below take the target buffer as a parameter -- the editor's brush
+    // writes TerrainLight, effects write PrimaryTerrainLight. Only the latter is what the
+    // terrain light VBO mirrors, so only that one dirties rows for the next upload.
+    void MarkPrimaryLightRowsDirty(const vec3_t* buffer, int centerRow, int range)
+    {
+        if (buffer != PrimaryTerrainLight) return;
+
+        Render::Terrain::LightRows::MarkRange(centerRow - range, centerRow + range);
+    }
+}
+
 void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer)
 {
     auto rf = (float)Range;
@@ -922,6 +941,7 @@ void SetTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer
     yf = (yf / TERRAIN_SCALE);
     int   xi = (int)xf;
     int   yi = (int)yf;
+    MarkPrimaryLightRowsDirty(Buffer, yi, Range);
     int   syi = yi - Range;
     int   eyi = yi + Range;
     auto syf = (float)(syi);
@@ -955,6 +975,7 @@ void AddTerrainLight(float xf, float yf, vec3_t Light, int Range, vec3_t* Buffer
     yf = (yf / TERRAIN_SCALE);
     int   xi = (int)xf;
     int   yi = (int)yf;
+    MarkPrimaryLightRowsDirty(Buffer, yi, Range);
     int   syi = yi - Range;
     int   eyi = yi + Range;
     auto syf = (float)(syi);
@@ -989,6 +1010,7 @@ void AddTerrainLightClip(float xf, float yf, vec3_t Light, int Range, vec3_t* Bu
     yf = (yf / TERRAIN_SCALE);
     int   xi = (int)xf;
     int   yi = (int)yf;
+    MarkPrimaryLightRowsDirty(Buffer, yi, Range);
     int   syi = yi - Range;
     int   eyi = yi + Range;
     auto syf = (float)(syi);
@@ -1061,6 +1083,7 @@ typedef void (APIENTRY* PFNGLGENBUFFERSPROC)(GLsizei, GLuint*);
 typedef void (APIENTRY* PFNGLDELETEBUFFERSPROC)(GLsizei, const GLuint*);
 typedef void (APIENTRY* PFNGLBINDBUFFERPROC)(GLenum, GLuint);
 typedef void (APIENTRY* PFNGLBUFFERDATAPROC)(GLenum, GLsizeiptr, const void*, GLenum);
+typedef void (APIENTRY* PFNGLBUFFERSUBDATAPROC)(GLenum, GLintptr, GLsizeiptr, const void*);
 typedef void (APIENTRY* PFNGLGENVERTEXARRAYSPROC)(GLsizei, GLuint*);
 typedef void (APIENTRY* PFNGLDELETEVERTEXARRAYSPROC)(GLsizei, const GLuint*);
 typedef void (APIENTRY* PFNGLBINDVERTEXARRAYPROC)(GLuint);
@@ -1073,6 +1096,7 @@ static PFNGLGENBUFFERSPROC             fn_glGenBuffers             = nullptr;
 static PFNGLDELETEBUFFERSPROC          fn_glDeleteBuffers          = nullptr;
 static PFNGLBINDBUFFERPROC             fn_glBindBuffer             = nullptr;
 static PFNGLBUFFERDATAPROC             fn_glBufferData             = nullptr;
+static PFNGLBUFFERSUBDATAPROC          fn_glBufferSubData          = nullptr;
 static PFNGLGENVERTEXARRAYSPROC        fn_glGenVertexArrays        = nullptr;
 static PFNGLDELETEVERTEXARRAYSPROC     fn_glDeleteVertexArrays     = nullptr;
 static PFNGLVERTEXATTRIBPOINTERPROC    fn_glVertexAttribPointer    = nullptr;
@@ -1092,6 +1116,7 @@ static bool LoadTerrainGLFunctions()
     fn_glDeleteBuffers           = (PFNGLDELETEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteBuffers");
     fn_glBindBuffer              = (PFNGLBINDBUFFERPROC)SDL_GL_GetProcAddress("glBindBuffer");
     fn_glBufferData              = (PFNGLBUFFERDATAPROC)SDL_GL_GetProcAddress("glBufferData");
+    fn_glBufferSubData           = (PFNGLBUFFERSUBDATAPROC)SDL_GL_GetProcAddress("glBufferSubData");
     fn_glGenVertexArrays         = (PFNGLGENVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glGenVertexArrays");
     fn_glDeleteVertexArrays      = (PFNGLDELETEVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glDeleteVertexArrays");
     fn_glVertexAttribPointer     = (PFNGLVERTEXATTRIBPOINTERPROC)SDL_GL_GetProcAddress("glVertexAttribPointer");
@@ -1099,7 +1124,7 @@ static bool LoadTerrainGLFunctions()
     fn_glPushDebugGroup          = (PFNGLPUSHDEBUGGROUPPROC)SDL_GL_GetProcAddress("glPushDebugGroup");
     fn_glPopDebugGroup           = (PFNGLPOPDEBUGGROUPPROC)SDL_GL_GetProcAddress("glPopDebugGroup");
 
-    loaded = (fn_glGenBuffers && fn_glBindBuffer && fn_glBufferData && fn_glGenVertexArrays);
+    loaded = (fn_glGenBuffers && fn_glBindBuffer && fn_glBufferData && fn_glBufferSubData && fn_glGenVertexArrays);
     return loaded;
 }
 
@@ -1201,6 +1226,10 @@ void CreateTerrainVBO()
     fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[1]);
     fn_glBufferData(GL_ARRAY_BUFFER, sizeof(PrimaryTerrainLight), nullptr, GL_STREAM_DRAW);
 
+    // Both light buffers were just allocated with undefined contents, so the next upload
+    // for each has to cover every row rather than only what changed since.
+    Render::Terrain::LightRows::MarkAll();
+
     // Element Index Buffer
     fn_glGenBuffers(1, &g_EBO_Terrain);
     fn_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_EBO_Terrain);
@@ -1211,15 +1240,42 @@ void CreateTerrainVBO()
     fn_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+// One terrain grid row of PrimaryTerrainLight is one contiguous byte range in the light
+// VBO, which is what lets a run of dirty rows go up as a single buffer update.
+static constexpr size_t TERRAIN_LIGHT_ROW_BYTES = sizeof(vec3_t) * TERRAIN_SIZE;
+
 void UploadTerrainLightVBO()
 {
     if (g_VBO_TerrainLight[0] == 0) return;
     if (!LoadTerrainGLFunctions()) return;
 
-    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[g_TerrainLightBufIdx]);
-    fn_glBufferData(GL_ARRAY_BUFFER, sizeof(PrimaryTerrainLight), PrimaryTerrainLight, GL_STREAM_DRAW);
-    fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
+    namespace LightRows = Render::Terrain::LightRows;
+
+    // Uploading the whole array every frame moved ~768 KB per frame for what is usually a
+    // few dozen changed rows (InitTerrainLight only refreshes the frustum band, and effect
+    // lights touch a handful of rows each), so only the rows that actually changed since
+    // this buffer was last written go up.
+    const int bufferIndex = g_TerrainLightBufIdx;
+    LightRows::Run dirtyRuns[LightRows::MaxRuns];
+    const int runCount = LightRows::CollectRuns(bufferIndex, dirtyRuns, LightRows::MaxRuns);
+
+    // Flip regardless of whether there was anything to upload, so the buffer the renderer
+    // reads this frame (g_TerrainLightBufIdx ^ 1) stays the one this call was responsible
+    // for. Both buffers are kept current by the per-buffer dirty sets, so an idle frame
+    // that skips the upload still draws correct lighting.
     g_TerrainLightBufIdx ^= 1;
+    if (runCount == 0) return;
+
+    fn_glBindBuffer(GL_ARRAY_BUFFER, g_VBO_TerrainLight[bufferIndex]);
+    for (int i = 0; i < runCount; i++)
+    {
+        const GLintptr   offset = (GLintptr)(dirtyRuns[i].firstRow * TERRAIN_LIGHT_ROW_BYTES);
+        const GLsizeiptr length = (GLsizeiptr)(dirtyRuns[i].rowCount * TERRAIN_LIGHT_ROW_BYTES);
+        fn_glBufferSubData(GL_ARRAY_BUFFER, offset, length, &PrimaryTerrainLight[TERRAIN_INDEX(0, dirtyRuns[i].firstRow)][0]);
+    }
+    fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    LightRows::ClearRuns(bufferIndex);
 }
 
 void CreateLodBuffer()
@@ -3238,6 +3294,12 @@ extern int EnableEvent;
 void InitTerrainLight()
 {
     int xi, yi;
+
+    // The frustum band is rewritten from BackTerrainLight below, so every row it covers
+    // changes even when the camera stands still (effect lights added last frame get reset
+    // back to the baked lighting here).
+    Render::Terrain::LightRows::MarkRange(FrustrumBoundMinY, FrustrumBoundMaxY + 3);
+
     yi = FrustrumBoundMinY;
     for (; yi <= FrustrumBoundMaxY + 3; yi += 1)
     {
