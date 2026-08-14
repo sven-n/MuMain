@@ -10,6 +10,8 @@
 #include "Render/Textures/ZzzOpenglUtil.h" // WindowWidth/WindowHeight
 #include <cstring>
 
+#include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
+
 RmlUiRuntime& RmlUiRuntime::Instance()
 {
     static RmlUiRuntime instance;
@@ -67,6 +69,17 @@ void RmlUiRuntime::Update()
 {
     if (!m_Context) return;
     m_Context->Update();
+}
+
+bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
+{
+    if (!m_Context) return true; // nothing to consume it -- let it fall through
+    return RmlSDL::InputEventHandler(m_Context, window, event);
+}
+
+bool RmlUiRuntime::IsMouseOverUI() const
+{
+    return m_Context && m_Context->IsMouseInteracting();
 }
 
 void RmlUiRuntime::Render()

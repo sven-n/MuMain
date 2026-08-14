@@ -23,6 +23,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Scenes/SceneCore.h"
 #include "Engine/Pathing/ZzzPath.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 #include "GameLogic/Events/MatchEvent.h"
@@ -307,7 +308,11 @@ void SelectObjects()
     SelectedNpc = -1;
     SelectedOperate = -1;
 
-    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429))
+    // Third click-gating flag alongside the two legacy ones, per the RmlUi migration plan's
+    // Phase 0.8 -- MouseOnWindow (Legacy/CUIMng tier) and CheckMouseUse() (NewUI tier) are each
+    // owned by their own tier with their own lifecycle, so this adds a flag rather than trying
+    // to unify three ownership models into one right now.
+    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && !RmlUiRuntime::Instance().IsMouseOverUI() && SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429))
     {
         if (Core::Input::IsKeyDown(VK_MENU))
         {

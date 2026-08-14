@@ -111,6 +111,16 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
         "source/*.cpp"
 )
 
+# RmlUi's official SDL input-event backend (RmlSDL::InputEventHandler/ConvertKey/
+# ConvertMouseButton/GetKeyModifierState) -- not part of RmlCore itself (RMLUI_BACKEND=none
+# above skips RmlUi's bundled renderer/platform backends), but there is no reason to hand-roll
+# an SDL-keycode-to-Rml::Input::KeyIdentifier mapping table when RmlUi ships a tested one. Only
+# this one file is compiled, not the rest of ThirdParty/RmlUi/Backends/ (which also contains
+# GL2/GL3/GPU/Vulkan renderer backends this project doesn't use, and whose own SystemInterface_SDL
+# class this project doesn't need -- see RmlUiSystemInterface). Not picked up by the GLOB_RECURSE
+# above since it globs "source/*.cpp", not ThirdParty/.
+list(APPEND MU_CLIENT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.cpp")
+
 # Per-platform entry points (App/Platform/<OS>/Winmain.cpp, main.cpp, main.mm)
 # belong to the executable, not the engine library. Removing them keeps the
 # library free of a WinMain/main() so it can be linked into test binaries that
@@ -459,6 +469,9 @@ target_include_directories(MuClient PUBLIC
   "${CMAKE_BINARY_DIR}/generated"
   # stb_truetype backs the portable GDI text rasterizer (issue #462).
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/stb"
+  # RmlUi's official SDL input backend (RmlUi_Platform_SDL.h) -- see the RmlUi_Platform_SDL.cpp
+  # addition to MU_CLIENT_SOURCES above.
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 
@@ -472,6 +485,7 @@ target_compile_definitions(MuClient PUBLIC
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
   $<$<BOOL:${ENABLE_EDITOR}>:_EDITOR>  # Editor features for admin builds
+  RMLUI_SDL_VERSION_MAJOR=3  # RmlUi_Platform_SDL.h's SDL2-vs-SDL3 API switch -- this project is SDL3-only
 )
 
 if (MSVC)
