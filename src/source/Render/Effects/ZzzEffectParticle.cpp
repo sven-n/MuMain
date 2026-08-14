@@ -17,6 +17,8 @@
 #include "World/MapInfra/MapManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Render/Shaders/PassthroughShader.h"
+#include "Render/Effects/ParticleDrawOrder.h"
+#include "Render/Core/RenderConfig.h"
 #include "Scenes/MainScene.h"
 
 vec3_t g_vParticleWind = { 0.0f, 0.0f, 0.0f };
@@ -9264,6 +9266,105 @@ namespace
             o->LifeTime = 0;
         }
     }
+
+    bool ShouldRenderInPass(const PARTICLE* o, BYTE byRenderOneMore)
+    {
+        if (!o->Live) return false;
+        if (byRenderOneMore == 1) return o->Position[2] <= 350.f;
+        if (byRenderOneMore == 2) return o->Position[2] > 300.f;
+        return true;
+    }
+
+    // Draw cases that pick their own blend mode instead of keeping the additive default
+    // RenderParticle() sets before the switch. Their sprites are subtractive or
+    // alpha-blended, neither of which is order-independent, so they never get reordered.
+    // Derived by reading every case body in RenderParticle() for a blend-state call; a
+    // missing entry here would be a real ordering bug, so it is checked by a script-assisted
+    // sweep rather than by memory, and the switch below must be kept in step with that
+    // function.
+    bool DrawCaseOverridesBlend(int type)
+    {
+        switch (type)
+        {
+        case BITMAP_CLUD64:
+        case BITMAP_TWINTAIL_WATER:
+        case BITMAP_SMOKE:
+        case BITMAP_SMOKE + 1:
+        case BITMAP_SMOKE + 3:
+        case BITMAP_SMOKE + 4:
+        case BITMAP_ADV_SMOKE + 1:
+        case BITMAP_FIRE:
+        case BITMAP_FIRE + 2:
+        case BITMAP_FIRE + 3:
+        case BITMAP_LIGHT + 2:
+        case BITMAP_CLOUD:
+        case BITMAP_SPARK:
+        case BITMAP_SMOKELINE2:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    // The two depth-test toggles in RenderParticle() are sticky -- nothing restores the
+    // previous state, so once one fires every particle drawn after it in the frame inherits
+    // it. Those particles have to keep their position, and because DrawOrder treats
+    // non-reorderable entries as barriers, nothing gets moved across them either.
+    bool DrawTogglesDepthState(const PARTICLE* o)
+    {
+        return (o->Type == BITMAP_LIGHT && o->SubType == 6)
+            || (o->Type == BITMAP_EXPLOTION && o->SubType == 5);
+    }
+
+    bool IsReorderable(const PARTICLE* o)
+    {
+        if (DrawTogglesDepthState(o)) return false;
+        if (DrawCaseOverridesBlend(o->Type)) return false;
+
+        // Components == 3 is exactly what RenderParticle() tests to choose additive
+        // blending (GL_ONE, GL_ONE) over the alpha-tested branch. Additive accumulation is
+        // commutative, so those sprites can be permuted freely; alpha-tested ones cannot.
+        const BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
+        return pBitmap != nullptr && pBitmap->Components == 3;
+    }
+
+    void RenderParticlesInSlotOrder(BYTE byRenderOneMore)
+    {
+        for (int i = 0; i < MAX_PARTICLES; i++)
+        {
+            PARTICLE* o = &Particles[i];
+            if (!ShouldRenderInPass(o, byRenderOneMore)) continue;
+
+            RenderParticle(o, i);
+        }
+    }
+
+    void RenderParticlesGroupedByTexture(BYTE byRenderOneMore)
+    {
+        // File-scope rather than a local: MAX_PARTICLES entries is far too much to put on
+        // the stack, and this only ever runs on the main render thread.
+        static Render::Effects::DrawOrder::Entry s_DrawOrder[MAX_PARTICLES];
+
+        size_t count = 0;
+        for (int i = 0; i < MAX_PARTICLES; i++)
+        {
+            PARTICLE* o = &Particles[i];
+            if (!ShouldRenderInPass(o, byRenderOneMore)) continue;
+
+            s_DrawOrder[count].particleIndex = i;
+            s_DrawOrder[count].textureKey = o->TexType;
+            s_DrawOrder[count].reorderable = IsReorderable(o);
+            count++;
+        }
+
+        Render::Effects::DrawOrder::GroupByTexture(s_DrawOrder, count);
+
+        for (size_t entry = 0; entry < count; entry++)
+        {
+            const int particleIndex = s_DrawOrder[entry].particleIndex;
+            RenderParticle(&Particles[particleIndex], particleIndex);
+        }
+    }
 }
 
 void RenderParticles(BYTE byRenderOneMore)
@@ -9277,20 +9378,11 @@ void RenderParticles(BYTE byRenderOneMore)
         return;
     }
 
-    for (int i = 0; i < MAX_PARTICLES; i++)
+    if (g_SortParticleDraws)
     {
-        PARTICLE* o = &Particles[i];
-        if (!o->Live) continue;
-
-        if (byRenderOneMore == 1)
-        {
-            if (o->Position[2] > 350.f) continue;
-        }
-        else if (byRenderOneMore == 2)
-        {
-            if (o->Position[2] <= 300.f) continue;
-        }
-
-        RenderParticle(o, i);
+        RenderParticlesGroupedByTexture(byRenderOneMore);
+        return;
     }
+
+    RenderParticlesInSlotOrder(byRenderOneMore);
 }
