@@ -327,6 +327,26 @@ void DisableTexture(bool AlphaTest)
 {
     EnableDepthMask();
 
+    // GLP-19: AlphaTestEnable, g_AlphaRef and TextureEnable are ALL IRBatchKey fields
+    // (ImmediateRenderer.cpp -- gl.alphaTestEnable / gl.alphaRef / gl.textureEnable), so a batch
+    // still pending here would be submitted under the NEW values. This function had no flush at
+    // all while every other state wrapper in this file got one, and its D3D11 branch below writes
+    // all three unconditionally (the GL branch dirty-checks each). Surfaced as solid untextured
+    // rectangles blinking over the UI: RenderColor() -- the solid-colour quad behind text/panel
+    // boxes -- calls this on EVERY call, and whether the stale batch got drained first depended
+    // on whether EnableDepthMask() above happened to find depth-mask dirty, which is what made it
+    // intermittent rather than constant.
+    //
+    // Dirty-checked first, then flush (gotcha 45's shape): RenderColor()'s per-quad call rate
+    // means an unconditional flush here would fire once per UI quad and undo GLP-19's batching
+    // entirely. The condition mirrors the branches below exactly -- g_AlphaRef only ever moves
+    // when AlphaTestEnable flips (GL) or when the requested ref differs (D3D11).
+    if (AlphaTestEnable != AlphaTest || TextureEnable ||
+        g_AlphaRef != (AlphaTest ? g_AlphaFuncRef : -1.0f))
+    {
+        IR::Flush();
+    }
+
     // DXP-16 increment 3: this function was the one sibling in this file's Enable*/Disable*
     // family without a g_RenderBackend==D3D11 branch (see EnableAlphaTest's comment above for the
     // pattern/history) -- its only call sites (BMD::RenderBodyShadow, RenderPartObjectEffect's
