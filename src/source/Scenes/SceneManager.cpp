@@ -56,6 +56,8 @@ FrameTimingState g_frameTiming;
 #include "imgui.h"
 #endif
 
+#include "Render/RmlUi/RmlUiRuntime.h"
+
 // External declarations
 extern int GrabScreen;
 extern int WaterTextureNumber;
@@ -1172,6 +1174,19 @@ void MainScene(HDC hDC)
 
         if (Success)
         {
+            // RmlUi migration plan Phase 0.4: single per-frame choke point, regardless of which
+            // scene is active or which legacy windows have migrated -- fires unconditionally
+            // once real 2D UI/scene rendering for this frame has already happened, before the
+            // editor overlay/cursor and the swap below. Where RmlUi's output should land in
+            // z-order relative to CUIMng::Render()/g_pNewUISystem->Render() is a separate,
+            // later decision (Phase 0.8) -- this only establishes the mechanical "runs once,
+            // after scene rendering, before swap" contract.
+            if (RmlUiRuntime::Instance().IsCreated())
+            {
+                RmlUiRuntime::Instance().Update();
+                RmlUiRuntime::Instance().Render();
+            }
+
 #ifdef _EDITOR
             // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
             g_MuEditorCore.Render();

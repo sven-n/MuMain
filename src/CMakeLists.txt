@@ -45,6 +45,22 @@ set(SDLMIXER_MIDI OFF CACHE BOOL "" FORCE)
 set(SDLMIXER_GME OFF CACHE BOOL "" FORCE)
 add_subdirectory(ThirdParty/SDL_mixer EXCLUDE_FROM_ALL)
 
+mu_ensure_submodule("ThirdParty/RmlUi"
+  INDICATOR "CMakeLists.txt"
+  URL "https://github.com/mikke89/RmlUi.git")
+
+# RmlUi -- static link, no bundled backends/samples/Lua bindings. We supply our own
+# Rml::RenderInterface/SystemInterface (source/Render/RmlUi/) targeting this engine's RHI::
+# abstraction instead of one of RmlUi's stock backends. Font engine left at RmlUi's default
+# for now -- see the RmlUi migration plan's Open Decisions for the FreeType-vs-GDI-bridge call.
+# Not gated behind ENABLE_EDITOR (unlike imgui below): this ships in the real game, not just
+# admin/editor builds.
+set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
+set(RMLUI_BACKEND "none" CACHE STRING "" FORCE)
+set(RMLUI_LUA_BINDINGS OFF CACHE BOOL "" FORCE)
+set(RMLUI_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory(ThirdParty/RmlUi EXCLUDE_FROM_ALL)
+
 # Determine architecture if CMAKE_SIZEOF_VOID_P isn't set
 if (NOT DEFINED CMAKE_SIZEOF_VOID_P OR CMAKE_SIZEOF_VOID_P EQUAL 0)
   # Try to detect from compiler path
@@ -815,6 +831,11 @@ target_link_libraries(MuClient PUBLIC
   SDL3::SDL3
   SDL3_mixer::SDL3_mixer
 )
+
+# Link RmlUi (game UI middleware) on all platforms. RmlCore's own CMake exports its Include/
+# directory as a PUBLIC usage requirement, so no manual target_include_directories entry is
+# needed here -- verify this holds during first bring-up rather than adding a redundant path.
+target_link_libraries(MuClient PUBLIC RmlCore)
 
 # Link ImGui for all platforms when editor is enabled. imgui carries its own
 # opengl32/dwmapi link dependencies (see its definition above), so the engine

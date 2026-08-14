@@ -17,6 +17,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/RHI/RHI.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
@@ -898,6 +899,7 @@ namespace
         OpenglWindowWidth = WindowWidth;
         OpenglWindowHeight = WindowHeight;
         RHI::OnResize(WindowWidth, WindowHeight); // no-op on GL
+        RmlUiRuntime::Instance().OnResize(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
         ReinitializeFonts();
         UpdateResolutionDependentSystems();
         UpdateCursorClip();
@@ -1812,6 +1814,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
     RHI::Init(nullptr, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
+    RmlUiRuntime::Instance().Create(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight)); // after RHI::Init -- the render interface issues RHI:: calls
 
 #if defined(_DEBUG) && ENABLE_GL_KHR_DEBUG_CALLBACK
     // DXP-08: register the KHR_debug callback now that a current context exists.
@@ -2044,6 +2047,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_MuEditorCore.Shutdown();
 #endif
     UnregisterBundledFonts();   // mirror the startup registration
+    // Before RHI::Shutdown() -- Rml::Shutdown() (called from Destroy()) releases every
+    // outstanding compiled-geometry/texture handle via RmlUiRenderInterface, which issues
+    // RHI::DestroyBuffer/DestroyTexture calls that must run while RHI is still valid.
+    RmlUiRuntime::Instance().Destroy();
     RHI::Shutdown();
     KillGLWindow();
     DestroyWindow();
