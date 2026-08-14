@@ -479,6 +479,11 @@ namespace {
     // increment 2.) The input layout itself has no equivalent bug: IASetInputLayout is called
     // unconditionally every BindVertexBuffer, never cached.
     uint32_t g_CurrentSlot0BufferId = 0;
+    // Which VertexLayout slot 0 was last bound WITH. Needed only so an IR::Flush() fired from a
+    // site that already has the caller's IA state bound can put it back (FlushIRPreservingIA
+    // below) -- the buffer id alone is not enough, since restoring requires the layout to pick the
+    // right input layout and stride. -1 = nothing bound yet.
+    int g_CurrentSlot0Layout = -1;
     // DXP-16: same dirty-check shape as g_CurrentSlot0BufferId above, for IASetIndexBuffer.
     uint32_t g_CurrentIndexBufferId = 0;
 
@@ -589,6 +594,7 @@ namespace {
             g_LayoutBytecode[i].clear();
         }
         g_CurrentSlot0BufferId = 0;
+        g_CurrentSlot0Layout   = -1; // input layouts were just released; nothing valid to restore to
         g_CurrentIndexBufferId = 0;
         g_CurrentTopology = static_cast<D3D11_PRIMITIVE_TOPOLOGY>(-1);
     }
@@ -754,6 +760,28 @@ RHI::BufferHandle CreateIndexBuffer(const void* initialData, size_t sizeBytes, R
     return CreateBufferGeneric(D3D11_BIND_INDEX_BUFFER, initialData, sizeBytes, usage == RHI::BufferUsage::Dynamic, -1);
 }
 
+// A grown buffer keeps its RHI handle id but gets a BRAND-NEW ID3D11Buffer. Both IA bind caches
+// (g_CurrentSlot0BufferId / g_CurrentIndexBufferId) key on the handle id, so without this the next
+// BindVertexBuffer/BindIndexBuffer dirty-check reports "already bound", skips the rebind, and
+// leaves the input assembler pointed at the buffer that was just RELEASED. Subsequent draws read
+// recycled GPU memory -- random garbage geometry, size scaling with whatever the draw was, and
+// intermittent because it only ever follows a growth event.
+//
+// Both growth sites need this. UpdateBuffer already re-pointed constant-buffer slots after
+// recreating (see below), which is the same class of fixup -- the IA caches were simply missed.
+// Reachable in normal play: FlushTerrainBuckets() appends the whole frame's terrain indices into
+// g_TerrainDynamicEBO, sized for ~2000 tiles and grown on demand for wider views, and then binds
+// that same handle immediately afterwards.
+void InvalidateBindCachesFor(uint32_t handleId)
+{
+    if (g_CurrentSlot0BufferId == handleId)
+    {
+        g_CurrentSlot0BufferId = 0;
+        g_CurrentSlot0Layout   = -1;
+    }
+    if (g_CurrentIndexBufferId == handleId) g_CurrentIndexBufferId = 0;
+}
+
 void UpdateBuffer(RHI::BufferHandle handle, const void* data, size_t sizeBytes)
 {
     auto it = g_Buffers.find(handle.id);
@@ -767,6 +795,7 @@ void UpdateBuffer(RHI::BufferHandle handle, const void* data, size_t sizeBytes)
         rec.capacity = static_cast<UINT>(sizeBytes) * 2;
         rec.buffer   = CreateD3DBuffer(rec.capacity, rec.bindFlag, nullptr, true);
         if (!rec.buffer) return;
+        InvalidateBindCachesFor(handle.id);
         if (rec.uniformSlot >= 0)
         {
             g_Context->VSSetConstantBuffers(static_cast<UINT>(rec.uniformSlot), 1, &rec.buffer);
@@ -797,6 +826,7 @@ size_t AppendBuffer(RHI::BufferHandle handle, const void* data, size_t sizeBytes
         rec.capacity = needed * 2;
         rec.buffer   = CreateD3DBuffer(rec.capacity, rec.bindFlag, nullptr, true);
         if (!rec.buffer) return 0;
+        InvalidateBindCachesFor(handle.id); // see the helper -- the ID3D11Buffer identity changed
         rec.writeOffset = 0;
         mapType = D3D11_MAP_WRITE_DISCARD;
     }
@@ -903,6 +933,7 @@ void BindVertexBuffer(RHI::BufferHandle handle, RHI::VertexLayout layout)
     if (g_CurrentSlot0BufferId != handle.id) IR::Flush();
 
     g_Context->IASetInputLayout(g_InputLayout[idx]);
+    g_CurrentSlot0Layout = idx;
     if (g_CurrentSlot0BufferId != handle.id)
     {
         ID3D11Buffer* vb = it->second.buffer;
@@ -911,6 +942,33 @@ void BindVertexBuffer(RHI::BufferHandle handle, RHI::VertexLayout layout)
         g_Context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
         g_CurrentSlot0BufferId = handle.id;
     }
+}
+
+// GLP-19 follow-up: IR::Flush() re-enters BindVertexBuffer to bind IR's own VBO with
+// VertexLayout::PosUvColor, and restores nothing. That is harmless when the flush happens BEFORE
+// the caller binds its IA state (BindVertexBuffer's own hook, where the caller's bind lands
+// afterwards and wins), but every other flush site fires AFTER the caller is already bound --
+// Draw(), DrawIndexed() and BindTexture(). There the clobber survives into the caller's draw,
+// which then reads its vertices/indices through IR's buffer at PosUvColor's stride: garbage
+// geometry, arbitrary shapes, scaling with whatever the caller was trying to draw.
+//
+// This is the hazard known_gotchas.md:36 predicted for anything alternating VertexLayouts within
+// a frame. Restoring the previous binding here keeps every flush site safe by construction rather
+// than relying on each one to notice.
+//
+// Re-entrancy: IR::Flush() -> RHI::Draw -> this helper again, but Flush() clears its pending flag
+// before submitting, so the inner call is a no-op and its prev/current comparison matches, leaving
+// IR's own binding alone for its own draw. The outer call then restores the original caller.
+void FlushIRPreservingIA()
+{
+    const uint32_t prevBuffer = g_CurrentSlot0BufferId;
+    const int      prevLayout = g_CurrentSlot0Layout;
+
+    IR::Flush();
+
+    if (prevLayout >= 0 && prevBuffer != 0 && g_CurrentSlot0BufferId != prevBuffer)
+        RHI_D3D11_Impl::BindVertexBuffer(RHI::BufferHandle{ prevBuffer },
+                                         static_cast<RHI::VertexLayout>(prevLayout));
 }
 
 void BindIndexBuffer(RHI::BufferHandle handle)
@@ -951,8 +1009,9 @@ void Draw(RHI::Topology topology, uint32_t vertexCount, uint32_t firstVertex)
     // GLP-19 (ported from RHI_GL.cpp's Draw() -- see that comment for the full rationale): a
     // deferred IR batch may never survive another draw. Re-entrancy is safe -- IR::Flush()
     // clears its pending flag before calling back into RHI::Draw(), so the inner call here is
-    // a no-op.
-    IR::Flush();
+    // a no-op. Preserving form: the caller has already bound its IA state by this point, and a
+    // bare IR::Flush() would leave IR's VBO bound underneath this draw.
+    FlushIRPreservingIA();
 
     if (!g_Context) return;
     D3D11_PRIMITIVE_TOPOLOGY topo;
@@ -963,7 +1022,7 @@ void Draw(RHI::Topology topology, uint32_t vertexCount, uint32_t firstVertex)
 
 void DrawIndexed(RHI::Topology topology, uint32_t indexCount, uint32_t firstIndex)
 {
-    IR::Flush(); // GLP-19 -- see Draw()
+    FlushIRPreservingIA(); // GLP-19 -- see Draw()
 
     if (!g_Context) return;
     D3D11_PRIMITIVE_TOPOLOGY topo;
@@ -1099,7 +1158,10 @@ void BindTexture(RHI::TextureHandle handle, int slot)
     // otherwise merged quads sample whichever texture was bound last. Placed after the dirty-check
     // above so consecutive same-texture binds (terrain's per-bucket base+overlay pair, almost
     // always unchanged from the previous bucket) still merge rather than flushing per call.
-    IR::Flush();
+    // Preserving form -- callers bind their vertex buffer BEFORE their textures (terrain's
+    // FlushTerrainBuckets binds once outside its loop, then sets textures per bucket inside it),
+    // so a bare IR::Flush() here would swap IR's VBO under the loop's remaining draws.
+    FlushIRPreservingIA();
 
     g_CurrentTextureBound[slot] = true;
     g_CurrentTextureId[slot]    = handle.id;
