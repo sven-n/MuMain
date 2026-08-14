@@ -194,6 +194,13 @@ cbuffer TerrainFlags : register(b5)
     int   u_BaseIsWater;
     int   u_OverlayIsWater;
     float u_AlphaRef;
+    // Twin of the GLSL u_BaseUVScale/u_OverlayUVScale uniforms -- see their comment for why a
+    // fixed constant cannot work here. Only the vertex stage reads them, but both stages share
+    // register b5 and must therefore declare the SAME layout. The four scalars above occupy
+    // exactly one 16-byte register, so these two float2s pack into the second without straddling;
+    // TerrainFlagsCB (C++) must keep matching this byte-for-byte.
+    float2 u_BaseUVScale;
+    float2 u_OverlayUVScale;
 };
 
 struct VSInput
@@ -215,9 +222,14 @@ struct VSOutput
 VSOutput main(VSInput input)
 {
     VSOutput o;
-    float2 baseUV = input.a_Pos.xy * 0.0025;
-    o.uvBase    = (u_BaseIsWater    != 0) ? baseUV + float2(u_WaterMove, 0.0) : baseUV;
-    o.uvOverlay = (u_OverlayIsWater != 0) ? baseUV + float2(u_WaterMove, 0.0) : baseUV;
+    // Mirrors the GLSL twin exactly. Two bugs lived here: the scale was the hardcoded 0.0025
+    // (correct only for 256px tile bitmaps -- this tree also ships 64px and 128px ones, so every
+    // other resolution rendered visibly wrong-sized), and the overlay reused baseUV instead of its
+    // own scale, which stayed invisible while both were the same constant.
+    float2 baseUV    = input.a_Pos.xy * u_BaseUVScale;
+    float2 overlayUV = input.a_Pos.xy * u_OverlayUVScale;
+    o.uvBase    = (u_BaseIsWater    != 0) ? baseUV    + float2(u_WaterMove, 0.0) : baseUV;
+    o.uvOverlay = (u_OverlayIsWater != 0) ? overlayUV + float2(u_WaterMove, 0.0) : overlayUV;
     o.light = input.a_Light;
     o.alpha = input.a_Alpha;
     o.pos   = mul(u_MVP, float4(input.a_Pos, 1.0));
@@ -232,6 +244,13 @@ cbuffer TerrainFlags : register(b5)
     int   u_BaseIsWater;
     int   u_OverlayIsWater;
     float u_AlphaRef;
+    // Twin of the GLSL u_BaseUVScale/u_OverlayUVScale uniforms -- see their comment for why a
+    // fixed constant cannot work here. Only the vertex stage reads them, but both stages share
+    // register b5 and must therefore declare the SAME layout. The four scalars above occupy
+    // exactly one 16-byte register, so these two float2s pack into the second without straddling;
+    // TerrainFlagsCB (C++) must keep matching this byte-for-byte.
+    float2 u_BaseUVScale;
+    float2 u_OverlayUVScale;
 };
 
 Texture2D    u_BaseTex     : register(t0);
@@ -292,7 +311,18 @@ namespace {
         return true;
     }
 
-    struct TerrainFlagsCB { float waterMove; int32_t baseIsWater; int32_t overlayIsWater; float alphaRef; };
+    // Must match the HLSL `cbuffer TerrainFlags : register(b5)` declaration byte-for-byte -- see
+    // the comment there. First four scalars = one 16-byte register; the two float2 pairs = the
+    // second. 32 bytes total.
+    struct TerrainFlagsCB {
+        float   waterMove;
+        int32_t baseIsWater;
+        int32_t overlayIsWater;
+        float   alphaRef;
+        float   baseUVScale[2];
+        float   overlayUVScale[2];
+    };
+    static_assert(sizeof(TerrainFlagsCB) == 32, "TerrainFlagsCB must stay in lockstep with the HLSL cbuffer layout");
 }
 #endif // RHI_D3D11_AVAILABLE -- ID3DBlob/D3DCompile aren't declared without <d3dcompiler.h>
        // (guarded above with the same macro); this block would fail to compile on non-Windows
@@ -486,6 +516,12 @@ void TerrainShader::CreateD3D11()
     m_D3DBaseIsWater = 0;
     m_D3DOverlayIsWater = 0;
     m_LastAlphaRef = -1.0f;
+    // Seed the UV scale to the same 0.01f the GL path's CreateGL() uses (and that
+    // TerrainDrawBucket defaults to), rather than leaving the -12345.0f dirty-check sentinel to be
+    // uploaded as a real scale on this first flush. Every real tile draw overwrites it via
+    // SetUVScale() before use.
+    m_LastBaseUVScale[0] = m_LastBaseUVScale[1] = 0.01f;
+    m_LastOverlayUVScale[0] = m_LastOverlayUVScale[1] = 0.01f;
     UploadD3D11Flags();
 
     // DXP-16 increment 2 fix (superseded by increment 3, see below): this shader used to own a
@@ -526,6 +562,13 @@ void TerrainShader::UploadD3D11Flags()
     cb.baseIsWater    = m_D3DBaseIsWater;
     cb.overlayIsWater = m_D3DOverlayIsWater;
     cb.alphaRef       = m_LastAlphaRef;
+    // m_Last*UVScale doubles as the live value here, not just SetUVScale's dirty-check cache --
+    // same way m_LastAlphaRef already does. Only one backend runs per process, so there is no
+    // risk of the GL path's use of these fields racing this one.
+    cb.baseUVScale[0]    = m_LastBaseUVScale[0];
+    cb.baseUVScale[1]    = m_LastBaseUVScale[1];
+    cb.overlayUVScale[0] = m_LastOverlayUVScale[0];
+    cb.overlayUVScale[1] = m_LastOverlayUVScale[1];
     RHI::UpdateUniformBlock(m_D3DFlagsCBuffer, &cb, sizeof(cb));
 }
 void TerrainShader::UnbindD3D11()
@@ -585,6 +628,29 @@ void TerrainShader::SetOverlayTexture(GLuint texID)
 
 void TerrainShader::SetUVScale(float baseScaleX, float baseScaleY, float overlayScaleX, float overlayScaleY)
 {
+    // This function shipped with NO D3D11 branch while every sibling here has one (SetWaterMove,
+    // SetWaterFlags, SetBaseTexture, SetOverlayTexture, SyncAlphaRef) -- it arrived later, with the
+    // upstream c6603879 merge that added per-texture UV scaling, and only the GLSL half of the
+    // shader pair was updated with it. Under D3D11 m_LocBaseUVScale is -1 and fn_glUniform2f is
+    // null, so the whole body below was a silent no-op: the scale never reached the GPU and the
+    // HLSL twin fell back to its own hardcoded 0.0025, i.e. correct tile size only on 256px
+    // bitmaps. Symptom was wrong-sized ground tiles under D3D11 while GL looked right.
+    if (g_RenderBackend == RenderBackend::D3D11)
+    {
+        // Dirty-checked for the same reason the GL path is -- adjacent buckets usually share both
+        // textures, and this would otherwise re-upload the whole cbuffer per bucket.
+        if (baseScaleX != m_LastBaseUVScale[0] || baseScaleY != m_LastBaseUVScale[1] ||
+            overlayScaleX != m_LastOverlayUVScale[0] || overlayScaleY != m_LastOverlayUVScale[1])
+        {
+            m_LastBaseUVScale[0] = baseScaleX;
+            m_LastBaseUVScale[1] = baseScaleY;
+            m_LastOverlayUVScale[0] = overlayScaleX;
+            m_LastOverlayUVScale[1] = overlayScaleY;
+            UploadD3D11Flags();
+        }
+        return;
+    }
+
     // Dirty-checked like SyncAlphaRef -- adjacent tiles on the same map very often share both
     // textures, so this is usually a no-op glUniform-wise.
     if (m_LocBaseUVScale != -1 && fn_glUniform2f &&
