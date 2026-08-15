@@ -9,6 +9,15 @@
 		<span class="label label-account">{{account_label}}</span>
 		<span class="label label-password">{{password_label}}</span>
 
+		<!-- Purely decorative frame standing in for the input boxes' visual backing -- inert
+		     under the legacy theme (its background sprite already provides one), styled by the
+		     modern theme only. See themes/modern/login.rcss's .input-frame comment for why this
+		     is safe to draw after the legacy text underneath without covering it. Shared here
+		     (not theme-specific RML) since it's meaningful structure, not visual styling -- the
+		     theme decides whether it's visible, not whether it exists. -->
+		<div class="input-frame input-account"></div>
+		<div class="input-frame input-password"></div>
+
 		<div class="checkbox-row checkbox-remember-me" data-event-click="login_toggle_remember_me">
 			<div class="checkbox-box" data-class-checked="remember_me_checked"></div>
 			<span class="checkbox-label">{{remember_me_label}}</span>

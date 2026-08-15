@@ -68,6 +68,10 @@ public:
     std::wstring GetFontSelection() const { return m_fontSelection; }
     void SetFontSelection(const std::wstring& font);
 
+    // Active RmlUi theme name ("legacy"/"modern") -- see UI::RmlBridge::RmlTheme.
+    std::wstring GetRmlTheme() const { return m_rmlTheme; }
+    void SetRmlTheme(const std::wstring& theme);
+
     // Camera
     int GetZoom() const { return m_zoom; }
     void SetZoom(int zoom);
@@ -104,6 +108,7 @@ private:
 
     std::wstring m_uiLocale;
     std::wstring m_fontSelection;
+    std::wstring m_rmlTheme;
 
     int m_zoom;
 

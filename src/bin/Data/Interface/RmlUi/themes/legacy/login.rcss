@@ -38,6 +38,13 @@ body {
 .label-account { left: 30px; top: 113px; }
 .label-password{ left: 30px; top: 139px; }
 
+/* Inert under this theme -- the legacy input-box frame sprites (CLoginWin's m_asprInputBox,
+   BITMAP_LOG_IN+8) already provide the visual backing. See login.rml's comment and the modern
+   theme's login.rcss for where this class is actually styled. */
+.input-frame {
+	display: none;
+}
+
 .checkbox-row {
 	position: absolute;
 	cursor: pointer;

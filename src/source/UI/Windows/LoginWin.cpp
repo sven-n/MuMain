@@ -31,6 +31,7 @@
 #include "Data/GameConfig/GameConfigConstants.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
@@ -95,7 +96,12 @@ void CLoginWin::Create()
     // The login background is fixed artwork and does not scale with the window
     // size, so keep the original height. The credential-consent controls fit on
     // the panel and the trust warning is drawn just below it (issue #462).
-    CWin::Create(329, 245, BITMAP_LOG_IN + 7);
+    // Background sprite is theme-gated: the "modern" theme draws the whole panel look itself in
+    // RCSS (themes/modern/login.rcss's #panel), so it never creates one -- CWin::Create's own
+    // nTexID<=-2 sentinel (confirmed precedent: ServerSelWin.cpp's CWin::Create(0,0,-2)) leaves
+    // m_psprBg null, and CWin::Render()'s existing `if (m_psprBg)` guard then draws nothing.
+    const bool bUseLegacySprites = UI::RmlBridge::UsesLegacySpriteChrome(UI::RmlBridge::GetActiveThemeName());
+    CWin::Create(329, 245, bUseLegacySprites ? (BITMAP_LOG_IN + 7) : -2);
 
     m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
     m_asprInputBox[LIW_PASSWORD].Create(156, 23, BITMAP_LOG_IN + 8);
@@ -192,8 +198,10 @@ void CLoginWin::Create()
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSavePassword(); });
             });
 
+        // Routed through UI::RmlBridge::LoadThemedDocument (not Context::LoadDocument directly)
+        // so this document resolves against the active theme's stylesheet -- see RmlTheme.h.
         if (modelCreated)
-            m_pRmlDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/login.rml");
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/login.rml");
     }
 }
 
@@ -421,10 +429,16 @@ void CLoginWin::RenderControls()
     // Legacy chrome removed here -- the background panel is still drawn by CWin::Render()'s
     // m_psprBg (unchanged); checkboxes/OK-Cancel buttons/labels/trust-warning text now render
     // via the RmlUi overlay instead (see this class's header comment and login.rml/.rcss).
-    // Input-box frame sprites and the actual CUITextInputBox text rendering are kept exactly as
-    // before -- text entry deliberately did not move to RmlUi.
-    m_asprInputBox[LIW_ACCOUNT].Render();
-    m_asprInputBox[LIW_PASSWORD].Render();
+    // Input-box frame sprites are theme-gated the same way the background sprite is (Create()'s
+    // comment) -- the modern theme draws its own .input-frame outline in RCSS instead
+    // (themes/modern/login.rcss), so rendering the legacy frame sprites there too would draw
+    // both on top of each other. The actual CUITextInputBox text rendering is never gated --
+    // text entry deliberately did not move to RmlUi in either theme.
+    if (UI::RmlBridge::UsesLegacySpriteChrome(UI::RmlBridge::GetActiveThemeName()))
+    {
+        m_asprInputBox[LIW_ACCOUNT].Render();
+        m_asprInputBox[LIW_PASSWORD].Render();
+    }
     m_pUsernameInputBox->Render();
     m_pPasswordInputBox->Render();
 
