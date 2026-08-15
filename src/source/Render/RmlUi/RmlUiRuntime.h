@@ -26,9 +26,13 @@ public:
     void Update();
     void Render();
 
-    // Forwards one SDL event to RmlUi via its official RmlSDL::InputEventHandler (vendored at
-    // ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.cpp -- see the RmlUi migration plan's Phase
-    // 0.8: reusing RmlUi's own tested SDL-keycode/modifier mapping rather than hand-rolling one).
+    // Forwards one SDL event to RmlUi. Motion and button down/up are handled directly (see the
+    // .cpp) to avoid two real bugs in RmlUi's official RmlSDL::InputEventHandler (vendored at
+    // ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.cpp) that don't fit this engine's own
+    // conventions: it calls SDL_CaptureMouse() on every button press/release, and it scales
+    // motion coordinates by SDL_GetWindowPixelDensity(). Every other event type (wheel/key/text)
+    // still goes through it -- still reusing RmlUi's own tested SDL-keycode/modifier mapping
+    // rather than hand-rolling one (RmlUi migration plan Phase 0.8).
     // @return false if RmlUi consumed the event (an element under the cursor / holding focus
     // claimed it) -- the caller should then skip its own legacy handling for this event. true
     // means RmlUi did not consume it (matches Rml::Context::Process*'s own "still propagating"

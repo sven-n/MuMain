@@ -15,7 +15,10 @@ body {
 	position: absolute;
 	width: 329px;
 	height: 245px;
-	font-family: "Tahoma";
+	/* Matches the family actually loaded via Rml::LoadFontFace (RmlUiRuntime::Create) --
+	   "Tahoma" was never loaded and rendered no text at all (confirmed from a real screenshot:
+	   shapes rendered, every label/button/warning string was blank). */
+	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: white;
 }

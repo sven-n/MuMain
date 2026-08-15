@@ -39,6 +39,16 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
         return;
     }
 
+    // Reuses the same bundled fonts this engine already ships for its portable GDI-text shim
+    // (Core/Platform/BundledFonts.h, "fonts/LiberationSans-*.ttf", copied next to the exe by the
+    // same asset-copy step as everything else under src/bin/) rather than adding a new font
+    // dependency. fallback_face=true on the regular weight means any RML/RCSS font-family that
+    // doesn't match a loaded face still renders with this one instead of silently rendering no
+    // text at all -- confirmed missing entirely (shapes rendered, text didn't) from a real
+    // screenshot before this fix.
+    Rml::LoadFontFace("fonts/LiberationSans-Regular.ttf", true);
+    Rml::LoadFontFace("fonts/LiberationSans-Bold.ttf");
+
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
 }
 
@@ -89,6 +99,18 @@ bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
         return m_Context->ProcessMouseButtonDown(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
     if (event.type == SDL_EVENT_MOUSE_BUTTON_UP)
         return m_Context->ProcessMouseButtonUp(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
+
+    // Mouse motion is also handled directly rather than through RmlSDL::InputEventHandler, which
+    // multiplies the raw event coordinates by SDL_GetWindowPixelDensity() before forwarding them
+    // -- correct for a backend whose Context was created in DPI-independent "points" and needs
+    // converting up to real pixels, but this engine's own HandleMouseMotion() (Winmain.cpp)
+    // applies no such scaling, and RmlUiRuntime::Create() built the Context directly from
+    // WindowWidth/WindowHeight (already real pixels). Multiplying by density on top of that
+    // double-applies any non-1.0 scaling, drifting RmlUi's notion of the cursor position away
+    // from where the game itself thinks it is -- plausible root cause of a real report ("mouse
+    // only seems to work in some areas"). Feed the same raw coordinates HandleMouseMotion() sees.
+    if (event.type == SDL_EVENT_MOUSE_MOTION)
+        return m_Context->ProcessMouseMove(static_cast<int>(event.motion.x), static_cast<int>(event.motion.y), RmlSDL::GetKeyModifierState());
 
     return RmlSDL::InputEventHandler(m_Context, window, event);
 }
