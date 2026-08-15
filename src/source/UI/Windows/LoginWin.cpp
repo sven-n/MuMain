@@ -202,6 +202,12 @@ void CLoginWin::Create()
         // so this document resolves against the active theme's stylesheet -- see RmlTheme.h.
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/login.rml");
+
+        // Deliberately NOT calling UI::RmlBridge::MakeDraggable() here -- the login screen is
+        // meant to stay static (see this class's CursorInWin(WA_MOVE) override, hardcoded false).
+        // MakeDraggable() itself was built and verified against this exact document during
+        // development (see docs/rmlui-ui-system/architecture.md) but isn't wired up for real use
+        // on this window.
     }
 }
 
