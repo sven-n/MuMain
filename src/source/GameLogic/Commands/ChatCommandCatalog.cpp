@@ -4,6 +4,7 @@
 #include "Data/Translation/MultiLanguage.h"
 #include "Network/Server/WSclient.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "UI/NewUI/NewUISystem.h"
 
 namespace GameLogic::Commands
 {
@@ -186,5 +187,12 @@ void ChatCommandCatalog::Execute(const std::wstring& commandLine)
     }
 
     SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, commandLine.c_str());
+
+    // Put it into the chat history as if it had been typed, so that it can be
+    // repeated with the arrow keys without going through the window again.
+    if (g_pChatInputBox != nullptr)
+    {
+        g_pChatInputBox->AddChatHistory(commandLine);
+    }
 }
 }
