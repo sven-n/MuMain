@@ -162,33 +162,38 @@ void CLoginWin::Create()
     // SetPosition() below), not recreated.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
-        m_pRmlDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/login.rml");
-        if (m_pRmlDoc)
-        {
-            m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "login",
-                [this](Rml::DataModelConstructor& c, LoginRmlModel& model)
-                {
-                    c.Bind("remember_me_checked", &model.rememberMeChecked);
-                    c.Bind("save_password_checked", &model.savePasswordChecked);
-                    c.Bind("server_name", &model.serverName);
-                    c.Bind("account_label", &model.accountLabel);
-                    c.Bind("password_label", &model.passwordLabel);
-                    c.Bind("remember_me_label", &model.rememberMeLabel);
-                    c.Bind("save_password_label", &model.savePasswordLabel);
-                    c.Bind("trust_warning", &model.trustWarning);
-                    c.Bind("ok_label", &model.okLabel);
-                    c.Bind("cancel_label", &model.cancelLabel);
+        // The data model must exist BEFORE the document referencing it (via data-model="login")
+        // is loaded -- RmlUi resolves data-model/{{bindings}} while PARSING the RML, so a model
+        // created after LoadDocument() is too late: every {{...}} in the document falls back to
+        // rendering its own literal source text instead of the bound value (confirmed from a
+        // real screenshot: "{{account_label}}", "{{server_name}}" etc. rendered verbatim). Create
+        // the model first, then load the document.
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "login",
+            [this](Rml::DataModelConstructor& c, LoginRmlModel& model)
+            {
+                c.Bind("remember_me_checked", &model.rememberMeChecked);
+                c.Bind("save_password_checked", &model.savePasswordChecked);
+                c.Bind("server_name", &model.serverName);
+                c.Bind("account_label", &model.accountLabel);
+                c.Bind("password_label", &model.passwordLabel);
+                c.Bind("remember_me_label", &model.rememberMeLabel);
+                c.Bind("save_password_label", &model.savePasswordLabel);
+                c.Bind("trust_warning", &model.trustWarning);
+                c.Bind("ok_label", &model.okLabel);
+                c.Bind("cancel_label", &model.cancelLabel);
 
-                    c.BindEventCallback("login_ok_click",
-                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
-                    c.BindEventCallback("login_cancel_click",
-                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
-                    c.BindEventCallback("login_toggle_remember_me",
-                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRememberMe(); });
-                    c.BindEventCallback("login_toggle_save_password",
-                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSavePassword(); });
-                });
-        }
+                c.BindEventCallback("login_ok_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+                c.BindEventCallback("login_cancel_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+                c.BindEventCallback("login_toggle_remember_me",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRememberMe(); });
+                c.BindEventCallback("login_toggle_save_password",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSavePassword(); });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/login.rml");
     }
 }
 
