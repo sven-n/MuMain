@@ -38,6 +38,8 @@ namespace RHI_GL_Impl {
     void SetDepthWriteEnabled(bool enabled);
     void SetFogEnabled(bool enabled);
     void SetPolygonOffset(bool enabled, float factor, float units);
+    void SetScissorEnabled(bool enabled);
+    void SetScissorRect(int x, int y, int w, int h);
 
     void BindVertexBuffer(RHI::BufferHandle handle, RHI::VertexLayout layout);
     void BindIndexBuffer(RHI::BufferHandle handle);
@@ -179,6 +181,16 @@ void SetFogEnabled(bool enabled)
 void SetPolygonOffset(bool enabled, float factor, float units)
 {
     RHI_GL_Impl::SetPolygonOffset(enabled, factor, units);
+}
+
+void SetScissorEnabled(bool enabled)
+{
+    RHI_GL_Impl::SetScissorEnabled(enabled);
+}
+
+void SetScissorRect(int x, int y, int w, int h)
+{
+    RHI_GL_Impl::SetScissorRect(x, y, w, h);
 }
 
 void BindVertexBuffer(BufferHandle handle, VertexLayout layout)

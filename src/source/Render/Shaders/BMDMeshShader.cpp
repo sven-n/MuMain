@@ -202,7 +202,7 @@ void main() {
         // the translation component (row.xyz only, no homogeneous term).
         skinnedNormal = normalize(vec3(dot(r0.xyz, a_Normal), dot(r1.xyz, a_Normal), dot(r2.xyz, a_Normal)));
         // Per-vertex lighting, ported 1:1 from BMD::Transform's CPU loop:
-        //   Luminosity = DotProduct(tn, LightPosition) * 0.8f + 0.4f; clamp to >= 0.2f (no upper bound)
+        //   Luminosity = VectorDotProduct(tn, LightPosition) * 0.8f + 0.4f; clamp to >= 0.2f (no upper bound)
         //   LightTransform = BodyLight * Luminosity
         // u_LightEnable mirrors RenderMesh's `useLight` (false for RENDER_BRIGHT / !LightEnable /
         // StreamMesh) — those cases use flat u_BodyLight, same as the CPU fallback did.
@@ -220,7 +220,7 @@ void main() {
         v_ChromeUVStatic = skinnedNormal.xy * 0.5 + 0.5;
         if (u_RenderMode == 7) {
             // RENDER_CHROME4 animated UV, ported 1:1 from the CPU g_chrome[] formula (ZzzBMD.cpp):
-            //   g_chrome[j][0] = DotProduct(n,Lp);     g_chrome[j][1] = 1.f - DotProduct(n,Lp);
+            //   g_chrome[j][0] = VectorDotProduct(n,Lp);     g_chrome[j][1] = 1.f - VectorDotProduct(n,Lp);
             //   g_chrome[j][1] -= n[2]*0.5f + waveLoc*3.f; g_chrome[j][0] += n[1]*0.5f + Lp[1]*3.f;
             // (waveLoc is the same CPU value as u_ChromeWave — confirmed identical formula.)
             vec3 Lp = vec3(u_ChromeLightVec, 1.0);

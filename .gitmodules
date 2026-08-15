@@ -10,3 +10,6 @@
 [submodule "src/ThirdParty/RmlUi"]
 	path = src/ThirdParty/RmlUi
 	url = https://github.com/mikke89/RmlUi.git
+[submodule "src/ThirdParty/freetype"]
+	path = src/ThirdParty/freetype
+	url = https://github.com/freetype/freetype.git

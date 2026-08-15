@@ -4,13 +4,12 @@
 #include "RmlUiSystemInterface.h"
 
 #include <RmlUi/Core/Core.h>
+#include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
 #include "Render/RHI/RHI.h"
 #include "Render/Core/GlobalUBO.h"
 #include "Render/Core/ImmediateRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h" // WindowWidth/WindowHeight
 #include <cstring>
-
-#include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
 
 RmlUiRuntime& RmlUiRuntime::Instance()
 {

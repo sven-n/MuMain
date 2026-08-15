@@ -1,0 +1,79 @@
+/* Overlay for CLoginWin's checkboxes/buttons/labels/trust-warning text. The legacy panel
+   background sprite (CWin::m_psprBg, BITMAP_LOG_IN+7) still renders underneath this, unchanged
+   -- see LoginWin.h's class comment. #panel's left/top are set from C++ (LoginWin.cpp's
+   SetPosition()) to track the same real-window-pixel origin the legacy panel sprite uses; every
+   child below uses fixed-pixel offsets relative to that container, matching "the login
+   background is fixed artwork and does not scale with window size" (LoginWin.cpp). */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+#panel {
+	position: absolute;
+	width: 329px;
+	height: 245px;
+	font-family: "Tahoma";
+	font-size: 12px;
+	color: white;
+}
+
+.label {
+	position: absolute;
+}
+.label-server  { left: 111px; top: 80px; }
+.label-account { left: 30px; top: 113px; }
+.label-password{ left: 30px; top: 139px; }
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+}
+.checkbox-remember-me  { left: 109px; top: 156px; }
+.checkbox-save-password{ left: 109px; top: 176px; }
+
+.checkbox-box {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	border: 1px #808080;
+	background-color: #202020;
+}
+.checkbox-box.checked {
+	background-color: #c0a050;
+}
+
+.checkbox-label {
+	position: absolute;
+	left: 21px;
+	top: 1px;
+	white-space: nowrap;
+}
+
+.btn {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
+	cursor: pointer;
+	background-color: #402c1a;
+	border: 1px #806040;
+}
+.btn:hover {
+	background-color: #5a4026;
+}
+.btn-ok     { left: 150px; top: 200px; }
+.btn-cancel { left: 211px; top: 200px; }
+
+/* Below the fixed-size panel, matching the legacy "no room inside it" comment. */
+.trust-warning {
+	position: absolute;
+	left: 30px;
+	top: 252px;
+	width: 280px;
+	color: #ffd23c;
+}

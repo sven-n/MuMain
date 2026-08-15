@@ -185,7 +185,7 @@ int SelectCharacter(BYTE Kind)
                     vec3_t vSub;
                     VectorSubtract(o->Position, g_Camera.Position, vSub);
 
-                    float fNewDist = DotProduct(vSub, vSub);
+                    float fNewDist = VectorDotProduct(vSub, vSub);
 
                     if (fNewDist < fNearestDist)
                     {

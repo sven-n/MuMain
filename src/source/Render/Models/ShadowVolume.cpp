@@ -60,7 +60,7 @@ void CShadowVolume::DeterminateSilhouette(short nMesh, vec3_t ppVertexTransforme
         pVertex[2] = &ppVertexTransformed[nMesh][pnVertexIndex[2]];
         vec3_t Normal;
         FaceNormalize(*pVertex[0], *pVertex[1], *pVertex[2], Normal);
-        if (DotProduct(Normal, m_vLight) <= 0.f)
+        if (VectorDotProduct(Normal, m_vLight) <= 0.f)
             pTriangle->Front = true;
         else
             pTriangle->Front = false;
