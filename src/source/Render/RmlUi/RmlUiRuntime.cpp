@@ -73,6 +73,23 @@ void RmlUiRuntime::Update()
 bool RmlUiRuntime::ProcessSdlEvent(SDL_Event& event, SDL_Window* window)
 {
     if (!m_Context) return true; // nothing to consume it -- let it fall through
+
+    // Mouse button down/up are handled directly here instead of delegating to
+    // RmlSDL::InputEventHandler, which also calls SDL_CaptureMouse(true/false) on every button
+    // press/release (RmlUi_Platform_SDL.cpp) -- correct for a sample app that owns the whole
+    // window, but a real bug in this engine: it has its own cursor rendering and mouse-clip
+    // handling (Winmain.cpp's UpdateCursorClip()) that was never built to expect SDL's capture
+    // mode being toggled externally, and every mouse click in the game (not just clicks on
+    // RmlUi elements) passes through this function. Confirmed by a real user report: the cursor
+    // stopped tracking correctly ("does not follow where you drag") starting right after the
+    // first click-driven scene transition (server selection -> login) once RmlUi's button-event
+    // path started firing. Still reuses RmlSDL::ConvertMouseButton/GetKeyModifierState (pure,
+    // side-effect-free helpers) for the actual button index/modifier mapping.
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+        return m_Context->ProcessMouseButtonDown(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_UP)
+        return m_Context->ProcessMouseButtonUp(RmlSDL::ConvertMouseButton(event.button.button), RmlSDL::GetKeyModifierState());
+
     return RmlSDL::InputEventHandler(m_Context, window, event);
 }
 
