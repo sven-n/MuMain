@@ -52,6 +52,6 @@ endfunction()
 
 add_subdirectory(text)
 
-add_subdirectory(render)
+add_subdirectory(terrain)
 
 add_subdirectory(editor)
