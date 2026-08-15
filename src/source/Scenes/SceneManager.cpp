@@ -1190,6 +1190,31 @@ void MainScene(HDC hDC)
                 RmlUiRuntime::Instance().Render();
             }
 
+            // Content that must always sit visually on top of RmlUi, regardless of theme: the
+            // game cursor, and (login/character scenes specifically) CLoginWin's legacy
+            // CUITextInputBox text. Both used to render earlier, inside RenderInfomation()
+            // (SceneCommon.cpp) for these two scenes -- moved here since RmlUi always renders
+            // last in the frame, and a theme whose RmlUi panel has an opaque background (unlike
+            // the login screen's original "legacy" theme, whose panel is transparent) would
+            // otherwise visually cover both. Confirmed against a real screenshot testing the
+            // login screen's sprite-free "modern" theme, where the cursor and input text
+            // rendered invisibly underneath the now-opaque panel.
+            //
+            // Needs its own BeginBitmap()/EndBitmap() bracket: NewRenderLogInScene()'s own
+            // BeginBitmap() call (LoginScene.cpp) is long since matched by an EndBitmap() before
+            // that function returns (it runs entirely inside RenderCurrentScene(), well before
+            // this point), which restores GlobalUBO's Proj/View back to the 3D perspective that
+            // was active before it -- so by here the 2D ortho ConvertX/ConvertY-based rendering
+            // RenderCursor()/RenderTextOnTop() rely on is gone unless re-established here.
+            if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+            {
+                BeginBitmap();
+                if (CUIMng::Instance().m_LoginWin.IsShow())
+                    CUIMng::Instance().m_LoginWin.RenderTextOnTop();
+                RenderCursor();
+                EndBitmap();
+            }
+
 #ifdef _EDITOR
             // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
             g_MuEditorCore.Render();

@@ -52,6 +52,15 @@ public:
     CUITextInputBox* GetUsernameInputBox() const { return m_pUsernameInputBox; }
     CUITextInputBox* GetPasswordInputBox() const { return m_pPasswordInputBox; }
 
+    // Draws the actual username/password text -- called explicitly by SceneManager.cpp AFTER
+    // RmlUiRuntime::Render(), not from RenderControls() (which still runs earlier, as part of
+    // CUIMng::Render()'s normal legacy pass). RmlUi always renders last in the frame, so any
+    // theme whose #panel has an opaque background (the "modern" theme; "legacy"'s is
+    // transparent, which is why this was never visibly broken before) would otherwise paint
+    // over this text -- confirmed against a real screenshot testing the modern theme, where the
+    // input text (and the cursor, fixed the same way) rendered invisibly underneath the panel.
+    void RenderTextOnTop();
+
     // Called from the RmlUi login document's data-event-click callbacks (see Create()'s
     // DataModelConstructor::BindEventCallback registrations). Polled-and-cleared exactly like
     // the legacy CButton::IsClick() edge triggers they supplement in UpdateWhileActive()/

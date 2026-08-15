@@ -432,17 +432,21 @@ void CLoginWin::RenderControls()
     // Input-box frame sprites are theme-gated the same way the background sprite is (Create()'s
     // comment) -- the modern theme draws its own .input-frame outline in RCSS instead
     // (themes/modern/login.rcss), so rendering the legacy frame sprites there too would draw
-    // both on top of each other. The actual CUITextInputBox text rendering is never gated --
-    // text entry deliberately did not move to RmlUi in either theme.
+    // both on top of each other. The actual CUITextInputBox text is NOT rendered here -- see
+    // RenderTextOnTop()'s comment for why it moved to a separate, later call.
     if (UI::RmlBridge::UsesLegacySpriteChrome(UI::RmlBridge::GetActiveThemeName()))
     {
         m_asprInputBox[LIW_ACCOUNT].Render();
         m_asprInputBox[LIW_PASSWORD].Render();
     }
-    m_pUsernameInputBox->Render();
-    m_pPasswordInputBox->Render();
 
     SyncRmlModel();
+}
+
+void CLoginWin::RenderTextOnTop()
+{
+    m_pUsernameInputBox->Render();
+    m_pPasswordInputBox->Render();
 }
 
 void CLoginWin::SyncRmlModel()
