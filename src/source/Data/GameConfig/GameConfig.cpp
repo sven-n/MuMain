@@ -70,6 +70,9 @@ void GameConfig::Load()
     m_serverIP   = ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP);
     m_serverPort = ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort);
 
+    m_chatCommandFavourites = ReadStringList(L"ChatCommands", L"Favourite");
+    m_chatCommandTemplates = ReadStringList(L"ChatCommands", L"Template");
+
     m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
     m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
 
@@ -110,10 +113,50 @@ void GameConfig::Save()
     WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
     WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
 
+    WriteStringList(L"ChatCommands", L"Favourite", m_chatCommandFavourites);
+    WriteStringList(L"ChatCommands", L"Template", m_chatCommandTemplates);
+
     WriteString(CfgSectionUI, CfgKeyUILocale, m_uiLocale);
     WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
+}
+
+std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)
+{
+    std::vector<std::wstring> result;
+    const auto count = ReadInt(section, (std::wstring(keyPrefix) + L"Count").c_str(), 0);
+    for (int i = 0; i < count; ++i)
+    {
+        auto entry = ReadString(section, (std::wstring(keyPrefix) + std::to_wstring(i)).c_str(), L"");
+        if (!entry.empty())
+        {
+            result.push_back(std::move(entry));
+        }
+    }
+
+    return result;
+}
+
+void GameConfig::WriteStringList(const wchar_t* section, const wchar_t* keyPrefix, const std::vector<std::wstring>& values)
+{
+    WriteInt(section, (std::wstring(keyPrefix) + L"Count").c_str(), static_cast<int>(values.size()));
+    for (size_t i = 0; i < values.size(); ++i)
+    {
+        WriteString(section, (std::wstring(keyPrefix) + std::to_wstring(i)).c_str(), values[i]);
+    }
+}
+
+void GameConfig::SetChatCommandFavourites(const std::vector<std::wstring>& favourites)
+{
+    m_chatCommandFavourites = favourites;
+    Save();
+}
+
+void GameConfig::SetChatCommandTemplates(const std::vector<std::wstring>& templates)
+{
+    m_chatCommandTemplates = templates;
+    Save();
 }
 
 void GameConfig::SetWindowSize(int width, int height)
