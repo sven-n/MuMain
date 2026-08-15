@@ -142,6 +142,71 @@ lookup fails, specifically for RmlUi-referenced theme assets. This would make cu
 theming meaningfully easier for modders (no proprietary-format conversion step) without touching
 the legacy game-asset pipeline everything else still uses. Flagged as a real option, not started.
 
+## Coordinates, scaling, and positioning — what a theme actually controls
+
+A natural question once you're authoring custom sprites: if I supply an image at a fixed pixel
+size, will the engine scale it correctly for me across resolutions? And separately, does my
+theme's RCSS decide where the whole panel sits on screen, or whether it can be dragged? The
+honest answers are more specific than "yes, handled automatically" — worth being precise about,
+since they shape what a theme author should and shouldn't expect to control.
+
+### Scaling and aspect ratio: nothing is automatic today
+
+Every coordinate in both existing themes (`legacy` and `modern`) is **fixed pixels**
+(`left: 150px`, `width: 54px`, ...), and nothing scales those values based on resolution or
+window size. A 1920×1080 window and a 1024×768 window render the login panel at the *exact same
+physical pixel size* — the only thing that changes is the panel's on-screen position, and that's
+recentered by legacy C++ code (see below), not by any scaling RmlUi does.
+
+RmlUi itself does have real scaling primitives — `%` (relative to the containing block), `vw`/`vh`
+(true viewport-percentage units), and `dp` (density-independent pixels, globally rescaled via a
+single `Context::SetDensityIndependentPixelRatio()` call — RmlUi's own built-in mechanism for a
+modern-game-style "UI Scale" option, confirmed against `Source/Core/ComputeProperty.cpp`/
+`Context.cpp`). **None of this is wired up in this engine yet.** Using `dp` instead of `px` in a
+theme's RCSS today would have zero visible effect, because nothing ever calls
+`SetDensityIndependentPixelRatio()` with anything other than its default. Making a theme actually
+scale with resolution needs two things together: the theme author using relative units, *and* an
+engine-side driver computing and applying a ratio — only the first half is available today. See
+the migration plan's "Scaling & DPI" section for the intended direction (a **uniform** fit factor,
+`min(WindowWidth/refWidth, WindowHeight/refHeight)`, never independent per-axis scaling — that
+non-uniform scaling is a confirmed, separate legacy bug, not something to reproduce; see
+[Gotchas](gotchas-and-patterns.md)).
+
+Practically: fixed `px` is also just the *correct* choice for a raster sprite regardless of
+whether scaling is wired up — an image has a native resolution, and stretching it non-uniformly or
+upscaling it blurs/pixelates. Real resolution-independence for sprite art means authoring multiple
+resolution variants or switching to vector-friendly RCSS (flat colors, `border-radius`), not
+scaling one fixed image. A custom-sprite theme should expect to look the same physical size at
+every resolution, the same way the `legacy` theme's original artwork always has.
+
+### Panel position vs. element layout vs. draggability — three different owners
+
+These are easy to conflate but are controlled by three different, independent things:
+
+- **Layout of elements *within* the panel** (where a label, button, or checkbox sits relative to
+  the panel's own top-left corner) — this is fully expressed in RCSS (`.btn-ok { left: 150px; top:
+  200px; }`, etc.) and is exactly what a theme controls. Change these values and the layout
+  changes, no C++ involved.
+- **The panel's own position on screen** (centered, edge-pinned, or anywhere else) — for the
+  current login pilot, this is **not** theme-controlled at all. `CLoginWin::SetPosition()` pushes
+  the panel's `left`/`top` values in from C++ every frame/resize, driven by the legacy `CUIMng`
+  centering math (`(GetScreenWidth() - panelWidth) / 2`-style) — the exact same math that
+  positions the legacy background sprite. A theme's RCSS receives this position; it doesn't choose
+  it. This is a consequence of the login screen still being a *hybrid* window (part `CWin`, part
+  RmlUi) — a window built without any leftover `CWin` positioning dependency could express its own
+  anchoring purely in RCSS (`position: absolute; right: 0; bottom: 0;` for a corner-pinned HUD
+  element, for example), but that's not how this pilot is built.
+- **Draggability** — purely a legacy `CWin` concept (`CWin::Update()`'s `WS_MOVE` state machine,
+  gated by `CursorInWin(WA_MOVE)`), entirely unrelated to RmlUi or RCSS. `CLoginWin` explicitly
+  hardcodes this off (`CursorInWin` always returns `false` for `WA_MOVE`) — a deliberate choice for
+  a login screen, not a limitation of the framework. RmlUi/RCSS has no built-in "make this
+  draggable" concept the way a desktop UI toolkit might; a future window wanting drag behavior
+  through RmlUi would need to implement it itself via mouse-event handlers, not a CSS property.
+
+**Bottom line for a modder**: your theme's RCSS fully controls what's *inside* the panel and (for
+the login screen specifically) nothing about *where the panel is* or *whether it moves* — those
+are inherited from the legacy window this pilot hasn't fully cut ties with yet.
+
 ## Known limitations (as of the Phase 1 pilot)
 
 - **Not yet a live in-game hot-swap.** Switching themes today means editing `config.ini` and
@@ -158,6 +223,11 @@ the legacy game-asset pipeline everything else still uses. Flagged as a real opt
   see [A third case: a theme with its own custom images](#a-third-case-a-theme-with-its-own-custom-images)
   above. No converter tool exists in this repo today, and a missing/wrong-format image fails
   completely silently.
+- **No scaling is wired up, and the panel's on-screen position isn't theme-controlled** — see
+  [Coordinates, scaling, and positioning](#coordinates-scaling-and-positioning--what-a-theme-actually-controls)
+  above. Themes are fixed-`px` and always render at the same physical size regardless of
+  resolution; the login panel's own screen position and draggability are inherited from the
+  legacy `CWin` this pilot is still hybrid with, not something a theme's RCSS decides.
 - **Only the login screen has a theme system today.** Every other window (still-legacy or a
   future RmlUi migration) doesn't participate in theme selection yet — extending
   `LoadThemedDocument()` to a new window is the same pattern `CLoginWin` already uses, not new
