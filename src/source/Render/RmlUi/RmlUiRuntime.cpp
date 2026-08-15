@@ -143,12 +143,27 @@ void RmlUiRuntime::Render()
     memcpy(savedProj, GlobalUBO::Instance().GetProj(), sizeof(savedProj));
     memcpy(savedView, GlobalUBO::Instance().GetView(), sizeof(savedView));
 
+    // RmlUiRenderInterface::RenderGeometry calls GlobalUBO::SetModel(origin, scale) once per
+    // compiled-geometry draw to translate it to its element's screen position -- necessary, but
+    // it leaves Model holding whatever the LAST draw this frame set it to (e.g. the login panel's
+    // OK button origin) with nothing to put it back afterward. Legacy 2D/3D rendering (BeginBitmap/
+    // BeginOpengl-based sprite, text and world draws) never sets Model itself -- it assumes Model
+    // is identity, the way it always was before RmlUi existed. Confirmed as the cause of a real
+    // report: RmlUi's own elements rendered in the right place, but every legacy element and the
+    // "responsive"/clickable area had shifted toward the upper-right -- exactly what a leaked,
+    // never-reset translation does to everything drawn after it. PushModel()/PopModel() (already
+    // built for exactly this save/restore shape) brackets the whole call the same way savedProj/
+    // savedView do above.
+    GlobalUBO::Instance().PushModel();
+
     // SetOrtho() resets View to identity internally (GlobalUBO.cpp) -- no separate SetView() call
     // needed here. bottom/top are swapped relative to BeginBitmap()'s (0, W, 0, H) call to get the
     // top-down flip described above; confirmed against SetOrtho()'s closed-form matrix, not assumed.
     GlobalUBO::Instance().SetOrtho(0.0f, (float)WindowWidth, (float)WindowHeight, 0.0f);
 
     m_Context->Render();
+
+    GlobalUBO::Instance().PopModel();
 
     // Scissor has no BindState-style cache to self-correct a leak (RHI.h's comment on
     // SetScissorEnabled/SetScissorRect) -- force it off here unconditionally rather than trusting
