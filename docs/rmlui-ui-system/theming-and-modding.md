@@ -87,6 +87,61 @@ sprite and the input-box *frame* sprites for windows built the way `CLoginWin` i
 subclass whose `Create()` checks `UsesLegacySpriteChrome` before creating those specific sprites)
 — a future migrated window that never had legacy sprite chrome to begin with has nothing to gate.
 
+## A third case: a theme with its own custom images
+
+`UsesLegacySpriteChrome` only controls whether the *old, hardcoded, non-authorable* legacy
+bitmaps (`BITMAP_LOG_IN+7`, `BITMAP_CHECK_BTN`, `BITMAP_BUTTON` — literal C++ constants a modder
+cannot add to without a source change) get drawn underneath the RmlUi overlay. It has nothing to
+do with whether a theme can have **its own new image assets** — a custom background photo, custom
+button art, a logo. That's a separate, already-working capability: RmlUi's own `LoadTexture`
+(`RmlUiRenderInterface.cpp`) already routes any image an RCSS file references through this
+engine's normal texture pipeline. No engine changes are needed to use it — but there are two real
+constraints worth knowing before you do, and they're rougher than the sprite-free case above.
+
+**How the image reference resolves.** Confirmed against RmlUi's real source
+(`Source/Core/StyleSheetParser.cpp`, `ElementEffects.cpp`, `Decorator.cpp`): a relative image path
+inside an RCSS rule resolves against **that stylesheet's own location** — not the shared `login.rml`'s
+virtual per-theme URL. So a custom theme's background image can simply sit next to its own
+`login.rcss`:
+
+```
+themes/<your-theme-name>/
+    login.rcss
+    panel_bg.tga      <- referenced from login.rcss below
+```
+
+```rcss
+#panel {
+    decorator: image( panel_bg.tga );
+}
+```
+
+**The real constraint: only this engine's proprietary OZT/OZJ containers are supported, not plain
+PNG/JPG/BMP.** `RmlUiRenderInterface::LoadTexture` routes through `CGlobalBitmap::LoadImage`
+(`Render/Sprites/GlobalBitmap.cpp`) — the same loader every other texture in the game uses, so
+RmlUi-referenced images share its ref-counted cache/eviction. That loader only handles two
+extensions: `.jpg` (via `OpenJpegTurbo`) and `.tga` (via `OpenTga`) — and **both internally swap
+the extension to this engine's own container format before opening** (`.OZJ`/`.OZT`
+respectively). Concretely: if your RCSS references `panel_bg.tga`, the file that actually needs to
+exist on disk is `panel_bg.OZT`, not a real `.tga`. Any other extension (`.png`, `.bmp`, ...) isn't
+handled at all. There is no PNG/JPG→OZT/OZJ converter in this repository — a modder needs an
+external tool from the wider MU private-server modding community (this format predates this
+project) to produce one.
+
+**Failures are completely silent.** A missing file or an unsupported extension returns `false`
+from `LoadImage` with **no log line at all** — `RmlUiRenderInterface::LoadTexture` then returns a
+null texture handle, and the element just renders with no image, no error, no diagnostic. If a
+custom theme's image isn't showing up, double-check the extension-swap rule above (a real `.tga`
+file, or a file with the wrong internal container, both fail exactly the same silent way) before
+assuming something else is wrong.
+
+**Open follow-up, not yet decided or built**: vendoring `stb_image.h` (a small, permissively-licensed
+single-header decoder — not currently vendored anywhere in this repo, confirmed by search) to give
+`RmlUiRenderInterface::LoadTexture` a fallback path for plain PNG/JPG/BMP/TGA when the OZT/OZJ
+lookup fails, specifically for RmlUi-referenced theme assets. This would make custom-sprite
+theming meaningfully easier for modders (no proprietary-format conversion step) without touching
+the legacy game-asset pipeline everything else still uses. Flagged as a real option, not started.
+
 ## Known limitations (as of the Phase 1 pilot)
 
 - **Not yet a live in-game hot-swap.** Switching themes today means editing `config.ini` and
@@ -99,6 +154,10 @@ subclass whose `Create()` checks `UsesLegacySpriteChrome` before creating those 
   [Gotchas](gotchas-and-patterns.md#box-shadow-blur-renders-as-a-solid-white-block). Stick to
   `background-color`, `border`, and `border-radius` for a themed panel's look; all three are pure
   geometry and render correctly.
+- **Custom theme images require this engine's proprietary OZT/OZJ format, not plain PNG/JPG** —
+  see [A third case: a theme with its own custom images](#a-third-case-a-theme-with-its-own-custom-images)
+  above. No converter tool exists in this repo today, and a missing/wrong-format image fails
+  completely silently.
 - **Only the login screen has a theme system today.** Every other window (still-legacy or a
   future RmlUi migration) doesn't participate in theme selection yet — extending
   `LoadThemedDocument()` to a new window is the same pattern `CLoginWin` already uses, not new

@@ -277,3 +277,37 @@ behavior when no font face is loaded at all, not an error condition that surface
 as a fallback face. Also fix any RCSS `font-family` that doesn't match a loaded family name exactly
 (`"Tahoma"` was never loaded — even with *some* font loaded elsewhere, an RCSS rule naming an
 unloaded family still renders no text for that element).
+
+---
+
+## Theming & modding
+
+### Custom theme images silently require a proprietary format, not plain PNG/JPG
+
+**Not a bug that was fixed** — a real constraint discovered while designing the modding workflow,
+documented here so it isn't rediscovered the hard way by a modder (or a future dev helping one).
+
+A theme's own images (a custom background, custom button art) go through the exact same
+`RmlUiRenderInterface::LoadTexture` → `CGlobalBitmap::LoadImage` path as every other texture in the
+game — a deliberate Phase 0 design choice, so RmlUi-referenced images share the same ref-counted
+cache/eviction. The consequence: `CGlobalBitmap::LoadImage` (`Render/Sprites/GlobalBitmap.cpp`)
+only recognizes two extensions, `.jpg`/`.tga` — and **both internally swap the extension to this
+engine's proprietary container format before opening** (`.OZJ`/`.OZT`). An RCSS rule referencing
+`panel_bg.tga` actually needs a file named `panel_bg.OZT` on disk, not a real `.tga`; plain
+`.png`/`.bmp` aren't handled at all, and there's no converter tool in this repo. Worse: a missing
+file or unrecognized extension fails with **zero logging anywhere in the chain** — `LoadImage`
+returns `false` silently, `LoadTexture` returns a null handle, and the element just renders with no
+image and no diagnostic.
+
+**What does work, confirmed against RmlUi's real source**: a relative image path inside an RCSS
+rule (`decorator: image(...)`, `background-image`) resolves against *that stylesheet's own
+resolved location* (`StyleSheetParser.cpp`/`ElementEffects.cpp`/`Decorator.cpp`), not the shared
+`login.rml`'s virtual per-theme source URL — so a custom theme's image can sit right next to its
+own `.rcss` file and be referenced with a plain relative path. This part needed no fix; it already
+works correctly by virtue of how `LoadThemedDocument()` and RmlUi's own stylesheet-loading both
+handle source URLs.
+
+See [Theming & Modding](theming-and-modding.md#a-third-case-a-theme-with-its-own-custom-images)
+for the full workflow and the open (not yet built) follow-up: vendoring `stb_image.h` to give
+`LoadTexture` a plain-PNG/JPG/BMP fallback for RmlUi-referenced theme assets specifically, without
+touching the legacy OZT/OZJ pipeline everything else still depends on.
