@@ -117,6 +117,13 @@ void RmlUiRuntime::Render()
     // stale clip rect can never survive into the next renderer's draws.
     RHI::SetScissorEnabled(false);
 
+    // RmlUiRenderInterface::RenderGeometry leaves RHI::BlendMode::Blend3 active on the last
+    // draw call (cull+depthmask OFF, alpha blend ON per RHI.h's enum comment) -- nothing resets
+    // this per-frame the way BeginOpengl() forces depth-test/cull/depth-write/alpha-test back on
+    // unconditionally every frame (ZzzOpenglUtil.cpp), so restore a known-good opaque state
+    // explicitly here rather than assuming whatever runs next sets its own blend mode first.
+    RHI::SetBlendMode(RHI::BlendMode::Opaque);
+
     GlobalUBO::Instance().SetProj(savedProj);
     GlobalUBO::Instance().SetView(savedView);
 }
