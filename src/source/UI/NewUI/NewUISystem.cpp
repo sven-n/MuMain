@@ -349,7 +349,7 @@ bool CNewUISystem::LoadMainSceneInterface()
     }
 
     m_pNewChatCommandWindow = new CNewUIChatCommandWindow;
-    if (m_pNewChatCommandWindow->Create(m_pNewUIMng, 180, 80) == false)
+    if (m_pNewChatCommandWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
     {
         return false;
     }
@@ -911,6 +911,11 @@ void CNewUISystem::Show(DWORD dwKey)
         HideAllGroupA();
         m_pNewCommandWindow->OpenningProcess();
     }
+    else if (dwKey == INTERFACE_COMMAND_LIST)
+    {
+        HideAllGroupA();
+        m_pNewChatCommandWindow->OpenningProcess();
+    }
     else if (dwKey == INTERFACE_GUILDINFO)
     {
         HideAllGroupA();
@@ -1394,6 +1399,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         m_pNewCommandWindow->ClosingProcess();
     }
+    else if (dwKey == INTERFACE_COMMAND_LIST)
+    {
+        m_pNewChatCommandWindow->ClosingProcess();
+    }
     else if (dwKey == INTERFACE_WINDOW_MENU)
     {
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, false);
@@ -1617,6 +1626,7 @@ void CNewUISystem::HideAllGroupA()
         INTERFACE_SENATUS,
         INTERFACE_GUARDSMAN,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_KANTURU2ND_ENTERNPC,
         INTERFACE_DUELWATCH,
@@ -1677,6 +1687,7 @@ void CNewUISystem::HideAllGroupB()
         INTERFACE_SENATUS,
         INTERFACE_GUARDSMAN,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_KANTURU2ND_ENTERNPC,
         INTERFACE_CURSEDTEMPLE_NPC,
@@ -1717,6 +1728,7 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
     {
         INTERFACE_PARTY,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,

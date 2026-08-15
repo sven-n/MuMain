@@ -12946,4 +12946,28 @@
   <data name="SpecialCommands" xml:space="preserve">
     <value>Special</value>
   </data>
+  <data name="ChatCommandsBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="ChatCommandsTemplates" xml:space="preserve">
+    <value>Templates</value>
+  </data>
+  <data name="ChatCommandsNoTemplates" xml:space="preserve">
+    <value>No templates saved yet.</value>
+  </data>
+  <data name="ChatCommandsSaveTemplate" xml:space="preserve">
+    <value>Save as template</value>
+  </data>
+  <data name="ChatCommandsAddFavourite" xml:space="preserve">
+    <value>Add to favourites</value>
+  </data>
+  <data name="ChatCommandsRemoveFavourite" xml:space="preserve">
+    <value>Remove from favourites</value>
+  </data>
+  <data name="ChatCommandsFillRequired" xml:space="preserve">
+    <value>Please enter the required values first.</value>
+  </data>
+  <data name="ChatCommandsUnknownCommand" xml:space="preserve">
+    <value>This command is not available anymore.</value>
+  </data>
 </root>
