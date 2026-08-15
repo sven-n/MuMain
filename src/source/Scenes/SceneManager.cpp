@@ -723,6 +723,50 @@ static void RenderGLStats()
         FrameProfiler::CounterValue(FC::UboSkips)); // GLP-10
     g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
+    // ImmediateRenderer batching. Vtx/Draw is the headline: an IR batch is 6 vertices per quad
+    // after decomposition, so ~6 means every sprite is still its own draw call and GLP-19's
+    // batching is merging nothing. Anything well above that means runs are merging.
+    const uint32_t irDraws = FrameProfiler::CounterValue(FC::IRDraws);
+    const uint32_t irVertices = FrameProfiler::CounterValue(FC::IRVertices);
+    const float vtxPerDraw = (irDraws > 0) ? ((float)irVertices / (float)irDraws) : 0.0f;
+    mu_swprintf(szLine, L"IR     Draw:%u  Vtx:%u  Vtx/Draw:%.1f",
+        irDraws, irVertices, vtxPerDraw);
+    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // What cut those batches short. The largest bucket is where a batching fix has to aim; a
+    // breakdown dominated by Tex means draws are ordered so the texture keeps changing, which
+    // is a scheduling problem rather than a batching one.
+    mu_swprintf(szLine, L"IRbreak Tex:%u Blend:%u Depth:%u Prog:%u Uni:%u Mtx:%u Draw:%u Other:%u",
+        FrameProfiler::CounterValue(FC::IRBreakTexture),
+        FrameProfiler::CounterValue(FC::IRBreakBlend),
+        FrameProfiler::CounterValue(FC::IRBreakDepth),
+        FrameProfiler::CounterValue(FC::IRBreakProgram),
+        FrameProfiler::CounterValue(FC::IRBreakUniform),
+        FrameProfiler::CounterValue(FC::IRBreakMatrix),
+        FrameProfiler::CounterValue(FC::IRBreakDraw),
+        FrameProfiler::CounterValue(FC::IRBreakOther));
+    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Per-pass batch quality for the three IR-heavy passes. GLP-24 split these out of Other
+    // precisely because they were the frame's largest draw-call producers while invisible;
+    // this is the same split for batching.
+    static constexpr FP kIRRows[] = { FP::Sprites, FP::Particles, FP::Joints, FP::UI };
+    for (FP pass : kIRRows)
+    {
+        const uint32_t passDraws = FrameProfiler::CounterValue(pass, FC::IRDraws);
+        if (passDraws == 0) continue;
+
+        const uint32_t passVertices = FrameProfiler::CounterValue(pass, FC::IRVertices);
+        mu_swprintf(szLine, L"  %-9hs Draw:%5u  Vtx/Draw:%5.1f  Tex:%u Blend:%u Draw:%u",
+            FrameProfiler::kPassNames[(int)pass],
+            passDraws,
+            (float)passVertices / (float)passDraws,
+            FrameProfiler::CounterValue(pass, FC::IRBreakTexture),
+            FrameProfiler::CounterValue(pass, FC::IRBreakBlend),
+            FrameProfiler::CounterValue(pass, FC::IRBreakDraw));
+        g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    }
+
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
 }

@@ -90,6 +90,25 @@ namespace FrameProfiler
         UboSkips,       // GLP-10: UpdateUniformBlock calls short-circuited because the content
                          // was byte-identical to that slot's last same-frame upload -- NOT
                          // included in GLCalls (no GL call happened), unlike every counter above
+
+        // ---- ImmediateRenderer batching ----
+        // None of these bump GLCalls: they either tag a GL call some other counter already
+        // counted (IRDraws is one of DrawCalls), or describe work that issued nothing.
+        //
+        // IRVertices / IRDraws is the number that says whether GLP-19's batching is doing
+        // anything: 4 vertices per draw means every sprite is still its own draw call, a large
+        // ratio means runs are merging. The IRBreak* buckets say what stopped them merging, so
+        // the fix can be aimed at the actual cause instead of guessed at.
+        IRDraws,        // IR batches that reached the driver -- a subset of DrawCalls
+        IRVertices,     // vertices submitted through those batches
+        IRBreakTexture, // batch broken by a texture bind
+        IRBreakBlend,   // ... by a blend-mode change
+        IRBreakDepth,   // ... by a depth test/mask change
+        IRBreakProgram, // ... by a shader program bind
+        IRBreakUniform, // ... by a shader uniform write that changes how pixels are shaded
+        IRBreakMatrix,  // ... by a transform change (GlobalUBO push/pop)
+        IRBreakDraw,    // ... by some other draw call cutting in between two IR batches
+        IRBreakOther,   // ... by anything else, including the deliberate end-of-pass flushes
         Count_
     };
 

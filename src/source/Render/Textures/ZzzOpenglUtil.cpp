@@ -190,7 +190,7 @@ void BindTexture(int tex)
         // GLP-19: a texture change invalidates any batch IR has accumulated but not yet drawn --
         // those quads were submitted against the OLD texture. Only fires inside this dirty-check,
         // so the common case (consecutive same-texture particles) costs nothing and still merges.
-        IR::Flush();
+        IR::Flush(IR::FlushCause::Texture);
         CachTexture = tex;
         const uint32_t textureID = (tex >= 0) ? static_cast<uint32_t>(Bitmaps[tex].TextureNumber)
                                                : static_cast<uint32_t>(-1 * tex);
@@ -251,7 +251,7 @@ void EnableDepthTest()
 {
     if (!DepthTestEnable)
     {
-        IR::Flush(); // GLP-19 -- depth state is batch state; flush before it changes
+        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- depth state is batch state; flush before it changes
         DepthTestEnable = true;
         glEnable(GL_DEPTH_TEST);
     }
@@ -261,7 +261,7 @@ void DisableDepthTest()
 {
     if (DepthTestEnable)
     {
-        IR::Flush(); // GLP-19 -- see EnableDepthTest
+        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         DepthTestEnable = false;
         glDisable(GL_DEPTH_TEST);
     }
@@ -271,7 +271,7 @@ void EnableDepthMask()
 {
     if (!DepthMaskEnable)
     {
-        IR::Flush(); // GLP-19 -- see EnableDepthTest
+        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         DepthMaskEnable = true;
         glDepthMask(true);
     }
@@ -281,7 +281,7 @@ void DisableDepthMask()
 {
     if (DepthMaskEnable)
     {
-        IR::Flush(); // GLP-19 -- see EnableDepthTest
+        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         DepthMaskEnable = false;
         glDepthMask(false);
     }
@@ -291,7 +291,7 @@ void EnableCullFace()
 {
     if (!CullFaceEnable)
     {
-        IR::Flush(); // GLP-19 -- see EnableDepthTest
+        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         CullFaceEnable = true;
         glEnable(GL_CULL_FACE);
     }
@@ -301,7 +301,7 @@ void DisableCullFace()
 {
     if (CullFaceEnable)
     {
-        IR::Flush(); // GLP-19 -- see EnableDepthTest
+        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         CullFaceEnable = false;
         glDisable(GL_CULL_FACE);
     }
@@ -340,7 +340,7 @@ void DisableAlphaBlend()
 {
     if (AlphaBlendType != 0)
     {
-        IR::Flush(); // GLP-19 -- blend func is batch state; flush BEFORE it changes
+        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- blend func is batch state; flush BEFORE it changes
         AlphaBlendType = 0;
         glDisable(GL_BLEND);
     }
@@ -367,7 +367,7 @@ void EnableAlphaTest(bool DepthMask)
 {
     if (AlphaBlendType != 2)
     {
-        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
+        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 2;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -396,7 +396,7 @@ void EnableAlphaBlend()
 {
     if (AlphaBlendType != 3)
     {
-        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
+        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 3;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -424,7 +424,7 @@ void EnableAlphaBlendMinus()
 {
     if (AlphaBlendType != 4)
     {
-        IR::Flush(); // GLP-19 -- subtractive blend (ZERO, ONE_MINUS_SRC_COLOR); a batch leaking
+        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- subtractive blend (ZERO, ONE_MINUS_SRC_COLOR); a batch leaking
                       // into this is exactly the black-polygon artifact
         AlphaBlendType = 4;
         glEnable(GL_BLEND);
@@ -453,7 +453,7 @@ void EnableAlphaBlend2()
 {
     if (AlphaBlendType != 5)
     {
-        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
+        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 5;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE);
@@ -481,7 +481,7 @@ void EnableAlphaBlend3()
 {
     if (AlphaBlendType != 6)
     {
-        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
+        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 6;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -509,7 +509,7 @@ void EnableAlphaBlend4()
 {
     if (AlphaBlendType != 7)
     {
-        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
+        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 7;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
@@ -537,7 +537,7 @@ void EnableLightMap()
 {
     if (AlphaBlendType != 1)
     {
-        IR::Flush(); // GLP-19 -- see AlphaBlendType 0
+        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 1;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
