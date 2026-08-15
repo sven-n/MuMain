@@ -12943,4 +12943,7 @@
   <data name="JToggleChatCommands" xml:space="preserve">
     <value>J : Chat Commands On/Off</value>
   </data>
+  <data name="SpecialCommands" xml:space="preserve">
+    <value>Special</value>
+  </data>
 </root>

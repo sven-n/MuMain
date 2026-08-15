@@ -3661,6 +3661,8 @@ enum COMMAND_TYPE
     COMMAND_ADD_FRIEND,
     COMMAND_FOLLOW,
     COMMAND_BATTLE,
+    // Leads to the chat commands the server offers to this player.
+    COMMAND_SPECIAL,
     COMMAND_END
 };
 

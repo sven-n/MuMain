@@ -89,6 +89,7 @@ void SEASON3B::CNewUICommandWindow::InitButtons()
     m_BtnCommand[COMMAND_RIVALOFF].ChangeText(&I18N::Game::SuspendHostilities);
     m_BtnCommand[COMMAND_ADD_FRIEND].ChangeText(&I18N::Game::AddFriend);
     m_BtnCommand[COMMAND_FOLLOW].ChangeText(&I18N::Game::Follow);
+    m_BtnCommand[COMMAND_SPECIAL].ChangeText(&I18N::Game::SpecialCommands);
     m_BtnCommand[COMMAND_BATTLE].ChangeText(&I18N::Game::Duel);
 }
 
@@ -130,6 +131,16 @@ bool SEASON3B::CNewUICommandWindow::BtnProcess()
     {
         if (m_BtnCommand[i].UpdateMouseEvent() == true)
         {
+            // The chat commands don't act on the selected character, they open
+            // their own list instead.
+            if (i == COMMAND_SPECIAL)
+            {
+                g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND);
+                g_pNewUISystem->Show(SEASON3B::INTERFACE_COMMAND_LIST);
+                PlayBuffer(SOUND_CLICK01);
+                return true;
+            }
+
             if (m_iCurSelectCommand != COMMAND_NONE)
                 SetBtnState(m_iCurSelectCommand, false);
 
