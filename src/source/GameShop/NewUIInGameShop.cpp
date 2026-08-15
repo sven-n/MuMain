@@ -1,4 +1,4 @@
-﻿// NewUIInGameShop.cpp: implementation of the NewUIInGameShop class.
+// NewUIInGameShop.cpp: implementation of the NewUIInGameShop class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -16,6 +16,9 @@
 #include "World/MapInfra/MapManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/Core/GlobalUBO.h"
+#include "Core/Utilities/Log/ErrorReport.h"
 
 using namespace SEASON3B;
 
@@ -306,24 +309,61 @@ void CNewUIInGameShop::SetRateScale(int _ItemType)
     }
 }
 
+// DXP-07d increment 3's shadow-compare diagnostic validated RenderDisplayItems()'s proj/view closed
+// form and post-pop restore across multiple soaks; DXP-08a deleted the diagnostic and the FFP
+// matrix-stack calls it was validating (see RenderDisplayItems()'s own comments below). Its per-item
+// loop only calls RenderItem3D(), which carries no GL model transform. The restore mirror runs
+// BEFORE BeginBitmap() is called again (unlike CNewUI3DCamera::Render(), where it runs after) — a
+// genuine save/restore of whatever context was active at entry, not a BeginBitmap()-delegated
+// restore, hence its own pre-panel snapshot below.
+static float s_PreShopProj[16];
+static float s_PreShopView[16];
+
 void CNewUIInGameShop::RenderDisplayItems()
 {
     EndBitmap();
 
-    glMatrixMode(GL_PROJECTION);
+    // Snapshot the CPU source of truth right after EndBitmap() restores it (DXP-07a), before this
+    // panel overwrites GlobalUBO — used to check the post-pop restore below for symmetry.
+    memcpy(s_PreShopProj, GlobalUBO::Instance().GetProj(), sizeof(s_PreShopProj));
+    memcpy(s_PreShopView, GlobalUBO::Instance().GetView(), sizeof(s_PreShopView));
+
     SaveCameraPerspective();
-    glPushMatrix();
-    glLoadIdentity();
     glViewport2(0, 0, WindowWidth, WindowHeight);
     gluPerspective2(2.0f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
+    // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket,
+    // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, and shadow-compare diagnostic are
+    // deleted — DXP-07d already proved this closed form matches bit-for-bit, and GlobalUBO is the
+    // only consumer (same finding used for CNewUI3DCamera::Render()). This
+    // panel's projection is a plain gluPerspective(2.0f deg, aspect, RENDER_ITEMVIEW_NEAR,
+    // RENDER_ITEMVIEW_FAR) closed form (note: Fov=2.0f here, not the 1.f used elsewhere), and its
+    // view is identity.
+    {
+        float aspect = (float)WindowWidth / (float)WindowHeight;
+        float fovRad = 2.0f * 0.5f * Q_PI / 180.0f;
+        float f = 1.0f / tanf(fovRad);
+        float zNear = RENDER_ITEMVIEW_NEAR;
+        float zFar  = RENDER_ITEMVIEW_FAR;
+        float cpuProj[16];
+        BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
+        float cpuView[16] = {
+            1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
+        };
+
+        GlobalUBO::Instance().SetProj(cpuProj);
+        GlobalUBO::Instance().SetView(cpuView);
+
+        // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used to
+        // produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
+        static const float s_IdentityCameraMatrix[3][4] = {
+            {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
+        };
+        memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
+    }
     EnableDepthTest();
     EnableDepthMask();
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    ClearDepthBuffer();
 
     for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
     {
@@ -334,12 +374,11 @@ void CNewUIInGameShop::RenderDisplayItems()
 
     UpdateMousePositionn();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-
+    // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the restore-symmetry shadow-compare
+    // are deleted — GlobalUBO is restored directly from the pre-panel snapshot taken at entry.
     RestoreCameraPerspective();
+    GlobalUBO::Instance().SetProj(s_PreShopProj);
+    GlobalUBO::Instance().SetView(s_PreShopView);
     BeginBitmap();
 }
 

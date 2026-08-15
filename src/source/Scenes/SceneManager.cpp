@@ -10,6 +10,10 @@
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/PlatformInfo.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Core/RenderConfig.h"
+#include "Render/RHI/RHI.h"
 
 //=============================================================================
 // Frame Timing State Implementation
@@ -87,6 +91,15 @@ void SetShowFpsCounter(bool enabled)
 {
     g_bShowFpsCounter = enabled;
     if (enabled) g_bShowDebugInfo = false;
+}
+
+// GLP-01: independent of the two flags above -- $glstats can be shown alongside $details or
+// $fpscounter, not just standalone. Also the single switch that gates FrameProfiler's counter/
+// GPU-timer increments themselves (FrameProfiler::g_CountersEnabled), so turning the overlay
+// off also stops paying for the instrumentation.
+void SetShowGLStats(bool enabled)
+{
+    FrameProfiler::g_CountersEnabled = enabled;
 }
 
 //=============================================================================
@@ -213,8 +226,10 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
 static void CaptureScreenshot()
 {
     std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
-    glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, Buffer.data());
-    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100);
+    // DXP-12: RHI::ReadColorFramebuffer's contract is top-down (unlike raw glReadPixels'
+    // bottom-up) -- WriteJpeg's bottomUp=false tells turbojpeg to skip its own flip.
+    RHI::ReadColorFramebuffer(0, 0, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), Buffer.data());
+    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100, false);
 
     GrabScreen++;
     GrabScreen %= 10000;
@@ -341,7 +356,7 @@ static void UpdateCoreSystems()
 static void SetClearAndFogColor(float r, float g, float b)
 {
     extern GLfloat FogColor[4];
-    glClearColor(r, g, b, 1.f);
+    SetClearColor(r, g, b, 1.f);
     FogColor[0] = r;
     FogColor[1] = g;
     FogColor[2] = b;
@@ -386,7 +401,7 @@ static void SetWorldClearColor()
     else
         SetClearAndFogColor(0.f, 0.f, 0.f);            // Black (default)
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ClearColorAndDepthBuffers();
 }
 
 /**
@@ -437,33 +452,33 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
     float glBottom = (float)WindowHeight - gy - gh;
     float glTop = (float)WindowHeight - gy;
 
-    // Background
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    DisableTexture2D();
+    EnableBlend();
+    SetBlendFuncAlpha();
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-    glBegin(GL_QUADS);
-    glVertex2f(gx, glBottom);
-    glVertex2f(gx + gw, glBottom);
-    glVertex2f(gx + gw, glTop);
-    glVertex2f(gx, glTop);
-    glEnd();
+    IR::Begin(GL_QUADS);
+    PassthroughShader::Instance().SetUseTexture(false);
+    IR::Color4f(0.0f, 0.0f, 0.0f, 0.5f);
+    IR::Vertex2f(gx, glBottom);
+    IR::Vertex2f(gx + gw, glBottom);
+    IR::Vertex2f(gx + gw, glTop);
+    IR::Vertex2f(gx, glTop);
+    IR::End();
 
-    // Target line at 16.67ms (60fps)
     float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
     float lineY = glBottom + target60 * gh;
-    glColor4f(0.3f, 0.8f, 0.3f, 0.5f);
-    glBegin(GL_LINES);
-    glVertex2f(gx, lineY);
-    glVertex2f(gx + gw, lineY);
-    glEnd();
+    IR::Begin(GL_LINES);
+    PassthroughShader::Instance().SetUseTexture(false);
+    IR::Color4f(0.3f, 0.8f, 0.3f, 0.5f);
+    IR::Vertex2f(gx, lineY);
+    IR::Vertex2f(gx + gw, lineY);
+    IR::End();
 
-    // Frame bars
     float barW = gw / FRAME_HISTORY_SIZE;
     int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
 
-    glBegin(GL_QUADS);
+    IR::Begin(GL_QUADS);
+    PassthroughShader::Instance().SetUseTexture(false);
     for (int i = 0; i < s_frameCount; i++)
     {
         int idx = (oldest + i) % FRAME_HISTORY_SIZE;
@@ -471,23 +486,22 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
         float norm = std::min(ms / GRAPH_MAX_MS, 1.0f);
         float barH = norm * gh;
 
-        // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
         if (ms < THRESHOLD_60FPS_MS)
-            glColor4f(0.2f, 0.9f, 0.2f, 0.8f);
+            IR::Color4f(0.2f, 0.9f, 0.2f, 0.8f);
         else if (ms < THRESHOLD_40FPS_MS)
-            glColor4f(0.9f, 0.9f, 0.2f, 0.8f);
+            IR::Color4f(0.9f, 0.9f, 0.2f, 0.8f);
         else
-            glColor4f(0.9f, 0.2f, 0.2f, 0.8f);
+            IR::Color4f(0.9f, 0.2f, 0.2f, 0.8f);
 
         float bx = gx + i * barW;
-        glVertex2f(bx, glBottom);
-        glVertex2f(bx + barW, glBottom);
-        glVertex2f(bx + barW, glBottom + barH);
-        glVertex2f(bx, glBottom + barH);
+        IR::Vertex2f(bx, glBottom);
+        IR::Vertex2f(bx + barW, glBottom);
+        IR::Vertex2f(bx + barW, glBottom + barH);
+        IR::Vertex2f(bx, glBottom + barH);
     }
-    glEnd();
+    IR::End();
 
-    glEnable(GL_TEXTURE_2D);
+    EnableTexture2D();
 }
 
 /**
@@ -574,17 +588,140 @@ static void RenderDebugInfo()
     // Per-pass frame timing (ms) — accumulated by FRAME_PROFILE scopes around the
     // major render passes in MainScene. Reset just below so next frame starts fresh.
     using FP = FrameProfiler::Pass;
-    mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f",
+    mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f  Oth:%5.2f",
              FrameProfiler::AccumulatorMs(FP::Terrain),
              FrameProfiler::AccumulatorMs(FP::Objects),
              FrameProfiler::AccumulatorMs(FP::Characters),
              FrameProfiler::AccumulatorMs(FP::Items),
-             FrameProfiler::AccumulatorMs(FP::Effects));
+             FrameProfiler::AccumulatorMs(FP::Effects),
+             FrameProfiler::AccumulatorMs(FP::Other)); // 1-frame-lagged: debug-overlay/reconnect-dialog render cost only now (Present split out below, DXP-23)
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
-    FrameProfiler::ResetFrame();
+
+    // DXP-23: UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
+    // FRAME_PROFILE scope) -- this frame's own value, RenderCurrentScene() already ran above.
+    // Present = PlatformSwapBuffers() self-time, split out of Other so a large reading
+    // unambiguously points at GPU-stall wait rather than HUD render cost -- 1-frame-lagged like
+    // Oth above, since the swap itself only happens after this function returns.
+    mu_swprintf(szLine, L"UI:%6.2f  Present:%6.2f",
+             FrameProfiler::AccumulatorMs(FP::UI),
+             FrameProfiler::AccumulatorMs(FP::Present));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Move/update-phase cost of particle & effect simulation (UpdateGameEntities(), not the
+    // render-side Effects pass above) — added to gauge whether MoveEffects()/MoveParticles()
+    // are worth parallelizing on a worker thread pool (see feature-ffp-shader-port task memory).
+    mu_swprintf(szLine, L"MoveSim ms  MoveFx:%5.2f  MovePart:%5.2f",
+             FrameProfiler::AccumulatorMs(FP::MoveEffects),
+             FrameProfiler::AccumulatorMs(FP::MoveParticles));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // DXP-20 baseline: BMD::Transform() self-time (CPU skinning + per-vertex/normal loops),
+    // summed across every body transformed this frame (subset of the Objects/Chars/Items passes
+    // above, not additive with them). Judge the whole GPU-skinning task against this number.
+    mu_swprintf(szLine, L"Skinning ms  Transform:%5.2f", FrameProfiler::AccumulatorMs(FP::Skinning));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — splits the Characters
+    // pass above into "waiting on the animation thread pool" vs "everything else" (actual
+    // per-character RenderMesh calls), and shows whether this tick's animation ran on the
+    // worker thread pool or sequentially on the main thread (PARALLEL_ANIMATION_THRESHOLD = 20
+    // active characters, ZzzCharacter.cpp). Remove once the FPS investigation is resolved.
+    {
+        extern size_t g_LastActiveCharacterCount;
+        extern bool   g_LastAnimationWasParallel;
+        float charWaitMs = FrameProfiler::AccumulatorMs(FP::CharWait);
+        float charRenderMs = FrameProfiler::AccumulatorMs(FP::Characters) - charWaitMs;
+        mu_swprintf(szLine, L"CharDbg  Active:%3d  Parallel:%d  Wait:%5.2f  Render:%5.2f",
+            (int)g_LastActiveCharacterCount, (int)g_LastAnimationWasParallel, charWaitMs, charRenderMs);
+        g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    }
 
     // Frame time graph below text
     RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
+
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
+
+    // FrameProfiler::ResetFrame() used to live here, which meant AccumulatorMs only ever reset
+    // when $details itself was on -- with $glstats added as an independent overlay reading the
+    // same accumulators, that would show a running session total instead of a per-frame value
+    // whenever $details was off. Reset now happens once per frame unconditionally, after every
+    // reader (this function and RenderGLStats() below) has had a chance to read -- see the
+    // FrameProfiler::ResetFrame()/ResetCounters()/AdvanceGpuTimers() call in MainScene().
+}
+
+/**
+ * @brief Renders the $glstats overlay: per-pass GL call/draw/buffer counters and GPU pass
+ * timers (GLP-01). Independent of $details -- reads the same FrameProfiler accumulators but
+ * is gated by its own flag (FrameProfiler::g_CountersEnabled, set via SetShowGLStats()).
+ */
+static void RenderGLStats()
+{
+    if (!FrameProfiler::g_CountersEnabled)
+        return;
+
+    BeginBitmap();
+
+    wchar_t szLine[128];
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+
+    // Right-hand column so this can be shown alongside $details' left-aligned overlay without
+    // the two overlapping.
+    const float x = DEBUG_TEXT_X + 260.0f;
+    int y = DEBUG_TEXT_Y_START;
+
+    using FP = FrameProfiler::Pass;
+    using FC = FrameProfiler::Counter;
+
+    mu_swprintf(szLine, L"GLStats  Pass       CPUms  GPUms     GL   Draw BufUpd(Orph)");
+    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // One row per GL-call-bearing pass. The passes left out are the ones that genuinely issue no
+    // GL calls of their own -- MoveEffects, MoveParticles (update-phase simulation), Skinning and
+    // CharWait (CPU work) and Present (buffer swap); $details already covers their CPU cost.
+    //
+    // GLP-24: `Other` used to be left out too, on the same justification, and that was wrong -- it
+    // is the remainder bucket, not a CPU-only pass, and it was the frame's largest GL producer.
+    // The list had been copied from kGpuTimedPasses, where excluding Other IS correct (it has no
+    // timestamp pair). Rows must sum to the printed totals below; if they don't, a pass is missing
+    // from this list. Other's GPU-ms column reads 0 by design -- it is untimed, not free.
+    static constexpr FP kRows[] = {
+        FP::Terrain, FP::Objects, FP::Characters, FP::Items, FP::Effects,
+        FP::Sprites, FP::Particles, FP::Joints, FP::UI, FP::Overlay, FP::Other
+    };
+    for (FP pass : kRows)
+    {
+        const int gpuIdx = FrameProfiler::GpuTimedIndex(pass);
+        const float gpuMs = (gpuIdx >= 0) ? FrameProfiler::GpuMs(pass) : 0.0f;
+        // '!' marks a GPU reading that dropped entries at kMaxEntriesPerPass -- a truncated sum
+        // must never be mistaken for a complete one.
+        const char* truncFlag = (gpuIdx >= 0 && FrameProfiler::GpuMsTruncated(pass)) ? "!" : " ";
+        mu_swprintf(szLine, L"%-10hs %6.2f %6.2f%hs %5u %5u %5u(%u)",
+            FrameProfiler::kPassNames[(int)pass],
+            FrameProfiler::AccumulatorMs(pass),
+            gpuMs,
+            truncFlag,
+            FrameProfiler::CounterValue(pass, FC::GLCalls),
+            FrameProfiler::CounterValue(pass, FC::DrawCalls),
+            FrameProfiler::CounterValue(pass, FC::BufferUpdates),
+            FrameProfiler::CounterValue(pass, FC::BufferOrphans));
+        g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    }
+
+    // Frame totals -- includes binds/uniform writes, which aren't broken out per-row above
+    // (would make the table too wide to read at a glance).
+    mu_swprintf(szLine, L"Total  GL:%u  Draw:%u  BufUpd:%u(%u)  ProgBind:%u  TexBind:%u  UniWr:%u  UboSkip:%u",
+        FrameProfiler::CounterValue(FC::GLCalls),
+        FrameProfiler::CounterValue(FC::DrawCalls),
+        FrameProfiler::CounterValue(FC::BufferUpdates),
+        FrameProfiler::CounterValue(FC::BufferOrphans),
+        FrameProfiler::CounterValue(FC::ProgramBinds),
+        FrameProfiler::CounterValue(FC::TextureBinds),
+        FrameProfiler::CounterValue(FC::UniformWrites),
+        FrameProfiler::CounterValue(FC::UboSkips)); // GLP-10
+    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
@@ -1013,9 +1150,25 @@ void MainScene(HDC hDC)
     try
     {
         Success = RenderCurrentScene(hDC);
-        RenderDebugInfo();
-        RenderFpsCounter();
-        UI::Reconnect::RenderDialog();
+        {
+            // GLP-24: tagged Overlay, not Other. These three render text as roughly one IR quad per
+            // glyph, so with $glstats on they were adding hundreds of draw calls to the very bucket
+            // the overlay exists to investigate -- an observer effect big enough to mislead. Keep
+            // the Reset/Advance calls inside this scope; see the comment below for the ordering.
+            FRAME_PROFILE(Overlay);
+            RenderDebugInfo();
+            RenderGLStats();
+            RenderFpsCounter();
+            UI::Reconnect::RenderDialog();
+
+            // Once per frame, unconditionally -- see the comment at the end of RenderDebugInfo()
+            // for why this can't live inside either overlay function. AdvanceGpuTimers() must run
+            // after this frame's Terrain/Objects/Characters/Items/Effects/UI passes have all
+            // issued their GpuTimerBegin/End calls, which RenderCurrentScene() above guarantees.
+            FrameProfiler::ResetFrame();
+            FrameProfiler::ResetCounters();
+            FrameProfiler::AdvanceGpuTimers();
+        }
 
         if (Success)
         {
@@ -1032,7 +1185,13 @@ void MainScene(HDC hDC)
                 EndBitmap();
             }
 #endif
-            PlatformSwapBuffers();
+            // DXP-23: split into its own Present bucket (was folded into Other). A large reading
+            // here means the CPU is stalling waiting for the GPU command queue to drain (GPU-side
+            // cost, e.g. vsync block or genuine fill-rate/shader cost), not CPU-side render logic.
+            {
+                FRAME_PROFILE(Present);
+                PlatformSwapBuffers();
+            }
         }
 
         CheckServerConnection();
@@ -1040,10 +1199,22 @@ void MainScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        // Log exception in MainScene
+        // DXP-16: was OutputDebugStringA-only, invisible without a debugger attached. Since
+        // PlatformSwapBuffers() above only runs `if (Success)` (Success comes from
+        // RenderCurrentScene()'s return value), anything throwing in that path silently skips the
+        // frame's Present() with zero trace in MuError.log -- mirror it to g_ErrorReport too so a
+        // skipped-frame theory is checkable instead of invisible.
         char errorMsg[256];
         sprintf_s(errorMsg, sizeof(errorMsg), "Exception in MainScene: %s", e.what());
         OutputDebugStringA(errorMsg);
+        g_ErrorReport.Write(L"[MainScene] std::exception: %hs\r\n", e.what());
+    }
+    catch (...)
+    {
+        // DXP-16: pairs with the std::exception catch above -- a non-std exception (SEH,
+        // _com_error, etc.) previously had no handler here at all, which for MSVC's default SEH
+        // translation could itself explain a skipped/aborted frame with zero log trace anywhere.
+        g_ErrorReport.Write(L"[MainScene] non-std exception (SEH/other)\r\n");
     }
 }
 
@@ -1058,6 +1229,10 @@ void RenderScene(HDC hDC)
     ReconnectManager::Instance().Update();
 
     g_frameTiming.MarkFrameRendered();
+
+    // Pairs with PlatformSwapBuffers()'s RHI::EndFrame() call -- reserved per-frame
+    // backend hook (currently a no-op on GL).
+    RHI::BeginFrame();
 
     try
     {

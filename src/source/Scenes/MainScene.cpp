@@ -23,6 +23,9 @@
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Core/RenderConfig.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Engine/AI/GOBoid.h"
@@ -283,9 +286,9 @@ static void UpdateGameEntities()
     MoveMounts();
     ThePetProcess().UpdatePets();
     MovePoints();
-    MoveEffects();
+    { FRAME_PROFILE(MoveEffects); MoveEffects(); }
     MoveJoints();
-    MoveParticles();
+    { FRAME_PROFILE(MoveParticles); MoveParticles(); }
     MovePointers();
 
     g_Direction.CheckDirection();
@@ -386,6 +389,41 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 }
 
+// DXP-23 diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
+static bool g_bDisableEffectsDebug = false;
+
+void SetDisableEffects(bool disabled)
+{
+    g_bDisableEffectsDebug = disabled;
+}
+
+// DXP-23 diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
+static bool g_bDisableSpritesDebug = false;
+static bool g_bDisableParticlesDebug = false;
+static bool g_bDisableSkillEffectModelsDebug = false;
+static bool g_bDisableBoidsDebug = false;
+
+void SetDisableSprites(bool disabled) { g_bDisableSpritesDebug = disabled; }
+void SetDisableParticles(bool disabled) { g_bDisableParticlesDebug = disabled; }
+void SetDisableSkillEffectModels(bool disabled) { g_bDisableSkillEffectModelsDebug = disabled; }
+void SetDisableBoids(bool disabled) { g_bDisableBoidsDebug = disabled; }
+bool IsSpritesDisabledDebug() { return g_bDisableSpritesDebug; }
+bool IsParticlesDisabledDebug() { return g_bDisableParticlesDebug; }
+bool IsSkillEffectModelsDisabledDebug() { return g_bDisableSkillEffectModelsDebug; }
+bool IsBoidsDisabledDebug() { return g_bDisableBoidsDebug; }
+
+static bool g_bDisableWingShadowDebug = false;
+void SetDisableWingShadow(bool disabled) { g_bDisableWingShadowDebug = disabled; }
+bool IsWingShadowDisabledDebug() { return g_bDisableWingShadowDebug; }
+
+static bool g_bDisableJointsDebug = false;
+void SetDisableJoints(bool disabled) { g_bDisableJointsDebug = disabled; }
+bool IsJointsDisabledDebug() { return g_bDisableJointsDebug; }
+
+static bool g_bDisableWingExtraLayersDebug = false;
+void SetDisableWingExtraLayers(bool disabled) { g_bDisableWingExtraLayersDebug = disabled; }
+bool IsWingExtraLayersDisabledDebug() { return g_bDisableWingExtraLayersDebug; }
+
 /**
  * @brief Renders all 3D game entities (terrain, objects, characters, effects).
  *
@@ -399,13 +437,13 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     // DevEditor render toggle checks
     bool renderTerrain = DevEditor_ShouldRenderTerrain();
     bool renderStatic = DevEditor_ShouldRenderStaticObjects();
-    bool renderEffects = DevEditor_ShouldRenderEffects();
+    bool renderEffects = DevEditor_ShouldRenderEffects() && !g_bDisableEffectsDebug;
     bool renderDroppedItems = DevEditor_ShouldRenderDroppedItems();
     bool renderWeatherEffects = DevEditor_ShouldRenderWeatherEffects();
 #else
     bool renderTerrain = true;
     bool renderStatic = true;
-    bool renderEffects = true;
+    bool renderEffects = !g_bDisableEffectsDebug;
     bool renderDroppedItems = true;
     bool renderWeatherEffects = true;
 #endif
@@ -415,7 +453,11 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         if (gMapManager.WorldActive == WD_39KANTURU_3RD)
         {
             if (!g_Direction.m_CKanturu.IsMayaScene())
-                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+                // GLP-16 GPU-ms investigation: CPU-only scope -- GpuTimerBegin/End for this pass
+                // are now called manually, tightly around the real draw submission inside
+                // ZzzLodTerrain.cpp's FlushTerrainBuckets(), not around this whole CPU-heavy
+                // gather+sort+flush call. See FrameProfiler.h's Scope class comment for why.
+                { FRAME_PROFILE_CPU_ONLY(Terrain); RenderTerrain(false); }
         }
         else
             if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.WorldActive != -1)
@@ -424,7 +466,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
                 {
                     FRAME_PROFILE(Objects); RenderObjects();
                 }
-                { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+                { FRAME_PROFILE_CPU_ONLY(Terrain); RenderTerrain(false); }
             }
     }
 
@@ -441,7 +483,10 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 
     if (EditFlag != EDIT_NONE && renderTerrain)
     {
-        FRAME_PROFILE(Terrain); RenderTerrain(true);
+        // Dev-editor path: takes the non-shader (IR-based) fallback, which never reaches
+        // FlushTerrainBuckets()'s manual GpuTimerBegin/End -- Terrain GPU ms will read stale/0 in
+        // this mode, CPU ms is unaffected. Not worth instrumenting a debug-only path for.
+        FRAME_PROFILE_CPU_ONLY(Terrain); RenderTerrain(true);
     }
     if (!g_Camera.TopViewEnable && renderDroppedItems)
         { FRAME_PROFILE(Items); RenderItems(); }
@@ -461,7 +506,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     if (renderStatic)
         { FRAME_PROFILE(Objects); RenderObjects_AfterCharacter(); }
 
-    RenderJoints(byWaterMap);
+    { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
 
     if (renderEffects)
     {
@@ -477,8 +522,11 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderLeaves();
     }
 
-    RenderSprites();
-    RenderParticles();
+    // GLP-24: these two were the frame's largest GL producers and fell outside every FRAME_PROFILE
+    // scope (the Effects scope closes above), so they were attributed to Other, which the $glstats
+    // overlay never printed.
+    { FRAME_PROFILE(Sprites); RenderSprites(); }
+    { FRAME_PROFILE(Particles); RenderParticles(); }
 
     if (IsWaterTerrain() == false)
     {
@@ -496,17 +544,19 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         EndOpengl();
         BeginOpengl(0, 0, width, height);
         RenderWaterTerrain();
-        RenderJoints(byWaterMap);
-        RenderEffects(true);
-        RenderBlurs();
+        // Water maps run a full second pass, so Joints/Effects/Sprites/Particles are each entered
+        // twice per frame here. CPU ms accumulates across entries; GPU ms needs FrameProfiler's
+        // multi-entry query pairs (GLP-24) to do the same rather than reporting only this one.
+        { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
+        { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
         CheckSprites();
         BeginSprite();
 
         if (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
             RenderLeaves();
 
-        RenderSprites(byWaterMap);
-        RenderParticles(byWaterMap);
+        { FRAME_PROFILE(Sprites); RenderSprites(byWaterMap); }
+        { FRAME_PROFILE(Particles); RenderParticles(byWaterMap); }
         RenderPoints(byWaterMap);
 
         EndSprite();
@@ -636,30 +686,32 @@ bool RenderMainScene()
     // DEBUG: Render mouse ray as a visible line (magenta) from MousePosition to MouseTarget
     {
         GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
-        GLboolean tex2d = glIsEnabled(GL_TEXTURE_2D);
+        GLboolean tex2d = GL_FALSE;
         glDisable(GL_DEPTH_TEST);
-        glDisable(GL_TEXTURE_2D);
+        if (!g_CoreProfile) { tex2d = glIsEnabled(GL_TEXTURE_2D); glDisable(GL_TEXTURE_2D); }
         glLineWidth(2.0f);
-        glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
-        glBegin(GL_LINES);
-        glVertex3fv(MousePosition);
-        glVertex3fv(MouseTarget);
-        glEnd();
 
-        // Draw a small cross at MousePosition (green)
+        IR::Begin(GL_LINES);
+        PassthroughShader::Instance().SetUseTexture(false);
+        IR::Color4f(1.0f, 0.0f, 1.0f, 1.0f);
+        IR::Vertex3fv(MousePosition);
+        IR::Vertex3fv(MouseTarget);
+        IR::End();
+
         constexpr float S = 30.0f;
-        glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-        glBegin(GL_LINES);
-        glVertex3f(MousePosition[0] - S, MousePosition[1], MousePosition[2]);
-        glVertex3f(MousePosition[0] + S, MousePosition[1], MousePosition[2]);
-        glVertex3f(MousePosition[0], MousePosition[1] - S, MousePosition[2]);
-        glVertex3f(MousePosition[0], MousePosition[1] + S, MousePosition[2]);
-        glEnd();
+        IR::Begin(GL_LINES);
+        PassthroughShader::Instance().SetUseTexture(false);
+        IR::Color4f(0.0f, 1.0f, 0.0f, 1.0f);
+        IR::Vertex3f(MousePosition[0] - S, MousePosition[1], MousePosition[2]);
+        IR::Vertex3f(MousePosition[0] + S, MousePosition[1], MousePosition[2]);
+        IR::Vertex3f(MousePosition[0], MousePosition[1] - S, MousePosition[2]);
+        IR::Vertex3f(MousePosition[0], MousePosition[1] + S, MousePosition[2]);
+        IR::End();
 
         glLineWidth(1.0f);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         if (depthTest) glEnable(GL_DEPTH_TEST);
-        if (tex2d) glEnable(GL_TEXTURE_2D);
+        if (!g_CoreProfile && tex2d) glEnable(GL_TEXTURE_2D);
     }
 
     // DEBUG: Log ray state on left click (debounced to one log per click)
@@ -685,8 +737,7 @@ bool RenderMainScene()
     }
 #endif
 
-    RenderMainSceneUI();
-
+    { FRAME_PROFILE(UI); RenderMainSceneUI(); }
 
     EndOpengl();
 

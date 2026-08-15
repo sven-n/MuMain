@@ -139,7 +139,7 @@ void CUIMng::ReleaseTitleSceneUI()
 void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 {
     ::BeginOpengl();
-    ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ::ClearColorAndDepthBuffers();
     ::BeginBitmap();
 
     for (int i = 0; i < UIM_TS_MAX; ++i)
@@ -154,7 +154,7 @@ void CUIMng::RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
 
     ::EndBitmap();
     ::EndOpengl();
-    ::glFlush();
+    ::FlushGL();
 #ifdef _EDITOR
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
     g_MuEditorCore.Render();

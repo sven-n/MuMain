@@ -10,6 +10,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
 
 
@@ -461,12 +462,12 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
     return true;
     case 96:
         b->StreamMesh = 0;
-        glAlphaFunc(GL_GREATER, 0.0f);
+        SetAlphaFuncRef(0.0f);
         b->RenderMesh(
             0, RENDER_TEXTURE, 1.0f, o->BlendMesh,
             o->BlendMeshLight, o->BlendMeshTexCoordU,
             -(int)WorldTime % 20000 * 0.00005f);
-        glAlphaFunc(GL_GREATER, 0.25f);
+        SetAlphaFuncRef(0.25f);
         b->StreamMesh = -1;
         return true;
     case 98:

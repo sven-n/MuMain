@@ -126,7 +126,7 @@ void RenderWaterTerrain(int Texture, float xf, float yf, float SizeX, float Size
 
 void SettingHellasColor()
 {
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    SetClearColor(0.f, 0.f, 0.f, 1.f);
 }
 
 BYTE GetHellasLevel(CLASS_TYPE Class, int Level)

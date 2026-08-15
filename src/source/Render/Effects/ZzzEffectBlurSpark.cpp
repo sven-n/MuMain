@@ -1,7 +1,9 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Core/ImmediateRenderer.h"
+#include "Render/Core/RenderConfig.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -213,30 +215,30 @@ void RenderBlurs()
             BindTexture(nTexture);
             for (int j = 0; j < blur.Number - 1; j++)
             {
-                glBegin(GL_TRIANGLE_FAN);
+                IR::Begin(GL_TRIANGLE_FAN);
                 float Light;
                 float TexU;
                 if (blur.Owner->Level == 0)
                     Light = (blur.Number - j) / static_cast<float>(blur.Number);
                 else
                     Light = 1.f;
-                glColor3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
+                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
                 TexU = (j) / static_cast<float>(blur.Number);
-                glTexCoord2f(TexU, 1.f);
-                glVertex3fv(blur.P1[j]);
-                glTexCoord2f(TexU, 0.f);
-                glVertex3fv(blur.P2[j]);
+                IR::TexCoord2f(TexU, 1.f);
+                IR::Vertex3fv(blur.P1[j]);
+                IR::TexCoord2f(TexU, 0.f);
+                IR::Vertex3fv(blur.P2[j]);
                 if (blur.Owner->Level == 0)
                     Light = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
                 else
                     Light = 1.f;
-                glColor3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
+                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
                 TexU = (j + 1) / static_cast<float>(blur.Number);
-                glTexCoord2f(TexU, 0.f);
-                glVertex3fv(blur.P2[j + 1]);
-                glTexCoord2f(TexU, 1.f);
-                glVertex3fv(blur.P1[j + 1]);
-                glEnd();
+                IR::TexCoord2f(TexU, 0.f);
+                IR::Vertex3fv(blur.P2[j + 1]);
+                IR::TexCoord2f(TexU, 1.f);
+                IR::Vertex3fv(blur.P1[j + 1]);
+                IR::End();
             }
         }
     }
@@ -383,22 +385,22 @@ void RenderObjectBlurs()
                     }
                 }
 
-                glBegin(GL_TRIANGLE_FAN);
+                IR::Begin(GL_TRIANGLE_FAN);
                 float Light = (blur.Number - j) / static_cast<float>(blur.Number);
                 float TexU = (j) / static_cast<float>(blur.Number);
-                glColor3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                glTexCoord2f(TexU, 1.f);
-                glVertex3fv(blur.P1[j]);
-                glTexCoord2f(TexU, 0.f);
-                glVertex3fv(blur.P2[j]);
+                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
+                IR::TexCoord2f(TexU, 1.f);
+                IR::Vertex3fv(blur.P1[j]);
+                IR::TexCoord2f(TexU, 0.f);
+                IR::Vertex3fv(blur.P2[j]);
                 Light = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
-                glColor3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
+                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
                 TexU = (j + 1) / static_cast<float>(blur.Number);
-                glTexCoord2f(TexU, 0.f);
-                glVertex3fv(blur.P2[j + 1]);
-                glTexCoord2f(TexU, 1.f);
-                glVertex3fv(blur.P1[j + 1]);
-                glEnd();
+                IR::TexCoord2f(TexU, 0.f);
+                IR::Vertex3fv(blur.P2[j + 1]);
+                IR::TexCoord2f(TexU, 1.f);
+                IR::Vertex3fv(blur.P1[j + 1]);
+                IR::End();
             }
         }
     }
@@ -631,36 +633,34 @@ void RenderFlagFace(OBJECT* o, int x, int y, vec3_t Light, int Tex1, int Tex2)
     }
 
     BindTexture(Tex2);
-    glBegin(GL_QUADS);
-
+    IR::Begin(GL_QUADS);
     for (int i = 0; i < n; i++)
     {
         int vlist = f->vlist[i];
         physics_vertex* v = &g_flagVertices[vlist];
-        glTexCoord2f(TexCoord[i][0], TexCoord[i][1]);
-        glColor3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
+        IR::TexCoord2f(TexCoord[i][0], TexCoord[i][1]);
+        IR::Color3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
         vec3_t p, Position;
         Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
         Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
-        glVertex3f(Position[0], Position[1], Position[2]);
+        IR::Vertex3f(Position[0], Position[1], Position[2]);
     }
-    glEnd();
+    IR::End();
 
     BindTexture(Tex1);
-    glBegin(GL_QUADS);
-
+    IR::Begin(GL_QUADS);
     for (int i = n - 1; i >= 0; i--)
     {
         int vlist = f->vlist[i];
         physics_vertex* v = &g_flagVertices[vlist];
-        glTexCoord2f(TexCoord[i][0], TexCoord[i][1]);
-        glColor3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
+        IR::TexCoord2f(TexCoord[i][0], TexCoord[i][1]);
+        IR::Color3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
         vec3_t p, Position;
         Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
         Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
-        glVertex3f(Position[0], Position[1], Position[2]);
+        IR::Vertex3f(Position[0], Position[1], Position[2]);
     }
-    glEnd();
+    IR::End();
 }
 
 void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2)

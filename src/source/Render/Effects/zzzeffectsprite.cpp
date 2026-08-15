@@ -14,6 +14,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "Scenes/MainScene.h"
 
 #include <algorithm>
 
@@ -125,6 +126,10 @@ void RenderSprite(OBJECT* o, OBJECT* Owner)
 void RenderSprites(BYTE byRenderOneMore)
 {
     if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+    if (IsSpritesDisabledDebug()) // DXP-23 diagnostic
     {
         return;
     }

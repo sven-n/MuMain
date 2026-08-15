@@ -11,6 +11,7 @@
 #include <imagehlp.h>
 #endif
 #include "ErrorReport.h"
+#include "Render/RHI/RHI.h"  // GLP-08: RHI::GetCaps() for WriteOpenGLInfo()'s boot log
 
 // Max UTF-8 bytes for a single log line. Source buffer is wchar_t[1024]; UTF-8 needs
 // up to 3 bytes per BMP character (and 4 bytes per surrogate pair), so a 1024-wchar
@@ -219,14 +220,32 @@ void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
 void CErrorReport::WriteOpenGLInfo(void)
 {
     Write(L"<OpenGL information>\r\n");
-    Write(L"Vendor\t\t: %ls\r\n", (wchar_t*)glGetString(GL_VENDOR));
-    Write(L"Render\t\t: %ls\r\n", (wchar_t*)glGetString(GL_RENDERER));
-    Write(L"OpenGL version\t: %ls\r\n", (wchar_t*)glGetString(GL_VERSION));
+    // GLP-08: was (wchar_t*)glGetString(...) -- glGetString returns a narrow (ASCII) const
+    // GLubyte*, and reinterpreting those bytes as UTF-16 code units produced garbled output.
+    // %hs is this file's own established narrow-string convention (see WriteFontInfo() above).
+    Write(L"Vendor\t\t: %hs\r\n", (const char*)glGetString(GL_VENDOR));
+    Write(L"Render\t\t: %hs\r\n", (const char*)glGetString(GL_RENDERER));
+    Write(L"OpenGL version\t: %hs\r\n", (const char*)glGetString(GL_VERSION));
     GLint iResult[2];
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, iResult);
     Write(L"Max Texture size\t: %d x %d\r\n", iResult[0], iResult[0]);
     glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iResult);
     Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
+
+    // GLP-08: resolved context version + capability probe -- this is the deliverable a remote
+    // user's log needs to be actionable, and what GLP-09/15/22 will branch on.
+    GLint maxVertexUniformBlocks = 0;
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &maxVertexUniformBlocks);
+    Write(L"Max Vertex Uniform Blocks\t: %d\r\n", maxVertexUniformBlocks);
+
+    const RHI::Caps& caps = RHI::GetCaps();
+    Write(L"GL context\t: %d.%d\r\n", caps.glMajor, caps.glMinor);
+    Write(L"Caps.bufferStorage\t: %d\r\n", caps.bufferStorage ? 1 : 0);
+    Write(L"Caps.vertexAttribBinding\t: %d\r\n", caps.vertexAttribBinding ? 1 : 0);
+    Write(L"Caps.programBinary\t: %d\r\n", caps.programBinary ? 1 : 0);
+    Write(L"Caps.timerQuery\t: %d\r\n", caps.timerQuery ? 1 : 0);
+    Write(L"Caps.uboOffsetAlignment\t: %d\r\n", caps.uboOffsetAlignment);
+    Write(L"Caps.maxUniformBlockSize\t: %d\r\n", caps.maxUniformBlockSize);
 }
 
 void CErrorReport::WriteFontInfo(void)

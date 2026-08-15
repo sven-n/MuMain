@@ -15,7 +15,7 @@
 
 CGlobalBitmap Bitmaps;
 
-bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality)
+bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality, bool bottomUp)
 {
     const auto fileCloser = [](FILE* fp) { if (fp != nullptr) { fclose(fp); } };
     std::unique_ptr<FILE, decltype(fileCloser)> outfile(_wfopen(filename, L"wb"), fileCloser);
@@ -35,7 +35,7 @@ bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, 
     std::vector<unsigned char> outputBuffer(maxSize);
     unsigned long jpegSize = maxSize;
     unsigned char* jpegPtr = outputBuffer.data();
-    const int flags = TJFLAG_BOTTOMUP | TJFLAG_NOREALLOC;
+    const int flags = (bottomUp ? TJFLAG_BOTTOMUP : 0) | TJFLAG_NOREALLOC;
     const auto result = tjCompress2(handle.get(), Buffer, Width, 0, Height, TJPF_RGB, &jpegPtr, &jpegSize, TJSAMP_444, quality, flags);
 
     if (result != 0)

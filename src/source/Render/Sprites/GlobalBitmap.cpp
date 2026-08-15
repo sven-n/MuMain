@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "turbojpeg.h"
 #include "Render/Sprites/GlobalBitmap.h"
+#include "Render/RHI/RHI.h"
 #include "Core/Platform/PathResolve.h"
 
 #include <algorithm>
@@ -439,9 +440,15 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
 
         if (--pBitmap->Ref == 0 || bForce)
         {
-            glDeleteTextures(1, &(pBitmap->TextureNumber));
+            // DXP-12: RHI::DestroyTexture invalidates BindState's texture cache internally
+            // (matches BindState.h's documented contract -- see RHI_GL.cpp's DestroyTexture).
+            RHI::DestroyTexture(RHI::TextureHandle{ pBitmap->TextureNumber });
 
-            const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->Width * pBitmap->Height * pBitmap->Components);
+            // DXP-12: BufferStorage.size() (actual allocated bytes), not Width*Height*Components --
+            // Components is a blend-mode semantic flag now decoupled from real buffer byte layout
+            // for JPEG-sourced bitmaps (stays 3 even though the RHI-uploaded buffer is 4
+            // bytes/pixel, see OpenJpegTurbo's comment), so it would under-count the decrement here.
+            const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->BufferStorage.size());
             m_dwUsedTextureMemory -= memoryUsed;
 
             m_mapBitmap.erase(mi);
@@ -650,47 +657,59 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
 
     pNewBitmap->Width = static_cast<float>(textureWidth);
     pNewBitmap->Height = static_cast<float>(textureHeight);
+    // DXP-12: RHI's texture format contract is RGBA8 always (DXGI has no 24-bit RGB format), so
+    // the RGB->RGBA expansion (alpha=255) that used to happen implicitly on the GL side (upload
+    // format=GL_RGB into an internalformat=GL_RGBA8 texture) now happens explicitly here, in the
+    // loader, so both backends receive identical RGBA8 payloads.
+    //
+    // Components stays 3, NOT 4, despite the buffer now being 4 bytes/pixel. Found the hard way
+    // (2026-08-03 runtime regression -- torch/particle effects went from additive-transparent to
+    // solid black squares): Components isn't just a byte count, it's a semantic "does this bitmap
+    // have a real per-pixel alpha channel" flag that ~8 render call sites branch on to pick blend
+    // mode / vertex color (ZzzEffectParticle.cpp:8939 EnableAlphaBlend vs EnableAlphaTest,
+    // ZzzOpenglUtil.cpp:1098, ZzzEffectPointer.cpp:96, ZzzBMD.cpp:1535/1551/1572,
+    // SideHair.cpp:55/72, EditObjects.cpp:274). JPEG source data has no alpha channel (every pixel
+    // would come out alpha=255 either way, implicit-fill or explicit) -- setting Components=4
+    // wrongly told all of those "this texture has real alpha," routing black background pixels
+    // through alpha-blend instead of additive. Components==3 for "no real alpha" / ==4 for "real
+    // alpha" is the existing tree-wide contract; RHI's buffer format is an internal upload detail
+    // that must NOT change it. (Memory accounting below no longer reads Components for this
+    // reason -- see UnloadImage's BufferStorage.size()-based fix.)
     pNewBitmap->Components = 3;
     pNewBitmap->Ref = 1;
 
-    const auto textureBufferSize = static_cast<std::size_t>(textureWidth) * static_cast<std::size_t>(textureHeight) * 3u;
+    const auto textureBufferSize = static_cast<std::size_t>(textureWidth) * static_cast<std::size_t>(textureHeight) * 4u;
     pNewBitmap->BufferStorage.resize(textureBufferSize);
     pNewBitmap->Buffer = pNewBitmap->BufferStorage.data();
     m_dwUsedTextureMemory += static_cast<std::uint32_t>(textureBufferSize);
 
-    const int jpegRowSize = jpegWidth * 3;
-    const int textureRowSize = textureWidth * 3;
+    // Per-pixel expand (can't memcpy across differing bytes/pixel like the pre-RHI fast path
+    // did) -- textureWidth/Height are always >= jpegWidth/Height (NextPowerOfTwo rounds up, and
+    // jpegWidth/Height > MAX_WIDTH/HEIGHT was already rejected above), so cols/rows just guard
+    // the copy bounds; padding beyond them stays zero from BufferStorage's resize.
     const int rows = std::min<int>(jpegHeight, textureHeight);
-
-    std::size_t offset = 0;
-    if (jpegWidth != textureWidth)
+    const int cols = std::min<int>(jpegWidth, textureWidth);
+    for (int row = 0; row < rows; ++row)
     {
-        for (int row = 0; row < rows; ++row)
+        const unsigned char* srcRow = &decompressedBuffer[static_cast<std::size_t>(row) * jpegWidth * 3u];
+        unsigned char* dstRow = &pNewBitmap->Buffer[static_cast<std::size_t>(row) * textureWidth * 4u];
+        for (int col = 0; col < cols; ++col)
         {
-            memcpy(&pNewBitmap->Buffer[offset], &decompressedBuffer[static_cast<std::size_t>(row) * jpegRowSize], static_cast<std::size_t>(jpegRowSize));
-            offset += static_cast<std::size_t>(textureRowSize);
+            dstRow[col * 4 + 0] = srcRow[col * 3 + 0];
+            dstRow[col * 4 + 1] = srcRow[col * 3 + 1];
+            dstRow[col * 4 + 2] = srcRow[col * 3 + 2];
+            dstRow[col * 4 + 3] = 255;
         }
     }
-    else
-    {
-        memcpy(pNewBitmap->Buffer, decompressedBuffer.data(), static_cast<std::size_t>(jpegHeight) * static_cast<std::size_t>(jpegWidth) * 3u);
-    }
 
-    glGenTextures(1, &(pNewBitmap->TextureNumber));
-
-    glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
+    RHI::TextureDesc desc;
+    desc.width = textureWidth;
+    desc.height = textureHeight;
+    desc.filter = (uiFilter == GL_LINEAR) ? RHI::TexFilter::Linear : RHI::TexFilter::Nearest;
+    desc.wrap = (uiWrapMode == GL_REPEAT) ? RHI::TexWrap::Repeat : RHI::TexWrap::Clamp;
+    pNewBitmap->TextureNumber = RHI::CreateTexture(desc, pNewBitmap->Buffer).id;
 
     m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
 
     return true;
 }
@@ -765,23 +784,24 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
         }
     }
 
-    glGenTextures(1, &(pNewBitmap->TextureNumber));
-
-    glBindTexture(GL_TEXTURE_2D, pNewBitmap->TextureNumber);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pNewBitmap->Buffer);
+    RHI::TextureDesc desc;
+    desc.width = Width;
+    desc.height = Height;
+    desc.filter = (uiFilter == GL_LINEAR) ? RHI::TexFilter::Linear : RHI::TexFilter::Nearest;
+    desc.wrap = (uiWrapMode == GL_REPEAT) ? RHI::TexWrap::Repeat : RHI::TexWrap::Clamp;
+    pNewBitmap->TextureNumber = RHI::CreateTexture(desc, pNewBitmap->Buffer).id;
 
     m_mapBitmap.insert(type_bitmap_map::value_type(uiBitmapIndex, std::move(pNewBitmap)));
 
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, uiFilter);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, uiWrapMode);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, uiWrapMode);
+    // DXP-08a: GL_TEXTURE_ENV/GL_TEXTURE_ENV_MODE is FFP-only texture-combiner state Core Profile
+    // removes outright (the id=1280 "<target> or <pname> require feature(s) disabled" violation);
+    // the shader path (PassthroughShader/IR::) never reads it, and this resets to GL's own default
+    // (GL_MODULATE) anyway, so it's a no-op on the shader pipeline regardless of profile. Guarded rather
+    // than deleted since this is a rarely-hit texture-load path, not proven dead with the same
+    // exhaustive attribution as the hot-path matrix-stack/color-bridge calls. Stays raw GL --
+    // texture-env is FFP pipeline state, not texture-object state, so it's out of RHI's scope
+    // (RHI.h has no equivalent, deliberately -- see DXP-11 design doc's Q1).
+    if (!g_CoreProfile) glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     return true;
 }

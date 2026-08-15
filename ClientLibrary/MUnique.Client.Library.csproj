@@ -40,10 +40,24 @@
   </ItemGroup>
 
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(ci)'!='true'">
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(ci)'!='true'"
+          Inputs="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml;
+                  $(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml;
+                  $(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml;
+                  $(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\CommonEnums.xml;
+                  GenerateExtensionsDotNet.xslt;GenerateEnums.xslt;GenerateFunctionsHeader.xslt;GenerateFunctions.xslt;GenerateBindingsHeader.xslt"
+          Outputs="ConnectionManager.ClientToServerFunctions.cs;ConnectionManager.ChatServerFunctions.cs;ConnectionManager.ConnectServerFunctions.cs;
+                   ..\src\source\Dotnet\PacketFunctions_CommonEnums.h;..\src\source\Dotnet\PacketFunctions_ClientToServer_Enums.h;..\src\source\Dotnet\PacketFunctions_ChatServer_Enums.h;..\src\source\Dotnet\PacketFunctions_ConnectServer_Enums.h;
+                   ..\src\source\Dotnet\PacketFunctions_ClientToServer.h;..\src\source\Dotnet\PacketFunctions_ChatServer.h;..\src\source\Dotnet\PacketFunctions_ConnectServer.h;
+                   ..\src\source\Dotnet\PacketFunctions_ClientToServer.cpp;..\src\source\Dotnet\PacketFunctions_ChatServer.cpp;..\src\source\Dotnet\PacketFunctions_ConnectServer.cpp;
+                   ..\src\source\Dotnet\PacketBindings_ClientToServer.h;..\src\source\Dotnet\PacketBindings_ChatServer.h;..\src\source\Dotnet\PacketBindings_ConnectServer.h">
     <!-- We only run the transformation locally on our dev environment with visual studio.
         The CI environment is identified by the parameter 'ci'. It's set in the azure pipelines and Dockerfile.
-        If you run into errors here under Linux/Mac OS, it might help to add this parameter, too. -->
+        If you run into errors here under Linux/Mac OS, it might help to add this parameter, too.
+        Inputs/Outputs added 2026-08-03: without them this target has no incremental-build tracking
+        and MSBuild reruns it (unconditionally overwriting every output below) on every single
+        dotnet build/publish, even when the packet XML/XSLT sources haven't changed. See
+        CLIENT/src/CMakeLists.txt's DOTNET_DLL_PATH comment for the CMake-side half of this fix. -->
     <XslTransformation OutputPaths="ConnectionManager.ClientToServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
     <XslTransformation OutputPaths="ConnectionManager.ChatServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
     <XslTransformation OutputPaths="ConnectionManager.ConnectServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
