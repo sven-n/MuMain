@@ -31,12 +31,15 @@ graph TD
     SourceUrl --> LFM["Rml::Context::LoadDocumentFromMemory(text, sourceUrl)"]
     LFM --> LinkResolve["&lt;link href='login.rcss'&gt; resolves<br>relative to sourceUrl"]
     LinkResolve --> RealFile["Data/Interface/RmlUi/themes/modern/login.rcss<br>(this file DOES need to exist on disk)"]
-
-    Cache --> SpriteCheck["UI::RmlBridge::UsesLegacySpriteChrome(themeName)"]
-    SpriteCheck --> Manifest["GetPrivateProfileIntW against<br>themes/modern/theme.ini<br>[Theme] UsesLegacySpriteChrome"]
-    Manifest -->|"1"| Sprites["CWin::Create() creates the legacy<br>background sprite + input-frame sprites"]
-    Manifest -->|"0 or file/key absent (default)"| NoSprites["CWin::Create(w,h,-2) — sentinel<br>skips the sprite entirely;<br>RCSS draws the whole look"]
 ```
+
+`CWin::Create()` always passes `nTexID=-2` for this window — CWin never draws background/frame
+chrome, in any theme. A "legacy-look" theme (like `themes/legacy/login.rcss`) reproduces the
+original look with its own `decorator: image(...)` rules pointing at the same art files the old
+sprites used; a "modern" theme uses flat colors/vector shapes instead. Either way, RmlUi renders
+100% of it — see [Core principle](#core-principle-rml-is-theme-agnostic-rcss-is-the-swappable-unit)
+above and the note on an earlier, removed mechanism in
+[Gotchas](gotchas-and-patterns.md#a-per-theme-flag-to-opt-back-into-cwin-sprite-rendering-was-the-wrong-shape).
 
 The key mechanism, `UI::RmlBridge::LoadThemedDocument()` (`UI/RmlBridge/RmlTheme.h/.cpp`), is what
 keeps RML shared and un-duplicated: it reads the RML file's text once, then calls
@@ -49,54 +52,34 @@ wraps the string in a `StreamMemory` and calls `SetSourceURL()` on it before par
 (`Data/Interface/RmlUi/themes/<name>/login.rml`) never needs to exist as a real file — only the
 `.rcss` it resolves to does.
 
-## `theme.ini` manifest
-
-Optional. Lives at `Data/Interface/RmlUi/themes/<name>/theme.ini`:
-
-```ini
-[Theme]
-UsesLegacySpriteChrome=1
-```
-
-Read directly via `GetPrivateProfileIntW` against that theme's own file — **not** a hardcoded C++
-allowlist. Absence of the file, or absence of the key inside it, both default to `0`
-(fully programmatic). This is deliberately data-driven per theme folder: a theme that wants to
-reuse legacy sprite chrome (the `legacy` theme's shape) ships one line in its own `theme.ini`; a
-theme that doesn't (the common case — a reskin, seasonal theme, accessibility theme, or a mod)
-needs no manifest at all.
-
 ## Adding a new theme — step by step
 
-**The common case: a fully programmatic (sprite-free) theme.** No source changes, no
-recompilation.
+No source changes, no recompilation — every theme, whether it reuses the original art or brings
+its own, is a drop-a-folder operation.
 
 1. Create `src/bin/Data/Interface/RmlUi/themes/<your-theme-name>/`.
 2. Write `login.rcss` in that folder, styling the same class names the shared `login.rml` uses
    (`#panel`, `.label`, `.checkbox-row`, `.checkbox-box`, `.btn`, `.trust-warning`,
-   `.input-frame` — see `themes/modern/login.rcss` for a complete real example, and
+   `.input-frame` — see `themes/modern/login.rcss` for a flat-color/vector-shape example, and
+   `themes/legacy/login.rcss` for an image-decorator example — and
    [Architecture](architecture.md) §2 for which RCSS properties are safe to use — **avoid
    `box-shadow` with a blur radius**, it isn't supported (see
    [Gotchas](gotchas-and-patterns.md#box-shadow-blur-renders-as-a-solid-white-block)).
-3. (Optional) Add a `theme.ini` if you want `UsesLegacySpriteChrome=1` — most new themes won't.
-4. Edit `config.ini`'s `[UI]` section: `RmlTheme=<your-theme-name>`.
-5. Relaunch. No rebuild needed — this is a pure data/config change.
+3. Edit `config.ini`'s `[UI]` section: `RmlTheme=<your-theme-name>`.
+4. Relaunch. No rebuild needed — this is a pure data/config change.
 
-**The rarer case: a theme that reuses legacy sprite chrome.** Same as above, plus set
-`UsesLegacySpriteChrome=1` in that theme's `theme.ini`. Note this only affects the *background*
-sprite and the input-box *frame* sprites for windows built the way `CLoginWin` is (a `CWin`
-subclass whose `Create()` checks `UsesLegacySpriteChrome` before creating those specific sprites)
-— a future migrated window that never had legacy sprite chrome to begin with has nothing to gate.
+## Bringing your own images to a theme
 
-## A third case: a theme with its own custom images
-
-`UsesLegacySpriteChrome` only controls whether the *old, hardcoded, non-authorable* legacy
-bitmaps (`BITMAP_LOG_IN+7`, `BITMAP_CHECK_BTN`, `BITMAP_BUTTON` — literal C++ constants a modder
-cannot add to without a source change) get drawn underneath the RmlUi overlay. It has nothing to
-do with whether a theme can have **its own new image assets** — a custom background photo, custom
-button art, a logo. That's a separate, already-working capability: RmlUi's own `LoadTexture`
-(`RmlUiRenderInterface.cpp`) already routes any image an RCSS file references through this
-engine's normal texture pipeline. No engine changes are needed to use it — but there are two real
-constraints worth knowing before you do, and they're rougher than the sprite-free case above.
+Every migrated window's background/frame chrome is drawn by RmlUi itself, in every theme — never
+by `CWin` or any other legacy widget (see [Gotchas](gotchas-and-patterns.md) for why an earlier
+per-theme flag that let a theme opt back into `CWin`-drawn chrome was removed). A theme is free to
+either reuse the original hardcoded legacy bitmaps (`BITMAP_LOG_IN+7`'s file,
+`Interface/login_back.tga`, is exactly what `themes/legacy/login.rcss`'s `#panel` decorator
+references — see it for a complete real example) or bring **its own new image assets** — a custom
+background photo, custom button art, a logo. Both go through the same, already-working path:
+RmlUi's own `LoadTexture` (`RmlUiRenderInterface.cpp`) routes any image an RCSS file references
+through this engine's normal texture pipeline. No engine changes are needed to use it — but there
+are three real constraints worth knowing before you do.
 
 **How the image reference resolves.** Confirmed against RmlUi's real source
 (`Source/Core/StyleSheetParser.cpp`, `ElementEffects.cpp`, `Decorator.cpp`): a relative image path
@@ -116,6 +99,10 @@ themes/<your-theme-name>/
 }
 ```
 
+This is enough to prove path resolution, but not necessarily enough to render correctly as-is —
+read the next two constraints (format, and non-power-of-two sizing) before trusting a direct
+path reference like this in a real theme.
+
 **The real constraint: only this engine's proprietary OZT/OZJ containers are supported, not plain
 PNG/JPG/BMP.** `RmlUiRenderInterface::LoadTexture` routes through `CGlobalBitmap::LoadImage`
 (`Render/Sprites/GlobalBitmap.cpp`) — the same loader every other texture in the game uses, so
@@ -127,6 +114,31 @@ exist on disk is `panel_bg.OZT`, not a real `.tga`. Any other extension (`.png`,
 handled at all. There is no PNG/JPG→OZT/OZJ converter in this repository — a modder needs an
 external tool from the wider MU private-server modding community (this format predates this
 project) to produce one.
+
+**A non-power-of-two-sized image needs an explicit `@spritesheet` declaration, or it will render
+squished with visible padding.** This engine's `.OZT`/`.OZJ` loaders pad every texture up to the
+next power-of-two size internally (a 329×245 image becomes a 512×256 texture, real content in the
+top-left corner, the rest zero-filled) — invisible to legacy `CSprite` callers (which track their
+own real dimensions separately) but **not** invisible to a plain `decorator: image("file.tga")`,
+which always samples the *entire* stored texture as 0..1 UV. The fix is to declare the image as a
+named sprite with its real pixel rectangle, and reference the sprite name instead of the raw path:
+
+```rcss
+@spritesheet panel-bg-sheet
+{
+    src: panel_bg.tga;
+    panel-bg-image: 0px 0px 329px 245px;  /* the image's REAL, unpadded pixel size */
+}
+
+#panel {
+    decorator: image(panel-bg-image);   /* the sprite name, not "panel_bg.tga" directly */
+}
+```
+
+If the image's real dimensions genuinely are an exact power of two (256×256, 512×128, ...), this
+step is unnecessary — the padding is a no-op and a direct path reference renders correctly. See
+[Gotchas](gotchas-and-patterns.md#a-referenced-images-real-unpadded-size-must-be-declared-via-spritesheet-not-assumed)
+for the full root-cause writeup.
 
 **Failures are completely silent.** A missing file or an unsupported extension returns `false`
 from `LoadImage` with **no log line at all** — `RmlUiRenderInterface::LoadTexture` then returns a
@@ -211,18 +223,17 @@ are inherited from the legacy window this pilot hasn't fully cut ties with yet.
 
 - **Not yet a live in-game hot-swap.** Switching themes today means editing `config.ini` and
   relaunching. A true runtime toggle needs each migrated window to tear down and rebuild its
-  `Rml::ElementDocument`/`DataModel` against the new theme (and, for sprite-backed themes, its
-  `CWin` background/frame sprites) — the teardown/rebuild lifecycle (`Context::RemoveDataModel`
-  semantics, `CSprite` re-`Create()` safety) hasn't been verified safe enough to build yet. Real
+  `Rml::ElementDocument`/`DataModel` against the new theme — the teardown/rebuild lifecycle
+  (`Context::RemoveDataModel` semantics) hasn't been verified safe enough to build yet. Real
   follow-up work, not started.
 - **`box-shadow` with a blur radius is unsupported** — see
   [Gotchas](gotchas-and-patterns.md#box-shadow-blur-renders-as-a-solid-white-block). Stick to
-  `background-color`, `border`, and `border-radius` for a themed panel's look; all three are pure
-  geometry and render correctly.
+  `background-color`, `border`, `border-radius`, and `decorator: image(...)` for a themed panel's
+  look; all render correctly.
 - **Custom theme images require this engine's proprietary OZT/OZJ format, not plain PNG/JPG** —
-  see [A third case: a theme with its own custom images](#a-third-case-a-theme-with-its-own-custom-images)
-  above. No converter tool exists in this repo today, and a missing/wrong-format image fails
-  completely silently.
+  see [Bringing your own images to a theme](#bringing-your-own-images-to-a-theme) above. No
+  converter tool exists in this repo today, and a missing/wrong-format image fails completely
+  silently.
 - **No scaling is wired up, and the panel's on-screen position isn't theme-controlled** — see
   [Coordinates, scaling, and positioning](#coordinates-scaling-and-positioning--what-a-theme-actually-controls)
   above. Themes are fixed-`px` and always render at the same physical size regardless of

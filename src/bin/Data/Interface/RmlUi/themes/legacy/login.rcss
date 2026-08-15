@@ -1,9 +1,35 @@
-/* Overlay for CLoginWin's checkboxes/buttons/labels/trust-warning text. The legacy panel
-   background sprite (CWin::m_psprBg, BITMAP_LOG_IN+7) still renders underneath this, unchanged
-   -- see LoginWin.h's class comment. #panel's left/top are set from C++ (LoginWin.cpp's
-   SetPosition()) to track the same real-window-pixel origin the legacy panel sprite uses; every
-   child below uses fixed-pixel offsets relative to that container, matching "the login
-   background is fixed artwork and does not scale with window size" (LoginWin.cpp). */
+/* Full RmlUi overlay for the login dialog -- panel background, input-box frames, checkboxes,
+   buttons, labels, and trust-warning text are ALL rendered here now. CWin no longer draws
+   anything for this window (CLoginWin::Create() always passes nTexID=-2); this theme reproduces
+   the original legacy look by pointing #panel/.input-frame's decorators at the *same* art files
+   the old CWin sprites used (Interface/login_back.tga, Interface/login_me.tga) -- same pixels,
+   different renderer. #panel's left/top are set from C++ (LoginWin.cpp's SetPosition()) to track
+   the window's real-pixel origin; every child below uses fixed-pixel offsets relative to that
+   container, matching "the login background is fixed artwork and does not scale with window
+   size" (LoginWin.cpp). */
+
+/* This engine's legacy .OZT loader (CGlobalBitmap::OpenTga) pads every texture up to the next
+   power-of-two size (e.g. 329x245 -> 512x256), leaving the real image in the top-left corner and
+   the rest zero-filled -- a leftover constraint from old GPUs, invisible to every legacy CSprite
+   caller because CSprite computes its own UV sub-rect from the ORIGINAL dimensions it was given
+   (see CSprite::Create's m_fOrgWidth/m_fOrgHeight-based texcoord math), not the padded texture
+   size. RmlUi's plain `decorator: image(...)` has no such caller-supplied sub-rect -- it always
+   samples the FULL texture as 0..1 UV -- so referencing these files directly stretched the real
+   329x245/156x23 art across a small corner of the panel while squishing in a chunk of blank
+   padding. Fix: declare each image as a named sprite with an explicit pixel rectangle matching its
+   REAL (unpadded) size -- RmlUi's sprite path uses that rectangle for UV math instead of the full
+   texture, exactly like CSprite's own original-dimensions approach. */
+@spritesheet login-back-sheet
+{
+	src: "../../../login_back.tga";
+	login-back-image: 0px 0px 329px 245px;
+}
+
+@spritesheet login-input-frame-sheet
+{
+	src: "../../../login_me.tga";
+	login-input-frame-image: 0px 0px 156px 23px;
+}
 
 body {
 	width: 100%;
@@ -29,6 +55,14 @@ body {
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: white;
+	/* The exact same 329x245 artwork CWin::m_psprBg used to draw (BITMAP_LOG_IN+7) -- loaded
+	   through RmlUiRenderInterface::LoadTexture -> CGlobalBitmap::LoadImage, which finds and
+	   ref-counts the same cached texture by filename (it's already resident, preloaded
+	   unconditionally by ZzzOpenData.cpp regardless of which theme is active), so this is not a
+	   second GPU upload of the same file. References the named sprite (see @spritesheet above),
+	   not the raw file path directly -- required to get correct UV coordinates against this
+	   texture's power-of-two-padded real size. */
+	decorator: image(login-back-image);
 }
 
 .label {
@@ -38,12 +72,22 @@ body {
 .label-account { left: 30px; top: 113px; }
 .label-password{ left: 30px; top: 139px; }
 
-/* Inert under this theme -- the legacy input-box frame sprites (CLoginWin's m_asprInputBox,
-   BITMAP_LOG_IN+8) already provide the visual backing. See login.rml's comment and the modern
-   theme's login.rcss for where this class is actually styled. */
+/* Same art file the old CLoginWin::m_asprInputBox CSprites drew (Interface/login_me.tga,
+   BITMAP_LOG_IN+8), now rendered by RmlUi instead. pointer-events stays "none" (inherited from
+   body) -- purely visual, must not intercept clicks meant for the legacy CUITextInputBox
+   underneath. Renders as part of RmlUi's pass (after all legacy 2D content, before
+   CLoginWin::RenderTextOnTop()'s later call -- see SceneManager.cpp), so the input text drawn on
+   top afterward is never covered, same ordering the modern theme's border-only version relies on. */
 .input-frame {
-	display: none;
+	position: absolute;
+	width: 156px;
+	height: 23px;
+	/* Same named-sprite note as #panel above -- see @spritesheet login-input-frame-sheet. */
+	decorator: image(login-input-frame-image);
+	pointer-events: none;
 }
+.input-account  { left: 109px; top: 106px; }
+.input-password { left: 109px; top: 131px; }
 
 .checkbox-row {
 	position: absolute;

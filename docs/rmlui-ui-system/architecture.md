@@ -22,10 +22,15 @@ graph TD
 ```
 
 No window has been fully retired yet — the login screen is a **hybrid**: `CWin` still owns the
-window's position/size/z-order bookkeeping and (theme-dependent) background sprite; RmlUi renders
-the interactive overlay (checkboxes, buttons, labels) on top. Retiring a window means removing its
-last legacy dependency, not swapping frameworks atomically — see the migration plan's Retirement
-criteria for the full checklist.
+window's position/size/z-order bookkeeping (and its `CursorInWin` hit-testing), but draws nothing
+visual at all (`CWin::Create()` is always called with `nTexID=-2`). RmlUi renders 100% of the
+visible panel — background, input-box frames, checkboxes, buttons, labels — in every theme; a
+"legacy-look" theme reproduces the original art by pointing its own RCSS decorators at the same
+image files the old `CWin`/`CSprite` objects used to draw (see
+[Theming & Modding](theming-and-modding.md)), it just isn't `CWin` doing the drawing anymore.
+Retiring a window means removing its remaining legacy dependency (position/hit-testing), not
+swapping frameworks atomically — see the migration plan's Retirement criteria for the full
+checklist.
 
 ## 2. Render interface: why a custom one, and what it doesn't do
 
@@ -41,6 +46,21 @@ backends. Reasons:
 - `RenderGeometry` binds the same `PassthroughShader` every other 2D/3D draw call in this engine
   uses, and translates via `GlobalUBO::SetModel(origin, scale)` — a uniform that already existed
   for exactly this purpose. There is no RmlUi-specific shader.
+
+### Two texture "kinds" with two different id spaces
+
+Every `Rml::TextureHandle` this class hands out is backed by one of two kinds, tracked internally
+(`TextureRecord::kind`): `Generated` (RmlUi's own rasterized content — font glyph atlases — where
+`id` is a real `RHI::TextureHandle`/GL name straight from `RHI::CreateTexture`), and `FileBacked`
+(any image loaded through `CGlobalBitmap`, e.g. a themed panel's background) where **`id` is a
+`CGlobalBitmap` bitmap-*index*, not a GL name at all** — resolving it to something bindable
+requires `Bitmaps.GetTexture(id)->TextureNumber`. `ReleaseTexture` dispatches correctly on `kind`;
+`RenderGeometry`'s texture-binding line originally didn't (bound `id` directly as a GL name for
+both kinds), which went unnoticed for the whole migration until the first `FileBacked` texture was
+actually rendered (see [Gotchas](gotchas-and-patterns.md#filebacked-textures-rendered-using-the-wrong-gl-texture-object)
+for the full incident) — now fixed, but worth knowing as an invariant if this class grows a third
+texture source: **the two id spaces are never interchangeable, and every method that consumes
+`TextureRecord::id` needs to dispatch on `kind`, not just some of them.**
 
 **Only the "required functions for basic rendering" section of `Rml::RenderInterface` is
 implemented.** The optional advanced functions — `SetTransform`, layers, filters — are left at
@@ -83,14 +103,14 @@ two separate real bugs (see [Gotchas](gotchas-and-patterns.md)):
 ```mermaid
 sequenceDiagram
     participant Scene as RenderCurrentScene()<br>(3D world + legacy 2D)
-    participant UIMng as CUIMng::Render()<br>(CWin background sprite,<br>CUITextInputBox text)
-    participant Rml as RmlUiRuntime::Render()<br>(the overlay)
+    participant UIMng as CUIMng::Render()<br>(CWin draws nothing;<br>CUITextInputBox text stays for later)
+    participant Rml as RmlUiRuntime::Render()<br>(the whole panel: bg, frames, controls)
     participant Post as Post-RmlUi draws<br>(cursor, RenderTextOnTop)
 
     Scene->>Scene: 3D terrain/objects/characters
     Scene->>UIMng: BeginBitmap() 2D ortho pass
-    UIMng->>UIMng: CWin::Render() → background sprite<br>(theme-gated, legacy sprite chrome only)
-    UIMng->>UIMng: RenderControls() → checkboxes/buttons FRAME sprites<br>(theme-gated)
+    UIMng->>UIMng: CWin::Render() → m_psprBg is null, draws nothing
+    UIMng->>UIMng: RenderControls() → SyncRmlModel() only, no legacy drawing left
     Scene->>Scene: EndBitmap() — restores pre-2D 3D perspective
     Note over Scene,Rml: control returns all the way up to MainScene()
     Rml->>Rml: GlobalUBO::PushModel()<br>SetOrtho(top-down)<br>m_Context->Render()<br>PopModel() / restore blend+scissor/Proj/View
@@ -100,12 +120,17 @@ sequenceDiagram
     Post->>Post: EndBitmap()
 ```
 
-Why this matters concretely: the login screen's **legacy** theme has a fully transparent RmlUi
-`#panel` background, so whatever legacy content rendered underneath it (input text, cursor) stayed
-visible regardless of draw order — the ordering bug was invisible for the entire time only the
-legacy theme existed. The **modern** theme gives `#panel` an opaque `background-color`, which
-immediately covered the cursor and input text the first time it was tested. Both symptoms were the
-*same* underlying ordering fact, just newly exposed by an opaque panel.
+Why this matters concretely: at the time this ordering bug was found, the login screen's
+**legacy** theme had a fully transparent RmlUi `#panel` background, so whatever legacy content
+rendered underneath it (input text, cursor) stayed visible regardless of draw order — the bug was
+invisible for the entire time only that transparent panel existed. The **modern** theme gave
+`#panel` an opaque `background-color`, which immediately covered the cursor and input text the
+first time it was tested. Both symptoms were the *same* underlying ordering fact, just newly
+exposed by an opaque panel — which is exactly why the `legacy` theme's panel (now also opaque,
+since it draws the original background image via `decorator: image(...)` instead of relying on a
+transparent RmlUi panel over a CWin-drawn sprite) still renders correctly today: `RenderTextOnTop()`
+already runs after `RmlUiRuntime::Render()`, so the input text is never covered regardless of which
+theme's panel is opaque.
 
 **Practical rule for any future migrated window**: if a window's RmlUi overlay might ever have an
 opaque background over a region where legacy content (text, a cursor, anything not itself RmlUi)
@@ -227,16 +252,21 @@ as event parameters) rather than hand-rolled `mousedown`/`mousemove`/`mouseup` t
   bug for whatever's underneath it. This isn't a workaround; it's the same reason real UI
   toolkits use a title bar instead of "drag from anywhere on the window body" — content inside a
   panel (buttons, text fields) needs to keep receiving its own clicks.
-- **The optional `onMove` callback exists because RmlUi and legacy chrome are NOT actually
-  linked beyond a one-time position sync.** A hybrid window's legacy `CWin` background sprite and
-  its RmlUi overlay are two independently-rendered things that merely started at the same
-  position (both set once from the same `CWin::SetPosition()` call) — RmlUi has no knowledge of
-  `CWin::m_ptPos`, and moving one never moves the other. Confirmed by a real test: dragging via
-  `MakeDraggable()` alone moved the RmlUi checkboxes/buttons/labels correctly, while the legacy
-  background sprite underneath them stayed exactly where it started, immediately and visibly
-  desyncing. `onMove(newLeft, newTop)` fires on every drag tick specifically so a hybrid window's
-  caller can also update its legacy position in lockstep; a fully migrated, sprite-free panel has
-  nothing to sync and can omit it.
+- **The optional `onMove` callback exists because RmlUi and any remaining legacy state are NOT
+  actually linked beyond a one-time position sync.** At the time this was built and tested, the
+  login window still had a `CWin`-drawn background sprite alongside the RmlUi overlay — two
+  independently-rendered things that merely started at the same position (both set once from the
+  same `CWin::SetPosition()` call). RmlUi has no knowledge of `CWin::m_ptPos`, and moving one never
+  moves the other. Confirmed by a real test: dragging via `MakeDraggable()` alone moved the RmlUi
+  checkboxes/buttons/labels correctly, while the legacy background sprite underneath them stayed
+  exactly where it started, immediately and visibly desyncing. `onMove(newLeft, newTop)` fires on
+  every drag tick specifically so a caller can update whatever legacy state still needs to track
+  the panel (a `CWin::SetPosition()` call, hit-test bookkeeping, etc.) in lockstep. The login
+  window no longer has a `CWin`-drawn sprite to desync from (see §1 — `CWin` draws nothing for it
+  in any theme now), but `CWin` still owns this window's position/hit-testing, so the same
+  reasoning would still apply the moment position itself needs to move with the panel; a fully
+  migrated window with no remaining legacy state at all has nothing to sync and can omit the
+  callback entirely.
 
 Verified against a real build+run using the login screen's document as a test bed (a temporary
 handle wired to `.trust-warning`, since `#panel` itself can't be its own handle for the reason

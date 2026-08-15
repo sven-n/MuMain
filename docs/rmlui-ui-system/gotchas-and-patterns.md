@@ -181,6 +181,82 @@ compositing is actually implemented in `RmlUiRenderInterface`. `background-color
 `border-radius` are all pure geometry and render correctly — they're what should carry a themed
 panel's look instead.
 
+### `FileBacked` textures rendered using the wrong GL texture object
+
+**Symptom**: the `legacy` theme's `#panel`/`.input-frame` `decorator: image(...)` backgrounds
+didn't render at all (fully transparent, no error logged anywhere), and separately, unrelated debug
+overlay text appeared blown up and garbled in the middle of the login panel.
+
+**Root cause**: `RmlUiRenderInterface` hands RmlUi an opaque `Rml::TextureHandle` for every texture
+it loads, backed internally by one of two *kinds* (`RmlUiRenderInterface.h`'s own header comment
+already flags this distinction as load-bearing): `Generated` (RmlUi's own font-glyph atlases —
+`id` is a real `RHI::TextureHandle`/GL name straight from `RHI::CreateTexture`) and `FileBacked`
+(anything routed through `CGlobalBitmap` — `id` is a **bitmap *index*** into that cache, e.g. `31009`
+for `login_back.tga`, not a GL name at all). `ReleaseTexture` already dispatched correctly on
+`kind` (`Bitmaps.UnloadImage` for `FileBacked`, `RHI::DestroyTexture` for `Generated`) — but
+`RenderGeometry`'s texture-binding line bound `texIt->second.id` directly as a GL texture name
+**for both kinds**, unconditionally. This was invisible for the entire migration up to this point
+because every texture RmlUi had ever rendered was `Generated` (text only, no images) — the
+`legacy` theme's background/input-frame decorators were the **first `FileBacked` textures RmlUi
+ever rendered**, and binding bitmap-index `31009` as if it were a GL texture name bound whatever
+GL texture object actually happened to hold that numeric name — plausibly explaining the garbled
+debug-overlay-looking text as a side effect of sampling the wrong (but very real) texture.
+
+**How it was actually found**: not guessed after the fact — narrowed down by elimination. A
+temporary diagnostic in `LoadTexture` confirmed the texture *load* itself succeeded (a valid,
+non-`BITMAP_UNKNOWN` bitmap index, correctly ref-counted against the exact same cache slot
+(`BITMAP_LOG_IN+7` = `31009`) the original working `CWin` sprite used) before concluding the bug
+had to be downstream of loading, in the actual render/bind path — reading `RenderGeometry` line by
+line against the class's own header comment (which explicitly warns the two id spaces are "not
+guaranteed disjoint") is what surfaced the mismatch.
+
+**Fix**: `RenderGeometry` now checks `kind` before binding — `FileBacked` resolves through
+`Bitmaps.GetTexture(id)->TextureNumber` to get the real GL name first; `Generated` uses `id`
+directly as before.
+
+**Practical rule for the next migrated window**: any decorator/`<img>` that references a real
+image file (not text) is exercising the `FileBacked` path for the first time in whatever window
+migrates next after this fix — already fixed now, but if a *different*, similarly-shaped id-space
+mismatch bug shows up again, check every place a `TextureRecord`/`kind` is consumed, not just
+`ReleaseTexture` (which was already correct) — a class-wide invariant being enforced in one method
+doesn't guarantee it's enforced in all of them.
+
+### A referenced image's real (unpadded) size must be declared via `@spritesheet`, not assumed
+
+**Symptom**: after fixing the texture-binding bug above, `login_back.tga`'s art appeared squeezed
+into roughly the top-left two-thirds of the panel, with a blank strip along the right/bottom edges
+— not invisible, but visibly wrong.
+
+**Root cause**: this engine's legacy `.OZT` loader (`CGlobalBitmap::OpenTga`) pads every texture up
+to the next power-of-two size (`NextPowerOfTwo`) — confirmed by reading it: 329×245 becomes a
+512×256 texture, with the real image content in the top-left corner and the rest zero-filled. This
+is a leftover constraint from old GPUs; it's invisible to every legacy `CSprite` caller because
+`CSprite::Create()` computes its own UV sub-rect from the *original* dimensions the caller passed
+in (`m_fOrgWidth`/`m_fOrgHeight`), never the padded texture size. RmlUi's plain
+`decorator: image("path/to/file")` has no equivalent caller-supplied sub-rect — a referenced image
+with no matching named sprite always samples the *entire* texture as 0..1 UV — so it stretched the
+real content across a corner of the panel while squishing in a chunk of blank padding on the rest.
+
+**Fix**: declare the image as a named sprite via `@spritesheet`, with an explicit pixel rectangle
+matching its *real* (unpadded) size —
+```rcss
+@spritesheet login-back-sheet
+{
+	src: "../../../login_back.tga";
+	login-back-image: 0px 0px 329px 245px;
+}
+```
+then reference the sprite *name* (not the raw path) in the decorator: `decorator: image(login-back-image);`.
+`DecoratorTiledInstancer::GetTileProperties` (`Source/Core/DecoratorTiled.cpp`) checks for a named
+sprite match *before* falling back to treating the name as a raw image path — a declared sprite's
+`Rectanglef` becomes the tile's UV sub-rect instead of the full texture, exactly mirroring
+`CSprite`'s own original-dimensions approach.
+
+**Practical rule for the next migrated window**: any RCSS `decorator: image(...)` (or `<img>`)
+referencing one of this engine's real (non-power-of-two-dimensioned) legacy art assets needs a
+`@spritesheet` declaration with the asset's *real* pixel size — never reference the raw file path
+directly unless the asset's real dimensions already happen to be an exact power of two.
+
 ---
 
 ## Input
@@ -307,10 +383,41 @@ own `.rcss` file and be referenced with a plain relative path. This part needed 
 works correctly by virtue of how `LoadThemedDocument()` and RmlUi's own stylesheet-loading both
 handle source URLs.
 
-See [Theming & Modding](theming-and-modding.md#a-third-case-a-theme-with-its-own-custom-images)
+See [Theming & Modding](theming-and-modding.md#bringing-your-own-images-to-a-theme)
 for the full workflow and the open (not yet built) follow-up: vendoring `stb_image.h` to give
 `LoadTexture` a plain-PNG/JPG/BMP fallback for RmlUi-referenced theme assets specifically, without
 touching the legacy OZT/OZJ pipeline everything else still depends on.
+
+### A per-theme flag to opt back into `CWin` sprite rendering was the wrong shape
+
+**Not a bug — a design mistake caught and reversed before it caused one.** The theme framework
+originally shipped a per-theme `theme.ini` manifest key, `UsesLegacySpriteChrome`, that let a
+theme tell `CLoginWin::Create()`/`RenderControls()` to keep creating and drawing `CWin`'s
+background sprite and the `CUITextInputBox` frame `CSprite`s underneath the RmlUi overlay, instead
+of RmlUi drawing that chrome itself. The `legacy` theme shipped with this flag set to `1`.
+
+**Why this was wrong**: the entire point of migrating a window to RmlUi is that RmlUi ends up
+owning its rendering — a configurable escape hatch that lets a theme opt back into the *old*
+renderer drawing part of a *migrated* window's visuals works directly against that. It also wasn't
+even necessary: the art files the flag was protecting (`Interface/login_back.tga`,
+`Interface/login_me.tga`) are ordinary standalone images (no sprite-sheet cropping — confirmed by
+reading the `CSprite::Create()` call sites for `BITMAP_LOG_IN+7`/`+8`, both pass `nMaxFrame=0`),
+already preloaded into the shared, ref-counted bitmap cache regardless of theme. RmlUi's own
+`LoadTexture` (`RmlUiRenderInterface.cpp` → `CGlobalBitmap::LoadImage`) finds and ref-counts that
+same cached texture by filename (`CGlobalBitmap::FindTexture(filename)` scans by name across the
+whole cache, not just entries loaded through the named-load path) — so pointing an RCSS decorator
+at the same file was never blocked by anything technical, only by an unnecessary flag.
+
+**Fix**: removed `UsesLegacySpriteChrome` entirely — from `RmlTheme.h/.cpp`, both theme's
+`theme.ini` files (which had no other purpose), and `CLoginWin`. `CWin::Create()` now always passes
+`nTexID=-2` for this window, in every theme, unconditionally. The `legacy` theme reproduces the
+original look by giving `#panel`/`.input-frame` a `decorator: image(...)` pointing at the same
+`Interface/login_back.tga`/`Interface/login_me.tga` files the old sprites drew — same pixels,
+rendered by RmlUi instead of `CWin`. **Lesson**: a data-driven per-theme toggle is the right shape
+for things that are genuinely a visual choice (colors, layout, whether to use vector shapes or
+raster art) — it's the wrong shape for something that contradicts the migration's own goal
+regardless of which value it's set to; that kind of "flexibility" should be caught during design,
+not shipped and left as an unused footgun once nothing exercises the non-default path.
 
 ---
 
@@ -347,7 +454,11 @@ handle candidate (`#panel` itself), that isolated the second, separate finding b
 
 **Not a bug in `MakeDraggable()`** — a real architectural fact about how hybrid windows are built,
 worth being explicit about since it's easy to assume RmlUi "contains" or is otherwise linked to
-the legacy chrome underneath it.
+the legacy chrome underneath it. (At the time this was found, the login window's `legacy` theme
+still had `CWin` drawing the background sprite — that's since been removed, see
+[the entry below](#a-per-theme-flag-to-opt-back-into-cwin-sprite-rendering-was-the-wrong-shape),
+but the underlying fact this section documents is unchanged: RmlUi and whatever legacy state a
+hybrid window still owns are never automatically linked.)
 
 A hybrid window's legacy `CWin` background sprite and its RmlUi overlay are two **independently
 rendered things** that merely start at the same screen position — both set once, from the same
@@ -358,9 +469,9 @@ frame to frame, while the legacy background sprite stayed exactly where it start
 and visibly desyncing from the content now floating away from it.
 
 **Fix**: `MakeDraggable()` takes an optional `onMove(newLeft, newTop)` callback, fired on every
-drag tick, specifically so a hybrid window's caller can also reposition its legacy chrome (e.g.
-call `CWin::SetPosition()`) in lockstep. A fully migrated, sprite-free panel has nothing to sync
-and can simply omit the callback.
+drag tick, specifically so a hybrid window's caller can also reposition whatever legacy state
+still needs to track the panel (e.g. call `CWin::SetPosition()`) in lockstep. A fully migrated
+window with no remaining legacy state has nothing to sync and can simply omit the callback.
 
 ### A whole panel can't usually be its own drag handle
 

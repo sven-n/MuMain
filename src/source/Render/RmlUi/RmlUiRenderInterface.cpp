@@ -95,7 +95,21 @@ void RmlUiRenderInterface::RenderGeometry(Rml::CompiledGeometryHandle geometry, 
     auto texIt = m_Textures.find(texture);
     if (texture != 0 && texIt != m_Textures.end())
     {
-        PassthroughShader::Instance().SetTexture(static_cast<GLuint>(texIt->second.id), 0);
+        // FileBacked's stored id is a CGlobalBitmap bitmap-index, not a GL texture name -- must be
+        // resolved through Bitmaps.GetTexture()->TextureNumber to get the real bindable handle
+        // (see this class's header comment on why the two id spaces are never interchangeable).
+        // Generated's id is already a real RHI::TextureHandle/GL name from RHI::CreateTexture, so
+        // it's used as-is. This distinction was already respected in ReleaseTexture below but was
+        // missed here -- latent since RmlUi's only textures until now were Generated (font glyph
+        // atlases); the first FileBacked decorator image exposed it.
+        GLuint glTextureName = static_cast<GLuint>(texIt->second.id);
+        if (texIt->second.kind == TextureKind::FileBacked)
+        {
+            BITMAP_t* bmp = Bitmaps.GetTexture(texIt->second.id);
+            glTextureName = bmp ? static_cast<GLuint>(bmp->TextureNumber) : 0;
+        }
+
+        PassthroughShader::Instance().SetTexture(glTextureName, 0);
         PassthroughShader::Instance().SetUseTexture(true);
     }
     else

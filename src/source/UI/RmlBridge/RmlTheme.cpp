@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "RmlTheme.h"
 #include "Data/GameConfig/GameConfig.h"
-#include "Core/Platform/WinIni.h" // GetPrivateProfileIntW -- reading each theme's own theme.ini
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -30,30 +29,12 @@ namespace UI::RmlBridge
             std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (char)std::tolower(c); });
             return s;
         }
-
-        std::wstring WidenAscii(const std::string& s)
-        {
-            std::wstring out(s.size(), L'\0');
-            std::transform(s.begin(), s.end(), out.begin(), [](char c) { return static_cast<wchar_t>(c); });
-            return out;
-        }
     }
 
     const std::string& GetActiveThemeName()
     {
         static const std::string cached = ToLower(NarrowAscii(GameConfig::GetInstance().GetRmlTheme()));
         return cached;
-    }
-
-    bool UsesLegacySpriteChrome(const std::string& themeName)
-    {
-        // Data-driven, not a hardcoded C++ list -- see this header's own comment on why. Absence
-        // of the manifest file (GetPrivateProfileIntW's own contract) or the key inside it both
-        // fall through to the same default (0/false), so a theme folder with no theme.ini at all
-        // -- the expected shape for a plain sprite-free/modder theme -- just works.
-        const std::wstring manifestPath =
-            L"Data/Interface/RmlUi/themes/" + WidenAscii(ToLower(themeName)) + L"/theme.ini";
-        return GetPrivateProfileIntW(L"Theme", L"UsesLegacySpriteChrome", 0, manifestPath.c_str()) != 0;
     }
 
     std::string ThemedDocumentSourceUrl(const char* documentName, const std::string& themeName)

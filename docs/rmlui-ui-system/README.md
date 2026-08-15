@@ -36,7 +36,7 @@ system — end to end.
 2. **[Theming & Modding](theming-and-modding.md)**
    *How the swappable-theme system works, and how to add a new theme without touching engine
    code.* Covers the theme-folder convention, `LoadThemedDocument()`'s RML/RCSS resolution
-   mechanism, the `theme.ini` manifest format, and a step-by-step guide for modders.
+   mechanism, and a step-by-step guide for modders.
 
 3. **[Gotchas & Bug Catalog](gotchas-and-patterns.md)**
    *Real bugs found during the pilot migration, with root cause and fix.* Read this before
@@ -77,11 +77,11 @@ system — end to end.
 | **Render interface** | [`Render/RmlUi/RmlUiRenderInterface.h/.cpp`](../../src/source/Render/RmlUi/RmlUiRenderInterface.h) | `Rml::RenderInterface` implementation targeting `RHI::` directly — vertex conversion, texture loading, scissor. |
 | **System interface** | [`Render/RmlUi/RmlUiSystemInterface.h/.cpp`](../../src/source/Render/RmlUi/RmlUiSystemInterface.h) | `Rml::SystemInterface` implementation — clock, logging, clipboard. |
 | **Model/binder layer** | [`UI/RmlBridge/RmlModelBinder.h`](../../src/source/UI/RmlBridge/RmlModelBinder.h) | Generic per-window `Rml::DataModel` wrapper — owns the model instance and `DataModelHandle`, exposes `MarkDirty()`. |
-| **Theme framework** | [`UI/RmlBridge/RmlTheme.h/.cpp`](../../src/source/UI/RmlBridge/RmlTheme.h) | Active-theme resolution, per-theme `theme.ini` manifest reading, `LoadThemedDocument()`. |
+| **Theme framework** | [`UI/RmlBridge/RmlTheme.h/.cpp`](../../src/source/UI/RmlBridge/RmlTheme.h) | Active-theme resolution, `LoadThemedDocument()`. |
 | **Draggable panels** | [`UI/RmlBridge/RmlDraggable.h/.cpp`](../../src/source/UI/RmlBridge/RmlDraggable.h) | `MakeDraggable(handle, panel, onMove)` — generic drag-to-move on RmlUi's native drag events. |
 | **Pilot window** | [`UI/Windows/LoginWin.h/.cpp`](../../src/source/UI/Windows/LoginWin.h) | The Phase 1 pilot — hybrid `CWin` + RmlUi overlay, the reference implementation every pattern in this doc set is drawn from. |
 | **Frame hook** | [`Scenes/SceneManager.cpp`](../../src/source/Scenes/SceneManager.cpp), [`Scenes/LoadingScene.cpp`](../../src/source/Scenes/LoadingScene.cpp) | Where `RmlUiRuntime::Update()/Render()` (and the post-render cursor/text draws) are called per scene. |
-| **RML/RCSS assets** | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) | `login.rml` (shared, theme-agnostic) + `themes/<name>/` (per-theme RCSS + optional manifest). |
+| **RML/RCSS assets** | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) | `login.rml` (shared, theme-agnostic) + `themes/<name>/` (per-theme RCSS, no manifest file needed). |
 
 ---
 
@@ -93,17 +93,11 @@ system — end to end.
 |---|---|---|
 | `RmlTheme` | `legacy` | Active RmlUi theme name — any folder under `Data/Interface/RmlUi/themes/`. Read once at startup by `GameConfig::GetRmlTheme()`; **not yet a live in-game hot-swap** — change it and relaunch. See [Theming & Modding](theming-and-modding.md). |
 
-### Per-theme `theme.ini` (optional)
-
-Lives at `Data/Interface/RmlUi/themes/<name>/theme.ini`, read directly via `GetPrivateProfileIntW`
-(not through `GameConfig`):
-
-| Key | Default | Meaning |
-|---|---|---|
-| `[Theme] UsesLegacySpriteChrome` | `0` | `1` keeps the legacy `CWin` background sprite and `CUITextInputBox` frame sprites drawn underneath the RmlUi overlay (the `legacy` theme's shape). `0` (or no `theme.ini` at all) means the theme is fully programmatic — RCSS draws everything itself, no sprite dependency. |
-
-See [Theming & Modding](theming-and-modding.md) for the full mechanism and a step-by-step guide to
-adding a new theme.
+Every theme — including `legacy` — renders 100% of its window's chrome through RmlUi; `CWin` never
+draws a background or frame sprite for a migrated window, in any theme. `legacy` reproduces the
+original look by pointing its RCSS decorators at the same art files the old sprites used; `modern`
+uses flat colors/vector shapes instead. See [Theming & Modding](theming-and-modding.md) for the
+full mechanism and a step-by-step guide to adding a new theme.
 
 ## Vendored Dependency
 

@@ -1,8 +1,9 @@
-/* "Modern" theme -- fully programmatic, no legacy sprite dependency at all. Unlike the "legacy"
-   theme (themes/legacy/login.rcss), CWin's background sprite and the CUITextInputBox frame
-   sprites are never created for this theme (see UI::RmlBridge::UsesLegacySpriteChrome and
-   CLoginWin::Create()/RenderControls()) -- #panel below draws the entire panel look itself, and
-   .input-frame stands in for the input boxes' visual frame.
+/* "Modern" theme -- fully programmatic, using flat colors/vector shapes instead of the legacy
+   art files (contrast with themes/legacy/login.rcss, which reproduces the original look by
+   pointing its decorators at the same sprite images CWin used to draw). CWin never draws
+   anything for this window in any theme (CLoginWin::Create() always passes nTexID=-2) --
+   #panel below draws the entire panel look itself, and .input-frame stands in for the input
+   boxes' visual frame.
 
    Same class names/structure as the legacy theme throughout -- this file is the swappable unit,
    not login.rml (see the RmlUi migration plan's Theming section). Still fixed-px, same as legacy,

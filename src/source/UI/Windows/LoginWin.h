@@ -12,14 +12,16 @@ class CUITextInputBox;
 
 namespace Rml { class ElementDocument; }
 
-// RmlUi migration plan Phase 1 pilot (login dialog): the legacy CButton/CSprite objects below
-// remain the actual state-holders (IsCheck/SetCheck, position/size bookkeeping via CWin) --
-// nothing about their internal semantics changed. What changed is how they're driven: an RmlUi
-// document (Data/Interface/RmlUi/login.rml) now renders the checkboxes/buttons/labels/trust
-// warning as an overlay positioned on top of CWin::Render()'s existing background sprite
-// (m_psprBg, still drawn exactly as before -- not reproduced in RmlUi, to avoid re-authoring a
-// working panel graphic and to minimize regression risk with no compiler available to verify
-// against). Username/password text entry deliberately stays on the legacy CUITextInputBox
+// RmlUi migration plan Phase 1 pilot (login dialog): CWin no longer draws anything for this
+// window -- Create() always passes nTexID=-2, so m_psprBg is never created, and the input-box
+// frame sprites this class used to own (m_asprInputBox) are gone entirely. The RmlUi document
+// (Data/Interface/RmlUi/login.rml) renders the panel background, input-box frames, checkboxes,
+// buttons, labels, and trust warning as an overlay -- the "legacy" theme reproduces the original
+// look by pointing its RCSS decorators at the same art files (Interface/login_back.tga,
+// Interface/login_me.tga) the old CWin sprites drew, so this is a renderer swap, not a visual
+// change. The legacy CButton objects below remain the actual state-holders (IsCheck/SetCheck) for
+// the checkboxes/OK/Cancel buttons -- nothing about their internal semantics changed, only what
+// draws them. Username/password text entry deliberately stays on the legacy CUITextInputBox
 // objects (m_pUsernameInputBox/m_pPasswordInputBox) rather than moving to native RmlUi <input>
 // elements -- external code (WSclient.cpp, MsgWin.cpp) calls GetUsernameInputBox()/
 // GetPasswordInputBox()->GiveFocus() directly for error-recovery focus redirection, and
@@ -28,7 +30,6 @@ namespace Rml { class ElementDocument; }
 class CLoginWin : public CWin
 {
 protected:
-    CSprite		m_asprInputBox[2];
     CButton		m_aBtn[2];
     CButton     m_aBtnRememberMe;
     CButton     m_aBtnSavePassword;
@@ -111,7 +112,6 @@ private:
     void SyncRmlModel();
 
 protected:
-    void PreRelease();
     void UpdateWhileActive(double dDeltaTick);
     void UpdateWhileShow(double dDeltaTick);
     void RenderControls();

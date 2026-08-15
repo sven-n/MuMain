@@ -9,39 +9,30 @@ namespace Rml
 }
 
 // Which RmlUi visual theme is active -- see the RmlUi migration plan's Theming / Scaling & DPI
-// sections. A theme is identified purely by NAME (a folder), and everything about it -- including
-// whether it wants legacy sprite chrome -- is read from that folder, not hardcoded in C++. This
-// is deliberate: it's what makes a theme (including one a modder drops in, not just "legacy"/
-// "modern") a plug-in-a-folder operation with zero source changes or recompilation, for either
-// kind of theme:
+// sections. A theme is identified purely by NAME (a folder), not hardcoded in C++: just
+// Data/Interface/RmlUi/themes/<name>/<document>.rcss, no manifest file needed. This is deliberate:
+// it's what makes a theme (including one a modder drops in, not just "legacy"/"modern") a
+// plug-in-a-folder operation with zero source changes or recompilation.
 //
-//   Data/Interface/RmlUi/themes/<name>/<document>.rcss   -- required, the actual visual styling
-//   Data/Interface/RmlUi/themes/<name>/theme.ini          -- optional, see UsesLegacySpriteChrome
-//
-// A theme with no theme.ini (or no UsesLegacySpriteChrome key in it) defaults to fully
-// programmatic/sprite-free -- the common case for a new reskin, seasonal theme, high-contrast/
-// accessibility theme, or a mod: just drop RCSS files in a new folder and point config.ini's
-// [UI] RmlTheme at it, no C++ involved at all.
+// Every migrated window renders its own visuals entirely through RmlUi -- CWin (and any other
+// legacy widget) never draws background/frame art for a migrated window, in any theme. A
+// "legacy-look" theme reproduces the original art by pointing its own RCSS decorators at the same
+// image files the old sprites used (e.g. themes/legacy/login.rcss's `decorator: image(...)`) --
+// that's a choice of asset, not a choice of renderer. There used to be a per-theme
+// `UsesLegacySpriteChrome` manifest flag letting a theme opt back into CWin drawing the
+// background -- removed (see docs/rmlui-ui-system/gotchas-and-patterns.md) because it worked
+// against the migration's actual point: once a window is migrated, RmlUi owns 100% of its
+// rendering, unconditionally.
 //
 // Read once from GameConfig at startup, not a live in-game hot-swap yet -- switching themes today
 // means editing config.ini's [UI] RmlTheme value and relaunching. A true runtime toggle needs each
 // migrated window to tear down and rebuild its Rml::ElementDocument/DataModel against the new
-// theme's stylesheet path (and, for sprite-backed themes, its CWin background/frame sprites) --
-// a real follow-up, not this increment's scope.
+// theme's stylesheet path -- a real follow-up, not this increment's scope.
 namespace UI::RmlBridge
 {
     // Cached on first call from GameConfig::GetRmlTheme() (e.g. "legacy", "modern", or any
     // modder-supplied folder name -- not a closed set).
     const std::string& GetActiveThemeName();
-
-    // True only for themes that should keep drawing the legacy background/input-frame sprites
-    // (CWin::m_psprBg, the CUITextInputBox frame CSprites) underneath the RmlUi overlay, the way
-    // the original Phase 1 pilot did -- read from that theme's own
-    // Data/Interface/RmlUi/themes/<name>/theme.ini ([Theme] UsesLegacySpriteChrome=1), defaulting
-    // to false (fully programmatic) if the file or key is absent. Data-driven per theme folder,
-    // not a hardcoded C++ allowlist -- a new theme (modder-supplied or not) that wants legacy
-    // sprite chrome just ships that one line in its own theme.ini, no engine changes needed.
-    bool UsesLegacySpriteChrome(const std::string& themeName);
 
     // Builds the virtual source URL a themed document should be loaded against, e.g.
     // "Data/Interface/RmlUi/themes/modern/login.rml" -- this path need not exist on disk (the RML

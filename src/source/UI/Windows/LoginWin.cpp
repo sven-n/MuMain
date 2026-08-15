@@ -36,9 +36,6 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 
-#define	LIW_ACCOUNT		0
-#define	LIW_PASSWORD	1
-
 #define LIW_OK			0
 #define LIW_CANCEL		1
 
@@ -96,15 +93,12 @@ void CLoginWin::Create()
     // The login background is fixed artwork and does not scale with the window
     // size, so keep the original height. The credential-consent controls fit on
     // the panel and the trust warning is drawn just below it (issue #462).
-    // Background sprite is theme-gated: the "modern" theme draws the whole panel look itself in
-    // RCSS (themes/modern/login.rcss's #panel), so it never creates one -- CWin::Create's own
-    // nTexID<=-2 sentinel (confirmed precedent: ServerSelWin.cpp's CWin::Create(0,0,-2)) leaves
-    // m_psprBg null, and CWin::Render()'s existing `if (m_psprBg)` guard then draws nothing.
-    const bool bUseLegacySprites = UI::RmlBridge::UsesLegacySpriteChrome(UI::RmlBridge::GetActiveThemeName());
-    CWin::Create(329, 245, bUseLegacySprites ? (BITMAP_LOG_IN + 7) : -2);
-
-    m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
-    m_asprInputBox[LIW_PASSWORD].Create(156, 23, BITMAP_LOG_IN + 8);
+    // CWin never draws anything for this window -- every theme's #panel/.input-frame renders the
+    // background/input-box-frame artwork itself (see themes/legacy/login.rcss and
+    // themes/modern/login.rcss). CWin::Create's own nTexID<=-2 sentinel (confirmed precedent:
+    // ServerSelWin.cpp's CWin::Create(0,0,-2)) leaves m_psprBg null, and CWin::Render()'s existing
+    // `if (m_psprBg)` guard then draws nothing.
+    CWin::Create(329, 245, -2);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -211,19 +205,9 @@ void CLoginWin::Create()
     }
 }
 
-void CLoginWin::PreRelease()
-{
-    for (int i = 0; i < 2; ++i)
-        m_asprInputBox[i].Release();
-}
-
 void CLoginWin::SetPosition(int x, int y)
 {
 	CWin::SetPosition(x, y);
-
-	const int boxOffsetX = x + 109;
-	m_asprInputBox[LIW_ACCOUNT].SetPosition(boxOffsetX, y + 106);
-	m_asprInputBox[LIW_PASSWORD].SetPosition(boxOffsetX, y + 131);
 
 	if (g_iChatInputType == 1)
 	{
@@ -261,10 +245,7 @@ void CLoginWin::Show(bool bShow)
     CWin::Show(bShow);
 
     for (int i = 0; i < 2; ++i)
-    {
-        m_asprInputBox[i].Show(bShow);
         m_aBtn[i].Show(bShow);
-    }
     m_aBtnRememberMe.Show(bShow);
     m_aBtnSavePassword.Show(bShow);
 
@@ -432,20 +413,11 @@ void CLoginWin::RenderControls()
         FirstLoad = 0;
     }
 
-    // Legacy chrome removed here -- the background panel is still drawn by CWin::Render()'s
-    // m_psprBg (unchanged); checkboxes/OK-Cancel buttons/labels/trust-warning text now render
-    // via the RmlUi overlay instead (see this class's header comment and login.rml/.rcss).
-    // Input-box frame sprites are theme-gated the same way the background sprite is (Create()'s
-    // comment) -- the modern theme draws its own .input-frame outline in RCSS instead
-    // (themes/modern/login.rcss), so rendering the legacy frame sprites there too would draw
-    // both on top of each other. The actual CUITextInputBox text is NOT rendered here -- see
-    // RenderTextOnTop()'s comment for why it moved to a separate, later call.
-    if (UI::RmlBridge::UsesLegacySpriteChrome(UI::RmlBridge::GetActiveThemeName()))
-    {
-        m_asprInputBox[LIW_ACCOUNT].Render();
-        m_asprInputBox[LIW_PASSWORD].Render();
-    }
-
+    // All panel chrome (background, input-box frames, checkboxes, OK/Cancel buttons, labels,
+    // trust-warning text) now renders via the RmlUi overlay -- see this class's header comment
+    // and login.rml/.rcss. Nothing legacy left to draw here. The actual CUITextInputBox text is
+    // NOT rendered here -- see RenderTextOnTop()'s comment for why it moved to a separate, later
+    // call.
     SyncRmlModel();
 }
 
