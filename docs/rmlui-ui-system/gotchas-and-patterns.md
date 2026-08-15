@@ -311,3 +311,65 @@ See [Theming & Modding](theming-and-modding.md#a-third-case-a-theme-with-its-own
 for the full workflow and the open (not yet built) follow-up: vendoring `stb_image.h` to give
 `LoadTexture` a plain-PNG/JPG/BMP fallback for RmlUi-referenced theme assets specifically, without
 touching the legacy OZT/OZJ pipeline everything else still depends on.
+
+---
+
+## Interaction helpers
+
+### A drag handle that inherited `pointer-events: none` never fires drag events at all
+
+**Symptom**: `UI::RmlBridge::MakeDraggable()`, first wired to a test handle, produced no reaction
+whatsoever to click-and-drag — not `dragstart`, not `drag`, not even `mouseover` when a temporary
+diagnostic listener was added for every event type.
+
+**Root cause**: the exact same inheritance mechanism as the
+[`pointer-events` click-swallowing bug](#pointer-events-swallows-every-click-on-screen) above, but
+biting from the opposite direction. A handle element positioned inside a full-window document
+following that fix inherits `pointer-events: none` from `body` by default (only specific
+interactive elements opt back in to `auto`). `Context::GetElementAtPoint` (`Source/Core/Context.cpp`)
+explicitly skips any element whose computed `pointer_events()` is `None` — so an unmodified handle
+is invisible to RmlUi's own hit-testing, never becomes `hover`, and `dragstart`/`drag` (which only
+dispatch on the hover chain) never fire, regardless of whether `drag: drag` is set correctly.
+
+**Fix**: `MakeDraggable()` forces `pointer-events: auto` on `handle` itself, so a caller doesn't
+need to remember a matching RCSS rule.
+
+**Diagnostic approach that actually found it**: rather than keep guessing after three failed
+"still not moving" reports, added a temporary listener logging *every* event type reaching the
+handle (not just drag-specific ones) and a temporary log confirming the handle/panel element
+pointers themselves were non-null. The first version of that logging still showed *zero* events,
+even `mouseover` — a much stronger signal than "the drag didn't work," since it ruled out
+`Style::Drag`/event-ID mistakes entirely and pointed straight at hit-testing. Once `mouseover`
+was confirmed reaching the listener but `dragstart` still wasn't happening from a *different*
+handle candidate (`#panel` itself), that isolated the second, separate finding below.
+
+### Dragging the RmlUi overlay does not move a hybrid window's legacy sprite chrome
+
+**Not a bug in `MakeDraggable()`** — a real architectural fact about how hybrid windows are built,
+worth being explicit about since it's easy to assume RmlUi "contains" or is otherwise linked to
+the legacy chrome underneath it.
+
+A hybrid window's legacy `CWin` background sprite and its RmlUi overlay are two **independently
+rendered things** that merely start at the same screen position — both set once, from the same
+`CWin::SetPosition()` call (see [Architecture §6](architecture.md#6-coexistence-bridging-cloginwins-specific-pattern)).
+RmlUi has no knowledge of `CWin::m_ptPos`, and nothing keeps the two in sync afterward. Confirmed
+by a real test: dragging via `MakeDraggable()` moved the RmlUi checkboxes/buttons/labels correctly
+frame to frame, while the legacy background sprite stayed exactly where it started, immediately
+and visibly desyncing from the content now floating away from it.
+
+**Fix**: `MakeDraggable()` takes an optional `onMove(newLeft, newTop)` callback, fired on every
+drag tick, specifically so a hybrid window's caller can also reposition its legacy chrome (e.g.
+call `CWin::SetPosition()`) in lockstep. A fully migrated, sprite-free panel has nothing to sync
+and can simply omit the callback.
+
+### A whole panel can't usually be its own drag handle
+
+Corollary of the pointer-events gotcha above, but worth stating as its own lesson: for any window
+whose panel inherited `pointer-events: none` for the click-passthrough fix (true of every
+full-window document built so far), the panel **can't be dragged by clicking anywhere on it**
+without forcing its `pointer-events` back to `auto` — which would reintroduce the exact
+click-swallowing bug that fix exists to prevent, for anything underneath the panel (input boxes,
+other legacy content). Use a dedicated handle element instead (a title bar, a specific label) —
+this isn't a workaround for a limitation, it's the same reason real UI toolkits use a title bar
+rather than "grab anywhere on the window body": content inside a panel needs to keep receiving
+its own clicks independently of the drag gesture.

@@ -194,3 +194,50 @@ replacements — a harmless redundant detection path — while `RmlClickOk()`/`R
 etc. (invoked from RmlUi's `data-event-click` bindings) set the same underlying state the legacy
 buttons would have. `SyncRmlModel()` runs every `RenderControls()` call, diffing legacy state
 against the bound model and only dirtying fields that actually changed.
+
+## 7. Reusable interaction helpers (`UI::RmlBridge`)
+
+**Standing design principle**: any interaction pattern more than one migrated window will
+plausibly want belongs in `UI::RmlBridge` as a shared, generic primitive — not hand-rolled per
+window. `RmlModelBinder` (data binding) and `RmlTheme` (theming) already follow this; draggability
+is the newest example, added specifically because re-implementing `CWin::Update()`'s `WS_MOVE`
+state machine (title-bar hit-rect, mouse-delta tracking, `SetPosition()` calls) for every future
+panel that wants to move would be exactly the duplicated logic `docs/CODING_RULES.md` warns
+against.
+
+### `UI::RmlBridge::MakeDraggable` (`UI/RmlBridge/RmlDraggable.h/.cpp`)
+
+Built on RmlUi's own native drag events (`Style::Drag::Drag`, `EventId::Dragstart`/`Drag` —
+`Source/Core/Context.cpp`'s `UpdateHoverChain`, which already carries the current mouse position
+as event parameters) rather than hand-rolled `mousedown`/`mousemove`/`mouseup` tracking.
+`MakeDraggable(handle, panel, onMove = nullptr)`:
+
+- Sets `drag: drag` **and** `pointer-events: auto` on `handle` itself, so the caller doesn't need
+  matching RCSS for either. The second one is not optional decoration — a handle that inherited
+  `pointer-events: none` (the normal state for anything under a full-window document following the
+  pointer-events fix, [Gotchas](gotchas-and-patterns.md#pointer-events-swallows-every-click-on-screen))
+  never becomes `hover` at all, so `dragstart`/`drag` never fire regardless of the `drag` property
+  — confirmed the hard way during a real test (zero events reached the listener, not even
+  `mouseover`, until `pointer-events: auto` was forced).
+- Repositions `panel` by setting its `left`/`top` properties directly from each `drag` event's
+  `mouse_x`/`mouse_y` parameters, relative to the position captured at `dragstart`.
+- **`handle` should be a dedicated grab area, not the whole panel** — for any window whose panel
+  inherited `pointer-events: none` for the click-passthrough fix (true of every full-window
+  document so far), the panel itself can't be dragged directly without reintroducing that exact
+  bug for whatever's underneath it. This isn't a workaround; it's the same reason real UI
+  toolkits use a title bar instead of "drag from anywhere on the window body" — content inside a
+  panel (buttons, text fields) needs to keep receiving its own clicks.
+- **The optional `onMove` callback exists because RmlUi and legacy chrome are NOT actually
+  linked beyond a one-time position sync.** A hybrid window's legacy `CWin` background sprite and
+  its RmlUi overlay are two independently-rendered things that merely started at the same
+  position (both set once from the same `CWin::SetPosition()` call) — RmlUi has no knowledge of
+  `CWin::m_ptPos`, and moving one never moves the other. Confirmed by a real test: dragging via
+  `MakeDraggable()` alone moved the RmlUi checkboxes/buttons/labels correctly, while the legacy
+  background sprite underneath them stayed exactly where it started, immediately and visibly
+  desyncing. `onMove(newLeft, newTop)` fires on every drag tick specifically so a hybrid window's
+  caller can also update its legacy position in lockstep; a fully migrated, sprite-free panel has
+  nothing to sync and can omit it.
+
+Verified against a real build+run using the login screen's document as a test bed (a temporary
+handle wired to `.trust-warning`, since `#panel` itself can't be its own handle for the reason
+above) — not wired up as a real feature there, since the login screen is meant to stay static.

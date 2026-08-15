@@ -62,6 +62,12 @@ system — end to end.
   allowlist — see [Theming & Modding](theming-and-modding.md).
 - **Event-driven input arbitration** at the SDL-event level (`Winmain.cpp`), using RmlUi's own
   official SDL backend for keycode/modifier mapping rather than a hand-rolled bridge.
+- **Reusable interaction helpers, not per-window reimplementation.** Draggability
+  (`UI::RmlBridge::MakeDraggable`) is one function call built on RmlUi's own native drag events —
+  the standing design principle is that any interaction pattern more than one migrated window
+  will want (dragging, and whatever comes after it) belongs in `UI::RmlBridge` as a shared
+  primitive, not copy-pasted or reinvented per window. See
+  [Architecture §7](architecture.md#7-reusable-interaction-helpers-uirmlbridge).
 
 ## Primary Subsystems & Source Map
 
@@ -72,6 +78,7 @@ system — end to end.
 | **System interface** | [`Render/RmlUi/RmlUiSystemInterface.h/.cpp`](../../src/source/Render/RmlUi/RmlUiSystemInterface.h) | `Rml::SystemInterface` implementation — clock, logging, clipboard. |
 | **Model/binder layer** | [`UI/RmlBridge/RmlModelBinder.h`](../../src/source/UI/RmlBridge/RmlModelBinder.h) | Generic per-window `Rml::DataModel` wrapper — owns the model instance and `DataModelHandle`, exposes `MarkDirty()`. |
 | **Theme framework** | [`UI/RmlBridge/RmlTheme.h/.cpp`](../../src/source/UI/RmlBridge/RmlTheme.h) | Active-theme resolution, per-theme `theme.ini` manifest reading, `LoadThemedDocument()`. |
+| **Draggable panels** | [`UI/RmlBridge/RmlDraggable.h/.cpp`](../../src/source/UI/RmlBridge/RmlDraggable.h) | `MakeDraggable(handle, panel, onMove)` — generic drag-to-move on RmlUi's native drag events. |
 | **Pilot window** | [`UI/Windows/LoginWin.h/.cpp`](../../src/source/UI/Windows/LoginWin.h) | The Phase 1 pilot — hybrid `CWin` + RmlUi overlay, the reference implementation every pattern in this doc set is drawn from. |
 | **Frame hook** | [`Scenes/SceneManager.cpp`](../../src/source/Scenes/SceneManager.cpp), [`Scenes/LoadingScene.cpp`](../../src/source/Scenes/LoadingScene.cpp) | Where `RmlUiRuntime::Update()/Render()` (and the post-render cursor/text draws) are called per scene. |
 | **RML/RCSS assets** | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) | `login.rml` (shared, theme-agnostic) + `themes/<name>/` (per-theme RCSS + optional manifest). |
