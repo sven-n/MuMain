@@ -989,7 +989,7 @@ void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)
     // free -- IR::Flush() calls straight back into here, but it clears its pending flag before
     // submitting, so the inner call is a no-op. Consecutive IR quads (particles, text runs) still
     // merge, because nothing else draws between them -- which is exactly the hot path.
-    IR::Flush();
+    IR::Flush(IR::FlushCause::Draw);
 
     GLenum mode;
     switch (topology)
@@ -1005,7 +1005,7 @@ void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)
 
 void DrawIndexed(Topology topology, uint32_t indexCount, uint32_t firstIndex)
 {
-    IR::Flush(); // GLP-19 -- see Draw()
+    IR::Flush(IR::FlushCause::Draw); // GLP-19 -- see Draw()
 
     GLenum mode;
     switch (topology)
@@ -1054,7 +1054,7 @@ void UpdateTexture(TextureHandle handle, int x, int y, int w, int h, const void*
     // per string). A pending IR batch still references the old content, so it must be drawn first;
     // otherwise every merged quad samples whatever was uploaded last, which showed up as UI text
     // where each line displayed a later line's glyphs.
-    IR::Flush();
+    IR::Flush(IR::FlushCause::Texture);
     BindTexture2D(0, handle.id);
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixelsRGBA);
 }

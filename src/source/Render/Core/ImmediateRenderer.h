@@ -24,10 +24,25 @@ namespace IR {
     // same-state quads becomes ONE draw call instead of one per quad.
     void End();
 
+    // What stopped a batch from growing any further. Purely for the $glstats breakdown -- it
+    // does not change what Flush() does. Passing the real cause is what makes the counters
+    // worth reading, so prefer an accurate tag over the default.
+    enum class FlushCause
+    {
+        Texture,
+        Blend,
+        Depth,
+        Program,
+        Uniform,
+        Matrix,
+        Draw,       // some other draw call cut in between two IR batches
+        Other,      // deliberate flushes: end of pass, frame present, viewport changes
+    };
+
     // Issues the pending batch, if any. Idempotent. Must be called before anything that changes
     // state the pending vertices were submitted under, and before the frame is presented --
     // PlatformSwapBuffers() does the latter. The state hooks that call this live in
     // PassthroughShader (uniform changes) and BindTexture (texture changes); everything else is
     // caught by the state-key comparison in Begin().
-    void Flush();
+    void Flush(FlushCause cause = FlushCause::Other);
 }

@@ -61,7 +61,7 @@ void BindProgram(GLuint program)
 {
     if (program == s_lastProgram) return;
     if (!LoadBindStateFunctions()) return;
-    IR::Flush();
+    IR::Flush(IR::FlushCause::Program);
     fn_glUseProgram(program);
     s_lastProgram = program;
     FrameProfiler::CountGLCall(FrameProfiler::Counter::ProgramBinds);
@@ -81,7 +81,7 @@ void BindTexture2D(int slot, GLuint texture)
     {
         const bool slotChanges = (slot != s_lastActiveSlot);
         const bool texChanges  = !(slot >= 0 && slot < kMaxCachedTextureSlots && s_lastTexture[slot] == texture);
-        if (slotChanges || texChanges) IR::Flush();
+        if (slotChanges || texChanges) IR::Flush(IR::FlushCause::Texture);
     }
 
     // GLP-05: BindState is now the complete monopoly on the active texture unit, not just
@@ -107,7 +107,7 @@ void BindVAO(GLuint vao)
 {
     if (vao == s_lastVAO) return;
     if (!LoadBindStateFunctions()) return;
-    IR::Flush(); // GLP-19 -- see BindProgram(); safe to re-enter, Flush() clears its flag first
+    IR::Flush(IR::FlushCause::Other); // GLP-19 -- see BindProgram(); safe to re-enter, Flush() clears its flag first
     fn_glBindVertexArray(vao);
     s_lastVAO = vao;
     FrameProfiler::CountGLCall();
