@@ -8,6 +8,7 @@
 #include "UI/NewUI/Dialogs/NewUIChatCommandWindow.h"
 
 #include "Audio/DSPlaySound.h"
+#include "Core/Text/TextLineWrap.h"
 #include "GameLogic/Commands/ChatCommandFavourites.h"
 #include "UI/NewUI/NewUISystem.h"
 
@@ -61,6 +62,15 @@ namespace
         }
 
         g_pRenderText->RenderText(x, y, text, boxWidth, boxHeight, sort);
+    }
+
+    // The text renderer works in real pixels while the window is laid out in
+    // reference units, which is what the screen rate converts between.
+    int MeasureInReferenceUnits(const wchar_t* text, size_t length)
+    {
+        SIZE size = { 0, 0 };
+        GetTextExtentPoint32(g_pRenderText->GetFontDC(), text, static_cast<int>(length), &size);
+        return (g_fScreenRate_x > 0.f) ? static_cast<int>(size.cx / g_fScreenRate_x) : size.cx;
     }
 
     void RenderValueBackground(int x, int y, int width, int height)
@@ -225,6 +235,7 @@ void SEASON3B::CNewUIChatCommandWindow::ShowPage(ePAGE page)
     case PAGE_PARAMETERS:
         m_BtnLeft.ChangeText(&I18N::Game::ChatCommandsBack);
         m_BtnRight.ChangeText(&I18N::Game::ChatCommandsExecute);
+        WrapDescriptionOfSelected();
         break;
 
     case PAGE_TEMPLATES:
@@ -490,9 +501,39 @@ int SEASON3B::CNewUIChatCommandWindow::GetScrollableRowCount() const
     return static_cast<int>(m_commandOrder.size());
 }
 
+void SEASON3B::CNewUIChatCommandWindow::WrapDescriptionOfSelected()
+{
+    m_descriptionLines.clear();
+
+    const auto* command = GetSelectedCommand();
+    if (command == NULL)
+    {
+        return;
+    }
+
+    g_pRenderText->SetFont(g_hFont);
+    m_descriptionLines = WrapTextToWidth(command->Description, CONTENT_WIDTH, MeasureInReferenceUnits);
+}
+
+int SEASON3B::CNewUIChatCommandWindow::GetVisibleDescriptionLineCount() const
+{
+    const auto* command = GetSelectedCommand();
+    if (command == NULL)
+    {
+        return 0;
+    }
+
+    // What the parameters and the two actions below them need, plus the gap
+    // which separates them from the description.
+    const auto reserved = static_cast<int>(command->Parameters.size()) * PARAMETER_HEIGHT + 3 * ROW_HEIGHT;
+    const auto available = CONTENT_BOTTOM - CONTENT_TOP - reserved;
+    const auto fitting = std::max(0, available / ROW_HEIGHT);
+    return std::min(fitting, static_cast<int>(m_descriptionLines.size()));
+}
+
 int SEASON3B::CNewUIChatCommandWindow::GetParameterTop() const
 {
-    return m_Pos.y + CONTENT_TOP + DESCRIPTION_HEIGHT + ROW_HEIGHT;
+    return m_Pos.y + CONTENT_TOP + (GetVisibleDescriptionLineCount() + 1) * ROW_HEIGHT;
 }
 
 int SEASON3B::CNewUIChatCommandWindow::GetActionTop() const
@@ -778,8 +819,16 @@ void SEASON3B::CNewUIChatCommandWindow::RenderBaseWindow()
 
     RenderImage(IMAGE_CHATCOMMAND_BACK, x, y, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
     RenderImage(IMAGE_CHATCOMMAND_TOP, x, y, float(WINDOW_WIDTH), float(FRAME_TOP_HEIGHT));
-    RenderImage(IMAGE_CHATCOMMAND_LEFT, x, y + float(FRAME_TOP_HEIGHT), float(FRAME_SIDE_WIDTH), middleHeight);
-    RenderImage(IMAGE_CHATCOMMAND_RIGHT, x + float(WINDOW_WIDTH - FRAME_SIDE_WIDTH), y + float(FRAME_TOP_HEIGHT), float(FRAME_SIDE_WIDTH), middleHeight);
+
+    // The side pieces are stretched instead of drawn one to one: the window is
+    // taller than they are, and asking for more of them than they have samples
+    // past their end. They are a plain vertical border, so stretching them
+    // doesn't show.
+    RenderImageStretch(IMAGE_CHATCOMMAND_LEFT, x, y + float(FRAME_TOP_HEIGHT), float(FRAME_SIDE_WIDTH), middleHeight,
+        0.f, 0.f, float(FRAME_SIDE_WIDTH), float(FRAME_SIDE_TEXTURE_HEIGHT));
+    RenderImageStretch(IMAGE_CHATCOMMAND_RIGHT, x + float(WINDOW_WIDTH - FRAME_SIDE_WIDTH), y + float(FRAME_TOP_HEIGHT), float(FRAME_SIDE_WIDTH), middleHeight,
+        0.f, 0.f, float(FRAME_SIDE_WIDTH), float(FRAME_SIDE_TEXTURE_HEIGHT));
+
     RenderImage(IMAGE_CHATCOMMAND_BOTTOM, x, y + float(WINDOW_HEIGHT - FRAME_BOTTOM_HEIGHT), float(WINDOW_WIDTH), float(FRAME_BOTTOM_HEIGHT));
 }
 
@@ -843,7 +892,11 @@ void SEASON3B::CNewUIChatCommandWindow::RenderParameterPage()
     }
 
     UseTextColor(DescriptionColor);
-    RenderLine(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP, command->Description.c_str(), CONTENT_WIDTH, DESCRIPTION_HEIGHT);
+    const auto descriptionLines = GetVisibleDescriptionLineCount();
+    for (int line = 0; line < descriptionLines; ++line)
+    {
+        RenderLine(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP + line * ROW_HEIGHT, m_descriptionLines[line].c_str(), CONTENT_WIDTH);
+    }
 
     for (size_t i = 0; i < command->Parameters.size(); ++i)
     {

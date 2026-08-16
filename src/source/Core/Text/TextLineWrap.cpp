@@ -94,6 +94,83 @@ int SeparateTextIntoLines(const wchar_t* lpszText, wchar_t* lpszSeparated, int i
     return iMaxLine;
 }
 
+namespace
+{
+// Drops the spaces a line ends with, so that they don't count against the
+// width of a line which was broken at one of them.
+void TrimTrailingSpaces(std::wstring& line)
+{
+    while (!line.empty() && line.back() == L' ')
+    {
+        line.pop_back();
+    }
+}
+}
+
+std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth, const MeasureTextWidth& measureWidth)
+{
+    std::vector<std::wstring> lines;
+    if (text.empty() || maxWidth <= 0 || !measureWidth)
+    {
+        return lines;
+    }
+
+    std::wstring line;
+    // Where the current line may be broken, which is behind the last space it
+    // has seen. npos while it has none.
+    size_t breakAt = std::wstring::npos;
+
+    for (const wchar_t character : text)
+    {
+        if (character == L'\n')
+        {
+            TrimTrailingSpaces(line);
+            lines.push_back(line);
+            line.clear();
+            breakAt = std::wstring::npos;
+            continue;
+        }
+
+        line += character;
+        if (character == L' ')
+        {
+            breakAt = line.size();
+            continue;
+        }
+
+        if (measureWidth(line.c_str(), line.size()) <= maxWidth)
+        {
+            continue;
+        }
+
+        if (breakAt != std::wstring::npos)
+        {
+            std::wstring rest = line.substr(breakAt);
+            line.erase(breakAt);
+            TrimTrailingSpaces(line);
+            lines.push_back(line);
+            line = std::move(rest);
+        }
+        else if (line.size() > 1)
+        {
+            // A single word which is wider than a whole line. It has to be
+            // broken somewhere, otherwise it would never fit.
+            lines.push_back(line.substr(0, line.size() - 1));
+            line = line.substr(line.size() - 1);
+        }
+
+        breakAt = std::wstring::npos;
+    }
+
+    TrimTrailingSpaces(line);
+    if (!line.empty())
+    {
+        lines.push_back(line);
+    }
+
+    return lines;
+}
+
 void CutText(const wchar_t* Text, wchar_t* Text1, wchar_t* Text2, size_t maxLength)
 {
     auto sourceText = std::wstring(Text);

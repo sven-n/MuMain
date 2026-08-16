@@ -35,6 +35,8 @@ namespace SEASON3B
         {
             COMMAND_WINDOW_WIDTH = 190,
             COMMAND_WINDOW_HEIGHT = 459,
+            // How tall newui_item_back02-L/R actually are.
+            COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT = 320,
         };
 
     private:

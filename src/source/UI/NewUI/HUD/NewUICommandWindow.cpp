@@ -258,8 +258,15 @@ void SEASON3B::CNewUICommandWindow::RenderBaseWindow()
 {
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), float(COMMAND_WINDOW_HEIGHT));
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), 64.f);
-    RenderImage(IMAGE_COMMAND_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_COMMAND_BASE_WINDOW_RIGHT, m_Pos.x + float(COMMAND_WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f);
+    // Stretched, not drawn one to one: the window grew past the height of the
+    // side pieces when the twelfth button was added, and asking for more of
+    // them than they have samples past their end - which repeats their upper
+    // end as a seam next to the exit button. They are a plain vertical border,
+    // so stretching them doesn't show.
+    RenderImageStretch(IMAGE_COMMAND_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f,
+        0.f, 0.f, 21.f, float(COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT));
+    RenderImageStretch(IMAGE_COMMAND_BASE_WINDOW_RIGHT, m_Pos.x + float(COMMAND_WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(COMMAND_WINDOW_HEIGHT) - 64.f - 45.f,
+        0.f, 0.f, 21.f, float(COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT));
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(COMMAND_WINDOW_HEIGHT) - 45.f, float(COMMAND_WINDOW_WIDTH), 45.f);
 }
 

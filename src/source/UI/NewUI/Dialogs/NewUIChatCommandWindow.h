@@ -44,6 +44,10 @@ namespace SEASON3B
             FRAME_TOP_HEIGHT = 64,
             FRAME_SIDE_WIDTH = 21,
             FRAME_BOTTOM_HEIGHT = 45,
+            // The side pieces are only this tall. Drawing them for more than
+            // that samples past the texture, which repeats their upper end as
+            // a seam near the bottom of the window.
+            FRAME_SIDE_TEXTURE_HEIGHT = 320,
         };
 
         enum eLAYOUT
@@ -53,7 +57,8 @@ namespace SEASON3B
             CONTENT_WIDTH = WINDOW_WIDTH - 2 * CONTENT_LEFT,
             CONTENT_TOP = 36,
             ROW_HEIGHT = 15,
-            VISIBLE_ROWS = 21,
+            // As many rows as fit above the buttons.
+            VISIBLE_ROWS = 20,
             BUTTON_WIDTH = 64,
             BUTTON_HEIGHT = 29,
             BUTTON_ROW_Y = 358,
@@ -61,9 +66,9 @@ namespace SEASON3B
             EXIT_BUTTON_Y = 392,
             EXIT_BUTTON_WIDTH = 36,
             EXIT_BUTTON_HEIGHT = 29,
-            // The description of a command gets three lines before the
-            // parameters begin.
-            DESCRIPTION_HEIGHT = 3 * ROW_HEIGHT,
+            // Where the rows have to end so that they don't run into the
+            // buttons below them.
+            CONTENT_BOTTOM = BUTTON_ROW_Y - ROW_HEIGHT,
             VALUE_HEIGHT = 16,
             // A parameter takes its name, the box with its value, and a gap.
             PARAMETER_HEIGHT = ROW_HEIGHT + VALUE_HEIGHT + 4,
@@ -127,6 +132,12 @@ namespace SEASON3B
         void UnloadImages();
 
         int GetScrollableRowCount() const;
+        // The description is wrapped once when the page is entered, because
+        // measuring it against the font is too much work for every frame.
+        void WrapDescriptionOfSelected();
+        // How many of the wrapped lines are shown. A long description gives way
+        // to the parameters, which are the part the player has to reach.
+        int GetVisibleDescriptionLineCount() const;
         int GetParameterTop() const;
         int GetActionTop() const;
         bool HasLeftButton() const { return m_page != PAGE_COMMANDS; }
@@ -154,6 +165,7 @@ namespace SEASON3B
 
         // The value of every parameter of the selected command, in its order.
         std::vector<std::wstring> m_parameterValues;
+        std::vector<std::wstring> m_descriptionLines;
         // One box is enough: it is moved onto whichever parameter is edited.
         std::unique_ptr<CUITextInputBox> m_pValueInput;
         int m_editedParameter;
