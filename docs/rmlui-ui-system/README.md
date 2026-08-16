@@ -21,9 +21,12 @@ layer. RmlUi is being adopted as the long-term replacement, migrated incremental
 new systems coexisting — not a big-bang rewrite.
 
 The login/character-select dialog (`CLoginWin`) is the **Phase 1 pilot**: the first real
-migrated window, and the one this documentation set is written against. It exercises the full
-pipeline — render interface, input arbitration, data binding, and (added later) the theming
-system — end to end.
+migrated window, and the one most of this documentation set is written against. It exercises the
+full pipeline — render interface, input arbitration, data binding, and (added later) the theming
+system — end to end. A second pass ("Batch 2") extended the rest of the login scene the same
+way — `CLoginMainWin`, `CSysMenuWin`, `COptionWin`, and `RememberPasswordPrompt` — validating the
+pattern against a window with no dynamic state at all, a full-screen dim-modal backdrop, a
+draggable control, and a window that was never `CWin`-based to begin with.
 
 ## Document Index
 
@@ -47,9 +50,24 @@ system — end to end.
 
 ## Architectural Highlights
 
-- **Coexistence, not replacement-in-place.** RmlUi renders as an overlay on top of (or instead
-  of) legacy sprite chrome, driven by the same underlying game state via a small model/binder
-  layer (`UI::RmlBridge`). Legacy call sites keep working unchanged.
+- **Coexistence at the codebase level, not a per-window overlay.** A migrated window's `CWin`
+  never draws its own background/frame chrome once migrated, in any theme — RmlUi owns 100% of a
+  migrated window's rendering, always *instead of* the legacy sprite chrome, never layered on top
+  of it (an earlier per-theme opt-back-in flag briefly allowed the "on top of" case; removed, see
+  [Gotchas](gotchas-and-patterns.md#a-per-theme-flag-to-opt-back-into-cwin-sprite-rendering-was-the-wrong-shape)).
+  What coexists is *old and new systems side by side across the codebase*, migrated window by
+  window, not old-and-new rendering layered within one window. Two structural shapes exist for a
+  migrated window, not one: a **hybrid** `CWin` + RmlUi overlay that keeps the legacy window's
+  position/hit-testing bookkeeping (`CLoginWin`, `CLoginMainWin`, `CSysMenuWin`, `COptionWin` — see
+  [Architecture §6](architecture.md#6-coexistence-bridging-cloginwins-specific-pattern)), and a
+  **pure RmlUi** window with no `CWin` involvement at all
+  (`RememberPasswordPrompt` — see [Architecture §6a](architecture.md#6a-a-pure-rmlui-window-with-no-cwin-at-all)).
+  A model/binder layer (`UI::RmlBridge::RmlModelBinder`) is the common case for a window with
+  dynamic state, not a hard requirement — `CLoginMainWin` has none and needs no binder at all (see
+  [Architecture §5](architecture.md#5-data-binding-modelbinder-pattern)). External legacy call
+  sites keep working unchanged either way (e.g. `CUIMng::m_SysMenuWin`, or
+  `RememberPasswordPrompt.h`'s free-function API), even where the internals they call into were
+  fully rewritten.
 - **Custom `RHI::`-backed render interface**, not RmlUi's bundled OpenGL/D3D backends — RmlUi's
   `RenderGeometry` draws through this engine's own `RHI::DrawIndexed` / `PassthroughShader`,
   sharing the same `GlobalUBO` every other 2D/3D draw call uses, rather than maintaining a second,
@@ -79,9 +97,10 @@ system — end to end.
 | **Model/binder layer** | [`UI/RmlBridge/RmlModelBinder.h`](../../src/source/UI/RmlBridge/RmlModelBinder.h) | Generic per-window `Rml::DataModel` wrapper — owns the model instance and `DataModelHandle`, exposes `MarkDirty()`. |
 | **Theme framework** | [`UI/RmlBridge/RmlTheme.h/.cpp`](../../src/source/UI/RmlBridge/RmlTheme.h) | Active-theme resolution, `LoadThemedDocument()`. |
 | **Draggable panels** | [`UI/RmlBridge/RmlDraggable.h/.cpp`](../../src/source/UI/RmlBridge/RmlDraggable.h) | `MakeDraggable(handle, panel, onMove)` — generic drag-to-move on RmlUi's native drag events. |
-| **Pilot window** | [`UI/Windows/LoginWin.h/.cpp`](../../src/source/UI/Windows/LoginWin.h) | The Phase 1 pilot — hybrid `CWin` + RmlUi overlay, the reference implementation every pattern in this doc set is drawn from. |
+| **Pilot window** | [`UI/Windows/LoginWin.h/.cpp`](../../src/source/UI/Windows/LoginWin.h) | The Phase 1 pilot — hybrid `CWin` + RmlUi overlay, the reference implementation most patterns in this doc set are drawn from. |
+| **Batch 2 windows** | [`UI/Windows/LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`OptionWin`](../../src/source/UI/Windows/OptionWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h) | Same login-scene extended in one pass. `RememberPasswordPrompt` is the one **pure-RmlUi** window (no `CWin` at all) — see [Architecture §6a](architecture.md#6a-a-pure-rmlui-window-with-no-cwin-at-all). `OptionWin` is `UI::RmlBridge::MakeDraggable`'s first production use. |
 | **Frame hook** | [`Scenes/SceneManager.cpp`](../../src/source/Scenes/SceneManager.cpp), [`Scenes/LoadingScene.cpp`](../../src/source/Scenes/LoadingScene.cpp) | Where `RmlUiRuntime::Update()/Render()` (and the post-render cursor/text draws) are called per scene. |
-| **RML/RCSS assets** | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) | `login.rml` (shared, theme-agnostic) + `themes/<name>/` (per-theme RCSS, no manifest file needed). |
+| **RML/RCSS assets** | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) | One `.rml` per window (shared, theme-agnostic) + `themes/<name>/` (per-theme RCSS, no manifest file needed) + `themes/<name>/base.rcss` (shared cross-window rules — `.btn`, `.checkbox-*`, `#backdrop` — linked by every window's `.rml` except `login.rml`, which predates it and stays self-contained; see [Theming & Modding](theming-and-modding.md#shared-cross-window-rcss-basercss)). |
 
 ---
 

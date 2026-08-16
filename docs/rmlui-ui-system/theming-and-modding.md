@@ -65,8 +65,62 @@ its own, is a drop-a-folder operation.
    [Architecture](architecture.md) §2 for which RCSS properties are safe to use — **avoid
    `box-shadow` with a blur radius**, it isn't supported (see
    [Gotchas](gotchas-and-patterns.md#box-shadow-blur-renders-as-a-solid-white-block)).
-3. Edit `config.ini`'s `[UI]` section: `RmlTheme=<your-theme-name>`.
-4. Relaunch. No rebuild needed — this is a pure data/config change.
+3. Write `base.rcss` in the same folder — every window migrated since the login pilot links it
+   (see [Shared cross-window RCSS](#shared-cross-window-rcss-basercss)), so a theme missing it
+   renders those windows' buttons/checkboxes/backdrop completely unstyled. `login.rcss` itself is
+   the one exception (doesn't link `base.rcss`, see that section).
+4. Write the remaining per-window `.rcss` files this theme should cover
+   (`login_main.rcss`/`sys_menu.rcss`/`option.rcss`/`remember_password_prompt.rcss`) — a theme
+   missing one of these still loads (RmlUi doesn't error on a missing stylesheet), it just renders
+   that one window unstyled, not the whole theme.
+5. Edit `config.ini`'s `[UI]` section: `RmlTheme=<your-theme-name>`.
+6. Relaunch. No rebuild needed — this is a pure data/config change.
+
+## Shared cross-window RCSS: `base.rcss`
+
+`login.rcss` (both themes) proved out a set of generic, non-positional rules —
+`.btn`/`.btn:hover`, `.checkbox-row`/`.checkbox-box`/`.checkbox-box.checked`/`.checkbox-label` —
+that every subsequently-migrated window also needs. Rather than re-deriving them per window,
+Batch 2 introduced `themes/<name>/base.rcss`, holding exactly those shared rules plus two new
+ones: `body { pointer-events: none; }` (the mandatory click-passthrough reset every full-window
+document needs, see
+[Gotchas](gotchas-and-patterns.md#pointer-events-swallows-every-click-on-screen)) and `#backdrop`
+(a full-screen semi-transparent dim overlay, for any window that previously relied on `CWin`'s own
+default-`nTexID=-1` dim sprite — `CSysMenuWin`/`COptionWin` both do; `CLoginWin`/`CLoginMainWin`
+never did, they use `nTexID=-2`).
+
+A new migrated window's `<head>` links `base.rcss` first, then its own positional `.rcss`:
+
+```html
+<link type="text/rcss" href="base.rcss"/>
+<link type="text/rcss" href="sys_menu.rcss"/>
+```
+
+`.btn` in `base.rcss` is sized for the 108×30 `BITMAP_TEXT_BTN` shape (`CSysMenuWin`'s 4 buttons,
+`COptionWin`'s Close button) — a window with a different button size (like `CLoginMainWin`'s 54×30
+icon buttons) defines its own class instead of overriding `.btn`'s dimensions.
+
+**`login.rcss`/`login.rml` themselves deliberately don't link `base.rcss`** and still define their
+own copies of these rules — they're the only files in the whole migration verified against a real
+run, and retrofitting them for pure dedup risked an RCSS cascade/specificity regression for zero
+functional gain. Fold them in as a fast-follow once `base.rcss`'s shape has proven stable against
+more consumers than it has today.
+
+### `#backdrop` usage
+
+```html
+<div id="backdrop"></div>
+<div id="panel" data-model="...">
+    ...
+</div>
+```
+
+Placed as the *first* child of `<body>`, before `#panel`, so it paints underneath. Unlike
+`#panel`'s children, `#backdrop` sets `pointer-events: auto` directly (not inherited) — this is
+intentional, not an oversight: `CWin::CursorInWin(WA_ALL)` already treats the whole screen as "in
+this window" while a full-screen legacy window like this is shown, so `#backdrop` consuming clicks
+(without doing anything with them) reproduces existing behavior rather than introducing a new
+click-through hole.
 
 ## Bringing your own images to a theme
 
@@ -239,7 +293,10 @@ are inherited from the legacy window this pilot hasn't fully cut ties with yet.
   above. Themes are fixed-`px` and always render at the same physical size regardless of
   resolution; the login panel's own screen position and draggability are inherited from the
   legacy `CWin` this pilot is still hybrid with, not something a theme's RCSS decides.
-- **Only the login screen has a theme system today.** Every other window (still-legacy or a
-  future RmlUi migration) doesn't participate in theme selection yet — extending
-  `LoadThemedDocument()` to a new window is the same pattern `CLoginWin` already uses, not new
-  design work.
+- **Five windows have a theme system today**: the login pilot (`CLoginWin`) plus Batch 2's
+  `CLoginMainWin`/`CSysMenuWin`/`COptionWin`/`RememberPasswordPrompt`, all routed through
+  `LoadThemedDocument()`. Every other window (still-legacy or a future RmlUi migration) doesn't
+  participate in theme selection yet — extending `LoadThemedDocument()` to a new window is the
+  same pattern already established, not new design work. See
+  [Shared cross-window RCSS](#shared-cross-window-rcss-basercss) below for what a new window
+  should reuse rather than re-derive.

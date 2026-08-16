@@ -484,3 +484,28 @@ other legacy content). Use a dedicated handle element instead (a title bar, a sp
 this isn't a workaround for a limitation, it's the same reason real UI toolkits use a title bar
 rather than "grab anywhere on the window body": content inside a panel needs to keep receiving
 its own clicks independently of the drag gesture.
+
+### `MakeDraggable` tracks both axes: a horizontal-only slider has to fight that
+
+**Symptom**: while building `COptionWin`'s volume/render-level sliders (`MakeDraggable`'s first
+real production use, beyond the throwaway test handle described above), a slider thumb dragged
+horizontally also visibly drifted up/down, tracking the cursor's Y movement even though the track
+itself never moves vertically.
+
+**Root cause**: `MakeDraggable`'s internal `DragMoveListener` unconditionally sets **both** `left`
+and `top` from the `drag` event's mouse delta (`RmlDraggable.cpp`) — correct, and the whole point,
+for a freely-draggable panel (its only use case until now), but a slider thumb is constrained to
+one axis, and `MakeDraggable` itself has no concept of that constraint — it always tracks the
+cursor on both axes regardless of what `handle`/`panel` conceptually represent.
+
+**Fix**: not a change to `MakeDraggable` itself (both-axis tracking is correct for its actual
+job — panel dragging). Each slider's `onMove` callback (`COptionWin::OnSliderThumbDragged`)
+recomputes and overwrites `left` with the clamped/snapped value as intended, *and* also resets
+`top` back to a fixed `"0px"` on every tick, undoing whatever vertical value `MakeDraggable` just
+set moments earlier in the same event.
+
+**Practical rule for the next 1D-constrained draggable element** (a slider, a horizontal scroll
+thumb, anything that isn't a freely-draggable panel): `MakeDraggable`'s `onMove` callback is the
+right place to clamp/snap the axis you care about, but remember to also reset the axis you *don't*
+care about — it will otherwise silently drift with the cursor, since `MakeDraggable` has no way to
+know your handle is axis-constrained.

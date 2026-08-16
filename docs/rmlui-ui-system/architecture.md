@@ -220,6 +220,52 @@ etc. (invoked from RmlUi's `data-event-click` bindings) set the same underlying 
 buttons would have. `SyncRmlModel()` runs every `RenderControls()` call, diffing legacy state
 against the bound model and only dirtying fields that actually changed.
 
+`CSysMenuWin` and `COptionWin` follow the identical shape, with one addition: both previously
+relied on `CWin::Create()`'s *default* `nTexID=-1` (a real full-screen alpha=128 black
+`m_psprBg`) rather than `CLoginWin`'s `-2`, so migrating them also meant reproducing that dim
+backdrop in RmlUi (`#backdrop`, see [Theming & Modding](theming-and-modding.md#backdrop-usage))
+and switching their own `CWin::Create()` call to `-2`. Their `CWinEx m_winBack` member stays alive
+purely for its quantized-height geometry math (`SetLine()`/`GetWidth()`/`GetHeight()`) — never
+rendered, the same "legacy object survives only as bookkeeping" shape `CLoginWin`'s own
+`CButton`s already established.
+
+`CLoginMainWin` is the one variant on this pattern worth calling out: it has no dynamic state or
+I18N text at all (two pure image buttons), so it skips `RmlModelBinder`/`SyncRmlModel()` entirely
+and wires clicks via a plain `Rml::Element::AddEventListener` + a small self-owning listener class
+(the same shape `RmlDraggable.cpp`'s own listener uses internally — see §7). The model/binder
+layer is the right tool for a window with state to keep in sync, not a mandatory part of the
+pattern.
+
+## 6a. A pure-RmlUi window with no `CWin` at all
+
+`RememberPasswordPrompt` (`UI/Windows/RememberPasswordPrompt.h/.cpp`) is a different shape from
+every window above: it was never a `CWin`/`CUIMng` window to begin with (previously built on the
+shared `SEASON3B::CNewUICommonMessageBox`/`g_MessageBox` engine — a stack shared with ~80
+unrelated dialogs elsewhere in the codebase), so migrating it meant no legacy position/hit-testing
+state to bridge at all. It's a handful of free functions in `namespace UI::Login` plus file-static
+state (a lazily-created `Rml::ElementDocument*` + `RmlModelBinder`, following the same
+`if (!doc && RmlUiRuntime::Instance().IsCreated())` creation guard every other window uses, just
+without an owning class's `Create()` to hang it on). Its public API
+(`OpenRememberPasswordPrompt()`/`RememberPasswordChoiceState()`/`ClearRememberPasswordChoice()`)
+stayed byte-identical across the migration — every external call site (all four, in `LoginWin.cpp`)
+needed zero changes.
+
+Two things this shape has to solve that a hybrid window doesn't:
+- **No `CWin::SetPosition()` to piggyback on for centering.** The panel is centered once, in C++,
+  at document-creation time, reading `#panel`'s own RCSS-declared `width`/`height` back via
+  `Rml::Element::GetProperty()` and `CInput::Instance().GetScreenWidth()/GetScreenHeight()`. There
+  is currently no resize hook — a live resolution change while the dialog is open leaves it
+  off-center until the next open. A known, accepted gap, not a hidden one.
+- **No natural per-frame tick call site, and no verified RmlUi `Keydown` routing to an unfocused
+  document.** The dialog needs to resolve on Enter/Esc the same way its OK/Cancel buttons do, but
+  has no naturally-focused element the way `CLoginWin`'s text inputs give it one. Rather than
+  introduce RmlUi document-level `Keydown` listening as a new, unverified pattern, it exposes
+  `UI::Login::Tick()` — polls `CInput::Instance().IsKeyDown(VK_RETURN/VK_ESCAPE)` while the dialog
+  is `Pending` — called once per frame from `CLoginWin::UpdateWhileShow()` (which already ticks
+  while this dialog is open, for the same reason `ApplyRememberPasswordChoice()` does). A future
+  window that genuinely needs RmlUi-native keyboard focus routing would be the first real test of
+  whether that unverified path works; this one deliberately didn't become that test.
+
 ## 7. Reusable interaction helpers (`UI::RmlBridge`)
 
 **Standing design principle**: any interaction pattern more than one migrated window will
@@ -268,6 +314,19 @@ as event parameters) rather than hand-rolled `mousedown`/`mousemove`/`mouseup` t
   migrated window with no remaining legacy state at all has nothing to sync and can omit the
   callback entirely.
 
-Verified against a real build+run using the login screen's document as a test bed (a temporary
-handle wired to `.trust-warning`, since `#panel` itself can't be its own handle for the reason
-above) — not wired up as a real feature there, since the login screen is meant to stay static.
+First proven against a real build+run using the login screen's document as a throwaway test bed (a
+temporary handle wired to `.trust-warning`, since `#panel` itself can't be its own handle for the
+reason above) — not wired up as a real feature there, since the login screen is meant to stay
+static. Its first real production use is `COptionWin`'s two sliders (Batch 2): each slider's thumb
+is its own `handle` *and* `panel` (there's nothing else to move), with the `onMove` callback
+clamping to the track's real travel distance and snapping to the slider's discrete step count —
+the same discrete-position math `CSlider::Update()` does for the legacy widget, just applied to a
+hand-rolled RmlUi element instead. This surfaced a real gotcha `MakeDraggable` itself doesn't
+solve: it tracks **both** axes (sets `left` *and* `top` from the drag delta), which is correct for
+a freely-draggable panel but wrong for a horizontal-only slider track — the caller has to reset
+`top` back to a fixed value on every drag tick, or the thumb visibly drifts vertically with the
+cursor. See
+[Gotchas](gotchas-and-patterns.md#makedraggable-tracks-both-axes-a-horizontal-only-slider-has-to-fight-that)
+for the full writeup. `CSlider`'s legacy widget stays alive alongside the RmlUi thumb purely for
+input-detection redundancy (mirrored via `SetSlidePos()` after every drag), the same pattern every
+other migrated control in this codebase follows.
