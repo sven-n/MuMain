@@ -82,6 +82,7 @@ CNewUISystem::CNewUISystem()
     m_pNewOptionWindow = nullptr;
     m_pNewHeroPositionInfo = nullptr;
     m_pNewHelpWindow = nullptr;
+    m_pNewChatCommandWindow = nullptr;
     m_pNewItemExplanationWindow = nullptr;
     m_pNewSetItemExplanation = nullptr;
     m_pNewQuickCommandWindow = nullptr;
@@ -347,6 +348,12 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
     }
 
+    m_pNewChatCommandWindow = new CNewUIChatCommandWindow;
+    if (m_pNewChatCommandWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
+    {
+        return false;
+    }
+
     m_pNewHelpWindow = new CNewUIHelpWindow;
     if (m_pNewHelpWindow->Create(m_pNewUIMng, 0, 0) == false)
     {
@@ -535,6 +542,7 @@ void CNewUISystem::UnloadMainSceneInterface()
     }
 
     SAFE_DELETE(m_pNewHelpWindow);
+    SAFE_DELETE(m_pNewChatCommandWindow);
     SAFE_DELETE(m_pNewItemExplanationWindow);
     SAFE_DELETE(m_pNewSetItemExplanation);
     SAFE_DELETE(m_pNewQuickCommandWindow);
@@ -902,6 +910,11 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         HideAllGroupA();
         m_pNewCommandWindow->OpenningProcess();
+    }
+    else if (dwKey == INTERFACE_COMMAND_LIST)
+    {
+        HideAllGroupA();
+        m_pNewChatCommandWindow->OpenningProcess();
     }
     else if (dwKey == INTERFACE_GUILDINFO)
     {
@@ -1386,6 +1399,10 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         m_pNewCommandWindow->ClosingProcess();
     }
+    else if (dwKey == INTERFACE_COMMAND_LIST)
+    {
+        m_pNewChatCommandWindow->ClosingProcess();
+    }
     else if (dwKey == INTERFACE_WINDOW_MENU)
     {
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_WINDOW, false);
@@ -1609,6 +1626,7 @@ void CNewUISystem::HideAllGroupA()
         INTERFACE_SENATUS,
         INTERFACE_GUARDSMAN,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_KANTURU2ND_ENTERNPC,
         INTERFACE_DUELWATCH,
@@ -1669,6 +1687,7 @@ void CNewUISystem::HideAllGroupB()
         INTERFACE_SENATUS,
         INTERFACE_GUARDSMAN,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_KANTURU2ND_ENTERNPC,
         INTERFACE_CURSEDTEMPLE_NPC,
@@ -1709,6 +1728,7 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
     {
         INTERFACE_PARTY,
         INTERFACE_COMMAND,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_GUILDINFO,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
@@ -2279,6 +2299,11 @@ CNewUIHeroPositionInfo* CNewUISystem::GetUI_NewHeroPositionInfo() const
 CNewUIHelpWindow* CNewUISystem::GetUI_NewHelpWindow() const
 {
     return m_pNewHelpWindow;
+}
+
+CNewUIChatCommandWindow* CNewUISystem::GetUI_NewChatCommandWindow() const
+{
+    return m_pNewChatCommandWindow;
 }
 
 CNewUIItemExplanationWindow* CNewUISystem::GetUI_NewItemExplanationWindow() const

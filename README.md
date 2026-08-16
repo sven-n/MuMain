@@ -290,6 +290,9 @@ The client reads options from `config.ini` in the executable directory:
 - [Camera system](docs/camera-system.md) - modes, switching (F9), config,
   frustum culling, `$details` overlay, and the gameplay behaviour changes
   from the 3D camera rework.
+- [Chat commands window](docs/chat-commands.md) - the commands the server
+  offers (J), how their values are entered, and how favourites and
+  templates are stored.
 - [DevEditor](docs/dev-editor.md) - the in-game tuning UI (F12, debug
   builds only).
 - [Options window and config](docs/options-window.md) - runtime

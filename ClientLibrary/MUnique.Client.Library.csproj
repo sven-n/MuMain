@@ -14,6 +14,8 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <WarningsAsErrors>nullable;CS4014;VSTHRD110;VSTHRD100</WarningsAsErrors>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <!-- The version of the packet definitions this client is built against. -->
+    <OpenMuPacketsVersion>0.9.10</OpenMuPacketsVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MUnique.OpenMU.Network.Packets" Version="0.9.9" />
+    <PackageReference Include="MUnique.OpenMU.Network.Packets" Version="$(OpenMuPacketsVersion)" />
     <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
   </ItemGroup>
 
@@ -39,10 +41,10 @@
 
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(ci)'!='true'"
-          Inputs="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml;
-                  $(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml;
-                  $(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml;
-                  $(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\CommonEnums.xml;
+          Inputs="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml;
+                  $(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml;
+                  $(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml;
+                  $(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\CommonEnums.xml;
                   GenerateExtensionsDotNet.xslt;GenerateEnums.xslt;GenerateFunctionsHeader.xslt;GenerateFunctions.xslt;GenerateBindingsHeader.xslt"
           Outputs="ConnectionManager.ClientToServerFunctions.cs;ConnectionManager.ChatServerFunctions.cs;ConnectionManager.ConnectServerFunctions.cs;
                    ..\src\source\Dotnet\PacketFunctions_CommonEnums.h;..\src\source\Dotnet\PacketFunctions_ClientToServer_Enums.h;..\src\source\Dotnet\PacketFunctions_ChatServer_Enums.h;..\src\source\Dotnet\PacketFunctions_ConnectServer_Enums.h;
@@ -56,25 +58,25 @@
         and MSBuild reruns it (unconditionally overwriting every output below) on every single
         dotnet build/publish, even when the packet XML/XSLT sources haven't changed. See
         CLIENT/src/CMakeLists.txt's DOTNET_DLL_PATH comment for the CMake-side half of this fix. -->
-    <XslTransformation OutputPaths="ConnectionManager.ClientToServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
-    <XslTransformation OutputPaths="ConnectionManager.ChatServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
-    <XslTransformation OutputPaths="ConnectionManager.ConnectServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+    <XslTransformation OutputPaths="ConnectionManager.ClientToServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="ConnectionManager.ChatServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="ConnectionManager.ConnectServerFunctions.cs" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateExtensionsDotNet.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
 
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_CommonEnums.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\CommonEnums.xml" XslInputPath="GenerateEnums.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='CommonEnums'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ClientToServer_Enums.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateEnums.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ChatServer_Enums.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateEnums.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ConnectServer_Enums.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateEnums.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_CommonEnums.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\CommonEnums.xml" XslInputPath="GenerateEnums.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='CommonEnums'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ClientToServer_Enums.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateEnums.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ChatServer_Enums.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateEnums.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ConnectServer_Enums.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateEnums.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
 
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ClientToServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ChatServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ConnectServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ClientToServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ChatServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ConnectServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateFunctionsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
 
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ClientToServer.cpp" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ChatServer.cpp" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ConnectServer.cpp" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ClientToServer.cpp" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ChatServer.cpp" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketFunctions_ConnectServer.cpp" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateFunctions.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
 
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketBindings_ClientToServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketBindings_ChatServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
-    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketBindings_ConnectServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\0.9.9\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketBindings_ClientToServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ClientToServer\ClientToServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ClientToServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketBindings_ChatServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ChatServer\ChatServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ChatServer'/&gt;" />
+    <XslTransformation OutputPaths="..\src\source\Dotnet\PacketBindings_ConnectServer.h" XmlInputPaths="$(NuGetPackageRoot)\munique.openmu.network.packets\$(OpenMuPacketsVersion)\contentFiles\any\net10.0\ConnectServer\ConnectServerPackets.xml" XslInputPath="GenerateBindingsHeader.xslt" Parameters="&lt;Parameter Name='subNamespace' Value='ConnectServer'/&gt;" />
   </Target>
 </Project>
