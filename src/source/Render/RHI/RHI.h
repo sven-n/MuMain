@@ -143,6 +143,21 @@ void SetDepthWriteEnabled(bool);
 void SetFogEnabled(bool);
 void SetPolygonOffset(bool enabled, float factor = -1.f, float units = -1.f); // PlanarShadowShader's one caller
 
+// ---- Scissor (2D clip regions) ----
+// No caller anywhere in the tree until the RmlUi integration (RmlUi's RenderInterface contract
+// requires EnableScissorRegion/SetScissorRegion). (x, y) is TOP-LEFT origin, y-down -- the same
+// top-down contract SetViewport's callers and ReadColorFramebuffer already use; RHI_GL flips to
+// GL's bottom-left glScissor internally using the last SetViewport height, mirroring how
+// ReadColorFramebuffer flips row order for the same reason. Do not pass GL-native coordinates.
+//
+// Unlike every other piece of GL state this header exposes, there is no BindState-style cache
+// backing this -- whatever enables scissor MUST unconditionally disable it before returning
+// control to any other renderer this frame (an RAII guard at the call site, not caller
+// discipline), or every subsequent 2D/3D draw silently inherits a stale clip rect with nothing
+// to catch it.
+void SetScissorEnabled(bool enabled);
+void SetScissorRect(int x, int y, int w, int h);
+
 // ---- Shaders ----
 // The 5 existing shader classes KEEP their bespoke Bind(...) signatures (design doc Q1,
 // decided: BMDMeshShader::Bind()'s 16-param signature stays as-is for the first RHI pass).

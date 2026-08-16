@@ -287,6 +287,7 @@ The client reads options from `config.ini` in the executable directory:
 ## Documentation
 
 - [GPU Skinning & Core Profile](docs/GPU%20Skinning/README.md) - architecture, UBO layouts, ImmediateRenderer (`IR::`), the FFP-retirement milestone catalog (`DXP-01` to `DXP-27`), and the Core Profile GL performance regression series (`GLP-xx`, `$glstats`).
+- [RmlUi UI System](docs/rmlui-ui-system/README.md) - the ongoing migration from the client's three legacy UI frameworks to RmlUi: render/input architecture, the frame render-order contract, the pluggable theming/modding system, and a catalog of real bugs found (and fixed) during the pilot migration.
 - [Camera system](docs/camera-system.md) - modes, switching (F9), config,
   frustum culling, `$details` overlay, and the gameplay behaviour changes
   from the 3D camera rework.

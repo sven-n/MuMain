@@ -37,6 +37,10 @@ namespace CfgKeys
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
     inline constexpr wchar_t CfgKeyFont[]     = L"Font";
+    // Active RmlUi theme name ("legacy" or "modern") -- resolves to
+    // Data/Interface/RmlUi/themes/<name>/ (see the RmlUi migration plan's Scaling & DPI /
+    // Theming sections). Not yet a full runtime hot-swap -- read once at startup.
+    inline constexpr wchar_t CfgKeyRmlTheme[] = L"RmlTheme";
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
@@ -77,6 +81,11 @@ namespace CfgDefaults
     // Windows, fontconfig "sans-serif" on Linux), so the look is unchanged until
     // the user picks a font. Any value is passed through as the GDI face name.
     inline constexpr wchar_t CfgDefaultFont[] = L"";
+
+    // "legacy" reproduces the original sprite/texture look; "modern" is fully
+    // programmatic RCSS with no sprite dependency. Defaults to legacy so nothing
+    // changes for existing players until they opt in.
+    inline constexpr wchar_t CfgDefaultRmlTheme[] = L"legacy";
 
     // DXP-08 Stage G: flipped to default-on after DXP-08a/DXP-09 prerequisites were fixed and
     // soak-confirmed clean under CoreProfile=1 (2026-08-01). Set CoreProfile=0 in config.ini to

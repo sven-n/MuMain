@@ -94,7 +94,7 @@ void CSWaterTerrain::Render(void)
     for (j = 0; j < m_iTriangleListNum; j++)
     {
         offset = m_iTriangleList[j];
-        alpha = 1.f - DotProduct(m_Normals[offset], m_vLightVector);
+        alpha = 1.f - VectorDotProduct(m_Normals[offset], m_vLightVector);
         IR::Color3f(alpha, alpha * 2.5f, alpha * 3.f);
         IR::TexCoord2f(g_chrome[offset][1], g_chrome[offset][0]);
         IR::Vertex3fv(m_Vertices[offset]);

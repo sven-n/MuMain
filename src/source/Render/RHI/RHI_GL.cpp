@@ -878,6 +878,32 @@ void SetPolygonOffset(bool enabled, float factor, float units)
     }
 }
 
+// ---- Scissor ----
+static bool s_ScissorEnabled = false;
+
+void SetScissorEnabled(bool enabled)
+{
+    if (enabled == s_ScissorEnabled) return;
+    // Scissor has no BindState-style cache to self-correct a leak (RHI.h's comment on this
+    // pair) -- flush any pending IR:: batch first so a quad built before this state change
+    // can't get silently merged into one draw call with a quad built after it, the same
+    // discipline Draw()/DrawIndexed()/UpdateTexture() already apply to other state that isn't
+    // part of IR::'s own batch-key snapshot.
+    IR::Flush();
+    s_ScissorEnabled = enabled;
+    if (enabled) glEnable(GL_SCISSOR_TEST);
+    else         glDisable(GL_SCISSOR_TEST);
+}
+
+void SetScissorRect(int x, int y, int w, int h)
+{
+    IR::Flush();
+    // RHI.h's contract is top-left origin, y-down (matches SetViewport's callers); GL's
+    // glScissor is bottom-left origin. Flip using the height from the last SetViewport call,
+    // the same backend-side flip ReadColorFramebuffer applies to row order for the same reason.
+    glScissor(x, g_Height - y - h, w, h);
+}
+
 // ---- Vertex layout + binding ----
 typedef void (APIENTRY* PFNGLGENVERTEXARRAYSPROC)(GLsizei n, GLuint* arrays);
 typedef void (APIENTRY* PFNGLDELETEVERTEXARRAYSPROC)(GLsizei n, const GLuint* arrays);

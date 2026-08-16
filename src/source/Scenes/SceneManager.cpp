@@ -56,6 +56,8 @@ FrameTimingState g_frameTiming;
 #include "imgui.h"
 #endif
 
+#include "Render/RmlUi/RmlUiRuntime.h"
+
 // External declarations
 extern int GrabScreen;
 extern int WaterTextureNumber;
@@ -1172,6 +1174,47 @@ void MainScene(HDC hDC)
 
         if (Success)
         {
+            // RmlUi migration plan Phase 0.4. CORRECTION (2026-08-15): this is NOT actually a
+            // single per-frame choke point regardless of scene, despite the original comment
+            // here claiming so -- this whole block lives inside the static, unnamed function
+            // that only LOG_IN_SCENE/CHARACTER_SCENE/MAIN_SCENE route through (via MainScene(hDC)
+            // in RenderScene()'s switch below). LOADING_SCENE and WEBZEN_SCENE call LoadingScene()/
+            // WebzenScene() directly instead and never reach this block, each running its own
+            // independent BeginOpengl->render->EndOpengl->PlatformSwapBuffers() cycle. LoadingScene()
+            // now has its own matching Update()/Render() call for exactly this reason -- see
+            // LoadingScene.cpp. WebzenScene() does not yet; add one there the same way if/when
+            // RmlUi content needs to appear during that scene.
+            if (RmlUiRuntime::Instance().IsCreated())
+            {
+                RmlUiRuntime::Instance().Update();
+                RmlUiRuntime::Instance().Render();
+            }
+
+            // Content that must always sit visually on top of RmlUi, regardless of theme: the
+            // game cursor, and (login/character scenes specifically) CLoginWin's legacy
+            // CUITextInputBox text. Both used to render earlier, inside RenderInfomation()
+            // (SceneCommon.cpp) for these two scenes -- moved here since RmlUi always renders
+            // last in the frame, and a theme whose RmlUi panel has an opaque background (unlike
+            // the login screen's original "legacy" theme, whose panel is transparent) would
+            // otherwise visually cover both. Confirmed against a real screenshot testing the
+            // login screen's sprite-free "modern" theme, where the cursor and input text
+            // rendered invisibly underneath the now-opaque panel.
+            //
+            // Needs its own BeginBitmap()/EndBitmap() bracket: NewRenderLogInScene()'s own
+            // BeginBitmap() call (LoginScene.cpp) is long since matched by an EndBitmap() before
+            // that function returns (it runs entirely inside RenderCurrentScene(), well before
+            // this point), which restores GlobalUBO's Proj/View back to the 3D perspective that
+            // was active before it -- so by here the 2D ortho ConvertX/ConvertY-based rendering
+            // RenderCursor()/RenderTextOnTop() rely on is gone unless re-established here.
+            if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+            {
+                BeginBitmap();
+                if (CUIMng::Instance().m_LoginWin.IsShow())
+                    CUIMng::Instance().m_LoginWin.RenderTextOnTop();
+                RenderCursor();
+                EndBitmap();
+            }
+
 #ifdef _EDITOR
             // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
             g_MuEditorCore.Render();

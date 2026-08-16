@@ -24,7 +24,12 @@ extern "C" {
     bool QuaternionCompare(const vec4_t v1, const vec4_t v2);
 
 #define Vector(a,b,c,d) {(d)[0]=a;(d)[1]=b;(d)[2]=c;}
-#define Vector4(a,b,c,d,target) {(target)[0]=a;(target)[1]=b;(target)[2]=c;(target)[3]=d;}
+// Named Vector4Set (not Vector4) -- Rml::Vector4 is a real class in RmlUi's Core namespace, and
+// since macros ignore C++ namespaces, a macro literally named Vector4 textually replaces every
+// occurrence of that identifier anywhere ZzzMathLib.h is visible, including inside RmlUi's own
+// headers. Previously worked around with a push_macro/undef/pop_macro guard wrapped around every
+// RmlUi include site; renamed instead so no such guard is needed at all.
+#define Vector4Set(a,b,c,d,target) {(target)[0]=a;(target)[1]=b;(target)[2]=c;(target)[3]=d;}
 #define VectorAvg(a) ( ( (a)[0] + (a)[1] + (a)[2] ) / 3 )
 #define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
 #define VectorSubtractScaled(a,b,c,d) {(c)[0]=(a)[0]-(b)[0]*(d);(c)[1]=(a)[1]-(b)[1]*(d);(c)[2]=(a)[2]-(b)[2]*(d);}
@@ -33,7 +38,9 @@ extern "C" {
 #define VectorCopy(a,b) {(b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2];}
 #define QuaternionCopy(a,b) {(b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2];(b)[3]=(a)[3];}
 #define VectorScale(a,b,c) {(c)[0]=(b)*(a)[0];(c)[1]=(b)*(a)[1];(c)[2]=(b)*(a)[2];}
-#define DotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
+// Named VectorDotProduct (not DotProduct) -- see the Vector4Set comment above; Rml::Vector3/
+// Vector4::DotProduct() are real methods RmlUi's headers define, textually collided the same way.
+#define VectorDotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
 #define VectorFill(a,b) { (a)[0]=(b); (a)[1]=(b); (a)[2]=(b);}
 
     inline void SETLIMITS(float& VALUE_, const float MAX_, const float MIN_)

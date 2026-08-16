@@ -45,6 +45,45 @@ set(SDLMIXER_MIDI OFF CACHE BOOL "" FORCE)
 set(SDLMIXER_GME OFF CACHE BOOL "" FORCE)
 add_subdirectory(ThirdParty/SDL_mixer EXCLUDE_FROM_ALL)
 
+mu_ensure_submodule("ThirdParty/freetype"
+  INDICATOR "CMakeLists.txt"
+  URL "https://github.com/freetype/freetype.git")
+
+# FreeType -- vendored solely because RmlUi's default font engine (below) requires it and
+# find_package(Freetype) found nothing on this machine. RmlUi's own Dependencies.cmake only
+# checks `if(NOT TARGET Freetype::Freetype)` (CMake/Utilities.cmake's
+# report_dependency_found_or_error) -- it doesn't care whether that target came from
+# find_package or was created here, so add_subdirectory + an ALIAS matching FreeType's own
+# target name ("freetype", CMakeLists.txt) satisfies it. Must run before RmlUi's
+# add_subdirectory below.
+set(FT_DISABLE_ZLIB ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_BZIP2 ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_PNG ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_HARFBUZZ ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_BROTLI ON CACHE BOOL "" FORCE)
+add_subdirectory(ThirdParty/freetype EXCLUDE_FROM_ALL)
+add_library(Freetype::Freetype ALIAS freetype)
+
+mu_ensure_submodule("ThirdParty/RmlUi"
+  INDICATOR "CMakeLists.txt"
+  URL "https://github.com/mikke89/RmlUi.git")
+
+# RmlUi -- static link, no bundled samples/Lua bindings. We supply our own
+# Rml::RenderInterface/SystemInterface (source/Render/RmlUi/) targeting this engine's RHI::
+# abstraction instead of one of RmlUi's stock backends -- RMLUI_BACKEND only selects which
+# backend the SAMPLES build against (RmlUi's own CMakeLists.txt validates it unconditionally
+# regardless of RMLUI_SAMPLES though, so it must still be left at a valid value from
+# CMake/OptionsLists.cmake; "auto" is a no-op here since RMLUI_SAMPLES is OFF). Font engine
+# left at RmlUi's own default (freetype, vendored above) rather than building a custom bridge
+# to this engine's GDI/stb_truetype text rasterizer -- see the RmlUi migration plan's Open
+# Decisions. Not gated behind ENABLE_EDITOR (unlike imgui below): this ships in the real game,
+# not just admin/editor builds.
+set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
+set(RMLUI_BACKEND "auto" CACHE STRING "" FORCE)
+set(RMLUI_LUA_BINDINGS OFF CACHE BOOL "" FORCE)
+set(RMLUI_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory(ThirdParty/RmlUi EXCLUDE_FROM_ALL)
+
 # Determine architecture if CMAKE_SIZEOF_VOID_P isn't set
 if (NOT DEFINED CMAKE_SIZEOF_VOID_P OR CMAKE_SIZEOF_VOID_P EQUAL 0)
   # Try to detect from compiler path
@@ -94,6 +133,16 @@ file(GLOB_RECURSE MU_CLIENT_SOURCES
   CONFIGURE_DEPENDS
         "source/*.cpp"
 )
+
+# RmlUi's official SDL input-event backend (RmlSDL::InputEventHandler/ConvertKey/
+# ConvertMouseButton/GetKeyModifierState) -- not part of RmlUi::Core itself (RMLUI_SAMPLES=OFF
+# above skips building any of RmlUi's bundled renderer/platform backends), but there is no reason to hand-roll
+# an SDL-keycode-to-Rml::Input::KeyIdentifier mapping table when RmlUi ships a tested one. Only
+# this one file is compiled, not the rest of ThirdParty/RmlUi/Backends/ (which also contains
+# GL2/GL3/GPU/Vulkan renderer backends this project doesn't use, and whose own SystemInterface_SDL
+# class this project doesn't need -- see RmlUiSystemInterface). Not picked up by the GLOB_RECURSE
+# above since it globs "source/*.cpp", not ThirdParty/.
+list(APPEND MU_CLIENT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.cpp")
 
 # Per-platform entry points (App/Platform/<OS>/Winmain.cpp, main.cpp, main.mm)
 # belong to the executable, not the engine library. Removing them keeps the
@@ -443,6 +492,9 @@ target_include_directories(MuClient PUBLIC
   "${CMAKE_BINARY_DIR}/generated"
   # stb_truetype backs the portable GDI text rasterizer (issue #462).
   "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/stb"
+  # RmlUi's official SDL input backend (RmlUi_Platform_SDL.h) -- see the RmlUi_Platform_SDL.cpp
+  # addition to MU_CLIENT_SOURCES above.
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends"
   $<$<BOOL:${ENABLE_EDITOR}>:${CMAKE_CURRENT_SOURCE_DIR}/MuEditor>
 )
 
@@ -456,6 +508,7 @@ target_compile_definitions(MuClient PUBLIC
   $<$<CONFIG:Debug>:_DEBUG;_FOREIGN_DEBUG>
   $<$<CONFIG:Release>:NDEBUG;_FOREIGN_NDEBUG;LDS_PATCH_GLOBAL_100520>
   $<$<BOOL:${ENABLE_EDITOR}>:_EDITOR>  # Editor features for admin builds
+  RMLUI_SDL_VERSION_MAJOR=3  # RmlUi_Platform_SDL.h's SDL2-vs-SDL3 API switch -- this project is SDL3-only
 )
 
 if (MSVC)
@@ -815,6 +868,14 @@ target_link_libraries(MuClient PUBLIC
   SDL3::SDL3
   SDL3_mixer::SDL3_mixer
 )
+
+# Link RmlUi (game UI middleware) on all platforms. The real target is rmlui_core, aliased as
+# RmlUi::Core (Source/Core/CMakeLists.txt) -- NOT "RmlCore", which silently passed through
+# target_link_libraries as a bare (nonexistent) name with no compile error until every RmlUi-
+# including source file failed on a missing Include/ path, caught during a real build. RmlUi::Core
+# exports its Include/ directory as a genuine INTERFACE usage requirement, so no manual
+# target_include_directories entry is needed on top of linking the correct target.
+target_link_libraries(MuClient PUBLIC RmlUi::Core)
 
 # Link ImGui for all platforms when editor is enabled. imgui carries its own
 # opengl32/dwmapi link dependencies (see its definition above), so the engine
